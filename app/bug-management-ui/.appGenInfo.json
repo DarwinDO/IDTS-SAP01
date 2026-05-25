@@ -1,0 +1,28 @@
+{
+  "generationParameters": {
+    "generationDate": "Mon May 25 2026 23:32:28 GMT+0700 (Indochina Time)",
+    "generatorPlatform": "Visual Studio Code",
+    "serviceType": "Local CAP",
+    "metadataFilename": "",
+    "serviceUrl": "http://localhost:4004/odata/v4/bug/",
+    "appName": "bug-management-ui",
+    "appTitle": "Issue and Defect Tracking System",
+    "appDescription": "Fiori application for issue and defect tracking",
+    "appNamespace": "idts",
+    "ui5Theme": "sap_horizon",
+    "ui5Version": "1.148.0",
+    "enableEslint": true,
+    "enableTypeScript": false,
+    "showMockDataInfo": false,
+    "generatorVersion": "1.24.0",
+    "template": "List Report Page V4",
+    "generatorName": "SAP Fiori Application Generator",
+    "entityRelatedConfig": [
+      {
+        "type": "Main Entity",
+        "value": "Bugs"
+      }
+    ],
+    "launchText": "To launch the generated app, start your CAP project:  and navigate to the following location in your browser:\n\nhttp://localhost:4004/bug-management-ui/webapp/index.html"
+  }
+}

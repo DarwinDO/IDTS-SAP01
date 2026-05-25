@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+    "@cap-js/postgres": "^2",
+    "@sap/cds": "^9.9.1"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^2",
+    "cds-plugin-ui5": "^0.13.0"
+  },
+  "workspaces": [
+    "app/*"
+  ],
+  "scripts": {
+    "watch-bug-management-ui": "cds watch --open idts.bugmanagementui/index.html?sap-ui-xx-viewCache=false --livereload false"
+  },
+  "sapux": [
+    "app/bug-management-ui"
+  ]
+}

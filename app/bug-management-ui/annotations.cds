@@ -1,0 +1,1 @@
+using BugService as service from '../../srv/service';
