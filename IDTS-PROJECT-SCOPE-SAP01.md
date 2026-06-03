@@ -30,9 +30,9 @@ Mục tiêu chính gồm:
 
 Theo hướng mentor muốn đơn giản hóa, hệ thống nên có **3 role chính**:
 
-## **Role 1: Tester / Admin / Reporter**
+## **Role 1: Tester**
 
-Role này đại diện cho người phát hiện, ghi nhận, kiểm tra và quản lý bug ở mức cơ bản.
+Role này đại diện cho người phát hiện, ghi nhận, kiểm tra và quản lý bug ở mức cơ bản. Trong MVP hiện tại, `Reporter` không tách thành role riêng vì dự án dùng nội bộ và Tester là người chính phát hiện/báo cáo bug. `Admin` cũng chưa tách thành role riêng vì chưa có workflow admin chuyên biệt; các trách nhiệm quản trị nhẹ sẽ do Tester hoặc PM xử lý theo quyền được cấp.
 
 Các quyền chính:
 
@@ -58,7 +58,7 @@ Các quyền chính:
 * View bug details.  
 * Review bug information.  
 * Request more information nếu bug report chưa rõ.  
-* Reject assigned bug nếu bug sai module hoặc không phù hợp.  
+* Reject assigned bug nếu bug sai module hoặc không phù hợp; phải có lý do reject và follow-up owner.
 * Add developer note.  
 * Update bug status.
 
@@ -96,7 +96,7 @@ Hệ thống cho phép Tester ghi nhận bug mới với các thông tin:
 * Priority / Severity  
 * Module / Category  
 * Screenshot / Evidence  
-* Reporter information  
+* Tester / created-by information
 * Created date
 
 ## **4.2. Existing Bug Checking**
@@ -151,7 +151,7 @@ Developer sau khi nhận bug có thể:
 * Kiểm tra thông tin bug có đủ rõ không.  
 * Yêu cầu Tester bổ sung thông tin.  
 * Kiểm tra module có đúng không.  
-* Từ chối bug nếu bug bị assign sai module.  
+* Từ chối bug nếu bug bị assign sai module; phải ghi rõ lý do và người follow-up tiếp theo.
 * Thêm technical note.  
 * Cập nhật status.
 
@@ -253,3 +253,104 @@ Các trigger notification:
 
 ---
 
+# **7. Current MVP Baseline Alignment**
+
+Mục này đồng bộ project scope với các quyết định BA hiện hành trong `docs/project-context.md`, diagram BA, và business rules cập nhật.
+
+## **7.1. Scope hiện hành**
+
+IDTS là defect tracking system cho môi trường SAP testing. Hệ thống tập trung vào:
+
+* Ghi nhận bug/defect.
+* Kiểm tra bug trùng trước khi tạo mới.
+* Phân loại bug theo SAP Module, Application Component và Defect Category.
+* Assign Developer phù hợp theo Developer Responsibility.
+* Cho phép `Pending Assignment` khi chưa có Developer phù hợp.
+* Developer review, request more information, reject sai phân loại hoặc sai assignee, update status và note.
+* Tester/PM xác nhận kết quả xử lý thông qua bước retest trước khi close nếu cần.
+* Comment, attachment/evidence, notification, audit/history log.
+* PM monitoring theo workload, overdue, status, next processor và planning fields.
+
+## **7.2. Classification model**
+
+Không nên dùng một field `Module / Category` chung cho mọi tình huống khi code chính thức.
+
+Mô hình đúng:
+
+| Khái niệm | Mục đích |
+| ----- | ----- |
+| **SAP Module** | Bối cảnh nghiệp vụ SAP như FI, MM, SD; optional nếu bug không thuộc SAP functional module |
+| **Application Component** | Khu vực app/system nơi bug xuất hiện, ví dụ IDTS Bug Report, Dashboard, Custom Fiori App |
+| **Defect Category** | Loại lỗi/tầng kỹ thuật như Fiori/UI5, SAP CAP Backend, Database, Authorization |
+| **Component Category** | Cặp hợp lệ giữa Application Component và Defect Category |
+| **Developer Responsibility** | Mapping Developer có thể xử lý Component Category nào, optional theo SAP Module |
+
+## **7.3. Status scope**
+
+Bộ status trong MVP:
+
+* New
+* Pending Assignment
+* Assigned
+* In Review
+* Need More Information
+* In Progress
+* Resolved
+* Retest Required
+* Rejected
+* Reopened
+* Closed
+
+`Reassigned` là action, không phải status chính.
+
+`Rejected` là status hợp lệ nhưng không phải final status. Khi bug bị `Rejected`, hệ thống phải có rejection reason, history log, `nextProcessor` và follow-up action rõ ràng như sửa phân loại, bổ sung thông tin, reassign hoặc chuyển về `Pending Assignment`.
+
+**English clarification:** `Rejected` is a valid follow-up status, not a terminal state. A rejected bug must always have a rejection reason, a next processor, and a clear next action.
+
+**Giải thích tiếng Việt:** `Rejected` là status cần xử lý tiếp, không phải trạng thái kết thúc. Bug bị reject luôn phải có lý do reject, người xử lý tiếp, và hành động kế tiếp rõ ràng.
+
+## **7.4. Retest and closure**
+
+IDTS không nên đóng bug ngay khi Developer mark `Resolved`.
+
+Flow hiện hành:
+
+Developer mark `Resolved` -> Tester/PM xác định có cần retest không -> nếu cần thì `Retest Required` -> retest pass thì `Closed`, retest fail thì `Reopened`.
+
+## **7.5. nextProcessor and PM monitoring**
+
+`nextProcessor` là người hoặc queue cần hành động tiếp theo trên bug. Nó không thay thế Developer `assignee`.
+
+Hệ thống nên tự động cập nhật `nextProcessor` theo status/action:
+
+* Assigned/In Review/In Progress -> assigned Developer.
+* Need More Information -> Tester.
+* Pending Assignment -> PM queue hoặc Tester.
+* Rejected -> Tester hoặc PM để xử lý follow-up.
+* Resolved/Retest Required -> Tester/PM.
+* Closed -> không còn next processor.
+
+PM dashboard nên hỗ trợ nhìn bug theo `assignee`, `nextProcessor`, overdue, priority/severity, SAP Module, Application Component và Defect Category.
+
+## **7.6. Lightweight test context**
+
+MVP có thể lưu reference nhẹ đến test context:
+
+* `environment`
+* `testCaseRef`
+* `testRunRef`
+
+Không xây full test management module trong scope hiện tại.
+
+## **7.7. Still out of scope**
+
+Các phần sau vẫn nằm ngoài scope:
+
+* Direct code fixing inside IDTS.
+* Source code management.
+* CI/CD.
+* Code review workflow.
+* Sprint planning.
+* Transport/release management.
+* Full SAP Cloud ALM, SAP Solution Manager, Jira hoặc ServiceNow replacement.
+* Mandatory AI Root Cause Analysis.

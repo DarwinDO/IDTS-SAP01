@@ -1,0 +1,4 @@
+interface:
+  display_name: "IDTS Product Discovery"
+  short_description: "BA discovery for IDTS requirements"
+  default_prompt: "Use $product-discovery to clarify an IDTS requirement before writing specs or code."

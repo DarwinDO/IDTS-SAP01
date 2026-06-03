@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "idts-product-discovery/output-schema.json",
+  "title": "IDTS Product Discovery Findings",
+  "description": "Structured output for IDTS BA discovery. Adapted from the Ask Why output schema by Phuc NT / BA Zone / Digital School.",
+  "type": "object",
+  "version": "1.0.0",
+  "properties": {
+    "business_problem": {
+      "type": "string",
+      "description": "Underlying business problem, not the proposed solution."
+    },
+    "business_goal": {
+      "type": "string",
+      "description": "Measurable goal or expected business outcome."
+    },
+    "stakeholders": {
+      "type": "array",
+      "description": "IDTS roles or external stakeholders affected by the requirement.",
+      "items": { "type": "string" }
+    },
+    "pain_points": {
+      "type": "array",
+      "description": "Current observable pain points or symptoms.",
+      "items": { "type": "string" }
+    },
+    "root_causes": {
+      "type": "array",
+      "description": "Root causes identified through Ask Why analysis.",
+      "items": { "type": "string" }
+    },
+    "functional_requirements": {
+      "type": "array",
+      "description": "Actionable system behaviors for CAP/Fiori or documentation.",
+      "items": { "type": "string" }
+    },
+    "non_functional_requirements": {
+      "type": "array",
+      "description": "Audit, security, usability, performance, reliability, and maintainability needs.",
+      "items": { "type": "string" }
+    },
+    "business_rules": {
+      "type": "array",
+      "description": "Testable IDTS business rules and transition rules.",
+      "items": { "type": "string" }
+    },
+    "constraints": {
+      "type": "array",
+      "description": "Scope, school, SAP stack, timeline, deployment, or technology constraints.",
+      "items": { "type": "string" }
+    },
+    "risks": {
+      "type": "array",
+      "description": "Risks with likelihood, impact, and mitigation when possible.",
+      "items": { "type": "string" }
+    },
+    "assumptions": {
+      "type": "array",
+      "description": "Unconfirmed assumptions to validate before downstream specs or implementation.",
+      "items": { "type": "string" }
+    },
+    "dependencies": {
+      "type": "array",
+      "description": "Decisions, documents, teams, templates, or technical artifacts this work depends on.",
+      "items": { "type": "string" }
+    },
+    "open_questions": {
+      "type": "array",
+      "description": "Unresolved questions, ideally with owner and due date.",
+      "items": { "type": "string" }
+    },
+    "scope_classification": {
+      "type": "string",
+      "description": "MVP, P1, P2, or out-of-scope recommendation."
+    },
+    "impacted_idts_artifacts": {
+      "type": "array",
+      "description": "Docs, diagrams, CAP, Fiori, test, and PM artifacts affected by the discovery.",
+      "items": { "type": "string" }
+    }
+  },
+  "required": [
+    "business_problem",
+    "business_goal",
+    "stakeholders",
+    "pain_points",
+    "root_causes",
+    "functional_requirements",
+    "non_functional_requirements",
+    "business_rules",
+    "constraints",
+    "risks",
+    "assumptions",
+    "dependencies",
+    "open_questions",
+    "scope_classification",
+    "impacted_idts_artifacts"
+  ]
+}

@@ -53,13 +53,13 @@ Hệ thống có **3 role chính**:
 
 | Role | Mục đích chính |
 | ----- | ----- |
-| **Tester / Admin / Reporter** | Phát hiện, ghi nhận, cập nhật, assign/reassign và theo dõi bug |
+| **Tester** | Phát hiện, ghi nhận, cập nhật, assign/reassign, bổ sung thông tin, retest/close/reopen và theo dõi bug |
 | **Developer** | Tiếp nhận bug, review thông tin, phản hồi và cập nhật trạng thái |
 | **PM** | Theo dõi tổng quan tiến độ, workload, overdue bugs và báo cáo |
 
-## **Role 1: Tester / Admin / Reporter**
+## **Role 1: Tester**
 
-Role này là người trực tiếp phát hiện lỗi, tạo bug report và phân công bug.
+Role này là người trực tiếp phát hiện lỗi, tạo bug report và phân công bug. Trong MVP hiện tại, `Reporter` không tách thành role riêng vì hệ thống dùng nội bộ và Tester là người chính báo cáo bug. `Admin` cũng chưa tách thành role riêng vì chưa có workflow admin chuyên biệt; các việc quản trị nhẹ sẽ do Tester hoặc PM xử lý theo quyền được cấp.
 
 Các nhiệm vụ chính:
 
@@ -90,7 +90,7 @@ Các nhiệm vụ chính:
 * Request more information nếu bug report chưa rõ.  
 * Add developer note.  
 * Update bug status.  
-* Reject assigned bug nếu bug sai module/category hoặc không phù hợp.  
+* Reject assigned bug nếu bug sai module/category hoặc không phù hợp; phải có lý do reject và người follow-up tiếp theo.
 * Comment trong bug report.  
 * Không trực tiếp đóng vai trò sửa code trong hệ thống.
 
@@ -213,7 +213,7 @@ Trạng thái ban đầu của bug sau khi submit có thể phụ thuộc vào t
 | Bug chưa xác định được Developer phù hợp | **Pending Assignment** | Bug đã được ghi nhận nhưng cần được phân công sau |
 | Bug được tạo nhưng cần kiểm tra thêm thông tin | **New** hoặc **Need Review** | Bug đã được ghi nhận nhưng cần được kiểm tra lại trước khi xử lý |
 
-Nếu bug có Developer phù hợp, bug có thể chuyển sang trạng thái **Assigned**. Nếu chưa có Developer phù hợp, bug vẫn được ghi nhận nhưng ở trạng thái **Pending Assignment** để PM hoặc Tester/Admin/Reporter theo dõi và phân công sau. 
+Nếu bug có Developer phù hợp, bug có thể chuyển sang trạng thái **Assigned**. Nếu chưa có Developer phù hợp, bug vẫn được ghi nhận nhưng ở trạng thái **Pending Assignment** để PM hoặc Tester theo dõi và phân công sau.
 
 Cách này giữ được logic chặt chẽ nhưng vẫn thực tế, vì trong một số trường hợp chưa có Developer phù hợp hoặc Developer đang quá tải.
 
@@ -227,7 +227,7 @@ Sau khi bug được assign, Developer có thể:
 * Review thông tin bug.  
 * Kiểm tra module/category có phù hợp không.  
 * Yêu cầu Tester bổ sung thông tin nếu bug chưa rõ.  
-* Reject bug nếu bug không thuộc phạm vi xử lý.  
+* Reject bug nếu bug không thuộc phạm vi xử lý; phải ghi rõ lý do và follow-up owner.
 * Add developer note.  
 * Update bug status.
 
@@ -237,7 +237,7 @@ Các case chính:
 | ----- | ----- |
 | Bug rõ ràng và phù hợp | Developer review và cập nhật status |
 | Bug thiếu thông tin | Developer request more information |
-| Bug sai module/category | Developer reject bug |
+| Bug sai module/category hoặc assignee không phù hợp | Developer reject kèm lý do; Tester hoặc PM follow-up để sửa thông tin, reassign hoặc đưa về Pending Assignment |
 | Bug cần chuyển người khác | Tester reassign bug |
 
 ---
@@ -248,7 +248,7 @@ Comment là nơi trao đổi giữa các role trong từng bug report.
 
 Người có thể tham gia comment:
 
-* Tester / Admin / Reporter  
+* Tester
 * Developer chịu trách nhiệm cho bug  
 * PM phụ trách dự án/team
 
@@ -282,7 +282,7 @@ Bộ status nên giữ:
 | **Need More Information** | Developer yêu cầu Tester bổ sung thông tin |
 | **In Progress** | Developer đang xử lý/theo dõi xử lý |
 | **Resolved** | Developer đã cập nhật kết quả xử lý |
-| **Rejected** | Developer từ chối vì sai module/không phù hợp |
+| **Rejected** | Developer từ chối vì sai module/category hoặc assignee không phù hợp; đây là status cần follow-up, không phải final status |
 | **Reopened** | Bug được mở lại |
 | **Closed** | Bug đã đóng |
 
@@ -308,7 +308,7 @@ PM có thể nhận escalation notification khi:
 * Bug high/critical chưa được assign.  
 * Bug bị overdue.  
 * Bug pending assignment quá lâu.  
-* Developer reject bug.  
+* Developer reject bug và hệ thống cần xác định follow-up owner.
 * Bug bị reassign nhiều lần.  
 * Bug không được cập nhật trong thời gian quy định.
 
@@ -353,12 +353,18 @@ Developer nhận bug được assign
 → Tester bổ sung thông tin  
 → Developer review lại
 
-Nếu bug sai module/category:
+Nếu bug sai module/category hoặc assignee không phù hợp:
 
-Developer reject bug  
-→ Bug quay lại Tester  
-→ Tester cập nhật module/category nếu cần  
-→ Tester reassign cho Developer khác
+Developer reject bug kèm lý do
+→ Bug status = Rejected
+→ Hệ thống lưu rejection reason, history log và `nextProcessor`
+→ Tester hoặc PM follow-up
+→ Tester hoặc PM cập nhật module/category, bổ sung thông tin hoặc đổi assignee nếu cần
+→ Reassign cho Developer khác hoặc đưa bug về Pending Assignment nếu chưa có Developer phù hợp
+
+**English clarification:** `Rejected` is not the end of the bug lifecycle. It is a follow-up status that must identify who acts next and what correction is required.
+
+**Tiếng Việt:** `Rejected` không kết thúc vòng đời bug. Đây là status cần xử lý tiếp và phải xác định rõ ai xử lý tiếp, cần sửa gì hoặc cần phân công lại như thế nào.
 
 Nếu bug hợp lệ:
 
@@ -375,4 +381,109 @@ PM xem dashboard/report
 
 ---
 
-	
+
+---
+
+# **5. Current BA Baseline Alignment**
+
+Mục này là baseline hiện hành để đồng bộ với `docs/project-context.md`, diagram BA, và các quyết định đã chốt trước khi code CAP/Fiori.
+
+## **5.1. Classification Model**
+
+Từ giờ không gộp tất cả vào một khái niệm `module/category` chung nữa. Khi triển khai, hệ thống dùng các khái niệm rõ hơn:
+
+| Khái niệm | Ý nghĩa | Ví dụ |
+| ----- | ----- | ----- |
+| **SAP Module** | Bối cảnh nghiệp vụ SAP thật sự | FI, MM, SD, CO, PP, HCM |
+| **Application Component** | Màn hình, app, service, hoặc khu vực chức năng nơi bug xuất hiện | IDTS Bug Report, Assignment, Notification, Dashboard, Custom Fiori App |
+| **Defect Category** | Loại lỗi hoặc tầng kỹ thuật của lỗi | Fiori/UI5, SAP CAP Backend, Database, Authorization, Integration, Workflow |
+| **Component Category** | Cặp hợp lệ giữa Application Component và Defect Category | IDTS Bug Report + Fiori/UI5 |
+| **Developer Responsibility** | Mapping Developer với Component Category, có thể giới hạn thêm theo SAP Module | Dev A xử lý IDTS Bug Report + Fiori/UI5 trong FI |
+
+Luồng chọn trên Fiori nên là:
+
+Tester chọn `SAP Module` nếu liên quan -> hệ thống lọc `Application Component` -> Tester chọn `Defect Category` hợp lệ -> hệ thống lọc Developer theo `Developer Responsibility`.
+
+Với bug thuần IDTS, `SAP Module` có thể để trống hoặc chọn `Not Applicable`. Không được gọi các chức năng IDTS như Bug Report, Assignment, Notification là SAP Module.
+
+## **5.2. Current Status Set**
+
+Bộ status hiện hành:
+
+| Status | Ý nghĩa |
+| ----- | ----- |
+| **New** | Bug mới được ghi nhận hoặc đang ở bước submit ban đầu |
+| **Pending Assignment** | Bug đã submit nhưng chưa có Developer phù hợp |
+| **Assigned** | Bug đã được assign cho một Developer chính |
+| **In Review** | Developer đang review thông tin bug |
+| **Need More Information** | Developer yêu cầu Tester bổ sung thông tin |
+| **In Progress** | Developer đang xử lý hoặc theo dõi xử lý ngoài IDTS |
+| **Resolved** | Developer đã cung cấp kết quả xử lý/phản hồi |
+| **Retest Required** | Tester/PM cần kiểm tra lại trước khi đóng |
+| **Rejected** | Developer từ chối vì sai phân loại hoặc assign không phù hợp; đây là status cần follow-up, không phải final status |
+| **Reopened** | Bug được mở lại vì vấn đề vẫn còn |
+| **Closed** | Bug đã được xác nhận hoàn tất |
+
+`Reassigned` không phải status chính. Reassign là một action và phải được ghi vào history log.
+
+## **5.2.1. Rejected Follow-up Rule**
+
+**English:** `Rejected` is allowed as a bug status, but it is not a final state. When a bug becomes `Rejected`, the system must store a rejection reason, set `nextProcessor`, and make the next responsible party clear. The follow-up owner is normally Tester or PM. The next action must be one of: correct classification, add missing information, reassign to another Developer, or move the bug back to `Pending Assignment` when no suitable Developer is available.
+
+**Tiếng Việt:** `Rejected` được phép là status của bug, nhưng không phải trạng thái kết thúc. Khi bug chuyển sang `Rejected`, hệ thống phải lưu lý do reject, set `nextProcessor`, và xác định rõ ai chịu trách nhiệm xử lý tiếp. Người follow-up thường là Tester hoặc PM. Hành động tiếp theo phải là một trong các hướng: sửa phân loại, bổ sung thông tin, reassign cho Developer khác, hoặc đưa bug về `Pending Assignment` nếu chưa có Developer phù hợp.
+
+## **5.3. Resolve and Retest Flow**
+
+Flow xử lý cuối nên là:
+
+Developer xử lý hoặc phản hồi xong -> status `Resolved` -> nếu cần xác minh thì chuyển `Retest Required` -> Tester/PM retest -> nếu pass thì `Closed`, nếu fail thì `Reopened`.
+
+Không nên cho Developer tự đóng bug trực tiếp nếu team muốn Tester hoặc PM là người xác nhận cuối cùng.
+
+## **5.4. Next Processor**
+
+`nextProcessor` không phải role mới và không thay thế `assignee`.
+
+- `assignee`: Developer chính chịu trách nhiệm kỹ thuật.
+- `nextProcessor`: người hiện tại cần thực hiện hành động tiếp theo.
+
+Ví dụ:
+
+| Status | Next processor hợp lý |
+| ----- | ----- |
+| **Pending Assignment** | PM queue hoặc Tester |
+| **Assigned / In Review / In Progress** | Developer được assign |
+| **Need More Information** | Tester |
+| **Rejected** | Tester hoặc PM để sửa phân loại, bổ sung thông tin, reassign, hoặc đưa về Pending Assignment |
+| **Resolved / Retest Required** | Tester/PM |
+| **Closed** | Không cần next processor |
+
+`nextProcessor` nên được hệ thống set tự động theo status/action. Trong MVP, chỉ PM nên override thủ công trong trường hợp escalation hoặc ngoại lệ.
+
+## **5.5. Lightweight Test Context and Planning**
+
+IDTS nên lưu thêm thông tin test context ở mức nhẹ:
+
+* `environment`: môi trường phát hiện lỗi, ví dụ DEV, QAS, UAT, browser, device, SAP client nếu có.
+* `testCaseRef`: mã hoặc link tham chiếu test case nếu bug phát sinh từ test case.
+* `testRunRef`: mã hoặc link tham chiếu lần chạy test.
+
+Các field này giúp trace bug tốt hơn nhưng không biến IDTS thành full test management system.
+
+PM monitoring nên có thêm các field như:
+
+* `plannedCompletionDate`
+* `dueDate`
+* `estimatedEffortHours`
+* `nextProcessor`
+
+## **5.6. SAP Tooling Reference**
+
+Baseline này mượn các điểm phù hợp từ SAP Cloud ALM và Focused Build:
+
+* Defect có thể liên quan test run/test case.
+* Có vòng xử lý resolved -> retest -> close.
+* Có người chịu trách nhiệm bước tiếp theo.
+* PM cần dữ liệu planning và overdue rõ ràng.
+
+Không áp dụng các phần quá nặng như full ALM, ITSM, transport/release management, CI/CD, code review, source-code management, hoặc full Jira replacement.

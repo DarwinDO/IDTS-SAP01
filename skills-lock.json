@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "skills": {
+    "BRD Creation": {
+      "source": "danhvb/my-ba-skills",
+      "sourceType": "github",
+      "skillPath": "multi-agent-ba/.agent/skills/senior-ba/brd-creation/SKILL.md",
+      "computedHash": "7d74f09d87a28ba153ef060bbe4d3395581ba58ef4904a54c2af766427dd1491"
+    },
+    "FRS Creation": {
+      "source": "danhvb/my-ba-skills",
+      "sourceType": "github",
+      "skillPath": "multi-agent-ba/.agent/skills/senior-ba/frs-creation/SKILL.md",
+      "computedHash": "afe38a4c0d2e6cd6dcfa9ce54406adc34e16414435b0e2046e367fd8e8137cbd"
+    },
+    "docx": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/docx/SKILL.md",
+      "computedHash": "150be87ff7b18f273ad07da303adb1cf2ca21cc3e76db7a2cf0373405178a278"
+    },
+    "docx-manipulation": {
+      "source": "claude-office-skills/skills",
+      "sourceType": "github",
+      "skillPath": "docx-manipulation/SKILL.md",
+      "computedHash": "bcc46df3f1891c0150f209857b7e510ab016925c71bca0bf48ade99d02f0bc80"
+    },
+    "sap-fiori-guidelines": {
+      "source": "SAP/ai-skills-library",
+      "sourceType": "github",
+      "skillPath": "skills/sap-fiori-guidelines/SKILL.md",
+      "computedHash": "04f60696d01a02fd86b158962ed0f828f4d4ac8cac9331e1d6311e6e7acc225e"
+    },
+    "srs-documentation": {
+      "source": "doubleslashse/claude-marketplace",
+      "sourceType": "github",
+      "skillPath": "Plugins/business-analyst/skills/srs-documentation/SKILL.md",
+      "computedHash": "921340aa7b55d17dec17553d0e7c8218c9355c87bd099684ab269b935e004bab"
+    }
+  }
+}

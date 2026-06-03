@@ -12,7 +12,7 @@ Hệ thống có **3 role chính**:
 
 | Role | Mục đích chính |
 | ----- | ----- |
-| **Tester / Admin / Reporter** | Phát hiện, ghi nhận, cập nhật, assign/reassign và theo dõi bug |
+| **Tester** | Phát hiện, ghi nhận, cập nhật, assign/reassign, bổ sung thông tin, retest/close/reopen và theo dõi bug |
 | **Developer** | Tiếp nhận bug, review thông tin, phản hồi và cập nhật trạng thái |
 | **PM** | Theo dõi tổng quan tiến độ, workload, overdue bugs và báo cáo |
 
@@ -20,9 +20,9 @@ Hệ thống có **3 role chính**:
 
 # **A. Business Rules về Role và quyền hạn**
 
-## **BR-01 \- Tester / Admin / Reporter có quyền ghi nhận bug**
+## **BR-01 \- Tester có quyền ghi nhận bug**
 
-Tester / Admin / Reporter được phép:
+Tester được phép:
 
 * Detect bug  
 * Check existing bug  
@@ -37,6 +37,8 @@ Tester / Admin / Reporter được phép:
 * Add comment/feedback  
 * Track bug status
 
+Trong MVP hiện tại, `Reporter` không tách thành role riêng vì Tester là người chính phát hiện và báo cáo bug nội bộ. `Admin` cũng chưa tách thành role riêng vì chưa có workflow admin chuyên biệt; các trách nhiệm quản trị nhẹ như sửa phân loại, duy trì master data hoặc điều phối reassignment sẽ do Tester hoặc PM xử lý theo quyền được cấp.
+
 ---
 
 ## **BR-02 \- Developer chỉ xử lý bug được assign hoặc bug có quyền xem**
@@ -49,7 +51,7 @@ Developer được phép:
 * Request more information  
 * Add developer note  
 * Update bug status  
-* Reject assigned bug nếu bug sai module hoặc thông tin không phù hợp  
+* Reject assigned bug nếu bug sai module hoặc thông tin không phù hợp; phải có lý do reject và follow-up owner
 * Comment trong bug report
 
 Developer **không phải người tạo bug chính** và **không trực tiếp sửa code trong hệ thống**.
@@ -222,7 +224,7 @@ Tester có thể reassign bug trong các trường hợp:
 
 * Developer đang bận  
 * Workload không phù hợp  
-* Developer reject bug  
+* Developer reject bug và cần follow-up/reassign
 * Bug bị phân sai module  
 * PM yêu cầu reassign  
 * Developer không cập nhật trong thời gian dài
@@ -245,11 +247,23 @@ Developer được phép reject bug nếu:
 * Bug description không liên quan đến phạm vi xử lý  
 * Bug cần chuyển sang Developer khác
 
-Sau khi Developer reject, bug quay lại Tester để:
+Sau khi Developer reject, status của bug có thể là `Rejected`, nhưng `Rejected` không được xem là trạng thái kết thúc. Hệ thống bắt buộc phải:
+
+* Lưu rejection reason
+* Ghi history log
+* Set `nextProcessor` là Tester hoặc PM
+* Xác định action follow-up tiếp theo
+
+Sau khi Developer reject, Tester hoặc PM phải follow up để:
 
 * Update module/category  
 * Bổ sung thông tin  
 * Reassign cho Developer khác
+* Hoặc đưa bug về `Pending Assignment` nếu chưa có Developer phù hợp
+
+**English clarification:** `Rejected` is a follow-up status, not a final status. Every rejected bug must have a reason, a next processor, and a clear next action such as reclassification, additional information, reassignment, or Pending Assignment.
+
+**Giải thích tiếng Việt:** `Rejected` là trạng thái cần xử lý tiếp, không phải trạng thái kết thúc. Mỗi bug bị reject phải có lý do, người xử lý tiếp, và hành động tiếp theo rõ ràng như sửa phân loại, bổ sung thông tin, reassign hoặc chuyển về Pending Assignment.
 
 ---
 
@@ -292,7 +306,7 @@ Tester phải chọn module/category trước. Sau đó, hệ thống sẽ hiể
 
 Nếu không có Developer phù hợp, hoặc tất cả Developer phù hợp đang có workload quá cao, hệ thống cho phép Tester chọn tùy chọn **“Chưa có Developer phù hợp”** ở cuối danh sách Developer.
 
-Khi Tester chọn **“Chưa có Developer phù hợp”** và submit bug, bug sẽ được ghi nhận với trạng thái **Pending Assignment**. Bug ở trạng thái này chưa được chuyển sang Developer review và cần được PM hoặc Tester/Admin/Reporter theo dõi để assign Developer phù hợp sau đó.
+Khi Tester chọn **“Chưa có Developer phù hợp”** và submit bug, bug sẽ được ghi nhận với trạng thái **Pending Assignment**. Bug ở trạng thái này chưa được chuyển sang Developer review và cần được PM hoặc Tester theo dõi để assign Developer phù hợp sau đó.
 
 | Trường hợp | Hành động | Trạng thái sau khi submit |
 | ----- | ----- | ----- |
@@ -409,7 +423,7 @@ PM dùng thông tin này để đánh giá việc phân công có hợp lý khô
 
 ## **BR-22 \- PM có thể yêu cầu reassign bug**
 
-PM không nhất thiết trực tiếp reassign, nhưng có thể yêu cầu Tester/Admin/Reporter reassign trong các trường hợp:
+PM không nhất thiết trực tiếp reassign, nhưng có thể yêu cầu Tester reassign trong các trường hợp:
 
 * Developer quá tải  
 * Bug overdue  
@@ -430,7 +444,7 @@ Ví dụ:
 * Bug priority high/critical chưa được assign  
 * Bug overdue  
 * Bug bị reassign nhiều lần  
-* Developer reject bug  
+* Developer reject bug và hệ thống đã xác định follow-up owner
 * Bug bị giữ ở Need More Information quá lâu  
 * Bug không được cập nhật trong thời gian quy định
 
@@ -451,7 +465,7 @@ Bộ status đề xuất:
 | **In Progress** | Developer đang xử lý/đang theo dõi xử lý |
 | **Resolved** | Developer đánh dấu đã xử lý xong hoặc đã có phản hồi xử lý |
 | **Reopened** | Bug được mở lại sau khi phát hiện vẫn còn vấn đề |
-| **Rejected** | Developer từ chối vì sai module/không phù hợp |
+| **Rejected** | Developer từ chối vì sai module/category hoặc assignee không phù hợp; đây là status cần follow-up, không phải final status |
 | **Closed** | Bug được đóng |
 | **Pending Assignment** | Bug đã submit nhưng chưa assign Developer |
 
@@ -474,8 +488,13 @@ Một số transition hợp lý:
 | Resolved | Reopened | Tester |
 | Reopened | Assigned | Tester |
 | Assigned | Rejected | Developer |
-| Rejected | Pending Assignment | Tester |
+| Rejected | Assigned | Tester hoặc PM sau khi sửa thông tin hoặc chọn Developer phù hợp |
+| Rejected | Pending Assignment | Tester hoặc PM nếu chưa có Developer phù hợp |
 | Assigned | Assigned | Tester reassign |
+
+**English clarification:** `Rejected` must not be used as a silent terminal state. A transition to `Rejected` requires a rejection reason, history log, `nextProcessor`, and an allowed follow-up transition.
+
+**Giải thích tiếng Việt:** `Rejected` không được dùng như trạng thái kết thúc im lặng. Mọi transition sang `Rejected` phải có lý do reject, history log, `nextProcessor` và transition follow-up hợp lệ.
 
 ---
 
@@ -499,7 +518,7 @@ Khi bug đã Closed:
 
 | Role | Quyền comment |
 | ----- | ----- |
-| **Tester / Admin / Reporter** | Bổ sung thông tin, trả lời yêu cầu từ Developer, thêm feedback, cập nhật bằng chứng hoặc mô tả thêm về bug |
+| **Tester** | Bổ sung thông tin, trả lời yêu cầu từ Developer, thêm feedback, cập nhật bằng chứng hoặc mô tả thêm về bug |
 | **Developer** | Hỏi thêm thông tin, ghi chú phân tích kỹ thuật, giải thích lý do cập nhật trạng thái, phản hồi về bug được assign |
 | **PM** | Theo dõi trao đổi, nhắc nhở tiến độ, hỏi thêm tình trạng xử lý, yêu cầu cập nhật thông tin hoặc đề xuất reassign nếu cần |
 
@@ -535,7 +554,7 @@ Các trigger notification nên có:
 | Tester updates submitted bug | Developer |
 | Developer updates status | Tester, PM nếu cần |
 | Bug overdue | PM |
-| Developer rejects bug | Tester, PM nếu cần |
+| Developer rejects bug | Tester hoặc PM để follow-up |
 | Bug closed | Tester, Developer, PM nếu cần |
 
 ---
@@ -654,7 +673,7 @@ Tester, Developer và PM có thể search/filter theo:
 * Priority/severity  
 * Module/category  
 * Assignee  
-* Reporter  
+* Created by / Tester
 * Created date  
 * Updated date
 
@@ -734,3 +753,103 @@ Không bao gồm:
 
 ---
 
+# **O. Business Rules cập nhật theo BA baseline hiện hành**
+
+Các rule dưới đây làm rõ baseline hiện hành để đồng bộ với `docs/project-context.md` và các diagram BA. Nếu nội dung cũ dùng cách gọi `module/category` chung, khi code nên áp dụng cách gọi chi tiết trong các rule này.
+
+## **BR-42 - Bug classification phải tách SAP Module, Application Component và Defect Category**
+
+Khi tạo hoặc cập nhật bug, hệ thống không nên gộp mọi thứ vào một field `module/category` mơ hồ.
+
+Mô hình phân loại hiện hành:
+
+| Khái niệm | Bắt buộc? | Ý nghĩa |
+| ----- | ----- | ----- |
+| **SAP Module** | Optional theo ngữ cảnh | Bối cảnh nghiệp vụ SAP như FI, MM, SD, CO, PP, HCM |
+| **Application Component** | Bắt buộc | App, màn hình, service hoặc khu vực chức năng nơi bug xuất hiện |
+| **Defect Category** | Bắt buộc | Loại lỗi hoặc tầng kỹ thuật như Fiori/UI5, SAP CAP Backend, Database, Authorization |
+| **Component Category** | Do hệ thống suy ra | Cặp hợp lệ giữa Application Component và Defect Category |
+| **Developer Responsibility** | Dữ liệu cấu hình | Mapping Developer với Component Category, có thể giới hạn theo SAP Module |
+
+Luồng lọc trên Fiori:
+
+Tester chọn `SAP Module` nếu liên quan -> hệ thống lọc `Application Component` -> hệ thống lọc `Defect Category` hợp lệ -> hệ thống lọc Developer theo `Developer Responsibility`.
+
+Với bug thuần IDTS, `SAP Module` có thể để trống hoặc chọn `Not Applicable`.
+
+## **BR-43 - Bộ status chính phải bao gồm Retest Required**
+
+Bộ status chính của IDTS:
+
+| Status | Ý nghĩa |
+| ----- | ----- |
+| **New** | Bug mới được ghi nhận hoặc đang ở bước submit ban đầu |
+| **Pending Assignment** | Bug đã submit nhưng chưa có Developer phù hợp |
+| **Assigned** | Bug đã được assign cho một Developer chính |
+| **In Review** | Developer đang review thông tin bug |
+| **Need More Information** | Developer yêu cầu Tester bổ sung thông tin |
+| **In Progress** | Developer đang xử lý hoặc theo dõi xử lý ngoài IDTS |
+| **Resolved** | Developer đã cung cấp kết quả xử lý/phản hồi |
+| **Retest Required** | Tester/PM cần kiểm tra lại trước khi đóng |
+| **Rejected** | Developer từ chối vì sai phân loại hoặc assign không phù hợp; đây là trạng thái cần follow-up, không phải trạng thái kết thúc |
+| **Reopened** | Bug được mở lại vì vấn đề vẫn còn |
+| **Closed** | Bug đã được xác nhận hoàn tất |
+
+`Reassigned` không phải status chính. Reassign là action và phải được ghi nhận trong history log.
+
+**English clarification:** `Rejected` remains in the main status list, but it must always lead to a follow-up step. It must not be used as a silent terminal state.
+
+**Giải thích tiếng Việt:** `Rejected` vẫn nằm trong bộ status chính, nhưng luôn phải dẫn tới một bước xử lý tiếp theo. Không được dùng `Rejected` như trạng thái kết thúc im lặng.
+
+## **BR-44 - Resolve phải đi qua bước xác nhận hoặc retest trước khi Closed**
+
+Developer có thể chuyển bug sang `Resolved` khi đã có kết quả xử lý hoặc phản hồi xử lý.
+
+Sau `Resolved`:
+
+| Tình huống | Hành động |
+| ----- | ----- |
+| Cần kiểm tra lại | Chuyển sang `Retest Required` |
+| Retest pass | Chuyển sang `Closed` |
+| Retest fail | Chuyển sang `Reopened` |
+| Không cần retest và Tester/PM chấp nhận | Chuyển thẳng `Closed` nếu rule cho phép |
+
+Developer không nên tự đóng bug nếu quy trình yêu cầu Tester/PM xác nhận cuối cùng.
+
+## **BR-45 - nextProcessor phải được hệ thống cập nhật theo hành động tiếp theo**
+
+`nextProcessor` là người cần thực hiện bước tiếp theo trên bug. Đây không phải role mới và không thay thế `assignee`.
+
+| Status / Action | nextProcessor hợp lý |
+| ----- | ----- |
+| Bug được assign | Developer được assign |
+| Không có Developer phù hợp | PM queue hoặc Tester |
+| Developer request more information | Tester |
+| Tester bổ sung thông tin xong | Developer được assign |
+| Developer reject bug | Tester hoặc PM để sửa phân loại, bổ sung thông tin, reassign, hoặc đưa về Pending Assignment |
+| Developer mark Resolved | Tester/PM |
+| Bug vào Retest Required | Tester/PM |
+| Bug Closed | Không cần nextProcessor |
+
+Backend CAP handler nên tự động cập nhật `nextProcessor` khi status, assignee hoặc assignment decision thay đổi. Mọi thay đổi quan trọng phải ghi history log.
+
+## **BR-46 - Bug nên có lightweight test context và planning fields**
+
+Để tăng traceability nhưng không xây full test management module, bug nên có các field optional:
+
+| Field | Ý nghĩa |
+| ----- | ----- |
+| **environment** | Môi trường phát hiện lỗi như DEV, QAS, UAT, browser, device, SAP client nếu có |
+| **testCaseRef** | Mã hoặc link tham chiếu test case |
+| **testRunRef** | Mã hoặc link tham chiếu test run |
+
+Để hỗ trợ PM monitoring, bug nên có thêm:
+
+| Field | Ý nghĩa |
+| ----- | ----- |
+| **plannedCompletionDate** | Ngày dự kiến hoàn thành |
+| **dueDate** | Ngày đến hạn để tính overdue |
+| **estimatedEffortHours** | Ước lượng effort nếu nhóm cần |
+| **nextProcessor** | Người hoặc queue đang cần xử lý bước tiếp theo |
+
+Các field này không được dùng để mở rộng IDTS thành Jira, SAP Cloud ALM, SAP Solution Manager hoặc hệ thống test management đầy đủ.

@@ -1,0 +1,75 @@
+{
+  "googleWorkspace": {
+    "reviewFolderName": "SAP490 Review",
+    "reviewFolderId": "<GOOGLE_DRIVE_SAP490_REVIEW_FOLDER_ID>",
+    "deliverableTemplateFolderName": "Deliverable_template",
+    "deliverableTemplateFolderId": "<GOOGLE_DRIVE_DELIVERABLE_TEMPLATE_FOLDER_ID>",
+    "writeMode": "review-copy",
+    "allowOverwrite": false
+  },
+  "reviewArtifacts": {
+    "brdEnglishDocx": {
+      "source": "docs/ba/brd/brd.en.md",
+      "localDocx": "docs/ba/brd/brd.en.docx",
+      "driveReviewName": "IDTS_BRD_EN.docx",
+      "googleDocId": ""
+    },
+    "brdVietnameseDocx": {
+      "source": "docs/ba/brd/brd.vi.md",
+      "localDocx": "docs/ba/brd/brd.vi.docx",
+      "driveReviewName": "IDTS_BRD_VI.docx",
+      "googleDocId": ""
+    },
+    "srsEnglishDocx": {
+      "source": "docs/ba/srs/srs.en.md",
+      "localDocx": "docs/ba/srs/srs.en.docx",
+      "driveReviewName": "IDTS_SRS_EN.docx",
+      "googleDocId": ""
+    },
+    "srsVietnameseDocx": {
+      "source": "docs/ba/srs/srs.vi.md",
+      "localDocx": "docs/ba/srs/srs.vi.docx",
+      "driveReviewName": "IDTS_SRS_VI.docx",
+      "googleDocId": ""
+    },
+    "frsEnglishDocx": {
+      "source": "docs/ba/frs/frs.en.md",
+      "localDocx": "docs/ba/frs/frs.en.docx",
+      "driveReviewName": "IDTS_FRS_EN.docx",
+      "googleDocId": ""
+    },
+    "frsVietnameseDocx": {
+      "source": "docs/ba/frs/frs.vi.md",
+      "localDocx": "docs/ba/frs/frs.vi.docx",
+      "driveReviewName": "IDTS_FRS_VI.docx",
+      "googleDocId": ""
+    }
+  },
+  "sharedSheets": {
+    "requirementBacklog": {
+      "source": "docs/ba/04-requirement-backlog.md",
+      "spreadsheetId": "",
+      "range": "Requirement Backlog!A1"
+    },
+    "traceabilityMatrix": {
+      "source": "docs/ba/brd/brd.en.md",
+      "spreadsheetId": "",
+      "range": "Traceability Matrix!A1"
+    },
+    "businessRuleMatrix": {
+      "source": "IDTS-Business-Rule.md",
+      "spreadsheetId": "",
+      "range": "Business Rule Matrix!A1"
+    },
+    "riskDecisionLog": {
+      "source": "docs/pm/risk-decision-log.md",
+      "spreadsheetId": "",
+      "range": "Risk Decision Log!A1"
+    },
+    "openQuestions": {
+      "source": "docs/pm/tasks/",
+      "spreadsheetId": "",
+      "range": "Open Questions!A1"
+    }
+  }
+}

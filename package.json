@@ -5,12 +5,22 @@
   },
   "devDependencies": {
     "@cap-js/sqlite": "^2",
+    "@googleworkspace/cli": "^0.22.5",
     "cds-plugin-ui5": "^0.13.0"
   },
   "workspaces": [
     "app/*"
   ],
   "scripts": {
+    "sap490:gws:version": "gws --version",
+    "sap490:gws:auth-status": "gws auth status",
+    "sap490:gws:check": "node scripts/sap490/gws-check.mjs",
+    "sap490:gws:find-review-folder": "node scripts/sap490/find-drive-folder.mjs \"SAP490 Review\"",
+    "sap490:gws:dry-run": "node scripts/sap490/sync-dry-run.mjs",
+    "sap490:gws:upload-review-docx": "node scripts/sap490/upload-review-docx.mjs",
+    "sap490:gws:upload-review-docx:execute": "node scripts/sap490/upload-review-docx.mjs --execute",
+    "sap490:gws:sync-review-sheets": "node scripts/sap490/sync-review-sheets.mjs",
+    "sap490:gws:sync-review-sheets:execute": "node scripts/sap490/sync-review-sheets.mjs --execute",
     "watch-bug-management-ui": "cds watch --open idts.bugmanagementui/index.html?sap-ui-xx-viewCache=false --livereload false"
   },
   "sapux": [
