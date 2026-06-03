@@ -1,6 +1,6 @@
 # Risk and Decision Log
 
-Last updated: 2026-06-03
+Last updated: 2026-06-04
 
 ## Decisions
 
@@ -22,6 +22,7 @@ Last updated: 2026-06-03
 | DEC-014 | 2026-06-03 | Use three active MVP roles: Tester, Developer, and PM. Reporter and Admin are not separate MVP roles. | The project is internal, Tester is the primary person who finds/reports bugs, and no dedicated Admin workflow is currently planned. | Canonical docs, BRD/SRS/FRS, BA support docs, diagrams, authorization rules, and PM handover must use Tester/Developer/PM as active roles. Reporter and Admin can be reconsidered after MVP if external reporting or formal admin flows are added. |
 | DEC-015 | 2026-06-03 | Use `gws` as the preferred repeatable automation layer for SAP490 Google Drive/Docs/Sheets sync after installation and configuration; keep the Google Drive connector as the interactive Codex fallback. | The team has multiple developers and needs repeatable commands that can run outside one chat thread. | Repository Markdown remains the source of truth; DOCX/XLSX are generated local artifacts; Google Docs/Sheets are review copies. Sync rules are documented in `docs/sap490/sync-workflow.md`. |
 | DEC-016 | 2026-06-03 | Use member-owned PM status files: DonHV, SangVN, DatDT, and NhanT. | The team wants each member to update their own work log to reduce merge conflicts and make weekly consolidation easier. | New threads must ask the user identity first, then read/update the matching file under `docs/pm/status/`. DonHV owns BA/PM consolidation and may support other lanes. |
+| DEC-017 | 2026-06-04 | Add optional Learning Recap / Mentor Mode for nontrivial tasks. | The team wants AI-assisted work to also improve member understanding, especially for SAP CAP/Fiori, BA/PM, SAP490, and tooling decisions. | AGENTS.md routes this workflow and `.agents/skills/learning-recap` defines the teach-back process. It is optional and should not be forced after small tasks. |
 
 ## Risks
 
@@ -37,6 +38,7 @@ Last updated: 2026-06-03
 | RISK-008 | Rejected bugs may be left without a clear owner or next action. | Medium | High | Enforce rejection reason, nextProcessor, notification, history log, and allowed follow-up transitions in backend and UI. |
 | RISK-009 | Product Discovery may slow down simple confirmed work if applied too heavily. | Low | Medium | Use it for new, unclear, or business-impacting requests; skip it for trivial factual answers and already-confirmed implementation tasks. |
 | RISK-010 | Google Docs/Sheets review copies may drift from repository Markdown if feedback is edited directly in Google Workspace and not synced back. | Medium | High | Update repository Markdown first, regenerate local DOCX/XLSX, then sync Google copies. Use `docs/sap490/sync-workflow.md` and avoid committing local Google credentials or Drive IDs. |
+| RISK-011 | Learning Recap may slow down delivery if applied after every small task. | Medium | Low | Keep it optional. Offer it after nontrivial tasks and activate it when the user asks or agrees. |
 
 Vietnamese:
 
@@ -55,6 +57,8 @@ Vietnamese:
 
 - Quyết định DEC-016: dùng file PM status theo từng thành viên gồm DonHV, SangVN, DatDT và NhanT. Thread mới phải hỏi user là thành viên nào trước, sau đó đọc/cập nhật đúng file trong `docs/pm/status/`. DonHV chịu trách nhiệm tổng hợp BA/PM và có thể hỗ trợ các mảng khác.
 - Rủi ro RISK-004: nhiều người chỉnh song song có thể gây conflict; giảm rủi ro bằng file status theo từng thành viên, file task theo từng work package và để DonHV tổng hợp tài liệu/shared Sheets/Excel.
+- Quyết định DEC-017: thêm Learning Recap / Mentor Mode tùy chọn cho các task không tầm thường. AGENTS.md route workflow này và `.agents/skills/learning-recap` định nghĩa cách dạy lại, teach-back và quiz nhẹ.
+- Rủi ro RISK-011: Learning Recap có thể làm chậm delivery nếu dùng sau mọi task nhỏ; giảm rủi ro bằng cách chỉ offer sau task lớn và chỉ active khi user yêu cầu hoặc đồng ý.
 
 ## Decision Update Rule
 

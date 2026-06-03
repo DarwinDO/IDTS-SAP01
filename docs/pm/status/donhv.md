@@ -1,6 +1,6 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
-Last updated: 2026-06-03
+Last updated: 2026-06-04
 
 Vietnamese: Trạng thái của DonHV - Leader / BA-PM / hỗ trợ các workstream khác.
 
@@ -35,6 +35,7 @@ Vietnamese: Chuẩn bị và duy trì baseline dự án trước Sprint 1: tài 
 - BRD/SRS/FRS Markdown and DOCX deliverables created and maintained.
 - SAP490 Google Workspace sync workflow, `gws` scripts, team setup guide, and template demo upload were prepared.
 - MVP role baseline clarified as Tester, Developer, and PM.
+- Optional Learning Recap / Mentor Mode was added for post-task teaching and teach-back.
 
 Vietnamese:
 
@@ -43,6 +44,7 @@ Vietnamese:
 - Đã tạo và duy trì các deliverable BRD/SRS/FRS dạng Markdown và DOCX.
 - Đã chuẩn bị workflow sync SAP490 Google Workspace, script `gws`, hướng dẫn setup team và demo upload template.
 - Đã chốt baseline role MVP là Tester, Developer và PM.
+- Đã thêm Learning Recap / Mentor Mode tùy chọn để dạy lại và kiểm tra hiểu sau task.
 
 ## In Progress
 
@@ -82,6 +84,7 @@ Vietnamese: Mỗi phiên làm việc cần thêm một dòng vào bảng này.
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2026-06-03 | PM setup | Renamed status model from workstream files to member files and kept DonHV as leader/BA-PM owner | Team status ownership reset | None | Fixed | `rg`, `git diff --check` | Team members update their own status files |
 | 2026-06-03 | SAP490 docs | Created SAP490 template inventory and usage guide | Template purpose/fill guidance documented | None | Fixed | `openpyxl`, `rg`, `git diff --check` | Use inventory before filling SAP490 templates |
+| 2026-06-04 | Agent learning workflow | Added optional Learning Recap / Mentor Mode in AGENTS.md and `.agents/skills/learning-recap` | Mentor-style teach-back workflow integrated | None | Fixed | `rg`, `git diff --check`, `npx ai-devkit@latest lint --json` | Use after nontrivial tasks when requested or useful |
 
 Vietnamese:
 
@@ -89,6 +92,7 @@ Vietnamese:
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2026-06-03 | PM setup | Đổi mô hình status từ file theo workstream sang file theo thành viên và giữ DonHV là leader/BA-PM owner | Đã reset ownership status của team | Không có | Đã xử lý | `rg`, `git diff --check` | Thành viên cập nhật file status của mình |
 | 2026-06-03 | SAP490 docs | Tạo inventory và hướng dẫn sử dụng template SAP490 | Đã document mục đích và cách fill template | Không có | Đã xử lý | `openpyxl`, `rg`, `git diff --check` | Dùng inventory trước khi điền template SAP490 |
+| 2026-06-04 | Agent learning workflow | Thêm Learning Recap / Mentor Mode tùy chọn trong AGENTS.md và `.agents/skills/learning-recap` | Đã tích hợp workflow dạy lại và teach-back | Không có | Đã xử lý | `rg`, `git diff --check`, `npx ai-devkit@latest lint --json` | Dùng sau task không tầm thường khi user yêu cầu hoặc khi hữu ích |
 
 ## Update Rule
 

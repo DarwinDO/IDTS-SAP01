@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-06-03
+Last updated: 2026-06-04
 
 ## Snapshot
 
@@ -35,11 +35,13 @@ Last updated: 2026-06-03
 - Safe `gws` Google Sheets review script is available. It creates a new timestamped workbook with Requirement Backlog, Traceability Matrix, Business Rule Matrix, Risk Decision Log, and Open Questions tabs.
 - PM status tracking now uses member-owned files: `status/donhv.md`, `status/sangvn.md`, `status/datdt.md`, and `status/nhant.md`.
 - SAP490 template inventory is documented in `docs/sap490/template-inventory.md`.
+- Optional Learning Recap / Mentor Mode is available through `.agents/skills/learning-recap` and AGENTS.md routing for nontrivial tasks.
 
 Vietnamese:
 
 - Trạng thái PM hiện dùng file theo từng thành viên: `status/donhv.md`, `status/sangvn.md`, `status/datdt.md`, và `status/nhant.md`.
 - Inventory template SAP490 đã được ghi tại `docs/sap490/template-inventory.md`.
+- Learning Recap / Mentor Mode tùy chọn đã có trong `.agents/skills/learning-recap` và được route trong AGENTS.md cho các task không tầm thường.
 
 ## What Is Not Started
 

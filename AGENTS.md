@@ -250,6 +250,7 @@ This repo uses three kinds of agent guidance:
 - Repo-local behavior skill under `.agents/skills/karpathy-guidelines`, adapted from `multica-ai/andrej-karpathy-skills` for this SAP CAP/Fiori project.
 - Repo-local BA discovery skill under `.agents/skills/product-discovery`, adapted from `phucnt-bazone-vietnam/product-discovery` for IDTS requirement elicitation.
 - Repo-local BA/DOCX deliverable skill under `.agents/skills/idts-ba-docx-deliverables`, used as the primary coordinator for IDTS SAP490 hybrid BRD/SRS/FRS Markdown and DOCX deliverables.
+- Repo-local learning skill under `.agents/skills/learning-recap`, used as an optional mentor mode after nontrivial work so the user understands what changed, why it changed, and how it affects IDTS.
 - Installed SAP AI Skills Library skill under `.agents/skills/sap-fiori-guidelines`.
 - AI DevKit workflow skills under `.agents/skills`: `dev-lifecycle`, `verify`, `memory`, `structured-debug`, and `document-code`.
 - Installed external document support skills under `.agents/skills`: `docx`, `docx-manipulation`, `brd-creation`, `srs-documentation`, and `frs-creation`.
@@ -284,6 +285,60 @@ Dùng `idts-ba-docx-deliverables` trước khi tạo, chỉnh sửa hoặc conve
 - Vị trí output Markdown và DOCX.
 - Cách dùng `brd-creation`, `srs-documentation`, `frs-creation`, `docx`, và `docx-manipulation` như nguồn tham khảo phụ.
 - Rule chất lượng DOCX như bảng Word thật, heading style, bảng approval/version, traceability matrix, và visual QA.
+
+## Learning Recap / Mentor Mode
+
+Use `.agents/skills/learning-recap` as an optional teaching workflow after nontrivial tasks. This mode is for understanding, not for doing the task faster.
+
+Offer a Learning Recap after tasks involving:
+
+- SAP, CAP, CDS, OData, Fiori, UI5, or SAP490 concepts.
+- BA/PM decisions, workflow/status/role/ownership changes, or project-scope decisions.
+- BRD/SRS/FRS, DOCX/XLSX/PPTX, Google Workspace sync, or template work.
+- Debugging, architecture, data model, service, handler, annotation, or UI behavior.
+- Any task where the user is likely to benefit from understanding the reasoning and impact.
+
+Activate Learning Recap when the user says `learning recap`, `mentor mode`, `teach me`, `explain what you did`, `check if I understood`, or a similar request.
+
+When active:
+
+1. Explain the original problem.
+2. Explain the context and constraints.
+3. Walk through what changed or what was decided.
+4. Explain why this approach was chosen.
+5. Explain the impact on IDTS and future work.
+6. Ask the user to explain one key concept back in their own words.
+7. Correct misunderstandings before continuing.
+8. Ask a short quiz only after the user has tried to answer.
+
+Do not force this mode after every small task. For routine or tiny tasks, just mention that Learning Recap is available if the user wants it.
+
+Vietnamese:
+
+Dùng `.agents/skills/learning-recap` như một workflow dạy lại tùy chọn sau các task không tầm thường. Mode này dùng để giúp user hiểu, không phải để làm task nhanh hơn.
+
+Hãy đề xuất Learning Recap sau các task liên quan:
+
+- Khái niệm SAP, CAP, CDS, OData, Fiori, UI5 hoặc SAP490.
+- Quyết định BA/PM, thay đổi workflow/status/role/ownership hoặc quyết định scope.
+- BRD/SRS/FRS, DOCX/XLSX/PPTX, Google Workspace sync hoặc template.
+- Debugging, architecture, data model, service, handler, annotation hoặc UI behavior.
+- Bất kỳ task nào user có lợi khi hiểu reasoning và impact.
+
+Kích hoạt Learning Recap khi user nói `learning recap`, `mentor mode`, `teach me`, `explain what you did`, `check if I understood`, hoặc yêu cầu tương tự.
+
+Khi active:
+
+1. Giải thích vấn đề ban đầu.
+2. Giải thích context và constraint.
+3. Đi qua phần đã thay đổi hoặc quyết định.
+4. Giải thích vì sao chọn hướng này.
+5. Giải thích tác động tới IDTS và việc sau này.
+6. Yêu cầu user giải thích lại một khái niệm quan trọng bằng lời của họ.
+7. Sửa hiểu sai trước khi đi tiếp.
+8. Chỉ hỏi quiz ngắn sau khi user đã thử trả lời.
+
+Không ép mode này sau mọi task nhỏ. Với task thường hoặc rất nhỏ, chỉ cần nói Learning Recap có sẵn nếu user muốn.
 
 ## Product Discovery Before Specs
 
