@@ -252,12 +252,14 @@ annotate service.Bugs with @(
 
 annotate service.Bugs with {
   ID                    @UI.Hidden;
-  bugNumber             @Core.Computed;
-  description           @UI.MultiLineText;
-  stepsToReproduce      @UI.MultiLineText;
-  actualResult          @UI.MultiLineText;
-  expectedResult        @UI.MultiLineText;
-  rejectionReason       @UI.MultiLineText;
+  bugNumber             @Core.Computed @Common.Label : 'Bug Number';
+  title                 @Common.Label : 'Title';
+  description           @UI.MultiLineText @Common.Label : 'Description';
+  stepsToReproduce      @UI.MultiLineText @Common.Label : 'Steps to Reproduce';
+  actualResult          @UI.MultiLineText @Common.Label : 'Actual Result';
+  expectedResult        @UI.MultiLineText @Common.Label : 'Expected Result';
+  rejectionReason       @UI.MultiLineText @Common.Label : 'Rejection Reason';
+  dueDate               @Common.Label : 'Due Date';
   status                @Common.Label : 'Status';
   priority              @Common.Label : 'Priority';
   severity              @Common.Label : 'Severity';

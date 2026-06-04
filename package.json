@@ -6,6 +6,7 @@
   "devDependencies": {
     "@cap-js/sqlite": "^2",
     "@googleworkspace/cli": "^0.22.5",
+    "@sap/cds-dk": "^9.9.2",
     "cds-plugin-ui5": "^0.13.0"
   },
   "workspaces": [

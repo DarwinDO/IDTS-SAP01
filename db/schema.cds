@@ -80,17 +80,17 @@ entity DeveloperResponsibilities : cuid, managed {
 }
 
 entity Bugs : cuid, managed {
-  bugNumber              : String(30);
-  title                  : String(255) not null;
-  description            : LargeString not null;
+  bugNumber              : String(30)         @Common.Label : 'Bug Number';
+  title                  : String(255) not null @Common.Label : 'Title';
+  description            : LargeString not null @Common.Label : 'Description';
   status                 : Association to StatusValues not null;
   priority               : Association to PriorityValues not null;
   severity               : Association to SeverityValues not null;
   environment            : Association to EnvironmentValues;
-  environmentDetail      : String(255);
-  stepsToReproduce       : LargeString not null;
-  actualResult           : LargeString not null;
-  expectedResult         : LargeString not null;
+  environmentDetail      : String(255)        @Common.Label : 'Environment Detail';
+  stepsToReproduce       : LargeString not null @Common.Label : 'Steps to Reproduce';
+  actualResult           : LargeString not null @Common.Label : 'Actual Result';
+  expectedResult         : LargeString not null @Common.Label : 'Expected Result';
   sapModule              : Association to SAPModules;
   applicationComponent   : Association to ApplicationComponents not null;
   defectCategory         : Association to DefectCategories not null;
@@ -99,12 +99,12 @@ entity Bugs : cuid, managed {
   assignee               : Association to DeveloperProfiles;
   nextProcessorUser      : Association to Users;
   nextProcessorRole      : Association to ProcessorRoleValues;
-  rejectionReason        : LargeString;
-  testCaseRef            : String(80);
-  testRunRef             : String(80);
-  plannedCompletionDate  : Date;
-  dueDate                : Date;
-  estimatedEffortHours   : Decimal(9,2);
+  rejectionReason        : LargeString        @Common.Label : 'Rejection Reason';
+  testCaseRef            : String(80)         @Common.Label : 'Test Case Reference';
+  testRunRef             : String(80)         @Common.Label : 'Test Run Reference';
+  plannedCompletionDate  : Date               @Common.Label : 'Planned Completion Date';
+  dueDate                : Date               @Common.Label : 'Due Date';
+  estimatedEffortHours   : Decimal(9,2)       @Common.Label : 'Estimated Effort Hours';
 
   comments               : Composition of many Comments on comments.bug = $self;
   attachments            : Composition of many Attachments on attachments.bug = $self;
