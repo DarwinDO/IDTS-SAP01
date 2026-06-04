@@ -81,10 +81,14 @@ erDiagram
         string testRunRef
         date plannedCompletionDate
         uuid sapModuleID
+        uuid applicationComponentID
+        uuid defectCategoryID
         uuid componentCategoryID
         uuid createdByID
         uuid assigneeID
         uuid nextProcessorID
+        string nextProcessorRole
+        string rejectionReason
         date dueDate
         decimal estimatedEffortHours
         datetime createdAt
@@ -149,7 +153,9 @@ erDiagram
     SAP_MODULE ||--o{ SAP_MODULE_COMPONENT : allows
     APPLICATION_COMPONENT ||--o{ SAP_MODULE_COMPONENT : available_in
     APPLICATION_COMPONENT ||--o{ COMPONENT_CATEGORY : allows
+    APPLICATION_COMPONENT ||--o{ BUG : selected_component
     DEFECT_CATEGORY ||--o{ COMPONENT_CATEGORY : available_for
+    DEFECT_CATEGORY ||--o{ BUG : selected_category
     COMPONENT_CATEGORY ||--o{ BUG : classifies
 
     DEVELOPER_PROFILE ||--o{ DEVELOPER_RESPONSIBILITY : can_handle
@@ -182,9 +188,10 @@ erDiagram
 - `DEFECT_CATEGORY` is the type or technical layer of the defect. Examples: Fiori/UI5, SAP CAP Backend, Database, Workflow, Integration, Authorization, Performance.
 - `COMPONENT_CATEGORY` controls which defect categories are valid for each application component. This supports dependent value help in Fiori.
 - `DEVELOPER_RESPONSIBILITY` maps a developer to a valid `COMPONENT_CATEGORY`. It can optionally be scoped to a `SAP_MODULE` when responsibility differs by SAP business area.
-- `BUG` can store an optional `sapModuleID` plus the selected `componentCategoryID`. The UI can still show SAP Module, Application Component, and Category as separate fields.
+- `BUG` stores an optional `sapModuleID`, selected `applicationComponentID`, selected `defectCategoryID`, and validated `componentCategoryID`. The UI can still show SAP Module, Application Component, and Category as separate fields while the backend keeps the validated assignment key.
 - `BUG.environment`, `testCaseRef`, and `testRunRef` provide lightweight traceability to the SAP test context without creating a full test management module.
-- `BUG.nextProcessorID`, `plannedCompletionDate`, `dueDate`, and `estimatedEffortHours` support SAP Cloud ALM-style ownership and PM monitoring while staying inside the IDTS MVP scope.
+- `BUG.nextProcessorID`, `nextProcessorRole`, `plannedCompletionDate`, `dueDate`, and `estimatedEffortHours` support SAP Cloud ALM-style ownership and PM monitoring while staying inside the IDTS MVP scope.
+- `BUG.rejectionReason` stores the latest visible rejection reason. Full immutable rejection history stays in `HISTORY_LOG.reason`.
 - `COMMENT`, `ATTACHMENT`, `HISTORY_LOG`, and `NOTIFICATION` are lifecycle-owned child records of a bug.
 - `DUPLICATE_LINK` records relationships between similar bugs without forcing duplicate data into the main bug record.
 
@@ -230,11 +237,13 @@ There is no direct business relationship line between `APPLICATION_COMPONENT` an
 
 They meet on transactional or responsibility records:
 
-- On `BUG`, the Tester may select both `sapModuleID` and `componentCategoryID`.
+- On `BUG`, the Tester may select `sapModuleID`, `applicationComponentID`, and `defectCategoryID`; the backend validates or derives `componentCategoryID`.
 - On `DEVELOPER_RESPONSIBILITY`, a developer may be mapped to a `componentCategoryID`, optionally restricted by `sapModuleID`.
 
 Only add a stricter bridge such as `SAP_MODULE_COMPONENT_CATEGORY` if the business later requires rules like "this component/category pair is valid for FI but not valid for MM". For the current IDTS scope, `SAP_MODULE_COMPONENT` is enough for component filtering, and `COMPONENT_CATEGORY` is enough for category filtering.
 
 ## Current Implementation Gap
 
-The current CAP model only contains a minimal `Bugs` entity. This conceptual model should guide future incremental implementation, not be copied all at once without reviewing priority and scope.
+Before WP1 implementation, the CAP model only contained a minimal `Bugs` entity. After WP1 Data Model Foundation, the implemented CDS model now follows this conceptual structure at entity/relationship level. Handler rules, Fiori annotations, and dependent value-help behavior still belong to later work packages.
+
+Vietnamese: Trước WP1, CAP model chỉ có entity `Bugs` tối giản. Sau WP1 Data Model Foundation, CDS model đã đi theo cấu trúc conceptual này ở mức entity/relationship. Handler rules, Fiori annotations và dependent value-help behavior vẫn thuộc các work package sau.

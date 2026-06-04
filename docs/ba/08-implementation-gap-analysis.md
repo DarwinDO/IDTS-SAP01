@@ -3,6 +3,12 @@
 Status: BA baseline draft v1  
 Last updated: 2026-06-01
 
+Implementation note - 2026-06-04:
+
+WP1 Data Model Foundation has since expanded `db/schema.cds`, `srv/service.cds`, and `db/data/` from the minimal scaffold into a compile-ready CAP model. The original gap analysis below is kept for traceability and should be read as the pre-WP1 baseline.
+
+Vietnamese: Ghi chú implementation - 2026-06-04: WP1 Data Model Foundation đã mở rộng `db/schema.cds`, `srv/service.cds` và `db/data/` từ scaffold tối giản thành CAP model compile-ready. Gap analysis bên dưới được giữ để traceability và nên đọc như baseline trước WP1.
+
 ## Current Repo Snapshot
 
 | Area | Current state |

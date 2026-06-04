@@ -1,0 +1,4 @@
+code,name,descr,sortOrder,active,criticality
+PRIMARY,Primary,Primary responsible developer for this area,10,true,3
+BACKUP,Backup,Backup developer for this area,20,true,2
+EXPERT,Expert,Expert reviewer for complex issues,30,true,1

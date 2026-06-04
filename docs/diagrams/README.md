@@ -31,6 +31,10 @@ Read in this order:
 6. `06-notification-audit-monitoring.md`
    - Submit/review notification sequence.
    - PM monitoring and escalation flow.
+7. `07-srs-system-context.md`
+   - Concise SRS system context diagram.
+8. `08-frs-functional-workflows.md`
+   - FRS workflow diagrams for defect tracking, rejection, assignment, review, request information, retest, and PM monitoring.
 
 ## BA Modeling Decisions
 

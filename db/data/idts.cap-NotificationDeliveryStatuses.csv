@@ -1,0 +1,5 @@
+code,name,descr,sortOrder,active,criticality
+PENDING,Pending,Notification is pending delivery,10,true,1
+SENT,Sent,Notification was sent,20,true,3
+FAILED,Failed,Notification delivery failed,30,true,3
+SKIPPED,Skipped,Notification delivery was skipped,40,true,0

@@ -1,0 +1,4 @@
+code,name,descr,sortOrder,active,criticality
+AVAILABLE,Available,Developer can receive assignments,10,true,3
+BUSY,Busy,Developer has limited capacity,20,true,2
+UNAVAILABLE,Unavailable,Developer should not receive new assignments,30,true,1

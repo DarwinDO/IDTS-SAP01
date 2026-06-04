@@ -1,0 +1,4 @@
+code,name,descr,sortOrder,active,criticality
+TESTER,Tester,Creates and verifies bugs,10,true,3
+DEVELOPER,Developer,Reviews and resolves assigned bugs,20,true,2
+PM,Project Manager,Monitors workload and overdue bugs,30,true,1

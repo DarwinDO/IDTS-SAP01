@@ -149,6 +149,12 @@ Before writing or modifying SAP-specific code, query the relevant MCP server. If
 
 For cross-layer changes, query all relevant servers. Example: adding a bug status action with a toolbar button may require CAP MCP, Fiori MCP, UI5 MCP, and the SAP Fiori Guidelines skill.
 
+If an expected MCP namespace such as `mcp__cap`, `mcp__fiori`, or `mcp__ui5` is not visible in the current Codex session, do not assume the MCP server is broken. First use `tool_search` with a focused query such as `cap mcp search_model search_docs`, `fiori mcp`, or `ui5 mcp` to lazy-load deferred MCP tools. After the namespace appears, verify it with a small read-only call before making SAP-specific changes.
+
+Vietnamese:
+
+Nếu namespace MCP mong đợi như `mcp__cap`, `mcp__fiori`, hoặc `mcp__ui5` chưa hiện trong session Codex hiện tại, đừng kết luận ngay là MCP server bị hỏng. Trước tiên dùng `tool_search` với query tập trung như `cap mcp search_model search_docs`, `fiori mcp`, hoặc `ui5 mcp` để lazy-load deferred MCP tools. Sau khi namespace xuất hiện, gọi thử một lệnh read-only nhỏ để verify trước khi chỉnh SAP-specific artifacts.
+
 ## Skill, MCP, and Tool Reporting
 
 When using any skill, MCP server, or MCP tool, report it to the user.
@@ -251,9 +257,11 @@ This repo uses three kinds of agent guidance:
 - Repo-local BA discovery skill under `.agents/skills/product-discovery`, adapted from `phucnt-bazone-vietnam/product-discovery` for IDTS requirement elicitation.
 - Repo-local BA/DOCX deliverable skill under `.agents/skills/idts-ba-docx-deliverables`, used as the primary coordinator for IDTS SAP490 hybrid BRD/SRS/FRS Markdown and DOCX deliverables.
 - Repo-local learning skill under `.agents/skills/learning-recap`, used as an optional mentor mode after nontrivial work so the user understands what changed, why it changed, and how it affects IDTS.
+- Repo-local database modeling skill under `.agents/skills/idts-database-modeling`, used before brainstorming, reviewing, or implementing IDTS CAP/CDS database model changes.
 - Installed SAP AI Skills Library skill under `.agents/skills/sap-fiori-guidelines`.
 - AI DevKit workflow skills under `.agents/skills`: `dev-lifecycle`, `verify`, `memory`, `structured-debug`, and `document-code`.
 - Installed external document support skills under `.agents/skills`: `docx`, `docx-manipulation`, `brd-creation`, `srs-documentation`, and `frs-creation`.
+- Installed external database support skill under `.agents/skills`: `database-schema-design`.
 
 Use `sap-fiori-guidelines` when working on:
 
@@ -267,6 +275,28 @@ Use `sap-fiori-guidelines` when working on:
 - UX consistency and accessibility
 
 Use AI DevKit skills only as workflow support. They do not replace the SAP MCP servers, repo-local SAP skills, CAP/Fiori/UI5 documentation, or the business markdown files.
+
+Use `idts-database-modeling` before database-related BA review, ERD/DBML work, or changes to `db/schema.cds`, `srv/service.cds`, seed data, value lists, classification model, Developer Responsibility, audit/history, notifications, or assignment-related persistence.
+
+Database routing rules:
+
+- CAP CDS remains the source of truth for implemented backend data model.
+- `database-schema-design` is a secondary brainstorming/documentation aid only.
+- Before writing CDS changes, use `sap-cap` and query CAP MCP when available.
+- Do not introduce Prisma, Supabase, raw SQL migrations, database-specific triggers, or vendor-specific types unless the project direction is explicitly changed and documented.
+- Keep SQLite local development portable to future HANA Cloud or PostgreSQL deployment.
+
+Vietnamese:
+
+Dùng `idts-database-modeling` trước khi review BA về database, làm ERD/DBML, hoặc chỉnh `db/schema.cds`, `srv/service.cds`, seed data, value list, classification model, Developer Responsibility, audit/history, notifications, hoặc persistence liên quan đến assignment.
+
+Rule routing database:
+
+- CAP CDS vẫn là source of truth cho data model backend được implement.
+- `database-schema-design` chỉ là công cụ brainstorm/tài liệu hóa phụ.
+- Trước khi viết CDS, dùng `sap-cap` và query CAP MCP khi có thể.
+- Không đưa Prisma, Supabase, raw SQL migration, trigger riêng của database, hoặc datatype phụ thuộc vendor vào repo nếu project chưa đổi hướng rõ ràng và chưa cập nhật tài liệu.
+- Giữ SQLite local development portable sang HANA Cloud hoặc PostgreSQL sau này.
 
 Use `idts-ba-docx-deliverables` before creating, editing, or converting formal BRD/SRS/FRS artifacts. It controls the IDTS-specific routing for:
 
@@ -538,6 +568,39 @@ Use these rules:
 - Do not add credentials, private endpoints, tenant details, or customer data.
 - Keep notes concise and update them when a later implementation changes the meaning.
 
+## Beginner Code Explanation Rule
+
+When creating a new code, model, annotation, configuration, script, or seed-data file, explain it for a team that is new to SAP CAP, CDS, Fiori Elements, SAPUI5, OData, and local SQLite development.
+
+Apply this rule to new files and to major rewrites of existing files:
+
+- Explain the purpose of the file.
+- Explain every meaningful block of code or configuration in the file.
+- For CDS files, explain entities, associations, compositions, keys, aspects, annotations, and generated foreign keys when relevant.
+- For Fiori Elements files, explain how annotations, `manifest.json`, routing, pages, facets, line items, field groups, value helps, semantic colors, and i18n affect the UI.
+- For SAPUI5 custom files, explain views, controllers, fragments, models, bindings, events, formatter logic, and lifecycle hooks.
+- For CSV seed files, explain what each dataset is used for and how it relates to the CAP model and Fiori UI.
+- Explain SAP-specific terms in plain language and connect them back to IDTS.
+- Always create or update a topic-specific note under `docs/knowledge/` for the code/file explanation. The final response should summarize only the most important points and link to the knowledge note.
+- Vietnamese: Luôn tạo hoặc cập nhật note riêng trong `docs/knowledge/` để giải thích code/file. Final response chỉ tóm tắt các ý quan trọng nhất và dẫn link tới knowledge note.
+- Mention what was verified and what the team should inspect manually.
+
+Vietnamese:
+
+Khi tạo file code, model, annotation, configuration, script hoặc seed-data mới, hãy giải thích file đó cho một team chưa biết SAP CAP, CDS, Fiori Elements, SAPUI5, OData và SQLite local.
+
+Áp dụng rule này cho file mới và các lần rewrite lớn của file hiện có:
+
+- Giải thích mục đích của file.
+- Giải thích từng block code hoặc configuration có ý nghĩa trong file.
+- Với CDS, giải thích entity, association, composition, key, aspect, annotation và generated foreign key khi có liên quan.
+- Với Fiori Elements, giải thích annotation, `manifest.json`, routing, page, facet, line item, field group, value help, semantic color và i18n ảnh hưởng tới UI như thế nào.
+- Với SAPUI5 custom file, giải thích view, controller, fragment, model, binding, event, formatter logic và lifecycle hook.
+- Với CSV seed file, giải thích dataset dùng để làm gì và liên quan thế nào tới CAP model/Fiori UI.
+- Giải thích thuật ngữ SAP bằng ngôn ngữ dễ hiểu và nối lại với IDTS.
+- Nếu phần giải thích quá dài cho final response, hãy tạo hoặc cập nhật note riêng trong `docs/knowledge/` và tóm tắt các ý quan trọng trong final response.
+- Nêu rõ đã verify gì và team nên kiểm tra thủ công gì.
+
 ## AI DevKit Workflow Layer
 
 AI DevKit is configured for Codex as a lightweight delivery workflow, not as a generic product template. Use it for multi-file or nontrivial work, especially changes that affect a business flow, CAP service behavior, Fiori annotations, UI behavior, tests, or project documentation.
@@ -577,6 +640,7 @@ AI DevKit guardrails:
 - Use OData V4-compatible CAP patterns.
 - Prefer UUID primary keys for entities exposed to Fiori Elements.
 - Prefer CAP common aspects such as `cuid` and `managed` for new core business entities when consistent with the existing model.
+- Use `idts-database-modeling` and the WP1 data-model review checklist before expanding the database schema.
 - Use clear domain entities and relationships: Bugs, Developers, SAPModules, ApplicationComponents, DefectCategories, ComponentCategories, DeveloperResponsibilities, Comments, Attachments, HistoryLogs, Notifications.
 - Use compositions for lifecycle-owned bug child data such as comments, attachment metadata, history logs, and notifications; use associations for reusable master data such as developers, modules, and categories.
 - Keep the status model aligned with documented statuses: New, Pending Assignment, Assigned, In Review, Need More Information, In Progress, Resolved, Retest Required, Rejected, Reopened, Closed.

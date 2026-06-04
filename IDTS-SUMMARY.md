@@ -477,7 +477,13 @@ PM monitoring nên có thêm các field như:
 * `estimatedEffortHours`
 * `nextProcessor`
 
-## **5.6. SAP Tooling Reference**
+## **5.6. Database Modeling Baseline for WP1**
+
+**English:** WP1 Data Model Foundation follows `docs/ba/09-database-model-review.md`. The Bug model should keep UUID as the technical key and add a readable `bugNumber`. Tester selects Application Component and Defect Category; the system derives or validates Component Category for assignment. SAP Module is optional context. `nextProcessor` is a lightweight hybrid ownership concept with a role/queue code and a specific user when known. Rejected bugs keep the latest rejection reason on Bug and immutable reasons in HistoryLogs. Attachments store metadata and storage reference only in MVP. Duplicate checking stores confirmed Duplicate/Similar/Related links, not every runtime candidate.
+
+**Vietnamese:** WP1 Data Model Foundation đi theo `docs/ba/09-database-model-review.md`. Bug model giữ UUID làm technical key và thêm `bugNumber` dễ đọc. Tester chọn Application Component và Defect Category; hệ thống derive hoặc validate Component Category để assignment. SAP Module là context tùy chọn. `nextProcessor` là ownership concept dạng hybrid nhẹ gồm role/queue code và user cụ thể khi biết rõ. Bug bị Rejected lưu rejection reason mới nhất trên Bug và lưu reason bất biến trong HistoryLogs. Attachment trong MVP chỉ lưu metadata và storage reference. Duplicate checking chỉ lưu link Duplicate/Similar/Related đã xác nhận, không lưu mọi runtime candidate.
+
+## **5.7. SAP Tooling Reference**
 
 Baseline này mượn các điểm phù hợp từ SAP Cloud ALM và Focused Build:
 

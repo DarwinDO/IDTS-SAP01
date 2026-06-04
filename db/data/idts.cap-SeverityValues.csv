@@ -1,0 +1,5 @@
+code,name,descr,sortOrder,active,criticality
+MINOR,Minor,Minor impact or cosmetic issue,10,true,0
+MAJOR,Major,Major functional impact,20,true,2
+CRITICAL,Critical,Critical functional impact,30,true,3
+BLOCKER,Blocker,Blocks testing or key business flow,40,true,3

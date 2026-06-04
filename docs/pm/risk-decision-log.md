@@ -23,6 +23,8 @@ Last updated: 2026-06-04
 | DEC-015 | 2026-06-03 | Use `gws` as the preferred repeatable automation layer for SAP490 Google Drive/Docs/Sheets sync after installation and configuration; keep the Google Drive connector as the interactive Codex fallback. | The team has multiple developers and needs repeatable commands that can run outside one chat thread. | Repository Markdown remains the source of truth; DOCX/XLSX are generated local artifacts; Google Docs/Sheets are review copies. Sync rules are documented in `docs/sap490/sync-workflow.md`. |
 | DEC-016 | 2026-06-03 | Use member-owned PM status files: DonHV, SangVN, DatDT, and NhanT. | The team wants each member to update their own work log to reduce merge conflicts and make weekly consolidation easier. | New threads must ask the user identity first, then read/update the matching file under `docs/pm/status/`. DonHV owns BA/PM consolidation and may support other lanes. |
 | DEC-017 | 2026-06-04 | Add optional Learning Recap / Mentor Mode for nontrivial tasks. | The team wants AI-assisted work to also improve member understanding, especially for SAP CAP/Fiori, BA/PM, SAP490, and tooling decisions. | AGENTS.md routes this workflow and `.agents/skills/learning-recap` defines the teach-back process. It is optional and should not be forced after small tasks. |
+| DEC-018 | 2026-06-04 | Use CAP CDS as the source of truth for IDTS database implementation; use `idts-database-modeling` and `database-schema-design` only as review/design support. | Generic database tools are useful for brainstorming, but IDTS is a SAP CAP project and should not drift into Prisma, Supabase, raw SQL, or vendor-specific modeling. | WP1 should start from `docs/ba/09-database-model-review.md`, `docs/ba/05-data-dictionary.md`, CAP MCP, and `sap-cap`; external schema artifacts remain optional documentation, not implementation source. |
+| DEC-019 | 2026-06-04 | Adopt the DB-Q01 to DB-Q08 database modeling baseline for WP1. | The team needs concrete decisions before expanding `db/schema.cds`, especially for nextProcessor, Component Category derivation, rejection reason storage, attachments, bugNumber, optional SAP Module, and duplicate links. | `docs/ba/09-database-model-review.md`, `docs/project-context.md`, and the three IDTS canonical docs now define the WP1 database baseline. SangVN/Backend should use it before coding CDS. |
 
 ## Risks
 
@@ -39,6 +41,7 @@ Last updated: 2026-06-04
 | RISK-009 | Product Discovery may slow down simple confirmed work if applied too heavily. | Low | Medium | Use it for new, unclear, or business-impacting requests; skip it for trivial factual answers and already-confirmed implementation tasks. |
 | RISK-010 | Google Docs/Sheets review copies may drift from repository Markdown if feedback is edited directly in Google Workspace and not synced back. | Medium | High | Update repository Markdown first, regenerate local DOCX/XLSX, then sync Google copies. Use `docs/sap490/sync-workflow.md` and avoid committing local Google credentials or Drive IDs. |
 | RISK-011 | Learning Recap may slow down delivery if applied after every small task. | Medium | Low | Keep it optional. Offer it after nontrivial tasks and activate it when the user asks or agrees. |
+| RISK-012 | Generic database tools may push the project away from CAP/CDS patterns or hide business meaning behind generic SQL tables. | Medium | High | Treat CAP CDS and IDTS BA documents as authoritative. Use database skills and external schema artifacts only as secondary review aids, then verify CAP syntax with CAP MCP and `cds compile srv --to edmx`. |
 
 Vietnamese:
 
@@ -59,6 +62,10 @@ Vietnamese:
 - Rủi ro RISK-004: nhiều người chỉnh song song có thể gây conflict; giảm rủi ro bằng file status theo từng thành viên, file task theo từng work package và để DonHV tổng hợp tài liệu/shared Sheets/Excel.
 - Quyết định DEC-017: thêm Learning Recap / Mentor Mode tùy chọn cho các task không tầm thường. AGENTS.md route workflow này và `.agents/skills/learning-recap` định nghĩa cách dạy lại, teach-back và quiz nhẹ.
 - Rủi ro RISK-011: Learning Recap có thể làm chậm delivery nếu dùng sau mọi task nhỏ; giảm rủi ro bằng cách chỉ offer sau task lớn và chỉ active khi user yêu cầu hoặc đồng ý.
+
+- Quyết định DEC-018: CAP CDS là source of truth cho implementation database của IDTS. `idts-database-modeling` và `database-schema-design` chỉ dùng làm hỗ trợ review/design, không thay thế CAP model.
+- Rủi ro RISK-012: tool database generic có thể kéo dự án lệch khỏi CAP/CDS hoặc làm mất ý nghĩa nghiệp vụ; giảm rủi ro bằng cách dùng tài liệu BA và CAP CDS làm nguồn chính, rồi verify bằng CAP MCP và `cds compile srv --to edmx`.
+- Quyết định DEC-019: chốt baseline DB-Q01 đến DB-Q08 cho WP1, gồm nextProcessor hybrid, derive/validate Component Category, lưu classification fields có consistency validation, lưu rejection reason trên Bug và HistoryLogs, attachment metadata-only, thêm bugNumber, SAP Module optional và DuplicateLinks chỉ lưu link đã xác nhận.
 
 ## Decision Update Rule
 

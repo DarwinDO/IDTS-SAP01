@@ -1,0 +1,7 @@
+code,name,descr,sortOrder,active,criticality
+ASSIGNED,Assigned,Bug was assigned to a developer,10,true,1
+NEED_MORE_INFORMATION,Need More Information,Additional information is requested,20,true,2
+UPDATED,Updated,Bug was updated,30,true,0
+REJECTED,Rejected,Bug needs follow-up after rejection,40,true,2
+OVERDUE,Overdue,Bug is overdue,50,true,3
+CLOSED,Closed,Bug was closed,60,true,3

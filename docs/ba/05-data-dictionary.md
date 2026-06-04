@@ -109,6 +109,8 @@ This document is a BA blueprint for the target conceptual model. It is not the c
 | actualResult | Large String | Yes | Current wrong behavior. |
 | expectedResult | Large String | Yes | Expected correct behavior. |
 | sapModule | Association to SAPModules | Optional | Business context; can be empty/NA. |
+| applicationComponent | Association to ApplicationComponents | Yes | Where the defect appears. Stored directly for Fiori filtering and PM reporting. |
+| defectCategory | Association to DefectCategories | Yes | What type or technical layer of defect it is. Stored directly for Fiori filtering and PM reporting. |
 | componentCategory | Association to ComponentCategories | Yes | Main classification key. |
 | reporter | Association to Users | Yes | User who created the bug. |
 | assignee | Association to DeveloperProfiles | Optional | Empty for Pending Assignment. |
@@ -174,6 +176,7 @@ This document is a BA blueprint for the target conceptual model. It is not the c
 Vietnamese:
 
 - Khi status là `Rejected`, hệ thống phải lưu được lý do reject và xác định nextProcessor. Có thể dùng field riêng `rejectionReason` hoặc dùng `HistoryLogs.reason`, miễn là UI và audit log vẫn truy xuất được lý do reject rõ ràng.
+- Bug lưu cả `applicationComponent`, `defectCategory` và `componentCategory`. Hai field đầu giúp Fiori filter/report rõ ràng; `componentCategory` là cặp hợp lệ dùng cho assignment và phải được CAP handler validate consistency.
 
 ## DuplicateLinks
 

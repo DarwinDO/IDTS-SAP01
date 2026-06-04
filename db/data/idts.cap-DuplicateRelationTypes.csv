@@ -1,0 +1,4 @@
+code,name,descr,sortOrder,active,criticality
+DUPLICATE,Duplicate,The target bug is the same issue,10,true,2
+SIMILAR,Similar,The target bug appears similar,20,true,1
+RELATED,Related,The target bug is related but not the same issue,30,true,0

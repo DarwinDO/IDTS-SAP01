@@ -54,6 +54,36 @@ Potential support entities:
 - Optional test context fields on `Bugs`, such as `testCaseRef`, `testRunRef`, and `environment`, without building a full test management module
 - Optional planning/ownership fields on `Bugs`, such as `plannedCompletionDate`, `dueDate`, `estimatedEffortHours`, and `nextProcessor`
 
+## Database Modeling Baseline
+
+WP1 Data Model Foundation should follow the decision baseline in `docs/ba/09-database-model-review.md`.
+
+Key baseline decisions:
+
+- `nextProcessor` is a lightweight hybrid ownership concept: store a specific user when known and keep a role/queue code for cases such as PM queue, Tester follow-up, or Unassigned Queue. It is not a second assignee.
+- Tester selects Application Component and Defect Category in Fiori. The system derives or validates Component Category as the assignment key.
+- Bug should store Application Component, Defect Category, and Component Category with backend consistency validation.
+- Rejected bugs should keep the latest `rejectionReason` on Bug and immutable rejection reasons in HistoryLogs.
+- Attachments in MVP store metadata and `storageRef`; binary storage design is deferred until deployment/storage requirements are explicit.
+- Bugs should have a human-readable `bugNumber` in addition to UUID.
+- SAP Module remains optional context and optional assignment filter, not a mandatory field for every bug.
+- Duplicate checking stores confirmed Duplicate/Similar/Related links in `DuplicateLinks`; runtime candidates are not persisted in MVP.
+
+Vietnamese:
+
+WP1 Data Model Foundation nên đi theo decision baseline trong `docs/ba/09-database-model-review.md`.
+
+Các quyết định chính:
+
+- `nextProcessor` là ownership concept dạng hybrid nhẹ: lưu user cụ thể khi biết rõ và lưu role/queue code cho các trường hợp như PM queue, Tester follow-up hoặc Unassigned Queue. Nó không phải assignee thứ hai.
+- Tester chọn Application Component và Defect Category trên Fiori. Hệ thống derive hoặc validate Component Category làm assignment key.
+- Bug nên lưu Application Component, Defect Category và Component Category, kèm backend consistency validation.
+- Bug bị Rejected nên lưu `rejectionReason` mới nhất trên Bug và lưu reason bất biến trong HistoryLogs.
+- Attachment trong MVP chỉ lưu metadata và `storageRef`; thiết kế binary storage được defer đến khi deployment/storage requirement rõ ràng.
+- Bug nên có `bugNumber` dễ đọc ngoài UUID.
+- SAP Module là context tùy chọn và filter assignment tùy chọn, không bắt buộc cho mọi bug.
+- Duplicate checking chỉ lưu link Duplicate/Similar/Related đã xác nhận trong `DuplicateLinks`; candidate runtime không persist trong MVP.
+
 ## Main Statuses
 
 - New

@@ -109,6 +109,8 @@ Note: `@sap-ux/fiori-mcp-server` and `@ui5/mcp-server` are stdio MCP servers. Pa
 ## Troubleshooting
 
 - If a server is not listed in VS Code, reload the window and confirm that the MCP extension/client supports `.vscode/mcp.json`.
+- If a Codex session does not show expected MCP tools such as `mcp__cap__search_docs` or `mcp__cap__search_model`, first try tool discovery. Use `tool_search` with a focused query such as `cap mcp search_model search_docs`. In the current Codex runtime, MCP tools can be deferred and may only become callable after discovery.
+- After lazy-loading CAP MCP, verify it with a read-only model search such as `mcp__cap.search_model` using the current project path. The expected current IDTS scaffold result includes `BugService`, `BugService.Bugs`, and `idts.cap.Bugs`.
 - If `npx` cannot download a package, check npm registry access, proxy, and corporate firewall settings.
 - If `npx` prompts interactively, keep `-y` in the args.
 - If UI5 MCP rejects command-line flags, run it without extra flags; it does not accept arbitrary CLI arguments.
@@ -116,3 +118,8 @@ Note: `@sap-ux/fiori-mcp-server` and `@ui5/mcp-server` are stdio MCP servers. Pa
 - If `npx -y @ai-devkit/memory` prints npm deprecation warnings but still returns MCP `initialize` and `tools/list`, the server is usable; record the warning and re-check package updates later.
 - If a package version changes behavior, record the observed version and consider pinning the package version in the MCP config.
 - Do not put credentials, service keys, or private endpoints in MCP config.
+
+Vietnamese:
+
+- Nếu session Codex không hiện tool MCP mong đợi như `mcp__cap__search_docs` hoặc `mcp__cap__search_model`, hãy thử discovery trước. Dùng `tool_search` với query tập trung như `cap mcp search_model search_docs`. Trong Codex runtime hiện tại, MCP tools có thể bị deferred và chỉ callable sau discovery.
+- Sau khi lazy-load CAP MCP, verify bằng lệnh read-only như `mcp__cap.search_model` với project path hiện tại. Với scaffold IDTS hiện tại, kết quả mong đợi có `BugService`, `BugService.Bugs`, và `idts.cap.Bugs`.

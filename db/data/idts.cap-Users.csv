@@ -1,0 +1,5 @@
+ID,displayName,email,role_code,active
+10000000-0000-0000-0000-000000000001,DonHV,donhv@example.local,PM,true
+10000000-0000-0000-0000-000000000002,SangVN,sangvn@example.local,DEVELOPER,true
+10000000-0000-0000-0000-000000000003,DatDT,datdt@example.local,DEVELOPER,true
+10000000-0000-0000-0000-000000000004,NhanT,nhant@example.local,TESTER,true

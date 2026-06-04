@@ -853,3 +853,9 @@ Backend CAP handler nên tự động cập nhật `nextProcessor` khi status, a
 | **nextProcessor** | Người hoặc queue đang cần xử lý bước tiếp theo |
 
 Các field này không được dùng để mở rộng IDTS thành Jira, SAP Cloud ALM, SAP Solution Manager hoặc hệ thống test management đầy đủ.
+
+## **BR-47 - WP1 database model must follow the confirmed modeling baseline**
+
+**English:** WP1 must follow the database baseline in `docs/ba/09-database-model-review.md`. The Bug entity should use UUID as the technical key and a readable `bugNumber` for users. Application Component and Defect Category are user-facing selections; Component Category is the validated assignment key. SAP Module is optional context and optional assignment filter, not a mandatory field for every bug. `nextProcessor` should support both a role/queue code and a specific user when known. Rejected bugs must store the latest rejection reason for display and immutable rejection reasons in HistoryLogs. Attachments should store metadata and storage reference only in MVP. DuplicateLinks should store confirmed duplicate/similar/related relationships only.
+
+**Vietnamese:** WP1 phải đi theo database baseline trong `docs/ba/09-database-model-review.md`. Entity Bug dùng UUID làm technical key và có `bugNumber` dễ đọc cho người dùng. Application Component và Defect Category là lựa chọn user-facing; Component Category là assignment key đã validate. SAP Module là context tùy chọn và filter assignment tùy chọn, không bắt buộc cho mọi bug. `nextProcessor` nên hỗ trợ cả role/queue code và user cụ thể khi biết rõ. Bug bị Rejected phải lưu rejection reason mới nhất để hiển thị và lưu reason bất biến trong HistoryLogs. Attachment trong MVP chỉ nên lưu metadata và storage reference. DuplicateLinks chỉ lưu quan hệ duplicate/similar/related đã xác nhận.

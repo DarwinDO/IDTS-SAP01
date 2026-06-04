@@ -1,0 +1,5 @@
+code,name,descr,sortOrder,active,criticality
+LOW,Low,Low business priority,10,true,0
+MEDIUM,Medium,Normal business priority,20,true,1
+HIGH,High,High business priority,30,true,2
+CRITICAL,Critical,Critical business priority,40,true,3

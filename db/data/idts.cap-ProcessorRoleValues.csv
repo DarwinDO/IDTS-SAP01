@@ -1,0 +1,6 @@
+code,name,descr,sortOrder,active,criticality
+TESTER,Tester,Tester is expected to take the next action,10,true,1
+DEVELOPER,Developer,Assigned developer is expected to take the next action,20,true,1
+PM,Project Manager,PM queue is expected to take the next action,30,true,2
+UNASSIGNED_QUEUE,Unassigned Queue,No individual owner is known yet,40,true,2
+NONE,None,No next processor is required,50,true,0

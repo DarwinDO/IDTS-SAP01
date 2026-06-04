@@ -41,6 +41,7 @@ The following skills are inspired by `SAP-samples/cap-agentic-engineered`, but r
 - `.agents/skills/karpathy-guidelines/SKILL.md`: behavior guardrails for assumption handling, simple design, surgical edits, and verifiable completion
 - `.agents/skills/product-discovery/SKILL.md`: BA product discovery before BRD/SRS/FRS, diagrams, scope changes, or unclear requirements
 - `.agents/skills/idts-ba-docx-deliverables/SKILL.md`: IDTS-specific SAP490 hybrid BRD/SRS/FRS Markdown and DOCX deliverable routing
+- `.agents/skills/idts-database-modeling/SKILL.md`: IDTS-specific database modeling review for CAP/CDS, ERD support, normalization, value helps, audit/history, notifications, and assignment data
 
 These skills do not replace the installed SAP Fiori Guidelines skill. They route the agent to the correct MCP server before code changes.
 
@@ -81,6 +82,28 @@ Các external document support skills đã cài:
 - `.agents/skills/frs-creation/SKILL.md`: checklist FRS generic và cấu trúc functional requirement.
 
 Các external skills này chỉ là nguồn tham khảo phụ. Chúng không được override `AGENTS.md`, `docs/project-context.md`, quyết định SAP490 hybrid, các file nghiệp vụ canonical của IDTS, SAP MCP routing, hoặc skill `idts-ba-docx-deliverables`.
+
+## Database Modeling Skills and Tools
+
+Use `.agents/skills/idts-database-modeling/SKILL.md` as the primary skill for IDTS database review and CAP/CDS data-model planning.
+
+Installed database support:
+
+- `.agents/skills/database-schema-design/SKILL.md`: generic normalization and relationship design reference.
+- DBML CLI was evaluated but not kept because its binary timed out in this session and it added dependency audit noise.
+
+These are secondary aids. CAP CDS remains the implementation source of truth, and database work must still follow `sap-cap`, CAP MCP-first routing, `docs/project-context.md`, and the IDTS BA data dictionary.
+
+Vietnamese:
+
+Dùng `.agents/skills/idts-database-modeling/SKILL.md` làm skill chính cho review database và lập kế hoạch CAP/CDS data model của IDTS.
+
+Database support đã cài:
+
+- `.agents/skills/database-schema-design/SKILL.md`: nguồn tham khảo generic về normalization và relationship design.
+- DBML CLI đã được thử nhưng không giữ lại vì binary bị timeout trong phiên này và làm tăng cảnh báo audit dependency.
+
+Các công cụ này chỉ là nguồn hỗ trợ phụ. CAP CDS vẫn là source of truth cho implementation, và database work vẫn phải đi theo `sap-cap`, CAP MCP-first routing, `docs/project-context.md`, và IDTS BA data dictionary.
 
 ## AI DevKit Workflow Skills
 

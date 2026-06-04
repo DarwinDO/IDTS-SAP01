@@ -1,0 +1,12 @@
+code,name,descr,sortOrder,active,criticality
+NEW,New,Bug report was created and awaits assignment,10,true,0
+PENDING_ASSIGNMENT,Pending Assignment,No suitable developer is assigned yet,20,true,2
+ASSIGNED,Assigned,Bug is assigned to a developer,30,true,1
+IN_REVIEW,In Review,Developer is reviewing the bug,40,true,1
+NEED_MORE_INFORMATION,Need More Information,Tester must provide additional information,50,true,2
+IN_PROGRESS,In Progress,Developer is working on the bug,60,true,1
+RESOLVED,Resolved,Developer marked the bug as resolved,70,true,3
+RETEST_REQUIRED,Retest Required,Tester or PM must verify the resolution,80,true,2
+REJECTED,Rejected,Bug assignment or classification was rejected and needs follow-up,90,true,2
+REOPENED,Reopened,Bug was reopened after verification,100,true,2
+CLOSED,Closed,Bug is verified and closed,110,true,3

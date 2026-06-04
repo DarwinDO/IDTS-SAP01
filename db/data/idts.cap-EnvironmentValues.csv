@@ -1,0 +1,5 @@
+code,name,descr,sortOrder,active,criticality
+DEV,Development,Development environment,10,true,0
+QAS,Quality Assurance,Quality assurance environment,20,true,1
+UAT,User Acceptance Test,User acceptance test environment,30,true,1
+PROD,Production,Production environment,40,true,3

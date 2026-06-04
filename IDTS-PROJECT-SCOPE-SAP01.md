@@ -342,7 +342,13 @@ MVP có thể lưu reference nhẹ đến test context:
 
 Không xây full test management module trong scope hiện tại.
 
-## **7.7. Still out of scope**
+## **7.7. Database modeling baseline for WP1**
+
+**English:** The implementation model for WP1 must follow `docs/ba/09-database-model-review.md`. This keeps IDTS aligned with SAP CAP/CDS and avoids turning the data model into a generic issue tracker. The core baseline is: UUID remains the technical key; `bugNumber` is added for readable tracking; Application Component and Defect Category are selected by users; Component Category is derived or validated for assignment; SAP Module is optional; `nextProcessor` supports role/queue ownership and specific user ownership when known; Rejected bugs store both latest display reason and historical audit reason; attachments store metadata and reference only; duplicate checking stores confirmed links only.
+
+**Vietnamese:** Implementation model cho WP1 phải đi theo `docs/ba/09-database-model-review.md`. Điều này giữ IDTS đúng hướng SAP CAP/CDS và tránh biến data model thành issue tracker generic. Baseline chính là: UUID vẫn là technical key; thêm `bugNumber` để tracking dễ đọc; Application Component và Defect Category do user chọn; Component Category được derive hoặc validate để assignment; SAP Module là optional; `nextProcessor` hỗ trợ ownership theo role/queue và user cụ thể khi biết rõ; bug Rejected lưu cả reason mới nhất để hiển thị và reason lịch sử để audit; attachment chỉ lưu metadata/reference; duplicate checking chỉ lưu link đã xác nhận.
+
+## **7.8. Still out of scope**
 
 Các phần sau vẫn nằm ngoài scope:
 

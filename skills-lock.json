@@ -13,6 +13,12 @@
       "skillPath": "multi-agent-ba/.agent/skills/senior-ba/frs-creation/SKILL.md",
       "computedHash": "afe38a4c0d2e6cd6dcfa9ce54406adc34e16414435b0e2046e367fd8e8137cbd"
     },
+    "database-schema-design": {
+      "source": "aj-geddes/useful-ai-prompts",
+      "sourceType": "github",
+      "skillPath": "skills/database-schema-design/SKILL.md",
+      "computedHash": "d9e7e4d99e7441c47bc524c361d8ed407295beff4b794c1736081de54e9ee48b"
+    },
     "docx": {
       "source": "anthropics/skills",
       "sourceType": "github",
