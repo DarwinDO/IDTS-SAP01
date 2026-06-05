@@ -82,6 +82,10 @@ Each member must update their own status file after finishing a work session. Th
 - The verification command, evidence, or manual check result.
 - The next handoff or dependency.
 
+Bug/error logging is mandatory for every task. During any work session, if an agent or team member discovers any bug, error, broken command, failed verification, UI defect, data issue, MCP/tool issue, or unclear behavior, they must record it in the appropriate member status file under `docs/pm/status/`, even when the issue was fixed in the same session. The log must include the symptom, affected file/tool/screen when known, root cause if known, fix status, verification evidence, and remaining owner if still open.
+
+When a discovered bug or error is actionable for team tracking, also try to create or update a Jira issue through Atlassian Rovo/Jira MCP if the connector is available. Search Jira first to avoid duplicates. If a matching Jira issue exists, add a comment/update instead of creating a new issue. If a new Jira issue is created, record the Jira key/link in the relevant member status file. Do not send credentials, tokens, private endpoints, local-only paths with secrets, or sensitive personal data to Jira. For transient one-off command issues that were immediately fixed and have no remaining team action, the member status log is enough unless the user asks for Jira tracking.
+
 Vietnamese:
 
 Để giảm conflict khi merge, không chỉnh file status của thành viên khác trừ khi task cần phối hợp giữa nhiều người hoặc `donhv` đang tổng hợp/hỗ trợ. Chi tiết tiến độ nên ghi trong file work package, còn `current-status.md` chỉ ghi ngắn gọn cho handover.
@@ -94,6 +98,10 @@ Mỗi thành viên phải cập nhật file status của mình sau khi xong mộ
 - Mỗi bug/lỗi đã fix hay còn mở.
 - Command verify, bằng chứng hoặc kết quả manual check.
 - Handoff hoặc dependency tiếp theo.
+
+Việc ghi nhận bug/lỗi là bắt buộc cho mọi task. Trong bất kỳ phiên làm việc nào, nếu agent hoặc thành viên phát hiện bug, lỗi, command hỏng, verification fail, lỗi UI, lỗi dữ liệu, lỗi MCP/tool hoặc hành vi chưa rõ, phải ghi vào đúng file status của thành viên trong `docs/pm/status/`, kể cả khi lỗi đó đã được fix ngay trong cùng phiên. Log phải có triệu chứng, file/tool/màn hình bị ảnh hưởng nếu biết, nguyên nhân nếu biết, trạng thái fix, bằng chứng verify, và owner tiếp theo nếu còn mở.
+
+Khi bug hoặc lỗi phát hiện được là việc cần team theo dõi, hãy cố gắng tạo hoặc cập nhật Jira issue thông qua Atlassian Rovo/Jira MCP nếu connector khả dụng. Trước khi tạo mới phải search Jira để tránh duplicate. Nếu đã có issue phù hợp, hãy comment/update issue đó thay vì tạo issue mới. Nếu tạo Jira issue mới, phải ghi Jira key/link vào file status thành viên liên quan. Không gửi credential, token, endpoint private, local path có secret, hoặc dữ liệu cá nhân nhạy cảm lên Jira. Với lỗi command tạm thời đã fix ngay và không còn action cho team, ghi trong member status là đủ trừ khi user yêu cầu track trên Jira.
 
 DonHV consolidates team work at the end of a group work session or week. DonHV is responsible for updating project documents, SAP490 deliverables, Google Sheets, Excel files, and other shared summaries after reading the member status files.
 

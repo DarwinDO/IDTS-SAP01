@@ -360,3 +360,27 @@ Các phần sau vẫn nằm ngoài scope:
 * Transport/release management.
 * Full SAP Cloud ALM, SAP Solution Manager, Jira hoặc ServiceNow replacement.
 * Mandatory AI Root Cause Analysis.
+
+## **7.9. Mentor-confirmed Sprint 02 implementation scope**
+
+**English:**
+
+After the latest mentor meeting, the team should not spend the next sprint redrawing the already accepted rules and diagrams. Sprint 02 should focus on implementing and demonstrating the happy flow for one bug, with the following scope refinements:
+
+- Developers may view and discuss bugs in the same project/team when they have visibility permission.
+- Bugs are not private to only the assigned developer, but primary processing actions remain controlled by assignee or authorized roles.
+- Developer note is optional by default.
+- Note/reason is mandatory only for specific transitions that need an explicit explanation: request more information, reject, resolve, and reopen.
+- Fiori Bug Detail must prioritize the assignee and status fields, use dropdown/value help for status editing, make important input fields easy to use, and move severity/environment to a supporting or right-side information area where possible.
+- DonHV is now Backend CAP lead and owner of backend bug fixing. NhanT supports backend verification and QA. DatDT leads Fiori/UI5. SangVN supports Fiori/UI5.
+
+**Vietnamese:**
+
+Sau buổi họp mentor gần nhất, team không nên dành sprint tiếp theo để vẽ lại rule và diagram đã được chấp nhận. Sprint 02 nên tập trung implement và demo happy flow cho một bug, với các điều chỉnh scope sau:
+
+- Developer có thể xem và thảo luận bug trong cùng project/team khi có quyền visibility.
+- Bug không private chỉ cho developer được assign, nhưng action xử lý chính vẫn do assignee hoặc role được phép thực hiện.
+- Developer note mặc định là optional.
+- Note/reason chỉ bắt buộc ở các transition cần giải thích rõ: request more information, reject, resolve và reopen.
+- Fiori Bug Detail phải ưu tiên assignee và status, status edit bằng dropdown/value help, field quan trọng phải dễ nhập, và severity/environment nên nằm ở vùng thông tin phụ hoặc bên phải khi có thể.
+- DonHV hiện là Backend CAP lead và owner phần backend bug fixing. NhanT hỗ trợ backend verification và QA. DatDT lead Fiori/UI5. SangVN hỗ trợ Fiori/UI5.

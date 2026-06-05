@@ -1,6 +1,6 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
-Last updated: 2026-06-04
+Last updated: 2026-06-05
 
 Vietnamese: Trạng thái của DonHV - Leader / BA-PM / hỗ trợ các workstream khác.
 
@@ -10,8 +10,8 @@ Vietnamese: Trạng thái của DonHV - Leader / BA-PM / hỗ trợ các workstr
 | --- | --- |
 | Member | DonHV |
 | Team role | Leader |
-| Primary responsibility | BA/PM coordination, SAP490 deliverables, project documentation, scope alignment, weekly consolidation |
-| Support responsibility | May support Backend CAP, Fiori/UI5, and QA/Verification when needed |
+| Primary responsibility | Leader, Backend CAP lead for Sprint 02, backend bug fixing, project documentation, scope alignment, weekly consolidation |
+| Support responsibility | May support BA/PM consolidation, Fiori/UI5, and QA/Verification when needed |
 
 Vietnamese:
 
@@ -19,14 +19,14 @@ Vietnamese:
 | --- | --- |
 | Thành viên | DonHV |
 | Vai trò nhóm | Leader |
-| Trách nhiệm chính | Điều phối BA/PM, deliverable SAP490, tài liệu dự án, thống nhất scope, tổng hợp hàng tuần |
-| Trách nhiệm hỗ trợ | Có thể hỗ trợ Backend CAP, Fiori/UI5 và QA/Verification khi cần |
+| Trách nhiệm chính | Leader, Backend CAP lead cho Sprint 02, backend bug fixing, tài liệu dự án, thống nhất scope, tổng hợp hàng tuần |
+| Trách nhiệm hỗ trợ | Có thể hỗ trợ BA/PM consolidation, Fiori/UI5 và QA/Verification khi cần |
 
 ## Current Focus
 
-Prepare and maintain the project baseline before Sprint 1 implementation: BA/PM documents, SAP490 template/sync workflow, team handover rules, and mentor review readiness.
+Prepare Sprint 02 delivery after mentor feedback: lead Backend CAP work, own backend bug fixing, coordinate Jira/PM handover, and keep project documentation aligned when business meaning changes.
 
-Vietnamese: Chuẩn bị và duy trì baseline dự án trước Sprint 1: tài liệu BA/PM, workflow template/sync SAP490, rule handover trong team và trạng thái sẵn sàng review với mentor.
+Vietnamese: Chuẩn bị delivery Sprint 02 sau feedback mentor: lead Backend CAP, chịu trách nhiệm backend bug fixing, điều phối Jira/PM handover và giữ tài liệu dự án đồng bộ khi nghiệp vụ thay đổi.
 
 ## Done
 
@@ -48,24 +48,24 @@ Vietnamese:
 
 ## In Progress
 
-- Awaiting mentor/user review of BRD, SRS, FRS, SAP490 workflow, and PM execution plan.
+- Sprint 02 mentor feedback and happy-flow plan prepared for Jira backlog and implementation.
 
 Vietnamese:
 
-- Đang chờ mentor/user review BRD, SRS, FRS, workflow SAP490 và kế hoạch triển khai PM.
+- Đã chuẩn bị feedback mentor Sprint 02 và happy-flow plan để tạo Jira backlog và bắt đầu implementation.
 
 ## Next
 
+- Create Jira backlog from `docs/pm/07-sprint-2-plan.md`.
+- Lead backend rule and handler changes for developer visibility, mandatory note/reason validation, history, nextProcessor, and backend bug fixing.
 - Consolidate weekly updates from `sangvn.md`, `datdt.md`, and `nhant.md`.
-- Update project docs, SAP490 deliverables, Google Sheets, or Excel files after the team work session is complete.
-- Support Sprint 1 WP1 Data Model Foundation when implementation starts.
 - Keep risks and decisions updated in `docs/pm/risk-decision-log.md`.
 
 Vietnamese:
 
+- Tạo Jira backlog từ `docs/pm/07-sprint-2-plan.md`.
+- Lead backend rule và handler cho developer visibility, mandatory note/reason validation, history, nextProcessor và backend bug fixing.
 - Tổng hợp cập nhật hằng tuần từ `sangvn.md`, `datdt.md` và `nhant.md`.
-- Cập nhật tài liệu dự án, deliverable SAP490, Google Sheets hoặc file Excel sau khi phiên làm việc của nhóm hoàn tất.
-- Hỗ trợ Sprint 1 WP1 Data Model Foundation khi bắt đầu implementation.
 - Duy trì risk/decision trong `docs/pm/risk-decision-log.md`.
 
 ## Blockers
@@ -92,6 +92,7 @@ Vietnamese: Mỗi phiên làm việc cần thêm một dòng vào bảng này.
 | 2026-06-04 | WP4 Fiori Elements UX | Reviewed DatDT `Sap_FE` repo and integrated useful List Report/Object Page ideas into current CAP/Fiori app | Initial annotation-driven UI pass and demo bug seed completed | Fiori MCP tool not exposed; DatDT attachment fragment is static and not service-backed | Partially fixed; annotations/build/browser smoke pass, attachment upload remains WP7 | `tool_search`, `mcp__cap.search_model`, `cds compile srv app/bug-management-ui --to edmx`, `cds deploy --to sqlite::memory:`, `npx ui5 build --config ui5.yaml --clean-dest --dest %TEMP%/idts-ui5-build`, Playwright browser smoke, `git diff --check` | DatDT can continue WP4 after WP2/WP3 value-help/action support |
 | 2026-06-04 | WP2/WP3/WP4 continuation | Implemented service value helps, bound bug lifecycle actions, CAP handler validations, nextProcessor automation, history/notification side effects, and Fiori Object Page actions | WP2 and WP3 completed for MVP; WP4 core screens updated | Browser MCP has snapshot/screenshot but no click/type in this session; real attachment upload and deeper QA remain | Fixed for MVP; remaining items handed to WP4/WP7/QA | `tool_search`, `mcp__cap.search_docs`, `mcp__cap.search_model`, `mcp__fiori.search_docs`, `cds compile srv app/bug-management-ui --to edmx`, `cds deploy --to sqlite::memory:`, OData action smoke calls, `npx ui5 build --config ui5.yaml --clean-dest --dest $env:TEMP/idts-ui5-build`, Playwright browser smoke | SangVN can review WP2/WP3 backend; DatDT can continue UI usability QA; NhanT can prepare regression scenarios |
 | 2026-06-04 | WP4 UI refinement | Adjusted List Report UX after visual review: GridTable layout, draft-enabled standard Create dialog, and semantic status display without default icons | UI refinement implemented and compile/build/browser verified | Toolbar standard action label remains `Create`; dialog title is `Create Bug`. Full manual create-save QA still needed | Fixed for MVP; manual UI QA remains | `mcp__fiori.search_docs`, `mcp__cap.search_docs`, `cds compile srv app/bug-management-ui --to edmx`, `npx ui5 build --config ui5.yaml --clean-dest --dest $env:TEMP/idts-ui-fix-build`, Playwright browser click/snapshot | DatDT should manually verify Create Bug save flow and table behavior in browser |
+| 2026-06-05 | Sprint 02 planning | Synced mentor feedback into canonical docs, created Sprint 02 plan, updated PM handover, created Jira backlog, and added Jira bug-tracking rule to AGENTS.md | Sprint 02 planning baseline, Jira backlog, and agent bug-tracking rule completed | `IDTS-SUMMARY.md` append initially failed because console showed mojibake while file content was UTF-8 clean | Fixed by verifying the real line text with `Select-String` and patching using clean UTF-8 text | `Get-Content`, `Select-String`, `apply_patch`, Atlassian Rovo MCP `_createjiraissue`, `_searchjiraissuesusingjql`; Jira issues `IDTS-1` to `IDTS-12`; pending final `git diff --check` | Start backend handler updates for Sprint 02 |
 
 Vietnamese:
 
@@ -100,6 +101,7 @@ Vietnamese:
 | 2026-06-03 | PM setup | Đổi mô hình status từ file theo workstream sang file theo thành viên và giữ DonHV là leader/BA-PM owner | Đã reset ownership status của team | Không có | Đã xử lý | `rg`, `git diff --check` | Thành viên cập nhật file status của mình |
 | 2026-06-03 | SAP490 docs | Tạo inventory và hướng dẫn sử dụng template SAP490 | Đã document mục đích và cách fill template | Không có | Đã xử lý | `openpyxl`, `rg`, `git diff --check` | Dùng inventory trước khi điền template SAP490 |
 | 2026-06-04 | Agent learning workflow | Thêm Learning Recap / Mentor Mode tùy chọn trong AGENTS.md và `.agents/skills/learning-recap` | Đã tích hợp workflow dạy lại và teach-back | Không có | Đã xử lý | `rg`, `git diff --check`, `npx ai-devkit@latest lint --json` | Dùng sau task không tầm thường khi user yêu cầu hoặc khi hữu ích |
+| 2026-06-05 | Sprint 02 planning | Sync feedback mentor vào canonical docs, tạo Sprint 02 plan, cập nhật PM handover, tạo Jira backlog và thêm rule track bug bằng Jira vào AGENTS.md | Đã hoàn thành baseline planning Sprint 02, Jira backlog và rule agent về bug tracking | Lần append `IDTS-SUMMARY.md` đầu tiên fail vì console hiển thị mojibake dù file là UTF-8 sạch | Đã fix bằng cách kiểm tra text thật bằng `Select-String` và patch lại bằng UTF-8 đúng | `Get-Content`, `Select-String`, `apply_patch`, Atlassian Rovo MCP `_createjiraissue`, `_searchjiraissuesusingjql`; Jira issues `IDTS-1` đến `IDTS-12`; chờ `git diff --check` cuối | Bắt đầu backend handler updates cho Sprint 02 |
 
 | 2026-06-04 | BA/database readiness | Tách diagram trong SRS/FRS vào `docs/diagrams`, cài hỗ trợ database modeling và viết review database model hiện tại | Đã hoàn tất diagram pack và baseline review database | DBML CLI thử nghiệm bị timeout và làm tăng audit noise | Đã xử lý bằng cách gỡ DBML CLI và chỉ giữ database skills | `npx skills add`, `npm uninstall @dbml/cli`, `cds compile srv --to edmx`, `rg`, `git diff --check` | Chốt các câu hỏi DB còn mở, rồi bắt đầu WP1 Data Model Foundation |
 | 2026-06-04 | WP1 database baseline | Chuyển DB-Q01 đến DB-Q08 từ câu hỏi mở thành quyết định database rõ ràng cho WP1 và sync vào canonical docs | Đã hoàn tất baseline quyết định database | Không có | Đã xử lý | `rg`, `cds compile srv --to edmx`, `npx ai-devkit@latest lint --json`, `git diff --check` | Backend có thể bắt đầu WP1 sau khi đọc `docs/ba/09-database-model-review.md` |

@@ -1,15 +1,15 @@
 # Current Project Status
 
-Last updated: 2026-06-04
+Last updated: 2026-06-05
 
 ## Snapshot
 
 | Field | Current value |
 | --- | --- |
-| Project phase | Sprint 1 implementation in progress; WP1, WP2, and WP3 MVP implementation completed; WP4 core Fiori screens updated |
+| Project phase | Sprint 02 planning ready after mentor feedback; WP1, WP2, and WP3 MVP implementation completed; WP4 core Fiori screens updated |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
-| Current sprint | Sprint 1 WP1/WP2/WP3 done for MVP; WP4 core List/Object/Create/Assignment/Developer Review metadata updated |
-| Recommended next action | Run deeper QA scenarios, then continue WP5 Comments/History polish, WP6 PM Monitoring, and WP7 Notifications/Attachments |
+| Current sprint | Sprint 02 should focus on mentor feedback, happy flow demo, backend note/reason validation, and Bug Detail UI refinements |
+| Recommended next action | Create Jira backlog from `docs/pm/07-sprint-2-plan.md`, then implement backend fixes and Fiori Bug Detail refinements |
 | Main implementation risk | Fiori screens and backend handlers now exist, but deeper browser QA, real attachment upload, external notification delivery, authorization, and automated tests are still incomplete |
 
 ## What Is Already Done
@@ -45,6 +45,8 @@ Last updated: 2026-06-04
 - DatDT's `Sap_FE` reference repo was reviewed and useful List Report/Object Page ideas were integrated into the existing CAP/Fiori app.
 - WP4 Fiori Elements core screens are updated: list filters/table columns, object page sections, value helps, object page actions, semantic criticality, rejected follow-up fields, and child sections for comments, attachments, history, and notifications.
 - Four IDTS-aligned demo bug records were added under `db/data/idts.cap-Bugs.csv`, and browser smoke verification shows the List Report rendering 4 rows after pressing `Go`.
+- Mentor feedback for Sprint 02 is baselined: developers may view/discuss team-visible bugs, primary lifecycle actions remain controlled, developer notes are optional by default, selected transitions require note/reason, and Bug Detail UI should prioritize assignee/status and key input fields.
+- Sprint 02 plan is documented in `docs/pm/07-sprint-2-plan.md`. DonHV now leads Backend CAP and backend bug fixing; NhanT supports backend verification/QA; DatDT leads Fiori/UI5; SangVN supports Fiori/UI5.
 
 Vietnamese:
 
@@ -52,6 +54,8 @@ Vietnamese:
 - WP2 Service và Value Help đã hoàn thành ở mức Sprint 1 MVP: OData V4 metadata có bound lifecycle actions và Fiori value help annotations.
 - WP3 Handler Rules và Validation đã hoàn thành ở mức Sprint 1 MVP: `srv/service.js` xử lý create/update validation, assignment responsibility checks, status transition validation, nextProcessor automation, history logs và notification records.
 - WP4 core Fiori screens đã cập nhật: List Report, Object Page, Create metadata, Assignment value help/actions, Developer Review actions, Rejected follow-up, History và Notifications sections.
+- Feedback mentor cho Sprint 02 đã được baseline: developer có thể xem/thảo luận bug trong team, lifecycle action chính vẫn kiểm soát, developer note mặc định optional, một số transition bắt buộc note/reason, và Bug Detail UI cần ưu tiên assignee/status cùng các field nhập quan trọng.
+- Sprint 02 plan được ghi tại `docs/pm/07-sprint-2-plan.md`. DonHV hiện lead Backend CAP và backend bug fixing; NhanT hỗ trợ backend verification/QA; DatDT lead Fiori/UI5; SangVN hỗ trợ Fiori/UI5.
 
 - Trạng thái PM hiện dùng file theo từng thành viên: `status/donhv.md`, `status/sangvn.md`, `status/datdt.md`, và `status/nhant.md`.
 - Inventory template SAP490 đã được ghi tại `docs/sap490/template-inventory.md`.
@@ -72,19 +76,19 @@ Vietnamese:
 
 | Member | Primary responsibility | Status |
 | --- | --- | --- |
-| DonHV | Leader, BA/PM, SAP490 deliverables, weekly consolidation, cross-workstream support | `status/donhv.md` |
-| SangVN | Backend CAP primary, with shared delivery support when assigned | `status/sangvn.md` |
+| DonHV | Leader, Backend CAP lead for Sprint 02, backend bug fixing, weekly consolidation, cross-workstream support | `status/donhv.md` |
+| SangVN | Fiori/UI5 support for Sprint 02, with shared delivery support when assigned | `status/sangvn.md` |
 | DatDT | Fiori/UI5 primary, with shared delivery support when assigned | `status/datdt.md` |
-| NhanT | QA/Verification primary, with shared delivery support when assigned | `status/nhant.md` |
+| NhanT | Backend verification and QA primary for Sprint 02, with shared delivery support when assigned | `status/nhant.md` |
 
 Vietnamese:
 
 | Thành viên | Trách nhiệm chính | Status |
 | --- | --- | --- |
-| DonHV | Leader, BA/PM, deliverable SAP490, tổng hợp hằng tuần, hỗ trợ cross-workstream | `status/donhv.md` |
-| SangVN | Phụ trách chính Backend CAP, có thể hỗ trợ delivery chung khi được phân công | `status/sangvn.md` |
+| DonHV | Leader, Backend CAP lead cho Sprint 02, backend bug fixing, tổng hợp hằng tuần, hỗ trợ cross-workstream | `status/donhv.md` |
+| SangVN | Hỗ trợ Fiori/UI5 cho Sprint 02, có thể hỗ trợ delivery chung khi được phân công | `status/sangvn.md` |
 | DatDT | Phụ trách chính Fiori/UI5, có thể hỗ trợ delivery chung khi được phân công | `status/datdt.md` |
-| NhanT | Phụ trách chính QA/Verification, có thể hỗ trợ delivery chung khi được phân công | `status/nhant.md` |
+| NhanT | Phụ trách backend verification và QA cho Sprint 02, có thể hỗ trợ delivery chung khi được phân công | `status/nhant.md` |
 
 ## Current Decisions
 

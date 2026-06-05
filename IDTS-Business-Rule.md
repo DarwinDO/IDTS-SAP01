@@ -859,3 +859,69 @@ Các field này không được dùng để mở rộng IDTS thành Jira, SAP Cl
 **English:** WP1 must follow the database baseline in `docs/ba/09-database-model-review.md`. The Bug entity should use UUID as the technical key and a readable `bugNumber` for users. Application Component and Defect Category are user-facing selections; Component Category is the validated assignment key. SAP Module is optional context and optional assignment filter, not a mandatory field for every bug. `nextProcessor` should support both a role/queue code and a specific user when known. Rejected bugs must store the latest rejection reason for display and immutable rejection reasons in HistoryLogs. Attachments should store metadata and storage reference only in MVP. DuplicateLinks should store confirmed duplicate/similar/related relationships only.
 
 **Vietnamese:** WP1 phải đi theo database baseline trong `docs/ba/09-database-model-review.md`. Entity Bug dùng UUID làm technical key và có `bugNumber` dễ đọc cho người dùng. Application Component và Defect Category là lựa chọn user-facing; Component Category là assignment key đã validate. SAP Module là context tùy chọn và filter assignment tùy chọn, không bắt buộc cho mọi bug. `nextProcessor` nên hỗ trợ cả role/queue code và user cụ thể khi biết rõ. Bug bị Rejected phải lưu rejection reason mới nhất để hiển thị và lưu reason bất biến trong HistoryLogs. Attachment trong MVP chỉ nên lưu metadata và storage reference. DuplicateLinks chỉ lưu quan hệ duplicate/similar/related đã xác nhận.
+
+## **BR-48 - Mentor-confirmed developer collaboration, note, and Bug Detail UI rules**
+
+**English:**
+
+This rule refines BR-02, BR-18, BR-25, and BR-27 after mentor feedback. Developers should not be isolated from bugs that are assigned to other developers. In the MVP, developers may view bug details and participate in discussion/comment threads when the bug belongs to the same project/team or when they have project-level visibility. However, the right to perform primary processing actions remains controlled.
+
+Developer visibility and action rules:
+
+| Capability | Rule |
+| ----- | ----- |
+| View bug list and details | Developers may view bugs within the project/team when they have visibility permission. |
+| Discuss or comment | Developers may join discussion/comment threads to support clarification and knowledge sharing. |
+| Add developer note | Developer note is optional by default. |
+| Change processing status | Only the assignee or an authorized role may perform primary lifecycle actions unless a later authorization rule expands this. |
+| Reject, request more information, resolve | These actions must remain controlled and auditable. |
+
+Developer note is not mandatory for every status change. It is mandatory only when the transition needs an explicit reason or technical result:
+
+| Transition / action | Required note or reason |
+| ----- | ----- |
+| `Assigned` or `In Review` or `In Progress` -> `Need More Information` | Required reason describing what information is missing. |
+| `Assigned` or `In Review` or `In Progress` -> `Rejected` | Required rejection reason and follow-up owner/action. |
+| `In Progress` -> `Resolved` | Required resolution note or processing result. |
+| `Resolved` -> `Reopened` | Required reopen reason, usually from Tester or PM rather than Developer. |
+| Other normal transitions such as `Assigned` -> `In Review` or `In Review` -> `In Progress` | Developer note is optional. |
+
+Bug Detail UI rules for Fiori implementation:
+
+- The bug status must be editable through a dropdown or value help, not free text.
+- Assignee should be placed in the top/high-priority area of the Bug Detail page.
+- Important input fields should be grouped for fast entry and review: title, status, assignee, priority, application component, defect category, steps to reproduce, actual result, and expected result.
+- Severity and environment should be placed in the right/supporting information area or a secondary group so the main workflow fields remain easy to scan.
+- UI validation must make required note/reason fields visible and clear only for transitions where they are required.
+
+**Vietnamese:**
+
+Rule này làm rõ BR-02, BR-18, BR-25 và BR-27 sau feedback của mentor. Developer không nên bị tách riêng khỏi các bug được assign cho developer khác. Trong MVP, developer có thể xem bug detail và tham gia trao đổi/comment khi bug thuộc cùng project/team hoặc khi họ có quyền xem cấp project. Tuy nhiên, quyền thực hiện các action xử lý chính vẫn phải được kiểm soát.
+
+Rule về quyền xem và hành động của Developer:
+
+| Khả năng | Rule |
+| ----- | ----- |
+| Xem bug list và bug detail | Developer có thể xem bug trong project/team khi có quyền visibility. |
+| Thảo luận hoặc comment | Developer có thể tham gia discussion/comment để hỗ trợ làm rõ thông tin và chia sẻ hiểu biết. |
+| Thêm developer note | Developer note mặc định là optional. |
+| Đổi processing status | Chỉ assignee hoặc role được phép mới thực hiện lifecycle action chính, trừ khi authorization rule sau này mở rộng. |
+| Reject, request more information, resolve | Các action này phải được kiểm soát và audit rõ ràng. |
+
+Developer note không bắt buộc cho mọi lần đổi status. Note/reason chỉ bắt buộc khi transition cần lý do hoặc kết quả kỹ thuật rõ ràng:
+
+| Transition / action | Note hoặc reason bắt buộc |
+| ----- | ----- |
+| `Assigned` hoặc `In Review` hoặc `In Progress` -> `Need More Information` | Bắt buộc ghi rõ thiếu thông tin gì. |
+| `Assigned` hoặc `In Review` hoặc `In Progress` -> `Rejected` | Bắt buộc rejection reason và follow-up owner/action. |
+| `In Progress` -> `Resolved` | Bắt buộc resolution note hoặc kết quả xử lý. |
+| `Resolved` -> `Reopened` | Bắt buộc reopen reason, thường do Tester hoặc PM ghi thay vì Developer. |
+| Các transition bình thường như `Assigned` -> `In Review` hoặc `In Review` -> `In Progress` | Developer note optional. |
+
+Rule UI Bug Detail cho Fiori implementation:
+
+- Status của bug phải được edit bằng dropdown hoặc value help, không nhập text tự do.
+- Assignee cần được đặt ở vùng trên cùng hoặc vùng ưu tiên cao của Bug Detail page.
+- Các field nhập liệu quan trọng cần được nhóm để nhập và review nhanh: title, status, assignee, priority, application component, defect category, steps to reproduce, actual result, expected result.
+- Severity và environment nên chuyển sang vùng thông tin bên phải hoặc nhóm phụ để các field workflow chính dễ quan sát hơn.
+- UI validation phải làm rõ field note/reason bắt buộc chỉ ở những transition thật sự cần note/reason.

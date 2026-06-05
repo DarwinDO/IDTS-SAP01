@@ -181,3 +181,39 @@ Vietnamese:
 2. PM monitors developer workload and overdue bugs.
 3. PM receives escalation notifications for high-priority unassigned bugs, overdue bugs, repeated reassignments, rejected bugs, and stale updates.
 4. PM can comment or request reassignment without replacing Developer or Tester responsibilities.
+
+## Mentor-Confirmed Sprint 02 Delta
+
+English:
+
+The latest mentor feedback confirms that the current business rules and diagrams are settled enough for implementation. Sprint 02 should focus on the happy flow demo and UI/backend corrections rather than redrawing accepted diagrams.
+
+Business and UI deltas:
+
+- Developers may view and discuss bugs within the same project/team when they have visibility permission. A bug should not be private to only the assigned developer.
+- Primary processing remains controlled: only the assignee or an authorized role should perform lifecycle-changing actions such as request more information, reject, resolve, or main status processing.
+- Developer note is optional by default.
+- Note/reason is mandatory only for transitions that need explicit explanation:
+  - `Assigned` / `In Review` / `In Progress` -> `Need More Information`.
+  - `Assigned` / `In Review` / `In Progress` -> `Rejected`.
+  - `In Progress` -> `Resolved`.
+  - `Resolved` -> `Reopened`.
+- Bug Detail UI should place assignee near the top, use dropdown/value help for editable status, group important input fields for fast entry and review, and move severity/environment into a supporting or right-side information area where possible.
+- Team allocation for Sprint 02: DonHV leads Backend CAP and backend bug fixing, NhanT supports backend verification/QA, DatDT leads Fiori/UI5, and SangVN supports Fiori/UI5.
+
+Vietnamese:
+
+Feedback mentor mới nhất xác nhận business rules và diagrams hiện tại đã đủ ổn để implementation. Sprint 02 nên tập trung vào happy flow demo và các chỉnh sửa UI/backend thay vì vẽ lại diagram đã được chấp nhận.
+
+Delta nghiệp vụ và UI:
+
+- Developer có thể xem và thảo luận bug trong cùng project/team khi có quyền visibility. Bug không nên private chỉ cho developer được assign.
+- Xử lý chính vẫn phải được kiểm soát: chỉ assignee hoặc role được phép mới nên thực hiện action đổi lifecycle như request more information, reject, resolve hoặc xử lý status chính.
+- Developer note mặc định là optional.
+- Note/reason chỉ bắt buộc ở các transition cần giải thích rõ:
+  - `Assigned` / `In Review` / `In Progress` -> `Need More Information`.
+  - `Assigned` / `In Review` / `In Progress` -> `Rejected`.
+  - `In Progress` -> `Resolved`.
+  - `Resolved` -> `Reopened`.
+- Bug Detail UI cần đưa assignee lên gần đầu, status khi edit dùng dropdown/value help, field quan trọng được nhóm để nhập và review nhanh, và severity/environment nằm ở vùng thông tin phụ hoặc bên phải khi có thể.
+- Phân công Sprint 02: DonHV lead Backend CAP và backend bug fixing, NhanT hỗ trợ backend verification/QA, DatDT lead Fiori/UI5, SangVN hỗ trợ Fiori/UI5.

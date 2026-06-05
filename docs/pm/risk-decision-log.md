@@ -1,6 +1,6 @@
 # Risk and Decision Log
 
-Last updated: 2026-06-04
+Last updated: 2026-06-05
 
 ## Decisions
 
@@ -25,6 +25,7 @@ Last updated: 2026-06-04
 | DEC-017 | 2026-06-04 | Add optional Learning Recap / Mentor Mode for nontrivial tasks. | The team wants AI-assisted work to also improve member understanding, especially for SAP CAP/Fiori, BA/PM, SAP490, and tooling decisions. | AGENTS.md routes this workflow and `.agents/skills/learning-recap` defines the teach-back process. It is optional and should not be forced after small tasks. |
 | DEC-018 | 2026-06-04 | Use CAP CDS as the source of truth for IDTS database implementation; use `idts-database-modeling` and `database-schema-design` only as review/design support. | Generic database tools are useful for brainstorming, but IDTS is a SAP CAP project and should not drift into Prisma, Supabase, raw SQL, or vendor-specific modeling. | WP1 should start from `docs/ba/09-database-model-review.md`, `docs/ba/05-data-dictionary.md`, CAP MCP, and `sap-cap`; external schema artifacts remain optional documentation, not implementation source. |
 | DEC-019 | 2026-06-04 | Adopt the DB-Q01 to DB-Q08 database modeling baseline for WP1. | The team needs concrete decisions before expanding `db/schema.cds`, especially for nextProcessor, Component Category derivation, rejection reason storage, attachments, bugNumber, optional SAP Module, and duplicate links. | `docs/ba/09-database-model-review.md`, `docs/project-context.md`, and the three IDTS canonical docs now define the WP1 database baseline. SangVN/Backend should use it before coding CDS. |
+| DEC-020 | 2026-06-05 | Adopt the Sprint 02 mentor feedback baseline: developers may view/discuss team-visible bugs, lifecycle-changing actions remain controlled, developer notes are optional by default, selected transitions require note/reason, and Bug Detail UI must prioritize assignee/status and key input fields. DonHV leads Backend CAP/backend bug fixing; NhanT supports backend verification/QA; DatDT leads Fiori/UI5; SangVN supports Fiori/UI5. | Mentor confirmed rules/diagrams are settled enough and the team should focus on implementation/demo rather than redrawing analysis artifacts. | Canonical docs, Sprint 02 plan, Jira backlog, backend handlers, Fiori Bug Detail layout, and QA checks must follow this baseline. |
 
 ## Risks
 
@@ -42,6 +43,7 @@ Last updated: 2026-06-04
 | RISK-010 | Google Docs/Sheets review copies may drift from repository Markdown if feedback is edited directly in Google Workspace and not synced back. | Medium | High | Update repository Markdown first, regenerate local DOCX/XLSX, then sync Google copies. Use `docs/sap490/sync-workflow.md` and avoid committing local Google credentials or Drive IDs. |
 | RISK-011 | Learning Recap may slow down delivery if applied after every small task. | Medium | Low | Keep it optional. Offer it after nontrivial tasks and activate it when the user asks or agrees. |
 | RISK-012 | Generic database tools may push the project away from CAP/CDS patterns or hide business meaning behind generic SQL tables. | Medium | High | Treat CAP CDS and IDTS BA documents as authoritative. Use database skills and external schema artifacts only as secondary review aids, then verify CAP syntax with CAP MCP and `cds compile srv --to edmx`. |
+| RISK-013 | Developers may misunderstand wider visibility as permission to process any bug. | Medium | High | Separate view/comment permission from lifecycle-changing actions in backend handlers, Fiori UI actions, QA tests, and documentation. |
 
 Vietnamese:
 
@@ -66,6 +68,8 @@ Vietnamese:
 - Quyết định DEC-018: CAP CDS là source of truth cho implementation database của IDTS. `idts-database-modeling` và `database-schema-design` chỉ dùng làm hỗ trợ review/design, không thay thế CAP model.
 - Rủi ro RISK-012: tool database generic có thể kéo dự án lệch khỏi CAP/CDS hoặc làm mất ý nghĩa nghiệp vụ; giảm rủi ro bằng cách dùng tài liệu BA và CAP CDS làm nguồn chính, rồi verify bằng CAP MCP và `cds compile srv --to edmx`.
 - Quyết định DEC-019: chốt baseline DB-Q01 đến DB-Q08 cho WP1, gồm nextProcessor hybrid, derive/validate Component Category, lưu classification fields có consistency validation, lưu rejection reason trên Bug và HistoryLogs, attachment metadata-only, thêm bugNumber, SAP Module optional và DuplicateLinks chỉ lưu link đã xác nhận.
+- Quyết định DEC-020: chốt baseline feedback mentor cho Sprint 02. Developer có thể xem/thảo luận bug trong team, nhưng action đổi lifecycle vẫn phải kiểm soát. Developer note mặc định optional; một số transition phải có note/reason. Bug Detail UI cần ưu tiên assignee/status và field nhập quan trọng. DonHV lead Backend CAP/backend bug fixing, NhanT hỗ trợ backend verification/QA, DatDT lead Fiori/UI5, SangVN hỗ trợ Fiori/UI5.
+- Rủi ro RISK-013: Developer có thể hiểu nhầm quyền xem/thảo luận rộng hơn là quyền xử lý mọi bug. Cần tách rõ quyền view/comment với lifecycle-changing action trong backend handler, Fiori action, QA test và documentation.
 
 ## Decision Update Rule
 

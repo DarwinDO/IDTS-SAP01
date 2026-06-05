@@ -493,3 +493,31 @@ Baseline này mượn các điểm phù hợp từ SAP Cloud ALM và Focused Bui
 * PM cần dữ liệu planning và overdue rõ ràng.
 
 Không áp dụng các phần quá nặng như full ALM, ITSM, transport/release management, CI/CD, code review, source-code management, hoặc full Jira replacement.
+
+## **5.8. Mentor-confirmed Sprint 02 rule delta**
+
+**English:**
+
+The mentor confirmed that the current business rules and diagrams are settled enough for the next development phase. The next focus is implementation, especially the happy flow for one bug and the Bug Detail UI refinements needed for mentor demo.
+
+Confirmed updates:
+
+- Developers may view and discuss bugs in the same project/team when they have visibility permission. Bugs should not be private to only the assigned developer.
+- Primary processing actions remain controlled: the assignee or an authorized role should perform lifecycle-changing actions such as request information, reject, resolve, or main status processing.
+- Developer note is optional by default.
+- Note/reason is mandatory only for specific transitions: request more information, reject, resolve, and reopen.
+- Bug Detail UI should place assignee near the top, make status editable through dropdown/value help, group important input fields for fast use, and move severity/environment to a supporting or right-side area when possible.
+- DonHV shifts from BA/PM primary execution to Backend CAP lead and backend bug fixing. NhanT supports backend verification and QA. DatDT leads Fiori/UI5. SangVN supports Fiori/UI5.
+
+**Vietnamese:**
+
+Mentor đã chốt rằng business rules và diagrams hiện tại đã đủ ổn để chuyển sang giai đoạn development tiếp theo. Trọng tâm tiếp theo là implementation, đặc biệt là happy flow cho một bug và các chỉnh sửa Bug Detail UI cần thiết để demo với mentor.
+
+Cập nhật đã chốt:
+
+- Developer có thể xem và thảo luận bug trong cùng project/team khi có quyền visibility. Bug không nên bị private chỉ cho developer được assign.
+- Action xử lý chính vẫn phải được kiểm soát: assignee hoặc role được phép mới nên thực hiện các action đổi lifecycle như request information, reject, resolve hoặc xử lý status chính.
+- Developer note mặc định là optional.
+- Note/reason chỉ bắt buộc ở các transition cụ thể: request more information, reject, resolve và reopen.
+- Bug Detail UI cần đưa assignee lên gần đầu, status phải edit bằng dropdown/value help, field quan trọng phải được nhóm để nhập nhanh, và severity/environment nên chuyển sang vùng phụ hoặc bên phải khi có thể.
+- DonHV chuyển từ vai trò thực thi BA/PM chính sang Backend CAP lead và backend bug fixing. NhanT hỗ trợ backend verification và QA. DatDT lead Fiori/UI5. SangVN hỗ trợ Fiori/UI5.
