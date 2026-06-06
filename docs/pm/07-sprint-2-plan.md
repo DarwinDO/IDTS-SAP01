@@ -1,6 +1,6 @@
 # Sprint 02 Plan - Mentor Feedback and Happy Flow Demo
 
-Last updated: 2026-06-05
+Last updated: 2026-06-06
 
 ## English
 
@@ -45,7 +45,7 @@ Confirmed changes:
 | ID | Work Item | Owner | Support | Output |
 | --- | --- | --- | --- | --- |
 | S2-BE-01 | Refine developer visibility and processing permission model | DonHV | NhanT | Backend rule design for view/discuss vs process actions |
-| S2-BE-02 | Implement mandatory note/reason validation for selected transitions | DonHV | NhanT | CAP handler validates required reasons only for mentor-confirmed transitions |
+| S2-BE-02 | Implement mandatory note/reason validation for selected transitions | NhanT | DonHV | CAP handler validates required reasons only for mentor-confirmed transitions |
 | S2-BE-03 | Ensure history, nextProcessor, and notification side effects remain correct | DonHV | NhanT | Status changes produce correct audit/history and next owner |
 | S2-BE-04 | Fix backend bugs found during Sprint 02 QA | DonHV | NhanT | Backend bug fixes with evidence in DonHV status file |
 | S2-QA-01 | Create happy-flow verification checklist | NhanT | DonHV | Checklist for create -> assign -> review -> request/reject/resolve |
@@ -53,9 +53,9 @@ Confirmed changes:
 | S2-FE-01 | Redesign Bug Detail field layout | DatDT | SangVN | Assignee/status prioritized; important fields grouped |
 | S2-FE-02 | Make editable status a dropdown/value help | SangVN | DatDT | No free-text status editing in edit mode |
 | S2-FE-03 | Improve input usability for important fields | DatDT | SangVN | Title, status, assignee, priority, application component, defect category, steps/actual/expected easy to enter |
-| S2-FE-04 | Move severity and environment to supporting area | DatDT | SangVN | Layout is more balanced and easier to scan |
+| S2-FE-04 | Move severity and environment to supporting area | SangVN | DatDT | Layout is more balanced and easier to scan |
 | S2-FE-05 | Improve comments/developer note section usability | SangVN | DatDT | Discussion and optional developer note are usable from Bug Detail |
-| S2-DEMO-01 | Prepare mentor demo script and final smoke test | DonHV | NhanT, DatDT, SangVN | Demo flow, screenshots, and final known-issue list |
+| S2-DEMO-01 | Prepare mentor demo script and final smoke test | NhanT | DonHV, DatDT, SangVN | Demo flow, screenshots, and final known-issue list |
 
 ## Week 1 Plan
 
@@ -63,8 +63,8 @@ Confirmed changes:
 | --- | --- | --- | --- | --- |
 | Day 1 | Sync mentor delta to docs and backlog; inspect backend handlers | Define QA checklist and happy-flow scenarios | Inspect current Bug Detail/Object Page layout | Inspect current status/value help behavior |
 | Day 2 | Design/implement view-discuss vs process permission behavior | Review backend validation cases | Move assignee/status to priority area | Implement or refine status dropdown/value help behavior |
-| Day 3 | Implement required note/reason validation | Test transition validation cases | Regroup important fields for create/edit/detail | Tune semantic display and field usability |
-| Day 4 | Verify history/nextProcessor/notification side effects | Prepare seed/test data and API evidence | Move severity/environment to supporting area | Improve comments/developer note usability |
+| Day 3 | Support note/reason validation design and backend review | Implement/test transition validation cases | Regroup important fields for create/edit/detail | Tune semantic display and field usability |
+| Day 4 | Verify history/nextProcessor/notification side effects | Prepare seed/test data and API evidence | Support layout review | Move severity/environment to supporting area and improve comments/developer note usability |
 | Day 5 | Fix backend bugs from QA | Execute backend regression and report bugs | Browser smoke test layout | Browser smoke test dropdown/note behavior |
 
 ## Week 2 Plan
@@ -75,7 +75,7 @@ Confirmed changes:
 | Day 7 | Align service contract with FE needs | Re-run transition checks | Polish Object Page/Create/Edit | Polish comment/developer note UX |
 | Day 8 | Prepare backend demo evidence | Verify history/notification records | Browser walkthrough | Browser walkthrough |
 | Day 9 | Consolidate open bugs and blockers | Regression test | Final FE cleanup | Final FE cleanup |
-| Day 10 | Demo script and Jira/status update | QA sign-off notes | UI demo ready | UI demo ready |
+| Day 10 | Jira/status coordination and backend evidence | Demo script, final smoke test, and QA sign-off notes | UI demo ready | UI demo ready |
 
 ## Acceptance Criteria
 
@@ -101,16 +101,16 @@ Suggested Jira issues:
 | Jira Summary | Type | Owner |
 | --- | --- | --- |
 | Update developer visibility and processing permission model | Task | DonHV |
-| Implement mandatory note/reason validation for selected transitions | Task | DonHV |
+| Implement mandatory note/reason validation for selected transitions | Task | NhanT |
 | Verify history, nextProcessor, and notification side effects | Task | DonHV |
 | Fix backend bugs found during Sprint 02 QA | Task | DonHV |
 | Create and execute happy-flow backend verification checklist | Task | NhanT |
 | Redesign Bug Detail field layout | Task | DatDT |
 | Make editable status use dropdown/value help | Task | SangVN |
 | Improve important field input usability | Task | DatDT |
-| Move severity and environment to supporting area | Task | DatDT |
+| Move severity and environment to supporting area | Task | SangVN |
 | Improve comments and developer note usability | Task | SangVN |
-| Prepare mentor demo script and final smoke test | Task | DonHV |
+| Prepare mentor demo script and final smoke test | Task | NhanT |
 
 ## Vietnamese
 
@@ -155,7 +155,7 @@ Cập nhật đã chốt:
 | ID | Công việc | Owner | Hỗ trợ | Output |
 | --- | --- | --- | --- | --- |
 | S2-BE-01 | Làm rõ quyền developer view/discuss và quyền xử lý chính | DonHV | NhanT | Rule backend cho view/discuss vs process action |
-| S2-BE-02 | Implement validation note/reason bắt buộc cho selected transitions | DonHV | NhanT | CAP handler chỉ bắt reason ở transition đã chốt |
+| S2-BE-02 | Implement validation note/reason bắt buộc cho selected transitions | NhanT | DonHV | CAP handler chỉ bắt reason ở transition đã chốt |
 | S2-BE-03 | Đảm bảo history, nextProcessor và notification side effect đúng | DonHV | NhanT | Status change ghi đúng audit/history và next owner |
 | S2-BE-04 | Fix backend bug phát hiện trong Sprint 02 QA | DonHV | NhanT | Backend bug fix có evidence trong status DonHV |
 | S2-QA-01 | Tạo checklist verify happy flow | NhanT | DonHV | Checklist create -> assign -> review -> request/reject/resolve |
@@ -163,9 +163,9 @@ Cập nhật đã chốt:
 | S2-FE-01 | Redesign layout field Bug Detail | DatDT | SangVN | Assignee/status được ưu tiên; field quan trọng được nhóm |
 | S2-FE-02 | Status edit bằng dropdown/value help | SangVN | DatDT | Không còn edit status bằng free text |
 | S2-FE-03 | Cải thiện input usability cho field quan trọng | DatDT | SangVN | Title, status, assignee, priority, application component, defect category, steps/actual/expected dễ nhập |
-| S2-FE-04 | Chuyển severity và environment sang vùng phụ | DatDT | SangVN | Layout cân hơn và dễ scan hơn |
+| S2-FE-04 | Chuyển severity và environment sang vùng phụ | SangVN | DatDT | Layout cân hơn và dễ scan hơn |
 | S2-FE-05 | Cải thiện comments/developer note section | SangVN | DatDT | Thảo luận và developer note optional dùng được từ Bug Detail |
-| S2-DEMO-01 | Chuẩn bị demo script và final smoke test | DonHV | NhanT, DatDT, SangVN | Demo flow, screenshot và danh sách known issue cuối |
+| S2-DEMO-01 | Chuẩn bị demo script và final smoke test | NhanT | DonHV, DatDT, SangVN | Demo flow, screenshot và danh sách known issue cuối |
 
 ## Acceptance Criteria
 

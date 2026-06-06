@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-06-05
+Last updated: 2026-06-06
 
 ## Snapshot
 
@@ -9,7 +9,7 @@ Last updated: 2026-06-05
 | Project phase | Sprint 02 planning ready after mentor feedback; WP1, WP2, and WP3 MVP implementation completed; WP4 core Fiori screens updated |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
 | Current sprint | Sprint 02 should focus on mentor feedback, happy flow demo, backend note/reason validation, and Bug Detail UI refinements |
-| Recommended next action | Create Jira backlog from `docs/pm/07-sprint-2-plan.md`, then implement backend fixes and Fiori Bug Detail refinements |
+| Recommended next action | Start assigned Jira tasks from `docs/pm/07-sprint-2-plan.md`, then implement backend fixes, validation checks, and Fiori Bug Detail refinements |
 | Main implementation risk | Fiori screens and backend handlers now exist, but deeper browser QA, real attachment upload, external notification delivery, authorization, and automated tests are still incomplete |
 
 ## What Is Already Done
@@ -46,7 +46,7 @@ Last updated: 2026-06-05
 - WP4 Fiori Elements core screens are updated: list filters/table columns, object page sections, value helps, object page actions, semantic criticality, rejected follow-up fields, and child sections for comments, attachments, history, and notifications.
 - Four IDTS-aligned demo bug records were added under `db/data/idts.cap-Bugs.csv`, and browser smoke verification shows the List Report rendering 4 rows after pressing `Go`.
 - Mentor feedback for Sprint 02 is baselined: developers may view/discuss team-visible bugs, primary lifecycle actions remain controlled, developer notes are optional by default, selected transitions require note/reason, and Bug Detail UI should prioritize assignee/status and key input fields.
-- Sprint 02 plan is documented in `docs/pm/07-sprint-2-plan.md`. DonHV now leads Backend CAP and backend bug fixing; NhanT supports backend verification/QA; DatDT leads Fiori/UI5; SangVN supports Fiori/UI5.
+- Sprint 02 plan is documented in `docs/pm/07-sprint-2-plan.md`. Jira issues `IDTS-1` to `IDTS-12` are assigned: DonHV owns Backend CAP lead/bug fixing, NhanT owns validation/QA/demo smoke testing, DatDT owns core Bug Detail layout/input usability, and SangVN owns status value help plus supporting field/comment usability.
 
 Vietnamese:
 
@@ -55,7 +55,7 @@ Vietnamese:
 - WP3 Handler Rules và Validation đã hoàn thành ở mức Sprint 1 MVP: `srv/service.js` xử lý create/update validation, assignment responsibility checks, status transition validation, nextProcessor automation, history logs và notification records.
 - WP4 core Fiori screens đã cập nhật: List Report, Object Page, Create metadata, Assignment value help/actions, Developer Review actions, Rejected follow-up, History và Notifications sections.
 - Feedback mentor cho Sprint 02 đã được baseline: developer có thể xem/thảo luận bug trong team, lifecycle action chính vẫn kiểm soát, developer note mặc định optional, một số transition bắt buộc note/reason, và Bug Detail UI cần ưu tiên assignee/status cùng các field nhập quan trọng.
-- Sprint 02 plan được ghi tại `docs/pm/07-sprint-2-plan.md`. DonHV hiện lead Backend CAP và backend bug fixing; NhanT hỗ trợ backend verification/QA; DatDT lead Fiori/UI5; SangVN hỗ trợ Fiori/UI5.
+- Sprint 02 plan được ghi tại `docs/pm/07-sprint-2-plan.md`. Jira issues `IDTS-1` đến `IDTS-12` đã được assign: DonHV phụ trách Backend CAP lead/bug fixing, NhanT phụ trách validation/QA/demo smoke test, DatDT phụ trách core Bug Detail layout/input usability, và SangVN phụ trách status value help cùng supporting field/comment usability.
 
 - Trạng thái PM hiện dùng file theo từng thành viên: `status/donhv.md`, `status/sangvn.md`, `status/datdt.md`, và `status/nhant.md`.
 - Inventory template SAP490 đã được ghi tại `docs/sap490/template-inventory.md`.

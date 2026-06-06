@@ -1,6 +1,6 @@
 # IDTS Task Board
 
-Last updated: 2026-06-05
+Last updated: 2026-06-06
 
 Use this board for high-level movement only. Detailed task notes belong in the matching file under `docs/pm/tasks/`.
 
@@ -39,7 +39,7 @@ Vietnamese:
 | WP5 | Comments and History | SangVN, DatDT | DonHV, NhanT | `tasks/wp5-comments-history.md` |
 | WP6 | PM Monitoring | DatDT, SangVN | DonHV, NhanT | `tasks/wp6-pm-monitoring.md` |
 | WP7 | Notifications and Attachments | SangVN, DatDT | DonHV, NhanT | `tasks/wp7-notification-attachments.md` |
-| SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, DatDT | NhanT, SangVN | `07-sprint-2-plan.md` |
+| SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Assigned Jira issues `IDTS-1` to `IDTS-12` | `07-sprint-2-plan.md` |
 
 Vietnamese:
 
@@ -48,7 +48,7 @@ Vietnamese:
 | WP5 | Comments và History | SangVN, DatDT | DonHV, NhanT | `tasks/wp5-comments-history.md` |
 | WP6 | PM Monitoring | DatDT, SangVN | DonHV, NhanT | `tasks/wp6-pm-monitoring.md` |
 | WP7 | Notifications và Attachments | SangVN, DatDT | DonHV, NhanT | `tasks/wp7-notification-attachments.md` |
-| SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, DatDT | NhanT, SangVN | `07-sprint-2-plan.md` |
+| SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Đã assign Jira issues `IDTS-1` đến `IDTS-12` | `07-sprint-2-plan.md` |
 
 ## In Progress
 
