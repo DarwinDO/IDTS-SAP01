@@ -2,18 +2,8 @@ using BugService as service from '../../srv/service';
 
 annotate service.Bugs with @(
   Capabilities.InsertRestrictions : {
-    Insertable : true,
-    RequiredProperties : [
-      title,
-      description,
-      priority_code,
-      severity_code,
-      applicationComponent_ID,
-      defectCategory_ID,
-      stepsToReproduce,
-      actualResult,
-      expectedResult
-    ]
+    Insertable           : true,
+    RequiredProperties   : [ title ]
   },
   UI.HeaderInfo : {
     TypeName       : 'Bug',
@@ -87,7 +77,6 @@ annotate service.Bugs with @(
     applicationComponent_ID,
     defectCategory_ID,
     assignee_ID,
-    nextProcessorRole_code,
     dueDate
   ],
   UI.LineItem : [
@@ -100,36 +89,11 @@ annotate service.Bugs with @(
     { $Type : 'UI.DataField', Label : 'Application Component', Value : applicationComponent.name },
     { $Type : 'UI.DataField', Label : 'Defect Category', Value : defectCategory.name },
     { $Type : 'UI.DataField', Label : 'Assignee', Value : assignee.user.displayName },
-    { $Type : 'UI.DataField', Label : 'Next Processor', Value : nextProcessorRole.name },
+
     { $Type : 'UI.DataField', Label : 'Due Date', Value : dueDate },
     { $Type : 'UI.DataField', Label : 'Updated At', Value : modifiedAt }
   ],
   UI.Facets : [
-    {
-      $Type  : 'UI.CollectionFacet',
-      ID     : 'BugDetails',
-      Label  : 'Bug Details',
-      Facets : [
-        {
-          $Type  : 'UI.ReferenceFacet',
-          ID     : 'GeneralInfo',
-          Label  : 'General Information',
-          Target : '@UI.FieldGroup#GeneralInfo'
-        },
-        {
-          $Type  : 'UI.ReferenceFacet',
-          ID     : 'Classification',
-          Label  : 'Classification',
-          Target : '@UI.FieldGroup#Classification'
-        },
-        {
-          $Type  : 'UI.ReferenceFacet',
-          ID     : 'Reproduction',
-          Label  : 'Reproduction and Results',
-          Target : '@UI.FieldGroup#Reproduction'
-        }
-      ]
-    },
     {
       $Type  : 'UI.CollectionFacet',
       ID     : 'Ownership',
@@ -152,6 +116,31 @@ annotate service.Bugs with @(
           ID     : 'Planning',
           Label  : 'Planning',
           Target : '@UI.FieldGroup#Planning'
+        }
+      ]
+    },
+    {
+      $Type  : 'UI.CollectionFacet',
+      ID     : 'BugDetails',
+      Label  : 'Bug Details',
+      Facets : [
+        {
+          $Type  : 'UI.ReferenceFacet',
+          ID     : 'GeneralInfo',
+          Label  : 'General Information',
+          Target : '@UI.FieldGroup#GeneralInfo'
+        },
+        {
+          $Type  : 'UI.ReferenceFacet',
+          ID     : 'Classification',
+          Label  : 'Classification',
+          Target : '@UI.FieldGroup#Classification'
+        },
+        {
+          $Type  : 'UI.ReferenceFacet',
+          ID     : 'Reproduction',
+          Label  : 'Reproduction and Results',
+          Target : '@UI.FieldGroup#Reproduction'
         }
       ]
     },
@@ -185,7 +174,7 @@ annotate service.Bugs with @(
       { $Type : 'UI.DataField', Label : 'Bug Number', Value : bugNumber },
       { $Type : 'UI.DataField', Label : 'Title', Value : title },
       { $Type : 'UI.DataField', Label : 'Description', Value : description },
-      { $Type : 'UI.DataField', Label : 'Status', Value : status.name, Criticality : status.criticality, CriticalityRepresentation : #WithoutIcon },
+      { $Type : 'UI.DataField', Label : 'Status', Value : status_code },
       { $Type : 'UI.DataField', Label : 'Priority', Value : priority.name, Criticality : priority.criticality, CriticalityRepresentation : #WithoutIcon },
       { $Type : 'UI.DataField', Label : 'Severity', Value : severity.name, Criticality : severity.criticality, CriticalityRepresentation : #WithoutIcon },
       { $Type : 'UI.DataField', Label : 'Environment', Value : environment.name },
@@ -214,15 +203,13 @@ annotate service.Bugs with @(
   UI.FieldGroup #Assignment : {
     Data : [
       { $Type : 'UI.DataField', Label : 'Assignee', Value : assignee.user.displayName },
-      { $Type : 'UI.DataField', Label : 'Next Processor User', Value : nextProcessorUser.displayName },
-      { $Type : 'UI.DataField', Label : 'Next Processor Role', Value : nextProcessorRole.name }
+      { $Type : 'UI.DataField', Label : 'Next Processor User', Value : nextProcessorUser.displayName }
     ]
   },
   UI.FieldGroup #RejectedFollowUp : {
     Data : [
       { $Type : 'UI.DataField', Label : 'Latest Rejection Reason', Value : rejectionReason },
-      { $Type : 'UI.DataField', Label : 'Next Processor User', Value : nextProcessorUser.displayName },
-      { $Type : 'UI.DataField', Label : 'Next Processor Role', Value : nextProcessorRole.name }
+      { $Type : 'UI.DataField', Label : 'Next Processor User', Value : nextProcessorUser.displayName }
     ]
   },
   UI.FieldGroup #Planning : {
@@ -271,32 +258,35 @@ annotate service.Bugs with {
   reporter              @Common.Label : 'Reporter';
   assignee              @Common.Label : 'Assignee';
   nextProcessorUser     @Common.Label : 'Next Processor User';
-  nextProcessorRole     @Common.Label : 'Next Processor Role';
+
   componentCategory     @UI.Hidden @Core.Computed;
 };
 
 annotate service.Bugs:componentCategory.ID with @UI.Hidden @Core.Computed;
 
-annotate service.Bugs:status.code with @Common.ValueList : {
-    Label : 'Status',
+annotate service.Bugs:status.code with @(
+  Common.ValueListWithFixedValues : true,
+  Common.ValueList                : {
+    Label          : 'Status',
     CollectionPath : 'StatusValues',
-    SearchSupported : true,
-    Parameters : [
+    SearchSupported : false,
+    Parameters     : [
       {
-        $Type : 'Common.ValueListParameterInOut',
+        $Type             : 'Common.ValueListParameterInOut',
         LocalDataProperty : status_code,
         ValueListProperty : 'code'
       },
       {
-        $Type : 'Common.ValueListParameterDisplayOnly',
+        $Type             : 'Common.ValueListParameterDisplayOnly',
         ValueListProperty : 'name'
       },
       {
-        $Type : 'Common.ValueListParameterDisplayOnly',
+        $Type             : 'Common.ValueListParameterDisplayOnly',
         ValueListProperty : 'descr'
       }
     ]
-  };
+  }
+);
 
 annotate service.Bugs:priority.code with @Common.ValueList : {
     Label : 'Priority',
@@ -467,22 +457,6 @@ annotate service.Bugs:reporter.ID with @Common.ValueList : {
     ]
   };
 
-annotate service.Bugs:nextProcessorRole.code with @Common.ValueList : {
-    Label : 'Next Processor Role',
-    CollectionPath : 'ProcessorRoleValues',
-    SearchSupported : true,
-    Parameters : [
-      {
-        $Type : 'Common.ValueListParameterInOut',
-        LocalDataProperty : nextProcessorRole_code,
-        ValueListProperty : 'code'
-      },
-      {
-        $Type : 'Common.ValueListParameterDisplayOnly',
-        ValueListProperty : 'name'
-      }
-    ]
-  };
 
 annotate service.StatusValues with @(
   Common.SemanticKey : [ code ],
@@ -640,16 +614,21 @@ annotate service.Attachments with {
   bug @UI.Hidden;
 };
 
-annotate service.HistoryLogs with @UI.LineItem : [
-  { $Type : 'UI.DataField', Label : 'Time', Value : createdAt },
-  { $Type : 'UI.DataField', Label : 'Actor', Value : actor.displayName },
-  { $Type : 'UI.DataField', Label : 'Role', Value : actorRole.name },
-  { $Type : 'UI.DataField', Label : 'Action', Value : actionType.name },
-  { $Type : 'UI.DataField', Label : 'Field', Value : fieldName },
-  { $Type : 'UI.DataField', Label : 'Old Value', Value : oldValue },
-  { $Type : 'UI.DataField', Label : 'New Value', Value : newValue },
-  { $Type : 'UI.DataField', Label : 'Reason', Value : reason }
-];
+annotate service.HistoryLogs with @(
+  Capabilities.InsertRestrictions : { Insertable : false },
+  Capabilities.DeleteRestrictions : { Deletable  : false },
+  Capabilities.UpdateRestrictions : { Updatable  : false },
+  UI.LineItem : [
+    { $Type : 'UI.DataField', Label : 'Time',      Value : createdAt },
+    { $Type : 'UI.DataField', Label : 'Actor',     Value : actor.displayName },
+    { $Type : 'UI.DataField', Label : 'Role',      Value : actorRole.name },
+    { $Type : 'UI.DataField', Label : 'Action',    Value : actionType.name },
+    { $Type : 'UI.DataField', Label : 'Field',     Value : fieldName },
+    { $Type : 'UI.DataField', Label : 'Old Value', Value : oldValue },
+    { $Type : 'UI.DataField', Label : 'New Value', Value : newValue },
+    { $Type : 'UI.DataField', Label : 'Reason',    Value : reason }
+  ]
+);
 
 annotate service.HistoryLogs with {
   ID     @UI.Hidden;
