@@ -22,6 +22,12 @@ const PROCESSOR_ROLE = {
   NONE: 'NONE'
 }
 
+const USER_ROLE = {
+  TESTER: 'TESTER',
+  DEVELOPER: 'DEVELOPER',
+  PM: 'PM'
+}
+
 const ACTION = {
   CREATE: 'CREATE',
   EDIT: 'EDIT',
@@ -35,6 +41,22 @@ const ACTION = {
   CLOSE: 'CLOSE',
   REOPEN: 'REOPEN'
 }
+
+const COORDINATOR_ROLES = new Set([USER_ROLE.TESTER, USER_ROLE.PM])
+const COMMENT_ROLES = new Set([USER_ROLE.TESTER, USER_ROLE.DEVELOPER, USER_ROLE.PM])
+const DEVELOPER_ACTIONS = new Set([
+  ACTION.STATUS_CHANGE,
+  ACTION.REQUEST_INFO,
+  ACTION.REJECT,
+  ACTION.RESOLVE
+])
+const DEVELOPER_DIRECT_STATUSES = new Set([
+  STATUS.IN_REVIEW,
+  STATUS.NEED_MORE_INFORMATION,
+  STATUS.IN_PROGRESS,
+  STATUS.RESOLVED,
+  STATUS.REJECTED
+])
 
 const EVENT = {
   ASSIGNED: 'ASSIGNED',
@@ -88,10 +110,11 @@ const TESTER_STATUSES = new Set([
 module.exports = class BugService extends cds.ApplicationService {
   async init () {
     const entities = this.entities
-    const { Bugs } = entities
+    const { Bugs, Comments } = entities
 
     this.before('CREATE', Bugs, req => prepareBugWrite(req, entities, { isCreate: true }))
     this.before('UPDATE', Bugs, req => prepareBugWrite(req, entities, { isCreate: false }))
+    this.before('CREATE', Comments, req => prepareCommentCreate(req, entities))
     this.after('CREATE', Bugs, (data, req) => recordCreateSideEffects(req, data, entities))
     this.after('UPDATE', Bugs, (data, req) => recordUpdateSideEffects(req, entities))
 
@@ -183,6 +206,8 @@ async function prepareBugWrite (req, entities, { isCreate }) {
   }
 
   const finalStatus = req.data.status_code || finalData.status_code
+  await enforceBugWritePermission(req, entities, oldBug, { ...finalData, ...req.data, status_code: finalStatus }, { isCreate })
+
   if (!isCreate && req.data.status_code && oldBug.status_code !== req.data.status_code) {
     validateTransition(req, oldBug.status_code, req.data.status_code)
   }
@@ -231,6 +256,8 @@ async function transitionBug (req, entities, options) {
   const bugID = bugIDFrom(req)
   const oldBug = await readBug(req, entities, bugID)
   if (!oldBug) return req.reject(404, 'Bug not found.')
+
+  await enforceActionPermission(req, entities, oldBug, options.actionType)
 
   if (options.requireReason && !trimToNull(options.reason)) {
     return req.reject(400, 'This action requires a reason.', reasonTarget(options.actionType))
@@ -288,8 +315,169 @@ async function transitionBug (req, entities, options) {
     })
   }
 
+  if (oldBug.nextProcessorUser_ID !== updatedBug.nextProcessorUser_ID) {
+    await writeHistory(req, entities, {
+      bugID,
+      actorID,
+      actionType: options.actionType,
+      fieldName: 'nextProcessorUser',
+      oldValue: oldBug.nextProcessorUser_ID,
+      newValue: updatedBug.nextProcessorUser_ID,
+      reason: trimToNull(options.reason)
+    })
+  }
+
+  if (oldBug.nextProcessorRole_code !== updatedBug.nextProcessorRole_code) {
+    await writeHistory(req, entities, {
+      bugID,
+      actorID,
+      actionType: options.actionType,
+      fieldName: 'nextProcessorRole',
+      oldValue: oldBug.nextProcessorRole_code,
+      newValue: updatedBug.nextProcessorRole_code,
+      reason: trimToNull(options.reason)
+    })
+  }
+
   await writeNotificationForStatus(req, entities, updatedBug, options.status)
   return updatedBug
+}
+
+async function prepareCommentCreate (req, entities) {
+  req.data.content = trimToNull(req.data.content)
+  if (!req.data.content) {
+    return req.reject(400, 'Comment content is required.', 'content')
+  }
+
+  const actor = await resolveRequestUser(req, entities)
+  if (actor) {
+    if (!COMMENT_ROLES.has(actor.role_code)) {
+      return req.reject(403, 'Only Tester, Developer, or PM users can add comments.')
+    }
+
+    if (req.data.author_ID && req.data.author_ID !== actor.ID) {
+      return req.reject(403, 'Users cannot create comments on behalf of another user.', 'author')
+    }
+
+    req.data.author_ID = actor.ID
+    req.data.authorRole_code = actor.role_code
+  }
+
+  if (!req.data.author_ID) {
+    return req.reject(400, 'Comment author is required.', 'author')
+  }
+
+  const author = await cds.tx(req).run(SELECT.one.from(entities.Users).where({
+    ID: req.data.author_ID,
+    active: true
+  }))
+
+  if (!author) {
+    return req.reject(400, 'Comment author must be an active user.', 'author')
+  }
+
+  if (!COMMENT_ROLES.has(author.role_code)) {
+    return req.reject(400, 'Comment author must be a Tester, Developer, or PM user.', 'authorRole')
+  }
+
+  if (!req.data.authorRole_code) {
+    req.data.authorRole_code = author.role_code
+  }
+}
+
+async function enforceBugWritePermission (req, entities, oldBug, nextBug, { isCreate }) {
+  const actor = await resolveRequestUser(req, entities)
+  if (!actor) return
+
+  if (isCreate) {
+    if (COORDINATOR_ROLES.has(actor.role_code)) return
+    return req.reject(403, 'Only Tester or PM users can create bug reports.')
+  }
+
+  const statusChanged = oldBug.status_code !== nextBug.status_code
+  const assigneeChanged = oldBug.assignee_ID !== nextBug.assignee_ID
+
+  if (assigneeChanged && !COORDINATOR_ROLES.has(actor.role_code)) {
+    return req.reject(403, 'Only Tester or PM users can assign or reassign bugs.', 'assignee')
+  }
+
+  if (!statusChanged) return
+
+  if (COORDINATOR_ROLES.has(actor.role_code)) return
+
+  const canDeveloperProcess = actor.role_code === USER_ROLE.DEVELOPER &&
+    DEVELOPER_DIRECT_STATUSES.has(nextBug.status_code) &&
+    await isAssignedDeveloper(req, entities, actor.ID, oldBug)
+
+  if (canDeveloperProcess) return
+
+  return req.reject(
+    403,
+    'Only the assigned developer, Tester, or PM can change the bug processing status.',
+    'status'
+  )
+}
+
+async function enforceActionPermission (req, entities, bug, actionType) {
+  const actor = await resolveRequestUser(req, entities)
+  if (!actor) return
+
+  if (COORDINATOR_ROLES.has(actor.role_code)) return
+
+  const canDeveloperProcess = actor.role_code === USER_ROLE.DEVELOPER &&
+    DEVELOPER_ACTIONS.has(actionType) &&
+    await isAssignedDeveloper(req, entities, actor.ID, bug)
+
+  if (canDeveloperProcess) return
+
+  return req.reject(
+    403,
+    'Only the assigned developer, Tester, or PM can perform this bug processing action.'
+  )
+}
+
+async function isAssignedDeveloper (req, entities, userID, bug) {
+  if (!userID || !bug?.assignee_ID) return false
+  const assigneeUserID = await userIDForDeveloper(req, entities, bug.assignee_ID)
+  return assigneeUserID === userID
+}
+
+async function resolveRequestUser (req, entities) {
+  for (const candidate of requestUserCandidates(req)) {
+    const user = await activeUserFromCandidate(req, entities, candidate)
+    if (user) return user
+  }
+
+  return null
+}
+
+async function activeUserFromCandidate (req, entities, candidate) {
+  const tx = cds.tx(req)
+
+  const byID = await tx.run(SELECT.one.from(entities.Users).where({ ID: candidate, active: true }))
+  if (byID) return byID
+
+  const byEmail = await tx.run(SELECT.one.from(entities.Users).where({ email: candidate, active: true }))
+  if (byEmail) return byEmail
+
+  return tx.run(SELECT.one.from(entities.Users).where({ displayName: candidate, active: true }))
+}
+
+function requestUserCandidates (req) {
+  const attributes = req.user?.attr || {}
+  const values = [
+    req.user?.id,
+    attributes.email,
+    attributes.user_name,
+    attributes.login_name,
+    attributes.name,
+    attributes.given_name
+  ]
+
+  return values
+    .flatMap(value => Array.isArray(value) ? value : [value])
+    .map(value => typeof value === 'string' ? value.trim() : value)
+    .filter(value => value && value !== 'anonymous')
 }
 
 function validateRequiredBugFields (req, bug) {
@@ -531,6 +719,30 @@ function notificationTargetForStatus (bug, status) {
     }
   }
 
+  if (status === STATUS.RESOLVED && bug.nextProcessorUser_ID) {
+    return {
+      recipientID: bug.nextProcessorUser_ID,
+      eventType: EVENT.UPDATED,
+      message: `${bug.bugNumber || 'Bug'} is resolved and ready for verification.`
+    }
+  }
+
+  if (status === STATUS.RETEST_REQUIRED && bug.nextProcessorUser_ID) {
+    return {
+      recipientID: bug.nextProcessorUser_ID,
+      eventType: EVENT.UPDATED,
+      message: `${bug.bugNumber || 'Bug'} requires retest.`
+    }
+  }
+
+  if (status === STATUS.REOPENED && bug.nextProcessorUser_ID) {
+    return {
+      recipientID: bug.nextProcessorUser_ID,
+      eventType: EVENT.UPDATED,
+      message: `${bug.bugNumber || 'Bug'} was reopened and needs follow-up.`
+    }
+  }
+
   if (status === STATUS.CLOSED && bug.reporter_ID) {
     return {
       recipientID: bug.reporter_ID,
@@ -543,6 +755,9 @@ function notificationTargetForStatus (bug, status) {
 }
 
 async function actorForAction (req, entities, bug, actionType) {
+  const actor = await resolveRequestUser(req, entities)
+  if (actor) return actor.ID
+
   if ([ACTION.REQUEST_INFO, ACTION.REJECT, ACTION.RESOLVE, ACTION.STATUS_CHANGE].includes(actionType)) {
     const assigneeUserID = await userIDForDeveloper(req, entities, bug.assignee_ID)
     if (assigneeUserID) return assigneeUserID

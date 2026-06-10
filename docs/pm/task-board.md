@@ -1,6 +1,6 @@
 # IDTS Task Board
 
-Last updated: 2026-06-06
+Last updated: 2026-06-10
 
 Use this board for high-level movement only. Detailed task notes belong in the matching file under `docs/pm/tasks/`.
 
@@ -39,7 +39,6 @@ Vietnamese:
 | WP5 | Comments and History | SangVN, DatDT | DonHV, NhanT | `tasks/wp5-comments-history.md` |
 | WP6 | PM Monitoring | DatDT, SangVN | DonHV, NhanT | `tasks/wp6-pm-monitoring.md` |
 | WP7 | Notifications and Attachments | SangVN, DatDT | DonHV, NhanT | `tasks/wp7-notification-attachments.md` |
-| SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Assigned Jira issues `IDTS-1` to `IDTS-12` | `07-sprint-2-plan.md` |
 
 Vietnamese:
 
@@ -48,18 +47,19 @@ Vietnamese:
 | WP5 | Comments và History | SangVN, DatDT | DonHV, NhanT | `tasks/wp5-comments-history.md` |
 | WP6 | PM Monitoring | DatDT, SangVN | DonHV, NhanT | `tasks/wp6-pm-monitoring.md` |
 | WP7 | Notifications và Attachments | SangVN, DatDT | DonHV, NhanT | `tasks/wp7-notification-attachments.md` |
-| SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Đã assign Jira issues `IDTS-1` đến `IDTS-12` | `07-sprint-2-plan.md` |
 
 ## In Progress
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
+| SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Sprint implementation has started. Jira `IDTS-2` and `IDTS-4` are Done; `IDTS-5` remains In Progress as backend QA bug-fix bucket. |
 | WP4 | Fiori Elements UX | DatDT | Core List/Object/Create/Assignment/Developer Review metadata is updated; GridTable and draft-enabled Create Bug dialog refinement applied. Deeper QA and attachment upload remain. |
 
 Vietnamese:
 
 | ID | Công việc | Thành viên chính | Ghi chú |
 | --- | --- | --- | --- |
+| SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Implementation Sprint 02 đã bắt đầu. Jira `IDTS-2` và `IDTS-4` đã Done; `IDTS-5` vẫn In Progress để nhận bug backend từ QA. |
 | WP4 | Fiori Elements UX | DatDT | Metadata cho List/Object/Create/Assignment/Developer Review đã cập nhật; đã tinh chỉnh GridTable và dialog Create Bug bằng draft. Vẫn còn QA sâu và attachment upload. |
 
 ## Blocked
