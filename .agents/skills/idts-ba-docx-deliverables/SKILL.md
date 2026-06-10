@@ -63,7 +63,7 @@ Default routing:
 
 ### SAP490 Google Workspace Sync
 
-Read `../../../docs/sap490/sync-workflow.md` before syncing BRD/SRS/FRS, SAP490 templates, DOCX, XLSX, Google Docs, or Google Sheets.
+Read `../../../docs/sap490/sync-workflow.en.md` and `../../../docs/sap490/sync-workflow.vi.md` before syncing BRD/SRS/FRS, SAP490 templates, DOCX, XLSX, Google Docs, or Google Sheets.
 
 Default sync position:
 
@@ -76,7 +76,7 @@ Default sync position:
 
 Vietnamese:
 
-Đọc `../../../docs/sap490/sync-workflow.md` trước khi sync BRD/SRS/FRS, SAP490 template, DOCX, XLSX, Google Docs hoặc Google Sheets.
+Đọc `../../../docs/sap490/sync-workflow.en.md` và `../../../docs/sap490/sync-workflow.vi.md` trước khi sync BRD/SRS/FRS, SAP490 template, DOCX, XLSX, Google Docs hoặc Google Sheets.
 
 Vị trí sync mặc định:
 

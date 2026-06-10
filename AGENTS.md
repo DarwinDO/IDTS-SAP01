@@ -107,6 +107,60 @@ DonHV consolidates team work at the end of a group work session or week. DonHV i
 
 Vietnamese: DonHV tổng hợp công việc của team vào cuối phiên làm việc nhóm hoặc cuối tuần. DonHV chịu trách nhiệm cập nhật tài liệu dự án, deliverable SAP490, Google Sheets, Excel và các bản tổng hợp chung sau khi đọc status của từng thành viên.
 
+## Git Branch Naming
+
+Before starting any nontrivial implementation, documentation, PM, BA, or tool/setup task, use a dedicated Git branch with a clear task name and the executing member name.
+
+Branch names must be lowercase kebab-case and follow this pattern:
+
+```text
+<type>/<jira-key-or-task-id>-<short-task-slug>-<member>
+```
+
+Recommended branch types:
+
+- `feature/` for new CAP/Fiori/UI5 functionality or planned enhancement work.
+- `fix/` for bug fixes.
+- `docs/` for documentation-only changes.
+- `chore/` for tooling, configuration, dependency, or repository maintenance.
+- `refactor/` for behavior-preserving cleanup.
+
+Examples:
+
+- `feature/idts-2-developer-visibility-donhv`
+- `fix/idts-5-backend-transition-bug-donhv`
+- `feature/idts-8-status-value-help-sangvn`
+- `docs/sprint-2-plan-donhv`
+
+If no Jira issue exists yet, use the PM work package or task ID, for example `feature/wp4-bug-detail-layout-datdt`. Avoid vague branch names such as `dev`, `test`, `update`, `new-ui`, or member-only names.
+
+Vietnamese:
+
+Trước khi bắt đầu bất kỳ task implementation, documentation, PM, BA hoặc tool/setup không tầm thường nào, hãy dùng một Git branch riêng có tên thể hiện rõ task và tên member thực hiện.
+
+Tên branch phải dùng chữ thường, kebab-case và theo format:
+
+```text
+<type>/<jira-key-or-task-id>-<short-task-slug>-<member>
+```
+
+Các loại branch khuyến nghị:
+
+- `feature/` cho chức năng mới hoặc enhancement đã có kế hoạch.
+- `fix/` cho bug fix.
+- `docs/` cho thay đổi chỉ liên quan tài liệu.
+- `chore/` cho tooling, config, dependency hoặc maintenance repo.
+- `refactor/` cho cleanup không đổi behavior.
+
+Ví dụ:
+
+- `feature/idts-2-developer-visibility-donhv`
+- `fix/idts-5-backend-transition-bug-donhv`
+- `feature/idts-8-status-value-help-sangvn`
+- `docs/sprint-2-plan-donhv`
+
+Nếu chưa có Jira issue, dùng PM work package hoặc task ID, ví dụ `feature/wp4-bug-detail-layout-datdt`. Tránh tên branch mơ hồ như `dev`, `test`, `update`, `new-ui`, hoặc chỉ có tên member.
+
 ## Canonical Business Documentation Sync
 
 When changing or discovering important project information, keep the canonical project documents aligned.
@@ -197,12 +251,12 @@ Auto-install examples that are acceptable when directly useful for the task: `op
 
 For BRD/SRS/FRS and DOCX work, prefer this discovery baseline before authoring or editing:
 
-- `idts-ba-docx-deliverables` as the primary coordinator for IDTS SAP490 hybrid BRD/SRS/FRS Markdown and DOCX deliverables.
+- `idts-ba-docx-deliverables` as the primary coordinator for IDTS SAP490 hybrid BRD/SRS/FRS Markdown deliverables and template-filled DOCX/XLSX/PPTX artifacts.
 - `product-discovery` for requirement elicitation and BA framing.
 - `dev-lifecycle` for structured SDLC workflow when the deliverable affects implementation.
 - `documents` skill/plugin for creating, editing, rendering, and visually verifying DOCX files.
 - `verify` before claiming a generated document or conversion is complete.
-- Local document tooling such as `python-docx`, Pandoc with `reference.docx`, LibreOffice CLI, and project document generation scripts.
+- Local document tooling such as `python-docx`, LibreOffice CLI, and project document generation scripts. Pandoc with `reference.docx` is allowed for ordinary Markdown-to-DOCX drafts, but not for final SAP490 non-Markdown submission artifacts unless the user explicitly asks for a labeled prototype.
 - External BRD/SRS/FRS, DOCX, XLSX, or diagram skills/tools may be auto-installed when they are trusted, task-relevant, and low-risk. Once installed, use them as secondary references under the repo-specific coordinator skill, not as project authority.
 
 For Google Workspace document collaboration, prefer `gws` as the repeatable team automation layer after it is installed and configured. Use the Google Drive connector as an interactive fallback for quick read, review, or one-off updates inside Codex. Keep the repo Markdown/DOCX/XLSX artifacts as the source of truth; Google Docs and Google Sheets are review and collaboration copies, not the canonical source.
@@ -228,12 +282,12 @@ Ví dụ có thể tự cài khi trực tiếp hữu ích cho task: `openpyxl` �
 
 Với BRD/SRS/FRS và DOCX, trước khi viết hoặc chỉnh sửa hãy ưu tiên baseline discovery sau:
 
-- `idts-ba-docx-deliverables` làm skill điều phối chính cho deliverable BRD/SRS/FRS Markdown và DOCX theo SAP490 hybrid của IDTS.
+- `idts-ba-docx-deliverables` làm skill điều phối chính cho deliverable BRD/SRS/FRS Markdown và artifact DOCX/XLSX/PPTX được fill từ template theo SAP490 hybrid của IDTS.
 - `product-discovery` để elicitation requirement và định hình góc nhìn BA.
 - `dev-lifecycle` cho workflow SDLC có cấu trúc khi deliverable ảnh hưởng implementation.
 - `documents` skill/plugin để tạo, chỉnh sửa, render, và kiểm tra trực quan file DOCX.
 - `verify` trước khi tuyên bố tài liệu hoặc bước convert đã hoàn tất.
-- Document tooling local như `python-docx`, Pandoc với `reference.docx`, LibreOffice CLI, và script generate document của project.
+- Document tooling local như `python-docx`, LibreOffice CLI, và script generate document của project. Pandoc với `reference.docx` được phép dùng cho draft Markdown-to-DOCX thông thường, nhưng không dùng cho artifact SAP490 non-Markdown chính thức trừ khi user yêu cầu trực tiếp một prototype có label rõ ràng.
 - Skill/tool BRD/SRS/FRS, DOCX, XLSX hoặc diagram bên ngoài có thể tự cài khi đáng tin cậy, liên quan trực tiếp tới task và rủi ro thấp. Sau khi cài, dùng chúng như nguồn tham khảo phụ dưới repo-specific coordinator skill, không dùng làm project authority.
 
 Với cộng tác tài liệu Google Workspace, ưu tiên `gws` làm lớp automation lặp lại cho team sau khi đã cài và cấu hình. Dùng Google Drive connector như fallback tương tác để đọc nhanh, review nhanh, hoặc cập nhật một lần trong Codex. Giữ Markdown/DOCX/XLSX trong repo là source of truth; Google Docs và Google Sheets chỉ là bản review/collaboration, không phải nguồn canonical.
@@ -263,7 +317,7 @@ This repo uses three kinds of agent guidance:
 - Repo-local SAP routing skills under `.agents/skills/sap-cap`, `.agents/skills/sap-fiori`, and `.agents/skills/sap-ui5`, inspired by `SAP-samples/cap-agentic-engineered`.
 - Repo-local behavior skill under `.agents/skills/karpathy-guidelines`, adapted from `multica-ai/andrej-karpathy-skills` for this SAP CAP/Fiori project.
 - Repo-local BA discovery skill under `.agents/skills/product-discovery`, adapted from `phucnt-bazone-vietnam/product-discovery` for IDTS requirement elicitation.
-- Repo-local BA/DOCX deliverable skill under `.agents/skills/idts-ba-docx-deliverables`, used as the primary coordinator for IDTS SAP490 hybrid BRD/SRS/FRS Markdown and DOCX deliverables.
+- Repo-local BA/DOCX deliverable skill under `.agents/skills/idts-ba-docx-deliverables`, used as the primary coordinator for IDTS SAP490 hybrid BRD/SRS/FRS Markdown deliverables and template-filled DOCX/XLSX/PPTX artifacts.
 - Repo-local learning skill under `.agents/skills/learning-recap`, used as an optional mentor mode after nontrivial work so the user understands what changed, why it changed, and how it affects IDTS.
 - Repo-local database modeling skill under `.agents/skills/idts-database-modeling`, used before brainstorming, reviewing, or implementing IDTS CAP/CDS database model changes.
 - Installed SAP AI Skills Library skill under `.agents/skills/sap-fiori-guidelines`.
@@ -311,8 +365,10 @@ Use `idts-ba-docx-deliverables` before creating, editing, or converting formal B
 - SAP490 hybrid document structure.
 - English/Vietnamese split deliverables.
 - Markdown and DOCX output placement.
+- SAP490 template-copy-fill workflow for DOCX, XLSX, PPTX, and other non-Markdown deliverables.
+- Template fidelity rules for fonts, sizes, colors, tables, formulas, headers, footers, cover pages, and page setup.
 - Use of `brd-creation`, `srs-documentation`, `frs-creation`, `docx`, and `docx-manipulation` as supporting references.
-- DOCX quality rules such as true Word tables, heading styles, approval/version tables, traceability matrices, and visual QA.
+- DOCX/XLSX/PPTX quality rules such as true Word tables, heading styles, approval/version tables, traceability matrices, formula/style preservation, visual QA, and Vietnamese text checks.
 
 Vietnamese:
 
@@ -321,8 +377,10 @@ Dùng `idts-ba-docx-deliverables` trước khi tạo, chỉnh sửa hoặc conve
 - Cấu trúc tài liệu SAP490 hybrid.
 - Deliverable tách tiếng Anh/tiếng Việt.
 - Vị trí output Markdown và DOCX.
+- Workflow copy template rồi fill cho DOCX, XLSX, PPTX và các deliverable SAP490 không phải Markdown.
+- Rule giữ fidelity của template về font, cỡ chữ, màu, bảng, formula, header, footer, cover page và page setup.
 - Cách dùng `brd-creation`, `srs-documentation`, `frs-creation`, `docx`, và `docx-manipulation` như nguồn tham khảo phụ.
-- Rule chất lượng DOCX như bảng Word thật, heading style, bảng approval/version, traceability matrix, và visual QA.
+- Rule chất lượng DOCX/XLSX/PPTX như bảng Word thật, heading style, bảng approval/version, traceability matrix, giữ formula/style, visual QA và kiểm tra lỗi tiếng Việt.
 
 ## Learning Recap / Mentor Mode
 
@@ -462,11 +520,15 @@ From now on, every newly created or updated documentation file, especially every
 - External templates may keep their required school/vendor language and format, but any repo-authored guidance around them must still be bilingual.
 - If the user explicitly asks for only one language for a specific artifact, follow the user request and mention the exception in the final response.
 
-Formal BA deliverables are an explicit exception to the same-file bilingual rule. BRD, SRS, and FRS must be split by language and stored in their own folders:
+Formal BA deliverables and SAP490 submission artifacts are explicit exceptions to the same-file bilingual rule. BRD, SRS, FRS, and every project-authored deliverable under `docs/sap490/` must be split by language and stored as separate files:
 
 - `docs/ba/brd/brd.en.md` and `docs/ba/brd/brd.vi.md`
 - `docs/ba/srs/srs.en.md` and `docs/ba/srs/srs.vi.md`
 - `docs/ba/frs/frs.en.md` and `docs/ba/frs/frs.vi.md`
+- SAP490 examples: `Blueprint_IDTS_SAP01_en_v0.1.docx` and `Blueprint_IDTS_SAP01_vi_v0.1.docx`
+- SAP490 examples: `Test_Report_IDTS_SAP01_en_v0.1.xlsx` and `Test_Report_IDTS_SAP01_vi_v0.1.xlsx`
+
+Do not mix English and Vietnamese in the same SAP490 deliverable unless the school-provided template itself requires a bilingual field or the user explicitly approves a one-off exception. If an exception is needed, record the reason in the final response and the relevant PM status file.
 
 Each formal deliverable should also have matching DOCX files when requested:
 
@@ -478,11 +540,15 @@ For BRD/SRS/FRS, use SAP490 hybrid style. BRD must stay business-first with only
 
 Vietnamese:
 
-Các deliverable BA chính thức là ngoại lệ rõ ràng của rule song ngữ trong cùng file. BRD, SRS và FRS phải tách theo ngôn ngữ và đặt trong folder riêng:
+Các deliverable BA chính thức và artifact nộp SAP490 là ngoại lệ rõ ràng của rule song ngữ trong cùng file. BRD, SRS, FRS và mọi deliverable do project tự viết bên trong `docs/sap490/` phải tách theo ngôn ngữ và lưu thành file riêng:
 
 - `docs/ba/brd/brd.en.md` và `docs/ba/brd/brd.vi.md`
 - `docs/ba/srs/srs.en.md` và `docs/ba/srs/srs.vi.md`
 - `docs/ba/frs/frs.en.md` và `docs/ba/frs/frs.vi.md`
+- Ví dụ SAP490: `Blueprint_IDTS_SAP01_en_v0.1.docx` và `Blueprint_IDTS_SAP01_vi_v0.1.docx`
+- Ví dụ SAP490: `Test_Report_IDTS_SAP01_en_v0.1.xlsx` và `Test_Report_IDTS_SAP01_vi_v0.1.xlsx`
+
+Không trộn tiếng Anh và tiếng Việt trong cùng một deliverable SAP490, trừ khi template do trường cung cấp bắt buộc có field song ngữ hoặc user duyệt rõ một ngoại lệ riêng. Nếu cần ngoại lệ, phải ghi rõ lý do trong final response và file PM status liên quan.
 
 Khi user yêu cầu DOCX, mỗi deliverable chính thức cần có file DOCX tương ứng:
 
@@ -494,13 +560,24 @@ Với BRD/SRS/FRS, dùng hướng SAP490 hybrid. BRD phải ưu tiên nghiệp v
 
 ## SAP490 Google Workspace Sync Rule
 
-Use `docs/sap490/sync-workflow.md` as the project guide for syncing SAP490 deliverables to Google Drive, Google Docs, and Google Sheets.
+Use `docs/sap490/sync-workflow.en.md` and `docs/sap490/sync-workflow.vi.md` as the project guides for syncing SAP490 deliverables to Google Drive, Google Docs, and Google Sheets.
 
 Source-of-truth order:
 
 1. Repo Markdown files are the canonical editable source for BRD, SRS, FRS, BA/PM docs, requirements, decisions, and rules.
-2. Local DOCX/XLSX files generated from repo sources and SAP490 templates are the submission-ready artifacts.
+2. Local DOCX/XLSX/PPTX files under `docs/sap490/generated/` are submission-ready artifacts only when they are copied from the matching school template and filled from approved repo sources.
 3. Google Docs and Google Sheets are review/collaboration copies for mentor and team feedback.
+
+SAP490 language and template-fill rules:
+
+- Every project-authored SAP490 artifact must have separate English and Vietnamese files. Use clear suffixes such as `_en_` and `_vi_`, or `.en.` and `.vi.`, in filenames.
+- SAP490 Markdown companion files are optional working sources or checklists. If created, they must also be split into separate English and Vietnamese files.
+- For non-Markdown SAP490 deliverables such as DOCX, XLSX, and PPTX, always copy the matching file from `docs/sap490/templates/` and fill the copied file. Do not create final SAP490 submission files by converting Markdown with Pandoc or by generating a fresh document from scratch.
+- A Markdown-to-DOCX/XLSX/PPTX path may be used only for a clearly labeled draft/prototype when the user explicitly asks for it. It must not be treated as a submission-ready SAP490 artifact.
+- Preserve the original template visual and technical format: font family, font size, text color, table width/height, borders, shading, merged cells, formulas, named ranges, sheet structure, headers, footers, cover page, page setup, numbering, and official heading/title hierarchy.
+- When additional content is required, reuse existing template styles and sections. Do not introduce arbitrary fonts, colors, spacing, table styles, or heading formats.
+- After filling a SAP490 document, verify file existence, expected content, removed sample/template text, layout preservation, and Vietnamese text quality. Check for mojibake, missing accents, replacement characters, broken line wrapping, and incorrect encoding.
+- SAP490 documents must be written in a professional academic style: clear title, consistent heading hierarchy, version/history table where relevant, approval/sign-off fields where the template provides them, glossary or traceability when useful, and wording suitable for university submission.
 
 Tool routing:
 
@@ -514,10 +591,10 @@ Template preservation:
 - Treat `docs/sap490/templates/` as read-only source templates.
 - Never edit template originals directly. Copy from template to a generated output file before filling content.
 - Fill only approved placeholders, named ranges, mapped table rows, or explicitly documented sections.
-- Do not restructure page setup, headings, fonts, table layout, formulas, merged cells, headers, footers, or cover pages unless the task explicitly asks for a template revision.
+- Do not restructure page setup, headings, fonts, font sizes, colors, table layout, table dimensions, formulas, merged cells, headers, footers, cover pages, or official template sections unless the task explicitly asks for a template revision.
 - For DOCX, prefer Documents, `python-docx`, OpenXML, or a verified project script that preserves Word styles and tables.
 - For XLSX, prefer Spreadsheets, `openpyxl`, or a verified project script that preserves workbook styles, formulas, and sheet structure.
-- Verify generated DOCX/XLSX layout before reporting completion. For DOCX, render/export to PDF or images when possible. For XLSX, inspect sheets/ranges and preserve formulas/styles.
+- Verify generated DOCX/XLSX/PPTX layout before reporting completion. For DOCX/PPTX, render/export to PDF or images when possible. For XLSX, inspect sheets/ranges and preserve formulas/styles.
 
 Sync safety:
 
@@ -529,13 +606,24 @@ Sync safety:
 
 Vietnamese:
 
-Dùng `docs/sap490/sync-workflow.md` làm hướng dẫn chính của project khi sync deliverable SAP490 lên Google Drive, Google Docs và Google Sheets.
+Dùng `docs/sap490/sync-workflow.en.md` và `docs/sap490/sync-workflow.vi.md` làm hướng dẫn chính của project khi sync deliverable SAP490 lên Google Drive, Google Docs và Google Sheets.
 
 Thứ tự source of truth:
 
 1. Markdown trong repo là nguồn canonical có thể chỉnh sửa cho BRD, SRS, FRS, tài liệu BA/PM, requirement, decision và rule.
-2. DOCX/XLSX local được generate từ source trong repo và SAP490 template là artifact sẵn sàng để nộp.
+2. DOCX/XLSX/PPTX local trong `docs/sap490/generated/` chỉ được xem là artifact sẵn sàng để nộp khi được copy từ template trường tương ứng và fill từ source đã được duyệt trong repo.
 3. Google Docs và Google Sheets là bản review/collaboration để mentor và team góp ý.
+
+Rule ngôn ngữ và template-fill cho SAP490:
+
+- Mọi artifact SAP490 do project tự viết phải có file tiếng Anh và tiếng Việt riêng. Dùng suffix rõ ràng như `_en_` và `_vi_`, hoặc `.en.` và `.vi.`, trong tên file.
+- File Markdown companion cho SAP490 chỉ là source/checklist làm việc tùy chọn. Nếu tạo Markdown, cũng phải tách thành file tiếng Anh và file tiếng Việt riêng.
+- Với deliverable SAP490 không phải Markdown như DOCX, XLSX và PPTX, luôn copy file tương ứng từ `docs/sap490/templates/` rồi fill vào bản copy. Không tạo file SAP490 chính thức bằng cách convert Markdown bằng Pandoc hoặc generate tài liệu mới từ đầu.
+- Luồng Markdown-to-DOCX/XLSX/PPTX chỉ được dùng cho draft/prototype đã gắn nhãn rõ khi user yêu cầu trực tiếp. Không xem đó là artifact SAP490 sẵn sàng để nộp.
+- Giữ nguyên format trực quan và kỹ thuật của template gốc: font chữ, cỡ chữ, màu chữ, chiều rộng/cao bảng, border, màu nền, merged cell, formula, named range, cấu trúc sheet, header, footer, cover page, page setup, numbering và hệ thống heading/title chính thức.
+- Khi cần thêm nội dung, phải dùng lại style và section đã có trong template. Không tự ý thêm font, màu, spacing, table style hoặc heading format khác.
+- Sau khi fill tài liệu SAP490, verify file tồn tại, nội dung mong muốn, sample/template text đã được thay đúng, layout được giữ, và chất lượng tiếng Việt. Kiểm tra lỗi mojibake, thiếu dấu, ký tự replacement, xuống dòng hỏng và lỗi encoding.
+- Tài liệu SAP490 phải được viết theo phong cách học thuật/chuyên nghiệp: title rõ ràng, heading hierarchy nhất quán, bảng version/history khi phù hợp, approval/sign-off nếu template có sẵn, glossary hoặc traceability khi hữu ích, và wording phù hợp để nộp cho trường.
 
 Routing tool:
 
@@ -549,10 +637,10 @@ Bảo toàn template:
 - Xem `docs/sap490/templates/` là template gốc dạng read-only.
 - Không chỉnh trực tiếp template gốc. Luôn copy template sang file output generated trước khi fill nội dung.
 - Chỉ fill placeholder, named range, dòng bảng đã map, hoặc section đã được document rõ.
-- Không đổi page setup, heading, font, table layout, formula, merged cell, header, footer, hoặc cover page trừ khi task yêu cầu sửa template rõ ràng.
+- Không đổi page setup, heading, font, cỡ chữ, màu chữ, table layout, kích thước bảng, formula, merged cell, header, footer, cover page hoặc section chính thức của template trừ khi task yêu cầu sửa template rõ ràng.
 - Với DOCX, ưu tiên Documents, `python-docx`, OpenXML, hoặc project script đã verify là giữ được Word style và table.
 - Với XLSX, ưu tiên Spreadsheets, `openpyxl`, hoặc project script đã verify là giữ workbook style, formula và cấu trúc sheet.
-- Verify layout DOCX/XLSX generated trước khi báo hoàn tất. Với DOCX, render/export sang PDF hoặc image khi có thể. Với XLSX, kiểm tra sheet/range và giữ formula/style.
+- Verify layout DOCX/XLSX/PPTX generated trước khi báo hoàn tất. Với DOCX/PPTX, render/export sang PDF hoặc image khi có thể. Với XLSX, kiểm tra sheet/range và giữ formula/style.
 
 An toàn sync:
 
