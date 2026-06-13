@@ -4,6 +4,7 @@
     "@sap/cds": "^9.9.1"
   },
   "devDependencies": {
+    "@cap-js/cds-test": "^1.0.1",
     "@cap-js/sqlite": "^2",
     "@googleworkspace/cli": "^0.22.5",
     "@sap/cds-dk": "^9.9.2",
