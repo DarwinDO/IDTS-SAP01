@@ -1,0 +1,10 @@
+{
+  "[test]": {
+    "requires": {
+      "db": {
+        "kind": "sqlite",
+        "credentials": { "url": ":memory:" }
+      }
+    }
+  }
+}
