@@ -133,7 +133,8 @@ module.exports = class BugService extends cds.ApplicationService {
       status: STATUS.RESOLVED,
       actionType: ACTION.RESOLVE,
       reason: req.data.note,
-      requireAssignee: true
+      requireAssignee: true,
+      requireReason: true
     }))
     this.on('sendToRetest', req => transitionBug(req, entities, {
       status: STATUS.RETEST_REQUIRED,
