@@ -1,8 +1,8 @@
 # WP3 - Handler Rules and Validation
 
-Status: Completed for Sprint 1 MVP
+Status: Completed for Sprint 1 MVP; Sprint 02 backend refinements added
 Owner workstream: Backend CAP
-Last updated: 2026-06-04
+Last updated: 2026-06-10
 
 ## Goal
 
@@ -49,11 +49,31 @@ Vietnamese:
 - Đã thêm tạo Notification record cho các event Assigned, Need More Information, Rejected và Closed.
 - Đã verify bằng OData calls: `resolveBug` pass với transition hợp lệ, transition sai `RESOLVED -> IN_PROGRESS` bị reject HTTP 400, create tự derive `componentCategory_ID`, và `assignToDeveloper` ghi history/notification.
 
+## 2026-06-10 Sprint 02 Backend Refinement
+
+English:
+
+- Added request-user-aware processing permission to `srv/service.js`.
+- Developers keep team-visible access and can discuss bugs, but workflow processing is enforced for the assigned Developer, Tester, or PM when the request user maps to an active IDTS user.
+- Added comment create handling so authenticated Tester, Developer, or PM users cannot create comments on behalf of someone else.
+- Bound action transitions now write HistoryLogs for `nextProcessorUser` and `nextProcessorRole` changes.
+- Added in-app notification records for `Resolved`, `Retest Required`, and `Reopened` follow-up using the existing `UPDATED` notification event type.
+- Jira `IDTS-2` and `IDTS-4` were moved to Done after verification; Jira `IDTS-5` remains In Progress for new backend QA bugs.
+
+Vietnamese:
+
+- Đã thêm kiểm soát quyền xử lý dựa trên request user trong `srv/service.js`.
+- Developer vẫn có thể xem và thảo luận bug trong team, nhưng thao tác xử lý workflow sẽ được kiểm soát cho Developer được assign, Tester hoặc PM khi request user map được vào active user của IDTS.
+- Đã thêm xử lý create comment để user Tester, Developer hoặc PM đã xác thực không thể tạo comment thay người khác.
+- Bound action transition hiện ghi HistoryLogs cho thay đổi `nextProcessorUser` và `nextProcessorRole`.
+- Đã thêm notification record in-app cho follow-up của `Resolved`, `Retest Required`, và `Reopened` bằng event type hiện có là `UPDATED`.
+- Jira `IDTS-2` và `IDTS-4` đã chuyển Done sau khi verify; Jira `IDTS-5` vẫn In Progress để nhận bug backend mới từ QA.
+
 ## Remaining Notes
 
-English: This is an MVP backend rule layer. It does not yet implement real authorization/XSUAA, external notification delivery, binary attachment storage, or automated test files.
+English: This is an MVP backend rule layer. It now has request-user-aware permission checks for local mocked/basic-auth and future authenticated runtime, but it does not yet implement real XSUAA role collections, external notification delivery, binary attachment storage, or automated test files.
 
-Vietnamese: Đây là lớp backend rule mức MVP. Chưa implement authorization/XSUAA thật, gửi notification ra kênh ngoài, binary attachment storage hoặc automated test files.
+Vietnamese: Đây là lớp backend rule mức MVP. Hiện đã có kiểm tra quyền dựa trên request user cho mocked/basic-auth local và runtime xác thực sau này, nhưng chưa implement XSUAA role collection thật, gửi notification ra kênh ngoài, binary attachment storage hoặc automated test files.
 
 ## Definition of Done
 

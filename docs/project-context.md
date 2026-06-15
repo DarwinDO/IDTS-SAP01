@@ -23,7 +23,7 @@ Vietnamese: IDTS không phải Jira đầy đủ và không phải hệ thống 
 | Role | Responsibility |
 | --- | --- |
 | Tester | Detect bugs, create and update bug reports, check duplicates, classify bugs, assign/reassign developers, provide requested information, retest, close or reopen when needed, comment, and track status |
-| Developer | View assigned bugs, review bug details, request more information, reject wrong classification or unsuitable assignment with reason, add developer notes, update processing status |
+| Developer | View assigned and team-visible bugs when permitted, discuss/comment, review bug details, request more information, reject wrong classification or unsuitable assignment with reason, add optional developer notes when useful, and update processing status only when assigned or authorized |
 | PM | Monitor all bugs, workload, overdue bugs, status progress, history, reports, and escalation notifications |
 
 MVP role baseline: IDTS currently uses three active roles only: Tester, Developer, and PM. `Reporter` is not a separate MVP role because the project is internal and Testers are the primary people who find and report bugs. `Admin` is not a separate MVP role because no dedicated admin workflow is planned yet; lightweight administrative responsibilities such as master-data upkeep, classification correction, and reassignment coordination are handled by Tester or PM where authorized.

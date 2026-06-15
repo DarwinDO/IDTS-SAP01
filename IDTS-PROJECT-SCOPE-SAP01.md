@@ -50,17 +50,18 @@ Các quyền chính:
 
 ## **Role 2: Developer**
 
-Role này là người tiếp nhận bug và cập nhật trạng thái xử lý.
+Role này là người tiếp nhận bug, có thể xem/thảo luận bug thuộc cùng project/team khi có quyền visibility, và cập nhật trạng thái xử lý trong phạm vi được phép.
 
 Các quyền chính:
 
 * View assigned bugs.  
+* View team-visible bugs trong cùng project/team khi có quyền visibility.
 * View bug details.  
 * Review bug information.  
 * Request more information nếu bug report chưa rõ.  
-* Reject assigned bug nếu bug sai module hoặc không phù hợp; phải có lý do reject và follow-up owner.
-* Add developer note.  
-* Update bug status.
+* Reject bug nếu bug sai module/category, sai assignment hoặc không phù hợp; phải có lý do reject và follow-up owner/action.
+* Add developer note khi cần; developer note mặc định optional trừ các transition bắt buộc reason/note.
+* Update processing status nếu là assignee hoặc role được phép.
 
 ## **Role 3: PM**
 

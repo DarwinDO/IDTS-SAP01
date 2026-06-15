@@ -80,17 +80,18 @@ Các nhiệm vụ chính:
 
 ## **Role 2: Developer**
 
-Role này là người tiếp nhận bug được phân công và cập nhật trạng thái xử lý.
+Role này là người tiếp nhận bug được phân công, có thể xem/thảo luận bug thuộc cùng project/team khi có quyền visibility, và cập nhật trạng thái xử lý trong phạm vi được phép.
 
 Các nhiệm vụ chính:
 
 * View assigned bugs.  
+* View team-visible bugs trong cùng project/team khi có quyền visibility.
 * View bug details.  
 * Review bug information.  
 * Request more information nếu bug report chưa rõ.  
-* Add developer note.  
-* Update bug status.  
-* Reject assigned bug nếu bug sai module/category hoặc không phù hợp; phải có lý do reject và người follow-up tiếp theo.
+* Add developer note khi cần; developer note mặc định optional trừ các transition bắt buộc reason/note.
+* Update processing status nếu là assignee hoặc role được phép.
+* Reject bug nếu bug sai module/category, sai assignment hoặc không phù hợp; phải có lý do reject và người follow-up tiếp theo.
 * Comment trong bug report.  
 * Không trực tiếp đóng vai trò sửa code trong hệ thống.
 
