@@ -9,7 +9,7 @@ Last updated: 2026-06-15
 | Project phase | Sprint 02 integration: PR #1, PR #2, DonHV backend, and SAP490 documentation branches consolidated into `dev` |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
 | Current sprint | Sprint 02 focuses on mentor feedback, happy flow demo, backend note/reason validation, and Bug Detail UI refinements |
-| Recommended next action | Finish final UI/browser happy-path QA after selective `Remake_UI` integration, close remaining Sprint 02 issues `IDTS-5`, `IDTS-8`, `IDTS-10`, `IDTS-11`, and prepare the final demo under `IDTS-12` |
+| Recommended next action | Run manual create-save QA and Bug Detail usability review with DatDT/SangVN, close remaining Sprint 02 issues `IDTS-5`, `IDTS-8`, `IDTS-10`, `IDTS-11`, and prepare the final demo under `IDTS-12` |
 | Main implementation risk | Fiori screens and backend handlers now exist, but deeper browser QA, real attachment upload, external notification delivery, production XSUAA authorization, and automated tests are still incomplete |
 
 ## What Is Already Done
@@ -145,9 +145,9 @@ Vietnamese:
 
 ## WP4 Current Note
 
-DatDT's `Sap_FE` reference repo and `Remake_UI` branch have been reviewed. The current IDTS Fiori app now has MVP annotation-driven List Report/Object Page integration, value help, Object Page actions, GridTable list layout, draft-enabled standard Create, Assignment-first Object Page ordering, read-only History table capabilities, and `NewPage` create flow evaluation. Deeper browser QA, manual create-save QA, and real attachment upload remain open.
+DatDT's `Sap_FE` reference repo and `Remake_UI` branch have been reviewed. The current IDTS Fiori app now has MVP annotation-driven List Report/Object Page integration, value help, Object Page actions, GridTable list layout, draft-enabled standard Create, Assignment-first Object Page ordering, read-only History table capabilities, and `NewPage` create flow evaluation. Post-merge browser smoke confirmed List Report data, Object Page section order, and Create Bug prefill dialog. Manual create-save QA and real attachment upload remain open.
 
-Vietnamese: Đã review repo tham khảo `Sap_FE` và branch `Remake_UI` của DatDT. App Fiori hiện tại của IDTS đã có tích hợp List Report/Object Page bằng annotation ở mức MVP, value help, Object Page actions, layout List Report dạng GridTable, standard Create đã bật bằng draft, đưa Assignment lên đầu Object Page, đặt History table read-only, và đánh giá create flow bằng `NewPage`. Browser QA sâu hơn, manual create-save QA và upload attachment thật vẫn còn mở.
+Vietnamese: Đã review repo tham khảo `Sap_FE` và branch `Remake_UI` của DatDT. App Fiori hiện tại của IDTS đã có tích hợp List Report/Object Page bằng annotation ở mức MVP, value help, Object Page actions, layout List Report dạng GridTable, standard Create đã bật bằng draft, đưa Assignment lên đầu Object Page, đặt History table read-only, và đánh giá create flow bằng `NewPage`. Browser smoke sau merge đã xác nhận List Report có data, thứ tự Object Page section đúng, và dialog Create Bug prefill mở được. Manual create-save QA và upload attachment thật vẫn còn mở.
 
 ## Next Handover Instruction
 
