@@ -52,14 +52,14 @@ Vietnamese:
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
-| SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 6 Done (`IDTS-2`, `3`, `4`, `6`, `7`, `9`), 4 In Progress (`IDTS-5`, `8`, `10`, `11`), and 2 To Do (`IDTS-1`, `12`). GitHub has 2 open PRs and 0 merged PRs. |
+| SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 6 Done (`IDTS-2`, `3`, `4`, `6`, `7`, `9`), 4 In Progress (`IDTS-5`, `8`, `10`, `11`), and 2 To Do (`IDTS-1`, `12`). GitHub PR #1 and PR #2, plus both DonHV branches, were integrated into `dev` on 2026-06-15. |
 | WP4 | Fiori Elements UX | DatDT | Core List/Object/Create/Assignment/Developer Review metadata is updated; GridTable and draft-enabled Create Bug dialog refinement applied. Deeper QA and attachment upload remain. |
 
 Vietnamese:
 
 | ID | Công việc | Thành viên chính | Ghi chú |
 | --- | --- | --- | --- |
-| SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 6 Done (`IDTS-2`, `3`, `4`, `6`, `7`, `9`), 4 In Progress (`IDTS-5`, `8`, `10`, `11`), và 2 To Do (`IDTS-1`, `12`). GitHub có 2 PR đang mở và chưa có PR nào được merge. |
+| SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 6 Done (`IDTS-2`, `3`, `4`, `6`, `7`, `9`), 4 In Progress (`IDTS-5`, `8`, `10`, `11`), và 2 To Do (`IDTS-1`, `12`). GitHub PR #1, PR #2 và hai nhánh của DonHV đã được tích hợp vào `dev` ngày 2026-06-15. |
 | WP4 | Fiori Elements UX | DatDT | Metadata cho List/Object/Create/Assignment/Developer Review đã cập nhật; đã tinh chỉnh GridTable và dialog Create Bug bằng draft. Vẫn còn QA sâu và attachment upload. |
 
 ## Blocked

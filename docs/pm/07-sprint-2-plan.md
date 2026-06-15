@@ -63,18 +63,18 @@ Confirmed changes:
 | --- | --- | --- | --- | --- |
 | IDTS-1 | Sprint 02 Epic | DonHV | To Do | Keep open until the happy-flow demo and remaining child tasks are complete. |
 | IDTS-2 | Developer visibility and processing permission model | DonHV | Done | Backend now keeps view/discussion open while restricting workflow processing to assigned Developer, Tester, or PM when request user is known. |
-| IDTS-3 | Mandatory note/reason validation | NhanT | Done | Included in open PR #1 from `main` to `dev`. |
+| IDTS-3 | Mandatory note/reason validation | NhanT | Done | Merged into `dev` through PR #1 on 2026-06-15. |
 | IDTS-4 | Verify history, nextProcessor, and notification side effects | DonHV | Done | `resolveBug` smoke verified status, nextProcessor history, and notification side effects. |
 | IDTS-5 | Backend bugs found during Sprint 02 QA | DonHV | In Progress | Kept open as QA bug-fix bucket. No separate QA-reported backend bug is available yet. |
-| IDTS-6 | Happy-flow backend verification checklist | NhanT | Done | Included in open PR #1 from `main` to `dev`. |
+| IDTS-6 | Happy-flow backend verification checklist | NhanT | Done | Merged into `dev` through PR #1; the corrected programmatic suite passes 21/21 scenarios. |
 | IDTS-7 | Redesign Bug Detail field layout | DatDT | Done | Jira is Done; remote branch `Remake_UI` exists but has no PR and conflicts with PR #2 in `annotations.cds`. Review/cherry-pick selected UI changes instead of merging the branch wholesale. |
-| IDTS-8 | Editable status dropdown/value help | SangVN | In Progress | Included in open PR #2 from `feature/idts-bug-detail-ui-sangvn` to `dev`. |
+| IDTS-8 | Editable status dropdown/value help | SangVN | In Progress | PR #2 was merged into `dev`; Jira remains In Progress until browser verification is completed. |
 | IDTS-9 | Important field input usability | DatDT | Done | Jira is Done; no dedicated PR was found. DatDT's related `Remake_UI` changes require review because they also relax Create required fields and change the creation flow. |
-| IDTS-10 | Move severity and environment | SangVN | In Progress | Included in open PR #2. |
-| IDTS-11 | Comments and developer note usability | SangVN | In Progress | Included in open PR #2. |
+| IDTS-10 | Move severity and environment | SangVN | In Progress | PR #2 was merged into `dev`; browser verification remains. |
+| IDTS-11 | Comments and developer note usability | SangVN | In Progress | PR #2 was merged into `dev`; browser verification remains. |
 | IDTS-12 | Mentor demo script and final smoke test | NhanT | To Do | Start after the required backend/UI changes are reviewed and merged. |
 
-GitHub audit: PR #1 and PR #2 are open, cleanly mergeable, have no submitted review, and have no configured commit status checks. No PR has been merged.
+GitHub audit: PR #1 and PR #2 were merged into `dev` on 2026-06-15 together with both DonHV branches. No GitHub commit status checks are configured; local CAP compile/deploy, the 21/21 backend suite, and the UI5 build passed.
 
 ## Week 1 Plan
 
@@ -192,18 +192,18 @@ Cập nhật đã chốt:
 | --- | --- | --- | --- | --- |
 | IDTS-1 | Epic Sprint 02 | DonHV | To Do | Giữ mở đến khi hoàn thành happy-flow demo và các child task còn lại. |
 | IDTS-2 | Developer visibility và processing permission model | DonHV | Done | Backend cho phép xem/thảo luận bug trong team nhưng giới hạn xử lý workflow cho Developer được assign, Tester hoặc PM khi xác định được request user. |
-| IDTS-3 | Validation note/reason bắt buộc | NhanT | Done | Đang nằm trong PR #1 mở từ `main` vào `dev`. |
+| IDTS-3 | Validation note/reason bắt buộc | NhanT | Done | Đã merge vào `dev` qua PR #1 ngày 2026-06-15. |
 | IDTS-4 | Verify history, nextProcessor và notification side effects | DonHV | Done | Smoke test `resolveBug` đã verify status, history của nextProcessor và notification side effect. |
 | IDTS-5 | Backend bug phát hiện trong Sprint 02 QA | DonHV | In Progress | Giữ mở như bucket bug-fix từ QA. Hiện chưa có bug backend riêng được QA báo cáo. |
-| IDTS-6 | Checklist verify backend happy flow | NhanT | Done | Đang nằm trong PR #1 mở từ `main` vào `dev`. |
+| IDTS-6 | Checklist verify backend happy flow | NhanT | Done | Đã merge vào `dev` qua PR #1; bộ test programmatic sau khi sửa đã pass 21/21 scenario. |
 | IDTS-7 | Redesign layout field Bug Detail | DatDT | Done | Jira đã Done; remote branch `Remake_UI` chưa có PR và conflict với PR #2 tại `annotations.cds`. Cần review/cherry-pick phần UI phù hợp thay vì merge nguyên branch. |
-| IDTS-8 | Status edit bằng dropdown/value help | SangVN | In Progress | Đang nằm trong PR #2 từ `feature/idts-bug-detail-ui-sangvn` vào `dev`. |
+| IDTS-8 | Status edit bằng dropdown/value help | SangVN | In Progress | PR #2 đã merge vào `dev`; Jira vẫn In Progress đến khi verify trên browser xong. |
 | IDTS-9 | Cải thiện input usability cho field quan trọng | DatDT | Done | Jira đã Done; chưa tìm thấy PR riêng. Các thay đổi liên quan trong `Remake_UI` cần review vì đồng thời giảm Create required fields và đổi creation flow. |
-| IDTS-10 | Chuyển severity và environment sang vùng phụ | SangVN | In Progress | Đang nằm trong PR #2. |
-| IDTS-11 | Cải thiện comments và developer note | SangVN | In Progress | Đang nằm trong PR #2. |
+| IDTS-10 | Chuyển severity và environment sang vùng phụ | SangVN | In Progress | PR #2 đã merge vào `dev`; vẫn cần verify trên browser. |
+| IDTS-11 | Cải thiện comments và developer note | SangVN | In Progress | PR #2 đã merge vào `dev`; vẫn cần verify trên browser. |
 | IDTS-12 | Demo script và final smoke test | NhanT | To Do | Bắt đầu sau khi các thay đổi backend/UI cần thiết được review và merge. |
 
-Audit GitHub: PR #1 và PR #2 đang mở, có thể merge sạch, chưa có review được submit và chưa có commit status check được cấu hình. Chưa có PR nào được merge.
+Audit GitHub: PR #1, PR #2 và hai nhánh của DonHV đã được merge vào `dev` ngày 2026-06-15. GitHub chưa cấu hình commit status check; CAP compile/deploy, backend suite 21/21 và UI5 build đều pass ở local.
 
 ## Acceptance Criteria
 
