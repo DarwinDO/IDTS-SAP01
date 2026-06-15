@@ -1,5 +1,4 @@
 ﻿# Hướng Dẫn Setup `gws` Cho Team SAP490
-
 ## Vietnamese
 
 ### 1. Mục Đích
@@ -185,4 +184,3 @@ Lệnh này cũng tạo file mới có timestamp. Nó không overwrite Google Do
 | Không tìm thấy folder | Account chưa có quyền hoặc tên folder khác | Nhờ Drive owner share `SAP490 Review`; retry. |
 | Thiếu local config | Chưa tạo `drive-ids.local.json` | Copy từ `drive-ids.example.json` rồi điền local IDs. |
 | Dry-run báo thiếu DOCX | Chưa generate document | Regenerate DOCX BRD/SRS/FRS trước khi lên kế hoạch sync. |
-

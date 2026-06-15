@@ -4,7 +4,7 @@
 
 Vietnamese: Checklist QA backend luồng chính cho IDTS-6.
 
-**Status: EXECUTED 2026-06-13 — 20/21 PASS (1 Skip — test environment limitation)**
+**Status: RE-VERIFIED 2026-06-15 — 21/21 PASS**
 
 ---
 
@@ -20,7 +20,7 @@ Vietnamese: Checklist QA backend luồng chính cho IDTS-6.
 | Date | 2026-06-13 |
 | Test method | Direct CDS handler dispatch (in-process, no HTTP) |
 | Tool | `node scripts/qa/test-idts6-programmatic.js` |
-| Result | **20 PASS / 1 SKIP / 0 bug** |
+| Result | **21 PASS / 0 FAIL** |
 | Date | 2026-06-13 |
 
 ---
@@ -220,7 +220,7 @@ Vietnamese: Checklist QA backend luồng chính cho IDTS-6.
 
 | Scenario | Pass/Fail | Bug Found | Notes |
 | --- | --- | --- | --- |
-| SC-01a Create bug | ⚠️ SKIP | None | In-process CREATE dispatch needs generic query (env limit, not a real bug) |
+| SC-01a Create bug | ✅ PASS | None | Direct dispatch now includes an `INSERT` query and deterministic test UUID. |
 | SC-01b Create bug missing title | ✅ PASS | None | HTTP 400 "Title is required." |
 | SC-01c Create bug missing component | ✅ PASS | None | Validated by SC-01b combined check |
 | SC-02a Assign to developer | ✅ PASS | None | HTTP 200, status=ASSIGNED |
@@ -241,9 +241,9 @@ Vietnamese: Checklist QA backend luồng chính cho IDTS-6.
 | SC-11a Close bug | ✅ PASS | None | HTTP 200, status=CLOSED |
 | SC-12a History logs recorded | ✅ PASS | None | 5 entries found; CLOSE→RESOLVE→IN_PROGRESS chain verified |
 
-**Total: 20 PASS / 1 SKIP / 0 FAIL**
+**Total: 21 PASS / 0 FAIL**
 
-> SC-01a skip reason: `cds.srv.dispatch` with event=CREATE requires a generic query target which is not available outside HTTP context. Validation logic in prepareBugWrite IS exercised correctly (SC-01b pass proves this).
+> SC-01a was re-enabled on 2026-06-15. Root cause of the previous skip was a test-harness request without a generic `INSERT` query, not an environment limitation. The corrected test now verifies successful Create and missing-title rejection.
 
 ---
 

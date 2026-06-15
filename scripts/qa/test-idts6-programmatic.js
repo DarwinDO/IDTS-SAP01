@@ -12,7 +12,7 @@ process.env.CDS_LOG_LEVEL = 'warn'
 process.env.NODE_ENV = 'test'
 process.env.CDS_ENV = 'test'
 
-// Temporarily suppress require of cds-plugin-ui5 
+// Temporarily suppress require of cds-plugin-ui5
 const Module = require('module')
 const _originalResolve = Module._resolveFilename
 Module._resolveFilename = function(request, parent, isMain, options) {
@@ -27,6 +27,7 @@ let PASS = 0, FAIL = 0
 
 const BUG1 = '90000000-0000-0000-0000-000000000001'  // NEW
 const BUG3 = '90000000-0000-0000-0000-000000000003'  // IN_PROGRESS w/ SangVN assignee
+const BUG_CREATE = '90000000-0000-0000-0000-000000000099'
 const DEV_SANG = '20000000-0000-0000-0000-000000000001'
 const DEV_DAT  = '20000000-0000-0000-0000-000000000002'
 const COMP_6   = '40000000-0000-0000-0000-000000000006'
@@ -69,18 +70,21 @@ async function runSrv(srv) {
   // ----------------------------------------------------------------
   console.log('SC-01: Create Bug')
   try {
+    const createData = {
+      ID: BUG_CREATE,
+      title: 'QA-IDTS6 Happy Flow Test Bug',
+      description: 'Created by NhanT for IDTS-6 QA verification run',
+      stepsToReproduce: '1. Open bug list  2. Click create  3. Fill form',
+      actualResult: 'Bug creation form not validated',
+      expectedResult: 'All required fields validated',
+      priority_code: 'HIGH', severity_code: 'MAJOR', environment_code: 'QAS',
+      applicationComponent_ID: COMP_6, defectCategory_ID: CAT_2, reporter_ID: REPORTER
+    }
     const req1a = new cds.Request({
       method: 'POST', event: 'CREATE',
       target: srv.entities.Bugs,
-      data: {
-        title: 'QA-IDTS6 Happy Flow Test Bug',
-        description: 'Created by NhanT for IDTS-6 QA verification run',
-        stepsToReproduce: '1. Open bug list  2. Click create  3. Fill form',
-        actualResult: 'Bug creation form not validated',
-        expectedResult: 'All required fields validated',
-        priority_code: 'HIGH', severity_code: 'MAJOR', environment_code: 'QAS',
-        applicationComponent_ID: COMP_6, defectCategory_ID: CAT_2, reporter_ID: REPORTER
-      },
+      query: INSERT.into(srv.entities.Bugs).entries(createData),
+      data: createData,
       user: new cds.User({ id: 'alice' })
     })
     await srv.dispatch(req1a)
@@ -92,13 +96,17 @@ async function runSrv(srv) {
   }
 
   try {
+    const missingTitleData = {
+      ID: '90000000-0000-0000-0000-000000000098',
+      description: 'no title', stepsToReproduce: 'x', actualResult: 'x', expectedResult: 'x',
+      priority_code: 'HIGH', severity_code: 'MAJOR', environment_code: 'QAS',
+      applicationComponent_ID: COMP_6, defectCategory_ID: CAT_2, reporter_ID: REPORTER
+    }
     const req1b = new cds.Request({
       method: 'POST', event: 'CREATE',
       target: srv.entities.Bugs,
-      data: { description:'no title', stepsToReproduce:'x', actualResult:'x', expectedResult:'x',
-        priority_code:'HIGH', severity_code:'MAJOR', environment_code:'QAS',
-        applicationComponent_ID: COMP_6, defectCategory_ID: CAT_2, reporter_ID: REPORTER
-      },
+      query: INSERT.into(srv.entities.Bugs).entries(missingTitleData),
+      data: missingTitleData,
       user: new cds.User({ id: 'alice' })
     })
     await srv.dispatch(req1b)

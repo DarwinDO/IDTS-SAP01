@@ -1,5 +1,4 @@
 ﻿# SAP490 Google Workspace Sync Workflow
-
 ## English
 
 ### 1. Purpose
@@ -153,4 +152,3 @@ Before reporting a SAP490 sync task as complete:
 - Sync result was read back or otherwise verified.
 - Credentials and private config were not committed.
 - Relevant PM task/status or risk/decision entry was updated when the sync affects delivery coordination.
-

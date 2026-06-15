@@ -1,5 +1,4 @@
 ﻿# Quy Trình Sync Google Workspace SAP490
-
 ## Vietnamese
 
 ### 1. Mục Đích
@@ -153,4 +152,3 @@ Trước khi báo một task sync SAP490 là hoàn tất:
 - Kết quả sync đã được readback hoặc verify bằng cách phù hợp.
 - Credential và private config không bị commit.
 - PM task/status hoặc risk/decision liên quan đã được cập nhật khi sync ảnh hưởng delivery coordination.
-

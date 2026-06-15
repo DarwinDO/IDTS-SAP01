@@ -1,5 +1,4 @@
 ﻿# SAP490 `gws` Team Setup Guide
-
 ## English
 
 ### 1. Purpose
@@ -185,4 +184,3 @@ This also creates new timestamped files. It does not overwrite existing Google D
 | Folder search returns no result | Account cannot access folder or folder name differs | Ask Drive owner to share `SAP490 Review`; retry. |
 | Local config missing | `drive-ids.local.json` not created | Copy from `drive-ids.example.json` and fill local IDs. |
 | Dry-run shows missing DOCX | Document has not been generated yet | Regenerate BRD/SRS/FRS DOCX before sync planning. |
-
