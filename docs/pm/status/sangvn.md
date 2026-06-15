@@ -32,11 +32,13 @@ Vietnamese: Chưa bắt đầu. Việc backend đầu tiên nên làm là WP1 Da
 
 - Initial repo has a minimal CAP model and service.
 - BA data dictionary and implementation gap analysis define the target MVP model.
+- Sprint 2 UI annotations (IDTS-8, 10, 11) for editable status, supporting area, and multiline action notes are updated.
 
 Vietnamese:
 
 - Repo ban đầu đã có CAP model và service tối thiểu.
 - Data dictionary và implementation gap analysis của BA đã mô tả model MVP mục tiêu.
+- Cập nhật xong UI annotations cho Sprint 2 (IDTS-8, 10, 11) liên quan đến status dropdown, vùng thông tin phụ và multiline action notes.
 
 ## In Progress
 
@@ -69,12 +71,14 @@ Vietnamese: Đang chờ xác nhận bắt đầu Sprint 1.
 | Date | Task/WP | What was done | Completed part | Issues/Bugs found | Fix status | Evidence/Commands | Next handoff |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2026-06-03 | Status setup | Member status file created from previous Backend CAP status | Backend status ownership assigned to SangVN | None | Fixed | `rg`, `git diff --check` | Start WP1 when approved |
+| 2026-06-13 | IDTS-8, 10, 11 (Sprint 2) | Updated Bug Detail UI annotations (dropdown status, supporting info facet, multiline action notes) | UI annotations completed | None | - | `cds compile srv --to edmx` | Manual QA/Testing |
 
 Vietnamese:
 
 | Ngày | Task/WP | Đã làm gì | Phần đã xong | Khó khăn/Bug phát hiện | Trạng thái fix | Bằng chứng/Lệnh đã chạy | Handoff tiếp theo |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2026-06-03 | Status setup | Tạo file status thành viên từ status Backend CAP cũ | Đã giao ownership backend cho SangVN | Không có | Đã xử lý | `rg`, `git diff --check` | Bắt đầu WP1 khi được duyệt |
+| 2026-06-13 | IDTS-8, 10, 11 (Sprint 2) | Cập nhật UI annotations cho Bug Detail (dropdown status, facet Supporting Info, multiline note) | Đã xong UI annotations | Không có | - | `cds compile srv --to edmx` | Test giao diện (Manual QA) |
 
 ## Update Rule
 

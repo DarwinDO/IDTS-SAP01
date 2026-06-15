@@ -118,6 +118,12 @@ annotate service.Bugs with @(
         },
         {
           $Type  : 'UI.ReferenceFacet',
+          ID     : 'SupportingInfo',
+          Label  : 'Supporting Information',
+          Target : '@UI.FieldGroup#SupportingInfo'
+        },
+        {
+          $Type  : 'UI.ReferenceFacet',
           ID     : 'Classification',
           Label  : 'Classification',
           Target : '@UI.FieldGroup#Classification'
@@ -185,21 +191,25 @@ annotate service.Bugs with @(
       { $Type : 'UI.DataField', Label : 'Bug Number', Value : bugNumber },
       { $Type : 'UI.DataField', Label : 'Title', Value : title },
       { $Type : 'UI.DataField', Label : 'Description', Value : description },
-      { $Type : 'UI.DataField', Label : 'Status', Value : status.name, Criticality : status.criticality, CriticalityRepresentation : #WithoutIcon },
-      { $Type : 'UI.DataField', Label : 'Priority', Value : priority.name, Criticality : priority.criticality, CriticalityRepresentation : #WithoutIcon },
-      { $Type : 'UI.DataField', Label : 'Severity', Value : severity.name, Criticality : severity.criticality, CriticalityRepresentation : #WithoutIcon },
-      { $Type : 'UI.DataField', Label : 'Environment', Value : environment.name },
-      { $Type : 'UI.DataField', Label : 'Environment Detail', Value : environmentDetail },
-      { $Type : 'UI.DataField', Label : 'Reporter', Value : reporter.displayName },
+      { $Type : 'UI.DataField', Label : 'Status', Value : status_code, Criticality : status.criticality, CriticalityRepresentation : #WithoutIcon },
+      { $Type : 'UI.DataField', Label : 'Priority', Value : priority_code, Criticality : priority.criticality, CriticalityRepresentation : #WithoutIcon },
+      { $Type : 'UI.DataField', Label : 'Reporter', Value : reporter_ID },
       { $Type : 'UI.DataField', Label : 'Created At', Value : createdAt },
       { $Type : 'UI.DataField', Label : 'Updated At', Value : modifiedAt }
     ]
   },
+  UI.FieldGroup #SupportingInfo : {
+    Data : [
+      { $Type : 'UI.DataField', Label : 'Severity', Value : severity_code, Criticality : severity.criticality, CriticalityRepresentation : #WithoutIcon },
+      { $Type : 'UI.DataField', Label : 'Environment', Value : environment_code },
+      { $Type : 'UI.DataField', Label : 'Environment Detail', Value : environmentDetail }
+    ]
+  },
   UI.FieldGroup #Classification : {
     Data : [
-      { $Type : 'UI.DataField', Label : 'SAP Module', Value : sapModule.name },
-      { $Type : 'UI.DataField', Label : 'Application Component', Value : applicationComponent.name },
-      { $Type : 'UI.DataField', Label : 'Defect Category', Value : defectCategory.name }
+      { $Type : 'UI.DataField', Label : 'SAP Module', Value : sapModule_ID },
+      { $Type : 'UI.DataField', Label : 'Application Component', Value : applicationComponent_ID },
+      { $Type : 'UI.DataField', Label : 'Defect Category', Value : defectCategory_ID }
     ]
   },
   UI.FieldGroup #Reproduction : {
@@ -277,7 +287,7 @@ annotate service.Bugs with {
 
 annotate service.Bugs:componentCategory.ID with @UI.Hidden @Core.Computed;
 
-annotate service.Bugs:status.code with @Common.ValueList : {
+annotate service.Bugs:status.code with @Common.ValueListWithFixedValues : true @Common.ValueList : {
     Label : 'Status',
     CollectionPath : 'StatusValues',
     SearchSupported : true,
@@ -684,3 +694,36 @@ annotate service.DuplicateLinks with {
   ID        @UI.Hidden;
   sourceBug @UI.Hidden;
 };
+
+annotate service.Bugs actions {
+  assignToDeveloper(
+    note @UI.MultiLineText @Common.Label : 'Developer Note'
+  );
+  moveToPendingAssignment(
+    reason @UI.MultiLineText @Common.Label : 'Reason'
+  );
+  markInReview(
+    note @UI.MultiLineText @Common.Label : 'Developer Note'
+  );
+  requestMoreInformation(
+    reason @UI.MultiLineText @Common.Label : 'Reason'
+  );
+  rejectBug(
+    reason @UI.MultiLineText @Common.Label : 'Rejection Reason'
+  );
+  startProgress(
+    note @UI.MultiLineText @Common.Label : 'Developer Note'
+  );
+  resolveBug(
+    note @UI.MultiLineText @Common.Label : 'Developer Note'
+  );
+  sendToRetest(
+    note @UI.MultiLineText @Common.Label : 'Developer Note'
+  );
+  closeBug(
+    note @UI.MultiLineText @Common.Label : 'Developer Note'
+  );
+  reopenBug(
+    reason @UI.MultiLineText @Common.Label : 'Reason'
+  );
+}
