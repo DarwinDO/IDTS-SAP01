@@ -2,18 +2,7 @@ using BugService as service from '../../srv/service';
 
 annotate service.Bugs with @(
   Capabilities.InsertRestrictions : {
-    Insertable : true,
-    RequiredProperties : [
-      title,
-      description,
-      priority_code,
-      severity_code,
-      applicationComponent_ID,
-      defectCategory_ID,
-      stepsToReproduce,
-      actualResult,
-      expectedResult
-    ]
+    Insertable : true
   },
   UI.HeaderInfo : {
     TypeName       : 'Bug',
@@ -242,41 +231,26 @@ annotate service.Bugs with @(
       { $Type : 'UI.DataField', Label : 'Estimated Effort Hours', Value : estimatedEffortHours }
     ]
   },
-  UI.FieldGroup #CreateBug : {
-    Data : [
-      { $Type : 'UI.DataField', Label : 'Title', Value : title },
-      { $Type : 'UI.DataField', Label : 'Description', Value : description },
-      { $Type : 'UI.DataField', Label : 'Priority', Value : priority_code },
-      { $Type : 'UI.DataField', Label : 'Severity', Value : severity_code },
-      { $Type : 'UI.DataField', Label : 'Environment', Value : environment_code },
-      { $Type : 'UI.DataField', Label : 'SAP Module', Value : sapModule_ID },
-      { $Type : 'UI.DataField', Label : 'Application Component', Value : applicationComponent_ID },
-      { $Type : 'UI.DataField', Label : 'Defect Category', Value : defectCategory_ID },
-      { $Type : 'UI.DataField', Label : 'Steps to Reproduce', Value : stepsToReproduce },
-      { $Type : 'UI.DataField', Label : 'Actual Result', Value : actualResult },
-      { $Type : 'UI.DataField', Label : 'Expected Result', Value : expectedResult },
-      { $Type : 'UI.DataField', Label : 'Due Date', Value : dueDate }
-    ]
-  }
+
 );
 
 annotate service.Bugs with {
   ID                    @UI.Hidden;
   bugNumber             @Core.Computed @Common.Label : 'Bug Number';
-  title                 @Common.Label : 'Title';
-  description           @UI.MultiLineText @Common.Label : 'Description';
-  stepsToReproduce      @UI.MultiLineText @Common.Label : 'Steps to Reproduce';
-  actualResult          @UI.MultiLineText @Common.Label : 'Actual Result';
-  expectedResult        @UI.MultiLineText @Common.Label : 'Expected Result';
+  title                 @Common.Label : 'Title' @Common.FieldControl : #Mandatory;
+  description           @UI.MultiLineText @Common.Label : 'Description' @Common.FieldControl : #Mandatory;
+  stepsToReproduce      @UI.MultiLineText @Common.Label : 'Steps to Reproduce' @Common.FieldControl : #Mandatory;
+  actualResult          @UI.MultiLineText @Common.Label : 'Actual Result' @Common.FieldControl : #Mandatory;
+  expectedResult        @UI.MultiLineText @Common.Label : 'Expected Result' @Common.FieldControl : #Mandatory;
   rejectionReason       @UI.MultiLineText @Common.Label : 'Rejection Reason';
   dueDate               @Common.Label : 'Due Date';
   status                @Common.Label : 'Status';
-  priority              @Common.Label : 'Priority';
-  severity              @Common.Label : 'Severity';
+  priority              @Common.Label : 'Priority' @Common.FieldControl : #Mandatory;
+  severity              @Common.Label : 'Severity' @Common.FieldControl : #Mandatory;
   environment           @Common.Label : 'Environment';
   sapModule             @Common.Label : 'SAP Module';
-  applicationComponent  @Common.Label : 'Application Component';
-  defectCategory        @Common.Label : 'Defect Category';
+  applicationComponent  @Common.Label : 'Application Component' @Common.FieldControl : #Mandatory;
+  defectCategory        @Common.Label : 'Defect Category' @Common.FieldControl : #Mandatory;
   componentCategory     @Common.Label : 'Component Category';
   reporter              @Common.Label : 'Reporter';
   assignee              @Common.Label : 'Assignee';
