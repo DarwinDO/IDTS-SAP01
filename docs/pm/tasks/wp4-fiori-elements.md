@@ -1,10 +1,10 @@
 # WP4 - Fiori Elements UX
 
-Status: In Progress - core screens updated for WP2/WP3
+Status: In Progress - Option B create-page prototype completed; Option C comparison pending
 Owner workstream: Fiori/UI5
 Primary member: DatDT
 Support: DonHV, NhanT
-Last updated: 2026-06-04
+Last updated: 2026-06-15
 
 Vietnamese: WP4 đang ở trạng thái In Progress. DatDT phụ trách chính Fiori/UI5; DonHV và NhanT hỗ trợ/review khi cần.
 
@@ -43,6 +43,7 @@ Vietnamese:
 | WP4-T05 | Add semantic status display. | Completed for MVP; semantic colors kept without default icons |
 | WP4-T06 | Add visible Rejected follow-up information: rejection reason, nextProcessor/queue, and allowed follow-up actions. | Completed for MVP; fields and Object Page actions available |
 | WP4-T07 | Verify UI with local preview and relevant lint/tooling. | Compile/build verification completed; browser smoke in progress |
+| WP4-T08 | Compare the standard full-page create flow (Option B) with a custom guided create page (Option C). | Option B completed and verified; Option C pending on a separate branch |
 
 Vietnamese:
 
@@ -55,6 +56,7 @@ Vietnamese:
 | WP4-T05 | Thêm hiển thị semantic status. | Hoàn thành mức MVP; giữ màu semantic nhưng bỏ icon mặc định |
 | WP4-T06 | Hiển thị Rejected follow-up: rejection reason, nextProcessor/queue, và action tiếp theo. | Hoàn thành mức MVP; field và action đã có |
 | WP4-T07 | Verify UI bằng local preview và lint/tooling phù hợp. | Đã hoàn thành compile/build verification; browser smoke đang kiểm tra |
+| WP4-T08 | So sánh create flow full-page chuẩn (Option B) với custom guided create page (Option C). | Option B đã hoàn thành và verify; Option C đang chờ trên branch riêng |
 
 ## Current Implementation Notes
 
@@ -151,3 +153,23 @@ Vietnamese:
 - Giữ nguyên toàn bộ required bug fields, `nextProcessorRole`, supporting info và các lifecycle actions trên Object Page.
 - Browser smoke trên feature branch đã thấy 4 bug rows ở List Report, section Object Page đúng thứ tự mong muốn, và bảng History không có action create/edit/delete.
 - QA còn lại: kiểm tra thủ công happy path tạo và save bug thật trên browser, đồng thời xem có cần cải thiện navigation khi bấm vào text trong GridTable hay chỉ cần ghi nhận là hành vi của GridTable.
+
+## 2026-06-15 Create Flow Option B
+
+English:
+
+- Removed `Capabilities.InsertRestrictions.RequiredProperties` while keeping List Report creation mode as `NewPage`.
+- Added `Common.FieldControl/Mandatory` to nine user-entered mandatory fields.
+- Kept CAP handler validation and database constraints unchanged.
+- Verified an empty draft activation returns HTTP 400 with mandatory-field errors.
+- Verified a complete draft activation returns HTTP 201, generates a bug number, derives Component Category, assigns the fallback Tester reporter, and starts in `Pending Assignment`.
+- Branch: `feature/idts-create-flow-option-b-donhv`.
+
+Vietnamese:
+
+- Bỏ `Capabilities.InsertRestrictions.RequiredProperties` và vẫn giữ creation mode của List Report là `NewPage`.
+- Thêm `Common.FieldControl/Mandatory` cho chín field bắt buộc do người dùng nhập.
+- Không thay đổi CAP handler validation và database constraint.
+- Đã verify activate draft rỗng trả HTTP 400 cùng lỗi field bắt buộc.
+- Đã verify draft đầy đủ activate thành công với HTTP 201, sinh bug number, derive Component Category, gán Tester reporter mặc định và bắt đầu ở `Pending Assignment`.
+- Branch: `feature/idts-create-flow-option-b-donhv`.
