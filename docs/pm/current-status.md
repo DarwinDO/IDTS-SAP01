@@ -1,15 +1,15 @@
 # Current Project Status
 
-Last updated: 2026-06-06
+Last updated: 2026-06-15
 
 ## Snapshot
 
 | Field | Current value |
 | --- | --- |
-| Project phase | Sprint 02 planning ready after mentor feedback; WP1, WP2, and WP3 MVP implementation completed; WP4 core Fiori screens updated |
+| Project phase | Sprint 02 implementation and review; 6 Jira tasks are Done, 4 are In Progress, and the Epic plus final demo task remain To Do |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
 | Current sprint | Sprint 02 should focus on mentor feedback, happy flow demo, backend note/reason validation, and Bug Detail UI refinements |
-| Recommended next action | Start assigned Jira tasks from `docs/pm/07-sprint-2-plan.md`, then implement backend fixes, validation checks, and Fiori Bug Detail refinements |
+| Recommended next action | Review and merge the two open pull requests, open PRs for completed unmerged branches, then finish the remaining UI and demo tasks |
 | Main implementation risk | Fiori screens and backend handlers now exist, but deeper browser QA, real attachment upload, external notification delivery, authorization, and automated tests are still incomplete |
 
 ## What Is Already Done
@@ -47,6 +47,7 @@ Last updated: 2026-06-06
 - Four IDTS-aligned demo bug records were added under `db/data/idts.cap-Bugs.csv`, and browser smoke verification shows the List Report rendering 4 rows after pressing `Go`.
 - Mentor feedback for Sprint 02 is baselined: developers may view/discuss team-visible bugs, primary lifecycle actions remain controlled, developer notes are optional by default, selected transitions require note/reason, and Bug Detail UI should prioritize assignee/status and key input fields.
 - Sprint 02 plan is documented in `docs/pm/07-sprint-2-plan.md`. Jira issues `IDTS-1` to `IDTS-12` are assigned: DonHV owns Backend CAP lead/bug fixing, NhanT owns validation/QA/demo smoke testing, DatDT owns core Bug Detail layout/input usability, and SangVN owns status value help plus supporting field/comment usability.
+- Jira/GitHub audit on 2026-06-15 found six completed Jira tasks: `IDTS-2`, `IDTS-3`, `IDTS-4`, `IDTS-6`, `IDTS-7`, and `IDTS-9`. Two pull requests are open against `dev`: PR #1 for `IDTS-3`/`IDTS-6` and PR #2 for `IDTS-8`/`IDTS-10`/`IDTS-11`. No pull request has been merged yet.
 
 Vietnamese:
 
@@ -56,6 +57,7 @@ Vietnamese:
 - WP4 core Fiori screens đã cập nhật: List Report, Object Page, Create metadata, Assignment value help/actions, Developer Review actions, Rejected follow-up, History và Notifications sections.
 - Feedback mentor cho Sprint 02 đã được baseline: developer có thể xem/thảo luận bug trong team, lifecycle action chính vẫn kiểm soát, developer note mặc định optional, một số transition bắt buộc note/reason, và Bug Detail UI cần ưu tiên assignee/status cùng các field nhập quan trọng.
 - Sprint 02 plan được ghi tại `docs/pm/07-sprint-2-plan.md`. Jira issues `IDTS-1` đến `IDTS-12` đã được assign: DonHV phụ trách Backend CAP lead/bug fixing, NhanT phụ trách validation/QA/demo smoke test, DatDT phụ trách core Bug Detail layout/input usability, và SangVN phụ trách status value help cùng supporting field/comment usability.
+- Audit Jira/GitHub ngày 2026-06-15 ghi nhận sáu Jira task đã hoàn thành: `IDTS-2`, `IDTS-3`, `IDTS-4`, `IDTS-6`, `IDTS-7`, và `IDTS-9`. Có hai pull request đang mở vào `dev`: PR #1 cho `IDTS-3`/`IDTS-6` và PR #2 cho `IDTS-8`/`IDTS-10`/`IDTS-11`. Chưa có pull request nào được merge.
 
 - Trạng thái PM hiện dùng file theo từng thành viên: `status/donhv.md`, `status/sangvn.md`, `status/datdt.md`, và `status/nhant.md`.
 - Inventory template SAP490 đã được ghi tại `docs/sap490/template-inventory.md`.

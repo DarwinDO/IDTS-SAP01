@@ -57,13 +57,24 @@ Confirmed changes:
 | S2-FE-05 | Improve comments/developer note section usability | SangVN | DatDT | Discussion and optional developer note are usable from Bug Detail |
 | S2-DEMO-01 | Prepare mentor demo script and final smoke test | NhanT | DonHV, DatDT, SangVN | Demo flow, screenshots, and final known-issue list |
 
-## Current Progress - 2026-06-10
+## Current Progress - 2026-06-15
 
 | Jira | Work item | Owner | Status | Notes |
 | --- | --- | --- | --- | --- |
+| IDTS-1 | Sprint 02 Epic | DonHV | To Do | Keep open until the happy-flow demo and remaining child tasks are complete. |
 | IDTS-2 | Developer visibility and processing permission model | DonHV | Done | Backend now keeps view/discussion open while restricting workflow processing to assigned Developer, Tester, or PM when request user is known. |
+| IDTS-3 | Mandatory note/reason validation | NhanT | Done | Included in open PR #1 from `main` to `dev`. |
 | IDTS-4 | Verify history, nextProcessor, and notification side effects | DonHV | Done | `resolveBug` smoke verified status, nextProcessor history, and notification side effects. |
 | IDTS-5 | Backend bugs found during Sprint 02 QA | DonHV | In Progress | Kept open as QA bug-fix bucket. No separate QA-reported backend bug is available yet. |
+| IDTS-6 | Happy-flow backend verification checklist | NhanT | Done | Included in open PR #1 from `main` to `dev`. |
+| IDTS-7 | Redesign Bug Detail field layout | DatDT | Done | Jira is Done; remote branch `Remake_UI` exists but no PR currently targets `dev`. |
+| IDTS-8 | Editable status dropdown/value help | SangVN | In Progress | Included in open PR #2 from `feature/idts-bug-detail-ui-sangvn` to `dev`. |
+| IDTS-9 | Important field input usability | DatDT | Done | Jira is Done; no dedicated PR was found. |
+| IDTS-10 | Move severity and environment | SangVN | In Progress | Included in open PR #2. |
+| IDTS-11 | Comments and developer note usability | SangVN | In Progress | Included in open PR #2. |
+| IDTS-12 | Mentor demo script and final smoke test | NhanT | To Do | Start after the required backend/UI changes are reviewed and merged. |
+
+GitHub audit: PR #1 and PR #2 are open, cleanly mergeable, have no submitted review, and have no configured commit status checks. No PR has been merged.
 
 ## Week 1 Plan
 
@@ -175,13 +186,24 @@ Cập nhật đã chốt:
 | S2-FE-05 | Cải thiện comments/developer note section | SangVN | DatDT | Thảo luận và developer note optional dùng được từ Bug Detail |
 | S2-DEMO-01 | Chuẩn bị demo script và final smoke test | NhanT | DonHV, DatDT, SangVN | Demo flow, screenshot và danh sách known issue cuối |
 
-## Tiến Độ Hiện Tại - 2026-06-10
+## Tiến Độ Hiện Tại - 2026-06-15
 
 | Jira | Công việc | Owner | Trạng thái | Ghi chú |
 | --- | --- | --- | --- | --- |
+| IDTS-1 | Epic Sprint 02 | DonHV | To Do | Giữ mở đến khi hoàn thành happy-flow demo và các child task còn lại. |
 | IDTS-2 | Developer visibility và processing permission model | DonHV | Done | Backend cho phép xem/thảo luận bug trong team nhưng giới hạn xử lý workflow cho Developer được assign, Tester hoặc PM khi xác định được request user. |
+| IDTS-3 | Validation note/reason bắt buộc | NhanT | Done | Đang nằm trong PR #1 mở từ `main` vào `dev`. |
 | IDTS-4 | Verify history, nextProcessor và notification side effects | DonHV | Done | Smoke test `resolveBug` đã verify status, history của nextProcessor và notification side effect. |
 | IDTS-5 | Backend bug phát hiện trong Sprint 02 QA | DonHV | In Progress | Giữ mở như bucket bug-fix từ QA. Hiện chưa có bug backend riêng được QA báo cáo. |
+| IDTS-6 | Checklist verify backend happy flow | NhanT | Done | Đang nằm trong PR #1 mở từ `main` vào `dev`. |
+| IDTS-7 | Redesign layout field Bug Detail | DatDT | Done | Jira đã Done; có remote branch `Remake_UI` nhưng hiện chưa có PR vào `dev`. |
+| IDTS-8 | Status edit bằng dropdown/value help | SangVN | In Progress | Đang nằm trong PR #2 từ `feature/idts-bug-detail-ui-sangvn` vào `dev`. |
+| IDTS-9 | Cải thiện input usability cho field quan trọng | DatDT | Done | Jira đã Done; chưa tìm thấy PR riêng. |
+| IDTS-10 | Chuyển severity và environment sang vùng phụ | SangVN | In Progress | Đang nằm trong PR #2. |
+| IDTS-11 | Cải thiện comments và developer note | SangVN | In Progress | Đang nằm trong PR #2. |
+| IDTS-12 | Demo script và final smoke test | NhanT | To Do | Bắt đầu sau khi các thay đổi backend/UI cần thiết được review và merge. |
+
+Audit GitHub: PR #1 và PR #2 đang mở, có thể merge sạch, chưa có review được submit và chưa có commit status check được cấu hình. Chưa có PR nào được merge.
 
 ## Acceptance Criteria
 

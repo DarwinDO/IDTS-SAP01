@@ -1,6 +1,6 @@
 # IDTS Task Board
 
-Last updated: 2026-06-10
+Last updated: 2026-06-15
 
 Use this board for high-level movement only. Detailed task notes belong in the matching file under `docs/pm/tasks/`.
 
@@ -52,14 +52,14 @@ Vietnamese:
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
-| SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Sprint implementation has started. Jira `IDTS-2` and `IDTS-4` are Done; `IDTS-5` remains In Progress as backend QA bug-fix bucket. |
+| SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 6 Done (`IDTS-2`, `3`, `4`, `6`, `7`, `9`), 4 In Progress (`IDTS-5`, `8`, `10`, `11`), and 2 To Do (`IDTS-1`, `12`). GitHub has 2 open PRs and 0 merged PRs. |
 | WP4 | Fiori Elements UX | DatDT | Core List/Object/Create/Assignment/Developer Review metadata is updated; GridTable and draft-enabled Create Bug dialog refinement applied. Deeper QA and attachment upload remain. |
 
 Vietnamese:
 
 | ID | Công việc | Thành viên chính | Ghi chú |
 | --- | --- | --- | --- |
-| SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Implementation Sprint 02 đã bắt đầu. Jira `IDTS-2` và `IDTS-4` đã Done; `IDTS-5` vẫn In Progress để nhận bug backend từ QA. |
+| SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 6 Done (`IDTS-2`, `3`, `4`, `6`, `7`, `9`), 4 In Progress (`IDTS-5`, `8`, `10`, `11`), và 2 To Do (`IDTS-1`, `12`). GitHub có 2 PR đang mở và chưa có PR nào được merge. |
 | WP4 | Fiori Elements UX | DatDT | Metadata cho List/Object/Create/Assignment/Developer Review đã cập nhật; đã tinh chỉnh GridTable và dialog Create Bug bằng draft. Vẫn còn QA sâu và attachment upload. |
 
 ## Blocked
