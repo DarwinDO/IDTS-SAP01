@@ -107,6 +107,31 @@ annotate service.Bugs with @(
   UI.Facets : [
     {
       $Type  : 'UI.CollectionFacet',
+      ID     : 'Ownership',
+      Label  : 'Assignment and Follow-up',
+      Facets : [
+        {
+          $Type  : 'UI.ReferenceFacet',
+          ID     : 'Assignment',
+          Label  : 'Assignment',
+          Target : '@UI.FieldGroup#Assignment'
+        },
+        {
+          $Type  : 'UI.ReferenceFacet',
+          ID     : 'RejectedFollowUp',
+          Label  : 'Rejected Follow-up',
+          Target : '@UI.FieldGroup#RejectedFollowUp'
+        },
+        {
+          $Type  : 'UI.ReferenceFacet',
+          ID     : 'Planning',
+          Label  : 'Planning',
+          Target : '@UI.FieldGroup#Planning'
+        }
+      ]
+    },
+    {
+      $Type  : 'UI.CollectionFacet',
       ID     : 'BugDetails',
       Label  : 'Bug Details',
       Facets : [
@@ -133,31 +158,6 @@ annotate service.Bugs with @(
           ID     : 'Reproduction',
           Label  : 'Reproduction and Results',
           Target : '@UI.FieldGroup#Reproduction'
-        }
-      ]
-    },
-    {
-      $Type  : 'UI.CollectionFacet',
-      ID     : 'Ownership',
-      Label  : 'Assignment and Follow-up',
-      Facets : [
-        {
-          $Type  : 'UI.ReferenceFacet',
-          ID     : 'Assignment',
-          Label  : 'Assignment',
-          Target : '@UI.FieldGroup#Assignment'
-        },
-        {
-          $Type  : 'UI.ReferenceFacet',
-          ID     : 'RejectedFollowUp',
-          Label  : 'Rejected Follow-up',
-          Target : '@UI.FieldGroup#RejectedFollowUp'
-        },
-        {
-          $Type  : 'UI.ReferenceFacet',
-          ID     : 'Planning',
-          Label  : 'Planning',
-          Target : '@UI.FieldGroup#Planning'
         }
       ]
     },
@@ -650,16 +650,21 @@ annotate service.Attachments with {
   bug @UI.Hidden;
 };
 
-annotate service.HistoryLogs with @UI.LineItem : [
-  { $Type : 'UI.DataField', Label : 'Time', Value : createdAt },
-  { $Type : 'UI.DataField', Label : 'Actor', Value : actor.displayName },
-  { $Type : 'UI.DataField', Label : 'Role', Value : actorRole.name },
-  { $Type : 'UI.DataField', Label : 'Action', Value : actionType.name },
-  { $Type : 'UI.DataField', Label : 'Field', Value : fieldName },
-  { $Type : 'UI.DataField', Label : 'Old Value', Value : oldValue },
-  { $Type : 'UI.DataField', Label : 'New Value', Value : newValue },
-  { $Type : 'UI.DataField', Label : 'Reason', Value : reason }
-];
+annotate service.HistoryLogs with @(
+  Capabilities.InsertRestrictions : { Insertable : false },
+  Capabilities.DeleteRestrictions : { Deletable : false },
+  Capabilities.UpdateRestrictions : { Updatable : false },
+  UI.LineItem : [
+    { $Type : 'UI.DataField', Label : 'Time', Value : createdAt },
+    { $Type : 'UI.DataField', Label : 'Actor', Value : actor.displayName },
+    { $Type : 'UI.DataField', Label : 'Role', Value : actorRole.name },
+    { $Type : 'UI.DataField', Label : 'Action', Value : actionType.name },
+    { $Type : 'UI.DataField', Label : 'Field', Value : fieldName },
+    { $Type : 'UI.DataField', Label : 'Old Value', Value : oldValue },
+    { $Type : 'UI.DataField', Label : 'New Value', Value : newValue },
+    { $Type : 'UI.DataField', Label : 'Reason', Value : reason }
+  ]
+);
 
 annotate service.HistoryLogs with {
   ID     @UI.Hidden;

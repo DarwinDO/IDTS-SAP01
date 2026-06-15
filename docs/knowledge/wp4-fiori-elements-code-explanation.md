@@ -221,3 +221,95 @@ WP2 bổ sung value help annotation và service contract để user chọn đún
 WP3 bổ sung backend handler để user không thể bypass business rule bằng cách sửa raw OData payload. Ví dụ WP3 cần validate assignment, status transition, `nextProcessor`, rejection reason, history log và notification.
 
 WP4 sau đó dùng output của WP2/WP3 để hoàn thiện Create, Assignment, Developer Review và follow-up action trên Fiori.
+
+## 2026-06-15 Selective Remake_UI Integration
+
+English:
+
+This update selectively reused safe ideas from DatDT's `Remake_UI` branch instead of merging the whole branch.
+
+### What Changed
+
+- The Object Page section `Assignment and Follow-up` was moved above `Bug Details`.
+- `HistoryLogs` was annotated with `Insertable : false`, `Updatable : false`, and `Deletable : false`.
+- The List Report create mode was changed from `CreationDialog` to `NewPage`.
+
+### Why Assignment Is First
+
+In SAP Fiori Elements Object Page, the order of `UI.Facets` controls the order of sections on the page.
+
+For IDTS, assignee and next processor are operationally important because users often need to know:
+
+- Who is currently responsible for the bug.
+- Which role or user must act next.
+- Whether the bug is waiting for a developer, tester, or PM.
+
+Putting Assignment first makes the Bug Detail screen closer to the mentor feedback: assignee/status should be easy to see before reading all supporting details.
+
+### Why History Is Read-Only
+
+`HistoryLogs` is an audit trail. Users should not manually create, edit, or delete audit records from the UI.
+
+The backend creates history records when a lifecycle action changes status, assignee, next processor, reason, or other tracked fields. Fiori reads the OData capability annotations and hides or disables create/edit/delete behavior for the History table.
+
+### Why NewPage Replaced CreationDialog
+
+The previous Create Bug dialog was too crowded because a valid bug has many required fields: title, description, priority, severity, steps to reproduce, actual result, expected result, application component, and defect category.
+
+SAP Fiori guidance treats creation dialogs as better for small create forms. For IDTS, a create page is more appropriate because the user needs enough space to write clear defect information.
+
+Important behavior: with OData V4 Fiori Elements and draft create, `NewPage` can still show an initial prefill dialog for required fields before continuing to the new object page. This is expected framework behavior. It is still better than a large 12-field dialog because optional fields such as environment, SAP module, and due date are no longer forced into the first dialog.
+
+### What Was Intentionally Not Adopted
+
+- Required fields were not reduced to only `title`.
+- `nextProcessorRole` was not removed.
+- Object Page action annotations were not removed.
+- The Supporting Info section was not removed.
+
+These rejected changes would weaken IDTS business behavior or make the UI less aligned with backend rules.
+
+Vietnamese:
+
+Bản cập nhật này chỉ chọn lọc những ý tưởng an toàn từ branch `Remake_UI` của DatDT, không merge nguyên branch.
+
+### Đã Thay Đổi Gì
+
+- Section `Assignment and Follow-up` trong Object Page được đưa lên trước `Bug Details`.
+- `HistoryLogs` được annotation là không cho tạo, sửa, xóa từ UI.
+- Chế độ tạo bug của List Report được đổi từ `CreationDialog` sang `NewPage`.
+
+### Vì Sao Đưa Assignment Lên Đầu
+
+Trong SAP Fiori Elements Object Page, thứ tự của `UI.Facets` quyết định thứ tự các section trên màn hình.
+
+Với IDTS, assignee và next processor rất quan trọng trong vận hành vì user cần biết nhanh:
+
+- Ai đang chịu trách nhiệm bug.
+- Role hoặc user nào cần xử lý tiếp theo.
+- Bug đang chờ developer, tester hay PM.
+
+Đưa Assignment lên đầu giúp màn hình Bug Detail sát hơn với feedback mentor: assignee/status phải dễ thấy trước khi đọc các thông tin phụ.
+
+### Vì Sao History Phải Read-Only
+
+`HistoryLogs` là audit trail. User không nên tự tạo, sửa hoặc xóa record lịch sử từ giao diện.
+
+Backend sẽ tạo history record khi lifecycle action làm thay đổi status, assignee, next processor, reason hoặc field cần audit khác. Fiori đọc capability annotation từ OData metadata và ẩn hoặc disable hành vi create/edit/delete cho bảng History.
+
+### Vì Sao Đổi Từ CreationDialog Sang NewPage
+
+Dialog Create Bug cũ bị quá chật vì một bug hợp lệ cần nhiều field bắt buộc: title, description, priority, severity, steps to reproduce, actual result, expected result, application component và defect category.
+
+Theo hướng dẫn SAP Fiori, creation dialog phù hợp hơn với form tạo nhỏ. Với IDTS, create page hợp lý hơn vì tester cần đủ không gian để viết thông tin defect rõ ràng.
+
+Lưu ý quan trọng: với Fiori Elements OData V4 và draft create, `NewPage` vẫn có thể hiện một prefill dialog ban đầu cho các required field trước khi vào trang tạo mới. Đây là hành vi framework bình thường. Cách này vẫn tốt hơn dialog 12 field trước đó vì các field optional như environment, SAP module và due date không còn bị ép vào bước đầu tiên.
+
+### Những Gì Cố Ý Không Lấy Từ Remake_UI
+
+- Không giảm required fields xuống chỉ còn `title`.
+- Không xóa `nextProcessorRole`.
+- Không xóa Object Page action annotations.
+- Không xóa section Supporting Info.
+
+Các thay đổi bị loại này có thể làm yếu business behavior của IDTS hoặc khiến UI không còn khớp backend rules.
