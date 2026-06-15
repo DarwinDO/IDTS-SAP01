@@ -1,8 +1,8 @@
 # WP3 - Handler Rules and Validation
 
-Status: Completed for Sprint 1 MVP; Sprint 02 backend refinements added
+Status: Completed for Sprint 1 MVP; Sprint 02 backend refinements and SAP490 test evidence added
 Owner workstream: Backend CAP
-Last updated: 2026-06-10
+Last updated: 2026-06-15
 
 ## Goal
 
@@ -25,7 +25,7 @@ Implement backend rules that protect business-critical transitions and ownership
 | WP3-T04 | Implement nextProcessor auto-update rules. | Completed |
 | WP3-T05 | Create history logs for important changes. | Completed |
 | WP3-T06 | Enforce Rejected follow-up rules: rejection reason, nextProcessor, allowed follow-up transitions. | Completed |
-| WP3-T07 | Add focused backend tests or repeatable manual verification. | Completed manual/API verification |
+| WP3-T07 | Add focused backend tests or repeatable manual verification. | Completed repeatable programmatic verification |
 
 ## 2026-06-04 Implementation Update
 
@@ -71,9 +71,23 @@ Vietnamese:
 
 ## Remaining Notes
 
-English: This is an MVP backend rule layer. It now has request-user-aware permission checks for local mocked/basic-auth and future authenticated runtime, but it does not yet implement real XSUAA role collections, external notification delivery, binary attachment storage, or automated test files.
+English: This is an MVP backend rule layer. It now has request-user-aware permission checks for local mocked/basic-auth and future authenticated runtime plus a repeatable direct-service QA script, but it does not yet implement real XSUAA role collections, external notification delivery, binary attachment storage, or a CI-integrated automated test suite.
 
-Vietnamese: Đây là lớp backend rule mức MVP. Hiện đã có kiểm tra quyền dựa trên request user cho mocked/basic-auth local và runtime xác thực sau này, nhưng chưa implement XSUAA role collection thật, gửi notification ra kênh ngoài, binary attachment storage hoặc automated test files.
+Vietnamese: Đây là lớp backend rule mức MVP. Hiện đã có kiểm tra quyền dựa trên request user cho mocked/basic-auth local và runtime xác thực sau này, đồng thời có QA script gọi service trực tiếp để chạy lặp lại; tuy nhiên chưa implement XSUAA role collection thật, gửi notification ra kênh ngoài, binary attachment storage hoặc automated test suite tích hợp CI.
+
+## 2026-06-15 SAP490 Test Evidence
+
+English:
+
+- `scripts/qa/test-idts6-programmatic.js` verifies 21 backend happy-flow and negative cases with 21 PASS / 0 FAIL.
+- Added separate English and Vietnamese template-filled SAP490 workbooks for Test Scenario, Unit Test, and Test and Fix Bug under `docs/sap490/generated/`.
+- The workbooks record 12 lifecycle scenarios, all 21 executed cases, evidence links, and the fixed `IDTS-5` SC-01a direct CREATE harness issue.
+
+Vietnamese:
+
+- `scripts/qa/test-idts6-programmatic.js` verify 21 case backend happy flow và negative với kết quả 21 PASS / 0 FAIL.
+- Đã thêm các workbook SAP490 Test Scenario, Unit Test và Test and Fix Bug tách riêng tiếng Anh/tiếng Việt, được copy/fill từ template trong `docs/sap490/generated/`.
+- Các workbook ghi 12 lifecycle scenario, toàn bộ 21 case đã chạy, link bằng chứng và lỗi harness direct CREATE SC-01a của `IDTS-5` đã được sửa.
 
 ## Definition of Done
 

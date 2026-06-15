@@ -36,6 +36,7 @@ Last updated: 2026-06-15
 - PM status tracking now uses member-owned files: `status/donhv.md`, `status/sangvn.md`, `status/datdt.md`, and `status/nhant.md`.
 - SAP490 template inventory is documented in `docs/sap490/template-inventory.en.md` and `docs/sap490/template-inventory.vi.md`.
 - SAP490 Blueprint draft v0.1 is available as two template-filled DOCX files copied from the school Blueprint template: `docs/sap490/generated/Blueprint_IDTS_SAP01_en_v0.1.docx` and `docs/sap490/generated/Blueprint_IDTS_SAP01_vi_v0.1.docx`.
+- SAP490 Test Scenario, Unit Test, and Test and Fix Bug v0.1 workbooks are available as separate English and Vietnamese files copied and filled from the school templates. They document 12 backend happy-flow scenarios, 21 passing programmatic cases, and the fixed `IDTS-5` SC-01a QA harness issue.
 - Optional Learning Recap / Mentor Mode is available through `.agents/skills/learning-recap` and AGENTS.md routing for nontrivial tasks.
 - SRS/FRS embedded Mermaid diagrams were extracted into `docs/diagrams/07-srs-system-context.md` and `docs/diagrams/08-frs-functional-workflows.md`.
 - Database modeling support is available through `.agents/skills/idts-database-modeling` and installed `database-schema-design`; the current model review is documented in `docs/ba/09-database-model-review.md`.
@@ -71,6 +72,7 @@ Vietnamese:
 - Trạng thái PM hiện dùng file theo từng thành viên: `status/donhv.md`, `status/sangvn.md`, `status/datdt.md`, và `status/nhant.md`.
 - Inventory template SAP490 đã được ghi tại `docs/sap490/template-inventory.en.md` và `docs/sap490/template-inventory.vi.md`.
 - SAP490 Blueprint draft v0.1 đã có thành hai file DOCX copy từ template Blueprint của trường rồi fill trực tiếp: `docs/sap490/generated/Blueprint_IDTS_SAP01_en_v0.1.docx` và `docs/sap490/generated/Blueprint_IDTS_SAP01_vi_v0.1.docx`.
+- SAP490 Test Scenario, Unit Test và Test and Fix Bug v0.1 đã có bản tiếng Anh và tiếng Việt riêng, được copy/fill trực tiếp từ template trường. Bộ file ghi 12 happy-flow scenario backend, 21 programmatic test case pass và lỗi QA harness SC-01a của `IDTS-5` đã được sửa.
 - Learning Recap / Mentor Mode tùy chọn đã có trong `.agents/skills/learning-recap` và được route trong AGENTS.md cho các task không tầm thường.
 
 - Mermaid diagram nhúng trong SRS/FRS đã được tách ra `docs/diagrams/07-srs-system-context.md` và `docs/diagrams/08-frs-functional-workflows.md`.
