@@ -9,7 +9,7 @@ Last updated: 2026-06-15
 | Project phase | Sprint 02 integration: PR #1, PR #2, DonHV backend, and SAP490 documentation branches consolidated into `dev` |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
 | Current sprint | Sprint 02 focuses on mentor feedback, happy flow demo, backend note/reason validation, and Bug Detail UI refinements |
-| Recommended next action | Review DatDT `Remake_UI` selectively, finish `IDTS-5`, `IDTS-8`, `IDTS-10`, `IDTS-11`, and prepare the final demo under `IDTS-12` |
+| Recommended next action | Finish final UI/browser happy-path QA after selective `Remake_UI` integration, close remaining Sprint 02 issues `IDTS-5`, `IDTS-8`, `IDTS-10`, `IDTS-11`, and prepare the final demo under `IDTS-12` |
 | Main implementation risk | Fiori screens and backend handlers now exist, but deeper browser QA, real attachment upload, external notification delivery, production XSUAA authorization, and automated tests are still incomplete |
 
 ## What Is Already Done
@@ -54,6 +54,7 @@ Last updated: 2026-06-15
 - Bound action side effects now log `nextProcessorUser` and `nextProcessorRole` changes and create in-app notification records for resolved, retest-required, and reopened follow-up.
 - Jira/GitHub audit on 2026-06-15 found six completed Jira tasks: `IDTS-2`, `IDTS-3`, `IDTS-4`, `IDTS-6`, `IDTS-7`, and `IDTS-9`.
 - GitHub PR #1 (`IDTS-3`/`IDTS-6`) and PR #2 (`IDTS-8`/`IDTS-10`/`IDTS-11`) were integrated into `dev` together with DonHV's backend and SAP490 documentation branches.
+- DatDT's `Remake_UI` branch was reviewed selectively. Accepted items are Assignment-first Object Page ordering, read-only History table capabilities, and create flow evaluation; rejected items are relaxed required fields, removed `nextProcessorRole`, removed lifecycle actions, and removed supporting info.
 
 Vietnamese:
 
@@ -68,6 +69,7 @@ Vietnamese:
 - Side effect của bound action hiện ghi log thay đổi `nextProcessorUser` và `nextProcessorRole`, đồng thời tạo notification record cho follow-up của resolved, retest-required và reopened.
 - Audit Jira/GitHub ngày 2026-06-15 ghi nhận sáu Jira task đã hoàn thành: `IDTS-2`, `IDTS-3`, `IDTS-4`, `IDTS-6`, `IDTS-7`, và `IDTS-9`.
 - GitHub PR #1 (`IDTS-3`/`IDTS-6`) và PR #2 (`IDTS-8`/`IDTS-10`/`IDTS-11`) đã được tích hợp vào `dev` cùng hai branch backend và SAP490 documentation của DonHV.
+- Branch `Remake_UI` của DatDT đã được review chọn lọc. Các phần được nhận là đưa Assignment lên đầu Object Page, đặt bảng History read-only, và đánh giá lại create flow; các phần không nhận là giảm required fields, xóa `nextProcessorRole`, xóa lifecycle actions, và xóa supporting info.
 
 - Trạng thái PM hiện dùng file theo từng thành viên: `status/donhv.md`, `status/sangvn.md`, `status/datdt.md`, và `status/nhant.md`.
 - Inventory template SAP490 đã được ghi tại `docs/sap490/template-inventory.en.md` và `docs/sap490/template-inventory.vi.md`.
@@ -143,9 +145,9 @@ Vietnamese:
 
 ## WP4 Current Note
 
-DatDT's `Sap_FE` reference repo has been reviewed. The current IDTS Fiori app now has MVP annotation-driven List Report/Object Page integration, value help, Object Page actions, GridTable list layout, draft-enabled standard Create, and Create Bug dialog support. Deeper browser QA and real attachment upload remain open.
+DatDT's `Sap_FE` reference repo and `Remake_UI` branch have been reviewed. The current IDTS Fiori app now has MVP annotation-driven List Report/Object Page integration, value help, Object Page actions, GridTable list layout, draft-enabled standard Create, Assignment-first Object Page ordering, read-only History table capabilities, and `NewPage` create flow evaluation. Deeper browser QA, manual create-save QA, and real attachment upload remain open.
 
-Vietnamese: Đã review repo tham khảo `Sap_FE` của DatDT. App Fiori hiện tại của IDTS đã có tích hợp List Report/Object Page bằng annotation ở mức MVP, value help, Object Page actions, layout List Report dạng GridTable, standard Create đã bật bằng draft, và hỗ trợ dialog Create Bug. Browser QA sâu hơn và upload attachment thật vẫn còn mở.
+Vietnamese: Đã review repo tham khảo `Sap_FE` và branch `Remake_UI` của DatDT. App Fiori hiện tại của IDTS đã có tích hợp List Report/Object Page bằng annotation ở mức MVP, value help, Object Page actions, layout List Report dạng GridTable, standard Create đã bật bằng draft, đưa Assignment lên đầu Object Page, đặt History table read-only, và đánh giá create flow bằng `NewPage`. Browser QA sâu hơn, manual create-save QA và upload attachment thật vẫn còn mở.
 
 ## Next Handover Instruction
 

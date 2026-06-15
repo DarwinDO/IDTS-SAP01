@@ -129,3 +129,25 @@ Vietnamese:
 English: WP4 remains open for deeper browser QA, action usability tuning, and future attachment upload behavior. The current UI remains annotation-driven Fiori Elements; no custom UI5 controller or fragment was added.
 
 Vietnamese: WP4 vẫn còn mở cho browser QA sâu hơn, tinh chỉnh usability của action và attachment upload thật sau này. UI hiện tại vẫn theo hướng Fiori Elements annotation-driven; chưa thêm custom UI5 controller hoặc fragment.
+
+## 2026-06-15 Selective Remake_UI Integration
+
+English:
+
+- Reviewed DatDT's `Remake_UI` branch and applied only the changes that fit the current CAP/Fiori contract.
+- Moved `Assignment and Follow-up` above `Bug Details` on the Object Page so assignee, next processor user, and next processor role are visible earlier.
+- Made `HistoryLogs` read-only through OData capability annotations: insert, update, and delete are disabled for the History child table.
+- Changed create behavior from `CreationDialog` to `NewPage` because the create bug form has many required fields and the old dialog was too crowded.
+- Preserved all required bug fields, `nextProcessorRole`, supporting info, and Object Page lifecycle actions.
+- Browser smoke on the feature branch showed 4 bug rows in the List Report, Object Page sections in the intended order, and no create/edit/delete action in the History table.
+- Remaining QA: manually complete a real create-save happy path in the browser and check whether row text navigation should be improved or documented as GridTable behavior.
+
+Vietnamese:
+
+- Đã review branch `Remake_UI` của DatDT và chỉ áp dụng các thay đổi phù hợp với contract CAP/Fiori hiện tại.
+- Đưa section `Assignment and Follow-up` lên trước `Bug Details` trên Object Page để assignee, next processor user và next processor role dễ thấy hơn.
+- Đặt `HistoryLogs` read-only bằng OData capability annotations: không cho insert, update và delete trong bảng History.
+- Đổi create behavior từ `CreationDialog` sang `NewPage` vì form tạo bug có nhiều field bắt buộc và dialog cũ quá chật.
+- Giữ nguyên toàn bộ required bug fields, `nextProcessorRole`, supporting info và các lifecycle actions trên Object Page.
+- Browser smoke trên feature branch đã thấy 4 bug rows ở List Report, section Object Page đúng thứ tự mong muốn, và bảng History không có action create/edit/delete.
+- QA còn lại: kiểm tra thủ công happy path tạo và save bug thật trên browser, đồng thời xem có cần cải thiện navigation khi bấm vào text trong GridTable hay chỉ cần ghi nhận là hành vi của GridTable.

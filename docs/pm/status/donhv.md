@@ -141,6 +141,32 @@ Vietnamese note: DonHV đã hỗ trợ tiếp WP2/WP3/WP4 bằng cách thêm val
 
 Vietnamese note: DonHV đã tinh chỉnh tiếp WP4 UI sau khi review giao diện: đổi List Report sang `GridTable`, bật draft trên `BugService.Bugs` để standard Create button xuất hiện, đổi Create thành `CreationDialog` với `UI.FieldGroup#CreateBug`, và bỏ icon mặc định khỏi Status/Priority/Severity bằng `CriticalityRepresentation : #WithoutIcon`. CAP compile, UI5 build và browser click mở dialog đã pass; DatDT/NhanT vẫn nên kiểm tra thủ công save flow của Create Bug trên browser.
 
+## 2026-06-15 Selective Fiori UI Integration Log
+
+English:
+
+| Field | Detail |
+| --- | --- |
+| Task/WP | WP4 Fiori Elements selective `Remake_UI` integration |
+| What was done | Reviewed DatDT's `Remake_UI` changes after PR #1, PR #2, and DonHV branches were merged to `dev`; applied only Assignment-first Object Page ordering, read-only History table capability annotations, and `NewPage` create flow evaluation. |
+| Completed part | CAP/Fiori annotations compile, backend QA suite passes, UI5 build passes, and browser smoke showed List Report rows, Object Page section order, Assignment fields, History table, and Create flow behavior. |
+| Issues/Bugs found | `CreationDialog` was too crowded for IDTS because the create form has many required fields; local Fiori dev server logs non-blocking 404s for `Component-preload.js` and `/sap/bc/lrep/flex/*`; `cds-plugin-ui5` logs a non-blocking welcome-page injection warning; GridTable text click did not navigate during smoke testing and the Details icon was used instead; after stopping the visible server PIDs, an npm/cds child process still held `.tmp/cds-watch-ui.log`. |
+| Fix status | Create flow changed to `NewPage`; History read-only and Assignment-first layout fixed. Local dev 404/welcome-page noise is open but non-blocking because direct app URL works and UI5 build creates preload assets. GridTable text navigation remains an open UX note for DatDT/SangVN manual QA. The locked `.tmp` log was fixed by locating and stopping the remaining npm/cds child PIDs, then deleting `.tmp`. |
+| Evidence/Commands | `mcp__fiori.search_docs`; `mcp__cap.search_model`; `cds compile srv app/bug-management-ui --to edmx`; `cds deploy --to sqlite::memory:`; `node scripts/qa/test-idts6-programmatic.js` = 21 PASS / 0 FAIL; `npx ui5 build --config ui5.yaml --clean-dest --dest $env:TEMP\\idts-ui-selective-build`; browser smoke on `http://localhost:4004/idts.bugmanagementui/index.html?sap-ui-xx-viewCache=false`. |
+| Next handoff | Merge selective branch into `dev` after final verification, then DatDT/SangVN should manually verify create-save behavior and Bug Detail usability. |
+
+Vietnamese:
+
+| Trường | Chi tiết |
+| --- | --- |
+| Task/WP | WP4 Fiori Elements tích hợp chọn lọc `Remake_UI` |
+| Đã làm gì | Review thay đổi `Remake_UI` của DatDT sau khi PR #1, PR #2 và các branch của DonHV đã merge vào `dev`; chỉ lấy các phần đưa Assignment lên đầu Object Page, đặt History table read-only, và đánh giá create flow bằng `NewPage`. |
+| Phần đã xong | CAP/Fiori annotations compile pass, backend QA suite pass, UI5 build pass, browser smoke thấy List Report rows, thứ tự Object Page section, Assignment fields, History table và Create flow. |
+| Bug/lỗi phát hiện | `CreationDialog` quá chật với IDTS vì form tạo bug có nhiều required fields; dev server Fiori local có 404 không chặn cho `Component-preload.js` và `/sap/bc/lrep/flex/*`; `cds-plugin-ui5` có warning không chặn khi inject welcome page; khi smoke test GridTable, click vào text không navigate nên phải dùng icon Details; sau khi dừng visible server PID, vẫn còn npm/cds child process giữ `.tmp/cds-watch-ui.log`. |
+| Trạng thái fix | Đã đổi create flow sang `NewPage`; đã fix History read-only và Assignment-first layout. 404/welcome-page noise của local dev vẫn mở nhưng không chặn vì direct app URL chạy được và UI5 build có tạo preload assets. GridTable text navigation là UX note còn mở cho DatDT/SangVN manual QA. Lỗi lock `.tmp` đã fix bằng cách tìm và dừng các npm/cds child PID còn lại rồi xóa `.tmp`. |
+| Bằng chứng/lệnh | `mcp__fiori.search_docs`; `mcp__cap.search_model`; `cds compile srv app/bug-management-ui --to edmx`; `cds deploy --to sqlite::memory:`; `node scripts/qa/test-idts6-programmatic.js` = 21 PASS / 0 FAIL; `npx ui5 build --config ui5.yaml --clean-dest --dest $env:TEMP\\idts-ui-selective-build`; browser smoke tại `http://localhost:4004/idts.bugmanagementui/index.html?sap-ui-xx-viewCache=false`. |
+| Handoff tiếp theo | Merge nhánh selective vào `dev` sau final verification, rồi DatDT/SangVN kiểm tra thủ công create-save behavior và usability Bug Detail. |
+
 ## Update Rule
 
 - DonHV updates this file for leader decisions, BA/PM work, SAP490 deliverables, weekly consolidation, and cross-workstream support.
