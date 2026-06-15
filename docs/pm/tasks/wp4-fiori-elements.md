@@ -130,6 +130,26 @@ English: WP4 remains open for deeper browser QA, action usability tuning, and fu
 
 Vietnamese: WP4 vẫn còn mở cho browser QA sâu hơn, tinh chỉnh usability của action và attachment upload thật sau này. UI hiện tại vẫn theo hướng Fiori Elements annotation-driven; chưa thêm custom UI5 controller hoặc fragment.
 
+## 2026-06-15 Create Flow Option C Prototype
+
+English:
+
+- Added a separate `Guided Create Bug` toolbar action while preserving the standard Fiori `Create` NewPage flow.
+- Implemented a three-step responsive wizard for Classification, Bug Details, and Reproduction and Results.
+- Implemented dependent SAP Module -> Application Component -> Defect Category selection.
+- Implemented CAP draft creation and activation through the public OData V4 `BugService.draftActivate(...)` action.
+- Browser happy-path verification created an active bug, applied backend defaults, and navigated to the standard Object Page.
+- Option C remains a prototype. Option B is still recommended for the MVP because it has less custom code and lower Fiori upgrade/regression risk.
+
+Vietnamese:
+
+- Đã thêm action riêng `Guided Create Bug` trên toolbar và vẫn giữ luồng `Create` NewPage chuẩn của Fiori.
+- Đã xây wizard responsive ba bước: Classification, Bug Details, Reproduction and Results.
+- Đã xử lý lựa chọn phụ thuộc SAP Module -> Application Component -> Defect Category.
+- Đã xử lý tạo và activate CAP draft qua public OData V4 action `BugService.draftActivate(...)`.
+- Browser happy-path đã tạo active bug, nhận default từ backend và điều hướng sang Object Page chuẩn.
+- Option C vẫn là prototype. Option B vẫn được khuyến nghị cho MVP vì ít custom code hơn và có rủi ro upgrade/regression Fiori thấp hơn.
+
 ## 2026-06-15 Selective Remake_UI Integration
 
 English:

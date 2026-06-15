@@ -167,6 +167,32 @@ Vietnamese:
 | Bằng chứng/lệnh | `mcp__fiori.search_docs`; `mcp__cap.search_model`; `cds compile srv app/bug-management-ui --to edmx`; `cds deploy --to sqlite::memory:`; `node scripts/qa/test-idts6-programmatic.js` = 21 PASS / 0 FAIL; `npx ui5 build --config ui5.yaml --clean-dest --dest $env:TEMP\\idts-ui-selective-build`; browser smoke tại `http://localhost:4004/idts.bugmanagementui/index.html?sap-ui-xx-viewCache=false`; Atlassian Rovo comment `IDTS-10` / `10135`. |
 | Handoff tiếp theo | Nhánh selective đã merge vào `dev` và đã verify. DatDT/SangVN cần kiểm tra thủ công full create-save behavior và usability Bug Detail; DonHV giữ backend happy-flow suite pass làm baseline sau merge. |
 
+## 2026-06-15 WP4 Create Flow Option C
+
+English:
+
+| Field | Detail |
+| --- | --- |
+| Task/WP | WP4 guided custom create prototype |
+| What was done | Added a List Report `Guided Create Bug` action, a three-step FPM/SAPUI5 wizard, dependent classification dropdowns, required-field validation, CAP draft activation, and Object Page navigation. |
+| Completed part | Full browser happy path passed. The created bug became active with `PENDING_ASSIGNMENT`, backend-derived component category, reporter, PM next processor, and correct submitted values. Desktop and mobile layouts had no horizontal overflow. |
+| Issues/Bugs found | Fiori scaffold initially replaced normal Bug Object Page navigation; OData bindings used plain sorter objects and crashed with `getGroupPaths`; `sap.m.Input#getSelectedKey` caused false required-field errors; `editFlow.saveDocument` failed because the standalone JSON form had no FE entity context; action result navigation pointed to the operation path; FPM logs a non-blocking `DraftMessages` warning for `/guided-create`; in-app Browser had no `iab` instance and the Playwright shell wrapper could not run because Windows `bash.exe` pointed to an unavailable WSL runtime; the first UI5 build command was run from the repo root instead of the app workspace and reported a missing package name. |
+| Fix status | Restored Object Page routing; used `sap.ui.model.Sorter`; validated ComboBox versus text controls by control type; activated drafts with public OData V4 `BugService.draftActivate(...)`; navigated using a fresh active Bugs context; used Playwright MCP fallback for browser QA; reran UI5 build from `app/bug-management-ui`, where `package.json` and `ui5.yaml` are located. The FPM route warning remains open and is documented as a prototype risk. |
+| Evidence/Commands | Fiori MCP and CAP MCP documentation search; Playwright happy path created `BUG-0006`; OData GET verified active data; test records were deleted with HTTP 204; desktop/mobile screenshots under `output/playwright/`; final compile/build/backend checks recorded in the branch verification. |
+| Next handoff | Compare Option B and Option C with DatDT/SangVN and mentor. Keep Option B as MVP baseline unless usability testing justifies maintaining the custom wizard. |
+
+Vietnamese:
+
+| Trường | Chi tiết |
+| --- | --- |
+| Task/WP | WP4 prototype guided custom create |
+| Đã làm gì | Thêm action `Guided Create Bug` trên List Report, wizard FPM/SAPUI5 ba bước, dropdown phân loại phụ thuộc, validation field bắt buộc, CAP draft activation và navigation sang Object Page. |
+| Phần đã xong | Browser happy path đầy đủ đã pass. Bug được tạo thành active entity với `PENDING_ASSIGNMENT`, component category do backend suy ra, reporter, PM next processor và dữ liệu nhập chính xác. Layout desktop/mobile không overflow ngang. |
+| Bug/lỗi phát hiện | Fiori scaffold ban đầu thay sai navigation Object Page; OData binding dùng sorter object thường gây `getGroupPaths`; `sap.m.Input#getSelectedKey` làm validation Title sai; `editFlow.saveDocument` fail vì form JSON độc lập không có FE entity context; navigation từ action result đi nhầm tới operation path; FPM còn warning không chặn về `DraftMessages` tại `/guided-create`; Browser in-app không có instance `iab`, còn Playwright shell wrapper không chạy vì `bash.exe` của Windows trỏ tới WSL runtime chưa có; lệnh UI5 build đầu tiên được chạy nhầm từ repo root nên báo thiếu package name. |
+| Trạng thái fix | Đã khôi phục Object Page routing; dùng `sap.ui.model.Sorter`; phân biệt ComboBox và text control khi validate; activate draft qua public OData V4 `BugService.draftActivate(...)`; navigate bằng active Bugs context mới; dùng Playwright MCP làm fallback browser QA; chạy lại UI5 build trong `app/bug-management-ui`, nơi có `package.json` và `ui5.yaml`. Warning FPM route còn mở và đã được ghi là rủi ro prototype. |
+| Bằng chứng/lệnh | Fiori MCP và CAP MCP documentation search; Playwright happy path tạo `BUG-0006`; OData GET xác nhận active data; record test đã được xóa với HTTP 204; screenshot desktop/mobile trong `output/playwright/`; compile/build/backend check cuối được ghi trong verification của branch. |
+| Handoff tiếp theo | So sánh Option B và Option C cùng DatDT/SangVN và mentor. Giữ Option B làm MVP baseline trừ khi usability testing chứng minh cần bảo trì custom wizard. |
+
 ## Update Rule
 
 - DonHV updates this file for leader decisions, BA/PM work, SAP490 deliverables, weekly consolidation, and cross-workstream support.

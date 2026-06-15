@@ -49,7 +49,9 @@
       "libs": {
         "sap.m": {},
         "sap.ui.core": {},
-        "sap.fe.templates": {}
+        "sap.ui.layout": {},
+        "sap.fe.templates": {},
+        "sap.fe.core": {}
       }
     },
     "contentDensities": {
@@ -92,6 +94,11 @@
           "pattern": "Bugs({key}):?query:",
           "name": "BugsObjectPage",
           "target": "BugsObjectPage"
+        },
+        {
+          "name": "GuidedCreateBugPage",
+          "pattern": "guided-create:?query:",
+          "target": "GuidedCreateBugPage"
         }
       ],
       "targets": {
@@ -125,6 +132,16 @@
                       "name": "NewPage"
                     },
                     "selectionMode": "Multi"
+                  },
+                  "actions": {
+                    "GuidedCreateBug": {
+                      "press": ".extension.idts.bugmanagementui.ext.controller.BugsListExtension.onOpenGuidedCreate",
+                      "text": "{i18n>guidedCreateBugAction}",
+                      "enabled": true,
+                      "visible": true,
+                      "requiresSelection": false,
+                      "priority": "High"
+                    }
                   }
                 }
               }
@@ -141,6 +158,33 @@
               "enhanceI18n": "i18n/i18n.properties",
               "contextPath": "/Bugs"
             }
+          }
+        },
+        "GuidedCreateBugPage": {
+          "type": "Component",
+          "id": "GuidedCreateBugPage",
+          "name": "sap.fe.core.fpm",
+          "options": {
+            "settings": {
+              "navigation": {
+                "Bugs": {
+                  "detail": {
+                    "route": "BugsObjectPage"
+                  }
+                }
+              },
+              "contextPath": "/Bugs",
+              "viewName": "idts.bugmanagementui.ext.view.GuidedCreateBug"
+            }
+          }
+        }
+      }
+    },
+    "extends": {
+      "extensions": {
+        "sap.ui.controllerExtensions": {
+          "sap.fe.templates.ListReport.ListReportController#idts.bugmanagementui::BugsList": {
+            "controllerName": "idts.bugmanagementui.ext.controller.BugsListExtension"
           }
         }
       }

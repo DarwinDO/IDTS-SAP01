@@ -1,0 +1,234 @@
+<mvc:View
+    controllerName="idts.bugmanagementui.ext.view.GuidedCreateBug"
+    height="100%"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:mvc="sap.ui.core.mvc">
+    <Page
+        id="GuidedCreateBug"
+        busy="{form>/busy}"
+        title="{i18n>guidedCreateBugTitle}">
+        <content>
+            <Wizard
+                id="guidedCreateWizard"
+                complete=".onWizardComplete"
+                class="sapUiResponsiveContentPadding">
+                <WizardStep
+                    id="classificationStep"
+                    title="{i18n>guidedStepClassification}">
+                    <form:SimpleForm
+                        id="classificationForm"
+                        editable="true"
+                        layout="ResponsiveGridLayout"
+                        labelSpanXL="4"
+                        labelSpanL="4"
+                        labelSpanM="4"
+                        labelSpanS="12"
+                        columnsXL="2"
+                        columnsL="2"
+                        columnsM="1">
+                        <Label labelFor="sapModule" text="{i18n>fieldSapModule}" />
+                        <ComboBox
+                            id="sapModule"
+                            change=".onSAPModuleChange"
+                            selectedKey="{form>/sapModule_ID}"
+                            showSecondaryValues="true"
+                            width="100%"
+                            items="{
+                                path: '/SAPModules',
+                                filters: [{ path: 'active', operator: 'EQ', value1: true }]
+                            }">
+                            <core:ListItem key="{ID}" text="{name}" additionalText="{code}" />
+                        </ComboBox>
+
+                        <Label
+                            labelFor="applicationComponent"
+                            required="true"
+                            text="{i18n>fieldApplicationComponent}" />
+                        <ComboBox
+                            id="applicationComponent"
+                            change=".onApplicationComponentChange"
+                            required="true"
+                            selectedKey="{form>/applicationComponent_ID}"
+                            showSecondaryValues="true"
+                            width="100%" />
+
+                        <Label
+                            labelFor="defectCategory"
+                            required="true"
+                            text="{i18n>fieldDefectCategory}" />
+                        <ComboBox
+                            id="defectCategory"
+                            enabled="{form>/categoryEnabled}"
+                            required="true"
+                            selectedKey="{form>/defectCategory_ID}"
+                            showSecondaryValues="true"
+                            width="100%" />
+
+                        <Label labelFor="priority" required="true" text="{i18n>fieldPriority}" />
+                        <ComboBox
+                            id="priority"
+                            required="true"
+                            selectedKey="{form>/priority_code}"
+                            width="100%"
+                            items="{
+                                path: '/PriorityValues',
+                                filters: [{ path: 'active', operator: 'EQ', value1: true }]
+                            }">
+                            <core:Item key="{code}" text="{name}" />
+                        </ComboBox>
+
+                        <Label labelFor="severity" required="true" text="{i18n>fieldSeverity}" />
+                        <ComboBox
+                            id="severity"
+                            required="true"
+                            selectedKey="{form>/severity_code}"
+                            width="100%"
+                            items="{
+                                path: '/SeverityValues',
+                                filters: [{ path: 'active', operator: 'EQ', value1: true }]
+                            }">
+                            <core:Item key="{code}" text="{name}" />
+                        </ComboBox>
+
+                        <Label labelFor="environment" text="{i18n>fieldEnvironment}" />
+                        <ComboBox
+                            id="environment"
+                            selectedKey="{form>/environment_code}"
+                            width="100%"
+                            items="{
+                                path: '/EnvironmentValues',
+                                filters: [{ path: 'active', operator: 'EQ', value1: true }]
+                            }">
+                            <core:Item key="{code}" text="{name}" />
+                        </ComboBox>
+                    </form:SimpleForm>
+                </WizardStep>
+
+                <WizardStep id="detailsStep" title="{i18n>guidedStepDetails}">
+                    <form:SimpleForm
+                        id="detailsForm"
+                        editable="true"
+                        layout="ResponsiveGridLayout"
+                        labelSpanXL="4"
+                        labelSpanL="4"
+                        labelSpanM="4"
+                        labelSpanS="12"
+                        columnsXL="2"
+                        columnsL="2"
+                        columnsM="1">
+                        <Label labelFor="title" required="true" text="{i18n>fieldTitle}" />
+                        <Input
+                            id="title"
+                            required="true"
+                            value="{form>/title}"
+                            width="100%" />
+
+                        <Label
+                            labelFor="description"
+                            required="true"
+                            text="{i18n>fieldDescription}" />
+                        <TextArea
+                            id="description"
+                            growing="true"
+                            growingMaxLines="8"
+                            required="true"
+                            rows="4"
+                            value="{form>/description}"
+                            width="100%" />
+
+                        <Label
+                            labelFor="environmentDetail"
+                            text="{i18n>fieldEnvironmentDetail}" />
+                        <Input
+                            id="environmentDetail"
+                            value="{form>/environmentDetail}"
+                            width="100%" />
+
+                        <Label labelFor="testCaseRef" text="{i18n>fieldTestCaseRef}" />
+                        <Input id="testCaseRef" value="{form>/testCaseRef}" width="100%" />
+
+                        <Label labelFor="testRunRef" text="{i18n>fieldTestRunRef}" />
+                        <Input id="testRunRef" value="{form>/testRunRef}" width="100%" />
+
+                        <Label labelFor="dueDate" text="{i18n>fieldDueDate}" />
+                        <DatePicker
+                            id="dueDate"
+                            displayFormat="medium"
+                            value="{form>/dueDate}"
+                            valueFormat="yyyy-MM-dd"
+                            width="100%" />
+                    </form:SimpleForm>
+                </WizardStep>
+
+                <WizardStep
+                    id="reproductionStep"
+                    title="{i18n>guidedStepReproduction}">
+                    <form:SimpleForm
+                        id="reproductionForm"
+                        editable="true"
+                        layout="ResponsiveGridLayout"
+                        labelSpanXL="3"
+                        labelSpanL="3"
+                        labelSpanM="4"
+                        labelSpanS="12"
+                        columnsXL="1"
+                        columnsL="1"
+                        columnsM="1">
+                        <Label
+                            labelFor="stepsToReproduce"
+                            required="true"
+                            text="{i18n>fieldStepsToReproduce}" />
+                        <TextArea
+                            id="stepsToReproduce"
+                            growing="true"
+                            growingMaxLines="10"
+                            required="true"
+                            rows="5"
+                            value="{form>/stepsToReproduce}"
+                            width="100%" />
+
+                        <Label
+                            labelFor="actualResult"
+                            required="true"
+                            text="{i18n>fieldActualResult}" />
+                        <TextArea
+                            id="actualResult"
+                            growing="true"
+                            growingMaxLines="8"
+                            required="true"
+                            rows="4"
+                            value="{form>/actualResult}"
+                            width="100%" />
+
+                        <Label
+                            labelFor="expectedResult"
+                            required="true"
+                            text="{i18n>fieldExpectedResult}" />
+                        <TextArea
+                            id="expectedResult"
+                            growing="true"
+                            growingMaxLines="8"
+                            required="true"
+                            rows="4"
+                            value="{form>/expectedResult}"
+                            width="100%" />
+                    </form:SimpleForm>
+                </WizardStep>
+            </Wizard>
+        </content>
+        <footer>
+            <OverflowToolbar>
+                <ToolbarSpacer />
+                <Button id="cancelButton" press=".onCancel" text="{i18n>cancel}" />
+                <Button
+                    id="createButton"
+                    enabled="{form>/canCreate}"
+                    press=".onCreate"
+                    text="{i18n>createBug}"
+                    type="Emphasized" />
+            </OverflowToolbar>
+        </footer>
+    </Page>
+</mvc:View>

@@ -149,6 +149,10 @@ DatDT's `Sap_FE` reference repo and `Remake_UI` branch have been reviewed. The c
 
 Vietnamese: Đã review repo tham khảo `Sap_FE` và branch `Remake_UI` của DatDT. App Fiori hiện tại của IDTS đã có tích hợp List Report/Object Page bằng annotation ở mức MVP, value help, Object Page actions, layout List Report dạng GridTable, standard Create đã bật bằng draft, đưa Assignment lên đầu Object Page, đặt History table read-only, và đánh giá create flow bằng `NewPage`. Browser smoke sau merge đã xác nhận List Report có data, thứ tự Object Page section đúng, và dialog Create Bug prefill mở được. Manual create-save QA và upload attachment thật vẫn còn mở.
 
+Create-flow comparison branches are now available. Option B keeps the standard Fiori Elements `NewPage` create flow and is the recommended MVP baseline. Option C adds a three-step guided custom page with dependent classification and a verified CAP draft happy path, but it has higher custom-code and FPM routing risk. See `docs/knowledge/wp4-create-flow-option-c.md`.
+
+Vietnamese: Hiện đã có hai branch để so sánh create flow. Option B giữ luồng tạo `NewPage` chuẩn của Fiori Elements và được khuyến nghị làm baseline MVP. Option C thêm custom page ba bước, phân loại phụ thuộc và đã verify CAP draft happy path, nhưng có rủi ro bảo trì custom code và FPM routing cao hơn. Xem `docs/knowledge/wp4-create-flow-option-c.md`.
+
 ## Next Handover Instruction
 
 Any new agent or developer should identify their member name first, then read this file, `task-board.md`, the relevant member file under `status/*.md`, and the relevant `tasks/*.md` before making changes.
