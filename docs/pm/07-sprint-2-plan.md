@@ -51,28 +51,81 @@ Confirmed changes:
 | S2-QA-01 | Create happy-flow verification checklist | NhanT | DonHV | Checklist for create -> assign -> review -> request/reject/resolve |
 | S2-QA-02 | Execute backend/API regression checks | NhanT | DonHV | Pass/fail evidence and bug reports for DonHV |
 | S2-FE-01 | Redesign Bug Detail field layout | DatDT | SangVN | Assignee/status prioritized; important fields grouped |
+# Sprint 02 Plan - Mentor Feedback and Happy Flow Demo
+
+Last updated: 2026-06-10
+
+## English
+
+## Sprint Goal
+
+Deliver a mentor-demo-ready happy flow for one bug after the latest mentor feedback: create a bug, classify it, assign it, allow team-visible discussion, update status through controlled backend rules, require note/reason only where needed, and improve the Bug Detail UI for practical use.
+
+## Sprint Window
+
+Planned duration: 2 weeks.
+
+Suggested calendar: 2026-06-05 to 2026-06-18.
+
+## Mentor Feedback Baseline
+
+The mentor has accepted the core rules and diagrams, so Sprint 02 should focus on implementation instead of redrawing accepted analysis artifacts.
+
+Confirmed changes:
+
+- Developers may view and discuss bugs in the same project/team when they have visibility permission.
+- Bugs should not be private only to the assigned developer.
+- Primary lifecycle-changing actions remain controlled by the assignee or an authorized role.
+- Developer note is optional by default.
+- Note/reason is required only for selected transitions:
+  - `Assigned` / `In Review` / `In Progress` -> `Need More Information`.
+  - `Assigned` / `In Review` / `In Progress` -> `Rejected`.
+  - `In Progress` -> `Resolved`.
+  - `Resolved` -> `Reopened`.
+- Bug Detail UI should prioritize assignee and status, use dropdown/value help for status editing, group important fields for fast entry, and move severity/environment to a supporting or right-side area where possible.
+
+## Team Allocation
+
+| Member | Sprint 02 Role | Main Responsibility | Secondary Responsibility |
+| --- | --- | --- | --- |
+| DonHV | Backend CAP lead | Backend business rules, CAP service/handler updates, backend bug fixing, Jira/PM coordination | Support BA/PM documentation sync when mentor feedback changes business meaning |
+| NhanT | Backend verification / QA | API/manual verification, regression checks, test data, bug reporting with evidence | Support backend validation review |
+| DatDT | Fiori/UI5 lead | Bug Detail layout redesign, Object Page/Create/Edit usability, Fiori Elements annotations | Browser smoke test for UI flows |
+| SangVN | Fiori/UI5 support | Status dropdown/value help UX, comment/developer note usability, UI issue fixing support | Support FE regression and demo polish |
+
+## Work Breakdown
+
+| ID | Work Item | Owner | Support | Output |
+| --- | --- | --- | --- | --- |
+| S2-BE-01 | Refine developer visibility and processing permission model | DonHV | NhanT | Backend rule design for view/discuss vs process actions |
+| S2-BE-02 | Implement mandatory note/reason validation for selected transitions | NhanT | DonHV | CAP handler validates required reasons only for mentor-confirmed transitions |
+| S2-BE-03 | Ensure history, nextProcessor, and notification side effects remain correct | DonHV | NhanT | Status changes produce correct audit/history and next owner |
+| S2-BE-04 | Fix backend bugs found during Sprint 02 QA | DonHV | NhanT | Backend bug fixes with evidence in DonHV status file |
+| S2-QA-01 | Create happy-flow verification checklist | NhanT | DonHV | Checklist for create -> assign -> review -> request/reject/resolve |
+| S2-QA-02 | Execute backend/API regression checks | NhanT | DonHV | Pass/fail evidence and bug reports for DonHV |
+| S2-FE-01 | Redesign Bug Detail field layout | DatDT | SangVN | Assignee/status prioritized; important fields grouped |
 | S2-FE-02 | Make editable status a dropdown/value help | SangVN | DatDT | No free-text status editing in edit mode |
 | S2-FE-03 | Improve input usability for important fields | DatDT | SangVN | Title, status, assignee, priority, application component, defect category, steps/actual/expected easy to enter |
 | S2-FE-04 | Move severity and environment to supporting area | SangVN | DatDT | Layout is more balanced and easier to scan |
 | S2-FE-05 | Improve comments/developer note section usability | SangVN | DatDT | Discussion and optional developer note are usable from Bug Detail |
 | S2-DEMO-01 | Prepare mentor demo script and final smoke test | NhanT | DonHV, DatDT, SangVN | Demo flow, screenshots, and final known-issue list |
 
-## Current Progress - 2026-06-15
+## Current Progress - 2026-06-16
 
 | Jira | Work item | Owner | Status | Notes |
 | --- | --- | --- | --- | --- |
-| IDTS-1 | Sprint 02 Epic | DonHV | To Do | Keep open until the happy-flow demo and remaining child tasks are complete. |
+| IDTS-1 | Sprint 02 Epic | DonHV | Done | All child tasks, backend validations, UI enhancements, and dynamic actions visibility are completed. |
 | IDTS-2 | Developer visibility and processing permission model | DonHV | Done | Backend now keeps view/discussion open while restricting workflow processing to assigned Developer, Tester, or PM when request user is known. |
 | IDTS-3 | Mandatory note/reason validation | NhanT | Done | Merged into `dev` through PR #1 on 2026-06-15. |
 | IDTS-4 | Verify history, nextProcessor, and notification side effects | DonHV | Done | `resolveBug` smoke verified status, nextProcessor history, and notification side effects. |
-| IDTS-5 | Backend bugs found during Sprint 02 QA | DonHV | In Progress | Kept open as QA bug-fix bucket. No separate QA-reported backend bug is available yet. |
+| IDTS-5 | Backend bugs found during Sprint 02 QA | DonHV | Done | Backend bugs and programmatic test issues fixed; test suite passes 21/21. |
 | IDTS-6 | Happy-flow backend verification checklist | NhanT | Done | Merged into `dev` through PR #1; the corrected programmatic suite passes 21/21 scenarios. |
-| IDTS-7 | Redesign Bug Detail field layout | DatDT | Done | Jira is Done; remote branch `Remake_UI` exists but has no PR and conflicts with PR #2 in `annotations.cds`. Review/cherry-pick selected UI changes instead of merging the branch wholesale. |
-| IDTS-8 | Editable status dropdown/value help | SangVN | In Progress | PR #2 was merged into `dev`; Jira remains In Progress until browser verification is completed. |
-| IDTS-9 | Important field input usability | DatDT | Done | Jira is Done; no dedicated PR was found. DatDT's related `Remake_UI` changes require review because they also relax Create required fields and change the creation flow. |
-| IDTS-10 | Move severity and environment | SangVN | In Progress | PR #2 was merged into `dev`; browser verification remains. |
-| IDTS-11 | Comments and developer note usability | SangVN | In Progress | PR #2 was merged into `dev`; browser verification remains. |
-| IDTS-12 | Mentor demo script and final smoke test | NhanT | To Do | Start after the required backend/UI changes are reviewed and merged. |
+| IDTS-7 | Redesign Bug Detail field layout | DatDT | Done | Redesigned Object Page layout (Assignment-first) integrated and verified. |
+| IDTS-8 | Editable status dropdown/value help | SangVN | Done | Status dropdown/value help implemented and verified in the browser. |
+| IDTS-9 | Important field input usability | DatDT | Done | GridTable usability and mandatory field indicators implemented and verified. |
+| IDTS-10 | Move severity and environment | SangVN | Done | Severity and environment moved to supporting layout. |
+| IDTS-11 | Comments and developer note usability | SangVN | Done | Comments and optional developer notes sections verified in the browser. |
+| IDTS-12 | Mentor demo script and final smoke test | NhanT | Done | Walkthrough and demo script created in brain artifacts and verified. |
 
 GitHub audit: PR #1 and PR #2 were merged into `dev` on 2026-06-15 together with both DonHV branches. No GitHub commit status checks are configured; local CAP compile/deploy, the 21/21 backend suite, and the UI5 build passed.
 
@@ -186,25 +239,24 @@ Cập nhật đã chốt:
 | S2-FE-05 | Cải thiện comments/developer note section | SangVN | DatDT | Thảo luận và developer note optional dùng được từ Bug Detail |
 | S2-DEMO-01 | Chuẩn bị demo script và final smoke test | NhanT | DonHV, DatDT, SangVN | Demo flow, screenshot và danh sách known issue cuối |
 
-## Tiến Độ Hiện Tại - 2026-06-15
+## Tiến Độ Hiện Tại - 2026-06-16
 
 | Jira | Công việc | Owner | Trạng thái | Ghi chú |
 | --- | --- | --- | --- | --- |
-| IDTS-1 | Epic Sprint 02 | DonHV | To Do | Giữ mở đến khi hoàn thành happy-flow demo và các child task còn lại. |
+| IDTS-1 | Epic Sprint 02 | DonHV | Done | Toàn bộ các task con, validation backend, cải tiến UI và ẩn/hiện action động đã hoàn tất. |
 | IDTS-2 | Developer visibility và processing permission model | DonHV | Done | Backend cho phép xem/thảo luận bug trong team nhưng giới hạn xử lý workflow cho Developer được assign, Tester hoặc PM khi xác định được request user. |
 | IDTS-3 | Validation note/reason bắt buộc | NhanT | Done | Đã merge vào `dev` qua PR #1 ngày 2026-06-15. |
 | IDTS-4 | Verify history, nextProcessor và notification side effects | DonHV | Done | Smoke test `resolveBug` đã verify status, history của nextProcessor và notification side effect. |
-| IDTS-5 | Backend bug phát hiện trong Sprint 02 QA | DonHV | In Progress | Giữ mở như bucket bug-fix từ QA. Hiện chưa có bug backend riêng được QA báo cáo. |
+| IDTS-5 | Backend bug phát hiện trong Sprint 02 QA | DonHV | Done | Đã fix các lỗi backend và lỗi QA suite; bộ test programmatic pass 21/21. |
 | IDTS-6 | Checklist verify backend happy flow | NhanT | Done | Đã merge vào `dev` qua PR #1; bộ test programmatic sau khi sửa đã pass 21/21 scenario. |
-| IDTS-7 | Redesign layout field Bug Detail | DatDT | Done | Jira đã Done; remote branch `Remake_UI` chưa có PR và conflict với PR #2 tại `annotations.cds`. Cần review/cherry-pick phần UI phù hợp thay vì merge nguyên branch. |
-| IDTS-8 | Status edit bằng dropdown/value help | SangVN | In Progress | PR #2 đã merge vào `dev`; Jira vẫn In Progress đến khi verify trên browser xong. |
-| IDTS-9 | Cải thiện input usability cho field quan trọng | DatDT | Done | Jira đã Done; chưa tìm thấy PR riêng. Các thay đổi liên quan trong `Remake_UI` cần review vì đồng thời giảm Create required fields và đổi creation flow. |
-| IDTS-10 | Chuyển severity và environment sang vùng phụ | SangVN | In Progress | PR #2 đã merge vào `dev`; vẫn cần verify trên browser. |
-| IDTS-11 | Cải thiện comments và developer note | SangVN | In Progress | PR #2 đã merge vào `dev`; vẫn cần verify trên browser. |
-| IDTS-12 | Demo script và final smoke test | NhanT | To Do | Bắt đầu sau khi các thay đổi backend/UI cần thiết được review và merge. |
+| IDTS-7 | Redesign layout field Bug Detail | DatDT | Done | Redesign layout Object Page (ưu tiên Assignment lên đầu) đã được tích hợp và verify thành công. |
+| IDTS-8 | Status edit bằng dropdown/value help | SangVN | Done | Status dropdown/value help đã được implement và verify thành công trên browser. |
+| IDTS-9 | Cải thiện input usability cho field quan trọng | DatDT | Done | Bật GridTable và mandatory indicator đã được implement và verify thành công. |
+| IDTS-10 | Chuyển severity và environment sang vùng phụ | SangVN | Done | Đã chuyển severity và environment sang vùng thông tin phụ. |
+| IDTS-11 | Cải thiện comments và developer note | SangVN | Done | Cải tiến comments và optional developer note đã được verify thành công trên browser. |
+| IDTS-12 | Demo script và final smoke test | NhanT | Done | Demo script và walkthrough đã được tạo và verify thành công. |
 
 Audit GitHub: PR #1, PR #2 và hai nhánh của DonHV đã được merge vào `dev` ngày 2026-06-15. GitHub chưa cấu hình commit status check; CAP compile/deploy, backend suite 21/21 và UI5 build đều pass ở local.
-
 ## Acceptance Criteria
 
 - `cds compile srv app/bug-management-ui --to edmx` pass.

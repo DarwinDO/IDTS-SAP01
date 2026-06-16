@@ -52,15 +52,15 @@ Vietnamese:
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
-| SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 6 Done (`IDTS-2`, `3`, `4`, `6`, `7`, `9`), 4 In Progress (`IDTS-5`, `8`, `10`, `11`), and 2 To Do (`IDTS-1`, `12`). GitHub PR #1 and PR #2, plus both DonHV branches, were integrated into `dev` on 2026-06-15. |
-| WP4 | Fiori Elements UX | DatDT | Core layout, dynamic creation hiding, and assignee value help are completed (Option B verified). Deeper UI QA and attachment upload remain. |
+| SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 11 Done (`IDTS-1` to `11`) and 1 To Do (`IDTS-12`). All development branches (PR #1, PR #2, Option B, visibility) are now consolidated into `dev`. |
+| WP4 | Fiori Elements UX | DatDT | Core layout, dynamic creation hiding, assignee value help, and dynamic visibility are completed. Deeper UI QA and attachment upload remain. |
 
 Vietnamese:
 
 | ID | Công việc | Thành viên chính | Ghi chú |
 | --- | --- | --- | --- |
-| SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 6 Done (`IDTS-2`, `3`, `4`, `6`, `7`, `9`), 4 In Progress (`IDTS-5`, `8`, `10`, `11`), và 2 To Do (`IDTS-1`, `12`). GitHub PR #1, PR #2 và hai nhánh của DonHV đã được tích hợp vào `dev` ngày 2026-06-15. |
-| WP4 | Fiori Elements UX | DatDT | Đã hoàn thành cấu trúc giao diện chính, ẩn động trang tạo mới và Value Help Assignee (Option B đã verify). QA sâu giao diện và upload đính kèm còn chờ. |
+| SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 11 Done (`IDTS-1` đến `11`) và 1 To Do (`IDTS-12`). Tất cả các branch (PR #1, PR #2, Option B, visibility) đã được tích hợp đầy đủ vào `dev`. |
+| WP4 | Fiori Elements UX | DatDT | Đã hoàn thành cấu trúc giao diện chính, ẩn động trang tạo mới, Value Help Assignee và ẩn/hiện action động. QA sâu giao diện và upload đính kèm còn chờ. |
 
 ## Blocked
 
