@@ -29,33 +29,42 @@
     "app/bug-management-ui"
   ],
   "cds": {
+    "security": {
+      "mock": {
+        "defaultUsers": {
+          "enabled": false
+        }
+      }
+    },
     "requires": {
       "auth": {
-        "kind": "mocked",
-        "users": {
-          "DonHV": {
-            "roles": [
-              "PM",
-              "authenticated-user"
-            ]
-          },
-          "SangVN": {
-            "roles": [
-              "DEVELOPER",
-              "authenticated-user"
-            ]
-          },
-          "DatDT": {
-            "roles": [
-              "DEVELOPER",
-              "authenticated-user"
-            ]
-          },
-          "NhanT": {
-            "roles": [
-              "TESTER",
-              "authenticated-user"
-            ]
+        "[development]": {
+          "kind": "mocked",
+          "users": {
+            "DonHV": {
+              "roles": [
+                "PM",
+                "authenticated-user"
+              ]
+            },
+            "SangVN": {
+              "roles": [
+                "DEVELOPER",
+                "authenticated-user"
+              ]
+            },
+            "DatDT": {
+              "roles": [
+                "DEVELOPER",
+                "authenticated-user"
+              ]
+            },
+            "NhanT": {
+              "roles": [
+                "TESTER",
+                "authenticated-user"
+              ]
+            }
           }
         }
       }

@@ -13,7 +13,7 @@ Vietnamese: Chỉ dùng board này để theo dõi trạng thái cấp cao. Chi 
 | PM-001 | Create PM delivery pack | `docs/pm/` structure, status files, work packages, Sprint 1 plan |
 | BA-001 | Create BA documentation pack | `docs/ba/` baseline |
 | BA-002 | Create BRD deliverables | `docs/ba/brd/brd.en.md`, `docs/ba/brd/brd.vi.md`, `docs/ba/brd/brd.en.docx`, `docs/ba/brd/brd.vi.docx` |
-| BA-003 | Create SRS and FRS deliverables | `docs/ba/srs/`, `docs/ba/frs/` Markdown and DOCX files |
+| BA-003 | Create SRS and FRS deliverables | Markdown and DOCX files under `docs/ba/srs/` and `docs/ba/frs/` |
 | BA-004 | Align MVP role baseline | Canonical docs, BRD/SRS/FRS, BA support docs, diagrams, and PM handover updated to Tester/Developer/PM |
 | WP1 | Data Model Foundation | Expanded CAP CDS model, service projections, and seed data under `db/data/` |
 | WP2 | Service and Value Help | OData V4 service actions, value help annotations, and metadata compile completed |
@@ -26,8 +26,8 @@ Vietnamese:
 | PM-001 | Tạo bộ tài liệu PM | Cấu trúc `docs/pm/`, status files, work packages, kế hoạch Sprint 1 |
 | BA-001 | Tạo bộ tài liệu BA | Baseline trong `docs/ba/` |
 | BA-002 | Tạo BRD deliverables | `docs/ba/brd/brd.en.md`, `docs/ba/brd/brd.vi.md`, `docs/ba/brd/brd.en.docx`, `docs/ba/brd/brd.vi.docx` |
-| BA-003 | Tạo SRS và FRS deliverables | Markdown và DOCX trong `docs/ba/srs/`, `docs/ba/frs/` |
-| BA-004 | Chốt baseline role MVP | Canonical docs, BRD/SRS/FRS, BA docs, diagrams, và PM handover đã cập nhật về Tester/Developer/PM |
+| BA-003 | Tạo SRS và FRS deliverables | Các file Markdown và DOCX trong `docs/ba/srs/` và `docs/ba/frs/` |
+| BA-004 | Chốt baseline role MVP | Canonical docs, BRD/SRS/FRS, BA docs, diagrams, và PM handover đã cập nhật theo Tester/Developer/PM |
 | WP1 | Nền tảng Data Model | CAP CDS model, service projections, và seed data trong `db/data/` |
 | WP2 | Service và Value Help | Đã hoàn thành OData V4 service actions, value help annotations và metadata compile |
 | WP3 | Handler Rules và Validation | Đã hoàn thành CAP handler rules cho create/update, assignment, status transition, nextProcessor, history và notifications |
@@ -52,15 +52,15 @@ Vietnamese:
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
-| SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 12 Done (`IDTS-1` to `12`). All development branches and the final demo script are consolidated into `dev`. |
-| WP4 | Fiori Elements UX | DatDT | Core layout, dynamic creation hiding, assignee value help, dynamic visibility, and mock login are completed. Deeper UI QA and attachment upload remain. |
+| SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 6 Done (`IDTS-2`, `IDTS-3`, `IDTS-4`, `IDTS-6`, `IDTS-7`, `IDTS-9`), 4 In Progress (`IDTS-5`, `IDTS-8`, `IDTS-10`, `IDTS-11`), 2 To Do (`IDTS-1`, `IDTS-12`). All development branches are consolidated into `dev`. |
+| WP4 | Fiori Elements UX | DatDT | Core layout, dynamic creation hiding, assignee value help, dynamic visibility, and dev-only mock login are completed. Deeper UI QA and attachment upload remain. |
 
 Vietnamese:
 
 | ID | Công việc | Thành viên chính | Ghi chú |
 | --- | --- | --- | --- |
-| SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 12 Done (`IDTS-1` đến `12`). Tất cả các branch phát triển và demo script đã được tích hợp đầy đủ vào `dev`. |
-| WP4 | Fiori Elements UX | DatDT | Đã hoàn thành cấu trúc giao diện chính, ẩn động trang tạo mới, Value Help Assignee, ẩn/hiện action động và mock login. QA sâu giao diện và upload đính kèm còn chờ. |
+| SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 6 Done (`IDTS-2`, `IDTS-3`, `IDTS-4`, `IDTS-6`, `IDTS-7`, `IDTS-9`), 4 In Progress (`IDTS-5`, `IDTS-8`, `IDTS-10`, `IDTS-11`), 2 To Do (`IDTS-1`, `IDTS-12`). Tất cả các branch phát triển đã được tích hợp vào `dev`. |
+| WP4 | Fiori Elements UX | DatDT | Đã hoàn thành cấu trúc giao diện chính, ẩn động trang tạo mới, Value Help Assignee, ẩn/hiện action động và mock login chỉ cho development. QA sâu giao diện và upload đính kèm còn chờ. |
 
 ## Blocked
 
@@ -83,7 +83,7 @@ Vietnamese:
 
 Vietnamese:
 
-- Chỉ chuyển trạng thái work package trên board sau khi đã cập nhật file `tasks/*.md` tương ứng.
+- Chỉ chuyển trạng thái work package lên board sau khi đã cập nhật file `tasks/*.md` tương ứng.
 - Giữ board ngắn gọn, không ghi log implementation chi tiết ở đây.
 - Nếu nhiều developer làm cùng lúc, mỗi người cập nhật work package liên quan và file status của chính mình trong `status/`.
-- DonHV tổng hợp cập nhật của từng thành viên vào tài liệu PM/SAP490 sau phiên làm việc nhóm hoặc buổi review hằng tuần.
+- DonHV tổng hợp cập nhật của từng thành viên vào tài liệu PM/SAP490 sau phiên làm việc nhóm hoặc buổi review hàng tuần.

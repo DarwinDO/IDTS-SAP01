@@ -1,6 +1,6 @@
 using idts.cap as db from '../db/schema';
 
-service BugService {
+service BugService @(requires: 'authenticated-user') {
   entity Bugs as projection on db.Bugs {
     *,
     assignee.user.displayName as assigneeDisplayName,

@@ -56,7 +56,8 @@ Last updated: 2026-06-16
 - Jira/GitHub audit on 2026-06-15 found six completed Jira tasks: `IDTS-2`, `IDTS-3`, `IDTS-4`, `IDTS-6`, `IDTS-7`, and `IDTS-9`.
 - GitHub PR #1 (`IDTS-3`/`IDTS-6`) and PR #2 (`IDTS-8`/`IDTS-10`/`IDTS-11`) were integrated into `dev` together with DonHV's backend and SAP490 documentation branches.
 - DatDT's `Remake_UI` branch was reviewed selectively. Accepted items are Assignment-first Object Page ordering, read-only History table capabilities, and create flow evaluation; rejected items are relaxed required fields, removed `nextProcessorRole`, removed lifecycle actions, and removed supporting info.
-- Configured local mock authentication users (`DonHV`, `SangVN`, `DatDT`, `NhanT`) in `package.json` and optimized backend capability calculations from O(N) queries to O(1) query to resolve the N+1 performance issue.
+- Configured development-only local mock authentication users (`DonHV`, `SangVN`, `DatDT`, `NhanT`) in `package.json` and optimized backend capability calculations from O(N) queries to O(1) query to resolve the N+1 performance issue.
+- `BugService` now requires `authenticated-user`, so anonymous access is blocked while local mock users still work for role-based QA.
 - Created the Sprint 02 Walkthrough & Demo Script inside the repository at `docs/pm/tasks/wp4-walkthrough.md`.
 
 Vietnamese:

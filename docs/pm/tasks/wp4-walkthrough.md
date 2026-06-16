@@ -61,6 +61,28 @@ Follow these steps to demonstrate the dynamic visibility and mock login capabili
    - Because `DonHV` is a PM, they **only see PM actions** (such as *Close Bug* or *Reopen Bug* once resolved) and they do NOT see developer technical buttons (`Resolve Bug`, `Start Progress`) on the Object Page header, keeping their UI completely clean.
 3. Switch login to **DatDT** (Developer / Assignee for BUG-0003):
    - Reload the Object Page for **BUG-0003**.
-   - Because `DatDT` is the assigned developer, they **see technical actions** (`Request More Information`, `Reject Bug`, and `Resolve Bug`) on the header.
-   - Click **Resolve Bug**. A popup parameter prompt will request a reason/note (mandatory rule). Fill in the note to successfully transition the bug to `RESOLVED`.
-   - Once resolved, the developer buttons dynamically disappear.
+    - Because `DatDT` is the assigned developer, they **see technical actions** (`Request More Information`, `Reject Bug`, and `Resolve Bug`) on the header.
+    - Click **Resolve Bug**. A popup parameter prompt will request a reason/note (mandatory rule). Fill in the note to successfully transition the bug to `RESOLVED`.
+    - Once resolved, the developer buttons dynamically disappear.
+
+## Vietnamese Walkthrough
+
+### 1. Chạy ứng dụng local
+1. Khởi động server:
+   ```bash
+   npx cds serve --in-memory
+   ```
+2. Mở ứng dụng:
+   `http://localhost:4004/idts.bugmanagementui/index.html?sap-ui-xx-viewCache=false`
+
+### 2. Đổi người dùng bằng Mock Login
+1. Vì mock authentication đang bật ở môi trường local, CAP sẽ cho phép đăng nhập mock user bằng màn hình Mock Login hoặc basic auth.
+2. Đăng nhập bằng **DonHV** (PM / Coordinator):
+   - Kiểm tra nút **Delete** không còn xuất hiện ở List Report.
+   - Mở **BUG-0003** đang ở trạng thái `IN_PROGRESS`.
+   - DonHV chỉ thấy nhóm action quản lý như *Close Bug* hoặc *Reopen Bug* khi bug phù hợp, không thấy action kỹ thuật của developer.
+3. Chuyển sang **DatDT** (Developer / assignee của BUG-0003):
+   - Reload Object Page của **BUG-0003**.
+   - DatDT sẽ thấy các action kỹ thuật như `Request More Information`, `Reject Bug`, và `Resolve Bug`.
+   - Bấm **Resolve Bug**, nhập note/lý do bắt buộc, rồi xác nhận bug chuyển sang `RESOLVED`.
+   - Sau khi resolve xong, các action của developer sẽ tự ẩn đi.
