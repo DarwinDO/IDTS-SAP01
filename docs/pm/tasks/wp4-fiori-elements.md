@@ -223,3 +223,19 @@ Vietnamese:
 - Sửa lỗi gán Assignee bằng cách đổi binding trường hiển thị sang `assignee_ID` đi kèm Value Help, giúp trường này có thể nhập/chọn trên màn hình tạo.
 - Thắt chặt bảo mật backend trong `srv/service.js` để luôn ghi đè `bugNumber`, `reporter_ID` (gán bằng user đang đăng nhập thực tế) và `status_code` khi tạo mới, chặn đứng việc client gửi tham số tùy tiện.
 - Verify thực tế bằng Playwright browser subagent trên môi trường local, xác nhận màn hình tạo bug cực kỳ sạch sẽ, ẩn toàn bộ tab/field không liên quan và Value Help chọn Assignee chạy tốt.
+
+## 2026-06-16 Role Action Visibility and Status Editability Fix
+
+English:
+
+- Fixed a backend read-gap in `srv/service.js`: Fiori Elements sometimes requests `canAssign`, `canResolve`, and related virtual capability flags without selecting `status_code` or `assignee_ID`.
+- `enrichBugCapabilities` now loads missing `status_code` and `assignee_ID` by bug ID before computing action booleans, so capability flags no longer fall back to `false` incorrectly.
+- Changed the Object Page `Status` field in `annotations.cds` from `status_code` to `status.name`, making status display-only on the form.
+- This keeps workflow transitions on the approved bound actions instead of allowing users to open a generic status value help and hit backend transition errors.
+
+Vietnamese:
+
+- Đã sửa một lỗ hổng khi đọc dữ liệu trong `srv/service.js`: Fiori Elements đôi khi request các cờ ảo như `canAssign`, `canResolve` nhưng lại không select `status_code` hoặc `assignee_ID`.
+- `enrichBugCapabilities` giờ sẽ tự đọc bù `status_code` và `assignee_ID` theo bug ID trước khi tính quyền action, nên các cờ capability không còn bị rơi sai về `false`.
+- Đã đổi field `Status` trên Object Page trong `annotations.cds` từ `status_code` sang `status.name`, khiến status chỉ còn hiển thị chứ không cho sửa trực tiếp trên form.
+- Cách này buộc các chuyển trạng thái đi qua bound actions đã được duyệt, thay vì để user mở generic status value help rồi gặp lỗi transition từ backend.

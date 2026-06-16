@@ -107,11 +107,26 @@ const TESTER_STATUSES = new Set([
   STATUS.RETEST_REQUIRED
 ])
 
+const CAPABILITY_FIELDS = new Set([
+  'canMarkInReview',
+  'canStartProgress',
+  'canResolve',
+  'canRequestMoreInfo',
+  'canReject',
+  'canSendToRetest',
+  'canClose',
+  'canReopen',
+  'canAssign',
+  'canMoveToPending'
+])
+
 module.exports = class BugService extends cds.ApplicationService {
   async init () {
     const entities = this.entities
     const { Bugs, Comments } = entities
 
+    this.before('READ', Bugs, req => ensureCapabilitySelectDependencies(req))
+    this.before('READ', Bugs.drafts, req => ensureCapabilitySelectDependencies(req))
     this.before('CREATE', Bugs, req => prepareBugWrite(req, entities, { isCreate: true }))
     this.before('UPDATE', Bugs, req => prepareBugWrite(req, entities, { isCreate: false }))
     this.before('PATCH', Bugs.drafts, req => prepareDraftPatch(req, entities))
@@ -917,6 +932,7 @@ async function enrichBugCapabilities (bugs, req, entities) {
   const rows = Array.isArray(bugs) ? bugs : [bugs].filter(Boolean)
   if (!rows.length) return
 
+  const capabilityInputs = await readCapabilityInputs(rows, req, entities)
   const actor = await resolveRequestUser(req, entities)
   if (!actor) {
     for (const row of rows) {
@@ -949,8 +965,12 @@ async function enrichBugCapabilities (bugs, req, entities) {
   }
 
   for (const row of rows) {
-    const status = row.status_code
-    const assigneeID = row.assignee_ID
+    const rowCapabilityInputs =
+      capabilityInputs.byID.get(row.ID) ||
+      capabilityInputs.byBugNumber.get(row.bugNumber) ||
+      {}
+    const status = row.status_code ?? rowCapabilityInputs.status_code
+    const assigneeID = row.assignee_ID ?? rowCapabilityInputs.assignee_ID
     const allowedTransitions = ALLOWED_TRANSITIONS[status] || []
 
     // Developer actions are only allowed for the assigned developer of the bug
@@ -968,5 +988,72 @@ async function enrichBugCapabilities (bugs, req, entities) {
     row.canReopen = allowedTransitions.includes(STATUS.REOPENED) && isCoordinator
     row.canAssign = allowedTransitions.includes(STATUS.ASSIGNED) && isCoordinator
     row.canMoveToPending = allowedTransitions.includes(STATUS.PENDING_ASSIGNMENT) && isCoordinator
+  }
+}
+
+function ensureCapabilitySelectDependencies (req) {
+  const columns = req.query?.SELECT?.columns
+  if (!Array.isArray(columns) || !columns.length) return
+
+  const selectedRefs = new Set(
+    columns
+      .map(column => Array.isArray(column?.ref) ? column.ref.join('/') : null)
+      .filter(Boolean)
+  )
+
+  const requestsCapabilityField = [...CAPABILITY_FIELDS].some(field => selectedRefs.has(field))
+  if (!requestsCapabilityField) return
+
+  for (const dependency of ['ID', 'status_code', 'assignee_ID']) {
+    if (!selectedRefs.has(dependency)) {
+      columns.push({ ref: [dependency] })
+      selectedRefs.add(dependency)
+    }
+  }
+}
+
+async function readCapabilityInputs (rows, req, entities) {
+  const rowsNeedingLookup = rows.filter(row => row.ID || row.bugNumber)
+  const capabilityInputsByBugID = new Map()
+  const capabilityInputsByBugNumber = new Map()
+  if (!rowsNeedingLookup.length) {
+    return { byID: capabilityInputsByBugID, byBugNumber: capabilityInputsByBugNumber }
+  }
+
+  await readCapabilityInputsFromEntity(rowsNeedingLookup, entities.Bugs.drafts, req, capabilityInputsByBugID, capabilityInputsByBugNumber)
+  await readCapabilityInputsFromEntity(rowsNeedingLookup, entities.Bugs, req, capabilityInputsByBugID, capabilityInputsByBugNumber)
+  return { byID: capabilityInputsByBugID, byBugNumber: capabilityInputsByBugNumber }
+}
+
+async function readCapabilityInputsFromEntity (rows, entity, req, capabilityInputsByBugID, capabilityInputsByBugNumber) {
+  if (!rows?.length || !entity) return
+
+  const ids = [...new Set(rows.map(row => row.ID).filter(Boolean))]
+  const bugNumbers = [...new Set(rows.map(row => row.bugNumber).filter(Boolean))]
+  const bugs = []
+
+  if (ids.length) {
+    bugs.push(...await cds.tx(req).run(
+      SELECT.from(entity)
+        .columns('ID', 'bugNumber', 'status_code', 'assignee_ID')
+        .where({ ID: { in: ids } })
+    ))
+  }
+
+  if (bugNumbers.length) {
+    bugs.push(...await cds.tx(req).run(
+      SELECT.from(entity)
+        .columns('ID', 'bugNumber', 'status_code', 'assignee_ID')
+        .where({ bugNumber: { in: bugNumbers } })
+    ))
+  }
+
+  for (const bug of bugs) {
+    const entry = {
+      status_code: bug.status_code,
+      assignee_ID: bug.assignee_ID
+    }
+    if (bug.ID) capabilityInputsByBugID.set(bug.ID, entry)
+    if (bug.bugNumber) capabilityInputsByBugNumber.set(bug.bugNumber, entry)
   }
 }

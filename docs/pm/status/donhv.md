@@ -1,6 +1,6 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
-Last updated: 2026-06-15
+Last updated: 2026-06-16
 
 Vietnamese: Trạng thái của DonHV - Leader / BA-PM / hỗ trợ các workstream khác.
 
@@ -85,6 +85,7 @@ Vietnamese: Mỗi phiên làm việc cần thêm một dòng vào bảng này.
 
 | Date | Task/WP | What was done | Completed part | Issues/Bugs found | Fix status | Evidence/Commands | Next handoff |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-06-16 | WP4 role action visibility | Fixed backend capability enrichment so Fiori action booleans still compute when FE omits `status_code` and `assignee_ID`; made Object Page status display-only; restarted stale local server on port 4004 for clean auth-based testing | Backend/UI fix implemented on `fix/idts-5-role-action-visibility-donhv` | Found two UI bugs: stale `cds watch` on port 4004 still allowed anonymous access, and FE requests selecting only `canXxx` flags caused all actions to appear unavailable because capability inputs were missing | Fixed in code and local runtime; fresh 4004 now returns `401` for anonymous and computes role-based `canXxx` correctly when authenticated | `mcp__fiori.search_docs`, `mcp__cap.search_model`, OData fetch on `localhost:4004/4006`, `git diff --check` pending final verify | Re-test Object Page as DonHV/SangVN/NhanT and then decide whether action-bar grouping needs another WP4 UX pass |
 | 2026-06-03 | PM setup | Renamed status model from workstream files to member files and kept DonHV as leader/BA-PM owner | Team status ownership reset | None | Fixed | `rg`, `git diff --check` | Team members update their own status files |
 | 2026-06-03 | SAP490 docs | Created SAP490 template inventory and usage guide | Template purpose/fill guidance documented | None | Fixed | `openpyxl`, `rg`, `git diff --check` | Use inventory before filling SAP490 templates |
 | 2026-06-04 | Agent learning workflow | Added optional Learning Recap / Mentor Mode in AGENTS.md and `.agents/skills/learning-recap` | Mentor-style teach-back workflow integrated | None | Fixed | `rg`, `git diff --check`, `npx ai-devkit@latest lint --json` | Use after nontrivial tasks when requested or useful |
