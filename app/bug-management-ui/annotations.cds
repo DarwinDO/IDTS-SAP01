@@ -214,6 +214,22 @@ annotate service.Bugs with @(
       ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
     }
   ],
+  UI.PresentationVariant : {
+    Visualizations : [ '@UI.LineItem' ],
+    RequestAtLeast : [
+      canAssign,
+      canMoveToPending,
+      canAddComment,
+      canMarkInReview,
+      canStartProgress,
+      canResolve,
+      canRequestMoreInfo,
+      canReject,
+      canSendToRetest,
+      canClose,
+      canReopen
+    ]
+  },
   UI.FieldGroup #GeneralInfo : {
     Data : [
       { $Type : 'UI.DataField', Label : 'Bug Number', Value : bugNumber, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} },
@@ -726,7 +742,13 @@ annotate service.HistoryLogs with @(
 annotate service.HistoryLogs with {
   ID     @UI.Hidden;
   bug    @UI.Hidden;
-  reason @UI.MultiLineText;
+  actor  @Common.FieldControl : #ReadOnly;
+  actorRole @Common.FieldControl : #ReadOnly;
+  actionType @Common.FieldControl : #ReadOnly;
+  fieldName @Common.FieldControl : #ReadOnly;
+  oldValue @Common.FieldControl : #ReadOnly;
+  newValue @Common.FieldControl : #ReadOnly;
+  reason @UI.MultiLineText @Common.FieldControl : #ReadOnly;
 };
 
 annotate service.Notifications with @UI.LineItem : [
@@ -742,7 +764,12 @@ annotate service.Notifications with @UI.LineItem : [
 annotate service.Notifications with {
   ID      @UI.Hidden;
   bug     @UI.Hidden;
-  message @UI.MultiLineText;
+  recipient @Common.FieldControl : #ReadOnly;
+  eventType @Common.FieldControl : #ReadOnly;
+  channel @Common.FieldControl : #ReadOnly;
+  deliveryStatus @Common.FieldControl : #ReadOnly;
+  message @UI.MultiLineText @Common.FieldControl : #ReadOnly;
+  sentAt @Common.FieldControl : #ReadOnly;
 };
 
 annotate service.DuplicateLinks with @UI.LineItem : [
