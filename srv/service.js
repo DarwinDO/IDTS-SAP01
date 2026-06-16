@@ -937,27 +937,36 @@ async function enrichBugCapabilities (bugs, req, entities) {
   const actorRole = actor.role_code
   const isCoordinator = COORDINATOR_ROLES.has(actorRole)
 
+  // O(1) query: Resolve the actor's developer profile ID once if they are a developer
+  let actorDeveloperProfileID = null
+  if (actorRole === USER_ROLE.DEVELOPER) {
+    const profile = await cds.tx(req).run(
+      SELECT.one.from(entities.DeveloperProfiles).where({ user_ID: actor.ID })
+    )
+    if (profile) {
+      actorDeveloperProfileID = profile.ID
+    }
+  }
+
   for (const row of rows) {
     const status = row.status_code
     const assigneeID = row.assignee_ID
-
-    const isDeveloper = (actorRole === USER_ROLE.DEVELOPER)
-    const isAssignedDev = isDeveloper && assigneeID && (await isAssignedDeveloper(req, entities, actor.ID, row))
-
-    const allowedForDeveloper = isAssignedDev
-    const allowedForCoordinator = isCoordinator
-
     const allowedTransitions = ALLOWED_TRANSITIONS[status] || []
 
-    row.canMarkInReview = allowedTransitions.includes(STATUS.IN_REVIEW) && (allowedForCoordinator || allowedForDeveloper)
-    row.canStartProgress = allowedTransitions.includes(STATUS.IN_PROGRESS) && (allowedForCoordinator || allowedForDeveloper)
-    row.canResolve = allowedTransitions.includes(STATUS.RESOLVED) && (allowedForCoordinator || allowedForDeveloper)
-    row.canRequestMoreInfo = allowedTransitions.includes(STATUS.NEED_MORE_INFORMATION) && (allowedForCoordinator || allowedForDeveloper)
-    row.canReject = allowedTransitions.includes(STATUS.REJECTED) && (allowedForCoordinator || allowedForDeveloper)
-    row.canSendToRetest = allowedTransitions.includes(STATUS.RETEST_REQUIRED) && allowedForCoordinator
-    row.canClose = allowedTransitions.includes(STATUS.CLOSED) && allowedForCoordinator
-    row.canReopen = allowedTransitions.includes(STATUS.REOPENED) && allowedForCoordinator
-    row.canAssign = allowedTransitions.includes(STATUS.ASSIGNED) && allowedForCoordinator
-    row.canMoveToPending = allowedTransitions.includes(STATUS.PENDING_ASSIGNMENT) && allowedForCoordinator
+    // Developer actions are only allowed for the assigned developer of the bug
+    const isAssignedDev = !!(actorDeveloperProfileID && assigneeID === actorDeveloperProfileID)
+
+    row.canMarkInReview = allowedTransitions.includes(STATUS.IN_REVIEW) && isAssignedDev
+    row.canStartProgress = allowedTransitions.includes(STATUS.IN_PROGRESS) && isAssignedDev
+    row.canResolve = allowedTransitions.includes(STATUS.RESOLVED) && isAssignedDev
+    row.canRequestMoreInfo = allowedTransitions.includes(STATUS.NEED_MORE_INFORMATION) && isAssignedDev
+    row.canReject = allowedTransitions.includes(STATUS.REJECTED) && isAssignedDev
+
+    // Coordination actions are only allowed for PM and Tester
+    row.canSendToRetest = allowedTransitions.includes(STATUS.RETEST_REQUIRED) && isCoordinator
+    row.canClose = allowedTransitions.includes(STATUS.CLOSED) && isCoordinator
+    row.canReopen = allowedTransitions.includes(STATUS.REOPENED) && isCoordinator
+    row.canAssign = allowedTransitions.includes(STATUS.ASSIGNED) && isCoordinator
+    row.canMoveToPending = allowedTransitions.includes(STATUS.PENDING_ASSIGNMENT) && isCoordinator
   }
 }

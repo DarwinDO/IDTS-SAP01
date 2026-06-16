@@ -56,6 +56,8 @@ Last updated: 2026-06-16
 - Jira/GitHub audit on 2026-06-15 found six completed Jira tasks: `IDTS-2`, `IDTS-3`, `IDTS-4`, `IDTS-6`, `IDTS-7`, and `IDTS-9`.
 - GitHub PR #1 (`IDTS-3`/`IDTS-6`) and PR #2 (`IDTS-8`/`IDTS-10`/`IDTS-11`) were integrated into `dev` together with DonHV's backend and SAP490 documentation branches.
 - DatDT's `Remake_UI` branch was reviewed selectively. Accepted items are Assignment-first Object Page ordering, read-only History table capabilities, and create flow evaluation; rejected items are relaxed required fields, removed `nextProcessorRole`, removed lifecycle actions, and removed supporting info.
+- Configured local mock authentication users (`DonHV`, `SangVN`, `DatDT`, `NhanT`) in `package.json` and optimized backend capability calculations from O(N) queries to O(1) query to resolve the N+1 performance issue.
+- Created the Sprint 02 Walkthrough & Demo Script inside the repository at `docs/pm/tasks/wp4-walkthrough.md`.
 
 Vietnamese:
 
@@ -82,6 +84,8 @@ Vietnamese:
 - Mermaid diagram nhúng trong SRS/FRS đã được tách ra `docs/diagrams/07-srs-system-context.md` và `docs/diagrams/08-frs-functional-workflows.md`.
 - Hỗ trợ database modeling đã có qua `.agents/skills/idts-database-modeling` và `database-schema-design` đã cài; review model hiện tại được ghi trong `docs/ba/09-database-model-review.md`.
 - Các quyết định database DB-Q01 đến DB-Q08 cho WP1 đã được baseline trong `docs/ba/09-database-model-review.md` và sync vào các IDTS canonical docs.
+- Đã cấu hình mock users local (`DonHV`, `SangVN`, `DatDT`, `NhanT`) trong `package.json` và tối ưu hóa backend capability calculation từ O(N) queries về O(1) query để loại bỏ vấn đề hiệu năng N+1.
+- Đã tạo tài liệu Walkthrough & Demo Script chính thức của Sprint 02 trong repo tại `docs/pm/tasks/wp4-walkthrough.md`.
 
 ## What Is Not Started
 

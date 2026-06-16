@@ -52,15 +52,15 @@ Vietnamese:
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
-| SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 11 Done (`IDTS-1` to `11`) and 1 To Do (`IDTS-12`). All development branches (PR #1, PR #2, Option B, visibility) are now consolidated into `dev`. |
-| WP4 | Fiori Elements UX | DatDT | Core layout, dynamic creation hiding, assignee value help, and dynamic visibility are completed. Deeper UI QA and attachment upload remain. |
+| SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 12 Done (`IDTS-1` to `12`). All development branches and the final demo script are consolidated into `dev`. |
+| WP4 | Fiori Elements UX | DatDT | Core layout, dynamic creation hiding, assignee value help, dynamic visibility, and mock login are completed. Deeper UI QA and attachment upload remain. |
 
 Vietnamese:
 
 | ID | Công việc | Thành viên chính | Ghi chú |
 | --- | --- | --- | --- |
-| SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 11 Done (`IDTS-1` đến `11`) và 1 To Do (`IDTS-12`). Tất cả các branch (PR #1, PR #2, Option B, visibility) đã được tích hợp đầy đủ vào `dev`. |
-| WP4 | Fiori Elements UX | DatDT | Đã hoàn thành cấu trúc giao diện chính, ẩn động trang tạo mới, Value Help Assignee và ẩn/hiện action động. QA sâu giao diện và upload đính kèm còn chờ. |
+| SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 12 Done (`IDTS-1` đến `12`). Tất cả các branch phát triển và demo script đã được tích hợp đầy đủ vào `dev`. |
+| WP4 | Fiori Elements UX | DatDT | Đã hoàn thành cấu trúc giao diện chính, ẩn động trang tạo mới, Value Help Assignee, ẩn/hiện action động và mock login. QA sâu giao diện và upload đính kèm còn chờ. |
 
 ## Blocked
 
