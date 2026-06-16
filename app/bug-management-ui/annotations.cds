@@ -7,6 +7,28 @@ annotate service.Bugs with @(
   Capabilities.DeleteRestrictions : {
     Deletable : false
   },
+  Capabilities.NavigationRestrictions : {
+    RestrictedProperties : [
+      {
+        NavigationProperty : notifications,
+        InsertRestrictions : { Insertable : false },
+        DeleteRestrictions : { Deletable : false },
+        UpdateRestrictions : { Updatable : false }
+      },
+      {
+        NavigationProperty : historyLogs,
+        InsertRestrictions : { Insertable : false },
+        DeleteRestrictions : { Deletable : false },
+        UpdateRestrictions : { Updatable : false }
+      },
+      {
+        NavigationProperty : comments,
+        InsertRestrictions : { Insertable : false },
+        DeleteRestrictions : { Deletable : false },
+        UpdateRestrictions : { Updatable : false }
+      }
+    ]
+  },
   UI.HeaderInfo : {
     TypeName       : 'Bug',
     TypeNamePlural : 'Bugs',
@@ -687,6 +709,8 @@ annotate service.Comments with @UI.LineItem : [
 ];
 
 annotate service.Comments with @(
+  UI.CreateHidden : true,
+  UI.DeleteHidden : true,
   Capabilities.InsertRestrictions : { Insertable : false },
   Capabilities.DeleteRestrictions : { Deletable : false },
   Capabilities.UpdateRestrictions : { Updatable : false }
@@ -697,7 +721,7 @@ annotate service.Comments with {
   bug        @UI.Hidden;
   author     @Common.FieldControl : #ReadOnly;
   authorRole @Common.FieldControl : #ReadOnly;
-  content    @UI.MultiLineText @Common.FieldControl : #Mandatory;
+  content    @UI.MultiLineText @Common.FieldControl : #ReadOnly;
 };
 
 annotate service.Attachments with @UI.LineItem : [
@@ -724,6 +748,8 @@ annotate service.Attachments with {
 };
 
 annotate service.HistoryLogs with @(
+  UI.CreateHidden : true,
+  UI.DeleteHidden : true,
   Capabilities.InsertRestrictions : { Insertable : false },
   Capabilities.DeleteRestrictions : { Deletable : false },
   Capabilities.UpdateRestrictions : { Updatable : false },
@@ -750,6 +776,14 @@ annotate service.HistoryLogs with {
   newValue @Common.FieldControl : #ReadOnly;
   reason @UI.MultiLineText @Common.FieldControl : #ReadOnly;
 };
+
+annotate service.Notifications with @(
+  UI.CreateHidden : true,
+  UI.DeleteHidden : true,
+  Capabilities.InsertRestrictions : { Insertable : false },
+  Capabilities.DeleteRestrictions : { Deletable : false },
+  Capabilities.UpdateRestrictions : { Updatable : false }
+);
 
 annotate service.Notifications with @UI.LineItem : [
   { $Type : 'UI.DataField', Label : 'Created At', Value : createdAt },

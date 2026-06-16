@@ -63,10 +63,10 @@ service BugService @(requires: 'authenticated-user') {
     action closeBug(note: String) returns Bugs;
     action reopenBug(reason: String) returns Bugs;
   };
-  entity Comments as projection on db.Comments;
+  @readonly entity Comments as projection on db.Comments;
   entity Attachments as projection on db.Attachments;
-  entity HistoryLogs as projection on db.HistoryLogs;
-  entity Notifications as projection on db.Notifications;
+  @readonly entity HistoryLogs as projection on db.HistoryLogs;
+  @readonly entity Notifications as projection on db.Notifications;
   entity DuplicateLinks as projection on db.DuplicateLinks;
 
   entity Users as projection on db.Users;
