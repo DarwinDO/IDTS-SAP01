@@ -123,10 +123,22 @@ entity Comments : cuid, managed {
 entity Attachments : cuid, managed {
   bug        : Association to Bugs not null;
   uploadedBy : Association to Users not null;
-  fileName   : String(255) not null;
-  mediaType  : String(100);
+  @Core.MediaType                  : mediaType
+  @Core.ContentDisposition.Filename: fileName
+  @Core.AcceptableMediaTypes       : [
+    'image/jpeg',
+    'image/png',
+    'application/pdf',
+    'text/plain',
+    'application/json',
+    'text/csv',
+    'application/zip'
+  ]
+  content    : LargeBinary;
+  fileName   : String(255);
+  mediaType  : String(100) @Core.IsMediaType;
   fileSize   : Integer64;
-  storageRef : String(500) not null;
+  storageRef : String(500);
 }
 
 entity HistoryLogs : cuid, managed {

@@ -139,7 +139,22 @@
             "settings": {
               "editableHeaderContent": false,
               "enhanceI18n": "i18n/i18n.properties",
-              "contextPath": "/Bugs"
+              "contextPath": "/Bugs",
+              "controlConfiguration": {
+                "comments/@com.sap.vocabularies.UI.v1.LineItem": {
+                  "tableSettings": {
+                    "type": "ResponsiveTable",
+                    "creationMode": {
+                      "name": "InlineCreationRows"
+                    }
+                  }
+                },
+                "attachments/@com.sap.vocabularies.UI.v1.LineItem": {
+                  "tableSettings": {
+                    "type": "ResponsiveTable"
+                  }
+                }
+              }
             }
           }
         }

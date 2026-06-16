@@ -206,7 +206,7 @@ annotate service.Bugs with @(
       { $Type : 'UI.DataField', Label : 'Bug Number', Value : bugNumber, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} },
       { $Type : 'UI.DataField', Label : 'Title', Value : title },
       { $Type : 'UI.DataField', Label : 'Description', Value : description },
-      { $Type : 'UI.DataField', Label : 'Status', Value : status.name, Criticality : status.criticality, CriticalityRepresentation : #WithoutIcon, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} },
+      { $Type : 'UI.DataField', Label : 'Status', Value : status.name, Criticality : status.criticality, CriticalityRepresentation : #WithoutIcon, ![@Common.FieldControl] : #ReadOnly, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} },
       { $Type : 'UI.DataField', Label : 'Priority', Value : priority_code, Criticality : priority.criticality, CriticalityRepresentation : #WithoutIcon },
       { $Type : 'UI.DataField', Label : 'Reporter', Value : reporter.displayName, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} },
       { $Type : 'UI.DataField', Label : 'Created At', Value : createdAt, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} },
@@ -270,7 +270,7 @@ annotate service.Bugs with {
   expectedResult        @UI.MultiLineText @Common.Label : 'Expected Result' @Common.FieldControl : #Mandatory;
   rejectionReason       @UI.MultiLineText @Common.Label : 'Rejection Reason';
   dueDate               @Common.Label : 'Due Date';
-  status                @Common.Label : 'Status';
+  status                @Common.Label : 'Status' @Common.FieldControl : #ReadOnly;
   priority              @Common.Label : 'Priority' @Common.FieldControl : #Mandatory;
   severity              @Common.Label : 'Severity' @Common.FieldControl : #Mandatory;
   environment           @Common.Label : 'Environment';
@@ -287,7 +287,7 @@ annotate service.Bugs with {
 
 annotate service.Bugs:componentCategory.ID with @UI.Hidden @Core.Computed;
 
-annotate service.Bugs:status.code with @Common.ValueListWithFixedValues : true @Common.ValueList : {
+annotate service.Bugs:status.code with @Common.FieldControl : #ReadOnly @Common.ValueListWithFixedValues : true @Common.ValueList : {
     Label : 'Status',
     CollectionPath : 'StatusValues',
     SearchSupported : true,
@@ -651,30 +651,47 @@ annotate service.DeveloperProfiles with @(
 );
 
 annotate service.Comments with @UI.LineItem : [
-  { $Type : 'UI.DataField', Label : 'Created At', Value : createdAt },
+  { $Type : 'UI.DataField', Label : 'Comment', Value : content },
   { $Type : 'UI.DataField', Label : 'Author', Value : author.displayName },
   { $Type : 'UI.DataField', Label : 'Role', Value : authorRole.name },
-  { $Type : 'UI.DataField', Label : 'Comment', Value : content }
+  { $Type : 'UI.DataField', Label : 'Created At', Value : createdAt }
 ];
 
+annotate service.Comments with @(
+  Capabilities.InsertRestrictions : { Insertable : true },
+  Capabilities.DeleteRestrictions : { Deletable : false },
+  Capabilities.UpdateRestrictions : { Updatable : false }
+);
+
 annotate service.Comments with {
-  ID      @UI.Hidden;
-  bug     @UI.Hidden;
-  content @UI.MultiLineText;
+  ID         @UI.Hidden;
+  bug        @UI.Hidden;
+  author     @Common.FieldControl : #ReadOnly;
+  authorRole @Common.FieldControl : #ReadOnly;
+  content    @Common.FieldControl : #Mandatory;
 };
 
 annotate service.Attachments with @UI.LineItem : [
-  { $Type : 'UI.DataField', Label : 'File Name', Value : fileName },
+  { $Type : 'UI.DataField', Label : 'Attachment', Value : content },
   { $Type : 'UI.DataField', Label : 'Media Type', Value : mediaType },
   { $Type : 'UI.DataField', Label : 'Size', Value : fileSize },
   { $Type : 'UI.DataField', Label : 'Uploaded By', Value : uploadedBy.displayName },
-  { $Type : 'UI.DataField', Label : 'Uploaded At', Value : createdAt },
-  { $Type : 'UI.DataField', Label : 'Storage Reference', Value : storageRef }
+  { $Type : 'UI.DataField', Label : 'Uploaded At', Value : createdAt }
 ];
 
+annotate service.Attachments with @(
+  Capabilities.InsertRestrictions : { Insertable : true },
+  Capabilities.DeleteRestrictions : { Deletable : true },
+  Capabilities.UpdateRestrictions : { Updatable : false },
+  UI.MediaResource : { Stream : content }
+);
+
 annotate service.Attachments with {
-  ID  @UI.Hidden;
-  bug @UI.Hidden;
+  ID         @UI.Hidden;
+  bug        @UI.Hidden;
+  storageRef @UI.Hidden;
+  uploadedBy @Common.FieldControl : #ReadOnly;
+  content    @Common.FieldControl : #Mandatory;
 };
 
 annotate service.HistoryLogs with @(

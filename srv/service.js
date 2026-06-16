@@ -44,6 +44,7 @@ const ACTION = {
 
 const COORDINATOR_ROLES = new Set([USER_ROLE.TESTER, USER_ROLE.PM])
 const COMMENT_ROLES = new Set([USER_ROLE.TESTER, USER_ROLE.DEVELOPER, USER_ROLE.PM])
+const ATTACHMENT_ROLES = new Set([USER_ROLE.TESTER, USER_ROLE.DEVELOPER, USER_ROLE.PM])
 const DEVELOPER_ACTIONS = new Set([
   ACTION.STATUS_CHANGE,
   ACTION.REQUEST_INFO,
@@ -119,20 +120,43 @@ const CAPABILITY_FIELDS = new Set([
   'canAssign',
   'canMoveToPending'
 ])
+const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024
+const ACCEPTED_ATTACHMENT_MEDIA_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'application/pdf',
+  'text/plain',
+  'application/json',
+  'text/csv',
+  'application/zip'
+])
 
 module.exports = class BugService extends cds.ApplicationService {
   async init () {
     const entities = this.entities
-    const { Bugs, Comments } = entities
+    const { Bugs, Comments, Attachments } = entities
+
+    const commentTargets = [Comments, Comments?.drafts].filter(Boolean)
+    const attachmentTargets = [Attachments, Attachments?.drafts].filter(Boolean)
 
     this.before('READ', Bugs, req => ensureCapabilitySelectDependencies(req))
     this.before('READ', Bugs.drafts, req => ensureCapabilitySelectDependencies(req))
     this.before('CREATE', Bugs, req => prepareBugWrite(req, entities, { isCreate: true }))
     this.before('UPDATE', Bugs, req => prepareBugWrite(req, entities, { isCreate: false }))
     this.before('PATCH', Bugs.drafts, req => prepareDraftPatch(req, entities))
-    this.before('CREATE', Comments, req => prepareCommentCreate(req, entities))
+    for (const target of commentTargets) {
+      this.before('CREATE', target, req => prepareCommentCreate(req, entities))
+    }
+    for (const target of attachmentTargets) {
+      this.before('CREATE', target, req => prepareAttachmentWrite(req, entities, { isCreate: true }))
+      this.before('UPDATE', target, req => prepareAttachmentWrite(req, entities, { isCreate: false }))
+      this.before('PATCH', target, req => prepareAttachmentWrite(req, entities, { isCreate: false }))
+    }
     this.after('CREATE', Bugs, (data, req) => recordCreateSideEffects(req, data, entities))
     this.after('UPDATE', Bugs, (data, req) => recordUpdateSideEffects(req, entities))
+    for (const target of commentTargets) {
+      this.after('CREATE', target, (data, req) => recordCommentCreateSideEffects(req, data, entities))
+    }
     this.after('READ', Bugs, async (bugs, req) => {
       await enrichAssigneeDisplayNames(bugs, req, entities)
       await enrichBugCapabilities(bugs, req, entities)
@@ -415,6 +439,68 @@ async function prepareCommentCreate (req, entities) {
   }
 }
 
+async function prepareAttachmentWrite (req, entities, { isCreate }) {
+  const headers = requestHeaders(req)
+  const actor = await resolveRequestUser(req, entities)
+
+  if (actor && !ATTACHMENT_ROLES.has(actor.role_code)) {
+    return req.reject(403, 'Only Tester, Developer, or PM users can upload attachments.')
+  }
+
+  if (!req.data.ID && isCreate) {
+    req.data.ID = cds.utils.uuid()
+  }
+
+  if (req.data.uploadedBy_ID && actor && req.data.uploadedBy_ID !== actor.ID) {
+    return req.reject(403, 'Users cannot upload attachments on behalf of another user.', 'uploadedBy')
+  }
+
+  if (actor) {
+    req.data.uploadedBy_ID = actor.ID
+  }
+
+  const uploadedByID = req.data.uploadedBy_ID || (isCreate ? null : undefined)
+  if (uploadedByID === null) {
+    return req.reject(400, 'Attachment uploader is required.', 'uploadedBy')
+  }
+
+  if (req.data.uploadedBy_ID) {
+    const uploader = await cds.tx(req).run(SELECT.one.from(entities.Users).where({
+      ID: req.data.uploadedBy_ID,
+      active: true
+    }))
+
+    if (!uploader) {
+      return req.reject(400, 'Attachment uploader must be an active user.', 'uploadedBy')
+    }
+
+    if (!ATTACHMENT_ROLES.has(uploader.role_code)) {
+      return req.reject(400, 'Attachment uploader must be a Tester, Developer, or PM user.', 'uploadedBy')
+    }
+  }
+
+  if (isCreate && !req.data.storageRef) {
+    req.data.storageRef = `db://attachments/${req.data.ID}`
+  }
+
+  req.data.fileName = trimToNull(req.data.fileName) || fileNameFromHeaders(headers) || req.data.fileName
+  req.data.mediaType = normalizeMediaType(req.data.mediaType) || normalizeMediaType(headers['content-type']) || req.data.mediaType
+
+  const contentLength = Number(headers['content-length'])
+  if (Number.isFinite(contentLength) && contentLength > 0) {
+    req.data.fileSize = contentLength
+  }
+
+  const mediaType = normalizeMediaType(req.data.mediaType)
+  if (mediaType && !ACCEPTED_ATTACHMENT_MEDIA_TYPES.has(mediaType)) {
+    return req.reject(400, `Unsupported attachment media type: ${mediaType}.`, 'mediaType')
+  }
+
+  if (Number.isFinite(Number(req.data.fileSize)) && Number(req.data.fileSize) > MAX_ATTACHMENT_BYTES) {
+    return req.reject(413, `Attachment size exceeds the ${Math.floor(MAX_ATTACHMENT_BYTES / (1024 * 1024))} MB limit.`, 'fileSize')
+  }
+}
+
 async function enforceBugWritePermission (req, entities, oldBug, nextBug, { isCreate }) {
   const actor = await resolveRequestUser(req, entities)
   if (!actor) return
@@ -490,7 +576,23 @@ async function activeUserFromCandidate (req, entities, candidate) {
   const byEmail = await tx.run(SELECT.one.from(entities.Users).where({ email: candidate, active: true }))
   if (byEmail) return byEmail
 
-  return tx.run(SELECT.one.from(entities.Users).where({ displayName: candidate, active: true }))
+  const byDisplayName = await tx.run(SELECT.one.from(entities.Users).where({ displayName: candidate, active: true }))
+  if (byDisplayName) return byDisplayName
+
+  const normalizedCandidate = typeof candidate === 'string' ? candidate.trim().toLowerCase() : null
+  if (!normalizedCandidate) return null
+
+  const activeUsers = await tx.run(
+    SELECT.from(entities.Users)
+      .columns('ID', 'displayName', 'email', 'role_code', 'active')
+      .where({ active: true })
+  )
+
+  return activeUsers.find(user =>
+    [user.ID, user.email, user.displayName]
+      .filter(Boolean)
+      .some(value => String(value).trim().toLowerCase() === normalizedCandidate)
+  ) || null
 }
 
 function requestUserCandidates (req) {
@@ -664,6 +766,20 @@ async function recordUpdateSideEffects (req, entities) {
   if (statusChange) {
     await writeNotificationForStatus(req, entities, req._finalBug, statusChange.newValue)
   }
+}
+
+async function recordCommentCreateSideEffects (req, data, entities) {
+  if (!data?.bug_ID || !data?.author_ID) return
+
+  await writeHistory(req, entities, {
+    bugID: data.bug_ID,
+    actorID: data.author_ID,
+    actionType: ACTION.EDIT,
+    fieldName: 'comment',
+    oldValue: null,
+    newValue: data.content,
+    reason: null
+  })
 }
 
 function importantChanges (oldBug, finalBug) {
@@ -893,6 +1009,33 @@ function trimToNull (value) {
   if (typeof value !== 'string') return value
   const trimmed = value.trim()
   return trimmed || null
+}
+
+function normalizeMediaType (value) {
+  const normalized = trimToNull(value)
+  if (!normalized || typeof normalized !== 'string') return normalized
+  return normalized.split(';')[0].trim().toLowerCase()
+}
+
+function requestHeaders (req) {
+  return req.http?.req?.headers || {}
+}
+
+function fileNameFromHeaders (headers) {
+  const candidates = [
+    headers?.slug,
+    headers?.['x-file-name'],
+    parseFileNameFromContentDisposition(headers?.['content-disposition'])
+  ]
+
+  return candidates.map(trimToNull).find(Boolean) || null
+}
+
+function parseFileNameFromContentDisposition (contentDisposition) {
+  if (!contentDisposition || typeof contentDisposition !== 'string') return null
+  const match = contentDisposition.match(/filename\*?=(?:UTF-8''|")?([^";]+)/i)
+  if (!match?.[1]) return null
+  return decodeURIComponent(match[1].replace(/"/g, '').trim())
 }
 
 function reasonTarget (actionType) {

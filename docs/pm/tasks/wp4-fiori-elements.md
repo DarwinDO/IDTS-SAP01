@@ -230,12 +230,16 @@ English:
 
 - Fixed a backend read-gap in `srv/service.js`: Fiori Elements sometimes requests `canAssign`, `canResolve`, and related virtual capability flags without selecting `status_code` or `assignee_ID`.
 - `enrichBugCapabilities` now loads missing `status_code` and `assignee_ID` by bug ID before computing action booleans, so capability flags no longer fall back to `false` incorrectly.
-- Changed the Object Page `Status` field in `annotations.cds` from `status_code` to `status.name`, making status display-only on the form.
+- Kept the Object Page `Status` field bound to `status.name` and explicitly marked both the rendered `UI.DataField` and `status_code` metadata as `Common.FieldControlType/ReadOnly`.
 - This keeps workflow transitions on the approved bound actions instead of allowing users to open a generic status value help and hit backend transition errors.
+- Added a case-insensitive fallback in `resolveRequestUser` for local dev, so mock logins like `donhv` still map to the IDTS user `DonHV` and show the correct action set.
+- Verified in live `$metadata` that `BugService.Bugs/status_code` is now read-only and the `Status` field on the Object Page carries a read-only `Common.FieldControl` annotation.
 
 Vietnamese:
 
 - Đã sửa một lỗ hổng khi đọc dữ liệu trong `srv/service.js`: Fiori Elements đôi khi request các cờ ảo như `canAssign`, `canResolve` nhưng lại không select `status_code` hoặc `assignee_ID`.
 - `enrichBugCapabilities` giờ sẽ tự đọc bù `status_code` và `assignee_ID` theo bug ID trước khi tính quyền action, nên các cờ capability không còn bị rơi sai về `false`.
-- Đã đổi field `Status` trên Object Page trong `annotations.cds` từ `status_code` sang `status.name`, khiến status chỉ còn hiển thị chứ không cho sửa trực tiếp trên form.
+- Giữ field `Status` trên Object Page bind tới `status.name` và khóa rõ ràng cả `UI.DataField` hiển thị lẫn metadata `status_code` bằng `Common.FieldControlType/ReadOnly`.
 - Cách này buộc các chuyển trạng thái đi qua bound actions đã được duyệt, thay vì để user mở generic status value help rồi gặp lỗi transition từ backend.
+- Đã thêm fallback không phân biệt hoa/thường trong `resolveRequestUser` cho local dev, nên mock login kiểu `donhv` vẫn map được tới user IDTS `DonHV` và hiển thị đúng bộ action.
+- Đã verify trên `$metadata` thực tế rằng `BugService.Bugs/status_code` đã là read-only và DataField `Status` trên Object Page cũng mang annotation `Common.FieldControl` dạng read-only.

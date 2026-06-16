@@ -29,6 +29,14 @@
     "app/bug-management-ui"
   ],
   "cds": {
+    "fiori": {
+      "move_media_data_in_db": true
+    },
+    "server": {
+      "body_parser": {
+        "limit": "12mb"
+      }
+    },
     "security": {
       "mock": {
         "defaultUsers": {
