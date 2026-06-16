@@ -10,7 +10,7 @@ Last updated: 2026-06-16
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
 | Current sprint | Sprint 02 focuses on mentor feedback, happy flow demo, backend note/reason validation, and Bug Detail UI refinements |
 | Recommended next action | Prepare the final demo script under `IDTS-12` and compile/verify all final deliverables for Sprint 2 review |
-| Main implementation risk | Fiori screens and backend handlers now exist, but deeper browser QA, real attachment upload, external notification delivery, production XSUAA authorization, and automated tests are still incomplete |
+| Main implementation risk | Fiori screens and backend handlers now exist, but deeper browser QA, external notification delivery, production XSUAA authorization, and automated tests are still incomplete |
 
 ## What Is Already Done
 
@@ -47,6 +47,7 @@ Last updated: 2026-06-16
 - WP3 Handler Rules and Validation is implemented for Sprint 1 MVP: create/update validation, assignment responsibility checks, status transition validation, nextProcessor automation, history logs, and notification records are handled in `srv/service.js`.
 - DatDT's `Sap_FE` reference repo was reviewed and useful List Report/Object Page ideas were integrated into the existing CAP/Fiori app.
 - WP4 Fiori Elements core screens are updated: list filters/table columns, object page sections, value helps, object page actions, semantic criticality, rejected follow-up fields, and child sections for comments, attachments, history, and notifications.
+- Real attachment upload is implemented for the MVP flow, including stream upload and download metadata handling.
 - Four IDTS-aligned demo bug records were added under `db/data/idts.cap-Bugs.csv`, and browser smoke verification shows the List Report rendering 4 rows after pressing `Go`.
 - Mentor feedback for Sprint 02 is baselined: developers may view/discuss team-visible bugs, primary lifecycle actions remain controlled, developer notes are optional by default, selected transitions require note/reason, and Bug Detail UI should prioritize assignee/status and key input fields.
 - Sprint 02 plan is documented in `docs/pm/07-sprint-2-plan.md`. Jira issues `IDTS-1` to `IDTS-12` are assigned: DonHV owns Backend CAP lead/bug fixing, NhanT owns validation/QA/demo smoke testing, DatDT owns core Bug Detail layout/input usability, and SangVN owns status value help plus supporting field/comment usability.
@@ -66,6 +67,7 @@ Vietnamese:
 - WP2 Service và Value Help đã hoàn thành ở mức Sprint 1 MVP: OData V4 metadata có bound lifecycle actions và Fiori value help annotations.
 - WP3 Handler Rules và Validation đã hoàn thành ở mức Sprint 1 MVP: `srv/service.js` xử lý create/update validation, assignment responsibility checks, status transition validation, nextProcessor automation, history logs và notification records.
 - WP4 core Fiori screens đã cập nhật: List Report, Object Page, Create metadata, Assignment value help/actions, Developer Review actions, Rejected follow-up, History và Notifications sections.
+- Real attachment upload đã được implement cho MVP flow, gồm stream upload và xử lý metadata khi tải xuống.
 - Feedback mentor cho Sprint 02 đã được baseline: developer có thể xem/thảo luận bug trong team, lifecycle action chính vẫn kiểm soát, developer note mặc định optional, một số transition bắt buộc note/reason, và Bug Detail UI cần ưu tiên assignee/status cùng các field nhập quan trọng.
 - Sprint 02 plan được ghi tại `docs/pm/07-sprint-2-plan.md`. Jira issues `IDTS-1` đến `IDTS-12` đã được assign: DonHV phụ trách Backend CAP lead/bug fixing, NhanT phụ trách validation/QA/demo smoke test, DatDT phụ trách core Bug Detail layout/input usability, và SangVN phụ trách status value help cùng supporting field/comment usability.
 - Sprint 02 backend implementation đã bắt đầu. Jira `IDTS-2` và `IDTS-4` đã Done; Jira `IDTS-5` đang In Progress như bucket bug-fix backend từ QA.
@@ -90,7 +92,6 @@ Vietnamese:
 
 ## What Is Not Started
 
-- Real attachment upload/storage behavior.
 - External notification delivery beyond persisted notification records.
 - Production XSUAA role collections and deployment-level authorization hardening.
 - Deeper QA scenarios and automated verification beyond compile/build/API/browser smoke checks.
@@ -152,7 +153,7 @@ Vietnamese:
 
 ## WP4 Current Note
 
-The Fiori Elements UI for the Bug Creation flow (Option B) is completed, refined, and verified. Child facets (History, Comments, Attachments, Notifications) and system fields are dynamically hidden during creation using draft-state OData expressions, while remaining fully available for active records. The Assignee field is fully editable via value help, the value-help dialog shows business columns, and the selected Assignee displays the developer name instead of a UUID. Common value-list popups now use business labels such as Priority Code and Priority. Backend handlers are hardened to overwrite bugNumber, status_code, and reporter_ID. Playwright CLI smoke tests verified the layout and lookup without using Playwright MCP.
+The Fiori Elements UI for the Bug Creation flow (Option B) is completed, refined, and verified. Child facets (History, Comments, Attachments, Notifications) and system fields are dynamically hidden during creation using draft-state OData expressions, while remaining fully available for active records. The Assignee field is fully editable via value help, the value-help dialog shows business columns, and the selected Assignee displays the developer name instead of a UUID. Comments are added through a bound action and attachments support real stream upload. Common value-list popups now use business labels such as Priority Code and Priority. Backend handlers are hardened to overwrite bugNumber, status_code, and reporter_ID. Playwright CLI smoke tests verified the layout and lookup without using Playwright MCP.
 
 Vietnamese: Giao diện Fiori Elements cho luồng tạo bug (Option B) đã hoàn thành và được kiểm thử thành công. Các tab phụ (Lịch sử, Bình luận, Đính kèm, Thông báo) và trường hệ thống được ẩn động khi tạo mới nhờ biểu thức draft OData, nhưng vẫn hiển thị đầy đủ ở chế độ xem/sửa bug cũ. Trường Assignee có thể chọn qua Value Help. Backend đã được thắt chặt bảo mật để ghi đè bugNumber, status_code và reporter_ID. Browser smoke test bằng Playwright đã xác nhận giao diện sạch sẽ và lookup chạy tốt.
 

@@ -34,6 +34,19 @@ annotate service.Bugs with @(
     },
     {
       $Type  : 'UI.DataFieldForAction',
+      Label  : 'Add Comment',
+      Action : 'BugService.addComment',
+      ![@UI.Hidden] : {
+        $edmJson : {
+          $Or : [
+            { $Not : { $Path : 'canAddComment' } },
+            { $Eq : [ { $Path : 'IsActiveEntity' }, false ] }
+          ]
+        }
+      }
+    },
+    {
+      $Type  : 'UI.DataFieldForAction',
       Label  : 'Mark In Review',
       Action : 'BugService.markInReview',
       ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canMarkInReview' } } }
@@ -658,7 +671,7 @@ annotate service.Comments with @UI.LineItem : [
 ];
 
 annotate service.Comments with @(
-  Capabilities.InsertRestrictions : { Insertable : true },
+  Capabilities.InsertRestrictions : { Insertable : false },
   Capabilities.DeleteRestrictions : { Deletable : false },
   Capabilities.UpdateRestrictions : { Updatable : false }
 );
@@ -668,7 +681,7 @@ annotate service.Comments with {
   bug        @UI.Hidden;
   author     @Common.FieldControl : #ReadOnly;
   authorRole @Common.FieldControl : #ReadOnly;
-  content    @Common.FieldControl : #Mandatory;
+  content    @UI.MultiLineText @Common.FieldControl : #Mandatory;
 };
 
 annotate service.Attachments with @UI.LineItem : [
@@ -745,6 +758,12 @@ annotate service.DuplicateLinks with {
 };
 
 annotate service.Bugs actions {
+  @Common.SideEffects : {
+    TargetEntities : [comments, historyLogs]
+  }
+  addComment(
+    content @UI.MultiLineText @Common.Label : 'Comment'
+  );
   assignToDeveloper(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
   );

@@ -109,6 +109,7 @@ const TESTER_STATUSES = new Set([
 ])
 
 const CAPABILITY_FIELDS = new Set([
+  'canAddComment',
   'canMarkInReview',
   'canStartProgress',
   'canResolve',
@@ -167,6 +168,7 @@ module.exports = class BugService extends cds.ApplicationService {
     })
 
     this.on('assignToDeveloper', req => assignToDeveloper(req, entities))
+    this.on('addComment', req => addComment(req, entities))
     this.on('moveToPendingAssignment', req => transitionBug(req, entities, {
       status: STATUS.PENDING_ASSIGNMENT,
       actionType: ACTION.REASSIGN,
@@ -304,6 +306,46 @@ async function assignToDeveloper (req, entities) {
     assigneeID,
     clearRejectionReason: true
   })
+}
+
+async function addComment (req, entities) {
+  const bugID = bugIDFrom(req)
+  const bug = await readBug(req, entities, bugID)
+  if (!bug) return req.reject(404, 'Bug not found.')
+
+  const actor = await resolveRequestUser(req, entities)
+  if (!actor || !COMMENT_ROLES.has(actor.role_code)) {
+    return req.reject(403, 'Only Tester, Developer, or PM users can add comments.')
+  }
+
+  const content = trimToNull(req.data.content)
+  if (!content) {
+    return req.reject(400, 'Comment content is required.', 'content')
+  }
+
+  const tx = cds.tx(req)
+  const commentID = cds.utils.uuid()
+  await tx.run(
+    INSERT.into(entities.Comments).entries({
+      ID: commentID,
+      bug_ID: bug.ID,
+      author_ID: actor.ID,
+      authorRole_code: actor.role_code,
+      content
+    })
+  )
+
+  await writeHistory(req, entities, {
+    bugID: bug.ID,
+    actorID: actor.ID,
+    actionType: ACTION.EDIT,
+    fieldName: 'comment',
+    oldValue: null,
+    newValue: content,
+    reason: null
+  })
+
+  return tx.run(SELECT.one.from(entities.Bugs).where({ ID: bug.ID }))
 }
 
 async function transitionBug (req, entities, options) {
@@ -483,11 +525,18 @@ async function prepareAttachmentWrite (req, entities, { isCreate }) {
     req.data.storageRef = `db://attachments/${req.data.ID}`
   }
 
+  const headerMediaType = normalizeMediaType(headers['content-type'])
   req.data.fileName = trimToNull(req.data.fileName) || fileNameFromHeaders(headers) || req.data.fileName
-  req.data.mediaType = normalizeMediaType(req.data.mediaType) || normalizeMediaType(headers['content-type']) || req.data.mediaType
+
+  const explicitMediaType = normalizeMediaType(req.data.mediaType)
+  if (explicitMediaType) {
+    req.data.mediaType = explicitMediaType
+  } else if (headerMediaType && !isEnvelopeMediaType(headerMediaType)) {
+    req.data.mediaType = headerMediaType
+  }
 
   const contentLength = Number(headers['content-length'])
-  if (Number.isFinite(contentLength) && contentLength > 0) {
+  if (!isEnvelopeMediaType(headerMediaType) && Number.isFinite(contentLength) && contentLength > 0) {
     req.data.fileSize = contentLength
   }
 
@@ -1017,6 +1066,10 @@ function normalizeMediaType (value) {
   return normalized.split(';')[0].trim().toLowerCase()
 }
 
+function isEnvelopeMediaType (mediaType) {
+  return mediaType === 'multipart/mixed' || mediaType === 'application/json'
+}
+
 function requestHeaders (req) {
   return req.http?.req?.headers || {}
 }
@@ -1089,6 +1142,7 @@ async function enrichBugCapabilities (bugs, req, entities) {
       row.canReopen = false
       row.canAssign = false
       row.canMoveToPending = false
+      row.canAddComment = false
     }
     return
   }
@@ -1131,6 +1185,7 @@ async function enrichBugCapabilities (bugs, req, entities) {
     row.canReopen = allowedTransitions.includes(STATUS.REOPENED) && isCoordinator
     row.canAssign = allowedTransitions.includes(STATUS.ASSIGNED) && isCoordinator
     row.canMoveToPending = allowedTransitions.includes(STATUS.PENDING_ASSIGNMENT) && isCoordinator
+    row.canAddComment = COMMENT_ROLES.has(actorRole)
   }
 }
 

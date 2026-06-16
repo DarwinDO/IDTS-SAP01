@@ -2,7 +2,7 @@
 
 ## Summary
 
-IDTS is a SAP CAP + Fiori Elements/SAPUI5 application for tracking bugs and defects in an SAP software testing environment. The system supports reporting, duplicate checking, classification by SAP module, application component, and defect category, assignment to a suitable developer, developer review, retest before closure, comments, notifications, audit/history logs, and PM monitoring.
+IDTS is a SAP CAP + Fiori Elements/SAPUI5 application for tracking bugs and defects in an SAP software testing environment. The system supports reporting, duplicate checking, classification by SAP module, application component, and defect category, assignment to a suitable developer, developer review, retest before closure, comments, attachments, notifications, audit/history logs, and PM monitoring.
 
 This is not a full Jira replacement and not a source-code workflow system. Developers use IDTS to review assigned bugs, request information, reject wrong assignments, add notes, and update statuses. A rejected bug must continue to a clear follow-up owner and action through `nextProcessor`; rejection is not a silent final state. Code fixes, CI/CD, code review, sprint planning, and mandatory AI root cause analysis are outside the current scope.
 
@@ -64,7 +64,7 @@ Key baseline decisions:
 - Tester selects Application Component and Defect Category in Fiori. The system derives or validates Component Category as the assignment key.
 - Bug should store Application Component, Defect Category, and Component Category with backend consistency validation.
 - Rejected bugs should keep the latest `rejectionReason` on Bug and immutable rejection reasons in HistoryLogs.
-- Attachments in MVP store metadata and `storageRef`; binary storage design is deferred until deployment/storage requirements are explicit.
+- Attachments in MVP store file content in the database together with metadata and `storageRef`; external object storage can be deferred until deployment/storage requirements are explicit.
 - Bugs should have a human-readable `bugNumber` in addition to UUID.
 - SAP Module remains optional context and optional assignment filter, not a mandatory field for every bug.
 - Duplicate checking stores confirmed Duplicate/Similar/Related links in `DuplicateLinks`; runtime candidates are not persisted in MVP.
@@ -79,7 +79,7 @@ Các quyết định chính:
 - Tester chọn Application Component và Defect Category trên Fiori. Hệ thống derive hoặc validate Component Category làm assignment key.
 - Bug nên lưu Application Component, Defect Category và Component Category, kèm backend consistency validation.
 - Bug bị Rejected nên lưu `rejectionReason` mới nhất trên Bug và lưu reason bất biến trong HistoryLogs.
-- Attachment trong MVP chỉ lưu metadata và `storageRef`; thiết kế binary storage được defer đến khi deployment/storage requirement rõ ràng.
+- Attachment trong MVP lưu file content trong database cùng metadata và `storageRef`; thiết kế external object storage có thể defer đến khi deployment/storage requirement rõ ràng.
 - Bug nên có `bugNumber` dễ đọc ngoài UUID.
 - SAP Module là context tùy chọn và filter assignment tùy chọn, không bắt buộc cho mọi bug.
 - Duplicate checking chỉ lưu link Duplicate/Similar/Related đã xác nhận trong `DuplicateLinks`; candidate runtime không persist trong MVP.

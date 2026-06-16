@@ -12,9 +12,11 @@ service BugService @(requires: 'authenticated-user') {
     virtual canSendToRetest       : Boolean,
     virtual canClose              : Boolean,
     virtual canReopen             : Boolean,
-    virtual canAssign             : Boolean,
-    virtual canMoveToPending      : Boolean
+  virtual canAssign             : Boolean,
+  virtual canMoveToPending      : Boolean,
+  virtual canAddComment         : Boolean
   } actions {
+    action addComment(content: LargeString) returns Bugs;
     action assignToDeveloper(
       @Common.ValueList : {
         Label : 'Assignable Developer',

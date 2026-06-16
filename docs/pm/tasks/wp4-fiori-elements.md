@@ -62,7 +62,7 @@ Vietnamese:
 
 - DatDT's generated app was not copied directly because it targets a mock `Defects` service and placeholder URL.
 - Useful UI ideas were translated into CAP CDS annotations for the existing `BugService.Bugs` service.
-- Attachment upload was not copied because the DatDT fragment is static and the IDTS backend does not yet have a complete upload/storage flow.
+- Attachment upload is now implemented in the IDTS flow with backend stream handling; the DatDT fragment was still not copied directly because it is static and tied to a different service structure.
 - The current UI remains annotation-driven Fiori Elements; no custom SAPUI5 controller or fragment was added in this pass.
 - Four IDTS-aligned demo bugs were added under `db/data/idts.cap-Bugs.csv` so the List Report shows data during local review.
 
@@ -70,7 +70,7 @@ Vietnamese:
 
 - Không copy nguyên app generated của DatDT vì app đó trỏ tới mock service `Defects` và URL placeholder.
 - Các ý tưởng UI hữu ích đã được chuyển thành CAP CDS annotation cho service hiện tại `BugService.Bugs`.
-- Chưa copy attachment upload vì fragment của DatDT là static và backend IDTS chưa có flow upload/storage hoàn chỉnh.
+- Attachment upload nay đã được implement trong flow IDTS với backend stream handling; fragment của DatDT vẫn không copy trực tiếp vì nó static và gắn với service structure khác.
 - UI hiện tại vẫn theo hướng Fiori Elements annotation-driven; chưa thêm custom SAPUI5 controller hoặc fragment trong lần này.
 - Đã thêm bốn bug demo phù hợp với IDTS trong `db/data/idts.cap-Bugs.csv` để List Report có dữ liệu khi review local.
 
@@ -128,9 +128,9 @@ Vietnamese:
 
 ## Remaining Notes
 
-English: WP4 remains open for deeper browser QA, action usability tuning, and future attachment upload behavior. The current UI remains annotation-driven Fiori Elements; no custom UI5 controller or fragment was added.
+English: WP4 remains open for deeper browser QA and action usability tuning. Attachment upload behavior is already implemented in the current FE flow. The current UI remains annotation-driven Fiori Elements; no custom UI5 controller or fragment was added.
 
-Vietnamese: WP4 vẫn còn mở cho browser QA sâu hơn, tinh chỉnh usability của action và attachment upload thật sau này. UI hiện tại vẫn theo hướng Fiori Elements annotation-driven; chưa thêm custom UI5 controller hoặc fragment.
+Vietnamese: WP4 vẫn còn mở cho browser QA sâu hơn và tinh chỉnh usability của action. Attachment upload đã được implement trong flow FE hiện tại. UI hiện tại vẫn theo hướng Fiori Elements annotation-driven; chưa thêm custom UI5 controller hoặc fragment.
 
 ## 2026-06-15 Selective Remake_UI Integration
 
