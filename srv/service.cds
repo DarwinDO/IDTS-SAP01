@@ -3,7 +3,17 @@ using idts.cap as db from '../db/schema';
 service BugService {
   entity Bugs as projection on db.Bugs {
     *,
-    assignee.user.displayName as assigneeDisplayName
+    assignee.user.displayName as assigneeDisplayName,
+    virtual canMarkInReview       : Boolean,
+    virtual canStartProgress      : Boolean,
+    virtual canResolve            : Boolean,
+    virtual canRequestMoreInfo    : Boolean,
+    virtual canReject             : Boolean,
+    virtual canSendToRetest       : Boolean,
+    virtual canClose              : Boolean,
+    virtual canReopen             : Boolean,
+    virtual canAssign             : Boolean,
+    virtual canMoveToPending      : Boolean
   } actions {
     action assignToDeveloper(
       @Common.ValueList : {

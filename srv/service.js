@@ -118,8 +118,14 @@ module.exports = class BugService extends cds.ApplicationService {
     this.before('CREATE', Comments, req => prepareCommentCreate(req, entities))
     this.after('CREATE', Bugs, (data, req) => recordCreateSideEffects(req, data, entities))
     this.after('UPDATE', Bugs, (data, req) => recordUpdateSideEffects(req, entities))
-    this.after('READ', Bugs, (bugs, req) => enrichAssigneeDisplayNames(bugs, req, entities))
-    this.after('READ', Bugs.drafts, (bugs, req) => enrichAssigneeDisplayNames(bugs, req, entities))
+    this.after('READ', Bugs, async (bugs, req) => {
+      await enrichAssigneeDisplayNames(bugs, req, entities)
+      await enrichBugCapabilities(bugs, req, entities)
+    })
+    this.after('READ', Bugs.drafts, async (bugs, req) => {
+      await enrichAssigneeDisplayNames(bugs, req, entities)
+      await enrichBugCapabilities(bugs, req, entities)
+    })
 
     this.on('assignToDeveloper', req => assignToDeveloper(req, entities))
     this.on('moveToPendingAssignment', req => transitionBug(req, entities, {
@@ -904,5 +910,54 @@ async function prepareDraftPatch (req, entities) {
     }
   } else {
     req.data.componentCategory_ID = null
+  }
+}
+
+async function enrichBugCapabilities (bugs, req, entities) {
+  const rows = Array.isArray(bugs) ? bugs : [bugs].filter(Boolean)
+  if (!rows.length) return
+
+  const actor = await resolveRequestUser(req, entities)
+  if (!actor) {
+    for (const row of rows) {
+      row.canMarkInReview = false
+      row.canStartProgress = false
+      row.canResolve = false
+      row.canRequestMoreInfo = false
+      row.canReject = false
+      row.canSendToRetest = false
+      row.canClose = false
+      row.canReopen = false
+      row.canAssign = false
+      row.canMoveToPending = false
+    }
+    return
+  }
+
+  const actorRole = actor.role_code
+  const isCoordinator = COORDINATOR_ROLES.has(actorRole)
+
+  for (const row of rows) {
+    const status = row.status_code
+    const assigneeID = row.assignee_ID
+
+    const isDeveloper = (actorRole === USER_ROLE.DEVELOPER)
+    const isAssignedDev = isDeveloper && assigneeID && (await isAssignedDeveloper(req, entities, actor.ID, row))
+
+    const allowedForDeveloper = isAssignedDev
+    const allowedForCoordinator = isCoordinator
+
+    const allowedTransitions = ALLOWED_TRANSITIONS[status] || []
+
+    row.canMarkInReview = allowedTransitions.includes(STATUS.IN_REVIEW) && (allowedForCoordinator || allowedForDeveloper)
+    row.canStartProgress = allowedTransitions.includes(STATUS.IN_PROGRESS) && (allowedForCoordinator || allowedForDeveloper)
+    row.canResolve = allowedTransitions.includes(STATUS.RESOLVED) && (allowedForCoordinator || allowedForDeveloper)
+    row.canRequestMoreInfo = allowedTransitions.includes(STATUS.NEED_MORE_INFORMATION) && (allowedForCoordinator || allowedForDeveloper)
+    row.canReject = allowedTransitions.includes(STATUS.REJECTED) && (allowedForCoordinator || allowedForDeveloper)
+    row.canSendToRetest = allowedTransitions.includes(STATUS.RETEST_REQUIRED) && allowedForCoordinator
+    row.canClose = allowedTransitions.includes(STATUS.CLOSED) && allowedForCoordinator
+    row.canReopen = allowedTransitions.includes(STATUS.REOPENED) && allowedForCoordinator
+    row.canAssign = allowedTransitions.includes(STATUS.ASSIGNED) && allowedForCoordinator
+    row.canMoveToPending = allowedTransitions.includes(STATUS.PENDING_ASSIGNMENT) && allowedForCoordinator
   }
 }

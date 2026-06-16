@@ -4,6 +4,9 @@ annotate service.Bugs with @(
   Capabilities.InsertRestrictions : {
     Insertable : true
   },
+  Capabilities.DeleteRestrictions : {
+    Deletable : false
+  },
   UI.HeaderInfo : {
     TypeName       : 'Bug',
     TypeNamePlural : 'Bugs',
@@ -21,61 +24,61 @@ annotate service.Bugs with @(
       $Type  : 'UI.DataFieldForAction',
       Label  : 'Assign Developer',
       Action : 'BugService.assignToDeveloper',
-      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
+      ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canAssign' } } }
     },
     {
       $Type  : 'UI.DataFieldForAction',
       Label  : 'Move to Pending Assignment',
       Action : 'BugService.moveToPendingAssignment',
-      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
+      ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canMoveToPending' } } }
     },
     {
       $Type  : 'UI.DataFieldForAction',
       Label  : 'Mark In Review',
       Action : 'BugService.markInReview',
-      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
+      ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canMarkInReview' } } }
     },
     {
       $Type  : 'UI.DataFieldForAction',
       Label  : 'Request More Information',
       Action : 'BugService.requestMoreInformation',
-      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
+      ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canRequestMoreInfo' } } }
     },
     {
       $Type  : 'UI.DataFieldForAction',
       Label  : 'Reject Bug',
       Action : 'BugService.rejectBug',
-      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
+      ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canReject' } } }
     },
     {
       $Type  : 'UI.DataFieldForAction',
       Label  : 'Start Progress',
       Action : 'BugService.startProgress',
-      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
+      ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canStartProgress' } } }
     },
     {
       $Type  : 'UI.DataFieldForAction',
       Label  : 'Resolve Bug',
       Action : 'BugService.resolveBug',
-      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
+      ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canResolve' } } }
     },
     {
       $Type  : 'UI.DataFieldForAction',
       Label  : 'Send to Retest',
       Action : 'BugService.sendToRetest',
-      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
+      ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canSendToRetest' } } }
     },
     {
       $Type  : 'UI.DataFieldForAction',
       Label  : 'Close Bug',
       Action : 'BugService.closeBug',
-      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
+      ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canClose' } } }
     },
     {
       $Type  : 'UI.DataFieldForAction',
       Label  : 'Reopen Bug',
       Action : 'BugService.reopenBug',
-      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
+      ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canReopen' } } }
     }
   ],
   UI.SelectionFields : [

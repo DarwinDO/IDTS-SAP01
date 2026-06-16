@@ -9,7 +9,7 @@ Last updated: 2026-06-16
 | Project phase | Sprint 02 integration: PR #1, PR #2, DonHV backend, and SAP490 documentation branches consolidated into `dev` |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
 | Current sprint | Sprint 02 focuses on mentor feedback, happy flow demo, backend note/reason validation, and Bug Detail UI refinements |
-| Recommended next action | Run manual create-save QA and Bug Detail usability review with DatDT/SangVN, close remaining Sprint 02 issues `IDTS-5`, `IDTS-8`, `IDTS-10`, `IDTS-11`, and prepare the final demo under `IDTS-12` |
+| Recommended next action | Prepare the final demo script under `IDTS-12` and compile/verify all final deliverables for Sprint 2 review |
 | Main implementation risk | Fiori screens and backend handlers now exist, but deeper browser QA, real attachment upload, external notification delivery, production XSUAA authorization, and automated tests are still incomplete |
 
 ## What Is Already Done
