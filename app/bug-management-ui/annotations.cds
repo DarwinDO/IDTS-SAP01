@@ -3,17 +3,7 @@ using BugService as service from '../../srv/service';
 annotate service.Bugs with @(
   Capabilities.InsertRestrictions : {
     Insertable : true,
-    RequiredProperties : [
-      title,
-      description,
-      priority_code,
-      severity_code,
-      applicationComponent_ID,
-      defectCategory_ID,
-      stepsToReproduce,
-      actualResult,
-      expectedResult
-    ]
+    RequiredProperties : [ title ]
   },
   UI.HeaderInfo : {
     TypeName       : 'Bug',
@@ -286,6 +276,16 @@ annotate service.Bugs with {
 };
 
 annotate service.Bugs:componentCategory.ID with @UI.Hidden @Core.Computed;
+
+// Fix UI-BUG-001 / UI-BUG-002: show associated entity names instead of raw UUIDs
+// @Common.Text on the association element tells Fiori Elements to display the
+// target text property in view mode; edit mode still uses value help on _ID
+annotate service.Bugs with {
+  sapModule            @Common.Text : sapModule.name             @Common.TextArrangement : #TextOnly;
+  applicationComponent @Common.Text : applicationComponent.name  @Common.TextArrangement : #TextOnly;
+  defectCategory       @Common.Text : defectCategory.name        @Common.TextArrangement : #TextOnly;
+  reporter             @Common.Text : reporter.displayName        @Common.TextArrangement : #TextOnly;
+};
 
 annotate service.Bugs:status.code with @Common.ValueListWithFixedValues : true @Common.ValueList : {
     Label : 'Status',

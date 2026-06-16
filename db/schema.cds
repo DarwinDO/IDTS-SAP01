@@ -82,19 +82,19 @@ entity DeveloperResponsibilities : cuid, managed {
 entity Bugs : cuid, managed {
   bugNumber              : String(30)         @Common.Label : 'Bug Number';
   title                  : String(255) not null @Common.Label : 'Title';
-  description            : LargeString not null @Common.Label : 'Description';
+  description            : LargeString        @Common.Label : 'Description';
   status                 : Association to StatusValues not null;
-  priority               : Association to PriorityValues not null;
-  severity               : Association to SeverityValues not null;
+  priority               : Association to PriorityValues;
+  severity               : Association to SeverityValues;
   environment            : Association to EnvironmentValues;
   environmentDetail      : String(255)        @Common.Label : 'Environment Detail';
-  stepsToReproduce       : LargeString not null @Common.Label : 'Steps to Reproduce';
-  actualResult           : LargeString not null @Common.Label : 'Actual Result';
-  expectedResult         : LargeString not null @Common.Label : 'Expected Result';
+  stepsToReproduce       : LargeString        @Common.Label : 'Steps to Reproduce';
+  actualResult           : LargeString        @Common.Label : 'Actual Result';
+  expectedResult         : LargeString        @Common.Label : 'Expected Result';
   sapModule              : Association to SAPModules;
-  applicationComponent   : Association to ApplicationComponents not null;
-  defectCategory         : Association to DefectCategories not null;
-  componentCategory      : Association to ComponentCategories not null;
+  applicationComponent   : Association to ApplicationComponents;
+  defectCategory         : Association to DefectCategories;
+  componentCategory      : Association to ComponentCategories;
   reporter               : Association to Users not null;
   assignee               : Association to DeveloperProfiles;
   nextProcessorUser      : Association to Users;

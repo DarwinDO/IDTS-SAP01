@@ -114,6 +114,10 @@ module.exports = class BugService extends cds.ApplicationService {
 
     this.before('CREATE', Bugs, req => prepareBugWrite(req, entities, { isCreate: true }))
     this.before('UPDATE', Bugs, req => prepareBugWrite(req, entities, { isCreate: false }))
+    // Full required-field validation only on draft activation (user clicks Save)
+    this.before('draftActivate', Bugs, req => {
+      if (req.data) validateRequiredBugFields(req, req.data)
+    })
     this.before('CREATE', Comments, req => prepareCommentCreate(req, entities))
     this.after('CREATE', Bugs, (data, req) => recordCreateSideEffects(req, data, entities))
     this.after('UPDATE', Bugs, (data, req) => recordUpdateSideEffects(req, entities))
@@ -198,7 +202,12 @@ async function prepareBugWrite (req, entities, { isCreate }) {
   }
 
   const merged = { ...oldBug, ...req.data }
-  validateRequiredBugFields(req, merged)
+  if (isCreate) {
+    // Draft creation: only require title so the Create dialog can navigate to the Object Page
+    if (!trimToNull(merged.title)) req.error(400, 'Title is required.', 'title')
+  } else {
+    validateRequiredBugFields(req, merged)
+  }
   await deriveOrValidateComponentCategory(req, entities, merged)
 
   const finalData = { ...oldBug, ...req.data }

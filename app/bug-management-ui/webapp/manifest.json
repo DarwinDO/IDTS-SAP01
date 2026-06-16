@@ -122,7 +122,12 @@
                       "filter": true
                     },
                     "creationMode": {
-                      "name": "NewPage"
+                      "name": "NewPage",
+                      "createWithParameterDialog": {
+                        "fields": {
+                          "title": { "display": "mandatory" }
+                        }
+                      }
                     },
                     "selectionMode": "Multi"
                   }
