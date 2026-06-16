@@ -20,52 +20,62 @@ annotate service.Bugs with @(
     {
       $Type  : 'UI.DataFieldForAction',
       Label  : 'Assign Developer',
-      Action : 'BugService.assignToDeveloper'
+      Action : 'BugService.assignToDeveloper',
+      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
     },
     {
       $Type  : 'UI.DataFieldForAction',
       Label  : 'Move to Pending Assignment',
-      Action : 'BugService.moveToPendingAssignment'
+      Action : 'BugService.moveToPendingAssignment',
+      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
     },
     {
       $Type  : 'UI.DataFieldForAction',
       Label  : 'Mark In Review',
-      Action : 'BugService.markInReview'
+      Action : 'BugService.markInReview',
+      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
     },
     {
       $Type  : 'UI.DataFieldForAction',
       Label  : 'Request More Information',
-      Action : 'BugService.requestMoreInformation'
+      Action : 'BugService.requestMoreInformation',
+      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
     },
     {
       $Type  : 'UI.DataFieldForAction',
       Label  : 'Reject Bug',
-      Action : 'BugService.rejectBug'
+      Action : 'BugService.rejectBug',
+      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
     },
     {
       $Type  : 'UI.DataFieldForAction',
       Label  : 'Start Progress',
-      Action : 'BugService.startProgress'
+      Action : 'BugService.startProgress',
+      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
     },
     {
       $Type  : 'UI.DataFieldForAction',
       Label  : 'Resolve Bug',
-      Action : 'BugService.resolveBug'
+      Action : 'BugService.resolveBug',
+      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
     },
     {
       $Type  : 'UI.DataFieldForAction',
       Label  : 'Send to Retest',
-      Action : 'BugService.sendToRetest'
+      Action : 'BugService.sendToRetest',
+      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
     },
     {
       $Type  : 'UI.DataFieldForAction',
       Label  : 'Close Bug',
-      Action : 'BugService.closeBug'
+      Action : 'BugService.closeBug',
+      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
     },
     {
       $Type  : 'UI.DataFieldForAction',
       Label  : 'Reopen Bug',
-      Action : 'BugService.reopenBug'
+      Action : 'BugService.reopenBug',
+      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
     }
   ],
   UI.SelectionFields : [
@@ -96,33 +106,8 @@ annotate service.Bugs with @(
   UI.Facets : [
     {
       $Type  : 'UI.CollectionFacet',
-      ID     : 'Ownership',
-      Label  : 'Assignment and Follow-up',
-      Facets : [
-        {
-          $Type  : 'UI.ReferenceFacet',
-          ID     : 'Assignment',
-          Label  : 'Assignment',
-          Target : '@UI.FieldGroup#Assignment'
-        },
-        {
-          $Type  : 'UI.ReferenceFacet',
-          ID     : 'RejectedFollowUp',
-          Label  : 'Rejected Follow-up',
-          Target : '@UI.FieldGroup#RejectedFollowUp'
-        },
-        {
-          $Type  : 'UI.ReferenceFacet',
-          ID     : 'Planning',
-          Label  : 'Planning',
-          Target : '@UI.FieldGroup#Planning'
-        }
-      ]
-    },
-    {
-      $Type  : 'UI.CollectionFacet',
       ID     : 'BugDetails',
-      Label  : 'Bug Details',
+      Label: 'Bug Summary',
       Facets : [
         {
           $Type  : 'UI.ReferenceFacet',
@@ -135,7 +120,14 @@ annotate service.Bugs with @(
           ID     : 'SupportingInfo',
           Label  : 'Supporting Information',
           Target : '@UI.FieldGroup#SupportingInfo'
-        },
+        }
+      ]
+    },
+    {
+      $Type  : 'UI.CollectionFacet',
+      ID     : 'ClassificationAndAssignment',
+      Label: 'Classification and Assignment',
+      Facets : [
         {
           $Type  : 'UI.ReferenceFacet',
           ID     : 'Classification',
@@ -144,9 +136,36 @@ annotate service.Bugs with @(
         },
         {
           $Type  : 'UI.ReferenceFacet',
+          ID     : 'Assignment',
+          Label  : 'Assignment',
+          Target : '@UI.FieldGroup#Assignment'
+        },
+        {
+          $Type  : 'UI.ReferenceFacet',
+          ID     : 'RejectedFollowUp',
+          Label  : 'Rejected Follow-up',
+          Target: '@UI.FieldGroup#RejectedFollowUp',
+          ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
+        },
+        {
+          $Type  : 'UI.ReferenceFacet',
+          ID     : 'Planning',
+          Label  : 'Planning',
+          Target: '@UI.FieldGroup#Planning',
+          ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
+        }
+      ]
+    },
+    {
+      $Type  : 'UI.CollectionFacet',
+      ID     : 'ReproductionFacet',
+      Label: 'Reproduction and Test Context',
+      Facets : [
+        {
+          $Type  : 'UI.ReferenceFacet',
           ID     : 'Reproduction',
-          Label  : 'Reproduction and Results',
-          Target : '@UI.FieldGroup#Reproduction'
+          Label  : 'Reproduction and Test Context',
+          Target: '@UI.FieldGroup#Reproduction'
         }
       ]
     },
@@ -154,37 +173,41 @@ annotate service.Bugs with @(
       $Type  : 'UI.ReferenceFacet',
       ID     : 'Comments',
       Label  : 'Comments',
-      Target : 'comments/@UI.LineItem'
+      Target : 'comments/@UI.LineItem',
+      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
     },
     {
       $Type  : 'UI.ReferenceFacet',
       ID     : 'Attachments',
       Label  : 'Attachments',
-      Target : 'attachments/@UI.LineItem'
+      Target : 'attachments/@UI.LineItem',
+      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
     },
     {
       $Type  : 'UI.ReferenceFacet',
       ID     : 'History',
       Label  : 'History',
-      Target : 'historyLogs/@UI.LineItem'
+      Target : 'historyLogs/@UI.LineItem',
+      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
     },
     {
       $Type  : 'UI.ReferenceFacet',
       ID     : 'Notifications',
       Label  : 'Notifications',
-      Target : 'notifications/@UI.LineItem'
+      Target : 'notifications/@UI.LineItem',
+      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
     }
   ],
   UI.FieldGroup #GeneralInfo : {
     Data : [
-      { $Type : 'UI.DataField', Label : 'Bug Number', Value : bugNumber },
+      { $Type : 'UI.DataField', Label : 'Bug Number', Value : bugNumber, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} },
       { $Type : 'UI.DataField', Label : 'Title', Value : title },
       { $Type : 'UI.DataField', Label : 'Description', Value : description },
-      { $Type : 'UI.DataField', Label : 'Status', Value : status_code, Criticality : status.criticality, CriticalityRepresentation : #WithoutIcon },
+      { $Type : 'UI.DataField', Label : 'Status', Value : status_code, Criticality : status.criticality, CriticalityRepresentation : #WithoutIcon, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} },
       { $Type : 'UI.DataField', Label : 'Priority', Value : priority_code, Criticality : priority.criticality, CriticalityRepresentation : #WithoutIcon },
-      { $Type : 'UI.DataField', Label : 'Reporter', Value : reporter_ID },
-      { $Type : 'UI.DataField', Label : 'Created At', Value : createdAt },
-      { $Type : 'UI.DataField', Label : 'Updated At', Value : modifiedAt }
+      { $Type : 'UI.DataField', Label : 'Reporter', Value : reporter.displayName, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} },
+      { $Type : 'UI.DataField', Label : 'Created At', Value : createdAt, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} },
+      { $Type : 'UI.DataField', Label : 'Updated At', Value : modifiedAt, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} }
     ]
   },
   UI.FieldGroup #SupportingInfo : {
@@ -212,9 +235,9 @@ annotate service.Bugs with @(
   },
   UI.FieldGroup #Assignment : {
     Data : [
-      { $Type : 'UI.DataField', Label : 'Assignee', Value : assignee.user.displayName },
-      { $Type : 'UI.DataField', Label : 'Next Processor User', Value : nextProcessorUser.displayName },
-      { $Type : 'UI.DataField', Label : 'Next Processor Role', Value : nextProcessorRole.name }
+      { $Type : 'UI.DataField', Label : 'Assignee', Value : assignee_ID },
+      { $Type : 'UI.DataField', Label : 'Next Processor User', Value : nextProcessorUser.displayName, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} },
+      { $Type : 'UI.DataField', Label : 'Next Processor Role', Value : nextProcessorRole.name, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} }
     ]
   },
   UI.FieldGroup #RejectedFollowUp : {
@@ -252,10 +275,10 @@ annotate service.Bugs with {
   applicationComponent  @Common.Label : 'Application Component' @Common.FieldControl : #Mandatory;
   defectCategory        @Common.Label : 'Defect Category' @Common.FieldControl : #Mandatory;
   componentCategory     @Common.Label : 'Component Category';
-  reporter              @Common.Label : 'Reporter';
+  reporter              @Common.Label : 'Reporter' @Common.FieldControl : #ReadOnly;
   assignee              @Common.Label : 'Assignee';
-  nextProcessorUser     @Common.Label : 'Next Processor User';
-  nextProcessorRole     @Common.Label : 'Next Processor Role';
+  nextProcessorUser     @Common.Label : 'Next Processor User' @Common.FieldControl : #ReadOnly;
+  nextProcessorRole     @Common.Label : 'Next Processor Role' @Common.FieldControl : #ReadOnly;
   componentCategory     @UI.Hidden @Core.Computed;
 };
 
@@ -333,7 +356,7 @@ annotate service.Bugs:environment.code with @Common.ValueList : {
     ]
   };
 
-annotate service.Bugs:sapModule.ID with @Common.ValueList : {
+annotate service.Bugs:sapModule.ID with @Common.Text : sapModule.name @Common.TextArrangement : #TextOnly @Common.ValueList : {
     Label : 'SAP Module',
     CollectionPath : 'SAPModules',
     SearchSupported : true,
@@ -354,7 +377,7 @@ annotate service.Bugs:sapModule.ID with @Common.ValueList : {
     ]
   };
 
-annotate service.Bugs:applicationComponent.ID with @Common.ValueList : {
+annotate service.Bugs:applicationComponent.ID with @Common.Text : applicationComponent.name @Common.TextArrangement : #TextOnly @Common.ValueList : {
     Label : 'Application Component',
     CollectionPath : 'ApplicationComponents',
     SearchSupported : true,
@@ -379,7 +402,7 @@ annotate service.Bugs:applicationComponent.ID with @Common.ValueList : {
     ]
   };
 
-annotate service.Bugs:defectCategory.ID with @Common.ValueList : {
+annotate service.Bugs:defectCategory.ID with @Common.Text : defectCategory.name @Common.TextArrangement : #TextOnly @Common.ValueList : {
     Label : 'Defect Category',
     CollectionPath : 'DefectCategories',
     SearchSupported : true,
@@ -404,24 +427,51 @@ annotate service.Bugs:defectCategory.ID with @Common.ValueList : {
     ]
   };
 
-annotate service.Bugs:assignee.ID with @Common.ValueList : {
+annotate service.Bugs:assignee.ID with @Common.Label : 'Assignee'
+  @Common.Text : assigneeDisplayName
+  @Common.TextArrangement : #TextOnly
+  @Common.ValueList : {
     Label : 'Assignable Developer',
-    CollectionPath : 'DeveloperResponsibilities',
+    CollectionPath : 'AssignableDevelopers',
     SearchSupported : true,
     Parameters : [
       {
         $Type : 'Common.ValueListParameterInOut',
         LocalDataProperty : assignee_ID,
-        ValueListProperty : 'developerProfile_ID'
+        ValueListProperty : 'developerProfileID'
       },
       {
         $Type : 'Common.ValueListParameterIn',
         LocalDataProperty : componentCategory_ID,
-        ValueListProperty : 'componentCategory_ID'
+        ValueListProperty : 'componentCategoryID'
       },
       {
         $Type : 'Common.ValueListParameterDisplayOnly',
-        ValueListProperty : 'responsibilityLevel_code'
+        ValueListProperty : 'developerName'
+      },
+      {
+        $Type : 'Common.ValueListParameterDisplayOnly',
+        ValueListProperty : 'developerEmail'
+      },
+      {
+        $Type : 'Common.ValueListParameterDisplayOnly',
+        ValueListProperty : 'availabilityStatusName'
+      },
+      {
+        $Type : 'Common.ValueListParameterDisplayOnly',
+        ValueListProperty : 'applicationComponentName'
+      },
+      {
+        $Type : 'Common.ValueListParameterDisplayOnly',
+        ValueListProperty : 'defectCategoryName'
+      },
+      {
+        $Type : 'Common.ValueListParameterDisplayOnly',
+        ValueListProperty : 'sapModuleName'
+      },
+      {
+        $Type : 'Common.ValueListParameterDisplayOnly',
+        ValueListProperty : 'responsibilityLevelName'
       }
     ]
   };
@@ -706,3 +756,99 @@ annotate service.Bugs actions {
     reason @UI.MultiLineText @Common.Label : 'Reason'
   );
 }
+
+annotate service.StatusValues with {
+  code      @Common.Label : 'Status Code';
+  name      @Common.Label : 'Status';
+  descr     @Common.Label : 'Description';
+  sortOrder @Common.Label : 'Sort Order';
+};
+
+annotate service.PriorityValues with {
+  code      @Common.Label : 'Priority Code';
+  name      @Common.Label : 'Priority';
+  descr     @Common.Label : 'Description';
+  sortOrder @Common.Label : 'Sort Order';
+};
+
+annotate service.SeverityValues with {
+  code      @Common.Label : 'Severity Code';
+  name      @Common.Label : 'Severity';
+  descr     @Common.Label : 'Description';
+  sortOrder @Common.Label : 'Sort Order';
+};
+
+annotate service.EnvironmentValues with {
+  code      @Common.Label : 'Environment Code';
+  name      @Common.Label : 'Environment';
+  descr     @Common.Label : 'Description';
+  sortOrder @Common.Label : 'Sort Order';
+};
+
+annotate service.ProcessorRoleValues with {
+  code  @Common.Label : 'Processor Role Code';
+  name  @Common.Label : 'Processor Role';
+  descr @Common.Label : 'Description';
+};
+
+annotate service.SAPModules with {
+  ID     @UI.Hidden;
+  code   @Common.Label : 'SAP Module Code';
+  name   @Common.Label : 'SAP Module';
+  active @Common.Label : 'Active';
+};
+
+annotate service.ApplicationComponents with {
+  ID            @UI.Hidden;
+  code          @Common.Label : 'Component Code';
+  name          @Common.Label : 'Application Component';
+  componentType @Common.Label : 'Component Type';
+  active        @Common.Label : 'Active';
+};
+
+annotate service.DefectCategories with {
+  ID           @UI.Hidden;
+  code         @Common.Label : 'Category Code';
+  name         @Common.Label : 'Defect Category';
+  categoryType @Common.Label : 'Category Type';
+  active       @Common.Label : 'Active';
+};
+
+annotate service.AssignableDevelopers with @(
+  UI.SelectionFields : [ developerName, developerEmail, applicationComponentName, defectCategoryName, sapModuleName, responsibilityLevelName, active ],
+  UI.LineItem : [
+    { $Type : 'UI.DataField', Label : 'Developer', Value : developerName },
+    { $Type : 'UI.DataField', Label : 'Email', Value : developerEmail },
+    { $Type : 'UI.DataField', Label : 'Availability', Value : availabilityStatusName, Criticality : availabilityCriticality },
+    { $Type : 'UI.DataField', Label : 'Application Component', Value : applicationComponentName },
+    { $Type : 'UI.DataField', Label : 'Defect Category', Value : defectCategoryName },
+    { $Type : 'UI.DataField', Label : 'SAP Module Scope', Value : sapModuleName },
+    { $Type : 'UI.DataField', Label : 'Responsibility Level', Value : responsibilityLevelName },
+    { $Type : 'UI.DataField', Label : 'Active', Value : active }
+  ]
+);
+
+annotate service.AssignableDevelopers with {
+  ID                       @UI.Hidden;
+  developerProfileID       @UI.Hidden @Common.Label : 'Developer ID';
+  componentCategoryID      @UI.Hidden @Common.Label : 'Component Category ID';
+  sapModuleID              @UI.Hidden @Common.Label : 'SAP Module ID';
+  developerName            @Common.Label : 'Developer';
+  developerEmail           @Common.Label : 'Email';
+  availabilityStatusName   @Common.Label : 'Availability';
+  applicationComponentName @Common.Label : 'Application Component';
+  defectCategoryName       @Common.Label : 'Defect Category';
+  sapModuleName            @Common.Label : 'SAP Module Scope';
+  responsibilityLevelName  @Common.Label : 'Responsibility Level';
+};
+
+annotate service.Bugs with @(
+  Common.SideEffects #ComponentCategoryDerivation: {
+    SourceProperties : [applicationComponent_ID, defectCategory_ID],
+    TargetProperties : ['componentCategory_ID']
+  },
+  Common.SideEffects #AssigneeDisplayNameRefresh: {
+    SourceProperties : [assignee_ID],
+    TargetProperties : ['assigneeDisplayName']
+  }
+);

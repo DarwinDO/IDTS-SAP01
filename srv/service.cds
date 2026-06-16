@@ -1,25 +1,40 @@
 using idts.cap as db from '../db/schema';
 
 service BugService {
-  entity Bugs as projection on db.Bugs actions {
+  entity Bugs as projection on db.Bugs {
+    *,
+    assignee.user.displayName as assigneeDisplayName
+  } actions {
     action assignToDeveloper(
       @Common.ValueList : {
         Label : 'Assignable Developer',
-        CollectionPath : 'DeveloperProfiles',
+        CollectionPath : 'AssignableDevelopers',
         SearchSupported : true,
         Parameters : [
           {
             $Type : 'Common.ValueListParameterInOut',
             LocalDataProperty : assigneeID,
-            ValueListProperty : 'ID'
+            ValueListProperty : 'developerProfileID'
           },
           {
             $Type : 'Common.ValueListParameterDisplayOnly',
-            ValueListProperty : 'user_ID'
+            ValueListProperty : 'developerName'
           },
           {
             $Type : 'Common.ValueListParameterDisplayOnly',
-            ValueListProperty : 'availabilityStatus_code'
+            ValueListProperty : 'developerEmail'
+          },
+          {
+            $Type : 'Common.ValueListParameterDisplayOnly',
+            ValueListProperty : 'availabilityStatusName'
+          },
+          {
+            $Type : 'Common.ValueListParameterDisplayOnly',
+            ValueListProperty : 'applicationComponentName'
+          },
+          {
+            $Type : 'Common.ValueListParameterDisplayOnly',
+            ValueListProperty : 'defectCategoryName'
           }
         ]
       }
@@ -50,6 +65,21 @@ service BugService {
   entity DefectCategories as projection on db.DefectCategories;
   entity ComponentCategories as projection on db.ComponentCategories;
   entity DeveloperResponsibilities as projection on db.DeveloperResponsibilities;
+  entity AssignableDevelopers as select from db.DeveloperResponsibilities {
+    key ID,
+    developerProfile.ID as developerProfileID,
+    developerProfile.user.displayName as developerName,
+    developerProfile.user.email as developerEmail,
+    developerProfile.availabilityStatus.name as availabilityStatusName,
+    developerProfile.availabilityStatus.criticality as availabilityCriticality,
+    componentCategory.ID as componentCategoryID,
+    componentCategory.component.name as applicationComponentName,
+    componentCategory.defectCategory.name as defectCategoryName,
+    sapModule.ID as sapModuleID,
+    sapModule.name as sapModuleName,
+    responsibilityLevel.name as responsibilityLevelName,
+    active
+  };
 
   entity UserRoles as projection on db.UserRoles;
   entity StatusValues as projection on db.StatusValues;

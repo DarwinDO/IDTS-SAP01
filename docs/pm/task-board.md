@@ -1,6 +1,6 @@
 # IDTS Task Board
 
-Last updated: 2026-06-15
+Last updated: 2026-06-16
 
 Use this board for high-level movement only. Detailed task notes belong in the matching file under `docs/pm/tasks/`.
 
@@ -53,14 +53,14 @@ Vietnamese:
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
 | SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 6 Done (`IDTS-2`, `3`, `4`, `6`, `7`, `9`), 4 In Progress (`IDTS-5`, `8`, `10`, `11`), and 2 To Do (`IDTS-1`, `12`). GitHub PR #1 and PR #2, plus both DonHV branches, were integrated into `dev` on 2026-06-15. |
-| WP4 | Fiori Elements UX | DatDT | Core List/Object/Create/Assignment/Developer Review metadata is updated; GridTable and draft-enabled Create Bug dialog refinement applied. Deeper QA and attachment upload remain. |
+| WP4 | Fiori Elements UX | DatDT | Core layout, dynamic creation hiding, and assignee value help are completed (Option B verified). Deeper UI QA and attachment upload remain. |
 
 Vietnamese:
 
 | ID | Công việc | Thành viên chính | Ghi chú |
 | --- | --- | --- | --- |
 | SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 6 Done (`IDTS-2`, `3`, `4`, `6`, `7`, `9`), 4 In Progress (`IDTS-5`, `8`, `10`, `11`), và 2 To Do (`IDTS-1`, `12`). GitHub PR #1, PR #2 và hai nhánh của DonHV đã được tích hợp vào `dev` ngày 2026-06-15. |
-| WP4 | Fiori Elements UX | DatDT | Metadata cho List/Object/Create/Assignment/Developer Review đã cập nhật; đã tinh chỉnh GridTable và dialog Create Bug bằng draft. Vẫn còn QA sâu và attachment upload. |
+| WP4 | Fiori Elements UX | DatDT | Đã hoàn thành cấu trúc giao diện chính, ẩn động trang tạo mới và Value Help Assignee (Option B đã verify). QA sâu giao diện và upload đính kèm còn chờ. |
 
 ## Blocked
 

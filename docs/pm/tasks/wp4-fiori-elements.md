@@ -1,12 +1,12 @@
 # WP4 - Fiori Elements UX
 
-Status: In Progress - Option B create-page prototype completed; Option C comparison pending
+Status: In Progress - Option B Create Flow completed, other WP4 elements in progress
 Owner workstream: Fiori/UI5
 Primary member: DatDT
 Support: DonHV, NhanT
-Last updated: 2026-06-15
+Last updated: 2026-06-16
 
-Vietnamese: WP4 đang ở trạng thái In Progress. DatDT phụ trách chính Fiori/UI5; DonHV và NhanT hỗ trợ/review khi cần.
+Vietnamese: WP4 đang thực hiện - Đã hoàn thành Option B tạo bug sạch sẽ và verify thực tế; các phần khác của WP4 đang tiếp tục.
 
 ## Goal
 
@@ -42,8 +42,8 @@ Vietnamese:
 | WP4-T04 | Add dependent value-help behavior where supported by annotations/service. | Completed for MVP annotation support; deeper UX QA pending |
 | WP4-T05 | Add semantic status display. | Completed for MVP; semantic colors kept without default icons |
 | WP4-T06 | Add visible Rejected follow-up information: rejection reason, nextProcessor/queue, and allowed follow-up actions. | Completed for MVP; fields and Object Page actions available |
-| WP4-T07 | Verify UI with local preview and relevant lint/tooling. | Compile/build verification completed; browser smoke in progress |
-| WP4-T08 | Compare the standard full-page create flow (Option B) with a custom guided create page (Option C). | Option B completed and verified; Option C pending on a separate branch |
+| WP4-T07 | Verify UI with local preview and relevant lint/tooling. | Completed; browser smoke tests verified on local server |
+| WP4-T08 | Compare the standard full-page create flow (Option B) with a custom guided create page (Option C). | Option B finalized and verified; Option C kept as reference prototype |
 
 Vietnamese:
 
@@ -55,8 +55,8 @@ Vietnamese:
 | WP4-T04 | Thêm dependent value-help khi annotation/service hỗ trợ. | Hoàn thành support annotation mức MVP; QA sâu còn chờ |
 | WP4-T05 | Thêm hiển thị semantic status. | Hoàn thành mức MVP; giữ màu semantic nhưng bỏ icon mặc định |
 | WP4-T06 | Hiển thị Rejected follow-up: rejection reason, nextProcessor/queue, và action tiếp theo. | Hoàn thành mức MVP; field và action đã có |
-| WP4-T07 | Verify UI bằng local preview và lint/tooling phù hợp. | Đã hoàn thành compile/build verification; browser smoke đang kiểm tra |
-| WP4-T08 | So sánh create flow full-page chuẩn (Option B) với custom guided create page (Option C). | Option B đã hoàn thành và verify; Option C đang chờ trên branch riêng |
+| WP4-T07 | Verify UI bằng local preview và lint/tooling phù hợp. | Hoàn thành; kiểm tra browser smoke đã xác nhận |
+| WP4-T08 | So sánh create flow full-page chuẩn (Option B) với custom guided create page (Option C). | Option B đã hoàn thành, làm sạch và verify; Option C giữ làm prototype tham khảo |
 
 ## Current Implementation Notes
 
@@ -165,6 +165,38 @@ English:
 - Verified a complete draft activation returns HTTP 201, generates a bug number, derives Component Category, assigns the fallback Tester reporter, and starts in `Pending Assignment`.
 - Branch: `feature/idts-create-flow-option-b-donhv`.
 
+## 2026-06-16 Assignee Value Help Display Fix
+
+English:
+
+- Added a dedicated `AssignableDevelopers` value-help projection so the Assignee picker shows developer name, email, availability, application component, defect category, SAP module scope, and responsibility level instead of technical database columns.
+- Added `assigneeDisplayName` enrichment for both active `Bugs` and `Bugs.drafts`, allowing Fiori draft side-effect reads to show `DatDT` instead of the raw developer UUID after selection.
+- Added property-level labels for common value-list entities so representative popups such as Priority show `Priority Code` and `Priority` instead of `code` and `name`.
+- Verified with Playwright CLI only; Playwright MCP was not used.
+
+Vietnamese:
+
+- Thêm projection value help riêng `AssignableDevelopers` để popup chọn Assignee hiển thị tên developer, email, availability, application component, defect category, SAP module scope và responsibility level thay vì cột kỹ thuật trong database.
+- Thêm enrichment `assigneeDisplayName` cho cả active `Bugs` và `Bugs.drafts`, giúp Fiori draft side-effect read hiển thị `DatDT` thay vì UUID của developer sau khi chọn.
+- Thêm label ở property-level cho các value-list entity phổ biến để các popup đại diện như Priority hiển thị `Priority Code` và `Priority` thay vì `code` và `name`.
+- Đã verify chỉ bằng Playwright CLI; không dùng Playwright MCP.
+
+## 2026-06-16 SAP490 Functional/Test Deliverable Update
+
+English:
+
+- Generated SAP490 Functional Specification v0.1 as separate English and Vietnamese workbooks from the school `Functional_Specification.xlsx` template.
+- Generated SAP490 Test and Fix Bug v0.2 as separate English and Vietnamese workbooks from the school `Test_And_Fix_Bug.xlsx` template.
+- Functional Specification records the target C-prime Create/Object Page flow for WP4: General Information first, Classification and Assignment second, and Reproduction/Test Context third.
+- Test and Fix Bug v0.2 records the fixed Assignee value help issues and the remaining layout refinement decision.
+
+Vietnamese:
+
+- Đã generate SAP490 Functional Specification v0.1 thành hai workbook tiếng Anh và tiếng Việt riêng từ template `Functional_Specification.xlsx` của trường.
+- Đã generate SAP490 Test and Fix Bug v0.2 thành hai workbook tiếng Anh và tiếng Việt riêng từ template `Test_And_Fix_Bug.xlsx` của trường.
+- Functional Specification ghi target flow C-prime cho Create/Object Page của WP4: General Information trước, Classification and Assignment thứ hai, và Reproduction/Test Context thứ ba.
+- Test and Fix Bug v0.2 ghi các lỗi Assignee value help đã fix và decision refine layout còn lại.
+
 Vietnamese:
 
 - Bỏ `Capabilities.InsertRestrictions.RequiredProperties` và vẫn giữ creation mode của List Report là `NewPage`.
@@ -173,3 +205,21 @@ Vietnamese:
 - Đã verify activate draft rỗng trả HTTP 400 cùng lỗi field bắt buộc.
 - Đã verify draft đầy đủ activate thành công với HTTP 201, sinh bug number, derive Component Category, gán Tester reporter mặc định và bắt đầu ở `Pending Assignment`.
 - Branch: `feature/idts-create-flow-option-b-donhv`.
+
+## 2026-06-16 Option B Refinement and Backend Hardening
+
+English:
+
+- Refined Fiori annotations to dynamically hide child facets (Comments, Attachments, History, Notifications, Planning, and Rejected Follow-up) and system-managed fields (Bug Number, Status, Reporter, Created/Modified dates, Next Processor) during bug creation.
+- Used OData V4 EDM JSON expressions based on `IsActiveEntity = false and HasActiveEntity = false` to target new creation drafts specifically, preventing layout disruption when editing existing bugs.
+- Fixed the Assignee selection field by binding it directly to `assignee_ID` with Value Help, making it fully editable during creation.
+- Hardened backend handlers in `srv/service.js` to always overwrite `bugNumber`, `reporter_ID` (with actual logged-in user ID), and `status_code` on bug creation, blocking client-side parameter injection.
+- Verified using a Playwright browser subagent that the create page has a clean layout, hidden tables/planning/rejection facets, and a functional Assignee lookup.
+
+Vietnamese:
+
+- Tinh chỉnh annotations để ẩn động các child facets (Comments, Attachments, History, Notifications, Planning và Rejected Follow-up) cùng các field do hệ thống quản lý (Bug Number, Status, Reporter, Ngày tạo/cập nhật, Next Processor) khi tạo mới bug.
+- Sử dụng biểu thức EDM JSON dựa trên `IsActiveEntity = false and HasActiveEntity = false` để ẩn chỉ trong quá trình tạo mới bản ghi nháp (creation draft), giữ nguyên giao diện đầy đủ khi chỉnh sửa hoặc xem bug cũ.
+- Sửa lỗi gán Assignee bằng cách đổi binding trường hiển thị sang `assignee_ID` đi kèm Value Help, giúp trường này có thể nhập/chọn trên màn hình tạo.
+- Thắt chặt bảo mật backend trong `srv/service.js` để luôn ghi đè `bugNumber`, `reporter_ID` (gán bằng user đang đăng nhập thực tế) và `status_code` khi tạo mới, chặn đứng việc client gửi tham số tùy tiện.
+- Verify thực tế bằng Playwright browser subagent trên môi trường local, xác nhận màn hình tạo bug cực kỳ sạch sẽ, ẩn toàn bộ tab/field không liên quan và Value Help chọn Assignee chạy tốt.

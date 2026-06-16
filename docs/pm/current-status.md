@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-06-15
+Last updated: 2026-06-16
 
 ## Snapshot
 
@@ -37,6 +37,7 @@ Last updated: 2026-06-15
 - SAP490 template inventory is documented in `docs/sap490/template-inventory.en.md` and `docs/sap490/template-inventory.vi.md`.
 - SAP490 Blueprint draft v0.1 is available as two template-filled DOCX files copied from the school Blueprint template: `docs/sap490/generated/Blueprint_IDTS_SAP01_en_v0.1.docx` and `docs/sap490/generated/Blueprint_IDTS_SAP01_vi_v0.1.docx`.
 - SAP490 Test Scenario, Unit Test, and Test and Fix Bug v0.1 workbooks are available as separate English and Vietnamese files copied and filled from the school templates. They document 12 backend happy-flow scenarios, 21 passing programmatic cases, and the fixed `IDTS-5` SC-01a QA harness issue.
+- SAP490 Functional Specification v0.1 and Test and Fix Bug v0.2 workbooks are available as separate English and Vietnamese files copied and filled from the school templates. They document the target C-prime Create/Object Page flow, Assignee value help fix, value-list label fix, and the remaining WP4 layout refinement decision.
 - Optional Learning Recap / Mentor Mode is available through `.agents/skills/learning-recap` and AGENTS.md routing for nontrivial tasks.
 - SRS/FRS embedded Mermaid diagrams were extracted into `docs/diagrams/07-srs-system-context.md` and `docs/diagrams/08-frs-functional-workflows.md`.
 - Database modeling support is available through `.agents/skills/idts-database-modeling` and installed `database-schema-design`; the current model review is documented in `docs/ba/09-database-model-review.md`.
@@ -75,6 +76,7 @@ Vietnamese:
 - Inventory template SAP490 đã được ghi tại `docs/sap490/template-inventory.en.md` và `docs/sap490/template-inventory.vi.md`.
 - SAP490 Blueprint draft v0.1 đã có thành hai file DOCX copy từ template Blueprint của trường rồi fill trực tiếp: `docs/sap490/generated/Blueprint_IDTS_SAP01_en_v0.1.docx` và `docs/sap490/generated/Blueprint_IDTS_SAP01_vi_v0.1.docx`.
 - SAP490 Test Scenario, Unit Test và Test and Fix Bug v0.1 đã có bản tiếng Anh và tiếng Việt riêng, được copy/fill trực tiếp từ template trường. Bộ file ghi 12 happy-flow scenario backend, 21 programmatic test case pass và lỗi QA harness SC-01a của `IDTS-5` đã được sửa.
+- SAP490 Functional Specification v0.1 và Test and Fix Bug v0.2 đã có bản tiếng Anh và tiếng Việt riêng, được copy/fill trực tiếp từ template trường. Bộ file ghi target flow C-prime cho Create/Object Page, fix Value Help Assignee, fix label value list và decision refine layout còn lại của WP4.
 - Learning Recap / Mentor Mode tùy chọn đã có trong `.agents/skills/learning-recap` và được route trong AGENTS.md cho các task không tầm thường.
 
 - Mermaid diagram nhúng trong SRS/FRS đã được tách ra `docs/diagrams/07-srs-system-context.md` và `docs/diagrams/08-frs-functional-workflows.md`.
@@ -145,9 +147,11 @@ Vietnamese:
 
 ## WP4 Current Note
 
-DatDT's `Sap_FE` reference repo and `Remake_UI` branch have been reviewed. The current IDTS Fiori app now has MVP annotation-driven List Report/Object Page integration, value help, Object Page actions, GridTable list layout, draft-enabled standard Create, Assignment-first Object Page ordering, read-only History table capabilities, and `NewPage` create flow evaluation. Post-merge browser smoke confirmed List Report data, Object Page section order, and Create Bug prefill dialog. Manual create-save QA and real attachment upload remain open.
+The Fiori Elements UI for the Bug Creation flow (Option B) is completed, refined, and verified. Child facets (History, Comments, Attachments, Notifications) and system fields are dynamically hidden during creation using draft-state OData expressions, while remaining fully available for active records. The Assignee field is fully editable via value help, the value-help dialog shows business columns, and the selected Assignee displays the developer name instead of a UUID. Common value-list popups now use business labels such as Priority Code and Priority. Backend handlers are hardened to overwrite bugNumber, status_code, and reporter_ID. Playwright CLI smoke tests verified the layout and lookup without using Playwright MCP.
 
-Vietnamese: Đã review repo tham khảo `Sap_FE` và branch `Remake_UI` của DatDT. App Fiori hiện tại của IDTS đã có tích hợp List Report/Object Page bằng annotation ở mức MVP, value help, Object Page actions, layout List Report dạng GridTable, standard Create đã bật bằng draft, đưa Assignment lên đầu Object Page, đặt History table read-only, và đánh giá create flow bằng `NewPage`. Browser smoke sau merge đã xác nhận List Report có data, thứ tự Object Page section đúng, và dialog Create Bug prefill mở được. Manual create-save QA và upload attachment thật vẫn còn mở.
+Vietnamese: Giao diện Fiori Elements cho luồng tạo bug (Option B) đã hoàn thành và được kiểm thử thành công. Các tab phụ (Lịch sử, Bình luận, Đính kèm, Thông báo) và trường hệ thống được ẩn động khi tạo mới nhờ biểu thức draft OData, nhưng vẫn hiển thị đầy đủ ở chế độ xem/sửa bug cũ. Trường Assignee có thể chọn qua Value Help. Backend đã được thắt chặt bảo mật để ghi đè bugNumber, status_code và reporter_ID. Browser smoke test bằng Playwright đã xác nhận giao diện sạch sẽ và lookup chạy tốt.
+
+Vietnamese clean note: Trường Assignee hiện chọn được qua value help, popup hiển thị cột nghiệp vụ, và sau khi chọn sẽ hiển thị tên developer như `DatDT` thay vì UUID. Các popup value list phổ biến cũng đã có label nghiệp vụ, ví dụ `Priority Code` và `Priority`. Lần verify này dùng Playwright CLI, không dùng Playwright MCP.
 
 ## Next Handover Instruction
 

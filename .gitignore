@@ -10,6 +10,11 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+.tmp/
+.playwright-cli/
+.playwright-mcp/
+__pycache__/
+*.pyc
 
 # Google Workspace / local SAP490 sync credentials
 .gws/

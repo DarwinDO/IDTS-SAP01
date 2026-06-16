@@ -114,9 +114,12 @@ module.exports = class BugService extends cds.ApplicationService {
 
     this.before('CREATE', Bugs, req => prepareBugWrite(req, entities, { isCreate: true }))
     this.before('UPDATE', Bugs, req => prepareBugWrite(req, entities, { isCreate: false }))
+    this.before('PATCH', Bugs.drafts, req => prepareDraftPatch(req, entities))
     this.before('CREATE', Comments, req => prepareCommentCreate(req, entities))
     this.after('CREATE', Bugs, (data, req) => recordCreateSideEffects(req, data, entities))
     this.after('UPDATE', Bugs, (data, req) => recordUpdateSideEffects(req, entities))
+    this.after('READ', Bugs, (bugs, req) => enrichAssigneeDisplayNames(bugs, req, entities))
+    this.after('READ', Bugs.drafts, (bugs, req) => enrichAssigneeDisplayNames(bugs, req, entities))
 
     this.on('assignToDeveloper', req => assignToDeveloper(req, entities))
     this.on('moveToPendingAssignment', req => transitionBug(req, entities, {
@@ -188,13 +191,18 @@ async function prepareBugWrite (req, entities, { isCreate }) {
     return req.reject(404, 'Bug not found.')
   }
 
-  if (isCreate && !req.data.bugNumber) {
+  if (isCreate) {
     req.data.bugNumber = await nextBugNumber(req, entities)
-  }
 
-  if (isCreate && !req.data.reporter_ID) {
-    const fallbackTester = await firstUserByRole(req, entities, 'TESTER')
-    if (fallbackTester) req.data.reporter_ID = fallbackTester.ID
+    const actor = await resolveRequestUser(req, entities)
+    let resolvedReporterId = null
+    if (actor) {
+      resolvedReporterId = actor.ID
+    } else {
+      const fallbackTester = await firstUserByRole(req, entities, 'TESTER')
+      if (fallbackTester) resolvedReporterId = fallbackTester.ID
+    }
+    req.data.reporter_ID = resolvedReporterId
   }
 
   const merged = { ...oldBug, ...req.data }
@@ -202,7 +210,7 @@ async function prepareBugWrite (req, entities, { isCreate }) {
   await deriveOrValidateComponentCategory(req, entities, merged)
 
   const finalData = { ...oldBug, ...req.data }
-  if (isCreate && !finalData.status_code) {
+  if (isCreate) {
     req.data.status_code = finalData.assignee_ID ? STATUS.ASSIGNED : STATUS.PENDING_ASSIGNMENT
   }
 
@@ -777,6 +785,68 @@ async function readBug (req, entities, bugID) {
   return cds.tx(req).run(SELECT.one.from(entities.Bugs).where({ ID: bugID }))
 }
 
+async function enrichAssigneeDisplayNames (bugs, req, entities) {
+  const rows = Array.isArray(bugs) ? bugs : [bugs].filter(Boolean)
+  const needsDisplayName = rows.some(row => Object.prototype.hasOwnProperty.call(row, 'assigneeDisplayName'))
+  if (!needsDisplayName) return
+
+  await fillMissingAssigneeIDs(rows, req, entities)
+
+  const assigneeIDs = [...new Set(rows.map(row => row.assignee_ID).filter(Boolean))]
+  if (!assigneeIDs.length) return
+
+  const tx = cds.tx(req)
+  const profiles = await tx.run(
+    SELECT.from(entities.DeveloperProfiles)
+      .columns('ID', 'user_ID')
+      .where({ ID: { in: assigneeIDs } })
+  )
+  const userIDs = [...new Set(profiles.map(profile => profile.user_ID).filter(Boolean))]
+  if (!userIDs.length) return
+
+  const users = await tx.run(
+    SELECT.from(entities.Users)
+      .columns('ID', 'displayName')
+      .where({ ID: { in: userIDs } })
+  )
+  const userNameByID = new Map(users.map(user => [user.ID, user.displayName]))
+  const profileNameByID = new Map(
+    profiles.map(profile => [profile.ID, userNameByID.get(profile.user_ID)])
+  )
+
+  for (const row of rows) {
+    if (row.assignee_ID) row.assigneeDisplayName = profileNameByID.get(row.assignee_ID) || null
+  }
+}
+
+async function fillMissingAssigneeIDs (rows, req, entities) {
+  const rowsNeedingLookup = rows
+    .filter(row => row.ID && row.assignee_ID === undefined)
+  if (!rowsNeedingLookup.length) return
+
+  await fillMissingAssigneeIDsFromEntity(rowsNeedingLookup, entities.Bugs.drafts, req)
+  await fillMissingAssigneeIDsFromEntity(
+    rowsNeedingLookup.filter(row => row.assignee_ID === undefined),
+    entities.Bugs,
+    req
+  )
+}
+
+async function fillMissingAssigneeIDsFromEntity (rows, entity, req) {
+  if (!rows?.length || !entity) return
+
+  const bugs = await cds.tx(req).run(
+    SELECT.from(entity)
+      .columns('ID', 'assignee_ID')
+      .where({ ID: { in: rows.map(row => row.ID) } })
+  )
+  const assigneeIDByBugID = new Map(bugs.map(bug => [bug.ID, bug.assignee_ID]))
+
+  for (const row of rows) {
+    row.assignee_ID = assigneeIDByBugID.get(row.ID)
+  }
+}
+
 async function nextBugNumber (req, entities) {
   const result = await cds.tx(req).run(SELECT.one.from(entities.Bugs).columns('count(*) as count'))
   const next = Number(result?.count || 0) + 1
@@ -811,4 +881,28 @@ function reasonTarget (actionType) {
 function toHistoryValue (value) {
   if (value === null || value === undefined) return null
   return String(value).slice(0, 1000)
+}
+
+async function prepareDraftPatch (req, entities) {
+  const bugID = bugIDFrom(req)
+  if (!bugID) return
+
+  const currentDraft = await cds.tx(req).run(SELECT.one.from(entities.Bugs.drafts).where({ ID: bugID }))
+  if (!currentDraft) return
+
+  const merged = { ...currentDraft, ...req.data }
+  if (merged.applicationComponent_ID && merged.defectCategory_ID) {
+    const componentCategory = await cds.tx(req).run(SELECT.one.from(entities.ComponentCategories).where({
+      component_ID: merged.applicationComponent_ID,
+      defectCategory_ID: merged.defectCategory_ID,
+      active: true
+    }))
+    if (componentCategory) {
+      req.data.componentCategory_ID = componentCategory.ID
+    } else {
+      req.data.componentCategory_ID = null
+    }
+  } else {
+    req.data.componentCategory_ID = null
+  }
 }
