@@ -703,8 +703,8 @@ annotate service.DeveloperProfiles with @(
 
 annotate service.Comments with @UI.LineItem : [
   { $Type : 'UI.DataField', Label : 'Comment', Value : content },
-  { $Type : 'UI.DataField', Label : 'Author', Value : author.displayName },
-  { $Type : 'UI.DataField', Label : 'Role', Value : authorRole.name },
+  { $Type : 'UI.DataField', Label : 'Author', Value : author_ID },
+  { $Type : 'UI.DataField', Label : 'Role', Value : authorRole_code },
   { $Type : 'UI.DataField', Label : 'Created At', Value : createdAt }
 ];
 
@@ -719,22 +719,25 @@ annotate service.Comments with @(
 annotate service.Comments with {
   ID         @UI.Hidden;
   bug        @UI.Hidden;
-  author     @Common.FieldControl : #ReadOnly;
-  authorRole @Common.FieldControl : #ReadOnly;
+  author     @Common.Text : author.displayName @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
+  authorRole @Common.Text : authorRole.name @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
   content    @UI.MultiLineText @Common.FieldControl : #ReadOnly;
+  createdAt  @Common.FieldControl : #ReadOnly;
 };
 
 annotate service.Attachments with @UI.LineItem : [
-  { $Type : 'UI.DataField', Label : 'Attachment', Value : content },
+  { $Type : 'UI.DataField', Label : 'File Name', Value : fileName },
   { $Type : 'UI.DataField', Label : 'Media Type', Value : mediaType },
   { $Type : 'UI.DataField', Label : 'Size', Value : fileSize },
-  { $Type : 'UI.DataField', Label : 'Uploaded By', Value : uploadedBy.displayName },
+  { $Type : 'UI.DataField', Label : 'Uploaded By', Value : uploadedBy_ID },
   { $Type : 'UI.DataField', Label : 'Uploaded At', Value : createdAt }
 ];
 
 annotate service.Attachments with @(
-  Capabilities.InsertRestrictions : { Insertable : true },
-  Capabilities.DeleteRestrictions : { Deletable : true },
+  UI.CreateHidden : true,
+  UI.DeleteHidden : true,
+  Capabilities.InsertRestrictions : { Insertable : false },
+  Capabilities.DeleteRestrictions : { Deletable : false },
   Capabilities.UpdateRestrictions : { Updatable : false },
   UI.MediaResource : { Stream : content }
 );
@@ -743,8 +746,12 @@ annotate service.Attachments with {
   ID         @UI.Hidden;
   bug        @UI.Hidden;
   storageRef @UI.Hidden;
-  uploadedBy @Common.FieldControl : #ReadOnly;
-  content    @Common.FieldControl : #Mandatory;
+  uploadedBy @Common.Text : uploadedBy.displayName @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
+  content    @Common.FieldControl : #ReadOnly;
+  fileName   @Common.FieldControl : #ReadOnly;
+  mediaType  @Common.FieldControl : #ReadOnly;
+  fileSize   @Common.FieldControl : #ReadOnly;
+  createdAt  @Common.FieldControl : #ReadOnly;
 };
 
 annotate service.HistoryLogs with @(
@@ -755,9 +762,9 @@ annotate service.HistoryLogs with @(
   Capabilities.UpdateRestrictions : { Updatable : false },
   UI.LineItem : [
     { $Type : 'UI.DataField', Label : 'Time', Value : createdAt },
-    { $Type : 'UI.DataField', Label : 'Actor', Value : actor.displayName },
-    { $Type : 'UI.DataField', Label : 'Role', Value : actorRole.name },
-    { $Type : 'UI.DataField', Label : 'Action', Value : actionType.name },
+    { $Type : 'UI.DataField', Label : 'Actor', Value : actor_ID },
+    { $Type : 'UI.DataField', Label : 'Role', Value : actorRole_code },
+    { $Type : 'UI.DataField', Label : 'Action', Value : actionType_code },
     { $Type : 'UI.DataField', Label : 'Field', Value : fieldName },
     { $Type : 'UI.DataField', Label : 'Old Value', Value : oldValue },
     { $Type : 'UI.DataField', Label : 'New Value', Value : newValue },
@@ -768,13 +775,14 @@ annotate service.HistoryLogs with @(
 annotate service.HistoryLogs with {
   ID     @UI.Hidden;
   bug    @UI.Hidden;
-  actor  @Common.FieldControl : #ReadOnly;
-  actorRole @Common.FieldControl : #ReadOnly;
-  actionType @Common.FieldControl : #ReadOnly;
+  actor  @Common.Text : actor.displayName @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
+  actorRole @Common.Text : actorRole.name @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
+  actionType @Common.Text : actionType.name @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
   fieldName @Common.FieldControl : #ReadOnly;
   oldValue @Common.FieldControl : #ReadOnly;
   newValue @Common.FieldControl : #ReadOnly;
   reason @UI.MultiLineText @Common.FieldControl : #ReadOnly;
+  createdAt @Common.FieldControl : #ReadOnly;
 };
 
 annotate service.Notifications with @(
@@ -787,10 +795,10 @@ annotate service.Notifications with @(
 
 annotate service.Notifications with @UI.LineItem : [
   { $Type : 'UI.DataField', Label : 'Created At', Value : createdAt },
-  { $Type : 'UI.DataField', Label : 'Recipient', Value : recipient.displayName },
-  { $Type : 'UI.DataField', Label : 'Event', Value : eventType.name },
-  { $Type : 'UI.DataField', Label : 'Channel', Value : channel.name },
-  { $Type : 'UI.DataField', Label : 'Delivery Status', Value : deliveryStatus.name, Criticality : deliveryStatus.criticality },
+  { $Type : 'UI.DataField', Label : 'Recipient', Value : recipient_ID },
+  { $Type : 'UI.DataField', Label : 'Event', Value : eventType_code },
+  { $Type : 'UI.DataField', Label : 'Channel', Value : channel_code },
+  { $Type : 'UI.DataField', Label : 'Delivery Status', Value : deliveryStatus_code, Criticality : deliveryStatus.criticality },
   { $Type : 'UI.DataField', Label : 'Message', Value : message },
   { $Type : 'UI.DataField', Label : 'Sent At', Value : sentAt }
 ];
@@ -798,12 +806,13 @@ annotate service.Notifications with @UI.LineItem : [
 annotate service.Notifications with {
   ID      @UI.Hidden;
   bug     @UI.Hidden;
-  recipient @Common.FieldControl : #ReadOnly;
-  eventType @Common.FieldControl : #ReadOnly;
-  channel @Common.FieldControl : #ReadOnly;
-  deliveryStatus @Common.FieldControl : #ReadOnly;
+  recipient @Common.Text : recipient.displayName @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
+  eventType @Common.Text : eventType.name @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
+  channel @Common.Text : channel.name @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
+  deliveryStatus @Common.Text : deliveryStatus.name @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
   message @UI.MultiLineText @Common.FieldControl : #ReadOnly;
   sentAt @Common.FieldControl : #ReadOnly;
+  createdAt @Common.FieldControl : #ReadOnly;
 };
 
 annotate service.DuplicateLinks with @UI.LineItem : [
