@@ -54,6 +54,8 @@ Vietnamese:
 | --- | --- | --- | --- |
 | SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 6 Done (`IDTS-2`, `IDTS-3`, `IDTS-4`, `IDTS-6`, `IDTS-7`, `IDTS-9`), 4 In Progress (`IDTS-5`, `IDTS-8`, `IDTS-10`, `IDTS-11`), 2 To Do (`IDTS-1`, `IDTS-12`). All development branches are consolidated into `dev`. |
 | WP4 | Fiori Elements UX | DatDT | Core layout, dynamic creation hiding, assignee value help, dynamic visibility, and dev-only mock login are completed. Deeper UI QA and attachment upload remain. |
+| WP5 | Comments and History | SangVN, DatDT | Backend comment side-effects and history log triggers implemented by DonHV; UI comments usability in progress. |
+| WP7 | Notifications and Attachments | SangVN, DatDT | DB attachment LargeBinary content storage, media type / size (10MB limit) validations, and upload metadata handlers implemented by DonHV; UI upload integration in progress. |
 
 Vietnamese:
 
@@ -61,6 +63,8 @@ Vietnamese:
 | --- | --- | --- | --- |
 | SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 6 Done (`IDTS-2`, `IDTS-3`, `IDTS-4`, `IDTS-6`, `IDTS-7`, `IDTS-9`), 4 In Progress (`IDTS-5`, `IDTS-8`, `IDTS-10`, `IDTS-11`), 2 To Do (`IDTS-1`, `IDTS-12`). Tất cả các branch phát triển đã được tích hợp vào `dev`. |
 | WP4 | Fiori Elements UX | DatDT | Đã hoàn thành cấu trúc giao diện chính, ẩn động trang tạo mới, Value Help Assignee, ẩn/hiện action động và mock login chỉ cho development. QA sâu giao diện và upload đính kèm còn chờ. |
+| WP5 | Comments và History | SangVN, DatDT | Backend side-effects comment và ghi history log đã được DonHV implement; UI comments usability đang thực hiện. |
+| WP7 | Notifications và Attachments | SangVN, DatDT | Lưu trữ LargeBinary attachment trong DB, validate media type / file size (10MB) và upload metadata handlers đã được DonHV implement; UI upload đang thực hiện. |
 
 ## Blocked
 
