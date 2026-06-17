@@ -66,12 +66,14 @@ Vietnamese: Đang chờ Backend CAP WP1 và WP2.
 
 | Date | Task/WP | What was done | Completed part | Issues/Bugs found | Fix status | Evidence/Commands | Next handoff |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-06-17 | IDTS-9 QA UI Retest | Retested the Assign Developer action dialog to verify if the input field displays the selected developer name instead of UUID | Verified the dialog is visible and uses label 'Assignee' with business-friendly value help rows; however, selecting a developer still populates the raw UUID in the input field | Standard Fiori Elements limitation on action parameter text binding in OData V4 | Open (investigated) | browser_subagent execution, screenshots Captured: dialog_before_selection_1781693070331.png, dialog_after_selection_1781693103672.png | Wait for team decision on recommendation (Accept for demo or design custom FE extension) |
 | 2026-06-03 | Status setup | Member status file created from previous Fiori/UI5 status | Fiori/UI5 status ownership assigned to DatDT | None | Fixed | `rg`, `git diff --check` | Wait for WP1/WP2 service contract |
 
 Vietnamese:
 
 | Ngày | Task/WP | Đã làm gì | Phần đã xong | Khó khăn/Bug phát hiện | Trạng thái fix | Bằng chứng/Lệnh đã chạy | Handoff tiếp theo |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-06-17 | IDTS-9 QA UI Retest | Retest Assign Developer dialog xem có hiển thị tên thay vì UUID không | Đã xác nhận label là 'Assignee' và value help hiển thị đúng thông tin nghiệp vụ; tuy nhiên ô nhập liệu vẫn hiện UUID sau khi chọn | Lỗi hiển thị UUID do giới hạn của standard Fiori Elements đối với action parameter | Open (đang phân tích) | browser_subagent, chụp screenshot dialog_before_selection_1781693070331.png, dialog_after_selection_1781693103672.png | Chờ thống nhất phương án xử lý (Chấp nhận cho demo hoặc làm custom UI5/FE extension) |
 | 2026-06-03 | Status setup | Tạo file status thành viên từ status Fiori/UI5 cũ | Đã giao ownership Fiori/UI5 cho DatDT | Không có | Đã xử lý | `rg`, `git diff --check` | Chờ service contract từ WP1/WP2 |
 
 ## Update Rule

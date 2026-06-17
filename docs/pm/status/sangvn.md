@@ -70,6 +70,7 @@ Vietnamese: Đang chờ xác nhận bắt đầu Sprint 1.
 
 | Date | Task/WP | What was done | Completed part | Issues/Bugs found | Fix status | Evidence/Commands | Next handoff |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-06-17 | IDTS-9 QA UI Retest | Retested the Assign Developer action dialog to verify if the input field displays the selected developer name instead of UUID | Verified the dialog is visible and uses label 'Assignee' with business-friendly value help rows; however, selecting a developer still populates the raw UUID in the input field | Standard Fiori Elements limitation on action parameter text binding in OData V4 | Open (investigated) | browser_subagent execution, screenshots Captured: dialog_before_selection_1781693070331.png, dialog_after_selection_1781693103672.png | Wait for team decision on recommendation (Accept for demo or design custom FE extension) |
 | 2026-06-03 | Status setup | Member status file created from previous Backend CAP status | Backend status ownership assigned to SangVN | None | Fixed | `rg`, `git diff --check` | Start WP1 when approved |
 | 2026-06-13 | IDTS-8, 10, 11 (Sprint 2) | Updated Bug Detail UI annotations (dropdown status, supporting info facet, multiline action notes) | UI annotations completed | None | - | `cds compile srv --to edmx` | Manual QA/Testing |
 
@@ -77,6 +78,7 @@ Vietnamese:
 
 | Ngày | Task/WP | Đã làm gì | Phần đã xong | Khó khăn/Bug phát hiện | Trạng thái fix | Bằng chứng/Lệnh đã chạy | Handoff tiếp theo |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-06-17 | IDTS-9 QA UI Retest | Retest Assign Developer dialog xem có hiển thị tên thay vì UUID không | Đã xác nhận label là 'Assignee' và value help hiển thị đúng thông tin nghiệp vụ; tuy nhiên ô nhập liệu vẫn hiện UUID sau khi chọn | Lỗi hiển thị UUID do giới hạn của standard Fiori Elements đối với action parameter | Open (đang phân tích) | browser_subagent, chụp screenshot dialog_before_selection_1781693070331.png, dialog_after_selection_1781693103672.png | Chờ thống nhất phương án xử lý (Chấp nhận cho demo hoặc làm custom UI5/FE extension) |
 | 2026-06-03 | Status setup | Tạo file status thành viên từ status Backend CAP cũ | Đã giao ownership backend cho SangVN | Không có | Đã xử lý | `rg`, `git diff --check` | Bắt đầu WP1 khi được duyệt |
 | 2026-06-13 | IDTS-8, 10, 11 (Sprint 2) | Cập nhật UI annotations cho Bug Detail (dropdown status, facet Supporting Info, multiline note) | Đã xong UI annotations | Không có | - | `cds compile srv --to edmx` | Test giao diện (Manual QA) |
 
