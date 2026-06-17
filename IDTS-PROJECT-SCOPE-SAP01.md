@@ -150,7 +150,7 @@ Developer sau khi nhận bug có thể:
 
 * Xem chi tiết bug.  
 * Kiểm tra thông tin bug có đủ rõ không.  
-* Yêu cầu Tester bổ sung thông tin.  
+* Yêu cầu Tester hoặc PM bổ sung thông tin.
 * Kiểm tra module có đúng không.  
 * Từ chối bug nếu bug bị assign sai module; phải ghi rõ lý do và người follow-up tiếp theo.
 * Thêm technical note.  
@@ -177,7 +177,7 @@ Hệ thống cần theo dõi trạng thái bug.
 
 Bộ status đơn giản nên dùng:
 
-New  
+New (legacy/import compatibility only)
 Assigned  
 In Review  
 Need More Information  
@@ -196,7 +196,7 @@ Tester và Developer có thể trao đổi trong bug report.
 
 Ví dụ:
 
-* Tester bổ sung thông tin.  
+* Tester hoặc PM bổ sung thông tin rồi dùng `Resubmit to Developer`.
 * Developer hỏi thêm dữ liệu.  
 * Developer ghi chú kỹ thuật.  
 * Tester phản hồi lại nếu cần.  
@@ -270,6 +270,8 @@ IDTS là defect tracking system cho môi trường SAP testing. Hệ thống t�
 * Developer review, request more information, reject sai phân loại hoặc sai assignee, update status và note.
 * Tester/PM xác nhận kết quả xử lý thông qua bước retest trước khi close nếu cần.
 * Comment, attachment/evidence, notification, audit/history log.
+* User-facing history may be summarized per business event, while raw field-level history logs remain available for audit.
+* Lich su tren UI co the duoc nhom theo business event de doc nhanh, trong khi history log chi tiet van duoc giu cho audit.
 * PM monitoring theo workload, overdue, status, next processor và planning fields.
 
 ## **7.2. Classification model**
@@ -290,7 +292,7 @@ Mô hình đúng:
 
 Bộ status trong MVP:
 
-* New
+* New (legacy/import compatibility only)
 * Pending Assignment
 * Assigned
 * In Review
@@ -302,9 +304,9 @@ Bộ status trong MVP:
 * Reopened
 * Closed
 
-`Reassigned` là action, không phải status chính.
+`Reassigned` là action, không phải status chính. Trong create happy flow hiện tại, backend persist `Assigned` hoặc `Pending Assignment` ngay khi submit; `New` chỉ còn để tương thích dữ liệu cũ/import và các transition được kiểm soát.
 
-`Rejected` là status hợp lệ nhưng không phải final status. Khi bug bị `Rejected`, hệ thống phải có rejection reason, history log, `nextProcessor` và follow-up action rõ ràng như sửa phân loại, bổ sung thông tin, reassign hoặc chuyển về `Pending Assignment`.
+`Rejected` là status hợp lệ nhưng không phải final status. Khi bug bị `Rejected`, hệ thống phải có rejection reason, history log, `nextProcessor` và follow-up action rõ ràng như sửa phân loại/ngữ cảnh, có thể bổ sung supporting information, reassign hoặc chuyển về `Pending Assignment`. Ở MVP, `Rejected` không đi trực tiếp sang `Need More Information`.
 
 **English clarification:** `Rejected` is a valid follow-up status, not a terminal state. A rejected bug must always have a rejection reason, a next processor, and a clear next action.
 
@@ -325,9 +327,9 @@ Developer mark `Resolved` -> Tester/PM xác định có cần retest không -> n
 Hệ thống nên tự động cập nhật `nextProcessor` theo status/action:
 
 * Assigned/In Review/In Progress -> assigned Developer.
-* Need More Information -> Tester.
+* Need More Information -> Tester. PM có thể hỗ trợ follow-up và dùng `Resubmit to Developer` khi cần.
 * Pending Assignment -> PM queue hoặc Tester.
-* Rejected -> Tester hoặc PM để xử lý follow-up.
+* Rejected -> Tester hoặc PM để xử lý follow-up theo hướng sửa phân loại/ngữ cảnh, reassign hoặc đưa về `Pending Assignment`.
 * Resolved/Retest Required -> Tester/PM.
 * Closed -> không còn next processor.
 
@@ -345,9 +347,9 @@ Không xây full test management module trong scope hiện tại.
 
 ## **7.7. Database modeling baseline for WP1**
 
-**English:** The implementation model for WP1 must follow `docs/ba/09-database-model-review.md`. This keeps IDTS aligned with SAP CAP/CDS and avoids turning the data model into a generic issue tracker. The core baseline is: UUID remains the technical key; `bugNumber` is added for readable tracking; Application Component and Defect Category are selected by users; Component Category is derived or validated for assignment; SAP Module is optional; `nextProcessor` supports role/queue ownership and specific user ownership when known; Rejected bugs store both latest display reason and historical audit reason; attachments store metadata and reference only; duplicate checking stores confirmed links only.
+**English:** The implementation model for WP1 must follow `docs/ba/09-database-model-review.md`. This keeps IDTS aligned with SAP CAP/CDS and avoids turning the data model into a generic issue tracker. The core baseline is: UUID remains the technical key; `bugNumber` is added for readable tracking; Application Component and Defect Category are selected by users; Component Category is derived or validated for assignment; SAP Module is optional; `nextProcessor` supports role/queue ownership and specific user ownership when known; Rejected bugs store both latest display reason and historical audit reason; attachments store file content in the database together with metadata and reference in MVP; duplicate checking stores confirmed links only.
 
-**Vietnamese:** Implementation model cho WP1 phải đi theo `docs/ba/09-database-model-review.md`. Điều này giữ IDTS đúng hướng SAP CAP/CDS và tránh biến data model thành issue tracker generic. Baseline chính là: UUID vẫn là technical key; thêm `bugNumber` để tracking dễ đọc; Application Component và Defect Category do user chọn; Component Category được derive hoặc validate để assignment; SAP Module là optional; `nextProcessor` hỗ trợ ownership theo role/queue và user cụ thể khi biết rõ; bug Rejected lưu cả reason mới nhất để hiển thị và reason lịch sử để audit; attachment chỉ lưu metadata/reference; duplicate checking chỉ lưu link đã xác nhận.
+**Vietnamese:** Implementation model cho WP1 phải đi theo `docs/ba/09-database-model-review.md`. Điều này giữ IDTS đúng hướng SAP CAP/CDS và tránh biến data model thành issue tracker generic. Baseline chính là: UUID vẫn là technical key; thêm `bugNumber` để tracking dễ đọc; Application Component và Defect Category do user chọn; Component Category được derive hoặc validate để assignment; SAP Module là optional; `nextProcessor` hỗ trợ ownership theo role/queue và user cụ thể khi biết rõ; bug Rejected lưu cả reason mới nhất để hiển thị và reason lịch sử để audit; attachment lưu file content trong database cùng metadata/reference; duplicate checking chỉ lưu link đã xác nhận.
 
 ## **7.8. Still out of scope**
 

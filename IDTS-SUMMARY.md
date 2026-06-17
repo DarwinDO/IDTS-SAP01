@@ -212,9 +212,9 @@ Trạng thái ban đầu của bug sau khi submit có thể phụ thuộc vào t
 | ----- | ----- | ----- |
 | Bug đã có Developer phụ trách | **Assigned** | Bug đã được ghi nhận và có người chịu trách nhiệm xử lý |
 | Bug chưa xác định được Developer phù hợp | **Pending Assignment** | Bug đã được ghi nhận nhưng cần được phân công sau |
-| Bug được tạo nhưng cần kiểm tra thêm thông tin | **New** hoặc **Need Review** | Bug đã được ghi nhận nhưng cần được kiểm tra lại trước khi xử lý |
+| Trạng thái `New` | **Legacy / import compatibility only** | Giữ lại để tương thích dữ liệu cũ hoặc dữ liệu import; không phải trạng thái submit chuẩn của happy flow hiện tại |
 
-Nếu bug có Developer phù hợp, bug có thể chuyển sang trạng thái **Assigned**. Nếu chưa có Developer phù hợp, bug vẫn được ghi nhận nhưng ở trạng thái **Pending Assignment** để PM hoặc Tester theo dõi và phân công sau.
+Nếu bug có Developer phù hợp, bug được ghi nhận trực tiếp ở trạng thái **Assigned**. Nếu chưa có Developer phù hợp, bug được ghi nhận ở trạng thái **Pending Assignment** để PM hoặc Tester theo dõi và phân công sau. Trong create happy flow hiện tại, backend không persist `New`; `New` chỉ còn để tương thích dữ liệu cũ/import.
 
 Cách này giữ được logic chặt chẽ nhưng vẫn thực tế, vì trong một số trường hợp chưa có Developer phù hợp hoặc Developer đang quá tải.
 
@@ -238,7 +238,7 @@ Các case chính:
 | ----- | ----- |
 | Bug rõ ràng và phù hợp | Developer review và cập nhật status |
 | Bug thiếu thông tin | Developer request more information |
-| Bug sai module/category hoặc assignee không phù hợp | Developer reject kèm lý do; Tester hoặc PM follow-up để sửa thông tin, reassign hoặc đưa về Pending Assignment |
+| Bug sai module/category hoặc assignee không phù hợp | Developer reject kèm lý do; Tester hoặc PM follow-up để sửa phân loại/ngữ cảnh, có thể bổ sung supporting information, reassign hoặc đưa về Pending Assignment |
 | Bug cần chuyển người khác | Tester reassign bug |
 
 ---
@@ -276,7 +276,7 @@ Bộ status nên giữ:
 
 | Status | Ý nghĩa |
 | ----- | ----- |
-| **New** | Bug mới được tạo hoặc đang ở trạng thái ghi nhận ban đầu |
+| **New** | Trạng thái tương thích dữ liệu cũ/import; không phải trạng thái khởi tạo chuẩn của create happy flow hiện tại |
 | **Pending Assignment** | Bug đã submit nhưng chưa có Developer phù hợp |
 | **Assigned** | Bug đã được assign cho Developer |
 | **In Review** | Developer đang review thông tin bug |
@@ -351,7 +351,11 @@ Developer nhận bug được assign
 → Developer xem bug details  
 → Developer kiểm tra thông tin bug  
 → Nếu thông tin chưa rõ: Request More Information  
-→ Tester bổ sung thông tin  
+→ Bug status = Need More Information
+→ Tester hoặc PM bổ sung thông tin qua edit/comment/attachment
+→ Tester hoặc PM dùng `Resubmit to Developer` kèm update summary
+→ Bug status quay về `Assigned`
+→ Hệ thống ghi history, follow-up comment, notification và trả `nextProcessor` về Developer được assign
 → Developer review lại
 
 Nếu bug sai module/category hoặc assignee không phù hợp:
@@ -413,7 +417,7 @@ Bộ status hiện hành:
 
 | Status | Ý nghĩa |
 | ----- | ----- |
-| **New** | Bug mới được ghi nhận hoặc đang ở bước submit ban đầu |
+| **New** | Trạng thái tương thích dữ liệu cũ/import; không phải trạng thái khởi tạo chuẩn của create happy flow hiện tại |
 | **Pending Assignment** | Bug đã submit nhưng chưa có Developer phù hợp |
 | **Assigned** | Bug đã được assign cho một Developer chính |
 | **In Review** | Developer đang review thông tin bug |
@@ -429,9 +433,9 @@ Bộ status hiện hành:
 
 ## **5.2.1. Rejected Follow-up Rule**
 
-**English:** `Rejected` is allowed as a bug status, but it is not a final state. When a bug becomes `Rejected`, the system must store a rejection reason, set `nextProcessor`, and make the next responsible party clear. The follow-up owner is normally Tester or PM. The next action must be one of: correct classification, add missing information, reassign to another Developer, or move the bug back to `Pending Assignment` when no suitable Developer is available.
+**English:** `Rejected` is allowed as a bug status, but it is not a final state. When a bug becomes `Rejected`, the system must store a rejection reason, set `nextProcessor`, and make the next responsible party clear. The follow-up owner is normally Tester or PM. In the MVP, the next action should be to correct classification/context, optionally add supporting information, reassign to another Developer, or move the bug back to `Pending Assignment` when no suitable Developer is available. `Rejected` does not go directly to `Need More Information`.
 
-**Tiếng Việt:** `Rejected` được phép là status của bug, nhưng không phải trạng thái kết thúc. Khi bug chuyển sang `Rejected`, hệ thống phải lưu lý do reject, set `nextProcessor`, và xác định rõ ai chịu trách nhiệm xử lý tiếp. Người follow-up thường là Tester hoặc PM. Hành động tiếp theo phải là một trong các hướng: sửa phân loại, bổ sung thông tin, reassign cho Developer khác, hoặc đưa bug về `Pending Assignment` nếu chưa có Developer phù hợp.
+**Tiếng Việt:** `Rejected` được phép là status của bug, nhưng không phải trạng thái kết thúc. Khi bug chuyển sang `Rejected`, hệ thống phải lưu lý do reject, set `nextProcessor`, và xác định rõ ai chịu trách nhiệm xử lý tiếp. Người follow-up thường là Tester hoặc PM. Ở MVP, hướng xử lý tiếp theo là sửa phân loại/ngữ cảnh, có thể bổ sung thêm thông tin hỗ trợ, reassign cho Developer khác, hoặc đưa bug về `Pending Assignment` nếu chưa có Developer phù hợp. `Rejected` không đi trực tiếp sang `Need More Information`.
 
 ## **5.3. Resolve and Retest Flow**
 
@@ -454,8 +458,8 @@ Ví dụ:
 | ----- | ----- |
 | **Pending Assignment** | PM queue hoặc Tester |
 | **Assigned / In Review / In Progress** | Developer được assign |
-| **Need More Information** | Tester |
-| **Rejected** | Tester hoặc PM để sửa phân loại, bổ sung thông tin, reassign, hoặc đưa về Pending Assignment |
+| **Need More Information** | Tester (PM có thể hỗ trợ coordination và resubmit) |
+| **Rejected** | Tester hoặc PM để sửa phân loại/ngữ cảnh, có thể bổ sung thêm supporting information, reassign, hoặc đưa về Pending Assignment |
 | **Resolved / Retest Required** | Tester/PM |
 | **Closed** | Không cần next processor |
 
@@ -480,9 +484,9 @@ PM monitoring nên có thêm các field như:
 
 ## **5.6. Database Modeling Baseline for WP1**
 
-**English:** WP1 Data Model Foundation follows `docs/ba/09-database-model-review.md`. The Bug model should keep UUID as the technical key and add a readable `bugNumber`. Tester selects Application Component and Defect Category; the system derives or validates Component Category for assignment. SAP Module is optional context. `nextProcessor` is a lightweight hybrid ownership concept with a role/queue code and a specific user when known. Rejected bugs keep the latest rejection reason on Bug and immutable reasons in HistoryLogs. Attachments store metadata and storage reference only in MVP. Duplicate checking stores confirmed Duplicate/Similar/Related links, not every runtime candidate.
+**English:** WP1 Data Model Foundation follows `docs/ba/09-database-model-review.md`. The Bug model should keep UUID as the technical key and add a readable `bugNumber`. Tester selects Application Component and Defect Category; the system derives or validates Component Category for assignment. SAP Module is optional context. `nextProcessor` is a lightweight hybrid ownership concept with a role/queue code and a specific user when known. Rejected bugs keep the latest rejection reason on Bug and immutable reasons in HistoryLogs. User-facing history is grouped as readable `HistoryEvents`, while `HistoryLogs` stays the raw append-only field audit. Attachments store file content in the database together with metadata and storage reference in MVP. Duplicate checking stores confirmed Duplicate/Similar/Related links, not every runtime candidate.
 
-**Vietnamese:** WP1 Data Model Foundation đi theo `docs/ba/09-database-model-review.md`. Bug model giữ UUID làm technical key và thêm `bugNumber` dễ đọc. Tester chọn Application Component và Defect Category; hệ thống derive hoặc validate Component Category để assignment. SAP Module là context tùy chọn. `nextProcessor` là ownership concept dạng hybrid nhẹ gồm role/queue code và user cụ thể khi biết rõ. Bug bị Rejected lưu rejection reason mới nhất trên Bug và lưu reason bất biến trong HistoryLogs. Attachment trong MVP chỉ lưu metadata và storage reference. Duplicate checking chỉ lưu link Duplicate/Similar/Related đã xác nhận, không lưu mọi runtime candidate.
+**Vietnamese:** WP1 Data Model Foundation đi theo `docs/ba/09-database-model-review.md`. Bug model giữ UUID làm technical key và thêm `bugNumber` dễ đọc. Tester chọn Application Component và Defect Category; hệ thống derive hoặc validate Component Category để assignment. SAP Module là context tùy chọn. `nextProcessor` là ownership concept dạng hybrid nhẹ gồm role/queue code và user cụ thể khi biết rõ. Bug bị Rejected lưu rejection reason mới nhất trên Bug và lưu reason bất biến trong HistoryLogs. Lich su hien cho nguoi dung duoc nhom thanh `HistoryEvents` de doc nhanh, con `HistoryLogs` van la audit append-only o muc field. Attachment trong MVP lưu file content trong database cùng metadata và storage reference. Duplicate checking chỉ lưu link Duplicate/Similar/Related đã xác nhận, không lưu mọi runtime candidate.
 
 ## **5.7. SAP Tooling Reference**
 

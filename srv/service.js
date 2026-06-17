@@ -42,6 +42,34 @@ const ACTION = {
   REOPEN: 'REOPEN'
 }
 
+const HISTORY_FIELD_LABELS = {
+  title: 'Title',
+  description: 'Description',
+  status: 'Status',
+  priority: 'Priority',
+  severity: 'Severity',
+  environment: 'Environment',
+  environmentDetail: 'Environment Detail',
+  assignee: 'Assignee',
+  sapModule: 'SAP Module',
+  applicationComponent: 'Application Component',
+  defectCategory: 'Defect Category',
+  componentCategory: 'Component Category',
+  stepsToReproduce: 'Steps to Reproduce',
+  actualResult: 'Actual Result',
+  expectedResult: 'Expected Result',
+  testCaseRef: 'Test Case Reference',
+  testRunRef: 'Test Run Reference',
+  plannedCompletionDate: 'Planned Completion Date',
+  dueDate: 'Due Date',
+  estimatedEffortHours: 'Estimated Effort Hours',
+  nextProcessorUser: 'Next Processor User',
+  nextProcessorRole: 'Next Processor Role',
+  rejectionReason: 'Rejection Reason',
+  comment: 'Comment',
+  attachment: 'Attachment'
+}
+
 const COORDINATOR_ROLES = new Set([USER_ROLE.TESTER, USER_ROLE.PM])
 const COMMENT_ROLES = new Set([USER_ROLE.TESTER, USER_ROLE.DEVELOPER, USER_ROLE.PM])
 const ATTACHMENT_ROLES = new Set([USER_ROLE.TESTER, USER_ROLE.DEVELOPER, USER_ROLE.PM])
@@ -85,11 +113,11 @@ const ALLOWED_TRANSITIONS = {
     STATUS.RESOLVED,
     STATUS.REJECTED
   ],
-  [STATUS.NEED_MORE_INFORMATION]: [STATUS.ASSIGNED, STATUS.IN_REVIEW, STATUS.REJECTED],
+  [STATUS.NEED_MORE_INFORMATION]: [STATUS.ASSIGNED, STATUS.PENDING_ASSIGNMENT],
   [STATUS.IN_PROGRESS]: [STATUS.NEED_MORE_INFORMATION, STATUS.RESOLVED, STATUS.REJECTED],
   [STATUS.RESOLVED]: [STATUS.RETEST_REQUIRED, STATUS.CLOSED, STATUS.REOPENED],
   [STATUS.RETEST_REQUIRED]: [STATUS.CLOSED, STATUS.REOPENED],
-  [STATUS.REJECTED]: [STATUS.PENDING_ASSIGNMENT, STATUS.ASSIGNED, STATUS.NEED_MORE_INFORMATION],
+  [STATUS.REJECTED]: [STATUS.PENDING_ASSIGNMENT, STATUS.ASSIGNED],
   [STATUS.REOPENED]: [STATUS.ASSIGNED, STATUS.IN_REVIEW, STATUS.IN_PROGRESS],
   [STATUS.CLOSED]: [STATUS.REOPENED]
 }
@@ -109,6 +137,7 @@ const TESTER_STATUSES = new Set([
 ])
 
 const CAPABILITY_FIELDS = new Set([
+  'canAddComment',
   'canMarkInReview',
   'canStartProgress',
   'canResolve',
@@ -118,7 +147,8 @@ const CAPABILITY_FIELDS = new Set([
   'canClose',
   'canReopen',
   'canAssign',
-  'canMoveToPending'
+  'canMoveToPending',
+  'canResubmit'
 ])
 const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024
 const ACCEPTED_ATTACHMENT_MEDIA_TYPES = new Set([
@@ -130,6 +160,35 @@ const ACCEPTED_ATTACHMENT_MEDIA_TYPES = new Set([
   'text/csv',
   'application/zip'
 ])
+const READ_ONLY_ENTITY_NAMES = [
+  'Users',
+  'DeveloperProfiles',
+  'SAPModules',
+  'ApplicationComponents',
+  'SAPModuleComponents',
+  'DefectCategories',
+  'ComponentCategories',
+  'DeveloperResponsibilities',
+  'AssignableDevelopers',
+  'ValidDefectCategories',
+  'UserRoles',
+  'StatusValues',
+  'PriorityValues',
+  'SeverityValues',
+  'EnvironmentValues',
+  'ProcessorRoleValues',
+  'AvailabilityStatuses',
+  'ResponsibilityLevels',
+  'ActionTypes',
+  'NotificationEventTypes',
+  'NotificationChannels',
+  'NotificationDeliveryStatuses',
+  'DuplicateRelationTypes',
+  'HistoryEvents',
+  'HistoryLogs',
+  'Notifications',
+  'DuplicateLinks'
+]
 
 module.exports = class BugService extends cds.ApplicationService {
   async init () {
@@ -139,6 +198,7 @@ module.exports = class BugService extends cds.ApplicationService {
     const commentTargets = [Comments, Comments?.drafts].filter(Boolean)
     const attachmentTargets = [Attachments, Attachments?.drafts].filter(Boolean)
 
+    registerReadOnlyEntityGuards(this, entities)
     this.before('READ', Bugs, req => ensureCapabilitySelectDependencies(req))
     this.before('READ', Bugs.drafts, req => ensureCapabilitySelectDependencies(req))
     this.before('CREATE', Bugs, req => prepareBugWrite(req, entities, { isCreate: true }))
@@ -157,16 +217,23 @@ module.exports = class BugService extends cds.ApplicationService {
     for (const target of commentTargets) {
       this.after('CREATE', target, (data, req) => recordCommentCreateSideEffects(req, data, entities))
     }
+    for (const target of attachmentTargets) {
+      this.after('CREATE', target, (data, req) => recordAttachmentWriteSideEffects(req, data, entities, { isCreate: true }))
+      this.after('UPDATE', target, (data, req) => recordAttachmentWriteSideEffects(req, data, entities, { isCreate: false }))
+      this.after('PATCH', target, (data, req) => recordAttachmentWriteSideEffects(req, data, entities, { isCreate: false }))
+    }
     this.after('READ', Bugs, async (bugs, req) => {
-      await enrichAssigneeDisplayNames(bugs, req, entities)
+      await enrichBugDisplayFields(bugs, req, entities)
       await enrichBugCapabilities(bugs, req, entities)
     })
     this.after('READ', Bugs.drafts, async (bugs, req) => {
-      await enrichAssigneeDisplayNames(bugs, req, entities)
+      await enrichBugDisplayFields(bugs, req, entities)
       await enrichBugCapabilities(bugs, req, entities)
     })
+    this.on('SAVE', Bugs.drafts, (req, next) => handleDraftSave(req, entities, next))
 
     this.on('assignToDeveloper', req => assignToDeveloper(req, entities))
+    this.on('addComment', req => addComment(req, entities))
     this.on('moveToPendingAssignment', req => transitionBug(req, entities, {
       status: STATUS.PENDING_ASSIGNMENT,
       actionType: ACTION.REASSIGN,
@@ -187,6 +254,7 @@ module.exports = class BugService extends cds.ApplicationService {
       requireAssignee: true,
       requireReason: true
     }))
+    this.on('resubmitToDeveloper', req => resubmitToDeveloper(req, entities))
     this.on('rejectBug', req => transitionBug(req, entities, {
       status: STATUS.REJECTED,
       actionType: ACTION.REJECT,
@@ -225,6 +293,20 @@ module.exports = class BugService extends cds.ApplicationService {
     }))
 
     return super.init()
+  }
+}
+
+function registerReadOnlyEntityGuards (service, entities) {
+  const targets = READ_ONLY_ENTITY_NAMES
+    .flatMap(name => [entities[name], entities[name]?.drafts])
+    .filter(Boolean)
+
+  for (const target of targets) {
+    for (const event of ['CREATE', 'UPDATE', 'PATCH', 'DELETE']) {
+      service.before(event, target, req => {
+        req.reject(405, `${target.name} is read-only in BugService.`)
+      })
+    }
   }
 }
 
@@ -306,6 +388,146 @@ async function assignToDeveloper (req, entities) {
   })
 }
 
+async function resubmitToDeveloper (req, entities) {
+  const bugID = bugIDFrom(req)
+  const oldBug = await readBug(req, entities, bugID)
+  if (!oldBug) return req.reject(404, 'Bug not found.')
+
+  const actor = await resolveRequestUser(req, entities)
+  if (actor && !COORDINATOR_ROLES.has(actor.role_code)) {
+    return req.reject(403, 'Only Tester or PM users can resubmit a bug to the developer.')
+  }
+
+  const note = trimToNull(req.data.note)
+  if (!note) {
+    return req.reject(400, 'Resubmitting to the developer requires an update summary.', 'note')
+  }
+
+  if (!oldBug.assignee_ID) {
+    return req.reject(400, 'This action requires an assigned developer.', 'assignee')
+  }
+
+  validateTransition(req, oldBug.status_code, STATUS.ASSIGNED)
+
+  const patch = {
+    status_code: STATUS.ASSIGNED
+  }
+
+  const nextState = { ...oldBug, ...patch }
+  const nextProcessor = await determineNextProcessor(req, entities, nextState)
+  patch.nextProcessorUser_ID = nextProcessor.userID
+  patch.nextProcessorRole_code = nextProcessor.roleCode
+
+  const tx = cds.tx(req)
+  await tx.run(UPDATE(entities.Bugs).set(patch).where({ ID: bugID }))
+
+  const updatedBug = await tx.run(SELECT.one.from(entities.Bugs).where({ ID: bugID }))
+  const actorUser = actor || (oldBug.reporter_ID
+    ? await tx.run(SELECT.one.from(entities.Users).where({ ID: oldBug.reporter_ID }))
+    : null)
+
+  if (actorUser?.ID) {
+    await tx.run(
+      INSERT.into(entities.Comments).entries({
+        ID: cds.utils.uuid(),
+        bug_ID: bugID,
+        author_ID: actorUser.ID,
+        authorRole_code: actorUser.role_code,
+        content: `Resubmitted after information request: ${note}`
+      })
+    )
+  }
+
+  const historyChanges = [
+    {
+      fieldName: 'status',
+      oldValue: oldBug.status_code,
+      newValue: updatedBug.status_code
+    }
+  ]
+
+  if (oldBug.nextProcessorUser_ID !== updatedBug.nextProcessorUser_ID) {
+    historyChanges.push({
+      fieldName: 'nextProcessorUser',
+      oldValue: oldBug.nextProcessorUser_ID,
+      newValue: updatedBug.nextProcessorUser_ID
+    })
+  }
+
+  if (oldBug.nextProcessorRole_code !== updatedBug.nextProcessorRole_code) {
+    historyChanges.push({
+      fieldName: 'nextProcessorRole',
+      oldValue: oldBug.nextProcessorRole_code,
+      newValue: updatedBug.nextProcessorRole_code
+    })
+  }
+
+  await writeHistoryEvent(req, entities, {
+    bugID,
+    actorID: actorUser?.ID || oldBug.reporter_ID,
+    actionType: ACTION.STATUS_CHANGE,
+    reason: note,
+    summary: 'Resubmitted bug to the assigned developer after additional information was provided.',
+    changes: historyChanges
+  })
+
+  if (updatedBug.nextProcessorUser_ID) {
+    await writeNotificationRecord(req, entities, {
+      bugID,
+      recipientID: updatedBug.nextProcessorUser_ID,
+      eventType: EVENT.UPDATED,
+      message: `${updatedBug.bugNumber || 'Bug'} was resubmitted with additional information.`
+    })
+  }
+
+  return updatedBug
+}
+
+async function addComment (req, entities) {
+  const bugID = bugIDFrom(req)
+  const bug = await readBug(req, entities, bugID)
+  if (!bug) return req.reject(404, 'Bug not found.')
+
+  const actor = await resolveRequestUser(req, entities)
+  if (!actor || !COMMENT_ROLES.has(actor.role_code)) {
+    return req.reject(403, 'Only Tester, Developer, or PM users can add comments.')
+  }
+
+  const content = trimToNull(req.data.content)
+  if (!content) {
+    return req.reject(400, 'Comment content is required.', 'content')
+  }
+
+  const tx = cds.tx(req)
+  const commentID = cds.utils.uuid()
+  await tx.run(
+    INSERT.into(entities.Comments).entries({
+      ID: commentID,
+      bug_ID: bug.ID,
+      author_ID: actor.ID,
+      authorRole_code: actor.role_code,
+      content
+    })
+  )
+
+  await writeHistoryEvent(req, entities, {
+    bugID: bug.ID,
+    actorID: actor.ID,
+    actionType: ACTION.EDIT,
+    reason: null,
+    summary: 'Added a comment.',
+    changes: [
+      {
+        fieldName: 'comment',
+        oldValue: null,
+        newValue: content
+      }
+    ]
+  })
+
+  return tx.run(SELECT.one.from(entities.Bugs).where({ ID: bug.ID }))
+}
+
 async function transitionBug (req, entities, options) {
   const bugID = bugIDFrom(req)
   const oldBug = await readBug(req, entities, bugID)
@@ -346,52 +568,45 @@ async function transitionBug (req, entities, options) {
 
   const updatedBug = await tx.run(SELECT.one.from(entities.Bugs).where({ ID: bugID }))
   const actorID = await actorForAction(req, entities, oldBug, options.actionType)
-
-  await writeHistory(req, entities, {
-    bugID,
-    actorID,
-    actionType: options.actionType,
-    fieldName: 'status',
-    oldValue: oldBug.status_code,
-    newValue: options.status,
-    reason: trimToNull(options.reason)
-  })
+  const historyChanges = [
+    {
+      fieldName: 'status',
+      oldValue: oldBug.status_code,
+      newValue: options.status
+    }
+  ]
 
   if (oldBug.assignee_ID !== updatedBug.assignee_ID) {
-    await writeHistory(req, entities, {
-      bugID,
-      actorID,
-      actionType: oldBug.assignee_ID ? ACTION.REASSIGN : ACTION.ASSIGN,
+    historyChanges.push({
       fieldName: 'assignee',
       oldValue: oldBug.assignee_ID,
-      newValue: updatedBug.assignee_ID,
-      reason: trimToNull(options.reason)
+      newValue: updatedBug.assignee_ID
     })
   }
 
   if (oldBug.nextProcessorUser_ID !== updatedBug.nextProcessorUser_ID) {
-    await writeHistory(req, entities, {
-      bugID,
-      actorID,
-      actionType: options.actionType,
+    historyChanges.push({
       fieldName: 'nextProcessorUser',
       oldValue: oldBug.nextProcessorUser_ID,
-      newValue: updatedBug.nextProcessorUser_ID,
-      reason: trimToNull(options.reason)
+      newValue: updatedBug.nextProcessorUser_ID
     })
   }
 
   if (oldBug.nextProcessorRole_code !== updatedBug.nextProcessorRole_code) {
-    await writeHistory(req, entities, {
-      bugID,
-      actorID,
-      actionType: options.actionType,
+    historyChanges.push({
       fieldName: 'nextProcessorRole',
       oldValue: oldBug.nextProcessorRole_code,
-      newValue: updatedBug.nextProcessorRole_code,
-      reason: trimToNull(options.reason)
+      newValue: updatedBug.nextProcessorRole_code
     })
   }
+
+  await writeHistoryEvent(req, entities, {
+    bugID,
+    actorID,
+    actionType: options.actionType,
+    reason: trimToNull(options.reason),
+    changes: historyChanges
+  })
 
   await writeNotificationForStatus(req, entities, updatedBug, options.status)
   return updatedBug
@@ -442,6 +657,11 @@ async function prepareCommentCreate (req, entities) {
 async function prepareAttachmentWrite (req, entities, { isCreate }) {
   const headers = requestHeaders(req)
   const actor = await resolveRequestUser(req, entities)
+  const attachmentID = attachmentIDFrom(req)
+
+  if (!isCreate && attachmentID) {
+    req._oldAttachment = await readAttachment(req, req.target, attachmentID)
+  }
 
   if (actor && !ATTACHMENT_ROLES.has(actor.role_code)) {
     return req.reject(403, 'Only Tester, Developer, or PM users can upload attachments.')
@@ -483,11 +703,26 @@ async function prepareAttachmentWrite (req, entities, { isCreate }) {
     req.data.storageRef = `db://attachments/${req.data.ID}`
   }
 
+  if (isAttachmentContentRequest(req) && req.data.content == null) {
+    const binaryContent = await extractAttachmentContent(req)
+    if (binaryContent) {
+      req.data.content = binaryContent
+      if (!req.data.fileSize) req.data.fileSize = binaryContent.length
+    }
+  }
+
+  const headerMediaType = normalizeMediaType(headers['content-type'])
   req.data.fileName = trimToNull(req.data.fileName) || fileNameFromHeaders(headers) || req.data.fileName
-  req.data.mediaType = normalizeMediaType(req.data.mediaType) || normalizeMediaType(headers['content-type']) || req.data.mediaType
+
+  const explicitMediaType = normalizeMediaType(req.data.mediaType)
+  if (explicitMediaType) {
+    req.data.mediaType = explicitMediaType
+  } else if (headerMediaType && !isEnvelopeMediaType(headerMediaType)) {
+    req.data.mediaType = headerMediaType
+  }
 
   const contentLength = Number(headers['content-length'])
-  if (Number.isFinite(contentLength) && contentLength > 0) {
+  if (!isEnvelopeMediaType(headerMediaType) && Number.isFinite(contentLength) && contentLength > 0) {
     req.data.fileSize = contentLength
   }
 
@@ -730,16 +965,22 @@ async function determineNextProcessor (req, entities, bug) {
 async function recordCreateSideEffects (req, data, entities) {
   if (!data?.ID) return
   const bug = await readBug(req, entities, data.ID)
-  const actorID = bug.reporter_ID || (await firstUserByRole(req, entities, 'TESTER'))?.ID
+  const actor = await resolveRequestUser(req, entities)
+  const actorID = actor?.ID || bug.reporter_ID || (await firstUserByRole(req, entities, 'TESTER'))?.ID
 
-  await writeHistory(req, entities, {
+  await writeHistoryEvent(req, entities, {
     bugID: data.ID,
     actorID,
     actionType: ACTION.CREATE,
-    fieldName: 'status',
-    oldValue: null,
-    newValue: bug.status_code,
-    reason: 'Bug report created.'
+    reason: 'Bug report created.',
+    summary: `Created bug report with initial status ${await displayStatus(req, entities, bug.status_code)}.`,
+    changes: [
+      {
+        fieldName: 'status',
+        oldValue: null,
+        newValue: bug.status_code
+      }
+    ]
   })
 
   await writeNotificationForStatus(req, entities, bug, bug.status_code)
@@ -749,18 +990,18 @@ async function recordUpdateSideEffects (req, entities) {
   const changes = req._importantChanges || []
   if (!changes.length) return
 
-  const actorID = req._finalBug?.reporter_ID || (await firstUserByRole(req, entities, 'PM'))?.ID
-  for (const change of changes) {
-    await writeHistory(req, entities, {
-      bugID: req._finalBug.ID,
-      actorID,
-      actionType: actionTypeForChange(change),
-      fieldName: change.fieldName,
-      oldValue: change.oldValue,
-      newValue: change.newValue,
-      reason: change.fieldName === 'rejectionReason' ? change.newValue : null
-    })
-  }
+  const actor = await resolveRequestUser(req, entities)
+  const actorID = actor?.ID || req._finalBug?.reporter_ID || (await firstUserByRole(req, entities, 'PM'))?.ID
+  const eventActionType = changes.some(change => change.fieldName === 'assignee')
+    ? actionTypeForChange(changes.find(change => change.fieldName === 'assignee'))
+    : actionTypeForChange(changes[0])
+  await writeHistoryEvent(req, entities, {
+    bugID: req._finalBug.ID,
+    actorID,
+    actionType: eventActionType,
+    changes,
+    reason: trimToNull(changes.find(change => change.fieldName === 'rejectionReason')?.newValue)
+  })
 
   const statusChange = changes.find(change => change.fieldName === 'status')
   if (statusChange) {
@@ -771,25 +1012,151 @@ async function recordUpdateSideEffects (req, entities) {
 async function recordCommentCreateSideEffects (req, data, entities) {
   if (!data?.bug_ID || !data?.author_ID) return
 
-  await writeHistory(req, entities, {
+  await writeHistoryEvent(req, entities, {
     bugID: data.bug_ID,
     actorID: data.author_ID,
     actionType: ACTION.EDIT,
-    fieldName: 'comment',
+    reason: null,
+    summary: 'Added a comment.',
+    changes: [
+      {
+        fieldName: 'comment',
+        oldValue: null,
+        newValue: data.content
+      }
+    ]
+  })
+}
+
+async function recordAttachmentWriteSideEffects (req, data, entities, { isCreate }) {
+  const attachment = data?.ID ? await readAttachment(req, req.target, data.ID) : null
+  if (!attachment?.bug_ID) return
+
+  const actor = await resolveRequestUser(req, entities)
+  const actorID = actor?.ID || attachment.uploadedBy_ID || req.data?.uploadedBy_ID
+  if (!actorID) return
+
+  const fileName = trimToNull(attachment.fileName) || trimToNull(req.data?.fileName) || attachment.ID
+  const hadContentBefore = hasAttachmentPayload(req._oldAttachment)
+  const hasContentNow = hasAttachmentPayload(attachment)
+
+  if (isCreate) {
+    if (!hasContentNow) return
+
+    await writeHistoryEvent(req, entities, {
+      bugID: attachment.bug_ID,
+      actorID,
+      actionType: ACTION.EDIT,
+      summary: `Added attachment ${fileName}.`,
+      changes: [
+        {
+          fieldName: 'attachment',
+          oldValue: null,
+          newValue: attachment.ID,
+          oldValueDisplay: null,
+          newValueDisplay: fileName
+        }
+      ]
+    })
+    return
+  }
+
+  if (!req._oldAttachment) return
+
+  if (!hadContentBefore && hasContentNow) {
+    await writeHistoryEvent(req, entities, {
+      bugID: attachment.bug_ID,
+      actorID,
+      actionType: ACTION.EDIT,
+      summary: `Added attachment ${fileName}.`,
+      changes: [
+        {
+          fieldName: 'attachment',
+          oldValue: null,
+          newValue: attachment.ID,
+          oldValueDisplay: null,
+          newValueDisplay: fileName
+        }
+      ]
+    })
+    return
+  }
+
+  const attachmentChanges = importantAttachmentChanges(req._oldAttachment, attachment)
+  if (!attachmentChanges.length) return
+
+  await writeHistoryEvent(req, entities, {
+    bugID: attachment.bug_ID,
+    actorID,
+    actionType: ACTION.EDIT,
+    summary: `Updated attachment ${fileName}.`,
+    changes: attachmentChanges
+  })
+}
+
+async function recordDraftAttachmentSaveSideEffects (req, data, entities) {
+  const bugID = data?.ID || bugIDFrom(req)
+  if (!bugID) return
+
+  const previousActiveAttachments = req._preSaveActiveAttachments || []
+  const previousActiveIds = new Set(previousActiveAttachments.map(attachment => attachment.ID))
+  const activeAttachments = await cds.tx(req).run(
+    SELECT.from(entities.Attachments)
+      .columns('ID', 'bug_ID', 'fileName', 'mediaType', 'fileSize')
+      .where({ bug_ID: bugID })
+  )
+
+  const addedAttachments = activeAttachments.filter(attachment => !previousActiveIds.has(attachment.ID))
+  if (!addedAttachments.length) return
+
+  const actor = await resolveRequestUser(req, entities)
+  const activeBug = await readBug(req, entities, bugID)
+  const actorID = actor?.ID || activeBug?.reporter_ID || (await firstUserByRole(req, entities, 'TESTER'))?.ID
+  if (!actorID) return
+
+  const changes = addedAttachments.map(attachment => ({
+    fieldName: 'attachment',
     oldValue: null,
-    newValue: data.content,
-    reason: null
+    newValue: attachment.ID,
+    oldValueDisplay: null,
+    newValueDisplay: trimToNull(attachment.fileName) || attachment.ID
+  }))
+
+  const summary = addedAttachments.length === 1
+    ? `Added attachment ${changes[0].newValueDisplay}.`
+    : `Added ${addedAttachments.length} attachments.`
+
+  await writeHistoryEvent(req, entities, {
+    bugID,
+    actorID,
+    actionType: ACTION.EDIT,
+    summary,
+    changes
   })
 }
 
 function importantChanges (oldBug, finalBug) {
   const tracked = [
+    ['title', 'title'],
+    ['description', 'description'],
     ['status_code', 'status'],
+    ['priority_code', 'priority'],
+    ['severity_code', 'severity'],
+    ['environment_code', 'environment'],
+    ['environmentDetail', 'environmentDetail'],
     ['assignee_ID', 'assignee'],
     ['sapModule_ID', 'sapModule'],
     ['applicationComponent_ID', 'applicationComponent'],
     ['defectCategory_ID', 'defectCategory'],
     ['componentCategory_ID', 'componentCategory'],
+    ['stepsToReproduce', 'stepsToReproduce'],
+    ['actualResult', 'actualResult'],
+    ['expectedResult', 'expectedResult'],
+    ['testCaseRef', 'testCaseRef'],
+    ['testRunRef', 'testRunRef'],
+    ['plannedCompletionDate', 'plannedCompletionDate'],
+    ['dueDate', 'dueDate'],
+    ['estimatedEffortHours', 'estimatedEffortHours'],
     ['nextProcessorUser_ID', 'nextProcessorUser'],
     ['nextProcessorRole_code', 'nextProcessorRole'],
     ['rejectionReason', 'rejectionReason']
@@ -811,32 +1178,263 @@ function actionTypeForChange (change) {
   return ACTION.EDIT
 }
 
-async function writeHistory (req, entities, entry) {
+async function writeHistoryEvent (req, entities, entry) {
   if (!entry.actorID) return
-  const actor = await SELECT.one.from(entities.Users).where({ ID: entry.actorID })
-  await cds.tx(req).run(INSERT.into(entities.HistoryLogs).entries({
+  const tx = cds.tx(req)
+  const actor = await tx.run(SELECT.one.from(entities.Users).where({ ID: entry.actorID }))
+  if (!actor) return
+
+  const changes = await enrichHistoryChanges(req, entities, entry.changes || [])
+  if (!changes.length) return
+
+  const reason = trimToNull(entry.reason)
+  const summary = trimToNull(entry.summary) || buildHistorySummary(entry.actionType, changes)
+  const eventID = cds.utils.uuid()
+
+  await tx.run(INSERT.into(entities.HistoryEvents).entries({
+    ID: eventID,
     bug_ID: entry.bugID,
     actor_ID: entry.actorID,
-    actorRole_code: actor?.role_code,
+    actorRole_code: actor.role_code,
     actionType_code: entry.actionType,
-    fieldName: entry.fieldName,
-    oldValue: toHistoryValue(entry.oldValue),
-    newValue: toHistoryValue(entry.newValue),
-    reason: entry.reason
+    summary,
+    reason
   }))
+
+  await tx.run(INSERT.into(entities.HistoryLogs).entries(
+    changes.map(change => ({
+      bug_ID: entry.bugID,
+      event_ID: eventID,
+      actor_ID: entry.actorID,
+      actorRole_code: actor.role_code,
+      actionType_code: entry.actionType,
+      fieldName: change.fieldName,
+      fieldLabel: change.fieldLabel,
+      oldValue: toHistoryValue(change.oldValue),
+      oldValueDisplay: toHistoryValue(change.oldValueDisplay),
+      newValue: toHistoryValue(change.newValue),
+      newValueDisplay: toHistoryValue(change.newValueDisplay),
+      reason
+    }))
+  ))
+}
+
+async function enrichHistoryChanges (req, entities, changes) {
+  const enriched = []
+
+  for (const change of changes) {
+    enriched.push({
+      ...change,
+      fieldLabel: change.fieldLabel || historyFieldLabel(change.fieldName),
+      oldValueDisplay: change.oldValueDisplay ?? await historyValueDisplay(req, entities, change.fieldName, change.oldValue),
+      newValueDisplay: change.newValueDisplay ?? await historyValueDisplay(req, entities, change.fieldName, change.newValue)
+    })
+  }
+
+  return enriched
+}
+
+function historyFieldLabel (fieldName) {
+  return HISTORY_FIELD_LABELS[fieldName] || fieldName
+}
+
+async function historyValueDisplay (req, entities, fieldName, value) {
+  if (value === null || value === undefined || value === '') return null
+
+  switch (fieldName) {
+    case 'priority':
+      return displayCodeListName(req, entities.PriorityValues, value)
+    case 'severity':
+      return displayCodeListName(req, entities.SeverityValues, value)
+    case 'environment':
+      return displayCodeListName(req, entities.EnvironmentValues, value)
+    case 'status':
+      return displayStatus(req, entities, value)
+    case 'assignee':
+      return displayDeveloperName(req, entities, value)
+    case 'sapModule':
+      return displayEntityNameByID(req, entities.SAPModules, value)
+    case 'applicationComponent':
+      return displayEntityNameByID(req, entities.ApplicationComponents, value)
+    case 'defectCategory':
+      return displayEntityNameByID(req, entities.DefectCategories, value)
+    case 'componentCategory':
+      return displayComponentCategory(req, entities, value)
+    case 'nextProcessorUser':
+      return displayUserName(req, entities, value)
+    case 'nextProcessorRole':
+      return displayProcessorRole(req, entities, value)
+    default:
+      return String(value)
+  }
+}
+
+async function displayStatus (req, entities, code) {
+  return displayCodeListName(req, entities.StatusValues, code)
+}
+
+async function displayProcessorRole (req, entities, code) {
+  return displayCodeListName(req, entities.ProcessorRoleValues, code)
+}
+
+async function displayCodeListName (req, entity, code) {
+  if (!code || !entity) return null
+  const row = await cds.tx(req).run(
+    SELECT.one.from(entity)
+      .columns('name')
+      .where({ code })
+  )
+  return row?.name || String(code)
+}
+
+async function displayUserName (req, entities, userID) {
+  if (!userID) return null
+  const row = await cds.tx(req).run(
+    SELECT.one.from(entities.Users)
+      .columns('displayName')
+      .where({ ID: userID })
+  )
+  return row?.displayName || String(userID)
+}
+
+async function displayDeveloperName (req, entities, developerProfileID) {
+  if (!developerProfileID) return null
+  const userID = await userIDForDeveloper(req, entities, developerProfileID)
+  if (!userID) return String(developerProfileID)
+  return displayUserName(req, entities, userID)
+}
+
+async function displayEntityNameByID (req, entity, id) {
+  if (!id || !entity) return null
+  const row = await cds.tx(req).run(
+    SELECT.one.from(entity)
+      .columns('name')
+      .where({ ID: id })
+  )
+  return row?.name || String(id)
+}
+
+async function displayComponentCategory (req, entities, componentCategoryID) {
+  if (!componentCategoryID) return null
+
+  const row = await cds.tx(req).run(
+    SELECT.one.from(entities.ComponentCategories)
+      .columns('component_ID', 'defectCategory_ID')
+      .where({ ID: componentCategoryID })
+  )
+
+  if (!row) return String(componentCategoryID)
+
+  const componentName = await displayEntityNameByID(req, entities.ApplicationComponents, row.component_ID)
+  const defectCategoryName = await displayEntityNameByID(req, entities.DefectCategories, row.defectCategory_ID)
+  const combined = [componentName, defectCategoryName].filter(Boolean).join(' / ')
+  return combined || String(componentCategoryID)
+}
+
+function buildHistorySummary (actionType, changes) {
+  const statusChange = findHistoryChange(changes, 'status')
+  const assigneeChange = findHistoryChange(changes, 'assignee')
+
+  switch (actionType) {
+    case ACTION.CREATE:
+      return `Created bug report.${statusChangeSuffix(statusChange)}`
+    case ACTION.ASSIGN:
+      return `${assigneeChange?.newValueDisplay ? `Assigned bug to ${assigneeChange.newValueDisplay}.` : 'Assigned bug to a developer.'}${statusChangeSuffix(statusChange)}`
+    case ACTION.REASSIGN:
+      return `${assigneeChange?.newValueDisplay ? `Reassigned bug to ${assigneeChange.newValueDisplay}.` : 'Reassigned bug.'}${statusChangeSuffix(statusChange)}`
+    case ACTION.REQUEST_INFO:
+      return `Requested more information.${statusChangeSuffix(statusChange)}`
+    case ACTION.REJECT:
+      return `Rejected bug for follow-up.${statusChangeSuffix(statusChange)}`
+    case ACTION.RESOLVE:
+      return `Marked bug as resolved.${statusChangeSuffix(statusChange)}`
+    case ACTION.RETEST:
+      return `Moved bug to retest.${statusChangeSuffix(statusChange)}`
+    case ACTION.CLOSE:
+      return `Closed bug.${statusChangeSuffix(statusChange)}`
+    case ACTION.REOPEN:
+      return `Reopened bug.${statusChangeSuffix(statusChange)}`
+    case ACTION.STATUS_CHANGE:
+      return statusActionSummary(statusChange)
+    case ACTION.EDIT:
+    default:
+      return genericEditSummary(changes)
+  }
+}
+
+function findHistoryChange (changes, fieldName) {
+  return changes.find(change => change.fieldName === fieldName)
+}
+
+function statusChangeSuffix (change) {
+  if (!change || change.oldValueDisplay === change.newValueDisplay) return ''
+  const fromPart = change.oldValueDisplay ? ` from ${change.oldValueDisplay}` : ''
+  const toPart = change.newValueDisplay ? change.newValueDisplay : 'Unknown'
+  return ` Status changed${fromPart} to ${toPart}.`
+}
+
+function statusActionSummary (statusChange) {
+  if (!statusChange?.newValueDisplay) return 'Updated workflow status.'
+
+  switch (statusChange.newValueDisplay) {
+    case 'In Review':
+      return 'Moved bug to In Review.'
+    case 'In Progress':
+      return 'Started working on the bug.'
+    default:
+      return `Changed status to ${statusChange.newValueDisplay}.`
+  }
+}
+
+function genericEditSummary (changes) {
+  const labels = [...new Set(changes.map(change => change.fieldLabel).filter(Boolean))]
+  if (!labels.length) return 'Updated bug details.'
+  if (labels.length === 1) return `Updated ${labels[0].toLowerCase()}.`
+  if (labels.length <= 3) return `Updated ${labels.join(', ')}.`
+  return `Updated ${labels.length} bug fields.`
+}
+
+function importantAttachmentChanges (oldAttachment, newAttachment) {
+  const tracked = [
+    ['fileName', 'attachment'],
+    ['mediaType', 'attachment'],
+    ['fileSize', 'attachment']
+  ]
+
+  return tracked
+    .filter(([field]) => oldAttachment[field] !== newAttachment[field])
+    .map(([field, fieldName]) => ({
+      fieldName,
+      fieldLabel: historyFieldLabel(fieldName),
+      oldValue: oldAttachment.ID,
+      newValue: newAttachment.ID,
+      oldValueDisplay: trimToNull(oldAttachment.fileName) || oldAttachment.ID,
+      newValueDisplay: trimToNull(newAttachment.fileName) || newAttachment.ID
+    }))
 }
 
 async function writeNotificationForStatus (req, entities, bug, status) {
   const notification = notificationTargetForStatus(bug, status)
   if (!notification?.recipientID || !notification.eventType) return
 
+  await writeNotificationRecord(req, entities, {
+    bugID: bug.ID,
+    recipientID: notification.recipientID,
+    eventType: notification.eventType,
+    message: notification.message
+  })
+}
+
+async function writeNotificationRecord (req, entities, entry) {
+  if (!entry?.bugID || !entry?.recipientID || !entry?.eventType) return
+
   await cds.tx(req).run(INSERT.into(entities.Notifications).entries({
-    bug_ID: bug.ID,
-    recipient_ID: notification.recipientID,
-    eventType_code: notification.eventType,
+    bug_ID: entry.bugID,
+    recipient_ID: entry.recipientID,
+    eventType_code: entry.eventType,
     channel_code: 'IN_APP',
     deliveryStatus_code: 'PENDING',
-    message: notification.message
+    message: entry.message
   }))
 }
 
@@ -922,65 +1520,101 @@ async function readBug (req, entities, bugID) {
   return cds.tx(req).run(SELECT.one.from(entities.Bugs).where({ ID: bugID }))
 }
 
-async function enrichAssigneeDisplayNames (bugs, req, entities) {
+async function enrichBugDisplayFields (bugs, req, entities) {
   const rows = Array.isArray(bugs) ? bugs : [bugs].filter(Boolean)
-  const needsDisplayName = rows.some(row => Object.prototype.hasOwnProperty.call(row, 'assigneeDisplayName'))
-  if (!needsDisplayName) return
+  if (!rows.length) return
 
-  await fillMissingAssigneeIDs(rows, req, entities)
-
-  const assigneeIDs = [...new Set(rows.map(row => row.assignee_ID).filter(Boolean))]
-  if (!assigneeIDs.length) return
+  await fillMissingBugDisplayKeys(rows, req, entities)
 
   const tx = cds.tx(req)
-  const profiles = await tx.run(
-    SELECT.from(entities.DeveloperProfiles)
-      .columns('ID', 'user_ID')
-      .where({ ID: { in: assigneeIDs } })
-  )
-  const userIDs = [...new Set(profiles.map(profile => profile.user_ID).filter(Boolean))]
-  if (!userIDs.length) return
+  const assigneeIDs = [...new Set(rows.map(row => row.assignee_ID).filter(Boolean))]
+  const userIDs = [...new Set(rows.flatMap(row => [row.reporter_ID, row.nextProcessorUser_ID]).filter(Boolean))]
+  const roleCodes = [...new Set(rows.map(row => row.nextProcessorRole_code).filter(Boolean))]
 
-  const users = await tx.run(
-    SELECT.from(entities.Users)
-      .columns('ID', 'displayName')
-      .where({ ID: { in: userIDs } })
-  )
+  const profiles = assigneeIDs.length
+    ? await tx.run(
+      SELECT.from(entities.DeveloperProfiles)
+        .columns('ID', 'user_ID')
+        .where({ ID: { in: assigneeIDs } })
+    )
+    : []
+
+  for (const profile of profiles) {
+    if (profile.user_ID) userIDs.push(profile.user_ID)
+  }
+
+  const distinctUserIDs = [...new Set(userIDs.filter(Boolean))]
+
+  const users = distinctUserIDs.length
+    ? await tx.run(
+      SELECT.from(entities.Users)
+        .columns('ID', 'displayName')
+        .where({ ID: { in: distinctUserIDs } })
+    )
+    : []
   const userNameByID = new Map(users.map(user => [user.ID, user.displayName]))
   const profileNameByID = new Map(
     profiles.map(profile => [profile.ID, userNameByID.get(profile.user_ID)])
   )
+  const processorRoles = roleCodes.length
+    ? await tx.run(
+      SELECT.from(entities.ProcessorRoleValues)
+        .columns('code', 'name')
+        .where({ code: { in: roleCodes } })
+    )
+    : []
+  const roleNameByCode = new Map(processorRoles.map(role => [role.code, role.name]))
 
   for (const row of rows) {
-    if (row.assignee_ID) row.assigneeDisplayName = profileNameByID.get(row.assignee_ID) || null
+    row.reporterDisplayName = row.reporter_ID ? userNameByID.get(row.reporter_ID) || null : null
+    row.assigneeDisplayName = row.assignee_ID ? profileNameByID.get(row.assignee_ID) || null : null
+    row.nextProcessorUserDisplayName = row.nextProcessorUser_ID ? userNameByID.get(row.nextProcessorUser_ID) || null : null
+    row.nextProcessorRoleName = row.nextProcessorRole_code ? roleNameByCode.get(row.nextProcessorRole_code) || null : null
   }
 }
 
-async function fillMissingAssigneeIDs (rows, req, entities) {
+async function fillMissingBugDisplayKeys (rows, req, entities) {
   const rowsNeedingLookup = rows
-    .filter(row => row.ID && row.assignee_ID === undefined)
+    .filter(row =>
+      row.ID && (
+        row.reporter_ID === undefined ||
+        row.assignee_ID === undefined ||
+        row.nextProcessorUser_ID === undefined ||
+        row.nextProcessorRole_code === undefined
+      )
+    )
   if (!rowsNeedingLookup.length) return
 
-  await fillMissingAssigneeIDsFromEntity(rowsNeedingLookup, entities.Bugs.drafts, req)
-  await fillMissingAssigneeIDsFromEntity(
-    rowsNeedingLookup.filter(row => row.assignee_ID === undefined),
+  await fillMissingBugDisplayKeysFromEntity(rowsNeedingLookup, entities.Bugs.drafts, req)
+  await fillMissingBugDisplayKeysFromEntity(
+    rowsNeedingLookup.filter(row =>
+      row.reporter_ID === undefined ||
+      row.assignee_ID === undefined ||
+      row.nextProcessorUser_ID === undefined ||
+      row.nextProcessorRole_code === undefined
+    ),
     entities.Bugs,
     req
   )
 }
 
-async function fillMissingAssigneeIDsFromEntity (rows, entity, req) {
+async function fillMissingBugDisplayKeysFromEntity (rows, entity, req) {
   if (!rows?.length || !entity) return
 
   const bugs = await cds.tx(req).run(
     SELECT.from(entity)
-      .columns('ID', 'assignee_ID')
+      .columns('ID', 'reporter_ID', 'assignee_ID', 'nextProcessorUser_ID', 'nextProcessorRole_code')
       .where({ ID: { in: rows.map(row => row.ID) } })
   )
-  const assigneeIDByBugID = new Map(bugs.map(bug => [bug.ID, bug.assignee_ID]))
+  const bugByID = new Map(bugs.map(bug => [bug.ID, bug]))
 
   for (const row of rows) {
-    row.assignee_ID = assigneeIDByBugID.get(row.ID)
+    const bug = bugByID.get(row.ID)
+    if (!bug) continue
+    if (row.reporter_ID === undefined) row.reporter_ID = bug.reporter_ID
+    if (row.assignee_ID === undefined) row.assignee_ID = bug.assignee_ID
+    if (row.nextProcessorUser_ID === undefined) row.nextProcessorUser_ID = bug.nextProcessorUser_ID
+    if (row.nextProcessorRole_code === undefined) row.nextProcessorRole_code = bug.nextProcessorRole_code
   }
 }
 
@@ -1004,6 +1638,10 @@ function bugIDFrom (req) {
   return req.params?.[0]?.ID || req.data?.ID
 }
 
+function attachmentIDFrom (req) {
+  return req.params?.[0]?.ID || req.data?.ID
+}
+
 function trimToNull (value) {
   if (value === null || value === undefined) return null
   if (typeof value !== 'string') return value
@@ -1017,8 +1655,52 @@ function normalizeMediaType (value) {
   return normalized.split(';')[0].trim().toLowerCase()
 }
 
+function isEnvelopeMediaType (mediaType) {
+  return mediaType === 'multipart/mixed' || mediaType === 'application/json'
+}
+
 function requestHeaders (req) {
   return req.http?.req?.headers || {}
+}
+
+function hasAttachmentPayload (attachment) {
+  if (!attachment) return false
+  if (attachment.content != null) return true
+  return Number.isFinite(Number(attachment.fileSize)) && Number(attachment.fileSize) > 0
+}
+
+async function readAttachment (req, entity, attachmentID) {
+  if (!entity || !attachmentID) return null
+  return cds.tx(req).run(
+    SELECT.one.from(entity)
+      .columns('ID', 'bug_ID', 'uploadedBy_ID', 'fileName', 'mediaType', 'fileSize', 'content')
+      .where({ ID: attachmentID })
+  )
+}
+
+function isAttachmentContentRequest (req) {
+  const path = req.http?.req?.path || req.http?.req?.originalUrl || ''
+  return typeof path === 'string' && /\/content(?:\?|$)/.test(path)
+}
+
+async function extractAttachmentContent (req) {
+  const body = req.http?.req?.body
+
+  if (Buffer.isBuffer(body)) return body
+  if (typeof body === 'string') return Buffer.from(body)
+  if (body instanceof Uint8Array) return Buffer.from(body)
+  if (body instanceof ArrayBuffer) return Buffer.from(body)
+
+  const stream = req.http?.req
+  if (!stream || typeof stream.on !== 'function' || stream.readableEnded) return null
+
+  const chunks = []
+  for await (const chunk of stream) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+  }
+
+  if (!chunks.length) return null
+  return Buffer.concat(chunks)
 }
 
 function fileNameFromHeaders (headers) {
@@ -1071,6 +1753,24 @@ async function prepareDraftPatch (req, entities) {
   }
 }
 
+async function handleDraftSave (req, entities, next) {
+  await captureDraftSaveState(req, entities)
+  const result = await next()
+  await recordDraftAttachmentSaveSideEffects(req, result, entities)
+  return result
+}
+
+async function captureDraftSaveState (req, entities) {
+  const bugID = bugIDFrom(req)
+  if (!bugID) return
+
+  req._preSaveActiveAttachments = await cds.tx(req).run(
+    SELECT.from(entities.Attachments)
+      .columns('ID', 'bug_ID', 'fileName', 'mediaType', 'fileSize')
+      .where({ bug_ID: bugID })
+  )
+}
+
 async function enrichBugCapabilities (bugs, req, entities) {
   const rows = Array.isArray(bugs) ? bugs : [bugs].filter(Boolean)
   if (!rows.length) return
@@ -1089,6 +1789,8 @@ async function enrichBugCapabilities (bugs, req, entities) {
       row.canReopen = false
       row.canAssign = false
       row.canMoveToPending = false
+      row.canResubmit = false
+      row.canAddComment = false
     }
     return
   }
@@ -1131,6 +1833,8 @@ async function enrichBugCapabilities (bugs, req, entities) {
     row.canReopen = allowedTransitions.includes(STATUS.REOPENED) && isCoordinator
     row.canAssign = allowedTransitions.includes(STATUS.ASSIGNED) && isCoordinator
     row.canMoveToPending = allowedTransitions.includes(STATUS.PENDING_ASSIGNMENT) && isCoordinator
+    row.canResubmit = status === STATUS.NEED_MORE_INFORMATION && allowedTransitions.includes(STATUS.ASSIGNED) && isCoordinator && !!assigneeID
+    row.canAddComment = COMMENT_ROLES.has(actorRole)
   }
 }
 

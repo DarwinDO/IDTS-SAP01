@@ -3,7 +3,11 @@ using idts.cap as db from '../db/schema';
 service BugService @(requires: 'authenticated-user') {
   entity Bugs as projection on db.Bugs {
     *,
-    assignee.user.displayName as assigneeDisplayName,
+    virtual reporterDisplayName : String(120),
+    componentCategory : redirected to ComponentCategories,
+    virtual assigneeDisplayName : String(120),
+    virtual nextProcessorUserDisplayName : String(120),
+    virtual nextProcessorRoleName : String(120),
     virtual canMarkInReview       : Boolean,
     virtual canStartProgress      : Boolean,
     virtual canResolve            : Boolean,
@@ -13,8 +17,11 @@ service BugService @(requires: 'authenticated-user') {
     virtual canClose              : Boolean,
     virtual canReopen             : Boolean,
     virtual canAssign             : Boolean,
-    virtual canMoveToPending      : Boolean
+    virtual canMoveToPending      : Boolean,
+    virtual canResubmit           : Boolean,
+    virtual canAddComment         : Boolean
   } actions {
+    action addComment(content: LargeString) returns Bugs;
     action assignToDeveloper(
       @Common.ValueList : {
         Label : 'Assignable Developer',
@@ -48,12 +55,14 @@ service BugService @(requires: 'authenticated-user') {
           }
         ]
       }
+      @Common.Label : 'Assignee'
       assigneeID: UUID,
       note: String
     ) returns Bugs;
     action moveToPendingAssignment(reason: String) returns Bugs;
     action markInReview(note: String) returns Bugs;
     action requestMoreInformation(reason: String) returns Bugs;
+    action resubmitToDeveloper(note: String) returns Bugs;
     action rejectBug(reason: String) returns Bugs;
     action startProgress(note: String) returns Bugs;
     action resolveBug(note: String) returns Bugs;
@@ -61,10 +70,36 @@ service BugService @(requires: 'authenticated-user') {
     action closeBug(note: String) returns Bugs;
     action reopenBug(reason: String) returns Bugs;
   };
-  entity Comments as projection on db.Comments;
-  entity Attachments as projection on db.Attachments;
-  entity HistoryLogs as projection on db.HistoryLogs;
-  entity Notifications as projection on db.Notifications;
+  entity Comments as projection on db.Comments {
+    *,
+    author.displayName as authorDisplayName,
+    authorRole.name as authorRoleName
+  };
+  entity Attachments as projection on db.Attachments {
+    *,
+    uploadedBy.displayName as uploadedByDisplayName
+  };
+  entity HistoryEvents as projection on db.HistoryEvents {
+    *,
+    actor.displayName as actorDisplayName,
+    actorRole.name as actorRoleName,
+    actionType.name as actionTypeName
+  };
+  entity HistoryLogs as projection on db.HistoryLogs {
+    *,
+    actor.displayName as actorDisplayName,
+    actorRole.name as actorRoleName,
+    actionType.name as actionTypeName,
+    event.summary as historyEventSummary
+  };
+  entity Notifications as projection on db.Notifications {
+    *,
+    recipient.displayName as recipientDisplayName,
+    eventType.name as eventTypeName,
+    channel.name as channelName,
+    deliveryStatus.name as deliveryStatusName,
+    deliveryStatus.criticality as deliveryStatusCriticality
+  };
   entity DuplicateLinks as projection on db.DuplicateLinks;
 
   entity Users as projection on db.Users;
@@ -74,7 +109,10 @@ service BugService @(requires: 'authenticated-user') {
   entity SAPModuleComponents as projection on db.SAPModuleComponents;
   entity DefectCategories as projection on db.DefectCategories;
   entity ComponentCategories as projection on db.ComponentCategories;
-  entity DeveloperResponsibilities as projection on db.DeveloperResponsibilities;
+  entity DeveloperResponsibilities as projection on db.DeveloperResponsibilities {
+    *,
+    componentCategory : redirected to ComponentCategories
+  };
   entity AssignableDevelopers as select from db.DeveloperResponsibilities {
     key ID,
     developerProfile.ID as developerProfileID,
@@ -90,6 +128,17 @@ service BugService @(requires: 'authenticated-user') {
     responsibilityLevel.name as responsibilityLevelName,
     active
   };
+  entity ValidDefectCategories as select from db.ComponentCategories {
+    key ID as componentCategoryID,
+    component.ID as applicationComponentID,
+    component.code as applicationComponentCode,
+    component.name as applicationComponentName,
+    defectCategory.ID as defectCategoryID,
+    defectCategory.code as defectCategoryCode,
+    defectCategory.name as defectCategoryName,
+    defectCategory.categoryType as defectCategoryType,
+    active
+  } where active = true and component.active = true and defectCategory.active = true;
 
   entity UserRoles as projection on db.UserRoles;
   entity StatusValues as projection on db.StatusValues;

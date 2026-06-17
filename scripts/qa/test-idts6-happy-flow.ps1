@@ -83,7 +83,7 @@ Write-Host "  CSRF token: $(if ($csrf) { 'obtained' } else { 'not required (dev 
 Write-Host ""
 
 # Seed data IDs
-$BUG1 = "90000000-0000-0000-0000-000000000001"  # NEW
+$BUG1 = "90000000-0000-0000-0000-000000000001"  # PENDING_ASSIGNMENT
 $BUG3 = "90000000-0000-0000-0000-000000000003"  # IN_PROGRESS, assignee=SangVN profile
 $DEV_SANG = "20000000-0000-0000-0000-000000000001"  # SangVN DeveloperProfile
 $DEV_DAT  = "20000000-0000-0000-0000-000000000002"  # DatDT DeveloperProfile
@@ -130,7 +130,7 @@ Write-Host ""
 
 # ----------------------------------------------------------------
 # SC-02: Assign to Developer
-# BUG-0001 (NEW) - component=CC1, DatDT has responsibility for CC1
+# BUG-0001 (PENDING_ASSIGNMENT) - component=CC1, DatDT has responsibility for CC1
 # ----------------------------------------------------------------
 Write-Host "SC-02: Assign to Developer"
 

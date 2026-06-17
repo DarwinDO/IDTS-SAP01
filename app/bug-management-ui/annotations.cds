@@ -7,6 +7,28 @@ annotate service.Bugs with @(
   Capabilities.DeleteRestrictions : {
     Deletable : false
   },
+  Capabilities.NavigationRestrictions : {
+    RestrictedProperties : [
+      {
+        NavigationProperty : notifications,
+        InsertRestrictions : { Insertable : false },
+        DeleteRestrictions : { Deletable : false },
+        UpdateRestrictions : { Updatable : false }
+      },
+      {
+        NavigationProperty : historyEvents,
+        InsertRestrictions : { Insertable : false },
+        DeleteRestrictions : { Deletable : false },
+        UpdateRestrictions : { Updatable : false }
+      },
+      {
+        NavigationProperty : comments,
+        InsertRestrictions : { Insertable : false },
+        DeleteRestrictions : { Deletable : false },
+        UpdateRestrictions : { Updatable : false }
+      }
+    ]
+  },
   UI.HeaderInfo : {
     TypeName       : 'Bug',
     TypeNamePlural : 'Bugs',
@@ -34,6 +56,19 @@ annotate service.Bugs with @(
     },
     {
       $Type  : 'UI.DataFieldForAction',
+      Label  : 'Add Comment',
+      Action : 'BugService.addComment',
+      ![@UI.Hidden] : {
+        $edmJson : {
+          $Or : [
+            { $Not : { $Path : 'canAddComment' } },
+            { $Eq : [ { $Path : 'IsActiveEntity' }, false ] }
+          ]
+        }
+      }
+    },
+    {
+      $Type  : 'UI.DataFieldForAction',
       Label  : 'Mark In Review',
       Action : 'BugService.markInReview',
       ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canMarkInReview' } } }
@@ -43,6 +78,12 @@ annotate service.Bugs with @(
       Label  : 'Request More Information',
       Action : 'BugService.requestMoreInformation',
       ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canRequestMoreInfo' } } }
+    },
+    {
+      $Type  : 'UI.DataFieldForAction',
+      Label  : 'Resubmit to Developer',
+      Action : 'BugService.resubmitToDeveloper',
+      ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canResubmit' } } }
     },
     {
       $Type  : 'UI.DataFieldForAction',
@@ -101,8 +142,8 @@ annotate service.Bugs with @(
     { $Type : 'UI.DataField', Label : 'SAP Module', Value : sapModule.name },
     { $Type : 'UI.DataField', Label : 'Application Component', Value : applicationComponent.name },
     { $Type : 'UI.DataField', Label : 'Defect Category', Value : defectCategory.name },
-    { $Type : 'UI.DataField', Label : 'Assignee', Value : assignee.user.displayName },
-    { $Type : 'UI.DataField', Label : 'Next Processor', Value : nextProcessorRole.name },
+    { $Type : 'UI.DataField', Label : 'Assignee', Value : assigneeDisplayName },
+    { $Type : 'UI.DataField', Label : 'Next Processor', Value : nextProcessorRoleName },
     { $Type : 'UI.DataField', Label : 'Due Date', Value : dueDate },
     { $Type : 'UI.DataField', Label : 'Updated At', Value : modifiedAt }
   ],
@@ -148,14 +189,26 @@ annotate service.Bugs with @(
           ID     : 'RejectedFollowUp',
           Label  : 'Rejected Follow-up',
           Target: '@UI.FieldGroup#RejectedFollowUp',
-          ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
+          ![@UI.Hidden] : {
+            $edmJson : {
+              $Or : [
+                {
+                  $And : [
+                    { $Eq : [ { $Path : 'IsActiveEntity' }, false ] },
+                    { $Eq : [ { $Path : 'HasActiveEntity' }, false ] }
+                  ]
+                },
+                { $Ne : [ { $Path : 'status_code' }, 'REJECTED' ] }
+              ]
+            }
+          }
         },
         {
           $Type  : 'UI.ReferenceFacet',
           ID     : 'Planning',
           Label  : 'Planning',
           Target: '@UI.FieldGroup#Planning',
-          ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
+          ![@UI.Hidden] : true
         }
       ]
     },
@@ -174,6 +227,12 @@ annotate service.Bugs with @(
     },
     {
       $Type  : 'UI.ReferenceFacet',
+      ID     : 'Attachments',
+      Label  : 'Evidence / Attachments',
+      Target : 'attachments/@UI.LineItem'
+    },
+    {
+      $Type  : 'UI.ReferenceFacet',
       ID     : 'Comments',
       Label  : 'Comments',
       Target : 'comments/@UI.LineItem',
@@ -181,16 +240,9 @@ annotate service.Bugs with @(
     },
     {
       $Type  : 'UI.ReferenceFacet',
-      ID     : 'Attachments',
-      Label  : 'Attachments',
-      Target : 'attachments/@UI.LineItem',
-      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
-    },
-    {
-      $Type  : 'UI.ReferenceFacet',
       ID     : 'History',
       Label  : 'History',
-      Target : 'historyLogs/@UI.LineItem',
+      Target : 'historyEvents/@UI.LineItem',
       ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
     },
     {
@@ -201,16 +253,33 @@ annotate service.Bugs with @(
       ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
     }
   ],
+  UI.PresentationVariant : {
+    Visualizations : [ '@UI.LineItem' ],
+    RequestAtLeast : [
+      canAssign,
+      canMoveToPending,
+      canResubmit,
+      canAddComment,
+      canMarkInReview,
+      canStartProgress,
+      canResolve,
+      canRequestMoreInfo,
+      canReject,
+      canSendToRetest,
+      canClose,
+      canReopen
+    ]
+  },
   UI.FieldGroup #GeneralInfo : {
     Data : [
-      { $Type : 'UI.DataField', Label : 'Bug Number', Value : bugNumber, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} },
+      { $Type : 'UI.DataField', Label : 'Bug Number', Value : bugNumber, ![@Common.FieldControl] : #ReadOnly, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} },
       { $Type : 'UI.DataField', Label : 'Title', Value : title },
       { $Type : 'UI.DataField', Label : 'Description', Value : description },
       { $Type : 'UI.DataField', Label : 'Status', Value : status.name, Criticality : status.criticality, CriticalityRepresentation : #WithoutIcon, ![@Common.FieldControl] : #ReadOnly, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} },
       { $Type : 'UI.DataField', Label : 'Priority', Value : priority_code, Criticality : priority.criticality, CriticalityRepresentation : #WithoutIcon },
-      { $Type : 'UI.DataField', Label : 'Reporter', Value : reporter.displayName, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} },
-      { $Type : 'UI.DataField', Label : 'Created At', Value : createdAt, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} },
-      { $Type : 'UI.DataField', Label : 'Updated At', Value : modifiedAt, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} }
+      { $Type : 'UI.DataField', Label : 'Reporter', Value : reporterDisplayName, ![@Common.FieldControl] : #ReadOnly, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} },
+      { $Type : 'UI.DataField', Label : 'Created At', Value : createdAt, ![@Common.FieldControl] : #ReadOnly, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} },
+      { $Type : 'UI.DataField', Label : 'Updated At', Value : modifiedAt, ![@Common.FieldControl] : #ReadOnly, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} }
     ]
   },
   UI.FieldGroup #SupportingInfo : {
@@ -238,23 +307,42 @@ annotate service.Bugs with @(
   },
   UI.FieldGroup #Assignment : {
     Data : [
-      { $Type : 'UI.DataField', Label : 'Assignee', Value : assignee_ID },
-      { $Type : 'UI.DataField', Label : 'Next Processor User', Value : nextProcessorUser.displayName, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} },
-      { $Type : 'UI.DataField', Label : 'Next Processor Role', Value : nextProcessorRole.name, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} }
+      { $Type : 'UI.DataField', Label : 'Assignee', Value : assigneeDisplayName, ![@Common.FieldControl] : #ReadOnly },
+      {
+        $Type  : 'UI.DataFieldForAction',
+        Label  : 'Assign Developer',
+        Action : 'BugService.assignToDeveloper',
+        Inline : true,
+        ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canAssign' } } }
+      },
+      {
+        $Type : 'UI.DataField',
+        Label : 'Next Processor User',
+        Value : nextProcessorUserDisplayName,
+        ![@Common.FieldControl] : #ReadOnly,
+        ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
+      },
+      {
+        $Type : 'UI.DataField',
+        Label : 'Next Processor Role',
+        Value : nextProcessorRoleName,
+        ![@Common.FieldControl] : #ReadOnly,
+        ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
+      }
     ]
   },
   UI.FieldGroup #RejectedFollowUp : {
     Data : [
-      { $Type : 'UI.DataField', Label : 'Latest Rejection Reason', Value : rejectionReason },
-      { $Type : 'UI.DataField', Label : 'Next Processor User', Value : nextProcessorUser.displayName },
-      { $Type : 'UI.DataField', Label : 'Next Processor Role', Value : nextProcessorRole.name }
+      { $Type : 'UI.DataField', Label : 'Latest Rejection Reason', Value : rejectionReason, ![@Common.FieldControl] : #ReadOnly },
+      { $Type : 'UI.DataField', Label : 'Next Processor User', Value : nextProcessorUserDisplayName, ![@Common.FieldControl] : #ReadOnly },
+      { $Type : 'UI.DataField', Label : 'Next Processor Role', Value : nextProcessorRoleName, ![@Common.FieldControl] : #ReadOnly }
     ]
   },
   UI.FieldGroup #Planning : {
     Data : [
-      { $Type : 'UI.DataField', Label : 'Planned Completion Date', Value : plannedCompletionDate },
-      { $Type : 'UI.DataField', Label : 'Due Date', Value : dueDate },
-      { $Type : 'UI.DataField', Label : 'Estimated Effort Hours', Value : estimatedEffortHours }
+      { $Type : 'UI.DataField', Label : 'Planned Completion Date', Value : plannedCompletionDate, ![@Common.FieldControl] : #ReadOnly },
+      { $Type : 'UI.DataField', Label : 'Due Date', Value : dueDate, ![@Common.FieldControl] : #ReadOnly },
+      { $Type : 'UI.DataField', Label : 'Estimated Effort Hours', Value : estimatedEffortHours, ![@Common.FieldControl] : #ReadOnly }
     ]
   },
 
@@ -268,8 +356,8 @@ annotate service.Bugs with {
   stepsToReproduce      @UI.MultiLineText @Common.Label : 'Steps to Reproduce' @Common.FieldControl : #Mandatory;
   actualResult          @UI.MultiLineText @Common.Label : 'Actual Result' @Common.FieldControl : #Mandatory;
   expectedResult        @UI.MultiLineText @Common.Label : 'Expected Result' @Common.FieldControl : #Mandatory;
-  rejectionReason       @UI.MultiLineText @Common.Label : 'Rejection Reason';
-  dueDate               @Common.Label : 'Due Date';
+  rejectionReason       @UI.MultiLineText @Common.Label : 'Rejection Reason' @Common.FieldControl : #ReadOnly;
+  dueDate               @Common.Label : 'Due Date' @Common.FieldControl : #ReadOnly;
   status                @Common.Label : 'Status' @Common.FieldControl : #ReadOnly;
   priority              @Common.Label : 'Priority' @Common.FieldControl : #Mandatory;
   severity              @Common.Label : 'Severity' @Common.FieldControl : #Mandatory;
@@ -279,9 +367,15 @@ annotate service.Bugs with {
   defectCategory        @Common.Label : 'Defect Category' @Common.FieldControl : #Mandatory;
   componentCategory     @Common.Label : 'Component Category';
   reporter              @Common.Label : 'Reporter' @Common.FieldControl : #ReadOnly;
-  assignee              @Common.Label : 'Assignee';
+  reporterDisplayName   @Common.Label : 'Reporter' @Common.FieldControl : #ReadOnly @Core.Computed;
+  assignee              @Common.Label : 'Assignee' @Common.FieldControl : #ReadOnly;
+  assigneeDisplayName   @Common.Label : 'Assignee' @Common.FieldControl : #ReadOnly @Core.Computed;
   nextProcessorUser     @Common.Label : 'Next Processor User' @Common.FieldControl : #ReadOnly;
+  nextProcessorUserDisplayName @Common.Label : 'Next Processor User' @Common.FieldControl : #ReadOnly @Core.Computed;
   nextProcessorRole     @Common.Label : 'Next Processor Role' @Common.FieldControl : #ReadOnly;
+  nextProcessorRoleName @Common.Label : 'Next Processor Role' @Common.FieldControl : #ReadOnly @Core.Computed;
+  plannedCompletionDate @Common.Label : 'Planned Completion Date' @Common.FieldControl : #ReadOnly;
+  estimatedEffortHours  @Common.Label : 'Estimated Effort Hours' @Common.FieldControl : #ReadOnly;
   componentCategory     @UI.Hidden @Core.Computed;
 };
 
@@ -407,30 +501,45 @@ annotate service.Bugs:applicationComponent.ID with @Common.Text : applicationCom
 
 annotate service.Bugs:defectCategory.ID with @Common.Text : defectCategory.name @Common.TextArrangement : #TextOnly @Common.ValueList : {
     Label : 'Defect Category',
-    CollectionPath : 'DefectCategories',
+    CollectionPath : 'ValidDefectCategories',
     SearchSupported : true,
     Parameters : [
       {
+        $Type : 'Common.ValueListParameterIn',
+        LocalDataProperty : applicationComponent_ID,
+        ValueListProperty : 'applicationComponentID'
+      },
+      {
         $Type : 'Common.ValueListParameterInOut',
         LocalDataProperty : defectCategory_ID,
-        ValueListProperty : 'ID'
+        ValueListProperty : 'defectCategoryID'
+      },
+      {
+        $Type : 'Common.ValueListParameterOut',
+        LocalDataProperty : componentCategory_ID,
+        ValueListProperty : 'componentCategoryID'
       },
       {
         $Type : 'Common.ValueListParameterDisplayOnly',
-        ValueListProperty : 'code'
+        ValueListProperty : 'defectCategoryCode'
       },
       {
         $Type : 'Common.ValueListParameterDisplayOnly',
-        ValueListProperty : 'name'
+        ValueListProperty : 'defectCategoryName'
       },
       {
         $Type : 'Common.ValueListParameterDisplayOnly',
-        ValueListProperty : 'categoryType'
+        ValueListProperty : 'defectCategoryType'
+      },
+      {
+        $Type : 'Common.ValueListParameterDisplayOnly',
+        ValueListProperty : 'applicationComponentName'
       }
     ]
   };
 
-annotate service.Bugs:assignee.ID with @Common.Label : 'Assignee'
+annotate service.Bugs:assignee.ID with @Common.FieldControl : #ReadOnly
+  @Common.Label : 'Assignee'
   @Common.Text : assigneeDisplayName
   @Common.TextArrangement : #TextOnly
   @Common.ValueList : {
@@ -479,7 +588,7 @@ annotate service.Bugs:assignee.ID with @Common.Label : 'Assignee'
     ]
   };
 
-annotate service.Bugs:reporter.ID with @Common.ValueList : {
+annotate service.Bugs:reporter.ID with @Common.FieldControl : #ReadOnly @Common.ValueList : {
     Label : 'Reporter',
     CollectionPath : 'Users',
     SearchSupported : true,
@@ -504,7 +613,9 @@ annotate service.Bugs:reporter.ID with @Common.ValueList : {
     ]
   };
 
-annotate service.Bugs:nextProcessorRole.code with @Common.ValueList : {
+annotate service.Bugs:nextProcessorUser.ID with @Common.FieldControl : #ReadOnly;
+
+annotate service.Bugs:nextProcessorRole.code with @Common.FieldControl : #ReadOnly @Common.ValueList : {
     Label : 'Next Processor Role',
     CollectionPath : 'ProcessorRoleValues',
     SearchSupported : true,
@@ -652,13 +763,15 @@ annotate service.DeveloperProfiles with @(
 
 annotate service.Comments with @UI.LineItem : [
   { $Type : 'UI.DataField', Label : 'Comment', Value : content },
-  { $Type : 'UI.DataField', Label : 'Author', Value : author.displayName },
-  { $Type : 'UI.DataField', Label : 'Role', Value : authorRole.name },
+  { $Type : 'UI.DataField', Label : 'Author', Value : authorDisplayName },
+  { $Type : 'UI.DataField', Label : 'Role', Value : authorRoleName },
   { $Type : 'UI.DataField', Label : 'Created At', Value : createdAt }
 ];
 
 annotate service.Comments with @(
-  Capabilities.InsertRestrictions : { Insertable : true },
+  UI.CreateHidden : true,
+  UI.DeleteHidden : true,
+  Capabilities.InsertRestrictions : { Insertable : false },
   Capabilities.DeleteRestrictions : { Deletable : false },
   Capabilities.UpdateRestrictions : { Updatable : false }
 );
@@ -666,22 +779,25 @@ annotate service.Comments with @(
 annotate service.Comments with {
   ID         @UI.Hidden;
   bug        @UI.Hidden;
-  author     @Common.FieldControl : #ReadOnly;
-  authorRole @Common.FieldControl : #ReadOnly;
-  content    @Common.FieldControl : #Mandatory;
+  author     @Common.Text : author.displayName @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
+  authorRole @Common.Text : authorRole.name @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
+  content    @UI.MultiLineText @Common.FieldControl : #ReadOnly;
+  createdAt  @Common.FieldControl : #ReadOnly;
 };
 
 annotate service.Attachments with @UI.LineItem : [
   { $Type : 'UI.DataField', Label : 'Attachment', Value : content },
   { $Type : 'UI.DataField', Label : 'Media Type', Value : mediaType },
   { $Type : 'UI.DataField', Label : 'Size', Value : fileSize },
-  { $Type : 'UI.DataField', Label : 'Uploaded By', Value : uploadedBy.displayName },
+  { $Type : 'UI.DataField', Label : 'Uploaded By', Value : uploadedByDisplayName },
   { $Type : 'UI.DataField', Label : 'Uploaded At', Value : createdAt }
 ];
 
 annotate service.Attachments with @(
+  UI.CreateHidden : false,
+  UI.DeleteHidden : true,
   Capabilities.InsertRestrictions : { Insertable : true },
-  Capabilities.DeleteRestrictions : { Deletable : true },
+  Capabilities.DeleteRestrictions : { Deletable : false },
   Capabilities.UpdateRestrictions : { Updatable : false },
   UI.MediaResource : { Stream : content }
 );
@@ -690,22 +806,56 @@ annotate service.Attachments with {
   ID         @UI.Hidden;
   bug        @UI.Hidden;
   storageRef @UI.Hidden;
-  uploadedBy @Common.FieldControl : #ReadOnly;
-  content    @Common.FieldControl : #Mandatory;
+  uploadedBy @Common.Text : uploadedBy.displayName @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
+  content    @Common.FieldControl : #ReadOnly;
+  fileName   @Common.FieldControl : #ReadOnly;
+  mediaType  @Common.FieldControl : #ReadOnly;
+  fileSize   @Common.FieldControl : #ReadOnly;
+  createdAt  @Common.FieldControl : #ReadOnly;
 };
 
-annotate service.HistoryLogs with @(
+annotate service.HistoryEvents with @(
+  UI.CreateHidden : true,
+  UI.DeleteHidden : true,
   Capabilities.InsertRestrictions : { Insertable : false },
   Capabilities.DeleteRestrictions : { Deletable : false },
   Capabilities.UpdateRestrictions : { Updatable : false },
   UI.LineItem : [
     { $Type : 'UI.DataField', Label : 'Time', Value : createdAt },
-    { $Type : 'UI.DataField', Label : 'Actor', Value : actor.displayName },
-    { $Type : 'UI.DataField', Label : 'Role', Value : actorRole.name },
-    { $Type : 'UI.DataField', Label : 'Action', Value : actionType.name },
-    { $Type : 'UI.DataField', Label : 'Field', Value : fieldName },
-    { $Type : 'UI.DataField', Label : 'Old Value', Value : oldValue },
-    { $Type : 'UI.DataField', Label : 'New Value', Value : newValue },
+    { $Type : 'UI.DataField', Label : 'Actor', Value : actorDisplayName },
+    { $Type : 'UI.DataField', Label : 'Role', Value : actorRoleName },
+    { $Type : 'UI.DataField', Label : 'Action', Value : actionTypeName },
+    { $Type : 'UI.DataField', Label : 'Summary', Value : summary },
+    { $Type : 'UI.DataField', Label : 'Reason', Value : reason }
+  ]
+);
+
+annotate service.HistoryEvents with {
+  ID         @UI.Hidden;
+  bug        @UI.Hidden;
+  actor      @Common.Text : actor.displayName @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
+  actorRole  @Common.Text : actorRole.name @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
+  actionType @Common.Text : actionType.name @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
+  summary    @Common.FieldControl : #ReadOnly;
+  reason     @UI.MultiLineText @Common.FieldControl : #ReadOnly;
+  createdAt  @Common.FieldControl : #ReadOnly;
+};
+
+annotate service.HistoryLogs with @(
+  UI.CreateHidden : true,
+  UI.DeleteHidden : true,
+  Capabilities.InsertRestrictions : { Insertable : false },
+  Capabilities.DeleteRestrictions : { Deletable : false },
+  Capabilities.UpdateRestrictions : { Updatable : false },
+  UI.LineItem : [
+    { $Type : 'UI.DataField', Label : 'Time', Value : createdAt },
+    { $Type : 'UI.DataField', Label : 'Actor', Value : actorDisplayName },
+    { $Type : 'UI.DataField', Label : 'Role', Value : actorRoleName },
+    { $Type : 'UI.DataField', Label : 'Action', Value : actionTypeName },
+    { $Type : 'UI.DataField', Label : 'Summary', Value : historyEventSummary },
+    { $Type : 'UI.DataField', Label : 'Field', Value : fieldLabel },
+    { $Type : 'UI.DataField', Label : 'Old Value', Value : oldValueDisplay },
+    { $Type : 'UI.DataField', Label : 'New Value', Value : newValueDisplay },
     { $Type : 'UI.DataField', Label : 'Reason', Value : reason }
   ]
 );
@@ -713,15 +863,34 @@ annotate service.HistoryLogs with @(
 annotate service.HistoryLogs with {
   ID     @UI.Hidden;
   bug    @UI.Hidden;
-  reason @UI.MultiLineText;
+  event  @UI.Hidden;
+  actor  @Common.Text : actor.displayName @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
+  actorRole @Common.Text : actorRole.name @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
+  actionType @Common.Text : actionType.name @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
+  fieldName @Common.FieldControl : #ReadOnly;
+  fieldLabel @Common.FieldControl : #ReadOnly;
+  oldValue @Common.FieldControl : #ReadOnly;
+  oldValueDisplay @Common.FieldControl : #ReadOnly;
+  newValue @Common.FieldControl : #ReadOnly;
+  newValueDisplay @Common.FieldControl : #ReadOnly;
+  reason @UI.MultiLineText @Common.FieldControl : #ReadOnly;
+  createdAt @Common.FieldControl : #ReadOnly;
 };
+
+annotate service.Notifications with @(
+  UI.CreateHidden : true,
+  UI.DeleteHidden : true,
+  Capabilities.InsertRestrictions : { Insertable : false },
+  Capabilities.DeleteRestrictions : { Deletable : false },
+  Capabilities.UpdateRestrictions : { Updatable : false }
+);
 
 annotate service.Notifications with @UI.LineItem : [
   { $Type : 'UI.DataField', Label : 'Created At', Value : createdAt },
-  { $Type : 'UI.DataField', Label : 'Recipient', Value : recipient.displayName },
-  { $Type : 'UI.DataField', Label : 'Event', Value : eventType.name },
-  { $Type : 'UI.DataField', Label : 'Channel', Value : channel.name },
-  { $Type : 'UI.DataField', Label : 'Delivery Status', Value : deliveryStatus.name, Criticality : deliveryStatus.criticality },
+  { $Type : 'UI.DataField', Label : 'Recipient', Value : recipientDisplayName },
+  { $Type : 'UI.DataField', Label : 'Event', Value : eventTypeName },
+  { $Type : 'UI.DataField', Label : 'Channel', Value : channelName },
+  { $Type : 'UI.DataField', Label : 'Delivery Status', Value : deliveryStatusName, Criticality : deliveryStatusCriticality },
   { $Type : 'UI.DataField', Label : 'Message', Value : message },
   { $Type : 'UI.DataField', Label : 'Sent At', Value : sentAt }
 ];
@@ -729,7 +898,13 @@ annotate service.Notifications with @UI.LineItem : [
 annotate service.Notifications with {
   ID      @UI.Hidden;
   bug     @UI.Hidden;
-  message @UI.MultiLineText;
+  recipient @Common.Text : recipient.displayName @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
+  eventType @Common.Text : eventType.name @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
+  channel @Common.Text : channel.name @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
+  deliveryStatus @Common.Text : deliveryStatus.name @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
+  message @UI.MultiLineText @Common.FieldControl : #ReadOnly;
+  sentAt @Common.FieldControl : #ReadOnly;
+  createdAt @Common.FieldControl : #ReadOnly;
 };
 
 annotate service.DuplicateLinks with @UI.LineItem : [
@@ -745,33 +920,284 @@ annotate service.DuplicateLinks with {
 };
 
 annotate service.Bugs actions {
+  @Common.SideEffects : {
+    TargetEntities : [comments, historyEvents]
+  }
+  addComment(
+    content @UI.MultiLineText @Common.Label : 'Comment'
+  );
+  @Common.SideEffects : {
+    TargetProperties : [
+      'status_code',
+      'assignee_ID',
+      'assigneeDisplayName',
+      'nextProcessorUser_ID',
+      'nextProcessorRole_code',
+      'canAssign',
+      'canMoveToPending',
+      'canResubmit',
+      'canAddComment',
+      'canMarkInReview',
+      'canStartProgress',
+      'canResolve',
+      'canRequestMoreInfo',
+      'canReject',
+      'canSendToRetest',
+      'canClose',
+      'canReopen'
+    ],
+    TargetEntities : [historyEvents, notifications]
+  }
   assignToDeveloper(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
   );
+  @Common.SideEffects : {
+    TargetProperties : [
+      'status_code',
+      'assignee_ID',
+      'assigneeDisplayName',
+      'nextProcessorUser_ID',
+      'nextProcessorRole_code',
+      'canAssign',
+      'canMoveToPending',
+      'canResubmit',
+      'canAddComment',
+      'canMarkInReview',
+      'canStartProgress',
+      'canResolve',
+      'canRequestMoreInfo',
+      'canReject',
+      'canSendToRetest',
+      'canClose',
+      'canReopen'
+    ],
+    TargetEntities : [historyEvents, notifications]
+  }
   moveToPendingAssignment(
     reason @UI.MultiLineText @Common.Label : 'Reason'
   );
+  @Common.SideEffects : {
+    TargetProperties : [
+      'status_code',
+      'assignee_ID',
+      'assigneeDisplayName',
+      'nextProcessorUser_ID',
+      'nextProcessorRole_code',
+      'canAssign',
+      'canMoveToPending',
+      'canResubmit',
+      'canAddComment',
+      'canMarkInReview',
+      'canStartProgress',
+      'canResolve',
+      'canRequestMoreInfo',
+      'canReject',
+      'canSendToRetest',
+      'canClose',
+      'canReopen'
+    ],
+    TargetEntities : [historyEvents, notifications]
+  }
   markInReview(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
   );
+  @Common.SideEffects : {
+    TargetProperties : [
+      'status_code',
+      'assignee_ID',
+      'assigneeDisplayName',
+      'nextProcessorUser_ID',
+      'nextProcessorRole_code',
+      'canAssign',
+      'canMoveToPending',
+      'canResubmit',
+      'canAddComment',
+      'canMarkInReview',
+      'canStartProgress',
+      'canResolve',
+      'canRequestMoreInfo',
+      'canReject',
+      'canSendToRetest',
+      'canClose',
+      'canReopen'
+    ],
+    TargetEntities : [historyEvents, notifications]
+  }
   requestMoreInformation(
     reason @UI.MultiLineText @Common.Label : 'Reason'
   );
+  @Common.SideEffects : {
+    TargetProperties : [
+      'status_code',
+      'assignee_ID',
+      'assigneeDisplayName',
+      'nextProcessorUser_ID',
+      'nextProcessorRole_code',
+      'canAssign',
+      'canMoveToPending',
+      'canResubmit',
+      'canAddComment',
+      'canMarkInReview',
+      'canStartProgress',
+      'canResolve',
+      'canRequestMoreInfo',
+      'canReject',
+      'canSendToRetest',
+      'canClose',
+      'canReopen'
+    ],
+    TargetEntities : [historyEvents, notifications]
+  }
+  resubmitToDeveloper(
+    note @UI.MultiLineText @Common.Label : 'Update Summary'
+  );
+  @Common.SideEffects : {
+    TargetProperties : [
+      'status_code',
+      'assignee_ID',
+      'assigneeDisplayName',
+      'nextProcessorUser_ID',
+      'nextProcessorRole_code',
+      'canAssign',
+      'canMoveToPending',
+      'canResubmit',
+      'canAddComment',
+      'canMarkInReview',
+      'canStartProgress',
+      'canResolve',
+      'canRequestMoreInfo',
+      'canReject',
+      'canSendToRetest',
+      'canClose',
+      'canReopen'
+    ],
+    TargetEntities : [historyEvents, notifications, comments]
+  }
   rejectBug(
     reason @UI.MultiLineText @Common.Label : 'Rejection Reason'
   );
+  @Common.SideEffects : {
+    TargetProperties : [
+      'status_code',
+      'assignee_ID',
+      'assigneeDisplayName',
+      'nextProcessorUser_ID',
+      'nextProcessorRole_code',
+      'canAssign',
+      'canMoveToPending',
+      'canResubmit',
+      'canAddComment',
+      'canMarkInReview',
+      'canStartProgress',
+      'canResolve',
+      'canRequestMoreInfo',
+      'canReject',
+      'canSendToRetest',
+      'canClose',
+      'canReopen'
+    ],
+    TargetEntities : [historyEvents, notifications]
+  }
   startProgress(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
   );
+  @Common.SideEffects : {
+    TargetProperties : [
+      'status_code',
+      'assignee_ID',
+      'assigneeDisplayName',
+      'nextProcessorUser_ID',
+      'nextProcessorRole_code',
+      'canAssign',
+      'canMoveToPending',
+      'canResubmit',
+      'canAddComment',
+      'canMarkInReview',
+      'canStartProgress',
+      'canResolve',
+      'canRequestMoreInfo',
+      'canReject',
+      'canSendToRetest',
+      'canClose',
+      'canReopen'
+    ],
+    TargetEntities : [historyEvents, notifications]
+  }
   resolveBug(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
   );
+  @Common.SideEffects : {
+    TargetProperties : [
+      'status_code',
+      'assignee_ID',
+      'assigneeDisplayName',
+      'nextProcessorUser_ID',
+      'nextProcessorRole_code',
+      'canAssign',
+      'canMoveToPending',
+      'canResubmit',
+      'canAddComment',
+      'canMarkInReview',
+      'canStartProgress',
+      'canResolve',
+      'canRequestMoreInfo',
+      'canReject',
+      'canSendToRetest',
+      'canClose',
+      'canReopen'
+    ],
+    TargetEntities : [historyEvents, notifications]
+  }
   sendToRetest(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
   );
+  @Common.SideEffects : {
+    TargetProperties : [
+      'status_code',
+      'assignee_ID',
+      'assigneeDisplayName',
+      'nextProcessorUser_ID',
+      'nextProcessorRole_code',
+      'canAssign',
+      'canMoveToPending',
+      'canResubmit',
+      'canAddComment',
+      'canMarkInReview',
+      'canStartProgress',
+      'canResolve',
+      'canRequestMoreInfo',
+      'canReject',
+      'canSendToRetest',
+      'canClose',
+      'canReopen'
+    ],
+    TargetEntities : [historyEvents, notifications]
+  }
   closeBug(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
   );
+  @Common.SideEffects : {
+    TargetProperties : [
+      'status_code',
+      'assignee_ID',
+      'assigneeDisplayName',
+      'nextProcessorUser_ID',
+      'nextProcessorRole_code',
+      'canAssign',
+      'canMoveToPending',
+      'canResubmit',
+      'canAddComment',
+      'canMarkInReview',
+      'canStartProgress',
+      'canResolve',
+      'canRequestMoreInfo',
+      'canReject',
+      'canSendToRetest',
+      'canClose',
+      'canReopen'
+    ],
+    TargetEntities : [historyEvents, notifications]
+  }
   reopenBug(
     reason @UI.MultiLineText @Common.Label : 'Reason'
   );
@@ -850,7 +1276,7 @@ annotate service.AssignableDevelopers with @(
 
 annotate service.AssignableDevelopers with {
   ID                       @UI.Hidden;
-  developerProfileID       @UI.Hidden @Common.Label : 'Developer ID';
+  developerProfileID       @UI.Hidden @Common.Label : 'Developer ID' @Common.Text : developerName @Common.TextArrangement : #TextOnly;
   componentCategoryID      @UI.Hidden @Common.Label : 'Component Category ID';
   sapModuleID              @UI.Hidden @Common.Label : 'SAP Module ID';
   developerName            @Common.Label : 'Developer';
@@ -862,10 +1288,37 @@ annotate service.AssignableDevelopers with {
   responsibilityLevelName  @Common.Label : 'Responsibility Level';
 };
 
+annotate service.ValidDefectCategories with @(
+  UI.SelectionFields : [ defectCategoryName, applicationComponentName, defectCategoryType, active ],
+  UI.LineItem : [
+    { $Type : 'UI.DataField', Label : 'Defect Category', Value : defectCategoryName },
+    { $Type : 'UI.DataField', Label : 'Category Code', Value : defectCategoryCode },
+    { $Type : 'UI.DataField', Label : 'Category Type', Value : defectCategoryType },
+    { $Type : 'UI.DataField', Label : 'Application Component', Value : applicationComponentName },
+    { $Type : 'UI.DataField', Label : 'Component Code', Value : applicationComponentCode },
+    { $Type : 'UI.DataField', Label : 'Active', Value : active }
+  ]
+);
+
+annotate service.ValidDefectCategories with {
+  componentCategoryID      @UI.Hidden @Common.Label : 'Component Category ID';
+  applicationComponentID   @UI.Hidden @Common.Label : 'Application Component ID';
+  defectCategoryID         @UI.Hidden @Common.Label : 'Defect Category ID';
+  applicationComponentCode @Common.Label : 'Component Code';
+  applicationComponentName @Common.Label : 'Application Component';
+  defectCategoryCode       @Common.Label : 'Category Code';
+  defectCategoryName       @Common.Label : 'Defect Category';
+  defectCategoryType       @Common.Label : 'Category Type';
+};
+
 annotate service.Bugs with @(
   Common.SideEffects #ComponentCategoryDerivation: {
     SourceProperties : [applicationComponent_ID, defectCategory_ID],
     TargetProperties : ['componentCategory_ID']
+  },
+  Common.SideEffects #AttachmentRowsRefresh: {
+    SourceEntities : [attachments],
+    TargetEntities : [attachments]
   },
   Common.SideEffects #AssigneeDisplayNameRefresh: {
     SourceProperties : [assignee_ID],

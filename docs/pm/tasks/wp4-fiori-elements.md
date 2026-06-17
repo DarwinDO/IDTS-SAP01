@@ -4,7 +4,7 @@ Status: In Progress - Option B Create Flow completed, other WP4 elements in prog
 Owner workstream: Fiori/UI5
 Primary member: DatDT
 Support: DonHV, NhanT
-Last updated: 2026-06-16
+Last updated: 2026-06-17
 
 Vietnamese: WP4 đang thực hiện - Đã hoàn thành Option B tạo bug sạch sẽ và verify thực tế; các phần khác của WP4 đang tiếp tục.
 
@@ -62,7 +62,7 @@ Vietnamese:
 
 - DatDT's generated app was not copied directly because it targets a mock `Defects` service and placeholder URL.
 - Useful UI ideas were translated into CAP CDS annotations for the existing `BugService.Bugs` service.
-- Attachment upload was not copied because the DatDT fragment is static and the IDTS backend does not yet have a complete upload/storage flow.
+- Attachment upload is now implemented in the IDTS flow with backend stream handling; the DatDT fragment was still not copied directly because it is static and tied to a different service structure.
 - The current UI remains annotation-driven Fiori Elements; no custom SAPUI5 controller or fragment was added in this pass.
 - Four IDTS-aligned demo bugs were added under `db/data/idts.cap-Bugs.csv` so the List Report shows data during local review.
 
@@ -70,7 +70,7 @@ Vietnamese:
 
 - Không copy nguyên app generated của DatDT vì app đó trỏ tới mock service `Defects` và URL placeholder.
 - Các ý tưởng UI hữu ích đã được chuyển thành CAP CDS annotation cho service hiện tại `BugService.Bugs`.
-- Chưa copy attachment upload vì fragment của DatDT là static và backend IDTS chưa có flow upload/storage hoàn chỉnh.
+- Attachment upload nay đã được implement trong flow IDTS với backend stream handling; fragment của DatDT vẫn không copy trực tiếp vì nó static và gắn với service structure khác.
 - UI hiện tại vẫn theo hướng Fiori Elements annotation-driven; chưa thêm custom SAPUI5 controller hoặc fragment trong lần này.
 - Đã thêm bốn bug demo phù hợp với IDTS trong `db/data/idts.cap-Bugs.csv` để List Report có dữ liệu khi review local.
 
@@ -128,9 +128,9 @@ Vietnamese:
 
 ## Remaining Notes
 
-English: WP4 remains open for deeper browser QA, action usability tuning, and future attachment upload behavior. The current UI remains annotation-driven Fiori Elements; no custom UI5 controller or fragment was added.
+English: WP4 remains open for deeper browser QA and action usability tuning. Attachment upload behavior is already implemented in the current FE flow. The current UI remains annotation-driven Fiori Elements; no custom UI5 controller or fragment was added.
 
-Vietnamese: WP4 vẫn còn mở cho browser QA sâu hơn, tinh chỉnh usability của action và attachment upload thật sau này. UI hiện tại vẫn theo hướng Fiori Elements annotation-driven; chưa thêm custom UI5 controller hoặc fragment.
+Vietnamese: WP4 vẫn còn mở cho browser QA sâu hơn và tinh chỉnh usability của action. Attachment upload đã được implement trong flow FE hiện tại. UI hiện tại vẫn theo hướng Fiori Elements annotation-driven; chưa thêm custom UI5 controller hoặc fragment.
 
 ## 2026-06-15 Selective Remake_UI Integration
 
@@ -139,6 +139,7 @@ English:
 - Reviewed DatDT's `Remake_UI` branch and applied only the changes that fit the current CAP/Fiori contract.
 - Moved `Assignment and Follow-up` above `Bug Details` on the Object Page so assignee, next processor user, and next processor role are visible earlier.
 - Made `HistoryLogs` read-only through OData capability annotations: insert, update, and delete are disabled for the History child table.
+- Refined the history read model so the Object Page can show grouped `HistoryEvents` with readable summaries, while `HistoryLogs` remains the raw field-level audit trail.
 - Changed create behavior from `CreationDialog` to `NewPage` because the create bug form has many required fields and the old dialog was too crowded.
 - Preserved all required bug fields, `nextProcessorRole`, supporting info, and Object Page lifecycle actions.
 - Browser smoke on the feature branch showed 4 bug rows in the List Report, Object Page sections in the intended order, and no create/edit/delete action in the History table.
@@ -223,6 +224,22 @@ Vietnamese:
 - Sửa lỗi gán Assignee bằng cách đổi binding trường hiển thị sang `assignee_ID` đi kèm Value Help, giúp trường này có thể nhập/chọn trên màn hình tạo.
 - Thắt chặt bảo mật backend trong `srv/service.js` để luôn ghi đè `bugNumber`, `reporter_ID` (gán bằng user đang đăng nhập thực tế) và `status_code` khi tạo mới, chặn đứng việc client gửi tham số tùy tiện.
 - Verify thực tế bằng Playwright browser subagent trên môi trường local, xác nhận màn hình tạo bug cực kỳ sạch sẽ, ẩn toàn bộ tab/field không liên quan và Value Help chọn Assignee chạy tốt.
+
+## 2026-06-17 Need More Information Resubmit CTA
+
+English:
+
+- Added a dedicated Object Page action `Resubmit to Developer` for the `Need More Information` follow-up path instead of relying on generic edit/comment plus another workflow action.
+- The action is shown only when the bug is in `Need More Information`, an assignee already exists, and the current user is Tester or PM.
+- The action parameter requires an `Update Summary` so the follow-up reason is explicit in the product and auditable in backend history.
+- Action side effects refresh comments, history, notifications, and capability flags so the page reflects the returned `Assigned` state immediately after execution.
+
+Vietnamese:
+
+- Đã thêm action riêng trên Object Page là `Resubmit to Developer` cho nhánh follow-up của `Need More Information`, thay vì buộc user phải edit/comment rồi kết hợp thêm một action khác.
+- Action này chỉ hiện khi bug đang ở `Need More Information`, đã có assignee, và user hiện tại là Tester hoặc PM.
+- Param của action bắt buộc nhập `Update Summary` để lý do follow-up được thể hiện rõ trên sản phẩm và audit được ở backend history.
+- Side effect của action refresh comments, history, notifications và capability flags để page phản ánh ngay trạng thái `Assigned` sau khi thực thi.
 
 ## 2026-06-16 Role Action Visibility and Status Editability Fix
 

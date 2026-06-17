@@ -143,10 +143,7 @@
               "controlConfiguration": {
                 "comments/@com.sap.vocabularies.UI.v1.LineItem": {
                   "tableSettings": {
-                    "type": "ResponsiveTable",
-                    "creationMode": {
-                      "name": "InlineCreationRows"
-                    }
+                    "type": "ResponsiveTable"
                   }
                 },
                 "attachments/@com.sap.vocabularies.UI.v1.LineItem": {
@@ -167,7 +164,7 @@
   },
   "sap.fe": {
     "app": {
-      "enableLazyLoading": true
+      "enableLazyLoading": false
     }
   }
 }

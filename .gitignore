@@ -15,6 +15,9 @@ pnpm-debug.log*
 .playwright-mcp/
 __pycache__/
 *.pyc
+db.sqlite
+db.sqlite-shm
+db.sqlite-wal
 
 # Google Workspace / local SAP490 sync credentials
 .gws/

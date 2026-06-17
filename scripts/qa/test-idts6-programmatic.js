@@ -25,11 +25,14 @@ const cds = require('@sap/cds')
 const RESULTS = []
 let PASS = 0, FAIL = 0
 
-const BUG1 = '90000000-0000-0000-0000-000000000001'  // NEW
+const BUG1 = '90000000-0000-0000-0000-000000000001'  // PENDING_ASSIGNMENT
 const BUG3 = '90000000-0000-0000-0000-000000000003'  // IN_PROGRESS w/ SangVN assignee
 const BUG_CREATE = '90000000-0000-0000-0000-000000000099'
+const BUG_CREATE_ASSIGNED = '90000000-0000-0000-0000-000000000097'
 const DEV_SANG = '20000000-0000-0000-0000-000000000001'
 const DEV_DAT  = '20000000-0000-0000-0000-000000000002'
+const COMP_1   = '40000000-0000-0000-0000-000000000001'
+const CAT_1    = '50000000-0000-0000-0000-000000000001'
 const COMP_6   = '40000000-0000-0000-0000-000000000006'
 const CAT_2    = '50000000-0000-0000-0000-000000000002'
 const REPORTER = '10000000-0000-0000-0000-000000000004'
@@ -63,6 +66,19 @@ async function runSrv(srv) {
     return cds.tx({}, tx => tx.run(INSERT.into(srv.entities[entity]).entries(data)))
   }
 
+  async function updateBug(bugID, patch) {
+    const req = new cds.Request({
+      method: 'PATCH',
+      event: 'UPDATE',
+      target: srv.entities.Bugs,
+      query: UPDATE.entity(srv.entities.Bugs).set(patch).where({ ID: bugID }),
+      params: [{ ID: bugID, IsActiveEntity: true }],
+      data: { ID: bugID, ...patch },
+      user: new cds.User({ id: 'alice', roles: ['BugManager'] })
+    })
+    return srv.dispatch(req)
+  }
+
   console.log('')
 
   // ----------------------------------------------------------------
@@ -87,9 +103,14 @@ async function runSrv(srv) {
       data: createData,
       user: new cds.User({ id: 'alice' })
     })
-    await srv.dispatch(req1a)
-    // If we reach here, validation passed (201 equivalent)
-    rec('SC-01a Create bug all required fields', true, 201, 201, `passed before-handler validation`)
+    const createdBug = await srv.dispatch(req1a)
+    rec(
+      'SC-01a Create bug all required fields',
+      createdBug?.status_code === 'PENDING_ASSIGNMENT',
+      201,
+      201,
+      `status=${createdBug?.status_code || 'n/a'}`
+    )
   } catch(e) {
     const code = e.code || e.statusCode || 500
     rec('SC-01a Create bug all required fields', false, code, 201, e.message?.substring(0,80)||'unknown')
@@ -114,6 +135,43 @@ async function runSrv(srv) {
   } catch(e) {
     const code = e.code || e.statusCode || 500
     rec('SC-01b Create missing title -> 400', code===400, code, 400, e.message?.substring(0,60)||'')
+  }
+
+  try {
+    const createAssignedData = {
+      ID: BUG_CREATE_ASSIGNED,
+      title: 'QA-IDTS6 Create Assigned Bug',
+      description: 'Created with a valid pre-selected developer for status verification',
+      stepsToReproduce: '1. Open create page  2. Fill data  3. Pick developer  4. Submit',
+      actualResult: 'Need to verify initial persisted status',
+      expectedResult: 'Status should be ASSIGNED on create when assignee is selected',
+      priority_code: 'HIGH',
+      severity_code: 'MAJOR',
+      environment_code: 'QAS',
+      applicationComponent_ID: COMP_1,
+      defectCategory_ID: CAT_1,
+      assignee_ID: DEV_DAT,
+      reporter_ID: REPORTER
+    }
+    const req1c = new cds.Request({
+      method: 'POST',
+      event: 'CREATE',
+      target: srv.entities.Bugs,
+      query: INSERT.into(srv.entities.Bugs).entries(createAssignedData),
+      data: createAssignedData,
+      user: new cds.User({ id: 'alice' })
+    })
+    const createdAssignedBug = await srv.dispatch(req1c)
+    rec(
+      'SC-01c Create bug with assignee -> ASSIGNED',
+      createdAssignedBug?.status_code === 'ASSIGNED',
+      201,
+      201,
+      `status=${createdAssignedBug?.status_code || 'n/a'}`
+    )
+  } catch (e) {
+    const code = e.code || e.statusCode || 500
+    rec('SC-01c Create bug with assignee -> ASSIGNED', false, code, 201, e.message?.substring(0, 80) || 'unknown')
   }
 
   console.log('')
@@ -165,6 +223,36 @@ async function runSrv(srv) {
   const r5b = await callAction(BUG1, 'requestMoreInformation', { reason: '' })
   rec('SC-05b requestMoreInfo empty reason -> 400', !r5b.ok && r5b.code===400, r5b.code, 400, r5b.msg)
 
+  const r5c = await callAction(BUG1, 'resubmitToDeveloper', { note: 'Updated steps and attached the missing evidence.' })
+  rec('SC-05c resubmitToDeveloper NEED_MORE_INFORMATION -> ASSIGNED', r5c.ok, r5c.code, 200, r5c.data?.status_code||r5c.msg)
+
+  const bug1Comments = await cds.tx({}, tx => tx.run(
+    SELECT.from(srv.entities.Comments).where({ bug_ID: BUG1 }).orderBy('createdAt desc').limit(1)
+  ))
+  const latestBug1Comment = bug1Comments?.[0]
+  rec(
+    'SC-05d resubmitToDeveloper creates follow-up comment',
+    !!latestBug1Comment?.content && latestBug1Comment.content.includes('Resubmitted after information request:'),
+    200,
+    200,
+    latestBug1Comment?.content || 'no comment found'
+  )
+
+  const bug1Notifications = await cds.tx({}, tx => tx.run(
+    SELECT.from(srv.entities.Notifications).where({ bug_ID: BUG1 }).orderBy('createdAt desc').limit(2)
+  ))
+  const resubmitNotification = bug1Notifications.find(notification =>
+    notification.eventType_code === 'UPDATED' &&
+    notification.message?.includes('resubmitted with additional information')
+  )
+  rec(
+    'SC-05e resubmitToDeveloper creates developer notification',
+    !!resubmitNotification,
+    200,
+    200,
+    resubmitNotification?.message || 'no resubmit notification found'
+  )
+
   console.log('')
   console.log('SC-06: Reject Bug')
   const r6a = await callAction(BUG3, 'rejectBug', { reason: 'Wrong classification - UI category' })
@@ -172,6 +260,9 @@ async function runSrv(srv) {
 
   const r6b = await callAction(BUG3, 'rejectBug', { reason: '' })
   rec('SC-06b rejectBug empty reason -> 400', !r6b.ok && r6b.code===400, r6b.code, 400, r6b.msg)
+
+  const r6c = await callAction(BUG3, 'requestMoreInformation', { reason: 'Rejected bugs should not request more info directly' })
+  rec('SC-06c requestMoreInfo on REJECTED -> 400', !r6c.ok && r6c.code===400, r6c.code, 400, r6c.msg)
 
   console.log('')
   console.log('SC-07: Move to Pending Assignment')
@@ -233,9 +324,55 @@ async function runSrv(srv) {
         console.log(`           ${h.actionType_code} | ${h.fieldName} | ${h.oldValue} -> ${h.newValue}`)
       })
     }
+
+    const histEvents = await cds.tx({}, tx => tx.run(
+      SELECT.from(srv.entities.HistoryEvents).where({ bug_ID: BUG3 }).orderBy('createdAt desc').limit(3)
+    ))
+    const eventCount = histEvents?.length || 0
+    rec('SC-12b HistoryEvents for BUG-0003', eventCount > 0, 200, 200, `events found: ${eventCount}`)
+    if (eventCount > 0) {
+      console.log('         Sample events:')
+      histEvents.slice(0, 2).forEach(event => {
+        console.log(`           ${event.actionType_code} | ${event.summary}`)
+      })
+    }
   } catch(e) {
     rec('SC-12a HistoryLogs for BUG-0003', false, 500, 200, e.message)
+    rec('SC-12b HistoryEvents for BUG-0003', false, 500, 200, e.message)
   }
+
+  console.log('')
+  console.log('SC-13: Generic edit history coverage')
+  try {
+    const updatedTitle = `QA title update ${Date.now()}`
+    const updatedDescription = `QA description update ${Date.now()}`
+    const updatedBug = await updateBug(BUG1, {
+      title: updatedTitle,
+      description: updatedDescription
+    })
+    rec('SC-13a updateBug title/description', !!updatedBug?.ID, 200, 200, updatedBug?.title || 'no payload')
+
+    const contentHistory = await cds.tx({}, tx => tx.run(
+      SELECT.from(srv.entities.HistoryLogs)
+        .columns('fieldName', 'newValue')
+        .where({ bug_ID: BUG1, fieldName: { in: ['title', 'description'] } })
+        .orderBy('createdAt desc')
+        .limit(10)
+    ))
+    const titleLogged = contentHistory.some(row => row.fieldName === 'title' && row.newValue === updatedTitle)
+    const descriptionLogged = contentHistory.some(row => row.fieldName === 'description' && row.newValue === updatedDescription)
+    rec('SC-13b title edit writes history', titleLogged, 200, 200, JSON.stringify(contentHistory[0] || {}))
+    rec('SC-13c description edit writes history', descriptionLogged, 200, 200, JSON.stringify(contentHistory[1] || {}))
+  } catch (e) {
+    const code = e.code || e.statusCode || 500
+    rec('SC-13a updateBug title/description', false, code, 200, e.message?.substring(0, 100) || 'unknown')
+    rec('SC-13b title edit writes history', false, code, 200, e.message?.substring(0, 100) || 'unknown')
+    rec('SC-13c description edit writes history', false, code, 200, e.message?.substring(0, 100) || 'unknown')
+  }
+
+  console.log('')
+  console.log('SC-14: Attachment draft flow note')
+  console.log('  INFO  Attachment create/history is verified by the HTTP draft-flow QA script because direct child writes on draft compositions are intentionally rejected outside the root draft path.')
 }
 
 async function main() {

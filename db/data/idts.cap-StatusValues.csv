@@ -1,5 +1,5 @@
 code,name,descr,sortOrder,active,criticality
-NEW,New,Bug report was created and awaits assignment,10,true,0
+NEW,New,Legacy or import compatibility state for previously recorded bugs,10,true,0
 PENDING_ASSIGNMENT,Pending Assignment,No suitable developer is assigned yet,20,true,2
 ASSIGNED,Assigned,Bug is assigned to a developer,30,true,1
 IN_REVIEW,In Review,Developer is reviewing the bug,40,true,1

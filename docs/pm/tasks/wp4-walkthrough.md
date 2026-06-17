@@ -53,17 +53,71 @@ Follow these steps to demonstrate the dynamic visibility and mock login capabili
 2. Open the Fiori Elements application in your browser:
    `http://localhost:4004/idts.bugmanagementui/index.html?sap-ui-xx-viewCache=false`
 
-#### Step 2: Switch Personas via Mock Login
+#### Step 2: Happy Flow Create + Review Demo
+1. Log in as **NhanT** (Tester).
+2. From the Bugs List Report, click **Create**.
+3. Fill the required fields with a **valid** classification pair:
+   - Application Component: **IDTS Bug Report**
+   - Defect Category: **SAP Fiori UI5**
+4. Upload a real file in **Evidence / Attachments** during create.
+5. Click **Create**.
+6. Verify the bug is created successfully and receives a new bug number.
+7. Add a comment through **Add Comment**.
+8. Use **Assign Developer** and choose **DatDT** from the filtered value help.
+9. Switch persona to **DatDT** and open the same bug.
+10. Verify developer actions are available, then execute **Mark In Review**.
+
+### 2A. Happy Flow Demo Checklist
+
+Use this as the live script during mentor review.
+
+| Step | Persona | Action | Test data / focus | Expected result | Current risk to watch |
+| --- | --- | --- | --- | --- | --- |
+| HF-01 | NhanT | Open List Report and press `Go` | Seed/demo data visible | Bug list loads without blank screen or auth error | Low |
+| HF-02 | NhanT | Click `Create` | Create page must open | Create flow opens with Bug Summary, Classification and Assignment, Reproduction and Test Context, and Evidence / Attachments | Low |
+| HF-03 | NhanT | Fill required fields | Use valid pair: `IDTS Bug Report` + `SAP Fiori UI5` | No validation error while entering required data | Low |
+| HF-04 | NhanT | Upload one real file before save | Example: `.tmp/demo-attachment.txt` | Uploaded file row appears on draft page before save | Low |
+| HF-05 | NhanT | Save bug | Same valid data | Bug is created, bug number is generated, Object Page opens | Low |
+| HF-06 | NhanT | Check attachment section after create | Same created bug | Attachment should still be visible on active Object Page | Low |
+| HF-07 | NhanT | Add comment | Example comment about evidence uploaded | Comment row appears with author name and role | Low |
+| HF-08 | NhanT | Assign Developer | Choose `DatDT` from value help | Bug becomes `Assigned`, assignee becomes `DatDT` | Medium: dialog still shows technical parameter text |
+| HF-09 | DatDT | Open same bug | Assigned bug | Developer actions are visible only for valid developer flow | Low |
+| HF-10 | DatDT | Run `Mark In Review` | Optional developer note empty | Backend status changes to `In Review` successfully | Low |
+| HF-11 | DonHV | Open bug as PM | Review only | PM can review bug, comments, attachments, history, notifications without developer-only action clutter | Low |
+
+### 2B. Demo Safety Rules
+
+- Always use the valid classification pair `IDTS Bug Report` + `SAP Fiori UI5` for live create.
+- Keep one seeded fallback bug ready only as a contingency for operator error; the refreshed happy flow now passes on the local demo stack.
+- The remaining UX imperfection is the Assign Developer dialog input still showing a technical UUID after selection, even though the label is `Assignee` and the value-help rows are business-friendly.
+
+#### Step 3: Switch Personas via Mock Login
 1. Because mock authentication is active, CAP provides a Mock Login popup/banner if you access the direct service page or click a restricted action, or you can supply basic authorization in headers.
 2. Log in as **DonHV** (PM / Coordinator):
    - In the List Report toolbar, verify that the **Delete** button is completely missing.
-   - Open **BUG-0003** (currently `IN_PROGRESS` status).
+   - Open an assigned bug such as **BUG-0003** or the newly created demo bug.
    - Because `DonHV` is a PM, they **only see PM actions** (such as *Close Bug* or *Reopen Bug* once resolved) and they do NOT see developer technical buttons (`Resolve Bug`, `Start Progress`) on the Object Page header, keeping their UI completely clean.
 3. Switch login to **DatDT** (Developer / Assignee for BUG-0003):
    - Reload the Object Page for **BUG-0003**.
     - Because `DatDT` is the assigned developer, they **see technical actions** (`Request More Information`, `Reject Bug`, and `Resolve Bug`) on the header.
     - Click **Resolve Bug**. A popup parameter prompt will request a reason/note (mandatory rule). Fill in the note to successfully transition the bug to `RESOLVED`.
     - Once resolved, the developer buttons dynamically disappear.
+
+### 3. Current Known Risks Before Mentor Demo
+
+- **Assign dialog wording gap**: the assignment action parameter still shows technical text like `assigneeID` and a UUID in the input instead of a business label/name.
+
+### 3A. Fix Priority Recommendation
+
+| Priority | Gap | Why it comes first | Recommended owner |
+| --- | --- | --- | --- |
+| P3 | Assign dialog wording/value gap | Business rows and label are fixed. A latest annotation-only candidate fix now adds `@Common.Text : developerName` on `AssignableDevelopers.developerProfileID`, but browser retest is still required to confirm the selected input stops showing UUID. Jira follow-up: `IDTS-9` reopened. | DatDT / SangVN |
+
+### 4. Current Safe Demo Recommendation
+
+- Use the valid classification pair above.
+- A prepared fallback seed bug is optional rather than required; the rerun on `localhost:4012` already passed the create + attachment + comment + assignment + developer-review path.
+- The main polish note to mention only if asked is that the Assign Developer action field was the last visible FE usability gap; a candidate annotation-only fix is now staged and must be rechecked in browser before calling the UI fully clean.
 
 ## Vietnamese Walkthrough
 
