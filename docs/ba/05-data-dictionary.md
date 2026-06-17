@@ -1,7 +1,7 @@
 # 05 - Data Dictionary
 
 Status: BA baseline draft v1  
-Last updated: 2026-06-01
+Last updated: 2026-06-17
 
 This document is a BA blueprint for the target conceptual model. It is not the current implemented CDS schema.
 
@@ -20,6 +20,7 @@ This document is a BA blueprint for the target conceptual model. It is not the c
 | Bugs | Main defect record. | P0 |
 | Comments | Discussion attached to a bug. | P0 |
 | Attachments | Evidence file metadata. | P1 |
+| HistoryEvents | User-facing business history events with readable summaries. | P0 |
 | HistoryLogs | Audit trail of important changes. | P0 |
 | Notifications | Notification event records. | P1 |
 | DuplicateLinks | Links between similar/duplicate bugs. | P1 |
@@ -147,17 +148,35 @@ This document is a BA blueprint for the target conceptual model. It is not the c
 | storageRef | String | Yes | Storage pointer, not hardcoded external endpoint. |
 | createdAt | Timestamp | Yes | Upload timestamp. |
 
+## HistoryEvents
+
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| ID | UUID | Yes | Primary key. |
+| bug | Association/Composition to Bugs | Yes | Parent bug. |
+| actor | Association to Users | Yes | User who performed the business action. |
+| actorRole | String | Yes | Actor role at action time. |
+| actionType | String | Yes | Business action such as Create, Assign, Resolve, Reject, or Close. |
+| summary | String | Yes | Readable event text for the UI, for example "Assigned bug to DatDT. Status changed from New to Assigned." |
+| reason | String | Optional/required by rule | Carries reject/request/reopen rationale when the workflow requires explanation. |
+| createdAt | Timestamp | Yes | Event timestamp. |
+
 ## HistoryLogs
 
 | Field | Type | Required | Notes |
 | --- | --- | --- | --- |
 | ID | UUID | Yes | Primary key. |
 | bug | Association/Composition to Bugs | Yes | Parent bug. |
+| event | Association to HistoryEvents | Yes | Parent business event used to group several field-level changes into one readable event in the UI. |
 | actor | Association to Users | Yes | User who performed action. |
 | actorRole | String | Yes | Actor role at action time. |
 | actionType | String | Yes | Create, Edit, Assign, Reassign, StatusChange, RequestInfo, Reject, Resolve, Close, Reopen. |
+| fieldName | String | Optional | Technical field identifier such as `status`, `assignee`, or `nextProcessorRole`. |
+| fieldLabel | String | Optional | Human-readable field label stored for display/export. |
 | oldValue | String | Optional | Previous value when applicable. |
+| oldValueDisplay | String | Optional | Display-ready old value, for example `Assigned` instead of `ASSIGNED` or `DatDT` instead of a UUID. |
 | newValue | String | Optional | New value when applicable. |
+| newValueDisplay | String | Optional | Display-ready new value for the same reason as above. |
 | reason | String | Optional/required by rule | Required for reject, reopen, request info, some reassignment. For reject, the reason must support follow-up action. |
 | timestamp | Timestamp | Yes | Action time. |
 
@@ -192,6 +211,6 @@ Vietnamese:
 
 - Use UUID primary keys for Fiori Elements friendliness.
 - Use CAP `cuid` and `managed` aspects where consistent with implementation style.
-- Use compositions for bug-owned child records: Comments, Attachments, HistoryLogs, Notifications.
+- Use compositions for bug-owned child records: Comments, Attachments, HistoryEvents, HistoryLogs, Notifications.
 - Use associations for reusable master data: Users, Developers, SAPModules, ApplicationComponents, DefectCategories.
 - Backend validation must enforce status transitions and assignment rules.

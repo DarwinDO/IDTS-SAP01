@@ -64,7 +64,9 @@ sequenceDiagram
 
 ```mermaid
 stateDiagram-v2
-    [*] --> New
+    [*] --> Create_Decision
+    Create_Decision --> Assigned
+    Create_Decision --> Pending_Assignment
     New --> Assigned
     New --> Pending_Assignment
     Pending_Assignment --> Assigned

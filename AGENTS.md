@@ -701,6 +701,38 @@ Khi tạo file code, model, annotation, configuration, script hoặc seed-data m
 
 AI DevKit is configured for Codex as a lightweight delivery workflow, not as a generic product template. Use it for multi-file or nontrivial work, especially changes that affect a business flow, CAP service behavior, Fiori annotations, UI behavior, tests, or project documentation.
 
+Mandatory rule for this repository:
+
+- For every nontrivial task, the agent must explicitly analyze which AI DevKit workflow skills are relevant before implementation or final reporting.
+- The agent must follow an AI DevKit-style flow even when the work stays inside normal coding mode:
+  1. Clarify the task and expected outcome.
+  2. Choose the relevant workflow support, for example `structured-debug`, `verify`, `document-code`, `dev-lifecycle`, or `memory`.
+  3. State which of those skills will be used and why.
+  4. Do the work with SAP MCP-first routing and normal repo guardrails.
+  5. Verify with fresh evidence before claiming success.
+  6. Store stable reusable knowledge only after the root cause or decision is confirmed.
+- If an AI DevKit skill is intentionally not used for a nontrivial task, the agent must say why.
+- Every final response for a nontrivial task must include a short `AI DevKit flow used` section that states:
+  - which AI DevKit skills were used,
+  - which AI DevKit skills were considered but skipped,
+  - and how verification was done before completion.
+
+Vietnamese:
+
+- Với mọi task không tầm thường, agent phải chủ động phân tích xem skill/workflow nào của AI DevKit là phù hợp trước khi code hoặc báo cáo hoàn tất.
+- Agent phải đi theo flow kiểu AI DevKit ngay cả khi vẫn làm việc trong coding mode thông thường:
+  1. Làm rõ task và kết quả mong đợi.
+  2. Chọn workflow support phù hợp, ví dụ `structured-debug`, `verify`, `document-code`, `dev-lifecycle`, hoặc `memory`.
+  3. Nêu rõ sẽ dùng skill nào và vì sao.
+  4. Thực hiện công việc theo SAP MCP-first routing và các guardrail của repo.
+  5. Verify bằng bằng chứng mới trước khi kết luận đã xong.
+  6. Chỉ lưu knowledge ổn định sau khi root cause hoặc quyết định đã được xác nhận.
+- Nếu cố ý không dùng AI DevKit skill nào cho một task không tầm thường, agent phải nói rõ lý do.
+- Mọi final response cho task không tầm thường phải có một mục ngắn `AI DevKit flow used`, nêu rõ:
+  - đã dùng AI DevKit skill nào,
+  - đã cân nhắc skill nào nhưng không dùng,
+  - và đã verify bằng cách nào trước khi kết luận hoàn tất.
+
 Available project commands:
 
 - `/new-requirement`: capture a new feature or change request under `docs/ai/requirements`.

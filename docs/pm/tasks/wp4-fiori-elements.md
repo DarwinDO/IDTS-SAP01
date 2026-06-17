@@ -4,7 +4,7 @@ Status: In Progress - Option B Create Flow completed, other WP4 elements in prog
 Owner workstream: Fiori/UI5
 Primary member: DatDT
 Support: DonHV, NhanT
-Last updated: 2026-06-16
+Last updated: 2026-06-17
 
 Vietnamese: WP4 đang thực hiện - Đã hoàn thành Option B tạo bug sạch sẽ và verify thực tế; các phần khác của WP4 đang tiếp tục.
 
@@ -139,6 +139,7 @@ English:
 - Reviewed DatDT's `Remake_UI` branch and applied only the changes that fit the current CAP/Fiori contract.
 - Moved `Assignment and Follow-up` above `Bug Details` on the Object Page so assignee, next processor user, and next processor role are visible earlier.
 - Made `HistoryLogs` read-only through OData capability annotations: insert, update, and delete are disabled for the History child table.
+- Refined the history read model so the Object Page can show grouped `HistoryEvents` with readable summaries, while `HistoryLogs` remains the raw field-level audit trail.
 - Changed create behavior from `CreationDialog` to `NewPage` because the create bug form has many required fields and the old dialog was too crowded.
 - Preserved all required bug fields, `nextProcessorRole`, supporting info, and Object Page lifecycle actions.
 - Browser smoke on the feature branch showed 4 bug rows in the List Report, Object Page sections in the intended order, and no create/edit/delete action in the History table.
@@ -223,6 +224,22 @@ Vietnamese:
 - Sửa lỗi gán Assignee bằng cách đổi binding trường hiển thị sang `assignee_ID` đi kèm Value Help, giúp trường này có thể nhập/chọn trên màn hình tạo.
 - Thắt chặt bảo mật backend trong `srv/service.js` để luôn ghi đè `bugNumber`, `reporter_ID` (gán bằng user đang đăng nhập thực tế) và `status_code` khi tạo mới, chặn đứng việc client gửi tham số tùy tiện.
 - Verify thực tế bằng Playwright browser subagent trên môi trường local, xác nhận màn hình tạo bug cực kỳ sạch sẽ, ẩn toàn bộ tab/field không liên quan và Value Help chọn Assignee chạy tốt.
+
+## 2026-06-17 Need More Information Resubmit CTA
+
+English:
+
+- Added a dedicated Object Page action `Resubmit to Developer` for the `Need More Information` follow-up path instead of relying on generic edit/comment plus another workflow action.
+- The action is shown only when the bug is in `Need More Information`, an assignee already exists, and the current user is Tester or PM.
+- The action parameter requires an `Update Summary` so the follow-up reason is explicit in the product and auditable in backend history.
+- Action side effects refresh comments, history, notifications, and capability flags so the page reflects the returned `Assigned` state immediately after execution.
+
+Vietnamese:
+
+- Đã thêm action riêng trên Object Page là `Resubmit to Developer` cho nhánh follow-up của `Need More Information`, thay vì buộc user phải edit/comment rồi kết hợp thêm một action khác.
+- Action này chỉ hiện khi bug đang ở `Need More Information`, đã có assignee, và user hiện tại là Tester hoặc PM.
+- Param của action bắt buộc nhập `Update Summary` để lý do follow-up được thể hiện rõ trên sản phẩm và audit được ở backend history.
+- Side effect của action refresh comments, history, notifications và capability flags để page phản ánh ngay trạng thái `Assigned` sau khi thực thi.
 
 ## 2026-06-16 Role Action Visibility and Status Editability Fix
 

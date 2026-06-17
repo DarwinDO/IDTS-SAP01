@@ -59,6 +59,8 @@ English:
 - Bound action transitions now write HistoryLogs for `nextProcessorUser` and `nextProcessorRole` changes.
 - Added in-app notification records for `Resolved`, `Retest Required`, and `Reopened` follow-up using the existing `UPDATED` notification event type.
 - Jira `IDTS-2` and `IDTS-4` were moved to Done after verification; Jira `IDTS-5` remains In Progress for new backend QA bugs.
+- Added explicit `resubmitToDeveloper(note)` recovery flow for `Need More Information`: Tester or PM must provide an update summary, the bug returns to `Assigned`, `nextProcessor` resets to the assigned Developer, and the action creates grouped history, a follow-up comment, and an in-app notification.
+- Tightened the transition matrix so `Rejected` no longer routes back through `Need More Information` in the current MVP; follow-up must be correction/reassignment or move to `Pending Assignment`.
 
 Vietnamese:
 
@@ -68,6 +70,8 @@ Vietnamese:
 - Bound action transition hiện ghi HistoryLogs cho thay đổi `nextProcessorUser` và `nextProcessorRole`.
 - Đã thêm notification record in-app cho follow-up của `Resolved`, `Retest Required`, và `Reopened` bằng event type hiện có là `UPDATED`.
 - Jira `IDTS-2` và `IDTS-4` đã chuyển Done sau khi verify; Jira `IDTS-5` vẫn In Progress để nhận bug backend mới từ QA.
+- Đã thêm flow phục hồi tường minh `resubmitToDeveloper(note)` cho `Need More Information`: Tester hoặc PM phải nhập update summary, bug quay về `Assigned`, `nextProcessor` trả về Developer được assign, đồng thời action tạo grouped history, follow-up comment và notification in-app.
+- Đã siết transition matrix để `Rejected` không quay lại qua nhánh `Need More Information` trong MVP hiện tại; hướng follow-up phải là sửa phân loại/ngữ cảnh, reassign hoặc chuyển về `Pending Assignment`.
 
 ## Remaining Notes
 
@@ -79,7 +83,7 @@ Vietnamese: Đây là lớp backend rule mức MVP. Hiện đã có kiểm tra q
 
 English:
 
-- `scripts/qa/test-idts6-programmatic.js` verifies 21 backend happy-flow and negative cases with 21 PASS / 0 FAIL.
+- At the time of the SAP490 v0.1 evidence pack, `scripts/qa/test-idts6-programmatic.js` verified 21 backend happy-flow and negative cases with 21 PASS / 0 FAIL.
 - Added separate English and Vietnamese template-filled SAP490 workbooks for Test Scenario, Unit Test, and Test and Fix Bug under `docs/sap490/generated/`.
 - The workbooks record 12 lifecycle scenarios, all 21 executed cases, evidence links, and the fixed `IDTS-5` SC-01a direct CREATE harness issue.
 
@@ -88,6 +92,32 @@ Vietnamese:
 - `scripts/qa/test-idts6-programmatic.js` verify 21 case backend happy flow và negative với kết quả 21 PASS / 0 FAIL.
 - Đã thêm các workbook SAP490 Test Scenario, Unit Test và Test and Fix Bug tách riêng tiếng Anh/tiếng Việt, được copy/fill từ template trong `docs/sap490/generated/`.
 - Các workbook ghi 12 lifecycle scenario, toàn bộ 21 case đã chạy, link bằng chứng và lỗi harness direct CREATE SC-01a của `IDTS-5` đã được sửa.
+
+## 2026-06-17 Resubmit Flow Test Expansion
+
+English:
+
+- `scripts/qa/test-idts6-programmatic.js` now covers 26 cases with 26 PASS / 0 FAIL after adding the `Need More Information -> Resubmit to Developer -> Assigned` path and the `REJECTED -> NEED_MORE_INFORMATION` negative check.
+- SAP490 workbook sync for the new 26-case baseline is still pending and should be done only after the team confirms the updated happy-flow demo pack.
+
+Vietnamese:
+
+- `scripts/qa/test-idts6-programmatic.js` hiện bao phủ 26 case với kết quả 26 PASS / 0 FAIL sau khi thêm nhánh `Need More Information -> Resubmit to Developer -> Assigned` và negative check `REJECTED -> NEED_MORE_INFORMATION`.
+- Việc sync workbook SAP490 lên baseline 26 case vẫn đang chờ và chỉ nên làm sau khi team chốt được gói happy-flow demo đã cập nhật.
+
+## 2026-06-17 Status Entry and Generic Audit Coverage Expansion
+
+English:
+
+- The current MVP create path is now explicitly treated as `Assigned` or `Pending Assignment` on submit; `New` is retained only for legacy/import compatibility and controlled transitions. The canonical IDTS docs and lifecycle diagrams were updated accordingly.
+- `importantChanges()` in `srv/service.js` now tracks generic content edits as auditable changes, including `title`, `description`, reproduction/result fields, environment fields, test references, and planning fields.
+- Repeatable backend verification was expanded to 30 PASS / 0 FAIL in `scripts/qa/test-idts6-programmatic.js`, including explicit checks that editing `title` and `description` writes `HistoryLogs`.
+
+Vietnamese:
+
+- Luồng create MVP hiện được chốt là khi submit sẽ persist `Assigned` hoặc `Pending Assignment`; `New` chỉ còn giữ cho mục đích tương thích dữ liệu cũ/import và các controlled transition. Các tài liệu canonical và lifecycle diagram đã được đồng bộ theo quyết định này.
+- `importantChanges()` trong `srv/service.js` hiện đã track thêm các thay đổi nội dung chung để ghi audit, gồm `title`, `description`, các field tái hiện/kết quả, environment, test reference và planning fields.
+- Bộ verify backend lặp lại đã được mở rộng thành 30 PASS / 0 FAIL trong `scripts/qa/test-idts6-programmatic.js`, bao gồm kiểm tra rõ rằng sửa `title` và `description` sẽ ghi `HistoryLogs`.
 
 ## Definition of Done
 

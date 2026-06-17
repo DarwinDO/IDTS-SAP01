@@ -94,8 +94,8 @@ The `before` handlers protect data consistency before the record is saved:
 
 The `after` handlers create audit side effects:
 
-- Create a `HistoryLogs` entry after bug creation.
-- Create `HistoryLogs` entries after important updates.
+- Create grouped `HistoryEvents` for user-facing history after bug creation and important updates.
+- Create linked `HistoryLogs` rows under each event for raw field-level audit details.
 - Create `Notifications` when status changes require attention.
 
 #### Action Handlers
@@ -156,7 +156,7 @@ This keeps `nextProcessor` system-maintained instead of making users manually ma
 
 #### History and Notification
 
-`writeHistory()` writes immutable audit entries to `HistoryLogs`.
+`writeHistoryEvent()` now writes one readable `HistoryEvents` row and one or more immutable `HistoryLogs` rows under it.
 
 `writeNotificationForStatus()` creates in-app notification records for key events:
 

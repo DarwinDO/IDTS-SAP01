@@ -164,7 +164,7 @@
   },
   "sap.fe": {
     "app": {
-      "enableLazyLoading": true
+      "enableLazyLoading": false
     }
   }
 }

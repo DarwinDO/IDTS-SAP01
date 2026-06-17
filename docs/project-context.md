@@ -43,6 +43,7 @@ Expected domain entities:
 - `DeveloperResponsibilities`
 - `Comments`
 - `Attachments`
+- `HistoryEvents`
 - `HistoryLogs`
 - `Notifications`
 
@@ -64,6 +65,7 @@ Key baseline decisions:
 - Tester selects Application Component and Defect Category in Fiori. The system derives or validates Component Category as the assignment key.
 - Bug should store Application Component, Defect Category, and Component Category with backend consistency validation.
 - Rejected bugs should keep the latest `rejectionReason` on Bug and immutable rejection reasons in HistoryLogs.
+- User-facing history should be grouped as `HistoryEvents` with a readable summary, while `HistoryLogs` remains the append-only field-level audit trail under each event.
 - Attachments in MVP store file content in the database together with metadata and `storageRef`; external object storage can be deferred until deployment/storage requirements are explicit.
 - Bugs should have a human-readable `bugNumber` in addition to UUID.
 - SAP Module remains optional context and optional assignment filter, not a mandatory field for every bug.
@@ -79,6 +81,7 @@ Các quyết định chính:
 - Tester chọn Application Component và Defect Category trên Fiori. Hệ thống derive hoặc validate Component Category làm assignment key.
 - Bug nên lưu Application Component, Defect Category và Component Category, kèm backend consistency validation.
 - Bug bị Rejected nên lưu `rejectionReason` mới nhất trên Bug và lưu reason bất biến trong HistoryLogs.
+- Lich su hien cho nguoi dung nen duoc nhom theo `HistoryEvents` co summary de doc nhanh, con `HistoryLogs` van la audit trail append-only o muc field cho moi event.
 - Attachment trong MVP lưu file content trong database cùng metadata và `storageRef`; thiết kế external object storage có thể defer đến khi deployment/storage requirement rõ ràng.
 - Bug nên có `bugNumber` dễ đọc ngoài UUID.
 - SAP Module là context tùy chọn và filter assignment tùy chọn, không bắt buộc cho mọi bug.
@@ -86,7 +89,7 @@ Các quyết định chính:
 
 ## Main Statuses
 
-- New
+- New (legacy/import compatibility only)
 - Pending Assignment
 - Assigned
 - In Review
@@ -107,7 +110,9 @@ Các quyết định chính:
 3. Tester creates a bug report if no suitable open bug exists.
 4. Tester enters title, description, SAP module if relevant, application component, defect category, priority, severity, environment, steps to reproduce, actual result, expected result, optional test case/test run references, and optional evidence.
 5. System validates mandatory fields.
-6. System creates a unique bug ID and writes audit history.
+6. System creates a unique bug ID, sets the initial persisted status to `Assigned` or `Pending Assignment`, and writes audit history.
+
+Current MVP note: `New` remains in the status catalog for legacy/import compatibility, but the normal create happy flow does not persist `New`. A newly submitted bug starts in `Assigned` when a developer is selected, or `Pending Assignment` when no suitable developer is selected.
 
 ### Assign Bug
 
@@ -131,8 +136,9 @@ Các quyết định chính:
 
 1. Developer changes status to Need More Information and adds a reason.
 2. Tester receives notification.
-3. Tester updates the bug report or comments with missing information.
-4. Bug returns to Assigned or In Review.
+3. Tester updates the bug report, comments, attachments, or reproduction details with the missing information.
+4. Tester or PM uses a dedicated `Resubmit to Developer` action and enters an update summary.
+5. System returns the bug to Assigned, sets `nextProcessor` back to the assigned Developer, writes history, creates a follow-up comment, and sends a notification to the Developer.
 
 ### Reject and Reassign
 
@@ -142,6 +148,7 @@ Các quyết định chính:
 4. Tester or PM updates SAP module, application component, defect category, missing information, or assignee if needed.
 5. Tester or PM reassigns to a suitable developer or moves it to Pending Assignment.
 6. Rejected is not a final status; it must lead to a follow-up action and history log.
+7. In MVP, Rejected does not go directly to Need More Information; the follow-up path is reassign or move to Pending Assignment.
 
 Vietnamese:
 
@@ -169,7 +176,7 @@ Vietnamese:
    - Assigned, In Review, In Progress: assigned Developer.
    - Need More Information: Tester.
    - Pending Assignment: PM queue or Tester.
-   - Rejected: Tester or PM must correct classification, add information, reassign, or move to Pending Assignment.
+   - Rejected: Tester or PM must correct classification, reassign, or move to Pending Assignment.
    - Resolved and Retest Required: Tester or PM.
    - Closed: no next processor.
 5. Manual override should be limited to PM escalation or exceptional reassignment in the MVP.

@@ -108,7 +108,7 @@ entity Bugs : cuid, managed {
 
   comments               : Composition of many Comments on comments.bug = $self;
   attachments            : Composition of many Attachments on attachments.bug = $self;
-  historyLogs            : Composition of many HistoryLogs on historyLogs.bug = $self;
+  historyEvents          : Composition of many HistoryEvents on historyEvents.bug = $self;
   notifications          : Composition of many Notifications on notifications.bug = $self;
   duplicateLinks         : Composition of many DuplicateLinks on duplicateLinks.sourceBug = $self;
 }
@@ -141,14 +141,28 @@ entity Attachments : cuid, managed {
   storageRef : String(500);
 }
 
-entity HistoryLogs : cuid, managed {
+entity HistoryEvents : cuid, managed {
   bug        : Association to Bugs not null;
   actor      : Association to Users not null;
   actorRole  : Association to UserRoles;
   actionType : Association to ActionTypes not null;
+  summary    : String(500) not null;
+  reason     : LargeString;
+  logs       : Composition of many HistoryLogs on logs.event = $self;
+}
+
+entity HistoryLogs : cuid, managed {
+  bug        : Association to Bugs not null;
+  event      : Association to HistoryEvents not null;
+  actor      : Association to Users not null;
+  actorRole  : Association to UserRoles;
+  actionType : Association to ActionTypes not null;
   fieldName  : String(80);
+  fieldLabel : String(120);
   oldValue   : String(1000);
+  oldValueDisplay : String(1000);
   newValue   : String(1000);
+  newValueDisplay : String(1000);
   reason     : LargeString;
 }
 

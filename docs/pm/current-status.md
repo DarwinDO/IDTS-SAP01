@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-06-16
+Last updated: 2026-06-17
 
 ## Snapshot
 
@@ -9,8 +9,8 @@ Last updated: 2026-06-16
 | Project phase | Sprint 02 integration: PR #1, PR #2, DonHV backend, and SAP490 documentation branches consolidated into `dev` |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
 | Current sprint | Sprint 02 focuses on mentor feedback, happy flow demo, backend note/reason validation, and Bug Detail UI refinements |
-| Recommended next action | Prepare the final demo script under `IDTS-12` and compile/verify all final deliverables for Sprint 2 review |
-| Main implementation risk | Fiori screens and backend handlers now exist, but deeper browser QA, external notification delivery, production XSUAA authorization, and automated tests are still incomplete |
+| Recommended next action | DatDT/SangVN should browser-retest reopened Jira `IDTS-9` on the latest annotation-only candidate fix for the Assign Developer dialog, then DonHV can sync the stable happy-flow evidence into the SAP490 Functional Specification and Test and Fix Bug artifacts |
+| Main implementation risk | The local CAP/Fiori happy flow is demo-safe at workflow level, but mentor polish still depends on whether the latest `AssignableDevelopers.developerProfileID` text annotation makes the Assign Developer action input show developer name instead of UUID |
 
 ## What Is Already Done
 
@@ -47,19 +47,26 @@ Last updated: 2026-06-16
 - WP3 Handler Rules and Validation is implemented for Sprint 1 MVP: create/update validation, assignment responsibility checks, status transition validation, nextProcessor automation, history logs, and notification records are handled in `srv/service.js`.
 - DatDT's `Sap_FE` reference repo was reviewed and useful List Report/Object Page ideas were integrated into the existing CAP/Fiori app.
 - WP4 Fiori Elements core screens are updated: list filters/table columns, object page sections, value helps, object page actions, semantic criticality, rejected follow-up fields, and child sections for comments, attachments, history, and notifications.
-- Real attachment upload is implemented for the MVP flow, including stream upload and download metadata handling.
+- Comment creation and attachment upload/download persistence are implemented for the MVP flow on local file-based SQLite. Shell verification proved that comment rows, attachment metadata, and attachment binary content survive CAP restart, and fresh browser retest proved the attachment row is persisted in DB/API after create-draft activation.
 - Four IDTS-aligned demo bug records were added under `db/data/idts.cap-Bugs.csv`, and browser smoke verification shows the List Report rendering 4 rows after pressing `Go`.
 - Mentor feedback for Sprint 02 is baselined: developers may view/discuss team-visible bugs, primary lifecycle actions remain controlled, developer notes are optional by default, selected transitions require note/reason, and Bug Detail UI should prioritize assignee/status and key input fields.
 - Sprint 02 plan is documented in `docs/pm/07-sprint-2-plan.md`. Jira issues `IDTS-1` to `IDTS-12` are assigned: DonHV owns Backend CAP lead/bug fixing, NhanT owns validation/QA/demo smoke testing, DatDT owns core Bug Detail layout/input usability, and SangVN owns status value help plus supporting field/comment usability.
 - Sprint 02 backend implementation has started. Jira `IDTS-2` and `IDTS-4` are Done; Jira `IDTS-5` is In Progress as the backend QA bug-fix bucket.
 - `srv/service.js` now keeps developer view/discussion open while enforcing processing actions for assigned Developer, Tester, or PM when request user is known.
 - Bound action side effects now log `nextProcessorUser` and `nextProcessorRole` changes and create in-app notification records for resolved, retest-required, and reopened follow-up.
+- `Need More Information` now has an explicit recovery action: Tester or PM uses `Resubmit to Developer` with an update summary, the bug returns to `Assigned`, `nextProcessor` goes back to the assigned Developer, and the system writes history/comment/notification side effects.
+- History now has a two-layer read model: `HistoryEvents` provides readable Object Page history summaries, while `HistoryLogs` keeps the raw append-only field audit; child tables also have flattened display-name fields to avoid UUID-heavy UI output.
+- Current MVP create flow now explicitly persists `Assigned` or `Pending Assignment` on submit; `New` is retained only for legacy/import compatibility and controlled transition handling, and the canonical IDTS docs/diagrams were aligned to that rule.
+- Backend audit coverage now includes generic content edits such as `title` and `description`, and the repeatable direct-service suite was expanded to 30 PASS / 0 FAIL.
+- Real draft attachment upload now writes attachment history correctly through the root draft-save flow. Shell HTTP QA against a clean local CAP server verified comment history, attachment upload/download, and attachment history end to end.
 - Jira/GitHub audit on 2026-06-15 found six completed Jira tasks: `IDTS-2`, `IDTS-3`, `IDTS-4`, `IDTS-6`, `IDTS-7`, and `IDTS-9`.
 - GitHub PR #1 (`IDTS-3`/`IDTS-6`) and PR #2 (`IDTS-8`/`IDTS-10`/`IDTS-11`) were integrated into `dev` together with DonHV's backend and SAP490 documentation branches.
 - DatDT's `Remake_UI` branch was reviewed selectively. Accepted items are Assignment-first Object Page ordering, read-only History table capabilities, and create flow evaluation; rejected items are relaxed required fields, removed `nextProcessorRole`, removed lifecycle actions, and removed supporting info.
 - Configured development-only local mock authentication users (`DonHV`, `SangVN`, `DatDT`, `NhanT`) in `package.json` and optimized backend capability calculations from O(N) queries to O(1) query to resolve the N+1 performance issue.
 - `BugService` now requires `authenticated-user`, so anonymous access is blocked while local mock users still work for role-based QA.
 - Created the Sprint 02 Walkthrough & Demo Script inside the repository at `docs/pm/tasks/wp4-walkthrough.md`.
+- Fresh browser rerun on `localhost:4012` now confirms the workflow path HF-01 to HF-11 at product level: create page open, dependent category filtering, real attachment retention after save, readable comment author, correct tester/developer/PM action separation, and active Object Page attachment visibility.
+- A follow-up annotation-only candidate fix was added for the remaining Assign Developer input-text issue: `service.AssignableDevelopers.developerProfileID` now carries `@Common.Text : developerName` with `#TextOnly`, and Jira `IDTS-9` was reopened for FE retest.
 
 Vietnamese:
 
@@ -67,7 +74,7 @@ Vietnamese:
 - WP2 Service và Value Help đã hoàn thành ở mức Sprint 1 MVP: OData V4 metadata có bound lifecycle actions và Fiori value help annotations.
 - WP3 Handler Rules và Validation đã hoàn thành ở mức Sprint 1 MVP: `srv/service.js` xử lý create/update validation, assignment responsibility checks, status transition validation, nextProcessor automation, history logs và notification records.
 - WP4 core Fiori screens đã cập nhật: List Report, Object Page, Create metadata, Assignment value help/actions, Developer Review actions, Rejected follow-up, History và Notifications sections.
-- Real attachment upload đã được implement cho MVP flow, gồm stream upload và xử lý metadata khi tải xuống.
+- Việc tạo comment và upload/download attachment đã chạy được trên SQLite file local cho MVP. Shell verification đã xác nhận comment, metadata attachment, và binary content của attachment vẫn còn sau khi restart CAP.
 - Feedback mentor cho Sprint 02 đã được baseline: developer có thể xem/thảo luận bug trong team, lifecycle action chính vẫn kiểm soát, developer note mặc định optional, một số transition bắt buộc note/reason, và Bug Detail UI cần ưu tiên assignee/status cùng các field nhập quan trọng.
 - Sprint 02 plan được ghi tại `docs/pm/07-sprint-2-plan.md`. Jira issues `IDTS-1` đến `IDTS-12` đã được assign: DonHV phụ trách Backend CAP lead/bug fixing, NhanT phụ trách validation/QA/demo smoke test, DatDT phụ trách core Bug Detail layout/input usability, và SangVN phụ trách status value help cùng supporting field/comment usability.
 - Sprint 02 backend implementation đã bắt đầu. Jira `IDTS-2` và `IDTS-4` đã Done; Jira `IDTS-5` đang In Progress như bucket bug-fix backend từ QA.
@@ -153,11 +160,11 @@ Vietnamese:
 
 ## WP4 Current Note
 
-The Fiori Elements UI for the Bug Creation flow (Option B) is completed, refined, and verified. Child facets (History, Comments, Attachments, Notifications) and system fields are dynamically hidden during creation using draft-state OData expressions, while remaining fully available for active records. The Assignee field is fully editable via value help, the value-help dialog shows business columns, and the selected Assignee displays the developer name instead of a UUID. Comments are added through a bound action and attachments support real stream upload. Common value-list popups now use business labels such as Priority Code and Priority. Backend handlers are hardened to overwrite bugNumber, status_code, and reporter_ID. Playwright CLI smoke tests verified the layout and lookup without using Playwright MCP.
+The Fiori Elements UI for the Bug Creation flow (Option B) is implemented and re-verified on a real browser path. Child facets (History, Comments, Notifications) and system fields are dynamically hidden during creation using draft-state OData expressions, while the attachment facet remains visible during create as Option A. Dependent filtering between Application Component and Defect Category now works, the attachment row remains visible right after create, and action visibility refresh is correct for Tester, Developer, and PM in the rerun. The remaining FE issue for mentor polish is narrower: the Assign Developer action parameter dialog already has a business label (`Assignee`) and business-friendly value-help rows, and an annotation-only candidate fix is now in place so the `ValueListProperty` itself carries developer text. FE still needs a browser retest to confirm whether the selected input finally shows the developer name instead of the UUID.
 
 Vietnamese: Giao diện Fiori Elements cho luồng tạo bug (Option B) đã hoàn thành và được kiểm thử thành công. Các tab phụ (Lịch sử, Bình luận, Đính kèm, Thông báo) và trường hệ thống được ẩn động khi tạo mới nhờ biểu thức draft OData, nhưng vẫn hiển thị đầy đủ ở chế độ xem/sửa bug cũ. Trường Assignee có thể chọn qua Value Help. Backend đã được thắt chặt bảo mật để ghi đè bugNumber, status_code và reporter_ID. Browser smoke test bằng Playwright đã xác nhận giao diện sạch sẽ và lookup chạy tốt.
 
-Vietnamese clean note: Trường Assignee hiện chọn được qua value help, popup hiển thị cột nghiệp vụ, và sau khi chọn sẽ hiển thị tên developer như `DatDT` thay vì UUID. Các popup value list phổ biến cũng đã có label nghiệp vụ, ví dụ `Priority Code` và `Priority`. Lần verify này dùng Playwright CLI, không dùng Playwright MCP.
+Vietnamese clean note: Trường Assignee hiện chọn được qua value help, popup hiển thị cột nghiệp vụ, nhưng sau khi chọn thì ô input của action `Assign Developer` vẫn đang hiển thị UUID thay vì tên developer. Các popup value list phổ biến cũng đã có label nghiệp vụ, ví dụ `Priority Code` và `Priority`. Lần verify này dùng Playwright CLI, không dùng Playwright MCP.
 
 ## Next Handover Instruction
 

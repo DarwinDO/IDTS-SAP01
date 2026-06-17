@@ -271,9 +271,9 @@ Sau khi Developer reject, Tester hoặc PM phải follow up để:
 * Reassign cho Developer khác
 * Hoặc đưa bug về `Pending Assignment` nếu chưa có Developer phù hợp
 
-**English clarification:** `Rejected` is a follow-up status, not a final status. Every rejected bug must have a reason, a next processor, and a clear next action such as reclassification, additional information, reassignment, or Pending Assignment.
+**English clarification:** `Rejected` is a follow-up status, not a final status. Every rejected bug must have a reason, a next processor, and a clear next action such as reclassification, optional supporting-information update, reassignment, or Pending Assignment. In the current MVP, `Rejected` does not return through `Need More Information`.
 
-**Giải thích tiếng Việt:** `Rejected` là trạng thái cần xử lý tiếp, không phải trạng thái kết thúc. Mỗi bug bị reject phải có lý do, người xử lý tiếp, và hành động tiếp theo rõ ràng như sửa phân loại, bổ sung thông tin, reassign hoặc chuyển về Pending Assignment.
+**Giải thích tiếng Việt:** `Rejected` là trạng thái cần xử lý tiếp, không phải trạng thái kết thúc. Mỗi bug bị reject phải có lý do, người xử lý tiếp, và hành động tiếp theo rõ ràng như sửa phân loại/ngữ cảnh, có thể bổ sung supporting information, reassign hoặc chuyển về Pending Assignment. Ở MVP hiện tại, `Rejected` không quay lại qua nhánh `Need More Information`.
 
 ---
 
@@ -375,6 +375,7 @@ Developer note hoặc reason chỉ bắt buộc khi transition cần lý do rõ 
 | Transition / action | Note hoặc reason bắt buộc |
 | ----- | ----- |
 | `Assigned` / `In Review` / `In Progress` -> `Need More Information` | Bắt buộc reason mô tả đang thiếu thông tin gì. |
+| `Need More Information` -> `Assigned` | Bắt buộc update summary khi Tester hoặc PM dùng `Resubmit to Developer`. |
 | `Assigned` / `In Review` / `In Progress` -> `Rejected` | Bắt buộc rejection reason và follow-up owner/action. |
 | `In Progress` -> `Resolved` | Bắt buộc resolution note hoặc kết quả xử lý. |
 | `Resolved` -> `Reopened` | Bắt buộc reopen reason, thường do Tester hoặc PM ghi nhận. |
@@ -480,7 +481,7 @@ Bộ status đề xuất:
 
 | Status | Ý nghĩa |
 | ----- | ----- |
-| **New** | Bug mới được tạo |
+| **New** | Trạng thái tương thích dữ liệu cũ/import; không phải trạng thái khởi tạo chuẩn của create happy flow hiện tại |
 | **Assigned** | Bug đã được assign cho Developer |
 | **Need More Information** | Developer yêu cầu Tester bổ sung thông tin |
 | **In Review** | Developer đang review thông tin bug |
@@ -505,7 +506,7 @@ Một số transition hợp lý:
 | Assigned | Need More Information | Developer |
 | Assigned | Rejected | Developer |
 | In Review | Need More Information | Developer |
-| Need More Information | Assigned/In Review | Tester sau khi bổ sung |
+| Need More Information | Assigned | Tester hoặc PM dùng `Resubmit to Developer` sau khi bổ sung |
 | In Review | In Progress | Developer |
 | In Review | Rejected | Developer |
 | In Progress | Need More Information | Developer |
@@ -521,15 +522,16 @@ Một số transition hợp lý:
 | Rejected | Pending Assignment | Tester hoặc PM nếu chưa có Developer phù hợp |
 | Assigned | Assigned | Tester reassign |
 
-**English clarification:** `Rejected` must not be used as a silent terminal state. A transition to `Rejected` requires a rejection reason, history log, `nextProcessor`, and an allowed follow-up transition.
+**English clarification:** `Rejected` must not be used as a silent terminal state. A transition to `Rejected` requires a rejection reason, history log, `nextProcessor`, and an allowed follow-up transition. In the MVP, `Rejected` does not return through `Need More Information`; the follow-up path is correction/reassignment or move to `Pending Assignment`.
 
-**Giải thích tiếng Việt:** `Rejected` không được dùng như trạng thái kết thúc im lặng. Mọi transition sang `Rejected` phải có lý do reject, history log, `nextProcessor` và transition follow-up hợp lệ.
+**Giải thích tiếng Việt:** `Rejected` không được dùng như trạng thái kết thúc im lặng. Mọi transition sang `Rejected` phải có lý do reject, history log, `nextProcessor` và transition follow-up hợp lệ. Ở MVP, `Rejected` không quay về bằng nhánh `Need More Information`; hướng follow-up là sửa phân loại/ngữ cảnh, reassign hoặc chuyển về `Pending Assignment`.
 
 Các transition cần note hoặc reason bắt buộc:
 
 | Transition / action | Required note or reason |
 | ----- | ----- |
 | `Assigned` / `In Review` / `In Progress` -> `Need More Information` | Required reason describing what information is missing. |
+| `Need More Information` -> `Assigned` | Required update summary when Tester or PM uses `Resubmit to Developer`. |
 | `Assigned` / `In Review` / `In Progress` -> `Rejected` | Required rejection reason and follow-up owner/action. |
 | `In Progress` -> `Resolved` | Required resolution note or processing result. |
 | `Resolved` -> `Reopened` | Required reopen reason, usually from Tester or PM. |
@@ -834,7 +836,7 @@ Bộ status chính của IDTS:
 
 | Status | Ý nghĩa |
 | ----- | ----- |
-| **New** | Bug mới được ghi nhận hoặc đang ở bước submit ban đầu |
+| **New** | Trạng thái tương thích dữ liệu cũ/import; không phải trạng thái khởi tạo chuẩn của create happy flow hiện tại |
 | **Pending Assignment** | Bug đã submit nhưng chưa có Developer phù hợp |
 | **Assigned** | Bug đã được assign cho một Developer chính |
 | **In Review** | Developer đang review thông tin bug |
@@ -851,6 +853,8 @@ Bộ status chính của IDTS:
 **English clarification:** `Rejected` remains in the main status list, but it must always lead to a follow-up step. It must not be used as a silent terminal state.
 
 **Giải thích tiếng Việt:** `Rejected` vẫn nằm trong bộ status chính, nhưng luôn phải dẫn tới một bước xử lý tiếp theo. Không được dùng `Rejected` như trạng thái kết thúc im lặng.
+
+**Current MVP clarification:** The normal create happy flow does not persist `New`. When a Tester submits a new bug, the backend writes `Assigned` if a suitable Developer is selected, or `Pending Assignment` if no suitable Developer is selected. `New` remains only for legacy/import compatibility and controlled transition handling.
 
 ## **BR-44 - Resolve phải đi qua bước xác nhận hoặc retest trước khi Closed**
 
@@ -876,8 +880,8 @@ Developer không nên tự đóng bug nếu quy trình yêu cầu Tester/PM xác
 | Bug được assign | Developer được assign |
 | Không có Developer phù hợp | PM queue hoặc Tester |
 | Developer request more information | Tester |
-| Tester bổ sung thông tin xong | Developer được assign |
-| Developer reject bug | Tester hoặc PM để sửa phân loại, bổ sung thông tin, reassign, hoặc đưa về Pending Assignment |
+| Tester hoặc PM dùng `Resubmit to Developer` | Developer được assign |
+| Developer reject bug | Tester hoặc PM để sửa phân loại/ngữ cảnh, có thể bổ sung supporting information, reassign, hoặc đưa về Pending Assignment |
 | Developer mark Resolved | Tester/PM |
 | Bug vào Retest Required | Tester/PM |
 | Bug Closed | Không cần nextProcessor |
@@ -907,6 +911,8 @@ Các field này không được dùng để mở rộng IDTS thành Jira, SAP Cl
 
 ## **BR-47 - WP1 database model must follow the confirmed modeling baseline**
 
-**English:** WP1 must follow the database baseline in `docs/ba/09-database-model-review.md`. The Bug entity should use UUID as the technical key and a readable `bugNumber` for users. Application Component and Defect Category are user-facing selections; Component Category is the validated assignment key. SAP Module is optional context and optional assignment filter, not a mandatory field for every bug. `nextProcessor` should support both a role/queue code and a specific user when known. Rejected bugs must store the latest rejection reason for display and immutable rejection reasons in HistoryLogs. Attachments should store file content in the database together with metadata and storage reference in MVP. DuplicateLinks should store confirmed duplicate/similar/related relationships only.
+**English:** WP1 must follow the database baseline in `docs/ba/09-database-model-review.md`. The Bug entity should use UUID as the technical key and a readable `bugNumber` for users. Application Component and Defect Category are user-facing selections; Component Category is the validated assignment key. SAP Module is optional context and optional assignment filter, not a mandatory field for every bug. `nextProcessor` should support both a role/queue code and a specific user when known. Rejected bugs must store the latest rejection reason for display and immutable rejection reasons in HistoryLogs. User-facing history should be grouped in `HistoryEvents`, while `HistoryLogs` remains the raw field-level audit under each event. Attachments should store file content in the database together with metadata and storage reference in MVP. DuplicateLinks should store confirmed duplicate/similar/related relationships only.
+
+**Vietnamese clarification:** Lich su hien cho nguoi dung nen duoc nhom theo `HistoryEvents` de doc nhanh, con `HistoryLogs` van la audit trail append-only o muc field cho tung event.
 
 **Vietnamese:** WP1 phải đi theo database baseline trong `docs/ba/09-database-model-review.md`. Entity Bug dùng UUID làm technical key và có `bugNumber` dễ đọc cho người dùng. Application Component và Defect Category là lựa chọn user-facing; Component Category là assignment key đã validate. SAP Module là context tùy chọn và filter assignment tùy chọn, không bắt buộc cho mọi bug. `nextProcessor` nên hỗ trợ cả role/queue code và user cụ thể khi biết rõ. Bug bị Rejected phải lưu rejection reason mới nhất để hiển thị và lưu reason bất biến trong HistoryLogs. Attachment trong MVP nên lưu file content trong database cùng metadata và storage reference. DuplicateLinks chỉ lưu quan hệ duplicate/similar/related đã xác nhận.

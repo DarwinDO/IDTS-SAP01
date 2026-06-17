@@ -114,14 +114,30 @@ erDiagram
         datetime createdAt
     }
 
-    HISTORY_LOG {
+    HISTORY_EVENT {
         uuid ID
         uuid bugID
         uuid actorID
         string actorRole
         string actionType
+        string summary
+        string reason
+        datetime timestamp
+    }
+
+    HISTORY_LOG {
+        uuid ID
+        uuid bugID
+        uuid eventID
+        uuid actorID
+        string actorRole
+        string actionType
+        string fieldName
+        string fieldLabel
         string oldValue
+        string oldValueDisplay
         string newValue
+        string newValueDisplay
         string reason
         datetime timestamp
     }
@@ -168,6 +184,10 @@ erDiagram
     BUG ||--o{ ATTACHMENT : has
     USER ||--o{ ATTACHMENT : uploads
 
+    BUG ||--o{ HISTORY_EVENT : has
+    USER ||--o{ HISTORY_EVENT : performs
+
+    HISTORY_EVENT ||--o{ HISTORY_LOG : expands_to
     BUG ||--o{ HISTORY_LOG : has
     USER ||--o{ HISTORY_LOG : performs
 
@@ -192,7 +212,9 @@ erDiagram
 - `BUG.environment`, `testCaseRef`, and `testRunRef` provide lightweight traceability to the SAP test context without creating a full test management module.
 - `BUG.nextProcessorID`, `nextProcessorRole`, `plannedCompletionDate`, `dueDate`, and `estimatedEffortHours` support SAP Cloud ALM-style ownership and PM monitoring while staying inside the IDTS MVP scope.
 - `BUG.rejectionReason` stores the latest visible rejection reason. Full immutable rejection history stays in `HISTORY_LOG.reason`.
-- `COMMENT`, `ATTACHMENT`, `HISTORY_LOG`, and `NOTIFICATION` are lifecycle-owned child records of a bug.
+- `HISTORY_EVENT` is the business-facing history layer for the UI. It groups one action such as Assign, Reject, Resolve, or Add Comment into a single readable event summary.
+- `HISTORY_LOG` remains the raw field-level audit trail under one `HISTORY_EVENT`. This is where old/new values, next processor changes, and other technical details stay immutable.
+- `COMMENT`, `ATTACHMENT`, `HISTORY_EVENT`, `HISTORY_LOG`, and `NOTIFICATION` are lifecycle-owned child records of a bug.
 - `DUPLICATE_LINK` records relationships between similar bugs without forcing duplicate data into the main bug record.
 
 ## Fiori Selection Flow

@@ -1,16 +1,16 @@
-# SangVN Status - Backend CAP Primary
+# SangVN Status - Fiori/UI5 Support
 
-Last updated: 2026-06-03
+Last updated: 2026-06-17
 
-Vietnamese: Trạng thái của SangVN - phụ trách chính Backend CAP.
+Vietnamese: Trạng thái của SangVN - hỗ trợ Fiori/UI5 cho Sprint 02.
 
 ## Member Identity
 
 | Field | Value |
 | --- | --- |
 | Member | SangVN |
-| Primary lane | Backend CAP |
-| Shared delivery responsibility | May receive Backend CAP, Fiori/UI5, or QA/Verification tasks as assigned, but Backend CAP is the primary focus |
+| Primary lane | Fiori/UI5 Support |
+| Shared delivery responsibility | May receive Backend CAP, Fiori/UI5, or QA/Verification tasks as assigned, but Sprint 02 priority is Fiori/UI5 support and shared delivery assistance |
 | Leader support | DonHV can support or unblock this lane when needed |
 
 Vietnamese:
@@ -18,69 +18,71 @@ Vietnamese:
 | Trường | Giá trị |
 | --- | --- |
 | Thành viên | SangVN |
-| Mảng chính | Backend CAP |
-| Trách nhiệm delivery chung | Có thể nhận task Backend CAP, Fiori/UI5 hoặc QA/Verification khi được phân công, nhưng Backend CAP là trọng tâm chính |
+| Mảng chính | Hỗ trợ Fiori/UI5 |
+| Trách nhiệm delivery chung | Có thể nhận task Backend CAP, Fiori/UI5 hoặc QA/Verification khi được phân công, nhưng ưu tiên của Sprint 02 là hỗ trợ Fiori/UI5 và hỗ trợ delivery chung khi cần |
 | Leader hỗ trợ | DonHV có thể hỗ trợ hoặc gỡ blocker cho mảng này khi cần |
 
 ## Current Focus
 
-Not started. The recommended first backend activity is WP1 Data Model Foundation.
+Sprint 02 Fiori/UI5 support work: support Bug Detail usability tuning, verify status/value-help/comment related FE behavior, and help re-test the remaining Assign Developer dialog gap.
 
-Vietnamese: Chưa bắt đầu. Việc backend đầu tiên nên làm là WP1 Data Model Foundation.
+Vietnamese: Trọng tâm hiện tại là phần hỗ trợ Fiori/UI5 của Sprint 02: hỗ trợ tinh chỉnh usability của Bug Detail, verify các hành vi FE liên quan đến status/value help/comment, và hỗ trợ retest phần gap còn lại của dialog Assign Developer.
 
 ## Done
 
-- Initial repo has a minimal CAP model and service.
-- BA data dictionary and implementation gap analysis define the target MVP model.
-- Sprint 2 UI annotations (IDTS-8, 10, 11) for editable status, supporting area, and multiline action notes are updated.
+- Initial repo baseline and BA implementation references were reviewed.
+- Sprint 02 UI annotations for editable status behavior, supporting information positioning, and multiline action-note usability were updated.
+- Shared FE support work is aligned with the current Sprint 02 handover instead of the old Backend CAP placeholder.
 
 Vietnamese:
 
-- Repo ban đầu đã có CAP model và service tối thiểu.
-- Data dictionary và implementation gap analysis của BA đã mô tả model MVP mục tiêu.
-- Cập nhật xong UI annotations cho Sprint 2 (IDTS-8, 10, 11) liên quan đến status dropdown, vùng thông tin phụ và multiline action notes.
+- Đã review baseline ban đầu của repo và các tài liệu BA liên quan đến implementation.
+- Đã cập nhật các UI annotations của Sprint 02 cho hành vi status editable, vị trí supporting information, và usability của multiline action note.
+- Đã đồng bộ lại vai trò hỗ trợ FE theo handover Sprint 02 hiện tại, không dùng placeholder Backend CAP cũ nữa.
 
 ## In Progress
 
-- None.
-
-Vietnamese: Chưa có.
-
-## Next
-
-- Start `docs/pm/tasks/wp1-data-model.md`.
-- Query CAP MCP guidance before editing CDS model or CAP service artifacts.
-- Expand `db/schema.cds` according to the BA data dictionary.
-- Verify with `cds compile srv --to edmx`.
+- Support retest and follow-up analysis for Jira `IDTS-9`.
+- Shared Fiori/UI5 delivery support for final mentor-demo readiness.
 
 Vietnamese:
 
-- Bắt đầu `docs/pm/tasks/wp1-data-model.md`.
-- Hỏi CAP MCP trước khi chỉnh CDS model hoặc CAP service artifact.
-- Mở rộng `db/schema.cds` theo BA data dictionary.
-- Verify bằng `cds compile srv --to edmx`.
+- Đang hỗ trợ retest và phân tích tiếp cho Jira `IDTS-9`.
+- Đang hỗ trợ delivery Fiori/UI5 chung để chốt trạng thái sẵn sàng cho demo với mentor.
+
+## Next
+
+- Support DatDT in browser re-verification of the latest annotation-only candidate for the Assign Developer dialog.
+- If the UUID still remains after selection, help evaluate whether the team should accept the gap for demo or build a targeted FE extension.
+- Continue using Fiori MCP and SAP Fiori Guidelines before touching annotations, manifest configuration, or custom UI decisions.
+
+Vietnamese:
+
+- Hỗ trợ DatDT verify lại trên browser candidate fix annotation-only mới nhất của dialog Assign Developer.
+- Nếu sau khi chọn vẫn còn hiện UUID, cùng team đánh giá nên chấp nhận gap đó cho demo hay làm targeted FE extension.
+- Tiếp tục dùng Fiori MCP và SAP Fiori Guidelines trước khi đụng vào annotations, manifest config, hoặc quyết định custom UI.
 
 ## Blockers
 
-- Waiting for Sprint 1 start confirmation.
+- None at execution level. The remaining blocker is a product decision on whether the last Assign Developer selected-text gap deserves custom FE work.
 
-Vietnamese: Đang chờ xác nhận bắt đầu Sprint 1.
+Vietnamese: Hiện không có blocker về execution. Blocker còn lại là quyết định sản phẩm: gap cuối cùng ở Assign Developer có đáng để đầu tư custom FE hay không.
 
 ## Session Log
 
 | Date | Task/WP | What was done | Completed part | Issues/Bugs found | Fix status | Evidence/Commands | Next handoff |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-06-17 | IDTS-9 QA UI Retest | Retested the Assign Developer action dialog to verify if the input field displays the selected developer name instead of UUID | Verified the dialog is visible and uses label 'Assignee' with business-friendly value help rows; however, selecting a developer still populates the raw UUID in the input field | Standard Fiori Elements limitation on action parameter text binding in OData V4 | Open (investigated) | browser_subagent execution, screenshots Captured: dialog_before_selection_1781693070331.png, dialog_after_selection_1781693103672.png | Wait for team decision on recommendation (Accept for demo or design custom FE extension) |
-| 2026-06-03 | Status setup | Member status file created from previous Backend CAP status | Backend status ownership assigned to SangVN | None | Fixed | `rg`, `git diff --check` | Start WP1 when approved |
-| 2026-06-13 | IDTS-8, 10, 11 (Sprint 2) | Updated Bug Detail UI annotations (dropdown status, supporting info facet, multiline action notes) | UI annotations completed | None | - | `cds compile srv --to edmx` | Manual QA/Testing |
+| 2026-06-17 | IDTS-9 QA UI Retest | Re-tested the Assign Developer action dialog on the latest local FE build to verify whether the selected input now resolves the developer name instead of the UUID | Confirmed that the dialog is visible, the field label is now `Assignee`, and the value-help rows are business-friendly. The remaining issue is narrower: after selecting a developer, the input still shows the raw developer-profile UUID instead of the readable developer name. | Likely a standard Fiori Elements action-parameter selected-text limitation or a remaining FE metadata handling gap for this dialog. Browser evidence confirms the symptom; root-cause classification is still under team review. | Open (investigated) | Local run via `npm run watch-bug-management-ui`; browser retest on `http://localhost:4004/...`; screenshots `dialog_before_selection_1781693070331.png`, `dialog_after_selection_1781693103672.png` | Wait for team decision on recommendation: accept for demo or build a targeted FE extension |
+| 2026-06-13 | IDTS-8, IDTS-10, IDTS-11 (Sprint 02) | Updated Bug Detail UI annotations for status dropdown behavior, supporting information placement, and multiline action notes | UI annotations completed | None | Fixed | `cds compile srv --to edmx` | Manual QA and shared FE follow-up |
+| 2026-06-03 | Status setup | Member status file created from previous status baseline | Ownership assigned to SangVN | None | Fixed | `rg`, `git diff --check` | Continue on assigned Sprint work |
 
 Vietnamese:
 
 | Ngày | Task/WP | Đã làm gì | Phần đã xong | Khó khăn/Bug phát hiện | Trạng thái fix | Bằng chứng/Lệnh đã chạy | Handoff tiếp theo |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-06-17 | IDTS-9 QA UI Retest | Retest Assign Developer dialog xem có hiển thị tên thay vì UUID không | Đã xác nhận label là 'Assignee' và value help hiển thị đúng thông tin nghiệp vụ; tuy nhiên ô nhập liệu vẫn hiện UUID sau khi chọn | Lỗi hiển thị UUID do giới hạn của standard Fiori Elements đối với action parameter | Open (đang phân tích) | browser_subagent, chụp screenshot dialog_before_selection_1781693070331.png, dialog_after_selection_1781693103672.png | Chờ thống nhất phương án xử lý (Chấp nhận cho demo hoặc làm custom UI5/FE extension) |
-| 2026-06-03 | Status setup | Tạo file status thành viên từ status Backend CAP cũ | Đã giao ownership backend cho SangVN | Không có | Đã xử lý | `rg`, `git diff --check` | Bắt đầu WP1 khi được duyệt |
-| 2026-06-13 | IDTS-8, 10, 11 (Sprint 2) | Cập nhật UI annotations cho Bug Detail (dropdown status, facet Supporting Info, multiline note) | Đã xong UI annotations | Không có | - | `cds compile srv --to edmx` | Test giao diện (Manual QA) |
+| 2026-06-17 | IDTS-9 QA UI Retest | Retest dialog Assign Developer trên bản FE local mới nhất để kiểm tra ô chọn sau khi chọn developer có hiện tên hay vẫn hiện UUID | Đã xác nhận label của field là `Assignee`, các dòng trong value help đã thân thiện hơn về mặt nghiệp vụ. Vấn đề còn lại hẹp hơn: sau khi chọn developer, ô input vẫn hiện UUID của developer profile thay vì tên đọc được. | Nhiều khả năng đây là giới hạn của standard Fiori Elements với selected text của action parameter, hoặc vẫn còn một khoảng FE metadata handling chưa được resolve hết. Hiện mới nên kết luận ở mức `likely`, chưa nên khẳng định tuyệt đối. | Open (đã điều tra và giữ mở) | Chạy local bằng `npm run watch-bug-management-ui`; browser retest trên `http://localhost:4004/...`; screenshot `dialog_before_selection_1781693070331.png`, `dialog_after_selection_1781693103672.png` | Chờ team chốt hướng xử lý: chấp nhận cho demo hoặc làm targeted FE extension |
+| 2026-06-13 | IDTS-8, IDTS-10, IDTS-11 (Sprint 02) | Cập nhật UI annotations cho Bug Detail liên quan status dropdown, vị trí Supporting Information, và multiline action note | Đã xong phần UI annotations | Không có | Đã xử lý | `cds compile srv --to edmx` | Manual QA và hỗ trợ FE tiếp theo |
+| 2026-06-03 | Status setup | Tạo file status thành viên từ baseline status cũ | Đã giao ownership cho SangVN | Không có | Đã xử lý | `rg`, `git diff --check` | Tiếp tục theo Sprint task được assign |
 
 ## Update Rule
 

@@ -1,6 +1,6 @@
 # IDTS Task Board
 
-Last updated: 2026-06-16
+Last updated: 2026-06-17
 
 Use this board for high-level movement only. Detailed task notes belong in the matching file under `docs/pm/tasks/`.
 
@@ -18,6 +18,7 @@ Vietnamese: Chỉ dùng board này để theo dõi trạng thái cấp cao. Chi 
 | WP1 | Data Model Foundation | Expanded CAP CDS model, service projections, and seed data under `db/data/` |
 | WP2 | Service and Value Help | OData V4 service actions, value help annotations, and metadata compile completed |
 | WP3 | Handler Rules and Validation | CAP handler rules for create/update, assignment, status transition, nextProcessor, history, and notifications completed |
+| WP7 | Notifications and Attachments | Backend persistence, in-app notifications, create-time attachment visibility, and browser happy-flow verification completed |
 
 Vietnamese:
 
@@ -31,6 +32,7 @@ Vietnamese:
 | WP1 | Nền tảng Data Model | CAP CDS model, service projections, và seed data trong `db/data/` |
 | WP2 | Service và Value Help | Đã hoàn thành OData V4 service actions, value help annotations và metadata compile |
 | WP3 | Handler Rules và Validation | Đã hoàn thành CAP handler rules cho create/update, assignment, status transition, nextProcessor, history và notifications |
+| WP7 | Notifications và Attachments | Đã xác nhận lưu trữ backend, bản ghi thông báo trong ứng dụng, và kiểm thử E2E comment/upload trên browser thành công. |
 
 ## Ready
 
@@ -38,7 +40,6 @@ Vietnamese:
 | --- | --- | --- | --- | --- |
 | WP5 | Comments and History | SangVN, DatDT | DonHV, NhanT | `tasks/wp5-comments-history.md` |
 | WP6 | PM Monitoring | DatDT, SangVN | DonHV, NhanT | `tasks/wp6-pm-monitoring.md` |
-| WP7 | Notifications and Attachments | SangVN, DatDT | DonHV, NhanT | `tasks/wp7-notification-attachments.md` |
 
 Vietnamese:
 
@@ -46,21 +47,20 @@ Vietnamese:
 | --- | --- | --- | --- | --- |
 | WP5 | Comments và History | SangVN, DatDT | DonHV, NhanT | `tasks/wp5-comments-history.md` |
 | WP6 | PM Monitoring | DatDT, SangVN | DonHV, NhanT | `tasks/wp6-pm-monitoring.md` |
-| WP7 | Notifications và Attachments | SangVN, DatDT | DonHV, NhanT | `tasks/wp7-notification-attachments.md` |
 
 ## In Progress
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
-| SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 6 Done (`IDTS-2`, `IDTS-3`, `IDTS-4`, `IDTS-6`, `IDTS-7`, `IDTS-9`), 4 In Progress (`IDTS-5`, `IDTS-8`, `IDTS-10`, `IDTS-11`), 2 To Do (`IDTS-1`, `IDTS-12`). All development branches are consolidated into `dev`. |
-| WP4 | Fiori Elements UX | DatDT | Core layout, dynamic creation hiding, assignee value help, dynamic visibility, and dev-only mock login are completed. Deeper UI QA and attachment upload remain. |
+| SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 5 Done (`IDTS-2`, `IDTS-3`, `IDTS-4`, `IDTS-6`, `IDTS-7`), 5 In Progress (`IDTS-5`, `IDTS-8`, `IDTS-9`, `IDTS-10`, `IDTS-11`), 2 To Do (`IDTS-1`, `IDTS-12`). `IDTS-9` was reopened because the Assign Developer action input still needs final browser confirmation after the latest annotation-only text fix. |
+| WP4 | Fiori Elements UX | DatDT | Core layout, dynamic creation hiding, assignee value help, dynamic visibility, dev-only mock login, and refreshed happy-flow verification are completed. Remaining refinement is limited to Assign Developer dialog polish; `app/bug-management-ui/annotations.cds` now annotates `AssignableDevelopers.developerProfileID` with business text, and DatDT/SangVN need to verify in browser whether the selected input stops showing UUID. |
 
 Vietnamese:
 
 | ID | Công việc | Thành viên chính | Ghi chú |
 | --- | --- | --- | --- |
 | SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 6 Done (`IDTS-2`, `IDTS-3`, `IDTS-4`, `IDTS-6`, `IDTS-7`, `IDTS-9`), 4 In Progress (`IDTS-5`, `IDTS-8`, `IDTS-10`, `IDTS-11`), 2 To Do (`IDTS-1`, `IDTS-12`). Tất cả các branch phát triển đã được tích hợp vào `dev`. |
-| WP4 | Fiori Elements UX | DatDT | Đã hoàn thành cấu trúc giao diện chính, ẩn động trang tạo mới, Value Help Assignee, ẩn/hiện action động và mock login chỉ cho development. QA sâu giao diện và upload đính kèm còn chờ. |
+| WP4 | Fiori Elements UX | DatDT | Đã hoàn thành cấu trúc giao diện chính, ẩn động trang tạo mới, Value Help Assignee, ẩn/hiện action động, mock login chỉ cho development và QA E2E upload đính kèm/comment. Các tinh chỉnh UI khác đang tiếp tục. |
 
 ## Blocked
 

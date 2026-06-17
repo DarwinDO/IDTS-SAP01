@@ -4,10 +4,12 @@ The status lifecycle below follows the documented statuses and BR-24/BR-25.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> New: bug draft is submitted
+    [*] --> Create_Decision: bug draft is submitted
 
-    New --> Assigned: submit with selected developer
-    New --> Pending_Assignment: submit without suitable developer
+    Create_Decision --> Assigned: submit with selected developer
+    Create_Decision --> Pending_Assignment: submit without suitable developer
+    New --> Assigned: legacy/import bug is assigned
+    New --> Pending_Assignment: legacy/import bug enters assignment queue
 
     Pending_Assignment --> Assigned: tester or PM-assisted assignment
 
@@ -42,7 +44,7 @@ stateDiagram-v2
 
 | Status | Main owner | Meaning |
 | --- | --- | --- |
-| New | Tester/System | Bug is newly recorded or being submitted. |
+| New | Tester/System | Legacy/import compatibility state; not the normal persisted create result of the current MVP flow. |
 | Pending Assignment | Tester/PM | Bug is valid enough to record but has no suitable developer yet. |
 | Assigned | Tester/System | Bug has one main developer assignee. |
 | In Review | Developer | Developer is checking information, area, evidence, and comments. |
@@ -57,6 +59,7 @@ stateDiagram-v2
 ## Notes
 
 - `Reassign` is treated as an assignment action and history log, not a separate primary status.
+- The current MVP create happy flow persists `Assigned` or `Pending Assignment` immediately on submit. `New` remains only for legacy/import compatibility and controlled transition handling.
 - `Rejected` is treated as a follow-up status, not a terminal status. It must have a reason, nextProcessor, and a later transition.
 - `Retest Required` keeps closure under Tester/PM control and mirrors common SAP ALM defect handling without adding a full test management module.
 - Closed bugs should not be edited freely. Reopen should be used when the issue still exists.

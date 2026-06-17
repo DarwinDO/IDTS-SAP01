@@ -150,7 +150,7 @@ Developer sau khi nhận bug có thể:
 
 * Xem chi tiết bug.  
 * Kiểm tra thông tin bug có đủ rõ không.  
-* Yêu cầu Tester bổ sung thông tin.  
+* Yêu cầu Tester hoặc PM bổ sung thông tin.
 * Kiểm tra module có đúng không.  
 * Từ chối bug nếu bug bị assign sai module; phải ghi rõ lý do và người follow-up tiếp theo.
 * Thêm technical note.  
@@ -177,7 +177,7 @@ Hệ thống cần theo dõi trạng thái bug.
 
 Bộ status đơn giản nên dùng:
 
-New  
+New (legacy/import compatibility only)
 Assigned  
 In Review  
 Need More Information  
@@ -196,7 +196,7 @@ Tester và Developer có thể trao đổi trong bug report.
 
 Ví dụ:
 
-* Tester bổ sung thông tin.  
+* Tester hoặc PM bổ sung thông tin rồi dùng `Resubmit to Developer`.
 * Developer hỏi thêm dữ liệu.  
 * Developer ghi chú kỹ thuật.  
 * Tester phản hồi lại nếu cần.  
@@ -270,6 +270,8 @@ IDTS là defect tracking system cho môi trường SAP testing. Hệ thống t�
 * Developer review, request more information, reject sai phân loại hoặc sai assignee, update status và note.
 * Tester/PM xác nhận kết quả xử lý thông qua bước retest trước khi close nếu cần.
 * Comment, attachment/evidence, notification, audit/history log.
+* User-facing history may be summarized per business event, while raw field-level history logs remain available for audit.
+* Lich su tren UI co the duoc nhom theo business event de doc nhanh, trong khi history log chi tiet van duoc giu cho audit.
 * PM monitoring theo workload, overdue, status, next processor và planning fields.
 
 ## **7.2. Classification model**
@@ -290,7 +292,7 @@ Mô hình đúng:
 
 Bộ status trong MVP:
 
-* New
+* New (legacy/import compatibility only)
 * Pending Assignment
 * Assigned
 * In Review
@@ -302,9 +304,9 @@ Bộ status trong MVP:
 * Reopened
 * Closed
 
-`Reassigned` là action, không phải status chính.
+`Reassigned` là action, không phải status chính. Trong create happy flow hiện tại, backend persist `Assigned` hoặc `Pending Assignment` ngay khi submit; `New` chỉ còn để tương thích dữ liệu cũ/import và các transition được kiểm soát.
 
-`Rejected` là status hợp lệ nhưng không phải final status. Khi bug bị `Rejected`, hệ thống phải có rejection reason, history log, `nextProcessor` và follow-up action rõ ràng như sửa phân loại, bổ sung thông tin, reassign hoặc chuyển về `Pending Assignment`.
+`Rejected` là status hợp lệ nhưng không phải final status. Khi bug bị `Rejected`, hệ thống phải có rejection reason, history log, `nextProcessor` và follow-up action rõ ràng như sửa phân loại/ngữ cảnh, có thể bổ sung supporting information, reassign hoặc chuyển về `Pending Assignment`. Ở MVP, `Rejected` không đi trực tiếp sang `Need More Information`.
 
 **English clarification:** `Rejected` is a valid follow-up status, not a terminal state. A rejected bug must always have a rejection reason, a next processor, and a clear next action.
 
@@ -325,9 +327,9 @@ Developer mark `Resolved` -> Tester/PM xác định có cần retest không -> n
 Hệ thống nên tự động cập nhật `nextProcessor` theo status/action:
 
 * Assigned/In Review/In Progress -> assigned Developer.
-* Need More Information -> Tester.
+* Need More Information -> Tester. PM có thể hỗ trợ follow-up và dùng `Resubmit to Developer` khi cần.
 * Pending Assignment -> PM queue hoặc Tester.
-* Rejected -> Tester hoặc PM để xử lý follow-up.
+* Rejected -> Tester hoặc PM để xử lý follow-up theo hướng sửa phân loại/ngữ cảnh, reassign hoặc đưa về `Pending Assignment`.
 * Resolved/Retest Required -> Tester/PM.
 * Closed -> không còn next processor.
 
