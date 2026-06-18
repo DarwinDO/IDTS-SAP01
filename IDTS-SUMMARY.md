@@ -409,7 +409,7 @@ Luồng chọn trên Fiori nên là:
 
 Tester chọn `SAP Module` nếu liên quan -> hệ thống lọc `Application Component` -> Tester chọn `Defect Category` hợp lệ -> hệ thống lọc Developer theo `Developer Responsibility`.
 
-Với bug thuần IDTS, `SAP Module` có thể để trống hoặc chọn `Not Applicable`. Không được gọi các chức năng IDTS như Bug Report, Assignment, Notification là SAP Module.
+Với bug thuần IDTS, `SAP Module` nên để trống. Không dùng giá trị giả như `Not Applicable`. Không được gọi các chức năng IDTS như Bug Report, Assignment, Notification là SAP Module.
 
 ## **5.2. Current Status Set**
 

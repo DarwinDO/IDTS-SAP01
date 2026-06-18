@@ -1,8 +1,8 @@
 # WP2 - Service and Value Help
 
-Status: Completed for Sprint 1 MVP
+Status: Completed for Sprint 1 MVP, refined in Sprint 2
 Owner workstream: Backend CAP
-Last updated: 2026-06-04
+Last updated: 2026-06-18
 
 ## Goal
 
@@ -37,17 +37,39 @@ English:
 
 Vietnamese:
 
-- WP2-T01 hoàn thành: đã review projection hiện tại của `BugService` và giữ service tập trung vào entity của IDTS.
-- WP2-T02 hoàn thành: Bugs, child entities, master data, responsibilities, history, notification và duplicate link vẫn được expose qua OData V4.
-- WP2-T03 hoàn thành: đã thêm Fiori value help annotation cho status, priority, severity, environment, SAP module, application component, defect category, reporter, assignee và next processor role.
-- WP2-T04 hoàn thành ở mức MVP: đã thêm bound OData actions trên `Bugs` chỉ cho các action thật trong vòng đời bug.
-- WP2-T05 hoàn thành: `cds compile srv app/bug-management-ui --to edmx` pass và metadata có `Common.ValueList` cùng bound action definitions.
+- WP2-T01 hoan thanh: da review projection hien tai cua `BugService` va giu service tap trung vao entity cua IDTS.
+- WP2-T02 hoan thanh: Bugs, child entities, master data, responsibilities, history, notification va duplicate link van duoc expose qua OData V4.
+- WP2-T03 hoan thanh: da them Fiori value help annotation cho status, priority, severity, environment, SAP module, application component, defect category, reporter, assignee va next processor role.
+- WP2-T04 hoan thanh o muc MVP: da them bound OData actions tren `Bugs` chi cho cac action that trong vong doi bug.
+- WP2-T05 hoan thanh: `cds compile srv app/bug-management-ui --to edmx` pass va metadata co `Common.ValueList` cung bound action definitions.
+
+## 2026-06-18 Sprint 2 Refinement
+
+English:
+
+- `AssignableDevelopers` no longer exposes duplicate rows from `DeveloperResponsibilities`. The service now serves a deduplicated read model so value help shows one row per real developer.
+- The assignee value help now receives both `componentCategory_ID` and `sapModule_ID` as input context, reducing mismatch between frontend selection and backend assignment validation.
+- `assignee_ID` is exposed for both create draft and edit draft. The active Object Page still shows `assigneeDisplayName` as read-only display text.
+- `Planning` fields are now visible again on the Object Page and are no longer annotation-locked as permanently read-only.
+
+Vietnamese:
+
+- `AssignableDevelopers` khong con bi duplicate do lay truc tiep tu `DeveloperResponsibilities`. Service gio phuc vu mot read model da deduplicate de value help chi hien mot dong cho moi developer thuc te.
+- Value help cua assignee gio nhan ca `componentCategory_ID` va `sapModule_ID` lam input context, giup giam truong hop frontend chon duoc dev nhung backend lai tu choi vi scope khong khop.
+- `assignee_ID` duoc expose cho ca create draft va edit draft. Active Object Page van hien `assigneeDisplayName` o che do read-only.
+- Cac field `Planning` da duoc mo hien lai tren Object Page va khong con bi annotation khoa read-only mot cach co dinh.
 
 ## Remaining Notes
 
-English: Dependent assignee value help is annotation-supported after `componentCategory_ID` exists. During initial create, CAP derives and validates `componentCategory_ID` on save. Backend validation remains the final source of truth.
+English:
 
-Vietnamese: Dependent assignee value help được hỗ trợ bằng annotation sau khi bug đã có `componentCategory_ID`. Khi create ban đầu, CAP derive và validate `componentCategory_ID` lúc save. Backend validation vẫn là nguồn kiểm tra cuối cùng.
+- Backend validation remains the final source of truth for assignment scope.
+- Browser automation still needs a clean auth-capable runtime path before this Sprint 2 refinement can be called fully UI-reverified.
+
+Vietnamese:
+
+- Backend validation van la nguon kiem tra cuoi cung cho assignment scope.
+- Browser automation van can mot runtime path on dinh co auth de co the goi refinement Sprint 2 nay la da duoc UI reverify day du.
 
 ## Definition of Done
 
@@ -58,4 +80,4 @@ Vietnamese: Dependent assignee value help được hỗ trợ bằng annotation 
 
 Vietnamese:
 
-- Service contract phải đủ để UI và handler xử lý flow `Rejected`: reject kèm lý do, hiển thị người xử lý tiếp, và đưa bug về `Assigned` hoặc `Pending Assignment` sau follow-up.
+- Service contract phai du de UI va handler xu ly flow `Rejected`: reject kem ly do, hien thi nguoi xu ly tiep, va dua bug ve `Assigned` hoac `Pending Assignment` sau follow-up.

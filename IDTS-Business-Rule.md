@@ -828,7 +828,7 @@ Luồng lọc trên Fiori:
 
 Tester chọn `SAP Module` nếu liên quan -> hệ thống lọc `Application Component` -> hệ thống lọc `Defect Category` hợp lệ -> hệ thống lọc Developer theo `Developer Responsibility`.
 
-Với bug thuần IDTS, `SAP Module` có thể để trống hoặc chọn `Not Applicable`.
+Với bug thuần IDTS, `SAP Module` nên để trống. Không dùng giá trị giả như `Not Applicable`.
 
 ## **BR-43 - Bộ status chính phải bao gồm Retest Required**
 

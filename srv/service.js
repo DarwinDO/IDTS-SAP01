@@ -230,6 +230,7 @@ module.exports = class BugService extends cds.ApplicationService {
       await enrichBugDisplayFields(bugs, req, entities)
       await enrichBugCapabilities(bugs, req, entities)
     })
+    this.on('READ', entities.AssignableDevelopers, req => readAssignableDevelopers(req, entities))
     this.on('SAVE', Bugs.drafts, (req, next) => handleDraftSave(req, entities, next))
 
     this.on('assignToDeveloper', req => assignToDeveloper(req, entities))
@@ -1518,6 +1519,188 @@ async function actorForAction (req, entities, bug, actionType) {
 async function readBug (req, entities, bugID) {
   if (!bugID) return null
   return cds.tx(req).run(SELECT.one.from(entities.Bugs).where({ ID: bugID }))
+}
+
+async function readAssignableDevelopers (req, entities) {
+  const tx = cds.tx(req)
+  const criteria = assignableDeveloperCriteria(req)
+  let rows
+
+  if (criteria.componentCategoryID) {
+    const responsibilities = await tx.run(
+      SELECT.from(entities.DeveloperResponsibilities)
+        .columns(
+          'ID',
+          'developerProfile_ID',
+          'componentCategory_ID',
+          'sapModule_ID',
+          'responsibilityLevel_code',
+          'active',
+          { ref: ['developerProfile', 'active'], as: 'developerActive' },
+          { ref: ['developerProfile', 'user', 'displayName'], as: 'developerName' },
+          { ref: ['developerProfile', 'user', 'email'], as: 'developerEmail' },
+          { ref: ['developerProfile', 'availabilityStatus', 'name'], as: 'availabilityStatusName' },
+          { ref: ['developerProfile', 'availabilityStatus', 'criticality'], as: 'availabilityCriticality' },
+          { ref: ['componentCategory', 'component', 'name'], as: 'applicationComponentName' },
+          { ref: ['componentCategory', 'defectCategory', 'name'], as: 'defectCategoryName' },
+          { ref: ['sapModule', 'name'], as: 'sapModuleName' },
+          { ref: ['responsibilityLevel', 'name'], as: 'responsibilityLevelName' }
+        )
+        .where({ active: true, componentCategory_ID: criteria.componentCategoryID })
+    )
+
+    const filteredResponsibilities = responsibilities.filter(row => {
+      if (!row.developerActive) return false
+      if (!criteria.sapModuleID) return true
+      return !row.sapModule_ID || row.sapModule_ID === criteria.sapModuleID
+    })
+
+    const byDeveloper = new Map()
+    for (const row of filteredResponsibilities) {
+      const current = byDeveloper.get(row.developerProfile_ID)
+      if (!current || shouldPreferAssignableResponsibility(row, current, criteria.sapModuleID)) {
+        byDeveloper.set(row.developerProfile_ID, row)
+      }
+    }
+
+    rows = [...byDeveloper.values()].map(row => ({
+      ID: row.developerProfile_ID,
+      developerProfileID: row.developerProfile_ID,
+      componentCategoryID: row.componentCategory_ID,
+      sapModuleID: row.sapModule_ID || null,
+      developerName: row.developerName,
+      developerEmail: row.developerEmail,
+      availabilityStatusName: row.availabilityStatusName,
+      availabilityCriticality: row.availabilityCriticality,
+      applicationComponentName: row.applicationComponentName,
+      defectCategoryName: row.defectCategoryName,
+      sapModuleName: row.sapModuleName || null,
+      responsibilityLevelName: row.responsibilityLevelName || null,
+      active: !!row.developerActive
+    }))
+  } else {
+    const profiles = await tx.run(
+      SELECT.from(entities.DeveloperProfiles)
+        .columns(
+          'ID',
+          'active',
+          { ref: ['user', 'displayName'], as: 'developerName' },
+          { ref: ['user', 'email'], as: 'developerEmail' },
+          { ref: ['availabilityStatus', 'name'], as: 'availabilityStatusName' },
+          { ref: ['availabilityStatus', 'criticality'], as: 'availabilityCriticality' }
+        )
+        .where({ active: true })
+    )
+
+    rows = profiles.map(row => ({
+      ID: row.ID,
+      developerProfileID: row.ID,
+      componentCategoryID: null,
+      sapModuleID: null,
+      developerName: row.developerName,
+      developerEmail: row.developerEmail,
+      availabilityStatusName: row.availabilityStatusName,
+      availabilityCriticality: row.availabilityCriticality,
+      applicationComponentName: null,
+      defectCategoryName: null,
+      sapModuleName: null,
+      responsibilityLevelName: null,
+      active: !!row.active
+    }))
+  }
+
+  rows = rows
+    .filter(row => filterAssignableDeveloperRow(row, criteria))
+    .sort((left, right) => left.developerName.localeCompare(right.developerName))
+
+  const total = rows.length
+  rows = applyLimit(rows, req.query?.SELECT?.limit)
+  rows.$count = total
+  return rows
+}
+
+function assignableDeveloperCriteria (req) {
+  const where = req.query?.SELECT?.where || []
+  const search = req.query?.SELECT?.search
+  return {
+    componentCategoryID: eqValueFromWhere(where, 'componentCategoryID'),
+    sapModuleID: eqValueFromWhere(where, 'sapModuleID'),
+    developerProfileID: eqValueFromWhere(where, 'developerProfileID'),
+    active: eqValueFromWhere(where, 'active'),
+    search: searchTermFromCqn(search)
+  }
+}
+
+function eqValueFromWhere (where, property) {
+  for (let index = 0; index < where.length - 2; index += 1) {
+    const left = where[index]
+    const operator = where[index + 1]
+    const right = where[index + 2]
+    if (operator !== '=') continue
+
+    if (left?.ref?.at(-1) === property && right && Object.prototype.hasOwnProperty.call(right, 'val')) {
+      return right.val
+    }
+
+    if (right?.ref?.at(-1) === property && left && Object.prototype.hasOwnProperty.call(left, 'val')) {
+      return left.val
+    }
+  }
+  return null
+}
+
+function searchTermFromCqn (search) {
+  if (!search) return null
+  if (typeof search === 'string') return trimToNull(search)
+  if (Array.isArray(search)) {
+    const parts = search
+      .map(entry => entry?.val)
+      .filter(value => typeof value === 'string')
+    return trimToNull(parts.join(' '))
+  }
+  return null
+}
+
+function shouldPreferAssignableResponsibility (candidate, current, sapModuleID) {
+  if (sapModuleID) {
+    const candidateExact = candidate.sapModule_ID === sapModuleID
+    const currentExact = current.sapModule_ID === sapModuleID
+    if (candidateExact !== currentExact) return candidateExact
+  }
+
+  const candidatePrimary = candidate.responsibilityLevel_code === 'PRIMARY'
+  const currentPrimary = current.responsibilityLevel_code === 'PRIMARY'
+  if (candidatePrimary !== currentPrimary) return candidatePrimary
+
+  if (!current.sapModule_ID && candidate.sapModule_ID) return false
+  if (!candidate.sapModule_ID && current.sapModule_ID) return true
+
+  return String(candidate.ID).localeCompare(String(current.ID)) < 0
+}
+
+function filterAssignableDeveloperRow (row, criteria) {
+  if (criteria.active !== null && criteria.active !== undefined && !!row.active !== !!criteria.active) {
+    return false
+  }
+
+  if (criteria.developerProfileID && row.developerProfileID !== criteria.developerProfileID) {
+    return false
+  }
+
+  if (!criteria.search) return true
+
+  const haystack = [row.developerName, row.developerEmail]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+  return haystack.includes(criteria.search.toLowerCase())
+}
+
+function applyLimit (rows, limit) {
+  if (!limit) return rows
+  const offset = Number(limit.offset?.val || 0)
+  const top = Number(limit.rows?.val || rows.length)
+  return rows.slice(offset, offset + top)
 }
 
 async function enrichBugDisplayFields (bugs, req, entities) {

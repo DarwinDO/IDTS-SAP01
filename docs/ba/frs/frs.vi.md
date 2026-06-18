@@ -286,7 +286,7 @@ flowchart TD
 | Trigger | User create hoặc edit bug chưa Closed. |
 | Preconditions | Classification master data active và available. |
 | Main flow | User chọn SAP Module nếu bug thuộc SAP business context; user chọn Application Component; user chọn Defect Category; system resolve Component Category. |
-| Alternative flow | Với pure IDTS bugs, SAP Module có thể empty hoặc Not Applicable. |
+| Alternative flow | Với pure IDTS bugs, SAP Module nên để trống. |
 | Validation rules | Application Component và Defect Category required; Component Category phải là active valid pair; invalid pairs bị reject. |
 | UI behavior | Application Component value help có thể filter theo selected SAP Module; Defect Category value help có thể filter theo Application Component. |
 | Status effect | Classification change không tự động close hoặc resolve bug. |

@@ -183,7 +183,7 @@ Verification methods:
 | ID | Source | Requirement Statement | Priority | Verification | Trace To |
 | --- | --- | --- | --- | --- | --- |
 | SRS-FR-CLASS-001 | BRD-BR-003, BR-RULE-003 | IDTS shall distinguish SAP Module, Application Component, and Defect Category as separate classification concepts. | Must | Inspection and demonstration | FRS-CLASS-001 |
-| SRS-FR-CLASS-002 | BR-42, REQ-CLS-001 | IDTS shall treat SAP Module as optional business context and shall allow pure IDTS bugs to leave it empty or use Not Applicable. | Must | Test | FRS-CLASS-001 |
+| SRS-FR-CLASS-002 | BR-42, REQ-CLS-001 | IDTS shall treat SAP Module as optional business context and shall allow pure IDTS bugs to leave it empty. | Must | Test | FRS-CLASS-001 |
 | SRS-FR-CLASS-003 | BR-42, REQ-CLS-001 | IDTS shall require Application Component and Defect Category for bug submission. | Must | Test | FRS-CLASS-001 |
 | SRS-FR-CLASS-004 | Data Dictionary | IDTS shall resolve a valid Component Category from the selected Application Component and Defect Category pair. | Must | Test | FRS-CLASS-001 |
 | SRS-FR-CLASS-005 | Fiori UX Requirements | IDTS should support dependent value help for Application Component and Defect Category in the Fiori create/edit flow. | Should | Demonstration | FRS-UX-001 |

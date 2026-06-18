@@ -282,7 +282,7 @@ Mô hình đúng:
 
 | Khái niệm | Mục đích |
 | ----- | ----- |
-| **SAP Module** | Bối cảnh nghiệp vụ SAP như FI, MM, SD; optional nếu bug không thuộc SAP functional module |
+| **SAP Module** | Bối cảnh nghiệp vụ SAP như FI, MM, SD; optional nếu bug không thuộc SAP functional module, khi đó để trống |
 | **Application Component** | Khu vực app/system nơi bug xuất hiện, ví dụ IDTS Bug Report, Dashboard, Custom Fiori App |
 | **Defect Category** | Loại lỗi/tầng kỹ thuật như Fiori/UI5, SAP CAP Backend, Database, Authorization |
 | **Component Category** | Cặp hợp lệ giữa Application Component và Defect Category |
