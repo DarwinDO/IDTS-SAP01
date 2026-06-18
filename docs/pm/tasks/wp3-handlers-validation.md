@@ -119,6 +119,22 @@ Vietnamese:
 - `importantChanges()` trong `srv/service.js` hiện đã track thêm các thay đổi nội dung chung để ghi audit, gồm `title`, `description`, các field tái hiện/kết quả, environment, test reference và planning fields.
 - Bộ verify backend lặp lại đã được mở rộng thành 30 PASS / 0 FAIL trong `scripts/qa/test-idts6-programmatic.js`, bao gồm kiểm tra rõ rằng sửa `title` và `description` sẽ ghi `HistoryLogs`.
 
+## 2026-06-18 Direct Assignee Draft Save Fix
+
+English:
+
+- Fixed the draft-edit assignment path so changing `assignee_ID` directly through the Object Page `Assignee` field is treated as the official assignment/reassignment flow.
+- `prepareBugWrite()` now derives `status_code = ASSIGNED` when an assignee is selected on update and `PENDING_ASSIGNMENT` when the assignee is cleared.
+- Draft activation side effects now compare the active bug before/after `SAVE` on `Bugs.drafts`, then create grouped `HistoryEvents` / `HistoryLogs` and notification records for assignment and reassignment.
+- Added repeatable HTTP regression script `scripts/qa/test-direct-assignee-draft-save.ps1`, exposed as `npm run qa:direct-assignee:http`.
+
+Vietnamese:
+
+- Đã sửa luồng assign khi edit draft để việc đổi field `Assignee` trực tiếp trên Object Page trở thành luồng assign/reassign chính thức.
+- Khi chọn developer, backend tự chuyển status sang `Assigned`; khi xóa assignee, backend chuyển về `Pending Assignment`.
+- Khi activate draft, backend so sánh bug active trước/sau save rồi ghi `HistoryEvents` / `HistoryLogs` dạng grouped và tạo notification cho Developer.
+- Đã thêm script regression HTTP `scripts/qa/test-direct-assignee-draft-save.ps1`, chạy qua `npm run qa:direct-assignee:http` khi có CAP server local tương ứng.
+
 ## Definition of Done
 
 - Invalid transitions are rejected in backend.

@@ -44,12 +44,6 @@ annotate service.Bugs with @(
   UI.Identification : [
     {
       $Type  : 'UI.DataFieldForAction',
-      Label  : 'Assign Developer',
-      Action : 'BugService.assignToDeveloper',
-      ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canAssign' } } }
-    },
-    {
-      $Type  : 'UI.DataFieldForAction',
       Label  : 'Move to Pending Assignment',
       Action : 'BugService.moveToPendingAssignment',
       ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canMoveToPending' } } }
@@ -328,25 +322,6 @@ annotate service.Bugs with @(
         }
       },
       {
-        $Type  : 'UI.DataFieldForAction',
-        Label  : 'Assign Developer',
-        Action : 'BugService.assignToDeveloper',
-        Inline : true,
-        ![@UI.Hidden] : {
-          $edmJson : {
-            $Or : [
-              {
-                $And : [
-                  { $Eq : [ { $Path : 'IsActiveEntity' }, false ] },
-                  { $Eq : [ { $Path : 'HasActiveEntity' }, false ] }
-                ]
-              },
-              { $Not : { $Path : 'canAssign' } }
-            ]
-          }
-        }
-      },
-      {
         $Type : 'UI.DataField',
         Label : 'Next Processor User',
         Value : nextProcessorUserDisplayName,
@@ -586,6 +561,7 @@ annotate service.Bugs:defectCategory.ID with @Common.Text : defectCategory.name 
   };
 
 annotate service.Bugs:assignee.ID with @Common.Label : 'Assignee'
+  @Common.FieldControl : assigneeFieldControl
   @Common.Text : assigneeDisplayName
   @Common.TextArrangement : #TextOnly
   @Common.ValueList : {

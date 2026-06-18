@@ -203,6 +203,22 @@ English:
 - Confirmed the selected assignee value now renders the readable developer name (`DatDT`) instead of the technical UUID in the action parameter input.
 - `IDTS-9` is now treated as closed at WP4 handover level; keep it only as a regression check for future FE changes.
 
+## 2026-06-18 Direct Assignee Field Assignment
+
+English:
+
+- Removed the `Assign Developer` action button from both the Object Page header action area and the Assignment section.
+- Kept the backend `assignToDeveloper` action for API/test compatibility, but the Fiori UI now uses the `Assignee` field and its filtered value help as the single assignment/reassignment path.
+- Added dynamic field control through `assigneeFieldControl`: Tester/PM can edit Assignee when the current status allows assignment, while Developer users see it as read-only.
+- Verified the annotation contract by CAP compile/CSN inspection: `BugService.assignToDeveloper` is no longer exposed by `UI.Identification` or `UI.FieldGroup#Assignment`, while `Assignee` uses dynamic `Common.FieldControl`.
+
+Vietnamese:
+
+- Đã bỏ nút `Assign Developer` khỏi header Object Page và khỏi section Assignment.
+- Backend action `assignToDeveloper` vẫn được giữ để không phá API/test cũ, nhưng Fiori UI chỉ dùng field `Assignee` và value help đã lọc đúng làm đường assign/reassign.
+- Thêm dynamic field control qua `assigneeFieldControl`: Tester/PM được edit Assignee khi status cho phép assign, còn Developer chỉ xem read-only.
+- Đã verify bằng CAP compile/CSN: `BugService.assignToDeveloper` không còn được expose trong `UI.Identification` hoặc `UI.FieldGroup#Assignment`; `Assignee` dùng `Common.FieldControl` động.
+
 Vietnamese:
 
 - ?? b? action `Add Comment` kh?i v?ng header generic v? chuy?n n? v?o ngay trong section `Comments`.

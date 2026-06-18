@@ -148,8 +148,13 @@ const CAPABILITY_FIELDS = new Set([
   'canReopen',
   'canAssign',
   'canMoveToPending',
-  'canResubmit'
+  'canResubmit',
+  'assigneeFieldControl'
 ])
+const FIELD_CONTROL = {
+  READ_ONLY: 1,
+  OPTIONAL: 3
+}
 const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024
 const ACCEPTED_ATTACHMENT_MEDIA_TYPES = new Set([
   'image/jpeg',
@@ -339,6 +344,8 @@ async function prepareBugWrite (req, entities, { isCreate }) {
 
   const finalData = { ...oldBug, ...req.data }
   if (isCreate) {
+    req.data.status_code = finalData.assignee_ID ? STATUS.ASSIGNED : STATUS.PENDING_ASSIGNMENT
+  } else if (oldBug.assignee_ID !== finalData.assignee_ID) {
     req.data.status_code = finalData.assignee_ID ? STATUS.ASSIGNED : STATUS.PENDING_ASSIGNMENT
   }
 
@@ -989,15 +996,18 @@ async function recordCreateSideEffects (req, data, entities) {
 
 async function recordUpdateSideEffects (req, entities) {
   const changes = req._importantChanges || []
-  if (!changes.length) return
+  await recordBugChangeSideEffects(req, entities, changes, req._finalBug)
+}
 
+async function recordBugChangeSideEffects (req, entities, changes, finalBug) {
+  if (!changes.length || !finalBug?.ID) return
   const actor = await resolveRequestUser(req, entities)
-  const actorID = actor?.ID || req._finalBug?.reporter_ID || (await firstUserByRole(req, entities, 'PM'))?.ID
+  const actorID = actor?.ID || finalBug.reporter_ID || (await firstUserByRole(req, entities, 'PM'))?.ID
   const eventActionType = changes.some(change => change.fieldName === 'assignee')
     ? actionTypeForChange(changes.find(change => change.fieldName === 'assignee'))
     : actionTypeForChange(changes[0])
   await writeHistoryEvent(req, entities, {
-    bugID: req._finalBug.ID,
+    bugID: finalBug.ID,
     actorID,
     actionType: eventActionType,
     changes,
@@ -1005,8 +1015,11 @@ async function recordUpdateSideEffects (req, entities) {
   })
 
   const statusChange = changes.find(change => change.fieldName === 'status')
+  const assigneeChange = changes.find(change => change.fieldName === 'assignee')
   if (statusChange) {
-    await writeNotificationForStatus(req, entities, req._finalBug, statusChange.newValue)
+    await writeNotificationForStatus(req, entities, finalBug, statusChange.newValue)
+  } else if (assigneeChange?.newValue) {
+    await writeNotificationForStatus(req, entities, finalBug, STATUS.ASSIGNED)
   }
 }
 
@@ -1939,6 +1952,7 @@ async function prepareDraftPatch (req, entities) {
 async function handleDraftSave (req, entities, next) {
   await captureDraftSaveState(req, entities)
   const result = await next()
+  await recordDraftBugSaveSideEffects(req, result, entities)
   await recordDraftAttachmentSaveSideEffects(req, result, entities)
   return result
 }
@@ -1947,11 +1961,24 @@ async function captureDraftSaveState (req, entities) {
   const bugID = bugIDFrom(req)
   if (!bugID) return
 
+  req._preSaveActiveBug = await readBug(req, entities, bugID)
   req._preSaveActiveAttachments = await cds.tx(req).run(
     SELECT.from(entities.Attachments)
       .columns('ID', 'bug_ID', 'fileName', 'mediaType', 'fileSize')
       .where({ bug_ID: bugID })
   )
+}
+
+async function recordDraftBugSaveSideEffects (req, data, entities) {
+  const oldBug = req._preSaveActiveBug
+  const bugID = data?.ID || bugIDFrom(req)
+  if (!oldBug || !bugID) return
+
+  const activeBug = await readBug(req, entities, bugID)
+  if (!activeBug) return
+
+  const changes = importantChanges(oldBug, activeBug)
+  await recordBugChangeSideEffects(req, entities, changes, activeBug)
 }
 
 async function enrichBugCapabilities (bugs, req, entities) {
@@ -1974,6 +2001,7 @@ async function enrichBugCapabilities (bugs, req, entities) {
       row.canMoveToPending = false
       row.canResubmit = false
       row.canAddComment = false
+      row.assigneeFieldControl = FIELD_CONTROL.READ_ONLY
     }
     return
   }
@@ -2018,6 +2046,9 @@ async function enrichBugCapabilities (bugs, req, entities) {
     row.canMoveToPending = allowedTransitions.includes(STATUS.PENDING_ASSIGNMENT) && isCoordinator
     row.canResubmit = status === STATUS.NEED_MORE_INFORMATION && allowedTransitions.includes(STATUS.ASSIGNED) && isCoordinator && !!assigneeID
     row.canAddComment = COMMENT_ROLES.has(actorRole)
+    row.assigneeFieldControl = isCoordinator && (!status || allowedTransitions.includes(STATUS.ASSIGNED))
+      ? FIELD_CONTROL.OPTIONAL
+      : FIELD_CONTROL.READ_ONLY
   }
 }
 

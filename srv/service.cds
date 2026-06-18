@@ -19,7 +19,8 @@ service BugService @(requires: 'authenticated-user') {
     virtual canAssign             : Boolean,
     virtual canMoveToPending      : Boolean,
     virtual canResubmit           : Boolean,
-    virtual canAddComment         : Boolean
+    virtual canAddComment         : Boolean,
+    virtual assigneeFieldControl  : Integer
   } actions {
     action addComment(content: LargeString) returns Bugs;
     action assignToDeveloper(
