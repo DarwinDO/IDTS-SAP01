@@ -3,6 +3,7 @@
 This document details the final implementation, backend validations, and manual UI verification flow for **Sprint 02** features in the Issue and Defect Tracking System (IDTS).
 
 Presentation script for the mentor demo: [wp4-mentor-demo-script.md](wp4-mentor-demo-script.md)
+The companion script now covers the main happy flow plus the `Need More Information -> Resubmit` and `Rejected -> Pending Assignment -> Reassign` follow-up branches.
 
 ## Changes Accomplished
 
