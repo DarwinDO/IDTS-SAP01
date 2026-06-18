@@ -42,8 +42,8 @@ Vietnamese:
 
 ## In Progress
 
-- Jira `IDTS-9` FE retest and final decision support for the Assign Developer dialog selected-text issue.
-- Sprint 02 Object Page usability polish remains active until the mentor-facing happy flow is fully accepted.
+- Sprint 02 Object Page usability regression checks remain active until the mentor-facing happy flow is fully accepted.
+- Core FE delivery for the current happy-flow baseline is complete; remaining work is demo-readiness polish and support for SAP490 evidence sync.
 
 Vietnamese:
 
@@ -52,9 +52,9 @@ Vietnamese:
 
 ## Next
 
-- Re-test the latest annotation-only candidate for `IDTS-9` on the Assign Developer dialog and capture exact browser evidence.
-- If UUID still remains in the selected input, support the team decision between accepting the gap for demo or implementing a targeted FE extension.
-- Keep the default path annotation-driven first; only move to custom UI5/FE extension if the remaining usability gap is judged worth the extra maintenance.
+- Keep the Assign Developer dialog as a regression check during the final mentor-demo rerun, but no separate FE fix stream is currently required for `IDTS-9`.
+- Support final Object Page polish review and any non-blocking usability cleanup that appears during the final browser rerun.
+- Keep the default path annotation-driven first; only move to custom UI5/FE extension if a new FE gap appears and is judged worth the extra maintenance.
 
 Vietnamese:
 

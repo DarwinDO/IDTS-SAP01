@@ -56,19 +56,6 @@ annotate service.Bugs with @(
     },
     {
       $Type  : 'UI.DataFieldForAction',
-      Label  : 'Add Comment',
-      Action : 'BugService.addComment',
-      ![@UI.Hidden] : {
-        $edmJson : {
-          $Or : [
-            { $Not : { $Path : 'canAddComment' } },
-            { $Eq : [ { $Path : 'IsActiveEntity' }, false ] }
-          ]
-        }
-      }
-    },
-    {
-      $Type  : 'UI.DataFieldForAction',
       Label  : 'Mark In Review',
       Action : 'BugService.markInReview',
       ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canMarkInReview' } } }
@@ -208,7 +195,7 @@ annotate service.Bugs with @(
           ID     : 'Planning',
           Label  : 'Planning',
           Target: '@UI.FieldGroup#Planning',
-          ![@UI.Hidden] : true
+          ![@UI.Hidden] : false
         }
       ]
     },
@@ -232,10 +219,22 @@ annotate service.Bugs with @(
       Target : 'attachments/@UI.LineItem'
     },
     {
-      $Type  : 'UI.ReferenceFacet',
+      $Type  : 'UI.CollectionFacet',
       ID     : 'Comments',
       Label  : 'Comments',
-      Target : 'comments/@UI.LineItem',
+      Facets : [
+        {
+          $Type  : 'UI.ReferenceFacet',
+          ID     : 'CommentAction',
+          Label  : 'Comment Actions',
+          Target : '@UI.Identification#CommentAction'
+        },
+        {
+          $Type  : 'UI.ReferenceFacet',
+          ID     : 'CommentList',
+          Target : 'comments/@UI.LineItem'
+        }
+      ],
       ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
     },
     {
@@ -307,13 +306,45 @@ annotate service.Bugs with @(
   },
   UI.FieldGroup #Assignment : {
     Data : [
-      { $Type : 'UI.DataField', Label : 'Assignee', Value : assigneeDisplayName, ![@Common.FieldControl] : #ReadOnly },
+      {
+        $Type : 'UI.DataField',
+        Label : 'Assignee',
+        Value : assignee_ID,
+        ![@UI.Hidden] : {
+          $edmJson : {
+            $Eq : [ { $Path : 'IsActiveEntity' }, true ]
+          }
+        }
+      },
+      {
+        $Type : 'UI.DataField',
+        Label : 'Assignee',
+        Value : assigneeDisplayName,
+        ![@Common.FieldControl] : #ReadOnly,
+        ![@UI.Hidden] : {
+          $edmJson : {
+            $Eq : [ { $Path : 'IsActiveEntity' }, false ]
+          }
+        }
+      },
       {
         $Type  : 'UI.DataFieldForAction',
         Label  : 'Assign Developer',
         Action : 'BugService.assignToDeveloper',
         Inline : true,
-        ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canAssign' } } }
+        ![@UI.Hidden] : {
+          $edmJson : {
+            $Or : [
+              {
+                $And : [
+                  { $Eq : [ { $Path : 'IsActiveEntity' }, false ] },
+                  { $Eq : [ { $Path : 'HasActiveEntity' }, false ] }
+                ]
+              },
+              { $Not : { $Path : 'canAssign' } }
+            ]
+          }
+        }
       },
       {
         $Type : 'UI.DataField',
@@ -340,11 +371,27 @@ annotate service.Bugs with @(
   },
   UI.FieldGroup #Planning : {
     Data : [
-      { $Type : 'UI.DataField', Label : 'Planned Completion Date', Value : plannedCompletionDate, ![@Common.FieldControl] : #ReadOnly },
-      { $Type : 'UI.DataField', Label : 'Due Date', Value : dueDate, ![@Common.FieldControl] : #ReadOnly },
-      { $Type : 'UI.DataField', Label : 'Estimated Effort Hours', Value : estimatedEffortHours, ![@Common.FieldControl] : #ReadOnly }
+      { $Type : 'UI.DataField', Label : 'Planned Completion Date', Value : plannedCompletionDate },
+      { $Type : 'UI.DataField', Label : 'Due Date', Value : dueDate },
+      { $Type : 'UI.DataField', Label : 'Estimated Effort Hours', Value : estimatedEffortHours }
     ]
   },
+  UI.Identification #CommentAction : [
+      {
+        $Type             : 'UI.DataFieldForAction',
+        Label             : 'Add Comment',
+        Action            : 'BugService.addComment',
+        ![@UI.Importance] : #High,
+        ![@UI.Hidden]     : {
+          $edmJson : {
+            $Or : [
+              { $Not : { $Path : 'canAddComment' } },
+              { $Eq : [ { $Path : 'IsActiveEntity' }, false ] }
+            ]
+          }
+        }
+      }
+  ],
 
 );
 
@@ -357,7 +404,7 @@ annotate service.Bugs with {
   actualResult          @UI.MultiLineText @Common.Label : 'Actual Result' @Common.FieldControl : #Mandatory;
   expectedResult        @UI.MultiLineText @Common.Label : 'Expected Result' @Common.FieldControl : #Mandatory;
   rejectionReason       @UI.MultiLineText @Common.Label : 'Rejection Reason' @Common.FieldControl : #ReadOnly;
-  dueDate               @Common.Label : 'Due Date' @Common.FieldControl : #ReadOnly;
+  dueDate               @Common.Label : 'Due Date';
   status                @Common.Label : 'Status' @Common.FieldControl : #ReadOnly;
   priority              @Common.Label : 'Priority' @Common.FieldControl : #Mandatory;
   severity              @Common.Label : 'Severity' @Common.FieldControl : #Mandatory;
@@ -368,14 +415,14 @@ annotate service.Bugs with {
   componentCategory     @Common.Label : 'Component Category';
   reporter              @Common.Label : 'Reporter' @Common.FieldControl : #ReadOnly;
   reporterDisplayName   @Common.Label : 'Reporter' @Common.FieldControl : #ReadOnly @Core.Computed;
-  assignee              @Common.Label : 'Assignee' @Common.FieldControl : #ReadOnly;
+  assignee              @Common.Label : 'Assignee';
   assigneeDisplayName   @Common.Label : 'Assignee' @Common.FieldControl : #ReadOnly @Core.Computed;
   nextProcessorUser     @Common.Label : 'Next Processor User' @Common.FieldControl : #ReadOnly;
   nextProcessorUserDisplayName @Common.Label : 'Next Processor User' @Common.FieldControl : #ReadOnly @Core.Computed;
   nextProcessorRole     @Common.Label : 'Next Processor Role' @Common.FieldControl : #ReadOnly;
   nextProcessorRoleName @Common.Label : 'Next Processor Role' @Common.FieldControl : #ReadOnly @Core.Computed;
-  plannedCompletionDate @Common.Label : 'Planned Completion Date' @Common.FieldControl : #ReadOnly;
-  estimatedEffortHours  @Common.Label : 'Estimated Effort Hours' @Common.FieldControl : #ReadOnly;
+  plannedCompletionDate @Common.Label : 'Planned Completion Date';
+  estimatedEffortHours  @Common.Label : 'Estimated Effort Hours';
   componentCategory     @UI.Hidden @Core.Computed;
 };
 
@@ -538,8 +585,7 @@ annotate service.Bugs:defectCategory.ID with @Common.Text : defectCategory.name 
     ]
   };
 
-annotate service.Bugs:assignee.ID with @Common.FieldControl : #ReadOnly
-  @Common.Label : 'Assignee'
+annotate service.Bugs:assignee.ID with @Common.Label : 'Assignee'
   @Common.Text : assigneeDisplayName
   @Common.TextArrangement : #TextOnly
   @Common.ValueList : {
@@ -556,6 +602,11 @@ annotate service.Bugs:assignee.ID with @Common.FieldControl : #ReadOnly
         $Type : 'Common.ValueListParameterIn',
         LocalDataProperty : componentCategory_ID,
         ValueListProperty : 'componentCategoryID'
+      },
+      {
+        $Type : 'Common.ValueListParameterIn',
+        LocalDataProperty : sapModule_ID,
+        ValueListProperty : 'sapModuleID'
       },
       {
         $Type : 'Common.ValueListParameterDisplayOnly',
@@ -933,6 +984,8 @@ annotate service.Bugs actions {
       'assigneeDisplayName',
       'nextProcessorUser_ID',
       'nextProcessorRole_code',
+      'nextProcessorUserDisplayName',
+      'nextProcessorRoleName',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -946,7 +999,7 @@ annotate service.Bugs actions {
       'canClose',
       'canReopen'
     ],
-    TargetEntities : [historyEvents, notifications]
+    TargetEntities : [status, historyEvents, notifications]
   }
   assignToDeveloper(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
@@ -958,6 +1011,8 @@ annotate service.Bugs actions {
       'assigneeDisplayName',
       'nextProcessorUser_ID',
       'nextProcessorRole_code',
+      'nextProcessorUserDisplayName',
+      'nextProcessorRoleName',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -971,7 +1026,7 @@ annotate service.Bugs actions {
       'canClose',
       'canReopen'
     ],
-    TargetEntities : [historyEvents, notifications]
+    TargetEntities : [status, historyEvents, notifications]
   }
   moveToPendingAssignment(
     reason @UI.MultiLineText @Common.Label : 'Reason'
@@ -983,6 +1038,8 @@ annotate service.Bugs actions {
       'assigneeDisplayName',
       'nextProcessorUser_ID',
       'nextProcessorRole_code',
+      'nextProcessorUserDisplayName',
+      'nextProcessorRoleName',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -996,7 +1053,7 @@ annotate service.Bugs actions {
       'canClose',
       'canReopen'
     ],
-    TargetEntities : [historyEvents, notifications]
+    TargetEntities : [status, historyEvents, notifications]
   }
   markInReview(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
@@ -1008,6 +1065,8 @@ annotate service.Bugs actions {
       'assigneeDisplayName',
       'nextProcessorUser_ID',
       'nextProcessorRole_code',
+      'nextProcessorUserDisplayName',
+      'nextProcessorRoleName',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1021,7 +1080,7 @@ annotate service.Bugs actions {
       'canClose',
       'canReopen'
     ],
-    TargetEntities : [historyEvents, notifications]
+    TargetEntities : [status, historyEvents, notifications]
   }
   requestMoreInformation(
     reason @UI.MultiLineText @Common.Label : 'Reason'
@@ -1033,6 +1092,8 @@ annotate service.Bugs actions {
       'assigneeDisplayName',
       'nextProcessorUser_ID',
       'nextProcessorRole_code',
+      'nextProcessorUserDisplayName',
+      'nextProcessorRoleName',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1046,7 +1107,7 @@ annotate service.Bugs actions {
       'canClose',
       'canReopen'
     ],
-    TargetEntities : [historyEvents, notifications]
+    TargetEntities : [status, historyEvents, notifications]
   }
   resubmitToDeveloper(
     note @UI.MultiLineText @Common.Label : 'Update Summary'
@@ -1058,6 +1119,8 @@ annotate service.Bugs actions {
       'assigneeDisplayName',
       'nextProcessorUser_ID',
       'nextProcessorRole_code',
+      'nextProcessorUserDisplayName',
+      'nextProcessorRoleName',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1071,7 +1134,7 @@ annotate service.Bugs actions {
       'canClose',
       'canReopen'
     ],
-    TargetEntities : [historyEvents, notifications, comments]
+    TargetEntities : [status, historyEvents, notifications, comments]
   }
   rejectBug(
     reason @UI.MultiLineText @Common.Label : 'Rejection Reason'
@@ -1083,6 +1146,8 @@ annotate service.Bugs actions {
       'assigneeDisplayName',
       'nextProcessorUser_ID',
       'nextProcessorRole_code',
+      'nextProcessorUserDisplayName',
+      'nextProcessorRoleName',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1096,7 +1161,7 @@ annotate service.Bugs actions {
       'canClose',
       'canReopen'
     ],
-    TargetEntities : [historyEvents, notifications]
+    TargetEntities : [status, historyEvents, notifications]
   }
   startProgress(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
@@ -1108,6 +1173,8 @@ annotate service.Bugs actions {
       'assigneeDisplayName',
       'nextProcessorUser_ID',
       'nextProcessorRole_code',
+      'nextProcessorUserDisplayName',
+      'nextProcessorRoleName',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1121,7 +1188,7 @@ annotate service.Bugs actions {
       'canClose',
       'canReopen'
     ],
-    TargetEntities : [historyEvents, notifications]
+    TargetEntities : [status, historyEvents, notifications]
   }
   resolveBug(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
@@ -1133,6 +1200,8 @@ annotate service.Bugs actions {
       'assigneeDisplayName',
       'nextProcessorUser_ID',
       'nextProcessorRole_code',
+      'nextProcessorUserDisplayName',
+      'nextProcessorRoleName',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1146,7 +1215,7 @@ annotate service.Bugs actions {
       'canClose',
       'canReopen'
     ],
-    TargetEntities : [historyEvents, notifications]
+    TargetEntities : [status, historyEvents, notifications]
   }
   sendToRetest(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
@@ -1158,6 +1227,8 @@ annotate service.Bugs actions {
       'assigneeDisplayName',
       'nextProcessorUser_ID',
       'nextProcessorRole_code',
+      'nextProcessorUserDisplayName',
+      'nextProcessorRoleName',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1171,7 +1242,7 @@ annotate service.Bugs actions {
       'canClose',
       'canReopen'
     ],
-    TargetEntities : [historyEvents, notifications]
+    TargetEntities : [status, historyEvents, notifications]
   }
   closeBug(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
@@ -1261,21 +1332,16 @@ annotate service.DefectCategories with {
 };
 
 annotate service.AssignableDevelopers with @(
-  UI.SelectionFields : [ developerName, developerEmail, applicationComponentName, defectCategoryName, sapModuleName, responsibilityLevelName, active ],
+  UI.SelectionFields : [ developerName, developerEmail, active ],
   UI.LineItem : [
     { $Type : 'UI.DataField', Label : 'Developer', Value : developerName },
     { $Type : 'UI.DataField', Label : 'Email', Value : developerEmail },
     { $Type : 'UI.DataField', Label : 'Availability', Value : availabilityStatusName, Criticality : availabilityCriticality },
-    { $Type : 'UI.DataField', Label : 'Application Component', Value : applicationComponentName },
-    { $Type : 'UI.DataField', Label : 'Defect Category', Value : defectCategoryName },
-    { $Type : 'UI.DataField', Label : 'SAP Module Scope', Value : sapModuleName },
-    { $Type : 'UI.DataField', Label : 'Responsibility Level', Value : responsibilityLevelName },
     { $Type : 'UI.DataField', Label : 'Active', Value : active }
   ]
 );
 
 annotate service.AssignableDevelopers with {
-  ID                       @UI.Hidden;
   developerProfileID       @UI.Hidden @Common.Label : 'Developer ID' @Common.Text : developerName @Common.TextArrangement : #TextOnly;
   componentCategoryID      @UI.Hidden @Common.Label : 'Component Category ID';
   sapModuleID              @UI.Hidden @Common.Label : 'SAP Module ID';
@@ -1312,10 +1378,6 @@ annotate service.ValidDefectCategories with {
 };
 
 annotate service.Bugs with @(
-  Common.SideEffects #ComponentCategoryDerivation: {
-    SourceProperties : [applicationComponent_ID, defectCategory_ID],
-    TargetProperties : ['componentCategory_ID']
-  },
   Common.SideEffects #AttachmentRowsRefresh: {
     SourceEntities : [attachments],
     TargetEntities : [attachments]

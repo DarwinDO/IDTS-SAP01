@@ -54,7 +54,7 @@ Acceptance criteria:
 - Defect Category is required.
 - Application Component value help can be filtered by SAP Module when configured.
 - Defect Category value help can be filtered by Application Component.
-- Pure IDTS bugs can use empty/Not Applicable SAP Module.
+- Pure IDTS bugs should leave SAP Module empty.
 
 ### REQ-ASSIGN-001 - Filter Developers by Responsibility
 

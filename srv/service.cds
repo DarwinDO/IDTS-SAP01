@@ -113,20 +113,20 @@ service BugService @(requires: 'authenticated-user') {
     *,
     componentCategory : redirected to ComponentCategories
   };
-  entity AssignableDevelopers as select from db.DeveloperResponsibilities {
-    key ID,
-    developerProfile.ID as developerProfileID,
-    developerProfile.user.displayName as developerName,
-    developerProfile.user.email as developerEmail,
-    developerProfile.availabilityStatus.name as availabilityStatusName,
-    developerProfile.availabilityStatus.criticality as availabilityCriticality,
-    componentCategory.ID as componentCategoryID,
-    componentCategory.component.name as applicationComponentName,
-    componentCategory.defectCategory.name as defectCategoryName,
-    sapModule.ID as sapModuleID,
-    sapModule.name as sapModuleName,
-    responsibilityLevel.name as responsibilityLevelName,
-    active
+  entity AssignableDevelopers {
+    key ID                    : UUID;
+    developerProfileID        : UUID;
+    componentCategoryID       : UUID;
+    sapModuleID               : UUID;
+    developerName             : String(120);
+    developerEmail            : String(255);
+    availabilityStatusName    : String(120);
+    availabilityCriticality   : Integer;
+    applicationComponentName  : String(120);
+    defectCategoryName        : String(120);
+    sapModuleName             : String(120);
+    responsibilityLevelName   : String(120);
+    active                    : Boolean;
   };
   entity ValidDefectCategories as select from db.ComponentCategories {
     key ID as componentCategoryID,

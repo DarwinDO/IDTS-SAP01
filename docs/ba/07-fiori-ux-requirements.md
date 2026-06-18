@@ -84,7 +84,7 @@ Use Fiori Elements List Report/Object Page as the default implementation. Prefer
 ## Create/Edit Form Flow
 
 1. Tester enters basic bug details.
-2. Tester selects SAP Module if relevant; pure IDTS bug can use empty/Not Applicable.
+2. Tester selects SAP Module if relevant; pure IDTS bug should leave it empty.
 3. Tester selects Application Component; value help is filtered by SAP Module when configured.
 4. Tester selects Defect Category; value help is filtered by Application Component.
 5. System resolves Component Category.

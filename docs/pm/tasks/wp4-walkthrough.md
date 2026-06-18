@@ -2,6 +2,9 @@
 
 This document details the final implementation, backend validations, and manual UI verification flow for **Sprint 02** features in the Issue and Defect Tracking System (IDTS).
 
+Presentation script for the mentor demo: [wp4-mentor-demo-script.md](wp4-mentor-demo-script.md)
+The companion script now covers the main happy flow plus the `Need More Information -> Resubmit` and `Rejected -> Pending Assignment -> Reassign` follow-up branches.
+
 ## Changes Accomplished
 
 ### 1. Mock Authentication Configuration
@@ -33,11 +36,12 @@ This document details the final implementation, backend validations, and manual 
 
 ### 1. Automated Programmatic Test Suite
 * The happy-flow verification checklist runs simulated requests using the test suite.
-* Running `node scripts/qa/test-idts6-programmatic.js` results in **21/21 PASS**.
+* Running `node scripts/qa/test-idts6-programmatic.js` now results in **30/30 PASS**.
+* Running `powershell -ExecutionPolicy Bypass -File scripts/qa/test-comments-attachments.ps1 -BaseUrl http://localhost:4014/odata/v4/bug` also passes the comment/attachment HTTP path end to end.
 
 ```text
 ==============================================
- TOTAL: 21 PASS  |  0 FAIL  |  21 tests
+ TOTAL: 30 PASS  |  0 FAIL  |  30 tests
 ==============================================
 ```
 
@@ -80,16 +84,16 @@ Use this as the live script during mentor review.
 | HF-05 | NhanT | Save bug | Same valid data | Bug is created, bug number is generated, Object Page opens | Low |
 | HF-06 | NhanT | Check attachment section after create | Same created bug | Attachment should still be visible on active Object Page | Low |
 | HF-07 | NhanT | Add comment | Example comment about evidence uploaded | Comment row appears with author name and role | Low |
-| HF-08 | NhanT | Assign Developer | Choose `DatDT` from value help | Bug becomes `Assigned`, assignee becomes `DatDT` | Medium: dialog still shows technical parameter text |
+| HF-08 | NhanT | Assign Developer | Choose `DatDT` from value help | Bug becomes `Assigned`, assignee becomes `DatDT` | Low |
 | HF-09 | DatDT | Open same bug | Assigned bug | Developer actions are visible only for valid developer flow | Low |
-| HF-10 | DatDT | Run `Mark In Review` | Optional developer note empty | Backend status changes to `In Review` successfully | Low |
+| HF-10 | DatDT | Run `Mark In Review` or `Start Progress` | Optional developer note empty for `Mark In Review`; required note for `Start Progress` | Backend status changes successfully and the Object Page refreshes to the new state immediately | Low |
 | HF-11 | DonHV | Open bug as PM | Review only | PM can review bug, comments, attachments, history, notifications without developer-only action clutter | Low |
 
 ### 2B. Demo Safety Rules
 
 - Always use the valid classification pair `IDTS Bug Report` + `SAP Fiori UI5` for live create.
 - Keep one seeded fallback bug ready only as a contingency for operator error; the refreshed happy flow now passes on the local demo stack.
-- The remaining UX imperfection is the Assign Developer dialog input still showing a technical UUID after selection, even though the label is `Assignee` and the value-help rows are business-friendly.
+- The Assign Developer dialog should continue to be watched as a regression check, but the current verified runtime already shows the selected developer name correctly.
 
 #### Step 3: Switch Personas via Mock Login
 1. Because mock authentication is active, CAP provides a Mock Login popup/banner if you access the direct service page or click a restricted action, or you can supply basic authorization in headers.
@@ -105,19 +109,20 @@ Use this as the live script during mentor review.
 
 ### 3. Current Known Risks Before Mentor Demo
 
-- **Assign dialog wording gap**: the assignment action parameter still shows technical text like `assigneeID` and a UUID in the input instead of a business label/name.
+- No product-blocking FE issue is currently open on the verified happy flow path HF-01 to HF-11.
+- Keep the Assign Developer selected-text path as a regression check only. On the current verified runtime, the dialog shows the selected developer name (`DatDT`) instead of the UUID.
 
 ### 3A. Fix Priority Recommendation
 
 | Priority | Gap | Why it comes first | Recommended owner |
 | --- | --- | --- | --- |
-| P3 | Assign dialog wording/value gap | Business rows and label are fixed. A latest annotation-only candidate fix now adds `@Common.Text : developerName` on `AssignableDevelopers.developerProfileID`, but browser retest is still required to confirm the selected input stops showing UUID. Jira follow-up: `IDTS-9` reopened. | DatDT / SangVN |
+| P3 | Assign dialog regression check | Keep one quick browser check for the Assign Developer dialog in the mentor-demo prep run to confirm the selected value still renders the developer name on the active stack. No targeted FE customization is currently required. | DatDT / SangVN |
 
 ### 4. Current Safe Demo Recommendation
 
 - Use the valid classification pair above.
-- A prepared fallback seed bug is optional rather than required; the rerun on `localhost:4012` already passed the create + attachment + comment + assignment + developer-review path.
-- The main polish note to mention only if asked is that the Assign Developer action field was the last visible FE usability gap; a candidate annotation-only fix is now staged and must be rechecked in browser before calling the UI fully clean.
+- A prepared fallback seed bug is optional rather than required; the rerun on `localhost:4004` already passed the create + attachment + comment + assignment + developer-review path.
+- No FE polish item currently needs proactive mention in the demo script. Only mention the Assign Developer dialog if a regression reappears during the final rerun.
 
 ## Vietnamese Walkthrough
 

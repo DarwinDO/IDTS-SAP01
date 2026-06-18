@@ -184,7 +184,7 @@ Verification methods:
 | ID | Source | Requirement Statement | Priority | Verification | Trace To |
 | --- | --- | --- | --- | --- | --- |
 | SRS-FR-CLASS-001 | BRD-BR-003, BR-RULE-003 | IDTS shall tách SAP Module, Application Component và Defect Category thành các khái niệm phân loại riêng. | Must | Inspection và demonstration | FRS-CLASS-001 |
-| SRS-FR-CLASS-002 | BR-42, REQ-CLS-001 | IDTS shall xem SAP Module là business context optional và cho phép bug thuần IDTS để trống hoặc dùng Not Applicable. | Must | Test | FRS-CLASS-001 |
+| SRS-FR-CLASS-002 | BR-42, REQ-CLS-001 | IDTS shall xem SAP Module là business context optional và cho phép bug thuần IDTS để trống. | Must | Test | FRS-CLASS-001 |
 | SRS-FR-CLASS-003 | BR-42, REQ-CLS-001 | IDTS shall bắt buộc Application Component và Defect Category khi submit bug. | Must | Test | FRS-CLASS-001 |
 | SRS-FR-CLASS-004 | Data Dictionary | IDTS shall resolve Component Category hợp lệ từ cặp Application Component và Defect Category đã chọn. | Must | Test | FRS-CLASS-001 |
 | SRS-FR-CLASS-005 | Fiori UX Requirements | IDTS should hỗ trợ dependent value help cho Application Component và Defect Category trong Fiori create/edit flow. | Should | Demonstration | FRS-UX-001 |

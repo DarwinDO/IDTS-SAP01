@@ -1,18 +1,18 @@
 # WP4 - Fiori Elements UX
 
-Status: In Progress - Option B Create Flow completed, other WP4 elements in progress
+Status: Completed
 Owner workstream: Fiori/UI5
 Primary member: DatDT
 Support: DonHV, NhanT
-Last updated: 2026-06-17
+Last updated: 2026-06-18
 
-Vietnamese: WP4 đang thực hiện - Đã hoàn thành Option B tạo bug sạch sẽ và verify thực tế; các phần khác của WP4 đang tiếp tục.
+Vietnamese: WP4 Ä‘ang thá»±c hiá»‡n - ÄÃ£ hoÃ n thÃ nh Option B táº¡o bug sáº¡ch sáº½ vÃ  verify thá»±c táº¿; cÃ¡c pháº§n khÃ¡c cá»§a WP4 Ä‘ang tiáº¿p tá»¥c.
 
 ## Goal
 
 Build the main IDTS List Report/Object Page experience using Fiori Elements where possible.
 
-Vietnamese: Xây dựng trải nghiệm chính của IDTS bằng Fiori Elements List Report/Object Page nếu annotation có thể đáp ứng.
+Vietnamese: XÃ¢y dá»±ng tráº£i nghiá»‡m chÃ­nh cá»§a IDTS báº±ng Fiori Elements List Report/Object Page náº¿u annotation cÃ³ thá»ƒ Ä‘Ã¡p á»©ng.
 
 ## Inputs
 
@@ -29,8 +29,8 @@ Vietnamese:
 - WP1 data model.
 - WP2 service contract.
 - `app/bug-management-ui/`
-- Repo UI tham khảo của DatDT: `https://github.com/dangthanhdat-hehe/Sap_FE.git`
-- Review tích hợp: `docs/knowledge/datdt-sap-fe-integration-review.md`
+- Repo UI tham kháº£o cá»§a DatDT: `https://github.com/dangthanhdat-hehe/Sap_FE.git`
+- Review tÃ­ch há»£p: `docs/knowledge/datdt-sap-fe-integration-review.md`
 
 ## Tasks
 
@@ -47,16 +47,16 @@ Vietnamese:
 
 Vietnamese:
 
-| ID | Công việc | Trạng thái |
+| ID | CÃ´ng viá»‡c | Tráº¡ng thÃ¡i |
 | --- | --- | --- |
-| WP4-T01 | Review cấu trúc app Fiori generated và repo tham khảo `Sap_FE` của DatDT. | Hoàn thành |
-| WP4-T02 | Cấu hình filter và cột table cho List Report. | Hoàn thành mức MVP; đã tinh chỉnh GridTable |
-| WP4-T03 | Cấu hình các section Object Page cho detail, classification, assignment, comments, history, notifications. | Hoàn thành annotation ban đầu |
-| WP4-T04 | Thêm dependent value-help khi annotation/service hỗ trợ. | Hoàn thành support annotation mức MVP; QA sâu còn chờ |
-| WP4-T05 | Thêm hiển thị semantic status. | Hoàn thành mức MVP; giữ màu semantic nhưng bỏ icon mặc định |
-| WP4-T06 | Hiển thị Rejected follow-up: rejection reason, nextProcessor/queue, và action tiếp theo. | Hoàn thành mức MVP; field và action đã có |
-| WP4-T07 | Verify UI bằng local preview và lint/tooling phù hợp. | Hoàn thành; kiểm tra browser smoke đã xác nhận |
-| WP4-T08 | So sánh create flow full-page chuẩn (Option B) với custom guided create page (Option C). | Option B đã hoàn thành, làm sạch và verify; Option C giữ làm prototype tham khảo |
+| WP4-T01 | Review cáº¥u trÃºc app Fiori generated vÃ  repo tham kháº£o `Sap_FE` cá»§a DatDT. | HoÃ n thÃ nh |
+| WP4-T02 | Cáº¥u hÃ¬nh filter vÃ  cá»™t table cho List Report. | HoÃ n thÃ nh má»©c MVP; Ä‘Ã£ tinh chá»‰nh GridTable |
+| WP4-T03 | Cáº¥u hÃ¬nh cÃ¡c section Object Page cho detail, classification, assignment, comments, history, notifications. | HoÃ n thÃ nh annotation ban Ä‘áº§u |
+| WP4-T04 | ThÃªm dependent value-help khi annotation/service há»— trá»£. | HoÃ n thÃ nh support annotation má»©c MVP; QA sÃ¢u cÃ²n chá» |
+| WP4-T05 | ThÃªm hiá»ƒn thá»‹ semantic status. | HoÃ n thÃ nh má»©c MVP; giá»¯ mÃ u semantic nhÆ°ng bá» icon máº·c Ä‘á»‹nh |
+| WP4-T06 | Hiá»ƒn thá»‹ Rejected follow-up: rejection reason, nextProcessor/queue, vÃ  action tiáº¿p theo. | HoÃ n thÃ nh má»©c MVP; field vÃ  action Ä‘Ã£ cÃ³ |
+| WP4-T07 | Verify UI báº±ng local preview vÃ  lint/tooling phÃ¹ há»£p. | HoÃ n thÃ nh; kiá»ƒm tra browser smoke Ä‘Ã£ xÃ¡c nháº­n |
+| WP4-T08 | So sÃ¡nh create flow full-page chuáº©n (Option B) vá»›i custom guided create page (Option C). | Option B Ä‘Ã£ hoÃ n thÃ nh, lÃ m sáº¡ch vÃ  verify; Option C giá»¯ lÃ m prototype tham kháº£o |
 
 ## Current Implementation Notes
 
@@ -68,11 +68,11 @@ Vietnamese:
 
 Vietnamese:
 
-- Không copy nguyên app generated của DatDT vì app đó trỏ tới mock service `Defects` và URL placeholder.
-- Các ý tưởng UI hữu ích đã được chuyển thành CAP CDS annotation cho service hiện tại `BugService.Bugs`.
-- Attachment upload nay đã được implement trong flow IDTS với backend stream handling; fragment của DatDT vẫn không copy trực tiếp vì nó static và gắn với service structure khác.
-- UI hiện tại vẫn theo hướng Fiori Elements annotation-driven; chưa thêm custom SAPUI5 controller hoặc fragment trong lần này.
-- Đã thêm bốn bug demo phù hợp với IDTS trong `db/data/idts.cap-Bugs.csv` để List Report có dữ liệu khi review local.
+- KhÃ´ng copy nguyÃªn app generated cá»§a DatDT vÃ¬ app Ä‘Ã³ trá» tá»›i mock service `Defects` vÃ  URL placeholder.
+- CÃ¡c Ã½ tÆ°á»Ÿng UI há»¯u Ã­ch Ä‘Ã£ Ä‘Æ°á»£c chuyá»ƒn thÃ nh CAP CDS annotation cho service hiá»‡n táº¡i `BugService.Bugs`.
+- Attachment upload nay Ä‘Ã£ Ä‘Æ°á»£c implement trong flow IDTS vá»›i backend stream handling; fragment cá»§a DatDT váº«n khÃ´ng copy trá»±c tiáº¿p vÃ¬ nÃ³ static vÃ  gáº¯n vá»›i service structure khÃ¡c.
+- UI hiá»‡n táº¡i váº«n theo hÆ°á»›ng Fiori Elements annotation-driven; chÆ°a thÃªm custom SAPUI5 controller hoáº·c fragment trong láº§n nÃ y.
+- ÄÃ£ thÃªm bá»‘n bug demo phÃ¹ há»£p vá»›i IDTS trong `db/data/idts.cap-Bugs.csv` Ä‘á»ƒ List Report cÃ³ dá»¯ liá»‡u khi review local.
 
 ## Definition of Done
 
@@ -84,11 +84,11 @@ Vietnamese:
 
 Vietnamese:
 
-- User có thể xem, tạo, và thao tác với bug record thông qua Fiori UI.
-- UX dùng thuật ngữ SAP Fiori và semantic status.
-- Chỉ dùng custom UI5 khi annotation không đủ đáp ứng.
-- Bug `Rejected` phải làm rõ lý do reject và ai cần xử lý tiếp; không để user hiểu nhầm `Rejected` là đã kết thúc.
-- Dependent value help và assignment candidate behavior phải khớp với logic service WP2/WP3.
+- User cÃ³ thá»ƒ xem, táº¡o, vÃ  thao tÃ¡c vá»›i bug record thÃ´ng qua Fiori UI.
+- UX dÃ¹ng thuáº­t ngá»¯ SAP Fiori vÃ  semantic status.
+- Chá»‰ dÃ¹ng custom UI5 khi annotation khÃ´ng Ä‘á»§ Ä‘Ã¡p á»©ng.
+- Bug `Rejected` pháº£i lÃ m rÃµ lÃ½ do reject vÃ  ai cáº§n xá»­ lÃ½ tiáº¿p; khÃ´ng Ä‘á»ƒ user hiá»ƒu nháº§m `Rejected` lÃ  Ä‘Ã£ káº¿t thÃºc.
+- Dependent value help vÃ  assignment candidate behavior pháº£i khá»›p vá»›i logic service WP2/WP3.
 
 ## 2026-06-04 Implementation Update
 
@@ -102,11 +102,11 @@ English:
 
 Vietnamese:
 
-- Đã thêm Object Page action annotations cho Assign Developer, Move to Pending Assignment, Mark In Review, Request More Information, Reject Bug, Start Progress, Resolve Bug, Send to Retest, Close Bug và Reopen Bug.
-- Đã thêm value help annotations để form Create/Edit và filter field dùng value list có ý nghĩa thay vì raw ID.
-- Đã ẩn `componentCategory` khỏi form chính vì đây là assignment key nội bộ được backend derive từ Application Component + Defect Category.
-- Đã thêm annotation cột cho value-help dialog của master data và Developer Responsibilities.
-- Đã verify List Report render qua direct app URL và Object Page route hiển thị các section Bug Details, Assignment and Follow-up, Comments, Attachments, History và Notifications.
+- ÄÃ£ thÃªm Object Page action annotations cho Assign Developer, Move to Pending Assignment, Mark In Review, Request More Information, Reject Bug, Start Progress, Resolve Bug, Send to Retest, Close Bug vÃ  Reopen Bug.
+- ÄÃ£ thÃªm value help annotations Ä‘á»ƒ form Create/Edit vÃ  filter field dÃ¹ng value list cÃ³ Ã½ nghÄ©a thay vÃ¬ raw ID.
+- ÄÃ£ áº©n `componentCategory` khá»i form chÃ­nh vÃ¬ Ä‘Ã¢y lÃ  assignment key ná»™i bá»™ Ä‘Æ°á»£c backend derive tá»« Application Component + Defect Category.
+- ÄÃ£ thÃªm annotation cá»™t cho value-help dialog cá»§a master data vÃ  Developer Responsibilities.
+- ÄÃ£ verify List Report render qua direct app URL vÃ  Object Page route hiá»ƒn thá»‹ cÃ¡c section Bug Details, Assignment and Follow-up, Comments, Attachments, History vÃ  Notifications.
 
 ## 2026-06-04 UI Refinement Update
 
@@ -120,17 +120,17 @@ English:
 
 Vietnamese:
 
-- Đã đổi table List Report từ `ResponsiveTable` sang `GridTable` để tận dụng chiều ngang desktop tốt hơn cho bug worklist.
-- Đã đổi create behavior từ `NewPage` sang `CreationDialog` và thêm `UI.FieldGroup#CreateBug` cho các field của dialog Create Bug.
-- Đã bật CAP/Fiori draft support trên `BugService.Bugs` bằng `@odata.draft.enabled` để SAP Fiori Elements OData V4 hiển thị standard Create button.
-- Vẫn giữ màu semantic criticality cho Status, Priority và Severity, nhưng thêm `CriticalityRepresentation : #WithoutIcon` để bỏ icon mặc định gây nhiễu.
-- Đã thêm text i18n `C_TRANSACTION_HELPER_SAPFE_ACTION_CREATE=Create Bug`.
+- ÄÃ£ Ä‘á»•i table List Report tá»« `ResponsiveTable` sang `GridTable` Ä‘á»ƒ táº­n dá»¥ng chiá»u ngang desktop tá»‘t hÆ¡n cho bug worklist.
+- ÄÃ£ Ä‘á»•i create behavior tá»« `NewPage` sang `CreationDialog` vÃ  thÃªm `UI.FieldGroup#CreateBug` cho cÃ¡c field cá»§a dialog Create Bug.
+- ÄÃ£ báº­t CAP/Fiori draft support trÃªn `BugService.Bugs` báº±ng `@odata.draft.enabled` Ä‘á»ƒ SAP Fiori Elements OData V4 hiá»ƒn thá»‹ standard Create button.
+- Váº«n giá»¯ mÃ u semantic criticality cho Status, Priority vÃ  Severity, nhÆ°ng thÃªm `CriticalityRepresentation : #WithoutIcon` Ä‘á»ƒ bá» icon máº·c Ä‘á»‹nh gÃ¢y nhiá»…u.
+- ÄÃ£ thÃªm text i18n `C_TRANSACTION_HELPER_SAPFE_ACTION_CREATE=Create Bug`.
 
 ## Remaining Notes
 
 English: WP4 remains open for deeper browser QA and action usability tuning. Attachment upload behavior is already implemented in the current FE flow. The current UI remains annotation-driven Fiori Elements; no custom UI5 controller or fragment was added.
 
-Vietnamese: WP4 vẫn còn mở cho browser QA sâu hơn và tinh chỉnh usability của action. Attachment upload đã được implement trong flow FE hiện tại. UI hiện tại vẫn theo hướng Fiori Elements annotation-driven; chưa thêm custom UI5 controller hoặc fragment.
+Vietnamese: WP4 váº«n cÃ²n má»Ÿ cho browser QA sÃ¢u hÆ¡n vÃ  tinh chá»‰nh usability cá»§a action. Attachment upload Ä‘Ã£ Ä‘Æ°á»£c implement trong flow FE hiá»‡n táº¡i. UI hiá»‡n táº¡i váº«n theo hÆ°á»›ng Fiori Elements annotation-driven; chÆ°a thÃªm custom UI5 controller hoáº·c fragment.
 
 ## 2026-06-15 Selective Remake_UI Integration
 
@@ -147,13 +147,13 @@ English:
 
 Vietnamese:
 
-- Đã review branch `Remake_UI` của DatDT và chỉ áp dụng các thay đổi phù hợp với contract CAP/Fiori hiện tại.
-- Đưa section `Assignment and Follow-up` lên trước `Bug Details` trên Object Page để assignee, next processor user và next processor role dễ thấy hơn.
-- Đặt `HistoryLogs` read-only bằng OData capability annotations: không cho insert, update và delete trong bảng History.
-- Đổi create behavior từ `CreationDialog` sang `NewPage` vì form tạo bug có nhiều field bắt buộc và dialog cũ quá chật.
-- Giữ nguyên toàn bộ required bug fields, `nextProcessorRole`, supporting info và các lifecycle actions trên Object Page.
-- Browser smoke trên feature branch đã thấy 4 bug rows ở List Report, section Object Page đúng thứ tự mong muốn, và bảng History không có action create/edit/delete.
-- QA còn lại: kiểm tra thủ công happy path tạo và save bug thật trên browser, đồng thời xem có cần cải thiện navigation khi bấm vào text trong GridTable hay chỉ cần ghi nhận là hành vi của GridTable.
+- ÄÃ£ review branch `Remake_UI` cá»§a DatDT vÃ  chá»‰ Ã¡p dá»¥ng cÃ¡c thay Ä‘á»•i phÃ¹ há»£p vá»›i contract CAP/Fiori hiá»‡n táº¡i.
+- ÄÆ°a section `Assignment and Follow-up` lÃªn trÆ°á»›c `Bug Details` trÃªn Object Page Ä‘á»ƒ assignee, next processor user vÃ  next processor role dá»… tháº¥y hÆ¡n.
+- Äáº·t `HistoryLogs` read-only báº±ng OData capability annotations: khÃ´ng cho insert, update vÃ  delete trong báº£ng History.
+- Äá»•i create behavior tá»« `CreationDialog` sang `NewPage` vÃ¬ form táº¡o bug cÃ³ nhiá»u field báº¯t buá»™c vÃ  dialog cÅ© quÃ¡ cháº­t.
+- Giá»¯ nguyÃªn toÃ n bá»™ required bug fields, `nextProcessorRole`, supporting info vÃ  cÃ¡c lifecycle actions trÃªn Object Page.
+- Browser smoke trÃªn feature branch Ä‘Ã£ tháº¥y 4 bug rows á»Ÿ List Report, section Object Page Ä‘Ãºng thá»© tá»± mong muá»‘n, vÃ  báº£ng History khÃ´ng cÃ³ action create/edit/delete.
+- QA cÃ²n láº¡i: kiá»ƒm tra thá»§ cÃ´ng happy path táº¡o vÃ  save bug tháº­t trÃªn browser, Ä‘á»“ng thá»i xem cÃ³ cáº§n cáº£i thiá»‡n navigation khi báº¥m vÃ o text trong GridTable hay chá»‰ cáº§n ghi nháº­n lÃ  hÃ nh vi cá»§a GridTable.
 
 ## 2026-06-15 Create Flow Option B
 
@@ -175,12 +175,40 @@ English:
 - Added property-level labels for common value-list entities so representative popups such as Priority show `Priority Code` and `Priority` instead of `code` and `name`.
 - Verified with Playwright CLI only; Playwright MCP was not used.
 
+## 2026-06-18 Retest Planning Alignment
+
+English:
+
+- WP4 browser retest should now follow `docs/qa/retest-matrix.en.md` and `docs/qa/retest-matrix.vi.md`.
+- No product-blocking UI-only gap remains open on the currently verified runtime.
+- The previously open lifecycle-refresh defect is now closed by annotation-only side-effect changes; the next browser pass should treat immediate post-action refresh as a regression check, not an open blocker.
+- The earlier create-time `componentCategory_ID` warning is no longer reproduced after removing the redundant derivation side effect; treat it as closed unless a future browser rerun proves otherwise.
+- The Assign Developer selected-text issue is now also closed at WP4 handover level: a focused live browser re-verification on `localhost:4004` confirmed the dialog shows the selected developer name instead of the UUID.
+- Backend and HTTP layers are already stable enough for mentor-demo happy flow; remaining WP4 work is limited to regression checking during the final demo rerun and downstream documentation sync.
+
+## 2026-06-18 Comments Section CTA Fix
+
+English:
+
+- Removed the global header `Add Comment` action from `UI.Identification` and moved it into the `Comments` section itself.
+- Implemented the section-level CTA through `UI.CollectionFacet` + `UI.ReferenceFacet` pointing to `@UI.Identification#CommentAction`, so the Comments area now has its own contextual entry point.
+- Re-verified on a live CAP server (`localhost:4018`) that the local `Add Comment` button is visible in the Comments section and opens the `Add Comment` dialog successfully.
+- `IDTS-11` / `TMP-BUG-23` should now be treated as closed at WP4 level.
+
+## 2026-06-18 Assign Developer Selected-Text Re-Verification
+
+English:
+
+- Re-verified the `Assign Developer` action dialog on the live local stack at `localhost:4004`.
+- Confirmed the selected assignee value now renders the readable developer name (`DatDT`) instead of the technical UUID in the action parameter input.
+- `IDTS-9` is now treated as closed at WP4 handover level; keep it only as a regression check for future FE changes.
+
 Vietnamese:
 
-- Thêm projection value help riêng `AssignableDevelopers` để popup chọn Assignee hiển thị tên developer, email, availability, application component, defect category, SAP module scope và responsibility level thay vì cột kỹ thuật trong database.
-- Thêm enrichment `assigneeDisplayName` cho cả active `Bugs` và `Bugs.drafts`, giúp Fiori draft side-effect read hiển thị `DatDT` thay vì UUID của developer sau khi chọn.
-- Thêm label ở property-level cho các value-list entity phổ biến để các popup đại diện như Priority hiển thị `Priority Code` và `Priority` thay vì `code` và `name`.
-- Đã verify chỉ bằng Playwright CLI; không dùng Playwright MCP.
+- ?? b? action `Add Comment` kh?i v?ng header generic v? chuy?n n? v?o ngay trong section `Comments`.
+- ?? implement CTA theo h??ng annotation-only b?ng `UI.CollectionFacet` + `UI.ReferenceFacet` tr? t?i `@UI.Identification#CommentAction`, gi?p khu v?c Comments c? entry point theo ng? c?nh ri?ng.
+- ?? verify l?i tr?n CAP server ch?y th?t (`localhost:4018`) r?ng n?t `Add Comment` hi?n th? ngay trong section Comments v? m? ???c dialog `Add Comment`.
+- `IDTS-11` / `TMP-BUG-23` c? th? xem l? ?? ??ng ? m?c WP4.
 
 ## 2026-06-16 SAP490 Functional/Test Deliverable Update
 
@@ -193,18 +221,18 @@ English:
 
 Vietnamese:
 
-- Đã generate SAP490 Functional Specification v0.1 thành hai workbook tiếng Anh và tiếng Việt riêng từ template `Functional_Specification.xlsx` của trường.
-- Đã generate SAP490 Test and Fix Bug v0.2 thành hai workbook tiếng Anh và tiếng Việt riêng từ template `Test_And_Fix_Bug.xlsx` của trường.
-- Functional Specification ghi target flow C-prime cho Create/Object Page của WP4: General Information trước, Classification and Assignment thứ hai, và Reproduction/Test Context thứ ba.
-- Test and Fix Bug v0.2 ghi các lỗi Assignee value help đã fix và decision refine layout còn lại.
+- ÄÃ£ generate SAP490 Functional Specification v0.1 thÃ nh hai workbook tiáº¿ng Anh vÃ  tiáº¿ng Viá»‡t riÃªng tá»« template `Functional_Specification.xlsx` cá»§a trÆ°á»ng.
+- ÄÃ£ generate SAP490 Test and Fix Bug v0.2 thÃ nh hai workbook tiáº¿ng Anh vÃ  tiáº¿ng Viá»‡t riÃªng tá»« template `Test_And_Fix_Bug.xlsx` cá»§a trÆ°á»ng.
+- Functional Specification ghi target flow C-prime cho Create/Object Page cá»§a WP4: General Information trÆ°á»›c, Classification and Assignment thá»© hai, vÃ  Reproduction/Test Context thá»© ba.
+- Test and Fix Bug v0.2 ghi cÃ¡c lá»—i Assignee value help Ä‘Ã£ fix vÃ  decision refine layout cÃ²n láº¡i.
 
 Vietnamese:
 
-- Bỏ `Capabilities.InsertRestrictions.RequiredProperties` và vẫn giữ creation mode của List Report là `NewPage`.
-- Thêm `Common.FieldControl/Mandatory` cho chín field bắt buộc do người dùng nhập.
-- Không thay đổi CAP handler validation và database constraint.
-- Đã verify activate draft rỗng trả HTTP 400 cùng lỗi field bắt buộc.
-- Đã verify draft đầy đủ activate thành công với HTTP 201, sinh bug number, derive Component Category, gán Tester reporter mặc định và bắt đầu ở `Pending Assignment`.
+- Bá» `Capabilities.InsertRestrictions.RequiredProperties` vÃ  váº«n giá»¯ creation mode cá»§a List Report lÃ  `NewPage`.
+- ThÃªm `Common.FieldControl/Mandatory` cho chÃ­n field báº¯t buá»™c do ngÆ°á»i dÃ¹ng nháº­p.
+- KhÃ´ng thay Ä‘á»•i CAP handler validation vÃ  database constraint.
+- ÄÃ£ verify activate draft rá»—ng tráº£ HTTP 400 cÃ¹ng lá»—i field báº¯t buá»™c.
+- ÄÃ£ verify draft Ä‘áº§y Ä‘á»§ activate thÃ nh cÃ´ng vá»›i HTTP 201, sinh bug number, derive Component Category, gÃ¡n Tester reporter máº·c Ä‘á»‹nh vÃ  báº¯t Ä‘áº§u á»Ÿ `Pending Assignment`.
 - Branch: `feature/idts-create-flow-option-b-donhv`.
 
 ## 2026-06-16 Option B Refinement and Backend Hardening
@@ -219,11 +247,11 @@ English:
 
 Vietnamese:
 
-- Tinh chỉnh annotations để ẩn động các child facets (Comments, Attachments, History, Notifications, Planning và Rejected Follow-up) cùng các field do hệ thống quản lý (Bug Number, Status, Reporter, Ngày tạo/cập nhật, Next Processor) khi tạo mới bug.
-- Sử dụng biểu thức EDM JSON dựa trên `IsActiveEntity = false and HasActiveEntity = false` để ẩn chỉ trong quá trình tạo mới bản ghi nháp (creation draft), giữ nguyên giao diện đầy đủ khi chỉnh sửa hoặc xem bug cũ.
-- Sửa lỗi gán Assignee bằng cách đổi binding trường hiển thị sang `assignee_ID` đi kèm Value Help, giúp trường này có thể nhập/chọn trên màn hình tạo.
-- Thắt chặt bảo mật backend trong `srv/service.js` để luôn ghi đè `bugNumber`, `reporter_ID` (gán bằng user đang đăng nhập thực tế) và `status_code` khi tạo mới, chặn đứng việc client gửi tham số tùy tiện.
-- Verify thực tế bằng Playwright browser subagent trên môi trường local, xác nhận màn hình tạo bug cực kỳ sạch sẽ, ẩn toàn bộ tab/field không liên quan và Value Help chọn Assignee chạy tốt.
+- Tinh chá»‰nh annotations Ä‘á»ƒ áº©n Ä‘á»™ng cÃ¡c child facets (Comments, Attachments, History, Notifications, Planning vÃ  Rejected Follow-up) cÃ¹ng cÃ¡c field do há»‡ thá»‘ng quáº£n lÃ½ (Bug Number, Status, Reporter, NgÃ y táº¡o/cáº­p nháº­t, Next Processor) khi táº¡o má»›i bug.
+- Sá»­ dá»¥ng biá»ƒu thá»©c EDM JSON dá»±a trÃªn `IsActiveEntity = false and HasActiveEntity = false` Ä‘á»ƒ áº©n chá»‰ trong quÃ¡ trÃ¬nh táº¡o má»›i báº£n ghi nhÃ¡p (creation draft), giá»¯ nguyÃªn giao diá»‡n Ä‘áº§y Ä‘á»§ khi chá»‰nh sá»­a hoáº·c xem bug cÅ©.
+- Sá»­a lá»—i gÃ¡n Assignee báº±ng cÃ¡ch Ä‘á»•i binding trÆ°á»ng hiá»ƒn thá»‹ sang `assignee_ID` Ä‘i kÃ¨m Value Help, giÃºp trÆ°á»ng nÃ y cÃ³ thá»ƒ nháº­p/chá»n trÃªn mÃ n hÃ¬nh táº¡o.
+- Tháº¯t cháº·t báº£o máº­t backend trong `srv/service.js` Ä‘á»ƒ luÃ´n ghi Ä‘Ã¨ `bugNumber`, `reporter_ID` (gÃ¡n báº±ng user Ä‘ang Ä‘Äƒng nháº­p thá»±c táº¿) vÃ  `status_code` khi táº¡o má»›i, cháº·n Ä‘á»©ng viá»‡c client gá»­i tham sá»‘ tÃ¹y tiá»‡n.
+- Verify thá»±c táº¿ báº±ng Playwright browser subagent trÃªn mÃ´i trÆ°á»ng local, xÃ¡c nháº­n mÃ n hÃ¬nh táº¡o bug cá»±c ká»³ sáº¡ch sáº½, áº©n toÃ n bá»™ tab/field khÃ´ng liÃªn quan vÃ  Value Help chá»n Assignee cháº¡y tá»‘t.
 
 ## 2026-06-17 Need More Information Resubmit CTA
 
@@ -236,10 +264,10 @@ English:
 
 Vietnamese:
 
-- Đã thêm action riêng trên Object Page là `Resubmit to Developer` cho nhánh follow-up của `Need More Information`, thay vì buộc user phải edit/comment rồi kết hợp thêm một action khác.
-- Action này chỉ hiện khi bug đang ở `Need More Information`, đã có assignee, và user hiện tại là Tester hoặc PM.
-- Param của action bắt buộc nhập `Update Summary` để lý do follow-up được thể hiện rõ trên sản phẩm và audit được ở backend history.
-- Side effect của action refresh comments, history, notifications và capability flags để page phản ánh ngay trạng thái `Assigned` sau khi thực thi.
+- ÄÃ£ thÃªm action riÃªng trÃªn Object Page lÃ  `Resubmit to Developer` cho nhÃ¡nh follow-up cá»§a `Need More Information`, thay vÃ¬ buá»™c user pháº£i edit/comment rá»“i káº¿t há»£p thÃªm má»™t action khÃ¡c.
+- Action nÃ y chá»‰ hiá»‡n khi bug Ä‘ang á»Ÿ `Need More Information`, Ä‘Ã£ cÃ³ assignee, vÃ  user hiá»‡n táº¡i lÃ  Tester hoáº·c PM.
+- Param cá»§a action báº¯t buá»™c nháº­p `Update Summary` Ä‘á»ƒ lÃ½ do follow-up Ä‘Æ°á»£c thá»ƒ hiá»‡n rÃµ trÃªn sáº£n pháº©m vÃ  audit Ä‘Æ°á»£c á»Ÿ backend history.
+- Side effect cá»§a action refresh comments, history, notifications vÃ  capability flags Ä‘á»ƒ page pháº£n Ã¡nh ngay tráº¡ng thÃ¡i `Assigned` sau khi thá»±c thi.
 
 ## 2026-06-16 Role Action Visibility and Status Editability Fix
 
@@ -254,9 +282,9 @@ English:
 
 Vietnamese:
 
-- Đã sửa một lỗ hổng khi đọc dữ liệu trong `srv/service.js`: Fiori Elements đôi khi request các cờ ảo như `canAssign`, `canResolve` nhưng lại không select `status_code` hoặc `assignee_ID`.
-- `enrichBugCapabilities` giờ sẽ tự đọc bù `status_code` và `assignee_ID` theo bug ID trước khi tính quyền action, nên các cờ capability không còn bị rơi sai về `false`.
-- Giữ field `Status` trên Object Page bind tới `status.name` và khóa rõ ràng cả `UI.DataField` hiển thị lẫn metadata `status_code` bằng `Common.FieldControlType/ReadOnly`.
-- Cách này buộc các chuyển trạng thái đi qua bound actions đã được duyệt, thay vì để user mở generic status value help rồi gặp lỗi transition từ backend.
-- Đã thêm fallback không phân biệt hoa/thường trong `resolveRequestUser` cho local dev, nên mock login kiểu `donhv` vẫn map được tới user IDTS `DonHV` và hiển thị đúng bộ action.
-- Đã verify trên `$metadata` thực tế rằng `BugService.Bugs/status_code` đã là read-only và DataField `Status` trên Object Page cũng mang annotation `Common.FieldControl` dạng read-only.
+- ÄÃ£ sá»­a má»™t lá»— há»•ng khi Ä‘á»c dá»¯ liá»‡u trong `srv/service.js`: Fiori Elements Ä‘Ã´i khi request cÃ¡c cá» áº£o nhÆ° `canAssign`, `canResolve` nhÆ°ng láº¡i khÃ´ng select `status_code` hoáº·c `assignee_ID`.
+- `enrichBugCapabilities` giá» sáº½ tá»± Ä‘á»c bÃ¹ `status_code` vÃ  `assignee_ID` theo bug ID trÆ°á»›c khi tÃ­nh quyá»n action, nÃªn cÃ¡c cá» capability khÃ´ng cÃ²n bá»‹ rÆ¡i sai vá» `false`.
+- Giá»¯ field `Status` trÃªn Object Page bind tá»›i `status.name` vÃ  khÃ³a rÃµ rÃ ng cáº£ `UI.DataField` hiá»ƒn thá»‹ láº«n metadata `status_code` báº±ng `Common.FieldControlType/ReadOnly`.
+- CÃ¡ch nÃ y buá»™c cÃ¡c chuyá»ƒn tráº¡ng thÃ¡i Ä‘i qua bound actions Ä‘Ã£ Ä‘Æ°á»£c duyá»‡t, thay vÃ¬ Ä‘á»ƒ user má»Ÿ generic status value help rá»“i gáº·p lá»—i transition tá»« backend.
+- ÄÃ£ thÃªm fallback khÃ´ng phÃ¢n biá»‡t hoa/thÆ°á»ng trong `resolveRequestUser` cho local dev, nÃªn mock login kiá»ƒu `donhv` váº«n map Ä‘Æ°á»£c tá»›i user IDTS `DonHV` vÃ  hiá»ƒn thá»‹ Ä‘Ãºng bá»™ action.
+- ÄÃ£ verify trÃªn `$metadata` thá»±c táº¿ ráº±ng `BugService.Bugs/status_code` Ä‘Ã£ lÃ  read-only vÃ  DataField `Status` trÃªn Object Page cÅ©ng mang annotation `Common.FieldControl` dáº¡ng read-only.

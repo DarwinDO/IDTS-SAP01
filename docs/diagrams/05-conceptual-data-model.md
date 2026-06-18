@@ -221,8 +221,8 @@ erDiagram
 
 The recommended Fiori create/edit form flow is:
 
-1. Tester selects `SAP Module` only when the defect belongs to a SAP business area. For pure IDTS defects, this field can be empty or "Not Applicable".
-2. Fiori value help for `Application Component` is filtered by the selected SAP Module through `SAP_MODULE_COMPONENT`. If SAP Module is empty or "Not Applicable", show general/IDTS components.
+1. Tester selects `SAP Module` only when the defect belongs to a SAP business area. For pure IDTS defects, this field should be left empty.
+2. Fiori value help for `Application Component` may use the selected SAP Module as context through `SAP_MODULE_COMPONENT`. If SAP Module is empty, the user is working in the general IDTS context.
 3. Tester selects `Application Component`, such as IDTS Bug Report, IDTS Assignment, Dashboard, or a custom SAP/Fiori component.
 4. Fiori value help for `Defect Category` is filtered by the selected Application Component through `COMPONENT_CATEGORY`.
 5. The selected Application Component/Defect Category pair identifies one `COMPONENT_CATEGORY`.

@@ -286,7 +286,7 @@ flowchart TD
 | Trigger | User creates or edits a non-closed bug. |
 | Preconditions | Classification master data is active and available. |
 | Main flow | User selects SAP Module if the bug belongs to a SAP business context; user selects Application Component; user selects Defect Category; system resolves Component Category. |
-| Alternative flow | For pure IDTS bugs, SAP Module can remain empty or Not Applicable. |
+| Alternative flow | For pure IDTS bugs, SAP Module should remain empty. |
 | Validation rules | Application Component and Defect Category are required; Component Category must be an active valid pair; invalid pairs are rejected. |
 | UI behavior | Application Component value help can be filtered by selected SAP Module; Defect Category value help can be filtered by Application Component. |
 | Status effect | Classification changes do not automatically close or resolve a bug. |

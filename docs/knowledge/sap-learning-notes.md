@@ -143,7 +143,7 @@ Recommended classification fields:
 | `ApplicationComponent` | Concrete application component or feature where the defect appears | IDTS Bug Report, IDTS Assignment, IDTS Notification, Dashboard, Custom Fiori App |
 | `DefectCategory` | Type or technical layer of the defect | Fiori/UI5, SAP CAP Backend, Database, Workflow, Integration, Authorization, Performance |
 
-For pure IDTS defects, `SAPModule` can be empty or "Not Applicable".
+For pure IDTS defects, `SAPModule` should be left empty.
 
 For SAP process defects, `SAPModule` should identify the SAP functional area, while `ApplicationComponent` should still identify the concrete component, app, screen, or process area where the bug appears.
 
@@ -164,7 +164,7 @@ Các field phân loại nên dùng:
 | `ApplicationComponent` | Component/chức năng cụ thể nơi bug xuất hiện | IDTS Bug Report, IDTS Assignment, IDTS Notification, Dashboard, Custom Fiori App |
 | `DefectCategory` | Loại lỗi hoặc lớp kỹ thuật của defect | Fiori/UI5, SAP CAP Backend, Database, Workflow, Integration, Authorization, Performance |
 
-Với bug thuần IDTS, `SAPModule` có thể để trống hoặc là "Not Applicable".
+Với bug thuần IDTS, `SAPModule` nên để trống.
 
 Với bug thuộc quy trình SAP, `SAPModule` nên cho biết functional area của SAP, còn `ApplicationComponent` vẫn nên cho biết component, app, màn hình hoặc process area cụ thể nơi bug xuất hiện.
 
@@ -188,8 +188,8 @@ Example classification:
 
 | SAPModule | ApplicationComponent | DefectCategory |
 | --- | --- | --- |
-| Not Applicable | IDTS Bug Report | Fiori/UI5 |
-| Not Applicable | IDTS Bug Report | SAP CAP Backend |
+| (blank) | IDTS Bug Report | Fiori/UI5 |
+| (blank) | IDTS Bug Report | SAP CAP Backend |
 | FI | Custom FI Fiori App | Authorization |
 | MM | Procurement Workflow | Workflow |
 
@@ -197,8 +197,8 @@ Example responsibility:
 
 | Developer | SAPModule scope | ApplicationComponent | DefectCategory |
 | --- | --- | --- | --- |
-| Dev A | Not Applicable | IDTS Bug Report | Fiori/UI5 |
-| Dev B | Not Applicable | IDTS Bug Report | SAP CAP Backend |
+| Dev A | (blank) | IDTS Bug Report | Fiori/UI5 |
+| Dev B | (blank) | IDTS Bug Report | SAP CAP Backend |
 | Dev C | FI | Custom FI Fiori App | Authorization |
 
 Implementation rule:
@@ -238,8 +238,8 @@ Ví dụ phân loại:
 
 | SAPModule | ApplicationComponent | DefectCategory |
 | --- | --- | --- |
-| Not Applicable | IDTS Bug Report | Fiori/UI5 |
-| Not Applicable | IDTS Bug Report | SAP CAP Backend |
+| (blank) | IDTS Bug Report | Fiori/UI5 |
+| (blank) | IDTS Bug Report | SAP CAP Backend |
 | FI | Custom FI Fiori App | Authorization |
 | MM | Procurement Workflow | Workflow |
 
@@ -247,8 +247,8 @@ Ví dụ trách nhiệm:
 
 | Developer | Phạm vi SAPModule | ApplicationComponent | DefectCategory |
 | --- | --- | --- | --- |
-| Dev A | Not Applicable | IDTS Bug Report | Fiori/UI5 |
-| Dev B | Not Applicable | IDTS Bug Report | SAP CAP Backend |
+| Dev A | (blank) | IDTS Bug Report | Fiori/UI5 |
+| Dev B | (blank) | IDTS Bug Report | SAP CAP Backend |
 | Dev C | FI | Custom FI Fiori App | Authorization |
 
 Rule triển khai:
@@ -276,8 +276,8 @@ Chỉ nên thêm bảng nối trực tiếp như `SAPModuleComponentCategory` n�
 
 Recommended Fiori create/edit form flow:
 
-1. Choose `SAP Module` only if the defect belongs to a SAP functional area. For pure IDTS defects, use empty or "Not Applicable".
-2. Choose `Application Component`; the value help is filtered by selected SAP Module through `SAPModuleComponent`. For "Not Applicable", show general/IDTS components.
+1. Choose `SAP Module` only if the defect belongs to a SAP functional area. For pure IDTS defects, leave it empty.
+2. Choose `Application Component`; the value help may use the selected SAP Module as context. If SAP Module is empty, the user is working in the general IDTS context.
 3. Choose `Defect Category`; the value help is filtered by the selected Application Component through `ComponentCategory`.
 4. Choose `Assignee`; the value help is filtered by `DeveloperResponsibility` using the selected Component Category and optional SAP Module.
 
@@ -287,8 +287,8 @@ Backend CAP validation must still enforce the rule, even if the UI filters value
 
 Luồng create/edit form Fiori nên là:
 
-1. Chọn `SAP Module` chỉ khi defect thuộc functional area của SAP. Với bug thuần IDTS, để trống hoặc chọn "Not Applicable".
-2. Chọn `Application Component`; value help được lọc theo SAP Module đã chọn thông qua `SAPModuleComponent`. Với "Not Applicable", hiển thị các component chung/IDTS.
+1. Chọn `SAP Module` chỉ khi defect thuộc functional area của SAP. Với bug thuần IDTS thì để trống.
+2. Chọn `Application Component`; value help có thể dùng SAP Module đã chọn làm context. Nếu SAP Module để trống thì user đang làm việc trong context IDTS chung.
 3. Chọn `Defect Category`; value help được lọc theo Application Component thông qua `ComponentCategory`.
 4. Chọn `Assignee`; value help được lọc bằng `DeveloperResponsibility` dựa trên Component Category đã chọn và SAP Module nếu có.
 
