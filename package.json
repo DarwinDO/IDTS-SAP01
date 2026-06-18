@@ -8,7 +8,8 @@
     "@cap-js/sqlite": "^2",
     "@googleworkspace/cli": "^0.22.5",
     "@sap/cds-dk": "^9.9.2",
-    "cds-plugin-ui5": "^0.13.0"
+    "cds-plugin-ui5": "^0.13.0",
+    "playwright": "^1.61.0"
   },
   "workspaces": [
     "app/*"
@@ -23,6 +24,7 @@
     "sap490:gws:upload-review-docx:execute": "node scripts/sap490/upload-review-docx.mjs --execute",
     "sap490:gws:sync-review-sheets": "node scripts/sap490/sync-review-sheets.mjs",
     "sap490:gws:sync-review-sheets:execute": "node scripts/sap490/sync-review-sheets.mjs --execute",
+    "sap490:generate:retest-pack": "python scripts/sap490/generate-retest-aligned-artifacts.py",
     "qa:comments-attachments:http": "powershell -ExecutionPolicy Bypass -File scripts/qa/test-comments-attachments.ps1",
     "qa:comments-attachments:programmatic": "node scripts/qa/test-comments-attachments-programmatic.js",
     "watch-bug-management-ui": "cds watch --open idts.bugmanagementui/index.html?sap-ui-xx-viewCache=false --livereload false"

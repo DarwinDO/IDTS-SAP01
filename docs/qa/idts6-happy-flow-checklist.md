@@ -4,7 +4,7 @@
 
 Vietnamese: Checklist QA backend luồng chính cho IDTS-6.
 
-**Status: RE-VERIFIED 2026-06-15 — 21/21 PASS**
+**Status: Historical baseline only. Superseded on 2026-06-18 by `docs/qa/retest-matrix.en.md` / `docs/qa/retest-matrix.vi.md` and the current `30 PASS / 0 FAIL` backend suite plus HTTP comment/attachment pass.**
 
 ---
 
@@ -20,7 +20,7 @@ Vietnamese: Checklist QA backend luồng chính cho IDTS-6.
 | Date | 2026-06-13 |
 | Test method | Direct CDS handler dispatch (in-process, no HTTP) |
 | Tool | `node scripts/qa/test-idts6-programmatic.js` |
-| Result | **21 PASS / 0 FAIL** |
+| Result | **Historical value: 21 PASS / 0 FAIL** |
 | Date | 2026-06-13 |
 
 ---
@@ -241,7 +241,9 @@ Vietnamese: Checklist QA backend luồng chính cho IDTS-6.
 | SC-11a Close bug | ✅ PASS | None | HTTP 200, status=CLOSED |
 | SC-12a History logs recorded | ✅ PASS | None | 5 entries found; CLOSE→RESOLVE→IN_PROGRESS chain verified |
 
-**Total: 21 PASS / 0 FAIL**
+**Historical Total: 21 PASS / 0 FAIL**
+
+> Current Sprint 02 retest planning and evidence no longer use this file as the primary source. Use `docs/qa/retest-matrix.en.md` and `docs/qa/retest-matrix.vi.md` for the active comprehensive retest scope.
 
 > SC-01a was re-enabled on 2026-06-15. Root cause of the previous skip was a test-harness request without a generic `INSERT` query, not an environment limitation. The corrected test now verifies successful Create and missing-title rejection.
 

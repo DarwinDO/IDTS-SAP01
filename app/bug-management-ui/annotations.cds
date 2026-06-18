@@ -56,19 +56,6 @@ annotate service.Bugs with @(
     },
     {
       $Type  : 'UI.DataFieldForAction',
-      Label  : 'Add Comment',
-      Action : 'BugService.addComment',
-      ![@UI.Hidden] : {
-        $edmJson : {
-          $Or : [
-            { $Not : { $Path : 'canAddComment' } },
-            { $Eq : [ { $Path : 'IsActiveEntity' }, false ] }
-          ]
-        }
-      }
-    },
-    {
-      $Type  : 'UI.DataFieldForAction',
       Label  : 'Mark In Review',
       Action : 'BugService.markInReview',
       ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canMarkInReview' } } }
@@ -232,10 +219,22 @@ annotate service.Bugs with @(
       Target : 'attachments/@UI.LineItem'
     },
     {
-      $Type  : 'UI.ReferenceFacet',
+      $Type  : 'UI.CollectionFacet',
       ID     : 'Comments',
       Label  : 'Comments',
-      Target : 'comments/@UI.LineItem',
+      Facets : [
+        {
+          $Type  : 'UI.ReferenceFacet',
+          ID     : 'CommentAction',
+          Label  : 'Comment Actions',
+          Target : '@UI.Identification#CommentAction'
+        },
+        {
+          $Type  : 'UI.ReferenceFacet',
+          ID     : 'CommentList',
+          Target : 'comments/@UI.LineItem'
+        }
+      ],
       ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
     },
     {
@@ -345,6 +344,22 @@ annotate service.Bugs with @(
       { $Type : 'UI.DataField', Label : 'Estimated Effort Hours', Value : estimatedEffortHours, ![@Common.FieldControl] : #ReadOnly }
     ]
   },
+  UI.Identification #CommentAction : [
+      {
+        $Type             : 'UI.DataFieldForAction',
+        Label             : 'Add Comment',
+        Action            : 'BugService.addComment',
+        ![@UI.Importance] : #High,
+        ![@UI.Hidden]     : {
+          $edmJson : {
+            $Or : [
+              { $Not : { $Path : 'canAddComment' } },
+              { $Eq : [ { $Path : 'IsActiveEntity' }, false ] }
+            ]
+          }
+        }
+      }
+  ],
 
 );
 
@@ -933,6 +948,8 @@ annotate service.Bugs actions {
       'assigneeDisplayName',
       'nextProcessorUser_ID',
       'nextProcessorRole_code',
+      'nextProcessorUserDisplayName',
+      'nextProcessorRoleName',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -946,7 +963,7 @@ annotate service.Bugs actions {
       'canClose',
       'canReopen'
     ],
-    TargetEntities : [historyEvents, notifications]
+    TargetEntities : [status, historyEvents, notifications]
   }
   assignToDeveloper(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
@@ -958,6 +975,8 @@ annotate service.Bugs actions {
       'assigneeDisplayName',
       'nextProcessorUser_ID',
       'nextProcessorRole_code',
+      'nextProcessorUserDisplayName',
+      'nextProcessorRoleName',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -971,7 +990,7 @@ annotate service.Bugs actions {
       'canClose',
       'canReopen'
     ],
-    TargetEntities : [historyEvents, notifications]
+    TargetEntities : [status, historyEvents, notifications]
   }
   moveToPendingAssignment(
     reason @UI.MultiLineText @Common.Label : 'Reason'
@@ -983,6 +1002,8 @@ annotate service.Bugs actions {
       'assigneeDisplayName',
       'nextProcessorUser_ID',
       'nextProcessorRole_code',
+      'nextProcessorUserDisplayName',
+      'nextProcessorRoleName',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -996,7 +1017,7 @@ annotate service.Bugs actions {
       'canClose',
       'canReopen'
     ],
-    TargetEntities : [historyEvents, notifications]
+    TargetEntities : [status, historyEvents, notifications]
   }
   markInReview(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
@@ -1008,6 +1029,8 @@ annotate service.Bugs actions {
       'assigneeDisplayName',
       'nextProcessorUser_ID',
       'nextProcessorRole_code',
+      'nextProcessorUserDisplayName',
+      'nextProcessorRoleName',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1021,7 +1044,7 @@ annotate service.Bugs actions {
       'canClose',
       'canReopen'
     ],
-    TargetEntities : [historyEvents, notifications]
+    TargetEntities : [status, historyEvents, notifications]
   }
   requestMoreInformation(
     reason @UI.MultiLineText @Common.Label : 'Reason'
@@ -1033,6 +1056,8 @@ annotate service.Bugs actions {
       'assigneeDisplayName',
       'nextProcessorUser_ID',
       'nextProcessorRole_code',
+      'nextProcessorUserDisplayName',
+      'nextProcessorRoleName',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1046,7 +1071,7 @@ annotate service.Bugs actions {
       'canClose',
       'canReopen'
     ],
-    TargetEntities : [historyEvents, notifications]
+    TargetEntities : [status, historyEvents, notifications]
   }
   resubmitToDeveloper(
     note @UI.MultiLineText @Common.Label : 'Update Summary'
@@ -1058,6 +1083,8 @@ annotate service.Bugs actions {
       'assigneeDisplayName',
       'nextProcessorUser_ID',
       'nextProcessorRole_code',
+      'nextProcessorUserDisplayName',
+      'nextProcessorRoleName',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1071,7 +1098,7 @@ annotate service.Bugs actions {
       'canClose',
       'canReopen'
     ],
-    TargetEntities : [historyEvents, notifications, comments]
+    TargetEntities : [status, historyEvents, notifications, comments]
   }
   rejectBug(
     reason @UI.MultiLineText @Common.Label : 'Rejection Reason'
@@ -1083,6 +1110,8 @@ annotate service.Bugs actions {
       'assigneeDisplayName',
       'nextProcessorUser_ID',
       'nextProcessorRole_code',
+      'nextProcessorUserDisplayName',
+      'nextProcessorRoleName',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1096,7 +1125,7 @@ annotate service.Bugs actions {
       'canClose',
       'canReopen'
     ],
-    TargetEntities : [historyEvents, notifications]
+    TargetEntities : [status, historyEvents, notifications]
   }
   startProgress(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
@@ -1108,6 +1137,8 @@ annotate service.Bugs actions {
       'assigneeDisplayName',
       'nextProcessorUser_ID',
       'nextProcessorRole_code',
+      'nextProcessorUserDisplayName',
+      'nextProcessorRoleName',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1121,7 +1152,7 @@ annotate service.Bugs actions {
       'canClose',
       'canReopen'
     ],
-    TargetEntities : [historyEvents, notifications]
+    TargetEntities : [status, historyEvents, notifications]
   }
   resolveBug(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
@@ -1133,6 +1164,8 @@ annotate service.Bugs actions {
       'assigneeDisplayName',
       'nextProcessorUser_ID',
       'nextProcessorRole_code',
+      'nextProcessorUserDisplayName',
+      'nextProcessorRoleName',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1146,7 +1179,7 @@ annotate service.Bugs actions {
       'canClose',
       'canReopen'
     ],
-    TargetEntities : [historyEvents, notifications]
+    TargetEntities : [status, historyEvents, notifications]
   }
   sendToRetest(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
@@ -1158,6 +1191,8 @@ annotate service.Bugs actions {
       'assigneeDisplayName',
       'nextProcessorUser_ID',
       'nextProcessorRole_code',
+      'nextProcessorUserDisplayName',
+      'nextProcessorRoleName',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1171,7 +1206,7 @@ annotate service.Bugs actions {
       'canClose',
       'canReopen'
     ],
-    TargetEntities : [historyEvents, notifications]
+    TargetEntities : [status, historyEvents, notifications]
   }
   closeBug(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
@@ -1312,10 +1347,6 @@ annotate service.ValidDefectCategories with {
 };
 
 annotate service.Bugs with @(
-  Common.SideEffects #ComponentCategoryDerivation: {
-    SourceProperties : [applicationComponent_ID, defectCategory_ID],
-    TargetProperties : ['componentCategory_ID']
-  },
   Common.SideEffects #AttachmentRowsRefresh: {
     SourceEntities : [attachments],
     TargetEntities : [attachments]

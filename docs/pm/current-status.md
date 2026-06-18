@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-06-17
+Last updated: 2026-06-18
 
 ## Snapshot
 
@@ -9,8 +9,8 @@ Last updated: 2026-06-17
 | Project phase | Sprint 02 integration: PR #1, PR #2, DonHV backend, and SAP490 documentation branches consolidated into `dev` |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
 | Current sprint | Sprint 02 focuses on mentor feedback, happy flow demo, backend note/reason validation, and Bug Detail UI refinements |
-| Recommended next action | DatDT/SangVN should browser-retest reopened Jira `IDTS-9` on the latest annotation-only candidate fix for the Assign Developer dialog, then DonHV can sync the stable happy-flow evidence into the SAP490 Functional Specification and Test and Fix Bug artifacts |
-| Main implementation risk | The local CAP/Fiori happy flow is demo-safe at workflow level, but mentor polish still depends on whether the latest `AssignableDevelopers.developerProfileID` text annotation makes the Assign Developer action input show developer name instead of UUID |
+| Recommended next action | DonHV should now sync the final verified browser evidence into the SAP490 review pack and prepare the final mentor-demo rerun script from the stabilized happy flow baseline. |
+| Main implementation risk | No remaining product-blocking FE polish gap is currently open in the mentor happy flow. The main risk is now documentation/retest drift if SAP490 artifacts and demo evidence are not refreshed from the latest verified runtime state. |
 
 ## What Is Already Done
 
@@ -36,8 +36,11 @@ Last updated: 2026-06-17
 - PM status tracking now uses member-owned files: `status/donhv.md`, `status/sangvn.md`, `status/datdt.md`, and `status/nhant.md`.
 - SAP490 template inventory is documented in `docs/sap490/template-inventory.en.md` and `docs/sap490/template-inventory.vi.md`.
 - SAP490 Blueprint draft v0.1 is available as two template-filled DOCX files copied from the school Blueprint template: `docs/sap490/generated/Blueprint_IDTS_SAP01_en_v0.1.docx` and `docs/sap490/generated/Blueprint_IDTS_SAP01_vi_v0.1.docx`.
-- SAP490 Test Scenario, Unit Test, and Test and Fix Bug v0.1 workbooks are available as separate English and Vietnamese files copied and filled from the school templates. They document 12 backend happy-flow scenarios, 21 passing programmatic cases, and the fixed `IDTS-5` SC-01a QA harness issue.
-- SAP490 Functional Specification v0.1 and Test and Fix Bug v0.2 workbooks are available as separate English and Vietnamese files copied and filled from the school templates. They document the target C-prime Create/Object Page flow, Assignee value help fix, value-list label fix, and the remaining WP4 layout refinement decision.
+- SAP490 review workbooks were refreshed on 2026-06-18 as separate English and Vietnamese copies from the school templates: `Functional_Specification_IDTS_SAP01_{en,vi}_v0.2.xlsx`, `Test_Scenario_IDTS_SAP01_{en,vi}_v0.2.xlsx`, `Unit_Test_IDTS_SAP01_{en,vi}_v0.2.xlsx`, `Functional_Test_IDTS_SAP01_{en,vi}_v0.1.xlsx`, `Test_And_Fix_Bug_IDTS_SAP01_{en,vi}_v0.3.xlsx`, and `Test_Report_IDTS_SAP01_{en,vi}_v0.1.xlsx`.
+- The refreshed SAP490 pack now reflects the current Sprint 02 create/assignment/lifecycle/audit baseline, the `30 PASS / 0 FAIL` backend retest suite, the HTTP attachment/comment verification pass, and the currently known browser/UI polish gaps.
+- A new retest planning source exists under `docs/qa/retest-matrix.en.md` and `docs/qa/retest-matrix.vi.md`. It is now the primary test-planning reference for Sprint 02 instead of the older `21/21` checklist.
+- A real browser QA pass on `localhost:4004` has now validated the create path, real draft attachment retention after save, Add Comment flow, role-based action visibility, developer lifecycle entry path, and immediate Object Page refresh after lifecycle submit once the final side-effect annotation fix was applied. A focused follow-up browser probe also no longer reproduces the earlier `componentCategory_ID` drill-down warning during create.
+- A dedicated mentor demo script for the happy-flow walkthrough now exists at `docs/pm/tasks/wp4-mentor-demo-script.md`, aligned with the verified Sprint 02 flow.
 - Optional Learning Recap / Mentor Mode is available through `.agents/skills/learning-recap` and AGENTS.md routing for nontrivial tasks.
 - SRS/FRS embedded Mermaid diagrams were extracted into `docs/diagrams/07-srs-system-context.md` and `docs/diagrams/08-frs-functional-workflows.md`.
 - Database modeling support is available through `.agents/skills/idts-database-modeling` and installed `database-schema-design`; the current model review is documented in `docs/ba/09-database-model-review.md`.
@@ -59,6 +62,7 @@ Last updated: 2026-06-17
 - Current MVP create flow now explicitly persists `Assigned` or `Pending Assignment` on submit; `New` is retained only for legacy/import compatibility and controlled transition handling, and the canonical IDTS docs/diagrams were aligned to that rule.
 - Backend audit coverage now includes generic content edits such as `title` and `description`, and the repeatable direct-service suite was expanded to 30 PASS / 0 FAIL.
 - Real draft attachment upload now writes attachment history correctly through the root draft-save flow. Shell HTTP QA against a clean local CAP server verified comment history, attachment upload/download, and attachment history end to end.
+- A repeatable SAP490 generator script now exists at `scripts/sap490/generate-retest-aligned-artifacts.py`, exposed through `npm run sap490:generate:retest-pack`, so the review workbooks can be regenerated from one source after future retest cycles.
 - The `IDTS-5` backend hardening stream has now been merged into `dev`. Remaining remote branches outside `origin/dev` are `origin/Feat/fe-Fix_UI_datdt`, `origin/Remake_UI`, and `origin/feature/idts-create-flow-option-c-donhv`; they are currently treated as stale UI/prototype branches and should be re-reviewed before any merge or deletion.
 - Jira/GitHub audit on 2026-06-15 found six completed Jira tasks: `IDTS-2`, `IDTS-3`, `IDTS-4`, `IDTS-6`, `IDTS-7`, and `IDTS-9`.
 - GitHub PR #1 (`IDTS-3`/`IDTS-6`) and PR #2 (`IDTS-8`/`IDTS-10`/`IDTS-11`) were integrated into `dev` together with DonHV's backend and SAP490 documentation branches.
@@ -66,37 +70,40 @@ Last updated: 2026-06-17
 - Configured development-only local mock authentication users (`DonHV`, `SangVN`, `DatDT`, `NhanT`) in `package.json` and optimized backend capability calculations from O(N) queries to O(1) query to resolve the N+1 performance issue.
 - `BugService` now requires `authenticated-user`, so anonymous access is blocked while local mock users still work for role-based QA.
 - Created the Sprint 02 Walkthrough & Demo Script inside the repository at `docs/pm/tasks/wp4-walkthrough.md`.
-- Fresh browser rerun on `localhost:4012` now confirms the workflow path HF-01 to HF-11 at product level: create page open, dependent category filtering, real attachment retention after save, readable comment author, correct tester/developer/PM action separation, and active Object Page attachment visibility.
-- A follow-up annotation-only candidate fix was added for the remaining Assign Developer input-text issue: `service.AssignableDevelopers.developerProfileID` now carries `@Common.Text : developerName` with `#TextOnly`, and Jira `IDTS-9` was reopened for FE retest.
+- Fresh browser rerun on `localhost:4004` now confirms the workflow path HF-01 to HF-11 at product level: create page open, dependent category filtering, real attachment retention after save, readable comment author, correct tester/developer/PM action separation, and active Object Page attachment visibility.
+- A follow-up Fiori annotation refinement now exposes a local `Add Comment` CTA inside the Comments section itself, and a fresh browser verification on `localhost:4018` confirmed that the section-level action is visible and opens the `Add Comment` dialog successfully.
+- A follow-up annotation-only candidate fix was added for the Assign Developer selected-text issue: `service.AssignableDevelopers.developerProfileID` now carries `@Common.Text : developerName` with `#TextOnly`, and a focused live browser re-verification on `localhost:4004` confirmed the dialog now renders the selected developer name (`DatDT`) instead of the UUID, so `IDTS-9` is now treated as closed at PM/QA handover level.
 
 Vietnamese:
 
-- WP1 Data Model Foundation đã được implement trong `db/schema.cds`, `srv/service.cds` và `db/data/`; CAP compile và SQLite in-memory deploy đều pass.
-- WP2 Service và Value Help đã hoàn thành ở mức Sprint 1 MVP: OData V4 metadata có bound lifecycle actions và Fiori value help annotations.
-- WP3 Handler Rules và Validation đã hoàn thành ở mức Sprint 1 MVP: `srv/service.js` xử lý create/update validation, assignment responsibility checks, status transition validation, nextProcessor automation, history logs và notification records.
-- WP4 core Fiori screens đã cập nhật: List Report, Object Page, Create metadata, Assignment value help/actions, Developer Review actions, Rejected follow-up, History và Notifications sections.
-- Việc tạo comment và upload/download attachment đã chạy được trên SQLite file local cho MVP. Shell verification đã xác nhận comment, metadata attachment, và binary content của attachment vẫn còn sau khi restart CAP.
-- Feedback mentor cho Sprint 02 đã được baseline: developer có thể xem/thảo luận bug trong team, lifecycle action chính vẫn kiểm soát, developer note mặc định optional, một số transition bắt buộc note/reason, và Bug Detail UI cần ưu tiên assignee/status cùng các field nhập quan trọng.
-- Sprint 02 plan được ghi tại `docs/pm/07-sprint-2-plan.md`. Jira issues `IDTS-1` đến `IDTS-12` đã được assign: DonHV phụ trách Backend CAP lead/bug fixing, NhanT phụ trách validation/QA/demo smoke test, DatDT phụ trách core Bug Detail layout/input usability, và SangVN phụ trách status value help cùng supporting field/comment usability.
-- Sprint 02 backend implementation đã bắt đầu. Jira `IDTS-2` và `IDTS-4` đã Done; Jira `IDTS-5` đang In Progress như bucket bug-fix backend từ QA.
-- `srv/service.js` hiện vẫn cho developer xem/thảo luận bug trong team, nhưng kiểm soát action xử lý workflow cho Developer được assign, Tester hoặc PM khi xác định được request user.
-- Side effect của bound action hiện ghi log thay đổi `nextProcessorUser` và `nextProcessorRole`, đồng thời tạo notification record cho follow-up của resolved, retest-required và reopened.
-- Audit Jira/GitHub ngày 2026-06-15 ghi nhận sáu Jira task đã hoàn thành: `IDTS-2`, `IDTS-3`, `IDTS-4`, `IDTS-6`, `IDTS-7`, và `IDTS-9`.
-- GitHub PR #1 (`IDTS-3`/`IDTS-6`) và PR #2 (`IDTS-8`/`IDTS-10`/`IDTS-11`) đã được tích hợp vào `dev` cùng hai branch backend và SAP490 documentation của DonHV.
-- Branch `Remake_UI` của DatDT đã được review chọn lọc. Các phần được nhận là đưa Assignment lên đầu Object Page, đặt bảng History read-only, và đánh giá lại create flow; các phần không nhận là giảm required fields, xóa `nextProcessorRole`, xóa lifecycle actions, và xóa supporting info.
+- WP1 Data Model Foundation Ä‘Ã£ Ä‘Æ°á»£c implement trong `db/schema.cds`, `srv/service.cds` vÃ  `db/data/`; CAP compile vÃ  SQLite in-memory deploy Ä‘á»u pass.
+- WP2 Service vÃ  Value Help Ä‘Ã£ hoÃ n thÃ nh á»Ÿ má»©c Sprint 1 MVP: OData V4 metadata cÃ³ bound lifecycle actions vÃ  Fiori value help annotations.
+- WP3 Handler Rules vÃ  Validation Ä‘Ã£ hoÃ n thÃ nh á»Ÿ má»©c Sprint 1 MVP: `srv/service.js` xá»­ lÃ½ create/update validation, assignment responsibility checks, status transition validation, nextProcessor automation, history logs vÃ  notification records.
+- WP4 core Fiori screens Ä‘Ã£ cáº­p nháº­t: List Report, Object Page, Create metadata, Assignment value help/actions, Developer Review actions, Rejected follow-up, History vÃ  Notifications sections.
+- Viá»‡c táº¡o comment vÃ  upload/download attachment Ä‘Ã£ cháº¡y Ä‘Æ°á»£c trÃªn SQLite file local cho MVP. Shell verification Ä‘Ã£ xÃ¡c nháº­n comment, metadata attachment, vÃ  binary content cá»§a attachment váº«n cÃ²n sau khi restart CAP.
+- Feedback mentor cho Sprint 02 Ä‘Ã£ Ä‘Æ°á»£c baseline: developer cÃ³ thá»ƒ xem/tháº£o luáº­n bug trong team, lifecycle action chÃ­nh váº«n kiá»ƒm soÃ¡t, developer note máº·c Ä‘á»‹nh optional, má»™t sá»‘ transition báº¯t buá»™c note/reason, vÃ  Bug Detail UI cáº§n Æ°u tiÃªn assignee/status cÃ¹ng cÃ¡c field nháº­p quan trá»ng.
+- Sprint 02 plan Ä‘Æ°á»£c ghi táº¡i `docs/pm/07-sprint-2-plan.md`. Jira issues `IDTS-1` Ä‘áº¿n `IDTS-12` Ä‘Ã£ Ä‘Æ°á»£c assign: DonHV phá»¥ trÃ¡ch Backend CAP lead/bug fixing, NhanT phá»¥ trÃ¡ch validation/QA/demo smoke test, DatDT phá»¥ trÃ¡ch core Bug Detail layout/input usability, vÃ  SangVN phá»¥ trÃ¡ch status value help cÃ¹ng supporting field/comment usability.
+- Sprint 02 backend implementation Ä‘Ã£ báº¯t Ä‘áº§u. Jira `IDTS-2` vÃ  `IDTS-4` Ä‘Ã£ Done; Jira `IDTS-5` Ä‘ang In Progress nhÆ° bucket bug-fix backend tá»« QA.
+- `srv/service.js` hiá»‡n váº«n cho developer xem/tháº£o luáº­n bug trong team, nhÆ°ng kiá»ƒm soÃ¡t action xá»­ lÃ½ workflow cho Developer Ä‘Æ°á»£c assign, Tester hoáº·c PM khi xÃ¡c Ä‘á»‹nh Ä‘Æ°á»£c request user.
+- Side effect cá»§a bound action hiá»‡n ghi log thay Ä‘á»•i `nextProcessorUser` vÃ  `nextProcessorRole`, Ä‘á»“ng thá»i táº¡o notification record cho follow-up cá»§a resolved, retest-required vÃ  reopened.
+- Audit Jira/GitHub ngÃ y 2026-06-15 ghi nháº­n sÃ¡u Jira task Ä‘Ã£ hoÃ n thÃ nh: `IDTS-2`, `IDTS-3`, `IDTS-4`, `IDTS-6`, `IDTS-7`, vÃ  `IDTS-9`.
+- GitHub PR #1 (`IDTS-3`/`IDTS-6`) vÃ  PR #2 (`IDTS-8`/`IDTS-10`/`IDTS-11`) Ä‘Ã£ Ä‘Æ°á»£c tÃ­ch há»£p vÃ o `dev` cÃ¹ng hai branch backend vÃ  SAP490 documentation cá»§a DonHV.
+- Branch `Remake_UI` cá»§a DatDT Ä‘Ã£ Ä‘Æ°á»£c review chá»n lá»c. CÃ¡c pháº§n Ä‘Æ°á»£c nháº­n lÃ  Ä‘Æ°a Assignment lÃªn Ä‘áº§u Object Page, Ä‘áº·t báº£ng History read-only, vÃ  Ä‘Ã¡nh giÃ¡ láº¡i create flow; cÃ¡c pháº§n khÃ´ng nháº­n lÃ  giáº£m required fields, xÃ³a `nextProcessorRole`, xÃ³a lifecycle actions, vÃ  xÃ³a supporting info.
 
-- Trạng thái PM hiện dùng file theo từng thành viên: `status/donhv.md`, `status/sangvn.md`, `status/datdt.md`, và `status/nhant.md`.
-- Inventory template SAP490 đã được ghi tại `docs/sap490/template-inventory.en.md` và `docs/sap490/template-inventory.vi.md`.
-- SAP490 Blueprint draft v0.1 đã có thành hai file DOCX copy từ template Blueprint của trường rồi fill trực tiếp: `docs/sap490/generated/Blueprint_IDTS_SAP01_en_v0.1.docx` và `docs/sap490/generated/Blueprint_IDTS_SAP01_vi_v0.1.docx`.
-- SAP490 Test Scenario, Unit Test và Test and Fix Bug v0.1 đã có bản tiếng Anh và tiếng Việt riêng, được copy/fill trực tiếp từ template trường. Bộ file ghi 12 happy-flow scenario backend, 21 programmatic test case pass và lỗi QA harness SC-01a của `IDTS-5` đã được sửa.
-- SAP490 Functional Specification v0.1 và Test and Fix Bug v0.2 đã có bản tiếng Anh và tiếng Việt riêng, được copy/fill trực tiếp từ template trường. Bộ file ghi target flow C-prime cho Create/Object Page, fix Value Help Assignee, fix label value list và decision refine layout còn lại của WP4.
-- Learning Recap / Mentor Mode tùy chọn đã có trong `.agents/skills/learning-recap` và được route trong AGENTS.md cho các task không tầm thường.
+- Tráº¡ng thÃ¡i PM hiá»‡n dÃ¹ng file theo tá»«ng thÃ nh viÃªn: `status/donhv.md`, `status/sangvn.md`, `status/datdt.md`, vÃ  `status/nhant.md`.
+- Inventory template SAP490 Ä‘Ã£ Ä‘Æ°á»£c ghi táº¡i `docs/sap490/template-inventory.en.md` vÃ  `docs/sap490/template-inventory.vi.md`.
+- SAP490 Blueprint draft v0.1 Ä‘Ã£ cÃ³ thÃ nh hai file DOCX copy tá»« template Blueprint cá»§a trÆ°á»ng rá»“i fill trá»±c tiáº¿p: `docs/sap490/generated/Blueprint_IDTS_SAP01_en_v0.1.docx` vÃ  `docs/sap490/generated/Blueprint_IDTS_SAP01_vi_v0.1.docx`.
+- SAP490 Test Scenario, Unit Test vÃ  Test and Fix Bug v0.1 Ä‘Ã£ cÃ³ báº£n tiáº¿ng Anh vÃ  tiáº¿ng Viá»‡t riÃªng, Ä‘Æ°á»£c copy/fill trá»±c tiáº¿p tá»« template trÆ°á»ng. Bá»™ file ghi 12 happy-flow scenario backend, 21 programmatic test case pass vÃ  lá»—i QA harness SC-01a cá»§a `IDTS-5` Ä‘Ã£ Ä‘Æ°á»£c sá»­a.
+- Bá»™ workbook review SAP490 Ä‘Ã£ Ä‘Æ°á»£c lÃ m má»›i ngÃ y 2026-06-18 thÃ nh cÃ¡c báº£n tiáº¿ng Anh vÃ  tiáº¿ng Viá»‡t tÃ¡ch riÃªng, copy/fill trá»±c tiáº¿p tá»« template trÆ°á»ng: `Functional_Specification_IDTS_SAP01_{en,vi}_v0.2.xlsx`, `Test_Scenario_IDTS_SAP01_{en,vi}_v0.2.xlsx`, `Unit_Test_IDTS_SAP01_{en,vi}_v0.2.xlsx`, `Functional_Test_IDTS_SAP01_{en,vi}_v0.1.xlsx`, `Test_And_Fix_Bug_IDTS_SAP01_{en,vi}_v0.3.xlsx`, vÃ  `Test_Report_IDTS_SAP01_{en,vi}_v0.1.xlsx`.
+- Bộ SAP490 mới đã phản ánh baseline hiện tại của Sprint 02 cho create/assignment/lifecycle/audit, kết quả retest backend `30 PASS / 0 FAIL`, kết quả HTTP pass cho attachment/comment, và xác nhận browser QA mới nhất rằng dialog Assign Developer hiện hiển thị tên developer đúng trên runtime đã verify.
+- Bá»™ tÃ i liá»‡u láº­p káº¿ hoáº¡ch retest má»›i náº±m táº¡i `docs/qa/retest-matrix.en.md` vÃ  `docs/qa/retest-matrix.vi.md`. ÄÃ¢y lÃ  nguá»“n planning test chÃ­nh cho Sprint 02, thay cho checklist cÅ© `21/21`.
+- Learning Recap / Mentor Mode tÃ¹y chá»n Ä‘Ã£ cÃ³ trong `.agents/skills/learning-recap` vÃ  Ä‘Æ°á»£c route trong AGENTS.md cho cÃ¡c task khÃ´ng táº§m thÆ°á»ng.
 
-- Mermaid diagram nhúng trong SRS/FRS đã được tách ra `docs/diagrams/07-srs-system-context.md` và `docs/diagrams/08-frs-functional-workflows.md`.
-- Hỗ trợ database modeling đã có qua `.agents/skills/idts-database-modeling` và `database-schema-design` đã cài; review model hiện tại được ghi trong `docs/ba/09-database-model-review.md`.
-- Các quyết định database DB-Q01 đến DB-Q08 cho WP1 đã được baseline trong `docs/ba/09-database-model-review.md` và sync vào các IDTS canonical docs.
-- Đã cấu hình mock users local (`DonHV`, `SangVN`, `DatDT`, `NhanT`) trong `package.json` và tối ưu hóa backend capability calculation từ O(N) queries về O(1) query để loại bỏ vấn đề hiệu năng N+1.
-- Đã tạo tài liệu Walkthrough & Demo Script chính thức của Sprint 02 trong repo tại `docs/pm/tasks/wp4-walkthrough.md`.
+- Mermaid diagram nhÃºng trong SRS/FRS Ä‘Ã£ Ä‘Æ°á»£c tÃ¡ch ra `docs/diagrams/07-srs-system-context.md` vÃ  `docs/diagrams/08-frs-functional-workflows.md`.
+- Há»— trá»£ database modeling Ä‘Ã£ cÃ³ qua `.agents/skills/idts-database-modeling` vÃ  `database-schema-design` Ä‘Ã£ cÃ i; review model hiá»‡n táº¡i Ä‘Æ°á»£c ghi trong `docs/ba/09-database-model-review.md`.
+- CÃ¡c quyáº¿t Ä‘á»‹nh database DB-Q01 Ä‘áº¿n DB-Q08 cho WP1 Ä‘Ã£ Ä‘Æ°á»£c baseline trong `docs/ba/09-database-model-review.md` vÃ  sync vÃ o cÃ¡c IDTS canonical docs.
+- ÄÃ£ cáº¥u hÃ¬nh mock users local (`DonHV`, `SangVN`, `DatDT`, `NhanT`) trong `package.json` vÃ  tá»‘i Æ°u hÃ³a backend capability calculation tá»« O(N) queries vá» O(1) query Ä‘á»ƒ loáº¡i bá» váº¥n Ä‘á» hiá»‡u nÄƒng N+1.
+- ÄÃ£ táº¡o tÃ i liá»‡u Walkthrough & Demo Script chÃ­nh thá»©c cá»§a Sprint 02 trong repo táº¡i `docs/pm/tasks/wp4-walkthrough.md`.
 
 ## What Is Not Started
 
@@ -115,12 +122,12 @@ Vietnamese:
 
 Vietnamese:
 
-| Thành viên | Trách nhiệm chính | Status |
+| ThÃ nh viÃªn | TrÃ¡ch nhiá»‡m chÃ­nh | Status |
 | --- | --- | --- |
-| DonHV | Leader, Backend CAP lead cho Sprint 02, backend bug fixing, tổng hợp hằng tuần, hỗ trợ cross-workstream | `status/donhv.md` |
-| SangVN | Hỗ trợ Fiori/UI5 cho Sprint 02, có thể hỗ trợ delivery chung khi được phân công | `status/sangvn.md` |
-| DatDT | Phụ trách chính Fiori/UI5, có thể hỗ trợ delivery chung khi được phân công | `status/datdt.md` |
-| NhanT | Phụ trách backend verification và QA cho Sprint 02, có thể hỗ trợ delivery chung khi được phân công | `status/nhant.md` |
+| DonHV | Leader, Backend CAP lead cho Sprint 02, backend bug fixing, tá»•ng há»£p háº±ng tuáº§n, há»— trá»£ cross-workstream | `status/donhv.md` |
+| SangVN | Há»— trá»£ Fiori/UI5 cho Sprint 02, cÃ³ thá»ƒ há»— trá»£ delivery chung khi Ä‘Æ°á»£c phÃ¢n cÃ´ng | `status/sangvn.md` |
+| DatDT | Phá»¥ trÃ¡ch chÃ­nh Fiori/UI5, cÃ³ thá»ƒ há»— trá»£ delivery chung khi Ä‘Æ°á»£c phÃ¢n cÃ´ng | `status/datdt.md` |
+| NhanT | Phá»¥ trÃ¡ch backend verification vÃ  QA cho Sprint 02, cÃ³ thá»ƒ há»— trá»£ delivery chung khi Ä‘Æ°á»£c phÃ¢n cÃ´ng | `status/nhant.md` |
 
 ## Current Decisions
 
@@ -143,32 +150,32 @@ Vietnamese:
 
 Vietnamese:
 
-- `Rejected` vẫn là status hợp lệ nhưng không phải final status. Mỗi bug bị Rejected phải có lý do reject, nextProcessor và action tiếp theo rõ ràng.
-- Developer có thể xem và thảo luận bug trong team, nhưng action xử lý workflow vẫn bị giới hạn cho Developer được assign, Tester hoặc PM khi xác định được request user.
-- Product Discovery đã được thêm như bước BA trước khi viết BRD/SRS/FRS hoặc xử lý requirement chưa rõ.
-- BRD v1.2 đang được duy trì trong `docs/ba/brd/` theo hướng SAP490 hybrid, với bản tiếng Anh và tiếng Việt tách riêng, gồm cả Markdown và DOCX.
-- Routing cho BA/DOCX deliverable của IDTS đã có tại `.agents/skills/idts-ba-docx-deliverables`, với các external document skills được dùng như nguồn tham khảo phụ.
-- Helper fallback Markdown-to-DOCX local hiện giữ Markdown table thành bảng Word thật có thể chỉnh sửa cho các deliverable BA chính thức.
+- `Rejected` váº«n lÃ  status há»£p lá»‡ nhÆ°ng khÃ´ng pháº£i final status. Má»—i bug bá»‹ Rejected pháº£i cÃ³ lÃ½ do reject, nextProcessor vÃ  action tiáº¿p theo rÃµ rÃ ng.
+- Developer cÃ³ thá»ƒ xem vÃ  tháº£o luáº­n bug trong team, nhÆ°ng action xá»­ lÃ½ workflow váº«n bá»‹ giá»›i háº¡n cho Developer Ä‘Æ°á»£c assign, Tester hoáº·c PM khi xÃ¡c Ä‘á»‹nh Ä‘Æ°á»£c request user.
+- Product Discovery Ä‘Ã£ Ä‘Æ°á»£c thÃªm nhÆ° bÆ°á»›c BA trÆ°á»›c khi viáº¿t BRD/SRS/FRS hoáº·c xá»­ lÃ½ requirement chÆ°a rÃµ.
+- BRD v1.2 Ä‘ang Ä‘Æ°á»£c duy trÃ¬ trong `docs/ba/brd/` theo hÆ°á»›ng SAP490 hybrid, vá»›i báº£n tiáº¿ng Anh vÃ  tiáº¿ng Viá»‡t tÃ¡ch riÃªng, gá»“m cáº£ Markdown vÃ  DOCX.
+- Routing cho BA/DOCX deliverable cá»§a IDTS Ä‘Ã£ cÃ³ táº¡i `.agents/skills/idts-ba-docx-deliverables`, vá»›i cÃ¡c external document skills Ä‘Æ°á»£c dÃ¹ng nhÆ° nguá»“n tham kháº£o phá»¥.
+- Helper fallback Markdown-to-DOCX local hiá»‡n giá»¯ Markdown table thÃ nh báº£ng Word tháº­t cÃ³ thá»ƒ chá»‰nh sá»­a cho cÃ¡c deliverable BA chÃ­nh thá»©c.
 
-- SRS v1.1 đang được duy trì trong `docs/ba/srs/`; FRS v1.2 đang được duy trì trong `docs/ba/frs/`, với bản tiếng Anh/tiếng Việt tách riêng, gồm cả Markdown và DOCX.
-- FRS v1.1 đã sửa lỗi Mermaid syntax ở rejected follow-up sequence và bổ sung workflow diagrams còn thiếu cho create/assign, developer review, request information, retest/closure và PM monitoring.
-- BRD v1.2, SRS v1.1 và FRS v1.2 đã cập nhật MVP role baseline thành ba role active: Tester, Developer và PM. Reporter và Admin chưa tách thành role riêng trong MVP.
-- Các file DOCX của BRD/SRS/FRS đã được regenerate từ Markdown mới và smoke-test bằng LibreOffice conversion trong thư mục tạm.
-- SRS/FRS DOCX đã được smoke-test bằng LibreOffice convert trong thư mục tạm, không tạo PDF trong repo.
-- Workflow sync SAP490 Google Workspace đã được document tại `docs/sap490/sync-workflow.en.md` và `docs/sap490/sync-workflow.vi.md`; `@googleworkspace/cli` đã được cài làm dev dependency, các script check/dry-run an toàn đã có, và OAuth authentication đã verify trên máy hiện tại. Các developer khác vẫn cần tự authenticate `gws` ở local trước khi làm sync.
-- Script upload review an toàn bằng `gws` đã có cho các file DOCX BRD/SRS/FRS. Script tạo bản review mới có timestamp và không overwrite file Drive hiện có.
-- Script Google Sheets review an toàn bằng `gws` đã có. Script tạo workbook mới có timestamp gồm các tab Requirement Backlog, Traceability Matrix, Business Rule Matrix, Risk Decision Log và Open Questions.
+- SRS v1.1 Ä‘ang Ä‘Æ°á»£c duy trÃ¬ trong `docs/ba/srs/`; FRS v1.2 Ä‘ang Ä‘Æ°á»£c duy trÃ¬ trong `docs/ba/frs/`, vá»›i báº£n tiáº¿ng Anh/tiáº¿ng Viá»‡t tÃ¡ch riÃªng, gá»“m cáº£ Markdown vÃ  DOCX.
+- FRS v1.1 Ä‘Ã£ sá»­a lá»—i Mermaid syntax á»Ÿ rejected follow-up sequence vÃ  bá»• sung workflow diagrams cÃ²n thiáº¿u cho create/assign, developer review, request information, retest/closure vÃ  PM monitoring.
+- BRD v1.2, SRS v1.1 vÃ  FRS v1.2 Ä‘Ã£ cáº­p nháº­t MVP role baseline thÃ nh ba role active: Tester, Developer vÃ  PM. Reporter vÃ  Admin chÆ°a tÃ¡ch thÃ nh role riÃªng trong MVP.
+- CÃ¡c file DOCX cá»§a BRD/SRS/FRS Ä‘Ã£ Ä‘Æ°á»£c regenerate tá»« Markdown má»›i vÃ  smoke-test báº±ng LibreOffice conversion trong thÆ° má»¥c táº¡m.
+- SRS/FRS DOCX Ä‘Ã£ Ä‘Æ°á»£c smoke-test báº±ng LibreOffice convert trong thÆ° má»¥c táº¡m, khÃ´ng táº¡o PDF trong repo.
+- Workflow sync SAP490 Google Workspace Ä‘Ã£ Ä‘Æ°á»£c document táº¡i `docs/sap490/sync-workflow.en.md` vÃ  `docs/sap490/sync-workflow.vi.md`; `@googleworkspace/cli` Ä‘Ã£ Ä‘Æ°á»£c cÃ i lÃ m dev dependency, cÃ¡c script check/dry-run an toÃ n Ä‘Ã£ cÃ³, vÃ  OAuth authentication Ä‘Ã£ verify trÃªn mÃ¡y hiá»‡n táº¡i. CÃ¡c developer khÃ¡c váº«n cáº§n tá»± authenticate `gws` á»Ÿ local trÆ°á»›c khi lÃ m sync.
+- Script upload review an toÃ n báº±ng `gws` Ä‘Ã£ cÃ³ cho cÃ¡c file DOCX BRD/SRS/FRS. Script táº¡o báº£n review má»›i cÃ³ timestamp vÃ  khÃ´ng overwrite file Drive hiá»‡n cÃ³.
+- Script Google Sheets review an toÃ n báº±ng `gws` Ä‘Ã£ cÃ³. Script táº¡o workbook má»›i cÃ³ timestamp gá»“m cÃ¡c tab Requirement Backlog, Traceability Matrix, Business Rule Matrix, Risk Decision Log vÃ  Open Questions.
 
 ## WP4 Current Note
 
-The Fiori Elements UI for the Bug Creation flow (Option B) is implemented and re-verified on a real browser path. Child facets (History, Comments, Notifications) and system fields are dynamically hidden during creation using draft-state OData expressions, while the attachment facet remains visible during create as Option A. Dependent filtering between Application Component and Defect Category now works, the attachment row remains visible right after create, and action visibility refresh is correct for Tester, Developer, and PM in the rerun. The remaining FE issue for mentor polish is narrower: the Assign Developer action parameter dialog already has a business label (`Assignee`) and business-friendly value-help rows, and an annotation-only candidate fix is now in place so the `ValueListProperty` itself carries developer text. FE still needs a browser retest to confirm whether the selected input finally shows the developer name instead of the UUID.
+The Fiori Elements UI for the Bug Creation flow (Option B) is implemented and re-verified on a real browser path. Child facets (History, Comments, Notifications) and system fields are dynamically hidden during creation using draft-state OData expressions, while the attachment facet remains visible during create as Option A. Dependent filtering between Application Component and Defect Category now works, the attachment row remains visible right after create, role-based action visibility is correct for Tester, Developer, and PM, the `Start Progress` lifecycle submit now refreshes the Object Page state immediately after the side-effect fix, the earlier `componentCategory_ID` create warning is no longer reproduced after removing the redundant derivation side effect, the Comments section now exposes a local `Add Comment` CTA inside the section itself, and the Assign Developer action dialog now shows the selected developer name rather than the UUID on the current verified runtime.
 
-Vietnamese: Giao diện Fiori Elements cho luồng tạo bug (Option B) đã hoàn thành và được kiểm thử thành công. Các tab phụ (Lịch sử, Bình luận, Đính kèm, Thông báo) và trường hệ thống được ẩn động khi tạo mới nhờ biểu thức draft OData, nhưng vẫn hiển thị đầy đủ ở chế độ xem/sửa bug cũ. Trường Assignee có thể chọn qua Value Help. Backend đã được thắt chặt bảo mật để ghi đè bugNumber, status_code và reporter_ID. Browser smoke test bằng Playwright đã xác nhận giao diện sạch sẽ và lookup chạy tốt.
+Vietnamese: Giao diá»‡n Fiori Elements cho luá»“ng táº¡o bug (Option B) Ä‘Ã£ hoÃ n thÃ nh vÃ  Ä‘Æ°á»£c kiá»ƒm thá»­ thÃ nh cÃ´ng. CÃ¡c tab phá»¥ (Lá»‹ch sá»­, BÃ¬nh luáº­n, ÄÃ­nh kÃ¨m, ThÃ´ng bÃ¡o) vÃ  trÆ°á»ng há»‡ thá»‘ng Ä‘Æ°á»£c áº©n Ä‘á»™ng khi táº¡o má»›i nhá» biá»ƒu thá»©c draft OData, nhÆ°ng váº«n hiá»ƒn thá»‹ Ä‘áº§y Ä‘á»§ á»Ÿ cháº¿ Ä‘á»™ xem/sá»­a bug cÅ©. TrÆ°á»ng Assignee cÃ³ thá»ƒ chá»n qua Value Help. Backend Ä‘Ã£ Ä‘Æ°á»£c tháº¯t cháº·t báº£o máº­t Ä‘á»ƒ ghi Ä‘Ã¨ bugNumber, status_code vÃ  reporter_ID. Browser smoke test báº±ng Playwright Ä‘Ã£ xÃ¡c nháº­n giao diá»‡n sáº¡ch sáº½ vÃ  lookup cháº¡y tá»‘t.
 
-Vietnamese clean note: Trường Assignee hiện chọn được qua value help, popup hiển thị cột nghiệp vụ, nhưng sau khi chọn thì ô input của action `Assign Developer` vẫn đang hiển thị UUID thay vì tên developer. Các popup value list phổ biến cũng đã có label nghiệp vụ, ví dụ `Priority Code` và `Priority`. Lần verify này dùng Playwright CLI, không dùng Playwright MCP.
+Vietnamese clean note: Trường Assignee hiện chọn được qua value help, popup hiển thị cột nghiệp vụ, và trên runtime đã verify thì ô input của action `Assign Developer` hiện hiển thị tên developer đã chọn thay vì UUID. Các popup value list phổ biến cũng đã có label nghiệp vụ, ví dụ `Priority Code` và `Priority`. Lần verify này dùng Playwright CLI, không dùng Playwright MCP.
 
 ## Next Handover Instruction
 
 Any new agent or developer should identify their member name first, then read this file, `task-board.md`, the relevant member file under `status/*.md`, and the relevant `tasks/*.md` before making changes.
 
-Vietnamese: Agent hoặc developer mới phải xác định tên thành viên trước, sau đó đọc file này, `task-board.md`, file status thành viên tương ứng trong `status/*.md`, và file `tasks/*.md` liên quan trước khi chỉnh sửa.
+Vietnamese: Agent hoáº·c developer má»›i pháº£i xÃ¡c Ä‘á»‹nh tÃªn thÃ nh viÃªn trÆ°á»›c, sau Ä‘Ã³ Ä‘á»c file nÃ y, `task-board.md`, file status thÃ nh viÃªn tÆ°Æ¡ng á»©ng trong `status/*.md`, vÃ  file `tasks/*.md` liÃªn quan trÆ°á»›c khi chá»‰nh sá»­a.

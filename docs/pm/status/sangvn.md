@@ -42,8 +42,8 @@ Vietnamese:
 
 ## In Progress
 
-- Support retest and follow-up analysis for Jira `IDTS-9`.
-- Shared Fiori/UI5 delivery support for final mentor-demo readiness.
+- Shared Fiori/UI5 delivery support for final mentor-demo readiness remains active.
+- `IDTS-9` is no longer an open FE blocker; keep it only as a regression check during the final browser rerun.
 
 Vietnamese:
 
@@ -52,8 +52,8 @@ Vietnamese:
 
 ## Next
 
-- Support DatDT in browser re-verification of the latest annotation-only candidate for the Assign Developer dialog.
-- If the UUID still remains after selection, help evaluate whether the team should accept the gap for demo or build a targeted FE extension.
+- Support DatDT in the final browser rerun and watch for any FE regression in Assign Developer, Comments CTA, or Object Page action visibility.
+- If a new FE gap appears during the final rerun, help evaluate whether it should be fixed now or deferred from the demo baseline.
 - Continue using Fiori MCP and SAP Fiori Guidelines before touching annotations, manifest configuration, or custom UI decisions.
 
 Vietnamese:
