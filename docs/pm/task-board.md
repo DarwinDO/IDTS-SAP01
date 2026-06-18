@@ -1,6 +1,6 @@
-﻿# IDTS Task Board
+# IDTS Task Board
 
-Last updated: 2026-06-17
+Last updated: 2026-06-18
 
 Use this board for high-level movement only. Detailed task notes belong in the matching file under `docs/pm/tasks/`.
 
@@ -18,6 +18,7 @@ Vietnamese: Chỉ dùng board này để theo dõi trạng thái cấp cao. Chi 
 | WP1 | Data Model Foundation | Expanded CAP CDS model, service projections, and seed data under `db/data/` |
 | WP2 | Service and Value Help | OData V4 service actions, value help annotations, and metadata compile completed |
 | WP3 | Handler Rules and Validation | CAP handler rules for create/update, assignment, status transition, nextProcessor, history, and notifications completed |
+| WP4 | Fiori Elements UX | Core layout, dynamic creation hiding, assignee value help, mock-login QA, local Comments CTA, and Assign Developer selected-text verification completed on the current live stack |
 | WP7 | Notifications and Attachments | Backend persistence, in-app notifications, create-time attachment visibility, and browser happy-flow verification completed |
 
 Vietnamese:
@@ -32,6 +33,7 @@ Vietnamese:
 | WP1 | Nền tảng Data Model | CAP CDS model, service projections, và seed data trong `db/data/` |
 | WP2 | Service và Value Help | Đã hoàn thành OData V4 service actions, value help annotations và metadata compile |
 | WP3 | Handler Rules và Validation | Đã hoàn thành CAP handler rules cho create/update, assignment, status transition, nextProcessor, history và notifications |
+| WP4 | Fiori Elements UX | Đã hoàn thành layout chính, ẩn động khi create, value help assignee, QA mock-login, nút Add Comment trong section Comments, và xác minh dialog Assign Developer hiển thị tên đúng trên runtime hiện tại |
 | WP7 | Notifications và Attachments | Đã xác nhận lưu trữ backend, bản ghi thông báo trong ứng dụng, và kiểm thử E2E comment/upload trên browser thành công. |
 
 ## Ready
@@ -52,15 +54,13 @@ Vietnamese:
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
-| SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 5 Done (`IDTS-2`, `IDTS-3`, `IDTS-4`, `IDTS-6`, `IDTS-7`), 5 In Progress (`IDTS-5`, `IDTS-8`, `IDTS-9`, `IDTS-10`, `IDTS-11`), 2 To Do (`IDTS-1`, `IDTS-12`). `IDTS-9` was reopened because the Assign Developer action input still needs final browser confirmation after the latest annotation-only text fix. |
-| WP4 | Fiori Elements UX | DatDT | Core layout, dynamic creation hiding, assignee value help, dynamic visibility, dev-only mock login, and refreshed happy-flow verification are completed. Remaining refinement is limited to Assign Developer dialog polish; `app/bug-management-ui/annotations.cds` now annotates `AssignableDevelopers.developerProfileID` with business text, and DatDT/SangVN need to verify in browser whether the selected input stops showing UUID. |
+| SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP, and real browser QA are now stable enough to prove the happy flow. Remaining work is final SAP490 sync and mentor-demo rerun, not FE/blocking workflow repair. |
 
 Vietnamese:
 
 | ID | Công việc | Thành viên chính | Ghi chú |
 | --- | --- | --- | --- |
-| SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Jira: 5 Done (`IDTS-2`, `IDTS-3`, `IDTS-4`, `IDTS-6`, `IDTS-7`), 5 In Progress (`IDTS-5`, `IDTS-8`, `IDTS-9`, `IDTS-10`, `IDTS-11`), 2 To Do (`IDTS-1`, `IDTS-12`). `IDTS-9` đã được mở lại vì ô input của action Assign Developer vẫn cần browser verify lần cuối sau bản fix annotation-only text. |
-| WP4 | Fiori Elements UX | DatDT | Đã hoàn thành cấu trúc giao diện chính, ẩn động trang tạo mới, Value Help Assignee, dynamic visibility, mock login chỉ cho development và happy-flow verify mới. Phần refine còn lại chủ yếu là dialog Assign Developer; `app/bug-management-ui/annotations.cds` đã gán business text cho `AssignableDevelopers.developerProfileID`, DatDT/SangVN cần verify trên browser xem ô đã hiển thị tên thay vì UUID chưa. |
+| SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP và browser QA thật hiện đã đủ để chứng minh happy flow chính. Phần còn lại là sync SAP490 cuối và rerun demo mentor, không còn là sửa FE hay workflow blocking. |
 
 ## Blocked
 
