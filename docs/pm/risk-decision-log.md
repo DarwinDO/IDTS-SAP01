@@ -1,6 +1,6 @@
 # Risk and Decision Log
 
-Last updated: 2026-06-05
+Last updated: 2026-06-18
 
 ## Decisions
 
@@ -26,6 +26,7 @@ Last updated: 2026-06-05
 | DEC-018 | 2026-06-04 | Use CAP CDS as the source of truth for IDTS database implementation; use `idts-database-modeling` and `database-schema-design` only as review/design support. | Generic database tools are useful for brainstorming, but IDTS is a SAP CAP project and should not drift into Prisma, Supabase, raw SQL, or vendor-specific modeling. | WP1 should start from `docs/ba/09-database-model-review.md`, `docs/ba/05-data-dictionary.md`, CAP MCP, and `sap-cap`; external schema artifacts remain optional documentation, not implementation source. |
 | DEC-019 | 2026-06-04 | Adopt the DB-Q01 to DB-Q08 database modeling baseline for WP1. | The team needs concrete decisions before expanding `db/schema.cds`, especially for nextProcessor, Component Category derivation, rejection reason storage, attachments, bugNumber, optional SAP Module, and duplicate links. | `docs/ba/09-database-model-review.md`, `docs/project-context.md`, and the three IDTS canonical docs now define the WP1 database baseline. SangVN/Backend should use it before coding CDS. |
 | DEC-020 | 2026-06-05 | Adopt the Sprint 02 mentor feedback baseline: developers may view/discuss team-visible bugs, lifecycle-changing actions remain controlled, developer notes are optional by default, selected transitions require note/reason, and Bug Detail UI must prioritize assignee/status and key input fields. DonHV leads Backend CAP/backend bug fixing; NhanT supports backend verification/QA; DatDT leads Fiori/UI5; SangVN supports Fiori/UI5. | Mentor confirmed rules/diagrams are settled enough and the team should focus on implementation/demo rather than redrawing analysis artifacts. | Canonical docs, Sprint 02 plan, Jira backlog, backend handlers, Fiori Bug Detail layout, and QA checks must follow this baseline. |
+| DEC-021 | 2026-06-18 | Use the Object Page `Assignee` field and filtered value help as the single Fiori UI path for assignment/reassignment; remove the duplicate `Assign Developer` buttons from the UI while retaining backend action compatibility. | The field value help already has the correct classification context and avoids the competing action-parameter dialog. A single UI path reduces bugs and keeps assignment side effects centralized in draft save/update handling. | Fiori Object Page no longer exposes `Assign Developer` buttons. CAP handlers must treat `assignee_ID` changes as assignment/reassignment, derive status, update `nextProcessor`, write history, and create notification records. The backend action remains available for existing tests/API callers. |
 
 ## Risks
 
