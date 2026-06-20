@@ -261,6 +261,32 @@ Vietnamese note: Ngày 2026-06-16, DonHV đã hoàn thiện phần comment và m
 
 Vietnamese note: NgÃ y 2026-06-17, DonHV Ä‘Ã£ gá»¡ bá» ownership trÃ¡c tiáº¿p cá»§a `Bugs.historyLogs` Ä‘á»ƒ trá» vá» grouped `HistoryEvents`, tá»« Ä‘Ã³ váº¡ch ra lÃ½ do draft conflict vÃ  báº­t láº¡i upload attachment trÃªn Fiori annotations. CÃ²n cáº§n Claude retest UI cho draft edit vÃ  attachment upload.
 
+## 2026-06-20 - IDTS-28 backend service split
+
+English:
+
+| Field | Detail |
+| --- | --- |
+| Task/WP | IDTS-28 / backend refactor support under WP3 |
+| What was done | Split the oversized `srv/service.js` backend handler into focused modules: `srv/bug-service/constants.js`, `srv/bug-service/helpers.js`, `srv/bug-service/history.js`, and `srv/bug-service/read-models.js`. Kept `srv/service.js` as the orchestration layer for CAP hook registration and workflow handlers. |
+| Completed part | Structural refactor is implemented. `srv/service.js` dropped from about 2120 lines to about 702 lines while preserving the existing service contract, assignment/history/notification logic, and read-model enrichment flow. |
+| Issues/Bugs found | Verification blocker found in local desktop runtime: `scripts/qa/test-idts6-programmatic.js` failed before exercising product behavior because native module `better-sqlite3.node` in `node_modules` was compiled for `NODE_MODULE_VERSION 127`, while the available Codex desktop Node runtime is `NODE_MODULE_VERSION 137` (`Node.js v24.14.0`). This is an environment/runtime mismatch, not evidence of a product regression from the refactor. Additional tool issue: Atlassian Rovo `addCommentToJiraIssue` for `IDTS-28` returned HTTP 500, so the Jira progress comment could not be posted from this session. |
+| Fix status | Code refactor completed. Syntax and CAP compile checks passed. The runtime blocker is now resolved for verification by using an official Node.js 22 runtime that matches `NODE_MODULE_VERSION 127`, and the backend programmatic regression passed. Jira connector issue from the earlier retry no longer blocks tracking because later Jira comment posting succeeded. |
+| Evidence/Commands | `C:\\Users\\LapHub\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe --check srv/service.js` = exit 0; same `--check` for all four new modules = exit 0; `PATH=<bundled-node>; .\\node_modules\\.bin\\cds.cmd compile srv/service.cds app/bug-management-ui/annotations.cds --to edmx` = exit 0; `git diff --check` = exit 0; attempted bundled-runtime `node scripts/qa/test-idts6-programmatic.js` = exit 1 with `better_sqlite3.node` / `NODE_MODULE_VERSION` mismatch; downloaded official Node.js `v22.23.0` (modules `127`) and reran `scripts/qa/test-idts6-programmatic.js` = `30 PASS / 0 FAIL`. |
+| Next handoff | Backend refactor now has compile + regression evidence. Post the resolved verification note to Jira `IDTS-28`, then either close the ticket or move to review depending on the team workflow. Continue with the FE large-file split and its own full retest. |
+
+Vietnamese:
+
+| Trường | Chi tiết |
+| --- | --- |
+| Task/WP | IDTS-28 / hỗ trợ refactor backend trong WP3 |
+| Đã làm gì | Tách `srv/service.js` đang quá lớn thành các module rõ trách nhiệm: `srv/bug-service/constants.js`, `srv/bug-service/helpers.js`, `srv/bug-service/history.js`, và `srv/bug-service/read-models.js`. Giữ `srv/service.js` làm lớp orchestration cho CAP hooks và workflow handlers. |
+| Phần đã xong | Đã implement xong phần refactor cấu trúc. `srv/service.js` giảm từ khoảng 2120 dòng xuống khoảng 702 dòng nhưng vẫn giữ nguyên service contract hiện có, cùng logic assignment/history/notification và read-model enrichment. |
+| Bug/lỗi phát hiện | Phát hiện blocker ở môi trường verify local desktop: `scripts/qa/test-idts6-programmatic.js` fail trước khi chạy vào behavior của sản phẩm vì native module `better-sqlite3.node` trong `node_modules` đang được build cho `NODE_MODULE_VERSION 127`, trong khi runtime Node khả dụng của Codex desktop là `NODE_MODULE_VERSION 137` (`Node.js v24.14.0`). Đây là lỗi lệch runtime/môi trường, chưa phải bằng chứng regression của product do refactor gây ra. Lỗi tool bổ sung: Atlassian Rovo `addCommentToJiraIssue` cho `IDTS-28` trả về HTTP 500 nên chưa post được comment tiến độ từ session này. |
+| Trạng thái fix | Refactor code đã xong. Các check syntax và CAP compile đều pass. Blocker runtime cho verify hiện đã được gỡ bằng cách dùng Node.js 22 chính thức khớp `NODE_MODULE_VERSION 127`, và bộ regression backend programmatic đã pass. Lỗi Jira connector ở lần retry trước không còn chặn tracking vì lần comment Jira sau đã thành công. |
+| Bằng chứng/lệnh | `C:\\Users\\LapHub\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe --check srv/service.js` = exit 0; các lệnh `--check` cho 4 module mới = exit 0; `PATH=<bundled-node>; .\\node_modules\\.bin\\cds.cmd compile srv/service.cds app/bug-management-ui/annotations.cds --to edmx` = exit 0; `git diff --check` = exit 0; chạy thử bundled-runtime `node scripts/qa/test-idts6-programmatic.js` = exit 1 với lỗi `better_sqlite3.node` / lệch `NODE_MODULE_VERSION`; tải Node.js chính thức `v22.23.0` (modules `127`) và chạy lại `scripts/qa/test-idts6-programmatic.js` = `30 PASS / 0 FAIL`. |
+| Handoff tiếp theo | Backend refactor hiện đã có bằng chứng compile + regression. Ghi note verify đã xử lý blocker lên Jira `IDTS-28`, rồi đóng ticket hoặc chuyển review tùy workflow của team. Sau đó tiếp tục phần tách file FE lớn và full retest tương ứng. |
+
 ## Update Rule
 
 - DonHV updates this file for leader decisions, BA/PM work, SAP490 deliverables, weekly consolidation, and cross-workstream support.

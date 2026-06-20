@@ -135,6 +135,22 @@ Vietnamese:
 - Khi activate draft, backend so sánh bug active trước/sau save rồi ghi `HistoryEvents` / `HistoryLogs` dạng grouped và tạo notification cho Developer.
 - Đã thêm script regression HTTP `scripts/qa/test-direct-assignee-draft-save.ps1`, chạy qua `npm run qa:direct-assignee:http` khi có CAP server local tương ứng.
 
+## 2026-06-20 IDTS-28 Service Refactor
+
+English:
+
+- Split the monolithic `srv/service.js` into focused backend modules under `srv/bug-service/`: `constants.js`, `helpers.js`, `history.js`, and `read-models.js`.
+- Kept business behavior in the same CAP service boundary; `srv/service.js` now mainly registers hooks and keeps workflow-specific handlers, validation, and next-processor rules.
+- Structural verification passed with syntax checks plus `cds compile srv/service.cds app/bug-management-ui/annotations.cds --to edmx`.
+- Full programmatic backend regression was temporarily blocked by a local runtime issue: `better-sqlite3.node` in `node_modules` was built for `NODE_MODULE_VERSION 127`, while the bundled Codex desktop Node runtime is `NODE_MODULE_VERSION 137`. The blocker was resolved by rerunning the suite with official Node.js `v22.23.0` (modules `127`), and `scripts/qa/test-idts6-programmatic.js` then passed with `30 PASS / 0 FAIL`.
+
+Vietnamese:
+
+- Đã tách `srv/service.js` dài thành các module backend rõ trách nhiệm trong `srv/bug-service/`: `constants.js`, `helpers.js`, `history.js`, và `read-models.js`.
+- Giữ nguyên boundary nghiệp vụ trong cùng CAP service; `srv/service.js` hiện chủ yếu còn phần đăng ký hooks cùng các workflow handlers, validation, và next-processor rules.
+- Verify cấu trúc đã pass với syntax checks và `cds compile srv/service.cds app/bug-management-ui/annotations.cds --to edmx`.
+- Regression backend programmatic đầy đủ ban đầu bị chặn do lệch runtime local: `better-sqlite3.node` trong `node_modules` được build cho `NODE_MODULE_VERSION 127`, trong khi bundled Codex desktop Node runtime là `NODE_MODULE_VERSION 137`. Blocker này đã được gỡ bằng cách chạy lại suite với Node.js chính thức `v22.23.0` (modules `127`), và `scripts/qa/test-idts6-programmatic.js` đã pass `30 PASS / 0 FAIL`.
+
 ## Definition of Done
 
 - Invalid transitions are rejected in backend.
