@@ -1,0 +1,93 @@
+{
+  "dependencies": {
+    "@cap-js/postgres": "^2",
+    "@sap/cds": "^9.9.1"
+  },
+  "devDependencies": {
+    "@cap-js/cds-test": "^1.0.1",
+    "@cap-js/sqlite": "^2",
+    "@googleworkspace/cli": "^0.22.5",
+    "@sap/cds-dk": "^9.9.2",
+    "playwright": "^1.61.0"
+  },
+  "scripts": {
+    "sap490:gws:version": "gws --version",
+    "sap490:gws:auth-status": "gws auth status",
+    "sap490:gws:check": "node scripts/sap490/gws-check.mjs",
+    "sap490:gws:find-review-folder": "node scripts/sap490/find-drive-folder.mjs \"SAP490 Review\"",
+    "sap490:gws:dry-run": "node scripts/sap490/sync-dry-run.mjs",
+    "sap490:gws:upload-review-docx": "node scripts/sap490/upload-review-docx.mjs",
+    "sap490:gws:upload-review-docx:execute": "node scripts/sap490/upload-review-docx.mjs --execute",
+    "sap490:gws:sync-review-sheets": "node scripts/sap490/sync-review-sheets.mjs",
+    "sap490:gws:sync-review-sheets:execute": "node scripts/sap490/sync-review-sheets.mjs --execute",
+    "sap490:generate:retest-pack": "python scripts/sap490/generate-retest-aligned-artifacts.py",
+    "qa:comments-attachments:http": "powershell -ExecutionPolicy Bypass -File scripts/qa/test-comments-attachments.ps1",
+    "qa:comments-attachments:programmatic": "node scripts/qa/test-comments-attachments-programmatic.js",
+    "qa:direct-assignee:http": "powershell -ExecutionPolicy Bypass -File scripts/qa/test-direct-assignee-draft-save.ps1",
+    "watch-bug-management-ui": "cds watch --open idts.bugmanagementui/index.html?sap-ui-xx-viewCache=false --livereload false"
+  },
+  "sapux": [
+    "app/bug-management-ui"
+  ],
+  "cds": {
+    "fiori": {
+      "move_media_data_in_db": true
+    },
+    "server": {
+      "body_parser": {
+        "limit": "12mb"
+      }
+    },
+    "security": {
+      "mock": {
+        "defaultUsers": {
+          "enabled": false
+        }
+      }
+    },
+    "requires": {
+      "db": {
+        "[development]": {
+          "kind": "sqlite",
+          "credentials": {
+            "url": "db.sqlite"
+          }
+        }
+      },
+      "auth": {
+        "[development]": {
+          "kind": "mocked",
+          "users": {
+            "DonHV": {
+              "roles": [
+                "PM",
+                "authenticated-user"
+              ]
+            },
+            "SangVN": {
+              "roles": [
+                "DEVELOPER",
+                "authenticated-user"
+              ]
+            },
+            "DatDT": {
+              "roles": [
+                "DEVELOPER",
+                "authenticated-user"
+              ]
+            },
+            "NhanT": {
+              "roles": [
+                "TESTER",
+                "authenticated-user"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
