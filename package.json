@@ -27,7 +27,9 @@
     "sap490:generate:retest-pack": "python scripts/sap490/generate-retest-aligned-artifacts.py",
     "qa:comments-attachments:http": "powershell -ExecutionPolicy Bypass -File scripts/qa/test-comments-attachments.ps1",
     "qa:comments-attachments:programmatic": "node scripts/qa/test-comments-attachments-programmatic.js",
+    "qa:developer-workload:programmatic": "node scripts/qa/test-developer-workload-programmatic.js",
     "qa:direct-assignee:http": "powershell -ExecutionPolicy Bypass -File scripts/qa/test-direct-assignee-draft-save.ps1",
+    "qa:pm-monitoring:programmatic": "node scripts/qa/test-pm-monitoring-programmatic.js",
     "watch-bug-management-ui": "cds watch --open idts.bugmanagementui/index.html?sap-ui-xx-viewCache=false --livereload false"
   },
   "sapux": [

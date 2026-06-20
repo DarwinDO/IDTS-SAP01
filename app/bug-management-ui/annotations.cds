@@ -111,8 +111,15 @@ annotate service.Bugs with @(
     applicationComponent_ID,
     defectCategory_ID,
     assignee_ID,
+    nextProcessorUser_ID,
     nextProcessorRole_code,
-    dueDate
+    dueDate,
+    createdAt,
+    modifiedAt,
+    isOverdue,
+    isPendingAssignment,
+    isRejectedFollowUp,
+    isRetestRequired
   ],
   UI.LineItem : [
     { $Type : 'UI.DataField', Label : 'Bug Number', Value : bugNumber },
@@ -379,6 +386,8 @@ annotate service.Bugs with {
   actualResult          @UI.MultiLineText @Common.Label : 'Actual Result' @Common.FieldControl : #Mandatory;
   expectedResult        @UI.MultiLineText @Common.Label : 'Expected Result' @Common.FieldControl : #Mandatory;
   rejectionReason       @UI.MultiLineText @Common.Label : 'Rejection Reason' @Common.FieldControl : #ReadOnly;
+  createdAt             @Common.Label : 'Created At' @Common.FieldControl : #ReadOnly @UI.HiddenFilter : false;
+  modifiedAt            @Common.Label : 'Updated At' @Common.FieldControl : #ReadOnly @UI.HiddenFilter : false;
   dueDate               @Common.Label : 'Due Date';
   status                @Common.Label : 'Status' @Common.FieldControl : #ReadOnly;
   priority              @Common.Label : 'Priority' @Common.FieldControl : #Mandatory;
@@ -396,6 +405,11 @@ annotate service.Bugs with {
   nextProcessorUserDisplayName @Common.Label : 'Next Processor User' @Common.FieldControl : #ReadOnly @Core.Computed;
   nextProcessorRole     @Common.Label : 'Next Processor Role' @Common.FieldControl : #ReadOnly;
   nextProcessorRoleName @Common.Label : 'Next Processor Role' @Common.FieldControl : #ReadOnly @Core.Computed;
+  currentActionOwnerDisplayName @Common.Label : 'Current Action Owner' @Common.FieldControl : #ReadOnly @Core.Computed;
+  isOverdue             @Common.Label : 'Overdue' @Common.FieldControl : #ReadOnly @Core.Computed;
+  isPendingAssignment   @Common.Label : 'Pending Assignment' @Common.FieldControl : #ReadOnly @Core.Computed;
+  isRejectedFollowUp    @Common.Label : 'Rejected Follow-up' @Common.FieldControl : #ReadOnly @Core.Computed;
+  isRetestRequired      @Common.Label : 'Retest Required' @Common.FieldControl : #ReadOnly @Core.Computed;
   plannedCompletionDate @Common.Label : 'Planned Completion Date';
   estimatedEffortHours  @Common.Label : 'Estimated Effort Hours';
   componentCategory     @UI.Hidden @Core.Computed;
@@ -640,7 +654,30 @@ annotate service.Bugs:reporter.ID with @Common.FieldControl : #ReadOnly @Common.
     ]
   };
 
-annotate service.Bugs:nextProcessorUser.ID with @Common.FieldControl : #ReadOnly;
+annotate service.Bugs:nextProcessorUser.ID with @Common.FieldControl : #ReadOnly @Common.ValueList : {
+    Label : 'Next Processor User',
+    CollectionPath : 'Users',
+    SearchSupported : true,
+    Parameters : [
+      {
+        $Type : 'Common.ValueListParameterInOut',
+        LocalDataProperty : nextProcessorUser_ID,
+        ValueListProperty : 'ID'
+      },
+      {
+        $Type : 'Common.ValueListParameterDisplayOnly',
+        ValueListProperty : 'displayName'
+      },
+      {
+        $Type : 'Common.ValueListParameterDisplayOnly',
+        ValueListProperty : 'email'
+      },
+      {
+        $Type : 'Common.ValueListParameterDisplayOnly',
+        ValueListProperty : 'role_code'
+      }
+    ]
+  };
 
 annotate service.Bugs:nextProcessorRole.code with @Common.FieldControl : #ReadOnly @Common.ValueList : {
     Label : 'Next Processor Role',
@@ -989,6 +1026,11 @@ annotate service.Bugs actions {
       'nextProcessorRole_code',
       'nextProcessorUserDisplayName',
       'nextProcessorRoleName',
+      'currentActionOwnerDisplayName',
+      'isOverdue',
+      'isPendingAssignment',
+      'isRejectedFollowUp',
+      'isRetestRequired',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1016,6 +1058,11 @@ annotate service.Bugs actions {
       'nextProcessorRole_code',
       'nextProcessorUserDisplayName',
       'nextProcessorRoleName',
+      'currentActionOwnerDisplayName',
+      'isOverdue',
+      'isPendingAssignment',
+      'isRejectedFollowUp',
+      'isRetestRequired',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1043,6 +1090,11 @@ annotate service.Bugs actions {
       'nextProcessorRole_code',
       'nextProcessorUserDisplayName',
       'nextProcessorRoleName',
+      'currentActionOwnerDisplayName',
+      'isOverdue',
+      'isPendingAssignment',
+      'isRejectedFollowUp',
+      'isRetestRequired',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1070,6 +1122,11 @@ annotate service.Bugs actions {
       'nextProcessorRole_code',
       'nextProcessorUserDisplayName',
       'nextProcessorRoleName',
+      'currentActionOwnerDisplayName',
+      'isOverdue',
+      'isPendingAssignment',
+      'isRejectedFollowUp',
+      'isRetestRequired',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1097,6 +1154,11 @@ annotate service.Bugs actions {
       'nextProcessorRole_code',
       'nextProcessorUserDisplayName',
       'nextProcessorRoleName',
+      'currentActionOwnerDisplayName',
+      'isOverdue',
+      'isPendingAssignment',
+      'isRejectedFollowUp',
+      'isRetestRequired',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1124,6 +1186,11 @@ annotate service.Bugs actions {
       'nextProcessorRole_code',
       'nextProcessorUserDisplayName',
       'nextProcessorRoleName',
+      'currentActionOwnerDisplayName',
+      'isOverdue',
+      'isPendingAssignment',
+      'isRejectedFollowUp',
+      'isRetestRequired',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1151,6 +1218,11 @@ annotate service.Bugs actions {
       'nextProcessorRole_code',
       'nextProcessorUserDisplayName',
       'nextProcessorRoleName',
+      'currentActionOwnerDisplayName',
+      'isOverdue',
+      'isPendingAssignment',
+      'isRejectedFollowUp',
+      'isRetestRequired',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1178,6 +1250,11 @@ annotate service.Bugs actions {
       'nextProcessorRole_code',
       'nextProcessorUserDisplayName',
       'nextProcessorRoleName',
+      'currentActionOwnerDisplayName',
+      'isOverdue',
+      'isPendingAssignment',
+      'isRejectedFollowUp',
+      'isRetestRequired',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1205,6 +1282,11 @@ annotate service.Bugs actions {
       'nextProcessorRole_code',
       'nextProcessorUserDisplayName',
       'nextProcessorRoleName',
+      'currentActionOwnerDisplayName',
+      'isOverdue',
+      'isPendingAssignment',
+      'isRejectedFollowUp',
+      'isRetestRequired',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1230,6 +1312,13 @@ annotate service.Bugs actions {
       'assigneeDisplayName',
       'nextProcessorUser_ID',
       'nextProcessorRole_code',
+      'nextProcessorUserDisplayName',
+      'nextProcessorRoleName',
+      'currentActionOwnerDisplayName',
+      'isOverdue',
+      'isPendingAssignment',
+      'isRejectedFollowUp',
+      'isRetestRequired',
       'canAssign',
       'canMoveToPending',
       'canResubmit',
@@ -1243,7 +1332,7 @@ annotate service.Bugs actions {
       'canClose',
       'canReopen'
     ],
-    TargetEntities : [historyEvents, notifications]
+    TargetEntities : [status, historyEvents, notifications]
   }
   reopenBug(
     reason @UI.MultiLineText @Common.Label : 'Reason'
@@ -1360,6 +1449,6 @@ annotate service.Bugs with @(
   },
   Common.SideEffects #AssigneeDisplayNameRefresh: {
     SourceProperties : [assignee_ID],
-    TargetProperties : ['assigneeDisplayName']
+    TargetProperties : ['assigneeDisplayName', 'currentActionOwnerDisplayName']
   }
 );

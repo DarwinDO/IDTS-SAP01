@@ -875,6 +875,8 @@ Developer không nên tự đóng bug nếu quy trình yêu cầu Tester/PM xác
 
 `nextProcessor` là người cần thực hiện bước tiếp theo trên bug. Đây không phải role mới và không thay thế `assignee`.
 
+UI wording baseline: show `Assignee (Technical Owner)` for the developer owner and `Current Action Owner` for the person or queue that must act now.
+
 | Status / Action | nextProcessor hợp lý |
 | ----- | ----- |
 | Bug được assign | Developer được assign |

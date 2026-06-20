@@ -176,6 +176,7 @@ const READ_ONLY_ENTITY_NAMES = [
   'ComponentCategories',
   'DeveloperResponsibilities',
   'AssignableDevelopers',
+  'DeveloperWorkloads',
   'ValidDefectCategories',
   'UserRoles',
   'StatusValues',

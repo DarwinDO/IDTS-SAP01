@@ -7,8 +7,11 @@ const {
   CAPABILITY_FIELDS,
   COMMENT_ROLES,
   COORDINATOR_ROLES,
+  DEVELOPER_STATUSES,
   FIELD_CONTROL,
+  PROCESSOR_ROLE,
   STATUS,
+  TESTER_STATUSES,
   USER_ROLE
 } = require('./constants')
 
@@ -16,6 +19,14 @@ const {
   resolveRequestUser,
   trimToNull
 } = require('./helpers')
+
+const DISPLAY_FIELDS = new Set([
+  'reporterDisplayName',
+  'assigneeDisplayName',
+  'nextProcessorUserDisplayName',
+  'nextProcessorRoleName',
+  'currentActionOwnerDisplayName'
+])
 
 async function readAssignableDevelopers (req, entities) {
   const tx = cds.tx(req)
@@ -249,6 +260,60 @@ async function enrichBugDisplayFields (bugs, req, entities) {
     row.assigneeDisplayName = row.assignee_ID ? profileNameByID.get(row.assignee_ID) || null : null
     row.nextProcessorUserDisplayName = row.nextProcessorUser_ID ? userNameByID.get(row.nextProcessorUser_ID) || null : null
     row.nextProcessorRoleName = row.nextProcessorRole_code ? roleNameByCode.get(row.nextProcessorRole_code) || null : null
+    row.currentActionOwnerDisplayName = deriveCurrentActionOwnerDisplayName(row)
+  }
+}
+
+function deriveCurrentActionOwnerDisplayName (row) {
+  const status = row.status_code
+  if (!status || status === STATUS.CLOSED) return null
+
+  if (DEVELOPER_STATUSES.has(status)) {
+    return row.assigneeDisplayName ||
+      row.nextProcessorUserDisplayName ||
+      currentActionOwnerQueueLabel(row.nextProcessorRole_code, row.nextProcessorRoleName)
+  }
+
+  if (status === STATUS.PENDING_ASSIGNMENT) {
+    return currentActionOwnerQueueLabel(row.nextProcessorRole_code, row.nextProcessorRoleName) ||
+      row.nextProcessorUserDisplayName ||
+      null
+  }
+
+  if (TESTER_STATUSES.has(status)) {
+    if (row.nextProcessorRole_code === PROCESSOR_ROLE.PM || row.nextProcessorRole_code === PROCESSOR_ROLE.UNASSIGNED_QUEUE) {
+      return currentActionOwnerQueueLabel(row.nextProcessorRole_code, row.nextProcessorRoleName) ||
+        row.nextProcessorUserDisplayName ||
+        null
+    }
+
+    return row.nextProcessorUserDisplayName ||
+      currentActionOwnerQueueLabel(row.nextProcessorRole_code, row.nextProcessorRoleName) ||
+      row.reporterDisplayName ||
+      null
+  }
+
+  return row.nextProcessorUserDisplayName ||
+    currentActionOwnerQueueLabel(row.nextProcessorRole_code, row.nextProcessorRoleName) ||
+    null
+}
+
+function currentActionOwnerQueueLabel (roleCode, roleName) {
+  if (!roleCode) return roleName || null
+
+  switch (roleCode) {
+    case PROCESSOR_ROLE.PM:
+      return roleName || 'Project Manager'
+    case PROCESSOR_ROLE.UNASSIGNED_QUEUE:
+      return roleName || 'Unassigned Queue'
+    case PROCESSOR_ROLE.TESTER:
+      return roleName || 'Tester'
+    case PROCESSOR_ROLE.DEVELOPER:
+      return roleName || 'Developer'
+    case PROCESSOR_ROLE.NONE:
+      return null
+    default:
+      return roleName || null
   }
 }
 
@@ -256,6 +321,7 @@ async function fillMissingBugDisplayKeys (rows, req, entities) {
   const rowsNeedingLookup = rows
     .filter(row =>
       row.ID && (
+        row.status_code === undefined ||
         row.reporter_ID === undefined ||
         row.assignee_ID === undefined ||
         row.nextProcessorUser_ID === undefined ||
@@ -267,6 +333,7 @@ async function fillMissingBugDisplayKeys (rows, req, entities) {
   await fillMissingBugDisplayKeysFromEntity(rowsNeedingLookup, entities.Bugs.drafts, req)
   await fillMissingBugDisplayKeysFromEntity(
     rowsNeedingLookup.filter(row =>
+      row.status_code === undefined ||
       row.reporter_ID === undefined ||
       row.assignee_ID === undefined ||
       row.nextProcessorUser_ID === undefined ||
@@ -282,7 +349,7 @@ async function fillMissingBugDisplayKeysFromEntity (rows, entity, req) {
 
   const bugs = await cds.tx(req).run(
     SELECT.from(entity)
-      .columns('ID', 'reporter_ID', 'assignee_ID', 'nextProcessorUser_ID', 'nextProcessorRole_code')
+      .columns('ID', 'status_code', 'reporter_ID', 'assignee_ID', 'nextProcessorUser_ID', 'nextProcessorRole_code')
       .where({ ID: { in: rows.map(row => row.ID) } })
   )
   const bugByID = new Map(bugs.map(bug => [bug.ID, bug]))
@@ -290,6 +357,7 @@ async function fillMissingBugDisplayKeysFromEntity (rows, entity, req) {
   for (const row of rows) {
     const bug = bugByID.get(row.ID)
     if (!bug) continue
+    if (row.status_code === undefined) row.status_code = bug.status_code
     if (row.reporter_ID === undefined) row.reporter_ID = bug.reporter_ID
     if (row.assignee_ID === undefined) row.assignee_ID = bug.assignee_ID
     if (row.nextProcessorUser_ID === undefined) row.nextProcessorUser_ID = bug.nextProcessorUser_ID
@@ -375,9 +443,24 @@ function ensureCapabilitySelectDependencies (req) {
   )
 
   const requestsCapabilityField = [...CAPABILITY_FIELDS].some(field => selectedRefs.has(field))
-  if (!requestsCapabilityField) return
+  const requestsDisplayField = [...DISPLAY_FIELDS].some(field => selectedRefs.has(field))
+  if (!requestsCapabilityField && !requestsDisplayField) return
 
-  for (const dependency of ['ID', 'status_code', 'assignee_ID']) {
+  const dependencies = new Set()
+
+  if (requestsCapabilityField) {
+    for (const dependency of ['ID', 'status_code', 'assignee_ID']) {
+      dependencies.add(dependency)
+    }
+  }
+
+  if (requestsDisplayField) {
+    for (const dependency of ['ID', 'status_code', 'reporter_ID', 'assignee_ID', 'nextProcessorUser_ID', 'nextProcessorRole_code']) {
+      dependencies.add(dependency)
+    }
+  }
+
+  for (const dependency of dependencies) {
     if (!selectedRefs.has(dependency)) {
       columns.push({ ref: [dependency] })
       selectedRefs.add(dependency)

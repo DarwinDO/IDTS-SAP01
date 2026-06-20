@@ -60,6 +60,8 @@ const {
   readAssignableDevelopers
 } = require('./bug-service/read-models')
 
+const { readDeveloperWorkloads } = require('./bug-service/monitoring')
+
 module.exports = class BugService extends cds.ApplicationService {
   async init () {
     const entities = this.entities
@@ -108,6 +110,7 @@ module.exports = class BugService extends cds.ApplicationService {
     })
 
     this.on('READ', entities.AssignableDevelopers, req => readAssignableDevelopers(req, entities))
+    this.on('READ', entities.DeveloperWorkloads, req => readDeveloperWorkloads(req, entities))
     this.on('SAVE', Bugs.drafts, (req, next) => handleDraftSave(req, entities, next))
 
     this.on('assignToDeveloper', req => assignToDeveloper(req, entities))

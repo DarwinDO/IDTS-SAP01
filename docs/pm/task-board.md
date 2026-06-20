@@ -1,6 +1,6 @@
 # IDTS Task Board
 
-Last updated: 2026-06-18
+Last updated: 2026-06-20
 
 Use this board for high-level movement only. Detailed task notes belong in the matching file under `docs/pm/tasks/`.
 
@@ -41,26 +41,26 @@ Vietnamese:
 | ID | Task | Primary member | Support / review | Detail file |
 | --- | --- | --- | --- | --- |
 | WP5 | Comments and History | SangVN, DatDT | DonHV, NhanT | `tasks/wp5-comments-history.md` |
-| WP6 | PM Monitoring | DatDT, SangVN | DonHV, NhanT | `tasks/wp6-pm-monitoring.md` |
 
 Vietnamese:
 
 | ID | Công việc | Thành viên chính | Hỗ trợ / review | File chi tiết |
 | --- | --- | --- | --- | --- |
 | WP5 | Comments và History | SangVN, DatDT | DonHV, NhanT | `tasks/wp5-comments-history.md` |
-| WP6 | PM Monitoring | DatDT, SangVN | DonHV, NhanT | `tasks/wp6-pm-monitoring.md` |
 
 ## In Progress
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
 | SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP, and real browser QA are now stable enough to prove the happy flow. Remaining work is final SAP490 sync and mentor-demo rerun, not FE/blocking workflow repair. |
+| WP6 | PM Monitoring | DonHV, DatDT, SangVN | Ownership wording is locked; backend `Current Action Owner`, derived monitoring flags, and the read-only `DeveloperWorkloads` aggregate are now implemented and verified. FE monitoring views/filter variants/browser UAT remain pending. |
 
 Vietnamese:
 
 | ID | Công việc | Thành viên chính | Ghi chú |
 | --- | --- | --- | --- |
 | SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP và browser QA thật hiện đã đủ để chứng minh happy flow chính. Phần còn lại là sync SAP490 cuối và rerun demo mentor, không còn là sửa FE hay workflow blocking. |
+| WP6 | PM Monitoring | DonHV, DatDT, SangVN | Sprint 3 ownership wording đã chốt; backend `Current Action Owner` và các monitoring flag dẫn xuất đã implement + verify; phần còn lại là FE monitoring views/filter variants và browser UAT. |
 
 ## Blocked
 
