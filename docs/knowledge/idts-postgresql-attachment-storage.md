@@ -69,42 +69,37 @@ The PostgreSQL proof showed this early: after a tiny 42-byte draft attachment up
 | PostgreSQL large object style | Use PostgreSQL-specific large object storage and keep an object ID/reference in DB. | Better for large binaries inside PostgreSQL ecosystem; avoids huge row values. | PostgreSQL-specific; less portable to HANA; CAP does not model this as cleanly as normal CDS `LargeBinary`; adds raw DB coupling. | Not recommended for IDTS while portability to HANA/PostgreSQL remains a goal. |
 | Hybrid threshold | Store small files in DB, large files externally based on size limit. | Simple small-file path; prevents very large DB growth. | Two storage paths to test; more edge cases; migration complexity. | Viable later, but more complex than IDTS needs right now. |
 
-## Recommendation
+## Approved direction and CAP compatibility finding
 
-For the current IDTS MVP:
+DonHV approved the long-term external object-storage direction on 2026-06-21.
 
 1. Keep SQLite as the default local development DB.
 2. Do not promote PostgreSQL as a supported runtime profile until the draft/media activation blocker is resolved.
-3. Keep `Attachments.content : LargeBinary` for the current demo only if the team accepts small test files and SQLite-focused evidence.
-4. For PostgreSQL/HANA production-style readiness, prefer moving toward metadata-in-DB plus external object/file storage.
+3. Keep the current `Attachments.content : LargeBinary` path only as temporary local/demo compatibility.
+4. Implement the target through the SAP-supported `@cap-js/attachments` plugin instead of building a generic custom storage abstraction first.
+5. Use a dedicated object-store binding for PostgreSQL/HANA production-style verification so file bytes stay outside the relational DB.
+
+Compatibility evidence:
+
+- Installed and latest available versions at investigation time are `@sap/cds 9.9.1`, `@sap/cds-dk 9.9.2`, and `@cap-js/postgres 2.3.0`; a package upgrade does not directly remove the current blocker.
+- `@cap-js/attachments 3.12.2` supports CAP Node.js 8 or newer and is Apache-2.0 licensed.
+- The plugin supports Fiori draft attachment handling, streaming, maximum file-size validation, MIME restrictions, and object-store implementations for AWS S3, Azure Blob Storage, and GCP Cloud Storage through SAP Object Store bindings.
+- When a dedicated storage target is bound, only attachment metadata/reference data remains in the relational database.
+- The plugin's local fallback stores attachment bytes in the local database. Therefore, PostgreSQL acceptance for the long-term architecture must use a non-DB storage target or a controlled provider test setup.
 
 ## Phase 3 plan
 
-Phase 3 should be a decision and implementation-planning phase, not an immediate migration.
+The decision step is complete. Implementation is tracked in Jira `IDTS-31`.
 
-1. Confirm target deployment posture:
-   - Demo-only local development.
-   - PostgreSQL as team dev/test profile.
-   - HANA/PostgreSQL production-style portability.
-
-2. Decide attachment storage:
-   - Keep DB binary temporarily with file-size limits.
-   - Move to metadata + external storage.
-   - Defer external storage and mark PostgreSQL as blocked for attachment draft flows.
-
-3. Create a focused technical spike if external storage is selected:
-   - Add a storage adapter boundary in `srv/bug-service/`.
-   - Keep `Attachments` metadata in CAP CDS.
-   - Store only `storageRef`, `fileName`, `mediaType`, and `fileSize` in DB.
-   - Stream upload/download through CAP handlers.
-   - Preserve history/audit for attachment upload.
-
-4. Add PostgreSQL-aware regression:
+1. Integrate `@cap-js/attachments` with the draft-enabled `BugService.Bugs` composition.
+2. Map or replace the current custom attachment entity and remove the active Fiori dependency on the custom persisted `LargeBinary`.
+3. Preserve IDTS-specific authorization, accepted MIME types, file-size limit, and history/audit behavior around the plugin lifecycle.
+4. Configure object-store binding only through CAP service binding/private environment configuration; never commit credentials or endpoints.
+5. Add PostgreSQL-aware regression:
    - Keep SQLite in-memory tests for fast local development.
-   - Add HTTP-based profile tests for PostgreSQL.
-   - Avoid claiming PostgreSQL support unless draft create/edit/activate and attachment upload/download pass.
-
-5. Update canonical docs only after the storage decision changes business/architecture meaning.
+   - Add HTTP-based profile tests for PostgreSQL with non-DB attachment storage.
+   - Require draft create/edit/activate, upload/download, history, and cleanup behavior to pass.
+6. Define migration handling for existing database attachment rows before removing the legacy path.
 
 ## Commands used in the proof
 
@@ -122,4 +117,3 @@ node .\node_modules\@sap\cds-dk\bin\cds.js serve all --profile postgres --port 4
 powershell -ExecutionPolicy Bypass -File scripts/qa/test-direct-assignee-draft-save.ps1 -BaseUrl http://localhost:4105/odata/v4/bug
 powershell -ExecutionPolicy Bypass -File scripts/qa/test-comments-attachments.ps1 -BaseUrl http://localhost:4105/odata/v4/bug -BugId 90000000-0000-0000-0000-000000000001
 ```
-

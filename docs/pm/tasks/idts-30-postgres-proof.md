@@ -1,6 +1,6 @@
 # IDTS-30 - PostgreSQL Local Proof and Attachment Storage Decision
 
-Status: In Progress / Phase 2 blocked by draft-media issue  
+Status: Done / implementation handed off to `IDTS-31`
 Owner: DonHV  
 Jira: `IDTS-30`  
 Last updated: 2026-06-21
@@ -90,29 +90,20 @@ Detailed storage analysis is documented in:
 
 - `docs/knowledge/idts-postgresql-attachment-storage.md`
 
-## Phase 3 Plan
+## Phase 3 Decision Result
 
-1. Decide the target:
-   - demo-only SQLite remains enough, or
-   - PostgreSQL becomes a supported team dev/test profile, or
-   - production-style HANA/PostgreSQL portability is required.
+DonHV approved the long-term direction:
 
-2. Decide attachment architecture:
-   - keep DB binary with strict upload size limits, or
-   - move to metadata in DB + external storage pointer, or
-   - defer attachment support in PostgreSQL until a storage adapter is built.
+- Keep attachment metadata/reference in CAP persistence.
+- Move file bytes to external object storage.
+- Prefer the SAP-supported `@cap-js/attachments` plugin over a custom generic storage adapter.
+- Preserve SQLite as the local default.
+- Do not promote PostgreSQL until attachment draft activation passes with a non-DB storage target.
 
-3. If choosing external storage:
-   - keep `Attachments` metadata in CDS,
-   - remove or stop using `content` as persisted DB binary for production profile,
-   - add a storage adapter in `srv/bug-service/`,
-   - stream upload/download through CAP service handlers,
-   - keep attachment history/audit unchanged.
+Compatibility investigation confirmed:
 
-4. Make QA profile-aware:
-   - preserve fast SQLite in-memory tests,
-   - add PostgreSQL live HTTP regression,
-   - only mark PostgreSQL support complete when draft activate, direct assignee draft save, comments, attachment upload/download, history, and PM monitoring all pass.
+- `@sap/cds 9.9.1`, `@sap/cds-dk 9.9.2`, and `@cap-js/postgres 2.3.0` are already the latest available versions at investigation time.
+- `@cap-js/attachments 3.12.2` supports the current CAP runtime and provides Fiori draft support, streaming, validation, and object-store providers.
+- Local plugin fallback still stores bytes in the database, so it does not by itself prove the target PostgreSQL architecture.
 
-5. Update canonical business/architecture docs after the storage decision is approved.
-
+Implementation is tracked in Jira `IDTS-31` and `docs/pm/tasks/idts-31-object-store-attachments.md`.

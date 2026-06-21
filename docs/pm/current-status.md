@@ -9,8 +9,8 @@ Last updated: 2026-06-21
 | Project phase | Sprint 02 baseline is stable in `dev`; Sprint 03 backend kickoff has started for ownership clarity and PM monitoring |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
 | Current sprint | Sprint 03 kickoff focuses on ownership wording, current action owner display, history readability, and PM monitoring usability |
-| Recommended next action | DatDT and SangVN should consume the now-ready backend ownership, grouped history, and PM monitoring contracts (`currentActionOwnerDisplayName`, `HistoryEvents.groupedChangeContext`, `HistoryEvents.changeCount`, derived monitoring flags, and `DeveloperWorkloads`) in the FE Object Page summary, timeline, filter variants, and monitoring views. |
-| Main implementation risk | Ownership semantics may remain confusing if FE labels and PM filters lag behind the backend contract and documented wording baseline. |
+| Recommended next action | Start `IDTS-31`: integrate the SAP-supported `@cap-js/attachments` path, preserve IDTS authorization/history behavior, and prove PostgreSQL draft attachment flow with non-DB object storage. |
+| Main implementation risk | The current custom `LargeBinary` draft flow still blocks PostgreSQL activation, while local fallback behavior of the CAP attachments plugin also stores bytes in DB unless an object-store target is bound. |
 
 ## What Is Already Done
 

@@ -66,7 +66,7 @@ Key baseline decisions:
 - Bug should store Application Component, Defect Category, and Component Category with backend consistency validation.
 - Rejected bugs should keep the latest `rejectionReason` on Bug and immutable rejection reasons in HistoryLogs.
 - User-facing history should be grouped as `HistoryEvents` with a readable summary, while `HistoryLogs` remains the append-only field-level audit trail under each event.
-- Attachments in MVP store file content in the database together with metadata and `storageRef`; external object storage can be deferred until deployment/storage requirements are explicit.
+- The approved long-term attachment target stores metadata/reference data in CAP persistence and file bytes in external object storage through the SAP-supported `@cap-js/attachments` path. The current custom database-binary implementation remains temporary for local/demo compatibility until Jira `IDTS-31` completes the migration.
 - Bugs should have a human-readable `bugNumber` in addition to UUID.
 - SAP Module remains optional context and optional assignment filter, not a mandatory field for every bug. For pure IDTS bugs, leave it empty instead of using a pseudo-value such as `Not Applicable`.
 - Duplicate checking stores confirmed Duplicate/Similar/Related links in `DuplicateLinks`; runtime candidates are not persisted in MVP.
@@ -82,7 +82,7 @@ Các quyết định chính:
 - Bug nên lưu Application Component, Defect Category và Component Category, kèm backend consistency validation.
 - Bug bị Rejected nên lưu `rejectionReason` mới nhất trên Bug và lưu reason bất biến trong HistoryLogs.
 - Lich su hien cho nguoi dung nen duoc nhom theo `HistoryEvents` co summary de doc nhanh, con `HistoryLogs` van la audit trail append-only o muc field cho moi event.
-- Attachment trong MVP lưu file content trong database cùng metadata và `storageRef`; thiết kế external object storage có thể defer đến khi deployment/storage requirement rõ ràng.
+- Hướng attachment dài hạn đã duyệt là lưu metadata/reference trong CAP persistence và lưu file bytes ở external object storage qua `@cap-js/attachments`. Cách lưu binary trong database hiện tại chỉ là implementation local/demo tạm thời cho đến khi Jira `IDTS-31` hoàn tất migration.
 - Bug nên có `bugNumber` dễ đọc ngoài UUID.
 - SAP Module là context tùy chọn và filter assignment tùy chọn, không bắt buộc cho mọi bug. Với bug thuần IDTS thì để trống, không dùng giá trị giả như `Not Applicable`.
 - Duplicate checking chỉ lưu link Duplicate/Similar/Related đã xác nhận trong `DuplicateLinks`; candidate runtime không persist trong MVP.
