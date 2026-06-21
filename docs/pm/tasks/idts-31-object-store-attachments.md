@@ -1,6 +1,6 @@
 # IDTS-31 - Object-Store-Backed Attachments
 
-Status: Ready
+Status: In Progress / plugin migration verified, shared object-store acceptance pending
 Owner: DonHV
 Jira: `IDTS-31`
 Dependency: `IDTS-30`
@@ -70,3 +70,31 @@ Replace the active custom binary-in-database attachment path with the SAP-suppor
 ## Open Deployment Input
 
 The implementation can start with plugin/model integration, but final target-profile verification requires one approved object-store environment or a controlled provider test setup. SAP Object Store binding with `kind: standard` is the preferred deployment-neutral option.
+
+## Implementation Result
+
+Completed:
+
+- Installed `@cap-js/attachments 3.12.2`.
+- Replaced the custom `idts.cap.Attachments` entity with the plugin-managed `Bugs.attachments` composition.
+- Added `fileSize`, 10 MB maximum, and the existing accepted MIME types.
+- Removed the legacy `cds.fiori.move_media_data_in_db=true` setting that caused PostgreSQL `decode(bytea, unknown)`.
+- Preserved Tester/Developer/PM upload authorization.
+- Adapted attachment history to plugin fields `up__ID` and `filename`.
+- Updated the HTTP regression to use `BugService.Bugs_attachments`.
+- Added profile `integration`, shared PostgreSQL config template, npm commands, and team setup documentation.
+
+Verified:
+
+- SQLite HTTP draft upload/activate/download/history: PASS.
+- PostgreSQL clean-database DB-fallback draft upload/activate/download/history: PASS.
+- PostgreSQL direct-assignee draft regression: PASS.
+- CAP compile and UI5 build: PASS.
+- Backend suites: happy flow `30/30`, history `13/13`, PM monitoring `20/20`, workload `36/36`, comments persistence PASS.
+
+Pending:
+
+- Provision or bind the shared object store.
+- Run the same HTTP attachment acceptance with `attachments.kind=standard`.
+- Confirm binary content is not stored in the PostgreSQL metadata table.
+- Decide the backup/export procedure for any legacy attachment rows before deploying to a database that contains the old tables.

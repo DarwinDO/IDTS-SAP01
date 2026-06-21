@@ -42,11 +42,11 @@ Vietnamese:
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
-| IDTS-31 | Object-store-backed attachment implementation | DonHV | Long-term direction approved. Ready to integrate `@cap-js/attachments`, preserve IDTS rules/history, and verify PostgreSQL draft activation with non-DB storage. |
+None currently.
 
 Vietnamese:
 
-`IDTS-31` đã sẵn sàng để DonHV triển khai hướng attachment dùng external object storage.
+Hiện chưa có work package nào ở trạng thái Ready.
 
 ## In Progress
 
@@ -54,6 +54,7 @@ Vietnamese:
 | --- | --- | --- | --- |
 | SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP, and real browser QA are now stable enough to prove the happy flow. Remaining work is final SAP490 sync and mentor-demo rerun, not FE/blocking workflow repair. |
 | WP6 | PM Monitoring | DonHV, DatDT, SangVN | Ownership wording is locked; backend `Current Action Owner`, derived monitoring flags, and the read-only `DeveloperWorkloads` aggregate are now implemented and verified. FE monitoring views/filter variants/browser UAT remain pending. |
+| IDTS-31 | Object-store-backed attachment implementation | DonHV | Plugin migration and SQLite/PostgreSQL DB-fallback regression pass. Shared PostgreSQL is selected; final external object-store binding and non-DB acceptance remain pending. |
 
 Vietnamese:
 

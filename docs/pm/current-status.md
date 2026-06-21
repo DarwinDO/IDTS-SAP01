@@ -9,8 +9,8 @@ Last updated: 2026-06-21
 | Project phase | Sprint 02 baseline is stable in `dev`; Sprint 03 backend kickoff has started for ownership clarity and PM monitoring |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
 | Current sprint | Sprint 03 kickoff focuses on ownership wording, current action owner display, history readability, and PM monitoring usability |
-| Recommended next action | Start `IDTS-31`: integrate the SAP-supported `@cap-js/attachments` path, preserve IDTS authorization/history behavior, and prove PostgreSQL draft attachment flow with non-DB object storage. |
-| Main implementation risk | The current custom `LargeBinary` draft flow still blocks PostgreSQL activation, while local fallback behavior of the CAP attachments plugin also stores bytes in DB unless an object-store target is bound. |
+| Recommended next action | Provision/bind the shared external object store for profile `integration`, then run the final non-DB attachment acceptance against the team shared PostgreSQL environment. |
+| Main implementation risk | Code and PostgreSQL DB-fallback regression pass, but final external object-storage acceptance depends on a shared object-store service binding and coordinated migration from legacy attachment tables. |
 
 ## What Is Already Done
 
@@ -79,7 +79,7 @@ Last updated: 2026-06-21
 - WP6 backend now also exposes a read-only `BugService.DeveloperWorkloads` aggregate for PM monitoring. The new service contract is assignee-based, keeps active zero-load developers visible, retains inactive developers only while they still own open bugs, and passed fresh programmatic verification with `36 PASS / 0 FAIL`.
 - `HistoryEvents` now also exposes read-only grouped timeline support for Sprint 3 (`groupedChangeContext`, `changeCount`) while `HistoryLogs` remains the raw field-level audit detail source. Fresh programmatic verification passed `13 PASS / 0 FAIL` across assign, resubmit, reject, pending-assignment, close, and generic edit scenarios.
 - IDTS-28 service refactor is merged into `dev` through GitHub PR #5 at merge commit `9129ae8bb3fb22502260b3a435ad5df14fdf8108`. Local verification passed syntax checks, CAP compile, UI5 build, backend happy-flow, history-events, PM monitoring, developer workload, comments/attachments, and `git diff --check`. Jira `IDTS-28` remains In Progress only until IDTS-23 and IDTS-24 retest closure evidence is attached.
-- IDTS-30 PostgreSQL proof is in progress. PostgreSQL Phase 1 deploy passed with `@cap-js/postgres`, but Phase 2 HTTP regression found a blocker: draft activation fails for attachment media content with `function decode(bytea, unknown) does not exist`. SQLite remains the default local runtime until the attachment storage decision is made.
+- IDTS-31 implementation now uses `@cap-js/attachments`, removes the legacy `move_media_data_in_db` path, preserves 10 MB/MIME/role/history rules, and passes SQLite plus PostgreSQL DB-fallback attachment draft regression. The team selected one shared PostgreSQL integration database; final external object-store verification remains pending service binding.
 
 Vietnamese:
 

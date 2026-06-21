@@ -143,86 +143,11 @@ function bugIDFrom (req) {
   return req.params?.[0]?.ID || req.data?.ID
 }
 
-function attachmentIDFrom (req) {
-  return req.params?.[0]?.ID || req.data?.ID
-}
-
 function trimToNull (value) {
   if (value === null || value === undefined) return null
   if (typeof value !== 'string') return value
   const trimmed = value.trim()
   return trimmed || null
-}
-
-function normalizeMediaType (value) {
-  const normalized = trimToNull(value)
-  if (!normalized || typeof normalized !== 'string') return normalized
-  return normalized.split(';')[0].trim().toLowerCase()
-}
-
-function isEnvelopeMediaType (mediaType) {
-  return mediaType === 'multipart/mixed' || mediaType === 'application/json'
-}
-
-function requestHeaders (req) {
-  return req.http?.req?.headers || {}
-}
-
-function hasAttachmentPayload (attachment) {
-  if (!attachment) return false
-  if (attachment.content != null) return true
-  return Number.isFinite(Number(attachment.fileSize)) && Number(attachment.fileSize) > 0
-}
-
-async function readAttachment (req, entity, attachmentID) {
-  if (!entity || !attachmentID) return null
-  return cds.tx(req).run(
-    SELECT.one.from(entity)
-      .columns('ID', 'bug_ID', 'uploadedBy_ID', 'fileName', 'mediaType', 'fileSize', 'content')
-      .where({ ID: attachmentID })
-  )
-}
-
-function isAttachmentContentRequest (req) {
-  const path = req.http?.req?.path || req.http?.req?.originalUrl || ''
-  return typeof path === 'string' && /\/content(?:\?|$)/.test(path)
-}
-
-async function extractAttachmentContent (req) {
-  const body = req.http?.req?.body
-
-  if (Buffer.isBuffer(body)) return body
-  if (typeof body === 'string') return Buffer.from(body)
-  if (body instanceof Uint8Array) return Buffer.from(body)
-  if (body instanceof ArrayBuffer) return Buffer.from(body)
-
-  const stream = req.http?.req
-  if (!stream || typeof stream.on !== 'function' || stream.readableEnded) return null
-
-  const chunks = []
-  for await (const chunk of stream) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
-  }
-
-  if (!chunks.length) return null
-  return Buffer.concat(chunks)
-}
-
-function fileNameFromHeaders (headers) {
-  const candidates = [
-    headers?.slug,
-    headers?.['x-file-name'],
-    parseFileNameFromContentDisposition(headers?.['content-disposition'])
-  ]
-
-  return candidates.map(trimToNull).find(Boolean) || null
-}
-
-function parseFileNameFromContentDisposition (contentDisposition) {
-  if (!contentDisposition || typeof contentDisposition !== 'string') return null
-  const match = contentDisposition.match(/filename\*?=(?:UTF-8''|")?([^";]+)/i)
-  if (!match?.[1]) return null
-  return decodeURIComponent(match[1].replace(/"/g, '').trim())
 }
 
 function reasonTarget () {
@@ -248,17 +173,7 @@ module.exports = {
   firstUserByRole,
   userIDForDeveloper,
   bugIDFrom,
-  attachmentIDFrom,
   trimToNull,
-  normalizeMediaType,
-  isEnvelopeMediaType,
-  requestHeaders,
-  hasAttachmentPayload,
-  readAttachment,
-  isAttachmentContentRequest,
-  extractAttachmentContent,
-  fileNameFromHeaders,
-  parseFileNameFromContentDisposition,
   reasonTarget,
   toHistoryValue
 }
