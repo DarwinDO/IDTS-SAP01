@@ -74,6 +74,15 @@ cds bind objectStore --to <shared-object-store-service-instance>
 
 The generated private binding must remain outside source control. Until the shared object store is available, developers can verify the plugin locally with SQLite/DB fallback, but that does not prove the final external-storage architecture.
 
+Verified AWS S3 setup:
+
+- Create a private bucket with all public access blocked.
+- Create a dedicated IAM service user with access limited to that bucket.
+- Never use root-user access keys.
+- Keep `bucket`, `region`, `access_key_id`, and `secret_access_key` only in `.cdsrc-private.json` under `requires.objectStore.credentials`.
+- The repository example contains placeholders only. Do not paste real keys into Git, Jira, chat, screenshots, logs, or shared documentation.
+- AWS S3 acceptance passed with PostgreSQL metadata/reference storage and binary bytes outside PostgreSQL.
+
 ## Migration from the Legacy Attachment Tables
 
 The old custom model used:
