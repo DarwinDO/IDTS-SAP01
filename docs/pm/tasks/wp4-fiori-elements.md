@@ -322,3 +322,4 @@ Vietnamese:
 - So sánh normalized compiled CSN trước/sau khi tách; cả hai có SHA-256 `bc04ad74370d83b916b7f14d8778df302d740293dafeb6edf5ee4110995271c7`.
 - Không nhận 49 build artifact bị track trong `gen/srv` và thêm `gen/` vào `.gitignore`.
 - Verification mới đã pass: CAP compile, UI5 build, backend regression `30 PASS / 0 FAIL`, programmatic QA comments/attachments, HTTP QA direct-assignee, HTTP QA comments/attachments, và Playwright UAT cho List Report cùng toàn bộ section Object Page mong đợi.
+- Jira `IDTS-29` was moved to Done after evidence comment `10153`.
