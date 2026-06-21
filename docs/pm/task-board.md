@@ -22,6 +22,7 @@ Vietnamese: Chỉ dùng board này để theo dõi trạng thái cấp cao. Chi 
 | WP5 | Comments and History | Grouped `HistoryEvents` read model, comments/attachments audit baseline, and Sprint 3 grouped history payload support completed for backend handoff |
 | WP7 | Notifications and Attachments | Backend persistence, in-app notifications, create-time attachment visibility, and browser happy-flow verification completed |
 | IDTS-30 | PostgreSQL local proof and attachment storage decision | PostgreSQL deploy/read proof completed, draft-media blocker documented, long-term object-storage direction approved, and implementation handed off to `IDTS-31` |
+| IDTS-31 | Object-store-backed attachment implementation | Native AWS S3 acceptance passed with PostgreSQL metadata/reference, external binary storage, upload/activate/download/history/delete cleanup, and full regression evidence |
 
 Vietnamese:
 
@@ -37,6 +38,8 @@ Vietnamese:
 | WP3 | Handler Rules và Validation | Đã hoàn thành CAP handler rules cho create/update, assignment, status transition, nextProcessor, history và notifications |
 | WP4 | Fiori Elements UX | Core UX đã hoàn thành; refactor annotation theo module của `IDTS-29` đã được tích hợp với metadata tương đương, UI5 build sạch, regression tự động và browser UAT cho List Report/Object Page |
 | WP7 | Notifications và Attachments | Đã xác nhận lưu trữ backend, bản ghi thông báo trong ứng dụng, và kiểm thử E2E comment/upload trên browser thành công. |
+
+| IDTS-31 | Attachment using object storage | AWS S3 acceptance passed: PostgreSQL stores metadata/reference, S3 stores binary content, and upload/activate/download/history/delete cleanup plus full regression were verified. |
 
 ## Ready
 
@@ -54,7 +57,6 @@ Hiện chưa có work package nào ở trạng thái Ready.
 | --- | --- | --- | --- |
 | SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP, and real browser QA are now stable enough to prove the happy flow. Remaining work is final SAP490 sync and mentor-demo rerun, not FE/blocking workflow repair. |
 | WP6 | PM Monitoring | DonHV, DatDT, SangVN | Ownership wording is locked; backend `Current Action Owner`, derived monitoring flags, and the read-only `DeveloperWorkloads` aggregate are now implemented and verified. FE monitoring views/filter variants/browser UAT remain pending. |
-| IDTS-31 | Object-store-backed attachment implementation | DonHV | Plugin migration and SQLite/PostgreSQL DB-fallback regression pass. Shared PostgreSQL is selected; 2026-06-21 readiness check confirmed the local machine still lacks integration PostgreSQL credentials and object-store binding, so final non-DB acceptance remains pending. |
 
 Vietnamese:
 
