@@ -1,6 +1,6 @@
 # IDTS Task Board
 
-Last updated: 2026-06-20
+Last updated: 2026-06-21
 
 Use this board for high-level movement only. Detailed task notes belong in the matching file under `docs/pm/tasks/`.
 
@@ -19,6 +19,7 @@ Vietnamese: Chỉ dùng board này để theo dõi trạng thái cấp cao. Chi 
 | WP2 | Service and Value Help | OData V4 service actions, value help annotations, and metadata compile completed |
 | WP3 | Handler Rules and Validation | CAP handler rules for create/update, assignment, status transition, nextProcessor, history, and notifications completed |
 | WP4 | Fiori Elements UX | Core layout, dynamic creation hiding, assignee value help, mock-login QA, local Comments CTA, and Assign Developer selected-text verification completed on the current live stack |
+| WP5 | Comments and History | Grouped `HistoryEvents` read model, comments/attachments audit baseline, and Sprint 3 grouped history payload support completed for backend handoff |
 | WP7 | Notifications and Attachments | Backend persistence, in-app notifications, create-time attachment visibility, and browser happy-flow verification completed |
 
 Vietnamese:
@@ -38,15 +39,11 @@ Vietnamese:
 
 ## Ready
 
-| ID | Task | Primary member | Support / review | Detail file |
-| --- | --- | --- | --- | --- |
-| WP5 | Comments and History | SangVN, DatDT | DonHV, NhanT | `tasks/wp5-comments-history.md` |
+None currently.
 
 Vietnamese:
 
-| ID | Công việc | Thành viên chính | Hỗ trợ / review | File chi tiết |
-| --- | --- | --- | --- | --- |
-| WP5 | Comments và History | SangVN, DatDT | DonHV, NhanT | `tasks/wp5-comments-history.md` |
+Hiện chưa có work package nào ở trạng thái Ready.
 
 ## In Progress
 

@@ -89,7 +89,9 @@ service BugService @(requires: 'authenticated-user') {
     *,
     actor.displayName as actorDisplayName,
     actorRole.name as actorRoleName,
-    actionType.name as actionTypeName
+    actionType.name as actionTypeName,
+    virtual changeCount : Integer,
+    virtual groupedChangeContext : String(1000)
   };
   entity HistoryLogs as projection on db.HistoryLogs {
     *,

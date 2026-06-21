@@ -2,7 +2,7 @@
 
 Status: Completed for Sprint 1 MVP; Sprint 02 backend refinements and SAP490 test evidence added
 Owner workstream: Backend CAP
-Last updated: 2026-06-15
+Last updated: 2026-06-21
 
 ## Goal
 
@@ -139,10 +139,12 @@ Vietnamese:
 
 English:
 
-- Split the monolithic `srv/service.js` into focused backend modules under `srv/bug-service/`: `constants.js`, `helpers.js`, `history.js`, and `read-models.js`.
-- Kept business behavior in the same CAP service boundary; `srv/service.js` now mainly registers hooks and keeps workflow-specific handlers, validation, and next-processor rules.
-- Structural verification passed with syntax checks plus `cds compile srv/service.cds app/bug-management-ui/annotations.cds --to edmx`.
-- Full programmatic backend regression was temporarily blocked by a local runtime issue: `better-sqlite3.node` in `node_modules` was built for `NODE_MODULE_VERSION 127`, while the bundled Codex desktop Node runtime is `NODE_MODULE_VERSION 137`. The blocker was resolved by rerunning the suite with official Node.js `v22.23.0` (modules `127`), and `scripts/qa/test-idts6-programmatic.js` then passed with `30 PASS / 0 FAIL`.
+- Split the monolithic `srv/service.js` into focused backend modules under `srv/bug-service/`: `constants.js`, `helpers.js`, `history.js`, `read-models.js`, `guards.js`, `permissions.js`, `bug-write.js`, `actions.js`, `content.js`, and `drafts.js`.
+- Kept business behavior in the same CAP service boundary; `srv/service.js` is now a thin orchestration layer that registers hooks and action handlers. After the follow-up Sprint 3 `HistoryEvents` read-model hook additions, the file remains thin at 148 lines in the current branch.
+- Fresh backend verification passed with syntax checks, `cds compile srv/service.cds app/bug-management-ui/annotations.cds --to edmx`, `scripts/qa/test-idts6-programmatic.js` (`30 PASS / 0 FAIL`), `scripts/qa/test-pm-monitoring-programmatic.js` (`20 PASS / 0 FAIL`), `scripts/qa/test-developer-workload-programmatic.js` (`36 PASS / 0 FAIL`), and `scripts/qa/test-comments-attachments-programmatic.js` (`RESULT: PASS`).
+- A non-product verify issue was found: running the PM monitoring and developer workload suites in parallel can hit duplicate seed initialization (`UNIQUE constraint failed: idts_cap_Users.ID`). Rerunning `test-pm-monitoring-programmatic.js` sequentially passes, so this is treated as a harness/isolation limitation rather than a backend regression.
+- The earlier runtime blocker still applies for bundled Codex Node: `better-sqlite3.node` in `node_modules` targets `NODE_MODULE_VERSION 127`, while the bundled desktop runtime is `NODE_MODULE_VERSION 137`. Current verification therefore uses official Node.js `v22.23.0` (module version `127`).
+- Sprint 3 cross-ticket closure is still pending: Jira `IDTS-23` and `IDTS-24` remain `To Do`, so `IDTS-28` should stay open until automated-regression handoff and browser UAT are rerun on a live local stack.
 
 Vietnamese:
 

@@ -901,6 +901,8 @@ annotate service.HistoryEvents with {
   actorRole  @Common.Text : actorRole.name @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
   actionType @Common.Text : actionType.name @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
   summary    @Common.FieldControl : #ReadOnly;
+  groupedChangeContext @Common.Label : 'Change Context' @UI.MultiLineText @Common.FieldControl : #ReadOnly;
+  changeCount @Common.Label : 'Change Count' @Common.FieldControl : #ReadOnly @UI.Hidden;
   reason     @UI.MultiLineText @Common.FieldControl : #ReadOnly;
   createdAt  @Common.FieldControl : #ReadOnly;
 };

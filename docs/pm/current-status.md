@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-06-20
+Last updated: 2026-06-21
 
 ## Snapshot
 
@@ -9,7 +9,7 @@ Last updated: 2026-06-20
 | Project phase | Sprint 02 baseline is stable in `dev`; Sprint 03 backend kickoff has started for ownership clarity and PM monitoring |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
 | Current sprint | Sprint 03 kickoff focuses on ownership wording, current action owner display, history readability, and PM monitoring usability |
-| Recommended next action | DatDT and SangVN should consume the now-ready backend ownership and PM monitoring contracts (`currentActionOwnerDisplayName`, derived monitoring flags, and `DeveloperWorkloads`) in the FE Object Page summary, filter variants, and monitoring views. |
+| Recommended next action | DatDT and SangVN should consume the now-ready backend ownership, grouped history, and PM monitoring contracts (`currentActionOwnerDisplayName`, `HistoryEvents.groupedChangeContext`, `HistoryEvents.changeCount`, derived monitoring flags, and `DeveloperWorkloads`) in the FE Object Page summary, timeline, filter variants, and monitoring views. |
 | Main implementation risk | Ownership semantics may remain confusing if FE labels and PM filters lag behind the backend contract and documented wording baseline. |
 
 ## What Is Already Done
@@ -76,6 +76,7 @@ Last updated: 2026-06-20
 - The separate `Assign Developer` Object Page buttons have now been removed from the Fiori UI. Assignment/reassignment uses the editable `Assignee` field and its filtered value help as the single UI path; the backend `assignToDeveloper` action remains available for API/test compatibility. HTTP draft regression now verifies `draftEdit -> PATCH assignee_ID -> draftActivate` persists the assignee, sets status to `Assigned`, recalculates `nextProcessor`, writes grouped history, and creates developer notification records.
 - WP6 backend support now exposes filterable monitoring fields on `BugService.Bugs` (`isOverdue`, `isPendingAssignment`, `isRejectedFollowUp`, `isRetestRequired`), adds `nextProcessorUser` filter support for PM monitoring, and keeps `currentActionOwnerDisplayName` readable even on sparse READ selections. Fresh programmatic verification passed `20 PASS / 0 FAIL` on the new PM monitoring suite while the existing backend suite stayed `30 PASS / 0 FAIL`.
 - WP6 backend now also exposes a read-only `BugService.DeveloperWorkloads` aggregate for PM monitoring. The new service contract is assignee-based, keeps active zero-load developers visible, retains inactive developers only while they still own open bugs, and passed fresh programmatic verification with `36 PASS / 0 FAIL`.
+- `HistoryEvents` now also exposes read-only grouped timeline support for Sprint 3 (`groupedChangeContext`, `changeCount`) while `HistoryLogs` remains the raw field-level audit detail source. Fresh programmatic verification passed `13 PASS / 0 FAIL` across assign, resubmit, reject, pending-assignment, close, and generic edit scenarios.
 
 Vietnamese:
 
