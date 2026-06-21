@@ -98,3 +98,22 @@ Pending:
 - Run the same HTTP attachment acceptance with `attachments.kind=standard`.
 - Confirm binary content is not stored in the PostgreSQL metadata table.
 - Decide the backup/export procedure for any legacy attachment rows before deploying to a database that contains the old tables.
+
+## 2026-06-21 Acceptance Follow-up
+
+Attempted final target-profile readiness check after the implementation was merged to `dev`.
+
+Result:
+
+- CAP profile `integration` resolves to PostgreSQL.
+- `requires.attachments` resolves to the `@cap-js/attachments` standard provider with `objectStore.kind = shared`.
+- `.cdsrc-private.json` is present but does not contain integration PostgreSQL credentials or object-store binding.
+- `default-env.json` is not present.
+- `cf` CLI is not available on this machine.
+- Jira `IDTS-31` received blocker comment `10159`.
+
+Decision:
+
+- Do not move `IDTS-31` to Done yet.
+- The next required action is environment provisioning/binding, not product-code change.
+- After shared PostgreSQL and shared object storage are provided, rerun the HTTP attachment acceptance under profile `integration` and verify that file bytes are not stored in PostgreSQL metadata tables.
