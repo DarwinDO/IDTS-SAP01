@@ -3,6 +3,7 @@ default-env-admin.json
 .env
 .cdsrc-private.json
 node_modules/
+gen/
 .DS_Store
 logs/
 *.log
