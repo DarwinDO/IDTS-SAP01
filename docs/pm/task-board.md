@@ -51,6 +51,7 @@ Hiện chưa có work package nào ở trạng thái Ready.
 | --- | --- | --- | --- |
 | SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP, and real browser QA are now stable enough to prove the happy flow. Remaining work is final SAP490 sync and mentor-demo rerun, not FE/blocking workflow repair. |
 | WP6 | PM Monitoring | DonHV, DatDT, SangVN | Ownership wording is locked; backend `Current Action Owner`, derived monitoring flags, and the read-only `DeveloperWorkloads` aggregate are now implemented and verified. FE monitoring views/filter variants/browser UAT remain pending. |
+| IDTS-30 | PostgreSQL local proof and attachment storage decision | DonHV | Phase 1 PostgreSQL deploy passed; Phase 2 draft/media HTTP regression is blocked by `decode(bytea, unknown)` during `draftActivate` for attachment media content. |
 
 Vietnamese:
 
@@ -63,7 +64,7 @@ Vietnamese:
 
 | ID | Task | Blocker | Required decision |
 | --- | --- | --- | --- |
-| None | None | None | None |
+| IDTS-30 | PostgreSQL runtime proof | CAP PostgreSQL draft activation fails for `Attachments.content : LargeBinary` with `function decode(bytea, unknown) does not exist`. | Decide whether to keep binary-in-DB as demo-only, fix/upgrade CAP media draft behavior, or move attachments to metadata + external storage before promoting PostgreSQL. |
 
 Vietnamese:
 
