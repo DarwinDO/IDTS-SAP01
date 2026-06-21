@@ -1,9 +1,9 @@
 # IDTS-31 - Object-Store-Backed Attachments
 
-Status: Ready  
-Owner: DonHV  
-Jira: `IDTS-31`  
-Dependency: `IDTS-30`  
+Status: Ready
+Owner: DonHV
+Jira: `IDTS-31`
+Dependency: `IDTS-30`
 Last updated: 2026-06-21
 
 ## Goal
