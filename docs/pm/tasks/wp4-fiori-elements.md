@@ -323,3 +323,4 @@ Vietnamese:
 - Không nhận 49 build artifact bị track trong `gen/srv` và thêm `gen/` vào `.gitignore`.
 - Verification mới đã pass: CAP compile, UI5 build, backend regression `30 PASS / 0 FAIL`, programmatic QA comments/attachments, HTTP QA direct-assignee, HTTP QA comments/attachments, và Playwright UAT cho List Report cùng toàn bộ section Object Page mong đợi.
 - Jira `IDTS-29` was moved to Done after evidence comment `10153`.
+- GitHub PR #4 appeared after the direct branch review and was closed as superseded because the reviewed source changes were already in `dev` and the PR still contained generated `gen/srv` artifacts.
