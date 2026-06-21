@@ -117,3 +117,33 @@ Decision:
 - Do not move `IDTS-31` to Done yet.
 - The next required action is environment provisioning/binding, not product-code change.
 - After shared PostgreSQL and shared object storage are provided, rerun the HTTP attachment acceptance under profile `integration` and verify that file bytes are not stored in PostgreSQL metadata tables.
+
+## 2026-06-21 MinIO Compatibility Spike
+
+The short MinIO spike used the stock `@cap-js/attachments 3.12.2` S3 adapter without modifying plugin or application code.
+
+Result:
+
+- MinIO started locally and the `idts-attachments` bucket was created.
+- CAP deployed successfully to a clean PostgreSQL database and connected with `attachments.kind=s3`.
+- Comment creation, history, draft edit, and attachment metadata creation passed.
+- Binary upload failed with HTTP 500 and `getaddrinfo ENOTFOUND idts-attachments.localhost`.
+- The AWS SDK endpoint override reached MinIO, but the adapter used virtual-hosted bucket addressing. Local MinIO requires path-style addressing or matching wildcard DNS, while the stock plugin does not expose `forcePathStyle`.
+- The spike environment, MinIO container, and temporary PostgreSQL database were removed after the failed proof.
+
+Decision:
+
+- Stop the MinIO spike; do not build or maintain a custom storage adapter for IDTS.
+- Treat this as provider/environment compatibility, not a product-flow defect.
+- Cloudflare R2 is also S3-compatible but requires a custom endpoint, so it must pass a focused compatibility check before being accepted with the stock plugin.
+- Prefer a supported SAP Object Store, AWS S3, Azure Blob Storage, or GCP Cloud Storage binding for final acceptance.
+- Jira evidence: `IDTS-31#10161`.
+
+## Completion Plan
+
+1. Environment owner selects and provisions one supported external object-store provider. SAP BTP Object Store is preferred when available; native AWS S3, Azure Blob Storage, or GCP Cloud Storage is acceptable without an SAP BTP account.
+2. Create a clean shared PostgreSQL database/schema or take an approved backup/export of legacy attachment rows before deployment. Do not bypass CAP's destructive-drop protection.
+3. Supply PostgreSQL and object-store credentials only through ignored private CAP configuration or service binding; verify `cds env requires.db --profile integration` and `cds env requires.attachments --profile integration`.
+4. Deploy and run the application under profile `integration`; execute attachment upload, draft activation, download, delete/cleanup, MIME/size validation, authorization, and history regression.
+5. Query PostgreSQL attachment tables to prove metadata/reference is present while binary content is absent, and verify the corresponding object exists in external storage.
+6. Run the existing CAP/UI5/backend regression suites, attach evidence to Jira, update PM/status/risk documents, move IDTS-31 to Done, and regenerate the affected SAP490 test/fix artifacts.
