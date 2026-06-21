@@ -18,7 +18,7 @@ Vietnamese: Chỉ dùng board này để theo dõi trạng thái cấp cao. Chi 
 | WP1 | Data Model Foundation | Expanded CAP CDS model, service projections, and seed data under `db/data/` |
 | WP2 | Service and Value Help | OData V4 service actions, value help annotations, and metadata compile completed |
 | WP3 | Handler Rules and Validation | CAP handler rules for create/update, assignment, status transition, nextProcessor, history, and notifications completed |
-| WP4 | Fiori Elements UX | Core layout, dynamic creation hiding, assignee value help, mock-login QA, local Comments CTA, and Assign Developer selected-text verification completed on the current live stack |
+| WP4 | Fiori Elements UX | Core UX is complete; `IDTS-29` modular annotation refactor is integrated with equivalent compiled metadata, clean UI5 build, automated regression, and List Report/Object Page browser UAT |
 | WP5 | Comments and History | Grouped `HistoryEvents` read model, comments/attachments audit baseline, and Sprint 3 grouped history payload support completed for backend handoff |
 | WP7 | Notifications and Attachments | Backend persistence, in-app notifications, create-time attachment visibility, and browser happy-flow verification completed |
 
@@ -34,7 +34,7 @@ Vietnamese:
 | WP1 | Nền tảng Data Model | CAP CDS model, service projections, và seed data trong `db/data/` |
 | WP2 | Service và Value Help | Đã hoàn thành OData V4 service actions, value help annotations và metadata compile |
 | WP3 | Handler Rules và Validation | Đã hoàn thành CAP handler rules cho create/update, assignment, status transition, nextProcessor, history và notifications |
-| WP4 | Fiori Elements UX | Đã hoàn thành layout chính, ẩn động khi create, value help assignee, QA mock-login, nút Add Comment trong section Comments, và xác minh dialog Assign Developer hiển thị tên đúng trên runtime hiện tại |
+| WP4 | Fiori Elements UX | Core UX đã hoàn thành; refactor annotation theo module của `IDTS-29` đã được tích hợp với metadata tương đương, UI5 build sạch, regression tự động và browser UAT cho List Report/Object Page |
 | WP7 | Notifications và Attachments | Đã xác nhận lưu trữ backend, bản ghi thông báo trong ứng dụng, và kiểm thử E2E comment/upload trên browser thành công. |
 
 ## Ready

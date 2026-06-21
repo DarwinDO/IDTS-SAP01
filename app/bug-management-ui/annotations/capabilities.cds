@@ -1,0 +1,32 @@
+using BugService as service from '../../../srv/service';
+
+annotate service.Bugs with @(
+  Capabilities.InsertRestrictions : {
+    Insertable : true
+  },
+  Capabilities.DeleteRestrictions : {
+    Deletable : false
+  },
+  Capabilities.NavigationRestrictions : {
+    RestrictedProperties : [
+      {
+        NavigationProperty : notifications,
+        InsertRestrictions : { Insertable : false },
+        DeleteRestrictions : { Deletable : false },
+        UpdateRestrictions : { Updatable : false }
+      },
+      {
+        NavigationProperty : historyEvents,
+        InsertRestrictions : { Insertable : false },
+        DeleteRestrictions : { Deletable : false },
+        UpdateRestrictions : { Updatable : false }
+      },
+      {
+        NavigationProperty : comments,
+        InsertRestrictions : { Insertable : false },
+        DeleteRestrictions : { Deletable : false },
+        UpdateRestrictions : { Updatable : false }
+      }
+    ]
+  }
+);

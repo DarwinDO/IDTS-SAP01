@@ -304,3 +304,23 @@ Vietnamese:
 - CÃ¡ch nÃ y buá»™c cÃ¡c chuyá»ƒn tráº¡ng thÃ¡i Ä‘i qua bound actions Ä‘Ã£ Ä‘Æ°á»£c duyá»‡t, thay vÃ¬ Ä‘á»ƒ user má»Ÿ generic status value help rá»“i gáº·p lá»—i transition tá»« backend.
 - ÄÃ£ thÃªm fallback khÃ´ng phÃ¢n biá»‡t hoa/thÆ°á»ng trong `resolveRequestUser` cho local dev, nÃªn mock login kiá»ƒu `donhv` váº«n map Ä‘Æ°á»£c tá»›i user IDTS `DonHV` vÃ  hiá»ƒn thá»‹ Ä‘Ãºng bá»™ action.
 - ÄÃ£ verify trÃªn `$metadata` thá»±c táº¿ ráº±ng `BugService.Bugs/status_code` Ä‘Ã£ lÃ  read-only vÃ  DataField `Status` trÃªn Object Page cÅ©ng mang annotation `Common.FieldControl` dáº¡ng read-only.
+
+## 2026-06-21 - IDTS-29 modular annotation integration
+
+English:
+
+- Reviewed DatDT's `fix/fe-Refactor_annotation.cds_datdt` branch because no DatDT pull request targeted `dev`.
+- Accepted the refactor that turns `app/bug-management-ui/annotations.cds` into a small import hub and moves annotations into eight feature-scoped files.
+- Compared normalized compiled CSN before and after the split; both produced SHA-256 `bc04ad74370d83b916b7f14d8778df302d740293dafeb6edf5ee4110995271c7`.
+- Rejected 49 tracked `gen/srv` build artifacts from the integration and added `gen/` to `.gitignore`.
+- Fresh verification passed: CAP compile, UI5 build, `30 PASS / 0 FAIL` backend regression, comments/attachments programmatic QA, direct-assignee HTTP QA, comments/attachments HTTP QA, and Playwright UAT for the List Report plus all expected Object Page sections.
+
+Vietnamese:
+
+- Review nhánh `fix/fe-Refactor_annotation.cds_datdt` của DatDT vì không có PR DatDT nào target `dev`.
+- Nhận phần refactor biến `app/bug-management-ui/annotations.cds` thành import hub nhỏ và tách annotation vào 8 file theo feature.
+- So sánh normalized compiled CSN trước/sau khi tách; cả hai có SHA-256 `bc04ad74370d83b916b7f14d8778df302d740293dafeb6edf5ee4110995271c7`.
+- Không nhận 49 build artifact bị track trong `gen/srv` và thêm `gen/` vào `.gitignore`.
+- Verification mới đã pass: CAP compile, UI5 build, backend regression `30 PASS / 0 FAIL`, programmatic QA comments/attachments, HTTP QA direct-assignee, HTTP QA comments/attachments, và Playwright UAT cho List Report cùng toàn bộ section Object Page mong đợi.
+- Jira `IDTS-29` was moved to Done after evidence comment `10153`.
+- GitHub PR #4 appeared after the direct branch review and was closed as superseded because the reviewed source changes were already in `dev` and the PR still contained generated `gen/srv` artifacts.

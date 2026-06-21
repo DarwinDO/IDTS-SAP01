@@ -1,4 +1,3 @@
-approval_policy = "never"
 [mcp_servers.cap]
 command = "npx"
 args = ["-y", "@cap-js/mcp-server"]

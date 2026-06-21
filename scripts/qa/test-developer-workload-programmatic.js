@@ -17,7 +17,7 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 }
 
 const cds = require('@sap/cds')
-const { INSERT, SELECT } = cds.ql
+const { INSERT, SELECT, UPDATE } = cds.ql
 
 const RESULTS = []
 let PASS = 0
@@ -208,6 +208,21 @@ async function main () {
 }
 
 async function seedWorkloadScenario (db) {
+  const dates = {
+    overdueMinus4: dateOffset(-4),
+    overdueMinus3: dateOffset(-3),
+    overdueMinus2: dateOffset(-2),
+    overdueMinus1: dateOffset(-1),
+    today: dateOffset(0),
+    futurePlus4: dateOffset(4)
+  }
+
+  await db.run(
+    UPDATE('idts.cap.Bugs')
+      .set({ dueDate: null })
+      .where({ assignee_ID: PROFILES.SANG })
+  )
+
   await db.run(INSERT.into('idts.cap.Users').entries([
     {
       ID: USERS.ZERO,
@@ -264,7 +279,7 @@ async function seedWorkloadScenario (db) {
       assignee_ID: PROFILES.SANG,
       nextProcessorUser_ID: USERS.SANG,
       nextProcessorRole_code: 'DEVELOPER',
-      dueDate: '2026-06-19',
+      dueDate: dates.overdueMinus2,
       estimatedEffortHours: '2.00'
     }),
     bugEntry({
@@ -274,7 +289,7 @@ async function seedWorkloadScenario (db) {
       assignee_ID: PROFILES.SANG,
       nextProcessorUser_ID: USERS.SANG,
       nextProcessorRole_code: 'DEVELOPER',
-      dueDate: '2026-06-21',
+      dueDate: dates.today,
       estimatedEffortHours: '1.50'
     }),
     bugEntry({
@@ -284,7 +299,7 @@ async function seedWorkloadScenario (db) {
       assignee_ID: PROFILES.SANG,
       nextProcessorUser_ID: USERS.SANG,
       nextProcessorRole_code: 'DEVELOPER',
-      dueDate: '2026-06-20',
+      dueDate: dates.overdueMinus1,
       estimatedEffortHours: '1.00'
     }),
     bugEntry({
@@ -294,7 +309,7 @@ async function seedWorkloadScenario (db) {
       assignee_ID: PROFILES.SANG,
       nextProcessorUser_ID: USERS.NHANT,
       nextProcessorRole_code: 'TESTER',
-      dueDate: '2026-06-18',
+      dueDate: dates.overdueMinus3,
       estimatedEffortHours: '4.00'
     }),
     bugEntry({
@@ -304,7 +319,7 @@ async function seedWorkloadScenario (db) {
       assignee_ID: PROFILES.SANG,
       nextProcessorUser_ID: USERS.NHANT,
       nextProcessorRole_code: 'TESTER',
-      dueDate: '2026-06-17',
+      dueDate: dates.overdueMinus4,
       estimatedEffortHours: '3.00'
     }),
     bugEntry({
@@ -314,10 +329,16 @@ async function seedWorkloadScenario (db) {
       assignee_ID: PROFILES.LEGACY,
       nextProcessorUser_ID: USERS.LEGACY,
       nextProcessorRole_code: 'DEVELOPER',
-      dueDate: '2026-06-25',
+      dueDate: dates.futurePlus4,
       estimatedEffortHours: '2.25'
     })
   ]))
+}
+
+function dateOffset (days) {
+  const date = new Date()
+  date.setUTCDate(date.getUTCDate() + days)
+  return date.toISOString().slice(0, 10)
 }
 
 function bugEntry (overrides) {
