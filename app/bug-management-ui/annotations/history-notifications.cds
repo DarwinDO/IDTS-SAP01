@@ -25,36 +25,6 @@ annotate service.Comments with {
 };
 
 
-annotate service.Attachments with @UI.LineItem : [
-  { $Type : 'UI.DataField', Label : 'Attachment', Value : content },
-  { $Type : 'UI.DataField', Label : 'Media Type', Value : mediaType },
-  { $Type : 'UI.DataField', Label : 'Size', Value : fileSize },
-  { $Type : 'UI.DataField', Label : 'Uploaded By', Value : uploadedByDisplayName },
-  { $Type : 'UI.DataField', Label : 'Uploaded At', Value : createdAt }
-];
-
-annotate service.Attachments with @(
-  UI.CreateHidden : false,
-  UI.DeleteHidden : true,
-  Capabilities.InsertRestrictions : { Insertable : true },
-  Capabilities.DeleteRestrictions : { Deletable : false },
-  Capabilities.UpdateRestrictions : { Updatable : false },
-  UI.MediaResource : { Stream : content }
-);
-
-annotate service.Attachments with {
-  ID         @UI.Hidden;
-  bug        @UI.Hidden;
-  storageRef @UI.Hidden;
-  uploadedBy @Common.Text : uploadedBy.displayName @Common.TextArrangement : #TextOnly @Common.FieldControl : #ReadOnly;
-  content    @Common.FieldControl : #ReadOnly;
-  fileName   @Common.FieldControl : #ReadOnly;
-  mediaType  @Common.FieldControl : #ReadOnly;
-  fileSize   @Common.FieldControl : #ReadOnly;
-  createdAt  @Common.FieldControl : #ReadOnly;
-};
-
-
 annotate service.HistoryEvents with @(
   UI.CreateHidden : true,
   UI.DeleteHidden : true,

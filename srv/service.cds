@@ -81,10 +81,6 @@ service BugService @(requires: 'authenticated-user') {
     author.displayName as authorDisplayName,
     authorRole.name as authorRoleName
   };
-  entity Attachments as projection on db.Attachments {
-    *,
-    uploadedBy.displayName as uploadedByDisplayName
-  };
   entity HistoryEvents as projection on db.HistoryEvents {
     *,
     actor.displayName as actorDisplayName,

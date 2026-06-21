@@ -21,6 +21,7 @@ Vietnamese: Chỉ dùng board này để theo dõi trạng thái cấp cao. Chi 
 | WP4 | Fiori Elements UX | Core UX is complete; `IDTS-29` modular annotation refactor is integrated with equivalent compiled metadata, clean UI5 build, automated regression, and List Report/Object Page browser UAT |
 | WP5 | Comments and History | Grouped `HistoryEvents` read model, comments/attachments audit baseline, and Sprint 3 grouped history payload support completed for backend handoff |
 | WP7 | Notifications and Attachments | Backend persistence, in-app notifications, create-time attachment visibility, and browser happy-flow verification completed |
+| IDTS-30 | PostgreSQL local proof and attachment storage decision | PostgreSQL deploy/read proof completed, draft-media blocker documented, long-term object-storage direction approved, and implementation handed off to `IDTS-31` |
 
 Vietnamese:
 
@@ -39,6 +40,8 @@ Vietnamese:
 
 ## Ready
 
+| ID | Task | Primary member | Note |
+| --- | --- | --- | --- |
 None currently.
 
 Vietnamese:
@@ -51,6 +54,7 @@ Hiện chưa có work package nào ở trạng thái Ready.
 | --- | --- | --- | --- |
 | SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP, and real browser QA are now stable enough to prove the happy flow. Remaining work is final SAP490 sync and mentor-demo rerun, not FE/blocking workflow repair. |
 | WP6 | PM Monitoring | DonHV, DatDT, SangVN | Ownership wording is locked; backend `Current Action Owner`, derived monitoring flags, and the read-only `DeveloperWorkloads` aggregate are now implemented and verified. FE monitoring views/filter variants/browser UAT remain pending. |
+| IDTS-31 | Object-store-backed attachment implementation | DonHV | Plugin migration and SQLite/PostgreSQL DB-fallback regression pass. Shared PostgreSQL is selected; final external object-store binding and non-DB acceptance remain pending. |
 
 Vietnamese:
 

@@ -6,7 +6,6 @@ const {
 } = require('./bug-service/constants')
 
 const {
-  recordAttachmentWriteSideEffects,
   recordCommentCreateSideEffects,
   recordCreateSideEffects,
   recordUpdateSideEffects
@@ -44,7 +43,8 @@ const {
 module.exports = class BugService extends cds.ApplicationService {
   async init () {
     const entities = this.entities
-    const { Bugs, Comments, Attachments, HistoryEvents } = entities
+    const { Bugs, Comments, HistoryEvents } = entities
+    const Attachments = entities['Bugs.attachments']
 
     const commentTargets = [Comments, Comments?.drafts].filter(Boolean)
     const attachmentTargets = [Attachments, Attachments?.drafts].filter(Boolean)
@@ -65,9 +65,7 @@ module.exports = class BugService extends cds.ApplicationService {
     }
 
     for (const target of attachmentTargets) {
-      this.before('CREATE', target, req => prepareAttachmentWrite(req, entities, { isCreate: true }))
-      this.before('UPDATE', target, req => prepareAttachmentWrite(req, entities, { isCreate: false }))
-      this.before('PATCH', target, req => prepareAttachmentWrite(req, entities, { isCreate: false }))
+      this.before(['CREATE', 'PUT', 'UPDATE', 'PATCH', 'DELETE'], target, req => prepareAttachmentWrite(req, entities))
     }
 
     this.after('CREATE', Bugs, (data, req) => recordCreateSideEffects(req, data, entities))
@@ -75,12 +73,6 @@ module.exports = class BugService extends cds.ApplicationService {
 
     for (const target of commentTargets) {
       this.after('CREATE', target, (data, req) => recordCommentCreateSideEffects(req, data, entities))
-    }
-
-    for (const target of attachmentTargets) {
-      this.after('CREATE', target, (data, req) => recordAttachmentWriteSideEffects(req, data, entities, { isCreate: true }))
-      this.after('UPDATE', target, (data, req) => recordAttachmentWriteSideEffects(req, data, entities, { isCreate: false }))
-      this.after('PATCH', target, (data, req) => recordAttachmentWriteSideEffects(req, data, entities, { isCreate: false }))
     }
 
     this.after('READ', Bugs, async (bugs, req) => {

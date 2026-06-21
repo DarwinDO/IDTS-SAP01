@@ -51,9 +51,9 @@ async function captureDraftSaveState (req, entities) {
 
   req._preSaveActiveBug = await readBug(req, entities, bugID)
   req._preSaveActiveAttachments = await cds.tx(req).run(
-    SELECT.from(entities.Attachments)
-      .columns('ID', 'bug_ID', 'fileName', 'mediaType', 'fileSize')
-      .where({ bug_ID: bugID })
+    SELECT.from(entities['Bugs.attachments'])
+      .columns('ID', 'up__ID', 'filename', 'mimeType', 'fileSize')
+      .where({ up__ID: bugID })
   )
 }
 

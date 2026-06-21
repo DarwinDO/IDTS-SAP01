@@ -19,8 +19,6 @@ const {
   displayStatus,
   displayUserName,
   firstUserByRole,
-  hasAttachmentPayload,
-  readAttachment,
   readBug,
   resolveRequestUser,
   toHistoryValue,
@@ -101,72 +99,6 @@ async function recordCommentCreateSideEffects (req, data, entities) {
   })
 }
 
-async function recordAttachmentWriteSideEffects (req, data, entities, { isCreate }) {
-  const attachment = data?.ID ? await readAttachment(req, req.target, data.ID) : null
-  if (!attachment?.bug_ID) return
-
-  const actor = await resolveRequestUser(req, entities)
-  const actorID = actor?.ID || attachment.uploadedBy_ID || req.data?.uploadedBy_ID
-  if (!actorID) return
-
-  const fileName = trimToNull(attachment.fileName) || trimToNull(req.data?.fileName) || attachment.ID
-  const hadContentBefore = hasAttachmentPayload(req._oldAttachment)
-  const hasContentNow = hasAttachmentPayload(attachment)
-
-  if (isCreate) {
-    if (!hasContentNow) return
-
-    await writeHistoryEvent(req, entities, {
-      bugID: attachment.bug_ID,
-      actorID,
-      actionType: ACTION.EDIT,
-      summary: `Added attachment ${fileName}.`,
-      changes: [
-        {
-          fieldName: 'attachment',
-          oldValue: null,
-          newValue: attachment.ID,
-          oldValueDisplay: null,
-          newValueDisplay: fileName
-        }
-      ]
-    })
-    return
-  }
-
-  if (!req._oldAttachment) return
-
-  if (!hadContentBefore && hasContentNow) {
-    await writeHistoryEvent(req, entities, {
-      bugID: attachment.bug_ID,
-      actorID,
-      actionType: ACTION.EDIT,
-      summary: `Added attachment ${fileName}.`,
-      changes: [
-        {
-          fieldName: 'attachment',
-          oldValue: null,
-          newValue: attachment.ID,
-          oldValueDisplay: null,
-          newValueDisplay: fileName
-        }
-      ]
-    })
-    return
-  }
-
-  const attachmentChanges = importantAttachmentChanges(req._oldAttachment, attachment)
-  if (!attachmentChanges.length) return
-
-  await writeHistoryEvent(req, entities, {
-    bugID: attachment.bug_ID,
-    actorID,
-    actionType: ACTION.EDIT,
-    summary: `Updated attachment ${fileName}.`,
-    changes: attachmentChanges
-  })
-}
-
 async function recordDraftAttachmentSaveSideEffects (req, data, entities) {
   const bugID = data?.ID || bugIDFrom(req)
   if (!bugID) return
@@ -174,9 +106,9 @@ async function recordDraftAttachmentSaveSideEffects (req, data, entities) {
   const previousActiveAttachments = req._preSaveActiveAttachments || []
   const previousActiveIds = new Set(previousActiveAttachments.map(attachment => attachment.ID))
   const activeAttachments = await cds.tx(req).run(
-    SELECT.from(entities.Attachments)
-      .columns('ID', 'bug_ID', 'fileName', 'mediaType', 'fileSize')
-      .where({ bug_ID: bugID })
+    SELECT.from(entities['Bugs.attachments'])
+      .columns('ID', 'up__ID', 'filename', 'mimeType', 'fileSize')
+      .where({ up__ID: bugID })
   )
 
   const addedAttachments = activeAttachments.filter(attachment => !previousActiveIds.has(attachment.ID))
@@ -192,7 +124,7 @@ async function recordDraftAttachmentSaveSideEffects (req, data, entities) {
     oldValue: null,
     newValue: attachment.ID,
     oldValueDisplay: null,
-    newValueDisplay: trimToNull(attachment.fileName) || attachment.ID
+    newValueDisplay: trimToNull(attachment.filename) || attachment.ID
   }))
 
   const summary = addedAttachments.length === 1
@@ -408,25 +340,6 @@ function genericEditSummary (changes) {
   return `Updated ${labels.length} bug fields.`
 }
 
-function importantAttachmentChanges (oldAttachment, newAttachment) {
-  const tracked = [
-    ['fileName', 'attachment'],
-    ['mediaType', 'attachment'],
-    ['fileSize', 'attachment']
-  ]
-
-  return tracked
-    .filter(([field]) => oldAttachment[field] !== newAttachment[field])
-    .map(([field, fieldName]) => ({
-      fieldName,
-      fieldLabel: historyFieldLabel(fieldName),
-      oldValue: oldAttachment.ID,
-      newValue: newAttachment.ID,
-      oldValueDisplay: trimToNull(oldAttachment.fileName) || oldAttachment.ID,
-      newValueDisplay: trimToNull(newAttachment.fileName) || newAttachment.ID
-    }))
-}
-
 async function writeNotificationForStatus (req, entities, bug, status) {
   const notification = notificationTargetForStatus(bug, status)
   if (!notification?.recipientID || !notification.eventType) return
@@ -534,7 +447,6 @@ module.exports = {
   recordUpdateSideEffects,
   recordBugChangeSideEffects,
   recordCommentCreateSideEffects,
-  recordAttachmentWriteSideEffects,
   recordDraftAttachmentSaveSideEffects,
   importantChanges,
   writeHistoryEvent,

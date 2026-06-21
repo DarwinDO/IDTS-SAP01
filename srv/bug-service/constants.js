@@ -155,17 +155,6 @@ const FIELD_CONTROL = {
   OPTIONAL: 3
 }
 
-const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024
-const ACCEPTED_ATTACHMENT_MEDIA_TYPES = new Set([
-  'image/jpeg',
-  'image/png',
-  'application/pdf',
-  'text/plain',
-  'application/json',
-  'text/csv',
-  'application/zip'
-])
-
 const READ_ONLY_ENTITY_NAMES = [
   'Users',
   'DeveloperProfiles',
@@ -214,7 +203,5 @@ module.exports = {
   TESTER_STATUSES,
   CAPABILITY_FIELDS,
   FIELD_CONTROL,
-  MAX_ATTACHMENT_BYTES,
-  ACCEPTED_ATTACHMENT_MEDIA_TYPES,
   READ_ONLY_ENTITY_NAMES
 }
