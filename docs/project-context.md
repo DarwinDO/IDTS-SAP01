@@ -171,23 +171,27 @@ Vietnamese:
 
 1. The system maintains `nextProcessor` as the person or queue expected to take the next action.
 2. `nextProcessor` does not replace `assignee`; `assignee` remains the main Developer responsible for technical handling.
-3. CAP handlers should update `nextProcessor` automatically when status, assignee, or assignment decision changes.
-4. Common mappings:
+3. UI wording baseline: show `Assignee (Technical Owner)` for the developer owner and `Current Action Owner` for the person or queue that must act now.
+4. CAP handlers should update `nextProcessor` automatically when status, assignee, or assignment decision changes.
+5. Common mappings:
    - Assigned, In Review, In Progress: assigned Developer.
    - Need More Information: Tester.
    - Pending Assignment: PM queue or Tester.
    - Rejected: Tester or PM must correct classification, reassign, or move to Pending Assignment.
    - Resolved and Retest Required: Tester or PM.
    - Closed: no next processor.
-5. Manual override should be limited to PM escalation or exceptional reassignment in the MVP.
-6. Every important `nextProcessor` change should be written to history logs.
+6. Manual override should be limited to PM escalation or exceptional reassignment in the MVP.
+7. Every important `nextProcessor` change should be written to history logs.
 
 ### PM Monitoring
 
 1. PM views all bug reports and filters by status, priority, severity, SAP module, application component, defect category, assignee, next processor, created date, updated date, and overdue state.
-2. PM monitors developer workload and overdue bugs.
-3. PM receives escalation notifications for high-priority unassigned bugs, overdue bugs, repeated reassignments, rejected bugs, and stale updates.
-4. PM can comment or request reassignment without replacing Developer or Tester responsibilities.
+2. Backend monitoring contract on `BugService.Bugs` now exposes read-only derived fields `isOverdue`, `isPendingAssignment`, `isRejectedFollowUp`, `isRetestRequired`, and `currentActionOwnerDisplayName` for PM-facing monitoring and ownership clarity.
+3. User/queue filtering for the current action owner should continue to use `nextProcessorUser` and `nextProcessorRole`; `currentActionOwnerDisplayName` is a readable summary, not the filtering key.
+4. Backend workload summary is exposed separately as read-only `BugService.DeveloperWorkloads`, aggregated by `assignee` as the technical owner rather than by `nextProcessor`.
+5. `BugService.DeveloperWorkloads` includes active developers even when they currently own zero open bugs, and it retains inactive developers only while they still own open bugs that PM must clean up.
+6. PM receives escalation notifications for high-priority unassigned bugs, overdue bugs, repeated reassignments, rejected bugs, and stale updates.
+7. PM can comment or request reassignment without replacing Developer or Tester responsibilities.
 
 ## Mentor-Confirmed Sprint 02 Delta
 

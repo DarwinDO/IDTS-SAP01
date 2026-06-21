@@ -6,11 +6,11 @@ Last updated: 2026-06-21
 
 | Field | Current value |
 | --- | --- |
-| Project phase | Sprint 02 integration: PR #1, PR #2, DonHV backend, and SAP490 documentation branches consolidated into `dev` |
+| Project phase | Sprint 02 baseline is stable in `dev`; Sprint 03 backend kickoff has started for ownership clarity and PM monitoring |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
-| Current sprint | Sprint 02 focuses on mentor feedback, happy flow demo, backend note/reason validation, and Bug Detail UI refinements |
-| Recommended next action | DonHV should now sync the final verified browser evidence into the SAP490 review pack and prepare the final mentor-demo rerun script from the stabilized happy flow baseline. |
-| Main implementation risk | No remaining product-blocking FE polish gap is currently open in the mentor happy flow. The main risk is now documentation/retest drift if SAP490 artifacts and demo evidence are not refreshed from the latest verified runtime state. |
+| Current sprint | Sprint 03 kickoff focuses on ownership wording, current action owner display, history readability, and PM monitoring usability |
+| Recommended next action | DatDT and SangVN should consume the now-ready backend ownership, grouped history, and PM monitoring contracts (`currentActionOwnerDisplayName`, `HistoryEvents.groupedChangeContext`, `HistoryEvents.changeCount`, derived monitoring flags, and `DeveloperWorkloads`) in the FE Object Page summary, timeline, filter variants, and monitoring views. |
+| Main implementation risk | Ownership semantics may remain confusing if FE labels and PM filters lag behind the backend contract and documented wording baseline. |
 
 ## What Is Already Done
 
@@ -75,6 +75,9 @@ Last updated: 2026-06-21
 - A follow-up Fiori annotation refinement now exposes a local `Add Comment` CTA inside the Comments section itself, and a fresh browser verification on `localhost:4018` confirmed that the section-level action is visible and opens the `Add Comment` dialog successfully.
 - A follow-up annotation-only candidate fix was added for the Assign Developer selected-text issue: `service.AssignableDevelopers.developerProfileID` now carries `@Common.Text : developerName` with `#TextOnly`, and a focused live browser re-verification on `localhost:4004` confirmed the dialog now renders the selected developer name (`DatDT`) instead of the UUID, so `IDTS-9` is now treated as closed at PM/QA handover level.
 - The separate `Assign Developer` Object Page buttons have now been removed from the Fiori UI. Assignment/reassignment uses the editable `Assignee` field and its filtered value help as the single UI path; the backend `assignToDeveloper` action remains available for API/test compatibility. HTTP draft regression now verifies `draftEdit -> PATCH assignee_ID -> draftActivate` persists the assignee, sets status to `Assigned`, recalculates `nextProcessor`, writes grouped history, and creates developer notification records.
+- WP6 backend support now exposes filterable monitoring fields on `BugService.Bugs` (`isOverdue`, `isPendingAssignment`, `isRejectedFollowUp`, `isRetestRequired`), adds `nextProcessorUser` filter support for PM monitoring, and keeps `currentActionOwnerDisplayName` readable even on sparse READ selections. Fresh programmatic verification passed `20 PASS / 0 FAIL` on the new PM monitoring suite while the existing backend suite stayed `30 PASS / 0 FAIL`.
+- WP6 backend now also exposes a read-only `BugService.DeveloperWorkloads` aggregate for PM monitoring. The new service contract is assignee-based, keeps active zero-load developers visible, retains inactive developers only while they still own open bugs, and passed fresh programmatic verification with `36 PASS / 0 FAIL`.
+- `HistoryEvents` now also exposes read-only grouped timeline support for Sprint 3 (`groupedChangeContext`, `changeCount`) while `HistoryLogs` remains the raw field-level audit detail source. Fresh programmatic verification passed `13 PASS / 0 FAIL` across assign, resubmit, reject, pending-assignment, close, and generic edit scenarios.
 
 Vietnamese:
 
@@ -141,9 +144,11 @@ Vietnamese:
 | Defect Category | Required defect type or technical layer. |
 | Component Category | Valid pair of Application Component and Defect Category. |
 | Developer Responsibility | Maps Developer to Component Category, optionally scoped by SAP Module. |
+| Ownership wording | `Assignee` = Technical Owner. `Current Action Owner` = person or queue that must act now. |
 | nextProcessor | System-maintained current action owner or queue; not a second assignee. |
 | Retest Required | Kept as a core status between Resolved and Closed when verification is needed. |
 | Rejected | Kept as a valid follow-up status; must have rejection reason, nextProcessor, and next action. |
+| Cancel status | Not added in Sprint 3 by default; keep as discovery-only unless a later explicit decision approves it. |
 | MVP roles | Three active roles: Tester, Developer, and PM. Reporter and Admin are not separate MVP roles. |
 | Developer visibility | Developers may view and discuss team-visible bugs, but workflow processing is restricted to assigned Developer, Tester, or PM when request user is known. |
 | SRS style | Uses a traditional SRS outline, with requirement quality, traceability, and verification aligned to ISO/IEC/IEEE 29148-style discipline. |

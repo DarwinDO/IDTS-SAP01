@@ -352,6 +352,9 @@ function buildHistorySummary (actionType, changes) {
     case ACTION.ASSIGN:
       return `${assigneeChange?.newValueDisplay ? `Assigned bug to ${assigneeChange.newValueDisplay}.` : 'Assigned bug to a developer.'}${statusChangeSuffix(statusChange)}`
     case ACTION.REASSIGN:
+      if (statusChange?.newValue === STATUS.PENDING_ASSIGNMENT && !assigneeChange?.newValue) {
+        return 'Moved bug to Pending Assignment.'
+      }
       return `${assigneeChange?.newValueDisplay ? `Reassigned bug to ${assigneeChange.newValueDisplay}.` : 'Reassigned bug.'}${statusChangeSuffix(statusChange)}`
     case ACTION.REQUEST_INFO:
       return `Requested more information.${statusChangeSuffix(statusChange)}`

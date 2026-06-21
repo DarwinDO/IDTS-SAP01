@@ -9,8 +9,15 @@ annotate service.Bugs with @(
     applicationComponent_ID,
     defectCategory_ID,
     assignee_ID,
+    nextProcessorUser_ID,
     nextProcessorRole_code,
-    dueDate
+    dueDate,
+    createdAt,
+    modifiedAt,
+    isOverdue,
+    isPendingAssignment,
+    isRejectedFollowUp,
+    isRetestRequired
   ],
   UI.LineItem : [
     { $Type : 'UI.DataField', Label : 'Bug Number', Value : bugNumber },

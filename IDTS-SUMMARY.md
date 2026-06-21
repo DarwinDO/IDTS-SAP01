@@ -451,6 +451,7 @@ Không nên cho Developer tự đóng bug trực tiếp nếu team muốn Tester
 
 - `assignee`: Developer chính chịu trách nhiệm kỹ thuật.
 - `nextProcessor`: người hiện tại cần thực hiện hành động tiếp theo.
+- UI wording baseline: show `Assignee (Technical Owner)` for the developer owner and `Current Action Owner` for the person or queue that must act now.
 
 Ví dụ:
 

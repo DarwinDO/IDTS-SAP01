@@ -9,6 +9,8 @@ annotate service.Bugs with {
   actualResult          @UI.MultiLineText @Common.Label : 'Actual Result' @Common.FieldControl : #Mandatory;
   expectedResult        @UI.MultiLineText @Common.Label : 'Expected Result' @Common.FieldControl : #Mandatory;
   rejectionReason       @UI.MultiLineText @Common.Label : 'Rejection Reason' @Common.FieldControl : #ReadOnly;
+  createdAt             @Common.Label : 'Created At' @Common.FieldControl : #ReadOnly @UI.HiddenFilter : false;
+  modifiedAt            @Common.Label : 'Updated At' @Common.FieldControl : #ReadOnly @UI.HiddenFilter : false;
   dueDate               @Common.Label : 'Due Date';
   status                @Common.Label : 'Status' @Common.FieldControl : #ReadOnly;
   priority              @Common.Label : 'Priority' @Common.FieldControl : #Mandatory;
@@ -26,6 +28,11 @@ annotate service.Bugs with {
   nextProcessorUserDisplayName @Common.Label : 'Next Processor User' @Common.FieldControl : #ReadOnly @Core.Computed;
   nextProcessorRole     @Common.Label : 'Next Processor Role' @Common.FieldControl : #ReadOnly;
   nextProcessorRoleName @Common.Label : 'Next Processor Role' @Common.FieldControl : #ReadOnly @Core.Computed;
+  currentActionOwnerDisplayName @Common.Label : 'Current Action Owner' @Common.FieldControl : #ReadOnly @Core.Computed;
+  isOverdue             @Common.Label : 'Overdue' @Common.FieldControl : #ReadOnly @Core.Computed;
+  isPendingAssignment   @Common.Label : 'Pending Assignment' @Common.FieldControl : #ReadOnly @Core.Computed;
+  isRejectedFollowUp    @Common.Label : 'Rejected Follow-up' @Common.FieldControl : #ReadOnly @Core.Computed;
+  isRetestRequired      @Common.Label : 'Retest Required' @Common.FieldControl : #ReadOnly @Core.Computed;
   plannedCompletionDate @Common.Label : 'Planned Completion Date';
   estimatedEffortHours  @Common.Label : 'Estimated Effort Hours';
   componentCategory     @UI.Hidden @Core.Computed;

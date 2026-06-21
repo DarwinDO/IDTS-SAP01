@@ -237,7 +237,30 @@ annotate service.Bugs:reporter.ID with @Common.FieldControl : #ReadOnly @Common.
     ]
   };
 
-annotate service.Bugs:nextProcessorUser.ID with @Common.FieldControl : #ReadOnly;
+annotate service.Bugs:nextProcessorUser.ID with @Common.FieldControl : #ReadOnly @Common.ValueList : {
+    Label : 'Next Processor User',
+    CollectionPath : 'Users',
+    SearchSupported : true,
+    Parameters : [
+      {
+        $Type : 'Common.ValueListParameterInOut',
+        LocalDataProperty : nextProcessorUser_ID,
+        ValueListProperty : 'ID'
+      },
+      {
+        $Type : 'Common.ValueListParameterDisplayOnly',
+        ValueListProperty : 'displayName'
+      },
+      {
+        $Type : 'Common.ValueListParameterDisplayOnly',
+        ValueListProperty : 'email'
+      },
+      {
+        $Type : 'Common.ValueListParameterDisplayOnly',
+        ValueListProperty : 'role_code'
+      }
+    ]
+  };
 
 annotate service.Bugs:nextProcessorRole.code with @Common.FieldControl : #ReadOnly @Common.ValueList : {
     Label : 'Next Processor Role',

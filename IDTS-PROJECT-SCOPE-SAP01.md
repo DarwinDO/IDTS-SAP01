@@ -324,6 +324,8 @@ Developer mark `Resolved` -> Tester/PM xác định có cần retest không -> n
 
 `nextProcessor` là người hoặc queue cần hành động tiếp theo trên bug. Nó không thay thế Developer `assignee`.
 
+UI wording baseline: show `Assignee (Technical Owner)` for the developer owner and `Current Action Owner` for the person or queue that must act now.
+
 Hệ thống nên tự động cập nhật `nextProcessor` theo status/action:
 
 * Assigned/In Review/In Progress -> assigned Developer.
