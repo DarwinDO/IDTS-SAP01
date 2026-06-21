@@ -1,6 +1,11 @@
 namespace idts.cap;
 
 using { cuid, managed } from '@sap/cds/common';
+using { Attachments as ManagedAttachments } from '@cap-js/attachments';
+
+aspect BugAttachments : ManagedAttachments {
+  fileSize : Integer64 @readonly;
+}
 
 aspect CodeList {
   key code     : String(40);
@@ -107,7 +112,7 @@ entity Bugs : cuid, managed {
   estimatedEffortHours   : Decimal(9,2)       @Common.Label : 'Estimated Effort Hours';
 
   comments               : Composition of many Comments on comments.bug = $self;
-  attachments            : Composition of many Attachments on attachments.bug = $self;
+  attachments            : Composition of many BugAttachments;
   historyEvents          : Composition of many HistoryEvents on historyEvents.bug = $self;
   notifications          : Composition of many Notifications on notifications.bug = $self;
   duplicateLinks         : Composition of many DuplicateLinks on duplicateLinks.sourceBug = $self;
@@ -120,27 +125,6 @@ entity Comments : cuid, managed {
   content    : LargeString not null;
 }
 
-entity Attachments : cuid, managed {
-  bug        : Association to Bugs not null;
-  uploadedBy : Association to Users not null;
-  @Core.MediaType                  : mediaType
-  @Core.ContentDisposition.Filename: fileName
-  @Core.AcceptableMediaTypes       : [
-    'image/jpeg',
-    'image/png',
-    'application/pdf',
-    'text/plain',
-    'application/json',
-    'text/csv',
-    'application/zip'
-  ]
-  content    : LargeBinary;
-  fileName   : String(255);
-  mediaType  : String(100) @Core.IsMediaType;
-  fileSize   : Integer64;
-  storageRef : String(500);
-}
-
 entity HistoryEvents : cuid, managed {
   bug        : Association to Bugs not null;
   actor      : Association to Users not null;
@@ -149,6 +133,19 @@ entity HistoryEvents : cuid, managed {
   summary    : String(500) not null;
   reason     : LargeString;
   logs       : Composition of many HistoryLogs on logs.event = $self;
+}
+
+annotate Bugs.attachments with {
+  content @Validation.Maximum : '10MB'
+          @Core.AcceptableMediaTypes : [
+            'image/jpeg',
+            'image/png',
+            'application/pdf',
+            'text/plain',
+            'application/json',
+            'text/csv',
+            'application/zip'
+          ];
 }
 
 entity HistoryLogs : cuid, managed {

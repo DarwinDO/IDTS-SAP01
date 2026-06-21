@@ -2,7 +2,7 @@
 
 Status: Completed for Sprint 1 MVP; Sprint 02 backend refinements and SAP490 test evidence added
 Owner workstream: Backend CAP
-Last updated: 2026-06-15
+Last updated: 2026-06-21
 
 ## Goal
 
@@ -118,6 +118,42 @@ Vietnamese:
 - Luồng create MVP hiện được chốt là khi submit sẽ persist `Assigned` hoặc `Pending Assignment`; `New` chỉ còn giữ cho mục đích tương thích dữ liệu cũ/import và các controlled transition. Các tài liệu canonical và lifecycle diagram đã được đồng bộ theo quyết định này.
 - `importantChanges()` trong `srv/service.js` hiện đã track thêm các thay đổi nội dung chung để ghi audit, gồm `title`, `description`, các field tái hiện/kết quả, environment, test reference và planning fields.
 - Bộ verify backend lặp lại đã được mở rộng thành 30 PASS / 0 FAIL trong `scripts/qa/test-idts6-programmatic.js`, bao gồm kiểm tra rõ rằng sửa `title` và `description` sẽ ghi `HistoryLogs`.
+
+## 2026-06-18 Direct Assignee Draft Save Fix
+
+English:
+
+- Fixed the draft-edit assignment path so changing `assignee_ID` directly through the Object Page `Assignee` field is treated as the official assignment/reassignment flow.
+- `prepareBugWrite()` now derives `status_code = ASSIGNED` when an assignee is selected on update and `PENDING_ASSIGNMENT` when the assignee is cleared.
+- Draft activation side effects now compare the active bug before/after `SAVE` on `Bugs.drafts`, then create grouped `HistoryEvents` / `HistoryLogs` and notification records for assignment and reassignment.
+- Added repeatable HTTP regression script `scripts/qa/test-direct-assignee-draft-save.ps1`, exposed as `npm run qa:direct-assignee:http`.
+
+Vietnamese:
+
+- Đã sửa luồng assign khi edit draft để việc đổi field `Assignee` trực tiếp trên Object Page trở thành luồng assign/reassign chính thức.
+- Khi chọn developer, backend tự chuyển status sang `Assigned`; khi xóa assignee, backend chuyển về `Pending Assignment`.
+- Khi activate draft, backend so sánh bug active trước/sau save rồi ghi `HistoryEvents` / `HistoryLogs` dạng grouped và tạo notification cho Developer.
+- Đã thêm script regression HTTP `scripts/qa/test-direct-assignee-draft-save.ps1`, chạy qua `npm run qa:direct-assignee:http` khi có CAP server local tương ứng.
+
+## 2026-06-20 IDTS-28 Service Refactor
+
+English:
+
+- Split the monolithic `srv/service.js` into focused backend modules under `srv/bug-service/`: `constants.js`, `helpers.js`, `history.js`, `read-models.js`, `guards.js`, `permissions.js`, `bug-write.js`, `actions.js`, `content.js`, and `drafts.js`.
+- Kept business behavior in the same CAP service boundary; `srv/service.js` is now a thin orchestration layer that registers hooks and action handlers. After the follow-up Sprint 3 `HistoryEvents` read-model hook additions, the file remains thin at 148 lines in the current branch.
+- GitHub PR #5 merged the refactor into `dev` at merge commit `9129ae8bb3fb22502260b3a435ad5df14fdf8108`; Jira `IDTS-28` was updated with evidence comment `10154`.
+- Fresh backend verification passed with syntax checks, `cds compile srv/service.cds app/bug-management-ui/annotations.cds --to edmx`, `scripts/qa/test-idts6-programmatic.js` (`30 PASS / 0 FAIL`), `scripts/qa/test-pm-monitoring-programmatic.js` (`20 PASS / 0 FAIL`), `scripts/qa/test-developer-workload-programmatic.js` (`36 PASS / 0 FAIL`), and `scripts/qa/test-comments-attachments-programmatic.js` (`RESULT: PASS`).
+- A non-product verify issue was found: running the PM monitoring and developer workload suites in parallel can hit duplicate seed initialization (`UNIQUE constraint failed: idts_cap_Users.ID`). Rerunning `test-pm-monitoring-programmatic.js` sequentially passes, so this is treated as a harness/isolation limitation rather than a backend regression.
+- During the final `dev` sync, the developer-workload QA fixture was hardened because absolute due dates made `SangVN overdueOwnedBugCount` change from `4` to `5` on 2026-06-21. The test now clears seeded SangVN due dates in the in-memory DB and uses date-relative fixture due dates, restoring deterministic `36 PASS / 0 FAIL` evidence without changing product logic.
+- The earlier runtime blocker still applies for bundled Codex Node: `better-sqlite3.node` in `node_modules` targets `NODE_MODULE_VERSION 127`, while the bundled desktop runtime is `NODE_MODULE_VERSION 137`. Current verification therefore uses official Node.js `v22.23.0` (module version `127`).
+- Sprint 3 cross-ticket closure is still pending: Jira `IDTS-23` and `IDTS-24` remain `To Do`, so `IDTS-28` should stay open until automated-regression handoff and browser UAT are rerun on a live local stack.
+
+Vietnamese:
+
+- Đã tách `srv/service.js` dài thành các module backend rõ trách nhiệm trong `srv/bug-service/`: `constants.js`, `helpers.js`, `history.js`, và `read-models.js`.
+- Giữ nguyên boundary nghiệp vụ trong cùng CAP service; `srv/service.js` hiện chủ yếu còn phần đăng ký hooks cùng các workflow handlers, validation, và next-processor rules.
+- Verify cấu trúc đã pass với syntax checks và `cds compile srv/service.cds app/bug-management-ui/annotations.cds --to edmx`.
+- Regression backend programmatic đầy đủ ban đầu bị chặn do lệch runtime local: `better-sqlite3.node` trong `node_modules` được build cho `NODE_MODULE_VERSION 127`, trong khi bundled Codex desktop Node runtime là `NODE_MODULE_VERSION 137`. Blocker này đã được gỡ bằng cách chạy lại suite với Node.js chính thức `v22.23.0` (modules `127`), và `scripts/qa/test-idts6-programmatic.js` đã pass `30 PASS / 0 FAIL`.
 
 ## Definition of Done
 

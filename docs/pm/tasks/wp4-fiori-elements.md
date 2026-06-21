@@ -203,6 +203,22 @@ English:
 - Confirmed the selected assignee value now renders the readable developer name (`DatDT`) instead of the technical UUID in the action parameter input.
 - `IDTS-9` is now treated as closed at WP4 handover level; keep it only as a regression check for future FE changes.
 
+## 2026-06-18 Direct Assignee Field Assignment
+
+English:
+
+- Removed the `Assign Developer` action button from both the Object Page header action area and the Assignment section.
+- Kept the backend `assignToDeveloper` action for API/test compatibility, but the Fiori UI now uses the `Assignee` field and its filtered value help as the single assignment/reassignment path.
+- Added dynamic field control through `assigneeFieldControl`: Tester/PM can edit Assignee when the current status allows assignment, while Developer users see it as read-only.
+- Verified the annotation contract by CAP compile/CSN inspection: `BugService.assignToDeveloper` is no longer exposed by `UI.Identification` or `UI.FieldGroup#Assignment`, while `Assignee` uses dynamic `Common.FieldControl`.
+
+Vietnamese:
+
+- Đã bỏ nút `Assign Developer` khỏi header Object Page và khỏi section Assignment.
+- Backend action `assignToDeveloper` vẫn được giữ để không phá API/test cũ, nhưng Fiori UI chỉ dùng field `Assignee` và value help đã lọc đúng làm đường assign/reassign.
+- Thêm dynamic field control qua `assigneeFieldControl`: Tester/PM được edit Assignee khi status cho phép assign, còn Developer chỉ xem read-only.
+- Đã verify bằng CAP compile/CSN: `BugService.assignToDeveloper` không còn được expose trong `UI.Identification` hoặc `UI.FieldGroup#Assignment`; `Assignee` dùng `Common.FieldControl` động.
+
 Vietnamese:
 
 - ?? b? action `Add Comment` kh?i v?ng header generic v? chuy?n n? v?o ngay trong section `Comments`.
@@ -288,3 +304,23 @@ Vietnamese:
 - CÃ¡ch nÃ y buá»™c cÃ¡c chuyá»ƒn tráº¡ng thÃ¡i Ä‘i qua bound actions Ä‘Ã£ Ä‘Æ°á»£c duyá»‡t, thay vÃ¬ Ä‘á»ƒ user má»Ÿ generic status value help rá»“i gáº·p lá»—i transition tá»« backend.
 - ÄÃ£ thÃªm fallback khÃ´ng phÃ¢n biá»‡t hoa/thÆ°á»ng trong `resolveRequestUser` cho local dev, nÃªn mock login kiá»ƒu `donhv` váº«n map Ä‘Æ°á»£c tá»›i user IDTS `DonHV` vÃ  hiá»ƒn thá»‹ Ä‘Ãºng bá»™ action.
 - ÄÃ£ verify trÃªn `$metadata` thá»±c táº¿ ráº±ng `BugService.Bugs/status_code` Ä‘Ã£ lÃ  read-only vÃ  DataField `Status` trÃªn Object Page cÅ©ng mang annotation `Common.FieldControl` dáº¡ng read-only.
+
+## 2026-06-21 - IDTS-29 modular annotation integration
+
+English:
+
+- Reviewed DatDT's `fix/fe-Refactor_annotation.cds_datdt` branch because no DatDT pull request targeted `dev`.
+- Accepted the refactor that turns `app/bug-management-ui/annotations.cds` into a small import hub and moves annotations into eight feature-scoped files.
+- Compared normalized compiled CSN before and after the split; both produced SHA-256 `bc04ad74370d83b916b7f14d8778df302d740293dafeb6edf5ee4110995271c7`.
+- Rejected 49 tracked `gen/srv` build artifacts from the integration and added `gen/` to `.gitignore`.
+- Fresh verification passed: CAP compile, UI5 build, `30 PASS / 0 FAIL` backend regression, comments/attachments programmatic QA, direct-assignee HTTP QA, comments/attachments HTTP QA, and Playwright UAT for the List Report plus all expected Object Page sections.
+
+Vietnamese:
+
+- Review nhánh `fix/fe-Refactor_annotation.cds_datdt` của DatDT vì không có PR DatDT nào target `dev`.
+- Nhận phần refactor biến `app/bug-management-ui/annotations.cds` thành import hub nhỏ và tách annotation vào 8 file theo feature.
+- So sánh normalized compiled CSN trước/sau khi tách; cả hai có SHA-256 `bc04ad74370d83b916b7f14d8778df302d740293dafeb6edf5ee4110995271c7`.
+- Không nhận 49 build artifact bị track trong `gen/srv` và thêm `gen/` vào `.gitignore`.
+- Verification mới đã pass: CAP compile, UI5 build, backend regression `30 PASS / 0 FAIL`, programmatic QA comments/attachments, HTTP QA direct-assignee, HTTP QA comments/attachments, và Playwright UAT cho List Report cùng toàn bộ section Object Page mong đợi.
+- Jira `IDTS-29` was moved to Done after evidence comment `10153`.
+- GitHub PR #4 appeared after the direct branch review and was closed as superseded because the reviewed source changes were already in `dev` and the PR still contained generated `gen/srv` artifacts.

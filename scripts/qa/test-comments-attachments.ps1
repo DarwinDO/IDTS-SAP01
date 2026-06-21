@@ -238,8 +238,8 @@ try {
         -Url "$BaseUrl/Bugs(ID=$($draftBug.ID),IsActiveEntity=false)/attachments" `
         -Body @{
             ID        = $attachmentId
-            fileName  = $fileName
-            mediaType = "text/plain"
+            filename  = $fileName
+            mimeType = "text/plain"
             fileSize  = $fileBytes.Length
         }
     Assert-SuccessResponse -Response $attachmentCreateResponse.Response -Label "Create draft attachment metadata"
@@ -249,7 +249,7 @@ try {
     Write-Host "SC-CA-04 Upload draft attachment stream"
     $uploadResponse = Invoke-BinaryPut `
         -Client $client `
-        -Url "$BaseUrl/Attachments(ID=$attachmentId,IsActiveEntity=false)/content" `
+        -Url "$BaseUrl/Bugs_attachments(ID=$attachmentId,IsActiveEntity=false)/content" `
         -Bytes $fileBytes `
         -ContentType "text/plain" `
         -FileName $fileName
@@ -262,16 +262,16 @@ try {
         $result = Invoke-JsonRequest `
             -Client $client `
             -Method "Get" `
-            -Url "$BaseUrl/Attachments(ID=$attachmentId,IsActiveEntity=false)"
+            -Url "$BaseUrl/Bugs_attachments(ID=$attachmentId,IsActiveEntity=false)"
         Assert-SuccessResponse -Response $result.Response -Label "Read draft attachment metadata"
-        if ($result.Json.mediaType -eq "text/plain" -and [int64]$result.Json.fileSize -eq $fileBytes.Length) {
+        if ($result.Json.mimeType -eq "text/plain" -and [int64]$result.Json.fileSize -eq $fileBytes.Length) {
             return $result.Json
         }
         return $null
     }
-    Write-Host "  PASS  metadata read back with mediaType=$($attachmentRead.mediaType) and fileSize=$($attachmentRead.fileSize)"
-    if (-not $attachmentRead.fileName) {
-        Write-Host "  WARN  fileName is still null after upload; backend metadata handling needs follow-up"
+    Write-Host "  PASS  metadata read back with mimeType=$($attachmentRead.mimeType) and fileSize=$($attachmentRead.fileSize)"
+    if (-not $attachmentRead.filename) {
+        Write-Host "  WARN  filename is still null after upload; backend metadata handling needs follow-up"
     }
 
     Write-Host ""
@@ -287,7 +287,7 @@ try {
     Write-Host "SC-CA-07 Download and verify active content"
     $downloadResponse = Invoke-BinaryGet `
         -Client $client `
-        -Url "$BaseUrl/Attachments(ID=$attachmentId,IsActiveEntity=true)/content"
+        -Url "$BaseUrl/Bugs_attachments(ID=$attachmentId,IsActiveEntity=true)/content"
     Assert-SuccessResponse -Response $downloadResponse.Response -Label "Download active attachment content"
     $downloadedText = [System.Text.Encoding]::UTF8.GetString($downloadResponse.Bytes)
     if ($downloadedText -ne $fileText) {

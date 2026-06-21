@@ -3,11 +3,16 @@ using idts.cap as db from '../db/schema';
 service BugService @(requires: 'authenticated-user') {
   entity Bugs as projection on db.Bugs {
     *,
+    (dueDate != null and dueDate < date($now) and status.code != 'CLOSED' ? true : false) as isOverdue : Boolean,
+    (status.code == 'PENDING_ASSIGNMENT' ? true : false) as isPendingAssignment : Boolean,
+    (status.code == 'REJECTED' ? true : false) as isRejectedFollowUp : Boolean,
+    (status.code == 'RETEST_REQUIRED' ? true : false) as isRetestRequired : Boolean,
     virtual reporterDisplayName : String(120),
     componentCategory : redirected to ComponentCategories,
     virtual assigneeDisplayName : String(120),
     virtual nextProcessorUserDisplayName : String(120),
     virtual nextProcessorRoleName : String(120),
+    virtual currentActionOwnerDisplayName : String(120),
     virtual canMarkInReview       : Boolean,
     virtual canStartProgress      : Boolean,
     virtual canResolve            : Boolean,
@@ -19,7 +24,8 @@ service BugService @(requires: 'authenticated-user') {
     virtual canAssign             : Boolean,
     virtual canMoveToPending      : Boolean,
     virtual canResubmit           : Boolean,
-    virtual canAddComment         : Boolean
+    virtual canAddComment         : Boolean,
+    virtual assigneeFieldControl  : Integer
   } actions {
     action addComment(content: LargeString) returns Bugs;
     action assignToDeveloper(
@@ -75,15 +81,13 @@ service BugService @(requires: 'authenticated-user') {
     author.displayName as authorDisplayName,
     authorRole.name as authorRoleName
   };
-  entity Attachments as projection on db.Attachments {
-    *,
-    uploadedBy.displayName as uploadedByDisplayName
-  };
   entity HistoryEvents as projection on db.HistoryEvents {
     *,
     actor.displayName as actorDisplayName,
     actorRole.name as actorRoleName,
-    actionType.name as actionTypeName
+    actionType.name as actionTypeName,
+    virtual changeCount : Integer,
+    virtual groupedChangeContext : String(1000)
   };
   entity HistoryLogs as projection on db.HistoryLogs {
     *,
@@ -127,6 +131,31 @@ service BugService @(requires: 'authenticated-user') {
     sapModuleName             : String(120);
     responsibilityLevelName   : String(120);
     active                    : Boolean;
+  };
+  @readonly
+  entity DeveloperWorkloads {
+    key developerProfileID      : UUID;
+    developerUserID             : UUID;
+    developerName               : String(120);
+    developerEmail              : String(255);
+    availabilityStatusCode      : String(40);
+    availabilityStatusName      : String(120);
+    availabilityCriticality     : Integer;
+    workloadLimit               : Integer;
+    openOwnedBugCount           : Integer;
+    overdueOwnedBugCount        : Integer;
+    currentActionItemCount      : Integer;
+    assignedCount               : Integer;
+    inReviewCount               : Integer;
+    inProgressCount             : Integer;
+    reopenedCount               : Integer;
+    needMoreInformationCount    : Integer;
+    resolvedCount               : Integer;
+    retestRequiredCount         : Integer;
+    rejectedCount               : Integer;
+    estimatedEffortHoursTotal   : Decimal(9,2);
+    isOverloaded                : Boolean;
+    active                      : Boolean;
   };
   entity ValidDefectCategories as select from db.ComponentCategories {
     key ID as componentCategoryID,

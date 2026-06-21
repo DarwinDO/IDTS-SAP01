@@ -1,6 +1,6 @@
 # IDTS Task Board
 
-Last updated: 2026-06-18
+Last updated: 2026-06-21
 
 Use this board for high-level movement only. Detailed task notes belong in the matching file under `docs/pm/tasks/`.
 
@@ -18,8 +18,10 @@ Vietnamese: Chỉ dùng board này để theo dõi trạng thái cấp cao. Chi 
 | WP1 | Data Model Foundation | Expanded CAP CDS model, service projections, and seed data under `db/data/` |
 | WP2 | Service and Value Help | OData V4 service actions, value help annotations, and metadata compile completed |
 | WP3 | Handler Rules and Validation | CAP handler rules for create/update, assignment, status transition, nextProcessor, history, and notifications completed |
-| WP4 | Fiori Elements UX | Core layout, dynamic creation hiding, assignee value help, mock-login QA, local Comments CTA, and Assign Developer selected-text verification completed on the current live stack |
+| WP4 | Fiori Elements UX | Core UX is complete; `IDTS-29` modular annotation refactor is integrated with equivalent compiled metadata, clean UI5 build, automated regression, and List Report/Object Page browser UAT |
+| WP5 | Comments and History | Grouped `HistoryEvents` read model, comments/attachments audit baseline, and Sprint 3 grouped history payload support completed for backend handoff |
 | WP7 | Notifications and Attachments | Backend persistence, in-app notifications, create-time attachment visibility, and browser happy-flow verification completed |
+| IDTS-30 | PostgreSQL local proof and attachment storage decision | PostgreSQL deploy/read proof completed, draft-media blocker documented, long-term object-storage direction approved, and implementation handed off to `IDTS-31` |
 
 Vietnamese:
 
@@ -33,34 +35,33 @@ Vietnamese:
 | WP1 | Nền tảng Data Model | CAP CDS model, service projections, và seed data trong `db/data/` |
 | WP2 | Service và Value Help | Đã hoàn thành OData V4 service actions, value help annotations và metadata compile |
 | WP3 | Handler Rules và Validation | Đã hoàn thành CAP handler rules cho create/update, assignment, status transition, nextProcessor, history và notifications |
-| WP4 | Fiori Elements UX | Đã hoàn thành layout chính, ẩn động khi create, value help assignee, QA mock-login, nút Add Comment trong section Comments, và xác minh dialog Assign Developer hiển thị tên đúng trên runtime hiện tại |
+| WP4 | Fiori Elements UX | Core UX đã hoàn thành; refactor annotation theo module của `IDTS-29` đã được tích hợp với metadata tương đương, UI5 build sạch, regression tự động và browser UAT cho List Report/Object Page |
 | WP7 | Notifications và Attachments | Đã xác nhận lưu trữ backend, bản ghi thông báo trong ứng dụng, và kiểm thử E2E comment/upload trên browser thành công. |
 
 ## Ready
 
-| ID | Task | Primary member | Support / review | Detail file |
-| --- | --- | --- | --- | --- |
-| WP5 | Comments and History | SangVN, DatDT | DonHV, NhanT | `tasks/wp5-comments-history.md` |
-| WP6 | PM Monitoring | DatDT, SangVN | DonHV, NhanT | `tasks/wp6-pm-monitoring.md` |
+| ID | Task | Primary member | Note |
+| --- | --- | --- | --- |
+None currently.
 
 Vietnamese:
 
-| ID | Công việc | Thành viên chính | Hỗ trợ / review | File chi tiết |
-| --- | --- | --- | --- | --- |
-| WP5 | Comments và History | SangVN, DatDT | DonHV, NhanT | `tasks/wp5-comments-history.md` |
-| WP6 | PM Monitoring | DatDT, SangVN | DonHV, NhanT | `tasks/wp6-pm-monitoring.md` |
+Hiện chưa có work package nào ở trạng thái Ready.
 
 ## In Progress
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
 | SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP, and real browser QA are now stable enough to prove the happy flow. Remaining work is final SAP490 sync and mentor-demo rerun, not FE/blocking workflow repair. |
+| WP6 | PM Monitoring | DonHV, DatDT, SangVN | Ownership wording is locked; backend `Current Action Owner`, derived monitoring flags, and the read-only `DeveloperWorkloads` aggregate are now implemented and verified. FE monitoring views/filter variants/browser UAT remain pending. |
+| IDTS-31 | Object-store-backed attachment implementation | DonHV | Plugin migration and SQLite/PostgreSQL DB-fallback regression pass. Shared PostgreSQL is selected; 2026-06-21 readiness check confirmed the local machine still lacks integration PostgreSQL credentials and object-store binding, so final non-DB acceptance remains pending. |
 
 Vietnamese:
 
 | ID | Công việc | Thành viên chính | Ghi chú |
 | --- | --- | --- | --- |
 | SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP và browser QA thật hiện đã đủ để chứng minh happy flow chính. Phần còn lại là sync SAP490 cuối và rerun demo mentor, không còn là sửa FE hay workflow blocking. |
+| WP6 | PM Monitoring | DonHV, DatDT, SangVN | Sprint 3 ownership wording đã chốt; backend `Current Action Owner` và các monitoring flag dẫn xuất đã implement + verify; phần còn lại là FE monitoring views/filter variants và browser UAT. |
 
 ## Blocked
 

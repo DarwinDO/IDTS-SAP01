@@ -1,0 +1,16 @@
+{
+  "requires": {
+    "db": {
+      "[integration]": {
+        "credentials": {
+          "host": "<shared-postgresql-host>",
+          "port": 5432,
+          "database": "<shared-database-name>",
+          "user": "<team-user-or-personal-user>",
+          "password": "<private-password>",
+          "ssl": true
+        }
+      }
+    }
+  }
+}
