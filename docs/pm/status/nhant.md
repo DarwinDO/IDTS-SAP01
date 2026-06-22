@@ -24,9 +24,35 @@ Vietnamese:
 
 ## Current Focus
 
-IDTS-12: DEMO – Prepare mentor demo script and final smoke test.
+IDTS-23: Expand automated regression for ownership, history, and monitoring.
 
-Vietnamese: IDTS-12: DEMO – Chuẩn bị kịch bản demo mentor và smoke test cuối.
+Vietnamese: IDTS-23: Mở rộng kiểm thử hồi quy tự động cho ownership, history, và monitoring.
+
+## Latest Updates
+
+- **2026-06-21**: Thực hiện task IDTS-23: Expand automated regression for ownership, history, and monitoring.
+  - Tạo script `scripts/qa/test-idts23-regression.js` chạy hồi quy toàn diện lifecycle ownership, history, và giám sát.
+  - Fix lỗi test harness: cài package `@cap-js/attachments` thiếu do dependency của service.
+  - Fix lỗi treo `callAction` / deadlock `cds.tx()` pattern trong test-idts23 bằng cách chuyển đổi sang sử dụng promise với `srv.dispatch(req)` và xử lý `catch` mà không wrap bằng timeout không cần thiết.
+  - Fix lỗi runtime: Test ownership PASS hoàn toàn `(12/12)`, Test history PASS hoàn toàn `(1/1)`, Test monitoring PASS hoàn toàn `(16/16)`.
+  - Tổng cộng 29/29 checks PASS. Test chạy thành công bằng lệnh `node scripts/qa/test-idts23-regression.js`.
+
+- **2026-06-17**: Đã verify toàn bộ PM Monitoring Flags theo checklist manual. Mọi chức năng `isOverdue`, `isRejectedFollowUp`, `isPendingAssignment`, `isRetestRequired` hiển thị và hoạt động đúng với UI List Report. Test manual thành công!
+
+## Remaining Blockers
+
+- None. Tạm thời không có blocker nào cho script regression này.
+
+Vietnamese: Không có blocker. Script chạy thành công.
+
+## Provisional Status / Bug Staging
+
+- **Bug 1 (Fix tại chỗ)**: Lỗi `NOT NULL constraint failed: idts_cap_Bugs.stepsToReproduce` khi gọi `assignToDeveloper` từ test programmatic, do req truyền qua dispatch kích hoạt hook UPDATE nhưng bị thiếu data do CDS test model tự validate strict field constraint, fix bằng việc truyền đúng structure.
+- **Bug 2 (Fix tại chỗ)**: Lỗi deadlock và timeout khi gọi `assignToDeveloper`, nguyên nhân do `callAction` tự wrap `timeout` và treo Promise khi lỗi xảy ra bên trong service (VD sai authorization role do test data), fix bằng cách check try-catch cho Promise `srv.dispatch`.
+
+Vietnamese:
+- **Bug 1**: `NOT NULL constraint failed: idts_cap_Bugs.stepsToReproduce` khi update bằng `assignToDeveloper` vì data test model update bằng db.run bị thiếu. Đã fix.
+- **Bug 2**: Deadlock timeout test script. Đã fix cách handle Promise catch. bug, assign, pending assignment, developer review, request information, reject, resolve, retest, close, reopen, comments, history, and PM monitoring.
 
 ## Done
 
