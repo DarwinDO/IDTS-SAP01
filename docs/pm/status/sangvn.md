@@ -1,6 +1,6 @@
 # SangVN Status - Fiori/UI5 Support
 
-Last updated: 2026-06-17
+Last updated: 2026-06-22
 
 Vietnamese: Trạng thái của SangVN - hỗ trợ Fiori/UI5 cho Sprint 02.
 
@@ -24,9 +24,9 @@ Vietnamese:
 
 ## Current Focus
 
-Sprint 02 Fiori/UI5 support work: support Bug Detail usability tuning, verify status/value-help/comment related FE behavior, and help re-test the remaining Assign Developer dialog gap.
+Sprint 03 Fiori/UI5 support work: IDTS-20 ownership label refinement is in progress. Next task is IDTS-19 grouped history timeline with selective UI5 extension.
 
-Vietnamese: Trọng tâm hiện tại là phần hỗ trợ Fiori/UI5 của Sprint 02: hỗ trợ tinh chỉnh usability của Bug Detail, verify các hành vi FE liên quan đến status/value help/comment, và hỗ trợ retest phần gap còn lại của dialog Assign Developer.
+Vietnamese: Trọng tâm hiện tại là phần Fiori/UI5 của Sprint 03: IDTS-20 chỉnh label ownership đang thực hiện. Task tiếp theo là IDTS-19 grouped history timeline với UI5 extension.
 
 ## Done
 
@@ -72,6 +72,7 @@ Vietnamese: Hiện không có blocker về execution. Blocker còn lại là quy
 
 | Date | Task/WP | What was done | Completed part | Issues/Bugs found | Fix status | Evidence/Commands | Next handoff |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-06-22 | IDTS-20 (Sprint 03) | Refined UI labels and helper text for ownership semantics per DEC-022. Updated 4 annotation CDS files: `labels.cds` (Assignee → Assignee (Technical Owner), Next Processor User → Current Action Owner, Next Processor Role → Action Owner Role, Pending Assignment → Awaiting Assignment, Rejected Follow-up → Rejected — Needs Follow-up), `ownership-assignment.cds` (Assignment and Rejected Follow-up FieldGroup labels), `list-report.cds` (column headers: Technical Owner, Action Owner), `object-page.cds` (added Current Action Owner to General Info section). | All 4 annotation files updated, CDS compile passed with no errors | npm install required — `@cap-js/attachments` was missing after fresh `git pull origin dev`. CDS compile warning on `NonUpdateableProperties` from `@cap-js/attachments` — pre-existing, not related to IDTS-20 changes. | Environment issue: Fixed by running `npm install`. Warning: pre-existing, not a product defect. | `git checkout -b feature/idts-20-ownership-labels-sangvn`; `npm install`; `npx cds compile srv --to edmx` (pass); `Select-String` grep confirmed all new labels in annotation files | Browser manual check pending; then commit and push branch for PR |
 | 2026-06-17 | IDTS-9 QA UI Retest | Re-tested the Assign Developer action dialog on the latest local FE build to verify whether the selected input now resolves the developer name instead of the UUID | Confirmed that the dialog is visible, the field label is now `Assignee`, and the value-help rows are business-friendly. The remaining issue is narrower: after selecting a developer, the input still shows the raw developer-profile UUID instead of the readable developer name. | Likely a standard Fiori Elements action-parameter selected-text limitation or a remaining FE metadata handling gap for this dialog. Browser evidence confirms the symptom; root-cause classification is still under team review. | Open (investigated) | Local run via `npm run watch-bug-management-ui`; browser retest on `http://localhost:4004/...`; screenshots `dialog_before_selection_1781693070331.png`, `dialog_after_selection_1781693103672.png` | Wait for team decision on recommendation: accept for demo or build a targeted FE extension |
 | 2026-06-13 | IDTS-8, IDTS-10, IDTS-11 (Sprint 02) | Updated Bug Detail UI annotations for status dropdown behavior, supporting information placement, and multiline action notes | UI annotations completed | None | Fixed | `cds compile srv --to edmx` | Manual QA and shared FE follow-up |
 | 2026-06-03 | Status setup | Member status file created from previous status baseline | Ownership assigned to SangVN | None | Fixed | `rg`, `git diff --check` | Continue on assigned Sprint work |
@@ -80,6 +81,7 @@ Vietnamese:
 
 | Ngày | Task/WP | Đã làm gì | Phần đã xong | Khó khăn/Bug phát hiện | Trạng thái fix | Bằng chứng/Lệnh đã chạy | Handoff tiếp theo |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-06-22 | IDTS-20 (Sprint 03) | Chỉnh label UI cho ownership semantics theo DEC-022. Cập nhật 4 file annotation CDS: `labels.cds` (Assignee → Assignee (Technical Owner), Next Processor User → Current Action Owner, Next Processor Role → Action Owner Role, Pending Assignment → Awaiting Assignment, Rejected Follow-up → Rejected — Needs Follow-up), `ownership-assignment.cds` (label Assignment và Rejected Follow-up), `list-report.cds` (cột Technical Owner, Action Owner), `object-page.cds` (thêm Current Action Owner vào General Info). | Cả 4 file annotation đã cập nhật, CDS compile pass không lỗi | npm install cần chạy trước — `@cap-js/attachments` chưa có sau git pull. CDS compile warning `NonUpdateableProperties` từ `@cap-js/attachments` — có sẵn trước đó, không liên quan IDTS-20. | Lỗi môi trường: fix bằng npm install. Warning: có sẵn, không phải bug sản phẩm. | `git checkout -b feature/idts-20-ownership-labels-sangvn`; `npm install`; `npx cds compile srv --to edmx` (pass); grep xác nhận label mới trong annotation files | Chờ manual browser check; sau đó commit và push branch cho PR |
 | 2026-06-17 | IDTS-9 QA UI Retest | Retest dialog Assign Developer trên bản FE local mới nhất để kiểm tra ô chọn sau khi chọn developer có hiện tên hay vẫn hiện UUID | Đã xác nhận label của field là `Assignee`, các dòng trong value help đã thân thiện hơn về mặt nghiệp vụ. Vấn đề còn lại hẹp hơn: sau khi chọn developer, ô input vẫn hiện UUID của developer profile thay vì tên đọc được. | Nhiều khả năng đây là giới hạn của standard Fiori Elements với selected text của action parameter, hoặc vẫn còn một khoảng FE metadata handling chưa được resolve hết. Hiện mới nên kết luận ở mức `likely`, chưa nên khẳng định tuyệt đối. | Open (đã điều tra và giữ mở) | Chạy local bằng `npm run watch-bug-management-ui`; browser retest trên `http://localhost:4004/...`; screenshot `dialog_before_selection_1781693070331.png`, `dialog_after_selection_1781693103672.png` | Chờ team chốt hướng xử lý: chấp nhận cho demo hoặc làm targeted FE extension |
 | 2026-06-13 | IDTS-8, IDTS-10, IDTS-11 (Sprint 02) | Cập nhật UI annotations cho Bug Detail liên quan status dropdown, vị trí Supporting Information, và multiline action note | Đã xong phần UI annotations | Không có | Đã xử lý | `cds compile srv --to edmx` | Manual QA và hỗ trợ FE tiếp theo |
 | 2026-06-03 | Status setup | Tạo file status thành viên từ baseline status cũ | Đã giao ownership cho SangVN | Không có | Đã xử lý | `rg`, `git diff --check` | Tiếp tục theo Sprint task được assign |

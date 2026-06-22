@@ -5,7 +5,7 @@ annotate service.Bugs with @(
     Data : [
       {
         $Type : 'UI.DataField',
-        Label : 'Assignee',
+        Label : 'Assignee (Technical Owner)',
         Value : assignee_ID,
         ![@UI.Hidden] : {
           $edmJson : {
@@ -15,7 +15,7 @@ annotate service.Bugs with @(
       },
       {
         $Type : 'UI.DataField',
-        Label : 'Assignee',
+        Label : 'Assignee (Technical Owner)',
         Value : assigneeDisplayName,
         ![@Common.FieldControl] : #ReadOnly,
         ![@UI.Hidden] : {
@@ -26,14 +26,14 @@ annotate service.Bugs with @(
       },
       {
         $Type : 'UI.DataField',
-        Label : 'Next Processor User',
+        Label : 'Current Action Owner',
         Value : nextProcessorUserDisplayName,
         ![@Common.FieldControl] : #ReadOnly,
         ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
       },
       {
         $Type : 'UI.DataField',
-        Label : 'Next Processor Role',
+        Label : 'Action Owner Role',
         Value : nextProcessorRoleName,
         ![@Common.FieldControl] : #ReadOnly,
         ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
@@ -43,8 +43,8 @@ annotate service.Bugs with @(
   UI.FieldGroup #RejectedFollowUp : {
     Data : [
       { $Type : 'UI.DataField', Label : 'Latest Rejection Reason', Value : rejectionReason, ![@Common.FieldControl] : #ReadOnly },
-      { $Type : 'UI.DataField', Label : 'Next Processor User', Value : nextProcessorUserDisplayName, ![@Common.FieldControl] : #ReadOnly },
-      { $Type : 'UI.DataField', Label : 'Next Processor Role', Value : nextProcessorRoleName, ![@Common.FieldControl] : #ReadOnly }
+      { $Type : 'UI.DataField', Label : 'Current Action Owner', Value : nextProcessorUserDisplayName, ![@Common.FieldControl] : #ReadOnly },
+      { $Type : 'UI.DataField', Label : 'Action Owner Role', Value : nextProcessorRoleName, ![@Common.FieldControl] : #ReadOnly }
     ]
   }
 );
