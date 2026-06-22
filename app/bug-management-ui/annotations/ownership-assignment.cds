@@ -1,11 +1,11 @@
 using BugService as service from '../../../srv/service';
 
 annotate service.Bugs with @(
-  UI.FieldGroup #Assignment : {
+  UI.FieldGroup #OwnershipSummary : {
     Data : [
       {
         $Type : 'UI.DataField',
-        Label : 'Assignee',
+        Label : 'Assignee (Technical Owner)',
         Value : assignee_ID,
         ![@UI.Hidden] : {
           $edmJson : {
@@ -15,7 +15,7 @@ annotate service.Bugs with @(
       },
       {
         $Type : 'UI.DataField',
-        Label : 'Assignee',
+        Label : 'Assignee (Technical Owner)',
         Value : assigneeDisplayName,
         ![@Common.FieldControl] : #ReadOnly,
         ![@UI.Hidden] : {
@@ -26,8 +26,40 @@ annotate service.Bugs with @(
       },
       {
         $Type : 'UI.DataField',
-        Label : 'Next Processor User',
-        Value : nextProcessorUserDisplayName,
+        Label : 'Current Action Owner',
+        Value : currentActionOwnerDisplayName,
+        ![@Common.FieldControl] : #ReadOnly,
+        ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
+      }
+    ]
+  },
+  UI.FieldGroup #Assignment : {
+    Data : [
+      {
+        $Type : 'UI.DataField',
+        Label : 'Assignee (Technical Owner)',
+        Value : assignee_ID,
+        ![@UI.Hidden] : {
+          $edmJson : {
+            $Eq : [ { $Path : 'IsActiveEntity' }, true ]
+          }
+        }
+      },
+      {
+        $Type : 'UI.DataField',
+        Label : 'Assignee (Technical Owner)',
+        Value : assigneeDisplayName,
+        ![@Common.FieldControl] : #ReadOnly,
+        ![@UI.Hidden] : {
+          $edmJson : {
+            $Eq : [ { $Path : 'IsActiveEntity' }, false ]
+          }
+        }
+      },
+      {
+        $Type : 'UI.DataField',
+        Label : 'Current Action Owner',
+        Value : currentActionOwnerDisplayName,
         ![@Common.FieldControl] : #ReadOnly,
         ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
       },
@@ -43,7 +75,7 @@ annotate service.Bugs with @(
   UI.FieldGroup #RejectedFollowUp : {
     Data : [
       { $Type : 'UI.DataField', Label : 'Latest Rejection Reason', Value : rejectionReason, ![@Common.FieldControl] : #ReadOnly },
-      { $Type : 'UI.DataField', Label : 'Next Processor User', Value : nextProcessorUserDisplayName, ![@Common.FieldControl] : #ReadOnly },
+      { $Type : 'UI.DataField', Label : 'Current Action Owner', Value : currentActionOwnerDisplayName, ![@Common.FieldControl] : #ReadOnly },
       { $Type : 'UI.DataField', Label : 'Next Processor Role', Value : nextProcessorRoleName, ![@Common.FieldControl] : #ReadOnly }
     ]
   }

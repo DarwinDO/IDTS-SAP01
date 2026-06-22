@@ -16,6 +16,20 @@ annotate service.Bugs with @(
   UI.Facets : [
     {
       $Type  : 'UI.CollectionFacet',
+      ID     : 'OwnershipSummaryFacet',
+      Label  : 'Ownership',
+      Facets : [
+        {
+          $Type  : 'UI.ReferenceFacet',
+          ID     : 'OwnershipSummaryRef',
+          Label  : 'Ownership Summary',
+          Target : '@UI.FieldGroup#OwnershipSummary',
+          ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
+        }
+      ]
+    },
+    {
+      $Type  : 'UI.CollectionFacet',
       ID     : 'BugDetails',
       Label: 'Bug Summary',
       Facets : [
