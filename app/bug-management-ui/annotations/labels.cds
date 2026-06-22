@@ -23,10 +23,13 @@ annotate service.Bugs with {
   reporter              @Common.Label : 'Reporter' @Common.FieldControl : #ReadOnly;
   reporterDisplayName   @Common.Label : 'Reporter' @Common.FieldControl : #ReadOnly @Core.Computed;
   assignee              @Common.Label : 'Assignee (Technical Owner)' @Common.QuickInfo : 'The developer technically responsible for fixing this bug';
+  assignee_ID           @Common.Label : 'Assignee (Technical Owner)' @Common.QuickInfo : 'The developer technically responsible for fixing this bug';
   assigneeDisplayName   @Common.Label : 'Assignee (Technical Owner)' @Common.QuickInfo : 'The developer technically responsible for fixing this bug' @Common.FieldControl : #ReadOnly @Core.Computed;
   nextProcessorUser     @Common.Label : 'Current Action Owner' @Common.QuickInfo : 'The specific person who must take action right now' @Common.FieldControl : #ReadOnly;
+  nextProcessorUser_ID  @Common.Label : 'Current Action Owner' @Common.QuickInfo : 'The specific person who must take action right now' @Common.FieldControl : #ReadOnly;
   nextProcessorUserDisplayName @Common.Label : 'Current Action Owner' @Common.QuickInfo : 'The specific person who must take action right now' @Common.FieldControl : #ReadOnly @Core.Computed;
   nextProcessorRole     @Common.Label : 'Action Owner Role' @Common.QuickInfo : 'The team or role responsible if a specific person is not yet assigned' @Common.FieldControl : #ReadOnly;
+  nextProcessorRole_code @Common.Label : 'Action Owner Role' @Common.QuickInfo : 'The team or role responsible if a specific person is not yet assigned' @Common.FieldControl : #ReadOnly;
   nextProcessorRoleName @Common.Label : 'Action Owner Role' @Common.QuickInfo : 'The team or role responsible if a specific person is not yet assigned' @Common.FieldControl : #ReadOnly @Core.Computed;
   currentActionOwnerDisplayName @Common.Label : 'Current Action Owner' @Common.QuickInfo : 'The specific person who must take action right now' @Common.FieldControl : #ReadOnly @Core.Computed;
   isOverdue             @Common.Label : 'Overdue' @Common.FieldControl : #ReadOnly @Core.Computed;
