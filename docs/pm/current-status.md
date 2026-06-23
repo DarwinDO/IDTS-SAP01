@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-06-21
+Last updated: 2026-06-22
 
 ## Snapshot
 
@@ -80,9 +80,11 @@ Last updated: 2026-06-21
 - `HistoryEvents` now also exposes read-only grouped timeline support for Sprint 3 (`groupedChangeContext`, `changeCount`) while `HistoryLogs` remains the raw field-level audit detail source. Fresh programmatic verification passed `13 PASS / 0 FAIL` across assign, resubmit, reject, pending-assignment, close, and generic edit scenarios.
 - IDTS-28 service refactor is merged into `dev` through GitHub PR #5 at merge commit `9129ae8bb3fb22502260b3a435ad5df14fdf8108`. Local verification passed syntax checks, CAP compile, UI5 build, backend happy-flow, history-events, PM monitoring, developer workload, comments/attachments, and `git diff --check`. Jira `IDTS-28` remains In Progress only until IDTS-23 and IDTS-24 retest closure evidence is attached.
 - IDTS-31 is Done. The implementation uses `@cap-js/attachments`, removes the legacy `move_media_data_in_db` path, preserves 10 MB/MIME/role/history rules, and passes SQLite, PostgreSQL DB-fallback, and native AWS S3 acceptance. The final proof confirmed PostgreSQL stores metadata/reference with `content = NULL`, AWS S3 stores the binary object, and deletion cleans both stores. Jira evidence is recorded in comment `10162`.
+- Source-code knowledge mirrors now exist for every tracked file under `app/`, `srv/`, and `db`. Future changes in those folders must update the matching note under `docs/knowledge/app/`, `docs/knowledge/srv/`, or `docs/knowledge/db/`, including explicit cross-folder links.
 
 Vietnamese:
 
+- Source-code knowledge mirror đã có cho mọi file đang được Git track trong `app/`, `srv/`, và `db`. Sau này khi sửa các folder này, thành viên phải cập nhật note tương ứng trong `docs/knowledge/app/`, `docs/knowledge/srv/`, hoặc `docs/knowledge/db/`, bao gồm liên kết chéo giữa các folder.
 - WP1 Data Model Foundation Ä‘Ã£ Ä‘Æ°á»£c implement trong `db/schema.cds`, `srv/service.cds` vÃ  `db/data/`; CAP compile vÃ  SQLite in-memory deploy Ä‘á»u pass.
 - WP2 Service vÃ  Value Help Ä‘Ã£ hoÃ n thÃ nh á»Ÿ má»©c Sprint 1 MVP: OData V4 metadata cÃ³ bound lifecycle actions vÃ  Fiori value help annotations.
 - WP3 Handler Rules vÃ  Validation Ä‘Ã£ hoÃ n thÃ nh á»Ÿ má»©c Sprint 1 MVP: `srv/service.js` xá»­ lÃ½ create/update validation, assignment responsibility checks, status transition validation, nextProcessor automation, history logs vÃ  notification records.

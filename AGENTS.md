@@ -705,6 +705,68 @@ Khi tạo file code, model, annotation, configuration, script hoặc seed-data m
 - Nếu phần giải thích quá dài cho final response, hãy tạo hoặc cập nhật note riêng trong `docs/knowledge/` và tóm tắt các ý quan trọng trong final response.
 - Nêu rõ đã verify gì và team nên kiểm tra thủ công gì.
 
+## Source Code Knowledge Mirror Rule
+
+Every task that creates or changes a tracked source file under `app/`, `srv/`, or `db/` must also create or update the matching mirror knowledge note under `docs/knowledge/app/`, `docs/knowledge/srv/`, or `docs/knowledge/db/`.
+
+Use this exact mirror convention:
+
+- `app/<path>/<file>` -> `docs/knowledge/app/<path>/<file>.md`
+- `srv/<path>/<file>` -> `docs/knowledge/srv/<path>/<file>.md`
+- `db/<path>/<file>` -> `docs/knowledge/db/<path>/<file>.md`
+
+The mirror note must explain the source file in clear, beginner-friendly language. Understanding is more important than brevity. A longer explanation is acceptable when it helps a new team member understand the file safely.
+
+A mirror note is not acceptable if it only lists source lines, imports, fields, actions, or config keys. It must teach the reader how to understand the file: what problem the file solves, how the runtime/project flow uses it, why the important parts matter, and what breaks if linked files change.
+
+Use `docs/knowledge/guidelines/knowledge-mirror-anchors.md` as the living template for the `Important source anchors` section. Anchors must be IDTS-domain-first and include location, IDTS concept, impact if broken, and must-check-together references.
+
+The English and Vietnamese sections must be equivalent in meaning and depth. Vietnamese must not be a short summary of a fuller English explanation. If an anchor exists in English, the matching Vietnamese section must include the same anchor concept, impact, and must-check-together information in natural Vietnamese.
+
+Each mirror note must include:
+
+- What the source file is used for.
+- Where it fits in the IDTS flow.
+- The main parts of the file.
+- Which files in the other main folders it links to, when applicable.
+- The exact line, declaration, import, binding, annotation, endpoint, entity, action, or dataset concept where that link appears.
+- How the linked files affect each other.
+- Safe editing notes, including what else must be checked when this file changes.
+
+For CSV seed files, explain which CAP entity the dataset belongs to, what the rows are used for, and how the dataset affects Fiori value helps, backend rules, tests, or demos.
+
+For Fiori/CAP/UI5/OData/SAP terms, explain them plainly and connect them back to IDTS. Do not use academic wording when a simpler explanation works.
+
+Do not put secrets, access keys, passwords, private endpoints, screenshots containing credentials, or local-only private configuration values into any mirror note.
+
+Vietnamese:
+
+Mọi task tạo mới hoặc chỉnh sửa file source đã được Git track trong `app/`, `srv/`, hoặc `db/` đều phải tạo hoặc cập nhật note giải thích mirror tương ứng trong `docs/knowledge/app/`, `docs/knowledge/srv/`, hoặc `docs/knowledge/db/`.
+
+Dùng đúng quy ước mirror này:
+
+- `app/<path>/<file>` -> `docs/knowledge/app/<path>/<file>.md`
+- `srv/<path>/<file>` -> `docs/knowledge/srv/<path>/<file>.md`
+- `db/<path>/<file>` -> `docs/knowledge/db/<path>/<file>.md`
+
+Note mirror phải giải thích source file bằng ngôn ngữ rõ ràng, dễ hiểu cho người mới. Độ thông hiểu quan trọng hơn độ ngắn. Giải thích dài hơn được chấp nhận nếu giúp thành viên mới hiểu file an toàn hơn.
+
+Mỗi note mirror phải có:
+
+- File source dùng để làm gì.
+- File nằm ở đâu trong flow IDTS.
+- Các phần chính trong file.
+- Nếu có, file này liên kết với file nào ở các folder chính khác.
+- Dòng, khai báo, import, binding, annotation, endpoint, entity, action, hoặc concept dataset cụ thể nơi liên kết đó xuất hiện.
+- Các file được liên kết ảnh hưởng nhau như thế nào.
+- Lưu ý khi sửa an toàn, bao gồm cần kiểm tra thêm file nào khi file này thay đổi.
+
+Với CSV seed file, phải giải thích dataset thuộc CAP entity nào, các dòng dữ liệu dùng để làm gì, và dataset ảnh hưởng thế nào tới Fiori value help, backend rule, test, hoặc demo.
+
+Với thuật ngữ Fiori/CAP/UI5/OData/SAP, hãy giải thích bằng lời đơn giản và nối lại với IDTS. Không dùng văn phong học thuật khi có thể nói dễ hiểu hơn.
+
+Không ghi secret, access key, password, endpoint private, ảnh chụp màn hình chứa credential, hoặc giá trị private config chỉ dùng local vào bất kỳ mirror note nào.
+
 ## AI DevKit Workflow Layer
 
 AI DevKit is configured for Codex as a lightweight delivery workflow, not as a generic product template. Use it for multi-file or nontrivial work, especially changes that affect a business flow, CAP service behavior, Fiori annotations, UI behavior, tests, or project documentation.
