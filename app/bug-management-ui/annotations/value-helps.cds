@@ -238,7 +238,7 @@ annotate service.Bugs:reporter.ID with @Common.FieldControl : #ReadOnly @Common.
   };
 
 annotate service.Bugs:nextProcessorUser.ID with @Common.FieldControl : #ReadOnly @Common.ValueList : {
-    Label : 'Next Processor User',
+    Label : 'Current Action Owner',
     CollectionPath : 'Users',
     SearchSupported : true,
     Parameters : [
@@ -263,7 +263,7 @@ annotate service.Bugs:nextProcessorUser.ID with @Common.FieldControl : #ReadOnly
   };
 
 annotate service.Bugs:nextProcessorRole.code with @Common.FieldControl : #ReadOnly @Common.ValueList : {
-    Label : 'Next Processor Role',
+    Label : 'Action Owner Role',
     CollectionPath : 'ProcessorRoleValues',
     SearchSupported : true,
     Parameters : [
