@@ -1,7 +1,7 @@
 # Sprint 02 – Mentor Demo Script
 
-**Prepared by:** NhanT (QA) | **Date:** 2026-06-17  
-**Sprint Goal:** Demonstrate happy-flow for one bug lifecycle end-to-end  
+**Prepared by:** NhanT (QA) | **Date:** 2026-06-17
+**Sprint Goal:** Demonstrate happy-flow for one bug lifecycle end-to-end
 **Jira:** IDTS-12 | **Sprint:** IDTS Sprint 2
 
 Vietnamese: Kịch bản demo mentor cho Sprint 02 – happy flow vòng đời bug.

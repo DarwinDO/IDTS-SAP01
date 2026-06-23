@@ -88,7 +88,7 @@ async function callAction (srv, bugID, actionName, data = {}, requestUser = test
     data,
     user: requestUser
   })
-  
+
   try {
     const result = await srv.dispatch(req)
     return { ok: true, data: result }
