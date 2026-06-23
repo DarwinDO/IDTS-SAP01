@@ -24,13 +24,7 @@ annotate service.Bugs with @(
       },
       {
         $Type : 'UI.DataField',
-        Value : nextProcessorUserDisplayName,
-        ![@Common.FieldControl] : #ReadOnly,
-        ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
-      },
-      {
-        $Type : 'UI.DataField',
-        Value : nextProcessorRoleName,
+        Value : currentActionOwnerDisplayName,
         ![@Common.FieldControl] : #ReadOnly,
         ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
       }
@@ -39,8 +33,7 @@ annotate service.Bugs with @(
   UI.FieldGroup #RejectedFollowUp : {
     Data : [
       { $Type : 'UI.DataField', Label : 'Latest Rejection Reason', Value : rejectionReason, ![@Common.FieldControl] : #ReadOnly },
-      { $Type : 'UI.DataField', Value : nextProcessorUserDisplayName, ![@Common.FieldControl] : #ReadOnly },
-      { $Type : 'UI.DataField', Value : nextProcessorRoleName, ![@Common.FieldControl] : #ReadOnly }
+      { $Type : 'UI.DataField', Value : currentActionOwnerDisplayName, ![@Common.FieldControl] : #ReadOnly }
     ]
   }
 );

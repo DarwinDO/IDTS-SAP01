@@ -25,7 +25,7 @@ annotate service.Bugs with @(
   ],
   UI.DataPoint #AssigneeDataPoint : {
     Value : assigneeDisplayName,
-    Title : 'Assignee',
+    Title : 'Assignee (Technical Owner)',
     Description : 'The developer technically responsible for fixing this bug'
   },
   UI.DataPoint #ActionOwnerDataPoint : {
