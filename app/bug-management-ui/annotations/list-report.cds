@@ -28,8 +28,8 @@ annotate service.Bugs with @(
     { $Type : 'UI.DataField', Label : 'SAP Module', Value : sapModule.name },
     { $Type : 'UI.DataField', Label : 'Application Component', Value : applicationComponent.name },
     { $Type : 'UI.DataField', Label : 'Defect Category', Value : defectCategory.name },
-    { $Type : 'UI.DataField', Label : 'Assignee', Value : assigneeDisplayName },
-    { $Type : 'UI.DataField', Label : 'Next Processor', Value : nextProcessorRoleName },
+    { $Type : 'UI.DataField', Value : assigneeDisplayName },
+    { $Type : 'UI.DataField', Value : currentActionOwnerDisplayName },
     { $Type : 'UI.DataField', Label : 'Due Date', Value : dueDate },
     { $Type : 'UI.DataField', Label : 'Updated At', Value : modifiedAt }
   ],

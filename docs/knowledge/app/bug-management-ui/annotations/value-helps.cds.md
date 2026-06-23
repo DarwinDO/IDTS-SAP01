@@ -4,75 +4,149 @@
 
 ### What this file is for
 
-Defines ValueList annotations for various fields on Bugs, especially the dependent value helps for classification and assignment.
+This file tells Fiori Elements which lookup dialogs to show when a user edits fields on a Bug.
 
-Key examples:
-- Status, Priority, Severity (with fixed values)
-- Application Component → Defect Category (dependent)
-- Assignee (AssignableDevelopers with rich columns)
+In plain terms, a Value Help is the popup list behind fields such as Status, Priority, Application Component, Defect Category, Assignee, Current Action Owner, and Action Owner Role. Without these annotations, the UI would either show raw IDs/codes or provide a weak generic picker.
 
-### IDTS flow
+### Beginner explanation
 
-When creating or editing a bug, the tester gets smart filtered lists:
-- After choosing Application Component, only relevant Defect Categories appear.
-- Assignee value help only shows developers responsible for the current ComponentCategory (and optional SAP Module).
+CAP exposes the data model and OData service, but Fiori still needs hints about how a user should choose values. This file provides those hints with `@Common.ValueList`.
 
-This is a major usability feature for correct classification and assignment.
+For IDTS, this matters because several fields are not free text:
+
+- A tester should pick an Application Component from a controlled list.
+- Defect Category should depend on the chosen Application Component.
+- Assignee should come from suitable developers, not from every user in the system.
+- Current Action Owner and Action Owner Role should use business wording, not the raw `nextProcessor` technical term.
+
+### Flow in IDTS
+
+During bug creation or editing, this file supports the classification and assignment flow:
+
+1. The tester chooses an Application Component.
+2. The Defect Category value help is filtered so only valid combinations are offered.
+3. The backend derives or validates the Component Category from that pair.
+4. The Assignee value help uses `AssignableDevelopers` so the tester sees suitable developers with readable context.
+5. Current action owner fields stay read-only in normal UI usage, but their value help labels still need business-friendly wording because they can appear in generated dialogs, filters, or metadata-driven UI surfaces.
 
 ### Important source anchors
 
-- Annotations for `applicationComponent_ID` and `defectCategory_ID` with dependent ValueList.
-  **IDTS concept**: Enforces that only valid ComponentCategory combinations are chosen. Directly supports the assignment key concept.
+- Location: `annotate service.Bugs:applicationComponent.ID`
+  - IDTS concept: Application Component is the place where the bug appears.
+  - Impact if broken: Users may classify bugs against the wrong UI/module area.
+  - Must check together: `db/schema.cds`, `srv/service.cds`, `db/data/idts.cap-ApplicationComponents.csv`, and `app/bug-management-ui/annotations/object-page.cds`.
 
-- Annotation for assignee using `AssignableDevelopers` with multiple display columns (name, email, availability, component, defect category...).
-  **IDTS concept**: Gives rich context so the tester can pick the right developer based on workload and responsibility.
+- Location: `annotate service.Bugs:defectCategory.ID`
+  - IDTS concept: Defect Category combines with Application Component to form the Component Category assignment key.
+  - Impact if broken: Assignee filtering can become wrong because developer responsibility depends on the derived Component Category.
+  - Must check together: `srv/bug-service/bug-write.js`, `srv/bug-service/read-models.js`, `db/data/idts.cap-ComponentCategories.csv`, and `db/data/idts.cap-DefectCategories.csv`.
 
-### Cross-folder links
+- Location: `annotate service.Bugs:assignee.ID`
+  - IDTS concept: Assignee means Technical Owner, the developer responsible for fixing the bug.
+  - Impact if broken: Tester may assign bugs to unsuitable developers or see unreadable UUID values.
+  - Must check together: `srv/service.cds` entity `AssignableDevelopers`, `srv/bug-service/read-models.js`, and `app/bug-management-ui/annotations/ownership-assignment.cds`.
 
-- `srv/service.cds` (ValidDefectCategories, AssignableDevelopers, StatusValues...)
-- `srv/bug-service/read-models.js` (the actual query logic)
-- `db/data/` seeds for the lookup tables
-- `ownership-assignment.cds` and actions annotations
+- Location: `annotate service.Bugs:nextProcessorUser.ID`
+  - IDTS concept: The technical field is `nextProcessorUser`, but the UI concept is Current Action Owner.
+  - Impact if broken: Users may confuse the next person who must act with the technical assignee.
+  - Must check together: `app/bug-management-ui/annotations/labels.cds`, `app/bug-management-ui/annotations/list-report.cds`, and `srv/bug-service/actions.js`.
 
-### Safe editing
+- Location: `annotate service.Bugs:nextProcessorRole.code`
+  - IDTS concept: The technical field is `nextProcessorRole`, but the UI concept is Action Owner Role.
+  - Impact if broken: PM/Tester users may see raw backend wording and misunderstand ownership.
+  - Must check together: `db/data/idts.cap-ProcessorRoleValues.csv`, `app/bug-management-ui/annotations/labels.cds`, and `docs/project-context.md`.
 
-Changes here must stay in sync with the backend read models and seed data. Test dependent filtering thoroughly in the browser.
+### Cross-folder impact
+
+- `db/schema.cds` defines the associations and generated foreign-key fields used by these value helps.
+- `srv/service.cds` exposes value-list entities such as `StatusValues`, `ValidDefectCategories`, `AssignableDevelopers`, `Users`, and `ProcessorRoleValues`.
+- `srv/bug-service/read-models.js` builds the readable and filtered backend result sets.
+- `db/data/*.csv` provides the seed lookup data shown in the popups.
+- `app/bug-management-ui/annotations/labels.cds` supplies the final user-facing labels for the same concepts.
+
+### Safe editing checklist
+
+- Do not point `LocalDataProperty` to a field that is not exposed by `BugService.Bugs`.
+- Keep technical names such as `nextProcessorUser` out of user-facing labels unless the screen is explicitly technical/debug-only.
+- After editing, run `npx cds compile srv app/bug-management-ui --to edmx`.
+- For visible Fiori behavior, also run the UI5 build and browser-check the relevant value help popup.
+- If this file changes, update this knowledge note because the mapping between source property, backend lookup entity, and user-facing wording is easy to break.
 
 ## Vietnamese
 
 ### File này dùng để làm gì
 
-Định nghĩa ValueList annotation cho các trường trên Bugs, đặc biệt là value help phụ thuộc cho phân loại và phân công.
+File này nói cho Fiori Elements biết phải mở popup chọn dữ liệu nào khi user sửa các field trên Bug.
 
-Ví dụ quan trọng:
-- Status, Priority, Severity
-- Application Component → Defect Category (phụ thuộc)
-- Assignee (AssignableDevelopers)
+Nói dễ hiểu, Value Help là popup danh sách phía sau các field như Status, Priority, Application Component, Defect Category, Assignee, Current Action Owner, và Action Owner Role. Nếu không có các annotation này, UI có thể chỉ hiện ID/code thô hoặc mở một popup chọn dữ liệu quá chung chung.
 
-### Flow IDTS
+### Giải thích cho người mới
 
-Khi tạo/sửa bug, tester được danh sách thông minh:
-- Chọn Application Component trước → chỉ hiện Defect Category hợp lệ.
-- Value help Assignee chỉ hiện developer có responsibility cho ComponentCategory hiện tại.
+CAP expose data model và OData service, nhưng Fiori vẫn cần thêm chỉ dẫn để biết user nên chọn giá trị bằng cách nào. File này cung cấp các chỉ dẫn đó bằng `@Common.ValueList`.
 
-Đây là tính năng sử dụng quan trọng để phân loại và gán đúng.
+Với IDTS, phần này quan trọng vì nhiều field không phải text nhập tự do:
+
+- Tester phải chọn Application Component từ danh sách chuẩn.
+- Defect Category phải phụ thuộc vào Application Component đã chọn.
+- Assignee phải lấy từ danh sách developer phù hợp, không phải toàn bộ user trong hệ thống.
+- Current Action Owner và Action Owner Role phải dùng wording nghiệp vụ, không lộ thuật ngữ kỹ thuật `nextProcessor`.
+
+### Flow hoạt động trong IDTS
+
+Khi tạo hoặc sửa bug, file này hỗ trợ flow phân loại và phân công:
+
+1. Tester chọn Application Component.
+2. Value help của Defect Category được lọc để chỉ hiện các cặp hợp lệ.
+3. Backend derive hoặc validate Component Category từ cặp đó.
+4. Value help của Assignee dùng `AssignableDevelopers` để tester thấy developer phù hợp kèm thông tin dễ đọc.
+5. Các field current action owner thường là read-only, nhưng label trong value help vẫn phải thân thiện vì chúng có thể xuất hiện trong dialog, filter hoặc UI sinh tự động từ metadata.
 
 ### Các điểm neo quan trọng
 
-- Annotation cho applicationComponent và defectCategory (dependent ValueList).
-- Annotation cho assignee dùng AssignableDevelopers với nhiều cột thông tin.
+- Vị trí: `annotate service.Bugs:applicationComponent.ID`
+  - Khái niệm IDTS: Application Component là nơi bug xuất hiện.
+  - Ảnh hưởng nếu sai: User có thể phân loại bug vào sai khu vực UI/module.
+  - Phải kiểm tra cùng: `db/schema.cds`, `srv/service.cds`, `db/data/idts.cap-ApplicationComponents.csv`, và `app/bug-management-ui/annotations/object-page.cds`.
 
-### Liên kết
+- Vị trí: `annotate service.Bugs:defectCategory.ID`
+  - Khái niệm IDTS: Defect Category kết hợp với Application Component để tạo Component Category, tức key dùng cho assignment.
+  - Ảnh hưởng nếu sai: Bộ lọc assignee có thể sai vì developer responsibility phụ thuộc Component Category.
+  - Phải kiểm tra cùng: `srv/bug-service/bug-write.js`, `srv/bug-service/read-models.js`, `db/data/idts.cap-ComponentCategories.csv`, và `db/data/idts.cap-DefectCategories.csv`.
 
-service.cds, read-models.js, seed data, các file annotation liên quan.
+- Vị trí: `annotate service.Bugs:assignee.ID`
+  - Khái niệm IDTS: Assignee nghĩa là Technical Owner, tức developer chịu trách nhiệm xử lý kỹ thuật của bug.
+  - Ảnh hưởng nếu sai: Tester có thể assign nhầm developer hoặc thấy UUID khó đọc.
+  - Phải kiểm tra cùng: `srv/service.cds` entity `AssignableDevelopers`, `srv/bug-service/read-models.js`, và `app/bug-management-ui/annotations/ownership-assignment.cds`.
 
-### Checklist
+- Vị trí: `annotate service.Bugs:nextProcessorUser.ID`
+  - Khái niệm IDTS: Field kỹ thuật là `nextProcessorUser`, nhưng khái niệm hiển thị cho user là Current Action Owner.
+  - Ảnh hưởng nếu sai: User có thể nhầm người cần hành động tiếp theo với developer assignee.
+  - Phải kiểm tra cùng: `app/bug-management-ui/annotations/labels.cds`, `app/bug-management-ui/annotations/list-report.cds`, và `srv/bug-service/actions.js`.
 
-Phải đồng bộ với backend read model và seed. Test lọc phụ thuộc kỹ trên browser.
+- Vị trí: `annotate service.Bugs:nextProcessorRole.code`
+  - Khái niệm IDTS: Field kỹ thuật là `nextProcessorRole`, nhưng khái niệm hiển thị cho user là Action Owner Role.
+  - Ảnh hưởng nếu sai: PM/Tester có thể thấy wording backend thô và hiểu sai ownership.
+  - Phải kiểm tra cùng: `db/data/idts.cap-ProcessorRoleValues.csv`, `app/bug-management-ui/annotations/labels.cds`, và `docs/project-context.md`.
+
+### Liên kết với folder khác
+
+- `db/schema.cds` định nghĩa association và các foreign-key field được dùng trong value help.
+- `srv/service.cds` expose các entity tra cứu như `StatusValues`, `ValidDefectCategories`, `AssignableDevelopers`, `Users`, và `ProcessorRoleValues`.
+- `srv/bug-service/read-models.js` tạo các danh sách backend đã được lọc và dễ đọc.
+- `db/data/*.csv` cung cấp seed lookup data được hiển thị trong popup.
+- `app/bug-management-ui/annotations/labels.cds` giữ label cuối cùng mà user nhìn thấy cho cùng các khái niệm.
+
+### Checklist sửa an toàn
+
+- Không trỏ `LocalDataProperty` tới field không được expose bởi `BugService.Bugs`.
+- Không để thuật ngữ kỹ thuật như `nextProcessorUser` xuất hiện trong label cho user, trừ khi đó là màn hình kỹ thuật/debug.
+- Sau khi sửa, chạy `npx cds compile srv app/bug-management-ui --to edmx`.
+- Với hành vi Fiori nhìn thấy được, chạy thêm UI5 build và kiểm tra popup value help liên quan trên browser.
+- Nếu file này đổi, phải cập nhật note này vì mapping giữa source property, backend lookup entity và wording hiển thị rất dễ bị lệch.
 
 ## Metadata
 
 - Source file: `app/bug-management-ui/annotations/value-helps.cds`
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/annotations/value-helps.cds.md`
 - Source layer: `app`
-- Last reviewed: 2026-06-22
+- Last reviewed: 2026-06-23
