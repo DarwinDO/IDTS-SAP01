@@ -104,6 +104,36 @@
               "contextPath": "/Bugs",
               "enhanceI18n": "i18n/i18n.properties",
               "variantManagement": "Page",
+              "initialLoad": "Enabled",
+              "views": {
+                "showCounts": true,
+                "paths": [
+                  {
+                    "key": "_tab_AllBugs",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionVariant#AllBugs"
+                  },
+                  {
+                    "key": "_tab_PendingAssignment",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionVariant#PendingAssignment"
+                  },
+                  {
+                    "key": "_tab_RejectedFollowUp",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionVariant#RejectedFollowUp"
+                  },
+                  {
+                    "key": "_tab_RetestRequired",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionVariant#RetestRequired"
+                  },
+                  {
+                    "key": "_tab_Overdue",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionVariant#Overdue"
+                  },
+                  {
+                    "key": "_tab_MyActionItems",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionVariant#MyActionItems"
+                  }
+                ]
+              },
               "navigation": {
                 "Bugs": {
                   "detail": {

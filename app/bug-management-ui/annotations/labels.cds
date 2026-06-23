@@ -32,10 +32,10 @@ annotate service.Bugs with {
 
   nextProcessorRoleName @Common.Label : 'Action Owner Role' @Common.QuickInfo : 'The team or role responsible if a specific person is not yet assigned' @Common.FieldControl : #ReadOnly @Core.Computed;
   currentActionOwnerDisplayName @Common.Label : 'Current Action Owner' @Common.QuickInfo : 'The specific person who must take action right now' @Common.FieldControl : #ReadOnly @Core.Computed;
-  isOverdue             @Common.Label : 'Overdue' @Common.FieldControl : #ReadOnly @Core.Computed;
-  isPendingAssignment   @Common.Label : 'Awaiting Assignment' @Common.QuickInfo : 'Bug is classified and needs a developer assignment' @Common.FieldControl : #ReadOnly @Core.Computed;
-  isRejectedFollowUp    @Common.Label : 'Rejected \u2014 Needs Follow-up' @Common.QuickInfo : 'Bug was rejected and requires review or clarification from the reporter' @Common.FieldControl : #ReadOnly @Core.Computed;
-  isRetestRequired      @Common.Label : 'Retest Required' @Common.FieldControl : #ReadOnly @Core.Computed;
+  isOverdue             @Common.Label : 'Overdue' @Common.FieldControl : #ReadOnly @Core.Computed @UI.HiddenFilter : false;
+  isPendingAssignment   @Common.Label : 'Awaiting Assignment' @Common.QuickInfo : 'Bug is classified and needs a developer assignment' @Common.FieldControl : #ReadOnly @Core.Computed @UI.HiddenFilter : false;
+  isRejectedFollowUp    @Common.Label : 'Rejected \u2014 Needs Follow-up' @Common.QuickInfo : 'Bug was rejected and requires review or clarification from the reporter' @Common.FieldControl : #ReadOnly @Core.Computed @UI.HiddenFilter : false;
+  isRetestRequired      @Common.Label : 'Retest Required' @Common.FieldControl : #ReadOnly @Core.Computed @UI.HiddenFilter : false;
   plannedCompletionDate @Common.Label : 'Planned Completion Date';
   estimatedEffortHours  @Common.Label : 'Estimated Effort Hours';
   componentCategory     @UI.Hidden @Core.Computed;
