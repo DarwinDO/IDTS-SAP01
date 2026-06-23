@@ -1,6 +1,6 @@
 # IDTS-31 - Object-Store-Backed Attachments
 
-Status: In Progress / plugin migration verified, shared object-store acceptance pending
+Status: Done / AWS S3 external-storage acceptance passed
 Owner: DonHV
 Jira: `IDTS-31`
 Dependency: `IDTS-30`
@@ -147,3 +147,27 @@ Decision:
 4. Deploy and run the application under profile `integration`; execute attachment upload, draft activation, download, delete/cleanup, MIME/size validation, authorization, and history regression.
 5. Query PostgreSQL attachment tables to prove metadata/reference is present while binary content is absent, and verify the corresponding object exists in external storage.
 6. Run the existing CAP/UI5/backend regression suites, attach evidence to Jira, update PM/status/risk documents, move IDTS-31 to Done, and regenerate the affected SAP490 test/fix artifacts.
+
+## 2026-06-21 Final AWS S3 Acceptance
+
+AWS S3 was selected as the supported external object-store provider for the current IDTS integration environment.
+
+Acceptance evidence:
+
+- Dedicated private S3 bucket access passed through `HeadBucket` and `ListObjectsV2`.
+- CAP deployed successfully to a clean PostgreSQL acceptance database and started with `attachments.kind=s3`.
+- Draft attachment metadata create, 42-byte binary upload, draft activation, active download, content comparison, and attachment history all passed.
+- S3 contained the real 42-byte object while PostgreSQL stored filename, MIME type, size, and object key with `content = NULL`.
+- Active attachment deletion returned HTTP 204; the PostgreSQL attachment row and S3 object were both removed.
+- Direct-assignee HTTP regression passed.
+- CAP compile passed with one non-blocking plugin-generated capability annotation warning; UI5 build passed.
+- Sequential backend regression passed: happy flow `30/30`, history `13/13`, PM monitoring `20/20`, workload `36/36`, and comments persistence PASS.
+- Credentials remain only in ignored `.cdsrc-private.json`; the tracked example contains placeholders only.
+- Jira evidence: `IDTS-31#10162`; Jira status moved to Done.
+
+Remaining operational work is outside the IDTS-31 implementation acceptance:
+
+- Rotate the IAM access key periodically and immediately if exposed.
+- Configure AWS budget alerts before the free-plan credit period ends.
+- Coordinate backup/export before applying the plugin schema to any PostgreSQL database that still contains legacy attachment evidence.
+- Monitor the non-blocking plugin-generated `NonUpdateableProperties` compile warning during CAP/plugin upgrades.

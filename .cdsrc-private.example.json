@@ -11,6 +11,14 @@
           "ssl": true
         }
       }
+    },
+    "objectStore": {
+      "credentials": {
+        "bucket": "<private-aws-s3-bucket>",
+        "region": "<aws-region>",
+        "access_key_id": "<private-iam-access-key-id>",
+        "secret_access_key": "<private-iam-secret-access-key>"
+      }
     }
   }
 }

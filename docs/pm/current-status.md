@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-06-21
+Last updated: 2026-06-22
 
 ## Snapshot
 
@@ -9,8 +9,8 @@ Last updated: 2026-06-21
 | Project phase | Sprint 02 baseline is stable in `dev`; Sprint 03 backend kickoff has started for ownership clarity and PM monitoring |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
 | Current sprint | Sprint 03 kickoff focuses on ownership wording, current action owner display, history readability, and PM monitoring usability |
-| Recommended next action | Provision/bind the shared external object store for profile `integration`, then run the final non-DB attachment acceptance against the team shared PostgreSQL environment. |
-| Main implementation risk | Code and PostgreSQL DB-fallback regression pass, but final external object-storage acceptance depends on a shared object-store service binding and coordinated migration from legacy attachment tables. |
+| Recommended next action | Transfer the completed IDTS-31 AWS S3 evidence into the next SAP490 Test And Fix Bug/Test Report refresh, then continue WP6 Fiori monitoring views and UAT. |
+| Main implementation risk | Legacy PostgreSQL attachment evidence still requires coordinated backup/export before schema replacement; AWS IAM credentials also require rotation and budget monitoring. |
 
 ## What Is Already Done
 
@@ -79,10 +79,12 @@ Last updated: 2026-06-21
 - WP6 backend now also exposes a read-only `BugService.DeveloperWorkloads` aggregate for PM monitoring. The new service contract is assignee-based, keeps active zero-load developers visible, retains inactive developers only while they still own open bugs, and passed fresh programmatic verification with `36 PASS / 0 FAIL`.
 - `HistoryEvents` now also exposes read-only grouped timeline support for Sprint 3 (`groupedChangeContext`, `changeCount`) while `HistoryLogs` remains the raw field-level audit detail source. Fresh programmatic verification passed `13 PASS / 0 FAIL` across assign, resubmit, reject, pending-assignment, close, and generic edit scenarios.
 - IDTS-28 service refactor is merged into `dev` through GitHub PR #5 at merge commit `9129ae8bb3fb22502260b3a435ad5df14fdf8108`. Local verification passed syntax checks, CAP compile, UI5 build, backend happy-flow, history-events, PM monitoring, developer workload, comments/attachments, and `git diff --check`. Jira `IDTS-28` remains In Progress only until IDTS-23 and IDTS-24 retest closure evidence is attached.
-- IDTS-31 implementation now uses `@cap-js/attachments`, removes the legacy `move_media_data_in_db` path, preserves 10 MB/MIME/role/history rules, and passes SQLite plus PostgreSQL DB-fallback attachment draft regression. The team selected one shared PostgreSQL integration database; final external object-store verification remains pending service binding. A 2026-06-21 acceptance follow-up confirmed that this machine does not yet have integration PostgreSQL credentials or object-store binding, so Jira `IDTS-31` remains In Progress.
+- IDTS-31 is Done. The implementation uses `@cap-js/attachments`, removes the legacy `move_media_data_in_db` path, preserves 10 MB/MIME/role/history rules, and passes SQLite, PostgreSQL DB-fallback, and native AWS S3 acceptance. The final proof confirmed PostgreSQL stores metadata/reference with `content = NULL`, AWS S3 stores the binary object, and deletion cleans both stores. Jira evidence is recorded in comment `10162`.
+- Source-code knowledge mirrors now exist for every tracked file under `app/`, `srv/`, and `db`. Future changes in those folders must update the matching note under `docs/knowledge/app/`, `docs/knowledge/srv/`, or `docs/knowledge/db/`, including explicit cross-folder links.
 
 Vietnamese:
 
+- Source-code knowledge mirror đã có cho mọi file đang được Git track trong `app/`, `srv/`, và `db`. Sau này khi sửa các folder này, thành viên phải cập nhật note tương ứng trong `docs/knowledge/app/`, `docs/knowledge/srv/`, hoặc `docs/knowledge/db/`, bao gồm liên kết chéo giữa các folder.
 - WP1 Data Model Foundation Ä‘Ã£ Ä‘Æ°á»£c implement trong `db/schema.cds`, `srv/service.cds` vÃ  `db/data/`; CAP compile vÃ  SQLite in-memory deploy Ä‘á»u pass.
 - WP2 Service vÃ  Value Help Ä‘Ã£ hoÃ n thÃ nh á»Ÿ má»©c Sprint 1 MVP: OData V4 metadata cÃ³ bound lifecycle actions vÃ  Fiori value help annotations.
 - WP3 Handler Rules vÃ  Validation Ä‘Ã£ hoÃ n thÃ nh á»Ÿ má»©c Sprint 1 MVP: `srv/service.js` xá»­ lÃ½ create/update validation, assignment responsibility checks, status transition validation, nextProcessor automation, history logs vÃ  notification records.
