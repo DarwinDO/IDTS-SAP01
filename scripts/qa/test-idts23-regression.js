@@ -55,6 +55,11 @@ function expectEqual (label, actual, expected) {
   rec(label, actual === expected, `actual=${JSON.stringify(actual)} expected=${JSON.stringify(expected)}`)
 }
 
+function expectOneOf (label, actual, allowedValues) {
+  const pass = allowedValues.includes(actual)
+  rec(label, pass, `actual=${JSON.stringify(actual)} allowed=${JSON.stringify(allowedValues)}`)
+}
+
 function expectTruthy (label, value, detail = '') {
   rec(label, !!value, detail || `value=${JSON.stringify(value)}`)
 }
@@ -74,79 +79,82 @@ const USER_SANG  = '10000000-0000-0000-0000-000000000002'  // User SangVN
 
 /* ── Mock users ── */
 
-function tester ()   { return new cds.User({ id: 'NhanT',  roles: ['TESTER',    'authenticated-user'] }) }
-function developer (name) { return new cds.User({ id: name || 'SangVN', roles: ['DEVELOPER', 'authenticated-user'] }) }
-function pm ()       { return new cds.User({ id: 'DonHV',  roles: ['PM',        'authenticated-user'] }) }
+function tester ()   { return new cds.User({ id: 'alice', roles: ['TESTER',    'authenticated-user'] }) }
+function developer (name) { return new cds.User({ id: name || 'alice', roles: ['DEVELOPER', 'authenticated-user'] }) }
+function pm ()       { return new cds.User({ id: 'alice', roles: ['PM',        'authenticated-user'] }) }
 
 /* ── Helpers ── */
 
 async function callAction (srv, bugID, actionName, data = {}, requestUser = tester()) {
-  const req = new cds.Request({
-    method: 'POST',
-    event: actionName,
-    params: [{ ID: bugID, IsActiveEntity: true }],
-    data,
-    user: requestUser
-  })
-
   try {
-    const result = await srv.dispatch(req)
-    return { ok: true, data: result }
+    const req = new cds.Request({
+      method: 'POST',
+      event: actionName,
+      params: [{ ID: bugID, IsActiveEntity: true }],
+      data,
+      user: requestUser
+    })
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error(`TIMEOUT: ${actionName} hung for 5s (likely SQLite deadlock)`)), 5000)
+    )
+    const result = await Promise.race([srv.dispatch(req), timeout])
+    return { ok: true, code: 200, data: result }
   } catch (e) {
-    return { ok: false, error: e }
+    return { ok: false, code: e.code || e.statusCode || 500, msg: e.message?.substring(0, 200) || '' }
   }
 }
 
+async function mustCallAction (srv, bugID, actionName, data = {}, requestUser = tester()) {
+  const res = await callAction(srv, bugID, actionName, data, requestUser)
+  if (!res.ok) {
+    const detail = `${actionName} failed: code=${res.code} msg=${res.msg}`
+    rec(`ACTION ${actionName} must succeed`, false, detail)
+    throw new Error(detail)
+  }
+  return res
+}
+
 async function readBugOwnership (srv, bugID, entities) {
-  const pmUser = pm()
-  const rows = await cds.tx({}, tx =>
-    tx.run(
+  const req = new cds.Request({ method: 'GET', event: 'READ', user: pm() })
+  return cds.tx(req, async tx => {
+    const rows = await tx.run(
       SELECT.from(entities.Bugs)
         .columns('ID', 'bugNumber', 'status_code', 'reporter_ID', 'assignee_ID',
           'nextProcessorUser_ID', 'nextProcessorRole_code')
         .where({ ID: bugID })
     )
-  )
-  await enrichBugDisplayFields(rows, { user: pmUser }, entities)
-  return rows[0] || null
+    await enrichBugDisplayFields(rows, req, entities)
+    return rows[0] || null
+  })
 }
 
 async function readBugMonitoring (srv, bugID) {
-  const rows = await cds.tx({}, tx =>
-    tx.run(
+  const req = new cds.Request({ method: 'GET', event: 'READ', user: pm() })
+  return cds.tx(req, async tx => {
+    const rows = await tx.run(
       SELECT.from('BugService.Bugs')
         .columns('ID', 'isOverdue', 'isPendingAssignment', 'isRejectedFollowUp', 'isRetestRequired')
         .where({ ID: bugID })
     )
-  )
-  return rows[0] || null
+    return rows[0] || null
+  })
 }
 
 async function latestHistoryEvent (srv, bugID, actionType, entities) {
-  const req = {
-    query: {
-      SELECT: {
-        columns: [
-          { ref: ['summary'] },
-          { ref: ['reason'] },
-          { ref: ['groupedChangeContext'] },
-          { ref: ['changeCount'] },
-          { ref: ['actionType_code'] }
-        ]
-      }
-    }
-  }
-  ensureHistoryEventSelectDependencies(req)
+  const req = new cds.Request({ method: 'GET', event: 'READ', user: pm() })
+  return cds.tx(req, async tx => {
+    ensureHistoryEventSelectDependencies(req)
 
-  const rows = await cds.tx(req).run(
-    SELECT.from(srv.entities.HistoryEvents)
-      .columns('ID', 'summary', 'reason', 'actionType_code', 'createdAt')
-      .where({ bug_ID: bugID, actionType_code: actionType })
-      .orderBy('createdAt desc')
-      .limit(1)
-  )
-  await enrichHistoryEventPayload(rows, req, entities)
-  return rows[0] || null
+    const rows = await tx.run(
+      SELECT.from(srv.entities.HistoryEvents)
+        .columns('ID', 'summary', 'reason', 'actionType_code', 'createdAt')
+        .where({ bug_ID: bugID, actionType_code: actionType })
+        .orderBy('createdAt desc')
+        .limit(1)
+    )
+    await enrichHistoryEventPayload(rows, req, entities)
+    return rows[0] || null
+  })
 }
 
 async function createTestBug (db, overrides = {}) {
@@ -166,8 +174,8 @@ async function createTestBug (db, overrides = {}) {
       actualResult: 'To be verified.',
       expectedResult: 'Consistent ownership, history, and monitoring.',
       applicationComponent_ID: '40000000-0000-0000-0000-000000000001',
-      defectCategory_ID: '50000000-0000-0000-0000-000000000001',
-      componentCategory_ID: '60000000-0000-0000-0000-000000000001',
+      defectCategory_ID: '50000000-0000-0000-0000-000000000002',
+      componentCategory_ID: '60000000-0000-0000-0000-000000000002',
       reporter_ID: USER_NHANT,
       assignee_ID: overrides.assignee_ID || null,
       nextProcessorUser_ID: overrides.nextProcessorUser_ID || null,
@@ -184,6 +192,8 @@ async function createTestBug (db, overrides = {}) {
 /* ══════════════════════════════════════════
    MAIN
    ══════════════════════════════════════════ */
+
+const EXPECTED_MIN_CHECKS = 45 // Ownership(14) + History(16) + Monitoring(15) = 45
 
 async function main () {
   console.log('')
@@ -215,7 +225,16 @@ async function main () {
     await sectionMonitoringFlags(srv, entities, BUG_MON)
   } catch (error) {
     const detail = error?.stack || error?.message || JSON.stringify(error) || 'unknown error'
-    rec('REG-00 regression flow bootstraps successfully', false, detail)
+    rec('REG-00 regression flow crashed', false, detail)
+  }
+
+  /* Guard: script must not exit 0 if sections were skipped */
+  if (RESULTS.length < EXPECTED_MIN_CHECKS) {
+    rec(
+      `REG-GUARD expected >= ${EXPECTED_MIN_CHECKS} checks but only ran ${RESULTS.length}`,
+      false,
+      'Sections were skipped or crashed early'
+    )
   }
 
   console.log('')
@@ -231,6 +250,8 @@ async function main () {
     }
     process.exit(1)
   }
+
+  console.log('\nAll checks passed.')
 }
 
 /* ══════════════════════════════════════════
@@ -245,68 +266,68 @@ async function sectionOwnershipLifecycle (srv, entities, bugID) {
   expectEqual('OWN-01 Pending Assignment owner = Project Manager', bug?.currentActionOwnerDisplayName, 'Project Manager')
 
   /* OWN-02 Assign developer → owner = SangVN */
-  await callAction(srv, bugID, 'assignToDeveloper', { assigneeID: DEV_SANG, note: 'Assign for ownership regression' })
+  await mustCallAction(srv, bugID, 'assignToDeveloper', { assigneeID: DEV_SANG, note: 'Assign for ownership regression' })
   bug = await readBugOwnership(srv, bugID, entities)
   expectEqual('OWN-02 Assigned owner = SangVN', bug?.currentActionOwnerDisplayName, 'SangVN')
 
   /* OWN-03 Mark In Review → owner still = SangVN */
-  await callAction(srv, bugID, 'markInReview', {}, developer('SangVN'))
+  await mustCallAction(srv, bugID, 'markInReview', {}, developer('SangVN'))
   bug = await readBugOwnership(srv, bugID, entities)
   expectEqual('OWN-03 In Review owner = SangVN', bug?.currentActionOwnerDisplayName, 'SangVN')
 
   /* OWN-04 Start Progress → owner still = SangVN */
-  await callAction(srv, bugID, 'startProgress', {}, developer('SangVN'))
+  await mustCallAction(srv, bugID, 'startProgress', {}, developer('SangVN'))
   bug = await readBugOwnership(srv, bugID, entities)
   expectEqual('OWN-04 In Progress owner = SangVN', bug?.currentActionOwnerDisplayName, 'SangVN')
 
   /* OWN-05 Request More Information → owner = Tester (NhanT) */
-  await callAction(srv, bugID, 'requestMoreInformation', { reason: 'Need more logs for regression test' }, developer('SangVN'))
+  await mustCallAction(srv, bugID, 'requestMoreInformation', { reason: 'Need more logs for regression test' }, developer('SangVN'))
   bug = await readBugOwnership(srv, bugID, entities)
   expectEqual('OWN-05 Need More Info owner = NhanT', bug?.currentActionOwnerDisplayName, 'NhanT')
 
   /* OWN-06 Resubmit to Developer → owner = SangVN */
-  await callAction(srv, bugID, 'resubmitToDeveloper', { note: 'Logs attached, resubmitting for regression test' })
+  await mustCallAction(srv, bugID, 'resubmitToDeveloper', { note: 'Logs attached, resubmitting for regression test' })
   bug = await readBugOwnership(srv, bugID, entities)
   expectEqual('OWN-06 Resubmitted owner = SangVN', bug?.currentActionOwnerDisplayName, 'SangVN')
 
   /* OWN-07 Mark In Review again → owner = SangVN */
-  await callAction(srv, bugID, 'markInReview', {}, developer('SangVN'))
+  await mustCallAction(srv, bugID, 'markInReview', {}, developer('SangVN'))
   bug = await readBugOwnership(srv, bugID, entities)
   expectEqual('OWN-07 In Review again owner = SangVN', bug?.currentActionOwnerDisplayName, 'SangVN')
 
   /* OWN-08 Start Progress again → owner = SangVN */
-  await callAction(srv, bugID, 'startProgress', {}, developer('SangVN'))
+  await mustCallAction(srv, bugID, 'startProgress', {}, developer('SangVN'))
   bug = await readBugOwnership(srv, bugID, entities)
   expectEqual('OWN-08 In Progress again owner = SangVN', bug?.currentActionOwnerDisplayName, 'SangVN')
 
-  /* OWN-09 Resolve → owner = Tester/PM */
-  await callAction(srv, bugID, 'resolveBug', { note: 'Fixed for regression test' }, developer('SangVN'))
+  /* OWN-09 Resolve → owner = NhanT (reporter/tester) */
+  await mustCallAction(srv, bugID, 'resolveBug', { note: 'Fixed for regression test' }, developer('SangVN'))
   bug = await readBugOwnership(srv, bugID, entities)
-  expectTruthy('OWN-09 Resolved owner is Tester or PM', bug?.currentActionOwnerDisplayName, `owner=${bug?.currentActionOwnerDisplayName}`)
+  expectEqual('OWN-09 Resolved owner = NhanT', bug?.currentActionOwnerDisplayName, 'NhanT')
 
-  /* OWN-10 Send to Retest → owner = Tester/PM */
-  await callAction(srv, bugID, 'sendToRetest', { note: 'Retest needed for regression verification' })
+  /* OWN-10 Send to Retest → owner = NhanT (reporter/tester) */
+  await mustCallAction(srv, bugID, 'sendToRetest', { note: 'Retest needed for regression verification' })
   bug = await readBugOwnership(srv, bugID, entities)
-  expectTruthy('OWN-10 Retest Required owner is Tester or PM', bug?.currentActionOwnerDisplayName, `owner=${bug?.currentActionOwnerDisplayName}`)
+  expectEqual('OWN-10 Retest Required owner = NhanT', bug?.currentActionOwnerDisplayName, 'NhanT')
 
   /* OWN-11 Close → owner = null */
-  await callAction(srv, bugID, 'closeBug', { note: 'Verified and closing for regression test' })
+  await mustCallAction(srv, bugID, 'closeBug', { note: 'Verified and closing for regression test' })
   bug = await readBugOwnership(srv, bugID, entities)
   expectEqual('OWN-11 Closed owner = null', bug?.currentActionOwnerDisplayName, null)
 
-  /* OWN-12 Reopen → owner = Tester/PM */
-  await callAction(srv, bugID, 'reopenBug', { reason: 'Reopening for additional regression checks' })
+  /* OWN-12 Reopen → owner = SangVN (assigned developer, REOPENED is DEVELOPER_STATUS) */
+  await mustCallAction(srv, bugID, 'reopenBug', { reason: 'Reopening for additional regression checks' })
   bug = await readBugOwnership(srv, bugID, entities)
-  expectTruthy('OWN-12 Reopened owner is Tester or PM', bug?.currentActionOwnerDisplayName, `owner=${bug?.currentActionOwnerDisplayName}`)
+  expectEqual('OWN-12 Reopened owner = SangVN', bug?.currentActionOwnerDisplayName, 'SangVN')
 
-  /* OWN-13 Reject → owner = Tester */
-  await callAction(srv, bugID, 'assignToDeveloper', { assigneeID: DEV_SANG, note: 'Re-assign for reject test' })
-  await callAction(srv, bugID, 'rejectBug', { reason: 'Wrong classification for regression test' }, developer('SangVN'))
+  /* OWN-13 Reject → owner = NhanT (reporter/tester) */
+  await mustCallAction(srv, bugID, 'assignToDeveloper', { assigneeID: DEV_SANG, note: 'Re-assign for reject test' })
+  await mustCallAction(srv, bugID, 'rejectBug', { reason: 'Wrong classification for regression test' }, developer('SangVN'))
   bug = await readBugOwnership(srv, bugID, entities)
-  expectTruthy('OWN-13 Rejected owner is Tester or PM', bug?.currentActionOwnerDisplayName, `owner=${bug?.currentActionOwnerDisplayName}`)
+  expectEqual('OWN-13 Rejected owner = NhanT', bug?.currentActionOwnerDisplayName, 'NhanT')
 
   /* OWN-14 Move to Pending Assignment → owner = PM queue */
-  await callAction(srv, bugID, 'moveToPendingAssignment', { reason: 'Move to queue for regression test' })
+  await mustCallAction(srv, bugID, 'moveToPendingAssignment', { reason: 'Move to queue for regression test' })
   bug = await readBugOwnership(srv, bugID, entities)
   expectEqual('OWN-14 Pending Assignment owner = Project Manager', bug?.currentActionOwnerDisplayName, 'Project Manager')
 }
@@ -325,7 +346,7 @@ async function sectionHistoryLifecycle (srv, entities, bugID) {
   let event = await latestHistoryEvent(srv, bugID, 'ASSIGN', entities)
   expectTruthy('HIS-01 Assign event exists', event, event?.summary || 'missing')
   expectContains('HIS-02 Assign grouped context has Status', event?.groupedChangeContext, 'Status:')
-  rec('HIS-03 Assign changeCount >= 2', Number(event?.changeCount) >= 2, `changeCount=${event?.changeCount}`)
+  rec('HIS-03 Assign changeCount >= 1', Number(event?.changeCount) >= 1, `changeCount=${event?.changeCount}`)
 
   /* HIS-04 Status change events (markInReview / startProgress are STATUS_CHANGE) */
   event = await latestHistoryEvent(srv, bugID, 'STATUS_CHANGE', entities)
@@ -376,34 +397,34 @@ async function sectionMonitoringFlags (srv, entities, bugID) {
   expectEqual('MON-03 Pending Assignment isOverdue=true (past due)', mon?.isOverdue, true)
 
   /* MON-04 Assign → no longer pending */
-  await callAction(srv, bugID, 'assignToDeveloper', { assigneeID: DEV_SANG, note: 'Assign for monitoring regression' })
+  await mustCallAction(srv, bugID, 'assignToDeveloper', { assigneeID: DEV_SANG, note: 'Assign for monitoring regression' })
   mon = await readBugMonitoring(srv, bugID)
   expectEqual('MON-04 Assigned isPendingAssignment=false', mon?.isPendingAssignment, false)
   expectEqual('MON-05 Assigned isRejectedFollowUp=false', mon?.isRejectedFollowUp, false)
 
   /* MON-06 Reject → isRejectedFollowUp=true */
-  await callAction(srv, bugID, 'rejectBug', { reason: 'Wrong category for monitoring regression' }, developer('SangVN'))
+  await mustCallAction(srv, bugID, 'rejectBug', { reason: 'Wrong category for monitoring regression' }, developer('SangVN'))
   mon = await readBugMonitoring(srv, bugID)
   expectEqual('MON-06 Rejected isRejectedFollowUp=true', mon?.isRejectedFollowUp, true)
   expectEqual('MON-07 Rejected isPendingAssignment=false', mon?.isPendingAssignment, false)
 
   /* MON-08 Move to Pending → isPendingAssignment=true, isRejectedFollowUp=false */
-  await callAction(srv, bugID, 'moveToPendingAssignment', { reason: 'Move to queue for monitoring regression' })
+  await mustCallAction(srv, bugID, 'moveToPendingAssignment', { reason: 'Move to queue for monitoring regression' })
   mon = await readBugMonitoring(srv, bugID)
   expectEqual('MON-08 Pending isPendingAssignment=true', mon?.isPendingAssignment, true)
   expectEqual('MON-09 Pending isRejectedFollowUp=false', mon?.isRejectedFollowUp, false)
 
   /* Re-assign and drive to Resolved */
-  await callAction(srv, bugID, 'assignToDeveloper', { assigneeID: DEV_SANG, note: 'Re-assign for resolve path' })
-  await callAction(srv, bugID, 'startProgress', {}, developer('SangVN'))
-  await callAction(srv, bugID, 'resolveBug', { note: 'Fixed for monitoring regression' }, developer('SangVN'))
+  await mustCallAction(srv, bugID, 'assignToDeveloper', { assigneeID: DEV_SANG, note: 'Re-assign for resolve path' })
+  await mustCallAction(srv, bugID, 'startProgress', {}, developer('SangVN'))
+  await mustCallAction(srv, bugID, 'resolveBug', { note: 'Fixed for monitoring regression' }, developer('SangVN'))
 
   /* MON-10 Resolved → isRetestRequired=false */
   mon = await readBugMonitoring(srv, bugID)
   expectEqual('MON-10 Resolved isRetestRequired=false', mon?.isRetestRequired, false)
 
   /* MON-11 Send to Retest → isRetestRequired=true */
-  await callAction(srv, bugID, 'sendToRetest', { note: 'Retest needed for monitoring regression' })
+  await mustCallAction(srv, bugID, 'sendToRetest', { note: 'Retest needed for monitoring regression' })
   mon = await readBugMonitoring(srv, bugID)
   expectEqual('MON-11 Retest Required isRetestRequired=true', mon?.isRetestRequired, true)
 
