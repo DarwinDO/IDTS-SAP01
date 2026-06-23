@@ -4,101 +4,104 @@
 
 ### What this file is for
 
-Seed dataset for `ComponentCategories`. Read this file as local/demo data that CAP loads into the database. It affects dropdowns, value helps, sample bugs, workflow labels, and demo behavior.
+Seed data for `ComponentCategories`. This is one of the most important relationship tables in IDTS.
 
-### How to read this file
+`ComponentCategories` is the **assignment key**: it connects an `ApplicationComponent` with a `DefectCategory`. When a tester classifies a bug, the system uses (or validates) the matching ComponentCategory to find suitable developers via `DeveloperResponsibilities`.
 
-This file belongs to the data layer. It defines schema or seed data consumed through CAP services and Fiori value helps.
+### IDTS flow and business meaning
 
-Read it through three practical questions:
+Tester selects Application Component + Defect Category in the create form.
+→ The system looks up or validates the corresponding `ComponentCategory`.
+→ This ComponentCategory is stored on the Bug and used for:
+  - Filtering suitable developers (AssignableDevelopers read model)
+  - DeveloperResponsibilities matching
+  - PM monitoring and workload views
 
-- What screen, API, data model, or developer workflow does this file support?
-- Which other layer consumes the output of this file?
-- If this file changes, which service/UI/data/test file must be checked next?
+This is a core design decision: assignment is not done by SAP Module or separate component/category, but by the **pair** (ComponentCategory).
 
-### Runtime / project flow
+### Columns explained
 
-- During local database deployment, CAP imports this CSV into `ComponentCategories`.
-- Service projections and value helps expose the seeded rows to the UI.
-- Changing codes/IDs here can change dropdown choices, demo records, and workflow lookups.
+- `ID`: UUID primary key.
+- `component_ID`: Reference to ApplicationComponents.
+- `defectCategory_ID`: Reference to DefectCategories.
+- `active`: Whether this combination is currently valid for assignment.
 
-### Main concepts explained
+### Impact if data is wrong or missing
 
-- This CSV loads `13` seed rows into `ComponentCategories`.
-- Header columns: `ID, component_ID, defectCategory_ID, active`.
-- For code-list CSV files, `code` is often what backend logic compares; do not rename codes casually.
-- For relationship CSV files, foreign-key columns must point to valid IDs from related seed files.
-
-### Important source anchors
-
-These anchors are deliberately short. They are not the main explanation; they only point you back to the most useful source locations after you understand the flow above.
-
-- Line 1: `ID, component_ID, defectCategory_ID, active` — The header defines the columns CAP imports into the matching seed entity.
-- Line 2: `60000000-0000-0000-0000-000000000001, 40000000-0000-0000-0000-000000000001, 50000000-0000-0000-0000-000000000001, true` — The first data row is a concrete example loaded into the local development database.
+- Missing ComponentCategory for a used pair → value help for assignee becomes empty or wrong; bugs cannot be assigned properly.
+- Wrong links → developers get bugs outside their responsibility area.
+- Inactive rows still referenced by demo bugs → assignment demo breaks.
 
 ### Cross-folder dependency map
 
-This section answers: which file in another main folder is linked, where the link appears, and how the linked files affect each other.
-
-- **CSV filename/entity → `db/schema.cds`**: CAP loads this file into the `ComponentCategories` entity. Impact: Column names and foreign keys must match the schema.
-- **Seeded values → `srv/service.cds`**: BugService exposes or uses `ComponentCategories` directly or indirectly. Impact: Changing seed codes/names can change dropdowns, workflow matching, status labels, and demo data.
-- **Value-help data → `app/bug-management-ui/annotations/value-helps.cds`**: Fiori value helps often display these master-data rows. Impact: Missing/inactive seed rows can make dropdowns empty or confusing.
+- **db/schema.cds**: Entity `ComponentCategories` + associations from `Bugs.componentCategory` and `DeveloperResponsibilities.componentCategory`.
+- **srv/service.cds**: `ValidDefectCategories` view + redirected `componentCategory` in DeveloperResponsibilities. Also used in `AssignableDevelopers`.
+- **srv/bug-service/read-models.js**: `readAssignableDevelopers` and capability logic heavily use ComponentCategory.
+- **srv/bug-service/bug-write.js**: `deriveOrValidateComponentCategory` during create/update.
+- **app/bug-management-ui/annotations/value-helps.cds** and **ownership-assignment.cds**: Dependent value help (Component → Defect Category) and assignment section on Object Page.
+- **db/data/idts.cap-DeveloperResponsibilities.csv**: Links developers to these categories.
+- **db/data/idts.cap-Bugs.csv**: Demo bugs store specific `componentCategory_ID`.
 
 ### Safe editing checklist
 
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Keep IDs/codes stable unless related service logic, tests, and demo data are updated together.
-- Validate that referenced IDs exist in related seed files.
+- This file must stay in sync with ComponentCategories used in demo Bugs.csv and DeveloperResponsibilities.csv.
+- When adding new classification pairs, also seed corresponding DeveloperResponsibilities if you want them assignable in demo.
+- Changes affect create flow, value help, assignment, and PM views.
+- After edit: verify dependent value help in browser + assignment behavior + backend tests.
 
 ## Vietnamese
 
 ### File này dùng để làm gì
 
-Seed dataset for `ComponentCategories`. File này nằm ở lớp dữ liệu. Nó định nghĩa schema hoặc seed data mà service và Fiori dùng thông qua CAP/OData.
+Dữ liệu seed cho `ComponentCategories`. Đây là một trong những bảng quan trọng nhất của IDTS.
 
-### Cách đọc file này cho dễ hiểu
+`ComponentCategories` là **khóa phân công**: nó nối `ApplicationComponent` với `DefectCategory`. Khi tester phân loại bug, hệ thống dùng (hoặc kiểm tra) ComponentCategory tương ứng để tìm developer phù hợp qua `DeveloperResponsibilities`.
 
-- Đừng đọc file này như danh sách dòng code rời rạc.
-- Hãy đọc theo flow: người dùng/UI làm gì, CAP service nhận gì, backend xử lý gì, và dữ liệu nào bị ảnh hưởng.
-- Nếu phần English dài hơn, hãy xem đó là bản giải thích đầy đủ; phần Vietnamese này giúp nắm ý chính trước.
+### Flow nghiệp vụ IDTS
 
-### Flow chính
+Tester chọn Application Component + Defect Category khi tạo bug.
+→ Hệ thống tra cứu hoặc validate ComponentCategory tương ứng.
+→ ComponentCategory này được lưu vào Bug và dùng cho:
+  - Lọc developer phù hợp (AssignableDevelopers)
+  - So khớp DeveloperResponsibilities
+  - Theo dõi workload của PM
 
-- During local database deployment, CAP imports this CSV into `ComponentCategories`.
-- Service projections and value helps expose the seeded rows to the UI.
-- Changing codes/IDs here can change dropdown choices, demo records, and workflow lookups.
+Đây là quyết định thiết kế cốt lõi: phân công không theo SAP Module hay component/category riêng lẻ, mà theo **cặp** (ComponentCategory).
 
-### Các ý quan trọng cần hiểu
+### Giải thích các cột
 
-- This CSV loads `13` seed rows into `ComponentCategories`.
-- Header columns: `ID, component_ID, defectCategory_ID, active`.
-- For code-list CSV files, `code` is often what backend logic compares; do not rename codes casually.
-- For relationship CSV files, foreign-key columns must point to valid IDs from related seed files.
+- `ID`: Khóa chính UUID.
+- `component_ID`: Tham chiếu đến ApplicationComponents.
+- `defectCategory_ID`: Tham chiếu đến DefectCategories.
+- `active`: Cặp này còn hợp lệ để phân công không.
 
-### Liên kết với file ở folder khác
+### Ảnh hưởng nếu dữ liệu sai hoặc thiếu
 
-Phần này nói rõ file này liên kết với file nào, liên kết nằm ở đâu, và nếu sửa một bên thì bên kia bị ảnh hưởng thế nào.
+- Thiếu ComponentCategory cho cặp đang dùng → value help assignee trống hoặc sai; không phân công được bug đúng cách.
+- Liên kết sai → developer nhận bug ngoài phạm vi trách nhiệm.
+- Dòng inactive vẫn được demo bugs tham chiếu → demo assignment hỏng.
 
-- **CSV filename/entity → `db/schema.cds`**: CAP loads this file into the `ComponentCategories` entity. Impact: Column names and foreign keys must match the schema.
-- **Seeded values → `srv/service.cds`**: BugService exposes or uses `ComponentCategories` directly or indirectly. Impact: Changing seed codes/names can change dropdowns, workflow matching, status labels, and demo data.
-- **Value-help data → `app/bug-management-ui/annotations/value-helps.cds`**: Fiori value helps often display these master-data rows. Impact: Missing/inactive seed rows can make dropdowns empty or confusing.
+### Liên kết với file/folder khác
+
+- **db/schema.cds**: Entity `ComponentCategories` + các association từ `Bugs.componentCategory` và `DeveloperResponsibilities.componentCategory`.
+- **srv/service.cds**: View `ValidDefectCategories` + componentCategory được redirect trong DeveloperResponsibilities. Dùng trong `AssignableDevelopers`.
+- **srv/bug-service/read-models.js**: `readAssignableDevelopers` và logic capability dùng nhiều ComponentCategory.
+- **srv/bug-service/bug-write.js**: Hàm `deriveOrValidateComponentCategory` khi create/update.
+- **app/bug-management-ui/annotations/value-helps.cds** và **ownership-assignment.cds**: Value help phụ thuộc (Component → Defect Category) và phần assignment trên Object Page.
+- **db/data/idts.cap-DeveloperResponsibilities.csv**: Liên kết developer với các category này.
+- **db/data/idts.cap-Bugs.csv**: Dữ liệu demo lưu `componentCategory_ID` cụ thể.
 
 ### Khi sửa file này cần chú ý
 
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Keep IDs/codes stable unless related service logic, tests, and demo data are updated together.
-- Validate that referenced IDs exist in related seed files.
+- File này phải đồng bộ với ComponentCategories dùng trong Bugs.csv demo và DeveloperResponsibilities.csv.
+- Khi thêm cặp phân loại mới, nên seed thêm DeveloperResponsibilities nếu muốn dùng được trong demo.
+- Thay đổi ảnh hưởng create flow, value help, assignment và view PM.
+- Sau khi sửa: kiểm tra value help phụ thuộc trên browser + hành vi phân công + test backend.
 
 ## Metadata
 
 - Source file: `db/data/idts.cap-ComponentCategories.csv`
 - Knowledge mirror: `docs/knowledge/db/data/idts.cap-ComponentCategories.csv.md`
-- Source layer: `db`
-- Source type: `.csv`
-- Source line count at documentation time: 14
-- Documentation style: learning-oriented explanation, not line listing only
+- Source layer: `db/data`
+- Documentation style: learning-oriented + IDTS domain impact
 - Last reviewed: 2026-06-22

@@ -332,6 +332,19 @@ Vietnamese:
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2026-06-22 | Knowledge mirror quality - "Important source anchors" template | Reviewed current anchors in all mirror files (db/, srv/, app/). Identified that most used generic boilerplate ("This is a control point that changes imports, metadata..."). Designed and published a strict IDTS-oriented template that forces domain concepts, business impact, and cross-contract links. Created reference file and added real examples from bug-write.js, actions.js (transitionBug), schema.cds (Bugs + componentCategory), and service.cds (actions + canXXX virtuals). | New durable template + reference created at `docs/knowledge/guidelines/knowledge-mirror-anchors.md` (bilingual). All future mirrors should follow the new bullet format. | None (documentation improvement only). | N/A | Created `docs/knowledge/guidelines/knowledge-mirror-anchors.md`; branch `docs/code-knowledge-map-donhv`; template contains 4 full rewritten IDTS-specific examples with exact lines, status values, nextProcessor, componentCategory, HistoryEvents, canXXX, Tester/Developer/PM impact. | Apply the new template when refreshing or creating any additional mirror notes. Update existing weak anchors gradually when touching those source files. Record in team status when applied. |
 
+## Session Log Addition (2026-06-22) - Knowledge Mirror Full Rewrite (remaining 62)
+
+| Date | Task/WP | What was done | Completed part | Issues/Bugs found | Fix status | Evidence/Commands | Next handoff |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-06-22 | Rewrite priorities 1-6 knowledge mirrors | On branch `docs/code-knowledge-map-donhv`, rewrote files according to priorities 1-6 from the review:
+Priority 1: Key db/data CSVs (StatusValues, ComponentCategories, DeveloperResponsibilities, Bugs, PriorityValues, ApplicationComponents, SAPModules, DeveloperProfiles, DefectCategories and others).
+Priority 2: Critical annotations (list-report.cds, object-page.cds, ownership-assignment.cds, value-helps.cds, labels.cds).
+Priority 3: manifest.json + Component.js.
+Priority 4: i18n.properties + i18n_en.properties.
+Priority 5: Main OPA journeys (BugsListJourney, BugsObjectPageJourney).
+Priority 6: capabilities.cds + history-notifications.cds (full review + rewrite).
+Used new IDTS-oriented template (full bilingual, proper anchors with Impact/Must check, domain terms). Preserved 5 core mirrors. | Major progress on priorities 1-6. Bad generic patterns greatly reduced on targeted business files. Mirror count stable. | Trailing whitespace introduced in many files during bulk writes (git diff --check shows them). Some lower priority config files still have old text. | Whitespace is non-blocking for docs; can be cleaned in follow-up commit. | rg bad pattern scan (business files much cleaner); git ls-files count 67/67; npx ai-devkit lint (base ok); updated this status. | Clean trailing ws on key files. Complete any remaining CSVs in priority 1 if needed. Verify browser + tests on changed areas. |
+
 ## Update Rule
 
 - DonHV updates this file for leader decisions, BA/PM work, SAP490 deliverables, weekly consolidation, and cross-workstream support.

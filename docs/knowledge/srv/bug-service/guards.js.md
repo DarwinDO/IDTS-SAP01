@@ -4,102 +4,61 @@
 
 ### What this file is for
 
-Backend helper module for `guards` behavior inside BugService. Read this file as one focused part of the service runtime. It is loaded directly or indirectly from `srv/service.js` and supports validation, permissions, read enrichment, side effects, drafts, content, monitoring, or history.
+Registers "read-only" guards on all master data and read-model entities (Users, value lists, DeveloperWorkloads, AssignableDevelopers, HistoryEvents, etc.).
 
-### How to read this file
+These entities must never be written through the main BugService OData endpoint.
 
-This file belongs to the CAP service layer. It handles OData requests, business validation, read enrichment, permissions, or side effects.
+### IDTS flow
 
-Read it through three practical questions:
+During service init, `registerReadOnlyEntityGuards` attaches before-CREATE/UPDATE/PATCH/DELETE handlers that immediately reject with 405.
 
-- What screen, API, data model, or developer workflow does this file support?
-- Which other layer consumes the output of this file?
-- If this file changes, which service/UI/data/test file must be checked next?
-
-### Runtime / project flow
-
-- An OData request/action arrives at BugService.
-- `srv/service.js` dispatches the request to this module or uses it during before/after processing.
-- The module validates permissions/data, computes display fields, records side effects, or builds read models.
-- The result is returned to Fiori and/or persisted using entities from `db/schema.cds`.
-
-### Main concepts explained
-
-- This file supports build, preview, lint, bootstrap, translation, or generated app behavior.
-- It may not implement business behavior directly, but it can still affect whether developers can run, test, or understand the app.
-- Configuration changes should be treated as code changes when they alter behavior or dependencies.
+This protects the master data (statuses, roles, components, developer responsibilities) and the computed read models from accidental or malicious writes.
 
 ### Important source anchors
 
-These anchors are deliberately short. They are not the main explanation; they only point you back to the most useful source locations after you understand the flow above.
-
-- Line 1: `const { READ_ONLY_ENTITY_NAMES } = require('./constants')` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 3: `function registerReadOnlyEntityGuards (service, entities) {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 17: `module.exports = {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
+- `registerReadOnlyEntityGuards` using READ_ONLY_ENTITY_NAMES from constants.
+  **IDTS concept**: Prevents direct modification of all lookup tables and PM/assignment read models.
+  **Impact if broken**: Someone could corrupt value lists or computed workload data through the OData API.
+  **Must check together**: `constants.js` (READ_ONLY_ENTITY_NAMES), `srv/service.js` (call in init), `db/schema.cds`.
 
 ### Cross-folder dependency map
 
-This section answers: which file in another main folder is linked, where the link appears, and how the linked files affect each other.
-
-- **Module wiring → `srv/service.js`**: This module is loaded by the BugService bootstrap or a module that bootstrap uses. Impact: Changing exports/imports requires updating the service wiring.
-- **Runtime contract → `srv/service.cds`**: The module implements behavior behind service entities/actions declared in CDS. Impact: The public OData contract and JavaScript behavior must stay aligned.
-- **Data access → `db/schema.cds`**: The module reads/writes/query entities and associations from the data model. Impact: Renaming schema fields or changing associations can break handlers.
+Called from `srv/service.js`. The list of protected entities comes from constants (which is derived from the schema projections).
 
 ### Safe editing checklist
 
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Keep backend validation authoritative; hidden UI buttons are not a security boundary.
-- If action names, virtual fields, or entity names change, update CDS, annotations, tests, and this note together.
+When you add a new read-only projection in service.cds, add its name to the constant list so the guard protects it.
 
 ## Vietnamese
 
 ### File này dùng để làm gì
 
-Backend helper module for `guards` behavior inside BugService. File này nằm ở lớp backend CAP service. Nó xử lý request OData, kiểm tra nghiệp vụ, tính field hiển thị, phân quyền hoặc side effect.
+Đăng ký guard "chỉ đọc" cho tất cả các entity master data và read model (Users, value lists, DeveloperWorkloads, AssignableDevelopers, HistoryEvents...).
 
-### Cách đọc file này cho dễ hiểu
+Những entity này không được phép ghi qua endpoint BugService chính.
 
-- Đừng đọc file này như danh sách dòng code rời rạc.
-- Hãy đọc theo flow: người dùng/UI làm gì, CAP service nhận gì, backend xử lý gì, và dữ liệu nào bị ảnh hưởng.
-- Nếu phần English dài hơn, hãy xem đó là bản giải thích đầy đủ; phần Vietnamese này giúp nắm ý chính trước.
+### Flow hoạt động trong IDTS
 
-### Flow chính
+Khi khởi động service, hàm đăng ký before handler cho CREATE/UPDATE/PATCH/DELETE và reject ngay 405.
 
-- An OData request/action arrives at BugService.
-- `srv/service.js` dispatches the request to this module or uses it during before/after processing.
-- The module validates permissions/data, computes display fields, records side effects, or builds read models.
-- The result is returned to Fiori and/or persisted using entities from `db/schema.cds`.
+Điều này bảo vệ dữ liệu tham chiếu (trạng thái, vai trò, component, developer responsibility) và các read model tính toán.
 
-### Các ý quan trọng cần hiểu
+### Các điểm neo quan trọng trong source
 
-- This file supports build, preview, lint, bootstrap, translation, or generated app behavior.
-- It may not implement business behavior directly, but it can still affect whether developers can run, test, or understand the app.
-- Configuration changes should be treated as code changes when they alter behavior or dependencies.
+`registerReadOnlyEntityGuards` + READ_ONLY_ENTITY_NAMES từ constants.
+Bảo vệ các bảng lookup và dữ liệu tính toán của PM/assignment.
 
-### Liên kết với file ở folder khác
+### Liên kết với file/folder khác
 
-Phần này nói rõ file này liên kết với file nào, liên kết nằm ở đâu, và nếu sửa một bên thì bên kia bị ảnh hưởng thế nào.
+Gọi từ service.js. Danh sách đến từ constants (dựa trên schema).
 
-- **Module wiring → `srv/service.js`**: This module is loaded by the BugService bootstrap or a module that bootstrap uses. Impact: Changing exports/imports requires updating the service wiring.
-- **Runtime contract → `srv/service.cds`**: The module implements behavior behind service entities/actions declared in CDS. Impact: The public OData contract and JavaScript behavior must stay aligned.
-- **Data access → `db/schema.cds`**: The module reads/writes/query entities and associations from the data model. Impact: Renaming schema fields or changing associations can break handlers.
+### Checklist sửa an toàn
 
-### Khi sửa file này cần chú ý
-
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Keep backend validation authoritative; hidden UI buttons are not a security boundary.
-- If action names, virtual fields, or entity names change, update CDS, annotations, tests, and this note together.
+Khi thêm projection chỉ đọc mới ở service.cds, thêm tên vào constant để guard bảo vệ.
 
 ## Metadata
 
 - Source file: `srv/bug-service/guards.js`
 - Knowledge mirror: `docs/knowledge/srv/bug-service/guards.js.md`
 - Source layer: `srv`
-- Source type: `.js`
-- Source line count at documentation time: 19
-- Documentation style: learning-oriented explanation, not line listing only
 - Last reviewed: 2026-06-22

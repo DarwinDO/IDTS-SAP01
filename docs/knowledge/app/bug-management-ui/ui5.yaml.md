@@ -31,7 +31,7 @@ Read it through three practical questions:
 
 These anchors are deliberately short. They are not the main explanation; they only point you back to the most useful source locations after you understand the flow above.
 
-- Line 1: `# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
+- Line 1: `# yaml-language-server:$schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
 - Line 3: `specVersion: "4.0"` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
 - Line 4: `metadata:` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
 - Line 5: `name: idts.bugmanagementui` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.

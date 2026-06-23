@@ -4,101 +4,105 @@
 
 ### What this file is for
 
-Seed dataset for `Bugs`. Read this file as local/demo data that CAP loads into the database. It affects dropdowns, value helps, sample bugs, workflow labels, and demo behavior.
+Demo / sample bug data. These rows are loaded into the `Bugs` table for local development and demonstrations.
 
-### How to read this file
+They are designed to showcase different IDTS states and flows:
+- Pending Assignment cases
+- Assigned + In Progress
+- Rejected with clear follow-up owner and reason
+- etc.
 
-This file belongs to the data layer. It defines schema or seed data consumed through CAP services and Fiori value helps.
+### IDTS flow and business meaning
 
-Read it through three practical questions:
+These records are not just random data. They are crafted to exercise:
+- ComponentCategory-based assignment (or lack of it → PENDING_ASSIGNMENT)
+- Rejection flow with `rejectionReason` and `nextProcessor`
+- Different priority/severity combinations
+- Planned dates for overdue detection
 
-- What screen, API, data model, or developer workflow does this file support?
-- Which other layer consumes the output of this file?
-- If this file changes, which service/UI/data/test file must be checked next?
+They help testers and developers see realistic data when running the app locally or doing demos.
 
-### Runtime / project flow
+### Columns explained (selected important ones)
 
-- During local database deployment, CAP imports this CSV into `Bugs`.
-- Service projections and value helps expose the seeded rows to the UI.
-- Changing codes/IDs here can change dropdown choices, demo records, and workflow lookups.
+- `bugNumber`: Human readable ID (BUG-0001, ...).
+- `status_code`, `priority_code`, `severity_code`: Direct references to the code list seeds.
+- `componentCategory_ID`: The assignment key.
+- `assignee_ID` / `nextProcessorUser_ID` / `nextProcessorRole_code`: Ownership fields.
+- `rejectionReason`: Only populated on rejected bugs (mandatory in business rule).
+- `dueDate`, `estimatedEffortHours`: Used for PM monitoring and overdue flags.
 
-### Main concepts explained
+### Impact if data is wrong or missing
 
-- This CSV loads `4` seed rows into `Bugs`.
-- Header columns: `ID, bugNumber, title, description, status_code, priority_code, severity_code, environment_code, environmentDetail, stepsToReproduce, actualResult, expectedResult, sapModule_ID, applicationComponent_ID, defectCategory_ID, componentCategory_ID, reporter_ID, assignee_ID, nextProcessorUser_ID, nextProcessorRole_code, rejectionReason, testCaseRef, testRunRef, plannedCompletionDate, dueDate, estimatedEffortHours`.
-- For code-list CSV files, `code` is often what backend logic compares; do not rename codes casually.
-- For relationship CSV files, foreign-key columns must point to valid IDs from related seed files.
-
-### Important source anchors
-
-These anchors are deliberately short. They are not the main explanation; they only point you back to the most useful source locations after you understand the flow above.
-
-- Line 1: `ID, bugNumber, title, description, status_code, priority_code, severity_code, environment_code, environmentDetail, stepsToReproduce, actualResult, expectedResult, sapModule_ID, applicationComponent_ID, defectCategory_ID, componentCategory_ID, reporter_ID, assignee_ID, nextProcessorUser_ID, nextProcessorRole_code, rejectionReason, testCaseRef, testRunRef, plannedCompletionDate, dueDate, estimatedEffortHours` — The header defines the columns CAP imports into the matching seed entity.
-- Line 2: `90000000-0000-0000-0000-000000000001, BUG-0001, List report filters do not show defect category value help, Tester cannot quickly filter bugs by defect category in the Fiori list report., PENDING_ASSIGNMENT, HIGH` — The first data row is a concrete example loaded into the local development database.
+- Wrong componentCategory or status codes → demo flows (assignment, rejection, PM views) break or look unrealistic.
+- Missing rejectionReason on REJECTED rows → violates the rule that Rejected is not final.
+- Bad dates → isOverdue calculations fail in monitoring.
 
 ### Cross-folder dependency map
 
-This section answers: which file in another main folder is linked, where the link appears, and how the linked files affect each other.
-
-- **CSV filename/entity → `db/schema.cds`**: CAP loads this file into the `Bugs` entity. Impact: Column names and foreign keys must match the schema.
-- **Seeded values → `srv/service.cds`**: BugService exposes or uses `Bugs` directly or indirectly. Impact: Changing seed codes/names can change dropdowns, workflow matching, status labels, and demo data.
-- **Value-help data → `app/bug-management-ui/annotations/value-helps.cds`**: Fiori value helps often display these master-data rows. Impact: Missing/inactive seed rows can make dropdowns empty or confusing.
+- **db/schema.cds**: Directly populates the `Bugs` entity and all its associations.
+- **db/data/** other CSVs: All foreign keys (status, priority, componentCategory, developer, user, etc.) must exist in the corresponding seeds.
+- **srv/service.cds**: The virtual fields (`isOverdue`, `isPendingAssignment`, `isRejectedFollowUp`, display names, canXXX capabilities) are calculated on top of this data.
+- **srv/bug-service/**: Handlers, read-models, and monitoring use this data for realistic behavior.
+- **app/bug-management-ui/**: List Report and Object Page are populated from these rows during demo.
 
 ### Safe editing checklist
 
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Keep IDs/codes stable unless related service logic, tests, and demo data are updated together.
-- Validate that referenced IDs exist in related seed files.
+- When editing a demo bug, make sure all referenced codes/IDs still exist in the other seed CSVs.
+- Keep at least one PENDING_ASSIGNMENT, one REJECTED with nextProcessor + reason, and one with dueDate in the past (for overdue testing).
+- After changes, reload the app (`cds watch` or redeploy) and verify the List Report filters + Object Page actions behave as expected for that state.
 
 ## Vietnamese
 
 ### File này dùng để làm gì
 
-Seed dataset for `Bugs`. File này nằm ở lớp dữ liệu. Nó định nghĩa schema hoặc seed data mà service và Fiori dùng thông qua CAP/OData.
+Dữ liệu bug mẫu / demo. Các dòng này được nạp vào bảng `Bugs` để dùng khi phát triển local và trình diễn.
 
-### Cách đọc file này cho dễ hiểu
+Chúng được thiết kế để thể hiện nhiều trạng thái và flow khác nhau của IDTS.
 
-- Đừng đọc file này như danh sách dòng code rời rạc.
-- Hãy đọc theo flow: người dùng/UI làm gì, CAP service nhận gì, backend xử lý gì, và dữ liệu nào bị ảnh hưởng.
-- Nếu phần English dài hơn, hãy xem đó là bản giải thích đầy đủ; phần Vietnamese này giúp nắm ý chính trước.
+### Flow nghiệp vụ IDTS và ý nghĩa
 
-### Flow chính
+Không phải dữ liệu ngẫu nhiên. Chúng được tạo để minh họa:
+- Trường hợp Pending Assignment (chưa có developer phù hợp)
+- Bug đã assign và đang làm
+- Bug bị Rejected có lý do rõ ràng và nextProcessor
+- Các mức priority/severity khác nhau
+- Ngày đến hạn để test overdue
 
-- During local database deployment, CAP imports this CSV into `Bugs`.
-- Service projections and value helps expose the seeded rows to the UI.
-- Changing codes/IDs here can change dropdown choices, demo records, and workflow lookups.
+Giúp người mới và demo thấy dữ liệu thực tế khi chạy app.
 
-### Các ý quan trọng cần hiểu
+### Giải thích các cột quan trọng
 
-- This CSV loads `4` seed rows into `Bugs`.
-- Header columns: `ID, bugNumber, title, description, status_code, priority_code, severity_code, environment_code, environmentDetail, stepsToReproduce, actualResult, expectedResult, sapModule_ID, applicationComponent_ID, defectCategory_ID, componentCategory_ID, reporter_ID, assignee_ID, nextProcessorUser_ID, nextProcessorRole_code, rejectionReason, testCaseRef, testRunRef, plannedCompletionDate, dueDate, estimatedEffortHours`.
-- For code-list CSV files, `code` is often what backend logic compares; do not rename codes casually.
-- For relationship CSV files, foreign-key columns must point to valid IDs from related seed files.
+- `bugNumber`: Mã dễ đọc (BUG-0001...).
+- `status_code`, `priority_code`, `severity_code`: Tham chiếu đến code list.
+- `componentCategory_ID`: Khóa phân công.
+- `assignee_ID` / `nextProcessorUser_ID` / `nextProcessorRole_code`: Các trường ownership.
+- `rejectionReason`: Chỉ có ở bug REJECTED (bắt buộc theo rule).
+- `dueDate`, `estimatedEffortHours`: Dùng cho PM monitoring và cờ quá hạn.
 
-### Liên kết với file ở folder khác
+### Ảnh hưởng nếu dữ liệu sai hoặc thiếu
 
-Phần này nói rõ file này liên kết với file nào, liên kết nằm ở đâu, và nếu sửa một bên thì bên kia bị ảnh hưởng thế nào.
+- Sai componentCategory hoặc status code → các flow demo (phân công, reject, PM) bị hỏng hoặc không thực tế.
+- Bug REJECTED thiếu rejectionReason → vi phạm quy tắc "Rejected không phải trạng thái cuối".
+- Ngày sai → tính isOverdue trong monitoring sai.
 
-- **CSV filename/entity → `db/schema.cds`**: CAP loads this file into the `Bugs` entity. Impact: Column names and foreign keys must match the schema.
-- **Seeded values → `srv/service.cds`**: BugService exposes or uses `Bugs` directly or indirectly. Impact: Changing seed codes/names can change dropdowns, workflow matching, status labels, and demo data.
-- **Value-help data → `app/bug-management-ui/annotations/value-helps.cds`**: Fiori value helps often display these master-data rows. Impact: Missing/inactive seed rows can make dropdowns empty or confusing.
+### Liên kết với file/folder khác
+
+- **db/schema.cds**: Nạp trực tiếp vào entity `Bugs` và tất cả association.
+- **db/data/** các file CSV khác: Tất cả khóa ngoại phải tồn tại ở seed tương ứng.
+- **srv/service.cds**: Các virtual field (isOverdue, isPendingAssignment, isRejectedFollowUp, tên hiển thị, canXXX) được tính trên dữ liệu này.
+- **srv/bug-service/**: Handler, read-model, monitoring dùng dữ liệu này để có hành vi thực tế.
+- **app/bug-management-ui/**: List Report và Object Page được đổ từ các dòng này khi demo.
 
 ### Khi sửa file này cần chú ý
 
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Keep IDs/codes stable unless related service logic, tests, and demo data are updated together.
-- Validate that referenced IDs exist in related seed files.
+- Khi sửa bug demo, đảm bảo tất cả code/ID tham chiếu vẫn tồn tại trong các CSV seed khác.
+- Giữ ít nhất: một PENDING_ASSIGNMENT, một REJECTED có nextProcessor + lý do, và một bug có dueDate trong quá khứ (để test overdue).
+- Sau khi sửa, reload app và kiểm tra filter List Report + action Object Page hoạt động đúng với trạng thái đó.
 
 ## Metadata
 
 - Source file: `db/data/idts.cap-Bugs.csv`
 - Knowledge mirror: `docs/knowledge/db/data/idts.cap-Bugs.csv.md`
-- Source layer: `db`
-- Source type: `.csv`
-- Source line count at documentation time: 5
-- Documentation style: learning-oriented explanation, not line listing only
+- Source layer: `db/data`
+- Documentation style: learning-oriented + IDTS domain impact
 - Last reviewed: 2026-06-22

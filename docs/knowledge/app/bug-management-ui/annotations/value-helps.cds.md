@@ -4,105 +4,75 @@
 
 ### What this file is for
 
-Fiori annotation module for `value-helps`. Read this file as metadata that Fiori Elements uses to generate the UI without a custom controller. It does not save data by itself; it tells Fiori how to display or call the CAP service.
+Defines ValueList annotations for various fields on Bugs, especially the dependent value helps for classification and assignment.
 
-### How to read this file
+Key examples:
+- Status, Priority, Severity (with fixed values)
+- Application Component → Defect Category (dependent)
+- Assignee (AssignableDevelopers with rich columns)
 
-This file belongs to the Fiori/UI5 frontend layer. It affects generated screens, OData calls, UI tests, app bootstrap, or visible text.
+### IDTS flow
 
-Read it through three practical questions:
+When creating or editing a bug, the tester gets smart filtered lists:
+- After choosing Application Component, only relevant Defect Categories appear.
+- Assignee value help only shows developers responsible for the current ComponentCategory (and optional SAP Module).
 
-- What screen, API, data model, or developer workflow does this file support?
-- Which other layer consumes the output of this file?
-- If this file changes, which service/UI/data/test file must be checked next?
-
-### Runtime / project flow
-
-- CAP/Fiori tooling combines this annotation with `srv/service.cds` metadata.
-- Fiori Elements reads the generated metadata and creates list/detail pages.
-- When a user clicks a generated action button, Fiori calls the CAP action declared in `srv/service.cds` and handled by `srv/service.js`/`srv/bug-service/*`.
-
-### Main concepts explained
-
-- Value helps are the dropdown/search dialogs Fiori shows for association or code fields.
-- Each value help must point to a service collection and match local field to value-list field.
-- Backend service and seed data changes can make value helps empty or misleading.
+This is a major usability feature for correct classification and assignment.
 
 ### Important source anchors
 
-These anchors are deliberately short. They are not the main explanation; they only point you back to the most useful source locations after you understand the flow above.
+- Annotations for `applicationComponent_ID` and `defectCategory_ID` with dependent ValueList.
+  **IDTS concept**: Enforces that only valid ComponentCategory combinations are chosen. Directly supports the assignment key concept.
 
-- Line 1: `using BugService as service from '../../../srv/service';` — This imports another CDS service/model; if the imported file changes, this file can compile differently.
-- Line 3: `annotate service.Bugs:status.code with @Common.FieldControl : #ReadOnly @Common.ValueListWithFixedValues : true @Common.ValueList : {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 9: `$Type : 'Common.ValueListParameterInOut'` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 11: `ValueListProperty : 'code'` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 14: `$Type : 'Common.ValueListParameterDisplayOnly'` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 15: `ValueListProperty : 'name'` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 18: `$Type : 'Common.ValueListParameterDisplayOnly'` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 19: `ValueListProperty : 'descr'` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 24: `annotate service.Bugs:priority.code with @Common.ValueList : {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 30: `$Type : 'Common.ValueListParameterInOut'` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
+- Annotation for assignee using `AssignableDevelopers` with multiple display columns (name, email, availability, component, defect category...).
+  **IDTS concept**: Gives rich context so the tester can pick the right developer based on workload and responsibility.
 
-### Cross-folder dependency map
+### Cross-folder links
 
-This section answers: which file in another main folder is linked, where the link appears, and how the linked files affect each other.
+- `srv/service.cds` (ValidDefectCategories, AssignableDevelopers, StatusValues...)
+- `srv/bug-service/read-models.js` (the actual query logic)
+- `db/data/` seeds for the lookup tables
+- `ownership-assignment.cds` and actions annotations
 
-- **Line 1 → `srv/service.cds`**: The frontend annotation/manifest points to `BugService` or its `/odata/v4/bug/` endpoint. Impact: If service entity/action names change, Fiori fields, buttons, routing, or data loading must be updated.
-- **Annotation target → `db/schema.cds`**: Most annotated fields originate from `db/schema.cds` through `srv/service.cds` projections. Impact: Schema field/association changes can break Fiori metadata through the service layer.
+### Safe editing
 
-### Safe editing checklist
-
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Compile or inspect OData metadata after annotation changes so you know Fiori can still find the target fields/actions.
-- Check `srv/service.cds` before adding a field/action reference; annotations cannot invent backend fields.
+Changes here must stay in sync with the backend read models and seed data. Test dependent filtering thoroughly in the browser.
 
 ## Vietnamese
 
 ### File này dùng để làm gì
 
-Fiori annotation module for `value-helps`. File này nằm ở lớp frontend Fiori/UI5. Nó ảnh hưởng màn hình, cách gọi OData, test UI, bootstrap app hoặc text hiển thị.
+Định nghĩa ValueList annotation cho các trường trên Bugs, đặc biệt là value help phụ thuộc cho phân loại và phân công.
 
-### Cách đọc file này cho dễ hiểu
+Ví dụ quan trọng:
+- Status, Priority, Severity
+- Application Component → Defect Category (phụ thuộc)
+- Assignee (AssignableDevelopers)
 
-- Đừng đọc file này như danh sách dòng code rời rạc.
-- Hãy đọc theo flow: người dùng/UI làm gì, CAP service nhận gì, backend xử lý gì, và dữ liệu nào bị ảnh hưởng.
-- Nếu phần English dài hơn, hãy xem đó là bản giải thích đầy đủ; phần Vietnamese này giúp nắm ý chính trước.
+### Flow IDTS
 
-### Flow chính
+Khi tạo/sửa bug, tester được danh sách thông minh:
+- Chọn Application Component trước → chỉ hiện Defect Category hợp lệ.
+- Value help Assignee chỉ hiện developer có responsibility cho ComponentCategory hiện tại.
 
-- CAP/Fiori tooling combines this annotation with `srv/service.cds` metadata.
-- Fiori Elements reads the generated metadata and creates list/detail pages.
-- When a user clicks a generated action button, Fiori calls the CAP action declared in `srv/service.cds` and handled by `srv/service.js`/`srv/bug-service/*`.
+Đây là tính năng sử dụng quan trọng để phân loại và gán đúng.
 
-### Các ý quan trọng cần hiểu
+### Các điểm neo quan trọng
 
-- Value helps are the dropdown/search dialogs Fiori shows for association or code fields.
-- Each value help must point to a service collection and match local field to value-list field.
-- Backend service and seed data changes can make value helps empty or misleading.
+- Annotation cho applicationComponent và defectCategory (dependent ValueList).
+- Annotation cho assignee dùng AssignableDevelopers với nhiều cột thông tin.
 
-### Liên kết với file ở folder khác
+### Liên kết
 
-Phần này nói rõ file này liên kết với file nào, liên kết nằm ở đâu, và nếu sửa một bên thì bên kia bị ảnh hưởng thế nào.
+service.cds, read-models.js, seed data, các file annotation liên quan.
 
-- **Line 1 → `srv/service.cds`**: The frontend annotation/manifest points to `BugService` or its `/odata/v4/bug/` endpoint. Impact: If service entity/action names change, Fiori fields, buttons, routing, or data loading must be updated.
-- **Annotation target → `db/schema.cds`**: Most annotated fields originate from `db/schema.cds` through `srv/service.cds` projections. Impact: Schema field/association changes can break Fiori metadata through the service layer.
+### Checklist
 
-### Khi sửa file này cần chú ý
-
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Compile or inspect OData metadata after annotation changes so you know Fiori can still find the target fields/actions.
-- Check `srv/service.cds` before adding a field/action reference; annotations cannot invent backend fields.
+Phải đồng bộ với backend read model và seed. Test lọc phụ thuộc kỹ trên browser.
 
 ## Metadata
 
 - Source file: `app/bug-management-ui/annotations/value-helps.cds`
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/annotations/value-helps.cds.md`
 - Source layer: `app`
-- Source type: `.cds`
-- Source line count at documentation time: 455
-- Documentation style: learning-oriented explanation, not line listing only
 - Last reviewed: 2026-06-22

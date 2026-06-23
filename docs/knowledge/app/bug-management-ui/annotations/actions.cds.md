@@ -53,7 +53,7 @@ So this file is the bridge between backend workflow actions and the generated Fi
   **Must check together**: `srv/service.cds` bound action names, `srv/service.js` `this.on(...)` handlers, backend action tests.
 
 - **Location**: `app/bug-management-ui/annotations/actions.cds:9`, `:15`, `:21`, `:27`, `:33`, `:39`, `:45`, `:51`, `:57`, `:63`
-  `![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canXXX' } } }`
+  `![@UI.Hidden] : {$edmJson : {$Not : {$Path : 'canXXX' } } }`
   **IDTS concept**: Backend-driven action visibility. Fiori hides or shows buttons based on capability fields calculated by the backend, such as `canReject` or `canClose`.
   **Impact if broken**: Users can see invalid buttons, miss valid buttons, or experience UI/backend mismatch. Backend permission still protects the server, but the UI becomes confusing.
   **Must check together**: `srv/service.cds:16-27` `canXXX` virtual fields, `srv/bug-service/read-models.js:368` capability enrichment, `srv/bug-service/permissions.js`.
@@ -145,7 +145,7 @@ Vì vậy file này là cầu nối giữa backend workflow actions và UI Fiori
   **Phải kiểm tra cùng**: Tên bound action trong `srv/service.cds`, các handler `this.on(...)` trong `srv/service.js`, backend action tests.
 
 - **Vị trí**: `app/bug-management-ui/annotations/actions.cds:9`, `:15`, `:21`, `:27`, `:33`, `:39`, `:45`, `:51`, `:57`, `:63`
-  `![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canXXX' } } }`
+  `![@UI.Hidden] : {$edmJson : {$Not : {$Path : 'canXXX' } } }`
   **Khái niệm IDTS**: Ẩn/hiện action dựa trên backend. Fiori ẩn hoặc hiện button dựa trên capability fields được backend tính, ví dụ `canReject` hoặc `canClose`.
   **Ảnh hưởng nếu sai**: User có thể thấy button không hợp lệ, mất button hợp lệ, hoặc gặp mismatch giữa UI và backend. Backend permission vẫn bảo vệ server, nhưng UI sẽ gây hiểu nhầm.
   **Phải kiểm tra cùng**: `srv/service.cds:16-27` virtual fields `canXXX`, `srv/bug-service/read-models.js:368` capability enrichment, `srv/bug-service/permissions.js`.

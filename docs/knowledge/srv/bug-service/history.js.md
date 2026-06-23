@@ -4,109 +4,63 @@
 
 ### What this file is for
 
-Backend helper module for `history` behavior inside BugService. Read this file as one focused part of the service runtime. It is loaded directly or indirectly from `srv/service.js` and supports validation, permissions, read enrichment, side effects, drafts, content, monitoring, or history.
+Writes HistoryEvents and HistoryLogs for every significant change to a Bug, plus side effects for Comments and Attachments.
 
-### How to read this file
+Also contains helpers to decide what changed and which actionType to record.
 
-This file belongs to the CAP service layer. It handles OData requests, business validation, read enrichment, permissions, or side effects.
+### IDTS flow
 
-Read it through three practical questions:
+After CREATE/UPDATE of Bugs and after CREATE of Comments, the after hooks call the record*SideEffects functions. These create a HistoryEvent, attach the changed fields as HistoryLogs, and create in-app Notifications when appropriate.
 
-- What screen, API, data model, or developer workflow does this file support?
-- Which other layer consumes the output of this file?
-- If this file changes, which service/UI/data/test file must be checked next?
-
-### Runtime / project flow
-
-- An OData request/action arrives at BugService.
-- `srv/service.js` dispatches the request to this module or uses it during before/after processing.
-- The module validates permissions/data, computes display fields, records side effects, or builds read models.
-- The result is returned to Fiori and/or persisted using entities from `db/schema.cds`.
-
-### Main concepts explained
-
-- History records are audit evidence: what changed, who changed it, and why.
-- This supports PM monitoring and SAP490 Test/Fix Bug documentation later.
-- Display enrichment keeps history readable instead of showing only raw IDs.
+This implements the required audit trail and the grouped history shown on the Object Page.
 
 ### Important source anchors
 
-These anchors are deliberately short. They are not the main explanation; they only point you back to the most useful source locations after you understand the flow above.
+- `recordCreateSideEffects`, `recordUpdateSideEffects`, `recordCommentCreateSideEffects`, `writeHistoryEvent`.
+  **IDTS concept**: Guarantees that create, every important field change, comments, and attachments produce immutable audit records + notifications.
+  **Impact if broken**: No history visible for PM or developer, no notifications, broken SAP490 audit evidence.
+  **Must check together**: `srv/service.js` (after hooks), `db/schema.cds` (HistoryEvents + HistoryLogs + Notifications), `history-read-models.js`, Fiori history facet.
 
-- Line 1: `const cds = require('@sap/cds')` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 10: `} = require('./constants')` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 27: `} = require('./helpers')` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 29: `async function recordCreateSideEffects (req, data, entities) {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 53: `async function recordUpdateSideEffects (req, entities) {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 58: `async function recordBugChangeSideEffects (req, entities, changes, finalBug) {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 83: `async function recordCommentCreateSideEffects (req, data, entities) {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 102: `async function recordDraftAttachmentSaveSideEffects (req, data, entities) {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 143: `function importantChanges (oldBug, finalBug) {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 179: `function actionTypeForChange (change) {` — This declares or uses a business operation that Fiori/OData can call.
+- `importantChanges`, `actionTypeForChange`.
+  **IDTS concept**: Decide which fields are worth recording as history and which high-level actionType the event represents.
+  **Impact if broken**: History becomes either too noisy or misses important changes (status, assignee, rejectionReason, etc.).
+  **Must check together**: constants (HISTORY_FIELD_LABELS, ACTION), the places that call writeHistoryEvent.
 
 ### Cross-folder dependency map
 
-This section answers: which file in another main folder is linked, where the link appears, and how the linked files affect each other.
-
-- **Module wiring → `srv/service.js`**: This module is loaded by the BugService bootstrap or a module that bootstrap uses. Impact: Changing exports/imports requires updating the service wiring.
-- **Runtime contract → `srv/service.cds`**: The module implements behavior behind service entities/actions declared in CDS. Impact: The public OData contract and JavaScript behavior must stay aligned.
-- **Data access → `db/schema.cds`**: The module reads/writes/query entities and associations from the data model. Impact: Renaming schema fields or changing associations can break handlers.
+Wired exclusively through `srv/service.js` after hooks. Model in `db/schema.cds`. Display enrichment in history-read-models. Notifications created here are shown in the Notifications facet.
 
 ### Safe editing checklist
 
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Keep backend validation authoritative; hidden UI buttons are not a security boundary.
-- If action names, virtual fields, or entity names change, update CDS, annotations, tests, and this note together.
+When you add a field that should be audited, add it to the important changes logic and HISTORY_FIELD_LABELS. When adding new notification triggers, add the corresponding writeNotification call. Update tests and the history facet annotations.
 
 ## Vietnamese
 
 ### File này dùng để làm gì
 
-Backend helper module for `history` behavior inside BugService. File này nằm ở lớp backend CAP service. Nó xử lý request OData, kiểm tra nghiệp vụ, tính field hiển thị, phân quyền hoặc side effect.
+Ghi HistoryEvents + HistoryLogs cho mọi thay đổi quan trọng của Bug, comment, attachment. Chứa helper quyết định thay đổi gì và actionType nào.
 
-### Cách đọc file này cho dễ hiểu
+### Flow hoạt động trong IDTS
 
-- Đừng đọc file này như danh sách dòng code rời rạc.
-- Hãy đọc theo flow: người dùng/UI làm gì, CAP service nhận gì, backend xử lý gì, và dữ liệu nào bị ảnh hưởng.
-- Nếu phần English dài hơn, hãy xem đó là bản giải thích đầy đủ; phần Vietnamese này giúp nắm ý chính trước.
+Sau CREATE/UPDATE Bugs và CREATE Comments, after hooks gọi record side effects → tạo HistoryEvent + Logs + Notification.
 
-### Flow chính
+Thực hiện audit trail và lịch sử nhóm trên Object Page.
 
-- An OData request/action arrives at BugService.
-- `srv/service.js` dispatches the request to this module or uses it during before/after processing.
-- The module validates permissions/data, computes display fields, records side effects, or builds read models.
-- The result is returned to Fiori and/or persisted using entities from `db/schema.cds`.
+### Các điểm neo quan trọng
 
-### Các ý quan trọng cần hiểu
+record*SideEffects, writeHistoryEvent, importantChanges, actionTypeForChange.
 
-- History records are audit evidence: what changed, who changed it, and why.
-- This supports PM monitoring and SAP490 Test/Fix Bug documentation later.
-- Display enrichment keeps history readable instead of showing only raw IDs.
+### Liên kết
 
-### Liên kết với file ở folder khác
+Chỉ gọi qua after hooks ở service.js. Model ở schema. Làm giàu hiển thị ở history-read-models. Notification facet.
 
-Phần này nói rõ file này liên kết với file nào, liên kết nằm ở đâu, và nếu sửa một bên thì bên kia bị ảnh hưởng thế nào.
+### Checklist
 
-- **Module wiring → `srv/service.js`**: This module is loaded by the BugService bootstrap or a module that bootstrap uses. Impact: Changing exports/imports requires updating the service wiring.
-- **Runtime contract → `srv/service.cds`**: The module implements behavior behind service entities/actions declared in CDS. Impact: The public OData contract and JavaScript behavior must stay aligned.
-- **Data access → `db/schema.cds`**: The module reads/writes/query entities and associations from the data model. Impact: Renaming schema fields or changing associations can break handlers.
-
-### Khi sửa file này cần chú ý
-
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Keep backend validation authoritative; hidden UI buttons are not a security boundary.
-- If action names, virtual fields, or entity names change, update CDS, annotations, tests, and this note together.
+Thêm field audit → cập nhật importantChanges + labels. Thêm trigger notification → thêm write. Cập nhật test và annotation history facet.
 
 ## Metadata
 
 - Source file: `srv/bug-service/history.js`
 - Knowledge mirror: `docs/knowledge/srv/bug-service/history.js.md`
 - Source layer: `srv`
-- Source type: `.js`
-- Source line count at documentation time: 456
-- Documentation style: learning-oriented explanation, not line listing only
 - Last reviewed: 2026-06-22

@@ -4,105 +4,48 @@
 
 ### What this file is for
 
-Fiori annotation module for `labels`. Read this file as metadata that Fiori Elements uses to generate the UI without a custom controller. It does not save data by itself; it tells Fiori how to display or call the CAP service.
+Central place for labels and field control annotations on the Bugs entity (required fields, read-only fields, multi-line text, etc.).
 
-### How to read this file
+### IDTS flow
 
-This file belongs to the Fiori/UI5 frontend layer. It affects generated screens, OData calls, UI tests, app bootstrap, or visible text.
+Defines which fields are mandatory when creating a bug (title, description, stepsToReproduce, actualResult, expectedResult) and which are read-only in certain contexts (rejectionReason after reject).
 
-Read it through three practical questions:
-
-- What screen, API, data model, or developer workflow does this file support?
-- Which other layer consumes the output of this file?
-- If this file changes, which service/UI/data/test file must be checked next?
-
-### Runtime / project flow
-
-- CAP/Fiori tooling combines this annotation with `srv/service.cds` metadata.
-- Fiori Elements reads the generated metadata and creates list/detail pages.
-- When a user clicks a generated action button, Fiori calls the CAP action declared in `srv/service.cds` and handled by `srv/service.js`/`srv/bug-service/*`.
-
-### Main concepts explained
-
-- This file supports build, preview, lint, bootstrap, translation, or generated app behavior.
-- It may not implement business behavior directly, but it can still affect whether developers can run, test, or understand the app.
-- Configuration changes should be treated as code changes when they alter behavior or dependencies.
+Also marks long text fields for proper UI rendering.
 
 ### Important source anchors
 
-These anchors are deliberately short. They are not the main explanation; they only point you back to the most useful source locations after you understand the flow above.
+- `@Common.FieldControl : #Mandatory` on key fields.
+  **IDTS concept**: Enforces minimum information needed for a usable bug report (reproduction steps and expected vs actual are critical).
 
-- Line 1: `using BugService as service from '../../../srv/service';` — This imports another CDS service/model; if the imported file changes, this file can compile differently.
-- Line 3: `annotate service.Bugs with {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 4: `ID                    @UI.Hidden;` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 5: `bugNumber             @Core.Computed @Common.Label : 'Bug Number';` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 6: `title                 @Common.Label : 'Title' @Common.FieldControl : #Mandatory;` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 7: `description           @UI.MultiLineText @Common.Label : 'Description' @Common.FieldControl : #Mandatory;` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 8: `stepsToReproduce      @UI.MultiLineText @Common.Label : 'Steps to Reproduce' @Common.FieldControl : #Mandatory;` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 9: `actualResult          @UI.MultiLineText @Common.Label : 'Actual Result' @Common.FieldControl : #Mandatory;` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 10: `expectedResult        @UI.MultiLineText @Common.Label : 'Expected Result' @Common.FieldControl : #Mandatory;` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 11: `rejectionReason       @UI.MultiLineText @Common.Label : 'Rejection Reason' @Common.FieldControl : #ReadOnly;` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
+- `@UI.MultiLineText` on description, steps, results, rejectionReason.
+  **IDTS concept**: Ensures these important long-text fields render as text areas instead of single-line inputs.
 
-### Cross-folder dependency map
+### Cross-folder
 
-This section answers: which file in another main folder is linked, where the link appears, and how the linked files affect each other.
-
-- **Line 1 → `srv/service.cds`**: The frontend annotation/manifest points to `BugService` or its `/odata/v4/bug/` endpoint. Impact: If service entity/action names change, Fiori fields, buttons, routing, or data loading must be updated.
-- **Annotation target → `db/schema.cds`**: Most annotated fields originate from `db/schema.cds` through `srv/service.cds` projections. Impact: Schema field/association changes can break Fiori metadata through the service layer.
-
-### Safe editing checklist
-
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Compile or inspect OData metadata after annotation changes so you know Fiori can still find the target fields/actions.
-- Check `srv/service.cds` before adding a field/action reference; annotations cannot invent backend fields.
+Works with Object Page and create form annotations. Backend validations in bug-write.js also protect some of these rules.
 
 ## Vietnamese
 
 ### File này dùng để làm gì
 
-Fiori annotation module for `labels`. File này nằm ở lớp frontend Fiori/UI5. Nó ảnh hưởng màn hình, cách gọi OData, test UI, bootstrap app hoặc text hiển thị.
+Nơi tập trung annotation nhãn và field control cho Bugs (trường bắt buộc, chỉ đọc, text nhiều dòng...).
 
-### Cách đọc file này cho dễ hiểu
+### Flow IDTS
 
-- Đừng đọc file này như danh sách dòng code rời rạc.
-- Hãy đọc theo flow: người dùng/UI làm gì, CAP service nhận gì, backend xử lý gì, và dữ liệu nào bị ảnh hưởng.
-- Nếu phần English dài hơn, hãy xem đó là bản giải thích đầy đủ; phần Vietnamese này giúp nắm ý chính trước.
+Xác định trường nào bắt buộc khi tạo bug và trường nào chỉ đọc ở một số ngữ cảnh. Đánh dấu trường text dài để render đúng.
 
-### Flow chính
+### Các điểm neo quan trọng
 
-- CAP/Fiori tooling combines this annotation with `srv/service.cds` metadata.
-- Fiori Elements reads the generated metadata and creates list/detail pages.
-- When a user clicks a generated action button, Fiori calls the CAP action declared in `srv/service.cds` and handled by `srv/service.js`/`srv/bug-service/*`.
+- FieldControl #Mandatory trên các trường quan trọng.
+- @UI.MultiLineText trên description, steps, results, rejectionReason.
 
-### Các ý quan trọng cần hiểu
+### Liên kết
 
-- This file supports build, preview, lint, bootstrap, translation, or generated app behavior.
-- It may not implement business behavior directly, but it can still affect whether developers can run, test, or understand the app.
-- Configuration changes should be treated as code changes when they alter behavior or dependencies.
-
-### Liên kết với file ở folder khác
-
-Phần này nói rõ file này liên kết với file nào, liên kết nằm ở đâu, và nếu sửa một bên thì bên kia bị ảnh hưởng thế nào.
-
-- **Line 1 → `srv/service.cds`**: The frontend annotation/manifest points to `BugService` or its `/odata/v4/bug/` endpoint. Impact: If service entity/action names change, Fiori fields, buttons, routing, or data loading must be updated.
-- **Annotation target → `db/schema.cds`**: Most annotated fields originate from `db/schema.cds` through `srv/service.cds` projections. Impact: Schema field/association changes can break Fiori metadata through the service layer.
-
-### Khi sửa file này cần chú ý
-
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Compile or inspect OData metadata after annotation changes so you know Fiori can still find the target fields/actions.
-- Check `srv/service.cds` before adding a field/action reference; annotations cannot invent backend fields.
+Phối hợp với Object Page và form create. Backend cũng bảo vệ một số rule.
 
 ## Metadata
 
 - Source file: `app/bug-management-ui/annotations/labels.cds`
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/annotations/labels.cds.md`
 - Source layer: `app`
-- Source type: `.cds`
-- Source line count at documentation time: 41
-- Documentation style: learning-oriented explanation, not line listing only
 - Last reviewed: 2026-06-22

@@ -4,105 +4,85 @@
 
 ### What this file is for
 
-Fiori annotation module for `list-report`. Read this file as metadata that Fiori Elements uses to generate the UI without a custom controller. It does not save data by itself; it tells Fiori how to display or call the CAP service.
+Fiori Elements annotations that configure the **List Report** page for Bugs.
 
-### How to read this file
+It defines:
+- Which fields are available as filters (SelectionFields)
+- The columns shown in the table (LineItem)
+- Presentation variant and some capability fields for action visibility
 
-This file belongs to the Fiori/UI5 frontend layer. It affects generated screens, OData calls, UI tests, app bootstrap, or visible text.
+### IDTS flow
 
-Read it through three practical questions:
+This is the main entry screen for Tester and PM. They use filters like status, priority, component, assignee, nextProcessor, isOverdue, isPendingAssignment, etc. to find and manage bugs.
 
-- What screen, API, data model, or developer workflow does this file support?
-- Which other layer consumes the output of this file?
-- If this file changes, which service/UI/data/test file must be checked next?
-
-### Runtime / project flow
-
-- CAP/Fiori tooling combines this annotation with `srv/service.cds` metadata.
-- Fiori Elements reads the generated metadata and creates list/detail pages.
-- When a user clicks a generated action button, Fiori calls the CAP action declared in `srv/service.cds` and handled by `srv/service.js`/`srv/bug-service/*`.
-
-### Main concepts explained
-
-- `UI.SelectionFields` controls filters above the bug table.
-- `UI.LineItem` controls table columns in the main bug list.
-- `RequestAtLeast` asks OData to fetch hidden fields needed for button/UI state.
+The table shows key information with semantic colors for status, priority, severity.
 
 ### Important source anchors
 
-These anchors are deliberately short. They are not the main explanation; they only point you back to the most useful source locations after you understand the flow above.
+- `UI.SelectionFields`: Includes business filters such as `status_code`, `applicationComponent_ID`, `defectCategory_ID`, `assignee_ID`, `nextProcessorUser_ID`, plus the monitoring virtuals (`isOverdue`, `isPendingAssignment`, `isRejectedFollowUp`, `isRetestRequired`).
+  **IDTS concept**: Allows PM and testers to quickly slice the bug list by classification, ownership, and monitoring flags.
+  **Impact if broken**: Important filters disappear or monitoring flags cannot be used for views.
 
-- Line 1: `using BugService as service from '../../../srv/service';` — This imports another CDS service/model; if the imported file changes, this file can compile differently.
-- Line 3: `annotate service.Bugs with @(` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 4: `UI.SelectionFields : [` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 22: `UI.LineItem : [` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 23: `{ $Type : 'UI.DataField', Label : 'Bug Number', Value : bugNumber }` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 24: `{ $Type : 'UI.DataField', Label : 'Title', Value : title }` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 25: `{ $Type : 'UI.DataField', Label : 'Status', Value : status.name, Criticality : status.criticality, CriticalityRepresentation : #WithoutIcon }` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 26: `{ $Type : 'UI.DataField', Label : 'Priority', Value : priority.name, Criticality : priority.criticality, CriticalityRepresentation : #WithoutIcon }` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 27: `{ $Type : 'UI.DataField', Label : 'Severity', Value : severity.name, Criticality : severity.criticality, CriticalityRepresentation : #WithoutIcon }` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 28: `{ $Type : 'UI.DataField', Label : 'SAP Module', Value : sapModule.name }` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
+- `UI.LineItem`: Shows bugNumber, title, status (with criticality), priority, severity, SAP Module, Application Component, Defect Category, assigneeDisplayName, nextProcessorRoleName, dueDate, modifiedAt.
+  **IDTS concept**: Surface the key business fields + assignment/ownership information + dates needed for workload management.
+  **Impact if broken**: List becomes hard to scan; missing Component Category or next processor info hurts assignment and follow-up workflows.
+
+- Reference to many `can*` fields in RequestAtLeast / PresentationVariant.
+  **IDTS concept**: Ensures the backend capability flags are loaded so row-level action buttons or mass actions can be controlled.
 
 ### Cross-folder dependency map
 
-This section answers: which file in another main folder is linked, where the link appears, and how the linked files affect each other.
-
-- **Line 1 → `srv/service.cds`**: The frontend annotation/manifest points to `BugService` or its `/odata/v4/bug/` endpoint. Impact: If service entity/action names change, Fiori fields, buttons, routing, or data loading must be updated.
-- **Annotation target → `db/schema.cds`**: Most annotated fields originate from `db/schema.cds` through `srv/service.cds` projections. Impact: Schema field/association changes can break Fiori metadata through the service layer.
+- **srv/service.cds**: The Bugs projection + all virtual fields and display names used here.
+- **srv/bug-service/read-models.js**: Computes the `can*` flags and display names.
+- **db/schema.cds**: Source of status, component, assignee, nextProcessor fields.
+- **app/bug-management-ui/annotations/value-helps.cds**: Many SelectionFields have dependent value helps defined elsewhere.
+- **manifest.json**: The List Report route uses this metadata.
 
 ### Safe editing checklist
 
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Compile or inspect OData metadata after annotation changes so you know Fiori can still find the target fields/actions.
-- Check `srv/service.cds` before adding a field/action reference; annotations cannot invent backend fields.
+When adding/removing filters or columns, also consider:
+- Performance (RequestAtLeast)
+- Value help annotations
+- Capability calculations in backend
+- OPA tests that rely on specific columns/filters
+
+Test the List Report with different roles and filter combinations after changes.
 
 ## Vietnamese
 
 ### File này dùng để làm gì
 
-Fiori annotation module for `list-report`. File này nằm ở lớp frontend Fiori/UI5. Nó ảnh hưởng màn hình, cách gọi OData, test UI, bootstrap app hoặc text hiển thị.
+Annotation cấu hình trang **List Report** cho Bugs.
 
-### Cách đọc file này cho dễ hiểu
+Định nghĩa bộ lọc, cột bảng, và một số trường capability để điều khiển action.
 
-- Đừng đọc file này như danh sách dòng code rời rạc.
-- Hãy đọc theo flow: người dùng/UI làm gì, CAP service nhận gì, backend xử lý gì, và dữ liệu nào bị ảnh hưởng.
-- Nếu phần English dài hơn, hãy xem đó là bản giải thích đầy đủ; phần Vietnamese này giúp nắm ý chính trước.
+### Flow IDTS
 
-### Flow chính
+Đây là màn hình chính cho Tester và PM. Họ dùng filter trạng thái, ưu tiên, component, người gán, nextProcessor, isOverdue... để tìm và quản lý bug.
 
-- CAP/Fiori tooling combines this annotation with `srv/service.cds` metadata.
-- Fiori Elements reads the generated metadata and creates list/detail pages.
-- When a user clicks a generated action button, Fiori calls the CAP action declared in `srv/service.cds` and handled by `srv/service.js`/`srv/bug-service/*`.
+Bảng hiển thị thông tin quan trọng kèm màu sắc semantic.
 
-### Các ý quan trọng cần hiểu
+### Các điểm neo quan trọng trong source
 
-- `UI.SelectionFields` controls filters above the bug table.
-- `UI.LineItem` controls table columns in the main bug list.
-- `RequestAtLeast` asks OData to fetch hidden fields needed for button/UI state.
+- `UI.SelectionFields`: Bao gồm các filter nghiệp vụ quan trọng (status, applicationComponent, defectCategory, assignee, nextProcessor) và các virtual theo dõi PM.
+- `UI.LineItem`: Các cột chính: bugNumber, title, status (có màu), priority, severity, component, assignee, nextProcessor, dueDate...
+- Tham chiếu nhiều `can*` field.
 
-### Liên kết với file ở folder khác
+### Liên kết với file/folder khác
 
-Phần này nói rõ file này liên kết với file nào, liên kết nằm ở đâu, và nếu sửa một bên thì bên kia bị ảnh hưởng thế nào.
+- service.cds (virtual field và display name)
+- read-models.js (tính can* và tên)
+- schema.cds
+- value-helps.cds
+- manifest.json
 
-- **Line 1 → `srv/service.cds`**: The frontend annotation/manifest points to `BugService` or its `/odata/v4/bug/` endpoint. Impact: If service entity/action names change, Fiori fields, buttons, routing, or data loading must be updated.
-- **Annotation target → `db/schema.cds`**: Most annotated fields originate from `db/schema.cds` through `srv/service.cds` projections. Impact: Schema field/association changes can break Fiori metadata through the service layer.
+### Checklist sửa an toàn
 
-### Khi sửa file này cần chú ý
-
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Compile or inspect OData metadata after annotation changes so you know Fiori can still find the target fields/actions.
-- Check `srv/service.cds` before adding a field/action reference; annotations cannot invent backend fields.
+Khi thay đổi filter/cột phải xem xét hiệu năng, value help, capability backend và test OPA. Test lại List Report với nhiều vai trò.
 
 ## Metadata
 
 - Source file: `app/bug-management-ui/annotations/list-report.cds`
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/annotations/list-report.cds.md`
 - Source layer: `app`
-- Source type: `.cds`
-- Source line count at documentation time: 53
-- Documentation style: learning-oriented explanation, not line listing only
 - Last reviewed: 2026-06-22

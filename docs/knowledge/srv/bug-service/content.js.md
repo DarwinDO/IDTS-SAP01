@@ -4,105 +4,54 @@
 
 ### What this file is for
 
-Backend helper module for `content` behavior inside BugService. Read this file as one focused part of the service runtime. It is loaded directly or indirectly from `srv/service.js` and supports validation, permissions, read enrichment, side effects, drafts, content, monitoring, or history.
+Prepares and guards write operations for Comments and Attachments (including draft handling).
 
-### How to read this file
+### IDTS flow
 
-This file belongs to the CAP service layer. It handles OData requests, business validation, read enrichment, permissions, or side effects.
+Before CREATE of Comments and before any write on Attachments (including draft), the service calls the prepare functions here to set author, authorRole, and enforce size/media type rules.
 
-Read it through three practical questions:
-
-- What screen, API, data model, or developer workflow does this file support?
-- Which other layer consumes the output of this file?
-- If this file changes, which service/UI/data/test file must be checked next?
-
-### Runtime / project flow
-
-- An OData request/action arrives at BugService.
-- `srv/service.js` dispatches the request to this module or uses it during before/after processing.
-- The module validates permissions/data, computes display fields, records side effects, or builds read models.
-- The result is returned to Fiori and/or persisted using entities from `db/schema.cds`.
-
-### Main concepts explained
-
-- This file supports build, preview, lint, bootstrap, translation, or generated app behavior.
-- It may not implement business behavior directly, but it can still affect whether developers can run, test, or understand the app.
-- Configuration changes should be treated as code changes when they alter behavior or dependencies.
+After comment creation, side effects are recorded.
 
 ### Important source anchors
 
-These anchors are deliberately short. They are not the main explanation; they only point you back to the most useful source locations after you understand the flow above.
-
-- Line 1: `const cds = require('@sap/cds')` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 8: `} = require('./constants')` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 13: `} = require('./helpers')` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 15: `async function prepareCommentCreate (req, entities) {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 57: `async function prepareAttachmentWrite (req, entities) {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 70: `module.exports = {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
+- `prepareCommentCreate`, `prepareAttachmentWrite`.
+  **IDTS concept**: Ensures comments always have the correct author and role, and attachments respect the 10MB + allowed MIME types defined on the model.
+  **Impact if broken**: Comments can be created anonymously or with wrong role; invalid or oversized attachments can be uploaded.
+  **Must check together**: `srv/service.js` (before hooks on Comments and Bugs.attachments), `db/schema.cds` (Comments, BugAttachments), `history.js` (side effects), Fiori attachment and comment facets.
 
 ### Cross-folder dependency map
 
-This section answers: which file in another main folder is linked, where the link appears, and how the linked files affect each other.
-
-- **Module wiring → `srv/service.js`**: This module is loaded by the BugService bootstrap or a module that bootstrap uses. Impact: Changing exports/imports requires updating the service wiring.
-- **Runtime contract → `srv/service.cds`**: The module implements behavior behind service entities/actions declared in CDS. Impact: The public OData contract and JavaScript behavior must stay aligned.
-- **Data access → `db/schema.cds`**: The module reads/writes/query entities and associations from the data model. Impact: Renaming schema fields or changing associations can break handlers.
+Wired in `srv/service.js`. Model rules in `db/schema.cds`. Side effects go to history. UI facets in the Object Page annotations.
 
 ### Safe editing checklist
 
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Keep backend validation authoritative; hidden UI buttons are not a security boundary.
-- If action names, virtual fields, or entity names change, update CDS, annotations, tests, and this note together.
+Changes to attachment rules or comment authorship must be reflected here, in the schema annotations, and in any upload tests.
 
 ## Vietnamese
 
 ### File này dùng để làm gì
 
-Backend helper module for `content` behavior inside BugService. File này nằm ở lớp backend CAP service. Nó xử lý request OData, kiểm tra nghiệp vụ, tính field hiển thị, phân quyền hoặc side effect.
+Chuẩn bị và bảo vệ ghi Comments và Attachments (kể cả draft).
 
-### Cách đọc file này cho dễ hiểu
+### Flow hoạt động trong IDTS
 
-- Đừng đọc file này như danh sách dòng code rời rạc.
-- Hãy đọc theo flow: người dùng/UI làm gì, CAP service nhận gì, backend xử lý gì, và dữ liệu nào bị ảnh hưởng.
-- Nếu phần English dài hơn, hãy xem đó là bản giải thích đầy đủ; phần Vietnamese này giúp nắm ý chính trước.
+Trước khi tạo Comment và trước mọi write Attachment, gọi prepare để set author/authorRole và kiểm tra quy tắc size/media type.
 
-### Flow chính
+### Các điểm neo quan trọng
 
-- An OData request/action arrives at BugService.
-- `srv/service.js` dispatches the request to this module or uses it during before/after processing.
-- The module validates permissions/data, computes display fields, records side effects, or builds read models.
-- The result is returned to Fiori and/or persisted using entities from `db/schema.cds`.
+prepareCommentCreate, prepareAttachmentWrite.
 
-### Các ý quan trọng cần hiểu
+### Liên kết
 
-- This file supports build, preview, lint, bootstrap, translation, or generated app behavior.
-- It may not implement business behavior directly, but it can still affect whether developers can run, test, or understand the app.
-- Configuration changes should be treated as code changes when they alter behavior or dependencies.
+Wired ở service.js. Model ở schema. Side effect history. UI ở Object Page annotations.
 
-### Liên kết với file ở folder khác
+### Checklist
 
-Phần này nói rõ file này liên kết với file nào, liên kết nằm ở đâu, và nếu sửa một bên thì bên kia bị ảnh hưởng thế nào.
-
-- **Module wiring → `srv/service.js`**: This module is loaded by the BugService bootstrap or a module that bootstrap uses. Impact: Changing exports/imports requires updating the service wiring.
-- **Runtime contract → `srv/service.cds`**: The module implements behavior behind service entities/actions declared in CDS. Impact: The public OData contract and JavaScript behavior must stay aligned.
-- **Data access → `db/schema.cds`**: The module reads/writes/query entities and associations from the data model. Impact: Renaming schema fields or changing associations can break handlers.
-
-### Khi sửa file này cần chú ý
-
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Keep backend validation authoritative; hidden UI buttons are not a security boundary.
-- If action names, virtual fields, or entity names change, update CDS, annotations, tests, and this note together.
+Thay đổi quy tắc attachment/comment phải cập nhật ở đây + schema annotation + test upload.
 
 ## Metadata
 
 - Source file: `srv/bug-service/content.js`
 - Knowledge mirror: `docs/knowledge/srv/bug-service/content.js.md`
 - Source layer: `srv`
-- Source type: `.js`
-- Source line count at documentation time: 73
-- Documentation style: learning-oriented explanation, not line listing only
 - Last reviewed: 2026-06-22

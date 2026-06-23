@@ -4,111 +4,67 @@
 
 ### What this file is for
 
-Backend helper module for `read-models` behavior inside BugService. Read this file as one focused part of the service runtime. It is loaded directly or indirectly from `srv/service.js` and supports validation, permissions, read enrichment, side effects, drafts, content, monitoring, or history.
+Contains the logic that enriches Bug data for the UI (display names for reporter/assignee/nextProcessor) and computes the dynamic `can*` capability flags that control which action buttons are visible on the Object Page.
 
-### How to read this file
+Also implements the `AssignableDevelopers` value help used when assigning a bug.
 
-This file belongs to the CAP service layer. It handles OData requests, business validation, read enrichment, permissions, or side effects.
+### IDTS flow
 
-Read it through three practical questions:
+After every READ of Bugs (or drafts), `enrichBugDisplayFields` and `enrichBugCapabilities` are called.
 
-- What screen, API, data model, or developer workflow does this file support?
-- Which other layer consumes the output of this file?
-- If this file changes, which service/UI/data/test file must be checked next?
-
-### Runtime / project flow
-
-- An OData request/action arrives at BugService.
-- `srv/service.js` dispatches the request to this module or uses it during before/after processing.
-- The module validates permissions/data, computes display fields, records side effects, or builds read models.
-- The result is returned to Fiori and/or persisted using entities from `db/schema.cds`.
-
-### Main concepts explained
-
-- Read models enrich raw database rows with display text and capability booleans that Fiori can bind to simply.
-- Capability booleans such as `canClose` and `canAssign` matter because action annotations use them to show/hide buttons.
-- This avoids storing UI-only values directly in the database.
+`readAssignableDevelopers` powers the filtered value help that only shows developers responsible for the selected componentCategory (and optionally SAP Module).
 
 ### Important source anchors
 
-These anchors are deliberately short. They are not the main explanation; they only point you back to the most useful source locations after you understand the flow above.
+- `enrichBugCapabilities` + `CAPABILITY_FIELDS` from constants.
+  **IDTS concept**: Calculates per-bug boolean flags (`canResolve`, `canReject`, `canClose`...) based on current status, who the actor is, and whether they are the assignee or a coordinator. These flags are used by Fiori annotations to hide or show action buttons.
+  **Impact if broken**: Wrong buttons are shown to the wrong roles; developers see actions they cannot actually perform (or cannot see legitimate ones).
+  **Must check together**: `srv/service.cds` (virtual can* fields), `annotations/actions.cds` and `capabilities.cds`, `permissions.js`, `constants.js`.
 
-- Line 1: `const cds = require('@sap/cds')` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 16: `} = require('./constants')` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 21: `} = require('./helpers')` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 31: `async function readAssignableDevelopers (req, entities) {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 129: `function assignableDeveloperCriteria (req) {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 141: `function eqValueFromWhere (where, property) {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 159: `function searchTermFromCqn (search) {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 171: `function shouldPreferAssignableResponsibility (candidate, current, sapModuleID) {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 188: `function filterAssignableDeveloperRow (row, criteria) {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 206: `function applyLimit (rows, limit) {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
+- `readAssignableDevelopers`.
+  **IDTS concept**: The custom read that implements the smart assignee value help. Filters DeveloperResponsibilities by the bug's componentCategory and (optionally) sapModule.
+  **Impact if broken**: Tester cannot find suitable developers; assignment uses the wrong list.
+  **Must check together**: `srv/service.cds` (AssignableDevelopers entity), `db/schema.cds` (DeveloperResponsibilities + ComponentCategories), Fiori value-helps annotation.
 
 ### Cross-folder dependency map
 
-This section answers: which file in another main folder is linked, where the link appears, and how the linked files affect each other.
-
-- **Module wiring → `srv/service.js`**: This module is loaded by the BugService bootstrap or a module that bootstrap uses. Impact: Changing exports/imports requires updating the service wiring.
-- **Runtime contract → `srv/service.cds`**: The module implements behavior behind service entities/actions declared in CDS. Impact: The public OData contract and JavaScript behavior must stay aligned.
-- **Data access → `db/schema.cds`**: The module reads/writes/query entities and associations from the data model. Impact: Renaming schema fields or changing associations can break handlers.
-- **UI behavior → `app/bug-management-ui/annotations/actions.cds`**: Button visibility, side effects, or value helps can depend on fields/actions this module computes or handles. Impact: Backend behavior changes may require annotation and test changes.
+- Called from `srv/service.js` after READ and on specific READ handlers.
+- Depends on constants for status/role sets and capability list.
+- Feeds virtual fields declared in `srv/service.cds`.
+- The value help is consumed by `app/.../annotations/value-helps.cds` and the Assign action in Fiori.
 
 ### Safe editing checklist
 
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Keep backend validation authoritative; hidden UI buttons are not a security boundary.
-- If action names, virtual fields, or entity names change, update CDS, annotations, tests, and this note together.
+When adding a new action or changing when a transition is allowed, update both the capability calculation here and the corresponding `@UI.Hidden` annotation. Test the button visibility in the real browser for all three roles.
 
 ## Vietnamese
 
 ### File này dùng để làm gì
 
-Backend helper module for `read-models` behavior inside BugService. File này nằm ở lớp backend CAP service. Nó xử lý request OData, kiểm tra nghiệp vụ, tính field hiển thị, phân quyền hoặc side effect.
+Chứa logic làm giàu dữ liệu Bug cho UI (tên reporter/assignee/nextProcessor) và tính toán các cờ `can*` động để điều khiển nút action trên Object Page.
 
-### Cách đọc file này cho dễ hiểu
+Đồng thời implement value help `AssignableDevelopers`.
 
-- Đừng đọc file này như danh sách dòng code rời rạc.
-- Hãy đọc theo flow: người dùng/UI làm gì, CAP service nhận gì, backend xử lý gì, và dữ liệu nào bị ảnh hưởng.
-- Nếu phần English dài hơn, hãy xem đó là bản giải thích đầy đủ; phần Vietnamese này giúp nắm ý chính trước.
+### Flow hoạt động trong IDTS
 
-### Flow chính
+Sau mỗi READ Bugs, các hàm enrich được gọi. `readAssignableDevelopers` cung cấp value help đã lọc theo componentCategory (và SAP Module nếu có).
 
-- An OData request/action arrives at BugService.
-- `srv/service.js` dispatches the request to this module or uses it during before/after processing.
-- The module validates permissions/data, computes display fields, records side effects, or builds read models.
-- The result is returned to Fiori and/or persisted using entities from `db/schema.cds`.
+### Các điểm neo quan trọng
 
-### Các ý quan trọng cần hiểu
+- `enrichBugCapabilities`: tính cờ can* dựa trên trạng thái, actor và quyền.
+- `readAssignableDevelopers`: value help phân công thông minh theo responsibility.
 
-- Read models enrich raw database rows with display text and capability booleans that Fiori can bind to simply.
-- Capability booleans such as `canClose` and `canAssign` matter because action annotations use them to show/hide buttons.
-- This avoids storing UI-only values directly in the database.
+### Liên kết
 
-### Liên kết với file ở folder khác
+Gọi từ service.js. Dựa constants. Cung cấp virtual field cho service.cds. Dùng bởi annotation value-helps và action.
 
-Phần này nói rõ file này liên kết với file nào, liên kết nằm ở đâu, và nếu sửa một bên thì bên kia bị ảnh hưởng thế nào.
+### Checklist sửa an toàn
 
-- **Module wiring → `srv/service.js`**: This module is loaded by the BugService bootstrap or a module that bootstrap uses. Impact: Changing exports/imports requires updating the service wiring.
-- **Runtime contract → `srv/service.cds`**: The module implements behavior behind service entities/actions declared in CDS. Impact: The public OData contract and JavaScript behavior must stay aligned.
-- **Data access → `db/schema.cds`**: The module reads/writes/query entities and associations from the data model. Impact: Renaming schema fields or changing associations can break handlers.
-- **UI behavior → `app/bug-management-ui/annotations/actions.cds`**: Button visibility, side effects, or value helps can depend on fields/actions this module computes or handles. Impact: Backend behavior changes may require annotation and test changes.
-
-### Khi sửa file này cần chú ý
-
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Keep backend validation authoritative; hidden UI buttons are not a security boundary.
-- If action names, virtual fields, or entity names change, update CDS, annotations, tests, and this note together.
+Thêm action hoặc thay đổi transition → cập nhật cả capability ở đây và annotation UI. Test visibility cho 3 vai trò trên browser thật.
 
 ## Metadata
 
 - Source file: `srv/bug-service/read-models.js`
 - Knowledge mirror: `docs/knowledge/srv/bug-service/read-models.js.md`
 - Source layer: `srv`
-- Source type: `.js`
-- Source line count at documentation time: 522
-- Documentation style: learning-oriented explanation, not line listing only
 - Last reviewed: 2026-06-22

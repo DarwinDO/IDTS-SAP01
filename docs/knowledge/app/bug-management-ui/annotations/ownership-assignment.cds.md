@@ -4,105 +4,49 @@
 
 ### What this file is for
 
-Fiori annotation module for `ownership-assignment`. Read this file as metadata that Fiori Elements uses to generate the UI without a custom controller. It does not save data by itself; it tells Fiori how to display or call the CAP service.
+Annotations for the **Assignment** section on the Object Page.
 
-### How to read this file
+It controls visibility and editability of assignee and nextProcessor fields, and related actions.
 
-This file belongs to the Fiori/UI5 frontend layer. It affects generated screens, OData calls, UI tests, app bootstrap, or visible text.
+### IDTS concept
 
-Read it through three practical questions:
+Assignment is a core business concept. The file uses `@UI.Hidden` based on capability fields and `@Common.FieldControl` to make assignee read-only or editable depending on context and user role.
 
-- What screen, API, data model, or developer workflow does this file support?
-- Which other layer consumes the output of this file?
-- If this file changes, which service/UI/data/test file must be checked next?
+It also handles display of next processor (the current action owner).
 
-### Runtime / project flow
+### Impact and links
 
-- CAP/Fiori tooling combines this annotation with `srv/service.cds` metadata.
-- Fiori Elements reads the generated metadata and creates list/detail pages.
-- When a user clicks a generated action button, Fiori calls the CAP action declared in `srv/service.cds` and handled by `srv/service.js`/`srv/bug-service/*`.
+- Works with `canAssign`, `canMoveToPending`, `assigneeFieldControl` from backend.
+- Closely related to DeveloperResponsibilities and ComponentCategory logic.
+- Affects Tester (can assign) vs Developer (mostly read-only) experience.
 
-### Main concepts explained
-
-- This file supports build, preview, lint, bootstrap, translation, or generated app behavior.
-- It may not implement business behavior directly, but it can still affect whether developers can run, test, or understand the app.
-- Configuration changes should be treated as code changes when they alter behavior or dependencies.
-
-### Important source anchors
-
-These anchors are deliberately short. They are not the main explanation; they only point you back to the most useful source locations after you understand the flow above.
-
-- Line 1: `using BugService as service from '../../../srv/service';` — This imports another CDS service/model; if the imported file changes, this file can compile differently.
-- Line 3: `annotate service.Bugs with @(` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 4: `UI.FieldGroup #Assignment : {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 7: `$Type : 'UI.DataField'` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 10: `![@UI.Hidden] : {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 17: `$Type : 'UI.DataField'` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 20: `![@Common.FieldControl] : #ReadOnly` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 21: `![@UI.Hidden] : {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 28: `$Type : 'UI.DataField'` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 31: `![@Common.FieldControl] : #ReadOnly` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-
-### Cross-folder dependency map
-
-This section answers: which file in another main folder is linked, where the link appears, and how the linked files affect each other.
-
-- **Line 1 → `srv/service.cds`**: The frontend annotation/manifest points to `BugService` or its `/odata/v4/bug/` endpoint. Impact: If service entity/action names change, Fiori fields, buttons, routing, or data loading must be updated.
-- **Annotation target → `db/schema.cds`**: Most annotated fields originate from `db/schema.cds` through `srv/service.cds` projections. Impact: Schema field/association changes can break Fiori metadata through the service layer.
-
-### Safe editing checklist
-
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Compile or inspect OData metadata after annotation changes so you know Fiori can still find the target fields/actions.
-- Check `srv/service.cds` before adding a field/action reference; annotations cannot invent backend fields.
+See also value-helps and capabilities annotations.
 
 ## Vietnamese
 
 ### File này dùng để làm gì
 
-Fiori annotation module for `ownership-assignment`. File này nằm ở lớp frontend Fiori/UI5. Nó ảnh hưởng màn hình, cách gọi OData, test UI, bootstrap app hoặc text hiển thị.
+Annotation cho phần **Assignment** trên Object Page.
 
-### Cách đọc file này cho dễ hiểu
+Điều khiển ẩn/hiện và khả năng sửa của assignee và nextProcessor, cũng như action liên quan.
 
-- Đừng đọc file này như danh sách dòng code rời rạc.
-- Hãy đọc theo flow: người dùng/UI làm gì, CAP service nhận gì, backend xử lý gì, và dữ liệu nào bị ảnh hưởng.
-- Nếu phần English dài hơn, hãy xem đó là bản giải thích đầy đủ; phần Vietnamese này giúp nắm ý chính trước.
+### Khái niệm IDTS
 
-### Flow chính
+Phân công là khái niệm nghiệp vụ cốt lõi. File dùng `@UI.Hidden` theo capability và FieldControl để assignee có thể sửa hay chỉ đọc tùy ngữ cảnh và vai trò.
 
-- CAP/Fiori tooling combines this annotation with `srv/service.cds` metadata.
-- Fiori Elements reads the generated metadata and creates list/detail pages.
-- When a user clicks a generated action button, Fiori calls the CAP action declared in `srv/service.cds` and handled by `srv/service.js`/`srv/bug-service/*`.
+Cũng hiển thị next processor (người phải hành động tiếp).
 
-### Các ý quan trọng cần hiểu
+### Ảnh hưởng và liên kết
 
-- This file supports build, preview, lint, bootstrap, translation, or generated app behavior.
-- It may not implement business behavior directly, but it can still affect whether developers can run, test, or understand the app.
-- Configuration changes should be treated as code changes when they alter behavior or dependencies.
+Làm việc với canAssign, canMoveToPending, assigneeFieldControl từ backend.
+Liên quan chặt với DeveloperResponsibilities và ComponentCategory.
+Ảnh hưởng trải nghiệm của Tester (có thể gán) so với Developer.
 
-### Liên kết với file ở folder khác
-
-Phần này nói rõ file này liên kết với file nào, liên kết nằm ở đâu, và nếu sửa một bên thì bên kia bị ảnh hưởng thế nào.
-
-- **Line 1 → `srv/service.cds`**: The frontend annotation/manifest points to `BugService` or its `/odata/v4/bug/` endpoint. Impact: If service entity/action names change, Fiori fields, buttons, routing, or data loading must be updated.
-- **Annotation target → `db/schema.cds`**: Most annotated fields originate from `db/schema.cds` through `srv/service.cds` projections. Impact: Schema field/association changes can break Fiori metadata through the service layer.
-
-### Khi sửa file này cần chú ý
-
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Compile or inspect OData metadata after annotation changes so you know Fiori can still find the target fields/actions.
-- Check `srv/service.cds` before adding a field/action reference; annotations cannot invent backend fields.
+Xem thêm value-helps và capabilities.
 
 ## Metadata
 
 - Source file: `app/bug-management-ui/annotations/ownership-assignment.cds`
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/annotations/ownership-assignment.cds.md`
 - Source layer: `app`
-- Source type: `.cds`
-- Source line count at documentation time: 108
-- Documentation style: learning-oriented explanation, not line listing only
 - Last reviewed: 2026-06-22

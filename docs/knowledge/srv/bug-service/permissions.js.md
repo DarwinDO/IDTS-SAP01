@@ -4,100 +4,100 @@
 
 ### What this file is for
 
-Backend helper module for `permissions` behavior inside BugService. Read this file as one focused part of the service runtime. It is loaded directly or indirectly from `srv/service.js` and supports validation, permissions, read enrichment, side effects, drafts, content, monitoring, or history.
+Role and ownership permission enforcement for all write operations and workflow actions on Bugs, Comments, and Attachments.
 
-### How to read this file
+This is the backend gatekeeper. Even if the Fiori UI hides a button, a direct OData call will still be checked here.
 
-This file belongs to the CAP service layer. It handles OData requests, business validation, read enrichment, permissions, or side effects.
+### Beginner explanation
 
-Read it through three practical questions:
+In IDTS the system deliberately limits who can do what:
+- Only Tester or PM (coordinator roles) can create bugs or (re)assign them.
+- Only the currently assigned Developer (plus coordinators) can move the bug through the developer-controlled statuses.
+- When a bug is Rejected, only coordinators can correct it.
+- A Developer can only act on bugs currently assigned to them.
 
-- What screen, API, data model, or developer workflow does this file support?
-- Which other layer consumes the output of this file?
-- If this file changes, which service/UI/data/test file must be checked next?
+This file implements these rules at the service level so they are enforced even for direct API calls.
 
-### Runtime / project flow
+### IDTS flow
 
-- An OData request/action arrives at BugService.
-- `srv/service.js` dispatches the request to this module or uses it during before/after processing.
-- The module validates permissions/data, computes display fields, records side effects, or builds read models.
-- The result is returned to Fiori and/or persisted using entities from `db/schema.cds`.
+When any write or action happens:
+1. `srv/service.js` calls the permission functions (through prepareBugWrite or the action handlers).
+2. The actor is resolved.
+3. Role and "is assigned developer" checks are performed using the sets from constants.
+4. Unauthorized requests are rejected with 403 before any data changes.
 
-### Main concepts explained
-
-- This is backend enforcement, not just UI convenience.
-- Even if a user manually calls an OData action, backend permission checks should reject invalid actions.
-- Frontend hidden buttons and backend permission checks must stay consistent.
+This is how the project enforces that primary lifecycle actions remain controlled.
 
 ### Important source anchors
 
-These anchors are deliberately short. They are not the main explanation; they only point you back to the most useful source locations after you understand the flow above.
+- **Location**: `srv/bug-service/permissions.js:13`
+  `async function enforceBugWritePermission(...)`
+  **IDTS concept**: Protects create and direct status/assignee changes. Only coordinators can assign; only assigned Developer + coordinators can drive developer statuses.
+  **Impact if broken**: Unauthorized assignment or status moves; nextProcessor and history become inconsistent.
+  **Must check together**: `bug-write.js`, `constants.js` (roles and status sets), `srv/service.js` before hooks.
 
-- Line 6: `} = require('./constants')` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 11: `} = require('./helpers')` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 13: `async function enforceBugWritePermission (req, entities, oldBug, nextBug, { isCreate }) {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 46: `async function enforceActionPermission (req, entities, bug, actionType) {` — This declares or uses a business operation that Fiori/OData can call.
-- Line 64: `async function isAssignedDeveloper (req, entities, userID, bug) {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 70: `module.exports = {` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
+- **Location**: `srv/bug-service/permissions.js:46`
+  `async function enforceActionPermission(...)`
+  **IDTS concept**: Checks for all workflow actions (assign, resolve, reject, request info, etc.).
+  **Impact if broken**: Wrong roles can execute privileged actions; Developer can act on unassigned bugs.
+  **Must check together**: `actions.js`, `constants.js`, `srv/service.js` on handlers, Fiori action annotations.
+
+- **Location**: `isAssignedDeveloper` helper
+  **IDTS concept**: Verifies the acting user is the technical owner (assignee) of the bug.
+  **Impact if broken**: Access control for Developer self-service status changes fails.
+  **Must check together**: `helpers.js`, constants DEVELOPER_DIRECT_STATUSES.
 
 ### Cross-folder dependency map
 
-This section answers: which file in another main folder is linked, where the link appears, and how the linked files affect each other.
-
-- **Module wiring → `srv/service.js`**: This module is loaded by the BugService bootstrap or a module that bootstrap uses. Impact: Changing exports/imports requires updating the service wiring.
-- **Runtime contract → `srv/service.cds`**: The module implements behavior behind service entities/actions declared in CDS. Impact: The public OData contract and JavaScript behavior must stay aligned.
-- **Data access → `db/schema.cds`**: The module reads/writes/query entities and associations from the data model. Impact: Renaming schema fields or changing associations can break handlers.
-- **UI behavior → `app/bug-management-ui/annotations/actions.cds`**: Button visibility, side effects, or value helps can depend on fields/actions this module computes or handles. Impact: Backend behavior changes may require annotation and test changes.
+- Permissions logic is called from `srv/service.js` and the action/bug-write modules.
+- The rules here must stay in sync with capability virtual fields exposed in `srv/service.cds` and hidden by annotations in the Fiori app.
+- Relies on role_code and assignee_ID from the data model.
 
 ### Safe editing checklist
 
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Keep backend validation authoritative; hidden UI buttons are not a security boundary.
-- If action names, virtual fields, or entity names change, update CDS, annotations, tests, and this note together.
+- Change to permission rules requires coordinated update in constants, this file, actions, capability calculation, and Fiori annotations.
+- Test both allowed and forbidden cases.
+- Backend is authoritative.
 
 ## Vietnamese
 
 ### File này dùng để làm gì
 
-Backend helper module for `permissions` behavior inside BugService. File này nằm ở lớp backend CAP service. Nó xử lý request OData, kiểm tra nghiệp vụ, tính field hiển thị, phân quyền hoặc side effect.
+Thực thi phân quyền theo vai trò và quyền sở hữu cho mọi thao tác ghi và action trên bug, comment, attachment.
 
-### Cách đọc file này cho dễ hiểu
+Đây là lớp kiểm soát ở backend. UI có ẩn nút thì gọi OData trực tiếp vẫn bị chặn ở đây.
 
-- Đừng đọc file này như danh sách dòng code rời rạc.
-- Hãy đọc theo flow: người dùng/UI làm gì, CAP service nhận gì, backend xử lý gì, và dữ liệu nào bị ảnh hưởng.
-- Nếu phần English dài hơn, hãy xem đó là bản giải thích đầy đủ; phần Vietnamese này giúp nắm ý chính trước.
+### Giải thích cho người mới
 
-### Flow chính
+Hệ thống giới hạn rõ ràng:
+- Chỉ Tester/PM mới được tạo bug hoặc gán/re-assign.
+- Chỉ Developer được assign (và coordinator) mới được đẩy trạng thái developer-controlled.
+- Bug Rejected chỉ coordinator mới được sửa.
+- Developer chỉ tác động được bug đang assign cho mình.
 
-- An OData request/action arrives at BugService.
-- `srv/service.js` dispatches the request to this module or uses it during before/after processing.
-- The module validates permissions/data, computes display fields, records side effects, or builds read models.
-- The result is returned to Fiori and/or persisted using entities from `db/schema.cds`.
+File này hiện thực hóa các quy tắc đó.
 
-### Các ý quan trọng cần hiểu
+### Flow hoạt động trong IDTS
 
-- This is backend enforcement, not just UI convenience.
-- Even if a user manually calls an OData action, backend permission checks should reject invalid actions.
-- Frontend hidden buttons and backend permission checks must stay consistent.
+Mọi write/action đều đi qua các hàm permission trước khi thay đổi dữ liệu. Actor được giải quyết, role + assigned check được thực hiện, request không hợp lệ bị reject 403.
 
-### Liên kết với file ở folder khác
+Đây là cách project đảm bảo "primary lifecycle actions remain controlled".
 
-Phần này nói rõ file này liên kết với file nào, liên kết nằm ở đâu, và nếu sửa một bên thì bên kia bị ảnh hưởng thế nào.
+### Các điểm neo quan trọng trong source
 
-- **Module wiring → `srv/service.js`**: This module is loaded by the BugService bootstrap or a module that bootstrap uses. Impact: Changing exports/imports requires updating the service wiring.
-- **Runtime contract → `srv/service.cds`**: The module implements behavior behind service entities/actions declared in CDS. Impact: The public OData contract and JavaScript behavior must stay aligned.
-- **Data access → `db/schema.cds`**: The module reads/writes/query entities and associations from the data model. Impact: Renaming schema fields or changing associations can break handlers.
-- **UI behavior → `app/bug-management-ui/annotations/actions.cds`**: Button visibility, side effects, or value helps can depend on fields/actions this module computes or handles. Impact: Backend behavior changes may require annotation and test changes.
+- `enforceBugWritePermission`: bảo vệ create và thay đổi trực tiếp assignee/status.
+- `enforceActionPermission`: bảo vệ các action workflow.
+- `isAssignedDeveloper`: xác nhận Developer là owner hiện tại.
 
-### Khi sửa file này cần chú ý
+### Liên kết với file/folder khác
 
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Keep backend validation authoritative; hidden UI buttons are not a security boundary.
-- If action names, virtual fields, or entity names change, update CDS, annotations, tests, and this note together.
+Gọi từ service.js, actions.js, bug-write.js. Phải khớp với virtual can* ở service.cds và annotation UI. Dựa vào dữ liệu role và assignee trong schema.
+
+### Checklist sửa an toàn
+
+- Thay đổi permission → cập nhật đồng bộ constants + actions + capability + annotation Fiori.
+- Test cả case được phép và bị chặn.
+- Backend là nguồn sự thật.
 
 ## Metadata
 
