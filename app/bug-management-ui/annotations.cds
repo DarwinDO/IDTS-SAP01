@@ -8,3 +8,4 @@ using from './annotations/object-page';
 using from './annotations/actions';
 using from './annotations/ownership-assignment';
 using from './annotations/history-notifications';
+using from './annotations/pm-monitoring';

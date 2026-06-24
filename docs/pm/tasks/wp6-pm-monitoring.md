@@ -66,3 +66,12 @@ Give PM users enough visibility to monitor workload, overdue bugs, pending assig
   - inactive developers remain visible only if they still own open bugs that must be reassigned or cleaned up.
 - Programmatic verification now covers service-level filtering, search, pagination, `$count`, projection, overload detection, inactive-backlog retention, and zero-load active developers through `scripts/qa/test-developer-workload-programmatic.js` (`36 PASS / 0 FAIL`).
 - Remaining Sprint 3 work for this package is FE consumption of `DeveloperWorkloads`, browser/UAT confirmation, and final PM filter-variant polish.
+
+## 2026-06-24 FE Filter Variant Integration Update
+
+- PR #17 fixed the local SQLite stale service-view blocker for PM monitoring filters by adding `dev:sqlite:refresh-views` and the canonical `qa:pm-monitoring:http` OData regression.
+- PR #16 was repaired on DatDT's branch after the merge conflict with PR #17:
+  - the four business tabs use the backend monitoring flags again: `isOverdue`, `isPendingAssignment`, `isRejectedFollowUp`, and `isRetestRequired`;
+  - the misleading `My Action Items` tab is now `PM Action Queue`, filtering records routed to `nextProcessorRole_code = 'PM'`;
+  - the knowledge mirror for `pm-monitoring.cds` explains the cross-folder contract and local SQLite refresh requirement.
+- Browser UAT on a persistent local SQLite database must run `npm run dev:sqlite:refresh-views` before opening the app, otherwise old local service views can still produce `no such column` errors even when source code is correct.
