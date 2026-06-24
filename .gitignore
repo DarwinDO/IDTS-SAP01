@@ -4,6 +4,7 @@ default-env-admin.json
 .cdsrc-private.json
 node_modules/
 gen/
+app/bug-management-ui/dist/
 .DS_Store
 logs/
 *.log
