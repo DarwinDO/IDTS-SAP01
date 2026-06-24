@@ -1,6 +1,6 @@
 # NhanT Status - QA/Verification Primary
 
-Last updated: 2026-06-13
+Last updated: 2026-06-24
 
 Vietnamese: Trạng thái của NhanT - phụ trách chính QA/Verification.
 
@@ -24,25 +24,27 @@ Vietnamese:
 
 ## Current Focus
 
-IDTS-6: QA – Create and execute happy-flow backend verification checklist.
+IDTS-23: Automated regression for ownership, readable history, and PM monitoring.
 
-Vietnamese: IDTS-6: QA – Tạo và thực hiện checklist QA backend luồng chính.
+Vietnamese: IDTS-23: Kiểm thử hồi quy tự động cho ownership, lịch sử dễ đọc và PM monitoring.
 
 ## Done
 
 - Definition of Done is documented in `docs/pm/05-definition-of-done.md`.
 - Sprint 1 verification commands are documented.
+- IDTS-23 regression script covers 45 ownership, history, and monitoring checks.
 
 Vietnamese:
 
 - Definition of Done đã được ghi trong `docs/pm/05-definition-of-done.md`.
 - Các lệnh verification cho Sprint 1 đã được document.
+- Script regression IDTS-23 bao phủ 45 checks về ownership, history và monitoring.
 
 ## In Progress
 
-- None (IDTS-6 checklist re-verified during DonHV integration: 21/21 PASS).
+- None. IDTS-23 is ready for merge after DonHV review.
 
-Vietnamese: Không có (IDTS-6 đã được DonHV re-verify trong lúc integration: 21/21 PASS).
+Vietnamese: Không có. IDTS-23 đã sẵn sàng merge sau khi DonHV review.
 
 ## Next
 
@@ -67,6 +69,7 @@ Vietnamese: Đang chờ implementation bắt đầu.
 | 2026-06-03 | Status setup | Member status file created from previous QA/Verification status | QA/Verification status ownership assigned to NhanT | None | Fixed | `rg`, `git diff --check` | Prepare WP1 verification when implementation starts |
 | 2026-06-09 | IDTS-3 | Read AGENTS.md, project-context.md, service.js; identified missing `requireReason: true` on `resolveBug` handler; applied surgical fix; ran Node.js syntax check and logic test | Fix applied to `srv/service.js` line 137; all 10 validation scenarios PASS; CDS compile OK | **Bug:** `resolveBug` (`In Progress → Resolved`) was missing `requireReason: true` — note was silently optional, violating mentor-confirmed business rule | Fixed ✅ | `node --check srv/service.js` → SYNTAX OK; `cds compile srv --to edmx` (via cds.ps1) → EDMX output no errors; logic test 10/10 PASS | DonHV to review `srv/service.js` diff and do Jira update/close IDTS-3 |
 | 2026-06-13 | IDTS-6 | Read task, seed data, service.js; created `docs/qa/idts6-happy-flow-checklist.md`; wrote `scripts/qa/test-idts6-programmatic.js`; ran test via direct CDS handler dispatch (bypass UI5 plugin issue); all action handlers tested | Checklist file + test script created; IDTS-3 fix re-confirmed (resolveBug empty note=400, with note=200); HistoryLogs 5 entries verified | Initial SC-01a direct CREATE request lacked a generic query and was treated as an environment skip | Fixed during DonHV integration on 2026-06-15 by adding an `INSERT` query and deterministic test UUIDs | `node scripts/qa/test-idts6-programmatic.js` → 21 PASS 0 FAIL; `node --check srv/service.js` OK | IDTS-6 is ready for final merge verification |
+| 2026-06-24 | IDTS-23 / PR #11 | Added and refined `scripts/qa/test-idts23-regression.js`; DonHV reviewed the PR and removed inherited IDTS-12/IDTS-6 artifacts that were outside the PR scope | Regression now checks 14 ownership cases, 16 history cases, and 15 monitoring cases | **Process/documentation issue:** PR #11 inherited an outdated Sprint 02 demo script and manual HTTP file from an older branch; the PR body also still said 29 checks | Fixed before merge by narrowing the PR to the IDTS-23 script and this status update, then updating the PR body | `node --check scripts/qa/test-idts23-regression.js` → exit 0; `node scripts/qa/test-idts23-regression.js` → 45 PASS, 0 FAIL; `npx cds compile srv app/bug-management-ui --to edmx` → exit 0; `git diff --check origin/dev...HEAD` → exit 0 | Merge PR #11 into `dev` |
 
 Vietnamese:
 
@@ -75,6 +78,7 @@ Vietnamese:
 | 2026-06-03 | Status setup | Tạo file status thành viên từ status QA/Verification cũ | Đã giao ownership QA/Verification cho NhanT | Không có | Đã xử lý | `rg`, `git diff --check` | Chuẩn bị verification cho WP1 khi implementation bắt đầu |
 | 2026-06-09 | IDTS-3 | Đọc AGENTS.md, project-context.md, service.js; phát hiện thiếu `requireReason: true` ở handler `resolveBug`; áp dụng fix surgical; chạy Node.js syntax check và logic test | Fix đã áp dụng vào `srv/service.js` dòng 137; 10/10 validation scenario PASS; CDS compile OK | **Bug:** `resolveBug` (`In Progress → Resolved`) thiếu `requireReason: true` — note đang optional âm thầm, vi phạm business rule mentor đã xác nhận | Đã fix ✅ | `node --check srv/service.js` → SYNTAX OK; `cds compile srv --to edmx` (qua cds.ps1) → EDMX output không lỗi; logic test 10/10 PASS | DonHV review diff `srv/service.js` và cập nhật/đóng Jira IDTS-3 |
 | 2026-06-13 | IDTS-6 | Đọc task, seed data, service.js; tạo `docs/qa/idts6-happy-flow-checklist.md`; viết `scripts/qa/test-idts6-programmatic.js`; chạy test qua direct CDS handler dispatch (bypass vấn đề UI5 plugin); kiểm tra toàn bộ action handler | File checklist + test script đã tạo; IDTS-3 fix xác nhận lại (resolveBug note rỗng=400, có note=200); HistoryLogs 5 entries đã verify | Request CREATE trực tiếp của SC-01a ban đầu thiếu generic query và bị xem nhầm là giới hạn môi trường | Đã fix khi DonHV integration ngày 2026-06-15 bằng cách thêm `INSERT` query và UUID test cố định | `node scripts/qa/test-idts6-programmatic.js` → 21 PASS 0 FAIL; `node --check srv/service.js` OK | IDTS-6 sẵn sàng cho final merge verification |
+| 2026-06-24 | IDTS-23 / PR #11 | Thêm và hoàn thiện `scripts/qa/test-idts23-regression.js`; DonHV review PR và loại các artifact IDTS-12/IDTS-6 bị kéo theo nhưng nằm ngoài scope | Regression hiện kiểm tra 14 case ownership, 16 case history và 15 case monitoring | **Process/documentation issue:** PR #11 kéo theo demo Sprint 02 và file HTTP cũ từ branch trước; PR body vẫn ghi 29 checks | Đã fix trước merge bằng cách thu gọn PR chỉ còn script IDTS-23 và status update này, sau đó cập nhật PR body | `node --check scripts/qa/test-idts23-regression.js` → exit 0; `node scripts/qa/test-idts23-regression.js` → 45 PASS, 0 FAIL; `npx cds compile srv app/bug-management-ui --to edmx` → exit 0; `git diff --check origin/dev...HEAD` → exit 0 | Merge PR #11 vào `dev` |
 
 ## Update Rule
 
