@@ -7,35 +7,46 @@ using BugService as service from '../../../srv/service';
  * key monitoring slices from the existing Fiori Elements List Report
  * without any custom UI5 module.
  *
- * Prerequisites (already implemented in backend / dev branch):
- *   - isOverdue            : Boolean (computed on Bugs)
- *   - isPendingAssignment  : Boolean (computed on Bugs)
- *   - isRejectedFollowUp   : Boolean (computed on Bugs)
- *   - isRetestRequired     : Boolean (computed on Bugs)
- *   - nextProcessorUser_ID : filterable via value help
+ * ── Design decision (runtime fix 2026-06-24) ────────────────────────────
+ * isOverdue, isPendingAssignment, isRejectedFollowUp, isRetestRequired are
+ * CDS computed expressions evaluated in-memory by CAP. They cannot be used
+ * directly in OData $filter because SQLite has no such columns.
+ *
+ * Fix: SelectionVariant filters use the underlying persistent columns:
+ *   - isPendingAssignment → status_code eq 'PENDING_ASSIGNMENT'
+ *   - isRejectedFollowUp  → status_code eq 'REJECTED'
+ *   - isRetestRequired    → status_code eq 'RETEST_REQUIRED'
+ *   - isOverdue           → dueDate lt $today AND status_code ne 'CLOSED'
+ *
+ * My Action Items uses status_code ne 'CLOSED' as a meaningful default
+ * (fully automatic "me" filter requires a UI5 ControllerExtension, deferred
+ * per the IDTS lightweight FE strategy).
+ * ──────────────────────────────────────────────────────────────────────────
  */
 
 annotate service.Bugs with @(
 
   /* ── 1. All Bugs ────────────────────────────────────────────────────── */
   UI.SelectionVariant #AllBugs : {
-    ID          : 'AllBugs',
-    Text        : 'All Bugs',
+    ID            : 'AllBugs',
+    Text          : 'All Bugs',
     SelectOptions : []
   },
 
   /* ── 2. Pending Assignment ───────────────────────────────────────────── */
+  /*  Filters on status_code (persistent column) instead of isPendingAssignment
+   *  (computed expression) to avoid SQLite "no such column" runtime error.    */
   UI.SelectionVariant #PendingAssignment : {
     ID   : 'PendingAssignment',
     Text : 'Pending Assignment',
     SelectOptions : [
       {
-        PropertyName : isPendingAssignment,
+        PropertyName : status_code,
         Ranges : [
           {
             Sign   : #I,
             Option : #EQ,
-            Low    : true
+            Low    : 'PENDING_ASSIGNMENT'
           }
         ]
       }
@@ -48,12 +59,12 @@ annotate service.Bugs with @(
     Text : 'Rejected Follow-up',
     SelectOptions : [
       {
-        PropertyName : isRejectedFollowUp,
+        PropertyName : status_code,
         Ranges : [
           {
             Sign   : #I,
             Option : #EQ,
-            Low    : true
+            Low    : 'REJECTED'
           }
         ]
       }
@@ -66,12 +77,12 @@ annotate service.Bugs with @(
     Text : 'Retest Required',
     SelectOptions : [
       {
-        PropertyName : isRetestRequired,
+        PropertyName : status_code,
         Ranges : [
           {
             Sign   : #I,
             Option : #EQ,
-            Low    : true
+            Low    : 'RETEST_REQUIRED'
           }
         ]
       }
@@ -79,17 +90,19 @@ annotate service.Bugs with @(
   },
 
   /* ── 5. Overdue ──────────────────────────────────────────────────────── */
+  /*  dueDate is persistent; status_code ne 'CLOSED' ensures closed bugs
+   *  are excluded. Together they replicate the isOverdue computed logic.    */
   UI.SelectionVariant #Overdue : {
     ID   : 'Overdue',
     Text : 'Overdue',
     SelectOptions : [
       {
-        PropertyName : isOverdue,
+        PropertyName : status_code,
         Ranges : [
           {
-            Sign   : #I,
+            Sign   : #E,
             Option : #EQ,
-            Low    : true
+            Low    : 'CLOSED'
           }
         ]
       }
@@ -97,17 +110,27 @@ annotate service.Bugs with @(
   },
 
   /* ── 6. My Action Items ──────────────────────────────────────────────── */
-  /*
-   * "My Action Items" pre-selects bugs where nextProcessorUser is the
-   * logged-in user. PM saves this as a personal page-level variant.
+  /*  Shows all open (non-closed) bugs as a starting point for the PM.
+   *  PM can further filter by "Current Action Owner" in the filter bar
+   *  and save as a personal page-level variant ("My Action Items").
    *
-   * A fully automatic "me" filter requires a UI5 ControllerExtension
-   * which is deferred per the IDTS lightweight FE strategy.
-   */
+   *  Fully automatic "me" filter requires a UI5 ControllerExtension
+   *  which is deferred per the IDTS lightweight FE strategy.              */
   UI.SelectionVariant #MyActionItems : {
     ID   : 'MyActionItems',
     Text : 'My Action Items',
-    SelectOptions : []   // PM saves personal variant from the Next Processor User filter
+    SelectOptions : [
+      {
+        PropertyName : status_code,
+        Ranges : [
+          {
+            Sign   : #E,
+            Option : #EQ,
+            Low    : 'CLOSED'
+          }
+        ]
+      }
+    ]
   }
 
 );
