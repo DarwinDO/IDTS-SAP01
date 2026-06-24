@@ -3,130 +3,120 @@ using BugService as service from '../../../srv/service';
 /**
  * IDTS-22 — PM Monitoring FE Views / Filter Variants
  *
- * Provides six SelectionVariant presets so PM can switch between
+ * Provides six SelectionVariant presets so PM users can switch between
  * key monitoring slices from the existing Fiori Elements List Report
  * without any custom UI5 module.
  *
- * ── Design decision (runtime fix 2026-06-24) ────────────────────────────
- * isOverdue, isPendingAssignment, isRejectedFollowUp, isRetestRequired are
- * CDS computed expressions evaluated in-memory by CAP. They cannot be used
- * directly in OData $filter because SQLite has no such columns.
+ * Backend contract note:
+ *   isOverdue, isPendingAssignment, isRejectedFollowUp, and isRetestRequired
+ *   are computed fields exposed by BugService.Bugs. They are intentionally
+ *   used here because they express the same business meaning as the tab names.
  *
- * Fix: SelectionVariant filters use the underlying persistent columns:
- *   - isPendingAssignment → status_code eq 'PENDING_ASSIGNMENT'
- *   - isRejectedFollowUp  → status_code eq 'REJECTED'
- *   - isRetestRequired    → status_code eq 'RETEST_REQUIRED'
- *   - isOverdue           → dueDate lt $today AND status_code ne 'CLOSED'
+ * Local SQLite note:
+ *   If a local db.sqlite was created before these service-view fields existed,
+ *   run `npm run dev:sqlite:refresh-views` before browser UAT. Otherwise SQLite
+ *   may still hold an old BugService_Bugs view and fail with "no such column".
  *
- * My Action Items uses status_code ne 'CLOSED' as a meaningful default
- * (fully automatic "me" filter requires a UI5 ControllerExtension, deferred
- * per the IDTS lightweight FE strategy).
- * ──────────────────────────────────────────────────────────────────────────
+ * PM Action Queue:
+ *   A fully automatic "my user" filter needs a UI5 ControllerExtension because
+ *   SelectionVariant annotations cannot inject the runtime user dynamically.
+ *   For the annotation-only MVP, this tab shows records where the current action
+ *   owner is the PM queue.
  */
 
 annotate service.Bugs with @(
 
-  /* ── 1. All Bugs ────────────────────────────────────────────────────── */
+  /* 1. All Bugs */
   UI.SelectionVariant #AllBugs : {
-    ID            : 'AllBugs',
-    Text          : 'All Bugs',
+    ID          : 'AllBugs',
+    Text        : 'All Bugs',
     SelectOptions : []
   },
 
-  /* ── 2. Pending Assignment ───────────────────────────────────────────── */
-  /*  Filters on status_code (persistent column) instead of isPendingAssignment
-   *  (computed expression) to avoid SQLite "no such column" runtime error.    */
+  /* 2. Pending Assignment */
   UI.SelectionVariant #PendingAssignment : {
     ID   : 'PendingAssignment',
     Text : 'Pending Assignment',
     SelectOptions : [
       {
-        PropertyName : status_code,
+        PropertyName : isPendingAssignment,
         Ranges : [
           {
             Sign   : #I,
             Option : #EQ,
-            Low    : 'PENDING_ASSIGNMENT'
+            Low    : true
           }
         ]
       }
     ]
   },
 
-  /* ── 3. Rejected Follow-up ───────────────────────────────────────────── */
+  /* 3. Rejected Follow-up */
   UI.SelectionVariant #RejectedFollowUp : {
     ID   : 'RejectedFollowUp',
     Text : 'Rejected Follow-up',
     SelectOptions : [
       {
-        PropertyName : status_code,
+        PropertyName : isRejectedFollowUp,
         Ranges : [
           {
             Sign   : #I,
             Option : #EQ,
-            Low    : 'REJECTED'
+            Low    : true
           }
         ]
       }
     ]
   },
 
-  /* ── 4. Retest Required ──────────────────────────────────────────────── */
+  /* 4. Retest Required */
   UI.SelectionVariant #RetestRequired : {
     ID   : 'RetestRequired',
     Text : 'Retest Required',
     SelectOptions : [
       {
-        PropertyName : status_code,
+        PropertyName : isRetestRequired,
         Ranges : [
           {
             Sign   : #I,
             Option : #EQ,
-            Low    : 'RETEST_REQUIRED'
+            Low    : true
           }
         ]
       }
     ]
   },
 
-  /* ── 5. Overdue ──────────────────────────────────────────────────────── */
-  /*  dueDate is persistent; status_code ne 'CLOSED' ensures closed bugs
-   *  are excluded. Together they replicate the isOverdue computed logic.    */
+  /* 5. Overdue */
   UI.SelectionVariant #Overdue : {
     ID   : 'Overdue',
     Text : 'Overdue',
     SelectOptions : [
       {
-        PropertyName : status_code,
+        PropertyName : isOverdue,
         Ranges : [
           {
-            Sign   : #E,
+            Sign   : #I,
             Option : #EQ,
-            Low    : 'CLOSED'
+            Low    : true
           }
         ]
       }
     ]
   },
 
-  /* ── 6. My Action Items ──────────────────────────────────────────────── */
-  /*  Shows all open (non-closed) bugs as a starting point for the PM.
-   *  PM can further filter by "Current Action Owner" in the filter bar
-   *  and save as a personal page-level variant ("My Action Items").
-   *
-   *  Fully automatic "me" filter requires a UI5 ControllerExtension
-   *  which is deferred per the IDTS lightweight FE strategy.              */
+  /* 6. PM Action Queue */
   UI.SelectionVariant #MyActionItems : {
-    ID   : 'MyActionItems',
-    Text : 'My Action Items',
+    ID   : 'PMActionQueue',
+    Text : 'PM Action Queue',
     SelectOptions : [
       {
-        PropertyName : status_code,
+        PropertyName : nextProcessorRole_code,
         Ranges : [
           {
-            Sign   : #E,
+            Sign   : #I,
             Option : #EQ,
-            Low    : 'CLOSED'
+            Low    : 'PM'
           }
         ]
       }

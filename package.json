@@ -31,9 +31,9 @@
     "qa:developer-workload:programmatic": "node scripts/qa/test-developer-workload-programmatic.js",
     "qa:direct-assignee:http": "powershell -ExecutionPolicy Bypass -File scripts/qa/test-direct-assignee-draft-save.ps1",
     "qa:history-events:programmatic": "node scripts/qa/test-history-events-programmatic.js assign && node scripts/qa/test-history-events-programmatic.js resubmit && node scripts/qa/test-history-events-programmatic.js reject && node scripts/qa/test-history-events-programmatic.js pending && node scripts/qa/test-history-events-programmatic.js close && node scripts/qa/test-history-events-programmatic.js edit",
-    "qa:pm-monitoring:programmatic": "node scripts/qa/test-pm-monitoring-programmatic.js",
     "qa:pm-monitoring:http": "node scripts/qa/test-pm-monitoring-http.js",
-
+    "qa:pm-monitoring:programmatic": "node scripts/qa/test-pm-monitoring-programmatic.js",
+    "dev:sqlite:refresh-views": "node scripts/dev/refresh-sqlite-service-views.js",
     "integration:db:env": "cds env requires.db --profile integration",
     "integration:db:deploy": "cds deploy --profile integration",
     "integration:serve": "cds serve all --profile integration",
