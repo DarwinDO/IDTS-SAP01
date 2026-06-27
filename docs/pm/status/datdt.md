@@ -1,6 +1,6 @@
 # DatDT Status - Fiori/UI5 Primary
 
-Last updated: 2026-06-24
+Last updated: 2026-06-27
 
 Vietnamese: Trạng thái của DatDT - phụ trách chính Fiori/UI5.
 
@@ -24,7 +24,7 @@ Vietnamese:
 
 ## Current Focus
 
-Sprint 03 Fiori/UI5: IDTS-18 Object Page Ownership Summary completed. Next focus is WP6 PM Monitoring FE views and browser UAT.
+Sprint 03 Fiori/UI5: IDTS-18 and IDTS-22 are merged into `dev`. Current DatDT focus is IDTS-13 stale Object Page refresh fix and the new IDTS-33 manual browser UAT scope for FE shell, PM monitoring, create/assignment usability, Object Page refresh, comments, attachments, and notifications.
 
 Vietnamese: Sprint 03 Fiori/UI5: đã hoàn thành IDTS-18 Ownership Summary trên Object Page. Trọng tâm tiếp theo là WP6 PM Monitoring FE views và browser UAT.
 
@@ -42,7 +42,8 @@ Vietnamese:
 
 ## In Progress
 
-- WP6 PM Monitoring FE views and filter variants (browser UAT still pending).
+- IDTS-13 Object Page stale-state fix is in progress on DatDT's branch per the latest Jira update.
+- IDTS-33 manual browser UAT is ready for DatDT and covers FE shell, PM monitoring, create/assignment usability, Object Page refresh, comments, attachments, and notifications.
 - Support final SAP490 evidence sync after IDTS-18 integration into `dev`.
 
 Vietnamese:
@@ -52,6 +53,8 @@ Vietnamese:
 
 ## Next
 
+- Continue IDTS-13 branch/PR handoff after the stale-state fix is ready for review.
+- Pick up IDTS-33 manual browser UAT on latest `dev`, running `npm run dev:sqlite:refresh-views` before local SQLite browser UAT.
 - Keep the Assign Developer dialog as a regression check during the final mentor-demo rerun, but no separate FE fix stream is currently required for `IDTS-9`.
 - Support final Object Page polish review and any non-blocking usability cleanup that appears during the final browser rerun.
 - Keep the default path annotation-driven first; only move to custom UI5/FE extension if a new FE gap appears and is judged worth the extra maintenance.
@@ -72,6 +75,7 @@ Vietnamese: Hiện không có blocker về execution. Blocker còn lại chỉ l
 
 | Date | Task/WP | What was done | Completed part | Issues/Bugs found | Fix status | Evidence/Commands | Next handoff |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-06-27 | IDTS-13 and IDTS-33 Jira coordination | DonHV checked DatDT's Jira tasks. IDTS-13 has a new DatDT comment saying the stale Object Page refresh fix is on branch `fix/idts-13-stale-object-page-datdt` and is ready for PR review. DonHV also created IDTS-33 as the DatDT companion manual UAT task split from IDTS-32. | Jira state reviewed; IDTS-33 created and assigned to DatDT; IDTS-32/IDTS-33 linked as related tasks. | No product bug found by DonHV in this planning step. Process change: the broad manual UAT scope was split so DatDT owns FE-shell-heavy testing and SangVN owns workflow/history-heavy testing. | Not applicable. | Jira search for DatDT tasks succeeded; IDTS-33 created; IDTS-32 edited; comments added to IDTS-32 and IDTS-33; issue link created. | DatDT to provide PR for IDTS-13 branch and later execute IDTS-33 manual browser UAT evidence on latest `dev`. |
 | 2026-06-24 | IDTS-22 PR #16 conflict and FE semantics fix by DonHV | DonHV merged latest `dev` after PR #17, resolved the PR #16 conflict by keeping the verified `dev` PM-monitoring HTTP regression and SQLite view refresh utility, then corrected `pm-monitoring.cds` so the four business tabs use the backend monitoring flags again. The misleading `My Action Items` tab was changed to `PM Action Queue` and now filters `nextProcessorRole_code = 'PM'` instead of showing all open bugs. | Conflict resolution and FE annotation correction completed. Knowledge mirror was rewritten to explain the backend-view dependency, the PM queue decision, and cross-folder links. | **Process/merge issue:** PR #16 conflicted with `dev` in `package.json` and `scripts/qa/test-pm-monitoring-http.js` because PR #17 added the canonical backend HTTP regression and SQLite view refresh tooling first. **Functional issue:** the previous DatDT fix made `Overdue` mean only `status_code != CLOSED`, which did not match the business meaning of overdue. | Fixed in this session on DatDT branch. Browser UAT still requires running `npm run dev:sqlite:refresh-views` before opening local persistent SQLite data. | `npm run dev:sqlite:refresh-views` refreshed 34 views; `npx cds compile srv app/bug-management-ui --to edmx` pass with known attachment metadata warning; `npm run qa:pm-monitoring:programmatic` -> 20 PASS / 0 FAIL; `npm run qa:pm-monitoring:http` on port 4027 -> 8 PASS / 0 FAIL; PM queue HTTP filter check pass; UI5 build from app folder pass; AI DevKit lint pass; conflict-marker scan pass. | After PR #16 is merged, keep future PM monitoring tabs aligned with their real filter meaning; do not label a tab "My" unless a runtime-user filter is implemented. |
 | 2026-06-24 | IDTS-22 PM Monitoring Blocker Fix | Fixed 4 blockers raised by DonHV in PR #16. 1) Replaced computed CDS flags (isOverdue, etc.) with persistent DB columns `status_code` and `dueDate` in `pm-monitoring.cds` SelectionVariants to fix SQLite runtime crashes. 2) Fixed My Action Items by applying `status_code ne 'CLOSED'`. 3) Created HTTP OData $filter regression test `test-pm-monitoring-http.js` to catch DB-level query failures. 4) Restored corrupted `actions.cds` syntax that broke the build. 5) Added Vietnamese translation to the knowledge mirror. | SelectionVariant definitions fixed; OData filter logic verified at HTTP level; new `qa:pm-monitoring:http` script added to `package.json`; knowledge mirror updated. | **Build defect (tooling issue):** `actions.cds` had invalid CDS single-quote syntax (`'in/comments'`) on working tree from a previous uncommitted change, causing `cds compile` to fail with "Mismatched '/'". | Fixed in session (restored `actions.cds`). All blockers from leader review are resolved. | `git restore app/bug-management-ui/annotations/actions.cds` exit 0; `npm run qa:pm-monitoring:http` -> 15 PASS / 0 FAIL; `npm run qa:pm-monitoring:programmatic` -> 20 PASS / 0 FAIL; `npx cds compile srv app/bug-management-ui --to edmx` pass. | Ready to comment on Jira and push force update for PR #16 re-review. |
 | 2026-06-24 | IDTS-22 / PR #16 leader re-review | DonHV checked DatDT's Jira update, inspected rebased commit `74da851`, reran compile/build/regression/lint checks, and exercised the six List Report tabs through the Codex Browser plugin. | The branch is rebased on `dev` commit `feaf6cf`; GitHub reports PR #16 as `CLEAN/MERGEABLE`; static and existing automated checks pass. | **Product defect:** opening derived-flag tabs such as Overdue causes SQLite errors (`no such column: $B.isOverdue` / `$B.isPendingAssignment`) because the SelectionVariant filter reaches SQL using calculated projection aliases. **Functional defect:** `My Action Items` has an empty `SelectOptions` list and therefore shows all eight bugs instead of user-specific work. **Test-harness issue:** IDTS-23 regression reads the flags but does not issue OData `$filter` requests against them, so it misses the runtime failure. **Documentation issue:** the new knowledge mirror is English-only and does not meet the required equivalent English/Vietnamese beginner format. **Tooling issue:** one review-only PowerShell `rg` command initially failed because of an unterminated quoted string, and the first status patch failed because PowerShell output displayed UTF-8 text incorrectly; both review commands were corrected without affecting product verification. | Open. PR is Git-mergeable but not product-ready and must not be merged until the derived-filter backend handling, My Action Items behavior, documentation, and browser regression coverage are fixed and retested. | `npx cds compile srv app/bug-management-ui --to edmx` pass; `npx ui5 build --config ui5.yaml` pass; IDTS-23 regression `45 PASS / 0 FAIL`; AI DevKit lint `5 ok, 0 warn/miss`; `git diff --check origin/dev...HEAD` pass; Browser plugin reproduced the SQL errors and showed `My Action Items (8)`. | DatDT to fix PR #16 on the same branch, add filter-level regression coverage, update the knowledge mirror, rerun browser UAT, and report evidence on Jira. |
