@@ -47,6 +47,11 @@ Vietnamese:
 | --- | --- | --- | --- |
 | IDTS-32 | Manual browser UAT for Sprint 3 workflow/history flows | SangVN | Jira task narrowed after split: SangVN owns Developer lifecycle, Need More Information/resubmit, reject follow-up, retest/close/reopen, grouped history timeline, and role/action visibility checks. |
 | IDTS-33 | Manual browser UAT for Sprint 3 FE shell, monitoring, and Object Page flows | DatDT | Jira task created as the DatDT companion split from IDTS-32: PM monitoring, create flow, assignment/reassignment usability, Object Page stale-state regression, comments, attachments, and notifications smoke test. |
+| IDTS-34 | Custom login/authentication foundation | DonHV | Backend CAP custom email/password login, password hashing, request-user mapping, and security-safe auth foundation without SAP BTP/XSUAA dependency. Blocks IDTS-35 and IDTS-38. |
+| IDTS-35 | Login UI and authenticated app session flow | DatDT | Fiori/UI5 login entry, login/logout behavior, and authenticated OData session handling after backend auth contract is available. Blocked by IDTS-34. |
+| IDTS-36 | SMTP email notification delivery with outbox tracking | DonHV | Real SMTP delivery for all in-app notifications using safe private config and delivery statuses. Email failure must not roll back bug workflow. Blocks IDTS-37 and IDTS-38. |
+| IDTS-37 | Notification UI and email delivery status readability | SangVN | FE/QA review of notification section after SMTP/outbox changes, focusing on readable event/channel/status/recipient/message output. Blocked by IDTS-36. |
+| IDTS-38 | Regression test custom login and SMTP notification flows | NhanT | QA coverage for login success/failure, role behavior, SMTP success/failure, disabled email config, and no-secret evidence. Blocked by IDTS-34 and IDTS-36. |
 
 Vietnamese:
 
