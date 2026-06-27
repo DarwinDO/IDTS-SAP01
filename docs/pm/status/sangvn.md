@@ -1,6 +1,6 @@
 # SangVN Status - Fiori/UI5 Support
 
-Last updated: 2026-06-24
+Last updated: 2026-06-27
 
 Vietnamese: Trạng thái của SangVN - hỗ trợ Fiori/UI5 cho Sprint 02.
 
@@ -24,7 +24,7 @@ Vietnamese:
 
 ## Current Focus
 
-Sprint 03 Fiori/UI5 support work: IDTS-19 grouped history timeline remains the main implementation task. IDTS-32 is now added as a ready manual browser UAT task for Sprint 3 workflow and monitoring regression coverage.
+Sprint 03 Fiori/UI5 support work: IDTS-19 grouped history timeline remains the main implementation task. IDTS-32 is now narrowed to SangVN's manual browser UAT scope for workflow/history, lifecycle, and role/action visibility coverage after DatDT received the companion FE-shell UAT task IDTS-33.
 
 Vietnamese: Trọng tâm hiện tại là phần Fiori/UI5 của Sprint 03: IDTS-20 chỉnh label ownership đang thực hiện. Task tiếp theo là IDTS-19 grouped history timeline với UI5 extension.
 
@@ -43,7 +43,7 @@ Vietnamese:
 ## In Progress
 
 - Shared Fiori/UI5 delivery support for final mentor-demo readiness remains active.
-- Jira IDTS-32 is ready for SangVN to run manual browser UAT across Sprint 3 PM monitoring, workflow lifecycle, history, comments, attachments, notifications, and role/action visibility.
+- Jira IDTS-32 is ready for SangVN to run manual browser UAT across workflow lifecycle, grouped history, reject/retest follow-up, and role/action visibility.
 - `IDTS-9` is no longer an open FE blocker; keep it only as a regression check during the final browser rerun.
 
 Vietnamese:
@@ -53,7 +53,7 @@ Vietnamese:
 
 ## Next
 
-- Pick up Jira IDTS-32 after the current implementation handoff allows it, using latest `dev` and running `npm run dev:sqlite:refresh-views` before local browser UAT.
+- Pick up the narrowed Jira IDTS-32 workflow/history UAT after the current implementation handoff allows it, using latest `dev` and running `npm run dev:sqlite:refresh-views` before local browser UAT.
 - Support DatDT in the final browser rerun and watch for any FE regression in Assign Developer, Comments CTA, or Object Page action visibility.
 - If a new FE gap appears during the final rerun, help evaluate whether it should be fixed now or deferred from the demo baseline.
 - Continue using Fiori MCP and SAP Fiori Guidelines before touching annotations, manifest configuration, or custom UI decisions.
@@ -74,6 +74,7 @@ Vietnamese: Hiện không có blocker về execution. Blocker còn lại là quy
 
 | Date | Task/WP | What was done | Completed part | Issues/Bugs found | Fix status | Evidence/Commands | Next handoff |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-06-27 | IDTS-32 / IDTS-33 manual UAT split | DonHV split the original broad IDTS-32 manual browser UAT scope. IDTS-32 now stays with SangVN and covers workflow/history-heavy testing: Developer lifecycle, Need More Information/resubmit, reject follow-up, retest/close/reopen, grouped history timeline, and role/action visibility. | IDTS-32 Jira description updated and linked to IDTS-33. | No product bug found in this planning step. Process change: FE-shell-heavy UAT was moved out to DatDT under IDTS-33 to reduce overload and make ownership clearer. | Not applicable. | Jira IDTS-32 edited; Jira IDTS-33 created and linked with `Relates`; comments added on both Jira issues. | SangVN to execute IDTS-32 workflow/history UAT and record findings/evidence in this file. |
 | 2026-06-24 | IDTS-32 Manual browser UAT planning | DonHV created Jira task IDTS-32 for SangVN to manually test Sprint 3 browser flows: PM monitoring slices, bug create, assignment/reassignment, developer lifecycle, Need More Information/resubmit, reject follow-up, retest/close/reopen, grouped history timeline, comments/attachments/notifications, and role/action visibility. | Jira task created and assigned to SangVN. | No product bug found in this planning step. Process note: manual UAT must classify any later finding as product defect, environment blocker, tooling issue, test-harness issue, data issue, documentation issue, or process issue. | Not applicable. | Jira IDTS-32 created through Atlassian Rovo; PM board updated. | SangVN to execute manual browser UAT on latest `dev` and update this status file with evidence/findings. |
 | 2026-06-23 | IDTS-20 PR #14 DonHV support fix | DonHV reviewed the pushed PR #14 branch against SangVN's Jira comment, merged the current `origin/dev` documentation baseline into the branch, restored the missing `package-lock.json` package root name, replaced the remaining value-help labels `Next Processor User` and `Next Processor Role` with `Current Action Owner` and `Action Owner Role`, and updated the matching knowledge mirror for `value-helps.cds`. | PR #14 cleanup support completed on SangVN branch. | Process/documentation mismatch: Jira comment said `package-lock.json` was reverted, but the PR still removed `packages[""].name`. UI wording issue: `value-helps.cds` still exposed `Next Processor User/Role` labels in metadata-driven value-help surfaces. | Fixed in this support commit. | `git diff --check` PASS; targeted `rg "Next Processor User|Next Processor Role" app/bug-management-ui/annotations` returned no matches; `npx cds compile srv app/bug-management-ui --to edmx` exit 0 with only the known `@cap-js/attachments` warning; `npx ui5 build --config ui5.yaml` in `app/bug-management-ui` succeeded; `npx ai-devkit@latest lint --json` PASS; secret scan returned no matches. | DonHV to push this branch, merge PR #14, then continue DatDT PR/branch review. |
 | 2026-06-23 | IDTS-20 (Sprint 03) | Fixed PR #14 review findings from DonHV. 1) Removed invalid `_ID` and `_code` annotations on foreign keys in `labels.cds` to fix compiler warnings. 2) Fixed DataPoint `Title` in `object-page.cds` to 'Assignee (Technical Owner)'. 3) Replaced `nextProcessorRoleName` and `nextProcessorUserDisplayName` with `currentActionOwnerDisplayName` in List Report and Assignment field groups to remove ambiguity. 4) Reverted unintended `package-lock.json` changes. | Cleaned up all PR #14 findings and compiler warnings | `npx cds compile srv app/bug-management-ui --to edmx` was throwing `has not been found` warnings for foreign keys. `package-lock.json` was mistakenly modified. | Fixed | `git checkout package-lock.json`; `npx cds compile srv app/bug-management-ui --to edmx` (0 warnings on UI); `git diff --check` (pass) | SangVN to commit and push/re-create PR for DonHV |

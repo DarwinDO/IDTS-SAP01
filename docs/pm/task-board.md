@@ -1,6 +1,6 @@
 # IDTS Task Board
 
-Last updated: 2026-06-24
+Last updated: 2026-06-27
 
 Use this board for high-level movement only. Detailed task notes belong in the matching file under `docs/pm/tasks/`.
 
@@ -45,7 +45,8 @@ Vietnamese:
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
-| IDTS-32 | Manual browser UAT for Sprint 3 workflow and monitoring flows | SangVN | Jira task created for manual testing of PM monitoring, create/assignment, lifecycle actions, rejected follow-up, retest/close/reopen, grouped history timeline, comments/attachments, notifications, and role/action visibility. |
+| IDTS-32 | Manual browser UAT for Sprint 3 workflow/history flows | SangVN | Jira task narrowed after split: SangVN owns Developer lifecycle, Need More Information/resubmit, reject follow-up, retest/close/reopen, grouped history timeline, and role/action visibility checks. |
+| IDTS-33 | Manual browser UAT for Sprint 3 FE shell, monitoring, and Object Page flows | DatDT | Jira task created as the DatDT companion split from IDTS-32: PM monitoring, create flow, assignment/reassignment usability, Object Page stale-state regression, comments, attachments, and notifications smoke test. |
 
 Vietnamese:
 
