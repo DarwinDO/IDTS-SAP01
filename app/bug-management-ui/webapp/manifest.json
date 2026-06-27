@@ -124,7 +124,31 @@
                     "creationMode": {
                       "name": "NewPage"
                     },
-                    "selectionMode": "Multi"
+                    "selectionMode": "Multi",
+                    "quickVariantSelection": {
+                      "paths": [
+                        {
+                          "annotationPath": "com.sap.vocabularies.UI.v1.SelectionVariant#AllBugs"
+                        },
+                        {
+                          "annotationPath": "com.sap.vocabularies.UI.v1.SelectionVariant#PendingAssignment"
+                        },
+                        {
+                          "annotationPath": "com.sap.vocabularies.UI.v1.SelectionVariant#RejectedFollowUp"
+                        },
+                        {
+                          "annotationPath": "com.sap.vocabularies.UI.v1.SelectionVariant#RetestRequired"
+                        },
+                        {
+                          "annotationPath": "com.sap.vocabularies.UI.v1.SelectionVariant#Overdue"
+                        },
+                        {
+                          "annotationPath": "com.sap.vocabularies.UI.v1.SelectionVariant#MyActionItems"
+                        }
+                      ],
+                      "hideTableTitle": false,
+                      "showCounts": true
+                    }
                   }
                 }
               }

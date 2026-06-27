@@ -41,7 +41,8 @@
             <HBox justifyContent="SpaceBetween" alignItems="Center" width="100%">
               <HBox alignItems="Center">
                 <Label text="{actionTypeName}" design="Bold" class="sapUiTinyMarginEnd" />
-                <Text text="by {actorDisplayName}" class="sapThemeMetaData" />
+                <Label text="{i18n>historyTimelineBy}" class="sapThemeMetaData sapUiTinyMarginEnd" />
+                <Text text="{actorDisplayName}" class="sapThemeMetaData" />
               </HBox>
               <Text
                 text="{
@@ -63,7 +64,7 @@
             <Panel
               expandable="true"
               expanded="false"
-              headerText="Show Details ({changeCount} changes)"
+              headerText="{i18n>historyTimelineShowDetails}"
               visible="{= ${changeCount} > 0 }"
               class="sapUiTinyMarginTop"
               backgroundDesign="Transparent"
@@ -79,13 +80,13 @@
               >
                 <columns>
                   <Column width="30%">
-                    <Text text="Field" />
+                    <Text text="{i18n>historyTimelineField}" />
                   </Column>
                   <Column width="35%">
-                    <Text text="Old Value" />
+                    <Text text="{i18n>historyTimelineOldValue}" />
                   </Column>
                   <Column width="35%">
-                    <Text text="New Value" />
+                    <Text text="{i18n>historyTimelineNewValue}" />
                   </Column>
                 </columns>
                 <ColumnListItem>
