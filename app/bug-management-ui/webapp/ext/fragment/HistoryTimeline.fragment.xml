@@ -1,0 +1,106 @@
+<core:FragmentDefinition
+  xmlns="sap.m"
+  xmlns:core="sap.ui.core"
+>
+  <VBox class="sapUiSmallMarginTop">
+    <List
+      id="historyTimelineList"
+      items="{
+        path: 'historyEvents',
+        parameters: {
+          $expand: 'logs',
+          $orderby: 'createdAt desc'
+        }
+      }"
+      showSeparators="None"
+      noDataText="{i18n>historyTimelineNoData}"
+    >
+      <CustomListItem type="Inactive" class="sapUiTinyMarginBottom">
+        <HBox class="sapUiSmallMargin" alignItems="Start">
+          <!-- Timeline icon -->
+          <core:Icon
+            src="{= ${actionTypeName} === 'Created' ? 'sap-icon://create' :
+                  (${actionTypeName} === 'Comment Added' ? 'sap-icon://comment' :
+                  (${actionTypeName} === 'Resolved' ? 'sap-icon://accept' :
+                  (${actionTypeName} === 'Closed' ? 'sap-icon://complete' :
+                  (${actionTypeName} === 'Rejected' ? 'sap-icon://decline' :
+                  (${actionTypeName} === 'Assigned' || ${actionTypeName} === 'Reassigned' ? 'sap-icon://person-placeholder' :
+                  (${actionTypeName} === 'Attachment Added' ? 'sap-icon://attachment' :
+                  (${actionTypeName} === 'Resubmitted' ? 'sap-icon://redo' :
+                  'sap-icon://activity-items')))))))}"
+            size="1.25rem"
+            color="{= ${actionTypeName} === 'Resolved' || ${actionTypeName} === 'Closed' ? '#2b7c2b' :
+                    (${actionTypeName} === 'Rejected' ? '#bb0000' :
+                    (${actionTypeName} === 'Created' ? '#0854a0' :
+                    '#6a6d70'))}"
+            class="sapUiSmallMarginEnd sapUiTinyMarginTop"
+          />
+          <!-- Event content -->
+          <VBox width="100%">
+            <!-- Header row: action + actor + time -->
+            <HBox justifyContent="SpaceBetween" alignItems="Center" width="100%">
+              <HBox alignItems="Center">
+                <Label text="{actionTypeName}" design="Bold" class="sapUiTinyMarginEnd" />
+                <Text text="by {actorDisplayName}" class="sapThemeMetaData" />
+              </HBox>
+              <Text
+                text="{
+                  path: 'createdAt',
+                  type: 'sap.ui.model.odata.type.DateTimeOffset',
+                  formatOptions: { relative: true, relativeScale: 'auto' }
+                }"
+                class="sapThemeMetaData"
+              />
+            </HBox>
+
+            <!-- Summary -->
+            <Text text="{summary}" visible="{= !!${summary} }" wrapping="true" class="sapUiTinyMarginTop" />
+
+            <!-- Grouped change context -->
+            <Text text="{groupedChangeContext}" visible="{= !!${groupedChangeContext} }" wrapping="true" class="sapThemeMetaData sapUiTinyMarginTop" />
+
+            <!-- Expandable detail logs -->
+            <Panel
+              expandable="true"
+              expanded="false"
+              headerText="Show Details ({changeCount} changes)"
+              visible="{= ${changeCount} > 0 }"
+              class="sapUiTinyMarginTop"
+              backgroundDesign="Transparent"
+            >
+              <Table
+                items="{
+                  path: 'logs',
+                  templateShareable: false
+                }"
+                showSeparators="Inner"
+                fixedLayout="false"
+                backgroundDesign="Transparent"
+              >
+                <columns>
+                  <Column width="30%">
+                    <Text text="Field" />
+                  </Column>
+                  <Column width="35%">
+                    <Text text="Old Value" />
+                  </Column>
+                  <Column width="35%">
+                    <Text text="New Value" />
+                  </Column>
+                </columns>
+                <ColumnListItem>
+                  <Text text="{fieldLabel}" />
+                  <Text text="{oldValueDisplay}" class="sapThemeMetaData" />
+                  <Text text="{newValueDisplay}" />
+                </ColumnListItem>
+              </Table>
+            </Panel>
+
+            <!-- Reason / rejection warning -->
+            <ObjectStatus text="{reason}" state="Warning" icon="sap-icon://message-warning" visible="{= !!${reason} }" class="sapUiTinyMarginTop" />
+          </VBox>
+        </HBox>
+      </CustomListItem>
+    </List>
+  </VBox>
+</core:FragmentDefinition>
