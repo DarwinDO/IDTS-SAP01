@@ -1,6 +1,6 @@
 # IDTS Task Board
 
-Last updated: 2026-06-27
+Last updated: 2026-06-28
 
 Use this board for high-level movement only. Detailed task notes belong in the matching file under `docs/pm/tasks/`.
 
@@ -23,6 +23,9 @@ Vietnamese: Chỉ dùng board này để theo dõi trạng thái cấp cao. Chi 
 | WP7 | Notifications and Attachments | Backend persistence, in-app notifications, create-time attachment visibility, and browser happy-flow verification completed |
 | IDTS-30 | PostgreSQL local proof and attachment storage decision | PostgreSQL deploy/read proof completed, draft-media blocker documented, long-term object-storage direction approved, and implementation handed off to `IDTS-31` |
 | IDTS-31 | Object-store-backed attachment implementation | Native AWS S3 acceptance passed with PostgreSQL metadata/reference, external binary storage, upload/activate/download/history/delete cleanup, and full regression evidence |
+| IDTS-13 | Object Page stale state after lifecycle action submit | PR #20 merged into `dev`; bound action side effects now refresh the bound Object Page entity and related history/notification/comment entities. Jira moved to Done. |
+| IDTS-19 | Grouped history timeline with selective UI5 extension | PR #18 merged into `dev`; Object Page now has a grouped HistoryTimeline custom section while PM monitoring `views.paths` are preserved. Jira moved to Done. |
+| IDTS-24 | Persona-based browser UAT evidence | PR #24 merged into `dev`; Playwright UAT script for Tester, Developer, and PM personas is integrated, evidence output is ignored, and Jira moved to Done. |
 
 Vietnamese:
 
@@ -40,13 +43,15 @@ Vietnamese:
 | WP7 | Notifications và Attachments | Đã xác nhận lưu trữ backend, bản ghi thông báo trong ứng dụng, và kiểm thử E2E comment/upload trên browser thành công. |
 
 | IDTS-31 | Attachment using object storage | AWS S3 acceptance passed: PostgreSQL stores metadata/reference, S3 stores binary content, and upload/activate/download/history/delete cleanup plus full regression were verified. |
+| IDTS-13 | Object Page stale state sau lifecycle action | PR #20 da merge vao `dev`; side effect cua bound action refresh lai bound Object Page entity va cac entity history/notification/comment lien quan. Jira da chuyen Done. |
+| IDTS-19 | Grouped history timeline bang selective UI5 extension | PR #18 da merge vao `dev`; Object Page co custom section HistoryTimeline dang grouped event, dong thoi giu nguyen PM monitoring `views.paths`. Jira da chuyen Done. |
+| IDTS-24 | Browser UAT evidence theo persona | PR #24 da merge vao `dev`; script Playwright UAT cho Tester, Developer, PM da tich hop, evidence output duoc ignore, va Jira da chuyen Done. |
 
 ## Ready
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
 | IDTS-32 | Manual browser UAT for Sprint 3 workflow/history flows | SangVN | Jira task narrowed after split: SangVN owns Developer lifecycle, Need More Information/resubmit, reject follow-up, retest/close/reopen, grouped history timeline, and role/action visibility checks. |
-| IDTS-33 | Manual browser UAT for Sprint 3 FE shell, monitoring, and Object Page flows | DatDT | Jira task created as the DatDT companion split from IDTS-32: PM monitoring, create flow, assignment/reassignment usability, Object Page stale-state regression, comments, attachments, and notifications smoke test. |
 | IDTS-34 | Custom login/authentication foundation | DonHV | Backend CAP custom email/password login, password hashing, request-user mapping, and security-safe auth foundation without SAP BTP/XSUAA dependency. Blocks IDTS-35 and IDTS-38. |
 | IDTS-35 | Login UI and authenticated app session flow | DatDT | Fiori/UI5 login entry, login/logout behavior, and authenticated OData session handling after backend auth contract is available. Blocked by IDTS-34. |
 | IDTS-36 | SMTP email notification delivery with outbox tracking | DonHV | Real SMTP delivery for all in-app notifications using safe private config and delivery statuses. Email failure must not roll back bug workflow. Blocks IDTS-37 and IDTS-38. |
@@ -62,14 +67,16 @@ Hiện chưa có work package nào ở trạng thái Ready.
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
 | SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP, and real browser QA are now stable enough to prove the happy flow. Remaining work is final SAP490 sync and mentor-demo rerun, not FE/blocking workflow repair. |
-| WP6 | PM Monitoring | DonHV, DatDT, SangVN | Ownership wording is locked; backend `Current Action Owner`, derived monitoring flags, and the read-only `DeveloperWorkloads` aggregate are now implemented and verified. FE monitoring views/filter variants/browser UAT remain pending. |
+| WP6 | PM Monitoring | DonHV, DatDT, SangVN | Ownership wording is locked; backend monitoring fields, FE monitoring views, Object Page refresh side effects, grouped history timeline, and persona UAT automation are now merged. Remaining manual split tasks are IDTS-32 and IDTS-33 evidence follow-up. |
+| IDTS-33 | Manual browser UAT for Sprint 3 FE shell, monitoring, and Object Page flows | DatDT | Jira is In Progress. DatDT owns the FE-shell-heavy manual UAT companion scope after IDTS-13 was merged. |
 
 Vietnamese:
 
 | ID | Công việc | Thành viên chính | Ghi chú |
 | --- | --- | --- | --- |
 | SP2 | Sprint 02 Mentor Feedback và Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP và browser QA thật hiện đã đủ để chứng minh happy flow chính. Phần còn lại là sync SAP490 cuối và rerun demo mentor, không còn là sửa FE hay workflow blocking. |
-| WP6 | PM Monitoring | DonHV, DatDT, SangVN | Sprint 3 ownership wording đã chốt; backend `Current Action Owner` và các monitoring flag dẫn xuất đã implement + verify; phần còn lại là FE monitoring views/filter variants và browser UAT. |
+| WP6 | PM Monitoring | DonHV, DatDT, SangVN | Ownership wording đã chốt; backend monitoring fields, FE monitoring views, Object Page refresh side effects, grouped history timeline, và persona UAT automation đã merge. Phần còn lại là evidence follow-up của IDTS-32 và IDTS-33. |
+| IDTS-33 | Manual browser UAT cho FE shell, monitoring và Object Page flows | DatDT | Jira đang In Progress. DatDT phụ trách manual UAT phần FE-shell-heavy sau khi IDTS-13 đã merge. |
 
 ## Blocked
 
