@@ -1,6 +1,6 @@
 # Risk and Decision Log
 
-Last updated: 2026-06-21
+Last updated: 2026-06-27
 
 ## Decisions
 
@@ -37,6 +37,7 @@ Last updated: 2026-06-21
 | DEC-029 | 2026-06-21 | Do not add a custom MinIO adapter to IDTS after the stock attachment-plugin spike failed on virtual-hosted bucket addressing. | The short spike proved CAP/PostgreSQL and attachment metadata work, but binary upload resolved `idts-attachments.localhost`; supporting local MinIO would require path-style/DNS work or plugin customization outside the approved SAP-supported scope. | Final IDTS-31 acceptance must use a supported SAP Object Store, native AWS S3, Azure Blob Storage, or GCP Cloud Storage binding. S3-compatible providers that require custom endpoints, including Cloudflare R2, need explicit stock-plugin compatibility proof first. |
 | DEC-030 | 2026-06-21 | Use a private native AWS S3 bucket as the accepted external object store for the current IDTS integration environment. | The stock `@cap-js/attachments` S3 adapter passed upload, activation, download, history, PostgreSQL binary-absence, and delete cleanup without custom code. | IDTS-31 is Done. PostgreSQL stores attachment metadata/reference while AWS S3 stores file bytes. Credentials remain private and the bucket remains non-public. |
 | DEC-031 | 2026-06-22 | Maintain source-code knowledge mirrors for every tracked file under `app/`, `srv/`, and `db`. | The team needs beginner-friendly explanations that show how Fiori, CAP services, and CDS/data files connect, especially for members learning CAP/Fiori. | Any future task that creates or changes a tracked source file in those folders must create or update the matching mirror note under `docs/knowledge/app/`, `docs/knowledge/srv/`, or `docs/knowledge/db/`, including explicit cross-folder links and safe-edit notes. |
+| DEC-032 | 2026-06-27 | Implement IDTS login as custom email/password authentication in CAP Node.js, and implement email notification through real SMTP with delivery/outbox tracking. | The team does not expect to have SAP BTP/XSUAA access, but still needs real login and real email behavior. SMTP must be real, but email failure must not break bug workflow actions. | Jira IDTS-34 to IDTS-38 split the work across backend auth, FE login, SMTP delivery, notification UI/readability, and QA regression. Secrets stay in private config; `Users` remains the internal profile/role source. |
 
 ## Risks
 
@@ -59,6 +60,7 @@ Last updated: 2026-06-21
 | RISK-015 | External object-storage behavior may differ from the verified DB fallback. | Medium | High | Bind one shared object store to profile `integration` and rerun draft upload/activate/download/history acceptance before moving `IDTS-31` to Done. |
 | RISK-016 | An S3-compatible provider may still be incompatible with the stock plugin because it requires a custom endpoint, path-style addressing, or provider-specific behavior. | Medium | High | Run a short provider compatibility gate before adoption. Do not customize the attachment plugin unless a separate architecture decision explicitly accepts the maintenance cost. |
 | RISK-017 | Long-lived AWS IAM access keys may be exposed, forgotten, or remain active beyond the project/free-credit period. | Medium | High | Keep keys only in ignored private configuration/password storage, use least-privilege bucket policy, rotate regularly, deactivate unused keys, and configure AWS budget alerts. |
+| RISK-018 | Custom login and SMTP delivery may introduce security defects or secret leakage if implemented casually. | Medium | High | Store only password hashes, keep auth/SMTP secrets in ignored private config, scan docs/code before commit, use safe error messages, test wrong-password/inactive-user/invalid-token paths, and keep email sending out of the core workflow transaction. |
 
 Vietnamese:
 

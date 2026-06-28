@@ -4,13 +4,13 @@
 
 ### What this file is for
 
-The main Fiori Elements application descriptor. It configures the app bootstrap, OData service connection, routing between List Report and Object Page, and models.
+The main Fiori Elements application descriptor. It configures the app bootstrap, OData service connection, routing between List Report and Object Page, models, List Report monitoring tabs, and custom Object Page sections.
 
 ### IDTS flow
 
 Browser loads the app → UI5 reads this file → connects to `/odata/v4/bug/` → Fiori Elements generates List Report (for bugs) and Object Page (for single bug) based on `contextPath: /Bugs`.
 
-All custom IDTS behavior (buttons, facets, value helps) is added on top via annotations.
+All custom IDTS behavior (buttons, facets, value helps, and the grouped history timeline section) is added on top via annotations and manifest page configuration.
 
 ### Important source anchors
 
@@ -20,6 +20,13 @@ All custom IDTS behavior (buttons, facets, value helps) is added on top via anno
 - `sap.ui5.routing` with targets for ListReport and ObjectPage using `contextPath: "/Bugs"`.
   **IDTS concept**: Binds the generated pages to the Bugs collection and single instance.
 
+- `BugsList.options.settings.views.paths`
+  **IDTS concept**: Preserves WP6 PM monitoring tabs: All Bugs, Pending Assignment, Rejected Follow-up, Retest Required, Overdue, and PM Action Queue.
+  **Why this matters**: In this OData V4 Fiori Elements app, the PM monitoring tabs are configured as List Report `views.paths` at page settings level. Do not move them into table `quickVariantSelection`, because that can change the already verified PM monitoring tab behavior.
+
+- `BugsObjectPage.options.settings.content.body.sections.HistoryTimeline`
+  **IDTS concept**: Injects the custom grouped history timeline fragment before Notifications so users can read event-level audit history on the Object Page.
+
 - i18n and compact/cozy densities.
   **IDTS concept**: Standard Fiori setup for professional enterprise look.
 
@@ -27,33 +34,37 @@ All custom IDTS behavior (buttons, facets, value helps) is added on top via anno
 
 - Links to `srv/service.cds`
 - Annotations merged via `app/services.cds`
-- OPA tests rely on the routes defined here
+- OPA/browser checks rely on the routes and PM monitoring tab configuration defined here
+- The History timeline section depends on `webapp/ext/fragment/HistoryTimeline.fragment.xml`
 
 ## Vietnamese
 
 ### File này dùng để làm gì
 
-File mô tả ứng dụng Fiori Elements. Cấu hình kết nối OData, routing List ↔ Object Page, model.
+File mô tả ứng dụng Fiori Elements. Cấu hình kết nối OData, routing List ↔ Object Page, model, tab monitoring của List Report, và custom section của Object Page.
 
 ### Flow IDTS
 
 Load app → kết nối service → sinh List Report và Object Page cho Bugs.
 
-Hành vi IDTS tùy chỉnh được thêm qua annotation.
+Hành vi IDTS tùy chỉnh được thêm qua annotation và cấu hình page trong manifest.
 
 ### Các điểm neo quan trọng
 
 - URI service
 - Routing với contextPath /Bugs
+- `views.paths` giữ các tab monitoring WP6 cho PM
+- Lưu ý quan trọng: app này đang dùng Fiori Elements OData V4 và các tab PM monitoring đã được verify bằng cấu hình `views.paths` ở page settings. Không chuyển phần này vào `tableSettings.quickVariantSelection`, vì có thể làm thay đổi hành vi tab monitoring đã ổn định.
+- `HistoryTimeline` chèn fragment timeline lịch sử vào Object Page
 - i18n
 
 ### Liên kết
 
-srv/service.cds, annotations, OPA test.
+srv/service.cds, annotations, OPA/browser test, fragment HistoryTimeline.
 
 ## Metadata
 
 - Source file: `app/bug-management-ui/webapp/manifest.json`
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/manifest.json.md`
 - Source layer: `app`
-- Last reviewed: 2026-06-22
+- Last reviewed: 2026-06-27
