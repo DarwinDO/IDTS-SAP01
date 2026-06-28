@@ -34,7 +34,7 @@ annotate service.Bugs with {
   currentActionOwnerDisplayName @Common.Label : 'Current Action Owner' @Common.QuickInfo : 'The specific person who must take action right now' @Common.FieldControl : #ReadOnly @Core.Computed;
   isOverdue             @Common.Label : 'Overdue' @Common.FieldControl : #ReadOnly @Core.Computed @UI.HiddenFilter : false;
   isPendingAssignment   @Common.Label : 'Awaiting Assignment' @Common.QuickInfo : 'Bug is classified and needs a developer assignment' @Common.FieldControl : #ReadOnly @Core.Computed @UI.HiddenFilter : false;
-  isRejectedFollowUp    @Common.Label : 'Rejected \u2014 Needs Follow-up' @Common.QuickInfo : 'Bug was rejected and requires review or clarification from the reporter' @Common.FieldControl : #ReadOnly @Core.Computed @UI.HiddenFilter : false;
+  isRejectedFollowUp    @Common.Label : 'Rejected - Needs Follow-up' @Common.QuickInfo : 'Bug was rejected and requires review or clarification from the reporter' @Common.FieldControl : #ReadOnly @Core.Computed @UI.HiddenFilter : false;
   isRetestRequired      @Common.Label : 'Retest Required' @Common.FieldControl : #ReadOnly @Core.Computed @UI.HiddenFilter : false;
   plannedCompletionDate @Common.Label : 'Planned Completion Date';
   estimatedEffortHours  @Common.Label : 'Estimated Effort Hours';
