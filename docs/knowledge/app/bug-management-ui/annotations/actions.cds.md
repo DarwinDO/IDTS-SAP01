@@ -66,7 +66,7 @@ So this file is the bridge between backend workflow actions and the generated Fi
 
 - **Location**: `app/bug-management-ui/annotations/actions.cds:91-438`
   `@Common.SideEffects` blocks for bound actions
-  **IDTS concept**: Fiori refresh contract after backend action changes data. Lifecycle actions change status, assignee, next processor, capability booleans, history, notifications, and sometimes comments. Side effects tell Fiori what to reload.
+  **IDTS concept**: Fiori refresh contract after backend action changes data. Lifecycle actions change status, assignee, next processor, capability booleans, history, notifications, and sometimes comments. Side effects tell Fiori what to reload. We use `TargetEntities: [in]` (and related paths like `'in/historyEvents'`) to force Fiori Elements V4 to fully refresh the bound entity instead of flat `TargetProperties`, which caused stale Object Page issues (IDTS-13).
   **Impact if broken**: Backend changes may succeed, but the Object Page can still show stale status/buttons/history until manual reload. This was a real class of UI issue in IDTS.
   **Must check together**: `srv/bug-service/actions.js`, `srv/bug-service/read-models.js`, Object Page sections, browser lifecycle refresh tests.
 
@@ -158,7 +158,7 @@ Vì vậy file này là cầu nối giữa backend workflow actions và UI Fiori
 
 - **Vị trí**: `app/bug-management-ui/annotations/actions.cds:91-438`
   Các block `@Common.SideEffects` cho bound actions
-  **Khái niệm IDTS**: Hợp đồng refresh của Fiori sau khi backend action đổi dữ liệu. Lifecycle actions đổi status, assignee, next processor, capability booleans, history, notifications và đôi khi comments. Side effects nói cho Fiori biết cần reload gì.
+  **Khái niệm IDTS**: Hợp đồng refresh của Fiori sau khi backend action đổi dữ liệu. Lifecycle actions đổi status, assignee, next processor, capability booleans, history, notifications và đôi khi comments. Side effects nói cho Fiori biết cần reload gì. Chúng ta sử dụng `TargetEntities: [in]` (và các path con như `'in/historyEvents'`) để buộc Fiori Elements V4 tải lại toàn bộ bound entity; tránh dùng `TargetProperties` phẳng từng gây ra lỗi stale Object Page (IDTS-13).
   **Ảnh hưởng nếu sai**: Backend đã đổi dữ liệu thành công nhưng Object Page vẫn hiển thị status/buttons/history cũ cho đến khi user reload thủ công. Đây từng là một nhóm lỗi UI thật trong IDTS.
   **Phải kiểm tra cùng**: `srv/bug-service/actions.js`, `srv/bug-service/read-models.js`, các Object Page sections, browser lifecycle refresh tests.
 
