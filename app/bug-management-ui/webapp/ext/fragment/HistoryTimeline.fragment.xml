@@ -44,28 +44,21 @@
                 <Label text="{i18n>historyTimelineBy}" class="sapThemeMetaData sapUiTinyMarginEnd" />
                 <Text text="{actorDisplayName}" class="sapThemeMetaData" />
               </HBox>
-              <Text
-                text="{
-                  path: 'createdAt',
-                  type: 'sap.ui.model.odata.type.DateTimeOffset',
-                  formatOptions: { relative: true, relativeScale: 'auto' }
-                }"
-                class="sapThemeMetaData"
-              />
+              <Text text="{createdAt}" class="sapThemeMetaData" />
             </HBox>
 
             <!-- Summary -->
-            <Text text="{summary}" visible="{= !!${summary} }" wrapping="true" class="sapUiTinyMarginTop" />
+            <Text text="{summary}" visible="{= !!%{summary} }" wrapping="true" class="sapUiTinyMarginTop" />
 
             <!-- Grouped change context -->
-            <Text text="{groupedChangeContext}" visible="{= !!${groupedChangeContext} }" wrapping="true" class="sapThemeMetaData sapUiTinyMarginTop" />
+            <Text text="{groupedChangeContext}" visible="{= !!%{groupedChangeContext} }" wrapping="true" class="sapThemeMetaData sapUiTinyMarginTop" />
 
             <!-- Expandable detail logs -->
             <Panel
               expandable="true"
               expanded="false"
               headerText="{i18n>historyTimelineShowDetails}"
-              visible="{= ${changeCount} > 0 }"
+              visible="{= %{changeCount} > 0 }"
               class="sapUiTinyMarginTop"
               backgroundDesign="Transparent"
             >
@@ -98,7 +91,7 @@
             </Panel>
 
             <!-- Reason / rejection warning -->
-            <ObjectStatus text="{reason}" state="Warning" icon="sap-icon://message-warning" visible="{= !!${reason} }" class="sapUiTinyMarginTop" />
+            <ObjectStatus text="{reason}" state="Warning" icon="sap-icon://message-warning" visible="{= !!%{reason} }" class="sapUiTinyMarginTop" />
           </VBox>
         </HBox>
       </CustomListItem>
