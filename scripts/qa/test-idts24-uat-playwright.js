@@ -43,22 +43,20 @@ async function runUat() {
 
     await page.screenshot({ path: path.join(UAT_DIR, '01_tester_list_report.png'), fullPage: true });
 
-    // Open first bug (Click the row, not just the text to trigger navigation)
-    const firstRow = await page.$('tr:has-text("BUG-0003")');
-    if (firstRow) {
-        await firstRow.click();
-        await page.waitForTimeout(4000); // Wait for Object Page
+    // Open first bug (Direct URL navigation to avoid Fiori click flakiness)
+    const objPageUrl = 'http://localhost:4004/idts.bugmanagementui/index.html#/Bugs(ID=90000000-0000-0000-0000-000000000003,IsActiveEntity=true)';
+    await page.goto(objPageUrl, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(6000); // Wait for Object Page to fully load
 
         await page.screenshot({ path: path.join(UAT_DIR, '02_tester_object_page_ownership.png'), fullPage: true });
 
         // Click History tab
-        const historyTab = await page.$('div:has-text("History")');
+        const historyTab = await page.$('text="History"');
         if (historyTab) {
             await historyTab.click();
             await page.waitForTimeout(2000);
             await page.screenshot({ path: path.join(UAT_DIR, '03_tester_history_tab.png'), fullPage: true });
         }
-    }
     await context.close();
 
     // 2. Developer Persona (SangVN)
@@ -96,7 +94,7 @@ async function runUat() {
     await page.waitForTimeout(3000);
     
     // Click Pending Assignment tab for PM
-    const pendingTab = await page.$('div:has-text("Pending Assignment")');
+    const pendingTab = await page.$('text="Pending Assignment (2)"');
     if (pendingTab) {
         await pendingTab.click();
         await page.waitForTimeout(3000); // Wait for table to filter
