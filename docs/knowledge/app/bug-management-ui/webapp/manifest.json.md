@@ -20,8 +20,9 @@ All custom IDTS behavior (buttons, facets, value helps, and the grouped history 
 - `sap.ui5.routing` with targets for ListReport and ObjectPage using `contextPath: "/Bugs"`.
   **IDTS concept**: Binds the generated pages to the Bugs collection and single instance.
 
-- `BugsList.options.settings.controlConfiguration["@com.sap.vocabularies.UI.v1.LineItem"].tableSettings.quickVariantSelection`
+- `BugsList.options.settings.views.paths`
   **IDTS concept**: Preserves WP6 PM monitoring tabs: All Bugs, Pending Assignment, Rejected Follow-up, Retest Required, Overdue, and PM Action Queue.
+  **Why this matters**: In this OData V4 Fiori Elements app, the PM monitoring tabs are configured as List Report `views.paths` at page settings level. Do not move them into table `quickVariantSelection`, because that can change the already verified PM monitoring tab behavior.
 
 - `BugsObjectPage.options.settings.content.body.sections.HistoryTimeline`
   **IDTS concept**: Injects the custom grouped history timeline fragment before Notifications so users can read event-level audit history on the Object Page.
@@ -52,7 +53,8 @@ Hành vi IDTS tùy chỉnh được thêm qua annotation và cấu hình page tr
 
 - URI service
 - Routing với contextPath /Bugs
-- `quickVariantSelection` giữ các tab monitoring WP6 cho PM
+- `views.paths` giữ các tab monitoring WP6 cho PM
+- Lưu ý quan trọng: app này đang dùng Fiori Elements OData V4 và các tab PM monitoring đã được verify bằng cấu hình `views.paths` ở page settings. Không chuyển phần này vào `tableSettings.quickVariantSelection`, vì có thể làm thay đổi hành vi tab monitoring đã ổn định.
 - `HistoryTimeline` chèn fragment timeline lịch sử vào Object Page
 - i18n
 
