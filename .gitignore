@@ -31,3 +31,5 @@ docs/sap490/drive-ids.local.json
 docs/sap490/*.local.json
 docs/sap490/*.local.log
 docs/sap490/*.local.log.jsonl
+scripts/qa/uat-evidence/
+sql_output.txt
