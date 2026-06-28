@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-06-22
+Last updated: 2026-06-28
 
 ## Snapshot
 
@@ -81,10 +81,12 @@ Last updated: 2026-06-22
 - IDTS-28 service refactor is merged into `dev` through GitHub PR #5 at merge commit `9129ae8bb3fb22502260b3a435ad5df14fdf8108`. Local verification passed syntax checks, CAP compile, UI5 build, backend happy-flow, history-events, PM monitoring, developer workload, comments/attachments, and `git diff --check`. Jira `IDTS-28` remains In Progress only until IDTS-23 and IDTS-24 retest closure evidence is attached.
 - IDTS-31 is Done. The implementation uses `@cap-js/attachments`, removes the legacy `move_media_data_in_db` path, preserves 10 MB/MIME/role/history rules, and passes SQLite, PostgreSQL DB-fallback, and native AWS S3 acceptance. The final proof confirmed PostgreSQL stores metadata/reference with `content = NULL`, AWS S3 stores the binary object, and deletion cleans both stores. Jira evidence is recorded in comment `10162`.
 - Source-code knowledge mirrors now exist for every tracked file under `app/`, `srv/`, and `db`. Future changes in those folders must update the matching note under `docs/knowledge/app/`, `docs/knowledge/srv/`, or `docs/knowledge/db/`, including explicit cross-folder links.
+- Sprint 3 integration update on 2026-06-28: PR #18 (`IDTS-19` grouped history timeline), PR #20 (`IDTS-13` Object Page side-effect refresh), and PR #24 (`IDTS-24` browser UAT evidence script) were reviewed, fixed where needed, merged into `dev`, and moved to Done in Jira. Remaining manual UAT follow-up is split between `IDTS-32` for SangVN and `IDTS-33` for DatDT.
 
 Vietnamese:
 
 - Source-code knowledge mirror đã có cho mọi file đang được Git track trong `app/`, `srv/`, và `db`. Sau này khi sửa các folder này, thành viên phải cập nhật note tương ứng trong `docs/knowledge/app/`, `docs/knowledge/srv/`, hoặc `docs/knowledge/db/`, bao gồm liên kết chéo giữa các folder.
+- Sprint 3 integration update ngày 2026-06-28: PR #18 (`IDTS-19` grouped history timeline), PR #20 (`IDTS-13` Object Page side-effect refresh), và PR #24 (`IDTS-24` browser UAT evidence script) đã được review, fix khi cần, merge vào `dev`, và chuyển Done trên Jira. Manual UAT follow-up còn lại được tách giữa `IDTS-32` của SangVN và `IDTS-33` của DatDT.
 - WP1 Data Model Foundation Ä‘Ã£ Ä‘Æ°á»£c implement trong `db/schema.cds`, `srv/service.cds` vÃ  `db/data/`; CAP compile vÃ  SQLite in-memory deploy Ä‘á»u pass.
 - WP2 Service vÃ  Value Help Ä‘Ã£ hoÃ n thÃ nh á»Ÿ má»©c Sprint 1 MVP: OData V4 metadata cÃ³ bound lifecycle actions vÃ  Fiori value help annotations.
 - WP3 Handler Rules vÃ  Validation Ä‘Ã£ hoÃ n thÃ nh á»Ÿ má»©c Sprint 1 MVP: `srv/service.js` xá»­ lÃ½ create/update validation, assignment responsibility checks, status transition validation, nextProcessor automation, history logs vÃ  notification records.
