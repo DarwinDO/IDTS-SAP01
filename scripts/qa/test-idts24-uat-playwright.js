@@ -17,25 +17,25 @@ async function runUat() {
         console.log("Edge not found, trying Chrome...");
         browser = await chromium.launch({ channel: 'chrome' });
     }
-    
+
     // Instead of waiting for text, we can use HTTP Basic Auth directly with Playwright
     // Or we go to the root / to see the CAP default page.
-    
+
     // 1. Tester Persona (NhanT)
     console.log('Running UAT for Tester (NhanT)...');
     let context = await browser.newContext({
         httpCredentials: { username: 'NhanT', password: '' }
     });
     let page = await context.newPage();
-    
+
     await page.goto('http://localhost:4004/idts.bugmanagementui/index.html', { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(5000);
     await page.screenshot({ path: path.join(UAT_DIR, '00_debug_login.png'), fullPage: true });
-    
+
     // Wait for the Fiori App to load
     await page.waitForSelector('text=Bugs', { timeout: 60000 });
     await page.waitForTimeout(3000); // Wait for list report to settle
-    
+
     // Click Go
     const goButton = await page.$('bdi:has-text("Go")');
     if (goButton) await goButton.click();
@@ -48,15 +48,15 @@ async function runUat() {
     await page.goto(objPageUrl, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(6000); // Wait for Object Page to fully load
 
-        await page.screenshot({ path: path.join(UAT_DIR, '02_tester_object_page_ownership.png'), fullPage: true });
+    await page.screenshot({ path: path.join(UAT_DIR, '02_tester_object_page_ownership.png'), fullPage: true });
 
-        // Click History tab
-        const historyTab = await page.$('text="History"');
-        if (historyTab) {
-            await historyTab.click();
-            await page.waitForTimeout(2000);
-            await page.screenshot({ path: path.join(UAT_DIR, '03_tester_history_tab.png'), fullPage: true });
-        }
+    // Click History tab
+    const historyTab = await page.$('text="History"');
+    if (historyTab) {
+        await historyTab.click();
+        await page.waitForTimeout(2000);
+        await page.screenshot({ path: path.join(UAT_DIR, '03_tester_history_tab.png'), fullPage: true });
+    }
     await context.close();
 
     // 2. Developer Persona (SangVN)
@@ -67,11 +67,11 @@ async function runUat() {
     page = await context.newPage();
     page.on('console', msg => console.log('BROWSER CONSOLE:', msg.text()));
     page.on('pageerror', err => console.log('BROWSER ERROR:', err));
-    
+
     await page.goto('http://localhost:4004/idts.bugmanagementui/index.html', { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('text=Bugs', { timeout: 60000 });
     await page.waitForTimeout(3000);
-    
+
     if (await page.$('bdi:has-text("Go")')) await page.click('bdi:has-text("Go")');
     await page.waitForTimeout(3000);
 
@@ -84,15 +84,15 @@ async function runUat() {
         httpCredentials: { username: 'DonHV', password: '' }
     });
     page = await context.newPage();
-    
+
     await page.goto('http://localhost:4004/idts.bugmanagementui/index.html', { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('text=Bugs', { timeout: 60000 });
     await page.waitForTimeout(3000);
-    
+
     // Test PM Monitoring filters if possible
     if (await page.$('bdi:has-text("Go")')) await page.click('bdi:has-text("Go")');
     await page.waitForTimeout(3000);
-    
+
     // Click Pending Assignment tab for PM
     const pendingTab = await page.$('text="Pending Assignment (2)"');
     if (pendingTab) {
