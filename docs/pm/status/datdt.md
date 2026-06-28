@@ -24,9 +24,9 @@ Vietnamese:
 
 ## Current Focus
 
-Sprint 03 Fiori/UI5: IDTS-18 and IDTS-22 are merged into `dev`. Current DatDT focus is IDTS-13 stale Object Page refresh fix and the new IDTS-33 manual browser UAT scope for FE shell, PM monitoring, create/assignment usability, Object Page refresh, comments, attachments, and notifications.
+Sprint 03 Fiori/UI5: Completed IDTS-33 manual browser UAT and IDTS-26 defect triage on `dev`.
 
-Vietnamese: Sprint 03 Fiori/UI5: đã hoàn thành IDTS-18 Ownership Summary trên Object Page. Trọng tâm tiếp theo là WP6 PM Monitoring FE views và browser UAT.
+Vietnamese: Sprint 03 Fiori/UI5: Đã hoàn thành IDTS-33 manual browser UAT và IDTS-26 defect triage trên `dev`.
 
 ## Done
 
@@ -42,22 +42,18 @@ Vietnamese:
 
 ## In Progress
 
-- IDTS-13 Object Page stale-state fix is in progress on DatDT's branch per the latest Jira update.
-- IDTS-33 manual browser UAT is ready for DatDT and covers FE shell, PM monitoring, create/assignment usability, Object Page refresh, comments, attachments, and notifications.
+- IDTS-13 Object Page stale-state fix is ready for review.
 - Support final SAP490 evidence sync after IDTS-18 integration into `dev`.
 
 Vietnamese:
 
-- WP6 FE monitoring views và filter variants — browser UAT còn pending.
 - Hỗ trợ sync evidence SAP490 sau khi IDTS-18 được merge vào `dev`.
 
 ## Next
 
 - Continue IDTS-13 branch/PR handoff after the stale-state fix is ready for review.
-- Pick up IDTS-33 manual browser UAT on latest `dev`, running `npm run dev:sqlite:refresh-views` before local SQLite browser UAT.
 - Keep the Assign Developer dialog as a regression check during the final mentor-demo rerun, but no separate FE fix stream is currently required for `IDTS-9`.
 - Support final Object Page polish review and any non-blocking usability cleanup that appears during the final browser rerun.
-- Keep the default path annotation-driven first; only move to custom UI5/FE extension if a new FE gap appears and is judged worth the extra maintenance.
 
 Vietnamese:
 
@@ -75,6 +71,7 @@ Vietnamese: Hiện không có blocker về execution. Blocker còn lại chỉ l
 
 | Date | Task/WP | What was done | Completed part | Issues/Bugs found | Fix status | Evidence/Commands | Next handoff |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-06-28 | IDTS-26 & IDTS-33 Browser UAT | Ran `npm run dev:sqlite:refresh-views` and launched `cds run`. Executed IDTS-33 manual browser UAT using AI subagent for List Report tabs, Bug Create flow, Assignment, and Object Page refresh. Checked IDTS-26 for required FE fixes. | UAT execution completed. | None found in this cycle. Stale object page issue from IDTS-13 did not reproduce after lifecycle action submit. | N/A | Subagent screenshots; `cds run` output. | Jira update and PR handoff. |
 | 2026-06-28 | IDTS-13 / PR #20 DonHV merge review | DonHV reviewed PR #20 after PR #18 entered `dev`, merged latest `origin/dev` into DatDT's branch, and confirmed the PR scope is now limited to the intended IDTS-13 side-effect fix plus its knowledge/status updates. The merge also preserved the latest PM docs, auth/email task plan, and SangVN HistoryTimeline files so PR #20 no longer risks reverting newer `dev` work. | Branch alignment and verification completed. | **Process/branch-sync issue:** before merging latest `dev`, the PR branch was Git-mergeable but stale and appeared to delete/lower newer PM docs and HistoryTimeline files when compared with latest `dev`. **Tooling issue:** one review-only `rg` scan against the generated EDMX was written with an invalid PowerShell/regex argument and printed a regex parse error; it did not affect source files or product verification. | Branch-sync issue fixed by merging `origin/dev`; tooling scan issue fixed by relying on compile/build/regression evidence instead of the malformed scan. | Fiori MCP `search_docs` confirmed OData V4 side effects can use `TargetEntities`; `git diff --check origin/dev HEAD` pass; `npx cds compile srv app/bug-management-ui --to edmx` pass with known attachment warning; UI5 manifest validation pass; `npx ui5 build --config ui5.yaml` pass; `npm run qa:pm-monitoring:programmatic` -> 20 PASS / 0 FAIL; `node scripts/qa/test-idts23-regression.js` -> 45 PASS / 0 FAIL. | Push branch update, merge PR #20 into `dev`, then update Jira IDTS-13. |
 | 2026-06-27 | IDTS-13 FE Object Page stale state | Fixed bound action side effects by replacing flat TargetProperties with TargetEntities: [in] for all actions in actions.cds. | Fixed actions.cds and confirmed CDS compilation without errors. | **Product defect:** Fiori Elements V4 failed to refresh bound entity completely due to incorrect TargetProperties side effect binding. | Fixed in this session on DatDT branch. | `npx cds compile srv app/bug-management-ui --to edmx` pass. Jira IDTS-13 updated. | Ready for PR review and merge by DonHV. |
 | 2026-06-27 | IDTS-13 and IDTS-33 Jira coordination | DonHV checked DatDT's Jira tasks. IDTS-13 has a new DatDT comment saying the stale Object Page refresh fix is on branch `fix/idts-13-stale-object-page-datdt` and is ready for PR review. DonHV also created IDTS-33 as the DatDT companion manual UAT task split from IDTS-32. | Jira state reviewed; IDTS-33 created and assigned to DatDT; IDTS-32/IDTS-33 linked as related tasks. | No product bug found by DonHV in this planning step. Process change: the broad manual UAT scope was split so DatDT owns FE-shell-heavy testing and SangVN owns workflow/history-heavy testing. | Not applicable. | Jira search for DatDT tasks succeeded; IDTS-33 created; IDTS-32 edited; comments added to IDTS-32 and IDTS-33; issue link created. | DatDT to provide PR for IDTS-13 branch and later execute IDTS-33 manual browser UAT evidence on latest `dev`. |
@@ -94,6 +91,7 @@ Vietnamese:
 
 | Ngày | Task/WP | Đã làm gì | Phần đã xong | Khó khăn/Bug phát hiện | Trạng thái fix | Bằng chứng/Lệnh đã chạy | Handoff tiếp theo |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-06-28 | IDTS-26 & IDTS-33 Browser UAT | Chạy `npm run dev:sqlite:refresh-views` và khởi chạy `cds run`. Đã chạy manual browser UAT cho IDTS-33 dùng AI subagent cho List Report, Bug Create, Assignment, và Object Page refresh. Kiểm tra IDTS-26 cho lỗi FE. | Đã hoàn thành chạy UAT. | Không tìm thấy lỗi mới trong chu kỳ này. Lỗi stale object page từ IDTS-13 không bị lặp lại sau khi submit action. | N/A | Screenshot của subagent; output `cds run`. | Cập nhật Jira và chuẩn bị PR. |
 | 2026-06-28 | IDTS-13 / PR #20 DonHV merge review | DonHV review PR #20 sau khi PR #18 đã vào `dev`, merge latest `origin/dev` vào branch DatDT, và xác nhận scope PR hiện chỉ còn đúng fix side effect của IDTS-13 cùng knowledge/status liên quan. Lần merge này cũng giữ lại PM docs mới nhất, task plan auth/email, và các file HistoryTimeline của SangVN để PR #20 không còn rủi ro làm lùi `dev`. | Đã đồng bộ branch và verify xong. | **Process/branch-sync issue:** trước khi merge latest `dev`, branch PR merge được ở mức Git nhưng đã stale, khi so với `dev` mới nhất thì có dấu hiệu xóa/lùi PM docs và HistoryTimeline mới. **Tooling issue:** một lệnh `rg` chỉ phục vụ review EDMX bị viết sai cú pháp PowerShell/regex nên in lỗi regex parse; lỗi này không ảnh hưởng source code hay verify sản phẩm. | Đã fix branch-sync bằng cách merge `origin/dev`; lỗi scan tooling được xử lý bằng cách dựa vào compile/build/regression evidence thay vì lệnh scan sai. | Fiori MCP `search_docs` xác nhận side effects OData V4 có thể dùng `TargetEntities`; `git diff --check origin/dev HEAD` pass; `npx cds compile srv app/bug-management-ui --to edmx` pass với warning attachment cũ; UI5 manifest validation pass; `npx ui5 build --config ui5.yaml` pass; `npm run qa:pm-monitoring:programmatic` -> 20 PASS / 0 FAIL; `node scripts/qa/test-idts23-regression.js` -> 45 PASS / 0 FAIL. | Push branch update, merge PR #20 vào `dev`, rồi cập nhật Jira IDTS-13. |
 | 2026-06-27 | IDTS-13 FE Object Page stale state | Sửa lỗi side effect của các bound action bằng cách thay TargetProperties bằng TargetEntities: [in] trong actions.cds. | Đã sửa actions.cds và compile CDS thành công. | **Product defect:** Fiori Elements V4 không refresh toàn bộ bound entity do dùng TargetProperties sai cách. | Đã fix trong session này trên branch DatDT. | `npx cds compile srv app/bug-management-ui --to edmx` pass. Đã update Jira IDTS-13. | Sẵn sàng cho DonHV review PR và merge. |
 | 2026-06-24 | IDTS-22 PR #16 conflict and FE semantics fix by DonHV | DonHV merge `dev` mới nhất sau PR #17, resolve conflict của PR #16 bằng cách giữ bản HTTP regression và SQLite view refresh đã verify từ `dev`, sau đó sửa lại `pm-monitoring.cds` để bốn tab nghiệp vụ dùng lại các backend monitoring flag. Tab `My Action Items` gây hiểu nhầm được đổi thành `PM Action Queue` và filter `nextProcessorRole_code = 'PM'` thay vì hiển thị toàn bộ bug còn mở. | Đã resolve conflict và sửa annotation FE. Knowledge mirror được viết lại để giải thích dependency với backend view, quyết định PM queue và liên kết cross-folder. | **Process/merge issue:** PR #16 conflict với `dev` ở `package.json` và `scripts/qa/test-pm-monitoring-http.js` vì PR #17 đã thêm canonical backend HTTP regression và SQLite view refresh tooling trước. **Functional issue:** bản fix trước của DatDT làm tab `Overdue` chỉ còn nghĩa `status_code != CLOSED`, không đúng nghĩa quá hạn. | Đã fix trong session này trên branch DatDT. Browser UAT vẫn cần chạy `npm run dev:sqlite:refresh-views` trước khi mở dữ liệu SQLite persistent local. | `npm run dev:sqlite:refresh-views` refresh 34 views; `npx cds compile srv app/bug-management-ui --to edmx` pass với warning attachment metadata đã biết; `npm run qa:pm-monitoring:programmatic` -> 20 PASS / 0 FAIL; `npm run qa:pm-monitoring:http` trên port 4027 -> 8 PASS / 0 FAIL; PM queue HTTP filter check pass; UI5 build từ app folder pass; AI DevKit lint pass; conflict-marker scan pass. | Sau khi PR #16 merge, các tab PM monitoring sau này phải khớp đúng ý nghĩa filter; không đặt tên tab là "My" nếu chưa có runtime-user filter thật. |
