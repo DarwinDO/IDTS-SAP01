@@ -83,354 +83,73 @@ annotate service.Bugs with @(
 
 annotate service.Bugs actions {
   @Common.SideEffects : {
-    TargetEntities : [comments, historyEvents]
+    TargetEntities : [in, 'in/comments', 'in/historyEvents']
   }
   addComment(
     content @UI.MultiLineText @Common.Label : 'Comment'
   );
   @Common.SideEffects : {
-    TargetProperties : [
-      'status_code',
-      'assignee_ID',
-      'assigneeDisplayName',
-      'nextProcessorUser_ID',
-      'nextProcessorRole_code',
-      'nextProcessorUserDisplayName',
-      'nextProcessorRoleName',
-      'currentActionOwnerDisplayName',
-      'isOverdue',
-      'isPendingAssignment',
-      'isRejectedFollowUp',
-      'isRetestRequired',
-      'canAssign',
-      'canMoveToPending',
-      'canResubmit',
-      'canAddComment',
-      'canMarkInReview',
-      'canStartProgress',
-      'canResolve',
-      'canRequestMoreInfo',
-      'canReject',
-      'canSendToRetest',
-      'canClose',
-      'canReopen'
-    ],
-    TargetEntities : [status, historyEvents, notifications]
+    TargetEntities : [in, 'in/historyEvents', 'in/notifications']
   }
   assignToDeveloper(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
   );
   @Common.SideEffects : {
-    TargetProperties : [
-      'status_code',
-      'assignee_ID',
-      'assigneeDisplayName',
-      'nextProcessorUser_ID',
-      'nextProcessorRole_code',
-      'nextProcessorUserDisplayName',
-      'nextProcessorRoleName',
-      'currentActionOwnerDisplayName',
-      'isOverdue',
-      'isPendingAssignment',
-      'isRejectedFollowUp',
-      'isRetestRequired',
-      'canAssign',
-      'canMoveToPending',
-      'canResubmit',
-      'canAddComment',
-      'canMarkInReview',
-      'canStartProgress',
-      'canResolve',
-      'canRequestMoreInfo',
-      'canReject',
-      'canSendToRetest',
-      'canClose',
-      'canReopen'
-    ],
-    TargetEntities : [status, historyEvents, notifications]
+    TargetEntities : [in, 'in/historyEvents', 'in/notifications']
   }
   moveToPendingAssignment(
     reason @UI.MultiLineText @Common.Label : 'Reason'
   );
   @Common.SideEffects : {
-    TargetProperties : [
-      'status_code',
-      'assignee_ID',
-      'assigneeDisplayName',
-      'nextProcessorUser_ID',
-      'nextProcessorRole_code',
-      'nextProcessorUserDisplayName',
-      'nextProcessorRoleName',
-      'currentActionOwnerDisplayName',
-      'isOverdue',
-      'isPendingAssignment',
-      'isRejectedFollowUp',
-      'isRetestRequired',
-      'canAssign',
-      'canMoveToPending',
-      'canResubmit',
-      'canAddComment',
-      'canMarkInReview',
-      'canStartProgress',
-      'canResolve',
-      'canRequestMoreInfo',
-      'canReject',
-      'canSendToRetest',
-      'canClose',
-      'canReopen'
-    ],
-    TargetEntities : [status, historyEvents, notifications]
+    TargetEntities : [in, 'in/historyEvents', 'in/notifications']
   }
   markInReview(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
   );
   @Common.SideEffects : {
-    TargetProperties : [
-      'status_code',
-      'assignee_ID',
-      'assigneeDisplayName',
-      'nextProcessorUser_ID',
-      'nextProcessorRole_code',
-      'nextProcessorUserDisplayName',
-      'nextProcessorRoleName',
-      'currentActionOwnerDisplayName',
-      'isOverdue',
-      'isPendingAssignment',
-      'isRejectedFollowUp',
-      'isRetestRequired',
-      'canAssign',
-      'canMoveToPending',
-      'canResubmit',
-      'canAddComment',
-      'canMarkInReview',
-      'canStartProgress',
-      'canResolve',
-      'canRequestMoreInfo',
-      'canReject',
-      'canSendToRetest',
-      'canClose',
-      'canReopen'
-    ],
-    TargetEntities : [status, historyEvents, notifications]
+    TargetEntities : [in, 'in/historyEvents', 'in/notifications']
   }
   requestMoreInformation(
     reason @UI.MultiLineText @Common.Label : 'Reason'
   );
   @Common.SideEffects : {
-    TargetProperties : [
-      'status_code',
-      'assignee_ID',
-      'assigneeDisplayName',
-      'nextProcessorUser_ID',
-      'nextProcessorRole_code',
-      'nextProcessorUserDisplayName',
-      'nextProcessorRoleName',
-      'currentActionOwnerDisplayName',
-      'isOverdue',
-      'isPendingAssignment',
-      'isRejectedFollowUp',
-      'isRetestRequired',
-      'canAssign',
-      'canMoveToPending',
-      'canResubmit',
-      'canAddComment',
-      'canMarkInReview',
-      'canStartProgress',
-      'canResolve',
-      'canRequestMoreInfo',
-      'canReject',
-      'canSendToRetest',
-      'canClose',
-      'canReopen'
-    ],
-    TargetEntities : [status, historyEvents, notifications]
+    TargetEntities : [in, 'in/historyEvents', 'in/notifications']
   }
   resubmitToDeveloper(
     note @UI.MultiLineText @Common.Label : 'Update Summary'
   );
   @Common.SideEffects : {
-    TargetProperties : [
-      'status_code',
-      'assignee_ID',
-      'assigneeDisplayName',
-      'nextProcessorUser_ID',
-      'nextProcessorRole_code',
-      'nextProcessorUserDisplayName',
-      'nextProcessorRoleName',
-      'currentActionOwnerDisplayName',
-      'isOverdue',
-      'isPendingAssignment',
-      'isRejectedFollowUp',
-      'isRetestRequired',
-      'canAssign',
-      'canMoveToPending',
-      'canResubmit',
-      'canAddComment',
-      'canMarkInReview',
-      'canStartProgress',
-      'canResolve',
-      'canRequestMoreInfo',
-      'canReject',
-      'canSendToRetest',
-      'canClose',
-      'canReopen'
-    ],
-    TargetEntities : [status, historyEvents, notifications, comments]
+    TargetEntities : [in, 'in/historyEvents', 'in/notifications', 'in/comments']
   }
   rejectBug(
     reason @UI.MultiLineText @Common.Label : 'Rejection Reason'
   );
   @Common.SideEffects : {
-    TargetProperties : [
-      'status_code',
-      'assignee_ID',
-      'assigneeDisplayName',
-      'nextProcessorUser_ID',
-      'nextProcessorRole_code',
-      'nextProcessorUserDisplayName',
-      'nextProcessorRoleName',
-      'currentActionOwnerDisplayName',
-      'isOverdue',
-      'isPendingAssignment',
-      'isRejectedFollowUp',
-      'isRetestRequired',
-      'canAssign',
-      'canMoveToPending',
-      'canResubmit',
-      'canAddComment',
-      'canMarkInReview',
-      'canStartProgress',
-      'canResolve',
-      'canRequestMoreInfo',
-      'canReject',
-      'canSendToRetest',
-      'canClose',
-      'canReopen'
-    ],
-    TargetEntities : [status, historyEvents, notifications]
+    TargetEntities : [in, 'in/historyEvents', 'in/notifications']
   }
   startProgress(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
   );
   @Common.SideEffects : {
-    TargetProperties : [
-      'status_code',
-      'assignee_ID',
-      'assigneeDisplayName',
-      'nextProcessorUser_ID',
-      'nextProcessorRole_code',
-      'nextProcessorUserDisplayName',
-      'nextProcessorRoleName',
-      'currentActionOwnerDisplayName',
-      'isOverdue',
-      'isPendingAssignment',
-      'isRejectedFollowUp',
-      'isRetestRequired',
-      'canAssign',
-      'canMoveToPending',
-      'canResubmit',
-      'canAddComment',
-      'canMarkInReview',
-      'canStartProgress',
-      'canResolve',
-      'canRequestMoreInfo',
-      'canReject',
-      'canSendToRetest',
-      'canClose',
-      'canReopen'
-    ],
-    TargetEntities : [status, historyEvents, notifications]
+    TargetEntities : [in, 'in/historyEvents', 'in/notifications']
   }
   resolveBug(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
   );
   @Common.SideEffects : {
-    TargetProperties : [
-      'status_code',
-      'assignee_ID',
-      'assigneeDisplayName',
-      'nextProcessorUser_ID',
-      'nextProcessorRole_code',
-      'nextProcessorUserDisplayName',
-      'nextProcessorRoleName',
-      'currentActionOwnerDisplayName',
-      'isOverdue',
-      'isPendingAssignment',
-      'isRejectedFollowUp',
-      'isRetestRequired',
-      'canAssign',
-      'canMoveToPending',
-      'canResubmit',
-      'canAddComment',
-      'canMarkInReview',
-      'canStartProgress',
-      'canResolve',
-      'canRequestMoreInfo',
-      'canReject',
-      'canSendToRetest',
-      'canClose',
-      'canReopen'
-    ],
-    TargetEntities : [status, historyEvents, notifications]
+    TargetEntities : [in, 'in/historyEvents', 'in/notifications']
   }
   sendToRetest(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
   );
   @Common.SideEffects : {
-    TargetProperties : [
-      'status_code',
-      'assignee_ID',
-      'assigneeDisplayName',
-      'nextProcessorUser_ID',
-      'nextProcessorRole_code',
-      'nextProcessorUserDisplayName',
-      'nextProcessorRoleName',
-      'canAssign',
-      'canMoveToPending',
-      'canResubmit',
-      'canAddComment',
-      'canMarkInReview',
-      'canStartProgress',
-      'canResolve',
-      'canRequestMoreInfo',
-      'canReject',
-      'canSendToRetest',
-      'canClose',
-      'canReopen'
-    ],
-    TargetEntities : [status, historyEvents, notifications]
+    TargetEntities : [in, 'in/historyEvents', 'in/notifications']
   }
   closeBug(
     note @UI.MultiLineText @Common.Label : 'Developer Note'
   );
   @Common.SideEffects : {
-    TargetProperties : [
-      'status_code',
-      'assignee_ID',
-      'assigneeDisplayName',
-      'nextProcessorUser_ID',
-      'nextProcessorRole_code',
-      'nextProcessorUserDisplayName',
-      'nextProcessorRoleName',
-      'currentActionOwnerDisplayName',
-      'isOverdue',
-      'isPendingAssignment',
-      'isRejectedFollowUp',
-      'isRetestRequired',
-      'canAssign',
-      'canMoveToPending',
-      'canResubmit',
-      'canAddComment',
-      'canMarkInReview',
-      'canStartProgress',
-      'canResolve',
-      'canRequestMoreInfo',
-      'canReject',
-      'canSendToRetest',
-      'canClose',
-      'canReopen'
-    ],
-    TargetEntities : [status, historyEvents, notifications]
+    TargetEntities : [in, 'in/historyEvents', 'in/notifications']
   }
   reopenBug(
     reason @UI.MultiLineText @Common.Label : 'Reason'

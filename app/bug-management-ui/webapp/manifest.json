@@ -181,6 +181,21 @@
                     "type": "ResponsiveTable"
                   }
                 }
+              },
+              "content": {
+                "body": {
+                  "sections": {
+                    "HistoryTimeline": {
+                      "title": "{i18n>historyTimelineTitle}",
+                      "type": "XMLFragment",
+                      "name": "idts.bugmanagementui.ext.fragment.HistoryTimeline",
+                      "position": {
+                        "anchor": "Notifications",
+                        "placement": "Before"
+                      }
+                    }
+                  }
+                }
               }
             }
           }
