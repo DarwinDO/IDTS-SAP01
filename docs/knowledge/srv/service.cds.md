@@ -194,6 +194,34 @@ File này trả lời các câu hỏi:
 - Khi đổi value-help read model, kiểm tra Fiori value-help annotations và seed data.
 - Giữ English và Vietnamese tương đương nhau.
 
+## IDTS-34 Auth Contract Update
+
+### English
+
+- `BugService.Users` is now an explicit safe projection. It exposes normal user profile fields such as ID, display name, email, role, and active flag, but it does not expose `passwordHash` or `passwordChangedAt`.
+- The actual login contract is not in this file. It is in `srv/auth.cds` as `AuthService.login`, `AuthService.logout`, and `AuthService.me`.
+- This split is intentional: `BugService` remains the defect-tracking OData service, while `AuthService` is the small authentication boundary.
+
+Important anchor:
+
+- **Location**: `srv/service.cds`, `entity Users as projection on db.Users { ... }`
+  **IDTS concept**: Safe user projection for BugService.
+  **Impact if broken**: Fiori or external OData clients could see password hashes, or existing user value helps/read models could lose safe profile fields.
+  **Must check together**: `db/schema.cds` `Users`, `srv/auth.cds`, `srv/auth.js`, `srv/bug-service/helpers.js`.
+
+### Vietnamese
+
+- `BugService.Users` hien la projection an toan co liet ke field ro rang. No expose cac field profile binh thuong nhu ID, display name, email, role va active, nhung khong expose `passwordHash` hoac `passwordChangedAt`.
+- Contract login that khong nam trong file nay. No nam trong `srv/auth.cds` voi `AuthService.login`, `AuthService.logout`, va `AuthService.me`.
+- Cach tach nay la co chu y: `BugService` van tap trung vao defect tracking OData service, con `AuthService` la boundary nho cho authentication.
+
+Anchor quan trong:
+
+- **Vi tri**: `srv/service.cds`, `entity Users as projection on db.Users { ... }`
+  **Khai niem IDTS**: Projection user an toan cho BugService.
+  **Anh huong neu sai**: Fiori hoac OData client co the thay password hash, hoac cac read model/value help dang dung user profile co the mat field can thiet.
+  **Phai kiem tra cung**: `db/schema.cds` `Users`, `srv/auth.cds`, `srv/auth.js`, `srv/bug-service/helpers.js`.
+
 ## Metadata
 
 - Source file: `srv/service.cds`

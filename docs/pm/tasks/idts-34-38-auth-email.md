@@ -69,6 +69,40 @@ Vietnamese:
 - Touched `app/`, `srv/`, or `db/` files have matching `docs/knowledge/` mirror updates.
 - PM status files record discovered bugs/errors immediately with classification.
 
+## IDTS-34 Backend Contract Implemented
+
+Date: 2026-06-29
+Owner: DonHV
+
+Implemented backend foundation:
+
+- Added `AuthService` with `login`, `logout`, and `me`.
+- Added `Users.passwordHash` and `Users.passwordChangedAt`.
+- Added `AuthSessions` for server-side bearer-token sessions.
+- Added custom CAP auth middleware at `srv/auth/custom-auth.js`.
+- Switched CAP auth config to the custom middleware for development, integration, and production profiles.
+- Added local setup utility `npm run dev:auth:set-password`; it reads `IDTS_AUTH_EMAIL` and `IDTS_AUTH_PASSWORD` from private environment variables and writes only a password hash.
+- Added `npm run qa:auth:programmatic` to verify active login, wrong password denial, inactive user denial, token hashing, request-user mapping, and logout revocation.
+
+FE contract for `IDTS-35`:
+
+- Login endpoint: `POST /odata/v4/auth/login`
+- Request body: `{ "email": "...", "password": "..." }`
+- Success response includes: `token`, `tokenType: "Bearer"`, `expiresAt`, and safe `user` profile.
+- Authenticated OData calls should send: `Authorization: Bearer <token>`.
+- Logout endpoint: `POST /odata/v4/auth/logout`.
+- Current-user endpoint: `GET /odata/v4/auth/me()`.
+- `AuthService.login` is intentionally public; protected business data remains guarded by `BugService @(requires: 'authenticated-user')`, while `logout` and `me()` use action/function-level `@requires`.
+
+Vietnamese:
+
+- Backend da co `AuthService` gom `login`, `logout`, va `me`.
+- `Users` co them `passwordHash` va `passwordChangedAt`; `AuthSessions` luu session bearer-token phia server.
+- Middleware custom CAP auth map bearer token thanh `cds.User`.
+- FE `IDTS-35` dung `POST /odata/v4/auth/login`, sau do gui `Authorization: Bearer <token>` khi goi OData can login.
+- `AuthService.login` duoc de public co chu dich; du lieu nghiep vu van duoc bao ve bang `BugService @(requires: 'authenticated-user')`, con `logout` va `me()` co `@requires` rieng tren action/function.
+- Local password khong commit vao source; dung `npm run dev:auth:set-password` voi bien moi truong private.
+
 ## IDTS-36 Tooling and SDK Research
 
 Date: 2026-06-29

@@ -250,7 +250,7 @@ Các trigger notification:
 | API Exposure | CAP Service APIs |
 | Workflow | SAP Build Process Automation, optional |
 | Notification | SAP BTP services / third-party webhook integration |
-| Authentication | XSUAA, optional depending on implementation |
+| Authentication | Near-term custom CAP Node.js login with `AuthService`, `Users.passwordHash`, server-side `AuthSessions`, and bearer-token request mapping. XSUAA remains optional/future if a SAP BTP account path is approved later. |
 
 ---
 

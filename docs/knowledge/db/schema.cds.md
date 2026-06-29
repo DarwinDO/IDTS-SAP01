@@ -192,6 +192,46 @@ Model này là lý do backend có thể validate assignment, ghi lifecycle histo
 - Khi đổi code lists, kiểm tra seed CSV values và backend constants đang so sánh code.
 - Giữ English và Vietnamese tương đương nhau.
 
+## IDTS-34 Auth Model Update
+
+### English
+
+- `Users.passwordHash` and `Users.passwordChangedAt` support custom email/password login. `Users` remains the internal business profile and role source; the password is never stored as plaintext.
+- `AuthSessions` stores server-side login sessions. The browser receives a bearer token, while the database stores only `tokenHash`, user reference, expiry, revoke time, and user-agent metadata.
+- `BugService.Users` must hide `passwordHash`; otherwise a normal OData user read could leak credential material.
+- Check this model together with `srv/auth.cds`, `srv/auth.js`, `srv/auth/custom-auth.js`, `srv/auth/passwords.js`, and `scripts/qa/test-auth-foundation-programmatic.js`.
+
+Important anchors:
+
+- **Location**: `db/schema.cds`, `Users.passwordHash`
+  **IDTS concept**: Login credential hash for custom auth.
+  **Impact if broken**: Active users cannot log in, or sensitive hash material could leak.
+  **Must check together**: `srv/auth.js`, `srv/auth/passwords.js`, `srv/service.cds`.
+
+- **Location**: `db/schema.cds`, `AuthSessions.tokenHash`
+  **IDTS concept**: Server-side session record for bearer-token auth.
+  **Impact if broken**: Token lookup, logout, expiry checks, and request-user mapping fail.
+  **Must check together**: `srv/auth/custom-auth.js`, `srv/auth.js`, auth QA script.
+
+### Vietnamese
+
+- `Users.passwordHash` va `Users.passwordChangedAt` ho tro custom login bang email/password. `Users` van la nguon profile va role noi bo; password that khong bao gio duoc luu plaintext.
+- `AuthSessions` luu session login phia server. Browser nhan bearer token, con database chi luu `tokenHash`, user reference, thoi diem het han, thoi diem revoke va user-agent metadata.
+- `BugService.Users` phai an `passwordHash`; neu khong, OData read binh thuong co the lam lo credential material.
+- Khi sua phan nay phai kiem tra cung `srv/auth.cds`, `srv/auth.js`, `srv/auth/custom-auth.js`, `srv/auth/passwords.js`, va `scripts/qa/test-auth-foundation-programmatic.js`.
+
+Anchor quan trong:
+
+- **Vi tri**: `db/schema.cds`, `Users.passwordHash`
+  **Khai niem IDTS**: Hash credential cho custom auth.
+  **Anh huong neu sai**: User active khong login duoc, hoac hash nhay cam bi lo.
+  **Phai kiem tra cung**: `srv/auth.js`, `srv/auth/passwords.js`, `srv/service.cds`.
+
+- **Vi tri**: `db/schema.cds`, `AuthSessions.tokenHash`
+  **Khai niem IDTS**: Session record phia server cho bearer-token auth.
+  **Anh huong neu sai**: Lookup token, logout, check het han, va map request user se fail.
+  **Phai kiem tra cung**: `srv/auth/custom-auth.js`, `srv/auth.js`, auth QA script.
+
 ## Metadata
 
 - Source file: `db/schema.cds`

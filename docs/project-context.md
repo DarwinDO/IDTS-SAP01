@@ -19,6 +19,16 @@ Vietnamese: IDTS không phải Jira đầy đủ và không phải hệ thống 
 - Current Fiori app: `app/bug-management-ui`
 - Current service: `BugService` at `/odata/v4/bug/`
 
+## Authentication Direction
+
+- Near-term login does not depend on SAP BTP/XSUAA because the team does not currently have a BTP account path.
+- IDTS uses a custom CAP Node.js auth foundation: `AuthService.login` verifies email/password against `Users.passwordHash`, creates an `AuthSessions` row, and returns a bearer token.
+- `Users` remains the internal business profile and role source for Tester, Developer, and PM.
+- HTTP requests to `BugService` must send the bearer token; the custom auth middleware maps the token back to `cds.User` with `authenticated-user` plus the IDTS business role.
+- Passwords, tokens, auth secrets, SMTP credentials, and private endpoints must not be committed. Local passwords are set through private environment variables and stored only as hashes.
+
+Vietnamese: Huong login gan han khong phu thuoc SAP BTP/XSUAA. IDTS dung custom auth trong CAP Node.js: `AuthService.login` verify email/password bang `Users.passwordHash`, tao `AuthSessions`, va tra bearer token. `Users` van la nguon profile/role noi bo cho Tester, Developer, PM. Request vao `BugService` gui bearer token; middleware map token thanh `cds.User`. Khong commit password, token, auth secret, SMTP credential hoac private endpoint.
+
 ## Roles
 
 | Role | Responsibility |

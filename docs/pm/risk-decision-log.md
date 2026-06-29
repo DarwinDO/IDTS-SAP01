@@ -1,6 +1,6 @@
 # Risk and Decision Log
 
-Last updated: 2026-06-27
+Last updated: 2026-06-29
 
 ## Decisions
 
@@ -38,6 +38,7 @@ Last updated: 2026-06-27
 | DEC-030 | 2026-06-21 | Use a private native AWS S3 bucket as the accepted external object store for the current IDTS integration environment. | The stock `@cap-js/attachments` S3 adapter passed upload, activation, download, history, PostgreSQL binary-absence, and delete cleanup without custom code. | IDTS-31 is Done. PostgreSQL stores attachment metadata/reference while AWS S3 stores file bytes. Credentials remain private and the bucket remains non-public. |
 | DEC-031 | 2026-06-22 | Maintain source-code knowledge mirrors for every tracked file under `app/`, `srv/`, and `db`. | The team needs beginner-friendly explanations that show how Fiori, CAP services, and CDS/data files connect, especially for members learning CAP/Fiori. | Any future task that creates or changes a tracked source file in those folders must create or update the matching mirror note under `docs/knowledge/app/`, `docs/knowledge/srv/`, or `docs/knowledge/db/`, including explicit cross-folder links and safe-edit notes. |
 | DEC-032 | 2026-06-27 | Implement IDTS login as custom email/password authentication in CAP Node.js, and implement email notification through real SMTP with delivery/outbox tracking. | The team does not expect to have SAP BTP/XSUAA access, but still needs real login and real email behavior. SMTP must be real, but email failure must not break bug workflow actions. | Jira IDTS-34 to IDTS-38 split the work across backend auth, FE login, SMTP delivery, notification UI/readability, and QA regression. Secrets stay in private config; `Users` remains the internal profile/role source. |
+| DEC-033 | 2026-06-29 | Use `AuthService`, `Users.passwordHash`, server-side `AuthSessions`, and Bearer-token request mapping as the IDTS-34 backend auth foundation. | Frontend login work needs a concrete OData contract, but the project still has no near-term SAP BTP/XSUAA account path. Keeping the session record server-side lets IDTS revoke sessions and avoids storing raw tokens in the database. | FE login should call `AuthService.login`, store the returned bearer token on the client side, send it as `Authorization: Bearer <token>` for protected OData calls, call `logout` to revoke the session, and use `me()` to restore the current user. Plaintext passwords, raw tokens, auth secrets, and private endpoints must stay out of source, docs, Jira, and logs. |
 
 ## Risks
 
@@ -61,6 +62,7 @@ Last updated: 2026-06-27
 | RISK-016 | An S3-compatible provider may still be incompatible with the stock plugin because it requires a custom endpoint, path-style addressing, or provider-specific behavior. | Medium | High | Run a short provider compatibility gate before adoption. Do not customize the attachment plugin unless a separate architecture decision explicitly accepts the maintenance cost. |
 | RISK-017 | Long-lived AWS IAM access keys may be exposed, forgotten, or remain active beyond the project/free-credit period. | Medium | High | Keep keys only in ignored private configuration/password storage, use least-privilege bucket policy, rotate regularly, deactivate unused keys, and configure AWS budget alerts. |
 | RISK-018 | Custom login and SMTP delivery may introduce security defects or secret leakage if implemented casually. | Medium | High | Store only password hashes, keep auth/SMTP secrets in ignored private config, scan docs/code before commit, use safe error messages, test wrong-password/inactive-user/invalid-token paths, and keep email sending out of the core workflow transaction. |
+| RISK-019 | Custom Bearer-token auth may be wired incorrectly in the CAP HTTP runtime or FE may store/send the token unsafely. | Medium | High | Keep the auth middleware small, test login/wrong-password/inactive/revoked-session paths, verify CAP compile after adding `AuthService`, document the FE contract clearly, and require IDTS-35/IDTS-38 browser or HTTP evidence that protected OData calls use the token correctly. |
 
 Vietnamese:
 

@@ -66,6 +66,32 @@ Developer **không phải người tạo bug chính** và **không trực tiếp
 
 **English clarification:** Developers may view and discuss bugs within the same project/team when they have visibility permission, but primary lifecycle-changing actions remain limited to the assigned Developer or an explicitly authorized role.
 
+## **BR-02A - Authentication source and session rule**
+
+Near-term IDTS authentication uses custom CAP Node.js login instead of requiring SAP BTP/XSUAA.
+
+Rules:
+
+* `Users` is the internal source for profile, email, active flag and MVP business role.
+* Passwords must be stored only as hashes in `Users.passwordHash`; plaintext passwords must not be committed or logged.
+* Successful login creates a server-side `AuthSessions` record and returns a bearer token.
+* The database stores only the token hash, not the raw bearer token.
+* Authenticated OData requests must map back to `cds.User` with `authenticated-user` plus the IDTS role (`TESTER`, `DEVELOPER`, or `PM`).
+* Inactive users must not be allowed to log in even if a password hash exists.
+
+Vietnamese:
+
+Huong authentication gan han cua IDTS dung custom login trong CAP Node.js, khong bat buoc SAP BTP/XSUAA.
+
+Rule:
+
+* `Users` la nguon noi bo cho profile, email, active flag va MVP business role.
+* Password chi duoc luu dang hash trong `Users.passwordHash`; khong commit hoac log plaintext password.
+* Login thanh cong tao `AuthSessions` phia server va tra bearer token.
+* Database chi luu token hash, khong luu raw bearer token.
+* Request OData da login phai map lai thanh `cds.User` voi `authenticated-user` cong role IDTS (`TESTER`, `DEVELOPER`, hoac `PM`).
+* User inactive khong duoc login du co password hash.
+
 ---
 
 ## **BR-03 \- PM có quyền giám sát, không trực tiếp xử lý bug**

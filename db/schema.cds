@@ -34,7 +34,19 @@ entity Users : cuid, managed {
   displayName : String(120) not null;
   email       : String(255) not null;
   role        : Association to UserRoles not null;
+  passwordHash: String(255);
+  passwordChangedAt : Timestamp;
   active      : Boolean default true;
+}
+
+entity AuthSessions : cuid, managed {
+  user       : Association to Users not null;
+  tokenHash  : String(64) not null;
+  issuedAt   : Timestamp not null;
+  expiresAt  : Timestamp not null;
+  revokedAt  : Timestamp;
+  lastUsedAt : Timestamp;
+  userAgent  : String(255);
 }
 
 entity DeveloperProfiles : cuid, managed {
