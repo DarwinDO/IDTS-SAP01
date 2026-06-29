@@ -500,7 +500,13 @@ Baseline này mượn các điểm phù hợp từ SAP Cloud ALM và Focused Bui
 
 Không áp dụng các phần quá nặng như full ALM, ITSM, transport/release management, CI/CD, code review, source-code management, hoặc full Jira replacement.
 
-## **5.8. Mentor-confirmed Sprint 02 rule delta**
+## **5.8. Authentication Baseline**
+
+**English:** Near-term IDTS login uses a custom CAP Node.js authentication foundation instead of requiring SAP BTP/XSUAA. `Users` stays the internal profile and role source. The backend verifies email/password through `Users.passwordHash`, creates server-side `AuthSessions`, returns a bearer token, and maps authenticated requests back to `cds.User` with `authenticated-user` plus the IDTS business role. Plaintext passwords, raw tokens, auth secrets, SMTP credentials, and private endpoints must not be committed.
+
+**Vietnamese:** Huong login gan han cua IDTS dung custom authentication trong CAP Node.js, khong bat buoc SAP BTP/XSUAA. `Users` van la nguon profile va role noi bo. Backend verify email/password bang `Users.passwordHash`, tao `AuthSessions` phia server, tra bearer token, va map request da login thanh `cds.User` voi `authenticated-user` cong role nghiep vu IDTS. Khong commit plaintext password, raw token, auth secret, SMTP credential hoac private endpoint.
+
+## **5.9. Mentor-confirmed Sprint 02 rule delta**
 
 **English:**
 

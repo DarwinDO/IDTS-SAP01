@@ -106,7 +106,17 @@ service BugService @(requires: 'authenticated-user') {
   };
   entity DuplicateLinks as projection on db.DuplicateLinks;
 
-  entity Users as projection on db.Users;
+  entity Users as projection on db.Users {
+    ID,
+    createdAt,
+    createdBy,
+    modifiedAt,
+    modifiedBy,
+    displayName,
+    email,
+    role,
+    active
+  };
   entity DeveloperProfiles as projection on db.DeveloperProfiles;
   entity SAPModules as projection on db.SAPModules;
   entity ApplicationComponents as projection on db.ApplicationComponents;
