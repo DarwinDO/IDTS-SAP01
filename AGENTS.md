@@ -332,6 +332,7 @@ This repo uses three kinds of agent guidance:
 - AI DevKit workflow skills under `.agents/skills`: `dev-lifecycle`, `verify`, `memory`, `structured-debug`, and `document-code`.
 - Installed external document support skills under `.agents/skills`: `docx`, `docx-manipulation`, `brd-creation`, `srs-documentation`, and `frs-creation`.
 - Installed external database support skill under `.agents/skills`: `database-schema-design`.
+- Installed external QA/testing support skills under `.agents/skills`: `backend-testing`, `api-testing-patterns`, `integration-testing`, `qa-report`, and `qa-test-plan`.
 
 Use `sap-fiori-guidelines` when working on:
 
@@ -345,6 +346,92 @@ Use `sap-fiori-guidelines` when working on:
 - UX consistency and accessibility
 
 Use AI DevKit skills only as workflow support. They do not replace the SAP MCP servers, repo-local SAP skills, CAP/Fiori/UI5 documentation, or the business markdown files.
+
+## QA and Testing Skill Routing
+
+Use these QA/testing skills as supporting workflows. They do not replace IDTS business rules, SAP CAP/Fiori routing, existing `scripts/qa/*` conventions, Jira evidence rules, or `verify`.
+
+Use `backend-testing` when:
+
+- Planning or writing backend QA coverage for CAP handlers, service modules, auth/session behavior, notification outbox workers, delivery retries, persistence, or backend regressions.
+- Deciding the smallest credible test layer mix: service-level, integration, API/contract, smoke, or slower regression.
+- Designing test fixture, seed/reset, auth bootstrap, environment control, or local-vs-PR execution lanes.
+
+Use `api-testing-patterns` when:
+
+- Designing OData/API test cases from the client contract point of view.
+- Checking auth headers, safe error behavior, response shape, filtering, validation, idempotency, or negative/error paths.
+- Reviewing whether an API test protects the contract instead of only testing implementation details.
+
+Use `integration-testing` when:
+
+- A test must prove multiple pieces work together, for example CAP service + SQLite/PostgreSQL profile + auth middleware + notification delivery/outbox logic.
+- External-service behavior matters and must be represented by a controlled fake, local test server, or real shared environment.
+- Data persistence, transaction boundaries, or retry/failure behavior are the main risk.
+
+Use `qa-report` only for real-user QA planning or reporting:
+
+- Personas, journeys, exploratory charters, regression suite planning, manual QA bug reports, and user-impact summaries.
+- Do not use it as the default backend test-design skill.
+- The installed package was reported by the Skills CLI as higher risk than the other QA skills; review its instructions before use and do not run unrelated helper scripts from it without a direct need.
+- Some companion references such as `qa-execution` may not be installed in this repo. If a referenced companion skill or file is missing, adapt the structure to IDTS PM/SAP490 docs instead of inventing missing artifacts.
+
+Use `qa-test-plan` only when a structured QA plan artifact is requested:
+
+- Prefer it for broad QA planning, especially when turning requirements into test suites for NhanT/SangVN handoff or SAP490 evidence preparation.
+- Its default input model expects `requirements/business-requirements.yaml` and `requirements/technical-requirements.yaml`; IDTS normally uses Markdown BA/PM sources instead, so map from `docs/ba/`, `docs/pm/`, and Jira context explicitly.
+- Do not create YAML test plans unless the user asks or the current task requires that output format.
+
+For IDTS-36 specifically:
+
+- Use `backend-testing` first to frame the backend/outbox test packet.
+- Use `api-testing-patterns` for OData/auth/contract checks around `Notifications` and `NotificationDeliveries`.
+- Use `integration-testing` for SMTP fake/server behavior, database persistence, and failure-does-not-rollback verification.
+- Use `verify` before claiming completion, with fresh command output.
+- Keep SMTP credentials, bearer tokens, private endpoints, and real recipient data out of source, docs, Jira, screenshots, and test output.
+
+Vietnamese:
+
+Dung cac skill QA/testing nay nhu workflow ho tro. Chung khong thay the business rule IDTS, SAP CAP/Fiori routing, convention `scripts/qa/*`, rule evidence Jira, hoac `verify`.
+
+Dung `backend-testing` khi:
+
+- Lap ke hoach hoac viet coverage backend cho CAP handler, module service, auth/session, notification outbox worker, retry delivery, persistence, hoac regression backend.
+- Chon lop test nho nhat nhung du tin cay: service-level, integration, API/contract, smoke, hoac regression cham hon.
+- Thiet ke fixture, seed/reset, auth bootstrap, environment control, hoac chia lane local-vs-PR.
+
+Dung `api-testing-patterns` khi:
+
+- Thiet ke test OData/API theo goc nhin contract cua client.
+- Kiem tra auth header, safe error, response shape, filtering, validation, idempotency, hoac negative/error paths.
+- Review xem test API co bao ve contract hay chi test implementation detail.
+
+Dung `integration-testing` khi:
+
+- Test can chung minh nhieu phan chay cung nhau, vi du CAP service + SQLite/PostgreSQL profile + auth middleware + notification delivery/outbox logic.
+- Hanh vi external service can duoc dai dien bang fake co kiem soat, local test server, hoac shared environment that.
+- Rui ro chinh nam o persistence, transaction boundary, retry, hoac failure behavior.
+
+Chi dung `qa-report` cho planning/report QA theo goc nhin user:
+
+- Persona, journey, exploratory charter, regression suite planning, bug report QA thu cong, va tom tat user impact.
+- Khong dung no lam skill mac dinh cho thiet ke backend test.
+- Skills CLI bao package nay co risk cao hon cac QA skill khac; can doc ky instruction truoc khi dung va khong chay helper script khong lien quan neu khong co nhu cau truc tiep.
+- Mot so companion reference nhu `qa-execution` co the chua duoc cai trong repo. Neu thieu companion skill/file duoc reference, hay map cau truc ve PM/SAP490 docs cua IDTS thay vi tu tao artifact khong co nguon.
+
+Chi dung `qa-test-plan` khi can artifact test plan co cau truc:
+
+- Uu tien cho planning QA rong, dac biet khi chuyen requirement thanh test suite de handoff cho NhanT/SangVN hoac chuan bi evidence SAP490.
+- Input mac dinh cua skill nay ky vong `requirements/business-requirements.yaml` va `requirements/technical-requirements.yaml`; IDTS thuong dung Markdown BA/PM sources, nen phai map ro tu `docs/ba/`, `docs/pm/`, va Jira context.
+- Khong tao YAML test plan neu user khong yeu cau hoac task hien tai khong can output format do.
+
+Rieng IDTS-36:
+
+- Dung `backend-testing` truoc de frame backend/outbox test packet.
+- Dung `api-testing-patterns` cho OData/auth/contract checks quanh `Notifications` va `NotificationDeliveries`.
+- Dung `integration-testing` cho SMTP fake/server behavior, database persistence, va verify loi email khong rollback workflow.
+- Dung `verify` truoc khi ket luan hoan tat, voi output command moi.
+- Khong dua SMTP credential, bearer token, private endpoint, hoac real recipient data vao source, docs, Jira, screenshot, hay test output.
 
 Use `idts-database-modeling` before database-related BA review, ERD/DBML work, or changes to `db/schema.cds`, `srv/service.cds`, seed data, value lists, classification model, Developer Responsibility, audit/history, notifications, or assignment-related persistence.
 

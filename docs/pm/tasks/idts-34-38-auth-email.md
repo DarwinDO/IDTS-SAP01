@@ -1,6 +1,6 @@
 # IDTS-34 to IDTS-38 - Custom Login and SMTP Email Notification
 
-Last updated: 2026-06-29
+Last updated: 2026-06-30
 
 ## Summary
 
@@ -361,4 +361,58 @@ Gợi ý implementation cho IDTS-36:
 - Bật SMTP pooling cho delivery/outbox worker với `maxConnections` nhỏ.
 - Wrapper gửi mail nên mỏng: lấy `NotificationDelivery`, dựng email message, gọi `sendMail`, rồi update status `SENT` hoặc `FAILED`.
 - Config SMTP vẫn phải để private, không commit vào source code.
+
+## IDTS-36 / IDTS-38 QA Skill Support
+
+Date: 2026-06-30
+Owner: DonHV
+Purpose: record the approved QA/testing skill support before implementing SMTP notification delivery and later regression QA.
+
+Installed in both the repo-local `.agents/skills/` folder and the external backup folder `C:\Users\LapHub\.agents\skills\`:
+
+- `backend-testing`
+- `api-testing-patterns`
+- `integration-testing`
+- `qa-report`
+- `qa-test-plan`
+
+Recommended usage:
+
+- Use `backend-testing` first for IDTS-36 backend/outbox test packet design.
+- Use `api-testing-patterns` for OData/API contract tests, especially auth headers, delivery status shape, validation, and negative paths.
+- Use `integration-testing` for CAP service + database + SMTP fake/local server behavior.
+- Use `qa-report` only for user-journey QA planning and user-impact bug report structure; do not use it as the default backend test-design skill.
+- Use `qa-test-plan` only when a structured QA test plan artifact is requested or needed for IDTS-38/SAP490 handoff.
+- Continue to use `verify` before claiming completion.
+
+Important caveats:
+
+- Skills CLI reported `qa-report` with a higher security-risk assessment than the other QA skills. Treat it as a planning/reference skill and review its instructions before use.
+- `qa-report` references companion QA execution resources that may not be installed in this repo. If those companion files are missing, map the output to IDTS PM/SAP490 documents instead of inventing unavailable artifacts.
+- `qa-test-plan` expects YAML requirement inputs by default. IDTS normally uses Markdown BA/PM/Jira sources, so agents must explicitly map those sources before using the skill.
+
+Vietnamese:
+
+Da cai vao ca repo-local `.agents/skills/` va folder backup ngoai `C:\Users\LapHub\.agents\skills\`:
+
+- `backend-testing`
+- `api-testing-patterns`
+- `integration-testing`
+- `qa-report`
+- `qa-test-plan`
+
+Khuyen nghi su dung:
+
+- Dung `backend-testing` truoc de thiet ke test packet backend/outbox cho IDTS-36.
+- Dung `api-testing-patterns` cho test contract OData/API, dac biet auth header, shape delivery status, validation va negative paths.
+- Dung `integration-testing` cho hanh vi CAP service + database + SMTP fake/local server.
+- Chi dung `qa-report` cho planning QA theo user journey va cau truc bug report theo user impact; khong dung lam skill mac dinh de thiet ke backend test.
+- Chi dung `qa-test-plan` khi can artifact QA test plan co cau truc hoac can handoff cho IDTS-38/SAP490.
+- Van phai dung `verify` truoc khi ket luan hoan tat.
+
+Luu y quan trong:
+
+- Skills CLI bao `qa-report` co security-risk assessment cao hon cac QA skill con lai. Xem no la skill planning/reference va doc instruction truoc khi dung.
+- `qa-report` reference mot so companion QA execution resource co the chua duoc cai trong repo. Neu thieu companion file, map output ve PM/SAP490 docs cua IDTS thay vi tao artifact khong co nguon.
+- `qa-test-plan` mac dinh ky vong input requirement dang YAML. IDTS thuong dung Markdown BA/PM/Jira sources, nen agent phai map source ro rang truoc khi dung skill.
 
