@@ -212,3 +212,111 @@ Quyết định sau spike:
 - Giữ `@opencoredev/email-sdk` là option tương lai nếu IDTS cần multi-provider adapter, typed provider validation hoặc fallback routing có sẵn.
 - Không commit SDK này vào project cho IDTS-36 v1.
 
+## Nodemailer Spike and Comparison with Email SDK
+
+Date: 2026-06-29
+Owner: DonHV
+Scope: short technical spike in a temporary folder outside this repo. No package was added to IDTS `package.json`.
+
+### Packages tested
+
+- `nodemailer@9.0.1`
+- `@opencoredev/email-sdk@0.6.5`
+- `smtp-server@3.15.0` for local SMTP capture
+- Node runtime: `v22.20.0`
+
+Nodemailer package metadata:
+
+- License: `MIT-0`
+- Node engine: `>=6.0.0`
+
+Email SDK package metadata from the previous spike:
+
+- License: `AGPL-3.0-only`
+- Node engine: `>=20.0.0`
+
+### Functional result
+
+Nodemailer passed the IDTS-relevant basics:
+
+- Test/capture mode works through `jsonTransport`.
+- Local SMTP send works against a test SMTP server.
+- SMTP failure is catchable as a normal JavaScript error with code such as `ESOCKET`.
+- Custom headers are preserved, but Nodemailer normalizes header casing, for example `X-IDTS-Notification-ID` becomes `X-Idts-Notification-ID`.
+
+Email SDK also passed the same basic SMTP send/failure tests, but it has a stronger typed abstraction and a dedicated `EmailProviderError`.
+
+### Local benchmark result
+
+Benchmark type: sequential local SMTP sends, 30 messages, no internet/provider latency. This measures local library and connection overhead only. It is not a real-provider performance guarantee.
+
+| Candidate | Mode | Messages | Total time | Average |
+| --- | --- | ---: | ---: | ---: |
+| Nodemailer | no pool | 30 | 3317 ms | 110.58 ms/email |
+| Nodemailer | SMTP pool, max 5 connections | 30 | 151 ms | 5.03 ms/email |
+| Email SDK | SMTP adapter | 30 | 3288 ms | 109.62 ms/email |
+
+Interpretation:
+
+- Nodemailer without pooling performs roughly the same as Email SDK SMTP in this local sequential test.
+- Nodemailer with SMTP pooling is much faster because it reuses SMTP connections.
+- For IDTS outbox delivery, pooling is useful if the app sends multiple queued emails in one worker run.
+- In a real SMTP provider scenario, network latency, provider throttling, authentication, and TLS dominate total time, so the local benchmark should only guide library choice, not final production throughput.
+
+### Decision after comparison
+
+Keep Nodemailer as the default for IDTS-36 v1.
+
+Reasons:
+
+- It meets the same basic functional needs as Email SDK for IDTS.
+- It has a permissive `MIT-0` license, unlike Email SDK's `AGPL-3.0-only`.
+- It supports SMTP pooling, which gives a clear performance path for batch outbox processing.
+- It is simpler and more familiar for a CAP Node.js backend.
+- It avoids adding a multi-provider abstraction before IDTS actually needs one.
+
+Recommended IDTS-36 implementation detail:
+
+- Use `nodemailer.createTransport(...)`.
+- Enable SMTP pooling for the background delivery/outbox worker, for example with a small `maxConnections` value.
+- Keep the send wrapper thin: convert `NotificationDelivery` rows into email messages, call `sendMail`, then update delivery status to `SENT` or `FAILED`.
+- Keep provider config private and external to source code.
+
+Vietnamese:
+
+Spike Nodemailer đã chạy trong thư mục tạm ngoài repo, không thêm dependency vào `package.json` của IDTS.
+
+Kết quả chức năng:
+
+- Nodemailer có thể test/capture email bằng `jsonTransport`.
+- Nodemailer gửi được SMTP vào local SMTP server.
+- Khi SMTP lỗi, Nodemailer throw lỗi JavaScript bình thường, ví dụ code `ESOCKET`, đủ để map sang delivery status `FAILED`.
+- Custom header vẫn được giữ, nhưng Nodemailer normalize cách viết hoa/thường của header, ví dụ `X-IDTS-Notification-ID` thành `X-Idts-Notification-ID`.
+
+So sánh benchmark local:
+
+| Candidate | Chế độ | Số email | Tổng thời gian | Trung bình |
+| --- | --- | ---: | ---: | ---: |
+| Nodemailer | không pool | 30 | 3317 ms | 110.58 ms/email |
+| Nodemailer | SMTP pool, tối đa 5 connection | 30 | 151 ms | 5.03 ms/email |
+| Email SDK | SMTP adapter | 30 | 3288 ms | 109.62 ms/email |
+
+Cách hiểu:
+
+- Nodemailer không bật pool gần như ngang Email SDK SMTP trong test local tuần tự.
+- Nodemailer bật SMTP pool nhanh hơn nhiều vì tái sử dụng connection.
+- Với outbox worker của IDTS, pooling hữu ích nếu một lần worker cần gửi nhiều email đang pending.
+- Benchmark local không đại diện hoàn toàn cho provider thật, vì thực tế còn bị ảnh hưởng bởi network, TLS, auth, rate limit và quota của provider.
+
+Quyết định sau khi so sánh:
+
+- Vẫn chọn Nodemailer làm default cho IDTS-36 v1.
+- Lý do: đủ chức năng, license dễ dùng hơn, có SMTP pooling, code đơn giản hơn, và không đưa abstraction multi-provider vào quá sớm.
+
+Gợi ý implementation cho IDTS-36:
+
+- Dùng `nodemailer.createTransport(...)`.
+- Bật SMTP pooling cho delivery/outbox worker với `maxConnections` nhỏ.
+- Wrapper gửi mail nên mỏng: lấy `NotificationDelivery`, dựng email message, gọi `sendMail`, rồi update status `SENT` hoặc `FAILED`.
+- Config SMTP vẫn phải để private, không commit vào source code.
+
