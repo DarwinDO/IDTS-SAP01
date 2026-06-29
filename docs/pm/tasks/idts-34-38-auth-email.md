@@ -6,6 +6,13 @@ Last updated: 2026-06-29
 
 This work package records the approved direction for the next authentication and email-notification slice.
 
+Current work order:
+
+1. Finish PM/Jira sync first so the team starts from a clean task state.
+2. Implement `IDTS-34` before FE login work because the FE needs a stable backend auth contract.
+3. Implement `IDTS-36` after the auth foundation, using Nodemailer plus SMTP/outbox tracking.
+4. Hand the stable contracts to DatDT (`IDTS-35`), SangVN (`IDTS-37`), and NhanT (`IDTS-38`).
+
 Decisions:
 
 - IDTS will not depend on SAP BTP/XSUAA for the near-term login path.

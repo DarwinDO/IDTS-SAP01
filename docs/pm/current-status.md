@@ -1,16 +1,16 @@
 # Current Project Status
 
-Last updated: 2026-06-28
+Last updated: 2026-06-29
 
 ## Snapshot
 
 | Field | Current value |
 | --- | --- |
-| Project phase | Sprint 02 baseline is stable in `dev`; Sprint 03 backend kickoff has started for ownership clarity and PM monitoring |
+| Project phase | Sprint 02 baseline is stable in `dev`; Sprint 03 integration is in PM/Jira evidence sync before the auth/email implementation slice |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
-| Current sprint | Sprint 03 kickoff focuses on ownership wording, current action owner display, history readability, and PM monitoring usability |
-| Recommended next action | Transfer the completed IDTS-31 AWS S3 evidence into the next SAP490 Test And Fix Bug/Test Report refresh, then continue WP6 Fiori monitoring views and UAT. |
-| Main implementation risk | Legacy PostgreSQL attachment evidence still requires coordinated backup/export before schema replacement; AWS IAM credentials also require rotation and budget monitoring. |
+| Current sprint | Sprint 03 now moves from monitoring/history/attachment stabilization into custom login (`IDTS-34`) and SMTP notification delivery (`IDTS-36`) |
+| Recommended next action | Finish PM/Jira sync for `IDTS-1`, `IDTS-25`, `IDTS-27`, `IDTS-28`, and `IDTS-33`, then implement `IDTS-34`, then implement `IDTS-36`. |
+| Main implementation risk | Jira/PM state was stale in a few places; auth/session handling and SMTP credentials must be implemented without committing secrets or breaking existing CAP/Fiori workflow behavior. |
 
 ## What Is Already Done
 
@@ -81,7 +81,9 @@ Last updated: 2026-06-28
 - IDTS-28 service refactor is merged into `dev` through GitHub PR #5 at merge commit `9129ae8bb3fb22502260b3a435ad5df14fdf8108`. Local verification passed syntax checks, CAP compile, UI5 build, backend happy-flow, history-events, PM monitoring, developer workload, comments/attachments, and `git diff --check`. Jira `IDTS-28` remains In Progress only until IDTS-23 and IDTS-24 retest closure evidence is attached.
 - IDTS-31 is Done. The implementation uses `@cap-js/attachments`, removes the legacy `move_media_data_in_db` path, preserves 10 MB/MIME/role/history rules, and passes SQLite, PostgreSQL DB-fallback, and native AWS S3 acceptance. The final proof confirmed PostgreSQL stores metadata/reference with `content = NULL`, AWS S3 stores the binary object, and deletion cleans both stores. Jira evidence is recorded in comment `10162`.
 - Source-code knowledge mirrors now exist for every tracked file under `app/`, `srv/`, and `db`. Future changes in those folders must update the matching note under `docs/knowledge/app/`, `docs/knowledge/srv/`, or `docs/knowledge/db/`, including explicit cross-folder links.
-- Sprint 3 integration update on 2026-06-28: PR #18 (`IDTS-19` grouped history timeline), PR #20 (`IDTS-13` Object Page side-effect refresh), and PR #24 (`IDTS-24` browser UAT evidence script) were reviewed, fixed where needed, merged into `dev`, and moved to Done in Jira. Remaining manual UAT follow-up is split between `IDTS-32` for SangVN and `IDTS-33` for DatDT.
+- Sprint 3 integration update on 2026-06-28: PR #18 (`IDTS-19` grouped history timeline), PR #20 (`IDTS-13` Object Page side-effect refresh), and PR #24 (`IDTS-24` browser UAT evidence script) were reviewed, fixed where needed, merged into `dev`, and moved to Done in Jira. As of the 2026-06-29 Jira live check, `IDTS-33` is Done; remaining manual workflow/history follow-up is `IDTS-32` plus PM/SAP490 consolidation under `IDTS-27`.
+- Jira live-state sync on 2026-06-29 confirmed: `IDTS-33` is Done; `IDTS-1` is still To Do; `IDTS-25`, `IDTS-27`, and `IDTS-28` are still In Progress; `IDTS-34` and `IDTS-36` are To Do. The PM board now reflects this state.
+- IDTS-36 implementation support notes now record Nodemailer as the default SMTP library for v1, with SMTP provider credentials kept in private config and email delivery tracked through an outbox/delivery status model.
 
 Vietnamese:
 
@@ -118,8 +120,9 @@ Vietnamese:
 
 ## What Is Not Started
 
-- External notification delivery beyond persisted notification records.
-- Production XSUAA role collections and deployment-level authorization hardening.
+- Custom login/authentication runtime for real email/password login (`IDTS-34`).
+- External SMTP notification delivery beyond persisted in-app notification records (`IDTS-36`).
+- Production XSUAA role collections and deployment-level authorization hardening remain out of the near-term custom-login path.
 - Deeper QA scenarios and automated verification beyond compile/build/API/browser smoke checks.
 
 ## Member Status Links
@@ -160,6 +163,8 @@ Vietnamese:
 | SRS style | Uses a traditional SRS outline, with requirement quality, traceability, and verification aligned to ISO/IEC/IEEE 29148-style discipline. |
 | FRS style | Uses function-detail specifications with workflow diagrams, validations, status effects, history/notification effects, acceptance criteria, and traceability to SRS. |
 | WP1-WP3 implementation | CAP model foundation, service/value help, and MVP runtime business validation are complete. |
+| Current work order | PM/Jira sync first, then `IDTS-34` backend custom login/auth foundation, then `IDTS-36` SMTP email/outbox delivery, then `IDTS-27` evidence consolidation. |
+| IDTS-36 email library | Nodemailer is selected for v1 because IDTS needs SMTP portability, simple Node.js integration, and no provider lock-in. `@opencoredev/email-sdk` remains a future reference only because it is AGPL-3.0-only and heavier than needed for this slice. |
 
 Vietnamese:
 
