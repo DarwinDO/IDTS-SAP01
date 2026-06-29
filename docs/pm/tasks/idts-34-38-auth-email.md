@@ -152,3 +152,63 @@ Vietnamese:
 - Nội dung email tối thiểu: bug number/title, event type, status/current action owner nếu có, và link hoặc placeholder ngắn.
 - Bắt buộc chạy secret scan trước commit.
 
+## Email SDK Spike - `@opencoredev/email-sdk`
+
+Date: 2026-06-29
+Owner: DonHV
+Scope: short technical spike only. The dependency was installed in a temporary folder outside this repo. It was not added to IDTS `package.json` or runtime source.
+
+### Result
+
+The SDK works for the basic capabilities IDTS would need:
+
+- `memoryProvider` can capture an email in tests.
+- SMTP adapter can send to a local SMTP server.
+- Failure path throws `EmailProviderError`, which is usable for marking an outbox delivery as `FAILED`.
+
+Verification evidence:
+
+- Temporary install: `@opencoredev/email-sdk@0.6.5` and `smtp-server@3.15.0`.
+- Node runtime: `v22.20.0`, satisfying the package requirement of Node `>=20`.
+- Memory send result: provider `memory`, one captured message, capture events `beforeSend` and `afterSend`.
+- SMTP send result: provider `smtp`, one local message accepted, recipient `developer@example.test`, subject/header present.
+- Failure result: simulated provider failure produced `EmailProviderError`.
+
+Important limitation:
+
+- The package license is `AGPL-3.0-only`. Do not adopt it as an IDTS runtime dependency unless the team explicitly accepts this license risk.
+- The repo/package is still new compared with Nodemailer. Treat it as a candidate or reference, not the default implementation choice.
+
+Decision after spike:
+
+- Keep `nodemailer` as the default IDTS-36 implementation recommendation.
+- Keep `@opencoredev/email-sdk` as an optional future candidate if IDTS later needs multi-provider adapters, typed provider validation, or built-in fallback routing.
+- Do not commit this SDK into the project for IDTS-36 v1.
+
+Vietnamese:
+
+Spike kỹ thuật ngắn với `@opencoredev/email-sdk` đã chạy được ở mức cơ bản:
+
+- `memoryProvider` bắt được email trong test.
+- SMTP adapter gửi được vào SMTP server local.
+- Khi provider fail, SDK throw `EmailProviderError`, có thể dùng để đánh dấu delivery/outbox là `FAILED`.
+
+Bằng chứng verify:
+
+- Cài tạm ngoài repo: `@opencoredev/email-sdk@0.6.5` và `smtp-server@3.15.0`.
+- Runtime Node: `v22.20.0`, đáp ứng yêu cầu Node `>=20`.
+- Memory send: provider `memory`, bắt được 1 message, capture events gồm `beforeSend` và `afterSend`.
+- SMTP send: provider `smtp`, SMTP server local nhận 1 message, recipient `developer@example.test`, subject/header đúng.
+- Failure test: provider fail giả lập tạo lỗi `EmailProviderError`.
+
+Giới hạn quan trọng:
+
+- Package dùng license `AGPL-3.0-only`. Không đưa vào runtime dependency của IDTS nếu team chưa duyệt rõ rủi ro license.
+- Repo/package còn mới so với Nodemailer. Nên xem là candidate hoặc nguồn tham khảo, không phải lựa chọn mặc định.
+
+Quyết định sau spike:
+
+- Vẫn giữ `nodemailer` là recommendation mặc định cho IDTS-36.
+- Giữ `@opencoredev/email-sdk` là option tương lai nếu IDTS cần multi-provider adapter, typed provider validation hoặc fallback routing có sẵn.
+- Không commit SDK này vào project cho IDTS-36 v1.
+
