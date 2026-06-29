@@ -9,8 +9,8 @@ This work package records the approved direction for the next authentication and
 Current work order:
 
 1. Finish PM/Jira sync first so the team starts from a clean task state.
-2. Implement `IDTS-34` before FE login work because the FE needs a stable backend auth contract.
-3. Implement `IDTS-36` after the auth foundation, using Nodemailer plus SMTP/outbox tracking.
+2. `IDTS-34` is merged into `dev`; DatDT can now implement FE login against the stable backend auth contract.
+3. Implement `IDTS-36` next, using Nodemailer plus SMTP/outbox tracking.
 4. Hand the stable contracts to DatDT (`IDTS-35`), SangVN (`IDTS-37`), and NhanT (`IDTS-38`).
 
 Decisions:
@@ -35,11 +35,11 @@ Vietnamese:
 
 | Jira | Owner | Focus | Dependency |
 | --- | --- | --- | --- |
-| IDTS-34 | DonHV | Backend custom login/auth foundation | Blocks IDTS-35, IDTS-38 |
-| IDTS-35 | DatDT | Login UI and authenticated app session | Blocked by IDTS-34 |
+| IDTS-34 | DonHV | Backend custom login/auth foundation | Done; PR #28 merged into `dev` |
+| IDTS-35 | DatDT | Login UI and authenticated app session | Can start from merged IDTS-34 contract |
 | IDTS-36 | DonHV | SMTP email delivery with outbox tracking | Blocks IDTS-37, IDTS-38 |
 | IDTS-37 | SangVN | Notification UI/readability verification | Blocked by IDTS-36 |
-| IDTS-38 | NhanT | Auth/email regression QA | Blocked by IDTS-34 and IDTS-36 |
+| IDTS-38 | NhanT | Auth/email regression QA | Blocked by IDTS-36 for full email coverage; auth contract is ready |
 
 ## Implementation Boundaries
 
@@ -73,6 +73,7 @@ Vietnamese:
 
 Date: 2026-06-29
 Owner: DonHV
+Status: Done on `dev` through GitHub PR #28, merge commit `52432e35c66a3c0137ed5b7c96c9f57d93409fc5`.
 
 Implemented backend foundation:
 

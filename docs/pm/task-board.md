@@ -27,6 +27,7 @@ Vietnamese: Chi dung board nay de theo doi trang thai cap cao. Chi tiet cong vie
 | IDTS-30 | PostgreSQL local proof and attachment storage decision | PostgreSQL deploy/read proof completed, draft-media blocker documented, long-term object-storage direction approved, and implementation handed off to `IDTS-31`. |
 | IDTS-31 | Object-store-backed attachment implementation | Native AWS S3 acceptance passed with PostgreSQL metadata/reference, external binary storage, upload/activate/download/history/delete cleanup, and full regression evidence. |
 | IDTS-33 | Manual browser UAT for Sprint 3 FE shell, monitoring, and Object Page flows | Jira live state is Done as of 2026-06-29. Remaining consolidation belongs to `IDTS-27`, not DatDT's active task queue. |
+| IDTS-34 | Custom login/authentication foundation | PR #28 merged into `dev`; backend now has `AuthService`, password hashing, server-side `AuthSessions`, Bearer-token request mapping, protected `BugService`, and focused auth verification. Jira moved to Done. |
 
 Vietnamese:
 
@@ -49,28 +50,27 @@ Vietnamese:
 | IDTS-30 | Thu PostgreSQL va chot huong attachment storage | Da chung minh PostgreSQL deploy/read, ghi nhan blocker draft-media, chot huong object storage dai han va ban giao sang `IDTS-31`. |
 | IDTS-31 | Attachment dung object storage | AWS S3 acceptance da pass: PostgreSQL luu metadata/reference, S3 luu binary content, va full regression da verify. |
 | IDTS-33 | Manual browser UAT cho FE shell, monitoring va Object Page flows | Jira live dang Done ngay 2026-06-29. Phan tong hop con lai thuoc `IDTS-27`, khong con nam trong hang doi task active cua DatDT. |
+| IDTS-34 | Nen tang custom login/authentication | PR #28 da merge vao `dev`; backend da co `AuthService`, hash password, `AuthSessions`, Bearer-token mapping, `BugService` duoc bao ve, va auth verification rieng. Jira da chuyen Done. |
 
 ## Ready
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
 | IDTS-32 | Manual browser UAT for Sprint 3 workflow/history flows | SangVN | Jira task narrowed after split: SangVN owns Developer lifecycle, Need More Information/resubmit, reject follow-up, retest/close/reopen, grouped history timeline, and role/action visibility checks. |
-| IDTS-34 | Custom login/authentication foundation | DonHV | Backend CAP custom email/password login, password hashing, request-user mapping, and security-safe auth foundation without SAP BTP/XSUAA dependency. Blocks IDTS-35 and IDTS-38. |
-| IDTS-35 | Login UI and authenticated app session flow | DatDT | Fiori/UI5 login entry, login/logout behavior, and authenticated OData session handling after backend auth contract is available. Blocked by IDTS-34. |
+| IDTS-35 | Login UI and authenticated app session flow | DatDT | Fiori/UI5 login entry, login/logout behavior, and authenticated OData session handling using the merged IDTS-34 backend auth contract. |
 | IDTS-36 | SMTP email notification delivery with outbox tracking | DonHV | Real SMTP delivery for all in-app notifications using Nodemailer, safe private config, and delivery statuses. Email failure must not roll back bug workflow. Blocks IDTS-37 and IDTS-38. |
 | IDTS-37 | Notification UI and email delivery status readability | SangVN | FE/QA review of notification section after SMTP/outbox changes, focusing on readable event/channel/status/recipient/message output. Blocked by IDTS-36. |
-| IDTS-38 | Regression test custom login and SMTP notification flows | NhanT | QA coverage for login success/failure, role behavior, SMTP success/failure, disabled email config, and no-secret evidence. Blocked by IDTS-34 and IDTS-36. |
+| IDTS-38 | Regression test custom login and SMTP notification flows | NhanT | QA coverage for login success/failure, role behavior, SMTP success/failure, disabled email config, and no-secret evidence. Blocked by IDTS-36; auth contract is now available from IDTS-34. |
 
 Vietnamese:
 
 | ID | Cong viec | Thanh vien chinh | Ghi chu |
 | --- | --- | --- | --- |
 | IDTS-32 | Manual browser UAT cho workflow/history Sprint 3 | SangVN | SangVN phu trach Developer lifecycle, Need More Information/resubmit, reject follow-up, retest/close/reopen, grouped history timeline va role/action visibility. |
-| IDTS-34 | Nen tang custom login/authentication | DonHV | Backend CAP login email/password custom, hash password, map request user va auth foundation an toan, khong phu thuoc SAP BTP/XSUAA. Block IDTS-35 va IDTS-38. |
-| IDTS-35 | Login UI va authenticated app session | DatDT | Login/logout tren FE va authenticated OData session sau khi backend auth contract san sang. Bi block boi IDTS-34. |
+| IDTS-35 | Login UI va authenticated app session | DatDT | Login/logout tren FE va authenticated OData session dua tren backend auth contract IDTS-34 da merge. |
 | IDTS-36 | SMTP email notification voi outbox tracking | DonHV | Gui email SMTP that bang Nodemailer, private config an toan va delivery statuses. Loi email khong duoc rollback bug workflow. Block IDTS-37 va IDTS-38. |
 | IDTS-37 | Notification UI va kha nang doc email delivery status | SangVN | FE/QA review notification section sau khi co SMTP/outbox, tap trung event/channel/status/recipient/message. Bi block boi IDTS-36. |
-| IDTS-38 | Regression test custom login va SMTP notification | NhanT | QA login success/failure, role behavior, SMTP success/failure, disabled email config va no-secret evidence. Bi block boi IDTS-34 va IDTS-36. |
+| IDTS-38 | Regression test custom login va SMTP notification | NhanT | QA login success/failure, role behavior, SMTP success/failure, disabled email config va no-secret evidence. Bi block boi IDTS-36; auth contract IDTS-34 da san sang. |
 
 ## In Progress
 
@@ -80,7 +80,7 @@ Vietnamese:
 | WP6 | PM Monitoring | DonHV, DatDT, SangVN | Ownership wording is locked; backend monitoring fields, FE monitoring views, Object Page refresh side effects, grouped history timeline, and persona UAT automation are merged. Remaining manual follow-up is `IDTS-32`; `IDTS-33` is Done on Jira. |
 | IDTS-1 | Sprint 02 epic Jira alignment | DonHV | Jira epic is still To Do while multiple child tasks are already Done. DonHV should resolve this during `IDTS-27` consolidation by commenting or transitioning the epic as appropriate. |
 | IDTS-25 | Fix backend defects found during Sprint 3 QA | DonHV | Jira live state is In Progress. Evidence and closure decision are still needed before Sprint 3 PM/SAP490 consolidation. |
-| IDTS-27 | Sync docs, Jira status, and Sprint 3 evidence | DonHV | Active PM/Jira/evidence consolidation bucket. Current work order: sync board/status first, then start `IDTS-34`, then `IDTS-36`. |
+| IDTS-27 | Sync docs, Jira status, and Sprint 3 evidence | DonHV | Active PM/Jira/evidence consolidation bucket. Current work order: `IDTS-34` is merged; next implementation slice is `IDTS-36`, then Sprint 3 evidence consolidation. |
 | IDTS-28 | Refactor backend service into focused modules | DonHV | Jira live state is In Progress even though the refactor is merged. Needs final retest/evidence closure alignment. |
 
 Vietnamese:
@@ -91,7 +91,7 @@ Vietnamese:
 | WP6 | PM Monitoring | DonHV, DatDT, SangVN | Backend monitoring, FE monitoring views, Object Page refresh, grouped history timeline va persona UAT automation da merge. Manual follow-up con lai la `IDTS-32`; `IDTS-33` da Done tren Jira. |
 | IDTS-1 | Jira alignment cho Sprint 02 epic | DonHV | Jira epic van To Do trong khi nhieu child task da Done. DonHV can xu ly trong `IDTS-27` bang comment hoac transition phu hop. |
 | IDTS-25 | Fix backend defects phat hien trong Sprint 3 QA | DonHV | Jira live dang In Progress. Can chot evidence va quyet dinh dong task truoc khi tong hop PM/SAP490 Sprint 3. |
-| IDTS-27 | Sync docs, Jira status va Sprint 3 evidence | DonHV | Bucket tong hop PM/Jira/evidence dang active. Thu tu hien tai: sync board/status truoc, sau do lam `IDTS-34`, roi `IDTS-36`. |
+| IDTS-27 | Sync docs, Jira status va Sprint 3 evidence | DonHV | Bucket tong hop PM/Jira/evidence dang active. `IDTS-34` da merge; slice tiep theo la `IDTS-36`, sau do tong hop evidence Sprint 3. |
 | IDTS-28 | Tach backend service thanh cac module tap trung | DonHV | Jira live dang In Progress du refactor da merge. Can chot retest/evidence closure. |
 
 ## Blocked
