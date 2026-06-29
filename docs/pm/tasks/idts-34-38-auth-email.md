@@ -1,6 +1,6 @@
 # IDTS-34 to IDTS-38 - Custom Login and SMTP Email Notification
 
-Last updated: 2026-06-27
+Last updated: 2026-06-29
 
 ## Summary
 
@@ -61,4 +61,94 @@ Vietnamese:
 - QA verifies PM, Developer, and Tester personas.
 - Touched `app/`, `srv/`, or `db/` files have matching `docs/knowledge/` mirror updates.
 - PM status files record discovered bugs/errors immediately with classification.
+
+## IDTS-36 Tooling and SDK Research
+
+Date: 2026-06-29
+Owner: DonHV
+Purpose: record the recommended tool choices before implementing SMTP notification delivery.
+
+### Recommended default for implementation
+
+- Use `nodemailer` as the Node.js SMTP client for IDTS-36.
+- Keep SMTP provider details behind private config, not source code.
+- Keep `Notifications` as the in-app source event record.
+- Add a separate delivery/outbox entity linked to `Notifications`.
+- Use delivery statuses: `PENDING`, `SENT`, `FAILED`, `SKIPPED`.
+- Send failures must be captured on the delivery record and must not roll back bug workflow actions.
+
+Vietnamese:
+
+- Dùng `nodemailer` làm SMTP client chính cho IDTS-36.
+- Thông tin SMTP provider phải nằm trong private config, không nằm trong source code.
+- Giữ `Notifications` là event record nội bộ của app.
+- Thêm entity delivery/outbox riêng, liên kết về `Notifications`.
+- Dùng các trạng thái delivery: `PENDING`, `SENT`, `FAILED`, `SKIPPED`.
+- Lỗi gửi email phải được ghi vào delivery record và không được rollback workflow xử lý bug.
+
+### Tools / SDKs / apps to support implementation
+
+| Tool | Type | Recommended use in IDTS | Notes |
+| --- | --- | --- | --- |
+| Nodemailer | Node.js SDK | Main SMTP sender library | Best fit for IDTS because the project needs SMTP and provider portability. |
+| Mailpit | Local app / Docker-capable SMTP test server | Local developer email capture and UI review | Good for local testing without sending real emails; also has an API for automated checks. |
+| Ethereal Email | Hosted fake SMTP service | Quick no-install SMTP preview during development | Useful when Docker/local tool setup is inconvenient; not a real delivery proof. |
+| `smtp-server` from Nodemailer | Node.js test utility / repo | Optional automated SMTP failure simulation | Use only if tests need controlled SMTP errors that Mailpit/Ethereal cannot provide. |
+| Brevo SMTP | Real SMTP provider | Candidate shared project SMTP provider | Useful if the team wants a real provider with a free quota; still needs account setup and private credentials. |
+| Gmail SMTP app password | Real SMTP provider option | Personal/demo-only fallback | Requires Google 2-Step Verification and an app password; not ideal for shared team ownership. |
+| Mailtrap | SaaS app / SDK / SMTP | Sandbox/staging email testing | Good testing platform; use SMTP mode if keeping IDTS provider-portable. |
+| SendGrid SMTP Relay | Real SMTP provider | Production-like SMTP option | Good provider candidate, but account/domain setup may be heavier than needed for this course project. |
+
+Vietnamese:
+
+| Tool | Loại | Cách dùng khuyến nghị trong IDTS | Ghi chú |
+| --- | --- | --- | --- |
+| Nodemailer | Node.js SDK | Thư viện gửi SMTP chính | Phù hợp nhất vì IDTS cần SMTP và muốn đổi provider bằng config. |
+| Mailpit | App local / SMTP test server chạy được bằng Docker | Bắt email local và review UI email | Tốt cho local test vì không gửi email thật; có API để automation check. |
+| Ethereal Email | Fake SMTP hosted | Xem preview email nhanh khi dev | Tiện khi không muốn cài Docker/local tool; không dùng làm bằng chứng gửi email thật. |
+| `smtp-server` của Nodemailer | Test utility / repo Node.js | Optional để giả lập lỗi SMTP có kiểm soát | Chỉ dùng nếu cần test lỗi SMTP mà Mailpit/Ethereal không đáp ứng. |
+| Brevo SMTP | Real SMTP provider | Ứng viên SMTP chung cho project | Có thể dùng nếu team muốn provider thật có free quota; vẫn cần account và credentials private. |
+| Gmail SMTP app password | Real SMTP provider option | Fallback cho demo cá nhân | Cần bật 2-Step Verification và tạo app password; không lý tưởng cho ownership chung của team. |
+| Mailtrap | SaaS app / SDK / SMTP | Test email sandbox/staging | Tốt cho testing; nếu muốn giữ provider-portable thì dùng SMTP mode. |
+| SendGrid SMTP Relay | Real SMTP provider | Option SMTP gần production | Mạnh nhưng setup account/domain có thể nặng hơn nhu cầu project. |
+
+### Default choice for IDTS-36 v1
+
+Use this stack unless a later decision changes it:
+
+1. `nodemailer` for SMTP sending.
+2. `Mailpit` or `Ethereal` for local/non-delivery testing.
+3. One real SMTP provider through private config for final proof.
+4. A simple CAP outbox table instead of Redis/RabbitMQ/BullMQ.
+
+Do not use provider SDKs as the core implementation in v1. Provider SDKs such as SendGrid SDK or Mailtrap SDK can work, but they lock the code to one vendor. IDTS-36 should stay SMTP-based so the provider can be changed by config.
+
+Vietnamese:
+
+Mặc định cho IDTS-36 v1:
+
+1. Dùng `nodemailer` để gửi SMTP.
+2. Dùng `Mailpit` hoặc `Ethereal` để test local/không gửi thật.
+3. Dùng một SMTP provider thật qua private config để làm bằng chứng cuối.
+4. Dùng outbox table đơn giản trong CAP, chưa cần Redis/RabbitMQ/BullMQ.
+
+Không dùng provider SDK làm lõi implementation ở v1. SDK của SendGrid hoặc Mailtrap vẫn có thể chạy, nhưng sẽ khóa code vào một vendor. IDTS-36 nên giữ hướng SMTP-based để đổi provider bằng config.
+
+### Implementation notes to carry into IDTS-36
+
+- Required private config fields: `enabled`, `host`, `port`, `secure`, `username`, `password`, `fromAddress`, `fromName`.
+- Optional private config fields: `replyTo`, `maxRetryCount`, `testMode`, `defaultTestRecipient`.
+- Primary recipient source: `Notifications.recipient -> Users.email`.
+- If recipient user has no email or is inactive, create a `SKIPPED` delivery record with a clear reason.
+- Minimum email content: bug number/title, event type, status/current action owner when available, and a short link or placeholder.
+- Secret scan is mandatory before commit.
+
+Vietnamese:
+
+- Private config bắt buộc: `enabled`, `host`, `port`, `secure`, `username`, `password`, `fromAddress`, `fromName`.
+- Private config tùy chọn: `replyTo`, `maxRetryCount`, `testMode`, `defaultTestRecipient`.
+- Nguồn người nhận chính: `Notifications.recipient -> Users.email`.
+- Nếu recipient không có email hoặc inactive, tạo delivery record trạng thái `SKIPPED` với lý do rõ.
+- Nội dung email tối thiểu: bug number/title, event type, status/current action owner nếu có, và link hoặc placeholder ngắn.
+- Bắt buộc chạy secret scan trước commit.
 
