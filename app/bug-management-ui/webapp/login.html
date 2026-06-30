@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In – IDTS</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0a6ed1 0%, #074491 100%);
+      font-family: "72", "72full", Arial, Helvetica, sans-serif;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      padding: 2.5rem 2rem 2rem;
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 1.75rem;
+    }
+    .logo-icon {
+      width: 48px; height: 48px;
+      background: #0a6ed1;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.75rem;
+    }
+    .logo-icon svg { fill: #fff; }
+    .logo h1 { font-size: 1.1rem; color: #1c2d3e; font-weight: 700; }
+    .logo p  { font-size: 0.8rem; color: #6a7d8e; margin-top: 2px; }
+
+    .error-bar {
+      display: none;
+      background: #ffd1d1;
+      border: 1px solid #e9201e;
+      border-radius: 4px;
+      color: #bb0000;
+      font-size: 0.82rem;
+      padding: 0.6rem 0.8rem;
+      margin-bottom: 1rem;
+    }
+    .error-bar.visible { display: block; }
+
+    label {
+      display: block;
+      font-size: 0.82rem;
+      color: #32363a;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      border: 1px solid #bfc5cc;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      color: #1c2d3e;
+      outline: none;
+      transition: border-color 0.15s;
+      margin-bottom: 1rem;
+    }
+    input:focus { border-color: #0a6ed1; box-shadow: 0 0 0 2px rgba(10,110,209,0.15); }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 0.65rem;
+      background: #0a6ed1;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-top: 0.25rem;
+    }
+    button[type="submit"]:hover:not(:disabled) { background: #0854a0; }
+    button[type="submit"]:disabled { background: #bfc5cc; cursor: not-allowed; }
+
+    .hint {
+      text-align: center;
+      font-size: 0.75rem;
+      color: #6a7d8e;
+      margin-top: 1.25rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24">
+          <path d="M20 8h-2.81A5.985 5.985 0 0 0 13 5.07V5a1 1 0 0 0-2 0v.07A5.985 5.985 0 0 0 6.81 8H4a1 1 0 0 0 0 2h2v1H4a1 1 0 0 0 0 2h2.09A6.009 6.009 0 0 0 12 18a6.009 6.009 0 0 0 5.91-5H20a1 1 0 0 0 0-2h-2v-1h2a1 1 0 0 0 0-2zm-8 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm-1-4h2v2h-2v-2zm0-4h2v2h-2V8z"/>
+        </svg>
+      </div>
+      <h1>Issue &amp; Defect Tracking</h1>
+      <p>Sign in to continue</p>
+    </div>
+
+    <div id="errorBar" class="error-bar" role="alert"></div>
+
+    <form id="loginForm" novalidate>
+      <label for="email">Email</label>
+      <input id="email" type="email" placeholder="you@example.local" autocomplete="username" required>
+
+      <label for="password">Password</label>
+      <input id="password" type="password" placeholder="Enter your password" autocomplete="current-password" required>
+
+      <button type="submit" id="submitBtn">Sign In</button>
+    </form>
+
+    <p class="hint">IDTS – SAP Internship Project</p>
+  </div>
+
+  <!-- CSP-safe external script instead of inline block (IDTS-35 DonHV review fix) -->
+  <script src="login-page.js"></script>
+</body>
+</html>
