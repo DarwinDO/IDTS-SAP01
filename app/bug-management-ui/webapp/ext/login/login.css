@@ -1,0 +1,15 @@
+/**
+ * IDTS-35 Login Dialog Styles
+ * Minimal CSS to ensure the login dialog has a polished look.
+ * Uses SAP Horizon theme variables where possible.
+ */
+
+/* Center the dialog vertically with a slight top offset */
+.idtsLoginDialog > .sapMDialogSection {
+    padding: 1rem;
+}
+
+/* Give the title a bit more prominence */
+.idtsLoginDialog .sapMDialogTitle {
+    font-weight: 600;
+}
