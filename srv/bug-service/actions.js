@@ -19,9 +19,11 @@ const {
 const {
   actorForAction,
   writeHistoryEvent,
-  writeNotificationForStatus,
-  writeNotificationRecord
+  writeNotificationForStatus
 } = require('./history')
+
+const { getEmailConfig } = require('../email/config')
+const { writeNotificationRecord } = require('../email/outbox')
 
 const { determineNextProcessor, validateAssignee, validateTransition } = require('./bug-write')
 const { enforceActionPermission } = require('./permissions')
@@ -125,12 +127,12 @@ async function resubmitToDeveloper (req, entities) {
   })
 
   if (updatedBug.nextProcessorUser_ID) {
-    await writeNotificationRecord(req, entities, {
+    await writeNotificationRecord(cds.tx(req), {
       bugID,
       recipientID: updatedBug.nextProcessorUser_ID,
       eventType: 'UPDATED',
       message: `${updatedBug.bugNumber || 'Bug'} was resubmitted with additional information.`
-    })
+    }, getEmailConfig())
   }
 
   return updatedBug

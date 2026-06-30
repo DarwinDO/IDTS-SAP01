@@ -183,7 +183,30 @@ entity Notifications : cuid, managed {
   deliveryStatus : Association to NotificationDeliveryStatuses not null;
   message        : String(500);
   sentAt         : Timestamp;
+  deliveries     : Composition of many NotificationDeliveries on deliveries.notification = $self;
 }
+
+entity NotificationDeliveries : cuid, managed {
+  notification      : Association to Notifications not null;
+  channel           : Association to NotificationChannels not null;
+  recipientEmail    : String(255);
+  templateKey       : String(80) not null;
+  subject           : String(255) not null;
+  textBody          : LargeString not null;
+  htmlBody          : LargeString not null;
+  status            : Association to NotificationDeliveryStatuses not null;
+  attemptCount      : Integer default 0 not null;
+  nextAttemptAt     : Timestamp;
+  lastAttemptAt     : Timestamp;
+  sentAt            : Timestamp;
+  lastErrorCode     : String(80);
+  lastErrorSummary  : String(500);
+  providerMessageId : String(255);
+  lockedUntil       : Timestamp;
+  lockToken         : String(64);
+}
+
+annotate NotificationDeliveries with @assert.unique.notificationChannel: [ notification, channel ];
 
 entity DuplicateLinks : cuid, managed {
   sourceBug    : Association to Bugs not null;

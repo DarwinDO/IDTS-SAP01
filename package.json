@@ -2,7 +2,8 @@
   "dependencies": {
     "@cap-js/attachments": "^3.12.2",
     "@cap-js/postgres": "^2",
-    "@sap/cds": "^9.9.1"
+    "@sap/cds": "^9.9.1",
+    "nodemailer": "^9.0.1"
   },
   "devDependencies": {
     "@cap-js/cds-test": "^1.0.1",
@@ -10,7 +11,8 @@
     "@googleworkspace/cli": "^0.22.5",
     "@sap/cds-dk": "^9.9.2",
     "cds-plugin-ui5": "^0.13.0",
-    "playwright": "^1.61.0"
+    "playwright": "^1.61.0",
+    "smtp-server": "^3.15.0"
   },
   "workspaces": [
     "app/*"
@@ -29,6 +31,8 @@
     "qa:comments-attachments:http": "powershell -ExecutionPolicy Bypass -File scripts/qa/test-comments-attachments.ps1",
     "qa:comments-attachments:programmatic": "node scripts/qa/test-comments-attachments-programmatic.js",
     "qa:auth:programmatic": "node scripts/qa/test-auth-foundation-programmatic.js",
+    "qa:email-outbox:programmatic": "node scripts/qa/test-email-outbox-programmatic.js",
+    "qa:email-smtp:integration": "node scripts/qa/test-email-smtp-integration.js",
     "qa:developer-workload:programmatic": "node scripts/qa/test-developer-workload-programmatic.js",
     "qa:direct-assignee:http": "powershell -ExecutionPolicy Bypass -File scripts/qa/test-direct-assignee-draft-save.ps1",
     "qa:history-events:programmatic": "node scripts/qa/test-history-events-programmatic.js assign && node scripts/qa/test-history-events-programmatic.js resubmit && node scripts/qa/test-history-events-programmatic.js reject && node scripts/qa/test-history-events-programmatic.js pending && node scripts/qa/test-history-events-programmatic.js close && node scripts/qa/test-history-events-programmatic.js edit",
@@ -97,6 +101,15 @@
     "idts": {
       "auth": {
         "sessionTtlMinutes": 480
+      },
+      "email": {
+        "enabled": false,
+        "secure": false,
+        "maxRetryCount": 2,
+        "pollIntervalMs": 15000,
+        "batchSize": 10,
+        "maxConnections": 3,
+        "testMode": false
       }
     }
   }

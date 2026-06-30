@@ -506,6 +506,12 @@ Không áp dụng các phần quá nặng như full ALM, ITSM, transport/release
 
 **Vietnamese:** Huong login gan han cua IDTS dung custom authentication trong CAP Node.js, khong bat buoc SAP BTP/XSUAA. `Users` van la nguon profile va role noi bo. Backend verify email/password bang `Users.passwordHash`, tao `AuthSessions` phia server, tra bearer token, va map request da login thanh `cds.User` voi `authenticated-user` cong role nghiep vu IDTS. Khong commit plaintext password, raw token, auth secret, SMTP credential hoac private endpoint.
 
+### **5.8.1. SMTP Email Delivery Baseline**
+
+**English:** IDTS stores the in-app notification as the source event and creates a separate database outbox row for email delivery. Nodemailer sends through provider-portable SMTP using private configuration. A background CAP worker changes each delivery through `PENDING`, `SENT`, `FAILED`, or `SKIPPED`; SMTP failure never rolls back the bug workflow. Delivery payloads contain only the minimum readable bug/event context, and public OData exposes safe operational fields rather than SMTP credentials, raw errors, worker locks, or HTML bodies.
+
+**Vietnamese:** IDTS lưu notification trong app làm source event và tạo một database outbox row riêng cho email delivery. Nodemailer gửi qua SMTP có thể đổi provider bằng private config. CAP worker chạy nền chuyển delivery qua `PENDING`, `SENT`, `FAILED` hoặc `SKIPPED`; lỗi SMTP không bao giờ rollback bug workflow. Payload email chỉ có context bug/event tối thiểu, còn OData công khai chỉ expose field vận hành an toàn, không expose SMTP credential, raw error, worker lock hoặc HTML body.
+
 ## **5.9. Mentor-confirmed Sprint 02 rule delta**
 
 **English:**

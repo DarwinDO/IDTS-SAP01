@@ -151,6 +151,28 @@ File này là nơi tất cả quy tắc trạng thái IDTS, cập nhật nextPro
 - Source line count at documentation time: ~156 (approx after refactor)
 - Documentation style: learning-oriented explanation, not line listing only
 - Last reviewed: 2026-06-22
+
+## IDTS-36 Worker Bootstrap Update
+
+### English
+
+After all BugService handlers are registered and `super.init()` completes, the service calls `startEmailWorker()`. This does not immediately send email: the worker module first checks private configuration and stays inactive when email is disabled or incomplete.
+
+- **Location**: `srv/service.js:42` and `:156`
+  import and call of `startEmailWorker`
+  **IDTS concept**: Start asynchronous SMTP delivery only after the CAP service is ready.
+  **Impact if broken**: No outbox rows are delivered, or a worker starts too early/too often and competes with service initialization.
+  **Must check together**: `srv/email/worker.js`, `package.json` email defaults, application startup smoke test.
+
+### Vietnamese
+
+Sau khi toàn bộ BugService handler được đăng ký và `super.init()` hoàn tất, service gọi `startEmailWorker()`. Lệnh này chưa gửi email ngay: worker kiểm tra private config trước và không hoạt động nếu email đang tắt hoặc cấu hình chưa đủ.
+
+- **Vị trí**: `srv/service.js:42` và `:156`
+  import và gọi `startEmailWorker`
+  **Khái niệm IDTS**: Chỉ khởi động việc gửi SMTP bất đồng bộ sau khi CAP service đã sẵn sàng.
+  **Ảnh hưởng nếu sai**: Outbox không được xử lý hoặc worker khởi động quá sớm/quá nhiều lần và xung đột với service initialization.
+  **Phải kiểm tra cùng**: `srv/email/worker.js`, email defaults trong `package.json`, startup smoke test.
 - The result is returned to Fiori and/or persisted using entities from `db/schema.cds`.
 
 ### Các ý quan trọng cần hiểu
