@@ -26,6 +26,9 @@ const {
   userIDForDeveloper
 } = require('./helpers')
 
+const { writeNotificationRecord } = require('../email/outbox')
+const { getEmailConfig } = require('../email/config')
+
 async function recordCreateSideEffects (req, data, entities) {
   if (!data?.ID) return
   const bug = await readBug(req, entities, data.ID)
@@ -344,25 +347,12 @@ async function writeNotificationForStatus (req, entities, bug, status) {
   const notification = notificationTargetForStatus(bug, status)
   if (!notification?.recipientID || !notification.eventType) return
 
-  await writeNotificationRecord(req, entities, {
+  await writeNotificationRecord(cds.tx(req), {
     bugID: bug.ID,
     recipientID: notification.recipientID,
     eventType: notification.eventType,
     message: notification.message
-  })
-}
-
-async function writeNotificationRecord (req, entities, entry) {
-  if (!entry?.bugID || !entry?.recipientID || !entry?.eventType) return
-
-  await cds.tx(req).run(INSERT.into(entities.Notifications).entries({
-    bug_ID: entry.bugID,
-    recipient_ID: entry.recipientID,
-    eventType_code: entry.eventType,
-    channel_code: 'IN_APP',
-    deliveryStatus_code: 'PENDING',
-    message: entry.message
-  }))
+  }, getEmailConfig())
 }
 
 function notificationTargetForStatus (bug, status) {
@@ -451,6 +441,5 @@ module.exports = {
   importantChanges,
   writeHistoryEvent,
   writeNotificationForStatus,
-  writeNotificationRecord,
   actorForAction
 }

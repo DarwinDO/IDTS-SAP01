@@ -29,6 +29,17 @@ Vietnamese: IDTS không phải Jira đầy đủ và không phải hệ thống 
 
 Vietnamese: Huong login gan han khong phu thuoc SAP BTP/XSUAA. IDTS dung custom auth trong CAP Node.js: `AuthService.login` verify email/password bang `Users.passwordHash`, tao `AuthSessions`, va tra bearer token. `Users` van la nguon profile/role noi bo cho Tester, Developer, PM. Request vao `BugService` gui bearer token; middleware map token thanh `cds.User`. Khong commit password, token, auth secret, SMTP credential hoac private endpoint.
 
+## Email Notification Direction
+
+- `Notifications` is the in-app source event. New in-app rows are considered delivered when persisted (`IN_APP/SENT`).
+- `NotificationDeliveries` is the separate email outbox and stores safe payload snapshots, delivery status, attempts, retry timing, sanitized failure detail, and worker locking.
+- Nodemailer sends through real SMTP only when private configuration is explicitly enabled and complete.
+- A CAP `cds.spawn` worker processes outbox rows after the original workflow request. SMTP failure changes delivery status but does not roll back bug assignment or lifecycle work.
+- Existing historical notifications are not automatically emailed after IDTS-36 deployment.
+- Email v1 uses the CAP database outbox; Redis, RabbitMQ, BullMQ, and provider-specific SDKs are not required.
+
+Vietnamese: `Notifications` la source event trong app va record moi duoc xem la `IN_APP/SENT` ngay khi luu thanh cong. `NotificationDeliveries` la email outbox rieng, luu payload snapshot an toan, status, so lan thu, lich retry, loi da lam sach va worker lock. Nodemailer chi gui SMTP that khi private config duoc bat ro rang va day du. Worker CAP `cds.spawn` xu ly outbox sau request workflow ban dau; SMTP fail chi doi delivery status, khong rollback assignment hoac lifecycle action. Notification lich su khong tu dong duoc gui lai. V1 dung CAP database outbox, khong can Redis/RabbitMQ/BullMQ hay provider SDK.
+
 ## Roles
 
 | Role | Responsibility |
@@ -57,6 +68,7 @@ Expected domain entities:
 - `HistoryEvents`
 - `HistoryLogs`
 - `Notifications`
+- `NotificationDeliveries`
 
 Potential support entities:
 

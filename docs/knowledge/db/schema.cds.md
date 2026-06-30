@@ -238,3 +238,53 @@ Anchor quan trong:
 - Knowledge mirror: `docs/knowledge/db/schema.cds.md`
 - Style baseline: `docs/knowledge/guidelines/knowledge-mirror-anchors.md`
 - Last reviewed: 2026-06-22
+
+## IDTS-36 Notification Delivery Model Update
+
+### English
+
+`Notifications` now remains the source event shown inside IDTS, while `NotificationDeliveries` records the separate attempt to deliver that event by email. This separation matters: a bug assignment can be committed even when SMTP is unavailable, and the team can still see whether the email is pending, sent, failed, or skipped.
+
+- **Location**: `db/schema.cds:178-186`
+  `Notifications` and its `deliveries` composition
+  **IDTS concept**: One business event can own one or more channel-specific delivery records. The current source notification is `IN_APP/SENT`; email has its own lifecycle.
+  **Impact if broken**: In-app notification state and SMTP state become mixed together, making UI status and troubleshooting misleading.
+  **Must check together**: `srv/email/outbox.js`, `srv/service.cds:99-126`, notification UI annotations.
+
+- **Location**: `db/schema.cds:189-207`
+  `entity NotificationDeliveries : cuid, managed`
+  **IDTS concept**: Durable email outbox containing the frozen recipient/payload, attempt counters, retry timing, safe error summary, provider message ID, and worker lock.
+  **Impact if broken**: Email can be lost, retried forever, duplicated by concurrent workers, or become impossible to diagnose.
+  **Must check together**: All modules under `srv/email/`, IDTS-36 tests, delivery-status code-list seed.
+
+- **Location**: `db/schema.cds:209`
+  `@assert.unique.notificationChannel: [ notification, channel ]`
+  **IDTS concept**: At most one EMAIL delivery row per source notification.
+  **Impact if broken**: Re-running notification creation can enqueue duplicate email for the same event.
+  **Must check together**: `writeNotificationRecord` and unique-constraint test.
+
+Existing historical notification rows are not automatically converted into email outbox rows and are not resent. This prevents IDTS-36 deployment from emailing old events unexpectedly.
+
+### Vietnamese
+
+`Notifications` tiếp tục là source event hiển thị trong IDTS, còn `NotificationDeliveries` ghi riêng kết quả giao event đó qua email. Việc tách này rất quan trọng: action assign bug vẫn commit được khi SMTP ngừng hoạt động, đồng thời team vẫn biết email đang chờ, đã gửi, bị lỗi hay bị bỏ qua.
+
+- **Vị trí**: `db/schema.cds:178-186`
+  `Notifications` và composition `deliveries`
+  **Khái niệm IDTS**: Một business event có thể sở hữu delivery record riêng theo từng channel. Notification nguồn hiện là `IN_APP/SENT`; email có lifecycle riêng.
+  **Ảnh hưởng nếu sai**: Trạng thái notification trong app và trạng thái SMTP bị trộn, làm UI và việc điều tra lỗi trở nên sai lệch.
+  **Phải kiểm tra cùng**: `srv/email/outbox.js`, `srv/service.cds:99-126`, annotation notification UI.
+
+- **Vị trí**: `db/schema.cds:189-207`
+  `entity NotificationDeliveries : cuid, managed`
+  **Khái niệm IDTS**: Email outbox bền vững, lưu snapshot recipient/payload, số lần thử, lịch retry, lỗi an toàn, provider message ID và worker lock.
+  **Ảnh hưởng nếu sai**: Email có thể bị mất, retry vô hạn, bị nhiều worker gửi trùng hoặc không còn đủ dữ liệu để điều tra.
+  **Phải kiểm tra cùng**: Toàn bộ module trong `srv/email/`, test IDTS-36, seed delivery-status.
+
+- **Vị trí**: `db/schema.cds:209`
+  `@assert.unique.notificationChannel: [ notification, channel ]`
+  **Khái niệm IDTS**: Mỗi source notification chỉ có tối đa một EMAIL delivery.
+  **Ảnh hưởng nếu sai**: Chạy lại bước tạo notification có thể enqueue hai email cho cùng event.
+  **Phải kiểm tra cùng**: `writeNotificationRecord` và unique-constraint test.
+
+Notification lịch sử không tự được tạo outbox và không được gửi lại. Rule này tránh việc deploy IDTS-36 vô tình gửi hàng loạt event cũ.

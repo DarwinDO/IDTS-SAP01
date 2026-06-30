@@ -652,6 +652,12 @@ Có thể dùng:
 * Telegram  
 * Third-party webhook
 
+### **BR-30A - Email delivery phải tách khỏi bug workflow**
+
+**English:** IDTS keeps the in-app `Notifications` record as the source event. Email delivery uses a separate `NotificationDeliveries` outbox record with `PENDING`, `SENT`, `FAILED`, or `SKIPPED` status. The notification and outbox instruction are stored with the business change, but SMTP network sending runs later in a background worker. An SMTP failure must not roll back assignment, status change, comment, or other bug workflow work. Disabled/incomplete SMTP configuration, inactive recipients, and missing/invalid recipient email are recorded as `SKIPPED`. SMTP credentials and raw transport errors must not be stored in business data or exposed through OData.
+
+**Vietnamese:** IDTS giữ `Notifications` trong app làm source event. Việc gửi email dùng record outbox `NotificationDeliveries` riêng với status `PENDING`, `SENT`, `FAILED` hoặc `SKIPPED`. Notification và outbox instruction được lưu cùng thay đổi nghiệp vụ, nhưng kết nối SMTP được worker nền xử lý sau. Lỗi SMTP không được rollback assignment, thay đổi status, comment hoặc workflow bug khác. SMTP bị tắt/thiếu cấu hình, recipient inactive hoặc email recipient thiếu/sai phải được ghi `SKIPPED`. SMTP credential và raw transport error không được lưu vào dữ liệu nghiệp vụ hoặc expose qua OData.
+
 ---
 
 # **J. Business Rules về audit/history**

@@ -178,3 +178,25 @@ Nút action trên Fiori chỉ là điểm bắt đầu trên UI. File này mới
 - Knowledge mirror: `docs/knowledge/srv/bug-service/actions.js.md`
 - Style baseline: `docs/knowledge/guidelines/knowledge-mirror-anchors.md`
 - Last reviewed: 2026-06-22
+
+## IDTS-36 Resubmit Notification Update
+
+### English
+
+`resubmitToDeveloper` creates its follow-up notification through the shared email outbox boundary. It passes the active CAP request transaction plus normalized email configuration, so the resubmit status/history/notification/outbox commit together while SMTP still runs later.
+
+- **Location**: `srv/bug-service/actions.js:25-26` and `:130`
+  imports and call of `writeNotificationRecord(cds.tx(req), ..., getEmailConfig())`
+  **IDTS concept**: A Tester/PM resubmit must notify the assigned Developer and create matching email delivery evidence.
+  **Impact if broken**: The bug returns to `ASSIGNED`, but the Developer receives no follow-up notification and the outbox has no email to process.
+  **Must check together**: `srv/email/outbox.js`, `srv/bug-service/history.js`, scenario SC-05e in `scripts/qa/test-idts6-programmatic.js`.
+
+### Vietnamese
+
+`resubmitToDeveloper` tạo follow-up notification qua email outbox boundary dùng chung. Hàm truyền CAP request transaction đang chạy và email config đã chuẩn hóa, nên status/history/notification/outbox của resubmit commit cùng nhau, còn SMTP vẫn chạy sau.
+
+- **Vị trí**: `srv/bug-service/actions.js:25-26` và `:130`
+  import và gọi `writeNotificationRecord(cds.tx(req), ..., getEmailConfig())`
+  **Khái niệm IDTS**: Khi Tester/PM resubmit, Developer được assign phải nhận notification và hệ thống phải có email delivery evidence tương ứng.
+  **Ảnh hưởng nếu sai**: Bug quay lại `ASSIGNED` nhưng Developer không nhận follow-up notification và outbox không có email để xử lý.
+  **Phải kiểm tra cùng**: `srv/email/outbox.js`, `srv/bug-service/history.js`, scenario SC-05e trong `scripts/qa/test-idts6-programmatic.js`.

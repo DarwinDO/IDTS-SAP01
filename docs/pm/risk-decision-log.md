@@ -1,6 +1,6 @@
 # Risk and Decision Log
 
-Last updated: 2026-06-29
+Last updated: 2026-06-30
 
 ## Decisions
 
@@ -63,6 +63,7 @@ Last updated: 2026-06-29
 | RISK-017 | Long-lived AWS IAM access keys may be exposed, forgotten, or remain active beyond the project/free-credit period. | Medium | High | Keep keys only in ignored private configuration/password storage, use least-privilege bucket policy, rotate regularly, deactivate unused keys, and configure AWS budget alerts. |
 | RISK-018 | Custom login and SMTP delivery may introduce security defects or secret leakage if implemented casually. | Medium | High | Store only password hashes, keep auth/SMTP secrets in ignored private config, scan docs/code before commit, use safe error messages, test wrong-password/inactive-user/invalid-token paths, and keep email sending out of the core workflow transaction. |
 | RISK-019 | Custom Bearer-token auth may be wired incorrectly in the CAP HTTP runtime or FE may store/send the token unsafely. | Medium | High | Keep the auth middleware small, test login/wrong-password/inactive/revoked-session paths, verify CAP compile after adding `AuthService`, document the FE contract clearly, and require IDTS-35/IDTS-38 browser or HTTP evidence that protected OData calls use the token correctly. |
+| RISK-020 | SMTP delivery is at-least-once, so an application crash after the provider accepts a message but before IDTS commits `SENT` can cause a retry and duplicate email. | Low | Medium | Use one delivery row per notification/channel, bounded worker locks, provider message IDs, retry limits and readable event IDs. Accept the residual risk for v1; do not claim exactly-once delivery unless a provider-supported idempotency design is added later. |
 
 Vietnamese:
 

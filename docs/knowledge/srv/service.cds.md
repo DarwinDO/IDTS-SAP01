@@ -228,3 +228,29 @@ Anchor quan trong:
 - Knowledge mirror: `docs/knowledge/srv/service.cds.md`
 - Style baseline: `docs/knowledge/guidelines/knowledge-mirror-anchors.md`
 - Last reviewed: 2026-06-22
+
+## IDTS-36 Email Delivery OData Contract
+
+### English
+
+`BugService.NotificationDeliveries` is a read-only projection for authenticated clients. It gives IDTS-37 enough information to show recipient, subject, status, attempts, timestamps, safe error summary, and provider message ID. It intentionally excludes `textBody`, `htmlBody`, worker locks, and all SMTP configuration.
+
+- **Location**: `srv/service.cds:108-126`
+  `@readonly entity NotificationDeliveries as projection on db.NotificationDeliveries`
+  **IDTS concept**: Safe operational visibility into email delivery without exposing the worker's private payload/control fields.
+  **Impact if broken**: Fiori may be unable to explain failed email, or an OData client may see data that should remain backend-only.
+  **Must check together**: `db/schema.cds:189`, `srv/bug-service/constants.js`, IDTS-37 UI/readability task, API contract test.
+
+`Notifications` keeps its `deliveries` navigation because the persistence model owns delivery rows as children. The public endpoint is `/odata/v4/bug/NotificationDeliveries`; client writes are rejected.
+
+### Vietnamese
+
+`BugService.NotificationDeliveries` là projection read-only cho client đã login. Nó cung cấp đủ dữ liệu để IDTS-37 hiển thị recipient, subject, status, số lần thử, thời gian, lỗi đã làm sạch và provider message ID. Nó cố ý không expose `textBody`, `htmlBody`, worker lock hoặc bất kỳ SMTP config nào.
+
+- **Vị trí**: `srv/service.cds:108-126`
+  `@readonly entity NotificationDeliveries as projection on db.NotificationDeliveries`
+  **Khái niệm IDTS**: Cho phép xem tình trạng email an toàn mà không làm lộ payload/control field private của worker.
+  **Ảnh hưởng nếu sai**: Fiori không giải thích được email fail hoặc OData client nhìn thấy dữ liệu chỉ backend mới nên dùng.
+  **Phải kiểm tra cùng**: `db/schema.cds:189`, `srv/bug-service/constants.js`, task UI/readability IDTS-37, API contract test.
+
+`Notifications` giữ navigation `deliveries` vì delivery là dữ liệu con của source event. Endpoint công khai là `/odata/v4/bug/NotificationDeliveries`; client không được ghi vào collection này.

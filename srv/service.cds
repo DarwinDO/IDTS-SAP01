@@ -104,6 +104,25 @@ service BugService @(requires: 'authenticated-user') {
     deliveryStatus.name as deliveryStatusName,
     deliveryStatus.criticality as deliveryStatusCriticality
   };
+  @readonly
+  entity NotificationDeliveries as projection on db.NotificationDeliveries {
+    ID,
+    createdAt,
+    modifiedAt,
+    notification,
+    channel,
+    recipientEmail,
+    templateKey,
+    subject,
+    status,
+    attemptCount,
+    nextAttemptAt,
+    lastAttemptAt,
+    sentAt,
+    lastErrorCode,
+    lastErrorSummary,
+    providerMessageId
+  };
   entity DuplicateLinks as projection on db.DuplicateLinks;
 
   entity Users as projection on db.Users {

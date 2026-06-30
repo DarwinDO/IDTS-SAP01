@@ -39,6 +39,7 @@ const {
   prepareDraftPatch,
   handleDraftSave
 } = require('./bug-service/drafts')
+const { startEmailWorker } = require('./email/worker')
 
 module.exports = class BugService extends cds.ApplicationService {
   async init () {
@@ -151,6 +152,7 @@ module.exports = class BugService extends cds.ApplicationService {
       requireReason: true
     }))
 
-    return super.init()
+    await super.init()
+    startEmailWorker()
   }
 }

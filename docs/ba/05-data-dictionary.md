@@ -161,6 +161,26 @@ This document is a BA blueprint for the target conceptual model. It is not the c
 | reason | String | Optional/required by rule | Carries reject/request/reopen rationale when the workflow requires explanation. |
 | createdAt | Timestamp | Yes | Event timestamp. |
 
+## NotificationDeliveries
+
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| ID | UUID | Yes | Primary key for one channel delivery attempt stream. |
+| notification | Association to Notifications | Yes | Source in-app event; one EMAIL row is allowed per notification. |
+| channel | Association to NotificationChannels | Yes | `EMAIL` for IDTS-36. |
+| recipientEmail | String | Conditional | Frozen destination; may be empty when the row is `SKIPPED` because email is missing. |
+| templateKey | String | Yes | Stable template/event key such as `BUG_ASSIGNED`. |
+| subject | String | Yes | Frozen business-readable subject. |
+| textBody / htmlBody | LargeString | Yes | Frozen minimal email payload used for retry; not exposed in the safe OData projection. |
+| status | Association to NotificationDeliveryStatuses | Yes | `PENDING`, `SENT`, `FAILED`, or `SKIPPED`. |
+| attemptCount | Integer | Yes | Number of SMTP attempts already made. |
+| nextAttemptAt / lastAttemptAt / sentAt | Timestamp | Optional | Retry and delivery timing evidence. |
+| lastErrorCode / lastErrorSummary | String | Optional | Sanitized operational failure detail; no raw credential/stack trace. |
+| providerMessageId | String | Optional | Message ID returned by SMTP provider after success. |
+| lockedUntil / lockToken | Timestamp / String | Optional | Internal worker coordination; not exposed to clients. |
+
+Vietnamese: `Notifications` trả lời sự kiện gì đã xảy ra trong IDTS, còn `NotificationDeliveries` trả lời email của sự kiện đó đang chờ, đã gửi, lỗi hay bị bỏ qua. Tách hai entity giúp SMTP fail mà không rollback bug workflow. Payload được đóng băng để retry không lấy nhầm nội dung bug mới hơn. Credential và raw transport error không được lưu trong entity này.
+
 ## HistoryLogs
 
 | Field | Type | Required | Notes |
