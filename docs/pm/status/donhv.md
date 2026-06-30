@@ -362,6 +362,26 @@ Used new IDTS-oriented template (full bilingual, proper anchors with Impact/Must
 
 ## Update Rule
 
+## 2026-06-30 - IDTS-36 real SMTP verification
+
+English:
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling issue | The first redacted SMTP readiness command did not start because the orchestration script contained PowerShell here-string syntax inside JavaScript. | Command-construction error in the Codex tool call; no application code or private configuration was executed or printed. | Fixed in session by switching to a plain command string. | Rerun the redacted readiness check, then continue with the isolated real-provider SMTP smoke test. |
+| Environment/configuration blocker | The first redacted readiness check found all SMTP values present, but runtime flags remained `enabled=false` and `testMode=false`; therefore the configuration was intentionally not ready to send. | The private configuration retained the safe disabled defaults for the two control flags. | Fixed by setting `enabled=true` and `testMode=true`; no credential value was printed. | Fresh redacted rerun: `enabled=true`, `ready=true`, `testMode=true`, no missing fields. Continue with the isolated real Brevo smoke test. |
+| External SMTP integration verification | Real-provider smoke with private Brevo SMTP config processed one test delivery from `PENDING` to `SENT`; `attemptCount=1`; `sentAt` and provider message-id were recorded; no safe error remained. | Not an error; this is the final private-provider acceptance proof for the IDTS-36 outbox path. | Passed. No credential, real recipient, private SMTP value, or provider message-id was copied into docs or Jira text. | Fresh smoke output ended with `IDTS-36 Brevo real-provider smoke: PASS`. User should still check inbox/spam because provider acceptance does not guarantee final mailbox placement. |
+| Tooling issue | The first skill-read command used the external backup skill root for `karpathy-guidelines` and `verify`, where those two repo-local skills do not exist. | Skill-root selection error in the Codex tool call; the repo-local skills are under `E:\IDTS-SAP01\.agents\skills`. | Fixed in session by reading the correct repo-local skill paths before continuing. | Correct `karpathy-guidelines` and `verify` skill files were read from `E:\IDTS-SAP01\.agents\skills`; no product code was affected. |
+
+Vietnamese:
+
+| Phân loại | Triệu chứng | Nguyên nhân | Trạng thái xử lý | Verify / bước tiếp theo |
+| --- | --- | --- | --- | --- |
+| Lỗi tooling | Lệnh kiểm tra SMTP đã che dữ liệu ở lần đầu chưa chạy vì orchestration script chứa cú pháp PowerShell here-string bên trong JavaScript. | Lỗi dựng command trong tool call của Codex; chưa có code ứng dụng hoặc private config nào được chạy hay in ra. | Đã xử lý trong phiên bằng cách đổi sang command string thuần. | Chạy lại readiness check đã che dữ liệu, sau đó tiếp tục smoke test SMTP provider thật trong môi trường cô lập. |
+| Blocker môi trường/cấu hình | Readiness check đã che dữ liệu ở lần đầu xác nhận các giá trị SMTP đều có mặt, nhưng cờ runtime vẫn là `enabled=false` và `testMode=false`; vì vậy cấu hình đã chủ động không cho gửi. | Private config vẫn giữ hai cờ điều khiển theo default an toàn. | Đã xử lý bằng cách đặt `enabled=true` và `testMode=true`; không có giá trị credential nào bị in ra. | Kết quả chạy lại mới: `enabled=true`, `ready=true`, `testMode=true`, không thiếu trường nào. Tiếp tục Brevo smoke test thật trong môi trường cô lập. |
+| Xác minh tích hợp SMTP thật | Smoke test với private Brevo SMTP config đã xử lý một delivery test từ `PENDING` sang `SENT`; `attemptCount=1`; đã ghi `sentAt` và provider message-id; không còn safe error. | Không phải lỗi; đây là bằng chứng provider thật đã chấp nhận outbox path của IDTS-36. | Pass. Không copy credential, người nhận thật, giá trị SMTP private, hoặc provider message-id vào docs/Jira. | Output smoke mới kết thúc bằng `IDTS-36 Brevo real-provider smoke: PASS`. User vẫn nên kiểm tra inbox/spam vì provider accepted không đồng nghĩa chắc chắn email vào inbox chính. |
+| Lỗi tooling | Lệnh đọc skill đầu tiên dùng nhầm external backup skill root cho `karpathy-guidelines` và `verify`, trong khi hai repo-local skill này không nằm ở đó. | Lỗi chọn skill root trong tool call của Codex; skill repo-local nằm ở `E:\IDTS-SAP01\.agents\skills`. | Đã fix trong phiên bằng cách đọc lại đúng repo-local skill path trước khi tiếp tục. | Đã đọc đúng `karpathy-guidelines` và `verify` từ `E:\IDTS-SAP01\.agents\skills`; không ảnh hưởng product code. |
+
 - DonHV updates this file for leader decisions, BA/PM work, SAP490 deliverables, weekly consolidation, and cross-workstream support.
 - When DonHV supports another member's task, record the support here and mention the affected member/task file.
 - Other members should not overwrite this file except when explicitly asked by DonHV.

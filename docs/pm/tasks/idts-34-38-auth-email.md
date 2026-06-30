@@ -458,5 +458,9 @@ Automated verification result:
 - Existing history, PM monitoring, developer workload, and comments regressions: PASS.
 - CAP compile: exit 0 with the known pre-existing attachment metadata warning.
 - Secret scan, knowledge mirror coverage, JSON parse, Node syntax, AI DevKit lint, and `git diff --check`: PASS.
-- Real SMTP-provider proof remains a private environment step; the agent did not read or copy real SMTP credentials.
+- Real Brevo SMTP-provider smoke: PASS. One isolated test delivery moved from `PENDING` to `SENT`; `attemptCount=1`; `sentAt` and provider message-id were recorded. Credentials, real recipient data, private SMTP values, and provider message-id were not copied into source, docs, Jira, or console summary output.
+
+Vietnamese:
+
+- Brevo SMTP provider smoke that: PASS. Mot delivery test co lap da di tu `PENDING` sang `SENT`; `attemptCount=1`; da ghi `sentAt` va provider message-id. Credential, du lieu nguoi nhan that, gia tri SMTP private, va provider message-id that khong duoc copy vao source, docs, Jira, hoac output tom tat console.
 
