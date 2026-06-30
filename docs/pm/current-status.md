@@ -9,7 +9,7 @@ Last updated: 2026-06-30
 | Project phase | Sprint 02 baseline is stable in `dev`; Sprint 03 integration is implementing SMTP email delivery after the merged custom-login slice |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
 | Current sprint | Sprint 03 has custom login merged and IDTS-36 SMTP/outbox active, followed by FE/QA work in `IDTS-35`, `IDTS-37`, and `IDTS-38` |
-| Recommended next action | Finish IDTS-36 regression/evidence and merge its branch, then hand the read-only delivery contract to SangVN and NhanT. |
+| Recommended next action | Review and merge IDTS-36 PR #29, run one private real-provider SMTP smoke, then hand the read-only delivery contract to SangVN and NhanT. |
 | Main implementation risk | SMTP credentials must stay private; delivery is at-least-once, so locking reduces duplicate sends but cannot provide exact-once behavior across a crash after provider acceptance. |
 
 ## What Is Already Done

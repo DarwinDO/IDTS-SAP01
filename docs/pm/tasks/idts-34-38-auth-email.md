@@ -421,6 +421,8 @@ Luu y quan trong:
 Date: 2026-06-30
 Owner: DonHV
 Branch: `feature/idts-36-smtp-outbox-donhv`
+Commit: `904db9a`
+Pull request: GitHub PR #29
 
 Implemented:
 

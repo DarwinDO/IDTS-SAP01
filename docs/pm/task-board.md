@@ -80,7 +80,7 @@ Vietnamese:
 | IDTS-25 | Fix backend defects found during Sprint 3 QA | DonHV | Jira live state is In Progress. Evidence and closure decision are still needed before Sprint 3 PM/SAP490 consolidation. |
 | IDTS-27 | Sync docs, Jira status, and Sprint 3 evidence | DonHV | Active PM/Jira/evidence consolidation bucket. Current work order: `IDTS-34` is merged; next implementation slice is `IDTS-36`, then Sprint 3 evidence consolidation. |
 | IDTS-28 | Refactor backend service into focused modules | DonHV | Jira live state is In Progress even though the refactor is merged. Needs final retest/evidence closure alignment. |
-| IDTS-36 | SMTP email notification delivery with outbox tracking | DonHV | Implementation is active on `feature/idts-36-smtp-outbox-donhv`: CAP outbox model, Nodemailer worker, safe OData projection, focused backend test, and local SMTP integration test are implemented; final regression/docs/Jira evidence is in progress. |
+| IDTS-36 | SMTP email notification delivery with outbox tracking | DonHV | Implementation is pushed in PR #29 from `feature/idts-36-smtp-outbox-donhv`; automated regression/docs/Jira evidence is complete. Awaiting review/merge and one private real-provider SMTP smoke. |
 
 Vietnamese:
 
@@ -92,7 +92,7 @@ Vietnamese:
 | IDTS-25 | Fix backend defects phat hien trong Sprint 3 QA | DonHV | Jira live dang In Progress. Can chot evidence va quyet dinh dong task truoc khi tong hop PM/SAP490 Sprint 3. |
 | IDTS-27 | Sync docs, Jira status va Sprint 3 evidence | DonHV | Bucket tong hop PM/Jira/evidence dang active. `IDTS-34` da merge; slice tiep theo la `IDTS-36`, sau do tong hop evidence Sprint 3. |
 | IDTS-28 | Tach backend service thanh cac module tap trung | DonHV | Jira live dang In Progress du refactor da merge. Can chot retest/evidence closure. |
-| IDTS-36 | SMTP email notification voi outbox tracking | DonHV | Dang implement tren `feature/idts-36-smtp-outbox-donhv`: da co CAP outbox model, Nodemailer worker, safe OData projection, focused backend test va local SMTP integration test; dang hoan tat regression/docs/Jira evidence. |
+| IDTS-36 | SMTP email notification voi outbox tracking | DonHV | Implementation da push trong PR #29 tu `feature/idts-36-smtp-outbox-donhv`; automated regression/docs/Jira evidence da xong. Dang cho review/merge va mot lan private real-provider SMTP smoke. |
 
 ## Blocked
 
