@@ -78,11 +78,7 @@
       }
     },
     "resources": {
-      "css": [
-        {
-          "uri": "ext/login/login.css"
-        }
-      ]
+      "css": []
     },
     "routing": {
       "config": {},

@@ -104,7 +104,6 @@
   <div class="card">
     <div class="logo">
       <div class="logo-icon">
-        <!-- Bug/defect icon -->
         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24">
           <path d="M20 8h-2.81A5.985 5.985 0 0 0 13 5.07V5a1 1 0 0 0-2 0v.07A5.985 5.985 0 0 0 6.81 8H4a1 1 0 0 0 0 2h2v1H4a1 1 0 0 0 0 2h2.09A6.009 6.009 0 0 0 12 18a6.009 6.009 0 0 0 5.91-5H20a1 1 0 0 0 0-2h-2v-1h2a1 1 0 0 0 0-2zm-8 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm-1-4h2v2h-2v-2zm0-4h2v2h-2V8z"/>
         </svg>
@@ -128,86 +127,7 @@
     <p class="hint">IDTS – SAP Internship Project</p>
   </div>
 
-  <script>
-    (function () {
-      var AUTH_LOGIN = '/odata/v4/auth/login';
-      var SESSION_TOKEN   = 'idts_auth_token';
-      var SESSION_USER    = 'idts_auth_user';
-      var SESSION_EXPIRES = 'idts_auth_expires';
-
-      var form      = document.getElementById('loginForm');
-      var emailEl   = document.getElementById('email');
-      var passwordEl= document.getElementById('password');
-      var submitBtn = document.getElementById('submitBtn');
-      var errorBar  = document.getElementById('errorBar');
-
-      // If already authenticated, skip to app
-      if (sessionStorage.getItem(SESSION_TOKEN)) {
-        goToApp();
-        return;
-      }
-
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        var email    = emailEl.value.trim();
-        var password = passwordEl.value;
-
-        if (!email || !password) {
-          showError('Please enter your email and password.');
-          return;
-        }
-
-        setLoading(true);
-        hideError();
-
-        fetch(AUTH_LOGIN, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: email, password: password })
-        })
-        .then(function (res) {
-          if (!res.ok) {
-            return res.json().then(function (body) {
-              var msg = (body && body.error && body.error.message)
-                ? body.error.message
-                : 'Invalid email or password.';
-              throw new Error(msg);
-            });
-          }
-          return res.json();
-        })
-        .then(function (data) {
-          // OData action responses may wrap value
-          var result = (data && data.value) ? data.value : data;
-          sessionStorage.setItem(SESSION_TOKEN,   result.token);
-          sessionStorage.setItem(SESSION_USER,    JSON.stringify(result.user));
-          sessionStorage.setItem(SESSION_EXPIRES, result.expiresAt || '');
-          goToApp();
-        })
-        .catch(function (err) {
-          setLoading(false);
-          showError(err.message || 'An unexpected error occurred.');
-        });
-      });
-
-      function goToApp () {
-        // Redirect to the Fiori app index
-        var base = window.location.pathname.replace(/\/login\.html$/, '');
-        window.location.href = base + '/index.html';
-      }
-
-      function showError(msg) {
-        errorBar.textContent = msg;
-        errorBar.classList.add('visible');
-      }
-      function hideError() {
-        errorBar.classList.remove('visible');
-      }
-      function setLoading(busy) {
-        submitBtn.disabled = busy;
-        submitBtn.textContent = busy ? 'Signing in…' : 'Sign In';
-      }
-    })();
-  </script>
+  <!-- CSP-safe external script instead of inline block (IDTS-35 DonHV review fix) -->
+  <script src="login-page.js"></script>
 </body>
 </html>
