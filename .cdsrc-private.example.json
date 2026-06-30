@@ -20,5 +20,25 @@
         "secret_access_key": "<private-iam-secret-access-key>"
       }
     }
+  },
+  "idts": {
+    "email": {
+      "enabled": false,
+      "host": "<private-smtp-host>",
+      "port": 587,
+      "secure": false,
+      "username": "<private-smtp-username>",
+      "password": "<private-smtp-password-or-app-password>",
+      "fromAddress": "<verified-sender@example.com>",
+      "fromName": "IDTS Notifications",
+      "replyTo": "<optional-reply-to@example.com>",
+      "baseUrl": "<optional-idts-app-base-url>",
+      "maxRetryCount": 2,
+      "pollIntervalMs": 15000,
+      "batchSize": 10,
+      "maxConnections": 3,
+      "testMode": false,
+      "defaultTestRecipient": "<optional-private-test-recipient@example.com>"
+    }
   }
 }

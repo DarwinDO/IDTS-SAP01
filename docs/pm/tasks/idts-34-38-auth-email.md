@@ -416,3 +416,51 @@ Luu y quan trong:
 - `qa-report` reference mot so companion QA execution resource co the chua duoc cai trong repo. Neu thieu companion file, map output ve PM/SAP490 docs cua IDTS thay vi tao artifact khong co nguon.
 - `qa-test-plan` mac dinh ky vong input requirement dang YAML. IDTS thuong dung Markdown BA/PM/Jira sources, nen agent phai map source ro rang truoc khi dung skill.
 
+## IDTS-36 Implementation Progress
+
+Date: 2026-06-30
+Owner: DonHV
+Branch: `feature/idts-36-smtp-outbox-donhv`
+Commit: `904db9a`
+Pull request: GitHub PR #29
+
+Implemented:
+
+- Added `NotificationDeliveries` as a durable CAP database outbox linked to `Notifications`, with a unique notification/channel constraint.
+- New in-app notifications are stored as `IN_APP/SENT`; email delivery has its own `PENDING/SENT/FAILED/SKIPPED` lifecycle.
+- Added a safe read-only `BugService.NotificationDeliveries` projection that excludes email bodies and worker locks.
+- Added normalized private configuration, minimal text/HTML templates, pooled Nodemailer sender, outbox processor, retry/backoff, safe error mapping, row locking, and a CAP `cds.spawn` worker.
+- SMTP sending happens after the original business request; SMTP failure is captured on the delivery row and is not thrown back into the bug workflow.
+- Added focused programmatic coverage for disabled/inactive/success/failure/retry/rollback/uniqueness/auth/write-denial cases and a local SMTP protocol integration test using `smtp-server`.
+
+Operational defaults:
+
+- Email disabled by default.
+- Poll every 15 seconds, batch size 10, maximum 3 SMTP connections.
+- Two retries after the first attempt.
+- Historical notifications are not backfilled or emailed automatically.
+
+Vietnamese:
+
+- Da them `NotificationDeliveries` lam CAP database outbox, lien ket voi `Notifications` va co unique constraint theo notification/channel.
+- Notification trong app moi la `IN_APP/SENT`; email co lifecycle `PENDING/SENT/FAILED/SKIPPED` rieng.
+- Da them OData projection read-only, khong expose email body hoac worker lock.
+- Da co private config normalization, template text/HTML toi thieu, Nodemailer pool, outbox processor, retry/backoff, safe error, row lock va worker `cds.spawn`.
+- SMTP chay sau request nghiep vu; loi gui chi cap nhat delivery, khong throw nguoc vao bug workflow.
+- Da co focused test cho disabled/inactive/success/failure/retry/rollback/uniqueness/auth/write denial va local SMTP integration test.
+
+Automated verification result:
+
+- Focused email outbox: PASS.
+- Local SMTP protocol integration: PASS.
+- Existing auth: 23 PASS / 0 FAIL.
+- Existing IDTS workflow including resubmit notification: 30 PASS / 0 FAIL after fixing one old-signature caller found by regression.
+- Existing history, PM monitoring, developer workload, and comments regressions: PASS.
+- CAP compile: exit 0 with the known pre-existing attachment metadata warning.
+- Secret scan, knowledge mirror coverage, JSON parse, Node syntax, AI DevKit lint, and `git diff --check`: PASS.
+- Real Brevo SMTP-provider smoke: PASS. One isolated test delivery moved from `PENDING` to `SENT`; `attemptCount=1`; `sentAt` and provider message-id were recorded. Credentials, real recipient data, private SMTP values, and provider message-id were not copied into source, docs, Jira, or console summary output.
+
+Vietnamese:
+
+- Brevo SMTP provider smoke that: PASS. Mot delivery test co lap da di tu `PENDING` sang `SENT`; `attemptCount=1`; da ghi `sentAt` va provider message-id. Credential, du lieu nguoi nhan that, gia tri SMTP private, va provider message-id that khong duoc copy vao source, docs, Jira, hoac output tom tat console.
+

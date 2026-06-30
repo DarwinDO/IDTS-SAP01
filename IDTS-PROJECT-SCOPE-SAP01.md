@@ -218,6 +218,14 @@ Các trigger notification:
 * Tester cập nhật bug report đã submit.  
 * Developer cập nhật trạng thái bug.
 
+**Approved SMTP baseline / Baseline SMTP đã duyệt:**
+
+* `Notifications` là source event hiển thị trong IDTS; email không thay thế notification trong app.
+* Email thật được gửi qua SMTP bằng Nodemailer và cấu hình private, không phụ thuộc SAP BTP/XSUAA.
+* Mỗi email có outbox/delivery status riêng: `PENDING`, `SENT`, `FAILED`, `SKIPPED`.
+* Worker gửi email sau khi business transaction đã commit; SMTP fail không được làm hỏng action xử lý bug.
+* Core scope không bao gồm message broker riêng như Redis, RabbitMQ hoặc BullMQ; CAP database outbox là đủ cho v1.
+
 ---
 
 # **5\. Out of Scope** 

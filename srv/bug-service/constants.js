@@ -183,6 +183,7 @@ const READ_ONLY_ENTITY_NAMES = [
   'HistoryEvents',
   'HistoryLogs',
   'Notifications',
+  'NotificationDeliveries',
   'DuplicateLinks'
 ]
 

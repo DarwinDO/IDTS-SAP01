@@ -147,3 +147,25 @@ Mọi thay đổi ở đây đều ảnh hưởng ngay đến luồng tạo, ph�
 - Source line count at documentation time: 207
 - Documentation style: learning-oriented explanation, not line listing only
 - Last reviewed: 2026-06-22
+
+## IDTS-36 Read-Only Guard Update
+
+### English
+
+`NotificationDeliveries` is included in `READ_ONLY_ENTITY_NAMES`. The email worker writes the persistence entity internally, but OData clients must not create, edit, retry, or delete delivery records.
+
+- **Location**: `srv/bug-service/constants.js:186`
+  `'NotificationDeliveries'`
+  **IDTS concept**: Delivery state is system-managed operational evidence.
+  **Impact if broken**: A client could forge `SENT`, erase failure evidence, or enqueue an email outside the approved notification flow.
+  **Must check together**: `srv/bug-service/guards.js`, `srv/service.cds:108`, API write-denial test.
+
+### Vietnamese
+
+`NotificationDeliveries` được thêm vào `READ_ONLY_ENTITY_NAMES`. Email worker được phép ghi persistence entity ở backend, nhưng OData client không được tạo, sửa, retry hoặc xóa delivery record.
+
+- **Vị trí**: `srv/bug-service/constants.js:186`
+  `'NotificationDeliveries'`
+  **Khái niệm IDTS**: Delivery status là operational evidence do hệ thống quản lý.
+  **Ảnh hưởng nếu sai**: Client có thể giả `SENT`, xóa bằng chứng lỗi hoặc enqueue email ngoài notification flow đã duyệt.
+  **Phải kiểm tra cùng**: `srv/bug-service/guards.js`, `srv/service.cds:108`, API write-denial test.

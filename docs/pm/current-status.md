@@ -6,11 +6,11 @@ Last updated: 2026-06-30
 
 | Field | Current value |
 | --- | --- |
-| Project phase | Sprint 02 baseline is stable in `dev`; Sprint 03 integration has completed the backend custom login slice and moves next to SMTP email delivery |
+| Project phase | Sprint 02 baseline is stable in `dev`; Sprint 03 integration is implementing SMTP email delivery after the merged custom-login slice |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
-| Current sprint | Sprint 03 now moves from custom login (`IDTS-34`, merged) into SMTP notification delivery (`IDTS-36`) and FE/QA follow-up (`IDTS-35`, `IDTS-38`) |
-| Recommended next action | Start `IDTS-36` SMTP/outbox implementation, while DatDT can start `IDTS-35` against the merged auth contract. |
-| Main implementation risk | SMTP credentials and auth/session follow-up must stay out of source control; FE must store/send the bearer token safely and QA must prove role behavior after login. |
+| Current sprint | Sprint 03 has custom login merged and IDTS-36 SMTP/outbox active, followed by FE/QA work in `IDTS-35`, `IDTS-37`, and `IDTS-38` |
+| Recommended next action | Review and merge IDTS-36 PR #29, then hand the read-only delivery contract to SangVN and NhanT. The private Brevo SMTP smoke has passed. |
+| Main implementation risk | SMTP credentials must stay private; delivery is at-least-once, so locking reduces duplicate sends but cannot provide exact-once behavior across a crash after provider acceptance. |
 
 ## What Is Already Done
 
@@ -83,7 +83,7 @@ Last updated: 2026-06-30
 - Source-code knowledge mirrors now exist for every tracked file under `app/`, `srv/`, and `db`. Future changes in those folders must update the matching note under `docs/knowledge/app/`, `docs/knowledge/srv/`, or `docs/knowledge/db/`, including explicit cross-folder links.
 - Sprint 3 integration update on 2026-06-28: PR #18 (`IDTS-19` grouped history timeline), PR #20 (`IDTS-13` Object Page side-effect refresh), and PR #24 (`IDTS-24` browser UAT evidence script) were reviewed, fixed where needed, merged into `dev`, and moved to Done in Jira. As of the 2026-06-29 Jira live check, `IDTS-33` is Done; remaining manual workflow/history follow-up is `IDTS-32` plus PM/SAP490 consolidation under `IDTS-27`.
 - Jira live-state sync on 2026-06-29 originally confirmed: `IDTS-33` is Done; `IDTS-1` is still To Do; `IDTS-25`, `IDTS-27`, and `IDTS-28` are still In Progress; `IDTS-36` is To Do. Later on 2026-06-29, `IDTS-34` was implemented, merged into `dev` through PR #28, and moved out of the active queue.
-- IDTS-36 implementation support notes now record Nodemailer as the default SMTP library for v1, with SMTP provider credentials kept in private config and email delivery tracked through an outbox/delivery status model.
+- IDTS-36 implementation support notes now record Nodemailer as the default SMTP library for v1, with SMTP provider credentials kept in private config and email delivery tracked through an outbox/delivery status model. Private Brevo SMTP smoke verification passed on 2026-06-30 without printing credentials, recipient data, or provider message-id.
 - IDTS-34 is merged into `dev` through GitHub PR #28 at merge commit `52432e35c66a3c0137ed5b7c96c9f57d93409fc5`. Backend custom login now exposes `AuthService.login/logout/me`, stores only password hashes, creates server-side `AuthSessions`, maps Bearer tokens to `cds.User`, keeps `BugService` protected, and passes focused auth verification (`23 PASS / 0 FAIL`) plus CAP compile on `dev`.
 - QA/testing skill support for IDTS-36/IDTS-38 is now installed and routed: `backend-testing`, `api-testing-patterns`, `integration-testing`, `qa-report`, and `qa-test-plan` exist under repo-local `.agents/skills/` and external backup `C:\Users\LapHub\.agents\skills\`. `backend-testing`, `api-testing-patterns`, and `integration-testing` are the primary implementation-test support skills; `qa-report` and `qa-test-plan` are secondary planning/reporting helpers.
 
@@ -122,7 +122,7 @@ Vietnamese:
 
 ## What Is Not Started
 
-- External SMTP notification delivery beyond persisted in-app notification records (`IDTS-36`).
+- Frontend readability for email delivery status (`IDTS-37`) and broader auth/email regression QA (`IDTS-38`) are not started yet; they depend on merged IDTS-36.
 - Production XSUAA role collections and deployment-level authorization hardening remain out of the near-term custom-login path.
 - Deeper QA scenarios and automated verification beyond compile/build/API/browser smoke checks.
 

@@ -64,3 +64,25 @@ Thêm field audit → cập nhật importantChanges + labels. Thêm trigger noti
 - Knowledge mirror: `docs/knowledge/srv/bug-service/history.js.md`
 - Source layer: `srv`
 - Last reviewed: 2026-06-22
+
+## IDTS-36 Notification Handoff Update
+
+### English
+
+This file still decides who receives a notification and for which bug lifecycle event. It no longer inserts only an in-app row itself. At `writeNotificationForStatus`, it passes the current request transaction to `srv/email/outbox.js`, which atomically creates both the source notification and email delivery record.
+
+- **Location**: `srv/bug-service/history.js:29` and `:350`
+  import and call of `writeNotificationRecord(cds.tx(req), ..., getEmailConfig())`
+  **IDTS concept**: Keep history, notification, and outbox creation in the same business transaction while leaving SMTP network delivery to a later worker.
+  **Impact if broken**: Status/history can commit without notification tracking, or SMTP can accidentally return to the critical workflow path.
+  **Must check together**: `srv/email/outbox.js:18`, `db/schema.cds` notification entities, workflow notification tests.
+
+### Vietnamese
+
+File này vẫn quyết định ai nhận notification và lifecycle event nào cần thông báo. Tuy nhiên nó không còn tự insert duy nhất một in-app row. Tại `writeNotificationForStatus`, nó truyền request transaction hiện tại sang `srv/email/outbox.js`; module đó tạo source notification và email delivery một cách atomic.
+
+- **Vị trí**: `srv/bug-service/history.js:29` và `:350`
+  import và gọi `writeNotificationRecord(cds.tx(req), ..., getEmailConfig())`
+  **Khái niệm IDTS**: Giữ history, notification và outbox trong cùng business transaction nhưng để việc kết nối SMTP cho worker chạy sau.
+  **Ảnh hưởng nếu sai**: Status/history có thể commit mà thiếu notification tracking hoặc SMTP quay lại chặn critical workflow.
+  **Phải kiểm tra cùng**: `srv/email/outbox.js:18`, các entity notification trong `db/schema.cds`, workflow notification tests.
