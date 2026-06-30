@@ -10,7 +10,7 @@ Current work order:
 
 1. Finish PM/Jira sync first so the team starts from a clean task state.
 2. `IDTS-34` is merged into `dev`; DatDT can now implement FE login against the stable backend auth contract.
-3. Implement `IDTS-36` next, using Nodemailer plus SMTP/outbox tracking.
+3. `IDTS-36` is merged into `dev`; SangVN and NhanT can now consume the notification delivery contract.
 4. Hand the stable contracts to DatDT (`IDTS-35`), SangVN (`IDTS-37`), and NhanT (`IDTS-38`).
 
 Decisions:
@@ -37,9 +37,9 @@ Vietnamese:
 | --- | --- | --- | --- |
 | IDTS-34 | DonHV | Backend custom login/auth foundation | Done; PR #28 merged into `dev` |
 | IDTS-35 | DatDT | Login UI and authenticated app session | Can start from merged IDTS-34 contract |
-| IDTS-36 | DonHV | SMTP email delivery with outbox tracking | Blocks IDTS-37, IDTS-38 |
-| IDTS-37 | SangVN | Notification UI/readability verification | Blocked by IDTS-36 |
-| IDTS-38 | NhanT | Auth/email regression QA | Blocked by IDTS-36 for full email coverage; auth contract is ready |
+| IDTS-36 | DonHV | SMTP email delivery with outbox tracking | Done; PR #29 merged into `dev`; Jira moved to Done |
+| IDTS-37 | SangVN | Notification UI/readability verification | Unblocked by merged IDTS-36 |
+| IDTS-38 | NhanT | Auth/email regression QA | Unblocked by merged IDTS-34 and IDTS-36 |
 
 ## Implementation Boundaries
 
@@ -421,8 +421,9 @@ Luu y quan trong:
 Date: 2026-06-30
 Owner: DonHV
 Branch: `feature/idts-36-smtp-outbox-donhv`
-Commit: `904db9a`
+Commits: `904db9a`, `b29c8b2`, `54d7927`
 Pull request: GitHub PR #29
+Status: Done on `dev` through merge commit `5356a7ffc962ca0545218f9c920503c28492f98b`; Jira `IDTS-36` moved to Done with evidence comment `10250`.
 
 Implemented:
 
