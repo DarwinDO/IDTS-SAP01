@@ -10,6 +10,64 @@
             height: 100%;
         }
     </style>
+
+    <!--
+        IDTS-35: Auth guard + OData interceptor.
+        This script runs SYNCHRONOUSLY before the UI5 bootstrap script is even
+        fetched, so every XHR — including the first $metadata request — already
+        carries the Authorization header.
+    -->
+    <script>
+        (function () {
+            var TOKEN_KEY = 'idts_auth_token';
+
+            /* ── 1. Redirect to login page if no token ── */
+            var token = sessionStorage.getItem(TOKEN_KEY);
+            if (!token) {
+                var base = window.location.pathname.replace(/\/index\.html(\?.*)?$/, '');
+                window.location.replace(base + '/login.html');
+                /* stop parsing — the browser will navigate away */
+            }
+
+            /* ── 2. Install XHR interceptor before UI5 boots ── */
+            /* Patches XMLHttpRequest so every OData V4 request carries Bearer. */
+            var _open = XMLHttpRequest.prototype.open;
+            XMLHttpRequest.prototype.open = function (method, url) {
+                this.__idtsUrl = url ? String(url) : '';
+                _open.apply(this, arguments);
+            };
+
+            var _send = XMLHttpRequest.prototype.send;
+            XMLHttpRequest.prototype.send = function () {
+                var url = this.__idtsUrl || '';
+                if (url.indexOf('/odata/v4/') !== -1) {
+                    var t = sessionStorage.getItem(TOKEN_KEY);
+                    if (t) {
+                        try { this.setRequestHeader('Authorization', 'Bearer ' + t); }
+                        catch (e) { /* header already sent – ignore */ }
+                    }
+                }
+                _send.apply(this, arguments);
+            };
+
+            /* ── 3. Expose logout helper ── */
+            window.idtsLogout = function () {
+                var t = sessionStorage.getItem(TOKEN_KEY);
+                if (t) {
+                    fetch('/odata/v4/auth/logout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + t }
+                    }).catch(function () {});
+                }
+                sessionStorage.removeItem(TOKEN_KEY);
+                sessionStorage.removeItem('idts_auth_user');
+                sessionStorage.removeItem('idts_auth_expires');
+                var base = window.location.pathname.replace(/\/index\.html(\?.*)?$/, '');
+                window.location.replace(base + '/login.html');
+            };
+        })();
+    </script>
+
     <script
         id="sap-ui-bootstrap"
         src="https://sapui5.hana.ondemand.com/1.148.0/resources/sap-ui-core.js"
