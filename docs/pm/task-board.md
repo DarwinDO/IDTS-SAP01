@@ -52,6 +52,7 @@ Vietnamese:
 | IDTS-31 | Attachment dung object storage | AWS S3 acceptance da pass: PostgreSQL luu metadata/reference, S3 luu binary content, va full regression da verify. |
 | IDTS-33 | Manual browser UAT cho FE shell, monitoring va Object Page flows | Jira live dang Done ngay 2026-06-29. Phan tong hop con lai thuoc `IDTS-27`, khong con nam trong hang doi task active cua DatDT. |
 | IDTS-34 | Nen tang custom login/authentication | PR #28 da merge vao `dev`; backend da co `AuthService`, hash password, `AuthSessions`, Bearer-token mapping, `BugService` duoc bao ve, va auth verification rieng. Jira da chuyen Done. |
+| IDTS-35 | Login UI va authenticated app session | PR #30 da merge vao `dev`; unauthenticated app entry redirect sang login, login gan Bearer token cho OData metadata, Fiori render va logout da browser-smoke pass. |
 | IDTS-36 | SMTP email notification voi outbox tracking | PR #29 da merge vao `dev`; backend da co `NotificationDeliveries`, Nodemailer SMTP sender, outbox worker/retry, delivery projection read-only an toan, automated regression evidence, private Brevo SMTP smoke evidence, va Jira da chuyen Done. |
 
 ## Ready
@@ -59,7 +60,6 @@ Vietnamese:
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
 | IDTS-32 | Manual browser UAT for Sprint 3 workflow/history flows | SangVN | Jira task narrowed after split: SangVN owns Developer lifecycle, Need More Information/resubmit, reject follow-up, retest/close/reopen, grouped history timeline, and role/action visibility checks. |
-| IDTS-35 | Login UI and authenticated app session flow | DatDT | Fiori/UI5 login entry, login/logout behavior, and authenticated OData session handling using the merged IDTS-34 backend auth contract. |
 | IDTS-37 | Notification UI and email delivery status readability | SangVN | FE/QA review of notification section after SMTP/outbox changes, focusing on readable event/channel/status/recipient/message output. Unblocked by merged IDTS-36. |
 | IDTS-38 | Regression test custom login and SMTP notification flows | NhanT | QA coverage for login success/failure, role behavior, SMTP success/failure, disabled email config, and no-secret evidence. Unblocked by merged IDTS-34 and IDTS-36. |
 
@@ -68,7 +68,6 @@ Vietnamese:
 | ID | Cong viec | Thanh vien chinh | Ghi chu |
 | --- | --- | --- | --- |
 | IDTS-32 | Manual browser UAT cho workflow/history Sprint 3 | SangVN | SangVN phu trach Developer lifecycle, Need More Information/resubmit, reject follow-up, retest/close/reopen, grouped history timeline va role/action visibility. |
-| IDTS-35 | Login UI va authenticated app session | DatDT | Login/logout tren FE va authenticated OData session dua tren backend auth contract IDTS-34 da merge. |
 | IDTS-37 | Notification UI va kha nang doc email delivery status | SangVN | FE/QA review notification section sau khi co SMTP/outbox, tap trung event/channel/status/recipient/message. Da duoc unblock boi IDTS-36 da merge. |
 | IDTS-38 | Regression test custom login va SMTP notification | NhanT | QA login success/failure, role behavior, SMTP success/failure, disabled email config va no-secret evidence. Da duoc unblock boi IDTS-34 va IDTS-36 da merge. |
 

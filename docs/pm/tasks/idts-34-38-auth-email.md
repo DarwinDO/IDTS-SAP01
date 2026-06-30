@@ -9,9 +9,9 @@ This work package records the approved direction for the next authentication and
 Current work order:
 
 1. Finish PM/Jira sync first so the team starts from a clean task state.
-2. `IDTS-34` is merged into `dev`; DatDT can now implement FE login against the stable backend auth contract.
+2. `IDTS-34` and `IDTS-35` are merged into `dev`; backend auth and the browser login/session flow are integrated.
 3. `IDTS-36` is merged into `dev`; SangVN and NhanT can now consume the notification delivery contract.
-4. Hand the stable contracts to DatDT (`IDTS-35`), SangVN (`IDTS-37`), and NhanT (`IDTS-38`).
+4. Hand the merged auth/login and email-delivery contracts to SangVN (`IDTS-37`) and NhanT (`IDTS-38`).
 
 Decisions:
 
@@ -36,7 +36,7 @@ Vietnamese:
 | Jira | Owner | Focus | Dependency |
 | --- | --- | --- | --- |
 | IDTS-34 | DonHV | Backend custom login/auth foundation | Done; PR #28 merged into `dev` |
-| IDTS-35 | DatDT | Login UI and authenticated app session | Can start from merged IDTS-34 contract |
+| IDTS-35 | DatDT | Login UI and authenticated app session | Done; PR #30 merged into `dev`; Jira live state confirmed Done |
 | IDTS-36 | DonHV | SMTP email delivery with outbox tracking | Done; PR #29 merged into `dev`; Jira moved to Done |
 | IDTS-37 | SangVN | Notification UI/readability verification | Unblocked by merged IDTS-36 |
 | IDTS-38 | NhanT | Auth/email regression QA | Unblocked by merged IDTS-34 and IDTS-36 |
