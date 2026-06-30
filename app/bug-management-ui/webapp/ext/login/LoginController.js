@@ -1,256 +1,93 @@
 /**
- * IDTS-35 Login Controller
+ * IDTS-35 login session helpers.
  *
- * Handles login/logout flow against the AuthService backend (IDTS-34).
- * Token is stored in sessionStorage (cleared on tab close, not persisted to disk).
- * No password or token is written to console logs or source code.
+ * The active login UI is the standalone login.html + login-page.js flow.
+ * This module deliberately contains only reusable session helpers for UI5 code
+ * that may later need to read the current user or trigger logout.
  *
- * Backend contract (from IDTS-34):
- *   POST /odata/v4/auth/login  { email, password }
- *     → { token, tokenType:"Bearer", expiresAt, user: { ID, displayName, email, role_code, roleName } }
- *   POST /odata/v4/auth/logout  (Authorization: Bearer <token>)
- *   GET  /odata/v4/auth/me()    (Authorization: Bearer <token>)
+ * It does not load a dialog or own the login form. Keeping it small avoids a
+ * broken dependency on the removed LoginDialog.fragment.xml artifact.
  */
-sap.ui.define(
-    [
-        "sap/ui/core/mvc/Controller",
-        "sap/ui/core/Fragment",
-        "sap/m/MessageToast",
-        "sap/m/BusyDialog"
-    ],
-    function (Controller, Fragment, MessageToast, BusyDialog) {
-        "use strict";
+sap.ui.define([], function () {
+    "use strict";
 
-        // ------------------------------------------------------------------
-        // Session storage keys  (no secret values stored here)
-        // ------------------------------------------------------------------
-        var SESSION_KEY_TOKEN    = "idts_auth_token";
-        var SESSION_KEY_USER     = "idts_auth_user";
-        var SESSION_KEY_EXPIRES  = "idts_auth_expires";
+    var SESSION_KEY_TOKEN   = "idts_auth_token";
+    var SESSION_KEY_USER    = "idts_auth_user";
+    var SESSION_KEY_EXPIRES = "idts_auth_expires";
+    var AUTH_BASE           = "/odata/v4/auth";
 
-        // ------------------------------------------------------------------
-        // Auth endpoint base
-        // ------------------------------------------------------------------
-        var AUTH_BASE = "/odata/v4/auth";
+    var LoginSession = {};
 
-        // ------------------------------------------------------------------
-        // Public static helpers used by Component.js
-        // ------------------------------------------------------------------
-        var LoginController = Controller.extend("idts.bugmanagementui.ext.login.LoginController", {
+    /**
+     * Check whether a non-expired auth token exists in sessionStorage.
+     */
+    LoginSession.isAuthenticated = function () {
+        var token = sessionStorage.getItem(SESSION_KEY_TOKEN);
+        var expires = sessionStorage.getItem(SESSION_KEY_EXPIRES);
 
-            // ---------------------------------------------------------------
-            // Lifecycle
-            // ---------------------------------------------------------------
+        if (!token) {
+            return false;
+        }
 
-            onInit: function () {
-                this._oDialog = null;
-                this._resolveLogin = null;
-            },
-
-            // ---------------------------------------------------------------
-            // Dialog management
-            // ---------------------------------------------------------------
-
-            /**
-             * Open the login dialog.
-             * Returns a Promise that resolves when login succeeds or rejects on cancel.
-             */
-            openLoginDialog: function (oView) {
-                var that = this;
-                return new Promise(function (resolve, reject) {
-                    that._resolveLogin = resolve;
-                    that._rejectLogin  = reject;
-
-                    if (!that._oDialog) {
-                        Fragment.load({
-                            id: "loginFrag",
-                            name: "idts.bugmanagementui.ext.login.LoginDialog",
-                            controller: that
-                        }).then(function (oDialog) {
-                            that._oDialog = oDialog;
-                            if (oView) {
-                                oView.addDependent(oDialog);
-                            }
-                            that._resetForm();
-                            oDialog.open();
-                        });
-                    } else {
-                        that._resetForm();
-                        that._oDialog.open();
-                    }
-                });
-            },
-
-            _resetForm: function () {
-                var oDialog = this._oDialog;
-                if (!oDialog) { return; }
-                Fragment.byId("loginFrag", "loginEmail").setValue("");
-                Fragment.byId("loginFrag", "loginPassword").setValue("");
-                Fragment.byId("loginFrag", "loginErrorStrip").setVisible(false);
-                Fragment.byId("loginFrag", "loginErrorStrip").setText("");
-                Fragment.byId("loginFrag", "loginButton").setEnabled(true);
-            },
-
-            // ---------------------------------------------------------------
-            // Event handlers
-            // ---------------------------------------------------------------
-
-            onLoginSubmit: function () {
-                var sEmail    = Fragment.byId("loginFrag", "loginEmail").getValue().trim();
-                var sPassword = Fragment.byId("loginFrag", "loginPassword").getValue();
-
-                if (!sEmail || !sPassword) {
-                    this._showError("Please enter your email and password.");
-                    return;
-                }
-
-                this._setLoading(true);
-                this._callLogin(sEmail, sPassword);
-            },
-
-            onLoginCancel: function () {
-                if (this._oDialog) {
-                    this._oDialog.close();
-                }
-                if (this._rejectLogin) {
-                    this._rejectLogin(new Error("Login cancelled by user."));
-                }
-            },
-
-            // ---------------------------------------------------------------
-            // Backend call
-            // ---------------------------------------------------------------
-
-            _callLogin: function (sEmail, sPassword) {
-                var that = this;
-
-                fetch(AUTH_BASE + "/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    // password is sent over HTTPS in production; never logged here
-                    body: JSON.stringify({ email: sEmail, password: sPassword })
-                })
-                .then(function (oRes) {
-                    if (!oRes.ok) {
-                        return oRes.json().then(function (oErr) {
-                            var sMsg = (oErr && oErr.error && oErr.error.message)
-                                ? oErr.error.message
-                                : "Login failed. Please check your credentials.";
-                            throw new Error(sMsg);
-                        });
-                    }
-                    return oRes.json();
-                })
-                .then(function (oData) {
-                    // Unwrap OData action wrapper if present
-                    var oResult = (oData && oData.value) ? oData.value : oData;
-                    that._persistSession(oResult);
-                    that._setLoading(false);
-                    if (that._oDialog) { that._oDialog.close(); }
-                    MessageToast.show("Welcome, " + oResult.user.displayName + "!");
-                    if (that._resolveLogin) { that._resolveLogin(oResult); }
-                })
-                .catch(function (oErr) {
-                    that._setLoading(false);
-                    that._showError(oErr.message || "An unexpected error occurred. Please try again.");
-                });
-            },
-
-            // ---------------------------------------------------------------
-            // Session helpers (static-like, also called from Component.js)
-            // ---------------------------------------------------------------
-
-            _persistSession: function (oLoginResult) {
-                sessionStorage.setItem(SESSION_KEY_TOKEN,   oLoginResult.token);
-                sessionStorage.setItem(SESSION_KEY_USER,    JSON.stringify(oLoginResult.user));
-                sessionStorage.setItem(SESSION_KEY_EXPIRES, oLoginResult.expiresAt || "");
-            },
-
-            // ---------------------------------------------------------------
-            // UI helpers
-            // ---------------------------------------------------------------
-
-            _showError: function (sMsg) {
-                var oStrip = Fragment.byId("loginFrag", "loginErrorStrip");
-                if (oStrip) {
-                    oStrip.setText(sMsg);
-                    oStrip.setVisible(true);
-                }
-            },
-
-            _setLoading: function (bLoading) {
-                var oBtn = Fragment.byId("loginFrag", "loginButton");
-                if (oBtn) { oBtn.setEnabled(!bLoading); }
+        if (expires) {
+            var expiresAt = new Date(expires);
+            if (!isNaN(expiresAt.getTime()) && expiresAt < new Date()) {
+                LoginSession.clearSession();
+                return false;
             }
-        });
+        }
 
-        // ------------------------------------------------------------------
-        // Static helpers exposed on the constructor so Component.js can use
-        // them without instantiating the controller.
-        // ------------------------------------------------------------------
+        return true;
+    };
 
-        /**
-         * Check whether a valid (non-expired) auth token exists in sessionStorage.
-         */
-        LoginController.isAuthenticated = function () {
-            var sToken   = sessionStorage.getItem(SESSION_KEY_TOKEN);
-            var sExpires = sessionStorage.getItem(SESSION_KEY_EXPIRES);
-            if (!sToken) { return false; }
-            if (sExpires) {
-                var dExpires = new Date(sExpires);
-                if (!isNaN(dExpires.getTime()) && dExpires < new Date()) {
-                    LoginController.clearSession();
-                    return false;
+    /**
+     * Return the stored Bearer token, or null when the browser tab has no session.
+     */
+    LoginSession.getToken = function () {
+        return sessionStorage.getItem(SESSION_KEY_TOKEN);
+    };
+
+    /**
+     * Return the stored safe user profile, or null when it is missing/corrupted.
+     */
+    LoginSession.getUser = function () {
+        var user = sessionStorage.getItem(SESSION_KEY_USER);
+        try {
+            return user ? JSON.parse(user) : null;
+        } catch (e) {
+            return null;
+        }
+    };
+
+    /**
+     * Call AuthService.logout when a token exists, then clear browser session data.
+     */
+    LoginSession.logout = function () {
+        var token = LoginSession.getToken();
+
+        if (token) {
+            fetch(AUTH_BASE + "/logout", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
                 }
-            }
-            return true;
-        };
+            }).catch(function () {
+                // Logout must still clear local state when the network is unavailable.
+            });
+        }
 
-        /**
-         * Return the stored Bearer token (or null if not authenticated).
-         */
-        LoginController.getToken = function () {
-            return sessionStorage.getItem(SESSION_KEY_TOKEN);
-        };
+        LoginSession.clearSession();
+    };
 
-        /**
-         * Return the stored user profile object (or null).
-         */
-        LoginController.getUser = function () {
-            var sUser = sessionStorage.getItem(SESSION_KEY_USER);
-            try { return sUser ? JSON.parse(sUser) : null; }
-            catch (e) { return null; }
-        };
+    /**
+     * Remove all IDTS auth data from the current browser tab.
+     */
+    LoginSession.clearSession = function () {
+        sessionStorage.removeItem(SESSION_KEY_TOKEN);
+        sessionStorage.removeItem(SESSION_KEY_USER);
+        sessionStorage.removeItem(SESSION_KEY_EXPIRES);
+    };
 
-        /**
-         * Call the logout endpoint then clear the local session.
-         */
-        LoginController.logout = function () {
-            var sToken = LoginController.getToken();
-            if (sToken) {
-                // Fire-and-forget: clear session regardless of server response
-                fetch(AUTH_BASE + "/logout", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": "Bearer " + sToken
-                    }
-                }).catch(function () {
-                    // ignore network errors on logout
-                });
-            }
-            LoginController.clearSession();
-        };
-
-        /**
-         * Remove all IDTS auth data from sessionStorage.
-         */
-        LoginController.clearSession = function () {
-            sessionStorage.removeItem(SESSION_KEY_TOKEN);
-            sessionStorage.removeItem(SESSION_KEY_USER);
-            sessionStorage.removeItem(SESSION_KEY_EXPIRES);
-        };
-
-        return LoginController;
-    }
-);
+    return LoginSession;
+});
