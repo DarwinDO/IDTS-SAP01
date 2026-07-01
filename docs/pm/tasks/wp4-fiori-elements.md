@@ -90,6 +90,22 @@ Vietnamese:
 - Bug `Rejected` pháº£i lÃ m rÃµ lÃ½ do reject vÃ  ai cáº§n xá»­ lÃ½ tiáº¿p; khÃ´ng Ä‘á»ƒ user hiá»ƒu nháº§m `Rejected` lÃ  Ä‘Ã£ káº¿t thÃºc.
 - Dependent value help vÃ  assignment candidate behavior pháº£i khá»›p vá»›i logic service WP2/WP3.
 
+## 2026-07-01 IDTS-43 Fiori UX Cleanup
+
+English:
+
+- Applied the IDTS-32 UX findings that belong in the Fiori layer: Priority, Severity, and Environment now use fixed value-list hints; the standard generated Create entry is hidden; a role-aware `Create Bug` header action is available only for Tester/PM; the raw History table facet is removed; and Reopen wording is clearer.
+- The role-aware Create action still relies on backend authorization as the security boundary. The UI only removes confusing entry points for Developer users.
+- Fixed a runtime integration issue found by browser smoke: manifest-based Fiori action handlers do not receive a normal controller `this.getView()` context. `BugListActions.js` now handles the observed Fiori action context and still uses `editFlow.createDocument(...)` for draft creation.
+- Verification evidence: `npm run qa:idts43:programmatic` passed 11/11, CAP compile passed with the existing attachment warning only, UI5 build passed, auth regression passed 23/23, browser smoke passed Developer hidden / Tester visible / PM click create, AI DevKit lint passed, diff check passed with Windows line-ending warnings only, and secret scan found no credential-like key patterns.
+
+Vietnamese:
+
+- Da ap dung cac finding UX cua IDTS-32 thuoc layer Fiori: Priority, Severity va Environment dung fixed value-list hint; nut Create chuan do Fiori sinh ra duoc an; custom action `Create Bug` chi hien voi Tester/PM; raw History table facet duoc bo; wording Reopen ro hon.
+- Role-aware Create van chi la lop UX. Backend authorization van la lop bao ve du lieu that; UI chi giup Developer khong thay duong tao bug gay roi.
+- Da fix loi runtime do browser smoke phat hien: handler action khai bao trong manifest khong nhan context controller co `this.getView()`. `BugListActions.js` hien xu ly dung context Fiori action quan sat duoc va van dung `editFlow.createDocument(...)` de tao draft.
+- Evidence verify: `npm run qa:idts43:programmatic` pass 11/11, CAP compile pass chi con warning attachment cu, UI5 build pass, auth regression pass 23/23, browser smoke pass Developer hidden / Tester visible / PM click create, AI DevKit lint pass, diff check pass chi co Windows line-ending warnings, va secret scan khong thay pattern credential-like key.
+
 ## 2026-06-04 Implementation Update
 
 English:

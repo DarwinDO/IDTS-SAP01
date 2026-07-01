@@ -184,9 +184,37 @@ Vì vậy file này là cầu nối giữa backend workflow actions và UI Fiori
 - Nếu user báo status/buttons bị stale sau action, kiểm tra file này trước khi viết custom UI5 code.
 - Giữ English và Vietnamese tương đương nhau.
 
+## IDTS-43 update - clearer reopen wording
+
+### English
+
+IDTS-43 changes the user-facing reopen wording from `Reopen Bug` to `Reopen Bug for Further Work`, and the action parameter label from `Reason` to `Reason for Reopening`.
+
+This does not change the backend transition. It only makes the Object Page action clearer. In IDTS, reopening means the bug needs more work after it had reached a resolved/closed-like state. The new label reduces the chance that a tester or PM interprets reopen as a generic edit action.
+
+Important anchor:
+
+- Location: `BugService.reopenBug` action label and `BugService.reopenBug.reason` label
+  - IDTS concept: Reopen sends a bug back into active work, so the reason must be explicit and auditable.
+  - Impact if broken: Users may reopen bugs without understanding the workflow meaning, or enter vague reasons.
+  - Must check together: `srv/service.cds` action parameter, `srv/bug-service/actions.js` reopen transition, history side effects in this file, and browser action dialog evidence.
+
+### Vietnamese
+
+IDTS-43 đổi wording hiển thị từ `Reopen Bug` thành `Reopen Bug for Further Work`, và đổi label parameter từ `Reason` thành `Reason for Reopening`.
+
+Thay đổi này không đổi transition backend. Nó chỉ làm action trên Object Page rõ nghĩa hơn. Trong IDTS, reopen nghĩa là bug cần quay lại xử lý sau khi đã ở trạng thái resolved/closed-like. Label mới giảm khả năng Tester hoặc PM hiểu nhầm reopen là một action edit chung chung.
+
+Điểm neo quan trọng:
+
+- Vị trí: label của action `BugService.reopenBug` và label của `BugService.reopenBug.reason`
+  - Khái niệm IDTS: Reopen đưa bug quay lại luồng xử lý, nên lý do phải rõ và audit được.
+  - Ảnh hưởng nếu sai: User có thể reopen bug mà không hiểu ý nghĩa workflow, hoặc nhập lý do quá mơ hồ.
+  - Phải kiểm tra cùng: action parameter trong `srv/service.cds`, reopen transition trong `srv/bug-service/actions.js`, side effects history trong file này, và evidence dialog action trên browser.
+
 ## Metadata
 
 - Source file: `app/bug-management-ui/annotations/actions.cds`
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/annotations/actions.cds.md`
 - Style baseline: `docs/knowledge/guidelines/knowledge-mirror-anchors.md`
-- Last reviewed: 2026-06-22
+- Last reviewed: 2026-07-01

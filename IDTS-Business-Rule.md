@@ -349,6 +349,10 @@ Khi Tester chọn **“Chưa có Developer phù hợp”** và submit bug, bug s
 | Tester chọn Developer cụ thể | Submit bug và assign cho Developer đó | Assigned |
 | Tester chọn “Chưa có Developer phù hợp” | Submit bug để ghi nhận, chưa assign Developer | Pending Assignment |
 
+**English clarification:** IDTS must not automatically pick a Developer during create. If the Tester or PM does not explicitly select an assignee, the bug starts as `Pending Assignment`.
+
+**Giải thích tiếng Việt:** IDTS không được tự chọn Developer khi tạo bug. Nếu Tester hoặc PM không chủ động chọn assignee, bug sẽ bắt đầu ở `Pending Assignment`.
+
 ---
 
 # **E. Business Rules về Developer review bug**

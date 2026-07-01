@@ -80,9 +80,41 @@ Nút action được điều khiển bởi capability (file annotation khác).
 
 Giữ phần phân loại và phân công nổi bật. Khi thêm trường phải cập nhật value help và annotation liên quan. Test trên browser với nhiều vai trò.
 
+## IDTS-43 update - keep one readable History section
+
+### English
+
+IDTS-43 removes the raw `History` table facet that pointed to `historyEvents/@UI.LineItem`.
+
+For a new Fiori learner, a facet is a section/part of the Object Page. Before this cleanup, the Object Page could show both a generated history table and the custom timeline/history section configured through the manifest. That made the same audit concept appear twice and confused manual QA.
+
+The data is not deleted. `HistoryEvents` and `HistoryLogs` still exist in the backend and can still be used by tests/API consumers. The UI simply keeps the friendlier custom History section as the main user-facing view.
+
+Important anchor:
+
+- Location: removed raw facet with `Target : 'historyEvents/@UI.LineItem'`
+  - IDTS concept: History should be readable event history, not duplicate raw audit tables.
+  - Impact if broken: Users may see two History sections and not know which one is the official audit view.
+  - Must check together: `app/bug-management-ui/webapp/manifest.json` custom `History` section, `app/bug-management-ui/webapp/ext/fragment/HistoryTimeline.fragment.xml`, `srv/service.cds` history projections, and `srv/bug-service/history.js`.
+
+### Vietnamese
+
+IDTS-43 bỏ raw facet `History` từng trỏ tới `historyEvents/@UI.LineItem`.
+
+Với người mới học Fiori, facet là một section/phần trên Object Page. Trước khi cleanup, Object Page có thể hiển thị cả bảng history tự sinh và section history/timeline custom trong manifest. Điều này làm cùng một khái niệm audit xuất hiện hai lần và gây rối khi QA thủ công.
+
+Dữ liệu không bị xóa. `HistoryEvents` và `HistoryLogs` vẫn tồn tại ở backend và vẫn dùng được cho test/API. UI chỉ giữ section History thân thiện hơn làm view chính cho người dùng.
+
+Điểm neo quan trọng:
+
+- Vị trí: raw facet bị bỏ với `Target : 'historyEvents/@UI.LineItem'`
+  - Khái niệm IDTS: History nên là lịch sử sự kiện dễ đọc, không phải nhiều bảng audit thô bị lặp.
+  - Ảnh hưởng nếu sai: User có thể thấy hai section History và không biết view nào là audit chính thức.
+  - Phải kiểm tra cùng: custom section `History` trong `app/bug-management-ui/webapp/manifest.json`, `app/bug-management-ui/webapp/ext/fragment/HistoryTimeline.fragment.xml`, history projections trong `srv/service.cds`, và `srv/bug-service/history.js`.
+
 ## Metadata
 
 - Source file: `app/bug-management-ui/annotations/object-page.cds`
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/annotations/object-page.cds.md`
 - Source layer: `app`
-- Last reviewed: 2026-06-22
+- Last reviewed: 2026-07-01

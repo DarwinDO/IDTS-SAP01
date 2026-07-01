@@ -216,6 +216,10 @@ Trạng thái ban đầu của bug sau khi submit có thể phụ thuộc vào t
 
 Nếu bug có Developer phù hợp, bug được ghi nhận trực tiếp ở trạng thái **Assigned**. Nếu chưa có Developer phù hợp, bug được ghi nhận ở trạng thái **Pending Assignment** để PM hoặc Tester theo dõi và phân công sau. Trong create happy flow hiện tại, backend không persist `New`; `New` chỉ còn để tương thích dữ liệu cũ/import.
 
+**English clarification:** IDTS must not automatically pick a Developer during create. If the Tester or PM does not explicitly select an assignee, the bug starts as `Pending Assignment`.
+
+**Tiếng Việt:** IDTS không được tự chọn Developer khi tạo bug. Nếu Tester hoặc PM không chủ động chọn assignee, bug sẽ bắt đầu ở `Pending Assignment`.
+
 Cách này giữ được logic chặt chẽ nhưng vẫn thực tế, vì trong một số trường hợp chưa có Developer phù hợp hoặc Developer đang quá tải.
 
 ---

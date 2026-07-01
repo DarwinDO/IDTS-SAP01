@@ -62,9 +62,51 @@ Hành vi IDTS tùy chỉnh được thêm qua annotation và cấu hình page tr
 
 srv/service.cds, annotations, OPA/browser test, fragment HistoryTimeline.
 
+## IDTS-43 update - custom Create Bug and single History section
+
+### English
+
+IDTS-43 changes two visible Fiori behaviors in this file.
+
+First, the List Report gets a custom header action named `Create Bug`. The standard framework Create is hidden by `app/bug-management-ui/annotations/capabilities.cds`, so this custom action becomes the intended create entry point. It calls `idts.bugmanagementui.ext.actions.BugListActions.createBug` and uses `isCreateVisible` for visibility/enabled state.
+
+Second, the custom Object Page history section is keyed as `History` instead of `HistoryTimeline`, and the raw generated History table facet is removed from `object-page.cds`. This keeps one user-facing History section while preserving backend audit data.
+
+Important anchors:
+
+- Location: `BugsList.options.settings.content.header.actions.CreateBug`
+  - IDTS concept: Role-aware create entry point for Tester/PM.
+  - Impact if broken: Users may lose the create entry point or Developer users may see a misleading create button.
+  - Must check together: `app/bug-management-ui/webapp/ext/actions/BugListActions.js`, `app/bug-management-ui/annotations/capabilities.cds`, `srv/service.js`, and `srv/bug-service/permissions.js`.
+
+- Location: `BugsObjectPage.options.settings.content.body.sections.History`
+  - IDTS concept: One readable history/timeline section on the Object Page.
+  - Impact if broken: The Object Page can show no history or duplicate history sections.
+  - Must check together: `app/bug-management-ui/annotations/object-page.cds`, `app/bug-management-ui/webapp/ext/fragment/HistoryTimeline.fragment.xml`, and history entities in `srv/service.cds`.
+
+### Vietnamese
+
+IDTS-43 thay đổi hai hành vi Fiori nhìn thấy được trong file này.
+
+Thứ nhất, List Report có custom header action tên `Create Bug`. Nút Create chuẩn của framework đã bị ẩn trong `app/bug-management-ui/annotations/capabilities.cds`, nên custom action này trở thành điểm vào chính thức để tạo bug. Nó gọi `idts.bugmanagementui.ext.actions.BugListActions.createBug` và dùng `isCreateVisible` để quyết định visible/enabled.
+
+Thứ hai, custom section History trên Object Page dùng key `History` thay vì `HistoryTimeline`, và raw generated History table facet bị bỏ khỏi `object-page.cds`. Cách này giữ một section History dễ đọc cho user nhưng không xóa dữ liệu audit backend.
+
+Điểm neo quan trọng:
+
+- Vị trí: `BugsList.options.settings.content.header.actions.CreateBug`
+  - Khái niệm IDTS: Điểm tạo bug theo role cho Tester/PM.
+  - Ảnh hưởng nếu sai: User có thể mất điểm tạo bug, hoặc Developer có thể thấy nút create gây hiểu nhầm.
+  - Phải kiểm tra cùng: `app/bug-management-ui/webapp/ext/actions/BugListActions.js`, `app/bug-management-ui/annotations/capabilities.cds`, `srv/service.js`, và `srv/bug-service/permissions.js`.
+
+- Vị trí: `BugsObjectPage.options.settings.content.body.sections.History`
+  - Khái niệm IDTS: Một section history/timeline dễ đọc trên Object Page.
+  - Ảnh hưởng nếu sai: Object Page có thể không hiện history hoặc hiện trùng nhiều section history.
+  - Phải kiểm tra cùng: `app/bug-management-ui/annotations/object-page.cds`, `app/bug-management-ui/webapp/ext/fragment/HistoryTimeline.fragment.xml`, và các history entity trong `srv/service.cds`.
+
 ## Metadata
 
 - Source file: `app/bug-management-ui/webapp/manifest.json`
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/manifest.json.md`
 - Source layer: `app`
-- Last reviewed: 2026-06-27
+- Last reviewed: 2026-07-01
