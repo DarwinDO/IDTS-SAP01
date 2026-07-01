@@ -6,14 +6,16 @@ services:
     plan: free
     branch: dev
     autoDeploy: true
-    buildCommand: npm ci
+    buildCommand: npm ci --include=dev
     startCommand: npm start
-    healthCheckPath: /
+    healthCheckPath: /odata/v4/auth/$metadata
     envVars:
       - key: NODE_ENV
         value: production
       - key: CDS_ENV
         value: integration
+      - key: cds_log_levels
+        value: '{"cds.serve":"warn"}'
       - key: DATABASE_URL
         fromDatabase:
           name: idts-sap01-qa-db
