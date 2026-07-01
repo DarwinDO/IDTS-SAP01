@@ -105,6 +105,18 @@
               "enhanceI18n": "i18n/i18n.properties",
               "variantManagement": "Page",
               "initialLoad": "Enabled",
+              "content": {
+                "header": {
+                  "actions": {
+                    "CreateBug": {
+                      "press": "idts.bugmanagementui.ext.actions.BugListActions.createBug",
+                      "visible": "idts.bugmanagementui.ext.actions.BugListActions.isCreateVisible",
+                      "enabled": "idts.bugmanagementui.ext.actions.BugListActions.isCreateVisible",
+                      "text": "{i18n>createBug}"
+                    }
+                  }
+                }
+              },
               "views": {
                 "showCounts": true,
                 "paths": [
@@ -185,7 +197,7 @@
               "content": {
                 "body": {
                   "sections": {
-                    "HistoryTimeline": {
+                    "History": {
                       "title": "{i18n>historyTimelineTitle}",
                       "type": "XMLFragment",
                       "name": "idts.bugmanagementui.ext.fragment.HistoryTimeline",

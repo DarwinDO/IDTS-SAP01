@@ -144,9 +144,37 @@ Khi tạo hoặc sửa bug, file này hỗ trợ flow phân loại và phân cô
 - Với hành vi Fiori nhìn thấy được, chạy thêm UI5 build và kiểm tra popup value help liên quan trên browser.
 - Nếu file này đổi, phải cập nhật note này vì mapping giữa source property, backend lookup entity và wording hiển thị rất dễ bị lệch.
 
+## IDTS-43 update - fixed value lists for key catalog fields
+
+### English
+
+IDTS-43 adds `@Common.ValueListWithFixedValues : true` to `priority.code`, `severity.code`, and `environment.code`.
+
+For a new Fiori learner, this means Fiori should treat these three fields like controlled dropdown/value-list fields, not like open text inputs. The backend still performs the final validation in `srv/bug-service/bug-write.js`, but the UI now gives the user the safer interaction first: choose from the configured catalog instead of typing an arbitrary code.
+
+Important anchor:
+
+- Location: `annotate service.Bugs:priority.code`, `annotate service.Bugs:severity.code`, `annotate service.Bugs:environment.code`
+  - IDTS concept: Priority, Severity, and Environment are catalog values, not free-text descriptions.
+  - Impact if broken: Users can type invalid values more easily, which leads to backend 400 errors or confusing create/edit forms.
+  - Must check together: `db/schema.cds` value-list associations, `srv/bug-service/bug-write.js` active-code validation, `srv/service.cds` projections for Priority/Severity/Environment, and seed files under `db/data/`.
+
+### Vietnamese
+
+IDTS-43 thêm `@Common.ValueListWithFixedValues : true` cho `priority.code`, `severity.code`, và `environment.code`.
+
+Với người mới học Fiori, điều này nghĩa là Fiori nên xem ba field này như field chọn từ danh sách chuẩn, không phải ô nhập text tự do. Backend vẫn là lớp kiểm tra cuối cùng trong `srv/bug-service/bug-write.js`, nhưng UI giờ hướng user theo cách an toàn hơn trước: chọn từ catalog đã cấu hình thay vì tự gõ một code bất kỳ.
+
+Điểm neo quan trọng:
+
+- Vị trí: `annotate service.Bugs:priority.code`, `annotate service.Bugs:severity.code`, `annotate service.Bugs:environment.code`
+  - Khái niệm IDTS: Priority, Severity, và Environment là giá trị catalog, không phải mô tả text tự do.
+  - Ảnh hưởng nếu sai: User dễ nhập giá trị không hợp lệ hơn, dẫn tới lỗi backend 400 hoặc form tạo/sửa gây khó hiểu.
+  - Phải kiểm tra cùng: association value-list trong `db/schema.cds`, validation catalog active trong `srv/bug-service/bug-write.js`, projection Priority/Severity/Environment trong `srv/service.cds`, và seed files trong `db/data/`.
+
 ## Metadata
 
 - Source file: `app/bug-management-ui/annotations/value-helps.cds`
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/annotations/value-helps.cds.md`
 - Source layer: `app`
-- Last reviewed: 2026-06-23
+- Last reviewed: 2026-07-01

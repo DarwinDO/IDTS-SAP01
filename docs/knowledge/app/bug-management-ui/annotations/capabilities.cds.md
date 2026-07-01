@@ -48,9 +48,41 @@ Các annotation `@UI.Hidden` theo canXXX.
 
 service.cds, read-models, permissions, actions.cds.
 
+## IDTS-43 update - hide the standard Create action
+
+### English
+
+IDTS-43 adds `UI.CreateHidden : true`.
+
+This is not a backend permission rule. It is a Fiori UI rule that hides the generated standard Create button. IDTS now uses a custom List Report action named `Create Bug`, because create visibility depends on the logged-in role from the custom login session. Tester and PM can see the custom action; Developer should not see it.
+
+The backend remains the security boundary. Even if a user manipulates browser storage or calls OData directly, `srv/bug-service/permissions.js` and `srv/service.js` must still reject unauthorized create/draft-create attempts.
+
+Important anchor:
+
+- Location: `UI.CreateHidden : true`
+  - IDTS concept: Create Bug is role-aware. It is allowed for Tester/PM and hidden from Developer.
+  - Impact if broken: The standard Create button can appear to Developer users, causing a confusing UI/backend mismatch.
+  - Must check together: `app/bug-management-ui/webapp/manifest.json` custom `CreateBug` action, `app/bug-management-ui/webapp/ext/actions/BugListActions.js`, `srv/service.js` `NEW` draft guard, and `srv/bug-service/permissions.js`.
+
+### Vietnamese
+
+IDTS-43 thêm `UI.CreateHidden : true`.
+
+Đây không phải rule phân quyền backend. Đây là rule UI của Fiori để ẩn nút Create chuẩn do framework tự sinh. IDTS hiện dùng một custom action ở List Report tên là `Create Bug`, vì việc nút tạo bug có hiện hay không phụ thuộc vào role của user trong custom login session. Tester và PM được thấy custom action; Developer không nên thấy.
+
+Backend vẫn là lớp bảo vệ thật. Kể cả khi user sửa browser storage hoặc gọi OData trực tiếp, `srv/bug-service/permissions.js` và `srv/service.js` vẫn phải chặn create/draft-create không hợp lệ.
+
+Điểm neo quan trọng:
+
+- Vị trí: `UI.CreateHidden : true`
+  - Khái niệm IDTS: Create Bug phải theo role. Tester/PM được tạo, Developer bị ẩn.
+  - Ảnh hưởng nếu sai: Nút Create chuẩn có thể hiện cho Developer, làm UI và backend lệch nhau.
+  - Phải kiểm tra cùng: custom action `CreateBug` trong `app/bug-management-ui/webapp/manifest.json`, `app/bug-management-ui/webapp/ext/actions/BugListActions.js`, draft guard `NEW` trong `srv/service.js`, và `srv/bug-service/permissions.js`.
+
 ## Metadata
 
 - Source file: `app/bug-management-ui/annotations/capabilities.cds`
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/annotations/capabilities.cds.md`
 - Source layer: `app`
-- Last reviewed: 2026-06-22
+- Last reviewed: 2026-07-01

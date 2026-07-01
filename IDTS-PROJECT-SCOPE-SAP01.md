@@ -134,9 +134,13 @@ Logic :
 
 Tester chọn module/category  
 → Hệ thống hiển thị danh sách Developer thuộc module đó  
-→ Tester chọn Developer phù hợp  
+→ Tester chọn Developer phù hợp hoặc chủ động để bug ở `Pending Assignment` khi chưa có Developer phù hợp
 → Hệ thống kiểm tra workload/availability nếu có  
 → Assign bug cho Developer
+
+**English clarification:** IDTS must not automatically pick a Developer during create. If the Tester or PM does not explicitly select an assignee, the bug starts as `Pending Assignment`.
+
+**Tiếng Việt:** IDTS không được tự chọn Developer khi tạo bug. Nếu Tester hoặc PM không chủ động chọn assignee, bug sẽ bắt đầu ở `Pending Assignment`.
 
 Nếu Developer đang bận hoặc workload không phù hợp:
 

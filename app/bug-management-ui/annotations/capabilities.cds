@@ -1,6 +1,7 @@
 using BugService as service from '../../../srv/service';
 
 annotate service.Bugs with @(
+  UI.CreateHidden : true,
   Capabilities.InsertRestrictions : {
     Insertable : true
   },

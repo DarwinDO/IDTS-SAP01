@@ -21,7 +21,7 @@ annotate service.Bugs:status.code with @Common.FieldControl : #ReadOnly @Common.
     ]
   };
 
-annotate service.Bugs:priority.code with @Common.ValueList : {
+annotate service.Bugs:priority.code with @Common.ValueListWithFixedValues : true @Common.ValueList : {
     Label : 'Priority',
     CollectionPath : 'PriorityValues',
     SearchSupported : true,
@@ -38,7 +38,7 @@ annotate service.Bugs:priority.code with @Common.ValueList : {
     ]
   };
 
-annotate service.Bugs:severity.code with @Common.ValueList : {
+annotate service.Bugs:severity.code with @Common.ValueListWithFixedValues : true @Common.ValueList : {
     Label : 'Severity',
     CollectionPath : 'SeverityValues',
     SearchSupported : true,
@@ -55,7 +55,7 @@ annotate service.Bugs:severity.code with @Common.ValueList : {
     ]
   };
 
-annotate service.Bugs:environment.code with @Common.ValueList : {
+annotate service.Bugs:environment.code with @Common.ValueListWithFixedValues : true @Common.ValueList : {
     Label : 'Environment',
     CollectionPath : 'EnvironmentValues',
     SearchSupported : true,
