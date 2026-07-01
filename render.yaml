@@ -1,6 +1,7 @@
 services:
   - type: web
     name: idts-sap01-qa
+    repo: https://github.com/DarwinDO/IDTS-SAP01
     runtime: node
     plan: free
     branch: dev

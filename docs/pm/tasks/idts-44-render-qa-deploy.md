@@ -105,6 +105,9 @@ Local verification before PR:
 | `npm run render:env:db` without injected URL | PASS - CAP resolves PostgreSQL profile with `credentials.url = null`, ready for injected env. |
 | `npm run render:env:db` with temporary fake `cds_requires_db_credentials_url` | PASS - CAP reads the injected URL under `requires.db.credentials.url`. |
 | `render.yaml` static check | PASS - service, database, `fromDatabase`, `sync: false`, and `npm start` are present. |
+| `render blueprints validate` before repo fix | FAIL - Render CLI requires `services[0].repo` for git-backed services. |
+| `render.yaml` repo follow-up | PASS - added `repo: https://github.com/DarwinDO/IDTS-SAP01`. |
+| `render blueprints validate` after repo fix | PASS - valid plan with service `idts-sap01-qa` and database `idts-sap01-qa-db`. |
 | `npx cds compile srv app/bug-management-ui --to edmx -s all` | PASS - exit 0; known attachment annotation warning remains non-blocking. |
 | `npm run qa:auth:programmatic` | PASS - 23 PASS / 0 FAIL. |
 | `npm run qa:email-outbox:programmatic` | PASS. |
@@ -121,6 +124,9 @@ Vietnamese:
 | `npm run render:env:db` khi chua inject URL | PASS - CAP nhan profile PostgreSQL voi `credentials.url = null`, san sang nhan env inject. |
 | `npm run render:env:db` voi fake `cds_requires_db_credentials_url` tam thoi | PASS - CAP doc URL inject dung vao `requires.db.credentials.url`. |
 | Static check `render.yaml` | PASS - co service, database, `fromDatabase`, `sync: false`, va `npm start`. |
+| `render blueprints validate` truoc fix repo | FAIL - Render CLI yeu cau `services[0].repo` cho Git-backed service. |
+| Follow-up repo trong `render.yaml` | PASS - da them `repo: https://github.com/DarwinDO/IDTS-SAP01`. |
+| `render blueprints validate` sau fix repo | PASS - plan hop le voi service `idts-sap01-qa` va database `idts-sap01-qa-db`. |
 | `npx cds compile srv app/bug-management-ui --to edmx -s all` | PASS - exit 0; warning attachment annotation da biet van non-blocking. |
 | `npm run qa:auth:programmatic` | PASS - 23 PASS / 0 FAIL. |
 | `npm run qa:email-outbox:programmatic` | PASS. |
