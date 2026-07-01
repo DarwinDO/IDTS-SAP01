@@ -126,6 +126,7 @@
     },
     "log": {
       "levels": {
+        "cds": "warn",
         "cds.serve": "warn"
       }
     }
