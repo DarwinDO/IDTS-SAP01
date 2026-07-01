@@ -16,14 +16,28 @@ services:
         value: integration
       - key: CDS_LOG_LEVEL
         value: warn
-      - key: DATABASE_URL
+      - key: cds_requires_db_credentials_host
         fromDatabase:
           name: idts-sap01-qa-db
-          property: connectionString
-      - key: cds_requires_db_credentials_url
+          property: host
+      - key: cds_requires_db_credentials_port
         fromDatabase:
           name: idts-sap01-qa-db
-          property: connectionString
+          property: port
+      - key: cds_requires_db_credentials_user
+        fromDatabase:
+          name: idts-sap01-qa-db
+          property: user
+      - key: cds_requires_db_credentials_password
+        fromDatabase:
+          name: idts-sap01-qa-db
+          property: password
+      - key: cds_requires_db_credentials_database
+        fromDatabase:
+          name: idts-sap01-qa-db
+          property: database
+      - key: cds_requires_db_credentials_ssl
+        value: true
       - key: cds_requires_objectStore_credentials_bucket
         sync: false
       - key: cds_requires_objectStore_credentials_region
