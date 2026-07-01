@@ -123,6 +123,11 @@
         "maxConnections": 3,
         "testMode": false
       }
+    },
+    "log": {
+      "levels": {
+        "cds.serve": "warn"
+      }
     }
   }
 }

@@ -108,6 +108,12 @@ Local verification before PR:
 | `render blueprints validate` before repo fix | FAIL - Render CLI requires `services[0].repo` for git-backed services. |
 | `render.yaml` repo follow-up | PASS - added `repo: https://github.com/DarwinDO/IDTS-SAP01`. |
 | `render blueprints validate` after repo fix | PASS - valid plan with service `idts-sap01-qa` and database `idts-sap01-qa-db`. |
+| First Render service creation | SECURITY ISSUE - CAP startup log printed the PostgreSQL URL; the temporary service and DB were deleted immediately before schema/data setup. |
+| Replacement Render service creation | IN PROGRESS - recreated Postgres and web service with `cds_log_levels={"cds.serve":"warn"}` to suppress CAP connection credential logging. |
+| Replacement log verification | FAIL - Render still logged the PostgreSQL URL; move mitigation from Render env-only to CAP config `cds.log.levels["cds.serve"]="warn"` in `package.json`, then rotate DB/service again. |
+| First public login page smoke | FAIL - service returned HTTP 404 for `/bug-management-ui/webapp/login.html`; likely build omitted devDependency `cds-plugin-ui5` because `NODE_ENV=production` was present during `npm ci`. |
+| Render build command follow-up | IN PROGRESS - change QA build command to `npm ci --include=dev` so `cds-plugin-ui5` is available for the shared QA preview service. |
+| Render health check follow-up | IN PROGRESS - change health check from `/` to `/odata/v4/auth/$metadata` because CAP does not serve a root route for this app. |
 | `npx cds compile srv app/bug-management-ui --to edmx -s all` | PASS - exit 0; known attachment annotation warning remains non-blocking. |
 | `npm run qa:auth:programmatic` | PASS - 23 PASS / 0 FAIL. |
 | `npm run qa:email-outbox:programmatic` | PASS. |
@@ -127,6 +133,12 @@ Vietnamese:
 | `render blueprints validate` truoc fix repo | FAIL - Render CLI yeu cau `services[0].repo` cho Git-backed service. |
 | Follow-up repo trong `render.yaml` | PASS - da them `repo: https://github.com/DarwinDO/IDTS-SAP01`. |
 | `render blueprints validate` sau fix repo | PASS - plan hop le voi service `idts-sap01-qa` va database `idts-sap01-qa-db`. |
+| Tao Render service lan dau | SECURITY ISSUE - log startup cua CAP da in PostgreSQL URL; temporary service va DB da bi xoa ngay truoc khi setup schema/data. |
+| Tao lai Render service | IN PROGRESS - da tao lai Postgres va web service voi `cds_log_levels={"cds.serve":"warn"}` de chan CAP log connection credential. |
+| Verify log replacement | FAIL - Render van log PostgreSQL URL; chuyen mitigation tu Render env-only sang CAP config `cds.log.levels["cds.serve"]="warn"` trong `package.json`, sau do rotate DB/service lan nua. |
+| Smoke public login page lan dau | FAIL - service tra HTTP 404 cho `/bug-management-ui/webapp/login.html`; kha nang cao build bo qua devDependency `cds-plugin-ui5` vi `NODE_ENV=production` co trong luc chay `npm ci`. |
+| Follow-up build command Render | IN PROGRESS - doi QA build command thanh `npm ci --include=dev` de `cds-plugin-ui5` co mat cho shared QA preview service. |
+| Follow-up health check Render | IN PROGRESS - doi health check tu `/` sang `/odata/v4/auth/$metadata` vi CAP khong serve root route cho app nay. |
 | `npx cds compile srv app/bug-management-ui --to edmx -s all` | PASS - exit 0; warning attachment annotation da biet van non-blocking. |
 | `npm run qa:auth:programmatic` | PASS - 23 PASS / 0 FAIL. |
 | `npm run qa:email-outbox:programmatic` | PASS. |
