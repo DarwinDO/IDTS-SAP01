@@ -54,9 +54,9 @@ Vietnamese: Các lệnh verify chính đã pass. Cảnh báo CAP về attachment
 
 ## Remaining handoff
 
-- After this branch is merged, require the `qa-depth-gate` GitHub Action in branch protection for `dev`.
+- Branch protection for `dev` now requires the `qa-depth-gate` GitHub Action.
 - NhanT should reuse `scripts/qa/lib/browser-harness.js` when hardening PR #33 or future browser QA scripts.
 - SangVN should retest IDTS-32 after IDTS-41, IDTS-42, and IDTS-43 are all on `dev`.
 - Scheduled automation can later inspect PRs for missing evidence and remote branches that are ahead of `dev` without an open PR.
 
-Vietnamese: Sau khi merge, cần bật branch protection yêu cầu `qa-depth-gate` pass. NhanT nên dùng browser harness mới cho PR #33 và các script QA sau này. SangVN retest IDTS-32 khi IDTS-41/42/43 đều đã vào `dev`.
+Vietnamese: Branch protection cua `dev` hien da yeu cau GitHub Action `qa-depth-gate` pass. NhanT nen dung browser harness moi cho PR #33 va cac script QA sau nay. SangVN retest IDTS-32 khi IDTS-41/42/43 deu da vao `dev`.
