@@ -120,6 +120,8 @@ Local verification before PR:
 | Render bootstrap with field DB env and `ssl=false` | PASS - service `srv-d92jk67aqgkc739h6ah0` became live from commit `e4b2d2f`; public AuthService metadata returned 200, login page returned 200, protected BugService anonymous metadata returned 401. |
 | Render DB URL log scan after successful bootstrap | PASS - redacted log scan from deploy start found no raw `postgresql://` match. |
 | Render PostgreSQL schema/data inspection | PASS - temporary IP allowlist plus Node `pg` confirmed CAP tables exist and `idts_cap_users` has 4 users; allowlist was cleared after inspection. |
+| Render QA user password state inspection | PASS - PostgreSQL has 4 active seed users, but all currently have no `passwordhash`; login verification is pending until DonHV supplies private password env vars. |
+| Render QA password helper | PASS - added and verified `npm run render:auth:set-qa-passwords`; syntax/help checks pass, missing DB URL fails safely without writing data, secret scan passes, and docs explain temporary allowlist cleanup. |
 | Render runtime command cleanup | PARTIAL - service config was updated from bootstrap command to `npm start`, but the follow-up manual deploy stayed in `build_in_progress` after `npm ci`; it was canceled to keep the already-live bootstrap deploy stable. |
 | First public login page smoke | FAIL - service returned HTTP 404 for `/bug-management-ui/webapp/login.html`; likely build omitted devDependency `cds-plugin-ui5` because `NODE_ENV=production` was present during `npm ci`. |
 | Render build command follow-up | IN PROGRESS - change QA build command to `npm ci --include=dev` so `cds-plugin-ui5` is available for the shared QA preview service. |
@@ -155,6 +157,8 @@ Vietnamese:
 | Render bootstrap with field DB env and `ssl=false` | PASS - service `srv-d92jk67aqgkc739h6ah0` became live from commit `e4b2d2f`; public AuthService metadata returned 200, login page returned 200, protected BugService anonymous metadata returned 401. |
 | Render DB URL log scan after successful bootstrap | PASS - redacted log scan from deploy start found no raw `postgresql://` match. |
 | Kiem tra schema/data PostgreSQL tren Render | PASS - dung temporary IP allowlist va Node `pg` de xac nhan CAP tables ton tai, `idts_cap_users` co 4 users; allowlist da duoc clear sau khi inspect. |
+| Kiem tra password state user QA tren Render | PASS - PostgreSQL co 4 active seed users, nhung tat ca chua co `passwordhash`; verify login dang cho DonHV nhap password private qua env. |
+| Helper set password QA tren Render | PASS - da them va verify `npm run render:auth:set-qa-passwords`; syntax/help pass, thieu DB URL thi fail an toan khong ghi data, secret scan pass, docs giai thich cach clear temporary allowlist. |
 | Render runtime command cleanup | PARTIAL - service config was updated from bootstrap command to `npm start`, but the follow-up manual deploy stayed in `build_in_progress` after `npm ci`; it was canceled to keep the already-live bootstrap deploy stable. |
 | Smoke public login page lan dau | FAIL - service tra HTTP 404 cho `/bug-management-ui/webapp/login.html`; kha nang cao build bo qua devDependency `cds-plugin-ui5` vi `NODE_ENV=production` co trong luc chay `npm ci`. |
 | Follow-up build command Render | IN PROGRESS - doi QA build command thanh `npm ci --include=dev` de `cds-plugin-ui5` co mat cho shared QA preview service. |

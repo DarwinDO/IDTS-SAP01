@@ -38,7 +38,7 @@ Render runs one Node.js web service from this repository:
 - Runtime: Node.js
 - Start command: `npm start`
 - CAP profile: `integration`
-- Database: Render PostgreSQL, injected into CAP through `cds_requires_db_credentials_url`
+- Database: Render PostgreSQL, injected into CAP through field credentials such as `cds_requires_db_credentials_host`, `cds_requires_db_credentials_user`, `cds_requires_db_credentials_password`, `cds_requires_db_credentials_database`, and `cds_requires_db_credentials_port`
 - Attachment binary storage: AWS S3, injected through `cds_requires_objectStore_credentials_*`
 - Email provider: Brevo SMTP, injected through `cds_idts_email_*`
 
@@ -50,7 +50,7 @@ Render sẽ chạy một web service Node.js từ repo này:
 - Runtime: Node.js
 - Lệnh start: `npm start`
 - Profile CAP: `integration`
-- Database: Render PostgreSQL, inject vào CAP bằng `cds_requires_db_credentials_url`
+- Database: Render PostgreSQL, inject vào CAP bằng các field credential như `cds_requires_db_credentials_host`, `cds_requires_db_credentials_user`, `cds_requires_db_credentials_password`, `cds_requires_db_credentials_database`, và `cds_requires_db_credentials_port`
 - Nội dung file attachment: AWS S3, inject bằng `cds_requires_objectStore_credentials_*`
 - Gửi email: Brevo SMTP, inject bằng `cds_idts_email_*`
 
@@ -61,7 +61,7 @@ CAP reads nested configuration from environment variables by using underscore pa
 Example:
 
 ```text
-cds_requires_db_credentials_url
+cds_requires_db_credentials_host
 ```
 
 means:
@@ -72,7 +72,7 @@ means:
     "requires": {
       "db": {
         "credentials": {
-          "url": "..."
+            "host": "..."
         }
       }
     }
@@ -82,6 +82,30 @@ means:
 
 That is why the Blueprint uses `cds_requires_*` and `cds_idts_*` variables instead of putting credentials into source files.
 
+Current Render QA note: the working PostgreSQL configuration uses field credentials instead of a single `credentials.url` value. In this project version, `@cap-js/postgres` connects correctly with:
+
+```text
+cds_requires_db_credentials_host
+cds_requires_db_credentials_port
+cds_requires_db_credentials_user
+cds_requires_db_credentials_password
+cds_requires_db_credentials_database
+cds_requires_db_credentials_ssl=false
+```
+
+Vietnamese:
+
+Ghi chú hiện tại cho Render QA: cấu hình PostgreSQL đang chạy ổn bằng các field credential riêng, không dùng một biến `credentials.url` duy nhất. Với version hiện tại của project, `@cap-js/postgres` kết nối đúng bằng:
+
+```text
+cds_requires_db_credentials_host
+cds_requires_db_credentials_port
+cds_requires_db_credentials_user
+cds_requires_db_credentials_password
+cds_requires_db_credentials_database
+cds_requires_db_credentials_ssl=false
+```
+
 Vietnamese:
 
 CAP đọc config lồng nhau từ biến môi trường bằng cách dùng tên biến có dấu gạch dưới.
@@ -89,7 +113,7 @@ CAP đọc config lồng nhau từ biến môi trường bằng cách dùng tên
 Ví dụ:
 
 ```text
-cds_requires_db_credentials_url
+cds_requires_db_credentials_host
 ```
 
 có nghĩa là:
@@ -100,7 +124,7 @@ có nghĩa là:
     "requires": {
       "db": {
         "credentials": {
-          "url": "..."
+            "host": "..."
         }
       }
     }
@@ -204,7 +228,7 @@ After the Render service is created, open the Render Shell for the web service a
 npm run render:db:deploy
 ```
 
-This runs `cds-deploy` using the `integration` profile and the PostgreSQL URL injected by Render.
+This runs `cds-deploy` using the `integration` profile and the PostgreSQL credentials injected by Render.
 
 Vietnamese:
 
@@ -216,7 +240,7 @@ Sau khi Render service được tạo, mở Render Shell của web service và c
 npm run render:db:deploy
 ```
 
-Lệnh này chạy `cds-deploy` bằng profile `integration` và PostgreSQL URL do Render inject.
+Lệnh này chạy `cds-deploy` bằng profile `integration` và PostgreSQL credentials do Render inject.
 
 ## First password setup
 
@@ -253,6 +277,78 @@ unset IDTS_AUTH_PASSWORD
 Lặp lại cho từng account QA cần đăng nhập.
 
 Lưu ý: command chỉ ghi password hash vào database. Không được in hoặc lưu plaintext password vào source control.
+
+## Current password setup path with Render CLI
+
+Render free-plan one-off jobs and pre-deploy commands may be unavailable. If Render Shell is not available, DonHV can set QA password hashes from the local machine with the Render CLI and the repository helper script.
+
+This path still keeps secrets out of source control:
+
+- Render CLI reads the private PostgreSQL connection string.
+- The password is read only from a local environment variable.
+- The helper writes only password hashes to PostgreSQL.
+- The temporary PostgreSQL IP allowlist entry must be removed after the command.
+
+PowerShell example for setting the same temporary QA password for all four seed users:
+
+```powershell
+$render = Join-Path $env:USERPROFILE '.local\bin\render.exe'
+$dbId = 'dpg-d92j3g4vikkc738fu670-a'
+$yourIp = '<your-current-public-ip>'
+
+& $render postgres update $dbId --ip-allow-list "cidr=$yourIp/32,description=temporary-password-setup" --confirm -o json | Out-Null
+try {
+  $db = (& $render postgres get $dbId --include-sensitive-connection-info -o json | ConvertFrom-Json).data
+  $env:IDTS_RENDER_DATABASE_URL = $db.connectionInfo.externalConnectionString
+  $env:IDTS_QA_SHARED_PASSWORD = '<private-temporary-password>'
+  npm run render:auth:set-qa-passwords
+} finally {
+  Remove-Item Env:\IDTS_RENDER_DATABASE_URL -ErrorAction SilentlyContinue
+  Remove-Item Env:\IDTS_QA_SHARED_PASSWORD -ErrorAction SilentlyContinue
+  & $render postgres update $dbId --clear-ip-allow-list --confirm -o json | Out-Null
+}
+```
+
+PowerShell example for setting one user only:
+
+```powershell
+$env:IDTS_AUTH_EMAIL = 'donhv@example.local'
+$env:IDTS_AUTH_PASSWORD = '<private-password>'
+npm run render:auth:set-qa-passwords
+Remove-Item Env:\IDTS_AUTH_EMAIL -ErrorAction SilentlyContinue
+Remove-Item Env:\IDTS_AUTH_PASSWORD -ErrorAction SilentlyContinue
+```
+
+Vietnamese:
+
+Render free plan có thể không cho chạy one-off job hoặc pre-deploy command. Nếu Render Shell không dùng được, DonHV có thể set password hash cho QA từ máy local bằng Render CLI và helper script trong repo.
+
+Cách này vẫn giữ secret an toàn:
+
+- Render CLI đọc private PostgreSQL connection string.
+- Password chỉ được đọc từ biến môi trường local.
+- Helper chỉ ghi password hash vào PostgreSQL.
+- Temporary PostgreSQL IP allowlist phải được gỡ sau khi chạy xong.
+
+Ví dụ PowerShell để set cùng một temporary QA password cho bốn user seed:
+
+```powershell
+$render = Join-Path $env:USERPROFILE '.local\bin\render.exe'
+$dbId = 'dpg-d92j3g4vikkc738fu670-a'
+$yourIp = '<public-ip-hien-tai-cua-ban>'
+
+& $render postgres update $dbId --ip-allow-list "cidr=$yourIp/32,description=temporary-password-setup" --confirm -o json | Out-Null
+try {
+  $db = (& $render postgres get $dbId --include-sensitive-connection-info -o json | ConvertFrom-Json).data
+  $env:IDTS_RENDER_DATABASE_URL = $db.connectionInfo.externalConnectionString
+  $env:IDTS_QA_SHARED_PASSWORD = '<private-temporary-password>'
+  npm run render:auth:set-qa-passwords
+} finally {
+  Remove-Item Env:\IDTS_RENDER_DATABASE_URL -ErrorAction SilentlyContinue
+  Remove-Item Env:\IDTS_QA_SHARED_PASSWORD -ErrorAction SilentlyContinue
+  & $render postgres update $dbId --clear-ip-allow-list --confirm -o json | Out-Null
+}
+```
 
 ## Verification after deploy
 
@@ -294,7 +390,7 @@ If the app cannot start:
 
 - check Render logs first;
 - confirm `CDS_ENV=integration`;
-- confirm `cds_requires_db_credentials_url` exists;
+- confirm the Render database field credentials exist, especially `cds_requires_db_credentials_host`, `cds_requires_db_credentials_user`, `cds_requires_db_credentials_password`, `cds_requires_db_credentials_database`, and `cds_requires_db_credentials_port`;
 - run `npm run render:env:db` in the Render Shell to inspect DB config shape without printing unrelated secrets.
 
 If SMTP causes noise:
@@ -315,7 +411,7 @@ Nếu app không start:
 
 - kiểm tra Render logs trước;
 - xác nhận `CDS_ENV=integration`;
-- xác nhận có `cds_requires_db_credentials_url`;
+- xác nhận có các field credential của Render database, đặc biệt là `cds_requires_db_credentials_host`, `cds_requires_db_credentials_user`, `cds_requires_db_credentials_password`, `cds_requires_db_credentials_database`, và `cds_requires_db_credentials_port`;
 - chạy `npm run render:env:db` trong Render Shell để xem shape config DB, không in các secret không liên quan.
 
 Nếu SMTP gây lỗi hoặc spam:
