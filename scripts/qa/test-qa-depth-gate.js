@@ -27,6 +27,10 @@ function main() {
   assert.strictEqual(result.pass, true, result.errors.join('\n'))
   console.log('  PASS  valid PR body passes')
 
+  result = validatePullRequestBody(`\uFEFF${validBody()}`)
+  assert.strictEqual(result.pass, true, result.errors.join('\n'))
+  console.log('  PASS  valid PR body with UTF-8 BOM passes')
+
   result = validatePullRequestBody(section('Summary', 'Only summary is present.'))
   assert.strictEqual(result.pass, false)
   assert(result.errors.some(error => /Missing required section: Positive Evidence/.test(error)))
@@ -55,7 +59,7 @@ function main() {
   assert.strictEqual(isUnexpectedConsoleError('Failed to load resource: the server responded with a status of 404'), false)
   console.log('  PASS  browser harness console classifier keeps runtime TypeError blocking')
 
-  console.log('\nQA Depth Gate self-test: 5 PASS / 0 FAIL')
+  console.log('\nQA Depth Gate self-test: 6 PASS / 0 FAIL')
 }
 
 try {

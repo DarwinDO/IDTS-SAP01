@@ -52,7 +52,7 @@ function normalizeHeading(text) {
 
 function extractSections(markdown) {
   const sections = new Map()
-  const lines = markdown.split(/\r?\n/)
+  const lines = markdown.replace(/^\uFEFF/, '').split(/\r?\n/)
   let current = null
   let buffer = []
 

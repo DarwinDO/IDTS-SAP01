@@ -108,7 +108,7 @@ Local verification before PR:
 | `npx cds compile srv app/bug-management-ui --to edmx -s all` | PASS - exit 0; known attachment annotation warning remains non-blocking. |
 | `npm run qa:auth:programmatic` | PASS - 23 PASS / 0 FAIL. |
 | `npm run qa:email-outbox:programmatic` | PASS. |
-| `npm run qa:depth:self-test` | PASS - 5 PASS / 0 FAIL. |
+| `npm run qa:depth:self-test` | PASS - 6 PASS / 0 FAIL after adding UTF-8 BOM coverage for PR bodies created from PowerShell files. |
 | `npm run qa:secret-scan` | PASS - no credential-like key patterns found. |
 | `npx ai-devkit@latest lint --json` | PASS - 5 ok / 0 miss / 0 warn. |
 | `git diff --check` | PASS - exit 0; Windows line-ending warnings only. |
@@ -124,7 +124,7 @@ Vietnamese:
 | `npx cds compile srv app/bug-management-ui --to edmx -s all` | PASS - exit 0; warning attachment annotation da biet van non-blocking. |
 | `npm run qa:auth:programmatic` | PASS - 23 PASS / 0 FAIL. |
 | `npm run qa:email-outbox:programmatic` | PASS. |
-| `npm run qa:depth:self-test` | PASS - 5 PASS / 0 FAIL. |
+| `npm run qa:depth:self-test` | PASS - 6 PASS / 0 FAIL sau khi them coverage UTF-8 BOM cho PR body tao tu file PowerShell. |
 | `npm run qa:secret-scan` | PASS - khong phat hien pattern credential. |
 | `npx ai-devkit@latest lint --json` | PASS - 5 ok / 0 miss / 0 warn. |
 | `git diff --check` | PASS - exit 0; chi co warning line-ending tren Windows. |
