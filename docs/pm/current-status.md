@@ -1,16 +1,16 @@
 # Current Project Status
 
-Last updated: 2026-06-30
+Last updated: 2026-07-01
 
 ## Snapshot
 
 | Field | Current value |
 | --- | --- |
-| Project phase | Sprint 02 baseline is stable in `dev`; Sprint 03 integration is implementing SMTP email delivery after the merged custom-login slice |
+| Project phase | Sprint 02 baseline is stable in `dev`; Sprint 03 integration is preparing a shared Render QA environment after the merged auth, login UI, SMTP/outbox, and QA-depth-gate slices |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
-| Current sprint | Sprint 03 custom authentication, login UI, and SMTP/outbox backend slices are merged; FE/QA work continues through `IDTS-37` and `IDTS-38` |
-| Recommended next action | Hand the merged login and delivery contracts to SangVN for `IDTS-37` and NhanT for `IDTS-38`, then continue Sprint 3 evidence consolidation under `IDTS-27`. |
-| Main implementation risk | SMTP credentials must stay private; delivery is at-least-once, so locking reduces duplicate sends but cannot provide exact-once behavior across a crash after provider acceptance. |
+| Current sprint | Sprint 03 custom authentication, login UI, SMTP/outbox, and QA Depth Gate are merged; `IDTS-44` is preparing Render deployment config/docs so the team can test on one shared QA URL |
+| Recommended next action | Finish and merge `IDTS-44`, then DonHV creates the Render Blueprint, enters secrets in Dashboard, deploys PostgreSQL schema, sets QA passwords, and runs shared endpoint verification. |
+| Main implementation risk | Shared QA deploy depends on private Render/Brevo/AWS/PostgreSQL environment variables staying out of repo/Jira/logs and on the first PostgreSQL schema/password setup being run in the right environment. |
 
 ## What Is Already Done
 
