@@ -347,6 +347,41 @@ Use `sap-fiori-guidelines` when working on:
 
 Use AI DevKit skills only as workflow support. They do not replace the SAP MCP servers, repo-local SAP skills, CAP/Fiori/UI5 documentation, or the business markdown files.
 
+## QA Depth Gate
+
+Every QA, review, or PR verification that touches `app/`, `srv/`, `db/`, or `scripts/qa/` must run two separate modes:
+
+1. Deterministic regression: prove the expected flow still works with focused commands or scripted checks.
+2. Falsification-first exploratory testing: actively try to break the feature with invalid input, wrong role, stale/reload state, repeated action, interrupted action, failure/recovery, or confusing UI/UX behavior.
+
+Do not conclude PASS from the happy path alone. If no bug is found, record what was tried to break the feature and what was not tested. `N/A` is allowed only with a concrete reason, for example `N/A - documentation-only change; no runtime role behavior`.
+
+For pull requests into `dev`, fill the PR template sections:
+
+- Positive Evidence
+- Negative Evidence
+- Edge/Boundary Evidence
+- Roles/Authorization
+- Persistence/Reload
+- UI/UX Review
+- Known Gaps
+- Jira/Evidence Links
+
+The `qa-depth-gate` GitHub Action validates these sections and runs the fast PR lane for relevant changes. If the PR changes browser QA, prefer the shared helper in `scripts/qa/lib/browser-harness.js` so page errors, unexpected console errors, unexpected HTTP failures, SAP error dialogs, screenshots, and persistence reload checks are handled consistently.
+
+Actionable product defects discovered during QA must have a Jira issue or be linked to an existing Jira issue. Do not bury product defects only inside a PR comment. Temporary environment/tooling issues still belong in the relevant member status file.
+
+Vietnamese:
+
+Moi QA, review, hoac PR verification cham vao `app/`, `srv/`, `db/`, hoac `scripts/qa/` phai chay hai mode rieng:
+
+1. Deterministic regression: chung minh flow dung van chay bang command/script cu the.
+2. Falsification-first exploratory testing: co gang pha feature bang input sai, sai role, stale/reload state, action lap lai, action bi gian doan, failure/recovery, hoac loi UI/UX kho hieu.
+
+Khong ket luan PASS chi vi happy path pass. Neu khong tim thay bug, phai ghi da thu pha feature bang cach nao va phan nao chua test. `N/A` chi hop le khi co ly do cu the.
+
+PR vao `dev` phai dien day du cac section evidence trong PR template. GitHub Action `qa-depth-gate` se check section bat buoc va chay fast PR lane cho thay doi lien quan. Neu sua browser QA, uu tien helper `scripts/qa/lib/browser-harness.js`. Defect san pham co action phai tao/link Jira; khong chi de trong comment PR.
+
 ## QA and Testing Skill Routing
 
 Use these QA/testing skills as supporting workflows. They do not replace IDTS business rules, SAP CAP/Fiori routing, existing `scripts/qa/*` conventions, Jira evidence rules, or `verify`.
