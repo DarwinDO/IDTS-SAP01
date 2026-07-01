@@ -1,6 +1,6 @@
 # IDTS-42 - QA Depth Gate and Hardened Browser Harness
 
-Status: Implementation branch ready for PR/merge.
+Status: Done through GitHub PR #38.
 
 Owner: NhanT primary QA owner; DonHV implemented the repository gate and process wiring.
 

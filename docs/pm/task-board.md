@@ -30,6 +30,7 @@ Vietnamese: Chi dung board nay de theo doi trang thai cap cao. Chi tiet cong vie
 | IDTS-34 | Custom login/authentication foundation | PR #28 merged into `dev`; backend now has `AuthService`, password hashing, server-side `AuthSessions`, Bearer-token request mapping, protected `BugService`, and focused auth verification. Jira moved to Done. |
 | IDTS-36 | SMTP email notification delivery with outbox tracking | PR #29 merged into `dev`; backend now has `NotificationDeliveries`, Nodemailer SMTP sender, outbox worker/retry handling, safe read-only delivery projection, automated regression evidence, private Brevo SMTP smoke evidence, and Jira moved to Done. |
 | IDTS-41 | Catalog validation and draft-create authorization | PR #35 merged into `dev`; backend now rejects invalid/inactive Priority, Severity, and Environment codes and blocks Developer draft-create at the CAP layer. Jira moved to Done. |
+| IDTS-42 | QA Depth Gate and hardened browser harness | PR #38 merged into `dev`; added mandatory PR evidence template, `qa-depth-gate` workflow, PR-body validator, reusable browser harness, secret scan, and PM/process documentation. |
 | IDTS-43 | Fiori UX cleanup from IDTS-32 findings | PR #36 merged into `dev` at `62197e6`; fixed value-list hints, role-aware Create Bug action, single History section, clearer Reopen wording, and role-based browser smoke evidence. |
 
 Vietnamese:
@@ -57,6 +58,7 @@ Vietnamese:
 | IDTS-35 | Login UI va authenticated app session | PR #30 da merge vao `dev`; unauthenticated app entry redirect sang login, login gan Bearer token cho OData metadata, Fiori render va logout da browser-smoke pass. |
 | IDTS-36 | SMTP email notification voi outbox tracking | PR #29 da merge vao `dev`; backend da co `NotificationDeliveries`, Nodemailer SMTP sender, outbox worker/retry, delivery projection read-only an toan, automated regression evidence, private Brevo SMTP smoke evidence, va Jira da chuyen Done. |
 | IDTS-41 | Validate catalog va chan draft-create sai quyen | PR #35 da merge vao `dev`; backend chan Priority, Severity, Environment sai/khong active va chan Developer tao draft o CAP layer. Jira da chuyen Done. |
+| IDTS-42 | QA Depth Gate va browser harness duoc harden | PR #38 da merge vao `dev`; da them PR evidence template bat buoc, workflow `qa-depth-gate`, validator PR body, browser harness dung lai, secret scan va tai lieu PM/process. |
 | IDTS-43 | Don dep Fiori UX tu finding IDTS-32 | PR #36 da merge vao `dev` tai `62197e6`; da fix value-list hint, Create Bug theo role, chi con mot History section, wording Reopen ro hon, va co browser smoke theo role. |
 
 ## Ready
@@ -65,7 +67,6 @@ Vietnamese:
 | --- | --- | --- | --- |
 | IDTS-37 | Notification UI and email delivery status readability | SangVN | FE/QA review of notification section after SMTP/outbox changes, focusing on readable event/channel/status/recipient/message output. Unblocked by merged IDTS-36. |
 | IDTS-38 | Regression test custom login and SMTP notification flows | NhanT | QA coverage for login success/failure, role behavior, SMTP success/failure, disabled email config, and no-secret evidence. Unblocked by merged IDTS-34 and IDTS-36. |
-| IDTS-42 | QA Depth Gate and hardened browser harness | NhanT | Add falsification-first checklist, mandatory PR evidence sections, CI gate, and reliable browser/API helpers. |
 
 Vietnamese:
 
@@ -73,7 +74,6 @@ Vietnamese:
 | --- | --- | --- | --- |
 | IDTS-37 | Notification UI va kha nang doc email delivery status | SangVN | FE/QA review notification section sau khi co SMTP/outbox, tap trung event/channel/status/recipient/message. Da duoc unblock boi IDTS-36 da merge. |
 | IDTS-38 | Regression test custom login va SMTP notification | NhanT | QA login success/failure, role behavior, SMTP success/failure, disabled email config va no-secret evidence. Da duoc unblock boi IDTS-34 va IDTS-36 da merge. |
-| IDTS-42 | QA Depth Gate va browser harness duoc harden | NhanT | Them checklist falsification-first, evidence PR bat buoc, CI gate va helper browser/API tin cay. |
 
 ## In Progress
 
