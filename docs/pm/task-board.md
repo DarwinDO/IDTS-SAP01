@@ -1,6 +1,6 @@
 # IDTS Task Board
 
-Last updated: 2026-06-29
+Last updated: 2026-07-01
 
 Use this board for high-level movement only. Detailed task notes belong in the matching file under `docs/pm/tasks/`.
 
@@ -59,17 +59,19 @@ Vietnamese:
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
-| IDTS-32 | Manual browser UAT for Sprint 3 workflow/history flows | SangVN | Jira task narrowed after split: SangVN owns Developer lifecycle, Need More Information/resubmit, reject follow-up, retest/close/reopen, grouped history timeline, and role/action visibility checks. |
 | IDTS-37 | Notification UI and email delivery status readability | SangVN | FE/QA review of notification section after SMTP/outbox changes, focusing on readable event/channel/status/recipient/message output. Unblocked by merged IDTS-36. |
 | IDTS-38 | Regression test custom login and SMTP notification flows | NhanT | QA coverage for login success/failure, role behavior, SMTP success/failure, disabled email config, and no-secret evidence. Unblocked by merged IDTS-34 and IDTS-36. |
+| IDTS-42 | QA Depth Gate and hardened browser harness | NhanT | Add falsification-first checklist, mandatory PR evidence sections, CI gate, and reliable browser/API helpers. |
+| IDTS-43 | Fiori UX cleanup from IDTS-32 findings | DatDT | Fixed value lists, role-aware Create, single History section, and clearer Reopen wording. |
 
 Vietnamese:
 
 | ID | Cong viec | Thanh vien chinh | Ghi chu |
 | --- | --- | --- | --- |
-| IDTS-32 | Manual browser UAT cho workflow/history Sprint 3 | SangVN | SangVN phu trach Developer lifecycle, Need More Information/resubmit, reject follow-up, retest/close/reopen, grouped history timeline va role/action visibility. |
 | IDTS-37 | Notification UI va kha nang doc email delivery status | SangVN | FE/QA review notification section sau khi co SMTP/outbox, tap trung event/channel/status/recipient/message. Da duoc unblock boi IDTS-36 da merge. |
 | IDTS-38 | Regression test custom login va SMTP notification | NhanT | QA login success/failure, role behavior, SMTP success/failure, disabled email config va no-secret evidence. Da duoc unblock boi IDTS-34 va IDTS-36 da merge. |
+| IDTS-42 | QA Depth Gate va browser harness duoc harden | NhanT | Them checklist falsification-first, evidence PR bat buoc, CI gate va helper browser/API tin cay. |
+| IDTS-43 | Don dep Fiori UX tu finding IDTS-32 | DatDT | Fixed value list, Create theo role, chi con mot History section va wording Reopen ro hon. |
 
 ## In Progress
 
@@ -81,6 +83,8 @@ Vietnamese:
 | IDTS-25 | Fix backend defects found during Sprint 3 QA | DonHV | Jira live state is In Progress. Evidence and closure decision are still needed before Sprint 3 PM/SAP490 consolidation. |
 | IDTS-27 | Sync docs, Jira status, and Sprint 3 evidence | DonHV | Active PM/Jira/evidence consolidation bucket. Current work order: `IDTS-34` and `IDTS-36` are merged; next is handoff to `IDTS-37`/`IDTS-38`, then Sprint 3 evidence consolidation. |
 | IDTS-28 | Refactor backend service into focused modules | DonHV | Jira live state is In Progress even though the refactor is merged. Needs final retest/evidence closure alignment. |
+| IDTS-32 | Manual browser UAT for Sprint 3 workflow/history flows | SangVN | Evidence branch merged through PR #34. Retest remains open until IDTS-41/42/43 fixes and no P0/P1 remain. |
+| IDTS-41 | Catalog validation and draft-create authorization | DonHV | Backend implementation and 18-check focused suite are complete on the task branch; PR/merge and cross-layer retest remain. |
 
 Vietnamese:
 
@@ -92,6 +96,8 @@ Vietnamese:
 | IDTS-25 | Fix backend defects phat hien trong Sprint 3 QA | DonHV | Jira live dang In Progress. Can chot evidence va quyet dinh dong task truoc khi tong hop PM/SAP490 Sprint 3. |
 | IDTS-27 | Sync docs, Jira status va Sprint 3 evidence | DonHV | Bucket tong hop PM/Jira/evidence dang active. `IDTS-34` va `IDTS-36` da merge; tiep theo la handoff `IDTS-37`/`IDTS-38`, sau do tong hop evidence Sprint 3. |
 | IDTS-28 | Tach backend service thanh cac module tap trung | DonHV | Jira live dang In Progress du refactor da merge. Can chot retest/evidence closure. |
+| IDTS-32 | Manual browser UAT cho workflow/history Sprint 3 | SangVN | Evidence branch da merge qua PR #34. Van can retest sau IDTS-41/42/43 va chi dong khi khong con P0/P1. |
+| IDTS-41 | Validate catalog va chan draft-create sai quyen | DonHV | Backend va suite 18 check da xong tren task branch; con PR/merge va retest cross-layer. |
 
 ## Blocked
 

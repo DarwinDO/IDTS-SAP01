@@ -12,6 +12,10 @@ const {
   recordBugChangeSideEffects,
   recordDraftAttachmentSaveSideEffects
 } = require('./history')
+const {
+  validateActiveCodeLists,
+  validateRequiredBugFields
+} = require('./bug-write')
 
 async function prepareDraftPatch (req, entities) {
   const bugID = bugIDFrom(req)
@@ -21,6 +25,7 @@ async function prepareDraftPatch (req, entities) {
   if (!currentDraft) return
 
   const merged = { ...currentDraft, ...req.data }
+  await validateActiveCodeLists(req, entities, merged)
   if (merged.applicationComponent_ID && merged.defectCategory_ID) {
     const componentCategory = await cds.tx(req).run(SELECT.one.from(entities.ComponentCategories).where({
       component_ID: merged.applicationComponent_ID,
@@ -38,11 +43,23 @@ async function prepareDraftPatch (req, entities) {
 }
 
 async function handleDraftSave (req, entities, next) {
+  await validateDraftForSave(req, entities)
   await captureDraftSaveState(req, entities)
   const result = await next()
   await recordDraftBugSaveSideEffects(req, result, entities)
   await recordDraftAttachmentSaveSideEffects(req, result, entities)
   return result
+}
+
+async function validateDraftForSave (req, entities) {
+  const bugID = bugIDFrom(req)
+  if (!bugID) return
+
+  const draft = await cds.tx(req).run(SELECT.one.from(entities.Bugs.drafts).where({ ID: bugID }))
+  if (!draft) return
+
+  validateRequiredBugFields(req, draft, { rejectFirst: true })
+  await validateActiveCodeLists(req, entities, draft)
 }
 
 async function captureDraftSaveState (req, entities) {
@@ -71,5 +88,6 @@ async function recordDraftBugSaveSideEffects (req, data, entities) {
 
 module.exports = {
   prepareDraftPatch,
-  handleDraftSave
+  handleDraftSave,
+  validateDraftForSave
 }

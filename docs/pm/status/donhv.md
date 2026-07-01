@@ -391,6 +391,32 @@ Vietnamese:
 | Bằng chứng/lệnh | `npx cds compile srv app/bug-management-ui --to edmx -s all` = exit 0 với warning attachment không liên quan; `node scripts/qa/test-idts23-regression.js` = 45 PASS / 0 FAIL; `npm run qa:auth:programmatic` = 23 PASS / 0 FAIL; `npx ui5 build --config ui5.yaml` = build succeeded; `node --check` cho `auth-guard.js`, `login-page.js`, `LoginController.js` = exit 0; browser smoke tại `http://localhost:4110` pass redirect khi chưa login, login sai, login đúng, OData không có 401/403, không có runtime error chặn, logout xóa token; `git diff --check` = exit 0; `npx ai-devkit@latest lint --json` = pass; Jira comment `IDTS-35#10254`. |
 | Handoff tiếp theo | DatDT có thể tiếp tục polish UI IDTS-35 theo feedback trên Jira. DonHV nên quyết định riêng forgot/reset password thành task backend+UI mới sau khi nền SMTP/outbox ổn định. |
 
+## 2026-07-01 - IDTS-32 findings and IDTS-41 backend hardening
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product defect | Priority, Severity, and Environment could accept unknown/inactive/free-text codes; Developer was not blocked at the beginning of root draft creation. | Associations lacked target assertions and write handlers did not validate active catalog rows; create authorization was applied only on the active write path instead of CAP draft `NEW`. | Fixed on `fix/idts-41-code-list-draft-auth-donhv`: `@assert.target`, shared active-code validator, draft PATCH/SAVE checks, and `before NEW` authorization. | `npm run qa:idts41:programmatic` = 18 PASS / 0 FAIL; CAP compile exit 0. PR/merge and browser retest remain. Jira: IDTS-41 linked to IDTS-32. |
+| Test-harness issue | The first focused suite stopped after 15 checks yet exited 0 while a simulated draft request remained unresolved. | The harness used the wrong draft event (`CREATE`) and had no completion guard; CAP uses `NEW` for root draft creation. | Fixed: confirmed lifecycle through CAP MCP, changed runtime hook to `NEW`, replaced the unstable direct draft simulation with a pure role assertion plus service-level active-create checks, and added an exact 18-check completion guard. | Fresh rerun completed all 18 checks with 0 failures. Browser/direct HTTP draft verification remains part of cross-layer retest. |
+| Environment issue | First CAP compile in the clean worktree could not resolve `@cap-js/attachments`. | Git worktrees do not automatically contain the ignored root `node_modules`. | Fixed locally by creating a junction from the worktree to the already-installed main-repo dependency directory; no tracked file changed. | Fresh `npx cds compile srv --to edmx -s all` exited 0 with only the pre-existing attachment annotation warning. |
+| Tooling issue | One inspection command referenced a nonexistent `test-idts23-full-regression.js`; an earlier PowerShell `rg` path glob and one UI5 MCP call also used incorrect parameters. | Command/path assumptions and Windows glob/API parameter mismatch, not product behavior. | Corrected by listing real files, using `--glob`/explicit paths, and retrying UI5 MCP with `projectDir`. | No product data or source was affected. Keep these as tooling evidence, not product bugs. |
+
+Vietnamese:
+
+| Phân loại | Triệu chứng / công việc | Nguyên nhân | Trạng thái fix | Verify / bước tiếp theo |
+| --- | --- | --- | --- | --- |
+| Product defect | Priority, Severity và Environment có thể nhận code không tồn tại/inactive/free text; Developer chưa bị chặn ngay khi bắt đầu root draft. | Association thiếu target assertion, write handler chưa kiểm tra catalog active và quyền create chỉ nằm ở active write path thay vì event draft `NEW` của CAP. | Đã fix trên `fix/idts-41-code-list-draft-auth-donhv`: `@assert.target`, validator active dùng chung, kiểm tra draft PATCH/SAVE và authorization `before NEW`. | `npm run qa:idts41:programmatic` = 18 PASS / 0 FAIL; CAP compile exit 0. Còn PR/merge và browser retest. Jira IDTS-41 đã link IDTS-32. |
+| Test-harness issue | Suite đầu tiên dừng sau 15 check nhưng vẫn exit 0 trong khi request draft mô phỏng chưa resolve. | Harness dùng sai event draft (`CREATE`) và không có completion guard; CAP dùng `NEW` để tạo root draft. | Đã xác nhận bằng CAP MCP, đổi runtime hook sang `NEW`, thay mô phỏng draft không ổn định bằng pure role assertion kết hợp service-level active-create, và thêm guard đúng 18 check. | Lần chạy mới hoàn tất đủ 18 check, 0 fail. Direct HTTP/browser draft vẫn phải retest ở bước cross-layer. |
+| Environment issue | CAP compile lần đầu trong worktree sạch không tìm thấy `@cap-js/attachments`. | Git worktree không tự có thư mục `node_modules` bị ignore của repo chính. | Đã tạo junction local tới dependency đã cài ở repo chính; không thay đổi tracked file. | Compile mới exit 0, chỉ còn warning annotation attachment đã biết từ trước. |
+| Tooling issue | Một lệnh inspection gọi nhầm file test không tồn tại; trước đó PowerShell `rg` glob và UI5 MCP cũng từng dùng sai tham số. | Giả định sai path, wildcard Windows và tên tham số API; không phải lỗi sản phẩm. | Đã sửa bằng cách list file thật, dùng `--glob`/path rõ ràng và gọi lại UI5 MCP bằng `projectDir`. | Không ảnh hưởng source hay dữ liệu sản phẩm; phải giữ phân loại tooling. |
+
+### Additional tooling note
+
+English: `gh pr diff 35 --check` failed because GitHub CLI does not support a `--check` option for `pr diff`. PR metadata was still read successfully and reported `MERGEABLE`. This was corrected by relying on the already-passed local `git diff --check` and using supported `gh pr diff` options only; no product source was affected.
+
+Vietnamese: Lệnh `gh pr diff 35 --check` fail vì GitHub CLI không hỗ trợ option `--check` cho `pr diff`. Metadata PR vẫn đọc thành công và báo `MERGEABLE`. Đã sửa cách verify bằng kết quả local `git diff --check` đã pass và chỉ dùng option hợp lệ của `gh pr diff`; không ảnh hưởng source sản phẩm.
+
 ## Update Rule
 
 ## 2026-06-30 - Shared QA backend explanation support
