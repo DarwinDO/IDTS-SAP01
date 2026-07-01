@@ -11,13 +11,12 @@ const {
 } = require('./helpers')
 
 async function enforceBugWritePermission (req, entities, oldBug, nextBug, { isCreate }) {
+  if (isCreate) {
+    return enforceBugCreatePermission(req, entities)
+  }
+
   const actor = await resolveRequestUser(req, entities)
   if (!actor) return
-
-  if (isCreate) {
-    if (COORDINATOR_ROLES.has(actor.role_code)) return
-    return req.reject(403, 'Only Tester or PM users can create bug reports.')
-  }
 
   const statusChanged = oldBug.status_code !== nextBug.status_code
   const assigneeChanged = oldBug.assignee_ID !== nextBug.assignee_ID
@@ -41,6 +40,17 @@ async function enforceBugWritePermission (req, entities, oldBug, nextBug, { isCr
     'Only the assigned developer, Tester, or PM can change the bug processing status.',
     'status'
   )
+}
+
+async function enforceBugCreatePermission (req, entities) {
+  const actor = await resolveRequestUser(req, entities)
+  return assertBugCreatePermission(req, actor)
+}
+
+function assertBugCreatePermission (req, actor) {
+  if (!actor) return
+  if (COORDINATOR_ROLES.has(actor.role_code)) return
+  return req.reject(403, 'Only Tester or PM users can create bug reports.')
 }
 
 async function enforceActionPermission (req, entities, bug, actionType) {
@@ -68,6 +78,8 @@ async function isAssignedDeveloper (req, entities, userID, bug) {
 }
 
 module.exports = {
+  assertBugCreatePermission,
+  enforceBugCreatePermission,
   enforceBugWritePermission,
   enforceActionPermission,
   isAssignedDeveloper

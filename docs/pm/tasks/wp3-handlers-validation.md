@@ -175,6 +175,24 @@ Vietnamese:
 - Đã thêm `scripts/qa/test-pm-monitoring-http.js` và command `qa:pm-monitoring:http` để kiểm tra đúng OData filter path mà Fiori sử dụng.
 - Bằng chứng expected failure trên bản copy DB stale trả HTTP 500; sau khi refresh view trên chính bản copy đó, HTTP suite pass `8 PASS / 0 FAIL`.
 
+## 2026-07-01 - IDTS-41 catalog and draft-create hardening
+
+English:
+
+- Added backend validation for Priority, Severity, and Environment across active create/update and shared draft validation paths.
+- Unknown, inactive, wrong-case, non-string, and whitespace-only catalog values return HTTP 400 with a field-specific target and are not persisted.
+- Added CAP `@assert.target` constraints as the referential-integrity layer; active-state checks remain in the Node.js handler.
+- Registered create-role enforcement on the CAP draft `NEW` event so Developer is blocked at the start of root draft creation.
+- Focused in-memory SQLite verification: `npm run qa:idts41:programmatic` ran 18 checks with 18 PASS / 0 FAIL.
+
+Vietnamese:
+
+- Đã thêm backend validation cho Priority, Severity và Environment ở active create/update và các đường draft dùng chung.
+- Code không tồn tại, inactive, sai hoa/thường, không phải string và chỉ có khoảng trắng đều trả HTTP 400 đúng target field và không được persist.
+- Đã thêm `@assert.target` làm lớp toàn vẹn tham chiếu; kiểm tra trạng thái active vẫn nằm trong handler Node.js.
+- Đã đăng ký rule quyền create ở event draft `NEW` của CAP để chặn Developer ngay khi bắt đầu root draft.
+- Verify SQLite in-memory tập trung: `npm run qa:idts41:programmatic` chạy 18 check, 18 PASS / 0 FAIL.
+
 ## Definition of Done
 
 - Invalid transitions are rejected in backend.

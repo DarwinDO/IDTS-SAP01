@@ -101,8 +101,11 @@ entity Bugs : cuid, managed {
   title                  : String(255) not null @Common.Label : 'Title';
   description            : LargeString not null @Common.Label : 'Description';
   status                 : Association to StatusValues not null;
+  @assert.target
   priority               : Association to PriorityValues not null;
+  @assert.target
   severity               : Association to SeverityValues not null;
+  @assert.target
   environment            : Association to EnvironmentValues;
   environmentDetail      : String(255)        @Common.Label : 'Environment Detail';
   stepsToReproduce       : LargeString not null @Common.Label : 'Steps to Reproduce';

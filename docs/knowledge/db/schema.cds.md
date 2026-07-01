@@ -1,5 +1,29 @@
 # Knowledge: `db/schema.cds`
 
+## 2026-07-01 update: catalog referential integrity
+
+### English
+
+The `priority`, `severity`, and `environment` associations on `Bugs` now use `@assert.target`. CAP therefore confirms that the referenced catalog row exists; a client cannot store a made-up code such as `1` merely because it fits the database column type.
+
+`@assert.target` protects existence. The Node.js write validator additionally protects `active=true`, because a catalog row can exist but be retired from business use.
+
+- **Location**: `Bugs.priority`, `Bugs.severity`, and `Bugs.environment`
+  **IDTS concept**: Classification fields point to controlled master data.
+  **Impact if broken**: Reports, criticality colors, and value helps can contain orphaned or retired values.
+  **Must check together**: catalog CSV files, `bug-write.js`, draft validation, and Fiori fixed value lists.
+
+### Vietnamese
+
+Ba association `priority`, `severity` và `environment` của `Bugs` hiện dùng `@assert.target`. CAP vì vậy phải xác nhận dòng catalog được tham chiếu tồn tại; client không thể lưu code tự chế như `1` chỉ vì giá trị đó vẫn vừa kiểu cột database.
+
+`@assert.target` bảo vệ việc target tồn tại. Validator Node.js bảo vệ thêm `active=true`, vì một dòng catalog có thể còn trong database nhưng đã ngừng dùng trong nghiệp vụ.
+
+- **Vị trí**: `Bugs.priority`, `Bugs.severity` và `Bugs.environment`
+  **Khái niệm IDTS**: Field phân loại phải trỏ đến master data có kiểm soát.
+  **Ảnh hưởng nếu sai**: Report, màu criticality và value help có thể chứa giá trị mồ côi hoặc đã ngừng dùng.
+  **Phải kiểm tra cùng**: các file CSV catalog, `bug-write.js`, draft validation và fixed value list của Fiori.
+
 ## English
 
 ### What this file is for

@@ -25,6 +25,7 @@ const {
 const { readDeveloperWorkloads } = require('./bug-service/monitoring')
 const { registerReadOnlyEntityGuards } = require('./bug-service/guards')
 const { prepareBugWrite } = require('./bug-service/bug-write')
+const { enforceBugCreatePermission } = require('./bug-service/permissions')
 const {
   assignToDeveloper,
   resubmitToDeveloper,
@@ -58,6 +59,7 @@ module.exports = class BugService extends cds.ApplicationService {
       this.before('READ', target, req => ensureHistoryEventSelectDependencies(req))
     }
     this.before('CREATE', Bugs, req => prepareBugWrite(req, entities, { isCreate: true }))
+    this.before('NEW', Bugs.drafts, req => enforceBugCreatePermission(req, entities))
     this.before('UPDATE', Bugs, req => prepareBugWrite(req, entities, { isCreate: false }))
     this.before('PATCH', Bugs.drafts, req => prepareDraftPatch(req, entities))
 

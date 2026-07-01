@@ -184,3 +184,31 @@ Các anchor này chỉ ra những dòng kiểm soát nghiệp vụ thật của 
 - Knowledge mirror: `docs/knowledge/srv/bug-service/bug-write.js.md`
 - Style baseline: `docs/knowledge/guidelines/knowledge-mirror-anchors.md`
 - Last reviewed: 2026-06-22
+
+## 2026-07-01 update: active catalog validation
+
+### English
+
+`prepareBugWrite()` now verifies that Priority, Severity, and Environment refer to real, active catalog rows before CAP writes a bug. This remains a backend rule even when Fiori provides value helps: a browser control improves data entry but cannot protect the database from direct OData calls or a modified client.
+
+`validateActiveCodeLists()` uses the exact catalog code as the contract. For example, `QAS` is valid while `qas`, `1`, an unknown code, an inactive row, and whitespace are rejected with HTTP 400. The error targets the matching `*_code` field so Fiori can associate the message with the input.
+
+- **Location**: `CODE_LIST_FIELDS` and `validateActiveCodeLists()`
+  **IDTS concept**: Priority, Severity, and Environment are controlled classifications, not arbitrary text.
+  **Impact if broken**: Invalid classifications can corrupt filtering, reporting, criticality colors, and QA evidence.
+  **Must check together**: `db/schema.cds`, the three catalog CSV files, `srv/bug-service/drafts.js`, and Fiori value-list annotations.
+
+When editing this rule, test create and update and prove rejected values are not persisted. Do not silently trim or change case, because that hides a faulty client and makes the API contract unpredictable.
+
+### Vietnamese
+
+`prepareBugWrite()` hiện kiểm tra Priority, Severity và Environment có trỏ đến dòng catalog thật sự tồn tại và đang active trước khi CAP ghi bug. Rule này vẫn phải nằm ở backend dù Fiori có value help: control trên trình duyệt chỉ hỗ trợ nhập liệu, không thể bảo vệ database trước OData gọi trực tiếp hoặc client đã bị sửa.
+
+`validateActiveCodeLists()` dùng chính xác code trong catalog làm contract. Ví dụ `QAS` hợp lệ; còn `qas`, `1`, code không tồn tại, dòng inactive và chuỗi chỉ có khoảng trắng đều bị trả HTTP 400. Error target trỏ đúng field `*_code` để Fiori gắn thông báo vào ô gây lỗi.
+
+- **Vị trí**: `CODE_LIST_FIELDS` và `validateActiveCodeLists()`
+  **Khái niệm IDTS**: Priority, Severity và Environment là phân loại có kiểm soát, không phải text tự do.
+  **Ảnh hưởng nếu sai**: Dữ liệu phân loại sai có thể làm hỏng filter, report, màu criticality và evidence QA.
+  **Phải kiểm tra cùng**: `db/schema.cds`, ba file CSV catalog, `srv/bug-service/drafts.js` và annotation value list của Fiori.
+
+Khi sửa rule này, phải test cả create lẫn update và chứng minh giá trị bị reject không được persist. Không tự trim hoặc đổi hoa/thường âm thầm vì cách đó che lỗi client và làm contract API khó đoán.

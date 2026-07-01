@@ -152,6 +152,26 @@ File này là nơi tất cả quy tắc trạng thái IDTS, cập nhật nextPro
 - Documentation style: learning-oriented explanation, not line listing only
 - Last reviewed: 2026-06-22
 
+## 2026-07-01 update: draft lifecycle authorization
+
+### English
+
+The service registers `enforceBugCreatePermission()` on `before('NEW', Bugs.drafts, ...)`. `NEW` is CAP's draft-specific event for starting a root draft; it is different from an ordinary database `CREATE`. This stops an unauthorized Developer before Fiori opens a writable new-Bug draft.
+
+- **Location**: the `NEW` hook beside CREATE/UPDATE/PATCH registration
+  **IDTS concept**: Backend authorization and role-aware Fiori UX agree from the first create step.
+  **Impact if broken**: Developer enters the form and is rejected only later, which is confusing and unsafe.
+  **Must check together**: `permissions.js`, CAP draft lifecycle, List Report Create behavior, and role-matrix browser QA.
+
+### Vietnamese
+
+Service đăng ký `enforceBugCreatePermission()` tại `before('NEW', Bugs.drafts, ...)`. `NEW` là event riêng của CAP khi bắt đầu root draft; nó khác database `CREATE` thông thường. Hook này chặn Developer không có quyền trước khi Fiori mở draft tạo Bug có thể chỉnh sửa.
+
+- **Vị trí**: hook `NEW` cạnh phần đăng ký CREATE/UPDATE/PATCH
+  **Khái niệm IDTS**: Backend authorization và UX theo role của Fiori phải khớp ngay từ bước create đầu tiên.
+  **Ảnh hưởng nếu sai**: Developer vào được form rồi chỉ bị chặn ở bước sau, gây khó hiểu và không an toàn.
+  **Phải kiểm tra cùng**: `permissions.js`, lifecycle draft CAP, hành vi Create của List Report và browser QA theo ma trận role.
+
 ## IDTS-36 Worker Bootstrap Update
 
 ### English

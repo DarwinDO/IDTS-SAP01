@@ -22,6 +22,12 @@ const {
 const { importantChanges } = require('./history')
 const { enforceBugWritePermission } = require('./permissions')
 
+const CODE_LIST_FIELDS = [
+  { field: 'priority_code', label: 'Priority', entity: 'PriorityValues' },
+  { field: 'severity_code', label: 'Severity', entity: 'SeverityValues' },
+  { field: 'environment_code', label: 'Environment', entity: 'EnvironmentValues' }
+]
+
 async function prepareBugWrite (req, entities, { isCreate }) {
   const bugID = req.params?.[0]?.ID || req.data?.ID
   const oldBug = isCreate ? {} : await readBug(req, entities, bugID)
@@ -46,6 +52,7 @@ async function prepareBugWrite (req, entities, { isCreate }) {
 
   const merged = { ...oldBug, ...req.data }
   validateRequiredBugFields(req, merged)
+  await validateActiveCodeLists(req, entities, merged)
   await deriveOrValidateComponentCategory(req, entities, merged)
 
   const finalData = { ...oldBug, ...req.data }
@@ -87,7 +94,38 @@ async function prepareBugWrite (req, entities, { isCreate }) {
   req._importantChanges = isCreate ? [] : importantChanges(oldBug, req._finalBug)
 }
 
-function validateRequiredBugFields (req, bug) {
+async function validateActiveCodeLists (req, entities, bug) {
+  for (const definition of CODE_LIST_FIELDS) {
+    const rawValue = bug[definition.field]
+
+    if (rawValue === null || rawValue === undefined) {
+      continue
+    }
+
+    if (typeof rawValue !== 'string' || rawValue.trim() !== rawValue || rawValue.length === 0) {
+      return req.reject(
+        400,
+        `${definition.label} must reference an active catalog value.`,
+        definition.field
+      )
+    }
+
+    const target = entities[definition.entity]
+    const activeValue = await cds.tx(req).run(
+      SELECT.one.from(target).columns('code').where({ code: rawValue, active: true })
+    )
+
+    if (!activeValue) {
+      return req.reject(
+        400,
+        `${definition.label} must reference an active catalog value.`,
+        definition.field
+      )
+    }
+  }
+}
+
+function validateRequiredBugFields (req, bug, { rejectFirst = false } = {}) {
   const required = [
     ['title', 'Title is required.'],
     ['description', 'Description is required.'],
@@ -102,7 +140,10 @@ function validateRequiredBugFields (req, bug) {
   ]
 
   for (const [field, message] of required) {
-    if (!trimToNull(bug[field])) req.error(400, message, field)
+    if (!trimToNull(bug[field])) {
+      if (rejectFirst) return req.reject(400, message, field)
+      req.error(400, message, field)
+    }
   }
 }
 
@@ -205,6 +246,8 @@ async function determineNextProcessor (req, entities, bug) {
 module.exports = {
   prepareBugWrite,
   determineNextProcessor,
+  validateActiveCodeLists,
+  validateRequiredBugFields,
   validateAssignee,
   validateTransition
 }

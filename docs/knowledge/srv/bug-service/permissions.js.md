@@ -108,3 +108,27 @@ Gọi từ service.js, actions.js, bug-write.js. Phải khớp với virtual can
 - Source line count at documentation time: 74
 - Documentation style: learning-oriented explanation, not line listing only
 - Last reviewed: 2026-06-22
+
+## 2026-07-01 update: create permission at draft start
+
+### English
+
+Bug creation permission is now expressed once in `enforceBugCreatePermission()` and `assertBugCreatePermission()`. Both active CREATE and Fiori draft `NEW` reuse the rule. CAP emits `NEW` when a user starts a new root draft; waiting for activation would let Developer enter a create flow that can never be completed.
+
+- **Location**: `enforceBugCreatePermission()` / `assertBugCreatePermission()`
+  **IDTS concept**: Only Tester and PM create Bug reports; Developer processes assigned work.
+  **Impact if broken**: Developer can start an unauthorized create session, leaving UI visibility as the only apparent protection.
+  **Must check together**: `srv/service.js` `before NEW`, Fiori Create visibility, login role mapping, and direct authorization tests.
+
+Hiding Create in Fiori is useful UX, but browser state is not a security boundary; this backend check remains mandatory.
+
+### Vietnamese
+
+Quyền tạo Bug hiện được gom vào `enforceBugCreatePermission()` và `assertBugCreatePermission()`. Cả active CREATE lẫn event draft `NEW` của Fiori đều dùng cùng rule. CAP phát `NEW` khi user bắt đầu root draft; nếu chờ đến activation mới chặn thì Developer vẫn vào một create flow mà họ không bao giờ được phép hoàn tất.
+
+- **Vị trí**: `enforceBugCreatePermission()` / `assertBugCreatePermission()`
+  **Khái niệm IDTS**: Chỉ Tester và PM tạo Bug report; Developer xử lý công việc đã được giao.
+  **Ảnh hưởng nếu sai**: Developer có thể bắt đầu phiên create trái quyền, khiến việc ẩn nút trên UI trở thành lớp bảo vệ duy nhất nhìn thấy được.
+  **Phải kiểm tra cùng**: `before NEW` trong `srv/service.js`, visibility của Fiori Create, mapping role khi login và test authorization trực tiếp.
+
+Ẩn Create trên Fiori là UX cần thiết, nhưng trạng thái trình duyệt không phải ranh giới bảo mật; backend check này vẫn bắt buộc.
