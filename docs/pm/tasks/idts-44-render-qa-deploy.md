@@ -115,6 +115,7 @@ Local verification before PR:
 | Final-rotation log verification after PR #44 | FAIL - final service still logged the PostgreSQL URL because `cds_log_levels` env overrode package config as a string; remove that env var and rely on package-level `cds`/`cds.serve` plus `CDS_LOG_LEVEL=warn`. |
 | Local DB deploy through external Render PostgreSQL | FAIL - local machine reached the PostgreSQL profile but timed out connecting to Render external DB; also confirmed `@cap-js/postgres` expects field credentials, not only `credentials.url`. |
 | Render DB env mapping follow-up | IN PROGRESS - change Blueprint/service env from connection string to `cds_requires_db_credentials_host/user/password/database/port/ssl`, then run schema deploy through Render pre-deploy in the internal network. |
+| Render free-plan schema bootstrap | IN PROGRESS - one-off jobs and pre-deploy commands are blocked on the free plan, so a temporary bootstrap start script is needed to deploy the DB inside Render while redacting failure logs. |
 | First public login page smoke | FAIL - service returned HTTP 404 for `/bug-management-ui/webapp/login.html`; likely build omitted devDependency `cds-plugin-ui5` because `NODE_ENV=production` was present during `npm ci`. |
 | Render build command follow-up | IN PROGRESS - change QA build command to `npm ci --include=dev` so `cds-plugin-ui5` is available for the shared QA preview service. |
 | Render health check follow-up | IN PROGRESS - change health check from `/` to `/odata/v4/auth/$metadata` because CAP does not serve a root route for this app. |
@@ -144,6 +145,7 @@ Vietnamese:
 | Verify log final rotation sau PR #44 | FAIL - service final van log PostgreSQL URL vi env `cds_log_levels` override package config thanh string; can bo env nay va chi dua vao package-level `cds`/`cds.serve` cung `CDS_LOG_LEVEL=warn`. |
 | Local DB deploy qua external Render PostgreSQL | FAIL - may local vao dung PostgreSQL profile nhung timeout khi ket noi toi Render external DB; dong thoi xac nhan `@cap-js/postgres` can credential field rieng, khong chi `credentials.url`. |
 | Follow-up mapping env DB Render | IN PROGRESS - doi Blueprint/service env tu connection string sang `cds_requires_db_credentials_host/user/password/database/port/ssl`, roi chay schema deploy bang Render pre-deploy trong internal network. |
+| Bootstrap schema tren Render free plan | IN PROGRESS - one-off job va pre-deploy command bi chan tren free plan, nen can script bootstrap tam thoi de deploy DB trong Render va redact log fail. |
 | Smoke public login page lan dau | FAIL - service tra HTTP 404 cho `/bug-management-ui/webapp/login.html`; kha nang cao build bo qua devDependency `cds-plugin-ui5` vi `NODE_ENV=production` co trong luc chay `npm ci`. |
 | Follow-up build command Render | IN PROGRESS - doi QA build command thanh `npm ci --include=dev` de `cds-plugin-ui5` co mat cho shared QA preview service. |
 | Follow-up health check Render | IN PROGRESS - doi health check tu `/` sang `/odata/v4/auth/$metadata` vi CAP khong serve root route cho app nay. |
