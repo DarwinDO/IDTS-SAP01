@@ -117,6 +117,10 @@ Local verification before PR:
 | Render DB env mapping follow-up | IN PROGRESS - change Blueprint/service env from connection string to `cds_requires_db_credentials_host/user/password/database/port/ssl`, then run schema deploy through Render pre-deploy in the internal network. |
 | Render free-plan schema bootstrap | IN PROGRESS - one-off jobs and pre-deploy commands are blocked on the free plan, so a temporary bootstrap start script is needed to deploy the DB inside Render while redacting failure logs. |
 | Render bootstrap timeout follow-up | IN PROGRESS - first bootstrap script run failed with `ResourceRequest timed out`; add Render DB pool acquire timeout env and rerun. |
+| Render bootstrap with field DB env and `ssl=false` | PASS - service `srv-d92jk67aqgkc739h6ah0` became live from commit `e4b2d2f`; public AuthService metadata returned 200, login page returned 200, protected BugService anonymous metadata returned 401. |
+| Render DB URL log scan after successful bootstrap | PASS - redacted log scan from deploy start found no raw `postgresql://` match. |
+| Render PostgreSQL schema/data inspection | PASS - temporary IP allowlist plus Node `pg` confirmed CAP tables exist and `idts_cap_users` has 4 users; allowlist was cleared after inspection. |
+| Render runtime command cleanup | PARTIAL - service config was updated from bootstrap command to `npm start`, but the follow-up manual deploy stayed in `build_in_progress` after `npm ci`; it was canceled to keep the already-live bootstrap deploy stable. |
 | First public login page smoke | FAIL - service returned HTTP 404 for `/bug-management-ui/webapp/login.html`; likely build omitted devDependency `cds-plugin-ui5` because `NODE_ENV=production` was present during `npm ci`. |
 | Render build command follow-up | IN PROGRESS - change QA build command to `npm ci --include=dev` so `cds-plugin-ui5` is available for the shared QA preview service. |
 | Render health check follow-up | IN PROGRESS - change health check from `/` to `/odata/v4/auth/$metadata` because CAP does not serve a root route for this app. |
@@ -148,6 +152,10 @@ Vietnamese:
 | Follow-up mapping env DB Render | IN PROGRESS - doi Blueprint/service env tu connection string sang `cds_requires_db_credentials_host/user/password/database/port/ssl`, roi chay schema deploy bang Render pre-deploy trong internal network. |
 | Bootstrap schema tren Render free plan | IN PROGRESS - one-off job va pre-deploy command bi chan tren free plan, nen can script bootstrap tam thoi de deploy DB trong Render va redact log fail. |
 | Follow-up timeout bootstrap Render | IN PROGRESS - lan chay bootstrap script dau fail voi `ResourceRequest timed out`; them env tang DB pool acquire timeout va chay lai. |
+| Render bootstrap with field DB env and `ssl=false` | PASS - service `srv-d92jk67aqgkc739h6ah0` became live from commit `e4b2d2f`; public AuthService metadata returned 200, login page returned 200, protected BugService anonymous metadata returned 401. |
+| Render DB URL log scan after successful bootstrap | PASS - redacted log scan from deploy start found no raw `postgresql://` match. |
+| Kiem tra schema/data PostgreSQL tren Render | PASS - dung temporary IP allowlist va Node `pg` de xac nhan CAP tables ton tai, `idts_cap_users` co 4 users; allowlist da duoc clear sau khi inspect. |
+| Render runtime command cleanup | PARTIAL - service config was updated from bootstrap command to `npm start`, but the follow-up manual deploy stayed in `build_in_progress` after `npm ci`; it was canceled to keep the already-live bootstrap deploy stable. |
 | Smoke public login page lan dau | FAIL - service tra HTTP 404 cho `/bug-management-ui/webapp/login.html`; kha nang cao build bo qua devDependency `cds-plugin-ui5` vi `NODE_ENV=production` co trong luc chay `npm ci`. |
 | Follow-up build command Render | IN PROGRESS - doi QA build command thanh `npm ci --include=dev` de `cds-plugin-ui5` co mat cho shared QA preview service. |
 | Follow-up health check Render | IN PROGRESS - doi health check tu `/` sang `/odata/v4/auth/$metadata` vi CAP khong serve root route cho app nay. |
