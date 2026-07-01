@@ -38,6 +38,12 @@ services:
           property: database
       - key: cds_requires_db_credentials_ssl
         value: true
+      - key: cds_requires_db_pool_acquireTimeoutMillis
+        value: 60000
+      - key: cds_requires_db_pool_min
+        value: 0
+      - key: cds_requires_db_pool_max
+        value: 2
       - key: cds_requires_objectStore_credentials_bucket
         sync: false
       - key: cds_requires_objectStore_credentials_region

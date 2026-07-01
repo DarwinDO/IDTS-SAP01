@@ -9,6 +9,7 @@ function redact(value) {
     .replace(/user:\s*'[^']*'/g, "user: '[REDACTED]'")
     .replace(/host:\s*'[^']*'/g, "host: '[REDACTED]'")
     .replace(/database:\s*'[^']*'/g, "database: '[REDACTED]'")
+    .replace(/deployment to [^\s]+:\d+ failed/g, 'deployment to [REDACTED_DB_HOST] failed')
     .replace(/cds_requires_db_credentials_password=[^\s]+/g, 'cds_requires_db_credentials_password=[REDACTED]')
 }
 
