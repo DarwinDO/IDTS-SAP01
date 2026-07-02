@@ -8,9 +8,9 @@ Last updated: 2026-07-01
 | --- | --- |
 | Project phase | Sprint 02 baseline is stable in `dev`; Sprint 03 integration is preparing a shared Render QA environment after the merged auth, login UI, SMTP/outbox, and QA-depth-gate slices |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
-| Current sprint | Sprint 03 custom authentication, login UI, SMTP/outbox, and QA Depth Gate are merged; `IDTS-44` is preparing Render deployment config/docs so the team can test on one shared QA URL |
-| Recommended next action | Finish and merge `IDTS-44`, then DonHV creates the Render Blueprint, enters secrets in Dashboard, deploys PostgreSQL schema, sets QA passwords, and runs shared endpoint verification. |
-| Main implementation risk | Shared QA deploy depends on private Render/Brevo/AWS/PostgreSQL environment variables staying out of repo/Jira/logs and on the first PostgreSQL schema/password setup being run in the right environment. |
+| Current sprint | Sprint 03 custom authentication, login UI, SMTP/outbox, and QA Depth Gate are merged; `IDTS-44` now has a live Render URL, PostgreSQL, real team login identities, authenticated OData persistence proof, and AWS S3 attachment acceptance. |
+| Recommended next action | Keep `IDTS-44` In Progress while DonHV resolves the Render-to-Brevo SMTP timeout. S3 is accepted; email outbox creation works, but Render delivery currently fails with sanitized `ETIMEDOUT` evidence. |
+| Main implementation risk | Shared QA deploy depends on private Render/Brevo/AWS/PostgreSQL environment variables staying out of repo/Jira/logs. The remaining open risk is SMTP network reachability from Render to Brevo, not the IDTS outbox transaction model. |
 
 ## What Is Already Done
 
