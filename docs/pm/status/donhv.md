@@ -623,6 +623,20 @@ Vietnamese:
 - When DonHV supports another member's task, record the support here and mention the affected member/task file.
 - Other members should not overwrite this file except when explicitly asked by DonHV.
 
+## 2026-07-02 - IDTS-44 Render QA account activation
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Deployment verification | The four seeded QA profiles existed in Render PostgreSQL but could not sign in because they had no password hashes. | Seed data intentionally contains profiles only; plaintext credentials are never committed. | Fixed by using the secret-safe password helper to write hashes for DonHV, SangVN, DatDT, and NhanT. A temporary PostgreSQL IP allowlist entry was removed immediately afterward. | Fresh public verification: 4/4 logins passed, wrong password returned HTTP 401, authenticated BugService OData returned HTTP 200, PostgreSQL remained available, and the IP allowlist count returned to 0. Next: verify email and S3 flows in the shared QA environment. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai fix | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Xac minh deployment | Bon profile QA seed da co trong Render PostgreSQL nhung chua dang nhap duoc vi chua co password hash. | Seed data co chu dich chi chua profile; plaintext credential khong duoc commit. | Da fix bang helper an toan de ghi hash cho DonHV, SangVN, DatDT va NhanT. Allowlist IP PostgreSQL tam thoi da duoc xoa ngay sau do. | Xac minh public moi: 4/4 login pass, password sai tra HTTP 401, BugService OData co auth tra HTTP 200, PostgreSQL van available, va so entry allowlist IP tro ve 0. Tiep theo: verify luong email va S3 tren shared QA. |
+
 Vietnamese:
 
 - DonHV cập nhật file này cho quyết định của leader, việc BA/PM, deliverable SAP490, tổng hợp hằng tuần và hỗ trợ cross-workstream.

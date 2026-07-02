@@ -134,6 +134,8 @@ Local verification before PR:
 | `npx ai-devkit@latest lint --json` | PASS - 5 ok / 0 miss / 0 warn. |
 | `git diff --check` | PASS - exit 0; Windows line-ending warnings only. |
 | `npm start` local smoke on port 4166 | PASS - login page reachable. |
+| Render QA password hash setup | PASS - hashes were written for all 4 active seed users through private process environment values; no plaintext password, hash, or database URL was printed. Temporary PostgreSQL IP allowlisting was cleared. |
+| Render public authentication smoke | PASS - DonHV, SangVN, DatDT, and NhanT all logged in; wrong password returned HTTP 401; authenticated BugService OData returned HTTP 200. |
 
 Vietnamese:
 
@@ -171,3 +173,5 @@ Vietnamese:
 | `npx ai-devkit@latest lint --json` | PASS - 5 ok / 0 miss / 0 warn. |
 | `git diff --check` | PASS - exit 0; chi co warning line-ending tren Windows. |
 | `npm start` smoke local tren port 4166 | PASS - login page reachable. |
+| Setup password hash QA tren Render | PASS - da ghi hash cho ca 4 seed user active bang private process environment; khong in plaintext password, hash hoac database URL. Allowlist IP PostgreSQL tam thoi da duoc clear. |
+| Smoke authentication public tren Render | PASS - DonHV, SangVN, DatDT va NhanT deu login duoc; password sai tra HTTP 401; BugService OData co auth tra HTTP 200. |
