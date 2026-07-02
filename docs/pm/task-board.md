@@ -32,6 +32,7 @@ Vietnamese: Chi dung board nay de theo doi trang thai cap cao. Chi tiet cong vie
 | IDTS-41 | Catalog validation and draft-create authorization | PR #35 merged into `dev`; backend now rejects invalid/inactive Priority, Severity, and Environment codes and blocks Developer draft-create at the CAP layer. Jira moved to Done. |
 | IDTS-42 | QA Depth Gate and hardened browser harness | PR #38 merged into `dev`; added mandatory PR evidence template, `qa-depth-gate` workflow, PR-body validator, reusable browser harness, secret scan, and PM/process documentation. |
 | IDTS-43 | Fiori UX cleanup from IDTS-32 findings | PR #36 merged into `dev` at `62197e6`; fixed value-list hints, role-aware Create Bug action, single History section, clearer Reopen wording, and role-based browser smoke evidence. |
+| IDTS-48 | Brevo Transactional API delivery for shared QA | PR #57 and PR #58 merged into `dev`; Render deploy `dep-d931rb6rnols73851g1g` is live on commit `bcf43b2`, authenticated shared-QA smoke passed, and a new Brevo API delivery reached `SENT` with `attemptCount = 1`. Jira moved to Done. |
 
 Vietnamese:
 
@@ -60,6 +61,7 @@ Vietnamese:
 | IDTS-41 | Validate catalog va chan draft-create sai quyen | PR #35 da merge vao `dev`; backend chan Priority, Severity, Environment sai/khong active va chan Developer tao draft o CAP layer. Jira da chuyen Done. |
 | IDTS-42 | QA Depth Gate va browser harness duoc harden | PR #38 da merge vao `dev`; da them PR evidence template bat buoc, workflow `qa-depth-gate`, validator PR body, browser harness dung lai, secret scan va tai lieu PM/process. |
 | IDTS-43 | Don dep Fiori UX tu finding IDTS-32 | PR #36 da merge vao `dev` tai `62197e6`; da fix value-list hint, Create Bug theo role, chi con mot History section, wording Reopen ro hon, va co browser smoke theo role. |
+| IDTS-48 | Brevo Transactional API cho shared QA | PR #57 va PR #58 da merge vao `dev`; Render deploy `dep-d931rb6rnols73851g1g` dang live tren commit `bcf43b2`, authenticated shared-QA smoke pass, va mot Brevo API delivery moi da `SENT` voi `attemptCount = 1`. Jira da chuyen Done. |
 
 ## Ready
 
@@ -90,8 +92,7 @@ Vietnamese:
 | IDTS-27 | Sync docs, Jira status, and Sprint 3 evidence | DonHV | Active PM/Jira/evidence consolidation bucket. Current work order: `IDTS-34` and `IDTS-36` are merged; next is handoff to `IDTS-37`/`IDTS-38`, then Sprint 3 evidence consolidation. |
 | IDTS-28 | Refactor backend service into focused modules | DonHV | Jira live state is In Progress even though the refactor is merged. Needs final retest/evidence closure alignment. |
 | IDTS-32 | Manual browser UAT for Sprint 3 workflow/history flows | SangVN | Evidence branch merged through PR #34. Retest remains open until IDTS-41/42/43 fixes and no P0/P1 remain. |
-| IDTS-44 | Deploy shared QA environment on Render | DonHV | Live Render/PostgreSQL, four real-email logins, protected OData, restart persistence, and AWS S3 attachment acceptance pass. Brevo outbox row creation works, but Render SMTP delivery is still blocked by `ETIMEDOUT`. |
-| IDTS-48 | Replace Brevo SMTP with Brevo Transactional API for shared QA email delivery | DonHV | Jira created and implementation started. Backend now has provider-neutral email config plus fake Brevo API integration coverage; full PR/Render acceptance still pending. |
+| IDTS-44 | Deploy shared QA environment on Render | DonHV | Live Render/PostgreSQL, four real-email logins, protected OData, restart persistence, AWS S3 attachment acceptance, and Brevo API real-provider delivery now pass. Final closure needs consolidated IDTS-44 evidence review. |
 
 Vietnamese:
 
@@ -104,8 +105,7 @@ Vietnamese:
 | IDTS-27 | Sync docs, Jira status va Sprint 3 evidence | DonHV | Bucket tong hop PM/Jira/evidence dang active. `IDTS-34` va `IDTS-36` da merge; tiep theo la handoff `IDTS-37`/`IDTS-38`, sau do tong hop evidence Sprint 3. |
 | IDTS-28 | Tach backend service thanh cac module tap trung | DonHV | Jira live dang In Progress du refactor da merge. Can chot retest/evidence closure. |
 | IDTS-32 | Manual browser UAT cho workflow/history Sprint 3 | SangVN | Evidence branch da merge qua PR #34. Van can retest sau IDTS-41/42/43 va chi dong khi khong con P0/P1. |
-| IDTS-44 | Deploy moi truong QA dung chung tren Render | DonHV | Render/PostgreSQL da live; 4 login email that, OData, persistence qua restart va AWS S3 attachment acceptance pass. Brevo tao duoc outbox row, nhung SMTP delivery tren Render con bi `ETIMEDOUT`. |
-| IDTS-48 | Doi Brevo SMTP sang Brevo Transactional API cho shared QA email | DonHV | Da tao Jira va bat dau implementation. Backend da co config email provider-neutral va fake Brevo API integration coverage; PR/Render acceptance day du van pending. |
+| IDTS-44 | Deploy moi truong QA dung chung tren Render | DonHV | Render/PostgreSQL da live; 4 login email that, OData, persistence qua restart, AWS S3 attachment acceptance va Brevo API real-provider delivery deu pass. Can review evidence tong hop truoc khi dong IDTS-44. |
 
 ## Blocked
 

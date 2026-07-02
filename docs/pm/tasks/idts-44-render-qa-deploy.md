@@ -1,6 +1,6 @@
 # IDTS-44 - Render Shared QA Deployment
 
-Last updated: 2026-07-01
+Last updated: 2026-07-02
 
 ## Summary
 
@@ -11,7 +11,7 @@ Target scope:
 - CAP Node.js backend and Fiori app served from one Render web service.
 - PostgreSQL cloud database through the CAP `integration` profile.
 - AWS S3 private object storage for attachments.
-- Brevo SMTP for email notification delivery.
+- Brevo Transactional API for shared-QA email notification delivery; SMTP remains available for local verification or fallback use.
 - Custom login remains the active authentication path.
 
 Vietnamese:
@@ -23,7 +23,7 @@ Phạm vi mục tiêu:
 - Backend CAP Node.js và Fiori app chạy trong một Render web service.
 - PostgreSQL cloud thông qua CAP profile `integration`.
 - AWS S3 private object storage cho attachment.
-- Brevo SMTP cho email notification.
+- Brevo Transactional API cho email notification tren shared QA; SMTP van duoc giu de verify local hoac lam fallback.
 - Custom login vẫn là hướng authentication hiện tại.
 
 ## Jira
@@ -146,6 +146,7 @@ Local verification before PR:
 | Brevo SMTP config presence | PASS - Render service has the required SMTP env keys and starts without the earlier `missing fields: host, username, password, fromAddress` warning. |
 | Brevo local SMTP verification | PASS - Nodemailer `verify()` against Brevo SMTP from DonHV local private config succeeded without printing credentials. |
 | Brevo recipient-real acceptance | BLOCKED - Render creates an EMAIL delivery row and the worker retries it, but Brevo SMTP delivery fails with sanitized `ETIMEDOUT` on ports 587 and 2525. The bug workflow still commits, so email failure isolation is accepted but real provider delivery is not. |
+| Brevo Transactional API acceptance after IDTS-48 | PASS - PR #57 and PR #58 are merged; exact commit `bcf43b2` reached `live` on Render. An authenticated assignment created one new delivery that reached `SENT` on the first attempt with `sentAt` and a provider message id. Post-deploy logs report `brevo-api: sent=1, failed=0` and no new provider error. |
 | Render log/metrics review | PARTIAL PASS - no `postgresql://` or AWS access-key pattern found; CPU/memory metrics are available. Operational error logs contain no bearer token value. |
 | Follow-up tracking | PASS - Jira IDTS-45 tracks DB expiry/backup and IDTS-46 tracks dependency security findings. |
 
@@ -197,5 +198,6 @@ Vietnamese:
 | Cau hinh Brevo SMTP | PASS - service Render co du key SMTP bat buoc va startup khong con warning `missing fields: host, username, password, fromAddress`. |
 | Verify SMTP Brevo tu local | PASS - Nodemailer `verify()` toi Brevo SMTP bang private config cua DonHV thanh cong va khong in credential. |
 | Brevo gui dung recipient | BLOCKED - Render tao duoc EMAIL delivery row va worker retry, nhung delivery qua Brevo SMTP fail voi `ETIMEDOUT` da sanitize tren port 587 va 2525. Workflow bug van commit, nen co the accept failure isolation nhung chua accept real provider delivery. |
+| Acceptance Brevo Transactional API sau IDTS-48 | PASS - PR #57 va PR #58 da merge; commit chinh xac `bcf43b2` da `live` tren Render. Mot thao tac assign co auth tao delivery moi va delivery `SENT` ngay lan dau, co `sentAt` va provider message id. Log sau deploy ghi `brevo-api: sent=1, failed=0` va khong co provider error moi. |
 | Review log/metrics Render | PASS mot phan - khong co match `postgresql://` hoac pattern AWS access key; co CPU/memory metrics. Log error khong lo gia tri bearer token. |
 | Follow-up Jira | PASS - IDTS-45 track DB het han/backup va IDTS-46 track dependency security. |
