@@ -12,6 +12,7 @@ Vietnamese: IDTS-48 doi duong gui email tren shared QA tu Brevo SMTP sang Brevo 
 
 - Jira: [IDTS-48](https://dutassociation.atlassian.net/browse/IDTS-48)
 - Owner: DonHV
+- Status: Done
 - Related: IDTS-44, IDTS-38
 
 ## Scope
@@ -42,6 +43,9 @@ Vietnamese:
 | `npm run qa:email-outbox:programmatic` | PASS |
 | `npm run qa:email-smtp:integration` | PASS |
 | Shared-QA Brevo API smoke after fixing `replyTo` env | PASS - delivery `SENT`, `attemptCount = 1` |
+| PR #58 hardening merge and Render deploy | PASS - merged to `dev` at `bcf43b2`; deploy `dep-d931rb6rnols73851g1g` reached `live` |
+| Final shared-QA Brevo API acceptance | PASS - authenticated smoke passed; new assignment notification for `BUG-0001` produced a `SENT` delivery with `attemptCount = 1`, `sentAt`, and provider message id |
+| Render error/log scan after PR #58 deploy | PASS - no error logs after deploy; email log reported `brevo-api: sent=1, failed=0` |
 
 Vietnamese:
 
@@ -51,6 +55,9 @@ Vietnamese:
 | `npm run qa:email-outbox:programmatic` | PASS |
 | `npm run qa:email-smtp:integration` | PASS |
 | Smoke Brevo API tren shared QA sau khi fix env `replyTo` | PASS - delivery `SENT`, `attemptCount = 1` |
+| Merge PR #58 va deploy Render | PASS - merge vao `dev` tai `bcf43b2`; deploy `dep-d931rb6rnols73851g1g` da `live` |
+| Acceptance Brevo API cuoi tren shared QA | PASS - authenticated smoke pass; notification assign moi cho `BUG-0001` tao delivery `SENT` voi `attemptCount = 1`, co `sentAt` va provider message id |
+| Scan log/error Render sau deploy PR #58 | PASS - khong co error log sau deploy; log email ghi `brevo-api: sent=1, failed=0` |
 
 ## Hardening follow-up
 
@@ -58,28 +65,10 @@ Shared QA found that Brevo rejects `replyTo.email` when the value uses placehold
 
 Vietnamese: Shared QA phat hien Brevo reject `replyTo.email` khi gia tri dung placeholder/display syntax nhu `<optional-reply-to@example.com>`. IDTS hien validate optional `replyTo` nhu email thuan an toan truoc khi xem email config la ready. Cach nay ngan delivery moi bi tao thanh `PENDING` voi payload chac chan bi provider reject.
 
-## Remaining work
+## Closure note
 
-- Run full compile/auth/secret/lint gates before PR.
-- Push PR into `dev`.
-- Configure Render private env:
-  - `cds_idts_email_enabled=true`
-  - `cds_idts_email_provider=brevo-api`
-  - `cds_idts_email_brevoApiKey=<private Brevo API key>`
-  - `cds_idts_email_brevoApiEndpoint=https://api.brevo.com/v3/smtp/email`
-  - `cds_idts_email_fromAddress=<verified sender>`
-- Deploy and verify one real shared-QA delivery reaches `SENT`.
-- Keep full recipient/API key/provider message-id out of Jira and repo evidence.
+IDTS-48 is complete. Shared QA now sends through Brevo Transactional API instead of relying on Render outbound SMTP. The original SMTP timeout is no longer blocking IDTS-44 email acceptance, and the provider-specific API key, recipient address, bearer token, database URL, and provider message id remain out of repo/Jira evidence.
 
 Vietnamese:
 
-- Chay full compile/auth/secret/lint gate truoc PR.
-- Push PR vao `dev`.
-- Cau hinh private env tren Render:
-  - `cds_idts_email_enabled=true`
-  - `cds_idts_email_provider=brevo-api`
-  - `cds_idts_email_brevoApiKey=<private Brevo API key>`
-  - `cds_idts_email_brevoApiEndpoint=https://api.brevo.com/v3/smtp/email`
-  - `cds_idts_email_fromAddress=<verified sender>`
-- Deploy va verify mot delivery shared-QA that chuyen sang `SENT`.
-- Khong dua recipient day du, API key, provider message-id that vao Jira hoac repo evidence.
+IDTS-48 da hoan tat. Shared QA hien gui email qua Brevo Transactional API thay vi phu thuoc outbound SMTP cua Render. Loi timeout SMTP ban dau khong con block email acceptance cua IDTS-44, va API key, dia chi recipient, bearer token, database URL, provider message id that khong duoc dua vao repo/Jira evidence.
