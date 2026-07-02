@@ -384,6 +384,45 @@ Các kiểm tra tối thiểu:
 9. Upload/download attachment nếu AWS S3 env đã cấu hình.
 10. Kiểm tra log để chắc chắn không in password, bearer token, SMTP password, AWS secret, hoặc dữ liệu người nhận private.
 
+## Change QA login emails without committing personal data
+
+The shared QA environment may use real team email addresses as login names and
+notification recipients. Keep those addresses in process environment variables;
+do not add them to the seed CSV, repository docs, Jira, or public evidence.
+
+Use `npm run render:auth:update-qa-emails` with these private variables:
+
+```text
+IDTS_QA_DONHV_EMAIL
+IDTS_QA_SANGVN_EMAIL
+IDTS_QA_DATDT_EMAIL
+IDTS_QA_NHANT_EMAIL
+```
+
+The helper locates users by stable seed UUID, lowercases the addresses, preserves
+password hashes and roles, rejects missing/invalid/duplicate values in one
+transaction, and revokes old sessions. After a future `cds deploy` reloads seed
+data, rerun this helper before shared QA login or email testing.
+
+Vietnamese:
+
+Moi truong QA dung chung co the dung email that cua team lam ten dang nhap va dia
+chi nhan notification. Chi truyen cac dia chi nay qua process environment; khong
+them vao CSV seed, tai lieu repo, Jira hoac evidence public.
+
+Chay `npm run render:auth:update-qa-emails` voi bon bien private o tren. Helper
+tim user bang UUID seed on dinh, chuyen email ve chu thuong, giu nguyen password
+hash va role, rollback neu thieu/sai/trung email, va revoke session cu. Sau lan
+`cds deploy` co nap lai seed data, phai chay lai helper truoc khi test login/email.
+
+For the attachment HTTP harness, pass a custom-auth bearer token through the
+process-only variable `IDTS_QA_BEARER_TOKEN`. The script keeps Basic Auth only as
+a local-development fallback and does not print the token.
+
+Vietnamese: Voi attachment HTTP harness tren shared QA, truyen bearer token qua
+bien process-only `IDTS_QA_BEARER_TOKEN`. Script chi giu Basic Auth lam fallback
+cho local development va khong in token.
+
 ## Rollback and emergency switches
 
 If the app cannot start:
@@ -426,7 +465,21 @@ Nếu upload attachment lỗi:
 - kiểm tra IAM policy có quyền `GetObject`, `PutObject`, `DeleteObject`, và multipart/list cho bucket đã cấu hình;
 - không chuyển bucket sang public.
 
-## Current limitation
+## Current operational limitation
+
+Render MCP and CLI are now available for service, deploy, and log inspection.
+Private secret values remain DonHV-controlled and must not be copied into chat,
+Jira, source files, or evidence. The free PostgreSQL instance expires on
+2026-07-31, so IDTS must back up and choose upgrade or migration by 2026-07-24.
+
+Vietnamese:
+
+Render MCP va CLI hien da dung duoc de xem service, deploy va log. Gia tri secret
+private van do DonHV kiem soat va khong duoc dua vao chat, Jira, source hoac
+evidence. PostgreSQL free het han ngay 31/07/2026, nen IDTS phai backup va chot
+nang cap hoac migrate truoc ngay 24/07/2026.
+
+## Current limitation (historical)
 
 This repository now has Render Blueprint support, but this Codex session does not currently expose callable Render service tools such as create service, list deploys, or read logs. DonHV still needs to create the Blueprint and enter secrets in the Render Dashboard.
 

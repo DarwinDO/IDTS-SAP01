@@ -1,7 +1,8 @@
 param(
     [string]$BaseUrl = "http://localhost:4004/odata/v4/bug",
     [string]$User = "NhanT",
-    [string]$BugId = "90000000-0000-0000-0000-000000000001"
+    [string]$BugId = "90000000-0000-0000-0000-000000000001",
+    [string]$BearerToken = $env:IDTS_QA_BEARER_TOKEN
 )
 
 $ErrorActionPreference = "Stop"
@@ -13,11 +14,15 @@ function New-BasicAuthValue([string]$Username) {
     return "Basic " + [Convert]::ToBase64String($bytes)
 }
 
-function New-HttpClient([string]$Username) {
+function New-HttpClient([string]$Username, [string]$Token) {
     $handler = [System.Net.Http.HttpClientHandler]::new()
     $client = [System.Net.Http.HttpClient]::new($handler)
     $client.Timeout = [TimeSpan]::FromSeconds(30)
-    $client.DefaultRequestHeaders.Authorization = [System.Net.Http.Headers.AuthenticationHeaderValue]::Parse((New-BasicAuthValue $Username))
+    if ($Token) {
+        $client.DefaultRequestHeaders.Authorization = [System.Net.Http.Headers.AuthenticationHeaderValue]::new("Bearer", $Token)
+    } else {
+        $client.DefaultRequestHeaders.Authorization = [System.Net.Http.Headers.AuthenticationHeaderValue]::Parse((New-BasicAuthValue $Username))
+    }
     return $client
 }
 
@@ -140,7 +145,7 @@ function Wait-Until {
     throw "$Label not found after $Attempts attempts."
 }
 
-$client = New-HttpClient $User
+$client = New-HttpClient -Username $User -Token $BearerToken
 
 try {
     Write-Host ""
