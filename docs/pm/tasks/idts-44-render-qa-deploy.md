@@ -136,6 +136,8 @@ Local verification before PR:
 | `npm start` local smoke on port 4166 | PASS - login page reachable. |
 | Render QA password hash setup | PASS - hashes were written for all 4 active seed users through private process environment values; no plaintext password, hash, or database URL was printed. Temporary PostgreSQL IP allowlisting was cleared. |
 | Render public authentication smoke | PASS - DonHV, SangVN, DatDT, and NhanT all logged in; wrong password returned HTTP 401; authenticated BugService OData returned HTTP 200. |
+| Shared-QA identity helper | PASS locally - helper targets stable seed UUIDs, validates all four private emails transactionally, preserves password hashes, revokes old sessions, and keeps personal addresses out of repository evidence. Programmatic success/rollback checks pass. |
+| Bearer attachment harness | PASS locally - existing HTTP attachment script accepts a process-only Bearer token while preserving local Basic Auth fallback; PowerShell parse and attachment regression pass. |
 
 Vietnamese:
 
@@ -175,3 +177,5 @@ Vietnamese:
 | `npm start` smoke local tren port 4166 | PASS - login page reachable. |
 | Setup password hash QA tren Render | PASS - da ghi hash cho ca 4 seed user active bang private process environment; khong in plaintext password, hash hoac database URL. Allowlist IP PostgreSQL tam thoi da duoc clear. |
 | Smoke authentication public tren Render | PASS - DonHV, SangVN, DatDT va NhanT deu login duoc; password sai tra HTTP 401; BugService OData co auth tra HTTP 200. |
+| Helper identity shared QA | PASS local - helper tim user bang UUID seed, validate bon email private trong transaction, giu password hash, revoke session cu va khong dua email that vao evidence repo. Test success/rollback da pass. |
+| Bearer attachment harness | PASS local - script HTTP attachment nhan Bearer token process-only va van giu Basic Auth fallback cho local; PowerShell parse va attachment regression pass. |
