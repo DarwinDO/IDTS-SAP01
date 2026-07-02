@@ -417,6 +417,22 @@ English: `gh pr diff 35 --check` failed because GitHub CLI does not support a `-
 
 Vietnamese: Lệnh `gh pr diff 35 --check` fail vì GitHub CLI không hỗ trợ option `--check` cho `pr diff`. Metadata PR vẫn đọc thành công và báo `MERGEABLE`. Đã sửa cách verify bằng kết quả local `git diff --check` đã pass và chỉ dùng option hợp lệ của `gh pr diff`; không ảnh hưởng source sản phẩm.
 
+## 2026-07-02 - IDTS-38 PR #33 QA support for NhanT
+
+English:
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Test-harness issue | PR #33 browser QA initially expected the Developer role-negative assignment check to return 403 but got 404. | The script called a non-existent OData action `assignBug`; the current CAP service action is `assignToDeveloper`. The role-negative case also used an action shape that did not match the service contract. | Fixed in NhanT's PR branch by logging in as the Developer role, calling `BugService.assignToDeveloper`, and requiring HTTP 403. | Rerun `npm run qa:auth-email:playwright` with private `QA_PASSWORD` passed all seven scenarios, including the Developer 403 check. |
+| Test-harness/process issue | PR #33 used a fallback plaintext QA password, printed the full outbox recipient email in logs, and waited with a fixed two-second sleep before reading the email outbox. | The QA script was convenient for local use but too loose for shared evidence: fallback credentials can hide missing setup, full recipient logs expose personal data, and fixed sleeps create flaky timing. | Fixed in NhanT's PR branch by requiring `QA_PASSWORD`, masking recipient emails in output, and polling for the next outbox record with a timeout. | Static checks and browser QA rerun passed. Next step is push the branch, wait for PR gate, then merge PR #33 if GitHub checks remain green. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung | Nguyen nhan | Trang thai fix | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Loi test-harness | QA browser cua PR #33 ban dau mong doi case Developer bi chan tra 403 nhung thuc te tra 404. | Script goi action OData khong ton tai `assignBug`; action dung trong CAP service hien tai la `assignToDeveloper`. Body/request cua case negative cung chua khop contract service. | Da fix tren branch PR cua NhanT bang cach login role Developer, goi `BugService.assignToDeveloper`, va bat buoc HTTP 403. | Chay lai `npm run qa:auth-email:playwright` voi `QA_PASSWORD` private da pass du bay scenario, gom ca check Developer bi chan 403. |
+| Loi test-harness/process | PR #33 dung password QA fallback dang plaintext, in day du email recipient cua outbox trong log, va cho co dinh hai giay truoc khi doc email outbox. | Script tien cho local nhung chua chat cho evidence dung chung: fallback password co the che viec thieu setup, log email day du lam lo du lieu ca nhan, fixed sleep de gay flaky. | Da fix tren branch PR cua NhanT bang cach bat buoc truyen `QA_PASSWORD`, mask email recipient khi log, va polling outbox record moi voi timeout. | Static checks va browser QA rerun da pass. Buoc tiep theo la push branch, doi PR gate, roi merge PR #33 neu GitHub checks van xanh. |
+
 ## Update Rule
 
 ## 2026-06-30 - Shared QA backend explanation support

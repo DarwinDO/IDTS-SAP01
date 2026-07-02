@@ -2,12 +2,17 @@ const { chromium } = require('playwright');
 const { execSync } = require('child_process');
 const { createHarness } = require('./lib/browser-harness');
 
-const QA_PASSWORD = process.env.QA_PASSWORD || 'password123';
+const QA_PASSWORD = process.env.QA_PASSWORD;
 const ROLES = {
     PM: 'donhv@example.local',
     TESTER: 'nhant@example.local',
     DEVELOPER: 'sangvn@example.local'
 };
+
+if (!QA_PASSWORD) {
+    console.error('QA_PASSWORD environment variable is required for IDTS-38 auth/email QA.');
+    process.exit(1);
+}
 
 function seedTestUsers() {
     Object.values(ROLES).forEach(email => {
@@ -31,6 +36,24 @@ function getEmailOutboxLastRecord() {
     `;
     const result = execSync(`node -e "${script.replace(/\n/g, ' ')}"`).toString().trim();
     return JSON.parse(result);
+}
+
+function maskEmail(email) {
+    if (typeof email !== 'string' || !email.includes('@')) return '[missing]';
+    const [name, domain] = email.split('@');
+    return `${name.slice(0, 2)}***@${domain}`;
+}
+
+async function waitForOutboxRecordAfter(oldRecordId, timeoutMs = 10000) {
+    const startedAt = Date.now();
+
+    while (Date.now() - startedAt < timeoutMs) {
+        const record = getEmailOutboxLastRecord();
+        if (record?.ID && record.ID !== oldRecordId) return record;
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+    throw new Error('Email Outbox record was not created within timeout.');
 }
 
 function clearHarnessErrors(harness) {
@@ -59,7 +82,7 @@ async function runTests() {
 
         const errorVisible = await page.waitForSelector('.error-bar', { state: 'visible', timeout: 5000 });
         if (!errorVisible) throw new Error('Error bar did not appear for wrong password.');
-        
+
         clearHarnessErrors(harness); // intentional failure
         console.log('✅ Passed: Wrong password rejected correctly.');
 
@@ -73,23 +96,30 @@ async function runTests() {
         console.log('✅ Passed: Valid login succeeded and redirected to Fiori app.');
 
         console.log('\\n3. Test: Unauthorized / role-negative action');
-        const assignActionRes = await page.evaluate(async () => {
-            const token = sessionStorage.getItem('idts_auth_token');
-            const res = await fetch('/odata/v4/bug/Bugs(ID=90000000-0000-0000-0000-000000000003,IsActiveEntity=true)/BugService.assignBug', {
+        const assignActionRes = await page.evaluate(async ({ developerEmail, password }) => {
+            const loginRes = await fetch('/odata/v4/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: developerEmail, password })
+            });
+            if (!loginRes.ok) return loginRes.status;
+            const login = await loginRes.json();
+            const token = login?.token;
+            const res = await fetch('/odata/v4/bug/Bugs(ID=90000000-0000-0000-0000-000000000003,IsActiveEntity=true)/BugService.assignToDeveloper', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                body: JSON.stringify({ processor_ID: "80000000-0000-0000-0000-000000000001" })
+                body: JSON.stringify({ assigneeID: "80000000-0000-0000-0000-000000000001", note: "QA role-negative assign attempt" })
             });
             return res.status;
-        });
-        
+        }, { developerEmail: ROLES.DEVELOPER, password: QA_PASSWORD });
+
         clearHarnessErrors(harness); // intentional failure
-        
-        if (assignActionRes !== 403 && assignActionRes !== 400) {
-            console.log(`⚠️  Warning: Role-negative case returned ${assignActionRes}`);
-        } else {
-            console.log('✅ Passed: Role-negative case correctly blocked.');
+
+        if (assignActionRes !== 403) {
+            throw new Error(`Developer role-negative assignToDeveloper expected 403 but got ${assignActionRes}.`);
         }
+
+        console.log('✅ Passed: Developer role-negative case correctly blocked.');
 
         console.log('\\n4. Test: Persistence/Reload');
         await harness.saveReloadAndCheck(async () => {
@@ -109,7 +139,7 @@ async function runTests() {
         await harness.clickAndCheck(page.locator('button[type="submit"]'), 'pm_login');
         await page.waitForURL('**/index.html**');
         await page.waitForSelector('.sapFDynamicPage', { timeout: 15000 });
-        
+
         const oldRecord = getEmailOutboxLastRecord();
 
         const rejectActionRes = await page.evaluate(async () => {
@@ -126,13 +156,9 @@ async function runTests() {
         console.log('✅ Passed: Authenticated workflow action executed.');
 
         console.log('\\n7. Test: Email Notification Delivery Check');
-        await page.waitForTimeout(2000);
-        const newRecord = getEmailOutboxLastRecord();
-        
-        if (newRecord.ID === oldRecord?.ID) {
-            throw new Error('Email Outbox record was not created after rejecting bug.');
-        }
-        console.log(`Outbox Record: [${newRecord.channel_code}] to [${newRecord.recipientEmail}] Status: [${newRecord.status_code}]`);
+        const newRecord = await waitForOutboxRecordAfter(oldRecord?.ID);
+
+        console.log(`Outbox Record: [${newRecord.channel_code}] to [${maskEmail(newRecord.recipientEmail)}] Status: [${newRecord.status_code}]`);
         if (newRecord.status_code !== 'SENT' && newRecord.status_code !== 'FAILED' && newRecord.status_code !== 'PENDING' && newRecord.status_code !== 'SKIPPED') {
             throw new Error(`Unexpected delivery status: ${newRecord.status_code}`);
         }
