@@ -82,8 +82,46 @@ Worker tạo một sender khi cấu hình private hợp lệ. Nhiều email tron
 - Giữ giới hạn pool và đóng transport khi shutdown.
 - Verify thay đổi bằng local SMTP integration test.
 
+### IDTS-48 update: SMTP and Brevo API transports
+
+This file now contains two transport adapters:
+
+- `createSmtpSender(config)` keeps the existing Nodemailer SMTP path.
+- `createBrevoApiSender(config)` sends the same email message through Brevo's HTTP Transactional API.
+- `createEmailSender(config)` is the small selector used by the worker.
+
+The important point for a new developer: the rest of IDTS still calls `sendMail(message)`. The outbox and worker do not need to know whether that call is implemented by SMTP or by HTTPS. This keeps the business rule stable: a bug action writes a delivery row, and the worker tries to deliver it later.
+
+Brevo API sends JSON to `/v3/smtp/email`. The API key is sent only in the HTTP header at runtime. The code must not print it, store it in `NotificationDeliveries`, or copy it to Jira evidence.
+
+Cross-folder check for this change:
+
+- `srv/email/config.js` decides whether provider is `smtp` or `brevo-api`.
+- `srv/email/worker.js` calls `createEmailSender`.
+- `scripts/qa/test-email-smtp-integration.js` protects the old SMTP path.
+- `scripts/qa/test-email-brevo-api-integration.js` protects the new API path with a local fake HTTP server.
+
+### Cap nhat IDTS-48: transport SMTP va Brevo API
+
+File nay hien co hai adapter gui email:
+
+- `createSmtpSender(config)` giu luong Nodemailer SMTP cu.
+- `createBrevoApiSender(config)` gui cung message email qua Brevo Transactional API bang HTTP.
+- `createEmailSender(config)` la selector nho de worker dung dung provider.
+
+Diem quan trong cho nguoi moi: cac phan con lai cua IDTS van chi goi `sendMail(message)`. Outbox va worker khong can biet ben trong la SMTP hay HTTPS. Nhu vay business rule van on dinh: action bug ghi delivery row, worker thu deliver sau.
+
+Brevo API gui JSON toi `/v3/smtp/email`. API key chi nam trong HTTP header luc runtime. Code khong duoc in API key, khong luu vao `NotificationDeliveries`, va khong copy len Jira evidence.
+
+Can kiem tra chung khi sua:
+
+- `srv/email/config.js` quyet dinh provider la `smtp` hay `brevo-api`.
+- `srv/email/worker.js` goi `createEmailSender`.
+- `scripts/qa/test-email-smtp-integration.js` bao ve luong SMTP cu.
+- `scripts/qa/test-email-brevo-api-integration.js` bao ve luong API moi bang fake HTTP server local.
+
 ## Metadata
 
 - Source: `srv/email/sender.js`
-- Related task: IDTS-36
-- Last reviewed: 2026-06-30
+- Related task: IDTS-36, IDTS-48
+- Last reviewed: 2026-07-02

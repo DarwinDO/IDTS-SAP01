@@ -144,7 +144,7 @@ async function processEmailDeliveries ({ tx, config, sendMail, now = new Date(),
     await tx.run(UPDATE(ENTITIES.Deliveries).set({ attemptCount, lastAttemptAt }).where({ ID: delivery.ID, lockToken }))
 
     try {
-      const smtpResult = await sendMail({
+      const providerResult = await sendMail({
         to: delivery.recipientEmail,
         from: formatFrom(config),
         replyTo: config.replyTo || undefined,
@@ -156,7 +156,7 @@ async function processEmailDeliveries ({ tx, config, sendMail, now = new Date(),
       await tx.run(UPDATE(ENTITIES.Deliveries).set({
         status_code: 'SENT',
         sentAt: now.toISOString(),
-        providerMessageId: smtpResult?.messageId || null,
+        providerMessageId: providerResult?.messageId || null,
         nextAttemptAt: null,
         lastErrorCode: null,
         lastErrorSummary: null,
@@ -194,9 +194,11 @@ function retryDelayMs (attemptCount) {
 }
 
 function sanitizeTransportError (error) {
-  const rawCode = String(error?.code || 'SMTP_DELIVERY_FAILED')
-  const code = /^[A-Z0-9_-]{1,80}$/i.test(rawCode) ? rawCode : 'SMTP_DELIVERY_FAILED'
+  const rawCode = String(error?.code || 'EMAIL_DELIVERY_FAILED')
+  const code = /^[A-Z0-9_-]{1,80}$/i.test(rawCode) ? rawCode : 'EMAIL_DELIVERY_FAILED'
   const summaries = {
+    BREVO_API_FAILED: 'Email provider API request failed.',
+    BREVO_API_REJECTED: 'Email provider API rejected the message.',
     EAUTH: 'SMTP authentication failed.',
     ECONNECTION: 'SMTP connection failed.',
     ECONNREFUSED: 'SMTP connection was refused.',
@@ -205,7 +207,7 @@ function sanitizeTransportError (error) {
   }
   return {
     code,
-    summary: summaries[code] || 'SMTP delivery failed.'
+    summary: summaries[code] || 'Email delivery failed.'
   }
 }
 

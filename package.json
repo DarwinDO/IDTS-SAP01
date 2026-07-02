@@ -49,6 +49,7 @@
     "qa:idts43:programmatic": "node scripts/qa/test-idts43-fiori-ux.js",
     "qa:email-outbox:programmatic": "node scripts/qa/test-email-outbox-programmatic.js",
     "qa:email-smtp:integration": "node scripts/qa/test-email-smtp-integration.js",
+    "qa:email-brevo-api:integration": "node scripts/qa/test-email-brevo-api-integration.js",
     "qa:auth-email:playwright": "node scripts/qa/test-idts38-auth-email-playwright.js",
     "qa:developer-workload:programmatic": "node scripts/qa/test-developer-workload-programmatic.js",
     "qa:direct-assignee:http": "powershell -ExecutionPolicy Bypass -File scripts/qa/test-direct-assignee-draft-save.ps1",
@@ -121,6 +122,8 @@
       },
       "email": {
         "enabled": false,
+        "provider": "smtp",
+        "brevoApiEndpoint": "https://api.brevo.com/v3/smtp/email",
         "secure": false,
         "maxRetryCount": 2,
         "pollIntervalMs": 15000,

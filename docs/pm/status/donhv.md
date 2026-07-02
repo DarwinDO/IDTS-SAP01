@@ -433,6 +433,24 @@ Vietnamese:
 | Loi test-harness | QA browser cua PR #33 ban dau mong doi case Developer bi chan tra 403 nhung thuc te tra 404. | Script goi action OData khong ton tai `assignBug`; action dung trong CAP service hien tai la `assignToDeveloper`. Body/request cua case negative cung chua khop contract service. | Da fix tren branch PR cua NhanT bang cach login role Developer, goi `BugService.assignToDeveloper`, va bat buoc HTTP 403. | Chay lai `npm run qa:auth-email:playwright` voi `QA_PASSWORD` private da pass du bay scenario, gom ca check Developer bi chan 403. |
 | Loi test-harness/process | PR #33 dung password QA fallback dang plaintext, in day du email recipient cua outbox trong log, va cho co dinh hai giay truoc khi doc email outbox. | Script tien cho local nhung chua chat cho evidence dung chung: fallback password co the che viec thieu setup, log email day du lam lo du lieu ca nhan, fixed sleep de gay flaky. | Da fix tren branch PR cua NhanT bang cach bat buoc truyen `QA_PASSWORD`, mask email recipient khi log, va polling outbox record moi voi timeout. | Static checks va browser QA rerun da pass. Buoc tiep theo la push branch, doi PR gate, roi merge PR #33 neu GitHub checks van xanh. |
 
+## 2026-07-02 - IDTS-48 Brevo API mitigation
+
+English:
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Environment/provider blocker | Render shared QA can create email outbox rows, but Brevo SMTP delivery still fails with sanitized `ETIMEDOUT` after ports 587 and 2525 were tested. | Local Brevo SMTP verification passed from DonHV's machine, so credentials are likely valid; the remaining issue is Render-to-Brevo SMTP reachability. | Mitigation started in Jira `IDTS-48`: add Brevo Transactional Email HTTP API provider while keeping SMTP fallback. | Fake Brevo API integration PASS, existing outbox PASS, existing SMTP integration PASS. Full compile/auth/secret/lint gates and Render real-provider smoke remain next. |
+| Environment/test-harness issue | The first IDTS-48 test run in the new worktree failed with `Cannot find module '@sap/cds'`. | The new Git worktree did not have `node_modules` installed yet. | Fixed by running `npm ci --include=dev` in the IDTS-48 worktree. | Email integration tests reran after install and proceeded to product/test assertions. |
+| Test-harness issue | First Brevo API integration test failed with `NOT NULL constraint failed: idts_cap_Notifications.bug_ID`. | The new test inserted a notification row manually but omitted the required `bug_ID`. | Fixed by reading a seeded bug and inserting `bug_ID` in both success and failure notification rows. | `npm run qa:email-brevo-api:integration` PASS after the fix. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung | Nguyen nhan | Trang thai fix | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Blocker moi truong/provider | Render shared QA tao duoc email outbox row, nhung Brevo SMTP delivery van fail voi `ETIMEDOUT` da sanitize sau khi thu port 587 va 2525. | Local Brevo SMTP verification tu may DonHV pass, nen credential kha nang cao hop le; van de con lai la Render khong reach duoc Brevo SMTP. | Da bat dau mitigation trong Jira `IDTS-48`: them Brevo Transactional Email HTTP API provider va giu SMTP fallback. | Fake Brevo API integration PASS, outbox hien co PASS, SMTP integration hien co PASS. Full compile/auth/secret/lint gate va Render real-provider smoke la buoc tiep theo. |
+| Loi moi truong/test-harness | Lan chay test IDTS-48 dau tien trong worktree moi fail `Cannot find module '@sap/cds'`. | Git worktree moi chua co `node_modules`. | Da fix bang `npm ci --include=dev` trong worktree IDTS-48. | Email integration tests chay lai sau install va tiep tuc toi assertion product/test. |
+| Loi test-harness | Brevo API integration test lan dau fail `NOT NULL constraint failed: idts_cap_Notifications.bug_ID`. | Test moi tu insert notification row nhung thieu field bat buoc `bug_ID`. | Da fix bang cach doc seed bug va insert `bug_ID` cho ca row success/failure. | `npm run qa:email-brevo-api:integration` PASS sau khi fix. |
+
 ## Update Rule
 
 ## 2026-06-30 - Shared QA backend explanation support

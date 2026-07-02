@@ -4,6 +4,8 @@ const cds = require('@sap/cds')
 
 const DEFAULTS = Object.freeze({
   enabled: false,
+  provider: 'smtp',
+  brevoApiEndpoint: 'https://api.brevo.com/v3/smtp/email',
   secure: false,
   maxRetryCount: 2,
   pollIntervalMs: 15000,
@@ -19,11 +21,14 @@ function getEmailConfig () {
 function normalizeEmailConfig (raw = {}) {
   const config = {
     enabled: toBoolean(raw.enabled, DEFAULTS.enabled),
+    provider: normalizeProvider(raw.provider),
     host: toStringOrNull(raw.host),
     port: toPositiveInteger(raw.port, 587),
     secure: toBoolean(raw.secure, DEFAULTS.secure),
     username: toStringOrNull(raw.username),
     password: toStringOrNull(raw.password),
+    brevoApiKey: toStringOrNull(raw.brevoApiKey),
+    brevoApiEndpoint: trimTrailingSlash(toStringOrNull(raw.brevoApiEndpoint)) || DEFAULTS.brevoApiEndpoint,
     fromAddress: toStringOrNull(raw.fromAddress),
     fromName: toStringOrNull(raw.fromName) || 'IDTS',
     replyTo: toStringOrNull(raw.replyTo),
@@ -47,9 +52,16 @@ function normalizeEmailConfig (raw = {}) {
 }
 
 function requiredFields (config) {
-  const fields = ['host', 'port', 'username', 'password', 'fromAddress']
+  const fields = config.provider === 'brevo-api'
+    ? ['brevoApiKey', 'brevoApiEndpoint', 'fromAddress']
+    : ['host', 'port', 'username', 'password', 'fromAddress']
   if (config.testMode) fields.push('defaultTestRecipient')
   return fields
+}
+
+function normalizeProvider (value) {
+  const provider = toStringOrNull(value) || DEFAULTS.provider
+  return provider === 'brevo-api' ? 'brevo-api' : 'smtp'
 }
 
 function toBoolean (value, fallback) {
