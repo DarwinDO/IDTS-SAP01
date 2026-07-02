@@ -738,3 +738,19 @@ Vietnamese:
 - DonHV cập nhật file này cho quyết định của leader, việc BA/PM, deliverable SAP490, tổng hợp hằng tuần và hỗ trợ cross-workstream.
 - Khi DonHV hỗ trợ task của thành viên khác, ghi phần hỗ trợ ở đây và nêu rõ file member/task bị ảnh hưởng.
 - Thành viên khác không ghi đè file này trừ khi được DonHV yêu cầu rõ.
+
+## 2026-07-02 - IDTS-48 replyTo config hardening
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product hardening | Implemented config validation so optional email `replyTo` must be a plain safe email address and cannot use placeholder/display syntax such as `<optional-reply-to@example.test>`. | The shared-QA Brevo API failure showed that the old basic email regex allowed angle brackets, which Brevo rejects in `replyTo.email`. | Fixed in `srv/email/config.js`, focused tests, `.cdsrc-private.example.json`, and knowledge mirror. | Fresh verification passed: `node --check`, `npm run qa:email-outbox:programmatic`, `npm run qa:email-brevo-api:integration`, `npx cds compile srv --to edmx -s all`, `npm run qa:secret-scan`, `npx ai-devkit@latest lint --json`, and `git diff --check`. |
+| Tooling/process issue | The first focused test run in the new worktree failed with `Cannot find module '@sap/cds'`. | The new isolated worktree had no `node_modules` yet. | Fixed by running `npm ci --include=dev` in the worktree. | Dependency install completed, but it reported the existing known 20 vulnerabilities already tracked separately; no dependency versions were changed. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai fix | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Hardening product | Da implement validation de optional email `replyTo` bat buoc la email thuan an toan va khong chap nhan placeholder/display syntax nhu `<optional-reply-to@example.test>`. | Loi Brevo API tren shared QA cho thay regex email cu van cho dau ngoac nhon, trong khi Brevo reject gia tri do trong `replyTo.email`. | Da fix trong `srv/email/config.js`, focused tests, `.cdsrc-private.example.json`, va knowledge mirror. | Verify moi da pass: `node --check`, `npm run qa:email-outbox:programmatic`, `npm run qa:email-brevo-api:integration`, `npx cds compile srv --to edmx -s all`, `npm run qa:secret-scan`, `npx ai-devkit@latest lint --json`, va `git diff --check`. |
+| Loi tooling/process | Lan chay focused test dau tien trong worktree moi fail voi `Cannot find module '@sap/cds'`. | Worktree tach rieng chua co `node_modules`. | Da fix bang `npm ci --include=dev` trong worktree. | Dependency install thanh cong, nhung van bao 20 vulnerabilities known existing da track rieng; khong doi version dependency nao. |

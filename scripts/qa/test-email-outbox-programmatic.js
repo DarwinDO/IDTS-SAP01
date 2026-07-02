@@ -68,6 +68,14 @@ async function main () {
   assert.equal(disabled.enabled, false)
   assert.equal(disabled.ready, false)
 
+  const invalidReplyTo = enabledConfig({ replyTo: '<optional-reply-to@example.test>' })
+  assert.equal(invalidReplyTo.ready, false)
+  assert.ok(invalidReplyTo.missing.includes('replyTo'))
+
+  const validReplyTo = enabledConfig({ replyTo: 'reply@example.test' })
+  assert.equal(validReplyTo.ready, true)
+  assert.equal(validReplyTo.replyTo, 'reply@example.test')
+
   const escaped = buildEmailMessage({
     notificationID: 'notification-template-test',
     recipientEmail: recipient.email,

@@ -32,16 +32,16 @@
       "password": "<private-smtp-password-or-app-password>",
       "brevoApiKey": "<private-brevo-transactional-api-key>",
       "brevoApiEndpoint": "https://api.brevo.com/v3/smtp/email",
-      "fromAddress": "<verified-sender@example.com>",
+      "fromAddress": "verified-sender@example.com",
       "fromName": "IDTS Notifications",
-      "replyTo": "<optional-reply-to@example.com>",
+      "replyTo": "",
       "baseUrl": "<optional-idts-app-base-url>",
       "maxRetryCount": 2,
       "pollIntervalMs": 15000,
       "batchSize": 10,
       "maxConnections": 3,
       "testMode": false,
-      "defaultTestRecipient": "<optional-private-test-recipient@example.com>"
+      "defaultTestRecipient": ""
     }
   }
 }

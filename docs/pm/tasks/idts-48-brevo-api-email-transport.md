@@ -41,6 +41,7 @@ Vietnamese:
 | `npm run qa:email-brevo-api:integration` | PASS |
 | `npm run qa:email-outbox:programmatic` | PASS |
 | `npm run qa:email-smtp:integration` | PASS |
+| Shared-QA Brevo API smoke after fixing `replyTo` env | PASS - delivery `SENT`, `attemptCount = 1` |
 
 Vietnamese:
 
@@ -49,6 +50,13 @@ Vietnamese:
 | `npm run qa:email-brevo-api:integration` | PASS |
 | `npm run qa:email-outbox:programmatic` | PASS |
 | `npm run qa:email-smtp:integration` | PASS |
+| Smoke Brevo API tren shared QA sau khi fix env `replyTo` | PASS - delivery `SENT`, `attemptCount = 1` |
+
+## Hardening follow-up
+
+Shared QA found that Brevo rejects `replyTo.email` when the value uses placeholder/display syntax such as `<optional-reply-to@example.com>`. IDTS now validates optional `replyTo` as a plain safe email address before treating email config as ready. This prevents new deliveries from becoming `PENDING` with a provider-rejected payload.
+
+Vietnamese: Shared QA phat hien Brevo reject `replyTo.email` khi gia tri dung placeholder/display syntax nhu `<optional-reply-to@example.com>`. IDTS hien validate optional `replyTo` nhu email thuan an toan truoc khi xem email config la ready. Cach nay ngan delivery moi bi tao thanh `PENDING` voi payload chac chan bi provider reject.
 
 ## Remaining work
 
