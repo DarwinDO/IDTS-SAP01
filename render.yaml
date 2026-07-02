@@ -1,0 +1,94 @@
+services:
+  - type: web
+    name: idts-sap01-qa
+    repo: https://github.com/DarwinDO/IDTS-SAP01
+    runtime: node
+    plan: free
+    branch: dev
+    autoDeploy: true
+    buildCommand: npm ci --include=dev
+    startCommand: npm start
+    healthCheckPath: /odata/v4/auth/$metadata
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CDS_ENV
+        value: integration
+      - key: CDS_LOG_LEVEL
+        value: warn
+      - key: cds_requires_db_credentials_host
+        fromDatabase:
+          name: idts-sap01-qa-db
+          property: host
+      - key: cds_requires_db_credentials_port
+        fromDatabase:
+          name: idts-sap01-qa-db
+          property: port
+      - key: cds_requires_db_credentials_user
+        fromDatabase:
+          name: idts-sap01-qa-db
+          property: user
+      - key: cds_requires_db_credentials_password
+        fromDatabase:
+          name: idts-sap01-qa-db
+          property: password
+      - key: cds_requires_db_credentials_database
+        fromDatabase:
+          name: idts-sap01-qa-db
+          property: database
+      - key: cds_requires_db_credentials_ssl
+        value: true
+      - key: cds_requires_db_pool_acquireTimeoutMillis
+        value: 60000
+      - key: cds_requires_db_pool_min
+        value: 0
+      - key: cds_requires_db_pool_max
+        value: 2
+      - key: cds_requires_objectStore_credentials_bucket
+        sync: false
+      - key: cds_requires_objectStore_credentials_region
+        sync: false
+      - key: cds_requires_objectStore_credentials_access_key_id
+        sync: false
+      - key: cds_requires_objectStore_credentials_secret_access_key
+        sync: false
+      - key: cds_idts_email_enabled
+        value: "false"
+      - key: cds_idts_email_host
+        sync: false
+      - key: cds_idts_email_port
+        value: "587"
+      - key: cds_idts_email_secure
+        value: "false"
+      - key: cds_idts_email_username
+        sync: false
+      - key: cds_idts_email_password
+        sync: false
+      - key: cds_idts_email_fromAddress
+        sync: false
+      - key: cds_idts_email_fromName
+        value: IDTS Notifications
+      - key: cds_idts_email_replyTo
+        sync: false
+      - key: cds_idts_email_baseUrl
+        sync: false
+      - key: cds_idts_email_testMode
+        value: "false"
+      - key: cds_idts_email_defaultTestRecipient
+        sync: false
+      - key: cds_idts_email_maxRetryCount
+        value: "2"
+      - key: cds_idts_email_pollIntervalMs
+        value: "15000"
+      - key: cds_idts_email_batchSize
+        value: "10"
+      - key: cds_idts_email_maxConnections
+        value: "3"
+
+databases:
+  - name: idts-sap01-qa-db
+    databaseName: idts_sap01_qa
+    user: idts_sap01_qa
+    plan: free
+    postgresMajorVersion: "15"
+    ipAllowList: []

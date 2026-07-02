@@ -58,7 +58,7 @@ annotate service.Bugs with @(
     },
     {
       $Type  : 'UI.DataFieldForAction',
-      Label  : 'Reopen Bug',
+      Label  : 'Reopen Bug for Further Work',
       Action : 'BugService.reopenBug',
       ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canReopen' } } }
     }
@@ -152,7 +152,7 @@ annotate service.Bugs actions {
     TargetEntities : [in, 'in/historyEvents', 'in/notifications']
   }
   reopenBug(
-    reason @UI.MultiLineText @Common.Label : 'Reason'
+    reason @UI.MultiLineText @Common.Label : 'Reason for Reopening'
   );
 }
 

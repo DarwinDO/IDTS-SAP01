@@ -3,7 +3,11 @@
     "@cap-js/attachments": "^3.12.2",
     "@cap-js/postgres": "^2",
     "@sap/cds": "^9.9.1",
-    "nodemailer": "^9.0.1"
+    "nodemailer": "^9.0.1",
+    "pg": "^8.21.0"
+  },
+  "engines": {
+    "node": ">=20 <23"
   },
   "devDependencies": {
     "@cap-js/cds-test": "^1.0.1",
@@ -18,6 +22,11 @@
     "app/*"
   ],
   "scripts": {
+    "start": "cds-serve all",
+    "render:db:deploy": "cds-deploy",
+    "render:env:db": "cds env requires.db --profile integration",
+    "render:auth:set-password": "node scripts/dev/set-local-user-password.js",
+    "render:auth:set-qa-passwords": "node scripts/render/set-qa-passwords-from-env.js",
     "sap490:gws:version": "gws --version",
     "sap490:gws:auth-status": "gws auth status",
     "sap490:gws:check": "node scripts/sap490/gws-check.mjs",
@@ -31,6 +40,11 @@
     "qa:comments-attachments:http": "powershell -ExecutionPolicy Bypass -File scripts/qa/test-comments-attachments.ps1",
     "qa:comments-attachments:programmatic": "node scripts/qa/test-comments-attachments-programmatic.js",
     "qa:auth:programmatic": "node scripts/qa/test-auth-foundation-programmatic.js",
+    "qa:depth:self-test": "node scripts/qa/test-qa-depth-gate.js",
+    "qa:depth:pr-body": "node scripts/qa/check-pr-depth.js",
+    "qa:secret-scan": "node scripts/qa/secret-scan.js",
+    "qa:idts41:programmatic": "node scripts/qa/test-idts41-code-list-validation.js",
+    "qa:idts43:programmatic": "node scripts/qa/test-idts43-fiori-ux.js",
     "qa:email-outbox:programmatic": "node scripts/qa/test-email-outbox-programmatic.js",
     "qa:email-smtp:integration": "node scripts/qa/test-email-smtp-integration.js",
     "qa:auth-email:playwright": "node scripts/qa/test-idts38-auth-email-playwright.js",
@@ -111,6 +125,12 @@
         "batchSize": 10,
         "maxConnections": 3,
         "testMode": false
+      }
+    },
+    "log": {
+      "levels": {
+        "cds": "warn",
+        "cds.serve": "warn"
       }
     }
   }

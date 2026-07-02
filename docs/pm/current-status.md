@@ -1,16 +1,16 @@
 # Current Project Status
 
-Last updated: 2026-06-30
+Last updated: 2026-07-01
 
 ## Snapshot
 
 | Field | Current value |
 | --- | --- |
-| Project phase | Sprint 02 baseline is stable in `dev`; Sprint 03 integration is implementing SMTP email delivery after the merged custom-login slice |
+| Project phase | Sprint 02 baseline is stable in `dev`; Sprint 03 integration is preparing a shared Render QA environment after the merged auth, login UI, SMTP/outbox, and QA-depth-gate slices |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
-| Current sprint | Sprint 03 custom authentication, login UI, and SMTP/outbox backend slices are merged; FE/QA work continues through `IDTS-37` and `IDTS-38` |
-| Recommended next action | Hand the merged login and delivery contracts to SangVN for `IDTS-37` and NhanT for `IDTS-38`, then continue Sprint 3 evidence consolidation under `IDTS-27`. |
-| Main implementation risk | SMTP credentials must stay private; delivery is at-least-once, so locking reduces duplicate sends but cannot provide exact-once behavior across a crash after provider acceptance. |
+| Current sprint | Sprint 03 custom authentication, login UI, SMTP/outbox, and QA Depth Gate are merged; `IDTS-44` is preparing Render deployment config/docs so the team can test on one shared QA URL |
+| Recommended next action | Finish and merge `IDTS-44`, then DonHV creates the Render Blueprint, enters secrets in Dashboard, deploys PostgreSQL schema, sets QA passwords, and runs shared endpoint verification. |
+| Main implementation risk | Shared QA deploy depends on private Render/Brevo/AWS/PostgreSQL environment variables staying out of repo/Jira/logs and on the first PostgreSQL schema/password setup being run in the right environment. |
 
 ## What Is Already Done
 
@@ -84,10 +84,13 @@ Last updated: 2026-06-30
 - Sprint 3 integration update on 2026-06-28: PR #18 (`IDTS-19` grouped history timeline), PR #20 (`IDTS-13` Object Page side-effect refresh), and PR #24 (`IDTS-24` browser UAT evidence script) were reviewed, fixed where needed, merged into `dev`, and moved to Done in Jira. As of the 2026-06-29 Jira live check, `IDTS-33` is Done; remaining manual workflow/history follow-up is `IDTS-32` plus PM/SAP490 consolidation under `IDTS-27`.
 - Jira live-state sync on 2026-06-29 originally confirmed: `IDTS-33` is Done; `IDTS-1` is still To Do; `IDTS-25`, `IDTS-27`, and `IDTS-28` are still In Progress; `IDTS-36` is To Do. Later on 2026-06-29, `IDTS-34` was implemented, merged into `dev` through PR #28, and moved out of the active queue.
 - IDTS-36 is merged into `dev` through GitHub PR #29 at merge commit `5356a7ffc962ca0545218f9c920503c28492f98b` and is Done in Jira. The implementation uses Nodemailer plus `NotificationDeliveries` outbox tracking, with SMTP credentials kept in private config. Private Brevo SMTP smoke verification passed on 2026-06-30 without printing credentials, recipient data, or provider message-id.
+- IDTS-42 is merged into `dev` through GitHub PR #38. The repository now has a mandatory QA Depth Gate baseline: PR evidence template, `qa-depth-gate` workflow, PR-body validator, reusable browser harness, secret scan, and documented falsification-first QA rules. GitHub branch protection for `dev` now requires the `qa-depth-gate` status check.
 - IDTS-34 is merged into `dev` through GitHub PR #28 at merge commit `52432e35c66a3c0137ed5b7c96c9f57d93409fc5`. Backend custom login now exposes `AuthService.login/logout/me`, stores only password hashes, creates server-side `AuthSessions`, maps Bearer tokens to `cds.User`, keeps `BugService` protected, and passes focused auth verification (`23 PASS / 0 FAIL`) plus CAP compile on `dev`.
 - QA/testing skill support for IDTS-36/IDTS-38 is now installed and routed: `backend-testing`, `api-testing-patterns`, `integration-testing`, `qa-report`, and `qa-test-plan` exist under repo-local `.agents/skills/` and external backup `C:\Users\LapHub\.agents\skills\`. `backend-testing`, `api-testing-patterns`, and `integration-testing` are the primary implementation-test support skills; `qa-report` and `qa-test-plan` are secondary planning/reporting helpers.
 
 Vietnamese:
+
+- IDTS-42 da merge vao `dev` qua GitHub PR #38. Repo hien co baseline QA Depth Gate bat buoc: PR evidence template, workflow `qa-depth-gate`, validator PR body, browser harness dung lai, secret scan va rule QA falsification-first. GitHub branch protection cua `dev` hien da yeu cau status check `qa-depth-gate`.
 
 - Source-code knowledge mirror đã có cho mọi file đang được Git track trong `app/`, `srv/`, và `db`. Sau này khi sửa các folder này, thành viên phải cập nhật note tương ứng trong `docs/knowledge/app/`, `docs/knowledge/srv/`, hoặc `docs/knowledge/db/`, bao gồm liên kết chéo giữa các folder.
 - Sprint 3 integration update ngày 2026-06-28: PR #18 (`IDTS-19` grouped history timeline), PR #20 (`IDTS-13` Object Page side-effect refresh), và PR #24 (`IDTS-24` browser UAT evidence script) đã được review, fix khi cần, merge vào `dev`, và chuyển Done trên Jira. Manual UAT follow-up còn lại được tách giữa `IDTS-32` của SangVN và `IDTS-33` của DatDT.

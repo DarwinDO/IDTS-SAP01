@@ -137,6 +137,10 @@ Các quyết định chính:
 
 Current MVP note: `New` remains in the status catalog for legacy/import compatibility, but the normal create happy flow does not persist `New`. A newly submitted bug starts in `Assigned` when a developer is selected, or `Pending Assignment` when no suitable developer is selected.
 
+Current create-assignment clarification: IDTS must not automatically pick a Developer during create. If the Tester or PM does not explicitly select an assignee, the bug starts as `Pending Assignment`.
+
+Vietnamese: IDTS không được tự chọn Developer khi tạo bug. Nếu Tester hoặc PM không chủ động chọn assignee, bug sẽ bắt đầu ở `Pending Assignment`.
+
 ### Assign Bug
 
 1. Tester selects SAP module if relevant, application component, and defect category.

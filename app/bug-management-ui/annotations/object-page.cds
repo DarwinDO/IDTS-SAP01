@@ -138,13 +138,6 @@ annotate service.Bugs with @(
     },
     {
       $Type  : 'UI.ReferenceFacet',
-      ID     : 'History',
-      Label  : 'History',
-      Target : 'historyEvents/@UI.LineItem',
-      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
-    },
-    {
-      $Type  : 'UI.ReferenceFacet',
       ID     : 'Notifications',
       Label  : 'Notifications',
       Target : 'notifications/@UI.LineItem',

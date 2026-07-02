@@ -1,0 +1,53 @@
+name: qa-depth-gate
+
+on:
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  qa-depth-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate PR evidence sections
+        run: node scripts/qa/check-pr-depth.js --event "$GITHUB_EVENT_PATH"
+
+      - name: Run QA Depth Gate self-test
+        run: npm run qa:depth:self-test
+
+      - name: Compile CAP metadata
+        run: npx cds compile srv app/bug-management-ui --to edmx -s all > /dev/null
+
+      - name: Run focused backend and contract checks
+        run: |
+          npm run qa:auth:programmatic
+          npm run qa:idts41:programmatic
+          npm run qa:idts43:programmatic
+          npm run qa:email-outbox:programmatic
+
+      - name: Build Fiori app
+        working-directory: app/bug-management-ui
+        run: npx ui5 build --config ui5.yaml
+
+      - name: Secret scan
+        run: npm run qa:secret-scan
+
+      - name: AI DevKit lint
+        run: npx ai-devkit@latest lint --json
+
+      - name: Whitespace diff check
+        run: git diff --check
