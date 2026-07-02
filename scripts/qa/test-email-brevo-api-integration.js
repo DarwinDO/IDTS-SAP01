@@ -56,6 +56,7 @@ async function main () {
     brevoApiEndpoint: endpoint,
     fromAddress: 'no-reply@example.test',
     fromName: 'IDTS API Test',
+    replyTo: 'reply@example.test',
     maxRetryCount: 2,
     batchSize: 10,
     pollIntervalMs: 15000
@@ -80,6 +81,7 @@ async function main () {
     assert.equal(requests[0].apiKeyPresent, true)
     assert.equal(requests[0].body.sender.email, 'no-reply@example.test')
     assert.equal(requests[0].body.to[0].email, 'recipient@example.test')
+    assert.equal(requests[0].body.replyTo.email, 'reply@example.test')
     assert.equal(requests[0].body.headers['X-IDTS-Notification-ID'], 'brevo-api-direct-test')
 
     const user = await db.run(SELECT.one.from('idts.cap.Users').columns('ID', 'email').where({ active: true }))

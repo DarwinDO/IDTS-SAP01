@@ -112,13 +112,22 @@ IDTS-48 adds `provider` to the email config. The default remains `smtp`, so exis
 
 This matters because Render could create outbox rows but timed out when connecting to Brevo SMTP. Brevo's HTTP Transactional API uses a normal HTTPS request, which is more likely to work from Render and is easier to fake in integration tests.
 
+### IDTS-48 hardening: plain email validation for `replyTo`
+
+Shared QA exposed an important config detail: Brevo accepts `replyTo.email` only when it is a plain email address. A placeholder or display-format value such as `<optional-reply-to@example.com>` looks readable to a human, but Brevo rejects it because the angle brackets become part of the email string.
+
+The config module now treats `replyTo` the same way as sender and test recipient addresses: if it is present, it must pass `isSafeEmailAddress`. That helper now rejects angle brackets and newline characters before checking the email shape. If `replyTo` is invalid, `normalizeEmailConfig` adds `replyTo` to `missing`, which makes `config.ready = false`. The outbox writer then creates `SKIPPED` deliveries instead of `PENDING` deliveries that would fail later at the provider.
+
+This is intentionally conservative. IDTS does not need full RFC email parsing here; it needs safe, ordinary operational addresses for a QA/demo notification system.
+
 Cross-folder check for this change:
 
 - `package.json` keeps safe defaults and the new test script.
 - `render.yaml` exposes placeholder Render env keys for provider, Brevo API key, and API endpoint.
-- `.cdsrc-private.example.json` documents placeholders only.
+- `.cdsrc-private.example.json` documents placeholders only and leaves optional `replyTo` blank instead of using display-format angle brackets.
 - `srv/email/sender.js` chooses the actual transport based on `config.provider`.
 - `scripts/qa/test-email-brevo-api-integration.js` proves the API config path without a real Brevo key.
+- `scripts/qa/test-email-outbox-programmatic.js` verifies invalid `replyTo` is rejected before provider delivery.
 
 ### Cap nhat IDTS-48: chon provider
 
@@ -126,13 +135,22 @@ IDTS-48 them `provider` vao config email. Mac dinh van la `smtp`, nen luong SMTP
 
 Ly do can doi: Render tao duoc outbox row nhung timeout khi ket noi Brevo SMTP. Brevo Transactional API dung HTTPS request binh thuong, nen co kha nang phu hop hon voi Render va de gia lap trong integration test hon.
 
+### Hardening IDTS-48: validate `replyTo` la email thuan
+
+Shared QA lam lo ra mot chi tiet cau hinh quan trong: Brevo chi chap nhan `replyTo.email` khi no la email thuan. Gia tri placeholder hoac display-format nhu `<optional-reply-to@example.com>` de doc voi con nguoi, nhung Brevo reject vi dau ngoac nhon bi xem la mot phan cua chuoi email.
+
+Module config hien xu ly `replyTo` giong sender va test recipient: neu co `replyTo`, no phai pass `isSafeEmailAddress`. Helper nay hien reject dau ngoac nhon va ky tu xuong dong truoc khi kiem tra dang email. Neu `replyTo` khong hop le, `normalizeEmailConfig` them `replyTo` vao `missing`, lam `config.ready = false`. Khi do outbox writer se tao delivery `SKIPPED` thay vi `PENDING` roi bi provider reject sau do.
+
+Day la cach lam co chu dich bao thu. IDTS khong can parser email RFC day du o day; he thong chi can dia chi van hanh binh thuong va an toan cho notification QA/demo.
+
 Can kiem tra chung khi sua:
 
 - `package.json` giu default an toan va them script test moi.
 - `render.yaml` co env placeholder cho provider, Brevo API key va API endpoint.
-- `.cdsrc-private.example.json` chi ghi placeholder, khong ghi secret that.
+- `.cdsrc-private.example.json` chi ghi placeholder, khong ghi secret that, va de trong `replyTo` optional thay vi dung dau ngoac nhon.
 - `srv/email/sender.js` chon transport dua tren `config.provider`.
 - `scripts/qa/test-email-brevo-api-integration.js` chung minh luong API ma khong can Brevo key that.
+- `scripts/qa/test-email-outbox-programmatic.js` verify `replyTo` sai format bi chan truoc khi tao provider delivery.
 
 ## Metadata
 

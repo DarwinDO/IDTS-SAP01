@@ -43,6 +43,7 @@ function normalizeEmailConfig (raw = {}) {
 
   config.missing = requiredFields(config).filter(field => !config[field])
   if (config.fromAddress && !isSafeEmailAddress(config.fromAddress)) config.missing.push('fromAddress')
+  if (config.replyTo && !isSafeEmailAddress(config.replyTo)) config.missing.push('replyTo')
   if (config.testMode && config.defaultTestRecipient && !isSafeEmailAddress(config.defaultTestRecipient)) {
     config.missing.push('defaultTestRecipient')
   }
@@ -94,7 +95,9 @@ function trimTrailingSlash (value) {
 }
 
 function isSafeEmailAddress (value) {
-  return typeof value === 'string' && !/[\r\n]/.test(value) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+  return typeof value === 'string' &&
+    !/[<>\r\n]/.test(value) &&
+    /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,63}$/.test(value)
 }
 
 module.exports = {
