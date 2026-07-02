@@ -73,7 +73,7 @@ async function updateQaEmails (client, targets) {
     const current = await client.query(
       `select id, displayname, role_code, active, passwordhash
          from idts_cap_users
-        where id = any($1::uuid[])
+        where id = any($1::text[])
         for update`,
       [ids]
     )
@@ -88,7 +88,7 @@ async function updateQaEmails (client, targets) {
       `select id
          from idts_cap_users
         where lower(email) = any($1::text[])
-          and not (id = any($2::uuid[]))`,
+          and not (id = any($2::text[]))`,
       [emails, ids]
     )
     if (collisions.rowCount) throw new Error('One or more QA email addresses are already used by another user.')
@@ -119,7 +119,7 @@ async function updateQaEmails (client, targets) {
           set revokedat = now(),
               modifiedat = now(),
               modifiedby = 'render-qa-identity-helper'
-        where user_id = any($1::uuid[])
+        where user_id = any($1::text[])
           and revokedat is null`,
       [ids]
     )
