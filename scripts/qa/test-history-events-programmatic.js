@@ -136,6 +136,10 @@ async function main () {
     if (SCENARIO === 'edit' || SCENARIO === 'all') {
       await verifyEditScenario(srv)
     }
+
+    if (SCENARIO === 'legacy-labels' || SCENARIO === 'all') {
+      await verifyLegacyHistoryLabelNormalization(srv)
+    }
   } catch (error) {
     const detail = error?.stack || error?.message || JSON.stringify(error) || 'unknown error'
     rec('HE-00 verification flow bootstraps successfully', false, detail)
@@ -162,7 +166,10 @@ async function verifyAssignScenario (srv) {
     rec('HE-01 assign summary is readable', assignEvent?.summary?.includes('Assigned bug to DatDT.'), assignEvent?.summary || 'missing summary')
     rec(
       'HE-02 assign grouped context is event-first readable',
-      assignEvent?.groupedChangeContext?.includes('Status:') && assignEvent?.groupedChangeContext?.includes('Assignee:'),
+      assignEvent?.groupedChangeContext?.includes('Status:') &&
+        assignEvent?.groupedChangeContext?.includes('Assignee:') &&
+        assignEvent?.groupedChangeContext?.includes('Current Action Owner:') &&
+        !assignEvent?.groupedChangeContext?.includes('Next Processor'),
       assignEvent?.groupedChangeContext || 'missing groupedChangeContext'
     )
     rec('HE-03 assign change count is populated', Number(assignEvent?.changeCount) >= 2, `changeCount=${assignEvent?.changeCount ?? 'n/a'}`)
@@ -236,6 +243,49 @@ async function verifyEditScenario (srv) {
       'HE-13 generic edit grouped context explains the change',
       !!editEvent?.groupedChangeContext && editEvent.groupedChangeContext.includes('Title:'),
       editEvent?.groupedChangeContext || 'missing groupedChangeContext'
+    )
+}
+
+async function verifyLegacyHistoryLabelNormalization (srv) {
+    const legacyEvent = {
+      ID: '99999999-9999-9999-9999-999999999999',
+      logs: [
+        {
+          ID: '99999999-9999-9999-9999-999999999991',
+          fieldName: 'nextProcessorUser',
+          fieldLabel: 'Next Processor User',
+          oldValueDisplay: 'DonHV',
+          newValueDisplay: 'DatDT',
+          createdAt: '2026-07-02T00:00:00.000Z'
+        },
+        {
+          ID: '99999999-9999-9999-9999-999999999992',
+          fieldName: 'nextProcessorRole',
+          fieldLabel: 'Next Processor Role',
+          oldValueDisplay: 'Tester',
+          newValueDisplay: 'Developer',
+          createdAt: '2026-07-02T00:00:01.000Z'
+        }
+      ]
+    }
+
+    await enrichHistoryEventPayload([legacyEvent], { user: user('DonHV', ['PM', 'authenticated-user']) }, srv.entities)
+
+    const labels = legacyEvent.logs.map(log => log.fieldLabel)
+    rec(
+      'HE-14 legacy nextProcessor user label is normalized for expanded logs',
+      labels.includes('Current Action Owner') && !labels.includes('Next Processor User'),
+      labels.join(', ')
+    )
+    rec(
+      'HE-15 legacy nextProcessor role label is normalized for expanded logs',
+      labels.includes('Action Owner Role') && !labels.includes('Next Processor Role'),
+      labels.join(', ')
+    )
+    rec(
+      'HE-16 legacy nextProcessor labels are absent from grouped context',
+      !!legacyEvent.groupedChangeContext && !legacyEvent.groupedChangeContext.includes('Next Processor'),
+      legacyEvent.groupedChangeContext || 'missing groupedChangeContext'
     )
 }
 
