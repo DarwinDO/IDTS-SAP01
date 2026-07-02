@@ -71,7 +71,6 @@ Vietnamese:
 | IDTS-38 | Regression test custom login and SMTP notification flows | NhanT | QA coverage for login success/failure, role behavior, SMTP success/failure, disabled email config, and no-secret evidence. Unblocked by merged IDTS-34 and IDTS-36. |
 | IDTS-45 | Back up and decide migration or upgrade for expiring Render PostgreSQL | DonHV | Due 2026-07-24 before the free database expires on 2026-07-31. |
 | IDTS-46 | Review and remediate npm dependency vulnerabilities | DonHV | Clean Render build reports 13 moderate and 7 high findings; use targeted upgrades, not broad force-fix. |
-| IDTS-49 | Derive reporter before custom-auth draft activation | DonHV | Final IDTS-44 review reproduced HTTP 400 `Reporter is required`; fix draft `NEW/SAVE` initialization, deploy, and rerun reporter email routing. |
 
 Vietnamese:
 
@@ -81,7 +80,6 @@ Vietnamese:
 | IDTS-38 | Regression test custom login va SMTP notification | NhanT | QA login success/failure, role behavior, SMTP success/failure, disabled email config va no-secret evidence. Da duoc unblock boi IDTS-34 va IDTS-36 da merge. |
 | IDTS-45 | Backup va chot migrate/nang cap Render PostgreSQL sap het han | DonHV | Han 24/07/2026 truoc khi DB free het han ngay 31/07/2026. |
 | IDTS-46 | Review va xu ly npm dependency vulnerabilities | DonHV | Clean build Render bao 13 moderate va 7 high; chi upgrade co muc tieu, khong force-fix rong. |
-| IDTS-49 | Derive reporter truoc custom-auth draft activation | DonHV | Final review IDTS-44 reproduce HTTP 400 `Reporter is required`; can fix khoi tao draft `NEW/SAVE`, deploy va rerun reporter email routing. |
 
 ## In Progress
 
@@ -94,6 +92,7 @@ Vietnamese:
 | IDTS-27 | Sync docs, Jira status, and Sprint 3 evidence | DonHV | Active PM/Jira/evidence consolidation bucket. Current work order: `IDTS-34` and `IDTS-36` are merged; next is handoff to `IDTS-37`/`IDTS-38`, then Sprint 3 evidence consolidation. |
 | IDTS-28 | Refactor backend service into focused modules | DonHV | Jira live state is In Progress even though the refactor is merged. Needs final retest/evidence closure alignment. |
 | IDTS-32 | Manual browser UAT for Sprint 3 workflow/history flows | SangVN | Evidence branch merged through PR #34. Retest remains open until IDTS-41/42/43 fixes and no P0/P1 remain. |
+| IDTS-49 | Derive reporter before custom-auth draft activation | DonHV | Local fix and verification are complete on `fix/idts-49-draft-reporter-donhv`; next step is PR merge, Render deploy, and DonHV reporter-routing smoke. |
 
 Vietnamese:
 
@@ -106,6 +105,7 @@ Vietnamese:
 | IDTS-27 | Sync docs, Jira status va Sprint 3 evidence | DonHV | Bucket tong hop PM/Jira/evidence dang active. `IDTS-34` va `IDTS-36` da merge; tiep theo la handoff `IDTS-37`/`IDTS-38`, sau do tong hop evidence Sprint 3. |
 | IDTS-28 | Tach backend service thanh cac module tap trung | DonHV | Jira live dang In Progress du refactor da merge. Can chot retest/evidence closure. |
 | IDTS-32 | Manual browser UAT cho workflow/history Sprint 3 | SangVN | Evidence branch da merge qua PR #34. Van can retest sau IDTS-41/42/43 va chi dong khi khong con P0/P1. |
+| IDTS-49 | Derive reporter truoc custom-auth draft activation | DonHV | Fix local va verification da hoan tat tren `fix/idts-49-draft-reporter-donhv`; buoc tiep theo la PR merge, deploy Render va smoke reporter-routing DonHV. |
 
 ## Blocked
 

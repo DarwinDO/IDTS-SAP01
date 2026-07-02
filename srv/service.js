@@ -37,6 +37,7 @@ const {
   prepareAttachmentWrite
 } = require('./bug-service/content')
 const {
+  prepareDraftNew,
   prepareDraftPatch,
   handleDraftSave
 } = require('./bug-service/drafts')
@@ -59,7 +60,10 @@ module.exports = class BugService extends cds.ApplicationService {
       this.before('READ', target, req => ensureHistoryEventSelectDependencies(req))
     }
     this.before('CREATE', Bugs, req => prepareBugWrite(req, entities, { isCreate: true }))
-    this.before('NEW', Bugs.drafts, req => enforceBugCreatePermission(req, entities))
+    this.before('NEW', Bugs.drafts, async req => {
+      const actor = await enforceBugCreatePermission(req, entities)
+      await prepareDraftNew(req, actor)
+    })
     this.before('UPDATE', Bugs, req => prepareBugWrite(req, entities, { isCreate: false }))
     this.before('PATCH', Bugs.drafts, req => prepareDraftPatch(req, entities))
 

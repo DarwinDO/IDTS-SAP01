@@ -122,6 +122,34 @@ Bug creation permission is now expressed once in `enforceBugCreatePermission()` 
 
 Hiding Create in Fiori is useful UX, but browser state is not a security boundary; this backend check remains mandatory.
 
+## 2026-07-02 update: IDTS-49 create permission returns the actor
+
+### English
+
+`enforceBugCreatePermission()` now does two jobs in one place: it verifies that the requester is an active IDTS user with a create-capable role, and it returns that same actor to the caller. `srv/service.js` uses the returned actor when starting a Fiori draft, so `drafts.js` can set `reporter_ID` without doing a second user lookup.
+
+Unmapped identities are no longer treated as "no actor but continue". They are rejected with `403` and target `reporter_ID`. This matters because a Bug reporter is mandatory and system-managed; allowing an unknown user through would only fail later with a less useful validation error.
+
+Important source anchors:
+
+- **Location**: `assertBugCreatePermission(req, actor)`
+  **IDTS concept**: Bug creation requires a real active Tester or PM identity.
+  **Impact if broken**: A request with an unknown login could start a draft that cannot be activated correctly, or Developer/unknown users could bypass the intended create gate.
+  **Must check together**: `srv/service.js` draft `NEW` hook, `drafts.js` reporter initialization, auth user mapping, and `scripts/qa/test-idts49-draft-reporter.js`.
+
+### Vietnamese
+
+`enforceBugCreatePermission()` hien lam hai viec tai mot noi: kiem tra requester co phai active IDTS user voi role duoc tao Bug hay khong, va tra ve chinh actor do cho caller. `srv/service.js` dung actor tra ve khi bat dau Fiori draft, de `drafts.js` set `reporter_ID` ma khong can query user lan hai.
+
+Identity khong map duoc khong con duoc xem la "khong co actor nhung cho di tiep". Backend reject `403` voi target `reporter_ID`. Dieu nay quan trong vi reporter cua Bug la bat buoc va do he thong quan ly; neu cho unknown user di tiep thi chi fail muon hon voi loi validation kho hieu hon.
+
+Important source anchors:
+
+- **Vi tri**: `assertBugCreatePermission(req, actor)`
+  **Khai niem IDTS**: Tao Bug yeu cau mot active Tester hoac PM identity that trong IDTS.
+  **Anh huong neu sai**: Request voi login khong map duoc co the bat dau draft khong activate duoc, hoac Developer/unknown user co the vuot qua create gate mong muon.
+  **Phai kiem tra cung**: draft `NEW` hook trong `srv/service.js`, reporter initialization trong `drafts.js`, auth user mapping, va `scripts/qa/test-idts49-draft-reporter.js`.
+
 ### Vietnamese
 
 Quyền tạo Bug hiện được gom vào `enforceBugCreatePermission()` và `assertBugCreatePermission()`. Cả active CREATE lẫn event draft `NEW` của Fiori đều dùng cùng rule. CAP phát `NEW` khi user bắt đầu root draft; nếu chờ đến activation mới chặn thì Developer vẫn vào một create flow mà họ không bao giờ được phép hoàn tất.

@@ -158,10 +158,23 @@ File này là nơi tất cả quy tắc trạng thái IDTS, cập nhật nextPro
 
 The service registers `enforceBugCreatePermission()` on `before('NEW', Bugs.drafts, ...)`. `NEW` is CAP's draft-specific event for starting a root draft; it is different from an ordinary database `CREATE`. This stops an unauthorized Developer before Fiori opens a writable new-Bug draft.
 
+For IDTS-49, this hook also captures the returned authenticated IDTS actor and passes it to `prepareDraftNew()`. That makes reporter initialization happen at draft creation time, not only at active `CREATE` time.
+
 - **Location**: the `NEW` hook beside CREATE/UPDATE/PATCH registration
   **IDTS concept**: Backend authorization and role-aware Fiori UX agree from the first create step.
-  **Impact if broken**: Developer enters the form and is rejected only later, which is confusing and unsafe.
-  **Must check together**: `permissions.js`, CAP draft lifecycle, List Report Create behavior, and role-matrix browser QA.
+  **Impact if broken**: Developer enters the form and is rejected only later, or a valid PM/Tester draft can fail activation with `Reporter is required`.
+  **Must check together**: `permissions.js`, `drafts.js`, CAP draft lifecycle, List Report Create behavior, and role-matrix browser QA.
+
+### Vietnamese
+
+Service dang ky `enforceBugCreatePermission()` tai `before('NEW', Bugs.drafts, ...)`. `NEW` la event rieng cua CAP khi bat dau root draft; no khac database `CREATE` thong thuong. Hook nay chan Developer khong co quyen truoc khi Fiori mo draft tao Bug co the chinh sua.
+
+Voi IDTS-49, hook nay con lay authenticated IDTS actor do permission function tra ve va truyen sang `prepareDraftNew()`. Nho vay reporter duoc khoi tao ngay luc tao draft, khong phai chi den active `CREATE` moi set.
+
+- **Vi tri**: hook `NEW` canh phan dang ky CREATE/UPDATE/PATCH
+  **Khai niem IDTS**: Backend authorization va UX theo role cua Fiori phai khop ngay tu buoc create dau tien.
+  **Anh huong neu sai**: Developer vao duoc form roi chi bi chan o buoc sau, hoac draft hop le do PM/Tester tao co the fail activation voi `Reporter is required`.
+  **Phai kiem tra cung**: `permissions.js`, `drafts.js`, CAP draft lifecycle, hanh vi Create cua List Report, va browser QA theo role matrix.
 
 ### Vietnamese
 
