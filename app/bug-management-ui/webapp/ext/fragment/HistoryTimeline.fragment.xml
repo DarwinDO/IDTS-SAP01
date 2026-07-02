@@ -50,9 +50,6 @@
             <!-- Summary -->
             <Text text="{summary}" visible="{= !!%{summary} }" wrapping="true" class="sapUiTinyMarginTop" />
 
-            <!-- Grouped change context -->
-            <Text text="{groupedChangeContext}" visible="{= !!%{groupedChangeContext} }" wrapping="true" class="sapThemeMetaData sapUiTinyMarginTop" />
-
             <!-- Expandable detail logs -->
             <Panel
               expandable="true"

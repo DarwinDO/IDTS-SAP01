@@ -13,7 +13,7 @@ In this CAP/Fiori app, history is stored in two levels:
 - `HistoryEvents`: one readable business event, for example “Added a comment” or “Resolved bug”.
 - `HistoryLogs`: detailed field changes under that event, for example old value and new value.
 
-This fragment is the UI layer for that idea. It binds to `historyEvents`, expands the nested `logs`, and renders each event as a list item with an icon, actor, timestamp, summary, optional grouped change text, optional detail table, and optional reason warning.
+This fragment is the UI layer for that idea. It binds to `historyEvents`, expands the nested `logs`, and renders each event as a list item with an icon, actor, timestamp, summary, optional detail table, and optional reason warning.
 
 The important UI5 detail is the expression-binding syntax:
 
@@ -26,8 +26,8 @@ The important UI5 detail is the expression-binding syntax:
 1. User opens a bug Object Page.
 2. `manifest.json` injects this fragment as the `HistoryTimeline` custom section.
 3. The fragment reads `historyEvents` for the current bug.
-4. CAP service logic enriches each event with display fields such as `actionTypeName`, `actorDisplayName`, `groupedChangeContext`, and `changeCount`.
-5. The UI shows a readable timeline first, then lets the user expand the detailed audit rows when needed.
+4. CAP service logic enriches each event with display fields such as `actionTypeName`, `actorDisplayName`, and `changeCount`.
+5. The UI shows a readable timeline summary first, then lets the user expand the detailed audit rows when needed.
 
 ### Important source anchors
 
@@ -36,10 +36,10 @@ The important UI5 detail is the expression-binding syntax:
   - Impact if broken: The timeline becomes empty or loses the detailed field-change rows.
   - Must check together: `srv/service.cds`, `srv/bug-service/history-read-models.js`, and `app/bug-management-ui/annotations/history-notifications.cds`.
 
-- Location: `visible="{= !!%{summary} }"` and `visible="{= !!%{groupedChangeContext} }"`
-  - IDTS concept: Summary and grouped change context are optional readable text blocks.
-  - Impact if broken: UI5 can log binding format errors and hide or render timeline text incorrectly.
-  - Must check together: Browser console output during IDTS-24 UAT and any change to `HistoryEvents.summary` or `groupedChangeContext`.
+- Location: `visible="{= !!%{summary} }"`
+  - IDTS concept: The main timeline shows only the business event summary by default. Field-level changes are kept in `Show Details`.
+  - Impact if broken: Users see noisy implementation-level field-change lines directly in the timeline.
+  - Must check together: Browser console output during UAT and any change to `HistoryEvents.summary`.
 
 - Location: `visible="{= %{changeCount} > 0 }"`
   - IDTS concept: The “Show Details” panel should appear only when there are raw audit log rows.
@@ -55,7 +55,7 @@ The important UI5 detail is the expression-binding syntax:
 
 - `app/bug-management-ui/webapp/manifest.json` registers this fragment as the Object Page custom section.
 - `srv/service.cds` exposes `BugService.HistoryEvents` and its nested `logs`.
-- `srv/bug-service/history-read-models.js` fills the readable timeline fields.
+- `srv/bug-service/history-read-models.js` fills the readable timeline fields. `groupedChangeContext` can still exist in the OData response for programmatic use, but this fragment no longer renders it directly.
 - `app/bug-management-ui/annotations/history-notifications.cds` keeps the standard history table available beside this custom section.
 - `app/bug-management-ui/webapp/i18n/i18n.properties` and `i18n_en.properties` provide all timeline labels.
 - `scripts/qa/test-idts24-uat-playwright.js` uses this section as browser UAT evidence, so binding errors here can make IDTS-24 evidence unfit for SAP490.
@@ -65,6 +65,7 @@ The important UI5 detail is the expression-binding syntax:
 - Keep this fragment read-only; it should explain history, not change workflow state.
 - If you add text, add i18n keys in both `i18n.properties` and `i18n_en.properties`.
 - If you add a new optional field in `visible`, prefer `%{fieldName}` inside expression bindings to avoid target-type conversion errors.
+- Do not re-add `groupedChangeContext` as a default visible text row unless the UX decision changes. It is too noisy for the main timeline and belongs in the expandable details.
 - If you change fields coming from `HistoryEvents`, verify the backend projection and read-model enrichment still provide them.
 - Rerun browser UAT and inspect console output, not only screenshots.
 
@@ -142,3 +143,27 @@ Chi tiết UI5 quan trọng nằm ở expression binding:
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/ext/fragment/HistoryTimeline.fragment.xml.md`
 - Source layer: `app`
 - Last reviewed: 2026-06-28
+
+## 2026-07-02 Update: Hide grouped change context from the main timeline
+
+### English
+
+The fragment no longer renders `groupedChangeContext` as a default text line under each history summary.
+
+Why: the timeline should be easy to scan. The main line should say the business event, for example “Requested more information. Status changed from Assigned to Need More Information.” The field-level changes such as current action owner, owner role, assignee, or status are still available in the expandable `Show Details` table. Showing both summary and grouped field changes by default made the timeline noisy and exposed implementation wording too prominently.
+
+- **Location**: `app/bug-management-ui/webapp/ext/fragment/HistoryTimeline.fragment.xml`
+  **IDTS concept**: History has two reading levels: event summary first, field-level audit details only when expanded.
+  **Impact if broken**: Users see noisy technical field-change lines directly in the timeline, making the Object Page harder to read.
+  **Must check together**: `srv/bug-service/history-read-models.js`, `HistoryEvents.groupedChangeContext`, `HistoryEvents.logs`, and browser smoke on the Object Page History section.
+
+### Vietnamese
+
+Fragment này không còn render `groupedChangeContext` thành một dòng text mặc định dưới mỗi history summary.
+
+Lý do: timeline cần dễ đọc trước. Dòng chính chỉ nên nói event nghiệp vụ, ví dụ “Requested more information. Status changed from Assigned to Need More Information.” Các thay đổi chi tiết từng field như người đang xử lý, vai trò xử lý, assignee hoặc status vẫn nằm trong bảng `Show Details`. Nếu hiện cả summary và grouped field changes cùng lúc thì timeline bị rối và lộ wording kỹ thuật quá nhiều.
+
+- **Vị trí**: `app/bug-management-ui/webapp/ext/fragment/HistoryTimeline.fragment.xml`
+  **Khái niệm IDTS**: History có hai tầng đọc: summary của event trước, chi tiết audit từng field chỉ xem khi mở rộng.
+  **Ảnh hưởng nếu sai**: User thấy các dòng field-change kỹ thuật ngay trên timeline, làm Object Page khó đọc hơn.
+  **Phải kiểm tra cùng**: `srv/bug-service/history-read-models.js`, `HistoryEvents.groupedChangeContext`, `HistoryEvents.logs`, và browser smoke ở Object Page History section.
