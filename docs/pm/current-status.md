@@ -8,8 +8,8 @@ Last updated: 2026-07-02
 | --- | --- |
 | Project phase | Sprint 02 baseline is stable in `dev`; Sprint 03 integration is preparing a shared Render QA environment after the merged auth, login UI, SMTP/outbox, and QA-depth-gate slices |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
-| Current sprint | Sprint 03 custom authentication, login UI, outbox delivery, and QA Depth Gate are merged; `IDTS-44` now has a live Render URL, PostgreSQL, real team login identities, authenticated OData persistence proof, AWS S3 attachment acceptance, and a successful Brevo Transactional API delivery. `IDTS-48` is Done. |
-| Recommended next action | Consolidate the remaining `IDTS-44` acceptance evidence and close it when the final review passes; then continue `IDTS-45` database-expiry planning and the `IDTS-37`/`IDTS-38` UI/QA handoff. |
+| Current sprint | Sprint 03 custom authentication, login UI, outbox delivery, and QA Depth Gate are merged; `IDTS-44` has live Render/PostgreSQL, auth/OData, Brevo API, and full post-redeploy S3 evidence, but final closure is blocked by draft reporter defect `IDTS-49`. |
+| Recommended next action | Fix `IDTS-49` so authenticated Tester/PM drafts derive reporter before save validation, deploy it to Render, rerun DonHV recipient routing, then close `IDTS-44`. Continue `IDTS-45` before the database expiry deadline. |
 | Main implementation risk | Shared QA still depends on private Render/Brevo/AWS/PostgreSQL environment variables staying out of repo, Jira, and logs. The Render PostgreSQL free-instance expiry remains the main time-bound infrastructure risk; Brevo SMTP reachability is no longer a blocker because shared QA uses the HTTPS Transactional API. |
 
 ## What Is Already Done
@@ -167,7 +167,7 @@ Vietnamese:
 | SRS style | Uses a traditional SRS outline, with requirement quality, traceability, and verification aligned to ISO/IEC/IEEE 29148-style discipline. |
 | FRS style | Uses function-detail specifications with workflow diagrams, validations, status effects, history/notification effects, acceptance criteria, and traceability to SRS. |
 | WP1-WP3 implementation | CAP model foundation, service/value help, and MVP runtime business validation are complete. |
-| Current work order | `IDTS-34` backend auth, `IDTS-35` FE login, `IDTS-36` outbox delivery, and `IDTS-48` Brevo API transport are complete; next is final `IDTS-44` evidence consolidation, followed by `IDTS-37` notification readability and `IDTS-38` regression QA. |
+| Current work order | `IDTS-34`, `IDTS-35`, `IDTS-36`, and `IDTS-48` are complete. `IDTS-49` now blocks final `IDTS-44` closure; after its fix/deploy/retest, continue `IDTS-37` notification readability and `IDTS-38` regression QA. |
 | IDTS-36 email library | Nodemailer is selected for v1 because IDTS needs SMTP portability, simple Node.js integration, and no provider lock-in. `@opencoredev/email-sdk` remains a future reference only because it is AGPL-3.0-only and heavier than needed for this slice. |
 
 Vietnamese:

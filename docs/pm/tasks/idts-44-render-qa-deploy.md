@@ -30,7 +30,7 @@ Phạm vi mục tiêu:
 
 - Jira: [IDTS-44](https://dutassociation.atlassian.net/browse/IDTS-44)
 - Owner: DonHV
-- Status: In Progress
+- Status: In Progress - blocked by [IDTS-49](https://dutassociation.atlassian.net/browse/IDTS-49)
 
 ## Implementation notes
 
@@ -201,3 +201,31 @@ Vietnamese:
 | Acceptance Brevo Transactional API sau IDTS-48 | PASS - PR #57 va PR #58 da merge; commit chinh xac `bcf43b2` da `live` tren Render. Mot thao tac assign co auth tao delivery moi va delivery `SENT` ngay lan dau, co `sentAt` va provider message id. Log sau deploy ghi `brevo-api: sent=1, failed=0` va khong co provider error moi. |
 | Review log/metrics Render | PASS mot phan - khong co match `postgresql://` hoac pattern AWS access key; co CPU/memory metrics. Log error khong lo gia tri bearer token. |
 | Follow-up Jira | PASS - IDTS-45 track DB het han/backup va IDTS-46 track dependency security. |
+
+## Final evidence review - 2026-07-02
+
+English:
+
+| Area | Result | Evidence / remaining work |
+| --- | --- | --- |
+| Render runtime | PASS | Current `dev` commit `97dfb3f` redeployed as `dep-d932p167r5hc73a2a1n0` and reached `live`; service is not suspended and PostgreSQL reports `available`. |
+| Auth and protected OData | PASS | Auth metadata and login page returned 200; wrong login and anonymous protected OData returned 401; authenticated protected OData returned 200. |
+| Brevo Transactional API | PASS | Render logs show `brevo-api: sent=1, failed=0` with no new provider error. Existing `SENT` evidence covered two recipients; the final review added a new `SENT` delivery for NhanT and restored BUG-0001 to `ASSIGNED`. |
+| PostgreSQL and AWS S3 persistence | PASS | A fresh QA attachment passed upload/activate/download. After redeploy, the same file downloaded with a matching SHA-256; delete returned 204 and post-delete download returned 404. |
+| Secret/log safety | PASS | Evidence contains no credential, bearer token, private recipient address, database URL, AWS key, or provider message id. Render error-log query returned no new error logs after the accepted Brevo deploy. |
+| Final reporter-routing scenario | BLOCKED | A PM-authenticated Bug draft cannot activate without a client-provided `reporter_ID`; activation returns HTTP 400 `Reporter is required`. Root cause is tracked by IDTS-49. Controlled failed drafts were deleted. |
+
+IDTS-44 must remain In Progress until IDTS-49 is fixed, merged, deployed, and the missing DonHV reporter notification reaches `SENT`.
+
+Vietnamese:
+
+| Khu vuc | Ket qua | Evidence / viec con lai |
+| --- | --- | --- |
+| Render runtime | PASS | Commit `dev` hien tai `97dfb3f` da redeploy thanh `dep-d932p167r5hc73a2a1n0` va dat `live`; service khong suspended, PostgreSQL bao `available`. |
+| Auth va protected OData | PASS | Auth metadata va login page tra 200; login sai va protected OData anonymous tra 401; protected OData co auth tra 200. |
+| Brevo Transactional API | PASS | Log Render ghi `brevo-api: sent=1, failed=0` va khong co provider error moi. Evidence `SENT` cu bao phu hai recipient; final review them delivery `SENT` cho NhanT va restore BUG-0001 ve `ASSIGNED`. |
+| PostgreSQL va AWS S3 persistence | PASS | Attachment QA moi pass upload/activate/download. Sau redeploy, cung file download voi SHA-256 khop; delete tra 204 va download sau delete tra 404. |
+| An toan secret/log | PASS | Evidence khong chua credential, bearer token, private recipient address, database URL, AWS key hay provider message id. Query error log Render khong co error moi sau Brevo deploy da accept. |
+| Scenario routing reporter cuoi | BLOCKED | Bug draft co PM auth khong activate duoc neu client khong gui `reporter_ID`; activation tra HTTP 400 `Reporter is required`. Root cause duoc track boi IDTS-49. Controlled failed drafts da xoa. |
+
+IDTS-44 phai giu In Progress den khi IDTS-49 duoc fix, merge, deploy va notification reporter DonHV con thieu dat `SENT`.
