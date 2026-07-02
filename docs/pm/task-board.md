@@ -1,6 +1,6 @@
 # IDTS Task Board
 
-Last updated: 2026-07-01
+Last updated: 2026-07-02
 
 Use this board for high-level movement only. Detailed task notes belong in the matching file under `docs/pm/tasks/`.
 
@@ -91,6 +91,7 @@ Vietnamese:
 | IDTS-28 | Refactor backend service into focused modules | DonHV | Jira live state is In Progress even though the refactor is merged. Needs final retest/evidence closure alignment. |
 | IDTS-32 | Manual browser UAT for Sprint 3 workflow/history flows | SangVN | Evidence branch merged through PR #34. Retest remains open until IDTS-41/42/43 fixes and no P0/P1 remain. |
 | IDTS-44 | Deploy shared QA environment on Render | DonHV | Live Render/PostgreSQL, four real-email logins, protected OData, restart persistence, and AWS S3 attachment acceptance pass. Brevo outbox row creation works, but Render SMTP delivery is still blocked by `ETIMEDOUT`. |
+| IDTS-48 | Replace Brevo SMTP with Brevo Transactional API for shared QA email delivery | DonHV | Jira created and implementation started. Backend now has provider-neutral email config plus fake Brevo API integration coverage; full PR/Render acceptance still pending. |
 
 Vietnamese:
 
@@ -104,6 +105,7 @@ Vietnamese:
 | IDTS-28 | Tach backend service thanh cac module tap trung | DonHV | Jira live dang In Progress du refactor da merge. Can chot retest/evidence closure. |
 | IDTS-32 | Manual browser UAT cho workflow/history Sprint 3 | SangVN | Evidence branch da merge qua PR #34. Van can retest sau IDTS-41/42/43 va chi dong khi khong con P0/P1. |
 | IDTS-44 | Deploy moi truong QA dung chung tren Render | DonHV | Render/PostgreSQL da live; 4 login email that, OData, persistence qua restart va AWS S3 attachment acceptance pass. Brevo tao duoc outbox row, nhung SMTP delivery tren Render con bi `ETIMEDOUT`. |
+| IDTS-48 | Doi Brevo SMTP sang Brevo Transactional API cho shared QA email | DonHV | Da tao Jira va bat dau implementation. Backend da co config email provider-neutral va fake Brevo API integration coverage; PR/Render acceptance day du van pending. |
 
 ## Blocked
 

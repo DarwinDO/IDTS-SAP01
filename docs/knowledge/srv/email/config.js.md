@@ -106,8 +106,36 @@ Hãy hiểu file này như bảng kiểm tra ở cửa vào của hệ thống e
 - Nếu đổi tên config key, phải cập nhật private example, PM handoff, test, sender và worker cùng lúc.
 - Không log toàn bộ config object vì lúc runtime object này có SMTP password.
 
+### IDTS-48 update: provider selection
+
+IDTS-48 adds `provider` to the email config. The default remains `smtp`, so existing local SMTP/Nodemailer behavior does not change. Shared QA can set `provider = "brevo-api"` and provide `brevoApiKey` plus `brevoApiEndpoint`. In that mode, SMTP host, port, username, and password are no longer required; the required fields become API key, endpoint, and sender address.
+
+This matters because Render could create outbox rows but timed out when connecting to Brevo SMTP. Brevo's HTTP Transactional API uses a normal HTTPS request, which is more likely to work from Render and is easier to fake in integration tests.
+
+Cross-folder check for this change:
+
+- `package.json` keeps safe defaults and the new test script.
+- `render.yaml` exposes placeholder Render env keys for provider, Brevo API key, and API endpoint.
+- `.cdsrc-private.example.json` documents placeholders only.
+- `srv/email/sender.js` chooses the actual transport based on `config.provider`.
+- `scripts/qa/test-email-brevo-api-integration.js` proves the API config path without a real Brevo key.
+
+### Cap nhat IDTS-48: chon provider
+
+IDTS-48 them `provider` vao config email. Mac dinh van la `smtp`, nen luong SMTP/Nodemailer local hien co khong bi doi hanh vi. Shared QA co the set `provider = "brevo-api"` va cung cap `brevoApiKey` cung `brevoApiEndpoint`. Khi dung mode nay, SMTP host, port, username va password khong con la truong bat buoc; truong bat buoc chuyen thanh API key, endpoint va dia chi sender.
+
+Ly do can doi: Render tao duoc outbox row nhung timeout khi ket noi Brevo SMTP. Brevo Transactional API dung HTTPS request binh thuong, nen co kha nang phu hop hon voi Render va de gia lap trong integration test hon.
+
+Can kiem tra chung khi sua:
+
+- `package.json` giu default an toan va them script test moi.
+- `render.yaml` co env placeholder cho provider, Brevo API key va API endpoint.
+- `.cdsrc-private.example.json` chi ghi placeholder, khong ghi secret that.
+- `srv/email/sender.js` chon transport dua tren `config.provider`.
+- `scripts/qa/test-email-brevo-api-integration.js` chung minh luong API ma khong can Brevo key that.
+
 ## Metadata
 
 - Source: `srv/email/config.js`
-- Related task: IDTS-36
-- Last reviewed: 2026-06-30
+- Related task: IDTS-36, IDTS-48
+- Last reviewed: 2026-07-02

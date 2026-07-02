@@ -96,8 +96,36 @@ Một dòng outbox tự nó không thể gửi email. Cần một worker định
 - Chỉ có một job/sender trong mỗi process.
 - Dùng `cds.spawn`; không gắn SMTP sending vào request transaction ban đầu.
 
+### IDTS-48 update: provider-neutral worker
+
+The worker no longer says "SMTP" for every runtime path. It now asks `sender.js` for `createEmailSender(config)`. That selector can return either the old SMTP sender or the new Brevo API sender.
+
+The worker still has the same responsibilities:
+
+1. Do nothing when email is disabled.
+2. Refuse to start when provider config is incomplete.
+3. Poll the outbox with `cds.spawn`.
+4. Log only counts and provider name, never email body or credentials.
+5. Close the sender on shutdown.
+
+This separation matters because Render shared QA can switch from SMTP to Brevo API by changing private environment variables, without changing bug workflow code.
+
+### Cap nhat IDTS-48: worker khong phu thuoc provider
+
+Worker khong con mac dinh goi moi duong gui email la "SMTP". No goi `createEmailSender(config)` trong `sender.js`. Selector nay co the tra ve SMTP sender cu hoac Brevo API sender moi.
+
+Worker van giu dung cac trach nhiem cu:
+
+1. Khong lam gi khi email disabled.
+2. Khong start neu provider config chua day du.
+3. Poll outbox bang `cds.spawn`.
+4. Chi log so luong va ten provider, khong log body email hay credential.
+5. Dong sender khi shutdown.
+
+Tach nhu vay giup Render shared QA doi tu SMTP sang Brevo API chi bang private environment variables, khong phai sua code workflow bug.
+
 ## Metadata
 
 - Source: `srv/email/worker.js`
-- Related task: IDTS-36
-- Last reviewed: 2026-06-30
+- Related task: IDTS-36, IDTS-48
+- Last reviewed: 2026-07-02

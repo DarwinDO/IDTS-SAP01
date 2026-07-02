@@ -54,6 +54,8 @@ services:
         sync: false
       - key: cds_idts_email_enabled
         value: "false"
+      - key: cds_idts_email_provider
+        value: smtp
       - key: cds_idts_email_host
         sync: false
       - key: cds_idts_email_port
@@ -64,6 +66,10 @@ services:
         sync: false
       - key: cds_idts_email_password
         sync: false
+      - key: cds_idts_email_brevoApiKey
+        sync: false
+      - key: cds_idts_email_brevoApiEndpoint
+        value: https://api.brevo.com/v3/smtp/email
       - key: cds_idts_email_fromAddress
         sync: false
       - key: cds_idts_email_fromName
