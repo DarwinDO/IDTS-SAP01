@@ -31,6 +31,8 @@ async function main () {
   assert.deepEqual(successfulClient.commands.slice(0, 2), ['begin', 'select'])
   assert.equal(successfulClient.commands.at(-1), 'commit')
   assert.ok(!successfulClient.commands.includes('rollback'))
+  assert.ok(successfulClient.sql.every(sql => !sql.includes('::uuid[]')))
+  assert.ok(successfulClient.sql.some(sql => sql.includes('::text[]')))
 
   const failingClient = fakeClient({ failOnUpdate: 2 })
   await assert.rejects(updateQaEmails(failingClient, targets), /controlled update failure/)
@@ -44,8 +46,10 @@ function fakeClient ({ failOnUpdate } = {}) {
   let updateCount = 0
   return {
     commands: [],
+    sql: [],
     async query (sql) {
       const normalized = sql.trim().toLowerCase()
+      this.sql.push(normalized)
       const command = normalized.split(/\s+/)[0]
       this.commands.push(command)
       if (normalized.startsWith('select id, displayname')) {
