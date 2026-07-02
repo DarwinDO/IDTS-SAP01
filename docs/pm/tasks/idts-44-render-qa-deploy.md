@@ -138,6 +138,16 @@ Local verification before PR:
 | Render public authentication smoke | PASS - DonHV, SangVN, DatDT, and NhanT all logged in; wrong password returned HTTP 401; authenticated BugService OData returned HTTP 200. |
 | Shared-QA identity helper | PASS locally - helper targets stable seed UUIDs, validates all four private emails transactionally, preserves password hashes, revokes old sessions, and keeps personal addresses out of repository evidence. Programmatic success/rollback checks pass. |
 | Bearer attachment harness | PASS locally - existing HTTP attachment script accepts a process-only Bearer token while preserving local Basic Auth fallback; PowerShell parse and attachment regression pass. |
+| Clean Render deploy | PASS - commits `cec3958` and `23ee70f` reached `live` with `npm ci --include=dev` and `npm start`; the latter is the current clean baseline. |
+| Cloud identity update | PASS - four stable users were updated through private env values, five old sessions were revoked, 4/4 new logins returned 200, old alias returned 401, and no address was added to repo evidence. |
+| PostgreSQL restart persistence | PASS - the same Bearer session returned authenticated OData 200 before and after a clean Render redeploy. |
+| Render object-store env mapping | PASS - S3 credentials with underscore field names must be supplied as one JSON env object through `cds_requires_objectStore_credentials`; plain underscore env keys were parsed into nested CAP config paths. |
+| AWS S3 attachment acceptance | PASS - after the JSON object-store env fix, the shared-QA Bearer smoke passed comment, draft edit, attachment metadata, S3 stream upload HTTP 204, draft activation, active download content match, and attachment history. |
+| Brevo SMTP config presence | PASS - Render service has the required SMTP env keys and starts without the earlier `missing fields: host, username, password, fromAddress` warning. |
+| Brevo local SMTP verification | PASS - Nodemailer `verify()` against Brevo SMTP from DonHV local private config succeeded without printing credentials. |
+| Brevo recipient-real acceptance | BLOCKED - Render creates an EMAIL delivery row and the worker retries it, but Brevo SMTP delivery fails with sanitized `ETIMEDOUT` on ports 587 and 2525. The bug workflow still commits, so email failure isolation is accepted but real provider delivery is not. |
+| Render log/metrics review | PARTIAL PASS - no `postgresql://` or AWS access-key pattern found; CPU/memory metrics are available. Operational error logs contain no bearer token value. |
+| Follow-up tracking | PASS - Jira IDTS-45 tracks DB expiry/backup and IDTS-46 tracks dependency security findings. |
 
 Vietnamese:
 
@@ -179,3 +189,13 @@ Vietnamese:
 | Smoke authentication public tren Render | PASS - DonHV, SangVN, DatDT va NhanT deu login duoc; password sai tra HTTP 401; BugService OData co auth tra HTTP 200. |
 | Helper identity shared QA | PASS local - helper tim user bang UUID seed, validate bon email private trong transaction, giu password hash, revoke session cu va khong dua email that vao evidence repo. Test success/rollback da pass. |
 | Bearer attachment harness | PASS local - script HTTP attachment nhan Bearer token process-only va van giu Basic Auth fallback cho local; PowerShell parse va attachment regression pass. |
+| Clean deploy Render | PASS - commit `cec3958` va `23ee70f` dat `live` voi `npm ci --include=dev` va `npm start`; commit sau la baseline sach hien tai. |
+| Cap nhat identity cloud | PASS - bon stable user duoc update bang private env, nam session cu bi revoke, 4/4 login moi tra 200, alias cu tra 401 va khong co dia chi that trong evidence repo. |
+| PostgreSQL persistence qua restart | PASS - cung Bearer session van goi OData 200 truoc va sau clean redeploy. |
+| Mapping env object-store Render | PASS - credential S3 co field ten underscore phai dua vao mot JSON env object `cds_requires_objectStore_credentials`; env key underscore rieng le bi CAP parse thanh nested config path. |
+| AWS S3 attachment | PASS - sau khi fix env object-store JSON, smoke shared-QA bang Bearer token pass comment, draft edit, metadata attachment, upload stream S3 HTTP 204, activate draft, download active dung content, va history attachment. |
+| Cau hinh Brevo SMTP | PASS - service Render co du key SMTP bat buoc va startup khong con warning `missing fields: host, username, password, fromAddress`. |
+| Verify SMTP Brevo tu local | PASS - Nodemailer `verify()` toi Brevo SMTP bang private config cua DonHV thanh cong va khong in credential. |
+| Brevo gui dung recipient | BLOCKED - Render tao duoc EMAIL delivery row va worker retry, nhung delivery qua Brevo SMTP fail voi `ETIMEDOUT` da sanitize tren port 587 va 2525. Workflow bug van commit, nen co the accept failure isolation nhung chua accept real provider delivery. |
+| Review log/metrics Render | PASS mot phan - khong co match `postgresql://` hoac pattern AWS access key; co CPU/memory metrics. Log error khong lo gia tri bearer token. |
+| Follow-up Jira | PASS - IDTS-45 track DB het han/backup va IDTS-46 track dependency security. |
