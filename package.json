@@ -43,6 +43,7 @@
     "qa:auth:programmatic": "node scripts/qa/test-auth-foundation-programmatic.js",
     "qa:render-identity:programmatic": "node scripts/qa/test-render-identity-helper.js",
     "qa:depth:self-test": "node scripts/qa/test-qa-depth-gate.js",
+    "qa:draft-reporter:programmatic": "node scripts/qa/test-idts49-draft-reporter.js",
     "qa:depth:pr-body": "node scripts/qa/check-pr-depth.js",
     "qa:secret-scan": "node scripts/qa/secret-scan.js",
     "qa:idts41:programmatic": "node scripts/qa/test-idts41-code-list-validation.js",
