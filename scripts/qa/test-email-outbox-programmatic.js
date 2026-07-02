@@ -16,7 +16,7 @@ const cds = require('@sap/cds')
 const { INSERT, SELECT, UPDATE } = cds.ql
 
 const { normalizeEmailConfig } = require('../../srv/email/config')
-const { buildEmailMessage } = require('../../srv/email/template')
+const { buildBugLink, buildEmailMessage } = require('../../srv/email/template')
 const {
   processEmailDeliveries,
   sanitizeTransportError,
@@ -94,6 +94,24 @@ async function main () {
   assert.match(escaped.html, /&lt;b&gt;Unsafe title&lt;\/b&gt;/)
   assert.doesNotMatch(escaped.html, /<script>/)
   assert.match(escaped.text, /Unsafe title/)
+  assert.match(escaped.text, /Notification type: Assigned/)
+  assert.match(escaped.text, /Current action owner: Developer <One>/)
+  assert.match(escaped.html, /IDTS Notification/)
+  assert.match(escaped.html, /Open Bug in IDTS/)
+  assert.match(escaped.html, /Current action owner/)
+  assert.doesNotMatch(escaped.html, /<dl>|<dt>|<dd>/)
+  assert.doesNotMatch(escaped.html, /index\.html\/#/)
+  assert.match(escaped.html, new RegExp(`https://idts\\.example\\.test/bug-management-ui/webapp/index\\.html#/Bugs\\(ID=${bug.ID},IsActiveEntity=true\\)`))
+
+  const appHtmlBaseLink = buildBugLink('https://idts.example.test/bug-management-ui/webapp/index.html', bug.ID)
+  assert.equal(appHtmlBaseLink, `https://idts.example.test/bug-management-ui/webapp/index.html#/Bugs(ID=${bug.ID},IsActiveEntity=true)`)
+  assert.doesNotMatch(appHtmlBaseLink, /index\.html\/#/)
+
+  const appFolderBaseLink = buildBugLink('https://idts.example.test/bug-management-ui/webapp/', bug.ID)
+  assert.equal(appFolderBaseLink, `https://idts.example.test/bug-management-ui/webapp/index.html#/Bugs(ID=${bug.ID},IsActiveEntity=true)`)
+
+  const rootBaseLink = buildBugLink('https://idts.example.test/', bug.ID)
+  assert.equal(rootBaseLink, `https://idts.example.test/bug-management-ui/webapp/index.html#/Bugs(ID=${bug.ID},IsActiveEntity=true)`)
 
   const pending = await db.tx(tx => writeNotificationRecord(tx, {
     bugID: bug.ID,

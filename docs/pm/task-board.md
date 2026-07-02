@@ -89,6 +89,7 @@ Vietnamese:
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
+| IDTS-50 | Email notification readability and deep-link polish | DonHV | Fix raw Gmail rendering and broken Fiori deep link from shared-QA email. Jira is In Progress; implementation branch is `fix/idts-50-email-link-template-donhv`. |
 | SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP, and real browser QA are stable enough to prove the happy flow. Remaining work is final SAP490 sync and mentor-demo rerun, not FE/blocking workflow repair. |
 | WP6 | PM Monitoring | DonHV, DatDT, SangVN | Ownership wording is locked; backend monitoring fields, FE monitoring views, Object Page refresh side effects, grouped history timeline, and persona UAT automation are merged. Remaining manual follow-up is `IDTS-32`; `IDTS-33` is Done on Jira. |
 | IDTS-1 | Sprint 02 epic Jira alignment | DonHV | Jira epic is still To Do while multiple child tasks are already Done. DonHV should resolve this during `IDTS-27` consolidation by commenting or transitioning the epic as appropriate. |
@@ -101,6 +102,7 @@ Vietnamese:
 
 | ID | Cong viec | Thanh vien chinh | Ghi chu |
 | --- | --- | --- | --- |
+| IDTS-50 | Cai thien email notification va sua deep link | DonHV | Sua email Gmail dang tho va link Fiori bi hong tu shared-QA email. Jira dang In Progress; branch implementation la `fix/idts-50-email-link-template-donhv`. |
 | SP2 | Sprint 02 Mentor Feedback va Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP va browser QA that da du on de chung minh happy flow. Phan con lai la sync SAP490 va rerun mentor demo. |
 | WP6 | PM Monitoring | DonHV, DatDT, SangVN | Backend monitoring, FE monitoring views, Object Page refresh, grouped history timeline va persona UAT automation da merge. Manual follow-up con lai la `IDTS-32`; `IDTS-33` da Done tren Jira. |
 | IDTS-1 | Jira alignment cho Sprint 02 epic | DonHV | Jira epic van To Do trong khi nhieu child task da Done. DonHV can xu ly trong `IDTS-27` bang comment hoac transition phu hop. |
