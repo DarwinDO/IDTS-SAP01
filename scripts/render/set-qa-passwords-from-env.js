@@ -20,10 +20,10 @@ const { Client } = require('pg')
 const { hashPassword } = require('../../srv/auth/passwords')
 
 const DEFAULT_USERS = [
-  { envKey: 'DONHV', email: 'donhv@example.local' },
-  { envKey: 'SANGVN', email: 'sangvn@example.local' },
-  { envKey: 'DATDT', email: 'datdt@example.local' },
-  { envKey: 'NHANT', email: 'nhant@example.local' }
+  { envKey: 'DONHV', id: '10000000-0000-0000-0000-000000000001' },
+  { envKey: 'SANGVN', id: '10000000-0000-0000-0000-000000000002' },
+  { envKey: 'DATDT', id: '10000000-0000-0000-0000-000000000003' },
+  { envKey: 'NHANT', id: '10000000-0000-0000-0000-000000000004' }
 ]
 
 async function main () {
@@ -52,24 +52,24 @@ async function main () {
   try {
     const updated = []
     for (const target of targets) {
-      const email = normalizeEmail(target.email)
       const passwordHash = await hashPassword(target.password)
+      const whereClause = target.id ? 'id = $2' : 'lower(email) = lower($2)'
+      const identity = target.id || normalizeEmail(target.email)
       const result = await client.query(
         `update idts_cap_users
            set passwordhash = $1,
                passwordchangedat = now()
-         where lower(email) = lower($2)
-         returning email, displayname, role_code, active`,
-        [passwordHash, email]
+         where ${whereClause}
+         returning displayname, role_code, active`,
+        [passwordHash, identity]
       )
 
       if (result.rowCount !== 1) {
-        fail(`Expected exactly one QA user for ${email}, updated ${result.rowCount}.`, 2)
+        fail(`Expected exactly one QA user for ${target.envKey || 'explicit email'}, updated ${result.rowCount}.`, 2)
       }
 
       const user = result.rows[0]
       updated.push({
-        email: user.email,
         displayName: user.displayname,
         role: user.role_code,
         active: user.active
@@ -98,14 +98,14 @@ function resolveTargets () {
 
   const sharedPassword = process.env.IDTS_QA_SHARED_PASSWORD
   if (sharedPassword) {
-    return DEFAULT_USERS.map(user => ({ email: user.email, password: sharedPassword }))
+    return DEFAULT_USERS.map(user => ({ ...user, password: sharedPassword }))
   }
 
   const targets = []
   for (const user of DEFAULT_USERS) {
     const password = process.env[`IDTS_QA_${user.envKey}_PASSWORD`]
     if (password) {
-      targets.push({ email: user.email, password })
+      targets.push({ ...user, password })
     }
   }
   return targets
@@ -151,9 +151,11 @@ Optional:
 The script prints only updated user identities. It does not print plaintext passwords, hashes, or database URLs.`)
 }
 
-main().catch(error => {
+if (require.main === module) main().catch(error => {
   const safeMessage = String(error && error.message ? error.message : error)
     .replace(/postgres(?:ql)?:\/\/[^\s]+/g, '[REDACTED_POSTGRES_URL]')
   console.error(`Failed to set Render QA passwords: ${safeMessage}`)
   process.exit(1)
 })
+
+module.exports = { DEFAULT_USERS, normalizeEmail, readBoolean, readInteger, resolveTargets }

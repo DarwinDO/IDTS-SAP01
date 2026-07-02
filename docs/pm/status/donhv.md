@@ -637,6 +637,22 @@ Vietnamese:
 | --- | --- | --- | --- | --- |
 | Xac minh deployment | Bon profile QA seed da co trong Render PostgreSQL nhung chua dang nhap duoc vi chua co password hash. | Seed data co chu dich chi chua profile; plaintext credential khong duoc commit. | Da fix bang helper an toan de ghi hash cho DonHV, SangVN, DatDT va NhanT. Allowlist IP PostgreSQL tam thoi da duoc xoa ngay sau do. | Xac minh public moi: 4/4 login pass, password sai tra HTTP 401, BugService OData co auth tra HTTP 200, PostgreSQL van available, va so entry allowlist IP tro ve 0. Tiep theo: verify luong email va S3 tren shared QA. |
 
+## 2026-07-02 - IDTS-44 shared QA acceptance implementation
+
+English:
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling/context issue | A read command executed from the root worktree could not find `render.yaml`, although the file exists on `origin/dev` and in the IDTS-44 worktree. | The root `dev` worktree had not yet incorporated the latest deployment commits when the read was attempted. | No product fix required; implementation continues from the clean IDTS-44 worktree based on current `origin/dev`. | Verify all deployment files from `E:/IDTS-SAP01-worktrees/idts-44-render`. |
+| Tooling issue | Render MCP read-only PostgreSQL query failed with `FATAL: SSL/TLS required` and unexpected EOF. | The MCP database connector did not negotiate the SSL requirement of this Render PostgreSQL instance. | Open as a connector limitation; do not classify as a product or database defect. | Use the proven Render CLI + temporary allowlist + Node `pg` SSL path, then clear the allowlist in `finally`. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung | Nguyen nhan | Trang thai fix | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Loi tooling/context | Lenh doc chay tu root worktree khong tim thay `render.yaml`, du file co tren `origin/dev` va worktree IDTS-44. | Root worktree `dev` chua nhan cac commit deployment moi nhat tai luc chay lenh. | Khong can fix product; tiep tuc implementation tu worktree IDTS-44 sach dua tren `origin/dev` moi. | Verify deployment file tai `E:/IDTS-SAP01-worktrees/idts-44-render`. |
+| Loi tooling | Render MCP query PostgreSQL read-only fail voi `FATAL: SSL/TLS required` va unexpected EOF. | Connector DB cua MCP khong negotiate dung SSL requirement cua Render PostgreSQL nay. | Ghi nhan la gioi han connector; khong xem la product hay database defect. | Dung Render CLI + allowlist tam + Node `pg` SSL da duoc chung minh, sau do clear allowlist trong `finally`. |
+
 Vietnamese:
 
 - DonHV cập nhật file này cho quyết định của leader, việc BA/PM, deliverable SAP490, tổng hợp hằng tuần và hỗ trợ cross-workstream.
