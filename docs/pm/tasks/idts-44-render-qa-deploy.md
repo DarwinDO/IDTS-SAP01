@@ -30,7 +30,7 @@ Phạm vi mục tiêu:
 
 - Jira: [IDTS-44](https://dutassociation.atlassian.net/browse/IDTS-44)
 - Owner: DonHV
-- Status: In Progress - blocked by [IDTS-49](https://dutassociation.atlassian.net/browse/IDTS-49)
+- Status: Done
 
 ## Implementation notes
 
@@ -217,6 +217,34 @@ English:
 
 IDTS-44 must remain In Progress until IDTS-49 is fixed, merged, deployed, and the missing DonHV reporter notification reaches `SENT`.
 
+## Final closure after IDTS-49 - 2026-07-02
+
+English:
+
+| Area | Result | Evidence |
+| --- | --- | --- |
+| IDTS-49 blocker | PASS | PR #61 merged into `dev`; merge commit `6b0fd4fe98742b942e8d250cabc3bb2dc02b99b4`. |
+| Render deploy | PASS | Deploy `dep-d93420m7r5hc73a45dvg` reached `live`. |
+| Auth/OData smoke | PASS | Metadata 200, wrong login 401, anonymous protected OData 401, authenticated protected OData 200. |
+| Reporter routing | PASS | PM draft without client `reporter_ID` activated successfully; Developer request-more-information committed; reporter email delivery reached `SENT` on attempt 1. |
+| Email worker/logs | PASS | Render log check found no new `Reporter is required`; Brevo API worker logged `sent=2, failed=0` during the smoke window. |
+| Secret safety | PASS | No credential, bearer token, private recipient address, provider message id, database URL, or AWS key was added to repo/Jira evidence. |
+
+Jira IDTS-44 is Done. Remaining infrastructure/dependency follow-ups are tracked separately by IDTS-45 and IDTS-46.
+
+Vietnamese:
+
+| Khu vuc | Ket qua | Evidence |
+| --- | --- | --- |
+| Blocker IDTS-49 | PASS | PR #61 da merge vao `dev`; merge commit `6b0fd4fe98742b942e8d250cabc3bb2dc02b99b4`. |
+| Deploy Render | PASS | Deploy `dep-d93420m7r5hc73a45dvg` dat `live`. |
+| Smoke auth/OData | PASS | Metadata 200, login sai 401, protected OData anonymous 401, protected OData co auth 200. |
+| Reporter routing | PASS | PM draft khong gui client `reporter_ID` activate thanh cong; Developer request-more-information commit; reporter email delivery dat `SENT` o attempt 1. |
+| Email worker/log | PASS | Log Render khong co `Reporter is required` moi; Brevo API worker ghi `sent=2, failed=0` trong smoke window. |
+| An toan secret | PASS | Khong dua credential, bearer token, private recipient address, provider message id, database URL hay AWS key vao repo/Jira evidence. |
+
+Jira IDTS-44 da Done. Follow-up infrastructure/dependency duoc track rieng bang IDTS-45 va IDTS-46.
+
 Vietnamese:
 
 | Khu vuc | Ket qua | Evidence / viec con lai |
@@ -228,4 +256,4 @@ Vietnamese:
 | An toan secret/log | PASS | Evidence khong chua credential, bearer token, private recipient address, database URL, AWS key hay provider message id. Query error log Render khong co error moi sau Brevo deploy da accept. |
 | Scenario routing reporter cuoi | BLOCKED | Bug draft co PM auth khong activate duoc neu client khong gui `reporter_ID`; activation tra HTTP 400 `Reporter is required`. Root cause duoc track boi IDTS-49. Controlled failed drafts da xoa. |
 
-IDTS-44 phai giu In Progress den khi IDTS-49 duoc fix, merge, deploy va notification reporter DonHV con thieu dat `SENT`.
+IDTS-44 da Done sau khi IDTS-49 duoc fix, merge, deploy va notification reporter con thieu dat `SENT`.

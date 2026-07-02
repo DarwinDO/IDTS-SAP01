@@ -33,6 +33,8 @@ Vietnamese: Chi dung board nay de theo doi trang thai cap cao. Chi tiet cong vie
 | IDTS-42 | QA Depth Gate and hardened browser harness | PR #38 merged into `dev`; added mandatory PR evidence template, `qa-depth-gate` workflow, PR-body validator, reusable browser harness, secret scan, and PM/process documentation. |
 | IDTS-43 | Fiori UX cleanup from IDTS-32 findings | PR #36 merged into `dev` at `62197e6`; fixed value-list hints, role-aware Create Bug action, single History section, clearer Reopen wording, and role-based browser smoke evidence. |
 | IDTS-48 | Brevo Transactional API delivery for shared QA | PR #57 and PR #58 merged into `dev`; Render deploy `dep-d931rb6rnols73851g1g` is live on commit `bcf43b2`, authenticated shared-QA smoke passed, and a new Brevo API delivery reached `SENT` with `attemptCount = 1`. Jira moved to Done. |
+| IDTS-49 | Derive reporter before custom-auth draft activation | PR #61 merged into `dev`; Render deploy `dep-d93420m7r5hc73a45dvg` is live, PM draft activation without client reporter passed, and reporter email delivery reached `SENT`. Jira moved to Done. |
+| IDTS-44 | Deploy shared QA environment on Render | Shared QA acceptance is complete: Render/PostgreSQL, auth/OData, Brevo API, AWS S3 attachment persistence, final IDTS-49 reporter routing, and sanitized log/evidence checks passed. Jira moved to Done. |
 
 Vietnamese:
 
@@ -62,6 +64,8 @@ Vietnamese:
 | IDTS-42 | QA Depth Gate va browser harness duoc harden | PR #38 da merge vao `dev`; da them PR evidence template bat buoc, workflow `qa-depth-gate`, validator PR body, browser harness dung lai, secret scan va tai lieu PM/process. |
 | IDTS-43 | Don dep Fiori UX tu finding IDTS-32 | PR #36 da merge vao `dev` tai `62197e6`; da fix value-list hint, Create Bug theo role, chi con mot History section, wording Reopen ro hon, va co browser smoke theo role. |
 | IDTS-48 | Brevo Transactional API cho shared QA | PR #57 va PR #58 da merge vao `dev`; Render deploy `dep-d931rb6rnols73851g1g` dang live tren commit `bcf43b2`, authenticated shared-QA smoke pass, va mot Brevo API delivery moi da `SENT` voi `attemptCount = 1`. Jira da chuyen Done. |
+| IDTS-49 | Derive reporter truoc custom-auth draft activation | PR #61 da merge vao `dev`; Render deploy `dep-d93420m7r5hc73a45dvg` dang live, PM draft activation khong can client reporter da pass, va reporter email delivery dat `SENT`. Jira da chuyen Done. |
+| IDTS-44 | Deploy shared QA environment tren Render | Acceptance shared QA da hoan tat: Render/PostgreSQL, auth/OData, Brevo API, AWS S3 attachment persistence, final IDTS-49 reporter routing, va log/evidence sanitized checks da pass. Jira da chuyen Done. |
 
 ## Ready
 
@@ -92,7 +96,6 @@ Vietnamese:
 | IDTS-27 | Sync docs, Jira status, and Sprint 3 evidence | DonHV | Active PM/Jira/evidence consolidation bucket. Current work order: `IDTS-34` and `IDTS-36` are merged; next is handoff to `IDTS-37`/`IDTS-38`, then Sprint 3 evidence consolidation. |
 | IDTS-28 | Refactor backend service into focused modules | DonHV | Jira live state is In Progress even though the refactor is merged. Needs final retest/evidence closure alignment. |
 | IDTS-32 | Manual browser UAT for Sprint 3 workflow/history flows | SangVN | Evidence branch merged through PR #34. Retest remains open until IDTS-41/42/43 fixes and no P0/P1 remain. |
-| IDTS-49 | Derive reporter before custom-auth draft activation | DonHV | Local fix and verification are complete on `fix/idts-49-draft-reporter-donhv`; next step is PR merge, Render deploy, and DonHV reporter-routing smoke. |
 
 Vietnamese:
 
@@ -105,19 +108,18 @@ Vietnamese:
 | IDTS-27 | Sync docs, Jira status va Sprint 3 evidence | DonHV | Bucket tong hop PM/Jira/evidence dang active. `IDTS-34` va `IDTS-36` da merge; tiep theo la handoff `IDTS-37`/`IDTS-38`, sau do tong hop evidence Sprint 3. |
 | IDTS-28 | Tach backend service thanh cac module tap trung | DonHV | Jira live dang In Progress du refactor da merge. Can chot retest/evidence closure. |
 | IDTS-32 | Manual browser UAT cho workflow/history Sprint 3 | SangVN | Evidence branch da merge qua PR #34. Van can retest sau IDTS-41/42/43 va chi dong khi khong con P0/P1. |
-| IDTS-49 | Derive reporter truoc custom-auth draft activation | DonHV | Fix local va verification da hoan tat tren `fix/idts-49-draft-reporter-donhv`; buoc tiep theo la PR merge, deploy Render va smoke reporter-routing DonHV. |
 
 ## Blocked
 
 | ID | Task | Blocker | Required decision |
 | --- | --- | --- | --- |
-| IDTS-44 | Deploy shared QA environment on Render | `IDTS-49`: authenticated Bug drafts fail activation when the client does not send system-managed `reporter_ID`. | Fix, merge, deploy, and verify DonHV reporter delivery reaches `SENT`; then close IDTS-44. |
+| None | None | No current blocker after IDTS-44 closure. | Continue scheduled follow-ups IDTS-45 and IDTS-46. |
 
 Vietnamese:
 
 | ID | Cong viec | Blocker | Quyet dinh can co |
 | --- | --- | --- | --- |
-| IDTS-44 | Deploy moi truong QA dung chung tren Render | `IDTS-49`: Bug draft co auth fail activation khi client khong gui field he thong `reporter_ID`. | Fix, merge, deploy va verify delivery reporter DonHV dat `SENT`; sau do dong IDTS-44. |
+| None | None | Khong con blocker hien tai sau khi dong IDTS-44. | Tiep tuc follow-up IDTS-45 va IDTS-46. |
 
 ## Update Rules
 

@@ -18,9 +18,12 @@ Nguyen nhan: active `CREATE` co derive reporter, nhung validation cua draft `SAV
 
 - Jira: [IDTS-49](https://dutassociation.atlassian.net/browse/IDTS-49)
 - Owner: DonHV
-- Status: In Progress
+- Status: Done
 - Branch: `fix/idts-49-draft-reporter-donhv`
-- Blocks: [IDTS-44](https://dutassociation.atlassian.net/browse/IDTS-44)
+- GitHub PR: #61
+- Merge commit: `6b0fd4fe98742b942e8d250cabc3bb2dc02b99b4`
+- Render deploy: `dep-d93420m7r5hc73a45dvg`
+- Unblocked: [IDTS-44](https://dutassociation.atlassian.net/browse/IDTS-44)
 
 ## Implementation notes
 
@@ -51,16 +54,26 @@ Vietnamese:
 | `npx ai-devkit@latest lint --json` | PASS - 5 ok / 0 required failures |
 | `git diff --check` | PASS - exit 0; Windows line-ending warnings only |
 
+## Final shared-QA evidence
+
+| Check | Result |
+| --- | --- |
+| PR #61 merged into `dev` | PASS |
+| Render deploy `dep-d93420m7r5hc73a45dvg` | PASS - `live` |
+| Health/auth metadata | PASS - 200 |
+| Wrong login | PASS - 401 |
+| Anonymous protected OData | PASS - 401 |
+| Authenticated protected OData | PASS - 200 |
+| PM draft without client `reporter_ID` | PASS - backend derived reporter before activation |
+| Draft activation | PASS - active Bug became `ASSIGNED` |
+| Developer request-more-information | PASS - action committed |
+| Reporter email delivery | PASS - `SENT`, attempt 1 |
+| Render log review | PASS - no new `Reporter is required`; Brevo API worker logged `sent=2, failed=0` in the smoke window |
+
 ## Remaining work
 
-1. Open and merge PR into `dev`.
-2. Deploy latest `dev` to Render.
-3. Rerun the missing IDTS-44 DonHV reporter-routing scenario.
-4. If delivery reaches `SENT`, update Jira IDTS-49 to Done and close IDTS-44.
+None for IDTS-49. Jira IDTS-49 is Done. Follow-up infrastructure and dependency tasks remain tracked separately by IDTS-45 and IDTS-46.
 
 Vietnamese:
 
-1. Tao va merge PR vao `dev`.
-2. Deploy `dev` moi nhat len Render.
-3. Chay lai scenario IDTS-44 con thieu: routing email ve reporter DonHV.
-4. Neu delivery dat `SENT`, chuyen Jira IDTS-49 sang Done va dong IDTS-44.
+Khong con viec mo cho IDTS-49. Jira IDTS-49 da Done. Follow-up ve infrastructure va dependency duoc track rieng bang IDTS-45 va IDTS-46.
