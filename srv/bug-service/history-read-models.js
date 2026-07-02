@@ -3,6 +3,7 @@ const cds = require('@sap/cds')
 const { SELECT } = cds.ql
 
 const { trimToNull } = require('./helpers')
+const { HISTORY_FIELD_LABELS } = require('./constants')
 
 const VIRTUAL_HISTORY_EVENT_FIELDS = new Set([
   'changeCount',
@@ -44,6 +45,11 @@ const LONG_TEXT_FIELDS = new Set([
   'expectedResult',
   'rejectionReason',
   'comment'
+])
+
+const LEGACY_HISTORY_FIELD_LABELS = new Map([
+  ['Next Processor User', HISTORY_FIELD_LABELS.nextProcessorUser],
+  ['Next Processor Role', HISTORY_FIELD_LABELS.nextProcessorRole]
 ])
 
 function ensureHistoryEventSelectDependencies (req) {
@@ -111,8 +117,26 @@ async function enrichHistoryEventPayload (events, req, entities) {
 
 function normalizeHistoryLogs (logs) {
   return [...logs]
-    .map(log => ({ ...log }))
+    .map(normalizeHistoryLog)
     .sort(compareHistoryLogs)
+}
+
+function normalizeHistoryLog (log) {
+  const normalized = { ...log }
+  normalized.fieldLabel = historyDisplayLabel(normalized)
+  return normalized
+}
+
+function historyDisplayLabel (log) {
+  const fieldName = trimToNull(log.fieldName)
+  if (fieldName && HISTORY_FIELD_LABELS[fieldName]) {
+    return HISTORY_FIELD_LABELS[fieldName]
+  }
+
+  const fieldLabel = trimToNull(log.fieldLabel)
+  if (!fieldLabel) return fieldName
+
+  return LEGACY_HISTORY_FIELD_LABELS.get(fieldLabel) || fieldLabel
 }
 
 function compareHistoryLogs (left, right) {
@@ -148,7 +172,7 @@ function summarizeHistoryLogs (logs) {
 
 function formatHistoryLogFragment (log) {
   const fieldName = trimToNull(log.fieldName)
-  const fieldLabel = trimToNull(log.fieldLabel) || fieldName
+  const fieldLabel = historyDisplayLabel(log)
   if (!fieldLabel) return null
 
   const oldValue = historyDisplayValue(log.oldValueDisplay, log.oldValue)

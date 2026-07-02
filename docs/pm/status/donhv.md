@@ -1,6 +1,15 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
-Last updated: 2026-06-30
+Last updated: 2026-07-02
+
+## 2026-07-02 - History Timeline ownership wording fix
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product defect | Object Page History Timeline still showed `Next Processor Role` and `Next Processor User` in the summary/detail rows after the rest of the UI had moved to ownership wording. | `HistoryLogs.fieldLabel` is persisted when history is written. New history used labels from `HISTORY_FIELD_LABELS`, while existing rows could still carry old labels. The read model was returning the persisted label directly. | Fixed in `fix/idts-history-current-action-owner-donhv` by changing new history labels to `Current Action Owner` / `Action Owner Role` and normalizing legacy persisted labels in `history-read-models.js` before returning `groupedChangeContext` or expanded logs. | `npm run qa:history-events:programmatic` PASS including legacy-label normalization; `npx cds compile srv app/bug-management-ui --to edmx -s all` PASS with known attachment metadata warning. Remaining: run browser smoke after deploy/merge to visually confirm the timeline on Render. |
+| Environment/dependency issue | First focused test run in clean worktree failed with `Cannot find module '@sap/cds'`. | The clean worktree `E:\IDTS-SAP01-history-wording` did not have `node_modules` installed. | Fixed by running `npm ci` in the worktree. NPM reported existing dependency audit warnings, not introduced by this change. | Rerun passed: `npm run qa:history-events:programmatic`. |
+
+Vietnamese: Đã fix lỗi wording trong History Timeline: phần lịch sử không còn dùng `Next Processor User/Role` nữa mà normalize sang `Current Action Owner` và `Action Owner Role`, kể cả với history row cũ đã lưu label cũ trong DB.
 
 ## 2026-07-02 - IDTS-50 email notification readability and deep-link fix
 
