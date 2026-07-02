@@ -34,6 +34,10 @@ async function main() {
   assert(!objectPage.includes("Target : 'historyEvents/@UI.LineItem'"), 'raw History facet must be removed')
   pass('raw History table facet is removed')
 
+  const historyTimeline = read(path.join('webapp', 'ext', 'fragment', 'HistoryTimeline.fragment.xml'))
+  assert(!historyTimeline.includes('groupedChangeContext'), 'groupedChangeContext must not be rendered as a default timeline text row')
+  pass('History timeline hides grouped field-change context by default')
+
   const actions = read(path.join('annotations', 'actions.cds'))
   assert(actions.includes("Label  : 'Reopen Bug for Further Work'"))
   assert(actions.includes("@Common.Label : 'Reason for Reopening'"))
@@ -110,7 +114,7 @@ async function main() {
   )
   pass('Create Bug fails safely when the Fiori model is unavailable')
 
-  console.log('\nIDTS-43 Fiori UX checks: 11 PASS / 0 FAIL')
+  console.log('\nIDTS-43 Fiori UX checks: 12 PASS / 0 FAIL')
 }
 
 main().catch(error => {
