@@ -8,7 +8,7 @@
 
 ### Beginner explanation
 
-SAPUI5 controls provide the basic Fiori look, but a login page still needs a layout: where the card sits, how much spacing it has, how it behaves on mobile, and how the intro panel looks. This CSS handles those layout details while using SAP theme variables such as `--sapBackgroundColor`, `--sapTile_Background`, and `--sapContent_Shadow2`.
+SAPUI5 controls provide the basic Fiori look, but a login page still needs a layout: where the card sits, how much spacing it has, and how it behaves on mobile. This CSS handles those layout details while using SAP theme variables such as `--sapBackgroundColor`, `--sapTile_Background`, and `--sapContent_Shadow2`.
 
 Using SAP theme variables is important because the page can follow the active SAP Horizon theme more naturally than hardcoded colors.
 
@@ -17,14 +17,13 @@ Using SAP theme variables is important because the page can follow the active SA
 1. `login.html` loads this CSS before `login-page.js`.
 2. `login-page.js` creates UI5 controls and adds classes such as `idtsLoginShell`, `idtsLoginCard`, and `idtsLoginMessage`.
 3. This CSS controls the login layout, card width, responsive behavior, and spacing.
-4. On smaller screens, the intro content is hidden and the login card uses the available width.
+4. On smaller screens, the login card uses the available width.
 
 ### Important source anchors
 
 | Location | IDTS concept | Impact if broken | Must check together |
 | --- | --- | --- | --- |
 | `.idtsLoginShell` | Login page layout | Login card may be misaligned or hard to use. | `login-page.js` HBox root |
-| `.idtsLoginIntro` | Desktop explanatory area | Desktop login may lose context or become visually empty. | `login-page.js` intro controls |
 | `.idtsLoginCard` | Sign-in card container | Inputs/buttons may look inconsistent or too wide/narrow. | `login-page.js` Panel |
 | `.idtsLoginMessage` | Error message spacing | Validation/auth errors may overlap surrounding controls. | `login-page.js` MessageStrip |
 | `@media (max-width: 48rem)` | Mobile layout | Phone/tablet layout may break. | Browser smoke responsive check |
@@ -60,14 +59,13 @@ Dùng SAP theme variables quan trọng vì trang login sẽ đi theo theme SAP H
 1. `login.html` load CSS này trước `login-page.js`.
 2. `login-page.js` tạo UI5 controls và gắn class như `idtsLoginShell`, `idtsLoginCard`, `idtsLoginMessage`.
 3. CSS này điều khiển layout login, độ rộng card, responsive behavior, và spacing.
-4. Trên màn hình nhỏ, phần intro được ẩn và login card dùng toàn bộ chiều rộng phù hợp.
+4. Trên màn hình nhỏ, login card dùng toàn bộ chiều rộng phù hợp.
 
 ### Các điểm source quan trọng
 
 | Vị trí | Khái niệm IDTS | Ảnh hưởng nếu sai | Phải kiểm tra cùng |
 | --- | --- | --- | --- |
 | `.idtsLoginShell` | Layout trang login | Login card có thể lệch vị trí hoặc khó dùng. | Root HBox trong `login-page.js` |
-| `.idtsLoginIntro` | Phần giải thích trên desktop | Desktop login mất context hoặc nhìn trống. | Intro controls trong `login-page.js` |
 | `.idtsLoginCard` | Container card đăng nhập | Input/button có thể nhìn lệch hoặc quá rộng/hẹp. | Panel trong `login-page.js` |
 | `.idtsLoginMessage` | Khoảng cách message lỗi | Lỗi validation/auth có thể chồng lên control khác. | MessageStrip trong `login-page.js` |
 | `@media (max-width: 48rem)` | Layout mobile | Giao diện phone/tablet có thể vỡ. | Browser smoke responsive |
