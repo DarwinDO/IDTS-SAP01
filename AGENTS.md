@@ -383,6 +383,68 @@ Use `sap-fiori-guidelines` when working on:
 
 Use AI DevKit skills only as workflow support. They do not replace the SAP MCP servers, repo-local SAP skills, CAP/Fiori/UI5 documentation, or the business markdown files.
 
+## User-Facing UI/UX Copy Gate
+
+This rule is mandatory for every UI/UX, Fiori Elements, SAPUI5, dashboard, login, profile, email preview, notification, comment, attachment, assignment, or Object Page change.
+
+The product UI is for IDTS end users, not for implementation notes. Do not put internal-only, developer-facing, environment-facing, deployment-facing, team-process, or architecture-explanation text in user-visible screens.
+
+Forbidden user-visible UI copy includes, but is not limited to:
+
+- Implementation or architecture wording such as `Custom CAP authentication`, `Fiori Elements application protected`, `OData endpoint`, `service contract`, `draft activation`, `worker`, `outbox`, `PostgreSQL`, `SQLite`, `Render`, `Brevo`, `AWS S3`, `SAP BTP/XSUAA`, `MCP`, or `plugin`.
+- Team/process wording such as `QA workspace`, `shared QA`, `Sprint 4 workflow`, `PR`, `branch`, `Jira task`, `dev`, `test harness`, `smoke test`, `debug`, or `local`.
+- Raw technical details such as stack traces, SQL text, table/column names, file paths, environment variable names, internal URLs, deployment names, access keys, tokens, provider IDs, or private infrastructure names.
+- Explanations written for developers, mentors, agents, or reviewers instead of the actual user performing the business task.
+
+Allowed user-facing copy must be role/task/outcome focused. Prefer wording that helps the user complete IDTS work, for example: `Sign in to continue`, `Track and resolve defects`, `Upload evidence`, `Assign developer`, `Request more information`, or `View bug status`.
+
+If technical context is useful, put it in `docs/knowledge/`, PM status files, Jira evidence, README/deployment docs, or developer comments. It belongs in the product UI only when it directly helps the business user make a decision, and even then it must be written in plain user language.
+
+Merge-blocking enforcement:
+
+- A UI/UX PR that adds or keeps forbidden dev-facing copy is not complete and must not be merged.
+- If the issue is found after merge or deploy, classify it as a `Product UX defect`, log it immediately in the responsible member status file, update or create Jira tracking when actionable, and fix it before starting another UI feature.
+- Repeated violation by an agent or team member must be escalated to DonHV. That actor must not continue UI/UX implementation until DonHV manually reviews the issue and confirms the rule is understood.
+- Do not mark the related Jira task Done while forbidden user-visible copy remains.
+
+Required verification for UI/UX work:
+
+- The PR evidence must include a `User-facing copy review` note.
+- Browser smoke or screenshot review must actively check that forbidden terms are not visible in the changed screens.
+- QA Depth Gate `UI/UX Review` must mention copy review, not only visual layout.
+- If a screen intentionally contains a technical term, the PR must explain why the end user needs to see it.
+
+Vietnamese:
+
+Rule nay bat buoc cho moi thay doi UI/UX, Fiori Elements, SAPUI5, dashboard, login, profile, email preview, notification, comment, attachment, assignment, hoac Object Page.
+
+UI san pham la cho nguoi dung IDTS, khong phai noi de ghi note implement. Khong duoc dua text noi bo, text cho developer, text ve moi truong deploy, text ve quy trinh team, hoac text giai thich kien truc len man hinh nguoi dung thay.
+
+Nhung loai text bi cam tren UI gom:
+
+- Tu/cum tu ky thuat nhu `Custom CAP authentication`, `Fiori Elements application protected`, `OData endpoint`, `service contract`, `draft activation`, `worker`, `outbox`, `PostgreSQL`, `SQLite`, `Render`, `Brevo`, `AWS S3`, `SAP BTP/XSUAA`, `MCP`, hoac `plugin`.
+- Tu/cum tu quy trinh team nhu `QA workspace`, `shared QA`, `Sprint 4 workflow`, `PR`, `branch`, `Jira task`, `dev`, `test harness`, `smoke test`, `debug`, hoac `local`.
+- Chi tiet ky thuat tho nhu stack trace, SQL, ten bang/cot, duong dan file, ten bien moi truong, URL noi bo, ten deploy, access key, token, provider ID, hoac ten ha tang private.
+- Cau chu viet cho developer, mentor, agent, reviewer thay vi nguoi dung dang lam nghiep vu that.
+
+Copy duoc phep tren UI phai tap trung vao role, task va ket qua cua nguoi dung. Uu tien cac cau nhu: `Sign in to continue`, `Track and resolve defects`, `Upload evidence`, `Assign developer`, `Request more information`, hoac `View bug status`.
+
+Neu can ghi ngu canh ky thuat, hay dua vao `docs/knowledge/`, PM status, Jira evidence, README/deployment docs, hoac developer comment. Chi dua len UI khi no truc tiep giup business user ra quyet dinh, va khi do van phai viet bang ngon ngu de hieu cho user.
+
+Che tai merge:
+
+- PR UI/UX con text dev-facing bi cam thi chua xong va khong duoc merge.
+- Neu phat hien sau khi merge/deploy, phai classify la `Product UX defect`, ghi ngay vao status file cua member phu trach, update/tao Jira neu can tracking, va fix truoc khi bat dau UI feature khac.
+- Neu agent hoac thanh vien tai pham, phai escalate cho DonHV. Nguoi/agent do khong duoc tiep tuc implement UI/UX cho den khi DonHV review thu cong va xac nhan da hieu rule.
+- Khong duoc chuyen Jira task lien quan sang Done khi UI van con copy bi cam.
+
+Verify bat buoc cho UI/UX:
+
+- Evidence PR phai co note `User-facing copy review`.
+- Browser smoke hoac screenshot review phai chu dong kiem tra cac term bi cam khong xuat hien tren man hinh da sua.
+- QA Depth Gate muc `UI/UX Review` phai noi ro da review copy, khong chi review layout.
+- Neu mot man hinh bat buoc hien term ky thuat, PR phai giai thich vi sao end user can thay term do.
+
 ## QA Depth Gate
 
 Every QA, review, or PR verification that touches `app/`, `srv/`, `db/`, or `scripts/qa/` must run two separate modes:
