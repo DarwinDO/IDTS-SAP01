@@ -2,6 +2,22 @@
 
 Last updated: 2026-07-03
 
+## 2026-07-03 - UI/UX user-facing copy gate
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Process hardening | DonHV requested a strict rule so UI/UX work cannot repeat the IDTS-52 mistake of showing internal/dev-facing copy on user-visible screens. | The previous login redesign allowed QA/developer explanation text to reach the product UI because AGENTS.md did not yet have a merge-blocking user-facing copy gate. | Added a dedicated `User-Facing UI/UX Copy Gate` section to `AGENTS.md`, including forbidden copy examples, allowed user-focused wording, required PR evidence, and escalation for repeated violations. | Run focused `rg` checks, `git diff --check`, AI DevKit lint, then open PR into `dev`. |
+| Tooling issue | First `gh pr create` attempt failed with PowerShell parse errors around `<<'EOF'`; second attempt failed because a multiline body passed through `--body` was split into extra arguments. | The first command used Bash heredoc syntax in PowerShell; the second relied on fragile native-argument handling for multiline strings. | Fixed by recording the issue and switching to `gh pr create --body-file -` with the PR body piped through stdin. | Re-run PR creation after amending this status entry into the docs commit. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai fix | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Process hardening | DonHV yeu cau siết rule de UI/UX khong lap lai loi IDTS-52: dua text noi bo/dev-facing len man hinh nguoi dung thay. | Ban redesign login truoc do de text giai thich cho QA/developer di vao product UI vi AGENTS.md chua co gate chan merge rieng cho user-facing copy. | Da them section `User-Facing UI/UX Copy Gate` vao `AGENTS.md`, gom vi du copy bi cam, wording duoc phep theo huong user, evidence PR bat buoc, va escalation neu tai pham. | Chay `rg` focused, `git diff --check`, AI DevKit lint, roi tao PR vao `dev`. |
+| Tooling issue | Lan dau chay `gh pr create` fail voi PowerShell parse error quanh `<<'EOF'`; lan thu hai fail vi multiline body truyen qua `--body` bi tach thanh extra arguments. | Lan dau dung cu phap Bash heredoc trong PowerShell; lan hai dua vao cach PowerShell truyen native argument voi multiline string nen khong on dinh. | Da ghi nhan issue va chuyen sang `gh pr create --body-file -`, pipe PR body qua stdin. | Amend status entry nay vao docs commit, sau do tao PR lai. |
+
 ## 2026-07-03 - IDTS-52 login page copy cleanup
 
 English:
