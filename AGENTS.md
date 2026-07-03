@@ -90,6 +90,24 @@ Member status files are also the temporary collection source for later SAP490 Te
 
 When a discovered bug or error is actionable for team tracking, also try to create or update a Jira issue through Atlassian Rovo/Jira MCP if the connector is available. Search Jira first to avoid duplicates. If a matching Jira issue exists, add a comment/update instead of creating a new issue. If a new Jira issue is created, record the Jira key/link in the relevant member status file. Do not send credentials, tokens, private endpoints, local-only paths with secrets, or sensitive personal data to Jira. For transient one-off command issues that were immediately fixed and have no remaining team action, the member status log is enough unless the user asks for Jira tracking.
 
+Jira task naming and issue hygiene are mandatory. Every new Jira task must use a clear summary, not a vague label. The summary must start with one domain prefix from `Backend`, `FE`, `QA`, `DevOps`, `Security`, `Docs`, `UX`, `PM`, or `Bug`, then state the concrete action and the affected object or flow. Avoid names such as `fix bug`, `update UI`, `test task`, `deploy`, or `refactor` without context.
+
+Every Jira task description must include:
+
+- Context / reason for creating the task.
+- Owner and support.
+- Due date.
+- Scope.
+- Out of scope when the task could be misunderstood.
+- Acceptance Criteria as a checklist.
+- Evidence expectation.
+- Dependencies / links section when the task relates to, blocks, is blocked by, duplicates, or follows up another task.
+- Security / no-secret note when the task touches auth, email, deployment, database, S3, API keys, user data, or private infrastructure.
+
+Bug tasks must also include steps to reproduce, expected result, actual result, and classification as product defect, environment blocker, tooling issue, data issue, test-harness issue, documentation issue, or process issue.
+
+If a Jira task depends on or is related to another task, create the proper Jira issue link when the instance supports it. Do not rely only on plain text in the description. Prefer link types such as `blocks`, `is blocked by`, `relates to`, `duplicates`, or the closest equivalent available in Jira. Tasks touching `app/`, `srv/`, or `db/` must mention the matching knowledge mirror requirement. QA tasks must request positive, negative, edge/boundary, role/authorization, persistence/reload, and UI/UX evidence when applicable.
+
 Vietnamese:
 
 Để giảm conflict khi merge, không chỉnh file status của thành viên khác trừ khi task cần phối hợp giữa nhiều người hoặc `donhv` đang tổng hợp/hỗ trợ. Chi tiết tiến độ nên ghi trong file work package, còn `current-status.md` chỉ ghi ngắn gọn cho handover.
@@ -110,6 +128,24 @@ Phải ghi nhận lỗi ngay sau khi quan sát thấy và trước khi chuyển 
 File status cá nhân đồng thời là nguồn tập hợp tạm để sau này fill vào Test And Fix Bug và các deliverable SAP490 liên quan. Mọi issue phát hiện được phải có trong session log. Các issue có ý nghĩa cho SAP490 phải được thêm vào mục staging bug tạm của thành viên nếu file đó có mục này, kể cả issue đã fix ngay trong phiên. DonHV sẽ quyết định entry nào được chuyển vào artifact SAP490 chính thức; agent không được tự bỏ qua lỗi chỉ vì lỗi đã được sửa nhanh.
 
 Khi bug hoặc lỗi phát hiện được là việc cần team theo dõi, hãy cố gắng tạo hoặc cập nhật Jira issue thông qua Atlassian Rovo/Jira MCP nếu connector khả dụng. Trước khi tạo mới phải search Jira để tránh duplicate. Nếu đã có issue phù hợp, hãy comment/update issue đó thay vì tạo issue mới. Nếu tạo Jira issue mới, phải ghi Jira key/link vào file status thành viên liên quan. Không gửi credential, token, endpoint private, local path có secret, hoặc dữ liệu cá nhân nhạy cảm lên Jira. Với lỗi command tạm thời đã fix ngay và không còn action cho team, ghi trong member status là đủ trừ khi user yêu cầu track trên Jira.
+
+Quy tắc đặt tên và mô tả Jira task là bắt buộc. Mọi Jira task mới phải có summary rõ ràng, không đặt tên chung chung. Summary phải bắt đầu bằng một prefix domain trong `Backend`, `FE`, `QA`, `DevOps`, `Security`, `Docs`, `UX`, `PM`, hoặc `Bug`, sau đó ghi rõ hành động cụ thể và đối tượng hoặc flow bị ảnh hưởng. Tránh các tên như `fix bug`, `update UI`, `test task`, `deploy`, hoặc `refactor` nếu không có ngữ cảnh rõ.
+
+Mô tả Jira task bắt buộc phải có:
+
+- Context / lý do tạo task.
+- Owner và support.
+- Due date.
+- Scope.
+- Out of scope nếu task dễ bị hiểu nhầm.
+- Acceptance Criteria dạng checklist.
+- Evidence expectation.
+- Dependency / link section nếu task liên quan task khác, block task khác, bị task khác block, duplicate, hoặc là follow-up từ task/evidence cũ.
+- Security / no-secret note nếu task liên quan auth, email, deploy, database, S3, API key, user data, hoặc hạ tầng private.
+
+Bug task bắt buộc có thêm steps to reproduce, expected result, actual result, và classification: product defect, environment blocker, tooling issue, data issue, test-harness issue, documentation issue, hoặc process issue.
+
+Nếu Jira task phụ thuộc hoặc liên quan task khác, phải tạo Jira issue link phù hợp khi Jira instance hỗ trợ. Không chỉ ghi dependency bằng text trong description. Ưu tiên các link type như `blocks`, `is blocked by`, `relates to`, `duplicates`, hoặc loại tương đương gần nhất có trong Jira. Task chạm vào `app/`, `srv/`, hoặc `db/` phải nhắc yêu cầu cập nhật knowledge mirror tương ứng. Task QA phải yêu cầu evidence positive, negative, edge/boundary, role/authorization, persistence/reload, và UI/UX khi phù hợp.
 
 DonHV consolidates team work at the end of a group work session or week. DonHV is responsible for updating project documents, SAP490 deliverables, Google Sheets, Excel files, and other shared summaries after reading the member status files.
 
