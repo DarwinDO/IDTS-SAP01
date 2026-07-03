@@ -1,6 +1,22 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
-Last updated: 2026-07-02
+Last updated: 2026-07-03
+
+## 2026-07-03 - IDTS-39 safe login/auth error handling
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product hardening | Started IDTS-39 to ensure login/auth never exposes raw SQL, stack traces, table/column names, tokens, credentials, or hostnames to UI/API clients. | Sprint 4 security task follows the observed login screen risk where stale local SQLite schema can surface backend SQL details. | In progress on `fix/idts-39-sanitize-login-errors-donhv`. | Implement safe 500 login/auth responses, sanitize server diagnostics, extend auth QA, then open PR to `dev`. |
+| Environment blocker | First `npm run qa:auth:programmatic` in the fresh IDTS-39 worktree failed with `Cannot find module '@sap/cds'`. | The isolated worktree was created from `origin/dev` but did not have `node_modules` installed yet. | Fixed by running `npm ci --include=dev`; not a product bug. | Rerun passed: `npm run qa:auth:programmatic` returned 28/28 checks, including the new safe-error assertions. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai fix | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Hardening product | Bat dau IDTS-39 de dam bao login/auth khong bao gio lo raw SQL, stack trace, ten bang/cot, token, credential hoac hostname ra UI/API client. | Task bao mat Sprint 4 xuat phat tu rui ro man hinh login co the hien chi tiet SQL backend khi schema SQLite local bi lech. | Dang lam tren `fix/idts-39-sanitize-login-errors-donhv`. | Implement response 500 an toan cho login/auth, sanitize diagnostic server, mo rong auth QA, roi tao PR vao `dev`. |
+| Environment blocker | Lan chay `npm run qa:auth:programmatic` dau tien trong worktree IDTS-39 moi fail voi `Cannot find module '@sap/cds'`. | Worktree tach rieng duoc tao tu `origin/dev` nhung chua co `node_modules`. | Da fix bang `npm ci --include=dev`; khong phai bug san pham. | Rerun pass: `npm run qa:auth:programmatic` tra 28/28 checks, bao gom assertion safe-error moi. |
 
 ## 2026-07-02 - History Timeline ownership wording fix
 

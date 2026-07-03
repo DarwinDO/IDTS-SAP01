@@ -5,6 +5,9 @@ const cds = require('@sap/cds')
 const { SELECT, UPDATE } = cds.ql
 const { hashToken } = require('./passwords')
 
+const LOG = cds.log('idts-auth')
+const AUTH_TEMPORARILY_UNAVAILABLE_MESSAGE = 'Authentication is temporarily unavailable. Please try again later.'
+
 module.exports = async function idtsCustomAuth (req, res, next) {
   try {
     const token = bearerTokenFrom(req)
@@ -49,7 +52,8 @@ module.exports = async function idtsCustomAuth (req, res, next) {
 
     next()
   } catch (error) {
-    next(error)
+    logUnexpectedAuthError(error)
+    return rejectAuthenticationUnavailable(res)
   }
 }
 
@@ -71,4 +75,34 @@ function rejectUnauthorized (res) {
       message: 'Invalid or expired authentication token.'
     }
   })
+}
+
+function rejectAuthenticationUnavailable (res) {
+  return res.status(500).json({
+    error: {
+      code: 'AUTHENTICATION_UNAVAILABLE',
+      message: AUTH_TEMPORARILY_UNAVAILABLE_MESSAGE
+    }
+  })
+}
+
+function logUnexpectedAuthError (error) {
+  LOG.error('Unexpected bearer authentication failure', {
+    diagnostic: safeAuthErrorDiagnostic(error)
+  })
+}
+
+function safeAuthErrorDiagnostic (error) {
+  const status = Number(error?.statusCode || error?.status)
+  return {
+    name: safeDiagnosticToken(error?.name, 'Error'),
+    code: safeDiagnosticToken(error?.code, 'UNKNOWN'),
+    status: Number.isFinite(status) ? status : null
+  }
+}
+
+function safeDiagnosticToken (value, fallback) {
+  if (typeof value !== 'string' && typeof value !== 'number') return fallback
+  const token = String(value).replace(/[^a-zA-Z0-9_.-]/g, '_').slice(0, 80)
+  return token || fallback
 }

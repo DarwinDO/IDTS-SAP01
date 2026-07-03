@@ -18,6 +18,7 @@ CAP authorization checks use `req.user` / `cds.context.user`. Before this file, 
 4. It reads the active `Users` row.
 5. It creates `cds.User` with `authenticated-user` and the business role (`PM`, `DEVELOPER`, `TESTER`).
 6. `BugService @(requires: 'authenticated-user')` can then accept the request.
+7. If the middleware itself hits an unexpected database/runtime error, it returns a generic `AUTHENTICATION_UNAVAILABLE` response instead of forwarding raw SQL or stack traces to the client.
 
 ### Important source anchors
 
@@ -31,11 +32,17 @@ CAP authorization checks use `req.user` / `cds.context.user`. Before this file, 
   **Impact if broken**: Permission checks, history actor, comments, and role-based actions use the wrong user.
   **Must check together**: `srv/bug-service/helpers.js`, `srv/bug-service/permissions.js`, auth QA script.
 
+- **Location**: `catch (error)` inside `idtsCustomAuth`
+  **IDTS concept**: Safe protected-request auth failure.
+  **Impact if broken**: Internal database errors during token validation may leak to API clients or UI error dialogs.
+  **Must check together**: `srv/auth.js`, `scripts/qa/test-auth-foundation-programmatic.js`, protected OData browser smoke.
+
 ### Cross-folder impact
 
 - Uses `AuthSessions` and `Users` from `db/schema.cds`.
 - Receives tokens created by `srv/auth.js`.
 - Enables `BugService` authorization in `srv/service.cds`.
+- Protects any authenticated OData/Fiori call from raw auth middleware errors.
 
 ### Safe editing checklist
 
@@ -43,6 +50,7 @@ CAP authorization checks use `req.user` / `cds.context.user`. Before this file, 
 - Do not log tokens.
 - Keep role names exactly aligned with existing backend checks.
 - Invalid tokens should receive 401 with a safe message.
+- Unexpected middleware errors should receive a generic 500 response and only sanitized diagnostic fields should be logged.
 
 ## Vietnamese
 
@@ -62,6 +70,7 @@ CAP authorization dung `req.user` / `cds.context.user`. Truoc file nay, local de
 4. Doc row `Users` active.
 5. Tao `cds.User` voi `authenticated-user` va business role (`PM`, `DEVELOPER`, `TESTER`).
 6. `BugService @(requires: 'authenticated-user')` co the accept request.
+7. Neu middleware gap loi database/runtime bat ngo, no tra response generic `AUTHENTICATION_UNAVAILABLE` thay vi day raw SQL hoac stack trace ra client.
 
 ### Anchor quan trong
 
@@ -75,11 +84,17 @@ CAP authorization dung `req.user` / `cds.context.user`. Truoc file nay, local de
   **Anh huong neu sai**: Permission checks, history actor, comments va role-based actions se dung sai user.
   **Phai kiem tra cung**: `srv/bug-service/helpers.js`, `srv/bug-service/permissions.js`, auth QA script.
 
+- **Vi tri**: `catch (error)` trong `idtsCustomAuth`
+  **Khai niem IDTS**: Xu ly loi auth an toan cho request protected.
+  **Anh huong neu sai**: Loi database noi bo khi validate token co the bi leak ra API client hoac UI error dialog.
+  **Phai kiem tra cung**: `srv/auth.js`, `scripts/qa/test-auth-foundation-programmatic.js`, protected OData browser smoke.
+
 ### Lien ket voi file khac
 
 - Dung `AuthSessions` va `Users` tu `db/schema.cds`.
 - Nhan token duoc tao boi `srv/auth.js`.
 - Bat authentication cho `BugService` trong `srv/service.cds`.
+- Bao ve moi request OData/Fiori da login khoi raw error phat sinh trong auth middleware.
 
 ### Checklist sua an toan
 
@@ -87,9 +102,10 @@ CAP authorization dung `req.user` / `cds.context.user`. Truoc file nay, local de
 - Khong log token.
 - Giu role names khop voi backend checks hien co.
 - Token sai tra 401 voi message an toan.
+- Loi middleware bat ngo nen tra generic 500 va chi log diagnostic da sanitize.
 
 ## Metadata
 
 - Source file: `srv/auth/custom-auth.js`
 - Knowledge mirror: `docs/knowledge/srv/auth/custom-auth.js.md`
-- Last reviewed: 2026-06-29
+- Last reviewed: 2026-07-03
