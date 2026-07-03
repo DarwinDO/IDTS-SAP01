@@ -14,32 +14,7 @@ body {
 
 .idtsLoginShell {
   min-height: 100vh;
-  padding: 3rem;
-  gap: 3rem;
-}
-
-.idtsLoginIntro {
-  max-width: 34rem;
-}
-
-.idtsLoginIntroCard {
   padding: 2rem;
-  border: 0.0625rem solid var(--sapGroup_ContentBorderColor, #d9d9d9);
-  border-radius: 1rem;
-  background: color-mix(in srgb, var(--sapTile_Background, #fff) 82%, transparent);
-  box-shadow: var(--sapContent_Shadow1, 0 0 0.125rem rgba(0, 0, 0, 0.2));
-}
-
-.idtsLoginIntroBadge {
-  margin-bottom: 1rem;
-}
-
-.idtsLoginIntroTitle {
-  margin-bottom: 0.75rem;
-}
-
-.idtsLoginIntroText {
-  max-width: 30rem;
 }
 
 .idtsLoginCard {
@@ -75,15 +50,9 @@ body {
   margin-top: 0.5rem;
 }
 
-.idtsLoginFinePrint {
-  margin-top: 1rem;
-  text-align: center;
-}
-
 @media (max-width: 64rem) {
   .idtsLoginShell {
-    padding: 2rem;
-    gap: 2rem;
+    padding: 1.5rem;
   }
 }
 
@@ -92,10 +61,6 @@ body {
     align-items: stretch;
     justify-content: flex-start;
     padding: 1rem;
-  }
-
-  .idtsLoginIntro {
-    display: none;
   }
 
   .idtsLoginCard {

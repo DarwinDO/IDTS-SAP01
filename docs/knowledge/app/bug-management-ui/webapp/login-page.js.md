@@ -18,9 +18,11 @@ The login screen now uses SAPUI5 controls instead of raw HTML form fields:
 - `sap.m.Button` for the primary Sign In action.
 - `sap.m.MessageStrip` for safe login errors.
 - `sap.m.Panel`, `sap.m.VBox`, and `sap.m.HBox` for responsive layout.
-- `sap.m.Avatar`, `sap.m.Title`, and `sap.m.Text` for SAP-style branding.
+- `sap.m.Avatar`, `sap.m.Title`, and `sap.m.Text` for simple SAP-style identity and sign-in wording.
 
 This matters because SAPUI5 controls automatically follow the active SAP theme and behave more consistently with the Fiori app than plain HTML inputs.
+
+The login page intentionally avoids developer-facing or environment-facing copy such as “custom CAP authentication”, “no SAP BTP/XSUAA”, or “QA workspace”. Those details are useful for the team but not useful to an end user who only needs to sign in.
 
 ### Flow in IDTS
 
@@ -83,9 +85,11 @@ Màn hình login hiện dùng SAPUI5 controls thay cho form HTML thuần:
 - `sap.m.Button` cho nút chính Sign In.
 - `sap.m.MessageStrip` để hiển thị lỗi login an toàn.
 - `sap.m.Panel`, `sap.m.VBox`, và `sap.m.HBox` cho layout responsive.
-- `sap.m.Avatar`, `sap.m.Title`, và `sap.m.Text` cho branding theo phong cách SAP.
+- `sap.m.Avatar`, `sap.m.Title`, và `sap.m.Text` cho phần nhận diện và chữ hướng dẫn đăng nhập đơn giản theo phong cách SAP.
 
 Điểm quan trọng là SAPUI5 controls tự đi theo SAP theme đang dùng, nên nhìn và hành xử đồng nhất hơn với Fiori app so với input HTML tự viết.
+
+Màn hình login cố ý không hiển thị các câu chữ mang tính nội bộ/dev-facing như “custom CAP authentication”, “no SAP BTP/XSUAA”, hoặc “QA workspace”. Các thông tin đó hữu ích cho team kỹ thuật, nhưng không hữu ích với người dùng cuối vì họ chỉ cần biết cách đăng nhập.
 
 ### Flow hoạt động trong IDTS
 

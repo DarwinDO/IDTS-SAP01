@@ -122,35 +122,9 @@
                         passwordInput,
                         signInButton
                     ]
-                }).addStyleClass("idtsLoginForm"),
-                new Text({
-                    text: "Custom CAP authentication - no SAP BTP/XSUAA account required for this QA environment."
-                }).addStyleClass("idtsLoginFinePrint sapUiTinyText")
+                }).addStyleClass("idtsLoginForm")
             ]
         }).addStyleClass("idtsLoginCard");
-
-        var intro = new VBox({
-            justifyContent: "Center",
-            items: [
-                new VBox({
-                    items: [
-                        new Text({
-                            text: "SAP Fiori-style QA workspace"
-                        }).addStyleClass("idtsLoginIntroBadge sapUiTinyText"),
-                        new Title({
-                            text: "Track bugs, ownership, comments, attachments, and notifications in one controlled flow.",
-                            level: "H2",
-                            titleStyle: "H2",
-                            wrapping: true
-                        }).addStyleClass("idtsLoginIntroTitle"),
-                        new Text({
-                            text: "IDTS keeps the Fiori Elements application protected while the team tests Sprint 4 workflows on the shared QA environment.",
-                            wrapping: true
-                        }).addStyleClass("idtsLoginIntroText")
-                    ]
-                }).addStyleClass("idtsLoginIntroCard")
-            ]
-        }).addStyleClass("idtsLoginIntro");
 
         new App({
             pages: [
@@ -161,7 +135,7 @@
                             alignItems: "Center",
                             justifyContent: "Center",
                             wrap: "Wrap",
-                            items: [intro, loginCard]
+                            items: [loginCard]
                         }).addStyleClass("idtsLoginShell")
                     ]
                 })

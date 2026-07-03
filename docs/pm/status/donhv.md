@@ -2,6 +2,24 @@
 
 Last updated: 2026-07-03
 
+## 2026-07-03 - IDTS-52 login page copy cleanup
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product UX defect | Shared-QA login page displayed implementation/team-facing copy: “SAP Fiori-style QA workspace”, “IDTS keeps the Fiori Elements application protected...”, and “Custom CAP authentication - no SAP BTP/XSUAA...”. | IDTS-52 initial login redesign used explanatory QA/dev copy to make the implementation direction visible during development, but that wording is not appropriate for an end-user sign-in screen. | Fixed locally on branch `fix/idts-52-login-copy-donhv` by removing the intro panel and technical fine print, keeping only the focused sign-in form and safe user-facing wording. | Run JS syntax check, UI5 build, auth smoke, browser smoke, secret scan, AI DevKit lint, and `git diff --check`; then create PR and deploy to shared QA. |
+| Test-harness issue | First local browser smoke wrapper failed before starting CAP with Node `spawn EINVAL`. | Windows child-process invocation of `npx.cmd` from the inline Node harness was rejected before any app request ran. | No product/data state changed. Retry the same smoke through `cmd.exe /c npx cds watch ...` so Windows command resolution is explicit. | Rerun local browser smoke and only accept the fix if forbidden login copy is absent and login/profile/logout still pass. |
+| Test-harness/tooling issue | Retried browser smoke through `cmd.exe /c npx cds watch` but the wrapper timed out before producing test output. A cleanup command then hit PowerShell `Cannot overwrite variable PID` because it used `$pid` as a loop variable. | The inline harness/server lifecycle is brittle on Windows; `$PID` is a reserved PowerShell variable. | No product change. Clean up port/process state with a safe variable name and use a simpler verification path for this copy-only UI fix. | Verify static/runtime copy absence through file scan plus API/build/auth checks; if needed, use shared-QA browser smoke after PR deploy instead of unstable local server orchestration. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai fix | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Product UX defect | Man login shared-QA hien cac cau chu noi bo/ky thuat: “SAP Fiori-style QA workspace”, “IDTS keeps the Fiori Elements application protected...”, va “Custom CAP authentication - no SAP BTP/XSUAA...”. | Ban redesign login IDTS-52 ban dau dung copy giai thich huong implement cho team QA/dev de de nhin trong luc phat trien, nhung day khong phu hop voi man hinh dang nhap cho nguoi dung cuoi. | Da fix local tren branch `fix/idts-52-login-copy-donhv` bang cach bo intro panel va fine print ky thuat, chi giu form dang nhap tap trung va wording an toan cho user. | Chay JS syntax check, UI5 build, auth smoke, browser smoke, secret scan, AI DevKit lint va `git diff --check`; sau do tao PR va deploy len shared QA. |
+| Loi test-harness | Wrapper browser smoke local dau tien fail truoc khi start CAP voi Node `spawn EINVAL`. | Cach goi child-process `npx.cmd` tren Windows trong inline Node harness bi runtime tu choi truoc khi co request nao vao app. | Khong co product/data state nao bi thay doi. Retry cung smoke qua `cmd.exe /c npx cds watch ...` de Windows resolve command ro rang. | Chay lai browser smoke local va chi chap nhan fix neu login khong con copy cam, login/profile/logout van pass. |
+| Loi test-harness/tooling | Retry browser smoke qua `cmd.exe /c npx cds watch` bi timeout truoc khi co output test. Lenh cleanup sau do gap `Cannot overwrite variable PID` vi dung `$pid` lam bien loop PowerShell. | Harness inline quan ly server tren Windows khong on dinh; `$PID` la bien he thong readonly cua PowerShell. | Khong co thay doi product. Cleanup port/process bang ten bien an toan va dung duong verify don gian hon cho UI copy-only fix. | Verify bang file scan runtime + build/API/auth checks; neu can thi chay browser smoke tren shared-QA sau khi PR deploy thay vi orchestration local khong on dinh. |
+
 ## 2026-07-03 - IDTS-52/IDTS-53 Fiori-style login and profile shell
 
 English:
