@@ -2,6 +2,28 @@
 
 Last updated: 2026-07-03
 
+## 2026-07-03 - IDTS-52/IDTS-53 Fiori-style login and profile shell
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Sprint 4 implementation | Implemented the first combined pass for `IDTS-52` and `IDTS-53` on `feature/idts-52-53-fiori-login-profile-donhv`: login page now uses SAPUI5 controls/Horizon theme, and the authenticated app now shows a SAPUI5 profile popover with name, email, role, session expiry, and Sign Out. | Sprint 4 UX polish requires a Fiori-consistent login/profile shell while keeping custom CAP auth and protected OData behavior unchanged. | Implemented locally; preparing PR into `dev`. | UI5 MCP linter clean; UI5 build pass; auth QA 28/28 pass; browser smoke pass for redirect, invalid login, valid login, profile popover, sign out, and refresh-after-logout. |
+| Product defect found in session | First browser smoke showed the new UI5 login page was blank with `Cannot read properties of undefined (reading 'Error')`. | The code assumed `ValueState`/`MessageType` enum exports that were not available in the SAPUI5 runtime shape used by the page. | Fixed by using stable UI5 string enum values for `Email`, `Password`, `Emphasized`, `Error`, and `None`; UI5 MCP linter stayed clean after the change. | Rerun browser smoke progressed past login render and completed successfully after the profile overlay fix below. |
+| Product defect found in session | Browser smoke could open the profile popover but Sign Out click was intercepted by the fixed profile host overlay. | `#idtsProfileShellHost` had a high z-index and pointer events over the popover area. | Fixed by setting pointer events off on the host and back on for the profile button. | Browser smoke pass confirmed Sign Out redirects to `login.html` and a fresh app URL after logout is guarded. |
+| Environment/setup issue | Fresh worktree had no `node_modules`, so local build/test required dependency bootstrap. | Worktree was created from `origin/dev`; dependencies are ignored and not shared from root worktree. | Fixed by `npm ci --include=dev`. Existing 20 npm vulnerabilities remain tracked by `IDTS-46`, not fixed in this UI task. | `npx ui5 build`, auth QA, browser smoke, secret scan, AI DevKit lint, and `git diff --check` pass after bootstrap. |
+| Tooling/worktree issue | `gh pr merge 68 --merge --delete-branch` for `IDTS-39` completed the remote merge but printed `fatal: 'dev' is already used by worktree at 'E:/IDTS-SAP01'` during local cleanup. | Root worktree already owns branch `dev`, so GitHub CLI could not switch local branch for cleanup. | Product merge succeeded; only local cleanup warning. | Verified PR #68 is merged at merge commit `a46b59215b2298c6c02e9077ea3f005743a2e725`. Jira/docs were stale and are being reconciled in this Sprint 4 pass. |
+
+Vietnamese:
+
+| Phân loại | Triệu chứng / công việc | Nguyên nhân | Trạng thái fix | Verify / bước tiếp theo |
+| --- | --- | --- | --- | --- |
+| Implementation Sprint 4 | Đã implement pass đầu cho `IDTS-52` và `IDTS-53` trên `feature/idts-52-53-fiori-login-profile-donhv`: login page dùng SAPUI5 controls/Horizon theme, app sau login có profile popover hiển thị tên, email, role, thời hạn session và Sign Out. | Sprint 4 cần polish login/profile shell theo hướng Fiori nhưng vẫn giữ custom CAP auth và protected OData hiện tại. | Đã implement local; chuẩn bị PR vào `dev`. | UI5 MCP linter sạch; UI5 build pass; auth QA 28/28 pass; browser smoke pass cho redirect, invalid login, valid login, profile popover, sign out và refresh-after-logout. |
+| Product defect phát hiện trong phiên | Browser smoke đầu tiên cho thấy login UI5 bị trắng với lỗi `Cannot read properties of undefined (reading 'Error')`. | Code giả định enum `ValueState`/`MessageType` có export như runtime không cung cấp ở page này. | Đã fix bằng string enum ổn định của UI5 cho `Email`, `Password`, `Emphasized`, `Error`, `None`; UI5 MCP linter vẫn sạch. | Browser smoke rerun vượt qua render login và pass sau khi fix overlay profile bên dưới. |
+| Product defect phát hiện trong phiên | Browser smoke mở được profile popover nhưng click Sign Out bị profile host overlay chặn. | `#idtsProfileShellHost` có z-index cao và vẫn nhận pointer events trên vùng popover. | Đã fix bằng cách tắt pointer events trên host và bật lại ở profile button. | Browser smoke pass xác nhận Sign Out redirect về `login.html` và mở lại app sau logout vẫn bị guard đúng. |
+| Lỗi môi trường/setup | Worktree mới chưa có `node_modules`, nên cần bootstrap dependency trước khi build/test. | Worktree tạo từ `origin/dev`; dependencies bị ignore và không dùng chung với root worktree. | Đã fix bằng `npm ci --include=dev`. 20 npm vulnerabilities đã biết vẫn thuộc `IDTS-46`, không xử lý trong task UI này. | `npx ui5 build`, auth QA, browser smoke, secret scan, AI DevKit lint và `git diff --check` pass sau bootstrap. |
+| Lỗi tooling/worktree | `gh pr merge 68 --merge --delete-branch` cho `IDTS-39` merge remote thành công nhưng local cleanup in `fatal: 'dev' is already used by worktree at 'E:/IDTS-SAP01'`. | Root worktree đang giữ branch `dev`, nên GitHub CLI không checkout local để cleanup được. | Product merge đã thành công; đây chỉ là warning cleanup local. | Verify PR #68 merged tại merge commit `a46b59215b2298c6c02e9077ea3f005743a2e725`. Jira/docs stale được reconcile trong pass Sprint 4 này. |
+
 ## 2026-07-03 - IDTS-39 safe login/auth error handling
 
 English:

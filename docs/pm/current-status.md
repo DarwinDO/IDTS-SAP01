@@ -9,7 +9,7 @@ Last updated: 2026-07-03
 | Project phase | Sprint 03 is being closed and Sprint 04 planning is opened. Sprint 02/Sprint 03 closure tasks have been reconciled on Jira where tool access allowed. |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
 | Current sprint | Sprint 03 closure is complete at Jira epic/task level: `IDTS-1`, `IDTS-14`, `IDTS-25`, `IDTS-27`, `IDTS-28`, `IDTS-38`, and `IDTS-50` are Done. Jira board sprint `IDTS Sprint 4` exists on board `34` for 2026-07-04 to 2026-07-18, and planning epic is `IDTS-51`. |
-| Recommended next action | Sprint 04 has started with `IDTS-39` safe login/auth error handling. After `IDTS-39` PR is reviewed/merged, continue `IDTS-45`, `IDTS-46`, and `IDTS-47`. Keep `IDTS-40` as AWS-native follow-up/alternative, not a blocker for accepted Render QA. |
+| Recommended next action | Sprint 04 has started. `IDTS-39`, `IDTS-52`, and `IDTS-53` are implemented/merged through the Sprint 4 UI-auth pass. Next practical work: continue `IDTS-45`, `IDTS-46`, and `IDTS-47`; keep `IDTS-40` as AWS-native follow-up/alternative, not a blocker for accepted Render QA. |
 | Main implementation risk | Shared QA still depends on private Render/Brevo/AWS/PostgreSQL environment variables staying out of repo, Jira, and logs. The Render PostgreSQL free-instance expiry remains the main time-bound infrastructure risk. Sprint 04 is now tracked both through the real Jira sprint `IDTS Sprint 4` and planning epic `IDTS-51`; `IDTS-40` remains a deferred AWS-native follow-up rather than a blocker for Render QA. |
 
 ## What Is Already Done
@@ -87,6 +87,7 @@ Last updated: 2026-07-03
 - IDTS-42 is merged into `dev` through GitHub PR #38. The repository now has a mandatory QA Depth Gate baseline: PR evidence template, `qa-depth-gate` workflow, PR-body validator, reusable browser harness, secret scan, and documented falsification-first QA rules. GitHub branch protection for `dev` now requires the `qa-depth-gate` status check.
 - IDTS-34 is merged into `dev` through GitHub PR #28 at merge commit `52432e35c66a3c0137ed5b7c96c9f57d93409fc5`. Backend custom login now exposes `AuthService.login/logout/me`, stores only password hashes, creates server-side `AuthSessions`, maps Bearer tokens to `cds.User`, keeps `BugService` protected, and passes focused auth verification (`23 PASS / 0 FAIL`) plus CAP compile on `dev`.
 - QA/testing skill support for IDTS-36/IDTS-38 is now installed and routed: `backend-testing`, `api-testing-patterns`, `integration-testing`, `qa-report`, and `qa-test-plan` exist under repo-local `.agents/skills/` and external backup `C:\Users\LapHub\.agents\skills\`. `backend-testing`, `api-testing-patterns`, and `integration-testing` are the primary implementation-test support skills; `qa-report` and `qa-test-plan` are secondary planning/reporting helpers.
+- IDTS-39, IDTS-52, and IDTS-53 are complete at implementation handoff level. Login/auth unexpected errors are sanitized, the custom login page now uses SAPUI5 controls with SAP Horizon styling, and the authenticated app now exposes a visible profile/sign-out popover.
 
 Vietnamese:
 
@@ -167,7 +168,7 @@ Vietnamese:
 | SRS style | Uses a traditional SRS outline, with requirement quality, traceability, and verification aligned to ISO/IEC/IEEE 29148-style discipline. |
 | FRS style | Uses function-detail specifications with workflow diagrams, validations, status effects, history/notification effects, acceptance criteria, and traceability to SRS. |
 | WP1-WP3 implementation | CAP model foundation, service/value help, and MVP runtime business validation are complete. |
-| Current work order | `IDTS-34`, `IDTS-35`, `IDTS-36`, `IDTS-44`, `IDTS-48`, and `IDTS-49` are complete. Next practical work: `IDTS-45` Render PostgreSQL expiry/backup decision, `IDTS-46` dependency remediation, then `IDTS-37` notification readability and `IDTS-38` regression QA. |
+| Current work order | `IDTS-34`, `IDTS-35`, `IDTS-36`, `IDTS-39`, `IDTS-44`, `IDTS-48`, `IDTS-49`, `IDTS-52`, and `IDTS-53` are complete. Next practical work: `IDTS-45` Render PostgreSQL expiry/backup decision, `IDTS-46` dependency remediation, `IDTS-47` History Timeline limit/pagination, then the remaining Sprint 4 UI polish tasks. |
 | IDTS-36 email library | Nodemailer is selected for v1 because IDTS needs SMTP portability, simple Node.js integration, and no provider lock-in. `@opencoredev/email-sdk` remains a future reference only because it is AGPL-3.0-only and heavier than needed for this slice. |
 
 Vietnamese:

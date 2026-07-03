@@ -42,6 +42,9 @@ Vietnamese: Chi dung board nay de theo doi trang thai cap cao. Chi tiet cong vie
 | IDTS-50 | Email notification readability and deep-link polish | DonHV confirmed email readability, deep-link behavior, and history wording are acceptable after Render/shared-QA verification. Jira moved to Done. |
 | IDTS-27 | Sync docs, Jira status, and Sprint 3 evidence | Sprint 3 closure/status sync was completed and summarized for handoff into Sprint 4. Jira moved to Done. |
 | IDTS-14 | Sprint 3 epic closure | Sprint 3 epic was closed after active follow-up work was moved under Sprint 4 epic `IDTS-51` or marked Done. |
+| IDTS-39 | Auth unexpected error sanitization | PR #68 merged into `dev`; login/auth now returns safe generic messages for unexpected failures while keeping invalid-credential behavior unchanged. |
+| IDTS-52 | Fiori-style custom sign-in page | Login page now uses SAPUI5 controls, Horizon theme, safe MessageStrip errors, responsive layout, and knowledge mirrors. |
+| IDTS-53 | Fiori profile menu and sign-out UX | Authenticated app now has a SAPUI5 profile popover showing name/email/role/session expiry with visible Sign Out; browser smoke verifies logout guard. |
 
 Vietnamese:
 
@@ -80,6 +83,9 @@ Vietnamese:
 | IDTS-50 | Dong email readability/deep-link polish | DonHV xac nhan email readability, deep link va history wording da OK sau shared-QA verification. Jira da chuyen Done. |
 | IDTS-27 | Sync docs, Jira status va Sprint 3 evidence | Da hoan tat tong hop closure/status Sprint 3 va handoff sang Sprint 4. Jira da chuyen Done. |
 | IDTS-14 | Dong epic Sprint 3 | Epic Sprint 3 da dong sau khi follow-up active duoc chuyen sang epic Sprint 4 `IDTS-51` hoac da Done. |
+| IDTS-39 | Sanitize loi login bat thuong | PR #68 da merge vao `dev`; login/auth tra message generic an toan cho loi bat thuong va giu nguyen hanh vi invalid credential. |
+| IDTS-52 | Login page custom theo Fiori style | Login page dung SAPUI5 controls, Horizon theme, MessageStrip loi an toan, responsive layout va knowledge mirrors. |
+| IDTS-53 | Profile menu va Sign Out UX | App sau login co SAPUI5 profile popover hien ten/email/role/session expiry va Sign Out ro rang; browser smoke da verify logout guard. |
 
 ## Ready
 
@@ -108,7 +114,6 @@ Vietnamese:
 | SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP, and real browser QA are stable enough to prove the happy flow. Remaining work is final SAP490 sync and mentor-demo rerun, not FE/blocking workflow repair. |
 | WP6 | PM Monitoring | DonHV, DatDT, SangVN | Ownership wording is locked; backend monitoring fields, FE monitoring views, Object Page refresh side effects, grouped history timeline, and persona UAT automation are merged. Remaining manual follow-up is `IDTS-32`; `IDTS-33` is Done on Jira. |
 | IDTS-32 | Manual browser UAT for Sprint 3 workflow/history flows | SangVN | Evidence branch merged through PR #34. Retest remains open until IDTS-41/42/43 fixes and no P0/P1 remain. |
-| IDTS-39 | Auth: sanitize unexpected login errors | DonHV | In progress on `fix/idts-39-sanitize-login-errors-donhv`; safe login/auth error handling implemented locally and PR verification is running. |
 
 Vietnamese:
 
@@ -117,7 +122,6 @@ Vietnamese:
 | IDTS-50 | Cai thien email notification va sua deep link | DonHV | Sua email Gmail dang tho va link Fiori bi hong tu shared-QA email. Jira dang In Progress; branch implementation la `fix/idts-50-email-link-template-donhv`. |
 | SP2 | Sprint 02 Mentor Feedback va Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP va browser QA that da du on de chung minh happy flow. Phan con lai la sync SAP490 va rerun mentor demo. |
 | WP6 | PM Monitoring | DonHV, DatDT, SangVN | Backend monitoring, FE monitoring views, Object Page refresh, grouped history timeline va persona UAT automation da merge. Manual follow-up con lai la `IDTS-32`; `IDTS-33` da Done tren Jira. |
-| IDTS-39 | Auth: sanitize unexpected login errors | DonHV | Dang lam tren `fix/idts-39-sanitize-login-errors-donhv`; safe login/auth error handling da implement local va dang verify de tao PR. |
 | IDTS-1 | Jira alignment cho Sprint 02 epic | DonHV | Jira epic van To Do trong khi nhieu child task da Done. DonHV can xu ly trong `IDTS-27` bang comment hoac transition phu hop. |
 | IDTS-25 | Fix backend defects phat hien trong Sprint 3 QA | DonHV | Jira live dang In Progress. Can chot evidence va quyet dinh dong task truoc khi tong hop PM/SAP490 Sprint 3. |
 | IDTS-27 | Sync docs, Jira status va Sprint 3 evidence | DonHV | Bucket tong hop PM/Jira/evidence dang active. `IDTS-34` va `IDTS-36` da merge; tiep theo la handoff `IDTS-37`/`IDTS-38`, sau do tong hop evidence Sprint 3. |
