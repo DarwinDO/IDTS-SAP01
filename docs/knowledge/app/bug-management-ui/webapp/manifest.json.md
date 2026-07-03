@@ -79,6 +79,30 @@ Important anchors:
   - Impact if broken: Users may lose the create entry point or Developer users may see a misleading create button.
   - Must check together: `app/bug-management-ui/webapp/ext/actions/BugListActions.js`, `app/bug-management-ui/annotations/capabilities.cds`, `srv/service.js`, and `srv/bug-service/permissions.js`.
 
+## IDTS-54 update - dashboard entry action
+
+### English
+
+IDTS-54 adds the List Report header action `OpenDashboard`. The dashboard itself is a protected standalone SAPUI5 page at `dashboard.html`, so the manifest only owns the user entry point from the generated bug list.
+
+Important anchors:
+
+- Location: `BugsList.options.settings.content.header.actions.OpenDashboard`
+  - IDTS concept: user-facing entry point from bug list to dashboard.
+  - Impact if broken: dashboard may exist but users cannot find it.
+  - Must check together: i18n key `dashboardOpenAction`, `webapp/ext/actions/BugListActions.js`, `webapp/dashboard.html`, `webapp/dashboard-page.js`, and browser smoke after login.
+
+### Vietnamese
+
+IDTS-54 thêm List Report header action `OpenDashboard`. Dashboard là một standalone SAPUI5 page được bảo vệ tại `dashboard.html`, nên manifest chỉ quản lý điểm vào từ bug list generated.
+
+Các anchor quan trọng:
+
+- Vị trí: `BugsList.options.settings.content.header.actions.OpenDashboard`
+  - Khái niệm IDTS: điểm vào dashboard dành cho user từ bug list.
+  - Ảnh hưởng nếu sai: dashboard tồn tại nhưng user không tìm thấy.
+  - Phải kiểm tra cùng: i18n key `dashboardOpenAction`, `webapp/ext/actions/BugListActions.js`, `webapp/dashboard.html`, `webapp/dashboard-page.js`, và browser smoke sau login.
+
 - Location: `BugsObjectPage.options.settings.content.body.sections.History`
   - IDTS concept: One readable history/timeline section on the Object Page.
   - Impact if broken: The Object Page can show no history or duplicate history sections.

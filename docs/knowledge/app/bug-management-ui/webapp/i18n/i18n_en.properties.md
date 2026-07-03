@@ -61,6 +61,30 @@ Với người mới học Fiori, điểm này quan trọng vì Fiori lấy labe
   - Ảnh hưởng nếu sai: User dùng English locale có thể thấy label lệch hoặc placeholder key bị thiếu.
   - Phải kiểm tra cùng: base `i18n.properties`, `manifest.json`, và cấu hình History trên Object Page.
 
+## IDTS-54 update - English dashboard labels
+
+### English
+
+IDTS-54 keeps the English bundle aligned with the base bundle by adding the same `dashboard*` keys used by the custom dashboard page.
+
+Important anchor:
+
+- Location: keys beginning with `dashboard`
+  - IDTS concept: English locale text for role-based dashboard tiles, focus list, workload list, and safe load error.
+  - Impact if broken: English users can see missing-key placeholders or inconsistent dashboard wording.
+  - Must check together: base `i18n.properties`, `dashboard.html`, and `dashboard-page.js`.
+
+### Vietnamese
+
+IDTS-54 giữ English bundle đồng bộ với base bundle bằng cách thêm cùng các key `dashboard*` mà custom dashboard page đang dùng.
+
+Anchor quan trọng:
+
+- Vị trí: các key bắt đầu bằng `dashboard`
+  - Khái niệm IDTS: text English cho tile dashboard theo role, focus list, workload list, và lỗi load dữ liệu an toàn.
+  - Ảnh hưởng nếu sai: user dùng English locale có thể thấy placeholder key hoặc wording dashboard không đồng nhất.
+  - Phải kiểm tra cùng: base `i18n.properties`, `dashboard.html`, và `dashboard-page.js`.
+
 ## Metadata
 
 - Source file: `app/bug-management-ui/webapp/i18n/i18n_en.properties`
