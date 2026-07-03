@@ -27,6 +27,7 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 const cds = require('@sap/cds')
 const { INSERT, SELECT, UPDATE } = cds.ql
 
+const AuthService = require('../../srv/auth')
 const customAuth = require('../../srv/auth/custom-auth')
 const {
   hashPassword,
@@ -58,6 +59,23 @@ function expectTruthy (label, actual) {
   rec(label, Boolean(actual), `actual=${JSON.stringify(actual)}`)
 }
 
+function expectNoLeak (label, value) {
+  const text = JSON.stringify(value).toLowerCase()
+  const leakPatterns = [
+    'select',
+    'from ',
+    'where ',
+    'passwordhash',
+    'tokenhash',
+    'abc123',
+    'very-secret-token',
+    'idts.cap.users',
+    'idts.cap.authsessions'
+  ]
+  const leaked = leakPatterns.filter(pattern => text.includes(pattern))
+  rec(label, leaked.length === 0, leaked.length ? `leaked=${leaked.join(', ')}` : 'no unsafe detail detected')
+}
+
 async function expectRejectsSafe (label, action) {
   try {
     await action()
@@ -67,6 +85,32 @@ async function expectRejectsSafe (label, action) {
     const message = String(error.message || '')
     rec(label, code === 401 && message.includes('Invalid email or password'), `code=${code} message=${message}`)
   }
+}
+
+async function expectRejectsGenericInternal (label, action) {
+  try {
+    await action()
+    rec(label, false, 'action unexpectedly succeeded')
+  } catch (error) {
+    const code = Number(error.code || error.statusCode || error.status)
+    const message = String(error.message || '')
+    const pass = code === 500 &&
+      message === AuthService.__test.LOGIN_TEMPORARILY_UNAVAILABLE_MESSAGE &&
+      !message.toLowerCase().includes('select') &&
+      !message.toLowerCase().includes('passwordhash')
+    rec(label, pass, `code=${code} message=${message}`)
+  }
+}
+
+function fakeUnexpectedLoginReject () {
+  const req = {
+    reject (code, message) {
+      const error = new Error(message)
+      error.code = code
+      throw error
+    }
+  }
+  return req.reject(500, AuthService.__test.LOGIN_TEMPORARILY_UNAVAILABLE_MESSAGE)
 }
 
 async function main () {
@@ -127,6 +171,14 @@ async function main () {
     password: INACTIVE_PASSWORD
   }))
 
+  const rawSqlError = Object.assign(
+    new Error('SQLITE_ERROR: no such column: SU.passwordHash in SELECT from idts.cap.Users where email = abc123'),
+    { code: 'SQLITE_ERROR' }
+  )
+  const diagnostic = AuthService.__test.safeAuthErrorDiagnostic(rawSqlError)
+  expectNoLeak('unexpected login diagnostic excludes raw SQL details', diagnostic)
+  await expectRejectsGenericInternal('unexpected login error response is sanitized', () => fakeUnexpectedLoginReject(rawSqlError))
+
   const session = await db.run(
     SELECT.one.from('idts.cap.AuthSessions')
       .columns('ID', 'user_ID', 'tokenHash', 'expiresAt', 'revokedAt')
@@ -180,6 +232,22 @@ async function main () {
 
   const rejected = await runCustomAuth(loginResult.token)
   expectEqual('middleware rejects revoked token', rejected.statusCode, 401)
+
+  const originalConnectTo = cds.connect.to
+  try {
+    cds.connect.to = async () => {
+      throw Object.assign(
+        new Error('SELECT tokenHash, passwordHash FROM idts.cap.AuthSessions WHERE tokenHash = very-secret-token'),
+        { code: 'SQLITE_ERROR' }
+      )
+    }
+    const internalAuthError = await runCustomAuth('token-that-triggers-internal-error')
+    expectEqual('middleware internal auth error status is generic', internalAuthError.statusCode, 500)
+    expectEqual('middleware internal auth error code is generic', internalAuthError.body?.error?.code, 'AUTHENTICATION_UNAVAILABLE')
+    expectNoLeak('middleware internal auth error response excludes raw SQL details', internalAuthError.body)
+  } finally {
+    cds.connect.to = originalConnectTo
+  }
 
   console.log('')
   console.log('==============================================')

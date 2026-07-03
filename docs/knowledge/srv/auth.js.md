@@ -16,8 +16,10 @@ CAP service files declare "what APIs exist"; JavaScript service files implement 
 2. It reads the active `Users` row and its `passwordHash`.
 3. It verifies the password using `srv/auth/passwords.js`.
 4. It creates an `AuthSessions` row with a hash of the token, not the raw token.
-5. `logout` revokes the session by setting `revokedAt`.
-6. `me` returns safe current-user profile data.
+5. If login fails because the email/password is wrong or the user is inactive, the service returns the same safe 401 message.
+6. If login fails because the database/runtime has an unexpected error, the service logs only sanitized diagnostic fields and returns a generic 500 message. This prevents raw SQL, table names, column names, tokens, passwords, or hostnames from appearing in the login UI.
+7. `logout` revokes the session by setting `revokedAt`.
+8. `me` returns safe current-user profile data.
 
 ### Important source anchors
 
@@ -31,18 +33,26 @@ CAP service files declare "what APIs exist"; JavaScript service files implement 
   **Impact if broken**: Bearer token cannot be validated later; logout cannot revoke the session.
   **Must check together**: `srv/auth/custom-auth.js`, `db/schema.cds` `AuthSessions`.
 
+- **Location**: `catch (error)` inside `login(req)`
+  **IDTS concept**: Safe login error handling.
+  **Impact if broken**: Raw database errors such as missing columns or SQL text may appear on the login page.
+  **Must check together**: `scripts/qa/test-auth-foundation-programmatic.js`, `app/bug-management-ui/webapp/login-page.js`, `srv/auth/custom-auth.js`.
+
 ### Cross-folder impact
 
 - Reads `Users` and writes `AuthSessions` from `db/schema.cds`.
 - Implements actions declared in `srv/auth.cds`.
 - Produces tokens consumed by `srv/auth/custom-auth.js`.
 - Gives FE `IDTS-35` a stable response shape.
+- Protects the login UI from displaying backend internals when local SQLite or cloud PostgreSQL schema is stale.
 
 ### Safe editing checklist
 
 - Never return `passwordHash`.
 - Never store the raw bearer token in DB.
 - Keep failure message safe: `Invalid email or password.`
+- Keep unexpected login errors generic for the client: do not expose SQL, table names, column names, stack traces, tokens, passwords, or hostnames.
+- If more diagnostic detail is needed, add sanitized server-side fields only and extend the auth QA script.
 - Keep role mapping compatible with current MVP roles: Tester, Developer, PM.
 
 ## Vietnamese
@@ -61,8 +71,10 @@ File service CDS khai bao "API nao ton tai"; file JavaScript service implement "
 2. Doc row `Users` active va `passwordHash`.
 3. Verify password bang `srv/auth/passwords.js`.
 4. Tao row `AuthSessions` voi hash cua token, khong luu raw token.
-5. `logout` revoke session bang cach set `revokedAt`.
-6. `me` tra safe current-user profile data.
+5. Neu login fail vi sai email/password hoac user inactive, service tra cung mot message 401 an toan.
+6. Neu login fail vi loi database/runtime bat ngo, service chi log cac field diagnostic da sanitize va tra message 500 chung chung. Cach nay ngan raw SQL, ten bang, ten cot, token, password hoac hostname hien ra tren man hinh login.
+7. `logout` revoke session bang cach set `revokedAt`.
+8. `me` tra safe current-user profile data.
 
 ### Anchor quan trong
 
@@ -76,22 +88,30 @@ File service CDS khai bao "API nao ton tai"; file JavaScript service implement "
   **Anh huong neu sai**: Bearer token khong validate duoc ve sau; logout khong revoke duoc session.
   **Phai kiem tra cung**: `srv/auth/custom-auth.js`, `db/schema.cds` `AuthSessions`.
 
+- **Vi tri**: `catch (error)` trong `login(req)`
+  **Khai niem IDTS**: Xu ly loi login an toan.
+  **Anh huong neu sai**: Loi database tho nhu missing column hoac SQL text co the hien tren trang login.
+  **Phai kiem tra cung**: `scripts/qa/test-auth-foundation-programmatic.js`, `app/bug-management-ui/webapp/login-page.js`, `srv/auth/custom-auth.js`.
+
 ### Lien ket voi file khac
 
 - Doc `Users` va ghi `AuthSessions` tu `db/schema.cds`.
 - Implement actions khai bao trong `srv/auth.cds`.
 - Tao token cho `srv/auth/custom-auth.js` verify.
 - Tao response shape on dinh cho FE `IDTS-35`.
+- Bao ve UI login khong hien chi tiet noi bo backend khi schema SQLite local hoac PostgreSQL cloud bi lech.
 
 ### Checklist sua an toan
 
 - Khong bao gio return `passwordHash`.
 - Khong bao gio luu raw bearer token trong DB.
 - Giu message fail an toan: `Invalid email or password.`
+- Giu loi login bat ngo o dang generic cho client: khong lo SQL, ten bang, ten cot, stack trace, token, password hoac hostname.
+- Neu can them diagnostic, chi them field da sanitize o server log va mo rong auth QA script.
 - Giu role mapping khop MVP roles: Tester, Developer, PM.
 
 ## Metadata
 
 - Source file: `srv/auth.js`
 - Knowledge mirror: `docs/knowledge/srv/auth.js.md`
-- Last reviewed: 2026-06-29
+- Last reviewed: 2026-07-03
