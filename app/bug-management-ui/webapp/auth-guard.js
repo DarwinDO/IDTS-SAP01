@@ -11,7 +11,9 @@
  *   - Stored in sessionStorage (never persisted to disk; cleared on tab close).
  *   - Never written to console or source code.
  *
- * Logout: call window.idtsLogout() from the browser console during development.
+ * IDTS-53 profile shell:
+ *   - This guard exposes safe session helpers.
+ *   - The SAPUI5 profile menu itself is rendered later by ext/login/ProfileShell.
  */
 (function () {
     "use strict";
@@ -68,4 +70,20 @@
         var base = window.location.pathname.replace(/\/index\.html(\?.*)?$/, "");
         window.location.replace(base + "/login.html");
     };
+
+    // ── 4. Safe session helper for the SAPUI5 profile shell ─────────────────
+    window.idtsCurrentUser = function () {
+        return readStoredUser();
+    };
+
+    function readStoredUser() {
+        var raw = sessionStorage.getItem(USER_KEY);
+        if (!raw) return null;
+        try {
+            return JSON.parse(raw);
+        } catch (e) {
+            return null;
+        }
+    }
+
 })();

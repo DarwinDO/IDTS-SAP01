@@ -4,97 +4,116 @@
 
 ### What this file is for
 
-Local browser bootstrap page for the UI. Read this as the page used by local preview to load SAPUI5 and start the component.
+`index.html` is the browser entry page for the protected IDTS Fiori Elements application. It loads `auth-guard.js` first, then bootstraps SAPUI5, then starts the `idts.bugmanagementui` component.
 
-### How to read this file
+After `IDTS-53`, it also contains a stable host element named `idtsProfileShellHost`. `auth-guard.js` uses that host to render the signed-in profile button and Sign Out popover.
 
-This file belongs to the Fiori/UI5 frontend layer. It affects generated screens, OData calls, UI tests, app bootstrap, or visible text.
+### Beginner explanation
 
-Read it through three practical questions:
+When a user opens the real app, this file is the first HTML page the browser receives. It does not define List Report or Object Page content directly. Instead, it starts SAPUI5 and tells UI5 to load the application component.
 
-- What screen, API, data model, or developer workflow does this file support?
-- Which other layer consumes the output of this file?
-- If this file changes, which service/UI/data/test file must be checked next?
+The most important detail is load order:
 
-### Runtime / project flow
+1. `auth-guard.js` loads first.
+2. `auth-guard.js` checks whether the browser has a login token.
+3. Only then does SAPUI5 load and start the Fiori Elements app.
 
-- The file supports app bootstrap, build, preview, lint, translation, or generated UI behavior.
-- It normally affects the frontend first, but bad configuration can stop the UI from reaching the backend service.
+This prevents the app from making its first OData metadata request without authentication.
 
-### Main concepts explained
+### Flow in IDTS
 
-- This file supports build, preview, lint, bootstrap, translation, or generated app behavior.
-- It may not implement business behavior directly, but it can still affect whether developers can run, test, or understand the app.
-- Configuration changes should be treated as code changes when they alter behavior or dependencies.
+1. Successful login redirects the browser from `login.html` to `index.html`.
+2. `index.html` loads `css/idts-shell.css` for profile shell styling.
+3. `index.html` loads `auth-guard.js` before SAPUI5.
+4. If the token is missing, `auth-guard.js` redirects back to `login.html`.
+5. If the token exists, SAPUI5 bootstraps with theme `sap_horizon`.
+6. UI5 ComponentSupport loads `idts.bugmanagementui`.
+7. The Fiori Elements List Report/Object Page renders from `manifest.json`, annotations, and OData metadata.
+8. `auth-guard.js` renders the profile/sign-out menu into `#idtsProfileShellHost`.
 
 ### Important source anchors
 
-These anchors are deliberately short. They are not the main explanation; they only point you back to the most useful source locations after you understand the flow above.
+| Location | IDTS concept | Impact if broken | Must check together |
+| --- | --- | --- | --- |
+| `<link rel="stylesheet" href="css/idts-shell.css">` | App shell/profile styling | Profile menu may render but look misplaced or inconsistent. | `css/idts-shell.css`, `auth-guard.js` |
+| `<script src="auth-guard.js"></script>` | Pre-bootstrap auth guard | First OData calls can be unauthenticated, causing blank app or 401/403. | `auth-guard.js`, `srv/auth/custom-auth.js` |
+| `src="https://sapui5.hana.ondemand.com/1.148.0/resources/sap-ui-core.js"` | SAPUI5 runtime | The Fiori Elements app cannot start if UI5 fails to load. | `login.html`, UI5 build config |
+| `data-sap-ui-theme="sap_horizon"` | SAP Horizon theme | App visual style can diverge from login/profile styling if changed. | `login.html`, CSS theme tokens |
+| `data-sap-ui-on-init="module:sap/ui/core/ComponentSupport"` | Component bootstrapping | The app component may not start automatically. | `Component.js`, `manifest.json` |
+| `<div id="idtsProfileShellHost"></div>` | Signed-in profile shell host | The profile menu cannot render if this host is removed or renamed. | `auth-guard.js`, `css/idts-shell.css` |
+| `data-name="idts.bugmanagementui"` | UI5 app component name | UI5 cannot locate the app component if the name changes incorrectly. | `Component.js`, `manifest.json` |
 
-- Line 13: `<script` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 14: `id="sap-ui-bootstrap"` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 16: `data-sap-ui-theme="sap_horizon"` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 17: `data-sap-ui-resource-roots='{` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 20: `data-sap-ui-on-init="module:sap/ui/core/ComponentSupport"` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 21: `data-sap-ui-compat-version="edge"` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 22: `data-sap-ui-async="true"` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 23: `data-sap-ui-frame-options="trusted"` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 24: `></script>` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
-- Line 28: `data-sap-ui-component` — This is a control point that changes imports, metadata, runtime behavior, routing, test behavior, or displayed text.
+### Cross-folder impact
 
-### Cross-folder dependency map
-
-This section answers: which file in another main folder is linked, where the link appears, and how the linked files affect each other.
-
-- No direct cross-folder dependency was detected. If future edits add one, document the exact line/declaration and impact here.
+- `srv/service.cds` exposes the protected `BugService` used by the Fiori Elements app started here.
+- `srv/auth/custom-auth.js` validates the bearer token injected by `auth-guard.js`.
+- `db/schema.cds` stores the business data shown by the app after OData calls succeed.
+- `app/bug-management-ui/webapp/manifest.json` defines the Fiori Elements pages and OData model loaded after this page starts the component.
+- `app/bug-management-ui/annotations/*.cds` affects the generated List Report/Object Page that appears after this bootstrap.
 
 ### Safe editing checklist
 
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
+- Keep `auth-guard.js` before the UI5 bootstrap.
+- Do not add inline code that logs or exposes tokens.
+- Do not remove `idtsProfileShellHost` unless `auth-guard.js` is updated in the same change.
+- If the UI5 version/theme changes, test both login and main app because they should stay visually aligned.
+- If component name/resource root changes, verify UI5 build and app startup.
 
 ## Vietnamese
 
 ### File này dùng để làm gì
 
-Local browser bootstrap page for the UI. File này nằm ở lớp frontend Fiori/UI5. Nó ảnh hưởng màn hình, cách gọi OData, test UI, bootstrap app hoặc text hiển thị.
+`index.html` là trang HTML vào chính của IDTS Fiori Elements app đã được bảo vệ. File này load `auth-guard.js` trước, sau đó bootstrap SAPUI5, rồi khởi động component `idts.bugmanagementui`.
 
-### Cách đọc file này cho dễ hiểu
+Sau `IDTS-53`, file này còn có một host ổn định tên `idtsProfileShellHost`. `auth-guard.js` dùng host đó để render nút profile và popover Sign Out.
 
-- Đừng đọc file này như danh sách dòng code rời rạc.
-- Hãy đọc theo flow: người dùng/UI làm gì, CAP service nhận gì, backend xử lý gì, và dữ liệu nào bị ảnh hưởng.
-- Nếu phần English dài hơn, hãy xem đó là bản giải thích đầy đủ; phần Vietnamese này giúp nắm ý chính trước.
+### Giải thích cho người mới
 
-### Flow chính
+Khi user mở app thật, đây là file HTML đầu tiên browser nhận được. Nó không tự định nghĩa nội dung List Report hoặc Object Page. Thay vào đó, nó khởi động SAPUI5 và bảo UI5 load application component.
 
-- The file supports app bootstrap, build, preview, lint, translation, or generated UI behavior.
-- It normally affects the frontend first, but bad configuration can stop the UI from reaching the backend service.
+Chi tiết quan trọng nhất là thứ tự load:
 
-### Các ý quan trọng cần hiểu
+1. `auth-guard.js` load trước.
+2. `auth-guard.js` kiểm tra browser có login token chưa.
+3. Sau đó SAPUI5 mới load và khởi động Fiori Elements app.
 
-- This file supports build, preview, lint, bootstrap, translation, or generated app behavior.
-- It may not implement business behavior directly, but it can still affect whether developers can run, test, or understand the app.
-- Configuration changes should be treated as code changes when they alter behavior or dependencies.
+Cách này tránh việc app gửi request OData metadata đầu tiên khi chưa có authentication.
 
-### Liên kết với file ở folder khác
+### Flow hoạt động trong IDTS
 
-Phần này nói rõ file này liên kết với file nào, liên kết nằm ở đâu, và nếu sửa một bên thì bên kia bị ảnh hưởng thế nào.
+1. Login thành công redirect browser từ `login.html` sang `index.html`.
+2. `index.html` load `css/idts-shell.css` cho styling của profile shell.
+3. `index.html` load `auth-guard.js` trước SAPUI5.
+4. Nếu thiếu token, `auth-guard.js` redirect về `login.html`.
+5. Nếu có token, SAPUI5 bootstrap với theme `sap_horizon`.
+6. UI5 ComponentSupport load component `idts.bugmanagementui`.
+7. Fiori Elements List Report/Object Page render dựa trên `manifest.json`, annotations, và OData metadata.
+8. `auth-guard.js` render profile/sign-out menu vào `#idtsProfileShellHost`.
 
-- No direct cross-folder dependency was detected. If future edits add one, document the exact line/declaration and impact here.
+### Các điểm source quan trọng
 
-### Khi sửa file này cần chú ý
+| Vị trí | Khái niệm IDTS | Ảnh hưởng nếu sai | Phải kiểm tra cùng |
+| --- | --- | --- | --- |
+| `<link rel="stylesheet" href="css/idts-shell.css">` | Styling app shell/profile | Profile menu có thể render nhưng nhìn lệch hoặc sai vị trí. | `css/idts-shell.css`, `auth-guard.js` |
+| `<script src="auth-guard.js"></script>` | Auth guard trước bootstrap | Request OData đầu tiên có thể thiếu auth, gây app trắng hoặc 401/403. | `auth-guard.js`, `srv/auth/custom-auth.js` |
+| `src="https://sapui5.hana.ondemand.com/1.148.0/resources/sap-ui-core.js"` | SAPUI5 runtime | Fiori Elements app không khởi động được nếu UI5 không load. | `login.html`, UI5 build config |
+| `data-sap-ui-theme="sap_horizon"` | SAP Horizon theme | App có thể nhìn lệch với login/profile nếu đổi sai theme. | `login.html`, CSS theme tokens |
+| `data-sap-ui-on-init="module:sap/ui/core/ComponentSupport"` | Bootstrap component | App component có thể không tự start. | `Component.js`, `manifest.json` |
+| `<div id="idtsProfileShellHost"></div>` | Host cho signed-in profile shell | Profile menu không render nếu host bị xóa hoặc đổi tên. | `auth-guard.js`, `css/idts-shell.css` |
+| `data-name="idts.bugmanagementui"` | Tên UI5 app component | UI5 không tìm được app component nếu đổi sai tên. | `Component.js`, `manifest.json` |
 
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
+### Liên kết với folder khác
 
-## Metadata
+- `srv/service.cds` expose protected `BugService` mà Fiori Elements app dùng sau khi start.
+- `srv/auth/custom-auth.js` validate bearer token được `auth-guard.js` gắn vào request.
+- `db/schema.cds` lưu dữ liệu nghiệp vụ được app hiển thị sau khi OData call thành công.
+- `app/bug-management-ui/webapp/manifest.json` định nghĩa Fiori Elements pages và OData model được load sau khi file này start component.
+- `app/bug-management-ui/annotations/*.cds` ảnh hưởng List Report/Object Page generated sau bootstrap này.
 
-- Source file: `app/bug-management-ui/webapp/index.html`
-- Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/index.html.md`
-- Source layer: `app`
-- Source type: `.html`
-- Source line count at documentation time: 35
-- Documentation style: learning-oriented explanation, not line listing only
-- Last reviewed: 2026-06-22
+### Checklist sửa file an toàn
+
+- Giữ `auth-guard.js` nằm trước UI5 bootstrap.
+- Không thêm inline code log hoặc expose token.
+- Không xóa `idtsProfileShellHost` nếu không cập nhật `auth-guard.js` trong cùng thay đổi.
+- Nếu đổi UI5 version/theme, test cả login và main app vì hai bên cần nhìn đồng bộ.
+- Nếu đổi component name/resource root, verify UI5 build và app startup.
