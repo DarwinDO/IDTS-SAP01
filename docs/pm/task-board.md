@@ -1,6 +1,6 @@
 # IDTS Task Board
 
-Last updated: 2026-07-02
+Last updated: 2026-07-03
 
 Use this board for high-level movement only. Detailed task notes belong in the matching file under `docs/pm/tasks/`.
 
@@ -35,6 +35,13 @@ Vietnamese: Chi dung board nay de theo doi trang thai cap cao. Chi tiet cong vie
 | IDTS-48 | Brevo Transactional API delivery for shared QA | PR #57 and PR #58 merged into `dev`; Render deploy `dep-d931rb6rnols73851g1g` is live on commit `bcf43b2`, authenticated shared-QA smoke passed, and a new Brevo API delivery reached `SENT` with `attemptCount = 1`. Jira moved to Done. |
 | IDTS-49 | Derive reporter before custom-auth draft activation | PR #61 merged into `dev`; Render deploy `dep-d93420m7r5hc73a45dvg` is live, PM draft activation without client reporter passed, and reporter email delivery reached `SENT`. Jira moved to Done. |
 | IDTS-44 | Deploy shared QA environment on Render | Shared QA acceptance is complete: Render/PostgreSQL, auth/OData, Brevo API, AWS S3 attachment persistence, final IDTS-49 reporter routing, and sanitized log/evidence checks passed. Jira moved to Done. |
+| IDTS-1 | Sprint 02 epic Jira alignment | Old Sprint 02 epic was closed after child work had already been completed or superseded by later sprint work. Jira moved to Done. |
+| IDTS-25 | Fix backend defects found during Sprint 3 QA | Sprint 3 backend-defect bucket was closed because remaining actionable issues were fixed or split into dedicated Jira tasks. Jira moved to Done. |
+| IDTS-28 | Refactor backend service into focused modules | Refactor had already merged into `dev`; closure evidence and subsequent regression/QA work were accepted. Jira moved to Done. |
+| IDTS-38 | Regression test custom login and SMTP/API notification flows | NhanT regression bucket was closed after DonHV confirmed login/email QA evidence was acceptable. Jira moved to Done. |
+| IDTS-50 | Email notification readability and deep-link polish | DonHV confirmed email readability, deep-link behavior, and history wording are acceptable after Render/shared-QA verification. Jira moved to Done. |
+| IDTS-27 | Sync docs, Jira status, and Sprint 3 evidence | Sprint 3 closure/status sync was completed and summarized for handoff into Sprint 4. Jira moved to Done. |
+| IDTS-14 | Sprint 3 epic closure | Sprint 3 epic was closed after active follow-up work was moved under Sprint 4 epic `IDTS-51` or marked Done. |
 
 Vietnamese:
 
@@ -66,36 +73,42 @@ Vietnamese:
 | IDTS-48 | Brevo Transactional API cho shared QA | PR #57 va PR #58 da merge vao `dev`; Render deploy `dep-d931rb6rnols73851g1g` dang live tren commit `bcf43b2`, authenticated shared-QA smoke pass, va mot Brevo API delivery moi da `SENT` voi `attemptCount = 1`. Jira da chuyen Done. |
 | IDTS-49 | Derive reporter truoc custom-auth draft activation | PR #61 da merge vao `dev`; Render deploy `dep-d93420m7r5hc73a45dvg` dang live, PM draft activation khong can client reporter da pass, va reporter email delivery dat `SENT`. Jira da chuyen Done. |
 | IDTS-44 | Deploy shared QA environment tren Render | Acceptance shared QA da hoan tat: Render/PostgreSQL, auth/OData, Brevo API, AWS S3 attachment persistence, final IDTS-49 reporter routing, va log/evidence sanitized checks da pass. Jira da chuyen Done. |
+| IDTS-1 | Dong epic Sprint 02 cu | Epic Sprint 02 cu da dong vi child work da xong hoac da duoc thay the boi cac sprint sau. Jira da chuyen Done. |
+| IDTS-25 | Dong bucket backend defect Sprint 3 | Bucket loi backend Sprint 3 da dong vi cac issue con lai da fix hoac tach thanh task rieng. Jira da chuyen Done. |
+| IDTS-28 | Dong backend refactor | Refactor da merge vao `dev`; closure evidence va regression/QA sau do da duoc chap nhan. Jira da chuyen Done. |
+| IDTS-38 | Dong regression login/email | Bucket QA cua NhanT da dong sau khi DonHV xac nhan evidence login/email dat yeu cau. Jira da chuyen Done. |
+| IDTS-50 | Dong email readability/deep-link polish | DonHV xac nhan email readability, deep link va history wording da OK sau shared-QA verification. Jira da chuyen Done. |
+| IDTS-27 | Sync docs, Jira status va Sprint 3 evidence | Da hoan tat tong hop closure/status Sprint 3 va handoff sang Sprint 4. Jira da chuyen Done. |
+| IDTS-14 | Dong epic Sprint 3 | Epic Sprint 3 da dong sau khi follow-up active duoc chuyen sang epic Sprint 4 `IDTS-51` hoac da Done. |
 
 ## Ready
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
 | IDTS-37 | Notification UI and email delivery status readability | SangVN | FE/QA review of notification section after SMTP/outbox changes, focusing on readable event/channel/status/recipient/message output. Unblocked by merged IDTS-36. |
-| IDTS-38 | Regression test custom login and SMTP notification flows | NhanT | QA coverage for login success/failure, role behavior, SMTP success/failure, disabled email config, and no-secret evidence. Unblocked by merged IDTS-34 and IDTS-36. |
+| IDTS-39 | Auth: sanitize unexpected login errors | DonHV | Due 2026-07-07. Sprint 4 hardening task under `IDTS-51`; linked to `IDTS-38`. |
 | IDTS-45 | Back up and decide migration or upgrade for expiring Render PostgreSQL | DonHV | Due 2026-07-24 before the free database expires on 2026-07-31. |
 | IDTS-46 | Review and remediate npm dependency vulnerabilities | DonHV | Clean Render build reports 13 moderate and 7 high findings; use targeted upgrades, not broad force-fix. |
+| IDTS-47 | Limit or paginate History Timeline on Object Page | SangVN | Due 2026-07-14. Follow-up from `IDTS-32` UAT finding; preserve readable history without raw duplicate table. |
+| IDTS-40 | AWS ECS/ECR shared QA deployment direction | DonHV | Due 2026-07-18 if kept active. Treat as AWS-native follow-up/alternative, not a blocker for accepted Render QA. |
 
 Vietnamese:
 
 | ID | Cong viec | Thanh vien chinh | Ghi chu |
 | --- | --- | --- | --- |
 | IDTS-37 | Notification UI va kha nang doc email delivery status | SangVN | FE/QA review notification section sau khi co SMTP/outbox, tap trung event/channel/status/recipient/message. Da duoc unblock boi IDTS-36 da merge. |
-| IDTS-38 | Regression test custom login va SMTP notification | NhanT | QA login success/failure, role behavior, SMTP success/failure, disabled email config va no-secret evidence. Da duoc unblock boi IDTS-34 va IDTS-36 da merge. |
+| IDTS-39 | Auth: sanitize unexpected login errors | DonHV | Due 2026-07-07. Task hardening Sprint 4 duoi `IDTS-51`; da link voi `IDTS-38`. |
 | IDTS-45 | Backup va chot migrate/nang cap Render PostgreSQL sap het han | DonHV | Han 24/07/2026 truoc khi DB free het han ngay 31/07/2026. |
 | IDTS-46 | Review va xu ly npm dependency vulnerabilities | DonHV | Clean build Render bao 13 moderate va 7 high; chi upgrade co muc tieu, khong force-fix rong. |
+| IDTS-47 | Limit/paginate History Timeline tren Object Page | SangVN | Due 2026-07-14. Follow-up tu finding UAT `IDTS-32`; giu History de doc va khong dua lai raw duplicate table. |
+| IDTS-40 | Huong deploy shared QA bang AWS ECS/ECR | DonHV | Due 2026-07-18 neu giu active. Xem la AWS-native follow-up/alternative, khong block Render QA da accepted. |
 
 ## In Progress
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
-| IDTS-50 | Email notification readability and deep-link polish | DonHV | Fix raw Gmail rendering and broken Fiori deep link from shared-QA email. Jira is In Progress; implementation branch is `fix/idts-50-email-link-template-donhv`. |
 | SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP, and real browser QA are stable enough to prove the happy flow. Remaining work is final SAP490 sync and mentor-demo rerun, not FE/blocking workflow repair. |
 | WP6 | PM Monitoring | DonHV, DatDT, SangVN | Ownership wording is locked; backend monitoring fields, FE monitoring views, Object Page refresh side effects, grouped history timeline, and persona UAT automation are merged. Remaining manual follow-up is `IDTS-32`; `IDTS-33` is Done on Jira. |
-| IDTS-1 | Sprint 02 epic Jira alignment | DonHV | Jira epic is still To Do while multiple child tasks are already Done. DonHV should resolve this during `IDTS-27` consolidation by commenting or transitioning the epic as appropriate. |
-| IDTS-25 | Fix backend defects found during Sprint 3 QA | DonHV | Jira live state is In Progress. Evidence and closure decision are still needed before Sprint 3 PM/SAP490 consolidation. |
-| IDTS-27 | Sync docs, Jira status, and Sprint 3 evidence | DonHV | Active PM/Jira/evidence consolidation bucket. Current work order: `IDTS-34` and `IDTS-36` are merged; next is handoff to `IDTS-37`/`IDTS-38`, then Sprint 3 evidence consolidation. |
-| IDTS-28 | Refactor backend service into focused modules | DonHV | Jira live state is In Progress even though the refactor is merged. Needs final retest/evidence closure alignment. |
 | IDTS-32 | Manual browser UAT for Sprint 3 workflow/history flows | SangVN | Evidence branch merged through PR #34. Retest remains open until IDTS-41/42/43 fixes and no P0/P1 remain. |
 
 Vietnamese:

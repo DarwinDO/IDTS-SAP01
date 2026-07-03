@@ -12,6 +12,8 @@ Owner: DonHV.
 
 Jira: [IDTS-50](https://dutassociation.atlassian.net/browse/IDTS-50)
 
+Status: Done on Jira as of 2026-07-03 after DonHV confirmed the shared-QA email readability, deep-link behavior, and history wording are acceptable.
+
 ## Scope
 
 - Redesign `srv/email/template.js` email HTML as a readable notification card.
@@ -79,6 +81,8 @@ IDTS-50 xử lý feedback đầu tiên từ email thật trên shared QA:
 Owner: DonHV.
 
 Jira: [IDTS-50](https://dutassociation.atlassian.net/browse/IDTS-50)
+
+Trạng thái: Done trên Jira ngày 2026-07-03 sau khi DonHV xác nhận email shared-QA dễ đọc hơn, deep link hoạt động đúng, và wording history đã đạt yêu cầu.
 
 ## Phạm vi
 

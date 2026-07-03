@@ -1,16 +1,16 @@
 # Current Project Status
 
-Last updated: 2026-07-02
+Last updated: 2026-07-03
 
 ## Snapshot
 
 | Field | Current value |
 | --- | --- |
-| Project phase | Sprint 02 baseline is stable in `dev`; Sprint 03 shared Render QA environment is deployed and accepted after the merged auth, login UI, email API delivery, attachment, and QA-depth-gate slices |
+| Project phase | Sprint 03 is being closed and Sprint 04 planning is opened. Sprint 02/Sprint 03 closure tasks have been reconciled on Jira where tool access allowed. |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
-| Current sprint | Sprint 03 custom authentication, login UI, outbox/API email delivery, QA Depth Gate, and shared Render QA acceptance are complete. `IDTS-44` and `IDTS-49` are Done on Jira after final reporter-routing smoke passed on Render. |
-| Recommended next action | Continue `IDTS-45` before the database expiry deadline and `IDTS-46` dependency remediation planning. Then hand off notification readability/regression work to `IDTS-37` and `IDTS-38`. |
-| Main implementation risk | Shared QA still depends on private Render/Brevo/AWS/PostgreSQL environment variables staying out of repo, Jira, and logs. The Render PostgreSQL free-instance expiry remains the main time-bound infrastructure risk; Brevo SMTP reachability is no longer a blocker because shared QA uses the HTTPS Transactional API. |
+| Current sprint | Sprint 03 closure is complete at Jira epic/task level: `IDTS-1`, `IDTS-14`, `IDTS-25`, `IDTS-27`, `IDTS-28`, `IDTS-38`, and `IDTS-50` are Done. Jira board sprint `IDTS Sprint 4` exists on board `34` for 2026-07-04 to 2026-07-18, and planning epic is `IDTS-51`. |
+| Recommended next action | Sprint 04 should start with `IDTS-39`, `IDTS-45`, `IDTS-46`, and `IDTS-47`. Keep `IDTS-40` as AWS-native follow-up/alternative, not a blocker for accepted Render QA. |
+| Main implementation risk | Shared QA still depends on private Render/Brevo/AWS/PostgreSQL environment variables staying out of repo, Jira, and logs. The Render PostgreSQL free-instance expiry remains the main time-bound infrastructure risk. Sprint 04 is now tracked both through the real Jira sprint `IDTS Sprint 4` and planning epic `IDTS-51`; `IDTS-40` remains a deferred AWS-native follow-up rather than a blocker for Render QA. |
 
 ## What Is Already Done
 
