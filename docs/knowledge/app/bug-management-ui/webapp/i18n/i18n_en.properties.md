@@ -85,6 +85,44 @@ Anchor quan trọng:
   - Ảnh hưởng nếu sai: user dùng English locale có thể thấy placeholder key hoặc wording dashboard không đồng nhất.
   - Phải kiểm tra cùng: base `i18n.properties`, `dashboard.html`, và `dashboard-page.js`.
 
+## IDTS-55 update - comments and evidence text
+
+### English
+
+IDTS-55 adds the English user-facing strings for the custom Comments and Evidence / Attachments sections.
+
+Important anchors:
+
+- **Location**: `app/bug-management-ui/webapp/i18n/i18n_en.properties:158`
+  `commentsSectionTitle=Comments`
+  **IDTS concept**: English title and labels for the custom comment feed.
+  **Impact if broken**: English users may see missing keys or unclear comment labels.
+  **Must check together**: `CommentsSection.fragment.xml`, `i18n.properties`, and browser smoke.
+
+- **Location**: `app/bug-management-ui/webapp/i18n/i18n_en.properties:171`
+  `attachmentsSectionTitle=Evidence / Attachments`
+  **IDTS concept**: English title and labels for evidence upload/list UX.
+  **Impact if broken**: The attachment section may show missing keys or text that feels internal rather than product-facing.
+  **Must check together**: `AttachmentsSection.fragment.xml`, `i18n.properties`, and browser smoke.
+
+### Vietnamese
+
+IDTS-55 thêm các chuỗi tiếng Anh hiển thị cho custom Comments và Evidence / Attachments sections.
+
+Các anchor quan trọng:
+
+- **Vị trí**: `app/bug-management-ui/webapp/i18n/i18n_en.properties:158`
+  `commentsSectionTitle=Comments`
+  **Khái niệm IDTS**: Title và label tiếng Anh cho comment feed custom.
+  **Ảnh hưởng nếu sai**: User dùng tiếng Anh có thể thấy missing key hoặc label comment khó hiểu.
+  **Phải kiểm tra cùng**: `CommentsSection.fragment.xml`, `i18n.properties`, và browser smoke.
+
+- **Vị trí**: `app/bug-management-ui/webapp/i18n/i18n_en.properties:171`
+  `attachmentsSectionTitle=Evidence / Attachments`
+  **Khái niệm IDTS**: Title và label tiếng Anh cho UX upload/list evidence.
+  **Ảnh hưởng nếu sai**: Attachment section có thể hiện missing key hoặc text quá nội bộ/dev-facing.
+  **Phải kiểm tra cùng**: `AttachmentsSection.fragment.xml`, `i18n.properties`, và browser smoke.
+
 ## Metadata
 
 - Source file: `app/bug-management-ui/webapp/i18n/i18n_en.properties`
