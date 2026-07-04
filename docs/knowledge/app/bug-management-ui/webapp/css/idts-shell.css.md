@@ -87,3 +87,38 @@ CSS này định vị và style host đó. Nó giữ profile button nổi ở g�
 - Ưu tiên SAP theme variables cho màu và shadow.
 - Verify profile button hiện sau login và không che action quan trọng của app.
 - Verify Sign Out vẫn xóa session và redirect về `login.html`.
+## IDTS-54 update - dashboard responsive styling
+
+### English
+
+IDTS-54 adds lightweight dashboard classes in this same shell CSS file:
+
+- `.idtsDashboardPage`
+- `.idtsDashboardTiles`
+- `.idtsDashboardTile`
+
+These classes only control spacing, max width, and tile width. They do not override Fiori Elements generated internals.
+
+Important anchor:
+
+- Location: `.idtsDashboardTile` and mobile media query
+  - IDTS concept: dashboard KPI tiles must wrap cleanly on desktop and mobile.
+  - Impact if broken: the dashboard can become too wide, cramped, or hard to scan.
+  - Must check together: `dashboard-page.js` tile layout and browser responsive smoke.
+
+### Vietnamese
+
+IDTS-54 thêm một số class nhẹ cho dashboard ngay trong file shell CSS này:
+
+- `.idtsDashboardPage`
+- `.idtsDashboardTiles`
+- `.idtsDashboardTile`
+
+Các class này chỉ điều chỉnh spacing, max width và độ rộng tile. Chúng không override internal generated control của Fiori Elements.
+
+Anchor quan trọng:
+
+- Vị trí: `.idtsDashboardTile` và media query mobile
+  - Khái niệm IDTS: KPI tile của dashboard phải tự wrap tốt trên desktop và mobile.
+  - Ảnh hưởng nếu sai: dashboard có thể quá rộng, chật, hoặc khó scan.
+  - Phải kiểm tra cùng: layout tile trong `dashboard-page.js` và browser responsive smoke.

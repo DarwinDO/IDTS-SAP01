@@ -69,6 +69,30 @@ This is not the main security layer. Real security stays in CAP backend handlers
 - If the create route changes, update `manifest.json`, this file, and the focused IDTS-43 QA script together.
 - Browser-smoke the create button with at least Developer, Tester, and PM roles.
 
+## IDTS-54 update - Open Dashboard action
+
+### English
+
+IDTS-54 adds `openDashboard()`. It opens the protected standalone SAPUI5 dashboard page at `dashboard.html`.
+
+Important anchor:
+
+- Location: `openDashboard()`
+  - IDTS concept: user-facing path from bug list to dashboard overview.
+  - Impact if broken: users can still use List Report/Object Page, but cannot reach the dashboard MVP.
+  - Must check together: `manifest.json` `OpenDashboard` action, `dashboard.html`, `dashboard-page.js`, and i18n key `dashboardOpenAction`.
+
+### Vietnamese
+
+IDTS-54 thêm `openDashboard()`. Hàm này mở standalone SAPUI5 dashboard page được bảo vệ tại `dashboard.html`.
+
+Anchor quan trọng:
+
+- Vị trí: `openDashboard()`
+  - Khái niệm IDTS: đường vào dashboard overview từ bug list.
+  - Ảnh hưởng nếu sai: user vẫn dùng được List Report/Object Page, nhưng không mở được dashboard MVP.
+  - Phải kiểm tra cùng: action `OpenDashboard` trong `manifest.json`, `dashboard.html`, `dashboard-page.js`, và i18n key `dashboardOpenAction`.
+
 ## Vietnamese
 
 ### File này dùng để làm gì

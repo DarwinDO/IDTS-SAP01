@@ -33,6 +33,19 @@
   color: var(--sapContent_LabelColor, #6a6d70);
 }
 
+.idtsDashboardPage {
+  max-width: 90rem;
+  margin: 0 auto;
+}
+
+.idtsDashboardTiles {
+  gap: 0.25rem;
+}
+
+.idtsDashboardTile {
+  width: 13rem;
+}
+
 @media (max-width: 37.5rem) {
   #idtsProfileShellHost {
     top: 0.25rem;
@@ -43,5 +56,9 @@
     max-width: 8rem;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .idtsDashboardTile {
+    width: 100%;
   }
 }
