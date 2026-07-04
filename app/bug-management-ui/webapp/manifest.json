@@ -49,6 +49,7 @@
       "libs": {
         "sap.m": {},
         "sap.ui.core": {},
+        "sap.ui.unified": {},
         "sap.fe.templates": {}
       }
     },
@@ -201,6 +202,22 @@
               "content": {
                 "body": {
                   "sections": {
+                    "IdtsCommentsCustom": {
+                      "title": "{i18n>commentsSectionTitle}",
+                      "template": "idts.bugmanagementui.ext.fragment.CommentsSection",
+                      "position": {
+                        "anchor": "ReproductionFacet",
+                        "placement": "After"
+                      }
+                    },
+                    "IdtsAttachmentsCustom": {
+                      "title": "{i18n>attachmentsSectionTitle}",
+                      "template": "idts.bugmanagementui.ext.fragment.AttachmentsSection",
+                      "position": {
+                        "anchor": "IdtsCommentsCustom",
+                        "placement": "After"
+                      }
+                    },
                     "History": {
                       "title": "{i18n>historyTimelineTitle}",
                       "type": "XMLFragment",

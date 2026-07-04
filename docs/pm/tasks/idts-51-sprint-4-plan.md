@@ -1,6 +1,6 @@
 # IDTS-51 - Sprint 4 Stabilization Plan
 
-Last updated: 2026-07-03
+Last updated: 2026-07-04
 
 ## Purpose
 
@@ -47,6 +47,7 @@ Vietnamese:
 | IDTS-52 | DatDT owner, DonHV support | First implementation pass completed: custom login page uses SAPUI5 controls, SAP Horizon styling, safe `MessageStrip` messages, and responsive layout. |
 | IDTS-53 | SangVN owner, DonHV support | First implementation pass completed: authenticated app shows a SAPUI5 profile popover with name, email, role, session expiry, and Sign Out. |
 | IDTS-54 | DonHV, DatDT support | Local implementation ready for PR: role dashboard MVP added as protected SAPUI5 `dashboard.html`, reading existing `Bugs` and `DeveloperWorkloads` OData without new write API. Browser smoke passed for PM dashboard tiles, workload visibility, safe copy, and no unexpected HTTP/page errors. |
+| IDTS-55 | DonHV, SangVN support | Local implementation ready for PR: Comments and Attachments Object Page sections replaced raw generated facets with SAPUI5 custom sections. Browser smoke passed for comment post/reload persistence, attachment upload/list/download/delete cleanup, and no formatter fatal or unexpected HTTP errors. |
 
 Vietnamese:
 
@@ -56,6 +57,7 @@ Vietnamese:
 | IDTS-52 | DatDT owner, DonHV support | Pass implement dau da xong: login page custom dung SAPUI5 controls, SAP Horizon styling, message loi an toan bang `MessageStrip`, va responsive layout. |
 | IDTS-53 | SangVN owner, DonHV support | Pass implement dau da xong: app sau login co SAPUI5 profile popover hien ten, email, role, session expiry, va Sign Out. |
 | IDTS-54 | DonHV, DatDT support | Local implementation san sang tao PR: dashboard MVP theo role duoc them bang SAPUI5 `dashboard.html` duoc bao ve, doc OData hien co `Bugs` va `DeveloperWorkloads`, khong them write API. Browser smoke pass cho PM dashboard tiles, workload visibility, safe copy, va khong co HTTP/page error bat thuong. |
+| IDTS-55 | DonHV, SangVN support | Local implementation san sang tao PR: Comments va Attachments tren Object Page duoc thay raw generated facets bang custom SAPUI5 sections. Browser smoke pass cho post comment, reload van thay comment, upload/list/download/delete attachment, cleanup, va khong co formatter fatal hoac HTTP error bat thuong. |
 
 - `IDTS-39` relates to `IDTS-38`.
 - `IDTS-45` relates to `IDTS-44`.

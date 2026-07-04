@@ -134,3 +134,87 @@ Thứ hai, custom section History trên Object Page dùng key `History` thay vì
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/manifest.json.md`
 - Source layer: `app`
 - Last reviewed: 2026-07-01
+
+## IDTS-55 runtime fix note
+
+### English
+
+The Comments and Evidence sections are custom Object Page sections under `BugsObjectPage.options.settings.content.body.sections`.
+
+For OData V4 Fiori Elements, the section entry must point to the fragment module path and preserve a stable section key:
+
+- `IdtsCommentsCustom`
+- `IdtsAttachmentsCustom`
+
+These keys are also used as anchors and stable generated IDs. If either key changes, check the fragment IDs, browser smoke locators, and knowledge mirrors together.
+
+### Vietnamese
+
+Comments và Evidence là custom Object Page sections dưới `BugsObjectPage.options.settings.content.body.sections`.
+
+Với Fiori Elements OData V4, section entry phải trỏ đúng module path của fragment và giữ key ổn định:
+
+- `IdtsCommentsCustom`
+- `IdtsAttachmentsCustom`
+
+Các key này đồng thời được dùng làm anchor và stable generated ID. Nếu đổi key, phải kiểm tra fragment IDs, browser smoke locators và knowledge mirrors cùng lúc.
+
+## IDTS-55 update - custom Comments and Evidence sections
+
+### English
+
+IDTS-55 adds two custom Object Page sections under `BugsObjectPage.options.settings.content.body.sections`:
+
+- `IdtsCommentsCustom`
+- `IdtsAttachmentsCustom`
+
+These sections keep the generated Fiori Elements Object Page, but replace the old raw comments/attachments facets with clearer custom SAPUI5 fragments. The manifest is the layer that tells Fiori Elements where those fragments appear. The behavior itself is in `BugCollaboration.js`.
+
+Important anchors:
+
+- **Location**: `app/bug-management-ui/webapp/manifest.json:52`
+  `"sap.ui.unified": {}`
+  **IDTS concept**: Enables the FileUploader control used by the Evidence / Attachments section.
+  **Impact if broken**: The custom attachment section can fail to load because `sap.ui.unified.FileUploader` is not available.
+  **Must check together**: `AttachmentsSection.fragment.xml`, UI5 build, and browser smoke on the Object Page.
+
+- **Location**: `app/bug-management-ui/webapp/manifest.json:205`
+  `IdtsCommentsCustom`
+  **IDTS concept**: Inserts the custom comment feed after the reproduction/test context area.
+  **Impact if broken**: Users may lose the improved comments UX or see the section in the wrong place.
+  **Must check together**: `CommentsSection.fragment.xml`, `BugCollaboration.js`, `object-page.cds`, and `srv/service.cds:addComment`.
+
+- **Location**: `app/bug-management-ui/webapp/manifest.json:214`
+  `IdtsAttachmentsCustom`
+  **IDTS concept**: Inserts the custom evidence upload/list section directly after comments.
+  **Impact if broken**: Users may lose upload/download/delete UX or see duplicate attachment sections.
+  **Must check together**: `AttachmentsSection.fragment.xml`, `BugCollaboration.js`, `object-page.cds`, `db/schema.cds` attachments, and `scripts/qa/test-comments-attachments.ps1`.
+
+### Vietnamese
+
+IDTS-55 thêm hai custom section vào Object Page dưới `BugsObjectPage.options.settings.content.body.sections`:
+
+- `IdtsCommentsCustom`
+- `IdtsAttachmentsCustom`
+
+Hai section này vẫn giữ Object Page generated của Fiori Elements, nhưng thay phần comments/attachments raw facet cũ bằng fragment SAPUI5 dễ dùng hơn. Manifest chỉ quyết định các fragment được chèn vào đâu; hành vi bấm nút và gọi backend nằm trong `BugCollaboration.js`.
+
+Các anchor quan trọng:
+
+- **Vị trí**: `app/bug-management-ui/webapp/manifest.json:52`
+  `"sap.ui.unified": {}`
+  **Khái niệm IDTS**: Bật thư viện chứa FileUploader dùng cho section Evidence / Attachments.
+  **Ảnh hưởng nếu sai**: Custom attachment section có thể không load vì thiếu `sap.ui.unified.FileUploader`.
+  **Phải kiểm tra cùng**: `AttachmentsSection.fragment.xml`, UI5 build, và browser smoke trên Object Page.
+
+- **Vị trí**: `app/bug-management-ui/webapp/manifest.json:205`
+  `IdtsCommentsCustom`
+  **Khái niệm IDTS**: Chèn comment feed custom ngay sau phần reproduction/test context.
+  **Ảnh hưởng nếu sai**: User mất UX comment mới hoặc section nằm sai vị trí.
+  **Phải kiểm tra cùng**: `CommentsSection.fragment.xml`, `BugCollaboration.js`, `object-page.cds`, và action `addComment` trong `srv/service.cds`.
+
+- **Vị trí**: `app/bug-management-ui/webapp/manifest.json:214`
+  `IdtsAttachmentsCustom`
+  **Khái niệm IDTS**: Chèn section evidence upload/list ngay sau comments.
+  **Ảnh hưởng nếu sai**: User mất UX upload/download/delete hoặc thấy trùng nhiều section attachment.
+  **Phải kiểm tra cùng**: `AttachmentsSection.fragment.xml`, `BugCollaboration.js`, `object-page.cds`, attachments trong `db/schema.cds`, và `scripts/qa/test-comments-attachments.ps1`.
