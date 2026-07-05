@@ -422,10 +422,7 @@ sap.ui.define([
         },
 
         formatAuthorInfo: function (name, role) {
-            if (name && role) {
-                return name + " - " + role;
-            }
-            return name || role || "";
+            return role || name || "";
         },
 
         formatUploader: function (value) {

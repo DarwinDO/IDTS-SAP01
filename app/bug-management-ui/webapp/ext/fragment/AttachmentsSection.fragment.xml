@@ -96,7 +96,7 @@
               type="Transparent"
               tooltip="{i18n>attachmentsDeleteTooltip}"
               press="Collaboration.onDeleteAttachment"
-              enabled="{= ${IsActiveEntity} === true }"
+              enabled="{= ${IsActiveEntity} === true &amp;&amp; ${HasDraftEntity} !== true }"
             />
           </HBox>
         </cells>
