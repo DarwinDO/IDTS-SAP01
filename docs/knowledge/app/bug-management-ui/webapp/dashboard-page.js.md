@@ -23,7 +23,7 @@ Then it calculates what each role should see:
 
 1. `dashboard.html` loads this script after SAPUI5 bootstrap.
 2. The script creates a SAPUI5 `App` and `Page`.
-3. It initializes the signed-in profile shell.
+3. It creates dashboard header actions, including `Refresh` and the signed-in profile action.
 4. It reads the safe login session through `LoginController`.
 5. It calls existing protected OData endpoints with the current Bearer token.
 6. It fills a JSON model named `dashboard`.
@@ -56,11 +56,17 @@ Then it calculates what each role should see:
   - Impact if broken: dashboard becomes a read-only summary without direct navigation to the actual bug.
   - Must check together: `manifest.json` Object Page route and browser smoke.
 
+- Location: `headerContent`
+  - IDTS concept: standalone-page action area for refresh and profile access.
+  - Impact if broken: header actions can overlap each other or the signed-in profile menu can become unreachable on the dashboard.
+  - Must check together: `ProfileShell.js`, `dashboard.html`, and browser smoke.
+
 ### Cross-folder impact
 
 - Reads data exposed by `srv/service.cds`.
 - Depends on virtual display fields enriched by `srv/bug-service/read-models.js`.
 - Uses `ProfileShell.js` and `LoginController.js` from `webapp/ext/login`.
+- Uses `ProfileShell.createHeaderButton()` so the dashboard profile action stays inside the SAPUI5 page header instead of floating above it.
 - The visible entry point comes from `manifest.json` and `BugListActions.js`.
 
 ### Safe editing checklist
@@ -70,6 +76,20 @@ Then it calculates what each role should see:
 - Do not hardcode real team emails.
 - Do not show internal/dev-facing text on the UI.
 - If role grouping changes, update business/PM docs because the meaning of the dashboard changes.
+
+## IDTS-58 follow-up notes
+
+### English
+
+The original IDTS-54 dashboard used the fixed profile shell overlay from `index.html`. During IDTS-58 browser smoke, that approach caused the profile trigger to overlap the `Refresh` button. The fix was not a visual hack inside CSS alone; the dashboard now requests a normal profile button from `ProfileShell.js` and places it in `sap.m.Page` `headerContent`.
+
+This keeps the dashboard closer to standard SAPUI5 page behavior: both actions are peers inside the same header layout, and overlap should be checked with browser smoke whenever header actions change.
+
+### Vietnamese
+
+Ban dau dashboard IDTS-54 dung fixed profile shell overlay giong `index.html`. Trong browser smoke cua IDTS-58, cach nay lam profile trigger de len nut `Refresh`. Ban fix cuoi khong chi la meo CSS; dashboard hien lay mot profile button binh thuong tu `ProfileShell.js` va dat no vao `sap.m.Page` `headerContent`.
+
+Cach nay gan hon voi hanh vi page SAPUI5 chuan: hai action nam cung mot header layout, va moi lan doi header actions deu nen kiem tra lai bang browser smoke.
 
 ## Vietnamese
 

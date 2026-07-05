@@ -161,7 +161,7 @@ UI cố ý chỉ hiển thị khái niệm sản phẩm bình thường: tên fi
 - Source file: `app/bug-management-ui/webapp/ext/fragment/AttachmentsSection.fragment.xml`
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/ext/fragment/AttachmentsSection.fragment.xml.md`
 - Source layer: `app`
-- Last reviewed: 2026-07-04
+- Last reviewed: 2026-07-05
 
 ## IDTS-55 runtime fix notes
 
@@ -179,6 +179,14 @@ If this file changes, browser smoke must verify:
 - Download returns the selected file.
 - Remove opens confirmation and deletes the file.
 - The file row is gone after delete and no private storage URL is visible.
+
+## IDTS-58 follow-up notes
+
+### English
+
+IDTS-58 tightened the Remove button state so it is enabled only when the opened bug is active and does not already have a draft. This keeps the row-level delete action aligned with the upload/comment controls and avoids offering a mutation path that CAP draft rules will reject.
+
+Browser smoke for IDTS-58 verified the visible effect by entering draft edit on the Object Page and confirming that the Remove button switched to the disabled UI5 state.
 
 ### Vietnamese
 

@@ -59,6 +59,11 @@ That is why upload/delete looks longer than a normal one-call request.
   **Impact if broken**: The Object Page can show a comment input but not actually create auditable comments; history and QA evidence can become incomplete.
   **Must check together**: `srv/service.cds` action `addComment`, `srv/bug-service/actions.js`, `app/bug-management-ui/annotations/history-notifications.cds`, and `CommentsSection.fragment.xml`.
 
+- **Location**: `formatAuthorInfo(...)`
+  **IDTS concept**: Feed metadata should complement the sender label, not repeat it.
+  **Impact if broken**: The same author name can appear twice in one feed item, making the comment section noisy and less Fiori-like.
+  **Must check together**: `CommentsSection.fragment.xml` sender/info bindings and browser smoke for comment rendering.
+
 - **Location**: `app/bug-management-ui/webapp/ext/sections/BugCollaboration.js:268`
   `onAttachmentSelected`
   **IDTS concept**: Evidence upload through CAP draft flow and `Bugs_attachments`.
@@ -92,7 +97,7 @@ That is why upload/delete looks longer than a normal one-call request.
 - Do not read auth tokens directly here. `auth-guard.js` owns request authentication for the Fiori app.
 - If the attachment draft sequence changes, update this module and `scripts/qa/test-comments-attachments.ps1` together.
 - Do not expose private object storage links in the UI.
-- Rerun `npx eslint app/bug-management-ui/webapp/ext/sections/BugCollaboration.js`, UI5 build, and comments/attachments QA after changes.
+- Rerun UI5 build and comments/attachments QA after changes.
 
 ## Vietnamese
 
@@ -193,7 +198,7 @@ Vì vậy upload/delete dài hơn một request thông thường.
 - Source file: `app/bug-management-ui/webapp/ext/sections/BugCollaboration.js`
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/ext/sections/BugCollaboration.js.md`
 - Source layer: `app`
-- Last reviewed: 2026-07-04
+- Last reviewed: 2026-07-05
 
 ## IDTS-55 runtime fix notes
 
@@ -206,6 +211,14 @@ After browser smoke, this file has three important runtime rules:
 - Formatter and event-handler module aliases are loaded from `core:require` in the XML controls. If alias names change in the fragments, this file and browser smoke must be checked together.
 
 These rules were added because the browser found real runtime failures that static build checks could not catch: missing formatter resolution, missing section context, stale list data after comment post, and wrong context selection during attachment delete.
+
+## IDTS-58 follow-up notes
+
+### English
+
+IDTS-58 kept the comment sender in `FeedListItem.sender` and changed `formatAuthorInfo(...)` so the info line shows role/timestamp context without repeating the same display name again. Browser smoke should therefore confirm that the page no longer contains patterns like `DonHV - Project Manager` while the sender label itself still shows `DonHV`.
+
+The same smoke also verified that attachment upload still works after the UI cleanup. That matters because this module owns both the visible comment/feed behavior and the draft-based attachment sequence.
 
 ### Vietnamese
 

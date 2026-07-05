@@ -37,7 +37,7 @@ This prevents the app from making its first OData metadata request without authe
 | --- | --- | --- | --- |
 | `<link rel="stylesheet" href="css/idts-shell.css">` | App shell/profile styling | Profile menu may render but look misplaced or inconsistent. | `css/idts-shell.css`, `auth-guard.js` |
 | `<script src="auth-guard.js"></script>` | Pre-bootstrap auth guard | First OData calls can be unauthenticated, causing blank app or 401/403. | `auth-guard.js`, `srv/auth/custom-auth.js` |
-| `src="https://sapui5.hana.ondemand.com/1.148.0/resources/sap-ui-core.js"` | SAPUI5 runtime | The Fiori Elements app cannot start if UI5 fails to load. | `login.html`, UI5 build config |
+| `src="resources/sap-ui-core.js"` | SAPUI5 runtime via the local app proxy | The Fiori Elements app cannot start if UI5 fails to load, and standalone pages can break in restricted/local runtimes if they bypass the app proxy. | `login.html`, `dashboard.html`, UI5 proxy config |
 | `data-sap-ui-theme="sap_horizon"` | SAP Horizon theme | App visual style can diverge from login/profile styling if changed. | `login.html`, CSS theme tokens |
 | `data-sap-ui-on-init="module:sap/ui/core/ComponentSupport"` | Component bootstrapping | The app component may not start automatically. | `Component.js`, `manifest.json` |
 | `<div id="idtsProfileShellHost"></div>` | Signed-in profile shell host | The profile menu cannot render if this host is removed or renamed. | `auth-guard.js`, `css/idts-shell.css` |
@@ -56,8 +56,22 @@ This prevents the app from making its first OData metadata request without authe
 - Keep `auth-guard.js` before the UI5 bootstrap.
 - Do not add inline code that logs or exposes tokens.
 - Do not remove `idtsProfileShellHost` unless `auth-guard.js` is updated in the same change.
-- If the UI5 version/theme changes, test both login and main app because they should stay visually aligned.
+- If the UI5 bootstrap path/version/theme changes, test login, dashboard, and main app together because the standalone pages should use the same proxied runtime.
 - If component name/resource root changes, verify UI5 build and app startup.
+
+## IDTS-58 follow-up notes
+
+### English
+
+As of IDTS-58, this page no longer hardcodes the public SAPUI5 CDN URL in the bootstrap script tag. It now uses the app-relative `resources/sap-ui-core.js` path so local/browser smoke can exercise the same UI5 proxy route as the rest of the app.
+
+This matters because the IDTS repo has standalone pages (`login.html`, `dashboard.html`) in addition to the generated Fiori Elements shell. When those pages bypass the app-relative UI5 path, local or restricted preview environments can fail even though the source code itself is correct.
+
+### Vietnamese
+
+Tu IDTS-58, file nay khong con hardcode public SAPUI5 CDN URL trong the bootstrap. No dung duong dan app-relative `resources/sap-ui-core.js` de local/browser smoke di qua cung UI5 proxy route nhu phan con lai cua app.
+
+Dieu nay quan trong vi repo IDTS co cac trang standalone (`login.html`, `dashboard.html`) ben canh Fiori Elements shell generate. Neu cac trang do bypass duong dan UI5 app-relative, moi truong preview local hoac bi gioi han co the fail du source van dung.
 
 ## Vietnamese
 
