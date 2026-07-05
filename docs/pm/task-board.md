@@ -97,6 +97,9 @@ Vietnamese:
 | IDTS-45 | Back up and decide migration or upgrade for expiring Render PostgreSQL | DonHV | Due 2026-07-24 before the free database expires on 2026-07-31. |
 | IDTS-46 | Review and remediate npm dependency vulnerabilities | DonHV | Clean Render build reports 13 moderate and 7 high findings; use targeted upgrades, not broad force-fix. |
 | IDTS-47 | Limit or paginate History Timeline on Object Page | SangVN | Due 2026-07-14. Follow-up from `IDTS-32` UAT finding; preserve readable history without raw duplicate table. |
+| IDTS-58 | Fix Sprint 4 UI defects found after Fiori redesign review | DatDT | Due 2026-07-10. Review and fix small FE/UI defects from login, profile, dashboard, comments, and attachments; link larger findings separately. |
+| IDTS-59 | Scan Sprint 4 Fiori screens for usability gaps and edge-case confusion | SangVN | Due 2026-07-11. Manual UI/UX scan that intentionally checks awkward flows, edge states, confusing wording, and SAP Fiori consistency. |
+| IDTS-60 | Browser and manual UAT for completed Sprint 4 UI baseline | NhanT | Due 2026-07-12. Earlier QA checkpoint for merged Sprint 4 UI baseline before final `IDTS-57` regression. |
 | IDTS-40 | AWS ECS/ECR shared QA deployment direction | DonHV | Due 2026-07-18 if kept active. Treat as AWS-native follow-up/alternative, not a blocker for accepted Render QA. |
 
 Vietnamese:
@@ -107,6 +110,9 @@ Vietnamese:
 | IDTS-45 | Backup va chot migrate/nang cap Render PostgreSQL sap het han | DonHV | Han 24/07/2026 truoc khi DB free het han ngay 31/07/2026. |
 | IDTS-46 | Review va xu ly npm dependency vulnerabilities | DonHV | Clean build Render bao 13 moderate va 7 high; chi upgrade co muc tieu, khong force-fix rong. |
 | IDTS-47 | Limit/paginate History Timeline tren Object Page | SangVN | Due 2026-07-14. Follow-up tu finding UAT `IDTS-32`; giu History de doc va khong dua lai raw duplicate table. |
+| IDTS-58 | Fix cac loi UI Sprint 4 sau Fiori redesign review | DatDT | Han 2026-07-10. Review va fix cac loi FE/UI nho o login, profile, dashboard, comments va attachments; finding lon phai tach/link Jira rieng. |
+| IDTS-59 | Scan UI/UX Sprint 4 Fiori de tim usability gap va edge-case confusion | SangVN | Han 2026-07-11. Manual scan co chu y pha happy path, kiem tra wording kho hieu, edge state va tinh nhat quan SAP Fiori. |
+| IDTS-60 | Browser/manual UAT cho baseline UI Sprint 4 da merge | NhanT | Han 2026-07-12. Checkpoint QA som cho baseline UI da merge truoc khi regression tong cuoi `IDTS-57`. |
 | IDTS-40 | Huong deploy shared QA bang AWS ECS/ECR | DonHV | Due 2026-07-18 neu giu active. Xem la AWS-native follow-up/alternative, khong block Render QA da accepted. |
 
 ## In Progress

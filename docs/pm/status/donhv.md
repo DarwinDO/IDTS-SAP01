@@ -2,6 +2,22 @@
 
 Last updated: 2026-07-04
 
+## 2026-07-05 - Sprint 4 FE/UX QA follow-up task split
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| PM/Jira planning | Checked whether Sprint 4 already had enough FE fix, UI/UX scan, browser test, manual test, and UAT work for SangVN, DatDT, and NhanT after `IDTS-52` to `IDTS-55`. | Existing Jira coverage had the main implementation tasks and final `IDTS-57`, but it did not separate the early FE defect-fix pass, manual UX scan, and completed-baseline browser/manual UAT checkpoint. | Created `IDTS-58` for DatDT, `IDTS-59` for SangVN, and `IDTS-60` for NhanT under `IDTS-51`, all in `IDTS Sprint 4` with due dates and Jira links. | JQL verified `IDTS-58`, `IDTS-59`, and `IDTS-60` have parent `IDTS-51`, Sprint 4 id `70`, assignee, due date, To Do status, labels, and issue links. |
+| Process/config sync | Root worktree had local PM status changes and `.codex/config.toml` changes while `dev` was behind `origin/dev`. | Root worktree was stale and dirty; direct edits there risked overwriting or mixing local config/status changes with current `origin/dev`. | Opened a fresh worktree from `origin/dev` and synced the relevant PM/Jira notes there. Per DonHV instruction, `.codex/config.toml` is included in the docs sync commit. | Verify with `git diff --check`, `npx ai-devkit@latest lint --json`, and PR review. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai fix | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Lap ke hoach PM/Jira | Da kiem tra Sprint 4 da co du task FE fix, UI/UX scan, browser test, manual test va UAT cho SangVN, DatDT, NhanT sau `IDTS-52` toi `IDTS-55` hay chua. | Jira da co cac task implementation chinh va final regression `IDTS-57`, nhung chua tach rieng vong fix FE som, scan UX thu cong va checkpoint browser/manual UAT cho baseline da merge. | Da tao `IDTS-58` cho DatDT, `IDTS-59` cho SangVN va `IDTS-60` cho NhanT duoi `IDTS-51`, nam trong Sprint 4, co due date va Jira links. | JQL da verify `IDTS-58`, `IDTS-59`, `IDTS-60` co parent `IDTS-51`, Sprint 4 id `70`, assignee, due date, To Do, labels va issue links. |
+| Sync process/config | Root worktree co thay doi local trong PM status va `.codex/config.toml` trong khi `dev` behind `origin/dev`. | Root worktree vua cu vua dirty; sua truc tiep de gay conflict hoac tron local config/status voi baseline moi. | Da tao fresh worktree tu `origin/dev` va sync cac note PM/Jira can thiet tai do. Theo yeu cau DonHV, `.codex/config.toml` duoc dua vao commit sync. | Verify bang `git diff --check`, `npx ai-devkit@latest lint --json`, va PR review. |
+
 ## 2026-07-04 - IDTS-55 comments and attachments Object Page polish
 
 English:
@@ -209,6 +225,30 @@ Vietnamese: Đã fix lỗi wording trong History Timeline: phần lịch sử kh
 Vietnamese: Đã ghi nhận và fix product defect của IDTS-50: email thật nhìn thô trong Gmail và link `Open this bug in IDTS` sinh sai `index.html/` dẫn tới Render 404. Nguyên nhân là template HTML quá tối giản và link builder dùng `/#/Bugs(<uuid>)` thay vì `#/Bugs(ID=<uuid>,IsActiveEntity=true)`. Ngoài ra lần chạy test đầu tiên fail vì worktree mới chưa có `node_modules`; đã chạy `npm ci` và rerun pass.
 
 Vietnamese: Trạng thái của DonHV - Leader / BA-PM / hỗ trợ các workstream khác.
+
+## 2026-07-02 - Email notification readability and deep-link diagnosis
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling issue | A read-only URL probe for the broken email link failed before making HTTP requests with PowerShell parser error `An empty pipe element is not allowed`. | The command attempted to pipe directly from a completed `foreach` block instead of assigning generated objects first. | Fixed in session by collecting results in a variable before formatting. No product code, private config, or remote data was changed. | Corrected probe plus `curl.exe` confirmed `index.html/` returns 404 while `index.html` returns 200. |
+
+Vietnamese: Loi tooling nho trong luc kiem tra link email: command PowerShell pipe truc tiep tu block `foreach` nen parser bao `An empty pipe element is not allowed`. Da doi sang cach gom ket qua vao bien truoc khi format; khong anh huong code san pham, private config hoac du lieu Render.
+
+## 2026-07-01 - Render MCP and CLI local setup support
+
+English:
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling issue | The first Render CLI install command verified the downloaded archive but did not find `render.exe` inside it. | The official Windows archive names the executable `cli_v2.21.0.exe`, not `render.exe`. | Fixed in session by inspecting the extracted archive and copying the actual executable to `C:\Users\LapHub\.local\bin\render.exe`. | `C:\Users\LapHub\.local\bin\render.exe --version` returned `render v2.21.0`. |
+| Environment/tooling issue | `render` was not immediately available by bare command inside the already-running Codex tool process. | The User PATH was updated to include `C:\Users\LapHub\.local\bin`, but the current Codex process keeps its inherited PATH until restart/new shell. | Workaround documented: use the full path now, or open a new terminal after the User PATH update. | Full-path CLI check passed; `whoami` correctly reports that login is still required. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Loi tooling | Lenh cai Render CLI dau tien da verify file tai ve nhung khong tim thay `render.exe` trong archive. | Archive Windows chinh thuc dat ten file thuc thi la `cli_v2.21.0.exe`, khong phai `render.exe`. | Da xu ly trong phien bang cach kiem tra archive da giai nen va copy dung executable sang `C:\Users\LapHub\.local\bin\render.exe`. | `C:\Users\LapHub\.local\bin\render.exe --version` tra ve `render v2.21.0`. |
+| Loi moi truong/tooling | Lenh `render` chua goi duoc ngay bang ten ngan trong process Codex dang chay. | User PATH da duoc them `C:\Users\LapHub\.local\bin`, nhung process Codex hien tai van giu PATH cu cho toi khi restart hoac mo shell moi. | Da ghi workaround: hien tai dung full path, hoac mo terminal moi sau khi PATH User duoc cap nhat. | Kiem tra bang full path da pass; `whoami` bao dung la con can login. |
 
 ## Member Identity
 
