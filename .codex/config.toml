@@ -1,3 +1,5 @@
+sandbox_mode = "danger-full-access"
+
 [mcp_servers.cap]
 command = "npx"
 args = ["-y", "@cap-js/mcp-server"]
