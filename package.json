@@ -43,6 +43,8 @@
     "qa:secret-scan": "node scripts/qa/secret-scan.js",
     "qa:idts41:programmatic": "node scripts/qa/test-idts41-code-list-validation.js",
     "qa:idts43:programmatic": "node scripts/qa/test-idts43-fiori-ux.js",
+    "qa:idts56:programmatic": "node scripts/qa/test-idts56-smart-assign.js",
+    "qa:idts56:browser": "node scripts/qa/test-idts56-smart-assign-browser.js",
     "qa:email-outbox:programmatic": "node scripts/qa/test-email-outbox-programmatic.js",
     "qa:email-smtp:integration": "node scripts/qa/test-email-smtp-integration.js",
     "qa:developer-workload:programmatic": "node scripts/qa/test-developer-workload-programmatic.js",

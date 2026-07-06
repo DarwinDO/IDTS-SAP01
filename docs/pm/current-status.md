@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-07-01
+Last updated: 2026-07-06
 
 ## Snapshot
 
@@ -85,6 +85,7 @@ Last updated: 2026-07-01
 - Jira live-state sync on 2026-06-29 originally confirmed: `IDTS-33` is Done; `IDTS-1` is still To Do; `IDTS-25`, `IDTS-27`, and `IDTS-28` are still In Progress; `IDTS-36` is To Do. Later on 2026-06-29, `IDTS-34` was implemented, merged into `dev` through PR #28, and moved out of the active queue.
 - IDTS-36 is merged into `dev` through GitHub PR #29 at merge commit `5356a7ffc962ca0545218f9c920503c28492f98b` and is Done in Jira. The implementation uses Nodemailer plus `NotificationDeliveries` outbox tracking, with SMTP credentials kept in private config. Private Brevo SMTP smoke verification passed on 2026-06-30 without printing credentials, recipient data, or provider message-id.
 - IDTS-42 is merged into `dev` through GitHub PR #38. The repository now has a mandatory QA Depth Gate baseline: PR evidence template, `qa-depth-gate` workflow, PR-body validator, reusable browser harness, secret scan, and documented falsification-first QA rules. GitHub branch protection for `dev` now requires the `qa-depth-gate` status check.
+- IDTS-56 Smart Assign developer UI is implemented on the Bug Object Page. The dialog uses SAPUI5/Fiori controls, supports search by developer/module/capability, shows availability states including Busy warnings, keeps CAP backend validation as the final enforcement layer, and has programmatic plus browser QA evidence under `docs/pm/evidence/idts-56/`.
 - IDTS-34 is merged into `dev` through GitHub PR #28 at merge commit `52432e35c66a3c0137ed5b7c96c9f57d93409fc5`. Backend custom login now exposes `AuthService.login/logout/me`, stores only password hashes, creates server-side `AuthSessions`, maps Bearer tokens to `cds.User`, keeps `BugService` protected, and passes focused auth verification (`23 PASS / 0 FAIL`) plus CAP compile on `dev`.
 - QA/testing skill support for IDTS-36/IDTS-38 is now installed and routed: `backend-testing`, `api-testing-patterns`, `integration-testing`, `qa-report`, and `qa-test-plan` exist under repo-local `.agents/skills/` and external backup `C:\Users\LapHub\.agents\skills\`. `backend-testing`, `api-testing-patterns`, and `integration-testing` are the primary implementation-test support skills; `qa-report` and `qa-test-plan` are secondary planning/reporting helpers.
 

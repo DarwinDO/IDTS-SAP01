@@ -61,9 +61,32 @@ Với người mới học Fiori, điểm này quan trọng vì Fiori lấy labe
   - Ảnh hưởng nếu sai: User dùng English locale có thể thấy label lệch hoặc placeholder key bị thiếu.
   - Phải kiểm tra cùng: base `i18n.properties`, `manifest.json`, và cấu hình History trên Object Page.
 
+## IDTS-56 update - English Smart Assign labels
+
+### English
+
+This file mirrors the base bundle's `smartAssign*` labels for English locale users.
+
+Important anchors:
+
+- `smartAssignDeveloper=Smart Assign`
+- `smartAssignDialogTitle=Smart Assign Developer`
+- `smartAssignBusyWarning` and `smartAssignUnavailableWarning`
+- `smartAssignAssignedToast` and `smartAssignAssignFailed`
+
+Impact if broken: the Object Page action or dialog can display missing i18n placeholders in English locales.
+
+Must check together: base `i18n.properties`, `manifest.json`, and `SmartAssignDeveloper.js`.
+
+### Vietnamese
+
+File nay giu cac label `smartAssign*` cho English locale, dong bo voi base bundle.
+
+Neu thieu key, Object Page action hoac dialog co the hien placeholder ky thuat thay vi label sach.
+
 ## Metadata
 
 - Source file: `app/bug-management-ui/webapp/i18n/i18n_en.properties`
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/i18n/i18n_en.properties.md`
 - Source layer: `app`
-- Last reviewed: 2026-07-01
+- Last reviewed: 2026-07-06

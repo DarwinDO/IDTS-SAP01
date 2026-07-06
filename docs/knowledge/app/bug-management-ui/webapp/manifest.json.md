@@ -104,9 +104,34 @@ Thứ hai, custom section History trên Object Page dùng key `History` thay vì
   - Ảnh hưởng nếu sai: Object Page có thể không hiện history hoặc hiện trùng nhiều section history.
   - Phải kiểm tra cùng: `app/bug-management-ui/annotations/object-page.cds`, `app/bug-management-ui/webapp/ext/fragment/HistoryTimeline.fragment.xml`, và các history entity trong `srv/service.cds`.
 
+## IDTS-56 update - Smart Assign Object Page action
+
+### English
+
+IDTS-56 adds a custom Object Page header action named `Smart Assign`.
+
+Important anchor:
+
+- Location: `BugsObjectPage.options.settings.content.header.actions.SmartAssignDeveloper`
+  - IDTS concept: PM/Tester-friendly developer assignment entry point.
+  - Behavior: calls `idts.bugmanagementui.ext.actions.SmartAssignDeveloper.openDialog`, which opens a SAPUI5 dialog listing assignable developers with search, capability, module scope, responsibility, and availability state.
+  - Security boundary: this is only UI assistance. CAP backend action `BugService.assignToDeveloper` and write validation still enforce valid assignee, role permission, responsibility, and availability.
+  - Must check together: `app/bug-management-ui/webapp/ext/actions/SmartAssignDeveloper.js`, `srv/service.cds`, `srv/bug-service/actions.js`, `srv/bug-service/bug-write.js`, and `scripts/qa/test-idts56-smart-assign*.js`.
+
+### Vietnamese
+
+IDTS-56 them custom action `Smart Assign` tren Object Page header.
+
+Diem neo quan trong:
+
+- Vi tri: `BugsObjectPage.options.settings.content.header.actions.SmartAssignDeveloper`
+  - Khai niem IDTS: diem vao de PM/Tester chon developer ro rang hon value help mac dinh.
+  - Hanh vi: goi `SmartAssignDeveloper.openDialog` de mo dialog SAPUI5 hien developer co the assign, search theo developer/module/capability, va hien availability.
+  - Ranh gioi bao mat: UI chi ho tro chon; CAP backend van la lop enforce cuoi cung cho quyen, assignee hop le, responsibility, va availability.
+
 ## Metadata
 
 - Source file: `app/bug-management-ui/webapp/manifest.json`
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/manifest.json.md`
 - Source layer: `app`
-- Last reviewed: 2026-07-01
+- Last reviewed: 2026-07-06
