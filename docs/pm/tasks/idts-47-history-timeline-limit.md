@@ -45,7 +45,8 @@ Use `sap.m.List` growing on `app/bug-management-ui/webapp/ext/fragment/HistoryTi
   - Count after growing trigger: `8`.
   - Expandable detail proof: `Show Details` opens the field/old/new value table.
   - Evidence screenshots: `docs/pm/evidence/idts-47/01_history_initial_limited.png`, `02_history_after_growing_more.png`, and `03_history_detail_expanded.png`.
+- GitHub PR: https://github.com/DarwinDO/IDTS-SAP01/pull/87.
 
 ## Status
 
-Implementation verified locally. Ready for PR/Jira review.
+Implementation verified locally and PR #87 is open for DonHV review.
