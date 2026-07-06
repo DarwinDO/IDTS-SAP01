@@ -1,0 +1,55 @@
+<core:FragmentDefinition
+  xmlns="sap.m"
+  xmlns:core="sap.ui.core"
+  xmlns:form="sap.ui.layout.form"
+  xmlns:assignment="idts.bugmanagementui.ext.controls"
+>
+  <assignment:SmartAssignmentSection class="sapUiSmallMarginTop sapUiSmallMarginBottom">
+    <Panel
+      backgroundDesign="Transparent"
+      expandable="false"
+    >
+      <content>
+        <form:Form editable="false">
+          <form:layout>
+            <form:ColumnLayout
+              columnsM="1"
+              columnsL="2"
+              columnsXL="2"
+            />
+          </form:layout>
+          <form:formContainers>
+            <form:FormContainer>
+              <form:formElements>
+                <form:FormElement label="{i18n>smartAssigneeLabel}">
+                  <form:fields>
+                    <Input
+                      core:require="{ SmartAssign: 'idts/bugmanagementui/ext/actions/SmartAssignDeveloper' }"
+                      value="{path: 'assigneeDisplayName', mode: 'OneWay'}"
+                      placeholder="{i18n>smartAssigneePlaceholder}"
+                      showValueHelp="true"
+                      editable="{= ${IsActiveEntity} !== true || ${canAssign} === true }"
+                      enabled="{= ${IsActiveEntity} !== true || ${canAssign} === true }"
+                      change="SmartAssign.resetAssigneeInput"
+                      valueHelpRequest="SmartAssign.openAssigneePicker"
+                    />
+                  </form:fields>
+                </form:FormElement>
+                <form:FormElement label="{i18n>currentActionOwnerLabel}">
+                  <form:fields>
+                    <Text text="{currentActionOwnerDisplayName}" />
+                  </form:fields>
+                </form:FormElement>
+                <form:FormElement label="{i18n>actionOwnerRoleLabel}">
+                  <form:fields>
+                    <Text text="{nextProcessorRoleName}" />
+                  </form:fields>
+                </form:FormElement>
+              </form:formElements>
+            </form:FormContainer>
+          </form:formContainers>
+        </form:Form>
+      </content>
+    </Panel>
+  </assignment:SmartAssignmentSection>
+</core:FragmentDefinition>

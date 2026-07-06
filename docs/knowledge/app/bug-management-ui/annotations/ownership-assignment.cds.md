@@ -164,3 +164,51 @@ File này giúp giao diện thể hiện rõ sự khác nhau đó mà không tha
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/annotations/ownership-assignment.cds.md`
 - Source layer: `app`
 - Last reviewed: 2026-06-24
+
+## IDTS-61 update - generated Assignee field removed from this FieldGroup
+
+### English
+
+IDTS-61 changes where the Assignee picker is rendered.
+
+Before IDTS-61, `UI.FieldGroup #Assignment` contained two generated Fiori Elements fields:
+
+- `assignee_ID` for draft/edit mode, which opened the standard value help.
+- `assigneeDisplayName` for display mode.
+
+After IDTS-61, those two Assignee entries are removed from this generated field group. The Assignee field is now rendered by the custom fragment `SmartAssignmentSection.fragment.xml`, and its value-help icon opens the Smart Assign dialog. This avoids two competing picker experiences: the old generic value help and the new Smart Assign picker.
+
+Important anchors:
+
+- **Location**: `UI.FieldGroup #Assignment`
+  **IDTS concept**: Still shows workflow ownership context, but no longer owns the Assignee picker UI.
+  **Impact if broken**: The Object Page can show duplicate Assignee fields or return to the old standard value-help flow.
+  **Must check together**: `manifest.json`, `SmartAssignmentSection.fragment.xml`, `SmartAssignDeveloper.js`, and `app/bug-management-ui/annotations/value-helps.cds`.
+
+- **Location**: removed `assignee_ID` and `assigneeDisplayName` DataFields
+  **IDTS concept**: Assignee is still part of the Bug model, but its user interaction is now custom Fiori/UI5.
+  **Impact if broken**: Tester/PM may not find the Smart Assign picker or may see UUID-oriented value help again.
+  **Must check together**: Object Page browser smoke, draft save behavior, and backend assignment validation.
+
+### Vietnamese
+
+IDTS-61 thay doi noi render Assignee picker.
+
+Truoc IDTS-61, `UI.FieldGroup #Assignment` co hai field generated cua Fiori Elements:
+
+- `assignee_ID` cho draft/edit mode, mo standard value help.
+- `assigneeDisplayName` cho display mode.
+
+Sau IDTS-61, hai entry Assignee nay duoc bo khoi generated field group. Field Assignee bay gio do custom fragment `SmartAssignmentSection.fragment.xml` render, va icon value-help cua field do se mo dialog Smart Assign. Cach nay tranh hai trai nghiem picker canh tranh nhau: value help cu va Smart Assign moi.
+
+Anchor quan trong:
+
+- **Vi tri**: `UI.FieldGroup #Assignment`
+  **Khai niem IDTS**: Van hien ngu canh ownership cua workflow, nhung khong con quan ly UI picker cua Assignee.
+  **Anh huong neu sai**: Object Page co the hien trung Assignee hoac quay lai standard value-help cu.
+  **Phai kiem tra cung**: `manifest.json`, `SmartAssignmentSection.fragment.xml`, `SmartAssignDeveloper.js`, va `app/bug-management-ui/annotations/value-helps.cds`.
+
+- **Vi tri**: da bo DataField `assignee_ID` va `assigneeDisplayName`
+  **Khai niem IDTS**: Assignee van la mot phan cua Bug model, nhung tuong tac nguoi dung duoc chuyen sang custom Fiori/UI5.
+  **Anh huong neu sai**: Tester/PM co the khong tim thay Smart Assign picker hoac thay value help cu thien ve UUID.
+  **Phai kiem tra cung**: browser smoke Object Page, draft save behavior, va backend assignment validation.
