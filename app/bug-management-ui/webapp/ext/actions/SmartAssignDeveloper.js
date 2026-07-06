@@ -61,6 +61,11 @@ sap.ui.define([
             return actionContext.getView();
         }
 
+        // In the current Fiori Elements runtime, manifest-based Object Page
+        // header actions receive an ExtensionAPI-like object with `_view`,
+        // not a controller with getView(). Keep this fallback isolated and
+        // covered by browser smoke; the dialog still uses public UI5 controls
+        // and backend validation remains the assignment authority.
         if (actionContext && actionContext._view) {
             return actionContext._view;
         }
