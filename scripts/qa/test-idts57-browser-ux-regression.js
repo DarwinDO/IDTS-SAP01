@@ -127,9 +127,9 @@ async function runTests() {
         await takeScreenshot(page, '04_fiori_object_page_collaboration');
         console.log('  PASS  Bug Collaboration section renders on Object Page.');
 
-        console.log('4. Assign Developer Flow & Persistence');
-        // PM clicks Assign to Developer (if the button is available as a custom action)
-        // Let's do a reload check for persistence
+        console.log('4. Session Persistence & Logout');
+        // This script verifies baseline persistence/logout only.
+        // Smart assignment interaction is covered by IDTS-56 browser QA and remains a known gap here.
         await page.reload();
         await page.waitForFunction(() => document.body.innerText.includes('General Information'), { timeout: 15000 });
         // Make sure we are not kicked out to login
