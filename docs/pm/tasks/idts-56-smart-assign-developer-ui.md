@@ -42,7 +42,9 @@ Build a SAPUI5/Fiori smart assignment dialog for the Bug Object Page so PM/Teste
 
 ## Handoff
 
-Ready for review. No backend assignment rule change was introduced.
+Merged and closed. No backend assignment rule change was introduced.
 
 - PR: https://github.com/DarwinDO/IDTS-SAP01/pull/79
-- Jira comment: `IDTS-56` comment `10352`
+- Merge commit: `9bd846a84b07f44e58cf303318bfda91fd3d4759`
+- Jira comments: `10352`, `10353`, `10356`
+- Jira status: Done

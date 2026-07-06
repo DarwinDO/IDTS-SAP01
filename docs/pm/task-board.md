@@ -46,7 +46,7 @@ Vietnamese: Chi dung board nay de theo doi trang thai cap cao. Chi tiet cong vie
 | IDTS-52 | Fiori-style custom sign-in page | Login page now uses SAPUI5 controls, Horizon theme, safe MessageStrip errors, responsive layout, and knowledge mirrors. |
 | IDTS-53 | Fiori profile menu and sign-out UX | Authenticated app now has a SAPUI5 profile popover showing name/email/role/session expiry with visible Sign Out; browser smoke verifies logout guard. |
 | IDTS-55 | Comments and attachments Object Page polish | PR #73 merged into `dev`; Render deploy `dep-d94cg4uq1p3s73bc6la0` is live and shared-QA smoke passed for comment reload persistence and attachment upload/download/delete cleanup. Jira moved to Done. |
-| IDTS-56 | Smart assign developer dialog/dropdown | PR #79 implements the Object Page `Smart Assign` dialog with SAPUI5/Fiori controls, searchable developer capability/availability table, backend assignment validation, programmatic QA, browser QA, and evidence under `docs/pm/evidence/idts-56/`. |
+| IDTS-56 | Smart assign developer dialog/dropdown | PR #79 merged into `dev`; Object Page `Smart Assign` dialog now uses SAPUI5/Fiori controls, searchable developer capability/availability table, backend assignment validation, programmatic QA, browser QA, and evidence under `docs/pm/evidence/idts-56/`. Jira moved to Done. |
 
 Vietnamese:
 
@@ -89,7 +89,7 @@ Vietnamese:
 | IDTS-52 | Login page custom theo Fiori style | Login page dung SAPUI5 controls, Horizon theme, MessageStrip loi an toan, responsive layout va knowledge mirrors. |
 | IDTS-53 | Profile menu va Sign Out UX | App sau login co SAPUI5 profile popover hien ten/email/role/session expiry va Sign Out ro rang; browser smoke da verify logout guard. |
 | IDTS-55 | Polish Comments va Attachments tren Object Page | PR #73 da merge vao `dev`; Render deploy `dep-d94cg4uq1p3s73bc6la0` dang live va shared-QA smoke pass cho comment reload persistence cung attachment upload/download/delete cleanup. Jira da chuyen Done. |
-| IDTS-56 | Dialog/dropdown Smart Assign developer | PR #79 implement action `Smart Assign` tren Object Page bang SAPUI5/Fiori controls, search developer/capability/availability, giu backend validation, co programmatic QA, browser QA va evidence trong `docs/pm/evidence/idts-56/`. |
+| IDTS-56 | Dialog/dropdown Smart Assign developer | PR #79 da merge vao `dev`; Object Page co action `Smart Assign` bang SAPUI5/Fiori controls, search developer/capability/availability, giu backend validation, co programmatic QA, browser QA va evidence trong `docs/pm/evidence/idts-56/`. Jira da chuyen Done. |
 
 ## Ready
 
