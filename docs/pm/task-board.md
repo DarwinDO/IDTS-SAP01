@@ -1,6 +1,6 @@
 # IDTS Task Board
 
-Last updated: 2026-07-06
+Last updated: 2026-07-05
 
 Use this board for high-level movement only. Detailed task notes belong in the matching file under `docs/pm/tasks/`.
 
@@ -32,9 +32,21 @@ Vietnamese: Chi dung board nay de theo doi trang thai cap cao. Chi tiet cong vie
 | IDTS-41 | Catalog validation and draft-create authorization | PR #35 merged into `dev`; backend now rejects invalid/inactive Priority, Severity, and Environment codes and blocks Developer draft-create at the CAP layer. Jira moved to Done. |
 | IDTS-42 | QA Depth Gate and hardened browser harness | PR #38 merged into `dev`; added mandatory PR evidence template, `qa-depth-gate` workflow, PR-body validator, reusable browser harness, secret scan, and PM/process documentation. |
 | IDTS-43 | Fiori UX cleanup from IDTS-32 findings | PR #36 merged into `dev` at `62197e6`; fixed value-list hints, role-aware Create Bug action, single History section, clearer Reopen wording, and role-based browser smoke evidence. |
-| IDTS-32 | Manual browser UAT for Sprint 3 workflow/history flows | Retest passed, findings fixed by IDTS-41 and IDTS-43. Jira moved to Done. |
-| IDTS-37 | Notification UI and email delivery status readability | FE/QA Review completed via Playwright subagent. Notifications UI shows readable values. Jira moved to Done. |
-| IDTS-56 | Smart assign developer dialog/dropdown | Object Page `Smart Assign` dialog implemented with SAPUI5/Fiori controls, searchable developer capability/availability table, backend assignment validation, programmatic QA, browser QA, and evidence under `docs/pm/evidence/idts-56/`. |
+| IDTS-48 | Brevo Transactional API delivery for shared QA | PR #57 and PR #58 merged into `dev`; Render deploy `dep-d931rb6rnols73851g1g` is live on commit `bcf43b2`, authenticated shared-QA smoke passed, and a new Brevo API delivery reached `SENT` with `attemptCount = 1`. Jira moved to Done. |
+| IDTS-49 | Derive reporter before custom-auth draft activation | PR #61 merged into `dev`; Render deploy `dep-d93420m7r5hc73a45dvg` is live, PM draft activation without client reporter passed, and reporter email delivery reached `SENT`. Jira moved to Done. |
+| IDTS-44 | Deploy shared QA environment on Render | Shared QA acceptance is complete: Render/PostgreSQL, auth/OData, Brevo API, AWS S3 attachment persistence, final IDTS-49 reporter routing, and sanitized log/evidence checks passed. Jira moved to Done. |
+| IDTS-1 | Sprint 02 epic Jira alignment | Old Sprint 02 epic was closed after child work had already been completed or superseded by later sprint work. Jira moved to Done. |
+| IDTS-25 | Fix backend defects found during Sprint 3 QA | Sprint 3 backend-defect bucket was closed because remaining actionable issues were fixed or split into dedicated Jira tasks. Jira moved to Done. |
+| IDTS-28 | Refactor backend service into focused modules | Refactor had already merged into `dev`; closure evidence and subsequent regression/QA work were accepted. Jira moved to Done. |
+| IDTS-38 | Regression test custom login and SMTP/API notification flows | NhanT regression bucket was closed after DonHV confirmed login/email QA evidence was acceptable. Jira moved to Done. |
+| IDTS-50 | Email notification readability and deep-link polish | DonHV confirmed email readability, deep-link behavior, and history wording are acceptable after Render/shared-QA verification. Jira moved to Done. |
+| IDTS-27 | Sync docs, Jira status, and Sprint 3 evidence | Sprint 3 closure/status sync was completed and summarized for handoff into Sprint 4. Jira moved to Done. |
+| IDTS-14 | Sprint 3 epic closure | Sprint 3 epic was closed after active follow-up work was moved under Sprint 4 epic `IDTS-51` or marked Done. |
+| IDTS-39 | Auth unexpected error sanitization | PR #68 merged into `dev`; login/auth now returns safe generic messages for unexpected failures while keeping invalid-credential behavior unchanged. |
+| IDTS-52 | Fiori-style custom sign-in page | Login page now uses SAPUI5 controls, Horizon theme, safe MessageStrip errors, responsive layout, and knowledge mirrors. |
+| IDTS-53 | Fiori profile menu and sign-out UX | Authenticated app now has a SAPUI5 profile popover showing name/email/role/session expiry with visible Sign Out; browser smoke verifies logout guard. |
+| IDTS-55 | Comments and attachments Object Page polish | PR #73 merged into `dev`; Render deploy `dep-d94cg4uq1p3s73bc6la0` is live and shared-QA smoke passed for comment reload persistence and attachment upload/download/delete cleanup. Jira moved to Done. |
+| IDTS-56 | Smart assign developer dialog/dropdown | PR #79 implements the Object Page `Smart Assign` dialog with SAPUI5/Fiori controls, searchable developer capability/availability table, backend assignment validation, programmatic QA, browser QA, and evidence under `docs/pm/evidence/idts-56/`. |
 
 Vietnamese:
 
@@ -63,21 +75,45 @@ Vietnamese:
 | IDTS-41 | Validate catalog va chan draft-create sai quyen | PR #35 da merge vao `dev`; backend chan Priority, Severity, Environment sai/khong active va chan Developer tao draft o CAP layer. Jira da chuyen Done. |
 | IDTS-42 | QA Depth Gate va browser harness duoc harden | PR #38 da merge vao `dev`; da them PR evidence template bat buoc, workflow `qa-depth-gate`, validator PR body, browser harness dung lai, secret scan va tai lieu PM/process. |
 | IDTS-43 | Don dep Fiori UX tu finding IDTS-32 | PR #36 da merge vao `dev` tai `62197e6`; da fix value-list hint, Create Bug theo role, chi con mot History section, wording Reopen ro hon, va co browser smoke theo role. |
-| IDTS-32 | Manual browser UAT cho workflow/history Sprint 3 | Retest passed, cac findings da duoc fix boi IDTS-41 va IDTS-43. Jira da chuyen Done. |
-| IDTS-37 | Notification UI va kha nang doc email delivery status | FE/QA Review hoan thanh qua Playwright subagent. UI hien thi de hieu. Jira da chuyen Done. |
-| IDTS-56 | Dialog/dropdown Smart Assign developer | Da implement action `Smart Assign` tren Object Page bang SAPUI5/Fiori controls, search developer/capability/availability, giu backend validation, co programmatic QA, browser QA va evidence trong `docs/pm/evidence/idts-56/`. |
+| IDTS-48 | Brevo Transactional API cho shared QA | PR #57 va PR #58 da merge vao `dev`; Render deploy `dep-d931rb6rnols73851g1g` dang live tren commit `bcf43b2`, authenticated shared-QA smoke pass, va mot Brevo API delivery moi da `SENT` voi `attemptCount = 1`. Jira da chuyen Done. |
+| IDTS-49 | Derive reporter truoc custom-auth draft activation | PR #61 da merge vao `dev`; Render deploy `dep-d93420m7r5hc73a45dvg` dang live, PM draft activation khong can client reporter da pass, va reporter email delivery dat `SENT`. Jira da chuyen Done. |
+| IDTS-44 | Deploy shared QA environment tren Render | Acceptance shared QA da hoan tat: Render/PostgreSQL, auth/OData, Brevo API, AWS S3 attachment persistence, final IDTS-49 reporter routing, va log/evidence sanitized checks da pass. Jira da chuyen Done. |
+| IDTS-1 | Dong epic Sprint 02 cu | Epic Sprint 02 cu da dong vi child work da xong hoac da duoc thay the boi cac sprint sau. Jira da chuyen Done. |
+| IDTS-25 | Dong bucket backend defect Sprint 3 | Bucket loi backend Sprint 3 da dong vi cac issue con lai da fix hoac tach thanh task rieng. Jira da chuyen Done. |
+| IDTS-28 | Dong backend refactor | Refactor da merge vao `dev`; closure evidence va regression/QA sau do da duoc chap nhan. Jira da chuyen Done. |
+| IDTS-38 | Dong regression login/email | Bucket QA cua NhanT da dong sau khi DonHV xac nhan evidence login/email dat yeu cau. Jira da chuyen Done. |
+| IDTS-50 | Dong email readability/deep-link polish | DonHV xac nhan email readability, deep link va history wording da OK sau shared-QA verification. Jira da chuyen Done. |
+| IDTS-27 | Sync docs, Jira status va Sprint 3 evidence | Da hoan tat tong hop closure/status Sprint 3 va handoff sang Sprint 4. Jira da chuyen Done. |
+| IDTS-14 | Dong epic Sprint 3 | Epic Sprint 3 da dong sau khi follow-up active duoc chuyen sang epic Sprint 4 `IDTS-51` hoac da Done. |
+| IDTS-39 | Sanitize loi login bat thuong | PR #68 da merge vao `dev`; login/auth tra message generic an toan cho loi bat thuong va giu nguyen hanh vi invalid credential. |
+| IDTS-52 | Login page custom theo Fiori style | Login page dung SAPUI5 controls, Horizon theme, MessageStrip loi an toan, responsive layout va knowledge mirrors. |
+| IDTS-53 | Profile menu va Sign Out UX | App sau login co SAPUI5 profile popover hien ten/email/role/session expiry va Sign Out ro rang; browser smoke da verify logout guard. |
+| IDTS-55 | Polish Comments va Attachments tren Object Page | PR #73 da merge vao `dev`; Render deploy `dep-d94cg4uq1p3s73bc6la0` dang live va shared-QA smoke pass cho comment reload persistence cung attachment upload/download/delete cleanup. Jira da chuyen Done. |
+| IDTS-56 | Dialog/dropdown Smart Assign developer | PR #79 implement action `Smart Assign` tren Object Page bang SAPUI5/Fiori controls, search developer/capability/availability, giu backend validation, co programmatic QA, browser QA va evidence trong `docs/pm/evidence/idts-56/`. |
 
 ## Ready
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
-| IDTS-38 | Regression test custom login and SMTP notification flows | NhanT | QA coverage for login success/failure, role behavior, SMTP success/failure, disabled email config, and no-secret evidence. Unblocked by merged IDTS-34 and IDTS-36. |
+| IDTS-37 | Notification UI and email delivery status readability | SangVN | FE/QA review of notification section after SMTP/outbox changes, focusing on readable event/channel/status/recipient/message output. Unblocked by merged IDTS-36. |
+| IDTS-45 | Back up and decide migration or upgrade for expiring Render PostgreSQL | DonHV | Due 2026-07-24 before the free database expires on 2026-07-31. |
+| IDTS-46 | Review and remediate npm dependency vulnerabilities | DonHV | Clean Render build reports 13 moderate and 7 high findings; use targeted upgrades, not broad force-fix. |
+| IDTS-47 | Limit or paginate History Timeline on Object Page | SangVN | Due 2026-07-14. Follow-up from `IDTS-32` UAT finding; preserve readable history without raw duplicate table. |
+| IDTS-59 | Scan Sprint 4 Fiori screens for usability gaps and edge-case confusion | SangVN | Due 2026-07-11. Manual UI/UX scan that intentionally checks awkward flows, edge states, confusing wording, and SAP Fiori consistency. |
+| IDTS-60 | Browser and manual UAT for completed Sprint 4 UI baseline | NhanT | Due 2026-07-12. Earlier QA checkpoint for merged Sprint 4 UI baseline before final `IDTS-57` regression. |
+| IDTS-40 | AWS ECS/ECR shared QA deployment direction | DonHV | Due 2026-07-18 if kept active. Treat as AWS-native follow-up/alternative, not a blocker for accepted Render QA. |
 
 Vietnamese:
 
 | ID | Cong viec | Thanh vien chinh | Ghi chu |
 | --- | --- | --- | --- |
-| IDTS-38 | Regression test custom login va SMTP notification | NhanT | QA login success/failure, role behavior, SMTP success/failure, disabled email config va no-secret evidence. Da duoc unblock boi IDTS-34 va IDTS-36 da merge. |
+| IDTS-37 | Notification UI va kha nang doc email delivery status | SangVN | FE/QA review notification section sau khi co SMTP/outbox, tap trung event/channel/status/recipient/message. Da duoc unblock boi IDTS-36 da merge. |
+| IDTS-45 | Backup va chot migrate/nang cap Render PostgreSQL sap het han | DonHV | Han 24/07/2026 truoc khi DB free het han ngay 31/07/2026. |
+| IDTS-46 | Review va xu ly npm dependency vulnerabilities | DonHV | Clean build Render bao 13 moderate va 7 high; chi upgrade co muc tieu, khong force-fix rong. |
+| IDTS-47 | Limit/paginate History Timeline tren Object Page | SangVN | Due 2026-07-14. Follow-up tu finding UAT `IDTS-32`; giu History de doc va khong dua lai raw duplicate table. |
+| IDTS-59 | Scan UI/UX Sprint 4 Fiori de tim usability gap va edge-case confusion | SangVN | Han 2026-07-11. Manual scan co chu y pha happy path, kiem tra wording kho hieu, edge state va tinh nhat quan SAP Fiori. |
+| IDTS-60 | Browser/manual UAT cho baseline UI Sprint 4 da merge | NhanT | Han 2026-07-12. Checkpoint QA som cho baseline UI da merge truoc khi regression tong cuoi `IDTS-57`. |
+| IDTS-40 | Huong deploy shared QA bang AWS ECS/ECR | DonHV | Due 2026-07-18 neu giu active. Xem la AWS-native follow-up/alternative, khong block Render QA da accepted. |
 
 ## In Progress
 
@@ -85,35 +121,34 @@ Vietnamese:
 | --- | --- | --- | --- |
 | SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP, and real browser QA are stable enough to prove the happy flow. Remaining work is final SAP490 sync and mentor-demo rerun, not FE/blocking workflow repair. |
 | WP6 | PM Monitoring | DonHV, DatDT, SangVN | Ownership wording is locked; backend monitoring fields, FE monitoring views, Object Page refresh side effects, grouped history timeline, and persona UAT automation are merged. Remaining manual follow-up is `IDTS-32`; `IDTS-33` is Done on Jira. |
-| IDTS-1 | Sprint 02 epic Jira alignment | DonHV | Jira epic is still To Do while multiple child tasks are already Done. DonHV should resolve this during `IDTS-27` consolidation by commenting or transitioning the epic as appropriate. |
-| IDTS-25 | Fix backend defects found during Sprint 3 QA | DonHV | Jira live state is In Progress. Evidence and closure decision are still needed before Sprint 3 PM/SAP490 consolidation. |
-| IDTS-27 | Sync docs, Jira status, and Sprint 3 evidence | DonHV | Active PM/Jira/evidence consolidation bucket. Current work order: `IDTS-34` and `IDTS-36` are merged; next is handoff to `IDTS-37`/`IDTS-38`, then Sprint 3 evidence consolidation. |
-| IDTS-28 | Refactor backend service into focused modules | DonHV | Jira live state is In Progress even though the refactor is merged. Needs final retest/evidence closure alignment. |
-| IDTS-44 | Deploy shared QA environment on Render | DonHV | Render Blueprint/config/docs are being prepared so the team can test login, OData, email, and attachments on a shared QA URL. |
+| IDTS-32 | Manual browser UAT for Sprint 3 workflow/history flows | SangVN | Evidence branch merged through PR #34. Retest remains open until IDTS-41/42/43 fixes and no P0/P1 remain. |
+| IDTS-58 | Fix Sprint 4 UI defects found after Fiori redesign review | DatDT | Branch `fix/idts-58-sprint-4-ui-defects-datdt` now contains the FE fixes and local browser-smoke evidence. Waiting for Jira evidence comment, push/PR review, and merge before board-level Done. |
 
 Vietnamese:
 
 | ID | Cong viec | Thanh vien chinh | Ghi chu |
 | --- | --- | --- | --- |
+| IDTS-50 | Cai thien email notification va sua deep link | DonHV | Sua email Gmail dang tho va link Fiori bi hong tu shared-QA email. Jira dang In Progress; branch implementation la `fix/idts-50-email-link-template-donhv`. |
 | SP2 | Sprint 02 Mentor Feedback va Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP va browser QA that da du on de chung minh happy flow. Phan con lai la sync SAP490 va rerun mentor demo. |
 | WP6 | PM Monitoring | DonHV, DatDT, SangVN | Backend monitoring, FE monitoring views, Object Page refresh, grouped history timeline va persona UAT automation da merge. Manual follow-up con lai la `IDTS-32`; `IDTS-33` da Done tren Jira. |
 | IDTS-1 | Jira alignment cho Sprint 02 epic | DonHV | Jira epic van To Do trong khi nhieu child task da Done. DonHV can xu ly trong `IDTS-27` bang comment hoac transition phu hop. |
 | IDTS-25 | Fix backend defects phat hien trong Sprint 3 QA | DonHV | Jira live dang In Progress. Can chot evidence va quyet dinh dong task truoc khi tong hop PM/SAP490 Sprint 3. |
 | IDTS-27 | Sync docs, Jira status va Sprint 3 evidence | DonHV | Bucket tong hop PM/Jira/evidence dang active. `IDTS-34` va `IDTS-36` da merge; tiep theo la handoff `IDTS-37`/`IDTS-38`, sau do tong hop evidence Sprint 3. |
 | IDTS-28 | Tach backend service thanh cac module tap trung | DonHV | Jira live dang In Progress du refactor da merge. Can chot retest/evidence closure. |
-| IDTS-44 | Deploy moi truong QA dung chung tren Render | DonHV | Dang chuan bi Render Blueprint/config/docs de team test login, OData, email va attachment bang mot shared QA URL. |
+| IDTS-32 | Manual browser UAT cho workflow/history Sprint 3 | SangVN | Evidence branch da merge qua PR #34. Van can retest sau IDTS-41/42/43 va chi dong khi khong con P0/P1. |
+| IDTS-58 | Fix cac loi UI Sprint 4 sau Fiori redesign review | DatDT | Branch `fix/idts-58-sprint-4-ui-defects-datdt` da co FE fixes va browser-smoke evidence local. Cho DatDT cap nhat Jira evidence, push/PR review, va merge truoc khi board-level Done. |
 
 ## Blocked
 
 | ID | Task | Blocker | Required decision |
 | --- | --- | --- | --- |
-| None | None | None | None |
+| None | None | No current blocker after IDTS-44 closure. | Continue scheduled follow-ups IDTS-45 and IDTS-46. |
 
 Vietnamese:
 
 | ID | Cong viec | Blocker | Quyet dinh can co |
 | --- | --- | --- | --- |
-| None | None | None | None |
+| None | None | Khong con blocker hien tai sau khi dong IDTS-44. | Tiep tuc follow-up IDTS-45 va IDTS-46. |
 
 ## Update Rules
 

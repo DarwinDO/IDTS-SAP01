@@ -1,0 +1,70 @@
+#idtsProfileShellHost {
+  position: fixed;
+  top: 0.5rem;
+  right: 0.75rem;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.idtsProfileButton.sapMBtn {
+  pointer-events: auto;
+  min-width: auto;
+}
+
+.idtsProfileButton .sapMBtnInner {
+  min-width: 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--sapShellColor, #fff) 88%, transparent);
+  box-shadow: var(--sapContent_Shadow0, 0 0 0.125rem rgba(0, 0, 0, 0.16));
+}
+
+.idtsProfileButton .sapMBtnIcon {
+  margin: 0;
+}
+
+.idtsProfilePopoverContent {
+  min-width: 18rem;
+  padding: 1rem;
+  gap: 0.75rem;
+}
+
+.idtsProfileHeader {
+  gap: 0.75rem;
+}
+
+.idtsProfileMeta {
+  gap: 0.125rem;
+}
+
+.idtsProfileEmail,
+.idtsProfileRole,
+.idtsProfileExpiry {
+  color: var(--sapContent_LabelColor, #6a6d70);
+}
+
+.idtsDashboardPage {
+  max-width: 90rem;
+  margin: 0 auto;
+}
+
+.idtsDashboardTiles {
+  gap: 0.25rem;
+}
+
+.idtsDashboardTile {
+  width: 13rem;
+}
+
+@media (max-width: 37.5rem) {
+  #idtsProfileShellHost {
+    top: 0.25rem;
+    right: 0.25rem;
+  }
+
+  .idtsDashboardTile {
+    width: 100%;
+  }
+}

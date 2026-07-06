@@ -148,6 +148,36 @@ Mọi thay đổi ở đây đều ảnh hưởng ngay đến luồng tạo, ph�
 - Documentation style: learning-oriented explanation, not line listing only
 - Last reviewed: 2026-06-22
 
+## IDTS History Wording Update
+
+### English
+
+The history label constants for the runtime owner fields now use the same user-facing language as the Object Page ownership section:
+
+- `nextProcessorUser` is displayed as `Current Action Owner`.
+- `nextProcessorRole` is displayed as `Action Owner Role`.
+
+This matters because history records are not only audit data. They are also read by the Fiori History section. If these labels stay as `Next Processor User` and `Next Processor Role`, the UI teaches the old internal implementation wording instead of the clearer business wording.
+
+- **Location**: `srv/bug-service/constants.js:64-65`
+  **IDTS concept**: `nextProcessor*` is the backend storage name, but the business meaning is “who must act now”.
+  **Impact if broken**: New history rows continue to show old wording in the timeline summary and expanded field-change table.
+  **Must check together**: `srv/bug-service/history-read-models.js`, `srv/bug-service/history.js`, `app/bug-management-ui/webapp/ext/fragment/HistoryTimeline.fragment.xml`, ownership labels in Fiori annotations.
+
+### Vietnamese
+
+Các label history cho nhóm field người/vai trò đang xử lý hiện dùng cùng ngôn ngữ hiển thị với phần ownership trên Object Page:
+
+- `nextProcessorUser` được hiển thị là `Current Action Owner`.
+- `nextProcessorRole` được hiển thị là `Action Owner Role`.
+
+Điểm quan trọng là history không chỉ là dữ liệu audit nội bộ. Fiori History section cũng đọc trực tiếp các label này để hiển thị cho người dùng. Nếu vẫn giữ `Next Processor User` và `Next Processor Role`, UI sẽ tiếp tục dạy người dùng thuật ngữ kỹ thuật cũ thay vì thuật ngữ nghiệp vụ dễ hiểu hơn.
+
+- **Vị trí**: `srv/bug-service/constants.js:64-65`
+  **Khái niệm IDTS**: `nextProcessor*` là tên lưu trữ nội bộ ở backend, còn ý nghĩa nghiệp vụ là “người hoặc vai trò cần xử lý hiện tại”.
+  **Ảnh hưởng nếu sai**: Các history row mới vẫn hiển thị wording cũ trong timeline summary và bảng chi tiết khi mở rộng.
+  **Phải kiểm tra cùng**: `srv/bug-service/history-read-models.js`, `srv/bug-service/history.js`, `app/bug-management-ui/webapp/ext/fragment/HistoryTimeline.fragment.xml`, các annotation label ownership của Fiori.
+
 ## IDTS-36 Read-Only Guard Update
 
 ### English

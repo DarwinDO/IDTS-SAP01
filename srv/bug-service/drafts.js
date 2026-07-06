@@ -4,7 +4,8 @@ const { SELECT } = cds.ql
 
 const {
   bugIDFrom,
-  readBug
+  readBug,
+  resolveRequestUser
 } = require('./helpers')
 
 const {
@@ -42,6 +43,39 @@ async function prepareDraftPatch (req, entities) {
   }
 }
 
+async function prepareDraftNew (req, actor) {
+  if (!actor) {
+    return req.reject(
+      403,
+      'An active IDTS user is required to create a bug report.',
+      'reporter_ID'
+    )
+  }
+
+  // Reporter is system-managed. Never trust a client-supplied reporter for a
+  // new draft; bind it to the authenticated IDTS user instead.
+  req.data.reporter_ID = actor.ID
+}
+
+async function ensureDraftReporterForSave (req, entities, draft, actor) {
+  if (draft.reporter_ID) return draft.reporter_ID
+
+  if (!actor && entities) actor = await resolveRequestUser(req, entities)
+
+  if (!actor) {
+    return req.reject(
+      403,
+      'An active IDTS user is required to activate a bug draft.',
+      'reporter_ID'
+    )
+  }
+
+  // This fallback supports drafts created before IDTS-49. The active CREATE
+  // handler still applies the authoritative system-managed fields afterward.
+  draft.reporter_ID = actor.ID
+  return actor.ID
+}
+
 async function handleDraftSave (req, entities, next) {
   await validateDraftForSave(req, entities)
   await captureDraftSaveState(req, entities)
@@ -58,6 +92,7 @@ async function validateDraftForSave (req, entities) {
   const draft = await cds.tx(req).run(SELECT.one.from(entities.Bugs.drafts).where({ ID: bugID }))
   if (!draft) return
 
+  await ensureDraftReporterForSave(req, entities, draft)
   validateRequiredBugFields(req, draft, { rejectFirst: true })
   await validateActiveCodeLists(req, entities, draft)
 }
@@ -87,7 +122,9 @@ async function recordDraftBugSaveSideEffects (req, data, entities) {
 }
 
 module.exports = {
+  ensureDraftReporterForSave,
   prepareDraftPatch,
+  prepareDraftNew,
   handleDraftSave,
   validateDraftForSave
 }

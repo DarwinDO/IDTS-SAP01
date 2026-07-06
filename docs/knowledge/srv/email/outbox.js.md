@@ -122,8 +122,34 @@ Gửi email trực tiếp bên trong request Assign hoặc Close rất rủi ro:
 - Không retry row `SENT` hoặc `SKIPPED`.
 - Hiểu delivery là at-least-once: locking giảm gửi trùng nhưng không thể bảo đảm exactly-once nếu process chết sau khi SMTP nhận mail.
 
+### IDTS-48 update: provider-neutral delivery results
+
+IDTS-48 keeps the outbox pattern exactly where it was. The database still stores one `NotificationDeliveries` row per email delivery attempt, and `processEmailDeliveries` still receives a generic `sendMail` function. The only change here is wording and error handling: the result is now called `providerResult` instead of `smtpResult`, and sanitized error summaries also cover Brevo API failures.
+
+For a new developer, the key idea is: outbox does not care which provider is used. SMTP, Brevo API, or a later provider must all return the same small result shape, mainly `{ messageId }`, or throw a sanitized error. That lets retry, lock, status, and rollback behavior remain stable.
+
+Cross-folder check for this change:
+
+- `srv/email/sender.js` turns provider-specific responses into `{ messageId }`.
+- `srv/email/worker.js` passes the selected sender to `processEmailDeliveries`.
+- `scripts/qa/test-email-outbox-programmatic.js` protects existing SMTP/outbox behavior.
+- `scripts/qa/test-email-brevo-api-integration.js` proves Brevo API success and failure still update delivery rows correctly.
+
+### Cap nhat IDTS-48: ket qua delivery khong phu thuoc provider
+
+IDTS-48 giu nguyen outbox pattern. Database van luu mot row `NotificationDeliveries` cho moi email delivery, va `processEmailDeliveries` van nhan mot ham `sendMail` chung. Thay doi chinh o file nay la cach goi ten va sanitize loi: ket qua bay gio la `providerResult` thay vi `smtpResult`, va summary loi da bao gom ca loi Brevo API.
+
+Y quan trong cho nguoi moi: outbox khong can biet provider nao dang duoc dung. SMTP, Brevo API, hay provider sau nay deu phai tra ve cung shape nho, chu yeu la `{ messageId }`, hoac throw loi da sanitize. Nho vay retry, lock, status va rollback behavior khong bi doi.
+
+Can kiem tra chung khi sua:
+
+- `srv/email/sender.js` bien response rieng cua provider thanh `{ messageId }`.
+- `srv/email/worker.js` dua sender da chon vao `processEmailDeliveries`.
+- `scripts/qa/test-email-outbox-programmatic.js` bao ve behavior SMTP/outbox hien co.
+- `scripts/qa/test-email-brevo-api-integration.js` chung minh Brevo API success/failure cap nhat delivery row dung.
+
 ## Metadata
 
 - Source: `srv/email/outbox.js`
-- Related task: IDTS-36
-- Last reviewed: 2026-06-30
+- Related task: IDTS-36, IDTS-48
+- Last reviewed: 2026-07-02

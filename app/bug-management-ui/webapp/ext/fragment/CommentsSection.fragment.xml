@@ -1,0 +1,80 @@
+<core:FragmentDefinition
+  xmlns="sap.m"
+  xmlns:core="sap.ui.core"
+  xmlns:collab="idts.bugmanagementui.ext.controls"
+>
+  <collab:BugCollaborationSection class="sapUiSmallMarginTop sapUiSmallMarginBottom">
+    <Panel
+      backgroundDesign="Transparent"
+      expandable="false"
+      class="sapUiSmallMarginBottom"
+    >
+      <content>
+        <VBox>
+          <Label
+            text="{i18n>commentsInputLabel}"
+            labelFor="idtsCommentTextArea"
+          />
+          <TextArea
+            id="idtsCommentTextArea"
+            width="100%"
+            rows="3"
+            growing="true"
+            growingMaxLines="6"
+            maxLength="1000"
+            placeholder="{i18n>commentsInputPlaceholder}"
+            enabled="{= ${IsActiveEntity} === true &amp;&amp; ${HasDraftEntity} !== true }"
+            class="sapUiTinyMarginTop"
+          />
+          <HBox justifyContent="End" class="sapUiTinyMarginTop">
+            <Button
+              core:require="{ Collaboration: 'idts/bugmanagementui/ext/sections/BugCollaboration' }"
+              text="{i18n>commentsPostButton}"
+              type="Emphasized"
+              icon="sap-icon://post"
+              press="Collaboration.onAddComment"
+              enabled="{= ${IsActiveEntity} === true &amp;&amp; ${HasDraftEntity} !== true }"
+            />
+          </HBox>
+          <MessageStrip
+            text="{i18n>commentsDraftWarning}"
+            type="Information"
+            showIcon="true"
+            visible="{= ${IsActiveEntity} !== true || ${HasDraftEntity} === true }"
+            class="sapUiTinyMarginTop"
+          />
+        </VBox>
+      </content>
+    </Panel>
+
+    <List
+      id="idtsCommentsFeed"
+      items="{
+        path: 'comments',
+        parameters: {
+          $orderby: 'createdAt desc'
+        }
+      }"
+      showSeparators="Inner"
+      noDataText="{i18n>commentsNoData}"
+    >
+      <FeedListItem
+        core:require="{ Collaboration: 'idts/bugmanagementui/ext/sections/BugCollaboration' }"
+        sender="{authorDisplayName}"
+        info="{
+          parts: [
+            { path: 'authorDisplayName' },
+            { path: 'authorRoleName' }
+          ],
+          formatter: 'Collaboration.formatAuthorInfo'
+        }"
+        timestamp="{ path: 'createdAt', formatter: 'Collaboration.formatDateTime' }"
+        text="{content}"
+        icon="sap-icon://person-placeholder"
+        senderActive="false"
+        iconActive="false"
+        maxCharacters="800"
+      />
+    </List>
+  </collab:BugCollaborationSection>
+</core:FragmentDefinition>

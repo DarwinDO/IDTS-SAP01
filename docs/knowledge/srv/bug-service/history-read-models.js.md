@@ -57,3 +57,55 @@ Khi thay đổi field ghi history hoặc cách nhóm, cập nhật cả file nà
 - Knowledge mirror: `docs/knowledge/srv/bug-service/history-read-models.js.md`
 - Source layer: `srv`
 - Last reviewed: 2026-06-22
+
+## IDTS History Wording Normalization
+
+### English
+
+This file now normalizes history field labels before sending them to the UI.
+
+The reason is subtle: `HistoryLogs.fieldLabel` is persisted in the database when the event is written. Older rows can therefore still contain `Next Processor User` and `Next Processor Role` even after the source constants are renamed. Without read-time normalization, old bugs keep showing outdated wording in the History Timeline forever.
+
+The read model now does two things:
+
+1. For known field names, it prefers the current label from `HISTORY_FIELD_LABELS`.
+2. For legacy persisted labels, it maps:
+   - `Next Processor User` -> `Current Action Owner`
+   - `Next Processor Role` -> `Action Owner Role`
+
+This affects both `groupedChangeContext` and expanded `logs`, so the short timeline sentence and the detail table stay consistent.
+
+- **Location**: `srv/bug-service/history-read-models.js:50-54`
+  **IDTS concept**: Legacy label compatibility for persisted audit rows.
+  **Impact if broken**: Existing Render/local history can still show old “Next Processor” wording even if new history rows are correct.
+  **Must check together**: `srv/bug-service/constants.js`, `scripts/qa/test-history-events-programmatic.js`, Fiori History Timeline fragment.
+
+- **Location**: `srv/bug-service/history-read-models.js:120-139`
+  **IDTS concept**: One normalized display label is used for both summary and expanded log table.
+  **Impact if broken**: Timeline summary and expanded table can disagree, making the audit trail look inconsistent.
+  **Must check together**: `HistoryEvents.groupedChangeContext`, `HistoryEvents.logs/fieldLabel`, browser smoke on the Object Page History section.
+
+### Vietnamese
+
+File này hiện normalize label của history trước khi trả dữ liệu về UI.
+
+Lý do hơi dễ bị bỏ sót: `HistoryLogs.fieldLabel` được lưu cứng vào database ngay lúc event được ghi. Vì vậy các row cũ vẫn có thể chứa `Next Processor User` và `Next Processor Role` dù source constant đã đổi tên. Nếu không normalize khi đọc, các bug cũ sẽ tiếp tục hiện wording cũ trong History Timeline mãi.
+
+Read model hiện làm hai việc:
+
+1. Với field name đã biết, ưu tiên label mới nhất từ `HISTORY_FIELD_LABELS`.
+2. Với label cũ đã lưu trong database, map lại:
+   - `Next Processor User` -> `Current Action Owner`
+   - `Next Processor Role` -> `Action Owner Role`
+
+Việc này áp dụng cho cả `groupedChangeContext` và `logs` mở rộng, nên câu tóm tắt ngắn trong timeline và bảng detail bên dưới dùng cùng một cách gọi.
+
+- **Vị trí**: `srv/bug-service/history-read-models.js:50-54`
+  **Khái niệm IDTS**: Tương thích label cũ cho audit row đã lưu trước đó.
+  **Ảnh hưởng nếu sai**: History hiện có trên Render/local vẫn có thể hiện chữ “Next Processor” dù history mới đã đúng.
+  **Phải kiểm tra cùng**: `srv/bug-service/constants.js`, `scripts/qa/test-history-events-programmatic.js`, Fiori History Timeline fragment.
+
+- **Vị trí**: `srv/bug-service/history-read-models.js:120-139`
+  **Khái niệm IDTS**: Dùng một label hiển thị đã normalize cho cả summary và bảng log mở rộng.
+  **Ảnh hưởng nếu sai**: Timeline summary và bảng detail có thể dùng hai wording khác nhau, làm audit trail trông không nhất quán.
+  **Phải kiểm tra cùng**: `HistoryEvents.groupedChangeContext`, `HistoryEvents.logs/fieldLabel`, browser smoke ở Object Page History section.

@@ -52,6 +52,10 @@ sap.ui.define([
             return canCreateBug();
         },
 
+        openDashboard: function () {
+            window.location.href = window.location.pathname.replace(/\/index\.html.*$/, "/dashboard.html");
+        },
+
         createBug: function () {
             if (!canCreateBug()) {
                 return Promise.reject(new Error("Current user is not allowed to create bug reports."));

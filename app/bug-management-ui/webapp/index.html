@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Issue and Defect Tracking System</title>
+    <link rel="stylesheet" href="css/idts-shell.css">
     <style>
         html, body, body > div, #container, #container-uiarea {
             height: 100%;
@@ -21,7 +22,7 @@
 
     <script
         id="sap-ui-bootstrap"
-        src="https://sapui5.hana.ondemand.com/1.148.0/resources/sap-ui-core.js"
+        src="resources/sap-ui-core.js"
         data-sap-ui-theme="sap_horizon"
         data-sap-ui-resource-roots='{
             "idts.bugmanagementui": "./"
@@ -33,6 +34,7 @@
     ></script>
 </head>
 <body class="sapUiBody sapUiSizeCompact" id="content">
+    <div id="idtsProfileShellHost"></div>
     <div
         data-sap-ui-component
         data-name="idts.bugmanagementui"

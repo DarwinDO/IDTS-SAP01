@@ -3,7 +3,8 @@
     "@cap-js/attachments": "^3.12.2",
     "@cap-js/postgres": "^2",
     "@sap/cds": "^9.9.1",
-    "nodemailer": "^9.0.1"
+    "nodemailer": "^9.0.1",
+    "pg": "^8.21.0"
   },
   "engines": {
     "node": ">=20 <23"
@@ -25,6 +26,8 @@
     "render:db:deploy": "cds-deploy",
     "render:env:db": "cds env requires.db --profile integration",
     "render:auth:set-password": "node scripts/dev/set-local-user-password.js",
+    "render:auth:set-qa-passwords": "node scripts/render/set-qa-passwords-from-env.js",
+    "render:auth:update-qa-emails": "node scripts/render/update-qa-emails-from-env.js",
     "sap490:gws:version": "gws --version",
     "sap490:gws:auth-status": "gws auth status",
     "sap490:gws:check": "node scripts/sap490/gws-check.mjs",
@@ -38,7 +41,9 @@
     "qa:comments-attachments:http": "powershell -ExecutionPolicy Bypass -File scripts/qa/test-comments-attachments.ps1",
     "qa:comments-attachments:programmatic": "node scripts/qa/test-comments-attachments-programmatic.js",
     "qa:auth:programmatic": "node scripts/qa/test-auth-foundation-programmatic.js",
+    "qa:render-identity:programmatic": "node scripts/qa/test-render-identity-helper.js",
     "qa:depth:self-test": "node scripts/qa/test-qa-depth-gate.js",
+    "qa:draft-reporter:programmatic": "node scripts/qa/test-idts49-draft-reporter.js",
     "qa:depth:pr-body": "node scripts/qa/check-pr-depth.js",
     "qa:secret-scan": "node scripts/qa/secret-scan.js",
     "qa:idts41:programmatic": "node scripts/qa/test-idts41-code-list-validation.js",
@@ -47,9 +52,11 @@
     "qa:idts56:browser": "node scripts/qa/test-idts56-smart-assign-browser.js",
     "qa:email-outbox:programmatic": "node scripts/qa/test-email-outbox-programmatic.js",
     "qa:email-smtp:integration": "node scripts/qa/test-email-smtp-integration.js",
+    "qa:email-brevo-api:integration": "node scripts/qa/test-email-brevo-api-integration.js",
+    "qa:auth-email:playwright": "node scripts/qa/test-idts38-auth-email-playwright.js",
     "qa:developer-workload:programmatic": "node scripts/qa/test-developer-workload-programmatic.js",
     "qa:direct-assignee:http": "powershell -ExecutionPolicy Bypass -File scripts/qa/test-direct-assignee-draft-save.ps1",
-    "qa:history-events:programmatic": "node scripts/qa/test-history-events-programmatic.js assign && node scripts/qa/test-history-events-programmatic.js resubmit && node scripts/qa/test-history-events-programmatic.js reject && node scripts/qa/test-history-events-programmatic.js pending && node scripts/qa/test-history-events-programmatic.js close && node scripts/qa/test-history-events-programmatic.js edit",
+    "qa:history-events:programmatic": "node scripts/qa/test-history-events-programmatic.js assign && node scripts/qa/test-history-events-programmatic.js resubmit && node scripts/qa/test-history-events-programmatic.js reject && node scripts/qa/test-history-events-programmatic.js pending && node scripts/qa/test-history-events-programmatic.js close && node scripts/qa/test-history-events-programmatic.js edit && node scripts/qa/test-history-events-programmatic.js legacy-labels",
     "qa:pm-monitoring:http": "node scripts/qa/test-pm-monitoring-http.js",
     "qa:pm-monitoring:programmatic": "node scripts/qa/test-pm-monitoring-programmatic.js",
     "dev:sqlite:refresh-views": "node scripts/dev/refresh-sqlite-service-views.js",
@@ -118,12 +125,20 @@
       },
       "email": {
         "enabled": false,
+        "provider": "smtp",
+        "brevoApiEndpoint": "https://api.brevo.com/v3/smtp/email",
         "secure": false,
         "maxRetryCount": 2,
         "pollIntervalMs": 15000,
         "batchSize": 10,
         "maxConnections": 3,
         "testMode": false
+      }
+    },
+    "log": {
+      "levels": {
+        "cds": "warn",
+        "cds.serve": "warn"
       }
     }
   }

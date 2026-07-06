@@ -61,8 +61,8 @@ const HISTORY_FIELD_LABELS = {
   plannedCompletionDate: 'Planned Completion Date',
   dueDate: 'Due Date',
   estimatedEffortHours: 'Estimated Effort Hours',
-  nextProcessorUser: 'Next Processor User',
-  nextProcessorRole: 'Next Processor Role',
+  nextProcessorUser: 'Current Action Owner',
+  nextProcessorRole: 'Action Owner Role',
   rejectionReason: 'Rejection Reason',
   comment: 'Comment',
   attachment: 'Attachment'

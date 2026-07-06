@@ -79,6 +79,30 @@ Important anchors:
   - Impact if broken: Users may lose the create entry point or Developer users may see a misleading create button.
   - Must check together: `app/bug-management-ui/webapp/ext/actions/BugListActions.js`, `app/bug-management-ui/annotations/capabilities.cds`, `srv/service.js`, and `srv/bug-service/permissions.js`.
 
+## IDTS-54 update - dashboard entry action
+
+### English
+
+IDTS-54 adds the List Report header action `OpenDashboard`. The dashboard itself is a protected standalone SAPUI5 page at `dashboard.html`, so the manifest only owns the user entry point from the generated bug list.
+
+Important anchors:
+
+- Location: `BugsList.options.settings.content.header.actions.OpenDashboard`
+  - IDTS concept: user-facing entry point from bug list to dashboard.
+  - Impact if broken: dashboard may exist but users cannot find it.
+  - Must check together: i18n key `dashboardOpenAction`, `webapp/ext/actions/BugListActions.js`, `webapp/dashboard.html`, `webapp/dashboard-page.js`, and browser smoke after login.
+
+### Vietnamese
+
+IDTS-54 thêm List Report header action `OpenDashboard`. Dashboard là một standalone SAPUI5 page được bảo vệ tại `dashboard.html`, nên manifest chỉ quản lý điểm vào từ bug list generated.
+
+Các anchor quan trọng:
+
+- Vị trí: `BugsList.options.settings.content.header.actions.OpenDashboard`
+  - Khái niệm IDTS: điểm vào dashboard dành cho user từ bug list.
+  - Ảnh hưởng nếu sai: dashboard tồn tại nhưng user không tìm thấy.
+  - Phải kiểm tra cùng: i18n key `dashboardOpenAction`, `webapp/ext/actions/BugListActions.js`, `webapp/dashboard.html`, `webapp/dashboard-page.js`, và browser smoke sau login.
+
 - Location: `BugsObjectPage.options.settings.content.body.sections.History`
   - IDTS concept: One readable history/timeline section on the Object Page.
   - Impact if broken: The Object Page can show no history or duplicate history sections.
@@ -104,34 +128,117 @@ Thứ hai, custom section History trên Object Page dùng key `History` thay vì
   - Ảnh hưởng nếu sai: Object Page có thể không hiện history hoặc hiện trùng nhiều section history.
   - Phải kiểm tra cùng: `app/bug-management-ui/annotations/object-page.cds`, `app/bug-management-ui/webapp/ext/fragment/HistoryTimeline.fragment.xml`, và các history entity trong `srv/service.cds`.
 
-## IDTS-56 update - Smart Assign Object Page action
-
-### English
-
-IDTS-56 adds a custom Object Page header action named `Smart Assign`.
-
-Important anchor:
-
-- Location: `BugsObjectPage.options.settings.content.header.actions.SmartAssignDeveloper`
-  - IDTS concept: PM/Tester-friendly developer assignment entry point.
-  - Behavior: calls `idts.bugmanagementui.ext.actions.SmartAssignDeveloper.openDialog`, which opens a SAPUI5 dialog listing assignable developers with search, capability, module scope, responsibility, and availability state.
-  - Security boundary: this is only UI assistance. CAP backend action `BugService.assignToDeveloper` and write validation still enforce valid assignee, role permission, responsibility, and availability.
-  - Must check together: `app/bug-management-ui/webapp/ext/actions/SmartAssignDeveloper.js`, `srv/service.cds`, `srv/bug-service/actions.js`, `srv/bug-service/bug-write.js`, and `scripts/qa/test-idts56-smart-assign*.js`.
-
-### Vietnamese
-
-IDTS-56 them custom action `Smart Assign` tren Object Page header.
-
-Diem neo quan trong:
-
-- Vi tri: `BugsObjectPage.options.settings.content.header.actions.SmartAssignDeveloper`
-  - Khai niem IDTS: diem vao de PM/Tester chon developer ro rang hon value help mac dinh.
-  - Hanh vi: goi `SmartAssignDeveloper.openDialog` de mo dialog SAPUI5 hien developer co the assign, search theo developer/module/capability, va hien availability.
-  - Ranh gioi bao mat: UI chi ho tro chon; CAP backend van la lop enforce cuoi cung cho quyen, assignee hop le, responsibility, va availability.
-
 ## Metadata
 
 - Source file: `app/bug-management-ui/webapp/manifest.json`
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/manifest.json.md`
 - Source layer: `app`
-- Last reviewed: 2026-07-06
+- Last reviewed: 2026-07-01
+
+## IDTS-55 runtime fix note
+
+### English
+
+The Comments and Evidence sections are custom Object Page sections under `BugsObjectPage.options.settings.content.body.sections`.
+
+For OData V4 Fiori Elements, the section entry must point to the fragment module path and preserve a stable section key:
+
+- `IdtsCommentsCustom`
+- `IdtsAttachmentsCustom`
+
+These keys are also used as anchors and stable generated IDs. If either key changes, check the fragment IDs, browser smoke locators, and knowledge mirrors together.
+
+### Vietnamese
+
+Comments và Evidence là custom Object Page sections dưới `BugsObjectPage.options.settings.content.body.sections`.
+
+Với Fiori Elements OData V4, section entry phải trỏ đúng module path của fragment và giữ key ổn định:
+
+- `IdtsCommentsCustom`
+- `IdtsAttachmentsCustom`
+
+Các key này đồng thời được dùng làm anchor và stable generated ID. Nếu đổi key, phải kiểm tra fragment IDs, browser smoke locators và knowledge mirrors cùng lúc.
+
+## IDTS-55 update - custom Comments and Evidence sections
+
+### English
+
+IDTS-55 adds two custom Object Page sections under `BugsObjectPage.options.settings.content.body.sections`:
+
+- `IdtsCommentsCustom`
+- `IdtsAttachmentsCustom`
+
+These sections keep the generated Fiori Elements Object Page, but replace the old raw comments/attachments facets with clearer custom SAPUI5 fragments. The manifest is the layer that tells Fiori Elements where those fragments appear. The behavior itself is in `BugCollaboration.js`.
+
+Important anchors:
+
+- **Location**: `app/bug-management-ui/webapp/manifest.json:52`
+  `"sap.ui.unified": {}`
+  **IDTS concept**: Enables the FileUploader control used by the Evidence / Attachments section.
+  **Impact if broken**: The custom attachment section can fail to load because `sap.ui.unified.FileUploader` is not available.
+  **Must check together**: `AttachmentsSection.fragment.xml`, UI5 build, and browser smoke on the Object Page.
+
+- **Location**: `app/bug-management-ui/webapp/manifest.json:205`
+  `IdtsCommentsCustom`
+  **IDTS concept**: Inserts the custom comment feed after the reproduction/test context area.
+  **Impact if broken**: Users may lose the improved comments UX or see the section in the wrong place.
+  **Must check together**: `CommentsSection.fragment.xml`, `BugCollaboration.js`, `object-page.cds`, and `srv/service.cds:addComment`.
+
+- **Location**: `app/bug-management-ui/webapp/manifest.json:214`
+  `IdtsAttachmentsCustom`
+  **IDTS concept**: Inserts the custom evidence upload/list section directly after comments.
+  **Impact if broken**: Users may lose upload/download/delete UX or see duplicate attachment sections.
+  **Must check together**: `AttachmentsSection.fragment.xml`, `BugCollaboration.js`, `object-page.cds`, `db/schema.cds` attachments, and `scripts/qa/test-comments-attachments.ps1`.
+
+### Vietnamese
+
+IDTS-55 thêm hai custom section vào Object Page dưới `BugsObjectPage.options.settings.content.body.sections`:
+
+- `IdtsCommentsCustom`
+- `IdtsAttachmentsCustom`
+
+Hai section này vẫn giữ Object Page generated của Fiori Elements, nhưng thay phần comments/attachments raw facet cũ bằng fragment SAPUI5 dễ dùng hơn. Manifest chỉ quyết định các fragment được chèn vào đâu; hành vi bấm nút và gọi backend nằm trong `BugCollaboration.js`.
+
+Các anchor quan trọng:
+
+- **Vị trí**: `app/bug-management-ui/webapp/manifest.json:52`
+  `"sap.ui.unified": {}`
+  **Khái niệm IDTS**: Bật thư viện chứa FileUploader dùng cho section Evidence / Attachments.
+  **Ảnh hưởng nếu sai**: Custom attachment section có thể không load vì thiếu `sap.ui.unified.FileUploader`.
+  **Phải kiểm tra cùng**: `AttachmentsSection.fragment.xml`, UI5 build, và browser smoke trên Object Page.
+
+- **Vị trí**: `app/bug-management-ui/webapp/manifest.json:205`
+  `IdtsCommentsCustom`
+  **Khái niệm IDTS**: Chèn comment feed custom ngay sau phần reproduction/test context.
+  **Ảnh hưởng nếu sai**: User mất UX comment mới hoặc section nằm sai vị trí.
+  **Phải kiểm tra cùng**: `CommentsSection.fragment.xml`, `BugCollaboration.js`, `object-page.cds`, và action `addComment` trong `srv/service.cds`.
+
+- **Vị trí**: `app/bug-management-ui/webapp/manifest.json:214`
+  `IdtsAttachmentsCustom`
+  **Khái niệm IDTS**: Chèn section evidence upload/list ngay sau comments.
+  **Ảnh hưởng nếu sai**: User mất UX upload/download/delete hoặc thấy trùng nhiều section attachment.
+  **Phải kiểm tra cùng**: `AttachmentsSection.fragment.xml`, `BugCollaboration.js`, `object-page.cds`, attachments trong `db/schema.cds`, và `scripts/qa/test-comments-attachments.ps1`.
+
+## IDTS-56 update - Smart Assign Object Page action
+
+### English
+
+IDTS-56 adds the `SmartAssignDeveloper` custom header action to the Bugs Object Page. The manifest only wires the action into Fiori Elements. The actual dialog behavior lives in `app/bug-management-ui/webapp/ext/actions/SmartAssignDeveloper.js`, and the final assignment rule still lives in the CAP backend.
+
+Important anchors:
+
+- **Location**: `BugsObjectPage.options.settings.content.header.actions.SmartAssignDeveloper`
+  **IDTS concept**: Gives Tester/PM users a clearer way to select a suitable developer from filtered assignment candidates.
+  **Impact if broken**: Users may lose the Smart Assign entry point, or the button may call the wrong extension handler.
+  **Must check together**: `SmartAssignDeveloper.js`, `i18n.properties`, `BugService.AssignableDevelopers`, `BugService.assignToDeveloper`, and the IDTS-56 QA scripts.
+
+### Vietnamese
+
+IDTS-56 thêm custom header action `SmartAssignDeveloper` vào Bugs Object Page. Manifest chỉ có nhiệm vụ gắn action này vào Fiori Elements. Hành vi mở dialog nằm trong `app/bug-management-ui/webapp/ext/actions/SmartAssignDeveloper.js`, còn luật assign cuối cùng vẫn nằm ở backend CAP.
+
+Điểm neo quan trọng:
+
+- **Vị trí**: `BugsObjectPage.options.settings.content.header.actions.SmartAssignDeveloper`
+  **Khái niệm IDTS**: Cho Tester/PM một cách rõ ràng hơn để chọn developer phù hợp từ danh sách candidate đã filter.
+  **Ảnh hưởng nếu sai**: User có thể mất nút Smart Assign, hoặc nút gọi nhầm extension handler.
+  **Phải kiểm tra cùng**: `SmartAssignDeveloper.js`, `i18n.properties`, `BugService.AssignableDevelopers`, `BugService.assignToDeveloper`, và các QA script IDTS-56.

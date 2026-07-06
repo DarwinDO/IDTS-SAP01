@@ -115,7 +115,8 @@ annotate service.Bugs with @(
       $Type  : 'UI.ReferenceFacet',
       ID     : 'Attachments',
       Label  : 'Evidence / Attachments',
-      Target : 'attachments/@UI.LineItem'
+      Target : 'attachments/@UI.LineItem',
+      ![@UI.Hidden] : true
     },
     {
       $Type  : 'UI.CollectionFacet',
@@ -134,7 +135,7 @@ annotate service.Bugs with @(
           Target : 'comments/@UI.LineItem'
         }
       ],
-      ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}}
+      ![@UI.Hidden] : true
     },
     {
       $Type  : 'UI.ReferenceFacet',

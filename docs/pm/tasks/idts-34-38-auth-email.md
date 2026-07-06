@@ -1,6 +1,6 @@
 # IDTS-34 to IDTS-38 - Custom Login and SMTP Email Notification
 
-Last updated: 2026-06-30
+Last updated: 2026-07-03
 
 ## Summary
 
@@ -39,7 +39,7 @@ Vietnamese:
 | IDTS-35 | DatDT | Login UI and authenticated app session | Done; PR #30 merged into `dev`; Jira live state confirmed Done |
 | IDTS-36 | DonHV | SMTP email delivery with outbox tracking | Done; PR #29 merged into `dev`; Jira moved to Done |
 | IDTS-37 | SangVN | Notification UI/readability verification | Unblocked by merged IDTS-36 |
-| IDTS-38 | NhanT | Auth/email regression QA | Unblocked by merged IDTS-34 and IDTS-36 |
+| IDTS-38 | NhanT | Auth/email regression QA | Done; DonHV confirmed the Sprint 3 login/email regression evidence is acceptable and Jira moved to Done |
 
 ## Implementation Boundaries
 

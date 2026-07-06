@@ -118,3 +118,45 @@ Dữ liệu không bị xóa. `HistoryEvents` và `HistoryLogs` vẫn tồn tạ
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/annotations/object-page.cds.md`
 - Source layer: `app`
 - Last reviewed: 2026-07-01
+
+## IDTS-55 update - hide raw comments and attachments facets
+
+### English
+
+IDTS-55 does not delete comments or attachments from the backend. It only hides the old generated Object Page facets for comments and attachments because the user-facing experience now comes from custom sections registered in `manifest.json`.
+
+For a Fiori beginner: a facet is a section of the Object Page. If the old facets stay visible while the custom sections are also registered, users see duplicate comments and duplicate attachment areas. That makes QA confusing and weakens the polished Fiori UX.
+
+Important anchors:
+
+- **Location**: `app/bug-management-ui/annotations/object-page.cds:116`
+  `ID : 'Attachments' ... ![@UI.Hidden] : true`
+  **IDTS concept**: Hide the raw generated attachment facet while keeping the attachment data and service contract.
+  **Impact if broken**: The Object Page may show both the generated attachment table and the custom Evidence / Attachments section.
+  **Must check together**: `manifest.json:IdtsAttachmentsCustom`, `AttachmentsSection.fragment.xml`, `BugCollaboration.js`, and `srv/service.cds:Bugs_attachments`.
+
+- **Location**: `app/bug-management-ui/annotations/object-page.cds:123`
+  `ID : 'Comments' ... ![@UI.Hidden] : true`
+  **IDTS concept**: Hide the old generated comments collection facet while keeping `Comments` and `addComment` available.
+  **Impact if broken**: The Object Page may show duplicate comment UX or expose the old action/table combination again.
+  **Must check together**: `manifest.json:IdtsCommentsCustom`, `CommentsSection.fragment.xml`, `BugCollaboration.js`, and `srv/service.cds:addComment`.
+
+### Vietnamese
+
+IDTS-55 không xóa comments hoặc attachments khỏi backend. Thay đổi này chỉ ẩn các facet generated cũ trên Object Page, vì trải nghiệm người dùng mới được cung cấp qua custom sections trong `manifest.json`.
+
+Với người mới học Fiori: facet là một section/phần trên Object Page. Nếu facet cũ vẫn hiện trong khi custom section mới cũng được đăng ký, user sẽ thấy trùng khu vực comments và trùng khu vực attachments. Điều đó gây rối khi QA và làm UX kém polish.
+
+Các anchor quan trọng:
+
+- **Vị trí**: `app/bug-management-ui/annotations/object-page.cds:116`
+  `ID : 'Attachments' ... ![@UI.Hidden] : true`
+  **Khái niệm IDTS**: Ẩn raw generated attachment facet nhưng giữ nguyên data và service contract.
+  **Ảnh hưởng nếu sai**: Object Page có thể hiện cả bảng attachment generated và custom Evidence / Attachments section.
+  **Phải kiểm tra cùng**: `manifest.json:IdtsAttachmentsCustom`, `AttachmentsSection.fragment.xml`, `BugCollaboration.js`, và `srv/service.cds:Bugs_attachments`.
+
+- **Vị trí**: `app/bug-management-ui/annotations/object-page.cds:123`
+  `ID : 'Comments' ... ![@UI.Hidden] : true`
+  **Khái niệm IDTS**: Ẩn comments collection facet cũ nhưng vẫn giữ `Comments` và action `addComment`.
+  **Ảnh hưởng nếu sai**: Object Page có thể hiện trùng comment UX hoặc lộ lại action/table cũ.
+  **Phải kiểm tra cùng**: `manifest.json:IdtsCommentsCustom`, `CommentsSection.fragment.xml`, `BugCollaboration.js`, và `srv/service.cds:addComment`.

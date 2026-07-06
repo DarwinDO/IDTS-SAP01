@@ -4,111 +4,96 @@
 
 ### What this file is for
 
-`Component.js` is the standard SAPUI5 component entry point for the IDTS Fiori
-Elements application. Its job is intentionally small: extend
-`sap/fe/core/AppComponent` and tell UI5 to use `manifest.json` as the app
-configuration.
+`Component.js` is the SAPUI5 component entry point for the protected IDTS Fiori Elements app. It extends `sap/fe/core/AppComponent`, uses `manifest.json` as the app configuration source, and initializes the post-login profile shell after UI5 is available.
+
+It does not validate tokens and it does not inject OData headers. Those pre-bootstrap responsibilities stay in `auth-guard.js`.
 
 ### Beginner explanation
 
-Think of this file as the front door of the Fiori app after the browser has
-already been allowed into `index.html`. It does not decide what screens exist,
-what fields are shown, or how OData is called. Those parts come mostly from
-`manifest.json`, CDS annotations, and the CAP OData metadata.
+After the browser passes the login guard in `index.html`, SAPUI5 loads this component. Fiori Elements then reads `manifest.json`, service metadata, and annotations to generate the List Report and Object Page.
 
-In IDTS-35, login is not handled here anymore. The login guard runs earlier in
-`auth-guard.js`, before the UI5 bootstrap script loads. That order matters
-because Fiori Elements may request `$metadata` immediately during startup, and
-that first request must already have the bearer token.
+For `IDTS-53`, this component also calls `ProfileShell.init()`. That is the right place for the profile shell because UI5 is already running here. The earlier `auth-guard.js` runs before UI5, so it should not create UI5 controls directly.
 
 ### Flow in IDTS
 
 1. Browser opens `webapp/index.html`.
-2. `index.html` loads `auth-guard.js` before the UI5 bootstrap.
-3. `auth-guard.js` redirects unauthenticated users to `login.html`, or installs
-   the OData bearer-token interceptor for authenticated users.
-4. UI5 bootstrap runs with `sap/ui/core/ComponentSupport`.
-5. UI5 loads this `Component.js`.
-6. This component extends `sap/fe/core/AppComponent` and lets Fiori Elements
-   render the List Report and Object Page based on `manifest.json` and service
-   metadata.
+2. `index.html` loads `auth-guard.js` before UI5.
+3. `auth-guard.js` redirects unauthenticated users or prepares bearer-token injection.
+4. SAPUI5 starts and loads `Component.js`.
+5. `Component.js` calls the normal Fiori Elements component initialization.
+6. `Component.js` calls `ProfileShell.init()`.
+7. `ProfileShell` renders the signed-in profile/sign-out UI into the stable host in `index.html`.
 
 ### Important source anchors
 
 | Location | IDTS concept | Impact if broken | Must check together |
 | --- | --- | --- | --- |
-| `sap.ui.define(["sap/fe/core/AppComponent"], ...)` | Fiori Elements app bootstrap | The app may fail to start or may not use Fiori Elements behavior. | `webapp/index.html`, `webapp/manifest.json` |
-| `metadata: { manifest: "json" }` | Manifest-driven app configuration | Routes, models, pages, and service binding may not load. | `webapp/manifest.json`, `app/bug-management-ui/annotations*.cds` |
+| `"sap/fe/core/AppComponent"` | Fiori Elements application base | The generated app may fail to start or lose Fiori Elements behavior. | `manifest.json`, annotations |
+| `"idts/bugmanagementui/ext/login/ProfileShell"` | Signed-in profile shell module | The visible profile menu and Sign Out UX may disappear. | `ext/login/ProfileShell.js`, `index.html`, `css/idts-shell.css` |
+| `metadata: { manifest: "json" }` | Manifest-driven configuration | Routes, models, pages, and service binding may not load. | `manifest.json` |
+| `AppComponent.prototype.init.apply(this, arguments)` | Required base initialization | Fiori Elements startup can break if this call is skipped. | UI5 build/browser smoke |
+| `ProfileShell.init()` | IDTS-53 profile startup | User cannot see signed-in account or Sign Out action. | `auth-guard.js`, `ProfileShell.js` |
 
 ### Cross-folder impact
 
-- `srv/service.cds` exposes `BugService`, which is the OData service used by the
-  Fiori app after this component starts.
-- `srv/auth.cds`, `srv/auth.js`, and `srv/auth/custom-auth.js` provide the login
-  and bearer-token contract that `auth-guard.js` and `login-page.js` depend on.
-- `db/schema.cds` defines `Users`, `AuthSessions`, and the bug-tracking entities
-  rendered through the Fiori app.
+- `srv/service.cds` exposes `BugService`, which the Fiori app uses after this component starts.
+- `srv/auth.cds`, `srv/auth.js`, and `srv/auth/custom-auth.js` define the login/session contract used before this component starts.
+- `db/schema.cds` contains the business data rendered by the Fiori Elements pages.
+- `app/bug-management-ui/webapp/manifest.json` defines the pages/routes/models consumed by this component.
 
 ### Safe editing checklist
 
-- Keep this file small unless there is a clear SAPUI5 component-level reason to
-  change it.
-- Do not put login flow, XHR monkey-patching, or UI code here; IDTS-35 keeps
-  those in `auth-guard.js` and `login-page.js`.
-- After editing, run UI5 build and at least one browser smoke test because this
-  file is part of application startup.
+- Always call the base `AppComponent` init before adding component-level startup behavior.
+- Do not move token validation or XHR header injection into this file; those must stay before UI5 bootstrap.
+- Keep component-level UI additions small and stable.
+- If profile shell behavior changes, update `ProfileShell.js`, `auth-guard.js`, and their knowledge mirrors together.
+- Run UI5 build/linter and browser smoke after changing this file.
 
 ## Vietnamese
 
 ### File này dùng để làm gì
 
-`Component.js` là điểm vào chuẩn của SAPUI5 component cho app Fiori Elements của
-IDTS. Nhiệm vụ của nó được giữ rất nhỏ: extend `sap/fe/core/AppComponent` và nói
-cho UI5 biết rằng app sẽ lấy cấu hình từ `manifest.json`.
+`Component.js` là entry point SAPUI5 component cho protected IDTS Fiori Elements app. File này extend `sap/fe/core/AppComponent`, dùng `manifest.json` làm nguồn cấu hình app, và khởi tạo profile shell sau khi UI5 đã sẵn sàng.
+
+File này không validate token và không tự gắn OData header. Những trách nhiệm cần chạy trước bootstrap vẫn nằm trong `auth-guard.js`.
 
 ### Giải thích cho người mới
 
-Có thể hiểu file này là “cửa vào” của Fiori app sau khi browser đã được phép đi
-vào `index.html`. Nó không quyết định app có màn hình nào, field nào được hiển
-thị, hoặc OData được gọi ra sao. Những phần đó chủ yếu đến từ `manifest.json`,
-CDS annotation, và metadata OData do CAP sinh ra.
+Sau khi browser vượt qua login guard trong `index.html`, SAPUI5 load component này. Fiori Elements sau đó đọc `manifest.json`, service metadata, và annotations để generate List Report và Object Page.
 
-Trong IDTS-35, login không còn xử lý trong file này. Phần kiểm tra đăng nhập
-chạy sớm hơn trong `auth-guard.js`, trước cả khi UI5 bootstrap được load. Thứ tự
-này quan trọng vì Fiori Elements có thể gọi `$metadata` ngay khi khởi động, và
-request đầu tiên đó phải có bearer token sẵn.
+Với `IDTS-53`, component này cũng gọi `ProfileShell.init()`. Đây là chỗ phù hợp để khởi tạo profile shell vì lúc này UI5 đã chạy. `auth-guard.js` chạy sớm hơn UI5, nên không nên tạo UI5 controls trực tiếp ở đó.
 
 ### Flow hoạt động trong IDTS
 
 1. Browser mở `webapp/index.html`.
-2. `index.html` load `auth-guard.js` trước UI5 bootstrap.
-3. `auth-guard.js` redirect user chưa đăng nhập sang `login.html`, hoặc gắn
-   interceptor để tự thêm bearer token cho OData nếu user đã đăng nhập.
-4. UI5 bootstrap chạy với `sap/ui/core/ComponentSupport`.
-5. UI5 load file `Component.js` này.
-6. Component extend `sap/fe/core/AppComponent` và để Fiori Elements render List
-   Report/Object Page dựa trên `manifest.json` và metadata service.
+2. `index.html` load `auth-guard.js` trước UI5.
+3. `auth-guard.js` redirect user chưa đăng nhập hoặc chuẩn bị bearer-token injection.
+4. SAPUI5 start và load `Component.js`.
+5. `Component.js` gọi initialization chuẩn của Fiori Elements component.
+6. `Component.js` gọi `ProfileShell.init()`.
+7. `ProfileShell` render signed-in profile/sign-out UI vào host ổn định trong `index.html`.
 
 ### Các điểm source quan trọng
 
 | Vị trí | Khái niệm IDTS | Ảnh hưởng nếu sai | Phải kiểm tra cùng |
 | --- | --- | --- | --- |
-| `sap.ui.define(["sap/fe/core/AppComponent"], ...)` | Bootstrap app Fiori Elements | App có thể không start được hoặc không chạy đúng hành vi Fiori Elements. | `webapp/index.html`, `webapp/manifest.json` |
-| `metadata: { manifest: "json" }` | App cấu hình bằng manifest | Routes, models, pages, và service binding có thể không load. | `webapp/manifest.json`, `app/bug-management-ui/annotations*.cds` |
+| `"sap/fe/core/AppComponent"` | Base app Fiori Elements | Generated app có thể không start hoặc mất hành vi Fiori Elements. | `manifest.json`, annotations |
+| `"idts/bugmanagementui/ext/login/ProfileShell"` | Module profile shell đã đăng nhập | Profile menu và Sign Out UX có thể biến mất. | `ext/login/ProfileShell.js`, `index.html`, `css/idts-shell.css` |
+| `metadata: { manifest: "json" }` | Cấu hình app bằng manifest | Routes, models, pages, service binding có thể không load. | `manifest.json` |
+| `AppComponent.prototype.init.apply(this, arguments)` | Base initialization bắt buộc | Fiori Elements startup có thể hỏng nếu bỏ call này. | UI5 build/browser smoke |
+| `ProfileShell.init()` | Khởi động profile IDTS-53 | User không thấy account đang login hoặc action Sign Out. | `auth-guard.js`, `ProfileShell.js` |
 
 ### Liên kết với folder khác
 
-- `srv/service.cds` expose `BugService`, là OData service mà Fiori app dùng sau
-  khi component này start.
-- `srv/auth.cds`, `srv/auth.js`, và `srv/auth/custom-auth.js` cung cấp contract
-  login/bearer-token mà `auth-guard.js` và `login-page.js` đang dựa vào.
-- `db/schema.cds` định nghĩa `Users`, `AuthSessions`, và các entity bug-tracking
-  được hiển thị qua Fiori app.
+- `srv/service.cds` expose `BugService`, được Fiori app dùng sau khi component này start.
+- `srv/auth.cds`, `srv/auth.js`, và `srv/auth/custom-auth.js` định nghĩa login/session contract dùng trước khi component này start.
+- `db/schema.cds` chứa dữ liệu nghiệp vụ được Fiori Elements pages hiển thị.
+- `app/bug-management-ui/webapp/manifest.json` định nghĩa pages/routes/models mà component này sử dụng.
 
 ### Checklist sửa file an toàn
 
-- Giữ file này nhỏ, chỉ sửa khi thật sự cần thay đổi ở cấp SAPUI5 component.
-- Không đưa login flow, XHR monkey-patch, hoặc UI code vào đây; IDTS-35 giữ
-  chúng trong `auth-guard.js` và `login-page.js`.
-- Sau khi sửa, chạy UI5 build và ít nhất một browser smoke test vì file này nằm
-  trong luồng khởi động app.
+- Luôn gọi base `AppComponent` init trước khi thêm startup behavior ở cấp component.
+- Không chuyển token validation hoặc XHR header injection vào file này; các phần đó phải nằm trước UI5 bootstrap.
+- Giữ UI bổ sung ở cấp component thật nhỏ và ổn định.
+- Nếu đổi profile shell behavior, cập nhật `ProfileShell.js`, `auth-guard.js`, và knowledge mirrors tương ứng cùng lúc.
+- Chạy UI5 build/linter và browser smoke sau khi sửa file này.

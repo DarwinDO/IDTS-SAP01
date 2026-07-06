@@ -4,7 +4,7 @@ const cds = require('@sap/cds')
 
 const { getEmailConfig } = require('./config')
 const { processEmailDeliveries } = require('./outbox')
-const { createSmtpSender } = require('./sender')
+const { createEmailSender } = require('./sender')
 
 const LOG = cds.log('idts-email')
 let job
@@ -15,15 +15,15 @@ function startEmailWorker () {
 
   const config = getEmailConfig()
   if (!config.enabled) {
-    LOG.info('SMTP email delivery is disabled; new delivery rows will be marked SKIPPED.')
+    LOG.info('Email delivery is disabled; new delivery rows will be marked SKIPPED.')
     return null
   }
   if (!config.ready) {
-    LOG.warn(`SMTP email delivery is not configured; missing fields: ${config.missing.join(', ')}.`)
+    LOG.warn(`Email delivery provider ${config.provider} is not configured; missing fields: ${config.missing.join(', ')}.`)
     return null
   }
 
-  sender = createSmtpSender(config)
+  sender = createEmailSender(config)
   job = cds.spawn({
     user: cds.User.privileged,
     every: config.pollIntervalMs
@@ -34,13 +34,13 @@ function startEmailWorker () {
       sendMail: message => sender.sendMail(message)
     })
     if (result.sent || result.failed) {
-      LOG.info(`SMTP outbox processed: sent=${result.sent}, failed=${result.failed}.`)
+      LOG.info(`Email outbox processed via ${config.provider}: sent=${result.sent}, failed=${result.failed}.`)
     }
   })
 
   job.on('failed', error => {
     const code = error?.code ? ` code=${error.code}` : ''
-    LOG.error(`SMTP outbox worker run failed.${code}`)
+    LOG.error(`Email outbox worker run failed.${code}`)
   })
 
   cds.once('shutdown', () => {

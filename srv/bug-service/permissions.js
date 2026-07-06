@@ -48,8 +48,14 @@ async function enforceBugCreatePermission (req, entities) {
 }
 
 function assertBugCreatePermission (req, actor) {
-  if (!actor) return
-  if (COORDINATOR_ROLES.has(actor.role_code)) return
+  if (!actor) {
+    return req.reject(
+      403,
+      'An active IDTS user is required to create a bug report.',
+      'reporter_ID'
+    )
+  }
+  if (COORDINATOR_ROLES.has(actor.role_code)) return actor
   return req.reject(403, 'Only Tester or PM users can create bug reports.')
 }
 

@@ -90,6 +90,24 @@ Member status files are also the temporary collection source for later SAP490 Te
 
 When a discovered bug or error is actionable for team tracking, also try to create or update a Jira issue through Atlassian Rovo/Jira MCP if the connector is available. Search Jira first to avoid duplicates. If a matching Jira issue exists, add a comment/update instead of creating a new issue. If a new Jira issue is created, record the Jira key/link in the relevant member status file. Do not send credentials, tokens, private endpoints, local-only paths with secrets, or sensitive personal data to Jira. For transient one-off command issues that were immediately fixed and have no remaining team action, the member status log is enough unless the user asks for Jira tracking.
 
+Jira task naming and issue hygiene are mandatory. Every new Jira task must use a clear summary, not a vague label. The summary must start with one domain prefix from `Backend`, `FE`, `QA`, `DevOps`, `Security`, `Docs`, `UX`, `PM`, or `Bug`, then state the concrete action and the affected object or flow. Avoid names such as `fix bug`, `update UI`, `test task`, `deploy`, or `refactor` without context.
+
+Every Jira task description must include:
+
+- Context / reason for creating the task.
+- Owner and support.
+- Due date.
+- Scope.
+- Out of scope when the task could be misunderstood.
+- Acceptance Criteria as a checklist.
+- Evidence expectation.
+- Dependencies / links section when the task relates to, blocks, is blocked by, duplicates, or follows up another task.
+- Security / no-secret note when the task touches auth, email, deployment, database, S3, API keys, user data, or private infrastructure.
+
+Bug tasks must also include steps to reproduce, expected result, actual result, and classification as product defect, environment blocker, tooling issue, data issue, test-harness issue, documentation issue, or process issue.
+
+If a Jira task depends on or is related to another task, create the proper Jira issue link when the instance supports it. Do not rely only on plain text in the description. Prefer link types such as `blocks`, `is blocked by`, `relates to`, `duplicates`, or the closest equivalent available in Jira. Tasks touching `app/`, `srv/`, or `db/` must mention the matching knowledge mirror requirement. QA tasks must request positive, negative, edge/boundary, role/authorization, persistence/reload, and UI/UX evidence when applicable.
+
 Vietnamese:
 
 Để giảm conflict khi merge, không chỉnh file status của thành viên khác trừ khi task cần phối hợp giữa nhiều người hoặc `donhv` đang tổng hợp/hỗ trợ. Chi tiết tiến độ nên ghi trong file work package, còn `current-status.md` chỉ ghi ngắn gọn cho handover.
@@ -110,6 +128,24 @@ Phải ghi nhận lỗi ngay sau khi quan sát thấy và trước khi chuyển 
 File status cá nhân đồng thời là nguồn tập hợp tạm để sau này fill vào Test And Fix Bug và các deliverable SAP490 liên quan. Mọi issue phát hiện được phải có trong session log. Các issue có ý nghĩa cho SAP490 phải được thêm vào mục staging bug tạm của thành viên nếu file đó có mục này, kể cả issue đã fix ngay trong phiên. DonHV sẽ quyết định entry nào được chuyển vào artifact SAP490 chính thức; agent không được tự bỏ qua lỗi chỉ vì lỗi đã được sửa nhanh.
 
 Khi bug hoặc lỗi phát hiện được là việc cần team theo dõi, hãy cố gắng tạo hoặc cập nhật Jira issue thông qua Atlassian Rovo/Jira MCP nếu connector khả dụng. Trước khi tạo mới phải search Jira để tránh duplicate. Nếu đã có issue phù hợp, hãy comment/update issue đó thay vì tạo issue mới. Nếu tạo Jira issue mới, phải ghi Jira key/link vào file status thành viên liên quan. Không gửi credential, token, endpoint private, local path có secret, hoặc dữ liệu cá nhân nhạy cảm lên Jira. Với lỗi command tạm thời đã fix ngay và không còn action cho team, ghi trong member status là đủ trừ khi user yêu cầu track trên Jira.
+
+Quy tắc đặt tên và mô tả Jira task là bắt buộc. Mọi Jira task mới phải có summary rõ ràng, không đặt tên chung chung. Summary phải bắt đầu bằng một prefix domain trong `Backend`, `FE`, `QA`, `DevOps`, `Security`, `Docs`, `UX`, `PM`, hoặc `Bug`, sau đó ghi rõ hành động cụ thể và đối tượng hoặc flow bị ảnh hưởng. Tránh các tên như `fix bug`, `update UI`, `test task`, `deploy`, hoặc `refactor` nếu không có ngữ cảnh rõ.
+
+Mô tả Jira task bắt buộc phải có:
+
+- Context / lý do tạo task.
+- Owner và support.
+- Due date.
+- Scope.
+- Out of scope nếu task dễ bị hiểu nhầm.
+- Acceptance Criteria dạng checklist.
+- Evidence expectation.
+- Dependency / link section nếu task liên quan task khác, block task khác, bị task khác block, duplicate, hoặc là follow-up từ task/evidence cũ.
+- Security / no-secret note nếu task liên quan auth, email, deploy, database, S3, API key, user data, hoặc hạ tầng private.
+
+Bug task bắt buộc có thêm steps to reproduce, expected result, actual result, và classification: product defect, environment blocker, tooling issue, data issue, test-harness issue, documentation issue, hoặc process issue.
+
+Nếu Jira task phụ thuộc hoặc liên quan task khác, phải tạo Jira issue link phù hợp khi Jira instance hỗ trợ. Không chỉ ghi dependency bằng text trong description. Ưu tiên các link type như `blocks`, `is blocked by`, `relates to`, `duplicates`, hoặc loại tương đương gần nhất có trong Jira. Task chạm vào `app/`, `srv/`, hoặc `db/` phải nhắc yêu cầu cập nhật knowledge mirror tương ứng. Task QA phải yêu cầu evidence positive, negative, edge/boundary, role/authorization, persistence/reload, và UI/UX khi phù hợp.
 
 DonHV consolidates team work at the end of a group work session or week. DonHV is responsible for updating project documents, SAP490 deliverables, Google Sheets, Excel files, and other shared summaries after reading the member status files.
 
@@ -346,6 +382,68 @@ Use `sap-fiori-guidelines` when working on:
 - UX consistency and accessibility
 
 Use AI DevKit skills only as workflow support. They do not replace the SAP MCP servers, repo-local SAP skills, CAP/Fiori/UI5 documentation, or the business markdown files.
+
+## User-Facing UI/UX Copy Gate
+
+This rule is mandatory for every UI/UX, Fiori Elements, SAPUI5, dashboard, login, profile, email preview, notification, comment, attachment, assignment, or Object Page change.
+
+The product UI is for IDTS end users, not for implementation notes. Do not put internal-only, developer-facing, environment-facing, deployment-facing, team-process, or architecture-explanation text in user-visible screens.
+
+Forbidden user-visible UI copy includes, but is not limited to:
+
+- Implementation or architecture wording such as `Custom CAP authentication`, `Fiori Elements application protected`, `OData endpoint`, `service contract`, `draft activation`, `worker`, `outbox`, `PostgreSQL`, `SQLite`, `Render`, `Brevo`, `AWS S3`, `SAP BTP/XSUAA`, `MCP`, or `plugin`.
+- Team/process wording such as `QA workspace`, `shared QA`, `Sprint 4 workflow`, `PR`, `branch`, `Jira task`, `dev`, `test harness`, `smoke test`, `debug`, or `local`.
+- Raw technical details such as stack traces, SQL text, table/column names, file paths, environment variable names, internal URLs, deployment names, access keys, tokens, provider IDs, or private infrastructure names.
+- Explanations written for developers, mentors, agents, or reviewers instead of the actual user performing the business task.
+
+Allowed user-facing copy must be role/task/outcome focused. Prefer wording that helps the user complete IDTS work, for example: `Sign in to continue`, `Track and resolve defects`, `Upload evidence`, `Assign developer`, `Request more information`, or `View bug status`.
+
+If technical context is useful, put it in `docs/knowledge/`, PM status files, Jira evidence, README/deployment docs, or developer comments. It belongs in the product UI only when it directly helps the business user make a decision, and even then it must be written in plain user language.
+
+Merge-blocking enforcement:
+
+- A UI/UX PR that adds or keeps forbidden dev-facing copy is not complete and must not be merged.
+- If the issue is found after merge or deploy, classify it as a `Product UX defect`, log it immediately in the responsible member status file, update or create Jira tracking when actionable, and fix it before starting another UI feature.
+- Repeated violation by an agent or team member must be escalated to DonHV. That actor must not continue UI/UX implementation until DonHV manually reviews the issue and confirms the rule is understood.
+- Do not mark the related Jira task Done while forbidden user-visible copy remains.
+
+Required verification for UI/UX work:
+
+- The PR evidence must include a `User-facing copy review` note.
+- Browser smoke or screenshot review must actively check that forbidden terms are not visible in the changed screens.
+- QA Depth Gate `UI/UX Review` must mention copy review, not only visual layout.
+- If a screen intentionally contains a technical term, the PR must explain why the end user needs to see it.
+
+Vietnamese:
+
+Rule nay bat buoc cho moi thay doi UI/UX, Fiori Elements, SAPUI5, dashboard, login, profile, email preview, notification, comment, attachment, assignment, hoac Object Page.
+
+UI san pham la cho nguoi dung IDTS, khong phai noi de ghi note implement. Khong duoc dua text noi bo, text cho developer, text ve moi truong deploy, text ve quy trinh team, hoac text giai thich kien truc len man hinh nguoi dung thay.
+
+Nhung loai text bi cam tren UI gom:
+
+- Tu/cum tu ky thuat nhu `Custom CAP authentication`, `Fiori Elements application protected`, `OData endpoint`, `service contract`, `draft activation`, `worker`, `outbox`, `PostgreSQL`, `SQLite`, `Render`, `Brevo`, `AWS S3`, `SAP BTP/XSUAA`, `MCP`, hoac `plugin`.
+- Tu/cum tu quy trinh team nhu `QA workspace`, `shared QA`, `Sprint 4 workflow`, `PR`, `branch`, `Jira task`, `dev`, `test harness`, `smoke test`, `debug`, hoac `local`.
+- Chi tiet ky thuat tho nhu stack trace, SQL, ten bang/cot, duong dan file, ten bien moi truong, URL noi bo, ten deploy, access key, token, provider ID, hoac ten ha tang private.
+- Cau chu viet cho developer, mentor, agent, reviewer thay vi nguoi dung dang lam nghiep vu that.
+
+Copy duoc phep tren UI phai tap trung vao role, task va ket qua cua nguoi dung. Uu tien cac cau nhu: `Sign in to continue`, `Track and resolve defects`, `Upload evidence`, `Assign developer`, `Request more information`, hoac `View bug status`.
+
+Neu can ghi ngu canh ky thuat, hay dua vao `docs/knowledge/`, PM status, Jira evidence, README/deployment docs, hoac developer comment. Chi dua len UI khi no truc tiep giup business user ra quyet dinh, va khi do van phai viet bang ngon ngu de hieu cho user.
+
+Che tai merge:
+
+- PR UI/UX con text dev-facing bi cam thi chua xong va khong duoc merge.
+- Neu phat hien sau khi merge/deploy, phai classify la `Product UX defect`, ghi ngay vao status file cua member phu trach, update/tao Jira neu can tracking, va fix truoc khi bat dau UI feature khac.
+- Neu agent hoac thanh vien tai pham, phai escalate cho DonHV. Nguoi/agent do khong duoc tiep tuc implement UI/UX cho den khi DonHV review thu cong va xac nhan da hieu rule.
+- Khong duoc chuyen Jira task lien quan sang Done khi UI van con copy bi cam.
+
+Verify bat buoc cho UI/UX:
+
+- Evidence PR phai co note `User-facing copy review`.
+- Browser smoke hoac screenshot review phai chu dong kiem tra cac term bi cam khong xuat hien tren man hinh da sua.
+- QA Depth Gate muc `UI/UX Review` phai noi ro da review copy, khong chi review layout.
+- Neu mot man hinh bat buoc hien term ky thuat, PR phai giai thich vi sao end user can thay term do.
 
 ## QA Depth Gate
 
