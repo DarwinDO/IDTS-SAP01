@@ -65,6 +65,7 @@ This task touches Fiori/UI5 assignment UX only. Do not log bearer tokens, privat
 - Initial Jira transition-with-comment attempt failed because the connector expected Atlassian document format for comments inside transitions. The task was transitioned separately and then commented successfully.
 - A fresh worktree at `E:\IDTS-SAP01-worktrees\idts-61` is used to avoid stale/dirty root worktree issues.
 - Implementation replaced the old separate Smart Assign Object Page header action with an Assignee custom section. The Assignee input is read-only for free text persistence and opens Smart Assign through the value-help icon.
+- PR #84 was merged into `dev` at merge commit `547474408f8a67db361460db201ef661cd910d57`.
 - Verification passed on 2026-07-06:
   - `npm run qa:idts56:browser`
   - `npm run qa:idts56:programmatic`
@@ -76,3 +77,4 @@ This task touches Fiori/UI5 assignment UX only. Do not log bearer tokens, privat
   - `git diff --check`
 - Known non-blocking warning: CAP compile still reports the existing attachments `NonUpdateableProperties` vocabulary warning from `db/schema.cds`; it is not introduced by IDTS-61.
 - Evidence screenshots are stored under `docs/pm/evidence/idts-61/`.
+- Post-merge note: final shared-QA Render smoke is the next verification step if the deployment pipeline auto-deploys from `dev`.
