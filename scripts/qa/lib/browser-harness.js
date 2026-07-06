@@ -13,6 +13,7 @@ const KNOWN_LOCAL_PREVIEW_404 = [
 
 const KNOWN_LOCAL_CONSOLE_NOISE = [
   /Failed to load resource: the server responded with a status of 404/i,
+  /failed to load JavaScript resource: .*Component-preload\.js/i,
   /Refused to execute script.*Component-preload/i,
   /failed to load JavaScript resource:.*Component-preload\.js/i,
   /LREP/i,
