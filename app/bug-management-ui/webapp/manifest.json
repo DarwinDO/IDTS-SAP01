@@ -49,6 +49,7 @@
       "libs": {
         "sap.m": {},
         "sap.ui.core": {},
+        "sap.ui.layout": {},
         "sap.ui.unified": {},
         "sap.fe.templates": {}
       }
@@ -200,23 +201,21 @@
                 }
               },
               "content": {
-                "header": {
-                  "actions": {
-                    "SmartAssignDeveloper": {
-                      "press": "idts.bugmanagementui.ext.actions.SmartAssignDeveloper.openDialog",
-                      "visible": "idts.bugmanagementui.ext.actions.SmartAssignDeveloper.isVisible",
-                      "enabled": "idts.bugmanagementui.ext.actions.SmartAssignDeveloper.isVisible",
-                      "text": "{i18n>smartAssignDeveloper}"
-                    }
-                  }
-                },
                 "body": {
                   "sections": {
+                    "IdtsSmartAssignment": {
+                      "title": "{i18n>smartAssignmentSectionTitle}",
+                      "template": "idts.bugmanagementui.ext.fragment.SmartAssignmentSection",
+                      "position": {
+                        "anchor": "ClassificationAndAssignment",
+                        "placement": "After"
+                      }
+                    },
                     "IdtsCommentsCustom": {
                       "title": "{i18n>commentsSectionTitle}",
                       "template": "idts.bugmanagementui.ext.fragment.CommentsSection",
                       "position": {
-                        "anchor": "ReproductionFacet",
+                        "anchor": "IdtsSmartAssignment",
                         "placement": "After"
                       }
                     },

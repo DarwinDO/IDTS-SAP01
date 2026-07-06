@@ -152,11 +152,12 @@ function loadSmartAssignModule(roleCode, modelHooks = {}) {
 
 async function verifyStaticContract() {
   const manifest = JSON.parse(readApp(path.join('webapp', 'manifest.json')))
-  const action = manifest['sap.ui5'].routing.targets.BugsObjectPage.options.settings.content.header.actions.SmartAssignDeveloper
-  assert.strictEqual(action.press, 'idts.bugmanagementui.ext.actions.SmartAssignDeveloper.openDialog')
-  assert.strictEqual(action.visible, 'idts.bugmanagementui.ext.actions.SmartAssignDeveloper.isVisible')
-  assert.strictEqual(action.text, '{i18n>smartAssignDeveloper}')
-  rec('manifest wires Smart Assign into the Bugs Object Page header', true)
+  const objectPageContent = manifest['sap.ui5'].routing.targets.BugsObjectPage.options.settings.content
+  assert(!objectPageContent.header?.actions?.SmartAssignDeveloper)
+  const smartAssignment = objectPageContent.body.sections.IdtsSmartAssignment
+  assert.strictEqual(smartAssignment.template, 'idts.bugmanagementui.ext.fragment.SmartAssignmentSection')
+  assert.strictEqual(smartAssignment.title, '{i18n>smartAssignmentSectionTitle}')
+  rec('manifest wires Smart Assign through the Assignee custom section, not a header action', true)
 
   const source = readApp(path.join('webapp', 'ext', 'actions', 'SmartAssignDeveloper.js'))
   assertHasAll(source, [
@@ -165,13 +166,27 @@ async function verifyStaticContract() {
     'sap/m/Table',
     'sap/m/ObjectStatus',
     'sap/m/MessageStrip',
+    'openAssigneePicker',
+    'setProperty("assignee_ID"',
     'BugService.assignToDeveloper'
   ], 'SmartAssignDeveloper.js')
   assert(!/<(div|span|style)\b/i.test(source), 'Smart Assign must not embed raw HTML/CSS')
   rec('Smart Assign uses SAPUI5 controls without raw mockup HTML/CSS', true)
 
+  const fragment = readApp(path.join('webapp', 'ext', 'fragment', 'SmartAssignmentSection.fragment.xml'))
+  assertHasAll(fragment, [
+    'showValueHelp="true"',
+    'valueHelpRequest="SmartAssign.openAssigneePicker"',
+    "mode: 'OneWay'",
+    'change="SmartAssign.resetAssigneeInput"'
+  ], 'SmartAssignmentSection.fragment.xml')
+  rec('Assignee field opens Smart Assign from value help and blocks free-text persistence', true)
+
   const requiredI18n = [
     'smartAssignDeveloper=',
+    'smartAssignmentSectionTitle=',
+    'smartAssigneeLabel=',
+    'smartAssignUseValueHelp=',
     'smartAssignDialogTitle=',
     'smartAssignSearchPlaceholder=',
     'smartAssignBusyWarning=',
@@ -180,6 +195,8 @@ async function verifyStaticContract() {
   ]
   assertHasAll(readApp(path.join('webapp', 'i18n', 'i18n.properties')), requiredI18n, 'i18n.properties')
   assertHasAll(readApp(path.join('webapp', 'i18n', 'i18n_en.properties')), requiredI18n, 'i18n_en.properties')
+  assert(!/CAP validation|Backend validation/i.test(readApp(path.join('webapp', 'i18n', 'i18n.properties'))))
+  assert(!/CAP validation|Backend validation/i.test(readApp(path.join('webapp', 'i18n', 'i18n_en.properties'))))
   rec('i18n bundles contain Smart Assign text keys', true)
 }
 

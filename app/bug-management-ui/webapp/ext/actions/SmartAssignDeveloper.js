@@ -87,6 +87,38 @@ sap.ui.define([
         throw new Error("Bug binding context is not available for smart assignment.");
     }
 
+    function isBugContext(context) {
+        return !!context && typeof context.getPath === "function" && /^\/Bugs\([^/]+\)$/.test(context.getPath());
+    }
+
+    function findBugContext(control) {
+        var current = control;
+        while (current) {
+            if (typeof current.getBindingContext === "function") {
+                var context = current.getBindingContext();
+                if (isBugContext(context)) {
+                    return context;
+                }
+            }
+            current = typeof current.getParent === "function" ? current.getParent() : null;
+        }
+        return null;
+    }
+
+    function findHost(control) {
+        var current = control;
+        while (current) {
+            if (
+                typeof current.getModel === "function" &&
+                typeof current.addDependent === "function"
+            ) {
+                return current;
+            }
+            current = typeof current.getParent === "function" ? current.getParent() : null;
+        }
+        throw new Error("Smart assignment host control is not available.");
+    }
+
     function getText(view, key, args) {
         var model = view.getModel("i18n") || view.getModel("@i18n");
         var bundle = model && model.getResourceBundle && model.getResourceBundle();
@@ -215,7 +247,16 @@ sap.ui.define([
         });
     }
 
-    function executeAssignment(model, bugContext, candidate, view) {
+    function executeAssignment(model, bugContext, candidate, view, sourceControl) {
+        if (bugContext.getProperty("IsActiveEntity") !== true && typeof bugContext.setProperty === "function") {
+            return bugContext.setProperty("assignee_ID", candidate.developerProfileID).then(function () {
+                if (sourceControl && typeof sourceControl.setValue === "function") {
+                    sourceControl.setValue(candidate.developerName);
+                }
+                MessageToast.show(getText(view, "smartAssignDraftAssignedToast", [candidate.developerName]));
+            });
+        }
+
         var operation = model.bindContext(
             bugContext.getPath() + "/BugService.assignToDeveloper(...)",
             undefined,
@@ -243,6 +284,8 @@ sap.ui.define([
         var propertyNames = [
             "componentCategory_ID",
             "sapModule_ID",
+            "IsActiveEntity",
+            "HasDraftEntity",
             "assigneeDisplayName",
             "canAssign"
         ];
@@ -261,7 +304,7 @@ sap.ui.define([
         });
     }
 
-    function buildDialog(view, model, bugContext, bug) {
+    function buildDialog(view, model, bugContext, bug, sourceControl) {
         var state = new JSONModel({
             candidates: [],
             visibleCandidates: [],
@@ -373,7 +416,7 @@ sap.ui.define([
                     }
 
                     dialog.setBusy(true);
-                    executeAssignment(model, bugContext, candidate, view)
+                    executeAssignment(model, bugContext, candidate, view, sourceControl)
                         .then(function () {
                             dialog.close();
                         })
@@ -437,6 +480,50 @@ sap.ui.define([
             return canUseAssignmentUi();
         },
 
+        resetAssigneeInput: function (event) {
+            var source = event.getSource();
+            var context = findBugContext(source);
+            var currentValue = context && context.getProperty("assigneeDisplayName") || "";
+            source.setValue(currentValue);
+            if (canUseAssignmentUi()) {
+                MessageToast.show(getText(findHost(source), "smartAssignUseValueHelp"));
+            }
+        },
+
+        openAssigneePicker: function (event) {
+            if (!canUseAssignmentUi()) {
+                return Promise.reject(new Error("Current user is not allowed to assign bugs."));
+            }
+
+            var source = event.getSource();
+            var view = findHost(source);
+            var bugContext = findBugContext(source);
+            if (!bugContext) {
+                MessageBox.error(getText(view, "smartAssignLoadFailed"));
+                return Promise.resolve(null);
+            }
+
+            var model = bugContext.getModel();
+
+            return bugContext.requestObject().then(function (bug) {
+                return requestMissingAssignmentProperties(bugContext, bug || {});
+            }).then(function (bug) {
+                if (!bug || (bug.IsActiveEntity === true && bug.canAssign === false)) {
+                    MessageToast.show(getText(view, "smartAssignUnavailableAction"));
+                    return null;
+                }
+
+                if (!bug.componentCategory_ID) {
+                    MessageToast.show(getText(view, "smartAssignMissingClassification"));
+                    return null;
+                }
+
+                var dialog = buildDialog(view, model, bugContext, bug, source);
+                dialog.open();
+                return dialog;
+            });
+        },
+
         openDialog: function (bindingContext) {
             if (!canUseAssignmentUi()) {
                 return Promise.reject(new Error("Current user is not allowed to assign bugs."));
@@ -449,7 +536,7 @@ sap.ui.define([
             return bugContext.requestObject().then(function (bug) {
                 return requestMissingAssignmentProperties(bugContext, bug || {});
             }).then(function (bug) {
-                if (!bug || bug.canAssign === false) {
+                if (!bug || (bug.IsActiveEntity === true && bug.canAssign === false)) {
                     MessageToast.show(getText(view, "smartAssignUnavailableAction"));
                     return null;
                 }

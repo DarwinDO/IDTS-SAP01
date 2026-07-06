@@ -242,3 +242,59 @@ IDTS-56 thêm custom header action `SmartAssignDeveloper` vào Bugs Object Page.
   **Khái niệm IDTS**: Cho Tester/PM một cách rõ ràng hơn để chọn developer phù hợp từ danh sách candidate đã filter.
   **Ảnh hưởng nếu sai**: User có thể mất nút Smart Assign, hoặc nút gọi nhầm extension handler.
   **Phải kiểm tra cùng**: `SmartAssignDeveloper.js`, `i18n.properties`, `BugService.AssignableDevelopers`, `BugService.assignToDeveloper`, và các QA script IDTS-56.
+
+## IDTS-61 update - Smart Assign moved into the Assignee field
+
+### English
+
+IDTS-61 removes the separate Object Page header action `SmartAssignDeveloper`. The Smart Assign flow is now entered from the Assignee field itself.
+
+The manifest adds a custom Object Page body section:
+
+- `IdtsSmartAssignment`
+
+This section renders `SmartAssignmentSection.fragment.xml`, which contains an Assignee input with a value-help icon. When the user presses that value-help icon, the app opens the Smart Assign dialog. This keeps the user workflow closer to normal Fiori assignment behavior: the user thinks "I am choosing an assignee", not "I am running a separate tool".
+
+Important anchors:
+
+- **Location**: `sap.ui5.dependencies.libs.sap.ui.layout`
+  **IDTS concept**: Enables the form layout used by the custom Assignment section.
+  **Impact if broken**: The Assignment section fragment may fail to load because `sap.ui.layout.form.Form` is missing.
+  **Must check together**: `SmartAssignmentSection.fragment.xml`, UI5 build, and browser smoke.
+
+- **Location**: `BugsObjectPage.options.settings.content.body.sections.IdtsSmartAssignment`
+  **IDTS concept**: Inserts the custom Assignee picker section on the Object Page.
+  **Impact if broken**: Users may lose the Smart Assign entry point or see it in a confusing place.
+  **Must check together**: `ownership-assignment.cds`, `SmartAssignmentSection.fragment.xml`, `SmartAssignDeveloper.js`, and the IDTS-56/61 browser QA script.
+
+- **Location**: removed `BugsObjectPage.options.settings.content.header.actions.SmartAssignDeveloper`
+  **IDTS concept**: Prevents two competing assignment entry points.
+  **Impact if broken**: Users can again see a separate Smart Assign button while Assignee also has a picker, which makes the flow inconsistent.
+  **Must check together**: Object Page browser smoke and Jira task IDTS-61 acceptance criteria.
+
+### Vietnamese
+
+IDTS-61 bo nut `SmartAssignDeveloper` rieng tren header cua Object Page. Luong Smart Assign bay gio duoc mo tu chinh field Assignee.
+
+Manifest them custom body section:
+
+- `IdtsSmartAssignment`
+
+Section nay render `SmartAssignmentSection.fragment.xml`, trong do co input Assignee va icon value-help. Khi user bam icon value-help, app mo dialog Smart Assign. Cach nay gan voi hanh vi Fiori hon: user hieu la minh dang chon Assignee, khong phai dang bam mot cong cu rieng.
+
+Anchor quan trong:
+
+- **Vi tri**: `sap.ui5.dependencies.libs.sap.ui.layout`
+  **Khai niem IDTS**: Bat thu vien form layout cho custom Assignment section.
+  **Anh huong neu sai**: Fragment Assignment co the khong load vi thieu `sap.ui.layout.form.Form`.
+  **Phai kiem tra cung**: `SmartAssignmentSection.fragment.xml`, UI5 build va browser smoke.
+
+- **Vi tri**: `BugsObjectPage.options.settings.content.body.sections.IdtsSmartAssignment`
+  **Khai niem IDTS**: Chen custom Assignee picker section vao Object Page.
+  **Anh huong neu sai**: User mat diem vao Smart Assign hoac section nam sai cho, gay kho hieu.
+  **Phai kiem tra cung**: `ownership-assignment.cds`, `SmartAssignmentSection.fragment.xml`, `SmartAssignDeveloper.js`, va browser QA script IDTS-56/61.
+
+- **Vi tri**: da bo `BugsObjectPage.options.settings.content.header.actions.SmartAssignDeveloper`
+  **Khai niem IDTS**: Tranh hai diem assign canh tranh nhau.
+  **Anh huong neu sai**: User lai thay ca nut Smart Assign rieng va field Assignee co picker, lam flow khong nhat quan.
+  **Phai kiem tra cung**: Object Page browser smoke va acceptance criteria cua Jira IDTS-61.

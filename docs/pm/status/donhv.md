@@ -2,6 +2,30 @@
 
 Last updated: 2026-07-06
 
+## 2026-07-06 - IDTS-61 Assignee Smart Assign picker
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Sprint 4 FE implementation | Implemented `IDTS-61` to move Smart Assign into the Assignee value-help flow instead of keeping a separate Object Page header button. | The old Sprint 4 UI had two mental models: a normal Assignee field and a separate Smart Assign action. DonHV chose the cleaner flow where the Assignee field itself opens Smart Assign. | Implemented on branch `feature/idts-61-assignee-smart-picker-donhv` in clean worktree `E:\IDTS-SAP01-worktrees\idts-61`; pending PR review/merge. | Fresh verification passed: `npm run qa:idts56:browser`, `npm run qa:idts56:programmatic`, `npx cds compile srv --to edmx -s all`, UI5 build, focused ESLint, `npm run qa:secret-scan`, AI DevKit lint, and `git diff --check`. Evidence is under `docs/pm/evidence/idts-61/`. |
+| Tooling issue | Initial Fiori MCP metadata read failed in the fresh worktree because `@cap-js/attachments` was not installed. | The isolated worktree did not have `node_modules`. | Fixed by running `npm ci --include=dev`; install reported the existing 20 dependency vulnerabilities tracked separately by `IDTS-46`. | Do not run broad `npm audit fix` in IDTS-61. Keep dependency remediation under `IDTS-46`. |
+| Jira connector issue | First attempt to transition `IDTS-61` with a comment in the transition payload failed. | The Jira connector required Atlassian document format for inline transition comments. | Fixed by transitioning the issue separately and adding a normal Jira comment afterward. | No product impact. Record this as tooling/process only. |
+| Verification issue | Focused ESLint initially failed on line ending style for `SmartAssignDeveloper.js`. | Windows patching produced CRLF while project ESLint expects LF. | Fixed with ESLint auto-fix and rerun; focused ESLint now passes. | Final `git diff --check` also passed; only Git LF/CRLF warnings were printed. |
+| Tooling issue | PowerShell process inspection first failed with `Cannot overwrite variable PID`. | The script used `$pid`, which conflicts with PowerShell's built-in read-only `$PID` variable. | Fixed by rerunning the inspection with a different variable name. | No product impact. CAP local server was stopped after browser verification. |
+| Existing warning | CAP compile still reports `NonUpdateableProperties` as an unknown property for attachment update restrictions. | Existing vocabulary warning in the attachment model area; not introduced by this Assignee UI change. | Left unchanged because IDTS-61 does not touch attachment annotations. | Track separately only if it becomes a product/runtime issue. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai fix | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Implementation FE Sprint 4 | Da implement `IDTS-61` de dua Smart Assign vao luong value-help cua field Assignee thay vi giu nut header rieng tren Object Page. | UI cu co hai cach nghi: field Assignee thong thuong va action Smart Assign rieng. DonHV chot huong sach hon la field Assignee tu mo Smart Assign. | Da implement tren branch `feature/idts-61-assignee-smart-picker-donhv` trong clean worktree `E:\IDTS-SAP01-worktrees\idts-61`; cho PR review/merge. | Verify moi da pass: `npm run qa:idts56:browser`, `npm run qa:idts56:programmatic`, `npx cds compile srv --to edmx -s all`, UI5 build, ESLint focused, `npm run qa:secret-scan`, AI DevKit lint, va `git diff --check`. Evidence nam trong `docs/pm/evidence/idts-61/`. |
+| Loi tooling | Lan doc metadata Fiori MCP dau tien fail trong fresh worktree vi thieu `@cap-js/attachments`. | Worktree rieng chua co `node_modules`. | Da fix bang `npm ci --include=dev`; install van bao 20 dependency vulnerabilities da duoc track rieng trong `IDTS-46`. | Khong chay `npm audit fix` rong trong IDTS-61. De dependency remediation cho `IDTS-46`. |
+| Loi Jira connector | Lan dau transition `IDTS-61` kem comment trong transition payload bi fail. | Jira connector yeu cau comment inline trong transition phai la Atlassian document format. | Da fix bang cach transition rieng roi add Jira comment rieng. | Khong anh huong product. Ghi la tooling/process issue. |
+| Loi verification | Focused ESLint dau tien fail do line ending cua `SmartAssignDeveloper.js`. | Patch tren Windows tao CRLF trong khi ESLint cua project yeu cau LF. | Da fix bang ESLint auto-fix va rerun; focused ESLint pass. | Final `git diff --check` cung pass; chi in warning LF/CRLF cua Git. |
+| Loi tooling | Lenh inspect process PowerShell dau tien fail voi `Cannot overwrite variable PID`. | Script dung bien `$pid`, trung voi bien he thong read-only `$PID` cua PowerShell. | Da chay lai bang ten bien khac. | Khong anh huong product. CAP server local da duoc tat sau browser verification. |
+| Warning co san | CAP compile van bao `NonUpdateableProperties` khong phai property hop le trong attachment update restrictions. | Warning vocabulary co san o khu vuc attachment model; khong phai do thay doi Assignee UI nay. | Khong sua trong IDTS-61 vi task nay khong cham annotation attachment. | Chi track rieng neu no thanh loi product/runtime. |
+
 ## 2026-07-06 - PR #76 merge and legacy UI route redirect
 
 English:

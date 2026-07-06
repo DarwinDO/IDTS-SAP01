@@ -5,27 +5,6 @@ annotate service.Bugs with @(
     Data : [
       {
         $Type : 'UI.DataField',
-        Label : 'Assignee (Technical Owner)',
-        Value : assignee_ID,
-        ![@UI.Hidden] : {
-          $edmJson : {
-            $Eq : [ { $Path : 'IsActiveEntity' }, true ]
-          }
-        }
-      },
-      {
-        $Type : 'UI.DataField',
-        Label : 'Assignee (Technical Owner)',
-        Value : assigneeDisplayName,
-        ![@Common.FieldControl] : #ReadOnly,
-        ![@UI.Hidden] : {
-          $edmJson : {
-            $Eq : [ { $Path : 'IsActiveEntity' }, false ]
-          }
-        }
-      },
-      {
-        $Type : 'UI.DataField',
         Label : 'Current Action Owner',
         Value : currentActionOwnerDisplayName,
         ![@Common.FieldControl] : #ReadOnly,

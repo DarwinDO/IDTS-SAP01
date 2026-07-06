@@ -1,5 +1,5 @@
 /**
- * IDTS-56 browser verification for the Smart Assign developer dialog.
+ * IDTS-56/61 browser verification for the Smart Assign developer picker.
  *
  * Requires a running local CAP/Fiori server:
  *   npm run watch-bug-management-ui
@@ -21,7 +21,7 @@ const { createHarness } = require('./lib/browser-harness')
 
 const BASE_URL = process.env.IDTS_UAT_BASE_URL || 'http://localhost:4004'
 const APP_URL = `${BASE_URL}/idts.bugmanagementui/index.html`
-const EVIDENCE_DIR = path.join(process.cwd(), 'docs', 'pm', 'evidence', 'idts-56')
+const EVIDENCE_DIR = path.join(process.cwd(), 'docs', 'pm', 'evidence', 'idts-61')
 
 const USERS = {
   PM: {
@@ -178,12 +178,15 @@ async function waitForVisible(locator, label, timeout = 90000) {
   })
 }
 
-function smartAssignAction(page) {
-  return page.locator([
-    '.sapMBtn:has-text("Smart Assign"):visible',
-    'button:has-text("Smart Assign"):visible',
-    '[role="button"]:has-text("Smart Assign"):visible'
-  ].join(', ')).first()
+function assigneePicker(page) {
+  const field = page.getByPlaceholder(/Choose a developer/i).first()
+  const valueHelp = page
+    .locator('.sapMInputBase:has(input[placeholder="Choose a developer"])')
+    .first()
+    .locator('.sapMInputValHelp, [role="button"][aria-label*="Value Help"], [title*="Value Help"]')
+    .first()
+
+  return { field, valueHelp }
 }
 
 async function runBrowserFlow(db, fixture, session) {
@@ -201,14 +204,15 @@ async function runBrowserFlow(db, fixture, session) {
   try {
     const objectPageUrl = `${APP_URL}#/Bugs(ID=${fixture.bugID},IsActiveEntity=true)`
     await page.goto(objectPageUrl, { waitUntil: 'domcontentloaded', timeout: 90000 })
-    const smartAssign = smartAssignAction(page)
-    await waitForVisible(smartAssign, 'Smart Assign action')
+    const smartAssign = assigneePicker(page)
+    await waitForVisible(smartAssign.field, 'Assignee smart picker field')
+    await waitForVisible(smartAssign.valueHelp, 'Assignee smart picker value help')
     await harness.assertNoBlockingSignals('object page load')
-    logPass('fixture Object Page loaded with Smart Assign action')
+    logPass('fixture Object Page loaded with Assignee smart picker')
 
-    await smartAssign.click()
+    await smartAssign.valueHelp.click()
     await page.waitForTimeout(1500)
-    await harness.screenshot('debug_after_smart_assign_click')
+    await harness.screenshot('debug_after_assignee_value_help_click')
     await harness.assertNoBlockingSignals('open Smart Assign dialog')
     await waitForVisible(page.getByRole('dialog', { name: /Smart Assign Developer/i }).first(), 'Smart Assign dialog')
     await waitForVisible(page.getByText('DatDT').first(), 'DatDT candidate')
