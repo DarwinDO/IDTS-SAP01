@@ -137,6 +137,25 @@ Chi tiết UI5 quan trọng nằm ở expression binding:
 - Nếu đổi field lấy từ `HistoryEvents`, kiểm tra lại projection backend và read-model enrichment.
 - Chạy lại browser UAT và xem console output, không chỉ nhìn screenshot.
 
+## 2026-07-06 Update: Limit initial History rendering with UI5 growing
+
+### English
+
+IDTS-47 enables `sap.m.List` growing on the Object Page History section. The first render now shows the newest 5 history events. Older events remain available through the standard UI5 growing trigger at the bottom of the list.
+
+Why: this is the smallest supported UI fix for long audit trails. It keeps the backend history/audit model unchanged, preserves expandable `HistoryLogs`, and avoids bringing back the removed raw History table. `growingScrollToLoad` stays `false` because the Object Page contains multiple sections and scrollable content; an explicit growing trigger is clearer and avoids relying on scroll-to-load assumptions.
+
+- **Location**: `app/bug-management-ui/webapp/ext/fragment/HistoryTimeline.fragment.xml`
+  **IDTS concept**: History should be newest-first and scan-friendly by default, while older audit events must still be reachable.
+  **Impact if broken**: Bugs with many comments or lifecycle changes can stretch the Object Page, or users may lose access to older audit details.
+  **Must check together**: UI5 `sap.m.List` growing behavior, Object Page browser evidence, and any future backend paging change for `HistoryEvents`.
+
+### Vietnamese ASCII
+
+IDTS-47 bat `sap.m.List` growing cho section History tren Object Page. Lan render dau chi hien 5 history event moi nhat. Cac event cu van xem duoc bang nut growing mac dinh cua UI5 o cuoi list.
+
+Ly do: day la fix UI nho nhat duoc UI5 ho tro cho audit trail dai. Backend history/audit khong doi, chi tiet `HistoryLogs` van xem duoc khi expand, va khong dua bang raw History cu quay lai. `growingScrollToLoad` giu `false` vi Object Page co nhieu section/scroll content; nut growing ro rang hon va khong phu thuoc gia dinh scroll-to-load.
+
 ## Metadata
 
 - Source file: `app/bug-management-ui/webapp/ext/fragment/HistoryTimeline.fragment.xml`
