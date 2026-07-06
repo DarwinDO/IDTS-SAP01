@@ -66,6 +66,7 @@ This task touches Fiori/UI5 assignment UX only. Do not log bearer tokens, privat
 - A fresh worktree at `E:\IDTS-SAP01-worktrees\idts-61` is used to avoid stale/dirty root worktree issues.
 - Implementation replaced the old separate Smart Assign Object Page header action with an Assignee custom section. The Assignee input is read-only for free text persistence and opens Smart Assign through the value-help icon.
 - PR #84 was merged into `dev` at merge commit `547474408f8a67db361460db201ef661cd910d57`.
+- PM docs sync PR #85 was merged into `dev` at merge commit `a68193ee91566fd6900ba9ae9e9fad759e2cb35e`.
 - Verification passed on 2026-07-06:
   - `npm run qa:idts56:browser`
   - `npm run qa:idts56:programmatic`
@@ -77,4 +78,9 @@ This task touches Fiori/UI5 assignment UX only. Do not log bearer tokens, privat
   - `git diff --check`
 - Known non-blocking warning: CAP compile still reports the existing attachments `NonUpdateableProperties` vocabulary warning from `db/schema.cds`; it is not introduced by IDTS-61.
 - Evidence screenshots are stored under `docs/pm/evidence/idts-61/`.
-- Post-merge note: final shared-QA Render smoke is the next verification step if the deployment pipeline auto-deploys from `dev`.
+- Post-merge shared-QA verification passed:
+  - Render deploy `dep-d95pqqbtqb8s73f4i0kg` reached `live` on commit `a68193ee91566fd6900ba9ae9e9fad759e2cb35e`.
+  - Public route smoke passed: auth metadata `200`, canonical login `200`, legacy login redirect `308`, protected anonymous OData `401`.
+  - Deployed artifact smoke passed: manifest contains `IdtsSmartAssignment`, the old header action is absent, the fragment opens Smart Assign from Assignee value-help, free-text reset is wired, and the action file contains both draft `assignee_ID` update and active `BugService.assignToDeveloper` paths.
+  - Render app error logs since deploy start showed no new app error entries.
+- Jira `IDTS-61` was moved to Done after merge and shared-QA verification.
