@@ -65,6 +65,18 @@
         ProfileShell,
         LoginSession
     ) {
+        var headerContent = [
+            new Button({
+                icon: "sap-icon://refresh",
+                text: "Refresh",
+                press: loadDashboard
+            })
+        ];
+        var profileHeaderButton = ProfileShell.createHeaderButton();
+        if (profileHeaderButton) {
+            headerContent.push(profileHeaderButton);
+        }
+
         var dashboardModel = new JSONModel({
             roleMessage: "",
             tiles: [],
@@ -79,13 +91,7 @@
                     title: "Dashboard",
                     showNavButton: true,
                     navButtonPress: openBugList,
-                    headerContent: [
-                        new Button({
-                            icon: "sap-icon://refresh",
-                            text: "Refresh",
-                            press: loadDashboard
-                        })
-                    ],
+                    headerContent: headerContent,
                     content: [
                         new VBox({
                             width: "100%",
@@ -167,7 +173,6 @@
 
         app.setModel(dashboardModel, "dashboard");
         app.placeAt("dashboardContent");
-        ProfileShell.init();
         loadDashboard();
 
         function loadDashboard() {

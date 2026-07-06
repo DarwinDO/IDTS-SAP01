@@ -1,6 +1,20 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
-Last updated: 2026-07-04
+Last updated: 2026-07-06
+
+## 2026-07-06 - PR #76 merge and legacy UI route redirect
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| GitHub/FE integration | Merged DatDT's PR #76 for `IDTS-58` into `dev`, then handled the remaining old URL risk before Render/user retest. | PR #76 correctly switched standalone pages to the app-proxied UI5 bootstrap path, but the old `/bug-management-ui/webapp/...` URL could still return HTML while its relative UI5 resource path returned 404. | Added a CAP bootstrap middleware in root `server.js` to permanently redirect legacy `/bug-management-ui/webapp/...` paths to canonical `/idts.bugmanagementui/...` paths. | Verified PR #76 merged at `cd0130b`; `node --check server.js`, `cds compile`, secret scan, `git diff --check`, and live route smoke passed. Legacy URLs return 308 and canonical login/UI5 resource return 200. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai fix | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| GitHub/FE integration | Da merge PR #76 cua DatDT cho `IDTS-58` vao `dev`, sau do xu ly tiep rui ro URL cu truoc khi Render/user retest. | PR #76 da doi standalone page sang UI5 bootstrap qua app proxy dung huong, nhung URL cu `/bug-management-ui/webapp/...` van co the tra HTML trong khi relative UI5 resource path bi 404. | Da them CAP bootstrap middleware trong root `server.js` de redirect vinh vien legacy `/bug-management-ui/webapp/...` sang canonical `/idts.bugmanagementui/...`. | Da verify PR #76 merge tai `cd0130b`; `node --check server.js`, `cds compile`, secret scan, `git diff --check`, va live route smoke pass. Legacy URL tra 308 va canonical login/UI5 resource tra 200. |
 
 ## 2026-07-05 - Sprint 4 FE/UX QA follow-up task split
 

@@ -1,6 +1,6 @@
 # IDTS-51 - Sprint 4 Stabilization Plan
 
-Last updated: 2026-07-04
+Last updated: 2026-07-05
 
 ## Purpose
 
@@ -48,6 +48,7 @@ Vietnamese:
 | IDTS-53 | SangVN owner, DonHV support | First implementation pass completed: authenticated app shows a SAPUI5 profile popover with name, email, role, session expiry, and Sign Out. |
 | IDTS-54 | DonHV, DatDT support | Local implementation ready for PR: role dashboard MVP added as protected SAPUI5 `dashboard.html`, reading existing `Bugs` and `DeveloperWorkloads` OData without new write API. Browser smoke passed for PM dashboard tiles, workload visibility, safe copy, and no unexpected HTTP/page errors. |
 | IDTS-55 | DonHV, SangVN support | Done: PR #73 merged into `dev` at `e24f0a9`; Render deploy `dep-d94cg4uq1p3s73bc6la0` is live; shared-QA browser smoke passed for comment post/reload persistence, attachment upload/list/download/delete cleanup, no formatter fatal, no unexpected HTTP errors, and no post-deploy Render error/5xx logs. |
+| IDTS-58 | DatDT owner | Local fix branch `fix/idts-58-sprint-4-ui-defects-datdt` is ready: standalone auth pages now load UI5 through the app-relative resource path, dashboard profile no longer overlaps `Refresh`, comments no longer duplicate the author name, and attachment delete is disabled during draft edit. Local browser smoke passed for login, dashboard, comment post, evidence upload, and draft-state action disable. |
 
 Vietnamese:
 
@@ -58,12 +59,14 @@ Vietnamese:
 | IDTS-53 | SangVN owner, DonHV support | Pass implement dau da xong: app sau login co SAPUI5 profile popover hien ten, email, role, session expiry, va Sign Out. |
 | IDTS-54 | DonHV, DatDT support | Local implementation san sang tao PR: dashboard MVP theo role duoc them bang SAPUI5 `dashboard.html` duoc bao ve, doc OData hien co `Bugs` va `DeveloperWorkloads`, khong them write API. Browser smoke pass cho PM dashboard tiles, workload visibility, safe copy, va khong co HTTP/page error bat thuong. |
 | IDTS-55 | DonHV, SangVN support | Done: PR #73 da merge vao `dev` tai `e24f0a9`; Render deploy `dep-d94cg4uq1p3s73bc6la0` dang live; shared-QA browser smoke pass cho post comment, reload van thay comment, upload/list/download/delete attachment, cleanup, khong co formatter fatal, khong co HTTP error bat thuong, va khong co Render error/5xx log sau deploy. |
+| IDTS-58 | DatDT owner | Branch fix local `fix/idts-58-sprint-4-ui-defects-datdt` da san sang: cac trang auth standalone da load UI5 qua duong dan resource cua app, profile dashboard khong con de len `Refresh`, comment khong con lap ten tac gia, va nut xoa attachment bi khoa khi dang o draft edit. Browser smoke local da pass cho login, dashboard, post comment, upload evidence, va trang thai disable cua action trong draft. |
 
 - `IDTS-39` relates to `IDTS-38`.
 - `IDTS-45` relates to `IDTS-44`.
 - `IDTS-46` relates to `IDTS-44`.
 - `IDTS-47` relates to `IDTS-32`.
 - `IDTS-40` relates to `IDTS-44` as an AWS-native follow-up/alternative.
+- `IDTS-58` relates to `IDTS-52`, `IDTS-53`, `IDTS-54`, `IDTS-55`, and is the FE handoff input for `IDTS-59` and `IDTS-60`.
 
 Vietnamese:
 
@@ -72,6 +75,7 @@ Vietnamese:
 - `IDTS-46` liên quan `IDTS-44`.
 - `IDTS-47` liên quan `IDTS-32`.
 - `IDTS-40` liên quan `IDTS-44` như follow-up/alternative theo hướng AWS-native.
+- `IDTS-58` lien quan `IDTS-52`, `IDTS-53`, `IDTS-54`, `IDTS-55` va la dau vao FE handoff cho `IDTS-59` va `IDTS-60`.
 
 ## Sprint 4 task hygiene
 

@@ -3,6 +3,19 @@ const { execSync } = require('child_process');
 const { createHarness } = require('./lib/browser-harness');
 const fs = require('fs');
 
+/**
+ * IDTS-57 QA Browser UX Regression
+ *
+ * Evidence Generation:
+ * Screenshots are generated locally in the git-ignored `scripts/qa/uat-evidence/idts-57/` directory.
+ * These must be manually uploaded to Jira or PRs. Do NOT commit passwords, tokens, or private URLs.
+ *
+ * Coverage Scope:
+ * This script currently focuses on the PM role (`donhv@example.local`) to verify the baseline UX.
+ * Tester and Developer role coverages are explicitly marked as OUT OF SCOPE for this script
+ * and will be covered in broader role-matrix QA tasks (e.g. IDTS-60 or subsequent).
+ */
+
 const QA_PASSWORD = process.env.QA_PASSWORD;
 const ROLES = {
     PM: 'donhv@example.local',
@@ -55,7 +68,7 @@ async function runTests() {
         await page.getByRole('textbox', { name: 'Email' }).fill(ROLES.TESTER);
         await page.locator('input[type="password"]').fill('WrongPassword123');
         await page.getByRole('button', { name: 'Sign In' }).click();
-        
+
         // The message strip is dynamic, let's wait for the error message text
         await page.waitForSelector('.idtsLoginMessage');
         const errorText = await page.textContent('.idtsLoginMessage');
@@ -108,7 +121,7 @@ async function runTests() {
         await page.goto(`http://localhost:4004/idts.bugmanagementui/index.html#/Bugs(ID=${BUG_ID},IsActiveEntity=true)`);
         await page.waitForLoadState('domcontentloaded');
         await harness.assertNoBlockingSignals('Object Page Load');
-        
+
         // Wait for Bug Collaboration Section
         await page.waitForSelector('textarea[id*="idtsCommentTextArea"]', { timeout: 10000 });
         await takeScreenshot(page, '04_fiori_object_page_collaboration');
@@ -132,7 +145,7 @@ async function runTests() {
         await page.click('.idtsProfileButton');
         const logoutButton = page.getByRole('button', { name: 'Sign Out' });
         await logoutButton.click();
-        
+
         await page.waitForURL('**/login.html');
         console.log('  PASS  Logout returns to login page.');
 

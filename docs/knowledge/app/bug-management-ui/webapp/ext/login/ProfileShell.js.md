@@ -24,9 +24,9 @@ This is safer because:
 1. The user logs in through `login.html`.
 2. `login-page.js` stores a safe public user profile in `sessionStorage`.
 3. `index.html` starts the protected Fiori app.
-4. `Component.js` calls `ProfileShell.init()`.
+4. `Component.js` or a standalone page calls a `ProfileShell` entry point.
 5. `ProfileShell` reads the current user through `window.idtsCurrentUser()`.
-6. It renders a profile button into `#idtsProfileShellHost`.
+6. It either renders a profile button into `#idtsProfileShellHost` or returns a header button for a standalone SAPUI5 page such as the dashboard.
 7. The user opens the popover to see name/email/role/session expiry.
 8. The user presses Sign Out.
 9. `ProfileShell` calls `window.idtsLogout()`, which clears the browser session and redirects to `login.html`.
@@ -36,6 +36,7 @@ This is safer because:
 | Location | IDTS concept | Impact if broken | Must check together |
 | --- | --- | --- | --- |
 | `PROFILE_HOST_ID = "idtsProfileShellHost"` | Stable render target | Profile menu cannot render if the host id changes. | `index.html`, `css/idts-shell.css` |
+| `createHeaderButton()` | Reusable profile action for standalone pages | Dashboard/profile entry can overlap page actions or disappear if the standalone-page integration is removed. | `dashboard-page.js`, browser smoke |
 | `currentUser()` | Signed-in user lookup | Popover cannot show the correct account if stored profile shape changes. | `auth-guard.js`, `login-page.js`, `srv/auth.js` |
 | `new Button({ icon: "sap-icon://person-placeholder" ... })` | Profile menu entry | User may not notice the signed-in account control. | `css/idts-shell.css`, browser smoke |
 | `new ResponsivePopover(...)` | SAP Fiori profile popover pattern | Profile details/sign-out may be unreadable or unavailable. | UI5 MCP/linter |
@@ -48,6 +49,7 @@ This is safer because:
 - `db/schema.cds` defines `Users` and `UserRoles`, which are the source of the displayed role/profile data.
 - `auth-guard.js` exposes `window.idtsCurrentUser()` and `window.idtsLogout()` consumed by this module.
 - `index.html` provides the host element and CSS link needed by this module.
+- `dashboard-page.js` can request a profile button directly for `sap.m.Page` header content when a fixed overlay would clash with page actions.
 
 ### Safe editing checklist
 
@@ -56,6 +58,20 @@ This is safer because:
 - Keep profile data limited to safe public fields: name, email, role, session expiry.
 - If `srv/auth.js publicUser()` changes shape, update `currentUser()` usage and browser smoke.
 - If logout behavior changes, verify refresh-after-logout cannot access protected app content.
+
+## IDTS-58 follow-up notes
+
+### English
+
+IDTS-58 added `createHeaderButton()` so the same profile popover can be reused in standalone pages. The dashboard now uses this helper in `headerContent` instead of relying on the fixed overlay host, which removed the overlap between the profile trigger and the `Refresh` button.
+
+The fixed-host render path is still important for the main Fiori Elements shell (`index.html`). So a safe change must keep both integration modes working: host-based render for the generated shell and direct button creation for standalone SAPUI5 pages.
+
+### Vietnamese
+
+IDTS-58 them `createHeaderButton()` de cung mot profile popover duoc dung lai tren cac trang standalone. Dashboard hien dung helper nay trong `headerContent` thay vi dua vao fixed overlay host, nen da bo duoc viec profile trigger de len nut `Refresh`.
+
+Duong render qua fixed host van quan trong cho Fiori Elements shell chinh (`index.html`). Vi vay moi thay doi an toan phai giu duoc ca hai cach tich hop: render qua host cho generated shell va tao truc tiep button cho trang SAPUI5 standalone.
 
 ## Vietnamese
 

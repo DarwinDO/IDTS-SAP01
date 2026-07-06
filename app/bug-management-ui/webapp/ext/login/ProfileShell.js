@@ -52,20 +52,14 @@ sap.ui.define([
     }
 
     function render(host, user) {
+        createProfileButton(user).placeAt(host);
+    }
+
+    function createProfileButton(user) {
         var displayName = safeUserText(user.displayName || user.email || "IDTS User");
         var email = safeUserText(user.email || "No email stored");
         var role = safeUserText(user.roleName || user.role_code || "Role not available");
         var expires = safeUserText(formatExpiry(sessionStorage.getItem(EXPIRES_KEY)));
-
-        var profileButton = new Button({
-            icon: "sap-icon://person-placeholder",
-            text: displayName,
-            type: ButtonType.Transparent,
-            tooltip: "Signed in as " + displayName,
-            press: function () {
-                profilePopover.openBy(profileButton);
-            }
-        }).addStyleClass("idtsProfileButton");
 
         var profilePopover = new ResponsivePopover({
             placement: PlacementType.Bottom,
@@ -113,7 +107,14 @@ sap.ui.define([
             ]
         });
 
-        profileButton.placeAt(host);
+        return new Button({
+            icon: "sap-icon://person-placeholder",
+            type: ButtonType.Transparent,
+            tooltip: "Open profile menu for " + displayName,
+            press: function (event) {
+                profilePopover.openBy(event.getSource());
+            }
+        }).addStyleClass("idtsProfileButton");
     }
 
     function currentUser() {
@@ -141,7 +142,13 @@ sap.ui.define([
         return "Session expires " + date.toLocaleString();
     }
 
+    function createHeaderButton() {
+        var user = currentUser();
+        return user ? createProfileButton(user) : null;
+    }
+
     return {
-        init: init
+        init: init,
+        createHeaderButton: createHeaderButton
     };
 });
