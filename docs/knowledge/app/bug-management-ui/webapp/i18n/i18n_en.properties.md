@@ -123,6 +123,38 @@ Các anchor quan trọng:
   **Ảnh hưởng nếu sai**: Attachment section có thể hiện missing key hoặc text quá nội bộ/dev-facing.
   **Phải kiểm tra cùng**: `AttachmentsSection.fragment.xml`, `i18n.properties`, và browser smoke.
 
+## IDTS-56 update - English Smart Assign labels
+
+### English
+
+This file mirrors the base bundle's `smartAssign*` labels for English locale users.
+
+Important anchors:
+
+- `smartAssignDeveloper=Smart Assign`
+- `smartAssignDialogTitle=Smart Assign Developer`
+- `smartAssignBusyWarning` and `smartAssignUnavailableWarning`
+- `smartAssignAssignedToast` and `smartAssignAssignFailed`
+
+Impact if broken: the Object Page action or dialog can display missing i18n placeholders in English locales.
+
+Must check together: base `i18n.properties`, `manifest.json`, and `SmartAssignDeveloper.js`.
+
+### Vietnamese
+
+File này giữ các label `smartAssign*` cho English locale, đồng bộ với base bundle.
+
+Các key quan trọng:
+
+- `smartAssignDeveloper=Smart Assign`
+- `smartAssignDialogTitle=Smart Assign Developer`
+- `smartAssignBusyWarning` và `smartAssignUnavailableWarning`
+- `smartAssignAssignedToast` và `smartAssignAssignFailed`
+
+Nếu thiếu key, Object Page action hoặc dialog có thể hiện placeholder kỹ thuật thay vì label sạch.
+
+Phải kiểm tra cùng: base `i18n.properties`, `manifest.json`, và `SmartAssignDeveloper.js`.
+
 ## Metadata
 
 - Source file: `app/bug-management-ui/webapp/i18n/i18n_en.properties`

@@ -218,3 +218,27 @@ Các anchor quan trọng:
   **Khái niệm IDTS**: Chèn section evidence upload/list ngay sau comments.
   **Ảnh hưởng nếu sai**: User mất UX upload/download/delete hoặc thấy trùng nhiều section attachment.
   **Phải kiểm tra cùng**: `AttachmentsSection.fragment.xml`, `BugCollaboration.js`, `object-page.cds`, attachments trong `db/schema.cds`, và `scripts/qa/test-comments-attachments.ps1`.
+
+## IDTS-56 update - Smart Assign Object Page action
+
+### English
+
+IDTS-56 adds the `SmartAssignDeveloper` custom header action to the Bugs Object Page. The manifest only wires the action into Fiori Elements. The actual dialog behavior lives in `app/bug-management-ui/webapp/ext/actions/SmartAssignDeveloper.js`, and the final assignment rule still lives in the CAP backend.
+
+Important anchors:
+
+- **Location**: `BugsObjectPage.options.settings.content.header.actions.SmartAssignDeveloper`
+  **IDTS concept**: Gives Tester/PM users a clearer way to select a suitable developer from filtered assignment candidates.
+  **Impact if broken**: Users may lose the Smart Assign entry point, or the button may call the wrong extension handler.
+  **Must check together**: `SmartAssignDeveloper.js`, `i18n.properties`, `BugService.AssignableDevelopers`, `BugService.assignToDeveloper`, and the IDTS-56 QA scripts.
+
+### Vietnamese
+
+IDTS-56 thêm custom header action `SmartAssignDeveloper` vào Bugs Object Page. Manifest chỉ có nhiệm vụ gắn action này vào Fiori Elements. Hành vi mở dialog nằm trong `app/bug-management-ui/webapp/ext/actions/SmartAssignDeveloper.js`, còn luật assign cuối cùng vẫn nằm ở backend CAP.
+
+Điểm neo quan trọng:
+
+- **Vị trí**: `BugsObjectPage.options.settings.content.header.actions.SmartAssignDeveloper`
+  **Khái niệm IDTS**: Cho Tester/PM một cách rõ ràng hơn để chọn developer phù hợp từ danh sách candidate đã filter.
+  **Ảnh hưởng nếu sai**: User có thể mất nút Smart Assign, hoặc nút gọi nhầm extension handler.
+  **Phải kiểm tra cùng**: `SmartAssignDeveloper.js`, `i18n.properties`, `BugService.AssignableDevelopers`, `BugService.assignToDeveloper`, và các QA script IDTS-56.

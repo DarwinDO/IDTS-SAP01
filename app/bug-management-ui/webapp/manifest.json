@@ -200,6 +200,16 @@
                 }
               },
               "content": {
+                "header": {
+                  "actions": {
+                    "SmartAssignDeveloper": {
+                      "press": "idts.bugmanagementui.ext.actions.SmartAssignDeveloper.openDialog",
+                      "visible": "idts.bugmanagementui.ext.actions.SmartAssignDeveloper.isVisible",
+                      "enabled": "idts.bugmanagementui.ext.actions.SmartAssignDeveloper.isVisible",
+                      "text": "{i18n>smartAssignDeveloper}"
+                    }
+                  }
+                },
                 "body": {
                   "sections": {
                     "IdtsCommentsCustom": {
