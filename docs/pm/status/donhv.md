@@ -1369,3 +1369,31 @@ Vietnamese:
 | Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
 | --- | --- | --- | --- | --- |
 | Loi tooling/runtime | Lan chay dau `render:db:restore-target:start` fail voi `RandomNumberGenerator does not contain a method named GetBytes`. | PowerShell/.NET runtime tren may nay khong expose static API `RandomNumberGenerator.GetBytes()` nhu helper ban dau dung. | Da fix bang cach doi sang `RandomNumberGenerator.Create()` va fill byte array bang instance API. Khong phai product defect. | Verify start/ready/stop da pass, local restore URL duoc redact khoi output. |
+
+## 2026-07-07 - IDTS-45 sanitized evidence summary helper
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| DevOps/process support | After backup/restore, DonHV still needed a repeatable way to create upload-safe Jira evidence without exposing backup contents or credentials. | The repo had instructions, but not a helper that collects only safe backup metadata and restore result notes. | Added `scripts/render/write-backup-evidence-summary.ps1` and npm script `render:db:evidence`. Output defaults to gitignored `docs/pm/evidence/idts-45/private/` for manual review/upload. | Verify with dummy backup/checksum and ensure secret scan remains clean. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| DevOps/process support | Sau backup/restore, DonHV van can cach lap lai de tao Jira evidence an toan, khong lo backup content hoac credential. | Repo da co huong dan nhung chua co helper gom chi metadata backup an toan va note ket qua restore. | Da them `scripts/render/write-backup-evidence-summary.ps1` va npm script `render:db:evidence`. Output mac dinh vao folder gitignored `docs/pm/evidence/idts-45/private/` de DonHV review/upload thu cong. | Verify bang dummy backup/checksum va dam bao secret scan van clean. |
+
+## 2026-07-07 - IDTS-45 evidence helper interpolation fix
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling/script issue | First dummy evidence summary rendered literal `$backupFileName`, `$backupHash`, and `$checksumFileName` instead of actual values. | The Markdown backticks in a PowerShell double-quoted here-string escaped the `$` variables. | Fixed by removing Markdown backticks around interpolated values so PowerShell expands them correctly. Not a product defect. | Rerun dummy evidence generation passed; output now shows actual file name, SHA-256, checksum filename, size, and restore notes. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Loi tooling/script | Dummy evidence summary dau tien render literal `$backupFileName`, `$backupHash`, va `$checksumFileName` thay vi gia tri that. | Markdown backtick trong PowerShell double-quoted here-string da escape cac bien `$`. | Da fix bang cach bo Markdown backticks quanh cac gia tri can interpolate de PowerShell expand dung. Khong phai product defect. | Rerun dummy evidence generation pass; output da hien dung file name, SHA-256, checksum filename, size va restore notes. |

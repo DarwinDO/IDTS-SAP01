@@ -114,6 +114,20 @@ Recommended proof:
 5. Record only safe evidence: timestamp, backup size, checksum, restore target
    type, and pass/fail summary.
 
+After the private backup and restore proof, generate a sanitized Markdown
+summary for manual Jira upload:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/render/write-backup-evidence-summary.ps1 `
+  -BackupPath "<path-to-private-pgdump>" `
+  -RestoreTargetType "Local Docker PostgreSQL target" `
+  -RestoreStatus "PASS" `
+  -VerificationNotes "Core CAP tables and representative rows were checked."
+```
+
+The default output goes to `docs/pm/evidence/idts-45/private`, which is
+gitignored. Review the generated file before uploading it manually to Jira.
+
 The repository can create a disposable local PostgreSQL target through Docker:
 
 ```powershell
@@ -190,6 +204,7 @@ environment variables, private credentials, and real recipient lists.
 - [x] Repo has a guarded restore/inspect helper.
 - [x] Backup and restore helpers support Docker fallback for PostgreSQL client tools.
 - [x] Repo can start and stop a disposable local PostgreSQL restore target through Docker.
+- [x] Repo can generate a sanitized evidence summary for manual Jira upload.
 - [x] Repo has safe evidence instructions.
 - [x] Risk and decision logs are updated.
 - [x] Render CLI read-only state confirms the database is Free, available, and expires on 2026-07-31.
