@@ -1266,3 +1266,19 @@ Vietnamese:
 | Remediation dependency | `npm update` tương thích giảm full audit từ 20 finding xuống 14 finding và giữ runtime finding ở mức moderate-only. | Một số transitive package có bản compatible mới hơn, nhưng upstream hiện vẫn còn finding moderate trong chuỗi GCP-provider của `@cap-js/attachments` và finding high trong UI5 build-tooling. | Đã áp dụng lockfile update; không đổi `package.json`. Không dùng force-fix. | Chạy CAP compile, QA script tập trung, secret scan, AI DevKit lint và `git diff --check`; ghi residual risk trong `docs/pm/tasks/idts-46-npm-vulnerability-review.md`. |
 | Model/tooling warning | `npx cds compile srv --to edmx -s all` pass exit 0 nhưng in warning `NonUpdateableProperties is not a known property` cho `@Capabilities.UpdateRestrictions` trên `BugService.Bugs_attachments`. | Warning thuộc annotation/model hiện hữu, không do dependency update trực tiếp. | Ghi nhận; không xử lý trong IDTS-46 vì task này chỉ xử lý dependency security. | Nếu muốn dọn sạch CAP warning, tạo/follow-up task riêng kiểm tra attachment annotation theo CAP/Fiori guidance. |
 | Tooling/config issue | Chạy `npx ui5 build --config app/bug-management-ui/ui5.yaml --dest .tmp\\ui5-build-idts46` từ root fail với `Missing or empty 'name' attribute in package.json`. | Root `package.json` hiện không có field `name`; UI5 CLI khi chạy từ root cần package name. | Workaround đúng là chạy UI5 build từ thư mục app `app/bug-management-ui`, lệnh này pass. | Không đổi root package metadata trong IDTS-46; cân nhắc follow-up nếu muốn UI5 build chạy được từ root. |
+
+## 2026-07-07 - IDTS-46 closure
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling/git workflow issue | `gh pr merge 94 --squash --delete-branch` failed with `fatal: 'dev' is already used by worktree at 'E:/IDTS-SAP01'`. | GitHub CLI attempted a local git operation that conflicts with the root worktree already owning local branch `dev`. | Merged PR #94 through GitHub API instead, then deleted the remote branch. Not a product defect. | Continue using API-based merge or a worktree not conflicting with local `dev` when needed. |
+| PM closure | PR #94 merged into `dev` at `645e6f1eda46e322bff6be5e0c16715222f7fbca`; Jira IDTS-46 transitioned to Done. | IDTS-46 remediation/evidence was accepted: compatible lockfile update, no force-fix, residual risk documented. | Done. | Next DonHV infrastructure/security follow-up is IDTS-45; remaining audit residuals need upstream monitoring only unless new advisories or reachable runtime exposure appear. |
+
+Vietnamese:
+
+| Phân loại | Triệu chứng / công việc | Nguyên nhân | Trạng thái xử lý | Xác minh / bước tiếp theo |
+| --- | --- | --- | --- | --- |
+| Lỗi tooling/git workflow | `gh pr merge 94 --squash --delete-branch` lỗi `fatal: 'dev' is already used by worktree at 'E:/IDTS-SAP01'`. | GitHub CLI cố chạy thao tác git local nhưng local branch `dev` đang thuộc root worktree. | Đã merge PR #94 bằng GitHub API, sau đó xóa remote branch. Không phải product defect. | Khi cần merge từ worktree phụ, dùng API-based merge hoặc worktree không conflict với local `dev`. |
+| Đóng PM | PR #94 đã merge vào `dev` tại `645e6f1eda46e322bff6be5e0c16715222f7fbca`; Jira IDTS-46 đã chuyển Done. | IDTS-46 đã đạt mục tiêu: compatible lockfile update, không force-fix, residual risk được document. | Done. | Follow-up infrastructure/security tiếp theo của DonHV là IDTS-45; residual audit còn lại chỉ cần upstream monitoring trừ khi có advisory mới hoặc runtime exposure thật. |

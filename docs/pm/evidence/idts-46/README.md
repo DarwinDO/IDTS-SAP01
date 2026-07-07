@@ -62,3 +62,11 @@ Vietnamese: Verification ngày 2026-07-07 đã pass CAP compile, auth QA, email 
 DonHV does not need to upload this folder automatically through Codex. After merge, upload the PR link and this evidence index or copied summary to Jira IDTS-46 manually if Jira evidence is required.
 
 Vietnamese: DonHV không cần Codex tự upload folder này lên Jira. Sau khi merge, nếu Jira cần evidence, DonHV tự upload link PR và evidence index hoặc phần summary đã copy vào Jira IDTS-46.
+
+## Closure - 2026-07-07
+
+- PR #94: `https://github.com/DarwinDO/IDTS-SAP01/pull/94`
+- Merge commit: `645e6f1eda46e322bff6be5e0c16715222f7fbca`
+- Jira IDTS-46 status: Done
+
+Vietnamese: IDTS-46 đã merge qua PR #94, commit `645e6f1eda46e322bff6be5e0c16715222f7fbca`, và Jira đã chuyển Done.
