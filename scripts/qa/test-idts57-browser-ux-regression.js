@@ -11,9 +11,9 @@ const fs = require('fs');
  * These must be manually uploaded to Jira or PRs. Do NOT commit passwords, tokens, or private URLs.
  *
  * Coverage Scope:
- * This script currently focuses on the PM role (`donhv@example.local`) to verify the baseline UX.
- * Tester and Developer role coverages are explicitly marked as OUT OF SCOPE for this script
- * and will be covered in broader role-matrix QA tasks (e.g. IDTS-60 or subsequent).
+ * This script verifies the Sprint 4 redesigned UI baseline across PM, Tester, and Developer roles.
+ * It covers login, profile shell, dashboard/list entry, Object Page collaboration, Smart Assign
+ * picker reachability, invalid bug navigation, session persistence, and logout.
  */
 
 const QA_PASSWORD = process.env.QA_PASSWORD;
@@ -140,7 +140,7 @@ async function runTests() {
             await page.waitForSelector('text="Smart Assign Developer"', { timeout: 10000 });
             await takeScreenshot(page, '04a_smart_assign_dialog');
             console.log('  PASS  Smart Assign picker dialog opens.');
-            
+
             // Search developer
             await page.getByPlaceholder(/Search developer/i).fill('SangVN');
             await page.waitForTimeout(1000);
@@ -169,7 +169,7 @@ async function runTests() {
         await page.goto(`http://localhost:4004/idts.bugmanagementui/index.html#/Bugs(ID=${INVALID_BUG_ID},IsActiveEntity=true)`);
         await page.waitForLoadState('domcontentloaded');
         // Wait a bit to ensure no crash, we expect a Not Found message or empty page, but not a crash
-        await page.waitForTimeout(2000); 
+        await page.waitForTimeout(2000);
         await takeScreenshot(page, '06_invalid_bug_id');
         console.log('  PASS  Invalid Bug ID load handles gracefully without crash.');
 
@@ -189,7 +189,7 @@ async function runTests() {
         await page.getByRole('button', { name: 'Sign In' }).click();
         await page.waitForSelector('.idtsProfileButton', { timeout: 15000 });
         await takeScreenshot(page, '07_tester_dashboard');
-        
+
         await page.goto(`http://localhost:4004/idts.bugmanagementui/index.html#/Bugs(ID=${BUG_ID},IsActiveEntity=true)`);
         await page.waitForSelector('textarea[id*="idtsCommentTextArea"]', { timeout: 10000 });
         await takeScreenshot(page, '08_tester_object_page');
@@ -207,7 +207,7 @@ async function runTests() {
         await page.getByRole('button', { name: 'Sign In' }).click();
         await page.waitForSelector('.idtsProfileButton', { timeout: 15000 });
         await takeScreenshot(page, '09_developer_dashboard');
-        
+
         await page.goto(`http://localhost:4004/idts.bugmanagementui/index.html#/Bugs(ID=${BUG_ID},IsActiveEntity=true)`);
         await page.waitForSelector('textarea[id*="idtsCommentTextArea"]', { timeout: 10000 });
         await takeScreenshot(page, '10_developer_object_page');
