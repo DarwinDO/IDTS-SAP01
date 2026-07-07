@@ -1229,3 +1229,40 @@ Vietnamese:
 - Jira IDTS-63 đã được đưa vào Sprint 4 và chuyển In Progress. AI runtime vẫn chuyển sang Sprint 5.
 - Verification pass: `git diff --check`, `node scripts/qa/secret-scan.js` và `npx ai-devkit@latest lint --json` (5 OK, 0 warning, 0 required failure).
 - Handoff tiếp theo: tạo/review PR documentation, attach evidence đã làm sạch lên Jira, rồi đóng IDTS-63 trước khi bắt đầu IDTS-46.
+## 2026-07-07 - IDTS-46 npm dependency security review
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Dependency security finding | Fresh audit of the latest `dev` lockfile reports 6 moderate runtime findings and 20 full-tree findings (13 moderate, 7 high, 0 critical). Runtime findings enter through `@cap-js/attachments` and its installed but provider-specific Google Cloud dependency chain; high findings are currently in UI5/CDS development tooling. | Current direct and transitive package versions in `package-lock.json`; reachability and compatible fixes still require package-path analysis. | IDTS-46 moved to In Progress. No dependency has been changed and no force-fix was run. | Install the exact lockfile in the isolated worktree, trace every high/runtime path, then apply only compatible targeted updates or document evidence-backed residual risk. |
+| Tooling/environment issue | `npm explain` returned `No dependencies found` for the audited packages in the fresh worktree. | The worktree had no `node_modules`; `npm audit` can inspect the lockfile, but `npm explain` needs the installed dependency tree. | Identified; not a product defect. | Run `npm ci --include=dev` in the isolated worktree, then repeat dependency-path inspection. |
+| Tooling/command behavior | `npm outdated --json` returned exit code 1 while producing a valid outdated-package report. | npm intentionally exits nonzero when outdated dependencies are found; the command did not fail to collect data. | Classified as expected diagnostic behavior, not a product defect. | Use the report to update only versions allowed by current compatibility ranges, then rerun audit and regressions. |
+
+Vietnamese:
+
+| Phân loại | Triệu chứng / công việc | Nguyên nhân | Trạng thái xử lý | Xác minh / bước tiếp theo |
+| --- | --- | --- | --- | --- |
+| Phát hiện security dependency | Audit mới trên lockfile `dev` báo 6 finding moderate ở runtime và 20 finding toàn cây (13 moderate, 7 high, 0 critical). Finding runtime đi qua `@cap-js/attachments` và chuỗi Google Cloud theo provider đã được cài; finding high hiện nằm trong tooling UI5/CDS dùng khi phát triển. | Phiên bản direct/transitive hiện có trong `package-lock.json`; vẫn cần phân tích dependency path, reachability và bản fix tương thích. | IDTS-46 đã chuyển In Progress. Chưa đổi dependency và không chạy force-fix. | Cài đúng lockfile trong worktree cô lập, trace toàn bộ path high/runtime, rồi chỉ update có mục tiêu hoặc ghi residual risk có evidence. |
+| Lỗi tooling/môi trường | `npm explain` trả `No dependencies found` cho các package đang audit trong worktree mới. | Worktree chưa có `node_modules`; `npm audit` đọc được lockfile nhưng `npm explain` cần cây dependency đã cài. | Đã xác định; không phải product defect. | Chạy `npm ci --include=dev` trong worktree cô lập rồi kiểm tra lại dependency path. |
+| Hành vi command/tooling | `npm outdated --json` trả exit code 1 dù đã xuất báo cáo package outdated hợp lệ. | npm chủ động trả mã khác 0 khi tìm thấy dependency outdated; command không thất bại trong việc thu thập dữ liệu. | Đã phân loại là hành vi diagnostic dự kiến, không phải product defect. | Dùng báo cáo để update đúng version nằm trong compatibility range, sau đó audit và regression lại. |
+
+## 2026-07-07 - IDTS-46 npm remediation evidence update
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling/path lookup issue | Initial skill reads used `C:\Users\LapHub\.agents\skills\karpathy-guidelines`, `sap-cap`, and `verify`, but those paths were not present in this machine profile. | The active repo uses repo-local skills under `E:\IDTS-SAP01\.agents\skills`; only some backup skills exist under the user profile path. | Corrected by reading repo-local skills before continuing. Not a product defect. | Continue using repo-local skill paths for IDTS work. |
+| Tooling/process issue | `package-lock.json` top-level `name` changed to the isolated worktree folder name after `npm update`. | Root `package.json` does not define a `name`, so npm inferred it from the current worktree directory. | Restored the lockfile name to `IDTS-SAP01` before commit. | Check `git diff` before commit to ensure no worktree-name noise remains. |
+| Dependency remediation | Compatible `npm update` reduced the full audit from 20 findings to 14 findings and kept runtime findings at moderate-only severity. | Upstream compatible releases are available for several transitive packages, but current upstream chains still carry `@cap-js/attachments` GCP-provider moderate findings and UI5 build-tooling high findings. | Lockfile update applied; `package.json` unchanged. No force-fix used. | Run CAP compile, focused QA scripts, secret scan, AI DevKit lint, and `git diff --check`; document remaining residual risk in `docs/pm/tasks/idts-46-npm-vulnerability-review.md`. |
+
+Vietnamese:
+
+| Phân loại | Triệu chứng / công việc | Nguyên nhân | Trạng thái xử lý | Xác minh / bước tiếp theo |
+| --- | --- | --- | --- | --- |
+| Lỗi tooling/path lookup | Ban đầu đọc skill ở `C:\Users\LapHub\.agents\skills\karpathy-guidelines`, `sap-cap`, và `verify` nhưng các path đó không tồn tại trong profile máy này. | Repo IDTS đang dùng skill repo-local dưới `E:\IDTS-SAP01\.agents\skills`; chỉ một số skill backup tồn tại ở user profile path. | Đã sửa bằng cách đọc skill repo-local trước khi tiếp tục. Không phải product defect. | Tiếp tục dùng repo-local skill path cho công việc IDTS. |
+| Lỗi tooling/process | Field `name` đầu `package-lock.json` bị đổi thành tên folder worktree sau khi chạy `npm update`. | Root `package.json` không có field `name`, nên npm suy ra từ thư mục worktree hiện tại. | Đã khôi phục lockfile name về `IDTS-SAP01` trước commit. | Kiểm tra `git diff` trước commit để chắc chắn không còn noise theo tên worktree. |
+| Remediation dependency | `npm update` tương thích giảm full audit từ 20 finding xuống 14 finding và giữ runtime finding ở mức moderate-only. | Một số transitive package có bản compatible mới hơn, nhưng upstream hiện vẫn còn finding moderate trong chuỗi GCP-provider của `@cap-js/attachments` và finding high trong UI5 build-tooling. | Đã áp dụng lockfile update; không đổi `package.json`. Không dùng force-fix. | Chạy CAP compile, QA script tập trung, secret scan, AI DevKit lint và `git diff --check`; ghi residual risk trong `docs/pm/tasks/idts-46-npm-vulnerability-review.md`. |
+| Model/tooling warning | `npx cds compile srv --to edmx -s all` pass exit 0 nhưng in warning `NonUpdateableProperties is not a known property` cho `@Capabilities.UpdateRestrictions` trên `BugService.Bugs_attachments`. | Warning thuộc annotation/model hiện hữu, không do dependency update trực tiếp. | Ghi nhận; không xử lý trong IDTS-46 vì task này chỉ xử lý dependency security. | Nếu muốn dọn sạch CAP warning, tạo/follow-up task riêng kiểm tra attachment annotation theo CAP/Fiori guidance. |
+| Tooling/config issue | Chạy `npx ui5 build --config app/bug-management-ui/ui5.yaml --dest .tmp\\ui5-build-idts46` từ root fail với `Missing or empty 'name' attribute in package.json`. | Root `package.json` hiện không có field `name`; UI5 CLI khi chạy từ root cần package name. | Workaround đúng là chạy UI5 build từ thư mục app `app/bug-management-ui`, lệnh này pass. | Không đổi root package metadata trong IDTS-46; cân nhắc follow-up nếu muốn UI5 build chạy được từ root. |
