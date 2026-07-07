@@ -20,6 +20,7 @@ the repository. DonHV will upload or attach evidence manually when needed.
 | PostgreSQL client fallback | Done | Host `pg_dump`/`pg_restore` are not installed, but Docker Desktop can run `postgres:15` clients for backup and restore helpers. |
 | Local restore target helper | Prepared | `scripts/render/start-local-restore-target.ps1` and `stop-local-restore-target.ps1` create/remove a disposable local PostgreSQL target through Docker. |
 | Sanitized evidence summary helper | Prepared | `scripts/render/write-backup-evidence-summary.ps1` writes safe Markdown evidence to gitignored `docs/pm/evidence/idts-45/private/`. |
+| Continuity proof orchestrator | Prepared | `scripts/render/run-render-postgres-continuity-proof.ps1` runs backup, local restore, evidence generation, and cleanup after `RENDER_QA_DATABASE_URL` is set locally. |
 | Restore proof | Pending private run | Must be executed against a temporary PostgreSQL target, not the live shared-QA database. |
 | Decision | Prepared | Recommendation is recorded in `docs/pm/tasks/idts-45-render-postgres-continuity.md` and `docs/pm/risk-decision-log.md`. |
 

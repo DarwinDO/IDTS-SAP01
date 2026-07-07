@@ -128,6 +128,20 @@ powershell -ExecutionPolicy Bypass -File scripts/render/write-backup-evidence-su
 The default output goes to `docs/pm/evidence/idts-45/private`, which is
 gitignored. Review the generated file before uploading it manually to Jira.
 
+For the full private proof flow, the repository also includes a one-command
+orchestrator:
+
+```powershell
+$env:RENDER_QA_DATABASE_URL = "<paste Render external database URL privately>"
+npm run render:db:continuity-proof
+```
+
+This command backs up Render QA PostgreSQL, starts a disposable local Docker
+PostgreSQL target, restores the backup, creates sanitized evidence, deletes the
+local restore URL file, and removes the disposable target. It still does not
+upload anything to Jira; DonHV reviews and uploads the generated sanitized
+summary manually.
+
 The repository can create a disposable local PostgreSQL target through Docker:
 
 ```powershell
@@ -205,6 +219,7 @@ environment variables, private credentials, and real recipient lists.
 - [x] Backup and restore helpers support Docker fallback for PostgreSQL client tools.
 - [x] Repo can start and stop a disposable local PostgreSQL restore target through Docker.
 - [x] Repo can generate a sanitized evidence summary for manual Jira upload.
+- [x] Repo can run a one-command private backup/restore/evidence proof after `RENDER_QA_DATABASE_URL` is set locally.
 - [x] Repo has safe evidence instructions.
 - [x] Risk and decision logs are updated.
 - [x] Render CLI read-only state confirms the database is Free, available, and expires on 2026-07-31.

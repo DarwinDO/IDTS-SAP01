@@ -1397,3 +1397,17 @@ Vietnamese:
 | Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
 | --- | --- | --- | --- | --- |
 | Loi tooling/script | Dummy evidence summary dau tien render literal `$backupFileName`, `$backupHash`, va `$checksumFileName` thay vi gia tri that. | Markdown backtick trong PowerShell double-quoted here-string da escape cac bien `$`. | Da fix bang cach bo Markdown backticks quanh cac gia tri can interpolate de PowerShell expand dung. Khong phai product defect. | Rerun dummy evidence generation pass; output da hien dung file name, SHA-256, checksum filename, size va restore notes. |
+
+## 2026-07-07 - IDTS-45 continuity proof runner
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| DevOps/process support | IDTS-45 had all individual helpers, but DonHV still had to run them manually in the correct order. | Backup, local restore target, restore, evidence generation, and cleanup were separate commands. | Added `scripts/render/run-render-postgres-continuity-proof.ps1` and npm script `render:db:continuity-proof` to orchestrate the private proof flow after `RENDER_QA_DATABASE_URL` is set locally. | Verify parse and no-secret preflight failure when the private Render DB URL is not set. Real proof still needs DonHV's private DB URL. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| DevOps/process support | IDTS-45 da co tung helper rieng, nhung DonHV van phai chay dung thu tu thu cong. | Backup, local restore target, restore, evidence generation va cleanup dang la cac lenh rieng le. | Da them `scripts/render/run-render-postgres-continuity-proof.ps1` va npm script `render:db:continuity-proof` de orchestration flow private sau khi `RENDER_QA_DATABASE_URL` duoc set local. | Verify parse va no-secret preflight failure khi chua set private Render DB URL. Proof that van can DB URL private cua DonHV. |

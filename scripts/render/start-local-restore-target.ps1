@@ -12,6 +12,11 @@ into Git, Jira, docs, screenshots, or shared evidence.
 
 .EXAMPLE
 powershell -ExecutionPolicy Bypass -File scripts/render/start-local-restore-target.ps1
+
+.EXAMPLE
+powershell -ExecutionPolicy Bypass -File scripts/render/start-local-restore-target.ps1 `
+  -UrlOutputPath "docs/pm/evidence/idts-45/private/restore-url.txt" `
+  -SuppressUrlOutput
 #>
 
 [CmdletBinding()]
@@ -20,7 +25,9 @@ param(
   [string]$PostgresDockerImage = "postgres:15",
   [string]$DatabaseName = "idts_restore",
   [string]$DatabaseUser = "idts_restore",
-  [int]$HostPort = 55432
+  [int]$HostPort = 55432,
+  [string]$UrlOutputPath,
+  [switch]$SuppressUrlOutput
 )
 
 Set-StrictMode -Version Latest
@@ -93,9 +100,22 @@ if (-not $ready) {
 $restoreUrl = "postgres://$($DatabaseUser):$($password)@localhost:$($HostPort)/$($DatabaseName)"
 
 Write-SafeInfo "Temporary restore target is ready."
-Write-SafeInfo "Set the restore URL only in your local shell. Do not paste it into Jira or Git."
-Write-Host ""
-Write-Host "`$env:IDTS_RESTORE_DATABASE_URL = '$restoreUrl'"
-Write-Host ""
+
+if (-not [string]::IsNullOrWhiteSpace($UrlOutputPath)) {
+  $urlOutputDirectory = Split-Path -Parent $UrlOutputPath
+  if (-not [string]::IsNullOrWhiteSpace($urlOutputDirectory)) {
+    New-Item -ItemType Directory -Force -Path $urlOutputDirectory | Out-Null
+  }
+  Set-Content -Encoding utf8 -LiteralPath $UrlOutputPath -Value $restoreUrl
+  Write-SafeInfo "Restore URL was written to a private local file. Delete it after proof."
+}
+
+if (-not $SuppressUrlOutput) {
+  Write-SafeInfo "Set the restore URL only in your local shell. Do not paste it into Jira or Git."
+  Write-Host ""
+  Write-Host "`$env:IDTS_RESTORE_DATABASE_URL = '$restoreUrl'"
+  Write-Host ""
+}
+
 Write-SafeInfo "Stop and remove this target after proof:"
 Write-Host "npm run render:db:restore-target:stop"
