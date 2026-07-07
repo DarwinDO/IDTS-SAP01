@@ -24,6 +24,7 @@
   "scripts": {
     "start": "cds-serve all",
     "render:db:deploy": "cds-deploy",
+    "render:db:backup": "powershell -ExecutionPolicy Bypass -File scripts/render/backup-render-postgres.ps1",
     "render:env:db": "cds env requires.db --profile integration",
     "render:auth:set-password": "node scripts/dev/set-local-user-password.js",
     "render:auth:set-qa-passwords": "node scripts/render/set-qa-passwords-from-env.js",
