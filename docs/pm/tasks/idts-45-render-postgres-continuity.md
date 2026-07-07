@@ -114,6 +114,22 @@ Recommended proof:
 5. Record only safe evidence: timestamp, backup size, checksum, restore target
    type, and pass/fail summary.
 
+The repository can create a disposable local PostgreSQL target through Docker:
+
+```powershell
+npm run render:db:restore-target:start
+```
+
+This prints a local-only `IDTS_RESTORE_DATABASE_URL` command. Copy it only into
+your private shell. Do not paste that URL into Git, Jira, screenshots, or shared
+evidence.
+
+After restore proof, remove the disposable target:
+
+```powershell
+npm run render:db:restore-target:stop
+```
+
 The repository includes a restore helper:
 
 ```powershell
@@ -173,6 +189,7 @@ environment variables, private credentials, and real recipient lists.
 - [x] Repo has a secret-safe backup helper.
 - [x] Repo has a guarded restore/inspect helper.
 - [x] Backup and restore helpers support Docker fallback for PostgreSQL client tools.
+- [x] Repo can start and stop a disposable local PostgreSQL restore target through Docker.
 - [x] Repo has safe evidence instructions.
 - [x] Risk and decision logs are updated.
 - [x] Render CLI read-only state confirms the database is Free, available, and expires on 2026-07-31.
