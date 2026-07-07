@@ -49,6 +49,7 @@ Vietnamese: Chi dung board nay de theo doi trang thai cap cao. Chi tiet cong vie
 | IDTS-56 | Smart assign developer dialog/dropdown | PR #79 merged into `dev`; Object Page `Smart Assign` dialog now uses SAPUI5/Fiori controls, searchable developer capability/availability table, backend assignment validation, programmatic QA, browser QA, and evidence under `docs/pm/evidence/idts-56/`. Jira moved to Done. |
 | IDTS-61 | Replace Assignee value help with Smart Assign picker | PR #84 merged into `dev`; PR #85 synced PM docs; Render deploy `dep-d95pqqbtqb8s73f4i0kg` is live on commit `a68193e`; route/static artifact smoke passed; Jira moved to Done. |
 | IDTS-47 | Limit or paginate History Timeline on Object Page | PR #87 merged into `dev`; Object Page History now uses UI5 `sap.m.List` growing with 5 initial events, older events remain accessible, expandable details are preserved, and Jira moved to Done. |
+| IDTS-46 | Review and remediate npm dependency vulnerabilities | PR #94 merged into `dev` at `645e6f1`; compatible lockfile updates reduced audit findings to 6 moderate runtime and 14 full-tree findings, with residual risk documented. Jira moved to Done. |
 
 Vietnamese:
 
@@ -94,6 +95,7 @@ Vietnamese:
 | IDTS-56 | Dialog/dropdown Smart Assign developer | PR #79 da merge vao `dev`; Object Page co action `Smart Assign` bang SAPUI5/Fiori controls, search developer/capability/availability, giu backend validation, co programmatic QA, browser QA va evidence trong `docs/pm/evidence/idts-56/`. Jira da chuyen Done. |
 | IDTS-61 | Thay Assignee value help bang Smart Assign picker | PR #84 da merge vao `dev`; PR #85 da sync PM docs; Render deploy `dep-d95pqqbtqb8s73f4i0kg` dang live tren commit `a68193e`; route/static artifact smoke pass; Jira da chuyen Done. |
 | IDTS-47 | Gioi han hoac phan trang History Timeline tren Object Page | PR #87 da merge vao `dev`; History tren Object Page dung UI5 `sap.m.List` growing voi 5 event ban dau, event cu van xem duoc, Show Details van giu duoc, va Jira da chuyen Done. |
+| IDTS-46 | Review va xu ly npm dependency vulnerabilities | PR #94 da merge vao `dev` tai `645e6f1`; compatible lockfile update giam audit con 6 moderate runtime va 14 finding full-tree, residual risk da duoc document. Jira da chuyen Done. |
 
 ## Ready
 
@@ -125,7 +127,6 @@ Vietnamese:
 | IDTS-32 | Manual browser UAT for Sprint 3 workflow/history flows | SangVN | Evidence branch merged through PR #34. Retest remains open until IDTS-41/42/43 fixes and no P0/P1 remain. |
 | IDTS-58 | Fix Sprint 4 UI defects found after Fiori redesign review | DatDT | Branch `fix/idts-58-sprint-4-ui-defects-datdt` now contains the FE fixes and local browser-smoke evidence. Waiting for Jira evidence comment, push/PR review, and merge before board-level Done. |
 | IDTS-63 | Define AI scope guardrails and human-review rules | DonHV | Added to Sprint 4 and moved to In Progress on 2026-07-07. This is the only AI Epic task committed to Sprint 4; runtime implementation waits for Sprint 5. |
-| IDTS-46 | Review and remediate npm dependency vulnerabilities | DonHV | Compatible lockfile update and evidence-backed residual-risk review are in progress on branch `chore/idts-46-npm-vulnerability-review-donhv`. |
 
 Vietnamese:
 
@@ -143,19 +144,18 @@ Vietnamese:
 | IDTS-58 | Fix cac loi UI Sprint 4 sau Fiori redesign review | DatDT | Branch `fix/idts-58-sprint-4-ui-defects-datdt` da co FE fixes va browser-smoke evidence local. Cho DatDT cap nhat Jira evidence, push/PR review, va merge truoc khi board-level Done. |
 | IDTS-63 | Chốt AI scope guardrail và human-review rule | DonHV | Đã đưa vào Sprint 4 và chuyển In Progress ngày 2026-07-07. Đây là task duy nhất của Epic AI được commit trong Sprint 4; runtime implementation chờ Sprint 5. |
 
-| IDTS-46 | Review va xu ly npm dependency vulnerabilities | DonHV | Dang thuc hien compatible lockfile update va review residual risk co evidence tren branch `chore/idts-46-npm-vulnerability-review-donhv`. |
 
 ## Blocked
 
 | ID | Task | Blocker | Required decision |
 | --- | --- | --- | --- |
-| None | None | No current blocker after IDTS-44 closure. | Continue scheduled follow-ups IDTS-45 and IDTS-46. |
+| None | None | No current blocker after IDTS-44 closure. | Continue scheduled follow-up IDTS-45. |
 
 Vietnamese:
 
 | ID | Cong viec | Blocker | Quyet dinh can co |
 | --- | --- | --- | --- |
-| None | None | Khong con blocker hien tai sau khi dong IDTS-44. | Tiep tuc follow-up IDTS-45 va IDTS-46. |
+| None | None | Khong con blocker hien tai sau khi dong IDTS-44. | Tiep tuc follow-up IDTS-45. |
 
 ## Update Rules
 
