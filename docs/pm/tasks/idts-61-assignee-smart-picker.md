@@ -84,3 +84,18 @@ This task touches Fiori/UI5 assignment UX only. Do not log bearer tokens, privat
   - Deployed artifact smoke passed: manifest contains `IdtsSmartAssignment`, the old header action is absent, the fragment opens Smart Assign from Assignee value-help, free-text reset is wired, and the action file contains both draft `assignee_ID` update and active `BugService.assignToDeveloper` paths.
   - Render app error logs since deploy start showed no new app error entries.
 - Jira `IDTS-61` was moved to Done after merge and shared-QA verification.
+- Follow-up layout defect found by DonHV after shared-QA visual review: the custom Assignment section was correct, but the old generated Object Page subsection was still shown inside the upper `Classification and Assignment` area. This made the page look like Assignment was split into two places.
+- Follow-up fix on branch `fix/idts-61-assignment-layout-donhv`:
+  - Renamed the upper generated section to `Classification and Planning`.
+  - Removed the old generated `Assignment` ReferenceFacet from `app/bug-management-ui/annotations/object-page.cds`.
+  - Kept the technical facet ID `ClassificationAndAssignment` unchanged so the custom Assignment section anchor in `manifest.json` remains stable.
+  - Added a regression assertion in `npm run qa:idts56:programmatic` to prevent `@UI.FieldGroup#Assignment` from being referenced again by the upper generated section.
+- Follow-up verification passed on 2026-07-06:
+  - `npx cds compile srv --to edmx -s all`
+  - `npm run qa:idts56:programmatic` (`12 PASS / 0 FAIL`)
+  - `npx ui5 build --config ui5.yaml --dest ..\..\.ui5-build\bug-management-ui`
+  - `node --check scripts/qa/test-idts56-smart-assign.js`
+  - `npm run qa:secret-scan`
+  - `npx ai-devkit@latest lint --json`
+  - `git diff --check`
+- Follow-up tooling note: the first compile/test attempt in the new isolated worktree failed because `node_modules` was not installed. Running `npm ci --include=dev` fixed the environment. The install still reports the existing dependency vulnerability backlog tracked by `IDTS-46`; no broad dependency fix was done in this layout task.

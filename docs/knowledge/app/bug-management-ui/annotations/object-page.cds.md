@@ -8,15 +8,16 @@ Fiori Elements annotations for the **Bug Object Page** (detail screen).
 
 It defines:
 - Header (bugNumber + title)
-- Main facets and field groups (General Info, Supporting Info, Classification, Assignment)
-- Layout of sections for comments, attachments, history, notifications (via other annotation files)
+- Main facets and field groups (General Info, Supporting Info, Classification, Planning)
+- Layout anchors for custom sections such as Assignment, comments, attachments, history, and notifications
 
 ### IDTS flow
 
 When opening a bug from the list, the Object Page shows all important information grouped logically:
 - Core bug data
 - Classification (module, component, defect category)
-- Assignment (assignee + next processor)
+- Planning fields
+- Assignment is shown through the custom Assignment section configured in `manifest.json`, not through the old generated subsection inside this file
 - Child data: comments, attachments, history events, notifications
 
 Action buttons are controlled by capability annotations (in other files).
@@ -26,11 +27,11 @@ Action buttons are controlled by capability annotations (in other files).
 - `UI.HeaderInfo`: Uses bugNumber as title and title as description.
   **IDTS concept**: Gives quick identification of the bug.
 
-- `UI.Facets` with CollectionFacet for "Bug Summary" and "Classification and Assignment".
-  **IDTS concept**: Groups fields so testers see reproduction info, while assignment and classification (the key for who should work on it) are clearly separated.
+- `UI.Facets` with CollectionFacet for "Bug Summary" and "Classification and Planning".
+  **IDTS concept**: Keeps classification and planning fields together while Assignment is handled by the custom Smart Assign section.
 
-- References to FieldGroup#GeneralInfo, #SupportingInfo, #Classification, #Assignment.
-  **IDTS concept**: Organizes mandatory fields (title, description, steps, actual/expected) near the top, while classification and ownership have dedicated sections.
+- References to FieldGroup#GeneralInfo, #SupportingInfo, #Classification, #Planning, and RejectedFollowUp.
+  **IDTS concept**: Organizes mandatory fields near the top, while technical ownership has a single dedicated Assignment section.
 
 ### Cross-folder dependency map
 
@@ -41,7 +42,7 @@ Action buttons are controlled by capability annotations (in other files).
 
 ### Safe editing checklist
 
-- Keep classification and assignment sections prominent (business rule: correct classification + assignment is core).
+- Keep classification and assignment visible, but do not duplicate assignment fields in both the generated Fiori section and the custom Smart Assign section.
 - When adding fields or changing facets, also update value helps and side-effect annotations.
 - Test on real browser for different roles (what a Developer sees vs Tester vs PM).
 
@@ -51,14 +52,15 @@ Action buttons are controlled by capability annotations (in other files).
 
 Annotation cho trang chi tiết **Bug Object Page**.
 
-Định nghĩa header, các facet và group trường (Thông tin chung, Phân loại, Phân công), và bố cục các phần con (comment, attachment, history, notification).
+Định nghĩa header, các facet và group trường (Thông tin chung, Phân loại, Planning), và các điểm neo layout cho các phần custom như Assignment, comment, attachment, history, notification.
 
 ### Flow IDTS
 
 Mở bug từ list → thấy đầy đủ thông tin được nhóm:
 - Dữ liệu bug cốt lõi
 - Phân loại (module, component, defect category)
-- Phân công (assignee + next processor)
+- Planning
+- Phân công được hiển thị qua custom Assignment section trong `manifest.json`, không còn nằm trong subsection generated cũ của file này
 - Dữ liệu con: comment, attachment, lịch sử, thông báo
 
 Nút action được điều khiển bởi capability (file annotation khác).
@@ -66,7 +68,7 @@ Nút action được điều khiển bởi capability (file annotation khác).
 ### Các điểm neo quan trọng trong source
 
 - `UI.HeaderInfo`: bugNumber làm title.
-- `UI.Facets`: Các CollectionFacet cho Bug Summary và Classification and Assignment.
+- `UI.Facets`: Các CollectionFacet cho Bug Summary và Classification and Planning.
 - Các FieldGroup quan trọng.
 
 ### Liên kết với file/folder khác
@@ -78,7 +80,7 @@ Nút action được điều khiển bởi capability (file annotation khác).
 
 ### Checklist sửa an toàn
 
-Giữ phần phân loại và phân công nổi bật. Khi thêm trường phải cập nhật value help và annotation liên quan. Test trên browser với nhiều vai trò.
+Giữ phần phân loại và phân công dễ thấy, nhưng không được lặp lại assignment ở cả generated Fiori section và custom Smart Assign section. Khi thêm trường phải cập nhật value help và annotation liên quan. Test trên browser với nhiều vai trò.
 
 ## IDTS-43 update - keep one readable History section
 

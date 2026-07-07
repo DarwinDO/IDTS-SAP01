@@ -159,6 +159,12 @@ async function verifyStaticContract() {
   assert.strictEqual(smartAssignment.title, '{i18n>smartAssignmentSectionTitle}')
   rec('manifest wires Smart Assign through the Assignee custom section, not a header action', true)
 
+  const objectPageAnnotations = readApp(path.join('annotations', 'object-page.cds'))
+  assert(objectPageAnnotations.includes("Label: 'Classification and Planning'"))
+  assert(!objectPageAnnotations.includes("ID     : 'Assignment'"))
+  assert(!objectPageAnnotations.includes("Target : '@UI.FieldGroup#Assignment'"))
+  rec('Object Page keeps assignment in one dedicated section without duplicate Assignment subsection', true)
+
   const source = readApp(path.join('webapp', 'ext', 'actions', 'SmartAssignDeveloper.js'))
   assertHasAll(source, [
     'sap/m/Dialog',

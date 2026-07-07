@@ -56,19 +56,13 @@ annotate service.Bugs with @(
     {
       $Type  : 'UI.CollectionFacet',
       ID     : 'ClassificationAndAssignment',
-      Label: 'Classification and Assignment',
+      Label: 'Classification and Planning',
       Facets : [
         {
           $Type  : 'UI.ReferenceFacet',
           ID     : 'Classification',
           Label  : 'Classification',
           Target : '@UI.FieldGroup#Classification'
-        },
-        {
-          $Type  : 'UI.ReferenceFacet',
-          ID     : 'Assignment',
-          Label  : 'Assignment',
-          Target : '@UI.FieldGroup#Assignment'
         },
         {
           $Type  : 'UI.ReferenceFacet',
