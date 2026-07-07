@@ -126,6 +126,7 @@ Vietnamese:
 | WP6 | PM Monitoring | DonHV, DatDT, SangVN | Ownership wording is locked; backend monitoring fields, FE monitoring views, Object Page refresh side effects, grouped history timeline, and persona UAT automation are merged. Remaining manual follow-up is `IDTS-32`; `IDTS-33` is Done on Jira. |
 | IDTS-32 | Manual browser UAT for Sprint 3 workflow/history flows | SangVN | Evidence branch merged through PR #34. Retest remains open until IDTS-41/42/43 fixes and no P0/P1 remain. |
 | IDTS-58 | Fix Sprint 4 UI defects found after Fiori redesign review | DatDT | Branch `fix/idts-58-sprint-4-ui-defects-datdt` now contains the FE fixes and local browser-smoke evidence. Waiting for Jira evidence comment, push/PR review, and merge before board-level Done. |
+| IDTS-63 | Define AI scope guardrails and human-review rules | DonHV | Added to Sprint 4 and moved to In Progress on 2026-07-07. This is the only AI Epic task committed to Sprint 4; runtime implementation waits for Sprint 5. |
 
 Vietnamese:
 
@@ -141,6 +142,7 @@ Vietnamese:
 | IDTS-28 | Tach backend service thanh cac module tap trung | DonHV | Jira live dang In Progress du refactor da merge. Can chot retest/evidence closure. |
 | IDTS-32 | Manual browser UAT cho workflow/history Sprint 3 | SangVN | Evidence branch da merge qua PR #34. Van can retest sau IDTS-41/42/43 va chi dong khi khong con P0/P1. |
 | IDTS-58 | Fix cac loi UI Sprint 4 sau Fiori redesign review | DatDT | Branch `fix/idts-58-sprint-4-ui-defects-datdt` da co FE fixes va browser-smoke evidence local. Cho DatDT cap nhat Jira evidence, push/PR review, va merge truoc khi board-level Done. |
+| IDTS-63 | Chốt AI scope guardrail và human-review rule | DonHV | Đã đưa vào Sprint 4 và chuyển In Progress ngày 2026-07-07. Đây là task duy nhất của Epic AI được commit trong Sprint 4; runtime implementation chờ Sprint 5. |
 
 ## Blocked
 

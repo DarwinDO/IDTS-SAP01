@@ -4,9 +4,21 @@
 
 IDTS is a SAP CAP + Fiori Elements/SAPUI5 application for tracking bugs and defects in an SAP software testing environment. The system supports reporting, duplicate checking, classification by SAP module, application component, and defect category, assignment to a suitable developer, developer review, retest before closure, comments, attachments, notifications, audit/history logs, and PM monitoring.
 
-This is not a full Jira replacement and not a source-code workflow system. Developers use IDTS to review assigned bugs, request information, reject wrong assignments, add notes, and update statuses. A rejected bug must continue to a clear follow-up owner and action through `nextProcessor`; rejection is not a silent final state. Code fixes, CI/CD, code review, sprint planning, and mandatory AI root cause analysis are outside the current scope.
+This is not a full Jira replacement and not a source-code workflow system. Developers use IDTS to review assigned bugs, request information, reject wrong assignments, add notes, and update statuses. A rejected bug must continue to a clear follow-up owner and action through `nextProcessor`; rejection is not a silent final state. Code fixes, CI/CD, code review, sprint planning, mandatory AI root cause analysis, and autonomous AI workflow actions are outside the current scope.
 
 Vietnamese: IDTS không phải Jira đầy đủ và không phải hệ thống quản lý source code. Developer dùng IDTS để review bug được assign, request thêm thông tin, reject assignment/phân loại sai, ghi chú và cập nhật status. Bug ở trạng thái `Rejected` vẫn phải có người xử lý tiếp và action tiếp theo rõ ràng thông qua `nextProcessor`; reject không phải trạng thái kết thúc im lặng.
+
+## AI Assistance Direction
+
+- Approved AI v1 capabilities are duplicate/similar detection, classification suggestion, bug/handoff summary, and Smart Assign explanation.
+- AI is suggestion-only. Users explicitly review, accept, reject, ignore, or apply results.
+- AI cannot assign, persist classification, confirm duplicates, or change bug lifecycle state by itself.
+- CAP validation and authorization remain authoritative.
+- AI is disabled by default, and provider failure cannot break the normal bug workflow.
+- Provider payloads use minimum allowlisted data. Credentials, tokens, private email/endpoint data, attachments, and storage references are forbidden in v1.
+- Persist only normalized safe suggestion/audit data; do not persist raw prompts, raw provider responses, or hidden reasoning.
+
+Vietnamese: AI v1 chỉ hỗ trợ tìm bug trùng/tương tự, gợi ý phân loại, tạo bug/handoff summary và giải thích Smart Assign. AI không tự hành động; người dùng phải review và chủ động quyết định. CAP vẫn là lớp validation/phân quyền cuối. AI mặc định tắt, lỗi AI không được làm hỏng workflow bình thường, và dữ liệu gửi provider phải tối thiểu, đã allowlist, không chứa secret, email private, attachment hoặc storage reference.
 
 ## Stack
 

@@ -954,3 +954,19 @@ Các field này không được dùng để mở rộng IDTS thành Jira, SAP Cl
 **Vietnamese clarification:** Lich su hien cho nguoi dung nen duoc nhom theo `HistoryEvents` de doc nhanh, con `HistoryLogs` van la audit trail append-only o muc field cho tung event.
 
 **Vietnamese:** WP1 phải đi theo database baseline trong `docs/ba/09-database-model-review.md`. Entity Bug dùng UUID làm technical key và có `bugNumber` dễ đọc cho người dùng. Application Component và Defect Category là lựa chọn user-facing; Component Category là assignment key đã validate. SAP Module là context tùy chọn và filter assignment tùy chọn, không bắt buộc cho mọi bug. `nextProcessor` nên hỗ trợ cả role/queue code và user cụ thể khi biết rõ. Bug bị Rejected phải lưu rejection reason mới nhất để hiển thị và lưu reason bất biến trong HistoryLogs. Attachment dùng `@cap-js/attachments`; local development được phép dùng DB fallback, còn integration/deployment target lưu file bytes ở external object storage và metadata trong CAP persistence. DuplicateLinks chỉ lưu quan hệ duplicate/similar/related đã xác nhận.
+
+## **BR-48 - AI chỉ được hỗ trợ quyết định, không được sở hữu workflow**
+
+IDTS có thể dùng AI cho bốn khả năng đã duyệt: tìm bug trùng/tương tự, gợi ý phân loại, tạo bug/handoff summary và giải thích Smart Assign.
+
+Các rule bắt buộc:
+
+* Mọi output AI phải được ghi và hiển thị như một suggestion chưa xác nhận.
+* Người dùng phải chủ động accept, reject, ignore hoặc apply suggestion.
+* AI không được tự assign Developer, tự tạo `DuplicateLinks`, tự sửa classification, tự close/reject bug hoặc tự đổi status.
+* CAP validation và role authorization vẫn là lớp quyết định cuối, kể cả khi UI đã ẩn hoặc cho phép một lựa chọn.
+* AI disabled, timeout, rate limit, malformed output hoặc provider failure không được chặn create/edit/comment/assignment/lifecycle flow bình thường.
+* Chỉ gửi dữ liệu tối thiểu đã allowlist và làm sạch. Cấm gửi password, hash, token, credential, private endpoint, email private, attachment content hoặc storage reference.
+* Chỉ lưu suggestion đã chuẩn hóa và trạng thái review cần cho audit; không lưu raw prompt, raw provider response hoặc hidden reasoning.
+
+**English clarification:** AI remains advisory. Human review and CAP enforcement are mandatory for every AI-assisted feature, and the non-AI workflow must remain available when AI is disabled or fails.

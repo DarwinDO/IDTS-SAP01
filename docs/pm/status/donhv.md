@@ -1184,3 +1184,42 @@ Vietnamese:
 | Resolve conflict va dong PR | Da review PR #87 cua SangVN cho `IDTS-47`, reproduce conflict GitHub o local, resolve conflict, bo sung evidence cho QA Depth Gate, merge PR #87 vao `dev`, comment Jira va chuyen Jira Done. Fragment UI runtime khong conflict; chi `docs/pm/current-status.md` conflict. | PR #87 dua tren `dev` cu, trong khi `dev` da merge IDTS-61 va cac update PM sync moi hon. | Done. PR #87 squash-merged vao `dev` tai commit `55120358911ea3c0ed46a4c5b99bb58ac14eeb82`; Jira `IDTS-47` da chuyen Done. | Shared-QA visual smoke tiep theo co the nam trong IDTS-59/IDTS-60; khong con blocker cho IDTS-47. |
 | Loi chat luong knowledge mirror | Update knowledge cua PR #87 dung section tieng Viet ASCII-only, ngan hon va kem day du hon section English. | Note duoc viet nhu quick verification note, chua phai bo sung knowledge mirror song ngu day du. | Da fix trong session bang cach thay bang section tieng Viet day du hon, cung y voi phan English. | `rg` khong con fail-pattern trong cac file da cham. |
 | Loi security dependency | `npm ci --include=dev` trong worktree review PR pass nhung bao 20 vulnerabilities: 13 moderate va 7 high. | Dependency tree hien co cua repo; Sprint 4 `IDTS-46` da track rieng. | Con mo ngoai scope PR #87. Khong doi dependency trong PR nay. | Tiep tuc verify tap trung cho IDTS-47; xu ly dependency remediation trong IDTS-46. |
+## 2026-07-07 - IDTS-63 AI guardrail discovery
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling issue | The first skill read attempted `C:\\Users\\LapHub\\.agents\\skills`, which does not exist in this environment. | The active IDTS skills are repository-local under `E:\\IDTS-SAP01\\.agents\\skills`; the initial lookup used the wrong skill root. | Fixed in-session. No repository or product state was affected. | Re-read `karpathy-guidelines` and `product-discovery` from the repository-local paths before continuing IDTS-63. |
+| Tooling issue | A focused PowerShell document-range read failed before reading files because `$f:$s` was parsed as an invalid variable reference. | PowerShell requires braces when a variable is immediately followed by `:` in an interpolated string. | Fixed in-session. No file was changed by the failed command. | Retry with `${f}:${s}` and continue the same read-only inspection. |
+| Git process issue | The first commit continued even though `git diff --cached --check` reported trailing whitespace and final blank lines. | The PowerShell commands were separated with `;`, so the failed check did not stop the following commit command. | Being corrected before push; no remote state was changed. | Remove every finding, rerun the staged check with an explicit stop condition, and amend the current commit. |
+
+Vietnamese:
+
+| Phân loại | Triệu chứng / công việc | Nguyên nhân | Trạng thái xử lý | Xác minh / bước tiếp theo |
+| --- | --- | --- | --- | --- |
+| Lỗi tooling | Lần đọc skill đầu tiên dùng đường dẫn `C:\\Users\\LapHub\\.agents\\skills`, nhưng đường dẫn này không tồn tại trong môi trường hiện tại. | Các skill IDTS đang dùng nằm trong repo tại `E:\\IDTS-SAP01\\.agents\\skills`; lần tra đầu đã dùng sai skill root. | Đã xử lý trong phiên. Không ảnh hưởng trạng thái repo hoặc sản phẩm. | Đã đọc lại `karpathy-guidelines` và `product-discovery` từ đúng đường dẫn repo-local trước khi tiếp tục IDTS-63. |
+| Lỗi tooling | Lệnh PowerShell đọc phạm vi tài liệu bị lỗi trước khi đọc file vì `$f:$s` được parse thành variable reference không hợp lệ. | PowerShell yêu cầu dùng dấu ngoặc nhọn khi biến đứng ngay trước dấu `:` trong chuỗi nội suy. | Đã xử lý trong phiên. Lệnh lỗi không thay đổi file nào. | Chạy lại bằng `${f}:${s}` và tiếp tục bước kiểm tra read-only. |
+| Lỗi quy trình Git | Lần commit đầu vẫn tiếp tục dù `git diff --cached --check` đã báo trailing whitespace và blank line cuối file. | Các lệnh PowerShell được nối bằng dấu `;`, nên exit code của bước kiểm tra không chặn lệnh commit tiếp theo. | Đang sửa trước khi push; không có remote state nào bị thay đổi. | Loại bỏ toàn bộ finding, chạy lại staged diff check bằng điều kiện dừng rõ ràng, rồi amend commit hiện tại. |
+
+### Work result
+
+English:
+
+- Defined the four approved AI capabilities as suggestion-only and documented explicit human-review rules.
+- Defined feature-level allowed/forbidden data, safe failure fallback, audit boundaries, and final security/QA gates.
+- Synchronized all four canonical business documents, discovery log, decision/risk log, Sprint 4 plan, task board, and the IDTS-62 work package.
+- Added sanitized repository evidence under `docs/pm/evidence/idts-63/`.
+- Jira IDTS-63 was added to Sprint 4 and transitioned to In Progress. Runtime AI work remains deferred to Sprint 5.
+- Verification passed: `git diff --check`, `node scripts/qa/secret-scan.js`, and `npx ai-devkit@latest lint --json` (5 OK, 0 warnings, 0 required failures).
+- Next handoff: create and review the documentation PR, attach the sanitized evidence to Jira, then close IDTS-63 before starting IDTS-46.
+
+Vietnamese:
+
+- Đã chốt bốn khả năng AI theo hướng suggestion-only và quy định rõ bước human review.
+- Đã chốt dữ liệu được phép/cấm theo feature, fallback an toàn, ranh giới audit và security/QA gate cuối.
+- Đã đồng bộ bốn tài liệu business canonical, discovery log, decision/risk log, kế hoạch Sprint 4, task board và work package IDTS-62.
+- Đã thêm evidence có thể commit và đã làm sạch trong `docs/pm/evidence/idts-63/`.
+- Jira IDTS-63 đã được đưa vào Sprint 4 và chuyển In Progress. AI runtime vẫn chuyển sang Sprint 5.
+- Verification pass: `git diff --check`, `node scripts/qa/secret-scan.js` và `npx ai-devkit@latest lint --json` (5 OK, 0 warning, 0 required failure).
+- Handoff tiếp theo: tạo/review PR documentation, attach evidence đã làm sạch lên Jira, rồi đóng IDTS-63 trước khi bắt đầu IDTS-46.

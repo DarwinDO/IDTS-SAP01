@@ -230,6 +230,15 @@ Các trigger notification:
 * Worker gửi email sau khi business transaction đã commit; SMTP fail không được làm hỏng action xử lý bug.
 * Core scope không bao gồm message broker riêng như Redis, RabbitMQ hoặc BullMQ; CAP database outbox là đủ cho v1.
 
+**Approved AI assistance baseline / Baseline AI assistance đã duyệt:**
+
+* AI v1 chỉ hỗ trợ tìm bug trùng/tương tự, gợi ý phân loại, tạo bug/handoff summary và giải thích Smart Assign.
+* AI chỉ đưa ra suggestion; người dùng phải review và chủ động apply, ignore hoặc reject.
+* AI không được tự assign, tạo duplicate link, sửa classification, close, reject hoặc chuyển status.
+* CAP validation, role authorization và workflow hiện tại vẫn là lớp quyết định cuối.
+* AI mặc định tắt; lỗi provider, timeout hoặc output sai không được làm hỏng workflow không dùng AI.
+* Không gửi credential, token, email private, private endpoint, attachment content hoặc dữ liệu không cần thiết cho AI provider.
+
 ---
 
 # **5\. Out of Scope** 
@@ -244,7 +253,7 @@ Các trigger notification:
 * Quản lý task/project kiểu Jira đầy đủ.  
 * Admin quản lý user phức tạp.  
 * Approval workflow nhiều cấp.  
-* AI Root Cause Analysis bắt buộc.  
+* AI Root Cause Analysis bắt buộc hoặc AI agent tự thực hiện workflow action.
 * Dashboard KPI nâng cao nếu chưa đủ thời gian.  
 * Tích hợp sâu với hệ thống SAP thật bên ngoài.  
 * Thay thế hoàn toàn Jira, SAP Solution Manager hoặc ServiceNow.
@@ -377,6 +386,7 @@ Các phần sau vẫn nằm ngoài scope:
 * Transport/release management.
 * Full SAP Cloud ALM, SAP Solution Manager, Jira hoặc ServiceNow replacement.
 * Mandatory AI Root Cause Analysis.
+* Autonomous AI assignment, duplicate confirmation, classification persistence, or lifecycle transitions.
 
 ## **7.9. Mentor-confirmed Sprint 02 implementation scope**
 
