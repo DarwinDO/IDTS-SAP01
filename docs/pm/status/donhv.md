@@ -1,6 +1,6 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
-Last updated: 2026-07-06
+Last updated: 2026-07-07
 
 ## 2026-07-06 - IDTS-61 Assignment section layout follow-up
 
@@ -1166,3 +1166,21 @@ Vietnamese:
 | Loi tooling/process | Thu quan ly Agile sprint chi bang Atlassian Rovo khong du vi tool hien co chi expose Jira issue-level API, khong co API tao/list sprint. Playwright rieng cung bi dung o man login Atlassian thay vi dung session Chrome da login. | Tao Sprint la thao tac Jira Agile board, va browser session khong phai Chrome khong dung profile dang nhap cua DonHV. | Da xu ly trong session nay bang Chrome plugin voi tab Jira da login, sau do dung sprint id lay duoc de update issue qua Jira API. | Chrome UI xac nhan `IDTS Sprint 4` tren board `34` ngay `4 Jul - 18 Jul`; Jira API chuyen task bang `customfield_10020 = 70`; JQL verify pass. |
 | Loi tooling/process | Thu clear Sprint bang `customfield_10020: []` qua Jira issue edit fail voi `Number value expected as the Sprint id`. | Field update cua Jira project nay can numeric sprint id, khong nhan empty array trong duong edit do. | Da xu ly bang cach set thang Sprint 4 id `70`, khong clear field truoc. | `Sprint = "IDTS Sprint 4"` tra ve 5 task da chot; `Sprint = "IDTS Sprint 3" AND statusCategory != Done` khong tra issue nao. |
 | Siết process | Da them rule Jira task naming, due date, dependency link, bug report, QA evidence va knowledge mirror vao `AGENTS.md`. | Rule cu da co bug logging va PR QA nhung chua bat buoc Jira summary/description/link day du. | Da xong trong repo docs. | Verify bang `rg`, `git diff --check`, va AI DevKit lint. |
+
+## 2026-07-07 - Review and resolve PR #87 for IDTS-47
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| PR conflict resolution | Reviewed SangVN PR #87 for `IDTS-47` and reproduced the GitHub conflict locally. Runtime UI fragment had no conflict; only `docs/pm/current-status.md` conflicted. | PR #87 was based on an older `dev`, while `dev` had since merged IDTS-61 and PM sync updates. | Resolved in a clean worktree by keeping latest `dev` status and adding the IDTS-47 review/merge handoff. | Push the merge-resolution commit back to PR #87, confirm the PR becomes mergeable, then merge if checks remain acceptable. |
+| Knowledge mirror quality issue | PR #87 knowledge update used a short ASCII-only Vietnamese section that was less complete than the English section. | The update was written as a quick verification note rather than a full bilingual knowledge mirror addition. | Fixed in-session by replacing it with a fuller Vietnamese section matching the English meaning. | `rg` found no remaining fail-pattern in the touched files. |
+| Dependency security issue | `npm ci --include=dev` in the clean PR review worktree completed but reported 20 vulnerabilities: 13 moderate and 7 high. | Existing repository dependency tree; tracked separately by Sprint 4 `IDTS-46`. | Open outside PR #87 scope. No dependency changes were made. | Continue with focused IDTS-47 verification; handle dependency remediation under IDTS-46. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai fix | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Resolve conflict PR | Da review PR #87 cua SangVN cho `IDTS-47` va reproduce conflict GitHub o local. Fragment UI runtime khong conflict; chi `docs/pm/current-status.md` conflict. | PR #87 dua tren `dev` cu, trong khi `dev` da merge IDTS-61 va cac update PM sync moi hon. | Da resolve trong worktree sach bang cach giu status moi nhat cua `dev` va them handoff review/merge cho IDTS-47. | Push commit resolve conflict len lai PR #87, xac nhan PR mergeable, roi merge neu checks van dat. |
+| Loi chat luong knowledge mirror | Update knowledge cua PR #87 dung section tieng Viet ASCII-only, ngan hon va kem day du hon section English. | Note duoc viet nhu quick verification note, chua phai bo sung knowledge mirror song ngu day du. | Da fix trong session bang cach thay bang section tieng Viet day du hon, cung y voi phan English. | `rg` khong con fail-pattern trong cac file da cham. |
+| Loi security dependency | `npm ci --include=dev` trong worktree review PR pass nhung bao 20 vulnerabilities: 13 moderate va 7 high. | Dependency tree hien co cua repo; Sprint 4 `IDTS-46` da track rieng. | Con mo ngoai scope PR #87. Khong doi dependency trong PR nay. | Tiep tuc verify tap trung cho IDTS-47; xu ly dependency remediation trong IDTS-46. |
