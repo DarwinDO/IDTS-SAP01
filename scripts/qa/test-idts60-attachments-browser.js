@@ -53,7 +53,7 @@ async function runTests() {
         console.log('1. Login (PM Role)');
         await page.goto(baseUrl);
         await page.waitForSelector('.idtsLoginCard', { timeout: 10000 });
-        
+
         await page.getByRole('textbox', { name: 'Email' }).fill(ROLES.PM);
         await page.locator('input[type="password"]').fill(QA_PASSWORD);
         await page.getByRole('button', { name: 'Sign In' }).click();
