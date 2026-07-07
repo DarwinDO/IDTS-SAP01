@@ -137,6 +137,32 @@ Chi tiết UI5 quan trọng nằm ở expression binding:
 - Nếu đổi field lấy từ `HistoryEvents`, kiểm tra lại projection backend và read-model enrichment.
 - Chạy lại browser UAT và xem console output, không chỉ nhìn screenshot.
 
+## 2026-07-06 Update: Limit initial History rendering with UI5 growing
+
+### English
+
+IDTS-47 enables `sap.m.List` growing on the Object Page History section. The first render now shows the newest 5 history events. Older events remain available through the standard UI5 growing trigger at the bottom of the list.
+
+Why: this is the smallest supported UI fix for long audit trails. It keeps the backend history/audit model unchanged, preserves expandable `HistoryLogs`, and avoids bringing back the removed raw History table. `growingScrollToLoad` stays `false` because the Object Page contains multiple sections and scrollable content; an explicit growing trigger is clearer and avoids relying on scroll-to-load assumptions.
+
+- **Location**: `app/bug-management-ui/webapp/ext/fragment/HistoryTimeline.fragment.xml`
+  **IDTS concept**: History should be newest-first and scan-friendly by default, while older audit events must still be reachable.
+  **Impact if broken**: Bugs with many comments or lifecycle changes can stretch the Object Page, or users may lose access to older audit details.
+  **Must check together**: UI5 `sap.m.List` growing behavior, Object Page browser evidence, and any future backend paging change for `HistoryEvents`.
+
+### Vietnamese
+
+IDTS-47 bật cơ chế `growing` của `sap.m.List` cho section History trên Object Page. Khi mở bug lần đầu, timeline chỉ render 5 history event mới nhất. Các event cũ không bị mất; user vẫn có thể bấm nút tải thêm mặc định của UI5 ở cuối list để xem tiếp.
+
+Lý do chọn cách này: đây là fix UI nhỏ nhất nhưng vẫn đi theo cơ chế được SAPUI5 hỗ trợ cho list dài. Backend history/audit không đổi, dữ liệu `HistoryEvents` và `HistoryLogs` vẫn giữ nguyên, và phần `Show Details` vẫn mở được bảng chi tiết field/old value/new value. Cách này cũng tránh đưa bảng raw History cũ quay lại, vì bảng đó làm Object Page bị trùng thông tin và khó đọc hơn.
+
+`growingScrollToLoad` được giữ là `false` vì Object Page có nhiều section và vùng scroll phức tạp. Nếu dùng tự động load khi scroll, user có thể không hiểu khi nào list tải thêm hoặc việc load thêm có thể phụ thuộc vào container scroll của Fiori Elements. Nút tải thêm rõ ràng hơn cho QA và cho người dùng cuối.
+
+- **Vị trí**: `app/bug-management-ui/webapp/ext/fragment/HistoryTimeline.fragment.xml`
+  **Khái niệm IDTS**: History nên hiển thị theo hướng mới nhất trước và dễ scan, nhưng các audit event cũ vẫn phải xem được khi cần.
+  **Ảnh hưởng nếu sai**: Bug có nhiều comment hoặc nhiều lần đổi trạng thái sẽ kéo Object Page quá dài, hoặc ngược lại user có thể không truy cập được lịch sử cũ.
+  **Phải kiểm tra cùng**: Cơ chế `growing` của UI5 `sap.m.List`, browser evidence trên Object Page, và mọi thay đổi backend paging trong tương lai cho `HistoryEvents`.
+
 ## Metadata
 
 - Source file: `app/bug-management-ui/webapp/ext/fragment/HistoryTimeline.fragment.xml`
