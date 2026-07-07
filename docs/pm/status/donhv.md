@@ -2,6 +2,26 @@
 
 Last updated: 2026-07-06
 
+## 2026-07-06 - IDTS-61 Assignment section layout follow-up
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product UX defect | Shared-QA visual review showed Assignment twice: the new custom Assignment section was visible, but the upper generated section still contained the old Assignment subsection. | `app/bug-management-ui/annotations/object-page.cds` still referenced `@UI.FieldGroup#Assignment` inside the old `ClassificationAndAssignment` facet. IDTS-61 moved the smart picker entry point, but the generated facet was not fully cleaned up. | Fixed on `fix/idts-61-assignment-layout-donhv`: the upper section is now labeled `Classification and Planning`, the old generated Assignment ReferenceFacet is removed, and the technical anchor ID remains unchanged for manifest positioning. | Fresh verification passed: `npx cds compile srv --to edmx -s all`, `npm run qa:idts56:programmatic` (`12 PASS / 0 FAIL`), UI5 build, JS syntax check, `npm run qa:secret-scan`, AI DevKit lint, and `git diff --check`. Next: create PR into `dev`, then let Render deploy and visually retest the Object Page. |
+| Test-harness hardening | The focused Smart Assign QA did not previously catch the duplicated Object Page assignment subsection. | The script verified the custom section and header-action removal, but not the generated `UI.Facets` cleanup. | Added a static assertion in `scripts/qa/test-idts56-smart-assign.js` so the upper Object Page section cannot reference `@UI.FieldGroup#Assignment` again. | The new assertion is included in the `12 PASS / 0 FAIL` focused run. |
+| Tooling issue | First compile/test attempt in the fresh follow-up worktree failed because CAP packages such as `@cap-js/attachments` were missing. | The isolated worktree did not have `node_modules`. | Fixed by running `npm ci --include=dev`. Existing npm vulnerabilities remain tracked by `IDTS-46`; no dependency remediation was attempted here. | Subsequent compile, focused QA, UI5 build, secret scan, and lint checks passed. |
+| Existing warning | CAP compile still prints the existing attachment vocabulary warning for `NonUpdateableProperties`. | Existing attachment annotation warning; not introduced by the Assignment layout fix. | Left unchanged because this follow-up only touches Object Page section layout. | Keep under separate follow-up only if it becomes a runtime/product issue. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai fix | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Loi UX san pham | Khi xem shared QA, Assignment bi hien hai lan: custom Assignment section moi da dung, nhung section generated phia tren van con subsection Assignment cu. | `app/bug-management-ui/annotations/object-page.cds` van con reference `@UI.FieldGroup#Assignment` trong facet cu `ClassificationAndAssignment`. IDTS-61 da doi entry point cua Smart Assign, nhung chua don het generated facet cu. | Da fix tren `fix/idts-61-assignment-layout-donhv`: section phia tren doi thanh `Classification and Planning`, bo ReferenceFacet Assignment cu, va giu nguyen technical anchor ID de manifest van position duoc custom section. | Verify moi da pass: `npx cds compile srv --to edmx -s all`, `npm run qa:idts56:programmatic` (`12 PASS / 0 FAIL`), UI5 build, JS syntax check, `npm run qa:secret-scan`, AI DevKit lint, va `git diff --check`. Buoc tiep theo: tao PR vao `dev`, cho Render deploy, roi retest truc quan tren Object Page. |
+| Tang cuong test-harness | QA focused Smart Assign truoc do chua bat duoc loi duplicate Assignment subsection tren Object Page. | Script da kiem tra custom section va viec bo header action, nhung chua kiem tra generated `UI.Facets` da duoc don sach hay chua. | Da them static assertion trong `scripts/qa/test-idts56-smart-assign.js` de section generated phia tren khong duoc reference lai `@UI.FieldGroup#Assignment`. | Assertion moi nam trong run focused `12 PASS / 0 FAIL`. |
+| Loi tooling | Lan compile/test dau trong worktree follow-up fail vi thieu package CAP nhu `@cap-js/attachments`. | Worktree rieng chua co `node_modules`. | Da fix bang `npm ci --include=dev`. Cac npm vulnerabilities co san van duoc track boi `IDTS-46`; khong xu ly dependency trong task layout nay. | Sau do compile, QA focused, UI5 build, secret scan va lint deu pass. |
+| Warning co san | CAP compile van in warning attachment vocabulary ve `NonUpdateableProperties`. | Warning annotation attachment co san; khong phai do fix layout Assignment. | Khong sua vi follow-up nay chi cham layout section Object Page. | Chi tach follow-up rieng neu no thanh loi runtime/product. |
+
 ## 2026-07-06 - IDTS-61 Assignee Smart Assign picker
 
 English:
