@@ -48,6 +48,7 @@ Vietnamese: Chi dung board nay de theo doi trang thai cap cao. Chi tiet cong vie
 | IDTS-55 | Comments and attachments Object Page polish | PR #73 merged into `dev`; Render deploy `dep-d94cg4uq1p3s73bc6la0` is live and shared-QA smoke passed for comment reload persistence and attachment upload/download/delete cleanup. Jira moved to Done. |
 | IDTS-56 | Smart assign developer dialog/dropdown | PR #79 merged into `dev`; Object Page `Smart Assign` dialog now uses SAPUI5/Fiori controls, searchable developer capability/availability table, backend assignment validation, programmatic QA, browser QA, and evidence under `docs/pm/evidence/idts-56/`. Jira moved to Done. |
 | IDTS-61 | Replace Assignee value help with Smart Assign picker | PR #84 merged into `dev`; PR #85 synced PM docs; Render deploy `dep-d95pqqbtqb8s73f4i0kg` is live on commit `a68193e`; route/static artifact smoke passed; Jira moved to Done. |
+| IDTS-47 | Limit or paginate History Timeline on Object Page | PR #87 merged into `dev`; Object Page History now uses UI5 `sap.m.List` growing with 5 initial events, older events remain accessible, expandable details are preserved, and Jira moved to Done. |
 
 Vietnamese:
 
@@ -92,6 +93,7 @@ Vietnamese:
 | IDTS-55 | Polish Comments va Attachments tren Object Page | PR #73 da merge vao `dev`; Render deploy `dep-d94cg4uq1p3s73bc6la0` dang live va shared-QA smoke pass cho comment reload persistence cung attachment upload/download/delete cleanup. Jira da chuyen Done. |
 | IDTS-56 | Dialog/dropdown Smart Assign developer | PR #79 da merge vao `dev`; Object Page co action `Smart Assign` bang SAPUI5/Fiori controls, search developer/capability/availability, giu backend validation, co programmatic QA, browser QA va evidence trong `docs/pm/evidence/idts-56/`. Jira da chuyen Done. |
 | IDTS-61 | Thay Assignee value help bang Smart Assign picker | PR #84 da merge vao `dev`; PR #85 da sync PM docs; Render deploy `dep-d95pqqbtqb8s73f4i0kg` dang live tren commit `a68193e`; route/static artifact smoke pass; Jira da chuyen Done. |
+| IDTS-47 | Gioi han hoac phan trang History Timeline tren Object Page | PR #87 da merge vao `dev`; History tren Object Page dung UI5 `sap.m.List` growing voi 5 event ban dau, event cu van xem duoc, Show Details van giu duoc, va Jira da chuyen Done. |
 
 ## Ready
 
@@ -123,7 +125,6 @@ Vietnamese:
 | SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP, and real browser QA are stable enough to prove the happy flow. Remaining work is final SAP490 sync and mentor-demo rerun, not FE/blocking workflow repair. |
 | WP6 | PM Monitoring | DonHV, DatDT, SangVN | Ownership wording is locked; backend monitoring fields, FE monitoring views, Object Page refresh side effects, grouped history timeline, and persona UAT automation are merged. Remaining manual follow-up is `IDTS-32`; `IDTS-33` is Done on Jira. |
 | IDTS-32 | Manual browser UAT for Sprint 3 workflow/history flows | SangVN | Evidence branch merged through PR #34. Retest remains open until IDTS-41/42/43 fixes and no P0/P1 remain. |
-| IDTS-47 | UX: Limit or paginate History Timeline on Object Page | SangVN | Implementation verified locally on branch `feature/idts-47-history-timeline-limit-sangvn`: UI5 `sap.m.List` growing shows 5 initial history events, older events remain accessible, and expandable details still render. PR #87 is open for DonHV review. |
 | IDTS-58 | Fix Sprint 4 UI defects found after Fiori redesign review | DatDT | Branch `fix/idts-58-sprint-4-ui-defects-datdt` now contains the FE fixes and local browser-smoke evidence. Waiting for Jira evidence comment, push/PR review, and merge before board-level Done. |
 
 Vietnamese:
@@ -139,7 +140,6 @@ Vietnamese:
 | IDTS-27 | Sync docs, Jira status va Sprint 3 evidence | DonHV | Bucket tong hop PM/Jira/evidence dang active. `IDTS-34` va `IDTS-36` da merge; tiep theo la handoff `IDTS-37`/`IDTS-38`, sau do tong hop evidence Sprint 3. |
 | IDTS-28 | Tach backend service thanh cac module tap trung | DonHV | Jira live dang In Progress du refactor da merge. Can chot retest/evidence closure. |
 | IDTS-32 | Manual browser UAT cho workflow/history Sprint 3 | SangVN | Evidence branch da merge qua PR #34. Van can retest sau IDTS-41/42/43 va chi dong khi khong con P0/P1. |
-| IDTS-47 | Gioi han hoac phan trang History Timeline tren Object Page | SangVN | Da verify local tren branch `feature/idts-47-history-timeline-limit-sangvn`: UI5 `sap.m.List` growing hien 5 history event ban dau, event cu van xem duoc, va Show Details van mo bang detail. PR #87 dang mo cho DonHV review. |
 | IDTS-58 | Fix cac loi UI Sprint 4 sau Fiori redesign review | DatDT | Branch `fix/idts-58-sprint-4-ui-defects-datdt` da co FE fixes va browser-smoke evidence local. Cho DatDT cap nhat Jira evidence, push/PR review, va merge truoc khi board-level Done. |
 
 ## Blocked

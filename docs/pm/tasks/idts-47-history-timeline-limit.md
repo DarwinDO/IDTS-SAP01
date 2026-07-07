@@ -46,7 +46,9 @@ Use `sap.m.List` growing on `app/bug-management-ui/webapp/ext/fragment/HistoryTi
   - Expandable detail proof: `Show Details` opens the field/old/new value table.
   - Evidence screenshots: `docs/pm/evidence/idts-47/01_history_initial_limited.png`, `02_history_after_growing_more.png`, and `03_history_detail_expanded.png`.
 - GitHub PR: https://github.com/DarwinDO/IDTS-SAP01/pull/87.
+- DonHV review/merge: PR #87 conflict was resolved against latest `dev`, `qa-depth-gate` passed, and the PR was squash-merged into `dev` at commit `55120358911ea3c0ed46a4c5b99bb58ac14eeb82`.
+- Jira: `IDTS-47` moved to Done on 2026-07-07 after merge evidence was recorded.
 
 ## Status
 
-Implementation verified locally and PR #87 is open for DonHV review.
+Done. Implementation is merged into `dev` through PR #87 and Jira `IDTS-47` is Done.
