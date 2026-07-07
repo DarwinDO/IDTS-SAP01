@@ -62,6 +62,18 @@ The repository includes a helper:
 powershell -ExecutionPolicy Bypass -File scripts/render/backup-render-postgres.ps1
 ```
 
+Shortcut:
+
+```powershell
+npm run render:db:backup
+```
+
+Preflight check:
+
+```powershell
+npm run render:db:backup:check
+```
+
 Before running it, DonHV must set the database URL privately:
 
 ```powershell
@@ -100,6 +112,45 @@ Recommended proof:
 5. Record only safe evidence: timestamp, backup size, checksum, restore target
    type, and pass/fail summary.
 
+The repository includes a restore helper:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/render/restore-render-postgres.ps1 `
+  -BackupPath "<path-to-private-pgdump>" `
+  -InspectOnly
+```
+
+Actual restore requires a temporary database URL and an explicit safety flag:
+
+```powershell
+$env:IDTS_RESTORE_DATABASE_URL = "<temporary PostgreSQL target URL>"
+powershell -ExecutionPolicy Bypass -File scripts/render/restore-render-postgres.ps1 `
+  -BackupPath "<path-to-private-pgdump>" `
+  -IUnderstandTargetWillBeOverwritten
+```
+
+Do not use the live Render QA database URL as `IDTS_RESTORE_DATABASE_URL`.
+
+## Current Render read-only state
+
+Checked on 2026-07-07 through Render CLI in workspace `IDTS_GSUSAP01`:
+
+| Resource | Value |
+| --- | --- |
+| Web service | `idts-sap01-qa` |
+| Service status | `not_suspended` |
+| Service branch | `dev` |
+| Public URL | `https://idts-sap01-qa.onrender.com` |
+| PostgreSQL instance | `idts-sap01-qa-db` |
+| PostgreSQL status | `available` |
+| PostgreSQL plan | `free` |
+| PostgreSQL region | `singapore` |
+| PostgreSQL expires at | `2026-07-31T15:26:56.160995Z` |
+| PostgreSQL IP allowlist | empty |
+
+This evidence intentionally excludes database connection strings, passwords,
+environment variables, private credentials, and real recipient lists.
+
 ## Options considered
 
 | Option | Pros | Cons | Decision |
@@ -113,8 +164,10 @@ Recommended proof:
 
 - [x] Jira `IDTS-45` exists, has due date 2026-07-24, and relates to `IDTS-44`.
 - [x] Repo has a secret-safe backup helper.
+- [x] Repo has a guarded restore/inspect helper.
 - [x] Repo has safe evidence instructions.
 - [x] Risk and decision logs are updated.
+- [x] Render CLI read-only state confirms the database is Free, available, and expires on 2026-07-31.
 - [ ] DonHV runs private backup with the real Render database URL.
 - [ ] Backup artifact is stored in approved private storage.
 - [ ] Restore proof succeeds on a temporary PostgreSQL target.
