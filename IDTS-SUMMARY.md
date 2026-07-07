@@ -25,6 +25,7 @@ Hệ thống bao gồm các phạm vi sau:
 * Comment giữa Tester, Developer và PM trong từng bug report.  
 * Notification cho các sự kiện quan trọng.  
 * Lưu history/audit log cho các thay đổi quan trọng.
+* AI hỗ trợ dạng suggestion-only cho tìm bug trùng/tương tự, gợi ý phân loại, tóm tắt bug/handoff và giải thích Smart Assign. Mọi kết quả phải được người dùng review; AI không tự thay đổi dữ liệu hoặc workflow.
 
 ## **Out of scope**
 
@@ -39,7 +40,11 @@ Hệ thống **không tập trung vào**:
 * Thay thế hoàn toàn Jira, SAP Solution Manager hoặc ServiceNow.  
 * Full project management system.  
 * Complex approval workflow nhiều cấp.  
-* AI Root Cause Analysis bắt buộc.
+* AI Root Cause Analysis bắt buộc hoặc autonomous agent tự assign, reject, close hay đổi status.
+
+**English clarification:** AI assistance is optional and advisory. CAP validation, role authorization, and explicit human actions remain authoritative. AI failure must not block the normal IDTS workflow.
+
+**Tiếng Việt:** AI là tính năng hỗ trợ tùy chọn. Validation CAP, phân quyền role và hành động rõ ràng của người dùng vẫn là nguồn quyết định cuối. AI lỗi không được chặn workflow IDTS bình thường.
 
 Nói ngắn gọn với mentor:
 

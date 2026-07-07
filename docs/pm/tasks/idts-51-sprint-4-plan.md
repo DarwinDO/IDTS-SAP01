@@ -13,9 +13,9 @@ Vietnamese: File này dùng để theo dõi các việc follow-up của Sprint 4
 - Planned start: 2026-07-04
 - Planned end: 2026-07-18
 
-Jira status: the real board sprint `IDTS Sprint 4` has been created on board `34` with sprint id `70`. The sprint window is 2026-07-04 to 2026-07-18, matching the planned Sprint 4 dates. `IDTS-39`, `IDTS-40`, `IDTS-45`, `IDTS-46`, and `IDTS-47` are assigned to this sprint and also grouped under Epic `IDTS-51`.
+Jira status: the real board sprint `IDTS Sprint 4` has been created on board `34` with sprint id `70`. The sprint window is 2026-07-04 to 2026-07-18, matching the planned Sprint 4 dates. `IDTS-39`, `IDTS-40`, `IDTS-45`, `IDTS-46`, and `IDTS-47` are grouped under Epic `IDTS-51`. `IDTS-63`, under the separate AI Epic `IDTS-62`, was added as a bounded Sprint 4 discovery task; runtime AI implementation is deferred to Sprint 5.
 
-Vietnamese: Jira board sprint thật `IDTS Sprint 4` đã được tạo trên board `34` với sprint id `70`. Sprint chạy từ 2026-07-04 đến 2026-07-18, khớp với ngày Sprint 4 đã chốt. `IDTS-39`, `IDTS-40`, `IDTS-45`, `IDTS-46`, và `IDTS-47` đã được đưa vào sprint này và đồng thời được gom dưới Epic `IDTS-51`.
+Vietnamese: Jira board sprint thật `IDTS Sprint 4` đã được tạo trên board `34` với sprint id `70`. Sprint chạy từ 2026-07-04 đến 2026-07-18. `IDTS-39`, `IDTS-40`, `IDTS-45`, `IDTS-46`, và `IDTS-47` thuộc Epic `IDTS-51`. `IDTS-63` thuộc Epic AI riêng `IDTS-62` được thêm vào như một task discovery có giới hạn; phần runtime AI chuyển sang Sprint 5.
 
 ## Active Sprint 4 candidates
 
@@ -26,6 +26,7 @@ Vietnamese: Jira board sprint thật `IDTS Sprint 4` đã được tạo trên b
 | IDTS-46 | DonHV | 2026-07-12 | Review dependency vulnerabilities found during Render/shared-QA work with targeted remediation. |
 | IDTS-47 | SangVN | 2026-07-14 | Fix the long History Timeline UX issue found during IDTS-32 UAT. |
 | IDTS-40 | DonHV | 2026-07-18 | Keep AWS ECS/ECR as a longer-term deployment direction or alternative; it does not block accepted Render QA. |
+| IDTS-63 | DonHV | 2026-07-09 | Define suggestion-only AI scope, data boundary, fallback, human review, and audit rules before any AI runtime work. |
 
 Vietnamese:
 
@@ -36,6 +37,7 @@ Vietnamese:
 | IDTS-46 | DonHV | 2026-07-12 | Review dependency vulnerabilities phát hiện trong quá trình Render/shared-QA, xử lý theo hướng targeted. |
 | IDTS-47 | SangVN | 2026-07-14 | Fix vấn đề UX History Timeline quá dài được phát hiện trong UAT IDTS-32. |
 | IDTS-40 | DonHV | 2026-07-18 | Giữ AWS ECS/ECR như hướng deploy dài hạn hoặc phương án thay thế; không block Render QA đã accepted. |
+| IDTS-63 | DonHV | 2026-07-09 | Chốt AI suggestion-only, data boundary, fallback, human review và audit trước khi làm AI runtime. |
 
 ## Issue links
 
