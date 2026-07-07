@@ -13,6 +13,9 @@
         }
       }"
       showSeparators="None"
+      growing="true"
+      growingThreshold="5"
+      growingScrollToLoad="false"
       noDataText="{i18n>historyTimelineNoData}"
     >
       <CustomListItem type="Inactive" class="sapUiTinyMarginBottom">
