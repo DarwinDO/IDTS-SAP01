@@ -469,6 +469,10 @@ The `qa-depth-gate` GitHub Action validates these sections and runs the fast PR 
 
 Actionable product defects discovered during QA must have a Jira issue or be linked to an existing Jira issue. Do not bury product defects only inside a PR comment. Temporary environment/tooling issues still belong in the relevant member status file.
 
+Evidence artifacts are mandatory when a test, check, QA run, scan, browser smoke, UAT session, or manual verification needs proof beyond command text. Generated raw artifacts may stay in ignored folders such as `scripts/qa/uat-evidence/` while the run is in progress, but the member must select the useful, safe, and relevant proof after review and place it in an intentional evidence folder such as `docs/pm/evidence/<jira-key>/` or another task-specific evidence folder approved by the repo. Do not commit noisy dumps, duplicate screenshots, screenshots with secrets/tokens/private endpoints, or evidence that does not prove the acceptance criteria.
+
+Every member must attach the final selected evidence files to the correct Jira task they are working on. A PR link or text comment alone is not enough when the task required screenshots, exported reports, scan logs, browser evidence, or UAT proof. The Jira comment should summarize what was attached and which acceptance criteria the evidence proves. If Jira attachment upload is unavailable, record the blocker in the member status file and Jira comment, then provide the best available fallback link/path until the attachment can be uploaded.
+
 Vietnamese:
 
 Moi QA, review, hoac PR verification cham vao `app/`, `srv/`, `db/`, hoac `scripts/qa/` phai chay hai mode rieng:
@@ -479,6 +483,10 @@ Moi QA, review, hoac PR verification cham vao `app/`, `srv/`, `db/`, hoac `scrip
 Khong ket luan PASS chi vi happy path pass. Neu khong tim thay bug, phai ghi da thu pha feature bang cach nao va phan nao chua test. `N/A` chi hop le khi co ly do cu the.
 
 PR vao `dev` phai dien day du cac section evidence trong PR template. GitHub Action `qa-depth-gate` se check section bat buoc va chay fast PR lane cho thay doi lien quan. Neu sua browser QA, uu tien helper `scripts/qa/lib/browser-harness.js`. Defect san pham co action phai tao/link Jira; khong chi de trong comment PR.
+
+Bang chung/evidence la bat buoc khi test, check, QA, scan, browser smoke, UAT, hoac manual verification can minh chung ngoai output command. Artifact raw sinh tu tool co the tam nam trong folder bi ignore nhu `scripts/qa/uat-evidence/` trong luc dang chay, nhung sau khi review, member phai chon cac bang chung huu ich, an toan va lien quan roi dua vao folder evidence co chu dich nhu `docs/pm/evidence/<jira-key>/` hoac folder evidence rieng da duoc repo chap nhan. Khong commit dump on ao, anh trung lap, anh co secret/token/private endpoint, hoac bang chung khong chung minh acceptance criteria.
+
+Moi member phai attach cac file evidence da chon len dung Jira task ma minh dang lam. Chi dan PR hoac comment text la chua du neu task yeu cau screenshot, report export, scan log, browser evidence, hoac UAT proof. Jira comment phai tom tat da attach gi va evidence do chung minh acceptance criteria nao. Neu Jira attachment upload bi loi hoac tool khong ho tro, phai ghi blocker vao member status file va Jira comment, sau do cung cap fallback link/path tot nhat cho den khi upload attachment duoc.
 
 ## QA and Testing Skill Routing
 
