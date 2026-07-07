@@ -23,3 +23,9 @@ Vietnamese: Folder này chỉ lưu evidence đã làm sạch và có thể commi
 - Jira live verification: IDTS-63 is in `IDTS Sprint 4` and status `In Progress`.
 
 Vietnamese: Kiểm tra ngày 2026-07-07 đã pass `git diff --check`, secret scan và AI DevKit lint. Jira live xác nhận IDTS-63 nằm trong `IDTS Sprint 4` và đang `In Progress`.
+
+## Manual Jira upload handoff
+
+DonHV will manually attach `docs/ba/discovery/idts-63-ai-assistance-guardrails.md` to Jira IDTS-63 after the repository work is merged. The repository copy is the source of truth; the Jira attachment is review evidence only.
+
+Vietnamese: DonHV sẽ tự attach file `docs/ba/discovery/idts-63-ai-assistance-guardrails.md` vào Jira IDTS-63 sau khi phần repo được merge. Bản trong repo là source of truth; attachment Jira chỉ là evidence review.
