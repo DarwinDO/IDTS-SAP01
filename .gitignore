@@ -32,4 +32,7 @@ docs/sap490/*.local.json
 docs/sap490/*.local.log
 docs/sap490/*.local.log.jsonl
 scripts/qa/uat-evidence/
+docs/pm/evidence/idts-45/private/
+*.pgdump
+*.pgdump.sha256
 sql_output.txt
