@@ -85,6 +85,8 @@ The script:
 - reads the URL from a private environment variable;
 - parses it into PostgreSQL client environment variables;
 - runs `pg_dump` without putting the password in the command line;
+- uses local PostgreSQL client tools when available, or Docker image
+  `postgres:15` as a fallback when Docker Desktop is running;
 - writes the dump outside the repository by default;
 - writes a SHA-256 checksum;
 - removes PostgreSQL connection environment variables before exit;
@@ -131,6 +133,11 @@ powershell -ExecutionPolicy Bypass -File scripts/render/restore-render-postgres.
 
 Do not use the live Render QA database URL as `IDTS_RESTORE_DATABASE_URL`.
 
+Like the backup helper, restore uses local `pg_restore` when available and falls
+back to Docker image `postgres:15` when Docker Desktop is running. This avoids
+installing the full PostgreSQL server on Windows just to run backup/restore
+client commands.
+
 ## Current Render read-only state
 
 Checked on 2026-07-07 through Render CLI in workspace `IDTS_GSUSAP01`:
@@ -165,6 +172,7 @@ environment variables, private credentials, and real recipient lists.
 - [x] Jira `IDTS-45` exists, has due date 2026-07-24, and relates to `IDTS-44`.
 - [x] Repo has a secret-safe backup helper.
 - [x] Repo has a guarded restore/inspect helper.
+- [x] Backup and restore helpers support Docker fallback for PostgreSQL client tools.
 - [x] Repo has safe evidence instructions.
 - [x] Risk and decision logs are updated.
 - [x] Render CLI read-only state confirms the database is Free, available, and expires on 2026-07-31.

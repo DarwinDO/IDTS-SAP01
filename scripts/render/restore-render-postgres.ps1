@@ -31,6 +31,7 @@ param(
   [Parameter(Mandatory = $true)]
   [string]$BackupPath,
   [string]$RestoreDatabaseUrlEnv = "IDTS_RESTORE_DATABASE_URL",
+  [string]$PostgresDockerImage = "postgres:15",
   [switch]$InspectOnly,
   [switch]$IUnderstandTargetWillBeOverwritten
 )
@@ -43,13 +44,101 @@ function Write-SafeInfo {
   Write-Host "[idts-45-restore] $Message"
 }
 
-function Get-RequiredCommand {
+function Get-PostgresClientRunner {
   param([string]$Name)
   $command = Get-Command $Name -ErrorAction SilentlyContinue
-  if (-not $command) {
-    throw "Required command '$Name' was not found. Install PostgreSQL client tools first, then retry. On Windows, install PostgreSQL and add its 'bin' folder to PATH."
+  if ($command) {
+    return @{
+      Mode = "host"
+      Command = $command.Source
+    }
   }
-  return $command.Source
+
+  $docker = Get-Command docker -ErrorAction SilentlyContinue
+  if ($docker) {
+    & $docker.Source run --rm $PostgresDockerImage $Name --version | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+      return @{
+        Mode = "docker"
+        Command = $docker.Source
+      }
+    }
+  }
+
+  throw "Required command '$Name' was not found on the host and Docker fallback '$PostgresDockerImage' could not run it. Install PostgreSQL client tools or start Docker Desktop, then retry."
+}
+
+function Get-DockerBackupMount {
+  param([string]$BackupPath)
+  $backupItem = Get-Item -LiteralPath $BackupPath
+  $backupDirectory = $backupItem.Directory.FullName
+  return @{
+    FileName = $backupItem.Name
+    Volume = "$($backupDirectory):/backup:ro"
+    ContainerPath = "/backup/$($backupItem.Name)"
+  }
+}
+
+function Invoke-PgRestoreList {
+  param(
+    [hashtable]$Runner,
+    [string]$BackupPath,
+    [string]$PostgresDockerImage
+  )
+
+  if ($Runner.Mode -eq "host") {
+    & $Runner.Command --list "$BackupPath" | Select-Object -First 20
+    return $LASTEXITCODE
+  }
+
+  $mount = Get-DockerBackupMount -BackupPath $BackupPath
+  $dockerArgs = @(
+    "run",
+    "--rm",
+    "--volume", $mount.Volume,
+    $PostgresDockerImage,
+    "pg_restore",
+    "--list",
+    $mount.ContainerPath
+  )
+  & $Runner.Command @dockerArgs | Select-Object -First 20
+  return $LASTEXITCODE
+}
+
+function Invoke-PgRestoreToTarget {
+  param(
+    [hashtable]$Runner,
+    [string]$BackupPath,
+    [string]$PostgresDockerImage
+  )
+
+  if ($Runner.Mode -eq "host") {
+    & $Runner.Command --clean --if-exists --no-owner --no-acl --dbname "$env:PGDATABASE" "$BackupPath"
+    return $LASTEXITCODE
+  }
+
+  $mount = Get-DockerBackupMount -BackupPath $BackupPath
+  $dockerArgs = @(
+    "run",
+    "--rm",
+    "--env", "PGHOST",
+    "--env", "PGPORT",
+    "--env", "PGDATABASE",
+    "--env", "PGUSER",
+    "--env", "PGPASSWORD",
+    "--env", "PGSSLMODE",
+    "--volume", $mount.Volume,
+    $PostgresDockerImage,
+    "pg_restore",
+    "--clean",
+    "--if-exists",
+    "--no-owner",
+    "--no-acl",
+    "--dbname", "$env:PGDATABASE",
+    $mount.ContainerPath
+  )
+  & $Runner.Command @dockerArgs
+  return $LASTEXITCODE
 }
 
 function Set-PostgresEnvFromUrl {
@@ -82,18 +171,19 @@ function Set-PostgresEnvFromUrl {
 }
 
 try {
-  $pgRestore = Get-RequiredCommand "pg_restore"
+  $pgRestore = Get-PostgresClientRunner "pg_restore"
 
   if (-not (Test-Path -LiteralPath $BackupPath)) {
     throw "Backup file was not found: $BackupPath"
   }
 
   Write-SafeInfo "Backup file exists."
+  Write-SafeInfo "pg_restore available via $($pgRestore.Mode)."
 
   if ($InspectOnly) {
-    & $pgRestore --list "$BackupPath" | Select-Object -First 20
-    if ($LASTEXITCODE -ne 0) {
-      throw "pg_restore --list failed with exit code $LASTEXITCODE."
+    $exitCode = Invoke-PgRestoreList -Runner $pgRestore -BackupPath $BackupPath -PostgresDockerImage $PostgresDockerImage
+    if ($exitCode -ne 0) {
+      throw "pg_restore --list failed with exit code $exitCode."
     }
     Write-SafeInfo "InspectOnly completed. No database connection was opened."
     exit 0
@@ -114,9 +204,9 @@ try {
   Set-PostgresEnvFromUrl -DatabaseUrl $databaseUrl
 
   Write-SafeInfo "Restore target variables are loaded without printing secret values."
-  & $pgRestore --clean --if-exists --no-owner --no-acl --dbname "$env:PGDATABASE" "$BackupPath"
-  if ($LASTEXITCODE -ne 0) {
-    throw "pg_restore failed with exit code $LASTEXITCODE."
+  $exitCode = Invoke-PgRestoreToTarget -Runner $pgRestore -BackupPath $BackupPath -PostgresDockerImage $PostgresDockerImage
+  if ($exitCode -ne 0) {
+    throw "pg_restore failed with exit code $exitCode."
   }
 
   Write-SafeInfo "Restore completed into the configured temporary PostgreSQL target."

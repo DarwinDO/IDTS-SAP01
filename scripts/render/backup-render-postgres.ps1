@@ -26,6 +26,7 @@ restore against the live shared-QA database.
 param(
   [string]$DatabaseUrlEnv = "RENDER_QA_DATABASE_URL",
   [string]$OutputDirectory = "$HOME\IDTS-private-backups\idts-45",
+  [string]$PostgresDockerImage = "postgres:15",
   [switch]$CheckOnly
 )
 
@@ -37,13 +38,64 @@ function Write-SafeInfo {
   Write-Host "[idts-45] $Message"
 }
 
-function Get-RequiredCommand {
+function Get-PostgresClientRunner {
   param([string]$Name)
   $command = Get-Command $Name -ErrorAction SilentlyContinue
-  if (-not $command) {
-    throw "Required command '$Name' was not found. Install PostgreSQL client tools first, then retry. On Windows, install PostgreSQL and add its 'bin' folder to PATH."
+  if ($command) {
+    return @{
+      Mode = "host"
+      Command = $command.Source
+    }
   }
-  return $command.Source
+
+  $docker = Get-Command docker -ErrorAction SilentlyContinue
+  if ($docker) {
+    & $docker.Source run --rm $PostgresDockerImage $Name --version | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+      return @{
+        Mode = "docker"
+        Command = $docker.Source
+      }
+    }
+  }
+
+  throw "Required command '$Name' was not found on the host and Docker fallback '$PostgresDockerImage' could not run it. Install PostgreSQL client tools or start Docker Desktop, then retry."
+}
+
+function Invoke-PgDumpBackup {
+  param(
+    [hashtable]$Runner,
+    [string]$BackupPath,
+    [string]$OutputDirectory,
+    [string]$PostgresDockerImage
+  )
+
+  if ($Runner.Mode -eq "host") {
+    & $Runner.Command --format=custom --no-owner --no-acl --file "$BackupPath"
+    return $LASTEXITCODE
+  }
+
+  $resolvedOutputDirectory = (Resolve-Path -LiteralPath $OutputDirectory).Path
+  $backupFileName = Split-Path -Leaf $BackupPath
+  $dockerArgs = @(
+    "run",
+    "--rm",
+    "--env", "PGHOST",
+    "--env", "PGPORT",
+    "--env", "PGDATABASE",
+    "--env", "PGUSER",
+    "--env", "PGPASSWORD",
+    "--env", "PGSSLMODE",
+    "--volume", "$($resolvedOutputDirectory):/backup",
+    $PostgresDockerImage,
+    "pg_dump",
+    "--format=custom",
+    "--no-owner",
+    "--no-acl",
+    "--file", "/backup/$backupFileName"
+  )
+  & $Runner.Command @dockerArgs
+  return $LASTEXITCODE
 }
 
 function Set-PostgresEnvFromUrl {
@@ -76,7 +128,7 @@ function Set-PostgresEnvFromUrl {
 }
 
 try {
-  $pgDump = Get-RequiredCommand "pg_dump"
+  $pgDump = Get-PostgresClientRunner "pg_dump"
   $databaseUrl = [Environment]::GetEnvironmentVariable($DatabaseUrlEnv, "Process")
   if ([string]::IsNullOrWhiteSpace($databaseUrl)) {
     $databaseUrl = [Environment]::GetEnvironmentVariable($DatabaseUrlEnv, "User")
@@ -87,7 +139,7 @@ try {
 
   Set-PostgresEnvFromUrl -DatabaseUrl $databaseUrl
 
-  Write-SafeInfo "pg_dump found."
+  Write-SafeInfo "pg_dump available via $($pgDump.Mode)."
   Write-SafeInfo "Database connection variables are loaded without printing secret values."
 
   if ($CheckOnly) {
@@ -101,9 +153,9 @@ try {
   $backupPath = Join-Path $OutputDirectory "idts-render-qa-postgres-$timestamp.pgdump"
   $checksumPath = "$backupPath.sha256"
 
-  & $pgDump --format=custom --no-owner --no-acl --file "$backupPath"
-  if ($LASTEXITCODE -ne 0) {
-    throw "pg_dump failed with exit code $LASTEXITCODE."
+  $exitCode = Invoke-PgDumpBackup -Runner $pgDump -BackupPath $backupPath -OutputDirectory $OutputDirectory -PostgresDockerImage $PostgresDockerImage
+  if ($exitCode -ne 0) {
+    throw "pg_dump failed with exit code $exitCode."
   }
 
   $hash = Get-FileHash -Algorithm SHA256 -Path $backupPath

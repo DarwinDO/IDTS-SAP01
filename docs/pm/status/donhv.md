@@ -1323,3 +1323,21 @@ Vietnamese:
 | Loi tooling/command | Lenh parse ket hop PowerShell/Node dau tien fail va lam mot phan Node expression bi PowerShell doc nham. | Quoting nested `node -e` JavaScript ben trong PowerShell `-Command` qua mong manh. | Da ghi nhan la loi tooling va tach thanh lenh parse PowerShell script rieng + Node package parse rieng. | Chay lai ca hai parse check rieng truoc khi commit. |
 | DevOps continuity | Bo sung tooling restore co guard cho flow backup Render PostgreSQL cua IDTS-45. | Baseline truoc do co backup helper nhung chua co cach repo-supported de inspect hoac restore file `.pgdump` private vao database tam thoi. | Da them `scripts/render/restore-render-postgres.ps1`, npm helper scripts, huong dan restore va evidence note an toan. Helper tu choi restore that neu chua co target URL private va flag xac nhan overwrite. | Verify parse script, safe failure khi thieu `pg_restore`, `git diff --check`, secret scan va AI DevKit lint. Backup/restore that van la buoc operator private. |
 | Render read-only check | Render CLI xac nhan thay workspace `IDTS_GSUSAP01`, web service `idts-sap01-qa`, va database `idts-sap01-qa-db` ma khong doc secret. | Render CLI dang login va workspace da duoc chon trong session may nay. | Da them cac fact an toan vao docs IDTS-45: service khong suspended, DB available/free/Singapore, het han 2026-07-31, IP allowlist rong. | Khong ghi connection string, DB password, hoac env value vao repo/Jira. |
+
+## 2026-07-07 - IDTS-45 Docker PostgreSQL client fallback
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Environment/tooling blocker | Host `pg_dump` and `pg_restore` are still missing from PATH. | PostgreSQL client tools are not installed on Windows. | Avoided installing full PostgreSQL by using Docker Desktop with image `postgres:15` as a client-tool fallback. | `docker run --rm postgres:15 pg_dump --version` and `pg_restore --version` both returned PostgreSQL 15.18. |
+| Environment/tooling issue | Docker CLI existed but Docker Desktop daemon was not running at first; `docker info` failed with missing `dockerDesktopLinuxEngine` pipe. | Docker Desktop was installed but not started in the current Windows session. | Started Docker Desktop in the background and verified daemon version 28.5.1. Not a product defect. | Use Docker fallback only when Docker Desktop is running. |
+| DevOps continuity work | Backup and restore helpers previously required host PostgreSQL client tools. | This made IDTS-45 harder on Windows machines without PostgreSQL installed. | Updated helpers to prefer host tools when present and fall back to `postgres:15` Docker clients without printing secret values. | Backup preflight with dummy URL now reports `pg_dump available via docker`; restore inspect with an invalid dummy dump reports `pg_restore available via docker` then fails correctly because the file is not a valid archive. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Blocker moi truong/tooling | Host `pg_dump` va `pg_restore` van chua co trong PATH. | May Windows chua cai PostgreSQL client tools. | Khong cai full PostgreSQL; dung Docker Desktop voi image `postgres:15` lam fallback client tools. | `docker run --rm postgres:15 pg_dump --version` va `pg_restore --version` deu tra PostgreSQL 15.18. |
+| Loi moi truong/tooling | Docker CLI co san nhung Docker Desktop daemon ban dau chua chay; `docker info` fail vi thieu pipe `dockerDesktopLinuxEngine`. | Docker Desktop da cai nhung chua start trong Windows session hien tai. | Da start Docker Desktop o nen va verify daemon version 28.5.1. Khong phai product defect. | Chi dung Docker fallback khi Docker Desktop dang chay. |
+| DevOps continuity | Backup va restore helpers truoc do bat buoc co PostgreSQL client tools tren host. | Dieu nay lam IDTS-45 kho chay hon tren may Windows chua cai PostgreSQL. | Da update helpers: uu tien host tools neu co, fallback sang Docker `postgres:15` neu Docker dang chay, khong in secret values. | Backup preflight voi dummy URL bao `pg_dump available via docker`; restore inspect voi dummy dump invalid bao `pg_restore available via docker` roi fail dung vi file khong phai archive hop le. |
