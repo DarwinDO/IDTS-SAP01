@@ -18,6 +18,7 @@ the repository. DonHV will upload or attach evidence manually when needed.
 | Backup helper | Prepared | `scripts/render/backup-render-postgres.ps1` creates a local private logical dump when DonHV provides `RENDER_QA_DATABASE_URL` privately. |
 | Restore helper | Prepared | `scripts/render/restore-render-postgres.ps1` can inspect a dump and restore only with an explicit overwrite flag against a temporary target. |
 | PostgreSQL client fallback | Done | Host `pg_dump`/`pg_restore` are not installed, but Docker Desktop can run `postgres:15` clients for backup and restore helpers. |
+| Local restore target helper | Prepared | `scripts/render/start-local-restore-target.ps1` and `stop-local-restore-target.ps1` create/remove a disposable local PostgreSQL target through Docker. |
 | Restore proof | Pending private run | Must be executed against a temporary PostgreSQL target, not the live shared-QA database. |
 | Decision | Prepared | Recommendation is recorded in `docs/pm/tasks/idts-45-render-postgres-continuity.md` and `docs/pm/risk-decision-log.md`. |
 

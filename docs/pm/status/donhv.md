@@ -1341,3 +1341,31 @@ Vietnamese:
 | Blocker moi truong/tooling | Host `pg_dump` va `pg_restore` van chua co trong PATH. | May Windows chua cai PostgreSQL client tools. | Khong cai full PostgreSQL; dung Docker Desktop voi image `postgres:15` lam fallback client tools. | `docker run --rm postgres:15 pg_dump --version` va `pg_restore --version` deu tra PostgreSQL 15.18. |
 | Loi moi truong/tooling | Docker CLI co san nhung Docker Desktop daemon ban dau chua chay; `docker info` fail vi thieu pipe `dockerDesktopLinuxEngine`. | Docker Desktop da cai nhung chua start trong Windows session hien tai. | Da start Docker Desktop o nen va verify daemon version 28.5.1. Khong phai product defect. | Chi dung Docker fallback khi Docker Desktop dang chay. |
 | DevOps continuity | Backup va restore helpers truoc do bat buoc co PostgreSQL client tools tren host. | Dieu nay lam IDTS-45 kho chay hon tren may Windows chua cai PostgreSQL. | Da update helpers: uu tien host tools neu co, fallback sang Docker `postgres:15` neu Docker dang chay, khong in secret values. | Backup preflight voi dummy URL bao `pg_dump available via docker`; restore inspect voi dummy dump invalid bao `pg_restore available via docker` roi fail dung vi file khong phai archive hop le. |
+
+## 2026-07-07 - IDTS-45 local restore target helper
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| DevOps continuity work | The restore proof still required DonHV to manually create a temporary PostgreSQL target. | The repo had backup and restore helpers, but not a repeatable helper to start/stop a disposable local target. | Added Docker-based start/stop helpers for a local PostgreSQL restore target and npm scripts to call them. The generated local URL is printed only to the terminal and must not be pasted into Jira/Git. | Verify scripts parse, start local target, prove readiness, then stop and remove the container. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| DevOps continuity | Restore proof van yeu cau DonHV tu tao PostgreSQL target tam thoi. | Repo da co backup va restore helper, nhung chua co helper lap lai de start/stop target local disposable. | Da them helper start/stop PostgreSQL restore target bang Docker va npm scripts tuong ung. Local URL duoc in chi tren terminal va khong duoc paste len Jira/Git. | Verify parse script, start target local, chung minh readiness, sau do stop va remove container. |
+
+## 2026-07-07 - IDTS-45 local restore helper fix
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling/runtime issue | First run of `render:db:restore-target:start` failed with `RandomNumberGenerator does not contain a method named GetBytes`. | The PowerShell/.NET runtime in this environment does not expose the static `RandomNumberGenerator.GetBytes()` API shape used by the initial helper. | Fixed by switching to `RandomNumberGenerator.Create()` and filling a byte array through the instance API. Not a product defect. | Start/ready/stop verification passed with the local restore URL redacted from output. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Loi tooling/runtime | Lan chay dau `render:db:restore-target:start` fail voi `RandomNumberGenerator does not contain a method named GetBytes`. | PowerShell/.NET runtime tren may nay khong expose static API `RandomNumberGenerator.GetBytes()` nhu helper ban dau dung. | Da fix bang cach doi sang `RandomNumberGenerator.Create()` va fill byte array bang instance API. Khong phai product defect. | Verify start/ready/stop da pass, local restore URL duoc redact khoi output. |
