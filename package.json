@@ -51,6 +51,7 @@
     "qa:idts56:programmatic": "node scripts/qa/test-idts56-smart-assign.js",
     "qa:idts56:browser": "node scripts/qa/test-idts56-smart-assign-browser.js",
     "qa:idts57:browser": "node scripts/qa/test-idts57-browser-ux-regression.js",
+    "qa:idts60:browser": "node scripts/qa/test-idts60-attachments-browser.js",
     "qa:email-outbox:programmatic": "node scripts/qa/test-email-outbox-programmatic.js",
     "qa:email-smtp:integration": "node scripts/qa/test-email-smtp-integration.js",
     "qa:email-brevo-api:integration": "node scripts/qa/test-email-brevo-api-integration.js",
