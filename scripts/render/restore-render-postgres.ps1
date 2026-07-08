@@ -120,8 +120,19 @@ function Invoke-PgRestoreToTarget {
   $mount = Get-DockerBackupMount -BackupPath $BackupPath
   $dockerArgs = @(
     "run",
-    "--rm",
-    "--env", "PGHOST",
+    "--rm"
+  )
+
+  if ($env:PGHOST -in @("localhost", "127.0.0.1", "::1")) {
+    $dockerArgs += @(
+      "--add-host", "host.docker.internal:host-gateway",
+      "--env", "PGHOST=host.docker.internal"
+    )
+  } else {
+    $dockerArgs += @("--env", "PGHOST")
+  }
+
+  $dockerArgs += @(
     "--env", "PGPORT",
     "--env", "PGDATABASE",
     "--env", "PGUSER",
@@ -163,7 +174,7 @@ function Set-PostgresEnvFromUrl {
   $env:PGDATABASE = [Uri]::UnescapeDataString($uri.AbsolutePath.TrimStart("/"))
   $env:PGUSER = [Uri]::UnescapeDataString($userInfoParts[0])
   $env:PGPASSWORD = [Uri]::UnescapeDataString($userInfoParts[1])
-  $env:PGSSLMODE = "require"
+  $env:PGSSLMODE = if ($uri.Host -in @("localhost", "127.0.0.1", "::1")) { "disable" } else { "require" }
 
   if ([string]::IsNullOrWhiteSpace($env:PGDATABASE)) {
     throw "Restore database URL does not contain a database name."

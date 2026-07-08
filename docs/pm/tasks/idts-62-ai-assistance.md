@@ -1,6 +1,6 @@
 # IDTS-62 - AI Assistance Work Package
 
-Last updated: 2026-07-07
+Last updated: 2026-07-08
 
 ## Purpose
 
@@ -40,6 +40,12 @@ Vietnamese: Chỉ IDTS-63 được đưa vào Sprint 4. Phần runtime bắt đ�
 
 ## Current status
 
-- IDTS-63: In Progress on 2026-07-07.
+- IDTS-63: Done at repository handoff level. PR #93 was merged into `dev` on 2026-07-07 with `qa-depth-gate` passing.
 - IDTS-64 to IDTS-72: Planned for Sprint 5; Jira due dates must be realigned when Sprint 5 is created.
 - No runtime AI dependency, API, CDS entity, or UI has been added under IDTS-63.
+
+Vietnamese:
+
+- IDTS-63: Done ở mức handoff repository. PR #93 đã merge vào `dev` ngày 2026-07-07 và `qa-depth-gate` đã pass.
+- IDTS-64 đến IDTS-72: Dự kiến đưa sang Sprint 5; due date Jira cần được chỉnh lại khi Sprint 5 được tạo.
+- IDTS-63 không thêm dependency AI runtime, API, CDS entity hoặc UI mới.

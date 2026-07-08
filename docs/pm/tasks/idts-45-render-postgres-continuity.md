@@ -182,6 +182,23 @@ back to Docker image `postgres:15` when Docker Desktop is running. This avoids
 installing the full PostgreSQL server on Windows just to run backup/restore
 client commands.
 
+### Executed proof - 2026-07-08
+
+The real Render QA PostgreSQL backup and local restore proof completed:
+
+- SHA-256 checksum file matched the generated backup.
+- Restore into disposable local Docker PostgreSQL completed successfully.
+- Core public CAP tables were present.
+- Safe row counts after restore: users 4, bugs 6, notifications 13,
+  notification deliveries 13, attachments 2, comments 10.
+- The local restore URL file was removed.
+- The disposable restore target container was removed.
+- Sanitized PASS evidence was generated under the gitignored private evidence
+  folder for DonHV to review and upload manually.
+
+No database URL, password, token, or backup content is recorded in this task
+document.
+
 ## Current Render read-only state
 
 Checked on 2026-07-07 through Render CLI in workspace `IDTS_GSUSAP01`:
@@ -223,9 +240,12 @@ environment variables, private credentials, and real recipient lists.
 - [x] Repo has safe evidence instructions.
 - [x] Risk and decision logs are updated.
 - [x] Render CLI read-only state confirms the database is Free, available, and expires on 2026-07-31.
-- [ ] DonHV runs private backup with the real Render database URL.
+- [x] DonHV runs private backup with the real Render database URL.
 - [ ] Backup artifact is stored in approved private storage.
-- [ ] Restore proof succeeds on a temporary PostgreSQL target.
+- [x] Restore proof succeeds on a temporary PostgreSQL target.
+- [x] Temporary external PostgreSQL IP allow rule is removed after proof.
+- [x] Shared QA login and authenticated OData smoke pass after external access cleanup.
+- [ ] Compromised Render PostgreSQL credential is rotated and the Blueprint-managed service is redeployed/smoked.
 - [ ] Upgrade or migration decision is executed before 2026-07-24.
 
 ## Vietnamese

@@ -21,7 +21,10 @@ the repository. DonHV will upload or attach evidence manually when needed.
 | Local restore target helper | Prepared | `scripts/render/start-local-restore-target.ps1` and `stop-local-restore-target.ps1` create/remove a disposable local PostgreSQL target through Docker. |
 | Sanitized evidence summary helper | Prepared | `scripts/render/write-backup-evidence-summary.ps1` writes safe Markdown evidence to gitignored `docs/pm/evidence/idts-45/private/`. |
 | Continuity proof orchestrator | Prepared | `scripts/render/run-render-postgres-continuity-proof.ps1` runs backup, local restore, evidence generation, and cleanup after `RENDER_QA_DATABASE_URL` is set locally. |
-| Restore proof | Pending private run | Must be executed against a temporary PostgreSQL target, not the live shared-QA database. |
+| Restore proof | Done | Real Render QA backup restored into a disposable local PostgreSQL target; checksum matched, core tables existed, representative safe row counts were checked, and cleanup removed the target. |
+| External access cleanup | Done | Temporary local backup IP allow rule was removed; fresh Render state reports an empty PostgreSQL IP allow list. |
+| Post-cleanup shared QA smoke | Done | Auth metadata 200, canonical login page 200 after redirect, anonymous BugService OData 401, valid login token received, authenticated OData 200. |
+| Credential rotation | Pending DonHV Dashboard action | Create a new Render-managed default credential, sync the Blueprint-managed database bindings, redeploy/smoke, then delete the old credential. Do not expose either credential in evidence. |
 | Decision | Prepared | Recommendation is recorded in `docs/pm/tasks/idts-45-render-postgres-continuity.md` and `docs/pm/risk-decision-log.md`. |
 
 ## Source references checked
