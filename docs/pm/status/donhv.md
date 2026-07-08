@@ -1515,3 +1515,17 @@ Vietnamese:
 | Security cleanup | Temporary external PostgreSQL allow rule `118.70.100.54/32` van con sau backup proof. | External access duoc bat tam de may DonHV backup local. | Da remove bang Render CLI `--clear-ip-allow-list`; fresh `postgres get` bao allow list rong va database available. | Giu external DB access tat cho toi maintenance window duoc approve tiep theo. |
 | Post-cleanup smoke | Shared QA van hoat dong sau khi tat external DB access. | Render web service dung internal Blueprint-managed `fromDatabase` credentials, nen runtime khong can local external access. | PASS: Auth metadata 200, anonymous BugService OData 401, valid login token received, authenticated OData 200, login route final status 200. | Rotate compromised DB credential bang Render-managed credential, sync Blueprint, redeploy va rerun smoke nay. |
 | Loi test-harness | PowerShell login-page check dau tra 308 va de status variable rong trong khi command tong van tiep tuc. | `Invoke-WebRequest` trong Windows PowerShell nay khong follow permanent redirect tu legacy login path. | Da fix trong phien bang cach doc redirect header va rerun voi `curl -L`; final URL `/idts.bugmanagementui/login.html` tra 200. Khong phai product defect. | Public smoke sau nay phai follow redirect hoac dung canonical login route. |
+
+## 2026-07-08 - IDTS-63 AI guardrail closure sync
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| PM/Jira closure sync | PR #93 for IDTS-63 was already merged into `dev`, but PM handover files still listed IDTS-63 as In Progress. | The repository delivery and board-level PM status had not been reconciled after the PR merge. | Updated PM task board, current status, AI work package, and evidence index to record IDTS-63 as merged/ready for closure. No runtime AI code, provider credential, API, CDS entity, or UI was added. | Run closure verification, open/merge the PM sync PR, then comment and transition Jira IDTS-63 to Done. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Dong bo PM/Jira | PR #93 cua IDTS-63 da merge vao `dev`, nhung file PM handover van ghi IDTS-63 In Progress. | Delivery tren repo va board-level PM status chua duoc reconcile sau khi PR merge. | Da cap nhat task board, current status, AI work package va evidence index de ghi nhan IDTS-63 da merge/san sang dong. Khong them runtime AI, provider credential, API, CDS entity hoac UI. | Chay verification, mo/merge PR sync PM, sau do comment va transition Jira IDTS-63 sang Done. |
