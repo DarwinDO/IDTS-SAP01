@@ -144,3 +144,17 @@ Vietnamese:
 | Phan loai | Cong viec / van de | Trang thai | Evidence / ban giao tiep theo |
 | --- | --- | --- | --- |
 | Ho tro cheo thanh vien | DonHV implement `IDTS-67` thay DatDT vi DonHV tam thoi dam nhan IDTS-67 den IDTS-70, nhung van giu tracking owner cua DatDT. | Scope backend da implement: action `suggestClassification`, validate catalog, status an toan, deterministic fallback, audit da sanitize, focused QA va knowledge mirrors. | Focused test pass: `npm run qa:idts67:programmatic` = `22 PASS / 0 FAIL`. DatDT can dua vao contract nay sau khi implement/review IDTS-70 Fiori AI suggestion UI. |
+
+## 2026-07-09 - IDTS-70 implemented by DonHV on behalf of DatDT
+
+English:
+
+| Classification | Work / issue | Status | Evidence / next handoff |
+| --- | --- | --- | --- |
+| Cross-member support | DonHV implemented `IDTS-70` because DonHV is temporarily taking over IDTS-67 to IDTS-70 while preserving DatDT ownership tracking. | In progress on branch `feature/idts-70-ai-review-ui-donhv`. The UI now has reusable AI suggestion review mapping in `AiReviewUi.js`, Smart Assign uses it for explanation status/copy, and i18n copy avoids internal/dev-facing terms. | Focused checks passed locally: `npm run qa:idts70:programmatic` = `7 PASS / 0 FAIL`; `npm run qa:idts56:programmatic` = `13 PASS / 0 FAIL`; UI5 build/linter, CAP compile, secret scan, AI DevKit lint, and `git diff --check` pass. DatDT should review the copy/UX after PR is opened. |
+
+Vietnamese:
+
+| Phan loai | Cong viec / van de | Trang thai | Evidence / ban giao tiep theo |
+| --- | --- | --- | --- |
+| Ho tro cheo thanh vien | DonHV implement `IDTS-70` thay DatDT vi DonHV tam thoi dam nhan IDTS-67 den IDTS-70, nhung van giu tracking owner cua DatDT. | Dang In Progress tren branch `feature/idts-70-ai-review-ui-donhv`. UI hien co helper review AI suggestion dung chung trong `AiReviewUi.js`, Smart Assign dung helper nay cho explanation status/copy, va i18n copy tranh cac tu noi bo/dev-facing. | Focused checks pass local: `npm run qa:idts70:programmatic` = `7 PASS / 0 FAIL`; `npm run qa:idts56:programmatic` = `13 PASS / 0 FAIL`; UI5 build/linter, CAP compile, secret scan, AI DevKit lint va `git diff --check` pass. DatDT nen review lai copy/UX sau khi PR duoc mo. |

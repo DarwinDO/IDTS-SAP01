@@ -25,7 +25,8 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
-    "../login/LoginController"
+    "../login/LoginController",
+    "../ai/AiReviewUi"
 ], function (
     Dialog,
     Button,
@@ -45,7 +46,8 @@ sap.ui.define([
     JSONModel,
     Filter,
     FilterOperator,
-    LoginSession
+    LoginSession,
+    AiReviewUi
 ) {
     "use strict";
 
@@ -125,6 +127,12 @@ sap.ui.define([
         return bundle && bundle.getText ? bundle.getText(key, args) : key;
     }
 
+    function getAiText(view) {
+        return function (key, args) {
+            return getText(view, key, args);
+        };
+    }
+
     function availabilityState(criticality) {
         if (criticality === 3) {
             return "Success";
@@ -164,6 +172,8 @@ sap.ui.define([
             warningText = getText(view, "smartAssignBusyWarning", [availability]);
         }
 
+        var aiReview = AiReviewUi.loading(getAiText(view));
+
         return {
             ID: row.ID,
             developerProfileID: row.developerProfileID || row.ID,
@@ -184,11 +194,12 @@ sap.ui.define([
             isUnavailable: isUnavailable,
             isBusy: isBusy,
             warningText: warningText,
-            aiExplanation: getText(view, "smartAssignAiExplanationLoading"),
-            aiExplanationMeta: getText(view, "smartAssignAiReviewRequired"),
-            aiExplanationState: "Information",
-            aiWarnings: "",
-            hasAiWarnings: false
+            aiExplanation: aiReview.explanation,
+            aiExplanationMeta: aiReview.meta,
+            aiExplanationState: aiReview.state,
+            aiWarnings: aiReview.warnings,
+            hasAiWarnings: aiReview.hasWarnings,
+            aiDecisionHint: aiReview.decisionHint
         };
     }
 
@@ -275,13 +286,10 @@ sap.ui.define([
             return [];
         }).then(normalizeExplanationResult).catch(function () {
             return candidates.map(function (candidate) {
-                return {
+                return Object.assign({
                     developerProfileID: candidate.developerProfileID,
-                    explanation: getText(view, "smartAssignAiExplanationUnavailable"),
-                    warnings: "",
-                    confidence: null,
-                    requiresReview: true
-                };
+                    providerStatus: "AI_PROVIDER_ERROR"
+                }, AiReviewUi.unavailable(getAiText(view)));
             });
         });
     }
@@ -306,27 +314,17 @@ sap.ui.define([
 
         var candidates = (state.getProperty("/candidates") || []).map(function (candidate) {
             var explanation = byDeveloperProfileID.get(candidate.developerProfileID);
-            if (!explanation) {
-                return Object.assign({}, candidate, {
-                    aiExplanation: getText(view, "smartAssignAiExplanationUnavailable"),
-                    aiExplanationMeta: getText(view, "smartAssignAiReviewRequired"),
-                    aiExplanationState: "Warning",
-                    aiWarnings: "",
-                    hasAiWarnings: false
-                });
-            }
-
-            var confidence = Number(explanation.confidence);
-            var confidenceText = Number.isFinite(confidence)
-                ? getText(view, "smartAssignAiConfidence", [Math.round(confidence * 100)])
-                : getText(view, "smartAssignAiReviewRequired");
+            var aiReview = explanation
+                ? AiReviewUi.decorateResult(explanation, getAiText(view))
+                : AiReviewUi.unavailable(getAiText(view));
 
             return Object.assign({}, candidate, {
-                aiExplanation: explanation.explanation || getText(view, "smartAssignAiExplanationUnavailable"),
-                aiExplanationMeta: confidenceText,
-                aiExplanationState: explanation.warnings ? "Warning" : "Information",
-                aiWarnings: explanation.warnings || "",
-                hasAiWarnings: Boolean(explanation.warnings)
+                aiExplanation: aiReview.explanation,
+                aiExplanationMeta: aiReview.meta,
+                aiExplanationState: aiReview.state,
+                aiWarnings: aiReview.warnings,
+                hasAiWarnings: aiReview.hasWarnings,
+                aiDecisionHint: aiReview.decisionHint
             });
         });
 
@@ -470,6 +468,10 @@ sap.ui.define([
                                 text: "{smartAssign>aiWarnings}",
                                 wrapping: true,
                                 visible: "{smartAssign>hasAiWarnings}"
+                            }),
+                            new Text({
+                                text: "{smartAssign>aiDecisionHint}",
+                                wrapping: true
                             })
                         ]
                     })

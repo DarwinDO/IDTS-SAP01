@@ -69,6 +69,7 @@
     "qa:idts67:programmatic": "node scripts/qa/test-idts67-classification-suggestion.js",
     "qa:idts68:programmatic": "node scripts/qa/test-idts68-bug-summary.js",
     "qa:idts69:programmatic": "node scripts/qa/test-idts69-assignment-explanation.js",
+    "qa:idts70:programmatic": "node scripts/qa/test-idts70-ai-review-ui.js",
     "qa:auth-email:playwright": "node scripts/qa/test-idts38-auth-email-playwright.js",
     "qa:developer-workload:programmatic": "node scripts/qa/test-developer-workload-programmatic.js",
     "qa:direct-assignee:http": "powershell -ExecutionPolicy Bypass -File scripts/qa/test-direct-assignee-draft-save.ps1",

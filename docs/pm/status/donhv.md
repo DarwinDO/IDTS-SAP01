@@ -1726,3 +1726,23 @@ Vietnamese:
 | --- | --- | --- | --- | --- |
 | Dong bo PM/Jira | IDTS-69 da merge nhung PM handover van ghi PR/Jira closure la buoc tiep theo. | Closure xay ra sau snapshot trong implementation PR. | PR #117 pass `qa-depth-gate`, squash-merge vao `dev` tai `ccaab62`, Jira comments `10433` va `10434` da duoc them, va Jira IDTS-69 da chuyen Done. | Task AI tiep theo la IDTS-70 Fiori AI suggestion review UI. |
 | Loi tooling | `gh pr merge` in `fatal: 'dev' is already used by worktree at 'E:/IDTS-SAP01'`. | Root worktree local dang giu branch `dev`; GitHub merge thanh cong nhung cleanup local khong switch/delete duoc local `dev`. | Da verify PR #117 la `MERGED` va `origin/dev` tro den `ccaab62`. | Khong phai product defect. Tiep tuc dung fresh worktree va verify GitHub state sau cac loi cleanup local. |
+
+## 2026-07-09 - IDTS-70 Fiori AI suggestion review UI implementation support
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| UI implementation support | DonHV started `IDTS-70` on behalf of DatDT and moved Jira to In Progress. | AI backend suggestion features now exist, but the UI needed one consistent Fiori review pattern before more screens consume AI output. | Added reusable `AiReviewUi.js`, integrated it into Smart Assign explanations, added safe i18n copy, focused QA, evidence, and knowledge mirrors. | Local verification passed: IDTS-70 `7/0`, IDTS-56 `13/0`, UI5 build, UI5 MCP linter, CAP compile, secret scan, AI DevKit lint, and `git diff --check`. Next: commit, PR, wait for `qa-depth-gate`, then Jira evidence/closure after merge. |
+| Product/UI helper defect | Disabled AI state showed `confidence 0%` even when confidence was missing. | JavaScript `Number(null)` returns `0`, so the helper treated missing confidence as a real zero value. | Fixed `numberOrNull(...)` to return `null` for `null`, `undefined`, and empty string before numeric conversion. | `npm run qa:idts70:programmatic` passed `7 PASS / 0 FAIL`. |
+| Test-harness issue | First IDTS-70 helper test failed when comparing a VM-context dependency array. | `assert.deepStrictEqual` is too strict for arrays created in a separate Node VM context. | Changed the assertion to check array length rather than cross-context prototype identity. | `npm run qa:idts70:programmatic` passed `7 PASS / 0 FAIL`. |
+| Model/compiler warning | CAP compile passed but repeated the existing `NonUpdateableProperties` warning on `BugService.Bugs_attachments`. | Existing attachment annotation compatibility warning; IDTS-70 does not change attachment annotations. | Logged as non-blocking and not caused by IDTS-70. | Keep under attachment/model cleanup if needed. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Ho tro implementation UI | DonHV bat dau `IDTS-70` thay DatDT va chuyen Jira sang In Progress. | Cac feature AI backend da co, nhung UI can mot pattern Fiori review thong nhat truoc khi nhieu man hinh khac dung AI output. | Da them `AiReviewUi.js` dung chung, tich hop vao Smart Assign explanations, them i18n copy an toan, focused QA, evidence va knowledge mirrors. | Verify local pass: IDTS-70 `7/0`, IDTS-56 `13/0`, UI5 build, UI5 MCP linter, CAP compile, secret scan, AI DevKit lint va `git diff --check`. Tiep theo: commit, tao PR, doi `qa-depth-gate`, sau do Jira evidence/closure khi merge. |
+| Product/UI helper defect | Trang thai AI disabled hien `confidence 0%` du confidence dang thieu. | JavaScript `Number(null)` tra ve `0`, nen helper xem missing confidence nhu gia tri zero that. | Da sua `numberOrNull(...)` de tra `null` cho `null`, `undefined`, va empty string truoc khi convert number. | `npm run qa:idts70:programmatic` pass `7 PASS / 0 FAIL`. |
+| Loi test-harness | Test helper IDTS-70 dau tien fail khi so sanh dependency array duoc tao trong VM context. | `assert.deepStrictEqual` qua chat voi array tao trong Node VM context khac. | Doi assertion sang check do dai array thay vi prototype identity xuyen context. | `npm run qa:idts70:programmatic` pass `7 PASS / 0 FAIL`. |
+| Canh bao model/compiler | CAP compile pass nhung lap lai warning `NonUpdateableProperties` tren `BugService.Bugs_attachments`. | Warning compatibility annotation attachment da ton tai; IDTS-70 khong sua attachment annotations. | Log la non-blocking va khong do IDTS-70 tao ra. | Giu cho cleanup attachment/model neu can. |

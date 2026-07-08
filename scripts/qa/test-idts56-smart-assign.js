@@ -136,6 +136,40 @@ function loadSmartAssignModule(roleCode, modelHooks = {}) {
                 }
               }
             }
+            if (dependency === '../ai/AiReviewUi') {
+              return {
+                loading() {
+                  return {
+                    explanation: 'Preparing suggestion...',
+                    meta: 'Review required',
+                    state: 'Information',
+                    warnings: '',
+                    hasWarnings: false,
+                    decisionHint: 'Review this suggestion and choose manually.'
+                  }
+                },
+                unavailable() {
+                  return {
+                    explanation: 'Suggestion details are unavailable. Review the standard details before deciding.',
+                    meta: 'Suggestion could not be prepared',
+                    state: 'Warning',
+                    warnings: '',
+                    hasWarnings: false,
+                    decisionHint: 'Review this suggestion and choose manually.'
+                  }
+                },
+                decorateResult(row) {
+                  return {
+                    explanation: row.explanation,
+                    meta: Number.isFinite(Number(row.confidence)) ? `Ready for review - confidence ${Math.round(Number(row.confidence) * 100)}%` : 'Review required',
+                    state: row.warnings ? 'Warning' : 'Information',
+                    warnings: row.warnings || '',
+                    hasWarnings: Boolean(row.warnings),
+                    decisionHint: 'Review this suggestion and choose manually.'
+                  }
+                }
+              }
+            }
             if (dependency === 'sap/m/MessageToast') return { show: message => { modelHooks.toast = message } }
             if (dependency === 'sap/m/MessageBox') return { error: message => { modelHooks.error = message } }
             return Control
@@ -200,6 +234,9 @@ async function verifyStaticContract() {
     'smartAssignAiExplanationColumn=',
     'smartAssignAiNotice=',
     'smartAssignAiExplanationUnavailable=',
+    'aiReviewStatusReady=',
+    'aiReviewStatusUnavailable=',
+    'aiReviewDecisionHint=',
     'smartAssignAssignedToast='
   ]
   assertHasAll(readApp(path.join('webapp', 'i18n', 'i18n.properties')), requiredI18n, 'i18n.properties')
