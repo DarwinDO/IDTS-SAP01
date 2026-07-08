@@ -312,3 +312,73 @@ Existing historical notification rows are not automatically converted into email
   **Phải kiểm tra cùng**: `writeNotificationRecord` và unique-constraint test.
 
 Notification lịch sử không tự được tạo outbox và không được gửi lại. Rule này tránh việc deploy IDTS-36 vô tình gửi hàng loạt event cũ.
+
+## IDTS-65 AI Suggestion Audit Model
+
+### English
+
+IDTS-65 adds a small audit model for AI suggestions. The new persistence entity is `AiSuggestions`, and it is attached to `Bugs` through `Bugs.aiSuggestions`.
+
+The important idea is that an AI result is not stored as a final decision. It is stored as a suggestion that belongs to a source bug and has a human review state. This supports the approved AI guardrail: AI may help, but it cannot assign, classify, confirm duplicates, or change workflow state by itself.
+
+Important anchors:
+
+- **Location**: `db/schema.cds`, `entity AiSuggestionFeatureTypes : CodeList {}`
+  **IDTS concept**: Allowed AI feature types.
+  **Impact if broken**: Future AI features may write inconsistent type codes, making filtering and review unreliable.
+  **Must check together**: `db/data/idts.cap-AiSuggestionFeatureTypes.csv`, `srv/ai/audit.js`.
+
+- **Location**: `db/schema.cds`, `entity AiSuggestionReviewStates : CodeList {}`
+  **IDTS concept**: Human review state for each AI suggestion.
+  **Impact if broken**: The system may lose the difference between pending, accepted, rejected, ignored, and expired AI output.
+  **Must check together**: `db/data/idts.cap-AiSuggestionReviewStates.csv`, future IDTS-70 review UI.
+
+- **Location**: `db/schema.cds`, `Bugs.aiSuggestions`
+  **IDTS concept**: AI suggestion ownership by source bug.
+  **Impact if broken**: A suggestion may lose the bug context needed for review, reporting, and audit.
+  **Must check together**: `entity AiSuggestions`, `srv/service.cds` `BugService.AiSuggestions`.
+
+- **Location**: `db/schema.cds`, `entity AiSuggestions`
+  **IDTS concept**: Persisted safe suggestion record.
+  **Impact if broken**: Future AI feature tasks may have no durable, reviewable audit trail or may store unsafe provider data elsewhere.
+  **Must check together**: `srv/ai/audit.js`, `srv/service.cds`, IDTS-65 QA script.
+
+Safe editing checklist:
+
+- Keep `AiSuggestions` tied to `Bugs`; IDTS v1 AI suggestions are bug-context suggestions, not global AI records.
+- Do not add raw prompt, raw provider response, credential, attachment content, or storage reference fields.
+- Keep review state as an association to a code list so UI and reporting can show readable labels.
+
+### Vietnamese
+
+IDTS-65 thêm model audit nhỏ cho AI suggestion. Entity lưu thật là `AiSuggestions`, và nó được gắn với `Bugs` qua `Bugs.aiSuggestions`.
+
+Ý chính là kết quả AI không được lưu như quyết định cuối. Nó được lưu như suggestion thuộc một bug nguồn và có trạng thái review bởi con người. Điều này khớp guardrail AI đã duyệt: AI có thể hỗ trợ, nhưng không được tự assign, tự phân loại, tự xác nhận duplicate hoặc tự đổi workflow state.
+
+Important anchors:
+
+- **Vị trí**: `db/schema.cds`, `entity AiSuggestionFeatureTypes : CodeList {}`
+  **Khái niệm IDTS**: Các loại AI feature được phép.
+  **Ảnh hưởng nếu sai**: Feature AI sau này có thể ghi type code không nhất quán, làm filter và review không đáng tin.
+  **Phải kiểm tra cùng**: `db/data/idts.cap-AiSuggestionFeatureTypes.csv`, `srv/ai/audit.js`.
+
+- **Vị trí**: `db/schema.cds`, `entity AiSuggestionReviewStates : CodeList {}`
+  **Khái niệm IDTS**: Trạng thái human review cho từng AI suggestion.
+  **Ảnh hưởng nếu sai**: Hệ thống có thể mất khả năng phân biệt AI output đang pending, accepted, rejected, ignored hoặc expired.
+  **Phải kiểm tra cùng**: `db/data/idts.cap-AiSuggestionReviewStates.csv`, UI review tương lai IDTS-70.
+
+- **Vị trí**: `db/schema.cds`, `Bugs.aiSuggestions`
+  **Khái niệm IDTS**: AI suggestion thuộc về bug nguồn.
+  **Ảnh hưởng nếu sai**: Suggestion có thể mất context bug cần cho review, reporting và audit.
+  **Phải kiểm tra cùng**: `entity AiSuggestions`, `srv/service.cds` `BugService.AiSuggestions`.
+
+- **Vị trí**: `db/schema.cds`, `entity AiSuggestions`
+  **Khái niệm IDTS**: Record suggestion an toàn được lưu bền vững.
+  **Ảnh hưởng nếu sai**: Các task AI sau này có thể không có audit trail để review hoặc lưu dữ liệu provider không an toàn ở nơi khác.
+  **Phải kiểm tra cùng**: `srv/ai/audit.js`, `srv/service.cds`, QA script IDTS-65.
+
+Lưu ý khi sửa:
+
+- Giữ `AiSuggestions` gắn với `Bugs`; AI suggestion v1 của IDTS là suggestion theo context bug, không phải record AI global.
+- Không thêm field raw prompt, raw provider response, credential, attachment content hoặc storage reference.
+- Giữ review state là association tới code list để UI và report hiển thị label dễ đọc.

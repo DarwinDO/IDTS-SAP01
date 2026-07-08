@@ -124,6 +124,29 @@ service BugService @(requires: 'authenticated-user') {
     providerMessageId
   };
   entity DuplicateLinks as projection on db.DuplicateLinks;
+  @readonly
+  entity AiSuggestions as projection on db.AiSuggestions {
+    ID,
+    createdAt,
+    modifiedAt,
+    bug,
+    featureType,
+    featureType.name as featureTypeName,
+    requestedBy,
+    requestedBy.displayName as requestedByDisplayName,
+    providerAlias,
+    modelAlias,
+    confidence,
+    suggestionPayload,
+    summary,
+    reviewState,
+    reviewState.name as reviewStateName,
+    reviewedBy,
+    reviewedBy.displayName as reviewedByDisplayName,
+    reviewedAt,
+    expiresAt,
+    correlationId
+  };
 
   entity Users as projection on db.Users {
     ID,
@@ -211,6 +234,8 @@ service BugService @(requires: 'authenticated-user') {
   entity NotificationChannels as projection on db.NotificationChannels;
   entity NotificationDeliveryStatuses as projection on db.NotificationDeliveryStatuses;
   entity DuplicateRelationTypes as projection on db.DuplicateRelationTypes;
+  entity AiSuggestionFeatureTypes as projection on db.AiSuggestionFeatureTypes;
+  entity AiSuggestionReviewStates as projection on db.AiSuggestionReviewStates;
 }
 
 annotate BugService.Bugs with @odata.draft.enabled;

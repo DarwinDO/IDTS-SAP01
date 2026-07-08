@@ -1,0 +1,6 @@
+code,name,descr,sortOrder,active,criticality
+PENDING,Pending Review,AI suggestion is stored and waiting for human review,10,true,2
+ACCEPTED,Accepted,Human reviewer accepted or used the suggestion,20,true,3
+REJECTED,Rejected,Human reviewer rejected the suggestion,30,true,1
+IGNORED,Ignored,Human reviewer explicitly ignored or skipped the suggestion,40,true,0
+EXPIRED,Expired,Suggestion is no longer relevant for the current bug state,50,true,2

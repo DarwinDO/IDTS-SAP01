@@ -969,4 +969,4 @@ Các rule bắt buộc:
 * Chỉ gửi dữ liệu tối thiểu đã allowlist và làm sạch. Cấm gửi password, hash, token, credential, private endpoint, email private, attachment content hoặc storage reference.
 * Chỉ lưu suggestion đã chuẩn hóa và trạng thái review cần cho audit; không lưu raw prompt, raw provider response hoặc hidden reasoning.
 
-**English clarification:** AI remains advisory. Human review and CAP enforcement are mandatory for every AI-assisted feature, and the non-AI workflow must remain available when AI is disabled or fails.
+**English clarification:** AI remains advisory. Human review and CAP enforcement are mandatory for every AI-assisted feature, and the non-AI workflow must remain available when AI is disabled or fails. Persisted `AiSuggestions` are review/audit records only; clients must not write them directly.

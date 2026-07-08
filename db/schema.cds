@@ -29,6 +29,8 @@ entity NotificationEventTypes : CodeList {}
 entity NotificationChannels : CodeList {}
 entity NotificationDeliveryStatuses : CodeList {}
 entity DuplicateRelationTypes : CodeList {}
+entity AiSuggestionFeatureTypes : CodeList {}
+entity AiSuggestionReviewStates : CodeList {}
 
 entity Users : cuid, managed {
   displayName : String(120) not null;
@@ -131,6 +133,7 @@ entity Bugs : cuid, managed {
   historyEvents          : Composition of many HistoryEvents on historyEvents.bug = $self;
   notifications          : Composition of many Notifications on notifications.bug = $self;
   duplicateLinks         : Composition of many DuplicateLinks on duplicateLinks.sourceBug = $self;
+  aiSuggestions          : Composition of many AiSuggestions on aiSuggestions.bug = $self;
 }
 
 entity Comments : cuid, managed {
@@ -215,4 +218,20 @@ entity DuplicateLinks : cuid, managed {
   sourceBug    : Association to Bugs not null;
   targetBug    : Association to Bugs not null;
   relationType : Association to DuplicateRelationTypes not null;
+}
+
+entity AiSuggestions : cuid, managed {
+  bug               : Association to Bugs not null;
+  featureType       : Association to AiSuggestionFeatureTypes not null;
+  requestedBy       : Association to Users not null;
+  providerAlias     : String(80);
+  modelAlias        : String(80);
+  confidence        : Decimal(5,4);
+  suggestionPayload : LargeString not null;
+  summary           : String(500);
+  reviewState       : Association to AiSuggestionReviewStates not null;
+  reviewedBy        : Association to Users;
+  reviewedAt        : Timestamp;
+  expiresAt         : Timestamp;
+  correlationId     : String(80);
 }

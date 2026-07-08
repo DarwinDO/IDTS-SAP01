@@ -254,3 +254,35 @@ Anchor quan trong:
   **Phải kiểm tra cùng**: `db/schema.cds:189`, `srv/bug-service/constants.js`, task UI/readability IDTS-37, API contract test.
 
 `Notifications` giữ navigation `deliveries` vì delivery là dữ liệu con của source event. Endpoint công khai là `/odata/v4/bug/NotificationDeliveries`; client không được ghi vào collection này.
+
+## IDTS-65 AI Suggestion Read Contract
+
+### English
+
+`BugService.AiSuggestions` is a read-only OData projection for safe AI suggestion audit rows.
+
+This projection exists so future UI/review tasks can show AI suggestions without exposing backend-only write control. It includes source bug, feature type, requester, provider/model aliases, confidence, safe suggestion payload, summary, review state, reviewer, timestamps, and correlation ID. It intentionally does not provide a public create/update/delete path.
+
+Important anchor:
+
+- **Location**: `srv/service.cds`, `@readonly entity AiSuggestions as projection on db.AiSuggestions`
+  **IDTS concept**: Safe public read contract for AI suggestions.
+  **Impact if broken**: Future Fiori review UI may not be able to display AI suggestions, or clients may gain the ability to write audit rows directly.
+  **Must check together**: `db/schema.cds` `AiSuggestions`, `srv/ai/audit.js`, `srv/bug-service/constants.js`, `scripts/qa/test-idts65-ai-suggestion-audit.js`.
+
+`AiSuggestionFeatureTypes` and `AiSuggestionReviewStates` are also exposed as service code-list projections so clients can display readable labels. Writes are blocked by the normal BugService read-only guard list.
+
+### Vietnamese
+
+`BugService.AiSuggestions` là OData projection read-only cho các dòng audit AI suggestion đã được làm sạch.
+
+Projection này tồn tại để các task UI/review sau này có thể hiển thị AI suggestion mà không mở quyền ghi từ client. Nó gồm bug nguồn, loại feature, người request, provider/model alias, confidence, payload suggestion an toàn, summary, review state, reviewer, timestamps và correlation ID. Nó cố ý không cung cấp public create/update/delete path.
+
+Important anchor:
+
+- **Vị trí**: `srv/service.cds`, `@readonly entity AiSuggestions as projection on db.AiSuggestions`
+  **Khái niệm IDTS**: Public read contract an toàn cho AI suggestion.
+  **Ảnh hưởng nếu sai**: UI review Fiori sau này có thể không hiển thị được AI suggestion, hoặc client có thể ghi trực tiếp vào audit row.
+  **Phải kiểm tra cùng**: `db/schema.cds` `AiSuggestions`, `srv/ai/audit.js`, `srv/bug-service/constants.js`, `scripts/qa/test-idts65-ai-suggestion-audit.js`.
+
+`AiSuggestionFeatureTypes` và `AiSuggestionReviewStates` cũng được expose như code-list projection để client có label dễ đọc. Ghi dữ liệu vào các entity này bị chặn bởi read-only guard list của BugService.

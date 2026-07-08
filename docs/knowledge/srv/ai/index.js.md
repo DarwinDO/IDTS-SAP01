@@ -65,3 +65,29 @@ File này là entry point để backend import các helper AI. Module backend kh
 
 - Chỉ export helper an toàn, có chủ đích cho backend feature code.
 - Không export raw provider internals nếu chưa có task yêu cầu.
+
+## IDTS-65 Audit Export Update
+
+### English
+
+IDTS-65 exports `createAiSuggestion` and `serializeSuggestionPayload` from this index file.
+
+This lets future AI feature modules import the provider abstraction and the audit writer from one stable module boundary:
+
+```js
+const { createAiProvider, createAiSuggestion } = require('../ai')
+```
+
+The important point is still separation of responsibility. `createAiProvider` talks to the AI seam, while `createAiSuggestion` stores the already-safe suggestion audit row. This file only exposes both helpers; it does not decide when AI should run or when a suggestion should be accepted.
+
+### Vietnamese
+
+IDTS-65 export thêm `createAiSuggestion` và `serializeSuggestionPayload` từ index file này.
+
+Điều này giúp các module AI sau này import provider abstraction và audit writer từ cùng một module boundary ổn định:
+
+```js
+const { createAiProvider, createAiSuggestion } = require('../ai')
+```
+
+Điểm quan trọng vẫn là tách trách nhiệm. `createAiProvider` gọi AI seam, còn `createAiSuggestion` lưu audit row của suggestion đã an toàn. File này chỉ expose helper; nó không quyết định khi nào AI chạy hoặc suggestion nào được accept.

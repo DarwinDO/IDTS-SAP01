@@ -42,7 +42,7 @@ Hệ thống **không tập trung vào**:
 * Complex approval workflow nhiều cấp.  
 * AI Root Cause Analysis bắt buộc hoặc autonomous agent tự assign, reject, close hay đổi status.
 
-**English clarification:** AI assistance is optional and advisory. CAP validation, role authorization, and explicit human actions remain authoritative. AI failure must not block the normal IDTS workflow.
+**English clarification:** AI assistance is optional and advisory. CAP validation, role authorization, and explicit human actions remain authoritative. AI failure must not block the normal IDTS workflow. Persisted `AiSuggestions` are audit/review records only; they do not mean AI has applied a workflow decision.
 
 **Tiếng Việt:** AI là tính năng hỗ trợ tùy chọn. Validation CAP, phân quyền role và hành động rõ ràng của người dùng vẫn là nguồn quyết định cuối. AI lỗi không được chặn workflow IDTS bình thường.
 
