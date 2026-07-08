@@ -1547,3 +1547,17 @@ Vietnamese:
 | Backend implementation | DonHV bat dau runtime AI foundation sau khi duyet plan tiep theo, bo qua IDTS-59 va IDTS-45 trong focus ngay lap tuc. | IDTS-63 da chot guardrail AI nhung chua co runtime AI seam. | Da them config AI mac dinh tat, safe provider wrapper, mock provider deterministic, helper redact prompt/error, private config placeholder, QA script tap trung, evidence va knowledge mirrors. Khong them credential/provider AI that hoac dependency moi. | `npm run qa:idts64:programmatic` pass `26 PASS / 0 FAIL`. Tiep tuc CAP compile, secret scan, AI DevKit lint, PR va Jira evidence/comment. |
 | Loi setup moi truong | Test IDTS-64 dau tien trong fresh worktree fail `Cannot find module '@sap/cds'`. | Fresh worktree chua co `node_modules`. | Da chay `npm ci --include=dev` trong worktree. Khong phai product defect. | Chay lai focused test da pass. |
 | Theo doi security/dependency | `npm ci --include=dev` bao 14 audit findings trong dependency tree. | Baseline dependency audit findings con lai tu dependency hien co cua project; IDTS-64 khong them package moi. | Ghi nhan la khong phai do IDTS-64 tao ra. | Tiep tuc track vulnerability trong security/dependency follow-up, khong nam trong task AI provider abstraction nay. |
+
+## 2026-07-08 - IDTS-64 merge and closure sync
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| PM/Jira closure sync | IDTS-64 implementation PR was merged, but PM handover still needed to move from implementation-started to merged/done. | PR #106 merged after the first PM update had already recorded In Progress state. | Updated PM task board, current status, and AI work package to record IDTS-64 as merged into `dev` at `6d637df`. Jira IDTS-64 was moved to In Progress and received comment `10420` with PR/evidence; next step is transition Done after this closure sync lands. | PR #106 `qa-depth-gate` passed; merge verified through GitHub. Start IDTS-65 from fresh `origin/dev` after closure sync. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Dong bo PM/Jira | PR implementation IDTS-64 da merge, nhung PM handover van can chuyen tu implementation-started sang merged/done. | PR #106 merge sau khi PM update dau tien da ghi trang thai In Progress. | Da cap nhat task board, current status va AI work package de ghi IDTS-64 da merge vao `dev` tai `6d637df`. Jira IDTS-64 da chuyen In Progress va co comment `10420` kem PR/evidence; buoc tiep theo la transition Done sau khi closure sync nay len dev. | PR #106 `qa-depth-gate` pass; merge da verify tren GitHub. Bat dau IDTS-65 tu fresh `origin/dev` sau closure sync. |
