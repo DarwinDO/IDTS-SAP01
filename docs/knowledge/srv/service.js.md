@@ -288,3 +288,21 @@ Phần này nói rõ file này liên kết với file nào, liên kết nằm �
 - Source line count at documentation time: 156
 - Documentation style: learning-oriented explanation, not line listing only
 - Last reviewed: 2026-06-22
+
+## IDTS-68 Bug Handoff Summary Wiring Update
+
+### English
+
+IDTS-68 updates this runtime wiring file to register `this.on('summarizeBugHandoff', ...)`.
+
+The service declaration lives in `srv/service.cds`, but CAP still needs this JavaScript registration so incoming OData action calls reach `srv/ai/bug-summary.js`. This keeps the service entry point consistent with the existing AI actions `suggestSimilarBugs` and `suggestClassification`.
+
+If this registration is removed, metadata may still show the action, but the runtime action will not execute correctly.
+
+### Vietnamese
+
+IDTS-68 cap nhat file wiring runtime nay de dang ky `this.on('summarizeBugHandoff', ...)`.
+
+Khai bao service nam trong `srv/service.cds`, nhung CAP van can registration JavaScript nay de OData action goi vao dung `srv/ai/bug-summary.js`. Cach nay giu service entry point nhat quan voi hai AI action hien co la `suggestSimilarBugs` va `suggestClassification`.
+
+Neu bo registration nay, metadata co the van thay action, nhung runtime action se khong chay dung.

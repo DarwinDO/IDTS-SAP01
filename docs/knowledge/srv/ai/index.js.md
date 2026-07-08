@@ -114,3 +114,17 @@ The classification logic remains in `srv/ai/classification-suggestion.js`. This 
 IDTS-67 export thêm `suggestClassification` cho CAP service handler và `buildClassificationSuggestions` cho focused backend verification.
 
 Logic phân loại vẫn nằm trong `srv/ai/classification-suggestion.js`. Index này giúp `srv/service.js` không phải import sâu vào từng file feature và giúp test có một import boundary ổn định.
+
+## IDTS-68 Export Update
+
+### English
+
+IDTS-68 exports `summarizeBugHandoff` and `buildBugHandoffSummary` from this index file.
+
+This lets `srv/service.js` import the new bug summary action from the same stable AI module boundary as duplicate detection and classification suggestion.
+
+### Vietnamese
+
+IDTS-68 export `summarizeBugHandoff` va `buildBugHandoffSummary` tu index file nay.
+
+Nho vay `srv/service.js` co the import action bug summary moi tu cung mot module boundary on dinh voi duplicate detection va classification suggestion.

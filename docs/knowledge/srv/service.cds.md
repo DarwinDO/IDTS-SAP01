@@ -338,3 +338,21 @@ Action này du?c thi?t k? ch? d? g?i ý. Nó không update `Bugs`; nó ch? tr? v? các
   - **Khái ni?m IDTS**: AI h? tr? review phân lo?i, không ph?i t? d?ng phân lo?i.
   - **?nh hu?ng n?u sai**: Fiori ho?c API client có th? không g?i du?c g?i ý phân lo?i, ho?c contract thi?u tr?ng thái validation/confidence.
   - **Ph?i ki?m tra cùng**: `srv/ai/classification-suggestion.js`, `srv/service.js`, các catalog entity trong `db/schema.cds`, và `scripts/qa/test-idts67-classification-suggestion.js`.
+
+## IDTS-68 Bug Handoff Summary Update
+
+### English
+
+IDTS-68 adds the unbound action `summarizeBugHandoff(sourceBugID)` and result type `BugHandoffSummaryResult`.
+
+This action belongs in `srv/service.cds` because it is a public OData contract, not a private helper. Clients call it when they need a reviewable summary for an existing bug. The action returns status, current action owner, missing information, latest important events, next expected action, provider status, grounding status, confidence, and a human-review flag.
+
+It does not expose a write API. It does not change the bug lifecycle. Runtime behavior is implemented in `srv/ai/bug-summary.js` and wired in `srv/service.js`.
+
+### Vietnamese
+
+IDTS-68 them unbound action `summarizeBugHandoff(sourceBugID)` va result type `BugHandoffSummaryResult`.
+
+Action nay nam trong `srv/service.cds` vi day la contract OData public, khong phai helper noi bo. Client goi no khi can mot ban summary co the review cho bug da ton tai. Action tra ve status, current action owner, thong tin con thieu, su kien quan trong gan day, next expected action, provider status, grounding status, confidence va co bat buoc human review.
+
+Action nay khong expose write API. No khong doi lifecycle cua bug. Runtime behavior nam trong `srv/ai/bug-summary.js` va duoc noi trong `srv/service.js`.
