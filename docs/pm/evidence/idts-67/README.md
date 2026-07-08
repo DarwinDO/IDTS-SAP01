@@ -2,8 +2,8 @@
 
 Date: 2026-07-08
 Branch: `feature/idts-67-ai-classification-suggestion-donhv`
-Pull request: https://github.com/DarwinDO/IDTS-SAP01/pull/113
-Jira: IDTS-67 comment `10428`, status moved to In Progress
+Pull request: https://github.com/DarwinDO/IDTS-SAP01/pull/113, merged into `dev` at `d167613`
+Jira: IDTS-67 comments `10428`, `10429`, `10430`; status moved to Done
 Owner tracking: DatDT
 Implemented by: DonHV
 
