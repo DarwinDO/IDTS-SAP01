@@ -55,6 +55,7 @@ Vietnamese: Chi dung board nay de theo doi trang thai cap cao. Chi tiet cong vie
 | IDTS-65 | Add read-safe AI suggestion audit model | PR #108 merged into `dev` at `a9c56b4`; backend now has `AiSuggestions`, AI feature/review codelists, backend-owned sanitized audit writer, read-only OData projection, focused QA evidence, and knowledge mirrors. Jira moved to Done. |
 | IDTS-66 | Implement duplicate and similar bug detection with embeddings | PR #110 merged into `dev` at `ea0b370`; backend now exposes authenticated suggestion-only hybrid ranking, safe deterministic fallback, sanitized source-linked audit, and no automatic `DuplicateLinks`. Focused QA passed `30/0`, final `qa-depth-gate` passed, and Jira moved to Done. |
 | IDTS-67 | Implement AI classification suggestion with catalog validation | PR #113 merged into `dev` at `d167613`; backend now exposes authenticated suggestion-only classification suggestions, validates provider values against active catalogs, flags invalid/inactive/low-confidence values, writes sanitized source-linked audit, and never mutates `Bugs`. Jira moved to Done. |
+| IDTS-70 | SAP Fiori AI suggestion review UI patterns | PR #119 merged into `dev` at `05f46b1`; reusable `AiReviewUi.js` now maps AI suggestion states to safe Fiori review copy, Smart Assign uses it for explanations, focused QA passed IDTS-70 `7/0` and IDTS-56 `13/0`, `qa-depth-gate` passed, and Jira moved to Done. |
 
 Vietnamese:
 
@@ -106,6 +107,7 @@ Vietnamese:
 | IDTS-65 | Them AI suggestion audit model read-safe | PR #108 da merge vao `dev` tai `a9c56b4`; backend co `AiSuggestions`, AI feature/review codelists, backend-owned sanitized audit writer, read-only OData projection, focused QA evidence va knowledge mirrors. Jira da chuyen Done. |
 | IDTS-66 | Implement duplicate/similar detection voi embedding | PR #110 da merge vao `dev` tai `ea0b370`; backend expose suggestion-only hybrid ranking co authentication, deterministic fallback an toan, audit da sanitize khi co source bug va khong tu tao `DuplicateLinks`. Focused QA pass `30/0`, final `qa-depth-gate` pass va Jira da chuyen Done. |
 | IDTS-67 | Implement AI classification suggestion co catalog validation | PR #113 da merge vao `dev` tai `d167613`; backend expose classification suggestion theo co che suggestion-only, validate provider value voi active catalog, danh dau invalid/inactive/low-confidence, ghi audit da sanitize khi co source bug va khong mutate `Bugs`. Jira da chuyen Done. |
+| IDTS-70 | SAP Fiori AI suggestion review UI patterns | PR #119 da merge vao `dev` tai `05f46b1`; `AiReviewUi.js` hien map AI suggestion states thanh Fiori review copy an toan, Smart Assign dung helper nay cho explanations, focused QA pass IDTS-70 `7/0` va IDTS-56 `13/0`, `qa-depth-gate` pass va Jira da chuyen Done. |
 
 ## Ready
 
@@ -128,7 +130,6 @@ Vietnamese:
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
 | IDTS-68 | Backend grounded bug/handoff summary | SangVN / DonHV support | Done at repository handoff level. PR #115 merged into `dev` at `d5e4297`; focused QA passed `28/0`, AI regression IDTS-64 to IDTS-68 passed, and Jira evidence comment is `10431`. Jira closure transition is handled after this closure sync. |
-| IDTS-70 | SAP Fiori AI suggestion review UI patterns | DatDT / DonHV support | In Progress. DonHV is implementing on behalf of DatDT on `feature/idts-70-ai-review-ui-donhv`; focused IDTS-70 QA and Smart Assign regression currently pass locally. |
 | IDTS-57 | Browser regression and SAP Fiori UX review for redesigned screens | NhanT | PR #77 merged the first Playwright browser UX regression harness into `dev`, but the task remains open because the merged coverage is PM-focused. Final role-matrix and broader manual/browser regression should continue through IDTS-60 and the remaining IDTS-57 pass. |
 | SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP, and real browser QA are stable enough to prove the happy flow. Remaining work is final SAP490 sync and mentor-demo rerun, not FE/blocking workflow repair. |
 | WP6 | PM Monitoring | DonHV, DatDT, SangVN | Ownership wording is locked; backend monitoring fields, FE monitoring views, Object Page refresh side effects, grouped history timeline, and persona UAT automation are merged. Remaining manual follow-up is `IDTS-32`; `IDTS-33` is Done on Jira. |
@@ -142,7 +143,6 @@ Vietnamese:
 | ID | Cong viec | Thanh vien chinh | Ghi chu |
 | --- | --- | --- | --- |
 | IDTS-57 | Browser regression va SAP Fiori UX review cho cac man hinh da redesign | NhanT | PR #77 da merge browser QA harness dau tien vao `dev`, nhung task van chua dong vi coverage hien tap trung PM. Can tiep tuc role matrix Tester/Developer/PM va manual/browser regression qua IDTS-60 va phan IDTS-57 con lai. |
-| IDTS-70 | SAP Fiori AI suggestion review UI patterns | DatDT / DonHV support | Dang In Progress. DonHV implement thay DatDT tren `feature/idts-70-ai-review-ui-donhv`; focused QA IDTS-70 va regression Smart Assign hien pass local. |
 | IDTS-50 | Cai thien email notification va sua deep link | DonHV | Sua email Gmail dang tho va link Fiori bi hong tu shared-QA email. Jira dang In Progress; branch implementation la `fix/idts-50-email-link-template-donhv`. |
 | SP2 | Sprint 02 Mentor Feedback va Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP va browser QA that da du on de chung minh happy flow. Phan con lai la sync SAP490 va rerun mentor demo. |
 | WP6 | PM Monitoring | DonHV, DatDT, SangVN | Backend monitoring, FE monitoring views, Object Page refresh, grouped history timeline va persona UAT automation da merge. Manual follow-up con lai la `IDTS-32`; `IDTS-33` da Done tren Jira. |
