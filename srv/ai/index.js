@@ -7,6 +7,10 @@ const {
   suggestSimilarBugs,
   rankSimilarBugCandidates
 } = require('./duplicate-detection')
+const {
+  suggestClassification,
+  buildClassificationSuggestions
+} = require('./classification-suggestion')
 const { redactSensitiveText, sanitizeErrorSummary } = require('./safety')
 
 module.exports = {
@@ -18,5 +22,7 @@ module.exports = {
   serializeSuggestionPayload,
   sanitizeErrorSummary,
   suggestSimilarBugs,
-  rankSimilarBugCandidates
+  rankSimilarBugCandidates,
+  suggestClassification,
+  buildClassificationSuggestions
 }

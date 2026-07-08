@@ -130,3 +130,17 @@ Vietnamese:
 - DatDT cập nhật file này sau mỗi phiên làm việc.
 - Ghi rõ đã làm gì, xong phần nào, blocker, bug/error UI phát hiện, đã fix hay chưa và bằng chứng verify.
 - Không chỉnh file status của thành viên khác trừ khi phối hợp với DonHV.
+
+## 2026-07-08 - IDTS-67 implemented by DonHV on behalf of DatDT
+
+English:
+
+| Classification | Work / issue | Status | Evidence / next handoff |
+| --- | --- | --- | --- |
+| Cross-member support | DonHV implemented `IDTS-67` because DonHV is temporarily taking over IDTS-67 to IDTS-70 while still preserving DatDT ownership tracking. | Backend scope implemented: `suggestClassification` action, catalog validation, safe statuses, deterministic fallback, sanitized audit, focused QA, and knowledge mirrors. | Focused test passed: `npm run qa:idts67:programmatic` = `22 PASS / 0 FAIL`. DatDT should use this contract later when implementing/reviewing IDTS-70 Fiori AI suggestion UI. |
+
+Vietnamese:
+
+| Phan loai | Cong viec / van de | Trang thai | Evidence / ban giao tiep theo |
+| --- | --- | --- | --- |
+| Ho tro cheo thanh vien | DonHV implement `IDTS-67` thay DatDT vi DonHV tam thoi dam nhan IDTS-67 den IDTS-70, nhung van giu tracking owner cua DatDT. | Scope backend da implement: action `suggestClassification`, validate catalog, status an toan, deterministic fallback, audit da sanitize, focused QA va knowledge mirrors. | Focused test pass: `npm run qa:idts67:programmatic` = `22 PASS / 0 FAIL`. DatDT can dua vao contract nay sau khi implement/review IDTS-70 Fiori AI suggestion UI. |

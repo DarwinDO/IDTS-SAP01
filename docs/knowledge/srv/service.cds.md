@@ -314,3 +314,27 @@ Important anchor:
   **Ph·∫£i ki·ªÉm tra c√πng**: `db/schema.cds` `AiSuggestions`, `srv/ai/audit.js`, `srv/bug-service/constants.js`, `scripts/qa/test-idts65-ai-suggestion-audit.js`.
 
 `AiSuggestionFeatureTypes` v√† `AiSuggestionReviewStates` c≈©ng ƒë∆∞·ª£c expose nh∆∞ code-list projection ƒë·ªÉ client c√≥ label d·ªÖ ƒë·ªçc. Ghi d·ªØ li·ªáu v√†o c√°c entity n√†y b·ªã ch·∫∑n b·ªüi read-only guard list c·ªßa BugService.
+
+## IDTS-67 update: AI classification suggestion action
+
+### English
+
+`srv/service.cds` now also exposes `suggestClassification`, an unbound OData action that returns reviewable classification suggestions for SAP Module, Application Component, Defect Category, Priority, and Severity.
+
+This action is intentionally suggestion-only. It does not update `Bugs`; it only returns structured rows for review. The runtime validation and fallback logic lives in `srv/ai/classification-suggestion.js`, and `srv/service.js` wires the action into CAP.
+
+- **Location**: `type ClassificationSuggestionCandidate` and `action suggestClassification(...)`
+  - **IDTS concept**: AI-assisted classification review, not automatic classification.
+  - **Impact if broken**: Fiori or API clients may not be able to request classification help, or may receive a contract that hides validation status/confidence.
+  - **Must check together**: `srv/ai/classification-suggestion.js`, `srv/service.js`, `db/schema.cds` catalog entities, and `scripts/qa/test-idts67-classification-suggestion.js`.
+
+### Ti?ng Vi?t
+
+`srv/service.cds` hi?n expose thÍm `suggestClassification`, m?t unbound OData action tr? v? g?i ˝ ph‚n lo?i d? review cho SAP Module, Application Component, Defect Category, Priority v‡ Severity.
+
+Action n‡y du?c thi?t k? ch? d? g?i ˝. NÛ khÙng update `Bugs`; nÛ ch? tr? v? c·c dÚng cÛ c?u tr˙c d? ngu?i d˘ng review. Logic validate v‡ fallback runtime n?m trong `srv/ai/classification-suggestion.js`, cÚn `srv/service.js` n?i action n‡y v‡o CAP.
+
+- **V? trÌ**: `type ClassificationSuggestionCandidate` v‡ `action suggestClassification(...)`
+  - **Kh·i ni?m IDTS**: AI h? tr? review ph‚n lo?i, khÙng ph?i t? d?ng ph‚n lo?i.
+  - **?nh hu?ng n?u sai**: Fiori ho?c API client cÛ th? khÙng g?i du?c g?i ˝ ph‚n lo?i, ho?c contract thi?u tr?ng th·i validation/confidence.
+  - **Ph?i ki?m tra c˘ng**: `srv/ai/classification-suggestion.js`, `srv/service.js`, c·c catalog entity trong `db/schema.cds`, v‡ `scripts/qa/test-idts67-classification-suggestion.js`.
