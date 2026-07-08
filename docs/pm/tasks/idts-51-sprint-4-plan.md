@@ -1,6 +1,6 @@
 # IDTS-51 - Sprint 4 Stabilization Plan
 
-Last updated: 2026-07-05
+Last updated: 2026-07-08
 
 ## Purpose
 
@@ -22,6 +22,7 @@ Vietnamese: Jira board sprint thật `IDTS Sprint 4` đã được tạo trên b
 | Jira | Owner | Due date | Sprint 4 reason |
 | --- | --- | --- | --- |
 | IDTS-39 | DonHV | 2026-07-07 | Harden login error handling so unexpected backend/database errors do not leak raw SQL or internal details. |
+| IDTS-59 | SangVN | 2026-07-11 | Scan completed Sprint 4 Fiori screens for usability gaps and edge-case confusion; local evidence report is in PR #104 and authenticated shared-QA scan still depends on private Render QA credentials/session or DonHV acceptance of local evidence. |
 | IDTS-45 | DonHV | 2026-07-24 | Back up and decide migration/upgrade before the Render PostgreSQL free instance expires. The due date intentionally extends beyond the sprint because the real deadline is 2026-07-31. |
 | IDTS-46 | DonHV | 2026-07-12 | Review dependency vulnerabilities found during Render/shared-QA work with targeted remediation. |
 | IDTS-47 | SangVN | 2026-07-14 | Fix the long History Timeline UX issue found during IDTS-32 UAT. |
@@ -33,6 +34,7 @@ Vietnamese:
 | Jira | Owner | Due date | Lý do đưa vào Sprint 4 |
 | --- | --- | --- | --- |
 | IDTS-39 | DonHV | 2026-07-07 | Hardening login error để lỗi backend/database bất ngờ không leak raw SQL hoặc thông tin nội bộ. |
+| IDTS-59 | SangVN | 2026-07-11 | Scan các màn hình Fiori Sprint 4 đã hoàn thành để tìm usability gap và edge-case confusion; local evidence report nằm trong PR #104, còn authenticated shared-QA scan phụ thuộc credential/session Render QA private hoặc DonHV chấp nhận local evidence. |
 | IDTS-45 | DonHV | 2026-07-24 | Backup và chốt migrate/upgrade trước khi Render PostgreSQL free hết hạn. Due date cố ý nằm ngoài sprint vì deadline thật là 2026-07-31. |
 | IDTS-46 | DonHV | 2026-07-12 | Review dependency vulnerabilities phát hiện trong quá trình Render/shared-QA, xử lý theo hướng targeted. |
 | IDTS-47 | SangVN | 2026-07-14 | Fix vấn đề UX History Timeline quá dài được phát hiện trong UAT IDTS-32. |
@@ -69,6 +71,7 @@ Vietnamese:
 - `IDTS-47` relates to `IDTS-32`.
 - `IDTS-40` relates to `IDTS-44` as an AWS-native follow-up/alternative.
 - `IDTS-58` relates to `IDTS-52`, `IDTS-53`, `IDTS-54`, `IDTS-55`, and is the FE handoff input for `IDTS-59` and `IDTS-60`.
+- `IDTS-59` follows `IDTS-58` as the SangVN UI/UX evidence scan and relates to `IDTS-57`/`IDTS-60` regression coverage.
 
 Vietnamese:
 
@@ -78,6 +81,7 @@ Vietnamese:
 - `IDTS-47` liên quan `IDTS-32`.
 - `IDTS-40` liên quan `IDTS-44` như follow-up/alternative theo hướng AWS-native.
 - `IDTS-58` lien quan `IDTS-52`, `IDTS-53`, `IDTS-54`, `IDTS-55` va la dau vao FE handoff cho `IDTS-59` va `IDTS-60`.
+- `IDTS-59` follow `IDTS-58` như scan evidence UI/UX của SangVN và liên quan coverage regression `IDTS-57`/`IDTS-60`.
 
 ## Sprint 4 task hygiene
 
