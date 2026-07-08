@@ -52,6 +52,7 @@ Vietnamese: Chi dung board nay de theo doi trang thai cap cao. Chi tiet cong vie
 | IDTS-46 | Review and remediate npm dependency vulnerabilities | PR #94 merged into `dev` at `645e6f1`; compatible lockfile updates reduced audit findings to 6 moderate runtime and 14 full-tree findings, with residual risk documented. Jira moved to Done. |
 | IDTS-63 | Define AI scope guardrails and human-review rules | PR #93 merged into `dev`; AI remains suggestion-only, human-reviewed, disabled from owning workflow decisions, and runtime implementation is deferred to Sprint 5 foundation tasks. |
 | IDTS-64 | Add AI provider abstraction and private runtime config | PR #106 merged into `dev` at `6d637df`; backend now has disabled-by-default AI config, safe provider wrapper, deterministic mock provider, sanitized failure/timeout handling, focused QA evidence, and knowledge mirrors. |
+| IDTS-65 | Add read-safe AI suggestion audit model | PR #108 merged into `dev` at `a9c56b4`; backend now has `AiSuggestions`, AI feature/review codelists, backend-owned sanitized audit writer, read-only OData projection, focused QA evidence, and knowledge mirrors. Jira moved to Done. |
 
 Vietnamese:
 
@@ -99,6 +100,8 @@ Vietnamese:
 | IDTS-47 | Gioi han hoac phan trang History Timeline tren Object Page | PR #87 da merge vao `dev`; History tren Object Page dung UI5 `sap.m.List` growing voi 5 event ban dau, event cu van xem duoc, Show Details van giu duoc, va Jira da chuyen Done. |
 | IDTS-46 | Review va xu ly npm dependency vulnerabilities | PR #94 da merge vao `dev` tai `645e6f1`; compatible lockfile update giam audit con 6 moderate runtime va 14 finding full-tree, residual risk da duoc document. Jira da chuyen Done. |
 | IDTS-63 | Chot AI scope guardrail va human-review rule | PR #93 da merge vao `dev`; AI chi la suggestion, phai co human review, khong duoc tu quyet workflow, va runtime implementation chuyen sang cac task foundation Sprint 5. |
+| IDTS-64 | Them AI provider abstraction va private runtime config | PR #106 da merge vao `dev` tai `6d637df`; backend co AI config mac dinh tat, safe provider wrapper, mock provider deterministic, sanitized failure/timeout handling, focused QA evidence va knowledge mirrors. Jira da chuyen Done. |
+| IDTS-65 | Them AI suggestion audit model read-safe | PR #108 da merge vao `dev` tai `a9c56b4`; backend co `AiSuggestions`, AI feature/review codelists, backend-owned sanitized audit writer, read-only OData projection, focused QA evidence va knowledge mirrors. Jira da chuyen Done. |
 
 ## Ready
 
@@ -121,7 +124,6 @@ Vietnamese:
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
 | IDTS-57 | Browser regression and SAP Fiori UX review for redesigned screens | NhanT | PR #77 merged the first Playwright browser UX regression harness into `dev`, but the task remains open because the merged coverage is PM-focused. Final role-matrix and broader manual/browser regression should continue through IDTS-60 and the remaining IDTS-57 pass. |
-| IDTS-65 | Add read-safe AI suggestion audit model | DonHV | Branch `feature/idts-65-ai-suggestion-audit-donhv` adds `AiSuggestions`, AI feature/review codelists, backend-owned writer, read-only OData projection, focused QA, evidence, and knowledge mirrors. PR/merge/Jira closure remain next. |
 | SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP, and real browser QA are stable enough to prove the happy flow. Remaining work is final SAP490 sync and mentor-demo rerun, not FE/blocking workflow repair. |
 | WP6 | PM Monitoring | DonHV, DatDT, SangVN | Ownership wording is locked; backend monitoring fields, FE monitoring views, Object Page refresh side effects, grouped history timeline, and persona UAT automation are merged. Remaining manual follow-up is `IDTS-32`; `IDTS-33` is Done on Jira. |
 | IDTS-32 | Manual browser UAT for Sprint 3 workflow/history flows | SangVN | Evidence branch merged through PR #34. Retest remains open until IDTS-41/42/43 fixes and no P0/P1 remain. |

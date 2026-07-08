@@ -1562,6 +1562,22 @@ Vietnamese:
 | --- | --- | --- | --- | --- |
 | Dong bo PM/Jira | PR implementation IDTS-64 da merge, nhung PM handover van can chuyen tu implementation-started sang merged/done. | PR #106 merge sau khi PM update dau tien da ghi trang thai In Progress. | Da cap nhat task board, current status va AI work package de ghi IDTS-64 da merge vao `dev` tai `6d637df`. Jira IDTS-64 da chuyen In Progress va co comment `10420` kem PR/evidence; buoc tiep theo la transition Done sau khi closure sync nay len dev. | PR #106 `qa-depth-gate` pass; merge da verify tren GitHub. Bat dau IDTS-65 tu fresh `origin/dev` sau closure sync. |
 
+## 2026-07-08 - IDTS-65 merge and closure sync
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| PM/Jira closure sync | IDTS-65 implementation PR was merged, but PM handover still needed to move from implementation-started to merged/done. | PR #108 merged after the implementation update had already recorded In Progress state. | Updated PM task board, current status, and AI work package to record IDTS-65 as merged into `dev` at `a9c56b4`. Jira IDTS-65 received comment `10422` with PR/evidence and was transitioned to Done. | PR #108 `qa-depth-gate` passed; merge and Jira Done were verified. Next AI implementation can start from IDTS-66 or the next approved feature task. |
+| Tooling/worktree issue | `gh pr merge 108 --squash --delete-branch` printed `fatal: 'dev' is already used by worktree at 'E:/IDTS-SAP01'` during local cleanup. | The root worktree already owns local branch `dev`, so GitHub CLI could not complete local checkout/cleanup from this secondary worktree. | Non-product issue. Rechecked PR #108 with repository-scoped GitHub CLI commands and confirmed it was already merged into `dev` at `a9c56b4`. | Continue using repository-scoped merge/verification from secondary worktrees; do not treat this as a product merge conflict. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Dong bo PM/Jira | PR implementation IDTS-65 da merge, nhung PM handover van can chuyen tu implementation-started sang merged/done. | PR #108 merge sau khi PM update implementation da ghi trang thai In Progress. | Da cap nhat task board, current status va AI work package de ghi IDTS-65 da merge vao `dev` tai `a9c56b4`. Jira IDTS-65 da co comment `10422` kem PR/evidence va da chuyen Done. | PR #108 `qa-depth-gate` pass; merge va Jira Done da verify. AI implementation tiep theo co the bat dau tu IDTS-66 hoac feature task da duyet tiep theo. |
+| Loi tooling/worktree | `gh pr merge 108 --squash --delete-branch` in `fatal: 'dev' is already used by worktree at 'E:/IDTS-SAP01'` trong luc cleanup local. | Root worktree dang giu local branch `dev`, nen GitHub CLI khong cleanup/checkout local duoc tu secondary worktree nay. | Khong phai loi product. Da kiem tra lai PR #108 bang GitHub CLI theo repo va xac nhan PR da merge vao `dev` tai `a9c56b4`. | Tiep tuc dung lenh merge/verify theo repo tu secondary worktree; khong xem day la merge conflict cua san pham. |
+
 ## 2026-07-08 - IDTS-65 AI suggestion audit implementation
 
 English:
