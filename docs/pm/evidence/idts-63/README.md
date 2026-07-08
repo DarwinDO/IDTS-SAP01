@@ -7,7 +7,8 @@ This folder contains sanitized, repository-safe evidence for the AI guardrail di
 - Guardrail document: `docs/ba/discovery/idts-63-ai-assistance-guardrails.md`
 - Canonical scope alignment: `IDTS-SUMMARY.md`, `IDTS-Business-Rule.md`, `IDTS-PROJECT-SCOPE-SAP01.md`, and `docs/project-context.md`
 - Decision and risk alignment: `docs/pm/risk-decision-log.md`
-- Jira tracking: IDTS-63 is in Sprint 4 and In Progress.
+- GitHub delivery: PR #93, `Docs: Define IDTS-63 AI assistance guardrails`, was merged into `dev`.
+- Jira tracking: IDTS-63 is ready for Done/closure after PR #93 and PM evidence sync.
 
 ## Safety
 
@@ -20,9 +21,18 @@ Vietnamese: Folder này chỉ lưu evidence đã làm sạch và có thể commi
 - `git diff --check`: PASS after removing one trailing-space finding.
 - `node scripts/qa/secret-scan.js`: PASS.
 - `npx ai-devkit@latest lint --json`: PASS, 5 checks OK, 0 warnings, 0 required failures.
-- Jira live verification: IDTS-63 is in `IDTS Sprint 4` and status `In Progress`.
+- Jira live verification at that time: IDTS-63 was in `IDTS Sprint 4` and still awaiting closure.
 
-Vietnamese: Kiểm tra ngày 2026-07-07 đã pass `git diff --check`, secret scan và AI DevKit lint. Jira live xác nhận IDTS-63 nằm trong `IDTS Sprint 4` và đang `In Progress`.
+Vietnamese: Kiểm tra ngày 2026-07-07 đã pass `git diff --check`, secret scan và AI DevKit lint. Tại thời điểm đó Jira live xác nhận IDTS-63 nằm trong `IDTS Sprint 4` và vẫn đang chờ closure.
+
+## Closure sync - 2026-07-08
+
+- PR #93 is merged into `dev`: https://github.com/DarwinDO/IDTS-SAP01/pull/93
+- GitHub `qa-depth-gate` for PR #93 completed successfully.
+- This follow-up sync updates PM/evidence state only; it does not add runtime AI code, provider credentials, API changes, CDS entities, or UI changes.
+- Fresh closure verification: `git diff --check`, stale-status `rg`, `node scripts/qa/secret-scan.js`, and `npx ai-devkit@latest lint --json` passed.
+
+Vietnamese: PR #93 đã merge vào `dev` và `qa-depth-gate` đã pass. Lượt sync này chỉ cập nhật trạng thái PM/evidence; không thêm runtime AI, provider credential, API, CDS entity hoặc UI mới. Verification mới đã pass `git diff --check`, scan stale-status bằng `rg`, secret scan và AI DevKit lint.
 
 ## Manual Jira upload handoff
 

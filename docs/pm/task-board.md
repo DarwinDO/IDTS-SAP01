@@ -50,6 +50,7 @@ Vietnamese: Chi dung board nay de theo doi trang thai cap cao. Chi tiet cong vie
 | IDTS-61 | Replace Assignee value help with Smart Assign picker | PR #84 merged into `dev`; PR #85 synced PM docs; Render deploy `dep-d95pqqbtqb8s73f4i0kg` is live on commit `a68193e`; route/static artifact smoke passed; Jira moved to Done. |
 | IDTS-47 | Limit or paginate History Timeline on Object Page | PR #87 merged into `dev`; Object Page History now uses UI5 `sap.m.List` growing with 5 initial events, older events remain accessible, expandable details are preserved, and Jira moved to Done. |
 | IDTS-46 | Review and remediate npm dependency vulnerabilities | PR #94 merged into `dev` at `645e6f1`; compatible lockfile updates reduced audit findings to 6 moderate runtime and 14 full-tree findings, with residual risk documented. Jira moved to Done. |
+| IDTS-63 | Define AI scope guardrails and human-review rules | PR #93 merged into `dev`; AI remains suggestion-only, human-reviewed, disabled from owning workflow decisions, and runtime implementation is deferred to Sprint 5 foundation tasks. |
 
 Vietnamese:
 
@@ -96,6 +97,7 @@ Vietnamese:
 | IDTS-61 | Thay Assignee value help bang Smart Assign picker | PR #84 da merge vao `dev`; PR #85 da sync PM docs; Render deploy `dep-d95pqqbtqb8s73f4i0kg` dang live tren commit `a68193e`; route/static artifact smoke pass; Jira da chuyen Done. |
 | IDTS-47 | Gioi han hoac phan trang History Timeline tren Object Page | PR #87 da merge vao `dev`; History tren Object Page dung UI5 `sap.m.List` growing voi 5 event ban dau, event cu van xem duoc, Show Details van giu duoc, va Jira da chuyen Done. |
 | IDTS-46 | Review va xu ly npm dependency vulnerabilities | PR #94 da merge vao `dev` tai `645e6f1`; compatible lockfile update giam audit con 6 moderate runtime va 14 finding full-tree, residual risk da duoc document. Jira da chuyen Done. |
+| IDTS-63 | Chot AI scope guardrail va human-review rule | PR #93 da merge vao `dev`; AI chi la suggestion, phai co human review, khong duoc tu quyet workflow, va runtime implementation chuyen sang cac task foundation Sprint 5. |
 
 ## Ready
 
@@ -124,7 +126,6 @@ Vietnamese:
 | WP6 | PM Monitoring | DonHV, DatDT, SangVN | Ownership wording is locked; backend monitoring fields, FE monitoring views, Object Page refresh side effects, grouped history timeline, and persona UAT automation are merged. Remaining manual follow-up is `IDTS-32`; `IDTS-33` is Done on Jira. |
 | IDTS-32 | Manual browser UAT for Sprint 3 workflow/history flows | SangVN | Evidence branch merged through PR #34. Retest remains open until IDTS-41/42/43 fixes and no P0/P1 remain. |
 | IDTS-58 | Fix Sprint 4 UI defects found after Fiori redesign review | DatDT | Branch `fix/idts-58-sprint-4-ui-defects-datdt` now contains the FE fixes and local browser-smoke evidence. Waiting for Jira evidence comment, push/PR review, and merge before board-level Done. |
-| IDTS-63 | Define AI scope guardrails and human-review rules | DonHV | Added to Sprint 4 and moved to In Progress on 2026-07-07. This is the only AI Epic task committed to Sprint 4; runtime implementation waits for Sprint 5. |
 | IDTS-45 | Back up and decide migration or upgrade for expiring Render PostgreSQL | DonHV | Moved to In Progress on 2026-07-07. Repo now has a secret-safe backup helper and continuity decision; private backup/restore proof still requires DonHV's private Render DB URL and temporary restore target. |
 
 Vietnamese:
@@ -142,7 +143,6 @@ Vietnamese:
 | IDTS-32 | Manual browser UAT cho workflow/history Sprint 3 | SangVN | Evidence branch da merge qua PR #34. Van can retest sau IDTS-41/42/43 va chi dong khi khong con P0/P1. |
 | IDTS-58 | Fix cac loi UI Sprint 4 sau Fiori redesign review | DatDT | Branch `fix/idts-58-sprint-4-ui-defects-datdt` da co FE fixes va browser-smoke evidence local. Cho DatDT cap nhat Jira evidence, push/PR review, va merge truoc khi board-level Done. |
 | IDTS-45 | Backup va chot migrate/nang cap Render PostgreSQL sap het han | DonHV | Da chuyen In Progress ngay 2026-07-07. Repo da co helper backup an toan va decision continuity; backup/restore proof that van can DonHV dung DB URL Render private va restore target tam thoi. |
-| IDTS-63 | Chốt AI scope guardrail và human-review rule | DonHV | Đã đưa vào Sprint 4 và chuyển In Progress ngày 2026-07-07. Đây là task duy nhất của Epic AI được commit trong Sprint 4; runtime implementation chờ Sprint 5. |
 
 
 ## Blocked

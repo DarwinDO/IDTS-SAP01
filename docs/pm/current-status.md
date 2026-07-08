@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-07-07
+Last updated: 2026-07-08
 
 ## Snapshot
 
@@ -9,7 +9,7 @@ Last updated: 2026-07-07
 | Project phase | Sprint 03 is being closed and Sprint 04 planning is opened. Sprint 02/Sprint 03 closure tasks have been reconciled on Jira where tool access allowed. |
 | Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
 | Current sprint | Sprint 03 closure is complete at Jira epic/task level: `IDTS-1`, `IDTS-14`, `IDTS-25`, `IDTS-27`, `IDTS-28`, `IDTS-38`, and `IDTS-50` are Done. Jira board sprint `IDTS Sprint 4` exists on board `34` for 2026-07-04 to 2026-07-18, and planning epic is `IDTS-51`. |
-| Recommended next action | Sprint 04 has started. `IDTS-39`, `IDTS-46`, `IDTS-47`, `IDTS-52`, `IDTS-53`, `IDTS-54`, `IDTS-55`, `IDTS-56`, and `IDTS-61` are implemented and merged through the Sprint 4 security/UI polish pass. `IDTS-57` still needs full role-matrix regression. DonHV has started `IDTS-45` Render PostgreSQL continuity and `IDTS-63` AI discovery. Runtime AI tasks remain planned for Sprint 5. In parallel, complete `IDTS-59`/`IDTS-60` and keep `IDTS-40` as an AWS-native follow-up rather than a Render QA blocker. |
+| Recommended next action | Sprint 04 has started. `IDTS-39`, `IDTS-46`, `IDTS-47`, `IDTS-52`, `IDTS-53`, `IDTS-54`, `IDTS-55`, `IDTS-56`, `IDTS-61`, and `IDTS-63` are implemented/merged through the Sprint 4 security, UI polish, and AI guardrail pass. `IDTS-57` still needs full role-matrix regression. DonHV continues `IDTS-45` Render PostgreSQL continuity, while runtime AI tasks remain planned for Sprint 5. In parallel, complete `IDTS-59`/`IDTS-60` and keep `IDTS-40` as an AWS-native follow-up rather than a Render QA blocker. |
 | Main implementation risk | Shared QA still depends on private Render/Brevo/AWS/PostgreSQL environment variables staying out of repo, Jira, and logs. The Render PostgreSQL free-instance expiry remains the main time-bound infrastructure risk; IDTS-45 now documents a private logical-backup helper and recommends upgrading Render PostgreSQL before expiry if shared QA remains needed. Sprint 04 is tracked both through the real Jira sprint `IDTS Sprint 4` and planning epic `IDTS-51`; `IDTS-40` remains a deferred AWS-native follow-up rather than a blocker for Render QA. |
 
 ## What Is Already Done
