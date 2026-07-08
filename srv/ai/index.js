@@ -15,6 +15,10 @@ const {
   summarizeBugHandoff,
   buildBugHandoffSummary
 } = require('./bug-summary')
+const {
+  explainSmartAssignment,
+  buildAssignmentExplanations
+} = require('./assignment-explanation')
 const { redactSensitiveText, sanitizeErrorSummary } = require('./safety')
 
 module.exports = {
@@ -30,5 +34,7 @@ module.exports = {
   suggestClassification,
   buildClassificationSuggestions,
   summarizeBugHandoff,
-  buildBugHandoffSummary
+  buildBugHandoffSummary,
+  explainSmartAssignment,
+  buildAssignmentExplanations
 }

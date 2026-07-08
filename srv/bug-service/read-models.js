@@ -31,6 +31,20 @@ const DISPLAY_FIELDS = new Set([
 async function readAssignableDevelopers (req, entities) {
   const tx = cds.tx(req)
   const criteria = assignableDeveloperCriteria(req)
+  let rows = await buildAssignableDeveloperRows(tx, entities, criteria)
+
+  rows = rows
+    .filter(row => filterAssignableDeveloperRow(row, criteria))
+    .sort((left, right) => left.developerName.localeCompare(right.developerName))
+
+  const total = rows.length
+  rows = applyLimit(rows, req.query?.SELECT?.limit)
+    .map(toPublicAssignableDeveloperRow)
+  rows.$count = total
+  return rows
+}
+
+async function buildAssignableDeveloperRows (tx, entities, criteria = {}) {
   let rows
 
   if (criteria.componentCategoryID) {
@@ -46,6 +60,7 @@ async function readAssignableDevelopers (req, entities) {
           { ref: ['developerProfile', 'active'], as: 'developerActive' },
           { ref: ['developerProfile', 'user', 'displayName'], as: 'developerName' },
           { ref: ['developerProfile', 'user', 'email'], as: 'developerEmail' },
+          { ref: ['developerProfile', 'workloadLimit'], as: 'workloadLimit' },
           { ref: ['developerProfile', 'availabilityStatus', 'name'], as: 'availabilityStatusName' },
           { ref: ['developerProfile', 'availabilityStatus', 'criticality'], as: 'availabilityCriticality' },
           { ref: ['componentCategory', 'component', 'name'], as: 'applicationComponentName' },
@@ -77,6 +92,7 @@ async function readAssignableDevelopers (req, entities) {
       sapModuleID: row.sapModule_ID || null,
       developerName: row.developerName,
       developerEmail: row.developerEmail,
+      workloadLimit: row.workloadLimit ?? null,
       availabilityStatusName: row.availabilityStatusName,
       availabilityCriticality: row.availabilityCriticality,
       applicationComponentName: row.applicationComponentName,
@@ -91,6 +107,7 @@ async function readAssignableDevelopers (req, entities) {
         .columns(
           'ID',
           'active',
+          'workloadLimit',
           { ref: ['user', 'displayName'], as: 'developerName' },
           { ref: ['user', 'email'], as: 'developerEmail' },
           { ref: ['availabilityStatus', 'name'], as: 'availabilityStatusName' },
@@ -106,6 +123,7 @@ async function readAssignableDevelopers (req, entities) {
       sapModuleID: null,
       developerName: row.developerName,
       developerEmail: row.developerEmail,
+      workloadLimit: row.workloadLimit ?? null,
       availabilityStatusName: row.availabilityStatusName,
       availabilityCriticality: row.availabilityCriticality,
       applicationComponentName: null,
@@ -116,13 +134,6 @@ async function readAssignableDevelopers (req, entities) {
     }))
   }
 
-  rows = rows
-    .filter(row => filterAssignableDeveloperRow(row, criteria))
-    .sort((left, right) => left.developerName.localeCompare(right.developerName))
-
-  const total = rows.length
-  rows = applyLimit(rows, req.query?.SELECT?.limit)
-  rows.$count = total
   return rows
 }
 
@@ -201,6 +212,11 @@ function filterAssignableDeveloperRow (row, criteria) {
     .join(' ')
     .toLowerCase()
   return haystack.includes(criteria.search.toLowerCase())
+}
+
+function toPublicAssignableDeveloperRow (row) {
+  const { workloadLimit, ...publicRow } = row
+  return publicRow
 }
 
 function applyLimit (rows, limit) {
@@ -516,6 +532,7 @@ async function readCapabilityInputsFromEntity (rows, entity, req, capabilityInpu
 
 module.exports = {
   readAssignableDevelopers,
+  buildAssignableDeveloperRows,
   enrichBugDisplayFields,
   enrichBugCapabilities,
   ensureCapabilitySelectDependencies

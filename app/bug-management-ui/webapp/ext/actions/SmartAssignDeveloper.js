@@ -183,7 +183,12 @@ sap.ui.define([
             moduleText: getText(view, "smartAssignModuleText", [moduleText, roleText]),
             isUnavailable: isUnavailable,
             isBusy: isBusy,
-            warningText: warningText
+            warningText: warningText,
+            aiExplanation: getText(view, "smartAssignAiExplanationLoading"),
+            aiExplanationMeta: getText(view, "smartAssignAiReviewRequired"),
+            aiExplanationState: "Information",
+            aiWarnings: "",
+            hasAiWarnings: false
         };
     }
 
@@ -208,15 +213,19 @@ sap.ui.define([
     }
 
     function applySearch(state) {
+        refreshVisibleCandidates(state);
+        state.setProperty("/selectedCandidate", null);
+        state.setProperty("/selectedCandidateId", "");
+        state.setProperty("/selectedWarningText", "");
+        state.setProperty("/assignEnabled", false);
+    }
+
+    function refreshVisibleCandidates(state) {
         var query = normalize(state.getProperty("/searchQuery"));
         var candidates = state.getProperty("/candidates") || [];
         state.setProperty("/visibleCandidates", candidates.filter(function (candidate) {
             return candidateMatches(candidate, query);
         }));
-        state.setProperty("/selectedCandidate", null);
-        state.setProperty("/selectedCandidateId", "");
-        state.setProperty("/selectedWarningText", "");
-        state.setProperty("/assignEnabled", false);
     }
 
     function updateSelection(state, candidate) {
@@ -245,6 +254,84 @@ sap.ui.define([
                 return enrichCandidate(context.getObject(), view);
             });
         });
+    }
+
+    function readAssignmentExplanations(model, bug, candidates, view) {
+        if (!candidates.length || !model || typeof model.bindContext !== "function") {
+            return Promise.resolve([]);
+        }
+
+        var operation = model.bindContext("/explainSmartAssignment(...)", undefined, { $$ownRequest: true });
+        operation.setParameter("sourceBugID", bug.ID || null);
+        operation.setParameter("componentCategoryID", bug.componentCategory_ID || null);
+        operation.setParameter("sapModuleID", bug.sapModule_ID || null);
+        operation.setParameter("limit", Math.min(candidates.length, 20));
+
+        return operation.execute("$auto").then(function () {
+            var resultContext = operation.getBoundContext && operation.getBoundContext();
+            if (resultContext && typeof resultContext.requestObject === "function") {
+                return resultContext.requestObject();
+            }
+            return [];
+        }).then(normalizeExplanationResult).catch(function () {
+            return candidates.map(function (candidate) {
+                return {
+                    developerProfileID: candidate.developerProfileID,
+                    explanation: getText(view, "smartAssignAiExplanationUnavailable"),
+                    warnings: "",
+                    confidence: null,
+                    requiresReview: true
+                };
+            });
+        });
+    }
+
+    function normalizeExplanationResult(result) {
+        if (Array.isArray(result)) {
+            return result;
+        }
+        if (result && Array.isArray(result.value)) {
+            return result.value;
+        }
+        if (result && result.value && Array.isArray(result.value.value)) {
+            return result.value.value;
+        }
+        return [];
+    }
+
+    function applyAssignmentExplanations(state, explanations, view) {
+        var byDeveloperProfileID = new Map((explanations || []).map(function (row) {
+            return [row.developerProfileID, row];
+        }));
+
+        var candidates = (state.getProperty("/candidates") || []).map(function (candidate) {
+            var explanation = byDeveloperProfileID.get(candidate.developerProfileID);
+            if (!explanation) {
+                return Object.assign({}, candidate, {
+                    aiExplanation: getText(view, "smartAssignAiExplanationUnavailable"),
+                    aiExplanationMeta: getText(view, "smartAssignAiReviewRequired"),
+                    aiExplanationState: "Warning",
+                    aiWarnings: "",
+                    hasAiWarnings: false
+                });
+            }
+
+            var confidence = Number(explanation.confidence);
+            var confidenceText = Number.isFinite(confidence)
+                ? getText(view, "smartAssignAiConfidence", [Math.round(confidence * 100)])
+                : getText(view, "smartAssignAiReviewRequired");
+
+            return Object.assign({}, candidate, {
+                aiExplanation: explanation.explanation || getText(view, "smartAssignAiExplanationUnavailable"),
+                aiExplanationMeta: confidenceText,
+                aiExplanationState: explanation.warnings ? "Warning" : "Information",
+                aiWarnings: explanation.warnings || "",
+                hasAiWarnings: Boolean(explanation.warnings)
+            });
+        });
+
+        state.setProperty("/candidates", candidates);
+        refreshVisibleCandidates(state);
     }
 
     function executeAssignment(model, bugContext, candidate, view, sourceControl) {
@@ -312,6 +399,7 @@ sap.ui.define([
             selectedCandidate: null,
             selectedCandidateId: "",
             selectedWarningText: "",
+            aiNoticeText: getText(view, "smartAssignAiNotice"),
             assignEnabled: false,
             busy: true,
             noDataText: getText(view, "smartAssignNoCandidates")
@@ -335,6 +423,11 @@ sap.ui.define([
                     minScreenWidth: "Tablet",
                     demandPopin: true,
                     header: new Text({ text: getText(view, "smartAssignAvailabilityColumn") })
+                }),
+                new Column({
+                    minScreenWidth: "Desktop",
+                    demandPopin: true,
+                    header: new Text({ text: getText(view, "smartAssignAiExplanationColumn") })
                 })
             ],
             selectionChange: function (event) {
@@ -362,6 +455,23 @@ sap.ui.define([
                     new ObjectStatus({
                         text: "{smartAssign>availabilityStatusName}",
                         state: "{smartAssign>availabilityState}"
+                    }),
+                    new VBox({
+                        items: [
+                            new Text({
+                                text: "{smartAssign>aiExplanation}",
+                                wrapping: true
+                            }),
+                            new ObjectStatus({
+                                text: "{smartAssign>aiExplanationMeta}",
+                                state: "{smartAssign>aiExplanationState}"
+                            }),
+                            new Text({
+                                text: "{smartAssign>aiWarnings}",
+                                wrapping: true,
+                                visible: "{smartAssign>hasAiWarnings}"
+                            })
+                        ]
                     })
                 ]
             })
@@ -380,6 +490,11 @@ sap.ui.define([
                     items: [
                         new MessageStrip({
                             text: getText(view, "smartAssignIntroMessage"),
+                            type: "Information",
+                            showIcon: true
+                        }),
+                        new MessageStrip({
+                            text: "{smartAssign>/aiNoticeText}",
                             type: "Information",
                             showIcon: true
                         }),
@@ -464,6 +579,10 @@ sap.ui.define([
                         : getText(view, "smartAssignNoCandidates")
                 );
                 applySearch(state);
+                return readAssignmentExplanations(model, bug, candidates, view)
+                    .then(function (explanations) {
+                        applyAssignmentExplanations(state, explanations, view);
+                    });
             })
             .catch(function (error) {
                 MessageBox.error(error && error.message ? error.message : getText(view, "smartAssignLoadFailed"));

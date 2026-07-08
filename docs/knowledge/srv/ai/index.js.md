@@ -128,3 +128,17 @@ This lets `srv/service.js` import the new bug summary action from the same stabl
 IDTS-68 export `summarizeBugHandoff` va `buildBugHandoffSummary` tu index file nay.
 
 Nho vay `srv/service.js` co the import action bug summary moi tu cung mot module boundary on dinh voi duplicate detection va classification suggestion.
+
+## IDTS-69 Assignment Explanation Export Update
+
+### English
+
+IDTS-69 additionally exports `explainSmartAssignment` for the CAP service handler and `buildAssignmentExplanations` for focused backend verification.
+
+The explanation logic remains in `srv/ai/assignment-explanation.js`. This index only keeps the backend import boundary stable, so `srv/service.js` can import from `srv/ai` instead of reaching into each AI feature file directly.
+
+### Vietnamese
+
+IDTS-69 export them `explainSmartAssignment` cho CAP service handler va `buildAssignmentExplanations` cho focused backend verification.
+
+Logic giai thich assignment van nam trong `srv/ai/assignment-explanation.js`. File index nay chi giu import boundary on dinh de `srv/service.js` import tu `srv/ai` thay vi import sau vao tung feature file.

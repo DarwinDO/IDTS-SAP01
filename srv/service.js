@@ -42,7 +42,7 @@ const {
   handleDraftSave
 } = require('./bug-service/drafts')
 const { startEmailWorker } = require('./email/worker')
-const { suggestSimilarBugs, suggestClassification, summarizeBugHandoff } = require('./ai')
+const { suggestSimilarBugs, suggestClassification, summarizeBugHandoff, explainSmartAssignment } = require('./ai')
 
 module.exports = class BugService extends cds.ApplicationService {
   async init () {
@@ -100,6 +100,7 @@ module.exports = class BugService extends cds.ApplicationService {
     this.on('suggestSimilarBugs', req => suggestSimilarBugs(req, entities))
     this.on('suggestClassification', req => suggestClassification(req, entities))
     this.on('summarizeBugHandoff', req => summarizeBugHandoff(req, entities))
+    this.on('explainSmartAssignment', req => explainSmartAssignment(req, entities))
     this.on('SAVE', Bugs.drafts, (req, next) => handleDraftSave(req, entities, next))
 
     this.on('assignToDeveloper', req => assignToDeveloper(req, entities))
