@@ -1,8 +1,10 @@
 # IDTS-67 Evidence - AI Classification Suggestion
 
-Date: 2026-07-08  
-Branch: `feature/idts-67-ai-classification-suggestion-donhv`  
-Owner tracking: DatDT  
+Date: 2026-07-08
+Branch: `feature/idts-67-ai-classification-suggestion-donhv`
+Pull request: https://github.com/DarwinDO/IDTS-SAP01/pull/113
+Jira: IDTS-67 comment `10428`, status moved to In Progress
+Owner tracking: DatDT
 Implemented by: DonHV
 
 ## Scope verified
