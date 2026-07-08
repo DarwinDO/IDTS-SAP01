@@ -152,6 +152,30 @@ File này là nơi tất cả quy tắc trạng thái IDTS, cập nhật nextPro
 - Documentation style: learning-oriented explanation, not line listing only
 - Last reviewed: 2026-06-22
 
+## IDTS-67 update: classification suggestion wiring
+
+### English
+
+`srv/service.js` now imports `suggestClassification` from `srv/ai` and registers it as the handler for the `suggestClassification` OData action declared in `srv/service.cds`.
+
+This file still only wires the action. It does not contain the classification logic. The actual AI provider call, catalog validation, fallback, and audit writing are in `srv/ai/classification-suggestion.js`.
+
+- **Location**: AI import and `this.on('suggestClassification', ...)`
+  - **IDTS concept**: CAP runtime action wiring.
+  - **Impact if broken**: the OData action may exist in metadata but fail at runtime, or call the wrong handler.
+  - **Must check together**: `srv/service.cds`, `srv/ai/index.js`, `srv/ai/classification-suggestion.js`, and `scripts/qa/test-idts67-classification-suggestion.js`.
+
+### Tiếng Việt
+
+`srv/service.js` hiện import `suggestClassification` từ `srv/ai` và đăng ký nó làm handler cho OData action `suggestClassification` đã khai báo trong `srv/service.cds`.
+
+File này vẫn chỉ làm nhiệm vụ nối action vào runtime. Nó không chứa logic phân loại. Phần gọi AI provider, validate catalog, fallback và ghi audit nằm trong `srv/ai/classification-suggestion.js`.
+
+- **Vị trí**: import AI và `this.on('suggestClassification', ...)`
+  - **Khái niệm IDTS**: nối CAP action vào runtime handler.
+  - **Ảnh hưởng nếu sai**: OData action có thể xuất hiện trong metadata nhưng lỗi khi gọi runtime, hoặc gọi nhầm handler.
+  - **Phải kiểm tra cùng**: `srv/service.cds`, `srv/ai/index.js`, `srv/ai/classification-suggestion.js`, và `scripts/qa/test-idts67-classification-suggestion.js`.
+
 ## IDTS-66 similar-bug handler wiring
 
 ### English

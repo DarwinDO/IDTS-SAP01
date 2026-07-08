@@ -15,6 +15,19 @@ service BugService @(requires: 'authenticated-user') {
     embeddingUsed    : Boolean;
   };
 
+  type ClassificationSuggestionCandidate {
+    field            : String(40);
+    fieldLabel       : String(120);
+    valueID          : UUID;
+    valueCode        : String(40);
+    valueName        : String(120);
+    confidence       : Decimal(5,4);
+    reason           : String(500);
+    status           : String(40);
+    providerStatus   : String(40);
+    requiresReview   : Boolean;
+  };
+
   action suggestSimilarBugs(
     sourceBugID            : UUID,
     title                  : String(255),
@@ -27,6 +40,20 @@ service BugService @(requires: 'authenticated-user') {
     limit                  : Integer,
     minScore               : Decimal(5,4)
   ) returns array of SimilarBugCandidate;
+
+  action suggestClassification(
+    sourceBugID            : UUID,
+    title                  : String(255),
+    description            : LargeString,
+    stepsToReproduce       : LargeString,
+    actualResult           : LargeString,
+    expectedResult         : LargeString,
+    sapModuleID            : UUID,
+    applicationComponentID : UUID,
+    defectCategoryID       : UUID,
+    priorityCode           : String(40),
+    severityCode           : String(40)
+  ) returns array of ClassificationSuggestionCandidate;
 
   entity Bugs as projection on db.Bugs {
     *,

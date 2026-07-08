@@ -101,3 +101,16 @@ IDTS-66 additionally exports `suggestSimilarBugs` for the CAP service handler an
 ### Vietnamese
 
 IDTS-66 export thêm `suggestSimilarBugs` cho CAP service handler và `rankSimilarBugCandidates` cho focused backend verification. Phần triển khai vẫn nằm trong `srv/ai/duplicate-detection.js`; index này chỉ cung cấp import boundary ổn định cho `srv/service.js` và mã QA.
+## IDTS-67 Classification Suggestion Export Update
+
+### English
+
+IDTS-67 exports `suggestClassification` for the CAP service handler and `buildClassificationSuggestions` for focused backend verification.
+
+The classification logic remains in `srv/ai/classification-suggestion.js`. This index keeps `srv/service.js` from importing deep feature files directly and gives tests a stable import boundary.
+
+### Vietnamese
+
+IDTS-67 export thêm `suggestClassification` cho CAP service handler và `buildClassificationSuggestions` cho focused backend verification.
+
+Logic phân loại vẫn nằm trong `srv/ai/classification-suggestion.js`. Index này giúp `srv/service.js` không phải import sâu vào từng file feature và giúp test có một import boundary ổn định.

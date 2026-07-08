@@ -88,6 +88,7 @@ Last updated: 2026-07-08
 - IDTS-34 is merged into `dev` through GitHub PR #28 at merge commit `52432e35c66a3c0137ed5b7c96c9f57d93409fc5`. Backend custom login now exposes `AuthService.login/logout/me`, stores only password hashes, creates server-side `AuthSessions`, maps Bearer tokens to `cds.User`, keeps `BugService` protected, and passes focused auth verification (`23 PASS / 0 FAIL`) plus CAP compile on `dev`.
 - QA/testing skill support for IDTS-36/IDTS-38 is now installed and routed: `backend-testing`, `api-testing-patterns`, `integration-testing`, `qa-report`, and `qa-test-plan` exist under repo-local `.agents/skills/` and external backup `C:\Users\LapHub\.agents\skills\`. `backend-testing`, `api-testing-patterns`, and `integration-testing` are the primary implementation-test support skills; `qa-report` and `qa-test-plan` are secondary planning/reporting helpers.
 - IDTS-39, IDTS-52, and IDTS-53 are complete at implementation handoff level. Login/auth unexpected errors are sanitized, the custom login page now uses SAPUI5 controls with SAP Horizon styling, and the authenticated app now exposes a visible profile/sign-out popover.
+- IDTS-67 is in progress on branch `feature/idts-67-ai-classification-suggestion-donhv`. DonHV is implementing it on behalf of DatDT. Focused backend QA for AI classification suggestion currently passes `22 PASS / 0 FAIL`; remaining handoff work is broader regression, PR, evidence, and Jira sync.
 
 Vietnamese:
 
