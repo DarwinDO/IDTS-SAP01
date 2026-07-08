@@ -97,7 +97,10 @@ if (-not $ready) {
   throw "PostgreSQL restore target did not become ready in time. Inspect Docker logs for '$ContainerName'."
 }
 
-$restoreUrl = "postgres://$($DatabaseUser):$($password)@localhost:$($HostPort)/$($DatabaseName)"
+$escapedDatabaseUser = [Uri]::EscapeDataString($DatabaseUser)
+$escapedPassword = [Uri]::EscapeDataString($password)
+$escapedDatabaseName = [Uri]::EscapeDataString($DatabaseName)
+$restoreUrl = "postgres://$($escapedDatabaseUser):$($escapedPassword)@localhost:$($HostPort)/$($escapedDatabaseName)"
 
 Write-SafeInfo "Temporary restore target is ready."
 

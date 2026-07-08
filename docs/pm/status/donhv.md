@@ -1411,3 +1411,89 @@ Vietnamese:
 | Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
 | --- | --- | --- | --- | --- |
 | DevOps/process support | IDTS-45 da co tung helper rieng, nhung DonHV van phai chay dung thu tu thu cong. | Backup, local restore target, restore, evidence generation va cleanup dang la cac lenh rieng le. | Da them `scripts/render/run-render-postgres-continuity-proof.ps1` va npm script `render:db:continuity-proof` de orchestration flow private sau khi `RENDER_QA_DATABASE_URL` duoc set local. | Verify parse va no-secret preflight failure khi chua set private Render DB URL. Proof that van can DB URL private cua DonHV. |
+
+## 2026-07-08 - IDTS-45 first real continuity proof
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| DevOps proof | Real Render PostgreSQL backup completed and produced a private `.pgdump` plus SHA-256 checksum. | DonHV provided the private external Render database URL through a local User environment variable. | Backup step passed; artifact remains outside the repo under the user private backup folder. | Fix the restore networking issue, then rerun the full continuity proof. |
+| Tooling/network issue | Docker `pg_restore` failed to connect to the disposable local target at `localhost:55432`; the target was ready and cleanup still ran. | Inside the PostgreSQL client container, `localhost` points to the client container itself, not the Windows host that publishes the restore-target port. | Fixed by mapping local hostnames to `host.docker.internal` for Docker-based restore clients. Not a product defect. | Full private proof later passed; restore completed and cleanup removed the target. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| DevOps proof | Backup Render PostgreSQL that da hoan tat va tao private `.pgdump` kem SHA-256 checksum. | DonHV cung cap external Render database URL qua local User environment variable. | Buoc backup pass; artifact nam ngoai repo trong private backup folder cua user. | Fix loi networking restore, sau do rerun full continuity proof. |
+| Loi tooling/network | Docker `pg_restore` khong ket noi duoc disposable local target tai `localhost:55432`; target da ready va cleanup van chay. | Ben trong PostgreSQL client container, `localhost` tro vao chinh client container, khong phai Windows host dang publish port cua restore target. | Da fix bang cach map local hostname sang `host.docker.internal` cho Docker-based restore client. Khong phai product defect. | Full private proof sau do pass; restore hoan tat va cleanup remove target. |
+
+## 2026-07-08 - IDTS-45 local restore SSL fix
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling/network issue | After mapping Docker localhost correctly, `pg_restore` reached the local target but failed with `server does not support SSL, but SSL was required`. | Restore URL parsing forced `PGSSLMODE=require` for every target, while the disposable local PostgreSQL container does not enable SSL. | Fixed by using `PGSSLMODE=disable` only for localhost/loopback targets and keeping `require` for Render/external targets. Not a product defect. | Full private proof passed with restore status PASS and clean target cleanup. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Loi tooling/network | Sau khi map Docker localhost dung, `pg_restore` da toi duoc local target nhung fail `server does not support SSL, but SSL was required`. | Restore URL parser ep `PGSSLMODE=require` cho moi target, trong khi disposable local PostgreSQL container khong bat SSL. | Da fix: chi dung `PGSSLMODE=disable` cho localhost/loopback; giu `require` cho Render/external target. Khong phai product defect. | Full private proof pass voi restore status PASS va cleanup target sach. |
+
+## 2026-07-08 - IDTS-45 generated restore URL encoding fix
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling/script issue | A later proof run generated a random local password containing `/` or `+`; `System.Uri` rejected the restore URL with `Invalid port specified`. | The generated database user/password/database components were inserted into the PostgreSQL URL without URI escaping. | Fixed by URI-escaping generated user, password, and database name before building the local restore URL. The temporary container was removed immediately. Not a product defect. | Rerun with target retained passed; safe table names/counts were inspected and the target was removed. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Loi tooling/script | Mot lan proof sau generate random local password co ky tu `/` hoac `+`; `System.Uri` reject restore URL voi `Invalid port specified`. | User/password/database components duoc dua vao PostgreSQL URL ma chua URI-escape. | Da fix bang cach URI-escape generated user, password va database name truoc khi tao local restore URL. Temporary container da duoc remove ngay. Khong phai product defect. | Rerun proof giu target pass; da inspect table names/counts an toan va remove target. |
+
+## 2026-07-08 - IDTS-45 continuity proof PASS
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| DevOps continuity proof | Real Render QA PostgreSQL backup, restore into a disposable local PostgreSQL target, checksum verification, representative table checks, evidence generation, and cleanup all completed. | The private Render external URL was provided locally; Docker PostgreSQL client fallback and local restore target were available. | PASS. Safe restored row counts: users 4, bugs 6, notifications 13, notification deliveries 13, attachments 2, comments 10. Core public tables were present. | DonHV should manually upload the latest sanitized PASS evidence file. Decide private backup storage and Render upgrade/migration before closing IDTS-45. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| DevOps continuity proof | Backup Render QA PostgreSQL that, restore vao disposable local PostgreSQL target, checksum verification, representative table checks, evidence generation va cleanup deu hoan tat. | Private Render external URL duoc cung cap local; Docker PostgreSQL client fallback va local restore target da san sang. | PASS. Safe restored row counts: users 4, bugs 6, notifications 13, notification deliveries 13, attachments 2, comments 10. Core public tables ton tai. | DonHV tu upload latest sanitized PASS evidence file. Can chot private backup storage va Render upgrade/migration truoc khi dong IDTS-45. |
+
+## 2026-07-08 - IDTS-45 private env cleanup tooling issue
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling/command issue | First command intended to remove and verify the User-scoped Render DB URL failed with `Unexpected token '?'`. | The local Windows PowerShell version does not support the ternary `? :` operator used in the verification output expression. The parser stopped before cleanup ran. | Fixed by retrying with PowerShell 5-compatible `if` statements. Not a product defect. | Process/User/Machine scopes all reported NOT_SET. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Loi tooling/command | Lenh dau de xoa va verify User-scoped Render DB URL fail `Unexpected token '?'`. | Windows PowerShell local khong ho tro ternary `? :`; parser dung truoc khi cleanup chay. | Da fix bang cach retry voi `if` statements tuong thich PowerShell 5. Khong phai product defect. | Process/User/Machine scopes deu NOT_SET. |
+
+## 2026-07-08 - IDTS-45 exposed Render DB credential follow-up
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Security/process issue | The Render external database URL containing credentials was pasted into the Codex chat. | A private infrastructure credential was shared through a conversation channel instead of being entered only in a local private terminal. | Local Process/User/Machine env scopes were cleared after proof. The credential must be treated as compromised. | DonHV must rotate the Render PostgreSQL credential in Dashboard, update any dependent Render service binding/env if required, redeploy, and rerun auth/OData smoke. Do not repeat the old credential in Jira/docs. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Loi security/process | Render external database URL co credential da duoc paste vao Codex chat. | Private infrastructure credential duoc share qua conversation thay vi chi nhap trong local private terminal. | Da xoa Process/User/Machine env sau proof. Credential phai duoc xem la da lo. | DonHV phai rotate Render PostgreSQL credential tren Dashboard, update service binding/env neu can, redeploy va rerun auth/OData smoke. Khong lap lai old credential trong Jira/docs. |
