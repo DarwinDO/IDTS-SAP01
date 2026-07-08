@@ -1710,3 +1710,19 @@ Vietnamese:
 | Canh bao model/compiler | CAP compile pass nhung lap lai warning `NonUpdateableProperties` tren `BugService.Bugs_attachments`. | Warning compatibility annotation attachment da ton tai; IDTS-69 khong sua attachment annotations. | Log la non-blocking va khong do IDTS-69 tao ra. | Giu cho cleanup attachment/model neu can. |
 | Loi tooling tai lieu | `apply_patch` khong update duoc `docs/knowledge/srv/service.cds.md` vi mirror cu co byte UTF-8 loi. | Noi dung mirror cu bi loi encoding. | Tao supplemental knowledge note cho IDTS-69 thay vi rewrite mirror cu trong feature task nay. | Co the lam docs cleanup encoding rieng sau. |
 | Dieu chinh test-harness | Test programmatic Smart Assign IDTS-56 fail sau khi them AI notice va async explanation call. | Test assert qua som va gia dinh fixed child index truoc khi MessageStrip moi duoc them. | Sua timing va index SearchField. | `npm run qa:idts56:programmatic` pass `13/0`. |
+
+## 2026-07-09 - IDTS-69 merge and closure sync
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| PM/Jira closure sync | IDTS-69 implementation was merged but PM handover still described PR/Jira closure as next. | Closure happened after the implementation PR snapshot was written. | PR #117 passed `qa-depth-gate`, squash-merged into `dev` at `ccaab62`, Jira comments `10433` and `10434` were added, and Jira IDTS-69 was transitioned to Done. | Next AI task is IDTS-70 Fiori AI suggestion review UI. |
+| Tooling issue | `gh pr merge` printed `fatal: 'dev' is already used by worktree at 'E:/IDTS-SAP01'`. | Local root worktree owns branch `dev`; GitHub merge succeeded but local branch cleanup could not switch/delete local `dev`. | Verified PR #117 state is `MERGED` and `origin/dev` points to `ccaab62`. | Not a product defect. Continue using fresh worktrees and verify GitHub state after local cleanup errors. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Dong bo PM/Jira | IDTS-69 da merge nhung PM handover van ghi PR/Jira closure la buoc tiep theo. | Closure xay ra sau snapshot trong implementation PR. | PR #117 pass `qa-depth-gate`, squash-merge vao `dev` tai `ccaab62`, Jira comments `10433` va `10434` da duoc them, va Jira IDTS-69 da chuyen Done. | Task AI tiep theo la IDTS-70 Fiori AI suggestion review UI. |
+| Loi tooling | `gh pr merge` in `fatal: 'dev' is already used by worktree at 'E:/IDTS-SAP01'`. | Root worktree local dang giu branch `dev`; GitHub merge thanh cong nhung cleanup local khong switch/delete duoc local `dev`. | Da verify PR #117 la `MERGED` va `origin/dev` tro den `ccaab62`. | Khong phai product defect. Tiep tuc dung fresh worktree va verify GitHub state sau cac loi cleanup local. |
