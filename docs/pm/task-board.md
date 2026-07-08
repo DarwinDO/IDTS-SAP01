@@ -51,6 +51,7 @@ Vietnamese: Chi dung board nay de theo doi trang thai cap cao. Chi tiet cong vie
 | IDTS-47 | Limit or paginate History Timeline on Object Page | PR #87 merged into `dev`; Object Page History now uses UI5 `sap.m.List` growing with 5 initial events, older events remain accessible, expandable details are preserved, and Jira moved to Done. |
 | IDTS-46 | Review and remediate npm dependency vulnerabilities | PR #94 merged into `dev` at `645e6f1`; compatible lockfile updates reduced audit findings to 6 moderate runtime and 14 full-tree findings, with residual risk documented. Jira moved to Done. |
 | IDTS-63 | Define AI scope guardrails and human-review rules | PR #93 merged into `dev`; AI remains suggestion-only, human-reviewed, disabled from owning workflow decisions, and runtime implementation is deferred to Sprint 5 foundation tasks. |
+| IDTS-64 | Add AI provider abstraction and private runtime config | PR #106 merged into `dev` at `6d637df`; backend now has disabled-by-default AI config, safe provider wrapper, deterministic mock provider, sanitized failure/timeout handling, focused QA evidence, and knowledge mirrors. |
 
 Vietnamese:
 
@@ -126,7 +127,6 @@ Vietnamese:
 | IDTS-58 | Fix Sprint 4 UI defects found after Fiori redesign review | DatDT | Branch `fix/idts-58-sprint-4-ui-defects-datdt` now contains the FE fixes and local browser-smoke evidence. Waiting for Jira evidence comment, push/PR review, and merge before board-level Done. |
 | IDTS-59 | Scan Sprint 4 Fiori screens for usability gaps and edge-case confusion | SangVN | Jira moved to In Progress. Local `dev` UI/UX scan passed for login, profile/sign-out, dashboard, Object Page, comments, attachments, Smart Assign, mobile dashboard, and logout guard. Repo evidence report is in PR #104 after DonHV Jira comment `10415`; Jira follow-up comment `10416` posted. Unauthenticated shared QA route smoke returned HTTP 200, while authenticated shared QA still needs private Render QA credentials/session. |
 | IDTS-45 | Back up and decide migration or upgrade for expiring Render PostgreSQL | DonHV | Moved to In Progress on 2026-07-07. Repo now has a secret-safe backup helper and continuity decision; private backup/restore proof still requires DonHV's private Render DB URL and temporary restore target. |
-| IDTS-64 | Add AI provider abstraction and private runtime config | DonHV | Implementation started on branch `feature/idts-64-ai-provider-abstraction-donhv`; scope is disabled-by-default backend AI seam, mock provider, sanitized failures, and focused programmatic evidence. |
 
 Vietnamese:
 

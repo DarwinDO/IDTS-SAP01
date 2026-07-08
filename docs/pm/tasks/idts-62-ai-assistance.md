@@ -41,13 +41,13 @@ Vietnamese: Chỉ IDTS-63 được đưa vào Sprint 4. Phần runtime bắt đ�
 ## Current status
 
 - IDTS-63: Done at repository handoff level. PR #93 was merged into `dev` on 2026-07-07 with `qa-depth-gate` passing.
-- IDTS-64: Implementation started after DonHV approved beginning the runtime foundation early. Current branch is `feature/idts-64-ai-provider-abstraction-donhv`; scope is disabled-by-default provider abstraction, mock provider, sanitized error handling, private config placeholders, and focused programmatic evidence.
-- IDTS-65 to IDTS-72: Planned after IDTS-64 foundation is accepted; Jira due dates should be realigned when Sprint 5 is created if they remain outside the active Sprint 4 focus.
+- IDTS-64: Done at repository handoff level. PR #106 was merged into `dev` on 2026-07-08 with `qa-depth-gate` passing. Backend AI now has a disabled-by-default provider abstraction, deterministic mock provider, sanitized failure/timeout behavior, private config placeholders, focused programmatic evidence, and knowledge mirrors.
+- IDTS-65 to IDTS-72: Planned after IDTS-64 foundation; Jira due dates should be realigned when Sprint 5 is created if they remain outside the active Sprint 4 focus.
 - No runtime AI dependency, API, CDS entity, or UI has been added under IDTS-63.
 
 Vietnamese:
 
 - IDTS-63: Done ở mức handoff repository. PR #93 đã merge vào `dev` ngày 2026-07-07 và `qa-depth-gate` đã pass.
-- IDTS-64: Đã bắt đầu implementation sau khi DonHV duyệt làm runtime foundation sớm. Branch hiện tại là `feature/idts-64-ai-provider-abstraction-donhv`; scope là provider abstraction mặc định tắt, mock provider, sanitize error, private config placeholder và evidence programmatic tập trung.
-- IDTS-65 đến IDTS-72: Làm sau khi foundation IDTS-64 được accept; due date Jira nên realign khi tạo Sprint 5 nếu các task này không thuộc focus active Sprint 4.
+- IDTS-64: Done ở mức repository handoff. PR #106 đã merge vào `dev` ngày 2026-07-08 và `qa-depth-gate` đã pass. Backend AI hiện có provider abstraction mặc định tắt, mock provider deterministic, failure/timeout đã sanitize, private config placeholder, evidence programmatic tập trung và knowledge mirrors.
+- IDTS-65 đến IDTS-72: Làm sau foundation IDTS-64; due date Jira nên realign khi tạo Sprint 5 nếu các task này không thuộc focus active Sprint 4.
 - IDTS-63 không thêm dependency AI runtime, API, CDS entity hoặc UI mới.
