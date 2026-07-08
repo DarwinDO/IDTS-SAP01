@@ -45,6 +45,21 @@ service BugService @(requires: 'authenticated-user') {
     requiresReview        : Boolean;
   };
 
+  type SmartAssignmentExplanationCandidate {
+    developerProfileID : UUID;
+    developerName      : String(120);
+    explanation        : String(700);
+    warnings           : String(500);
+    confidence         : Decimal(5,4);
+    status             : String(40);
+    providerStatus     : String(40);
+    groundingStatus    : String(40);
+    workloadOpenCount  : Integer;
+    workloadLimit      : Integer;
+    isOverloaded       : Boolean;
+    requiresReview     : Boolean;
+  };
+
   action suggestSimilarBugs(
     sourceBugID            : UUID,
     title                  : String(255),
@@ -75,6 +90,13 @@ service BugService @(requires: 'authenticated-user') {
   action summarizeBugHandoff(
     sourceBugID            : UUID
   ) returns BugHandoffSummaryResult;
+
+  action explainSmartAssignment(
+    sourceBugID          : UUID,
+    componentCategoryID  : UUID,
+    sapModuleID          : UUID,
+    limit                : Integer
+  ) returns array of SmartAssignmentExplanationCandidate;
 
   entity Bugs as projection on db.Bugs {
     *,

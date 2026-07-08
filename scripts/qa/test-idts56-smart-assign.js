@@ -197,6 +197,9 @@ async function verifyStaticContract() {
     'smartAssignSearchPlaceholder=',
     'smartAssignBusyWarning=',
     'smartAssignUnavailableWarning=',
+    'smartAssignAiExplanationColumn=',
+    'smartAssignAiNotice=',
+    'smartAssignAiExplanationUnavailable=',
     'smartAssignAssignedToast='
   ]
   assertHasAll(readApp(path.join('webapp', 'i18n', 'i18n.properties')), requiredI18n, 'i18n.properties')
@@ -220,6 +223,8 @@ async function verifyUiActionModule() {
   const testerModule = loadSmartAssignModule('TESTER', hooks)
   let bindListPath
   let bindListFilters
+  let bindContextPath
+  const operationParameters = {}
   const candidateRows = [
     {
       ID: DEV_DAT,
@@ -261,8 +266,39 @@ async function verifyUiActionModule() {
         }
       }
     },
-    bindContext() {
-      throw new Error('Assignment should not execute during dialog load check')
+    bindContext(pathName) {
+      bindContextPath = pathName
+      return {
+        setParameter(name, value) {
+          operationParameters[name] = value
+        },
+        execute() {
+          return Promise.resolve()
+        },
+        getBoundContext() {
+          return {
+            requestObject() {
+              return Promise.resolve({
+                value: [
+                  {
+                    developerProfileID: DEV_DAT,
+                    explanation: 'Matches Finance and Value Help responsibility.',
+                    confidence: 0.72,
+                    requiresReview: true
+                  },
+                  {
+                    developerProfileID: 'busy-profile',
+                    explanation: 'Matches Finance and Value Help but workload should be reviewed.',
+                    warnings: 'Availability is Busy.',
+                    confidence: 0.55,
+                    requiresReview: true
+                  }
+                ]
+              })
+            }
+          }
+        }
+      }
     }
   }
 
@@ -316,10 +352,15 @@ async function verifyUiActionModule() {
   rec('dialog loads assignable developers filtered by bug component category', true)
 
   await new Promise(resolve => setImmediate(resolve))
+  await new Promise(resolve => setImmediate(resolve))
+  assert.strictEqual(bindContextPath, '/explainSmartAssignment(...)')
+  assert.strictEqual(operationParameters.componentCategoryID, COMPONENT_CATEGORY_1)
   const state = dialog.models.smartAssign
   assert.strictEqual(state.getProperty('/visibleCandidates').length, 2)
+  assert(state.getProperty('/visibleCandidates')[0].aiExplanation.includes('Matches Finance'))
+  rec('dialog decorates Smart Assign candidates with reviewable explanations', true)
   state.setProperty('/searchQuery', 'busy fi backup')
-  dialog.settings.content[0].settings.items[1].settings.search({ getParameter: name => name === 'query' ? 'busy fi backup' : '' })
+  dialog.settings.content[0].settings.items[2].settings.search({ getParameter: name => name === 'query' ? 'busy fi backup' : '' })
   assert.strictEqual(state.getProperty('/visibleCandidates').length, 1)
   assert.strictEqual(state.getProperty('/visibleCandidates')[0].developerName, 'Busy Developer')
   rec('dialog search matches developer, module, and capability fields', true)
