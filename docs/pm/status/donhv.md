@@ -1529,3 +1529,21 @@ Vietnamese:
 | Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
 | --- | --- | --- | --- | --- |
 | Dong bo PM/Jira | PR #93 cua IDTS-63 da merge vao `dev`, nhung file PM handover van ghi IDTS-63 In Progress. | Delivery tren repo va board-level PM status chua duoc reconcile sau khi PR merge. | Da cap nhat task board, current status, AI work package va evidence index de ghi nhan IDTS-63 da merge/san sang dong. Khong them runtime AI, provider credential, API, CDS entity hoac UI. | Chay verification, mo/merge PR sync PM, sau do comment va transition Jira IDTS-63 sang Done. |
+
+## 2026-07-08 - IDTS-64 AI provider abstraction implementation
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Backend implementation | DonHV started the runtime AI foundation after approving the next plan, excluding IDTS-59 and IDTS-45 from the immediate focus. | IDTS-63 had approved AI guardrails but no runtime AI seam existed yet. | Added disabled-by-default AI config normalization, safe provider wrapper, deterministic mock provider, prompt/error redaction helpers, private config placeholders, focused QA script, evidence, and knowledge mirrors. No real AI provider credential or dependency was added. | `npm run qa:idts64:programmatic` passed `26 PASS / 0 FAIL`. Continue with CAP compile, secret scan, AI DevKit lint, PR, and Jira evidence/comment. |
+| Environment setup issue | First IDTS-64 focused test in the fresh worktree failed with `Cannot find module '@sap/cds'`. | Fresh worktree did not have `node_modules` installed. | Ran `npm ci --include=dev` in the worktree. Not a product defect. | Re-run focused test passed. |
+| Security/dependency follow-up | `npm ci --include=dev` reported 14 audit findings in the dependency tree. | Baseline dependency audit findings remain from existing project dependencies; IDTS-64 did not add a new package. | Recorded as not introduced by IDTS-64. | Keep vulnerability tracking under dependency/security follow-up work, not this AI provider abstraction task. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Backend implementation | DonHV bat dau runtime AI foundation sau khi duyet plan tiep theo, bo qua IDTS-59 va IDTS-45 trong focus ngay lap tuc. | IDTS-63 da chot guardrail AI nhung chua co runtime AI seam. | Da them config AI mac dinh tat, safe provider wrapper, mock provider deterministic, helper redact prompt/error, private config placeholder, QA script tap trung, evidence va knowledge mirrors. Khong them credential/provider AI that hoac dependency moi. | `npm run qa:idts64:programmatic` pass `26 PASS / 0 FAIL`. Tiep tuc CAP compile, secret scan, AI DevKit lint, PR va Jira evidence/comment. |
+| Loi setup moi truong | Test IDTS-64 dau tien trong fresh worktree fail `Cannot find module '@sap/cds'`. | Fresh worktree chua co `node_modules`. | Da chay `npm ci --include=dev` trong worktree. Khong phai product defect. | Chay lai focused test da pass. |
+| Theo doi security/dependency | `npm ci --include=dev` bao 14 audit findings trong dependency tree. | Baseline dependency audit findings con lai tu dependency hien co cua project; IDTS-64 khong them package moi. | Ghi nhan la khong phai do IDTS-64 tao ra. | Tiep tuc track vulnerability trong security/dependency follow-up, khong nam trong task AI provider abstraction nay. |
