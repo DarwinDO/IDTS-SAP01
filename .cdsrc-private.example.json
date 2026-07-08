@@ -42,6 +42,16 @@
       "maxConnections": 3,
       "testMode": false,
       "defaultTestRecipient": ""
+    },
+    "ai": {
+      "enabled": false,
+      "provider": "mock",
+      "timeoutMs": 10000,
+      "maxInputChars": 8000,
+      "modelAlias": "mock-chat",
+      "embeddingModelAlias": "mock-embedding",
+      "mockMode": "success",
+      "mockEmbeddingDimensions": 8
     }
   }
 }
