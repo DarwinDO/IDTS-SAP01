@@ -1625,3 +1625,17 @@ Vietnamese:
 | Loi tooling | Lenh search repo co kem hai path `test` va `tests` khong ton tai nen `rg` exit code 1, du van xac nhan repo khong co dependency `supertest`. | Repo nay dat repeatable QA trong `scripts/qa/`; gia dinh generic ve thu muc test la sai. | Da sua scope review ve `scripts/qa/`. Khong anh huong product hoac test code. | Tiep tuc dung style direct CAP service test hien co cua repo. |
 | Loi test-harness | Mot authorization assertion goi truc tiep service bang `tx.send()` va mong `@requires` o protocol layer reject, nhung in-process dispatch bo qua HTTP authorization path do. | Hinh dang test sai voi service-level authorization annotation; no khong dai dien cho OData request di qua custom-auth middleware. | Da bo assertion gay hieu nham. Service van co `@(requires: 'authenticated-user')`, va auth regression hien co da chung minh protected HTTP/OData behavior. | Giu IDTS-66 tap trung vao action behavior; dung auth HTTP/browser coverage hien co lam evidence authorization protocol. |
 | Loi tooling | Lan tao GitHub PR dau tien fail truoc khi goi GitHub voi parse error JavaScript `Unexpected identifier 'BugService'`. | Markdown backtick trong orchestration template bi hieu thanh dau ket thuc JavaScript template. | Da retry bang PowerShell here-string pipe vao `gh pr create --body-file -`; PR #110 duoc tao thanh cong. Lan fail khong tao trang thai repo/GitHub dang do. | Verify body/check cua PR #110 sau khi push amended status commit. |
+
+## 2026-07-08 - IDTS-66 merge and closure sync
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| PM/Jira closure sync | IDTS-66 implementation and evidence were complete, but PM handover still described PR #110 as awaiting review. | The implementation PR merged after the in-branch handover snapshot was written. | PR #110 was squash-merged into `dev` at `ea0b370`; Jira received closure comment `10426` and transitioned to Done. Updated task board, current status, AI work package, and evidence index to match live state. | Final GitHub `qa-depth-gate` passed; PR merge and Jira Done were verified. Next AI implementation may proceed to IDTS-67 after scope/dependency confirmation. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Dong bo PM/Jira | Implementation va evidence IDTS-66 da hoan tat, nhung PM handover van ghi PR #110 dang cho review. | PR implementation merge sau khi snapshot handover trong branch duoc ghi. | PR #110 da squash-merge vao `dev` tai `ea0b370`; Jira co closure comment `10426` va chuyen Done. Da cap nhat task board, current status, AI work package va evidence index khop live state. | Final GitHub `qa-depth-gate` pass; da verify PR merge va Jira Done. AI implementation tiep theo co the sang IDTS-67 sau khi xac nhan scope/dependency. |

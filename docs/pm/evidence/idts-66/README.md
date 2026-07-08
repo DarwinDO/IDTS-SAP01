@@ -40,4 +40,4 @@ DonHV can attach this README and `api-sample.json` to IDTS-66 after the PR is re
 
 Vietnamese: DonHV có thể tự attach README này và `api-sample.json` lên IDTS-66 khi PR sẵn sàng. Repo giữ bản nguồn; agent không tự upload evidence.
 
-Implementation review: GitHub PR #110 is open and mergeable. Jira comment `10425` links the PR and this evidence index.
+Closure: GitHub PR #110 was squash-merged into `dev` at `ea0b370`. Final `qa-depth-gate` passed, Jira closure comment is `10426`, and IDTS-66 is Done.

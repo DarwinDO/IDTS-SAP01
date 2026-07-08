@@ -53,6 +53,7 @@ Vietnamese: Chi dung board nay de theo doi trang thai cap cao. Chi tiet cong vie
 | IDTS-63 | Define AI scope guardrails and human-review rules | PR #93 merged into `dev`; AI remains suggestion-only, human-reviewed, disabled from owning workflow decisions, and runtime implementation is deferred to Sprint 5 foundation tasks. |
 | IDTS-64 | Add AI provider abstraction and private runtime config | PR #106 merged into `dev` at `6d637df`; backend now has disabled-by-default AI config, safe provider wrapper, deterministic mock provider, sanitized failure/timeout handling, focused QA evidence, and knowledge mirrors. |
 | IDTS-65 | Add read-safe AI suggestion audit model | PR #108 merged into `dev` at `a9c56b4`; backend now has `AiSuggestions`, AI feature/review codelists, backend-owned sanitized audit writer, read-only OData projection, focused QA evidence, and knowledge mirrors. Jira moved to Done. |
+| IDTS-66 | Implement duplicate and similar bug detection with embeddings | PR #110 merged into `dev` at `ea0b370`; backend now exposes authenticated suggestion-only hybrid ranking, safe deterministic fallback, sanitized source-linked audit, and no automatic `DuplicateLinks`. Focused QA passed `30/0`, final `qa-depth-gate` passed, and Jira moved to Done. |
 
 Vietnamese:
 
@@ -102,6 +103,7 @@ Vietnamese:
 | IDTS-63 | Chot AI scope guardrail va human-review rule | PR #93 da merge vao `dev`; AI chi la suggestion, phai co human review, khong duoc tu quyet workflow, va runtime implementation chuyen sang cac task foundation Sprint 5. |
 | IDTS-64 | Them AI provider abstraction va private runtime config | PR #106 da merge vao `dev` tai `6d637df`; backend co AI config mac dinh tat, safe provider wrapper, mock provider deterministic, sanitized failure/timeout handling, focused QA evidence va knowledge mirrors. Jira da chuyen Done. |
 | IDTS-65 | Them AI suggestion audit model read-safe | PR #108 da merge vao `dev` tai `a9c56b4`; backend co `AiSuggestions`, AI feature/review codelists, backend-owned sanitized audit writer, read-only OData projection, focused QA evidence va knowledge mirrors. Jira da chuyen Done. |
+| IDTS-66 | Implement duplicate/similar detection voi embedding | PR #110 da merge vao `dev` tai `ea0b370`; backend expose suggestion-only hybrid ranking co authentication, deterministic fallback an toan, audit da sanitize khi co source bug va khong tu tao `DuplicateLinks`. Focused QA pass `30/0`, final `qa-depth-gate` pass va Jira da chuyen Done. |
 
 ## Ready
 
@@ -130,7 +132,6 @@ Vietnamese:
 | IDTS-58 | Fix Sprint 4 UI defects found after Fiori redesign review | DatDT | Branch `fix/idts-58-sprint-4-ui-defects-datdt` now contains the FE fixes and local browser-smoke evidence. Waiting for Jira evidence comment, push/PR review, and merge before board-level Done. |
 | IDTS-59 | Scan Sprint 4 Fiori screens for usability gaps and edge-case confusion | SangVN | Jira moved to In Progress. Local `dev` UI/UX scan passed for login, profile/sign-out, dashboard, Object Page, comments, attachments, Smart Assign, mobile dashboard, and logout guard. Repo evidence report is in PR #104 after DonHV Jira comment `10415`; Jira follow-up comment `10416` posted. Unauthenticated shared QA route smoke returned HTTP 200, while authenticated shared QA still needs private Render QA credentials/session. |
 | IDTS-45 | Back up and decide migration or upgrade for expiring Render PostgreSQL | DonHV | Moved to In Progress on 2026-07-07. Repo now has a secret-safe backup helper and continuity decision; private backup/restore proof still requires DonHV's private Render DB URL and temporary restore target. |
-| IDTS-66 | Implement duplicate and similar bug detection with embeddings | DonHV | PR #110 is open and mergeable with focused QA `30/0`; the first GitHub `qa-depth-gate` run passed. Jira comment `10425` links the implementation/evidence. Awaiting review/merge and closure sync. |
 
 Vietnamese:
 
@@ -148,7 +149,6 @@ Vietnamese:
 | IDTS-58 | Fix cac loi UI Sprint 4 sau Fiori redesign review | DatDT | Branch `fix/idts-58-sprint-4-ui-defects-datdt` da co FE fixes va browser-smoke evidence local. Cho DatDT cap nhat Jira evidence, push/PR review, va merge truoc khi board-level Done. |
 | IDTS-59 | Scan UI/UX Sprint 4 Fiori de tim usability gap va edge-case confusion | SangVN | Jira da chuyen In Progress. Local `dev` UI/UX scan pass cho login, profile/sign-out, dashboard, Object Page, comments, attachments, Smart Assign, mobile dashboard va logout guard. Repo evidence report nam trong PR #104 sau Jira comment `10415`; da comment follow-up Jira `10416`. Shared QA route smoke khong can login tra HTTP 200, nhung authenticated shared QA van can credential/session Render QA private. |
 | IDTS-45 | Backup va chot migrate/nang cap Render PostgreSQL sap het han | DonHV | Da chuyen In Progress ngay 2026-07-07. Repo da co helper backup an toan va decision continuity; backup/restore proof that van can DonHV dung DB URL Render private va restore target tam thoi. |
-| IDTS-66 | Implement duplicate/similar detection voi embedding | DonHV | PR #110 dang open va mergeable, focused QA `30/0`; lan chay GitHub `qa-depth-gate` dau tien da pass. Jira comment `10425` da link implementation/evidence. Dang cho review/merge va closure sync. |
 
 
 ## Blocked
