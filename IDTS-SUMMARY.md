@@ -46,6 +46,10 @@ Hệ thống **không tập trung vào**:
 
 **Tiếng Việt:** AI là tính năng hỗ trợ tùy chọn. Validation CAP, phân quyền role và hành động rõ ràng của người dùng vẫn là nguồn quyết định cuối. AI lỗi không được chặn workflow IDTS bình thường.
 
+**IDTS-66 runtime clarification:** Duplicate/similar checking is exposed as an authenticated suggestion action. It ranks existing bugs using text, classification context, and embeddings when available; deterministic fallback remains available when AI is disabled or fails. The action never confirms a duplicate or writes `DuplicateLinks` automatically.
+
+**Làm rõ runtime IDTS-66:** Kiểm tra bug trùng/tương tự được expose dưới dạng action gợi ý có yêu cầu đăng nhập. Backend xếp hạng bug hiện có bằng text, classification context và embedding khi dùng được; nếu AI tắt hoặc lỗi thì vẫn có deterministic fallback. Action không tự xác nhận bug trùng và không tự ghi `DuplicateLinks`.
+
 Nói ngắn gọn với mentor:
 
 Hệ thống của nhóm em không phải là nơi sửa lỗi trực tiếp, mà là hệ thống hỗ trợ ghi nhận, phân công, theo dõi và quản lý trạng thái bug trong môi trường SAP.

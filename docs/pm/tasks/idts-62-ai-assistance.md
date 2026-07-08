@@ -43,7 +43,8 @@ Vietnamese: Chỉ IDTS-63 được đưa vào Sprint 4. Phần runtime bắt đ�
 - IDTS-63: Done at repository handoff level. PR #93 was merged into `dev` on 2026-07-07 with `qa-depth-gate` passing.
 - IDTS-64: Done at repository handoff level. PR #106 was merged into `dev` on 2026-07-08 with `qa-depth-gate` passing. Backend AI now has a disabled-by-default provider abstraction, deterministic mock provider, sanitized failure/timeout behavior, private config placeholders, focused programmatic evidence, and knowledge mirrors.
 - IDTS-65: Done at repository and Jira handoff level. PR #108 was merged into `dev` on 2026-07-08 at `a9c56b4` with `qa-depth-gate` passing, Jira comment `10422`, and Jira status Done. Backend AI now has a durable suggestion audit model, read-only OData projection, backend-owned sanitized writer, seed data, focused QA, evidence, and knowledge mirrors.
-- IDTS-66 to IDTS-72: Planned after IDTS-65 foundation; Jira due dates should be realigned when Sprint 5 is created if they remain outside the active Sprint 4 focus.
+- IDTS-66: PR #110 is open and mergeable after focused QA `30/0` and a passing first `qa-depth-gate` run. The implementation exposes an authenticated suggestion-only action, hybrid text/classification/embedding ranking, safe deterministic fallback, source-linked audit, no-auto-link behavior, evidence, and knowledge mirrors. Jira comment `10425` contains the review handoff.
+- IDTS-67 to IDTS-72: Planned after the IDTS-66 feature pass; Jira due dates should be realigned when Sprint 5 is created if they remain outside the active Sprint 4 focus.
 - No runtime AI dependency, API, CDS entity, or UI has been added under IDTS-63.
 
 Vietnamese:
@@ -51,5 +52,6 @@ Vietnamese:
 - IDTS-63: Done ở mức handoff repository. PR #93 đã merge vào `dev` ngày 2026-07-07 và `qa-depth-gate` đã pass.
 - IDTS-64: Done ở mức repository handoff. PR #106 đã merge vào `dev` ngày 2026-07-08 và `qa-depth-gate` đã pass. Backend AI hiện có provider abstraction mặc định tắt, mock provider deterministic, failure/timeout đã sanitize, private config placeholder, evidence programmatic tập trung và knowledge mirrors.
 - IDTS-65: Done ở mức repository và Jira handoff. PR #108 đã merge vào `dev` ngày 2026-07-08 tại `a9c56b4`, `qa-depth-gate` pass, Jira có comment `10422` và status Done. Backend AI hiện có suggestion audit model bền vững, OData projection read-only, backend-owned sanitized writer, seed data, focused QA, evidence và knowledge mirrors.
-- IDTS-66 đến IDTS-72: Làm sau foundation IDTS-65; due date Jira nên realign khi tạo Sprint 5 nếu các task này không thuộc focus active Sprint 4.
+- IDTS-66: PR #110 đang open và mergeable sau focused QA `30/0` và lần chạy `qa-depth-gate` đầu tiên đã pass. Implementation expose action suggestion-only có authentication, hybrid text/classification/embedding ranking, deterministic fallback an toàn, audit khi có source bug, no-auto-link, evidence và knowledge mirrors. Jira comment `10425` có review handoff.
+- IDTS-67 đến IDTS-72: Lên kế hoạch sau feature pass IDTS-66; due date Jira nên realign khi tạo Sprint 5 nếu các task này không thuộc focus active Sprint 4.
 - IDTS-63 không thêm dependency AI runtime, API, CDS entity hoặc UI mới.

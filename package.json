@@ -65,6 +65,7 @@
     "qa:email-brevo-api:integration": "node scripts/qa/test-email-brevo-api-integration.js",
     "qa:idts64:programmatic": "node scripts/qa/test-idts64-ai-provider.js",
     "qa:idts65:programmatic": "node scripts/qa/test-idts65-ai-suggestion-audit.js",
+    "qa:idts66:programmatic": "node scripts/qa/test-idts66-duplicate-detection.js",
     "qa:auth-email:playwright": "node scripts/qa/test-idts38-auth-email-playwright.js",
     "qa:developer-workload:programmatic": "node scripts/qa/test-developer-workload-programmatic.js",
     "qa:direct-assignee:http": "powershell -ExecutionPolicy Bypass -File scripts/qa/test-direct-assignee-draft-save.ps1",

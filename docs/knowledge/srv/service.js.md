@@ -152,6 +152,30 @@ File này là nơi tất cả quy tắc trạng thái IDTS, cập nhật nextPro
 - Documentation style: learning-oriented explanation, not line listing only
 - Last reviewed: 2026-06-22
 
+## IDTS-66 similar-bug handler wiring
+
+### English
+
+The service now registers `this.on('suggestSimilarBugs', ...)` and delegates the work to `srv/ai/duplicate-detection.js`. `service.js` does not contain scoring logic; it remains the wiring layer between the CDS action and the focused AI module.
+
+Important anchor:
+
+- **Location**: `this.on('suggestSimilarBugs', req => suggestSimilarBugs(req, entities))`
+  - **IDTS concept**: authenticated CAP action dispatch.
+  - **Impact if broken**: the action still appears in OData metadata but fails at runtime or bypasses the approved module.
+  - **Must check together**: `srv/service.cds`, `srv/ai/index.js`, `srv/ai/duplicate-detection.js`, and the IDTS-66 programmatic test.
+
+### Vietnamese
+
+Service đăng ký thêm `this.on('suggestSimilarBugs', ...)` và giao toàn bộ xử lý cho `srv/ai/duplicate-detection.js`. `service.js` không chứa logic tính điểm; nó vẫn chỉ là lớp nối giữa CDS action và module AI chuyên trách.
+
+Điểm neo quan trọng:
+
+- **Vị trí**: `this.on('suggestSimilarBugs', req => suggestSimilarBugs(req, entities))`
+  - **Khái niệm IDTS**: điều phối CAP action đã được bảo vệ bởi authenticated service.
+  - **Ảnh hưởng nếu sai**: action vẫn xuất hiện trong OData metadata nhưng lỗi runtime hoặc bỏ qua module đã được duyệt.
+  - **Phải kiểm tra cùng**: `srv/service.cds`, `srv/ai/index.js`, `srv/ai/duplicate-detection.js` và programmatic test IDTS-66.
+
 ## 2026-07-01 update: draft lifecycle authorization
 
 ### English

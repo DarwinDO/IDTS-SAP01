@@ -238,6 +238,8 @@ Các trigger notification:
 * CAP validation, role authorization và workflow hiện tại vẫn là lớp quyết định cuối.
 * AI mặc định tắt; lỗi provider, timeout hoặc output sai không được làm hỏng workflow không dùng AI.
 * Không gửi credential, token, email private, private endpoint, attachment content hoặc dữ liệu không cần thiết cho AI provider.
+* Duplicate/similar detection v1 dùng OData action suggestion-only với hybrid text/classification/embedding scoring và fallback deterministic. Runtime candidate không tự persist vào `DuplicateLinks`; chỉ check gắn với bug đã lưu mới ghi `AiSuggestions` audit row an toàn.
+* Duplicate/similar detection v1 uses a suggestion-only OData action with hybrid text/classification/embedding scoring and deterministic fallback. Runtime candidates are never auto-persisted as `DuplicateLinks`; only a check linked to a persisted source bug writes a safe `AiSuggestions` audit row.
 
 ---
 

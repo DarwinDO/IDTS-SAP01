@@ -970,3 +970,7 @@ Các rule bắt buộc:
 * Chỉ lưu suggestion đã chuẩn hóa và trạng thái review cần cho audit; không lưu raw prompt, raw provider response hoặc hidden reasoning.
 
 **English clarification:** AI remains advisory. Human review and CAP enforcement are mandatory for every AI-assisted feature, and the non-AI workflow must remain available when AI is disabled or fails. Persisted `AiSuggestions` are review/audit records only; clients must not write them directly.
+
+**Duplicate/similar implementation rule:** `suggestSimilarBugs` may return ranked candidates and a suggested relation label, but these values are review hints only. It must exclude the source bug, tolerate disabled/failed/malformed embedding output through deterministic fallback, and must not create `DuplicateLinks` or block create/edit/lifecycle actions. A persisted source-bug check may create a sanitized `AiSuggestions` audit row; a pre-create check must not invent a persisted bug reference.
+
+**Quy tắc triển khai duplicate/similar:** `suggestSimilarBugs` có thể trả danh sách ứng viên đã xếp hạng và nhãn relation gợi ý, nhưng đây chỉ là thông tin hỗ trợ review. Action phải loại bug nguồn, chịu được AI bị tắt/lỗi/embedding sai bằng deterministic fallback, và không được tạo `DuplicateLinks` hoặc chặn create/edit/lifecycle. Check trên bug đã lưu có thể tạo `AiSuggestions` audit row đã sanitize; check trước create không được tạo bug reference giả.

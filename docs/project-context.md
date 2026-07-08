@@ -19,6 +19,8 @@ Vietnamese: IDTS không phải Jira đầy đủ và không phải hệ thống 
 - Persist only normalized safe suggestion/audit data; do not persist raw prompts, raw provider responses, or hidden reasoning.
 - AI suggestions are stored as reviewable `AiSuggestions` audit rows linked to a source bug. The row is evidence for human review, not an autonomous workflow decision.
 - Vietnamese note: AI suggestion duoc luu thanh audit row `AiSuggestions` gan voi bug nguon de con nguoi review, khong phai quyet dinh workflow tu dong.
+- IDTS-66 exposes suggestion-only duplicate/similar candidates through `BugService.suggestSimilarBugs`. It combines text overlap, business classification, and provider embeddings, falls back safely when AI is unavailable, and never writes `DuplicateLinks` automatically. Pre-create checks can run without a persisted bug; source-linked checks write only a safe `AiSuggestions` audit row.
+- Vietnamese note: IDTS-66 expose candidate duplicate/similar theo huong suggestion-only qua `BugService.suggestSimilarBugs`. Backend ket hop text, classification va embedding, fallback an toan khi AI khong san sang, khong tu ghi `DuplicateLinks`; check truoc create khong can bug da persist, con check co source bug chi ghi `AiSuggestions` audit row an toan.
 
 Vietnamese: AI v1 chỉ hỗ trợ tìm bug trùng/tương tự, gợi ý phân loại, tạo bug/handoff summary và giải thích Smart Assign. AI không tự hành động; người dùng phải review và chủ động quyết định. CAP vẫn là lớp validation/phân quyền cuối. AI mặc định tắt, lỗi AI không được làm hỏng workflow bình thường, và dữ liệu gửi provider phải tối thiểu, đã allowlist, không chứa secret, email private, attachment hoặc storage reference.
 
