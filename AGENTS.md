@@ -354,12 +354,58 @@ When `karpathy-guidelines` is applied, report it under Skill/MCP reporting. If i
 
 `karpathy-guidelines` never replaces SAP MCP-first routing, SAP Fiori Guidelines, AI DevKit workflow skills, canonical business documents, or `docs/project-context.md`. It only enforces thinking style: scoped work, explicit assumptions, surgical changes, simplicity, and verification.
 
+## Mandatory Ponytail Simplicity Gate
+
+Treat `.agents/skills/ponytail` as a mandatory simplicity guardrail for this repository.
+
+Use the `ponytail` skill for every nontrivial coding, design, refactor, bug fix, dependency, script, SAP CAP, Fiori Elements, SAPUI5, database, AI feature, deployment, or technical documentation task. The purpose is to force the smallest maintainable solution that actually satisfies the requested scope.
+
+Use `ponytail-review` before recommending or performing a PR merge when the PR changes any of:
+
+- `app/`
+- `srv/`
+- `db/`
+- `scripts/`
+- `package.json`
+- `package-lock.json`
+- deployment/configuration files
+- shared agent/process files such as `AGENTS.md` or `.agents/skills/`
+
+The review must check for unnecessary abstractions, avoidable dependencies, duplicated helpers, speculative configuration, custom UI where SAPUI5/Fiori already provides a supported pattern, and code that can be safely deleted or simplified.
+
+Use `ponytail-audit` for repo-wide overengineering checks when the user asks to audit complexity, reduce bloat, simplify architecture, or prepare cleanup work. Use `ponytail-debt` when collecting deliberate `ponytail:` shortcut comments into a debt ledger.
+
+Ponytail is mandatory, but it is not allowed to weaken stricter project rules. Never use Ponytail to skip or reduce:
+
+- SAP MCP-first routing for CAP, Fiori, and UI5 artifacts.
+- Security, authorization, input validation, privacy, no-secret handling, or audit/history requirements.
+- QA Depth Gate evidence, browser/API tests, role/authorization checks, or persistence/reload checks.
+- Accessibility basics and user-facing UI/UX copy quality.
+- Knowledge mirror updates for changed files under `app/`, `srv/`, or `db/`.
+- Canonical business documentation sync when business meaning changes.
+- User-approved scope or acceptance criteria.
+
+If Ponytail identifies a smaller approach, state the tradeoff clearly. If the smaller approach conflicts with the user's explicit requirement, documented IDTS behavior, SAP-supported patterns, or safety rules, follow the stricter requirement and record why Ponytail was not allowed to reduce that part.
+
+Vietnamese:
+
+Xem `.agents/skills/ponytail` là guardrail bắt buộc để chống overengineering trong repo này.
+
+Phải dùng `ponytail` cho mọi task không tầm thường liên quan code, thiết kế kỹ thuật, refactor, bug fix, dependency, script, SAP CAP, Fiori Elements, SAPUI5, database, AI feature, deployment hoặc tài liệu kỹ thuật. Mục tiêu là chọn giải pháp nhỏ nhất nhưng vẫn đúng scope và maintain được.
+
+Phải dùng `ponytail-review` trước khi đề xuất hoặc thực hiện merge PR nếu PR có thay đổi trong `app/`, `srv/`, `db/`, `scripts/`, `package.json`, `package-lock.json`, file deploy/config, hoặc file process/agent dùng chung như `AGENTS.md` và `.agents/skills/`.
+
+Ponytail là bắt buộc, nhưng không được dùng Ponytail để né hoặc làm yếu các rule nghiêm ngặt hơn như SAP MCP-first routing, security/auth, validation, QA Depth Gate, accessibility, knowledge mirror, canonical docs, hoặc acceptance criteria đã được user duyệt.
+
+Nếu Ponytail đề xuất cách nhỏ hơn, phải nói rõ tradeoff. Nếu cách nhỏ hơn xung đột với yêu cầu user, business rule IDTS, SAP-supported pattern hoặc safety rule, phải theo rule nghiêm ngặt hơn và ghi rõ vì sao không được giảm scope ở phần đó.
+
 ## Local Skill Usage
 
 This repo uses three kinds of agent guidance:
 
 - Repo-local SAP routing skills under `.agents/skills/sap-cap`, `.agents/skills/sap-fiori`, and `.agents/skills/sap-ui5`, inspired by `SAP-samples/cap-agentic-engineered`.
 - Repo-local behavior skill under `.agents/skills/karpathy-guidelines`, adapted from `multica-ai/andrej-karpathy-skills` for this SAP CAP/Fiori project.
+- Repo-local simplicity skills under `.agents/skills/ponytail*`, adapted from `DietrichGebert/ponytail` for IDTS overengineering control.
 - Repo-local BA discovery skill under `.agents/skills/product-discovery`, adapted from `phucnt-bazone-vietnam/product-discovery` for IDTS requirement elicitation.
 - Repo-local BA/DOCX deliverable skill under `.agents/skills/idts-ba-docx-deliverables`, used as the primary coordinator for IDTS SAP490 hybrid BRD/SRS/FRS Markdown deliverables and template-filled DOCX/XLSX/PPTX artifacts.
 - Repo-local learning skill under `.agents/skills/learning-recap`, used as an optional mentor mode after nontrivial work so the user understands what changed, why it changed, and how it affects IDTS.
