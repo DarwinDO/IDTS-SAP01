@@ -243,6 +243,9 @@ environment variables, private credentials, and real recipient lists.
 - [x] DonHV runs private backup with the real Render database URL.
 - [ ] Backup artifact is stored in approved private storage.
 - [x] Restore proof succeeds on a temporary PostgreSQL target.
+- [x] Temporary external PostgreSQL IP allow rule is removed after proof.
+- [x] Shared QA login and authenticated OData smoke pass after external access cleanup.
+- [ ] Compromised Render PostgreSQL credential is rotated and the Blueprint-managed service is redeployed/smoked.
 - [ ] Upgrade or migration decision is executed before 2026-07-24.
 
 ## Vietnamese

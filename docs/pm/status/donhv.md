@@ -1497,3 +1497,21 @@ Vietnamese:
 | Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
 | --- | --- | --- | --- | --- |
 | Loi security/process | Render external database URL co credential da duoc paste vao Codex chat. | Private infrastructure credential duoc share qua conversation thay vi chi nhap trong local private terminal. | Da xoa Process/User/Machine env sau proof. Credential phai duoc xem la da lo. | DonHV phai rotate Render PostgreSQL credential tren Dashboard, update service binding/env neu can, redeploy va rerun auth/OData smoke. Khong lap lai old credential trong Jira/docs. |
+
+## 2026-07-08 - IDTS-45 external access cleanup and smoke
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Security cleanup | Temporary external PostgreSQL allow rule `118.70.100.54/32` remained after the backup proof. | External access was temporarily enabled for DonHV's local backup connection. | Removed with Render CLI `--clear-ip-allow-list`; fresh Render `postgres get` reports an empty allow list and database status available. | Keep external DB access disabled until another explicitly approved maintenance window. |
+| Post-cleanup smoke | Shared QA remained operational after external DB access was disabled. | The Render web service uses internal Blueprint-managed `fromDatabase` credentials, so local external access is not required for runtime. | PASS: Auth metadata 200, anonymous BugService OData 401, valid login token received, authenticated OData 200, login route final status 200. | Rotate the compromised database credential through Render-managed credentials, sync Blueprint, redeploy, then rerun this smoke. |
+| Test-harness issue | Initial PowerShell login-page check returned a 308 error and left the status variable blank while the overall command continued. | `Invoke-WebRequest` in this Windows PowerShell environment did not follow the permanent redirect from the legacy login path. | Fixed in-session by checking redirect headers and rerunning with `curl -L`; final URL `/idts.bugmanagementui/login.html` returned 200. Not a product defect. | Future public smoke should follow redirects or target the canonical login route. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Security cleanup | Temporary external PostgreSQL allow rule `118.70.100.54/32` van con sau backup proof. | External access duoc bat tam de may DonHV backup local. | Da remove bang Render CLI `--clear-ip-allow-list`; fresh `postgres get` bao allow list rong va database available. | Giu external DB access tat cho toi maintenance window duoc approve tiep theo. |
+| Post-cleanup smoke | Shared QA van hoat dong sau khi tat external DB access. | Render web service dung internal Blueprint-managed `fromDatabase` credentials, nen runtime khong can local external access. | PASS: Auth metadata 200, anonymous BugService OData 401, valid login token received, authenticated OData 200, login route final status 200. | Rotate compromised DB credential bang Render-managed credential, sync Blueprint, redeploy va rerun smoke nay. |
+| Loi test-harness | PowerShell login-page check dau tra 308 va de status variable rong trong khi command tong van tiep tuc. | `Invoke-WebRequest` trong Windows PowerShell nay khong follow permanent redirect tu legacy login path. | Da fix trong phien bang cach doc redirect header va rerun voi `curl -L`; final URL `/idts.bugmanagementui/login.html` tra 200. Khong phai product defect. | Public smoke sau nay phai follow redirect hoac dung canonical login route. |
