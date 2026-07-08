@@ -28,6 +28,23 @@ service BugService @(requires: 'authenticated-user') {
     requiresReview   : Boolean;
   };
 
+  type BugHandoffSummaryResult {
+    bugID                 : UUID;
+    bugNumber             : String(30);
+    generatedAt           : Timestamp;
+    label                 : String(120);
+    summary               : LargeString;
+    currentStatus         : String(120);
+    currentActionOwner    : String(120);
+    missingInformation    : LargeString;
+    latestImportantEvents : LargeString;
+    nextExpectedAction    : LargeString;
+    groundingStatus       : String(40);
+    providerStatus        : String(40);
+    confidence            : Decimal(5,4);
+    requiresReview        : Boolean;
+  };
+
   action suggestSimilarBugs(
     sourceBugID            : UUID,
     title                  : String(255),
@@ -54,6 +71,10 @@ service BugService @(requires: 'authenticated-user') {
     priorityCode           : String(40),
     severityCode           : String(40)
   ) returns array of ClassificationSuggestionCandidate;
+
+  action summarizeBugHandoff(
+    sourceBugID            : UUID
+  ) returns BugHandoffSummaryResult;
 
   entity Bugs as projection on db.Bugs {
     *,

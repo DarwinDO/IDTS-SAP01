@@ -11,6 +11,10 @@ const {
   suggestClassification,
   buildClassificationSuggestions
 } = require('./classification-suggestion')
+const {
+  summarizeBugHandoff,
+  buildBugHandoffSummary
+} = require('./bug-summary')
 const { redactSensitiveText, sanitizeErrorSummary } = require('./safety')
 
 module.exports = {
@@ -24,5 +28,7 @@ module.exports = {
   suggestSimilarBugs,
   rankSimilarBugCandidates,
   suggestClassification,
-  buildClassificationSuggestions
+  buildClassificationSuggestions,
+  summarizeBugHandoff,
+  buildBugHandoffSummary
 }
