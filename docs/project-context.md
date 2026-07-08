@@ -17,6 +17,8 @@ Vietnamese: IDTS không phải Jira đầy đủ và không phải hệ thống 
 - AI is disabled by default, and provider failure cannot break the normal bug workflow.
 - Provider payloads use minimum allowlisted data. Credentials, tokens, private email/endpoint data, attachments, and storage references are forbidden in v1.
 - Persist only normalized safe suggestion/audit data; do not persist raw prompts, raw provider responses, or hidden reasoning.
+- AI suggestions are stored as reviewable `AiSuggestions` audit rows linked to a source bug. The row is evidence for human review, not an autonomous workflow decision.
+- Vietnamese note: AI suggestion duoc luu thanh audit row `AiSuggestions` gan voi bug nguon de con nguoi review, khong phai quyet dinh workflow tu dong.
 
 Vietnamese: AI v1 chỉ hỗ trợ tìm bug trùng/tương tự, gợi ý phân loại, tạo bug/handoff summary và giải thích Smart Assign. AI không tự hành động; người dùng phải review và chủ động quyết định. CAP vẫn là lớp validation/phân quyền cuối. AI mặc định tắt, lỗi AI không được làm hỏng workflow bình thường, và dữ liệu gửi provider phải tối thiểu, đã allowlist, không chứa secret, email private, attachment hoặc storage reference.
 
@@ -81,6 +83,7 @@ Expected domain entities:
 - `HistoryLogs`
 - `Notifications`
 - `NotificationDeliveries`
+- `AiSuggestions`
 
 Potential support entities:
 
@@ -105,6 +108,8 @@ Key baseline decisions:
 - Bugs should have a human-readable `bugNumber` in addition to UUID.
 - SAP Module remains optional context and optional assignment filter, not a mandatory field for every bug. For pure IDTS bugs, leave it empty instead of using a pseudo-value such as `Not Applicable`.
 - Duplicate checking stores confirmed Duplicate/Similar/Related links in `DuplicateLinks`; runtime candidates are not persisted in MVP.
+- AI suggestion audit stores safe, normalized `AiSuggestions` rows linked to a source bug. It does not store raw prompts, raw provider responses, attachment content, credentials, or hidden reasoning.
+- Vietnamese note: AI suggestion audit chi luu cac dong `AiSuggestions` da chuan hoa va an toan, gan voi bug nguon. Khong luu raw prompt, raw provider response, attachment content, credential hoac hidden reasoning.
 
 Vietnamese:
 

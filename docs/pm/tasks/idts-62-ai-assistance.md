@@ -42,7 +42,8 @@ Vietnamese: Chỉ IDTS-63 được đưa vào Sprint 4. Phần runtime bắt đ�
 
 - IDTS-63: Done at repository handoff level. PR #93 was merged into `dev` on 2026-07-07 with `qa-depth-gate` passing.
 - IDTS-64: Done at repository handoff level. PR #106 was merged into `dev` on 2026-07-08 with `qa-depth-gate` passing. Backend AI now has a disabled-by-default provider abstraction, deterministic mock provider, sanitized failure/timeout behavior, private config placeholders, focused programmatic evidence, and knowledge mirrors.
-- IDTS-65 to IDTS-72: Planned after IDTS-64 foundation; Jira due dates should be realigned when Sprint 5 is created if they remain outside the active Sprint 4 focus.
+- IDTS-65: In implementation on `feature/idts-65-ai-suggestion-audit-donhv`. The model, read-only service projection, backend-owned writer, seed data, focused QA script, and evidence have been added locally; PR/merge/Jira closure remain next.
+- IDTS-66 to IDTS-72: Planned after IDTS-65 is accepted; Jira due dates should be realigned when Sprint 5 is created if they remain outside the active Sprint 4 focus.
 - No runtime AI dependency, API, CDS entity, or UI has been added under IDTS-63.
 
 Vietnamese:

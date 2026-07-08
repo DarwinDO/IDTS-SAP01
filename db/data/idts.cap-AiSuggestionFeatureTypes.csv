@@ -1,0 +1,5 @@
+code,name,descr,sortOrder,active,criticality
+DUPLICATE_DETECTION,Duplicate Detection,AI suggestion for possible duplicate or similar bug records,10,true,1
+CLASSIFICATION,Classification Suggestion,AI suggestion for SAP module component category priority or severity classification,20,true,1
+BUG_SUMMARY,Bug Summary,AI-generated summary or handoff summary for a bug,30,true,0
+ASSIGNMENT_EXPLANATION,Smart Assignment Explanation,AI explanation for why a developer may be suitable for assignment,40,true,1

@@ -1561,3 +1561,23 @@ Vietnamese:
 | Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
 | --- | --- | --- | --- | --- |
 | Dong bo PM/Jira | PR implementation IDTS-64 da merge, nhung PM handover van can chuyen tu implementation-started sang merged/done. | PR #106 merge sau khi PM update dau tien da ghi trang thai In Progress. | Da cap nhat task board, current status va AI work package de ghi IDTS-64 da merge vao `dev` tai `6d637df`. Jira IDTS-64 da chuyen In Progress va co comment `10420` kem PR/evidence; buoc tiep theo la transition Done sau khi closure sync nay len dev. | PR #106 `qa-depth-gate` pass; merge da verify tren GitHub. Bat dau IDTS-65 tu fresh `origin/dev` sau closure sync. |
+
+## 2026-07-08 - IDTS-65 AI suggestion audit implementation
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Backend implementation | DonHV started `IDTS-65` after `IDTS-64` was merged and closed. | The approved AI features need a durable review/audit trail before feature-specific AI suggestions can be implemented. | Added `AiSuggestions`, AI feature/review codelists, backend-owned writer `srv/ai/audit.js`, read-only `BugService.AiSuggestions`, seed data, focused QA, evidence, canonical notes, and knowledge mirrors. | Focused verification passed: `npm run qa:idts65:programmatic` = `19 PASS / 0 FAIL`. Continue with CAP compile, secret scan, AI DevKit lint, `git diff --check`, PR, and Jira evidence. |
+| Environment setup issue | First IDTS-65 focused test failed with `Cannot find module '@sap/cds'`. | Fresh worktree did not have `node_modules` installed. | Ran `npm ci --include=dev` in the IDTS-65 worktree. Not a product defect. | Rerun focused test passed. |
+| Security/dependency follow-up | `npm ci --include=dev` reported 14 audit findings. | Existing dependency baseline still has audit findings; IDTS-65 did not add a new npm package. | Recorded as not introduced by IDTS-65. | Keep tracking under dependency/security follow-up rather than this AI audit task. |
+| Test-harness issue | First read-only write check used direct service CQN insert and did not trigger the same guard path as the existing service write tests. | The test shape was wrong for the intended public service write contract. | Changed the test to use `tx.create(service.entities.AiSuggestions)`, matching the existing `NotificationDeliveries` read-only guard test style. | Rerun focused test passed and confirmed client-style write is rejected. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Backend implementation | DonHV bat dau `IDTS-65` sau khi `IDTS-64` da merge va dong. | Cac feature AI da duyet can audit/review trail ben vung truoc khi implement suggestion cu the. | Da them `AiSuggestions`, codelist AI feature/review, backend-owned writer `srv/ai/audit.js`, `BugService.AiSuggestions` read-only, seed data, focused QA, evidence, canonical notes va knowledge mirrors. | Focused verification pass: `npm run qa:idts65:programmatic` = `19 PASS / 0 FAIL`. Tiep theo chay CAP compile, secret scan, AI DevKit lint, `git diff --check`, PR va Jira evidence. |
+| Loi setup moi truong | Lan chay focused test IDTS-65 dau tien fail `Cannot find module '@sap/cds'`. | Fresh worktree chua co `node_modules`. | Da chay `npm ci --include=dev` trong worktree IDTS-65. Khong phai product defect. | Rerun focused test da pass. |
+| Theo doi security/dependency | `npm ci --include=dev` bao 14 audit findings. | Dependency baseline hien tai van co audit findings; IDTS-65 khong them npm package moi. | Ghi nhan la khong phai do IDTS-65 tao ra. | Tiep tuc track trong dependency/security follow-up, khong nam trong task AI audit nay. |
+| Loi test-harness | Check read-only write dau tien dung direct service CQN insert va khong di qua guard path giong test write service hien co. | Hinh dang test chua dung voi public service write contract can verify. | Doi test sang `tx.create(service.entities.AiSuggestions)`, giong style test read-only guard cua `NotificationDeliveries`. | Rerun focused test pass va xac nhan client-style write bi reject. |

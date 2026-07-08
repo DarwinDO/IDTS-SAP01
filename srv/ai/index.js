@@ -1,13 +1,16 @@
 'use strict'
 
 const { getAiConfig, normalizeAiConfig } = require('./config')
+const { createAiSuggestion, serializeSuggestionPayload } = require('./audit')
 const { createAiProvider } = require('./provider')
 const { redactSensitiveText, sanitizeErrorSummary } = require('./safety')
 
 module.exports = {
+  createAiSuggestion,
   createAiProvider,
   getAiConfig,
   normalizeAiConfig,
   redactSensitiveText,
+  serializeSuggestionPayload,
   sanitizeErrorSummary
 }
