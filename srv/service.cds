@@ -1,6 +1,33 @@
 using idts.cap as db from '../db/schema';
 
 service BugService @(requires: 'authenticated-user') {
+  type SimilarBugCandidate {
+    rank             : Integer;
+    bugID            : UUID;
+    bugNumber        : String(30);
+    title            : String(255);
+    statusCode       : String(40);
+    statusName       : String(120);
+    score            : Decimal(5,4);
+    suggestedRelationTypeCode : String(40);
+    reason           : String(500);
+    providerStatus   : String(40);
+    embeddingUsed    : Boolean;
+  };
+
+  action suggestSimilarBugs(
+    sourceBugID            : UUID,
+    title                  : String(255),
+    description            : LargeString,
+    statusCode             : String(40),
+    sapModuleID            : UUID,
+    applicationComponentID : UUID,
+    defectCategoryID       : UUID,
+    componentCategoryID    : UUID,
+    limit                  : Integer,
+    minScore               : Decimal(5,4)
+  ) returns array of SimilarBugCandidate;
+
   entity Bugs as projection on db.Bugs {
     *,
     (dueDate != null and dueDate < date($now) and status.code != 'CLOSED' ? true : false) as isOverdue : Boolean,

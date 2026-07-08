@@ -3,6 +3,10 @@
 const { getAiConfig, normalizeAiConfig } = require('./config')
 const { createAiSuggestion, serializeSuggestionPayload } = require('./audit')
 const { createAiProvider } = require('./provider')
+const {
+  suggestSimilarBugs,
+  rankSimilarBugCandidates
+} = require('./duplicate-detection')
 const { redactSensitiveText, sanitizeErrorSummary } = require('./safety')
 
 module.exports = {
@@ -12,5 +16,7 @@ module.exports = {
   normalizeAiConfig,
   redactSensitiveText,
   serializeSuggestionPayload,
-  sanitizeErrorSummary
+  sanitizeErrorSummary,
+  suggestSimilarBugs,
+  rankSimilarBugCandidates
 }

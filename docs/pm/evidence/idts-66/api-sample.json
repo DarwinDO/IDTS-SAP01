@@ -1,0 +1,22 @@
+{
+  "scenario": "similar persisted source bug",
+  "topCandidate": {
+    "rank": 1,
+    "bugID": "91000000-0000-0000-0000-000000000002",
+    "bugNumber": "BUG-AI-002",
+    "title": "Payment approval button stays disabled after invoice submission",
+    "statusCode": "PENDING_ASSIGNMENT",
+    "statusName": "Pending Assignment",
+    "score": "0.7921",
+    "suggestedRelationTypeCode": "DUPLICATE",
+    "reason": "Very similar title; similar description; same application component, defect category, component/category combination. This is a suggestion for human review.",
+    "providerStatus": "SUCCESS",
+    "embeddingUsed": true
+  },
+  "noResultScenario": {
+    "candidateCount": 0
+  },
+  "workflowSideEffect": {
+    "duplicateLinksCreated": 0
+  }
+}

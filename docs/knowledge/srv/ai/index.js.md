@@ -91,3 +91,13 @@ const { createAiProvider, createAiSuggestion } = require('../ai')
 ```
 
 Điểm quan trọng vẫn là tách trách nhiệm. `createAiProvider` gọi AI seam, còn `createAiSuggestion` lưu audit row của suggestion đã an toàn. File này chỉ expose helper; nó không quyết định khi nào AI chạy hoặc suggestion nào được accept.
+
+## IDTS-66 Duplicate Detection Export Update
+
+### English
+
+IDTS-66 additionally exports `suggestSimilarBugs` for the CAP service handler and `rankSimilarBugCandidates` for focused backend verification. The implementation remains in `srv/ai/duplicate-detection.js`; this index only provides the stable import boundary used by `srv/service.js` and QA code.
+
+### Vietnamese
+
+IDTS-66 export thêm `suggestSimilarBugs` cho CAP service handler và `rankSimilarBugCandidates` cho focused backend verification. Phần triển khai vẫn nằm trong `srv/ai/duplicate-detection.js`; index này chỉ cung cấp import boundary ổn định cho `srv/service.js` và mã QA.

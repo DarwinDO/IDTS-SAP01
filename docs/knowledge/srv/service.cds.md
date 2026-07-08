@@ -215,6 +215,34 @@ Important anchor:
 - Contract login that khong nam trong file nay. No nam trong `srv/auth.cds` voi `AuthService.login`, `AuthService.logout`, va `AuthService.me`.
 - Cach tach nay la co chu y: `BugService` van tap trung vao defect tracking OData service, con `AuthService` la boundary nho cho authentication.
 
+## IDTS-66 similar-bug action update
+
+### English
+
+`SimilarBugCandidate` and the unbound `suggestSimilarBugs` action form the public OData contract for duplicate/similar suggestions. “Unbound” means the client can call the action before a Bug row exists by sending title, description, status, and classification values. It may also send `sourceBugID` when checking an existing bug.
+
+The action returns rank, bug identity, status, score, suggested relation label, readable reason, provider status, and whether an embedding was used. It does not expose vectors, prompts, provider responses, or credentials. It also does not create `DuplicateLinks`; only a later explicit human confirmation flow may do that.
+
+Important anchor:
+
+- **Location**: `type SimilarBugCandidate` and `action suggestSimilarBugs(...)`
+  - **IDTS concept**: suggestion-only duplicate review contract.
+  - **Impact if broken**: the future Fiori review UI cannot safely call or interpret the backend result.
+  - **Must check together**: `srv/ai/duplicate-detection.js`, `srv/service.js`, IDTS-66 QA, and future IDTS-70 UI integration.
+
+### Vietnamese
+
+`SimilarBugCandidate` và unbound action `suggestSimilarBugs` tạo thành OData contract công khai cho gợi ý bug trùng/tương tự. “Unbound” nghĩa là client có thể gọi action trước khi có Bug row bằng cách gửi title, description, status và classification. Khi kiểm tra bug đã tồn tại, client có thể gửi thêm `sourceBugID`.
+
+Action trả rank, định danh bug, status, score, nhãn relation gợi ý, lý do dễ đọc, provider status và thông tin embedding có được dùng hay không. Action không expose vector, prompt, provider response hoặc credential. Nó cũng không tạo `DuplicateLinks`; chỉ flow xác nhận rõ ràng của con người trong task sau mới được làm việc đó.
+
+Điểm neo quan trọng:
+
+- **Vị trí**: `type SimilarBugCandidate` và `action suggestSimilarBugs(...)`
+  - **Khái niệm IDTS**: contract review duplicate theo hướng suggestion-only.
+  - **Ảnh hưởng nếu sai**: Fiori review UI sau này không thể gọi hoặc hiểu kết quả backend một cách an toàn.
+  - **Phải kiểm tra cùng**: `srv/ai/duplicate-detection.js`, `srv/service.js`, QA IDTS-66 và UI integration IDTS-70 sau này.
+
 Anchor quan trong:
 
 - **Vi tri**: `srv/service.cds`, `entity Users as projection on db.Users { ... }`
