@@ -2,6 +2,13 @@
 
 Date: 2026-07-09
 
+Repository status:
+
+- PR: https://github.com/DarwinDO/IDTS-SAP01/pull/115
+- Merge commit: `d5e4297`
+- GitHub check: `qa-depth-gate` passed.
+- Jira evidence comment: `IDTS-68` comment `10431`.
+
 ## Scope
 
 IDTS-68 adds a backend-only AI suggestion action for grounded bug and handoff summaries:
