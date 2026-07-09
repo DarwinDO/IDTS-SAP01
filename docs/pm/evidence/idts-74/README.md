@@ -7,6 +7,9 @@
 - `idts74_duplicate_review_dialog.png` shows the real SAPUI5 dialog with a visible similar-bug candidate, match score, reason, and manual-review guidance.
 - `idts74_duplicate_review_empty_state.png` shows the readable no-result state.
 - `idts74_duplicate_review_safe_failure.png` shows the generic failure message without backend/provider diagnostics.
+- `render-ai-smoke.json` records 25 passing authenticated API checks on the deployed Render commit.
+- `render-duplicate-review-browser-smoke.json` records the read-only shared-QA UI checks and exact Render deploy.
+- `render-duplicate-review-dialog.png` shows the deployed dialog on shared QA.
 - The browser fixture is temporary and is deleted after the run. No password, bearer token, provider credential, private endpoint, or personal email is stored in these artifacts.
 
 Run:
@@ -30,4 +33,7 @@ npm run qa:idts74:browser
 - `idts74_duplicate_review_dialog.png` cho thay dialog SAPUI5 that co candidate tuong tu, match score, reason, va huong dan user tu review.
 - `idts74_duplicate_review_empty_state.png` cho thay no-result state de doc.
 - `idts74_duplicate_review_safe_failure.png` cho thay thong bao loi generic, khong lo diagnostic backend/provider.
+- `render-ai-smoke.json` ghi 25 API check co authentication da pass tren commit deploy Render.
+- `render-duplicate-review-browser-smoke.json` ghi cac check UI read-only tren shared QA va dung Render deploy.
+- `render-duplicate-review-dialog.png` cho thay dialog da deploy tren shared QA.
 - Browser fixture chi ton tai tam thoi va duoc xoa sau khi test. Artifact khong luu password, bearer token, provider credential, private endpoint, hoac email ca nhan.

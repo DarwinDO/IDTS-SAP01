@@ -1,0 +1,43 @@
+{
+  "task": "IDTS-74",
+  "checkedAt": "2026-07-09T12:38:21.5320419Z",
+  "target": "Render shared QA",
+  "deploy": {
+    "id": "dep-d97p0sq8qa3s73f4tagg",
+    "commit": "d5e95491702d7a03992b6591e45874d4a42a08be",
+    "status": "live"
+  },
+  "checks": [
+    {
+      "name": "Private QA login succeeds",
+      "passed": true
+    },
+    {
+      "name": "Object Page exposes Find Similar Bugs",
+      "passed": true
+    },
+    {
+      "name": "Similar Bugs dialog opens",
+      "passed": true
+    },
+    {
+      "name": "Dialog displays a candidate with status, match score, relation, and reason",
+      "passed": true
+    },
+    {
+      "name": "Dialog states that the user must review and choose manually",
+      "passed": true
+    },
+    {
+      "name": "Smoke performs no Save, Assign, status transition, or duplicate-link action",
+      "passed": true
+    }
+  ],
+  "knownNonBlockingConsoleBaseline": [
+    "Component-preload.js is not generated in the current Render startup path",
+    "Locale-specific i18n fallback file is absent",
+    "LRep flexibility endpoints are unavailable outside an SAP launchpad",
+    "Existing UI5 dependency deprecation warning"
+  ],
+  "secretsStored": false
+}

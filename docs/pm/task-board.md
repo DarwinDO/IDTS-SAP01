@@ -133,7 +133,7 @@ Vietnamese:
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
-| IDTS-74 | Add duplicate and similar bug AI review panel | DonHV | Implemented on branch `feature/idts-74-duplicate-ai-review-panel-donhv`. Local static QA passed 133 checks and browser smoke captured the real Similar Bugs dialog with a candidate and safe review-only copy; PR is pending. |
+| IDTS-74 | Add duplicate and similar bug AI review panel | DonHV | Done. PR #130 squash-merged into `dev` at `d5e9549`; Render deploy `dep-d97p0sq8qa3s73f4tagg` is `live`; local static QA passed 133 checks, local browser smoke passed 6/6, authenticated Render AI smoke passed 25/25, and shared-QA browser evidence shows the deployed Similar Bugs dialog with a candidate and safe review-only copy. |
 | IDTS-68 | Backend grounded bug/handoff summary | SangVN / DonHV support | Done at repository handoff level. PR #115 merged into `dev` at `d5e4297`; focused QA passed `28/0`, AI regression IDTS-64 to IDTS-68 passed, and Jira evidence comment is `10431`. Jira closure transition is handled after this closure sync. |
 | IDTS-57 | Browser regression and SAP Fiori UX review for redesigned screens | NhanT | PR #77 merged the first Playwright browser UX regression harness into `dev`, but the task remains open because the merged coverage is PM-focused. Final role-matrix and broader manual/browser regression should continue through IDTS-60 and the remaining IDTS-57 pass. |
 | SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP, and real browser QA are stable enough to prove the happy flow. Remaining work is final SAP490 sync and mentor-demo rerun, not FE/blocking workflow repair. |
@@ -143,13 +143,13 @@ Vietnamese:
 | IDTS-59 | Scan Sprint 4 Fiori screens for usability gaps and edge-case confusion | SangVN | Jira moved to In Progress. Local `dev` UI/UX scan passed for login, profile/sign-out, dashboard, Object Page, comments, attachments, Smart Assign, mobile dashboard, and logout guard. Repo evidence report is in PR #104 after DonHV Jira comment `10415`; Jira follow-up comment `10416` posted. Unauthenticated shared QA route smoke returned HTTP 200, while authenticated shared QA still needs private Render QA credentials/session. |
 | IDTS-45 | Back up and decide migration or upgrade for expiring Render PostgreSQL | DonHV | Moved to In Progress on 2026-07-07. Repo now has a secret-safe backup helper and continuity decision; private backup/restore proof still requires DonHV's private Render DB URL and temporary restore target. |
 | IDTS-73 | Support pending attachments during Create Bug and hide Comments on create | DonHV | Done. PR #123 merged into `dev` at `2f600d4`, Render shared QA deployed the commit, API smoke passed, and browser smoke confirmed Comments hidden plus pending Evidence/Attachments selection enabled on Create Bug. |
-| IDTS-72 | Final QA acceptance for AI assistance and failure modes | NhanT / DonHV support | Reopened for visual evidence gap after DonHV review. Fresh local acceptance passed 6/6, and Smart Assign has product UI browser evidence. New visual audit evidence is under `docs/pm/evidence/idts-72/visual-ai-flows/`, showing duplicate detection, classification suggestion, and handoff summary are backend/API verified but not yet exposed as standalone product UI panels. Follow-up UI tasks `IDTS-74`, `IDTS-75`, and `IDTS-76` are now created and linked as blockers. Pending team decision: accept API-level evidence for those three flows or complete the follow-up UI panels before closure. |
+| IDTS-72 | Final QA acceptance for AI assistance and failure modes | NhanT / DonHV support | Reopened for visual evidence gap after DonHV review. Fresh local acceptance passed 6/6, Smart Assign has product UI browser evidence, and IDTS-74 now adds deployed duplicate/similar review evidence. Classification suggestion and handoff summary still need standalone product UI panels through `IDTS-75` and `IDTS-76`, unless the team explicitly accepts API-level evidence for those two flows. |
 
 Vietnamese:
 
 | ID | Cong viec | Thanh vien chinh | Ghi chu |
 | --- | --- | --- | --- |
-| IDTS-74 | Them panel review AI duplicate va similar bug | DonHV | Da implement tren branch `feature/idts-74-duplicate-ai-review-panel-donhv`. Static QA local pass 133 checks va browser smoke da chup dialog Similar Bugs that co candidate cung copy review-only an toan; PR con pending. |
+| IDTS-74 | Them panel review AI duplicate va similar bug | DonHV | Done. PR #130 da squash-merge vao `dev` tai `d5e9549`; Render deploy `dep-d97p0sq8qa3s73f4tagg` da `live`; static QA local pass 133 check, browser local pass 6/6, authenticated Render AI smoke pass 25/25, va shared-QA browser evidence cho thay dialog Similar Bugs da deploy voi candidate cung copy review-only an toan. |
 | IDTS-57 | Browser regression va SAP Fiori UX review cho cac man hinh da redesign | NhanT | PR #77 da merge browser QA harness dau tien vao `dev`, nhung task van chua dong vi coverage hien tap trung PM. Can tiep tuc role matrix Tester/Developer/PM va manual/browser regression qua IDTS-60 va phan IDTS-57 con lai. |
 | IDTS-50 | Cai thien email notification va sua deep link | DonHV | Sua email Gmail dang tho va link Fiori bi hong tu shared-QA email. Jira dang In Progress; branch implementation la `fix/idts-50-email-link-template-donhv`. |
 | SP2 | Sprint 02 Mentor Feedback va Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP va browser QA that da du on de chung minh happy flow. Phan con lai la sync SAP490 va rerun mentor demo. |
@@ -163,20 +163,20 @@ Vietnamese:
 | IDTS-59 | Scan UI/UX Sprint 4 Fiori de tim usability gap va edge-case confusion | SangVN | Jira da chuyen In Progress. Local `dev` UI/UX scan pass cho login, profile/sign-out, dashboard, Object Page, comments, attachments, Smart Assign, mobile dashboard va logout guard. Repo evidence report nam trong PR #104 sau Jira comment `10415`; da comment follow-up Jira `10416`. Shared QA route smoke khong can login tra HTTP 200, nhung authenticated shared QA van can credential/session Render QA private. |
 | IDTS-45 | Backup va chot migrate/nang cap Render PostgreSQL sap het han | DonHV | Da chuyen In Progress ngay 2026-07-07. Repo da co helper backup an toan va decision continuity; backup/restore proof that van can DonHV dung DB URL Render private va restore target tam thoi. |
 | IDTS-73 | Ho tro chon attachment khi Create Bug va an Comments khi create | DonHV | Done. PR #123 da merge vao `dev` tai `2f600d4`, Render shared QA da deploy commit nay, API smoke pass, va browser smoke xac nhan Comments da an cung nhu Evidence/Attachments co the chon file pending tren Create Bug. |
-| IDTS-72 | QA acceptance cuoi cho AI assistance va failure mode | NhanT / DonHV ho tro | Da reopen de bo sung visual evidence gap sau review cua DonHV. Fresh local acceptance pass 6/6 va Smart Assign co evidence UI san pham. Evidence audit moi nam trong `docs/pm/evidence/idts-72/visual-ai-flows/`, chi ro duplicate detection, classification suggestion va handoff summary da verify bang backend/API nhung chua co panel UI san pham rieng. Cac task UI follow-up `IDTS-74`, `IDTS-75`, va `IDTS-76` da duoc tao va link la blocker. Con cho team quyet dinh: chap nhan API-level evidence cho ba luong nay hay hoan tat cac UI panel follow-up truoc khi dong. |
+| IDTS-72 | QA acceptance cuoi cho AI assistance va failure mode | NhanT / DonHV ho tro | Da reopen de bo sung visual evidence gap sau review cua DonHV. Fresh local acceptance pass 6/6, Smart Assign co evidence UI san pham, va IDTS-74 da bo sung evidence duplicate/similar review tren ban deploy. Classification suggestion va handoff summary van can panel UI rieng qua `IDTS-75` va `IDTS-76`, tru khi team chap nhan ro rang API-level evidence cho hai luong nay. |
 
 
 ## Blocked
 
 | ID | Task | Blocker | Required decision |
 | --- | --- | --- | --- |
-| IDTS-72 | Full visual AI acceptance | Duplicate/similar detection, classification suggestion, and handoff summary are backend/API verified but not yet exposed as product UI panels. | Complete `IDTS-74`, `IDTS-75`, and `IDTS-76`, or explicitly accept API-level evidence for these three flows before closing IDTS-72. |
+| IDTS-72 | Full visual AI acceptance | Duplicate/similar review is now deployed through IDTS-74; classification suggestion and handoff summary remain backend/API verified without standalone product UI panels. | Complete `IDTS-75` and `IDTS-76`, or explicitly accept API-level evidence for those two flows before closing IDTS-72. |
 
 Vietnamese:
 
 | ID | Cong viec | Blocker | Quyet dinh can co |
 | --- | --- | --- | --- |
-| IDTS-72 | Acceptance AI visual day du | Duplicate/similar detection, classification suggestion va handoff summary da verify bang backend/API nhung chua expose thanh panel UI san pham. | Hoan tat `IDTS-74`, `IDTS-75`, va `IDTS-76`, hoac quyet dinh ro rang rang API-level evidence la du cho ba luong nay truoc khi dong IDTS-72. |
+| IDTS-72 | Acceptance AI visual day du | Duplicate/similar review da deploy qua IDTS-74; classification suggestion va handoff summary van moi verify bang backend/API, chua co panel UI rieng. | Hoan tat `IDTS-75` va `IDTS-76`, hoac chap nhan ro rang API-level evidence cho hai luong nay truoc khi dong IDTS-72. |
 
 ## Update Rules
 
