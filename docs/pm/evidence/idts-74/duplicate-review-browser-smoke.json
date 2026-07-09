@@ -1,0 +1,31 @@
+{
+  "task": "IDTS-74",
+  "checkedAt": "2026-07-09T12:06:28.267Z",
+  "target": "http://localhost:4014",
+  "results": [
+    {
+      "check": "entry-point-visible",
+      "passed": true
+    },
+    {
+      "check": "candidate-visible",
+      "passed": true
+    },
+    {
+      "check": "safe-review-copy",
+      "passed": true
+    },
+    {
+      "check": "no-result-state",
+      "passed": true
+    },
+    {
+      "check": "safe-failure-state",
+      "passed": true
+    },
+    {
+      "check": "no-workflow-mutation",
+      "passed": true
+    }
+  ]
+}
