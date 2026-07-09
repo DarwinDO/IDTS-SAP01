@@ -165,6 +165,40 @@ IDTS-73 adds `attachmentsPendingNoData`. This is the English fallback key for th
 
 IDTS-73 thêm `attachmentsPendingNoData`. Đây là key tiếng Anh dự phòng cho danh sách local-file đang chờ trên Create Bug page.
 
+## IDTS-74 update - English duplicate/similar review labels
+
+### English
+
+This file mirrors the base bundle's `duplicateReview*` labels for English locale users.
+
+Important anchors:
+
+- `duplicateReviewOpenButton=Find Similar Bugs`
+- `duplicateReviewDialogTitle=Similar Bugs`
+- `duplicateReviewIntroMessage`
+- `duplicateReviewScore=Match {0}%`
+- `duplicateReviewNoCandidates`
+
+Impact if broken: English locale users can see missing-key placeholders, or the duplicate review dialog can sound like an automated duplicate confirmation instead of a manual review helper.
+
+Must check together: base `i18n.properties`, `SmartAssignmentSection.fragment.xml`, `DuplicateReview.js`, and `scripts/qa/test-idts74-duplicate-review-ui.js`.
+
+### Vietnamese
+
+File nay giu cac label `duplicateReview*` cho English locale, dong bo voi base bundle.
+
+Key quan trong:
+
+- `duplicateReviewOpenButton=Find Similar Bugs`
+- `duplicateReviewDialogTitle=Similar Bugs`
+- `duplicateReviewIntroMessage`
+- `duplicateReviewScore=Match {0}%`
+- `duplicateReviewNoCandidates`
+
+Neu sai, user dung English locale co the thay missing-key placeholder, hoac dialog duplicate review co the nghe nhu he thong da tu xac nhan duplicate thay vi chi la cong cu review thu cong.
+
+Phai kiem tra cung: base `i18n.properties`, `SmartAssignmentSection.fragment.xml`, `DuplicateReview.js`, va `scripts/qa/test-idts74-duplicate-review-ui.js`.
+
 ## Metadata
 
 - Source file: `app/bug-management-ui/webapp/i18n/i18n_en.properties`

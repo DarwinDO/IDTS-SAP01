@@ -116,7 +116,6 @@ Vietnamese:
 | IDTS-37 | Notification UI and email delivery status readability | SangVN | FE/QA review of notification section after SMTP/outbox changes, focusing on readable event/channel/status/recipient/message output. Unblocked by merged IDTS-36. |
 | IDTS-60 | Browser and manual UAT for completed Sprint 4 UI baseline | NhanT | Due 2026-07-12. Earlier QA checkpoint for merged Sprint 4 UI baseline before final `IDTS-57` regression. |
 | IDTS-40 | AWS ECS/ECR shared QA deployment direction | DonHV | Due 2026-07-18 if kept active. Treat as AWS-native follow-up/alternative, not a blocker for accepted Render QA. |
-| IDTS-74 | Add duplicate and similar bug AI review panel | DonHV | Due 2026-07-21. Follow-up from the IDTS-72 visual audit; blocks full visual closure of IDTS-72 and relates to backend task IDTS-66. |
 | IDTS-75 | Add AI classification suggestion review panel | DonHV | Due 2026-07-22. Follow-up from the IDTS-72 visual audit; blocks full visual closure of IDTS-72 and relates to backend task IDTS-67. |
 | IDTS-76 | Add bug handoff summary AI review panel | DonHV | Due 2026-07-23. Follow-up from the IDTS-72 visual audit; blocks full visual closure of IDTS-72 and relates to backend task IDTS-68. |
 
@@ -127,7 +126,6 @@ Vietnamese:
 | IDTS-37 | Notification UI va kha nang doc email delivery status | SangVN | FE/QA review notification section sau khi co SMTP/outbox, tap trung event/channel/status/recipient/message. Da duoc unblock boi IDTS-36 da merge. |
 | IDTS-60 | Browser/manual UAT cho baseline UI Sprint 4 da merge | NhanT | Han 2026-07-12. Checkpoint QA som cho baseline UI da merge truoc khi regression tong cuoi `IDTS-57`. |
 | IDTS-40 | Huong deploy shared QA bang AWS ECS/ECR | DonHV | Due 2026-07-18 neu giu active. Xem la AWS-native follow-up/alternative, khong block Render QA da accepted. |
-| IDTS-74 | Them panel review AI duplicate va similar bug | DonHV | Due 2026-07-21. Follow-up tu visual audit IDTS-72; block viec dong IDTS-72 theo tieu chi visual day du va relate voi backend task IDTS-66. |
 | IDTS-75 | Them panel review AI classification suggestion | DonHV | Due 2026-07-22. Follow-up tu visual audit IDTS-72; block viec dong IDTS-72 theo tieu chi visual day du va relate voi backend task IDTS-67. |
 | IDTS-76 | Them panel review AI bug handoff summary | DonHV | Due 2026-07-23. Follow-up tu visual audit IDTS-72; block viec dong IDTS-72 theo tieu chi visual day du va relate voi backend task IDTS-68. |
 
@@ -135,6 +133,7 @@ Vietnamese:
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
+| IDTS-74 | Add duplicate and similar bug AI review panel | DonHV | Implemented on branch `feature/idts-74-duplicate-ai-review-panel-donhv`. Local static QA passed 133 checks and browser smoke captured the real Similar Bugs dialog with a candidate and safe review-only copy; PR is pending. |
 | IDTS-68 | Backend grounded bug/handoff summary | SangVN / DonHV support | Done at repository handoff level. PR #115 merged into `dev` at `d5e4297`; focused QA passed `28/0`, AI regression IDTS-64 to IDTS-68 passed, and Jira evidence comment is `10431`. Jira closure transition is handled after this closure sync. |
 | IDTS-57 | Browser regression and SAP Fiori UX review for redesigned screens | NhanT | PR #77 merged the first Playwright browser UX regression harness into `dev`, but the task remains open because the merged coverage is PM-focused. Final role-matrix and broader manual/browser regression should continue through IDTS-60 and the remaining IDTS-57 pass. |
 | SP2 | Sprint 02 Mentor Feedback and Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP, and real browser QA are stable enough to prove the happy flow. Remaining work is final SAP490 sync and mentor-demo rerun, not FE/blocking workflow repair. |
@@ -150,6 +149,7 @@ Vietnamese:
 
 | ID | Cong viec | Thanh vien chinh | Ghi chu |
 | --- | --- | --- | --- |
+| IDTS-74 | Them panel review AI duplicate va similar bug | DonHV | Da implement tren branch `feature/idts-74-duplicate-ai-review-panel-donhv`. Static QA local pass 133 checks va browser smoke da chup dialog Similar Bugs that co candidate cung copy review-only an toan; PR con pending. |
 | IDTS-57 | Browser regression va SAP Fiori UX review cho cac man hinh da redesign | NhanT | PR #77 da merge browser QA harness dau tien vao `dev`, nhung task van chua dong vi coverage hien tap trung PM. Can tiep tuc role matrix Tester/Developer/PM va manual/browser regression qua IDTS-60 va phan IDTS-57 con lai. |
 | IDTS-50 | Cai thien email notification va sua deep link | DonHV | Sua email Gmail dang tho va link Fiori bi hong tu shared-QA email. Jira dang In Progress; branch implementation la `fix/idts-50-email-link-template-donhv`. |
 | SP2 | Sprint 02 Mentor Feedback va Happy Flow Demo | DonHV, NhanT, DatDT, SangVN | Backend, HTTP va browser QA that da du on de chung minh happy flow. Phan con lai la sync SAP490 va rerun mentor demo. |

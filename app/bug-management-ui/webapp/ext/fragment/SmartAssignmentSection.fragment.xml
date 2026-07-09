@@ -10,6 +10,16 @@
       expandable="false"
     >
       <content>
+        <Toolbar>
+          <ToolbarSpacer />
+          <Button
+            core:require="{ DuplicateReview: 'idts/bugmanagementui/ext/actions/DuplicateReview' }"
+            text="{i18n>duplicateReviewOpenButton}"
+            icon="sap-icon://machine-learning"
+            type="Default"
+            press="DuplicateReview.openDialog"
+          />
+        </Toolbar>
         <form:Form editable="false">
           <form:layout>
             <form:ColumnLayout

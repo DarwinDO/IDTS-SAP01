@@ -1,0 +1,538 @@
+{
+  "task": "IDTS-74",
+  "checkedAt": "2026-07-09T12:08:30.159Z",
+  "checks": [
+    {
+      "label": "Object Page section opens duplicate review from product UI",
+      "pass": true
+    },
+    {
+      "label": "Object Page section loads DuplicateReview UI5 module",
+      "pass": true
+    },
+    {
+      "label": "duplicate review controller calls existing CAP action",
+      "pass": true
+    },
+    {
+      "label": "duplicate review sends source bug id when available",
+      "pass": true
+    },
+    {
+      "label": "duplicate review uses reusable AI review copy/state mapping",
+      "pass": true
+    },
+    {
+      "label": "duplicate review renders SAPUI5 Dialog",
+      "pass": true
+    },
+    {
+      "label": "duplicate review renders SAPUI5 responsive Table",
+      "pass": true
+    },
+    {
+      "label": "duplicate review keeps human decision explicit",
+      "pass": true
+    },
+    {
+      "label": "duplicate review does not show raw caught error messages",
+      "pass": true
+    },
+    {
+      "label": "duplicate review controller does not embed raw HTML",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"use strict\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"function\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"function\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"function\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"function\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"function\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"function\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"Similar bug review host control is not available.\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"i18n\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"@i18n\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReviewUnknownBug\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReviewUntitledBug\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReviewUnknownStatus\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReviewRelationSimilar\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReviewScore\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"function\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"ID\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"title\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"description\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"status_code\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"sapModule_ID\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"applicationComponent_ID\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"defectCategory_ID\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"componentCategory_ID\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"sourceBugID\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"title\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"description\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"statusCode\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"sapModuleID\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"applicationComponentID\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"defectCategoryID\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"componentCategoryID\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"limit\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"minScore\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"$direct\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"function\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReviewNoCandidates\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>/noDataText}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"14rem\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReviewBugColumn\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"10rem\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"Tablet\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReviewStatusColumn\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"8rem\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"Tablet\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReviewMatchColumn\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"20rem\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"Desktop\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReviewReasonColumn\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReview\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReview>/rows\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>bugNumber}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>title}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>statusName}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>scoreText}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>reviewState}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>relationType}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>reason}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>decisionHint}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReviewDialogTitle\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"54rem\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"30rem\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>/busy}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"100%\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReviewIntroMessage\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"Information\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"sapUiSmallMargin\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReviewCloseButton\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReview\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReviewLoadFailed\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReviewLoadFailed\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has duplicateReviewOpenButton",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has duplicateReviewDialogTitle",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has duplicateReviewIntroMessage",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has duplicateReviewBugColumn",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has duplicateReviewStatusColumn",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has duplicateReviewMatchColumn",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has duplicateReviewReasonColumn",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has duplicateReviewScore",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has duplicateReviewNoCandidates",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has duplicateReviewLoadFailed",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has duplicateReviewCloseButton",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties duplicateReviewOpenButton has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties duplicateReviewDialogTitle has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties duplicateReviewIntroMessage has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties duplicateReviewBugColumn has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties duplicateReviewStatusColumn has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties duplicateReviewMatchColumn has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties duplicateReviewReasonColumn has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties duplicateReviewScore has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties duplicateReviewRelationSimilar has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties duplicateReviewUnknownBug has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties duplicateReviewUntitledBug has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties duplicateReviewUnknownStatus has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties duplicateReviewNoCandidates has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties duplicateReviewLoadFailed has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties duplicateReviewCloseButton has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has duplicateReviewOpenButton",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has duplicateReviewDialogTitle",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has duplicateReviewIntroMessage",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has duplicateReviewBugColumn",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has duplicateReviewStatusColumn",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has duplicateReviewMatchColumn",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has duplicateReviewReasonColumn",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has duplicateReviewScore",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has duplicateReviewNoCandidates",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has duplicateReviewLoadFailed",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has duplicateReviewCloseButton",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties duplicateReviewOpenButton has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties duplicateReviewDialogTitle has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties duplicateReviewIntroMessage has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties duplicateReviewBugColumn has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties duplicateReviewStatusColumn has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties duplicateReviewMatchColumn has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties duplicateReviewReasonColumn has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties duplicateReviewScore has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties duplicateReviewRelationSimilar has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties duplicateReviewUnknownBug has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties duplicateReviewUntitledBug has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties duplicateReviewUnknownStatus has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties duplicateReviewNoCandidates has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties duplicateReviewLoadFailed has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties duplicateReviewCloseButton has user-facing copy",
+      "pass": true
+    }
+  ]
+}

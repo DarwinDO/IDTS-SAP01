@@ -55,6 +55,22 @@ The Assignee input is bound one-way to `assigneeDisplayName`. This means the use
 - Keep labels user-facing and consistent with `Assignee (Technical Owner)` and `Current Action Owner`.
 - Run UI5 build, UI5 linter, and browser smoke after changes.
 
+### IDTS-74 update: similar bug review entry point
+
+IDTS-74 adds a `Find Similar Bugs` button to the Assignment section header.
+
+The button uses `core:require` to load `idts/bugmanagementui/ext/actions/DuplicateReview` and calls `DuplicateReview.openDialog`. This is intentionally a small entry point: the fragment only renders the button, while `DuplicateReview.js` owns the dialog and the OData call to `suggestSimilarBugs`.
+
+This keeps the Object Page simple. The user can review similar/duplicate candidates from the bug detail page, but the UI does not confirm a duplicate automatically and does not write `DuplicateLinks`.
+
+Must check together:
+
+- `app/bug-management-ui/webapp/ext/actions/DuplicateReview.js`
+- `app/bug-management-ui/webapp/ext/ai/AiReviewUi.js`
+- `srv/service.cds`
+- `srv/ai/duplicate-detection.js`
+- `scripts/qa/test-idts74-duplicate-review-ui.js`
+
 ## Vietnamese
 
 ### File nay dung de lam gi
@@ -109,6 +125,22 @@ Input Assignee bind one-way vao `assigneeDisplayName`. Nghia la user thay ten as
 - Khong dung DOM selector hoac generated Fiori control ID.
 - Giu label dung voi `Assignee (Technical Owner)` va `Current Action Owner`.
 - Chay UI5 build, UI5 linter va browser smoke sau khi sua.
+
+### Cap nhat IDTS-74: diem mo review bug tuong tu
+
+IDTS-74 them nut `Find Similar Bugs` vao header cua section Assignment.
+
+Nut nay dung `core:require` de load `idts/bugmanagementui/ext/actions/DuplicateReview` va goi `DuplicateReview.openDialog`. Fragment chi lam entry point nho: no render button, con `DuplicateReview.js` quan ly dialog va viec goi OData action `suggestSimilarBugs`.
+
+Cach nay giu Object Page gon. User co the review candidate bug trung/tuong tu ngay tren bug detail page, nhung UI khong tu xac nhan duplicate va khong ghi `DuplicateLinks`.
+
+Phai kiem tra cung:
+
+- `app/bug-management-ui/webapp/ext/actions/DuplicateReview.js`
+- `app/bug-management-ui/webapp/ext/ai/AiReviewUi.js`
+- `srv/service.cds`
+- `srv/ai/duplicate-detection.js`
+- `scripts/qa/test-idts74-duplicate-review-ui.js`
 
 ## Metadata
 
