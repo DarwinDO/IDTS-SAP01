@@ -1,0 +1,148 @@
+{
+  "generatedAt": "2026-07-09T13:27:09.107Z",
+  "baseUrl": "https://idts-sap01-qa.onrender.com",
+  "qaUser": "do***@example.local",
+  "sourceBug": {
+    "ID": "792a32bf-31e0-4512-82fd-40d6fcbe8fc1",
+    "bugNumber": "BUG-0005",
+    "status_code": "NEED_MORE_INFORMATION"
+  },
+  "checks": [
+    {
+      "label": "Auth metadata is reachable",
+      "ok": true,
+      "detail": "actual=200 expected=200"
+    },
+    {
+      "label": "QA login succeeds",
+      "ok": true,
+      "detail": "actual=200 expected=200"
+    },
+    {
+      "label": "QA login returns bearer token",
+      "ok": true,
+      "detail": "token present"
+    },
+    {
+      "label": "anonymous AI action is blocked",
+      "ok": true,
+      "detail": "status=401"
+    },
+    {
+      "label": "Protected BugService metadata works with token",
+      "ok": true,
+      "detail": "actual=200 expected=200"
+    },
+    {
+      "label": "classification action returns 200",
+      "ok": true,
+      "detail": "actual=200 expected=200"
+    },
+    {
+      "label": "classification action returns rows",
+      "ok": true,
+      "detail": "actual=true"
+    },
+    {
+      "label": "classification Render response is sanitized",
+      "ok": true,
+      "detail": "no unsafe detail detected"
+    },
+    {
+      "label": "duplicate action returns 200",
+      "ok": true,
+      "detail": "actual=200 expected=200"
+    },
+    {
+      "label": "duplicate action returns an array",
+      "ok": true,
+      "detail": "actual=true"
+    },
+    {
+      "label": "duplicate Render response is sanitized",
+      "ok": true,
+      "detail": "no unsafe detail detected"
+    },
+    {
+      "label": "Render has an active source bug for source-linked AI smoke",
+      "ok": true,
+      "detail": "actual=\"792a32bf-31e0-4512-82fd-40d6fcbe8fc1\""
+    },
+    {
+      "label": "source bug has componentCategory for assignment explanation",
+      "ok": true,
+      "detail": "actual=\"60000000-0000-0000-0000-000000000001\""
+    },
+    {
+      "label": "summary action returns 200",
+      "ok": true,
+      "detail": "actual=200 expected=200"
+    },
+    {
+      "label": "summary action returns provider status",
+      "ok": true,
+      "detail": "actual=\"AI_DISABLED\""
+    },
+    {
+      "label": "summary requires human review",
+      "ok": true,
+      "detail": "actual=true expected=true"
+    },
+    {
+      "label": "summary Render response is sanitized",
+      "ok": true,
+      "detail": "no unsafe detail detected"
+    },
+    {
+      "label": "assignment explanation action returns 200",
+      "ok": true,
+      "detail": "actual=200 expected=200"
+    },
+    {
+      "label": "assignment explanation returns rows",
+      "ok": true,
+      "detail": "actual=true"
+    },
+    {
+      "label": "assignment explanation remains human-review only",
+      "ok": true,
+      "detail": "actual=true"
+    },
+    {
+      "label": "assignment Render response is sanitized",
+      "ok": true,
+      "detail": "no unsafe detail detected"
+    },
+    {
+      "label": "AI smoke does not mutate source bug status",
+      "ok": true,
+      "detail": "actual=\"NEED_MORE_INFORMATION\" expected=\"NEED_MORE_INFORMATION\""
+    },
+    {
+      "label": "AI smoke does not mutate source bug assignee",
+      "ok": true,
+      "detail": "actual=\"20000000-0000-0000-0000-000000000002\" expected=\"20000000-0000-0000-0000-000000000002\""
+    },
+    {
+      "label": "Render exposes AI suggestion audit rows for review",
+      "ok": true,
+      "detail": "actual=true"
+    },
+    {
+      "label": "Render AI audit rows are sanitized",
+      "ok": true,
+      "detail": "no unsafe detail detected"
+    }
+  ],
+  "samples": {
+    "classificationStatuses": [
+      "AI_DISABLED"
+    ],
+    "duplicateCount": 0,
+    "summaryStatus": "AI_DISABLED",
+    "assignmentStatuses": [
+      "AI_DISABLED"
+    ],
+    "auditCount": 10
+  }
+}

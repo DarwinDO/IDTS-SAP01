@@ -1,0 +1,62 @@
+{
+  "task": "IDTS-75",
+  "checkedAt": "2026-07-09T13:30:37.855Z",
+  "target": "https://idts-sap01-qa.onrender.com",
+  "bugID": "792a32bf-31e0-4512-82fd-40d6fcbe8fc1",
+  "checks": [
+    {
+      "name": "render-login-token",
+      "passed": true
+    },
+    {
+      "name": "object-page-loaded",
+      "passed": true
+    },
+    {
+      "name": "classification-review-button-visible",
+      "passed": true
+    },
+    {
+      "name": "classification-review-dialog-opened",
+      "passed": true
+    },
+    {
+      "name": "current-vs-suggested-visible",
+      "passed": true
+    },
+    {
+      "name": "manual-review-copy-visible",
+      "passed": true
+    },
+    {
+      "name": "no-internal-copy-visible",
+      "passed": true
+    },
+    {
+      "name": "no-http-5xx",
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "no-unexpected-console-errors",
+      "passed": true,
+      "details": []
+    }
+  ],
+  "knownNonBlockingConsole": [
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Refused to execute script from 'https://idts-sap01-qa.onrender.com/idts.bugmanagementui/Component-preload.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Refused to execute script from 'https://idts-sap01-qa.onrender.com/idts.bugmanagementui/Component-preload.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.",
+    "2026-07-09 20:30:33.003400 failed to load JavaScript resource: idts/bugmanagementui/Component-preload.js -  sap.ui.ModuleSystem",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "2026-07-09 20:30:34.151500 Connector (LrepConnector) failed call 'loadFlexData': Error\n\t\t\tApplication startup continues without data from this storage. -  ",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "2026-07-09 20:30:34.231500 Connector (LrepConnector) failed call 'loadFeatures': Error\n\t\t\tApplication startup continues without data from this storage. -  ",
+    "2026-07-09 20:30:34.689100 S/CUBE is not yet supported -  ",
+    "2026-07-09 20:30:36.216500 (dependency of 'sap/ui/mdc/p13n/panels/AdaptFiltersPanelContent.js') Importing the pseudo module 'sap/m/ListKeyboardMode' is deprecated. To access the type 'sap.m.ListKeyboardMode', please import 'sap/m/library'. You can then reference this type via the library's module export. For more information, see documentation under 'Best Practices for Loading Modules'. -  sap.ui.ModuleSystem"
+  ]
+}
