@@ -71,18 +71,21 @@ const checks = [
   expectNotMatches('classification review controller does not embed raw HTML', controller, /<(div|span|style|table)\b/i)
 ]
 
-assert(section.IdtsClassificationAssistance, 'manifest must register IdtsClassificationAssistance')
-checks.push({ label: 'manifest registers classification assistance section', pass: true })
+assert(section.IdtsClassificationActionRow, 'manifest must register IdtsClassificationActionRow')
+checks.push({ label: 'manifest registers classification action row', pass: true })
 assert.strictEqual(
-  section.IdtsClassificationAssistance.template,
+  section.IdtsClassificationActionRow.template,
   'idts.bugmanagementui.ext.fragment.ClassificationAssistanceSection'
 )
-checks.push({ label: 'manifest uses the classification assistance fragment', pass: true })
-assert.strictEqual(section.IdtsSmartAssignment.position.anchor, 'IdtsClassificationAssistance')
-checks.push({ label: 'assignment remains after classification assistance', pass: true })
+checks.push({ label: 'manifest uses the classification action row fragment', pass: true })
+assert(!section.IdtsClassificationActionRow.title, 'classification action row must not have a standalone section title')
+checks.push({ label: 'classification action row has no standalone section title', pass: true })
+assert(!section.IdtsClassificationAssistance, 'manifest must not register standalone IdtsClassificationAssistance section')
+checks.push({ label: 'manifest does not register the old standalone classification assistance section', pass: true })
+assert.strictEqual(section.IdtsSmartAssignment.position.anchor, 'IdtsClassificationActionRow')
+checks.push({ label: 'assignment remains after classification action row', pass: true })
 
 const requiredI18nKeys = [
-  'classificationReviewSectionTitle',
   'classificationReviewSectionHint',
   'classificationReviewOpenButton',
   'classificationReviewDialogTitle',

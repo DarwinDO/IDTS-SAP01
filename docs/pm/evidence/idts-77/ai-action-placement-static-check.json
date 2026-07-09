@@ -1,25 +1,41 @@
 {
   "task": "IDTS-77",
-  "checkedAt": "2026-07-09T16:03:53.474Z",
+  "checkedAt": "2026-07-09T17:16:31.735Z",
   "checks": [
     {
-      "label": "manifest uses the Similar Bug Check fragment",
+      "label": "manifest uses the similar bug action row fragment",
       "pass": true
     },
     {
-      "label": "IdtsSimilarBugCheck is positioned After BugDetails",
+      "label": "IdtsSimilarBugActionRow is positioned After BugDetails",
       "pass": true
     },
     {
-      "label": "IdtsClassificationAssistance is positioned After ClassificationAndAssignment",
+      "label": "IdtsClassificationActionRow is positioned After ClassificationAndAssignment",
       "pass": true
     },
     {
-      "label": "IdtsSmartAssignment is positioned After IdtsClassificationAssistance",
+      "label": "IdtsSmartAssignment is positioned After IdtsClassificationActionRow",
       "pass": true
     },
     {
-      "label": "IdtsHandoffSummary is positioned Before History",
+      "label": "manifest no longer registers standalone Similar Bug Check section",
+      "pass": true
+    },
+    {
+      "label": "manifest no longer registers standalone Classification Assistance section",
+      "pass": true
+    },
+    {
+      "label": "manifest no longer registers standalone Handoff Summary section",
+      "pass": true
+    },
+    {
+      "label": "similar bug action row has no section title",
+      "pass": true
+    },
+    {
+      "label": "classification action row has no section title",
       "pass": true
     },
     {
@@ -39,7 +55,11 @@
       "pass": true
     },
     {
-      "label": "handoff section still opens handoff review",
+      "label": "history section now owns handoff review action",
+      "pass": true
+    },
+    {
+      "label": "history section loads the handoff review module",
       "pass": true
     },
     {
@@ -55,11 +75,7 @@
       "pass": true
     },
     {
-      "label": "app/bug-management-ui/webapp/i18n/i18n.properties contains user-facing Similar Bug Check copy",
-      "pass": true
-    },
-    {
-      "label": "app/bug-management-ui/webapp/i18n/i18n.properties:similarBugReviewSectionTitle has no internal/developer-facing copy",
+      "label": "app/bug-management-ui/webapp/i18n/i18n.properties contains user-facing similar bug action-row copy",
       "pass": true
     },
     {
@@ -67,11 +83,7 @@
       "pass": true
     },
     {
-      "label": "app/bug-management-ui/webapp/i18n/i18n_en.properties contains user-facing Similar Bug Check copy",
-      "pass": true
-    },
-    {
-      "label": "app/bug-management-ui/webapp/i18n/i18n_en.properties:similarBugReviewSectionTitle has no internal/developer-facing copy",
+      "label": "app/bug-management-ui/webapp/i18n/i18n_en.properties contains user-facing similar bug action-row copy",
       "pass": true
     },
     {
