@@ -1,6 +1,6 @@
 {
   "task": "IDTS-73",
-  "checkedAt": "2026-07-09T05:54:42.345Z",
+  "checkedAt": "2026-07-09T07:03:56.931Z",
   "checks": [
     {
       "label": "manifest hides Comments custom section on create draft",

@@ -1,0 +1,29 @@
+{
+  "task": "IDTS-72",
+  "checkedAt": "2026-07-09T07:04:02.051Z",
+  "target": "local",
+  "expectedAiEnabled": true,
+  "results": [
+    {
+      "check": "smart-assign-entry",
+      "passed": true
+    },
+    {
+      "check": "safe-user-facing-copy",
+      "passed": true
+    },
+    {
+      "check": "ai-review-state",
+      "passed": true,
+      "state": "REVIEWABLE"
+    },
+    {
+      "check": "manual-review-control",
+      "passed": true
+    },
+    {
+      "check": "no-unconfirmed-mutation",
+      "passed": true
+    }
+  ]
+}
