@@ -1,21 +1,21 @@
 {
   "task": "IDTS-72",
   "purpose": "Final AI acceptance across four suggestion flows, review UI states, and safety behavior.",
-  "startedAt": "2026-07-09T07:01:06.459Z",
-  "finishedAt": "2026-07-09T07:01:13.048Z",
-  "renderSmokeRequested": true,
-  "renderSmokeStatus": "PASS",
+  "startedAt": "2026-07-09T07:36:17.517Z",
+  "finishedAt": "2026-07-09T07:36:35.389Z",
+  "renderSmokeRequested": false,
+  "renderSmokeStatus": "NOT_RUN",
   "totals": {
-    "suites": 7,
-    "passed": 7,
+    "suites": 6,
+    "passed": 6,
     "failed": 0
   },
   "results": [
     {
       "name": "IDTS-66 duplicate and similar bug detection",
       "script": "scripts/qa/test-idts66-duplicate-detection.js",
-      "startedAt": "2026-07-09T07:01:06.459Z",
-      "finishedAt": "2026-07-09T07:01:07.273Z",
+      "startedAt": "2026-07-09T07:36:17.517Z",
+      "finishedAt": "2026-07-09T07:36:32.005Z",
       "exitCode": 0,
       "passed": true,
       "summary": "TOTAL: 30 PASS  |  0 FAIL  |  30 checks",
@@ -24,8 +24,8 @@
     {
       "name": "IDTS-67 classification suggestion",
       "script": "scripts/qa/test-idts67-classification-suggestion.js",
-      "startedAt": "2026-07-09T07:01:07.273Z",
-      "finishedAt": "2026-07-09T07:01:08.060Z",
+      "startedAt": "2026-07-09T07:36:32.005Z",
+      "finishedAt": "2026-07-09T07:36:32.844Z",
       "exitCode": 0,
       "passed": true,
       "summary": "TOTAL: 22 PASS  |  0 FAIL  |  22 checks",
@@ -34,8 +34,8 @@
     {
       "name": "IDTS-68 grounded bug and handoff summary",
       "script": "scripts/qa/test-idts68-bug-summary.js",
-      "startedAt": "2026-07-09T07:01:08.060Z",
-      "finishedAt": "2026-07-09T07:01:08.869Z",
+      "startedAt": "2026-07-09T07:36:32.844Z",
+      "finishedAt": "2026-07-09T07:36:33.695Z",
       "exitCode": 0,
       "passed": true,
       "summary": "TOTAL: 28 PASS  |  0 FAIL  |  28 checks",
@@ -44,8 +44,8 @@
     {
       "name": "IDTS-69 Smart Assign explanation",
       "script": "scripts/qa/test-idts69-assignment-explanation.js",
-      "startedAt": "2026-07-09T07:01:08.869Z",
-      "finishedAt": "2026-07-09T07:01:09.638Z",
+      "startedAt": "2026-07-09T07:36:33.695Z",
+      "finishedAt": "2026-07-09T07:36:34.508Z",
       "exitCode": 0,
       "passed": true,
       "summary": "TOTAL: 6 PASS  |  0 FAIL",
@@ -54,8 +54,8 @@
     {
       "name": "IDTS-70 reusable Fiori AI review states",
       "script": "scripts/qa/test-idts70-ai-review-ui.js",
-      "startedAt": "2026-07-09T07:01:09.638Z",
-      "finishedAt": "2026-07-09T07:01:09.686Z",
+      "startedAt": "2026-07-09T07:36:34.508Z",
+      "finishedAt": "2026-07-09T07:36:34.565Z",
       "exitCode": 0,
       "passed": true,
       "summary": "TOTAL: 7 PASS  |  0 FAIL",
@@ -64,21 +64,11 @@
     {
       "name": "IDTS-71 AI safety and misuse review",
       "script": "scripts/qa/test-idts71-ai-security-review.js",
-      "startedAt": "2026-07-09T07:01:09.686Z",
-      "finishedAt": "2026-07-09T07:01:10.488Z",
+      "startedAt": "2026-07-09T07:36:34.565Z",
+      "finishedAt": "2026-07-09T07:36:35.389Z",
       "exitCode": 0,
       "passed": true,
       "summary": "TOTAL: 31 PASS  |  0 FAIL  |  31 checks",
-      "errorSummary": ""
-    },
-    {
-      "name": "IDTS-71 shared-QA Render AI smoke",
-      "script": "scripts/qa/test-idts71-render-ai-smoke.js",
-      "startedAt": "2026-07-09T07:01:10.488Z",
-      "finishedAt": "2026-07-09T07:01:13.048Z",
-      "exitCode": 0,
-      "passed": true,
-      "summary": "TOTAL: 25 PASS  |  0 FAIL  |  25 checks",
       "errorSummary": ""
     }
   ]

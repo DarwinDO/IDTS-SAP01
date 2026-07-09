@@ -74,6 +74,7 @@
     "qa:idts71:render-smoke": "node scripts/qa/test-idts71-render-ai-smoke.js",
     "qa:idts72:acceptance": "node scripts/qa/test-idts72-ai-acceptance.js",
     "qa:idts72:browser": "node scripts/qa/test-idts72-ai-browser.js",
+    "qa:idts72:visual-evidence": "node scripts/qa/test-idts72-visual-ai-evidence.js",
     "qa:idts73:programmatic": "node scripts/qa/test-idts73-create-attachments-ui.js",
     "qa:idts73:browser": "node scripts/qa/test-idts73-create-attachments-browser.js",
     "qa:auth-email:playwright": "node scripts/qa/test-idts38-auth-email-playwright.js",
