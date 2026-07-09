@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-07-09T06:14:56.631Z",
+  "url": "https://idts-sap01-qa.onrender.com/idts.bugmanagementui/index.html#/Bugs(ID=6be3d993-d9e5-4888-9fb3-83910c69b243,IsActiveEntity=false)",
+  "commentsVisible": false,
+  "uploadVisible": true,
+  "fileInputCount": 1,
+  "fileInputEnabled": true,
+  "unexpectedConsoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Refused to execute script from 'https://idts-sap01-qa.onrender.com/idts.bugmanagementui/Component-preload.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Refused to execute script from 'https://idts-sap01-qa.onrender.com/idts.bugmanagementui/Component-preload.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.",
+    "2026-07-09 13:14:37.353600 failed to load JavaScript resource: idts/bugmanagementui/Component-preload.js -  sap.ui.ModuleSystem",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "2026-07-09 13:14:42.900100 Connector (LrepConnector) failed call 'loadFlexData': Error\n\t\t\tApplication startup continues without data from this storage. -  "
+  ]
+}
