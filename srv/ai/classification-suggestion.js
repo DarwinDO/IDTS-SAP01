@@ -6,7 +6,11 @@ const { SELECT } = cds.ql
 const { FEATURE_TYPES, createAiSuggestion } = require('./audit')
 const { createAiProvider } = require('./provider')
 const { tokenSimilarity } = require('./duplicate-detection')
-const { sanitizeErrorSummary } = require('./safety')
+const {
+  containsUnsafeDiagnosticText,
+  redactSensitiveText,
+  sanitizeErrorSummary
+} = require('./safety')
 const { resolveRequestUser } = require('../bug-service/helpers')
 
 const LOW_CONFIDENCE_THRESHOLD = 0.6
@@ -152,10 +156,11 @@ async function readCatalogs (tx, entities) {
 
 function buildClassificationSuggestions ({ input, catalogs, providerResult }) {
   const payload = providerPayload(providerResult)
-  const providerStatus = providerResult?.status || 'AI_PROVIDER_ERROR'
+  const unsafeProviderOutput = containsUnsafeDiagnosticText(payload)
+  const providerStatus = unsafeProviderOutput ? 'AI_OUTPUT_UNSAFE' : (providerResult?.status || 'AI_PROVIDER_ERROR')
 
   return FIELD_DEFS.map(field => {
-    const raw = providerResult?.ok ? extractProviderValue(payload, field) : null
+    const raw = providerResult?.ok && !unsafeProviderOutput ? extractProviderValue(payload, field) : null
     if (raw?.hasValue) {
       return resolveProviderSuggestion({ field, raw, catalogs, providerStatus })
     }
@@ -454,6 +459,7 @@ function safeProviderReason (providerStatus) {
   if (providerStatus === 'AI_TIMEOUT') return 'AI assistance timed out, so only deterministic fallback was available.'
   if (providerStatus === 'AI_PROVIDER_UNSUPPORTED') return 'AI provider is not supported in this environment.'
   if (providerStatus === 'AI_PROVIDER_ERROR') return 'AI provider failed safely; no provider details are exposed.'
+  if (providerStatus === 'AI_OUTPUT_UNSAFE') return 'AI output was removed because it was not safe to show.'
   return sanitizeErrorSummary(new Error('AI provider did not return a usable classification suggestion.'))
 }
 
@@ -474,7 +480,8 @@ function normalizeKey (value) {
 }
 
 function safeReason (value) {
-  const text = cleanText(value)
+  const text = redactSensitiveText(cleanText(value), 500)
+  if (containsUnsafeDiagnosticText(text)) return 'AI output was removed because it was not safe to show.'
   return text.slice(0, 500)
 }
 
