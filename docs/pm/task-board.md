@@ -116,6 +116,9 @@ Vietnamese:
 | IDTS-37 | Notification UI and email delivery status readability | SangVN | FE/QA review of notification section after SMTP/outbox changes, focusing on readable event/channel/status/recipient/message output. Unblocked by merged IDTS-36. |
 | IDTS-60 | Browser and manual UAT for completed Sprint 4 UI baseline | NhanT | Due 2026-07-12. Earlier QA checkpoint for merged Sprint 4 UI baseline before final `IDTS-57` regression. |
 | IDTS-40 | AWS ECS/ECR shared QA deployment direction | DonHV | Due 2026-07-18 if kept active. Treat as AWS-native follow-up/alternative, not a blocker for accepted Render QA. |
+| IDTS-74 | Add duplicate and similar bug AI review panel | DonHV | Due 2026-07-21. Follow-up from the IDTS-72 visual audit; blocks full visual closure of IDTS-72 and relates to backend task IDTS-66. |
+| IDTS-75 | Add AI classification suggestion review panel | DonHV | Due 2026-07-22. Follow-up from the IDTS-72 visual audit; blocks full visual closure of IDTS-72 and relates to backend task IDTS-67. |
+| IDTS-76 | Add bug handoff summary AI review panel | DonHV | Due 2026-07-23. Follow-up from the IDTS-72 visual audit; blocks full visual closure of IDTS-72 and relates to backend task IDTS-68. |
 
 Vietnamese:
 
@@ -124,6 +127,9 @@ Vietnamese:
 | IDTS-37 | Notification UI va kha nang doc email delivery status | SangVN | FE/QA review notification section sau khi co SMTP/outbox, tap trung event/channel/status/recipient/message. Da duoc unblock boi IDTS-36 da merge. |
 | IDTS-60 | Browser/manual UAT cho baseline UI Sprint 4 da merge | NhanT | Han 2026-07-12. Checkpoint QA som cho baseline UI da merge truoc khi regression tong cuoi `IDTS-57`. |
 | IDTS-40 | Huong deploy shared QA bang AWS ECS/ECR | DonHV | Due 2026-07-18 neu giu active. Xem la AWS-native follow-up/alternative, khong block Render QA da accepted. |
+| IDTS-74 | Them panel review AI duplicate va similar bug | DonHV | Due 2026-07-21. Follow-up tu visual audit IDTS-72; block viec dong IDTS-72 theo tieu chi visual day du va relate voi backend task IDTS-66. |
+| IDTS-75 | Them panel review AI classification suggestion | DonHV | Due 2026-07-22. Follow-up tu visual audit IDTS-72; block viec dong IDTS-72 theo tieu chi visual day du va relate voi backend task IDTS-67. |
+| IDTS-76 | Them panel review AI bug handoff summary | DonHV | Due 2026-07-23. Follow-up tu visual audit IDTS-72; block viec dong IDTS-72 theo tieu chi visual day du va relate voi backend task IDTS-68. |
 
 ## In Progress
 
@@ -138,7 +144,7 @@ Vietnamese:
 | IDTS-59 | Scan Sprint 4 Fiori screens for usability gaps and edge-case confusion | SangVN | Jira moved to In Progress. Local `dev` UI/UX scan passed for login, profile/sign-out, dashboard, Object Page, comments, attachments, Smart Assign, mobile dashboard, and logout guard. Repo evidence report is in PR #104 after DonHV Jira comment `10415`; Jira follow-up comment `10416` posted. Unauthenticated shared QA route smoke returned HTTP 200, while authenticated shared QA still needs private Render QA credentials/session. |
 | IDTS-45 | Back up and decide migration or upgrade for expiring Render PostgreSQL | DonHV | Moved to In Progress on 2026-07-07. Repo now has a secret-safe backup helper and continuity decision; private backup/restore proof still requires DonHV's private Render DB URL and temporary restore target. |
 | IDTS-73 | Support pending attachments during Create Bug and hide Comments on create | DonHV | Done. PR #123 merged into `dev` at `2f600d4`, Render shared QA deployed the commit, API smoke passed, and browser smoke confirmed Comments hidden plus pending Evidence/Attachments selection enabled on Create Bug. |
-| IDTS-72 | Final QA acceptance for AI assistance and failure modes | NhanT / DonHV support | Reopened for visual evidence gap after DonHV review. Fresh local acceptance passed 6/6, and Smart Assign has product UI browser evidence. New visual audit evidence is under `docs/pm/evidence/idts-72/visual-ai-flows/`, showing duplicate detection, classification suggestion, and handoff summary are backend/API verified but not yet exposed as standalone product UI panels. Pending team decision: accept API-level evidence for those three flows or create UI follow-up tasks before closure. |
+| IDTS-72 | Final QA acceptance for AI assistance and failure modes | NhanT / DonHV support | Reopened for visual evidence gap after DonHV review. Fresh local acceptance passed 6/6, and Smart Assign has product UI browser evidence. New visual audit evidence is under `docs/pm/evidence/idts-72/visual-ai-flows/`, showing duplicate detection, classification suggestion, and handoff summary are backend/API verified but not yet exposed as standalone product UI panels. Follow-up UI tasks `IDTS-74`, `IDTS-75`, and `IDTS-76` are now created and linked as blockers. Pending team decision: accept API-level evidence for those three flows or complete the follow-up UI panels before closure. |
 
 Vietnamese:
 
@@ -157,20 +163,20 @@ Vietnamese:
 | IDTS-59 | Scan UI/UX Sprint 4 Fiori de tim usability gap va edge-case confusion | SangVN | Jira da chuyen In Progress. Local `dev` UI/UX scan pass cho login, profile/sign-out, dashboard, Object Page, comments, attachments, Smart Assign, mobile dashboard va logout guard. Repo evidence report nam trong PR #104 sau Jira comment `10415`; da comment follow-up Jira `10416`. Shared QA route smoke khong can login tra HTTP 200, nhung authenticated shared QA van can credential/session Render QA private. |
 | IDTS-45 | Backup va chot migrate/nang cap Render PostgreSQL sap het han | DonHV | Da chuyen In Progress ngay 2026-07-07. Repo da co helper backup an toan va decision continuity; backup/restore proof that van can DonHV dung DB URL Render private va restore target tam thoi. |
 | IDTS-73 | Ho tro chon attachment khi Create Bug va an Comments khi create | DonHV | Done. PR #123 da merge vao `dev` tai `2f600d4`, Render shared QA da deploy commit nay, API smoke pass, va browser smoke xac nhan Comments da an cung nhu Evidence/Attachments co the chon file pending tren Create Bug. |
-| IDTS-72 | QA acceptance cuoi cho AI assistance va failure mode | NhanT / DonHV ho tro | Da reopen de bo sung visual evidence gap sau review cua DonHV. Fresh local acceptance pass 6/6 va Smart Assign co evidence UI san pham. Evidence audit moi nam trong `docs/pm/evidence/idts-72/visual-ai-flows/`, chi ro duplicate detection, classification suggestion va handoff summary da verify bang backend/API nhung chua co panel UI san pham rieng. Con cho team quyet dinh: chap nhan API-level evidence cho ba luong nay hay tao task UI follow-up truoc khi dong. |
+| IDTS-72 | QA acceptance cuoi cho AI assistance va failure mode | NhanT / DonHV ho tro | Da reopen de bo sung visual evidence gap sau review cua DonHV. Fresh local acceptance pass 6/6 va Smart Assign co evidence UI san pham. Evidence audit moi nam trong `docs/pm/evidence/idts-72/visual-ai-flows/`, chi ro duplicate detection, classification suggestion va handoff summary da verify bang backend/API nhung chua co panel UI san pham rieng. Cac task UI follow-up `IDTS-74`, `IDTS-75`, va `IDTS-76` da duoc tao va link la blocker. Con cho team quyet dinh: chap nhan API-level evidence cho ba luong nay hay hoan tat cac UI panel follow-up truoc khi dong. |
 
 
 ## Blocked
 
 | ID | Task | Blocker | Required decision |
 | --- | --- | --- | --- |
-| None | None | No current blocker after IDTS-44 closure. | Continue scheduled follow-up IDTS-45. |
+| IDTS-72 | Full visual AI acceptance | Duplicate/similar detection, classification suggestion, and handoff summary are backend/API verified but not yet exposed as product UI panels. | Complete `IDTS-74`, `IDTS-75`, and `IDTS-76`, or explicitly accept API-level evidence for these three flows before closing IDTS-72. |
 
 Vietnamese:
 
 | ID | Cong viec | Blocker | Quyet dinh can co |
 | --- | --- | --- | --- |
-| None | None | Khong con blocker hien tai sau khi dong IDTS-44. | Tiep tuc follow-up IDTS-45. |
+| IDTS-72 | Acceptance AI visual day du | Duplicate/similar detection, classification suggestion va handoff summary da verify bang backend/API nhung chua expose thanh panel UI san pham. | Hoan tat `IDTS-74`, `IDTS-75`, va `IDTS-76`, hoac quyet dinh ro rang rang API-level evidence la du cho ba luong nay truoc khi dong IDTS-72. |
 
 ## Update Rules
 
