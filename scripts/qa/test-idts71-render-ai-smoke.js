@@ -70,7 +70,7 @@ async function main () {
     password: PASSWORD
   })
   expectEqual('QA login succeeds', login.status, 200)
-  expectTruthy('QA login returns bearer token', login.body?.token)
+  rec('QA login returns bearer token', Boolean(login.body?.token), login.body?.token ? 'token present' : 'missing token')
   const token = login.body.token
 
   const anonymous = await http('POST', '/odata/v4/bug/suggestClassification', {
@@ -165,36 +165,40 @@ async function main () {
 }
 
 async function findSourceBug (token) {
-  const path = '/odata/v4/bug/Bugs?' + new URLSearchParams({
+  const path = '/odata/v4/bug/Bugs?' + toODataQuery({
     $select: 'ID,bugNumber,title,status_code,assignee_ID,componentCategory_ID,sapModule_ID',
     $filter: 'IsActiveEntity eq true and componentCategory_ID ne null',
     $top: '10'
-  }).toString()
+  })
   const response = await http('GET', path, null, { token })
   if (response.status !== 200) return null
   return (response.body?.value || [])[0] || null
 }
 
 async function readBug (token, id) {
-  const path = '/odata/v4/bug/Bugs?' + new URLSearchParams({
+  const path = '/odata/v4/bug/Bugs?' + toODataQuery({
     $select: 'ID,bugNumber,status_code,assignee_ID',
     $filter: `ID eq ${id} and IsActiveEntity eq true`,
     $top: '1'
-  }).toString()
+  })
   const response = await http('GET', path, null, { token })
   if (response.status !== 200 || !response.body?.value?.[0]) throw new Error(`Could not re-read source bug. status=${response.status}`)
   return response.body.value[0]
 }
 
 async function readRecentAiSuggestions (token) {
-  const path = '/odata/v4/bug/AiSuggestions?' + new URLSearchParams({
+  const path = '/odata/v4/bug/AiSuggestions?' + toODataQuery({
     $select: 'ID,createdAt,featureTypeName,reviewStateName,summary,suggestionPayload,providerAlias,modelAlias',
     $orderby: 'createdAt desc',
     $top: '10'
-  }).toString()
+  })
   const response = await http('GET', path, null, { token })
   if (response.status !== 200) return []
   return response.body?.value || []
+}
+
+function toODataQuery (params) {
+  return new URLSearchParams(params).toString().replace(/\+/g, '%20')
 }
 
 async function http (method, pathname, body, options = {}) {
