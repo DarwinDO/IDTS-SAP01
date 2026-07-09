@@ -79,6 +79,34 @@ The user or a later UI task can review these suggestions. Nothing is automatical
 - Keep responses readable for UI review: status, confidence, reason, and catalog value must be explicit.
 - Update this mirror, `srv/service.cds.md`, `srv/service.js.md`, and the QA script when the action contract changes.
 
+## IDTS-71 security hardening note
+
+English:
+
+`classification-suggestion.js` now treats unsafe AI provider output as a security event, not as ordinary low-confidence text. If the provider returns content that looks like SQL diagnostics, password hashes, tokens, database URLs, API keys, stack traces, or other internal details, the module marks the provider status as `AI_OUTPUT_UNSAFE`.
+
+That means the provider value is not trusted, the provider reason is not shown, and the user only receives a safe review/fallback message. The bug record is still not changed. The audit record stores sanitized review information only, so the AI feature remains suggestion-only and human-reviewed.
+
+Important source anchor:
+
+- **Location**: `buildClassificationSuggestions()` and `safeReason()`
+  - **IDTS concept**: AI can help classification, but it cannot become a data-leak path.
+  - **Impact if broken**: a provider prompt-injection or provider-side error could expose SQL, tokens, private endpoints, or stack traces in the UI or `AiSuggestions`.
+  - **Must check together**: `srv/ai/safety.js`, `srv/ai/provider.js`, `srv/ai/audit.js`, `scripts/qa/test-idts67-classification-suggestion.js`, and `scripts/qa/test-idts71-ai-security-review.js`.
+
+Vietnamese:
+
+`classification-suggestion.js` hiện xem output AI không an toàn là một tình huống bảo mật, không phải chỉ là một lý do có độ tin cậy thấp. Nếu provider trả về nội dung giống SQL diagnostic, password hash, token, database URL, API key, stack trace hoặc chi tiết nội bộ khác, module sẽ đánh dấu trạng thái provider là `AI_OUTPUT_UNSAFE`.
+
+Điều đó có nghĩa là giá trị provider gợi ý sẽ không được tin, lý do provider đưa ra sẽ không hiển thị, và người dùng chỉ nhận được thông điệp review/fallback an toàn. Bản ghi bug vẫn không bị thay đổi. Bản ghi audit chỉ lưu thông tin review đã sanitize, nên tính năng AI vẫn giữ đúng nguyên tắc: chỉ gợi ý, cần con người review.
+
+Điểm neo quan trọng trong source:
+
+- **Vị trí**: `buildClassificationSuggestions()` và `safeReason()`
+  - **Khái niệm IDTS**: AI có thể hỗ trợ phân loại, nhưng không được trở thành đường làm lộ dữ liệu.
+  - **Ảnh hưởng nếu sai**: prompt-injection hoặc lỗi phía provider có thể làm lộ SQL, token, private endpoint hoặc stack trace trên UI hoặc trong `AiSuggestions`.
+  - **Phải kiểm tra cùng**: `srv/ai/safety.js`, `srv/ai/provider.js`, `srv/ai/audit.js`, `scripts/qa/test-idts67-classification-suggestion.js`, và `scripts/qa/test-idts71-ai-security-review.js`.
+
 ## Tiếng Việt
 
 ### File này dùng để làm gì
