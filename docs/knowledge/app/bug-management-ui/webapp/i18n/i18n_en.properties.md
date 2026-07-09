@@ -241,3 +241,21 @@ English locale bundle nay mirror day du cac key `handoffSummary*` tu base bundle
 Neu sai, user co the thay raw i18n key, mat entry point cho handoff summary, hoac thay wording nghe nhu AI tu quyet dinh thay vi chi la helper review thu cong.
 
 Phai kiem tra cung: base `i18n.properties`, `HandoffSummarySection.fragment.xml`, `HandoffSummaryReview.js` va static/browser test IDTS-76.
+
+## IDTS-77 update - English Similar Bug Check section labels
+
+### English
+
+This English locale bundle mirrors `similarBugReviewSectionTitle` and `similarBugReviewSectionHint` from the base bundle. These labels give the new Similar Bug Check Object Page section a user-facing title and helper sentence.
+
+Impact if broken: English locale users may see raw i18n keys or copy that sounds technical instead of product-facing.
+
+Must check together: base `i18n.properties`, `SimilarBugCheckSection.fragment.xml`, `manifest.json`, and `scripts/qa/test-idts77-ai-action-placement.js`.
+
+### Vietnamese
+
+English locale bundle này mirror `similarBugReviewSectionTitle` và `similarBugReviewSectionHint` từ base bundle. Các label này tạo title và câu hướng dẫn user-facing cho section Similar Bug Check mới trên Object Page.
+
+Nếu sai, user dùng English locale có thể thấy raw i18n key hoặc copy nghe quá kỹ thuật thay vì copy sản phẩm.
+
+Phải kiểm tra cùng: base `i18n.properties`, `SimilarBugCheckSection.fragment.xml`, `manifest.json`, và `scripts/qa/test-idts77-ai-action-placement.js`.

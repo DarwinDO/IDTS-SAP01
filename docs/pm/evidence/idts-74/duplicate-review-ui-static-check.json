@@ -1,13 +1,17 @@
 {
   "task": "IDTS-74",
-  "checkedAt": "2026-07-09T12:08:30.159Z",
+  "checkedAt": "2026-07-09T16:04:03.330Z",
   "checks": [
     {
-      "label": "Object Page section opens duplicate review from product UI",
+      "label": "Similar Bug Check section opens duplicate review from product UI",
       "pass": true
     },
     {
-      "label": "Object Page section loads DuplicateReview UI5 module",
+      "label": "Similar Bug Check section loads DuplicateReview UI5 module",
+      "pass": true
+    },
+    {
+      "label": "Similar Bug Check section uses user-facing helper text",
       "pass": true
     },
     {

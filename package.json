@@ -81,6 +81,7 @@
     "qa:idts75:browser": "node scripts/qa/test-idts75-classification-review-browser.js",
     "qa:idts76:programmatic": "node scripts/qa/test-idts76-handoff-summary-ui.js",
     "qa:idts76:browser": "node scripts/qa/test-idts76-handoff-summary-browser.js",
+    "qa:idts77:programmatic": "node scripts/qa/test-idts77-ai-action-placement.js",
     "qa:idts73:programmatic": "node scripts/qa/test-idts73-create-attachments-ui.js",
     "qa:idts73:browser": "node scripts/qa/test-idts73-create-attachments-browser.js",
     "qa:auth-email:playwright": "node scripts/qa/test-idts38-auth-email-playwright.js",

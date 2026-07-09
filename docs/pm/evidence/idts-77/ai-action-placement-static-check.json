@@ -1,0 +1,82 @@
+{
+  "task": "IDTS-77",
+  "checkedAt": "2026-07-09T16:03:53.474Z",
+  "checks": [
+    {
+      "label": "manifest uses the Similar Bug Check fragment",
+      "pass": true
+    },
+    {
+      "label": "IdtsSimilarBugCheck is positioned After BugDetails",
+      "pass": true
+    },
+    {
+      "label": "IdtsClassificationAssistance is positioned After ClassificationAndAssignment",
+      "pass": true
+    },
+    {
+      "label": "IdtsSmartAssignment is positioned After IdtsClassificationAssistance",
+      "pass": true
+    },
+    {
+      "label": "IdtsHandoffSummary is positioned Before History",
+      "pass": true
+    },
+    {
+      "label": "similar bug section opens duplicate review",
+      "pass": true
+    },
+    {
+      "label": "similar bug section uses the existing duplicate action module",
+      "pass": true
+    },
+    {
+      "label": "similar bug section uses the shared thin action-row hint",
+      "pass": true
+    },
+    {
+      "label": "classification section still opens classification review",
+      "pass": true
+    },
+    {
+      "label": "handoff section still opens handoff review",
+      "pass": true
+    },
+    {
+      "label": "Assignment section no longer owns Find Similar Bugs",
+      "pass": true
+    },
+    {
+      "label": "Assignment section no longer loads duplicate review module",
+      "pass": true
+    },
+    {
+      "label": "Assignment section no longer uses duplicate review button text",
+      "pass": true
+    },
+    {
+      "label": "app/bug-management-ui/webapp/i18n/i18n.properties contains user-facing Similar Bug Check copy",
+      "pass": true
+    },
+    {
+      "label": "app/bug-management-ui/webapp/i18n/i18n.properties:similarBugReviewSectionTitle has no internal/developer-facing copy",
+      "pass": true
+    },
+    {
+      "label": "app/bug-management-ui/webapp/i18n/i18n.properties:similarBugReviewSectionHint has no internal/developer-facing copy",
+      "pass": true
+    },
+    {
+      "label": "app/bug-management-ui/webapp/i18n/i18n_en.properties contains user-facing Similar Bug Check copy",
+      "pass": true
+    },
+    {
+      "label": "app/bug-management-ui/webapp/i18n/i18n_en.properties:similarBugReviewSectionTitle has no internal/developer-facing copy",
+      "pass": true
+    },
+    {
+      "label": "app/bug-management-ui/webapp/i18n/i18n_en.properties:similarBugReviewSectionHint has no internal/developer-facing copy",
+      "pass": true
+    }
+  ]
+}

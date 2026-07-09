@@ -38,7 +38,7 @@ function parseProperties (relativePath) {
 }
 
 const controller = read('app/bug-management-ui/webapp/ext/actions/DuplicateReview.js')
-const fragment = read('app/bug-management-ui/webapp/ext/fragment/SmartAssignmentSection.fragment.xml')
+const fragment = read('app/bug-management-ui/webapp/ext/fragment/SimilarBugCheckSection.fragment.xml')
 const i18nFiles = [
   'app/bug-management-ui/webapp/i18n/i18n.properties',
   'app/bug-management-ui/webapp/i18n/i18n_en.properties'
@@ -52,8 +52,9 @@ function controllerStringLiterals (source) {
 }
 
 const checks = [
-  expectIncludes('Object Page section opens duplicate review from product UI', fragment, 'DuplicateReview.openDialog'),
-  expectIncludes('Object Page section loads DuplicateReview UI5 module', fragment, 'idts/bugmanagementui/ext/actions/DuplicateReview'),
+  expectIncludes('Similar Bug Check section opens duplicate review from product UI', fragment, 'DuplicateReview.openDialog'),
+  expectIncludes('Similar Bug Check section loads DuplicateReview UI5 module', fragment, 'idts/bugmanagementui/ext/actions/DuplicateReview'),
+  expectIncludes('Similar Bug Check section uses user-facing helper text', fragment, 'similarBugReviewSectionHint'),
   expectIncludes('duplicate review controller calls existing CAP action', controller, '/suggestSimilarBugs(...)'),
   expectIncludes('duplicate review sends source bug id when available', controller, 'operation.setParameter("sourceBugID"'),
   expectIncludes('duplicate review uses reusable AI review copy/state mapping', controller, 'AiReviewUi.decorateResult'),

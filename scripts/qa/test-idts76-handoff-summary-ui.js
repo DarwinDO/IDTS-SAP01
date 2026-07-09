@@ -79,10 +79,11 @@ assert.strictEqual(
   'idts.bugmanagementui.ext.fragment.HandoffSummarySection'
 )
 checks.push({ label: 'manifest uses the handoff summary fragment', pass: true })
-assert.strictEqual(section.IdtsHandoffSummary.position.anchor, 'IdtsClassificationAssistance')
-checks.push({ label: 'handoff summary appears after classification assistance', pass: true })
-assert.strictEqual(section.IdtsSmartAssignment.position.anchor, 'IdtsHandoffSummary')
-checks.push({ label: 'smart assignment appears after handoff summary', pass: true })
+assert.strictEqual(section.IdtsHandoffSummary.position.anchor, 'History')
+assert.strictEqual(section.IdtsHandoffSummary.position.placement, 'Before')
+checks.push({ label: 'handoff summary appears before History', pass: true })
+assert.strictEqual(section.IdtsSmartAssignment.position.anchor, 'IdtsClassificationAssistance')
+checks.push({ label: 'smart assignment appears after classification assistance', pass: true })
 
 const requiredI18nKeys = [
   'handoffSummarySectionTitle',
