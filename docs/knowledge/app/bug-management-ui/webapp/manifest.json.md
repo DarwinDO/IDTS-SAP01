@@ -370,3 +370,51 @@ Day la thay doi vi tri trang trong manifest. Backend action da co trong `srv/ser
   **Khai niem IDTS**: Giu thu tu trang la classification assistance, handoff summary, roi assignment.
   **Anh huong neu sai**: Assignment co the hien truoc handoff summary, lam user kho thay cac helper review.
   **Phai kiem tra cung**: Object Page browser smoke va manifest JSON parse.
+
+## IDTS-77 update - AI review action section placement
+
+### English
+
+IDTS-77 corrects the Object Page custom section order for AI review actions.
+
+The important rule is semantic placement:
+
+- `IdtsSimilarBugCheck` appears after `BugDetails`, because duplicate/similar review is about the bug summary itself.
+- `IdtsClassificationAssistance` stays after `ClassificationAndAssignment`, because classification suggestions belong beside classification fields.
+- `IdtsSmartAssignment` stays after classification assistance, because assignment is a separate ownership area.
+- `IdtsHandoffSummary` now appears before `History`, because handoff summary is easiest to understand beside audit/history context.
+
+Important anchors:
+
+- **Location**: `BugsObjectPage.options.settings.content.body.sections.IdtsSimilarBugCheck`
+  **IDTS concept**: duplicate/similar review near Bug Summary.
+  **Impact if broken**: users may think duplicate review is part of assigning a developer.
+  **Must check together**: `SimilarBugCheckSection.fragment.xml`, `DuplicateReview.js`, and `scripts/qa/test-idts77-ai-action-placement.js`.
+
+- **Location**: `BugsObjectPage.options.settings.content.body.sections.IdtsHandoffSummary`
+  **IDTS concept**: handoff summary near History.
+  **Impact if broken**: users may see handoff review too early and miss the connection with lifecycle/audit context.
+  **Must check together**: `HandoffSummarySection.fragment.xml`, `HistoryTimeline.fragment.xml`, and browser smoke.
+
+### Vietnamese
+
+IDTS-77 chỉnh lại thứ tự custom section trên Object Page cho các action AI review.
+
+Rule quan trọng là đặt theo đúng ngữ nghĩa:
+
+- `IdtsSimilarBugCheck` nằm sau `BugDetails`, vì review duplicate/similar liên quan trực tiếp tới nội dung bug summary.
+- `IdtsClassificationAssistance` giữ sau `ClassificationAndAssignment`, vì suggestion classification thuộc ngữ cảnh các field phân loại.
+- `IdtsSmartAssignment` giữ sau classification assistance, vì assignment là vùng ownership riêng.
+- `IdtsHandoffSummary` hiện nằm trước `History`, vì handoff summary dễ hiểu nhất khi đặt gần ngữ cảnh audit/history.
+
+Anchor quan trọng:
+
+- **Vị trí**: `BugsObjectPage.options.settings.content.body.sections.IdtsSimilarBugCheck`
+  **Khái niệm IDTS**: review duplicate/similar nằm gần Bug Summary.
+  **Ảnh hưởng nếu sai**: user có thể hiểu nhầm duplicate review là một phần của việc assign developer.
+  **Phải kiểm tra cùng**: `SimilarBugCheckSection.fragment.xml`, `DuplicateReview.js`, và `scripts/qa/test-idts77-ai-action-placement.js`.
+
+- **Vị trí**: `BugsObjectPage.options.settings.content.body.sections.IdtsHandoffSummary`
+  **Khái niệm IDTS**: handoff summary nằm gần History.
+  **Ảnh hưởng nếu sai**: user có thể thấy handoff review quá sớm và không thấy liên kết với lifecycle/audit context.
+  **Phải kiểm tra cùng**: `HandoffSummarySection.fragment.xml`, `HistoryTimeline.fragment.xml`, và browser smoke.

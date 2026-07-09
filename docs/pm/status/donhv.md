@@ -2,6 +2,22 @@
 
 Last updated: 2026-07-09
 
+## 2026-07-09 - IDTS-77 AI review action placement correction
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product UI defect | DonHV observed that `Find Similar Bugs` was displayed inside the Assignment section, `Review Classification Suggestions` was separated from classification context, and `Review Handoff Summary` appeared too early instead of near History. | The AI review sections were originally added as separate proof-of-UI entry points; manifest anchors placed handoff before assignment, and the duplicate/similar button was embedded in `SmartAssignmentSection.fragment.xml`. | In progress on Jira `IDTS-77` and branch `fix/idts-77-ai-review-action-placement-donhv`. Moved duplicate/similar review into a new `SimilarBugCheckSection.fragment.xml` after Bug Summary, kept classification review after Classification and Planning, moved handoff summary before History, and removed duplicate review from Assignment. | Fresh static placement check passed: `npm run qa:idts77:programmatic` -> `19/19`. Continue UI5 build, secret/internal-copy scan, AI DevKit lint, git diff check, PR, Render deploy, and browser smoke after merge. |
+| Test-harness issue | Existing IDTS-74 and IDTS-76 static QA failed after the section-placement fix. | Those tests encoded the old placement: IDTS-74 expected `DuplicateReview` in `SmartAssignmentSection`, and IDTS-76 expected Handoff Summary after Classification Assistance. | Updated the static QA expectations to read `SimilarBugCheckSection.fragment.xml` and to expect Handoff Summary before `History`. | Rerun the focused IDTS-74/75/76/77 programmatic checks before commit. |
+| Tooling issue | A combined verification command using Bash-style `&&` failed in PowerShell with `The token '&&' is not a valid statement separator`. | The current PowerShell environment does not support that command separator syntax. | No product files were affected. Reran the verification commands separately. | Focused IDTS-74/75/76/77 checks, UI5 build, CAP compile, secret scan, AI DevKit lint, and `git diff --check` are tracked separately as the real evidence. |
+
+Vietnamese:
+
+| Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
+| --- | --- | --- | --- | --- |
+| Loi UI san pham | DonHV thay `Find Similar Bugs` dang nam trong section Assignment, `Review Classification Suggestions` bi tach khoi ngu canh classification, va `Review Handoff Summary` hien qua som thay vi gan History. | Cac AI review section ban dau duoc them de chung minh UI entry point; manifest anchor dat handoff truoc assignment, va nut duplicate/similar bi nhung trong `SmartAssignmentSection.fragment.xml`. | Dang lam tren Jira `IDTS-77` va branch `fix/idts-77-ai-review-action-placement-donhv`. Da dua duplicate/similar review vao `SimilarBugCheckSection.fragment.xml` moi sau Bug Summary, giu classification review sau Classification and Planning, dua handoff summary ve truoc History, va bo duplicate review khoi Assignment. | Static placement check moi pass: `npm run qa:idts77:programmatic` -> `19/19`. Tiep tuc UI5 build, scan secret/internal-copy, AI DevKit lint, git diff check, PR, Render deploy va browser smoke sau merge. |
+| Loi test-harness | Static QA hien co cua IDTS-74 va IDTS-76 fail sau khi fix vi tri section. | Cac test do dang gan chat vao vi tri cu: IDTS-74 doi `DuplicateReview` nam trong `SmartAssignmentSection`, va IDTS-76 doi Handoff Summary sau Classification Assistance. | Da cap nhat expectation static QA de doc `SimilarBugCheckSection.fragment.xml` va doi Handoff Summary nam truoc `History`. | Chay lai cac focused check IDTS-74/75/76/77 truoc khi commit. |
+| Loi tooling | Mot command verify ghep bang cu phap Bash `&&` fail trong PowerShell voi loi `The token '&&' is not a valid statement separator`. | Moi truong PowerShell hien tai khong ho tro cu phap separator do. | Khong anh huong product file. Da chay lai tung command verify rieng. | Cac evidence thuc te duoc track rieng: focused IDTS-74/75/76/77 checks, UI5 build, CAP compile, secret scan, AI DevKit lint, va `git diff --check`. |
+
 ## 2026-07-09 - IDTS-74 duplicate/similar review UI implementation
 
 | Classification | Symptom / work | Root cause | Fix status | Verification / next action |

@@ -55,21 +55,20 @@ The Assignee input is bound one-way to `assigneeDisplayName`. This means the use
 - Keep labels user-facing and consistent with `Assignee (Technical Owner)` and `Current Action Owner`.
 - Run UI5 build, UI5 linter, and browser smoke after changes.
 
-### IDTS-74 update: similar bug review entry point
+### IDTS-77 update: similar bug review moved out of Assignment
 
-IDTS-74 adds a `Find Similar Bugs` button to the Assignment section header.
+IDTS-77 removes the `Find Similar Bugs` button from this Assignment fragment.
 
-The button uses `core:require` to load `idts/bugmanagementui/ext/actions/DuplicateReview` and calls `DuplicateReview.openDialog`. This is intentionally a small entry point: the fragment only renders the button, while `DuplicateReview.js` owns the dialog and the OData call to `suggestSimilarBugs`.
+The earlier IDTS-74 implementation proved the duplicate/similar review dialog, but the button placement was misleading because duplicate checking belongs to the bug summary context, not to assignment. The button now lives in `SimilarBugCheckSection.fragment.xml`, and this fragment only handles assignment ownership.
 
-This keeps the Object Page simple. The user can review similar/duplicate candidates from the bug detail page, but the UI does not confirm a duplicate automatically and does not write `DuplicateLinks`.
+This keeps the Assignment section focused: choose or review the technical owner, show the current action owner, and do not mix in unrelated AI review actions.
 
 Must check together:
 
-- `app/bug-management-ui/webapp/ext/actions/DuplicateReview.js`
-- `app/bug-management-ui/webapp/ext/ai/AiReviewUi.js`
+- `app/bug-management-ui/webapp/ext/fragment/SimilarBugCheckSection.fragment.xml`
+- `app/bug-management-ui/webapp/manifest.json`
 - `srv/service.cds`
-- `srv/ai/duplicate-detection.js`
-- `scripts/qa/test-idts74-duplicate-review-ui.js`
+- `scripts/qa/test-idts77-ai-action-placement.js`
 
 ## Vietnamese
 
@@ -126,25 +125,24 @@ Input Assignee bind one-way vao `assigneeDisplayName`. Nghia la user thay ten as
 - Giu label dung voi `Assignee (Technical Owner)` va `Current Action Owner`.
 - Chay UI5 build, UI5 linter va browser smoke sau khi sua.
 
-### Cap nhat IDTS-74: diem mo review bug tuong tu
+### Cap nhat IDTS-77: review bug tuong tu duoc chuyen ra khoi Assignment
 
-IDTS-74 them nut `Find Similar Bugs` vao header cua section Assignment.
+IDTS-77 bo nut `Find Similar Bugs` khoi fragment Assignment nay.
 
-Nut nay dung `core:require` de load `idts/bugmanagementui/ext/actions/DuplicateReview` va goi `DuplicateReview.openDialog`. Fragment chi lam entry point nho: no render button, con `DuplicateReview.js` quan ly dialog va viec goi OData action `suggestSimilarBugs`.
+IDTS-74 truoc do da chung minh dialog review duplicate/similar chay duoc, nhung vi tri nut gay hieu nham vi duplicate check thuoc ngu canh bug summary, khong thuoc assignment. Nut hien nam trong `SimilarBugCheckSection.fragment.xml`, con fragment nay chi xu ly phan assignment ownership.
 
-Cach nay giu Object Page gon. User co the review candidate bug trung/tuong tu ngay tren bug detail page, nhung UI khong tu xac nhan duplicate va khong ghi `DuplicateLinks`.
+Cach nay giu section Assignment dung trong tam: chon hoac xem technical owner, hien thi current action owner, va khong tron action AI khong lien quan vao day.
 
 Phai kiem tra cung:
 
-- `app/bug-management-ui/webapp/ext/actions/DuplicateReview.js`
-- `app/bug-management-ui/webapp/ext/ai/AiReviewUi.js`
+- `app/bug-management-ui/webapp/ext/fragment/SimilarBugCheckSection.fragment.xml`
+- `app/bug-management-ui/webapp/manifest.json`
 - `srv/service.cds`
-- `srv/ai/duplicate-detection.js`
-- `scripts/qa/test-idts74-duplicate-review-ui.js`
+- `scripts/qa/test-idts77-ai-action-placement.js`
 
 ## Metadata
 
 - Source file: `app/bug-management-ui/webapp/ext/fragment/SmartAssignmentSection.fragment.xml`
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/ext/fragment/SmartAssignmentSection.fragment.xml.md`
 - Source layer: `app`
-- Last reviewed: 2026-07-06
+- Last reviewed: 2026-07-09
