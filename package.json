@@ -77,6 +77,8 @@
     "qa:idts72:visual-evidence": "node scripts/qa/test-idts72-visual-ai-evidence.js",
     "qa:idts74:programmatic": "node scripts/qa/test-idts74-duplicate-review-ui.js",
     "qa:idts74:browser": "node scripts/qa/test-idts74-duplicate-review-browser.js",
+    "qa:idts75:programmatic": "node scripts/qa/test-idts75-classification-review-ui.js",
+    "qa:idts75:browser": "node scripts/qa/test-idts75-classification-review-browser.js",
     "qa:idts73:programmatic": "node scripts/qa/test-idts73-create-attachments-ui.js",
     "qa:idts73:browser": "node scripts/qa/test-idts73-create-attachments-browser.js",
     "qa:auth-email:playwright": "node scripts/qa/test-idts38-auth-email-playwright.js",

@@ -1,0 +1,430 @@
+{
+  "task": "IDTS-75",
+  "checkedAt": "2026-07-09T13:14:38.039Z",
+  "checks": [
+    {
+      "label": "classification section opens the review dialog",
+      "pass": true
+    },
+    {
+      "label": "classification section loads the UI5 action module",
+      "pass": true
+    },
+    {
+      "label": "classification review calls the existing CAP action",
+      "pass": true
+    },
+    {
+      "label": "classification review supports persisted bugs",
+      "pass": true
+    },
+    {
+      "label": "classification review supports pre-create bug details",
+      "pass": true
+    },
+    {
+      "label": "classification review sends current classification context",
+      "pass": true
+    },
+    {
+      "label": "classification review uses reusable AI review mapping",
+      "pass": true
+    },
+    {
+      "label": "classification review renders a SAPUI5 Dialog",
+      "pass": true
+    },
+    {
+      "label": "classification review renders a responsive Table",
+      "pass": true
+    },
+    {
+      "label": "classification review shows current values",
+      "pass": true
+    },
+    {
+      "label": "classification review shows suggested values",
+      "pass": true
+    },
+    {
+      "label": "classification review shows confidence metadata",
+      "pass": true
+    },
+    {
+      "label": "classification review keeps manual decision guidance",
+      "pass": true
+    },
+    {
+      "label": "classification review has no OData update request",
+      "pass": true
+    },
+    {
+      "label": "classification review has no apply action",
+      "pass": true
+    },
+    {
+      "label": "classification review does not expose caught error messages",
+      "pass": true
+    },
+    {
+      "label": "classification review controller does not embed raw HTML",
+      "pass": true
+    },
+    {
+      "label": "manifest registers classification assistance section",
+      "pass": true
+    },
+    {
+      "label": "manifest uses the classification assistance fragment",
+      "pass": true
+    },
+    {
+      "label": "assignment remains after classification assistance",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has classificationReviewSectionTitle",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has classificationReviewSectionHint",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has classificationReviewOpenButton",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has classificationReviewDialogTitle",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has classificationReviewIntroMessage",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has classificationReviewFieldColumn",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has classificationReviewCurrentColumn",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has classificationReviewSuggestedColumn",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has classificationReviewReviewColumn",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has classificationReviewNotSet",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has classificationReviewNoSafeSuggestion",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has classificationReviewNoRows",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has classificationReviewLoadFailed",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has classificationReviewCloseButton",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has classificationReviewStatusSuggested",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has classificationReviewStatusLowConfidence",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has classificationReviewStatusInvalid",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has classificationReviewStatusNoSuggestion",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has classificationReviewStatusUnavailable",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has classificationReviewStatusReview",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has classificationReviewConfidence",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewSectionTitle is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewSectionHint is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewOpenButton is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewDialogTitle is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewIntroMessage is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewFieldColumn is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewCurrentColumn is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewSuggestedColumn is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewReviewColumn is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewNotSet is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewNoSafeSuggestion is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewUnknownField is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewNoRows is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewLoadFailed is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewCloseButton is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewStatusSuggested is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewStatusLowConfidence is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewStatusInvalid is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewStatusNoSuggestion is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewStatusUnavailable is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewStatusReview is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewConfidence is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has classificationReviewSectionTitle",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has classificationReviewSectionHint",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has classificationReviewOpenButton",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has classificationReviewDialogTitle",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has classificationReviewIntroMessage",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has classificationReviewFieldColumn",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has classificationReviewCurrentColumn",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has classificationReviewSuggestedColumn",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has classificationReviewReviewColumn",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has classificationReviewNotSet",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has classificationReviewNoSafeSuggestion",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has classificationReviewNoRows",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has classificationReviewLoadFailed",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has classificationReviewCloseButton",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has classificationReviewStatusSuggested",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has classificationReviewStatusLowConfidence",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has classificationReviewStatusInvalid",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has classificationReviewStatusNoSuggestion",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has classificationReviewStatusUnavailable",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has classificationReviewStatusReview",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has classificationReviewConfidence",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewSectionTitle is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewSectionHint is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewOpenButton is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewDialogTitle is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewIntroMessage is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewFieldColumn is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewCurrentColumn is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewSuggestedColumn is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewReviewColumn is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewNotSet is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewNoSafeSuggestion is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewUnknownField is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewNoRows is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewLoadFailed is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewCloseButton is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewStatusSuggested is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewStatusLowConfidence is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewStatusInvalid is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewStatusNoSuggestion is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewStatusUnavailable is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewStatusReview is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewConfidence is user-facing",
+      "pass": true
+    }
+  ]
+}
