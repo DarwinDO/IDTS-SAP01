@@ -193,3 +193,39 @@ Lý do: timeline cần dễ đọc trước. Dòng chính chỉ nên nói event 
   **Khái niệm IDTS**: History có hai tầng đọc: summary của event trước, chi tiết audit từng field chỉ xem khi mở rộng.
   **Ảnh hưởng nếu sai**: User thấy các dòng field-change kỹ thuật ngay trên timeline, làm Object Page khó đọc hơn.
   **Phải kiểm tra cùng**: `srv/bug-service/history-read-models.js`, `HistoryEvents.groupedChangeContext`, `HistoryEvents.logs`, và browser smoke ở Object Page History section.
+
+## 2026-07-10 Update: Handoff review action lives inside History
+
+### English
+
+IDTS-78 moves the `Review Handoff Summary` entry point into this History fragment. The old `HandoffSummarySection.fragment.xml` was deleted because it created a separate titled Object Page section. That separate section made the page look like handoff was an isolated AI feature instead of a review tool connected to lifecycle history.
+
+The fragment now renders a thin action row above the history list:
+
+- left side: short user-facing helper text;
+- right side: `Review Handoff Summary` button;
+- below it: the normal newest-first History timeline with growing enabled.
+
+Important anchor:
+
+- **Location**: top `section:SmartAssignmentSection` wrapper containing `HandoffSummaryReview.openDialog`
+  **IDTS concept**: Handoff summary is understood from the current bug lifecycle and history, so the entry point belongs inside History.
+  **Impact if broken**: Users may lose the handoff review action, or a separate Handoff Summary section may come back.
+  **Must check together**: `manifest.json`, `HandoffSummaryReview.js`, i18n `handoffSummarySectionHint`, and `scripts/qa/test-idts76-handoff-summary-ui.js`.
+
+### Vietnamese
+
+IDTS-78 chuyển điểm vào `Review Handoff Summary` vào chính History fragment này. File `HandoffSummarySection.fragment.xml` cũ đã bị xóa vì nó tạo ra một section Object Page riêng có tiêu đề riêng. Section riêng đó làm trang trông như handoff là một AI feature tách biệt, trong khi đúng ra nó là công cụ review gắn với lifecycle history.
+
+Fragment hiện render một action row mỏng phía trên danh sách history:
+
+- bên trái: câu hướng dẫn ngắn cho user;
+- bên phải: nút `Review Handoff Summary`;
+- bên dưới: timeline History mới nhất trước và có cơ chế tải thêm.
+
+Anchor quan trọng:
+
+- **Vị trí**: wrapper `section:SmartAssignmentSection` đầu file chứa `HandoffSummaryReview.openDialog`
+  **Khái niệm IDTS**: Handoff summary cần được hiểu từ lifecycle/history của bug hiện tại, nên điểm vào phải nằm trong History.
+  **Ảnh hưởng nếu sai**: User có thể mất nút handoff review, hoặc section Handoff Summary riêng có thể quay lại.
+  **Phải kiểm tra cùng**: `manifest.json`, `HandoffSummaryReview.js`, i18n `handoffSummarySectionHint`, và `scripts/qa/test-idts76-handoff-summary-ui.js`.

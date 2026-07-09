@@ -18,7 +18,7 @@ The important rule is: AI text is never treated as a workflow decision. The pers
 
 ### Flow inside IDTS
 
-1. `HandoffSummarySection.fragment.xml` renders the Object Page section and button.
+1. `HistoryTimeline.fragment.xml` renders the History section and the handoff review action row.
 2. `openDialog(...)` finds the current Bug binding context from the clicked control.
 3. `requestProperty("ID")` reads the current Bug ID.
 4. `readHandoffSummary(...)` invokes `/summarizeBugHandoff(...)` through the existing OData V4 model.
@@ -85,7 +85,7 @@ Quy tac quan trong: text AI khong bao gio la quyet dinh workflow. Nguoi dung van
 
 ### Flow trong IDTS
 
-1. `HandoffSummarySection.fragment.xml` render section va nut tren Object Page.
+1. `HistoryTimeline.fragment.xml` render History section va action row de mo handoff review.
 2. `openDialog(...)` tim binding context cua Bug hien tai tu control vua duoc bam.
 3. `requestProperty("ID")` doc Bug ID hien tai.
 4. `readHandoffSummary(...)` goi `/summarizeBugHandoff(...)` qua OData V4 model da co.

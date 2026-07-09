@@ -110,5 +110,29 @@ Fragment này chỉ đặt nút vào đúng vị trí trên Object Page. Nó kh�
 
 - Source file: `app/bug-management-ui/webapp/ext/fragment/SimilarBugCheckSection.fragment.xml`
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/ext/fragment/SimilarBugCheckSection.fragment.xml.md`
+
+## 2026-07-10 Update: Similar bug review is an action row, not a standalone section
+
+### English
+
+IDTS-78 keeps this fragment but changes its meaning in the Object Page layout. It is no longer presented as a visible section titled `Similar Bug Check`. It is only a thin helper row near Bug Summary, with helper text on the left and the `Find Similar Bugs` button on the right.
+
+Important anchor:
+
+- **Location**: root `section:SmartAssignmentSection` with `DuplicateReview.openDialog`
+  **IDTS concept**: Similar-bug review helps the user compare the current bug against existing reports; it is not an assignment area and not a separate workflow section.
+  **Impact if broken**: The action can drift back into Assignment or become a standalone section again.
+  **Must check together**: `manifest.json` key `IdtsSimilarBugActionRow`, `DuplicateReview.js`, and `scripts/qa/test-idts77-ai-action-placement.js`.
+
+### Vietnamese
+
+IDTS-78 giữ fragment này nhưng đổi ý nghĩa của nó trong layout Object Page. Nó không còn được trình bày như section có tiêu đề `Similar Bug Check`. Nó chỉ là một action row mỏng gần Bug Summary, có helper text bên trái và nút `Find Similar Bugs` bên phải.
+
+Anchor quan trọng:
+
+- **Vị trí**: root `section:SmartAssignmentSection` có `DuplicateReview.openDialog`
+  **Khái niệm IDTS**: Review bug tương tự giúp user so sánh bug hiện tại với report đã có; nó không thuộc Assignment và không phải workflow section riêng.
+  **Ảnh hưởng nếu sai**: Action có thể trôi ngược về Assignment hoặc lại thành một section riêng.
+  **Phải kiểm tra cùng**: `manifest.json` key `IdtsSimilarBugActionRow`, `DuplicateReview.js`, và `scripts/qa/test-idts77-ai-action-placement.js`.
 - Source layer: `app`
 - Last reviewed: 2026-07-09

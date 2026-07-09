@@ -1,13 +1,13 @@
 {
   "task": "IDTS-76",
-  "checkedAt": "2026-07-09T16:04:20.887Z",
+  "checkedAt": "2026-07-09T17:16:31.502Z",
   "checks": [
     {
-      "label": "handoff section opens the review dialog",
+      "label": "history section opens the handoff review dialog",
       "pass": true
     },
     {
-      "label": "handoff section loads the UI5 action module",
+      "label": "history section loads the UI5 action module",
       "pass": true
     },
     {
@@ -75,23 +75,11 @@
       "pass": true
     },
     {
-      "label": "manifest registers handoff summary section",
+      "label": "manifest no longer registers standalone handoff summary section",
       "pass": true
     },
     {
-      "label": "manifest uses the handoff summary fragment",
-      "pass": true
-    },
-    {
-      "label": "handoff summary appears before History",
-      "pass": true
-    },
-    {
-      "label": "smart assignment appears after classification assistance",
-      "pass": true
-    },
-    {
-      "label": "i18n.properties has handoffSummarySectionTitle",
+      "label": "smart assignment appears after classification action row",
       "pass": true
     },
     {
@@ -171,10 +159,6 @@
       "pass": true
     },
     {
-      "label": "i18n.properties handoffSummarySectionTitle is user-facing",
-      "pass": true
-    },
-    {
       "label": "i18n.properties handoffSummarySectionHint is user-facing",
       "pass": true
     },
@@ -251,10 +235,6 @@
       "pass": true
     },
     {
-      "label": "i18n_en.properties has handoffSummarySectionTitle",
-      "pass": true
-    },
-    {
       "label": "i18n_en.properties has handoffSummarySectionHint",
       "pass": true
     },
@@ -328,10 +308,6 @@
     },
     {
       "label": "i18n_en.properties has handoffSummaryCloseButton",
-      "pass": true
-    },
-    {
-      "label": "i18n_en.properties handoffSummarySectionTitle is user-facing",
       "pass": true
     },
     {

@@ -203,35 +203,25 @@
               "content": {
                 "body": {
                   "sections": {
-                    "IdtsSimilarBugCheck": {
-                      "title": "{i18n>similarBugReviewSectionTitle}",
+                    "IdtsSimilarBugActionRow": {
                       "template": "idts.bugmanagementui.ext.fragment.SimilarBugCheckSection",
                       "position": {
                         "anchor": "BugDetails",
                         "placement": "After"
                       }
                     },
-                    "IdtsClassificationAssistance": {
-                      "title": "{i18n>classificationReviewSectionTitle}",
+                    "IdtsClassificationActionRow": {
                       "template": "idts.bugmanagementui.ext.fragment.ClassificationAssistanceSection",
                       "position": {
                         "anchor": "ClassificationAndAssignment",
                         "placement": "After"
                       }
                     },
-                    "IdtsHandoffSummary": {
-                      "title": "{i18n>handoffSummarySectionTitle}",
-                      "template": "idts.bugmanagementui.ext.fragment.HandoffSummarySection",
-                      "position": {
-                        "anchor": "History",
-                        "placement": "Before"
-                      }
-                    },
                     "IdtsSmartAssignment": {
                       "title": "{i18n>smartAssignmentSectionTitle}",
                       "template": "idts.bugmanagementui.ext.fragment.SmartAssignmentSection",
                       "position": {
-                        "anchor": "IdtsClassificationAssistance",
+                        "anchor": "IdtsClassificationActionRow",
                         "placement": "After"
                       }
                     },

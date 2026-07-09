@@ -1,6 +1,6 @@
 {
   "task": "IDTS-75",
-  "checkedAt": "2026-07-09T16:04:14.215Z",
+  "checkedAt": "2026-07-09T17:16:31.257Z",
   "checks": [
     {
       "label": "classification section opens the review dialog",
@@ -71,19 +71,23 @@
       "pass": true
     },
     {
-      "label": "manifest registers classification assistance section",
+      "label": "manifest registers classification action row",
       "pass": true
     },
     {
-      "label": "manifest uses the classification assistance fragment",
+      "label": "manifest uses the classification action row fragment",
       "pass": true
     },
     {
-      "label": "assignment remains after classification assistance",
+      "label": "classification action row has no standalone section title",
       "pass": true
     },
     {
-      "label": "i18n.properties has classificationReviewSectionTitle",
+      "label": "manifest does not register the old standalone classification assistance section",
+      "pass": true
+    },
+    {
+      "label": "assignment remains after classification action row",
       "pass": true
     },
     {
@@ -164,10 +168,6 @@
     },
     {
       "label": "i18n.properties has classificationReviewConfidence",
-      "pass": true
-    },
-    {
-      "label": "i18n.properties classificationReviewSectionTitle is user-facing",
       "pass": true
     },
     {
@@ -255,10 +255,6 @@
       "pass": true
     },
     {
-      "label": "i18n_en.properties has classificationReviewSectionTitle",
-      "pass": true
-    },
-    {
       "label": "i18n_en.properties has classificationReviewSectionHint",
       "pass": true
     },
@@ -336,10 +332,6 @@
     },
     {
       "label": "i18n_en.properties has classificationReviewConfidence",
-      "pass": true
-    },
-    {
-      "label": "i18n_en.properties classificationReviewSectionTitle is user-facing",
       "pass": true
     },
     {

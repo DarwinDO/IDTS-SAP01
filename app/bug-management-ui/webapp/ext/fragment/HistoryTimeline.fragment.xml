@@ -1,8 +1,26 @@
 <core:FragmentDefinition
   xmlns="sap.m"
   xmlns:core="sap.ui.core"
+  xmlns:section="idts.bugmanagementui.ext.controls"
 >
   <VBox class="sapUiSmallMarginTop">
+    <section:SmartAssignmentSection
+      class="sapUiTinyMarginBottom"
+      visible="{= ${IsActiveEntity} === true }"
+    >
+      <Toolbar>
+        <Text text="{i18n>handoffSummarySectionHint}" />
+        <ToolbarSpacer />
+        <Button
+          core:require="{ HandoffSummaryReview: 'idts/bugmanagementui/ext/actions/HandoffSummaryReview' }"
+          text="{i18n>handoffSummaryOpenButton}"
+          icon="sap-icon://document-text"
+          type="Default"
+          press="HandoffSummaryReview.openDialog"
+        />
+      </Toolbar>
+    </section:SmartAssignmentSection>
+
     <List
       id="historyTimelineList"
       items="{

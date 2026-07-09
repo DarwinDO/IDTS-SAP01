@@ -418,3 +418,59 @@ Anchor quan trọng:
   **Khái niệm IDTS**: handoff summary nằm gần History.
   **Ảnh hưởng nếu sai**: user có thể thấy handoff review quá sớm và không thấy liên kết với lifecycle/audit context.
   **Phải kiểm tra cùng**: `HandoffSummarySection.fragment.xml`, `HistoryTimeline.fragment.xml`, và browser smoke.
+
+## IDTS-78 correction - AI actions must not be standalone Object Page sections
+
+### English
+
+IDTS-78 supersedes the IDTS-77 placement note above. IDTS-77 moved AI actions near the right business areas, but it still rendered them as separate Object Page sections with their own titles. DonHV clarified that the row style is acceptable, but the AI actions must not appear as standalone titled sections.
+
+Corrected rule:
+
+- `Find Similar Bugs` is a helper action for Bug Summary, not a visible `Similar Bug Check` section.
+- `Review Classification Suggestions` is a helper action for Classification and Planning, not a visible `Classification Assistance` section.
+- `Review Handoff Summary` is rendered inside the History fragment, not as a visible `Handoff Summary` section before or after History.
+
+Important anchors:
+
+- **Location**: `BugsObjectPage.options.settings.content.body.sections.IdtsSimilarBugActionRow`
+  **IDTS concept**: Similar-bug review stays near Bug Summary but has no standalone section title.
+  **Impact if broken**: Users may again see a separate AI section and misunderstand the action as its own workflow area.
+  **Must check together**: `SimilarBugCheckSection.fragment.xml`, `DuplicateReview.js`, and `scripts/qa/test-idts77-ai-action-placement.js`.
+
+- **Location**: `BugsObjectPage.options.settings.content.body.sections.IdtsClassificationActionRow`
+  **IDTS concept**: Classification review stays near classification fields but has no standalone section title.
+  **Impact if broken**: Users may think AI classification is a separate workflow step instead of review assistance.
+  **Must check together**: `ClassificationAssistanceSection.fragment.xml`, `ClassificationReview.js`, and `scripts/qa/test-idts75-classification-review-ui.js`.
+
+- **Location**: removed `BugsObjectPage.options.settings.content.body.sections.IdtsHandoffSummary`
+  **IDTS concept**: Handoff review belongs inside History because it summarizes lifecycle context.
+  **Impact if broken**: The page can show the standalone Handoff Summary section again.
+  **Must check together**: `HistoryTimeline.fragment.xml`, `HandoffSummaryReview.js`, and `scripts/qa/test-idts76-handoff-summary-ui.js`.
+
+### Vietnamese
+
+IDTS-78 thay thế ghi chú placement IDTS-77 ở trên. IDTS-77 đã đưa các action AI tới gần khu vực nghiệp vụ hơn, nhưng vẫn render chúng thành các section Object Page riêng có title riêng. DonHV đã chốt rõ: kiểu row mỏng là được, nhưng action AI không được xuất hiện như các section có tiêu đề riêng.
+
+Rule đúng sau khi sửa:
+
+- `Find Similar Bugs` là helper action cho Bug Summary, không phải section `Similar Bug Check` riêng.
+- `Review Classification Suggestions` là helper action cho Classification and Planning, không phải section `Classification Assistance` riêng.
+- `Review Handoff Summary` được render bên trong History fragment, không phải section `Handoff Summary` riêng trước hoặc sau History.
+
+Anchor quan trọng:
+
+- **Vị trí**: `BugsObjectPage.options.settings.content.body.sections.IdtsSimilarBugActionRow`
+  **Khái niệm IDTS**: Review similar bug nằm gần Bug Summary nhưng không có title section riêng.
+  **Ảnh hưởng nếu sai**: User có thể lại thấy một section AI riêng và hiểu nhầm action này là một workflow area độc lập.
+  **Phải kiểm tra cùng**: `SimilarBugCheckSection.fragment.xml`, `DuplicateReview.js`, và `scripts/qa/test-idts77-ai-action-placement.js`.
+
+- **Vị trí**: `BugsObjectPage.options.settings.content.body.sections.IdtsClassificationActionRow`
+  **Khái niệm IDTS**: Review classification nằm gần các field classification nhưng không có title section riêng.
+  **Ảnh hưởng nếu sai**: User có thể tưởng AI classification là một workflow step riêng thay vì công cụ hỗ trợ review.
+  **Phải kiểm tra cùng**: `ClassificationAssistanceSection.fragment.xml`, `ClassificationReview.js`, và `scripts/qa/test-idts75-classification-review-ui.js`.
+
+- **Vị trí**: đã bỏ `BugsObjectPage.options.settings.content.body.sections.IdtsHandoffSummary`
+  **Khái niệm IDTS**: Handoff review nằm trong History vì nó tóm tắt lifecycle context.
+  **Ảnh hưởng nếu sai**: Trang có thể hiện lại section Handoff Summary riêng.
+  **Phải kiểm tra cùng**: `HistoryTimeline.fragment.xml`, `HandoffSummaryReview.js`, và `scripts/qa/test-idts76-handoff-summary-ui.js`.

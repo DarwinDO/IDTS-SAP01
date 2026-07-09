@@ -94,5 +94,29 @@ Fragment này là điểm chèn nhỏ đó. Nó không chứa logic AI. Nó ch�
 
 - Source file: `app/bug-management-ui/webapp/ext/fragment/ClassificationAssistanceSection.fragment.xml`
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/ext/fragment/ClassificationAssistanceSection.fragment.xml.md`
+
+## 2026-07-10 Update: Classification review is an action row, not a standalone section
+
+### English
+
+IDTS-78 keeps this fragment as the entry point for `Review Classification Suggestions`, but the Object Page must not show it as a separate titled `Classification Assistance` section. The row belongs near Classification and Planning because it helps users review classification fields before making a final human decision.
+
+Important anchor:
+
+- **Location**: root `section:SmartAssignmentSection` with `ClassificationReview.openDialog`
+  **IDTS concept**: Classification suggestion is review assistance for SAP Module, Application Component, Defect Category, Priority, and Severity. It does not apply values automatically.
+  **Impact if broken**: Users may think AI classification is an independent workflow step or that AI can update classification by itself.
+  **Must check together**: `manifest.json` key `IdtsClassificationActionRow`, `ClassificationReview.js`, i18n `classificationReviewSectionHint`, and `scripts/qa/test-idts75-classification-review-ui.js`.
+
+### Vietnamese
+
+IDTS-78 vẫn giữ fragment này làm điểm vào cho `Review Classification Suggestions`, nhưng Object Page không được hiển thị nó như section riêng có tiêu đề `Classification Assistance`. Row này thuộc gần Classification and Planning vì nó hỗ trợ user review các field classification trước khi tự quyết định giá trị cuối.
+
+Anchor quan trọng:
+
+- **Vị trí**: root `section:SmartAssignmentSection` có `ClassificationReview.openDialog`
+  **Khái niệm IDTS**: Classification suggestion chỉ hỗ trợ review SAP Module, Application Component, Defect Category, Priority và Severity. Nó không tự apply giá trị.
+  **Ảnh hưởng nếu sai**: User có thể tưởng AI classification là workflow step độc lập hoặc AI có quyền tự cập nhật classification.
+  **Phải kiểm tra cùng**: `manifest.json` key `IdtsClassificationActionRow`, `ClassificationReview.js`, i18n `classificationReviewSectionHint`, và `scripts/qa/test-idts75-classification-review-ui.js`.
 - Source layer: `app`
 - Last reviewed: 2026-07-09

@@ -259,3 +259,25 @@ English locale bundle này mirror `similarBugReviewSectionTitle` và `similarBug
 Nếu sai, user dùng English locale có thể thấy raw i18n key hoặc copy nghe quá kỹ thuật thay vì copy sản phẩm.
 
 Phải kiểm tra cùng: base `i18n.properties`, `SimilarBugCheckSection.fragment.xml`, `manifest.json`, và `scripts/qa/test-idts77-ai-action-placement.js`.
+
+## IDTS-78 correction - English AI action rows no longer use standalone section title keys
+
+### English
+
+IDTS-78 removes the English Object Page section title keys for the AI helper rows:
+
+- `similarBugReviewSectionTitle`
+- `classificationReviewSectionTitle`
+- `handoffSummarySectionTitle`
+
+The English bundle still mirrors the helper text, button labels, dialog labels, safe failure messages, and review status wording from the base bundle. This keeps the UI understandable without showing separate AI sections.
+
+### Vietnamese
+
+IDTS-78 xóa các key title section tiếng Anh cho các AI helper row trên Object Page:
+
+- `similarBugReviewSectionTitle`
+- `classificationReviewSectionTitle`
+- `handoffSummarySectionTitle`
+
+English bundle vẫn mirror helper text, label nút, label dialog, safe failure message và review status wording từ base bundle. Cách này giữ UI dễ hiểu nhưng không hiển thị các section AI riêng.

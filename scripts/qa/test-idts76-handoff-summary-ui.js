@@ -38,7 +38,7 @@ function parseProperties (relativePath) {
 }
 
 const controller = read('app/bug-management-ui/webapp/ext/actions/HandoffSummaryReview.js')
-const fragment = read('app/bug-management-ui/webapp/ext/fragment/HandoffSummarySection.fragment.xml')
+const fragment = read('app/bug-management-ui/webapp/ext/fragment/HistoryTimeline.fragment.xml')
 const manifest = JSON.parse(read('app/bug-management-ui/webapp/manifest.json'))
 const i18nFiles = [
   'app/bug-management-ui/webapp/i18n/i18n.properties',
@@ -48,8 +48,8 @@ const forbiddenUserCopy = /\b(prompt|token|model|provider|architecture|debug|sta
 const section = manifest['sap.ui5'].routing.targets.BugsObjectPage.options.settings.content.body.sections
 
 const checks = [
-  expectIncludes('handoff section opens the review dialog', fragment, 'HandoffSummaryReview.openDialog'),
-  expectIncludes('handoff section loads the UI5 action module', fragment, 'idts/bugmanagementui/ext/actions/HandoffSummaryReview'),
+  expectIncludes('history section opens the handoff review dialog', fragment, 'HandoffSummaryReview.openDialog'),
+  expectIncludes('history section loads the UI5 action module', fragment, 'idts/bugmanagementui/ext/actions/HandoffSummaryReview'),
   expectIncludes('handoff review calls the existing CAP action', controller, '/summarizeBugHandoff(...)'),
   expectIncludes('handoff review sends source bug ID', controller, 'operation.setParameter("sourceBugID"'),
   expectIncludes('handoff review uses reusable AI review mapping', controller, 'AiReviewUi.decorateResult'),
@@ -72,21 +72,12 @@ const checks = [
   expectNotMatches('handoff review controller does not embed raw HTML', controller, /<(div|span|style|table)\b/i)
 ]
 
-assert(section.IdtsHandoffSummary, 'manifest must register IdtsHandoffSummary')
-checks.push({ label: 'manifest registers handoff summary section', pass: true })
-assert.strictEqual(
-  section.IdtsHandoffSummary.template,
-  'idts.bugmanagementui.ext.fragment.HandoffSummarySection'
-)
-checks.push({ label: 'manifest uses the handoff summary fragment', pass: true })
-assert.strictEqual(section.IdtsHandoffSummary.position.anchor, 'History')
-assert.strictEqual(section.IdtsHandoffSummary.position.placement, 'Before')
-checks.push({ label: 'handoff summary appears before History', pass: true })
-assert.strictEqual(section.IdtsSmartAssignment.position.anchor, 'IdtsClassificationAssistance')
-checks.push({ label: 'smart assignment appears after classification assistance', pass: true })
+assert(!section.IdtsHandoffSummary, 'manifest must not register standalone IdtsHandoffSummary section')
+checks.push({ label: 'manifest no longer registers standalone handoff summary section', pass: true })
+assert.strictEqual(section.IdtsSmartAssignment.position.anchor, 'IdtsClassificationActionRow')
+checks.push({ label: 'smart assignment appears after classification action row', pass: true })
 
 const requiredI18nKeys = [
-  'handoffSummarySectionTitle',
   'handoffSummarySectionHint',
   'handoffSummaryOpenButton',
   'handoffSummaryDialogTitle',
