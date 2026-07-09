@@ -1,0 +1,34 @@
+{
+  "task": "IDTS-73",
+  "checkedAt": "2026-07-09T07:04:13.045Z",
+  "target": "local",
+  "fullUpload": true,
+  "results": [
+    {
+      "check": "pending-files-before-save",
+      "passed": true,
+      "count": 2
+    },
+    {
+      "check": "unsupported-file-rejected",
+      "passed": true
+    },
+    {
+      "check": "oversized-file-rejected",
+      "passed": true
+    },
+    {
+      "check": "post-save-upload-and-hash",
+      "passed": true,
+      "files": 2
+    },
+    {
+      "check": "post-save-reload",
+      "passed": true
+    },
+    {
+      "check": "safe-upload-failure",
+      "passed": true
+    }
+  ]
+}
