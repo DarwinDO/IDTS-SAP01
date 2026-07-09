@@ -2052,3 +2052,18 @@ Vietnamese:
 | Product/UI defect | Shared QA vẫn hiện các section AI riêng: `Similar Bug Check`, `Classification Assistance`, và `Handoff Summary`. | IDTS-77 đã đưa action AI tới gần đúng khu vực nghiệp vụ nhưng vẫn đăng ký chúng là custom section riêng trong manifest và có title hiển thị. | Đang xử lý. Đã bỏ các section manifest riêng, đổi Similar/Classification thành action row không có title, chuyển Handoff Summary vào History fragment, và cập nhật static QA expectation. | Static check IDTS-74/75/76/77 đã pass. Cần cài dependency trong worktree sạch, chạy CAP compile, browser smoke, PR, deploy và shared-QA evidence. |
 | Environment blocker | `npx cds compile srv app/bug-management-ui --to edmx -s all` fail trong worktree sạch vì thiếu `@cap-js/attachments`. | Git worktree mới không dùng chung `node_modules` với root checkout. | Đang xử lý bằng cách cài dependency project trong worktree. Đây không phải product defect. | Chạy lại CAP compile sau `npm ci --include=dev`. |
 | Tooling issue | `npx ui5 build --config app/bug-management-ui/ui5.yaml` fail vì root `package.json` thiếu field `name`. | UI5 CLI đọc root workspace package thay vì package của app khi gọi từ repo root kèm config path. | Đã xử lý bằng cách chạy UI5 build từ `app/bug-management-ui`. Đây không phải product defect. | Với UI5 build focused, dùng working directory của app. |
+## 2026-07-10 - IDTS-78 shared-QA deploy evidence
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Shared-QA closure | PR #138 was merged into `dev` and Render deploy `dep-d97u1ii8qa3s73fdk630` is live at commit `fbfcd7e`. | The previous shared-QA deploy still served PR #136, so DonHV still saw standalone AI sections. | Complete. Triggered Render deploy manually because auto-deploy had not produced a new deploy entry yet. | Auth metadata returned HTTP 200. Deployed manifest contains `IdtsSimilarBugActionRow` and `IdtsClassificationActionRow`, no longer contains `IdtsSimilarBugCheck`, `IdtsClassificationAssistance`, or `IdtsHandoffSummary`; deployed History fragment contains `HandoffSummaryReview.openDialog`. |
+| Tooling issue | `gh pr merge 138 --squash --delete-branch` reported `dev is already used by worktree at E:/IDTS-SAP01`. | GitHub CLI completed the remote PR merge but failed during local branch/base cleanup because root worktree owns local `dev`. | Resolved. Verified PR #138 state is `MERGED`; used Render CLI to deploy merged commit. | Future merges from auxiliary worktrees should prefer API/remote-only merge or avoid local base-branch cleanup. |
+
+Vietnamese:
+
+| Phân loại | Triệu chứng / công việc | Nguyên nhân | Trạng thái xử lý | Verify / bước tiếp theo |
+| --- | --- | --- | --- | --- |
+| Shared-QA closure | PR #138 đã merge vào `dev` và Render deploy `dep-d97u1ii8qa3s73fdk630` đang live ở commit `fbfcd7e`. | Shared QA trước đó vẫn chạy PR #136 nên DonHV vẫn thấy các section AI riêng. | Hoàn tất. Đã trigger Render deploy thủ công vì auto-deploy chưa tạo deploy entry mới. | Auth metadata trả HTTP 200. Manifest đã deploy có `IdtsSimilarBugActionRow` và `IdtsClassificationActionRow`, không còn `IdtsSimilarBugCheck`, `IdtsClassificationAssistance`, hoặc `IdtsHandoffSummary`; History fragment đã deploy có `HandoffSummaryReview.openDialog`. |
+| Tooling issue | `gh pr merge 138 --squash --delete-branch` báo `dev is already used by worktree at E:/IDTS-SAP01`. | GitHub CLI đã merge PR trên remote nhưng fail ở bước cleanup local vì root worktree đang giữ branch `dev`. | Đã xử lý. Đã verify PR #138 là `MERGED`; dùng Render CLI deploy commit đã merge. | Lần sau khi merge từ auxiliary worktree nên dùng API/remote-only merge hoặc tránh cleanup local branch base. |
