@@ -76,7 +76,7 @@ LABELS = {
             ("IDTS-FE-004", "English", "A reason is required for this lifecycle transition.", "On request information, reject, resolve, or reopen when required"),
         ],
         "processing": [
-            "System hides system-managed and active-only sections while creating a new draft. Comments, attachments, history, notifications, planning, rejected follow-up, status, reporter, next processor, created date, and updated date are not editable during creation.",
+            "System hides system-managed and active-only collaboration sections while creating a new draft. Comments, history, notifications, planning, rejected follow-up, status, reporter, next processor, created date, and updated date are not editable during creation. Evidence files may be selected during create and are uploaded after the bug is saved.",
             "Assignee uses a dedicated AssignableDevelopers value help projection with developer name, email, availability, application component, defect category, SAP module scope, and responsibility level.",
             "After assignee selection, side effects refresh assigneeDisplayName so the UI displays the developer name instead of the raw UUID.",
             "On create, CAP handlers overwrite bugNumber, status_code, and reporter_ID. Client-provided values for system-managed fields are not trusted.",
@@ -165,7 +165,7 @@ LABELS = {
             ("IDTS-FE-004", "Vietnamese", "Transition này bắt buộc phải có lý do hoặc ghi chú.", "Khi request information, reject, resolve hoặc reopen nếu bắt buộc"),
         ],
         "processing": [
-            "Hệ thống ẩn các section system-managed và active-only khi tạo draft mới. Comments, attachments, history, notifications, planning, rejected follow-up, status, reporter, next processor, created date và updated date không được edit khi tạo mới.",
+            "Hệ thống ẩn các section collaboration system-managed và active-only khi tạo draft mới. Comments, history, notifications, planning, rejected follow-up, status, reporter, next processor, created date và updated date không được edit khi tạo mới. Evidence files có thể được chọn trong lúc create và được upload sau khi bug được lưu.",
             "Assignee dùng projection value help riêng AssignableDevelopers với developer name, email, availability, application component, defect category, SAP module scope và responsibility level.",
             "Sau khi chọn assignee, side effect refresh assigneeDisplayName để UI hiển thị tên developer thay vì UUID.",
             "Khi tạo bug, CAP handler ghi đè bugNumber, status_code và reporter_ID. Client không được tự quyết định các trường system-managed.",

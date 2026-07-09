@@ -1,0 +1,70 @@
+{
+  "task": "IDTS-73",
+  "checkedAt": "2026-07-09T05:54:42.345Z",
+  "checks": [
+    {
+      "label": "manifest hides Comments custom section on create draft",
+      "pass": true
+    },
+    {
+      "label": "comments section is hidden only for create drafts",
+      "pass": true
+    },
+    {
+      "label": "attachment section flushes pending files after active save",
+      "pass": true
+    },
+    {
+      "label": "attachment uploader allows selecting more than one file",
+      "pass": true
+    },
+    {
+      "label": "attachment uploader is enabled for create drafts",
+      "pass": true
+    },
+    {
+      "label": "pending attachment list is visible on create draft",
+      "pass": true
+    },
+    {
+      "label": "pending list uses selected-file model",
+      "pass": true
+    },
+    {
+      "label": "custom section has create-hide property",
+      "pass": true
+    },
+    {
+      "label": "custom section has pending-upload property",
+      "pass": true
+    },
+    {
+      "label": "custom section hides nearest ObjectPage subsection",
+      "pass": true
+    },
+    {
+      "label": "collaboration controller keeps files in memory by bug id",
+      "pass": true
+    },
+    {
+      "label": "collaboration controller detects create draft context",
+      "pass": true
+    },
+    {
+      "label": "collaboration controller flushes files after save",
+      "pass": true
+    },
+    {
+      "label": "collaboration controller reuses saved-bug upload flow",
+      "pass": true
+    },
+    {
+      "label": "pending attachment no-data text exists",
+      "pass": true
+    },
+    {
+      "label": "create attachment UI must not expose internal auth/deploy explanation",
+      "pass": true
+    }
+  ]
+}

@@ -3,7 +3,7 @@
   xmlns:core="sap.ui.core"
   xmlns:collab="idts.bugmanagementui.ext.controls"
 >
-  <collab:BugCollaborationSection class="sapUiSmallMarginTop sapUiSmallMarginBottom">
+  <collab:BugCollaborationSection hideOnCreate="true" class="sapUiSmallMarginTop sapUiSmallMarginBottom">
     <Panel
       backgroundDesign="Transparent"
       expandable="false"

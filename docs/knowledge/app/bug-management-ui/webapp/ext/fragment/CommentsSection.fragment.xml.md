@@ -172,3 +172,26 @@ Nếu sửa file này, browser smoke phải verify:
 - Comment mới hiện ngay.
 - Reload trang vẫn thấy comment đó.
 - Console không có formatter fatal error.
+## IDTS-73 create-page hiding notes
+
+### English
+
+IDTS-73 marks the root `BugCollaborationSection` with `hideOnCreate="true"`. This means the Comments section is not shown while a user is creating a brand-new bug. That behavior is intentional: comments are follow-up conversation after a bug exists, while the create page should focus on the initial report fields and optional evidence files.
+
+Important anchor:
+
+- **Location**: root `<collab:BugCollaborationSection hideOnCreate="true">`
+  **IDTS concept**: Create Bug should not show collaboration-only UI.
+  **Impact if broken**: Users see a disabled Comments section during create and may think comments are required or broken.
+  **Must check together**: `BugCollaborationSection.js`, `BugCollaboration.js:isCreateDraftContext`, and browser create-page smoke.
+
+### Vietnamese
+
+IDTS-73 đánh dấu root `BugCollaborationSection` bằng `hideOnCreate="true"`. Điều này nghĩa là Comments section không hiện khi user đang tạo bug mới. Đây là hành vi có chủ ý: comment là phần trao đổi sau khi bug đã tồn tại, còn create page nên tập trung vào các field báo lỗi ban đầu và các evidence file nếu có.
+
+Anchor quan trọng:
+
+- **Vị trí**: root `<collab:BugCollaborationSection hideOnCreate="true">`
+  **Khái niệm IDTS**: Create Bug không nên hiện UI chỉ dành cho cộng tác sau khi bug đã được tạo.
+  **Ảnh hưởng nếu sai**: User thấy Comments section bị disabled khi create và có thể nghĩ comment là bắt buộc hoặc bị lỗi.
+  **Phải kiểm tra cùng**: `BugCollaborationSection.js`, `BugCollaboration.js:isCreateDraftContext`, và browser smoke cho create page.

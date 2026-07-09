@@ -218,6 +218,54 @@ These rules were added because the browser found real runtime failures that stat
 
 IDTS-58 kept the comment sender in `FeedListItem.sender` and changed `formatAuthorInfo(...)` so the info line shows role/timestamp context without repeating the same display name again. Browser smoke should therefore confirm that the page no longer contains patterns like `DonHV - Project Manager` while the sender label itself still shows `DonHV`.
 
+## IDTS-73 create-page attachment notes
+
+### English
+
+IDTS-73 changes this module so attachments can be selected while the user is still creating a new bug. The file is not uploaded immediately because a new draft bug does not yet have a stable active bug record. Instead, the selected browser `File` objects are kept only in memory, keyed by the draft bug ID. After Fiori Elements saves the new bug and the Object Page receives the active bug context, `flushPendingCreateAttachments(...)` reuses the same saved-bug upload sequence that existing attachments already use: draft edit, create attachment metadata, PUT binary content, then draft activate.
+
+This is intentionally a UI-only pending queue. There is no temporary S3 object, no extra backend temp table, and no public temporary upload endpoint. If the browser tab is closed before Save, the selected files are lost, which is safer than leaving orphan files in object storage.
+
+Important anchors added by IDTS-73:
+
+- **Location**: `pendingCreateAttachmentsByBugId`
+  **IDTS concept**: Browser-memory holding area for files selected during Create Bug.
+  **Impact if broken**: Files selected before Save may disappear silently or upload to the wrong bug.
+  **Must check together**: `AttachmentsSection.fragment.xml`, `BugCollaborationSection.js`, and `scripts/qa/test-idts73-create-attachments-ui.js`.
+
+- **Location**: `isCreateDraftContext(context)`
+  **IDTS concept**: A brand-new bug draft is different from editing an existing active bug.
+  **Impact if broken**: The UI may either block valid create-time file selection or allow unsafe writes to an edit draft.
+  **Must check together**: Fiori Object Page create flow and draft properties `IsActiveEntity`, `HasActiveEntity`, and `HasDraftEntity`.
+
+- **Location**: `uploadFilesToSavedBug(...)`
+  **IDTS concept**: One shared upload implementation for both existing bugs and files selected during create.
+  **Impact if broken**: IDTS may pass one path but fail the other, creating inconsistent attachment behavior.
+  **Must check together**: `scripts/qa/test-comments-attachments-programmatic.js`, the HTTP draft attachment script, and shared QA upload smoke.
+
+### Vietnamese
+
+IDTS-73 thay đổi module này để người dùng có thể chọn attachment ngay khi đang tạo bug mới. File chưa được upload ngay vì draft bug mới chưa có bản ghi active ổn định. Thay vào đó, các browser `File` object chỉ được giữ trong bộ nhớ của tab, theo draft bug ID. Sau khi Fiori Elements lưu bug mới và Object Page nhận context của bug active, `flushPendingCreateAttachments(...)` dùng lại đúng sequence upload đã có cho bug đã lưu: draft edit, tạo metadata attachment, PUT binary content, rồi draft activate.
+
+Đây là hàng đợi tạm chỉ ở phía UI. Không có file tạm trên S3, không có bảng temp backend mới, và không có public temporary upload endpoint. Nếu đóng tab trước khi Save, các file đã chọn sẽ mất; cách này an toàn hơn việc để lại file mồ côi trong object storage.
+
+Các anchor quan trọng thêm bởi IDTS-73:
+
+- **Vị trí**: `pendingCreateAttachmentsByBugId`
+  **Khái niệm IDTS**: Nơi giữ file trong bộ nhớ browser khi user chọn file trong lúc Create Bug.
+  **Ảnh hưởng nếu sai**: File chọn trước khi Save có thể mất âm thầm hoặc bị upload vào sai bug.
+  **Phải kiểm tra cùng**: `AttachmentsSection.fragment.xml`, `BugCollaborationSection.js`, và `scripts/qa/test-idts73-create-attachments-ui.js`.
+
+- **Vị trí**: `isCreateDraftContext(context)`
+  **Khái niệm IDTS**: Draft của bug mới khác với draft khi đang chỉnh một bug active đã tồn tại.
+  **Ảnh hưởng nếu sai**: UI có thể chặn nhầm việc chọn file khi tạo mới, hoặc cho phép ghi không an toàn vào edit draft.
+  **Phải kiểm tra cùng**: Fiori Object Page create flow và các draft property `IsActiveEntity`, `HasActiveEntity`, `HasDraftEntity`.
+
+- **Vị trí**: `uploadFilesToSavedBug(...)`
+  **Khái niệm IDTS**: Một implementation upload dùng chung cho cả bug đã lưu và file được chọn trong lúc tạo bug.
+  **Ảnh hưởng nếu sai**: Một flow có thể pass còn flow còn lại fail, làm behavior attachment không nhất quán.
+  **Phải kiểm tra cùng**: `scripts/qa/test-comments-attachments-programmatic.js`, HTTP draft attachment script, và shared QA upload smoke.
+
 The same smoke also verified that attachment upload still works after the UI cleanup. That matters because this module owns both the visible comment/feed behavior and the draft-based attachment sequence.
 
 ### Vietnamese

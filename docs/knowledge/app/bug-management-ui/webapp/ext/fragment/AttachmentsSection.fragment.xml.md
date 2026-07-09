@@ -178,6 +178,54 @@ If this file changes, browser smoke must verify:
 - Upload shows the new file in the table.
 - Download returns the selected file.
 - Remove opens confirmation and deletes the file.
+
+## IDTS-73 create-time attachment selection notes
+
+### English
+
+IDTS-73 changes this fragment so the upload button is enabled not only for saved active bugs, but also for a brand-new Create Bug draft. On create, selecting a file does not write to S3 yet. The selected file name appears in the pending list, and `BugCollaboration.js` keeps the real browser file object in memory. After Save, the normal attachment upload flow runs against the newly saved bug.
+
+The Comments section is hidden on create, but Attachments remains visible because evidence can be part of the initial report. This gives testers a single Create Bug flow without needing to save first and then remember to upload evidence later.
+
+Important anchors:
+
+- **Location**: `multiple="true"`
+  **IDTS concept**: A tester can select more than one evidence file before saving the bug.
+  **Impact if broken**: Users may need repeated upload actions and can miss evidence during initial reporting.
+  **Must check together**: `BugCollaboration.js:validateAttachments` and browser create smoke.
+
+- **Location**: `enabled="{= ... ${HasActiveEntity} !== true ... }"`
+  **IDTS concept**: File selection is allowed for create drafts but still blocked for unsafe edit-draft states.
+  **Impact if broken**: Upload can be disabled on create, or enabled while an existing bug has a draft conflict.
+  **Must check together**: CAP draft behavior and `BugCollaboration.js:isCreateDraftContext`.
+
+- **Location**: `idtsPendingAttachmentsList`
+  **IDTS concept**: Shows selected local files before they are uploaded after Save.
+  **Impact if broken**: Button-only upload would give users no visible confirmation of which files are queued.
+  **Must check together**: `attachmentsPendingNoData` i18n key and IDTS-73 static QA script.
+
+### Vietnamese
+
+IDTS-73 thay đổi fragment này để nút upload được bật không chỉ trên bug active đã lưu, mà cả trên draft của màn hình Create Bug. Khi đang create, chọn file chưa ghi lên S3. Tên file đã chọn sẽ hiện trong pending list, còn `BugCollaboration.js` giữ browser file object thật trong bộ nhớ. Sau khi Save, flow upload attachment bình thường sẽ chạy trên bug vừa được lưu.
+
+Comments section bị ẩn khi create, nhưng Attachments vẫn hiện vì evidence có thể là một phần của báo cáo ban đầu. Cách này giúp tester tạo bug trong một flow duy nhất, không phải Save trước rồi nhớ quay lại upload evidence sau.
+
+Các anchor quan trọng:
+
+- **Vị trí**: `multiple="true"`
+  **Khái niệm IDTS**: Tester có thể chọn nhiều file evidence trước khi lưu bug.
+  **Ảnh hưởng nếu sai**: User phải upload lặp lại nhiều lần và có thể quên evidence trong lúc report ban đầu.
+  **Phải kiểm tra cùng**: `BugCollaboration.js:validateAttachments` và browser smoke cho create.
+
+- **Vị trí**: `enabled="{= ... ${HasActiveEntity} !== true ... }"`
+  **Khái niệm IDTS**: Cho phép chọn file ở create draft nhưng vẫn chặn các trạng thái edit draft không an toàn.
+  **Ảnh hưởng nếu sai**: Upload có thể bị disable khi create, hoặc bị enable khi bug đã có draft conflict.
+  **Phải kiểm tra cùng**: CAP draft behavior và `BugCollaboration.js:isCreateDraftContext`.
+
+- **Vị trí**: `idtsPendingAttachmentsList`
+  **Khái niệm IDTS**: Hiện các file local đã chọn trước khi chúng được upload sau Save.
+  **Ảnh hưởng nếu sai**: Nút upload dạng button-only sẽ không cho user biết file nào đang chờ upload.
+  **Phải kiểm tra cùng**: i18n key `attachmentsPendingNoData` và static QA script của IDTS-73.
 - The file row is gone after delete and no private storage URL is visible.
 
 ## IDTS-58 follow-up notes

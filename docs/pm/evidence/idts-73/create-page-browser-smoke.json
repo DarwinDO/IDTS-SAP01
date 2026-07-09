@@ -1,0 +1,11 @@
+{
+  "task": "IDTS-73",
+  "checkedAt": "2026-07-09T05:52:55.585Z",
+  "url": "http://localhost:4004/idts.bugmanagementui/index.html#/Bugs(ID=<redacted>)",
+  "commentsTextVisible": false,
+  "uploadEvidenceVisible": true,
+  "uploadEvidenceEnabled": true,
+  "unexpectedConsoleCount": 0,
+  "knownLocalToolingMessageCount": 14,
+  "unexpectedConsoleMessages": []
+}

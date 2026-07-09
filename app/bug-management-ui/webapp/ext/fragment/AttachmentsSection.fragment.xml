@@ -4,7 +4,7 @@
   xmlns:unified="sap.ui.unified"
   xmlns:collab="idts.bugmanagementui.ext.controls"
 >
-  <collab:BugCollaborationSection class="sapUiSmallMarginTop sapUiSmallMarginBottom">
+  <collab:BugCollaborationSection uploadPendingAttachmentsOnActive="true" class="sapUiSmallMarginTop sapUiSmallMarginBottom">
     <Toolbar design="Transparent">
       <Title text="{i18n>attachmentsToolbarTitle}" level="H4" />
       <ToolbarSpacer />
@@ -14,12 +14,13 @@
         buttonOnly="true"
         buttonText="{i18n>attachmentsUploadButton}"
         icon="sap-icon://upload"
+        multiple="true"
         sameFilenameAllowed="true"
         maximumFileSize="10"
         fileType="txt,pdf,png,jpg,jpeg"
         mimeType="text/plain,application/pdf,image/png,image/jpeg"
         change="Collaboration.onAttachmentSelected"
-        enabled="{= ${IsActiveEntity} === true &amp;&amp; ${HasDraftEntity} !== true }"
+        enabled="{= (${IsActiveEntity} === true &amp;&amp; ${HasDraftEntity} !== true) || (${IsActiveEntity} !== true &amp;&amp; ${HasActiveEntity} !== true) }"
         tooltip="{i18n>attachmentsUploadTooltip}"
       />
     </Toolbar>
@@ -34,9 +35,26 @@
       text="{i18n>attachmentsDraftWarning}"
       type="Information"
       showIcon="true"
-      visible="{= ${IsActiveEntity} !== true || ${HasDraftEntity} === true }"
+      visible="{= (${IsActiveEntity} !== true &amp;&amp; ${HasActiveEntity} === true) || ${HasDraftEntity} === true }"
       class="sapUiTinyMarginBottom"
     />
+
+    <List
+      id="idtsPendingAttachmentsList"
+      items="{idtsPendingAttachments>/files}"
+      visible="{= ${IsActiveEntity} !== true &amp;&amp; ${HasActiveEntity} !== true }"
+      showSeparators="Inner"
+      noDataText="{i18n>attachmentsPendingNoData}"
+      class="sapUiTinyMarginBottom"
+    >
+      <StandardListItem
+        core:require="{ Collaboration: 'idts/bugmanagementui/ext/sections/BugCollaboration' }"
+        title="{idtsPendingAttachments>name}"
+        description="{idtsPendingAttachments>type}"
+        info="{ path: 'idtsPendingAttachments>size', formatter: 'Collaboration.formatFileSize' }"
+        icon="sap-icon://attachment"
+      />
+    </List>
 
     <Table
       id="idtsAttachmentsTable"

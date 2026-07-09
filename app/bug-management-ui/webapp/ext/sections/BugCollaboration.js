@@ -1,8 +1,9 @@
 sap.ui.define([
     "sap/m/MessageBox",
     "sap/m/MessageToast",
+    "sap/ui/model/json/JSONModel",
     "sap/ui/core/util/File"
-], function (MessageBox, MessageToast, FileUtil) {
+], function (MessageBox, MessageToast, JSONModel, FileUtil) {
     "use strict";
 
     var MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
@@ -12,6 +13,8 @@ sap.ui.define([
         "image/png": true,
         "image/jpeg": true
     };
+    var pendingCreateAttachmentsByBugId = Object.create(null);
+    var pendingCreateAttachmentUploadByBugId = Object.create(null);
 
     function normalizeServiceUrl(model) {
         if (model && typeof model.getServiceUrl === "function") {
@@ -38,6 +41,22 @@ sap.ui.define([
 
     function isBugContext(context) {
         return !!context && typeof context.getPath === "function" && /^\/Bugs\([^/]+\)$/.test(context.getPath());
+    }
+
+    function isCreateDraftContext(context) {
+        return !!context &&
+            context.getProperty("IsActiveEntity") !== true &&
+            context.getProperty("HasActiveEntity") !== true;
+    }
+
+    function isSavedActiveContext(context) {
+        return !!context &&
+            context.getProperty("IsActiveEntity") === true &&
+            context.getProperty("HasDraftEntity") !== true;
+    }
+
+    function bugIdFromContext(context) {
+        return context && context.getProperty ? context.getProperty("ID") : null;
     }
 
     function findBugContext(control) {
@@ -229,6 +248,88 @@ sap.ui.define([
         return true;
     }
 
+    function toFileArray(files) {
+        return Array.prototype.slice.call(files || []);
+    }
+
+    function validateAttachments(files) {
+        if (!files.length) {
+            showSafeError("Please choose a file to upload.");
+            return false;
+        }
+        return files.every(validateAttachment);
+    }
+
+    function pendingFileRows(files) {
+        return files.map(function (file) {
+            return {
+                name: file.name,
+                type: file.type || "application/octet-stream",
+                size: file.size
+            };
+        });
+    }
+
+    function setPendingAttachmentListModel(control, bugId) {
+        var list = findControlByLocalId(control, "idtsPendingAttachmentsList");
+        if (!list) {
+            return;
+        }
+        var files = bugId && pendingCreateAttachmentsByBugId[bugId]
+            ? pendingCreateAttachmentsByBugId[bugId]
+            : [];
+        list.setModel(new JSONModel({
+            files: pendingFileRows(files)
+        }), "idtsPendingAttachments");
+    }
+
+    function queuePendingCreateAttachments(source, bugContext, files) {
+        var bugId = bugIdFromContext(bugContext);
+        if (!bugId) {
+            showSafeError("The selected file could not be attached to this draft. Please refresh and try again.");
+            return;
+        }
+
+        pendingCreateAttachmentsByBugId[bugId] = (pendingCreateAttachmentsByBugId[bugId] || []).concat(files);
+        setPendingAttachmentListModel(source, bugId);
+        MessageToast.show(files.length === 1 ? "Evidence selected." : files.length + " evidence files selected.");
+    }
+
+    function uploadFilesToSavedBug(source, bugContext, files) {
+        var serviceUrl = normalizeServiceUrl(source.getModel());
+
+        return editDraft(serviceUrl, bugContext)
+            .then(function (draftPath) {
+                return files.reduce(function (chain, file) {
+                    return chain.then(function () {
+                        var attachmentId = createUuid();
+                        var contentType = file.type || "application/octet-stream";
+
+                        return requestJson(serviceUrl + draftPath + "/attachments", {
+                            method: "POST",
+                            body: {
+                                ID: attachmentId,
+                                filename: file.name,
+                                mimeType: contentType,
+                                fileSize: file.size
+                            }
+                        }).then(function () {
+                            return requestBinary(serviceUrl + "/Bugs_attachments(ID=" + attachmentId + ",IsActiveEntity=false)/content", {
+                                method: "PUT",
+                                headers: {
+                                    "Content-Type": contentType,
+                                    "Content-Disposition": "attachment; filename=\"" + encodeURIComponent(file.name) + "\""
+                                },
+                                body: file
+                            });
+                        });
+                    });
+                }, window.Promise.resolve()).then(function () {
+                    return activateDraft(serviceUrl, draftPath);
+                });
+            });
+    }
+
     return {
         onAddComment: function (event) {
             var source = event.getSource();
@@ -269,52 +370,32 @@ sap.ui.define([
         onAttachmentSelected: function (event) {
             var source = event.getSource();
             var bugContext = findBugContext(source);
+            var files = toFileArray(event.getParameter("files"));
+
+            if (!validateAttachments(files)) {
+                source.clear();
+                return;
+            }
+
+            if (isCreateDraftContext(bugContext)) {
+                queuePendingCreateAttachments(source, bugContext, files);
+                source.clear();
+                return;
+            }
+
             if (!assertSavedBug(bugContext)) {
                 source.clear();
                 return;
             }
 
-            var files = event.getParameter("files") || [];
-            var file = files[0];
-            if (!validateAttachment(file)) {
-                source.clear();
-                return;
-            }
-
-            var serviceUrl = normalizeServiceUrl(source.getModel());
-            var attachmentId = createUuid();
-            var contentType = file.type || "application/octet-stream";
-
             source.setEnabled(false);
-            editDraft(serviceUrl, bugContext)
-                .then(function (draftPath) {
-                    return requestJson(serviceUrl + draftPath + "/attachments", {
-                        method: "POST",
-                        body: {
-                            ID: attachmentId,
-                            filename: file.name,
-                            mimeType: contentType,
-                            fileSize: file.size
-                        }
-                    }).then(function () {
-                        return requestBinary(serviceUrl + "/Bugs_attachments(ID=" + attachmentId + ",IsActiveEntity=false)/content", {
-                            method: "PUT",
-                            headers: {
-                                "Content-Type": contentType,
-                                "Content-Disposition": "attachment; filename=\"" + encodeURIComponent(file.name) + "\""
-                            },
-                            body: file
-                        });
-                    }).then(function () {
-                        return activateDraft(serviceUrl, draftPath);
-                    });
-                })
+            uploadFilesToSavedBug(source, bugContext, files)
                 .then(function () {
                     source.clear();
                     return refreshBugContext(bugContext);
                 })
                 .then(function () {
-                    MessageToast.show("Evidence uploaded.");
+                    MessageToast.show(files.length === 1 ? "Evidence uploaded." : files.length + " evidence files uploaded.");
                 })
                 .catch(function () {
                     showSafeError("The file could not be uploaded. Please refresh and try again.");
@@ -427,6 +508,40 @@ sap.ui.define([
 
         formatUploader: function (value) {
             return value || "Current user";
+        },
+
+        isCreateDraftContext: isCreateDraftContext,
+
+        flushPendingCreateAttachments: function (source, bugContext) {
+            var bugId = bugIdFromContext(bugContext);
+            var files = bugId && pendingCreateAttachmentsByBugId[bugId]
+                ? pendingCreateAttachmentsByBugId[bugId]
+                : [];
+
+            setPendingAttachmentListModel(source, bugId);
+
+            if (!bugId || !files.length || !isSavedActiveContext(bugContext) || pendingCreateAttachmentUploadByBugId[bugId]) {
+                return;
+            }
+
+            pendingCreateAttachmentUploadByBugId[bugId] = true;
+            uploadFilesToSavedBug(source, bugContext, files)
+                .then(function () {
+                    delete pendingCreateAttachmentsByBugId[bugId];
+                    setPendingAttachmentListModel(source, bugId);
+                    return refreshBugContext(bugContext);
+                })
+                .then(function () {
+                    MessageToast.show(files.length === 1 ? "Evidence uploaded." : files.length + " evidence files uploaded.");
+                })
+                .catch(function () {
+                    delete pendingCreateAttachmentsByBugId[bugId];
+                    setPendingAttachmentListModel(source, bugId);
+                    showSafeError("The bug was saved, but the selected evidence could not be uploaded. Please upload it again from the saved bug.");
+                })
+                .finally(function () {
+                    delete pendingCreateAttachmentUploadByBugId[bugId];
+                });
         }
     };
 });
