@@ -205,3 +205,21 @@ Phai kiem tra cung: base `i18n.properties`, `SmartAssignmentSection.fragment.xml
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/i18n/i18n_en.properties.md`
 - Source layer: `app`
 - Last reviewed: 2026-07-01
+
+## IDTS-75 update - English classification review labels
+
+### English
+
+This English locale bundle mirrors every new `classificationReview*` key from the base bundle. It keeps the section title, button, comparison columns, status wording, confidence text, safe failure message, and Close action consistent for English users.
+
+Impact if broken: English locale users may see raw i18n keys or wording that fails to distinguish valid, uncertain, invalid, and unavailable suggestions.
+
+Must check together: base `i18n.properties`, `ClassificationAssistanceSection.fragment.xml`, `ClassificationReview.js`, and the IDTS-75 static/browser tests.
+
+### Vietnamese
+
+English locale bundle nay mirror day du cac key `classificationReview*` tu base bundle. No giu section title, button, cot so sanh, wording status, confidence, thong bao loi an toan va nut Close dong bo cho user dung English.
+
+Neu sai, user co the thay raw i18n key hoac wording khong phan biet duoc suggestion hop le, chua chac chan, invalid va unavailable.
+
+Phai kiem tra cung: base `i18n.properties`, `ClassificationAssistanceSection.fragment.xml`, `ClassificationReview.js` va static/browser test IDTS-75.

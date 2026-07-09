@@ -203,11 +203,19 @@
               "content": {
                 "body": {
                   "sections": {
+                    "IdtsClassificationAssistance": {
+                      "title": "{i18n>classificationReviewSectionTitle}",
+                      "template": "idts.bugmanagementui.ext.fragment.ClassificationAssistanceSection",
+                      "position": {
+                        "anchor": "ClassificationAndAssignment",
+                        "placement": "After"
+                      }
+                    },
                     "IdtsSmartAssignment": {
                       "title": "{i18n>smartAssignmentSectionTitle}",
                       "template": "idts.bugmanagementui.ext.fragment.SmartAssignmentSection",
                       "position": {
-                        "anchor": "ClassificationAndAssignment",
+                        "anchor": "IdtsClassificationAssistance",
                         "placement": "After"
                       }
                     },

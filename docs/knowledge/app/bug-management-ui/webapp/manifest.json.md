@@ -308,3 +308,31 @@ Anchor quan trong:
   **Khai niem IDTS**: Tranh hai diem assign canh tranh nhau.
   **Anh huong neu sai**: User lai thay ca nut Smart Assign rieng va field Assignee co picker, lam flow khong nhat quan.
   **Phai kiem tra cung**: Object Page browser smoke va acceptance criteria cua Jira IDTS-61.
+
+## IDTS-75 update - Classification Assistance section
+
+### English
+
+The Object Page now inserts `IdtsClassificationAssistance` immediately after the standard `ClassificationAndAssignment` section. The existing `IdtsSmartAssignment` section is anchored after this new section so the page order remains:
+
+1. standard classification and planning fields;
+2. classification suggestion review;
+3. assignment.
+
+- **Location**: `BugsObjectPage.options.settings.content.body.sections.IdtsClassificationAssistance`
+  **IDTS concept**: Gives users a visible Fiori entry point to review the existing classification suggestion action.
+  **Impact if broken**: IDTS-75 may disappear from the Object Page or Assignment may appear in the wrong order.
+  **Must check together**: `ClassificationAssistanceSection.fragment.xml`, `ClassificationReview.js`, i18n files, and IDTS-75 browser evidence.
+
+### Vietnamese
+
+Object Page hien chen `IdtsClassificationAssistance` ngay sau section chuan `ClassificationAndAssignment`. Section `IdtsSmartAssignment` duoc anchor sau section moi de thu tu trang van la:
+
+1. cac field classification va planning chuan;
+2. review goi y classification;
+3. assignment.
+
+- **Vi tri**: `BugsObjectPage.options.settings.content.body.sections.IdtsClassificationAssistance`
+  **Khai niem IDTS**: Tao diem vao Fiori ro rang de user review action goi y classification da co.
+  **Anh huong neu sai**: IDTS-75 co the bien mat khoi Object Page hoac Assignment hien sai thu tu.
+  **Phai kiem tra cung**: `ClassificationAssistanceSection.fragment.xml`, `ClassificationReview.js`, cac file i18n va browser evidence IDTS-75.
