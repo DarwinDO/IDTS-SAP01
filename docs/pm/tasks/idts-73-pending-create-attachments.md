@@ -39,11 +39,18 @@ Branch: `feature/idts-73-pending-create-attachments-donhv`
 - `npm run qa:secret-scan`
 - `git diff --check`
 - UI5 MCP manifest validation and linter pass.
+- Render deploy `dep-d97jml8k1i2s73e8p77g` reached `live` on commit `2f600d4437df3b059878eb61554ff212a6bbd750`.
+- Shared QA API smoke passed: auth metadata `200`, wrong password `401`, valid login token returned, anonymous protected OData `401`, authenticated Bugs read OK.
+- Shared QA browser smoke passed for create draft: Comments hidden, Evidence/Attachments uploader visible/enabled, selected pending file appears before Save.
 
 ## Evidence
 
 - `docs/pm/evidence/idts-73/create-attachment-static-check.json`
+- `docs/pm/evidence/idts-73/render-create-page-smoke.json`
+- `docs/pm/evidence/idts-73/render-create-page-smoke.png`
+- `docs/pm/evidence/idts-73/render-create-page-pending-file-selected.json`
+- `docs/pm/evidence/idts-73/render-create-page-pending-file-selected.png`
 
 ## Current status
 
-In Progress. Code and focused verification are complete locally; remaining work is final lint/AI DevKit check, PR, Jira evidence comment, merge, and shared QA smoke after deploy.
+Done. PR #123 merged into `dev`, Render shared QA deployed the merged commit, Jira evidence comment `10445` was added, and Jira `IDTS-73` was transitioned to Done.
