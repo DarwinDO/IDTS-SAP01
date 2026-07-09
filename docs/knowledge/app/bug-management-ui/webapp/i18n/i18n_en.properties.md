@@ -223,3 +223,21 @@ English locale bundle nay mirror day du cac key `classificationReview*` tu base 
 Neu sai, user co the thay raw i18n key hoac wording khong phan biet duoc suggestion hop le, chua chac chan, invalid va unavailable.
 
 Phai kiem tra cung: base `i18n.properties`, `ClassificationAssistanceSection.fragment.xml`, `ClassificationReview.js` va static/browser test IDTS-75.
+
+## IDTS-76 update - English handoff summary review labels
+
+### English
+
+This English locale bundle mirrors every new `handoffSummary*` key from the base bundle. It keeps the Object Page section, dialog labels, sparse-data warning, safe failure message, and Close action consistent for English users.
+
+Impact if broken: English locale users may see raw i18n keys, lose the visible handoff-summary entry point, or receive wording that sounds like an autonomous AI decision instead of a manual review helper.
+
+Must check together: base `i18n.properties`, `HandoffSummarySection.fragment.xml`, `HandoffSummaryReview.js`, and the IDTS-76 static/browser tests.
+
+### Vietnamese
+
+English locale bundle nay mirror day du cac key `handoffSummary*` tu base bundle. No giu section tren Object Page, label dialog, sparse-data warning, safe failure message va nut Close dong bo cho user dung English.
+
+Neu sai, user co the thay raw i18n key, mat entry point cho handoff summary, hoac thay wording nghe nhu AI tu quyet dinh thay vi chi la helper review thu cong.
+
+Phai kiem tra cung: base `i18n.properties`, `HandoffSummarySection.fragment.xml`, `HandoffSummaryReview.js` va static/browser test IDTS-76.

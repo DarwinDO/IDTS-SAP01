@@ -118,7 +118,6 @@ Vietnamese:
 | IDTS-37 | Notification UI and email delivery status readability | SangVN | FE/QA review of notification section after SMTP/outbox changes, focusing on readable event/channel/status/recipient/message output. Unblocked by merged IDTS-36. |
 | IDTS-60 | Browser and manual UAT for completed Sprint 4 UI baseline | NhanT | Due 2026-07-12. Earlier QA checkpoint for merged Sprint 4 UI baseline before final `IDTS-57` regression. |
 | IDTS-40 | AWS ECS/ECR shared QA deployment direction | DonHV | Due 2026-07-18 if kept active. Treat as AWS-native follow-up/alternative, not a blocker for accepted Render QA. |
-| IDTS-76 | Add bug handoff summary AI review panel | DonHV | Due 2026-07-23. Follow-up from the IDTS-72 visual audit; blocks full visual closure of IDTS-72 and relates to backend task IDTS-68. |
 
 Vietnamese:
 
@@ -127,7 +126,6 @@ Vietnamese:
 | IDTS-37 | Notification UI va kha nang doc email delivery status | SangVN | FE/QA review notification section sau khi co SMTP/outbox, tap trung event/channel/status/recipient/message. Da duoc unblock boi IDTS-36 da merge. |
 | IDTS-60 | Browser/manual UAT cho baseline UI Sprint 4 da merge | NhanT | Han 2026-07-12. Checkpoint QA som cho baseline UI da merge truoc khi regression tong cuoi `IDTS-57`. |
 | IDTS-40 | Huong deploy shared QA bang AWS ECS/ECR | DonHV | Due 2026-07-18 neu giu active. Xem la AWS-native follow-up/alternative, khong block Render QA da accepted. |
-| IDTS-76 | Them panel review AI bug handoff summary | DonHV | Due 2026-07-23. Follow-up tu visual audit IDTS-72; block viec dong IDTS-72 theo tieu chi visual day du va relate voi backend task IDTS-68. |
 
 ## In Progress
 
@@ -144,6 +142,7 @@ Vietnamese:
 | IDTS-45 | Back up and decide migration or upgrade for expiring Render PostgreSQL | DonHV | Moved to In Progress on 2026-07-07. Repo now has a secret-safe backup helper and continuity decision; private backup/restore proof still requires DonHV's private Render DB URL and temporary restore target. |
 | IDTS-73 | Support pending attachments during Create Bug and hide Comments on create | DonHV | Done. PR #123 merged into `dev` at `2f600d4`, Render shared QA deployed the commit, API smoke passed, and browser smoke confirmed Comments hidden plus pending Evidence/Attachments selection enabled on Create Bug. |
 | IDTS-72 | Final QA acceptance for AI assistance and failure modes | NhanT / DonHV support | Reopened for visual evidence gap after DonHV review. Fresh local acceptance passed 6/6, Smart Assign has product UI browser evidence, IDTS-74 adds deployed duplicate/similar review evidence, and IDTS-75 adds deployed classification suggestion review evidence. Handoff summary still needs a standalone product UI panel through `IDTS-76`, unless the team explicitly accepts API-level evidence for that flow. |
+| IDTS-76 | Add bug handoff summary AI review panel | DonHV | In progress on `feature/idts-76-handoff-summary-review-panel-donhv`. Local implementation reuses the existing `summarizeBugHandoff` action and `AiReviewUi`, adds a review-only Object Page section/dialog, and has local browser evidence for positive, sparse-data, unsafe-output, safe-failure, and no-workflow-mutation scenarios. PR/Render/shared-QA evidence still pending. |
 
 Vietnamese:
 
@@ -164,6 +163,7 @@ Vietnamese:
 | IDTS-45 | Backup va chot migrate/nang cap Render PostgreSQL sap het han | DonHV | Da chuyen In Progress ngay 2026-07-07. Repo da co helper backup an toan va decision continuity; backup/restore proof that van can DonHV dung DB URL Render private va restore target tam thoi. |
 | IDTS-73 | Ho tro chon attachment khi Create Bug va an Comments khi create | DonHV | Done. PR #123 da merge vao `dev` tai `2f600d4`, Render shared QA da deploy commit nay, API smoke pass, va browser smoke xac nhan Comments da an cung nhu Evidence/Attachments co the chon file pending tren Create Bug. |
 | IDTS-72 | QA acceptance cuoi cho AI assistance va failure mode | NhanT / DonHV ho tro | Da reopen de bo sung visual evidence gap sau review cua DonHV. Fresh local acceptance pass 6/6, Smart Assign co evidence UI san pham, IDTS-74 da bo sung evidence duplicate/similar review tren ban deploy, va IDTS-75 da bo sung evidence classification suggestion review tren ban deploy. Handoff summary van can panel UI rieng qua `IDTS-76`, tru khi team chap nhan ro rang API-level evidence cho luong con lai nay. |
+| IDTS-76 | Them panel review AI bug handoff summary | DonHV | Dang lam tren `feature/idts-76-handoff-summary-review-panel-donhv`. Implementation local tai su dung action `summarizeBugHandoff` va `AiReviewUi`, them section/dialog Object Page chi de review, va da co browser evidence local cho positive, sparse-data, unsafe-output, safe-failure va no-workflow-mutation. PR/Render/shared-QA evidence van con pending. |
 
 
 ## Blocked
