@@ -1,0 +1,1 @@
+IDTS-73 pending create attachment smoke file.

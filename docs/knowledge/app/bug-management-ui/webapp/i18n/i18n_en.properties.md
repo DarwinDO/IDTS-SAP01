@@ -155,6 +155,16 @@ Nếu thiếu key, Object Page action hoặc dialog có thể hiện placeholder
 
 Phải kiểm tra cùng: base `i18n.properties`, `manifest.json`, và `SmartAssignDeveloper.js`.
 
+## IDTS-73 update - Create-time attachment pending text
+
+### English
+
+IDTS-73 adds `attachmentsPendingNoData`. This is the English fallback key for the pending local-file list on the Create Bug page.
+
+### Vietnamese
+
+IDTS-73 thêm `attachmentsPendingNoData`. Đây là key tiếng Anh dự phòng cho danh sách local-file đang chờ trên Create Bug page.
+
 ## Metadata
 
 - Source file: `app/bug-management-ui/webapp/i18n/i18n_en.properties`

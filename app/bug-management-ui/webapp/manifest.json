@@ -214,6 +214,7 @@
                     "IdtsCommentsCustom": {
                       "title": "{i18n>commentsSectionTitle}",
                       "template": "idts.bugmanagementui.ext.fragment.CommentsSection",
+                      "visible": "{= ${IsActiveEntity} === true || ${HasActiveEntity} === true }",
                       "position": {
                         "anchor": "IdtsSmartAssignment",
                         "placement": "After"

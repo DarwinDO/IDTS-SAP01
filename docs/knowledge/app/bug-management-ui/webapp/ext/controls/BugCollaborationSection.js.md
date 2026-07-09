@@ -132,3 +132,47 @@ Nó không dùng DOM selector, generated internal ID của Fiori, private SAPUI5
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/ext/controls/BugCollaborationSection.js.md`
 - Source layer: `app`
 - Last reviewed: 2026-07-04
+
+## IDTS-73 create-page visibility and pending upload notes
+
+### English
+
+IDTS-73 extends this root control with two small properties:
+
+- `hideOnCreate`: used by the Comments custom section so comments are not shown on the Create Bug page.
+- `uploadPendingAttachmentsOnActive`: used by the Attachments custom section so files selected during create are uploaded after the bug becomes active.
+
+This is still not a DOM hack. The control reads the public Fiori/Object Page binding context and uses the normal SAPUI5 control lifecycle. For comments, it hides the custom subsection only when the context is a brand-new create draft. For attachments, it asks `BugCollaboration.js` to flush any files that were selected while creating the bug.
+
+Important anchors:
+
+- **Location**: `hideOnCreate`
+  **IDTS concept**: Comments are collaboration after a bug exists, not part of initial bug creation.
+  **Impact if broken**: The Create Bug page can show a disabled or confusing Comments section.
+  **Must check together**: `CommentsSection.fragment.xml` and browser create-page smoke.
+
+- **Location**: `uploadPendingAttachmentsOnActive`
+  **IDTS concept**: Create-time file selection is completed only after the bug is saved.
+  **Impact if broken**: The selected evidence may never upload after Save.
+  **Must check together**: `AttachmentsSection.fragment.xml`, `BugCollaboration.js`, and IDTS-73 QA evidence.
+
+### Vietnamese
+
+IDTS-73 mở rộng root control này bằng hai property nhỏ:
+
+- `hideOnCreate`: dùng cho custom section Comments để không hiện Comments trên màn hình Create Bug.
+- `uploadPendingAttachmentsOnActive`: dùng cho custom section Attachments để file được chọn trong lúc create sẽ upload sau khi bug trở thành active.
+
+Đây vẫn không phải DOM hack. Control đọc public binding context của Fiori/Object Page và dùng lifecycle SAPUI5 bình thường. Với Comments, nó chỉ ẩn custom subsection khi context là draft tạo mới. Với Attachments, nó gọi `BugCollaboration.js` để flush các file đã chọn trong lúc tạo bug.
+
+Các anchor quan trọng:
+
+- **Vị trí**: `hideOnCreate`
+  **Khái niệm IDTS**: Comments là phần cộng tác sau khi bug đã tồn tại, không phải phần nhập liệu ban đầu khi tạo bug.
+  **Ảnh hưởng nếu sai**: Create Bug page có thể hiện Comments section bị disabled hoặc gây rối.
+  **Phải kiểm tra cùng**: `CommentsSection.fragment.xml` và browser smoke cho create page.
+
+- **Vị trí**: `uploadPendingAttachmentsOnActive`
+  **Khái niệm IDTS**: File chọn trong lúc tạo bug chỉ được hoàn tất sau khi bug được Save.
+  **Ảnh hưởng nếu sai**: Evidence đã chọn có thể không bao giờ được upload sau khi Save.
+  **Phải kiểm tra cùng**: `AttachmentsSection.fragment.xml`, `BugCollaboration.js`, và evidence QA của IDTS-73.

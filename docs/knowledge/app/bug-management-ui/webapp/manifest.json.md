@@ -128,6 +128,16 @@ Thứ hai, custom section History trên Object Page dùng key `History` thay vì
   - Ảnh hưởng nếu sai: Object Page có thể không hiện history hoặc hiện trùng nhiều section history.
   - Phải kiểm tra cùng: `app/bug-management-ui/annotations/object-page.cds`, `app/bug-management-ui/webapp/ext/fragment/HistoryTimeline.fragment.xml`, và các history entity trong `srv/service.cds`.
 
+## IDTS-73 update - Comments section hidden during Create Bug
+
+### English
+
+IDTS-73 adds a visibility rule to the `IdtsCommentsCustom` Object Page section. This prevents the Comments section from appearing in the Object Page navigation while the user is creating a brand-new bug. The section remains available for active bugs and edit drafts of existing bugs.
+
+### Vietnamese
+
+IDTS-73 thêm visibility rule cho Object Page section `IdtsCommentsCustom`. Rule này ngăn Comments section xuất hiện trên navigation của Object Page khi user đang tạo bug mới. Section vẫn hiện với bug active và edit draft của bug đã tồn tại.
+
 ## Metadata
 
 - Source file: `app/bug-management-ui/webapp/manifest.json`
