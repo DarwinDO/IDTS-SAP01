@@ -1,0 +1,414 @@
+{
+  "task": "IDTS-76",
+  "checkedAt": "2026-07-09T14:29:38.445Z",
+  "checks": [
+    {
+      "label": "handoff section opens the review dialog",
+      "pass": true
+    },
+    {
+      "label": "handoff section loads the UI5 action module",
+      "pass": true
+    },
+    {
+      "label": "handoff review calls the existing CAP action",
+      "pass": true
+    },
+    {
+      "label": "handoff review sends source bug ID",
+      "pass": true
+    },
+    {
+      "label": "handoff review uses reusable AI review mapping",
+      "pass": true
+    },
+    {
+      "label": "handoff review renders a SAPUI5 Dialog",
+      "pass": true
+    },
+    {
+      "label": "handoff review renders safe status",
+      "pass": true
+    },
+    {
+      "label": "handoff review shows summary",
+      "pass": true
+    },
+    {
+      "label": "handoff review shows missing information",
+      "pass": true
+    },
+    {
+      "label": "handoff review shows important events",
+      "pass": true
+    },
+    {
+      "label": "handoff review shows next action",
+      "pass": true
+    },
+    {
+      "label": "handoff review keeps manual decision guidance",
+      "pass": true
+    },
+    {
+      "label": "handoff review protects user copy",
+      "pass": true
+    },
+    {
+      "label": "handoff review has no OData update request",
+      "pass": true
+    },
+    {
+      "label": "handoff review has no comment write path",
+      "pass": true
+    },
+    {
+      "label": "handoff review has no workflow transition call",
+      "pass": true
+    },
+    {
+      "label": "handoff review does not expose caught error messages",
+      "pass": true
+    },
+    {
+      "label": "handoff review controller does not embed raw HTML",
+      "pass": true
+    },
+    {
+      "label": "manifest registers handoff summary section",
+      "pass": true
+    },
+    {
+      "label": "manifest uses the handoff summary fragment",
+      "pass": true
+    },
+    {
+      "label": "handoff summary appears after classification assistance",
+      "pass": true
+    },
+    {
+      "label": "smart assignment appears after handoff summary",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummarySectionTitle",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummarySectionHint",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummaryOpenButton",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummaryDialogTitle",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummaryIntroMessage",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummarySummaryLabel",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummaryStatusLabel",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummaryOwnerLabel",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummaryMissingLabel",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummaryEventsLabel",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummaryNextActionLabel",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummaryUnknownBug",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummaryNoDetails",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummaryNoMissingInfo",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummaryNoEvents",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummaryNoNextAction",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummarySparseWarning",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummaryLoading",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummaryLoadFailed",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummaryCloseButton",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummarySectionTitle is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummarySectionHint is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummaryOpenButton is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummaryDialogTitle is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummaryIntroMessage is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummarySummaryLabel is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummaryStatusLabel is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummaryOwnerLabel is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummaryMissingLabel is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummaryEventsLabel is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummaryNextActionLabel is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummaryUnknownBug is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummaryNoDetails is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummaryNoMissingInfo is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummaryNoEvents is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummaryNoNextAction is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummarySparseWarning is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummaryLoading is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummaryLoadFailed is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummaryCloseButton is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummarySectionTitle",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummarySectionHint",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummaryOpenButton",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummaryDialogTitle",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummaryIntroMessage",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummarySummaryLabel",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummaryStatusLabel",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummaryOwnerLabel",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummaryMissingLabel",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummaryEventsLabel",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummaryNextActionLabel",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummaryUnknownBug",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummaryNoDetails",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummaryNoMissingInfo",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummaryNoEvents",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummaryNoNextAction",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummarySparseWarning",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummaryLoading",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummaryLoadFailed",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummaryCloseButton",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummarySectionTitle is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummarySectionHint is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummaryOpenButton is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummaryDialogTitle is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummaryIntroMessage is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummarySummaryLabel is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummaryStatusLabel is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummaryOwnerLabel is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummaryMissingLabel is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummaryEventsLabel is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummaryNextActionLabel is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummaryUnknownBug is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummaryNoDetails is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummaryNoMissingInfo is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummaryNoEvents is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummaryNoNextAction is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummarySparseWarning is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummaryLoading is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummaryLoadFailed is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummaryCloseButton is user-facing",
+      "pass": true
+    }
+  ]
+}

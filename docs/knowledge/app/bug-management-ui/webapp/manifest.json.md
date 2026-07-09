@@ -336,3 +336,37 @@ Object Page hien chen `IdtsClassificationAssistance` ngay sau section chuan `Cla
   **Khai niem IDTS**: Tao diem vao Fiori ro rang de user review action goi y classification da co.
   **Anh huong neu sai**: IDTS-75 co the bien mat khoi Object Page hoac Assignment hien sai thu tu.
   **Phai kiem tra cung**: `ClassificationAssistanceSection.fragment.xml`, `ClassificationReview.js`, cac file i18n va browser evidence IDTS-75.
+
+## IDTS-76 update - Handoff Summary review section
+
+### English
+
+The Object Page now inserts `IdtsHandoffSummary` after `IdtsClassificationAssistance`. The existing `IdtsSmartAssignment` section is anchored after `IdtsHandoffSummary`, so the AI review sections stay together before the assignment section.
+
+This is intentionally a manifest-only page placement change. The backend action already exists in `srv/service.cds`; the UI only adds a visible review entry point.
+
+- **Location**: `BugsObjectPage.options.settings.content.body.sections.IdtsHandoffSummary`
+  **IDTS concept**: Gives users a visible place to open the existing handoff summary review.
+  **Impact if broken**: IDTS-76 may not appear on the Object Page, or the page order may become confusing.
+  **Must check together**: `HandoffSummarySection.fragment.xml`, `HandoffSummaryReview.js`, i18n files, and IDTS-76 browser evidence.
+
+- **Location**: `IdtsSmartAssignment.position.anchor = IdtsHandoffSummary`
+  **IDTS concept**: Keeps the page order as classification assistance, handoff summary, then assignment.
+  **Impact if broken**: Assignment may appear before the handoff summary, making the review helpers harder to find.
+  **Must check together**: Object Page browser smoke and manifest JSON parse.
+
+### Vietnamese
+
+Object Page hien chen `IdtsHandoffSummary` sau `IdtsClassificationAssistance`. Section `IdtsSmartAssignment` duoc anchor sau `IdtsHandoffSummary`, nen cac section AI review nam gan nhau truoc section assignment.
+
+Day la thay doi vi tri trang trong manifest. Backend action da co trong `srv/service.cds`; UI chi them mot entry point de user review.
+
+- **Vi tri**: `BugsObjectPage.options.settings.content.body.sections.IdtsHandoffSummary`
+  **Khai niem IDTS**: Tao diem vao ro rang de user mo handoff summary review da co.
+  **Anh huong neu sai**: IDTS-76 co the khong hien tren Object Page, hoac thu tu trang gay kho hieu.
+  **Phai kiem tra cung**: `HandoffSummarySection.fragment.xml`, `HandoffSummaryReview.js`, cac file i18n va browser evidence IDTS-76.
+
+- **Vi tri**: `IdtsSmartAssignment.position.anchor = IdtsHandoffSummary`
+  **Khai niem IDTS**: Giu thu tu trang la classification assistance, handoff summary, roi assignment.
+  **Anh huong neu sai**: Assignment co the hien truoc handoff summary, lam user kho thay cac helper review.
+  **Phai kiem tra cung**: Object Page browser smoke va manifest JSON parse.

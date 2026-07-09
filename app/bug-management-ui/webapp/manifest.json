@@ -211,11 +211,19 @@
                         "placement": "After"
                       }
                     },
+                    "IdtsHandoffSummary": {
+                      "title": "{i18n>handoffSummarySectionTitle}",
+                      "template": "idts.bugmanagementui.ext.fragment.HandoffSummarySection",
+                      "position": {
+                        "anchor": "IdtsClassificationAssistance",
+                        "placement": "After"
+                      }
+                    },
                     "IdtsSmartAssignment": {
                       "title": "{i18n>smartAssignmentSectionTitle}",
                       "template": "idts.bugmanagementui.ext.fragment.SmartAssignmentSection",
                       "position": {
-                        "anchor": "IdtsClassificationAssistance",
+                        "anchor": "IdtsHandoffSummary",
                         "placement": "After"
                       }
                     },

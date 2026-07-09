@@ -1,0 +1,27 @@
+{
+  "task": "IDTS-76",
+  "checkedAt": "2026-07-09T14:23:03.482Z",
+  "target": "http://localhost:4016",
+  "results": [
+    {
+      "check": "positive-dialog",
+      "passed": true
+    },
+    {
+      "check": "sparse-warning",
+      "passed": true
+    },
+    {
+      "check": "unsafe-output-safe",
+      "passed": true
+    },
+    {
+      "check": "safe-failure-state",
+      "passed": true
+    },
+    {
+      "check": "no-workflow-mutation",
+      "passed": true
+    }
+  ]
+}
