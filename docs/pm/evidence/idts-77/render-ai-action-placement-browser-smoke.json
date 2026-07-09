@@ -1,0 +1,168 @@
+{
+  "task": "IDTS-77",
+  "checkedAt": "2026-07-09T16:35:46.054Z",
+  "baseUrl": "https://idts-sap01-qa.onrender.com",
+  "deployId": "dep-d97sim5aeets739021bg",
+  "deployCommit": "31840d139a24e48d3d62911fb656db70edb57000",
+  "loginSource": "seed-donhv",
+  "bug": {
+    "ID": "792a32bf-31e0-4512-82fd-40d6fcbe8fc1",
+    "bugNumber": "BUG-0005",
+    "title": "IDTS-49 reporter routing smoke 1782989277245"
+  },
+  "y": {
+    "similarSection": -575.5,
+    "findSimilar": -598.5,
+    "classificationSection": -146.5,
+    "classificationAction": -169.5,
+    "assignmentSection": 93.5,
+    "handoffSection": 1289.875,
+    "handoffAction": 1354.875,
+    "historySection": 1445.875
+  },
+  "candidates": {
+    "Similar Bug Check": [
+      {
+        "tag": "SPAN",
+        "cls": "sapMITHTextContent",
+        "role": "",
+        "y": 97,
+        "x": 160.140625,
+        "text": "Similar Bug Check"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "sapUiSelectable",
+        "role": "",
+        "y": -575.5,
+        "x": 48,
+        "text": "Similar Bug Check"
+      }
+    ],
+    "Find Similar Bugs": [
+      {
+        "tag": "BDI",
+        "cls": "",
+        "role": "",
+        "y": -598.5,
+        "x": 1268.8125,
+        "text": "Find Similar Bugs"
+      }
+    ],
+    "Classification Assistance": [
+      {
+        "tag": "SPAN",
+        "cls": "sapMITHTextContent",
+        "role": "",
+        "y": 97,
+        "x": 526.734375,
+        "text": "Classification Assistance"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "sapUiSelectable",
+        "role": "",
+        "y": -146.5,
+        "x": 48,
+        "text": "Classification Assistance"
+      }
+    ],
+    "Review Classification Suggestions": [
+      {
+        "tag": "BDI",
+        "cls": "",
+        "role": "",
+        "y": -169.5,
+        "x": 1167.703125,
+        "text": "Review Classification Suggestions"
+      }
+    ],
+    "Assignment": [
+      {
+        "tag": "SPAN",
+        "cls": "sapMITHTextContent",
+        "role": "",
+        "y": 97,
+        "x": 722.1875,
+        "text": "Assignment"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "sapUiSelectable",
+        "role": "",
+        "y": 93.5,
+        "x": 48,
+        "text": "Assignment"
+      }
+    ],
+    "Handoff Summary": [
+      {
+        "tag": "SPAN",
+        "cls": "sapUiSelectable",
+        "role": "",
+        "y": 1289.875,
+        "x": 48,
+        "text": "Handoff Summary"
+      }
+    ],
+    "Review Handoff Summary": [
+      {
+        "tag": "BDI",
+        "cls": "",
+        "role": "",
+        "y": 1354.875,
+        "x": 1216.03125,
+        "text": "Review Handoff Summary"
+      }
+    ],
+    "History": [
+      {
+        "tag": "SPAN",
+        "cls": "sapUiSelectable",
+        "role": "",
+        "y": 1445.875,
+        "x": 48,
+        "text": "History"
+      }
+    ]
+  },
+  "checks": [
+    {
+      "label": "Similar Bug Check section is before Assignment section",
+      "passed": true
+    },
+    {
+      "label": "Find Similar Bugs action is before Assignment section",
+      "passed": true
+    },
+    {
+      "label": "Classification Assistance section is before Assignment section",
+      "passed": true
+    },
+    {
+      "label": "Review Classification Suggestions action is before Assignment section",
+      "passed": true
+    },
+    {
+      "label": "Handoff Summary section is before History section",
+      "passed": true
+    },
+    {
+      "label": "Review Handoff Summary action is before History section",
+      "passed": true
+    },
+    {
+      "label": "No HTTP 5xx response observed during shared-QA smoke",
+      "passed": true,
+      "details": []
+    },
+    {
+      "label": "No unexpected browser console errors observed during shared-QA smoke",
+      "passed": true,
+      "knownNonBlockingCount": 14,
+      "unexpectedErrors": []
+    }
+  ],
+  "screenshot": "render-idts77-ai-action-placement.png",
+  "passed": true
+}
