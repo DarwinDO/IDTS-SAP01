@@ -2,6 +2,26 @@
 
 Last updated: 2026-07-09
 
+## 2026-07-09 - IDTS-72 AI visual evidence audit
+
+English:
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| QA evidence gap | DonHV observed that the existing visible evidence only clearly proved the Smart Assign AI explanation flow. | Source inspection confirmed only `explainSmartAssignment` is currently called by the Fiori Object Page Smart Assign flow. `suggestSimilarBugs`, `suggestClassification`, and `summarizeBugHandoff` are exposed as CAP/OData actions and covered by backend/API tests, but no product UI panel currently calls them. | Added `scripts/qa/test-idts72-visual-ai-evidence.js` and `docs/pm/evidence/idts-72/visual-ai-flows/` to separate product UI evidence from backend/API visual report evidence. | Fresh local `npm run qa:idts72:acceptance` passed 6/6 suites. `npm run qa:idts72:visual-evidence` generated screenshots showing the exact UI evidence gap. Next action: decide whether IDTS-72 accepts API-level evidence for those three flows or create follow-up UI tasks before closure. |
+| Existing dependency finding | `npm ci --include=dev` in the fresh IDTS-72 visual evidence worktree reported 14 vulnerabilities. | Existing dependency state; vulnerability remediation is already tracked separately by `IDTS-46`. | Left unchanged. | Do not run broad `npm audit fix` in IDTS-72. Keep dependency remediation under `IDTS-46`. |
+| Tooling/process note | The first evidence README had mojibake in Vietnamese text and did not clearly explain backend/API evidence versus product UI evidence. | Earlier evidence text was not explicit enough for visual QA acceptance, and encoding made the Vietnamese section hard to read. | Rewrote `docs/pm/evidence/idts-72/README.md` and added `visual-ai-flows/README.md` with clear bilingual evidence boundaries. | Review files before manual Jira attachment. |
+| Tooling issue | First attempt to merge PR #126 through `gh pr merge` failed with `fatal: 'dev' is already used by worktree at 'E:/IDTS-SAP01'`. | The root worktree owns the local `dev` branch, so the GitHub CLI tried to perform a local git operation that conflicts with this separate task worktree. | Not a product issue. Continue by merging through GitHub remote/API flow from outside the task worktree or after pushing an amended PR branch. | Record this as tooling only; do not touch the root worktree local changes. |
+
+Vietnamese:
+
+| Phân loại | Triệu chứng / công việc | Nguyên nhân | Trạng thái fix | Verify / bước tiếp theo |
+| --- | --- | --- | --- | --- |
+| Gap evidence QA | DonHV phát hiện evidence nhìn thấy rõ hiện mới chứng minh luồng AI explanation trong Smart Assign. | Kiểm tra source xác nhận chỉ `explainSmartAssignment` đang được Fiori Object Page Smart Assign gọi trực tiếp. `suggestSimilarBugs`, `suggestClassification`, và `summarizeBugHandoff` đã expose qua CAP/OData action và có backend/API test, nhưng hiện chưa có panel UI sản phẩm gọi các action này. | Đã thêm `scripts/qa/test-idts72-visual-ai-evidence.js` và `docs/pm/evidence/idts-72/visual-ai-flows/` để tách rõ evidence UI sản phẩm với visual report từ backend/API. | Fresh local `npm run qa:idts72:acceptance` pass 6/6 suite. `npm run qa:idts72:visual-evidence` tạo screenshot chỉ rõ gap UI. Bước tiếp theo: quyết định IDTS-72 có chấp nhận API-level evidence cho ba luồng này hay cần tạo task UI follow-up trước khi đóng. |
+| Finding dependency có sẵn | `npm ci --include=dev` trong worktree visual evidence của IDTS-72 báo 14 vulnerabilities. | Đây là trạng thái dependency có sẵn; remediation đã được track riêng bằng `IDTS-46`. | Không sửa trong IDTS-72. | Không chạy broad `npm audit fix` trong IDTS-72. Giữ việc xử lý dependency trong `IDTS-46`. |
+| Ghi chú tooling/process | README evidence cũ bị mojibake ở phần tiếng Việt và chưa nói rõ ranh giới giữa backend/API evidence và product UI evidence. | Nội dung evidence trước đó chưa đủ rõ cho visual QA acceptance, và encoding làm phần tiếng Việt khó đọc. | Đã viết lại `docs/pm/evidence/idts-72/README.md` và thêm `visual-ai-flows/README.md` với ranh giới evidence song ngữ rõ ràng. | Review các file trước khi DonHV tự attach lên Jira. |
+| Lỗi tooling | Lần đầu merge PR #126 bằng `gh pr merge` fail với `fatal: 'dev' is already used by worktree at 'E:/IDTS-SAP01'`. | Root worktree đang giữ local branch `dev`, nên GitHub CLI cố chạy thao tác git local bị đụng với worktree task riêng này. | Không phải lỗi sản phẩm. Tiếp tục bằng cách merge qua GitHub remote/API flow từ ngoài task worktree hoặc sau khi push nhánh PR đã amend. | Ghi nhận là tooling only; không đụng local changes trong root worktree. |
+
 ## 2026-07-09 - IDTS-71 AI security and prompt-misuse review
 
 English:
