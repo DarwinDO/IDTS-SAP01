@@ -1,0 +1,36 @@
+{
+  "task": "IDTS-76",
+  "checkedAt": "2026-07-09T14:38:09.228Z",
+  "target": "https://idts-sap01-qa.onrender.com",
+  "qaUser": "do***@example.local",
+  "bugID": "792a32bf-31e0-4512-82fd-40d6fcbe8fc1",
+  "checks": [
+    {
+      "check": "button-visible",
+      "passed": true
+    },
+    {
+      "check": "dialog-visible",
+      "passed": true
+    },
+    {
+      "check": "summary-visible",
+      "passed": true
+    },
+    {
+      "check": "next-action-visible",
+      "passed": true
+    },
+    {
+      "check": "no-internal-copy",
+      "passed": true
+    }
+  ],
+  "knownNonBlockingConsole": [
+    "Refused to execute script from 'https://idts-sap01-qa.onrender.com/idts.bugmanagementui/Component-preload.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.",
+    "2026-07-09 21:38:02.903300 failed to load JavaScript resource: idts/bugmanagementui/Component-preload.js -  sap.ui.ModuleSystem",
+    "2026-07-09 21:38:04.382000 Connector (LrepConnector) failed call 'loadFlexData': Error\n\t\t\tApplication startup continues without data from this storage. -  ",
+    "2026-07-09 21:38:04.475000 Connector (LrepConnector) failed call 'loadFeatures': Error\n\t\t\tApplication startup continues without data from this storage. -  ",
+    "2026-07-09 21:38:04.964200 S/CUBE is not yet supported -  "
+  ]
+}
