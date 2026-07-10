@@ -54,6 +54,7 @@
     "qa:draft-reporter:programmatic": "node scripts/qa/test-idts49-draft-reporter.js",
     "qa:depth:pr-body": "node scripts/qa/check-pr-depth.js",
     "qa:secret-scan": "node scripts/qa/secret-scan.js",
+    "qa:agent-rules": "node scripts/qa/check-agent-rules.js",
     "qa:idts41:programmatic": "node scripts/qa/test-idts41-code-list-validation.js",
     "qa:idts43:programmatic": "node scripts/qa/test-idts43-fiori-ux.js",
     "qa:idts56:programmatic": "node scripts/qa/test-idts56-smart-assign.js",

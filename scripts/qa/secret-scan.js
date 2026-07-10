@@ -3,6 +3,7 @@
 
 const fs = require('fs')
 const path = require('path')
+const { execFileSync } = require('child_process')
 
 const ROOT = process.cwd()
 const IGNORED_DIRS = new Set([
@@ -24,11 +25,24 @@ const PATTERNS = [
   { name: 'SMTP password assignment', regex: /smtp[^=\n]{0,40}password\s*[:=]\s*['"]?[^\s'"<>{}]{12,}/i },
   { name: 'Bearer token literal', regex: /bearer\s+[A-Za-z0-9._~+/-]{30,}/i }
 ]
+const LOCAL_SECRET_FILES = new Set(['.cdsrc-private.json'])
+const trackedFiles = new Set(
+  execFileSync('git', ['ls-files', '-z'], { cwd: ROOT, encoding: 'utf8' })
+    .split('\0')
+    .filter(Boolean)
+)
+
+function isUntrackedLocalSecretFile(fullPath) {
+  const relative = path.relative(ROOT, fullPath)
+  return LOCAL_SECRET_FILES.has(relative) && !trackedFiles.has(relative)
+}
 
 function shouldSkip(fullPath) {
   const relative = path.relative(ROOT, fullPath)
   const parts = relative.split(path.sep)
-  return parts.some(part => IGNORED_DIRS.has(part)) || IGNORED_FILES.has(path.basename(fullPath))
+  return parts.some(part => IGNORED_DIRS.has(part)) ||
+    IGNORED_FILES.has(path.basename(fullPath)) ||
+    isUntrackedLocalSecretFile(fullPath)
 }
 
 function* walk(dir) {
