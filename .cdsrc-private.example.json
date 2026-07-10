@@ -50,6 +50,7 @@
       "maxInputChars": 8000,
       "modelAlias": "mock-chat",
       "embeddingModelAlias": "mock-embedding",
+      "openaiApiKey": "<private-openai-api-key-or-use-OPENAI_API_KEY>",
       "mockMode": "success",
       "mockEmbeddingDimensions": 8
     }

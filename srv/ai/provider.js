@@ -4,6 +4,7 @@ const cds = require('@sap/cds')
 
 const { getAiConfig } = require('./config')
 const { MockAiProvider } = require('./mock-provider')
+const { OpenAiProvider } = require('./openai-provider')
 const {
   redactSensitiveText,
   safeFeatureType,
@@ -66,6 +67,19 @@ class SafeAiProvider {
       })
     }
 
+    if (!this.config.ready) {
+      return failureResult({
+        operation,
+        featureType,
+        correlationId,
+        durationMs: Date.now() - started,
+        code: 'AI_CONFIGURATION_INCOMPLETE',
+        summary: 'AI assistance is not configured completely.',
+        retryable: false,
+        config: this.config
+      })
+    }
+
     try {
       const data = await withTimeout(execute(), this.config.timeoutMs)
       return successResult({
@@ -105,6 +119,9 @@ class SafeAiProvider {
 function createDelegate (config) {
   if (config.enabled && config.provider === 'mock' && !config.unsupported) {
     return new MockAiProvider(config)
+  }
+  if (config.enabled && config.provider === 'openai' && !config.unsupported && config.ready) {
+    return new OpenAiProvider(config)
   }
   return {
     chat: async () => null,

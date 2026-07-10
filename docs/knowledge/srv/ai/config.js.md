@@ -16,7 +16,7 @@ CAP loads project configuration into `cds.env`. IDTS already uses this pattern f
 - private overrides may live in `.cdsrc-private.json`, `.env`, or Render/AWS environment variables;
 - real secrets must never be committed.
 
-For IDTS-64, only the `mock` provider is supported. That is deliberate. The goal of this task is to build a safe backend seam first, not to call a real paid AI provider yet.
+`mock` remains the default provider for deterministic tests. IDTS also supports `openai` when an authorized environment owner explicitly supplies a private `openaiApiKey` or `OPENAI_API_KEY` and a model alias; missing configuration stays unavailable safely.
 
 ### Flow in IDTS
 
@@ -54,7 +54,7 @@ For IDTS-64, only the `mock` provider is supported. That is deliberate. The goal
 
 - Keep `enabled` default as `false`.
 - Do not add real provider keys, endpoints, tokens, or account IDs.
-- If a new provider is added, add a real adapter, tests, and security review evidence.
+- OpenAI uses the real adapter in `srv/ai/openai-provider.js`; keep its key private and leave `enabled` false in committed defaults.
 - Keep aliases sanitized; they are allowed in logs/audit only because they must not contain private endpoint or credential text.
 
 ## Tiếng Việt
