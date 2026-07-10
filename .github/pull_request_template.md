@@ -26,6 +26,10 @@
 
 <!-- Layout, wording, affordance, error feedback, accessibility, responsive behavior, or "N/A - <reason>". -->
 
+## Ponytail Simplicity
+
+<!-- Required for code changes: list ponytail skill(s) used, the simplest accepted approach, and what was intentionally not added. For non-code changes, write "N/A - documentation-only change". -->
+
 ## Known Gaps
 
 <!-- Known limitations, untested areas, follow-up Jira links. If none, say "None". -->
@@ -40,4 +44,5 @@
 - [ ] I checked role/authorization behavior or explained why it is N/A.
 - [ ] I checked persistence/reload behavior or explained why it is N/A.
 - [ ] I checked UI/UX consistency or explained why it is N/A.
+- [ ] I applied the required Ponytail skill or explained why this is a non-code change.
 - [ ] I recorded actionable defects in Jira or explained why none were found.
