@@ -1,6 +1,6 @@
 # BA-003 - SRS and FRS Deliverables
 
-Last updated: 2026-06-03
+Last updated: 2026-07-10
 
 ## English
 
@@ -12,14 +12,14 @@ Create formal Software Requirements Specification and Functional Requirements Sp
 
 | Output | Path | Status |
 | --- | --- | --- |
-| SRS English Markdown | `docs/ba/srs/srs.en.md` | Done |
-| SRS Vietnamese Markdown | `docs/ba/srs/srs.vi.md` | Done |
-| SRS English DOCX | `docs/ba/srs/srs.en.docx` | Done |
-| SRS Vietnamese DOCX | `docs/ba/srs/srs.vi.docx` | Done |
-| FRS English Markdown | `docs/ba/frs/frs.en.md` | Done v1.1 |
-| FRS Vietnamese Markdown | `docs/ba/frs/frs.vi.md` | Done v1.1 |
-| FRS English DOCX | `docs/ba/frs/frs.en.docx` | Done v1.1 |
-| FRS Vietnamese DOCX | `docs/ba/frs/frs.vi.docx` | Done v1.1 |
+| SRS English Markdown | `docs/ba/srs/srs.en.md` | Done v1.2 |
+| SRS Vietnamese Markdown | `docs/ba/srs/srs.vi.md` | Done v1.2 |
+| SRS English DOCX | `docs/ba/srs/srs.en.docx` | Done v1.2 |
+| SRS Vietnamese DOCX | `docs/ba/srs/srs.vi.docx` | Done v1.2 |
+| FRS English Markdown | `docs/ba/frs/frs.en.md` | Done v1.3 |
+| FRS Vietnamese Markdown | `docs/ba/frs/frs.vi.md` | Done v1.3 |
+| FRS English DOCX | `docs/ba/frs/frs.en.docx` | Done v1.3 |
+| FRS Vietnamese DOCX | `docs/ba/frs/frs.vi.docx` | Done v1.3 |
 
 ### Decisions Applied
 
@@ -28,6 +28,7 @@ Create formal Software Requirements Specification and Functional Requirements Sp
 - FRS contains detailed functional workflows, validations, status effects, history/notification effects, acceptance criteria, and traceability back to SRS.
 - FRS v1.2 keeps those workflow diagrams and aligns the functional actors to the MVP role baseline: Tester, Developer, and PM.
 - Mermaid diagram source is included in Markdown and DOCX as text. If mentor requires visual diagrams in DOCX, render the diagrams as images in a later formatting pass.
+- 2026-07-10 review sync adds optional advisory-AI requirements and detailed human-review/no-mutation/privacy behavior, upgrades attachment wording to the implemented draft upload/download flow, and retains all normal CAP authority. EN/VI DOCX files were regenerated, structure/content-checked, and uploaded as timestamped SAP490 Review copies.
 
 ### Verification
 

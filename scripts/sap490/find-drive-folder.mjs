@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
 
-const folderName = process.argv.slice(2).join(" ").trim() || "SAP490 Review";
+const folderName = process.argv.slice(2).join(" ").trim() || "SU26SAP01_GSU26SAP01";
 const escapedName = folderName.replaceAll("'", "\\'");
 const gwsRun = resolve("node_modules/@googleworkspace/cli/run.js");
 

@@ -3,8 +3,8 @@
 Dự án: Issue and Defect Tracking System in SAP  
 Loại tài liệu: Business Requirements Document (BRD)  
 Ngôn ngữ: Tiếng Việt  
-Trạng thái: Draft v1.2  
-Cập nhật lần cuối: 2026-06-03  
+Trạng thái: Draft v1.3
+Cập nhật lần cuối: 2026-07-10
 Chuẩn bị cho: SAP490 project delivery và mentor review  
 Phong cách tài liệu: SAP490 hybrid, ưu tiên nghiệp vụ và chỉ giữ bối cảnh triển khai SAP ở mức ngắn gọn
 
@@ -17,6 +17,7 @@ Phong cách tài liệu: SAP490 hybrid, ưu tiên nghiệp vụ và chỉ giữ 
 | v1.0 | 2026-06-01 | IDTS Project Team | Mentor / Supervisor | Bản BRD đầu tiên dựa trên IDTS business baseline, BA pack, PM pack và SAP490 guidance. | Draft |
 | v1.1 | 2026-06-01 | IDTS Project Team | Mentor / Supervisor | Chỉnh thành SAP490 hybrid BRD: giảm chi tiết kỹ thuật, thêm stakeholder needs, KPI, RACI, NFR, glossary, approval và requirement traceability. | Draft |
 | v1.2 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Cập nhật MVP role baseline thành ba role active: Tester, Developer và PM. Reporter và Admin được hoãn như role tách riêng và không còn là cột RACI active trong MVP. | Draft |
+| v1.3 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Đồng bộ baseline implementation và review hiện tại: workflow CAP/Fiori MVP, luồng audit/notification/attachment, PM monitoring và AI hỗ trợ tùy chọn có human review. | Draft |
 
 ### 1.2 Review và phê duyệt
 
@@ -121,7 +122,9 @@ Trong MVP, một người dùng thực tế có thể đảm nhận nhiều trá
 
 ## 8. Hiện trạng
 
-Repository hiện tại có scaffold SAP CAP/Fiori tối thiểu. Implementation hiện có nhỏ hơn business baseline đã thống nhất. Các business markdown files, BA documents, PM documents, diagrams và SAP490 guidance đã mô tả scope defect tracking mục tiêu, nhưng BRD chính thức đang được tinh chỉnh để trở thành nguồn đầu vào cho SRS và FRS.
+Repository hiện đã triển khai baseline CAP/Fiori MVP đã thống nhất: tạo bug có cấu trúc, classification và assignment theo responsibility, lifecycle action có kiểm soát, comment, draft attachment, audit/history, notification, PM monitoring và AI hỗ trợ tùy chọn chỉ ở mức human review. SAP490 review tập trung vào bằng chứng, traceability và phần acceptance còn lại thay vì một scaffold tối thiểu.
+
+Real AI provider tùy chọn mặc định tắt và không thay đổi business authority, authorization, validation, assignment hoặc status transition. Việc dùng ở production vẫn phụ thuộc private configuration đã được duyệt và bằng chứng live-provider riêng; BRD này không xem AI output là quyết định nghiệp vụ.
 
 Nếu chưa có hệ thống mục tiêu, nhóm sẽ dựa vào phối hợp thủ công, comment, ghi chú không chính thức hoặc file ngoài. Điều này tạo rủi ro bug bị trùng, assign sai, ownership không rõ, dùng status không nhất quán, rejected bug không có follow-up và thiếu audit trail.
 

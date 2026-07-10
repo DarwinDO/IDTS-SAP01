@@ -3,10 +3,10 @@
 Project: Issue and Defect Tracking System in SAP  
 Document type: Functional Requirements Specification (FRS)  
 Language: English  
-Status: Draft v1.2  
-Last updated: 2026-06-03  
-Prepared for: SAP490 project delivery, mentor review, Sprint 1 planning, and QA test design  
-Document style: SAP490 hybrid, function-detail-first, aligned with BRD v1.2 and SRS v1.1
+Status: Draft v1.3
+Last updated: 2026-07-10
+Prepared for: SAP490 project delivery, mentor review, implementation evidence, and QA test design
+Document style: SAP490 hybrid, function-detail-first, aligned with BRD v1.3 and SRS v1.2
 
 ## 1. Document Control
 
@@ -17,6 +17,7 @@ Document style: SAP490 hybrid, function-detail-first, aligned with BRD v1.2 and 
 | v1.0 | 2026-06-02 | IDTS Project Team | Mentor / Supervisor | Initial FRS created from BRD v1.1, SRS v1.0, BA baseline, diagrams, and SAP490 guidance. | Draft |
 | v1.1 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Fixed Mermaid syntax in rejected follow-up sequence and added missing workflow diagrams for create/assign, developer review, request information, retest/closure, and PM monitoring. | Draft |
 | v1.2 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Updated functional actors and workflows to the MVP role baseline: Tester, Developer, and PM. Reporter and Admin are deferred as separate roles. | Draft |
+| v1.3 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Synced real draft attachment behavior and optional advisory-AI review behavior with the implemented CAP/Fiori baseline. | Draft |
 
 ### 1.2 Review and Sign-Off
 
@@ -38,7 +39,7 @@ The FRS is more detailed than the BRD and more workflow-oriented than the SRS. I
 | Functional Area | Included in MVP | Notes |
 | --- | --- | --- |
 | Bug creation | Yes | Structured report with required fields and unique bug number. |
-| Duplicate checking | Yes | Manual search/filter support; AI duplicate detection is not required. |
+| Duplicate checking | Yes | Manual search/filter remains the core flow; advisory AI similar-bug suggestion is optional and review-only. |
 | Classification | Yes | SAP Module optional; Application Component and Defect Category required. |
 | Developer matching | Yes | Based on Component Category and optional SAP Module. |
 | Assignment | Yes | Assigned or Pending Assignment. |
@@ -49,7 +50,8 @@ The FRS is more detailed than the BRD and more workflow-oriented than the SRS. I
 | History log | Yes | Important actions recorded. |
 | Notification records | Yes | Event records and triggers; external delivery can be deferred. |
 | PM monitoring | Yes | Workload, overdue, queues, nextProcessor, status filters. |
-| Attachments | P1 | Metadata and reference support when time allows. |
+| Attachments | Yes | Draft upload/download and evidence metadata are implemented; attachment bytes are never sent to AI. |
+| Advisory AI | Optional | Similar-bug, classification, summary, and Smart Assign explanations require human review and never mutate the bug. |
 
 ## 4. Functional Workflow Diagrams
 
@@ -539,6 +541,20 @@ flowchart TD
 | Acceptance criteria | Core fields are visible; dependent value helps are understandable; actions match role/status; Rejected details are visible; validation messages are actionable. |
 | Traceability | SRS-IF-UI-001 to SRS-IF-UI-005, SRS-NFR-USE-001, SRS-NFR-USE-002. |
 
+### 5.20 FRS-AI-001 - Optional Advisory AI Review
+
+| Field | Specification |
+| --- | --- |
+| Purpose | Help users inspect similar bugs, possible classification, concise bug/handoff context, and Smart Assign rationale without automating a business decision. |
+| Primary actor | Tester, Developer, PM. |
+| Trigger | An authorized user explicitly requests an AI suggestion from its relevant business context. |
+| Preconditions | The feature is enabled with approved private configuration, or the UI presents the safe unavailable state while the normal workflow remains usable. |
+| Main flow | CAP allowlists and sanitizes permitted bug/context fields; the provider returns normalized advisory output; the UI renders it as text requiring review; the user may ignore it or use normal actions to make a decision. |
+| Validation rules | AI cannot bypass role authorization, catalog validation, Developer Responsibility eligibility, required reasons, or status transition rules. It does not create, edit, assign, reclassify, or transition bugs. |
+| Data protection | Do not send credentials, tokens, private endpoints, attachment bytes, raw logs, or unnecessary personal data. Do not persist raw prompts/provider responses or hidden reasoning. |
+| Acceptance criteria | Disabled, timeout, malformed, unsafe, and provider-failure states are safe; suggestions are visibly review-only; an audit record is sanitized; normal non-AI workflow continues. |
+| Traceability | SRS-FR-AI-001 to SRS-FR-AI-003; `docs/ba/discovery/idts-63-ai-assistance-guardrails.md`. |
+
 ## 6. Functional Data Rules
 
 | Rule ID | Rule |
@@ -569,6 +585,7 @@ flowchart TD
 | History | Important actions show actor, time, old/new value, and reason where applicable. |
 | Notifications | Event records exist without hardcoded external endpoints. |
 | PM monitoring | PM can identify workload, overdue, pending, rejected, retest, and nextProcessor queues. |
+| Advisory AI | Suggestions remain optional, review-only, safe on failure, and cannot mutate the bug. |
 
 ## 8. Traceability to SRS
 
@@ -593,6 +610,7 @@ flowchart TD
 | FRS-PM-001 | SRS-FR-PM-001, SRS-FR-PM-002, SRS-FR-PM-003 |
 | FRS-PM-002 | SRS-FR-PM-004 |
 | FRS-UX-001 | SRS-IF-UI-001 to SRS-IF-UI-005, SRS-NFR-USE-001, SRS-NFR-USE-002 |
+| FRS-AI-001 | SRS-FR-AI-001 to SRS-FR-AI-003 |
 
 ## 9. Open Issues
 
