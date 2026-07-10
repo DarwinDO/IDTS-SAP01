@@ -1,12 +1,14 @@
 # 09 - Database Model Review
 
-Status: BA/technical review draft v2  
-Last updated: 2026-06-04  
+Status: Historical BA/technical review draft v2
+Last updated: 2026-07-10
 Scope: Review only. This document does not implement the CDS model.
 
 Implementation note - 2026-06-04:
 
 WP1 Data Model Foundation has now implemented the recommended baseline in CAP CDS, service projections, and CAP CSV seed data. Keep this review as the decision rationale for DB-Q01 to DB-Q08; use the current `db/schema.cds` and `srv/service.cds` as the implemented source of truth.
+
+Review-sync note - 2026-07-10: sections that describe a minimal scaffold or work "before WP1" are retained only as the original gap-analysis evidence. They are not a statement of the current implementation state; review the current schema/service and linked knowledge mirrors for the implemented baseline.
 
 Vietnamese: Ghi chú implementation - 2026-06-04: WP1 Data Model Foundation đã implement baseline khuyến nghị trong CAP CDS, service projections và CAP CSV seed data. Giữ review này làm lý do quyết định cho DB-Q01 đến DB-Q08; dùng `db/schema.cds` và `srv/service.cds` hiện tại là source of truth đã implement.
 

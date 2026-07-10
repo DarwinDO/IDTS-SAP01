@@ -3,9 +3,9 @@
 Dự án: Issue and Defect Tracking System in SAP  
 Loại tài liệu: Software Requirements Specification (SRS)  
 Ngôn ngữ: Tiếng Việt  
-Trạng thái: Draft v1.1  
-Cập nhật lần cuối: 2026-06-03  
-Chuẩn bị cho: SAP490 project delivery, mentor review và Sprint 1 planning  
+Trạng thái: Draft v1.2
+Cập nhật lần cuối: 2026-07-10
+Chuẩn bị cho: SAP490 project delivery, mentor review, bằng chứng implementation và QA test design
 Phong cách tài liệu: Cấu trúc SRS truyền thống, kết hợp nguyên tắc chất lượng requirement, traceability và verification theo hướng ISO/IEC/IEEE 29148
 
 ## 1. Kiểm soát tài liệu
@@ -16,6 +16,7 @@ Phong cách tài liệu: Cấu trúc SRS truyền thống, kết hợp nguyên t
 | --- | --- | --- | --- | --- | --- |
 | v1.0 | 2026-06-02 | IDTS Project Team | Mentor / Supervisor | Tạo bản SRS đầu tiên từ BRD v1.1, BA baseline, diagrams, PM plan và SAP490 guidance. | Draft |
 | v1.1 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Cập nhật user class và functional requirements theo MVP role baseline: Tester, Developer và PM. Reporter và Admin được hoãn như role tách riêng. | Draft |
+| v1.2 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Đồng bộ baseline attachment đã triển khai và AI advisory tùy chọn, với ràng buộc rõ về human review, privacy và không có workflow authority. | Draft |
 
 ### 1.2 Review và phê duyệt
 
@@ -48,6 +49,8 @@ IDTS hỗ trợ quy trình report và tracking defect trong bối cảnh kiểm 
 
 IDTS không phải Jira đầy đủ, không phải SAP Cloud ALM, SAP Solution Manager, ServiceNow, công cụ quản lý source code, CI/CD, code review, sprint planning hoặc nền tảng AI root cause analysis bắt buộc.
 
+IDTS có thể cung cấp gợi ý AI tùy chọn cho similar bug, classification, summary và giải thích Smart Assign. Các gợi ý chỉ để review, mặc định tắt cho đến khi có private configuration được duyệt, và không bao giờ thay thế CAP authorization, validation, assignment hoặc lifecycle decision.
+
 ## 3. Tài liệu tham chiếu
 
 | Nguồn | Mục đích |
@@ -64,6 +67,7 @@ IDTS không phải Jira đầy đủ, không phải SAP Cloud ALM, SAP Solution 
 | `docs/ba/05-data-dictionary.md` | Conceptual data expectations. |
 | `docs/ba/06-authorization-matrix.md` | Role và action permissions. |
 | `docs/ba/07-fiori-ux-requirements.md` | Fiori UX expectations. |
+| `docs/ba/discovery/idts-63-ai-assistance-guardrails.md` | Phạm vi AI advisory đã duyệt, cùng các ràng buộc privacy, safety và human review. |
 | `docs/diagrams/` | Use case, workflow, status, data, audit và notification diagrams đã có. |
 | `docs/knowledge/sap490-deliverable-guidance.md` | Cách diễn giải SAP490 cho CAP/Fiori. |
 
@@ -232,6 +236,14 @@ Verification methods:
 | SRS-FR-PM-002 | BR-21 | IDTS shall cung cấp workload visibility theo Developer bằng assigned/open bug counts. | Must | Analysis và demonstration | FRS-PM-001 |
 | SRS-FR-PM-003 | BR-23 | IDTS shall expose các queue Pending Assignment, Need More Information, Retest Required, Rejected follow-up và Overdue cho PM monitoring. | Must | Demonstration | FRS-PM-001 |
 | SRS-FR-PM-004 | BR-22 | IDTS shall cho phép PM comment hoặc request reassignment; PM direct reassignment phụ thuộc decision authorization rõ ràng. | Must | Inspection và test | FRS-PM-002 |
+
+### 7.7 Optional Advisory AI
+
+| ID | Source | Requirement Statement | Priority | Verification | Trace To |
+| --- | --- | --- | --- | --- | --- |
+| SRS-FR-AI-001 | DISC-002 | IDTS có thể cung cấp gợi ý similar-bug, classification, bug/handoff summary và Smart Assign explanation chỉ dưới dạng advisory output để người dùng review. | Should | Test và demonstration | FRS-AI-001 |
+| SRS-FR-AI-002 | DISC-002 | AI output không được create, edit, assign, reclassify, transition, close, reopen hoặc làm thay đổi bug; normal action có authorization vẫn là đường quyết định duy nhất. | Must | Test | FRS-AI-001 |
+| SRS-FR-AI-003 | DISC-002 | AI request, response, audit record và lỗi hiển thị cho user không được chứa credential, token, private endpoint, attachment bytes, raw provider output hoặc personal data không cần thiết. | Must | Inspection và test | FRS-AI-001 |
 
 ## 8. Data Requirements
 

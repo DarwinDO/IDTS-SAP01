@@ -1,6 +1,6 @@
 {
   "task": "IDTS-77",
-  "checkedAt": "2026-07-09T17:16:31.735Z",
+  "checkedAt": "2026-07-10T06:48:40.360Z",
   "checks": [
     {
       "label": "manifest uses the similar bug action row fragment",

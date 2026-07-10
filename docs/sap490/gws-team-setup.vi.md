@@ -20,7 +20,7 @@ Setup này giúp mọi developer có cùng command local:
 | `npm run sap490:gws:version` | Verify version `gws` local. |
 | `npm run sap490:gws:auth-status` | Kiểm tra developer hiện tại đã authenticate chưa. |
 | `npm run sap490:gws:check` | Kiểm tra CLI, auth và local Drive config. |
-| `npm run sap490:gws:find-review-folder` | Tìm folder `SAP490 Review` trong phạm vi Google Drive mà developer có quyền truy cập. |
+| `npm run sap490:gws:find-review-folder` | Tìm folder `SU26SAP01_GSU26SAP01` trong phạm vi Google Drive mà developer có quyền truy cập. |
 | `npm run sap490:gws:dry-run` | Hiển thị target sync BRD/SRS/FRS lên Drive mà không thay đổi file remote. |
 | `npm run sap490:gws:upload-review-docx` | Preview upload bản review DOCX BRD/SRS/FRS có timestamp. |
 | `npm run sap490:gws:upload-review-docx:execute` | Upload bản review DOCX BRD/SRS/FRS có timestamp mà không overwrite file hiện có. |
@@ -35,7 +35,7 @@ Mỗi developer cần:
 
 - Có Node.js trên máy.
 - Cài dependency của repo bằng `npm install`.
-- Có quyền truy cập Google account vào folder Drive `SAP490 Review`.
+- Có quyền truy cập Google account vào folder Drive `SU26SAP01_GSU26SAP01`.
 - Có OAuth setup local cho Google Workspace thông qua `gws`.
 
 Project dùng `@googleworkspace/cli` làm dev dependency. Không cài npm package `gws` không scope vì package đó là tool khác.
@@ -106,7 +106,7 @@ Các field bắt buộc:
 
 | Field | Ý nghĩa |
 | --- | --- |
-| `googleWorkspace.reviewFolderId` | Google Drive folder ID của `SAP490 Review`. |
+| `googleWorkspace.reviewFolderId` | Google Drive folder ID của `SU26SAP01_GSU26SAP01`. |
 | `googleWorkspace.deliverableTemplateFolderId` | Google Drive folder ID của `Deliverable_template`. |
 
 File local này đã được ignore bởi git.
@@ -123,8 +123,8 @@ Dùng folder ID trả về để điền vào `googleWorkspace.reviewFolderId` t
 
 Nếu không tìm thấy folder:
 
-- Kiểm tra Google account có quyền vào folder `SAP490 Review`.
-- Kiểm tra tên folder đúng chính xác là `SAP490 Review`.
+- Kiểm tra Google account có quyền vào folder `SU26SAP01_GSU26SAP01`.
+- Kiểm tra tên folder đúng chính xác là `SU26SAP01_GSU26SAP01`.
 - Nhờ Drive owner share folder cho tài khoản developer.
 
 ### 8. Chạy Local Check
@@ -181,6 +181,6 @@ Lệnh này cũng tạo file mới có timestamp. Nó không overwrite Google Do
 | --- | --- | --- |
 | `gws` is not recognized | Chưa cài dependency hoặc chạy ngoài npm script context | Chạy `npm install`, sau đó dùng `npm run sap490:gws:version`. |
 | Auth status fail | Chưa login OAuth | Chạy `npx gws auth login` sau khi setup OAuth. |
-| Không tìm thấy folder | Account chưa có quyền hoặc tên folder khác | Nhờ Drive owner share `SAP490 Review`; retry. |
+| Không tìm thấy folder | Account chưa có quyền hoặc tên folder khác | Nhờ Drive owner share `SU26SAP01_GSU26SAP01`; retry. |
 | Thiếu local config | Chưa tạo `drive-ids.local.json` | Copy từ `drive-ids.example.json` rồi điền local IDs. |
 | Dry-run báo thiếu DOCX | Chưa generate document | Regenerate DOCX BRD/SRS/FRS trước khi lên kế hoạch sync. |

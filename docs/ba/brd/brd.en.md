@@ -3,8 +3,8 @@
 Project: Issue and Defect Tracking System in SAP  
 Document type: Business Requirements Document (BRD)  
 Language: English  
-Status: Draft v1.2  
-Last updated: 2026-06-03  
+Status: Draft v1.3
+Last updated: 2026-07-10
 Prepared for: SAP490 project delivery and mentor review  
 Document style: SAP490 hybrid, business-first with light SAP implementation context
 
@@ -17,6 +17,7 @@ Document style: SAP490 hybrid, business-first with light SAP implementation cont
 | v1.0 | 2026-06-01 | IDTS Project Team | Mentor / Supervisor | Initial BRD draft based on IDTS business baseline, BA pack, PM pack, and SAP490 guidance. | Draft |
 | v1.1 | 2026-06-01 | IDTS Project Team | Mentor / Supervisor | Revised into SAP490 hybrid BRD: reduced technical detail, added stakeholder needs, KPIs, RACI, NFRs, glossary, approval, and requirement traceability. | Draft |
 | v1.2 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Updated MVP role baseline to three active roles: Tester, Developer, and PM. Reporter and Admin are deferred as separate roles and no longer appear as active MVP RACI columns. | Draft |
+| v1.3 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Synced current implementation and review baseline: CAP/Fiori MVP workflow, audit/notification/attachment flows, PM monitoring, and optional human-review AI assistance. | Draft |
 
 ### 1.2 Review and Sign-Off
 
@@ -121,7 +122,9 @@ For MVP, one real user may perform multiple responsibilities, but only Tester, D
 
 ## 8. Current State
 
-The repository currently contains a minimal SAP CAP/Fiori scaffold. The existing implementation is smaller than the agreed business baseline. Business markdown files, BA documents, PM documents, diagrams, and SAP490 guidance already describe the intended defect tracking scope, but the formal BRD is being refined so it can become the upstream source for SRS and FRS.
+The repository now implements the agreed CAP/Fiori MVP baseline: structured bug creation, classification and responsibility-aware assignment, controlled lifecycle actions, comments, draft attachments, audit/history, notifications, PM monitoring, and optional AI assistance that remains human-review only. The SAP490 review focuses on evidence, traceability, and remaining acceptance rather than a minimal scaffold.
+
+The optional real AI provider is disabled by default and does not change business authority, authorization, validation, assignment, or status transitions. Its production use remains dependent on approved private configuration and separate live-provider evidence; this BRD does not treat AI output as a business decision.
 
 Without the target system, the team would rely on manual coordination, comments, informal notes, or external files. This creates risk around duplicate reports, wrong assignment, unclear ownership, inconsistent status usage, rejected bugs without follow-up, and missing audit trail.
 

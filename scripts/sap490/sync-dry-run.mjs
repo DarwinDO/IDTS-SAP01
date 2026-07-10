@@ -7,32 +7,32 @@ const artifacts = [
   {
     type: "BRD DOCX",
     localPath: "docs/ba/brd/brd.en.docx",
-    reviewName: "IDTS_BRD_EN.docx"
+    reviewName: "SU26SAP01_GSU26SAP01_BRD_EN.docx"
   },
   {
     type: "BRD DOCX",
     localPath: "docs/ba/brd/brd.vi.docx",
-    reviewName: "IDTS_BRD_VI.docx"
+    reviewName: "SU26SAP01_GSU26SAP01_BRD_VI.docx"
   },
   {
     type: "SRS DOCX",
     localPath: "docs/ba/srs/srs.en.docx",
-    reviewName: "IDTS_SRS_EN.docx"
+    reviewName: "SU26SAP01_GSU26SAP01_SRS_EN.docx"
   },
   {
     type: "SRS DOCX",
     localPath: "docs/ba/srs/srs.vi.docx",
-    reviewName: "IDTS_SRS_VI.docx"
+    reviewName: "SU26SAP01_GSU26SAP01_SRS_VI.docx"
   },
   {
     type: "FRS DOCX",
     localPath: "docs/ba/frs/frs.en.docx",
-    reviewName: "IDTS_FRS_EN.docx"
+    reviewName: "SU26SAP01_GSU26SAP01_FRS_EN.docx"
   },
   {
     type: "FRS DOCX",
     localPath: "docs/ba/frs/frs.vi.docx",
-    reviewName: "IDTS_FRS_VI.docx"
+    reviewName: "SU26SAP01_GSU26SAP01_FRS_VI.docx"
   }
 ];
 

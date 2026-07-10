@@ -2,7 +2,7 @@
 
 Status: Done
 Owner workstream: BA/PM
-Last updated: 2026-06-02
+Last updated: 2026-07-10
 
 ## Goal
 
@@ -25,6 +25,7 @@ Create the formal Business Requirements Document for IDTS in separate English an
 - Pandoc was tested for DOCX generation, but default rendering broke wide tables. Final DOCX files use the local fallback helper, which keeps content editable and converts wide tables into readable record blocks.
 - DOCX files were rendered and visually checked through the Documents workflow.
 - The local fallback helper was later updated to keep Markdown tables as real editable Word tables, with fixed table widths, wrapped content, header rows, and smaller table font for wide tables.
+- BRD EN/VI were synchronized to v1.3 on 2026-07-10: the current implemented CAP/Fiori baseline, review-only AI boundary, and live-provider evidence dependency are stated without changing business authority. Both DOCX files were regenerated and uploaded as new timestamped SAP490 Review copies.
 
 ## Next Step
 

@@ -3,10 +3,10 @@
 Dự án: Issue and Defect Tracking System in SAP  
 Loại tài liệu: Functional Requirements Specification (FRS)  
 Ngôn ngữ: Tiếng Việt  
-Trạng thái: Draft v1.2  
-Cập nhật lần cuối: 2026-06-03  
-Chuẩn bị cho: SAP490 project delivery, mentor review, Sprint 1 planning và QA test design  
-Phong cách tài liệu: SAP490 hybrid, ưu tiên functional detail, aligned với BRD v1.2 và SRS v1.1
+Trạng thái: Draft v1.3
+Cập nhật lần cuối: 2026-07-10
+Chuẩn bị cho: SAP490 project delivery, mentor review, bằng chứng implementation và QA test design
+Phong cách tài liệu: SAP490 hybrid, ưu tiên functional detail, aligned với BRD v1.3 và SRS v1.2
 
 ## 1. Kiểm soát tài liệu
 
@@ -17,6 +17,7 @@ Phong cách tài liệu: SAP490 hybrid, ưu tiên functional detail, aligned v�
 | v1.0 | 2026-06-02 | IDTS Project Team | Mentor / Supervisor | Tạo bản FRS đầu tiên từ BRD v1.1, SRS v1.0, BA baseline, diagrams và SAP490 guidance. | Draft |
 | v1.1 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Sửa lỗi Mermaid syntax trong rejected follow-up sequence và bổ sung workflow diagrams còn thiếu cho create/assign, developer review, request information, retest/closure và PM monitoring. | Draft |
 | v1.2 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Cập nhật functional actors và workflows theo MVP role baseline: Tester, Developer và PM. Reporter và Admin được hoãn như role tách riêng. | Draft |
+| v1.3 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Đồng bộ hành vi draft attachment thực và hành vi AI advisory review tùy chọn với baseline CAP/Fiori đã triển khai. | Draft |
 
 ### 1.2 Review và phê duyệt
 
@@ -38,7 +39,7 @@ FRS chi tiết hơn BRD và thiên về workflow hơn SRS. Tài liệu dùng cho
 | Functional Area | Có trong MVP | Ghi chú |
 | --- | --- | --- |
 | Bug creation | Có | Bug report có cấu trúc với required fields và unique bug number. |
-| Duplicate checking | Có | Manual search/filter support; không bắt buộc AI duplicate detection. |
+| Duplicate checking | Có | Manual search/filter vẫn là core flow; AI similar-bug suggestion chỉ là tùy chọn và review-only. |
 | Classification | Có | SAP Module optional; Application Component và Defect Category required. |
 | Developer matching | Có | Dựa trên Component Category và optional SAP Module. |
 | Assignment | Có | Assigned hoặc Pending Assignment. |
@@ -49,7 +50,8 @@ FRS chi tiết hơn BRD và thiên về workflow hơn SRS. Tài liệu dùng cho
 | History log | Có | Important actions được ghi nhận. |
 | Notification records | Có | Event records và triggers; external delivery có thể defer. |
 | PM monitoring | Có | Workload, overdue, queues, nextProcessor, status filters. |
-| Attachments | P1 | Metadata và reference support nếu còn thời gian. |
+| Attachments | Có | Đã triển khai draft upload/download và evidence metadata; attachment bytes không bao giờ gửi tới AI. |
+| Advisory AI | Optional | Similar-bug, classification, summary và Smart Assign explanation cần human review và không làm thay đổi bug. |
 
 ## 4. Functional Workflow Diagrams
 
@@ -539,6 +541,20 @@ flowchart TD
 | Acceptance criteria | Core fields visible; dependent value helps dễ hiểu; actions match role/status; Rejected details visible; validation messages actionable. |
 | Traceability | SRS-IF-UI-001 đến SRS-IF-UI-005, SRS-NFR-USE-001, SRS-NFR-USE-002. |
 
+### 5.20 FRS-AI-001 - Optional Advisory AI Review
+
+| Field | Specification |
+| --- | --- |
+| Purpose | Hỗ trợ user xem similar bug, classification có thể phù hợp, bug/handoff context ngắn gọn và Smart Assign rationale mà không tự động hóa quyết định nghiệp vụ. |
+| Primary actor | Tester, Developer, PM. |
+| Trigger | User có quyền chủ động yêu cầu AI suggestion từ business context tương ứng. |
+| Preconditions | Feature được bật với private configuration đã duyệt, hoặc UI hiển thị safe unavailable state trong khi normal workflow vẫn dùng được. |
+| Main flow | CAP allowlist và sanitize các field bug/context được phép; provider trả advisory output đã chuẩn hóa; UI render dưới dạng text cần review; user có thể bỏ qua hoặc dùng normal action để quyết định. |
+| Validation rules | AI không được bypass role authorization, catalog validation, Developer Responsibility eligibility, required reason hoặc status transition rule. AI không create, edit, assign, reclassify hoặc transition bug. |
+| Data protection | Không gửi credential, token, private endpoint, attachment bytes, raw log hoặc personal data không cần thiết. Không persist raw prompt/provider response hoặc hidden reasoning. |
+| Acceptance criteria | State disabled, timeout, malformed, unsafe và provider-failure đều an toàn; suggestion hiển thị review-only; audit record được sanitize; workflow không-AI vẫn tiếp tục. |
+| Traceability | SRS-FR-AI-001 đến SRS-FR-AI-003; `docs/ba/discovery/idts-63-ai-assistance-guardrails.md`. |
+
 ## 6. Functional Data Rules
 
 | Rule ID | Rule |
@@ -569,6 +585,7 @@ flowchart TD
 | History | Important actions hiển thị actor, time, old/new value và reason khi áp dụng. |
 | Notifications | Event records tồn tại và không hardcode external endpoints. |
 | PM monitoring | PM nhận diện workload, overdue, pending, rejected, retest và nextProcessor queues. |
+| Advisory AI | Suggestion là tùy chọn, review-only, an toàn khi lỗi và không làm thay đổi bug. |
 
 ## 8. Traceability to SRS
 
@@ -593,6 +610,7 @@ flowchart TD
 | FRS-PM-001 | SRS-FR-PM-001, SRS-FR-PM-002, SRS-FR-PM-003 |
 | FRS-PM-002 | SRS-FR-PM-004 |
 | FRS-UX-001 | SRS-IF-UI-001 đến SRS-IF-UI-005, SRS-NFR-USE-001, SRS-NFR-USE-002 |
+| FRS-AI-001 | SRS-FR-AI-001 đến SRS-FR-AI-003 |
 
 ## 9. Open Issues
 

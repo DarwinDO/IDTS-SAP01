@@ -20,7 +20,7 @@ The setup gives every developer the same local command surface:
 | `npm run sap490:gws:version` | Verify the local `gws` CLI version. |
 | `npm run sap490:gws:auth-status` | Check whether the current developer is authenticated. |
 | `npm run sap490:gws:check` | Check CLI, auth, and local Drive config. |
-| `npm run sap490:gws:find-review-folder` | Find the `SAP490 Review` folder in the developer's Google Drive access scope. |
+| `npm run sap490:gws:find-review-folder` | Find the `SU26SAP01_GSU26SAP01` folder in the developer's Google Drive access scope. |
 | `npm run sap490:gws:dry-run` | Show planned BRD/SRS/FRS Drive sync targets without changing remote files. |
 | `npm run sap490:gws:upload-review-docx` | Preview timestamped BRD/SRS/FRS DOCX review uploads. |
 | `npm run sap490:gws:upload-review-docx:execute` | Upload timestamped BRD/SRS/FRS DOCX review copies without overwriting existing files. |
@@ -35,7 +35,7 @@ Each developer needs:
 
 - Node.js available locally.
 - Repository dependencies installed with `npm install`.
-- Google account access to the `SAP490 Review` Drive folder.
+- Google account access to the `SU26SAP01_GSU26SAP01` Drive folder.
 - A local Google Workspace OAuth setup for `gws`.
 
 The project uses `@googleworkspace/cli` as a dev dependency. Do not install the unrelated `gws` npm package because that package is a different tool.
@@ -106,7 +106,7 @@ Required fields:
 
 | Field | Meaning |
 | --- | --- |
-| `googleWorkspace.reviewFolderId` | Google Drive folder ID for `SAP490 Review`. |
+| `googleWorkspace.reviewFolderId` | Google Drive folder ID for `SU26SAP01_GSU26SAP01`. |
 | `googleWorkspace.deliverableTemplateFolderId` | Google Drive folder ID for `Deliverable_template`. |
 
 This local file is ignored by git.
@@ -123,8 +123,8 @@ Use the returned folder ID for `googleWorkspace.reviewFolderId` in `docs/sap490/
 
 If the folder is not found:
 
-- Confirm that the Google account has access to the `SAP490 Review` folder.
-- Confirm that the folder name is exactly `SAP490 Review`.
+- Confirm that the Google account has access to the `SU26SAP01_GSU26SAP01` folder.
+- Confirm that the folder name is exactly `SU26SAP01_GSU26SAP01`.
 - Ask the Drive owner to share the folder with the developer account.
 
 ### 8. Run Local Check
@@ -181,6 +181,6 @@ This also creates new timestamped files. It does not overwrite existing Google D
 | --- | --- | --- |
 | `gws` is not recognized | Dependencies are not installed or command is run outside npm script context | Run `npm install`, then use `npm run sap490:gws:version`. |
 | Auth status fails | OAuth login not completed | Run `npx gws auth login` after OAuth setup. |
-| Folder search returns no result | Account cannot access folder or folder name differs | Ask Drive owner to share `SAP490 Review`; retry. |
+| Folder search returns no result | Account cannot access folder or folder name differs | Ask Drive owner to share `SU26SAP01_GSU26SAP01`; retry. |
 | Local config missing | `drive-ids.local.json` not created | Copy from `drive-ids.example.json` and fill local IDs. |
 | Dry-run shows missing DOCX | Document has not been generated yet | Regenerate BRD/SRS/FRS DOCX before sync planning. |
