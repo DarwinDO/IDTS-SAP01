@@ -74,8 +74,8 @@ const checks = [
 
 assert(!section.IdtsHandoffSummary, 'manifest must not register standalone IdtsHandoffSummary section')
 checks.push({ label: 'manifest no longer registers standalone handoff summary section', pass: true })
-assert.strictEqual(section.IdtsSmartAssignment.position.anchor, 'IdtsClassificationActionRow')
-checks.push({ label: 'smart assignment appears after classification action row', pass: true })
+assert.strictEqual(section.IdtsSmartAssignment.position.anchor, 'ClassificationAndAssignment')
+checks.push({ label: 'smart assignment appears after Classification and Planning', pass: true })
 
 const requiredI18nKeys = [
   'handoffSummarySectionHint',

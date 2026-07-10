@@ -38,7 +38,7 @@ function parseProperties (relativePath) {
 }
 
 const controller = read('app/bug-management-ui/webapp/ext/actions/ClassificationReview.js')
-const fragment = read('app/bug-management-ui/webapp/ext/fragment/ClassificationAssistanceSection.fragment.xml')
+const fragment = read('app/bug-management-ui/webapp/ext/fragment/ClassificationReviewField.fragment.xml')
 const manifest = JSON.parse(read('app/bug-management-ui/webapp/manifest.json'))
 const i18nFiles = [
   'app/bug-management-ui/webapp/i18n/i18n.properties',
@@ -48,8 +48,8 @@ const forbiddenUserCopy = /\b(prompt|token|model|provider|architecture|debug|sta
 const section = manifest['sap.ui5'].routing.targets.BugsObjectPage.options.settings.content.body.sections
 
 const checks = [
-  expectIncludes('classification section opens the review dialog', fragment, 'ClassificationReview.openDialog'),
-  expectIncludes('classification section loads the UI5 action module', fragment, 'idts/bugmanagementui/ext/actions/ClassificationReview'),
+  expectIncludes('classification review field opens the review dialog', fragment, 'ClassificationReview.openDialog'),
+  expectIncludes('classification review field loads the UI5 action module', fragment, 'idts/bugmanagementui/ext/actions/ClassificationReview'),
   expectIncludes('classification review calls the existing CAP action', controller, '/suggestClassification(...)'),
   expectIncludes('classification review supports persisted bugs', controller, 'operation.setParameter("sourceBugID"'),
   expectIncludes('classification review supports pre-create bug details', controller, 'operation.setParameter("title"'),
@@ -71,22 +71,23 @@ const checks = [
   expectNotMatches('classification review controller does not embed raw HTML', controller, /<(div|span|style|table)\b/i)
 ]
 
-assert(section.IdtsClassificationActionRow, 'manifest must register IdtsClassificationActionRow')
-checks.push({ label: 'manifest registers classification action row', pass: true })
+const fields = manifest['sap.ui5'].routing.targets.BugsObjectPage.options.settings.controlConfiguration['@com.sap.vocabularies.UI.v1.FieldGroup#Classification'].fields
+assert(fields.IdtsClassificationReview, 'manifest must register IdtsClassificationReview inside Classification FieldGroup')
+checks.push({ label: 'manifest registers classification review inside Classification FieldGroup', pass: true })
 assert.strictEqual(
-  section.IdtsClassificationActionRow.template,
-  'idts.bugmanagementui.ext.fragment.ClassificationAssistanceSection'
+  fields.IdtsClassificationReview.template,
+  'idts.bugmanagementui.ext.fragment.ClassificationReviewField'
 )
-checks.push({ label: 'manifest uses the classification action row fragment', pass: true })
-assert(!section.IdtsClassificationActionRow.title, 'classification action row must not have a standalone section title')
-checks.push({ label: 'classification action row has no standalone section title', pass: true })
+checks.push({ label: 'manifest uses the classification review field fragment', pass: true })
+assert.deepStrictEqual(fields.IdtsClassificationReview.position, { anchor: 'DataField::defectCategory_ID', placement: 'After' })
+checks.push({ label: 'classification review is positioned after Defect Category inside Classification', pass: true })
 assert(!section.IdtsClassificationAssistance, 'manifest must not register standalone IdtsClassificationAssistance section')
 checks.push({ label: 'manifest does not register the old standalone classification assistance section', pass: true })
-assert.strictEqual(section.IdtsSmartAssignment.position.anchor, 'IdtsClassificationActionRow')
-checks.push({ label: 'assignment remains after classification action row', pass: true })
+assert.strictEqual(section.IdtsSmartAssignment.position.anchor, 'ClassificationAndAssignment')
+checks.push({ label: 'assignment remains after Classification and Planning', pass: true })
 
 const requiredI18nKeys = [
-  'classificationReviewSectionHint',
+  'classificationReviewFieldLabel',
   'classificationReviewOpenButton',
   'classificationReviewDialogTitle',
   'classificationReviewIntroMessage',

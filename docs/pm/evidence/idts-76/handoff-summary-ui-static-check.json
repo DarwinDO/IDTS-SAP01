@@ -1,6 +1,6 @@
 {
   "task": "IDTS-76",
-  "checkedAt": "2026-07-09T17:16:31.502Z",
+  "checkedAt": "2026-07-10T05:20:37.220Z",
   "checks": [
     {
       "label": "history section opens the handoff review dialog",
@@ -79,7 +79,7 @@
       "pass": true
     },
     {
-      "label": "smart assignment appears after classification action row",
+      "label": "smart assignment appears after Classification and Planning",
       "pass": true
     },
     {
