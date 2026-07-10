@@ -1,6 +1,13 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
-Last updated: 2026-07-09
+Last updated: 2026-07-11
+
+## 2026-07-11 - Agent-rule routing PR verification
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Governance verification | Rechecked `chore/agent-rule-routing-donhv` before PR creation: seven rule files, concise router, required Ponytail evidence, and rule/QA script changes. | This task changes shared agent/process governance and therefore needs fresh pre-merge evidence. | Complete locally. `qa:agent-rules` passed (7 required rules), QA-depth self-test passed (6/0), secret scan passed, `node --check scripts/qa/check-agent-rules.js` passed, and `git diff --check` passed. | Run the required Ponytail review, push the committed branch, create a PR to `dev`, and merge only after checks/review are clean. |
+| Tooling issue | The configured GitHub plugin skill path was unavailable in the local plugin cache when preparing the PR workflow. | The available Skills catalog referenced a remote GitHub plugin version that is not present under the local `openai-curated-remote` cache. | No repository or GitHub state was changed. Use the authenticated `gh` CLI fallback for branch push/PR operations. | Verify `gh auth status`, push the existing committed branch, then create/inspect the PR. This is tooling only, not a product defect. |
 
 ## 2026-07-09 - IDTS-77 AI review action placement correction
 
