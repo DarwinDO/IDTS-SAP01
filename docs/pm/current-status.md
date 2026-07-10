@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-07-10
+Last updated: 2026-07-11
 
 ## Snapshot
 
@@ -40,6 +40,7 @@ Last updated: 2026-07-10
 - SAP490 review workbooks were refreshed on 2026-06-18 as separate English and Vietnamese copies from the school templates: `Functional_Specification_IDTS_SAP01_{en,vi}_v0.2.xlsx`, `Test_Scenario_IDTS_SAP01_{en,vi}_v0.2.xlsx`, `Unit_Test_IDTS_SAP01_{en,vi}_v0.2.xlsx`, `Functional_Test_IDTS_SAP01_{en,vi}_v0.1.xlsx`, `Test_And_Fix_Bug_IDTS_SAP01_{en,vi}_v0.3.xlsx`, and `Test_Report_IDTS_SAP01_{en,vi}_v0.1.xlsx`.
 - SAP490 review sync on 2026-07-10 uploaded 36 timestamped EN/VI review artifacts to the `SAP490 Review` Drive folder: BRD/SRS/FRS, Blueprint, Functional/Technical Specifications, Configuration Note, change tracker, Test Scenario/Unit/Functional/Test Report, product-only Test & Fix Bug, prepared UAT plan, Workshop deck, and Review Readiness register. The v0.4 defect workbook contains only 12 confirmed product defects; member status files retain non-product issues and the full issue log. Final Project Report and real UAT sign-off remain intentionally pending.
 - The four official Functional Specification v0.4 and Technical Specification v0.2 raw XLSX files were subsequently repaired with OfficeCLI and replaced in place at their existing Drive review IDs. The final local OfficeCLI validation and format/content scans are clean; the live Drive review confirms the corrected technical cover and readable horizontal Screen Layout table. This is presentation/documentation remediation only and adds no Test & Fix Bug row.
+- Release handover on 2026-07-11 merged the agent-rule routing, disabled-by-default OpenAI provider, and SAP490 review traceability PRs into `dev` at `d97ae6d`. Render service `idts-sap01-qa` deploy `dep-d98jk5cs728c73di5g0g` is live and `/odata/v4/auth/$metadata` returned HTTP 200; no private AI key/model was added and AI remains disabled by default.
 - The refreshed SAP490 pack now reflects the current Sprint 02 create/assignment/lifecycle/audit baseline, the `30 PASS / 0 FAIL` backend retest suite, the HTTP attachment/comment verification pass, and the currently known browser/UI polish gaps.
 - A new retest planning source exists under `docs/qa/retest-matrix.en.md` and `docs/qa/retest-matrix.vi.md`. It is now the primary test-planning reference for Sprint 02 instead of the older `21/21` checklist.
 - A real browser QA pass on `localhost:4004` has now validated the create path, real draft attachment retention after save, Add Comment flow, role-based action visibility, developer lifecycle entry path, and immediate Object Page refresh after lifecycle submit once the final side-effect annotation fix was applied. A focused follow-up browser probe also no longer reproduces the earlier `componentCategory_ID` drill-down warning during create.
