@@ -1,17 +1,17 @@
 {
   "task": "IDTS-74",
-  "checkedAt": "2026-07-10T06:48:39.270Z",
+  "checkedAt": "2026-07-11T00:39:51.765Z",
   "checks": [
     {
-      "label": "Similar Bug Check section opens duplicate review from product UI",
+      "label": "Similar bug review field opens duplicate review from product UI",
       "pass": true
     },
     {
-      "label": "Similar Bug Check section loads DuplicateReview UI5 module",
+      "label": "Similar bug review field loads DuplicateReview UI5 module",
       "pass": true
     },
     {
-      "label": "Similar Bug Check section uses user-facing helper text",
+      "label": "Similar bug review field uses the user-facing action label",
       "pass": true
     },
     {
@@ -331,6 +331,10 @@
       "pass": true
     },
     {
+      "label": "i18n.properties has similarBugReviewFieldLabel",
+      "pass": true
+    },
+    {
       "label": "i18n.properties has duplicateReviewOpenButton",
       "pass": true
     },
@@ -432,6 +436,10 @@
     },
     {
       "label": "i18n.properties duplicateReviewCloseButton has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has similarBugReviewFieldLabel",
       "pass": true
     },
     {

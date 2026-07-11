@@ -176,6 +176,7 @@ async function main () {
     await button.waitFor({ state: 'visible', timeout: 90000 })
     pass('Find Similar Bugs is visible on the product Object Page')
     results.push({ check: 'entry-point-visible', passed: true })
+    await harness.screenshot('idts74_similar_bug_entry_point_in_bug_summary')
 
     await button.click()
     const dialog = page.getByRole('dialog', { name: /^Similar Bugs$/i }).first()

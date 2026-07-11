@@ -474,3 +474,39 @@ Anchor quan trọng:
   **Khái niệm IDTS**: Handoff review nằm trong History vì nó tóm tắt lifecycle context.
   **Ảnh hưởng nếu sai**: Trang có thể hiện lại section Handoff Summary riêng.
   **Phải kiểm tra cùng**: `HistoryTimeline.fragment.xml`, `HandoffSummaryReview.js`, và `scripts/qa/test-idts76-handoff-summary-ui.js`.
+
+## IDTS-79 correction - action rows must live inside their business forms
+
+### English
+
+IDTS-78 removed the visible titles of the Similar Bug and Classification action rows, but the manifest still registered them under `content.body.sections`. Fiori Elements therefore still rendered each row as a separate Object Page block.
+
+IDTS-79 uses native `controlConfiguration` field extensions instead:
+
+- `IdtsSimilarBugReview` is injected after Description in `@UI.FieldGroup#GeneralInfo`.
+- `IdtsClassificationReview` is injected after Defect Category in `@UI.FieldGroup#Classification`.
+- The old `IdtsSimilarBugActionRow` and `IdtsClassificationActionRow` section entries are removed.
+
+This keeps the review dialogs and backend contracts unchanged while placing each entry point inside the form where users need it.
+
+### Vietnamese
+
+IDTS-78 đã bỏ title nhìn thấy được của hai action row Similar Bug và Classification, nhưng manifest vẫn đăng ký chúng trong `content.body.sections`. Vì vậy Fiori Elements vẫn render mỗi row thành một block Object Page riêng.
+
+IDTS-79 dùng native field extension của `controlConfiguration` thay vào đó:
+
+- `IdtsSimilarBugReview` được chèn sau Description trong `@UI.FieldGroup#GeneralInfo`.
+- `IdtsClassificationReview` được chèn sau Defect Category trong `@UI.FieldGroup#Classification`.
+- Hai section entry cũ `IdtsSimilarBugActionRow` và `IdtsClassificationActionRow` được bỏ.
+
+Cách này giữ nguyên dialog review và backend contract hiện có, nhưng đặt mỗi entry point vào đúng form mà user cần dùng.
+
+## IDTS-79 visual follow-up
+
+### English
+
+The first form-field version used long helper text inside the custom fragment. Browser evidence showed that a standard Fiori Form cell was too narrow for that layout. The final manifest therefore supplies short i18n labels (`Similar bugs` and `Classification suggestions`) and lets the fragments render only their action buttons.
+
+### Vietnamese
+
+Phiên bản field đầu tiên dùng helper text dài bên trong custom fragment. Evidence browser cho thấy một Fiori Form cell chuẩn quá hẹp cho layout đó. Manifest cuối cùng vì vậy cung cấp label i18n ngắn (`Similar bugs` và `Classification suggestions`) và để fragment chỉ render action button.

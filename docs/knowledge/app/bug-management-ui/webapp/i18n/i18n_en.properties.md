@@ -1,5 +1,15 @@
 # Knowledge: `app/bug-management-ui/webapp/i18n/i18n_en.properties`
 
+## IDTS-79 inline review labels
+
+### English
+
+This locale mirrors `similarBugReviewFieldLabel` and `classificationReviewFieldLabel`. Keep them short, user-facing, and free of implementation wording.
+
+### Vietnamese
+
+Locale này mirror `similarBugReviewFieldLabel` và `classificationReviewFieldLabel`. Giữ chúng ngắn, dành cho user, và không chứa wording implementation.
+
 ## English
 
 ### What this file is for

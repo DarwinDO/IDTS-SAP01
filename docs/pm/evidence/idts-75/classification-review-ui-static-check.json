@@ -1,13 +1,13 @@
 {
   "task": "IDTS-75",
-  "checkedAt": "2026-07-10T06:48:39.655Z",
+  "checkedAt": "2026-07-11T00:39:52.152Z",
   "checks": [
     {
-      "label": "classification section opens the review dialog",
+      "label": "classification review field opens the review dialog",
       "pass": true
     },
     {
-      "label": "classification section loads the UI5 action module",
+      "label": "classification review field loads the UI5 action module",
       "pass": true
     },
     {
@@ -71,15 +71,15 @@
       "pass": true
     },
     {
-      "label": "manifest registers classification action row",
+      "label": "manifest registers classification review inside Classification FieldGroup",
       "pass": true
     },
     {
-      "label": "manifest uses the classification action row fragment",
+      "label": "manifest uses the classification review field fragment",
       "pass": true
     },
     {
-      "label": "classification action row has no standalone section title",
+      "label": "classification review is positioned after Defect Category inside Classification",
       "pass": true
     },
     {
@@ -87,11 +87,11 @@
       "pass": true
     },
     {
-      "label": "assignment remains after classification action row",
+      "label": "assignment remains after Classification and Planning",
       "pass": true
     },
     {
-      "label": "i18n.properties has classificationReviewSectionHint",
+      "label": "i18n.properties has classificationReviewFieldLabel",
       "pass": true
     },
     {
@@ -171,7 +171,7 @@
       "pass": true
     },
     {
-      "label": "i18n.properties classificationReviewSectionHint is user-facing",
+      "label": "i18n.properties classificationReviewFieldLabel is user-facing",
       "pass": true
     },
     {
@@ -255,7 +255,7 @@
       "pass": true
     },
     {
-      "label": "i18n_en.properties has classificationReviewSectionHint",
+      "label": "i18n_en.properties has classificationReviewFieldLabel",
       "pass": true
     },
     {
@@ -335,7 +335,7 @@
       "pass": true
     },
     {
-      "label": "i18n_en.properties classificationReviewSectionHint is user-facing",
+      "label": "i18n_en.properties classificationReviewFieldLabel is user-facing",
       "pass": true
     },
     {

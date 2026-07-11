@@ -1,7 +1,7 @@
 {
   "task": "IDTS-74",
-  "checkedAt": "2026-07-09T12:06:28.267Z",
-  "target": "http://localhost:4014",
+  "checkedAt": "2026-07-10T05:19:17.014Z",
+  "target": "http://localhost:4004",
   "results": [
     {
       "check": "entry-point-visible",

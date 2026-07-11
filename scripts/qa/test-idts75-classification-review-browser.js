@@ -201,6 +201,7 @@ async function main () {
     await button.waitFor({ state: 'visible', timeout: 90000 })
     pass('Classification review entry point is visible')
     results.push({ check: 'entry-point-visible', passed: true })
+    await harness.screenshot('idts75_classification_review_entry_point_in_classification')
 
     await button.click()
     const dialog = page.getByRole('dialog', { name: /^Classification Suggestions$/i }).first()

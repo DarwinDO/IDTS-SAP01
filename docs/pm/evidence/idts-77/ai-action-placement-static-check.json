@@ -1,21 +1,25 @@
 {
   "task": "IDTS-77",
-  "checkedAt": "2026-07-10T06:48:40.360Z",
+  "checkedAt": "2026-07-11T00:39:52.839Z",
   "checks": [
     {
-      "label": "manifest uses the similar bug action row fragment",
+      "label": "manifest uses the similar bug review field fragment",
       "pass": true
     },
     {
-      "label": "IdtsSimilarBugActionRow is positioned After BugDetails",
+      "label": "IdtsSimilarBugReview is positioned After DataField::description inside its FieldGroup",
       "pass": true
     },
     {
-      "label": "IdtsClassificationActionRow is positioned After ClassificationAndAssignment",
+      "label": "manifest uses the classification review field fragment",
       "pass": true
     },
     {
-      "label": "IdtsSmartAssignment is positioned After IdtsClassificationActionRow",
+      "label": "IdtsClassificationReview is positioned After DataField::defectCategory_ID inside its FieldGroup",
+      "pass": true
+    },
+    {
+      "label": "IdtsSmartAssignment is positioned After ClassificationAndAssignment inside its FieldGroup",
       "pass": true
     },
     {
@@ -31,27 +35,27 @@
       "pass": true
     },
     {
-      "label": "similar bug action row has no section title",
+      "label": "manifest has no separate similar bug action-row section",
       "pass": true
     },
     {
-      "label": "classification action row has no section title",
+      "label": "manifest has no separate classification action-row section",
       "pass": true
     },
     {
-      "label": "similar bug section opens duplicate review",
+      "label": "similar bug form field opens duplicate review",
       "pass": true
     },
     {
-      "label": "similar bug section uses the existing duplicate action module",
+      "label": "similar bug form field uses the existing duplicate action module",
       "pass": true
     },
     {
-      "label": "similar bug section uses the shared thin action-row hint",
+      "label": "similar bug form field uses the review action label",
       "pass": true
     },
     {
-      "label": "classification section still opens classification review",
+      "label": "classification form field opens classification review",
       "pass": true
     },
     {
@@ -75,19 +79,27 @@
       "pass": true
     },
     {
-      "label": "app/bug-management-ui/webapp/i18n/i18n.properties contains user-facing similar bug action-row copy",
+      "label": "app/bug-management-ui/webapp/i18n/i18n.properties contains concise user-facing action labels",
       "pass": true
     },
     {
-      "label": "app/bug-management-ui/webapp/i18n/i18n.properties:similarBugReviewSectionHint has no internal/developer-facing copy",
+      "label": "app/bug-management-ui/webapp/i18n/i18n.properties:similarBugReviewFieldLabel has no internal/developer-facing copy",
       "pass": true
     },
     {
-      "label": "app/bug-management-ui/webapp/i18n/i18n_en.properties contains user-facing similar bug action-row copy",
+      "label": "app/bug-management-ui/webapp/i18n/i18n.properties:classificationReviewFieldLabel has no internal/developer-facing copy",
       "pass": true
     },
     {
-      "label": "app/bug-management-ui/webapp/i18n/i18n_en.properties:similarBugReviewSectionHint has no internal/developer-facing copy",
+      "label": "app/bug-management-ui/webapp/i18n/i18n_en.properties contains concise user-facing action labels",
+      "pass": true
+    },
+    {
+      "label": "app/bug-management-ui/webapp/i18n/i18n_en.properties:similarBugReviewFieldLabel has no internal/developer-facing copy",
+      "pass": true
+    },
+    {
+      "label": "app/bug-management-ui/webapp/i18n/i18n_en.properties:classificationReviewFieldLabel has no internal/developer-facing copy",
       "pass": true
     }
   ]

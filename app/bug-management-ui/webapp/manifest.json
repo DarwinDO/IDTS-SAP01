@@ -189,6 +189,30 @@
               "enhanceI18n": "i18n/i18n.properties",
               "contextPath": "/Bugs",
               "controlConfiguration": {
+                "@com.sap.vocabularies.UI.v1.FieldGroup#GeneralInfo": {
+                  "fields": {
+                    "IdtsSimilarBugReview": {
+                      "label": "{i18n>similarBugReviewFieldLabel}",
+                      "template": "idts.bugmanagementui.ext.fragment.SimilarBugReviewField",
+                      "position": {
+                        "anchor": "DataField::description",
+                        "placement": "After"
+                      }
+                    }
+                  }
+                },
+                "@com.sap.vocabularies.UI.v1.FieldGroup#Classification": {
+                  "fields": {
+                    "IdtsClassificationReview": {
+                      "label": "{i18n>classificationReviewFieldLabel}",
+                      "template": "idts.bugmanagementui.ext.fragment.ClassificationReviewField",
+                      "position": {
+                        "anchor": "DataField::defectCategory_ID",
+                        "placement": "After"
+                      }
+                    }
+                  }
+                },
                 "comments/@com.sap.vocabularies.UI.v1.LineItem": {
                   "tableSettings": {
                     "type": "ResponsiveTable"
@@ -203,25 +227,11 @@
               "content": {
                 "body": {
                   "sections": {
-                    "IdtsSimilarBugActionRow": {
-                      "template": "idts.bugmanagementui.ext.fragment.SimilarBugCheckSection",
-                      "position": {
-                        "anchor": "BugDetails",
-                        "placement": "After"
-                      }
-                    },
-                    "IdtsClassificationActionRow": {
-                      "template": "idts.bugmanagementui.ext.fragment.ClassificationAssistanceSection",
-                      "position": {
-                        "anchor": "ClassificationAndAssignment",
-                        "placement": "After"
-                      }
-                    },
                     "IdtsSmartAssignment": {
                       "title": "{i18n>smartAssignmentSectionTitle}",
                       "template": "idts.bugmanagementui.ext.fragment.SmartAssignmentSection",
                       "position": {
-                        "anchor": "IdtsClassificationActionRow",
+                        "anchor": "ClassificationAndAssignment",
                         "placement": "After"
                       }
                     },
