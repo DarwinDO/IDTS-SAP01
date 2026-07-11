@@ -17,6 +17,7 @@ Phong cách tài liệu: Cấu trúc SRS truyền thống, kết hợp nguyên t
 | v1.0 | 2026-06-02 | IDTS Project Team | Mentor / Supervisor | Tạo bản SRS đầu tiên từ BRD v1.1, BA baseline, diagrams, PM plan và SAP490 guidance. | Draft |
 | v1.1 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Cập nhật user class và functional requirements theo MVP role baseline: Tester, Developer và PM. Reporter và Admin được hoãn như role tách riêng. | Draft |
 | v1.2 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Đồng bộ baseline attachment đã triển khai và AI advisory tùy chọn, với ràng buộc rõ về human review, privacy và không có workflow authority. | Draft |
+| v1.3 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Thay source block system-context dùng khi review bằng figure đã render, có traceability và tham chiếu Diagram Pack. | Draft |
 
 ### 1.2 Review và phê duyệt
 
@@ -77,17 +78,9 @@ IDTS có thể cung cấp gợi ý AI tùy chọn cho similar bug, classificatio
 
 IDTS là ứng dụng SAP CAP Node.js, expose qua OData V4 và được sử dụng bởi frontend SAP Fiori Elements/SAPUI5. Local development dùng SQLite. Future deployment có thể dùng SAP HANA Cloud hoặc PostgreSQL, nhưng endpoint và credential không được hardcode.
 
-```mermaid
-flowchart LR
-    Tester["Tester"] --> Fiori["Fiori Elements / SAPUI5 App"]
-    Developer["Developer"] --> Fiori
-    PM["Project Manager"] --> Fiori
-    Fiori --> OData["CAP OData V4 Service"]
-    OData --> DB["SQLite local database"]
-    OData --> Logs["History Logs"]
-    OData --> Notif["Notification Records"]
-```
+![SRS System Context](../../diagrams/rendered/13-srs-system-context.svg)
 
+*Figure 13. SRS System Context. Canonical source: `docs/diagrams/07-srs-system-context.md`.*
 ### 4.2 Nhóm người dùng
 
 | Nhóm người dùng | Trách nhiệm chính |

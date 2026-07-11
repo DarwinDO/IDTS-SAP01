@@ -1,0 +1,12 @@
+flowchart TD
+    A["Developer marks Resolved"] --> B["System sets nextProcessor to Tester or PM"]
+    B --> C{"Verification needed?"}
+    C -->|"Yes"| D["Move to Retest Required"]
+    D --> E{"Retest result"}
+    E -->|"Passed"| F["Close bug"]
+    E -->|"Failed"| G["Reopen bug"]
+    C -->|"No and accepted"| F
+    G --> H["Update information or assignment"]
+    H --> I["Return to Assigned"]
+    F --> J["Clear nextProcessor"]
+    J --> K["Write history and notification records"]

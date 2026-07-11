@@ -1,0 +1,30 @@
+flowchart TB
+    subgraph Browser["User Browser"]
+        FioriApp["Fiori Elements / SAPUI5 App\napp/bug-management-ui"]
+    end
+
+    subgraph CAP["SAP CAP Node.js Backend"]
+        OData["OData V4 Service\nsrv/service.cds"]
+        Handlers["CAP Handlers and Validations\nsrv/*.js when added"]
+        Model["CDS Domain Model\ndb/schema.cds"]
+    end
+
+    subgraph Data["Data Persistence"]
+        SQLite["SQLite\nLocal development"]
+        DeployDB["HANA Cloud or PostgreSQL\nFuture deployment"]
+    end
+
+    subgraph OptionalAdapters["Optional Integration Adapters"]
+        Notify["Notification Adapter\nSAP BTP or third-party"]
+        Auth["Authentication / Authorization\nXSUAA later if required"]
+    end
+
+    FioriApp -->|"OData V4 calls"| OData
+    OData --> Handlers
+    OData --> Model
+    Handlers --> Model
+    Model --> SQLite
+    Model -. "portable CAP model" .-> DeployDB
+    Handlers -. "important events" .-> Notify
+    FioriApp -. "role-aware access later" .-> Auth
+    OData -. "role checks later" .-> Auth

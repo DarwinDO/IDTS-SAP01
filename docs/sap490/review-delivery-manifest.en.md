@@ -1,6 +1,6 @@
 # SU26SAP01 / GSU26SAP01 SAP490 Review Delivery Manifest
 
-Snapshot date: 2026-07-10
+Snapshot date: 2026-07-11
 Owner: DonHV / GSU26SAP01
 
 ## Purpose
@@ -23,6 +23,7 @@ This manifest links the review deliverables to their canonical repository source
 | Test Scenario, Unit Test, Functional Test, Test Report, UAT | `docs/pm/evidence/`, `docs/pm/status/`, QA scripts, test-workbook generators | Preserve workbook structure and formulas. UAT stays prepared until real execution/sign-off exists. |
 | Test and Fix Bug | Confirmed product defects and their evidence | Include product defects only. Tooling, environment, data, and test-harness issues remain in member status unless escalation is required. |
 | Team Contribution Matrix | `scripts/sap490/build-team-contribution-matrix.mjs`, Git/Jira/task/status evidence | Keep member work, Jira/PR references, and evidence links auditable in the dedicated Drive folder. |
+| Diagram Pack | `docs/diagrams/*.md`, `docs/diagrams/rendered/manifest.json`, rendered SVG and source fragments | Keep 21 canonical diagrams, editable source, SVG review assets, and a native Google Slides review deck together in the timestamped Diagram Pack folder. |
 
 ## Update and review procedure
 

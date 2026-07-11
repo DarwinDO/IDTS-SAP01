@@ -1,0 +1,18 @@
+sequenceDiagram
+    actor Dev as Developer
+    participant UI as Fiori Object Page
+    participant CAP as CAP Service
+    participant DB as Database
+    actor Tester as Tester
+
+    Dev->>UI: Request more information
+    UI->>Dev: Ask for required reason
+    Dev->>UI: Submit reason
+    UI->>CAP: Change status to Need More Information
+    CAP->>CAP: Validate assigned developer and reason
+    CAP->>DB: Save status and nextProcessor
+    CAP->>DB: Write history log
+    CAP->>DB: Create notification record
+    Tester->>UI: Add missing information
+    UI->>CAP: Return bug to Assigned or In Review
+    CAP->>DB: Save update and history

@@ -1,0 +1,8 @@
+flowchart LR
+    Tester["Tester"] --> Fiori["Fiori Elements / SAPUI5 App"]
+    Developer["Developer"] --> Fiori
+    PM["Project Manager"] --> Fiori
+    Fiori --> OData["CAP OData V4 Service"]
+    OData --> DB["SQLite local database"]
+    OData --> Logs["History Logs"]
+    OData --> Notif["Notification Records"]

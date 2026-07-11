@@ -22,6 +22,7 @@ Với project này, thư mục review Google Drive phải có tên `SU26SAP01_GS
 
 | Nhu cầu | Tool ưu tiên | Fallback |
 | --- | --- | --- |
+| Gate bắt buộc cho mọi document task | OfficeCLI preflight, format skill, inspection và validation | Không có; phải báo limitation của format trước khi dùng native tool |
 | Sync lặp lại cho team lên Google Drive/Docs/Sheets | `gws` CLI | Google Drive connector |
 | Readback hoặc kiểm tra nhanh trong Codex | Google Drive connector | `gws` CLI |
 | Tạo hoặc chỉnh DOCX local | Documents plugin, `python-docx`, project script fill vào template copy | Pandoc chỉ dùng cho draft/prototype có label rõ, không dùng cho file SAP490 chính thức |
@@ -33,16 +34,17 @@ Với project này, thư mục review Google Drive phải có tên `SU26SAP01_GS
 
 ### 4. Flow Sync Chuẩn
 
-1. Cập nhật source trong repo trước.
-2. Copy template SAP490 tương ứng và fill thành các file DOCX/XLSX/PPTX local tiếng Anh và tiếng Việt riêng từ source đã duyệt trong repo.
-3. Verify layout DOCX/XLSX/PPTX generated ở local.
-4. Dùng `gws` để upload bản review mới có timestamp với prefix `SU26SAP01_GSU26SAP01`, rồi đọc lại target folder.
-5. Convert bản DOCX review sang Google Docs khi cần mentor comment.
-6. Sync bảng có cấu trúc sang Google Sheets khi cần shared spreadsheet.
-7. Ghi kết quả sync vào sync log hoặc PM task note.
-8. Khi có feedback từ mentor, cập nhật Markdown trong repo trước.
-9. Tạo lại các bản DOCX/XLSX/PPTX đã fill từ template.
-10. Sync lại bản review đã cập nhật.
+1. Chạy OfficeCLI preflight bắt buộc. Với DOCX/XLSX/PPTX, load OfficeCLI format skill phù hợp và inspect artifact trước khi edit; chỉ dùng native format tool sau khi đã ghi nhận kết quả OfficeCLI.
+2. Cập nhật source trong repo trước.
+3. Copy template SAP490 tương ứng và fill thành các file DOCX/XLSX/PPTX local tiếng Anh và tiếng Việt riêng từ source đã duyệt trong repo.
+4. Chạy OfficeCLI validation và issue inspection, sau đó verify layout DOCX/XLSX/PPTX generated ở local.
+5. Dùng `gws` để upload bản review mới có timestamp với prefix `SU26SAP01_GSU26SAP01`, rồi đọc lại target folder.
+6. Convert bản DOCX review sang Google Docs khi cần mentor comment.
+7. Sync bảng có cấu trúc sang Google Sheets khi cần shared spreadsheet.
+8. Ghi kết quả sync vào sync log hoặc PM task note.
+9. Khi có feedback từ mentor, cập nhật Markdown trong repo trước.
+10. Tạo lại các bản DOCX/XLSX/PPTX đã fill từ template.
+11. Sync lại bản review đã cập nhật.
 
 ### 5. Google Sheets Mục Tiêu
 

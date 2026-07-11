@@ -1,0 +1,20 @@
+sequenceDiagram
+    actor Dev as Developer
+    participant UI as Fiori Object Page
+    participant CAP as CAP Service
+    participant DB as Database
+    actor Owner as Follow Up Owner
+
+    Dev->>UI: Choose Reject
+    UI->>Dev: Request rejection reason
+    Dev->>UI: Enter reason and confirm
+    UI->>CAP: Reject bug request
+    CAP->>CAP: Validate assigned developer and allowed status
+    CAP->>DB: Save status Rejected, reason, nextProcessor
+    CAP->>DB: Write history log
+    CAP->>DB: Create notification record
+    CAP-->>UI: Return rejected bug
+    Owner->>UI: Review rejected bug
+    Owner->>UI: Correct classification, add info, or choose assignee
+    UI->>CAP: Reassign or move to Pending Assignment
+    CAP->>DB: Save follow-up action and history

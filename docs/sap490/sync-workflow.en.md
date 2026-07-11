@@ -22,6 +22,7 @@ For this project, the Google Drive review root must be named `SU26SAP01_GSU26SAP
 
 | Need | Preferred tool | Fallback |
 | --- | --- | --- |
+| Mandatory document-task gate | OfficeCLI preflight, format skill, inspection, and validation | None; report a format limitation before using the native tool |
 | Repeatable team sync to Google Drive/Docs/Sheets | `gws` CLI | Google Drive connector |
 | Interactive readback or quick check in Codex | Google Drive connector | `gws` CLI |
 | Local DOCX creation or editing | Documents plugin, `python-docx`, project script that fills a copied template | Pandoc only for labeled drafts/prototypes, not final SAP490 submission files |
@@ -33,16 +34,17 @@ For this project, the Google Drive review root must be named `SU26SAP01_GSU26SAP
 
 ### 4. Standard Sync Flow
 
-1. Update repository source first.
-2. Copy the matching SAP490 template and fill separate English and Vietnamese local DOCX/XLSX/PPTX files from approved repository source.
-3. Verify generated DOCX/XLSX/PPTX layout locally.
-4. Use `gws` to upload a new timestamped review copy with the `SU26SAP01_GSU26SAP01` prefix, then read the target folder back.
-5. Convert DOCX review copies to Google Docs when mentor comments are needed.
-6. Sync structured tables to Google Sheets when a shared spreadsheet is useful.
-7. Record the sync result in a project sync log or PM task note.
-8. When mentor feedback arrives, update repository Markdown first.
-9. Recreate the template-filled DOCX/XLSX/PPTX copies.
-10. Sync the updated review copies again.
+1. Run the mandatory OfficeCLI preflight. For DOCX/XLSX/PPTX, load the matching OfficeCLI format skill and inspect the artifact before editing; use the native format tool only after the OfficeCLI result is recorded.
+2. Update repository source first.
+3. Copy the matching SAP490 template and fill separate English and Vietnamese local DOCX/XLSX/PPTX files from approved repository source.
+4. Run OfficeCLI validation and issue inspection, then verify generated DOCX/XLSX/PPTX layout locally.
+5. Use `gws` to upload a new timestamped review copy with the `SU26SAP01_GSU26SAP01` prefix, then read the target folder back.
+6. Convert DOCX review copies to Google Docs when mentor comments are needed.
+7. Sync structured tables to Google Sheets when a shared spreadsheet is useful.
+8. Record the sync result in a project sync log or PM task note.
+9. When mentor feedback arrives, update repository Markdown first.
+10. Recreate the template-filled DOCX/XLSX/PPTX copies.
+11. Sync the updated review copies again.
 
 ### 5. Google Sheets Targets
 
