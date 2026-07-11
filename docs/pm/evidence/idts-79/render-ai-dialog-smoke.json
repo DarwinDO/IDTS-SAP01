@@ -1,0 +1,170 @@
+{
+  "task": "IDTS-79",
+  "checkedAt": "2026-07-11T05:23:22.262Z",
+  "target": "Render shared QA",
+  "checks": [
+    {
+      "name": "private login succeeds",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "safe session is returned",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "fresh API smoke source is available",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "source read succeeds",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "source exists",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "all three AI action ids are present",
+      "passed": true,
+      "detail": "[\"Find Similar Bugs\",\"Review Classification Suggestions\",\"Review Handoff Summary\"]"
+    },
+    {
+      "name": "similar action locator is unique",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "similar dialog is visible",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "similar dialog names its review flow",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "similar dialog has user-facing content",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "similar dialog excludes unsafe diagnostics",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "similar dialog close control exists",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "similar close locator is unique",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "classification action locator is unique",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "classification dialog is visible",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "classification dialog names its review flow",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "classification dialog has user-facing content",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "classification dialog excludes unsafe diagnostics",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "classification dialog close control exists",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "classification close locator is unique",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "handoff action locator is unique",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "handoff dialog is visible",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "handoff dialog names its review flow",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "handoff dialog has user-facing content",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "handoff dialog excludes unsafe diagnostics",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "handoff dialog close control exists",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "handoff close locator is unique",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "source re-read after dialog reviews succeeds",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "review-only dialogs preserve status",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "review-only dialogs preserve assignee",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "no HTTP 5xx observed",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "no unexpected console errors beyond documented baseline",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "knownNonBlockingConsoleCount": 14,
+  "knownConsoleBaseline": "Render Component-preload/i18n/flexibility 404s outside SAP launchpad",
+  "secretsStored": false
+}
