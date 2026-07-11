@@ -2,6 +2,16 @@
 
 Last updated: 2026-07-11
 
+## 2026-07-11 - IDTS-81 email deep-link correction
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- |
+| Tooling / worktree issue | The clean IDTS-81 worktree does not yet contain the unmerged IDTS-79 work-package file, so the initial PM-file read reported a missing path. | The IDTS-79 evidence/PM updates are still in open PR #148 and therefore are not part of `origin/dev`. | Non-blocking. Read the available project context/status files and keep IDTS-81 tracking in this dedicated work item. | Do not copy or overwrite PR #148 files; add only the IDTS-81 work-package/status updates needed for this fix. |
+| Environment blocker | The first test-first run could not load `@sap/cds` in the new worktree. | Git worktrees do not share `node_modules`; dependencies have not been installed in this isolated checkout. | Under investigation; no product test outcome was claimed. | Run `npm ci --include=dev`, then rerun the intentionally failing email-link regression before changing the builder. |
+| Test-first verification | After installing dependencies, the updated email-outbox regression failed exactly as expected: generated HTML retained the legacy application route instead of the current Fiori route. | `normalizeAppUrl` preserves `/bug-management-ui/webapp/index.html` and defaults root URLs to that same legacy path. | Root cause confirmed; implementation can now be limited to the shared email URL normalization function and its regression expectations. | Change the builder, rerun the focused outbox suite, then verify a new Shared QA mail after deploy. |
+| Dependency-risk observation | `npm ci --include=dev` reports the existing 14 dependency vulnerabilities (9 moderate, 5 high). | This is the current lockfile audit state, unrelated to the narrow IDTS-81 URL fix. | Open under the existing Sprint 4 dependency-vulnerability follow-up; no broad `npm audit fix` is justified in this task. | Keep the IDTS-81 diff dependency-free and do not claim the audit risk is resolved. |
+| Implementation verification | Updated the shared email link normalizer to emit `/idts.bugmanagementui/index.html` for a deployment root/current app input and to remap the retired `/bug-management-ui/webapp` input. | The route generation is centralized in `srv/email/template.js`, so one small change corrects both HTML CTA and plain-text fallback links. | Local implementation complete. The focused test-first regression now passes, along with CAP compile, UI5 build, secret scan, AI DevKit lint, and whitespace check. | Run Ponytail review, create the PR, then merge/deploy and generate a fresh email for real Shared QA click verification. |
+
 ## 2026-07-11 - Agent-rule routing PR verification
 
 | Classification | Symptom / work | Root cause | Fix status | Verification / next action |
