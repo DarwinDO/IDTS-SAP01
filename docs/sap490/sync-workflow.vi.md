@@ -7,6 +7,8 @@ Tài liệu này định nghĩa cách team IDTS sync deliverable SAP490 giữa r
 
 Mục tiêu là hỗ trợ team nhiều developer cùng làm mà vẫn giữ repository là source of truth.
 
+Với project này, thư mục review Google Drive phải có tên `SU26SAP01_GSU26SAP01`. Mọi artifact và thư mục review do team tạo phải bắt đầu bằng cùng prefix mã đề tài/mã nhóm.
+
 ### 2. Source Of Truth
 
 | Layer | Vai trò | Rule |
@@ -14,12 +16,13 @@ Mục tiêu là hỗ trợ team nhiều developer cùng làm mà vẫn giữ rep
 | Repository Markdown | Nguồn canonical có thể chỉnh sửa | Cập nhật phần này trước cho BRD, SRS, FRS, tài liệu BA/PM, decision, risk và requirement. |
 | DOCX/XLSX/PPTX local | Artifact template-filled sẵn sàng để nộp | Copy template SAP490 tương ứng trước, rồi fill bản copy từ source đã duyệt trong repo. Verify layout trước khi share. |
 | Google Docs/Sheets | Bản collaboration và mentor review | Dùng cho comment, feedback, review và shared visibility. Không xem là source canonical. |
-| Google Drive folder | Nơi phân phối và review | Lưu bản review và artifact generated. Không lưu credential. |
+| Google Drive folder | Nơi phân phối và review | Dùng `SU26SAP01_GSU26SAP01`; lưu bản review và artifact generated với cùng prefix. Không lưu credential. |
 
 ### 3. Tooling Ưu Tiên
 
 | Nhu cầu | Tool ưu tiên | Fallback |
 | --- | --- | --- |
+| Gate bắt buộc cho mọi document task | OfficeCLI preflight, format skill, inspection và validation | Không có; phải báo limitation của format trước khi dùng native tool |
 | Sync lặp lại cho team lên Google Drive/Docs/Sheets | `gws` CLI | Google Drive connector |
 | Readback hoặc kiểm tra nhanh trong Codex | Google Drive connector | `gws` CLI |
 | Tạo hoặc chỉnh DOCX local | Documents plugin, `python-docx`, project script fill vào template copy | Pandoc chỉ dùng cho draft/prototype có label rõ, không dùng cho file SAP490 chính thức |
@@ -31,16 +34,17 @@ Mục tiêu là hỗ trợ team nhiều developer cùng làm mà vẫn giữ rep
 
 ### 4. Flow Sync Chuẩn
 
-1. Cập nhật source trong repo trước.
-2. Copy template SAP490 tương ứng và fill thành các file DOCX/XLSX/PPTX local tiếng Anh và tiếng Việt riêng từ source đã duyệt trong repo.
-3. Verify layout DOCX/XLSX/PPTX generated ở local.
-4. Dùng `gws` để upload hoặc update file tương ứng trên Google Drive.
-5. Convert bản DOCX review sang Google Docs khi cần mentor comment.
-6. Sync bảng có cấu trúc sang Google Sheets khi cần shared spreadsheet.
-7. Ghi kết quả sync vào sync log hoặc PM task note.
-8. Khi có feedback từ mentor, cập nhật Markdown trong repo trước.
-9. Tạo lại các bản DOCX/XLSX/PPTX đã fill từ template.
-10. Sync lại bản review đã cập nhật.
+1. Chạy OfficeCLI preflight bắt buộc. Với DOCX/XLSX/PPTX, load OfficeCLI format skill phù hợp và inspect artifact trước khi edit; chỉ dùng native format tool sau khi đã ghi nhận kết quả OfficeCLI.
+2. Cập nhật source trong repo trước.
+3. Copy template SAP490 tương ứng và fill thành các file DOCX/XLSX/PPTX local tiếng Anh và tiếng Việt riêng từ source đã duyệt trong repo.
+4. Chạy OfficeCLI validation và issue inspection, sau đó verify layout DOCX/XLSX/PPTX generated ở local.
+5. Dùng `gws` để upload bản review mới có timestamp với prefix `SU26SAP01_GSU26SAP01`, rồi đọc lại target folder.
+6. Convert bản DOCX review sang Google Docs khi cần mentor comment.
+7. Sync bảng có cấu trúc sang Google Sheets khi cần shared spreadsheet.
+8. Ghi kết quả sync vào sync log hoặc PM task note.
+9. Khi có feedback từ mentor, cập nhật Markdown trong repo trước.
+10. Tạo lại các bản DOCX/XLSX/PPTX đã fill từ template.
+11. Sync lại bản review đã cập nhật.
 
 ### 5. Google Sheets Mục Tiêu
 
@@ -127,7 +131,7 @@ Các script này đã có để setup an toàn và dry-run. Chúng không upload
 | `npm run sap490:gws:version` | Kiểm tra version `gws` local. |
 | `npm run sap490:gws:auth-status` | Kiểm tra developer hiện tại đã authenticate `gws` chưa. |
 | `npm run sap490:gws:check` | Kiểm tra `gws`, auth status và local Drive config. |
-| `npm run sap490:gws:find-review-folder` | Tìm folder `SAP490 Review` trên Google Drive sau khi login. |
+| `npm run sap490:gws:find-review-folder` | Tìm folder `SU26SAP01_GSU26SAP01` trên Google Drive sau khi login. |
 | `npm run sap490:gws:dry-run` | In ra target sync BRD/SRS/FRS lên Drive mà không đổi file remote. |
 | `npm run sap490:gws:upload-review-docx` | Dry-run kế hoạch upload bản review DOCX BRD/SRS/FRS có timestamp. |
 | `npm run sap490:gws:upload-review-docx:execute` | Upload bản review DOCX BRD/SRS/FRS có timestamp mà không overwrite file hiện có. |

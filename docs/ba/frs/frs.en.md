@@ -3,10 +3,10 @@
 Project: Issue and Defect Tracking System in SAP  
 Document type: Functional Requirements Specification (FRS)  
 Language: English  
-Status: Draft v1.2  
-Last updated: 2026-06-03  
-Prepared for: SAP490 project delivery, mentor review, Sprint 1 planning, and QA test design  
-Document style: SAP490 hybrid, function-detail-first, aligned with BRD v1.2 and SRS v1.1
+Status: Draft v1.4
+Last updated: 2026-07-11
+Prepared for: SAP490 project delivery, mentor review, implementation evidence, and QA test design
+Document style: SAP490 hybrid, function-detail-first, aligned with BRD v1.3 and SRS v1.2
 
 ## 1. Document Control
 
@@ -17,6 +17,8 @@ Document style: SAP490 hybrid, function-detail-first, aligned with BRD v1.2 and 
 | v1.0 | 2026-06-02 | IDTS Project Team | Mentor / Supervisor | Initial FRS created from BRD v1.1, SRS v1.0, BA baseline, diagrams, and SAP490 guidance. | Draft |
 | v1.1 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Fixed Mermaid syntax in rejected follow-up sequence and added missing workflow diagrams for create/assign, developer review, request information, retest/closure, and PM monitoring. | Draft |
 | v1.2 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Updated functional actors and workflows to the MVP role baseline: Tester, Developer, and PM. Reporter and Admin are deferred as separate roles. | Draft |
+| v1.3 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Synced real draft attachment behavior and optional advisory-AI review behavior with the implemented CAP/Fiori baseline. | Draft |
+| v1.4 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Replaced eight review-facing Mermaid blocks with rendered workflow figures and closed the visual-submission open issue. | Draft |
 
 ### 1.2 Review and Sign-Off
 
@@ -38,7 +40,7 @@ The FRS is more detailed than the BRD and more workflow-oriented than the SRS. I
 | Functional Area | Included in MVP | Notes |
 | --- | --- | --- |
 | Bug creation | Yes | Structured report with required fields and unique bug number. |
-| Duplicate checking | Yes | Manual search/filter support; AI duplicate detection is not required. |
+| Duplicate checking | Yes | Manual search/filter remains the core flow; advisory AI similar-bug suggestion is optional and review-only. |
 | Classification | Yes | SAP Module optional; Application Component and Defect Category required. |
 | Developer matching | Yes | Based on Component Category and optional SAP Module. |
 | Assignment | Yes | Assigned or Pending Assignment. |
@@ -49,199 +51,51 @@ The FRS is more detailed than the BRD and more workflow-oriented than the SRS. I
 | History log | Yes | Important actions recorded. |
 | Notification records | Yes | Event records and triggers; external delivery can be deferred. |
 | PM monitoring | Yes | Workload, overdue, queues, nextProcessor, status filters. |
-| Attachments | P1 | Metadata and reference support when time allows. |
+| Attachments | Yes | Draft upload/download and evidence metadata are implemented; attachment bytes are never sent to AI. |
+| Advisory AI | Optional | Similar-bug, classification, summary, and Smart Assign explanations require human review and never mutate the bug. |
 
 ## 4. Functional Workflow Diagrams
 
 ### 4.1 Main Defect Tracking Flow
 
-```mermaid
-flowchart TD
-    A["Tester detects defect"] --> B["Search similar bugs"]
-    B --> C{"Similar bug exists?"}
-    C -->|"Open"| D["Follow or update existing bug"]
-    C -->|"Closed"| E["Reopen or update existing bug if authorized"]
-    C -->|"No"| F["Create new bug report"]
-    F --> G["Classify by SAP Module, Application Component, Defect Category"]
-    G --> H["Filter Developer candidates"]
-    H --> I{"Suitable Developer selected?"}
-    I -->|"Yes"| J["Submit as Assigned"]
-    I -->|"No"| K["Submit as Pending Assignment"]
-    J --> L["Developer reviews"]
-    K --> M["PM or Tester monitors queue"]
-    L --> N{"Review result"}
-    N -->|"Missing info"| O["Need More Information"]
-    N -->|"Wrong classification or assignee"| P["Rejected with follow-up"]
-    N -->|"Valid"| Q["In Progress then Resolved"]
-    Q --> R["Retest Required when needed"]
-    R --> S{"Retest result"}
-    S -->|"Passed"| T["Closed"]
-    S -->|"Failed"| U["Reopened"]
-    P --> V["Tester or PM corrects and reassigns"]
-    O --> W["Tester adds information"]
-    W --> L
-    V --> H
-    U --> H
-```
+![Main Defect Tracking Flow](../../diagrams/rendered/14-frs-main-defect-flow.svg)
 
+*Figure 14. Main Defect Tracking Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.2 Rejected Follow-up Flow
 
-```mermaid
-sequenceDiagram
-    actor Dev as Developer
-    participant UI as Fiori Object Page
-    participant CAP as CAP Service
-    participant DB as Database
-    actor Owner as Follow Up Owner
+![Rejected Follow-up Flow](../../diagrams/rendered/15-frs-rejected-follow-up.svg)
 
-    Dev->>UI: Choose Reject
-    UI->>Dev: Request rejection reason
-    Dev->>UI: Enter reason and confirm
-    UI->>CAP: Reject bug request
-    CAP->>CAP: Validate assigned developer and allowed status
-    CAP->>DB: Save status Rejected, reason, nextProcessor
-    CAP->>DB: Write history log
-    CAP->>DB: Create notification record
-    CAP-->>UI: Return rejected bug
-    Owner->>UI: Review rejected bug
-    Owner->>UI: Correct classification, add info, or choose assignee
-    UI->>CAP: Reassign or move to Pending Assignment
-    CAP->>DB: Save follow-up action and history
-```
-
+*Figure 15. Rejected Follow-up Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.3 Status Lifecycle
 
-```mermaid
-stateDiagram-v2
-    [*] --> New
-    New --> Assigned
-    New --> Pending_Assignment
-    Pending_Assignment --> Assigned
-    Assigned --> In_Review
-    Assigned --> Rejected
-    In_Review --> Need_More_Information
-    Need_More_Information --> In_Review
-    In_Review --> In_Progress
-    In_Review --> Rejected
-    In_Progress --> Resolved
-    Resolved --> Retest_Required
-    Resolved --> Closed
-    Retest_Required --> Closed
-    Retest_Required --> Reopened
-    Resolved --> Reopened
-    Closed --> Reopened
-    Reopened --> Assigned
-    Rejected --> Assigned
-    Rejected --> Pending_Assignment
-    Closed --> [*]
-```
+![Status Lifecycle](../../diagrams/rendered/16-frs-status-lifecycle.svg)
 
+*Figure 16. Status Lifecycle. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.4 Bug Creation and Assignment Activity Flow
 
-```mermaid
-flowchart TD
-    A["Start bug creation"] --> B["Enter bug details"]
-    B --> C["Search existing bugs"]
-    C --> D{"Use existing bug?"}
-    D -->|"Open existing bug"| E["Follow or comment on existing bug"]
-    D -->|"Closed existing bug"| F["Reopen or update existing bug if authorized"]
-    D -->|"Create new"| G["Select classification"]
-    G --> H["Resolve Component Category"]
-    H --> I["Filter Developer candidates"]
-    I --> J{"Developer selected?"}
-    J -->|"Yes"| K["Set assignee"]
-    K --> L["Submit as Assigned"]
-    J -->|"No"| M["Choose No suitable developer"]
-    M --> N["Submit as Pending Assignment"]
-    L --> O["Write create and assign history"]
-    N --> P["Write create and pending history"]
-    O --> Q["Create notification record"]
-    P --> Q
-    Q --> R["End"]
-```
+![Bug Creation and Assignment Activity Flow](../../diagrams/rendered/17-frs-create-assignment.svg)
 
+*Figure 17. Bug Creation and Assignment Activity Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.5 Developer Review Decision Flow
 
-```mermaid
-flowchart TD
-    A["Developer opens assigned bug"] --> B["Review details, evidence, comments, and history"]
-    B --> C{"Can process bug?"}
-    C -->|"Missing information"| D["Request More Information"]
-    D --> E["Status: Need More Information"]
-    E --> F["Tester adds information"]
-    F --> B
-    C -->|"Wrong classification or assignee"| G["Reject with reason"]
-    G --> H["Status: Rejected"]
-    H --> I["Follow Up Owner corrects and reassigns"]
-    I --> B
-    C -->|"Valid"| J["Start review"]
-    J --> K["Move to In Progress"]
-    K --> L["Add developer note"]
-    L --> M["Mark Resolved"]
-```
+![Developer Review Decision Flow](../../diagrams/rendered/18-frs-developer-review.svg)
 
+*Figure 18. Developer Review Decision Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.6 Request More Information Flow
 
-```mermaid
-sequenceDiagram
-    actor Dev as Developer
-    participant UI as Fiori Object Page
-    participant CAP as CAP Service
-    participant DB as Database
-    actor Tester as Tester
+![Request More Information Flow](../../diagrams/rendered/19-frs-request-more-information.svg)
 
-    Dev->>UI: Request more information
-    UI->>Dev: Ask for required reason
-    Dev->>UI: Submit reason
-    UI->>CAP: Change status to Need More Information
-    CAP->>CAP: Validate assigned developer and reason
-    CAP->>DB: Save status and nextProcessor
-    CAP->>DB: Write history log
-    CAP->>DB: Create notification record
-    Tester->>UI: Add missing information
-    UI->>CAP: Return bug to Assigned or In Review
-    CAP->>DB: Save update and history
-```
-
+*Figure 19. Request More Information Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.7 Resolve, Retest, Close, and Reopen Flow
 
-```mermaid
-flowchart TD
-    A["Developer marks Resolved"] --> B["System sets nextProcessor to Tester or PM"]
-    B --> C{"Verification needed?"}
-    C -->|"Yes"| D["Move to Retest Required"]
-    D --> E{"Retest result"}
-    E -->|"Passed"| F["Close bug"]
-    E -->|"Failed"| G["Reopen bug"]
-    C -->|"No and accepted"| F
-    G --> H["Update information or assignment"]
-    H --> I["Return to Assigned"]
-    F --> J["Clear nextProcessor"]
-    J --> K["Write history and notification records"]
-```
+![Resolve, Retest, Close, and Reopen Flow](../../diagrams/rendered/20-frs-resolve-retest-close-reopen.svg)
 
+*Figure 20. Resolve, Retest, Close, and Reopen Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.8 PM Monitoring and Escalation Flow
 
-```mermaid
-flowchart TD
-    A["PM opens monitoring view"] --> B["Filter by status, priority, severity, module, component, assignee, nextProcessor, and due date"]
-    B --> C["Review workload by Developer"]
-    B --> D["Review Pending Assignment queue"]
-    B --> E["Review Rejected Follow-up queue"]
-    B --> F["Review Overdue and stale bugs"]
-    C --> G{"Action needed?"}
-    D --> G
-    E --> G
-    F --> G
-    G -->|"No"| H["Continue monitoring"]
-    G -->|"Yes"| I["Comment or request reassignment"]
-    I --> J{"PM direct reassignment approved?"}
-    J -->|"Yes"| K["PM reassigns to valid Developer"]
-    J -->|"No"| L["Tester performs reassignment"]
-    K --> M["Write history and notification records"]
-    L --> M
-```
+![PM Monitoring and Escalation Flow](../../diagrams/rendered/21-frs-pm-monitoring.svg)
 
+*Figure 21. PM Monitoring and Escalation Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ## 5. Detailed Functional Requirements
 
 ### 5.1 FRS-BUG-001 - Create Bug Report
@@ -539,6 +393,20 @@ flowchart TD
 | Acceptance criteria | Core fields are visible; dependent value helps are understandable; actions match role/status; Rejected details are visible; validation messages are actionable. |
 | Traceability | SRS-IF-UI-001 to SRS-IF-UI-005, SRS-NFR-USE-001, SRS-NFR-USE-002. |
 
+### 5.20 FRS-AI-001 - Optional Advisory AI Review
+
+| Field | Specification |
+| --- | --- |
+| Purpose | Help users inspect similar bugs, possible classification, concise bug/handoff context, and Smart Assign rationale without automating a business decision. |
+| Primary actor | Tester, Developer, PM. |
+| Trigger | An authorized user explicitly requests an AI suggestion from its relevant business context. |
+| Preconditions | The feature is enabled with approved private configuration, or the UI presents the safe unavailable state while the normal workflow remains usable. |
+| Main flow | CAP allowlists and sanitizes permitted bug/context fields; the provider returns normalized advisory output; the UI renders it as text requiring review; the user may ignore it or use normal actions to make a decision. |
+| Validation rules | AI cannot bypass role authorization, catalog validation, Developer Responsibility eligibility, required reasons, or status transition rules. It does not create, edit, assign, reclassify, or transition bugs. |
+| Data protection | Do not send credentials, tokens, private endpoints, attachment bytes, raw logs, or unnecessary personal data. Do not persist raw prompts/provider responses or hidden reasoning. |
+| Acceptance criteria | Disabled, timeout, malformed, unsafe, and provider-failure states are safe; suggestions are visibly review-only; an audit record is sanitized; normal non-AI workflow continues. |
+| Traceability | SRS-FR-AI-001 to SRS-FR-AI-003; `docs/ba/discovery/idts-63-ai-assistance-guardrails.md`. |
+
 ## 6. Functional Data Rules
 
 | Rule ID | Rule |
@@ -569,6 +437,7 @@ flowchart TD
 | History | Important actions show actor, time, old/new value, and reason where applicable. |
 | Notifications | Event records exist without hardcoded external endpoints. |
 | PM monitoring | PM can identify workload, overdue, pending, rejected, retest, and nextProcessor queues. |
+| Advisory AI | Suggestions remain optional, review-only, safe on failure, and cannot mutate the bug. |
 
 ## 8. Traceability to SRS
 
@@ -593,6 +462,7 @@ flowchart TD
 | FRS-PM-001 | SRS-FR-PM-001, SRS-FR-PM-002, SRS-FR-PM-003 |
 | FRS-PM-002 | SRS-FR-PM-004 |
 | FRS-UX-001 | SRS-IF-UI-001 to SRS-IF-UI-005, SRS-NFR-USE-001, SRS-NFR-USE-002 |
+| FRS-AI-001 | SRS-FR-AI-001 to SRS-FR-AI-003 |
 
 ## 9. Open Issues
 
@@ -602,4 +472,4 @@ flowchart TD
 | OI-FRS-002 | Confirm notification channel for MVP. | Team / Mentor | Determines whether notification records alone satisfy MVP. |
 | OI-FRS-003 | Confirm attachment storage approach. | Team / Mentor | Determines whether Attachments are metadata-only or actual file handling. |
 | OI-FRS-004 | Confirm overdue thresholds and workload limits. | Team / PM | Determines PM dashboard calculations. |
-| OI-FRS-005 | Confirm whether Mermaid diagram source in Markdown should be rendered as images for DOCX submission. | Team / Mentor | Affects final DOCX visual format only, not functional scope. |
+| OI-FRS-005 | Closed: workflow diagrams are rendered as figures in the FRS and standalone Diagram Pack. | IDTS Project Team | Visual DOCX and Drive review pack are the current review baseline. |

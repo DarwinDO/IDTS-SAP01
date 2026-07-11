@@ -1,0 +1,19 @@
+flowchart TD
+    A["Start bug creation"] --> B["Enter bug details"]
+    B --> C["Search existing bugs"]
+    C --> D{"Use existing bug?"}
+    D -->|"Open existing bug"| E["Follow or comment on existing bug"]
+    D -->|"Closed existing bug"| F["Reopen or update existing bug if authorized"]
+    D -->|"Create new"| G["Select classification"]
+    G --> H["Resolve Component Category"]
+    H --> I["Filter Developer candidates"]
+    I --> J{"Developer selected?"}
+    J -->|"Yes"| K["Set assignee"]
+    K --> L["Submit as Assigned"]
+    J -->|"No"| M["Choose No suitable developer"]
+    M --> N["Submit as Pending Assignment"]
+    L --> O["Write create and assign history"]
+    N --> P["Write create and pending history"]
+    O --> Q["Create notification record"]
+    P --> Q
+    Q --> R["End"]

@@ -7,6 +7,8 @@ This document defines how the IDTS team should sync SAP490 deliverables between 
 
 The goal is to support a multi-developer team without losing the repository as the source of truth.
 
+For this project, the Google Drive review root must be named `SU26SAP01_GSU26SAP01`. Every team-authored review artifact and child folder must begin with the same project/group prefix.
+
 ### 2. Source Of Truth
 
 | Layer | Role | Rule |
@@ -14,12 +16,13 @@ The goal is to support a multi-developer team without losing the repository as t
 | Repository Markdown | Canonical editable source | Update this first for BRD, SRS, FRS, BA/PM docs, decisions, risks, and requirements. |
 | Local DOCX/XLSX/PPTX | Submission-ready template-filled artifact | Copy the matching SAP490 template first, then fill the copy from approved repository sources. Verify layout before sharing. |
 | Google Docs/Sheets | Collaboration and mentor review copy | Use for comments, feedback, review, and shared visibility. Do not treat as canonical source. |
-| Google Drive folder | Distribution and review location | Store review copies and generated artifacts. Do not store credentials. |
+| Google Drive folder | Distribution and review location | Use `SU26SAP01_GSU26SAP01`; store review copies and generated artifacts with the same prefix. Do not store credentials. |
 
 ### 3. Preferred Tooling
 
 | Need | Preferred tool | Fallback |
 | --- | --- | --- |
+| Mandatory document-task gate | OfficeCLI preflight, format skill, inspection, and validation | None; report a format limitation before using the native tool |
 | Repeatable team sync to Google Drive/Docs/Sheets | `gws` CLI | Google Drive connector |
 | Interactive readback or quick check in Codex | Google Drive connector | `gws` CLI |
 | Local DOCX creation or editing | Documents plugin, `python-docx`, project script that fills a copied template | Pandoc only for labeled drafts/prototypes, not final SAP490 submission files |
@@ -31,16 +34,17 @@ The goal is to support a multi-developer team without losing the repository as t
 
 ### 4. Standard Sync Flow
 
-1. Update repository source first.
-2. Copy the matching SAP490 template and fill separate English and Vietnamese local DOCX/XLSX/PPTX files from approved repository source.
-3. Verify generated DOCX/XLSX/PPTX layout locally.
-4. Use `gws` to upload or update the matching Google Drive files.
-5. Convert DOCX review copies to Google Docs when mentor comments are needed.
-6. Sync structured tables to Google Sheets when a shared spreadsheet is useful.
-7. Record the sync result in a project sync log or PM task note.
-8. When mentor feedback arrives, update repository Markdown first.
-9. Recreate the template-filled DOCX/XLSX/PPTX copies.
-10. Sync the updated review copies again.
+1. Run the mandatory OfficeCLI preflight. For DOCX/XLSX/PPTX, load the matching OfficeCLI format skill and inspect the artifact before editing; use the native format tool only after the OfficeCLI result is recorded.
+2. Update repository source first.
+3. Copy the matching SAP490 template and fill separate English and Vietnamese local DOCX/XLSX/PPTX files from approved repository source.
+4. Run OfficeCLI validation and issue inspection, then verify generated DOCX/XLSX/PPTX layout locally.
+5. Use `gws` to upload a new timestamped review copy with the `SU26SAP01_GSU26SAP01` prefix, then read the target folder back.
+6. Convert DOCX review copies to Google Docs when mentor comments are needed.
+7. Sync structured tables to Google Sheets when a shared spreadsheet is useful.
+8. Record the sync result in a project sync log or PM task note.
+9. When mentor feedback arrives, update repository Markdown first.
+10. Recreate the template-filled DOCX/XLSX/PPTX copies.
+11. Sync the updated review copies again.
 
 ### 5. Google Sheets Targets
 
@@ -127,7 +131,7 @@ These scripts are available for safe setup and dry-run checks. They do not uploa
 | `npm run sap490:gws:version` | Check the local `gws` CLI version. |
 | `npm run sap490:gws:auth-status` | Check whether the current developer has authenticated `gws`. |
 | `npm run sap490:gws:check` | Check `gws`, auth status, and local Drive config presence. |
-| `npm run sap490:gws:find-review-folder` | Search Google Drive for the `SAP490 Review` folder after login. |
+| `npm run sap490:gws:find-review-folder` | Search Google Drive for the `SU26SAP01_GSU26SAP01` folder after login. |
 | `npm run sap490:gws:dry-run` | Print planned BRD/SRS/FRS Drive sync targets without changing remote files. |
 | `npm run sap490:gws:upload-review-docx` | Dry-run upload planning for timestamped BRD/SRS/FRS review DOCX copies. |
 | `npm run sap490:gws:upload-review-docx:execute` | Upload timestamped BRD/SRS/FRS review DOCX copies without overwriting existing files. |

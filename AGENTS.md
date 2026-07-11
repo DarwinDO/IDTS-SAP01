@@ -1,5 +1,21 @@
 # IDTS SAP CAP/Fiori Agent Instructions
 
+## Rule Library and Mandatory OfficeCLI
+
+This full instruction file remains the primary complete guide. The detailed, skill-style rules under [`.agents/rules/`](.agents/rules/README.md) are also mandatory: read every task-matching rule before acting. When guidance overlaps, follow the stricter instruction.
+
+For every task that creates, reads, edits, reviews, moves, synchronizes, or deletes documentation, sheets, presentations, PDFs, Google Drive artifacts, or SAP490 deliverables, invoke OfficeCLI first and report the command, result, and any format limitation. Use the detailed routing in `documentation-knowledge-and-sap490.md`; OfficeCLI preflight is required even when the target is Markdown or Google-native and needs another tool for the actual operation.
+
+### Mandatory Detailed Rule Routing
+
+| Task | Mandatory detailed rules |
+| --- | --- |
+| Any project work | `scope-and-domain.md`, `handover-and-issue-logging.md`, `change-control-and-git.md` |
+| CAP/CDS/OData/Fiori/UI5 | `sap-routing-and-ui.md` |
+| Code question, reading, design, writing, refactor, debug, review, or audit | `skills-quality-and-ponytail.md` |
+| Documents, knowledge mirrors, SAP490, Drive, DOCX/XLSX/PPTX/PDF | `documentation-knowledge-and-sap490.md` plus the OfficeCLI gate |
+| Tests, security, configuration, deployment, or release claims | `testing-security-and-release.md` |
+
 ## Role
 
 You are a SAP CAP + SAP Fiori/UI5 coding agent for this repository. Work as a conservative enterprise application engineer: read the local project context first, prefer SAP-supported patterns, and keep the solution inside the documented project scope.

@@ -3,9 +3,9 @@
 Project: Issue and Defect Tracking System in SAP  
 Document type: Software Requirements Specification (SRS)  
 Language: English  
-Status: Draft v1.1  
-Last updated: 2026-06-03  
-Prepared for: SAP490 project delivery, mentor review, and Sprint 1 planning  
+Status: Draft v1.3
+Last updated: 2026-07-11
+Prepared for: SAP490 project delivery, mentor review, implementation evidence, and QA test design
 Document style: Traditional SRS outline with ISO/IEC/IEEE 29148-style requirement quality, traceability, and verification discipline
 
 ## 1. Document Control
@@ -16,6 +16,8 @@ Document style: Traditional SRS outline with ISO/IEC/IEEE 29148-style requiremen
 | --- | --- | --- | --- | --- | --- |
 | v1.0 | 2026-06-02 | IDTS Project Team | Mentor / Supervisor | Initial SRS created from BRD v1.1, BA baseline, diagrams, PM plan, and SAP490 guidance. | Draft |
 | v1.1 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Updated user classes and functional requirements to the MVP role baseline: Tester, Developer, and PM. Reporter and Admin are deferred as separate roles. | Draft |
+| v1.2 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Synced the implemented attachment and optional advisory-AI baseline, with explicit human-review, privacy, and no-workflow-authority constraints. | Draft |
+| v1.3 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Replaced the review-facing system-context source block with a rendered, traceable figure and Diagram Pack reference. | Draft |
 
 ### 1.2 Review and Sign-Off
 
@@ -46,6 +48,8 @@ This SRS uses a traditional SRS outline for readability and aligns requirement q
 
 IDTS shall support defect reporting and tracking in an SAP software testing context. The system shall let Tester, Developer, and PM users create, classify, assign, review, request information, reject with follow-up, progress, resolve, retest, close, reopen, comment, audit, notify, and monitor bugs.
 
+IDTS may offer similar-bug, classification, summary, and Smart Assign explanations as optional advisory AI. These suggestions are review-only, disabled by default until approved private configuration is supplied, and never replace CAP authorization, validation, assignment, or lifecycle decisions.
+
 IDTS shall not become a full Jira, SAP Cloud ALM, SAP Solution Manager, ServiceNow, source-code management, CI/CD, code review, sprint planning, or mandatory AI root cause analysis platform.
 
 ## 3. References and Source Documents
@@ -63,6 +67,7 @@ IDTS shall not become a full Jira, SAP Cloud ALM, SAP Solution Manager, ServiceN
 | `docs/ba/05-data-dictionary.md` | Conceptual data expectations. |
 | `docs/ba/06-authorization-matrix.md` | Role and action permissions. |
 | `docs/ba/07-fiori-ux-requirements.md` | Fiori UX expectations. |
+| `docs/ba/discovery/idts-63-ai-assistance-guardrails.md` | Approved advisory-AI scope, privacy, safety, and human-review constraints. |
 | `docs/diagrams/` | Existing use case, workflow, status, data, audit, and notification diagrams. |
 | `docs/knowledge/sap490-deliverable-guidance.md` | SAP490 deliverable interpretation for CAP/Fiori. |
 
@@ -72,17 +77,9 @@ IDTS shall not become a full Jira, SAP Cloud ALM, SAP Solution Manager, ServiceN
 
 IDTS is a SAP CAP Node.js application exposed through OData V4 and consumed by a SAP Fiori Elements/SAPUI5 frontend. Local development uses SQLite. Future deployment may use SAP HANA Cloud or PostgreSQL, but endpoints and credentials shall not be hardcoded.
 
-```mermaid
-flowchart LR
-    Tester["Tester"] --> Fiori["Fiori Elements / SAPUI5 App"]
-    Developer["Developer"] --> Fiori
-    PM["Project Manager"] --> Fiori
-    Fiori --> OData["CAP OData V4 Service"]
-    OData --> DB["SQLite local database"]
-    OData --> Logs["History Logs"]
-    OData --> Notif["Notification Records"]
-```
+![SRS System Context](../../diagrams/rendered/13-srs-system-context.svg)
 
+*Figure 13. SRS System Context. Canonical source: `docs/diagrams/07-srs-system-context.md`.*
 ### 4.2 User Classes
 
 | User class | Main responsibilities |
@@ -231,6 +228,14 @@ Verification methods:
 | SRS-FR-PM-002 | BR-21 | IDTS shall provide workload visibility by Developer using assigned and open bug counts. | Must | Analysis and demonstration | FRS-PM-001 |
 | SRS-FR-PM-003 | BR-23 | IDTS shall expose Pending Assignment, Need More Information, Retest Required, Rejected follow-up, and Overdue queues for PM monitoring. | Must | Demonstration | FRS-PM-001 |
 | SRS-FR-PM-004 | BR-22 | IDTS shall allow PM users to comment or request reassignment; direct reassignment by PM shall depend on an explicit authorization decision. | Must | Inspection and test | FRS-PM-002 |
+
+### 7.7 Optional Advisory AI
+
+| ID | Source | Requirement Statement | Priority | Verification | Trace To |
+| --- | --- | --- | --- | --- | --- |
+| SRS-FR-AI-001 | DISC-002 | IDTS may provide similar-bug, classification, bug/handoff summary, and Smart Assign explanation suggestions only as reviewable advisory output. | Should | Test and demonstration | FRS-AI-001 |
+| SRS-FR-AI-002 | DISC-002 | AI output shall not create, edit, assign, reclassify, transition, close, reopen, or otherwise mutate a bug; the normal authorized action remains the only decision path. | Must | Test | FRS-AI-001 |
+| SRS-FR-AI-003 | DISC-002 | AI requests, responses, audit records, and user-visible failures shall exclude credentials, tokens, private endpoints, attachment bytes, raw provider output, and unnecessary personal data. | Must | Inspection and test | FRS-AI-001 |
 
 ## 8. Data Requirements
 

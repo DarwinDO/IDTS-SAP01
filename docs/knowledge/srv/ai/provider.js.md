@@ -31,7 +31,7 @@ This wrapper makes AI behavior consistent:
 4. The delegate provider runs.
 5. The wrapper returns `{ ok, status, operation, featureType, correlationId, data/error }`.
 
-For IDTS-64, the only delegate is the mock provider. Real providers must be added in later tasks with security review.
+The delegates are the deterministic mock provider and the optional real OpenAI provider. The wrapper still owns disabled/incomplete configuration, timeout, sanitization, and safe failure behavior for both.
 
 ### Important source anchors
 
@@ -53,7 +53,8 @@ For IDTS-64, the only delegate is the mock provider. Real providers must be adde
 ### Cross-folder impact
 
 - `srv/ai/config.js`: determines enabled/disabled/provider behavior.
-- `srv/ai/mock-provider.js`: current delegate implementation.
+- `srv/ai/mock-provider.js`: deterministic delegate used by tests.
+- `srv/ai/openai-provider.js`: optional server-side provider that uses only sanitized input and returns normalized text, JSON, or embeddings.
 - `docs/ba/discovery/idts-63-ai-assistance-guardrails.md`: defines fallback and no-autonomy rules.
 - Future `db/schema.cds` changes in `IDTS-65`: should store only safe normalized result data returned by this wrapper.
 

@@ -1,0 +1,35 @@
+sequenceDiagram
+    actor Dev as Developer
+    participant UI as Fiori App
+    participant CAP as CAP OData Service
+    participant DB as Database
+    participant Notify as Notification Adapter
+    actor Tester as Tester
+    actor PM as Project Manager
+
+    Dev->>UI: Open assigned bug
+    UI->>CAP: Read bug details, comments, history
+    CAP->>DB: Fetch bug context
+    DB-->>CAP: Return data
+    CAP-->>UI: Show bug details
+
+    alt Need more information
+        Dev->>UI: Request more information
+        UI->>CAP: Update status to Need More Information
+        CAP->>DB: Save status and history log
+        CAP->>Notify: Create information request notification
+        Notify-->>Tester: Notify tester
+    else Wrong classification or assignee
+        Dev->>UI: Reject bug
+        UI->>CAP: Update status to Rejected
+        CAP->>DB: Save rejection reason, nextProcessor, and history log
+        CAP->>Notify: Create rejection notification
+        Notify-->>Tester: Notify tester
+        Notify-->>PM: Notify PM if escalation rule applies
+    else Valid bug
+        Dev->>UI: Move to In Progress or Resolved
+        UI->>CAP: Update status and developer note
+        CAP->>DB: Save status, note, and history log
+        CAP->>Notify: Create status update notification
+        Notify-->>Tester: Notify tester
+    end

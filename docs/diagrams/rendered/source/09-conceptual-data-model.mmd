@@ -1,0 +1,191 @@
+erDiagram
+    USER {
+        uuid ID
+        string displayName
+        string email
+        string role
+        boolean active
+    }
+
+    DEVELOPER_PROFILE {
+        uuid ID
+        uuid userID
+        string availabilityStatus
+        int workloadLimit
+        boolean active
+    }
+
+    SAP_MODULE {
+        uuid ID
+        string code
+        string name
+        boolean active
+    }
+
+    APPLICATION_COMPONENT {
+        uuid ID
+        string code
+        string name
+        string componentType
+        boolean active
+    }
+
+    SAP_MODULE_COMPONENT {
+        uuid ID
+        uuid sapModuleID
+        uuid componentID
+        boolean active
+    }
+
+    DEFECT_CATEGORY {
+        uuid ID
+        string code
+        string name
+        string categoryType
+        boolean active
+    }
+
+    COMPONENT_CATEGORY {
+        uuid ID
+        uuid componentID
+        uuid defectCategoryID
+        boolean active
+    }
+
+    DEVELOPER_RESPONSIBILITY {
+        uuid ID
+        uuid developerProfileID
+        uuid componentCategoryID
+        uuid sapModuleID
+        string responsibilityLevel
+        boolean active
+    }
+
+    BUG {
+        uuid ID
+        string bugNumber
+        string title
+        string description
+        string status
+        string priority
+        string severity
+        string environment
+        string testCaseRef
+        string testRunRef
+        date plannedCompletionDate
+        uuid sapModuleID
+        uuid applicationComponentID
+        uuid defectCategoryID
+        uuid componentCategoryID
+        uuid createdByID
+        uuid assigneeID
+        uuid nextProcessorID
+        string nextProcessorRole
+        string rejectionReason
+        date dueDate
+        decimal estimatedEffortHours
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    COMMENT {
+        uuid ID
+        uuid bugID
+        uuid authorID
+        string authorRole
+        string content
+        datetime createdAt
+    }
+
+    ATTACHMENT {
+        uuid ID
+        uuid bugID
+        uuid uploadedByID
+        string fileName
+        string mediaType
+        string storageRef
+        datetime createdAt
+    }
+
+    HISTORY_EVENT {
+        uuid ID
+        uuid bugID
+        uuid actorID
+        string actorRole
+        string actionType
+        string summary
+        string reason
+        datetime timestamp
+    }
+
+    HISTORY_LOG {
+        uuid ID
+        uuid bugID
+        uuid eventID
+        uuid actorID
+        string actorRole
+        string actionType
+        string fieldName
+        string fieldLabel
+        string oldValue
+        string oldValueDisplay
+        string newValue
+        string newValueDisplay
+        string reason
+        datetime timestamp
+    }
+
+    NOTIFICATION {
+        uuid ID
+        uuid bugID
+        uuid recipientID
+        string eventType
+        string channel
+        string deliveryStatus
+        datetime createdAt
+    }
+
+    DUPLICATE_LINK {
+        uuid ID
+        uuid sourceBugID
+        uuid targetBugID
+        string relationType
+        datetime createdAt
+    }
+
+    USER ||--o{ BUG : creates
+    USER ||--o{ BUG : next_processor
+    USER ||--o| DEVELOPER_PROFILE : may_have
+    DEVELOPER_PROFILE ||--o{ BUG : assigned_to
+
+    SAP_MODULE ||--o{ BUG : optional_business_context
+    SAP_MODULE ||--o{ SAP_MODULE_COMPONENT : allows
+    APPLICATION_COMPONENT ||--o{ SAP_MODULE_COMPONENT : available_in
+    APPLICATION_COMPONENT ||--o{ COMPONENT_CATEGORY : allows
+    APPLICATION_COMPONENT ||--o{ BUG : selected_component
+    DEFECT_CATEGORY ||--o{ COMPONENT_CATEGORY : available_for
+    DEFECT_CATEGORY ||--o{ BUG : selected_category
+    COMPONENT_CATEGORY ||--o{ BUG : classifies
+
+    DEVELOPER_PROFILE ||--o{ DEVELOPER_RESPONSIBILITY : can_handle
+    COMPONENT_CATEGORY ||--o{ DEVELOPER_RESPONSIBILITY : responsibility_for
+    SAP_MODULE ||--o{ DEVELOPER_RESPONSIBILITY : optional_scope
+
+    BUG ||--o{ COMMENT : has
+    USER ||--o{ COMMENT : writes
+
+    BUG ||--o{ ATTACHMENT : has
+    USER ||--o{ ATTACHMENT : uploads
+
+    BUG ||--o{ HISTORY_EVENT : has
+    USER ||--o{ HISTORY_EVENT : performs
+
+    HISTORY_EVENT ||--o{ HISTORY_LOG : expands_to
+    BUG ||--o{ HISTORY_LOG : has
+    USER ||--o{ HISTORY_LOG : performs
+
+    BUG ||--o{ NOTIFICATION : triggers
+    USER ||--o{ NOTIFICATION : receives
+
+    BUG ||--o{ DUPLICATE_LINK : source
+    BUG ||--o{ DUPLICATE_LINK : target

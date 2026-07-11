@@ -11,6 +11,7 @@ const REQUIRED_SECTIONS = [
   'Roles/Authorization',
   'Persistence/Reload',
   'UI/UX Review',
+  'Ponytail Simplicity',
   'Known Gaps',
   'Jira/Evidence Links'
 ]

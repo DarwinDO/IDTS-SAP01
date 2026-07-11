@@ -13,7 +13,7 @@ const DEFAULTS = Object.freeze({
   mockEmbeddingDimensions: 8
 })
 
-const SUPPORTED_PROVIDERS = Object.freeze(['mock'])
+const SUPPORTED_PROVIDERS = Object.freeze(['mock', 'openai'])
 const SUPPORTED_MOCK_MODES = Object.freeze(['success', 'error', 'timeout'])
 
 function getAiConfig () {
@@ -36,9 +36,15 @@ function normalizeAiConfig (raw = {}) {
     mockEmbeddingDimensions: toPositiveInteger(raw.mockEmbeddingDimensions, DEFAULTS.mockEmbeddingDimensions)
   }
 
+  config.openaiApiKey = config.provider === 'openai'
+    ? toStringOrNull(raw.openaiApiKey) || toStringOrNull(process.env.OPENAI_API_KEY)
+    : null
+
   config.unsupported = config.enabled && !SUPPORTED_PROVIDERS.includes(config.provider)
   config.missing = []
   if (config.unsupported) config.missing.push('supportedProvider')
+  if (config.enabled && config.provider === 'openai' && !config.openaiApiKey) config.missing.push('openaiApiKey')
+  if (config.enabled && config.provider === 'openai' && !config.modelAlias) config.missing.push('modelAlias')
   config.ready = config.enabled && config.missing.length === 0
   return Object.freeze(config)
 }

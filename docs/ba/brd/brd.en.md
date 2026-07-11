@@ -3,8 +3,8 @@
 Project: Issue and Defect Tracking System in SAP  
 Document type: Business Requirements Document (BRD)  
 Language: English  
-Status: Draft v1.2  
-Last updated: 2026-06-03  
+Status: Draft v1.4
+Last updated: 2026-07-11
 Prepared for: SAP490 project delivery and mentor review  
 Document style: SAP490 hybrid, business-first with light SAP implementation context
 
@@ -17,6 +17,8 @@ Document style: SAP490 hybrid, business-first with light SAP implementation cont
 | v1.0 | 2026-06-01 | IDTS Project Team | Mentor / Supervisor | Initial BRD draft based on IDTS business baseline, BA pack, PM pack, and SAP490 guidance. | Draft |
 | v1.1 | 2026-06-01 | IDTS Project Team | Mentor / Supervisor | Revised into SAP490 hybrid BRD: reduced technical detail, added stakeholder needs, KPIs, RACI, NFRs, glossary, approval, and requirement traceability. | Draft |
 | v1.2 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Updated MVP role baseline to three active roles: Tester, Developer, and PM. Reporter and Admin are deferred as separate roles and no longer appear as active MVP RACI columns. | Draft |
+| v1.3 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Synced current implementation and review baseline: CAP/Fiori MVP workflow, audit/notification/attachment flows, PM monitoring, and optional human-review AI assistance. | Draft |
+| v1.4 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Added rendered business-review figures and Diagram Pack traceability; canonical diagram source remains version controlled. | Draft |
 
 ### 1.2 Review and Sign-Off
 
@@ -95,6 +97,22 @@ The current project baseline identifies these core business problems:
 Reporter and Admin are not separate MVP stakeholders. Testers perform internal reporting responsibilities, while lightweight administrative responsibilities are handled by Tester or PM where authorized. Dedicated Reporter and Admin roles may be reconsidered after MVP if the project expands to external reporting or formal master-data administration.
 | Mentor / Supervisor | Project scope and deliverables must be clear and SAP-relevant. | Business documents, diagrams, implementation artifacts, and test evidence aligned to SAP490. | BRD/SRS/FRS and implementation outputs are reviewable and consistent. |
 
+## 6.1 Diagram Pack and Traceability
+
+The following review visuals summarize the approved business context, role coverage, and end-to-end defect flow. Detailed editable source remains under `docs/diagrams/`.
+
+![System Context](../../diagrams/rendered/01-system-context.svg)
+
+*Figure 01. System Context. Canonical source: `docs/diagrams/01-system-context-and-architecture.md`.*
+
+![Use Case Diagram](../../diagrams/rendered/03-use-case.svg)
+
+*Figure 03. Use Case Diagram. Canonical source: `docs/diagrams/02-use-cases.md`.*
+
+![End-to-End Defect Tracking Flow](../../diagrams/rendered/04-end-to-end-defect-flow.svg)
+
+*Figure 04. End-to-End Defect Tracking Flow. Canonical source: `docs/diagrams/03-business-process-flows.md`.*
+
 ## 7. Roles and RACI
 
 | Activity | Tester | Developer | PM | Mentor / Supervisor |
@@ -121,7 +139,9 @@ For MVP, one real user may perform multiple responsibilities, but only Tester, D
 
 ## 8. Current State
 
-The repository currently contains a minimal SAP CAP/Fiori scaffold. The existing implementation is smaller than the agreed business baseline. Business markdown files, BA documents, PM documents, diagrams, and SAP490 guidance already describe the intended defect tracking scope, but the formal BRD is being refined so it can become the upstream source for SRS and FRS.
+The repository now implements the agreed CAP/Fiori MVP baseline: structured bug creation, classification and responsibility-aware assignment, controlled lifecycle actions, comments, draft attachments, audit/history, notifications, PM monitoring, and optional AI assistance that remains human-review only. The SAP490 review focuses on evidence, traceability, and remaining acceptance rather than a minimal scaffold.
+
+The optional real AI provider is disabled by default and does not change business authority, authorization, validation, assignment, or status transitions. Its production use remains dependent on approved private configuration and separate live-provider evidence; this BRD does not treat AI output as a business decision.
 
 Without the target system, the team would rely on manual coordination, comments, informal notes, or external files. This creates risk around duplicate reports, wrong assignment, unclear ownership, inconsistent status usage, rejected bugs without follow-up, and missing audit trail.
 

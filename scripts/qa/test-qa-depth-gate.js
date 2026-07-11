@@ -17,6 +17,7 @@ function validBody() {
     section('Roles/Authorization', 'N/A - documentation-only gate has no runtime role behavior.'),
     section('Persistence/Reload', 'N/A - no database state is changed by this documentation/tooling gate.'),
     section('UI/UX Review', 'N/A - no user-facing screen is changed by this gate.'),
+    section('Ponytail Simplicity', 'Used ponytail; kept the gate dependency-free and did not add a separate validation framework.'),
     section('Known Gaps', 'None'),
     section('Jira/Evidence Links', 'Jira: IDTS-42. Evidence: local self-test output.')
   ].join('\n')

@@ -18,6 +18,7 @@ const {
   redactSensitiveText
 } = require('../../srv/ai')
 const { containsUnsafeDiagnosticText } = require('../../srv/ai/safety')
+const { OpenAiProvider } = require('../../srv/ai/openai-provider')
 
 const RESULTS = []
 let PASS = 0
@@ -138,6 +139,53 @@ async function main () {
   expectEqual('timeout status is AI_TIMEOUT', timeoutResult.status, 'AI_TIMEOUT')
   expectEqual('timeout is retryable', timeoutResult.error.retryable, true)
   expectNoUnsafeDiagnostic('timeout response excludes unsafe diagnostic text', timeoutResult)
+
+  const incompleteOpenAiConfig = normalizeAiConfig({
+    enabled: true,
+    provider: 'openai',
+    modelAlias: 'review-model'
+  })
+  expectEqual('OpenAI config identifies missing private key', incompleteOpenAiConfig.ready, false)
+  const incompleteOpenAiProvider = createAiProvider(incompleteOpenAiConfig)
+  const incompleteOpenAiResult = await incompleteOpenAiProvider.structured({
+    featureType: 'classification',
+    instruction: 'Suggest a catalog value.',
+    input: { title: 'Synthetic test bug' }
+  })
+  expectEqual('incomplete OpenAI config returns safe result', incompleteOpenAiResult.status, 'AI_CONFIGURATION_INCOMPLETE')
+  expectNoUnsafeDiagnostic('incomplete OpenAI config excludes private detail', incompleteOpenAiResult)
+
+  const requests = []
+  const fakeFetch = async (url, options) => {
+    requests.push({ url, options })
+    const isEmbedding = url.endsWith('/embeddings')
+    return {
+      ok: true,
+      status: 200,
+      json: async () => isEmbedding
+        ? { data: [{ embedding: [0.1, -0.2, 0.3] }] }
+        : { output_text: '{"priority":"HIGH","confidence":0.9}' }
+    }
+  }
+  const openAiConfig = normalizeAiConfig({
+    enabled: true,
+    provider: 'openai',
+    openaiApiKey: 'test-only-key-not-for-network',
+    modelAlias: 'review-model',
+    embeddingModelAlias: 'embedding-model'
+  })
+  const openAiProvider = new OpenAiProvider(openAiConfig, fakeFetch)
+  const openAiStructured = await openAiProvider.structured({
+    schemaName: 'Idts Classification',
+    instruction: 'Use only supplied catalogs.',
+    input: { title: 'Synthetic test bug' }
+  })
+  expectEqual('OpenAI structured provider parses JSON response', openAiStructured.json.priority, 'HIGH')
+  expectEqual('OpenAI structured provider uses no-response-storage mode', JSON.parse(requests[0].options.body).store, false)
+  expectTruthy('OpenAI structured provider uses Responses endpoint', requests[0].url.endsWith('/v1/responses'))
+  const openAiEmbedding = await openAiProvider.embedding({ text: 'Synthetic embedding input' })
+  expectEqual('OpenAI embedding provider returns provider vector', openAiEmbedding.embedding.length, 3)
+  expectEqual('OpenAI embedding provider uses configured embedding model', JSON.parse(requests[1].options.body).model, 'embedding-model')
 
   const redacted = redactSensitiveText(`AWS key AKIA${'1'.repeat(16)} and xkeysib-${'1'.repeat(30)}`)
   expectTruthy('redactor masks AWS access key', redacted.includes('[redacted:awsAccessKey]'))

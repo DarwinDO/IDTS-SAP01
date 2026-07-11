@@ -3,8 +3,8 @@
 Dự án: Issue and Defect Tracking System in SAP  
 Loại tài liệu: Business Requirements Document (BRD)  
 Ngôn ngữ: Tiếng Việt  
-Trạng thái: Draft v1.2  
-Cập nhật lần cuối: 2026-06-03  
+Trạng thái: Draft v1.3
+Cập nhật lần cuối: 2026-07-10
 Chuẩn bị cho: SAP490 project delivery và mentor review  
 Phong cách tài liệu: SAP490 hybrid, ưu tiên nghiệp vụ và chỉ giữ bối cảnh triển khai SAP ở mức ngắn gọn
 
@@ -17,6 +17,8 @@ Phong cách tài liệu: SAP490 hybrid, ưu tiên nghiệp vụ và chỉ giữ 
 | v1.0 | 2026-06-01 | IDTS Project Team | Mentor / Supervisor | Bản BRD đầu tiên dựa trên IDTS business baseline, BA pack, PM pack và SAP490 guidance. | Draft |
 | v1.1 | 2026-06-01 | IDTS Project Team | Mentor / Supervisor | Chỉnh thành SAP490 hybrid BRD: giảm chi tiết kỹ thuật, thêm stakeholder needs, KPI, RACI, NFR, glossary, approval và requirement traceability. | Draft |
 | v1.2 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Cập nhật MVP role baseline thành ba role active: Tester, Developer và PM. Reporter và Admin được hoãn như role tách riêng và không còn là cột RACI active trong MVP. | Draft |
+| v1.3 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Đồng bộ baseline implementation và review hiện tại: workflow CAP/Fiori MVP, luồng audit/notification/attachment, PM monitoring và AI hỗ trợ tùy chọn có human review. | Draft |
+| v1.4 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Bổ sung figure review đã render và traceability tới Diagram Pack; canonical diagram source vẫn được version control. | Draft |
 
 ### 1.2 Review và phê duyệt
 
@@ -95,6 +97,22 @@ Baseline hiện tại xác định các vấn đề nghiệp vụ chính:
 Reporter và Admin không phải stakeholder tách riêng trong MVP. Tester đảm nhiệm trách nhiệm reporting nội bộ, còn trách nhiệm quản trị nhẹ do Tester hoặc PM xử lý theo quyền được cấp. Role Reporter và Admin chuyên biệt có thể xem xét lại sau MVP nếu dự án mở rộng sang báo cáo từ bên ngoài hoặc quản trị master data chính thức.
 | Mentor / Supervisor | Scope và deliverable phải rõ và liên quan SAP. | Cần business documents, diagrams, implementation artifacts và test evidence phù hợp SAP490. | BRD/SRS/FRS và implementation outputs nhất quán và review được. |
 
+## 6.1 Diagram Pack và Traceability
+
+Các hình review sau tóm tắt business context, role coverage và end-to-end defect flow đã được duyệt. Source có thể chỉnh sửa vẫn được giữ trong `docs/diagrams/`.
+
+![System Context](../../diagrams/rendered/01-system-context.svg)
+
+*Figure 01. System Context. Canonical source: `docs/diagrams/01-system-context-and-architecture.md`.*
+
+![Use Case Diagram](../../diagrams/rendered/03-use-case.svg)
+
+*Figure 03. Use Case Diagram. Canonical source: `docs/diagrams/02-use-cases.md`.*
+
+![End-to-End Defect Tracking Flow](../../diagrams/rendered/04-end-to-end-defect-flow.svg)
+
+*Figure 04. End-to-End Defect Tracking Flow. Canonical source: `docs/diagrams/03-business-process-flows.md`.*
+
 ## 7. Roles và RACI
 
 | Hoạt động | Tester | Developer | PM | Mentor / Supervisor |
@@ -121,7 +139,9 @@ Trong MVP, một người dùng thực tế có thể đảm nhận nhiều trá
 
 ## 8. Hiện trạng
 
-Repository hiện tại có scaffold SAP CAP/Fiori tối thiểu. Implementation hiện có nhỏ hơn business baseline đã thống nhất. Các business markdown files, BA documents, PM documents, diagrams và SAP490 guidance đã mô tả scope defect tracking mục tiêu, nhưng BRD chính thức đang được tinh chỉnh để trở thành nguồn đầu vào cho SRS và FRS.
+Repository hiện đã triển khai baseline CAP/Fiori MVP đã thống nhất: tạo bug có cấu trúc, classification và assignment theo responsibility, lifecycle action có kiểm soát, comment, draft attachment, audit/history, notification, PM monitoring và AI hỗ trợ tùy chọn chỉ ở mức human review. SAP490 review tập trung vào bằng chứng, traceability và phần acceptance còn lại thay vì một scaffold tối thiểu.
+
+Real AI provider tùy chọn mặc định tắt và không thay đổi business authority, authorization, validation, assignment hoặc status transition. Việc dùng ở production vẫn phụ thuộc private configuration đã được duyệt và bằng chứng live-provider riêng; BRD này không xem AI output là quyết định nghiệp vụ.
 
 Nếu chưa có hệ thống mục tiêu, nhóm sẽ dựa vào phối hợp thủ công, comment, ghi chú không chính thức hoặc file ngoài. Điều này tạo rủi ro bug bị trùng, assign sai, ownership không rõ, dùng status không nhất quán, rejected bug không có follow-up và thiếu audit trail.
 

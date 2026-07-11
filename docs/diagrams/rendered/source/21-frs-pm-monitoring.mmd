@@ -1,0 +1,17 @@
+flowchart TD
+    A["PM opens monitoring view"] --> B["Filter by status, priority, severity, module, component, assignee, nextProcessor, and due date"]
+    B --> C["Review workload by Developer"]
+    B --> D["Review Pending Assignment queue"]
+    B --> E["Review Rejected Follow-up queue"]
+    B --> F["Review Overdue and stale bugs"]
+    C --> G{"Action needed?"}
+    D --> G
+    E --> G
+    F --> G
+    G -->|"No"| H["Continue monitoring"]
+    G -->|"Yes"| I["Comment or request reassignment"]
+    I --> J{"PM direct reassignment approved?"}
+    J -->|"Yes"| K["PM reassigns to valid Developer"]
+    J -->|"No"| L["Tester performs reassignment"]
+    K --> M["Write history and notification records"]
+    L --> M

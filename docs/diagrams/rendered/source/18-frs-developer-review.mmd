@@ -1,0 +1,15 @@
+flowchart TD
+    A["Developer opens assigned bug"] --> B["Review details, evidence, comments, and history"]
+    B --> C{"Can process bug?"}
+    C -->|"Missing information"| D["Request More Information"]
+    D --> E["Status: Need More Information"]
+    E --> F["Tester adds information"]
+    F --> B
+    C -->|"Wrong classification or assignee"| G["Reject with reason"]
+    G --> H["Status: Rejected"]
+    H --> I["Follow Up Owner corrects and reassigns"]
+    I --> B
+    C -->|"Valid"| J["Start review"]
+    J --> K["Move to In Progress"]
+    K --> L["Add developer note"]
+    L --> M["Mark Resolved"]

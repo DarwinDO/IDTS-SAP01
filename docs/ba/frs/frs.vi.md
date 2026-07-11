@@ -3,10 +3,10 @@
 Dự án: Issue and Defect Tracking System in SAP  
 Loại tài liệu: Functional Requirements Specification (FRS)  
 Ngôn ngữ: Tiếng Việt  
-Trạng thái: Draft v1.2  
-Cập nhật lần cuối: 2026-06-03  
-Chuẩn bị cho: SAP490 project delivery, mentor review, Sprint 1 planning và QA test design  
-Phong cách tài liệu: SAP490 hybrid, ưu tiên functional detail, aligned với BRD v1.2 và SRS v1.1
+Trạng thái: Draft v1.3
+Cập nhật lần cuối: 2026-07-10
+Chuẩn bị cho: SAP490 project delivery, mentor review, bằng chứng implementation và QA test design
+Phong cách tài liệu: SAP490 hybrid, ưu tiên functional detail, aligned với BRD v1.3 và SRS v1.2
 
 ## 1. Kiểm soát tài liệu
 
@@ -17,6 +17,8 @@ Phong cách tài liệu: SAP490 hybrid, ưu tiên functional detail, aligned v�
 | v1.0 | 2026-06-02 | IDTS Project Team | Mentor / Supervisor | Tạo bản FRS đầu tiên từ BRD v1.1, SRS v1.0, BA baseline, diagrams và SAP490 guidance. | Draft |
 | v1.1 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Sửa lỗi Mermaid syntax trong rejected follow-up sequence và bổ sung workflow diagrams còn thiếu cho create/assign, developer review, request information, retest/closure và PM monitoring. | Draft |
 | v1.2 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Cập nhật functional actors và workflows theo MVP role baseline: Tester, Developer và PM. Reporter và Admin được hoãn như role tách riêng. | Draft |
+| v1.3 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Đồng bộ hành vi draft attachment thực và hành vi AI advisory review tùy chọn với baseline CAP/Fiori đã triển khai. | Draft |
+| v1.4 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Thay tám Mermaid block dùng khi review bằng workflow figure đã render và đóng open issue về visual submission. | Draft |
 
 ### 1.2 Review và phê duyệt
 
@@ -38,7 +40,7 @@ FRS chi tiết hơn BRD và thiên về workflow hơn SRS. Tài liệu dùng cho
 | Functional Area | Có trong MVP | Ghi chú |
 | --- | --- | --- |
 | Bug creation | Có | Bug report có cấu trúc với required fields và unique bug number. |
-| Duplicate checking | Có | Manual search/filter support; không bắt buộc AI duplicate detection. |
+| Duplicate checking | Có | Manual search/filter vẫn là core flow; AI similar-bug suggestion chỉ là tùy chọn và review-only. |
 | Classification | Có | SAP Module optional; Application Component và Defect Category required. |
 | Developer matching | Có | Dựa trên Component Category và optional SAP Module. |
 | Assignment | Có | Assigned hoặc Pending Assignment. |
@@ -49,199 +51,51 @@ FRS chi tiết hơn BRD và thiên về workflow hơn SRS. Tài liệu dùng cho
 | History log | Có | Important actions được ghi nhận. |
 | Notification records | Có | Event records và triggers; external delivery có thể defer. |
 | PM monitoring | Có | Workload, overdue, queues, nextProcessor, status filters. |
-| Attachments | P1 | Metadata và reference support nếu còn thời gian. |
+| Attachments | Có | Đã triển khai draft upload/download và evidence metadata; attachment bytes không bao giờ gửi tới AI. |
+| Advisory AI | Optional | Similar-bug, classification, summary và Smart Assign explanation cần human review và không làm thay đổi bug. |
 
 ## 4. Functional Workflow Diagrams
 
 ### 4.1 Main Defect Tracking Flow
 
-```mermaid
-flowchart TD
-    A["Tester detects defect"] --> B["Search similar bugs"]
-    B --> C{"Similar bug exists?"}
-    C -->|"Open"| D["Follow or update existing bug"]
-    C -->|"Closed"| E["Reopen or update existing bug if authorized"]
-    C -->|"No"| F["Create new bug report"]
-    F --> G["Classify by SAP Module, Application Component, Defect Category"]
-    G --> H["Filter Developer candidates"]
-    H --> I{"Suitable Developer selected?"}
-    I -->|"Yes"| J["Submit as Assigned"]
-    I -->|"No"| K["Submit as Pending Assignment"]
-    J --> L["Developer reviews"]
-    K --> M["PM or Tester monitors queue"]
-    L --> N{"Review result"}
-    N -->|"Missing info"| O["Need More Information"]
-    N -->|"Wrong classification or assignee"| P["Rejected with follow-up"]
-    N -->|"Valid"| Q["In Progress then Resolved"]
-    Q --> R["Retest Required when needed"]
-    R --> S{"Retest result"}
-    S -->|"Passed"| T["Closed"]
-    S -->|"Failed"| U["Reopened"]
-    P --> V["Tester or PM corrects and reassigns"]
-    O --> W["Tester adds information"]
-    W --> L
-    V --> H
-    U --> H
-```
+![Main Defect Tracking Flow](../../diagrams/rendered/14-frs-main-defect-flow.svg)
 
+*Figure 14. Main Defect Tracking Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.2 Rejected Follow-up Flow
 
-```mermaid
-sequenceDiagram
-    actor Dev as Developer
-    participant UI as Fiori Object Page
-    participant CAP as CAP Service
-    participant DB as Database
-    actor Owner as Follow Up Owner
+![Rejected Follow-up Flow](../../diagrams/rendered/15-frs-rejected-follow-up.svg)
 
-    Dev->>UI: Choose Reject
-    UI->>Dev: Request rejection reason
-    Dev->>UI: Enter reason and confirm
-    UI->>CAP: Reject bug request
-    CAP->>CAP: Validate assigned developer and allowed status
-    CAP->>DB: Save status Rejected, reason, nextProcessor
-    CAP->>DB: Write history log
-    CAP->>DB: Create notification record
-    CAP-->>UI: Return rejected bug
-    Owner->>UI: Review rejected bug
-    Owner->>UI: Correct classification, add info, or choose assignee
-    UI->>CAP: Reassign or move to Pending Assignment
-    CAP->>DB: Save follow-up action and history
-```
-
+*Figure 15. Rejected Follow-up Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.3 Status Lifecycle
 
-```mermaid
-stateDiagram-v2
-    [*] --> New
-    New --> Assigned
-    New --> Pending_Assignment
-    Pending_Assignment --> Assigned
-    Assigned --> In_Review
-    Assigned --> Rejected
-    In_Review --> Need_More_Information
-    Need_More_Information --> In_Review
-    In_Review --> In_Progress
-    In_Review --> Rejected
-    In_Progress --> Resolved
-    Resolved --> Retest_Required
-    Resolved --> Closed
-    Retest_Required --> Closed
-    Retest_Required --> Reopened
-    Resolved --> Reopened
-    Closed --> Reopened
-    Reopened --> Assigned
-    Rejected --> Assigned
-    Rejected --> Pending_Assignment
-    Closed --> [*]
-```
+![Status Lifecycle](../../diagrams/rendered/16-frs-status-lifecycle.svg)
 
+*Figure 16. Status Lifecycle. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.4 Bug Creation and Assignment Activity Flow
 
-```mermaid
-flowchart TD
-    A["Start bug creation"] --> B["Enter bug details"]
-    B --> C["Search existing bugs"]
-    C --> D{"Use existing bug?"}
-    D -->|"Open existing bug"| E["Follow or comment on existing bug"]
-    D -->|"Closed existing bug"| F["Reopen or update existing bug if authorized"]
-    D -->|"Create new"| G["Select classification"]
-    G --> H["Resolve Component Category"]
-    H --> I["Filter Developer candidates"]
-    I --> J{"Developer selected?"}
-    J -->|"Yes"| K["Set assignee"]
-    K --> L["Submit as Assigned"]
-    J -->|"No"| M["Choose No suitable developer"]
-    M --> N["Submit as Pending Assignment"]
-    L --> O["Write create and assign history"]
-    N --> P["Write create and pending history"]
-    O --> Q["Create notification record"]
-    P --> Q
-    Q --> R["End"]
-```
+![Bug Creation and Assignment Activity Flow](../../diagrams/rendered/17-frs-create-assignment.svg)
 
+*Figure 17. Bug Creation and Assignment Activity Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.5 Developer Review Decision Flow
 
-```mermaid
-flowchart TD
-    A["Developer opens assigned bug"] --> B["Review details, evidence, comments, and history"]
-    B --> C{"Can process bug?"}
-    C -->|"Missing information"| D["Request More Information"]
-    D --> E["Status: Need More Information"]
-    E --> F["Tester adds information"]
-    F --> B
-    C -->|"Wrong classification or assignee"| G["Reject with reason"]
-    G --> H["Status: Rejected"]
-    H --> I["Follow Up Owner corrects and reassigns"]
-    I --> B
-    C -->|"Valid"| J["Start review"]
-    J --> K["Move to In Progress"]
-    K --> L["Add developer note"]
-    L --> M["Mark Resolved"]
-```
+![Developer Review Decision Flow](../../diagrams/rendered/18-frs-developer-review.svg)
 
+*Figure 18. Developer Review Decision Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.6 Request More Information Flow
 
-```mermaid
-sequenceDiagram
-    actor Dev as Developer
-    participant UI as Fiori Object Page
-    participant CAP as CAP Service
-    participant DB as Database
-    actor Tester as Tester
+![Request More Information Flow](../../diagrams/rendered/19-frs-request-more-information.svg)
 
-    Dev->>UI: Request more information
-    UI->>Dev: Ask for required reason
-    Dev->>UI: Submit reason
-    UI->>CAP: Change status to Need More Information
-    CAP->>CAP: Validate assigned developer and reason
-    CAP->>DB: Save status and nextProcessor
-    CAP->>DB: Write history log
-    CAP->>DB: Create notification record
-    Tester->>UI: Add missing information
-    UI->>CAP: Return bug to Assigned or In Review
-    CAP->>DB: Save update and history
-```
-
+*Figure 19. Request More Information Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.7 Resolve, Retest, Close, and Reopen Flow
 
-```mermaid
-flowchart TD
-    A["Developer marks Resolved"] --> B["System sets nextProcessor to Tester or PM"]
-    B --> C{"Verification needed?"}
-    C -->|"Yes"| D["Move to Retest Required"]
-    D --> E{"Retest result"}
-    E -->|"Passed"| F["Close bug"]
-    E -->|"Failed"| G["Reopen bug"]
-    C -->|"No and accepted"| F
-    G --> H["Update information or assignment"]
-    H --> I["Return to Assigned"]
-    F --> J["Clear nextProcessor"]
-    J --> K["Write history and notification records"]
-```
+![Resolve, Retest, Close, and Reopen Flow](../../diagrams/rendered/20-frs-resolve-retest-close-reopen.svg)
 
+*Figure 20. Resolve, Retest, Close, and Reopen Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.8 PM Monitoring and Escalation Flow
 
-```mermaid
-flowchart TD
-    A["PM opens monitoring view"] --> B["Filter by status, priority, severity, module, component, assignee, nextProcessor, and due date"]
-    B --> C["Review workload by Developer"]
-    B --> D["Review Pending Assignment queue"]
-    B --> E["Review Rejected Follow-up queue"]
-    B --> F["Review Overdue and stale bugs"]
-    C --> G{"Action needed?"}
-    D --> G
-    E --> G
-    F --> G
-    G -->|"No"| H["Continue monitoring"]
-    G -->|"Yes"| I["Comment or request reassignment"]
-    I --> J{"PM direct reassignment approved?"}
-    J -->|"Yes"| K["PM reassigns to valid Developer"]
-    J -->|"No"| L["Tester performs reassignment"]
-    K --> M["Write history and notification records"]
-    L --> M
-```
+![PM Monitoring and Escalation Flow](../../diagrams/rendered/21-frs-pm-monitoring.svg)
 
+*Figure 21. PM Monitoring and Escalation Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ## 5. Detailed Functional Requirements
 
 ### 5.1 FRS-BUG-001 - Create Bug Report
@@ -539,6 +393,20 @@ flowchart TD
 | Acceptance criteria | Core fields visible; dependent value helps dễ hiểu; actions match role/status; Rejected details visible; validation messages actionable. |
 | Traceability | SRS-IF-UI-001 đến SRS-IF-UI-005, SRS-NFR-USE-001, SRS-NFR-USE-002. |
 
+### 5.20 FRS-AI-001 - Optional Advisory AI Review
+
+| Field | Specification |
+| --- | --- |
+| Purpose | Hỗ trợ user xem similar bug, classification có thể phù hợp, bug/handoff context ngắn gọn và Smart Assign rationale mà không tự động hóa quyết định nghiệp vụ. |
+| Primary actor | Tester, Developer, PM. |
+| Trigger | User có quyền chủ động yêu cầu AI suggestion từ business context tương ứng. |
+| Preconditions | Feature được bật với private configuration đã duyệt, hoặc UI hiển thị safe unavailable state trong khi normal workflow vẫn dùng được. |
+| Main flow | CAP allowlist và sanitize các field bug/context được phép; provider trả advisory output đã chuẩn hóa; UI render dưới dạng text cần review; user có thể bỏ qua hoặc dùng normal action để quyết định. |
+| Validation rules | AI không được bypass role authorization, catalog validation, Developer Responsibility eligibility, required reason hoặc status transition rule. AI không create, edit, assign, reclassify hoặc transition bug. |
+| Data protection | Không gửi credential, token, private endpoint, attachment bytes, raw log hoặc personal data không cần thiết. Không persist raw prompt/provider response hoặc hidden reasoning. |
+| Acceptance criteria | State disabled, timeout, malformed, unsafe và provider-failure đều an toàn; suggestion hiển thị review-only; audit record được sanitize; workflow không-AI vẫn tiếp tục. |
+| Traceability | SRS-FR-AI-001 đến SRS-FR-AI-003; `docs/ba/discovery/idts-63-ai-assistance-guardrails.md`. |
+
 ## 6. Functional Data Rules
 
 | Rule ID | Rule |
@@ -569,6 +437,7 @@ flowchart TD
 | History | Important actions hiển thị actor, time, old/new value và reason khi áp dụng. |
 | Notifications | Event records tồn tại và không hardcode external endpoints. |
 | PM monitoring | PM nhận diện workload, overdue, pending, rejected, retest và nextProcessor queues. |
+| Advisory AI | Suggestion là tùy chọn, review-only, an toàn khi lỗi và không làm thay đổi bug. |
 
 ## 8. Traceability to SRS
 
@@ -593,6 +462,7 @@ flowchart TD
 | FRS-PM-001 | SRS-FR-PM-001, SRS-FR-PM-002, SRS-FR-PM-003 |
 | FRS-PM-002 | SRS-FR-PM-004 |
 | FRS-UX-001 | SRS-IF-UI-001 đến SRS-IF-UI-005, SRS-NFR-USE-001, SRS-NFR-USE-002 |
+| FRS-AI-001 | SRS-FR-AI-001 đến SRS-FR-AI-003 |
 
 ## 9. Open Issues
 
@@ -602,4 +472,4 @@ flowchart TD
 | OI-FRS-002 | Xác nhận notification channel cho MVP. | Team / Mentor | Quyết định notification records alone có thỏa MVP hay không. |
 | OI-FRS-003 | Xác nhận attachment storage approach. | Team / Mentor | Quyết định Attachments metadata-only hay actual file handling. |
 | OI-FRS-004 | Xác nhận overdue thresholds và workload limits. | Team / PM | Quyết định PM dashboard calculations. |
-| OI-FRS-005 | Xác nhận Mermaid diagram source trong Markdown có cần render thành image cho DOCX submission không. | Team / Mentor | Ảnh hưởng visual format của DOCX cuối cùng, không đổi functional scope. |
+| OI-FRS-005 | Closed: workflow diagrams đã được render thành figure trong FRS và Diagram Pack riêng. | IDTS Project Team | Visual DOCX và Drive review pack là review baseline hiện tại. |

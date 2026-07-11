@@ -1,6 +1,6 @@
 {
   "task": "IDTS-77",
-  "checkedAt": "2026-07-10T05:20:37.279Z",
+  "checkedAt": "2026-07-11T00:39:52.839Z",
   "checks": [
     {
       "label": "manifest uses the similar bug review field fragment",

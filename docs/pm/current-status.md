@@ -1,13 +1,13 @@
 # Current Project Status
 
-Last updated: 2026-07-09
+Last updated: 2026-07-11
 
 ## Snapshot
 
 | Field | Current value |
 | --- | --- |
 | Project phase | Sprint 03 is being closed and Sprint 04 planning is opened. Sprint 02/Sprint 03 closure tasks have been reconciled on Jira where tool access allowed. |
-| Product baseline | BA documentation completed; CAP data model foundation now implemented beyond the initial scaffold |
+| Product baseline | CAP/Fiori MVP, attachment/audit/notification/PM flows, and advisory-AI review baseline are implemented; BRD v1.3, SRS v1.2, and FRS v1.3 were regenerated in EN/VI and published as timestamped SAP490 review copies. |
 | Current sprint | Sprint 03 closure is complete at Jira epic/task level: `IDTS-1`, `IDTS-14`, `IDTS-25`, `IDTS-27`, `IDTS-28`, `IDTS-38`, and `IDTS-50` are Done. Jira board sprint `IDTS Sprint 4` exists on board `34` for 2026-07-04 to 2026-07-18, and planning epic is `IDTS-51`. |
 | Recommended next action | Sprint 04 has started. The approved AI chain `IDTS-63` through `IDTS-71` is implemented and verified. `IDTS-74` closed the duplicate/similar product-UI evidence gap, `IDTS-75` closed the classification suggestion product-UI evidence gap, and `IDTS-76` closed the handoff-summary product-UI evidence gap with PR #134, Render deploy `dep-d97r30l7vvec73cp5gq0`, authenticated AI API smoke `25/0`, and shared-QA browser smoke. `IDTS-72` is now unblocked for final Jira closure after the evidence is recorded. `IDTS-57` still needs its broader role-matrix regression; `IDTS-45` and `IDTS-59` remain outside the immediate implementation focus; keep `IDTS-40` as an AWS-native follow-up rather than a Render QA blocker. |
 | Active implementation note | IDTS-72 visual evidence audit has repository evidence merged through PR #126. IDTS-74 is complete and deployed. IDTS-75 is complete at implementation, PR, Render, and shared-QA evidence level. IDTS-76 is complete at implementation, PR, Render, and shared-QA evidence level: it reuses `summarizeBugHandoff` and `AiReviewUi`, adds a review-only Handoff Summary Object Page section/dialog, and has local plus shared-QA evidence for positive, sparse-data, unsafe-output, safe-failure, no-workflow-mutation, deployed API smoke, and deployed browser smoke. |
@@ -22,9 +22,9 @@ Last updated: 2026-07-09
 - Assignment and nextProcessor behavior are documented at business level.
 - PM execution docs are created under `docs/pm/`.
 - Product Discovery workflow is available under `.agents/skills/product-discovery` and `docs/ba/discovery/`.
-- BRD v1.2 markdown and DOCX deliverables are maintained under `docs/ba/brd/`.
-- SRS v1.1 markdown and DOCX deliverables are maintained under `docs/ba/srs/`.
-- FRS v1.2 markdown and DOCX deliverables are maintained under `docs/ba/frs/`.
+- BRD v1.3 markdown and DOCX deliverables are maintained under `docs/ba/brd/`.
+- SRS v1.2 markdown and DOCX deliverables are maintained under `docs/ba/srs/`.
+- FRS v1.3 markdown and DOCX deliverables are maintained under `docs/ba/frs/`.
 - FRS v1.1 fixed Mermaid syntax in the rejected follow-up sequence and added the missing workflow diagrams for create/assign, developer review, request information, retest/closure, and PM monitoring.
 - BRD v1.2, SRS v1.1, and FRS v1.2 update the MVP role baseline to three active roles: Tester, Developer, and PM. Reporter and Admin are deferred as separate roles.
 - BRD/SRS/FRS DOCX files were regenerated from the updated Markdown sources and smoke-tested through LibreOffice conversion in a temporary folder.
@@ -38,6 +38,9 @@ Last updated: 2026-07-09
 - SAP490 template inventory is documented in `docs/sap490/template-inventory.en.md` and `docs/sap490/template-inventory.vi.md`.
 - SAP490 Blueprint draft v0.1 is available as two template-filled DOCX files copied from the school Blueprint template: `docs/sap490/generated/Blueprint_IDTS_SAP01_en_v0.1.docx` and `docs/sap490/generated/Blueprint_IDTS_SAP01_vi_v0.1.docx`.
 - SAP490 review workbooks were refreshed on 2026-06-18 as separate English and Vietnamese copies from the school templates: `Functional_Specification_IDTS_SAP01_{en,vi}_v0.2.xlsx`, `Test_Scenario_IDTS_SAP01_{en,vi}_v0.2.xlsx`, `Unit_Test_IDTS_SAP01_{en,vi}_v0.2.xlsx`, `Functional_Test_IDTS_SAP01_{en,vi}_v0.1.xlsx`, `Test_And_Fix_Bug_IDTS_SAP01_{en,vi}_v0.3.xlsx`, and `Test_Report_IDTS_SAP01_{en,vi}_v0.1.xlsx`.
+- SAP490 review sync on 2026-07-10 uploaded 36 timestamped EN/VI review artifacts to the `SAP490 Review` Drive folder: BRD/SRS/FRS, Blueprint, Functional/Technical Specifications, Configuration Note, change tracker, Test Scenario/Unit/Functional/Test Report, product-only Test & Fix Bug, prepared UAT plan, Workshop deck, and Review Readiness register. The v0.4 defect workbook contains only 12 confirmed product defects; member status files retain non-product issues and the full issue log. Final Project Report and real UAT sign-off remain intentionally pending.
+- The four official Functional Specification v0.4 and Technical Specification v0.2 raw XLSX files were subsequently repaired with OfficeCLI and replaced in place at their existing Drive review IDs. The final local OfficeCLI validation and format/content scans are clean; the live Drive review confirms the corrected technical cover and readable horizontal Screen Layout table. This is presentation/documentation remediation only and adds no Test & Fix Bug row.
+- Release handover on 2026-07-11 merged the agent-rule routing, disabled-by-default OpenAI provider, and SAP490 review traceability PRs into `dev` at `d97ae6d`. Render service `idts-sap01-qa` deploy `dep-d98jk5cs728c73di5g0g` is live and `/odata/v4/auth/$metadata` returned HTTP 200; no private AI key/model was added and AI remains disabled by default.
 - The refreshed SAP490 pack now reflects the current Sprint 02 create/assignment/lifecycle/audit baseline, the `30 PASS / 0 FAIL` backend retest suite, the HTTP attachment/comment verification pass, and the currently known browser/UI polish gaps.
 - A new retest planning source exists under `docs/qa/retest-matrix.en.md` and `docs/qa/retest-matrix.vi.md`. It is now the primary test-planning reference for Sprint 02 instead of the older `21/21` checklist.
 - A real browser QA pass on `localhost:4004` has now validated the create path, real draft attachment retention after save, Add Comment flow, role-based action visibility, developer lifecycle entry path, and immediate Object Page refresh after lifecycle submit once the final side-effect annotation fix was applied. A focused follow-up browser probe also no longer reproduces the earlier `componentCategory_ID` drill-down warning during create.
