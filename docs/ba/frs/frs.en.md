@@ -3,7 +3,7 @@
 Project: Issue and Defect Tracking System in SAP  
 Document type: Functional Requirements Specification (FRS)  
 Language: English  
-Status: Draft v1.4
+Status: Draft v1.5
 Last updated: 2026-07-11
 Prepared for: SAP490 project delivery, mentor review, implementation evidence, and QA test design
 Document style: SAP490 hybrid, function-detail-first, aligned with BRD v1.3 and SRS v1.2
@@ -19,6 +19,7 @@ Document style: SAP490 hybrid, function-detail-first, aligned with BRD v1.3 and 
 | v1.2 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Updated functional actors and workflows to the MVP role baseline: Tester, Developer, and PM. Reporter and Admin are deferred as separate roles. | Draft |
 | v1.3 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Synced real draft attachment behavior and optional advisory-AI review behavior with the implemented CAP/Fiori baseline. | Draft |
 | v1.4 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Replaced eight review-facing Mermaid blocks with rendered workflow figures and closed the visual-submission open issue. | Draft |
+| v1.5 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Replaced review figures with editable draw.io sources and readable PNG/PDF review outputs. | Draft |
 
 ### 1.2 Review and Sign-Off
 
@@ -58,44 +59,36 @@ The FRS is more detailed than the BRD and more workflow-oriented than the SRS. I
 
 ### 4.1 Main Defect Tracking Flow
 
-![Main Defect Tracking Flow](../../diagrams/rendered/14-frs-main-defect-flow.svg)
+![Figure 14. Main Defect Tracking Flow. IDTS Diagram Pack; editable master is maintained as a draw.io file with the project artifacts.](../../diagrams/review/png/14-frs-main-defect-flow.png){ width=6.5in }
 
-*Figure 14. Main Defect Tracking Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.2 Rejected Follow-up Flow
 
-![Rejected Follow-up Flow](../../diagrams/rendered/15-frs-rejected-follow-up.svg)
+![Figure 15. Rejected Follow-up Flow. IDTS Diagram Pack; editable master is maintained as a draw.io file with the project artifacts.](../../diagrams/review/png/15-frs-rejected-follow-up.png){ width=6.5in }
 
-*Figure 15. Rejected Follow-up Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.3 Status Lifecycle
 
-![Status Lifecycle](../../diagrams/rendered/16-frs-status-lifecycle.svg)
+![Figure 16. Status Lifecycle. IDTS Diagram Pack; editable master is maintained as a draw.io file with the project artifacts.](../../diagrams/review/png/16-frs-status-lifecycle.png){ width=6.5in }
 
-*Figure 16. Status Lifecycle. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.4 Bug Creation and Assignment Activity Flow
 
-![Bug Creation and Assignment Activity Flow](../../diagrams/rendered/17-frs-create-assignment.svg)
+![Figure 17. Bug Creation and Assignment Activity Flow. IDTS Diagram Pack; editable master is maintained as a draw.io file with the project artifacts.](../../diagrams/review/png/17-frs-create-assignment.png){ width=6.5in }
 
-*Figure 17. Bug Creation and Assignment Activity Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.5 Developer Review Decision Flow
 
-![Developer Review Decision Flow](../../diagrams/rendered/18-frs-developer-review.svg)
+![Figure 18. Developer Review Decision Flow. IDTS Diagram Pack; editable master is maintained as a draw.io file with the project artifacts.](../../diagrams/review/png/18-frs-developer-review.png){ width=6.5in }
 
-*Figure 18. Developer Review Decision Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.6 Request More Information Flow
 
-![Request More Information Flow](../../diagrams/rendered/19-frs-request-more-information.svg)
+![Figure 19. Request More Information Flow. IDTS Diagram Pack; editable master is maintained as a draw.io file with the project artifacts.](../../diagrams/review/png/19-frs-request-more-information.png){ width=6.5in }
 
-*Figure 19. Request More Information Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.7 Resolve, Retest, Close, and Reopen Flow
 
-![Resolve, Retest, Close, and Reopen Flow](../../diagrams/rendered/20-frs-resolve-retest-close-reopen.svg)
+![Figure 20. Resolve, Retest, Close, and Reopen Flow. IDTS Diagram Pack; editable master is maintained as a draw.io file with the project artifacts.](../../diagrams/review/png/20-frs-resolve-retest-close-reopen.png){ width=6.5in }
 
-*Figure 20. Resolve, Retest, Close, and Reopen Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.8 PM Monitoring and Escalation Flow
 
-![PM Monitoring and Escalation Flow](../../diagrams/rendered/21-frs-pm-monitoring.svg)
+![Figure 21. PM Monitoring and Escalation Flow. IDTS Diagram Pack; editable master is maintained as a draw.io file with the project artifacts.](../../diagrams/review/png/21-frs-pm-monitoring.png){ width=6.5in }
 
-*Figure 21. PM Monitoring and Escalation Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ## 5. Detailed Functional Requirements
 
 ### 5.1 FRS-BUG-001 - Create Bug Report

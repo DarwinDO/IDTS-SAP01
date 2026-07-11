@@ -3,7 +3,7 @@
 Project: Issue and Defect Tracking System in SAP  
 Document type: Business Requirements Document (BRD)  
 Language: English  
-Status: Draft v1.4
+Status: Draft v1.5
 Last updated: 2026-07-11
 Prepared for: SAP490 project delivery and mentor review  
 Document style: SAP490 hybrid, business-first with light SAP implementation context
@@ -19,6 +19,7 @@ Document style: SAP490 hybrid, business-first with light SAP implementation cont
 | v1.2 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Updated MVP role baseline to three active roles: Tester, Developer, and PM. Reporter and Admin are deferred as separate roles and no longer appear as active MVP RACI columns. | Draft |
 | v1.3 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Synced current implementation and review baseline: CAP/Fiori MVP workflow, audit/notification/attachment flows, PM monitoring, and optional human-review AI assistance. | Draft |
 | v1.4 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Added rendered business-review figures and Diagram Pack traceability; canonical diagram source remains version controlled. | Draft |
+| v1.5 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Replaced review figures with editable draw.io sources and readable PNG/PDF review outputs. | Draft |
 
 ### 1.2 Review and Sign-Off
 
@@ -101,17 +102,11 @@ Reporter and Admin are not separate MVP stakeholders. Testers perform internal r
 
 The following review visuals summarize the approved business context, role coverage, and end-to-end defect flow. Detailed editable source remains under `docs/diagrams/`.
 
-![System Context](../../diagrams/rendered/01-system-context.svg)
+![Figure 01. System Context. IDTS Diagram Pack; editable master is maintained as a draw.io file with the project artifacts.](../../diagrams/review/png/01-system-context.png){ width=6.5in }
 
-*Figure 01. System Context. Canonical source: `docs/diagrams/01-system-context-and-architecture.md`.*
+![Figure 03. Use Case Diagram. IDTS Diagram Pack; editable master is maintained as a draw.io file with the project artifacts.](../../diagrams/review/png/03-use-case.png){ width=6.5in }
 
-![Use Case Diagram](../../diagrams/rendered/03-use-case.svg)
-
-*Figure 03. Use Case Diagram. Canonical source: `docs/diagrams/02-use-cases.md`.*
-
-![End-to-End Defect Tracking Flow](../../diagrams/rendered/04-end-to-end-defect-flow.svg)
-
-*Figure 04. End-to-End Defect Tracking Flow. Canonical source: `docs/diagrams/03-business-process-flows.md`.*
+![Figure 04. End-to-End Defect Tracking Flow. IDTS Diagram Pack; editable master is maintained as a draw.io file with the project artifacts.](../../diagrams/review/png/04-end-to-end-defect-flow.png){ width=6.5in }
 
 ## 7. Roles and RACI
 

@@ -18,6 +18,7 @@ Phong cách tài liệu: Cấu trúc SRS truyền thống, kết hợp nguyên t
 | v1.1 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Cập nhật user class và functional requirements theo MVP role baseline: Tester, Developer và PM. Reporter và Admin được hoãn như role tách riêng. | Draft |
 | v1.2 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Đồng bộ baseline attachment đã triển khai và AI advisory tùy chọn, với ràng buộc rõ về human review, privacy và không có workflow authority. | Draft |
 | v1.3 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Thay source block system-context dùng khi review bằng figure đã render, có traceability và tham chiếu Diagram Pack. | Draft |
+| v1.4 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Thay figure review bằng source draw.io có thể chỉnh sửa và bổ sung figure kiến trúc/data model cho technical review. | Draft |
 
 ### 1.2 Review và phê duyệt
 
@@ -30,7 +31,7 @@ Phong cách tài liệu: Cấu trúc SRS truyền thống, kết hợp nguyên t
 
 ### 1.3 Mục đích tài liệu
 
-SRS này định nghĩa các yêu cầu phần mềm cho Issue and Defect Tracking System in SAP (IDTS). Tài liệu chuyển hóa hướng nghiệp vụ đã chốt thành các yêu cầu hệ thống có thể kiểm chứng cho SAP CAP, OData V4, Fiori Elements/SAPUI5, SQLite local development và định hướng triển khai HANA Cloud hoặc PostgreSQL sau này.
+SRS này định nghĩa các yêu cầu phần mềm cho Issue and Defect Tracking System in SAP (IDTS). Tài liệu chuyển hóa hướng nghiệp vụ đã chốt thành các yêu cầu hệ thống có thể kiểm chứng cho SAP CAP, OData V4, Fiori Elements/SAPUI5, SQLite local development và vận hành shared QA trên PostgreSQL.
 
 SRS này dùng cấu trúc SRS truyền thống để dễ đọc và áp dụng nguyên tắc requirement hiện đại theo hướng ISO/IEC/IEEE 29148 cho chất lượng requirement, traceability và verification trong bối cảnh SAP490 hybrid. Tài liệu không tuyên bố chứng nhận hoặc tuân thủ đầy đủ tiêu chuẩn chính thức.
 
@@ -76,11 +77,22 @@ IDTS có thể cung cấp gợi ý AI tùy chọn cho similar bug, classificatio
 
 ### 4.1 System Context
 
-IDTS là ứng dụng SAP CAP Node.js, expose qua OData V4 và được sử dụng bởi frontend SAP Fiori Elements/SAPUI5. Local development dùng SQLite. Future deployment có thể dùng SAP HANA Cloud hoặc PostgreSQL, nhưng endpoint và credential không được hardcode.
+IDTS là ứng dụng SAP CAP Node.js, expose qua OData V4 và được sử dụng bởi frontend SAP Fiori Elements/SAPUI5. Local development dùng SQLite, còn shared QA dùng PostgreSQL. Endpoint và credential là private configuration, không được hardcode.
 
-![SRS System Context](../../diagrams/rendered/13-srs-system-context.svg)
+![Figure 13. Bối cảnh hệ thống SRS. IDTS Diagram Pack; bản có thể chỉnh sửa được quản lý dưới dạng file draw.io cùng artifact của dự án.](../../diagrams/review/png/13-srs-system-context.png){ width=6.5in }
 
-*Figure 13. SRS System Context. Canonical source: `docs/diagrams/07-srs-system-context.md`.*
+### 4.1.1 Kiến trúc CAP/Fiori
+
+Figure này tách rõ UI trên trình duyệt, custom authentication, CAP OData service, workflow handler, data model và adapter email/lưu file. Đây là góc nhìn hệ thống, không chứa endpoint hay credential triển khai.
+
+![Figure 02. Kiến trúc CAP và Fiori. IDTS Diagram Pack; bản có thể chỉnh sửa được quản lý dưới dạng file draw.io cùng artifact của dự án.](../../diagrams/review/png/02-cap-fiori-architecture.png){ width=6.5in }
+
+### 4.1.2 Mô hình dữ liệu khái niệm
+
+Góc nhìn khái niệm này giải thích quan hệ nghiệp vụ dùng cho classification, assignment, history, notification, attachment và duplicate link. CDS schema vẫn là nguồn triển khai chính thức.
+
+![Figure 09. Mô hình dữ liệu IDTS khái niệm. IDTS Diagram Pack; bản có thể chỉnh sửa được quản lý dưới dạng file draw.io cùng artifact của dự án.](../../diagrams/review/png/09-conceptual-data-model.png){ width=6.5in }
+
 ### 4.2 Nhóm người dùng
 
 | Nhóm người dùng | Trách nhiệm chính |
@@ -99,8 +111,8 @@ Reporter và Admin không phải user class tách riêng trong MVP. Tester đả
 | API | OData V4. |
 | Frontend | Fiori Elements List Report/Object Page là mặc định; SAPUI5 extension chỉ dùng khi cần. |
 | Local database | SQLite. |
-| Future database | SAP HANA Cloud hoặc PostgreSQL, quyết định sau. |
-| Authentication / authorization | Role-based behavior phải được thiết kế; setup XSUAA/BTP cụ thể có thể chốt khi deployment planning. |
+| Shared-QA database | PostgreSQL; quyết định hosting/migration dài hạn vẫn được theo dõi ở task riêng. |
+| Authentication / authorization | Custom CAP authentication có role-based behavior; SAP BTP/XSUAA không cần thiết cho môi trường hiện tại. |
 
 ## 5. Assumptions, Constraints và Dependencies
 
@@ -112,8 +124,8 @@ Reporter và Admin không phải user class tách riêng trong MVP. Tester đả
 | ASM-002 | Application Component và Defect Category là bắt buộc để lọc assignee. |
 | ASM-003 | Component Category là cặp hợp lệ giữa Application Component và Defect Category. |
 | ASM-004 | Developer Responsibility map Developer với Component Category và optional SAP Module. |
-| ASM-005 | Notification delivery có thể bắt đầu bằng notification records và triggers; delivery channel thật có thể thêm sau. |
-| ASM-006 | Attachment có thể bắt đầu bằng metadata hoặc storage reference. |
+| ASM-005 | Notification record được gửi qua Brevo API khi cấu hình bật; lỗi delivery không được rollback business workflow. |
+| ASM-006 | Attachment metadata lưu cùng business record, còn nội dung file lưu qua object storage đã cấu hình. |
 | ASM-007 | BRD v1.2 là business baseline cho SRS này. |
 
 ### 5.2 Constraints

@@ -3,7 +3,7 @@
 Project: Issue and Defect Tracking System in SAP  
 Document type: Software Requirements Specification (SRS)  
 Language: English  
-Status: Draft v1.3
+Status: Draft v1.4
 Last updated: 2026-07-11
 Prepared for: SAP490 project delivery, mentor review, implementation evidence, and QA test design
 Document style: Traditional SRS outline with ISO/IEC/IEEE 29148-style requirement quality, traceability, and verification discipline
@@ -18,6 +18,7 @@ Document style: Traditional SRS outline with ISO/IEC/IEEE 29148-style requiremen
 | v1.1 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Updated user classes and functional requirements to the MVP role baseline: Tester, Developer, and PM. Reporter and Admin are deferred as separate roles. | Draft |
 | v1.2 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Synced the implemented attachment and optional advisory-AI baseline, with explicit human-review, privacy, and no-workflow-authority constraints. | Draft |
 | v1.3 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Replaced the review-facing system-context source block with a rendered, traceable figure and Diagram Pack reference. | Draft |
+| v1.4 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Replaced review figures with editable draw.io sources and added architecture/data-model figures for formal technical review. | Draft |
 
 ### 1.2 Review and Sign-Off
 
@@ -30,7 +31,7 @@ Document style: Traditional SRS outline with ISO/IEC/IEEE 29148-style requiremen
 
 ### 1.3 Document Purpose
 
-This SRS defines the software-level requirements for the Issue and Defect Tracking System in SAP (IDTS). It translates the approved business direction into verifiable system requirements for SAP CAP, OData V4, Fiori Elements/SAPUI5, local SQLite development, and later HANA Cloud or PostgreSQL deployment planning.
+This SRS defines the software-level requirements for the Issue and Defect Tracking System in SAP (IDTS). It translates the approved business direction into verifiable system requirements for SAP CAP, OData V4, Fiori Elements/SAPUI5, SQLite local development, and PostgreSQL shared-QA operation.
 
 This SRS uses a traditional SRS outline for readability and aligns requirement quality, traceability, and verification with ISO/IEC/IEEE 29148-style requirements engineering and the SAP490 hybrid delivery context. It does not claim strict certification against the official standard.
 
@@ -75,11 +76,22 @@ IDTS shall not become a full Jira, SAP Cloud ALM, SAP Solution Manager, ServiceN
 
 ### 4.1 System Context
 
-IDTS is a SAP CAP Node.js application exposed through OData V4 and consumed by a SAP Fiori Elements/SAPUI5 frontend. Local development uses SQLite. Future deployment may use SAP HANA Cloud or PostgreSQL, but endpoints and credentials shall not be hardcoded.
+IDTS is a SAP CAP Node.js application exposed through OData V4 and consumed by a SAP Fiori Elements/SAPUI5 frontend. Local development uses SQLite and the shared-QA environment uses PostgreSQL. Endpoints and credentials are private configuration and shall not be hardcoded.
 
-![SRS System Context](../../diagrams/rendered/13-srs-system-context.svg)
+![Figure 13. SRS System Context. IDTS Diagram Pack; editable master is maintained as a draw.io file with the project artifacts.](../../diagrams/review/png/13-srs-system-context.png){ width=6.5in }
 
-*Figure 13. SRS System Context. Canonical source: `docs/diagrams/07-srs-system-context.md`.*
+### 4.1.1 CAP/Fiori Architecture
+
+This figure separates the browser UI, custom authentication, CAP OData service, workflow handlers, data model, and external delivery/storage adapters. It is a system view, not a deployment credential or endpoint specification.
+
+![Figure 02. CAP and Fiori Architecture. IDTS Diagram Pack; editable master is maintained as a draw.io file with the project artifacts.](../../diagrams/review/png/02-cap-fiori-architecture.png){ width=6.5in }
+
+### 4.1.2 Conceptual Data Model
+
+This conceptual view explains the business relationships used for classification, assignment, history, notifications, attachments, and duplicate links. The CDS schema remains the implementation source of truth.
+
+![Figure 09. Conceptual IDTS Data Model. IDTS Diagram Pack; editable master is maintained as a draw.io file with the project artifacts.](../../diagrams/review/png/09-conceptual-data-model.png){ width=6.5in }
+
 ### 4.2 User Classes
 
 | User class | Main responsibilities |
@@ -98,8 +110,8 @@ Reporter and Admin are not separate MVP user classes. Tester performs internal r
 | API | OData V4. |
 | Frontend | Fiori Elements List Report/Object Page as default; SAPUI5 extensions only when needed. |
 | Local database | SQLite. |
-| Future database | SAP HANA Cloud or PostgreSQL, decided later. |
-| Authentication / authorization | Role-based behavior must be designed; concrete XSUAA/BTP setup may be finalized during deployment planning. |
+| Shared-QA database | PostgreSQL; the long-term hosting/migration decision remains tracked separately. |
+| Authentication / authorization | Custom CAP authentication with role-based behavior; SAP BTP/XSUAA is not required for the current environment. |
 
 ## 5. Assumptions, Constraints, and Dependencies
 
@@ -111,8 +123,8 @@ Reporter and Admin are not separate MVP user classes. Tester performs internal r
 | ASM-002 | Application Component and Defect Category are required for assignment filtering. |
 | ASM-003 | Component Category is the valid pair of Application Component and Defect Category. |
 | ASM-004 | Developer Responsibility maps Developers to Component Categories and optionally to SAP Modules. |
-| ASM-005 | Notification delivery can start as notification records and triggers; real channel delivery can be added later. |
-| ASM-006 | Attachments can start as metadata or storage references. |
+| ASM-005 | Notification records are delivered through the configured Brevo API when enabled; delivery failure must not roll back the business workflow. |
+| ASM-006 | Attachment metadata is stored with the business record and attachment content is stored through the configured object storage. |
 | ASM-007 | BRD v1.2 is the business baseline for this SRS. |
 
 ### 5.2 Constraints

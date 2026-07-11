@@ -19,6 +19,7 @@ Phong cách tài liệu: SAP490 hybrid, ưu tiên functional detail, aligned v�
 | v1.2 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Cập nhật functional actors và workflows theo MVP role baseline: Tester, Developer và PM. Reporter và Admin được hoãn như role tách riêng. | Draft |
 | v1.3 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Đồng bộ hành vi draft attachment thực và hành vi AI advisory review tùy chọn với baseline CAP/Fiori đã triển khai. | Draft |
 | v1.4 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Thay tám Mermaid block dùng khi review bằng workflow figure đã render và đóng open issue về visual submission. | Draft |
+| v1.5 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Thay figure review bằng source draw.io có thể chỉnh sửa và output PNG/PDF dễ đọc. | Draft |
 
 ### 1.2 Review và phê duyệt
 
@@ -58,44 +59,36 @@ FRS chi tiết hơn BRD và thiên về workflow hơn SRS. Tài liệu dùng cho
 
 ### 4.1 Main Defect Tracking Flow
 
-![Main Defect Tracking Flow](../../diagrams/rendered/14-frs-main-defect-flow.svg)
+![Figure 14. Main Defect Tracking Flow. IDTS Diagram Pack; bản có thể chỉnh sửa được quản lý dưới dạng file draw.io cùng artifact của dự án.](../../diagrams/review/png/14-frs-main-defect-flow.png){ width=6.5in }
 
-*Figure 14. Main Defect Tracking Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.2 Rejected Follow-up Flow
 
-![Rejected Follow-up Flow](../../diagrams/rendered/15-frs-rejected-follow-up.svg)
+![Figure 15. Rejected Follow-up Flow. IDTS Diagram Pack; bản có thể chỉnh sửa được quản lý dưới dạng file draw.io cùng artifact của dự án.](../../diagrams/review/png/15-frs-rejected-follow-up.png){ width=6.5in }
 
-*Figure 15. Rejected Follow-up Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.3 Status Lifecycle
 
-![Status Lifecycle](../../diagrams/rendered/16-frs-status-lifecycle.svg)
+![Figure 16. Status Lifecycle. IDTS Diagram Pack; bản có thể chỉnh sửa được quản lý dưới dạng file draw.io cùng artifact của dự án.](../../diagrams/review/png/16-frs-status-lifecycle.png){ width=6.5in }
 
-*Figure 16. Status Lifecycle. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.4 Bug Creation and Assignment Activity Flow
 
-![Bug Creation and Assignment Activity Flow](../../diagrams/rendered/17-frs-create-assignment.svg)
+![Figure 17. Tạo defect và phân công. IDTS Diagram Pack; bản có thể chỉnh sửa được quản lý dưới dạng file draw.io cùng artifact của dự án.](../../diagrams/review/png/17-frs-create-assignment.png){ width=6.5in }
 
-*Figure 17. Bug Creation and Assignment Activity Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.5 Developer Review Decision Flow
 
-![Developer Review Decision Flow](../../diagrams/rendered/18-frs-developer-review.svg)
+![Figure 18. Developer review. IDTS Diagram Pack; bản có thể chỉnh sửa được quản lý dưới dạng file draw.io cùng artifact của dự án.](../../diagrams/review/png/18-frs-developer-review.png){ width=6.5in }
 
-*Figure 18. Developer Review Decision Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.6 Request More Information Flow
 
-![Request More Information Flow](../../diagrams/rendered/19-frs-request-more-information.svg)
+![Figure 19. Request More Information Flow. IDTS Diagram Pack; bản có thể chỉnh sửa được quản lý dưới dạng file draw.io cùng artifact của dự án.](../../diagrams/review/png/19-frs-request-more-information.png){ width=6.5in }
 
-*Figure 19. Request More Information Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.7 Resolve, Retest, Close, and Reopen Flow
 
-![Resolve, Retest, Close, and Reopen Flow](../../diagrams/rendered/20-frs-resolve-retest-close-reopen.svg)
+![Figure 20. Resolve, retest, close và reopen. IDTS Diagram Pack; bản có thể chỉnh sửa được quản lý dưới dạng file draw.io cùng artifact của dự án.](../../diagrams/review/png/20-frs-resolve-retest-close-reopen.png){ width=6.5in }
 
-*Figure 20. Resolve, Retest, Close, and Reopen Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ### 4.8 PM Monitoring and Escalation Flow
 
-![PM Monitoring and Escalation Flow](../../diagrams/rendered/21-frs-pm-monitoring.svg)
+![Figure 21. PM monitoring và workload. IDTS Diagram Pack; bản có thể chỉnh sửa được quản lý dưới dạng file draw.io cùng artifact của dự án.](../../diagrams/review/png/21-frs-pm-monitoring.png){ width=6.5in }
 
-*Figure 21. PM Monitoring and Escalation Flow. Canonical source: `docs/diagrams/08-frs-functional-workflows.md`.*
 ## 5. Detailed Functional Requirements
 
 ### 5.1 FRS-BUG-001 - Create Bug Report

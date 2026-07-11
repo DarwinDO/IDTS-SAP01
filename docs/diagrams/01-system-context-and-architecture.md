@@ -2,7 +2,7 @@
 
 ## System Context
 
-This context diagram shows who uses IDTS and which external channels may be connected later.
+This context diagram shows the active IDTS users and the verified local/shared-QA integrations. Future alternatives are intentionally not shown as if they were already deployed.
 
 ```mermaid
 flowchart LR
@@ -12,20 +12,22 @@ flowchart LR
 
     IDTS["Issue and Defect Tracking System in SAP"]
 
-    NotificationChannels["Notification Channels\nEmail / Teams / Slack / Telegram / SAP BTP service"]
-    FutureDB["Future Deployment Database\nSAP HANA Cloud or PostgreSQL"]
+    NotificationChannels["Email Delivery\nBrevo API"]
+    SharedDB["Business Data\nSQLite local / PostgreSQL shared QA"]
+    Attachments["Attachment Content\nAWS S3"]
 
     Tester -->|"Create, update, assign, retest, comment, track"| IDTS
     Developer -->|"Review assigned bugs, request info, reject, update status, comment"| IDTS
     PM -->|"Monitor workload, overdue bugs, history, reports, escalation"| IDTS
 
     IDTS -->|"Send important events"| NotificationChannels
-    IDTS -->|"Persist business data when deployed"| FutureDB
+    IDTS -->|"Persist business data"| SharedDB
+    IDTS -->|"Store attachment bytes"| Attachments
 ```
 
 ## SAP CAP/Fiori Architecture
 
-This architecture diagram maps the current SAP technical direction without adding unsupported scope.
+This architecture diagram maps the implemented CAP/Fiori direction without presenting future deployment options as current behavior.
 
 ```mermaid
 flowchart TB
@@ -41,12 +43,13 @@ flowchart TB
 
     subgraph Data["Data Persistence"]
         SQLite["SQLite\nLocal development"]
-        DeployDB["HANA Cloud or PostgreSQL\nFuture deployment"]
+        DeployDB["PostgreSQL\nShared QA"]
     end
 
-    subgraph OptionalAdapters["Optional Integration Adapters"]
-        Notify["Notification Adapter\nSAP BTP or third-party"]
-        Auth["Authentication / Authorization\nXSUAA later if required"]
+    subgraph IntegrationAdapters["Current Integration Adapters"]
+        Notify["Brevo API\nEmail delivery"]
+        Storage["AWS S3\nAttachment content"]
+        Auth["Custom CAP authentication\nLogin, token, role checks"]
     end
 
     FioriApp -->|"OData V4 calls"| OData
@@ -55,9 +58,10 @@ flowchart TB
     Handlers --> Model
     Model --> SQLite
     Model -. "portable CAP model" .-> DeployDB
-    Handlers -. "important events" .-> Notify
-    FioriApp -. "role-aware access later" .-> Auth
-    OData -. "role checks later" .-> Auth
+    Handlers --> Notify
+    Handlers --> Storage
+    FioriApp --> Auth
+    OData --> Auth
 ```
 
 ## Architecture Notes

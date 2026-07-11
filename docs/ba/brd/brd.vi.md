@@ -19,6 +19,7 @@ Phong cách tài liệu: SAP490 hybrid, ưu tiên nghiệp vụ và chỉ giữ 
 | v1.2 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Cập nhật MVP role baseline thành ba role active: Tester, Developer và PM. Reporter và Admin được hoãn như role tách riêng và không còn là cột RACI active trong MVP. | Draft |
 | v1.3 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Đồng bộ baseline implementation và review hiện tại: workflow CAP/Fiori MVP, luồng audit/notification/attachment, PM monitoring và AI hỗ trợ tùy chọn có human review. | Draft |
 | v1.4 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Bổ sung figure review đã render và traceability tới Diagram Pack; canonical diagram source vẫn được version control. | Draft |
+| v1.5 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Thay figure review bằng source draw.io có thể chỉnh sửa và output PNG/PDF dễ đọc. | Draft |
 
 ### 1.2 Review và phê duyệt
 
@@ -101,17 +102,11 @@ Reporter và Admin không phải stakeholder tách riêng trong MVP. Tester đ�
 
 Các hình review sau tóm tắt business context, role coverage và end-to-end defect flow đã được duyệt. Source có thể chỉnh sửa vẫn được giữ trong `docs/diagrams/`.
 
-![System Context](../../diagrams/rendered/01-system-context.svg)
+![Figure 01. System Context. IDTS Diagram Pack; bản có thể chỉnh sửa được quản lý dưới dạng file draw.io cùng artifact của dự án.](../../diagrams/review/png/01-system-context.png){ width=6.5in }
 
-*Figure 01. System Context. Canonical source: `docs/diagrams/01-system-context-and-architecture.md`.*
+![Figure 03. Use Case Diagram. IDTS Diagram Pack; bản có thể chỉnh sửa được quản lý dưới dạng file draw.io cùng artifact của dự án.](../../diagrams/review/png/03-use-case.png){ width=6.5in }
 
-![Use Case Diagram](../../diagrams/rendered/03-use-case.svg)
-
-*Figure 03. Use Case Diagram. Canonical source: `docs/diagrams/02-use-cases.md`.*
-
-![End-to-End Defect Tracking Flow](../../diagrams/rendered/04-end-to-end-defect-flow.svg)
-
-*Figure 04. End-to-End Defect Tracking Flow. Canonical source: `docs/diagrams/03-business-process-flows.md`.*
+![Figure 04. End-to-End Defect Tracking Flow. IDTS Diagram Pack; bản có thể chỉnh sửa được quản lý dưới dạng file draw.io cùng artifact của dự án.](../../diagrams/review/png/04-end-to-end-defect-flow.png){ width=6.5in }
 
 ## 7. Roles và RACI
 
