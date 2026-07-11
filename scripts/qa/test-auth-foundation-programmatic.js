@@ -55,8 +55,14 @@ function expectEqual (label, actual, expected) {
   rec(label, actual === expected, `actual=${JSON.stringify(actual)} expected=${JSON.stringify(expected)}`)
 }
 
+function expectEqualRedacted (label, actual, expected) {
+  rec(label, actual === expected, actual === expected ? 'values match' : 'values differ')
+}
+
 function expectTruthy (label, actual) {
-  rec(label, Boolean(actual), `actual=${JSON.stringify(actual)}`)
+  // A truthy assertion can receive a bearer token, session identifier, or expiry.
+  // Keep the diagnostic useful without ever serializing a potentially sensitive value.
+  rec(label, Boolean(actual), actual ? 'value present' : 'value missing')
 }
 
 function expectNoLeak (label, value) {
@@ -187,7 +193,7 @@ async function main () {
 
   expectTruthy('session row created', session?.ID)
   expectEqual('raw token is not stored', session?.tokenHash === loginResult.token, false)
-  expectEqual('stored hash matches token', session?.tokenHash, hashToken(loginResult.token))
+  expectEqualRedacted('stored hash matches token', session?.tokenHash, hashToken(loginResult.token))
   expectEqual('session starts unrevoked', session?.revokedAt, null)
 
   const mapped = await runCustomAuth(loginResult.token)

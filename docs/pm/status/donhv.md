@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-11
 
+## 2026-07-11 - IDTS-80 auth QA output redaction
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Security/test-harness issue | `qa:auth:programmatic` printed a generated local bearer token in a PASS diagnostic; the first redaction rerun also showed a session token hash in an equality diagnostic. | Generic assertion helpers serialized values that are useful to compare but should not appear in terminal evidence. | Fixed in this branch: truthy diagnostics use `value present` / `value missing`, and the token-hash equality uses `values match` / `values differ`. No API or auth-runtime behavior changed. | Verified: auth suite `28 PASS / 0 FAIL`, output scan found no bearer-like or SHA-256-like value, secret scan and diff check pass. Jira: IDTS-80. |
+| Environment/tooling issue | The first IDTS-80 verification invocation could not load `@sap/cds`. | The fresh worktree had no `node_modules`; PowerShell captured the failed command output, so the wrapper's first output-scan message was not proof that the suite had run. | Under remediation by installing dependencies in this isolated worktree. No source, database, or shared-QA state changed. | Rerun the actual auth suite after `npm ci --include=dev`; do not claim test pass from the failed invocation. |
+| Dependency security warning | `npm ci --include=dev` completed in the IDTS-80 worktree but repeated the existing audit result: 14 dependency findings (9 moderate, 5 high) and deprecation warnings. | Existing lockfile/dependency tree; remediation is tracked separately under the security workstream. | Not changed in this narrow test-output fix; no dependency or lockfile update is included. | Continue focused IDTS-80 verification only; do not run broad or forced audit fixes here. |
+| Formatting/process issue | The first staged whitespace check reported one blank line at the end of the new IDTS-80 work-package file, but the combined shell command still proceeded to commit. | The command sequence did not stop on the non-zero `git diff --cached --check` result. | Fixed by removing the final blank line; the commit will be amended only after the staged whitespace check succeeds. | Use explicit exit-code handling around mandatory verification gates in future multi-step PowerShell commands. |
+
 ## 2026-07-11 - Agent-rule routing PR verification
 
 | Classification | Symptom / work | Root cause | Fix status | Verification / next action |
