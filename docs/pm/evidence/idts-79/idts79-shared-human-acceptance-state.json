@@ -1,0 +1,107 @@
+{
+  "task": "IDTS-79",
+  "marker": "UAT-MENTOR-20260711-1783750050192",
+  "createdAt": "2026-07-11T06:07:30.192Z",
+  "bugID": "2e76669b-661f-4729-80ff-aed67262f8e5",
+  "attachmentID": "cc338da4-3935-47d8-bdf3-9530baa497d3",
+  "attachmentSha256": "cab6226bb3b21e4d00309215ab65a1f87eb0f81bd93a5c655e877feb3175c121",
+  "filename": "uat-mentor-20260711-1783750050192-attachment.txt",
+  "roleLogins": [
+    {
+      "alias": "PM",
+      "role": "PM",
+      "loginStatus": 200,
+      "tokenReceived": true
+    },
+    {
+      "alias": "Developer",
+      "role": "DEVELOPER",
+      "loginStatus": 200,
+      "tokenReceived": true
+    },
+    {
+      "alias": "Tester",
+      "role": "TESTER",
+      "loginStatus": 200,
+      "tokenReceived": true
+    }
+  ],
+  "lifecycle": [
+    {
+      "name": "assignToDeveloper",
+      "actor": "PM",
+      "status": "ASSIGNED"
+    },
+    {
+      "name": "markInReview",
+      "actor": "Developer",
+      "status": "IN_REVIEW"
+    },
+    {
+      "name": "startProgress",
+      "actor": "Developer",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "name": "requestMoreInformation",
+      "actor": "Developer",
+      "status": "NEED_MORE_INFORMATION"
+    },
+    {
+      "name": "resubmitToDeveloper",
+      "actor": "Tester",
+      "status": "ASSIGNED"
+    },
+    {
+      "name": "markInReview",
+      "actor": "Developer",
+      "status": "IN_REVIEW"
+    },
+    {
+      "name": "startProgress",
+      "actor": "Developer",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "name": "resolveBug",
+      "actor": "Developer",
+      "status": "RESOLVED"
+    },
+    {
+      "name": "sendToRetest",
+      "actor": "Tester",
+      "status": "RETEST_REQUIRED"
+    },
+    {
+      "name": "closeBug",
+      "actor": "Tester",
+      "status": "CLOSED"
+    },
+    {
+      "name": "reopenBug",
+      "actor": "PM",
+      "status": "REOPENED"
+    },
+    {
+      "name": "markInReview",
+      "actor": "Developer",
+      "status": "IN_REVIEW"
+    },
+    {
+      "name": "startProgress",
+      "actor": "Developer",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "name": "resolveBug",
+      "actor": "Developer",
+      "status": "RESOLVED"
+    },
+    {
+      "name": "closeBug",
+      "actor": "Tester",
+      "status": "CLOSED"
+    }
+  ],
+  "expectedAfterRestart": "closed record and attachment still readable before controlled delete"
+}

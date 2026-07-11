@@ -1,0 +1,29 @@
+{
+  "task": "IDTS-72",
+  "checkedAt": "2026-07-11T05:11:19.841Z",
+  "target": "shared-qa",
+  "expectedAiEnabled": false,
+  "results": [
+    {
+      "check": "smart-assign-entry",
+      "passed": true
+    },
+    {
+      "check": "safe-user-facing-copy",
+      "passed": true
+    },
+    {
+      "check": "ai-review-state",
+      "passed": true,
+      "state": "SAFE_FALLBACK"
+    },
+    {
+      "check": "manual-review-control",
+      "passed": true
+    },
+    {
+      "check": "no-unconfirmed-mutation",
+      "passed": true
+    }
+  ]
+}
