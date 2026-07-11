@@ -18,13 +18,15 @@ Chạy acceptance mới trên Render Shared QA trước mentor review, không re
 - Similar Bugs, Classification Suggestions, Handoff Summary browser smoke: `32 checks PASS`.
 - Local Brevo API integration, SMTP integration, secret scan và QA Depth Gate self-test: PASS.
 - Báo cáo chính: [`mentor-ready-qa-report.vi.md`](../evidence/idts-79/mentor-ready-qa-report.vi.md).
+- Fresh role lifecycle: PM, Developer, and Tester completed the controlled full lifecycle; the retained demo record is closed.
+- Fresh S3/PostgreSQL proof: draft upload, activation, SHA-256 download, Render restart, post-restart re-download, delete, and post-delete read all passed.
+- Fresh email proof: controlled deliveries are `SENT` with provider message IDs and the connected mailbox received the notifications in Inbox.
 
 ## Acceptance còn lại
 
-- SangVN: create/validation/attachment/comment/resubmit/retest/close/reopen và inbox/spam confirmation.
-- DatDT: developer lifecycle/request information/resolve/evidence review và inbox/spam confirmation.
-- NhanT: dashboard/history/assignment role boundary, falsification-first exploratory test và responsive/UX review.
-- DonHV: một controlled S3 persistence proof sau same-commit restart/redeploy, dọn UAT records không giữ làm demo.
+- `IDTS-81` must correct the newly confirmed email fallback deep-link regression. Generate a new mail and click-test both CTA/fallback destination before calling email UX accepted.
+- NhanT: dashboard/history/assignment role boundary, falsification-first exploratory test and responsive/UX review remain useful supplementary sign-off, but no longer block the role lifecycle/S3/inbox proof already executed.
+- DonHV: manually attach selected safe evidence to Jira `IDTS-79`; do not attach raw mailbox content, recipient addresses, credentials, tokens, or redirect URLs.
 
 ## Known limitations
 

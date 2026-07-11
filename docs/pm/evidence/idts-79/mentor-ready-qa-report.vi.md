@@ -41,8 +41,23 @@ Tuy nhiên, **chưa được gọi là full sign-off cho toàn bộ hệ thống
 - `render-ai-dialog-smoke.json`: 32 checks cho Similar Bugs, Classification Suggestions và Handoff Summary trên UI Render.
 - `render-similar-bugs-dialog.png`, `render-classification-dialog.png`, `render-handoff-dialog.png`: screenshot dialog Render hiện tại.
 - `render-object-page-action-discovery.png`: minh chứng ba action hiện diện trên Object Page.
+- `idts79-shared-human-acceptance.json`: kết quả role lifecycle, attachment hash và cleanup flow đã redacted.
+- `mentor-qa-lifecycle-closed-before-restart.png`, `mentor-qa-attachment-deleted.png`: screenshot Shared QA của record controlled trước restart và sau delete attachment.
+- `idts79-inbox-confirmation.vi.md`: kết quả Gmail Inbox đã redacted, kèm finding deep-link `IDTS-81`.
 
 **Việc DonHV cần tự làm sau khi review evidence:** chọn các file phù hợp trong thư mục này và đính kèm thủ công vào Jira `IDTS-79`; không upload token, database URL, log thô hoặc thông tin cá nhân đầy đủ.
+
+## Acceptance thực tế đã chạy lại trên Shared QA
+
+| Hạng mục | Kết quả mới | Evidence an toàn |
+| --- | --- | --- |
+| PM / Developer / Tester lifecycle | PASS — ba phiên đăng nhập đúng role; chạy thực tế Assign → In Review → In Progress → Need More Information → Resubmit → Resolve → Retest → Close → Reopen → Close. Record demo cuối ở trạng thái `Closed`. | `idts79-shared-human-acceptance.json`, `mentor-qa-lifecycle-closed-before-restart.png` |
+| S3 attachment + PostgreSQL persistence | PASS — upload file text trong draft, activate, tải xuống và so SHA-256; restart đúng service Render; tải lại sau restart vẫn khớp hash. Sau đó delete attachment và đọc content trả trạng thái không còn tồn tại như mong đợi. | `idts79-shared-human-acceptance.json`, `idts79-attachment-delete-browser-smoke.json`, `mentor-qa-attachment-deleted.png` |
+| Email delivery/outbox | PASS — tất cả delivery mới của record UAT đều là `SENT`, có provider message ID, không rollback lifecycle. | `idts79-email-delivery-api.json` |
+| Inbox/spam thật | PASS một mailbox đã kết nối — nhiều mail mới của record UAT xuất hiện trong **Inbox**; không chỉ có dữ liệu outbox. | Gmail connector read-only; chỉ lưu kết luận redacted, không lưu recipient/message ID/redirect URL vào repo. |
+| Email deep link | **FAIL / product defect** — email mới vẫn có fallback link dùng route UI cũ. Flow email vẫn gửi thành công nhưng click có thể đi tới `Cannot GET`. Đã tạo [IDTS-81](https://dutassociation.atlassian.net/browse/IDTS-81), liên kết với IDTS-79 và IDTS-50. | Nội dung inbox đã được kiểm tra read-only; không copy raw email hoặc URL redirect vào evidence. |
+
+**Kết luận cập nhật:** lifecycle, S3 persistence và việc mail thật vào Inbox đã có fresh evidence. Tuy nhiên **không được gọi là full acceptance PASS** cho email UX/deep link cho đến khi `IDTS-81` được fix và một email mới được click xác nhận đến đúng Object Page. Một record UAT partial từ lần assertion đầu còn tồn tại vì active Bug DELETE được chặn đúng theo policy; không dùng SQL trực tiếp để xóa nó.
 
 ## Known gaps / rủi ro minh bạch
 

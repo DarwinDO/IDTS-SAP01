@@ -1,0 +1,18 @@
+{
+  "task": "IDTS-79",
+  "checkedAt": "2026-07-11T06:13:31.445Z",
+  "target": "shared-qa",
+  "notificationCount": 9,
+  "deliveryCounts": {
+    "SENT": 9
+  },
+  "allDeliveriesSent": true,
+  "providerMessageIdPresent": true,
+  "notificationSubjects": [
+    "[IDTS] [bug] - Updated",
+    "[IDTS] [bug] - Closed",
+    "[IDTS] [bug] - Need More Information",
+    "[IDTS] [bug] - Updated",
+    "[IDTS] [bug] - Updated"
+  ]
+}
