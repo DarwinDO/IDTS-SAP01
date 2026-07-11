@@ -101,17 +101,23 @@ async function main () {
   assert.match(escaped.html, /Current action owner/)
   assert.doesNotMatch(escaped.html, /<dl>|<dt>|<dd>/)
   assert.doesNotMatch(escaped.html, /index\.html\/#/)
-  assert.match(escaped.html, new RegExp(`https://idts\\.example\\.test/bug-management-ui/webapp/index\\.html#/Bugs\\(ID=${bug.ID},IsActiveEntity=true\\)`))
+  assert.match(escaped.html, new RegExp(`https://idts\\.example\\.test/idts\\.bugmanagementui/index\\.html#/Bugs\\(ID=${bug.ID},IsActiveEntity=true\\)`))
 
-  const appHtmlBaseLink = buildBugLink('https://idts.example.test/bug-management-ui/webapp/index.html', bug.ID)
-  assert.equal(appHtmlBaseLink, `https://idts.example.test/bug-management-ui/webapp/index.html#/Bugs(ID=${bug.ID},IsActiveEntity=true)`)
+  const appHtmlBaseLink = buildBugLink('https://idts.example.test/idts.bugmanagementui/index.html', bug.ID)
+  assert.equal(appHtmlBaseLink, `https://idts.example.test/idts.bugmanagementui/index.html#/Bugs(ID=${bug.ID},IsActiveEntity=true)`)
   assert.doesNotMatch(appHtmlBaseLink, /index\.html\/#/)
 
-  const appFolderBaseLink = buildBugLink('https://idts.example.test/bug-management-ui/webapp/', bug.ID)
-  assert.equal(appFolderBaseLink, `https://idts.example.test/bug-management-ui/webapp/index.html#/Bugs(ID=${bug.ID},IsActiveEntity=true)`)
+  const appFolderBaseLink = buildBugLink('https://idts.example.test/idts.bugmanagementui/', bug.ID)
+  assert.equal(appFolderBaseLink, `https://idts.example.test/idts.bugmanagementui/index.html#/Bugs(ID=${bug.ID},IsActiveEntity=true)`)
 
   const rootBaseLink = buildBugLink('https://idts.example.test/', bug.ID)
-  assert.equal(rootBaseLink, `https://idts.example.test/bug-management-ui/webapp/index.html#/Bugs(ID=${bug.ID},IsActiveEntity=true)`)
+  assert.equal(rootBaseLink, `https://idts.example.test/idts.bugmanagementui/index.html#/Bugs(ID=${bug.ID},IsActiveEntity=true)`)
+
+  const legacyHtmlBaseLink = buildBugLink('https://idts.example.test/bug-management-ui/webapp/index.html', bug.ID)
+  assert.equal(legacyHtmlBaseLink, `https://idts.example.test/idts.bugmanagementui/index.html#/Bugs(ID=${bug.ID},IsActiveEntity=true)`)
+
+  const legacyFolderBaseLink = buildBugLink('https://idts.example.test/bug-management-ui/webapp/', bug.ID)
+  assert.equal(legacyFolderBaseLink, `https://idts.example.test/idts.bugmanagementui/index.html#/Bugs(ID=${bug.ID},IsActiveEntity=true)`)
 
   const pending = await db.tx(tx => writeNotificationRecord(tx, {
     bugID: bug.ID,

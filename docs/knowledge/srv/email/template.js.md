@@ -25,7 +25,9 @@ There are two bodies because email clients work differently:
 - `text` is the safe fallback. It is readable even if the email client blocks HTML.
 - `html` is the styled version. In IDTS-50 it uses a simple SAP/Fiori-like card layout with a blue header, metadata table, primary action button, fallback link, and footer.
 
-The link is also built here because it is part of the email experience. Fiori Elements uses hash-based routing, so the URL must keep `#` directly after `index.html`. A wrong slash such as `index.html/#/...` makes the browser request `index.html/` from the server, which fails on Render.
+The link is also built here because it is part of the email experience. Fiori Elements uses hash-based routing, so the URL must keep `#` directly after `index.html`. In the current IDTS deployment, the Fiori entry page is `/idts.bugmanagementui/index.html`.
+
+`IDTS-81` also protects against an old private `baseUrl` value left from an earlier UI path. If configuration still mentions `/bug-management-ui/webapp`, this file treats that part as retired and rebuilds the link from the deployment root. That means a new email can recover safely without putting a real Render URL into source code or requiring every old delivery snapshot to be edited.
 
 ### Flow in IDTS
 
@@ -70,9 +72,9 @@ The link is also built here because it is part of the email experience. Fiori El
 
 - **Location**: `srv/email/template.js:92`
   `normalizeAppUrl(baseUrl)`.
-  **IDTS concept**: Keeps private deployment config flexible. `baseUrl` may be the Render root, the Fiori app folder, or the exact `index.html` path.
-  **Impact if broken**: Different environments may need different private config values, making local/Render behavior drift.
-  **Must check together**: `.cdsrc-private.example.json`, Render env vars, and any shared-QA smoke script that reads the public app URL.
+  **IDTS concept**: Normalizes a private deployment root, current Fiori app path, or retired app path into the one current Fiori entry page.
+  **Impact if broken**: A mail can be delivered successfully but send the recipient to a 404 page, making the notification unusable.
+  **Must check together**: `app/bug-management-ui/webapp/manifest.json`, `scripts/qa/test-email-outbox-programmatic.js`, Render `baseUrl`, and a newly delivered email on Shared QA.
 
 - **Location**: `srv/email/template.js:105`
   `escapeHtml(value)`.
@@ -97,8 +99,9 @@ The link is also built here because it is part of the email experience. Fiori El
 - Do not include full descriptions, comments, attachments, credentials, tokens, SMTP config, API keys, private endpoints, or full private recipient lists.
 - If changing link logic, test at least these `baseUrl` forms:
   - Render root, for example `https://host.example`;
-  - Fiori app folder, for example `https://host.example/bug-management-ui/webapp`;
-  - exact app HTML, for example `https://host.example/bug-management-ui/webapp/index.html`.
+  - current Fiori app folder, for example `https://host.example/idts.bugmanagementui`;
+  - current exact app HTML, for example `https://host.example/idts.bugmanagementui/index.html`;
+  - retired legacy folder/HTML forms, which must be remapped to the current app rather than emitted again.
 - If changing email wording, keep “notification type”, “current status”, and “current action owner” distinct.
 
 ## Vietnamese
@@ -126,7 +129,9 @@ Email có hai phần nội dung vì email client hoạt động khác nhau:
 - `text` là bản fallback an toàn. Nếu email client chặn HTML thì người nhận vẫn đọc được.
 - `html` là bản có giao diện. Trong IDTS-50, phần này dùng layout dạng card gần với SAP/Fiori: header xanh, bảng metadata, nút hành động chính, fallback link và footer.
 
-Link mở bug cũng được tạo trong file này vì nó là một phần của trải nghiệm email. Fiori Elements dùng hash-based routing, nên dấu `#` phải đứng ngay sau `index.html`. Nếu sinh sai thành `index.html/#/...`, browser sẽ request `index.html/` lên server trước, và Render sẽ trả 404.
+Link mở bug cũng được tạo trong file này vì nó là một phần của trải nghiệm email. Fiori Elements dùng hash-based routing, nên dấu `#` phải đứng ngay sau `index.html`. Ở bản triển khai IDTS hiện tại, trang vào Fiori là `/idts.bugmanagementui/index.html`.
+
+`IDTS-81` cũng bảo vệ trường hợp private `baseUrl` cũ còn sót lại từ UI path trước đây. Nếu config vẫn chứa `/bug-management-ui/webapp`, file này xem phần đó là đã retired và dựng lại link từ deployment root. Nhờ vậy email mới có thể tự khôi phục link an toàn mà không cần ghi Render URL thật vào source hoặc sửa các email snapshot lịch sử.
 
 ### Flow hoạt động trong IDTS
 
@@ -171,9 +176,9 @@ Link mở bug cũng được tạo trong file này vì nó là một phần củ
 
 - **Vị trí**: `srv/email/template.js:92`
   `normalizeAppUrl(baseUrl)`.
-  **Khái niệm IDTS**: Giữ cấu hình private deployment linh hoạt. `baseUrl` có thể là Render root, folder Fiori app, hoặc đúng path `index.html`.
-  **Ảnh hưởng nếu sai**: Mỗi môi trường phải cấu hình kiểu khác nhau, làm local và Render dễ lệch hành vi.
-  **Phải kiểm tra cùng**: `.cdsrc-private.example.json`, Render env vars, và shared-QA smoke script đọc public app URL.
+  **Khái niệm IDTS**: Chuẩn hóa deployment root private, current Fiori app path, hoặc path đã retired về đúng một trang vào Fiori hiện tại.
+  **Ảnh hưởng nếu sai**: Mail có thể gửi thành công nhưng đưa người nhận tới trang 404, khiến notification không dùng được.
+  **Phải kiểm tra cùng**: `app/bug-management-ui/webapp/manifest.json`, `scripts/qa/test-email-outbox-programmatic.js`, Render `baseUrl`, và một mail Shared QA mới được gửi.
 
 - **Vị trí**: `srv/email/template.js:105`
   `escapeHtml(value)`.
@@ -196,14 +201,15 @@ Link mở bug cũng được tạo trong file này vì nó là một phần củ
 - Escape mọi giá trị động trước khi đưa vào HTML.
 - Giữ link Fiori theo dạng `index.html#/Bugs(ID=<uuid>,IsActiveEntity=true)`, không dùng `index.html/#/Bugs(...)`.
 - Không đưa description đầy đủ, comment, attachment, credential, token, SMTP config, API key, private endpoint hoặc danh sách recipient thật vào email.
-- Nếu sửa logic link, phải test ít nhất ba dạng `baseUrl`:
+- Nếu sửa logic link, phải test ít nhất các dạng `baseUrl`:
   - Render root, ví dụ `https://host.example`;
-  - folder Fiori app, ví dụ `https://host.example/bug-management-ui/webapp`;
-  - đúng app HTML, ví dụ `https://host.example/bug-management-ui/webapp/index.html`.
+  - current Fiori app folder, ví dụ `https://host.example/idts.bugmanagementui`;
+  - current exact app HTML, ví dụ `https://host.example/idts.bugmanagementui/index.html`;
+  - legacy folder/HTML đã retired, phải được remap sang app hiện tại thay vì phát lại path cũ.
 - Nếu sửa wording email, phải giữ rõ ba khái niệm “notification type”, “current status”, và “current action owner”.
 
 ## Metadata
 
 - Source: `srv/email/template.js`
-- Related task: IDTS-50
-- Last reviewed: 2026-07-02
+- Related task: IDTS-50, IDTS-81
+- Last reviewed: 2026-07-11

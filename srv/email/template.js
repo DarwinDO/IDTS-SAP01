@@ -91,9 +91,19 @@ function buildBugLink (baseUrl, bugID) {
 
 function normalizeAppUrl (baseUrl) {
   const normalized = String(baseUrl).trim().replace(/\/+$/, '')
-  if (normalized.endsWith('/index.html')) return normalized
-  if (normalized.endsWith('/bug-management-ui/webapp')) return `${normalized}/index.html`
-  return `${normalized}/bug-management-ui/webapp/index.html`
+  const currentAppPath = '/idts.bugmanagementui/index.html'
+
+  if (normalized.endsWith(currentAppPath)) return normalized
+  if (normalized.endsWith('/idts.bugmanagementui')) return `${normalized}/index.html`
+
+  // A prior Shared QA setup stored the retired UI5 application path in the
+  // private base URL. Treat it as a deployment-root URL, never as a valid
+  // destination, so newly generated emails recover without a secret change.
+  const withoutLegacyAppPath = normalized
+    .replace(/\/bug-management-ui\/webapp\/index\.html$/i, '')
+    .replace(/\/bug-management-ui\/webapp$/i, '')
+
+  return `${withoutLegacyAppPath}${currentAppPath}`
 }
 
 function formatFrom (config) {
