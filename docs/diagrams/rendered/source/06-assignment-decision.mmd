@@ -1,0 +1,22 @@
+flowchart TD
+    A["Tester selects SAP Module\nif relevant"] --> B["System filters Application Components\nfor selected SAP Module"]
+    B --> C["Tester selects\nApplication Component"]
+    C --> D["System filters valid\nDefect Categories for component"]
+    D --> E["Tester selects Defect Category"]
+    E --> F["System identifies Component Category"]
+    F --> G["System lists developers mapped to\nComponent Category and optional SAP Module"]
+    G --> H{"Suitable developer available?"}
+    H -->|"Yes"| I["Tester selects developer"]
+    I --> J["Submit bug as Assigned"]
+    J --> K["Notify assigned developer"]
+    K --> L["Developer reviews bug"]
+
+    H -->|"No"| M["Tester selects\nNo suitable developer"]
+    M --> N["Submit bug as Pending Assignment"]
+    N --> O["Notify or expose to PM monitoring"]
+    O --> P["PM or Tester identifies assignee"]
+    P --> Q["Assign or reassign bug"]
+    Q --> J
+
+    H -->|"Developer overloaded"| R["Tester chooses another developer\nor Pending Assignment"]
+    R --> H

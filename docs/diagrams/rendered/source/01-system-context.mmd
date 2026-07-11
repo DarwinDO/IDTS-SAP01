@@ -1,0 +1,16 @@
+flowchart LR
+    Tester["Tester"]
+    Developer["Developer"]
+    PM["Project Manager"]
+
+    IDTS["Issue and Defect Tracking System in SAP"]
+
+    NotificationChannels["Notification Channels\nEmail / Teams / Slack / Telegram / SAP BTP service"]
+    FutureDB["Future Deployment Database\nSAP HANA Cloud or PostgreSQL"]
+
+    Tester -->|"Create, update, assign, retest, comment, track"| IDTS
+    Developer -->|"Review assigned bugs, request info, reject, update status, comment"| IDTS
+    PM -->|"Monitor workload, overdue bugs, history, reports, escalation"| IDTS
+
+    IDTS -->|"Send important events"| NotificationChannels
+    IDTS -->|"Persist business data when deployed"| FutureDB

@@ -1,0 +1,26 @@
+flowchart TD
+    A["Tester detects defect"] --> B["Search similar bugs"]
+    B --> C{"Similar bug exists?"}
+    C -->|"Open"| D["Follow or update existing bug"]
+    C -->|"Closed"| E["Reopen or update existing bug if authorized"]
+    C -->|"No"| F["Create new bug report"]
+    F --> G["Classify by SAP Module, Application Component, Defect Category"]
+    G --> H["Filter Developer candidates"]
+    H --> I{"Suitable Developer selected?"}
+    I -->|"Yes"| J["Submit as Assigned"]
+    I -->|"No"| K["Submit as Pending Assignment"]
+    J --> L["Developer reviews"]
+    K --> M["PM or Tester monitors queue"]
+    L --> N{"Review result"}
+    N -->|"Missing info"| O["Need More Information"]
+    N -->|"Wrong classification or assignee"| P["Rejected with follow-up"]
+    N -->|"Valid"| Q["In Progress then Resolved"]
+    Q --> R["Retest Required when needed"]
+    R --> S{"Retest result"}
+    S -->|"Passed"| T["Closed"]
+    S -->|"Failed"| U["Reopened"]
+    P --> V["Tester or PM corrects and reassigns"]
+    O --> W["Tester adds information"]
+    W --> L
+    V --> H
+    U --> H

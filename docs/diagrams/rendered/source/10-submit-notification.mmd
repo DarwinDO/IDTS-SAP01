@@ -1,0 +1,27 @@
+sequenceDiagram
+    actor Tester as Tester
+    participant UI as Fiori App
+    participant CAP as CAP OData Service
+    participant DB as Database
+    participant Notify as Notification Adapter
+    actor Dev as Developer
+    actor PM as Project Manager
+
+    Tester->>UI: Enter bug details and submit
+    UI->>CAP: Create bug request
+    CAP->>CAP: Validate required fields and assignment choice
+
+    alt Developer selected
+        CAP->>DB: Save bug with status Assigned
+        CAP->>DB: Write history log: Create + Assign
+        CAP->>Notify: Create Bug Assigned notification
+        Notify-->>Dev: Notify assigned developer
+    else No suitable developer
+        CAP->>DB: Save bug with status Pending Assignment
+        CAP->>DB: Write history log: Create + Pending Assignment
+        CAP->>Notify: Create Pending Assignment notification
+        Notify-->>PM: Notify or expose for monitoring
+    end
+
+    CAP-->>UI: Return created bug
+    UI-->>Tester: Show created bug and current status

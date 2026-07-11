@@ -1,6 +1,6 @@
 # Manifest bàn giao SAP490 Review của SU26SAP01 / GSU26SAP01
 
-Ngày snapshot: 2026-07-10
+Ngày snapshot: 2026-07-11
 Owner: DonHV / GSU26SAP01
 
 ## Mục đích
@@ -23,6 +23,7 @@ Manifest này liên kết deliverable review với source canonical trong reposi
 | Test Scenario, Unit Test, Functional Test, Test Report, UAT | `docs/pm/evidence/`, `docs/pm/status/`, QA script, generator workbook test | Giữ structure/formula workbook. UAT chỉ là prepared cho đến khi có thực thi/sign-off thật. |
 | Test and Fix Bug | Product defect đã xác nhận và evidence tương ứng | Chỉ đưa product defect. Tooling, environment, data và test-harness issue ở member status trừ khi phải escalation. |
 | Team Contribution Matrix | `scripts/sap490/build-team-contribution-matrix.mjs`, Git/Jira/task/status evidence | Giữ công việc thành viên, Jira/PR reference và evidence link có thể audit trong thư mục Drive contributions riêng. |
+| Diagram Pack | `docs/diagrams/*.md`, `docs/diagrams/rendered/manifest.json`, SVG render và source fragment | Giữ 21 sơ đồ canonical, source có thể chỉnh sửa, SVG review asset và native Google Slides review deck trong thư mục Diagram Pack có timestamp. |
 
 ## Quy trình cập nhật và review
 

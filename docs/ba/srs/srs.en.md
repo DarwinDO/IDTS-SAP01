@@ -3,8 +3,8 @@
 Project: Issue and Defect Tracking System in SAP  
 Document type: Software Requirements Specification (SRS)  
 Language: English  
-Status: Draft v1.2
-Last updated: 2026-07-10
+Status: Draft v1.3
+Last updated: 2026-07-11
 Prepared for: SAP490 project delivery, mentor review, implementation evidence, and QA test design
 Document style: Traditional SRS outline with ISO/IEC/IEEE 29148-style requirement quality, traceability, and verification discipline
 
@@ -17,6 +17,7 @@ Document style: Traditional SRS outline with ISO/IEC/IEEE 29148-style requiremen
 | v1.0 | 2026-06-02 | IDTS Project Team | Mentor / Supervisor | Initial SRS created from BRD v1.1, BA baseline, diagrams, PM plan, and SAP490 guidance. | Draft |
 | v1.1 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Updated user classes and functional requirements to the MVP role baseline: Tester, Developer, and PM. Reporter and Admin are deferred as separate roles. | Draft |
 | v1.2 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Synced the implemented attachment and optional advisory-AI baseline, with explicit human-review, privacy, and no-workflow-authority constraints. | Draft |
+| v1.3 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Replaced the review-facing system-context source block with a rendered, traceable figure and Diagram Pack reference. | Draft |
 
 ### 1.2 Review and Sign-Off
 
@@ -76,17 +77,9 @@ IDTS shall not become a full Jira, SAP Cloud ALM, SAP Solution Manager, ServiceN
 
 IDTS is a SAP CAP Node.js application exposed through OData V4 and consumed by a SAP Fiori Elements/SAPUI5 frontend. Local development uses SQLite. Future deployment may use SAP HANA Cloud or PostgreSQL, but endpoints and credentials shall not be hardcoded.
 
-```mermaid
-flowchart LR
-    Tester["Tester"] --> Fiori["Fiori Elements / SAPUI5 App"]
-    Developer["Developer"] --> Fiori
-    PM["Project Manager"] --> Fiori
-    Fiori --> OData["CAP OData V4 Service"]
-    OData --> DB["SQLite local database"]
-    OData --> Logs["History Logs"]
-    OData --> Notif["Notification Records"]
-```
+![SRS System Context](../../diagrams/rendered/13-srs-system-context.svg)
 
+*Figure 13. SRS System Context. Canonical source: `docs/diagrams/07-srs-system-context.md`.*
 ### 4.2 User Classes
 
 | User class | Main responsibilities |

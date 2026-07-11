@@ -1,0 +1,9 @@
+flowchart TD
+    A["Tester starts bug creation"] --> B["Search by title, area, status,\npriority, assignee, or keyword"]
+    B --> C{"Similar bug found?"}
+    C -->|"No"| D["Create new bug report"]
+    C -->|"Yes, open"| E["Follow or comment on existing bug"]
+    C -->|"Yes, closed"| F["Update or reopen existing bug"]
+    D --> G["Continue with required fields and assignment"]
+    E --> H["Avoid duplicate bug creation"]
+    F --> I["Create history log for reopen/update"]

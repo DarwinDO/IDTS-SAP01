@@ -1,0 +1,22 @@
+flowchart TD
+    A["PM opens dashboard/report"] --> B["System loads bug list, status,\npriority, severity, assignee,\ncreated date, updated date, due date"]
+    B --> C["System derives workload per developer"]
+    B --> D["System identifies overdue or stale bugs"]
+    B --> E["System identifies long Pending Assignment bugs"]
+
+    C --> F{"Workload concern?"}
+    D --> G{"Overdue concern?"}
+    E --> H{"Assignment concern?"}
+
+    F -->|"No"| I["PM continues monitoring"]
+    G -->|"No"| I
+    H -->|"No"| I
+
+    F -->|"Yes"| J["PM comments or requests reassignment"]
+    G -->|"Yes"| K["System or PM triggers escalation notification"]
+    H -->|"Yes"| L["PM asks Tester to assign developer"]
+
+    J --> M["History log records PM action/comment"]
+    K --> M
+    L --> M
+    M --> N["Tester reassigns or updates bug if needed"]

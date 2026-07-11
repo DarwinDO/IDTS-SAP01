@@ -18,6 +18,7 @@ Phong cách tài liệu: SAP490 hybrid, ưu tiên nghiệp vụ và chỉ giữ 
 | v1.1 | 2026-06-01 | IDTS Project Team | Mentor / Supervisor | Chỉnh thành SAP490 hybrid BRD: giảm chi tiết kỹ thuật, thêm stakeholder needs, KPI, RACI, NFR, glossary, approval và requirement traceability. | Draft |
 | v1.2 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Cập nhật MVP role baseline thành ba role active: Tester, Developer và PM. Reporter và Admin được hoãn như role tách riêng và không còn là cột RACI active trong MVP. | Draft |
 | v1.3 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Đồng bộ baseline implementation và review hiện tại: workflow CAP/Fiori MVP, luồng audit/notification/attachment, PM monitoring và AI hỗ trợ tùy chọn có human review. | Draft |
+| v1.4 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Bổ sung figure review đã render và traceability tới Diagram Pack; canonical diagram source vẫn được version control. | Draft |
 
 ### 1.2 Review và phê duyệt
 
@@ -95,6 +96,22 @@ Baseline hiện tại xác định các vấn đề nghiệp vụ chính:
 
 Reporter và Admin không phải stakeholder tách riêng trong MVP. Tester đảm nhiệm trách nhiệm reporting nội bộ, còn trách nhiệm quản trị nhẹ do Tester hoặc PM xử lý theo quyền được cấp. Role Reporter và Admin chuyên biệt có thể xem xét lại sau MVP nếu dự án mở rộng sang báo cáo từ bên ngoài hoặc quản trị master data chính thức.
 | Mentor / Supervisor | Scope và deliverable phải rõ và liên quan SAP. | Cần business documents, diagrams, implementation artifacts và test evidence phù hợp SAP490. | BRD/SRS/FRS và implementation outputs nhất quán và review được. |
+
+## 6.1 Diagram Pack và Traceability
+
+Các hình review sau tóm tắt business context, role coverage và end-to-end defect flow đã được duyệt. Source có thể chỉnh sửa vẫn được giữ trong `docs/diagrams/`.
+
+![System Context](../../diagrams/rendered/01-system-context.svg)
+
+*Figure 01. System Context. Canonical source: `docs/diagrams/01-system-context-and-architecture.md`.*
+
+![Use Case Diagram](../../diagrams/rendered/03-use-case.svg)
+
+*Figure 03. Use Case Diagram. Canonical source: `docs/diagrams/02-use-cases.md`.*
+
+![End-to-End Defect Tracking Flow](../../diagrams/rendered/04-end-to-end-defect-flow.svg)
+
+*Figure 04. End-to-End Defect Tracking Flow. Canonical source: `docs/diagrams/03-business-process-flows.md`.*
 
 ## 7. Roles và RACI
 

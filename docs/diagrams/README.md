@@ -2,6 +2,13 @@
 
 This folder contains business analysis diagrams for the Issue and Defect Tracking System in SAP.
 
+## Review Assets
+
+- The Markdown files in this folder remain the canonical diagram source.
+- `rendered/source/` contains extracted Mermaid and PlantUML source fragments for one-diagram-at-a-time review.
+- `rendered/` contains the generated SVG figures and `manifest.json`, which maps every review figure to its canonical source and SHA-256 content hash.
+- Regenerate the review assets with `python scripts/sap490/render-diagram-pack.py`, then render the extracted Mermaid/PlantUML files before publishing a new Diagram Pack.
+
 Source documents:
 
 - `IDTS-SUMMARY.md`

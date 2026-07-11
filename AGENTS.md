@@ -21,7 +21,7 @@ IDTS is a SAP CAP Node.js and SAP Fiori/UI5 application for defect tracking. Wor
 | Any project work | `scope-and-domain`, `handover-and-issue-logging`, `change-control-and-git` |
 | CAP/CDS/OData/Fiori/UI5 | `sap-routing-and-ui` |
 | Any code question, reading, design, writing, refactor, debug, review, or audit | `skills-quality-and-ponytail` |
-| Docs, knowledge mirrors, SAP490, Drive, DOCX/XLSX/PPTX/PDF | `documentation-knowledge-and-sap490` |
+| Any document, docs, sheet, presentation, PDF, SAP490, or Drive task | `documentation-knowledge-and-sap490` and the mandatory OfficeCLI gate |
 | Tests, security, config, deployment, release claims | `testing-security-and-release` |
 
 ## Non-Negotiable Rules
@@ -30,6 +30,7 @@ IDTS is a SAP CAP Node.js and SAP Fiori/UI5 application for defect tracking. Wor
 - Record every observed issue immediately in the correct member status file. SAP490 Test and Fix Bug contains product defects only; minor non-product issues remain in member status.
 - For SAP-specific code, query the matching MCP first: CAP for backend/CDS, SAP UX for Fiori Elements, UI5 for UI5 code. Verify a deferred MCP with a read-only call before modification.
 - Apply `karpathy-guidelines` to nontrivial project work. Apply the mandatory Ponytail matrix in `skills-quality-and-ponytail.md` to every code-related task.
+- Use OfficeCLI for every task that creates, reads, edits, reviews, moves, synchronizes, or deletes documentation, sheets, presentations, PDFs, Drive artifacts, or SAP490 deliverables. Read the detailed format routing in `documentation-knowledge-and-sap490`; report the OfficeCLI command/result and any format limitation.
 - Update canonical business documents together only when business meaning changes. Update knowledge mirrors for changed tracked files in `app/`, `srv/`, or `db/`.
 - Never commit credentials, tokens, OAuth data, private endpoints, or local/private configuration.
 - Use fresh verification evidence before claiming completion and report every skill, MCP, connector, command, warning, and remaining risk.

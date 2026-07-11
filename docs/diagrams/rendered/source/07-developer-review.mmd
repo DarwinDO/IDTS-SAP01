@@ -1,0 +1,24 @@
+flowchart TD
+    A["Developer opens assigned bug"] --> B["Review details, evidence,\ncomments, and history"]
+    B --> C{"Can developer process it?"}
+    C -->|"Information missing"| D["Set Need More Information"]
+    D --> E["Notify Tester"]
+    E --> F["Tester adds information"]
+    F --> B
+
+    C -->|"Wrong classification or assignee"| G["Reject assigned bug"]
+    G --> H["Save rejection reason\nand set nextProcessor"]
+    H --> I["Notify Tester\nand PM if needed"]
+    I --> J["Tester or PM\nupdates classification, info,\nor assignee"]
+    J --> K2{"Suitable Developer now?"}
+    K2 -->|"Yes"| L2["Reassign bug to Developer"]
+    K2 -->|"No"| M2["Move to Pending Assignment"]
+
+    C -->|"Valid"| K["Set In Review or In Progress"]
+    K --> L["Add developer note"]
+    L --> M["Set Resolved when response is complete"]
+    M --> N["Tester or PM retests if needed"]
+    N --> O{"Retest result"}
+    O -->|"Passed"| P["Close bug"]
+    O -->|"Failed"| Q["Reopen bug"]
+    O -->|"More info needed"| R["Request more information"]
