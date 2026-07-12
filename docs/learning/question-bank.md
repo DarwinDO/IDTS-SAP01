@@ -4,6 +4,16 @@
 
 The agent selects questions from the relevant flow and may add one question derived from the current diff. Do not reveal answers before the member attempts a teach-back.
 
+### Reproducible daily selection
+
+From 2026-07-13 (Asia/Bangkok), run this before the first nontrivial task of a member's day:
+
+```powershell
+npm run learning:gate -- donhv authentication 2026-07-13 2026-07-10
+```
+
+The same member, flow, date, and mode always produce the same set, so a member cannot rerun it to seek easier questions. The optional fourth value is the last verified ownership-code activity date, not a meeting or arbitrary task. Add `additional` as the fifth value for a later new flow on the same day; use `-` as the fourth value when there is no date, for example `npm run learning:gate -- datdt dashboard 2026-07-13 - additional`. The first daily gate is three base questions plus inactivity questions, up to seven; a later new flow adds two flow-specific questions. The runner only prints prompts and an evidence template. It does not reveal answers, score a member, update Jira, or replace the real debug exercise and teach-back.
+
 | Flow | Question prompts |
 | --- | --- |
 | Authentication | Trace Sign In from `login.html` to `AuthSessions`; explain why `auth.cds` and `auth.js` are both needed; identify the first safe backend breakpoint; explain where the bearer token is attached; describe what must never be returned after a database error. |
@@ -17,6 +27,16 @@ The agent selects questions from the relevant flow and may add one question deri
 ## Vietnamese
 
 Agent chọn câu hỏi theo flow liên quan và có thể thêm một câu từ diff hiện tại. Không được tiết lộ đáp án trước khi member tự teach-back.
+
+### Chọn câu hỏi lặp lại được mỗi ngày
+
+Từ 13/07/2026 theo múi giờ Asia/Bangkok, trước task không tầm thường đầu tiên trong ngày của một member, chạy lệnh sau:
+
+```powershell
+npm run learning:gate -- donhv authentication 2026-07-13 2026-07-10
+```
+
+Cùng member, flow, ngày và chế độ luôn cho ra cùng một bộ câu hỏi, nên member không thể chạy lại để tìm câu dễ hơn. Giá trị thứ tư (nếu có) là ngày ownership-code activity đã được xác minh, không phải ngày họp hoặc task bất kỳ. Thêm `additional` ở giá trị thứ năm nếu đây là flow mới tiếp theo trong cùng ngày; nếu không có ngày activity thì dùng `-` ở giá trị thứ tư, ví dụ `npm run learning:gate -- datdt dashboard 2026-07-13 - additional`. Gate đầu ngày gồm ba câu cơ bản cộng câu do không hoạt động, tối đa bảy câu; nếu cùng ngày bắt đầu một flow mới thì thêm hai câu riêng cho flow đó. Runner chỉ in prompt và mẫu evidence. Nó không tiết lộ đáp án, không tự chấm, không cập nhật Jira, và không thay thế debug exercise hay teach-back thật.
 
 | Flow | Câu hỏi gợi ý |
 | --- | --- |
