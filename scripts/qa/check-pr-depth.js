@@ -145,7 +145,18 @@ function validateOwnershipKnowledgeGate (text, errors) {
   }
 }
 
-function isOwnershipGateRequired (today = new Date().toISOString().slice(0, 10)) {
+function bangkokDate () {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Bangkok',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(new Date())
+  const value = Object.fromEntries(parts.map(part => [part.type, part.value]))
+  return `${value.year}-${value.month}-${value.day}`
+}
+
+function isOwnershipGateRequired (today = bangkokDate()) {
   return today >= OWNERSHIP_GATE_EFFECTIVE_DATE
 }
 
@@ -217,5 +228,6 @@ module.exports = {
   extractSections,
   stripComments,
   validateOwnershipKnowledgeGate,
-  isOwnershipGateRequired
+  isOwnershipGateRequired,
+  bangkokDate
 }

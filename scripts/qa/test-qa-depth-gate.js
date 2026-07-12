@@ -1,7 +1,7 @@
 'use strict'
 
 const assert = require('assert')
-const { validatePullRequestBody } = require('./check-pr-depth')
+const { validatePullRequestBody, bangkokDate } = require('./check-pr-depth')
 const { isAllowedLocalPreviewResponse, isUnexpectedConsoleError } = require('./lib/browser-harness')
 
 function section(name, body) {
@@ -90,6 +90,9 @@ function main() {
   assert.strictEqual(result.pass, true, result.errors.join('\n'))
   console.log('  PASS  gate is not required before effective date')
 
+  assert.match(bangkokDate(), /^\d{4}-\d{2}-\d{2}$/)
+  console.log('  PASS  default gate date is formatted in Asia/Bangkok')
+
   assert.strictEqual(
     isAllowedLocalPreviewResponse(404, 'http://localhost:4004/bug-management-ui/webapp/Component-preload.js'),
     true
@@ -104,7 +107,7 @@ function main() {
   assert.strictEqual(isUnexpectedConsoleError('Failed to load resource: the server responded with a status of 404'), false)
   console.log('  PASS  browser harness console classifier keeps runtime TypeError blocking')
 
-  console.log('\nQA Depth Gate self-test: 9 PASS / 0 FAIL')
+  console.log('\nQA Depth Gate self-test: 10 PASS / 0 FAIL')
 }
 
 try {
