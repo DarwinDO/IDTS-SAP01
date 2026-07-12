@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): tìm duplicate/similar theo bounded candidate scan + fallback. Kết quả chỉ để human review, không tạo DuplicateLink tự động.
 'use strict'
 
 const cds = require('@sap/cds')
@@ -20,6 +21,7 @@ const STOP_WORDS = new Set([
   'bug', 'defect', 'error', 'issue'
 ])
 
+// Breakpoint ở đây để kiểm tra input/candidate/providerStatus khi UI Similar Bugs ra kết quả lạ hoặc rỗng.
 async function suggestSimilarBugs (req, entities, dependencies = {}) {
   const tx = cds.tx(req)
   const provider = dependencies.provider || createAiProvider()

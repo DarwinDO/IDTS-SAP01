@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): dựng subject/text/HTML từ dữ liệu đã allowlist; không đưa description, attachment hay secret vào mail v1.
 'use strict'
 
 function buildEmailMessage ({

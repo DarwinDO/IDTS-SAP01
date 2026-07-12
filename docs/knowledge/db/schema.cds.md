@@ -1,5 +1,15 @@
 # Knowledge: `db/schema.cds`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: NhanT. Flow: every persisted IDTS flow. Start debugging at the entity and association used by the failing request, then trace to `srv/service.cds` and the matching `srv/` handler. Changing a field, association, composition, or constraint can affect OData metadata, validation, Fiori bindings, and seed data together.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: NhanT. Flow: mọi luồng IDTS có persist. Khi debug, bắt đầu từ entity/association của request lỗi, rồi lần sang `srv/service.cds` và handler `srv/` tương ứng. Đổi field, association, composition hoặc constraint có thể đồng thời ảnh hưởng OData metadata, validation, Fiori binding và seed data.
+
 ## 2026-07-01 update: catalog referential integrity
 
 ### English

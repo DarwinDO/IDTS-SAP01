@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/constants.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: SangVN. Flow: all workflow/business codes. Use this file when a status/action/role branch does not match seed data. A code rename must be reviewed with schema, CSV seed, service action, validation, and Fiori labels.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: SangVN. Flow: mọi workflow/business code. Dùng file này khi branch status/action/role không khớp seed data. Đổi code phải review cùng schema, CSV seed, service action, validation và Fiori label.
+
 ## English
 
 ### What this file is for

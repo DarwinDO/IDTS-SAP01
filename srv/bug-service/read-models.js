@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): enrich Bugs và đọc developer value help. Đây là cầu nối từ dữ liệu UUID sang display/capability mà Fiori cần.
 const cds = require('@sap/cds')
 
 const { SELECT } = cds.ql

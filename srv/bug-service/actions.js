@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): implementation thật của assign/comment/lifecycle action. Breakpoint `transitionBug` để hiểu status, owner, history và notification đổi cùng nhau thế nào.
 const cds = require('@sap/cds')
 
 const { INSERT, SELECT, UPDATE } = cds.ql
@@ -183,6 +184,7 @@ async function addComment (req, entities) {
   return tx.run(SELECT.one.from(entities.Bugs).where({ ID: bug.ID }))
 }
 
+// Một transition hợp lệ phải kiểm tra actor + trạng thái nguồn/đích + reason trước khi ghi audit/notification.
 async function transitionBug (req, entities, options) {
   const bugID = bugIDFrom(req)
   const oldBug = await readBug(req, entities, bugID)

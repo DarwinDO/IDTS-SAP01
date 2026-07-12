@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/permissions.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: SangVN. Flow: create and lifecycle authorization. Break at the relevant enforcement function for an unexpected 403. UI visibility is only convenience; this file remains the backend authority for direct OData calls.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: SangVN. Flow: create và lifecycle authorization. Đặt breakpoint tại enforcement function liên quan khi có 403 bất ngờ. UI visibility chỉ là tiện ích; file này vẫn là backend authority cho direct OData call.
+
 ## English
 
 ### What this file is for

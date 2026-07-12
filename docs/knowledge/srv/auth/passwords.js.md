@@ -1,5 +1,15 @@
 # Knowledge: `srv/auth/passwords.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: DatDT. Flow: password/session cryptography. Inspect inputs only in a local controlled debug session. This module must return derived hashes and verification results, never expose raw credentials to logs, API responses, or evidence.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: DatDT. Flow: password/session cryptography. Chỉ quan sát input trong local debug có kiểm soát. Module này chỉ trả derived hash và kết quả verify, không được đưa credential thô vào log, API response hay evidence.
+
 ## English
 
 ### What this file is for

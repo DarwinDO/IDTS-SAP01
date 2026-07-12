@@ -1,5 +1,15 @@
 # Knowledge: `srv/auth.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: DatDT. Flow: login -> Users/AuthSessions -> bearer token. Break at `login`, password verification, and session INSERT. Never record the password or returned token; verify that only a token hash persists. Check `custom-auth.js` for later protected requests.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: DatDT. Flow: login -> Users/AuthSessions -> bearer token. Đặt breakpoint tại `login`, password verification và session INSERT. Không ghi password hoặc token trả về; xác nhận chỉ token hash được persist. Với request protected sau đó, kiểm tra `custom-auth.js`.
+
 ## English
 
 ### What this file is for

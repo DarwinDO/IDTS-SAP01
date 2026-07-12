@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): outbox claim delivery, gửi và cập nhật trạng thái. Đây là ranh giới giúp email failure không phá transaction Bug.
 'use strict'
 
 const cds = require('@sap/cds')

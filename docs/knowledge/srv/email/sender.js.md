@@ -1,5 +1,15 @@
 # Knowledge: `srv/email/sender.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: NhanT. Flow: outbox message -> configured provider. This thin adapter must not decide retry or workflow success. Diagnose provider failures through sanitized code/status from `outbox.js`, never through raw credentials or request headers.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: NhanT. Flow: outbox message -> configured provider. Adapter mỏng này không quyết định retry hoặc workflow success. Chẩn đoán provider failure bằng code/status đã sanitize từ `outbox.js`, không dùng credential hay request header thô.
+
 ## English
 
 ### What this file is for

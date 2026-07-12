@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): adapter gửi mail theo provider config. Nó chỉ gửi; retry/status thuộc outbox để workflow không bị phụ thuộc provider.
 'use strict'
 
 const nodemailer = require('nodemailer')

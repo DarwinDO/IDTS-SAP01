@@ -1,5 +1,15 @@
 # Knowledge: `srv/email/worker.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: NhanT. Flow: committed delivery row -> scheduled worker -> sender. Break inside the `cds.spawn` callback for pending/failed delivery diagnosis. The worker transaction is intentionally separate from a Bug workflow transaction.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: NhanT. Flow: committed delivery row -> scheduled worker -> sender. Đặt breakpoint trong callback `cds.spawn` khi chẩn đoán delivery pending/failed. Worker transaction cố ý tách khỏi Bug workflow transaction.
+
 ## English
 
 ### What this file is for

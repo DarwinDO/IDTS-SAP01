@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): chặn client ghi thẳng vào read model/audit entity. Debug 405/403 ở đây trước khi nghi ngờ Fiori.
 const { READ_ONLY_ENTITY_NAMES } = require('./constants')
 
 function registerReadOnlyEntityGuards (service, entities) {

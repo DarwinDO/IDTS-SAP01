@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): public entry point của AI modules. `srv/service.js` chỉ import từ đây để wiring không phụ thuộc implementation từng feature.
 'use strict'
 
 const { getAiConfig, normalizeAiConfig } = require('./config')

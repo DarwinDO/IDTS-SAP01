@@ -1,5 +1,15 @@
 # Knowledge: `srv/auth/custom-auth.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: DatDT. Flow: bearer token -> CAP request user. Break where `AuthSessions` is read when a protected endpoint unexpectedly returns 401/403. Check `auth.js` session creation and client auth-guard together; never paste a bearer token into a note.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: DatDT. Flow: bearer token -> CAP request user. Đặt breakpoint tại chỗ đọc `AuthSessions` khi endpoint protected trả 401/403 bất ngờ. Kiểm tra cùng `auth.js` session creation và client auth-guard; không paste bearer token vào note.
+
 ## English
 
 ### What this file is for

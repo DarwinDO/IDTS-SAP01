@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): biến audit thô thành HistoryEvents dễ đọc. Breakpoint enrich khi timeline có actor/status hiển thị sai.
 const cds = require('@sap/cds')
 
 const { SELECT } = cds.ql

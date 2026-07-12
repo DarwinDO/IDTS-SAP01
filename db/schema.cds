@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): đây là bản thiết kế dữ liệu IDTS. Khi debug dữ liệu sai, bắt đầu từ entity/association ở đây rồi lần sang service và handler.
 namespace idts.cap;
 
 using { cuid, managed } from '@sap/cds/common';

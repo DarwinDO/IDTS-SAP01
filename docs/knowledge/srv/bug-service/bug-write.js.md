@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/bug-write.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: SangVN. Flow: create/update validation and assignment preparation. Break at `prepareBugWrite` for invalid field, reporter, component category, assignee, or starting status behavior. Check `schema.cds`, draft handlers, and Fiori value lists together.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: SangVN. Flow: create/update validation và assignment preparation. Đặt breakpoint `prepareBugWrite` khi field, reporter, component category, assignee hoặc starting status sai. Kiểm tra cùng `schema.cds`, draft handler và Fiori value list.
+
 ## English
 
 ### What this file is for

@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/history-read-models.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: SangVN. Flow: persisted audit -> readable timeline payload. Break at enrichment when actor, action, display text, or pagination fields are wrong. Keep raw audit and UI-friendly payload separate.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: SangVN. Flow: persisted audit -> readable timeline payload. Đặt breakpoint tại enrichment khi actor, action, display text hoặc pagination field sai. Giữ raw audit tách với payload thân thiện UI.
+
 ## English
 
 ### What this file is for

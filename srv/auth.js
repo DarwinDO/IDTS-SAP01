@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): nhận login, chỉ lưu hash của session token và luôn trả lỗi an toàn để không lộ user/password/database.
 'use strict'
 
 const cds = require('@sap/cds')
@@ -35,6 +36,7 @@ async function login (req) {
 
   try {
     const tx = cds.tx(req)
+    // Không phân biệt "không có user" và "sai password" ở response: tránh cho người ngoài dò account hợp lệ.
     const user = await tx.run(
       SELECT.one.from('idts.cap.Users')
         .columns('ID', 'displayName', 'email', 'role_code', 'active', 'passwordHash')
@@ -52,6 +54,7 @@ async function login (req) {
     const expiresAt = addMinutes(now, sessionTtlMinutes())
     const token = createSessionToken()
 
+    // DB chỉ nhận tokenHash; raw bearer token chỉ trả một lần cho client sau khi login thành công.
     await tx.run(
       INSERT.into('idts.cap.AuthSessions').entries({
         ID: cds.utils.uuid(),

@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): provider deterministic cho local/QA. Nó giúp test AI flow mà không cần key, network hoặc kết quả ngẫu nhiên.
 'use strict'
 
 const crypto = require('crypto')

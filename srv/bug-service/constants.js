@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): hằng số business code dùng ở mọi rule. Đổi code ở đây phải đồng bộ seed CSV, schema, action và Fiori value help.
 const STATUS = {
   NEW: 'NEW',
   PENDING_ASSIGNMENT: 'PENDING_ASSIGNMENT',

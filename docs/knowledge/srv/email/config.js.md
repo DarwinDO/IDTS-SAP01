@@ -1,5 +1,15 @@
 # Knowledge: `srv/email/config.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: NhanT. Flow: private email configuration -> outbox behavior. Inspect only enabled/ready/missing-field state. Real host, credentials, recipients, and API keys stay in private environment configuration.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: NhanT. Flow: private email configuration -> outbox behavior. Chỉ kiểm tra trạng thái enabled/ready/missing-field. Host, credential, recipient và API key thật phải ở private environment configuration.
+
 ## English
 
 ### What this file is for

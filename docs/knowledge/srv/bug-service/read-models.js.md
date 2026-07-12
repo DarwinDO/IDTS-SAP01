@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/read-models.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: SangVN. Flow: Bug read -> display names/capabilities/value help. Break on Bug READ enrichment when Fiori sees UUIDs, stale labels, or the wrong action visibility. Check corresponding annotations and session role.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: SangVN. Flow: Bug read -> display names/capabilities/value help. Đặt breakpoint tại Bug READ enrichment khi Fiori thấy UUID, label cũ hoặc visibility action sai. Kiểm tra annotation tương ứng và session role.
+
 ## English
 
 ### What this file is for

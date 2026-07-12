@@ -1,5 +1,15 @@
 # `srv/ai/mock-provider.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: NhanT. Flow: local/QA deterministic AI response. Use this provider to reproduce feature logic without network or a private key; changing its deterministic behavior requires matching test expectations.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: NhanT. Flow: local/QA deterministic AI response. Dùng provider này để reproduce feature logic không cần network/private key; đổi deterministic behavior phải khớp test expectation.
+
 ## English
 
 ### What this file is for

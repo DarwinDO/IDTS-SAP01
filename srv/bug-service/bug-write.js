@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): pipeline validate/chuẩn bị dữ liệu Bug trước CREATE/UPDATE. Đây là breakpoint đầu tiên khi field bị reject hoặc persist sai.
 const cds = require('@sap/cds')
 
 const { SELECT } = cds.ql
@@ -28,6 +29,7 @@ const CODE_LIST_FIELDS = [
   { field: 'environment_code', label: 'Environment', entity: 'EnvironmentValues' }
 ]
 
+// Giữ validation ở backend để draft, UI và OData trực tiếp đều nhận cùng business rule.
 async function prepareBugWrite (req, entities, { isCreate }) {
   const bugID = req.params?.[0]?.ID || req.data?.ID
   const oldBug = isCreate ? {} : await readBug(req, entities, bugID)

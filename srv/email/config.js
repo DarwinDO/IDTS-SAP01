@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): chỉ đọc/kiểm tra email config; credential thật phải ở private env, không nằm trong source hay evidence.
 'use strict'
 
 const cds = require('@sap/cds')

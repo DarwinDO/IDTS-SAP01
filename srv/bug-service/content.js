@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): bảo vệ comment và attachment. Browser có thể validate sớm, nhưng file/comment an toàn phải được xác nhận lại tại đây.
 const cds = require('@sap/cds')
 
 const { SELECT } = cds.ql

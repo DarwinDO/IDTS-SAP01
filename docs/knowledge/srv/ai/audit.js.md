@@ -1,5 +1,15 @@
 # Knowledge: `srv/ai/audit.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: NhanT. Flow: reviewed AI result -> AiSuggestions audit. Break at audit creation to prove a feature recorded a suggestion without changing the Bug. Store sanitized feature data only.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: NhanT. Flow: reviewed AI result -> AiSuggestions audit. Đặt breakpoint tại audit creation để chứng minh feature ghi suggestion mà không đổi Bug. Chỉ lưu feature data đã sanitize.
+
 ## English
 
 ### What this file is for

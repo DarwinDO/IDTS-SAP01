@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): điều khiển draft create/patch/save. Dùng khi lỗi chỉ xuất hiện trước hoặc đúng lúc activate draft.
 const cds = require('@sap/cds')
 
 const { SELECT } = cds.ql

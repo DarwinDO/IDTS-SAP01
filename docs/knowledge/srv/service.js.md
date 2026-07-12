@@ -1,5 +1,15 @@
 # Knowledge: `srv/service.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: NhanT. Flow: create, lifecycle, read enrichment, AI action, and email-worker startup. Break at `BugService.init()` to see which CAP handler owns a request, then step into the registered module. Changing a registration without the matching CDS action/entity and Fiori caller can make a button disappear or do nothing.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: NhanT. Flow: create, lifecycle, read enrichment, AI action và khởi động email worker. Đặt breakpoint `BugService.init()` để biết CAP handler nào nhận request, rồi step vào module đã đăng ký. Đổi registration mà không đổi CDS action/entity và Fiori caller tương ứng có thể làm nút biến mất hoặc bấm không chạy.
+
 ## English
 
 ### What this file is for

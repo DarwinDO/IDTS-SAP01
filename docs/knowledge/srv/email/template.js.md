@@ -1,5 +1,15 @@
 # Knowledge: `srv/email/template.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: NhanT. Flow: notification data -> safe email subject/text/HTML. Break at message building when wording or deep links are wrong. Check that only allowlisted Bug information is present and that the template never logs a private recipient/configuration.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: NhanT. Flow: notification data -> safe email subject/text/HTML. Đặt breakpoint tại message building khi wording hoặc deep link sai. Kiểm tra chỉ Bug information allowlist xuất hiện và template không log private recipient/configuration.
+
 ## English
 
 ### What this file is for

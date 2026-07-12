@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/history.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: SangVN. Flow: committed business change -> audit/history/notification. Break after a successful write to verify which event and notification should exist. Do not edit old audit rows merely to alter presentation text.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: SangVN. Flow: committed business change -> audit/history/notification. Đặt breakpoint sau write thành công để kiểm tra event/notification nào phải tồn tại. Không sửa audit row cũ chỉ để đổi presentation text.
+
 ## English
 
 ### What this file is for

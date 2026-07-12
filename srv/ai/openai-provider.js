@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): adapter HTTP cho provider thật. Chỉ nhận request đã sanitize và chỉ trả lỗi đã làm sạch cho tầng trên.
 'use strict'
 
 const API_BASE_URL = 'https://api.openai.com/v1'

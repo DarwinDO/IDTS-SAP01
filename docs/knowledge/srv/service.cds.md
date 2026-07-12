@@ -1,5 +1,15 @@
 # Knowledge: `srv/service.cds`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: NhanT. Flow: BugService OData contract. Use this file first when an action is absent from metadata or an OData URL is invalid; then check the same action in `srv/service.js` and its focused module. A contract change may also require Fiori annotation and knowledge-mirror updates.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: NhanT. Flow: OData contract của BugService. Đọc file này đầu tiên khi action không có trong metadata hoặc URL OData sai; sau đó kiểm tra action cùng tên trong `srv/service.js` và module cụ thể. Đổi contract có thể cần cập nhật Fiori annotation và knowledge mirror.
+
 ## English
 
 ### What this file is for
@@ -20,7 +30,7 @@ This file answers these questions:
 - Which virtual fields exist only for UI or monitoring, such as `canClose`, `isOverdue`, or `currentActionOwnerDisplayName`?
 - Which entities are read-only monitoring/read-model outputs?
 
-The important CAP idea is “projection”. `entity Bugs as projection on db.Bugs` means `BugService.Bugs` is not a new database table. It is an API-facing view over the persistent `db.Bugs` entity, with extra calculated or virtual fields added for Fiori and PM monitoring.
+The important CAP idea is â€œprojectionâ€. `entity Bugs as projection on db.Bugs` means `BugService.Bugs` is not a new database table. It is an API-facing view over the persistent `db.Bugs` entity, with extra calculated or virtual fields added for Fiori and PM monitoring.
 
 ### IDTS flow
 
@@ -99,100 +109,100 @@ The important CAP idea is “projection”. `entity Bugs as projection on db.Bug
 
 ## Vietnamese
 
-### File này dùng để làm gì
+### File nÃ y dÃ¹ng Ä‘á»ƒ lÃ m gÃ¬
 
-File này định nghĩa hợp đồng OData công khai của CAP service cho IDTS.
+File nÃ y Ä‘á»‹nh nghÄ©a há»£p Ä‘á»“ng OData cÃ´ng khai cá»§a CAP service cho IDTS.
 
-Trong CAP, `db/schema.cds` định nghĩa data model lưu trữ, còn `srv/service.cds` quyết định phần nào được expose ra ngoài qua OData. Fiori không nói chuyện trực tiếp với database table. Fiori gọi `BugService` tại `/odata/v4/bug/`, và file này định nghĩa entity, virtual field, read model và action mà Fiori có thể dùng.
+Trong CAP, `db/schema.cds` Ä‘á»‹nh nghÄ©a data model lÆ°u trá»¯, cÃ²n `srv/service.cds` quyáº¿t Ä‘á»‹nh pháº§n nÃ o Ä‘Æ°á»£c expose ra ngoÃ i qua OData. Fiori khÃ´ng nÃ³i chuyá»‡n trá»±c tiáº¿p vá»›i database table. Fiori gá»i `BugService` táº¡i `/odata/v4/bug/`, vÃ  file nÃ y Ä‘á»‹nh nghÄ©a entity, virtual field, read model vÃ  action mÃ  Fiori cÃ³ thá»ƒ dÃ¹ng.
 
-Với người mới học, hãy hiểu file này như “menu API” giữa Fiori và backend. Nếu một field, entity hoặc action không được expose ở đây, Fiori không thể bind hoặc gọi nó một cách ổn định.
+Vá»›i ngÆ°á»i má»›i há»c, hÃ£y hiá»ƒu file nÃ y nhÆ° â€œmenu APIâ€ giá»¯a Fiori vÃ  backend. Náº¿u má»™t field, entity hoáº·c action khÃ´ng Ä‘Æ°á»£c expose á»Ÿ Ä‘Ã¢y, Fiori khÃ´ng thá»ƒ bind hoáº·c gá»i nÃ³ má»™t cÃ¡ch á»•n Ä‘á»‹nh.
 
-### Giải thích cho người mới
+### Giáº£i thÃ­ch cho ngÆ°á»i má»›i
 
-File này trả lời các câu hỏi:
+File nÃ y tráº£ lá»i cÃ¡c cÃ¢u há»i:
 
-- Fiori có thể đọc và sửa dữ liệu bug nào?
-- Fiori có thể gọi workflow action nào?
-- Collection nào phục vụ value help, ví dụ assignable developers và valid defect categories?
-- Virtual field nào chỉ phục vụ UI hoặc monitoring, ví dụ `canClose`, `isOverdue`, `currentActionOwnerDisplayName`?
-- Entity nào là read-only output cho monitoring hoặc read model?
+- Fiori cÃ³ thá»ƒ Ä‘á»c vÃ  sá»­a dá»¯ liá»‡u bug nÃ o?
+- Fiori cÃ³ thá»ƒ gá»i workflow action nÃ o?
+- Collection nÃ o phá»¥c vá»¥ value help, vÃ­ dá»¥ assignable developers vÃ  valid defect categories?
+- Virtual field nÃ o chá»‰ phá»¥c vá»¥ UI hoáº·c monitoring, vÃ­ dá»¥ `canClose`, `isOverdue`, `currentActionOwnerDisplayName`?
+- Entity nÃ o lÃ  read-only output cho monitoring hoáº·c read model?
 
-Ý quan trọng của CAP ở đây là “projection”. `entity Bugs as projection on db.Bugs` nghĩa là `BugService.Bugs` không phải table mới. Nó là hình dạng API-facing của entity `db.Bugs`, có thêm các field tính toán hoặc virtual field phục vụ Fiori và PM monitoring.
+Ã quan trá»ng cá»§a CAP á»Ÿ Ä‘Ã¢y lÃ  â€œprojectionâ€. `entity Bugs as projection on db.Bugs` nghÄ©a lÃ  `BugService.Bugs` khÃ´ng pháº£i table má»›i. NÃ³ lÃ  hÃ¬nh dáº¡ng API-facing cá»§a entity `db.Bugs`, cÃ³ thÃªm cÃ¡c field tÃ­nh toÃ¡n hoáº·c virtual field phá»¥c vá»¥ Fiori vÃ  PM monitoring.
 
-### Flow hoạt động trong IDTS
+### Flow hoáº¡t Ä‘á»™ng trong IDTS
 
-1. Browser mở Fiori app.
-2. `app/bug-management-ui/webapp/manifest.json` trỏ frontend đến `/odata/v4/bug/`.
-3. CAP trả metadata được sinh từ `BugService`.
-4. Fiori đọc metadata đó để dựng List Report/Object Page, fields, actions, value helps và child tables.
-5. `srv/service.js` gắn runtime handlers vào các entity và action được khai báo ở đây.
-6. Các handler đó đọc/ghi persistent model trong `db/schema.cds`.
+1. Browser má»Ÿ Fiori app.
+2. `app/bug-management-ui/webapp/manifest.json` trá» frontend Ä‘áº¿n `/odata/v4/bug/`.
+3. CAP tráº£ metadata Ä‘Æ°á»£c sinh tá»« `BugService`.
+4. Fiori Ä‘á»c metadata Ä‘Ã³ Ä‘á»ƒ dá»±ng List Report/Object Page, fields, actions, value helps vÃ  child tables.
+5. `srv/service.js` gáº¯n runtime handlers vÃ o cÃ¡c entity vÃ  action Ä‘Æ°á»£c khai bÃ¡o á»Ÿ Ä‘Ã¢y.
+6. CÃ¡c handler Ä‘Ã³ Ä‘á»c/ghi persistent model trong `db/schema.cds`.
 
 ### Important source anchors
 
-- **Vị trí**: `srv/service.cds:1`
+- **Vá»‹ trÃ­**: `srv/service.cds:1`
   `using idts.cap as db from '../db/schema';`
-  **Khái niệm IDTS**: Liên kết service với data model. Dòng này import persistent model của IDTS để service có thể project Bugs, Comments, Users, DeveloperResponsibilities, code lists và child entities.
-  **Ảnh hưởng nếu sai**: `BugService` không expose được domain model, Fiori metadata generation fail, và backend handlers mất entity contract.
-  **Phải kiểm tra cùng**: `db/schema.cds`, `srv/service.js`, tất cả Fiori annotations import `BugService`.
+  **KhÃ¡i niá»‡m IDTS**: LiÃªn káº¿t service vá»›i data model. DÃ²ng nÃ y import persistent model cá»§a IDTS Ä‘á»ƒ service cÃ³ thá»ƒ project Bugs, Comments, Users, DeveloperResponsibilities, code lists vÃ  child entities.
+  **áº¢nh hÆ°á»Ÿng náº¿u sai**: `BugService` khÃ´ng expose Ä‘Æ°á»£c domain model, Fiori metadata generation fail, vÃ  backend handlers máº¥t entity contract.
+  **Pháº£i kiá»ƒm tra cÃ¹ng**: `db/schema.cds`, `srv/service.js`, táº¥t cáº£ Fiori annotations import `BugService`.
 
-- **Vị trí**: `srv/service.cds:4`
+- **Vá»‹ trÃ­**: `srv/service.cds:4`
   `entity Bugs as projection on db.Bugs { ... }`
-  **Khái niệm IDTS**: OData collection chính cho bug tracking. Đây là hình dạng service-level của bug mà List Report, Object Page, actions, comments, attachments, history, notifications và PM monitoring đều dùng.
-  **Ảnh hưởng nếu sai**: Toàn bộ Fiori app có thể mất fields, actions, child sections hoặc monitoring flags. Create/edit/list/detail flows đều có thể hỏng vì phụ thuộc `BugService.Bugs`.
-  **Phải kiểm tra cùng**: `db/schema.cds:87` `Bugs`, `app/bug-management-ui/webapp/manifest.json` `contextPath: /Bugs`, `app/bug-management-ui/annotations/*.cds`, `srv/service.js`.
+  **KhÃ¡i niá»‡m IDTS**: OData collection chÃ­nh cho bug tracking. ÄÃ¢y lÃ  hÃ¬nh dáº¡ng service-level cá»§a bug mÃ  List Report, Object Page, actions, comments, attachments, history, notifications vÃ  PM monitoring Ä‘á»u dÃ¹ng.
+  **áº¢nh hÆ°á»Ÿng náº¿u sai**: ToÃ n bá»™ Fiori app cÃ³ thá»ƒ máº¥t fields, actions, child sections hoáº·c monitoring flags. Create/edit/list/detail flows Ä‘á»u cÃ³ thá»ƒ há»ng vÃ¬ phá»¥ thuá»™c `BugService.Bugs`.
+  **Pháº£i kiá»ƒm tra cÃ¹ng**: `db/schema.cds:87` `Bugs`, `app/bug-management-ui/webapp/manifest.json` `contextPath: /Bugs`, `app/bug-management-ui/annotations/*.cds`, `srv/service.js`.
 
-- **Vị trí**: `srv/service.cds:6-9`
+- **Vá»‹ trÃ­**: `srv/service.cds:6-9`
   `isOverdue`, `isPendingAssignment`, `isRejectedFollowUp`, `isRetestRequired`
-  **Khái niệm IDTS**: Các flag phục vụ PM monitoring. Đây là derived fields ở service layer giúp UI lọc các nhóm bug thường gặp.
-  **Ảnh hưởng nếu sai**: PM dashboard và filter có thể hiển thị sai bug overdue, pending assignment, rejected follow-up hoặc retest required.
-  **Phải kiểm tra cùng**: `srv/bug-service/read-models.js`, PM monitoring tests, List Report annotations, phần PM Monitoring trong `docs/project-context.md`.
+  **KhÃ¡i niá»‡m IDTS**: CÃ¡c flag phá»¥c vá»¥ PM monitoring. ÄÃ¢y lÃ  derived fields á»Ÿ service layer giÃºp UI lá»c cÃ¡c nhÃ³m bug thÆ°á»ng gáº·p.
+  **áº¢nh hÆ°á»Ÿng náº¿u sai**: PM dashboard vÃ  filter cÃ³ thá»ƒ hiá»ƒn thá»‹ sai bug overdue, pending assignment, rejected follow-up hoáº·c retest required.
+  **Pháº£i kiá»ƒm tra cÃ¹ng**: `srv/bug-service/read-models.js`, PM monitoring tests, List Report annotations, pháº§n PM Monitoring trong `docs/project-context.md`.
 
-- **Vị trí**: `srv/service.cds:13-28`
-  Các virtual display và capability fields như `currentActionOwnerDisplayName`, `canReject`, `canClose`, `canAssign`, `canAddComment`
-  **Khái niệm IDTS**: Trạng thái action mà UI có thể đọc. CAP expose các field này qua OData, còn JavaScript fill giá trị khi đọc. Fiori annotation dùng chúng để ẩn/hiện button và hiển thị current owner.
-  **Ảnh hưởng nếu sai**: User có thể thấy sai nút action, nút cần ẩn lại hiện, nút hợp lệ lại biến mất, hoặc current owner hiển thị khó hiểu.
-  **Phải kiểm tra cùng**: `srv/bug-service/read-models.js:213` và `:368`, `app/bug-management-ui/annotations/actions.cds`, `app/bug-management-ui/annotations/ownership-assignment.cds`.
+- **Vá»‹ trÃ­**: `srv/service.cds:13-28`
+  CÃ¡c virtual display vÃ  capability fields nhÆ° `currentActionOwnerDisplayName`, `canReject`, `canClose`, `canAssign`, `canAddComment`
+  **KhÃ¡i niá»‡m IDTS**: Tráº¡ng thÃ¡i action mÃ  UI cÃ³ thá»ƒ Ä‘á»c. CAP expose cÃ¡c field nÃ y qua OData, cÃ²n JavaScript fill giÃ¡ trá»‹ khi Ä‘á»c. Fiori annotation dÃ¹ng chÃºng Ä‘á»ƒ áº©n/hiá»‡n button vÃ  hiá»ƒn thá»‹ current owner.
+  **áº¢nh hÆ°á»Ÿng náº¿u sai**: User cÃ³ thá»ƒ tháº¥y sai nÃºt action, nÃºt cáº§n áº©n láº¡i hiá»‡n, nÃºt há»£p lá»‡ láº¡i biáº¿n máº¥t, hoáº·c current owner hiá»ƒn thá»‹ khÃ³ hiá»ƒu.
+  **Pháº£i kiá»ƒm tra cÃ¹ng**: `srv/bug-service/read-models.js:213` vÃ  `:368`, `app/bug-management-ui/annotations/actions.cds`, `app/bug-management-ui/annotations/ownership-assignment.cds`.
 
-- **Vị trí**: `srv/service.cds:30-78`
-  Các bound actions bên trong `entity Bugs`
-  **Khái niệm IDTS**: Hợp đồng OData công khai cho lifecycle operations. Đây là các action mà Fiori buttons gọi; JavaScript handlers trong `srv/bug-service/actions.js` implement hành vi thật.
-  **Ảnh hưởng nếu sai**: Fiori action buttons có thể gọi action bị thiếu hoặc đổi tên, parameter note/reason có thể lệch, và lifecycle tests fail.
-  **Phải kiểm tra cùng**: `srv/service.js:94-147` action wiring, `srv/bug-service/actions.js`, `app/bug-management-ui/annotations/actions.cds`.
+- **Vá»‹ trÃ­**: `srv/service.cds:30-78`
+  CÃ¡c bound actions bÃªn trong `entity Bugs`
+  **KhÃ¡i niá»‡m IDTS**: Há»£p Ä‘á»“ng OData cÃ´ng khai cho lifecycle operations. ÄÃ¢y lÃ  cÃ¡c action mÃ  Fiori buttons gá»i; JavaScript handlers trong `srv/bug-service/actions.js` implement hÃ nh vi tháº­t.
+  **áº¢nh hÆ°á»Ÿng náº¿u sai**: Fiori action buttons cÃ³ thá»ƒ gá»i action bá»‹ thiáº¿u hoáº·c Ä‘á»•i tÃªn, parameter note/reason cÃ³ thá»ƒ lá»‡ch, vÃ  lifecycle tests fail.
+  **Pháº£i kiá»ƒm tra cÃ¹ng**: `srv/service.js:94-147` action wiring, `srv/bug-service/actions.js`, `app/bug-management-ui/annotations/actions.cds`.
 
-- **Vị trí**: `srv/service.cds:120`
+- **Vá»‹ trÃ­**: `srv/service.cds:120`
   `entity AssignableDevelopers { ... }`
-  **Khái niệm IDTS**: Read model cho value help chọn Developer. Nó expose developer profile, name, email, availability, component, defect category, SAP module và responsibility dưới dạng dễ dùng cho UI.
-  **Ảnh hưởng nếu sai**: Value help Assignee có thể hiện UUID, duplicate Developer, Developer unavailable hoặc thiếu context responsibility.
-  **Phải kiểm tra cùng**: `srv/bug-service/read-models.js:31`, `db/schema.cds:40` `DeveloperProfiles`, `db/schema.cds:79` `DeveloperResponsibilities`, Fiori value-help annotations.
+  **KhÃ¡i niá»‡m IDTS**: Read model cho value help chá»n Developer. NÃ³ expose developer profile, name, email, availability, component, defect category, SAP module vÃ  responsibility dÆ°á»›i dáº¡ng dá»… dÃ¹ng cho UI.
+  **áº¢nh hÆ°á»Ÿng náº¿u sai**: Value help Assignee cÃ³ thá»ƒ hiá»‡n UUID, duplicate Developer, Developer unavailable hoáº·c thiáº¿u context responsibility.
+  **Pháº£i kiá»ƒm tra cÃ¹ng**: `srv/bug-service/read-models.js:31`, `db/schema.cds:40` `DeveloperProfiles`, `db/schema.cds:79` `DeveloperResponsibilities`, Fiori value-help annotations.
 
-- **Vị trí**: `srv/service.cds:136`
+- **Vá»‹ trÃ­**: `srv/service.cds:136`
   `@readonly entity DeveloperWorkloads { ... }`
-  **Khái niệm IDTS**: Aggregate phục vụ PM monitoring. Đây không phải table bình thường; nó là output read-only được backend tính toán.
-  **Ảnh hưởng nếu sai**: PM workload view có thể thiếu Developer active đang có 0 bug, đếm sai status bucket hoặc đánh giá sai Developer overloaded.
-  **Phải kiểm tra cùng**: `srv/bug-service/monitoring.js`, PM monitoring tests, List Report hoặc future monitoring UI annotations.
+  **KhÃ¡i niá»‡m IDTS**: Aggregate phá»¥c vá»¥ PM monitoring. ÄÃ¢y khÃ´ng pháº£i table bÃ¬nh thÆ°á»ng; nÃ³ lÃ  output read-only Ä‘Æ°á»£c backend tÃ­nh toÃ¡n.
+  **áº¢nh hÆ°á»Ÿng náº¿u sai**: PM workload view cÃ³ thá»ƒ thiáº¿u Developer active Ä‘ang cÃ³ 0 bug, Ä‘áº¿m sai status bucket hoáº·c Ä‘Ã¡nh giÃ¡ sai Developer overloaded.
+  **Pháº£i kiá»ƒm tra cÃ¹ng**: `srv/bug-service/monitoring.js`, PM monitoring tests, List Report hoáº·c future monitoring UI annotations.
 
-- **Vị trí**: `srv/service.cds:187`
+- **Vá»‹ trÃ­**: `srv/service.cds:187`
   `annotate BugService.Bugs with @odata.draft.enabled;`
-  **Khái niệm IDTS**: Fiori draft editing. Draft cho phép Fiori tạo/sửa dữ liệu tạm trước khi activate thành bug chính thức.
-  **Ảnh hưởng nếu sai**: Create/edit flow, attachment draft flow và Object Page save behavior có thể hỏng.
-  **Phải kiểm tra cùng**: `srv/bug-service/drafts.js`, attachment handling, Fiori Object Page create/edit behavior, HTTP draft regression tests.
+  **KhÃ¡i niá»‡m IDTS**: Fiori draft editing. Draft cho phÃ©p Fiori táº¡o/sá»­a dá»¯ liá»‡u táº¡m trÆ°á»›c khi activate thÃ nh bug chÃ­nh thá»©c.
+  **áº¢nh hÆ°á»Ÿng náº¿u sai**: Create/edit flow, attachment draft flow vÃ  Object Page save behavior cÃ³ thá»ƒ há»ng.
+  **Pháº£i kiá»ƒm tra cÃ¹ng**: `srv/bug-service/drafts.js`, attachment handling, Fiori Object Page create/edit behavior, HTTP draft regression tests.
 
-### Liên kết với file khác
+### LiÃªn káº¿t vá»›i file khÃ¡c
 
-- `db/schema.cds` là data model gốc. Service này project model đó và thêm các field/action phục vụ OData.
-- `app/bug-management-ui/webapp/manifest.json` trỏ Fiori đến endpoint service này và context path `/Bugs`.
-- Các annotation dưới `app/bug-management-ui/annotations/` annotate entity/action được khai báo ở đây; annotation không thể tự tạo field thiếu trong service.
-- `srv/service.js` gắn runtime behavior vào các entity/action quan trọng được khai báo ở đây.
-- Các module dưới `srv/bug-service/` fill virtual fields, enforce permissions, tính monitoring read models và implement lifecycle actions.
+- `db/schema.cds` lÃ  data model gá»‘c. Service nÃ y project model Ä‘Ã³ vÃ  thÃªm cÃ¡c field/action phá»¥c vá»¥ OData.
+- `app/bug-management-ui/webapp/manifest.json` trá» Fiori Ä‘áº¿n endpoint service nÃ y vÃ  context path `/Bugs`.
+- CÃ¡c annotation dÆ°á»›i `app/bug-management-ui/annotations/` annotate entity/action Ä‘Æ°á»£c khai bÃ¡o á»Ÿ Ä‘Ã¢y; annotation khÃ´ng thá»ƒ tá»± táº¡o field thiáº¿u trong service.
+- `srv/service.js` gáº¯n runtime behavior vÃ o cÃ¡c entity/action quan trá»ng Ä‘Æ°á»£c khai bÃ¡o á»Ÿ Ä‘Ã¢y.
+- CÃ¡c module dÆ°á»›i `srv/bug-service/` fill virtual fields, enforce permissions, tÃ­nh monitoring read models vÃ  implement lifecycle actions.
 
-### Lưu ý khi sửa file này
+### LÆ°u Ã½ khi sá»­a file nÃ y
 
-- Xem file này như public API contract. Đổi tên entity, field hoặc action sẽ ảnh hưởng Fiori, tests và OData clients.
-- Khi thêm virtual field, phải thêm hoặc cập nhật read-model code để fill giá trị.
-- Khi đổi action, cập nhật `srv/service.js`, `actions.js`, Fiori action annotations và side effects.
-- Khi đổi value-help read model, kiểm tra Fiori value-help annotations và seed data.
-- Giữ English và Vietnamese tương đương nhau.
+- Xem file nÃ y nhÆ° public API contract. Äá»•i tÃªn entity, field hoáº·c action sáº½ áº£nh hÆ°á»Ÿng Fiori, tests vÃ  OData clients.
+- Khi thÃªm virtual field, pháº£i thÃªm hoáº·c cáº­p nháº­t read-model code Ä‘á»ƒ fill giÃ¡ trá»‹.
+- Khi Ä‘á»•i action, cáº­p nháº­t `srv/service.js`, `actions.js`, Fiori action annotations vÃ  side effects.
+- Khi Ä‘á»•i value-help read model, kiá»ƒm tra Fiori value-help annotations vÃ  seed data.
+- Giá»¯ English vÃ  Vietnamese tÆ°Æ¡ng Ä‘Æ°Æ¡ng nhau.
 
 ## IDTS-34 Auth Contract Update
 
@@ -219,7 +229,7 @@ Important anchor:
 
 ### English
 
-`SimilarBugCandidate` and the unbound `suggestSimilarBugs` action form the public OData contract for duplicate/similar suggestions. “Unbound” means the client can call the action before a Bug row exists by sending title, description, status, and classification values. It may also send `sourceBugID` when checking an existing bug.
+`SimilarBugCandidate` and the unbound `suggestSimilarBugs` action form the public OData contract for duplicate/similar suggestions. â€œUnboundâ€ means the client can call the action before a Bug row exists by sending title, description, status, and classification values. It may also send `sourceBugID` when checking an existing bug.
 
 The action returns rank, bug identity, status, score, suggested relation label, readable reason, provider status, and whether an embedding was used. It does not expose vectors, prompts, provider responses, or credentials. It also does not create `DuplicateLinks`; only a later explicit human confirmation flow may do that.
 
@@ -232,16 +242,16 @@ Important anchor:
 
 ### Vietnamese
 
-`SimilarBugCandidate` và unbound action `suggestSimilarBugs` tạo thành OData contract công khai cho gợi ý bug trùng/tương tự. “Unbound” nghĩa là client có thể gọi action trước khi có Bug row bằng cách gửi title, description, status và classification. Khi kiểm tra bug đã tồn tại, client có thể gửi thêm `sourceBugID`.
+`SimilarBugCandidate` vÃ  unbound action `suggestSimilarBugs` táº¡o thÃ nh OData contract cÃ´ng khai cho gá»£i Ã½ bug trÃ¹ng/tÆ°Æ¡ng tá»±. â€œUnboundâ€ nghÄ©a lÃ  client cÃ³ thá»ƒ gá»i action trÆ°á»›c khi cÃ³ Bug row báº±ng cÃ¡ch gá»­i title, description, status vÃ  classification. Khi kiá»ƒm tra bug Ä‘Ã£ tá»“n táº¡i, client cÃ³ thá»ƒ gá»­i thÃªm `sourceBugID`.
 
-Action trả rank, định danh bug, status, score, nhãn relation gợi ý, lý do dễ đọc, provider status và thông tin embedding có được dùng hay không. Action không expose vector, prompt, provider response hoặc credential. Nó cũng không tạo `DuplicateLinks`; chỉ flow xác nhận rõ ràng của con người trong task sau mới được làm việc đó.
+Action tráº£ rank, Ä‘á»‹nh danh bug, status, score, nhÃ£n relation gá»£i Ã½, lÃ½ do dá»… Ä‘á»c, provider status vÃ  thÃ´ng tin embedding cÃ³ Ä‘Æ°á»£c dÃ¹ng hay khÃ´ng. Action khÃ´ng expose vector, prompt, provider response hoáº·c credential. NÃ³ cÅ©ng khÃ´ng táº¡o `DuplicateLinks`; chá»‰ flow xÃ¡c nháº­n rÃµ rÃ ng cá»§a con ngÆ°á»i trong task sau má»›i Ä‘Æ°á»£c lÃ m viá»‡c Ä‘Ã³.
 
-Điểm neo quan trọng:
+Äiá»ƒm neo quan trá»ng:
 
-- **Vị trí**: `type SimilarBugCandidate` và `action suggestSimilarBugs(...)`
-  - **Khái niệm IDTS**: contract review duplicate theo hướng suggestion-only.
-  - **Ảnh hưởng nếu sai**: Fiori review UI sau này không thể gọi hoặc hiểu kết quả backend một cách an toàn.
-  - **Phải kiểm tra cùng**: `srv/ai/duplicate-detection.js`, `srv/service.js`, QA IDTS-66 và UI integration IDTS-70 sau này.
+- **Vá»‹ trÃ­**: `type SimilarBugCandidate` vÃ  `action suggestSimilarBugs(...)`
+  - **KhÃ¡i niá»‡m IDTS**: contract review duplicate theo hÆ°á»›ng suggestion-only.
+  - **áº¢nh hÆ°á»Ÿng náº¿u sai**: Fiori review UI sau nÃ y khÃ´ng thá»ƒ gá»i hoáº·c hiá»ƒu káº¿t quáº£ backend má»™t cÃ¡ch an toÃ n.
+  - **Pháº£i kiá»ƒm tra cÃ¹ng**: `srv/ai/duplicate-detection.js`, `srv/service.js`, QA IDTS-66 vÃ  UI integration IDTS-70 sau nÃ y.
 
 Anchor quan trong:
 
@@ -273,15 +283,15 @@ Anchor quan trong:
 
 ### Vietnamese
 
-`BugService.NotificationDeliveries` là projection read-only cho client đã login. Nó cung cấp đủ dữ liệu để IDTS-37 hiển thị recipient, subject, status, số lần thử, thời gian, lỗi đã làm sạch và provider message ID. Nó cố ý không expose `textBody`, `htmlBody`, worker lock hoặc bất kỳ SMTP config nào.
+`BugService.NotificationDeliveries` lÃ  projection read-only cho client Ä‘Ã£ login. NÃ³ cung cáº¥p Ä‘á»§ dá»¯ liá»‡u Ä‘á»ƒ IDTS-37 hiá»ƒn thá»‹ recipient, subject, status, sá»‘ láº§n thá»­, thá»i gian, lá»—i Ä‘Ã£ lÃ m sáº¡ch vÃ  provider message ID. NÃ³ cá»‘ Ã½ khÃ´ng expose `textBody`, `htmlBody`, worker lock hoáº·c báº¥t ká»³ SMTP config nÃ o.
 
-- **Vị trí**: `srv/service.cds:108-126`
+- **Vá»‹ trÃ­**: `srv/service.cds:108-126`
   `@readonly entity NotificationDeliveries as projection on db.NotificationDeliveries`
-  **Khái niệm IDTS**: Cho phép xem tình trạng email an toàn mà không làm lộ payload/control field private của worker.
-  **Ảnh hưởng nếu sai**: Fiori không giải thích được email fail hoặc OData client nhìn thấy dữ liệu chỉ backend mới nên dùng.
-  **Phải kiểm tra cùng**: `db/schema.cds:189`, `srv/bug-service/constants.js`, task UI/readability IDTS-37, API contract test.
+  **KhÃ¡i niá»‡m IDTS**: Cho phÃ©p xem tÃ¬nh tráº¡ng email an toÃ n mÃ  khÃ´ng lÃ m lá»™ payload/control field private cá»§a worker.
+  **áº¢nh hÆ°á»Ÿng náº¿u sai**: Fiori khÃ´ng giáº£i thÃ­ch Ä‘Æ°á»£c email fail hoáº·c OData client nhÃ¬n tháº¥y dá»¯ liá»‡u chá»‰ backend má»›i nÃªn dÃ¹ng.
+  **Pháº£i kiá»ƒm tra cÃ¹ng**: `db/schema.cds:189`, `srv/bug-service/constants.js`, task UI/readability IDTS-37, API contract test.
 
-`Notifications` giữ navigation `deliveries` vì delivery là dữ liệu con của source event. Endpoint công khai là `/odata/v4/bug/NotificationDeliveries`; client không được ghi vào collection này.
+`Notifications` giá»¯ navigation `deliveries` vÃ¬ delivery lÃ  dá»¯ liá»‡u con cá»§a source event. Endpoint cÃ´ng khai lÃ  `/odata/v4/bug/NotificationDeliveries`; client khÃ´ng Ä‘Æ°á»£c ghi vÃ o collection nÃ y.
 
 ## IDTS-65 AI Suggestion Read Contract
 
@@ -302,18 +312,18 @@ Important anchor:
 
 ### Vietnamese
 
-`BugService.AiSuggestions` là OData projection read-only cho các dòng audit AI suggestion đã được làm sạch.
+`BugService.AiSuggestions` lÃ  OData projection read-only cho cÃ¡c dÃ²ng audit AI suggestion Ä‘Ã£ Ä‘Æ°á»£c lÃ m sáº¡ch.
 
-Projection này tồn tại để các task UI/review sau này có thể hiển thị AI suggestion mà không mở quyền ghi từ client. Nó gồm bug nguồn, loại feature, người request, provider/model alias, confidence, payload suggestion an toàn, summary, review state, reviewer, timestamps và correlation ID. Nó cố ý không cung cấp public create/update/delete path.
+Projection nÃ y tá»“n táº¡i Ä‘á»ƒ cÃ¡c task UI/review sau nÃ y cÃ³ thá»ƒ hiá»ƒn thá»‹ AI suggestion mÃ  khÃ´ng má»Ÿ quyá»n ghi tá»« client. NÃ³ gá»“m bug nguá»“n, loáº¡i feature, ngÆ°á»i request, provider/model alias, confidence, payload suggestion an toÃ n, summary, review state, reviewer, timestamps vÃ  correlation ID. NÃ³ cá»‘ Ã½ khÃ´ng cung cáº¥p public create/update/delete path.
 
 Important anchor:
 
-- **Vị trí**: `srv/service.cds`, `@readonly entity AiSuggestions as projection on db.AiSuggestions`
-  **Khái niệm IDTS**: Public read contract an toàn cho AI suggestion.
-  **Ảnh hưởng nếu sai**: UI review Fiori sau này có thể không hiển thị được AI suggestion, hoặc client có thể ghi trực tiếp vào audit row.
-  **Phải kiểm tra cùng**: `db/schema.cds` `AiSuggestions`, `srv/ai/audit.js`, `srv/bug-service/constants.js`, `scripts/qa/test-idts65-ai-suggestion-audit.js`.
+- **Vá»‹ trÃ­**: `srv/service.cds`, `@readonly entity AiSuggestions as projection on db.AiSuggestions`
+  **KhÃ¡i niá»‡m IDTS**: Public read contract an toÃ n cho AI suggestion.
+  **áº¢nh hÆ°á»Ÿng náº¿u sai**: UI review Fiori sau nÃ y cÃ³ thá»ƒ khÃ´ng hiá»ƒn thá»‹ Ä‘Æ°á»£c AI suggestion, hoáº·c client cÃ³ thá»ƒ ghi trá»±c tiáº¿p vÃ o audit row.
+  **Pháº£i kiá»ƒm tra cÃ¹ng**: `db/schema.cds` `AiSuggestions`, `srv/ai/audit.js`, `srv/bug-service/constants.js`, `scripts/qa/test-idts65-ai-suggestion-audit.js`.
 
-`AiSuggestionFeatureTypes` và `AiSuggestionReviewStates` cũng được expose như code-list projection để client có label dễ đọc. Ghi dữ liệu vào các entity này bị chặn bởi read-only guard list của BugService.
+`AiSuggestionFeatureTypes` vÃ  `AiSuggestionReviewStates` cÅ©ng Ä‘Æ°á»£c expose nhÆ° code-list projection Ä‘á»ƒ client cÃ³ label dá»… Ä‘á»c. Ghi dá»¯ liá»‡u vÃ o cÃ¡c entity nÃ y bá»‹ cháº·n bá»Ÿi read-only guard list cá»§a BugService.
 
 ## IDTS-67 update: AI classification suggestion action
 
@@ -330,14 +340,14 @@ This action is intentionally suggestion-only. It does not update `Bugs`; it only
 
 ### Ti?ng Vi?t
 
-`srv/service.cds` hi?n expose th�m `suggestClassification`, m?t unbound OData action tr? v? g?i � ph�n lo?i d? review cho SAP Module, Application Component, Defect Category, Priority v� Severity.
+`srv/service.cds` hi?n expose thêm `suggestClassification`, m?t unbound OData action tr? v? g?i ý phân lo?i d? review cho SAP Module, Application Component, Defect Category, Priority và Severity.
 
-Action n�y du?c thi?t k? ch? d? g?i �. N� kh�ng update `Bugs`; n� ch? tr? v? c�c d�ng c� c?u tr�c d? ngu?i d�ng review. Logic validate v� fallback runtime n?m trong `srv/ai/classification-suggestion.js`, c�n `srv/service.js` n?i action n�y v�o CAP.
+Action này du?c thi?t k? ch? d? g?i ý. Nó không update `Bugs`; nó ch? tr? v? các dòng có c?u trúc d? ngu?i dùng review. Logic validate và fallback runtime n?m trong `srv/ai/classification-suggestion.js`, còn `srv/service.js` n?i action này vào CAP.
 
-- **V? tr�**: `type ClassificationSuggestionCandidate` v� `action suggestClassification(...)`
-  - **Kh�i ni?m IDTS**: AI h? tr? review ph�n lo?i, kh�ng ph?i t? d?ng ph�n lo?i.
-  - **?nh hu?ng n?u sai**: Fiori ho?c API client c� th? kh�ng g?i du?c g?i � ph�n lo?i, ho?c contract thi?u tr?ng th�i validation/confidence.
-  - **Ph?i ki?m tra c�ng**: `srv/ai/classification-suggestion.js`, `srv/service.js`, c�c catalog entity trong `db/schema.cds`, v� `scripts/qa/test-idts67-classification-suggestion.js`.
+- **V? trí**: `type ClassificationSuggestionCandidate` và `action suggestClassification(...)`
+  - **Khái ni?m IDTS**: AI h? tr? review phân lo?i, không ph?i t? d?ng phân lo?i.
+  - **?nh hu?ng n?u sai**: Fiori ho?c API client có th? không g?i du?c g?i ý phân lo?i, ho?c contract thi?u tr?ng thái validation/confidence.
+  - **Ph?i ki?m tra cùng**: `srv/ai/classification-suggestion.js`, `srv/service.js`, các catalog entity trong `db/schema.cds`, và `scripts/qa/test-idts67-classification-suggestion.js`.
 
 ## IDTS-68 Bug Handoff Summary Update
 

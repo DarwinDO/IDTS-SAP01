@@ -1,5 +1,15 @@
 # `srv/ai/duplicate-detection.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: DatDT/NhanT. Flow: Similar Bugs review. Start at `suggestSimilarBugs`, inspect bounded candidates, provider status, score, and audit row. The result must remain a suggestion; it must not write `DuplicateLinks` automatically.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: DatDT/NhanT. Flow: Similar Bugs review. Bắt đầu tại `suggestSimilarBugs`, quan sát bounded candidate, provider status, score và audit row. Kết quả luôn là suggestion; không được tự ghi `DuplicateLinks`.
+
 ## English
 
 ### What this file is for

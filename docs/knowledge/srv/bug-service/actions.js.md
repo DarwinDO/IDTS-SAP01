@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/actions.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: SangVN. Flow: assignment and status lifecycle. Start at `transitionBug`; inspect actor, old status, requested status, reason, next processor, and side effects. Every action must preserve authorization, history, and notification behavior.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: SangVN. Flow: assignment và status lifecycle. Bắt đầu tại `transitionBug`; quan sát actor, old status, requested status, reason, next processor và side effect. Mọi action phải giữ authorization, history và notification behavior.
+
 ## English
 
 ### What this file is for

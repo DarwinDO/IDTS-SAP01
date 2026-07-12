@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): hợp đồng OData của BugService. Đổi action/field ở đây phải kiểm tra handler `srv/service.js` và Fiori annotation cùng tên.
 using idts.cap as db from '../db/schema';
 
 service BugService @(requires: 'authenticated-user') {

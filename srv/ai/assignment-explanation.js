@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): giải thích vì sao developer có thể phù hợp; explanation không thay quyền chọn/validate assignee của backend.
 'use strict'
 
 const cds = require('@sap/cds')

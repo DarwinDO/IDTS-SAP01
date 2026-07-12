@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): worker chạy SAU transaction workflow. Email lỗi không được rollback việc assign/resolve/close bug.
 'use strict'
 
 const cds = require('@sap/cds')
@@ -24,6 +25,7 @@ function startEmailWorker () {
   }
 
   sender = createEmailSender(config)
+  // `cds.spawn` tạo transaction riêng cho polling; breakpoint callback này khi delivery bị kẹt PENDING/FAILED.
   job = cds.spawn({
     user: cds.User.privileged,
     every: config.pollIntervalMs

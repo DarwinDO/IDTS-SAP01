@@ -1,5 +1,15 @@
 # Knowledge: `srv/auth.cds`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: DatDT. Flow: sign in, sign out, current user. Check this action contract before changing login UI calls. Its implementation is `srv/auth.js`; the UI caller is under `app/bug-management-ui/webapp/ext/login/`.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: DatDT. Flow: sign in, sign out, current user. Kiểm tra action contract này trước khi đổi login UI call. Implementation nằm ở `srv/auth.js`; UI caller nằm trong `app/bug-management-ui/webapp/ext/login/`.
+
 ## English
 
 ### What this file is for

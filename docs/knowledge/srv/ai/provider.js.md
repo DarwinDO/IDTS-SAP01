@@ -1,5 +1,15 @@
 # `srv/ai/provider.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: NhanT. Flow: feature request -> configured provider or fallback. Inspect provider status, timeout, and sanitized diagnostics here. Do not let a provider failure mutate a Bug or bypass the feature's human-review contract.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: NhanT. Flow: feature request -> configured provider hoặc fallback. Quan sát provider status, timeout và sanitized diagnostic ở đây. Provider failure không được mutate Bug hoặc bỏ qua human-review contract.
+
 ## English
 
 ### What this file is for

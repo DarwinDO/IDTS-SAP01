@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): chặn secret/prompt nguy hiểm trước khi data đi vào AI provider hoặc diagnostic. Đây là security boundary của AI.
 'use strict'
 
 const SECRET_PATTERNS = Object.freeze([

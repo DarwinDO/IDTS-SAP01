@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): ghi audit/history và notification side effect sau business change thành công; không dùng UI wording làm source of truth.
 const cds = require('@sap/cds')
 
 const { INSERT, SELECT } = cds.ql

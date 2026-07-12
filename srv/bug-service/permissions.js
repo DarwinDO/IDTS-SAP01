@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): tập trung rule role/action. UI có thể ẩn nút, nhưng handler vẫn phải gọi rule này để chặn request trực tiếp.
 const {
   COORDINATOR_ROLES,
   DEVELOPER_ACTIONS,
