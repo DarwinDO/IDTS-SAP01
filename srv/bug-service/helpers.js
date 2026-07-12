@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): helper đọc Bug/user và chuẩn hóa input dùng chung. Chỉ giữ logic không thuộc riêng một action để tránh rule bị lệch.
 const cds = require('@sap/cds')
 
 const { SELECT } = cds.ql

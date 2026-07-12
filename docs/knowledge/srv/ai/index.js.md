@@ -1,5 +1,15 @@
 # `srv/ai/index.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: DatDT/NhanT. Flow: BugService AI-action wiring. This barrel identifies the supported AI public surface; changing exports requires matching `srv/service.js`, service CDS action declarations, UI caller, and focused tests.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: DatDT/NhanT. Flow: BugService AI-action wiring. Barrel này xác định AI public surface được hỗ trợ; đổi export phải kiểm tra cùng `srv/service.js`, service CDS action declaration, UI caller và focused test.
+
 ## English
 
 ### What this file is for

@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/guards.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: SangVN. Flow: read-only contracts. Inspect the registered target list when a client write is rejected or an audit/read model accidentally becomes mutable. Check service projections with the guard together.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: SangVN. Flow: read-only contract. Quan sát registered target list khi client write bị reject hoặc audit/read model vô tình trở thành mutable. Kiểm tra cùng service projection.
+
 ## English
 
 ### What this file is for

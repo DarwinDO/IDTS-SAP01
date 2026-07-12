@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/drafts.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: SangVN. Flow: draft NEW/PATCH/SAVE. Compare draft data and active data at `handleDraftSave` when a user sees correct fields before Save but wrong persisted data afterwards.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: SangVN. Flow: draft NEW/PATCH/SAVE. So sánh draft data và active data tại `handleDraftSave` khi user thấy field đúng trước Save nhưng persist sai sau đó.
+
 ## English
 
 ### What this file is for

@@ -1,5 +1,15 @@
 # `srv/ai/classification-suggestion.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: DatDT/NhanT. Flow: classification review. Inspect candidate confidence and active-catalog validation before a result reaches the dialog. A suggestion never writes the selected category for the user.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: DatDT/NhanT. Flow: classification review. Quan sát candidate confidence và active-catalog validation trước khi result tới dialog. Suggestion không tự lưu category cho user.
+
 ## English
 
 ### What this file is for

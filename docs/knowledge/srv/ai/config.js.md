@@ -1,5 +1,15 @@
 # `srv/ai/config.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: DatDT/NhanT. Flow: private AI configuration -> provider selection. Inspect feature enablement and safe defaults only; keys, endpoints, and model credentials never belong in this file or its evidence.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: DatDT/NhanT. Flow: private AI configuration -> provider selection. Chỉ kiểm tra feature enablement và safe default; key, endpoint và model credential không được nằm trong file/evidence này.
+
 ## English
 
 ### What this file is for

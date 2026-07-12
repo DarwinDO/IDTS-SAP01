@@ -1,5 +1,15 @@
 # `srv/ai/bug-summary.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: DatDT/NhanT. Flow: Bug/history -> handoff review summary. Break when source data is sparse or output looks unsafe; summary is display-only and cannot create a status transition, comment, or assignment.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: DatDT/NhanT. Flow: Bug/history -> handoff review summary. Đặt breakpoint khi source data thưa hoặc output không an toàn; summary chỉ hiển thị, không tạo status transition, comment hay assignment.
+
 ## English
 
 ### What this file is for

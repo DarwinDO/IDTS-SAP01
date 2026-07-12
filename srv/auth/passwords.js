@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): helper hash/verify password và session token; không đưa plaintext password hay token vào DB/log/evidence.
 'use strict'
 
 const {

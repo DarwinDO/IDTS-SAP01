@@ -1,5 +1,15 @@
 # `srv/ai/safety.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: NhanT. Flow: raw candidate input/output -> safe AI boundary. Break at redaction/sanitization when a provider error or suspicious prompt reaches the feature. This module protects logs and audit evidence as well as provider calls.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: NhanT. Flow: raw candidate input/output -> safe AI boundary. Đặt breakpoint tại redaction/sanitization khi provider error hoặc prompt đáng ngờ đi vào feature. Module này bảo vệ log/audit evidence lẫn provider call.
+
 ## English
 
 ### What this file is for

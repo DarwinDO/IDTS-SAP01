@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): middleware đổi Bearer token thành CAP request user. Breakpoint tại phần đọc AuthSessions khi OData bị 401 bất ngờ.
 'use strict'
 
 const cds = require('@sap/cds')

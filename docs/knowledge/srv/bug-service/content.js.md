@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/content.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: SangVN. Flow: comments and attachments. Break at the preparation functions to distinguish client-side validation from final server authorization/file validation. Check the collaboration UI and attachment storage adapter as linked boundaries.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: SangVN. Flow: comments và attachments. Đặt breakpoint tại preparation function để phân biệt client validation với server authorization/file validation cuối. Kiểm tra collaboration UI và attachment storage adapter như boundary liên kết.
+
 ## English
 
 ### What this file is for

@@ -1,5 +1,15 @@
 # Knowledge: `srv/email/outbox.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: NhanT. Flow: Notifications -> NotificationDeliveries -> claim/send/retry. Break at claim and status update to investigate `PENDING`, `SENT`, `FAILED`, or `SKIPPED`. A send failure must leave the already committed Bug change intact.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: NhanT. Flow: Notifications -> NotificationDeliveries -> claim/send/retry. Đặt breakpoint tại claim và status update để xem `PENDING`, `SENT`, `FAILED`, `SKIPPED`. Send failure phải giữ nguyên Bug change đã commit.
+
 ## English
 
 ### What this file is for

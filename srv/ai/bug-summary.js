@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): tạo handoff summary từ Bug/history đã allowlist; không dùng summary để tự chuyển status hoặc tạo comment.
 'use strict'
 
 const cds = require('@sap/cds')

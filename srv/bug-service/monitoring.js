@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): tạo read-only workload aggregate cho PM Dashboard; không được dùng nó để thay đổi ownership của Bug.
 const cds = require('@sap/cds')
 
 const { SELECT } = cds.ql

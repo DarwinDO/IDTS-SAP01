@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): provider seam. Feature gọi interface này để có mock/fallback; không gọi HTTP provider trực tiếp từ workflow handler.
 'use strict'
 
 const cds = require('@sap/cds')

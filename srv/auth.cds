@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): đây là API login/logout/me; nó tách khỏi BugService để auth có contract nhỏ và dễ kiểm tra quyền hơn.
 using idts.cap as db from '../db/schema';
 
 service AuthService {

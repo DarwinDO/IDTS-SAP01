@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/helpers.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: SangVN. Flow: shared Bug/user lookup and input normalization. Step here when two action modules see a different Bug or actor than expected. Keep feature-specific rules out of helpers.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: SangVN. Flow: shared Bug/user lookup và input normalization. Step vào đây khi hai action module nhìn thấy Bug hoặc actor khác mong đợi. Không đưa rule riêng của feature vào helper.
+
 ## English
 
 ### What this file is for

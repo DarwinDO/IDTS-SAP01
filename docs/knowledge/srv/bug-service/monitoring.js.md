@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/monitoring.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: NhanT. Flow: Bugs -> DeveloperWorkloads/dashboard. Break at aggregation when PM counts or overload flags differ from Bug data. This is read-only analysis, not an assignment engine.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: NhanT. Flow: Bugs -> DeveloperWorkloads/dashboard. Đặt breakpoint tại aggregation khi PM count hoặc overload flag khác Bug data. Đây là phân tích read-only, không phải assignment engine.
+
 ## English
 
 ### What this file is for

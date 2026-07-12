@@ -1,5 +1,15 @@
 # `srv/ai/assignment-explanation.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: DatDT/NhanT. Flow: candidate developer -> explanation row. Inspect explanation fallback and validation when the Smart Assign dialog is misleading. Human selection and backend `assignToDeveloper` remain authoritative.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: DatDT/NhanT. Flow: candidate developer -> explanation row. Quan sát explanation fallback/validation khi Smart Assign dialog gây hiểu nhầm. Human selection và backend `assignToDeveloper` vẫn là authoritative.
+
 ## English
 
 ### What this file is for

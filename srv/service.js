@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): lớp này chỉ "đấu dây" OData vào rule thật trong bug-service. Breakpoint `init()` để biết request sẽ đi sang module nào.
 const cds = require('@sap/cds')
 
 const {
@@ -60,6 +61,7 @@ module.exports = class BugService extends cds.ApplicationService {
     for (const target of historyEventTargets) {
       this.before('READ', target, req => ensureHistoryEventSelectDependencies(req))
     }
+    // Mọi create/update đều phải qua cùng pipeline để UI không thể bỏ qua validation/ownership bằng OData trực tiếp.
     this.before('CREATE', Bugs, req => prepareBugWrite(req, entities, { isCreate: true }))
     this.before('NEW', Bugs.drafts, async req => {
       const actor = await enforceBugCreatePermission(req, entities)
@@ -101,6 +103,7 @@ module.exports = class BugService extends cds.ApplicationService {
     this.on('suggestClassification', req => suggestClassification(req, entities))
     this.on('summarizeBugHandoff', req => summarizeBugHandoff(req, entities))
     this.on('explainSmartAssignment', req => explainSmartAssignment(req, entities))
+    // Draft chỉ thành Bug active tại đây; breakpoint này giúp phân biệt lỗi "chưa save" với lỗi persist/side effect sau save.
     this.on('SAVE', Bugs.drafts, (req, next) => handleDraftSave(req, entities, next))
 
     this.on('assignToDeveloper', req => assignToDeveloper(req, entities))

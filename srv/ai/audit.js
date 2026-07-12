@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): lưu dấu vết AI suggestion đã sanitize. Audit chứng minh AI chỉ tư vấn, không tự đổi Bug/workflow.
 'use strict'
 
 const cds = require('@sap/cds')

@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): gợi ý classification nhưng luôn validate với active catalog; user mới là người chọn/lưu giá trị cuối.
 'use strict'
 
 const cds = require('@sap/cds')

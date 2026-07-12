@@ -1,5 +1,15 @@
 # Knowledge: `srv/ai/openai-provider.js`
 
+## Ownership and debug anchor / Ownership và điểm dừng debug
+
+### English
+
+Primary owner: DonHV. Backup: NhanT. Flow: sanitized request -> real provider HTTP response. Diagnose only safe response status/code; never inspect or publish the authorization header. Check `provider.js` and `safety.js` with this adapter.
+
+### Vietnamese
+
+Primary owner: DonHV. Backup: NhanT. Flow: sanitized request -> real provider HTTP response. Chỉ chẩn đoán safe response status/code; không inspect hoặc công khai authorization header. Kiểm tra cùng `provider.js` và `safety.js`.
+
 ## English
 
 ### Purpose

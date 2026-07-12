@@ -1,3 +1,4 @@
+// Học nhanh (DonHV): đọc AI feature config an toàn; provider/key thật chỉ được lấy từ private env và AI có thể tắt hoàn toàn.
 'use strict'
 
 const cds = require('@sap/cds')
