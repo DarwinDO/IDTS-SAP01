@@ -23,6 +23,7 @@ Before the first nontrivial task of a calendar day, the executing member must co
 - When a later task on the same day enters a different ownership flow, ask two additional flow-specific questions.
 - Questions must test purpose, caller/dependency, end-to-end request trace, breakpoint/root-cause reasoning, data effect, or authorization/security. Do not test line-number trivia or syntax memorization.
 - Record the date, flow, question count, score, critical answers, debug exercise, teach-back result, and safe evidence path in the member progress file.
+- Use `npm run learning:gate -- <member> <flow> YYYY-MM-DD [last-activity|-] [additional]` to select one reproducible question set; use `-` when a later new flow has no last-activity date to supply. The command selects questions only; a human/agent must still assess the answer, debug exercise, and teach-back before recording PASS or FAIL.
 
 ## PASS, FAIL, and mentoring
 
