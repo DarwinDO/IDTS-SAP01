@@ -12,11 +12,12 @@ The 72-file source-comment rollout is listed in `runtime-comment-retrofit.md`; i
 
 ### First-day procedure from 2026-07-13
 
-1. Read `ownership-map.md` and the relevant Debug Lab before changing code.
-2. Run `npm run learning:gate -- <member> <flow> 2026-07-13 [last-activity|-] [additional]`.
-3. Answer before asking for hints; then complete one real or controlled debugger exercise and a teach-back.
-4. Record the assessed result in `progress/<member>.md`. Only a human/agent assessment can write `PASS`.
-5. On `FAIL`, learn and code with supervision, then retest. Do not merge a PR or transition Jira to Done before the retest passes.
+1. For an initial ownership area without beginner comments/mirrors yet, the agent first prepares a comment-only Learning Material Bootstrap PR. The member is not assessed before this material exists.
+2. Read `ownership-map.md`, the merged/bootstrap material, and the relevant Debug Lab before changing behavior.
+3. Run `npm run learning:gate -- <member> <flow> 2026-07-13 [last-activity|-] [additional]`.
+4. Answer before asking for hints; then complete one real or controlled debugger exercise and a teach-back.
+5. Record the assessed result in `progress/<member>.md`. Only a human/agent assessment can write `PASS`.
+6. On `FAIL`, learn and code with supervision, then retest. Do not merge a behavior-changing PR or transition Jira to Done before the retest passes.
 
 ## Vietnamese
 
@@ -30,8 +31,9 @@ Các Debug Lab: `debug-labs/authentication-session.md`, `debug-labs/create-and-l
 
 ### Quy trình ngày đầu tiên từ 13/07/2026
 
-1. Đọc `ownership-map.md` và Debug Lab liên quan trước khi sửa code.
-2. Chạy `npm run learning:gate -- <member> <flow> 2026-07-13 [last-activity|-] [additional]`.
-3. Tự trả lời trước khi xin gợi ý; sau đó làm một debugger exercise thật hoặc có kiểm soát và teach-back.
-4. Ghi kết quả đã được đánh giá vào `progress/<member>.md`. Chỉ đánh giá của người/agent mới được ghi `PASS`.
-5. Nếu `FAIL`, member vẫn được học và code dưới supervision, sau đó retest. Không merge PR hoặc chuyển Jira Done trước khi retest pass.
+1. Nếu một ownership area chưa có comment/mirror beginner-first, agent phải tạo trước một PR Learning Material Bootstrap chỉ có comment/mirror. Không đánh giá member khi tài liệu đó chưa tồn tại.
+2. Đọc `ownership-map.md`, material đã merge/đang bootstrap và Debug Lab liên quan trước khi sửa behavior.
+3. Chạy `npm run learning:gate -- <member> <flow> 2026-07-13 [last-activity|-] [additional]`.
+4. Tự trả lời trước khi xin gợi ý; sau đó làm một debugger exercise thật hoặc có kiểm soát và teach-back.
+5. Ghi kết quả đã được đánh giá vào `progress/<member>.md`. Chỉ đánh giá của người/agent mới được ghi `PASS`.
+6. Nếu `FAIL`, member vẫn được học và code dưới supervision, sau đó retest. Không merge PR có đổi behavior hoặc chuyển Jira Done trước khi retest pass.
