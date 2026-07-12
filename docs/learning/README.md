@@ -10,6 +10,14 @@ Debug Labs: `debug-labs/authentication-session.md`, `debug-labs/create-and-lifec
 
 The 72-file source-comment rollout is listed in `runtime-comment-retrofit.md`; it is deliberately split by owner so the explanation remains a learning exercise, not a copied answer.
 
+### First-day procedure from 2026-07-13
+
+1. Read `ownership-map.md` and the relevant Debug Lab before changing code.
+2. Run `npm run learning:gate -- <member> <flow> 2026-07-13 [last-activity|-] [additional]`.
+3. Answer before asking for hints; then complete one real or controlled debugger exercise and a teach-back.
+4. Record the assessed result in `progress/<member>.md`. Only a human/agent assessment can write `PASS`.
+5. On `FAIL`, learn and code with supervision, then retest. Do not merge a PR or transition Jira to Done before the retest passes.
+
 ## Vietnamese
 
 Folder này là lớp học thực hành của team. Nó không thay source code, test hoặc knowledge mirror. Nó nói rõ mỗi member sở hữu gì, một flow IDTS chạy thế nào, nên dừng debugger ở đâu và lưu bằng chứng học tập ra sao.
@@ -19,3 +27,11 @@ Hãy bắt đầu từ `ownership-map.md`, sau đó đọc Debug Lab của flow 
 Các Debug Lab: `debug-labs/authentication-session.md`, `debug-labs/create-and-lifecycle.md`, `debug-labs/assignment-comments-attachments.md`, `debug-labs/dashboard-history.md`, `debug-labs/notifications-email.md`, `debug-labs/ai-assistance.md` và `debug-labs/qa-release-evidence.md`. Learning page của từng member nằm trong `members/`.
 
 Đợt source comment 72 file nằm trong `runtime-comment-retrofit.md`; cố ý chia theo owner để phần giải thích vẫn là bài học, không phải câu trả lời copy sẵn.
+
+### Quy trình ngày đầu tiên từ 13/07/2026
+
+1. Đọc `ownership-map.md` và Debug Lab liên quan trước khi sửa code.
+2. Chạy `npm run learning:gate -- <member> <flow> 2026-07-13 [last-activity|-] [additional]`.
+3. Tự trả lời trước khi xin gợi ý; sau đó làm một debugger exercise thật hoặc có kiểm soát và teach-back.
+4. Ghi kết quả đã được đánh giá vào `progress/<member>.md`. Chỉ đánh giá của người/agent mới được ghi `PASS`.
+5. Nếu `FAIL`, member vẫn được học và code dưới supervision, sau đó retest. Không merge PR hoặc chuyển Jira Done trước khi retest pass.
