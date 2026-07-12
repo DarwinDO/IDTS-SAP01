@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-07-11
+Last updated: 2026-07-12
 
 ## Snapshot
 
@@ -12,6 +12,7 @@ Last updated: 2026-07-11
 | Recommended next action | Fix and deploy `IDTS-81` before closing Shared QA email acceptance: a fresh Inbox email proved delivery works but its fallback deep link still uses the retired Fiori route. The local regression now covers root, current app, and legacy base-url forms; after merge, generate a new mail and click-test the Object Page destination. |
 | Active implementation note | IDTS-72 visual evidence audit has repository evidence merged through PR #126. IDTS-74 is complete and deployed. IDTS-75 is complete at implementation, PR, Render, and shared-QA evidence level. IDTS-76 is complete at implementation, PR, Render, and shared-QA evidence level: it reuses `summarizeBugHandoff` and `AiReviewUi`, adds a review-only Handoff Summary Object Page section/dialog, and has local plus shared-QA evidence for positive, sparse-data, unsafe-output, safe-failure, no-workflow-mutation, deployed API smoke, and deployed browser smoke. |
 | Main implementation risk | Shared QA still depends on private Render/Brevo/AWS/PostgreSQL environment variables staying out of repo, Jira, and logs. The Render PostgreSQL free-instance expiry remains the main time-bound infrastructure risk; IDTS-45 now documents a private logical-backup helper and recommends upgrading Render PostgreSQL before expiry if shared QA remains needed. Sprint 04 is tracked both through the real Jira sprint `IDTS Sprint 4` and planning epic `IDTS-51`; `IDTS-40` remains a deferred AWS-native follow-up rather than a blocker for Render QA. |
+| Knowledge readiness | `IDTS-82` is In Progress. From 2026-07-13, every member must pass the ownership Knowledge Gate before nontrivial work and before PR merge/Jira Done. Debug Labs, a progress register, and a PR-body validator are being added; source-comment retrofit is split into IDTS-83 to IDTS-85 and QA validation is IDTS-86. |
 
 ## What Is Already Done
 

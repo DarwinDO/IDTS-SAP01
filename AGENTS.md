@@ -15,6 +15,7 @@ For every task that creates, reads, edits, reviews, moves, synchronizes, or dele
 | Code question, reading, design, writing, refactor, debug, review, or audit | `skills-quality-and-ponytail.md` |
 | Documents, knowledge mirrors, SAP490, Drive, DOCX/XLSX/PPTX/PDF | `documentation-knowledge-and-sap490.md` plus the OfficeCLI gate |
 | Tests, security, configuration, deployment, or release claims | `testing-security-and-release.md` |
+| Code ownership, beginner debugging, learning recap, task-start knowledge gate, or PR/Jira learning evidence | `ownership-learning-and-debug.md` |
 
 ## Role
 
@@ -679,6 +680,18 @@ Dùng `idts-ba-docx-deliverables` trước khi tạo, chỉnh sửa hoặc conve
 - Rule giữ fidelity của template về font, cỡ chữ, màu, bảng, formula, header, footer, cover page và page setup.
 - Cách dùng `brd-creation`, `srs-documentation`, `frs-creation`, `docx`, và `docx-manipulation` như nguồn tham khảo phụ.
 - Rule chất lượng DOCX/XLSX/PPTX như bảng Word thật, heading style, bảng approval/version, traceability matrix, giữ formula/style, visual QA và kiểm tra lỗi tiếng Việt.
+
+## Mandatory Code Ownership and Knowledge Gate
+
+From 2026-07-13 (Asia/Bangkok), all four IDTS members must follow `.agents/rules/ownership-learning-and-debug.md` for nontrivial task-start knowledge checks, beginner debugging, source comments, PR evidence, and Jira Done checks.
+
+Use `docs/learning/ownership-map.md` to identify the primary and backup owner before asking questions or assigning work. A member may learn and code after a failed gate, but the agent must not mark the task PASS, merge the PR, or transition Jira to Done until the retest PASS evidence exists.
+
+Vietnamese:
+
+Từ 13/07/2026 (Asia/Bangkok), cả bốn member IDTS phải tuân theo `.agents/rules/ownership-learning-and-debug.md` cho Knowledge Gate đầu task, beginner debugging, comment source, evidence PR và điều kiện Jira Done.
+
+Dùng `docs/learning/ownership-map.md` để xác định primary/backup owner trước khi hỏi hoặc phân công. Member fail gate vẫn được học và code có hướng dẫn, nhưng agent không được đánh PASS task, merge PR hoặc chuyển Jira Done cho đến khi có retest PASS evidence.
 
 ## Learning Recap / Mentor Mode
 
