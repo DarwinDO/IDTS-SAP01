@@ -1,6 +1,6 @@
 # IDTS Task Board
 
-Last updated: 2026-07-09
+Last updated: 2026-07-12
 
 Use this board for high-level movement only. Detailed task notes belong in the matching file under `docs/pm/tasks/`.
 
@@ -145,6 +145,7 @@ Vietnamese:
 | IDTS-73 | Support pending attachments during Create Bug and hide Comments on create | DonHV | Done. PR #123 merged into `dev` at `2f600d4`, Render shared QA deployed the commit, API smoke passed, and browser smoke confirmed Comments hidden plus pending Evidence/Attachments selection enabled on Create Bug. |
 | IDTS-72 | Final QA acceptance for AI assistance and failure modes | NhanT / DonHV support | Ready for closure after IDTS-76. Fresh local acceptance passed 6/6, Smart Assign has product UI browser evidence, IDTS-74 adds deployed duplicate/similar review evidence, IDTS-75 adds deployed classification suggestion review evidence, and IDTS-76 adds deployed handoff-summary review evidence. |
 | IDTS-81 | Correct Shared QA email fallback deep link | DonHV | In progress. A real Inbox delivery exposed the retired Fiori route. The fix maps root/current/legacy `baseUrl` forms to the current app entry page; await PR, Render deploy, and a fresh click-test. |
+| IDTS-82 | Establish code ownership and knowledge-gate governance | DonHV | In progress. Effective 2026-07-13: ownership map, Debug Labs, daily PR/Jira gate, and source-comment retrofit workstream are being added. IDTS-83 to IDTS-85 block IDTS-86. |
 
 Vietnamese:
 
@@ -166,6 +167,7 @@ Vietnamese:
 | IDTS-73 | Ho tro chon attachment khi Create Bug va an Comments khi create | DonHV | Done. PR #123 da merge vao `dev` tai `2f600d4`, Render shared QA da deploy commit nay, API smoke pass, va browser smoke xac nhan Comments da an cung nhu Evidence/Attachments co the chon file pending tren Create Bug. |
 | IDTS-72 | QA acceptance cuoi cho AI assistance va failure mode | NhanT / DonHV ho tro | San sang dong sau IDTS-76. Fresh local acceptance pass 6/6, Smart Assign co evidence UI san pham, IDTS-74 co evidence duplicate/similar review tren ban deploy, IDTS-75 co evidence classification suggestion review tren ban deploy, va IDTS-76 co evidence handoff-summary review tren ban deploy. |
 | IDTS-81 | Sua fallback deep link email Shared QA | DonHV | Dang lam. Mail that trong Inbox phat hien Fiori route da retired. Fix map root/current/legacy `baseUrl` sang app entry page hien tai; cho PR, Render deploy va click-test mail moi. |
+| IDTS-82 | Thiet lap code ownership va knowledge-gate governance | DonHV | Dang lam. Hieu luc 2026-07-13: dang them ownership map, Debug Lab, gate PR/Jira hang ngay va workstream retrofit source comment. IDTS-83 den IDTS-85 block IDTS-86. |
 
 
 ## Blocked

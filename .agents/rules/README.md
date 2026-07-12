@@ -18,5 +18,6 @@ priority: required
 | `skills-quality-and-ponytail.md` | Any code question, read, design, write, refactor, fix, review, or audit. |
 | `documentation-knowledge-and-sap490.md` | Canonical docs, knowledge mirrors, DOCX/XLSX/PPTX, SAP490, or Google Drive work. |
 | `testing-security-and-release.md` | Tests, QA, security, deployment, configuration, or completion claims. |
+| `ownership-learning-and-debug.md` | Code ownership, beginner debugging, task-start Knowledge Gate, learning recap, source comments, and PR/Jira learning evidence. |
 
 When instructions conflict, follow: current user request, `AGENTS.md`, project/context/PM records, then these rules.

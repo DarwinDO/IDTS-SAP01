@@ -30,6 +30,23 @@
 
 <!-- Required for code changes: list ponytail skill(s) used, the simplest accepted approach, and what was intentionally not added. For non-code changes, write "N/A - documentation-only change". -->
 
+## Ownership Knowledge Gate
+
+<!-- Required from 2026-07-13. Keep these exact fields. Result may be PASS only after score >= 80%, all critical questions pass, one debug exercise passes, and the member completes a teach-back. -->
+
+Member:
+Date:
+Ownership flow:
+Base questions:
+Inactive-day questions:
+Additional-flow questions:
+Score:
+Critical questions:
+Debug exercise:
+Teach-back:
+Evidence:
+Result:
+
 ## Known Gaps
 
 <!-- Known limitations, untested areas, follow-up Jira links. If none, say "None". -->
@@ -45,4 +62,5 @@
 - [ ] I checked persistence/reload behavior or explained why it is N/A.
 - [ ] I checked UI/UX consistency or explained why it is N/A.
 - [ ] I applied the required Ponytail skill or explained why this is a non-code change.
+- [ ] I completed the Ownership Knowledge Gate or explained why this PR predates 2026-07-13.
 - [ ] I recorded actionable defects in Jira or explained why none were found.

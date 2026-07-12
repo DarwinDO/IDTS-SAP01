@@ -12,11 +12,13 @@ const REQUIRED_SECTIONS = [
   'Persistence/Reload',
   'UI/UX Review',
   'Ponytail Simplicity',
+  'Ownership Knowledge Gate',
   'Known Gaps',
   'Jira/Evidence Links'
 ]
 
 const MIN_CONTENT_LENGTH = 12
+const OWNERSHIP_GATE_EFFECTIVE_DATE = '2026-07-13'
 
 function parseArgs(argv) {
   const args = {}
@@ -99,13 +101,74 @@ function isAllowedNoneSection(name, text) {
   return /^none\.?$/i.test(cleaned)
 }
 
-function validatePullRequestBody(markdown) {
+const OWNERSHIP_GATE_FIELDS = [
+  'Member',
+  'Date',
+  'Ownership flow',
+  'Base questions',
+  'Inactive-day questions',
+  'Additional-flow questions',
+  'Score',
+  'Critical questions',
+  'Debug exercise',
+  'Teach-back',
+  'Evidence',
+  'Result'
+]
+
+function validateOwnershipKnowledgeGate (text, errors) {
+  const values = new Map()
+  for (const line of text.split(/\r?\n/)) {
+    const match = /^([^:]+):\s*(.+?)\s*$/.exec(line)
+    if (match) values.set(match[1].trim().toLowerCase(), match[2].trim())
+  }
+
+  for (const field of OWNERSHIP_GATE_FIELDS) {
+    if (!values.has(field.toLowerCase())) errors.push(`Missing Ownership Knowledge Gate field: ${field}`)
+  }
+
+  const score = values.get('score') || ''
+  const scoreMatch = /^(\d{1,3})%$/.exec(score)
+  if (!scoreMatch || Number(scoreMatch[1]) < 80 || Number(scoreMatch[1]) > 100) {
+    errors.push('Ownership Knowledge Gate score must be 80% to 100%')
+  }
+
+  for (const field of ['Critical questions', 'Debug exercise', 'Teach-back', 'Result']) {
+    if ((values.get(field.toLowerCase()) || '').toUpperCase() !== 'PASS') {
+      errors.push(`Ownership Knowledge Gate field must be PASS: ${field}`)
+    }
+  }
+
+  const evidence = values.get('evidence') || ''
+  if (!/(^|\s)(docs\/learning\/progress\/|docs\/pm\/evidence\/)/.test(evidence)) {
+    errors.push('Ownership Knowledge Gate evidence must reference docs/learning/progress/ or docs/pm/evidence/')
+  }
+}
+
+function bangkokDate () {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Bangkok',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(new Date())
+  const value = Object.fromEntries(parts.map(part => [part.type, part.value]))
+  return `${value.year}-${value.month}-${value.day}`
+}
+
+function isOwnershipGateRequired (today = bangkokDate()) {
+  return today >= OWNERSHIP_GATE_EFFECTIVE_DATE
+}
+
+function validatePullRequestBody (markdown, options = {}) {
   const sections = extractSections(markdown)
   const errors = []
+  const ownershipGateRequired = options.ownershipGateRequired ?? isOwnershipGateRequired(options.today)
 
   for (const name of REQUIRED_SECTIONS) {
     const key = normalizeHeading(name)
     if (!sections.has(key)) {
+      if (name === 'Ownership Knowledge Gate' && !ownershipGateRequired) continue
       errors.push(`Missing required section: ${name}`)
       continue
     }
@@ -132,6 +195,9 @@ function validatePullRequestBody(markdown) {
       errors.push(`Section must explain untested/none claim: ${name}`)
     }
   }
+
+  const ownershipGate = sections.get(normalizeHeading('Ownership Knowledge Gate'))
+  if (ownershipGate) validateOwnershipKnowledgeGate(stripComments(ownershipGate), errors)
 
   return {
     pass: errors.length === 0,
@@ -160,5 +226,8 @@ module.exports = {
   REQUIRED_SECTIONS,
   validatePullRequestBody,
   extractSections,
-  stripComments
+  stripComments,
+  validateOwnershipKnowledgeGate,
+  isOwnershipGateRequired,
+  bangkokDate
 }

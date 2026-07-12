@@ -13,7 +13,8 @@ const REQUIRED_RULES = [
   'sap-routing-and-ui.md',
   'skills-quality-and-ponytail.md',
   'documentation-knowledge-and-sap490.md',
-  'testing-security-and-release.md'
+  'testing-security-and-release.md',
+  'ownership-learning-and-debug.md'
 ]
 
 function read (file) {
