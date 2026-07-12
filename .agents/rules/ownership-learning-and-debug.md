@@ -18,6 +18,15 @@ priority: required
 
 Before the first nontrivial task of a calendar day, the executing member must complete the Knowledge Gate for the task's relevant ownership flow.
 
+### Initial learning-material bootstrap exception
+
+The first rollout of source comments and knowledge mirrors must happen **before** the human owner is assessed on that material. For a dedicated bootstrap task such as IDTS-83, IDTS-84, or IDTS-85, an agent may first prepare concise Vietnamese source comments and matching bilingual knowledge mirrors.
+
+- A bootstrap PR may be merged before the member Knowledge Gate only when it changes learning material only: source comments and knowledge mirrors, with no runtime behavior, schema, service, manifest, test, dependency, or configuration change.
+- The PR must use the `Learning Material Bootstrap` declaration, name the learner and follow-up IDTS issue, and be reviewed for comment-only scope.
+- The member then studies the prepared PR/merged material, completes the relevant Knowledge Gate, debug exercise, and teach-back before receiving PASS for any later technical implementation, PR merge, or Jira Done.
+- The bootstrap exception never applies to a feature, bug fix, refactor, security change, or mixed behavior-plus-documentation PR. Those PRs always require a passing Ownership Knowledge Gate from 2026-07-13.
+
 - Start on 2026-07-13 with three questions and zero historical debt.
 - Add one question for each calendar day without an ownership-code activity after the most recent passing task. Cap the first gate at seven questions.
 - When a later task on the same day enters a different ownership flow, ask two additional flow-specific questions.
@@ -71,6 +80,15 @@ On FAIL:
 - Không được dùng ranh giới FE/BE làm lý do để không giải thích được luồng end-to-end.
 
 Trước task không tầm thường đầu tiên trong ngày, member phải vượt Knowledge Gate theo flow liên quan. Ngày 13/07 bắt đầu ba câu, không tính nợ lịch sử; mỗi ngày lịch không có ownership-code activity cộng một câu, tối đa bảy câu. Nếu cùng ngày chuyển qua flow khác, hỏi thêm hai câu của flow đó.
+
+### Ngoại lệ bootstrap tài liệu học ban đầu
+
+Đợt comment source và knowledge mirror đầu tiên phải được agent chuẩn bị **trước** khi đánh giá member trên chính tài liệu đó. Với task bootstrap riêng như IDTS-83, IDTS-84 hoặc IDTS-85, agent được tạo trước comment source tiếng Việt ngắn gọn và knowledge mirror song ngữ tương ứng.
+
+- PR bootstrap chỉ được merge trước Knowledge Gate của member khi chỉ đổi tài liệu học: comment source và knowledge mirror; không được đổi runtime behavior, schema, service, manifest, test, dependency hoặc config.
+- PR phải khai báo `Learning Material Bootstrap`, nêu learner và IDTS follow-up; reviewer phải kiểm tra diff thực sự chỉ có comment/mirror.
+- Sau đó member học từ PR/tài liệu đã merge, làm Knowledge Gate, debug exercise và teach-back trước khi được PASS cho mọi implementation kỹ thuật, merge PR hoặc Jira Done tiếp theo.
+- Ngoại lệ bootstrap không áp dụng cho feature, bug fix, refactor, security change hoặc PR vừa đổi behavior vừa đổi tài liệu. Các PR đó luôn cần Ownership Knowledge Gate PASS từ 13/07/2026.
 
 PASS cần tối thiểu 80%, đúng toàn bộ câu security/authorization/data integrity, trace được một flow, làm debug exercise và teach-back bằng lời của mình. FAIL vẫn được học và code có hướng dẫn, nhưng không được PASS task, merge PR hay Jira Done trước khi retest tương đương đạt.
 

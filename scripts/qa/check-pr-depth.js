@@ -12,7 +12,6 @@ const REQUIRED_SECTIONS = [
   'Persistence/Reload',
   'UI/UX Review',
   'Ponytail Simplicity',
-  'Ownership Knowledge Gate',
   'Known Gaps',
   'Jira/Evidence Links'
 ]
@@ -116,6 +115,15 @@ const OWNERSHIP_GATE_FIELDS = [
   'Result'
 ]
 
+const LEARNING_BOOTSTRAP_FIELDS = [
+  'Purpose',
+  'Runtime behavior changed',
+  'Scope verified',
+  'Learner',
+  'Follow-up Knowledge Gate',
+  'Evidence'
+]
+
 function validateOwnershipKnowledgeGate (text, errors) {
   const values = new Map()
   for (const line of text.split(/\r?\n/)) {
@@ -145,6 +153,40 @@ function validateOwnershipKnowledgeGate (text, errors) {
   }
 }
 
+function validateLearningMaterialBootstrap (text, errors) {
+  const values = new Map()
+  for (const line of text.split(/\r?\n/)) {
+    const match = /^([^:]+):\s*(.+?)\s*$/.exec(line)
+    if (match) values.set(match[1].trim().toLowerCase(), match[2].trim())
+  }
+
+  for (const field of LEARNING_BOOTSTRAP_FIELDS) {
+    if (!values.has(field.toLowerCase())) errors.push(`Missing Learning Material Bootstrap field: ${field}`)
+  }
+
+  if ((values.get('runtime behavior changed') || '').toUpperCase() !== 'NO') {
+    errors.push('Learning Material Bootstrap runtime behavior changed must be NO')
+  }
+
+  const scope = values.get('scope verified') || ''
+  if (!/comment/i.test(scope) || !/knowledge/i.test(scope)) {
+    errors.push('Learning Material Bootstrap scope must be limited to comments and knowledge mirrors')
+  }
+
+  if ((values.get('learner') || '').length < 2) {
+    errors.push('Learning Material Bootstrap learner must be identified')
+  }
+
+  if (!/^IDTS-\d+$/i.test(values.get('follow-up knowledge gate') || '')) {
+    errors.push('Learning Material Bootstrap follow-up Knowledge Gate must reference an IDTS issue')
+  }
+
+  const evidence = values.get('evidence') || ''
+  if (!/(^|\s)(docs\/knowledge\/|docs\/learning\/|docs\/pm\/evidence\/)/.test(evidence)) {
+    errors.push('Learning Material Bootstrap evidence must reference docs/knowledge/, docs/learning/, or docs/pm/evidence/')
+  }
+}
+
 function bangkokDate () {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Bangkok',
@@ -168,7 +210,6 @@ function validatePullRequestBody (markdown, options = {}) {
   for (const name of REQUIRED_SECTIONS) {
     const key = normalizeHeading(name)
     if (!sections.has(key)) {
-      if (name === 'Ownership Knowledge Gate' && !ownershipGateRequired) continue
       errors.push(`Missing required section: ${name}`)
       continue
     }
@@ -196,13 +237,23 @@ function validatePullRequestBody (markdown, options = {}) {
     }
   }
 
-  const ownershipGate = sections.get(normalizeHeading('Ownership Knowledge Gate'))
-  if (ownershipGate) validateOwnershipKnowledgeGate(stripComments(ownershipGate), errors)
+  const ownershipGate = stripComments(sections.get(normalizeHeading('Ownership Knowledge Gate')) || '')
+  const bootstrap = stripComments(sections.get(normalizeHeading('Learning Material Bootstrap')) || '')
+
+  if (ownershipGate && bootstrap) {
+    errors.push('Use either Ownership Knowledge Gate or Learning Material Bootstrap, not both')
+  } else if (ownershipGate) {
+    validateOwnershipKnowledgeGate(ownershipGate, errors)
+  } else if (bootstrap) {
+    validateLearningMaterialBootstrap(bootstrap, errors)
+  } else if (ownershipGateRequired) {
+    errors.push('Missing required section: Ownership Knowledge Gate or Learning Material Bootstrap')
+  }
 
   return {
     pass: errors.length === 0,
     errors,
-    checkedSections: REQUIRED_SECTIONS.length
+    checkedSections: REQUIRED_SECTIONS.length + 1
   }
 }
 
@@ -228,6 +279,7 @@ module.exports = {
   extractSections,
   stripComments,
   validateOwnershipKnowledgeGate,
+  validateLearningMaterialBootstrap,
   isOwnershipGateRequired,
   bangkokDate
 }

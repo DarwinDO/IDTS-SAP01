@@ -1,6 +1,8 @@
 'use strict'
 
 const assert = require('assert')
+const fs = require('fs')
+const path = require('path')
 const { validatePullRequestBody, bangkokDate } = require('./check-pr-depth')
 const { isAllowedLocalPreviewResponse, isUnexpectedConsoleError } = require('./lib/browser-harness')
 
@@ -34,6 +36,34 @@ function validBody() {
     ].join('\n')),
     section('Known Gaps', 'None'),
     section('Jira/Evidence Links', 'Jira: IDTS-42. Evidence: local self-test output.')
+  ].join('\n')
+}
+
+function bootstrapBody() {
+  return validBody().replace(section('Ownership Knowledge Gate', [
+    'Member: DonHV',
+    'Date: 2026-07-13',
+    'Ownership flow: Authentication/session/profile',
+    'Base questions: 3',
+    'Inactive-day questions: 0',
+    'Additional-flow questions: 0',
+    'Score: 100%',
+    'Critical questions: PASS',
+    'Debug exercise: PASS',
+    'Teach-back: PASS',
+    'Evidence: docs/learning/progress/donhv.md',
+    'Result: PASS'
+  ].join('\n')), section('Learning Material Bootstrap', bootstrapDeclaration()))
+}
+
+function bootstrapDeclaration() {
+  return [
+    'Purpose: Initial agent-created learning material for IDTS-84.',
+    'Runtime behavior changed: NO',
+    'Scope verified: Source comments and knowledge mirrors only.',
+    'Learner: DatDT',
+    'Follow-up Knowledge Gate: IDTS-84',
+    'Evidence: docs/knowledge/app/'
   ].join('\n')
 }
 
@@ -90,6 +120,33 @@ function main() {
   assert.strictEqual(result.pass, true, result.errors.join('\n'))
   console.log('  PASS  gate is not required before effective date')
 
+  result = validatePullRequestBody(bootstrapBody(), { ownershipGateRequired: true })
+  assert.strictEqual(result.pass, true, result.errors.join('\n'))
+  console.log('  PASS  a narrow learning-material bootstrap can precede the member gate')
+
+  result = validatePullRequestBody(bootstrapBody().replace('Runtime behavior changed: NO', 'Runtime behavior changed: YES'), { ownershipGateRequired: true })
+  assert.strictEqual(result.pass, false)
+  assert(result.errors.some(error => /runtime behavior changed must be NO/.test(error)))
+  console.log('  PASS  bootstrap cannot claim a runtime behavior change')
+
+  const missingGateAndBootstrap = beforeEffectiveDate
+  result = validatePullRequestBody(missingGateAndBootstrap, { ownershipGateRequired: true })
+  assert.strictEqual(result.pass, false)
+  assert(result.errors.some(error => /Ownership Knowledge Gate or Learning Material Bootstrap/.test(error)))
+  console.log('  PASS  post-effective PRs need a gate or a valid bootstrap declaration')
+
+  result = validatePullRequestBody(validBody() + section('Learning Material Bootstrap', bootstrapDeclaration()), { ownershipGateRequired: true })
+  assert.strictEqual(result.pass, false)
+  assert(result.errors.some(error => /either Ownership Knowledge Gate or Learning Material Bootstrap/.test(error)))
+  console.log('  PASS  a PR cannot use both declarations')
+
+  const template = fs.readFileSync(path.join(__dirname, '../../.github/pull_request_template.md'), 'utf8')
+  result = validatePullRequestBody(template, { ownershipGateRequired: true })
+  assert.strictEqual(result.pass, false)
+  assert(result.errors.some(error => /Ownership Knowledge Gate or Learning Material Bootstrap/.test(error)))
+  assert.strictEqual(result.errors.some(error => /Missing .* field/.test(error)), false)
+  console.log('  PASS  the blank template does not masquerade as a completed declaration')
+
   assert.match(bangkokDate(), /^\d{4}-\d{2}-\d{2}$/)
   console.log('  PASS  default gate date is formatted in Asia/Bangkok')
 
@@ -107,7 +164,7 @@ function main() {
   assert.strictEqual(isUnexpectedConsoleError('Failed to load resource: the server responded with a status of 404'), false)
   console.log('  PASS  browser harness console classifier keeps runtime TypeError blocking')
 
-  console.log('\nQA Depth Gate self-test: 10 PASS / 0 FAIL')
+  console.log('\nQA Depth Gate self-test: 15 PASS / 0 FAIL')
 }
 
 try {

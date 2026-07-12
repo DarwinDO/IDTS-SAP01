@@ -32,8 +32,8 @@
 
 ## Ownership Knowledge Gate
 
-<!-- Required from 2026-07-13. Keep these exact fields. Result may be PASS only after score >= 80%, all critical questions pass, one debug exercise passes, and the member completes a teach-back. -->
-
+<!-- Required from 2026-07-13 unless this PR is a valid Learning Material Bootstrap below. Copy/uncomment and complete this exact block; do not complete both declarations. -->
+<!--
 Member:
 Date:
 Ownership flow:
@@ -46,6 +46,19 @@ Debug exercise:
 Teach-back:
 Evidence:
 Result:
+-->
+
+## Learning Material Bootstrap
+
+<!-- Alternative only for the first agent-created source-comment + knowledge-mirror rollout. Copy/uncomment and complete this block; do not complete both declarations. This declaration is invalid for any runtime, schema, service, manifest, test, dependency, or configuration change. -->
+<!--
+Purpose:
+Runtime behavior changed: NO
+Scope verified: Source comments and knowledge mirrors only
+Learner:
+Follow-up Knowledge Gate:
+Evidence:
+-->
 
 ## Known Gaps
 
