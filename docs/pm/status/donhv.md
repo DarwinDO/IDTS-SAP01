@@ -2293,6 +2293,18 @@ Vietnamese:
 | Lỗi tooling | Command restart đầu tiên chưa chạy vì gán vào biến automatic chỉ đọc `$PID` của PowerShell. | Shell dành riêng `$PID` cho process id của chính nó. | Không đổi source hoặc shared-QA state. Retry bằng biến không reserved và inspect port listener thật trước khi dừng. | Restart service local an toàn rồi chạy lại browser smoke. |
 | Lỗi UI sản phẩm | Sau concise-label change, browser smoke mới không còn tìm thấy `Find Similar Bugs`. | Fragment custom field dùng `sap.m.Button` trần; pattern custom field hiện có của app cần `SmartAssignmentSection` để kế thừa binding context Fiori. | Đang xử lý. Khôi phục root control có context-aware sẵn có nhưng chỉ giữ button; form vẫn cung cấp label ngắn và không có helper text dài. | Restart local preview rồi chạy lại browser smoke và review screenshot. |
 
+## 2026-07-17 - IDTS-84/85 comment patch preparation
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling issue | A single large comment-only patch was rejected before writing because an existing source header contains a differently encoded em dash. | Patch context used terminal-rendered Unicode instead of an ASCII-stable anchor from the repository bytes. | No partial source or documentation change occurred. Split the material changes into small patches anchored on ASCII file starts or nearby stable lines. | Verify each resulting diff contains comments/mirrors only; do not classify this as a product defect. |
+
+### Vietnamese
+
+| Phân loại | Triệu chứng / công việc | Nguyên nhân | Trạng thái xử lý | Verify / bước tiếp theo |
+| --- | --- | --- | --- | --- |
+| Lỗi tooling | Một patch comment-only lớn bị từ chối trước khi ghi vì source header cũ có em dash được mã hóa khác với terminal. | Context patch dùng Unicode đã render từ terminal thay vì anchor ASCII ổn định từ byte trong repository. | Không có source hoặc tài liệu nào bị ghi dở. Tách material thành patch nhỏ, neo tại đầu file ASCII hoặc dòng lân cận ổn định. | Verify diff cuối chỉ có comment/mirror; không phân loại đây là product defect. |
+
 ## 2026-07-12 - IDTS-82 Knowledge Gate runner
 
 | Classification | Symptom / work | Root cause | Fix status | Verification / next action |
