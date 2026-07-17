@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/fragment/ClassificationReviewField.fragment.xml`
 
+> **Ownership / debug anchor:** DatDT owns this Classification field extension (backup: SangVN). The button opens review UI in the existing business section; it is not a new workflow action.
+> **Ownership / điểm debug:** DatDT sở hữu field extension Classification này (backup: SangVN). Nút mở review UI trong business section có sẵn, không phải workflow action mới.
+
 ## English
 
 ### What this file is for

@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/index.html`
 
+> **Ownership / debug anchor:** DatDT owns the protected Fiori shell bootstrap (backup: SangVN). Script order matters: auth guard must run before UI5 can request metadata.
+> **Ownership / điểm debug:** DatDT sở hữu protected Fiori shell bootstrap (backup: SangVN). Thứ tự script rất quan trọng: auth guard phải chạy trước khi UI5 request metadata.
+
 ## English
 
 ### What this file is for

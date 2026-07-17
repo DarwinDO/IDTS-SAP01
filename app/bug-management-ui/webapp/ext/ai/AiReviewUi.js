@@ -1,4 +1,5 @@
 /**
+ * Gợi ý học/debug: module này chỉ đổi dữ liệu AI thành text/trạng thái an toàn cho UI, không quyết định nghiệp vụ.
  * Reusable user-facing UI state mapping for IDTS AI suggestions.
  *
  * Keep this module presentation-focused. Backend actions still own AI

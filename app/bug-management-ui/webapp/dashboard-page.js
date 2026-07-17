@@ -1,4 +1,5 @@
 /**
+ * Gợi ý học/debug: dashboard chỉ đọc OData; số KPI sai thường bắt đầu từ filter/role profile, không phải từ thao tác ghi bug.
  * IDTS role-based dashboard page.
  *
  * Standalone SAPUI5 page protected by auth-guard.js. It reads existing OData

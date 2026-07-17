@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/login-page.js`
 
+> **Ownership / debug anchor:** DatDT owns the visible login flow (backup: DonHV). Verify a safe login response, sessionStorage keys, then redirect; never inspect or log the password.
+> **Ownership / điểm debug:** DatDT sở hữu login flow hiển thị (backup: DonHV). Verify response login an toàn, các sessionStorage key rồi redirect; không inspect hoặc log password.
+
 ## English
 
 ### What this file is for

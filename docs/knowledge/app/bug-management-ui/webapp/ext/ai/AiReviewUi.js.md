@@ -1,5 +1,8 @@
 # `AiReviewUi.js` - Reusable AI suggestion review UI helper
 
+> **Ownership / debug anchor:** DatDT owns AI result presentation (backup: DonHV). This module maps safe backend result states to UI wording and must not decide workflow or persist suggestions.
+> **Ownership / điểm debug:** DatDT sở hữu phần hiển thị kết quả AI (backup: DonHV). Module này map trạng thái an toàn từ backend sang wording UI và không được quyết định workflow hoặc persist suggestion.
+
 ## English
 
 ### What this file is for

@@ -1,4 +1,5 @@
 /**
+ * Gợi ý học/debug: summary chỉ để đọc trước khi bàn giao; không được nhầm dialog này với action chuyển trạng thái bug.
  * Handoff summary review dialog for the Bugs Object Page.
  *
  * This UI reuses the backend summarizeBugHandoff action. It only displays

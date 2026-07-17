@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/actions/HandoffSummaryReview.js`
 
+> **Ownership / debug anchor:** DatDT owns handoff-summary review UI (backup: DonHV). It must never write history, assignee, or status merely by opening the dialog.
+> **Ownership / điểm debug:** DatDT sở hữu UI review handoff summary (backup: DonHV). Mở dialog không được tự ghi history, assignee hoặc status.
+
 ## English
 
 ### What this file is for

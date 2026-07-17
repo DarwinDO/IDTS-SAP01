@@ -1,5 +1,8 @@
 # Knowledge: `app/services.cds`
 
+> **Ownership / debug anchor:** DatDT owns the annotation entry point (backup: SangVN). Break here when a Fiori annotation appears missing from `$metadata`; verify the imported module and `srv/service.cds` together.
+> **Ownership / điểm debug:** DatDT sở hữu điểm vào annotation (backup: SangVN). Dừng tại đây khi annotation Fiori mất khỏi `$metadata`; kiểm tra đồng thời module import và `srv/service.cds`.
+
 ## English
 
 ### What this file is for

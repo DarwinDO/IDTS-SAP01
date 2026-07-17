@@ -1,4 +1,5 @@
 /**
+ * Gợi ý học/debug: chỉ token được gắn vào request OData; không log hoặc đưa token lên UI khi dò lỗi 401.
  * IDTS Auth Guard – loaded by index.html BEFORE the UI5 bootstrap.
  *
  * Runs synchronously as the very first script so that:

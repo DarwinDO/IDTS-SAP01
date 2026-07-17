@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/css/login.css`
 
+> **Ownership / debug anchor:** DatDT owns login layout styling (backup: SangVN). Visual breakage starts with viewport and selector inspection, not authentication code.
+> **Ownership / điểm debug:** DatDT sở hữu style layout login (backup: SangVN). Lỗi hiển thị bắt đầu bằng viewport và selector, không phải code authentication.
+
 ## English
 
 ### What this file is for

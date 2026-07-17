@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/annotations.cds`
 
+> **Ownership / debug anchor:** DatDT owns this annotation aggregator (backup: SangVN). If a whole UI rule disappears, trace this import chain before changing the Fiori page.
+> **Ownership / điểm debug:** DatDT sở hữu file gom annotation này (backup: SangVN). Nếu cả một rule UI biến mất, lần theo chuỗi import này trước khi sửa trang Fiori.
+
 ## English
 
 ### What this file is for

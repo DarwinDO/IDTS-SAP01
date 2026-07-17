@@ -1,4 +1,5 @@
 /**
+ * Gợi ý học/debug: profile shell chỉ hiển thị user an toàn và gọi logout; backend vẫn kiểm tra role trên mọi OData request.
  * IDTS profile shell for the authenticated Fiori app.
  *
  * Renders a lightweight SAPUI5 profile button into the stable host owned by

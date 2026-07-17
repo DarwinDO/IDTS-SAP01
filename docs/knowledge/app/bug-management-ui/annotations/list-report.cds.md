@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/annotations/list-report.cds`
 
+> **Ownership / debug anchor:** DatDT owns this List Report metadata (backup: SangVN). Debug a missing filter or column here, then confirm the property is exposed by `srv/service.cds`.
+> **Ownership / điểm debug:** DatDT sở hữu metadata List Report này (backup: SangVN). Debug filter hoặc cột bị thiếu tại đây, rồi xác nhận property đã được expose bởi `srv/service.cds`.
+
 ## English
 
 ### What this file is for

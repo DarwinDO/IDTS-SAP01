@@ -1,4 +1,5 @@
 /**
+ * Gợi ý học/debug: dialog là review-only; nếu classification trong DB đổi, breakpoint phải đặt ở CAP handler, không phải file này.
  * Classification suggestion review dialog for the Bugs Object Page.
  *
  * The backend validates suggestions against IDTS catalogs. This UI only

@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/annotations/labels.cds`
 
+> **Ownership / debug anchor:** DatDT owns UI labels and client guidance (backup: SangVN). A mandatory-looking field here still needs matching CAP validation in `srv/`.
+> **Ownership / điểm debug:** DatDT sở hữu nhãn và hướng dẫn phía UI (backup: SangVN). Trường nhìn như bắt buộc ở đây vẫn phải có validation tương ứng trong `srv/`.
+
 ## English
 
 ### What this file is for

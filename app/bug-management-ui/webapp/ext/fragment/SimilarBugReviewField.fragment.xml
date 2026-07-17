@@ -1,3 +1,4 @@
+<!-- Nút này nằm trong Bug Summary để người dùng xem candidate tương tự, không tự tạo DuplicateLinks. -->
 <core:FragmentDefinition
   xmlns="sap.m"
   xmlns:core="sap.ui.core"

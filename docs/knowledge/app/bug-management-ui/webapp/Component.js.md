@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/Component.js`
 
+> **Ownership / debug anchor:** DatDT owns the Fiori Component boundary (backup: SangVN). For a first-load failure, inspect `index.html` and `auth-guard.js` before this module.
+> **Ownership / điểm debug:** DatDT sở hữu ranh giới Fiori Component (backup: SangVN). Khi lỗi first-load, kiểm tra `index.html` và `auth-guard.js` trước module này.
+
 ## English
 
 ### What this file is for

@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/dashboard-page.js`
 
+> **Ownership / debug anchor:** DatDT owns dashboard rendering (backup: NhanT). Inspect its OData read/filter and safe role profile when KPI content is wrong.
+> **Ownership / điểm debug:** DatDT sở hữu phần render dashboard (backup: NhanT). Khi KPI sai, kiểm OData read/filter và role profile an toàn.
+
 ## English
 
 ### What this file is for
