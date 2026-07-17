@@ -2353,6 +2353,18 @@ Vietnamese:
 | --- | --- | --- | --- | --- |
 | Lỗi test-harness / process | Lần QA Depth Gate đầu tiên từ chối cả hai PR learning-material dù diff comment/mirror hợp lệ. | Parser bootstrap yêu cầu follow-up phải đúng dạng `IDTS-<number>` và evidence phải bắt đầu bằng path `docs/...`; prose ban đầu thêm text sau issue key và trước evidence path. | Đã sửa declaration trong PR body; không file repository nào đổi. Sẽ tạo empty verification commit để workflow chạy lại vì GitHub không chạy lại workflow này chỉ khi sửa PR body. | Kiểm tra `qa-depth-gate` kế tiếp của PR #156 và #157; không merge trước khi PASS. |
 
+## 2026-07-17 - IDTS-84 GitHub CLI merge worktree collision
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling issue | `gh pr merge 156 --squash` failed locally with `dev is already used by worktree at E:/IDTS-SAP01`. | The GitHub CLI attempted a local post-merge checkout, but the root worktree owns the `dev` branch. The remote PR was still clean and mergeable. | Use the GitHub REST merge endpoint, which merges the remote PR without checking out local `dev`. | Confirm API merge result and re-check PR #157 mergeability before merging it. |
+
+### Vietnamese
+
+| Phân loại | Triệu chứng / công việc | Nguyên nhân | Trạng thái xử lý | Verify / bước tiếp theo |
+| --- | --- | --- | --- | --- |
+| Lỗi tooling | `gh pr merge 156 --squash` fail local với `dev is already used by worktree at E:/IDTS-SAP01`. | GitHub CLI thử checkout local sau merge, nhưng root worktree đang giữ branch `dev`. Remote PR vẫn clean và mergeable. | Dùng GitHub REST merge endpoint để merge remote PR mà không checkout local `dev`. | Xác nhận API merge result và kiểm lại mergeability PR #157 trước khi merge. |
+
 ## 2026-07-12 - IDTS-82 Knowledge Gate runner
 
 | Classification | Symptom / work | Root cause | Fix status | Verification / next action |
