@@ -1,5 +1,6 @@
 using BugService as service from '../../../srv/service';
 
+// Gợi ý học/debug: annotation này làm history/notification dễ đọc; dữ liệu audit gốc vẫn được tạo bởi backend workflow.
 annotate service.Comments with @UI.LineItem : [
   { $Type : 'UI.DataField', Label : 'Comment', Value : content },
   { $Type : 'UI.DataField', Label : 'Author', Value : authorDisplayName },

@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/annotations/object-page.cds`
 
+> **Ownership / debug anchor:** SangVN owns Object Page section placement (backup: DatDT). A moved section here changes only page composition; verify the fragment/controller and OData data source separately.
+> **Ownership / điểm debug:** SangVN sở hữu vị trí section Object Page (backup: DatDT). Dời section ở đây chỉ đổi bố cục trang; kiểm riêng fragment/controller và nguồn dữ liệu OData.
+
 ## English
 
 ### What this file is for

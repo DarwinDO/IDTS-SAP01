@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/fragment/HistoryTimeline.fragment.xml`
 
+> **Ownership / debug anchor:** SangVN owns the history timeline UI (backup: NhanT). This fragment reads audit events; use its visible batch/Show More behavior before assuming history persistence is missing.
+> **Ownership / điểm debug:** SangVN sở hữu UI history timeline (backup: NhanT). Fragment này đọc audit event; kiểm batch/Show More trước khi kết luận persistence history bị mất.
+
 ## English
 
 ### What this file is for

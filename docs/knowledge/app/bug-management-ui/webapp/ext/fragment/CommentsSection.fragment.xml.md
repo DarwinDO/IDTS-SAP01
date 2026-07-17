@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/fragment/CommentsSection.fragment.xml`
 
+> **Ownership / debug anchor:** SangVN owns comments UI (backup: DonHV). Comments require a saved bug key; the create page hides this section so no orphan comment can be created.
+> **Ownership / điểm debug:** SangVN sở hữu UI comments (backup: DonHV). Comment cần bug key đã lưu; trang create ẩn section này để không tạo comment mồ côi.
+
 ## English
 
 ### What this file is for

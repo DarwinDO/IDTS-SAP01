@@ -1,5 +1,6 @@
 using BugService as service from '../../../srv/service';
 
+// Gợi ý học/debug: Assignee là technical owner, khác Current Action Owner là người phải làm bước workflow hiện tại.
 annotate service.Bugs with @(
   UI.FieldGroup #Assignment : {
     Data : [

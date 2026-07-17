@@ -1,4 +1,5 @@
 sap.ui.define([
+    // Gợi ý học/debug: control này giữ binding context Object Page để fragment biết đang làm việc với bug nào.
     "sap/m/VBox",
     "idts/bugmanagementui/ext/sections/BugCollaboration"
 ], function (VBox, Collaboration) {

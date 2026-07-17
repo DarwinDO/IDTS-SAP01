@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/actions/BugListActions.js`
 
+> **Ownership / debug anchor:** SangVN owns custom List Report actions (backup: DatDT). For a failed create flow, trace the UI role check and then the backend draft-create authorization; UI hiding alone is not security.
+> **Ownership / điểm debug:** SangVN sở hữu custom action List Report (backup: DatDT). Khi create flow fail, trace UI role check rồi backend draft-create authorization; UI hide không phải security.
+
 ## English
 
 ### What this file is for

@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/annotations/history-notifications.cds`
 
+> **Ownership / debug anchor:** SangVN owns readable history/notification presentation (backup: NhanT). When an event looks wrong, compare this UI annotation with the event written by `srv/bug-service/history.js`.
+> **Ownership / điểm debug:** SangVN sở hữu cách trình bày history/notification dễ đọc (backup: NhanT). Khi event hiển thị sai, so annotation này với event do `srv/bug-service/history.js` ghi.
+
 ## English
 
 ### What this file is for

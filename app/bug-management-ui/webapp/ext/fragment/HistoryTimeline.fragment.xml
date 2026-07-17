@@ -1,3 +1,4 @@
+<!-- Gợi ý học/debug: history hiển thị audit đã có; dùng Show More/paging để tránh đổ toàn bộ event vào một lần. -->
 <core:FragmentDefinition
   xmlns="sap.m"
   xmlns:core="sap.ui.core"

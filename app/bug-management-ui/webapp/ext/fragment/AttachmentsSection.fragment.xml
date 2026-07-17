@@ -1,3 +1,4 @@
+<!-- Gợi ý học/debug: PostgreSQL giữ metadata attachment; binary file nằm ở S3. UI không nhận S3 credential hoặc private URL. -->
 <core:FragmentDefinition
   xmlns="sap.m"
   xmlns:core="sap.ui.core"

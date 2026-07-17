@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/sections/BugCollaboration.js`
 
+> **Ownership / debug anchor:** SangVN owns collaboration behavior after a bug exists (backup: DonHV). Break at the UI action, inspect the OData request, then follow the service authorization and persistence path.
+> **Ownership / điểm debug:** SangVN sở hữu collaboration sau khi bug đã tồn tại (backup: DonHV). Dừng tại UI action, xem OData request, rồi theo service authorization và persistence.
+
 ## English
 
 ### What this file is for

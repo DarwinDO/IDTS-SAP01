@@ -1,5 +1,6 @@
 using BugService as service from '../../../srv/service';
 
+// Gợi ý học/debug: value help giúp người dùng chọn catalog hợp lệ; backend vẫn chặn mã sai, inactive hoặc không đủ quyền.
 annotate service.Bugs:status.code with @Common.FieldControl : #ReadOnly @Common.ValueListWithFixedValues : true @Common.ValueList : {
     Label : 'Status',
     CollectionPath : 'StatusValues',

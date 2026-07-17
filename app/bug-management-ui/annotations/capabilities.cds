@@ -1,5 +1,6 @@
 using BugService as service from '../../../srv/service';
 
+// Gợi ý học/debug: capability ẩn/hiện thao tác chuẩn của Fiori, không phải lớp bảo mật thay thế cho service.
 annotate service.Bugs with @(
   UI.CreateHidden : true,
   Capabilities.InsertRestrictions : {

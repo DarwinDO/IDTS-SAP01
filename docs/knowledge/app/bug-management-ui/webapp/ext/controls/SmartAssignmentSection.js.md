@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/controls/SmartAssignmentSection.js`
 
+> **Ownership / debug anchor:** SangVN owns the smart-assignment section wrapper (backup: DonHV). It presents a guided selection; it must not bypass the explicit assignment action or backend checks.
+> **Ownership / điểm debug:** SangVN sở hữu wrapper section smart assignment (backup: DonHV). Nó trình bày lựa chọn có hướng dẫn; không được bỏ qua action assign rõ ràng hoặc backend check.
+
 ## English
 
 ### What this file is for
