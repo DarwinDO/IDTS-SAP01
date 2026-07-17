@@ -2377,6 +2377,18 @@ Vietnamese:
 | --- | --- | --- | --- | --- |
 | Lỗi tooling | Gọi `node scripts/learning/ownership-gate.js --help` trả exit code 1 và in usage thay vì help text. | Runner nhỏ xem mọi danh sách đối số thiếu là validation failure; chưa có help switch riêng. | Không cần đổi product. Dùng npm invocation đã ghi với member, flow, date và activity input. | Tạo question set bằng `npm run learning:gate -- <member> <flow> 2026-07-17 -`; không ghi PASS cho đến khi human trả lời/debug/teach-back. |
 
+## 2026-07-17 - Knowledge Gate flow-name mismatch
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Documentation / process issue | The approved plan named DatDT's flow `dashboard-history`, but the runner rejected it as unknown. | The plan/hand-off wording and the runner's registered flow identifier have drifted. | Under investigation; no gate record created and no result inferred. | Inspect registered flows and update the Jira hand-off wording or use a documented alias only after confirming the exact mapping. |
+
+### Vietnamese
+
+| Phân loại | Triệu chứng / công việc | Nguyên nhân | Trạng thái xử lý | Verify / bước tiếp theo |
+| --- | --- | --- | --- | --- |
+| Lỗi documentation / process | Plan đã duyệt gọi flow DatDT là `dashboard-history`, nhưng runner từ chối vì unknown. | Wording plan/handover và flow identifier đã đăng ký trong runner bị lệch. | Đang điều tra; chưa tạo gate record và không suy diễn kết quả. | Kiểm tra registered flow, rồi update Jira hand-off hoặc dùng documented alias sau khi xác nhận mapping chính xác. |
+
 ## 2026-07-12 - IDTS-82 Knowledge Gate runner
 
 | Classification | Symptom / work | Root cause | Fix status | Verification / next action |
