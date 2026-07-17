@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/login/LoginController.js`
 
+> **Ownership / debug anchor:** DatDT owns this UI5 session helper (backup: DonHV). Trace login form to `login-page.js`, token injection to `auth-guard.js`, and revocation to `srv/auth.js`.
+> **Ownership / điểm debug:** DatDT sở hữu UI5 session helper này (backup: DonHV). Trace form login tới `login-page.js`, token injection tới `auth-guard.js`, và revoke tới `srv/auth.js`.
+
 ## English
 
 ### What this file is for

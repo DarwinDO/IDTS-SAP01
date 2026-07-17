@@ -4,6 +4,9 @@
 **Last mirrored**: 2026-06-24
 **Related task**: IDTS-22
 
+> **Ownership / debug anchor:** DatDT owns PM monitoring presets (backup: NhanT for QA). They filter readable service data only; wrong counts require checking OData data and role scope, not only this annotation.
+> **Ownership / điểm debug:** DatDT sở hữu preset monitoring PM (backup QA: NhanT). Chúng chỉ lọc dữ liệu service được phép đọc; số lượng sai cần kiểm OData và role scope, không chỉ annotation này.
+
 ---
 
 ## What this file is for / File này dùng để làm gì

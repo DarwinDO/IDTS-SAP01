@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/login.html`
 
+> **Ownership / debug anchor:** DatDT owns the standalone login bootstrap (backup: SangVN). It exists before the Fiori app so users can obtain a session without anonymous protected OData calls.
+> **Ownership / điểm debug:** DatDT sở hữu standalone login bootstrap (backup: SangVN). Nó tồn tại trước Fiori app để user lấy session mà không gọi OData protected ở trạng thái anonymous.
+
 ## English
 
 ### What this file is for

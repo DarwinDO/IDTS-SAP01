@@ -1,3 +1,4 @@
+<!-- Nút chỉ mở review dialog trong FieldGroup Classification; áp dụng suggestion vẫn cần thao tác người dùng và CAP validation. -->
 <core:FragmentDefinition
   xmlns="sap.m"
   xmlns:core="sap.ui.core"

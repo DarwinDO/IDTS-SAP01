@@ -1,3 +1,4 @@
+// File điều phối annotation: các import bên dưới cùng mở rộng một BugService, không tự tạo API mới.
 using BugService as service from '../../srv/service';
 
 using from './annotations/capabilities';

@@ -1,3 +1,4 @@
+// Các preset monitoring chỉ lọc dữ liệu BugService đã cho phép PM đọc; chúng không tự tính hay ghi lại trạng thái bug.
 using BugService as service from '../../../srv/service';
 
 /**

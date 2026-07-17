@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/fragment/SimilarBugReviewField.fragment.xml`
 
+> **Ownership / debug anchor:** DatDT owns this Bug Summary extension (backup: SangVN). It opens candidate review only and cannot create `DuplicateLinks` by itself.
+> **Ownership / điểm debug:** DatDT sở hữu extension Bug Summary này (backup: SangVN). Nó chỉ mở candidate review và không thể tự tạo `DuplicateLinks`.
+
 ## English
 
 ### What this file is for

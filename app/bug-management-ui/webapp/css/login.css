@@ -1,3 +1,4 @@
+/* CSS này chỉ định bố cục đăng nhập; nếu giao diện vỡ, kiểm tra selector/viewport trước khi thay đổi logic login. */
 html,
 body,
 #loginContent,

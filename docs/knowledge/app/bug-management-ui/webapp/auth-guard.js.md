@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/auth-guard.js`
 
+> **Ownership / debug anchor:** DatDT owns the browser-side auth guard (backup: DonHV). A `401` means trace token storage, header injection, then the backend middleware; never print the token.
+> **Ownership / điểm debug:** DatDT sở hữu auth guard phía browser (backup: DonHV). Lỗi `401` cần lần theo token storage, header injection rồi middleware backend; không in token.
+
 ## English
 
 ### What this file is for

@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/actions/ClassificationReview.js`
 
+> **Ownership / debug anchor:** DatDT owns the review dialog (backup: DonHV). It displays suggestions only; a persisted classification change belongs in the CAP contract and handler.
+> **Ownership / điểm debug:** DatDT sở hữu dialog review (backup: DonHV). Nó chỉ hiển thị suggestion; thay đổi classification được lưu thuộc CAP contract và handler.
+
 ## English
 
 ### What this file is for

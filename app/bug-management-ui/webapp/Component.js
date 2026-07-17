@@ -1,4 +1,5 @@
 /**
+ * Gợi ý học/debug: nếu Fiori load nhưng OData bị 401, kiểm tra auth-guard trước Component vì guard chạy sớm hơn.
  * IDTS App Component
  *
  * Auth gate and OData Bearer-token injection are handled in index.html

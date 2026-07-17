@@ -1,3 +1,4 @@
+// Nhãn và bắt buộc ở đây chỉ hướng dẫn Fiori; CAP vẫn là nơi chặn dữ liệu sai khi gọi OData trực tiếp.
 using BugService as service from '../../../srv/service';
 
 annotate service.Bugs with {

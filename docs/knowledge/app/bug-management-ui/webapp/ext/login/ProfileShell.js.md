@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/login/ProfileShell.js`
 
+> **Ownership / debug anchor:** DatDT owns the signed-in profile shell (backup: SangVN). It shows safe session profile data; backend authorization remains authoritative after every click.
+> **Ownership / điểm debug:** DatDT sở hữu profile shell khi đã login (backup: SangVN). Nó hiển thị profile session an toàn; backend authorization vẫn là lớp quyết định sau mỗi click.
+
 ## English
 
 ### What this file is for

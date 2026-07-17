@@ -1,4 +1,5 @@
 /**
+ * Gợi ý học/debug: form login thật nằm ở login-page.js; helper này chỉ dùng lại session cho UI5 code.
  * IDTS-35 login session helpers.
  *
  * The active login UI is the standalone login.html + login-page.js flow.

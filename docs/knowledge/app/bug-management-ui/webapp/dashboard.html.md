@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/dashboard.html`
 
+> **Ownership / debug anchor:** DatDT owns dashboard bootstrap (backup: SangVN). The page must load the guard before UI5 so the first protected request is authenticated.
+> **Ownership / điểm debug:** DatDT sở hữu bootstrap dashboard (backup: SangVN). Trang phải nạp guard trước UI5 để request protected đầu tiên có xác thực.
+
 ## English
 
 ### What this file is for

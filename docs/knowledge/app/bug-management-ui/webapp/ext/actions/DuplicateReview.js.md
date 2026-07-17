@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/actions/DuplicateReview.js`
 
+> **Ownership / debug anchor:** DatDT owns similar-bug presentation (backup: DonHV). A no-result or unavailable response is safe and must not mutate bug workflow.
+> **Ownership / điểm debug:** DatDT sở hữu phần hiển thị bug tương tự (backup: DonHV). No-result hoặc unavailable là an toàn và không được làm đổi workflow bug.
+
 ## English
 
 ### What this file is for

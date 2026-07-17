@@ -1,4 +1,5 @@
 /**
+ * Gợi ý học/debug: password chỉ đi trong request login; browser chỉ giữ token và profile an toàn của tab hiện tại.
  * IDTS Login Page Script - loaded by login.html.
  *
  * Builds a standalone SAPUI5 login page before the Fiori Elements app starts.

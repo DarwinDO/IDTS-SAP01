@@ -1,4 +1,5 @@
 /**
+ * Gợi ý học/debug: action này chỉ đọc candidate; kết quả trống hoặc unavailable phải giữ bug hiện tại không đổi.
  * Similar bug review dialog for the Bugs Object Page.
  *
  * The backend action finds candidates; this UI only helps the user review

@@ -1,3 +1,4 @@
+// List Report dùng annotation này để biến các trường Bugs đã expose thành filter, cột và action có thể thấy.
 using BugService as service from '../../../srv/service';
 
 annotate service.Bugs with @(
