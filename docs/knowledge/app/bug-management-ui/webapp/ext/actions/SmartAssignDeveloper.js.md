@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/actions/SmartAssignDeveloper.js`
 
+> **Ownership / debug anchor:** SangVN owns the candidate-selection dialog (backup: DonHV). The dialog may explain/filter candidates, but a human selects and CAP validates the final assignee.
+> **Ownership / điểm debug:** SangVN sở hữu dialog chọn candidate (backup: DonHV). Dialog có thể giải thích/lọc candidate, nhưng người dùng chọn và CAP validate assignee cuối cùng.
+
 ## English
 
 ### What this file is for

@@ -1,3 +1,4 @@
+<!-- Gợi ý học/debug: integrated picker tìm/lọc candidate nhưng không auto-assign; selection phải qua action có backend validation. -->
 <core:FragmentDefinition
   xmlns="sap.m"
   xmlns:core="sap.ui.core"

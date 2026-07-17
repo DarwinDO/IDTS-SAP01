@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/fragment/SmartAssignmentSection.fragment.xml`
 
+> **Ownership / debug anchor:** SangVN owns the integrated assignee picker UI (backup: DonHV). It combines search and guidance in the assignee flow, but never auto-assigns or replaces server validation.
+> **Ownership / điểm debug:** SangVN sở hữu UI picker assignee tích hợp (backup: DonHV). Nó kết hợp search/guidance trong flow assignee nhưng không auto-assign hoặc thay server validation.
+
 ## English
 
 ### What this file is for

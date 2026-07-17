@@ -1,5 +1,6 @@
 using BugService as service from '../../../srv/service';
 
+// Gợi ý học/debug: file này chỉ đặt vị trí/nhãn action trên Fiori; quyền và chuyển trạng thái vẫn do handler CAP kiểm tra.
 annotate service.Bugs with @(
   UI.Identification : [
     {

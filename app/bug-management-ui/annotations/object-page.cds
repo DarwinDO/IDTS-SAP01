@@ -1,5 +1,6 @@
 using BugService as service from '../../../srv/service';
 
+// Gợi ý học/debug: thứ tự section Object Page được mô tả ở đây; section chỉ sắp UI, không tạo API hoặc đổi dữ liệu bug.
 annotate service.Bugs with @(
   UI.HeaderInfo : {
     TypeName       : 'Bug',

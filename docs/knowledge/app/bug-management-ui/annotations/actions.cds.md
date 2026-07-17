@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/annotations/actions.cds`
 
+> **Ownership / debug anchor:** SangVN owns Fiori action placement (backup: DatDT). Trace a pressed action from this metadata to its UI5 extension, then to the CAP handler that still authorizes it.
+> **Ownership / điểm debug:** SangVN sở hữu vị trí action Fiori (backup: DatDT). Trace action được nhấn từ metadata này tới UI5 extension, rồi tới CAP handler vẫn kiểm quyền.
+
 ## English
 
 ### What this file is for

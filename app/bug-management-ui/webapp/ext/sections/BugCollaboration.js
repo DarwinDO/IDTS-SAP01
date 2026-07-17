@@ -1,4 +1,5 @@
 sap.ui.define([
+    // Gợi ý học/debug: đây là logic section collaboration sau khi Bug đã lưu; trace action về OData trước khi nghi ngờ UI state.
     "sap/m/MessageBox",
     "sap/m/MessageToast",
     "sap/ui/model/json/JSONModel",

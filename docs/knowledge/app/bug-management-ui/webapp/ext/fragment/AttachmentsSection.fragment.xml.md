@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/fragment/AttachmentsSection.fragment.xml`
 
+> **Ownership / debug anchor:** SangVN owns attachment UI (backup: DonHV). PostgreSQL stores attachment metadata while S3 stores bytes; trace upload/download through OData and never surface private storage credentials.
+> **Ownership / điểm debug:** SangVN sở hữu UI attachment (backup: DonHV). PostgreSQL lưu metadata còn S3 lưu bytes; trace upload/download qua OData và không bao giờ lộ storage credential.
+
 ## English
 
 ### What this file is for

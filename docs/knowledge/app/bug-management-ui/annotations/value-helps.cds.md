@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/annotations/value-helps.cds`
 
+> **Ownership / debug anchor:** SangVN owns catalog value-help UX (backup: DonHV). A value help narrows choices, but invalid values must still be rejected by CAP validation.
+> **Ownership / điểm debug:** SangVN sở hữu UX value help catalog (backup: DonHV). Value help thu hẹp lựa chọn, nhưng giá trị sai vẫn phải bị CAP validation chặn.
+
 ## English
 
 ### What this file is for

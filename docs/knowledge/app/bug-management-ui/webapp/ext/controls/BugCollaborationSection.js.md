@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/controls/BugCollaborationSection.js`
 
+> **Ownership / debug anchor:** SangVN owns the collaboration section binding wrapper (backup: DatDT). If a comment/attachment targets the wrong bug, inspect the Object Page binding context first.
+> **Ownership / điểm debug:** SangVN sở hữu wrapper binding section collaboration (backup: DatDT). Nếu comment/attachment nhắm sai bug, kiểm Object Page binding context trước.
+
 ## English
 
 ### What this file is for

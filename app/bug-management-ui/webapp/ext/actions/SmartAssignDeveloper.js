@@ -1,4 +1,5 @@
 /**
+ * Gợi ý học/debug: dialog giúp so sánh developer, còn người dùng phải chọn rõ ràng và backend là nơi xác nhận assignee cuối cùng.
  * Smart developer assignment dialog for the Bugs Object Page.
  *
  * The dialog improves candidate discovery, while CAP remains the final

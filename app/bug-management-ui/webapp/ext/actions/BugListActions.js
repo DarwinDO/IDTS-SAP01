@@ -1,4 +1,5 @@
 /**
+ * Gợi ý học/debug: action List Report mở flow tạo bug; nếu Developer bị chặn, kiểm UI role rồi kiểm backend draft authorization.
  * Supported Fiori Elements List Report actions for IDTS Bugs.
  *
  * The standard Create action is hidden by annotation. This replacement reads

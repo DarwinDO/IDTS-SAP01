@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/annotations/ownership-assignment.cds`
 
+> **Ownership / debug anchor:** SangVN owns assignment wording/presentation (backup: DonHV). Always distinguish `assignee` (technical owner) from `currentActionOwner` (who must act now) before changing a label.
+> **Ownership / điểm debug:** SangVN sở hữu wording/trình bày assignment (backup: DonHV). Luôn phân biệt `assignee` (technical owner) với `currentActionOwner` (người phải làm lúc này) trước khi đổi label.
+
 ## English
 
 ### What this file is for

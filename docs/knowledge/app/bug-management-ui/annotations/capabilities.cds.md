@@ -1,5 +1,8 @@
 # Knowledge: `app/bug-management-ui/annotations/capabilities.cds`
 
+> **Ownership / debug anchor:** SangVN owns this Fiori affordance metadata (backup: DatDT). If an action is hidden or visible unexpectedly, check this file and then confirm the backend has the same authorization rule.
+> **Ownership / điểm debug:** SangVN sở hữu metadata affordance Fiori này (backup: DatDT). Nếu action ẩn/hiện sai, kiểm file này rồi xác nhận backend có cùng rule quyền.
+
 ## English
 
 ### What this file is for

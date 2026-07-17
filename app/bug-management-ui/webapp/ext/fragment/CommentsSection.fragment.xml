@@ -1,3 +1,4 @@
+<!-- Gợi ý học/debug: comment chỉ hiện/lưu sau khi bug có key; khi create draft chưa lưu, ẩn section thay vì tạo comment mồ côi. -->
 <core:FragmentDefinition
   xmlns="sap.m"
   xmlns:core="sap.ui.core"

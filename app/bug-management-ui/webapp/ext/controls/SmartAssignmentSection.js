@@ -1,4 +1,5 @@
 sap.ui.define([
+    // Gợi ý học/debug: section chỉ hiển thị trợ giúp chọn assignee; không được tự ghi assignment ngoài action/handler hợp lệ.
     "sap/m/VBox"
 ], function (VBox) {
     "use strict";
