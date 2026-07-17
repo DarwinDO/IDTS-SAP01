@@ -2341,6 +2341,18 @@ Vietnamese:
 | --- | --- | --- | --- | --- |
 | Finding security / dependency | `npm ci --include=dev` sạch chạy xong nhưng báo 14 vulnerability dependency (9 moderate, 5 high) và package transitive deprecated. | Baseline dependency trong lockfile hiện tại; task material-only không đổi package manifest hoặc lockfile. | Còn mở để đối chiếu record remediation Sprint 4 có sẵn; không chạy `npm audit fix` trong bootstrap chỉ có comment. | `npm ci --include=dev` exit 0; kiểm tra task security trước đó rồi mới quyết định reopen/tạo follow-up tập trung. |
 
+## 2026-07-17 - IDTS-84/85 QA Depth Gate declaration retry
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Test-harness / process issue | The first QA Depth Gate run rejected both learning-material PR bodies although the comments/mirrors diff was valid. | Bootstrap parser requires the follow-up field to be exactly `IDTS-<number>` and evidence to begin with a repository `docs/...` path; initial prose added text after the issue key and before the evidence path. | Fixed PR body declarations; no repository file changed. A new empty verification commit will trigger the workflow again because GitHub does not rerun this PR workflow on body edits alone. | Inspect the next `qa-depth-gate` run for PR #156 and #157; do not merge until it passes. |
+
+### Vietnamese
+
+| Phân loại | Triệu chứng / công việc | Nguyên nhân | Trạng thái xử lý | Verify / bước tiếp theo |
+| --- | --- | --- | --- | --- |
+| Lỗi test-harness / process | Lần QA Depth Gate đầu tiên từ chối cả hai PR learning-material dù diff comment/mirror hợp lệ. | Parser bootstrap yêu cầu follow-up phải đúng dạng `IDTS-<number>` và evidence phải bắt đầu bằng path `docs/...`; prose ban đầu thêm text sau issue key và trước evidence path. | Đã sửa declaration trong PR body; không file repository nào đổi. Sẽ tạo empty verification commit để workflow chạy lại vì GitHub không chạy lại workflow này chỉ khi sửa PR body. | Kiểm tra `qa-depth-gate` kế tiếp của PR #156 và #157; không merge trước khi PASS. |
+
 ## 2026-07-12 - IDTS-82 Knowledge Gate runner
 
 | Classification | Symptom / work | Root cause | Fix status | Verification / next action |
