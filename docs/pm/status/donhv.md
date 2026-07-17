@@ -2305,6 +2305,42 @@ Vietnamese:
 | --- | --- | --- | --- | --- |
 | Lỗi tooling | Một patch comment-only lớn bị từ chối trước khi ghi vì source header cũ có em dash được mã hóa khác với terminal. | Context patch dùng Unicode đã render từ terminal thay vì anchor ASCII ổn định từ byte trong repository. | Không có source hoặc tài liệu nào bị ghi dở. Tách material thành patch nhỏ, neo tại đầu file ASCII hoặc dòng lân cận ổn định. | Verify diff cuối chỉ có comment/mirror; không phân loại đây là product defect. |
 
+## 2026-07-17 - IDTS-84 UI5 lint baseline
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling / technical-debt finding | UI5 linter reports an outdated `manifest.json` version and legacy integration-test bootstrap attributes. None of the reported files are touched by the IDTS-84 learning-material diff. | Existing UI5 application/test baseline predates the current UI5 2.x lint rules. | Open; deliberately excluded from the comment-and-mirror-only bootstrap PR to keep runtime behavior unchanged. | `mcp__ui5__run_ui5_linter` on the IDTS-84 worktree; create or link a dedicated UI5 modernization task before changing runtime/test files. |
+
+### Vietnamese
+
+| Phân loại | Triệu chứng / công việc | Nguyên nhân | Trạng thái xử lý | Verify / bước tiếp theo |
+| --- | --- | --- | --- | --- |
+| Finding tooling / technical debt | UI5 linter báo version `manifest.json` cũ và các bootstrap attribute cũ trong integration test. Không file nào trong số đó thuộc diff material học tập IDTS-84. | Baseline UI5/test hiện có được tạo trước các rule lint UI5 2.x hiện tại. | Còn mở; chủ động không đưa vào PR bootstrap chỉ gồm comment và mirror để không đổi runtime behavior. | Chạy `mcp__ui5__run_ui5_linter` trên worktree IDTS-84; tạo hoặc link task UI5 modernization riêng trước khi chỉnh file runtime/test. |
+
+## 2026-07-17 - IDTS-84 fresh-worktree UI5 build setup
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Environment blocker | `ui5 build` could not start because the fresh IDTS-84 worktree has no local `node_modules/.bin/ui5.cmd`. | Fresh Git worktrees intentionally do not carry untracked dependency folders. | In progress; install dependencies strictly from the repository lockfile, then rerun the same build. | `Test-Path node_modules/.bin/ui5.cmd` returned false; run `npm ci --include=dev` without changing dependency manifests. |
+
+### Vietnamese
+
+| Phân loại | Triệu chứng / công việc | Nguyên nhân | Trạng thái xử lý | Verify / bước tiếp theo |
+| --- | --- | --- | --- | --- |
+| Blocker môi trường | `ui5 build` chưa thể bắt đầu vì worktree IDTS-84 mới không có local `node_modules/.bin/ui5.cmd`. | Git worktree mới chủ động không mang theo thư mục dependency untracked. | Đang xử lý; cài dependency đúng từ lockfile rồi chạy lại cùng build đó. | `Test-Path node_modules/.bin/ui5.cmd` trả false; chạy `npm ci --include=dev` và không đổi dependency manifest. |
+
+## 2026-07-17 - IDTS-84 dependency audit baseline
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Security / dependency finding | A clean `npm ci --include=dev` completed but reported 14 dependency vulnerabilities (9 moderate, 5 high) plus deprecated transitive packages. | Current lockfile dependency baseline; no package manifest or lockfile changed during the material-only task. | Open for verification against the existing Sprint 4 dependency-remediation record; do not run `npm audit fix` in a comment-only bootstrap. | `npm ci --include=dev` exit 0; inspect the prior security task before deciding whether to reopen/create a focused follow-up. |
+
+### Vietnamese
+
+| Phân loại | Triệu chứng / công việc | Nguyên nhân | Trạng thái xử lý | Verify / bước tiếp theo |
+| --- | --- | --- | --- | --- |
+| Finding security / dependency | `npm ci --include=dev` sạch chạy xong nhưng báo 14 vulnerability dependency (9 moderate, 5 high) và package transitive deprecated. | Baseline dependency trong lockfile hiện tại; task material-only không đổi package manifest hoặc lockfile. | Còn mở để đối chiếu record remediation Sprint 4 có sẵn; không chạy `npm audit fix` trong bootstrap chỉ có comment. | `npm ci --include=dev` exit 0; kiểm tra task security trước đó rồi mới quyết định reopen/tạo follow-up tập trung. |
+
 ## 2026-07-12 - IDTS-82 Knowledge Gate runner
 
 | Classification | Symptom / work | Root cause | Fix status | Verification / next action |
