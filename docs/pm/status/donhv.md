@@ -2365,6 +2365,18 @@ Vietnamese:
 | --- | --- | --- | --- | --- |
 | Lỗi tooling | `gh pr merge 156 --squash` fail local với `dev is already used by worktree at E:/IDTS-SAP01`. | GitHub CLI thử checkout local sau merge, nhưng root worktree đang giữ branch `dev`. Remote PR vẫn clean và mergeable. | Dùng GitHub REST merge endpoint để merge remote PR mà không checkout local `dev`. | Xác nhận API merge result và kiểm lại mergeability PR #157 trước khi merge. |
 
+## 2026-07-17 - Knowledge Gate runner usage discovery
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling issue | Calling `node scripts/learning/ownership-gate.js --help` returned exit code 1 and printed usage rather than help text. | The small runner treats every incomplete argument list as validation failure; it has no standalone help switch. | No product change required. Use its documented npm invocation with member, flow, date, and activity inputs. | Generate question sets with `npm run learning:gate -- <member> <flow> 2026-07-17 -` and do not record a PASS until the human supplies answers/debug/teach-back. |
+
+### Vietnamese
+
+| Phân loại | Triệu chứng / công việc | Nguyên nhân | Trạng thái xử lý | Verify / bước tiếp theo |
+| --- | --- | --- | --- | --- |
+| Lỗi tooling | Gọi `node scripts/learning/ownership-gate.js --help` trả exit code 1 và in usage thay vì help text. | Runner nhỏ xem mọi danh sách đối số thiếu là validation failure; chưa có help switch riêng. | Không cần đổi product. Dùng npm invocation đã ghi với member, flow, date và activity input. | Tạo question set bằng `npm run learning:gate -- <member> <flow> 2026-07-17 -`; không ghi PASS cho đến khi human trả lời/debug/teach-back. |
+
 ## 2026-07-12 - IDTS-82 Knowledge Gate runner
 
 | Classification | Symptom / work | Root cause | Fix status | Verification / next action |
