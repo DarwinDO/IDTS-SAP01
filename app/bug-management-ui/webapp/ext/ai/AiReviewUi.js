@@ -1,5 +1,5 @@
 /**
- * Gợi ý học/debug: module này chỉ đổi dữ liệu AI thành text/trạng thái an toàn cho UI, không quyết định nghiệp vụ.
+ * Gợi ý học/debug: module này chỉ đổi kết quả AI thành text/trạng thái an toàn cho UI, không quyết định nghiệp vụ.
  * Reusable user-facing UI state mapping for IDTS AI suggestions.
  *
  * Keep this module presentation-focused. Backend actions still own AI
@@ -12,6 +12,7 @@ sap.ui.define([], function () {
     var INTERNAL_COPY_PATTERN = /\b(prompt|token|model|provider|architecture|debug|stack|sql|password|credential|secret|api key|bearer|endpoint)\b/i;
 
     function numberOrNull(value) {
+        // Chuẩn hóa confidence từ OData; input không phải số trở thành null thay vì NaN lan ra UI.
         if (value === null || value === undefined || value === "") {
             return null;
         }
@@ -20,6 +21,7 @@ sap.ui.define([], function () {
     }
 
     function cleanText(value, fallback) {
+        // Loại text rỗng hoặc chứa từ khóa nội bộ trước khi dialog hiển thị cho người dùng.
         var text = typeof value === "string" ? value.trim() : "";
         if (!text || INTERNAL_COPY_PATTERN.test(text)) {
             return fallback || "";
@@ -28,6 +30,7 @@ sap.ui.define([], function () {
     }
 
     function statusText(status, confidence, getText) {
+        // Map provider status + confidence sang i18n label; không tự chấp nhận suggestion.
         var code = String(status || "").toUpperCase();
         if (code === "SUCCESS" || code === "EXPLAINED" || code === "SUGGESTED" || code === "GROUNDED") {
             if (confidence !== null && confidence < LOW_CONFIDENCE_THRESHOLD) {
@@ -45,6 +48,7 @@ sap.ui.define([], function () {
     }
 
     function stateFor(status, confidence, warnings) {
+        // Chọn semantic color Information/Warning để người dùng biết cần review kỹ.
         var code = String(status || "").toUpperCase();
         if (code === "AI_TIMEOUT" || code === "AI_PROVIDER_ERROR" || code === "AI_OUTPUT_UNSAFE" || code === "AI_PROVIDER_UNSUPPORTED") {
             return "Warning";
@@ -59,6 +63,8 @@ sap.ui.define([], function () {
     }
 
     function decorateResult(row, getText) {
+        // Caller là ba dialog AI. Output là view-model an toàn, luôn requiresReview=true.
+        // Breakpoint ở đây khi status/confidence/warning hiển thị sai.
         var confidence = numberOrNull(row && row.confidence);
         var warnings = cleanText(row && row.warnings, "");
         var providerStatus = row && row.providerStatus;
@@ -80,6 +86,7 @@ sap.ui.define([], function () {
     }
 
     function loading(getText) {
+        // State tạm trong lúc OData action chưa trả kết quả.
         return {
             explanation: getText("aiReviewLoading"),
             meta: getText("aiReviewStatusReviewRequired"),
@@ -92,6 +99,7 @@ sap.ui.define([], function () {
     }
 
     function unavailable(getText) {
+        // Failure fallback chung: không lộ raw provider error hay prompt.
         return decorateResult({
             explanation: getText("aiReviewExplanationUnavailable"),
             providerStatus: "AI_PROVIDER_ERROR",
@@ -101,6 +109,7 @@ sap.ui.define([], function () {
     }
 
     function hasInternalCopy(value) {
+        // Helper QA kiểm text dev-facing có lọt ra UI hay không.
         return INTERNAL_COPY_PATTERN.test(String(value || ""));
     }
 

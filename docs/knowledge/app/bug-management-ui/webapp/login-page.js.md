@@ -136,3 +136,9 @@ Màn hình login cố ý không hiển thị các câu chữ mang tính nội b�
 - Nếu đổi storage keys, phải cập nhật `auth-guard.js` và helper trong `LoginController.js` cùng lúc.
 - Nếu đổi UI5 controls, kiểm tra lại bootstrap library trong `login.html` và chạy UI5 checks.
 - Browser smoke tối thiểu các đường: submit rỗng, sai password, login đúng, protected OData sau redirect.
+
+## Symbol walkthrough and breakpoint order / Walkthrough theo symbol và thứ tự breakpoint (2026-07-18)
+
+**English.** Button/Enter → `submitLogin()` validates email/password → `fetch('/odata/v4/auth/login')` → `readSafeError()` for expected 400/401 or a generic message for 5xx → success stores token/user/expiry → `goToApp()` opens `index.html` → auth guard injects the token. `setBusy()` prevents duplicate submits; `resetValueStates()` and message helpers only change UI state. Watch trimmed email, HTTP status, safe response shape, and session key presence; never inspect/log the password or full token.
+
+**Tiếng Việt.** Nút/Enter → `submitLogin()` kiểm email/password → `fetch('/odata/v4/auth/login')` → `readSafeError()` dùng message an toàn cho 400/401 hoặc message chung cho 5xx → thành công lưu token/user/expiry → `goToApp()` mở `index.html` → auth guard gắn token. `setBusy()` ngăn submit trùng; các helper reset/message chỉ đổi trạng thái UI. Quan sát email đã trim, HTTP status, shape response an toàn và session key có tồn tại; không xem/log password hoặc toàn bộ token.

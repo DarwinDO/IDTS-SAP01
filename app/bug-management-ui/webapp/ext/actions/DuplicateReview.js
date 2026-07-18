@@ -1,5 +1,5 @@
 /**
- * Gợi ý học/debug: action này chỉ đọc candidate; kết quả trống hoặc unavailable phải giữ bug hiện tại không đổi.
+ * Gợi ý học/debug: dialog là review-only; trace từ openDialog → findSimilarBugs OData → enrichCandidate → JSONModel.
  * Similar bug review dialog for the Bugs Object Page.
  *
  * The backend action finds candidates; this UI only helps the user review
@@ -38,10 +38,12 @@ sap.ui.define([
     "use strict";
 
     function isBugContext(context) {
+        // Chỉ chấp nhận root Bug context, tránh dùng nhầm row context bên trong Object Page.
         return !!context && typeof context.getPath === "function" && /^\/Bugs\([^/]+\)$/.test(context.getPath());
     }
 
     function findBugContext(control) {
+        // Đi ngược cây control từ nút trong Bug Summary đến Bug đang mở.
         var current = control;
         while (current) {
             if (typeof current.getBindingContext === "function") {
@@ -56,6 +58,7 @@ sap.ui.define([
     }
 
     function findHost(control) {
+        // Host giữ i18n/model và quản lý destroy dialog bằng addDependent.
         var current = control;
         while (current) {
             if (
@@ -82,6 +85,7 @@ sap.ui.define([
     }
 
     function normalizeResult(result) {
+        // Chuẩn hóa shape trả về của CAP action trước khi đọc candidates.
         if (Array.isArray(result)) {
             return result;
         }
@@ -95,6 +99,7 @@ sap.ui.define([
     }
 
     function enrichCandidate(row, view) {
+        // Chuyển candidate backend thành row an toàn; explanation/status đi qua AiReviewUi.
         var review = AiReviewUi.decorateResult({
             explanation: row.reason,
             confidence: row.score,
@@ -118,6 +123,7 @@ sap.ui.define([
     }
 
     function requestMissingBugProperties(bugContext, bug) {
+        // Bổ sung title/description/context còn thiếu, không request toàn entity nếu đã có.
         if (!bugContext || typeof bugContext.requestProperty !== "function") {
             return Promise.resolve(bug);
         }
@@ -146,6 +152,8 @@ sap.ui.define([
     }
 
     function readSimilarBugs(model, bug) {
+        // Gọi CAP action findSimilarBugs; action chỉ tìm/gợi ý, không tạo DuplicateLinks.
+        // Breakpoint ở đây và Network khi danh sách rỗng/sai.
         var operation = model.bindContext("/suggestSimilarBugs(...)", undefined, { $$ownRequest: true });
         operation.setParameter("sourceBugID", bug.ID || null);
         operation.setParameter("title", bug.title || null);
@@ -168,6 +176,7 @@ sap.ui.define([
     }
 
     function buildDialog(view, model, bug) {
+        // Dựng dialog trước ở trạng thái busy, sau đó nạp rows hoặc hiện lỗi thân thiện.
         var state = new JSONModel({
             rows: [],
             busy: true,
@@ -291,6 +300,7 @@ sap.ui.define([
 
     return {
         openDialog: function (event) {
+            // XML fragment gọi: tìm Bug → request data → build/open dialog. Không có Bug thì dừng an toàn.
             var source = event.getSource();
             var view = findHost(source);
             var bugContext = findBugContext(source);

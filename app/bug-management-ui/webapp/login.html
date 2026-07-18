@@ -1,4 +1,4 @@
-<!-- Trang login độc lập để user có thể lấy session trước khi Fiori Elements cần gọi OData. -->
+<!-- Entry point login độc lập: nạp UI5 controls trước, rồi login-page.js dựng form và gọi AuthService. -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Sign In - IDTS</title>
   <link rel="stylesheet" href="css/login.css">
+  <!-- Bootstrap chỉ sap.m/sap.f cho trang login; chưa tạo Fiori Elements/OData model. -->
   <script
     id="sap-ui-bootstrap"
     src="resources/sap-ui-core.js"
@@ -18,6 +19,7 @@
   ></script>
 </head>
 <body class="sapUiBody sapUiSizeCompact">
+  <!-- login-page.js đặt SAPUI5 form vào host này; breakpoint submit nằm trong submitLogin(). -->
   <div id="loginContent"></div>
   <script src="login-page.js"></script>
 </body>

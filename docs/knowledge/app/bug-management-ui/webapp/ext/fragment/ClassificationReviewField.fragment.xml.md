@@ -80,3 +80,9 @@ Form Fiori cung cấp label ngắn **Classification suggestions**. Action mở d
 - Không thêm hành vi tự apply nếu chưa có workflow được duyệt riêng và backend validation.
 - Giữ action trong i18n và chỉ dùng UI5 control.
 - Sau khi sửa, chạy focused check IDTS-75 và IDTS-77.
+
+## Binding walkthrough / Walkthrough binding (2026-07-18)
+
+**English.** The Classification annotation inserts this fragment into the existing Classification field group. `core:require` loads `ClassificationReview.js`; `press="ClassificationReview.openDialog"` transfers the button event and current control tree to that module. `SmartAssignmentSection` is a visual row wrapper only. If the button is absent, inspect annotation/fragment loading; if press does nothing, break in `openDialog()`.
+
+**Tiếng Việt.** Annotation Classification chèn fragment vào field group Classification đang có. `core:require` nạp `ClassificationReview.js`; `press="ClassificationReview.openDialog"` chuyển event và control tree hiện tại sang module đó. `SmartAssignmentSection` chỉ là wrapper bố cục. Nút không hiện thì kiểm annotation/fragment; nút hiện nhưng bấm không chạy thì breakpoint ở `openDialog()`.

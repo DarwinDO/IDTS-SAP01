@@ -1,5 +1,5 @@
 /**
- * Gợi ý học/debug: summary chỉ để đọc trước khi bàn giao; không được nhầm dialog này với action chuyển trạng thái bug.
+ * Gợi ý học/debug: summary chỉ để đọc; trace từ openDialog → summarizeBugHandoff OData → enrichSummary → JSONModel.
  * Handoff summary review dialog for the Bugs Object Page.
  *
  * This UI reuses the backend summarizeBugHandoff action. It only displays
@@ -36,10 +36,12 @@ sap.ui.define([
     var INTERNAL_COPY_PATTERN = /\b(prompt|token|model|provider|architecture|debug|stack|sql|password|credential|secret|api key|bearer|endpoint)\b/i;
 
     function isBugContext(context) {
+        // Chỉ nhận root /Bugs(...) để summary luôn thuộc Bug đang mở.
         return !!context && typeof context.getPath === "function" && /^\/Bugs\([^/]+\)$/.test(context.getPath());
     }
 
     function findBugContext(control) {
+        // Nút trong History đi ngược cây control để tìm binding context của Bug.
         var current = control;
         while (current) {
             if (typeof current.getBindingContext === "function") {
@@ -54,6 +56,7 @@ sap.ui.define([
     }
 
     function findHost(control) {
+        // Host cung cấp model/i18n và quản lý vòng đời dialog.
         var current = control;
         while (current) {
             if (
@@ -80,6 +83,7 @@ sap.ui.define([
     }
 
     function safeText(value, fallback) {
+        // Chặn text rỗng hoặc dev-facing trước khi đưa summary lên UI.
         var text = typeof value === "string" ? value.trim() : "";
         if (!text || INTERNAL_COPY_PATTERN.test(text)) {
             return fallback || "";
@@ -88,6 +92,7 @@ sap.ui.define([
     }
 
     function normalizeResult(result) {
+        // CAP action có thể trả object bọc value; trả về một shape thống nhất.
         if (result && result.value && typeof result.value === "object") {
             return result.value;
         }
@@ -95,6 +100,8 @@ sap.ui.define([
     }
 
     function readHandoffSummary(model, bugID) {
+        // Gọi unbound action summarizeBugHandoff bằng Bug ID; không PATCH status/comment/history.
+        // Breakpoint ở đây khi action trả lỗi hoặc dữ liệu không khớp.
         var operation = model.bindContext("/summarizeBugHandoff(...)", undefined, { $$ownRequest: true });
         operation.setParameter("sourceBugID", bugID);
         return operation.invoke("$direct").then(function () {
@@ -107,6 +114,7 @@ sap.ui.define([
     }
 
     function formatDate(value) {
+        // Chỉ format timestamp cho display; không thay đổi thời gian nguồn.
         if (!value) {
             return "";
         }
@@ -118,6 +126,7 @@ sap.ui.define([
     }
 
     function section(labelKey, textPath) {
+        // Factory UI cho từng khối summary, giảm lặp control nhưng không chứa business rule.
         return new VBox({
             items: [
                 new Label({ text: labelKey, design: "Bold" }),
@@ -130,6 +139,7 @@ sap.ui.define([
     }
 
     function enrichSummary(result, view) {
+        // Sanitize và map backend result thành view-model review-only.
         var review = AiReviewUi.decorateResult({
             explanation: result.summary,
             confidence: result.confidence,
@@ -155,6 +165,7 @@ sap.ui.define([
     }
 
     function buildDialog(view, model, bugID) {
+        // Tạo loading model, invoke action, cập nhật state; failure chỉ báo lỗi, không ảnh hưởng workflow.
         var state = new JSONModel({
             busy: true,
             bugNumber: "",
@@ -253,6 +264,7 @@ sap.ui.define([
 
     return {
         openDialog: function (event) {
+            // History fragment gọi entry point: tìm Bug → đọc ID → build/open dialog.
             var source = event.getSource();
             var view = findHost(source);
             var bugContext = findBugContext(source);

@@ -89,3 +89,9 @@ Khi thay đổi filter/cột phải xem xét hiệu năng, value help, capabilit
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/annotations/list-report.cds.md`
 - Source layer: `app`
 - Last reviewed: 2026-06-22
+
+## Beginner-first execution map / Sơ đồ thực thi cho người mới (2026-07-18)
+
+**English.** Caller: CAP metadata compilation through `annotations.cds`. The `@UI.LineItem`, selection fields, header information, and presentation variants tell Fiori Elements which Bug properties become columns, filters, titles, and default ordering. Callee: the List Report generated from `manifest.json` and `BugService.Bugs`. The browser later sends OData GET requests based on this metadata; this file itself sends none. Debug order: target/entity name → compiled `$metadata` → browser Network query → visible table. A wrong property can break rendering or produce an empty column without changing backend data.
+
+**Tiếng Việt.** Caller là quá trình compile metadata qua `annotations.cds`. Các `@UI.LineItem`, selection field, header information và presentation variant nói cho Fiori Elements biết property Bug nào thành cột, filter, tiêu đề và thứ tự mặc định. Callee là List Report được sinh từ `manifest.json` và `BugService.Bugs`. Browser sẽ gửi OData GET theo metadata này; bản thân file không gửi request. Thứ tự debug: tên target/entity → `$metadata` đã compile → Network query → table hiển thị. Property sai có thể làm UI render lỗi hoặc cột trống nhưng không thay đổi database.

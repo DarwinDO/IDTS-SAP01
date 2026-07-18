@@ -116,3 +116,9 @@ Với cải thiện UX Sprint 4, file này cố ý không render UI5 controls tr
 - Nếu route OData thay đổi, verify request `$metadata` đầu tiên đã authenticated.
 - Nếu public user object thay đổi, cập nhật `login-page.js`, helper ở file này, và `ProfileShell.js`.
 - Browser smoke login, profile menu, sign out, refresh sau logout, và protected OData.
+
+## Symbol walkthrough and breakpoint order / Walkthrough theo symbol và thứ tự breakpoint (2026-07-18)
+
+**English.** (1) top-level token lookup decides redirect or continue; (2) patched `open()` remembers the URL; (3) patched `send()` injects the bearer token only for `/odata/v4/`; (4) CAP custom auth validates that token; (5) `idtsLogout()` posts logout, clears all three session keys, and redirects; (6) `readStoredUser()` safely parses the profile. Observe `url`, token presence (never its full value), HTTP status, and the safe user object. Failure before step 3 is browser/session; failure after a header is present belongs in backend auth.
+
+**Tiếng Việt.** (1) đoạn đọc token đầu file quyết định redirect hay đi tiếp; (2) `open()` đã patch ghi nhớ URL; (3) `send()` đã patch chỉ gắn bearer token cho `/odata/v4/`; (4) CAP custom auth kiểm token; (5) `idtsLogout()` gọi logout, xóa đủ ba session key và redirect; (6) `readStoredUser()` parse profile an toàn. Quan sát `url`, việc token có/không (không xem/in toàn bộ token), HTTP status và safe user object. Lỗi trước bước 3 thuộc browser/session; đã có header mà vẫn lỗi thì qua backend auth.

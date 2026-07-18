@@ -122,3 +122,9 @@ Anchor quan trọng:
   - Khái niệm IDTS: KPI tile của dashboard phải tự wrap tốt trên desktop và mobile.
   - Ảnh hưởng nếu sai: dashboard có thể quá rộng, chật, hoặc khó scan.
   - Phải kiểm tra cùng: layout tile trong `dashboard-page.js` và browser responsive smoke.
+
+## Selector-to-owner map / Bản đồ selector tới code sở hữu (2026-07-18)
+
+**English.** `#idtsProfileShellHost` belongs to `index.html`/`dashboard.html`; `.idtsProfile*` classes are added by `ProfileShell.js`; `.idtsDashboard*` classes are added by `dashboard-page.js`. CSS changes size, spacing, position, and responsive layout only. It must never hide authorization state or encode role/business rules. Debug with browser Styles/Computed first, then inspect the JavaScript only if the expected class is missing.
+
+**Tiếng Việt.** `#idtsProfileShellHost` thuộc `index.html`/`dashboard.html`; class `.idtsProfile*` do `ProfileShell.js` thêm; class `.idtsDashboard*` do `dashboard-page.js` thêm. CSS chỉ đổi kích thước, khoảng cách, vị trí và responsive layout. Không dùng CSS để giấu quyền hay mã hóa rule role/nghiệp vụ. Debug bằng tab Styles/Computed trước; chỉ qua JavaScript khi class mong đợi không tồn tại.

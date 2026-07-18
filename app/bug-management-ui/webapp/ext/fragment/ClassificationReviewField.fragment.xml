@@ -1,9 +1,13 @@
-<!-- Nút chỉ mở review dialog trong FieldGroup Classification; áp dụng suggestion vẫn cần thao tác người dùng và CAP validation. -->
+<!--
+  Annotation Classification nhúng fragment này. Button gọi ClassificationReview.openDialog;
+  dialog chỉ đọc suggestion, không PATCH classification. Breakpoint bắt đầu ở openDialog().
+-->
 <core:FragmentDefinition
   xmlns="sap.m"
   xmlns:core="sap.ui.core"
   xmlns:section="idts.bugmanagementui.ext.controls"
 >
+  <!-- Wrapper giữ cách đặt text bên trái/nút bên phải theo SAP Fiori section pattern. -->
   <section:SmartAssignmentSection>
     <Button
       core:require="{ ClassificationReview: 'idts/bugmanagementui/ext/actions/ClassificationReview' }"

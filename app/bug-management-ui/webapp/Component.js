@@ -22,6 +22,8 @@ sap.ui.define(
             metadata: { manifest: "json" },
 
             init: function () {
+                // UI5 gọi một lần sau khi auth guard/index bootstrap đã chạy. Base init tạo Fiori Elements app,
+                // rồi ProfileShell gắn avatar/menu theo user trong session; breakpoint ở đây khi shell thiếu.
                 AppComponent.prototype.init.apply(this, arguments);
                 ProfileShell.init();
             }

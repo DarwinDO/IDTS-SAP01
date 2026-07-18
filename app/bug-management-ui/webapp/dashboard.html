@@ -1,4 +1,4 @@
-<!-- Trang bootstrap dashboard: auth-guard phải chạy trước UI5 để request OData đầu tiên đã có Bearer token. -->
+<!-- Entry point dashboard: auth-guard bảo vệ session, dashboard-page.js tự đọc OData và dựng model theo role. -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,6 +13,7 @@
         }
     </style>
 
+    <!-- Nếu token thiếu, script này redirect trước khi UI5/dashboard gọi API. -->
     <script src="auth-guard.js"></script>
 
     <script
@@ -26,9 +27,11 @@
         data-sap-ui-async="true"
         data-sap-ui-frame-options="trusted"
     ></script>
+    <!-- Sau UI5 bootstrap, module này gọi Bugs + DeveloperWorkloads và placeAt dashboardContent. -->
     <script src="dashboard-page.js"></script>
 </head>
 <body class="sapUiBody sapUiSizeCompact">
+    <!-- Hai host tách biệt: một cho profile shell, một cho dashboard page. -->
     <div id="idtsProfileShellHost"></div>
     <div id="dashboardContent"></div>
 </body>

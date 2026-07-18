@@ -56,3 +56,9 @@ Thêm/đổi tên file annotation con → cập nhật import ở đây. Sau khi
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/annotations.cds.md`
 - Source layer: `app`
 - Last reviewed: 2026-06-22
+
+## Beginner-first execution map / Sơ đồ thực thi cho người mới (2026-07-18)
+
+**English.** Caller: `app/services.cds`. This file is an aggregator: each `using from './annotations/...'` loads one concern such as List Report, labels, actions, Object Page, value helps, or PM monitoring. Callee: the imported CDS files; their annotations target entities from `srv/service.cds`. No runtime code executes here. Debug order: confirm this import, confirm the child module import, compile metadata, then inspect the generated Fiori control. Removing one import removes only that concern from metadata but can make a whole UI section disappear.
+
+**Tiếng Việt.** Caller là `app/services.cds`. File này là “mục lục”: mỗi `using from './annotations/...'` nạp một nhóm như List Report, label, action, Object Page, value help hoặc PM monitoring. Callee là các CDS con; annotation của chúng target entity trong `srv/service.cds`. Không có code runtime chạy tại đây. Thứ tự debug: kiểm import ở file này → kiểm file con → compile metadata → xem control Fiori được sinh. Xóa nhầm một import chỉ làm mất nhóm metadata đó nhưng có thể khiến cả section UI biến mất.

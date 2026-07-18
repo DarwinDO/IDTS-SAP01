@@ -1,4 +1,4 @@
-/* CSS này chỉ định bố cục đăng nhập; nếu giao diện vỡ, kiểm tra selector/viewport trước khi thay đổi logic login. */
+/* CSS chỉ định bố cục đăng nhập; dữ liệu và submit vẫn thuộc login-page.js/AuthService. */
 html,
 body,
 #loginContent,
@@ -7,6 +7,7 @@ body,
 }
 
 body {
+  /* Nền dùng SAP theme variables nên tự thích ứng theme; không chứa thông tin nội bộ/dev-facing. */
   margin: 0;
   background:
     radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--sapAccentColor6, #0a6ed1) 16%, transparent), transparent 30%),
@@ -14,11 +15,13 @@ body {
 }
 
 .idtsLoginShell {
+  /* Shell căn card giữa viewport; breakpoint ở selector này khi toàn trang lệch. */
   min-height: 100vh;
   padding: 2rem;
 }
 
 .idtsLoginCard {
+  /* Card giới hạn chiều rộng desktop nhưng mở rộng trên mobile. */
   width: 100%;
   max-width: 26rem;
   border-radius: 1rem;
@@ -58,6 +61,7 @@ body {
 }
 
 @media (max-width: 48rem) {
+  /* Mobile bỏ căn giữa dọc để bàn phím ảo không đẩy form khỏi màn hình. */
   .idtsLoginShell {
     align-items: stretch;
     justify-content: flex-start;

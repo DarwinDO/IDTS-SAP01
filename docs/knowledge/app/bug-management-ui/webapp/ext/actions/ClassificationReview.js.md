@@ -153,3 +153,9 @@ Dialog chỉ có nút Close. Đây là chủ ý: AI hỗ trợ người dùng re
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/ext/actions/ClassificationReview.js.md`
 - Source layer: `app`
 - Last reviewed: 2026-07-09
+
+## Detailed request lifecycle / Vòng đời request chi tiết (2026-07-18)
+
+**English.** Fragment press → `openDialog()` → `findBugContext()` → `readBugData()` → missing properties are requested from the OData binding → `readClassificationSuggestions()` binds and invokes `suggestBugClassification(...)` → CAP service delegates to backend AI/classification code → result returns → `enrichSuggestion()` combines current and suggested values → `buildDialog()` updates a named JSONModel. Observe context path, Bug ID/draft flags, request parameters, provider status/confidence, and final rows. There is deliberately no `setProperty`, PATCH, submitBatch, or save side effect.
+
+**Tiếng Việt.** Nhấn nút fragment → `openDialog()` → `findBugContext()` → `readBugData()` → property thiếu được request từ OData binding → `readClassificationSuggestions()` bind và invoke `suggestBugClassification(...)` → CAP service chuyển sang backend AI/classification → result quay về → `enrichSuggestion()` ghép giá trị hiện tại và gợi ý → `buildDialog()` cập nhật named JSONModel. Quan sát context path, Bug ID/cờ draft, parameter request, provider status/confidence và row cuối. Cố ý không có `setProperty`, PATCH, submitBatch hay save.

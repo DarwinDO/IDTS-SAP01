@@ -160,3 +160,9 @@ Vietnamese:
 - Không gọi tab là `My Action Items` nếu nó chưa thật sự filter theo user runtime hiện tại.
 - Sau khi sửa file này, chạy CAP compile và regression HTTP cho PM monitoring.
 - Nếu browser UAT dùng SQLite local persistent, chạy `npm run dev:sqlite:refresh-views` trước khi retest.
+
+## Beginner-first execution map / Sơ đồ thực thi cho người mới (2026-07-18)
+
+**English.** Caller: CAP compiler, then Fiori Elements when a PM opens monitoring data. The annotations describe columns, criticality, filters, and navigation for read models such as developer workload; the actual counts are calculated in backend read models, not here. Callee: `srv/bug-service/read-models.js` and the OData projection in `srv/service.cds`. Input is already-calculated OData data; output is how Fiori presents it; no write side effect occurs. Debug wrong counts in the backend first, but debug wrong color/column/label here.
+
+**Tiếng Việt.** Caller là CAP compiler, sau đó Fiori Elements khi PM mở monitoring. Annotation mô tả cột, criticality, filter và navigation cho read model như workload developer; số lượng thật được tính ở backend read model, không phải file này. Callee liên quan là `srv/bug-service/read-models.js` và projection OData trong `srv/service.cds`. Input là dữ liệu OData đã tính; output là cách Fiori trình bày; không có side effect ghi dữ liệu. Count sai thì debug backend trước; màu/cột/label sai thì debug file này.
