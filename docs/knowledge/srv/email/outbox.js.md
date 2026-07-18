@@ -1,5 +1,15 @@
 # Knowledge: `srv/email/outbox.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+Workflow code calls `writeNotificationRecord` inside its database transaction. That function writes the in-app Notification plus one EMAIL delivery snapshot as PENDING or SKIPPED; it never contacts the provider. Later the worker calls `processEmailDeliveries`: select retry-eligible rows → claim with lock token/expiry → call injected `sendMail` → update SENT with timestamps/message ID, or FAILED with sanitized error and next retry. `readBugEmailContext` deliberately selects only safe template fields. Debug in that order and inspect status/attempt/lock/timestamps, not body credentials. This separation is why Brevo failure cannot roll back assign/resolve/close.
+
+### Vietnamese
+
+Workflow gọi `writeNotificationRecord` bên trong transaction database. Hàm ghi Notification in-app và một snapshot delivery EMAIL ở trạng thái PENDING hoặc SKIPPED; nó không liên hệ provider. Sau đó worker gọi `processEmailDeliveries`: chọn row còn được retry → claim bằng lock token/expiry → gọi `sendMail` được inject → update SENT với timestamp/message ID, hoặc FAILED với lỗi đã sanitize và lịch retry. `readBugEmailContext` cố ý chỉ select field template an toàn. Debug theo thứ tự đó và xem status/attempt/lock/timestamp, không xem credential/body nhạy cảm. Nhờ tách như vậy, lỗi Brevo không rollback assign/resolve/close.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

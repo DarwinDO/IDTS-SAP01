@@ -1,5 +1,15 @@
 # Knowledge: `srv/email/template.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+Outbox calls `buildEmailMessage` with an already-limited notification/Bug context. It builds subject, plain text and HTML from the same facts; every dynamic HTML value passes `escapeHtml`. `normalizeAppUrl` and `buildBugLink` construct the public Fiori deep link and omit it when configuration/ID is missing. `formatFrom` uses verified sender data only. This file has no database/provider side effect: output is a message object consumed by sender. Debug the input context → normalized base URL → final href/subject/text; never solve a broken link by hardcoding a QA host.
+
+### Vietnamese
+
+Outbox gọi `buildEmailMessage` với context notification/Bug đã được giới hạn. Hàm dựng subject, plain text và HTML từ cùng dữ kiện; mọi giá trị động trong HTML đều đi qua `escapeHtml`. `normalizeAppUrl` và `buildBugLink` tạo public Fiori deep link, và bỏ link khi thiếu config/ID. `formatFrom` chỉ dùng sender đã verify. File này không có side effect database/provider: output là message object cho sender. Debug theo input context → base URL đã normalize → href/subject/text cuối; không sửa link hỏng bằng cách hardcode host QA.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

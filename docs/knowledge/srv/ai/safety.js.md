@@ -1,5 +1,15 @@
 # `srv/ai/safety.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+Provider, audit and feature builders call this module at every untrusted text boundary. `redactSensitiveText` removes known secret/diagnostic patterns and limits length. `sanitizeErrorSummary` converts Error/provider responses into generic safe text. Diagnostic/feature token helpers allow only bounded characters. `containsUnsafeDiagnosticText` is a final guard that forces fallback when generated output still resembles SQL, stack traces or credentials. These functions return sanitized values and have no persistence/network side effect. Test both ordinary text preservation and malicious/secret-like text removal.
+
+### Vietnamese
+
+Provider, audit và feature builder gọi module này tại mọi ranh giới text không tin cậy. `redactSensitiveText` bỏ pattern secret/diagnostic đã biết và giới hạn độ dài. `sanitizeErrorSummary` chuyển Error/provider response thành text chung an toàn. Helper diagnostic/feature token chỉ cho ký tự có giới hạn. `containsUnsafeDiagnosticText` là hàng rào cuối buộc fallback khi output vẫn giống SQL, stack trace hoặc credential. Các hàm chỉ return giá trị đã sanitize, không có side effect DB/network. Phải test cả text bình thường được giữ và text độc hại/giống secret bị loại.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

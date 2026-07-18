@@ -1,5 +1,5 @@
 /**
- * Gợi ý học/debug: profile shell chỉ hiển thị user an toàn và gọi logout; backend vẫn kiểm tra role trên mọi OData request.
+ * Gợi ý học/debug: profile shell chỉ hiển thị safe profile và gọi logout; backend vẫn kiểm tra role trên mọi OData request.
  * IDTS profile shell for the authenticated Fiori app.
  *
  * Renders a lightweight SAPUI5 profile button into the stable host owned by
@@ -41,6 +41,7 @@ sap.ui.define([
     };
 
     function init() {
+        // Component.init gọi một lần. Thiếu host/user hoặc đã render thì không tạo nút trùng.
         var host = document.getElementById(PROFILE_HOST_ID);
         var user = currentUser();
 
@@ -53,10 +54,13 @@ sap.ui.define([
     }
 
     function render(host, user) {
+        // Đặt SAPUI5 Button vào div ổn định của index.html, không sửa DOM nội bộ Fiori Elements.
         createProfileButton(user).placeAt(host);
     }
 
     function createProfileButton(user) {
+        // Chuyển safe user thành Button + Popover. Sign Out gọi window.idtsLogout từ auth-guard.js.
+        // Breakpoint ở đây khi tên/role/avatar sai hoặc menu không mở.
         var displayName = safeUserText(user.displayName || user.email || "IDTS User");
         var email = safeUserText(user.email || "No email stored");
         var role = safeUserText(user.roleName || user.role_code || "Role not available");
@@ -119,6 +123,7 @@ sap.ui.define([
     }
 
     function currentUser() {
+        // Dependency ngược về auth-guard: chỉ lấy profile đã parse an toàn.
         if (typeof window.idtsCurrentUser === "function") {
             return window.idtsCurrentUser();
         }
@@ -126,10 +131,12 @@ sap.ui.define([
     }
 
     function safeUserText(value) {
+        // Chặn null/chuỗi rỗng trước khi bind vào control; UI5 vẫn escape text khi render.
         return typeof value === "string" && value.trim() ? value.trim() : "Not available";
     }
 
     function initialsFrom(displayName) {
+        // Tạo tối đa hai ký tự avatar; không thay đổi dữ liệu user.
         var parts = displayName.split(/\s+/).filter(Boolean);
         if (!parts.length) return "ID";
         if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
@@ -137,6 +144,7 @@ sap.ui.define([
     }
 
     function formatExpiry(value) {
+        // Chỉ format cho người dùng; thời hạn thật vẫn được kiểm trong LoginSession/auth backend.
         if (!value) return "Session expiry not provided";
         var date = new Date(value);
         if (isNaN(date.getTime())) return "Session expiry not provided";
@@ -144,6 +152,7 @@ sap.ui.define([
     }
 
     function createHeaderButton() {
+        // Entry point dự phòng cho extension muốn nhúng cùng profile button ở host khác.
         var user = currentUser();
         return user ? createProfileButton(user) : null;
     }

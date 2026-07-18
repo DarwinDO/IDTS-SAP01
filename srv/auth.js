@@ -17,6 +17,7 @@ const LOGIN_TEMPORARILY_UNAVAILABLE_MESSAGE = 'Sign-in is temporarily unavailabl
 const LOG = cds.log('idts-auth')
 
 class AuthService extends cds.ApplicationService {
+  // CAP gọi `init()` khi publish AuthService; ba action login/logout/me được nối tới handler bên dưới.
   async init () {
     this.on('login', req => login(req))
     this.on('logout', req => logout(req))
@@ -27,6 +28,8 @@ class AuthService extends cds.ApplicationService {
 }
 
 async function login (req) {
+  // UI login gửi email/password vào action này. Hàm normalize email, đọc user active, verify hash,
+  // tạo session token dạng thô cho client nhưng chỉ lưu hash token vào database.
   const email = normalizeEmail(req.data.email)
   const password = req.data.password
 
@@ -80,6 +83,7 @@ async function login (req) {
 }
 
 async function logout (req) {
+  // Lấy bearer token hiện tại, hash lại và vô hiệu session tương ứng; không cần lưu raw token để tìm row.
   const sessionID = req.user?.attr?.session_ID
   if (!sessionID) return false
 
@@ -93,6 +97,7 @@ async function logout (req) {
 }
 
 async function me (req) {
+  // Trả profile public của session đã được custom-auth xác thực; không trả passwordHash/tokenHash.
   const userID = req.user?.attr?.user_ID
   if (!userID) return req.reject(401, 'Authentication token is required.')
 
@@ -108,6 +113,7 @@ async function me (req) {
 }
 
 async function publicUser (tx, user) {
+  // Dựng object user an toàn cho response login/me bằng cách join role/profile cần hiển thị.
   const role = user.role_code
     ? await tx.run(SELECT.one.from('idts.cap.UserRoles').columns('name').where({ code: user.role_code }))
     : null
@@ -122,29 +128,35 @@ async function publicUser (tx, user) {
 }
 
 function normalizeEmail (email) {
+  // Chuẩn hóa username login thành lowercase/trim để PostgreSQL không phân biệt cùng email do casing.
   return typeof email === 'string' ? email.trim().toLowerCase() : null
 }
 
 function rejectInvalidCredentials (req) {
+  // Dùng cùng message cho email không tồn tại và password sai để không lộ account nào có thật.
   return req.reject(401, INVALID_CREDENTIALS_MESSAGE)
 }
 
 function userAgentFrom (req) {
+  // Lấy user-agent đã giới hạn độ dài để audit session, không dùng làm yếu tố xác thực.
   const header = req?.headers?.['user-agent'] || req?._?.req?.headers?.['user-agent']
   return typeof header === 'string' ? header.slice(0, 255) : null
 }
 
 function sessionTtlMinutes () {
+  // Đọc TTL private config với fallback an toàn; kết quả quyết định expiresAt của session mới.
   const configured = Number(cds.env.idts?.auth?.sessionTtlMinutes)
   return Number.isFinite(configured) && configured > 0 ? configured : DEFAULT_SESSION_TTL_MINUTES
 }
 
 function isExpectedClientAuthReject (error) {
+  // Phân biệt 4xx dự kiến với lỗi runtime để chỉ log diagnostic cần thiết.
   const code = Number(error?.code || error?.statusCode || error?.status)
   return code >= 400 && code < 500
 }
 
 function logUnexpectedAuthError (operation, error) {
+  // Log mã/tóm tắt đã sanitize cho vận hành; tuyệt đối không in raw SQL, stack, token hoặc credential.
   LOG.error('Unexpected authentication failure', {
     operation,
     diagnostic: safeAuthErrorDiagnostic(error)
@@ -152,6 +164,7 @@ function logUnexpectedAuthError (operation, error) {
 }
 
 function safeAuthErrorDiagnostic (error) {
+  // Chuyển error không tin cậy thành object code/summary an toàn cho server log.
   const status = Number(error?.statusCode || error?.status)
   return {
     name: safeDiagnosticToken(error?.name, 'Error'),
@@ -161,6 +174,7 @@ function safeAuthErrorDiagnostic (error) {
 }
 
 function safeDiagnosticToken (value, fallback) {
+  // Chỉ giữ ký tự allow-list và giới hạn độ dài của mã lỗi trước khi log.
   if (typeof value !== 'string' && typeof value !== 'number') return fallback
   const token = String(value).replace(/[^a-zA-Z0-9_.-]/g, '_').slice(0, 80)
   return token || fallback

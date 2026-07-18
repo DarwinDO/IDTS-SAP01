@@ -1,4 +1,5 @@
-// Các preset monitoring chỉ lọc dữ liệu BugService đã cho phép PM đọc; chúng không tự tính hay ghi lại trạng thái bug.
+// Các preset monitoring chỉ trình bày/lọc Bugs và DeveloperWorkloads do backend trả; chúng không tự tính hay ghi status.
+// Khi số liệu sai, xem Network response và `srv/bug-service/monitoring.js` trước khi đổi annotation.
 using BugService as service from '../../../srv/service';
 
 /**

@@ -134,3 +134,9 @@ Cách này tránh việc app gửi request OData metadata đầu tiên khi chưa
 - Không xóa `idtsProfileShellHost` nếu không cập nhật `auth-guard.js` trong cùng thay đổi.
 - Nếu đổi UI5 version/theme, test cả login và main app vì hai bên cần nhìn đồng bộ.
 - Nếu đổi component name/resource root, verify UI5 build và app startup.
+
+## Execution trace / Lần theo thực thi (2026-07-18)
+
+**English.** Browser → `index.html` → synchronous `auth-guard.js` → UI5 bootstrap → `Component.js` → `manifest.json` → Fiori Elements OData model. The profile host is consumed by `ProfileShell.js`; the component host is consumed by `ComponentSupport`. Watch Network: `auth-guard.js` must run before the first `$metadata` request. This file owns load order only; it does not authenticate credentials or query the database.
+
+**Tiếng Việt.** Browser → `index.html` → `auth-guard.js` chạy đồng bộ → UI5 bootstrap → `Component.js` → `manifest.json` → OData model của Fiori Elements. Profile host được `ProfileShell.js` dùng; component host được `ComponentSupport` dùng. Hãy xem Network: `auth-guard.js` phải chạy trước request `$metadata` đầu tiên. File này chỉ giữ thứ tự nạp; nó không kiểm password và không query database.

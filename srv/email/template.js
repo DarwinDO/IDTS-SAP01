@@ -2,6 +2,7 @@
 'use strict'
 
 function buildEmailMessage ({
+  // Nhận notification + Bug context đã giới hạn và tạo subject/text/html; output chỉ là message, chưa gửi mail.
   notificationID,
   recipientEmail,
   eventType,
@@ -84,6 +85,7 @@ function buildEmailMessage ({
 }
 
 function buildBugLink (baseUrl, bugID) {
+  // Nối public app URL với Fiori hash route của Bug; thiếu baseUrl/ID thì bỏ link thay vì tạo URL hỏng.
   if (!baseUrl || !bugID) return null
   const appUrl = normalizeAppUrl(baseUrl)
   const key = `ID=${encodeURIComponent(bugID)},IsActiveEntity=true`
@@ -91,6 +93,7 @@ function buildBugLink (baseUrl, bugID) {
 }
 
 function normalizeAppUrl (baseUrl) {
+  // Đưa baseUrl về đúng login/app path và bỏ slash dư để deep link chạy trên local lẫn Render.
   const normalized = String(baseUrl).trim().replace(/\/+$/, '')
   const currentAppPath = '/idts.bugmanagementui/index.html'
 
@@ -108,12 +111,14 @@ function normalizeAppUrl (baseUrl) {
 }
 
 function formatFrom (config) {
+  // Dựng From cho message từ sender verified; không chứa SMTP/API credential.
   if (!config?.fromAddress) return undefined
   const name = String(config.fromName || 'IDTS').replace(/["\r\n]/g, '')
   return `"${name}" <${config.fromAddress}>`
 }
 
 function escapeHtml (value) {
+  // Escape mọi text động trước khi đưa vào HTML email để title/message không chèn markup/script.
   return String(value ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')

@@ -31,6 +31,7 @@ const { writeNotificationRecord } = require('../email/outbox')
 const { getEmailConfig } = require('../email/config')
 
 async function recordCreateSideEffects (req, data, entities) {
+  // after CREATE Bug gọi vào đây: tạo event “Create” và notification phù hợp sau khi Bug chính đã tồn tại.
   if (!data?.ID) return
   const bug = await readBug(req, entities, data.ID)
   const actor = await resolveRequestUser(req, entities)
@@ -55,11 +56,13 @@ async function recordCreateSideEffects (req, data, entities) {
 }
 
 async function recordUpdateSideEffects (req, entities) {
+  // after UPDATE dùng snapshot `_oldBug/_finalBug` do bug-write chuẩn bị để không query và đoán lại thay đổi.
   const changes = req._importantChanges || []
   await recordBugChangeSideEffects(req, entities, changes, req._finalBug)
 }
 
 async function recordBugChangeSideEffects (req, entities, changes, finalBug) {
+  // Điều phối side effect cho một danh sách change: ghi HistoryEvent/Logs trước, rồi tạo notification nếu status cần báo.
   if (!changes.length || !finalBug?.ID) return
   const actor = await resolveRequestUser(req, entities)
   const actorID = actor?.ID || finalBug.reporter_ID || (await firstUserByRole(req, entities, 'PM'))?.ID
@@ -85,6 +88,7 @@ async function recordBugChangeSideEffects (req, entities, changes, finalBug) {
 }
 
 async function recordCommentCreateSideEffects (req, data, entities) {
+  // Sau khi comment persist, ghi event/comment notification với actor thật; lỗi trước INSERT không tạo audit giả.
   if (!data?.bug_ID || !data?.author_ID) return
 
   await writeHistoryEvent(req, entities, {
@@ -104,6 +108,7 @@ async function recordCommentCreateSideEffects (req, data, entities) {
 }
 
 async function recordDraftAttachmentSaveSideEffects (req, data, entities) {
+  // Sau draft SAVE, so attachment metadata trước/sau để ghi add/remove event; binary S3 không được nhúng vào history.
   const bugID = data?.ID || bugIDFrom(req)
   if (!bugID) return
 
@@ -145,6 +150,7 @@ async function recordDraftAttachmentSaveSideEffects (req, data, entities) {
 }
 
 function importantChanges (oldBug, finalBug) {
+  // So các field nghiệp vụ được audit và trả danh sách old/new; field kỹ thuật ngoài allow-list bị bỏ qua có chủ ý.
   const tracked = [
     ['title', 'title'],
     ['description', 'description'],
@@ -181,6 +187,7 @@ function importantChanges (oldBug, finalBug) {
 }
 
 function actionTypeForChange (change) {
+  // Suy ra loại event từ field/status đổi để timeline dùng icon/label đúng thay vì mọi thứ đều là Edit.
   if (change.fieldName === 'status') return ACTION.STATUS_CHANGE
   if (change.fieldName === 'assignee') return change.oldValue ? ACTION.REASSIGN : ACTION.ASSIGN
   if (change.fieldName === 'rejectionReason') return ACTION.REJECT
@@ -188,6 +195,7 @@ function actionTypeForChange (change) {
 }
 
 async function writeHistoryEvent (req, entities, entry) {
+  // Ghi HistoryEvent và các HistoryLogs trong transaction của request; đây là ranh giới persistence của audit.
   if (!entry.actorID) return
   const tx = cds.tx(req)
   const actor = await tx.run(SELECT.one.from(entities.Users).where({ ID: entry.actorID }))
@@ -229,6 +237,7 @@ async function writeHistoryEvent (req, entities, entry) {
 }
 
 async function enrichHistoryChanges (req, entities, changes) {
+  // Bổ sung label và display value cho UUID/code trước khi lưu, giúp người đọc không phải giải mã raw ID.
   const enriched = []
 
   for (const change of changes) {
@@ -244,10 +253,12 @@ async function enrichHistoryChanges (req, entities, changes) {
 }
 
 function historyFieldLabel (fieldName) {
+  // Map tên field kỹ thuật sang nhãn nghiệp vụ; fallback giữ tên để field mới không biến mất khỏi audit.
   return HISTORY_FIELD_LABELS[fieldName] || fieldName
 }
 
 async function historyValueDisplay (req, entities, fieldName, value) {
+  // Chọn helper lookup theo loại field (status, user, developer, catalog, component/category).
   if (value === null || value === undefined || value === '') return null
 
   switch (fieldName) {
@@ -279,6 +290,7 @@ async function historyValueDisplay (req, entities, fieldName, value) {
 }
 
 function buildHistorySummary (actionType, changes) {
+  // Tạo câu summary ngắn theo action; full old/new vẫn được lưu trong HistoryLogs.
   const statusChange = findHistoryChange(changes, 'status')
   const assigneeChange = findHistoryChange(changes, 'assignee')
 
@@ -313,10 +325,12 @@ function buildHistorySummary (actionType, changes) {
 }
 
 function findHistoryChange (changes, fieldName) {
+  // Tìm change theo field để các summary chuyên biệt lấy đúng old/new mà không phụ thuộc vị trí array.
   return changes.find(change => change.fieldName === fieldName)
 }
 
 function statusChangeSuffix (change) {
+  // Dựng hậu tố status cũ → mới bằng display value, tránh lộ code kỹ thuật khi đã có label.
   if (!change || change.oldValueDisplay === change.newValueDisplay) return ''
   const fromPart = change.oldValueDisplay ? ` from ${change.oldValueDisplay}` : ''
   const toPart = change.newValueDisplay ? change.newValueDisplay : 'Unknown'
@@ -324,6 +338,7 @@ function statusChangeSuffix (change) {
 }
 
 function statusActionSummary (statusChange) {
+  // Chọn câu nghiệp vụ cho từng status đích; không đưa “next processor” kỹ thuật vào summary user-facing.
   if (!statusChange?.newValueDisplay) return 'Updated workflow status.'
 
   switch (statusChange.newValueDisplay) {
@@ -337,6 +352,7 @@ function statusActionSummary (statusChange) {
 }
 
 function genericEditSummary (changes) {
+  // Fallback cho edit không thuộc action chuyên biệt: liệt kê field label quan trọng, giới hạn độ dài.
   const labels = [...new Set(changes.map(change => change.fieldLabel).filter(Boolean))]
   if (!labels.length) return 'Updated bug details.'
   if (labels.length === 1) return `Updated ${labels[0].toLowerCase()}.`
@@ -345,6 +361,7 @@ function genericEditSummary (changes) {
 }
 
 async function writeNotificationForStatus (req, entities, bug, status) {
+  // Xác định recipient từ status/next owner rồi ghi notification + email outbox; không gửi provider trực tiếp ở đây.
   const notification = notificationTargetForStatus(bug, status)
   if (!notification?.recipientID || !notification.eventType) return
 
@@ -357,6 +374,7 @@ async function writeNotificationForStatus (req, entities, bug, status) {
 }
 
 function notificationTargetForStatus (bug, status) {
+  // Mapping thuần từ status/Bug sang recipient và message intent; return null khi trạng thái không cần thông báo.
   if (status === STATUS.ASSIGNED && bug.nextProcessorUser_ID) {
     return {
       recipientID: bug.nextProcessorUser_ID,
@@ -417,6 +435,7 @@ function notificationTargetForStatus (bug, status) {
 }
 
 async function actorForAction (req, entities, bug, actionType) {
+  // Resolve actor cho audit; với dữ liệu legacy có fallback an toàn, nhưng ưu tiên session user hiện tại.
   const actor = await resolveRequestUser(req, entities)
   if (actor) return actor.ID
 

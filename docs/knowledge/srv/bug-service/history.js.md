@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/history.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+After-handlers and draft SAVE code call the four `record*SideEffects` entry points. They derive meaningful changes with `importantChanges`, choose action type/summary, enrich raw IDs/codes into display labels, and persist one HistoryEvent plus child HistoryLogs through `writeHistoryEvent`. Status events may call `writeNotificationForStatus`, which writes notification/outbox but does not send email. Attachment audit compares metadata only. Debug: source after-handler → change list → actor → enriched values → HistoryEvent INSERT → HistoryLogs INSERT → optional notification. `statusActionSummary` is user-facing wording; it must not expose internal “next processor” terminology. Audit should be created only after the primary change succeeds.
+
+### Vietnamese
+
+After-handler và code draft SAVE gọi bốn entry point `record*SideEffects`. Chúng lấy thay đổi có ý nghĩa bằng `importantChanges`, chọn action type/summary, enrich raw ID/code thành display label, rồi persist một HistoryEvent cùng HistoryLogs con qua `writeHistoryEvent`. Event status có thể gọi `writeNotificationForStatus`, hàm ghi notification/outbox chứ không gửi email trực tiếp. Audit attachment chỉ so metadata. Debug theo source after-handler → change list → actor → display value đã enrich → INSERT HistoryEvent → INSERT HistoryLogs → notification tùy chọn. `statusActionSummary` là wording user-facing; không được lộ thuật ngữ nội bộ “next processor”. Audit chỉ được tạo sau khi thay đổi chính thành công.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

@@ -145,3 +145,9 @@ Quy tắc quan trọng là đây chỉ là màn hình review, không phải auto
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/ext/actions/DuplicateReview.js.md`
 - Source layer: `app`
 - Last reviewed: 2026-07-09
+
+## Detailed request lifecycle / Vòng đời request chi tiết (2026-07-18)
+
+**English.** Bug Summary button → `openDialog()` → root context discovery → `requestMissingBugProperties()` → `readSimilarBugs()` invokes `findSimilarBugs(...)` → backend embedding/similarity service returns candidates → `enrichCandidate()` sanitizes and decorates each row → `buildDialog()` displays review evidence. Watch source Bug text/ID, candidate IDs/scores, provider status, and row count. Empty/unavailable results must leave the Bug unchanged; this module never creates `DuplicateLinks`.
+
+**Tiếng Việt.** Nút trong Bug Summary → `openDialog()` → tìm root context → `requestMissingBugProperties()` → `readSimilarBugs()` invoke `findSimilarBugs(...)` → backend embedding/similarity trả candidate → `enrichCandidate()` sanitize/decorate từng row → `buildDialog()` hiển thị evidence để review. Quan sát text/ID Bug nguồn, candidate ID/score, provider status và số row. Kết quả rỗng/unavailable phải giữ Bug nguyên; module không bao giờ tạo `DuplicateLinks`.

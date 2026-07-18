@@ -1,5 +1,5 @@
 /**
- * Gợi ý học/debug: chỉ token được gắn vào request OData; không log hoặc đưa token lên UI khi dò lỗi 401.
+ * Gợi ý học/debug: file này chạy trước UI5; đặt breakpoint ở bước đọc token và gắn Authorization khi app bị trả 401.
  * IDTS Auth Guard – loaded by index.html BEFORE the UI5 bootstrap.
  *
  * Runs synchronously as the very first script so that:
@@ -25,6 +25,7 @@
 
     // ── 1. Redirect to login page if no token ──────────────────────────────
     var token = sessionStorage.getItem(TOKEN_KEY);
+    // index.html vừa nạp file này. Không có token thì dừng bootstrap Fiori và chuyển sang login.html.
     if (!token) {
         var base = window.location.pathname.replace(/\/index\.html(\?.*)?$/, "");
         window.location.replace(base + "/login.html");
@@ -36,12 +37,15 @@
     // already carries the Authorization header.
     var _open = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (method, url) {
+        // Lưu URL khi UI5 mở XHR, để send() biết request nào là OData của IDTS.
         this.__idtsUrl = url ? String(url) : "";
         _open.apply(this, arguments);
     };
 
     var _send = XMLHttpRequest.prototype.send;
     XMLHttpRequest.prototype.send = function () {
+        // UI5 gọi send() cho $metadata và dữ liệu. Chỉ OData mới được gắn Bearer token;
+        // sau đó request tiếp tục sang CAP auth middleware. Breakpoint ở đây khi Network thiếu header.
         var url = this.__idtsUrl || "";
         if (url.indexOf("/odata/v4/") !== -1) {
             var t = sessionStorage.getItem(TOKEN_KEY);
@@ -55,6 +59,7 @@
 
     // ── 3. Logout helper ───────────────────────────────────────────────────
     window.idtsLogout = function () {
+        // ProfileShell gọi: báo logout cho AuthService nhưng luôn xóa session local kể cả mạng lỗi.
         var t = sessionStorage.getItem(TOKEN_KEY);
         if (t) {
             fetch("/odata/v4/auth/logout", {
@@ -74,10 +79,12 @@
 
     // ── 4. Safe session helper for the SAPUI5 profile shell ─────────────────
     window.idtsCurrentUser = function () {
+        // ProfileShell dùng helper này thay vì tự parse sessionStorage ở nhiều nơi.
         return readStoredUser();
     };
 
     function readStoredUser() {
+        // JSON hỏng được coi như không có user; không throw để làm trắng toàn bộ Fiori shell.
         var raw = sessionStorage.getItem(USER_KEY);
         if (!raw) return null;
         try {

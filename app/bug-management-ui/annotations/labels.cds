@@ -1,4 +1,5 @@
-// Nhãn và bắt buộc ở đây chỉ hướng dẫn Fiori; CAP vẫn là nơi chặn dữ liệu sai khi gọi OData trực tiếp.
+// Nhãn và field requirement ở đây hướng dẫn Fiori render form/message; CAP vẫn chặn dữ liệu sai ở backend.
+// Một label có thể được dùng ở nhiều trang vì Fiori đọc metadata, không cần XML riêng cho từng màn hình.
 using BugService as service from '../../../srv/service';
 
 annotate service.Bugs with {

@@ -1,5 +1,15 @@
 # Knowledge: `srv/auth.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+`AuthService.init()` wires CDS operations to `login/logout/me`. For login, execution is: normalize email → query active User → `verifyPassword` → create raw session token → hash token → INSERT AuthSessions → `publicUser` → return token/profile. Wrong email and wrong password both reach `rejectInvalidCredentials`, preventing account enumeration. Logout hashes the presented bearer token and sets `revokedAt`; `me` returns only the already-authenticated profile. Internal failures pass through `safeAuthErrorDiagnostic` before server logging and return a generic response. Debug with `req.data`, queried `user`, boolean password result, session expiry, and the returned public object; never inspect/copy the plain password/token into evidence.
+
+### Vietnamese
+
+`AuthService.init()` nối operation CDS với `login/logout/me`. Khi login, thứ tự là: chuẩn hóa email → query User active → `verifyPassword` → sinh raw session token → hash token → INSERT AuthSessions → `publicUser` → trả token/profile. Email sai và password sai đều tới `rejectInvalidCredentials`, tránh lộ account nào tồn tại. Logout hash bearer token đang gửi và set `revokedAt`; `me` chỉ trả profile đã được xác thực. Lỗi nội bộ đi qua `safeAuthErrorDiagnostic` trước khi log server và response chỉ dùng message chung. Khi debug, xem `req.data`, `user` query được, kết quả boolean password, session expiry và public object trả về; không copy password/token thô vào evidence.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

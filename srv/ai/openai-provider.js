@@ -4,6 +4,7 @@
 const API_BASE_URL = 'https://api.openai.com/v1'
 
 class OpenAiProvider {
+  // Adapter mỏng gọi OpenAI SDK cho chat/structured/embedding; SafeAiProvider bên ngoài xử lý sanitize/timeout/error.
   constructor (config, fetchImpl = globalThis.fetch) {
     if (typeof fetchImpl !== 'function') throw new Error('A fetch implementation is required for the OpenAI provider.')
     this.config = config
@@ -84,6 +85,7 @@ class OpenAiProvider {
 }
 
 function responseText (response) {
+  // Lấy text từ các shape response SDK được hỗ trợ; shape lạ trả rỗng để feature fallback.
   if (typeof response?.output_text === 'string') return response.output_text
   for (const item of response?.output || []) {
     for (const content of item?.content || []) {
@@ -94,6 +96,7 @@ function responseText (response) {
 }
 
 function safeSchemaName (value) {
+  // Chuẩn hóa JSON schema name theo ký tự provider chấp nhận, tránh gửi tên tùy ý.
   return String(value || 'Suggestion').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 64) || 'Suggestion'
 }
 

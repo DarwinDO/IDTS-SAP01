@@ -43,16 +43,19 @@ const FORBIDDEN_PAYLOAD_KEYS = new Set([
 ])
 
 function normalizeCode (value, fallback) {
+  // Chuẩn hóa code audit theo allow-list ký tự để dữ liệu provider không thành field kỹ thuật tùy ý.
   return sanitizeDiagnosticToken(value || fallback, fallback).toUpperCase().slice(0, 40)
 }
 
 function cleanText (value, maxLength) {
+  // Redact/cắt text trước khi lưu audit, tránh prompt/output dài hoặc chứa dữ liệu nhạy cảm.
   if (value === undefined || value === null) return null
   const text = redactSensitiveText(String(value), maxLength).trim()
   return text || null
 }
 
 function normalizeConfidence (value) {
+  // Ép confidence về 0..1 hoặc null; UI không nhận số provider ngoài phạm vi.
   if (value === undefined || value === null || value === '') return null
   const number = Number(value)
   if (!Number.isFinite(number)) return null
@@ -60,6 +63,7 @@ function normalizeConfidence (value) {
 }
 
 function sanitizePayloadValue (value, depth = 0) {
+  // Duyệt payload có giới hạn depth/size, bỏ key nhạy cảm trước JSON serialization.
   if (depth > 8) return '[redacted:max-depth]'
   if (value === undefined) return undefined
   if (value === null) return null
@@ -83,6 +87,7 @@ function sanitizePayloadValue (value, depth = 0) {
 }
 
 function serializeSuggestionPayload (payload) {
+  // Chuyển payload đã sanitize thành JSON có giới hạn; lỗi circular/format trả representation an toàn.
   const safePayload = sanitizePayloadValue(payload)
   const text = JSON.stringify(safePayload)
   if (!text || text === undefined) {
@@ -92,6 +97,7 @@ function serializeSuggestionPayload (payload) {
 }
 
 async function ensureActiveCode (tx, entityName, code, label) {
+  // Xác nhận suggestion code tồn tại và active trong catalog thật trước khi audit/response coi là grounded.
   const row = await tx.run(
     SELECT.one.from(entityName)
       .columns('code', 'active')
@@ -103,6 +109,7 @@ async function ensureActiveCode (tx, entityName, code, label) {
 }
 
 async function ensureTargetExists (tx, entityName, id, label) {
+  // Xác nhận source/target UUID trỏ record thật; ngăn audit chứa liên kết hallucinated.
   const row = await tx.run(
     SELECT.one.from(entityName)
       .columns('ID')
@@ -114,6 +121,7 @@ async function ensureTargetExists (tx, entityName, id, label) {
 }
 
 async function createAiSuggestion (tx, data) {
+  // Ranh giới persistence duy nhất của AI audit: INSERT AISuggestions đã chuẩn hóa, không update Bug.
   if (!tx || typeof tx.run !== 'function') {
     throw new Error('A CAP transaction or database service is required to create an AI suggestion audit row.')
   }

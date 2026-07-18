@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/content.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+`service.js` registers these handlers before writes to Comments and `Bugs.attachments`, for both active and draft targets. `prepareCommentCreate` resolves the parent Bug and authenticated actor, checks role/content, and overwrites author fields before INSERT. `prepareAttachmentWrite` resolves the parent Bug, checks role/action and metadata/MIME/size rules before the attachment adapter persists metadata/binary. PostgreSQL keeps attachment metadata/storage reference; S3 keeps file content. Break at the matching handler → parent Bug ID resolution → actor/role → normalized `req.data` → storage adapter. Rejecting here must occur before history/notification side effects.
+
+### Vietnamese
+
+`service.js` đăng ký các handler này trước thao tác ghi Comments và `Bugs.attachments`, cho cả target active lẫn draft. `prepareCommentCreate` resolve Bug cha và actor đã xác thực, kiểm role/content, rồi ghi đè author trước INSERT. `prepareAttachmentWrite` resolve Bug cha, kiểm role/action và rule metadata/MIME/size trước khi attachment adapter persist metadata/binary. PostgreSQL giữ metadata/storage reference; S3 giữ nội dung file. Break theo handler tương ứng → resolve Bug cha → actor/role → `req.data` đã normalize → storage adapter. Reject tại đây phải xảy ra trước side effect history/notification.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

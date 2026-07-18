@@ -1,4 +1,5 @@
-// List Report dùng annotation này để biến các trường Bugs đã expose thành filter, cột và action có thể thấy.
+// List Report dùng annotation này để biến field Bugs đã expose thành filter, cột và presentation mặc định.
+// Field phải tồn tại trong `srv/service.cds`; annotation không tự tạo data hay backend permission.
 using BugService as service from '../../../srv/service';
 
 annotate service.Bugs with @(

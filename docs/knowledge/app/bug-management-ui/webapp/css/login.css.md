@@ -86,3 +86,9 @@ Dùng SAP theme variables quan trọng vì trang login sẽ đi theo theme SAP H
 - Không đưa password, token, endpoint, hoặc dữ liệu user vào comment CSS.
 - Test desktop và mobile width sau khi đổi layout.
 - Nếu đổi spacing message, verify empty-submit và wrong-password display.
+
+## Selector-to-owner map / Bản đồ selector tới code sở hữu (2026-07-18)
+
+**English.** `login.html` owns `#loginContent`; `login-page.js` creates `.idtsLoginShell`, card, form, message, and button classes; media queries make the same controls usable on narrow screens. CSS has no request, token, or validation side effect. If login logic works but layout is wrong, inspect these selectors; if classes are absent, inspect control construction in `login-page.js`.
+
+**Tiếng Việt.** `login.html` sở hữu `#loginContent`; `login-page.js` tạo class shell, card, form, message và button; media query giúp cùng control dùng được trên màn hình hẹp. CSS không gửi request, không chạm token và không validate. Login chạy đúng nhưng bố cục sai thì kiểm selector ở đây; class không có thì kiểm đoạn dựng control trong `login-page.js`.

@@ -143,3 +143,9 @@ Quy tac quan trong: text AI khong bao gio la quyet dinh workflow. Nguoi dung van
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/ext/actions/HandoffSummaryReview.js.md`
 - Source layer: `app`
 - Last reviewed: 2026-07-09
+
+## Detailed request lifecycle / Vòng đời request chi tiết (2026-07-18)
+
+**English.** History button → `openDialog()` → root Bug context → request `ID` → `readHandoffSummary()` invokes `summarizeBugHandoff(...)` → backend reads persisted Bug/history context and produces grounded text → `enrichSummary()` sanitizes fields → `buildDialog()` updates its JSONModel. Observe Bug ID, provider/grounding status, missing-information text, latest events, and next action. The dialog is read-only: no comment, history, status, owner, or database row is written.
+
+**Tiếng Việt.** Nút trong History → `openDialog()` → root Bug context → request `ID` → `readHandoffSummary()` invoke `summarizeBugHandoff(...)` → backend đọc Bug/history đã lưu và tạo text grounded → `enrichSummary()` sanitize field → `buildDialog()` cập nhật JSONModel. Quan sát Bug ID, provider/grounding status, missing-information, latest events và next action. Dialog chỉ đọc: không ghi comment, history, status, owner hay row database.

@@ -17,6 +17,8 @@ const ENTITIES = Object.freeze({
 })
 
 async function writeNotificationRecord (tx, entry, config) {
+  // Workflow gọi trong transaction Bug: ghi Notifications và một delivery EMAIL duy nhất.
+  // Hàm chỉ tạo outbox PENDING/SKIPPED, không gọi Brevo/SMTP nên lỗi provider không rollback Bug.
   if (!entry?.bugID || !entry?.recipientID || !entry?.eventType) return {}
 
   const notificationID = cds.utils.uuid()
@@ -77,6 +79,7 @@ async function writeNotificationRecord (tx, entry, config) {
 }
 
 async function readBugEmailContext (tx, bugID) {
+  // Đọc bugNumber/title/status/owner cần cho template; không lấy description/comment/attachment nhạy cảm.
   const bug = await tx.run(SELECT.one.from(ENTITIES.Bugs)
     .columns('ID', 'bugNumber', 'title', 'status_code', 'nextProcessorUser_ID')
     .where({ ID: bugID }))
@@ -99,6 +102,7 @@ async function readBugEmailContext (tx, bugID) {
 }
 
 function skippedDeliveryReason (config, recipient) {
+  // Trả lý do SKIPPED khi email tắt, config thiếu hoặc recipient không hợp lệ/inactive.
   if (!config?.enabled) return { code: 'EMAIL_DISABLED', summary: 'Email delivery is disabled.' }
   if (!config.ready) return { code: 'EMAIL_CONFIG_INCOMPLETE', summary: 'Email delivery configuration is incomplete.' }
   if (!recipient) return { code: 'RECIPIENT_NOT_FOUND', summary: 'Notification recipient was not found.' }
@@ -109,6 +113,8 @@ function skippedDeliveryReason (config, recipient) {
 }
 
 async function processEmailDeliveries ({ tx, config, sendMail, now = new Date(), workerID = cds.utils.uuid() }) {
+  // Worker gọi theo batch: claim row đủ retry bằng lock token, gửi ngoài transaction claim,
+  // rồi update SENT/FAILED và lịch retry. Breakpoint ở claim, `sendMail`, và update trạng thái.
   if (!config?.ready || typeof sendMail !== 'function') return { sent: 0, failed: 0, skipped: 0 }
 
   const maxAttempts = config.maxRetryCount + 1
@@ -186,15 +192,18 @@ async function processEmailDeliveries ({ tx, config, sendMail, now = new Date(),
 }
 
 function formatFrom (config) {
+  // Dựng header From từ name/address đã normalize; không đưa credential vào message.
   const safeName = String(config.fromName || 'IDTS').replace(/["\r\n]/g, '')
   return `"${safeName}" <${config.fromAddress}>`
 }
 
 function retryDelayMs (attemptCount) {
+  // Backoff đơn giản theo số lần thử để provider lỗi không bị spam liên tục.
   return Math.min(60000 * (2 ** Math.max(attemptCount - 1, 0)), 15 * 60000)
 }
 
 function sanitizeTransportError (error) {
+  // Chỉ lưu mã/tóm tắt đã làm sạch vào delivery; bỏ hostname, username, password và stack.
   const rawCode = String(error?.code || 'EMAIL_DELIVERY_FAILED')
   const code = /^[A-Z0-9_-]{1,80}$/i.test(rawCode) ? rawCode : 'EMAIL_DELIVERY_FAILED'
   const summaries = {

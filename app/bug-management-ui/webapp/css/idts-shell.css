@@ -1,3 +1,4 @@
+/* Host cố định cho avatar/profile; pointer-events giúp host không che toolbar phía dưới. */
 #idtsProfileShellHost {
   position: fixed;
   top: 0.5rem;
@@ -6,6 +7,7 @@
   pointer-events: none;
 }
 
+/* Nút và popover dùng SAP theme variables; CSS chỉ trình bày, user/role đến từ ProfileShell.js. */
 .idtsProfileButton.sapMBtn {
   pointer-events: auto;
   min-width: auto;
@@ -45,6 +47,7 @@
   color: var(--sapContent_LabelColor, #6a6d70);
 }
 
+/* Dashboard giữ chiều rộng đọc được; KPI tile xuống một cột trên màn hình nhỏ. */
 .idtsDashboardPage {
   max-width: 90rem;
   margin: 0 auto;
@@ -59,6 +62,7 @@
 }
 
 @media (max-width: 37.5rem) {
+  /* Breakpoint CSS khi avatar che nội dung hoặc tile không co trên mobile. */
   #idtsProfileShellHost {
     top: 0.25rem;
     right: 0.25rem;

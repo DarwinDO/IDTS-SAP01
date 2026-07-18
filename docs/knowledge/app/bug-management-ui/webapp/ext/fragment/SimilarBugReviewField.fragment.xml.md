@@ -80,3 +80,9 @@ Form Fiori cung cấp label ngắn **Similar bugs**. Fragment này cung cấp n�
 - Giữ action ở dạng review-only; không tự link duplicate từ nút này.
 - Không bọc nó trong `SmartAssignmentSection` hoặc đưa nó lại dưới Assignment.
 - Sau khi sửa, chạy focused check IDTS-74 và IDTS-77.
+
+## Binding walkthrough / Walkthrough binding (2026-07-18)
+
+**English.** The Bug Summary annotation inserts this fragment beside summary content. `core:require` loads `DuplicateReview.js`; button press calls `DuplicateReview.openDialog`. The wrapper only aligns explanatory text and action; it does not calculate similarity. Missing button means metadata/fragment placement; failed request means continue from `openDialog()` to `readSimilarBugs()` and the CAP action.
+
+**Tiếng Việt.** Annotation Bug Summary chèn fragment cạnh nội dung summary. `core:require` nạp `DuplicateReview.js`; nhấn nút gọi `DuplicateReview.openDialog`. Wrapper chỉ căn text và action, không tính similarity. Mất nút thì kiểm metadata/vị trí fragment; request lỗi thì trace từ `openDialog()` đến `readSimilarBugs()` rồi CAP action.

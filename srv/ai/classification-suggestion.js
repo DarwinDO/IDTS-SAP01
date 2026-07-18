@@ -56,6 +56,8 @@ const FIELD_DEFS = [
 ]
 
 async function suggestClassification (req, entities, dependencies = {}) {
+  // Entry point action: resolve Bug context, đọc catalog active, gọi provider structured nếu bật,
+  // ground từng gợi ý vào catalog, audit và trả review-only; không PATCH classification của Bug.
   const tx = cds.tx(req)
   const provider = dependencies.provider || createAiProvider()
   const input = await resolveClassificationInput(tx, req, entities, req.data || {})
@@ -101,6 +103,7 @@ async function suggestClassification (req, entities, dependencies = {}) {
 }
 
 async function resolveClassificationInput (tx, req, entities, data) {
+  // Ghép source Bug với text/code input cho phép; output là context đã clean dùng chung cho fallback/provider.
   if (data.sourceBugID) {
     const source = await tx.run(
       SELECT.one.from(entities.Bugs)
@@ -138,6 +141,7 @@ async function resolveClassificationInput (tx, req, entities, data) {
 }
 
 async function readCatalogs (tx, entities) {
+  // Đọc toàn bộ catalog active liên quan trong một transaction để provider output luôn được kiểm chứng.
   const [sapModules, applicationComponents, defectCategories, priorityValues, severityValues] = await Promise.all([
     tx.run(SELECT.from(entities.SAPModules).columns('ID', 'code', 'name', 'active')),
     tx.run(SELECT.from(entities.ApplicationComponents).columns('ID', 'code', 'name', 'componentType', 'active')),
@@ -156,6 +160,7 @@ async function readCatalogs (tx, entities) {
 }
 
 function buildClassificationSuggestions ({ input, catalogs, providerResult }) {
+  // Dựng một row cho mỗi field; provider value sai/không có được thay bằng deterministic fallback hoặc no-result.
   const payload = providerPayload(providerResult)
   const unsafeProviderOutput = containsUnsafeDiagnosticText(payload)
   const providerStatus = unsafeProviderOutput ? 'AI_OUTPUT_UNSAFE' : (providerResult?.status || 'AI_PROVIDER_ERROR')
@@ -170,6 +175,7 @@ function buildClassificationSuggestions ({ input, catalogs, providerResult }) {
 }
 
 function resolveProviderSuggestion ({ field, raw, catalogs, providerStatus }) {
+  // Parse output của một field, tìm row catalog thật và tạo confidence/reason an toàn.
   const row = findCatalogRow(catalogs[field.catalogKey], raw)
   const confidence = confidenceFor(raw)
 
@@ -208,6 +214,7 @@ function resolveProviderSuggestion ({ field, raw, catalogs, providerStatus }) {
 }
 
 function fallbackSuggestion ({ field, input, catalogs, providerStatus }) {
+  // Chấm keyword/context local khi provider unavailable; vẫn yêu cầu user review trước khi áp dụng.
   const sourceValue = sourceValueFor(field, input)
   if (sourceValue) {
     const existing = findCatalogRow(catalogs[field.catalogKey], { id: sourceValue, code: sourceValue, name: sourceValue })
@@ -259,6 +266,7 @@ function fallbackSuggestion ({ field, input, catalogs, providerStatus }) {
 }
 
 function fallbackScore (field, row, text) {
+  // Kết hợp exact/current value và keyword score để chọn catalog candidate deterministic.
   const rowText = [row.code, row.name, row.componentType, row.categoryType].filter(Boolean).join(' ')
   const lexical = tokenSimilarity(text, rowText)
   const keyword = keywordScore(field, row, text)
@@ -266,6 +274,7 @@ function fallbackScore (field, row, text) {
 }
 
 function keywordScore (field, row, text) {
+  // So token của title/description với code/name/keywords catalog, không dùng model.
   const normalized = String(text || '').toLowerCase()
   const code = String(row.code || '').toUpperCase()
   if (field.key === 'priority' || field.key === 'severity') {
@@ -290,6 +299,7 @@ function keywordScore (field, row, text) {
 }
 
 async function recordClassificationAudit ({ tx, req, entities, input, provider, providerResult, result }) {
+  // Lưu source, grounded suggestion và provider status đã sanitize vào AISuggestions.
   if (!input.sourceBugID) return
 
   const requester = await resolveRequestUser(req, entities)
@@ -323,6 +333,7 @@ async function recordClassificationAudit ({ tx, req, entities, input, provider, 
 }
 
 function extractProviderValue (payload, field) {
+  // Lấy value từ các shape structured output được hỗ trợ; field khác bị bỏ.
   const direct = field.providerKeys.map(key => payload?.[key]).find(value => value !== undefined && value !== null)
   const nested = payload?.classification?.[field.key] || payload?.fields?.[field.key]
   const arrayValue = Array.isArray(payload?.suggestions)
@@ -332,6 +343,7 @@ function extractProviderValue (payload, field) {
 }
 
 function normalizeProviderValue (value) {
+  // Chuẩn hóa string/object provider thành `{code, confidence, reason}` giới hạn.
   if (value === undefined || value === null || value === '') return { hasValue: false }
   if (typeof value === 'string') {
     return { hasValue: true, code: cleanCode(value), name: cleanText(value), confidence: null, reason: null }
@@ -351,6 +363,7 @@ function normalizeProviderValue (value) {
 }
 
 function findCatalogRow (rows, raw) {
+  // Match provider code/name không phân biệt hoa thường nhưng chỉ return row active đã đọc từ DB.
   const id = cleanText(raw.id)
   const code = cleanCode(raw.code)
   const name = normalizeText(raw.name)
@@ -364,12 +377,14 @@ function findCatalogRow (rows, raw) {
 }
 
 function providerPayload (providerResult) {
+  // Lấy payload thành công; failure/no-data trả object rỗng để fallback.
   const data = providerResult?.data
   if (data?.json && typeof data.json === 'object') return data.json
   return data && typeof data === 'object' ? data : {}
 }
 
 function buildProviderBugInput (input) {
+  // Chọn field Bug tối thiểu gửi AI, loại comment/attachment/user/secret.
   return {
     title: cleanText(input.title),
     description: cleanText(input.description),
@@ -387,6 +402,7 @@ function buildProviderBugInput (input) {
 }
 
 function buildProviderCatalogInput (catalogs) {
+  // Gửi danh sách code/name active để model chọn trong closed set thay vì tự bịa code.
   return Object.fromEntries(Object.entries(catalogs).map(([key, rows]) => [
     key,
     rows
@@ -401,6 +417,7 @@ function buildProviderCatalogInput (catalogs) {
 }
 
 function suggestionRow ({ field, row = null, providerStatus, confidence = null, status, reason, requiresReview }) {
+  // Dựng response row thống nhất; `requiresReview` luôn bảo vệ quyết định cuối của user.
   return {
     field: field.key,
     fieldLabel: field.label,
@@ -416,6 +433,7 @@ function suggestionRow ({ field, row = null, providerStatus, confidence = null, 
 }
 
 function summarizeResult (result) {
+  // Tạo summary gọn cho audit, không copy toàn bộ provider payload.
   const suggested = result.filter(row => row.status === 'SUGGESTED').length
   const review = result.filter(row => row.status === 'LOW_CONFIDENCE').length
   const invalid = result.filter(row => row.status === 'INVALID_PROVIDER_VALUE').length
@@ -426,14 +444,17 @@ function summarizeResult (result) {
 }
 
 function sourceValueFor (field, input) {
+  // Lấy giá trị classification hiện tại để UI so sánh suggestion với source.
   return field.sourceID ? input[field.sourceID] : input[field.sourceCode]
 }
 
 function hasBugContext (input) {
+  // Chỉ cho gọi provider/ranking khi có title/description hoặc classification đủ dùng.
   return Boolean(bugText(input) || input.sourceBugID)
 }
 
 function bugText (input) {
+  // Ghép text deterministic dùng fallback keyword score.
   return [
     input.title,
     input.description,
@@ -444,18 +465,21 @@ function bugText (input) {
 }
 
 function confidenceFor (raw) {
+  // Chuẩn hóa confidence provider 0..1 hoặc null.
   const value = Number(raw?.confidence)
   if (Number.isFinite(value)) return Math.max(0, Math.min(1, value))
   return 0.5
 }
 
 function defaultReason (field, row, confidence) {
+  // Dựng lý do grounded từ catalog row/score khi provider không có reason dùng được.
   return confidence < LOW_CONFIDENCE_THRESHOLD
     ? `${field.label} matches an active catalog value but needs human review because confidence is low.`
     : `${field.label} matches the active IDTS catalog value ${row.code || row.name}.`
 }
 
 function safeProviderReason (providerStatus) {
+  // Chuyển trạng thái provider thành lời giải thích user-facing không lộ diagnostic.
   if (providerStatus === 'AI_DISABLED') return 'AI assistance is disabled, so only deterministic fallback was available.'
   if (providerStatus === 'AI_TIMEOUT') return 'AI assistance timed out, so only deterministic fallback was available.'
   if (providerStatus === 'AI_PROVIDER_UNSUPPORTED') return 'AI provider is not supported in this environment.'
@@ -465,28 +489,34 @@ function safeProviderReason (providerStatus) {
 }
 
 function cleanText (value) {
+  // Trim/redact/cắt text Bug trước provider/audit.
   return typeof value === 'string' ? value.trim() : ''
 }
 
 function cleanCode (value) {
+  // Chuẩn hóa code catalog; rỗng thành null.
   return typeof value === 'string' ? value.trim().toUpperCase() : ''
 }
 
 function normalizeText (value) {
+  // Lowercase text cho matching deterministic, không thay text response gốc.
   return String(value || '').trim().toLowerCase()
 }
 
 function normalizeKey (value) {
+  // Tạo key code/name để so không phân biệt khoảng trắng/casing.
   return normalizeText(value).replace(/[^a-z0-9]/g, '')
 }
 
 function safeReason (value) {
+  // Redact/cắt reason provider trước response.
   const text = redactSensitiveText(cleanText(value), 500)
   if (containsUnsafeDiagnosticText(text)) return 'AI output was removed because it was not safe to show.'
   return text.slice(0, 500)
 }
 
 function roundConfidence (value) {
+  // Làm tròn confidence để UI/audit/test ổn định.
   return Number(Math.max(0, Math.min(1, Number(value))).toFixed(4))
 }
 

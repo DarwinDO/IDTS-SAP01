@@ -1,5 +1,57 @@
 # Knowledge: `db/schema.cds`
 
+## Beginner-first data map (2026-07-18)
+
+### English
+
+#### How to read this file
+
+An `entity` becomes persisted database structure; an `Association` stores/uses a foreign-key link; a `Composition` means the child belongs to the parent aggregate; `cuid` adds UUID ID and `managed` adds created/modified audit fields. `srv/service.cds` projects selected entities to OData, and JavaScript handlers enforce rules before/after persistence.
+
+#### Entity groups and boundaries
+
+- `CodeList` and its children store stable codes/labels/active flags used by value helps and backend validation.
+- `Users/AuthSessions` own custom authentication. Password/token raw values are never columns; only hashes are stored.
+- `DeveloperProfiles` extends a User for assignment. `ComponentCategories` bridges component/category; `DeveloperResponsibilities` links a DeveloperProfile to that bridge and optional SAP module.
+- `Bugs` is the aggregate root. Reporter, assignee and next processor are different concepts. Comments, attachments, history, notifications, duplicate links and AI suggestions are child/related records.
+- Attachment metadata/storage reference is database data, while binary content is managed by the attachment storage adapter (S3 in Shared QA).
+- `HistoryEvents/HistoryLogs` are immutable audit meaning: one event per user action, child logs per changed field.
+- `Notifications/NotificationDeliveries` separate business notification from provider delivery/outbox retry.
+- `DuplicateLinks` records a human-confirmed relation; `AiSuggestions` records review evidence. Neither is the AI model itself.
+
+#### Create request and data effects
+
+Draft NEW creates a draft Bugs row and sets reporter. PATCH updates draft fields/child attachments. SAVE activates the Bugs row; compositions become attached to the active Bug. Backend code derives componentCategory/status/next processor and later inserts history/notification rows. Follow a bad value from this field definition → projection in `srv/service.cds` → handler in `srv/service.js`/`bug-service` → OData payload/UI annotation.
+
+#### Debug and safe editing
+
+For missing/wrong data, inspect the entity field and generated foreign-key name, then the active/draft database row, then the handler that writes it. Do not compare Users.ID with DeveloperProfiles.ID. Schema changes require migration/deploy and synchronized projections, handlers, annotations, tests and mirror updates. Do not run a seed-loading deploy on Shared QA without a data-preservation plan.
+
+### Vietnamese
+
+#### Cách đọc file này
+
+Một `entity` trở thành cấu trúc được persist trong database; `Association` lưu/dùng liên kết foreign key; `Composition` nghĩa là child thuộc aggregate cha; `cuid` thêm UUID ID và `managed` thêm field audit created/modified. `srv/service.cds` projection các entity cần thiết ra OData, còn JavaScript handler áp rule trước/sau persist.
+
+#### Các nhóm entity và ranh giới
+
+- `CodeList` và entity con lưu code/label/active ổn định cho value help và backend validation.
+- `Users/AuthSessions` giữ custom authentication. Password/token thô không bao giờ là cột; chỉ lưu hash.
+- `DeveloperProfiles` mở rộng User cho assignment. `ComponentCategories` nối component/category; `DeveloperResponsibilities` nối DeveloperProfile với bridge đó và SAP module tùy chọn.
+- `Bugs` là aggregate root. Reporter, assignee và next processor là ba khái niệm khác nhau. Comment, attachment, history, notification, duplicate link và AI suggestion là dữ liệu con/liên quan.
+- Metadata/storage reference attachment nằm trong database, còn binary content do attachment storage adapter quản lý (S3 trên Shared QA).
+- `HistoryEvents/HistoryLogs` là audit bất biến về ý nghĩa: một event cho một thao tác user, child log cho từng field đổi.
+- `Notifications/NotificationDeliveries` tách notification nghiệp vụ khỏi provider delivery/outbox retry.
+- `DuplicateLinks` ghi quan hệ đã được người dùng xác nhận; `AiSuggestions` ghi evidence review. Không entity nào là AI model.
+
+#### Request Create và ảnh hưởng dữ liệu
+
+Draft NEW tạo draft Bugs row và gắn reporter. PATCH cập nhật field draft/attachment con. SAVE activate Bugs row; composition được gắn vào Bug active. Backend suy ra componentCategory/status/next processor rồi insert history/notification. Hãy lần giá trị sai từ field tại đây → projection trong `srv/service.cds` → handler trong `srv/service.js`/`bug-service` → OData payload/UI annotation.
+
+#### Debug và sửa an toàn
+
+Khi dữ liệu thiếu/sai, xem field entity và tên foreign key generated, rồi row active/draft trong DB, rồi handler ghi nó. Không so Users.ID với DeveloperProfiles.ID. Đổi schema cần migration/deploy và đồng bộ projection, handler, annotation, test, mirror. Không chạy deploy nạp seed lên Shared QA nếu chưa có kế hoạch giữ dữ liệu.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

@@ -176,6 +176,8 @@
         app.placeAt("dashboardContent");
         loadDashboard();
 
+        // Sau khi session/profile sẵn sàng, gọi song song Bugs và DeveloperWorkloads rồi chọn dashboard theo role.
+        // Breakpoint đầu tiên khi KPI/list trống hoặc sai.
         function loadDashboard() {
             var user = LoginSession.getUser();
             var roleCode = user && user.role_code ? user.role_code : "";
@@ -203,6 +205,7 @@
             });
         }
 
+        // Gắn bearer token vào GET OData và parse JSON; response không OK đi vào error state chung.
         function fetchOData(url) {
             var token = LoginSession.getToken();
             return fetch(url, {
@@ -216,6 +219,7 @@
             });
         }
 
+        // Router thuần chọn model Tester/Developer/PM; không ghi DB hay gọi API tại đây.
         function buildDashboardModel(roleCode, user, bugs, workloads) {
             var userID = user && user.ID;
             var developerWorkload = findCurrentDeveloperWorkload(workloads, userID);
@@ -232,6 +236,7 @@
             return testerDashboard(user, openBugs);
         }
 
+        // Lọc theo reporter/current action/status để dựng KPI và focus list của Tester.
         function testerDashboard(user, bugs) {
             var userID = user && user.ID;
             var createdByMe = bugs.filter(function (bug) { return bug.reporterID === userID; });
@@ -255,6 +260,7 @@
             };
         }
 
+        // Kết hợp workload backend với Bug assign/current action của Developer đăng nhập.
         function developerDashboard(user, developerWorkload, bugs) {
             var userID = user && user.ID;
             var profileID = developerWorkload && developerWorkload.developerProfileID;
@@ -280,6 +286,7 @@
             };
         }
 
+        // PM thấy toàn cảnh open/pending/overdue và workload, không giới hạn theo một user.
         function pmDashboard(bugs, workloads) {
             var pendingAssignment = bugs.filter(function (bug) { return bug.isPendingAssignment; });
             var overdue = bugs.filter(function (bug) { return bug.isOverdue; });
@@ -297,6 +304,7 @@
             };
         }
 
+        // Chuẩn hóa boolean/null/label OData để filter và binding dùng cùng shape.
         function normalizeBugs(rows) {
             return rows
                 .filter(function (row) { return row.IsActiveEntity !== false; })
@@ -322,6 +330,7 @@
                 });
         }
 
+        // Chuyển count/decimal từ OData thành number hiển thị ổn định.
         function normalizeWorkloads(rows) {
             return rows
                 .filter(function (row) { return row.active !== false; })
@@ -339,6 +348,7 @@
                 });
         }
 
+        // Dựng row public/criticality cho list; không tính lại rule backend.
         function workloadList(workloads) {
             return workloads.slice(0, 8).map(function (row) {
                 var hasRisk = row.isOverloaded || row.overdueOwnedBugCount > 0;
@@ -351,6 +361,7 @@
             });
         }
 
+        // Chọn tối đa tám Bug ưu tiên và loại trùng ID để dashboard không kéo dài.
         function focusList(bugs) {
             var seen = {};
             var result = [];
@@ -374,6 +385,7 @@
             return result;
         }
 
+        // Map Users.ID đăng nhập với developerUserID trong read model workload.
         function findCurrentDeveloperWorkload(workloads, userID) {
             if (!userID) return null;
             for (var index = 0; index < workloads.length; index += 1) {
@@ -384,6 +396,7 @@
             return null;
         }
 
+        // Factory object KPI cho JSONModel; không có side effect.
         function tile(title, value, icon, valueColor) {
             return {
                 title: title,
@@ -395,10 +408,12 @@
             };
         }
 
+        // Điều hướng về Fiori List Report mà không xóa session.
         function openBugList() {
             window.location.href = "index.html";
         }
 
+        // Lấy Bug ID từ binding context và mở deep link Object Page; ID thiếu thì bỏ qua an toàn.
         function openBug(event) {
             var bug = event.getSource().getBindingContext("dashboard").getObject();
             if (!bug || !bug.ID) {

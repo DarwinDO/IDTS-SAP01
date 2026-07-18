@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/history-read-models.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+Before READ, `ensureHistoryEventSelectDependencies` adds fields/associations needed by enrichment even when Fiori sends a narrow `$select`. After database READ, `enrichHistoryEventPayload` normalizes logs, creates field labels/display values, sorts them by business order, and builds a short grouped context. `summarizeHistoryLogs/formatHistoryLogFragment/truncateHistoryValue` control only response readability; stored audit remains intact. Break at before-handler CQN → raw events/logs after DB → normalized logs → final response. If the timeline is long, check OData paging/UI “Show more” separately; this module summarizes each event but does not decide page size.
+
+### Vietnamese
+
+Trước READ, `ensureHistoryEventSelectDependencies` thêm field/association cần cho enrichment dù Fiori gửi `$select` hẹp. Sau khi database READ, `enrichHistoryEventPayload` chuẩn hóa logs, tạo field label/display value, sắp theo thứ tự nghiệp vụ và dựng grouped context ngắn. `summarizeHistoryLogs/formatHistoryLogFragment/truncateHistoryValue` chỉ điều khiển độ dễ đọc của response; audit đã lưu vẫn nguyên. Break theo before-handler CQN → event/log raw sau DB → log đã normalize → response cuối. Nếu timeline quá dài, kiểm OData paging/UI “Show more” riêng; module này tóm tắt từng event nhưng không quyết định page size.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English
