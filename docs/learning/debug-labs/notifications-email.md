@@ -2,52 +2,72 @@
 
 ## English
 
-### Goal
+### Goal and mental model
 
-Understand why a bug action must commit even if email delivery is unavailable. IDTS writes notification intent in the request transaction, then an independent worker delivers email later.
+The bug transaction records that an email should be sent; a separate worker sends it later. Therefore a provider outage changes delivery status but does not undo assignment, comment, or lifecycle work.
 
-### Safe setup and breakpoints
+### Step 1 — Use a safe local configuration
 
-Use local configuration with email disabled or a local test SMTP server. Do not change Render/Brevo credentials for this lab. Set breakpoints in a lifecycle action in `srv/bug-service/actions.js`, notification creation in `srv/bug-service/notifications.js`, `srv/email/outbox.js:processEmailDeliveries`, and `srv/email/worker.js:startEmailWorker`.
+Use email disabled mode or a local SMTP test server. Do not edit Render/Brevo secrets. Place breakpoints at:
 
-### Expected execution order
+1. a lifecycle function in `srv/bug-service/actions.js`, such as `transitionBug`;
+2. `srv/email/outbox.js:writeNotificationRecord`;
+3. `srv/email/worker.js:startEmailWorker` and its `cds.spawn` callback;
+4. `srv/email/outbox.js:processEmailDeliveries`;
+5. `srv/email/sender.js:createEmailSender` and the selected sender function.
 
-1. A bug action validates and updates Bug state inside its CAP transaction.
-2. The same transaction writes `Notifications` and one `NotificationDeliveries` row for channel EMAIL.
-3. If email is disabled, missing, inactive, or no recipient exists, delivery is marked `SKIPPED`; the Bug change still commits.
-4. If configuration is ready, the worker started by `startEmailWorker` uses `cds.spawn` on its own schedule, claims pending rows, and calls the configured sender.
-5. A success writes `SENT`, `sentAt`, attempt count, and provider message ID. A failure records a sanitized `FAILED` state and retry timing; it never rolls back the already-completed workflow.
+### Step 2 — Record notification intent
 
-### Inspect and failure exercise
+Perform one Bug action. In `transitionBug`, inspect the Bug update and actor. History/notification helpers call `writeNotificationRecord(cds.tx(req), ...)` with the same CAP request transaction. Inspect notification ID, Bug ID, recipient decision, channel, template key, and config status. The database side effects are an in-app `Notifications` row and at most one EMAIL `NotificationDeliveries` row.
 
-Inspect Notification ID, delivery status, `attemptCount`, `nextAttemptAt`, and sanitized error summary. Simulate a sender failure locally. Verify the bug status/history is still committed, then verify the delivery moves through retry rather than duplicating a sent row.
+If email is disabled, recipient is missing/inactive, or configuration is incomplete, the delivery becomes `SKIPPED`. The Bug/history transaction still commits.
+
+### Step 3 — Worker processes committed rows
+
+`srv/service.js:init` calls `startEmailWorker()` after CAP initialization. `cds.spawn` starts independent transactions on a polling interval. At `processEmailDeliveries`, inspect selected `PENDING`/retryable `FAILED` rows, lock token, `attemptCount`, and `nextAttemptAt`. The sender boundary chooses SMTP or Brevo API from private config.
+
+Success updates the same row to `SENT` with `sentAt` and provider message ID. Failure stores a sanitized summary, `FAILED`, retry timing, and incremented attempt count. It must never throw back into the already-finished Bug request.
+
+### Failure exercise
+
+Use a controlled local sender failure. Confirm: Bug status/history committed; delivery is `FAILED`; no secret/host/raw provider payload appears in UI or evidence; restoring the test sender lets a retry reach `SENT` without creating a duplicate delivery.
 
 ### Teach-back
 
-Explain why the email worker cannot run inside `assignToDeveloper`'s transaction and why raw SMTP/API errors must not be copied to the user interface or Jira evidence.
+Explain the transaction boundary, why `cds.spawn` is separate, and what PostgreSQL stores before and after a successful send.
 
 ## Vietnamese
 
-### Mục tiêu
+### Mục tiêu và mô hình dễ nhớ
 
-Hiểu vì sao bug action vẫn phải commit khi email không gửi được. IDTS ghi ý định notification trong transaction request, sau đó worker riêng mới gửi email.
+Transaction của Bug chỉ ghi nhận rằng cần gửi email; worker riêng gửi sau. Vì vậy provider bị lỗi chỉ làm đổi delivery status, không được hoàn tác assignment, comment hoặc lifecycle đã xong.
 
-### Chuẩn bị và breakpoint
+### Bước 1 — Dùng cấu hình local an toàn
 
-Dùng config local tắt email hoặc local test SMTP server. Không đổi credential Render/Brevo trong lab. Đặt breakpoint tại lifecycle action trong `srv/bug-service/actions.js`, phần tạo notification trong `srv/bug-service/notifications.js`, `srv/email/outbox.js:processEmailDeliveries`, `srv/email/worker.js:startEmailWorker`.
+Dùng email disabled hoặc local SMTP test server. Không sửa secret Render/Brevo. Đặt breakpoint:
 
-### Thứ tự chạy mong đợi
+1. một lifecycle function trong `srv/bug-service/actions.js`, ví dụ `transitionBug`;
+2. `srv/email/outbox.js:writeNotificationRecord`;
+3. `srv/email/worker.js:startEmailWorker` và callback `cds.spawn`;
+4. `srv/email/outbox.js:processEmailDeliveries`;
+5. `srv/email/sender.js:createEmailSender` và sender function được chọn.
 
-1. Bug action validate và update Bug state trong CAP transaction.
-2. Cùng transaction đó ghi `Notifications` và một `NotificationDeliveries` row cho channel EMAIL.
-3. Nếu email tắt, config thiếu, user inactive hoặc không có recipient, delivery thành `SKIPPED`; Bug change vẫn commit.
-4. Nếu config đủ, worker từ `startEmailWorker` dùng `cds.spawn` chạy theo lịch riêng, claim row pending và gọi sender đã cấu hình.
-5. Thành công ghi `SENT`, `sentAt`, số lần thử và provider message ID. Thất bại ghi `FAILED` đã sanitize cùng thời điểm retry; không rollback workflow đã xong.
+### Bước 2 — Ghi ý định notification
 
-### Cần quan sát và bài lỗi
+Thực hiện một Bug action. Trong `transitionBug`, xem Bug update và actor. Helper history/notification gọi `writeNotificationRecord(cds.tx(req), ...)` bằng cùng CAP request transaction. Xem notification ID, Bug ID, recipient decision, channel, template key và trạng thái config. Side effect database là một row `Notifications` trong app và tối đa một row EMAIL `NotificationDeliveries`.
 
-Quan sát Notification ID, delivery status, `attemptCount`, `nextAttemptAt` và error summary đã sanitize. Mô phỏng sender fail ở local. Xác nhận bug status/history vẫn commit, sau đó delivery retry thay vì tạo một sent row trùng.
+Nếu email tắt, recipient thiếu/inactive hoặc config chưa đủ thì delivery thành `SKIPPED`. Transaction Bug/history vẫn commit.
 
-### Giải thích lại
+### Bước 3 — Worker xử lý row đã commit
 
-Giải thích vì sao email worker không chạy trong transaction của `assignToDeveloper` và vì sao raw SMTP/API error không được xuất hiện trên UI hoặc Jira evidence.
+`srv/service.js:init` gọi `startEmailWorker()` sau khi CAP init. `cds.spawn` mở transaction riêng theo poll interval. Tại `processEmailDeliveries`, xem row `PENDING`/`FAILED` còn retry, lock token, `attemptCount`, `nextAttemptAt`. Sender boundary chọn SMTP hoặc Brevo API từ private config.
+
+Thành công update chính row đó thành `SENT`, có `sentAt` và provider message ID. Thất bại ghi summary đã sanitize, `FAILED`, lịch retry và tăng attempt count. Lỗi không được throw ngược vào Bug request đã hoàn tất.
+
+### Bài lỗi
+
+Dùng sender local cố ý fail. Xác nhận: Bug status/history vẫn commit; delivery là `FAILED`; UI/evidence không lộ secret/host/raw provider payload; khôi phục sender test thì retry thành `SENT` mà không tạo delivery trùng.
+
+### Teach-back
+
+Giải thích transaction boundary, vì sao `cds.spawn` chạy riêng và PostgreSQL lưu gì trước/sau khi gửi thành công.
