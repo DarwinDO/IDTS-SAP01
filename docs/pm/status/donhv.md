@@ -33,6 +33,13 @@ Last updated: 2026-07-11
 | Governance timezone follow-up | The first date-aware implementation used UTC when no test date was supplied, while the approved effective date is Asia/Bangkok. | JavaScript `toISOString()` always uses UTC. | Under active fix before opening the PR. | Derive the default date with `Asia/Bangkok`, keep explicit test dates deterministic, then rerun the gate tests. |
 | Governance timezone resolution | The default effective-date calculation now uses `Asia/Bangkok`. | `bangkokDate()` builds an ISO-like date from `Intl.DateTimeFormat` parts while tests may still pass an explicit date. | Fixed. | Fresh self-test reports `10 PASS / 0 FAIL`; `2026-07-12` is false and `2026-07-13` is true. |
 
+## 2026-07-12 - Ownership and beginner-debug curriculum analysis
+
+| Classification | Symptom / work | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling issue | A combined read-only `rg` inventory command returned exit code `1` after printing the expected `app`/`srv`/`db` file map and relevant login/workflow matches. | One search pipeline ended with a non-zero no-match/PowerShell pipeline status even though the required inventory output was already produced. | Resolved for this analysis by using the returned file map; no source, database, Jira, or runtime state changed. A first status patch also failed because it targeted an older mojibake line at the end of this file; no partial write occurred. | Use separate focused `rg` commands and stable ASCII anchors for future curriculum/status edits. This is not a product defect or SAP490 bug candidate. |
+| Tooling issue | The first attempt to load the `executing-plans`, `using-git-worktrees`, and `verify` skills used obsolete cache paths and returned `PathNotFound`. | The available skill catalog points to `openai-curated-remote` for Superpowers and the repository-local `.agents/skills` directory for `verify`, not the paths used in the first command. | Resolved before implementation. No source, Jira, or runtime state changed. | Read the same skills through their catalog paths before creating the clean worktree. This is not a product defect or SAP490 bug candidate. |
+
 ## 2026-07-11 - IDTS-81 email deep-link correction
 
 | Classification | Symptom / work | Root cause | Fix status | Verification / next action |
