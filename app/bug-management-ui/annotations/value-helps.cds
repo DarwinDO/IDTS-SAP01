@@ -2,6 +2,7 @@ using BugService as service from '../../../srv/service';
 
 // Gợi ý học/debug: value help giúp người dùng chọn catalog hợp lệ; backend vẫn chặn mã sai, inactive hoặc không đủ quyền.
 annotate service.Bugs:status.code with @Common.FieldControl : #ReadOnly @Common.ValueListWithFixedValues : true @Common.ValueList : {
+    // ValueList map field Bug với catalog OData; status read-only vì chỉ workflow action được đổi.
     Label : 'Status',
     CollectionPath : 'StatusValues',
     SearchSupported : true,
@@ -95,6 +96,7 @@ annotate service.Bugs:sapModule.ID with @Common.Text : sapModule.name @Common.Te
   };
 
 annotate service.Bugs:applicationComponent.ID with @Common.Text : applicationComponent.name @Common.TextArrangement : #TextOnly @Common.ValueList : {
+    // In-parameter SAP Module lọc Application Component; sai mapping sẽ cho candidate không thuộc module.
     Label : 'Application Component',
     CollectionPath : 'ApplicationComponents',
     SearchSupported : true,
@@ -120,6 +122,7 @@ annotate service.Bugs:applicationComponent.ID with @Common.Text : applicationCom
   };
 
 annotate service.Bugs:defectCategory.ID with @Common.Text : defectCategory.name @Common.TextArrangement : #TextOnly @Common.ValueList : {
+    // Các in-parameter classification lọc category hợp lệ; backend vẫn kiểm active/catalog khi SAVE.
     Label : 'Defect Category',
     CollectionPath : 'ValidDefectCategories',
     SearchSupported : true,
@@ -159,6 +162,7 @@ annotate service.Bugs:defectCategory.ID with @Common.Text : defectCategory.name 
   };
 
 annotate service.Bugs:assignee.ID with @Common.Label : 'Assignee'
+// Value help Assignee đọc AssignableDevelopers; lựa chọn cuối vẫn đi qua draft/action validation backend.
   @Common.FieldControl : assigneeFieldControl
   @Common.Text : assigneeDisplayName
   @Common.TextArrangement : #TextOnly

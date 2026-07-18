@@ -55,6 +55,7 @@ sap.ui.define([
     var MAX_CANDIDATES = 100;
 
     function canUseAssignmentUi() {
+        // Safe profile chỉ quyết định UX; CAP action vẫn kiểm Tester/PM và candidate hợp lệ.
         var user = LoginSession.getUser();
         return Boolean(user && (user.role_code === "TESTER" || user.role_code === "PM"));
     }
@@ -95,6 +96,7 @@ sap.ui.define([
     }
 
     function findBugContext(control) {
+        // Nút/value-help đi ngược cây control để lấy root Bug draft/active context.
         var current = control;
         while (current) {
             if (typeof current.getBindingContext === "function") {
@@ -158,6 +160,7 @@ sap.ui.define([
     }
 
     function enrichCandidate(row, view) {
+        // Chuẩn hóa workload, availability, capability và warning thành row dễ so sánh.
         var availability = row.availabilityStatusName || getText(view, "smartAssignAvailabilityUnknown");
         var criticality = Number(row.availabilityCriticality);
         var normalizedAvailability = normalize(availability);
@@ -205,6 +208,7 @@ sap.ui.define([
     }
 
     function candidateMatches(candidate, query) {
+        // Search theo tên/module/capability phía client; không thay danh sách candidate backend trả về.
         if (!query) {
             return true;
         }
@@ -241,6 +245,7 @@ sap.ui.define([
     }
 
     function updateSelection(state, candidate) {
+        // Chỉ đánh dấu row được chọn trong dialog; chưa ghi assignee vào Bug.
         state.setProperty("/selectedCandidate", candidate || null);
         state.setProperty("/selectedCandidateId", candidate ? candidate.developerProfileID : "");
         state.setProperty("/selectedWarningText", candidate ? candidate.warningText : "");
@@ -248,6 +253,7 @@ sap.ui.define([
     }
 
     function readCandidates(model, bug, view) {
+        // GET AssignableDevelopers theo classification của Bug; candidate source vẫn thuộc backend read model.
         var filters = [
             new Filter("active", FilterOperator.EQ, true),
             new Filter("componentCategoryID", FilterOperator.EQ, bug.componentCategory_ID)
@@ -269,6 +275,7 @@ sap.ui.define([
     }
 
     function readAssignmentExplanations(model, bug, candidates, view) {
+        // Gọi explainSmartAssignment cho candidate để giải thích review-only, không ranking/auto-assign.
         if (!candidates.length || !model || typeof model.bindContext !== "function") {
             return Promise.resolve([]);
         }
@@ -334,6 +341,8 @@ sap.ui.define([
     }
 
     function executeAssignment(model, bugContext, candidate, view, sourceControl) {
+        // Khi user xác nhận, invoke assignment action/backend validation rồi refresh root context.
+        // Breakpoint ở đây khi dialog chọn đúng nhưng assignee không được lưu.
         if (bugContext.getProperty("IsActiveEntity") !== true && typeof bugContext.setProperty === "function") {
             return bugContext.setProperty("assignee_ID", candidate.developerProfileID).then(function () {
                 if (sourceControl && typeof sourceControl.setValue === "function") {
@@ -363,6 +372,7 @@ sap.ui.define([
     }
 
     function requestMissingAssignmentProperties(bugContext, bug) {
+        // Chỉ đọc thêm classification/owner field cần cho candidate query và explanation.
         if (!bugContext || typeof bugContext.requestProperty !== "function") {
             return Promise.resolve(bug);
         }
@@ -391,6 +401,7 @@ sap.ui.define([
     }
 
     function buildDialog(view, model, bugContext, bug, sourceControl) {
+        // Tạo state + dialog, nạp candidates/explanations, filter/search và chỉ enable Confirm khi có selection.
         var state = new JSONModel({
             candidates: [],
             visibleCandidates: [],

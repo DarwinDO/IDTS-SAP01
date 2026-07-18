@@ -221,3 +221,9 @@ Thay đổi này không đổi transition backend. Nó chỉ làm action trên O
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/annotations/actions.cds.md`
 - Style baseline: `docs/knowledge/guidelines/knowledge-mirror-anchors.md`
 - Last reviewed: 2026-07-01
+
+## Execution map / Sơ đồ thực thi (2026-07-18)
+
+**English.** CAP compiler merges `UI.Identification` and action-parameter annotations into `BugService` metadata; Fiori Elements then renders buttons/dialog fields. A button press invokes the matching bound CAP action in `srv/service.cds`; the backend handler authorizes and changes status/history. `can*` fields only control visibility. Debug: metadata button → OData action request → handler/permission/workflow. This file never changes a Bug itself.
+
+**Tiếng Việt.** CAP compiler merge `UI.Identification` và annotation parameter action vào metadata `BugService`; Fiori Elements dùng chúng để dựng nút/dialog field. Nhấn nút sẽ invoke bound CAP action tương ứng trong `srv/service.cds`; handler backend mới authorize và đổi status/history. Field `can*` chỉ điều khiển visibility. Debug: nút metadata → request OData action → handler/permission/workflow. File này không tự đổi Bug.

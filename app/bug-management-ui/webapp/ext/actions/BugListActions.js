@@ -12,11 +12,13 @@ sap.ui.define([
     "use strict";
 
     function canCreateBug() {
+        // Manifest action gọi để ẩn/hiện Create; safe profile chỉ phục vụ UX, không thay backend authorization.
         var user = LoginSession.getUser();
         return Boolean(user && (user.role_code === "TESTER" || user.role_code === "PM"));
     }
 
     function getModelFromActionContext(actionContext) {
+        // Chuẩn hóa các shape ExtensionAPI giữa Fiori runtime để lấy đúng OData V4 model.
         if (actionContext && typeof actionContext.getModel === "function") {
             return actionContext.getModel();
         }
@@ -37,6 +39,7 @@ sap.ui.define([
     }
 
     function getEditFlowFromActionContext(actionContext) {
+        // Lấy Fiori EditFlow được hỗ trợ; không tự tạo draft bằng raw DOM/internal control.
         if (actionContext && actionContext.editFlow) {
             return actionContext.editFlow;
         }
@@ -50,14 +53,18 @@ sap.ui.define([
 
     return {
         isCreateVisible: function () {
+            // Manifest gọi khi tính visible của action Create Bug.
             return canCreateBug();
         },
 
         openDashboard: function () {
+            // Điều hướng sang custom dashboard nhưng giữ cùng session tab.
             window.location.href = window.location.pathname.replace(/\/index\.html.*$/, "/dashboard.html");
         },
 
         createBug: function () {
+            // Nút Create Bug gọi: check UX role → bind /Bugs → EditFlow.createDocument(NewPage).
+            // CAP nhận NEW draft và kiểm quyền lại; breakpoint ở đây rồi sang srv handler khi bị 403.
             if (!canCreateBug()) {
                 return Promise.reject(new Error("Current user is not allowed to create bug reports."));
             }

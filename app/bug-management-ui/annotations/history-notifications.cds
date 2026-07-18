@@ -2,6 +2,7 @@ using BugService as service from '../../../srv/service';
 
 // Gợi ý học/debug: annotation này làm history/notification dễ đọc; dữ liệu audit gốc vẫn được tạo bởi backend workflow.
 annotate service.Comments with @UI.LineItem : [
+  // Navigation comments được Fiori render thành table; row nguồn do addComment backend tạo.
   { $Type : 'UI.DataField', Label : 'Comment', Value : content },
   { $Type : 'UI.DataField', Label : 'Author', Value : authorDisplayName },
   { $Type : 'UI.DataField', Label : 'Role', Value : authorRoleName },
@@ -27,6 +28,7 @@ annotate service.Comments with {
 
 
 annotate service.HistoryEvents with @(
+  // HistoryEvents là nhóm audit cấp cao; logs chứa field-level detail và luôn read-only trên UI.
   UI.CreateHidden : true,
   UI.DeleteHidden : true,
   Capabilities.InsertRestrictions : { Insertable : false },
@@ -94,6 +96,7 @@ annotate service.HistoryLogs with {
 
 
 annotate service.Notifications with @(
+  // Notification table chỉ đọc in-app record; email trạng thái chi tiết nằm ở NotificationDeliveries.
   UI.CreateHidden : true,
   UI.DeleteHidden : true,
   Capabilities.InsertRestrictions : { Insertable : false },
@@ -125,6 +128,7 @@ annotate service.Notifications with {
 
 
 annotate service.DuplicateLinks with @UI.LineItem : [
+  // Hiển thị quan hệ duplicate đã lưu; AI similar-bug dialog không tự tạo các row này.
   { $Type : 'UI.DataField', Label : 'Target Bug', Value : targetBug.bugNumber },
   { $Type : 'UI.DataField', Label : 'Target Title', Value : targetBug.title },
   { $Type : 'UI.DataField', Label : 'Relation Type', Value : relationType.name },

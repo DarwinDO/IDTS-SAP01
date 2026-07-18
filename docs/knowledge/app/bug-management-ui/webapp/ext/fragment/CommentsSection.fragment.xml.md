@@ -198,3 +198,9 @@ Anchor quan trọng:
   **Khái niệm IDTS**: Create Bug không nên hiện UI chỉ dành cho cộng tác sau khi bug đã được tạo.
   **Ảnh hưởng nếu sai**: User thấy Comments section bị disabled khi create và có thể nghĩ comment là bắt buộc hoặc bị lỗi.
   **Phải kiểm tra cùng**: `BugCollaborationSection.js`, `BugCollaboration.js:isCreateDraftContext`, và browser smoke cho create page.
+
+## Binding walkthrough / Walkthrough binding (2026-07-18)
+
+**English.** Parent control hides the subsection for an unsaved NEW draft. After SAVE, TextArea holds local input, Post calls `Collaboration.onAddComment`, and the List binds the Bug's persisted comments navigation. The fragment does not write directly or choose author/role; backend derives those from the authenticated session. Debug hidden state at the parent control, submit in `onAddComment`, then backend action/history writer.
+
+**Tiếng Việt.** Control cha ẩn subsection khi NEW draft chưa lưu. Sau SAVE, TextArea giữ input local, Post gọi `Collaboration.onAddComment`, List bind navigation comments đã persist của Bug. Fragment không ghi trực tiếp và không tự chọn author/role; backend lấy từ session authenticated. Debug visibility ở control cha, submit trong `onAddComment`, rồi backend action/history writer.

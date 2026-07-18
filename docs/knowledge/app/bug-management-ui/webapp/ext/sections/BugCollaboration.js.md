@@ -280,3 +280,9 @@ Sau browser smoke, file này có ba rule runtime quan trọng:
 - Formatter và event handler module alias được load từ `core:require` trong XML controls. Nếu đổi alias trong fragment, phải kiểm tra file này và browser smoke cùng lúc.
 
 Các rule này được thêm vì browser đã phát hiện lỗi runtime thật mà static build không thấy được: formatter không resolve, custom section thiếu context, list không cập nhật sau post comment, và chọn nhầm context khi delete attachment.
+
+## Detailed request lifecycle / Vòng đời request chi tiết (2026-07-18)
+
+**English.** Comments: button → `onAddComment()` → locate root Bug and TextArea → bound `BugService.addComment` → backend persists comment/history → `refreshBugContext()` reloads navigation. Attachments after save: select → validate → edit draft → POST metadata → PUT binary content → activate draft → refresh. Before save, `queuePendingCreateAttachments()` keeps browser `File` objects only in memory; `flushPendingCreateAttachments()` runs after the Bug becomes active. PostgreSQL stores metadata; CAP's storage adapter sends bytes to S3. Breakpoint order: event handler → `request()`/Network → CAP endpoint → refresh.
+
+**Tiếng Việt.** Comment: nút → `onAddComment()` → tìm root Bug và TextArea → bound action `BugService.addComment` → backend persist comment/history → `refreshBugContext()` nạp lại navigation. Attachment sau save: chọn → validate → edit draft → POST metadata → PUT binary → activate draft → refresh. Trước save, `queuePendingCreateAttachments()` chỉ giữ `File` trong memory browser; `flushPendingCreateAttachments()` chạy khi Bug thành active. PostgreSQL giữ metadata; storage adapter CAP gửi bytes lên S3. Breakpoint: event handler → `request()`/Network → CAP endpoint → refresh.

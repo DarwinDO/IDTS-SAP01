@@ -13,6 +13,7 @@ sap.ui.define([
      * without reading DOM nodes or framework-internal control IDs.
      */
     return VBox.extend("idts.bugmanagementui.ext.controls.SmartAssignmentSection", {
+        // Control chỉ cung cấp VBox renderer ổn định cho fragment; không giữ selection hay gọi OData.
         renderer: VBox.getMetadata().getRenderer(),
 
         onBeforeRendering: function () {

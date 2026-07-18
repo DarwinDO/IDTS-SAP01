@@ -103,3 +103,9 @@ Control nay khong sua du lieu. No chi dam bao fragment thay cung Bug record voi 
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/ext/controls/SmartAssignmentSection.js.md`
 - Source layer: `app`
 - Last reviewed: 2026-07-06
+
+## Lifecycle walkthrough / Walkthrough lifecycle (2026-07-18)
+
+**English.** This module defines a stable VBox wrapper used by assignment and AI-action fragments. Fiori creates it while rendering custom content; child controls own events and bindings. There is no candidate state, OData request, or assignment side effect here. If layout content disappears, verify module/namespace/renderer; if selection fails, continue in `SmartAssignDeveloper.js`.
+
+**Tiếng Việt.** Module định nghĩa VBox wrapper ổn định cho assignment và fragment action AI. Fiori tạo nó khi render custom content; child control tự sở hữu event/binding. Không có candidate state, OData request hay side effect assignment ở đây. Nội dung layout mất thì kiểm module/namespace/renderer; chọn assignment lỗi thì qua `SmartAssignDeveloper.js`.

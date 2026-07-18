@@ -47,3 +47,9 @@ Dựa vào dữ liệu đã enrich từ backend.
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/annotations/history-notifications.cds.md`
 - Source layer: `app`
 - Last reviewed: 2026-06-22
+
+## Execution map / Sơ đồ thực thi (2026-07-18)
+
+**English.** Backend workflows persist Comments, HistoryEvents/Logs, Notifications, and DuplicateLinks; this file only describes their read-only tables, labels, criticality, and hidden technical fields. Fiori reads navigation properties from the current Bug and renders rows. Wrong data/actor belongs in backend history/notification writers; correct data with wrong label/order/visibility belongs here. Notification email delivery details remain a separate entity.
+
+**Tiếng Việt.** Backend workflow persist Comments, HistoryEvents/Logs, Notifications và DuplicateLinks; file này chỉ mô tả table read-only, label, criticality và field kỹ thuật cần ẩn. Fiori đọc navigation từ Bug hiện tại rồi render row. Dữ liệu/actor sai thì debug writer backend; dữ liệu đúng nhưng label/thứ tự/visibility sai thì debug file này. Chi tiết gửi email vẫn nằm ở entity delivery riêng.

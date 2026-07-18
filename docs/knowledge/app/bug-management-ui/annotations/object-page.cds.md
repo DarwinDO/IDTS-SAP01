@@ -165,3 +165,9 @@ Các anchor quan trọng:
   **Khái niệm IDTS**: Ẩn comments collection facet cũ nhưng vẫn giữ `Comments` và action `addComment`.
   **Ảnh hưởng nếu sai**: Object Page có thể hiện trùng comment UX hoặc lộ lại action/table cũ.
   **Phải kiểm tra cùng**: `manifest.json:IdtsCommentsCustom`, `CommentsSection.fragment.xml`, `BugCollaboration.js`, và `srv/service.cds:addComment`.
+
+## Execution map / Sơ đồ thực thi (2026-07-18)
+
+**English.** `manifest.json` selects the Bugs Object Page; Fiori reads this file's HeaderInfo, HeaderFacets, Facets, FieldGroups, and Identification metadata. Facet order becomes section order; each target points to a field group, navigation LineItem, or custom fragment. Field values come from `BugService.Bugs`; draft save remains CAP-owned. Debug missing section by tracing facet target → target annotation/fragment → compiled metadata → OData data.
+
+**Tiếng Việt.** `manifest.json` chọn Bugs Object Page; Fiori đọc HeaderInfo, HeaderFacets, Facets, FieldGroups và Identification từ file này. Thứ tự facet thành thứ tự section; mỗi target trỏ tới field group, navigation LineItem hoặc custom fragment. Giá trị field đến từ `BugService.Bugs`; draft save vẫn do CAP quản lý. Debug section mất theo chuỗi facet target → annotation/fragment đích → metadata compile → dữ liệu OData.

@@ -2,6 +2,7 @@ using BugService as service from '../../../srv/service';
 
 // Gợi ý học/debug: file này chỉ đặt vị trí/nhãn action trên Fiori; quyền và chuyển trạng thái vẫn do handler CAP kiểm tra.
 annotate service.Bugs with @(
+  // Fiori đọc UI.Identification để dựng toolbar Object Page; can* chỉ điều khiển UX, backend vẫn authorize.
   UI.Identification : [
     {
       $Type  : 'UI.DataFieldForAction',
@@ -83,6 +84,7 @@ annotate service.Bugs with @(
 );
 
 annotate service.Bugs actions {
+  // Các block parameter dưới đây quyết định label/kiểu nhập của action dialog; giá trị được gửi vào CAP action tương ứng.
   @Common.SideEffects : {
     TargetEntities : [in, 'in/comments', 'in/historyEvents']
   }
@@ -158,6 +160,7 @@ annotate service.Bugs actions {
 }
 
 annotate service.Bugs with @(
+  // Identification riêng cho action comment; handler addComment mới là nơi validate và persist.
   Common.SideEffects #AttachmentRowsRefresh: {
     SourceEntities : [attachments],
     TargetEntities : [attachments]

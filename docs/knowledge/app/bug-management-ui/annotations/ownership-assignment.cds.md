@@ -215,3 +215,9 @@ Anchor quan trong:
   **Khai niem IDTS**: Assignee van la mot phan cua Bug model, nhung tuong tac nguoi dung duoc chuyen sang custom Fiori/UI5.
   **Anh huong neu sai**: Tester/PM co the khong tim thay Smart Assign picker hoac thay value help cu thien ve UUID.
   **Phai kiem tra cung**: browser smoke Object Page, draft save behavior, va backend assignment validation.
+
+## Execution map / Sơ đồ thực thi (2026-07-18)
+
+**English.** Assignment metadata shows two different concepts: Assignee is the long-lived technical owner; Current Action Owner/Role identifies who must perform the current workflow step. Smart Assign reads `AssignableDevelopers`, which combines responsibility, availability, and workload from backend read models. UI selection never replaces CAP validation. Debug wrong candidate in read models; wrong field/label here; failed persisted assignment in the CAP action.
+
+**Tiếng Việt.** Metadata Assignment hiển thị hai khái niệm khác nhau: Assignee là technical owner dài hạn; Current Action Owner/Role là người phải làm bước workflow hiện tại. Smart Assign đọc `AssignableDevelopers`, kết hợp responsibility, availability và workload từ backend read model. Chọn trên UI không thay validation CAP. Candidate sai thì debug read model; field/label sai thì ở đây; lưu assignment thất bại thì qua CAP action.

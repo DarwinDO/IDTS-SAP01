@@ -2,6 +2,7 @@ using BugService as service from '../../../srv/service';
 
 // Gợi ý học/debug: Assignee là technical owner, khác Current Action Owner là người phải làm bước workflow hiện tại.
 annotate service.Bugs with @(
+  // Assignment hiển thị assignee kỹ thuật và current action owner riêng để tránh hiểu nhầm ownership workflow.
   UI.FieldGroup #Assignment : {
     Data : [
       {
@@ -65,6 +66,7 @@ annotate service.DeveloperProfiles with @(
 
 
 annotate service.AssignableDevelopers with @(
+  // Smart Assign đọc projection này; workload/availability là thông tin hỗ trợ, không tự chọn candidate.
   UI.SelectionFields : [ developerName, developerEmail, active ],
   UI.LineItem : [
     { $Type : 'UI.DataField', Label : 'Developer', Value : developerName },
