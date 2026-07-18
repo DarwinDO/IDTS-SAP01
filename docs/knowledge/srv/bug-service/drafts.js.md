@@ -1,5 +1,67 @@
 # Knowledge: `srv/bug-service/drafts.js`
 
+## Beginner execution walkthrough (2026-07-18)
+
+### English
+
+#### Mental model
+
+A Fiori draft is a temporary database version of a Bug. `NEW` creates it, each edit can cause a partial `PATCH`, and `SAVE` activates it as the official row. This file protects all three boundaries so incomplete browser payloads cannot bypass the active-write rules.
+
+#### Caller → function → next step
+
+- `service.js` NEW handler → `prepareDraftNew(req, actor)` → writes authenticated reporter into draft payload.
+- `service.js` PATCH handler → `prepareDraftPatch(req, entities)` → reads current draft, merges partial input, validates code lists, derives bridge ID → CAP persists patch.
+- `service.js` SAVE handler → `handleDraftSave(req, entities, next)` → validates full draft → captures old active state → `next()` activates draft → history and attachment side effects.
+
+#### Walkthrough and side effects
+
+`prepareDraftPatch` first extracts the Bug ID. A PATCH such as `{ severity_code: 'HIGH' }` is not enough for cross-field validation, so it queries the stored draft and creates `merged`. The component/category query either writes `componentCategory_ID` into this PATCH or clears a stale derived ID.
+
+`prepareDraftNew` overwrites any client reporter with `actor.ID`. `ensureDraftReporterForSave` is a compatibility fallback for older drafts, not a second normal reporter-selection rule.
+
+`handleDraftSave` is middleware. `next()` is the exact point where control returns to CAP and database activation occurs. Before `next()`, failures prevent activation. After `next()`, the returned active Bug can be used for audit and attachment handling.
+
+`captureDraftSaveState` stores active Bug and attachment metadata on the request. `recordDraftBugSaveSideEffects` reads the new active Bug after activation and records only meaningful differences.
+
+#### Debug lab order
+
+Use Browser Network to identify NEW, PATCH, or SAVE. Break first in the matching function. For PATCH inspect `bugID`, `req.data`, `currentDraft`, `merged`, and `componentCategory`. For SAVE step through `validateDraftForSave` → `captureDraftSaveState` → `next()` → side effects. Inspect the database only after stepping over `next()`; before that point the active row is not expected to contain the draft changes.
+
+#### Failure and safe editing
+
+Do not remove SAVE validation because PATCH can be skipped/interrupted or old drafts can predate current rules. Do not record post-save history before `next()`, because the active data does not exist yet. Keep this file aligned with `bug-write.js`, `service.js`, the Bugs draft projection, and pre-save attachment flow.
+
+### Vietnamese
+
+#### Mô hình tư duy
+
+Fiori draft là phiên bản tạm của Bug trong database. `NEW` tạo draft, mỗi lần sửa có thể sinh một `PATCH` chỉ chứa phần thay đổi, và `SAVE` kích hoạt draft thành row chính thức. File này bảo vệ cả ba ranh giới để payload thiếu từ browser không né được rule ghi active.
+
+#### Caller → hàm → bước tiếp theo
+
+- NEW handler trong `service.js` → `prepareDraftNew(req, actor)` → ghi reporter đã xác thực vào payload draft.
+- PATCH handler trong `service.js` → `prepareDraftPatch(req, entities)` → đọc draft hiện tại, merge input một phần, kiểm code-list, suy ra bridge ID → CAP persist patch.
+- SAVE handler trong `service.js` → `handleDraftSave(req, entities, next)` → kiểm toàn draft → chụp trạng thái active cũ → `next()` activate draft → side effect history và attachment.
+
+#### Walkthrough và side effect
+
+`prepareDraftPatch` lấy Bug ID trước. Một PATCH như `{ severity_code: 'HIGH' }` không đủ cho validation nhiều field, nên hàm query draft đã lưu và tạo `merged`. Query component/category sẽ ghi `componentCategory_ID` vào PATCH hoặc xóa derived ID đã cũ.
+
+`prepareDraftNew` ghi đè reporter client bằng `actor.ID`. `ensureDraftReporterForSave` chỉ là fallback tương thích cho draft cũ, không phải rule chọn reporter bình thường thứ hai.
+
+`handleDraftSave` là middleware. `next()` là đúng điểm control quay lại CAP và database activation diễn ra. Lỗi trước `next()` ngăn activation. Sau `next()`, Bug active trả về mới dùng được để xử lý audit và attachment.
+
+`captureDraftSaveState` lưu Bug active và attachment metadata vào request. `recordDraftBugSaveSideEffects` đọc Bug active mới sau activation và chỉ ghi khác biệt có ý nghĩa.
+
+#### Thứ tự Debug Lab
+
+Dùng Browser Network xác định request là NEW, PATCH hay SAVE. Break đầu tiên trong hàm tương ứng. Với PATCH, xem `bugID`, `req.data`, `currentDraft`, `merged`, `componentCategory`. Với SAVE, step qua `validateDraftForSave` → `captureDraftSaveState` → `next()` → side effects. Chỉ kiểm database sau khi step qua `next()`; trước điểm đó active row chưa có thay đổi draft là đúng.
+
+#### Failure path và sửa an toàn
+
+Không bỏ validation lúc SAVE vì PATCH có thể bị bỏ qua/gián đoạn hoặc draft cũ được tạo trước rule hiện tại. Không ghi history sau-save trước `next()` vì active data chưa tồn tại. Giữ file này đồng bộ với `bug-write.js`, `service.js`, Bugs draft projection và flow attachment trước save.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

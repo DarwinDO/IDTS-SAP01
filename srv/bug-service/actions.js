@@ -30,6 +30,8 @@ const { determineNextProcessor, validateAssignee, validateTransition } = require
 const { enforceActionPermission } = require('./permissions')
 
 async function assignToDeveloper (req, entities) {
+  // Action `assignToDeveloper` từ Object Page gọi vào đây. Hàm đọc Bug hiện tại, kiểm quyền điều phối,
+  // kiểm Developer phù hợp rồi update assignee/status/next processor trong cùng transaction.
   const assigneeID = trimToNull(req.data.assigneeID)
   if (!assigneeID) {
     return req.reject(400, 'Assign Developer requires an assigneeID parameter.', 'assigneeID')
@@ -45,6 +47,8 @@ async function assignToDeveloper (req, entities) {
 }
 
 async function resubmitToDeveloper (req, entities) {
+  // Tester gọi sau khi bổ sung thông tin. Hàm đưa Bug từ Need More Information trở lại Developer đã assign;
+  // breakpoint ở đây để kiểm assignee cũ, actor hiện tại và status đích trước khi update.
   const bugID = bugIDFrom(req)
   const oldBug = await readBug(req, entities, bugID)
   if (!oldBug) return req.reject(404, 'Bug not found.')
@@ -140,6 +144,8 @@ async function resubmitToDeveloper (req, entities) {
 }
 
 async function addComment (req, entities) {
+  // Bound action này tạo comment cho Bug đã active. Nội dung và actor được chuẩn hóa ở backend;
+  // side effect history/notification chạy sau khi INSERT comment thành công.
   const bugID = bugIDFrom(req)
   const bug = await readBug(req, entities, bugID)
   if (!bug) return req.reject(404, 'Bug not found.')
@@ -186,6 +192,8 @@ async function addComment (req, entities) {
 
 // Một transition hợp lệ phải kiểm tra actor + trạng thái nguồn/đích + reason trước khi ghi audit/notification.
 async function transitionBug (req, entities, options) {
+  // Tất cả action đổi trạng thái dùng chung pipeline này: đọc Bug → kiểm quyền → kiểm điều kiện option
+  // → tính next processor → update DB → ghi history/notification. `options` đến từ mapping trong service.js.
   const bugID = bugIDFrom(req)
   const oldBug = await readBug(req, entities, bugID)
   if (!oldBug) return req.reject(404, 'Bug not found.')

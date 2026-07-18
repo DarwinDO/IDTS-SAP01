@@ -1,5 +1,15 @@
 # Knowledge: `srv/auth.cds`
 
+## Beginner-first contract map (2026-07-18)
+
+### English
+
+`login.html/LoginController.js` calls the three operations declared here; CAP routes them to the same-named handlers in `srv/auth.js`. `AuthUser` is the safe profile returned to the browser. `LoginResult.token` is the one-time raw bearer token; neither password hash nor database token hash is part of this CDS contract. `login` is public by necessity, while `logout` and `me` carry `@requires: 'authenticated-user'`, so the custom middleware must resolve a valid session first. Break first at the Network request, then at `login`, `logout`, or `me` in `srv/auth.js`. Changing a name/type here requires changing the UI caller and JavaScript handler together.
+
+### Vietnamese
+
+`login.html/LoginController.js` gọi ba operation được khai báo tại đây; CAP chuyển chúng tới handler cùng tên trong `srv/auth.js`. `AuthUser` là profile an toàn trả cho browser. `LoginResult.token` là raw bearer token chỉ trả một lần; password hash và token hash trong database không thuộc contract CDS này. `login` bắt buộc phải public, còn `logout` và `me` có `@requires: 'authenticated-user'`, nên middleware custom phải resolve session hợp lệ trước. Break đầu tiên tại Network request, sau đó tại `login`, `logout` hoặc `me` trong `srv/auth.js`. Đổi tên/type ở đây phải đổi đồng thời UI caller và JavaScript handler.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

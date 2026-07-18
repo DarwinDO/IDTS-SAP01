@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/guards.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+`service.js` calls `registerReadOnlyEntityGuards` once during initialization. The function loops over `READ_ONLY_ENTITY_NAMES`, finds each runtime projection, and registers rejection handlers for client write events. The entities remain readable and may still be written internally by trusted backend code using database entities/transactions. Break during startup to inspect resolved targets, or at the rejection callback when direct OData unexpectedly allows/denies a write. Adding a read model/audit projection requires adding it to the constant list; removing a guard can expose internal aggregates or audit records to client mutation.
+
+### Vietnamese
+
+`service.js` gọi `registerReadOnlyEntityGuards` một lần khi init. Hàm lặp `READ_ONLY_ENTITY_NAMES`, tìm runtime projection và đăng ký handler reject thao tác ghi từ client. Entity vẫn đọc được và backend đáng tin vẫn có thể ghi nội bộ qua database entity/transaction. Break lúc startup để xem target resolve được, hoặc tại callback reject khi direct OData cho phép/từ chối bất ngờ. Thêm read model/audit projection phải thêm vào danh sách constant; bỏ guard có thể cho client sửa aggregate hoặc audit nội bộ.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

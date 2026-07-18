@@ -1,14 +1,17 @@
-// Học nhanh (DonHV): đây là bản thiết kế dữ liệu IDTS. Khi debug dữ liệu sai, bắt đầu từ entity/association ở đây rồi lần sang service và handler.
+// Đây là mô hình dữ liệu gốc của IDTS. Entity định nghĩa dữ liệu được lưu; association là liên kết tham chiếu;
+// composition là dữ liệu con thuộc vòng đời Bug. Khi debug dữ liệu sai, bắt đầu từ field/link ở đây rồi lần sang service và handler ghi nó.
 namespace idts.cap;
 
 using { cuid, managed } from '@sap/cds/common';
 using { Attachments as ManagedAttachments } from '@cap-js/attachments';
 
 aspect BugAttachments : ManagedAttachments {
+  // @cap-js/attachments quản lý metadata/storageRef/content flow; IDTS bổ sung fileSize để UI và validation hiển thị dung lượng.
   fileSize : Integer64 @readonly;
 }
 
 aspect CodeList {
+  // Các bảng danh mục dùng chung một hình dạng. `active=false` giữ lịch sử nhưng ngăn chọn giá trị mới.
   key code     : String(40);
       name     : String(120) not null;
       descr    : String(255);
@@ -34,6 +37,7 @@ entity AiSuggestionFeatureTypes : CodeList {}
 entity AiSuggestionReviewStates : CodeList {}
 
 entity Users : cuid, managed {
+  // User nghiệp vụ giữ profile/role/password hash. Không bao giờ lưu password thô trong entity này.
   displayName : String(120) not null;
   email       : String(255) not null;
   role        : Association to UserRoles not null;
@@ -43,6 +47,7 @@ entity Users : cuid, managed {
 }
 
 entity AuthSessions : cuid, managed {
+  // Mỗi lần login tạo session; DB chỉ giữ tokenHash. revokedAt/expiresAt quyết định token còn dùng được hay không.
   user       : Association to Users not null;
   tokenHash  : String(64) not null;
   issuedAt   : Timestamp not null;
@@ -53,6 +58,7 @@ entity AuthSessions : cuid, managed {
 }
 
 entity DeveloperProfiles : cuid, managed {
+  // DeveloperProfile là phần mở rộng của User cho assignment/workload; Users.ID và DeveloperProfiles.ID là hai ID khác nhau.
   user               : Association to Users not null;
   availabilityStatus : Association to AvailabilityStatuses;
   workloadLimit      : Integer;
@@ -73,6 +79,7 @@ entity ApplicationComponents : cuid, managed {
 }
 
 entity SAPModuleComponents : cuid, managed {
+  // Bridge này nói component thuộc SAP module nào; không phải assignment responsibility của developer.
   sapModule : Association to SAPModules not null;
   component : Association to ApplicationComponents not null;
   active    : Boolean default true;
@@ -86,12 +93,14 @@ entity DefectCategories : cuid, managed {
 }
 
 entity ComponentCategories : cuid, managed {
+  // Bridge component + defect category tạo khóa phân loại thật dùng để đối chiếu DeveloperResponsibilities.
   component      : Association to ApplicationComponents not null;
   defectCategory : Association to DefectCategories not null;
   active         : Boolean default true;
 }
 
 entity DeveloperResponsibilities : cuid, managed {
+  // Quy định Developer nào phù hợp cặp component/category và tùy chọn module; Smart Assign đọc, backend assign kiểm lại.
   developerProfile   : Association to DeveloperProfiles not null;
   componentCategory  : Association to ComponentCategories not null;
   sapModule          : Association to SAPModules;
@@ -100,6 +109,7 @@ entity DeveloperResponsibilities : cuid, managed {
 }
 
 entity Bugs : cuid, managed {
+  // Aggregate root chính. `assignee` là technical owner; `nextProcessor*` là người/role cần hành động tiếp theo.
   bugNumber              : String(30)         @Common.Label : 'Bug Number';
   title                  : String(255) not null @Common.Label : 'Title';
   description            : LargeString not null @Common.Label : 'Description';
@@ -129,6 +139,7 @@ entity Bugs : cuid, managed {
   dueDate                : Date               @Common.Label : 'Due Date';
   estimatedEffortHours   : Decimal(9,2)       @Common.Label : 'Estimated Effort Hours';
 
+  // Các composition bên dưới thuộc Bug: xóa/vòng đời Bug ảnh hưởng dữ liệu con theo semantics CAP composition.
   comments               : Composition of many Comments on comments.bug = $self;
   attachments            : Composition of many BugAttachments;
   historyEvents          : Composition of many HistoryEvents on historyEvents.bug = $self;
@@ -138,6 +149,7 @@ entity Bugs : cuid, managed {
 }
 
 entity Comments : cuid, managed {
+  // Comment chỉ tồn tại sau khi gắn Bug và author đã xác thực; content không phải history log kỹ thuật.
   bug        : Association to Bugs not null;
   author     : Association to Users not null;
   authorRole : Association to UserRoles;
@@ -145,6 +157,7 @@ entity Comments : cuid, managed {
 }
 
 entity HistoryEvents : cuid, managed {
+  // Một thao tác người dùng tạo một HistoryEvent; `logs` chứa từng field old/new của cùng thao tác.
   bug        : Association to Bugs not null;
   actor      : Association to Users not null;
   actorRole  : Association to UserRoles;
@@ -155,6 +168,7 @@ entity HistoryEvents : cuid, managed {
 }
 
 annotate Bugs.attachments with {
+  // Binary tối đa 10MB và chỉ nhận MIME allow-list. Metadata nằm PostgreSQL; storage adapter giữ nội dung ở S3/cloud storage.
   content @Validation.Maximum : '10MB'
           @Core.AcceptableMediaTypes : [
             'image/jpeg',
@@ -168,6 +182,7 @@ annotate Bugs.attachments with {
 }
 
 entity HistoryLogs : cuid, managed {
+  // Một row mô tả một field thay đổi; raw value phục vụ audit, display value phục vụ người đọc.
   bug        : Association to Bugs not null;
   event      : Association to HistoryEvents not null;
   actor      : Association to Users not null;
@@ -183,6 +198,7 @@ entity HistoryLogs : cuid, managed {
 }
 
 entity Notifications : cuid, managed {
+  // Notification in-app là intent nghiệp vụ; composition deliveries theo dõi việc gửi từng channel như EMAIL.
   bug            : Association to Bugs not null;
   recipient      : Association to Users not null;
   eventType      : Association to NotificationEventTypes not null;
@@ -194,6 +210,7 @@ entity Notifications : cuid, managed {
 }
 
 entity NotificationDeliveries : cuid, managed {
+  // Outbox email lưu message snapshot, retry/lock/status. Provider credential không thuộc entity này.
   notification      : Association to Notifications not null;
   channel           : Association to NotificationChannels not null;
   recipientEmail    : String(255);
@@ -214,14 +231,17 @@ entity NotificationDeliveries : cuid, managed {
 }
 
 annotate NotificationDeliveries with @assert.unique.notificationChannel: [ notification, channel ];
+// Unique constraint ngăn cùng một notification tạo hai delivery EMAIL khi workflow/worker chạy lặp.
 
 entity DuplicateLinks : cuid, managed {
+  // Liên kết duplicate chỉ được tạo khi user xác nhận; kết quả AI Similar Bugs tự nó không insert entity này.
   sourceBug    : Association to Bugs not null;
   targetBug    : Association to Bugs not null;
   relationType : Association to DuplicateRelationTypes not null;
 }
 
 entity AiSuggestions : cuid, managed {
+  // Audit suggestion review-only: lưu metadata/payload đã sanitize, không thay thế field nghiệp vụ trên Bugs.
   bug               : Association to Bugs not null;
   featureType       : Association to AiSuggestionFeatureTypes not null;
   requestedBy       : Association to Users not null;

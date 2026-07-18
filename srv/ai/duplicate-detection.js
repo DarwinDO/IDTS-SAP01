@@ -23,6 +23,8 @@ const STOP_WORDS = new Set([
 
 // Breakpoint ở đây để kiểm tra input/candidate/providerStatus khi UI Similar Bugs ra kết quả lạ hoặc rỗng.
 async function suggestSimilarBugs (req, entities, dependencies = {}) {
+  // Entry point action Similar Bugs: resolve source text/classification, đọc candidate, rank, enrich label,
+  // ghi audit và trả danh sách review-only; không đánh dấu duplicate hay sửa Bug.
   const tx = cds.tx(req)
   const provider = dependencies.provider || createAiProvider()
   const input = await resolveSearchInput(tx, req, req.data || {})
@@ -78,6 +80,7 @@ async function suggestSimilarBugs (req, entities, dependencies = {}) {
 }
 
 async function resolveSearchInput (tx, req, data) {
+  // Ghép sourceBug trong DB với input user cho phép, chuẩn hóa text/ID và bảo đảm có đủ ngữ cảnh tìm kiếm.
   const sourceBugID = cleanId(data.sourceBugID)
   let persisted = null
   if (sourceBugID) {
@@ -113,6 +116,7 @@ async function resolveSearchInput (tx, req, data) {
 }
 
 async function rankSimilarBugCandidates ({ input, candidates, provider, limit = DEFAULT_LIMIT, minScore = DEFAULT_MIN_SCORE }) {
+  // Xin embeddings theo batch khi provider sẵn sàng, sau đó chấm từng candidate; provider lỗi vẫn dùng lexical/classification fallback.
   const sourceText = embeddingText(input)
   const sourceEmbeddingResult = await provider.embedding({
     featureType: FEATURE_TYPES.DUPLICATE_DETECTION,
@@ -158,6 +162,7 @@ async function rankSimilarBugCandidates ({ input, candidates, provider, limit = 
 }
 
 function scoreCandidate ({ input, candidate, sourceEmbedding, candidateEmbedding, providerStatus }) {
+  // Kết hợp title, description, classification và cosine score thành điểm cuối + matched fields/reason có thể giải thích.
   const titleSimilarity = tokenSimilarity(input.title, candidate.title)
   const descriptionSimilarity = tokenSimilarity(input.description, candidate.description)
   const lexicalScore = (titleSimilarity * 0.72) + (descriptionSimilarity * 0.28)
@@ -183,6 +188,7 @@ function scoreCandidate ({ input, candidate, sourceEmbedding, candidateEmbedding
 }
 
 function classificationSimilarity (input, candidate) {
+  // So các code nghiệp vụ cùng loại và trả tỉ lệ match; field trống không được tính như match giả.
   const comparisons = [
     ['SAP module', input.sapModuleID, candidate.sapModule_ID],
     ['application component', input.applicationComponentID, candidate.applicationComponent_ID],
@@ -200,6 +206,7 @@ function classificationSimilarity (input, candidate) {
 }
 
 function tokenSimilarity (left, right) {
+  // Tính overlap token deterministic cho title/description khi không có embedding.
   const leftTokens = tokenize(left)
   const rightTokens = tokenize(right)
   if (!leftTokens.size || !rightTokens.size) return 0
@@ -211,6 +218,7 @@ function tokenSimilarity (left, right) {
 }
 
 function tokenize (value) {
+  // Lowercase, bỏ dấu câu và tách token duy nhất; không gọi provider.
   return new Set(
     String(value || '').slice(0, MAX_SEARCH_TEXT)
       .normalize('NFKD')
@@ -223,6 +231,7 @@ function tokenize (value) {
 }
 
 function cosineSimilarity (left, right) {
+  // Tính cosine cho hai vector cùng chiều; vector sai/zero trả 0 an toàn.
   if (!left || !right || left.length !== right.length) return null
   let dot = 0
   let leftMagnitude = 0
@@ -238,12 +247,14 @@ function cosineSimilarity (left, right) {
 }
 
 function validEmbedding (value) {
+  // Xác nhận array số hữu hạn trước khi cosine, tránh output provider lỗi làm NaN ranking.
   if (!Array.isArray(value) || value.length < 2) return null
   const numbers = value.map(Number)
   return numbers.every(Number.isFinite) ? numbers : null
 }
 
 function embeddingText (bug) {
+  // Ghép title/description/classification đã giới hạn thành text gửi embedding, không gửi comment/attachment.
   return [
     `Title: ${cleanText(bug.title) || ''}`,
     `Description: ${cleanText(bug.description) || ''}`,
@@ -256,6 +267,7 @@ function embeddingText (bug) {
 }
 
 async function enrichSemanticContext (tx, input, candidates) {
+  // Map ID/code sang tên component/category/module/status để reason UI dễ hiểu; không ảnh hưởng điểm raw.
   const definitions = [
     {
       entity: 'idts.cap.SAPModules',
@@ -308,6 +320,7 @@ async function enrichSemanticContext (tx, input, candidates) {
 }
 
 async function readNamesByID (tx, entityName, ids) {
+  // Query batch tên theo UUID và trả Map, tránh N+1 cho từng candidate.
   const uniqueIds = [...new Set(ids)]
   if (!uniqueIds.length) return new Map()
   const rows = await tx.run(
@@ -319,10 +332,12 @@ async function readNamesByID (tx, entityName, ids) {
 }
 
 function contextLabel (code, name) {
+  // Dựng label ưu tiên name nhưng giữ code làm fallback cho dữ liệu catalog cũ.
   return [code, name].filter(Boolean).join(' - ') || null
 }
 
 function buildReason ({ titleSimilarity, descriptionSimilarity, matchedFields }) {
+  // Tạo lý do ngắn dựa trên tín hiệu thật đã tính, không dùng văn bản provider không grounded.
   const reasons = []
   if (titleSimilarity >= 0.6) reasons.push('Very similar title')
   else if (titleSimilarity >= 0.25) reasons.push('Some title terms match')
@@ -333,17 +348,20 @@ function buildReason ({ titleSimilarity, descriptionSimilarity, matchedFields })
 }
 
 function relationTypeFor (score) {
+  // Map score sang mức strong/possible/weak để UI diễn giải, không tự kết luận duplicate.
   if (score >= 0.78) return 'DUPLICATE'
   if (score >= 0.55) return 'SIMILAR'
   return 'RELATED'
 }
 
 function fallbackProviderStatus (status) {
+  // Chuẩn hóa trạng thái provider để UI biết đang dùng fallback nhưng không thấy raw provider error.
   if (status === 'SUCCESS') return 'AI_EMBEDDING_INVALID'
   return status || 'AI_PROVIDER_ERROR'
 }
 
 async function recordSuggestionAudit ({ req, tx, entities, input, result, ranked, ranking, provider }) {
+  // Lưu summary/safe payload của lần review vào AISuggestions; không lưu embeddings hay prompt thô.
   if (!input.sourceBugID) return
   const requester = await resolveRequestUser(req, entities)
   if (!requester) return
@@ -377,6 +395,7 @@ async function recordSuggestionAudit ({ req, tx, entities, input, result, ranked
 }
 
 async function readStatusNames (tx, codes) {
+  // Query batch status label cho result; code lạ vẫn giữ fallback.
   const uniqueCodes = [...new Set(codes.filter(Boolean))]
   if (!uniqueCodes.length) return new Map()
   const rows = await tx.run(
@@ -388,6 +407,7 @@ async function readStatusNames (tx, codes) {
 }
 
 async function mapWithConcurrency (items, concurrency, mapper) {
+  // Chạy mapper theo worker pool nhỏ để embedding nhiều candidate không tạo quá nhiều request đồng thời.
   const result = new Array(items.length)
   let cursor = 0
   async function worker () {
@@ -402,12 +422,14 @@ async function mapWithConcurrency (items, concurrency, mapper) {
 }
 
 function normalizeLimit (value) {
+  // Ép limit vào khoảng an toàn để client không yêu cầu quét/trả toàn bộ Bugs.
   const parsed = Number(value)
   if (!Number.isInteger(parsed) || parsed <= 0) return DEFAULT_LIMIT
   return Math.min(parsed, MAX_LIMIT)
 }
 
 function normalizeMinScore (value) {
+  // Ép ngưỡng score về 0..1; invalid dùng default.
   if (value === undefined || value === null || value === '') return DEFAULT_MIN_SCORE
   const parsed = Number(value)
   if (!Number.isFinite(parsed)) return DEFAULT_MIN_SCORE
@@ -415,17 +437,20 @@ function normalizeMinScore (value) {
 }
 
 function cleanText (value, maxLength = MAX_SEARCH_TEXT) {
+  // Trim/redact/cắt text search trước query/provider.
   if (value === undefined || value === null) return null
   const text = String(value).slice(0, maxLength).trim()
   return text || null
 }
 
 function cleanId (value) {
+  // Chuẩn hóa UUID/string ID và giới hạn độ dài trước dùng làm key.
   const text = cleanText(value)
   return text ? text.slice(0, 36) : null
 }
 
 function roundScore (value) {
+  // Làm tròn điểm response/audit để kết quả test ổn định.
   return Number(Math.max(0, Math.min(1, value)).toFixed(4))
 }
 

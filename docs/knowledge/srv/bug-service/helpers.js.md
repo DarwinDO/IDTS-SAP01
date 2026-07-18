@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/helpers.js`
 
+## Beginner-first symbol map (2026-07-18)
+
+### English
+
+Helpers are grouped by purpose. Request/data helpers: `readBug`, `bugIDFrom`, `trimToNull`. Identity helpers: `requestUserCandidates` → `activeUserFromCandidate` → `resolveRequestUser`; this chain creates the trusted actor used by permissions/history. Display helpers map status, role, user, developer, catalog and component/category IDs to readable labels. Routing helpers `nextBugNumber`, `firstUserByRole`, and `userIDForDeveloper` support create and next-owner logic. `reasonTarget/toHistoryValue` normalize UI error/audit values. Break in the caller first, then the exact helper; inspect input IDs/entity and transaction result. Helpers normally return data and do not persist, except their caller writes the returned value.
+
+### Vietnamese
+
+Helper được chia theo mục đích. Nhóm request/data: `readBug`, `bugIDFrom`, `trimToNull`. Nhóm identity: `requestUserCandidates` → `activeUserFromCandidate` → `resolveRequestUser`; chuỗi này tạo actor đáng tin cho permission/history. Nhóm display map status, role, user, developer, catalog và component/category ID thành label dễ đọc. Nhóm định tuyến `nextBugNumber`, `firstUserByRole`, `userIDForDeveloper` phục vụ create và next owner. `reasonTarget/toHistoryValue` chuẩn hóa lỗi UI/giá trị audit. Break ở caller trước rồi đúng helper; xem input ID/entity và kết quả transaction. Helper thường chỉ return dữ liệu, caller mới persist giá trị đó.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

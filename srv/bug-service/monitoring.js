@@ -22,6 +22,8 @@ const STATUS_COUNT_FIELDS = new Map([
 ])
 
 async function readDeveloperWorkloads (req, entities) {
+  // Custom READ cho Dashboard/PM: đọc profile + Bug cần thiết, tính row workload trong memory,
+  // rồi áp `$search/$filter/$orderby/$top/$skip/$select` từ CQN trước khi trả response.
   const tx = cds.tx(req)
   const [profiles, bugs] = await Promise.all([
     tx.run(
@@ -79,6 +81,7 @@ async function readDeveloperWorkloads (req, entities) {
 }
 
 function buildDeveloperWorkloadRows (profiles, bugs) {
+  // Gom Bug theo developer và tính count/effort/overdue; không ghi aggregate xuống database.
   const rowsByProfileID = new Map()
 
   for (const profile of profiles) {
@@ -136,6 +139,7 @@ function buildDeveloperWorkloadRows (profiles, bugs) {
 }
 
 function emptyDeveloperWorkloadRow (base) {
+  // Tạo row 0 mặc định để developer chưa có Bug vẫn xuất hiện trong PM monitoring.
   return {
     developerProfileID: base.developerProfileID,
     developerUserID: base.developerUserID,
@@ -163,10 +167,12 @@ function emptyDeveloperWorkloadRow (base) {
 }
 
 function isOverdueBug (bug) {
+  // Bug chỉ overdue khi chưa Closed và dueDate nhỏ hơn ngày hiện tại; ngày hôm nay chưa tính quá hạn.
   return !!(bug?.dueDate && String(bug.dueDate) < todayDateString() && bug.status_code !== STATUS.CLOSED)
 }
 
 function isCurrentDeveloperAction (row, bug) {
+  // Chỉ tính workload “đang chờ developer này” khi nextProcessor và assignee cùng trỏ đúng người.
   return bug.nextProcessorRole_code === PROCESSOR_ROLE.DEVELOPER &&
     bug.nextProcessorUser_ID &&
     row.developerUserID &&
@@ -174,19 +180,23 @@ function isCurrentDeveloperAction (row, bug) {
 }
 
 function todayDateString () {
+  // Trả YYYY-MM-DD theo UTC để so với CDS Date mà không lẫn phần giờ.
   return new Date().toISOString().slice(0, 10)
 }
 
 function decimalToNumber (value) {
+  // CAP/PostgreSQL có thể trả Decimal dạng chuỗi; chuyển an toàn để cộng effort.
   const number = Number(value)
   return Number.isFinite(number) ? number : 0
 }
 
 function roundToTwoDecimals (value) {
+  // Làm tròn effort hiển thị, không thay đổi dữ liệu effort gốc trên Bug.
   return Math.round((value + Number.EPSILON) * 100) / 100
 }
 
 function isCountOnly (req) {
+  // Nhận diện request chỉ cần `$count`; caller trả số thay vì materialize toàn bộ row ra UI.
   const columns = req.query?.SELECT?.columns
   return Array.isArray(columns) &&
     columns.length === 1 &&
@@ -194,6 +204,7 @@ function isCountOnly (req) {
 }
 
 function applySearch (rows, search) {
+  // Áp full-text search đơn giản trên row đã tính vì đây không phải table SQL trực tiếp.
   const term = searchTermFromCqn(search)
   if (!term) return rows
 
@@ -212,6 +223,7 @@ function applySearch (rows, search) {
 }
 
 function searchTermFromCqn (search) {
+  // Trích text từ biểu thức CQN do CAP parse; không parse query string thủ công.
   if (!search) return null
   if (typeof search === 'string') return trimToNull(search)
   if (Array.isArray(search)) {
@@ -224,11 +236,13 @@ function searchTermFromCqn (search) {
 }
 
 function applyWhere (rows, where) {
+  // Đánh giá `$filter` trên aggregate rows trong memory; chỉ hỗ trợ tập toán tử được implement bên dưới.
   if (!Array.isArray(where) || !where.length) return rows
   return rows.filter(row => evaluateExpression(where, row))
 }
 
 function evaluateExpression (tokens, row) {
+  // Evaluator nhỏ cho AND/OR/comparison CQN; breakpoint tại đây khi filter dashboard trả sai row.
   let index = 0
 
   function parseOr () {
@@ -273,12 +287,14 @@ function evaluateExpression (tokens, row) {
 }
 
 function valueFromOperand (operand, row) {
+  // Đọc literal hoặc field reference từ operand CQN; không dùng eval JavaScript.
   if (operand?.ref?.length) return row[operand.ref.at(-1)]
   if (Object.prototype.hasOwnProperty.call(operand || {}, 'val')) return operand.val
   return operand
 }
 
 function compareValues (left, operator, right) {
+  // Thực hiện phép so sánh allow-list; operator lạ trả false thay vì chạy code động.
   switch (operator) {
     case '=':
     case '==':
@@ -302,6 +318,7 @@ function compareValues (left, operator, right) {
 }
 
 function likeCompare (left, right) {
+  // Mô phỏng LIKE cho chuỗi aggregate; escape/normalize wildcard trước khi so.
   if (left === null || left === undefined || right === null || right === undefined) return false
   const pattern = String(right)
     .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -311,6 +328,7 @@ function likeCompare (left, right) {
 }
 
 function applyOrderBy (rows, orderBy) {
+  // Sort bản sao rows theo CQN order để không làm biến đổi array nguồn dùng cho count/filter khác.
   const sorted = [...rows]
   const clauses = Array.isArray(orderBy) && orderBy.length
     ? orderBy
@@ -332,6 +350,7 @@ function applyOrderBy (rows, orderBy) {
 }
 
 function compareOrderValues (left, right) {
+  // So null/string/number ổn định cho sort nhiều cột.
   if (left === right) return 0
   if (left === null || left === undefined) return 1
   if (right === null || right === undefined) return -1
@@ -342,6 +361,7 @@ function compareOrderValues (left, right) {
 }
 
 function applyLimit (rows, limit) {
+  // Áp `$skip/$top` sau filter và sort, đúng thứ tự OData mong đợi.
   if (!limit) return rows
   const offset = Number(limit.offset?.val || 0)
   const top = Number(limit.rows?.val || rows.length)
@@ -349,6 +369,7 @@ function applyLimit (rows, limit) {
 }
 
 function applySelect (rows, columns) {
+  // Chỉ trả field client yêu cầu nhưng giữ key cần thiết; giảm payload cho dashboard.
   if (!Array.isArray(columns) || !columns.length) return rows
   if (columns.some(column => column === '*' || column?.ref?.[0] === '*')) return rows
 

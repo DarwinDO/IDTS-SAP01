@@ -1,5 +1,75 @@
 # Knowledge: `srv/service.js`
 
+## Beginner execution walkthrough (2026-07-18)
+
+### English
+
+#### Mental model
+
+Treat this file as a telephone switchboard. `srv/service.cds` publishes the telephone numbers (OData entities and actions). Fiori calls one number. CAP enters `BugService`, finds the matching registration in `init()`, and forwards the request to the imported function that owns the rule. This file normally coordinates; it should not duplicate the detailed rule.
+
+#### Caller → current file → callee
+
+- Create screen opens: Fiori draft request `NEW /Bugs(...)` → `this.before('NEW', Bugs.drafts, ...)` → `enforceBugCreatePermission()` → `prepareDraftNew()`.
+- User edits a field: `PATCH /Bugs(...)` → `this.before('PATCH', Bugs.drafts, ...)` → `prepareDraftPatch()`.
+- User presses Create/Save: draft `SAVE` → `this.on('SAVE', Bugs.drafts, ...)` → `handleDraftSave()` → CAP's `next()` → history/attachment side effects.
+- User presses a lifecycle action: OData action name → matching `this.on(...)` → `actions.js` or `transitionBug()`.
+- UI reads Bugs: `READ /Bugs` → dependency preparation before the query → database read → display/capability enrichment after the query → JSON response.
+
+#### Walk through `init()` by blocks
+
+1. `const entities = this.entities` obtains runtime projections from `srv/service.cds`. Watch `Object.keys(entities)` when an entity is unexpectedly undefined.
+2. `commentTargets`, `attachmentTargets`, and `historyEventTargets` build active/draft target lists. `.filter(Boolean)` prevents registering a handler on a projection that CAP did not generate.
+3. The first registration block protects read-only models and prepares/enriches reads. It does not write Bugs.
+4. The Bug write block covers active CREATE/UPDATE and draft NEW/PATCH. Its side effect is to mutate `req.data` or reject before CAP persists.
+5. Comment/attachment blocks attach the same rules to active and draft child entities.
+6. `after CREATE/UPDATE` creates audit and notification side effects after the main write succeeds.
+7. Custom READ and AI action handlers return calculated/review data. AI handlers must not silently mutate workflow fields.
+8. Draft SAVE owns the draft-to-active boundary. Lifecycle `this.on(...)` registrations dispatch button requests to the central action code.
+9. `super.init()` finishes CAP registration; `startEmailWorker()` starts an independent outbox poller after service initialization.
+
+#### Debug order
+
+For a Create Bug failure, use breakpoints in this order: `BugService.init()` once at startup → the `NEW`, `PATCH`, or `SAVE` callback matching the Network request → the imported function (`prepareDraftNew`, `prepareDraftPatch`, or `handleDraftSave`) → the validator that rejects. Inspect `req.event`, `req.target.name`, `req.data`, `req.user`, and `entities`. Expected order is `NEW`, zero or more `PATCH`, then `SAVE`; a missing `SAVE` means the browser never activated the draft.
+
+#### Safe-change warning
+
+A handler name must match three other layers: the action/entity declaration in `srv/service.cds`, the Fiori annotation or UI5 caller under `app/`, and the implementation module under `srv/`. Changing only this file can produce a button that is visible but does nothing, or an endpoint with no implementation.
+
+### Vietnamese
+
+#### Mô hình tư duy
+
+Hãy xem file này như tổng đài điện thoại. `srv/service.cds` công bố các “số điện thoại” là entity/action OData. Fiori gọi một số. CAP đi vào `BugService`, tìm đăng ký tương ứng trong `init()`, rồi chuyển request tới hàm import đang giữ rule. File này chủ yếu điều phối; không nên chép lại rule chi tiết vào đây.
+
+#### Caller → file hiện tại → callee
+
+- Mở màn hình Create: Fiori gửi draft request `NEW /Bugs(...)` → `this.before('NEW', Bugs.drafts, ...)` → `enforceBugCreatePermission()` → `prepareDraftNew()`.
+- Sửa một field: `PATCH /Bugs(...)` → `this.before('PATCH', Bugs.drafts, ...)` → `prepareDraftPatch()`.
+- Nhấn Create/Save: draft `SAVE` → `this.on('SAVE', Bugs.drafts, ...)` → `handleDraftSave()` → `next()` của CAP → side effect history/attachment.
+- Nhấn action lifecycle: tên OData action → `this.on(...)` tương ứng → `actions.js` hoặc `transitionBug()`.
+- UI đọc Bugs: `READ /Bugs` → chuẩn bị dependency trước query → đọc database → bổ sung display/capability sau query → trả JSON.
+
+#### Đi qua `init()` theo từng khối
+
+1. `const entities = this.entities` lấy projection runtime từ `srv/service.cds`. Xem `Object.keys(entities)` nếu một entity bất ngờ là undefined.
+2. `commentTargets`, `attachmentTargets`, `historyEventTargets` tạo danh sách target active/draft. `.filter(Boolean)` tránh đăng ký handler vào projection CAP không sinh ra.
+3. Khối đăng ký đầu bảo vệ read-only model và chuẩn bị/làm giàu READ. Khối này không ghi Bug.
+4. Khối ghi Bug bao phủ CREATE/UPDATE active và NEW/PATCH draft. Side effect của nó là sửa `req.data` hoặc reject trước khi CAP persist.
+5. Khối comment/attachment gắn cùng rule vào child entity active và draft.
+6. `after CREATE/UPDATE` tạo audit và notification sau khi thay đổi chính thành công.
+7. Custom READ và AI action trả dữ liệu tính toán/gợi ý. AI action không được âm thầm đổi field workflow.
+8. Draft SAVE giữ ranh giới draft thành active. Các đăng ký lifecycle `this.on(...)` chuyển request từ nút sang action code chung.
+9. `super.init()` hoàn tất đăng ký CAP; `startEmailWorker()` khởi động outbox poller độc lập sau khi service sẵn sàng.
+
+#### Thứ tự debug
+
+Với lỗi Create Bug, đặt breakpoint theo thứ tự: `BugService.init()` một lần khi startup → callback `NEW`, `PATCH` hoặc `SAVE` khớp request trong Network → hàm import (`prepareDraftNew`, `prepareDraftPatch` hoặc `handleDraftSave`) → validator reject. Quan sát `req.event`, `req.target.name`, `req.data`, `req.user` và `entities`. Thứ tự đúng là `NEW`, không hoặc nhiều lần `PATCH`, rồi `SAVE`; không thấy `SAVE` nghĩa là browser chưa activate draft.
+
+#### Cảnh báo khi sửa
+
+Tên handler phải khớp ba lớp khác: khai báo action/entity trong `srv/service.cds`, annotation hoặc UI5 caller dưới `app/`, và module implementation dưới `srv/`. Chỉ sửa file này có thể tạo nút nhìn thấy nhưng bấm không chạy, hoặc endpoint không có implementation.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

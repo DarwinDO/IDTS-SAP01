@@ -1,5 +1,15 @@
 # `srv/ai/duplicate-detection.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+`service.js` calls `suggestSimilarBugs`. Execution is: resolve source Bug/text → query candidate Bugs → ask provider for embeddings when available → `rankSimilarBugCandidates` → `scoreCandidate` → enrich names/status → audit → return sorted review rows. Scoring combines title/description token overlap, classification matches and valid cosine similarity; provider failure is converted to deterministic fallback. `embeddingText` sends only bounded Bug text/classification. Candidate concurrency/limit/minScore are bounded. No DuplicateLinks row is created here; the user must separately confirm a duplicate relation. Debug `input`, candidate count, provider status/vector validity, score components, threshold, ranked output and audit. A no-result is valid when every score is below threshold.
+
+### Vietnamese
+
+`service.js` gọi `suggestSimilarBugs`. Thứ tự: resolve source Bug/text → query candidate Bugs → xin embedding khi provider có sẵn → `rankSimilarBugCandidates` → `scoreCandidate` → enrich tên/status → audit → trả row review đã sort. Điểm kết hợp overlap token title/description, classification match và cosine hợp lệ; provider fail chuyển sang fallback deterministic. `embeddingText` chỉ gửi text/classification Bug đã giới hạn. Concurrency/limit/minScore đều bị giới hạn. File không tạo DuplicateLinks; user phải xác nhận quan hệ duplicate riêng. Debug `input`, số candidate, provider status/vector hợp lệ, thành phần score, threshold, ranked output và audit. Không có kết quả là hợp lệ khi mọi score dưới ngưỡng.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

@@ -16,10 +16,12 @@ const {
 const LOG = cds.log('idts-ai')
 
 function createAiProvider (config = getAiConfig()) {
+  // Factory public luôn trả SafeAiProvider, để mọi feature dùng cùng timeout/redaction/fallback contract.
   return new SafeAiProvider(config)
 }
 
 class SafeAiProvider {
+  // Wrapper bảo vệ delegate thật/mock: sanitize input, giới hạn thời gian và chuyển mọi lỗi thành result an toàn.
   constructor (config) {
     this.config = config
     this.delegate = createDelegate(config)
@@ -118,6 +120,7 @@ class SafeAiProvider {
 }
 
 function createDelegate (config) {
+  // Chọn OpenAI, mock hoặc disabled delegate theo config; feature code không phụ thuộc SDK cụ thể.
   if (config.enabled && config.provider === 'mock' && !config.unsupported) {
     return new MockAiProvider(config)
   }
@@ -132,6 +135,7 @@ function createDelegate (config) {
 }
 
 function sanitizeChatRequest (request, config) {
+  // Chỉ giữ messages/options allow-list, redact text và ép model alias/limit trước khi gọi provider.
   const messages = Array.isArray(request.messages) ? request.messages : []
   return {
     messages: messages.map(message => ({
@@ -142,6 +146,7 @@ function sanitizeChatRequest (request, config) {
 }
 
 function sanitizeStructuredRequest (request, config) {
+  // Chuẩn hóa request JSON-schema/structured output; schema name và payload đều bị giới hạn.
   return {
     schemaName: sanitizeDiagnosticToken(request.schemaName, 'Suggestion'),
     instruction: redactSensitiveText(request.instruction, config.maxInputChars),
@@ -150,12 +155,14 @@ function sanitizeStructuredRequest (request, config) {
 }
 
 function sanitizeEmbeddingRequest (request, config) {
+  // Redact/cắt text embedding và giới hạn batch để không gửi dữ liệu ngoài scope.
   return {
     text: redactSensitiveText(request.text, config.maxInputChars)
   }
 }
 
 function redactSensitiveObject (value, maxLength) {
+  // Duyệt object request có depth/size limit, dùng safety.js cho mọi string.
   if (value === undefined || value === null) return null
   if (typeof value === 'string') return redactSensitiveText(value, maxLength)
   if (typeof value === 'number' || typeof value === 'boolean') return value
@@ -172,6 +179,7 @@ function redactSensitiveObject (value, maxLength) {
 }
 
 function successResult ({ operation, featureType, correlationId, durationMs, data, config }) {
+  // Chuẩn hóa response thành envelope thành công có metadata an toàn; không expose raw SDK response.
   return Object.freeze({
     ok: true,
     status: 'SUCCESS',
@@ -186,6 +194,7 @@ function successResult ({ operation, featureType, correlationId, durationMs, dat
 }
 
 function failureResult ({ operation, featureType, correlationId, durationMs, code, summary, retryable, config }) {
+  // Chuẩn hóa timeout/provider error thành envelope thất bại để feature deterministic fallback.
   return Object.freeze({
     ok: false,
     status: code,
@@ -204,12 +213,14 @@ function failureResult ({ operation, featureType, correlationId, durationMs, cod
 }
 
 function modelAliasFor (operation, config) {
+  // Chọn alias model theo operation chat/structured/embedding cho audit, không trả model endpoint/key.
   return operation === 'embedding'
     ? (config.embeddingModelAlias || config.modelAlias || 'not-configured')
     : (config.modelAlias || 'not-configured')
 }
 
 function withTimeout (promise, timeoutMs) {
+  // Race provider promise với timer; timeout reject được SafeAiProvider chuyển thành failure result.
   let timeout
   return Promise.race([
     promise,

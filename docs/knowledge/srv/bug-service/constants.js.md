@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/constants.js`
 
+## Beginner-first constant map (2026-07-18)
+
+### English
+
+This file is shared vocabulary, not execution code. `STATUS/USER_ROLE/PROCESSOR_ROLE/ACTION` are stored/runtime codes. `ALLOWED_TRANSITIONS` is the lifecycle state machine. Coordinator/comment/attachment/developer Sets are authorization allow-lists. `DEVELOPER_STATUSES/TESTER_STATUSES` route the next action owner. `CAPABILITY_FIELDS/FIELD_CONTROL` support Fiori action/field UX, while `READ_ONLY_ENTITY_NAMES` feeds guards. Follow a code from this file to its seed catalog in `db/data`, association in `schema.cds`, rule in `permissions/bug-write/actions`, and label/action in Fiori. A code rename is a coordinated migration, not a local text edit.
+
+### Vietnamese
+
+File này là từ vựng dùng chung, không phải code thực thi. `STATUS/USER_ROLE/PROCESSOR_ROLE/ACTION` là code lưu/runtime. `ALLOWED_TRANSITIONS` là state machine lifecycle. Các Set coordinator/comment/attachment/developer là allow-list quyền. `DEVELOPER_STATUSES/TESTER_STATUSES` định tuyến người cần hành động tiếp. `CAPABILITY_FIELDS/FIELD_CONTROL` phục vụ UX action/field Fiori, còn `READ_ONLY_ENTITY_NAMES` cấp danh sách cho guards. Hãy lần một code từ file này sang catalog seed trong `db/data`, association trong `schema.cds`, rule trong `permissions/bug-write/actions`, rồi label/action Fiori. Đổi code là migration phối hợp nhiều lớp, không phải sửa text cục bộ.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

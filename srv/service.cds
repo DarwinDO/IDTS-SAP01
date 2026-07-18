@@ -1,7 +1,9 @@
-// Học nhanh (DonHV): hợp đồng OData của BugService. Đổi action/field ở đây phải kiểm tra handler `srv/service.js` và Fiori annotation cùng tên.
+// Đây là hợp đồng OData công khai của BugService. CDS nói client được đọc/gọi gì;
+// `srv/service.js` gắn behavior, còn Fiori annotations/manifest gọi đúng entity/action được khai báo tại đây.
 using idts.cap as db from '../db/schema';
 
 service BugService @(requires: 'authenticated-user') {
+  // Các type sau là response tạm của action AI review-only, không phải table được persist.
   type SimilarBugCandidate {
     rank             : Integer;
     bugID            : UUID;
@@ -61,6 +63,7 @@ service BugService @(requires: 'authenticated-user') {
     requiresReview     : Boolean;
   };
 
+  // Unbound AI actions nhận context tối thiểu và trả suggestion; handler phải ground/audit nhưng không tự sửa Bug.
   action suggestSimilarBugs(
     sourceBugID            : UUID,
     title                  : String(255),
@@ -99,6 +102,7 @@ service BugService @(requires: 'authenticated-user') {
     limit                : Integer
   ) returns array of SmartAssignmentExplanationCandidate;
 
+  // Projection Bugs expose aggregate chính, thêm field tính/virtual cho UX; dữ liệu gốc vẫn ở db.Bugs.
   entity Bugs as projection on db.Bugs {
     *,
     (dueDate != null and dueDate < date($now) and status.code != 'CLOSED' ? true : false) as isOverdue : Boolean,
@@ -125,6 +129,7 @@ service BugService @(requires: 'authenticated-user') {
     virtual canAddComment         : Boolean,
     virtual assigneeFieldControl  : Integer
   } actions {
+    // Bound actions chạy trên một Bug cụ thể. Tên/signature phải khớp `srv/service.js` và Fiori action annotation.
     action addComment(content: LargeString) returns Bugs;
     action assignToDeveloper(
       @Common.ValueList : {
@@ -174,6 +179,7 @@ service BugService @(requires: 'authenticated-user') {
     action closeBug(note: String) returns Bugs;
     action reopenBug(reason: String) returns Bugs;
   };
+  // Projection collaboration/audit bổ sung display fields nhưng không đổi schema gốc.
   entity Comments as projection on db.Comments {
     *,
     author.displayName as authorDisplayName,
@@ -202,6 +208,7 @@ service BugService @(requires: 'authenticated-user') {
     deliveryStatus.name as deliveryStatusName,
     deliveryStatus.criticality as deliveryStatusCriticality
   };
+  // Delivery read-only chỉ expose trạng thái an toàn cho UI; body HTML/config/credential không được công khai.
   @readonly
   entity NotificationDeliveries as projection on db.NotificationDeliveries {
     ID,
@@ -222,6 +229,7 @@ service BugService @(requires: 'authenticated-user') {
     providerMessageId
   };
   entity DuplicateLinks as projection on db.DuplicateLinks;
+  // AI audit read-only: client review được suggestion nhưng không được tự POST/PATCH audit row.
   @readonly
   entity AiSuggestions as projection on db.AiSuggestions {
     ID,
@@ -246,6 +254,7 @@ service BugService @(requires: 'authenticated-user') {
     correlationId
   };
 
+  // Public Users projection cố ý bỏ passwordHash và session fields.
   entity Users as projection on db.Users {
     ID,
     createdAt,
@@ -267,6 +276,7 @@ service BugService @(requires: 'authenticated-user') {
     *,
     componentCategory : redirected to ComponentCategories
   };
+  // Hai entity không persist dưới đây do JS custom READ tính: value help assignment và dashboard workload.
   entity AssignableDevelopers {
     key ID                    : UUID;
     developerProfileID        : UUID;
@@ -307,6 +317,7 @@ service BugService @(requires: 'authenticated-user') {
     isOverloaded                : Boolean;
     active                      : Boolean;
   };
+  // Value-help view chỉ trả cặp component/category đang active ở cả ba row liên quan.
   entity ValidDefectCategories as select from db.ComponentCategories {
     key ID as componentCategoryID,
     component.ID as applicationComponentID,
@@ -337,3 +348,4 @@ service BugService @(requires: 'authenticated-user') {
 }
 
 annotate BugService.Bugs with @odata.draft.enabled;
+// Bật draft protocol để Fiori dùng NEW → PATCH → SAVE thay vì ghi thẳng Bug active trong form edit/create.

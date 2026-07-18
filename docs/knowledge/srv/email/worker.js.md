@@ -1,5 +1,15 @@
 # Knowledge: `srv/email/worker.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+`srv/service.js` calls `startEmailWorker` once after service initialization. The function loads config/sender and uses `cds.spawn` to poll on a configured interval, opening a fresh transaction for each run and delegating delivery work to outbox. Disabled/incomplete config should avoid unsafe sending; a processing error is sanitized/logged and the next poll continues. Break at worker startup → scheduled callback → transaction → `processEmailDeliveries`. This worker is background runtime infrastructure, not an OData endpoint and not part of the Bug action transaction.
+
+### Vietnamese
+
+`srv/service.js` gọi `startEmailWorker` một lần sau khi service khởi động. Hàm tải config/sender và dùng `cds.spawn` poll theo interval, mở transaction mới cho mỗi lượt rồi giao xử lý delivery cho outbox. Config tắt/thiếu phải tránh gửi không an toàn; lỗi xử lý được sanitize/log và lượt poll sau vẫn tiếp tục. Break theo worker startup → scheduled callback → transaction → `processEmailDeliveries`. Worker là hạ tầng nền, không phải OData endpoint và không nằm trong transaction của Bug action.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

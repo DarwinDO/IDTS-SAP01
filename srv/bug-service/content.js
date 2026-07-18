@@ -14,6 +14,8 @@ const {
 } = require('./helpers')
 
 async function prepareCommentCreate (req, entities) {
+  // Chạy trước CREATE Comment active/draft. Hàm gắn Bug cha và author từ request đã xác thực,
+  // đồng thời chặn nội dung rỗng; client không được tự giả author bằng payload.
   req.data.content = trimToNull(req.data.content)
   if (!req.data.content) {
     return req.reject(400, 'Comment content is required.', 'content')
@@ -56,6 +58,8 @@ async function prepareCommentCreate (req, entities) {
 }
 
 async function prepareAttachmentWrite (req, entities) {
+  // Chạy trước mọi thao tác ghi/xóa attachment. Hàm kiểm quyền trên Bug cha và chuẩn hóa metadata;
+  // binary thật đi qua storage adapter/S3, còn DB chỉ giữ metadata và storage reference.
   const actor = await resolveRequestUser(req, entities)
 
   if (actor && !ATTACHMENT_ROLES.has(actor.role_code)) {

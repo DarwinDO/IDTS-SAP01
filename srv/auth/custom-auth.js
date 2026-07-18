@@ -10,6 +10,8 @@ const LOG = cds.log('idts-auth')
 const AUTH_TEMPORARILY_UNAVAILABLE_MESSAGE = 'Authentication is temporarily unavailable. Please try again later.'
 
 module.exports = async function idtsCustomAuth (req, res, next) {
+  // Express middleware chạy trước protected CAP endpoints: lấy bearer token, hash, đọc session/user active,
+  // gắn identity vào request rồi gọi `next()`. Login/public assets được route ngoài middleware này.
   try {
     const token = bearerTokenFrom(req)
     if (!token) return next()
@@ -59,6 +61,7 @@ module.exports = async function idtsCustomAuth (req, res, next) {
 }
 
 function bearerTokenFrom (req) {
+  // Parse đúng header `Authorization: Bearer ...`; không nhận token từ query string để tránh leak URL/log.
   const header = req.headers?.authorization || req.headers?.Authorization
   if (!header || typeof header !== 'string') return null
   const match = header.match(/^Bearer\s+(.+)$/i)
@@ -66,10 +69,12 @@ function bearerTokenFrom (req) {
 }
 
 function isExpired (expiresAt) {
+  // So expiry với thời điểm hiện tại; invalid/missing date được xem là hết hạn an toàn.
   return !expiresAt || new Date(expiresAt).getTime() <= Date.now()
 }
 
 function rejectUnauthorized (res) {
+  // Trả 401 generic cho token thiếu/sai/hết hạn, không cho client biết session row có tồn tại hay không.
   return res.status(401).json({
     error: {
       code: 'UNAUTHORIZED',
@@ -79,6 +84,7 @@ function rejectUnauthorized (res) {
 }
 
 function rejectAuthenticationUnavailable (res) {
+  // Trả lỗi dịch vụ generic khi DB/runtime auth hỏng; không đẩy raw SQL/stack ra browser.
   return res.status(500).json({
     error: {
       code: 'AUTHENTICATION_UNAVAILABLE',
@@ -88,12 +94,14 @@ function rejectAuthenticationUnavailable (res) {
 }
 
 function logUnexpectedAuthError (error) {
+  // Ghi diagnostic đã sanitize ở server để debug mà không làm lộ secret trong response/log.
   LOG.error('Unexpected bearer authentication failure', {
     diagnostic: safeAuthErrorDiagnostic(error)
   })
 }
 
 function safeAuthErrorDiagnostic (error) {
+  // Rút error thành mã/tóm tắt allow-list; bỏ object sâu và thông tin kết nối.
   const status = Number(error?.statusCode || error?.status)
   return {
     name: safeDiagnosticToken(error?.name, 'Error'),
@@ -103,6 +111,7 @@ function safeAuthErrorDiagnostic (error) {
 }
 
 function safeDiagnosticToken (value, fallback) {
+  // Chuẩn hóa token chẩn đoán, không liên quan bearer token đăng nhập.
   if (typeof value !== 'string' && typeof value !== 'number') return fallback
   const token = String(value).replace(/[^a-zA-Z0-9_.-]/g, '_').slice(0, 80)
   return token || fallback

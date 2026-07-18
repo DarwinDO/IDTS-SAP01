@@ -1,5 +1,15 @@
 # `srv/ai/index.js`
 
+## Beginner-first module map (2026-07-18)
+
+### English
+
+This is an export barrel only. `srv/service.js` imports four feature entry points from here; tests may import pure builders/config/safety helpers. Requiring this file loads modules but does not call AI, query data or write audit. Trace an action from its exported name to `duplicate-detection`, `classification-suggestion`, `bug-summary`, or `assignment-explanation`; shared calls then go to provider, safety and audit. Keep exports explicit so a service action cannot accidentally use an unsafe internal helper.
+
+### Vietnamese
+
+Đây chỉ là file gom export. `srv/service.js` import bốn feature entry point từ đây; test có thể import pure builder/config/safety helper. Require file này chỉ load module, không gọi AI, query data hay ghi audit. Lần một action từ tên export sang `duplicate-detection`, `classification-suggestion`, `bug-summary` hoặc `assignment-explanation`; sau đó các lời gọi dùng chung đi tới provider, safety và audit. Giữ export rõ ràng để service action không vô tình dùng helper nội bộ thiếu bảo vệ.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

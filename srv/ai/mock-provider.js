@@ -4,6 +4,7 @@
 const crypto = require('crypto')
 
 class MockAiProvider {
+  // Provider deterministic cho test/local: trả success/failure/no-result theo config mà không gọi mạng hay cần API key.
   constructor (config) {
     this.config = config
   }
@@ -48,11 +49,13 @@ class MockAiProvider {
 }
 
 function latestUserMessage (messages) {
+  // Lấy message user cuối làm input fixture; bỏ system content khỏi deterministic output.
   const message = [...messages].reverse().find(entry => entry?.role === 'user')
   return typeof message?.content === 'string' ? message.content.slice(0, 120) : ''
 }
 
 function deterministicEmbedding (text, dimensions) {
+  // Hash token text thành vector lặp lại được để test ranking; không đại diện chất lượng embedding thật.
   const hash = crypto.createHash('sha256').update(String(text)).digest()
   const values = []
   for (let i = 0; i < dimensions; i++) {

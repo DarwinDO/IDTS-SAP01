@@ -1,5 +1,15 @@
 # `srv/ai/mock-provider.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+`createDelegate` selects `MockAiProvider` for local/programmatic QA. Its methods return configured deterministic success/failure/no-result without network or API key. `latestUserMessage` supports predictable chat fixtures; `deterministicEmbedding` maps the same text to the same numeric vector so duplicate ranking tests are reproducible. This mock proves orchestration/fallback/safety, not real model quality. Debug mock mode/structured fixture and compare repeated output; never use mock PASS as evidence that a live provider understands bugs well.
+
+### Vietnamese
+
+`createDelegate` chọn `MockAiProvider` cho QA local/programmatic. Các method trả success/failure/no-result deterministic theo config, không gọi network hay cần API key. `latestUserMessage` hỗ trợ fixture chat đoán trước được; `deterministicEmbedding` map cùng text thành cùng vector số để test duplicate ranking lặp lại được. Mock chứng minh orchestration/fallback/safety, không chứng minh chất lượng model thật. Debug mock mode/structured fixture và so output lặp; không dùng mock PASS làm evidence rằng provider live hiểu Bug tốt.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

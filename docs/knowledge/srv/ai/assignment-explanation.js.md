@@ -1,5 +1,15 @@
 # `srv/ai/assignment-explanation.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+`explainSmartAssignment` resolves Bug/component/module input, reads assignable candidate profiles/responsibilities and workload, builds a bounded provider request, then merges provider rows by real candidate ID. Missing, hallucinated or unsafe provider explanations are replaced by `fallbackExplanation` grounded in suitability, availability and workload. Every public row carries warnings/confidence/provider/grounding/review status. Audit stores a safe summary/payload. This feature explains existing candidates; it does not rank with hidden authority, choose a developer, or call assignment action. Debug input IDs → candidate context → workload map → provider rows keyed by candidate ID → fallback/row builder → audit/result. Backend `validateAssignee` remains the final assignment gate.
+
+### Vietnamese
+
+`explainSmartAssignment` resolve input Bug/component/module, đọc candidate profile/responsibility và workload có thể assign, dựng provider request có giới hạn, rồi ghép provider row theo candidate ID thật. Explanation provider thiếu, hallucinate hoặc không an toàn được thay bằng `fallbackExplanation` grounded trên suitability, availability và workload. Mỗi public row có warning/confidence/provider/grounding/review status. Audit lưu summary/payload an toàn. Feature chỉ giải thích candidate hiện có; nó không ranking bằng quyền ẩn, không chọn developer và không gọi assignment action. Debug theo input ID → candidate context → workload map → provider row theo candidate ID → fallback/row builder → audit/result. Backend `validateAssignee` vẫn là hàng rào assign cuối.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English
