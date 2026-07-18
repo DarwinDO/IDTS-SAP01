@@ -132,3 +132,9 @@ Cách này an toàn hơn vì:
 - Chỉ hiển thị public profile fields an toàn: name, email, role, session expiry.
 - Nếu `srv/auth.js publicUser()` đổi shape, cập nhật cách dùng `currentUser()` và browser smoke.
 - Nếu đổi logout behavior, verify refresh sau logout không vào được protected app content.
+
+## Symbol walkthrough / Walkthrough theo symbol (2026-07-18)
+
+**English.** `Component.init()` calls `ProfileShell.init()` → it finds the stable HTML host and safe current user → `render()` places the button → `createProfileButton()` creates avatar/popover/sign-out → sign-out calls `window.idtsLogout()` from auth guard. `safeUserText`, `initialsFrom`, and `formatExpiry` only prepare display values. Watch `host`, safe `user`, and the rendered flag; backend authorization remains independent of this display.
+
+**Tiếng Việt.** `Component.init()` gọi `ProfileShell.init()` → tìm HTML host ổn định và current user an toàn → `render()` đặt button → `createProfileButton()` tạo avatar/popover/sign-out → sign-out gọi `window.idtsLogout()` từ auth guard. `safeUserText`, `initialsFrom`, `formatExpiry` chỉ chuẩn bị dữ liệu hiển thị. Quan sát `host`, safe `user` và cờ đã render; authorization backend hoàn toàn độc lập với phần hiển thị này.

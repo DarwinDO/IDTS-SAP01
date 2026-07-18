@@ -1,5 +1,5 @@
 /**
- * Gợi ý học/debug: form login thật nằm ở login-page.js; helper này chỉ dùng lại session cho UI5 code.
+ * Gợi ý học/debug: form login thật nằm ở login-page.js; module này chỉ cung cấp API đọc/xóa session cho UI5 code.
  * IDTS-35 login session helpers.
  *
  * The active login UI is the standalone login.html + login-page.js flow.
@@ -23,6 +23,8 @@ sap.ui.define([], function () {
      * Check whether a non-expired auth token exists in sessionStorage.
      */
     LoginSession.isAuthenticated = function () {
+        // Caller như dashboard-page dùng kết quả boolean này trước khi đọc profile hoặc gọi OData.
+        // Token hết hạn gây side effect clearSession(); breakpoint ở đây khi user bị logout bất ngờ.
         var token = sessionStorage.getItem(SESSION_KEY_TOKEN);
         var expires = sessionStorage.getItem(SESSION_KEY_EXPIRES);
 
@@ -45,6 +47,7 @@ sap.ui.define([], function () {
      * Return the stored Bearer token, or null when the browser tab has no session.
      */
     LoginSession.getToken = function () {
+        // Trả token cho fetch OData; không log, decode hoặc quyết định role ở client.
         return sessionStorage.getItem(SESSION_KEY_TOKEN);
     };
 
@@ -52,6 +55,7 @@ sap.ui.define([], function () {
      * Return the stored safe user profile, or null when it is missing/corrupted.
      */
     LoginSession.getUser = function () {
+        // Trả safe profile đã được AuthService cấp lúc login; JSON hỏng trả null để caller xử lý.
         var user = sessionStorage.getItem(SESSION_KEY_USER);
         try {
             return user ? JSON.parse(user) : null;
@@ -64,6 +68,7 @@ sap.ui.define([], function () {
      * Call AuthService.logout when a token exists, then clear browser session data.
      */
     LoginSession.logout = function () {
+        // Profile/menu gọi: POST AuthService.logout rồi xóa session local, kể cả provider/network lỗi.
         var token = LoginSession.getToken();
 
         if (token) {
@@ -85,6 +90,7 @@ sap.ui.define([], function () {
      * Remove all IDTS auth data from the current browser tab.
      */
     LoginSession.clearSession = function () {
+        // Xóa ba khóa cùng lúc; refresh sau đó sẽ bị auth-guard chuyển về login.
         sessionStorage.removeItem(SESSION_KEY_TOKEN);
         sessionStorage.removeItem(SESSION_KEY_USER);
         sessionStorage.removeItem(SESSION_KEY_EXPIRES);

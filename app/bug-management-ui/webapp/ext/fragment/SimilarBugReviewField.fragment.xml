@@ -1,9 +1,13 @@
-<!-- Nút này nằm trong Bug Summary để người dùng xem candidate tương tự, không tự tạo DuplicateLinks. -->
+<!--
+  Annotation Bug Summary nhúng fragment này. Button gọi DuplicateReview.openDialog;
+  kết quả chỉ để review, không tự tạo DuplicateLinks. Breakpoint bắt đầu ở openDialog().
+-->
 <core:FragmentDefinition
   xmlns="sap.m"
   xmlns:core="sap.ui.core"
   xmlns:section="idts.bugmanagementui.ext.controls"
 >
+  <!-- Wrapper giữ cách đặt text bên trái/nút bên phải, không chứa logic tìm duplicate. -->
   <section:SmartAssignmentSection>
     <Button
       core:require="{ DuplicateReview: 'idts/bugmanagementui/ext/actions/DuplicateReview' }"

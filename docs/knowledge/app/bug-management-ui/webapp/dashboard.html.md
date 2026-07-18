@@ -100,3 +100,9 @@ Page này vẫn được bảo vệ. `auth-guard.js` chạy trước SAPUI5, nê
 - Giữ `auth-guard.js` trước SAPUI5 bootstrap.
 - Không đưa private endpoint, credential, QA note, giải thích CAP/BTP/XSUAA, hoặc developer-facing text lên page.
 - Giữ file này như shell của dashboard; logic gom nhóm nghiệp vụ nằm trong `dashboard-page.js`.
+
+## Execution trace / Lần theo thực thi (2026-07-18)
+
+**English.** Browser → `auth-guard.js` → UI5 bootstrap → `dashboard-page.js`. The script places a custom SAPUI5 page in `#dashboardContent` and ProfileShell uses the separate profile host. If the dashboard is blank, check token redirect, UI5 resources, then `loadDashboard()`. This HTML contains no role filtering and no KPI calculation.
+
+**Tiếng Việt.** Browser → `auth-guard.js` → UI5 bootstrap → `dashboard-page.js`. Script đặt custom SAPUI5 page vào `#dashboardContent`, còn ProfileShell dùng host riêng. Dashboard trắng thì kiểm redirect/token, UI5 resource, rồi `loadDashboard()`. HTML này không lọc role và không tính KPI.

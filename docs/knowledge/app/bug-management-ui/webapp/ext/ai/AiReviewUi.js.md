@@ -166,3 +166,9 @@ Người dùng vẫn là người quyết định cuối cùng. UI không đư�
 - Không viết như thể AI đã chọn, approve, assign, close, hoặc thay đổi bug.
 - Confidence bị thiếu phải để trống, không biến thành `0%`.
 - Chạy lại `npm run qa:idts70:programmatic` sau khi sửa helper này.
+
+## Symbol walkthrough and safety boundary / Walkthrough và ranh giới an toàn (2026-07-18)
+
+**English.** AI dialogs pass raw action rows into `decorateResult()`. It calls `numberOrNull()`, `cleanText()`, `statusText()`, and `stateFor()` and returns a safe view-model with `requiresReview=true`. `loading()` and `unavailable()` provide predictable transient/failure states. This module does not call the provider, save suggestions, or move workflow. Break here when provider data exists but wording/color/warning is wrong; move to backend AI modules when the result itself is wrong.
+
+**Tiếng Việt.** Các dialog AI đưa row từ action vào `decorateResult()`. Hàm gọi `numberOrNull()`, `cleanText()`, `statusText()`, `stateFor()` rồi trả view-model an toàn với `requiresReview=true`. `loading()` và `unavailable()` tạo trạng thái chờ/lỗi ổn định. Module không gọi provider, không lưu suggestion và không chuyển workflow. Đặt breakpoint ở đây khi backend đã có dữ liệu nhưng text/màu/warning sai; nếu bản thân kết quả sai thì qua module AI backend.

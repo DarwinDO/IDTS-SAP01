@@ -1,4 +1,4 @@
-<!-- Shell Fiori chính: auth-guard phải được nạp trước UI5 bootstrap để tránh metadata request anonymous. -->
+<!-- Entry point Fiori: browser chạy auth-guard trước; chỉ khi có session mới bootstrap Component/manifest/OData. -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,8 +19,10 @@
         OData $metadata request fires.
         CSP note: external src="" script – not inline – satisfies enterprise CSP.
     -->
+    <!-- Breakpoint auth đầu tiên: file này redirect login hoặc gắn Bearer token cho mọi OData XHR. -->
     <script src="auth-guard.js"></script>
 
+    <!-- UI5 bootstrap đọc resource root, tạo Component.js rồi manifest.json quyết định page/service. -->
     <script
         id="sap-ui-bootstrap"
         src="resources/sap-ui-core.js"
@@ -35,7 +37,9 @@
     ></script>
 </head>
 <body class="sapUiBody sapUiSizeCompact" id="content">
+    <!-- ProfileShell.js đặt avatar/menu vào host riêng, không chạm DOM generated của Fiori Elements. -->
     <div id="idtsProfileShellHost"></div>
+    <!-- ComponentSupport đặt Fiori Elements app vào container này. -->
     <div
         data-sap-ui-component
         data-name="idts.bugmanagementui"

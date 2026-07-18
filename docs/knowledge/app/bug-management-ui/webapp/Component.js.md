@@ -100,3 +100,9 @@ Với `IDTS-53`, component này cũng gọi `ProfileShell.init()`. Đây là ch�
 - Giữ UI bổ sung ở cấp component thật nhỏ và ổn định.
 - Nếu đổi profile shell behavior, cập nhật `ProfileShell.js`, `auth-guard.js`, và knowledge mirrors tương ứng cùng lúc.
 - Chạy UI5 build/linter và browser smoke sau khi sửa file này.
+
+## Execution trace / Lần theo thực thi (2026-07-18)
+
+**English.** UI5 `ComponentSupport` creates this component after auth guard passes. `init()` first calls the Fiori Elements base component so manifest routing/models exist, then calls `ProfileShell.init()` to render the signed-in menu. Side effects: app startup and profile control creation; no direct database write. Break at `init()` when the whole app fails, then step into the base init for routing/model issues or ProfileShell for avatar/menu issues.
+
+**Tiếng Việt.** UI5 `ComponentSupport` tạo component này sau khi auth guard cho qua. `init()` gọi base component của Fiori Elements trước để routing/model trong manifest tồn tại, rồi gọi `ProfileShell.init()` để render menu user. Side effect là khởi động app và tạo profile control; không ghi database trực tiếp. Đặt breakpoint ở `init()` khi toàn app lỗi, sau đó step vào base init nếu routing/model lỗi hoặc ProfileShell nếu avatar/menu lỗi.

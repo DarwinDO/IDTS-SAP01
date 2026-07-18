@@ -98,3 +98,9 @@ File này giờ được giữ rất gọn. Nó không tự viết form HTML n�
 - Nếu đổi SAPUI5 version, theme, hoặc libraries, phải chạy UI5 build/lint và browser smoke.
 - Nếu đổi id vùng render, phải cập nhật `login-page.js` trong cùng commit.
 - Không đưa email thật, password, bearer token, API key, hoặc private endpoint vào file này hoặc knowledge note.
+
+## Execution trace / Lần theo thực thi (2026-07-18)
+
+**English.** Browser opens `login.html`; UI5 bootstrap loads `sap.m`/`sap.f`; `login-page.js` places controls into `#loginContent`; submit calls `AuthService.login`. There is no Fiori Elements component or protected OData model yet. If the page is blank, inspect bootstrap/resource loading first; if the form appears but login fails, move the breakpoint to `submitLogin()` and then `srv/auth.js`.
+
+**Tiếng Việt.** Browser mở `login.html`; UI5 bootstrap nạp `sap.m`/`sap.f`; `login-page.js` đặt control vào `#loginContent`; submit gọi `AuthService.login`. Lúc này chưa có Fiori Elements component hay protected OData model. Nếu trang trắng, kiểm bootstrap/resource trước; nếu có form nhưng login lỗi, chuyển breakpoint sang `submitLogin()` rồi tới `srv/auth.js`.

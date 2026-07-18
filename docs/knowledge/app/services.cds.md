@@ -60,3 +60,9 @@ Thêm annotation module mới → import ở đây. Thay đổi annotation → v
 - Knowledge mirror: `docs/knowledge/app/services.cds.md`
 - Source layer: `app`
 - Last reviewed: 2026-06-22
+
+## Beginner-first execution map / Sơ đồ thực thi cho người mới (2026-07-18)
+
+**English.** Caller: the CAP compiler. Current statement: `using from './bug-management-ui/annotations'`. Callee: `annotations.cds`, which imports smaller annotation modules. There is no HTTP request or database write here; the side effect is compiled OData metadata. Breakpoint substitute: run CAP compile and inspect whether the expected annotation appears in `$metadata`. If this import breaks, JavaScript handlers may still run but Fiori loses buttons, facets, labels, and value helps.
+
+**Tiếng Việt.** Caller là CAP compiler. Câu lệnh hiện tại là `using from './bug-management-ui/annotations'`. Callee là `annotations.cds`, rồi file đó import các module annotation nhỏ hơn. File này không nhận HTTP request và không ghi database; side effect của nó là metadata OData sau compile. “Breakpoint” phù hợp là chạy CAP compile rồi kiểm annotation mong đợi trong `$metadata`. Nếu import hỏng, JavaScript backend vẫn có thể chạy nhưng Fiori sẽ mất nút, facet, label và value help.

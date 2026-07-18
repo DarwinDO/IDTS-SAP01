@@ -110,3 +110,9 @@ Thiết kế cuối cùng dùng:
 - Giữ tên session key khớp với `login-page.js` và `auth-guard.js`.
 - Không bao giờ lưu hoặc log password.
 - Sau khi đổi behavior logout/session helper, chạy auth QA và browser smoke.
+
+## Symbol walkthrough / Walkthrough theo symbol (2026-07-18)
+
+**English.** `isAuthenticated()` reads token/expiry and clears an expired session; `getToken()` feeds authenticated fetch; `getUser()` parses only the safe public profile; `logout()` calls AuthService and always delegates to `clearSession()`; `clearSession()` removes all auth keys. Caller examples are dashboard and profile modules. No function here validates passwords or roles. Break at `isAuthenticated()` for unexpected redirects and `logout()` for stale sessions.
+
+**Tiếng Việt.** `isAuthenticated()` đọc token/expiry và xóa session hết hạn; `getToken()` cấp token cho fetch; `getUser()` chỉ parse public profile an toàn; `logout()` gọi AuthService rồi luôn chuyển tới `clearSession()`; `clearSession()` xóa mọi auth key. Caller điển hình là dashboard và profile module. Không hàm nào ở đây kiểm password hay quyền role. Đặt breakpoint ở `isAuthenticated()` khi redirect bất ngờ và `logout()` khi session còn sót.

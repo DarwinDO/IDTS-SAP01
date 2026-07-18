@@ -1,5 +1,5 @@
 /**
- * Gợi ý học/debug: dialog là review-only; nếu classification trong DB đổi, breakpoint phải đặt ở CAP handler, không phải file này.
+ * Gợi ý học/debug: dialog là review-only; trace từ openDialog → OData action → enrichSuggestion → JSONModel.
  * Classification suggestion review dialog for the Bugs Object Page.
  *
  * The backend validates suggestions against IDTS catalogs. This UI only
@@ -60,10 +60,12 @@ sap.ui.define([
     };
 
     function isBugContext(context) {
+        // Chỉ nhận binding context gốc /Bugs(...), tránh lấy nhầm context của table/association con.
         return !!context && typeof context.getPath === "function" && /^\/Bugs\([^/]+\)$/.test(context.getPath());
     }
 
     function findBugContext(control) {
+        // Nút trong XML fragment đi ngược cây control để tìm Bug đang mở.
         var current = control;
         while (current) {
             if (typeof current.getBindingContext === "function") {
@@ -78,6 +80,7 @@ sap.ui.define([
     }
 
     function findHost(control) {
+        // Tìm View/Object Page có model và addDependent để dialog theo đúng lifecycle UI5.
         var current = control;
         while (current) {
             if (
@@ -92,6 +95,7 @@ sap.ui.define([
     }
 
     function getText(view, key, args) {
+        // Đọc i18n; fallback key giúp debug khi bundle/binding thiếu mà không làm crash dialog.
         var model = view.getModel("i18n") || view.getModel("@i18n");
         var bundle = model && model.getResourceBundle && model.getResourceBundle();
         return bundle && bundle.getText ? bundle.getText(key, args) : key;
@@ -104,6 +108,7 @@ sap.ui.define([
     }
 
     function normalizeResult(result) {
+        // CAP action có thể trả object trực tiếp hoặc bọc trong value; chuẩn hóa trước khi render.
         if (Array.isArray(result)) {
             return result;
         }
@@ -117,6 +122,7 @@ sap.ui.define([
     }
 
     function requestProperty(bugContext, bug, propertyName) {
+        // Chỉ request field còn thiếu trên context để không tải lại toàn Bug.
         if (bug[propertyName] !== undefined || typeof bugContext.requestProperty !== "function") {
             return Promise.resolve();
         }
@@ -126,6 +132,7 @@ sap.ui.define([
     }
 
     function requestTextPath(bugContext, currentValues, field, propertyPath) {
+        // Đọc label association hiện tại, dùng để so suggestion với giá trị đang lưu.
         if (typeof bugContext.requestProperty !== "function") {
             return Promise.resolve();
         }
@@ -137,6 +144,7 @@ sap.ui.define([
     }
 
     function readBugData(bugContext) {
+        // Gom input cần thiết cho backend AI action. Không ghi PATCH hoặc thay classification tại đây.
         return bugContext.requestObject().then(function (bug) {
             var result = bug || {};
             var currentValues = {};
@@ -155,6 +163,7 @@ sap.ui.define([
     }
 
     function readClassificationSuggestions(model, bug) {
+        // Gọi CAP action suggestBugClassification qua OData V4; breakpoint Network/action ở đây.
         var operation = model.bindContext("/suggestClassification(...)", undefined, { $$ownRequest: true });
         var hasPersistedSource = bug.IsActiveEntity === true || bug.HasActiveEntity === true;
 
@@ -180,6 +189,7 @@ sap.ui.define([
     }
 
     function statusText(row, view) {
+        // Chuyển provider status/confidence thành lời giải thích review-facing.
         var status = String(row.status || "").toUpperCase();
         if (status === "SUGGESTED") {
             return getText(view, "classificationReviewStatusSuggested");
@@ -206,6 +216,7 @@ sap.ui.define([
     }
 
     function stateFor(row) {
+        // Chọn semantic state, không quyết định suggestion đúng/sai thay người dùng.
         var status = String(row.status || "").toUpperCase();
         if (status === "SUGGESTED") {
             return "Information";
@@ -217,6 +228,7 @@ sap.ui.define([
     }
 
     function fallbackCurrentValue(bug, field, view) {
+        // Khi association label chưa có, dùng code/ID hoặc text fallback an toàn.
         if (field === "priority") {
             return bug.priority_code || getText(view, "classificationReviewNotSet");
         }
@@ -227,6 +239,7 @@ sap.ui.define([
     }
 
     function enrichSuggestion(row, bug, view) {
+        // Ghép kết quả backend với giá trị hiện tại thành một row dialog; không mutate Bug context.
         var review = AiReviewUi.decorateResult({
             explanation: row.reason,
             confidence: row.confidence,
@@ -251,6 +264,7 @@ sap.ui.define([
     }
 
     function buildDialog(view, model, bug) {
+        // Tạo JSONModel + Table, invoke action, rồi cập nhật rows. Lỗi chỉ hiện MessageBox.
         var state = new JSONModel({
             rows: [],
             busy: true,
@@ -362,6 +376,7 @@ sap.ui.define([
 
     return {
         openDialog: function (event) {
+            // XML fragment gọi entry point này. Thứ tự debug: source → bugContext → readBugData → buildDialog.
             var source = event.getSource();
             var view = findHost(source);
             var bugContext = findBugContext(source);

@@ -164,3 +164,9 @@ Sau đó nó tính mỗi role nên thấy gì:
 - Không hardcode email thật của team.
 - Không đưa text nội bộ/dev-facing lên UI.
 - Nếu rule group theo role thay đổi, cập nhật business/PM docs vì ý nghĩa dashboard đã thay đổi.
+
+## Symbol walkthrough and breakpoint order / Walkthrough theo symbol và thứ tự breakpoint (2026-07-18)
+
+**English.** Page startup → `loadDashboard()` reads `LoginSession` → two `fetchOData()` calls load `Bugs` and `DeveloperWorkloads` → normalization converts OData values → `buildDashboardModel()` routes to Tester/Developer/PM builders → JSONModel refreshes tiles/lists. `focusList()` limits/deduplicates rows; `openBugList()` and `openBug()` only navigate. Breakpoints: `loadDashboard`, each fetch response, `buildDashboardModel`, then the role builder. Wrong source counts belong in backend read models; correct data but wrong grouping belongs here.
+
+**Tiếng Việt.** Page start → `loadDashboard()` đọc `LoginSession` → hai `fetchOData()` lấy `Bugs` và `DeveloperWorkloads` → normalize chuyển kiểu OData → `buildDashboardModel()` chọn builder Tester/Developer/PM → JSONModel refresh tile/list. `focusList()` giới hạn và loại trùng row; `openBugList()`/`openBug()` chỉ điều hướng. Breakpoint: `loadDashboard` → response từng fetch → `buildDashboardModel` → builder theo role. Count nguồn sai thì debug backend read model; dữ liệu đúng nhưng nhóm sai thì debug file này.

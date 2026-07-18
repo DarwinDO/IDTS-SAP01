@@ -143,6 +143,8 @@
             ]
         }).placeAt("loginContent");
 
+        // Nút Sign In/Enter gọi: kiểm input → POST AuthService.login → lưu token/profile
+        // vào sessionStorage → redirect app. Đây là breakpoint đầu tiên cho lỗi login UI.
         function submitLogin() {
             var email = emailInput.getValue().trim();
             var password = passwordInput.getValue();
@@ -194,6 +196,7 @@
                 });
         }
 
+        // Chỉ dùng message 400/401 dự kiến; 5xx luôn thành message chung để không lộ SQL/stack.
         function readSafeError(res) {
             if (res.status === 401 || res.status === 400) {
                 return res.json()
@@ -209,20 +212,24 @@
             return Promise.resolve(GENERIC_LOGIN_ERROR);
         }
 
+        // Hiện MessageStrip với text an toàn; không đưa raw response object vào DOM.
         function showMessage(message) {
             messageStrip.setText(message);
             messageStrip.setVisible(true);
         }
 
+        // Ẩn lỗi cũ trước lượt submit mới để user không nhầm trạng thái.
         function hideMessage() {
             messageStrip.setVisible(false);
         }
 
+        // Xóa viền Error của input sau khi user thử lại.
         function resetValueStates() {
             emailInput.setValueState(ValueState.None);
             passwordInput.setValueState(ValueState.None);
         }
 
+        // Khóa/mở form và busy indicator trong lúc fetch để tránh double submit.
         function setBusy(busy) {
             signInButton.setBusy(busy);
             signInButton.setEnabled(!busy);
@@ -231,6 +238,7 @@
         }
     });
 
+    // Redirect tới entry point Fiori được bảo vệ; auth-guard kiểm token lại khi app load.
     function goToApp() {
         var base = window.location.pathname.replace(/\/login\.html(\?.*)?$/, "");
         window.location.href = base + "/index.html";
