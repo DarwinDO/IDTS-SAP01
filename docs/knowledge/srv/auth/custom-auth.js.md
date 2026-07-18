@@ -1,5 +1,15 @@
 # Knowledge: `srv/auth/custom-auth.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+Every protected HTTP request enters exported `idtsCustomAuth` before CAP authorization. `bearerTokenFrom` reads only the Authorization header, the middleware hashes that raw token, queries an unrevoked/unexpired AuthSession with active User, updates last-use information, and attaches trusted identity for CAP before `next()`. Missing/invalid/expired tokens return generic 401. Database/runtime failures return an availability error and are logged only after sanitization. Breakpoints: middleware entry → extracted token presence (not value) → session query result → `isExpired` → immediately before `next()`. If `next()` is not reached, `srv/service.js` cannot receive the request.
+
+### Vietnamese
+
+Mọi HTTP request protected đi vào hàm export `idtsCustomAuth` trước authorization của CAP. `bearerTokenFrom` chỉ đọc Authorization header; middleware hash raw token đó, query AuthSession chưa revoke/chưa hết hạn cùng User active, cập nhật lần dùng và gắn identity đáng tin cho CAP trước khi gọi `next()`. Token thiếu/sai/hết hạn trả 401 chung. Lỗi database/runtime trả lỗi availability và chỉ log sau khi sanitize. Thứ tự breakpoint: đầu middleware → có/không có token (không xem giá trị) → kết quả query session → `isExpired` → ngay trước `next()`. Nếu không tới `next()`, `srv/service.js` chưa thể nhận request.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

@@ -12,6 +12,8 @@ let job
 let sender
 
 function startEmailWorker () {
+  // `service.js` gọi một lần khi startup. `cds.spawn` chạy poll định kỳ với transaction riêng,
+  // đọc outbox qua `processEmailDeliveries`; email failure chỉ được log/schedule retry, không dừng CAP service.
   if (job) return job
 
   const config = getEmailConfig()

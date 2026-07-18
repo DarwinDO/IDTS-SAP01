@@ -18,10 +18,12 @@ const SUPPORTED_PROVIDERS = Object.freeze(['mock', 'openai'])
 const SUPPORTED_MOCK_MODES = Object.freeze(['success', 'error', 'timeout'])
 
 function getAiConfig () {
+  // Đọc CAP private config và trả bản normalize; feature modules không đọc API key trực tiếp.
   return normalizeAiConfig(cds.env.idts?.ai || {})
 }
 
 function normalizeAiConfig (raw = {}) {
+  // Parse provider/mode/timeout/limits/model alias; secret chỉ ở config runtime, không đưa vào public result.
   const provider = normalizeProvider(raw.provider)
   const mockMode = normalizeMockMode(raw.mockMode)
   const config = {
@@ -51,15 +53,18 @@ function normalizeAiConfig (raw = {}) {
 }
 
 function normalizeProvider (value) {
+  // Chỉ cho provider được hỗ trợ; giá trị lạ fallback disabled/mock an toàn.
   return safeAlias(value) || DEFAULTS.provider
 }
 
 function normalizeMockMode (value) {
+  // Chọn hành vi mock deterministic cho test failure/no-result/success.
   const mode = safeAlias(value) || DEFAULTS.mockMode
   return SUPPORTED_MOCK_MODES.includes(mode) ? mode : DEFAULTS.mockMode
 }
 
 function normalizeMockStructuredOutput (value) {
+  // Parse structured fixture private với giới hạn; invalid không làm service crash.
   if (value && typeof value === 'object' && !Array.isArray(value)) {
     return Object.freeze({ ...value })
   }
@@ -70,12 +75,14 @@ function normalizeMockStructuredOutput (value) {
 }
 
 function safeAlias (value) {
+  // Cho phép model alias hiển thị/audit nhưng loại ký tự có thể lộ endpoint/secret.
   if (value === undefined || value === null) return null
   const alias = String(value).trim().toLowerCase().replace(/[^a-z0-9_.-]/g, '-').slice(0, 80)
   return alias || null
 }
 
 function toBoolean (value, fallback) {
+  // Parse env boolean chính xác, tránh chuỗi `'false'` bị coi là true.
   if (typeof value === 'boolean') return value
   if (typeof value === 'string') {
     if (value.toLowerCase() === 'true') return true
@@ -85,11 +92,13 @@ function toBoolean (value, fallback) {
 }
 
 function toPositiveInteger (value, fallback) {
+  // Parse timeout/limit dương và fallback khi invalid.
   const parsed = Number(value)
   return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback
 }
 
 function toStringOrNull (value) {
+  // Trim config string; rỗng thành null để completeness check hoạt động.
   if (value === undefined || value === null) return null
   const normalized = String(value).trim()
   return normalized || null

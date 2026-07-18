@@ -15,6 +15,8 @@ const MAX_FIELD_CHANGE_COUNT = 8
 const MAX_TEXT = 1200
 
 async function summarizeBugHandoff (req, entities, dependencies = {}) {
+  // Entry point Handoff Summary: đọc Bug + history grounded, gọi provider nếu bật, kiểm output,
+  // fallback deterministic, ghi audit và trả review-only summary; không đổi status/assignee/history.
   const tx = cds.tx(req)
   const provider = dependencies.provider || createAiProvider()
   const sourceBugID = cleanId(req.data?.sourceBugID)
@@ -61,6 +63,7 @@ async function summarizeBugHandoff (req, entities, dependencies = {}) {
 }
 
 async function readGroundedBugContext (tx, sourceBugID) {
+  // Đọc một snapshot Bug và association cần thiết làm nguồn sự thật cho summary.
   const bug = await tx.run(
     SELECT.one.from('idts.cap.Bugs')
       .columns(
@@ -151,6 +154,7 @@ async function readGroundedBugContext (tx, sourceBugID) {
 }
 
 async function readHistoryLogs (tx, eventIDs) {
+  // Query batch HistoryLogs của các event đã chọn; không lấy toàn bộ lịch sử vô hạn.
   if (!eventIDs.length) return []
   return tx.run(
     SELECT.from('idts.cap.HistoryLogs')
@@ -172,6 +176,7 @@ async function readHistoryLogs (tx, eventIDs) {
 }
 
 async function readUsers (tx, ids) {
+  // Map Users.ID sang display name cho actor/owner trong summary bằng một query batch.
   const unique = [...new Set(ids.filter(Boolean))]
   if (!unique.length) return new Map()
   const rows = await tx.run(
@@ -183,6 +188,7 @@ async function readUsers (tx, ids) {
 }
 
 async function readDeveloperUsers (tx, developerProfileIDs) {
+  // Map DeveloperProfile assignee sang User/display name để phân biệt technical owner và action owner.
   const unique = [...new Set(developerProfileIDs.filter(Boolean))]
   if (!unique.length) return new Map()
   const rows = await tx.run(
@@ -195,6 +201,7 @@ async function readDeveloperUsers (tx, developerProfileIDs) {
 }
 
 async function readCodeNames (tx, entityName, codes) {
+  // Map code status/catalog sang label, giữ code fallback cho dữ liệu cũ.
   const unique = [...new Set(codes.filter(Boolean))]
   if (!unique.length) return new Map()
   const rows = await tx.run(
@@ -206,6 +213,7 @@ async function readCodeNames (tx, entityName, codes) {
 }
 
 function buildBugHandoffSummary ({ context, providerResult, generatedAt }) {
+  // Chọn provider summary chỉ khi an toàn/grounded; nếu không dùng deterministic summary từ context thật.
   const fallback = deterministicSummary(context, generatedAt, providerResult?.status || 'AI_PROVIDER_ERROR')
   const normalized = normalizeProviderSummary(providerResult, context, generatedAt)
 
@@ -220,6 +228,7 @@ function buildBugHandoffSummary ({ context, providerResult, generatedAt }) {
 }
 
 function containsHighRiskDiagnostic (value) {
+  // Phát hiện SQL/stack/secret trong output provider để chặn trả ra UI.
   const text = JSON.stringify(value || {}).toLowerCase()
   return [
     'select passwordhash',
@@ -234,6 +243,7 @@ function containsHighRiskDiagnostic (value) {
 }
 
 function normalizeProviderSummary (providerResult, context, generatedAt) {
+  // Parse structured output, giới hạn event/text và đối chiếu dữ liệu nền trước khi tạo result.
   if (!providerResult?.ok) return null
   const payload = providerPayload(providerResult)
   if (!payload || typeof payload !== 'object') return null
@@ -259,11 +269,13 @@ function normalizeProviderSummary (providerResult, context, generatedAt) {
 }
 
 function joinDistinctText (...parts) {
+  // Ghép text không trùng/rỗng thành đoạn ngắn; dùng cho summary fallback.
   const values = parts.map(part => cleanText(part, MAX_TEXT)).filter(Boolean)
   return [...new Set(values)].join(' ')
 }
 
 function deterministicSummary (context, generatedAt, providerStatus) {
+  // Dựng toàn bộ handoff từ Bug/history bằng rule local khi AI tắt/lỗi/output xấu.
   const result = baseResult(context, generatedAt, providerStatus)
   return {
     ...result,
@@ -277,6 +289,7 @@ function deterministicSummary (context, generatedAt, providerStatus) {
 }
 
 function baseResult (context, generatedAt, providerStatus) {
+  // Tạo metadata chung (source, generatedAt, review flag, grounding status) cho mọi nhánh result.
   const bug = context.bug
   return {
     bugID: bug.ID,
@@ -291,6 +304,7 @@ function baseResult (context, generatedAt, providerStatus) {
 }
 
 function providerInput (context) {
+  // Chọn field cần thiết gửi provider; không gửi attachment binary, credential hay full private profile.
   const bug = context.bug
   return {
     bug: {
@@ -337,6 +351,7 @@ function providerInput (context) {
 }
 
 function fallbackSummary (context) {
+  // Tạo câu tóm tắt trạng thái/owner/classification hiện tại từ dữ liệu DB.
   const bug = context.bug
   const fragments = [
     `${bug.bugNumber || 'This bug'}: ${cleanText(bug.title, 180) || 'Untitled bug'}.`,
@@ -355,6 +370,7 @@ function fallbackSummary (context) {
 }
 
 function fallbackMissingInformation (context) {
+  // Liệt kê field nghiệp vụ còn thiếu dựa trên null/empty thật, không để model tự đoán.
   const missing = []
   const bug = context.bug
   if (!cleanText(bug.description)) missing.push('description')
@@ -368,6 +384,7 @@ function fallbackMissingInformation (context) {
 }
 
 function fallbackLatestEvents (context) {
+  // Chọn vài event mới nhất đã sanitize làm handoff context.
   if (!context.historyEvents.length) return 'No history events are recorded for this bug yet.'
   return context.historyEvents
     .slice(-5)
@@ -386,6 +403,7 @@ function fallbackLatestEvents (context) {
 }
 
 function fallbackNextAction (context) {
+  // Suy ra bước tiếp theo từ status/next processor hiện tại, chỉ là lời giải thích không chạy action.
   const status = context.bug.status_code
   if (status === 'NEED_MORE_INFORMATION') {
     return 'Tester or PM should provide the requested information, then resubmit the bug to the assigned developer.'
@@ -409,23 +427,27 @@ function fallbackNextAction (context) {
 }
 
 function currentActionOwner (context) {
+  // Ưu tiên nextProcessor user; fallback queue label, không nhầm với assignee kỹ thuật.
   if (context.display.nextProcessorUser) return context.display.nextProcessorUser
   if (context.display.nextProcessorRole) return context.display.nextProcessorRole
   return 'No current action owner is recorded.'
 }
 
 function groundingStatus (context) {
+  // Đánh dấu đủ/thiếu dữ liệu nguồn để UI hiểu độ tin cậy của summary.
   if (!context.comments.length || !context.historyEvents.length) return 'PARTIAL_DATA'
   return 'GROUNDED'
 }
 
 function providerPayload (providerResult) {
+  // Lấy structured data khi provider success; failure trả object rỗng.
   const data = providerResult?.data
   if (data?.json && typeof data.json === 'object') return data.json
   return data && typeof data === 'object' ? data : {}
 }
 
 function normalizeEvents (value) {
+  // Chuẩn hóa event array provider, giới hạn count/text và bỏ item không hợp lệ.
   if (Array.isArray(value)) {
     const text = value.map(item => cleanText(item?.summary || item?.text || item, 400)).filter(Boolean).join('\n')
     return text || null
@@ -434,12 +456,14 @@ function normalizeEvents (value) {
 }
 
 function normalizeConfidence (value, fallback) {
+  // Ép confidence 0..1 hoặc fallback deterministic.
   const number = Number(value)
   if (!Number.isFinite(number)) return fallback.toFixed(4)
   return Math.max(0, Math.min(1, number)).toFixed(4)
 }
 
 async function recordSummaryAudit ({ tx, req, entities, context, provider, providerResult, result }) {
+  // Lưu metadata/summary an toàn vào AISuggestions; không ghi summary vào HistoryEvents thật.
   const requester = await resolveRequestUser(req, entities)
   if (!requester) return
 
@@ -468,15 +492,18 @@ async function recordSummaryAudit ({ tx, req, entities, context, provider, provi
 }
 
 function labelWithCode (code, name) {
+  // Dựng label name (code) khi có, fallback code/name để dữ liệu cũ vẫn đọc được.
   return [code, name].filter(Boolean).join(' - ') || null
 }
 
 function cleanText (value, maxLength = MAX_TEXT) {
+  // Redact/cắt text từ DB/provider trước response/audit.
   if (value === undefined || value === null) return null
   return redactSensitiveText(String(value), maxLength).trim() || null
 }
 
 function cleanId (value) {
+  // Chuẩn hóa source UUID/string và giới hạn độ dài trước query.
   return cleanText(value, 36)
 }
 

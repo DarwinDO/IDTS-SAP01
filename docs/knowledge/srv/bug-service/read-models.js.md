@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/read-models.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+This module has two flows. Assignable Developers: READ handler extracts CQN criteria, joins profile/user/responsibility/workload, picks the best responsibility per candidate, filters/searches/pages and exposes only public fields; assignment is still revalidated by `bug-write.js`. Bug enrichment: after READ, display helpers fill names/current action owner, while capability helpers calculate virtual `can*`/field-control values from actor, status and ownership. Before READ, `ensureCapabilitySelectDependencies` prevents narrow `$select` from hiding required keys. Debug value help at `readAssignableDevelopers`; debug missing labels/buttons at `enrichBugDisplayFields/enrichBugCapabilities`. These virtual fields alter response UX, not persisted Bug rows or backend authorization.
+
+### Vietnamese
+
+Module có hai flow. Assignable Developers: READ handler lấy criteria CQN, join profile/user/responsibility/workload, chọn responsibility phù hợp nhất cho từng candidate, filter/search/page và chỉ expose field public; `bug-write.js` vẫn validate lại lúc assign. Bug enrichment: sau READ, display helper điền tên/current action owner, còn capability helper tính virtual `can*`/field-control từ actor, status và ownership. Trước READ, `ensureCapabilitySelectDependencies` tránh `$select` hẹp làm thiếu key cần thiết. Debug value help tại `readAssignableDevelopers`; debug thiếu label/nút tại `enrichBugDisplayFields/enrichBugCapabilities`. Virtual field chỉ đổi response UX, không persist Bug hay thay backend authorization.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

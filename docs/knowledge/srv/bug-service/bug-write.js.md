@@ -1,5 +1,75 @@
 # Knowledge: `srv/bug-service/bug-write.js`
 
+## Beginner execution walkthrough (2026-07-18)
+
+### English
+
+#### Mental model and input
+
+`prepareBugWrite()` is the final inspection desk for an active Bug write. Its input is not a complete form in every request: on update, `req.data` may contain only one changed field. Therefore it reads `oldBug`, merges old and incoming values, validates the complete result, and adds server-managed fields back to `req.data`. Rejecting stops persistence; mutating `req.data` changes what CAP writes.
+
+#### Execution order inside `prepareBugWrite()`
+
+1. Resolve Bug ID and read `oldBug` for update. Missing old data returns 404 rather than creating an accidental row.
+2. On create, generate `bugNumber` and derive reporter from the authenticated IDTS user. The fallback Tester only protects legacy/non-standard calls.
+3. Build `merged` and call required-field, active-catalog, and component/category validators.
+4. Derive the starting/updated status from assignee: `ASSIGNED` when present, otherwise `PENDING_ASSIGNMENT`.
+5. Call `enforceBugWritePermission()` using the final calculated state, then validate lifecycle transition and rejection reason.
+6. If an assignee exists, confirm the developer is active, available, and responsible for the selected scope.
+7. Calculate the next action owner with `determineNextProcessor()` and add its user/role IDs to `req.data`.
+8. Store old/final snapshots and important changes on `req` for `history.js`; these underscore properties are request-local, not database columns.
+
+#### Function-by-function boundaries
+
+- `validateActiveCodeLists`: input is a merged Bug; output is no value. It either continues or rejects with field-targeted 400. It queries Priority/Severity/Environment projections in the current transaction.
+- `validateRequiredBugFields`: checks business-required values after `trimToNull`. `rejectFirst` controls one error versus collecting multiple `req.error` messages.
+- `deriveOrValidateComponentCategory`: queries the active bridge row and writes its ID into both the outgoing payload and merged working object.
+- `validateAssignee`: crosses into DeveloperProfiles and DeveloperResponsibilities. It does not assign; it only accepts or rejects the requested assignee.
+- `validateTransition`: reads the state machine in `constants.js`; it has no database side effect.
+- `determineNextProcessor`: maps status to the next Users.ID/role. It may query PM/Tester or map DeveloperProfile to User, but only returns data for the caller to persist.
+
+#### Debug order and variables
+
+Set breakpoints at `prepareBugWrite`, the validator named in the 400 response, `enforceBugWritePermission`, and `determineNextProcessor`. Inspect `isCreate`, `req.data`, `oldBug`, `merged`, `finalData`, `finalStatus`, `actor`, and returned `nextProcessor`. If UI value help accepts a value but save rejects it, compare the sent code/ID with the active catalog/responsibility row queried here.
+
+#### Failure and safe editing
+
+Moving permission checks earlier than final status calculation can authorize the wrong state. Removing the backend catalog/assignee check lets direct OData callers bypass UI value help. Changing next-processor rules requires checking notifications, display enrichment, history wording, and role dashboard filters together.
+
+### Vietnamese
+
+#### Mô hình tư duy và input
+
+`prepareBugWrite()` là bàn kiểm tra cuối trước khi ghi Bug active. Input không phải lúc nào cũng là toàn bộ form: khi update, `req.data` có thể chỉ chứa một field vừa đổi. Vì vậy hàm đọc `oldBug`, ghép dữ liệu cũ với dữ liệu mới, kiểm toàn bộ kết quả, rồi thêm field do server quản lý trở lại `req.data`. Reject sẽ dừng persist; sửa `req.data` sẽ đổi dữ liệu CAP ghi.
+
+#### Thứ tự chạy trong `prepareBugWrite()`
+
+1. Lấy Bug ID và đọc `oldBug` khi update. Không thấy dữ liệu cũ thì trả 404, không vô tình tạo row mới.
+2. Khi create, sinh `bugNumber` và lấy reporter từ user IDTS đã xác thực. Fallback Tester chỉ bảo vệ call cũ/không chuẩn.
+3. Tạo `merged`, rồi kiểm field bắt buộc, catalog active và cặp component/category.
+4. Suy ra status từ assignee: có assignee là `ASSIGNED`, chưa có là `PENDING_ASSIGNMENT`.
+5. Gọi `enforceBugWritePermission()` với trạng thái cuối đã tính, sau đó kiểm transition và rejection reason.
+6. Nếu có assignee, xác nhận developer active, available và có responsibility đúng scope.
+7. Tính người xử lý tiếp theo bằng `determineNextProcessor()` và thêm user/role ID vào `req.data`.
+8. Lưu ảnh chụp cũ/cuối và thay đổi quan trọng vào `req` cho `history.js`; các property gạch dưới chỉ sống trong request, không phải cột DB.
+
+#### Ranh giới từng hàm
+
+- `validateActiveCodeLists`: input là Bug đã merge; không return dữ liệu. Hàm hoặc đi tiếp, hoặc reject 400 gắn đúng field. Nó query projection Priority/Severity/Environment trong transaction hiện tại.
+- `validateRequiredBugFields`: kiểm giá trị bắt buộc sau `trimToNull`. `rejectFirst` quyết định dừng ở một lỗi hay gom nhiều `req.error`.
+- `deriveOrValidateComponentCategory`: query bridge row active và ghi ID vào cả payload gửi đi lẫn object làm việc đã merge.
+- `validateAssignee`: đi sang DeveloperProfiles và DeveloperResponsibilities. Hàm không assign; nó chỉ chấp nhận hoặc từ chối assignee được yêu cầu.
+- `validateTransition`: đọc state machine trong `constants.js`; không có side effect database.
+- `determineNextProcessor`: map status sang Users.ID/role tiếp theo. Hàm có thể query PM/Tester hoặc map DeveloperProfile sang User, nhưng chỉ return dữ liệu để caller persist.
+
+#### Thứ tự debug và biến cần xem
+
+Đặt breakpoint tại `prepareBugWrite`, validator được nêu trong response 400, `enforceBugWritePermission`, và `determineNextProcessor`. Quan sát `isCreate`, `req.data`, `oldBug`, `merged`, `finalData`, `finalStatus`, `actor` và `nextProcessor` trả về. Nếu value help trên UI nhận giá trị nhưng Save bị reject, so code/ID đã gửi với catalog/responsibility active được query tại đây.
+
+#### Failure path và sửa an toàn
+
+Đưa permission check lên trước lúc tính final status có thể kiểm quyền trên trạng thái sai. Bỏ backend catalog/assignee check sẽ cho người gọi OData trực tiếp né value help UI. Đổi rule next processor phải kiểm cùng notification, display enrichment, history wording và filter dashboard theo role.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

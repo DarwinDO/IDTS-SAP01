@@ -4,11 +4,13 @@
 const nodemailer = require('nodemailer')
 
 function createEmailSender (config) {
+  // Factory chọn SMTP hoặc Brevo API một lần từ config; trả interface `sendMail` chung cho outbox.
   if (config?.provider === 'brevo-api') return createBrevoApiSender(config)
   return createSmtpSender(config)
 }
 
 function createSmtpSender (config) {
+  // Tạo Nodemailer transporter/pool private và wrapper gửi; không expose transporter ra OData.
   if (!config?.ready) throw new Error('SMTP configuration is not ready.')
 
   const transporter = nodemailer.createTransport({
@@ -30,6 +32,7 @@ function createSmtpSender (config) {
 }
 
 function createBrevoApiSender (config) {
+  // Trả sender gọi REST API Brevo bằng API key private; caller vẫn dùng cùng message contract.
   if (!config?.ready) throw new Error('Brevo API configuration is not ready.')
 
   return {
@@ -39,6 +42,7 @@ function createBrevoApiSender (config) {
 }
 
 async function sendBrevoApiMail (config, message) {
+  // POST payload đã map tới Brevo, kiểm HTTP status và return provider message ID; error được đẩy cho outbox sanitize/retry.
   const response = await fetch(config.brevoApiEndpoint, {
     method: 'POST',
     headers: {
@@ -70,6 +74,7 @@ async function sendBrevoApiMail (config, message) {
 }
 
 function toBrevoApiPayload (message, config) {
+  // Chuyển message nội bộ sang schema Brevo; lọc replyTo không hợp lệ thay vì gửi provider error.
   const payload = {
     sender: parseAddress(message.from, config),
     to: [{ email: message.to }],
@@ -87,6 +92,7 @@ function toBrevoApiPayload (message, config) {
 }
 
 function parseAddress (from, config) {
+  // Tách `Name <email>` hoặc fallback config thành sender object; không parse credential.
   const match = typeof from === 'string' ? from.match(/^"?(.*?)"?\s*<([^>]+)>$/) : null
   return {
     name: match?.[1] || config.fromName || 'IDTS',
@@ -95,6 +101,7 @@ function parseAddress (from, config) {
 }
 
 function sanitizeProviderMessage (message) {
+  // Giới hạn text lỗi provider trước khi throw để log/outbox không chứa response nhạy cảm quá dài.
   if (!message) return undefined
   return String(message).replace(/[\r\n]+/g, ' ').slice(0, 160)
 }

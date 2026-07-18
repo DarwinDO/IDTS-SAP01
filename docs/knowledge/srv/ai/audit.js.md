@@ -1,5 +1,15 @@
 # Knowledge: `srv/ai/audit.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+All four features call `createAiSuggestion` after building a result. Before INSERT, code/confidence/text/payload helpers normalize and sanitize values, while `ensureActiveCode/ensureTargetExists` ground references in database. `serializeSuggestionPayload` limits depth/length and removes sensitive keys. The only side effect is an AISuggestions audit row; it does not update Bug classification, duplicate link, assignee or history. Break at feature audit caller → normalized data → target/catalog checks → INSERT. A failed audit should be classified deliberately; never silently store raw provider payload to “help debugging.”
+
+### Vietnamese
+
+Cả bốn feature gọi `createAiSuggestion` sau khi dựng result. Trước INSERT, helper code/confidence/text/payload normalize và sanitize giá trị, còn `ensureActiveCode/ensureTargetExists` ground reference vào database. `serializeSuggestionPayload` giới hạn depth/length và bỏ key nhạy cảm. Side effect duy nhất là một AISuggestions audit row; nó không update classification, duplicate link, assignee hay history của Bug. Break theo feature audit caller → dữ liệu đã normalize → kiểm target/catalog → INSERT. Nếu audit fail phải phân loại rõ; không âm thầm lưu raw provider payload với lý do “dễ debug”.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

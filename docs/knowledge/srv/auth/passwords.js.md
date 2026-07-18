@@ -1,5 +1,15 @@
 # Knowledge: `srv/auth/passwords.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+`auth.js` and password setup tooling call this cryptographic helper. `normalizePassword` validates type/length before expensive bcrypt work. `hashPassword` returns a bcrypt hash for storage; `verifyPassword` returns only true/false. `createSessionToken` produces the raw unpredictable token returned once to the browser, while `hashToken` produces the SHA-256 lookup value stored in AuthSessions. `addMinutes` calculates expiry without mutating the input date. A safe debugger observes lengths/booleans and timestamps, never the actual password or token. Changing hash/token format requires a migration/compatibility plan for existing users/sessions.
+
+### Vietnamese
+
+`auth.js` và công cụ set password gọi helper mật mã này. `normalizePassword` kiểm kiểu/độ dài trước khi chạy bcrypt tốn tài nguyên. `hashPassword` trả bcrypt hash để lưu; `verifyPassword` chỉ trả true/false. `createSessionToken` sinh raw token khó đoán được trả một lần cho browser, còn `hashToken` tạo giá trị SHA-256 lưu trong AuthSessions để lookup. `addMinutes` tính expiry mà không sửa Date input. Khi debug an toàn chỉ xem độ dài/boolean/timestamp, không xem password hay token thật. Đổi format hash/token cần kế hoạch tương thích/migrate user và session cũ.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

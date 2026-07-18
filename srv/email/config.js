@@ -16,10 +16,12 @@ const DEFAULTS = Object.freeze({
 })
 
 function getEmailConfig () {
+  // Đọc `cds.env.idts.email` và trả config đã normalize; caller không đọc process.env rải rác.
   return normalizeEmailConfig(cds.env.idts?.email || {})
 }
 
 function normalizeEmailConfig (raw = {}) {
+  // Chuyển chuỗi env thành boolean/number/address an toàn và tính trạng thái enabled/complete.
   const config = {
     enabled: toBoolean(raw.enabled, DEFAULTS.enabled),
     provider: normalizeProvider(raw.provider),
@@ -54,6 +56,7 @@ function normalizeEmailConfig (raw = {}) {
 }
 
 function requiredFields (config) {
+  // Chọn danh sách field bắt buộc theo provider SMTP hoặc Brevo API; thiếu field khiến delivery SKIPPED.
   const fields = config.provider === 'brevo-api'
     ? ['brevoApiKey', 'brevoApiEndpoint', 'fromAddress']
     : ['host', 'port', 'username', 'password', 'fromAddress']
@@ -62,11 +65,13 @@ function requiredFields (config) {
 }
 
 function normalizeProvider (value) {
+  // Chỉ chấp nhận provider allow-list; giá trị lạ fallback về cấu hình mặc định an toàn.
   const provider = toStringOrNull(value) || DEFAULTS.provider
   return provider === 'brevo-api' ? 'brevo-api' : 'smtp'
 }
 
 function toBoolean (value, fallback) {
+  // Parse boolean từ env string/boolean mà không dùng truthiness của chuỗi `'false'`.
   if (typeof value === 'boolean') return value
   if (typeof value === 'string') {
     if (value.toLowerCase() === 'true') return true
@@ -76,26 +81,31 @@ function toBoolean (value, fallback) {
 }
 
 function toPositiveInteger (value, fallback) {
+  // Parse số nguyên dương cho interval/batch/connection; invalid dùng fallback.
   const parsed = Number(value)
   return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback
 }
 
 function toNonNegativeInteger (value, fallback) {
+  // Parse số >=0 cho retry/delay, cho phép 0 khi có ý nghĩa tắt retry.
   const parsed = Number(value)
   return Number.isInteger(parsed) && parsed >= 0 ? parsed : fallback
 }
 
 function toStringOrNull (value) {
+  // Trim string private config; giá trị rỗng thành null để validation nhận ra thiếu cấu hình.
   if (value === undefined || value === null) return null
   const normalized = String(value).trim()
   return normalized || null
 }
 
 function trimTrailingSlash (value) {
+  // Chuẩn hóa baseUrl trước khi nối deep link để tránh `//bug-management-ui`.
   return value?.replace(/\/+$/, '') || null
 }
 
 function isSafeEmailAddress (value) {
+  // Kiểm format tối thiểu cho sender/reply-to; không thay thế provider validation nhưng ngăn header value rõ ràng sai.
   return typeof value === 'string' &&
     !/[<>\r\n]/.test(value) &&
     /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,63}$/.test(value)

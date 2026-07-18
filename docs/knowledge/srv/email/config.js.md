@@ -1,5 +1,15 @@
 # Knowledge: `srv/email/config.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+Email worker/sender call `getEmailConfig`, which reads private CAP configuration and passes it through `normalizeEmailConfig`. The normalizer selects provider, parses booleans/numbers correctly, trims URLs/strings, validates sender/reply-to shape, and reports missing `requiredFields`. Provider-specific secrets remain in runtime config and must never enter OData/docs/logs. Debug by checking `enabled`, `provider`, completeness and numeric limits—not credential values. An incomplete/disabled configuration should lead to SKIPPED delivery, not a failed Bug workflow.
+
+### Vietnamese
+
+Email worker/sender gọi `getEmailConfig`; hàm đọc private CAP config rồi chuyển qua `normalizeEmailConfig`. Normalizer chọn provider, parse boolean/number đúng cách, trim URL/string, kiểm format sender/reply-to và xác định `requiredFields` còn thiếu. Secret theo provider chỉ tồn tại trong runtime config, không được đi vào OData/docs/log. Khi debug chỉ xem `enabled`, `provider`, độ đầy đủ và các limit số—không xem credential. Config thiếu/tắt phải tạo delivery SKIPPED, không làm workflow Bug fail.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

@@ -1,5 +1,15 @@
 # `srv/ai/bug-summary.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+`summarizeBugHandoff` requires a source Bug ID, reads a bounded grounded context (Bug, labels, owner and recent history/logs), sends only safe fields to provider, then calls `buildBugHandoffSummary`. Provider summary is accepted only after shape, length and unsafe-diagnostic checks; otherwise deterministic helpers build summary, missing information, recent events, current action owner and next expected action from database facts. `currentActionOwner` intentionally differs from assignee. The result and audit are review-only and do not create HistoryEvents or run lifecycle actions. Debug context query/maps → provider status/payload → risk check → fallback/normalized result → audit. Compare every claim with source context during teach-back.
+
+### Vietnamese
+
+`summarizeBugHandoff` cần source Bug ID, đọc context grounded có giới hạn (Bug, label, owner và history/log gần đây), chỉ gửi field an toàn cho provider, rồi gọi `buildBugHandoffSummary`. Provider summary chỉ được nhận sau khi kiểm shape, độ dài và diagnostic nguy hiểm; nếu không, helper deterministic dựng summary, thông tin còn thiếu, event gần đây, current action owner và bước tiếp theo từ dữ kiện database. `currentActionOwner` cố ý khác assignee. Result/audit chỉ để review, không tạo HistoryEvents hay chạy lifecycle action. Debug theo context query/map → provider status/payload → risk check → fallback/result đã normalize → audit. Khi teach-back phải đối chiếu mọi nhận định với source context.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

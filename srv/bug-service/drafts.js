@@ -1,4 +1,5 @@
-// Học nhanh (DonHV): điều khiển draft create/patch/save. Dùng khi lỗi chỉ xuất hiện trước hoặc đúng lúc activate draft.
+// File này điều khiển ba chặng draft của Fiori: NEW tạo nháp, PATCH cập nhật từng phần,
+// và SAVE kích hoạt nháp thành Bug active. Hãy bắt đầu debug ở đây khi lỗi chỉ xuất hiện trong Create/Edit draft.
 const cds = require('@sap/cds')
 
 const { SELECT } = cds.ql
@@ -20,6 +21,8 @@ const {
 } = require('./bug-write')
 
 async function prepareDraftPatch (req, entities) {
+  // Fiori gọi PATCH nhiều lần khi người dùng đổi field. `req.data` thường chỉ có field vừa đổi,
+  // nên phải đọc draft hiện tại rồi merge để validation nhìn thấy toàn bộ trạng thái form.
   const bugID = bugIDFrom(req)
   if (!bugID) return
 
@@ -27,6 +30,7 @@ async function prepareDraftPatch (req, entities) {
   if (!currentDraft) return
 
   const merged = { ...currentDraft, ...req.data }
+  // Kiểm code-list ngay lúc PATCH để UI nhận lỗi đúng field sớm, không chờ đến Save.
   await validateActiveCodeLists(req, entities, merged)
   if (merged.applicationComponent_ID && merged.defectCategory_ID) {
     const componentCategory = await cds.tx(req).run(SELECT.one.from(entities.ComponentCategories).where({
@@ -34,6 +38,8 @@ async function prepareDraftPatch (req, entities) {
       defectCategory_ID: merged.defectCategory_ID,
       active: true
     }))
+    // ComponentCategory là cặp hợp lệ giữa Application Component và Defect Category.
+    // Backend tự gắn ID khi cặp active tồn tại; nếu không thì xóa ID dẫn xuất cũ.
     if (componentCategory) {
       req.data.componentCategory_ID = componentCategory.ID
     } else {
@@ -45,6 +51,8 @@ async function prepareDraftPatch (req, entities) {
 }
 
 async function prepareDraftNew (req, actor) {
+  // `service.js` gọi sau khi kiểm quyền NEW. Reporter luôn lấy từ actor đã xác thực,
+  // nên client không thể tạo Bug dưới tên user khác bằng cách sửa payload.
   if (!actor) {
     return req.reject(
       403,
@@ -59,6 +67,8 @@ async function prepareDraftNew (req, actor) {
 }
 
 async function ensureDraftReporterForSave (req, entities, draft, actor) {
+  // Draft mới đã có reporter từ `prepareDraftNew`. Nhánh fallback chỉ cứu draft cũ;
+  // nếu không resolve được actor thì SAVE dừng để tránh Bug không rõ người báo.
   if (draft.reporter_ID) return draft.reporter_ID
 
   if (!actor && entities) actor = await resolveRequestUser(req, entities)
@@ -78,6 +88,8 @@ async function ensureDraftReporterForSave (req, entities, draft, actor) {
 }
 
 async function handleDraftSave (req, entities, next) {
+  // Thứ tự bắt buộc: validate → chụp trạng thái cũ → CAP persist qua `next()` → side effects.
+  // Đặt breakpoint lần lượt ở bốn dòng dưới để biết lỗi trước DB commit hay sau persist.
   await validateDraftForSave(req, entities)
   await captureDraftSaveState(req, entities)
   const result = await next()
@@ -87,6 +99,8 @@ async function handleDraftSave (req, entities, next) {
 }
 
 async function validateDraftForSave (req, entities) {
+  // SAVE là hàng rào cuối: đọc lại draft trong transaction hiện tại, bảo đảm reporter,
+  // rồi kiểm field bắt buộc và code-list. Không tin dữ liệu chỉ vì PATCH trước đó hợp lệ.
   const bugID = bugIDFrom(req)
   if (!bugID) return
 
@@ -99,6 +113,8 @@ async function validateDraftForSave (req, entities) {
 }
 
 async function captureDraftSaveState (req, entities) {
+  // Chụp Bug active và attachment metadata trước SAVE vào `req` để bước sau tính diff.
+  // Đây là dữ liệu tạm trong một request, không phải field được lưu vào database.
   const bugID = bugIDFrom(req)
   if (!bugID) return
 
@@ -111,6 +127,8 @@ async function captureDraftSaveState (req, entities) {
 }
 
 async function recordDraftBugSaveSideEffects (req, data, entities) {
+  // Chỉ edit draft của Bug đã active mới có `oldBug`; create lần đầu không đi nhánh diff này.
+  // Sau persist, đọc bản active mới, tính field thực sự đổi rồi ghi History/Notification.
   const oldBug = req._preSaveActiveBug
   const bugID = data?.ID || bugIDFrom(req)
   if (!oldBug || !bugID) return

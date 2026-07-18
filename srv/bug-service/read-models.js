@@ -30,6 +30,7 @@ const DISPLAY_FIELDS = new Set([
 ])
 
 async function readAssignableDevelopers (req, entities) {
+  // Custom READ cho value help Smart Assign: lấy criteria từ CQN, dựng candidate, filter/search/limit rồi trả row public.
   const tx = cds.tx(req)
   const criteria = assignableDeveloperCriteria(req)
   let rows = await buildAssignableDeveloperRows(tx, entities, criteria)
@@ -46,6 +47,7 @@ async function readAssignableDevelopers (req, entities) {
 }
 
 async function buildAssignableDeveloperRows (tx, entities, criteria = {}) {
+  // Đọc profile, user, responsibility và workload trong cùng transaction rồi ghép thành candidate có cảnh báo/suitability.
   let rows
 
   if (criteria.componentCategoryID) {
@@ -139,6 +141,7 @@ async function buildAssignableDeveloperRows (tx, entities, criteria = {}) {
 }
 
 function assignableDeveloperCriteria (req) {
+  // Trích component/category/module/search từ CQN; không tin query param tự đặt ngoài contract OData.
   const where = req.query?.SELECT?.where || []
   const search = req.query?.SELECT?.search
   return {
@@ -151,6 +154,7 @@ function assignableDeveloperCriteria (req) {
 }
 
 function eqValueFromWhere (where, property) {
+  // Tìm điều kiện `property eq value` trong cây CQN để lấy filter chính xác cho value help.
   for (let index = 0; index < where.length - 2; index += 1) {
     const left = where[index]
     const operator = where[index + 1]
@@ -169,6 +173,7 @@ function eqValueFromWhere (where, property) {
 }
 
 function searchTermFromCqn (search) {
+  // Chuẩn hóa `$search` thành text dùng cho tên, module và capability.
   if (!search) return null
   if (typeof search === 'string') return trimToNull(search)
   if (Array.isArray(search)) {
@@ -181,6 +186,7 @@ function searchTermFromCqn (search) {
 }
 
 function shouldPreferAssignableResponsibility (candidate, current, sapModuleID) {
+  // Khi một developer có nhiều responsibility, chọn record khớp module cụ thể hơn record tổng quát.
   if (sapModuleID) {
     const candidateExact = candidate.sapModule_ID === sapModuleID
     const currentExact = current.sapModule_ID === sapModuleID
@@ -198,6 +204,7 @@ function shouldPreferAssignableResponsibility (candidate, current, sapModuleID) 
 }
 
 function filterAssignableDeveloperRow (row, criteria) {
+  // Loại candidate không khớp component/category/module/search; backend vẫn validate lại khi assign.
   if (criteria.active !== null && criteria.active !== undefined && !!row.active !== !!criteria.active) {
     return false
   }
@@ -216,11 +223,13 @@ function filterAssignableDeveloperRow (row, criteria) {
 }
 
 function toPublicAssignableDeveloperRow (row) {
+  // Bỏ field nội bộ và chỉ expose dữ liệu cần cho dialog: tên, trạng thái, workload, suitability/warning.
   const { workloadLimit, ...publicRow } = row
   return publicRow
 }
 
 function applyLimit (rows, limit) {
+  // Áp paging CQN cho danh sách tính trong memory để value help không trả vô hạn.
   if (!limit) return rows
   const offset = Number(limit.offset?.val || 0)
   const top = Number(limit.rows?.val || rows.length)
@@ -228,6 +237,7 @@ function applyLimit (rows, limit) {
 }
 
 async function enrichBugDisplayFields (bugs, req, entities) {
+  // after READ Bugs: map code/UUID sang label/tên cho UI; chỉ enrich response, không persist field display.
   const rows = Array.isArray(bugs) ? bugs : [bugs].filter(Boolean)
   if (!rows.length) return
 
@@ -282,6 +292,7 @@ async function enrichBugDisplayFields (bugs, req, entities) {
 }
 
 function deriveCurrentActionOwnerDisplayName (row) {
+  // Chọn tên owner cụ thể hoặc label hàng đợi theo nextProcessor; assignee không mặc định là current action owner.
   const status = row.status_code
   if (!status || status === STATUS.CLOSED) return null
 
@@ -316,6 +327,7 @@ function deriveCurrentActionOwnerDisplayName (row) {
 }
 
 function currentActionOwnerQueueLabel (roleCode, roleName) {
+  // Dựng label thân thiện cho PM/Tester/unassigned queue khi chưa có user cụ thể.
   if (!roleCode) return roleName || null
 
   switch (roleCode) {
@@ -335,6 +347,7 @@ function currentActionOwnerQueueLabel (roleCode, roleName) {
 }
 
 async function fillMissingBugDisplayKeys (rows, req, entities) {
+  // Khi `$select` thiếu foreign key cần enrich, đọc bổ sung từ entity active/draft theo ID/bugNumber.
   const rowsNeedingLookup = rows
     .filter(row =>
       row.ID && (
@@ -362,6 +375,7 @@ async function fillMissingBugDisplayKeys (rows, req, entities) {
 }
 
 async function fillMissingBugDisplayKeysFromEntity (rows, entity, req) {
+  // Helper query đúng projection rồi merge key còn thiếu vào working rows, không thêm field ngoài response cuối nếu không cần.
   if (!rows?.length || !entity) return
 
   const bugs = await cds.tx(req).run(
@@ -383,6 +397,8 @@ async function fillMissingBugDisplayKeysFromEntity (rows, entity, req) {
 }
 
 async function enrichBugCapabilities (bugs, req, entities) {
+  // Tính virtual `can*` theo actor, role, status và ownership; Fiori dùng để enable/visible action.
+  // Đây chỉ là UX hint, permission.js vẫn là lớp bảo mật cuối.
   const rows = Array.isArray(bugs) ? bugs : [bugs].filter(Boolean)
   if (!rows.length) return
 
@@ -450,6 +466,7 @@ async function enrichBugCapabilities (bugs, req, entities) {
 }
 
 function ensureCapabilitySelectDependencies (req) {
+  // before READ bổ sung key/status/assignee cần tính capability dù UI gửi `$select` hẹp.
   const columns = req.query?.SELECT?.columns
   if (!Array.isArray(columns) || !columns.length) return
 
@@ -486,6 +503,7 @@ function ensureCapabilitySelectDependencies (req) {
 }
 
 async function readCapabilityInputs (rows, req, entities) {
+  // Gom dữ liệu capability từ active và draft projection, trả map theo Bug ID/number cho after-handler.
   const rowsNeedingLookup = rows.filter(row => row.ID || row.bugNumber)
   const capabilityInputsByBugID = new Map()
   const capabilityInputsByBugNumber = new Map()
@@ -499,6 +517,7 @@ async function readCapabilityInputs (rows, req, entities) {
 }
 
 async function readCapabilityInputsFromEntity (rows, entity, req, capabilityInputsByBugID, capabilityInputsByBugNumber) {
+  // Đọc batch các Bug còn thiếu rồi điền map; tránh query một lần cho từng row (N+1).
   if (!rows?.length || !entity) return
 
   const ids = [...new Set(rows.map(row => row.ID).filter(Boolean))]

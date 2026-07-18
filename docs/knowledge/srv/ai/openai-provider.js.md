@@ -1,5 +1,15 @@
 # Knowledge: `srv/ai/openai-provider.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+This is the narrow OpenAI SDK adapter chosen by `provider.js`. Its class translates safe internal chat/structured/embedding requests into SDK calls and returns data upward. `responseText` handles supported response shapes; `safeSchemaName` normalizes structured-output schema names. Timeout, redaction, retries/fallback and public error envelopes are owned by `SafeAiProvider`, not duplicated here. Break only after confirming sanitized request, then inspect operation/status/shape—not API key or full sensitive prompt.
+
+### Vietnamese
+
+Đây là adapter OpenAI SDK hẹp do `provider.js` chọn. Class chuyển request chat/structured/embedding nội bộ đã an toàn thành lời gọi SDK và trả data lên trên. `responseText` xử lý các shape response được hỗ trợ; `safeSchemaName` chuẩn hóa tên schema structured output. Timeout, redaction, retry/fallback và public error envelope thuộc `SafeAiProvider`, không chép lại tại đây. Chỉ break sau khi xác nhận request đã sanitize, rồi xem operation/status/shape—không xem API key hay prompt nhạy cảm đầy đủ.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

@@ -54,6 +54,7 @@ const LEGACY_HISTORY_FIELD_LABELS = new Map([
 ])
 
 function ensureHistoryEventSelectDependencies (req) {
+  // Trước READ, bổ sung các cột/association mà after-handler cần để dựng summary dù UI dùng `$select` hẹp.
   const columns = req.query?.SELECT?.columns
   if (!Array.isArray(columns) || !columns.length) return
 
@@ -72,6 +73,8 @@ function ensureHistoryEventSelectDependencies (req) {
 }
 
 async function enrichHistoryEventPayload (events, req, entities) {
+  // Sau READ HistoryEvents, chuẩn hóa logs, sắp thứ tự và tạo summary/display fields cho Object Page;
+  // chỉ sửa response, không update audit record trong database.
   const rows = Array.isArray(events) ? events : [events].filter(Boolean)
   if (!rows.length) return
 
@@ -117,18 +120,21 @@ async function enrichHistoryEventPayload (events, req, entities) {
 }
 
 function normalizeHistoryLogs (logs) {
+  // Đưa composition logs về array ổn định và sắp theo field order để UI không đổi thứ tự ngẫu nhiên.
   return [...logs]
     .map(normalizeHistoryLog)
     .sort(compareHistoryLogs)
 }
 
 function normalizeHistoryLog (log) {
+  // Tạo bản display-safe của một HistoryLog, giữ raw value cho fallback nhưng ưu tiên display value.
   const normalized = { ...log }
   normalized.fieldLabel = historyDisplayLabel(normalized)
   return normalized
 }
 
 function historyDisplayLabel (log) {
+  // Chọn label nghiệp vụ đã lưu; fallback từ field name khi record lịch sử cũ thiếu label.
   const fieldName = trimToNull(log.fieldName)
   if (fieldName && HISTORY_FIELD_LABELS[fieldName]) {
     return HISTORY_FIELD_LABELS[fieldName]
@@ -141,6 +147,7 @@ function historyDisplayLabel (log) {
 }
 
 function compareHistoryLogs (left, right) {
+  // Sắp field theo thứ tự nghiệp vụ cố định rồi mới theo tên, giúp mỗi event đọc như một câu chuyện.
   const fieldOrder = historyFieldOrderIndex(left.fieldName) - historyFieldOrderIndex(right.fieldName)
   if (fieldOrder !== 0) return fieldOrder
 
@@ -156,11 +163,13 @@ function compareHistoryLogs (left, right) {
 }
 
 function historyFieldOrderIndex (fieldName) {
+  // Trả index của field trong bảng ưu tiên; field chưa biết được đưa xuống cuối thay vì mất khỏi UI.
   const index = HISTORY_FIELD_ORDER.indexOf(fieldName)
   return index === -1 ? HISTORY_FIELD_ORDER.length : index
 }
 
 function summarizeHistoryLogs (logs) {
+  // Ghép vài thay đổi quan trọng thành summary ngắn cho timeline; full detail vẫn nằm trong logs mở rộng.
   const fragments = logs
     .map(formatHistoryLogFragment)
     .filter(Boolean)
@@ -172,6 +181,7 @@ function summarizeHistoryLogs (logs) {
 }
 
 function formatHistoryLogFragment (log) {
+  // Chuyển một change thành “Field: old → new”; không dùng cho dữ liệu ghi DB, chỉ cho response UI.
   const fieldName = trimToNull(log.fieldName)
   const fieldLabel = historyDisplayLabel(log)
   if (!fieldLabel) return null
@@ -212,10 +222,12 @@ function formatHistoryLogFragment (log) {
 }
 
 function historyDisplayValue (displayValue, rawValue) {
+  // Ưu tiên tên hiển thị đã enrich; fallback raw để history cũ vẫn có thông tin.
   return trimToNull(displayValue) || trimToNull(rawValue)
 }
 
 function truncateHistoryValue (value, maxLength) {
+  // Giới hạn summary để timeline không kéo dài; chi tiết đầy đủ vẫn ở phần Show Details.
   const normalized = String(value).replace(/\s+/g, ' ').trim()
   if (!normalized) return normalized
   if (normalized.length <= maxLength) return normalized

@@ -1,5 +1,15 @@
 # `srv/ai/provider.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+Feature code calls `createAiProvider`, receives `SafeAiProvider`, then calls chat/structured/embedding through one envelope. The wrapper sanitizes the request, chooses a delegate (OpenAI/mock/disabled), applies timeout and converts success/failure into a stable result containing safe status/data/metadata. It never throws raw provider diagnostics to feature/UI. `redactSensitiveObject` protects nested input; `modelAliasFor` returns a safe alias, not an endpoint/key. Debug feature request before sanitize → sanitized size/shape → delegate choice → timeout/provider result → final envelope. Fallback decisions belong to each feature, not this adapter.
+
+### Vietnamese
+
+Feature code gọi `createAiProvider`, nhận `SafeAiProvider`, rồi gọi chat/structured/embedding qua một envelope chung. Wrapper sanitize request, chọn delegate OpenAI/mock/disabled, áp timeout và chuyển success/failure thành result ổn định có status/data/metadata an toàn. Nó không throw raw provider diagnostic ra feature/UI. `redactSensitiveObject` bảo vệ input lồng nhau; `modelAliasFor` trả alias an toàn, không phải endpoint/key. Debug theo feature request trước sanitize → size/shape đã sanitize → delegate được chọn → timeout/provider result → envelope cuối. Quyết định fallback thuộc từng feature, không thuộc adapter này.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

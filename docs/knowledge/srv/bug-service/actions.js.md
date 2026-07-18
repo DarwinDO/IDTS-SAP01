@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/actions.js`
 
+## Beginner-first symbol walkthrough (2026-07-18)
+
+### English
+
+`service.js` dispatches Object Page OData actions here. `assignToDeveloper` reads the Bug, checks coordinator permission and assignee suitability, then writes assignee/status/next owner. `resubmitToDeveloper` returns a Need More Information Bug to its existing Developer. `addComment` creates a child Comment with trusted actor. `transitionBug` is the shared lifecycle pipeline: read → permission → option checks → transition validation → next processor calculation → transactional update → history/notification. Break at the public action, then `enforceActionPermission`, `validateTransition`, database UPDATE and side-effect writer. Inspect `req.data`, current Bug, `options`, actor, target status and next processor. A failure before UPDATE must leave Bug/history/notification unchanged.
+
+### Vietnamese
+
+`service.js` chuyển các OData action từ Object Page vào đây. `assignToDeveloper` đọc Bug, kiểm quyền coordinator và độ phù hợp assignee, rồi ghi assignee/status/next owner. `resubmitToDeveloper` trả Bug Need More Information về Developer cũ. `addComment` tạo Comment con với actor đáng tin. `transitionBug` là pipeline lifecycle dùng chung: đọc → permission → kiểm option → validation transition → tính next processor → update transaction → history/notification. Break tại public action, rồi `enforceActionPermission`, `validateTransition`, database UPDATE và side-effect writer. Xem `req.data`, Bug hiện tại, `options`, actor, status đích và next processor. Lỗi trước UPDATE phải để Bug/history/notification nguyên vẹn.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

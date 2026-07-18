@@ -1,5 +1,15 @@
 # Knowledge: `srv/email/sender.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+`createEmailSender` is the provider boundary. It chooses SMTP/Nodemailer or Brevo API but returns one `sendMail` contract to outbox. SMTP creates a private transporter. Brevo path maps the internal message with `toBrevoApiPayload`, parses a verified sender, performs HTTP send, and returns provider message ID. Invalid reply-to is filtered before provider submission; provider response text is sanitized before becoming an error. Break at factory choice → generated payload headers/recipient domain (not full private data) → provider status → returned message ID. No caller should import Nodemailer/Brevo directly outside this module.
+
+### Vietnamese
+
+`createEmailSender` là ranh giới provider. Nó chọn SMTP/Nodemailer hoặc Brevo API nhưng trả cùng contract `sendMail` cho outbox. Nhánh SMTP tạo transporter private. Nhánh Brevo map message nội bộ bằng `toBrevoApiPayload`, parse verified sender, gửi HTTP và trả provider message ID. Reply-to sai bị lọc trước khi gửi provider; text response provider được sanitize trước khi thành error. Break theo thứ tự: lựa chọn factory → header/domain recipient của payload (không xem full private data) → provider status → message ID trả về. Không caller nào nên import Nodemailer/Brevo trực tiếp ngoài module này.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

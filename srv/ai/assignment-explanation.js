@@ -18,6 +18,8 @@ const DEFAULT_LIMIT = 10
 const MAX_LIMIT = 20
 
 async function explainSmartAssignment (req, entities, dependencies = {}) {
+  // OData action entry point: resolve Bug/candidate context, gọi provider nếu bật, dựng explanation grounded,
+  // ghi AI audit rồi trả review-only result; không tự chọn hoặc ghi assignee.
   const tx = cds.tx(req)
   const provider = dependencies.provider || createAiProvider()
   const input = await resolveAssignmentInput(tx, req, entities, req.data || {})
@@ -57,6 +59,7 @@ async function explainSmartAssignment (req, entities, dependencies = {}) {
 }
 
 async function resolveAssignmentInput (tx, req, entities, data) {
+  // Chuẩn hóa sourceBug/candidate IDs từ request và đọc dữ liệu nền cần thiết trong transaction.
   const sourceBugID = cleanID(data.sourceBugID)
   let source = null
 
@@ -94,6 +97,7 @@ async function resolveAssignmentInput (tx, req, entities, data) {
 }
 
 async function readCandidateContext (tx, entities, input) {
+  // Đọc profile, responsibility và availability của candidate; loại ID không tồn tại/inactive khỏi giải thích.
   const rows = await buildAssignableDeveloperRows(tx, entities, {
     componentCategoryID: input.componentCategoryID,
     sapModuleID: input.sapModuleID,
@@ -113,6 +117,7 @@ async function readCandidateContext (tx, entities, input) {
 }
 
 async function readCandidateWorkloads (tx, entities, candidates) {
+  // Tính workload từ Bug hiện có cho candidate, chỉ dùng làm ground truth cảnh báo/ranking explanation.
   const ids = [...new Set(candidates.map(candidate => candidate.developerProfileID).filter(Boolean))]
   const workloads = new Map(ids.map(id => [id, emptyWorkload({ developerProfileID: id })]))
   if (!ids.length) return workloads
@@ -147,6 +152,7 @@ async function readCandidateWorkloads (tx, entities, candidates) {
 }
 
 function buildAssignmentExplanations ({ input, candidates, providerResult }) {
+  // Ghép provider output với candidate thật theo ID; output thiếu/sai được thay bằng fallback deterministic.
   const providerStatus = providerResult?.status || 'AI_PROVIDER_ERROR'
   const payload = providerPayload(providerResult)
   const unsafeProviderOutput = containsUnsafeDiagnosticText(payload)
@@ -186,6 +192,7 @@ function buildAssignmentExplanations ({ input, candidates, providerResult }) {
 }
 
 function fallbackExplanation (input, candidate) {
+  // Dựng lời giải thích từ responsibility/availability/workload khi AI tắt hoặc provider lỗi.
   const parts = []
   const warnings = []
 
@@ -240,6 +247,7 @@ function fallbackExplanation (input, candidate) {
 }
 
 async function recordAssignmentAudit ({ tx, req, entities, input, provider, providerResult, result }) {
+  // Lưu metadata request/result đã sanitize vào AISuggestions; không lưu prompt, secret hay tự đổi Bug.
   if (!input.sourceBugID) return
 
   const requester = await resolveRequestUser(req, entities)
@@ -271,6 +279,7 @@ async function recordAssignmentAudit ({ tx, req, entities, input, provider, prov
 }
 
 function buildProviderInput (input, candidates) {
+  // Chỉ gửi field allow-list cần cho explanation, không gửi comment/attachment/credential.
   return {
     bug: {
       bugNumber: input.bugNumber,
@@ -295,12 +304,14 @@ function buildProviderInput (input, candidates) {
 }
 
 function providerPayload (providerResult) {
+  // Lấy structured payload từ wrapper provider; status lỗi trả object rỗng để fallback tiếp quản.
   const data = providerResult?.data
   if (data?.json && typeof data.json === 'object') return data.json
   return data && typeof data === 'object' ? data : {}
 }
 
 function providerRowsByCandidateID (payload) {
+  // Index output theo candidate ID và bỏ row không khớp candidate thật để chống hallucination ID.
   const rows = Array.isArray(payload?.candidates)
     ? payload.candidates
     : Array.isArray(payload?.explanations)
@@ -324,6 +335,7 @@ function providerRowsByCandidateID (payload) {
 }
 
 function explanationRow ({ candidate, explanation, warnings, confidence, providerStatus, status, groundingStatus, requiresReview }) {
+  // Dựng row public thống nhất cho UI, luôn đánh dấu review khi suggestion không phải quyết định tự động.
   return {
     developerProfileID: candidate.developerProfileID,
     developerName: candidate.developerName || null,
@@ -341,6 +353,7 @@ function explanationRow ({ candidate, explanation, warnings, confidence, provide
 }
 
 function summarizeResult (result) {
+  // Tạo summary nhỏ cho audit/telemetry, không chép toàn bộ explanation nhạy cảm.
   if (!result.length) return 'Smart assignment explanation found no eligible developer candidates.'
   const overloaded = result.filter(row => row.isOverloaded).length
   const partial = result.filter(row => row.groundingStatus === 'PARTIAL_DATA').length
@@ -350,24 +363,28 @@ function summarizeResult (result) {
 }
 
 function normalizeLimit (value) {
+  // Giới hạn số candidate hợp lệ để provider/payload không phình do input client.
   const number = Number(value || DEFAULT_LIMIT)
   if (!Number.isFinite(number) || number <= 0) return DEFAULT_LIMIT
   return Math.min(MAX_LIMIT, Math.floor(number))
 }
 
 function confidenceFor (value, fallback) {
+  // Chuẩn hóa confidence về 0..1 và fallback khi provider trả sai kiểu/phạm vi.
   const number = Number(value)
   if (Number.isFinite(number)) return number
   return fallback
 }
 
 function roundConfidence (value) {
+  // Làm tròn confidence để UI/audit ổn định, không làm nó đáng tin hơn.
   const number = Number(value)
   if (!Number.isFinite(number)) return null
   return Number(Math.max(0, Math.min(1, number)).toFixed(4))
 }
 
 function emptyWorkload (candidate) {
+  // Tạo workload 0 khi chưa có Bug, giữ candidate vẫn review được thay vì biến mất.
   return {
     developerProfileID: candidate.developerProfileID,
     workloadLimit: candidate.workloadLimit ?? null,
@@ -381,22 +398,27 @@ function emptyWorkload (candidate) {
 }
 
 function todayDateString () {
+  // Trả ngày chuẩn để tính overdue nhất quán với workload backend.
   return new Date().toISOString().slice(0, 10)
 }
 
 function cleanID (value) {
+  // Chuẩn hóa ID text và chặn giá trị quá dài trước query/mapping.
   return typeof value === 'string' && value.trim() ? value.trim() : null
 }
 
 function cleanText (value) {
+  // Làm sạch text nghiệp vụ đầu vào, không dùng để sanitize diagnostic provider.
   return typeof value === 'string' ? value.trim() : ''
 }
 
 function cleanCode (value) {
+  // Chuẩn hóa catalog/status code cho so khớp deterministic.
   return typeof value === 'string' ? value.trim().toUpperCase().replace(/[^A-Z0-9_]/g, '_').slice(0, 40) : ''
 }
 
 function safeText (value, maxLength) {
+  // Cắt và redact text provider trước khi đưa vào response/audit.
   const text = cleanText(value)
   return text.slice(0, maxLength)
 }
