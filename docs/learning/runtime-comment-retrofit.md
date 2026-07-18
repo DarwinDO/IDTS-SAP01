@@ -2,52 +2,90 @@
 
 ## English
 
-This inventory freezes the scope at 72 non-generated runtime files. Each primary owner must add concise Vietnamese explanations only where a beginner would otherwise miss the purpose, trigger, side effect, rule, dependency, or debugger anchor. Do not add line-by-line narration. For every changed file, update its matching bilingual knowledge mirror with owner, backup, flow, breakpoint, linked files, and safe-edit impact.
+This inventory freezes the learning-material scope at 72 non-generated runtime files. The goal is not to comment every line. The goal is to explain every non-obvious entry point and small decision block well enough that a beginner can predict what runs next and where to place a breakpoint.
 
-### IDTS-83 — DonHV
+For each non-obvious function, event handler, CAP hook, annotation block, or UI action, the source comment must cover the relevant parts of this checklist:
+
+- what UI action, request, CAP event, or caller triggers it;
+- which input matters to the decision;
+- what the block decides or validates;
+- what it returns or changes;
+- which function, file, database table, or external provider receives control next;
+- where to stop the debugger when this behavior is wrong.
+
+A single generic file-header comment does not pass. Comments must not narrate obvious imports, braces, assignments, or syntax. JSON and properties files remain valid without inline comments; their knowledge mirrors must explain the missing connections, especially Fiori manifest wiring.
+
+Every source file has a matching bilingual knowledge mirror. Its explanation must use real symbols as anchors and include a beginner mental model, caller -> current symbol -> callee, request/data flow, side effects, cross-folder links, breakpoint order, expected variables, failure path, and safe-edit impact. English and Vietnamese must be equivalent in depth.
+
+### IDTS-87 — DonHV
 
 - `db/schema.cds`
 - every `srv/**/*.js`, `srv/service.cds`, and `srv/auth.cds`
 
+Priority traces: authentication/session, Fiori draft `NEW -> PATCH -> SAVE`, lifecycle transitions, email outbox, and AI advisory actions.
+
 ### IDTS-84 — DatDT
 
 - `app/services.cds`, `app/bug-management-ui/annotations.cds`
 - `annotations/labels.cds`, `list-report.cds`, `pm-monitoring.cds`
-- shell/login/dashboard files, both CSS files, `ext/ai/AiReviewUi.js`, `ext/login/*`
+- shell/login/dashboard files, both CSS files, `ext/ai/AiReviewUi.js`, and `ext/login/*`
 - `ClassificationReview.js`, `DuplicateReview.js`, `HandoffSummaryReview.js`
 - `ClassificationReviewField.fragment.xml`, `SimilarBugReviewField.fragment.xml`
+
+Priority traces: HTML/manifest entry point, login/session, OData read, role-aware dashboard, and AI review UI.
 
 ### IDTS-85 — SangVN
 
-- remaining six annotation files: `actions.cds`, `capabilities.cds`, `history-notifications.cds`, `object-page.cds`, `ownership-assignment.cds`, `value-helps.cds`
-- collaboration, controls, assignment/list actions, and four Object Page fragments listed in `ownership-map.md`
+- the six remaining annotation files: `actions.cds`, `capabilities.cds`, `history-notifications.cds`, `object-page.cds`, `ownership-assignment.cds`, `value-helps.cds`
+- collaboration, controls, assignment/list actions, and the four Object Page fragments listed in `ownership-map.md`
+
+Priority traces: metadata-generated Object Page, Smart Assign, comments, pre-save attachments, history paging, and the difference between assignee and current action owner.
 
 ### QA verification
 
-NhanT uses IDTS-86 to sample each owner area, follow the declared breakpoint, run a focused test, and require a teach-back. A comment that only repeats the syntax does not pass.
+IDTS-86 stays blocked until all three batches are merged. The delegated material reviewer then verifies structural coverage for all 72 files and deeply traces at least one flow per owner against the real source. A mirror that names a nonexistent symbol, a header-only comment, a syntax paraphrase, or an explanation that cannot produce a working breakpoint fails material QA. This material review does not replace each member's personal Knowledge Gate or teach-back.
 
 ## Vietnamese
 
-Inventory này chốt phạm vi 72 runtime file không generated. Primary owner phải thêm giải thích tiếng Việt ngắn gọn chỉ tại chỗ người mới dễ không hiểu mục đích, trigger, side effect, rule, dependency hoặc debugger anchor. Không kể lại từng dòng code. Mỗi file sửa phải cập nhật knowledge mirror song ngữ tương ứng với owner, backup, flow, breakpoint, linked file và ảnh hưởng khi sửa.
+Inventory này chốt phạm vi tài liệu học gồm 72 runtime file không generated. Mục tiêu không phải comment mọi dòng. Mục tiêu là giải thích từng entry point không hiển nhiên và từng khối quyết định nhỏ đủ rõ để người mới đoán được đoạn nào chạy tiếp theo và biết đặt breakpoint ở đâu.
 
-### IDTS-83 — DonHV
+Với mỗi function, event handler, CAP hook, annotation block hoặc UI action không hiển nhiên, comment trong source phải giải thích các ý phù hợp sau:
+
+- thao tác UI, request, CAP event hoặc caller nào làm đoạn code chạy;
+- input nào ảnh hưởng đến quyết định;
+- khối code đang quyết định hoặc kiểm tra điều gì;
+- nó trả về gì hoặc làm thay đổi dữ liệu nào;
+- function, file, bảng database hoặc external provider nào nhận quyền xử lý tiếp;
+- nên dừng debugger ở đâu khi hành vi này bị sai.
+
+Chỉ có một comment chung ở đầu file thì không đạt. Không comment lại import, dấu ngoặc, phép gán hoặc cú pháp hiển nhiên. File JSON và properties không cần inline comment vì định dạng không hỗ trợ; knowledge mirror của chúng phải bù lại các liên kết còn thiếu, đặc biệt phần wiring của Fiori manifest.
+
+Mỗi source file phải có knowledge mirror song ngữ tương ứng. Mirror phải dùng symbol thật làm anchor và có: mô hình tư duy cho người mới, caller -> symbol hiện tại -> callee, đường đi request/dữ liệu, side effect, liên kết khác folder, thứ tự breakpoint, biến cần xem, failure path và ảnh hưởng khi sửa. English và Vietnamese phải đầy đủ tương đương.
+
+### IDTS-87 — DonHV
 
 - `db/schema.cds`
-- mọi `srv/**/*.js`, `srv/service.cds` và `srv/auth.cds`
+- toàn bộ `srv/**/*.js`, `srv/service.cds` và `srv/auth.cds`
+
+Luồng ưu tiên: authentication/session, Fiori draft `NEW -> PATCH -> SAVE`, lifecycle transition, email outbox và các AI advisory action.
 
 ### IDTS-84 — DatDT
 
 - `app/services.cds`, `app/bug-management-ui/annotations.cds`
 - `annotations/labels.cds`, `list-report.cds`, `pm-monitoring.cds`
-- shell/login/dashboard, hai file CSS, `ext/ai/AiReviewUi.js`, `ext/login/*`
+- shell/login/dashboard, hai file CSS, `ext/ai/AiReviewUi.js` và `ext/login/*`
 - `ClassificationReview.js`, `DuplicateReview.js`, `HandoffSummaryReview.js`
 - `ClassificationReviewField.fragment.xml`, `SimilarBugReviewField.fragment.xml`
+
+Luồng ưu tiên: entry point HTML/manifest, login/session, OData read, dashboard theo role và AI review UI.
 
 ### IDTS-85 — SangVN
 
 - sáu annotation còn lại: `actions.cds`, `capabilities.cds`, `history-notifications.cds`, `object-page.cds`, `ownership-assignment.cds`, `value-helps.cds`
-- collaboration, controls, assignment/list actions và bốn Object Page fragment được liệt kê tại `ownership-map.md`
+- collaboration, controls, assignment/list actions và bốn Object Page fragment trong `ownership-map.md`
 
-### QA verification
+Luồng ưu tiên: Object Page sinh từ metadata, Smart Assign, comments, attachment chọn trước khi Save, phân trang history và sự khác nhau giữa assignee với current action owner.
 
-NhanT dùng IDTS-86 để lấy mẫu khu vực của từng owner, đi theo breakpoint đã nêu, chạy focused test và yêu cầu teach-back. Comment chỉ lặp lại cú pháp thì không PASS.
+### Kiểm tra QA
+
+IDTS-86 tiếp tục bị block đến khi ba batch đã merge. Sau đó reviewer material được DonHV ủy quyền kiểm tra coverage toàn bộ 72 file và trace sâu tối thiểu một flow của mỗi owner bằng cách đối chiếu với source thật. Mirror ghi symbol không tồn tại, comment chỉ có ở đầu file, comment kể lại cú pháp, hoặc lời giải thích không giúp đặt được breakpoint thật đều không đạt material QA. Việc review material này không thay thế Knowledge Gate hoặc teach-back cá nhân của từng thành viên.
