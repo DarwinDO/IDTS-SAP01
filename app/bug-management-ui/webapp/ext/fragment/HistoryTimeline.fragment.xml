@@ -5,6 +5,7 @@
   xmlns:section="idts.bugmanagementui.ext.controls"
 >
   <VBox class="sapUiSmallMarginTop">
+    <!-- Handoff review nằm trong History nhưng không ghi audit/status; press mở dialog read-only. -->
     <section:SmartAssignmentSection
       class="sapUiTinyMarginBottom"
       visible="{= ${IsActiveEntity} === true }"
@@ -22,6 +23,7 @@
       </Toolbar>
     </section:SmartAssignmentSection>
 
+    <!-- Growing list tải 5 event ban đầu; Show More tải batch tiếp theo thay vì render toàn bộ. -->
     <List
       id="historyTimelineList"
       items="{

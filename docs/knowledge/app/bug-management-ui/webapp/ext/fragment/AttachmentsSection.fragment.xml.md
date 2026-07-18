@@ -253,3 +253,9 @@ Nếu sửa file này, browser smoke phải verify:
 - Download trả về đúng file được chọn.
 - Remove mở confirmation và xóa file.
 - Sau delete không còn row file và không lộ private storage URL.
+
+## Binding walkthrough / Walkthrough binding (2026-07-18)
+
+**English.** `BugCollaborationSection` supplies the root Bug context. FileUploader `change` calls `onAttachmentSelected`; the pending model shows files selected before SAVE; the main List binds persisted `attachments`. Download/Delete buttons pass each attachment row context to collaboration handlers. The browser never receives S3 credentials/private URLs—only CAP content endpoints. Missing row after SAVE: trace context activation and pending flush; content failure: trace CAP storage/S3 after metadata exists.
+
+**Tiếng Việt.** `BugCollaborationSection` cấp root Bug context. FileUploader `change` gọi `onAttachmentSelected`; pending model hiện file chọn trước SAVE; List chính bind `attachments` đã persist. Nút Download/Delete chuyển row context attachment sang collaboration handler. Browser không nhận S3 credential/private URL—chỉ gọi CAP content endpoint. SAVE xong thiếu row thì trace context activation/pending flush; có metadata nhưng content lỗi thì trace CAP storage/S3.

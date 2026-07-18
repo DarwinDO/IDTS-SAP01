@@ -5,6 +5,7 @@
   xmlns:collab="idts.bugmanagementui.ext.controls"
 >
   <collab:BugCollaborationSection hideOnCreate="true" class="sapUiSmallMarginTop sapUiSmallMarginBottom">
+    <!-- hideOnCreate ẩn cả subsection khi NEW draft để không tạo comment mồ côi. -->
     <Panel
       backgroundDesign="Transparent"
       expandable="false"
@@ -16,6 +17,7 @@
             text="{i18n>commentsInputLabel}"
             labelFor="idtsCommentTextArea"
           />
+          <!-- TextArea chỉ giữ input local; nút Post gọi bound CAP action addComment. -->
           <TextArea
             id="idtsCommentTextArea"
             width="100%"
@@ -48,6 +50,7 @@
       </content>
     </Panel>
 
+    <!-- Sau action + refresh, list đọc navigation comments đã persist từ backend. -->
     <List
       id="idtsCommentsFeed"
       items="{

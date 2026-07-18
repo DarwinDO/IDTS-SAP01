@@ -6,6 +6,7 @@
   xmlns:assignment="idts.bugmanagementui.ext.controls"
 >
   <assignment:SmartAssignmentSection class="sapUiSmallMarginTop sapUiSmallMarginBottom">
+    <!-- Assignee kỹ thuật và current action owner hiển thị riêng; hai khái niệm không được gộp. -->
     <Panel
       backgroundDesign="Transparent"
       expandable="false"
@@ -24,6 +25,7 @@
               <form:formElements>
                 <form:FormElement label="{i18n>smartAssigneeLabel}">
                   <form:fields>
+                    <!-- Value help mở SmartAssignDeveloper picker; user phải chọn/confirm, không auto-assign. -->
                     <Input
                       core:require="{ SmartAssign: 'idts/bugmanagementui/ext/actions/SmartAssignDeveloper' }"
                       value="{path: 'assigneeDisplayName', mode: 'OneWay'}"

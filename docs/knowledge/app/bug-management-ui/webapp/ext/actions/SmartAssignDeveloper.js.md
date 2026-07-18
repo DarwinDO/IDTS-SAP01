@@ -92,3 +92,9 @@ Dialog giup PM/Tester chon developer de hon value help mac dinh. Tu IDTS-61, dia
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/ext/actions/SmartAssignDeveloper.js.md`
 - Source layer: `app`
 - Last reviewed: 2026-07-06
+
+## Detailed request lifecycle / Vòng đời request chi tiết (2026-07-18)
+
+**English.** Value-help event → root Bug context → request missing classification fields → read `AssignableDevelopers` → optionally invoke `explainSmartAssignment` → sanitize/decorate candidates → client search/filter → user selects one row → `executeAssignment()` invokes the backend assignment operation and refreshes the Bug. Selection and AI explanation are review aids only; no auto-assignment occurs. Watch Bug classification, candidate profile ID, availability/workload, selected row, action response, and refreshed assignee/current action owner.
+
+**Tiếng Việt.** Event value help → root Bug context → request classification field còn thiếu → đọc `AssignableDevelopers` → có thể invoke `explainSmartAssignment` → sanitize/decorate candidate → search/filter client → user chọn một row → `executeAssignment()` invoke operation backend và refresh Bug. Selection và AI explanation chỉ hỗ trợ review; không auto-assign. Quan sát classification Bug, candidate profile ID, availability/workload, row chọn, action response và assignee/current action owner sau refresh.

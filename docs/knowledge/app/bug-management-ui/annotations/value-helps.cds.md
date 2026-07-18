@@ -181,3 +181,9 @@ Với người mới học Fiori, điều này nghĩa là Fiori nên xem ba fiel
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/annotations/value-helps.cds.md`
 - Source layer: `app`
 - Last reviewed: 2026-07-01
+
+## Execution map / Sơ đồ thực thi (2026-07-18)
+
+**English.** Fiori uses each `Common.ValueList` to query a catalog entity and copy selected output values back to the Bug draft. In-parameters filter dependent choices, for example SAP Module → Application Component → valid Defect Category. Fixed values prevent arbitrary text in the UI, but CAP handlers still reject unknown, inactive, whitespace, or unauthorized values. Inspect the value-help Network GET, parameter mapping, then backend validation on PATCH/SAVE.
+
+**Tiếng Việt.** Fiori dùng mỗi `Common.ValueList` để query catalog entity rồi copy output được chọn vào Bug draft. In-parameter lọc lựa chọn phụ thuộc, ví dụ SAP Module → Application Component → Defect Category hợp lệ. Fixed value ngăn free text ở UI nhưng CAP handler vẫn chặn mã lạ, inactive, whitespace hoặc không đủ quyền. Kiểm Network GET của value help, mapping parameter, rồi validation backend ở PATCH/SAVE.

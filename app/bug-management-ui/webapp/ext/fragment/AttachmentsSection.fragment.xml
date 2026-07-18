@@ -6,9 +6,11 @@
   xmlns:collab="idts.bugmanagementui.ext.controls"
 >
   <collab:BugCollaborationSection uploadPendingAttachmentsOnActive="true" class="sapUiSmallMarginTop sapUiSmallMarginBottom">
+    <!-- Control cha theo dõi draft chuyển active và gọi flushPendingCreateAttachments sau SAVE. -->
     <Toolbar design="Transparent">
       <Title text="{i18n>attachmentsToolbarTitle}" level="H4" />
       <ToolbarSpacer />
+      <!-- change gọi onAttachmentSelected: NEW draft queue memory; saved Bug upload metadata + binary qua CAP. -->
       <unified:FileUploader
         core:require="{ Collaboration: 'idts/bugmanagementui/ext/sections/BugCollaboration' }"
         id="idtsAttachmentUploader"
@@ -40,6 +42,7 @@
       class="sapUiTinyMarginBottom"
     />
 
+    <!-- List bind navigation attachments: metadata từ PostgreSQL; download content đi qua CAP/S3 endpoint. -->
     <List
       id="idtsPendingAttachmentsList"
       items="{idtsPendingAttachments>/files}"

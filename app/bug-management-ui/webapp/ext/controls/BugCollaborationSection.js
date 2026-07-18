@@ -6,6 +6,7 @@ sap.ui.define([
     "use strict";
 
     function setNearestObjectPageSubSectionVisible(control, visible) {
+        // Khi create draft, ẩn cả subsection Comments chứ không chỉ child control để tránh khoảng trắng.
         var parent = control && typeof control.getParent === "function" ? control.getParent() : null;
 
         while (parent) {
@@ -23,6 +24,7 @@ sap.ui.define([
     }
 
     function findNearestParentContext(control) {
+        // Custom fragment không tự inherit root Bug context trong runtime này; đi lên parent để lấy context public.
         var parent = control && typeof control.getParent === "function" ? control.getParent() : null;
         var parentContext = null;
 
@@ -61,6 +63,8 @@ sap.ui.define([
         },
 
         _syncIdtsCollaborationState: function () {
+            // Đồng bộ context, visibility và upload pending mỗi lần model/render thay đổi.
+            // Breakpoint ở đây khi comment không ẩn hoặc attachment chưa flush sau SAVE.
             var parentContext = findNearestParentContext(this);
 
             if (parentContext && this.getBindingContext() !== parentContext) {
@@ -79,6 +83,7 @@ sap.ui.define([
         },
 
         onModelContextChange: function () {
+            // UI5 gọi khi draft chuyển context; sync trước rồi giữ lifecycle VBox mặc định.
             this._syncIdtsCollaborationState();
             if (VBox.prototype.onModelContextChange) {
                 VBox.prototype.onModelContextChange.apply(this, arguments);
@@ -86,6 +91,7 @@ sap.ui.define([
         },
 
         onBeforeRendering: function () {
+            // Safety pass ngay trước render để fragment dùng context mới nhất.
             this._syncIdtsCollaborationState();
 
             VBox.prototype.onBeforeRendering.apply(this, arguments);

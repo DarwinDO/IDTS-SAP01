@@ -2,6 +2,7 @@ using BugService as service from '../../../srv/service';
 
 // Gợi ý học/debug: capability ẩn/hiện thao tác chuẩn của Fiori, không phải lớp bảo mật thay thế cho service.
 annotate service.Bugs with @(
+  // Standard Create bị ẩn để BugListActions.createBug dùng Fiori EditFlow và kiểm role ở cả UI lẫn backend.
   UI.CreateHidden : true,
   Capabilities.InsertRestrictions : {
     Insertable : true

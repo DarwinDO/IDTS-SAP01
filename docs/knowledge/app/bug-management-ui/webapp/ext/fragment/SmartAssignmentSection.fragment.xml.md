@@ -149,3 +149,9 @@ Phai kiem tra cung:
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/ext/fragment/SmartAssignmentSection.fragment.xml.md`
 - Source layer: `app`
 - Last reviewed: 2026-07-09
+
+## Binding walkthrough / Walkthrough binding (2026-07-18)
+
+**English.** The Assignee Input displays `assigneeDisplayName` one-way and replaces normal value help with `SmartAssign.openAssigneePicker`. Change resets invalid free text; value-help request opens the candidate dialog. Separate Text controls show current action owner and role, so technical ownership is not confused with workflow responsibility. Editable/enabled bindings improve UX; backend validation remains final.
+
+**Tiếng Việt.** Input Assignee hiển thị `assigneeDisplayName` one-way và thay value help thường bằng `SmartAssign.openAssigneePicker`. Change reset free text không hợp lệ; value-help request mở dialog candidate. Text riêng hiển thị current action owner và role để không nhầm technical ownership với trách nhiệm workflow. Binding editable/enabled chỉ cải thiện UX; backend validation vẫn là lớp cuối.

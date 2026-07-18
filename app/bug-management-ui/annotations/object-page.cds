@@ -2,6 +2,7 @@ using BugService as service from '../../../srv/service';
 
 // Gợi ý học/debug: thứ tự section Object Page được mô tả ở đây; section chỉ sắp UI, không tạo API hoặc đổi dữ liệu bug.
 annotate service.Bugs with @(
+  // HeaderInfo + HeaderFacets dùng field computed/read-only từ BugService để tạo phần đầu trang.
   UI.HeaderInfo : {
     TypeName       : 'Bug',
     TypeNamePlural : 'Bugs',
@@ -35,6 +36,7 @@ annotate service.Bugs with @(
     Description : 'The specific person who must take action right now'
   },
   UI.Facets : [
+    // Thứ tự record ở đây là thứ tự section. Target trỏ tới FieldGroup, navigation LineItem hoặc custom fragment.
     {
       $Type  : 'UI.CollectionFacet',
       ID     : 'BugDetails',
@@ -141,6 +143,7 @@ annotate service.Bugs with @(
     }
   ],
   UI.FieldGroup #GeneralInfo : {
+    // Các FieldGroup bên dưới chỉ gom field để render; validation/persistence vẫn thuộc CAP draft flow.
     Data : [
       { $Type : 'UI.DataField', Label : 'Bug Number', Value : bugNumber, ![@Common.FieldControl] : #ReadOnly, ![@UI.Hidden] : {$edmJson: {$And: [{$Eq: [{$Path: 'IsActiveEntity'}, false]}, {$Eq: [{$Path: 'HasActiveEntity'}, false]}]}} },
       { $Type : 'UI.DataField', Label : 'Title', Value : title },

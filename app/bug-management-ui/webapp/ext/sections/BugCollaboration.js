@@ -18,6 +18,7 @@ sap.ui.define([
     var pendingCreateAttachmentUploadByBugId = Object.create(null);
 
     function normalizeServiceUrl(model) {
+        // Lấy service root từ OData model để mọi request comments/attachments dùng đúng deployment base URL.
         if (model && typeof model.getServiceUrl === "function") {
             return model.getServiceUrl().replace(/\/$/, "");
         }
@@ -25,6 +26,7 @@ sap.ui.define([
     }
 
     function createUuid() {
+        // Tạo ID client cho attachment metadata trước khi PUT binary; fallback dùng khi randomUUID không có.
         if (window.crypto && typeof window.crypto.randomUUID === "function") {
             return window.crypto.randomUUID();
         }
@@ -37,6 +39,7 @@ sap.ui.define([
     }
 
     function showSafeError(message) {
+        // Chỉ hiện message đã kiểm soát; không đưa raw XHR/S3/provider error lên UI.
         MessageBox.error(message || "The action could not be completed right now. Please refresh and try again.");
     }
 
@@ -45,6 +48,7 @@ sap.ui.define([
     }
 
     function isCreateDraftContext(context) {
+        // NEW draft chưa có active sibling: comment phải ẩn, attachment được giữ tạm trong memory.
         return !!context &&
             context.getProperty("IsActiveEntity") !== true &&
             context.getProperty("HasActiveEntity") !== true;
@@ -61,6 +65,7 @@ sap.ui.define([
     }
 
     function findBugContext(control) {
+        // Đi ngược control tree để tìm root /Bugs(...), không dùng nhầm context attachment/comment row.
         var current = control;
         while (current) {
             if (typeof current.getBindingContext === "function") {
@@ -100,6 +105,7 @@ sap.ui.define([
     }
 
     function findControlByLocalId(control, localId) {
+        // Tìm TextArea/Uploader trong fragment mà không phụ thuộc generated global ID của Fiori Elements.
         var current = control;
         while (current) {
             var found = findControlRecursive(current, localId);
@@ -112,6 +118,7 @@ sap.ui.define([
     }
 
     function refreshBugContext(context) {
+        // Sau write/activate, yêu cầu OData binding đọc lại navigation data để UI thấy comment/file mới.
         if (context && typeof context.requestRefresh === "function") {
             return context.requestRefresh();
         }
@@ -119,6 +126,7 @@ sap.ui.define([
     }
 
     function assertSavedBug(context) {
+        // Chặn thao tác cần persistent Bug khi context còn NEW draft hoặc không hợp lệ.
         if (!context) {
             showSafeError("The bug data is not available yet. Please refresh the page.");
             return false;
@@ -135,6 +143,8 @@ sap.ui.define([
     }
 
     function request(method, url, options) {
+        // Wrapper XHR chung: auth-guard tự gắn token; resolve status 2xx, reject lỗi mà không log secret.
+        // Breakpoint Network thấp nhất cho comments/attachments là onload/onerror tại đây.
         return new window.Promise(function (resolve, reject) {
             var xhr = new XMLHttpRequest();
             var headers = options && options.headers ? options.headers : {};
@@ -162,6 +172,7 @@ sap.ui.define([
     }
 
     function requestJson(url, options) {
+        // Serialize/parse JSON cho comment, metadata và draft action; binary không đi qua helper này.
         var headers = Object.assign({
             Accept: "application/json"
         }, options && options.headers ? options.headers : {});
@@ -181,6 +192,7 @@ sap.ui.define([
     }
 
     function requestBinary(url, options) {
+        // PUT/GET Blob tới CAP attachment content endpoint; CAP storage adapter mới giao tiếp S3.
         return request(options && options.method ? options.method : "GET", url, {
             headers: options && options.headers ? options.headers : {},
             body: options && options.body,
@@ -230,6 +242,7 @@ sap.ui.define([
     }
 
     function validateAttachment(file) {
+        // Client kiểm type/size để phản hồi sớm; backend/storage vẫn là lớp kiểm cuối.
         if (!file) {
             showSafeError("Please choose a file to upload.");
             return false;
@@ -285,6 +298,7 @@ sap.ui.define([
     }
 
     function queuePendingCreateAttachments(source, bugContext, files) {
+        // NEW draft: chỉ giữ File object trong memory theo Bug draft ID, chưa upload S3 trước SAVE.
         var bugId = bugIdFromContext(bugContext);
         if (!bugId) {
             showSafeError("The selected file could not be attached to this draft. Please refresh and try again.");
@@ -297,6 +311,8 @@ sap.ui.define([
     }
 
     function uploadFilesToSavedBug(source, bugContext, files) {
+        // Active Bug → edit draft → POST metadata → PUT binary content → activate draft.
+        // PostgreSQL giữ metadata; S3 giữ bytes. Failure không được giả báo upload thành công.
         var serviceUrl = normalizeServiceUrl(source.getModel());
 
         return editDraft(serviceUrl, bugContext)
@@ -333,6 +349,7 @@ sap.ui.define([
 
     return {
         onAddComment: function (event) {
+            // Add Comment button gọi: lấy text → bound action addComment → refresh context.
             var source = event.getSource();
             var bugContext = findBugContext(source);
             if (!assertSavedBug(bugContext)) {
@@ -369,6 +386,7 @@ sap.ui.define([
         },
 
         onAttachmentSelected: function (event) {
+            // FileUploader gọi: validate → queue nếu NEW, hoặc upload draft chain nếu Bug đã lưu.
             var source = event.getSource();
             var bugContext = findBugContext(source);
             var files = toFileArray(event.getParameter("files"));
@@ -407,6 +425,7 @@ sap.ui.define([
         },
 
         onDownloadAttachment: function (event) {
+            // GET content endpoint trả Blob; FileUtil lưu local với filename/content-type từ response.
             var source = event.getSource();
             var context = source.getBindingContext();
             var attachmentId = context && context.getProperty("ID");
@@ -430,6 +449,7 @@ sap.ui.define([
         },
 
         onDeleteAttachment: function (event) {
+            // Confirm → edit draft → DELETE metadata/content qua CAP → activate → refresh.
             var source = event.getSource();
             var attachmentContext = source.getBindingContext();
             var bugContext = findBugContext(source);
@@ -514,6 +534,8 @@ sap.ui.define([
         isCreateDraftContext: isCreateDraftContext,
 
         flushPendingCreateAttachments: function (source, bugContext) {
+            // BugCollaborationSection gọi sau SAVE khi context thành active; upload đúng một lần rồi xóa queue.
+            // Breakpoint ở đây khi file đã chọn trước Create nhưng không xuất hiện sau khi lưu Bug.
             var bugId = bugIdFromContext(bugContext);
             var files = bugId && pendingCreateAttachmentsByBugId[bugId]
                 ? pendingCreateAttachmentsByBugId[bugId]
