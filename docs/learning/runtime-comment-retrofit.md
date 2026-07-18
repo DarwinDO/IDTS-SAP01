@@ -43,7 +43,7 @@ Priority traces: metadata-generated Object Page, Smart Assign, comments, pre-sav
 
 ### QA verification
 
-IDTS-86 stays blocked until all three batches are merged. NhanT then verifies structural coverage for all 72 files and deeply traces at least one flow per owner against the real source. A mirror that names a nonexistent symbol, a header-only comment, a syntax paraphrase, or an explanation that cannot produce a working breakpoint fails material QA.
+IDTS-86 stays blocked until all three batches are merged. The delegated material reviewer then verifies structural coverage for all 72 files and deeply traces at least one flow per owner against the real source. A mirror that names a nonexistent symbol, a header-only comment, a syntax paraphrase, or an explanation that cannot produce a working breakpoint fails material QA. This material review does not replace each member's personal Knowledge Gate or teach-back.
 
 ## Vietnamese
 
@@ -88,4 +88,4 @@ Luồng ưu tiên: Object Page sinh từ metadata, Smart Assign, comments, attac
 
 ### Kiểm tra QA
 
-IDTS-86 tiếp tục bị block đến khi ba batch đã merge. Sau đó NhanT kiểm tra coverage toàn bộ 72 file và trace sâu tối thiểu một flow của mỗi owner bằng cách đối chiếu với source thật. Mirror ghi symbol không tồn tại, comment chỉ có ở đầu file, comment kể lại cú pháp, hoặc lời giải thích không giúp đặt được breakpoint thật đều không đạt material QA.
+IDTS-86 tiếp tục bị block đến khi ba batch đã merge. Sau đó reviewer material được DonHV ủy quyền kiểm tra coverage toàn bộ 72 file và trace sâu tối thiểu một flow của mỗi owner bằng cách đối chiếu với source thật. Mirror ghi symbol không tồn tại, comment chỉ có ở đầu file, comment kể lại cú pháp, hoặc lời giải thích không giúp đặt được breakpoint thật đều không đạt material QA. Việc review material này không thay thế Knowledge Gate hoặc teach-back cá nhân của từng thành viên.

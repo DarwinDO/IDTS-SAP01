@@ -8,7 +8,7 @@ Make each member able to explain and debug the code they own instead of only dem
 
 ### Current status
 
-`In Progress`. The first DonHV gate is `PAUSED — material quality defect`, not FAIL. The first material baseline skipped important code blocks and file transitions. Remediation is split into IDTS-87 (backend/data), IDTS-84 (DatDT FE area), IDTS-85 (SangVN Object Page area), then IDTS-86 validates the material before human gates resume.
+`In Progress`. The first DonHV gate is `PAUSED — material quality defect`, not FAIL. The corrected 72-file material and delegated IDTS-86 review now pass; the remaining work is the independent Knowledge Gate, debug exercise, and teach-back for each member.
 
 ### Scope
 
@@ -30,7 +30,7 @@ Make each member able to explain and debug the code they own instead of only dem
 2. PR #159 / IDTS-84: DatDT material — merged.
 3. PR #160 / IDTS-85: SangVN material — merged.
 4. Governance and Debug Lab remediation — in progress.
-5. IDTS-86 material QA against real source.
+5. IDTS-86 material QA against real source — PASS by DonHV-delegated agent review; personal gates are not included.
 6. Four human Knowledge Gates and teach-backs.
 7. Close IDTS-82 only after steps 5–6 PASS.
 
@@ -41,7 +41,7 @@ Make each member able to explain and debug the code they own instead of only dem
 - [x] Mirrors require real-symbol caller/callee, request flow, side effects, and debugger anchors.
 - [x] Seven Debug Labs provide UI action, Network request, breakpoint order, variables, data/external effect, failure exercise, and teach-back.
 - [x] DonHV's incomplete gate is recorded as PAUSED, not learner FAIL.
-- [ ] IDTS-86 verifies structural coverage and deeply traces at least one owner flow per batch.
+- [x] IDTS-86 verifies structural coverage and deeply traces at least one owner flow per batch.
 - [ ] DonHV, DatDT, SangVN, and NhanT each independently PASS their assigned gate/debug/teach-back.
 
 ### Evidence and safety
@@ -56,7 +56,7 @@ Giúp mỗi thành viên giải thích và debug được code thuộc ownership
 
 ### Trạng thái hiện tại
 
-`In Progress`. Gate đầu tiên của DonHV được ghi `PAUSED — material quality defect`, không phải FAIL. Material ban đầu bỏ qua nhiều khối code và điểm chuyển file quan trọng. Remediation được chia thành IDTS-87 (backend/data), IDTS-84 (khu vực FE DatDT), IDTS-85 (khu vực Object Page SangVN), sau đó IDTS-86 phải kiểm material trước khi đánh giá người học lại.
+`In Progress`. Gate đầu tiên của DonHV được ghi `PAUSED — material quality defect`, không phải FAIL. Material 72 file đã được sửa và phần review IDTS-86 được ủy quyền đã PASS; phần còn lại là từng thành viên tự làm Knowledge Gate, debug exercise và teach-back.
 
 ### Phạm vi
 
@@ -78,7 +78,7 @@ Giúp mỗi thành viên giải thích và debug được code thuộc ownership
 2. PR #159 / IDTS-84: material DatDT — đã merge.
 3. PR #160 / IDTS-85: material SangVN — đã merge.
 4. Sửa governance và Debug Lab — đang thực hiện.
-5. IDTS-86 đối chiếu material với source thật.
+5. IDTS-86 đối chiếu material với source thật — PASS qua review agent được DonHV ủy quyền; chưa bao gồm gate cá nhân.
 6. Bốn thành viên tự làm Knowledge Gate và teach-back.
 7. Chỉ đóng IDTS-82 sau khi bước 5–6 PASS.
 
@@ -89,7 +89,7 @@ Giúp mỗi thành viên giải thích và debug được code thuộc ownership
 - [x] Mirror bắt buộc caller/callee theo symbol thật, request flow, side effect và debugger anchor.
 - [x] Bảy Debug Lab có thao tác UI, Network request, thứ tự breakpoint, biến cần xem, tác động data/external, failure exercise và teach-back.
 - [x] Gate chưa hoàn tất của DonHV được ghi PAUSED, không ghi learner FAIL.
-- [ ] IDTS-86 kiểm coverage và trace sâu tối thiểu một flow thật của mỗi owner batch.
+- [x] IDTS-86 kiểm coverage và trace sâu tối thiểu một flow thật của mỗi owner batch.
 - [ ] DonHV, DatDT, SangVN và NhanT tự PASS gate/debug/teach-back được giao.
 
 ### Evidence và an toàn

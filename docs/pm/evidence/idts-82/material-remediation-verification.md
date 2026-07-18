@@ -35,7 +35,7 @@ Each source batch passed its focused compile/build/regression checks before merg
 
 ### Open human validation
 
-This document is implementation evidence, not human Knowledge Gate evidence. IDTS-86 must still compare the explanations with the real source and trace one flow per owner. DonHV, DatDT, SangVN, and NhanT must then independently debug and teach back their assigned flow. The governance PR must not claim PASS on their behalf.
+The delegated IDTS-86 material review now passes with the detailed report at `docs/pm/evidence/idts-86/material-quality-validation.md`. This implementation evidence is still not human Knowledge Gate evidence. DonHV, DatDT, SangVN, and NhanT must independently debug and teach back their assigned flow. The governance PR must not claim PASS on their behalf.
 
 ## Vietnamese
 
@@ -72,4 +72,4 @@ Mỗi source batch đã pass compile/build/regression tập trung và semantic c
 
 ### Human validation còn mở
 
-File này là implementation evidence, không phải evidence Knowledge Gate của con người. IDTS-86 vẫn phải đối chiếu lời giải thích với source thật và trace một flow của mỗi owner. Sau đó DonHV, DatDT, SangVN và NhanT phải tự debug và teach-back flow được giao. Governance PR không được tự ghi PASS thay họ.
+Review material IDTS-86 được DonHV ủy quyền hiện đã PASS, có báo cáo chi tiết tại `docs/pm/evidence/idts-86/material-quality-validation.md`. Evidence implementation này vẫn không phải evidence Knowledge Gate của con người. DonHV, DatDT, SangVN và NhanT phải tự debug và teach-back flow được giao. Governance PR không được tự ghi PASS thay họ.
