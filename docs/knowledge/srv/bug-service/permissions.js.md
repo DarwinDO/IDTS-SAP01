@@ -1,5 +1,61 @@
 # Knowledge: `srv/bug-service/permissions.js`
 
+## Beginner execution walkthrough (2026-07-18)
+
+### English
+
+#### Mental model
+
+There are two separate locks: Fiori capability/visibility is the front-door sign, while this file is the real lock. A user can manually call OData without the Fiori button, so every sensitive backend path must reach one of these permission functions before a database change.
+
+#### Caller and decision paths
+
+- `prepareBugWrite` → `enforceBugWritePermission`: create is delegated to create permission; update compares old/new assignee and status.
+- Draft NEW handler → `enforceBugCreatePermission` → `assertBugCreatePermission`: resolves the authenticated Users row and returns it only for Tester/PM.
+- Lifecycle functions in `actions.js` → `enforceActionPermission`: coordinators pass; Developer passes only when the action is allowed and the Bug is assigned to that Developer.
+- `enforce*` → `isAssignedDeveloper` → `userIDForDeveloper`: maps `DeveloperProfiles.ID` stored as assignee to `Users.ID` stored in the session.
+
+#### Important variables
+
+`actor.role_code` is the trusted internal role. `oldBug.assignee_ID` and `nextBug.assignee_ID` show whether assignment changed. `actionType` must be a value from `constants.js`. `canDeveloperProcess` is true only when role, action/status allow-list, and ownership all pass.
+
+Returning `undefined` from a successful check means “continue”; calling `req.reject(403, ...)` terminates the CAP request. These functions deliberately do not update a Bug themselves.
+
+#### Debug order
+
+For an unexpected 403, break at the relevant public enforcement function, then `resolveRequestUser`, then `isAssignedDeveloper`. Inspect `req.user`, resolved `actor`, `actor.active`, `role_code`, Bug `assignee_ID`, mapped User ID, and `actionType`/target status. If UI hides a valid action but direct API succeeds, the backend is correct and the capability/annotation layer needs debugging; if direct API succeeds for a forbidden role, this file or its caller is missing.
+
+#### Failure and safe editing
+
+Never replace backend checks with UI visibility. Do not compare `assignee_ID` directly with `Users.ID`; they belong to different entities. Permission changes must be mirrored in read-model capability fields and tested with allowed and forbidden direct OData requests.
+
+### Vietnamese
+
+#### Mô hình tư duy
+
+Có hai ổ khóa khác nhau: capability/visibility của Fiori là tấm biển ở cửa trước, còn file này mới là ổ khóa thật. User có thể tự gọi OData mà không qua nút Fiori, nên mọi đường backend nhạy cảm phải đi tới một permission function ở đây trước khi đổi database.
+
+#### Caller và các nhánh quyết định
+
+- `prepareBugWrite` → `enforceBugWritePermission`: create chuyển sang create permission; update so assignee/status cũ và mới.
+- Draft NEW handler → `enforceBugCreatePermission` → `assertBugCreatePermission`: resolve Users row đã xác thực và chỉ return cho Tester/PM.
+- Lifecycle function trong `actions.js` → `enforceActionPermission`: coordinator được qua; Developer chỉ qua khi action được phép và Bug assign cho chính Developer đó.
+- `enforce*` → `isAssignedDeveloper` → `userIDForDeveloper`: map `DeveloperProfiles.ID` đang lưu ở assignee sang `Users.ID` đang lưu trong session.
+
+#### Biến quan trọng
+
+`actor.role_code` là role nội bộ đáng tin. `oldBug.assignee_ID` và `nextBug.assignee_ID` cho biết assignment có đổi không. `actionType` phải là giá trị từ `constants.js`. `canDeveloperProcess` chỉ true khi role, allow-list action/status và ownership đều đúng.
+
+Return `undefined` từ check hợp lệ nghĩa là “đi tiếp”; gọi `req.reject(403, ...)` kết thúc CAP request. Các hàm này cố ý không tự update Bug.
+
+#### Thứ tự debug
+
+Khi gặp 403 bất ngờ, break tại enforcement function tương ứng, rồi `resolveRequestUser`, rồi `isAssignedDeveloper`. Xem `req.user`, `actor` đã resolve, `actor.active`, `role_code`, `assignee_ID` của Bug, User ID đã map và `actionType`/status đích. Nếu UI ẩn action hợp lệ nhưng gọi API trực tiếp thành công, backend đúng và cần debug capability/annotation; nếu API trực tiếp thành công cho role bị cấm, file này hoặc caller đang thiếu check.
+
+#### Failure path và sửa an toàn
+
+Không thay backend check bằng UI visibility. Không so trực tiếp `assignee_ID` với `Users.ID` vì chúng thuộc hai entity khác nhau. Mọi thay đổi quyền phải đồng bộ capability field trong read model và test cả direct OData allowed lẫn forbidden.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

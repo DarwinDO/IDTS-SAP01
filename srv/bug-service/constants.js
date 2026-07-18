@@ -1,5 +1,7 @@
-// Học nhanh (DonHV): hằng số business code dùng ở mọi rule. Đổi code ở đây phải đồng bộ seed CSV, schema, action và Fiori value help.
+// Nguồn hằng số runtime cho lifecycle, role, action, capability và read-only entity.
+// Đổi code ở đây phải đồng bộ catalog seed, schema/service contract, handler và Fiori annotation/value help.
 const STATUS = {
+  // Các trạng thái Bug được lưu bằng code; label hiển thị lấy từ StatusValues.
   NEW: 'NEW',
   PENDING_ASSIGNMENT: 'PENDING_ASSIGNMENT',
   ASSIGNED: 'ASSIGNED',
@@ -14,6 +16,7 @@ const STATUS = {
 }
 
 const PROCESSOR_ROLE = {
+  // Role/hàng đợi đang cần hành động tiếp theo; không đồng nghĩa với assignee kỹ thuật.
   TESTER: 'TESTER',
   DEVELOPER: 'DEVELOPER',
   PM: 'PM',
@@ -22,12 +25,14 @@ const PROCESSOR_ROLE = {
 }
 
 const USER_ROLE = {
+  // Ba role user nội bộ dùng cho authorization backend.
   TESTER: 'TESTER',
   DEVELOPER: 'DEVELOPER',
   PM: 'PM'
 }
 
 const ACTION = {
+  // Loại thao tác audit/history; không phải toàn bộ tên OData action.
   CREATE: 'CREATE',
   EDIT: 'EDIT',
   ASSIGN: 'ASSIGN',
@@ -42,6 +47,7 @@ const ACTION = {
 }
 
 const HISTORY_FIELD_LABELS = {
+  // Nhãn user-facing cho field audit để timeline không hiện tên kỹ thuật.
   title: 'Title',
   description: 'Description',
   status: 'Status',
@@ -70,6 +76,7 @@ const HISTORY_FIELD_LABELS = {
 }
 
 const COORDINATOR_ROLES = new Set([USER_ROLE.TESTER, USER_ROLE.PM])
+// Các Set quyền giúp permission/capability dùng cùng allow-list thay vì rải điều kiện role khắp file.
 const COMMENT_ROLES = new Set([USER_ROLE.TESTER, USER_ROLE.DEVELOPER, USER_ROLE.PM])
 const ATTACHMENT_ROLES = new Set([USER_ROLE.TESTER, USER_ROLE.DEVELOPER, USER_ROLE.PM])
 const DEVELOPER_ACTIONS = new Set([
@@ -95,6 +102,7 @@ const EVENT = {
 }
 
 const ALLOWED_TRANSITIONS = {
+  // State machine chính: key là status hiện tại, array là status được phép đi tới.
   [STATUS.NEW]: [STATUS.PENDING_ASSIGNMENT, STATUS.ASSIGNED, STATUS.REJECTED],
   [STATUS.PENDING_ASSIGNMENT]: [STATUS.ASSIGNED, STATUS.REJECTED],
   [STATUS.ASSIGNED]: [
@@ -122,6 +130,7 @@ const ALLOWED_TRANSITIONS = {
 }
 
 const DEVELOPER_STATUSES = new Set([
+  // Status mà current action owner thường là Developer assignee.
   STATUS.ASSIGNED,
   STATUS.IN_REVIEW,
   STATUS.IN_PROGRESS,
@@ -129,6 +138,7 @@ const DEVELOPER_STATUSES = new Set([
 ])
 
 const TESTER_STATUSES = new Set([
+  // Status mà reporter/Tester cần phản hồi hoặc xác nhận.
   STATUS.NEED_MORE_INFORMATION,
   STATUS.REJECTED,
   STATUS.RESOLVED,
@@ -136,6 +146,7 @@ const TESTER_STATUSES = new Set([
 ])
 
 const CAPABILITY_FIELDS = new Set([
+  // Virtual fields cần bảo vệ trong `$select` để after READ tính enable/visible cho action.
   'canAddComment',
   'canMarkInReview',
   'canStartProgress',
@@ -152,11 +163,13 @@ const CAPABILITY_FIELDS = new Set([
 ])
 
 const FIELD_CONTROL = {
+  // Giá trị SAP Common.FieldControl dùng cho assignee field read-only/optional.
   READ_ONLY: 1,
   OPTIONAL: 3
 }
 
 const READ_ONLY_ENTITY_NAMES = [
+  // Projection/catalog/audit chỉ đọc từ client; guards.js gắn reject handler cho thao tác ghi.
   'Users',
   'DeveloperProfiles',
   'SAPModules',

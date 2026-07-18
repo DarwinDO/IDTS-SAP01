@@ -1,4 +1,5 @@
-// Học nhanh (DonHV): pipeline validate/chuẩn bị dữ liệu Bug trước CREATE/UPDATE. Đây là breakpoint đầu tiên khi field bị reject hoặc persist sai.
+// Pipeline chuẩn hóa và kiểm tra Bug trước khi CAP ghi CREATE/UPDATE vào database.
+// Breakpoint đầu tiên ở `prepareBugWrite`; từ đó đi xuống validator tương ứng với field/status đang sai.
 const cds = require('@sap/cds')
 
 const { SELECT } = cds.ql
@@ -29,8 +30,9 @@ const CODE_LIST_FIELDS = [
   { field: 'environment_code', label: 'Environment', entity: 'EnvironmentValues' }
 ]
 
-// Giữ validation ở backend để draft, UI và OData trực tiếp đều nhận cùng business rule.
 async function prepareBugWrite (req, entities, { isCreate }) {
+  // `service.js` trigger hàm này trước CREATE/UPDATE active Bug. Input thật nằm trong `req.data`;
+  // khi update phải đọc `oldBug` để ghép field cũ với payload PATCH/UPDATE chỉ chứa phần thay đổi.
   const bugID = req.params?.[0]?.ID || req.data?.ID
   const oldBug = isCreate ? {} : await readBug(req, entities, bugID)
 
@@ -39,6 +41,8 @@ async function prepareBugWrite (req, entities, { isCreate }) {
   }
 
   if (isCreate) {
+    // Bug number và reporter là field do server quản lý. Không nhận hai giá trị này từ browser,
+    // nếu không client có thể giả người báo hoặc tự chọn số Bug trùng.
     req.data.bugNumber = await nextBugNumber(req, entities)
 
     const actor = await resolveRequestUser(req, entities)
@@ -52,11 +56,15 @@ async function prepareBugWrite (req, entities, { isCreate }) {
     req.data.reporter_ID = resolvedReporterId
   }
 
+  // Ba bước dưới kiểm từ chung đến riêng: field bắt buộc → catalog active → cặp component/category.
+  // Mỗi validator gắn `target` vào lỗi để Fiori đặt message dưới đúng field.
   const merged = { ...oldBug, ...req.data }
   validateRequiredBugFields(req, merged)
   await validateActiveCodeLists(req, entities, merged)
   await deriveOrValidateComponentCategory(req, entities, merged)
 
+  // Assignee quyết định trạng thái khởi đầu: có assignee thì Assigned, chưa có thì Pending Assignment.
+  // Cùng rule áp dụng khi coordinator thay đổi assignee trên Bug hiện có.
   const finalData = { ...oldBug, ...req.data }
   if (isCreate) {
     req.data.status_code = finalData.assignee_ID ? STATUS.ASSIGNED : STATUS.PENDING_ASSIGNMENT
@@ -64,6 +72,8 @@ async function prepareBugWrite (req, entities, { isCreate }) {
     req.data.status_code = finalData.assignee_ID ? STATUS.ASSIGNED : STATUS.PENDING_ASSIGNMENT
   }
 
+  // Quyền được kiểm sau khi backend đã suy ra status cuối, để không kiểm nhầm payload chưa hoàn chỉnh.
+  // Sau đó mới kiểm transition, lý do reject và tính hợp lệ của assignee.
   const finalStatus = req.data.status_code || finalData.status_code
   await enforceBugWritePermission(req, entities, oldBug, { ...finalData, ...req.data, status_code: finalStatus }, { isCreate })
 
@@ -87,16 +97,22 @@ async function prepareBugWrite (req, entities, { isCreate }) {
     req.data.rejectionReason = null
   }
 
+  // `nextProcessor` là người/role cần xử lý bước kế tiếp, khác với assignee kỹ thuật.
+  // Kết quả được ghi vào payload để persist cùng Bug trong một transaction.
   const nextProcessor = await determineNextProcessor(req, entities, { ...finalData, ...req.data })
   req.data.nextProcessorUser_ID = nextProcessor.userID
   req.data.nextProcessorRole_code = nextProcessor.roleCode
 
+  // Ba field bắt đầu bằng `_` chỉ sống trong request. After-handler trong `history.js` dùng chúng
+  // để ghi audit/notification mà không query và tính diff lại.
   req._oldBug = oldBug
   req._finalBug = { ...finalData, ...req.data }
   req._importantChanges = isCreate ? [] : importantChanges(oldBug, req._finalBug)
 }
 
 async function validateActiveCodeLists (req, entities, bug) {
+  // Chạy cho Priority, Severity và Environment. Giá trị phải là chuỗi đã trim và phải trỏ tới
+  // catalog row đang active; UI value help không thay thế được kiểm tra này vì API có thể bị gọi trực tiếp.
   for (const definition of CODE_LIST_FIELDS) {
     const rawValue = bug[definition.field]
 
@@ -112,6 +128,8 @@ async function validateActiveCodeLists (req, entities, bug) {
       )
     }
 
+    // `definition.entity` nối tên field với projection catalog tương ứng trong `service.cds`.
+    // Breakpoint tại query để xem rawValue và target khi một code nhìn đúng trên UI nhưng bị 400.
     const target = entities[definition.entity]
     const activeValue = await cds.tx(req).run(
       SELECT.one.from(target).columns('code').where({ code: rawValue, active: true })
@@ -128,6 +146,8 @@ async function validateActiveCodeLists (req, entities, bug) {
 }
 
 function validateRequiredBugFields (req, bug, { rejectFirst = false } = {}) {
+  // Draft SAVE dùng `rejectFirst=true` để dừng ở lỗi đầu tiên; active write có thể gom nhiều
+  // `req.error` để Fiori hiển thị cùng lúc các field còn thiếu.
   const required = [
     ['title', 'Title is required.'],
     ['description', 'Description is required.'],
@@ -150,6 +170,8 @@ function validateRequiredBugFields (req, bug, { rejectFirst = false } = {}) {
 }
 
 async function deriveOrValidateComponentCategory (req, entities, bug) {
+  // Application Component và Defect Category người dùng chọn phải tồn tại thành một cặp active.
+  // Backend tra cặp đó rồi tự gắn `componentCategory_ID`, không yêu cầu UI tự biết ID trung gian.
   if (!bug.applicationComponent_ID || !bug.defectCategory_ID) return
 
   const componentCategory = await SELECT.one.from(entities.ComponentCategories).where({
@@ -174,11 +196,14 @@ async function deriveOrValidateComponentCategory (req, entities, bug) {
     )
   }
 
+  // Ghi vào cả payload (`req.data`) lẫn bản merged (`bug`) để validator chạy sau nhìn cùng kết quả.
   req.data.componentCategory_ID = componentCategory.ID
   bug.componentCategory_ID = componentCategory.ID
 }
 
 async function validateAssignee (req, entities, bug) {
+  // Assignee phải là DeveloperProfile active, đang nhận việc và có responsibility phù hợp
+  // với component/category (và module nếu responsibility giới hạn module).
   const developer = await SELECT.one.from(entities.DeveloperProfiles).where({
     ID: bug.assignee_ID,
     active: true
@@ -192,6 +217,7 @@ async function validateAssignee (req, entities, bug) {
     return req.reject(400, 'Assigned developer is unavailable and cannot receive new bugs.', 'assignee')
   }
 
+  // Query có thể trả nhiều responsibility; `.some` bên dưới chỉ cần một record phù hợp là đủ.
   const responsibilities = await SELECT.from(entities.DeveloperResponsibilities).where({
     developerProfile_ID: bug.assignee_ID,
     componentCategory_ID: bug.componentCategory_ID,
@@ -212,6 +238,8 @@ async function validateAssignee (req, entities, bug) {
 }
 
 function validateTransition (req, fromStatus, toStatus) {
+  // `ALLOWED_TRANSITIONS` trong constants.js là state machine duy nhất của lifecycle.
+  // Breakpoint tại `allowed` để phân biệt lỗi mapping action với rule transition thật.
   if (!fromStatus || fromStatus === toStatus) return
   const allowed = ALLOWED_TRANSITIONS[fromStatus] || []
   if (!allowed.includes(toStatus)) {
@@ -220,6 +248,8 @@ function validateTransition (req, fromStatus, toStatus) {
 }
 
 async function determineNextProcessor (req, entities, bug) {
+  // Hàm này không update DB trực tiếp; nó chỉ trả `{ userID, roleCode }` cho caller persist.
+  // Thứ tự nhánh đi từ trạng thái kết thúc, hàng đợi PM, trạng thái Developer, rồi trạng thái Tester.
   if (bug.status_code === STATUS.CLOSED) {
     return { userID: null, roleCode: PROCESSOR_ROLE.NONE }
   }
@@ -230,6 +260,8 @@ async function determineNextProcessor (req, entities, bug) {
   }
 
   if (DEVELOPER_STATUSES.has(bug.status_code)) {
+    // Assignee là DeveloperProfile nên phải map sang Users.ID để notification/action-owner dùng được.
+    // Nếu mapping mất, fallback PM để Bug không rơi vào hàng đợi không người xử lý.
     const assigneeUserID = await userIDForDeveloper(req, entities, bug.assignee_ID)
     if (assigneeUserID) return { userID: assigneeUserID, roleCode: PROCESSOR_ROLE.DEVELOPER }
     const pm = await firstUserByRole(req, entities, 'PM')
@@ -237,6 +269,7 @@ async function determineNextProcessor (req, entities, bug) {
   }
 
   if (TESTER_STATUSES.has(bug.status_code)) {
+    // Các bước cần Tester ưu tiên reporter ban đầu; chỉ fallback Tester đầu tiên khi dữ liệu cũ thiếu reporter.
     const testerID = bug.reporter_ID || (await firstUserByRole(req, entities, 'TESTER'))?.ID
     return { userID: testerID || null, roleCode: PROCESSOR_ROLE.TESTER }
   }

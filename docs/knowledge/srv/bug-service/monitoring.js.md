@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/monitoring.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+`service.js` handles READ DeveloperWorkloads with `readDeveloperWorkloads`. It queries active profiles and relevant Bugs, calls `buildDeveloperWorkloadRows`, then applies CQN search/filter/order/paging/select in memory because these are calculated rows rather than a database table. Workload distinguishes technical ownership from current action ownership and computes overdue/effort/overload without persisting aggregates. Debug raw profiles/Bugs → one developer's empty row → each Bug contribution → filter evaluator → final page. The small expression evaluator uses an operator allow-list; never replace it with JavaScript `eval`.
+
+### Vietnamese
+
+`service.js` xử lý READ DeveloperWorkloads bằng `readDeveloperWorkloads`. Hàm query profile active và các Bug liên quan, gọi `buildDeveloperWorkloadRows`, rồi áp CQN search/filter/order/paging/select trong memory vì đây là row tính toán chứ không phải table DB. Workload phân biệt technical ownership với current action ownership và tính overdue/effort/overload mà không persist aggregate. Debug theo profile/Bug raw → empty row của một developer → đóng góp của từng Bug → filter evaluator → page cuối. Expression evaluator nhỏ dùng allow-list operator; không thay bằng JavaScript `eval`.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

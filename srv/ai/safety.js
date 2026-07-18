@@ -29,6 +29,7 @@ const UNSAFE_ERROR_TOKENS = Object.freeze([
 ])
 
 function redactSensitiveText (value, maxLength = 8000) {
+  // Redact pattern secret/token/email/diagnostic và cắt độ dài trước response, audit hoặc log.
   if (value === undefined || value === null) return ''
   let text = String(value)
   for (const pattern of SECRET_PATTERNS) {
@@ -41,12 +42,14 @@ function redactSensitiveText (value, maxLength = 8000) {
 }
 
 function sanitizeDiagnosticToken (value, fallback = 'UNKNOWN') {
+  // Chuẩn hóa mã lỗi/model/provider thành token allow-list, không phải auth token.
   if (value === undefined || value === null) return fallback
   const token = String(value).replace(/[^a-zA-Z0-9_.-]/g, '_').slice(0, 80)
   return token || fallback
 }
 
 function sanitizeErrorSummary (error) {
+  // Biến Error/provider response thành summary generic không lộ stack, SQL, host hay key.
   const raw = redactSensitiveText(error?.message || error?.code || error?.name || 'AI provider failed.', 180)
   const lower = raw.toLowerCase()
   const unsafe = UNSAFE_ERROR_TOKENS.some(token => lower.includes(token))
@@ -55,10 +58,12 @@ function sanitizeErrorSummary (error) {
 }
 
 function safeFeatureType (value) {
+  // Chỉ giữ feature type hợp lệ để audit không nhận nhãn tùy ý từ client.
   return sanitizeDiagnosticToken(value || 'GENERAL', 'GENERAL').toUpperCase().slice(0, 40)
 }
 
 function containsUnsafeDiagnosticText (value) {
+  // Phát hiện output còn dấu hiệu SQL/stack/secret để feature chuyển fallback thay vì trả text nguy hiểm.
   const raw = JSON.stringify(value || {})
   const lower = raw.toLowerCase()
   return UNSAFE_ERROR_TOKENS.some(token => lower.includes(token)) ||

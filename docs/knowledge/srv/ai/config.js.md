@@ -1,5 +1,15 @@
 # `srv/ai/config.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+Every AI feature reaches configuration through `getAiConfig`; `normalizeAiConfig` converts CAP/private env strings into provider, enabled flags, model aliases, timeout, batch and text limits. Provider/mock normalizers accept only known values; number/boolean helpers avoid common env parsing mistakes. The API key remains private and is not returned by this module. Debug enabled/provider/mode/limits and alias only. Invalid or incomplete config must produce disabled/fallback behavior through provider, not leak configuration or crash Bug workflow.
+
+### Vietnamese
+
+Mọi AI feature lấy cấu hình qua `getAiConfig`; `normalizeAiConfig` chuyển chuỗi CAP/private env thành provider, cờ enabled, model alias, timeout, batch và text limit. Provider/mock normalizer chỉ nhận giá trị biết trước; helper number/boolean tránh lỗi parse env phổ biến. API key vẫn private và module không return nó. Khi debug chỉ xem enabled/provider/mode/limit/alias. Config sai hoặc thiếu phải dẫn tới disabled/fallback qua provider, không lộ config hay làm crash Bug workflow.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English

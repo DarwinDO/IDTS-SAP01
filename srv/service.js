@@ -1,4 +1,6 @@
-// Học nhanh (DonHV): lớp này chỉ "đấu dây" OData vào rule thật trong bug-service. Breakpoint `init()` để biết request sẽ đi sang module nào.
+// File này là “bảng điều phối” của BugService: CAP nhận request OData tại đây,
+// rồi chuyển request sang module nghiệp vụ phù hợp trong `srv/bug-service/`, `srv/email/` hoặc `srv/ai/`.
+// Khi chưa biết request đi đâu, đặt breakpoint đầu tiên trong `init()` và breakpoint thứ hai tại handler được đăng ký bên dưới.
 const cds = require('@sap/cds')
 
 const {
@@ -47,6 +49,8 @@ const { suggestSimilarBugs, suggestClassification, summarizeBugHandoff, explainS
 
 module.exports = class BugService extends cds.ApplicationService {
   async init () {
+    // CAP gọi `init()` đúng một lần khi khởi động service. `this.entities` là các entity đã được expose
+    // bởi `srv/service.cds`; các module con nhận cùng object này để query đúng projection/entity runtime.
     const entities = this.entities
     const { Bugs, Comments, HistoryEvents } = entities
     const Attachments = entities['Bugs.attachments']
@@ -55,21 +59,28 @@ module.exports = class BugService extends cds.ApplicationService {
     const attachmentTargets = [Attachments, Attachments?.drafts].filter(Boolean)
     const historyEventTargets = [HistoryEvents, HistoryEvents?.drafts].filter(Boolean)
 
+    // Nhóm READ: guard chặn client ghi vào read model; before-handler bổ sung cột phụ thuộc
+    // trước khi CAP chạy SELECT, còn after-handler làm giàu kết quả trước khi trả JSON cho UI.
     registerReadOnlyEntityGuards(this, entities)
     this.before('READ', Bugs, req => ensureCapabilitySelectDependencies(req))
     this.before('READ', Bugs.drafts, req => ensureCapabilitySelectDependencies(req))
     for (const target of historyEventTargets) {
       this.before('READ', target, req => ensureHistoryEventSelectDependencies(req))
     }
-    // Mọi create/update đều phải qua cùng pipeline để UI không thể bỏ qua validation/ownership bằng OData trực tiếp.
+    // Nhóm ghi Bug active và draft: mọi đường tạo/sửa đều đi qua validation backend.
+    // Vì vậy người gọi OData trực tiếp cũng không thể bỏ qua role, code-list hoặc ownership chỉ bằng cách né UI.
     this.before('CREATE', Bugs, req => prepareBugWrite(req, entities, { isCreate: true }))
     this.before('NEW', Bugs.drafts, async req => {
+      // `NEW` là lúc Fiori tạo bản nháp rỗng. Kiểm quyền ngay tại đây để Developer không thể mở flow Create,
+      // sau đó `prepareDraftNew` ép reporter theo user đang đăng nhập thay vì tin reporter do client gửi.
       const actor = await enforceBugCreatePermission(req, entities)
       await prepareDraftNew(req, actor)
     })
     this.before('UPDATE', Bugs, req => prepareBugWrite(req, entities, { isCreate: false }))
     this.before('PATCH', Bugs.drafts, req => prepareDraftPatch(req, entities))
 
+    // Comment và attachment có cả entity active lẫn draft. Cùng một validator được gắn vào hai target
+    // để rule không thay đổi theo việc người dùng đang sửa draft hay Bug đã lưu.
     for (const target of commentTargets) {
       this.before('CREATE', target, req => prepareCommentCreate(req, entities))
     }
@@ -78,6 +89,8 @@ module.exports = class BugService extends cds.ApplicationService {
       this.before(['CREATE', 'PUT', 'UPDATE', 'PATCH', 'DELETE'], target, req => prepareAttachmentWrite(req, entities))
     }
 
+    // Các after-handler chạy sau khi thay đổi chính đã thành công. Chúng tạo history/notification;
+    // nếu debug thấy Bug đã lưu nhưng thiếu audit, bắt đầu ở các hàm `record*SideEffects` này.
     this.after('CREATE', Bugs, (data, req) => recordCreateSideEffects(req, data, entities))
     this.after('UPDATE', Bugs, (data, req) => recordUpdateSideEffects(req, entities))
 
@@ -97,15 +110,22 @@ module.exports = class BugService extends cds.ApplicationService {
       this.after('READ', target, async (events, req) => enrichHistoryEventPayload(events, req, entities))
     }
 
+    // Hai read model này tự tính dữ liệu thay vì để CAP SELECT projection thông thường:
+    // một cái cấp danh sách có thể assign, cái còn lại cấp workload cho Smart Assign/Dashboard.
     this.on('READ', entities.AssignableDevelopers, req => readAssignableDevelopers(req, entities))
     this.on('READ', entities.DeveloperWorkloads, req => readDeveloperWorkloads(req, entities))
+    // Bốn action AI đều là review-only: module `srv/ai/` dựng input và trả gợi ý;
+    // gọi action tại đây không tự ghi classification, assignee hoặc status vào database.
     this.on('suggestSimilarBugs', req => suggestSimilarBugs(req, entities))
     this.on('suggestClassification', req => suggestClassification(req, entities))
     this.on('summarizeBugHandoff', req => summarizeBugHandoff(req, entities))
     this.on('explainSmartAssignment', req => explainSmartAssignment(req, entities))
-    // Draft chỉ thành Bug active tại đây; breakpoint này giúp phân biệt lỗi "chưa save" với lỗi persist/side effect sau save.
+    // `SAVE` là ranh giới draft → active. `handleDraftSave` validate lần cuối, gọi `next()` để CAP persist,
+    // rồi mới ghi history/attachment side effects. Breakpoint tại đây phân biệt lỗi trước save với lỗi sau persist.
     this.on('SAVE', Bugs.drafts, (req, next) => handleDraftSave(req, entities, next))
 
+    // Action nghiệp vụ từ Object Page đi vào các handler dưới đây. Các action chuyển status dùng chung
+    // `transitionBug`: đó là nơi kiểm quyền, kiểm transition, update DB và ghi side effects.
     this.on('assignToDeveloper', req => assignToDeveloper(req, entities))
     this.on('addComment', req => addComment(req, entities))
     this.on('moveToPendingAssignment', req => transitionBug(req, entities, {
@@ -166,6 +186,8 @@ module.exports = class BugService extends cds.ApplicationService {
       requireReason: true
     }))
 
+    // `super.init()` cho CAP hoàn tất đăng ký service sau khi custom handler đã được gắn.
+    // Worker email khởi động sau đó và đọc outbox đã commit, không gửi mail trong transaction của action Bug.
     await super.init()
     startEmailWorker()
   }

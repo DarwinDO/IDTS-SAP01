@@ -1,5 +1,15 @@
 # `srv/ai/classification-suggestion.js`
 
+## Beginner-first execution map (2026-07-18)
+
+### English
+
+`suggestClassification` resolves Bug text/current values, reads active catalogs, sends a closed-set structured request when provider is available, and calls `buildClassificationSuggestions`. Each provider value is normalized and must match a real active catalog row; otherwise `fallbackSuggestion` uses deterministic keyword/current-context scoring or returns no-result. `suggestionRow` always includes review/status/provider/grounding information. Audit stores sanitized grounded output. This module never PATCHes priority, severity, module, component or category. Debug input → catalog counts → sanitized provider payload → row lookup → fallback score → final candidates/audit. If UI applies a suggestion, that is a separate explicit user action followed by normal backend validation.
+
+### Vietnamese
+
+`suggestClassification` resolve text/giá trị hiện tại của Bug, đọc catalog active, gửi structured request dạng closed set khi provider sẵn sàng, rồi gọi `buildClassificationSuggestions`. Mỗi provider value được normalize và phải match catalog row active thật; nếu không, `fallbackSuggestion` dùng keyword/current-context score deterministic hoặc trả no-result. `suggestionRow` luôn có thông tin review/status/provider/grounding. Audit lưu output grounded đã sanitize. Module không PATCH priority, severity, module, component hay category. Debug theo input → số row catalog → provider payload đã sanitize → lookup row → fallback score → candidate/audit cuối. Nếu UI áp suggestion, đó là thao tác user riêng và vẫn qua backend validation bình thường.
+
 ## Ownership and debug anchor / Ownership và điểm dừng debug
 
 ### English
