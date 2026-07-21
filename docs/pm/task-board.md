@@ -1,6 +1,6 @@
 # IDTS Task Board
 
-Last updated: 2026-07-12
+Last updated: 2026-07-21
 
 Use this board for high-level movement only. Detailed task notes belong in the matching file under `docs/pm/tasks/`.
 
@@ -58,6 +58,7 @@ Vietnamese: Chi dung board nay de theo doi trang thai cap cao. Chi tiet cong vie
 | IDTS-70 | SAP Fiori AI suggestion review UI patterns | PR #119 merged into `dev` at `05f46b1`; reusable `AiReviewUi.js` now maps AI suggestion states to safe Fiori review copy, Smart Assign uses it for explanations, focused QA passed IDTS-70 `7/0` and IDTS-56 `13/0`, `qa-depth-gate` passed, and Jira moved to Done. |
 | IDTS-75 | Add AI classification suggestion review panel | PR #132 merged into `dev` at `1fe23ac`; Render deploy `dep-d97q2d7avr4c73ddtg60` is live; authenticated Render AI API smoke passed `25/0`; shared-QA browser smoke proves the deployed Classification Suggestions dialog opens from Object Page, compares current/suggested values, keeps manual-review copy visible, and exposes no internal copy. |
 | IDTS-76 | Add AI handoff summary review panel | PR #134 merged into `dev` at `1f9510b`; Render deploy `dep-d97r30l7vvec73cp5gq0` is live; authenticated Render AI API smoke passed `25/0`; shared-QA browser smoke proves the deployed Handoff Summary dialog opens from Object Page, shows summary and next expected action, remains review-only, and exposes no internal copy. |
+| IDTS-84 | Add beginner explanations to shell, login, dashboard, and AI review runtime files | PR #159 merged the 22 deep learning source/mirror updates. DatDT passed the dashboard-history gate at 3/3 (100%), critical/debug/teach-back checks passed, sanitized progress and Jira evidence were recorded, and Jira moved to Done. |
 
 Vietnamese:
 
@@ -112,6 +113,7 @@ Vietnamese:
 | IDTS-70 | SAP Fiori AI suggestion review UI patterns | PR #119 da merge vao `dev` tai `05f46b1`; `AiReviewUi.js` hien map AI suggestion states thanh Fiori review copy an toan, Smart Assign dung helper nay cho explanations, focused QA pass IDTS-70 `7/0` va IDTS-56 `13/0`, `qa-depth-gate` pass va Jira da chuyen Done. |
 | IDTS-75 | Them panel review AI classification suggestion | PR #132 da merge vao `dev` tai `1fe23ac`; Render deploy `dep-d97q2d7avr4c73ddtg60` dang live; authenticated Render AI API smoke pass `25/0`; shared-QA browser smoke chung minh dialog Classification Suggestions da deploy, mo duoc tu Object Page, so sanh current/suggested value, giu copy manual-review va khong lo internal copy. |
 | IDTS-76 | Them panel review AI handoff summary | PR #134 da merge vao `dev` tai `1f9510b`; Render deploy `dep-d97r30l7vvec73cp5gq0` dang live; authenticated Render AI API smoke pass `25/0`; shared-QA browser smoke chung minh dialog Handoff Summary da deploy, mo duoc tu Object Page, hien summary va next expected action, chi de review, va khong lo internal copy. |
+| IDTS-84 | Them giai thich cho shell, login, dashboard va AI review runtime | PR #159 da merge 22 cap source/mirror learning material sau. DatDT PASS gate dashboard-history 3/3 (100%), PASS critical/debug/teach-back, da ghi progress va Jira evidence an toan, va Jira da chuyen Done. |
 
 ## Ready
 

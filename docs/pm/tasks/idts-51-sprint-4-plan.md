@@ -1,6 +1,6 @@
 # IDTS-51 - Sprint 4 Stabilization Plan
 
-Last updated: 2026-07-08
+Last updated: 2026-07-21
 
 ## Purpose
 
@@ -53,6 +53,7 @@ Vietnamese:
 | IDTS-54 | DonHV, DatDT support | Local implementation ready for PR: role dashboard MVP added as protected SAPUI5 `dashboard.html`, reading existing `Bugs` and `DeveloperWorkloads` OData without new write API. Browser smoke passed for PM dashboard tiles, workload visibility, safe copy, and no unexpected HTTP/page errors. |
 | IDTS-55 | DonHV, SangVN support | Done: PR #73 merged into `dev` at `e24f0a9`; Render deploy `dep-d94cg4uq1p3s73bc6la0` is live; shared-QA browser smoke passed for comment post/reload persistence, attachment upload/list/download/delete cleanup, no formatter fatal, no unexpected HTTP errors, and no post-deploy Render error/5xx logs. |
 | IDTS-58 | DatDT owner | Local fix branch `fix/idts-58-sprint-4-ui-defects-datdt` is ready: standalone auth pages now load UI5 through the app-relative resource path, dashboard profile no longer overlaps `Refresh`, comments no longer duplicate the author name, and attachment delete is disabled during draft edit. Local browser smoke passed for login, dashboard, comment post, evidence upload, and draft-state action disable. |
+| IDTS-84 | DatDT owner, DonHV/SangVN support | Learning material remediation merged through PR #159. DatDT completed the dashboard-history Knowledge Gate at 3/3 (100%), passed the critical/debug/teach-back checks, and recorded sanitized evidence in `docs/learning/progress/datdt.md`. |
 
 Vietnamese:
 
@@ -64,6 +65,7 @@ Vietnamese:
 | IDTS-54 | DonHV, DatDT support | Local implementation san sang tao PR: dashboard MVP theo role duoc them bang SAPUI5 `dashboard.html` duoc bao ve, doc OData hien co `Bugs` va `DeveloperWorkloads`, khong them write API. Browser smoke pass cho PM dashboard tiles, workload visibility, safe copy, va khong co HTTP/page error bat thuong. |
 | IDTS-55 | DonHV, SangVN support | Done: PR #73 da merge vao `dev` tai `e24f0a9`; Render deploy `dep-d94cg4uq1p3s73bc6la0` dang live; shared-QA browser smoke pass cho post comment, reload van thay comment, upload/list/download/delete attachment, cleanup, khong co formatter fatal, khong co HTTP error bat thuong, va khong co Render error/5xx log sau deploy. |
 | IDTS-58 | DatDT owner | Branch fix local `fix/idts-58-sprint-4-ui-defects-datdt` da san sang: cac trang auth standalone da load UI5 qua duong dan resource cua app, profile dashboard khong con de len `Refresh`, comment khong con lap ten tac gia, va nut xoa attachment bi khoa khi dang o draft edit. Browser smoke local da pass cho login, dashboard, post comment, upload evidence, va trang thai disable cua action trong draft. |
+| IDTS-84 | DatDT owner, DonHV/SangVN support | Remediation learning material da merge qua PR #159. DatDT hoan thanh Knowledge Gate dashboard-history voi 3/3 (100%), PASS critical/debug/teach-back, va ghi evidence da sanitize vao `docs/learning/progress/datdt.md`. |
 
 - `IDTS-39` relates to `IDTS-38`.
 - `IDTS-45` relates to `IDTS-44`.
