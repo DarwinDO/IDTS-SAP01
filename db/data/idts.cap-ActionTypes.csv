@@ -10,3 +10,14 @@ RESOLVE,Resolve,Developer marked bug as resolved,80,true,3
 RETEST,Retest,Tester or PM retested the bug,90,true,1
 CLOSE,Close,Bug was closed,100,true,3
 REOPEN,Reopen,Bug was reopened,110,true,2
+ASSIGN_TO_DEVELOPER,Assign to Developer,Assigned the bug to a specific developer,120,true,1
+MOVE_TO_PENDING_ASSIGNMENT,Move to Pending Assignment,Moved the bug to the pending assignment queue,130,true,1
+MARK_IN_REVIEW,Mark in Review,Marked the assigned bug as under developer review,140,true,1
+REQUEST_MORE_INFORMATION,Request More Information,Requested additional information from the tester or PM,150,true,2
+RESUBMIT_TO_DEVELOPER,Resubmit to Developer,Returned the updated bug to its assigned developer,160,true,1
+REJECT_BUG,Reject Bug,Rejected the bug for classification or assignment follow-up,170,true,2
+START_PROGRESS,Start Progress,Started active work on the bug,180,true,1
+RESOLVE_BUG,Resolve Bug,Marked the bug as resolved for verification,190,true,3
+SEND_TO_RETEST,Send to Retest,Sent the resolved bug for regression retesting,200,true,1
+CLOSE_BUG,Close Bug,Closed the bug after verification,210,true,3
+REOPEN_BUG,Reopen Bug,Reopened the bug for additional work,220,true,2

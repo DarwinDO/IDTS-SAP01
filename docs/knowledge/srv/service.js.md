@@ -1,5 +1,9 @@
 # Knowledge: `srv/service.js`
 
+## IDTS-89 exact workflow audit mapping
+
+The 11 public Bug workflow actions registered here now pass a unique `ACTION` value into `actions.js` or `transitionBug`. The complete action → handler → ActionType → permission table and breakpoint order are in `docs/ai/implementation/knowledge-one-to-one-action-audit.md`. Keep the OData names and status lifecycle unchanged. When adding a future workflow action that writes History, add its dedicated ActionType, code-list row, summary, actor fallback, permission mapping, direct API test, and database rollout in the same change.
+
 ## Beginner execution walkthrough (2026-07-18)
 
 ### English

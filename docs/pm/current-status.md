@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-07-12
+Last updated: 2026-07-23
 
 ## Snapshot
 
@@ -13,6 +13,7 @@ Last updated: 2026-07-12
 | Active implementation note | IDTS-72 visual evidence audit has repository evidence merged through PR #126. IDTS-74 is complete and deployed. IDTS-75 is complete at implementation, PR, Render, and shared-QA evidence level. IDTS-76 is complete at implementation, PR, Render, and shared-QA evidence level: it reuses `summarizeBugHandoff` and `AiReviewUi`, adds a review-only Handoff Summary Object Page section/dialog, and has local plus shared-QA evidence for positive, sparse-data, unsafe-output, safe-failure, no-workflow-mutation, deployed API smoke, and deployed browser smoke. |
 | Main implementation risk | Shared QA still depends on private Render/Brevo/AWS/PostgreSQL environment variables staying out of repo, Jira, and logs. The Render PostgreSQL free-instance expiry remains the main time-bound infrastructure risk; IDTS-45 now documents a private logical-backup helper and recommends upgrading Render PostgreSQL before expiry if shared QA remains needed. Sprint 04 is tracked both through the real Jira sprint `IDTS Sprint 4` and planning epic `IDTS-51`; `IDTS-40` remains a deferred AWS-native follow-up rather than a blocker for Render QA. |
 | Knowledge readiness | `IDTS-82` is In Progress. From 2026-07-13, every member must pass the ownership Knowledge Gate before nontrivial work and before PR merge/Jira Done. Debug Labs, a progress register, and a PR-body validator are being added; source-comment retrofit is split into IDTS-83 to IDTS-85 and QA validation is IDTS-86. |
+| Active audit refactor | `IDTS-89` is In Progress on `refactor/idts-89-one-to-one-action-audit-donhv`. Each of the 11 public Bug workflow actions now has an exact ActionType in local verification; legacy codes remain and Shared QA requires only the reviewed idempotent code-list UPSERT, never a destructive deploy. No merge or Jira Done until review and the separate Knowledge Gate permit it. |
 
 ## What Is Already Done
 

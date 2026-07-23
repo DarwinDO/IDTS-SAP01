@@ -162,7 +162,7 @@ async function main () {
 
 async function verifyAssignScenario (srv) {
     await callAction(srv, BUG1, 'assignToDeveloper', { assigneeID: DEV_DAT, note: 'Assign for history payload test' })
-    const assignEvent = await latestHistoryEvent(srv, BUG1, 'ASSIGN')
+    const assignEvent = await latestHistoryEvent(srv, BUG1, 'ASSIGN_TO_DEVELOPER')
     rec('HE-01 assign summary is readable', assignEvent?.summary?.includes('Assigned bug to DatDT.'), assignEvent?.summary || 'missing summary')
     rec(
       'HE-02 assign grouped context is event-first readable',
@@ -181,7 +181,7 @@ async function verifyResubmitScenario (srv) {
     await callAction(srv, BUG1, 'startProgress', {}, user('DatDT', ['DEVELOPER', 'authenticated-user']))
     await callAction(srv, BUG1, 'requestMoreInformation', { reason: 'Need more browser evidence for timeline check' }, user('DatDT', ['DEVELOPER', 'authenticated-user']))
     await callAction(srv, BUG1, 'resubmitToDeveloper', { note: 'Tester updated the missing details and evidence.' })
-    const resubmitEvent = await latestHistoryEvent(srv, BUG1, 'STATUS_CHANGE')
+    const resubmitEvent = await latestHistoryEvent(srv, BUG1, 'RESUBMIT_TO_DEVELOPER')
     rec(
       'HE-04 resubmit summary stays readable',
       resubmitEvent?.summary?.includes('Resubmitted bug to the assigned developer'),
@@ -196,7 +196,7 @@ async function verifyResubmitScenario (srv) {
 
 async function verifyRejectScenario (srv) {
     await callAction(srv, BUG3, 'rejectBug', { reason: 'Wrong classification for backend timeline contract test' }, user('SangVN', ['DEVELOPER', 'authenticated-user']))
-    const rejectEvent = await latestHistoryEvent(srv, BUG3, 'REJECT')
+    const rejectEvent = await latestHistoryEvent(srv, BUG3, 'REJECT_BUG')
     rec('HE-06 reject summary is readable', rejectEvent?.summary?.includes('Rejected bug for follow-up.'), rejectEvent?.summary || 'missing summary')
     rec('HE-07 reject reason remains on event payload', rejectEvent?.reason === 'Wrong classification for backend timeline contract test', rejectEvent?.reason || 'missing reason')
     rec(
@@ -209,7 +209,7 @@ async function verifyRejectScenario (srv) {
 async function verifyCloseScenario (srv) {
     await callAction(srv, BUG3, 'resolveBug', { note: 'Resolved before close event verification' }, user('SangVN', ['DEVELOPER', 'authenticated-user']))
     await callAction(srv, BUG3, 'closeBug', { note: 'PM verified and closed for timeline contract test' })
-    const closeEvent = await latestHistoryEvent(srv, BUG3, 'CLOSE')
+    const closeEvent = await latestHistoryEvent(srv, BUG3, 'CLOSE_BUG')
     rec('HE-10 close summary is readable', closeEvent?.summary?.includes('Closed bug.'), closeEvent?.summary || 'missing summary')
     rec(
       'HE-11 close grouped context is readable',
@@ -221,7 +221,7 @@ async function verifyCloseScenario (srv) {
 async function verifyPendingScenario (srv) {
     await callAction(srv, BUG3, 'rejectBug', { reason: 'Prepare pending-assignment summary normalization test' }, user('SangVN', ['DEVELOPER', 'authenticated-user']))
     await callAction(srv, BUG3, 'moveToPendingAssignment', { reason: 'Return to PM queue before reassignment' })
-    const movedPendingEvent = await latestHistoryEvent(srv, BUG3, 'REASSIGN')
+    const movedPendingEvent = await latestHistoryEvent(srv, BUG3, 'MOVE_TO_PENDING_ASSIGNMENT')
     rec(
       'HE-09 pending-assignment summary is normalized',
       movedPendingEvent?.summary === 'Moved bug to Pending Assignment.',

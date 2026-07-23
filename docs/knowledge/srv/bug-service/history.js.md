@@ -1,5 +1,9 @@
 # Knowledge: `srv/bug-service/history.js`
 
+## IDTS-89 exact command summaries and compatibility
+
+`buildHistorySummary` now has an explicit case for each exact workflow ActionType. It does not infer Mark In Review or Start Progress from the destination status when the command code is already known. `actorForAction` recognizes the new developer/coordinator groups while preserving legacy fallbacks. `writeHistoryEvent` copies the exact code to both the parent event and every field-level log. Legacy categories remain readable and are not rewritten.
+
 ## Beginner-first execution map (2026-07-18)
 
 ### English
