@@ -51,4 +51,5 @@ Make each public Bug workflow OData action that changes workflow state or writes
 - [x] Sanitized evidence is stored under `docs/pm/evidence/idts-89/`.
 - [x] Draft PR is created and remains unmerged until review and Knowledge Gate requirements are satisfied.
 - [x] Run and read back the 11-row UPSERT on Shared QA through authenticated Render CLI `psql`; business/history/user row counts and all 11 legacy ActionTypes remain unchanged.
+- [x] Prepare a runtime-only release proposal that records the current pre-deploy command, leaves broad `cds-deploy` disabled after release, and separates future schema/code-list/runtime operations. No release configuration was changed.
 - [ ] Deploy reviewed IDTS-89 runtime code through the protected branch process and run exact-action smoke. PR #163 is currently blocked by required `qa-depth-gate`; merge would also invoke the service's broad `cds-deploy` pre-deploy command. Do not use admin bypass or change release configuration without DonHV's explicit approval of both actions.
