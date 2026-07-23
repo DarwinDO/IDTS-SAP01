@@ -6,6 +6,12 @@ Use this board for high-level movement only. Detailed task notes belong in the m
 
 Vietnamese: Chi dung board nay de theo doi trang thai cap cao. Chi tiet cong viec phai ghi trong file tuong ung duoi `docs/pm/tasks/`.
 
+## In Progress
+
+| ID | Task | Current output |
+| --- | --- | --- |
+| IDTS-90 | Expand demo Developer accounts and responsibility coverage | Ten synthetic Developers, profiles, capability rows, narrow UPSERT helper and focused tests are implemented; PR and Shared QA verification remain. |
+
 ## Done
 
 | ID | Task | Output |

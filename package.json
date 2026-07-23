@@ -97,6 +97,8 @@
     "qa:pm-monitoring:programmatic": "node scripts/qa/test-pm-monitoring-programmatic.js",
     "dev:sqlite:refresh-views": "node scripts/dev/refresh-sqlite-service-views.js",
     "db:action-types:upsert": "node scripts/db/upsert-workflow-action-types.js",
+    "db:developer-demo:upsert": "node scripts/db/upsert-developer-demo-data.js",
+    "qa:idts90:developer-demo-data": "node scripts/qa/test-idts90-developer-demo-data.js",
     "dev:auth:set-password": "node scripts/dev/set-local-user-password.js",
     "integration:db:env": "cds env requires.db --profile integration",
     "integration:db:deploy": "cds deploy --profile integration",

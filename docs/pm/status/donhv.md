@@ -2,6 +2,17 @@
 
 Last updated: 2026-07-23
 
+## 2026-07-23 - IDTS-90 expanded Developer demo data
+
+- Added ten synthetic Developer users, ten DeveloperProfiles and twenty-two capability responsibilities without changing roles, schema, OData or UI behavior.
+- Added a dry-run-first, transactional and idempotent UPSERT helper that preserves password hashes, plus a focused in-memory CAP verification suite.
+- Environment issue: the fresh worktree initially had no `node_modules`, so `@sap/cds` could not be resolved. Fixed with `npm ci`; this was not a product defect.
+- Tooling issue: an earlier inventory command used Bash `||` syntax in PowerShell and failed at parse time. Corrected with native PowerShell handling; no product/data change occurred.
+- Tooling/process issue: a semicolon-separated PowerShell commit command continued after `git diff --cached --check` reported three Markdown trailing-space lines. Fixed immediately with `apply_patch`, reran the check, and amended the same local commit before push.
+- Test-harness finding: the first assertion assumed an unavailable active Developer must be hidden. Source review showed Smart Assign intentionally keeps the row visible with an availability warning. The test was corrected to verify the supported behavior; runtime code was unchanged.
+- Knowledge Gate: same-day additional assignment flow PASS at 90%, based only on DonHV's own prior debug/teach-back answers.
+- Next: repository verification, PR review/merge, narrow Shared QA UPSERT and read-model verification.
+
 ## 2026-07-23 - IDTS-89 one-to-one workflow ActionType audit
 
 | Classification | Symptom / work | Root cause | Fix status | Verification / next action |
