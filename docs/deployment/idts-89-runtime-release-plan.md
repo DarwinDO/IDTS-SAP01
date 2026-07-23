@@ -1,6 +1,6 @@
 # IDTS-89 Runtime-Only Release Plan
 
-Status: approved in principle by DonHV on 2026-07-23; execution remains blocked until the dedicated Knowledge Gate is complete, the PR body contains genuine evidence, and `qa-depth-gate` passes normally.
+Status: runtime-only release executed on 2026-07-23; deployed runtime and database preservation checks pass, while authenticated exact-action Shared QA smoke remains pending.
 
 ## Verified current state
 
@@ -150,5 +150,23 @@ After Knowledge Gate `90% — PASS` and a normal successful `qa-depth-gate`:
 - the live deploy remained `07be39e`; no configuration update triggered a
   deploy.
 
-The PR must pass the required check again after this checkpoint commit before
-Ready/merge.
+The checkpoint commit passed the required check normally before Ready/merge.
+PR #163 merged without admin bypass at
+`97792e8135dec0d8581126713f5725d6eeb068fd`.
+
+Manual deploy `dep-d9gtkhrrjlhs73d4mhqg` reached `live` at that exact merge SHA.
+Post-deploy verification confirmed:
+
+- auth metadata HTTP 200;
+- protected BugService metadata HTTP 401 without a token;
+- no Render error logs since the deploy began;
+- Bugs 12, HistoryEvents 62, HistoryLogs 122, and Users 4;
+- exact ActionTypes 11/11 and legacy ActionTypes 11/11;
+- auto-deploy remains `no/off`;
+- pre-deploy remains the no-op `true`.
+
+Direct authenticated exact-action smoke is still pending because no approved
+Shared QA login/session was available. Do not create an authentication bypass
+or mutate cloud users to close this gap. IDTS-89 remains In Progress until the
+deployed runtime is exercised with an approved PM/Tester or Developer session
+and the resulting HistoryEvent and HistoryLogs are read back.

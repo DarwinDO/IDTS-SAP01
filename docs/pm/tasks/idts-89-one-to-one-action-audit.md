@@ -2,7 +2,7 @@
 
 ## Status
 
-Blocked for reviewed runtime deployment; database rollout complete
+Done — runtime deployed and authenticated exact-action Shared QA smoke passed
 
 ## Owner and support
 
@@ -10,9 +10,9 @@ Blocked for reviewed runtime deployment; database rollout complete
 - Support: NhanT
 - Due date: 2026-07-25
 - Jira: `IDTS-89`
-- Draft PR: `https://github.com/DarwinDO/IDTS-SAP01/pull/163`
+- Merged PR: `https://github.com/DarwinDO/IDTS-SAP01/pull/163`
 - Branch: `refactor/idts-89-one-to-one-action-audit-donhv`
-- Knowledge Gate: `IN PROGRESS — handled in dedicated learning thread`
+- Knowledge Gate: `90% — PASS`
 
 ## Goal
 
@@ -54,4 +54,6 @@ Make each public Bug workflow OData action that changes workflow state or writes
 - [x] Prepare a runtime-only release proposal that records the current pre-deploy command, leaves broad `cds-deploy` disabled after release, and separates future schema/code-list/runtime operations. No release configuration was changed.
 - [x] DonHV approved the runtime-only release plan in principle; execution remains blocked because PR #163 still records Knowledge Gate `IN PROGRESS` and the required `qa-depth-gate` is failing.
 - [x] After Knowledge Gate 90% PASS and normal gate PASS, disable Shared QA auto-deploy and replace broad pre-deploy with `true`; readback confirms branch/build/start/health are unchanged and no deploy was triggered.
-- [ ] Deploy reviewed IDTS-89 runtime code through the protected branch process and run exact-action smoke. PR #163 is currently blocked by required `qa-depth-gate`; merge would also invoke the service's broad `cds-deploy` pre-deploy command. Do not use admin bypass or change release configuration without DonHV's explicit approval of both actions.
+- [x] Merge reviewed runtime code through normal branch protection without admin bypass and deploy the exact merge SHA through the runtime-only path.
+- [x] Verify live deploy status, health, protected-route authorization, no new error logs, database row preservation, 11/11 exact ActionTypes, and 11/11 legacy ActionTypes.
+- [x] Run authenticated exact-action Shared QA smoke and read back the resulting HistoryEvent, summary, actor, HistoryLogs, status, assignee, and next processor. The reversible PM smoke passed and restored the original assignee/state without exposing credentials.
