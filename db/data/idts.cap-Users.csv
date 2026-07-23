@@ -3,3 +3,13 @@ ID,displayName,email,role_code,active
 10000000-0000-0000-0000-000000000002,SangVN,sangvn@example.local,DEVELOPER,true
 10000000-0000-0000-0000-000000000003,DatDT,datdt@example.local,DEVELOPER,true
 10000000-0000-0000-0000-000000000004,NhanT,nhant@example.local,TESTER,true
+10000000-0000-0000-0000-000000000005,Fiori Developer 01,dev.fiori01@example.local,DEVELOPER,true
+10000000-0000-0000-0000-000000000006,Fiori Developer 02,dev.fiori02@example.local,DEVELOPER,true
+10000000-0000-0000-0000-000000000007,CAP Developer 01,dev.cap01@example.local,DEVELOPER,true
+10000000-0000-0000-0000-000000000008,CAP Developer 02,dev.cap02@example.local,DEVELOPER,true
+10000000-0000-0000-0000-000000000009,Database Developer 01,dev.database01@example.local,DEVELOPER,true
+10000000-0000-0000-0000-000000000010,Database Developer 02,dev.database02@example.local,DEVELOPER,true
+10000000-0000-0000-0000-000000000011,Integration Developer 01,dev.integration01@example.local,DEVELOPER,true
+10000000-0000-0000-0000-000000000012,Assignment Developer 01,dev.assignment01@example.local,DEVELOPER,true
+10000000-0000-0000-0000-000000000013,Cross-functional Expert,dev.expert01@example.local,DEVELOPER,true
+10000000-0000-0000-0000-000000000014,Backup Developer,dev.backup01@example.local,DEVELOPER,true
