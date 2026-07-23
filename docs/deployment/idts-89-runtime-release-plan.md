@@ -55,11 +55,13 @@ The commands below are a proposal, not authorization to run them.
    render services update srv-d92jk67aqgkc739h6ah0 --auto-deploy=false --confirm
    ```
 
-2. Replace the pre-deploy command with an explicit runtime-only no-op:
+2. Replace the pre-deploy command with the single-token POSIX no-op `true`.
+   This avoids PowerShell/native-CLI quoting ambiguity and performs no database
+   or seed operation:
 
    ```powershell
    render services update srv-d92jk67aqgkc739h6ah0 `
-     --pre-deploy-command "node -e ""console.log('Runtime-only release: database migration intentionally skipped')""" `
+     --pre-deploy-command true `
      --confirm
    ```
 
@@ -134,3 +136,19 @@ Create a separate Jira work item before re-enabling automatic deployment:
 
 Until that separation exists, Shared QA auto-deploy and broad pre-deploy must
 remain disabled.
+
+## Execution checkpoint — 2026-07-23
+
+After Knowledge Gate `90% — PASS` and a normal successful `qa-depth-gate`:
+
+- auto-deploy was changed from `yes/commit` to `no/off`;
+- pre-deploy was changed from `npm run render:db:deploy` to `true`;
+- build remained `npm ci --include=dev`;
+- start remained `npm start`;
+- branch remained `dev`;
+- health check remained `/odata/v4/auth/$metadata`;
+- the live deploy remained `07be39e`; no configuration update triggered a
+  deploy.
+
+The PR must pass the required check again after this checkpoint commit before
+Ready/merge.
