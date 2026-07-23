@@ -2,7 +2,7 @@
 
 ## Status
 
-Runtime deployed; authenticated exact-action Shared QA smoke pending
+Done — runtime deployed and authenticated exact-action Shared QA smoke passed
 
 ## Owner and support
 
@@ -56,4 +56,4 @@ Make each public Bug workflow OData action that changes workflow state or writes
 - [x] After Knowledge Gate 90% PASS and normal gate PASS, disable Shared QA auto-deploy and replace broad pre-deploy with `true`; readback confirms branch/build/start/health are unchanged and no deploy was triggered.
 - [x] Merge reviewed runtime code through normal branch protection without admin bypass and deploy the exact merge SHA through the runtime-only path.
 - [x] Verify live deploy status, health, protected-route authorization, no new error logs, database row preservation, 11/11 exact ActionTypes, and 11/11 legacy ActionTypes.
-- [ ] Run authenticated exact-action Shared QA smoke and read back the resulting HistoryEvent, summary, actor, HistoryLogs, status, assignee, and next processor. This remains blocked until an approved QA login/session is available; do not create an auth bypass or mutate cloud users.
+- [x] Run authenticated exact-action Shared QA smoke and read back the resulting HistoryEvent, summary, actor, HistoryLogs, status, assignee, and next processor. The reversible PM smoke passed and restored the original assignee/state without exposing credentials.

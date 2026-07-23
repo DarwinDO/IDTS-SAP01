@@ -4,10 +4,9 @@
 
 Runtime release: **PASS**.
 
-Authenticated exact-action Shared QA smoke: **PENDING — approved login/session
-required**.
+Authenticated exact-action Shared QA smoke: **PASS**.
 
-Jira IDTS-89 remains In Progress.
+The Jira issue can be closed after this evidence is synchronized.
 
 ## Protected merge and deploy
 
@@ -51,21 +50,31 @@ Jira IDTS-89 remains In Progress.
 The business, history, and user counts match the pre-release baseline. The
 database readback was SELECT-only.
 
-## Remaining verification
+## Authenticated exact-action Shared QA smoke
 
-No authenticated IDTS Shared QA tab or approved QA credential was available.
-The available browser state only exposed `Sign In - IDTS`. No credential,
-session storage, password, authentication bypass, or synthetic cloud-user
-mutation was used.
+The smoke used the approved private PM QA login from environment variables.
+No password or bearer token was printed, persisted, or added to this evidence.
 
-With an approved PM/Tester or Developer session, execute one reversible
-workflow action and verify:
+The test selected `BUG-0009`, which was already `ASSIGNED`, and performed a
+reversible pair of authorized OData actions:
 
-1. `HistoryEvents.actionType_code` equals the exact OData action code.
-2. Summary and actor are correct.
-3. HistoryLogs contain the expected field changes.
-4. Status, assignee, and next processor match the workflow contract.
-5. The action is authorized for the selected role and assignment.
+1. `moveToPendingAssignment` returned HTTP 200.
+2. The Bug changed to `PENDING_ASSIGNMENT` and its assignee was cleared.
+3. The latest HistoryEvent persisted
+   `actionType_code = MOVE_TO_PENDING_ASSIGNMENT`.
+4. The event contained a user-facing Pending Assignment summary and a resolved
+   actor.
+5. HistoryLogs used the same exact ActionType and contained changes for
+   `status`, `assignee`, `nextProcessorUser`, and `nextProcessorRole`.
+6. `assignToDeveloper` returned HTTP 200 and restored the original developer.
+7. Final readback returned `ASSIGNED`, the original assignee, and
+   `nextProcessorRole = DEVELOPER`.
 
-Jira comment `10576` records the live release and this remaining blocker
-without secrets or private connection details.
+The smoke exited with code 0 and left the Bug in its original business state.
+
+## Remaining risk
+
+This smoke proves one deployed exact-action path plus restoration. The local
+IDTS-89 suite remains the broad proof for all 11 action mappings, direct
+authorization, rollback, actor, next-processor, HistoryEvent, and HistoryLog
+contracts.
