@@ -1,6 +1,6 @@
 # IDTS-89 Runtime-Only Release Plan
 
-Status: proposed only; do not execute before DonHV approves after the dedicated Knowledge Gate is complete and `qa-depth-gate` passes normally.
+Status: approved in principle by DonHV on 2026-07-23; execution remains blocked until the dedicated Knowledge Gate is complete, the PR body contains genuine evidence, and `qa-depth-gate` passes normally.
 
 ## Verified current state
 
