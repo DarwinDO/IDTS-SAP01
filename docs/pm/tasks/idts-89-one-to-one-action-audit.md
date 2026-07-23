@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Blocked for Shared QA rollout; implementation and local review complete
 
 ## Owner and support
 
@@ -50,3 +50,4 @@ Make each public Bug workflow OData action that changes workflow state or writes
 - [x] CAP compile and focused/regression/security/quality gates pass.
 - [x] Sanitized evidence is stored under `docs/pm/evidence/idts-89/`.
 - [x] Draft PR is created and remains unmerged until review and Knowledge Gate requirements are satisfied.
+- [ ] Run the 11-row UPSERT and exact-action smoke on Shared QA after an approved authenticated Render Shell/SSL/SSH path is available. Current live service commit `07be39e` predates `origin/dev` `7cb2d54`; no destructive `cds-deploy` substitute is allowed.

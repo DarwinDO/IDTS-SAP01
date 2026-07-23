@@ -146,7 +146,7 @@ Vietnamese:
 | IDTS-72 | Final QA acceptance for AI assistance and failure modes | NhanT / DonHV support | Ready for closure after IDTS-76. Fresh local acceptance passed 6/6, Smart Assign has product UI browser evidence, IDTS-74 adds deployed duplicate/similar review evidence, IDTS-75 adds deployed classification suggestion review evidence, and IDTS-76 adds deployed handoff-summary review evidence. |
 | IDTS-81 | Correct Shared QA email fallback deep link | DonHV | In progress. A real Inbox delivery exposed the retired Fiori route. The fix maps root/current/legacy `baseUrl` forms to the current app entry page; await PR, Render deploy, and a fresh click-test. |
 | IDTS-82 | Establish code ownership and knowledge-gate governance | DonHV | In progress. Effective 2026-07-13: ownership map, Debug Labs, daily PR/Jira gate, and source-comment retrofit workstream are being added. IDTS-83 to IDTS-85 block IDTS-86. |
-| IDTS-89 | Trace each Bug workflow OData action with a dedicated audit ActionType | DonHV / NhanT support | In progress. 11/11 direct OData action mappings, authorization, rollback, history/log consistency, timeline labels, and idempotent code-list upsert pass locally. Documentation, full regression, evidence, PR, and review remain. Knowledge Gate stays `IN PROGRESS — handled in dedicated learning thread`. |
+| IDTS-89 | Trace each Bug workflow OData action with a dedicated audit ActionType | DonHV / NhanT support | Blocked for Shared QA rollout. Implementation, evidence, Draft PR, review, and local regression are complete; live Render commit `07be39e` is stale and no authenticated Shell/SSL/SSH write path is available. Never substitute destructive/broad `cds-deploy` for the 11-row UPSERT. |
 
 Vietnamese:
 
@@ -169,7 +169,7 @@ Vietnamese:
 | IDTS-72 | QA acceptance cuoi cho AI assistance va failure mode | NhanT / DonHV ho tro | San sang dong sau IDTS-76. Fresh local acceptance pass 6/6, Smart Assign co evidence UI san pham, IDTS-74 co evidence duplicate/similar review tren ban deploy, IDTS-75 co evidence classification suggestion review tren ban deploy, va IDTS-76 co evidence handoff-summary review tren ban deploy. |
 | IDTS-81 | Sua fallback deep link email Shared QA | DonHV | Dang lam. Mail that trong Inbox phat hien Fiori route da retired. Fix map root/current/legacy `baseUrl` sang app entry page hien tai; cho PR, Render deploy va click-test mail moi. |
 | IDTS-82 | Thiet lap code ownership va knowledge-gate governance | DonHV | Dang lam. Hieu luc 2026-07-13: dang them ownership map, Debug Lab, gate PR/Jira hang ngay va workstream retrofit source comment. IDTS-83 den IDTS-85 block IDTS-86. |
-| IDTS-89 | Trace 1-1 OData workflow action bang audit ActionType rieng | DonHV / NhanT ho tro | Dang lam. 11/11 direct OData action, authorization, rollback, history/log, timeline label va idempotent upsert da pass local. Con full regression, evidence, PR va review. Knowledge Gate giu `IN PROGRESS — handled in dedicated learning thread`. |
+| IDTS-89 | Trace 1-1 OData workflow action bang audit ActionType rieng | DonHV / NhanT ho tro | Bi chan o rollout Shared QA. Implementation, evidence, Draft PR, review va regression local da xong; Render live commit `07be39e` dang cu va chua co kenh Shell/SSL/SSH write da xac thuc. Khong duoc thay UPSERT 11 dong bang `cds-deploy` rong. |
 
 
 ## Blocked
