@@ -12,6 +12,9 @@ Last updated: 2026-07-23
 - Test-harness finding: the first assertion assumed an unavailable active Developer must be hidden. Source review showed Smart Assign intentionally keeps the row visible with an availability warning. The test was corrected to verify the supported behavior; runtime code was unchanged.
 - Knowledge Gate: same-day additional assignment flow PASS at 90%, based only on DonHV's own prior debug/teach-back answers.
 - Next: repository verification, PR review/merge, narrow Shared QA UPSERT and read-model verification.
+- Completion: PR #165 merged with `qa-depth-gate` PASS. The Shared QA transaction added 10/10/22 rows, final totals are 14 Users, 12 Developer users, 12 Profiles and 30 Responsibilities, and authenticated PM OData returned 12 assignment/workload rows.
+- Release safety: Render auto-deploy remains off, pre-deploy remains `true`, and runtime deploy remains the live IDTS-89 commit. No broad `cds deploy` was executed.
+- Tooling issue: `render deploys list` does not support the attempted `--limit` flag. Fixed by requesting JSON and selecting the first deploy locally; no Render state changed.
 
 ## 2026-07-23 - IDTS-89 one-to-one workflow ActionType audit
 
