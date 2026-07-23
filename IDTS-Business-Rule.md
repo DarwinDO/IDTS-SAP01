@@ -1,5 +1,11 @@
 # **Business Rules \- Issue and Defect Tracking System in SAP**
 
+## One-to-one workflow audit rule
+
+Every public Bug workflow OData action that changes workflow state or ownership and writes History must persist its own dedicated `HistoryEvents.actionType_code`. Different named commands must not share a generic code such as `STATUS_CHANGE` or `REASSIGN`. The same exact code is copied to child `HistoryLogs`; the readable timeline label comes from `ActionTypes`. Legacy codes remain valid for existing history and generic non-command edits, and existing History rows are not rewritten.
+
+Vietnamese: Mỗi OData workflow action công khai của Bug có thay đổi workflow/ownership và ghi History phải lưu một `HistoryEvents.actionType_code` riêng. Không được gom nhiều command có tên khác nhau vào mã chung như `STATUS_CHANGE` hoặc `REASSIGN`. `HistoryLogs` con dùng cùng mã chính xác, còn timeline lấy nhãn dễ đọc từ `ActionTypes`. Mã legacy vẫn được giữ để đọc lịch sử cũ và audit edit chung; không rewrite History cũ.
+
 ## **1\. Phạm vi nghiệp vụ của hệ thống**
 
 Hệ thống tập trung vào việc **ghi nhận, báo cáo, phân công và theo dõi lỗi/vấn đề** trong quá trình kiểm thử phần mềm.

@@ -298,23 +298,39 @@ function buildHistorySummary (actionType, changes) {
     case ACTION.CREATE:
       return `Created bug report.${statusChangeSuffix(statusChange)}`
     case ACTION.ASSIGN:
+    case ACTION.ASSIGN_TO_DEVELOPER:
       return `${assigneeChange?.newValueDisplay ? `Assigned bug to ${assigneeChange.newValueDisplay}.` : 'Assigned bug to a developer.'}${statusChangeSuffix(statusChange)}`
     case ACTION.REASSIGN:
       if (statusChange?.newValue === STATUS.PENDING_ASSIGNMENT && !assigneeChange?.newValue) {
         return 'Moved bug to Pending Assignment.'
       }
       return `${assigneeChange?.newValueDisplay ? `Reassigned bug to ${assigneeChange.newValueDisplay}.` : 'Reassigned bug.'}${statusChangeSuffix(statusChange)}`
+    case ACTION.MOVE_TO_PENDING_ASSIGNMENT:
+      return 'Moved bug to Pending Assignment.'
+    case ACTION.MARK_IN_REVIEW:
+      return 'Marked bug as In Review.'
     case ACTION.REQUEST_INFO:
+    case ACTION.REQUEST_MORE_INFORMATION:
       return `Requested more information.${statusChangeSuffix(statusChange)}`
+    case ACTION.RESUBMIT_TO_DEVELOPER:
+      return 'Resubmitted bug to the assigned developer after additional information was provided.'
     case ACTION.REJECT:
+    case ACTION.REJECT_BUG:
       return `Rejected bug for follow-up.${statusChangeSuffix(statusChange)}`
+    case ACTION.START_PROGRESS:
+      return 'Started progress on the bug.'
     case ACTION.RESOLVE:
+    case ACTION.RESOLVE_BUG:
       return `Marked bug as resolved.${statusChangeSuffix(statusChange)}`
     case ACTION.RETEST:
       return `Moved bug to retest.${statusChangeSuffix(statusChange)}`
+    case ACTION.SEND_TO_RETEST:
+      return `Sent bug to retest.${statusChangeSuffix(statusChange)}`
     case ACTION.CLOSE:
+    case ACTION.CLOSE_BUG:
       return `Closed bug.${statusChangeSuffix(statusChange)}`
     case ACTION.REOPEN:
+    case ACTION.REOPEN_BUG:
       return `Reopened bug.${statusChangeSuffix(statusChange)}`
     case ACTION.STATUS_CHANGE:
       return statusActionSummary(statusChange)
@@ -439,12 +455,34 @@ async function actorForAction (req, entities, bug, actionType) {
   const actor = await resolveRequestUser(req, entities)
   if (actor) return actor.ID
 
-  if ([ACTION.REQUEST_INFO, ACTION.REJECT, ACTION.RESOLVE, ACTION.STATUS_CHANGE].includes(actionType)) {
+  if ([
+    ACTION.REQUEST_INFO,
+    ACTION.REJECT,
+    ACTION.RESOLVE,
+    ACTION.STATUS_CHANGE,
+    ACTION.MARK_IN_REVIEW,
+    ACTION.REQUEST_MORE_INFORMATION,
+    ACTION.REJECT_BUG,
+    ACTION.START_PROGRESS,
+    ACTION.RESOLVE_BUG
+  ].includes(actionType)) {
     const assigneeUserID = await userIDForDeveloper(req, entities, bug.assignee_ID)
     if (assigneeUserID) return assigneeUserID
   }
 
-  if ([ACTION.ASSIGN, ACTION.REASSIGN, ACTION.RETEST, ACTION.CLOSE, ACTION.REOPEN].includes(actionType)) {
+  if ([
+    ACTION.ASSIGN,
+    ACTION.REASSIGN,
+    ACTION.RETEST,
+    ACTION.CLOSE,
+    ACTION.REOPEN,
+    ACTION.ASSIGN_TO_DEVELOPER,
+    ACTION.MOVE_TO_PENDING_ASSIGNMENT,
+    ACTION.RESUBMIT_TO_DEVELOPER,
+    ACTION.SEND_TO_RETEST,
+    ACTION.CLOSE_BUG,
+    ACTION.REOPEN_BUG
+  ].includes(actionType)) {
     if (bug.nextProcessorUser_ID) return bug.nextProcessorUser_ID
     if (bug.reporter_ID) return bug.reporter_ID
   }

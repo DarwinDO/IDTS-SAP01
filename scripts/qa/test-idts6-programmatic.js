@@ -101,7 +101,7 @@ async function runSrv(srv) {
       target: srv.entities.Bugs,
       query: INSERT.into(srv.entities.Bugs).entries(createData),
       data: createData,
-      user: new cds.User({ id: 'alice' })
+      user: new cds.User({ id: 'NhanT', roles: ['TESTER', 'authenticated-user'] })
     })
     const createdBug = await srv.dispatch(req1a)
     rec(
@@ -128,7 +128,7 @@ async function runSrv(srv) {
       target: srv.entities.Bugs,
       query: INSERT.into(srv.entities.Bugs).entries(missingTitleData),
       data: missingTitleData,
-      user: new cds.User({ id: 'alice' })
+      user: new cds.User({ id: 'NhanT', roles: ['TESTER', 'authenticated-user'] })
     })
     await srv.dispatch(req1b)
     rec('SC-01b Create missing title -> 400', false, 200, 400, 'Should have rejected')
@@ -159,7 +159,7 @@ async function runSrv(srv) {
       target: srv.entities.Bugs,
       query: INSERT.into(srv.entities.Bugs).entries(createAssignedData),
       data: createAssignedData,
-      user: new cds.User({ id: 'alice' })
+      user: new cds.User({ id: 'NhanT', roles: ['TESTER', 'authenticated-user'] })
     })
     const createdAssignedBug = await srv.dispatch(req1c)
     rec(

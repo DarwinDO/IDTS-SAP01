@@ -1,5 +1,9 @@
 # Knowledge: `srv/bug-service/actions.js`
 
+## IDTS-89 audit boundary
+
+`assignToDeveloper` writes `ASSIGN_TO_DEVELOPER`; `resubmitToDeveloper` writes `RESUBMIT_TO_DEVELOPER`; the shared `transitionBug` persists the exact ActionType supplied by `service.js`. Bug update, `HistoryEvents`, and `HistoryLogs` stay in the same request transaction, so a history insert failure rolls back the workflow change. See `docs/ai/implementation/knowledge-one-to-one-action-audit.md` for the full mapping and debug order.
+
 ## Beginner-first symbol walkthrough (2026-07-18)
 
 ### English

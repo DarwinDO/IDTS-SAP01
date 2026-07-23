@@ -1,5 +1,9 @@
 # Knowledge: `db/data/idts.cap-ActionTypes.csv`
 
+## IDTS-89 code-list expansion
+
+The seed now contains 22 rows: 11 legacy categories plus 11 exact workflow-command ActionTypes. New local/test databases load all rows from this CSV. Existing PostgreSQL databases must use the idempotent UPSERT in `scripts/db/upsert-workflow-action-types.js`; do not reset or destructively redeploy the database to refresh this code list. Timeline labels come from `name`, so they remain user-facing instead of exposing raw technical codes.
+
 ## English
 
 ### What this file is for

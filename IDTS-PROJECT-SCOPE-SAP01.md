@@ -1,5 +1,11 @@
 # **Project Scope \- Issue and Defect Tracking System in SAP**
 
+## Audit traceability baseline
+
+In scope, every named public Bug workflow OData action that writes History has one dedicated ActionType. `HistoryEvents.actionType_code` identifies the initiating command directly, and child `HistoryLogs` use the same code. Preserving legacy ActionTypes and historical rows is also in scope. Renaming endpoints, changing the lifecycle/role model, migrating old history, or applying this contract to read-only AI suggestion actions is out of scope.
+
+Vietnamese: Trong scope, mỗi OData workflow action công khai của Bug có ghi History dùng một ActionType riêng; nhìn `HistoryEvents.actionType_code` phải nhận ra ngay command. Giữ mã và dữ liệu lịch sử cũ là bắt buộc. Không đổi endpoint, lifecycle, role, không migrate History cũ và không áp dụng contract này cho AI action chỉ đọc/suggestion.
+
 ## **1\. Tên dự án**
 
 **English:** Issue and Defect Tracking System in SAP  

@@ -1,5 +1,11 @@
 # Project Context: Issue and Defect Tracking System in SAP
 
+## Workflow audit command contract
+
+The 11 state-changing public Bug workflow OData actions use one dedicated ActionType each in `HistoryEvents` and `HistoryLogs`. New workflow audit must identify the initiating command without status inference. Legacy ActionTypes stay in the catalog for old history and generic edits. The exact mapping, authorization groups, request lifecycle, breakpoint order, and non-destructive code-list rollout are documented in `docs/ai/implementation/knowledge-one-to-one-action-audit.md`.
+
+Vietnamese: 11 OData workflow action thay đổi trạng thái của Bug dùng 11 ActionType riêng trong `HistoryEvents` và `HistoryLogs`. Audit mới phải nhận diện command mà không suy đoán từ status. Mã legacy vẫn được giữ để đọc lịch sử cũ và edit chung.
+
 ## Summary
 
 IDTS is a SAP CAP + Fiori Elements/SAPUI5 application for tracking bugs and defects in an SAP software testing environment. The system supports reporting, duplicate checking, classification by SAP module, application component, and defect category, assignment to a suitable developer, developer review, retest before closure, comments, attachments, notifications, audit/history logs, and PM monitoring.
