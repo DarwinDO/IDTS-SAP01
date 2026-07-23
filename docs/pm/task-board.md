@@ -6,16 +6,11 @@ Use this board for high-level movement only. Detailed task notes belong in the m
 
 Vietnamese: Chi dung board nay de theo doi trang thai cap cao. Chi tiet cong viec phai ghi trong file tuong ung duoi `docs/pm/tasks/`.
 
-## In Progress
-
-| ID | Task | Current output |
-| --- | --- | --- |
-| IDTS-90 | Expand demo Developer accounts and responsibility coverage | Ten synthetic Developers, profiles, capability rows, narrow UPSERT helper and focused tests are implemented; PR and Shared QA verification remain. |
-
 ## Done
 
 | ID | Task | Output |
 | --- | --- | --- |
+| IDTS-90 | Expand demo Developer accounts and responsibility coverage | PR #165 merged; Shared QA now has 12 Developers with varied availability/workload and 30 responsibility rows; narrow UPSERT and authenticated read-model verification passed. |
 | PM-001 | Create PM delivery pack | `docs/pm/` structure, status files, work packages, Sprint 1 plan. |
 | BA-001 | Create BA documentation pack | `docs/ba/` baseline. |
 | BA-002 | Create BRD deliverables | `docs/ba/brd/brd.en.md`, `docs/ba/brd/brd.vi.md`, `docs/ba/brd/brd.en.docx`, `docs/ba/brd/brd.vi.docx`. |

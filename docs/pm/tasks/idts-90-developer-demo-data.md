@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress — implementation and local verification complete; PR/Shared QA UPSERT pending.
+Done — PR #165 merged and the narrow Shared QA UPSERT/read-model verification passed.
 
 ## Scope
 
@@ -17,9 +17,19 @@ In Progress — implementation and local verification complete; PR/Shared QA UPS
 - [x] Local seed has 14 Users, 12 Developer users, 12 profiles and 30 responsibilities.
 - [x] Every added profile has at least two responsibilities.
 - [x] Repeated UPSERT does not duplicate rows or overwrite password hashes.
-- [ ] PR passes repository gates and merges into `dev`.
-- [ ] Narrow UPSERT is applied to Shared QA PostgreSQL.
-- [ ] Shared QA read models expose the expanded pool.
+- [x] PR passes repository gates and merges into `dev`.
+- [x] Narrow UPSERT is applied to Shared QA PostgreSQL.
+- [x] Shared QA read models expose the expanded pool.
+
+## Completion evidence
+
+- PR #165 merged normally at `6d4e73b`; `qa-depth-gate` passed.
+- PostgreSQL before/after totals: `4/2/2/8` → `14/12/12/30` for Users/Developer users/Profiles/Responsibilities.
+- UPSERT result: 10 Users, 10 Profiles and 22 Responsibilities committed in one transaction.
+- Foreign-key verification found zero orphan responsibilities.
+- Authenticated OData smoke as PM returned 12 AssignableDevelopers and 12 DeveloperWorkloads.
+- All ten synthetic names were visible; Backup Developer showed the expected `Unavailable` warning.
+- Render web service stayed live on the existing IDTS-89 runtime commit. Auto-deploy remains off and pre-deploy remains `true`; no broad deploy was run.
 
 ## Security and boundaries
 
