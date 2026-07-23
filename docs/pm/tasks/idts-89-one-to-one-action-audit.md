@@ -10,6 +10,7 @@ In Progress
 - Support: NhanT
 - Due date: 2026-07-25
 - Jira: `IDTS-89`
+- Draft PR: `https://github.com/DarwinDO/IDTS-SAP01/pull/163`
 - Branch: `refactor/idts-89-one-to-one-action-audit-donhv`
 - Knowledge Gate: `IN PROGRESS — handled in dedicated learning thread`
 
@@ -48,4 +49,4 @@ Make each public Bug workflow OData action that changes workflow state or writes
 - [x] Legacy history remains readable and the UI timeline resolves labels.
 - [x] CAP compile and focused/regression/security/quality gates pass.
 - [x] Sanitized evidence is stored under `docs/pm/evidence/idts-89/`.
-- [ ] PR is created but not merged until review and Knowledge Gate requirements are satisfied.
+- [x] Draft PR is created and remains unmerged until review and Knowledge Gate requirements are satisfied.
