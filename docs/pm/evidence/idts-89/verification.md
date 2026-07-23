@@ -2,9 +2,9 @@
 
 Date: 2026-07-23
 
-Environment: fresh worktree from `origin/dev` commit `7cb2d54`, in-memory SQLite for direct CAP tests
+Environment: fresh worktree from `origin/dev` commit `7cb2d54`, in-memory SQLite for direct CAP tests, and Render PostgreSQL 15 for the approved code-list rollout
 
-Shared QA mutations: none
+Shared QA mutation: one idempotent 11-row ActionTypes UPSERT through authenticated Render CLI `psql`; no schema deploy, reset, delete, or workflow data mutation
 
 | Verification | Result |
 | --- | --- |
@@ -26,6 +26,12 @@ Shared QA mutations: none
 | Agent rules check | PASS — 8 required rules. |
 | `git diff --check` | PASS; Windows LF→CRLF checkout warnings are non-blocking and no bulk line-ending rewrite was performed. |
 | Runtime scope check | `app/`, `db/schema.cds`, and `srv/service.cds` unchanged. |
+| Render CLI authentication | PASS - `render v2.21.0`, authenticated to workspace `IDTS_GSUSAP01`. |
+| Shared QA baseline | PASS - 0/11 exact ActionTypes before UPSERT; Bugs 12, HistoryEvents 62, HistoryLogs 122, Users 4, legacy ActionTypes 11. |
+| Shared QA PostgreSQL UPSERT | PASS - one transaction completed with `BEGIN`, `INSERT 0 11`, `COMMIT`. |
+| Shared QA readback and preservation | PASS - 11/11 exact rows match code/name/description/order/active/criticality; Bugs 12, HistoryEvents 62, HistoryLogs 122, Users 4, and legacy ActionTypes 11 remain unchanged. |
+| Shared QA HTTP boundary smoke | PASS - auth metadata `200`; unauthenticated Bug metadata and ActionTypes return expected `401`. |
+| Shared QA exact workflow smoke | PENDING - live service commit `07be39e` predates both `origin/dev` `7cb2d54` and the IDTS-89 branch, so it cannot persist the new exact action codes yet. |
 
 ## CAP MCP guidance applied
 
@@ -33,8 +39,8 @@ CAP MCP was queried before implementation. It confirmed that CAP request process
 
 ## Known gaps and release hold
 
-- No Shared QA database mutation or deployed HTTP/browser execution was performed from this unreviewed branch.
-- The PostgreSQL-compatible UPSERT is verified through CAP CQN and repeated SQLite execution; the approved environment owner still must run the reviewed script against the intended bound PostgreSQL database and perform the documented before/after checks.
+- The approved PostgreSQL ActionTypes UPSERT and readback are complete; no Bugs, HistoryEvents, HistoryLogs, Users, or legacy ActionTypes were lost.
+- Exact workflow smoke remains pending until reviewed IDTS-89 runtime code is deployed through the protected branch process. The current live service is stale at `07be39e`.
 - The known attachment vocabulary warning is unchanged.
 - Dependency installation reported pre-existing lockfile findings; this task added no dependency and did not run `npm audit fix`.
 - Knowledge Gate remains `IN PROGRESS — handled in dedicated learning thread`. Do not merge or transition Jira Done until the dedicated learning task records a genuine PASS and review confirms the mapping.

@@ -2,7 +2,7 @@
 
 ## Status
 
-Blocked for Shared QA rollout; implementation and local review complete
+Blocked for reviewed runtime deployment; database rollout complete
 
 ## Owner and support
 
@@ -50,4 +50,5 @@ Make each public Bug workflow OData action that changes workflow state or writes
 - [x] CAP compile and focused/regression/security/quality gates pass.
 - [x] Sanitized evidence is stored under `docs/pm/evidence/idts-89/`.
 - [x] Draft PR is created and remains unmerged until review and Knowledge Gate requirements are satisfied.
-- [ ] Run the 11-row UPSERT and exact-action smoke on Shared QA after an approved authenticated Render Shell/SSL/SSH path is available. Current live service commit `07be39e` predates `origin/dev` `7cb2d54`; no destructive `cds-deploy` substitute is allowed.
+- [x] Run and read back the 11-row UPSERT on Shared QA through authenticated Render CLI `psql`; business/history/user row counts and all 11 legacy ActionTypes remain unchanged.
+- [ ] Deploy reviewed IDTS-89 runtime code through the protected branch process and run exact-action smoke. Current live service commit `07be39e` predates `origin/dev` `7cb2d54`; no destructive `cds-deploy` substitute is allowed.
