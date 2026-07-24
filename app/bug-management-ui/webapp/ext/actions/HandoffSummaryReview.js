@@ -13,11 +13,12 @@ sap.ui.define([
     "sap/m/ObjectStatus",
     "sap/m/MessageStrip",
     "sap/m/VBox",
-    "sap/m/HBox",
     "sap/m/Label",
     "sap/m/MessageBox",
     "sap/ui/model/json/JSONModel",
-    "../ai/AiReviewUi"
+    "sap/ui/Device",
+    "../ai/AiReviewUi",
+    "../ai/AiSuggestionReview"
 ], function (
     Dialog,
     Button,
@@ -25,11 +26,12 @@ sap.ui.define([
     ObjectStatus,
     MessageStrip,
     VBox,
-    HBox,
     Label,
     MessageBox,
     JSONModel,
-    AiReviewUi
+    Device,
+    AiReviewUi,
+    AiSuggestionReview
 ) {
     "use strict";
 
@@ -148,10 +150,10 @@ sap.ui.define([
         }, getAiText(view));
 
         return {
+            suggestionID: result.suggestionID || null,
             bugNumber: safeText(result.bugNumber, getText(view, "handoffSummaryUnknownBug")),
             generatedAt: formatDate(result.generatedAt),
             reviewStatus: review.meta,
-            reviewState: review.state,
             warnings: review.warnings,
             hasWarnings: review.hasWarnings,
             summary: review.explanation,
@@ -171,7 +173,6 @@ sap.ui.define([
             bugNumber: "",
             generatedAt: "",
             reviewStatus: getText(view, "aiReviewStatusReviewRequired"),
-            reviewState: "Information",
             warnings: "",
             hasWarnings: false,
             summary: getText(view, "handoffSummaryLoading"),
@@ -180,8 +181,18 @@ sap.ui.define([
             missingInformation: "",
             latestImportantEvents: "",
             nextExpectedAction: "",
-            decisionHint: getText(view, "aiReviewDecisionHint")
+            decisionHint: getText(view, "aiReviewDecisionHint"),
+            suggestionID: null,
+            reviewStateText: getText(view, "aiSuggestionReviewPending"),
+            reviewStateState: "Information",
+            reviewedByText: "",
+            reviewActionEnabled: false
         });
+        function submitReview(actionName) {
+            return AiSuggestionReview.submit(model, state, actionName, function (key, args) {
+                return getText(view, key, args);
+            });
+        }
 
         var dialog = new Dialog({
             title: getText(view, "handoffSummaryDialogTitle"),
@@ -189,10 +200,10 @@ sap.ui.define([
             contentHeight: "36rem",
             resizable: true,
             draggable: true,
+            stretch: Device.system.phone,
             busy: "{handoffSummary>/busy}",
             content: [
                 new VBox({
-                    width: "100%",
                     items: [
                         new MessageStrip({
                             text: getText(view, "handoffSummaryIntroMessage"),
@@ -200,22 +211,37 @@ sap.ui.define([
                             showIcon: true
                         }),
                         new MessageStrip({
+                            text: getText(view, "handoffSummaryReviewNotice"),
+                            type: "Information",
+                            showIcon: true
+                        }).addStyleClass("sapUiTinyMarginTop"),
+                        new MessageStrip({
                             text: "{handoffSummary>/warnings}",
                             type: "Warning",
                             showIcon: true,
                             visible: "{handoffSummary>/hasWarnings}"
                         }).addStyleClass("sapUiTinyMarginTop"),
-                        new HBox({
-                            justifyContent: "SpaceBetween",
-                            alignItems: "Center",
+                        new VBox({
                             items: [
                                 new Text({ text: "{handoffSummary>/bugNumber}", wrapping: true }),
-                                new ObjectStatus({
+                                new Text({
                                     text: "{handoffSummary>/reviewStatus}",
-                                    state: "{handoffSummary>/reviewState}"
-                                })
+                                    wrapping: true
+                                }).addStyleClass("sapUiTinyMarginTop")
                             ]
                         }).addStyleClass("sapUiSmallMarginTop sapUiSmallMarginBottom"),
+                        new VBox({
+                            items: [
+                                new ObjectStatus({
+                                    text: "{handoffSummary>/reviewStateText}",
+                                    state: "{handoffSummary>/reviewStateState}"
+                                }),
+                                new Text({
+                                    text: "{handoffSummary>/reviewedByText}",
+                                    wrapping: true
+                                })
+                            ]
+                        }).addStyleClass("sapUiSmallMarginBottom"),
                         section(getText(view, "handoffSummarySummaryLabel"), "{handoffSummary>/summary}"),
                         section(getText(view, "handoffSummaryStatusLabel"), "{handoffSummary>/currentStatus}"),
                         section(getText(view, "handoffSummaryOwnerLabel"), "{handoffSummary>/currentActionOwner}"),
@@ -234,12 +260,37 @@ sap.ui.define([
                     ]
                 }).addStyleClass("sapUiSmallMargin")
             ],
-            endButton: new Button({
-                text: getText(view, "handoffSummaryCloseButton"),
-                press: function () {
-                    dialog.close();
-                }
-            }),
+            buttons: [
+                new Button({
+                    text: getText(view, "aiSuggestionAcceptButton"),
+                    type: "Accept",
+                    enabled: "{handoffSummary>/reviewActionEnabled}",
+                    press: function () {
+                        return submitReview("acceptAiSuggestion");
+                    }
+                }),
+                new Button({
+                    text: getText(view, "aiSuggestionRejectButton"),
+                    type: "Reject",
+                    enabled: "{handoffSummary>/reviewActionEnabled}",
+                    press: function () {
+                        return submitReview("rejectAiSuggestion");
+                    }
+                }),
+                new Button({
+                    text: getText(view, "aiSuggestionIgnoreButton"),
+                    enabled: "{handoffSummary>/reviewActionEnabled}",
+                    press: function () {
+                        return submitReview("ignoreAiSuggestion");
+                    }
+                }),
+                new Button({
+                    text: getText(view, "handoffSummaryCloseButton"),
+                    press: function () {
+                        dialog.close();
+                    }
+                })
+            ],
             afterClose: function () {
                 dialog.destroy();
             }
@@ -250,7 +301,15 @@ sap.ui.define([
 
         readHandoffSummary(model, bugID)
             .then(function (result) {
-                state.setData(Object.assign(state.getData(), enrichSummary(result, view)));
+                var summary = enrichSummary(result, view);
+                state.setData(Object.assign(state.getData(), summary));
+                state.setProperty("/reviewActionEnabled", Boolean(summary.suggestionID));
+                state.setProperty(
+                    "/reviewStateText",
+                    summary.suggestionID
+                        ? getText(view, "aiSuggestionReviewPending")
+                        : getText(view, "aiSuggestionReviewUnavailable")
+                );
             })
             .catch(function () {
                 MessageBox.error(getText(view, "handoffSummaryLoadFailed"));

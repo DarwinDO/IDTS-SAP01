@@ -1,10 +1,10 @@
 # Software Requirements Specification
 
-Project: Issue and Defect Tracking System in SAP  
-Document type: Software Requirements Specification (SRS)  
-Language: English  
-Status: Draft v1.3
-Last updated: 2026-07-11
+Project: Issue and Defect Tracking System in SAP
+Document type: Software Requirements Specification (SRS)
+Language: English
+Status: Draft v1.5
+Last updated: 2026-07-24
 Prepared for: SAP490 project delivery, mentor review, implementation evidence, and QA test design
 Document style: Traditional SRS outline with ISO/IEC/IEEE 29148-style requirement quality, traceability, and verification discipline
 
@@ -18,6 +18,8 @@ Document style: Traditional SRS outline with ISO/IEC/IEEE 29148-style requiremen
 | v1.1 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Updated user classes and functional requirements to the MVP role baseline: Tester, Developer, and PM. Reporter and Admin are deferred as separate roles. | Draft |
 | v1.2 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Synced the implemented attachment and optional advisory-AI baseline, with explicit human-review, privacy, and no-workflow-authority constraints. | Draft |
 | v1.3 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Replaced the review-facing system-context source block with a rendered, traceable figure and Diagram Pack reference. | Draft |
+| v1.4 | 2026-07-22 | IDTS Project Team | Mentor / Supervisor | Aligned authentication/session, shared PostgreSQL/Render, attachment object storage, email outbox, and human-reviewed AI audit requirements with the implemented mentor-review baseline. | Draft |
+| v1.5 | 2026-07-24 | IDTS Project Team | Mentor / Supervisor | Added deployed OData base paths, exact workflow-action audit codes, and the current `AiSuggestions` PENDING-only review-state limitation. | Draft |
 
 ### 1.2 Review and Sign-Off
 
@@ -30,7 +32,7 @@ Document style: Traditional SRS outline with ISO/IEC/IEEE 29148-style requiremen
 
 ### 1.3 Document Purpose
 
-This SRS defines the software-level requirements for the Issue and Defect Tracking System in SAP (IDTS). It translates the approved business direction into verifiable system requirements for SAP CAP, OData V4, Fiori Elements/SAPUI5, local SQLite development, and later HANA Cloud or PostgreSQL deployment planning.
+This SRS defines the software-level requirements for the Issue and Defect Tracking System in SAP (IDTS). It translates the approved business direction into verifiable system requirements for SAP CAP, OData V4, Fiori Elements/SAPUI5, local SQLite development, and the current shared QA baseline on Render using PostgreSQL and externally bound object storage. A later production target remains a separate deployment decision.
 
 This SRS uses a traditional SRS outline for readability and aligns requirement quality, traceability, and verification with ISO/IEC/IEEE 29148-style requirements engineering and the SAP490 hybrid delivery context. It does not claim strict certification against the official standard.
 
@@ -75,7 +77,7 @@ IDTS shall not become a full Jira, SAP Cloud ALM, SAP Solution Manager, ServiceN
 
 ### 4.1 System Context
 
-IDTS is a SAP CAP Node.js application exposed through OData V4 and consumed by a SAP Fiori Elements/SAPUI5 frontend. Local development uses SQLite. Future deployment may use SAP HANA Cloud or PostgreSQL, but endpoints and credentials shall not be hardcoded.
+IDTS is a SAP CAP Node.js application exposed through OData V4 and consumed by a SAP Fiori Elements/SAPUI5 frontend. Local development uses SQLite. Shared QA runs on Render with PostgreSQL and externally bound object storage. Any later production target remains configurable; endpoints and credentials shall not be hardcoded.
 
 ![SRS System Context](../../diagrams/rendered/13-srs-system-context.svg)
 
@@ -98,8 +100,9 @@ Reporter and Admin are not separate MVP user classes. Tester performs internal r
 | API | OData V4. |
 | Frontend | Fiori Elements List Report/Object Page as default; SAPUI5 extensions only when needed. |
 | Local database | SQLite. |
-| Future database | SAP HANA Cloud or PostgreSQL, decided later. |
-| Authentication / authorization | Role-based behavior must be designed; concrete XSUAA/BTP setup may be finalized during deployment planning. |
+| Shared QA runtime and database | Render-hosted CAP runtime with PostgreSQL through the `integration` profile. |
+| Attachment storage | `@cap-js/attachments` composition with local DB fallback and externally bound S3 object storage for shared QA. |
+| Authentication / authorization | `AuthService.login` verifies credentials, `AuthSessions` holds server-managed bearer sessions, and middleware maps the session to the internal Tester, Developer, or PM role. XSUAA/BTP is not required for the current baseline. |
 
 ## 5. Assumptions, Constraints, and Dependencies
 
@@ -111,8 +114,8 @@ Reporter and Admin are not separate MVP user classes. Tester performs internal r
 | ASM-002 | Application Component and Defect Category are required for assignment filtering. |
 | ASM-003 | Component Category is the valid pair of Application Component and Defect Category. |
 | ASM-004 | Developer Responsibility maps Developers to Component Categories and optionally to SAP Modules. |
-| ASM-005 | Notification delivery can start as notification records and triggers; real channel delivery can be added later. |
-| ASM-006 | Attachments can start as metadata or storage references. |
+| ASM-005 | `Notifications` is the in-app event record; applicable events also create `NotificationDeliveries` email-outbox rows processed asynchronously. Live provider acceptance requires approved private configuration and evidence. |
+| ASM-006 | Attachments use the SAP-supported attachment composition; local development may use DB fallback while shared QA uses externally bound S3 object storage. |
 | ASM-007 | BRD v1.2 is the business baseline for this SRS. |
 
 ### 5.2 Constraints
@@ -132,7 +135,7 @@ Reporter and Admin are not separate MVP user classes. Tester performs internal r
 | DEP-001 | Mentor acceptance of SAP CAP/Fiori as SAP490 coding deliverable | May affect final report mapping. |
 | DEP-002 | Stable CDS model and service projections | Required before stable Fiori value helps and actions. |
 | DEP-003 | Confirm PM reassignment authority | Determines whether PM can directly assign/reassign or only request reassignment. |
-| DEP-004 | Confirm notification channel for MVP | Determines whether notification records are enough or external delivery is required. |
+| DEP-004 | Verify live email-provider configuration | The outbox behavior is implemented, but live delivery acceptance requires approved private configuration and evidence. |
 
 ## 6. Requirement Identification
 
@@ -147,6 +150,8 @@ SRS requirements use stable IDs:
 | `SRS-FR-COMMENT` | Comments |
 | `SRS-FR-AUDIT` | History and audit |
 | `SRS-FR-NOTIF` | Notification records |
+| `SRS-FR-AUTH` | Authentication and session control |
+| `SRS-FR-DELIVERY` | Asynchronous notification delivery |
 | `SRS-FR-PM` | PM monitoring |
 | `SRS-DATA` | Data requirements |
 | `SRS-IF` | Interface and UI requirements |
@@ -218,7 +223,10 @@ Verification methods:
 | SRS-FR-AUDIT-001 | BRD-BR-011, REQ-HISTORY-001 | IDTS shall write history logs for create, edit, assign, reassign, status change, request information, reject, resolve, retest, close, reopen, attachment, comment, and key notification events. | Must | Inspection and test | FRS-AUDIT-001 |
 | SRS-FR-AUDIT-002 | BR-32 | IDTS shall store actor, role, timestamp, action type, old value, new value, and reason when available in history logs. | Must | Inspection | FRS-AUDIT-001 |
 | SRS-FR-NOTIF-001 | BRD-BR-012, BR-29 | IDTS shall create notification records for assigned, reassigned, information request, bug update, rejected, overdue, resolved, retest, and closed events when applicable. | Must | Inspection and test | FRS-NOTIF-001 |
-| SRS-FR-NOTIF-002 | BR-30 | IDTS should keep external notification delivery pluggable and shall not hardcode channel endpoints. | Should | Inspection | FRS-NOTIF-001 |
+| SRS-FR-NOTIF-002 | BR-30 | IDTS shall create a separate `NotificationDeliveries` email-outbox row for applicable email events and shall not hardcode provider endpoints or credentials. | Must | Inspection and test | FRS-NOTIF-001 |
+| SRS-FR-DELIVERY-001 | BR-30 | An asynchronous worker shall process eligible email-outbox rows, record attempts/status/sanitized failures, and shall not roll back the originating bug action when the provider is unavailable. | Must | Inspection and test | FRS-NOTIF-001 |
+| SRS-FR-AUTH-001 | Authorization baseline | `AuthService.login` shall verify the supplied credentials and create an `AuthSessions` record without returning or persisting a plain-text password. | Must | Inspection and test | FRS-AUTH-001 |
+| SRS-FR-AUTH-002 | Authorization baseline | Authenticated BugService requests shall resolve the bearer session to an internal user and enforce Tester, Developer, or PM authorization in the backend. | Must | Inspection and test | FRS-AUTH-001 |
 
 ### 7.6 PM Monitoring
 
@@ -236,6 +244,7 @@ Verification methods:
 | SRS-FR-AI-001 | DISC-002 | IDTS may provide similar-bug, classification, bug/handoff summary, and Smart Assign explanation suggestions only as reviewable advisory output. | Should | Test and demonstration | FRS-AI-001 |
 | SRS-FR-AI-002 | DISC-002 | AI output shall not create, edit, assign, reclassify, transition, close, reopen, or otherwise mutate a bug; the normal authorized action remains the only decision path. | Must | Test | FRS-AI-001 |
 | SRS-FR-AI-003 | DISC-002 | AI requests, responses, audit records, and user-visible failures shall exclude credentials, tokens, private endpoints, attachment bytes, raw provider output, and unnecessary personal data. | Must | Inspection and test | FRS-AI-001 |
+| SRS-FR-AI-004 | DISC-002 | Source-linked suggestions shall persist only normalized safe data in `AiSuggestions`. The current implementation creates the audit row in `PENDING` and exposes no public action that persists `ACCEPTED`, `REJECTED`, or `IGNORED`; the row shall not represent an autonomous workflow decision. | Must | Inspection and test | FRS-AI-001 |
 
 ## 8. Data Requirements
 
@@ -247,9 +256,12 @@ Verification methods:
 | SRS-DATA-004 | Classification | IDTS shall store SAPModules, ApplicationComponents, DefectCategories, ComponentCategories, and DeveloperResponsibilities as maintainable master data or value-help data. | Must | Inspection |
 | SRS-DATA-005 | Responsibility | IDTS shall store active/inactive state for Developer profiles and responsibility mappings to prevent inactive Developers from being selected. | Must | Test |
 | SRS-DATA-006 | Comments | IDTS shall store comment content, author, author role, timestamp, and parent bug reference. | Must | Inspection |
-| SRS-DATA-007 | Attachments | IDTS should store attachment metadata including file name, media type, storage reference, uploader, and timestamp. | Should | Inspection |
-| SRS-DATA-008 | Notifications | IDTS shall store notification event type, recipient, channel where known, delivery status, timestamp, and parent bug reference. | Must | Inspection |
-| SRS-DATA-009 | HistoryLogs | IDTS shall store history logs as bug-owned audit records. | Must | Inspection |
+| SRS-DATA-007 | Attachments | IDTS shall store attachment metadata through the attachment composition and keep content in the configured DB fallback or external object store without exposing storage credentials. | Must | Inspection and test |
+| SRS-DATA-008 | Notifications | IDTS shall store in-app notification event type, recipient, channel, delivery status, timestamp, and parent bug reference. | Must | Inspection |
+| SRS-DATA-009 | Authentication sessions | IDTS shall store hashed/token-safe session records with user, expiry, and revocation state in `AuthSessions`; bearer tokens and passwords shall not be committed to source. | Must | Inspection and test |
+| SRS-DATA-010 | Email delivery outbox | IDTS shall store safe payload snapshots, attempts, retry timing, status, locking, and sanitized failure details in `NotificationDeliveries`. | Must | Inspection and test |
+| SRS-DATA-011 | AI suggestion audit | IDTS shall store normalized source-linked suggestion data in `AiSuggestions` without raw prompts, raw provider responses, credentials, attachment content, or hidden reasoning. Current source-linked rows begin and remain in `PENDING` until a separately approved review-state feature exists. | Must | Inspection and test |
+| SRS-DATA-012 | HistoryLogs | IDTS shall store history logs as bug-owned audit records. | Must | Inspection |
 
 ## 9. External Interface and UI Interface Requirements
 
@@ -260,6 +272,9 @@ Verification methods:
 | SRS-IF-ODATA-001 | IDTS shall expose core bug tracking data through OData V4 services suitable for Fiori Elements consumption. | Must | Inspection and compile |
 | SRS-IF-ODATA-002 | IDTS shall expose value-help data required for SAP Module, Application Component, Defect Category, Component Category, Developer, priority, severity, and status selection. | Must | Inspection and demonstration |
 | SRS-IF-ODATA-003 | IDTS shall expose actions or update operations for business-critical status transitions when simple field updates are not sufficient to enforce rules. | Should | Inspection and test |
+| SRS-IF-ODATA-004 | The deployed authentication service base path shall be `/odata/v4/auth/`, and the protected bug-management service base path shall be `/odata/v4/bug/`. | Must | Metadata inspection and HTTP test |
+| SRS-IF-ODATA-005 | Draft creation/editing shall use CAP draft events (`NEW`, repeated `PATCH`, and `SAVE`), while active persistence shall continue through `CREATE` for a new active Bug and `UPDATE` for an edited active Bug. | Must | Handler trace and integration test |
+| SRS-IF-ODATA-006 | The audit catalog shall distinguish the 11 exact workflow commands: `ASSIGN_TO_DEVELOPER`, `MOVE_TO_PENDING_ASSIGNMENT`, `MARK_IN_REVIEW`, `REQUEST_MORE_INFORMATION`, `RESUBMIT_TO_DEVELOPER`, `REJECT_BUG`, `START_PROGRESS`, `RESOLVE_BUG`, `SEND_TO_RETEST`, `CLOSE_BUG`, and `REOPEN_BUG`. | Must | Database inspection and IDTS-89 regression |
 
 ### 9.2 Fiori UI Interface
 
@@ -319,8 +334,8 @@ Verification methods:
 | ID | Open Issue | Owner | Impact |
 | --- | --- | --- | --- |
 | OI-SRS-001 | Confirm whether PM can directly assign/reassign in MVP or only request reassignment. | Team / Mentor | Authorization and Fiori action visibility. |
-| OI-SRS-002 | Confirm notification delivery scope for MVP. | Team / Mentor | Whether notification records are enough. |
-| OI-SRS-003 | Confirm attachment storage approach. | Team / Mentor | File storage design and test evidence handling. |
+| OI-SRS-002 | Confirm the evidence required for mentor acceptance of the implemented in-app notification and asynchronous email-outbox flow. | Team / Mentor | Live provider delivery must not be claimed without approved private configuration and evidence. |
+| OI-SRS-003 | Confirm the evidence required for mentor acceptance of externally bound attachment storage in shared QA. | Team / Mentor | Storage implementation exists; final acceptance depends on binding and test evidence. |
 | OI-SRS-004 | Confirm overdue thresholds by priority/severity. | Team / PM | PM dashboard and escalation logic. |
 | OI-SRS-005 | Confirm SAP490 acceptance of CAP/Fiori artifacts as SAP Coding deliverables. | Team / Mentor | Final report structure and evidence mapping. |
 

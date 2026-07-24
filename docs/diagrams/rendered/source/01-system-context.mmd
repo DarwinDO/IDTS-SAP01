@@ -5,12 +5,16 @@ flowchart LR
 
     IDTS["Issue and Defect Tracking System in SAP"]
 
-    NotificationChannels["Notification Channels\nEmail / Teams / Slack / Telegram / SAP BTP service"]
-    FutureDB["Future Deployment Database\nSAP HANA Cloud or PostgreSQL"]
+    Notifications["Notification Delivery\nIn-app records + email outbox\nSMTP / Brevo when configured"]
+    Data["Persistence Baseline\nSQLite local\nPostgreSQL shared QA / Render"]
+    ObjectStore["External Object Storage\nS3-compatible binding for attachment content"]
+    AI["Review-only AI Suggestions\nHuman decision + audit\nDisabled by default"]
 
     Tester -->|"Create, update, assign, retest, comment, track"| IDTS
     Developer -->|"Review assigned bugs, request info, reject, update status, comment"| IDTS
     PM -->|"Monitor workload, overdue bugs, history, reports, escalation"| IDTS
 
-    IDTS -->|"Send important events"| NotificationChannels
-    IDTS -->|"Persist business data when deployed"| FutureDB
+    IDTS -->|"Persist in-app event; deliver email asynchronously"| Notifications
+    IDTS -->|"Persist business data"| Data
+    IDTS -. "Store attachment binary when integration binding is active" .-> ObjectStore
+    IDTS -. "Request advisory suggestions; never auto-mutate business data" .-> AI

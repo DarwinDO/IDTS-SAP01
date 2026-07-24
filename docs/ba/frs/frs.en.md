@@ -1,12 +1,12 @@
 # Functional Requirements Specification
 
-Project: Issue and Defect Tracking System in SAP  
-Document type: Functional Requirements Specification (FRS)  
-Language: English  
-Status: Draft v1.4
-Last updated: 2026-07-11
+Project: Issue and Defect Tracking System in SAP
+Document type: Functional Requirements Specification (FRS)
+Language: English
+Status: Draft v1.6
+Last updated: 2026-07-24
 Prepared for: SAP490 project delivery, mentor review, implementation evidence, and QA test design
-Document style: SAP490 hybrid, function-detail-first, aligned with BRD v1.3 and SRS v1.2
+Document style: SAP490 hybrid, function-detail-first, aligned with BRD v1.6 and SRS v1.5
 
 ## 1. Document Control
 
@@ -19,6 +19,8 @@ Document style: SAP490 hybrid, function-detail-first, aligned with BRD v1.3 and 
 | v1.2 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Updated functional actors and workflows to the MVP role baseline: Tester, Developer, and PM. Reporter and Admin are deferred as separate roles. | Draft |
 | v1.3 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Synced real draft attachment behavior and optional advisory-AI review behavior with the implemented CAP/Fiori baseline. | Draft |
 | v1.4 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Replaced eight review-facing Mermaid blocks with rendered workflow figures and closed the visual-submission open issue. | Draft |
+| v1.5 | 2026-07-22 | IDTS Project Team | Mentor / Supervisor | Aligned authentication/session, shared QA data/storage, asynchronous email-outbox, and normalized human-reviewed AI audit behavior with the current implementation baseline. | Draft |
+| v1.6 | 2026-07-24 | IDTS Project Team | Mentor / Supervisor | Aligned OData/draft handler traceability and exact action audit codes; corrected AI review-state wording to the implemented PENDING-only audit behavior. | Draft |
 
 ### 1.2 Review and Sign-Off
 
@@ -49,10 +51,11 @@ The FRS is more detailed than the BRD and more workflow-oriented than the SRS. I
 | Retest and closure | Yes | Retest Required before close when verification is needed. |
 | Comments | Yes | Discussion attached to bug; no direct status change. |
 | History log | Yes | Important actions recorded. |
-| Notification records | Yes | Event records and triggers; external delivery can be deferred. |
+| Notifications and email delivery | Yes | In-app `Notifications` plus asynchronous `NotificationDeliveries` email-outbox work items for applicable events. |
 | PM monitoring | Yes | Workload, overdue, queues, nextProcessor, status filters. |
-| Attachments | Yes | Draft upload/download and evidence metadata are implemented; attachment bytes are never sent to AI. |
+| Attachments | Yes | Draft upload/download uses the supported attachment composition, with local DB fallback and externally bound object storage for shared QA; attachment bytes are never sent to AI. |
 | Advisory AI | Optional | Similar-bug, classification, summary, and Smart Assign explanations require human review and never mutate the bug. |
+| Runtime profiles | Yes | SQLite for local development; shared QA on Render with PostgreSQL and externally bound S3 object storage. |
 
 ## 4. Functional Workflow Diagrams
 
@@ -335,18 +338,36 @@ The FRS is more detailed than the BRD and more workflow-oriented than the SRS. I
 | Acceptance criteria | History answers who did what, when, and why where applicable. |
 | Traceability | SRS-FR-AUDIT-001, SRS-FR-AUDIT-002. |
 
+The deployed audit baseline keeps one exact action code for each bound workflow command so a reviewer can trace the OData request to the stored event without translating it into a broader legacy label:
+
+| Bound OData action | Persisted exact `ActionTypes.code` |
+| --- | --- |
+| `assignToDeveloper` | `ASSIGN_TO_DEVELOPER` |
+| `moveToPendingAssignment` | `MOVE_TO_PENDING_ASSIGNMENT` |
+| `markInReview` | `MARK_IN_REVIEW` |
+| `requestMoreInformation` | `REQUEST_MORE_INFORMATION` |
+| `resubmitToDeveloper` | `RESUBMIT_TO_DEVELOPER` |
+| `rejectBug` | `REJECT_BUG` |
+| `startProgress` | `START_PROGRESS` |
+| `resolveBug` | `RESOLVE_BUG` |
+| `sendToRetest` | `SEND_TO_RETEST` |
+| `closeBug` | `CLOSE_BUG` |
+| `reopenBug` | `REOPEN_BUG` |
+
+The runtime also preserves legacy action categories for historical compatibility. New exact-command evidence must use the exact code above.
+
 ### 5.16 FRS-NOTIF-001 - Notification Records
 
 | Field | Specification |
 | --- | --- |
-| Purpose | Record important notification events without hardcoding delivery channels. |
+| Purpose | Record important in-app events and queue applicable email delivery without hardcoding provider configuration. |
 | Primary actor | System. |
 | Trigger | Assignment, reassignment, request information, bug update, rejection, overdue, resolved, retest, or close event. |
 | Preconditions | Event and recipient can be determined. |
-| Main flow | System creates notification record with bug reference, recipient, eventType, channel where known, deliveryStatus, and timestamp. |
-| Alternative flow | External delivery adapter can be added later; failure to deliver shall not remove history log. |
-| Validation rules | No private endpoint, webhook URL, token, or service key is stored in repo code. |
-| Acceptance criteria | Notification records exist for important events; Rejected notification makes follow-up owner clear. |
+| Main flow | System persists the in-app `Notifications` row; when email applies, it creates a separate `NotificationDeliveries` outbox row with a safe payload snapshot. A background worker processes eligible rows and records attempts, retry timing, delivery status, locking, and sanitized failure details. |
+| Alternative flow | If email configuration is disabled, incomplete, or the provider fails, the outbox row records a safe unavailable/failed state; the original bug action, in-app notification, and history remain committed. |
+| Validation rules | No private endpoint, SMTP credential, token, or service key is stored in repo code or copied into user-visible failure text. Historical notifications are not automatically backfilled into the email outbox. |
+| Acceptance criteria | In-app notification records exist for important events; applicable email events create separate outbox rows; worker failure does not roll back workflow state; Rejected notification makes the follow-up owner clear. Live-provider success requires separate approved evidence. |
 | Traceability | SRS-FR-NOTIF-001, SRS-FR-NOTIF-002. |
 
 ### 5.17 FRS-PM-001 - PM Monitoring Dashboard and Lists
@@ -401,11 +422,39 @@ The FRS is more detailed than the BRD and more workflow-oriented than the SRS. I
 | Primary actor | Tester, Developer, PM. |
 | Trigger | An authorized user explicitly requests an AI suggestion from its relevant business context. |
 | Preconditions | The feature is enabled with approved private configuration, or the UI presents the safe unavailable state while the normal workflow remains usable. |
-| Main flow | CAP allowlists and sanitizes permitted bug/context fields; the provider returns normalized advisory output; the UI renders it as text requiring review; the user may ignore it or use normal actions to make a decision. |
+| Main flow | CAP allowlists and sanitizes permitted bug/context fields; the provider or deterministic fallback returns normalized advisory output; the UI renders it as text requiring review; source-linked output is stored as a safe `AiSuggestions` audit row in `PENDING`. The user may review or ignore the displayed advice and may separately use a normal authorized CAP action. The current service does not persist accept/reject/ignore review outcomes. |
 | Validation rules | AI cannot bypass role authorization, catalog validation, Developer Responsibility eligibility, required reasons, or status transition rules. It does not create, edit, assign, reclassify, or transition bugs. |
 | Data protection | Do not send credentials, tokens, private endpoints, attachment bytes, raw logs, or unnecessary personal data. Do not persist raw prompts/provider responses or hidden reasoning. |
-| Acceptance criteria | Disabled, timeout, malformed, unsafe, and provider-failure states are safe; suggestions are visibly review-only; an audit record is sanitized; normal non-AI workflow continues. |
-| Traceability | SRS-FR-AI-001 to SRS-FR-AI-003; `docs/ba/discovery/idts-63-ai-assistance-guardrails.md`. |
+| Acceptance criteria | Disabled, timeout, malformed, unsafe, and provider-failure states are safe; suggestions are visibly review-only; `AiSuggestions` contains normalized review/audit data but no raw prompt, raw provider response, attachment content, credential, or hidden reasoning; normal non-AI workflow continues. |
+| Traceability | SRS-FR-AI-001 to SRS-FR-AI-004; `docs/ba/discovery/idts-63-ai-assistance-guardrails.md`. |
+
+### 5.21 FRS-AUTH-001 - Login and Server-Managed Session
+
+| Field | Specification |
+| --- | --- |
+| Purpose | Authenticate an IDTS user and establish the identity and business role used by backend authorization. |
+| Primary actor | Tester, Developer, PM. |
+| Trigger | User submits email and password to `AuthService.login`, then sends the returned bearer token to BugService. |
+| Preconditions | An active internal user exists with a password hash and one supported business role. |
+| Main flow | The service verifies the password hash, creates an expiring `AuthSessions` row, returns a bearer token, and maps later requests to the internal user and role. |
+| Alternative flow | Invalid credentials, expired/revoked session, missing token, or unsupported role returns an authorization error without revealing credential detail. |
+| Validation rules | Plain-text passwords and bearer tokens are not written to logs or source; backend role checks remain authoritative even when the UI hides an action. |
+| Acceptance criteria | Valid login creates a usable session; invalid or expired sessions are rejected; authorized actions reflect the mapped Tester, Developer, or PM role. |
+| Traceability | SRS-FR-AUTH-001, SRS-FR-AUTH-002. |
+
+### 5.22 FRS-ATTACH-001 - Draft Attachment Handling
+
+| Field | Specification |
+| --- | --- |
+| Purpose | Let authorized users attach, download, and remove defect evidence while keeping storage configuration private. |
+| Primary actor | Tester, Developer, PM where authorized. |
+| Trigger | User uploads or manages evidence in the bug draft or persisted bug context. |
+| Preconditions | The bug/draft context is available and the configured attachment storage is reachable. |
+| Main flow | The attachment composition stores metadata and routes content to local DB fallback or the externally bound object store for shared QA. |
+| Alternative flow | Storage failure returns an actionable error and does not falsely report a completed upload; the normal non-attachment bug workflow remains available where valid. |
+| Validation rules | File metadata and authorization are validated; storage credentials/references are not exposed to AI provider payloads or committed to source. |
+| Acceptance criteria | Authorized upload/download works in the configured profile; unauthorized access is rejected; storage failure is visible and does not fabricate evidence. |
+| Traceability | SRS-DATA-007, SRS-IF-UI-003. |
 
 ## 6. Functional Data Rules
 
@@ -420,6 +469,10 @@ The FRS is more detailed than the BRD and more workflow-oriented than the SRS. I
 | FRS-DATA-RULE-007 | Closed bugs are not freely edited; Reopen is used when processing continues. |
 | FRS-DATA-RULE-008 | Comments do not directly change status. |
 | FRS-DATA-RULE-009 | History log must record important actions. |
+| FRS-DATA-RULE-010 | `AuthSessions` stores session lifecycle data without plain-text passwords; revoked or expired sessions cannot authorize BugService requests. |
+| FRS-DATA-RULE-011 | `NotificationDeliveries` is a separate email outbox; provider failure does not roll back the originating bug action or in-app notification. |
+| FRS-DATA-RULE-012 | `AiSuggestions` stores only normalized safe suggestion/audit data. Current source-linked rows are persisted in `PENDING`; no public action currently persists `ACCEPTED`, `REJECTED`, or `IGNORED`. |
+| FRS-DATA-RULE-013 | Attachment content uses the configured DB fallback or external object store; no storage credential is exposed in user-visible data. |
 
 ## 7. Acceptance Criteria Summary
 
@@ -435,7 +488,9 @@ The FRS is more detailed than the BRD and more workflow-oriented than the SRS. I
 | Retest and closure | Resolved bug can go to Retest Required; pass closes; fail reopens. |
 | Comments | Comment stores author, role, timestamp, and content without status change. |
 | History | Important actions show actor, time, old/new value, and reason where applicable. |
-| Notifications | Event records exist without hardcoded external endpoints. |
+| Notifications | In-app event records and applicable email-outbox rows exist without hardcoded external endpoints; provider failure does not roll back the workflow. |
+| Authentication | Valid login creates an expiring server-managed session; invalid, expired, or revoked sessions cannot authorize BugService requests. |
+| Attachments | Authorized users can manage evidence in the configured profile; storage failure is visible and does not create false evidence. |
 | PM monitoring | PM can identify workload, overdue, pending, rejected, retest, and nextProcessor queues. |
 | Advisory AI | Suggestions remain optional, review-only, safe on failure, and cannot mutate the bug. |
 
@@ -462,14 +517,15 @@ The FRS is more detailed than the BRD and more workflow-oriented than the SRS. I
 | FRS-PM-001 | SRS-FR-PM-001, SRS-FR-PM-002, SRS-FR-PM-003 |
 | FRS-PM-002 | SRS-FR-PM-004 |
 | FRS-UX-001 | SRS-IF-UI-001 to SRS-IF-UI-005, SRS-NFR-USE-001, SRS-NFR-USE-002 |
-| FRS-AI-001 | SRS-FR-AI-001 to SRS-FR-AI-003 |
+| FRS-AI-001 | SRS-FR-AI-001 to SRS-FR-AI-004 |
+| FRS-AUTH-001 | SRS-FR-AUTH-001, SRS-FR-AUTH-002 |
 
 ## 9. Open Issues
 
 | ID | Open Issue | Owner | Functional Impact |
 | --- | --- | --- | --- |
 | OI-FRS-001 | Confirm PM direct reassignment permission. | Team / Mentor | Determines whether PM sees Assign/Reassign actions or only request/comment actions. |
-| OI-FRS-002 | Confirm notification channel for MVP. | Team / Mentor | Determines whether notification records alone satisfy MVP. |
-| OI-FRS-003 | Confirm attachment storage approach. | Team / Mentor | Determines whether Attachments are metadata-only or actual file handling. |
+| OI-FRS-002 | Confirm mentor evidence required for the implemented in-app notification and asynchronous email-outbox flow. | Team / Mentor | Live-provider success remains a separate acceptance item and is not inferred from local/outbox tests. |
+| OI-FRS-003 | Confirm mentor evidence required for externally bound attachment storage in shared QA. | Team / Mentor | Actual file handling is implemented; final acceptance depends on active binding and test evidence. |
 | OI-FRS-004 | Confirm overdue thresholds and workload limits. | Team / PM | Determines PM dashboard calculations. |
 | OI-FRS-005 | Closed: workflow diagrams are rendered as figures in the FRS and standalone Diagram Pack. | IDTS Project Team | Visual DOCX and Drive review pack are the current review baseline. |

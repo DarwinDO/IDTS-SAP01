@@ -17,8 +17,8 @@ from openpyxl.styles import Alignment
 ROOT = Path(__file__).resolve().parents[2]
 TEMPLATES = ROOT / "docs" / "sap490" / "templates" / "Deliverable_template"
 OUT = ROOT / "docs" / "sap490" / "generated"
-DATE = date(2026, 7, 10)
-VERSION = "0.1"
+DATE = date(2026, 7, 24)
+VERSION = "0.3"
 SYSTEM = "IDTS-SAP01"
 NAME = "Issue and Defect Tracking System in SAP"
 
@@ -26,12 +26,12 @@ NAME = "Issue and Defect Tracking System in SAP"
 LABELS = {
     "en": {
         "technical_name": "CAP/Fiori MVP Technical Specification",
-        "history": "Initial SAP490 review technical specification aligned with the implemented CAP/Fiori MVP and evidence-backed advisory AI boundary.",
+        "history": "Mentor-ready refresh aligned with deployed OData paths, draft and active write events, exact workflow action audit codes, expanded developer demo data, and the evidence-backed advisory AI boundary.",
         "intro": "IDTS is a SAP CAP Node.js and SAP Fiori Elements application. CAP CDS defines the domain and OData V4 services; Node.js handlers enforce authorization, validation, audit/history and notification side effects.",
         "scope": "Included: bug reporting, classification, responsibility-aware assignment, lifecycle actions, comments, draft attachments, notifications, audit/history, PM monitoring, and review-only AI suggestions. Excluded: autonomous workflow decisions, credentials, private endpoints, and source-code management.",
         "assumptions": "SQLite supports local development; PostgreSQL/HANA portability remains a deployment direction. Real AI is disabled unless private configuration is approved. AI input is allowlisted and AI output is advisory only.",
-        "requirements": "CAP exposes authenticated OData V4 projections and bound actions. Fiori Elements/Object Page presents role- and status-appropriate actions. Backend remains authoritative for catalog, responsibility, and lifecycle validation.",
-        "design": "Core artifacts: db/schema.cds, srv/service.cds, srv/service.js, srv/ai/, app/bug-management-ui. Data model includes Bugs, master data, history/audit, notifications, attachments, and sanitized AI suggestion audit records.",
+        "requirements": "AuthService is exposed at /odata/v4/auth/ and BugService at /odata/v4/bug/. Fiori draft creation uses NEW, field changes use PATCH, and SAVE activates the draft through CREATE; editing an active Bug uses EDIT, PATCH, and UPDATE. Bound actions remain server-authorized. Backend remains authoritative for catalog, responsibility, and lifecycle validation.",
+        "design": "Core artifacts: db/schema.cds, srv/service.cds, srv/service.js, srv/bug-service/, srv/ai/, and app/bug-management-ui. Data includes Bugs, 14 QA users (12 Developers), 30 DeveloperResponsibilities, master data, exact action history/audit, notifications, PostgreSQL attachment metadata, S3 binary objects, and sanitized AiSuggestions rows that currently remain PENDING.",
         "standards": "Use CAP CDS/OData patterns, server-side authorization/validation, readable Fiori labels, safe error messages, no secrets in source/evidence, and matching docs/knowledge mirrors for changed app/srv/db files.",
         "screen": "Fiori Elements List Report and Object Page: Bug Summary, Classification and Assignment, Reproduction, Evidence/Attachments, Comments, History, Notifications, PM monitoring, and context-local review-only AI actions.",
         "messages": [
@@ -49,20 +49,31 @@ LABELS = {
             ("UAT-06", "Advisory AI safety", "User opens an AI review suggestion; normal workflow remains usable and no suggestion changes the bug automatically."),
         ],
         "config_items": [
-            ("CAP runtime", "CAP Node.js service and OData V4 metadata", "Configured / evidence in repository"),
-            ("Database", "SQLite local development with portable deployment direction", "Configured / no private connection data"),
+            ("Authentication", "AuthService /odata/v4/auth/ login/logout/me and hashed AuthSessions bearer-token records", "Configured; server-side authorization remains authoritative"),
+            ("Bug service and draft", "BugService /odata/v4/bug/; NEW/PATCH/SAVE for create and EDIT/PATCH/UPDATE for active edits", "Configured and verified without changing the public contract"),
+            ("Developer demo data", "14 Users, including 12 Developers, with 12 profiles and 30 DeveloperResponsibilities", "Configured for shared QA; values are demo data, not production identities"),
+            ("Hosting and database", "Render shared-QA baseline with PostgreSQL; SQLite remains local development only", "Configured; no private connection data in this workbook"),
+            ("Attachments", "@cap-js/attachments metadata in PostgreSQL with external S3 object storage for shared QA", "Configured; bucket and credentials remain private"),
+            ("Notifications", "Notifications plus NotificationDeliveries email outbox and worker; SMTP/Brevo provider is private configuration", "Configured; provider failure does not roll back the bug workflow"),
             ("Fiori UI", "Fiori Elements Object Page/List Report and safe UI5 extensions", "Configured / verified by QA"),
-            ("AI provider", "Optional provider seam; disabled by default and secret-free in source", "Configured as opt-in; live key not stored"),
+            ("Workflow audit", "11 exact workflow action types map one-to-one to bound commands", "Configured and verified; legacy audit categories remain for historical compatibility"),
+            ("AI provider", "AiSuggestions audit plus optional provider seam; live provider disabled and human-review-only", "NOT ACCEPTED live; mock/fallback/no-mutation PASS; source-linked rows remain PENDING"),
+            ("Security evidence", "Secrets, private endpoints, tokens, attachment content and raw provider output are excluded", "Required for every review and deployment handoff"),
+        ],
+        "change_rows": [
+            (1, "DonHV", "IDTS", "Review baseline", "CR-001", "N/A", "Synchronize the CAP/Fiori MVP and SAP490 mentor-review artifacts", "Mentor review", "Pending mentor review", "N/A", "N/A"),
+            (2, "DonHV", "IDTS", "Shared-QA configuration", "CR-002", "CR-001", "Document AuthService, Render/PostgreSQL, S3 attachments, notification outbox, and disabled-by-default AI without secrets", "Repository and review pack", "Prepared", "N/A", "N/A"),
+            (3, "Team", "IDTS", "QA evidence", "CR-003", "CR-001", "Separate executed Passed evidence from Pending tests and preserve product-only defect reporting", "Mentor review", "Prepared", "N/A", "N/A"),
         ],
     },
     "vi": {
         "technical_name": "Đặc tả kỹ thuật CAP/Fiori MVP",
-        "history": "Bản Technical Specification SAP490 đầu tiên cho review, đồng bộ CAP/Fiori MVP đã triển khai và boundary AI advisory có bằng chứng.",
+        "history": "Bản cập nhật mentor-ready đồng bộ endpoint OData đã deploy, sự kiện ghi draft/active, exact workflow action audit, dữ liệu demo Developer mở rộng và ranh giới AI tư vấn có bằng chứng.",
         "intro": "IDTS là ứng dụng SAP CAP Node.js và SAP Fiori Elements. CAP CDS định nghĩa domain và OData V4 service; Node.js handler enforce authorization, validation, audit/history và notification side effect.",
         "scope": "Bao gồm: bug reporting, classification, assignment theo responsibility, lifecycle action, comment, draft attachment, notification, audit/history, PM monitoring và AI suggestion chỉ để review. Loại trừ: quyết định workflow tự động, credential, private endpoint và source-code management.",
         "assumptions": "SQLite dùng cho local development; PostgreSQL/HANA là hướng deployment. Real AI mặc định tắt nếu chưa có private configuration được duyệt. AI input được allowlist và AI output chỉ là advisory.",
-        "requirements": "CAP expose authenticated OData V4 projection và bound action. Fiori Elements/Object Page hiển thị action phù hợp role/status. Backend vẫn là authority cho catalog, responsibility và lifecycle validation.",
-        "design": "Artifact chính: db/schema.cds, srv/service.cds, srv/service.js, srv/ai/, app/bug-management-ui. Data model gồm Bugs, master data, history/audit, notification, attachment và AI suggestion audit đã sanitize.",
+        "requirements": "AuthService được expose tại /odata/v4/auth/ và BugService tại /odata/v4/bug/. Luồng tạo draft dùng NEW, thay đổi field dùng PATCH và SAVE kích hoạt draft qua CREATE; sửa Bug active dùng EDIT, PATCH và UPDATE. Bound action luôn được kiểm quyền ở server. Backend quyết định cuối cùng cho catalog, responsibility và lifecycle validation.",
+        "design": "Artifact chính: db/schema.cds, srv/service.cds, srv/service.js, srv/bug-service/, srv/ai/ và app/bug-management-ui. Dữ liệu gồm Bugs, 14 user QA (12 Developer), 30 DeveloperResponsibilities, master data, history/audit exact action, notification, metadata attachment trong PostgreSQL, binary trên S3 và AiSuggestions đã làm sạch hiện giữ ở PENDING.",
         "standards": "Dùng CAP CDS/OData pattern, authorization/validation ở server, Fiori label dễ đọc, error message an toàn, không có secret trong source/evidence và cập nhật docs/knowledge mirror cho app/srv/db thay đổi.",
         "screen": "Fiori Elements List Report và Object Page: Bug Summary, Classification and Assignment, Reproduction, Evidence/Attachments, Comments, History, Notifications, PM monitoring và AI action review-only tại đúng context.",
         "messages": [
@@ -80,10 +91,21 @@ LABELS = {
             ("UAT-06", "AI advisory safety", "User mở AI review suggestion; normal workflow vẫn dùng được và suggestion không tự đổi bug."),
         ],
         "config_items": [
-            ("CAP runtime", "CAP Node.js service và OData V4 metadata", "Đã cấu hình / có evidence trong repository"),
-            ("Database", "SQLite local development với hướng deployment portable", "Đã cấu hình / không ghi private connection data"),
+            ("Xác thực", "AuthService /odata/v4/auth/ gồm login/logout/me và bản ghi bearer-token AuthSessions đã băm", "Đã cấu hình; authorization phía server vẫn là nguồn quyết định"),
+            ("Bug service và draft", "BugService /odata/v4/bug/; NEW/PATCH/SAVE khi tạo và EDIT/PATCH/UPDATE khi sửa active Bug", "Đã cấu hình và xác minh mà không đổi public contract"),
+            ("Dữ liệu demo Developer", "14 Users gồm 12 Developer, 12 profile và 30 DeveloperResponsibilities", "Đã cấu hình cho shared QA; đây là dữ liệu demo, không phải danh tính production"),
+            ("Hosting và cơ sở dữ liệu", "Baseline shared QA trên Render với PostgreSQL; SQLite chỉ dùng cho local development", "Đã cấu hình; workbook không chứa connection data riêng tư"),
+            ("Tệp đính kèm", "Metadata @cap-js/attachments trong PostgreSQL và object storage S3 bên ngoài cho shared QA", "Đã cấu hình; bucket và credential được giữ riêng tư"),
+            ("Thông báo", "Notifications cùng email outbox NotificationDeliveries và worker; SMTP/Brevo là cấu hình riêng tư", "Đã cấu hình; lỗi provider không rollback workflow bug"),
             ("Fiori UI", "Fiori Elements Object Page/List Report và UI5 extension an toàn", "Đã cấu hình / QA đã verify"),
-            ("AI provider", "Provider seam tùy chọn; mặc định tắt và source không có secret", "Opt-in; live key không lưu"),
+            ("Workflow audit", "11 exact workflow action type map một-một với các bound command", "Đã cấu hình và xác minh; category cũ chỉ giữ để tương thích lịch sử"),
+            ("AI provider", "AiSuggestions audit và provider seam tùy chọn; live provider đang tắt và chỉ hỗ trợ human review", "Live NOT ACCEPTED; mock/fallback/no-mutation PASS; source-linked row giữ ở PENDING"),
+            ("Bằng chứng bảo mật", "Loại trừ secret, private endpoint, token, nội dung attachment và raw provider output", "Bắt buộc cho mọi review và deployment handoff"),
+        ],
+        "change_rows": [
+            (1, "DonHV", "IDTS", "Baseline review", "CR-001", "N/A", "Đồng bộ CAP/Fiori MVP và artifact SAP490 cho mentor review", "Mentor review", "Đang chờ mentor review", "N/A", "N/A"),
+            (2, "DonHV", "IDTS", "Cấu hình shared QA", "CR-002", "CR-001", "Mô tả AuthService, Render/PostgreSQL, S3 attachment, notification outbox và AI mặc định tắt mà không ghi secret", "Repository và review pack", "Đã chuẩn bị", "N/A", "N/A"),
+            (3, "Team", "IDTS", "Bằng chứng QA", "CR-003", "CR-001", "Tách evidence Passed đã thực thi khỏi test Pending và giữ defect log chỉ gồm lỗi sản phẩm", "Mentor review", "Đã chuẩn bị", "N/A", "N/A"),
         ],
     },
 }
@@ -119,6 +141,11 @@ def write(ws, coordinate, value, wrap=True):
             shrink_to_fit=current.shrink_to_fit,
             indent=current.indent,
         )
+
+
+def remove_template_defined_names(wb):
+    """Static review copies do not use legacy template defined names."""
+    wb.defined_names.clear()
 
 
 def fill_cover(ws, title, function_id, function_name):
@@ -185,6 +212,7 @@ def uat(language):
     labels = LABELS[language]
     output = copy_template("UAT.xlsx", f"UAT_IDTS_SAP01_{language}_prepared_v{VERSION}.xlsx")
     wb = load_workbook(output)
+    remove_template_defined_names(wb)
     fill_cover(wb["Cover"], "User Acceptance Test (Prepared)" if language == "en" else "User Acceptance Test (Đã chuẩn bị)", "IDTS-UAT-REVIEW", "UAT preparation - not executed" if language == "en" else "Chuẩn bị UAT - chưa thực thi")
     history = wb["Histories"]
     for cell, value in zip(("B3", "C3", "D3", "E3", "F3", "G3"), (1, VERSION, labels["uat_history"], "Test Scenario, Test Cases, Test Result", DATE, "DonHV")):
@@ -210,7 +238,7 @@ def uat(language):
         cases.row_dimensions[row].height = 48
 
     results = wb["Test Result"]
-    write(results, "A7", "Prepared UAT only - execution, actual result, defects, acceptance decision, and sign-off are pending mentor/user testing.")
+    write(results, "A7", "Prepared UAT only - execution, actual result, defects, acceptance decision, and sign-off are pending mentor/user testing." if language == "en" else "Chỉ là kế hoạch UAT đã chuẩn bị - việc thực thi, actual result, defect, quyết định chấp nhận và sign-off vẫn đang chờ mentor/user kiểm thử.")
     results.row_dimensions[7].height = 60
     wb.properties.title = f"IDTS SAP490 UAT {language.upper()} prepared v{VERSION}"
     wb.properties.subject = "Prepared only; no UAT result or sign-off claimed"
@@ -223,6 +251,7 @@ def configuration(language):
     labels = LABELS[language]
     output = copy_template("Configuration_Note.xlsx", f"Configuration_Note_IDTS_SAP01_{language}_v{VERSION}.xlsx")
     wb = load_workbook(output)
+    remove_template_defined_names(wb)
     cover = wb["Cover"]
     write(cover, "I19", SYSTEM)
     write(cover, "I20", VERSION)
@@ -234,11 +263,20 @@ def configuration(language):
     for row, (item, detail, status) in enumerate(labels["config_items"], 4):
         for cell, value in zip((f"B{row}", f"C{row}", f"D{row}", f"E{row}", f"F{row}", f"G{row}", f"H{row}"), ("IDTS", row - 3, item, detail, "N/A", "Prepared", status)):
             write(checklist, cell, value)
+    sheet_notes = {
+        "4": "N/A - IDTS does not use classic SAP customizing transactions; runtime configuration is managed through CAP profiles and private environment variables.",
+        "5": "Intentionally unused - no transport request or classic SAP client configuration applies to this CAP/Fiori review artifact.",
+    }
+    if language == "vi":
+        sheet_notes = {
+            "4": "N/A - IDTS không dùng transaction customizing SAP cổ điển; cấu hình runtime được quản lý bằng CAP profile và biến môi trường riêng tư.",
+            "5": "Cố ý không sử dụng - transport request hoặc cấu hình SAP client cổ điển không áp dụng cho artifact CAP/Fiori này.",
+        }
     for name in ("4", "5"):
         ws = wb[name]
-        write(ws, "A4", "IDTS CAP/Fiori configuration guidance")
-        write(ws, "C5", "Repository configuration is documented without credentials; use private environment configuration for secrets.")
-        write(ws, "C6", "N/A - no classic SAP customizing transaction")
+        write(ws, "A4", "IDTS CAP/Fiori configuration guidance" if language == "en" else "Hướng dẫn cấu hình IDTS CAP/Fiori")
+        write(ws, "C5", "Repository configuration is documented without credentials; use private environment configuration for secrets." if language == "en" else "Cấu hình repository không ghi credential; secret phải dùng cấu hình môi trường riêng tư.")
+        write(ws, "C6", sheet_notes[name])
     wb.properties.title = f"IDTS SAP490 Configuration Note {language.upper()} v{VERSION}"
     wb.properties.subject = "Secret-free CAP/Fiori configuration review"
     wb.properties.creator = "IDTS SAP01 Team"
@@ -247,14 +285,12 @@ def configuration(language):
 
 
 def change_tracker(language):
+    labels = LABELS[language]
     output = copy_template("TR_Management.xlsx", f"TR_Management_IDTS_SAP01_{language}_v{VERSION}.xlsx")
     wb = load_workbook(output)
+    remove_template_defined_names(wb)
     ws = wb["Sheet1"]
-    changes = [
-        (1, "DonHV", "IDTS", "Review baseline", "CR-001", "N/A", "CAP/Fiori MVP and document synchronization for SAP490 review", "Mentor review", "Pending", "N/A", "N/A"),
-        (2, "DonHV", "IDTS", "AI configuration", "CR-002", "CR-001", "Optional OpenAI provider is disabled by default; private key is not stored in source", "Shared QA after approval", "Pending", "N/A", "N/A"),
-        (3, "Team", "IDTS", "QA evidence", "CR-003", "CR-001", "Template-derived test and defect evidence refresh; product defects only in Test & Fix Bug", "Mentor review", "Pending", "N/A", "N/A"),
-    ]
+    changes = labels["change_rows"]
     for row, record in enumerate(changes, 2):
         for column, value in enumerate(record, 1):
             write(ws, ws.cell(row, column).coordinate, value)

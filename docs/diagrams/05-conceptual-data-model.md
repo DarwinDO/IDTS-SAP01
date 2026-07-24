@@ -1,6 +1,6 @@
 # 05 - Conceptual Data Model
 
-This model is conceptual. It represents the target business scope, not the current minimal CAP schema.
+This model is conceptual but aligned with the current CAP entity baseline. It deliberately omits code-list entities and low-level storage/worker fields so that the business relationships remain readable.
 
 The classification model separates SAP functional modules from IDTS/application components. This avoids calling an IDTS feature such as Bug Report a "SAP module".
 
@@ -12,6 +12,14 @@ erDiagram
         string email
         string role
         boolean active
+    }
+
+    AUTH_SESSION {
+        uuid ID
+        uuid userID
+        string tokenHash
+        datetime expiresAt
+        datetime revokedAt
     }
 
     DEVELOPER_PROFILE {
@@ -104,13 +112,13 @@ erDiagram
         datetime createdAt
     }
 
-    ATTACHMENT {
+    BUG_ATTACHMENT {
         uuid ID
         uuid bugID
-        uuid uploadedByID
-        string fileName
-        string mediaType
-        string storageRef
+        string filename
+        string mimeType
+        string url
+        int fileSize
         datetime createdAt
     }
 
@@ -152,6 +160,27 @@ erDiagram
         datetime createdAt
     }
 
+    NOTIFICATION_DELIVERY {
+        uuid ID
+        uuid notificationID
+        string channel
+        string status
+        int attemptCount
+        datetime nextAttemptAt
+        string lastErrorCode
+    }
+
+    AI_SUGGESTION {
+        uuid ID
+        uuid bugID
+        uuid requestedByID
+        uuid reviewedByID
+        string featureType
+        string reviewState
+        decimal confidence
+        datetime reviewedAt
+    }
+
     DUPLICATE_LINK {
         uuid ID
         uuid sourceBugID
@@ -161,6 +190,7 @@ erDiagram
     }
 
     USER ||--o{ BUG : creates
+    USER ||--o{ AUTH_SESSION : authenticates_with
     USER ||--o{ BUG : next_processor
     USER ||--o| DEVELOPER_PROFILE : may_have
     DEVELOPER_PROFILE ||--o{ BUG : assigned_to
@@ -181,8 +211,7 @@ erDiagram
     BUG ||--o{ COMMENT : has
     USER ||--o{ COMMENT : writes
 
-    BUG ||--o{ ATTACHMENT : has
-    USER ||--o{ ATTACHMENT : uploads
+    BUG ||--o{ BUG_ATTACHMENT : has_managed_attachments
 
     BUG ||--o{ HISTORY_EVENT : has
     USER ||--o{ HISTORY_EVENT : performs
@@ -193,6 +222,10 @@ erDiagram
 
     BUG ||--o{ NOTIFICATION : triggers
     USER ||--o{ NOTIFICATION : receives
+    NOTIFICATION ||--o{ NOTIFICATION_DELIVERY : delivers_by_channel
+
+    BUG ||--o{ AI_SUGGESTION : has_review_only_suggestions
+    USER ||--o{ AI_SUGGESTION : requests_or_reviews
 
     BUG ||--o{ DUPLICATE_LINK : source
     BUG ||--o{ DUPLICATE_LINK : target
@@ -200,7 +233,8 @@ erDiagram
 
 ## Entity Notes
 
-- `USER` represents Tester, Developer, and PM users. Reporter and Admin are not separate MVP roles.
+- `USER` represents Tester, Developer, and PM users. Reporter and Admin are not separate MVP roles. Password hashes remain private and are intentionally omitted from the diagram.
+- `AUTH_SESSION` stores only a bearer-token hash plus expiry/revocation metadata. Raw bearer tokens are not persisted.
 - `DEVELOPER_PROFILE` exists only for users who can receive bug assignments.
 - `SAP_MODULE` is a real SAP functional/business module such as FI, MM, SD, CO, PP, or HCM. It should not contain IDTS feature names.
 - `APPLICATION_COMPONENT` is the concrete application component or feature area where the bug appears. Examples: IDTS Bug Report, IDTS Assignment, IDTS Notification, Dashboard, a custom Fiori app, or a CAP service.
@@ -214,7 +248,10 @@ erDiagram
 - `BUG.rejectionReason` stores the latest visible rejection reason. Full immutable rejection history stays in `HISTORY_LOG.reason`.
 - `HISTORY_EVENT` is the business-facing history layer for the UI. It groups one action such as Assign, Reject, Resolve, or Add Comment into a single readable event summary.
 - `HISTORY_LOG` remains the raw field-level audit trail under one `HISTORY_EVENT`. This is where old/new values, next processor changes, and other technical details stay immutable.
-- `COMMENT`, `ATTACHMENT`, `HISTORY_EVENT`, `HISTORY_LOG`, and `NOTIFICATION` are lifecycle-owned child records of a bug.
+- `BUG_ATTACHMENT` represents the `@cap-js/attachments` composition. CAP stores metadata in the database; the integration profile stores binary content through the configured S3-compatible object-store binding. The diagram does not treat a provider URL as business data.
+- `NOTIFICATION` is the in-app source event. `NOTIFICATION_DELIVERY` is a separate channel outbox row with attempt/retry/failure state; provider failure does not undo the bug action.
+- `AI_SUGGESTION` stores sanitized review/audit metadata for advisory results. It does not replace or automatically update `BUG` business fields.
+- `COMMENT`, `BUG_ATTACHMENT`, `HISTORY_EVENT`, `HISTORY_LOG`, `NOTIFICATION`, and `AI_SUGGESTION` are lifecycle-owned child records of a bug.
 - `DUPLICATE_LINK` records relationships between similar bugs without forcing duplicate data into the main bug record.
 
 ## Fiori Selection Flow
@@ -264,8 +301,8 @@ They meet on transactional or responsibility records:
 
 Only add a stricter bridge such as `SAP_MODULE_COMPONENT_CATEGORY` if the business later requires rules like "this component/category pair is valid for FI but not valid for MM". For the current IDTS scope, `SAP_MODULE_COMPONENT` is enough for component filtering, and `COMPONENT_CATEGORY` is enough for category filtering.
 
-## Current Implementation Gap
+## Current Implementation Alignment and Caveat
 
-Before WP1 implementation, the CAP model only contained a minimal `Bugs` entity. After WP1 Data Model Foundation, the implemented CDS model now follows this conceptual structure at entity/relationship level. Handler rules, Fiori annotations, and dependent value-help behavior still belong to later work packages.
+The implemented CDS model follows these core entities and relationships, including `AuthSessions`, managed attachments, `NotificationDeliveries`, and `AiSuggestions`. This remains a conceptual review view: exact code-list associations, worker-lock fields, provider payload fields, draft tables, and generated attachment storage details must be read from `db/schema.cds` and the compiled CDS model rather than inferred from this figure.
 
-Vietnamese: Trước WP1, CAP model chỉ có entity `Bugs` tối giản. Sau WP1 Data Model Foundation, CDS model đã đi theo cấu trúc conceptual này ở mức entity/relationship. Handler rules, Fiori annotations và dependent value-help behavior vẫn thuộc các work package sau.
+Vietnamese: CDS hiện tại đã có các entity/link chính trong diagram, bao gồm `AuthSessions`, managed attachments, `NotificationDeliveries` và `AiSuggestions`. Đây vẫn là conceptual review view; code-list association, worker lock, provider payload, draft table và storage field do attachment plugin sinh ra phải được đọc từ `db/schema.cds` và compiled CDS model, không suy ra từ hình này.

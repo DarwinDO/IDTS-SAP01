@@ -49,7 +49,7 @@ async function summarizeBugHandoff (req, entities, dependencies = {}) {
     generatedAt: new Date()
   })
 
-  await recordSummaryAudit({
+  const audit = await recordSummaryAudit({
     tx,
     req,
     entities,
@@ -59,7 +59,10 @@ async function summarizeBugHandoff (req, entities, dependencies = {}) {
     result
   })
 
-  return result
+  return {
+    suggestionID: audit?.ID || null,
+    ...result
+  }
 }
 
 async function readGroundedBugContext (tx, sourceBugID) {
@@ -465,9 +468,9 @@ function normalizeConfidence (value, fallback) {
 async function recordSummaryAudit ({ tx, req, entities, context, provider, providerResult, result }) {
   // Lưu metadata/summary an toàn vào AISuggestions; không ghi summary vào HistoryEvents thật.
   const requester = await resolveRequestUser(req, entities)
-  if (!requester) return
+  if (!requester) return null
 
-  await createAiSuggestion(tx, {
+  return createAiSuggestion(tx, {
     bugID: context.bug.ID,
     requestedByID: requester.ID,
     featureType: FEATURE_TYPES.BUG_SUMMARY,

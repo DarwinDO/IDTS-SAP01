@@ -11,7 +11,7 @@ from openpyxl.styles import Alignment
 ROOT = Path(__file__).resolve().parents[2]
 TEMPLATE = ROOT / "docs" / "sap490" / "templates" / "Deliverable_template" / "Test_And_Fix_Bug.xlsx"
 OUT = ROOT / "docs" / "sap490" / "generated"
-VERSION = "0.4"
+VERSION = "0.5"
 
 DEFECTS = [
     ("IDTS-13", "Object Page stale after lifecycle action", "Fiori side effects targeted properties instead of the bound entity, so action changes did not fully refresh the Object Page.", "The active bug, status, ownership, and related sections refresh after a successful lifecycle action.", "Changed action side effects to `TargetEntities: [$self]`; CAP compile and browser UAT passed."),
@@ -64,6 +64,7 @@ def fill(language):
     output = OUT / f"Test_And_Fix_Bug_IDTS_SAP01_{language}_v{VERSION}.xlsx"
     shutil.copy2(TEMPLATE, output)
     wb = load_workbook(output)
+    wb.defined_names.clear()
     ws = wb["Fix and bugs"]
     headers = ("No", "Bug", "Details", "Expected result", "Fix") if language == "en" else ("STT", "Lỗi sản phẩm", "Chi tiết", "Kết quả mong đợi", "Cách sửa")
     for cell, value in zip(("A1", "B1", "C1", "D1", "E1"), headers):
@@ -86,6 +87,22 @@ def fill(language):
         for column in range(2, 7):
             ws.cell(row, column).alignment = Alignment(wrap_text=True, vertical="top")
         ws.row_dimensions[row].height = row_height((title, details, expected, fix, f"{source} ({issue})"))
+    unused_notes = {
+        "en": (
+            "Intentionally unused — confirmed IDTS product defects are consolidated in 'Fix and bugs'; no second defect category is used.",
+            "N/A — no additional product-defect dataset is maintained for this review version.",
+        ),
+        "vi": (
+            "Cố ý không sử dụng — các lỗi sản phẩm IDTS đã xác nhận được tổng hợp trong sheet 'Fix and bugs'; không dùng nhóm lỗi thứ hai.",
+            "N/A — phiên bản review này không duy trì thêm bộ dữ liệu lỗi sản phẩm khác.",
+        ),
+    }
+    for sheet_name, note in zip(("Issue 2", "Issue 4"), unused_notes[language]):
+        note_ws = wb[sheet_name]
+        note_ws["A1"] = note
+        note_ws["A1"].alignment = Alignment(wrap_text=True, vertical="top")
+        note_ws.column_dimensions["A"].width = 80
+        note_ws.row_dimensions[1].height = 48
     wb.properties.title = f"IDTS SAP490 Test and Fix Bug {language.upper()} v{VERSION}"
     wb.properties.subject = "Confirmed product defects only"
     wb.save(output)

@@ -66,8 +66,8 @@ When an AI suggestion is generated, IDTS may store only a safe normalized audit 
 - Sanitized suggestion payload and optional normalized confidence.
 - Provider/model aliases that contain no credential or private endpoint.
 - Created time and requesting user.
-- Review state: `PENDING`, `ACCEPTED`, `REJECTED`, `IGNORED`, or `EXPIRED`.
-- Reviewer and review time when an explicit review occurs.
+- Target review-state vocabulary: `PENDING`, `ACCEPTED`, `REJECTED`, `IGNORED`, or `EXPIRED`. Current runtime persists source-linked suggestions in `PENDING` only; no public review-state update action is implemented yet.
+- Reviewer and review time are target fields for a future explicit review-state action, not current accepted evidence.
 
 Do not persist raw prompts, raw provider responses, hidden reasoning, credentials, tokens, attachment content, or unnecessary personal data. Audit records must not be publicly writable through OData.
 
@@ -140,8 +140,8 @@ Khi tạo gợi ý AI, IDTS chỉ được lưu audit record chuẩn hóa và an
 - Suggestion payload đã làm sạch và confidence chuẩn hóa nếu có.
 - Alias provider/model không chứa credential hoặc private endpoint.
 - Thời gian tạo và người yêu cầu.
-- Trạng thái review: `PENDING`, `ACCEPTED`, `REJECTED`, `IGNORED` hoặc `EXPIRED`.
-- Người review và thời gian review khi có hành động review rõ ràng.
+- Bộ giá trị review-state mục tiêu: `PENDING`, `ACCEPTED`, `REJECTED`, `IGNORED` hoặc `EXPIRED`. Runtime hiện chỉ persist source-linked suggestion ở `PENDING`; chưa có public action cập nhật review state.
+- Người review và thời gian review là field mục tiêu cho explicit review-state action trong tương lai, chưa phải evidence đã được nghiệm thu hiện tại.
 
 Không persist raw prompt, raw provider response, hidden reasoning, credential, token, attachment content hoặc dữ liệu cá nhân không cần thiết. Audit record không được cho client ghi trực tiếp qua OData.
 

@@ -1,11 +1,11 @@
 # Tài liệu Yêu cầu Nghiệp vụ
 
-Dự án: Issue and Defect Tracking System in SAP  
-Loại tài liệu: Business Requirements Document (BRD)  
-Ngôn ngữ: Tiếng Việt  
-Trạng thái: Draft v1.3
-Cập nhật lần cuối: 2026-07-10
-Chuẩn bị cho: SAP490 project delivery và mentor review  
+Dự án: Issue and Defect Tracking System in SAP
+Loại tài liệu: Business Requirements Document (BRD)
+Ngôn ngữ: Tiếng Việt
+Trạng thái: Draft v1.6
+Cập nhật lần cuối: 2026-07-24
+Chuẩn bị cho: SAP490 project delivery và mentor review
 Phong cách tài liệu: SAP490 hybrid, ưu tiên nghiệp vụ và chỉ giữ bối cảnh triển khai SAP ở mức ngắn gọn
 
 ## 1. Kiểm soát tài liệu
@@ -19,6 +19,8 @@ Phong cách tài liệu: SAP490 hybrid, ưu tiên nghiệp vụ và chỉ giữ 
 | v1.2 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Cập nhật MVP role baseline thành ba role active: Tester, Developer và PM. Reporter và Admin được hoãn như role tách riêng và không còn là cột RACI active trong MVP. | Draft |
 | v1.3 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Đồng bộ baseline implementation và review hiện tại: workflow CAP/Fiori MVP, luồng audit/notification/attachment, PM monitoring và AI hỗ trợ tùy chọn có human review. | Draft |
 | v1.4 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Bổ sung figure review đã render và traceability tới Diagram Pack; canonical diagram source vẫn được version control. | Draft |
+| v1.5 | 2026-07-22 | IDTS Project Team | Mentor / Supervisor | Đồng bộ baseline mentor review với authentication, dữ liệu/storage shared QA, email delivery bất đồng bộ và AI audit có human review đã triển khai. | Draft |
+| v1.6 | 2026-07-24 | IDTS Project Team | Mentor / Supervisor | Làm rõ audit AI hiện chỉ lưu suggestion có liên kết nguồn ở trạng thái `PENDING`; chưa có public action lưu `ACCEPTED`, `REJECTED` hoặc `IGNORED`. | Draft |
 
 ### 1.2 Review và phê duyệt
 
@@ -33,7 +35,7 @@ Phong cách tài liệu: SAP490 hybrid, ưu tiên nghiệp vụ và chỉ giữ 
 
 BRD này định nghĩa nhu cầu nghiệp vụ, mục tiêu, stakeholder, phạm vi, yêu cầu nghiệp vụ cấp cao, business rule, rủi ro và tiêu chí thành công cho Issue and Defect Tracking System in SAP (IDTS). Tài liệu dùng để thống nhất giữa nhóm dự án và mentor trước khi đi vào SRS, FRS, technical design và triển khai SAP CAP/Fiori.
 
-Đây là BRD theo hướng SAP490 hybrid. Tài liệu vẫn ưu tiên góc nhìn nghiệp vụ, đồng thời ghi nhận ngắn gọn rằng định hướng triển khai dự kiến là SAP CAP Node.js, OData V4, SAP Fiori Elements/SAPUI5 và SQLite cho local development. Thiết kế kỹ thuật chi tiết sẽ thuộc SRS, FRS, architecture và implementation documents sau này.
+Đây là BRD theo hướng SAP490 hybrid. Tài liệu vẫn ưu tiên góc nhìn nghiệp vụ, đồng thời ghi nhận ngắn gọn rằng IDTS dùng SAP CAP Node.js, OData V4, SAP Fiori Elements/SAPUI5, SQLite cho local development và baseline shared QA dùng PostgreSQL với object storage được bind bên ngoài. Thiết kế kỹ thuật chi tiết thuộc SRS, FRS, architecture và implementation documents.
 
 ## 2. Tóm tắt điều hành
 
@@ -139,7 +141,9 @@ Trong MVP, một người dùng thực tế có thể đảm nhận nhiều trá
 
 ## 8. Hiện trạng
 
-Repository hiện đã triển khai baseline CAP/Fiori MVP đã thống nhất: tạo bug có cấu trúc, classification và assignment theo responsibility, lifecycle action có kiểm soát, comment, draft attachment, audit/history, notification, PM monitoring và AI hỗ trợ tùy chọn chỉ ở mức human review. SAP490 review tập trung vào bằng chứng, traceability và phần acceptance còn lại thay vì một scaffold tối thiểu.
+Repository hiện đã triển khai baseline CAP/Fiori MVP đã thống nhất: tạo bug có cấu trúc, classification và assignment theo responsibility, lifecycle action có kiểm soát, comment, draft attachment, audit/history, notification, PM monitoring và AI hỗ trợ tùy chọn chỉ ở mức human review. User đăng nhập qua nền tảng login/session của project (`AuthService` và `AuthSessions`); quyền theo business role vẫn là authority cuối. Shared QA được host trên Render với PostgreSQL và S3 object storage bind bên ngoài, còn SQLite là profile local-development. SAP490 review tập trung vào bằng chứng, traceability và phần acceptance còn lại thay vì một scaffold tối thiểu.
+
+Important events tạo in-app notification và, khi áp dụng, tạo email-delivery work item riêng trong `NotificationDeliveries`. Email được xử lý bất đồng bộ: provider failure không được rollback bug action gốc. Optional AI output có liên kết nguồn được lưu thành review/audit record đã chuẩn hóa trong `AiSuggestions` ở trạng thái `PENDING`, không bao giờ là autonomous decision. Service hiện chưa có public action lưu `ACCEPTED`, `REJECTED` hoặc `IGNORED`; người dùng chỉ review output rồi thực hiện riêng một CAP action thông thường đã được cấp quyền. Acceptance của live provider vẫn phụ thuộc private configuration đã duyệt và bằng chứng riêng; BRD này không claim delivery chưa verify.
 
 Real AI provider tùy chọn mặc định tắt và không thay đổi business authority, authorization, validation, assignment hoặc status transition. Việc dùng ở production vẫn phụ thuộc private configuration đã được duyệt và bằng chứng live-provider riêng; BRD này không xem AI output là quyết định nghiệp vụ.
 
@@ -206,7 +210,7 @@ Business process mục tiêu cần hỗ trợ flow đầu-cuối sau:
 | Data model ổn định trước khi xây Fiori | Fiori List Report/Object Page phụ thuộc entity, association, action và annotation ổn định. |
 | Status transition rules rõ ràng | Backend validation và UI action phụ thuộc lifecycle đã thống nhất. |
 | Developer responsibility master data | Assignment filtering phụ thuộc responsibility mapping đáng tin cậy. |
-| Quyết định notification channel | MVP có thể bắt đầu bằng notification records; kênh gửi thực tế có thể để sau. |
+| Private integration configuration và acceptance evidence | Shared QA database, external object storage và live email delivery cần private binding/configuration đã duyệt cùng bằng chứng verify riêng. |
 
 ## 11. Business capabilities
 
@@ -295,9 +299,9 @@ Retest Required nằm giữa Resolved và Closed khi cần verification. Điều
 | Component Category | Cặp hợp lệ giữa Application Component và Defect Category. | Dùng để tránh combination không hợp lệ. |
 | Developer Responsibility | Mapping giữa Developer và Component Category, optional scoped by SAP Module. | Dẫn hướng assignment candidate filtering. |
 | Comment | Trao đổi gắn với bug. | Không trực tiếp đổi status. |
-| Attachment | Evidence metadata hoặc file reference. | Full file storage có thể deferred. |
+| Attachment | Evidence metadata và file content được quản lý qua attachment capability được hỗ trợ. | Shared QA lưu content trong S3 object storage bind bên ngoài; acceptance phụ thuộc active binding và evidence. |
 | History Log | Audit trail cho important actions. | Lưu actor, timestamp, action, old value, new value và reason khi cần. |
-| Notification | Record của important event và recipient. | External delivery có thể deferred. |
+| Notification | In-app event và recipient, kèm email-outbox record riêng khi áp dụng. | Live provider delivery cần approved evidence riêng. |
 
 ## 16. Yêu cầu reporting và monitoring
 
@@ -332,15 +336,16 @@ PM monitoring tối thiểu cần hỗ trợ:
 - SAP Module là optional vì không phải bug IDTS nào cũng thuộc SAP functional module.
 - Application Component và Defect Category là required cho assignment filtering.
 - Developer workload warning có thể bắt đầu ở mức MVP cơ bản.
-- External notification delivery có thể deferred; MVP có thể bắt đầu bằng notification records/triggers.
-- Attachments có thể bắt đầu bằng metadata và storage references.
+- Important events persist in-app notification và tạo email-delivery work item riêng khi áp dụng; email-provider failure không đảo ngược business action.
+- Local development dùng SQLite. Shared QA dùng PostgreSQL và externally bound object storage cho attachment content; acceptance cuối của external storage còn phụ thuộc active binding và evidence.
+- AI suggestion tùy chọn chỉ lưu dưới dạng review record đã chuẩn hóa, an toàn và gắn với source bug. Con người phải review và quyết định có sử dụng suggestion hay không.
 - Product Discovery được dùng cho future requirements chưa rõ trước khi update BRD/SRS/FRS hoặc implementation tasks.
 
 ### 18.2 Constraints
 
 - Solution phải khả thi trong phạm vi SAP490 project delivery.
-- Định hướng implementation dự kiến là SAP CAP Node.js, OData V4, SAP Fiori Elements/SAPUI5 và SQLite cho local development.
-- Future deployment có thể dùng SAP HANA Cloud hoặc PostgreSQL, nhưng không hardcode endpoint hoặc credential.
+- Baseline implementation là SAP CAP Node.js, OData V4, SAP Fiori Elements/SAPUI5, SQLite cho local development và PostgreSQL cho shared QA trên Render.
+- External object storage và email delivery dùng private configuration hoặc service binding; không hardcode endpoint, credential, token hoặc secret.
 - Thiết kế chi tiết CAP service, Fiori annotations, UI behavior và handler validation thuộc SRS/FRS/technical design, không nằm trong BRD này.
 - MVP không được mở rộng thành full ALM, ITSM, project management, source-code management, CI/CD hoặc code review.
 - Formal BRD/SRS/FRS deliverables được duy trì bằng file tiếng Anh và tiếng Việt riêng.
@@ -379,8 +384,8 @@ BRD được thỏa mãn khi dự án chứng minh được:
 | --- | --- | --- |
 | OQ-001 | Supervisor có chấp nhận SAP CAP/Fiori artifacts là SAP Coding deliverable trong SAP490 template không? | Team / Mentor |
 | OQ-002 | PM có quyền assign/reassign trực tiếp trong MVP hay chỉ request reassignment? | Team / Mentor |
-| OQ-003 | Notification channel nào bắt buộc cho MVP: chỉ in-app records, email, SAP BTP service hay third-party channels? | Team / Mentor |
-| OQ-004 | Cách lưu attachment nào phù hợp cho giai đoạn dự án hiện tại? | Team / Mentor |
+| OQ-003 | Mentor yêu cầu bằng chứng nào để accept baseline in-app cộng email outbox bất đồng bộ đã triển khai mà không claim live-provider delivery chưa verify? | Team / Mentor |
+| OQ-004 | Mentor yêu cầu bằng chứng nào để accept PostgreSQL và externally bound attachment storage trong shared QA? | Team / Mentor |
 | OQ-005 | SLA hoặc overdue threshold chính xác cho bug High, Medium và Low là gì? | Team / PM |
 
 ## 22. Glossary

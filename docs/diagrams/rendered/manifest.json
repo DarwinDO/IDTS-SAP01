@@ -9,7 +9,7 @@
       "sourceDocument": "docs/diagrams/01-system-context-and-architecture.md",
       "sourceAsset": "docs/diagrams/rendered/source/01-system-context.mmd",
       "svgAsset": "docs/diagrams/rendered/01-system-context.svg",
-      "sha256": "93240f888a90c276dd9a1eeb2ae733d61793567970bd9bc3b140c6a248c07c37"
+      "sha256": "7877ab584b82f263dde4bb87728345a2c5144f6c941c7e6b25d66544e8d17f59"
     },
     {
       "id": "02",
@@ -19,12 +19,12 @@
       "sourceDocument": "docs/diagrams/01-system-context-and-architecture.md",
       "sourceAsset": "docs/diagrams/rendered/source/02-cap-fiori-architecture.mmd",
       "svgAsset": "docs/diagrams/rendered/02-cap-fiori-architecture.svg",
-      "sha256": "83d7555c3138c7f716b222437dface78033c4b3eb6b145571b3d37083791fd7b"
+      "sha256": "856be48fef71fd4ab058f6467bacaa0d7707d501f099d47fd3c4ab94014f6d67"
     },
     {
       "id": "03",
       "asset": "03-use-case",
-      "title": "02 - Use Case Diagram",
+      "title": "Use Case Diagram",
       "format": "plantuml",
       "sourceDocument": "docs/diagrams/02-use-cases.md",
       "sourceAsset": "docs/diagrams/rendered/source/03-use-case.puml",
@@ -39,7 +39,7 @@
       "sourceDocument": "docs/diagrams/03-business-process-flows.md",
       "sourceAsset": "docs/diagrams/rendered/source/04-end-to-end-defect-flow.mmd",
       "svgAsset": "docs/diagrams/rendered/04-end-to-end-defect-flow.svg",
-      "sha256": "39d821704386ed08c723f3d54984aba2b01a109f09c7499d26e38420e52d9cee"
+      "sha256": "c8142d6a1e4b5481f631a813081c3c563d01e1bd38994be61b1cff72f4172e36"
     },
     {
       "id": "05",
@@ -69,27 +69,27 @@
       "sourceDocument": "docs/diagrams/03-business-process-flows.md",
       "sourceAsset": "docs/diagrams/rendered/source/07-developer-review.mmd",
       "svgAsset": "docs/diagrams/rendered/07-developer-review.svg",
-      "sha256": "82e35eb9667f84f6ec3404783195ccc7fcee0a64b6d28cd047308f41daf46aee"
+      "sha256": "9f33720cc8a99efb39545d99c776876d080fccae847ffaf1ba96e58736c9b84d"
     },
     {
       "id": "08",
       "asset": "08-status-lifecycle",
-      "title": "04 - Bug Status Lifecycle",
+      "title": "Bug Status Lifecycle",
       "format": "mermaid",
       "sourceDocument": "docs/diagrams/04-status-lifecycle.md",
       "sourceAsset": "docs/diagrams/rendered/source/08-status-lifecycle.mmd",
       "svgAsset": "docs/diagrams/rendered/08-status-lifecycle.svg",
-      "sha256": "f88545bfd7aafcd655cbab3eac240f98f2012c3a44325590559f79e5ef3392ef"
+      "sha256": "e4ed866cc01d1deedc35239db655c50504b2e5604a1ca07e575a36bbb91a2992"
     },
     {
       "id": "09",
       "asset": "09-conceptual-data-model",
-      "title": "05 - Conceptual Data Model",
+      "title": "Conceptual Data Model",
       "format": "mermaid",
       "sourceDocument": "docs/diagrams/05-conceptual-data-model.md",
       "sourceAsset": "docs/diagrams/rendered/source/09-conceptual-data-model.mmd",
       "svgAsset": "docs/diagrams/rendered/09-conceptual-data-model.svg",
-      "sha256": "a99139afa832b02746f225d8f37aa77d125802e04224e189f9038d2909780de0"
+      "sha256": "2ecdcccc0f6548542021618731949d1529c92f294aa4237f62e12c6bbddc78fe"
     },
     {
       "id": "10",
@@ -99,7 +99,7 @@
       "sourceDocument": "docs/diagrams/06-notification-audit-monitoring.md",
       "sourceAsset": "docs/diagrams/rendered/source/10-submit-notification.mmd",
       "svgAsset": "docs/diagrams/rendered/10-submit-notification.svg",
-      "sha256": "1999ed5113e5dcf887757bac3b26cb7a75628acc3735aefe926bf8df1e0b4e20"
+      "sha256": "d5ea46081fa475a6d7eb6693a30cd0e3a63bd7e52bd3be750d764ca1418a3270"
     },
     {
       "id": "11",
@@ -109,7 +109,7 @@
       "sourceDocument": "docs/diagrams/06-notification-audit-monitoring.md",
       "sourceAsset": "docs/diagrams/rendered/source/11-developer-review-notification.mmd",
       "svgAsset": "docs/diagrams/rendered/11-developer-review-notification.svg",
-      "sha256": "dac4ffa40ed3db77a24d48ac85b46c31ae4812cc10e65e8c51d324d8f93d19b3"
+      "sha256": "e820e627353d65840d86c609ebc16f3170702fa8b8e4601274eb683a27c1503f"
     },
     {
       "id": "12",
@@ -119,17 +119,17 @@
       "sourceDocument": "docs/diagrams/06-notification-audit-monitoring.md",
       "sourceAsset": "docs/diagrams/rendered/source/12-pm-monitoring.mmd",
       "svgAsset": "docs/diagrams/rendered/12-pm-monitoring.svg",
-      "sha256": "0416497e91fcf3592df31d9ad0b3fed39ef2f531d27c3e1a22e0d4ccb4562dbd"
+      "sha256": "597cea61d20d98ebb54af4f34ba4b888e55e37ac2ff17f0160f9a6247d8028a7"
     },
     {
       "id": "13",
       "asset": "13-srs-system-context",
-      "title": "07 - SRS System Context",
+      "title": "SRS System Context",
       "format": "mermaid",
       "sourceDocument": "docs/diagrams/07-srs-system-context.md",
       "sourceAsset": "docs/diagrams/rendered/source/13-srs-system-context.mmd",
       "svgAsset": "docs/diagrams/rendered/13-srs-system-context.svg",
-      "sha256": "aa34f5ca0e961f81c57679c0fb909346d2b3a77bbb56650df17913d48cd6cc5e"
+      "sha256": "87099d774de44e73471ea654da937890586f980291abb244c165f7c6042ce950"
     },
     {
       "id": "14",
@@ -159,7 +159,7 @@
       "sourceDocument": "docs/diagrams/08-frs-functional-workflows.md",
       "sourceAsset": "docs/diagrams/rendered/source/16-frs-status-lifecycle.mmd",
       "svgAsset": "docs/diagrams/rendered/16-frs-status-lifecycle.svg",
-      "sha256": "3e58157adce2eef5bdef57a01379c0f03a9f222d9a004a4eb97ed4bb5896f753"
+      "sha256": "fbcb2777f0821988407be050d3fcd2fcdc997628d6ddae88d86ba0cd1bfe0435"
     },
     {
       "id": "17",
@@ -179,7 +179,7 @@
       "sourceDocument": "docs/diagrams/08-frs-functional-workflows.md",
       "sourceAsset": "docs/diagrams/rendered/source/18-frs-developer-review.mmd",
       "svgAsset": "docs/diagrams/rendered/18-frs-developer-review.svg",
-      "sha256": "faa7e213d3150a802eb84c77c58f1e99e0e8afdf30d246fd275d7ef01f128500"
+      "sha256": "b7d4be318fe4231ec2336615f5be71a44d078c4e052d195b349c28167427147b"
     },
     {
       "id": "19",
@@ -189,7 +189,7 @@
       "sourceDocument": "docs/diagrams/08-frs-functional-workflows.md",
       "sourceAsset": "docs/diagrams/rendered/source/19-frs-request-more-information.mmd",
       "svgAsset": "docs/diagrams/rendered/19-frs-request-more-information.svg",
-      "sha256": "6186a9a234a0cdd85ae20a32bb74bf5b6efcfe38c1552a153cf35ae0dc1a2183"
+      "sha256": "db836bf08e80f19b981c835fce21f59a5d26c7fdc80eb0d73e2d92fce91641f8"
     },
     {
       "id": "20",

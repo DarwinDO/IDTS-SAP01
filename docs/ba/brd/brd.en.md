@@ -1,11 +1,11 @@
 # Business Requirements Document
 
-Project: Issue and Defect Tracking System in SAP  
-Document type: Business Requirements Document (BRD)  
-Language: English  
-Status: Draft v1.4
-Last updated: 2026-07-11
-Prepared for: SAP490 project delivery and mentor review  
+Project: Issue and Defect Tracking System in SAP
+Document type: Business Requirements Document (BRD)
+Language: English
+Status: Draft v1.6
+Last updated: 2026-07-24
+Prepared for: SAP490 project delivery and mentor review
 Document style: SAP490 hybrid, business-first with light SAP implementation context
 
 ## 1. Document Control
@@ -19,6 +19,8 @@ Document style: SAP490 hybrid, business-first with light SAP implementation cont
 | v1.2 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Updated MVP role baseline to three active roles: Tester, Developer, and PM. Reporter and Admin are deferred as separate roles and no longer appear as active MVP RACI columns. | Draft |
 | v1.3 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Synced current implementation and review baseline: CAP/Fiori MVP workflow, audit/notification/attachment flows, PM monitoring, and optional human-review AI assistance. | Draft |
 | v1.4 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Added rendered business-review figures and Diagram Pack traceability; canonical diagram source remains version controlled. | Draft |
+| v1.5 | 2026-07-22 | IDTS Project Team | Mentor / Supervisor | Aligned the mentor-review baseline with implemented authentication, shared QA data/storage, asynchronous email delivery, and human-reviewed AI audit behavior. | Draft |
+| v1.6 | 2026-07-24 | IDTS Project Team | Mentor / Supervisor | Clarified that the current AI audit stores source-linked suggestions in `PENDING`; no public action yet persists `ACCEPTED`, `REJECTED`, or `IGNORED`. | Draft |
 
 ### 1.2 Review and Sign-Off
 
@@ -33,7 +35,7 @@ Document style: SAP490 hybrid, business-first with light SAP implementation cont
 
 This BRD defines the business need, objectives, stakeholders, scope, high-level business requirements, business rules, risks, and success criteria for the Issue and Defect Tracking System in SAP (IDTS). It is intended to align the project team and mentor before detailed SRS, FRS, technical design, and SAP CAP/Fiori implementation work.
 
-This is a SAP490 hybrid BRD. It keeps the document business-first, while briefly recording that the expected implementation direction is SAP CAP Node.js, OData V4, SAP Fiori Elements/SAPUI5, and local SQLite for development. Detailed technical design belongs in later SRS, FRS, architecture, and implementation documents.
+This is a SAP490 hybrid BRD. It keeps the document business-first, while briefly recording that IDTS uses SAP CAP Node.js, OData V4, SAP Fiori Elements/SAPUI5, local SQLite for development, and a shared QA baseline using PostgreSQL with externally bound object storage. Detailed technical design belongs in the SRS, FRS, architecture, and implementation documents.
 
 ## 2. Executive Summary
 
@@ -139,7 +141,9 @@ For MVP, one real user may perform multiple responsibilities, but only Tester, D
 
 ## 8. Current State
 
-The repository now implements the agreed CAP/Fiori MVP baseline: structured bug creation, classification and responsibility-aware assignment, controlled lifecycle actions, comments, draft attachments, audit/history, notifications, PM monitoring, and optional AI assistance that remains human-review only. The SAP490 review focuses on evidence, traceability, and remaining acceptance rather than a minimal scaffold.
+The repository now implements the agreed CAP/Fiori MVP baseline: structured bug creation, classification and responsibility-aware assignment, controlled lifecycle actions, comments, draft attachments, audit/history, notifications, PM monitoring, and optional AI assistance that remains human-review only. Users authenticate through the project login/session foundation (`AuthService` and `AuthSessions`); business-role permissions remain authoritative. Shared QA is hosted on Render with PostgreSQL and externally bound S3 object storage, while SQLite remains the local-development profile. The SAP490 review focuses on evidence, traceability, and remaining acceptance rather than a minimal scaffold.
+
+Important events create in-app notification records and, when applicable, separate email-delivery work items in `NotificationDeliveries`. Email processing is asynchronous: a provider failure must not roll back the original bug action. Optional source-linked AI output is stored as a normalized `AiSuggestions` review/audit record in `PENDING`, never as an autonomous decision. The current service exposes no public action that persists `ACCEPTED`, `REJECTED`, or `IGNORED`; a user may only review the output and then separately invoke an ordinary authorized CAP action. Live-provider acceptance still depends on approved private configuration and evidence; this BRD does not claim unverified delivery.
 
 The optional real AI provider is disabled by default and does not change business authority, authorization, validation, assignment, or status transitions. Its production use remains dependent on approved private configuration and separate live-provider evidence; this BRD does not treat AI output as a business decision.
 
@@ -206,7 +210,7 @@ The target business process should support this end-to-end flow:
 | Stable data model before Fiori build | Fiori List Report/Object Page depends on stable entities, associations, actions, and annotations. |
 | Defined status transition rules | Backend validations and UI actions depend on agreed lifecycle rules. |
 | Developer responsibility master data | Assignment filtering depends on reliable responsibility mapping. |
-| Notification channel decision | MVP may start with notification records; actual delivery channel can be deferred. |
+| Private integration configuration and acceptance evidence | Shared QA database, external object storage, and live email delivery require approved private bindings/configuration and separate verification evidence. |
 
 ## 11. Business Capabilities
 
@@ -295,9 +299,9 @@ Retest Required sits between Resolved and Closed when verification is needed. Th
 | Component Category | Valid pair between Application Component and Defect Category. | Used to avoid invalid combinations. |
 | Developer Responsibility | Mapping between Developer and Component Category, optionally scoped by SAP Module. | Drives assignment candidate filtering. |
 | Comment | Discussion attached to a bug. | Does not directly change status. |
-| Attachment | Evidence metadata or file reference. | Full file storage can be deferred. |
+| Attachment | Evidence metadata and file content managed through the supported attachment capability. | Shared QA stores content in externally bound S3 object storage; acceptance depends on active binding and evidence. |
 | History Log | Audit trail for important actions. | Stores actor, timestamp, action, old value, new value, and reason where applicable. |
-| Notification | Record of important event and recipient. | External delivery can be deferred. |
+| Notification | In-app event and recipient, with a separate email-outbox record where applicable. | Live provider delivery requires separate approved evidence. |
 
 ## 16. Reporting and Monitoring Requirements
 
@@ -332,15 +336,16 @@ PM monitoring must support at least:
 - SAP Module is optional because not every IDTS bug belongs to a SAP functional module.
 - Application Component and Defect Category are required for assignment filtering.
 - Developer workload warning can start at a basic MVP level.
-- External notification delivery can be deferred; MVP may start with notification records/triggers.
-- Attachments can start as metadata and storage references.
+- Important events persist in-app notifications and create separate email-delivery work items where applicable; email-provider failure does not reverse the business action.
+- Local development uses SQLite. Shared QA uses PostgreSQL and externally bound object storage for attachment content; final external-storage acceptance remains dependent on the active binding and evidence.
+- Optional AI suggestions are stored only as normalized, safe review records linked to the source bug. A person must review and decide whether to use a suggestion.
 - Product Discovery is used for unclear future requirements before updating BRD/SRS/FRS or implementation tasks.
 
 ### 18.2 Constraints
 
 - The solution must remain feasible for SAP490 project delivery.
-- The expected implementation direction is SAP CAP Node.js, OData V4, SAP Fiori Elements/SAPUI5, and local SQLite for development.
-- Future deployment may target SAP HANA Cloud or PostgreSQL, but no endpoint or credential is hardcoded.
+- The implementation baseline is SAP CAP Node.js, OData V4, SAP Fiori Elements/SAPUI5, SQLite for local development, and PostgreSQL for shared QA on Render.
+- External object storage and email delivery use private configuration or service bindings; no endpoint, credential, token, or secret is hardcoded.
 - Detailed CAP service design, Fiori annotations, UI behavior, and handler validation belong in SRS/FRS/technical design, not in this BRD.
 - The MVP must not expand into full ALM, ITSM, project management, source-code management, CI/CD, or code review.
 - Formal BRD/SRS/FRS deliverables are maintained as separate English and Vietnamese files.
@@ -379,8 +384,8 @@ The BRD is satisfied when the project can demonstrate that:
 | --- | --- | --- |
 | OQ-001 | Does the supervisor accept SAP CAP/Fiori artifacts as the SAP Coding deliverable in SAP490 templates? | Team / Mentor |
 | OQ-002 | Should PM have direct assignment/reassignment permission in MVP, or only request reassignment? | Team / Mentor |
-| OQ-003 | Which notification channels are required for MVP: in-app records only, email, SAP BTP service, or third-party channels? | Team / Mentor |
-| OQ-004 | Which attachment storage approach is acceptable for the project stage? | Team / Mentor |
+| OQ-003 | What mentor evidence is required to accept the implemented in-app plus asynchronous email-outbox baseline without claiming unverified live-provider delivery? | Team / Mentor |
+| OQ-004 | What mentor evidence is required to accept PostgreSQL plus externally bound attachment storage in the shared QA environment? | Team / Mentor |
 | OQ-005 | What exact SLA or overdue thresholds should be used for High, Medium, and Low priority bugs? | Team / PM |
 
 ## 22. Glossary

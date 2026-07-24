@@ -2,7 +2,7 @@
 
 Status: Done
 Owner workstream: BA/PM
-Last updated: 2026-07-10
+Last updated: 2026-07-22
 
 ## Goal
 
@@ -26,6 +26,7 @@ Create the formal Business Requirements Document for IDTS in separate English an
 - DOCX files were rendered and visually checked through the Documents workflow.
 - The local fallback helper was later updated to keep Markdown tables as real editable Word tables, with fixed table widths, wrapped content, header rows, and smaller table font for wide tables.
 - BRD EN/VI were synchronized to v1.3 on 2026-07-10: the current implemented CAP/Fiori baseline, review-only AI boundary, and live-provider evidence dependency are stated without changing business authority. Both DOCX files were regenerated and uploaded as new timestamped SAP490 Review copies.
+- BRD EN/VI were synchronized to v1.5 on 2026-07-22. Version headers and change histories now match the documented AuthService/AuthSessions, Render/PostgreSQL, attachment/S3, NotificationDeliveries outbox, and human-reviewed/audited AiSuggestions baseline. Both DOCX files pass OfficeCLI schema/content validation and full visual inspection and replaced the existing Drive review bytes in place, preserving file IDs.
 
 ## Next Step
 

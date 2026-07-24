@@ -161,3 +161,13 @@ AI provider chỉ là tùy chọn. Nếu AI bị tắt, lỗi, timeout, hoặc t
 - Dữ liệu thiếu phải được nói rõ.
 - Provider failure phải an toàn và không được block workflow.
 - Nếu đổi response shape, cập nhật mirror này và focused QA script.
+
+## IDTS-94 persisted review bridge (2026-07-24)
+
+### English
+
+`recordSummaryAudit()` now returns the row created by `createAiSuggestion()`. `summarizeBugHandoff()` copies only that row's UUID to `result.suggestionID`, allowing the History dialog to call the shared review actions. The audit insert and response happen in the same request transaction; no Bug, comment, HistoryEvent, status, assignee, or action-owner field is changed.
+
+### Vietnamese
+
+`recordSummaryAudit()` giờ trả row do `createAiSuggestion()` tạo. `summarizeBugHandoff()` chỉ copy UUID của row đó vào `result.suggestionID` để dialog History gọi các review action dùng chung. Audit insert và response nằm trong cùng request transaction; không đổi Bug, comment, HistoryEvent, status, assignee, hay action owner.

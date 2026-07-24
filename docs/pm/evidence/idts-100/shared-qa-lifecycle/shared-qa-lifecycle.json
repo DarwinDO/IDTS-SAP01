@@ -1,0 +1,235 @@
+{
+  "generatedAt": "2026-07-24T13:42:26.656Z",
+  "environment": "Render Shared QA",
+  "deployedCommitExpected": "c953cd7ad3683fc2a891ad3d09708f236f157902",
+  "marker": "UAT-MENTOR-20260711-1784900533454",
+  "demoBug": {
+    "ID": "8716389e-687e-4da4-9363-db1beb355df5",
+    "bugNumber": "BUG-0017",
+    "finalStatus": "ASSIGNED",
+    "assigneePresent": true,
+    "nextProcessorRole": "DEVELOPER"
+  },
+  "roleMatrix": [
+    "PM",
+    "TESTER",
+    "DEVELOPER"
+  ],
+  "historyActionTypes": [
+    "ASSIGN_TO_DEVELOPER",
+    "CLOSE_BUG",
+    "CREATE",
+    "MARK_IN_REVIEW",
+    "MOVE_TO_PENDING_ASSIGNMENT",
+    "REJECT_BUG",
+    "REOPEN_BUG",
+    "REQUEST_MORE_INFORMATION",
+    "RESOLVE_BUG",
+    "RESUBMIT_TO_DEVELOPER",
+    "SEND_TO_RETEST",
+    "START_PROGRESS"
+  ],
+  "notificationCount": 10,
+  "checks": [
+    {
+      "label": "Login returns a bearer token",
+      "ok": true,
+      "detail": "role=PM"
+    },
+    {
+      "label": "Role matrix contains an active Tester",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Role matrix contains an active Developer",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Login returns a bearer token",
+      "ok": true,
+      "detail": "role=TESTER"
+    },
+    {
+      "label": "Login returns a bearer token",
+      "ok": true,
+      "detail": "role=DEVELOPER"
+    },
+    {
+      "label": "Developer has an active DeveloperProfile",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "At least one active component/category mapping exists",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Tester creates a valid draft bug",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Tester activates the draft through CAP SAVE",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "No assignee derives Pending Assignment",
+      "ok": true,
+      "detail": "actual=PENDING_ASSIGNMENT expected=PENDING_ASSIGNMENT"
+    },
+    {
+      "label": "Pending Assignment has no assignee",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Developer direct assignment is denied",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "PM assigns the bug to Developer",
+      "ok": true,
+      "detail": "actual=ASSIGNED expected=ASSIGNED"
+    },
+    {
+      "label": "Assigned bug stores the selected assignee",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Assigned Developer marks the bug In Review",
+      "ok": true,
+      "detail": "actual=IN_REVIEW expected=IN_REVIEW"
+    },
+    {
+      "label": "Assigned Developer starts progress",
+      "ok": true,
+      "detail": "actual=IN_PROGRESS expected=IN_PROGRESS"
+    },
+    {
+      "label": "Request More Information rejects a blank reason",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Developer requests more information",
+      "ok": true,
+      "detail": "actual=NEED_MORE_INFORMATION expected=NEED_MORE_INFORMATION"
+    },
+    {
+      "label": "Tester resubmits to the assigned Developer",
+      "ok": true,
+      "detail": "actual=ASSIGNED expected=ASSIGNED"
+    },
+    {
+      "label": "Developer resolves the bug",
+      "ok": true,
+      "detail": "actual=RESOLVED expected=RESOLVED"
+    },
+    {
+      "label": "Tester sends the bug to Retest Required",
+      "ok": true,
+      "detail": "actual=RETEST_REQUIRED expected=RETEST_REQUIRED"
+    },
+    {
+      "label": "Tester closes the verified bug",
+      "ok": true,
+      "detail": "actual=CLOSED expected=CLOSED"
+    },
+    {
+      "label": "Tester reopens the bug for further work",
+      "ok": true,
+      "detail": "actual=REOPENED expected=REOPENED"
+    },
+    {
+      "label": "PM returns the reopened bug to Assigned",
+      "ok": true,
+      "detail": "actual=ASSIGNED expected=ASSIGNED"
+    },
+    {
+      "label": "Assigned Developer rejects the bug with a reason",
+      "ok": true,
+      "detail": "actual=REJECTED expected=REJECTED"
+    },
+    {
+      "label": "PM moves rejected bug to Pending Assignment",
+      "ok": true,
+      "detail": "actual=PENDING_ASSIGNMENT expected=PENDING_ASSIGNMENT"
+    },
+    {
+      "label": "Move to Pending Assignment clears the assignee",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "PM reassigns the corrected bug",
+      "ok": true,
+      "detail": "actual=ASSIGNED expected=ASSIGNED"
+    },
+    {
+      "label": "History contains exact action type ASSIGN_TO_DEVELOPER",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "History contains exact action type MARK_IN_REVIEW",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "History contains exact action type START_PROGRESS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "History contains exact action type REQUEST_MORE_INFORMATION",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "History contains exact action type RESUBMIT_TO_DEVELOPER",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "History contains exact action type RESOLVE_BUG",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "History contains exact action type SEND_TO_RETEST",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "History contains exact action type CLOSE_BUG",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "History contains exact action type REOPEN_BUG",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "History contains exact action type REJECT_BUG",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "History contains exact action type MOVE_TO_PENDING_ASSIGNMENT",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "label": "Lifecycle creates in-app notification side effects",
+      "ok": true,
+      "detail": "count=10"
+    }
+  ]
+}
