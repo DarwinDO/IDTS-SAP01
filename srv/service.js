@@ -53,7 +53,8 @@ const {
   acceptAiSuggestion,
   rejectAiSuggestion,
   ignoreAiSuggestion,
-  applyClassificationSuggestion
+  applyClassificationSuggestion,
+  confirmDuplicateSuggestion
 } = require('./ai')
 
 module.exports = class BugService extends cds.ApplicationService {
@@ -130,11 +131,13 @@ module.exports = class BugService extends cds.ApplicationService {
     this.on('summarizeBugHandoff', req => summarizeBugHandoff(req, entities))
     this.on('explainSmartAssignment', req => explainSmartAssignment(req, entities))
     // Ba action review chỉ chốt trạng thái audit PENDING bằng actor đã xác thực.
-    // Action apply riêng chỉ cho Tester/PM và vẫn kiểm lại payload/catalog trước khi sửa classification.
+    // Hai action apply/confirm riêng chỉ cho Tester/PM và vẫn kiểm lại payload đã persist trước khi ghi nghiệp vụ.
     this.on('acceptAiSuggestion', req => acceptAiSuggestion(req, entities))
     this.on('rejectAiSuggestion', req => rejectAiSuggestion(req, entities))
     this.on('ignoreAiSuggestion', req => ignoreAiSuggestion(req, entities))
     this.on('applyClassificationSuggestion', req => applyClassificationSuggestion(req, entities))
+    // Confirmation không tin candidate content từ client và không đổi status của hai Bug.
+    this.on('confirmDuplicateSuggestion', req => confirmDuplicateSuggestion(req, entities))
     // `SAVE` là ranh giới draft → active. `handleDraftSave` validate lần cuối, gọi `next()` để CAP persist,
     // rồi mới ghi history/attachment side effects. Breakpoint tại đây phân biệt lỗi trước save với lỗi sau persist.
     this.on('SAVE', Bugs.drafts, (req, next) => handleDraftSave(req, entities, next))

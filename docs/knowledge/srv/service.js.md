@@ -1,5 +1,19 @@
 # Knowledge: `srv/service.js`
 
+## IDTS-95 confirmation wiring
+
+### English
+
+`BugService.init()` registers `confirmDuplicateSuggestion` beside the explicit AI review/apply actions. The service file only dispatches the request; authorization, stored-payload grounding, pair checks, and insert transaction remain in `srv/ai/duplicate-confirmation.js`.
+
+Primary owner: SangVN. Backup: DonHV. Debug the OData request at this registration, then step into `confirmDuplicateSuggestion`. A matching action declaration must remain in `srv/service.cds`.
+
+### Vietnamese
+
+`BugService.init()` đăng ký `confirmDuplicateSuggestion` cạnh các action AI review/apply rõ ràng. Service file chỉ dispatch request; authorization, kiểm payload đã lưu, kiểm pair và transaction insert nằm trong `srv/ai/duplicate-confirmation.js`.
+
+Owner chính: SangVN. Backup: DonHV. Debug OData request tại registration này rồi step vào `confirmDuplicateSuggestion`. Phải luôn có action declaration tương ứng trong `srv/service.cds`.
+
 ## IDTS-89 exact workflow audit mapping
 
 The 11 public Bug workflow actions registered here now pass a unique `ACTION` value into `actions.js` or `transitionBug`. The complete action → handler → ActionType → permission table and breakpoint order are in `docs/ai/implementation/knowledge-one-to-one-action-audit.md`. Keep the OData names and status lifecycle unchanged. When adding a future workflow action that writes History, add its dedicated ActionType, code-list row, summary, actor fallback, permission mapping, direct API test, and database rollout in the same change.

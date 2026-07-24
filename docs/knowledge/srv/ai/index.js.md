@@ -1,5 +1,19 @@
 # `srv/ai/index.js`
 
+## IDTS-95 duplicate confirmation export
+
+### English
+
+The public AI module entry point now exports `confirmDuplicateSuggestion` from `duplicate-confirmation.js`. `srv/service.js` imports it only through this index, keeping the service wiring independent of the feature file path. The export changes no provider configuration and does not call AI by itself.
+
+Primary owner: SangVN. Backup: DonHV. Debug from the `confirmDuplicateSuggestion` import/export here to its registration in `srv/service.js`, then into `srv/ai/duplicate-confirmation.js`.
+
+### Vietnamese
+
+Entry point chung của AI hiện export `confirmDuplicateSuggestion` từ `duplicate-confirmation.js`. `srv/service.js` chỉ import qua index này để wiring của service không phụ thuộc trực tiếp đường dẫn file feature. Export này không đổi provider config và tự nó không gọi AI.
+
+Owner chính: SangVN. Backup: DonHV. Khi debug, trace từ import/export `confirmDuplicateSuggestion` tại đây sang registration trong `srv/service.js`, sau đó vào `srv/ai/duplicate-confirmation.js`.
+
 ## Beginner-first module map (2026-07-18)
 
 ### English

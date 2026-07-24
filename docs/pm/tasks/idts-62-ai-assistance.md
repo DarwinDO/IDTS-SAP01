@@ -21,6 +21,7 @@ Vietnamese: Work package này theo dõi các khả năng AI suggestion đã duy�
 | 7 | IDTS-72 | NhanT | Final QA acceptance |
 | 8 | IDTS-74 to IDTS-77 | DonHV / FE support | Product UI panels and placement polish for duplicate/similar detection, classification suggestion, and handoff summary if full visual AI acceptance is required |
 | 9 | IDTS-91 to IDTS-93 | DatDT | Persist explicit review decisions in the existing dialogs, then apply accepted classification through a separate validated Tester/PM action |
+| 10 | IDTS-95 | SangVN | Confirm one stored candidate from an accepted Similar Bugs suggestion through a separate validated Tester/PM action |
 
 Vietnamese:
 
@@ -35,6 +36,7 @@ Vietnamese:
 | 7 | IDTS-72 | NhanT | QA acceptance cuối |
 | 8 | IDTS-74 den IDTS-77 | DonHV / FE support | Product UI panel va placement polish cho duplicate/similar detection, classification suggestion va handoff summary neu can acceptance AI day du theo UI visual |
 | 9 | IDTS-91 den IDTS-93 | DatDT | Luu quyet dinh review trong cac dialog hien co, sau do apply classification da Accept qua action Tester/PM rieng co validation |
+| 10 | IDTS-95 | SangVN | Xac nhan mot candidate da luu tu Similar Bugs suggestion da Accept qua action Tester/PM rieng co validation |
 
 ## Sprint decision
 
@@ -64,6 +66,7 @@ Vietnamese: Chỉ IDTS-63 được đưa vào Sprint 4. Phần runtime bắt đ�
 - IDTS-91: Implementation complete on PR #167. CAP exposes Accept/Reject/Ignore with authenticated reviewer/time persistence, conflict-safe `PENDING` updates, rollback evidence, and no Bug/workflow mutation. Focused QA passed `19/0`.
 - IDTS-92: Implementation complete on PR #167. Existing Similar Bugs and Classification dialogs expose Accept/Reject/Ignore, display persisted state/reviewer/time, disable repeat decisions, keep generic failures, and clear busy state. Static QA passed 47 checks; both local browser suites passed on a fresh temporary SQLite schema.
 - IDTS-93: Implementation complete on PR #167. A separate Tester/PM action applies only accepted, current, catalog-grounded classification fields with stale protection, idempotency, grouped history, and transaction rollback. Focused QA passed `35/0`; IDTS-67, IDTS-91, and IDTS-41 regressions remain green. Await GitHub review/QA, Jira handoff, and merge before board-level Done.
+- IDTS-95: Supervised implementation is in progress on `feature/idts-95-confirm-duplicate-suggestion-sangvn`, based on dependency PR #167. The backend action trusts only the persisted accepted Similar Bugs payload, restricts confirmation to Tester/PM, rejects self/outside/repeated/reverse links, uses one request transaction, and never changes either Bug lifecycle. Focused QA passes `31/0`; IDTS-66/91 regressions and CAP compile pass. Ownership Knowledge Gate is deferred, so no merge or Jira Done is permitted yet.
 - No runtime AI dependency, API, CDS entity, or UI has been added under IDTS-63.
 
 Vietnamese:
@@ -88,4 +91,5 @@ Vietnamese:
 - IDTS-91: Implementation da xong tren PR #167. CAP expose Accept/Reject/Ignore, persist reviewer/time da xac thuc, conditional update `PENDING`, co rollback evidence va khong doi Bug/workflow. Focused QA pass `19/0`.
 - IDTS-92: Implementation da xong tren PR #167. Hai dialog Similar Bugs va Classification co Accept/Reject/Ignore, hien state/reviewer/time da persist, khoa quyet dinh lap, giu loi chung va tat busy state. Static QA pass 47 check; hai browser suite local deu pass tren SQLite tam co schema moi.
 - IDTS-93: Implementation da xong tren PR #167. Action Tester/PM rieng chi apply classification da Accept, con hieu luc va grounded voi catalog; co stale protection, idempotency, grouped history va rollback transaction. Focused QA pass `35/0`; regression IDTS-67, IDTS-91 va IDTS-41 van green. Cho GitHub review/QA, Jira handoff va merge truoc khi chuyen Done cap board.
+- IDTS-95: Implementation duoi supervision dang lam tren `feature/idts-95-confirm-duplicate-suggestion-sangvn`, base tren dependency PR #167. Backend action chi tin Similar Bugs payload da persist va Accept, chi cho Tester/PM, chan self/outside/repeated/reverse link, dung mot request transaction va khong doi lifecycle cua hai Bug. Focused QA pass `31/0`; regression IDTS-66/91 va CAP compile pass. Ownership Knowledge Gate dang defer, nen chua duoc merge hoac chuyen Jira Done.
 - IDTS-63 không thêm dependency AI runtime, API, CDS entity hoặc UI mới.
