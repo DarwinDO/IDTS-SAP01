@@ -1,8 +1,11 @@
-flowchart LR
-    Tester["Tester"] --> Fiori["Fiori Elements / SAPUI5 App"]
-    Developer["Developer"] --> Fiori
-    PM["Project Manager"] --> Fiori
-    Fiori --> OData["CAP OData V4 Service"]
-    OData --> DB["SQLite local database"]
-    OData --> Logs["History Logs"]
-    OData --> Notif["Notification Records"]
+flowchart TB
+    Users["Tester / Developer / PM"] --> Fiori["Fiori Elements / SAPUI5 App"]
+    Fiori --> Auth["AuthService\nLogin + bearer session"]
+    Fiori --> OData["Authenticated BugService\nOData V4"]
+    Auth --> Sessions["AuthSessions\nToken hash / expiry / revocation"]
+    OData --> DB["CAP persistence\nSQLite local / PostgreSQL shared QA"]
+    OData --> Audit["HistoryEvents + HistoryLogs\nAiSuggestions human-review audit"]
+    OData --> Notif["Notifications in-app\nNotificationDeliveries email outbox"]
+    OData -. "Integration profile" .-> Storage["S3-compatible object storage\nAttachment binary"]
+    Notif -. "Asynchronous; configuration-gated" .-> Email["SMTP / Brevo provider"]
+    OData -. "Advisory only; disabled by default" .-> AI["AI provider"]

@@ -1,4 +1,4 @@
-﻿# Quy Trình Sync Google Workspace SAP490
+# Quy Trình Sync Google Workspace SAP490
 ## Vietnamese
 
 ### 1. Mục Đích
@@ -24,13 +24,13 @@ Với project này, thư mục review Google Drive phải có tên `SU26SAP01_GS
 | --- | --- | --- |
 | Gate bắt buộc cho mọi document task | OfficeCLI preflight, format skill, inspection và validation | Không có; phải báo limitation của format trước khi dùng native tool |
 | Sync lặp lại cho team lên Google Drive/Docs/Sheets | `gws` CLI | Google Drive connector |
-| Readback hoặc kiểm tra nhanh trong Codex | Google Drive connector | `gws` CLI |
+| Readback hoặc kiểm tra nhanh trong automation environment | Google Drive connector | `gws` CLI |
 | Tạo hoặc chỉnh DOCX local | Documents plugin, `python-docx`, project script fill vào template copy | Pandoc chỉ dùng cho draft/prototype có label rõ, không dùng cho file SAP490 chính thức |
 | Tạo hoặc chỉnh XLSX local | Spreadsheets plugin, `openpyxl`, project script | Chỉnh thủ công khi được duyệt |
 | Verify layout DOCX cuối | Documents render/export workflow, LibreOffice PDF export | Kiểm tra trực quan thủ công |
 | Verify XLSX cuối | Spreadsheets inspection, LibreOffice open/convert check | Kiểm tra trực quan thủ công |
 
-`gws` được ưu tiên cho automation lặp lại vì cùng một command hoặc npm script có thể được chạy bởi nhiều developer ở nhiều chat thread hoặc terminal khác nhau. Google Drive connector vẫn hữu ích cho thao tác tương tác nhanh bên trong Codex.
+`gws` được ưu tiên cho automation lặp lại vì cùng một command hoặc npm script có thể được chạy bởi nhiều developer ở nhiều chat thread hoặc terminal khác nhau. Google Drive connector vẫn hữu ích cho thao tác tương tác nhanh bên trong automation environment.
 
 ### 4. Flow Sync Chuẩn
 

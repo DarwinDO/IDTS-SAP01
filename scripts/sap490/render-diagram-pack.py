@@ -49,7 +49,8 @@ def main() -> None:
             diagram_source = fence.group("source").strip() + "\n"
             extension = "mmd" if diagram_format == "mermaid" else "puml"
             target = SOURCE_DIR / f"{asset_name}.{extension}"
-            target.write_text(diagram_source, encoding="utf-8")
+            # Keep source bytes stable across Windows/Linux so manifest hashes are directly verifiable.
+            target.write_text(diagram_source, encoding="utf-8", newline="\n")
             manifest.append(
                 {
                     "id": asset_name.split("-", 1)[0],
@@ -66,6 +67,7 @@ def main() -> None:
     (OUTPUT_DIR / "manifest.json").write_text(
         json.dumps({"diagramCount": len(manifest), "diagrams": manifest}, indent=2) + "\n",
         encoding="utf-8",
+        newline="\n",
     )
     print(f"Extracted {len(manifest)} diagrams to {OUTPUT_DIR.relative_to(ROOT)}")
 

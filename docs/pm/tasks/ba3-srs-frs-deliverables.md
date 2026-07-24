@@ -1,6 +1,6 @@
 # BA-003 - SRS and FRS Deliverables
 
-Last updated: 2026-07-10
+Last updated: 2026-07-22
 
 ## English
 
@@ -12,14 +12,14 @@ Create formal Software Requirements Specification and Functional Requirements Sp
 
 | Output | Path | Status |
 | --- | --- | --- |
-| SRS English Markdown | `docs/ba/srs/srs.en.md` | Done v1.2 |
-| SRS Vietnamese Markdown | `docs/ba/srs/srs.vi.md` | Done v1.2 |
-| SRS English DOCX | `docs/ba/srs/srs.en.docx` | Done v1.2 |
-| SRS Vietnamese DOCX | `docs/ba/srs/srs.vi.docx` | Done v1.2 |
-| FRS English Markdown | `docs/ba/frs/frs.en.md` | Done v1.3 |
-| FRS Vietnamese Markdown | `docs/ba/frs/frs.vi.md` | Done v1.3 |
-| FRS English DOCX | `docs/ba/frs/frs.en.docx` | Done v1.3 |
-| FRS Vietnamese DOCX | `docs/ba/frs/frs.vi.docx` | Done v1.3 |
+| SRS English Markdown | `docs/ba/srs/srs.en.md` | Done v1.4 |
+| SRS Vietnamese Markdown | `docs/ba/srs/srs.vi.md` | Done v1.4 |
+| SRS English DOCX | `docs/ba/srs/srs.en.docx` | Done v1.4 |
+| SRS Vietnamese DOCX | `docs/ba/srs/srs.vi.docx` | Done v1.4 |
+| FRS English Markdown | `docs/ba/frs/frs.en.md` | Done v1.5 |
+| FRS Vietnamese Markdown | `docs/ba/frs/frs.vi.md` | Done v1.5 |
+| FRS English DOCX | `docs/ba/frs/frs.en.docx` | Done v1.5 |
+| FRS Vietnamese DOCX | `docs/ba/frs/frs.vi.docx` | Done v1.5 |
 
 ### Decisions Applied
 
