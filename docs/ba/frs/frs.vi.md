@@ -1,12 +1,12 @@
 # Tài liệu Đặc tả Yêu cầu Chức năng
 
-Dự án: Issue and Defect Tracking System in SAP  
-Loại tài liệu: Functional Requirements Specification (FRS)  
-Ngôn ngữ: Tiếng Việt  
-Trạng thái: Draft v1.3
-Cập nhật lần cuối: 2026-07-10
+Dự án: Issue and Defect Tracking System in SAP
+Loại tài liệu: Functional Requirements Specification (FRS)
+Ngôn ngữ: Tiếng Việt
+Trạng thái: Draft v1.5
+Cập nhật lần cuối: 2026-07-22
 Chuẩn bị cho: SAP490 project delivery, mentor review, bằng chứng implementation và QA test design
-Phong cách tài liệu: SAP490 hybrid, ưu tiên functional detail, aligned với BRD v1.3 và SRS v1.2
+Phong cách tài liệu: SAP490 hybrid, ưu tiên functional detail, aligned với BRD v1.5 và SRS v1.4
 
 ## 1. Kiểm soát tài liệu
 
@@ -19,6 +19,7 @@ Phong cách tài liệu: SAP490 hybrid, ưu tiên functional detail, aligned v�
 | v1.2 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Cập nhật functional actors và workflows theo MVP role baseline: Tester, Developer và PM. Reporter và Admin được hoãn như role tách riêng. | Draft |
 | v1.3 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Đồng bộ hành vi draft attachment thực và hành vi AI advisory review tùy chọn với baseline CAP/Fiori đã triển khai. | Draft |
 | v1.4 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Thay tám Mermaid block dùng khi review bằng workflow figure đã render và đóng open issue về visual submission. | Draft |
+| v1.5 | 2026-07-22 | IDTS Project Team | Mentor / Supervisor | Đồng bộ authentication/session, dữ liệu/storage shared QA, email outbox bất đồng bộ và AI audit có human review với baseline implementation hiện tại. | Draft |
 
 ### 1.2 Review và phê duyệt
 
@@ -49,10 +50,11 @@ FRS chi tiết hơn BRD và thiên về workflow hơn SRS. Tài liệu dùng cho
 | Retest and closure | Có | Retest Required trước khi close khi cần verification. |
 | Comments | Có | Trao đổi gắn với bug; không đổi status trực tiếp. |
 | History log | Có | Important actions được ghi nhận. |
-| Notification records | Có | Event records và triggers; external delivery có thể defer. |
+| Notifications và email delivery | Có | In-app `Notifications` cùng email-outbox work item bất đồng bộ trong `NotificationDeliveries` cho event phù hợp. |
 | PM monitoring | Có | Workload, overdue, queues, nextProcessor, status filters. |
-| Attachments | Có | Đã triển khai draft upload/download và evidence metadata; attachment bytes không bao giờ gửi tới AI. |
+| Attachments | Có | Draft upload/download dùng attachment composition được hỗ trợ, DB fallback ở local và object storage bind bên ngoài cho shared QA; attachment bytes không bao giờ gửi tới AI. |
 | Advisory AI | Optional | Similar-bug, classification, summary và Smart Assign explanation cần human review và không làm thay đổi bug. |
+| Runtime profiles | Có | SQLite cho local development; shared QA trên Render với PostgreSQL và S3 object storage bind bên ngoài. |
 
 ## 4. Functional Workflow Diagrams
 
@@ -339,14 +341,14 @@ FRS chi tiết hơn BRD và thiên về workflow hơn SRS. Tài liệu dùng cho
 
 | Field | Specification |
 | --- | --- |
-| Purpose | Record important notification events mà không hardcode delivery channels. |
+| Purpose | Record important in-app events và queue email delivery phù hợp mà không hardcode provider configuration. |
 | Primary actor | System. |
 | Trigger | Assignment, reassignment, request information, bug update, rejection, overdue, resolved, retest hoặc close event. |
 | Preconditions | Event và recipient xác định được. |
-| Main flow | System tạo notification record với bug reference, recipient, eventType, channel khi biết, deliveryStatus và timestamp. |
-| Alternative flow | External delivery adapter có thể thêm sau; delivery failure không được xóa history log. |
-| Validation rules | Không lưu private endpoint, webhook URL, token hoặc service key trong repo code. |
-| Acceptance criteria | Notification records tồn tại cho important events; Rejected notification làm rõ follow-up owner. |
+| Main flow | System persist in-app row trong `Notifications`; khi email áp dụng, system tạo row outbox riêng trong `NotificationDeliveries` với safe payload snapshot. Background worker xử lý row đủ điều kiện và record attempt, retry timing, delivery status, locking và sanitized failure detail. |
+| Alternative flow | Nếu email config bị disable, thiếu hoặc provider fail, outbox row record safe unavailable/failed state; bug action gốc, in-app notification và history vẫn commit. |
+| Validation rules | Không lưu private endpoint, SMTP credential, token hoặc service key trong repo code hay user-visible failure text. Historical notification không tự động được backfill vào email outbox. |
+| Acceptance criteria | In-app notification tồn tại cho important events; email event phù hợp tạo outbox row riêng; worker failure không rollback workflow state; Rejected notification làm rõ follow-up owner. Live-provider success cần evidence riêng đã duyệt. |
 | Traceability | SRS-FR-NOTIF-001, SRS-FR-NOTIF-002. |
 
 ### 5.17 FRS-PM-001 - PM Monitoring Dashboard and Lists
@@ -401,11 +403,39 @@ FRS chi tiết hơn BRD và thiên về workflow hơn SRS. Tài liệu dùng cho
 | Primary actor | Tester, Developer, PM. |
 | Trigger | User có quyền chủ động yêu cầu AI suggestion từ business context tương ứng. |
 | Preconditions | Feature được bật với private configuration đã duyệt, hoặc UI hiển thị safe unavailable state trong khi normal workflow vẫn dùng được. |
-| Main flow | CAP allowlist và sanitize các field bug/context được phép; provider trả advisory output đã chuẩn hóa; UI render dưới dạng text cần review; user có thể bỏ qua hoặc dùng normal action để quyết định. |
+| Main flow | CAP allowlist và sanitize các field bug/context được phép; provider trả advisory output đã chuẩn hóa; UI render dưới dạng text cần review; source-linked output được lưu thành safe audit row trong `AiSuggestions`; user có thể accept, reject, ignore hoặc dùng normal action có authorization để quyết định. |
 | Validation rules | AI không được bypass role authorization, catalog validation, Developer Responsibility eligibility, required reason hoặc status transition rule. AI không create, edit, assign, reclassify hoặc transition bug. |
 | Data protection | Không gửi credential, token, private endpoint, attachment bytes, raw log hoặc personal data không cần thiết. Không persist raw prompt/provider response hoặc hidden reasoning. |
-| Acceptance criteria | State disabled, timeout, malformed, unsafe và provider-failure đều an toàn; suggestion hiển thị review-only; audit record được sanitize; workflow không-AI vẫn tiếp tục. |
-| Traceability | SRS-FR-AI-001 đến SRS-FR-AI-003; `docs/ba/discovery/idts-63-ai-assistance-guardrails.md`. |
+| Acceptance criteria | State disabled, timeout, malformed, unsafe và provider-failure đều an toàn; suggestion hiển thị review-only; `AiSuggestions` chỉ chứa review/audit data đã chuẩn hóa, không chứa raw prompt, raw provider response, attachment content, credential hoặc hidden reasoning; workflow không-AI vẫn tiếp tục. |
+| Traceability | SRS-FR-AI-001 đến SRS-FR-AI-004; `docs/ba/discovery/idts-63-ai-assistance-guardrails.md`. |
+
+### 5.21 FRS-AUTH-001 - Login và Server-Managed Session
+
+| Field | Specification |
+| --- | --- |
+| Purpose | Authenticate user IDTS và thiết lập identity cùng business role dùng cho backend authorization. |
+| Primary actor | Tester, Developer, PM. |
+| Trigger | User submit email/password tới `AuthService.login`, sau đó gửi bearer token trả về cho BugService. |
+| Preconditions | Có internal user active với password hash và một business role được hỗ trợ. |
+| Main flow | Service verify password hash, tạo row `AuthSessions` có expiry, trả bearer token và map request sau tới internal user cùng role. |
+| Alternative flow | Invalid credential, expired/revoked session, missing token hoặc unsupported role trả authorization error mà không lộ credential detail. |
+| Validation rules | Plain-text password và bearer token không được ghi log hoặc source; backend role check vẫn authoritative kể cả khi UI đã ẩn action. |
+| Acceptance criteria | Login hợp lệ tạo usable session; invalid hoặc expired session bị reject; authorized action phản ánh role Tester, Developer hoặc PM đã map. |
+| Traceability | SRS-FR-AUTH-001, SRS-FR-AUTH-002. |
+
+### 5.22 FRS-ATTACH-001 - Draft Attachment Handling
+
+| Field | Specification |
+| --- | --- |
+| Purpose | Cho authorized user attach, download và remove defect evidence trong khi giữ storage configuration private. |
+| Primary actor | Tester, Developer, PM khi có quyền. |
+| Trigger | User upload hoặc manage evidence trong bug draft hay persisted bug context. |
+| Preconditions | Bug/draft context available và configured attachment storage reachable. |
+| Main flow | Attachment composition lưu metadata và route content tới DB fallback ở local hoặc object store bind bên ngoài cho shared QA. |
+| Alternative flow | Storage failure trả actionable error và không báo sai upload completed; normal non-attachment bug workflow vẫn dùng được khi hợp lệ. |
+| Validation rules | File metadata và authorization được validate; storage credential/reference không expose tới AI provider payload hoặc commit vào source. |
+| Acceptance criteria | Authorized upload/download hoạt động trong configured profile; unauthorized access bị reject; storage failure visible và không fabricate evidence. |
+| Traceability | SRS-DATA-007, SRS-IF-UI-003. |
 
 ## 6. Functional Data Rules
 
@@ -420,6 +450,10 @@ FRS chi tiết hơn BRD và thiên về workflow hơn SRS. Tài liệu dùng cho
 | FRS-DATA-RULE-007 | Closed bugs không được edit tự do; Reopen dùng khi tiếp tục xử lý. |
 | FRS-DATA-RULE-008 | Comments không trực tiếp đổi status. |
 | FRS-DATA-RULE-009 | History log phải record important actions. |
+| FRS-DATA-RULE-010 | `AuthSessions` lưu session lifecycle data mà không lưu plain-text password; revoked hoặc expired session không authorize được BugService request. |
+| FRS-DATA-RULE-011 | `NotificationDeliveries` là email outbox riêng; provider failure không rollback bug action gốc hoặc in-app notification. |
+| FRS-DATA-RULE-012 | `AiSuggestions` chỉ lưu suggestion đã chuẩn hóa, an toàn cùng human-review/audit state. |
+| FRS-DATA-RULE-013 | Attachment content dùng configured DB fallback hoặc external object store; không expose storage credential trong user-visible data. |
 
 ## 7. Acceptance Criteria Summary
 
@@ -435,7 +469,9 @@ FRS chi tiết hơn BRD và thiên về workflow hơn SRS. Tài liệu dùng cho
 | Retest and closure | Resolved bug có thể vào Retest Required; pass thì close; fail thì reopen. |
 | Comments | Comment lưu author, role, timestamp và content mà không đổi status. |
 | History | Important actions hiển thị actor, time, old/new value và reason khi áp dụng. |
-| Notifications | Event records tồn tại và không hardcode external endpoints. |
+| Notifications | In-app event record và email-outbox row phù hợp tồn tại, không hardcode external endpoint; provider failure không rollback workflow. |
+| Authentication | Login hợp lệ tạo server-managed session có expiry; invalid, expired hoặc revoked session không authorize được BugService request. |
+| Attachments | Authorized user manage evidence được trong configured profile; storage failure visible và không tạo evidence giả. |
 | PM monitoring | PM nhận diện workload, overdue, pending, rejected, retest và nextProcessor queues. |
 | Advisory AI | Suggestion là tùy chọn, review-only, an toàn khi lỗi và không làm thay đổi bug. |
 
@@ -462,14 +498,15 @@ FRS chi tiết hơn BRD và thiên về workflow hơn SRS. Tài liệu dùng cho
 | FRS-PM-001 | SRS-FR-PM-001, SRS-FR-PM-002, SRS-FR-PM-003 |
 | FRS-PM-002 | SRS-FR-PM-004 |
 | FRS-UX-001 | SRS-IF-UI-001 đến SRS-IF-UI-005, SRS-NFR-USE-001, SRS-NFR-USE-002 |
-| FRS-AI-001 | SRS-FR-AI-001 đến SRS-FR-AI-003 |
+| FRS-AI-001 | SRS-FR-AI-001 đến SRS-FR-AI-004 |
+| FRS-AUTH-001 | SRS-FR-AUTH-001, SRS-FR-AUTH-002 |
 
 ## 9. Open Issues
 
 | ID | Open Issue | Owner | Functional Impact |
 | --- | --- | --- | --- |
 | OI-FRS-001 | Xác nhận quyền PM direct reassignment. | Team / Mentor | Quyết định PM thấy Assign/Reassign actions hay chỉ request/comment actions. |
-| OI-FRS-002 | Xác nhận notification channel cho MVP. | Team / Mentor | Quyết định notification records alone có thỏa MVP hay không. |
-| OI-FRS-003 | Xác nhận attachment storage approach. | Team / Mentor | Quyết định Attachments metadata-only hay actual file handling. |
+| OI-FRS-002 | Xác nhận mentor evidence cần cho flow in-app notification và email outbox bất đồng bộ đã triển khai. | Team / Mentor | Live-provider success là acceptance item riêng và không suy ra từ local/outbox test. |
+| OI-FRS-003 | Xác nhận mentor evidence cần cho externally bound attachment storage trong shared QA. | Team / Mentor | Actual file handling đã triển khai; acceptance cuối phụ thuộc active binding và test evidence. |
 | OI-FRS-004 | Xác nhận overdue thresholds và workload limits. | Team / PM | Quyết định PM dashboard calculations. |
 | OI-FRS-005 | Closed: workflow diagrams đã được render thành figure trong FRS và Diagram Pack riêng. | IDTS Project Team | Visual DOCX và Drive review pack là review baseline hiện tại. |

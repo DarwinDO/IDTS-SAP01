@@ -17,8 +17,8 @@ from openpyxl.styles import Alignment
 ROOT = Path(__file__).resolve().parents[2]
 TEMPLATES = ROOT / "docs" / "sap490" / "templates" / "Deliverable_template"
 OUT = ROOT / "docs" / "sap490" / "generated"
-DATE = date(2026, 7, 10)
-VERSION = "0.1"
+DATE = date(2026, 7, 22)
+VERSION = "0.2"
 SYSTEM = "IDTS-SAP01"
 NAME = "Issue and Defect Tracking System in SAP"
 
@@ -49,10 +49,18 @@ LABELS = {
             ("UAT-06", "Advisory AI safety", "User opens an AI review suggestion; normal workflow remains usable and no suggestion changes the bug automatically."),
         ],
         "config_items": [
-            ("CAP runtime", "CAP Node.js service and OData V4 metadata", "Configured / evidence in repository"),
-            ("Database", "SQLite local development with portable deployment direction", "Configured / no private connection data"),
+            ("Authentication", "AuthService login/logout/me and hashed AuthSessions bearer-token records", "Configured; server-side authorization remains authoritative"),
+            ("Hosting and database", "Render shared-QA baseline with PostgreSQL; SQLite remains local development only", "Configured; no private connection data in this workbook"),
+            ("Attachments", "@cap-js/attachments metadata in PostgreSQL with external S3 object storage for shared QA", "Configured; bucket and credentials remain private"),
+            ("Notifications", "Notifications plus NotificationDeliveries email outbox and worker; SMTP/Brevo provider is private configuration", "Configured; provider failure does not roll back the bug workflow"),
             ("Fiori UI", "Fiori Elements Object Page/List Report and safe UI5 extensions", "Configured / verified by QA"),
-            ("AI provider", "Optional provider seam; disabled by default and secret-free in source", "Configured as opt-in; live key not stored"),
+            ("AI provider", "AiSuggestions audit plus optional provider seam; disabled by default and human-review-only", "Configured as opt-in; no live key or autonomous mutation"),
+            ("Security evidence", "Secrets, private endpoints, tokens, attachment content and raw provider output are excluded", "Required for every review and deployment handoff"),
+        ],
+        "change_rows": [
+            (1, "DonHV", "IDTS", "Review baseline", "CR-001", "N/A", "Synchronize the CAP/Fiori MVP and SAP490 mentor-review artifacts", "Mentor review", "Pending mentor review", "N/A", "N/A"),
+            (2, "DonHV", "IDTS", "Shared-QA configuration", "CR-002", "CR-001", "Document AuthService, Render/PostgreSQL, S3 attachments, notification outbox, and disabled-by-default AI without secrets", "Repository and review pack", "Prepared", "N/A", "N/A"),
+            (3, "Team", "IDTS", "QA evidence", "CR-003", "CR-001", "Separate executed Passed evidence from Pending tests and preserve product-only defect reporting", "Mentor review", "Prepared", "N/A", "N/A"),
         ],
     },
     "vi": {
@@ -80,10 +88,18 @@ LABELS = {
             ("UAT-06", "AI advisory safety", "User mở AI review suggestion; normal workflow vẫn dùng được và suggestion không tự đổi bug."),
         ],
         "config_items": [
-            ("CAP runtime", "CAP Node.js service và OData V4 metadata", "Đã cấu hình / có evidence trong repository"),
-            ("Database", "SQLite local development với hướng deployment portable", "Đã cấu hình / không ghi private connection data"),
+            ("Xác thực", "AuthService login/logout/me và bản ghi bearer-token AuthSessions đã băm", "Đã cấu hình; authorization phía server vẫn là nguồn quyết định"),
+            ("Hosting và cơ sở dữ liệu", "Baseline shared QA trên Render với PostgreSQL; SQLite chỉ dùng cho local development", "Đã cấu hình; workbook không chứa connection data riêng tư"),
+            ("Tệp đính kèm", "Metadata @cap-js/attachments trong PostgreSQL và object storage S3 bên ngoài cho shared QA", "Đã cấu hình; bucket và credential được giữ riêng tư"),
+            ("Thông báo", "Notifications cùng email outbox NotificationDeliveries và worker; SMTP/Brevo là cấu hình riêng tư", "Đã cấu hình; lỗi provider không rollback workflow bug"),
             ("Fiori UI", "Fiori Elements Object Page/List Report và UI5 extension an toàn", "Đã cấu hình / QA đã verify"),
-            ("AI provider", "Provider seam tùy chọn; mặc định tắt và source không có secret", "Opt-in; live key không lưu"),
+            ("AI provider", "AiSuggestions audit và provider seam tùy chọn; mặc định tắt và chỉ hỗ trợ human review", "Opt-in; không lưu live key và không tự động thay đổi bug"),
+            ("Bằng chứng bảo mật", "Loại trừ secret, private endpoint, token, nội dung attachment và raw provider output", "Bắt buộc cho mọi review và deployment handoff"),
+        ],
+        "change_rows": [
+            (1, "DonHV", "IDTS", "Baseline review", "CR-001", "N/A", "Đồng bộ CAP/Fiori MVP và artifact SAP490 cho mentor review", "Mentor review", "Đang chờ mentor review", "N/A", "N/A"),
+            (2, "DonHV", "IDTS", "Cấu hình shared QA", "CR-002", "CR-001", "Mô tả AuthService, Render/PostgreSQL, S3 attachment, notification outbox và AI mặc định tắt mà không ghi secret", "Repository và review pack", "Đã chuẩn bị", "N/A", "N/A"),
+            (3, "Team", "IDTS", "Bằng chứng QA", "CR-003", "CR-001", "Tách evidence Passed đã thực thi khỏi test Pending và giữ defect log chỉ gồm lỗi sản phẩm", "Mentor review", "Đã chuẩn bị", "N/A", "N/A"),
         ],
     },
 }
@@ -119,6 +135,11 @@ def write(ws, coordinate, value, wrap=True):
             shrink_to_fit=current.shrink_to_fit,
             indent=current.indent,
         )
+
+
+def remove_template_defined_names(wb):
+    """Static review copies do not use legacy template defined names."""
+    wb.defined_names.clear()
 
 
 def fill_cover(ws, title, function_id, function_name):
@@ -185,6 +206,7 @@ def uat(language):
     labels = LABELS[language]
     output = copy_template("UAT.xlsx", f"UAT_IDTS_SAP01_{language}_prepared_v{VERSION}.xlsx")
     wb = load_workbook(output)
+    remove_template_defined_names(wb)
     fill_cover(wb["Cover"], "User Acceptance Test (Prepared)" if language == "en" else "User Acceptance Test (Đã chuẩn bị)", "IDTS-UAT-REVIEW", "UAT preparation - not executed" if language == "en" else "Chuẩn bị UAT - chưa thực thi")
     history = wb["Histories"]
     for cell, value in zip(("B3", "C3", "D3", "E3", "F3", "G3"), (1, VERSION, labels["uat_history"], "Test Scenario, Test Cases, Test Result", DATE, "DonHV")):
@@ -210,7 +232,7 @@ def uat(language):
         cases.row_dimensions[row].height = 48
 
     results = wb["Test Result"]
-    write(results, "A7", "Prepared UAT only - execution, actual result, defects, acceptance decision, and sign-off are pending mentor/user testing.")
+    write(results, "A7", "Prepared UAT only - execution, actual result, defects, acceptance decision, and sign-off are pending mentor/user testing." if language == "en" else "Chỉ là kế hoạch UAT đã chuẩn bị - việc thực thi, actual result, defect, quyết định chấp nhận và sign-off vẫn đang chờ mentor/user kiểm thử.")
     results.row_dimensions[7].height = 60
     wb.properties.title = f"IDTS SAP490 UAT {language.upper()} prepared v{VERSION}"
     wb.properties.subject = "Prepared only; no UAT result or sign-off claimed"
@@ -223,6 +245,7 @@ def configuration(language):
     labels = LABELS[language]
     output = copy_template("Configuration_Note.xlsx", f"Configuration_Note_IDTS_SAP01_{language}_v{VERSION}.xlsx")
     wb = load_workbook(output)
+    remove_template_defined_names(wb)
     cover = wb["Cover"]
     write(cover, "I19", SYSTEM)
     write(cover, "I20", VERSION)
@@ -234,11 +257,20 @@ def configuration(language):
     for row, (item, detail, status) in enumerate(labels["config_items"], 4):
         for cell, value in zip((f"B{row}", f"C{row}", f"D{row}", f"E{row}", f"F{row}", f"G{row}", f"H{row}"), ("IDTS", row - 3, item, detail, "N/A", "Prepared", status)):
             write(checklist, cell, value)
+    sheet_notes = {
+        "4": "N/A - IDTS does not use classic SAP customizing transactions; runtime configuration is managed through CAP profiles and private environment variables.",
+        "5": "Intentionally unused - no transport request or classic SAP client configuration applies to this CAP/Fiori review artifact.",
+    }
+    if language == "vi":
+        sheet_notes = {
+            "4": "N/A - IDTS không dùng transaction customizing SAP cổ điển; cấu hình runtime được quản lý bằng CAP profile và biến môi trường riêng tư.",
+            "5": "Cố ý không sử dụng - transport request hoặc cấu hình SAP client cổ điển không áp dụng cho artifact CAP/Fiori này.",
+        }
     for name in ("4", "5"):
         ws = wb[name]
-        write(ws, "A4", "IDTS CAP/Fiori configuration guidance")
-        write(ws, "C5", "Repository configuration is documented without credentials; use private environment configuration for secrets.")
-        write(ws, "C6", "N/A - no classic SAP customizing transaction")
+        write(ws, "A4", "IDTS CAP/Fiori configuration guidance" if language == "en" else "Hướng dẫn cấu hình IDTS CAP/Fiori")
+        write(ws, "C5", "Repository configuration is documented without credentials; use private environment configuration for secrets." if language == "en" else "Cấu hình repository không ghi credential; secret phải dùng cấu hình môi trường riêng tư.")
+        write(ws, "C6", sheet_notes[name])
     wb.properties.title = f"IDTS SAP490 Configuration Note {language.upper()} v{VERSION}"
     wb.properties.subject = "Secret-free CAP/Fiori configuration review"
     wb.properties.creator = "IDTS SAP01 Team"
@@ -247,14 +279,12 @@ def configuration(language):
 
 
 def change_tracker(language):
+    labels = LABELS[language]
     output = copy_template("TR_Management.xlsx", f"TR_Management_IDTS_SAP01_{language}_v{VERSION}.xlsx")
     wb = load_workbook(output)
+    remove_template_defined_names(wb)
     ws = wb["Sheet1"]
-    changes = [
-        (1, "DonHV", "IDTS", "Review baseline", "CR-001", "N/A", "CAP/Fiori MVP and document synchronization for SAP490 review", "Mentor review", "Pending", "N/A", "N/A"),
-        (2, "DonHV", "IDTS", "AI configuration", "CR-002", "CR-001", "Optional OpenAI provider is disabled by default; private key is not stored in source", "Shared QA after approval", "Pending", "N/A", "N/A"),
-        (3, "Team", "IDTS", "QA evidence", "CR-003", "CR-001", "Template-derived test and defect evidence refresh; product defects only in Test & Fix Bug", "Mentor review", "Pending", "N/A", "N/A"),
-    ]
+    changes = labels["change_rows"]
     for row, record in enumerate(changes, 2):
         for column, value in enumerate(record, 1):
             write(ws, ws.cell(row, column).coordinate, value)

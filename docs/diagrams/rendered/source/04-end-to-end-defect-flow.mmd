@@ -8,8 +8,9 @@ flowchart TD
         R6["Choose developer or\nNo suitable developer"]
         R7["Submit bug"]
         R8["Add missing information"]
-        R9["Reassign bug if needed"]
-        R10["Retest, close, or reopen"]
+        R8A["Resubmit to Developer\nwith required update summary"]
+        R9["Reassign or return to\nDeveloper processing"]
+        R10["Tester or PM verifies resolution"]
     end
 
     subgraph System["IDTS System"]
@@ -24,7 +25,9 @@ flowchart TD
         S9["Create history log"]
         S10["Send notification"]
         S11["Update status, comment, evidence, or assignment"]
-        S12["Set Retest Required\nwhen verification is needed"]
+        S12["Set Retest Required"]
+        S13["Close bug"]
+        S14["Reopen bug"]
     end
 
     subgraph Dev["Developer"]
@@ -56,10 +59,16 @@ flowchart TD
     S7 --> S9 --> S10 --> D1
     S8 --> S9 --> S10 --> P1
     D1 --> D2 --> D3
-    D3 -->|"Missing information"| D4 --> S11 --> S10 --> R8 --> D2
+    D3 -->|"Missing information"| D4 --> S11 --> S10 --> R8 --> R8A --> S11 --> S10 --> D1
     D3 -->|"Wrong classification or assignee"| D5 --> S11 --> S10 --> R9 --> S5
-    D3 -->|"Valid"| D6 --> D7 --> D8 --> S11 --> S12 --> S10 --> R10
-    R10 -->|"Retest passed"| S9
-    R10 -->|"No retest needed and accepted"| S9
-    R10 -->|"Issue still exists"| S11 --> R9
+    D3 -->|"Valid"| D6 --> D7 --> D8 --> S11 --> S10 --> R10
+    R10 -->|"Retest required"| S12
+    S12 -->|"Retest passed"| S13
+    S12 -->|"Retest failed"| S14
+    R10 -->|"No retest; accepted"| S13
+    R10 -->|"Issue still exists"| S14
+    S13 --> S9
+    S14 --> S9 --> R9
+    R9 -->|"Assign or reassign"| S5
+    R9 -->|"Keep current assignee"| D1
     P1 --> P2 --> P3 --> S11

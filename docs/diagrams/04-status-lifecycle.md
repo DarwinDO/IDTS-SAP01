@@ -12,28 +12,38 @@ stateDiagram-v2
     New --> Pending_Assignment: legacy/import bug enters assignment queue
 
     Pending_Assignment --> Assigned: tester or PM-assisted assignment
+    Pending_Assignment --> Rejected: coordinator rejects invalid assignment context
 
     Assigned --> In_Review: developer starts review
+    Assigned --> Need_More_Information: developer requests details directly
+    Assigned --> In_Progress: developer starts work directly
+    Assigned --> Pending_Assignment: coordinator clears unsuitable assignee
     Assigned --> Rejected: developer rejects wrong assignment
     Assigned --> Assigned: reassigned to another developer
 
     In_Review --> Need_More_Information: developer requests more details
-    Need_More_Information --> In_Review: reporter adds requested details
-    Need_More_Information --> Assigned: reporter updates and reassigns
+    Need_More_Information --> Assigned: Tester or PM resubmits with update summary and existing assignee
+    Need_More_Information --> Pending_Assignment: Tester or PM clears unavailable or unsuitable assignee
 
+    In_Review --> Assigned: coordinator reassigns
     In_Review --> In_Progress: information is valid
+    In_Review --> Resolved: developer resolves after review
     In_Review --> Rejected: wrong module or category confirmed
 
+    In_Progress --> Need_More_Information: developer requests more details
     In_Progress --> Resolved: developer marks resolution/response complete
+    In_Progress --> Rejected: developer rejects after processing review
 
     Resolved --> Retest_Required: verification is needed
-    Resolved --> Closed: no retest needed and reporter/PM accepts
+    Resolved --> Closed: no retest needed and Tester/PM accepts
     Retest_Required --> Closed: retest passed
     Retest_Required --> Reopened: retest failed
     Resolved --> Reopened: issue still exists before retest
     Closed --> Reopened: reopened after closure
 
-    Reopened --> Assigned: reporter assigns again
+    Reopened --> Assigned: Tester or PM assigns again
+    Reopened --> In_Review: assigned developer resumes review
+    Reopened --> In_Progress: assigned developer resumes work
     Rejected --> Assigned: corrected and reassigned
     Rejected --> Pending_Assignment: corrected but no suitable developer
 

@@ -7,6 +7,14 @@ erDiagram
         boolean active
     }
 
+    AUTH_SESSION {
+        uuid ID
+        uuid userID
+        string tokenHash
+        datetime expiresAt
+        datetime revokedAt
+    }
+
     DEVELOPER_PROFILE {
         uuid ID
         uuid userID
@@ -97,13 +105,13 @@ erDiagram
         datetime createdAt
     }
 
-    ATTACHMENT {
+    BUG_ATTACHMENT {
         uuid ID
         uuid bugID
-        uuid uploadedByID
-        string fileName
-        string mediaType
-        string storageRef
+        string filename
+        string mimeType
+        string url
+        int fileSize
         datetime createdAt
     }
 
@@ -145,6 +153,27 @@ erDiagram
         datetime createdAt
     }
 
+    NOTIFICATION_DELIVERY {
+        uuid ID
+        uuid notificationID
+        string channel
+        string status
+        int attemptCount
+        datetime nextAttemptAt
+        string lastErrorCode
+    }
+
+    AI_SUGGESTION {
+        uuid ID
+        uuid bugID
+        uuid requestedByID
+        uuid reviewedByID
+        string featureType
+        string reviewState
+        decimal confidence
+        datetime reviewedAt
+    }
+
     DUPLICATE_LINK {
         uuid ID
         uuid sourceBugID
@@ -154,6 +183,7 @@ erDiagram
     }
 
     USER ||--o{ BUG : creates
+    USER ||--o{ AUTH_SESSION : authenticates_with
     USER ||--o{ BUG : next_processor
     USER ||--o| DEVELOPER_PROFILE : may_have
     DEVELOPER_PROFILE ||--o{ BUG : assigned_to
@@ -174,8 +204,7 @@ erDiagram
     BUG ||--o{ COMMENT : has
     USER ||--o{ COMMENT : writes
 
-    BUG ||--o{ ATTACHMENT : has
-    USER ||--o{ ATTACHMENT : uploads
+    BUG ||--o{ BUG_ATTACHMENT : has_managed_attachments
 
     BUG ||--o{ HISTORY_EVENT : has
     USER ||--o{ HISTORY_EVENT : performs
@@ -186,6 +215,10 @@ erDiagram
 
     BUG ||--o{ NOTIFICATION : triggers
     USER ||--o{ NOTIFICATION : receives
+    NOTIFICATION ||--o{ NOTIFICATION_DELIVERY : delivers_by_channel
+
+    BUG ||--o{ AI_SUGGESTION : has_review_only_suggestions
+    USER ||--o{ AI_SUGGESTION : requests_or_reviews
 
     BUG ||--o{ DUPLICATE_LINK : source
     BUG ||--o{ DUPLICATE_LINK : target

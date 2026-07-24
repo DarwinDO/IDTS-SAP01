@@ -4,12 +4,14 @@ flowchart TD
     C -->|"Missing information"| D["Request More Information"]
     D --> E["Status: Need More Information"]
     E --> F["Tester adds information"]
-    F --> B
+    F --> F2["Tester or PM uses Resubmit to Developer\nwith required update summary"]
+    F2 --> F3["Status: Assigned\nexisting assignee becomes action owner"]
+    F3 --> B
     C -->|"Wrong classification or assignee"| G["Reject with reason"]
     G --> H["Status: Rejected"]
     H --> I["Follow Up Owner corrects and reassigns"]
     I --> B
-    C -->|"Valid"| J["Start review"]
-    J --> K["Move to In Progress"]
-    K --> L["Add developer note"]
-    L --> M["Mark Resolved"]
+    C -->|"Valid"| J["Start Review: In Review"]
+    J --> K["Start Progress: In Progress"]
+    K --> L["Developer note optional\nfor normal processing"]
+    L --> M["Resolve with required note"]
