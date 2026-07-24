@@ -1,5 +1,16 @@
 # IDTS-97 — Privacy-safe AI operational metrics
 
+## Summary
+
+Adds privacy-safe operational fields and a PM-only aggregate read function for audited AI suggestions. The implementation does not expose prompts, responses, raw errors, user emails, attachment content, private endpoints or credentials.
+
+## Ponytail Simplicity
+
+- Reuses the existing `AiSuggestions` audit table instead of adding a new telemetry store.
+- Adds only two nullable columns and one pure aggregation module.
+- Uses one narrow, idempotent PostgreSQL helper instead of broad CAP deployment or a migration framework.
+- Adds no UI framework, queue, scheduler or monitoring dependency.
+
 ## Positive Evidence
 
 - `npm run qa:idts97:programmatic`: 39 PASS / 0 FAIL.
