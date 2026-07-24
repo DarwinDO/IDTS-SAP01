@@ -1,22 +1,23 @@
 flowchart TD
     A["PM opens dashboard/report"] --> B["System loads bug list, status,\npriority, severity, assignee,\ncreated date, updated date, due date"]
     B --> C["System derives workload per developer"]
-    B --> D["System identifies overdue or stale bugs"]
-    B --> E["System identifies long Pending Assignment bugs"]
+    B --> D["Derived fields expose overdue and action-owner state"]
+    B --> E["PM filters Pending Assignment and rejected follow-up items"]
 
     C --> F{"Workload concern?"}
-    D --> G{"Overdue concern?"}
+    D --> G{"Overdue or stale concern?"}
     E --> H{"Assignment concern?"}
 
     F -->|"No"| I["PM continues monitoring"]
     G -->|"No"| I
     H -->|"No"| I
 
-    F -->|"Yes"| J["PM comments or requests reassignment"]
-    G -->|"Yes"| K["System or PM triggers escalation notification"]
-    H -->|"Yes"| L["PM asks Tester to assign developer"]
+    F -->|"Yes"| J["PM comments or coordinates reassignment"]
+    G -->|"Yes"| K["PM manually follows up or coordinates action"]
+    H -->|"Yes"| L["PM or Tester uses a supported assignment action"]
 
-    J --> M["History log records PM action/comment"]
+    J --> M["History records the PM comment or workflow action"]
     K --> M
     L --> M
-    M --> N["Tester reassigns or updates bug if needed"]
+    M --> N["Assignment/status actions create the normal\nin-app notification and email outbox row"]
+    D -. "Future only" .-> O["Scheduled overdue/stale escalation\nis not implemented in the current runtime"]

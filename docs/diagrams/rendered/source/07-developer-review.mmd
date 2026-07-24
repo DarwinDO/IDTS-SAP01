@@ -4,7 +4,9 @@ flowchart TD
     C -->|"Information missing"| D["Set Need More Information"]
     D --> E["Notify Tester"]
     E --> F["Tester adds information"]
-    F --> B
+    F --> F2["Tester or PM uses Resubmit to Developer\nwith required update summary"]
+    F2 --> F3["Status returns to Assigned\nfor the existing assignee"]
+    F3 --> B
 
     C -->|"Wrong classification or assignee"| G["Reject assigned bug"]
     G --> H["Save rejection reason\nand set nextProcessor"]
@@ -14,11 +16,10 @@ flowchart TD
     K2 -->|"Yes"| L2["Reassign bug to Developer"]
     K2 -->|"No"| M2["Move to Pending Assignment"]
 
-    C -->|"Valid"| K["Set In Review or In Progress"]
-    K --> L["Add developer note"]
-    L --> M["Set Resolved when response is complete"]
+    C -->|"Valid"| K["Start Review or Start Progress"]
+    K --> L["Developer note is optional\nfor normal processing"]
+    L --> M["Resolve with required resolution note"]
     M --> N["Tester or PM retests if needed"]
     N --> O{"Retest result"}
     O -->|"Passed"| P["Close bug"]
     O -->|"Failed"| Q["Reopen bug"]
-    O -->|"More info needed"| R["Request more information"]

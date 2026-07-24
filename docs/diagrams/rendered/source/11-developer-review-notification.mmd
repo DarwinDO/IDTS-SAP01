@@ -3,7 +3,8 @@ sequenceDiagram
     participant UI as Fiori App
     participant CAP as CAP OData Service
     participant DB as Database
-    participant Notify as Notification Adapter
+    participant Outbox as Notifications + Email Outbox
+    participant Worker as Email Worker / Provider
     actor Tester as Tester
     actor PM as Project Manager
 
@@ -17,19 +18,26 @@ sequenceDiagram
         Dev->>UI: Request more information
         UI->>CAP: Update status to Need More Information
         CAP->>DB: Save status and history log
-        CAP->>Notify: Create information request notification
-        Notify-->>Tester: Notify tester
+        CAP->>Outbox: Persist information-request event + email delivery row
+        Outbox-->>Tester: In-app notification available
     else Wrong classification or assignee
         Dev->>UI: Reject bug
         UI->>CAP: Update status to Rejected
         CAP->>DB: Save rejection reason, nextProcessor, and history log
-        CAP->>Notify: Create rejection notification
-        Notify-->>Tester: Notify tester
-        Notify-->>PM: Notify PM if escalation rule applies
+        CAP->>Outbox: Persist rejection event + email delivery row
+        Outbox-->>Tester: In-app notification available
+        Outbox-->>PM: Monitoring/escalation event when applicable
     else Valid bug
         Dev->>UI: Move to In Progress or Resolved
         UI->>CAP: Update status and developer note
         CAP->>DB: Save status, note, and history log
-        CAP->>Notify: Create status update notification
-        Notify-->>Tester: Notify tester
+        CAP->>Outbox: Persist status event + email delivery row
+        Outbox-->>Tester: In-app notification available
+    end
+
+    opt Email enabled and configuration complete
+        Worker->>Outbox: Claim committed PENDING / retryable FAILED rows
+        Worker->>Worker: Send through configured SMTP or Brevo provider
+        Worker->>Outbox: Mark SENT or FAILED and schedule bounded retry if eligible
+        Note over CAP,Worker: Provider outcome is asynchronous and cannot roll back the lifecycle transaction
     end
