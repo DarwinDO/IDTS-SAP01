@@ -3,7 +3,8 @@ sequenceDiagram
     participant UI as Fiori App
     participant CAP as CAP OData Service
     participant DB as Database
-    participant Notify as Notification Adapter
+    participant Outbox as Notifications + Email Outbox
+    participant Worker as Email Worker / Provider
     actor Dev as Developer
     actor PM as Project Manager
 
@@ -14,14 +15,25 @@ sequenceDiagram
     alt Developer selected
         CAP->>DB: Save bug with status Assigned
         CAP->>DB: Write history log: Create + Assign
-        CAP->>Notify: Create Bug Assigned notification
-        Notify-->>Dev: Notify assigned developer
+        CAP->>Outbox: Persist in-app SENT event + email delivery row
+        Outbox-->>Dev: In-app notification available
     else No suitable developer
         CAP->>DB: Save bug with status Pending Assignment
         CAP->>DB: Write history log: Create + Pending Assignment
-        CAP->>Notify: Create Pending Assignment notification
-        Notify-->>PM: Notify or expose for monitoring
+        CAP->>Outbox: Persist in-app SENT event + email delivery row
+        Outbox-->>PM: In-app notification / monitoring item available
     end
 
     CAP-->>UI: Return created bug
     UI-->>Tester: Show created bug and current status
+
+    opt Email enabled and configuration complete
+        Worker->>Outbox: Claim committed PENDING / retryable FAILED row
+        Worker->>Worker: Send through configured SMTP or Brevo provider
+        alt Provider accepts message
+            Worker->>Outbox: Mark delivery SENT
+        else Provider fails
+            Worker->>Outbox: Mark FAILED and schedule bounded retry
+            Note over Worker,Outbox: Email failure never rolls back the committed bug workflow
+        end
+    end

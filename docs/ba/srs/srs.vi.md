@@ -1,10 +1,10 @@
 # Tài liệu Đặc tả Yêu cầu Phần mềm
 
-Dự án: Issue and Defect Tracking System in SAP  
-Loại tài liệu: Software Requirements Specification (SRS)  
-Ngôn ngữ: Tiếng Việt  
-Trạng thái: Draft v1.2
-Cập nhật lần cuối: 2026-07-10
+Dự án: Issue and Defect Tracking System in SAP
+Loại tài liệu: Software Requirements Specification (SRS)
+Ngôn ngữ: Tiếng Việt
+Trạng thái: Draft v1.4
+Cập nhật lần cuối: 2026-07-22
 Chuẩn bị cho: SAP490 project delivery, mentor review, bằng chứng implementation và QA test design
 Phong cách tài liệu: Cấu trúc SRS truyền thống, kết hợp nguyên tắc chất lượng requirement, traceability và verification theo hướng ISO/IEC/IEEE 29148
 
@@ -18,6 +18,7 @@ Phong cách tài liệu: Cấu trúc SRS truyền thống, kết hợp nguyên t
 | v1.1 | 2026-06-03 | IDTS Project Team | Mentor / Supervisor | Cập nhật user class và functional requirements theo MVP role baseline: Tester, Developer và PM. Reporter và Admin được hoãn như role tách riêng. | Draft |
 | v1.2 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Đồng bộ baseline attachment đã triển khai và AI advisory tùy chọn, với ràng buộc rõ về human review, privacy và không có workflow authority. | Draft |
 | v1.3 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Thay source block system-context dùng khi review bằng figure đã render, có traceability và tham chiếu Diagram Pack. | Draft |
+| v1.4 | 2026-07-22 | IDTS Project Team | Mentor / Supervisor | Đồng bộ requirement về authentication/session, shared PostgreSQL/Render, attachment object storage, email outbox và AI audit có human review với baseline mentor review đã triển khai. | Draft |
 
 ### 1.2 Review và phê duyệt
 
@@ -30,7 +31,7 @@ Phong cách tài liệu: Cấu trúc SRS truyền thống, kết hợp nguyên t
 
 ### 1.3 Mục đích tài liệu
 
-SRS này định nghĩa các yêu cầu phần mềm cho Issue and Defect Tracking System in SAP (IDTS). Tài liệu chuyển hóa hướng nghiệp vụ đã chốt thành các yêu cầu hệ thống có thể kiểm chứng cho SAP CAP, OData V4, Fiori Elements/SAPUI5, SQLite local development và định hướng triển khai HANA Cloud hoặc PostgreSQL sau này.
+SRS này định nghĩa các yêu cầu phần mềm cho Issue and Defect Tracking System in SAP (IDTS). Tài liệu chuyển hóa hướng nghiệp vụ đã chốt thành các yêu cầu hệ thống có thể kiểm chứng cho SAP CAP, OData V4, Fiori Elements/SAPUI5, SQLite local development và baseline shared QA hiện tại trên Render dùng PostgreSQL cùng object storage bind bên ngoài. Production target sau này vẫn là deployment decision riêng.
 
 SRS này dùng cấu trúc SRS truyền thống để dễ đọc và áp dụng nguyên tắc requirement hiện đại theo hướng ISO/IEC/IEEE 29148 cho chất lượng requirement, traceability và verification trong bối cảnh SAP490 hybrid. Tài liệu không tuyên bố chứng nhận hoặc tuân thủ đầy đủ tiêu chuẩn chính thức.
 
@@ -76,7 +77,7 @@ IDTS có thể cung cấp gợi ý AI tùy chọn cho similar bug, classificatio
 
 ### 4.1 System Context
 
-IDTS là ứng dụng SAP CAP Node.js, expose qua OData V4 và được sử dụng bởi frontend SAP Fiori Elements/SAPUI5. Local development dùng SQLite. Future deployment có thể dùng SAP HANA Cloud hoặc PostgreSQL, nhưng endpoint và credential không được hardcode.
+IDTS là ứng dụng SAP CAP Node.js, expose qua OData V4 và được sử dụng bởi frontend SAP Fiori Elements/SAPUI5. Local development dùng SQLite. Shared QA chạy trên Render với PostgreSQL và object storage bind bên ngoài. Production target sau này vẫn configurable; endpoint và credential không được hardcode.
 
 ![SRS System Context](../../diagrams/rendered/13-srs-system-context.svg)
 
@@ -99,8 +100,9 @@ Reporter và Admin không phải user class tách riêng trong MVP. Tester đả
 | API | OData V4. |
 | Frontend | Fiori Elements List Report/Object Page là mặc định; SAPUI5 extension chỉ dùng khi cần. |
 | Local database | SQLite. |
-| Future database | SAP HANA Cloud hoặc PostgreSQL, quyết định sau. |
-| Authentication / authorization | Role-based behavior phải được thiết kế; setup XSUAA/BTP cụ thể có thể chốt khi deployment planning. |
+| Shared QA runtime và database | CAP runtime host trên Render với PostgreSQL qua profile `integration`. |
+| Attachment storage | Composition `@cap-js/attachments` với DB fallback ở local và S3 object storage bind bên ngoài cho shared QA. |
+| Authentication / authorization | `AuthService.login` verify credential, `AuthSessions` giữ bearer session do server quản lý và middleware map session tới internal role Tester, Developer hoặc PM. Baseline hiện tại không phụ thuộc XSUAA/BTP. |
 
 ## 5. Assumptions, Constraints và Dependencies
 
@@ -112,8 +114,8 @@ Reporter và Admin không phải user class tách riêng trong MVP. Tester đả
 | ASM-002 | Application Component và Defect Category là bắt buộc để lọc assignee. |
 | ASM-003 | Component Category là cặp hợp lệ giữa Application Component và Defect Category. |
 | ASM-004 | Developer Responsibility map Developer với Component Category và optional SAP Module. |
-| ASM-005 | Notification delivery có thể bắt đầu bằng notification records và triggers; delivery channel thật có thể thêm sau. |
-| ASM-006 | Attachment có thể bắt đầu bằng metadata hoặc storage reference. |
+| ASM-005 | `Notifications` là in-app event record; event phù hợp đồng thời tạo row email outbox trong `NotificationDeliveries` để xử lý bất đồng bộ. Acceptance live provider cần private configuration đã duyệt và evidence. |
+| ASM-006 | Attachment dùng composition được SAP hỗ trợ; local development có thể dùng DB fallback, shared QA dùng S3 object storage bind bên ngoài. |
 | ASM-007 | BRD v1.2 là business baseline cho SRS này. |
 
 ### 5.2 Constraints
@@ -133,7 +135,7 @@ Reporter và Admin không phải user class tách riêng trong MVP. Tester đả
 | DEP-001 | Mentor chấp nhận SAP CAP/Fiori là SAP490 coding deliverable | Có thể ảnh hưởng final report mapping. |
 | DEP-002 | CDS model và service projections ổn định | Cần trước khi ổn định Fiori value helps và actions. |
 | DEP-003 | Chốt quyền reassignment của PM | Quyết định PM được assign/reassign trực tiếp hay chỉ request. |
-| DEP-004 | Chốt notification channel cho MVP | Quyết định notification records có đủ hay cần external delivery. |
+| DEP-004 | Verify live email-provider configuration | Outbox behavior đã triển khai, nhưng acceptance live delivery cần private configuration đã duyệt và evidence. |
 
 ## 6. Quy ước mã yêu cầu
 
@@ -148,6 +150,8 @@ SRS requirements dùng ID ổn định:
 | `SRS-FR-COMMENT` | Comments |
 | `SRS-FR-AUDIT` | History và audit |
 | `SRS-FR-NOTIF` | Notification records |
+| `SRS-FR-AUTH` | Authentication và session control |
+| `SRS-FR-DELIVERY` | Notification delivery bất đồng bộ |
 | `SRS-FR-PM` | PM monitoring |
 | `SRS-DATA` | Data requirements |
 | `SRS-IF` | Interface và UI requirements |
@@ -219,7 +223,10 @@ Verification methods:
 | SRS-FR-AUDIT-001 | BRD-BR-011, REQ-HISTORY-001 | IDTS shall ghi history logs cho create, edit, assign, reassign, status change, request information, reject, resolve, retest, close, reopen, attachment, comment và key notification events. | Must | Inspection và test | FRS-AUDIT-001 |
 | SRS-FR-AUDIT-002 | BR-32 | IDTS shall lưu actor, role, timestamp, action type, old value, new value và reason khi có trong history logs. | Must | Inspection | FRS-AUDIT-001 |
 | SRS-FR-NOTIF-001 | BRD-BR-012, BR-29 | IDTS shall tạo notification records cho các event assigned, reassigned, information request, bug update, rejected, overdue, resolved, retest và closed khi áp dụng. | Must | Inspection và test | FRS-NOTIF-001 |
-| SRS-FR-NOTIF-002 | BR-30 | IDTS should giữ external notification delivery ở dạng pluggable và không hardcode channel endpoints. | Should | Inspection | FRS-NOTIF-001 |
+| SRS-FR-NOTIF-002 | BR-30 | IDTS shall tạo row email outbox riêng trong `NotificationDeliveries` cho event email phù hợp và không hardcode provider endpoint hoặc credential. | Must | Inspection và test | FRS-NOTIF-001 |
+| SRS-FR-DELIVERY-001 | BR-30 | Worker bất đồng bộ shall xử lý email-outbox row đủ điều kiện, record attempt/status/sanitized failure và không rollback bug action gốc khi provider unavailable. | Must | Inspection và test | FRS-NOTIF-001 |
+| SRS-FR-AUTH-001 | Authorization baseline | `AuthService.login` shall verify credential được cung cấp và tạo record `AuthSessions` mà không trả hoặc persist plain-text password. | Must | Inspection và test | FRS-AUTH-001 |
+| SRS-FR-AUTH-002 | Authorization baseline | Request đã authenticate tới BugService shall resolve bearer session thành internal user và enforce authorization Tester, Developer hoặc PM ở backend. | Must | Inspection và test | FRS-AUTH-001 |
 
 ### 7.6 PM Monitoring
 
@@ -237,6 +244,7 @@ Verification methods:
 | SRS-FR-AI-001 | DISC-002 | IDTS có thể cung cấp gợi ý similar-bug, classification, bug/handoff summary và Smart Assign explanation chỉ dưới dạng advisory output để người dùng review. | Should | Test và demonstration | FRS-AI-001 |
 | SRS-FR-AI-002 | DISC-002 | AI output không được create, edit, assign, reclassify, transition, close, reopen hoặc làm thay đổi bug; normal action có authorization vẫn là đường quyết định duy nhất. | Must | Test | FRS-AI-001 |
 | SRS-FR-AI-003 | DISC-002 | AI request, response, audit record và lỗi hiển thị cho user không được chứa credential, token, private endpoint, attachment bytes, raw provider output hoặc personal data không cần thiết. | Must | Inspection và test | FRS-AI-001 |
+| SRS-FR-AI-004 | DISC-002 | Source-linked suggestion shall chỉ persist normalized safe data trong `AiSuggestions`, gồm review status khi áp dụng; audit row không phải autonomous workflow decision. | Must | Inspection và test | FRS-AI-001 |
 
 ## 8. Data Requirements
 
@@ -248,8 +256,11 @@ Verification methods:
 | SRS-DATA-004 | Classification | IDTS shall lưu SAPModules, ApplicationComponents, DefectCategories, ComponentCategories và DeveloperResponsibilities như master data hoặc value-help data có thể maintain. | Must | Inspection |
 | SRS-DATA-005 | Responsibility | IDTS shall lưu active/inactive state cho Developer profiles và responsibility mappings để tránh chọn inactive Developers. | Must | Test |
 | SRS-DATA-006 | Comments | IDTS shall lưu comment content, author, author role, timestamp và parent bug reference. | Must | Inspection |
-| SRS-DATA-007 | Attachments | IDTS should lưu attachment metadata gồm file name, media type, storage reference, uploader và timestamp. | Should | Inspection |
-| SRS-DATA-008 | Notifications | IDTS shall lưu notification event type, recipient, channel khi biết, delivery status, timestamp và parent bug reference. | Must | Inspection |
+| SRS-DATA-007 | Attachments | IDTS shall lưu attachment metadata qua attachment composition và giữ content trong configured DB fallback hoặc external object store mà không expose storage credential. | Must | Inspection và test |
+| SRS-DATA-008 | Notifications | IDTS shall lưu in-app notification event type, recipient, channel, delivery status, timestamp và parent bug reference. | Must | Inspection |
+| SRS-DATA-009 | Authentication sessions | IDTS shall lưu hashed/token-safe session record gồm user, expiry và revocation state trong `AuthSessions`; bearer token và password không được commit vào source. | Must | Inspection và test |
+| SRS-DATA-010 | Email delivery outbox | IDTS shall lưu safe payload snapshot, attempt, retry timing, status, locking và sanitized failure detail trong `NotificationDeliveries`. | Must | Inspection và test |
+| SRS-DATA-011 | AI suggestion audit | IDTS shall lưu normalized source-linked suggestion và human-review state trong `AiSuggestions`, không lưu raw prompt, raw provider response, credential, attachment content hoặc hidden reasoning. | Must | Inspection và test |
 | SRS-DATA-009 | HistoryLogs | IDTS shall lưu history logs như bug-owned audit records. | Must | Inspection |
 
 ## 9. External Interface và UI Interface Requirements
@@ -320,8 +331,8 @@ Verification methods:
 | ID | Open Issue | Owner | Impact |
 | --- | --- | --- | --- |
 | OI-SRS-001 | Xác nhận PM được assign/reassign trực tiếp trong MVP hay chỉ request reassignment. | Team / Mentor | Authorization và Fiori action visibility. |
-| OI-SRS-002 | Xác nhận notification delivery scope cho MVP. | Team / Mentor | Notification records có đủ hay không. |
-| OI-SRS-003 | Xác nhận attachment storage approach. | Team / Mentor | File storage design và test evidence handling. |
+| OI-SRS-002 | Xác nhận evidence cần thiết để mentor accept flow in-app notification và email outbox bất đồng bộ đã triển khai. | Team / Mentor | Không claim live-provider delivery khi chưa có private configuration và evidence đã duyệt. |
+| OI-SRS-003 | Xác nhận evidence cần thiết để mentor accept externally bound attachment storage trong shared QA. | Team / Mentor | Storage implementation đã có; acceptance cuối phụ thuộc binding và test evidence. |
 | OI-SRS-004 | Xác nhận overdue thresholds theo priority/severity. | Team / PM | PM dashboard và escalation logic. |
 | OI-SRS-005 | Xác nhận SAP490 chấp nhận CAP/Fiori artifacts là SAP Coding deliverables. | Team / Mentor | Final report structure và evidence mapping. |
 

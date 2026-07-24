@@ -1,4 +1,4 @@
-﻿# SAP490 Google Workspace Sync Workflow
+# SAP490 Google Workspace Sync Workflow
 ## English
 
 ### 1. Purpose
@@ -24,13 +24,13 @@ For this project, the Google Drive review root must be named `SU26SAP01_GSU26SAP
 | --- | --- | --- |
 | Mandatory document-task gate | OfficeCLI preflight, format skill, inspection, and validation | None; report a format limitation before using the native tool |
 | Repeatable team sync to Google Drive/Docs/Sheets | `gws` CLI | Google Drive connector |
-| Interactive readback or quick check in Codex | Google Drive connector | `gws` CLI |
+| Interactive readback or quick check in an interactive review session | Google Drive connector | `gws` CLI |
 | Local DOCX creation or editing | Documents plugin, `python-docx`, project script that fills a copied template | Pandoc only for labeled drafts/prototypes, not final SAP490 submission files |
 | Local XLSX creation or editing | Spreadsheets plugin, `openpyxl`, project script | Manual edit only when approved |
 | Final DOCX layout verification | Documents render/export workflow, LibreOffice PDF export | Manual visual inspection |
 | Final XLSX verification | Spreadsheets inspection, LibreOffice open/convert check | Manual visual inspection |
 
-`gws` is preferred for repeated team automation because the same command or npm script can be run by different developers in different chat threads or local terminals. The Google Drive connector remains useful for quick interactive operations inside Codex.
+`gws` is preferred for repeated team automation because the same command or npm script can be run by different developers in different chat threads or local terminals. The Google Drive connector remains useful for quick interactive operations inside an interactive review session.
 
 ### 4. Standard Sync Flow
 

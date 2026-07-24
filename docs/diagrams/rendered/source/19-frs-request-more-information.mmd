@@ -8,11 +8,19 @@ sequenceDiagram
     Dev->>UI: Request more information
     UI->>Dev: Ask for required reason
     Dev->>UI: Submit reason
-    UI->>CAP: Change status to Need More Information
-    CAP->>CAP: Validate assigned developer and reason
-    CAP->>DB: Save status and nextProcessor
-    CAP->>DB: Write history log
-    CAP->>DB: Create notification record
+    UI->>CAP: requestMoreInformation(reason)
+    CAP->>CAP: Validate actor, source status, assignee, and required reason
+    CAP->>DB: Save Need More Information + Tester action owner
+    CAP->>DB: Write HistoryEvent / HistoryLogs
+    CAP->>DB: Create in-app notification + email outbox row
     Tester->>UI: Add missing information
-    UI->>CAP: Return bug to Assigned or In Review
-    CAP->>DB: Save update and history
+    alt Existing assignee remains suitable
+        UI->>CAP: resubmitToDeveloper(update summary)
+        CAP->>CAP: Require Tester/PM, assignee, summary, and valid transition
+        CAP->>DB: Save Assigned + Developer action owner
+        CAP->>DB: Write comment/history + notification/outbox
+    else No suitable assignee
+        UI->>CAP: moveToPendingAssignment(reason)
+        CAP->>DB: Clear assignee and save Pending Assignment
+        CAP->>DB: Write history + notification/outbox
+    end

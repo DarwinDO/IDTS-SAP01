@@ -5,13 +5,22 @@ stateDiagram-v2
     New --> Assigned
     New --> Pending_Assignment
     Pending_Assignment --> Assigned
+    Pending_Assignment --> Rejected
     Assigned --> In_Review
+    Assigned --> Need_More_Information
+    Assigned --> In_Progress
+    Assigned --> Pending_Assignment
     Assigned --> Rejected
     In_Review --> Need_More_Information
-    Need_More_Information --> In_Review
+    Need_More_Information --> Assigned
+    Need_More_Information --> Pending_Assignment
+    In_Review --> Assigned
     In_Review --> In_Progress
+    In_Review --> Resolved
     In_Review --> Rejected
+    In_Progress --> Need_More_Information
     In_Progress --> Resolved
+    In_Progress --> Rejected
     Resolved --> Retest_Required
     Resolved --> Closed
     Retest_Required --> Closed
@@ -19,6 +28,8 @@ stateDiagram-v2
     Resolved --> Reopened
     Closed --> Reopened
     Reopened --> Assigned
+    Reopened --> In_Review
+    Reopened --> In_Progress
     Rejected --> Assigned
     Rejected --> Pending_Assignment
     Closed --> [*]

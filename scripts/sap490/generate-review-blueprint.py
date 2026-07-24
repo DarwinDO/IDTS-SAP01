@@ -65,7 +65,7 @@ def build(language):
     set_cell(doc.tables[0].rows[3].cells[0], values["prepared"])
     # Reuse an existing history row to preserve original table layout.
     history_row = doc.tables[1].rows[3].cells
-    history_values = ["2026-07-10", "SAP490 review refresh", values["history"], "DonHV / Codex", "C", "v0.2"]
+    history_values = ["2026-07-10", "SAP490 review refresh", values["history"], "DonHV", "C", "v0.2"]
     for cell, value in zip(history_row, history_values):
         set_cell(cell, value)
 
