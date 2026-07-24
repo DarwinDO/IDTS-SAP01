@@ -17,8 +17,8 @@ from openpyxl.styles import Alignment
 ROOT = Path(__file__).resolve().parents[2]
 TEMPLATES = ROOT / "docs" / "sap490" / "templates" / "Deliverable_template"
 OUT = ROOT / "docs" / "sap490" / "generated"
-DATE = date(2026, 7, 22)
-VERSION = "0.2"
+DATE = date(2026, 7, 24)
+VERSION = "0.3"
 SYSTEM = "IDTS-SAP01"
 NAME = "Issue and Defect Tracking System in SAP"
 
@@ -26,12 +26,12 @@ NAME = "Issue and Defect Tracking System in SAP"
 LABELS = {
     "en": {
         "technical_name": "CAP/Fiori MVP Technical Specification",
-        "history": "Initial SAP490 review technical specification aligned with the implemented CAP/Fiori MVP and evidence-backed advisory AI boundary.",
+        "history": "Mentor-ready refresh aligned with deployed OData paths, draft and active write events, exact workflow action audit codes, expanded developer demo data, and the evidence-backed advisory AI boundary.",
         "intro": "IDTS is a SAP CAP Node.js and SAP Fiori Elements application. CAP CDS defines the domain and OData V4 services; Node.js handlers enforce authorization, validation, audit/history and notification side effects.",
         "scope": "Included: bug reporting, classification, responsibility-aware assignment, lifecycle actions, comments, draft attachments, notifications, audit/history, PM monitoring, and review-only AI suggestions. Excluded: autonomous workflow decisions, credentials, private endpoints, and source-code management.",
         "assumptions": "SQLite supports local development; PostgreSQL/HANA portability remains a deployment direction. Real AI is disabled unless private configuration is approved. AI input is allowlisted and AI output is advisory only.",
-        "requirements": "CAP exposes authenticated OData V4 projections and bound actions. Fiori Elements/Object Page presents role- and status-appropriate actions. Backend remains authoritative for catalog, responsibility, and lifecycle validation.",
-        "design": "Core artifacts: db/schema.cds, srv/service.cds, srv/service.js, srv/ai/, app/bug-management-ui. Data model includes Bugs, master data, history/audit, notifications, attachments, and sanitized AI suggestion audit records.",
+        "requirements": "AuthService is exposed at /odata/v4/auth/ and BugService at /odata/v4/bug/. Fiori draft creation uses NEW, field changes use PATCH, and SAVE activates the draft through CREATE; editing an active Bug uses EDIT, PATCH, and UPDATE. Bound actions remain server-authorized. Backend remains authoritative for catalog, responsibility, and lifecycle validation.",
+        "design": "Core artifacts: db/schema.cds, srv/service.cds, srv/service.js, srv/bug-service/, srv/ai/, and app/bug-management-ui. Data includes Bugs, 14 QA users (12 Developers), 30 DeveloperResponsibilities, master data, exact action history/audit, notifications, PostgreSQL attachment metadata, S3 binary objects, and sanitized AiSuggestions rows that currently remain PENDING.",
         "standards": "Use CAP CDS/OData patterns, server-side authorization/validation, readable Fiori labels, safe error messages, no secrets in source/evidence, and matching docs/knowledge mirrors for changed app/srv/db files.",
         "screen": "Fiori Elements List Report and Object Page: Bug Summary, Classification and Assignment, Reproduction, Evidence/Attachments, Comments, History, Notifications, PM monitoring, and context-local review-only AI actions.",
         "messages": [
@@ -49,12 +49,15 @@ LABELS = {
             ("UAT-06", "Advisory AI safety", "User opens an AI review suggestion; normal workflow remains usable and no suggestion changes the bug automatically."),
         ],
         "config_items": [
-            ("Authentication", "AuthService login/logout/me and hashed AuthSessions bearer-token records", "Configured; server-side authorization remains authoritative"),
+            ("Authentication", "AuthService /odata/v4/auth/ login/logout/me and hashed AuthSessions bearer-token records", "Configured; server-side authorization remains authoritative"),
+            ("Bug service and draft", "BugService /odata/v4/bug/; NEW/PATCH/SAVE for create and EDIT/PATCH/UPDATE for active edits", "Configured and verified without changing the public contract"),
+            ("Developer demo data", "14 Users, including 12 Developers, with 12 profiles and 30 DeveloperResponsibilities", "Configured for shared QA; values are demo data, not production identities"),
             ("Hosting and database", "Render shared-QA baseline with PostgreSQL; SQLite remains local development only", "Configured; no private connection data in this workbook"),
             ("Attachments", "@cap-js/attachments metadata in PostgreSQL with external S3 object storage for shared QA", "Configured; bucket and credentials remain private"),
             ("Notifications", "Notifications plus NotificationDeliveries email outbox and worker; SMTP/Brevo provider is private configuration", "Configured; provider failure does not roll back the bug workflow"),
             ("Fiori UI", "Fiori Elements Object Page/List Report and safe UI5 extensions", "Configured / verified by QA"),
-            ("AI provider", "AiSuggestions audit plus optional provider seam; disabled by default and human-review-only", "Configured as opt-in; no live key or autonomous mutation"),
+            ("Workflow audit", "11 exact workflow action types map one-to-one to bound commands", "Configured and verified; legacy audit categories remain for historical compatibility"),
+            ("AI provider", "AiSuggestions audit plus optional provider seam; live provider disabled and human-review-only", "NOT ACCEPTED live; mock/fallback/no-mutation PASS; source-linked rows remain PENDING"),
             ("Security evidence", "Secrets, private endpoints, tokens, attachment content and raw provider output are excluded", "Required for every review and deployment handoff"),
         ],
         "change_rows": [
@@ -65,12 +68,12 @@ LABELS = {
     },
     "vi": {
         "technical_name": "Đặc tả kỹ thuật CAP/Fiori MVP",
-        "history": "Bản Technical Specification SAP490 đầu tiên cho review, đồng bộ CAP/Fiori MVP đã triển khai và boundary AI advisory có bằng chứng.",
+        "history": "Bản cập nhật mentor-ready đồng bộ endpoint OData đã deploy, sự kiện ghi draft/active, exact workflow action audit, dữ liệu demo Developer mở rộng và ranh giới AI tư vấn có bằng chứng.",
         "intro": "IDTS là ứng dụng SAP CAP Node.js và SAP Fiori Elements. CAP CDS định nghĩa domain và OData V4 service; Node.js handler enforce authorization, validation, audit/history và notification side effect.",
         "scope": "Bao gồm: bug reporting, classification, assignment theo responsibility, lifecycle action, comment, draft attachment, notification, audit/history, PM monitoring và AI suggestion chỉ để review. Loại trừ: quyết định workflow tự động, credential, private endpoint và source-code management.",
         "assumptions": "SQLite dùng cho local development; PostgreSQL/HANA là hướng deployment. Real AI mặc định tắt nếu chưa có private configuration được duyệt. AI input được allowlist và AI output chỉ là advisory.",
-        "requirements": "CAP expose authenticated OData V4 projection và bound action. Fiori Elements/Object Page hiển thị action phù hợp role/status. Backend vẫn là authority cho catalog, responsibility và lifecycle validation.",
-        "design": "Artifact chính: db/schema.cds, srv/service.cds, srv/service.js, srv/ai/, app/bug-management-ui. Data model gồm Bugs, master data, history/audit, notification, attachment và AI suggestion audit đã sanitize.",
+        "requirements": "AuthService được expose tại /odata/v4/auth/ và BugService tại /odata/v4/bug/. Luồng tạo draft dùng NEW, thay đổi field dùng PATCH và SAVE kích hoạt draft qua CREATE; sửa Bug active dùng EDIT, PATCH và UPDATE. Bound action luôn được kiểm quyền ở server. Backend quyết định cuối cùng cho catalog, responsibility và lifecycle validation.",
+        "design": "Artifact chính: db/schema.cds, srv/service.cds, srv/service.js, srv/bug-service/, srv/ai/ và app/bug-management-ui. Dữ liệu gồm Bugs, 14 user QA (12 Developer), 30 DeveloperResponsibilities, master data, history/audit exact action, notification, metadata attachment trong PostgreSQL, binary trên S3 và AiSuggestions đã làm sạch hiện giữ ở PENDING.",
         "standards": "Dùng CAP CDS/OData pattern, authorization/validation ở server, Fiori label dễ đọc, error message an toàn, không có secret trong source/evidence và cập nhật docs/knowledge mirror cho app/srv/db thay đổi.",
         "screen": "Fiori Elements List Report và Object Page: Bug Summary, Classification and Assignment, Reproduction, Evidence/Attachments, Comments, History, Notifications, PM monitoring và AI action review-only tại đúng context.",
         "messages": [
@@ -88,12 +91,15 @@ LABELS = {
             ("UAT-06", "AI advisory safety", "User mở AI review suggestion; normal workflow vẫn dùng được và suggestion không tự đổi bug."),
         ],
         "config_items": [
-            ("Xác thực", "AuthService login/logout/me và bản ghi bearer-token AuthSessions đã băm", "Đã cấu hình; authorization phía server vẫn là nguồn quyết định"),
+            ("Xác thực", "AuthService /odata/v4/auth/ gồm login/logout/me và bản ghi bearer-token AuthSessions đã băm", "Đã cấu hình; authorization phía server vẫn là nguồn quyết định"),
+            ("Bug service và draft", "BugService /odata/v4/bug/; NEW/PATCH/SAVE khi tạo và EDIT/PATCH/UPDATE khi sửa active Bug", "Đã cấu hình và xác minh mà không đổi public contract"),
+            ("Dữ liệu demo Developer", "14 Users gồm 12 Developer, 12 profile và 30 DeveloperResponsibilities", "Đã cấu hình cho shared QA; đây là dữ liệu demo, không phải danh tính production"),
             ("Hosting và cơ sở dữ liệu", "Baseline shared QA trên Render với PostgreSQL; SQLite chỉ dùng cho local development", "Đã cấu hình; workbook không chứa connection data riêng tư"),
             ("Tệp đính kèm", "Metadata @cap-js/attachments trong PostgreSQL và object storage S3 bên ngoài cho shared QA", "Đã cấu hình; bucket và credential được giữ riêng tư"),
             ("Thông báo", "Notifications cùng email outbox NotificationDeliveries và worker; SMTP/Brevo là cấu hình riêng tư", "Đã cấu hình; lỗi provider không rollback workflow bug"),
             ("Fiori UI", "Fiori Elements Object Page/List Report và UI5 extension an toàn", "Đã cấu hình / QA đã verify"),
-            ("AI provider", "AiSuggestions audit và provider seam tùy chọn; mặc định tắt và chỉ hỗ trợ human review", "Opt-in; không lưu live key và không tự động thay đổi bug"),
+            ("Workflow audit", "11 exact workflow action type map một-một với các bound command", "Đã cấu hình và xác minh; category cũ chỉ giữ để tương thích lịch sử"),
+            ("AI provider", "AiSuggestions audit và provider seam tùy chọn; live provider đang tắt và chỉ hỗ trợ human review", "Live NOT ACCEPTED; mock/fallback/no-mutation PASS; source-linked row giữ ở PENDING"),
             ("Bằng chứng bảo mật", "Loại trừ secret, private endpoint, token, nội dung attachment và raw provider output", "Bắt buộc cho mọi review và deployment handoff"),
         ],
         "change_rows": [
