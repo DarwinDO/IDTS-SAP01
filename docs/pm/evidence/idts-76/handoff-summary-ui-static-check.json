@@ -1,6 +1,6 @@
 {
   "task": "IDTS-76",
-  "checkedAt": "2026-07-24T13:19:56.693Z",
+  "checkedAt": "2026-07-24T17:34:45.367Z",
   "checks": [
     {
       "label": "history section opens the handoff review dialog",
@@ -175,6 +175,10 @@
       "pass": true
     },
     {
+      "label": "i18n.properties handoffSummaryReviewNotice is user-facing",
+      "pass": true
+    },
+    {
       "label": "i18n.properties handoffSummarySummaryLabel is user-facing",
       "pass": true
     },
@@ -324,6 +328,10 @@
     },
     {
       "label": "i18n_en.properties handoffSummaryIntroMessage is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummaryReviewNotice is user-facing",
       "pass": true
     },
     {

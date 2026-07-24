@@ -19,6 +19,7 @@ sap.ui.define([
     "sap/m/ObjectStatus",
     "sap/m/MessageStrip",
     "sap/m/VBox",
+    "sap/m/HBox",
     "sap/m/Toolbar",
     "sap/m/ToolbarSpacer",
     "sap/m/MessageToast",
@@ -27,7 +28,8 @@ sap.ui.define([
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     "../login/LoginController",
-    "../ai/AiReviewUi"
+    "../ai/AiReviewUi",
+    "../ai/AiSuggestionReview"
 ], function (
     Dialog,
     Button,
@@ -40,6 +42,7 @@ sap.ui.define([
     ObjectStatus,
     MessageStrip,
     VBox,
+    HBox,
     Toolbar,
     ToolbarSpacer,
     MessageToast,
@@ -48,7 +51,8 @@ sap.ui.define([
     Filter,
     FilterOperator,
     LoginSession,
-    AiReviewUi
+    AiReviewUi,
+    AiSuggestionReview
 ) {
     "use strict";
 
@@ -316,6 +320,7 @@ sap.ui.define([
     }
 
     function applyAssignmentExplanations(state, explanations, view) {
+        var suggestionID = (explanations || [])[0] && explanations[0].suggestionID;
         var byDeveloperProfileID = new Map((explanations || []).map(function (row) {
             return [row.developerProfileID, row];
         }));
@@ -337,6 +342,14 @@ sap.ui.define([
         });
 
         state.setProperty("/candidates", candidates);
+        state.setProperty("/suggestionID", suggestionID || null);
+        state.setProperty("/reviewActionEnabled", Boolean(suggestionID));
+        state.setProperty(
+            "/reviewStateText",
+            suggestionID
+                ? getText(view, "aiSuggestionReviewPending")
+                : getText(view, "aiSuggestionReviewUnavailable")
+        );
         refreshVisibleCandidates(state);
     }
 
@@ -410,10 +423,20 @@ sap.ui.define([
             selectedCandidateId: "",
             selectedWarningText: "",
             aiNoticeText: getText(view, "smartAssignAiNotice"),
+            suggestionID: null,
+            reviewStateText: getText(view, "aiSuggestionReviewPending"),
+            reviewStateState: "Information",
+            reviewedByText: "",
+            reviewActionEnabled: false,
             assignEnabled: false,
             busy: true,
             noDataText: getText(view, "smartAssignNoCandidates")
         });
+        function submitReview(actionName) {
+            return AiSuggestionReview.submit(model, state, actionName, function (key, args) {
+                return getText(view, key, args);
+            });
+        }
 
         var table = new Table({
             mode: "SingleSelectMaster",
@@ -512,6 +535,51 @@ sap.ui.define([
                             type: "Information",
                             showIcon: true
                         }),
+                        new MessageStrip({
+                            text: getText(view, "smartAssignReviewNotice"),
+                            type: "Information",
+                            showIcon: true
+                        }).addStyleClass("sapUiTinyMarginTop"),
+                        new VBox({
+                            items: [
+                                new ObjectStatus({
+                                    text: "{smartAssign>/reviewStateText}",
+                                    state: "{smartAssign>/reviewStateState}"
+                                }),
+                                new Text({
+                                    text: "{smartAssign>/reviewedByText}",
+                                    wrapping: true
+                                }),
+                                new HBox({
+                                    wrap: "Wrap",
+                                    items: [
+                                        new Button({
+                                            text: getText(view, "aiSuggestionAcceptButton"),
+                                            type: "Accept",
+                                            enabled: "{smartAssign>/reviewActionEnabled}",
+                                            press: function () {
+                                                return submitReview("acceptAiSuggestion");
+                                            }
+                                        }),
+                                        new Button({
+                                            text: getText(view, "aiSuggestionRejectButton"),
+                                            type: "Reject",
+                                            enabled: "{smartAssign>/reviewActionEnabled}",
+                                            press: function () {
+                                                return submitReview("rejectAiSuggestion");
+                                            }
+                                        }).addStyleClass("sapUiTinyMarginBegin"),
+                                        new Button({
+                                            text: getText(view, "aiSuggestionIgnoreButton"),
+                                            enabled: "{smartAssign>/reviewActionEnabled}",
+                                            press: function () {
+                                                return submitReview("ignoreAiSuggestion");
+                                            }
+                                        }).addStyleClass("sapUiTinyMarginBegin")
+                                    ]
+                                }).addStyleClass("sapUiTinyMarginTop")
+                            ]
+                        }).addStyleClass("sapUiSmallMarginTopBottom"),
                         new SearchField({
                             width: "100%",
                             placeholder: getText(view, "smartAssignSearchPlaceholder"),
@@ -549,8 +617,8 @@ sap.ui.define([
                         .then(function () {
                             dialog.close();
                         })
-                        .catch(function (error) {
-                            MessageBox.error(error && error.message ? error.message : getText(view, "smartAssignAssignFailed"));
+                        .catch(function () {
+                            MessageBox.error(getText(view, "smartAssignAssignFailed"));
                         })
                         .finally(function () {
                             dialog.setBusy(false);
@@ -598,8 +666,8 @@ sap.ui.define([
                         applyAssignmentExplanations(state, explanations, view);
                     });
             })
-            .catch(function (error) {
-                MessageBox.error(error && error.message ? error.message : getText(view, "smartAssignLoadFailed"));
+            .catch(function () {
+                MessageBox.error(getText(view, "smartAssignLoadFailed"));
             })
             .finally(function () {
                 state.setProperty("/busy", false);

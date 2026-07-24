@@ -137,6 +137,27 @@ async function readBugState (db, bugID) {
   )
 }
 
+async function waitForReviewState (db, bugID, featureType, expectedState) {
+  let review
+  for (let attempt = 0; attempt < 30; attempt += 1) {
+    review = await db.run(
+      SELECT.one.from('idts.cap.AiSuggestions')
+        .columns('reviewState_code', 'reviewedBy_ID', 'reviewedAt')
+        .where({ bug_ID: bugID, featureType_code: featureType })
+        .orderBy('createdAt desc')
+    )
+    if (
+      review?.reviewState_code === expectedState &&
+      review?.reviewedBy_ID === PM_USER.ID &&
+      review?.reviewedAt
+    ) {
+      return review
+    }
+    await new Promise(resolve => setTimeout(resolve, 200))
+  }
+  return review
+}
+
 async function cleanup (db, bugID, sessionID) {
   await db.run(DELETE.from('idts.cap.AiSuggestions').where({ bug_ID: bugID })).catch(() => {})
   await db.run(DELETE.from('idts.cap.HistoryEvents').where({ bug_ID: bugID })).catch(() => {})
@@ -148,6 +169,36 @@ async function cleanup (db, bugID, sessionID) {
 async function closeDialog (dialog) {
   await dialog.getByRole('button', { name: /^Close$/i }).click()
   await dialog.waitFor({ state: 'hidden', timeout: 15000 })
+}
+
+async function captureMobileDialog (browser, session, bugID) {
+  const mobileContext = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    isMobile: true,
+    hasTouch: true,
+    deviceScaleFactor: 1,
+    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Version/17.0 Mobile/15E148 Safari/604.1'
+  })
+  await injectSession(mobileContext, session)
+  const mobilePage = await mobileContext.newPage()
+  const mobileHarness = await createHarness(mobilePage, { evidenceDir: EVIDENCE_DIR, settleMs: 1200 })
+
+  try {
+    await mobilePage.goto(`${APP_URL}#/Bugs(ID=${bugID},IsActiveEntity=true)`, {
+      waitUntil: 'domcontentloaded',
+      timeout: 90000
+    })
+    const mobileButton = mobilePage.getByRole('button', { name: /^Review Handoff Summary$/i }).first()
+    await mobileButton.waitFor({ state: 'visible', timeout: 90000 })
+    await mobileButton.click()
+    const mobileDialog = mobilePage.getByRole('dialog', { name: /^Handoff Summary$/i }).first()
+    await mobileDialog.waitFor({ state: 'visible', timeout: 30000 })
+    await mobileDialog.getByRole('button', { name: /^Accept$/i }).waitFor({ state: 'visible', timeout: 30000 })
+    await mobileHarness.assertNoBlockingSignals('mobile Handoff Summary dialog')
+    await mobileHarness.screenshot('idts94_handoff_summary_mobile')
+  } finally {
+    await mobileContext.close().catch(() => {})
+  }
 }
 
 function controlledSummary (status, summary) {
@@ -206,8 +257,46 @@ async function main () {
     }
     pass('Positive handoff summary dialog is visible and safe')
     results.push({ check: 'positive-dialog', passed: true })
+    const acceptButton = dialog.getByRole('button', { name: /^Accept$/i })
+    const rejectButton = dialog.getByRole('button', { name: /^Reject$/i })
+    const ignoreButton = dialog.getByRole('button', { name: /^Ignore$/i })
+    if (
+      !await acceptButton.isEnabled() ||
+      !await rejectButton.isEnabled() ||
+      !await ignoreButton.isEnabled()
+    ) {
+      throw new Error('Handoff review controls were not enabled for the persisted summary.')
+    }
+    await acceptButton.click()
+    await dialog.getByText('Accepted', { exact: true }).waitFor({ state: 'visible', timeout: 30000 })
+    await dialog.getByText(/^Reviewed by DonHV on /).waitFor({ state: 'visible', timeout: 30000 })
+    if (
+      await acceptButton.isEnabled() ||
+      await rejectButton.isEnabled() ||
+      await ignoreButton.isEnabled()
+    ) {
+      throw new Error('Handoff review controls remained enabled after the first decision.')
+    }
+    const accepted = await waitForReviewState(db, bugID, 'BUG_SUMMARY', 'ACCEPTED')
+    if (
+      accepted?.reviewState_code !== 'ACCEPTED' ||
+      accepted?.reviewedBy_ID !== PM_USER.ID ||
+      !accepted?.reviewedAt
+    ) {
+      throw new Error(`Handoff review was not persisted with reviewer/time: ${JSON.stringify(accepted)}`)
+    }
+    const afterReview = await readBugState(db, bugID)
+    if (JSON.stringify(afterReview) !== JSON.stringify(before)) {
+      throw new Error(`Handoff review mutated Bug state: before=${JSON.stringify(before)} after=${JSON.stringify(afterReview)}`)
+    }
+    pass('Accept persists handoff review and disables repeats without mutating the Bug')
+    results.push({ check: 'handoff-review-persisted-no-mutation', passed: true })
     await harness.screenshot('idts76_handoff_summary_dialog')
     await closeDialog(dialog)
+
+    await captureMobileDialog(browser, session, bugID)
+    pass('Handoff review controls remain visible at a 390x844 responsive viewport')
+    results.push({ check: 'handoff-responsive-viewport', passed: true })
 
     const actionUrl = /\/odata\/v4\/bug\/summarizeBugHandoff/i
     await page.route(actionUrl, async route => {
@@ -222,6 +311,9 @@ async function main () {
     const sparseDialog = page.getByRole('dialog', { name: /^Handoff Summary$/i }).first()
     await sparseDialog.waitFor({ state: 'visible', timeout: 30000 })
     await sparseDialog.getByText(/Some bug details are missing/i).waitFor({ state: 'visible', timeout: 30000 })
+    if (await sparseDialog.getByRole('button', { name: /^Accept$/i }).isEnabled()) {
+      throw new Error('Handoff review remained enabled when the response had no persisted suggestion ID.')
+    }
     pass('Sparse-data handoff summary keeps review warning visible')
     results.push({ check: 'sparse-warning', passed: true })
     await harness.screenshot('idts76_handoff_summary_sparse')

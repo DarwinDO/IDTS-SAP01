@@ -21,7 +21,8 @@ const { createHarness } = require('./lib/browser-harness')
 
 const BASE_URL = process.env.IDTS_UAT_BASE_URL || 'http://localhost:4004'
 const APP_URL = `${BASE_URL}/idts.bugmanagementui/index.html`
-const EVIDENCE_DIR = path.join(process.cwd(), 'docs', 'pm', 'evidence', 'idts-61')
+const EVIDENCE_DIR = process.env.IDTS_QA_EVIDENCE_DIR ||
+  path.join(process.cwd(), 'docs', 'pm', 'evidence', 'idts-61')
 
 const USERS = {
   PM: {
@@ -172,6 +173,27 @@ async function injectSession(context, session) {
   })
 }
 
+async function waitForAssignmentReview(db, bugID, expectedState) {
+  let review
+  for (let attempt = 0; attempt < 30; attempt += 1) {
+    review = await db.run(
+      SELECT.one.from('idts.cap.AiSuggestions')
+        .columns('reviewState_code', 'reviewedBy_ID', 'reviewedAt')
+        .where({ bug_ID: bugID, featureType_code: 'ASSIGNMENT_EXPLANATION' })
+        .orderBy('createdAt desc')
+    )
+    if (
+      review?.reviewState_code === expectedState &&
+      review?.reviewedBy_ID === USERS.PM.ID &&
+      review?.reviewedAt
+    ) {
+      return review
+    }
+    await new Promise(resolve => setTimeout(resolve, 200))
+  }
+  return review
+}
+
 async function waitForVisible(locator, label, timeout = 90000) {
   await locator.waitFor({ state: 'visible', timeout }).catch(async error => {
     throw new Error(`${label} was not visible: ${error.message}`)
@@ -220,6 +242,58 @@ async function runBrowserFlow(db, fixture, session) {
     await waitForVisible(page.getByText('Busy').first(), 'Busy availability warning state')
     await harness.screenshot('01_smart_assign_dialog_multiple_states')
     logPass('dialog shows multiple developer states')
+
+    const dialog = page.getByRole('dialog', { name: /Smart Assign Developer/i }).first()
+    const acceptReview = dialog.getByRole('button', { name: /^Accept$/i })
+    const rejectReview = dialog.getByRole('button', { name: /^Reject$/i })
+    const ignoreReview = dialog.getByRole('button', { name: /^Ignore$/i })
+    if (
+      !await acceptReview.isEnabled() ||
+      !await rejectReview.isEnabled() ||
+      !await ignoreReview.isEnabled()
+    ) {
+      throw new Error('Smart Assign explanation review controls were not enabled.')
+    }
+    await acceptReview.click()
+    await dialog.getByText('Accepted', { exact: true }).waitFor({ state: 'visible', timeout: 30000 })
+    await dialog.getByText(/^Reviewed by DonHV on /).waitFor({ state: 'visible', timeout: 30000 })
+    if (
+      await acceptReview.isEnabled() ||
+      await rejectReview.isEnabled() ||
+      await ignoreReview.isEnabled()
+    ) {
+      throw new Error('Smart Assign explanation review controls remained enabled after Accept.')
+    }
+    const reviewed = await waitForAssignmentReview(db, fixture.bugID, 'ACCEPTED')
+    if (
+      reviewed?.reviewState_code !== 'ACCEPTED' ||
+      reviewed?.reviewedBy_ID !== USERS.PM.ID ||
+      !reviewed?.reviewedAt
+    ) {
+      throw new Error(`Smart Assign explanation review was not persisted: ${JSON.stringify(reviewed)}`)
+    }
+    const unchangedAfterReview = await db.run(
+      SELECT.one.from('idts.cap.Bugs')
+        .columns('assignee_ID', 'status_code', 'nextProcessorUser_ID')
+        .where({ ID: fixture.bugID })
+    )
+    if (
+      unchangedAfterReview?.assignee_ID ||
+      unchangedAfterReview?.status_code !== 'PENDING_ASSIGNMENT' ||
+      unchangedAfterReview?.nextProcessorUser_ID !== USERS.PM.ID
+    ) {
+      throw new Error(`Explanation review mutated assignment/workflow: ${JSON.stringify(unchangedAfterReview)}`)
+    }
+    if (await dialog.getByRole('button', { name: /^Assign$/i }).isEnabled()) {
+      throw new Error('Accepting an explanation selected a developer or enabled Assign.')
+    }
+    await harness.screenshot('01b_smart_assign_explanation_reviewed')
+    await page.setViewportSize({ width: 390, height: 844 })
+    await dialog.waitFor({ state: 'visible', timeout: 15000 })
+    await acceptReview.waitFor({ state: 'visible', timeout: 15000 })
+    await harness.screenshot('01c_smart_assign_explanation_mobile')
+    await page.setViewportSize({ width: 1440, height: 1000 })
+    logPass('explanation review persists without selecting or assigning a developer')
 
     await page.getByPlaceholder(/Search developer/i).fill('busy backup')
     await waitForVisible(page.getByText('SangVN').first(), 'search result by busy backup')

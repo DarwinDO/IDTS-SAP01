@@ -21,6 +21,7 @@ Vietnamese: Work package này theo dõi các khả năng AI suggestion đã duy�
 | 7 | IDTS-72 | NhanT | Final QA acceptance |
 | 8 | IDTS-74 to IDTS-77 | DonHV / FE support | Product UI panels and placement polish for duplicate/similar detection, classification suggestion, and handoff summary if full visual AI acceptance is required |
 | 9 | IDTS-91 to IDTS-93 | DatDT | Persist explicit review decisions in the existing dialogs, then apply accepted classification through a separate validated Tester/PM action |
+| 10 | IDTS-94 | SangVN | Add persisted review decisions to Handoff Summary and Smart Assign explanation without changing Bug workflow or assignment |
 
 Vietnamese:
 
@@ -35,6 +36,7 @@ Vietnamese:
 | 7 | IDTS-72 | NhanT | QA acceptance cuối |
 | 8 | IDTS-74 den IDTS-77 | DonHV / FE support | Product UI panel va placement polish cho duplicate/similar detection, classification suggestion va handoff summary neu can acceptance AI day du theo UI visual |
 | 9 | IDTS-91 den IDTS-93 | DatDT | Luu quyet dinh review trong cac dialog hien co, sau do apply classification da Accept qua action Tester/PM rieng co validation |
+| 10 | IDTS-94 | SangVN | Them persisted review cho Handoff Summary va Smart Assign explanation ma khong doi workflow Bug hoac assignment |
 
 ## Sprint decision
 
@@ -64,6 +66,7 @@ Vietnamese: Chỉ IDTS-63 được đưa vào Sprint 4. Phần runtime bắt đ�
 - IDTS-91: Implementation complete on green PR #167. CAP exposes Accept/Reject/Ignore with authenticated reviewer/time persistence, conflict-safe `PENDING` updates, rollback evidence, and no Bug/workflow mutation. Focused QA passed `19/0`; Jira evidence comment is `10648`.
 - IDTS-92: Implementation complete on green PR #167. Existing Similar Bugs and Classification dialogs expose Accept/Reject/Ignore, display persisted state/reviewer/time, disable repeat decisions, keep generic failures, and clear busy state. Static QA passed 47 checks; both local browser suites passed on a fresh temporary SQLite schema; Jira evidence comment is `10649`.
 - IDTS-93: Implementation complete on green PR #167. A separate Tester/PM action applies only accepted, current, catalog-grounded classification fields with stale protection, idempotency, grouped history, and transaction rollback. Focused QA passed `35/0`; IDTS-67, IDTS-91, and IDTS-41 regressions remain green; Jira evidence comment is `10650`. Await human review, merge, and Jira closure before board-level Done.
+- IDTS-94: SangVN implementation, local evidence, and Ownership Knowledge Gate 3/3 (100%) are complete on `feature/idts-94-handoff-smart-assign-review-sangvn`. PR #168 is OPEN/DRAFT/CLEAN and remains stacked on PR #167. PR #167's QA gate passes, but GitHub now reports a conflict against `dev`; read-only merge-tree inspection limits it to `docs/pm/current-status.md` and `docs/pm/task-board.md`, not runtime CAP/Fiori files. No review changes Bug workflow, assignee, or action owner. Await the foundation owner's conflict resolution, stacked PR review, dependency merge, PR merge, and Jira closure.
 - No runtime AI dependency, API, CDS entity, or UI has been added under IDTS-63.
 
 Vietnamese:
@@ -88,4 +91,5 @@ Vietnamese:
 - IDTS-91: Implementation da xong tren PR #167 dang green. CAP expose Accept/Reject/Ignore, persist reviewer/time da xac thuc, conditional update `PENDING`, co rollback evidence va khong doi Bug/workflow. Focused QA pass `19/0`; Jira evidence comment `10648`.
 - IDTS-92: Implementation da xong tren PR #167 dang green. Hai dialog Similar Bugs va Classification co Accept/Reject/Ignore, hien state/reviewer/time da persist, khoa quyet dinh lap, giu loi chung va tat busy state. Static QA pass 47 check; hai browser suite local deu pass tren SQLite tam co schema moi; Jira evidence comment `10649`.
 - IDTS-93: Implementation da xong tren PR #167 dang green. Action Tester/PM rieng chi apply classification da Accept, con hieu luc va grounded voi catalog; co stale protection, idempotency, grouped history va rollback transaction. Focused QA pass `35/0`; regression IDTS-67, IDTS-91 va IDTS-41 van green; Jira evidence comment `10650`. Cho human review, merge va Jira closure truoc khi chuyen Done cap board.
+- IDTS-94: SangVN da xong implementation, evidence local va Ownership Knowledge Gate 3/3 (100%) tren `feature/idts-94-handoff-smart-assign-review-sangvn`. PR #168 OPEN/DRAFT/CLEAN va van stacked tren PR #167. QA gate cua PR #167 pass nhung GitHub hien bao conflict voi `dev`; merge-tree read-only gioi han conflict tai `docs/pm/current-status.md` va `docs/pm/task-board.md`, khong nam trong runtime CAP/Fiori. Review khong doi workflow Bug, assignee hoac action owner. Cho owner foundation xu ly conflict, stacked PR review, dependency merge, merge PR va Jira closure.
 - IDTS-63 không thêm dependency AI runtime, API, CDS entity hoặc UI mới.
