@@ -291,3 +291,7 @@ IDTS-78 xóa các key title section tiếng Anh cho các AI helper row trên Obj
 - `handoffSummarySectionTitle`
 
 English bundle vẫn mirror helper text, label nút, label dialog, safe failure message và review status wording từ base bundle. Cách này giữ UI dễ hiểu nhưng không hiển thị các section AI riêng.
+
+## IDTS-94 English review-decision copy
+
+This locale mirrors `aiSuggestionReviewUnavailable`, `handoffSummaryReviewNotice`, and `smartAssignReviewNotice` from the base bundle. Keep both bundles aligned so the review-only/no-mutation meaning is never replaced by a raw key in English locale.

@@ -394,3 +394,17 @@ Primary owner: DonHV. Backup: DatDT. Debug the action name and parameter in gene
 Service contract hiện expose `suggestionID` trên candidate duplicate/classification, result an toàn `AiSuggestionReviewResult`, ba review action rõ ràng và `applyClassificationSuggestion(suggestionID)`. Review action chỉ đổi trạng thái audit của suggestion. Apply action trả Bug bị tác động nhưng chỉ được đổi các field classification đã validate sau khi kiểm quyền Tester/PM.
 
 Owner chính: DonHV. Backup: DatDT. Khi debug, xem tên action và parameter trong metadata đã generate, rồi lần theo cùng tên qua `srv/service.js` tới `srv/ai/review.js` hoặc `srv/ai/classification-apply.js`. Đổi contract phải cập nhật UI caller và focused QA.
+
+## IDTS-94 review-control response bridge (2026-07-24)
+
+### English
+
+`BugHandoffSummaryResult` and `SmartAssignmentExplanationCandidate` now expose `suggestionID`. The value is the UUID of the sanitized `AiSuggestions` row created for that exact response. Handoff returns one ID on its result. Every Smart Assign explanation row from one request carries the same ID because the request is persisted as one review unit.
+
+The UI sends only this ID to `acceptAiSuggestion`, `rejectAiSuggestion`, or `ignoreAiSuggestion`. Adding the ID does not make Accept apply a summary, create history, select a developer, or assign anyone.
+
+### Vietnamese
+
+`BugHandoffSummaryResult` và `SmartAssignmentExplanationCandidate` giờ expose `suggestionID`. Giá trị này là UUID của row `AiSuggestions` đã sanitize được tạo cho chính response đó. Handoff trả một ID trên result. Mỗi explanation row của cùng một request Smart Assign mang cùng ID vì request được persist thành một review unit.
+
+UI chỉ gửi ID này cho `acceptAiSuggestion`, `rejectAiSuggestion`, hoặc `ignoreAiSuggestion`. Việc thêm ID không làm Accept áp dụng summary, tạo history, chọn developer, hoặc assign bất kỳ ai.

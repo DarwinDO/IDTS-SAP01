@@ -72,6 +72,11 @@ function makeControl(name) {
       return this
     }
 
+    addStyleClass(styleClass) {
+      this.styleClass = styleClass
+      return this
+    }
+
     setBusy(value) {
       this.busy = value
       return this
@@ -129,6 +134,7 @@ function loadSmartAssignModule(roleCode, modelHooks = {}) {
             if (dependency === 'sap/ui/model/json/JSONModel') return JSONModel
             if (dependency === 'sap/ui/model/Filter') return Filter
             if (dependency === 'sap/ui/model/FilterOperator') return { EQ: 'EQ' }
+            if (dependency === 'sap/m/SearchField') return makeControl('SearchField')
             if (dependency === '../login/LoginController') {
               return {
                 getUser() {
@@ -397,7 +403,8 @@ async function verifyUiActionModule() {
   assert(state.getProperty('/visibleCandidates')[0].aiExplanation.includes('Matches Finance'))
   rec('dialog decorates Smart Assign candidates with reviewable explanations', true)
   state.setProperty('/searchQuery', 'busy fi backup')
-  dialog.settings.content[0].settings.items[2].settings.search({ getParameter: name => name === 'query' ? 'busy fi backup' : '' })
+  const searchField = dialog.settings.content[0].settings.items.find(control => control.name === 'SearchField')
+  searchField.settings.search({ getParameter: name => name === 'query' ? 'busy fi backup' : '' })
   assert.strictEqual(state.getProperty('/visibleCandidates').length, 1)
   assert.strictEqual(state.getProperty('/visibleCandidates')[0].developerName, 'Busy Developer')
   rec('dialog search matches developer, module, and capability fields', true)
