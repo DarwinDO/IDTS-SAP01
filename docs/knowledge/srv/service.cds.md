@@ -1,5 +1,9 @@
 # Knowledge: `srv/service.cds`
 
+## IDTS-97 PM operational aggregate
+
+`readAiOperationalMetrics(windowDays)` is a PM-only read function. It returns typed counts grouped by feature/provider/model and never exposes `suggestionPayload`, prompt, response, error text, user email, endpoint, token, or credential. The reporting window defaults to 30 days and is capped at 90 days by the runtime handler.
+
 ## Beginner-first OData contract map (2026-07-18)
 
 ### English

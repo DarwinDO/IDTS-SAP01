@@ -240,11 +240,13 @@ async function main () {
 
   const auditRows = await db.run(
     SELECT.from('idts.cap.AiSuggestions')
-      .columns('bug_ID', 'featureType_code', 'reviewState_code', 'suggestionPayload')
+      .columns('bug_ID', 'featureType_code', 'operationStatus', 'latencyMs', 'reviewState_code', 'suggestionPayload')
       .where({ bug_ID: BUG_ID, featureType_code: 'BUG_SUMMARY' })
   )
   expectEqual('source-linked summary writes one AI audit row', auditRows.length, 1)
   expectEqual('summary audit starts pending review', auditRows[0]?.reviewState_code, 'PENDING')
+  expectEqual('summary audit persists final operation status', auditRows[0]?.operationStatus, 'SUCCESS')
+  expectTruthy('summary audit persists non-negative latency', auditRows[0]?.latencyMs >= 0)
   const auditPayload = JSON.parse(auditRows[0]?.suggestionPayload || '{}')
   expectEqual('summary audit records provider status', auditPayload.providerStatus, 'SUCCESS')
   expectNoUnsafeDiagnostic('summary audit payload is sanitized', auditPayload)

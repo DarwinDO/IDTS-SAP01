@@ -1,5 +1,9 @@
 # Knowledge: `db/schema.cds`
 
+## IDTS-97 operational fields
+
+`AiSuggestions.operationStatus` and `latencyMs` persist only a normalized provider outcome and non-negative duration. They support privacy-safe reliability aggregation; they must never be replaced with raw errors, prompts, responses, endpoints, or credentials. Missing latency remains null and is excluded from averages.
+
 ## Beginner-first data map (2026-07-18)
 
 ### English

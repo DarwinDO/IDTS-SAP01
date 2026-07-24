@@ -1,5 +1,9 @@
 # Knowledge: `srv/ai/audit.js`
 
+## IDTS-97 safe operational metadata
+
+`createAiSuggestion()` now normalizes and persists `operationStatus` plus `latencyMs`. Status is a diagnostic token, latency is a bounded non-negative integer, and missing latency stays null. The writer still sanitizes the suggestion payload and never stores provider request/response or raw error detail.
+
 ## Beginner-first execution map (2026-07-18)
 
 ### English

@@ -1,5 +1,9 @@
 # `srv/ai/classification-suggestion.js`
 
+## IDTS-97 operational evidence
+
+`recordClassificationAudit()` copies only normalized provider status and duration into the audit row. Classification inputs, catalog payloads, raw provider output, and error detail are not operational metric fields.
+
 ## Beginner-first execution map (2026-07-18)
 
 ### English

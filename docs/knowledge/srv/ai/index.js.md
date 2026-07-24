@@ -1,5 +1,9 @@
 # `srv/ai/index.js`
 
+## IDTS-97 metrics exports
+
+The barrel exports the safe metric builder/emitter, aggregate helper, and PM read handler from `metrics.js`. `srv/service.js` imports the read handler through this stable boundary; focused QA imports pure helpers without reaching into service wiring.
+
 ## Beginner-first module map (2026-07-18)
 
 ### English

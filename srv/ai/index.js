@@ -27,6 +27,12 @@ const {
   ignoreAiSuggestion
 } = require('./review')
 const { applyClassificationSuggestion } = require('./classification-apply')
+const {
+  aggregateAiOperationalMetrics,
+  emitAiOperationalMetric,
+  readAiOperationalMetrics,
+  safeOperationalMetric
+} = require('./metrics')
 const { redactSensitiveText, sanitizeErrorSummary } = require('./safety')
 
 // Nhóm export gồm config/provider/audit dùng chung, bốn feature entry point và các pure builder để test.
@@ -49,5 +55,9 @@ module.exports = {
   acceptAiSuggestion,
   rejectAiSuggestion,
   ignoreAiSuggestion,
-  applyClassificationSuggestion
+  applyClassificationSuggestion,
+  aggregateAiOperationalMetrics,
+  emitAiOperationalMetric,
+  readAiOperationalMetrics,
+  safeOperationalMetric
 }

@@ -1,5 +1,9 @@
 # `srv/ai/duplicate-detection.js`
 
+## IDTS-97 duration evidence
+
+Duplicate ranking measures total ranking duration for its persisted feature-level audit row and stores the final safe provider status. Individual embedding calls also emit provider-level operational logs. Neither path stores embedding vectors or input text in metrics.
+
 ## Beginner-first execution map (2026-07-18)
 
 ### English

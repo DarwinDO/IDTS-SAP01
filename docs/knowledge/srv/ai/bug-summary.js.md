@@ -1,5 +1,9 @@
 # `srv/ai/bug-summary.js`
 
+## IDTS-97 operational evidence
+
+`recordSummaryAudit()` stores normalized provider status and duration beside the existing sanitized handoff-summary audit. Metrics do not copy comments, history text, prompt, provider response, attachment content, or error detail.
+
 ## Beginner-first execution map (2026-07-18)
 
 ### English

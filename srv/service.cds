@@ -76,6 +76,26 @@ service BugService @(requires: 'authenticated-user') {
     reviewedAt              : Timestamp;
   };
 
+  type AiOperationalMetric {
+    windowStart        : Timestamp;
+    windowEnd          : Timestamp;
+    featureTypeCode    : String(40);
+    providerAlias      : String(80);
+    modelAlias         : String(80);
+    requestCount       : Integer;
+    successCount       : Integer;
+    failureCount       : Integer;
+    timeoutCount       : Integer;
+    unavailableCount   : Integer;
+    acceptedCount      : Integer;
+    rejectedCount      : Integer;
+    ignoredCount       : Integer;
+    pendingCount       : Integer;
+    latencySampleCount : Integer;
+    averageLatencyMs   : Integer;
+    maxLatencyMs       : Integer;
+  };
+
   // Unbound AI actions nhận context tối thiểu và trả suggestion; handler phải ground/audit nhưng không tự sửa Bug.
   action suggestSimilarBugs(
     sourceBugID            : UUID,
@@ -120,6 +140,10 @@ service BugService @(requires: 'authenticated-user') {
   action rejectAiSuggestion(suggestionID : UUID) returns AiSuggestionReviewResult;
   action ignoreAiSuggestion(suggestionID : UUID) returns AiSuggestionReviewResult;
   action applyClassificationSuggestion(suggestionID : UUID) returns Bugs;
+
+  // PM-only operational aggregate; reads allowlisted audit metadata and never exposes prompt/response/error detail.
+  @(requires: 'PM')
+  function readAiOperationalMetrics(windowDays : Integer) returns array of AiOperationalMetric;
 
   // Projection Bugs expose aggregate chính, thêm field tính/virtual cho UX; dữ liệu gốc vẫn ở db.Bugs.
   entity Bugs as projection on db.Bugs {
@@ -261,6 +285,8 @@ service BugService @(requires: 'authenticated-user') {
     requestedBy.displayName as requestedByDisplayName,
     providerAlias,
     modelAlias,
+    operationStatus,
+    latencyMs,
     confidence,
     suggestionPayload,
     summary,
