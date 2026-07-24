@@ -1,6 +1,6 @@
 # IDTS Task Board
 
-Last updated: 2026-07-23
+Last updated: 2026-07-24
 
 Use this board for high-level movement only. Detailed task notes belong in the matching file under `docs/pm/tasks/`.
 
@@ -134,6 +134,9 @@ Vietnamese:
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
+| IDTS-91 | Add explicit AI suggestion review actions | DatDT | Implementation and focused QA complete on `feature/idts-91-93-implementation-datdt`; `19/0` passed. Await review/PR/Jira handoff. |
+| IDTS-92 | Add persisted review controls to existing AI dialogs | DatDT | Static QA and both local browser suites passed; review state/reviewer/time persist without Bug mutation. Await review/PR/Jira handoff. |
+| IDTS-93 | Apply accepted classification suggestion safely | DatDT | Tester/PM-only validated apply, stale/idempotent/history/rollback coverage complete; focused QA `35/0` passed. Await review/PR/Jira handoff. |
 | IDTS-74 | Add duplicate and similar bug AI review panel | DonHV | Done. PR #130 squash-merged into `dev` at `d5e9549`; Render deploy `dep-d97p0sq8qa3s73f4tagg` is `live`; local static QA passed 133 checks, local browser smoke passed 6/6, authenticated Render AI smoke passed 25/25, and shared-QA browser evidence shows the deployed Similar Bugs dialog with a candidate and safe review-only copy. |
 | IDTS-68 | Backend grounded bug/handoff summary | SangVN / DonHV support | Done at repository handoff level. PR #115 merged into `dev` at `d5e4297`; focused QA passed `28/0`, AI regression IDTS-64 to IDTS-68 passed, and Jira evidence comment is `10431`. Jira closure transition is handled after this closure sync. |
 | IDTS-57 | Browser regression and SAP Fiori UX review for redesigned screens | NhanT | PR #77 merged the first Playwright browser UX regression harness into `dev`, but the task remains open because the merged coverage is PM-focused. Final role-matrix and broader manual/browser regression should continue through IDTS-60 and the remaining IDTS-57 pass. |
@@ -153,6 +156,9 @@ Vietnamese:
 
 | ID | Cong viec | Thanh vien chinh | Ghi chu |
 | --- | --- | --- | --- |
+| IDTS-91 | Them action review AI suggestion ro rang | DatDT | Implementation va focused QA da xong tren `feature/idts-91-93-implementation-datdt`; pass `19/0`. Cho review/PR/Jira handoff. |
+| IDTS-92 | Them persisted review control vao dialog AI hien co | DatDT | Static QA va hai browser suite local pass; review state/reviewer/time persist ma khong doi Bug. Cho review/PR/Jira handoff. |
+| IDTS-93 | Apply classification suggestion da Accept an toan | DatDT | Action chi Tester/PM, co validation stale/idempotent/history/rollback; focused QA pass `35/0`. Cho review/PR/Jira handoff. |
 | IDTS-74 | Them panel review AI duplicate va similar bug | DonHV | Done. PR #130 da squash-merge vao `dev` tai `d5e9549`; Render deploy `dep-d97p0sq8qa3s73f4tagg` da `live`; static QA local pass 133 check, browser local pass 6/6, authenticated Render AI smoke pass 25/25, va shared-QA browser evidence cho thay dialog Similar Bugs da deploy voi candidate cung copy review-only an toan. |
 | IDTS-57 | Browser regression va SAP Fiori UX review cho cac man hinh da redesign | NhanT | PR #77 da merge browser QA harness dau tien vao `dev`, nhung task van chua dong vi coverage hien tap trung PM. Can tiep tuc role matrix Tester/Developer/PM va manual/browser regression qua IDTS-60 va phan IDTS-57 con lai. |
 | IDTS-50 | Cai thien email notification va sua deep link | DonHV | Sua email Gmail dang tho va link Fiori bi hong tu shared-QA email. Jira dang In Progress; branch implementation la `fix/idts-50-email-link-template-donhv`. |

@@ -144,6 +144,32 @@ async function readReviewState (db, sourceID) {
   }
 }
 
+async function readLatestSuggestionReview (db, bugID, featureType) {
+  return db.run(
+    SELECT.one.from('idts.cap.AiSuggestions')
+      .columns('ID', 'reviewState_code', 'reviewedBy_ID', 'reviewedAt')
+      .where({ bug_ID: bugID, featureType_code: featureType })
+      .orderBy('createdAt desc')
+  )
+}
+
+async function waitForSuggestionReview (db, bugID, featureType, expectedState) {
+  let review
+  for (let attempt = 0; attempt < 30; attempt++) {
+    review = await readLatestSuggestionReview(db, bugID, featureType)
+    if (
+      review &&
+      review.reviewState_code === expectedState &&
+      review.reviewedBy_ID === PM_USER.ID &&
+      review.reviewedAt
+    ) {
+      return review
+    }
+    await new Promise(resolve => setTimeout(resolve, 100))
+  }
+  return review
+}
+
 async function closeDialog (dialog) {
   await dialog.getByRole('button', { name: /^Close$/i }).click()
   await dialog.waitFor({ state: 'hidden', timeout: 15000 })
@@ -195,6 +221,46 @@ async function main () {
     pass('Dialog copy stays user-facing and review-only')
     results.push({ check: 'candidate-visible', passed: true })
     results.push({ check: 'safe-review-copy', passed: true })
+
+    const acceptButton = dialog.getByRole('button', { name: /^Accept$/i })
+    const rejectButton = dialog.getByRole('button', { name: /^Reject$/i })
+    const ignoreButton = dialog.getByRole('button', { name: /^Ignore$/i })
+    await acceptButton.waitFor({ state: 'visible', timeout: 30000 })
+    if (
+      !(await acceptButton.isEnabled()) ||
+      !(await rejectButton.isEnabled()) ||
+      !(await ignoreButton.isEnabled())
+    ) {
+      throw new Error('AI suggestion review decisions were not enabled for a persisted suggestion.')
+    }
+    await acceptButton.click()
+    await dialog.getByText('Accepted', { exact: true }).waitFor({ state: 'visible', timeout: 30000 })
+    await dialog.getByText(/Reviewed by DonHV on/i).waitFor({ state: 'visible', timeout: 30000 })
+    if (
+      (await acceptButton.isEnabled()) ||
+      (await rejectButton.isEnabled()) ||
+      (await ignoreButton.isEnabled())
+    ) {
+      throw new Error('AI suggestion review decisions remained enabled after Accept.')
+    }
+    const accepted = await waitForSuggestionReview(
+      db,
+      pair.sourceID,
+      'DUPLICATE_DETECTION',
+      'ACCEPTED'
+    )
+    if (
+      !accepted ||
+      accepted.reviewState_code !== 'ACCEPTED' ||
+      accepted.reviewedBy_ID !== PM_USER.ID ||
+      !accepted.reviewedAt
+    ) {
+      throw new Error(
+        `Accepted duplicate suggestion review was not persisted with reviewer and time: ${JSON.stringify(accepted)}`
+      )
+    }
+    pass('Accept persists reviewer and time, then disables repeated decisions')
+    results.push({ check: 'accept-review-persisted', passed: true })
 
     await harness.screenshot('idts74_duplicate_review_dialog')
     await closeDialog(dialog)

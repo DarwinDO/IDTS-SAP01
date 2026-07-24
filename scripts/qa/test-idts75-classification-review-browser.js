@@ -128,6 +128,32 @@ async function readClassification (db, ID) {
   )
 }
 
+async function readLatestSuggestionReview (db, bugID, featureType) {
+  return db.run(
+    SELECT.one.from('idts.cap.AiSuggestions')
+      .columns('ID', 'reviewState_code', 'reviewedBy_ID', 'reviewedAt')
+      .where({ bug_ID: bugID, featureType_code: featureType })
+      .orderBy('createdAt desc')
+  )
+}
+
+async function waitForSuggestionReview (db, bugID, featureType, expectedState) {
+  let review
+  for (let attempt = 0; attempt < 30; attempt++) {
+    review = await readLatestSuggestionReview(db, bugID, featureType)
+    if (
+      review &&
+      review.reviewState_code === expectedState &&
+      review.reviewedBy_ID === PM_USER.ID &&
+      review.reviewedAt
+    ) {
+      return review
+    }
+    await new Promise(resolve => setTimeout(resolve, 100))
+  }
+  return review
+}
+
 async function cleanup (db, bugID, sessionIDs) {
   await db.run(DELETE.from('idts.cap.AiSuggestions').where({ bug_ID: bugID })).catch(() => {})
   await db.run(DELETE.from('idts.cap.Bugs').where({ ID: bugID })).catch(() => {})
@@ -224,6 +250,42 @@ async function main () {
     pass('Positive dialog keeps user-facing manual-review guidance')
     results.push({ check: 'positive-review-rows', passed: true })
     results.push({ check: 'safe-manual-review-copy', passed: true })
+
+    const acceptButton = dialog.getByRole('button', { name: /^Accept$/i })
+    const rejectButton = dialog.getByRole('button', { name: /^Reject$/i })
+    const ignoreButton = dialog.getByRole('button', { name: /^Ignore$/i })
+    await rejectButton.waitFor({ state: 'visible', timeout: 30000 })
+    if (
+      !(await acceptButton.isEnabled()) ||
+      !(await rejectButton.isEnabled()) ||
+      !(await ignoreButton.isEnabled())
+    ) {
+      throw new Error('AI suggestion review decisions were not enabled for a persisted suggestion.')
+    }
+    await rejectButton.click()
+    await dialog.getByText('Rejected', { exact: true }).waitFor({ state: 'visible', timeout: 30000 })
+    await dialog.getByText(/Reviewed by DonHV on/i).waitFor({ state: 'visible', timeout: 30000 })
+    if (
+      (await acceptButton.isEnabled()) ||
+      (await rejectButton.isEnabled()) ||
+      (await ignoreButton.isEnabled())
+    ) {
+      throw new Error('AI suggestion review decisions remained enabled after Reject.')
+    }
+    const rejected = await waitForSuggestionReview(db, bugID, 'CLASSIFICATION', 'REJECTED')
+    if (
+      !rejected ||
+      rejected.reviewState_code !== 'REJECTED' ||
+      rejected.reviewedBy_ID !== PM_USER.ID ||
+      !rejected.reviewedAt
+    ) {
+      throw new Error(
+        `Rejected classification suggestion review was not persisted with reviewer and time: ${JSON.stringify(rejected)}`
+      )
+    }
+    pass('Reject persists reviewer and time, then disables repeated decisions')
+    results.push({ check: 'reject-review-persisted', passed: true })
+
     await harness.screenshot('idts75_classification_review_dialog')
     await closeDialog(dialog)
 

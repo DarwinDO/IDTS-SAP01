@@ -5,6 +5,7 @@ using idts.cap as db from '../db/schema';
 service BugService @(requires: 'authenticated-user') {
   // Các type sau là response tạm của action AI review-only, không phải table được persist.
   type SimilarBugCandidate {
+    suggestionID     : UUID;
     rank             : Integer;
     bugID            : UUID;
     bugNumber        : String(30);
@@ -19,6 +20,7 @@ service BugService @(requires: 'authenticated-user') {
   };
 
   type ClassificationSuggestionCandidate {
+    suggestionID     : UUID;
     field            : String(40);
     fieldLabel       : String(120);
     valueID          : UUID;
@@ -63,6 +65,17 @@ service BugService @(requires: 'authenticated-user') {
     requiresReview     : Boolean;
   };
 
+  type AiSuggestionReviewResult {
+    suggestionID            : UUID;
+    bugID                   : UUID;
+    featureTypeCode         : String(40);
+    reviewStateCode         : String(40);
+    reviewStateName         : String(120);
+    reviewedByID            : UUID;
+    reviewedByDisplayName   : String(120);
+    reviewedAt              : Timestamp;
+  };
+
   // Unbound AI actions nhận context tối thiểu và trả suggestion; handler phải ground/audit nhưng không tự sửa Bug.
   action suggestSimilarBugs(
     sourceBugID            : UUID,
@@ -101,6 +114,12 @@ service BugService @(requires: 'authenticated-user') {
     sapModuleID          : UUID,
     limit                : Integer
   ) returns array of SmartAssignmentExplanationCandidate;
+
+  // Human review actions chỉ đổi audit row đang PENDING; không update Bug, assignment, duplicate link hoặc workflow.
+  action acceptAiSuggestion(suggestionID : UUID) returns AiSuggestionReviewResult;
+  action rejectAiSuggestion(suggestionID : UUID) returns AiSuggestionReviewResult;
+  action ignoreAiSuggestion(suggestionID : UUID) returns AiSuggestionReviewResult;
+  action applyClassificationSuggestion(suggestionID : UUID) returns Bugs;
 
   // Projection Bugs expose aggregate chính, thêm field tính/virtual cho UX; dữ liệu gốc vẫn ở db.Bugs.
   entity Bugs as projection on db.Bugs {

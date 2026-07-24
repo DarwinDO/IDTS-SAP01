@@ -292,3 +292,13 @@ When editing this rule, test create and update and prove rejected values are not
   **Phải kiểm tra cùng**: `db/schema.cds`, ba file CSV catalog, `srv/bug-service/drafts.js` và annotation value list của Fiori.
 
 Khi sửa rule này, phải test cả create lẫn update và chứng minh giá trị bị reject không được persist. Không tự trim hoặc đổi hoa/thường âm thầm vì cách đó che lỗi client và làm contract API khó đoán.
+
+## IDTS-93 reusable Component Category validation
+
+### English
+
+`resolveComponentCategory()` is now an exported validation helper. Normal Bug writes still call it through `deriveOrValidateComponentCategory()`, while `classification-apply.js` calls it to re-derive the active component/category pair before applying an accepted suggestion. Primary owner: DonHV; backup: DatDT. Debug the selected component/category IDs, active pair query, and returned `ComponentCategories.ID`. Keep the helper read/validate-only; callers remain responsible for deciding which request patch is persisted.
+
+### Vietnamese
+
+`resolveComponentCategory()` hiện là validation helper được export. Ghi Bug bình thường vẫn gọi nó qua `deriveOrValidateComponentCategory()`, còn `classification-apply.js` dùng nó để derive lại cặp component/category active trước khi áp dụng suggestion đã Accept. Owner chính: DonHV; backup: DatDT. Khi debug, xem component/category ID được chọn, query cặp active và `ComponentCategories.ID` trả về. Giữ helper chỉ đọc/validate; caller vẫn chịu trách nhiệm quyết định patch nào được persist.

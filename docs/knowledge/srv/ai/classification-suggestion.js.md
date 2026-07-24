@@ -205,3 +205,17 @@ Người dùng hoặc task UI sau này có thể review các gợi ý này. Khô
 - Giữ action dùng được khi AI bị tắt hoặc provider lỗi.
 - Giữ response dễ review cho UI: status, confidence, reason và catalog value phải rõ ràng.
 - Cập nhật mirror này, `srv/service.cds.md`, `srv/service.js.md` và QA script khi contract action thay đổi.
+
+## IDTS-92/93 persisted review contract
+
+### English
+
+For a saved source Bug, `suggestClassification()` now returns the persisted audit `suggestionID` on every review row. `recordClassificationAudit()` also stores a safe `sourceClassification` snapshot containing only the five controlled classification values. The ID lets the existing dialog invoke Accept/Reject/Ignore; the snapshot lets `classification-apply.js` reject a stale apply after a person has manually changed classification.
+
+Primary owner: DonHV. Backup: DatDT. Debug at `recordClassificationAudit()`: compare source values, the returned audit ID, and the sanitized payload. Check together with `review.js`, `classification-apply.js`, the two service files, and IDTS-67/91/93 tests. Never add private Bug content, user email, raw provider output, token, or endpoint to the snapshot.
+
+### Vietnamese
+
+Với Bug nguồn đã lưu, `suggestClassification()` hiện trả `suggestionID` của audit đã persist trên mọi review row. `recordClassificationAudit()` cũng lưu snapshot `sourceClassification` an toàn chỉ gồm năm giá trị classification có kiểm soát. ID cho phép dialog hiện tại gọi Accept/Reject/Ignore; snapshot giúp `classification-apply.js` chặn apply stale sau khi một người đã sửa classification thủ công.
+
+Owner chính: DonHV. Backup: DatDT. Khi debug, bắt đầu tại `recordClassificationAudit()`: so giá trị nguồn, audit ID trả về và payload đã sanitize. Kiểm cùng `review.js`, `classification-apply.js`, hai file service và test IDTS-67/91/93. Không thêm nội dung Bug riêng tư, email user, raw provider output, token hoặc endpoint vào snapshot.

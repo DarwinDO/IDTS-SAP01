@@ -380,3 +380,17 @@ IDTS-68 them unbound action `summarizeBugHandoff(sourceBugID)` va result type `B
 Action nay nam trong `srv/service.cds` vi day la contract OData public, khong phai helper noi bo. Client goi no khi can mot ban summary co the review cho bug da ton tai. Action tra ve status, current action owner, thong tin con thieu, su kien quan trong gan day, next expected action, provider status, grounding status, confidence va co bat buoc human review.
 
 Action nay khong expose write API. No khong doi lifecycle cua bug. Runtime behavior nam trong `srv/ai/bug-summary.js` va duoc noi trong `srv/service.js`.
+
+## IDTS-91/92/93 AI review contracts
+
+### English
+
+The service contract now exposes `suggestionID` on duplicate/classification candidate rows, the safe `AiSuggestionReviewResult`, three explicit review actions, and `applyClassificationSuggestion(suggestionID)`. Review actions update only suggestion audit state. The apply action returns the affected `Bugs` row but may change only validated classification fields after Tester/PM authorization.
+
+Primary owner: DonHV. Backup: DatDT. Debug the action name and parameter in generated metadata, then follow the same name through `srv/service.js` into `srv/ai/review.js` or `srv/ai/classification-apply.js`. A contract rename requires updating UI callers and focused QA.
+
+### Vietnamese
+
+Service contract hiện expose `suggestionID` trên candidate duplicate/classification, result an toàn `AiSuggestionReviewResult`, ba review action rõ ràng và `applyClassificationSuggestion(suggestionID)`. Review action chỉ đổi trạng thái audit của suggestion. Apply action trả Bug bị tác động nhưng chỉ được đổi các field classification đã validate sau khi kiểm quyền Tester/PM.
+
+Owner chính: DonHV. Backup: DatDT. Khi debug, xem tên action và parameter trong metadata đã generate, rồi lần theo cùng tên qua `srv/service.js` tới `srv/ai/review.js` hoặc `srv/ai/classification-apply.js`. Đổi contract phải cập nhật UI caller và focused QA.

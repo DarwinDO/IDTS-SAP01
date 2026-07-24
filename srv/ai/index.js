@@ -21,6 +21,12 @@ const {
   explainSmartAssignment,
   buildAssignmentExplanations
 } = require('./assignment-explanation')
+const {
+  acceptAiSuggestion,
+  rejectAiSuggestion,
+  ignoreAiSuggestion
+} = require('./review')
+const { applyClassificationSuggestion } = require('./classification-apply')
 const { redactSensitiveText, sanitizeErrorSummary } = require('./safety')
 
 // Nhóm export gồm config/provider/audit dùng chung, bốn feature entry point và các pure builder để test.
@@ -39,5 +45,9 @@ module.exports = {
   summarizeBugHandoff,
   buildBugHandoffSummary,
   explainSmartAssignment,
-  buildAssignmentExplanations
+  buildAssignmentExplanations,
+  acceptAiSuggestion,
+  rejectAiSuggestion,
+  ignoreAiSuggestion,
+  applyClassificationSuggestion
 }

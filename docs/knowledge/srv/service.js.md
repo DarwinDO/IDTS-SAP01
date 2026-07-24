@@ -390,3 +390,13 @@ IDTS-68 cap nhat file wiring runtime nay de dang ky `this.on('summarizeBugHandof
 Khai bao service nam trong `srv/service.cds`, nhung CAP van can registration JavaScript nay de OData action goi vao dung `srv/ai/bug-summary.js`. Cach nay giu service entry point nhat quan voi hai AI action hien co la `suggestSimilarBugs` va `suggestClassification`.
 
 Neu bo registration nay, metadata co the van thay action, nhung runtime action se khong chay dung.
+
+## IDTS-91/93 runtime wiring
+
+### English
+
+`BugService.init()` now registers Accept, Reject, Ignore, and Apply Classification handlers from `srv/ai`. The first three are review-only. `applyClassificationSuggestion` is the separate guarded write path for an already accepted classification suggestion. Primary owner: DonHV; backup: DatDT. Start debugging at the matching `this.on(...)`, then step into `review.js` or `classification-apply.js`. Keep this file as wiring only; authorization, catalog checks, stale protection, and history belong in the focused modules.
+
+### Vietnamese
+
+`BugService.init()` hiện đăng ký handler Accept, Reject, Ignore và Apply Classification từ `srv/ai`. Ba action đầu chỉ review. `applyClassificationSuggestion` là đường ghi riêng có guard cho classification suggestion đã Accept. Owner chính: DonHV; backup: DatDT. Khi debug, bắt đầu tại `this.on(...)` tương ứng rồi đi vào `review.js` hoặc `classification-apply.js`. Giữ file này chỉ làm wiring; quyền, catalog check, stale protection và history nằm trong module tập trung.
