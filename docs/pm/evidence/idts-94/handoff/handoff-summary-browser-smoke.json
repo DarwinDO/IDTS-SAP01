@@ -1,0 +1,35 @@
+{
+  "task": "IDTS-76",
+  "checkedAt": "2026-07-24T12:56:19.964Z",
+  "target": "http://localhost:4004",
+  "results": [
+    {
+      "check": "positive-dialog",
+      "passed": true
+    },
+    {
+      "check": "handoff-review-persisted-no-mutation",
+      "passed": true
+    },
+    {
+      "check": "handoff-responsive-viewport",
+      "passed": true
+    },
+    {
+      "check": "sparse-warning",
+      "passed": true
+    },
+    {
+      "check": "unsafe-output-safe",
+      "passed": true
+    },
+    {
+      "check": "safe-failure-state",
+      "passed": true
+    },
+    {
+      "check": "no-workflow-mutation",
+      "passed": true
+    }
+  ]
+}

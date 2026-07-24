@@ -6,6 +6,8 @@ process.env.NODE_ENV = 'test'
 process.env.CDS_ENV = 'test'
 
 const Module = require('module')
+const fs = require('node:fs')
+const path = require('node:path')
 const originalResolve = Module._resolveFilename
 Module._resolveFilename = function (request, parent, isMain, options) {
   if (request === 'cds-plugin-ui5') throw new Error('BLOCKED IN TEST')
@@ -22,6 +24,7 @@ const {
   safeOperationalMetric
 } = require('../../srv/ai')
 const { containsUnsafeDiagnosticText } = require('../../srv/ai/safety')
+const { statements: migrationStatements } = require('../db/migrate-idts97-ai-metrics')
 
 const RESULTS = []
 let PASS = 0
@@ -67,6 +70,22 @@ async function createMetricRow (db, overrides = {}) {
 }
 
 async function main () {
+  const migrationSource = fs.readFileSync(
+    path.resolve(__dirname, '../db/migrate-idts97-ai-metrics.js'),
+    'utf8'
+  )
+  expectTruthy('migration uses exactly two additive idempotent columns',
+    migrationStatements.length === 2 &&
+    migrationStatements.every(statement => statement.includes('ADD COLUMN IF NOT EXISTS')))
+  expectTruthy('migration is explicit execute and dry-run by default',
+    migrationSource.includes("process.argv.includes('--execute')") &&
+    migrationSource.includes("mode: 'dry-run'"))
+  expectTruthy('migration does not invoke CAP deploy or a child process',
+    !migrationSource.includes("require('@sap/cds')") &&
+    !migrationSource.includes("require('node:child_process')"))
+  expectTruthy('migration redacts PostgreSQL URLs',
+    migrationSource.includes('[REDACTED_POSTGRES_URL]'))
+
   console.log('')
   console.log('======================================================')
   console.log(' IDTS-97 Privacy-safe AI Operational Metrics')

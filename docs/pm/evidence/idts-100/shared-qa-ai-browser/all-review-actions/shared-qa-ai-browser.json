@@ -1,0 +1,39 @@
+{
+  "generatedAt": "2026-07-24T13:48:31.302Z",
+  "target": "Render Shared QA",
+  "bug": {
+    "ID": "1cb269fa-c2fa-421e-bd6d-23d6e415113e",
+    "bugNumber": "BUG-0013"
+  },
+  "providerAcceptance": "NOT ACCEPTED — live provider disabled by decision",
+  "results": [
+    {
+      "check": "Similar Bugs entry point is visible in its business section",
+      "passed": true
+    },
+    {
+      "check": "Similar Bugs dialog is readable, safe and review-only",
+      "passed": true
+    },
+    {
+      "check": "Classification Suggestions entry point is visible in its business section",
+      "passed": true
+    },
+    {
+      "check": "Classification Suggestions dialog is readable, safe and review-only",
+      "passed": true
+    },
+    {
+      "check": "Handoff Summary entry point is visible in its business section",
+      "passed": true
+    },
+    {
+      "check": "Handoff Summary dialog is readable, safe and review-only",
+      "passed": true
+    },
+    {
+      "check": "All three AI review actions leave workflow and ownership unchanged",
+      "passed": true
+    }
+  ]
+}

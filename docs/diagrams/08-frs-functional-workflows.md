@@ -70,13 +70,22 @@ stateDiagram-v2
     New --> Assigned
     New --> Pending_Assignment
     Pending_Assignment --> Assigned
+    Pending_Assignment --> Rejected
     Assigned --> In_Review
+    Assigned --> Need_More_Information
+    Assigned --> In_Progress
+    Assigned --> Pending_Assignment
     Assigned --> Rejected
     In_Review --> Need_More_Information
-    Need_More_Information --> In_Review
+    Need_More_Information --> Assigned
+    Need_More_Information --> Pending_Assignment
+    In_Review --> Assigned
     In_Review --> In_Progress
+    In_Review --> Resolved
     In_Review --> Rejected
+    In_Progress --> Need_More_Information
     In_Progress --> Resolved
+    In_Progress --> Rejected
     Resolved --> Retest_Required
     Resolved --> Closed
     Retest_Required --> Closed
@@ -84,6 +93,8 @@ stateDiagram-v2
     Resolved --> Reopened
     Closed --> Reopened
     Reopened --> Assigned
+    Reopened --> In_Review
+    Reopened --> In_Progress
     Rejected --> Assigned
     Rejected --> Pending_Assignment
     Closed --> [*]
@@ -122,15 +133,17 @@ flowchart TD
     C -->|"Missing information"| D["Request More Information"]
     D --> E["Status: Need More Information"]
     E --> F["Tester adds information"]
-    F --> B
+    F --> F2["Tester or PM uses Resubmit to Developer\nwith required update summary"]
+    F2 --> F3["Status: Assigned\nexisting assignee becomes action owner"]
+    F3 --> B
     C -->|"Wrong classification or assignee"| G["Reject with reason"]
     G --> H["Status: Rejected"]
     H --> I["Follow Up Owner corrects and reassigns"]
     I --> B
-    C -->|"Valid"| J["Start review"]
-    J --> K["Move to In Progress"]
-    K --> L["Add developer note"]
-    L --> M["Mark Resolved"]
+    C -->|"Valid"| J["Start Review: In Review"]
+    J --> K["Start Progress: In Progress"]
+    K --> L["Developer note optional\nfor normal processing"]
+    L --> M["Resolve with required note"]
 ```
 
 ## Request More Information Flow
@@ -146,14 +159,22 @@ sequenceDiagram
     Dev->>UI: Request more information
     UI->>Dev: Ask for required reason
     Dev->>UI: Submit reason
-    UI->>CAP: Change status to Need More Information
-    CAP->>CAP: Validate assigned developer and reason
-    CAP->>DB: Save status and nextProcessor
-    CAP->>DB: Write history log
-    CAP->>DB: Create notification record
+    UI->>CAP: requestMoreInformation(reason)
+    CAP->>CAP: Validate actor, source status, assignee, and required reason
+    CAP->>DB: Save Need More Information + Tester action owner
+    CAP->>DB: Write HistoryEvent / HistoryLogs
+    CAP->>DB: Create in-app notification + email outbox row
     Tester->>UI: Add missing information
-    UI->>CAP: Return bug to Assigned or In Review
-    CAP->>DB: Save update and history
+    alt Existing assignee remains suitable
+        UI->>CAP: resubmitToDeveloper(update summary)
+        CAP->>CAP: Require Tester/PM, assignee, summary, and valid transition
+        CAP->>DB: Save Assigned + Developer action owner
+        CAP->>DB: Write comment/history + notification/outbox
+    else No suitable assignee
+        UI->>CAP: moveToPendingAssignment(reason)
+        CAP->>DB: Clear assignee and save Pending Assignment
+        CAP->>DB: Write history + notification/outbox
+    end
 ```
 
 ## Resolve, Retest, Close, and Reopen Flow

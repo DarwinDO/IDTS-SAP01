@@ -34,6 +34,7 @@ service BugService @(requires: 'authenticated-user') {
   };
 
   type BugHandoffSummaryResult {
+    suggestionID          : UUID;
     bugID                 : UUID;
     bugNumber             : String(30);
     generatedAt           : Timestamp;
@@ -51,6 +52,7 @@ service BugService @(requires: 'authenticated-user') {
   };
 
   type SmartAssignmentExplanationCandidate {
+    suggestionID       : UUID;
     developerProfileID : UUID;
     developerName      : String(120);
     explanation        : String(700);

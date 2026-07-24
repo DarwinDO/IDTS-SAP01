@@ -45,7 +45,7 @@ async function explainSmartAssignment (req, entities, dependencies = {}) {
 
   const result = buildAssignmentExplanations({ input, candidates, providerResult })
 
-  await recordAssignmentAudit({
+  const audit = await recordAssignmentAudit({
     tx,
     req,
     entities,
@@ -55,7 +55,10 @@ async function explainSmartAssignment (req, entities, dependencies = {}) {
     result
   })
 
-  return result
+  return result.map(row => ({
+    suggestionID: audit?.ID || null,
+    ...row
+  }))
 }
 
 async function resolveAssignmentInput (tx, req, entities, data) {
@@ -248,13 +251,13 @@ function fallbackExplanation (input, candidate) {
 
 async function recordAssignmentAudit ({ tx, req, entities, input, provider, providerResult, result }) {
   // Lưu metadata request/result đã sanitize vào AISuggestions; không lưu prompt, secret hay tự đổi Bug.
-  if (!input.sourceBugID) return
+  if (!input.sourceBugID) return null
 
   const requester = await resolveRequestUser(req, entities)
-  if (!requester) return
+  if (!requester) return null
 
   const bestConfidence = result.reduce((max, row) => Math.max(max, Number(row.confidence || 0)), 0) || null
-  await createAiSuggestion(tx, {
+  return createAiSuggestion(tx, {
     bugID: input.sourceBugID,
     requestedByID: requester.ID,
     featureType: FEATURE_TYPES.ASSIGNMENT_EXPLANATION,

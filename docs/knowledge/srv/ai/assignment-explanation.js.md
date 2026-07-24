@@ -165,3 +165,13 @@ Quy tac quan trong: AI chi ho tro giai thich, con IDTS van dung backend validati
 - Giu fallback khi AI tat hoac provider loi.
 - Giu `requiresReview = true` vi explanation chi la goi y.
 - Chay lai `npm run qa:idts69:programmatic` va `npm run qa:idts56:programmatic` sau khi sua.
+
+## IDTS-94 persisted review bridge (2026-07-24)
+
+### English
+
+`recordAssignmentAudit()` now returns the single sanitized audit row created for the explanation request. `explainSmartAssignment()` copies that row's UUID to every returned candidate as `suggestionID`. The dialog therefore reviews the explanation set as one unit; accepting it never selects a table row and never calls `assignToDeveloper`.
+
+### Vietnamese
+
+`recordAssignmentAudit()` giờ trả một audit row đã sanitize của request explanation. `explainSmartAssignment()` copy UUID của row đó vào mỗi candidate dưới field `suggestionID`. Vì vậy dialog review cả tập explanation như một unit; Accept không chọn table row và không gọi `assignToDeveloper`.

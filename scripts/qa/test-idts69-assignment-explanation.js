@@ -51,6 +51,12 @@ async function invokeExplanation (service, payload) {
   }, tx => tx.send('explainSmartAssignment', payload))
 }
 
+async function reviewSuggestion (service, suggestionID, action = 'acceptAiSuggestion') {
+  return service.tx({
+    user: new cds.User({ id: 'DonHV', roles: ['PM', 'authenticated-user'] })
+  }, tx => tx.send(action, { suggestionID }))
+}
+
 async function callAssignAction (service, assigneeID) {
   const req = new cds.Request({
     method: 'POST',
@@ -114,20 +120,27 @@ async function main () {
   assert.strictEqual(dat.providerStatus, 'SUCCESS')
   assert(dat.explanation.includes('Provider explanation') || dat.explanation.includes('Matches'))
   assert.strictEqual(dat.requiresReview, true)
+  assert(dat.suggestionID)
+  assert(positive.every(row => row.suggestionID === dat.suggestionID))
   rec('provider success returns reviewable explanation for assignable candidate', true)
+  rec('all explanations return the same persisted suggestion ID', true)
 
   const auditRows = await db.run(
     SELECT.from('idts.cap.AiSuggestions')
-      .columns('featureType_code', 'operationStatus', 'latencyMs', 'reviewState_code', 'suggestionPayload')
+      .columns('ID', 'featureType_code', 'operationStatus', 'latencyMs', 'reviewState_code', 'suggestionPayload')
       .where({ bug_ID: BUG_ID, featureType_code: 'ASSIGNMENT_EXPLANATION' })
   )
   assert.strictEqual(auditRows.length, 1)
+  assert.strictEqual(dat.suggestionID, auditRows[0].ID)
   assert.strictEqual(auditRows[0].reviewState_code, 'PENDING')
   assert.strictEqual(auditRows[0].operationStatus, 'SUCCESS')
   assert(auditRows[0].latencyMs >= 0)
   const auditPayload = JSON.parse(auditRows[0].suggestionPayload)
   assert.strictEqual(auditPayload.providerStatus, 'SUCCESS')
   rec('source-linked assignment explanation writes sanitized AI audit row', true)
+  const reviewedExplanation = await reviewSuggestion(service, dat.suggestionID)
+  assert.strictEqual(reviewedExplanation.reviewStateCode, 'ACCEPTED')
+  rec('assignment explanation review persists ACCEPTED without assigning a developer', true)
 
   aiConfig({}, { enabled: false })
   const disabled = await invokeExplanation(service, {

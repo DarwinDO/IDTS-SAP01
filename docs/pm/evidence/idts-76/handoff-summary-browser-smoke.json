@@ -1,10 +1,18 @@
 {
   "task": "IDTS-76",
-  "checkedAt": "2026-07-09T14:23:03.482Z",
-  "target": "http://localhost:4016",
+  "checkedAt": "2026-07-24T17:37:08.309Z",
+  "target": "http://localhost:4004",
   "results": [
     {
       "check": "positive-dialog",
+      "passed": true
+    },
+    {
+      "check": "handoff-review-persisted-no-mutation",
+      "passed": true
+    },
+    {
+      "check": "handoff-responsive-viewport",
       "passed": true
     },
     {
