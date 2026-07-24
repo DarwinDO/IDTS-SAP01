@@ -7,6 +7,7 @@ import re
 import sys
 from collections import Counter
 from pathlib import Path
+from urllib.parse import unquote
 
 from openpyxl import load_workbook
 from openpyxl.cell.cell import MergedCell
@@ -111,9 +112,9 @@ VI_UNTRANSLATED_EXACT = {
 
 FILE_PATTERNS = {
     "scenario": "Test_Scenario_IDTS_SAP01_{lang}_v0.3.xlsx",
-    "unit": "Unit_Test_IDTS_SAP01_{lang}_v0.3.xlsx",
-    "functional": "Functional_Test_IDTS_SAP01_{lang}_v0.2.xlsx",
-    "report": "Test_Report_IDTS_SAP01_{lang}_v0.3.xlsx",
+    "unit": "Unit_Test_IDTS_SAP01_{lang}_v0.4.xlsx",
+    "functional": "Functional_Test_IDTS_SAP01_{lang}_v0.3.xlsx",
+    "report": "Test_Report_IDTS_SAP01_{lang}_v0.4.xlsx",
     "uat": "UAT_IDTS_SAP01_{lang}_prepared_v0.2.xlsx",
     "defect": "Test_And_Fix_Bug_IDTS_SAP01_{lang}_v0.5.xlsx",
 }
@@ -298,7 +299,7 @@ def validate_workbook(path, result):
                 else 100
                 if path.name.startswith("Functional_Test_")
                 and ws.title == "Test Result"
-                and 8 <= row_number <= 13
+                and 5 <= row_number <= 16
                 else 120
                 if path.name.startswith("Test_And_Fix_Bug_")
                 and ws.title == "Fix and bugs"
@@ -656,6 +657,117 @@ def validate_report_metrics(catalog, result):
         value_book.close()
 
 
+def hyperlink_target_is_valid(wb, hyperlink):
+    location = getattr(hyperlink, "location", None)
+    external_target = getattr(hyperlink, "target", None)
+    if external_target:
+        return False
+    target = location or getattr(hyperlink, "target", None)
+    if not target or not str(target).startswith("#"):
+        if location:
+            target = f"#{unquote(str(location))}"
+        else:
+            return bool(target)
+    match = re.fullmatch(r"#?'([^']+)'!([A-Z]+\d+)", unquote(str(target)))
+    if not match:
+        return False
+    sheet_name, coordinate = match.groups()
+    return (
+        sheet_name in wb.sheetnames
+        and wb[sheet_name][coordinate].value not in (None, "")
+    )
+
+
+def is_link_blue_without_link(cell):
+    color = cell.font.color
+    if cell.hyperlink or color is None:
+        return False
+    rgb = getattr(color, "rgb", None)
+    return isinstance(rgb, str) and rgb[-6:].upper() in {"0563C1", "0000FF"}
+
+
+def validate_evidence_contract(catalog, result):
+    baseline = catalog.get("evidenceBaseline", {})
+    runtime_sha = str(baseline.get("runtimeCommitSha") or "")
+    evidence_sha = str(baseline.get("evidenceCommitSha") or "")
+    if not re.fullmatch(r"[0-9a-f]{40}", runtime_sha):
+        result.fail("Catalog evidence baseline has missing/placeholder runtime commit SHA")
+    if not re.fullmatch(r"[0-9a-f]{40}", evidence_sha):
+        result.fail("Catalog evidence baseline has missing/placeholder evidence commit SHA")
+
+    for lang in ("en", "vi"):
+        functional_path = OUTPUT_DIR / FILE_PATTERNS["functional"].format(lang=lang)
+        functional_book = load_workbook(functional_path, data_only=False)
+        runs = functional_book["Test Result"]
+        if not str(runs["B5"].value or "").startswith("REG-"):
+            result.fail(f"{functional_path.name}: first run must start in official row block B5")
+        expected_last = 4 + len(catalog["executionRuns"]) * 2
+        if runs.freeze_panes != "B5":
+            result.fail(f"{functional_path.name}: Test Result freeze pane must be B5")
+        if str(runs.print_area) != f"'Test Result'!$B$4:$BR${expected_last}":
+            result.fail(f"{functional_path.name}: Test Result print area is stale")
+        functional_book.close()
+
+        report_path = OUTPUT_DIR / FILE_PATTERNS["report"].format(lang=lang)
+        report_book = load_workbook(report_path, data_only=False)
+        report_cases = report_book["Test Cases"]
+        for row in range(9, 9 + len(catalog["cases"])):
+            link_cell = report_cases[f"D{row}"]
+            plain_cell = report_cases[f"E{row}"]
+            if not link_cell.hyperlink or not hyperlink_target_is_valid(report_book, link_cell.hyperlink):
+                result.fail(f"{report_path.name}/Test Cases!D{row}: broken or blank internal hyperlink")
+            if is_link_blue_without_link(plain_cell):
+                result.fail(f"{report_path.name}/Test Cases!E{row}: link styling without hyperlink")
+            if plain_cell.hyperlink:
+                result.fail(f"{report_path.name}/Test Cases!E{row}: unexpected hyperlink")
+            if plain_cell.font.name != report_cases[f"F{row}"].font.name:
+                result.fail(f"{report_path.name}/Test Cases!E{row}: font family differs from template row")
+        report_book.close()
+
+        unit_path = OUTPUT_DIR / FILE_PATTERNS["unit"].format(lang=lang)
+        unit_book = load_workbook(unit_path, data_only=False)
+        unit = unit_book["UT"]
+        evidence = unit_book["Evidence"]
+        for row, case in enumerate(
+            [item for item in catalog["cases"] if item["testType"] == "UNIT"],
+            8,
+        ):
+            link_cell = unit[f"BL{row}"]
+            if not link_cell.hyperlink or not hyperlink_target_is_valid(unit_book, link_cell.hyperlink):
+                result.fail(f"{unit_path.name}/UT!BL{row}: missing or broken case evidence link")
+            evidence_row = row - 6
+            if evidence[f"A{evidence_row}"].value != f"EVD-{case['caseId']}":
+                result.fail(f"{unit_path.name}/Evidence!A{evidence_row}: wrong Evidence ID")
+            if not re.fullmatch(r"[0-9a-f]{40}", str(evidence[f"E{evidence_row}"].value or "")):
+                result.fail(f"{unit_path.name}/Evidence!E{evidence_row}: invalid baseline")
+            artifact = str(evidence[f"K{evidence_row}"].value or "")
+            artifact_link = evidence[f"K{evidence_row}"].hyperlink
+            if artifact.startswith("scripts/") or not artifact_link:
+                result.fail(f"{unit_path.name}/Evidence!K{evidence_row}: command/source-only evidence")
+        unit_book.close()
+
+    index_path = OUTPUT_DIR / "Integration_Evidence_Index_IDTS_SAP01_v0.1.xlsx"
+    if not index_path.exists():
+        result.fail(f"Missing workbook: {index_path.name}")
+        return
+    index_book = load_workbook(index_path, data_only=False)
+    index = index_book["Evidence Index"]
+    if index.max_row != len(catalog["cases"]) + 1:
+        result.fail(f"{index_path.name}: case/evidence row count mismatch")
+    for row, case in enumerate(catalog["cases"], 2):
+        if index[f"A{row}"].value != f"EVD-{case['caseId']}":
+            result.fail(f"{index_path.name}!A{row}: wrong Evidence ID")
+        if not index[f"E{row}"].hyperlink or not index[f"K{row}"].hyperlink:
+            result.fail(f"{index_path.name}: row {row} lacks baseline or artifact hyperlink")
+        if case["status"] == "PASSED":
+            required = ("E", "H", "I", "K")
+            for column in required:
+                value = str(index[f"{column}{row}"].value or "")
+                if not value or "<" in value:
+                    result.fail(f"{index_path.name}!{column}{row}: PASSED case lacks real evidence metadata")
+    index_book.close()
+
+
 def main():
     result = Validation()
     catalog = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
@@ -674,6 +786,7 @@ def main():
     validate_ids_and_parity(catalog, result)
     validate_case_content(catalog, result)
     validate_report_metrics(catalog, result)
+    validate_evidence_contract(catalog, result)
 
     print("SAP490 OFFICIAL-TEMPLATE TEST PACK VALIDATION")
     print(f"Catalog cases: {len(catalog.get('cases', []))}")

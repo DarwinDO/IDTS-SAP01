@@ -29,6 +29,16 @@
 - `docs/pm/evidence/idts-100/drive-sync-verification-20260724.md`
 - `docs/pm/evidence/idts-100/visual-review-20260724.md`
 - `docs/pm/evidence/idts-100/integration-evidence-index.md`
+- `docs/pm/evidence/idts-100/test-pack-evidence-remediation-20260724.md`
+
+### Test pack evidence remediation
+
+- Functional Test EN/VI v0.3 now uses the official result block without an unused blank block before generated runs.
+- Unit Test EN/VI v0.4 now has one complete Evidence row per case and correct internal links.
+- Test Report EN/VI v0.4 now uses valid internal links and template styling for non-linked text.
+- Integration Evidence Index v0.1 is available in the Drive Integration Test folder with public read-by-link access.
+- The repository validator now rejects broken/empty links, cosmetic blue text, placeholder baselines, command-only evidence, and template-font drift.
+- Six human UAT cases and mentor approval remain pending; this remediation does not change those statuses.
 
 ## Vietnamese
 
@@ -59,3 +69,13 @@
 - `docs/pm/evidence/idts-100/drive-sync-verification-20260724.md`
 - `docs/pm/evidence/idts-100/visual-review-20260724.md`
 - `docs/pm/evidence/idts-100/integration-evidence-index.md`
+- `docs/pm/evidence/idts-100/test-pack-evidence-remediation-20260724.md`
+
+### Sửa Test Pack và evidence
+
+- Functional Test EN/VI v0.3 dùng đúng block kết quả chính thức, không còn khoảng trống giả trước dữ liệu run.
+- Unit Test EN/VI v0.4 có một dòng Evidence đầy đủ cho từng case và link nội bộ đúng.
+- Test Report EN/VI v0.4 có link nội bộ hợp lệ; text không có link giữ style template.
+- Integration Evidence Index v0.1 đã nằm trong folder Integration Test trên Drive và có quyền đọc bằng link.
+- Validator đã chặn link hỏng/ô đích trống, text xanh giả, baseline placeholder, evidence chỉ có command và font lệch template.
+- Sáu UAT con người và mentor approval vẫn đang chờ; remediation này không thay đổi trạng thái đó.
