@@ -10,6 +10,10 @@ Branch: `feature/idts-95-confirm-duplicate-suggestion-sangvn`
 
 Dependency baseline: PR #167, `feature/idts-91-93-implementation-datdt`
 
+Implementation commit: `974a217`
+
+Jira evidence comment: `10647`
+
 ### Scope verified
 
 - A Tester or PM can confirm one candidate from an accepted, current `DUPLICATE_DETECTION` suggestion.
@@ -55,6 +59,10 @@ Owner: SangVN
 Branch: `feature/idts-95-confirm-duplicate-suggestion-sangvn`
 
 Dependency baseline: PR #167, `feature/idts-91-93-implementation-datdt`
+
+Implementation commit: `974a217`
+
+Jira evidence comment: `10647`
 
 ### Phạm vi đã verify
 
