@@ -3,8 +3,8 @@
 Dự án: Issue and Defect Tracking System in SAP
 Loại tài liệu: Software Requirements Specification (SRS)
 Ngôn ngữ: Tiếng Việt
-Trạng thái: Draft v1.4
-Cập nhật lần cuối: 2026-07-22
+Trạng thái: Draft v1.5
+Cập nhật lần cuối: 2026-07-24
 Chuẩn bị cho: SAP490 project delivery, mentor review, bằng chứng implementation và QA test design
 Phong cách tài liệu: Cấu trúc SRS truyền thống, kết hợp nguyên tắc chất lượng requirement, traceability và verification theo hướng ISO/IEC/IEEE 29148
 
@@ -19,6 +19,7 @@ Phong cách tài liệu: Cấu trúc SRS truyền thống, kết hợp nguyên t
 | v1.2 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Đồng bộ baseline attachment đã triển khai và AI advisory tùy chọn, với ràng buộc rõ về human review, privacy và không có workflow authority. | Draft |
 | v1.3 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Thay source block system-context dùng khi review bằng figure đã render, có traceability và tham chiếu Diagram Pack. | Draft |
 | v1.4 | 2026-07-22 | IDTS Project Team | Mentor / Supervisor | Đồng bộ requirement về authentication/session, shared PostgreSQL/Render, attachment object storage, email outbox và AI audit có human review với baseline mentor review đã triển khai. | Draft |
+| v1.5 | 2026-07-24 | IDTS Project Team | Mentor / Supervisor | Bổ sung OData base path đã deploy, exact workflow-action audit code và giới hạn review state hiện chỉ `PENDING` của `AiSuggestions`. | Draft |
 
 ### 1.2 Review và phê duyệt
 
@@ -244,7 +245,7 @@ Verification methods:
 | SRS-FR-AI-001 | DISC-002 | IDTS có thể cung cấp gợi ý similar-bug, classification, bug/handoff summary và Smart Assign explanation chỉ dưới dạng advisory output để người dùng review. | Should | Test và demonstration | FRS-AI-001 |
 | SRS-FR-AI-002 | DISC-002 | AI output không được create, edit, assign, reclassify, transition, close, reopen hoặc làm thay đổi bug; normal action có authorization vẫn là đường quyết định duy nhất. | Must | Test | FRS-AI-001 |
 | SRS-FR-AI-003 | DISC-002 | AI request, response, audit record và lỗi hiển thị cho user không được chứa credential, token, private endpoint, attachment bytes, raw provider output hoặc personal data không cần thiết. | Must | Inspection và test | FRS-AI-001 |
-| SRS-FR-AI-004 | DISC-002 | Source-linked suggestion shall chỉ persist normalized safe data trong `AiSuggestions`, gồm review status khi áp dụng; audit row không phải autonomous workflow decision. | Must | Inspection và test | FRS-AI-001 |
+| SRS-FR-AI-004 | DISC-002 | Source-linked suggestion chỉ được persist normalized safe data trong `AiSuggestions`. Implementation hiện tạo audit row ở `PENDING` và chưa expose public action lưu `ACCEPTED`, `REJECTED` hoặc `IGNORED`; audit row không phải autonomous workflow decision. | Must | Inspection và test | FRS-AI-001 |
 
 ## 8. Data Requirements
 
@@ -260,8 +261,8 @@ Verification methods:
 | SRS-DATA-008 | Notifications | IDTS shall lưu in-app notification event type, recipient, channel, delivery status, timestamp và parent bug reference. | Must | Inspection |
 | SRS-DATA-009 | Authentication sessions | IDTS shall lưu hashed/token-safe session record gồm user, expiry và revocation state trong `AuthSessions`; bearer token và password không được commit vào source. | Must | Inspection và test |
 | SRS-DATA-010 | Email delivery outbox | IDTS shall lưu safe payload snapshot, attempt, retry timing, status, locking và sanitized failure detail trong `NotificationDeliveries`. | Must | Inspection và test |
-| SRS-DATA-011 | AI suggestion audit | IDTS shall lưu normalized source-linked suggestion và human-review state trong `AiSuggestions`, không lưu raw prompt, raw provider response, credential, attachment content hoặc hidden reasoning. | Must | Inspection và test |
-| SRS-DATA-009 | HistoryLogs | IDTS shall lưu history logs như bug-owned audit records. | Must | Inspection |
+| SRS-DATA-011 | AI suggestion audit | IDTS lưu normalized source-linked suggestion trong `AiSuggestions`, không lưu raw prompt, raw provider response, credential, attachment content hoặc hidden reasoning. Các source-linked row hiện bắt đầu và giữ ở `PENDING` cho tới khi có feature review-state được duyệt riêng. | Must | Inspection và test |
+| SRS-DATA-012 | HistoryLogs | IDTS lưu history logs như bug-owned audit records. | Must | Inspection |
 
 ## 9. External Interface và UI Interface Requirements
 
@@ -272,6 +273,9 @@ Verification methods:
 | SRS-IF-ODATA-001 | IDTS shall expose core bug tracking data qua OData V4 services phù hợp cho Fiori Elements consumption. | Must | Inspection và compile |
 | SRS-IF-ODATA-002 | IDTS shall expose value-help data cần cho SAP Module, Application Component, Defect Category, Component Category, Developer, priority, severity và status selection. | Must | Inspection và demonstration |
 | SRS-IF-ODATA-003 | IDTS shall expose actions hoặc update operations cho business-critical status transitions khi simple field update không đủ enforce rules. | Should | Inspection và test |
+| SRS-IF-ODATA-004 | Base path của authentication service đã deploy là `/odata/v4/auth/`, còn base path của protected bug-management service là `/odata/v4/bug/`. | Must | Metadata inspection và HTTP test |
+| SRS-IF-ODATA-005 | Tạo/sửa draft dùng các CAP draft event `NEW`, `PATCH` lặp lại và `SAVE`; active persistence tiếp tục dùng `CREATE` cho Bug active mới và `UPDATE` cho Bug active được sửa. | Must | Handler trace và integration test |
+| SRS-IF-ODATA-006 | Audit catalog phải phân biệt 11 exact workflow command: `ASSIGN_TO_DEVELOPER`, `MOVE_TO_PENDING_ASSIGNMENT`, `MARK_IN_REVIEW`, `REQUEST_MORE_INFORMATION`, `RESUBMIT_TO_DEVELOPER`, `REJECT_BUG`, `START_PROGRESS`, `RESOLVE_BUG`, `SEND_TO_RETEST`, `CLOSE_BUG` và `REOPEN_BUG`. | Must | Database inspection và IDTS-89 regression |
 
 ### 9.2 Fiori UI Interface
 

@@ -133,6 +133,13 @@ def add_slide(prs: Presentation, title: str, image_path: Path, asset: str) -> No
     add_title(slide, title)
     add_contained_picture(slide, image_path)
     add_footer(slide, len(prs.slides), asset)
+    notes = slide.notes_slide.notes_text_frame
+    notes.text = (
+        f"Mentor review summary: {title}. "
+        "Use this diagram to explain the actors/components, the direction of the flow, "
+        "the CAP/backend control boundary, and the observable data or side effect. "
+        f"Canonical source asset: {asset}.png; editable source and manifest are kept in docs/diagrams/rendered."
+    )
 
 
 def main() -> None:

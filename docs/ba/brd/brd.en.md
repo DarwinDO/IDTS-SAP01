@@ -3,8 +3,8 @@
 Project: Issue and Defect Tracking System in SAP
 Document type: Business Requirements Document (BRD)
 Language: English
-Status: Draft v1.5
-Last updated: 2026-07-22
+Status: Draft v1.6
+Last updated: 2026-07-24
 Prepared for: SAP490 project delivery and mentor review
 Document style: SAP490 hybrid, business-first with light SAP implementation context
 
@@ -20,6 +20,7 @@ Document style: SAP490 hybrid, business-first with light SAP implementation cont
 | v1.3 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Synced current implementation and review baseline: CAP/Fiori MVP workflow, audit/notification/attachment flows, PM monitoring, and optional human-review AI assistance. | Draft |
 | v1.4 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Added rendered business-review figures and Diagram Pack traceability; canonical diagram source remains version controlled. | Draft |
 | v1.5 | 2026-07-22 | IDTS Project Team | Mentor / Supervisor | Aligned the mentor-review baseline with implemented authentication, shared QA data/storage, asynchronous email delivery, and human-reviewed AI audit behavior. | Draft |
+| v1.6 | 2026-07-24 | IDTS Project Team | Mentor / Supervisor | Clarified that the current AI audit stores source-linked suggestions in `PENDING`; no public action yet persists `ACCEPTED`, `REJECTED`, or `IGNORED`. | Draft |
 
 ### 1.2 Review and Sign-Off
 
@@ -142,7 +143,7 @@ For MVP, one real user may perform multiple responsibilities, but only Tester, D
 
 The repository now implements the agreed CAP/Fiori MVP baseline: structured bug creation, classification and responsibility-aware assignment, controlled lifecycle actions, comments, draft attachments, audit/history, notifications, PM monitoring, and optional AI assistance that remains human-review only. Users authenticate through the project login/session foundation (`AuthService` and `AuthSessions`); business-role permissions remain authoritative. Shared QA is hosted on Render with PostgreSQL and externally bound S3 object storage, while SQLite remains the local-development profile. The SAP490 review focuses on evidence, traceability, and remaining acceptance rather than a minimal scaffold.
 
-Important events create in-app notification records and, when applicable, separate email-delivery work items in `NotificationDeliveries`. Email processing is asynchronous: a provider failure must not roll back the original bug action. Optional AI output is stored as a normalized `AiSuggestions` review/audit record, never as an autonomous decision. Live-provider acceptance still depends on approved private configuration and evidence; this BRD does not claim unverified delivery.
+Important events create in-app notification records and, when applicable, separate email-delivery work items in `NotificationDeliveries`. Email processing is asynchronous: a provider failure must not roll back the original bug action. Optional source-linked AI output is stored as a normalized `AiSuggestions` review/audit record in `PENDING`, never as an autonomous decision. The current service exposes no public action that persists `ACCEPTED`, `REJECTED`, or `IGNORED`; a user may only review the output and then separately invoke an ordinary authorized CAP action. Live-provider acceptance still depends on approved private configuration and evidence; this BRD does not claim unverified delivery.
 
 The optional real AI provider is disabled by default and does not change business authority, authorization, validation, assignment, or status transitions. Its production use remains dependent on approved private configuration and separate live-provider evidence; this BRD does not treat AI output as a business decision.
 

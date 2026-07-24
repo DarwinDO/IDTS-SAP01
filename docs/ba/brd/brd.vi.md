@@ -3,8 +3,8 @@
 Dự án: Issue and Defect Tracking System in SAP
 Loại tài liệu: Business Requirements Document (BRD)
 Ngôn ngữ: Tiếng Việt
-Trạng thái: Draft v1.5
-Cập nhật lần cuối: 2026-07-22
+Trạng thái: Draft v1.6
+Cập nhật lần cuối: 2026-07-24
 Chuẩn bị cho: SAP490 project delivery và mentor review
 Phong cách tài liệu: SAP490 hybrid, ưu tiên nghiệp vụ và chỉ giữ bối cảnh triển khai SAP ở mức ngắn gọn
 
@@ -20,6 +20,7 @@ Phong cách tài liệu: SAP490 hybrid, ưu tiên nghiệp vụ và chỉ giữ 
 | v1.3 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Đồng bộ baseline implementation và review hiện tại: workflow CAP/Fiori MVP, luồng audit/notification/attachment, PM monitoring và AI hỗ trợ tùy chọn có human review. | Draft |
 | v1.4 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Bổ sung figure review đã render và traceability tới Diagram Pack; canonical diagram source vẫn được version control. | Draft |
 | v1.5 | 2026-07-22 | IDTS Project Team | Mentor / Supervisor | Đồng bộ baseline mentor review với authentication, dữ liệu/storage shared QA, email delivery bất đồng bộ và AI audit có human review đã triển khai. | Draft |
+| v1.6 | 2026-07-24 | IDTS Project Team | Mentor / Supervisor | Làm rõ audit AI hiện chỉ lưu suggestion có liên kết nguồn ở trạng thái `PENDING`; chưa có public action lưu `ACCEPTED`, `REJECTED` hoặc `IGNORED`. | Draft |
 
 ### 1.2 Review và phê duyệt
 
@@ -142,7 +143,7 @@ Trong MVP, một người dùng thực tế có thể đảm nhận nhiều trá
 
 Repository hiện đã triển khai baseline CAP/Fiori MVP đã thống nhất: tạo bug có cấu trúc, classification và assignment theo responsibility, lifecycle action có kiểm soát, comment, draft attachment, audit/history, notification, PM monitoring và AI hỗ trợ tùy chọn chỉ ở mức human review. User đăng nhập qua nền tảng login/session của project (`AuthService` và `AuthSessions`); quyền theo business role vẫn là authority cuối. Shared QA được host trên Render với PostgreSQL và S3 object storage bind bên ngoài, còn SQLite là profile local-development. SAP490 review tập trung vào bằng chứng, traceability và phần acceptance còn lại thay vì một scaffold tối thiểu.
 
-Important events tạo in-app notification và, khi áp dụng, tạo email-delivery work item riêng trong `NotificationDeliveries`. Email được xử lý bất đồng bộ: provider failure không được rollback bug action gốc. Optional AI output được lưu thành review/audit record đã chuẩn hóa trong `AiSuggestions`, không bao giờ là autonomous decision. Acceptance của live provider vẫn phụ thuộc private configuration đã duyệt và bằng chứng riêng; BRD này không claim delivery chưa verify.
+Important events tạo in-app notification và, khi áp dụng, tạo email-delivery work item riêng trong `NotificationDeliveries`. Email được xử lý bất đồng bộ: provider failure không được rollback bug action gốc. Optional AI output có liên kết nguồn được lưu thành review/audit record đã chuẩn hóa trong `AiSuggestions` ở trạng thái `PENDING`, không bao giờ là autonomous decision. Service hiện chưa có public action lưu `ACCEPTED`, `REJECTED` hoặc `IGNORED`; người dùng chỉ review output rồi thực hiện riêng một CAP action thông thường đã được cấp quyền. Acceptance của live provider vẫn phụ thuộc private configuration đã duyệt và bằng chứng riêng; BRD này không claim delivery chưa verify.
 
 Real AI provider tùy chọn mặc định tắt và không thay đổi business authority, authorization, validation, assignment hoặc status transition. Việc dùng ở production vẫn phụ thuộc private configuration đã được duyệt và bằng chứng live-provider riêng; BRD này không xem AI output là quyết định nghiệp vụ.
 

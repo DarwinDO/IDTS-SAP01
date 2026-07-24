@@ -1,6 +1,6 @@
 {
   "task": "IDTS-74",
-  "checkedAt": "2026-07-11T00:39:51.765Z",
+  "checkedAt": "2026-07-24T13:19:55.848Z",
   "checks": [
     {
       "label": "Similar bug review field opens duplicate review from product UI",
