@@ -4,7 +4,7 @@ Owner: SangVN
 
 Date: 2026-07-24
 
-Status: implementation and local evidence complete; Knowledge Gate, human review, merge, and Jira closure remain pending.
+Status: implementation, local evidence, and SangVN Ownership Knowledge Gate are complete; human review, dependency merge, PR merge, and Jira closure remain pending.
 
 ## Delivered scope
 
@@ -28,6 +28,7 @@ Status: implementation and local evidence complete; Knowledge Gate, human review
 | Empty/error | A response without `suggestionID` disables Handoff review; unsafe/provider-error flows show safe copy and do not change the Bug. |
 | Responsive UI | Mobile screenshots use a 390x844 true mobile-emulation context for Handoff and a 390x844 viewport for Smart Assign. |
 | Browser health | Both suites finish with no unexpected blocking console/network/page signals. |
+| Ownership Knowledge Gate | SangVN passed 3/3 (100%), including critical answers, teach-back, and controlled debug retest. Evidence: `knowledge-gate-sangvn-2026-07-24.md`. |
 
 ## Verification commands
 
@@ -59,6 +60,7 @@ Latest focused results:
 - Smart Assign browser: 7 checks passed.
 - CAP compile and UI5 build: exit 0.
 - UI5 MCP linter for both changed controllers: no findings.
+- Ownership Knowledge Gate: 3/3 (100%), critical/debug/teach-back PASS.
 
 ## Screenshots
 
@@ -75,7 +77,7 @@ Latest focused results:
 ## Known limitations and gates
 
 - The branch is stacked on the open IDTS-91/92/93 dependency branch; it must not merge before that foundation is approved.
-- The user deferred SangVN's personal Knowledge Gate until assigned implementation tasks are complete. This evidence does not waive the gate.
+- SangVN's Ownership Knowledge Gate is complete. PR #168 still requires human review and remains stacked on the open foundation PR #167.
 - OfficeCLI is unavailable in this environment (`OFFICECLI_NOT_FOUND`), so this Markdown evidence received repository/native checks but no OfficeCLI format validation.
 - CAP compile retains the existing unrelated attachment annotation warning for `NonUpdateableProperties`.
 - This work contains only the focused tests required to prove IDTS-94. The broader IDTS-96 regression task remains owned by NhanT.
