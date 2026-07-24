@@ -156,7 +156,7 @@ This document is a BA blueprint for the target conceptual model. It is not the c
 | bug | Association/Composition to Bugs | Yes | Parent bug. |
 | actor | Association to Users | Yes | User who performed the business action. |
 | actorRole | String | Yes | Actor role at action time. |
-| actionType | String | Yes | Business action such as Create, Assign, Resolve, Reject, or Close. |
+| actionType | Association to ActionTypes | Yes | Exact public workflow command code for named OData workflow actions; legacy category code for older history or generic non-command edits. |
 | summary | String | Yes | Readable event text for the UI, for example "Assigned bug to DatDT. Status changed from New to Assigned." |
 | reason | String | Optional/required by rule | Carries reject/request/reopen rationale when the workflow requires explanation. |
 | createdAt | Timestamp | Yes | Event timestamp. |
@@ -190,7 +190,7 @@ Vietnamese: `Notifications` trả lời sự kiện gì đã xảy ra trong IDTS
 | event | Association to HistoryEvents | Yes | Parent business event used to group several field-level changes into one readable event in the UI. |
 | actor | Association to Users | Yes | User who performed action. |
 | actorRole | String | Yes | Actor role at action time. |
-| actionType | String | Yes | Create, Edit, Assign, Reassign, StatusChange, RequestInfo, Reject, Resolve, Close, Reopen. |
+| actionType | Association to ActionTypes | Yes | Same exact command code as the parent HistoryEvent for new workflow actions; legacy categories remain valid for historical rows. |
 | fieldName | String | Optional | Technical field identifier such as `status`, `assignee`, or `nextProcessorRole`. |
 | fieldLabel | String | Optional | Human-readable field label stored for display/export. |
 | oldValue | String | Optional | Previous value when applicable. |
@@ -199,6 +199,10 @@ Vietnamese: `Notifications` trả lời sự kiện gì đã xảy ra trong IDTS
 | newValueDisplay | String | Optional | Display-ready new value for the same reason as above. |
 | reason | String | Optional/required by rule | Required for reject, reopen, request info, some reassignment. For reject, the reason must support follow-up action. |
 | timestamp | Timestamp | Yes | Action time. |
+
+### ActionTypes
+
+`ActionTypes.code` is the stable audit foreign key. The catalog contains 11 legacy categories plus 11 exact workflow-command codes: `ASSIGN_TO_DEVELOPER`, `MOVE_TO_PENDING_ASSIGNMENT`, `MARK_IN_REVIEW`, `REQUEST_MORE_INFORMATION`, `RESUBMIT_TO_DEVELOPER`, `REJECT_BUG`, `START_PROGRESS`, `RESOLVE_BUG`, `SEND_TO_RETEST`, `CLOSE_BUG`, and `REOPEN_BUG`. `name` and `descr` are user-facing; the UI must not substitute the raw code when a label exists. Existing PostgreSQL environments add the exact rows by idempotent UPSERT, without resetting business data.
 
 ## Notifications
 

@@ -343,42 +343,44 @@ async function sectionHistoryLifecycle (srv, entities, bugID) {
      Now verify history events for key transitions. */
 
   /* HIS-01 Assign event */
-  let event = await latestHistoryEvent(srv, bugID, 'ASSIGN', entities)
+  let event = await latestHistoryEvent(srv, bugID, 'ASSIGN_TO_DEVELOPER', entities)
   expectTruthy('HIS-01 Assign event exists', event, event?.summary || 'missing')
   expectContains('HIS-02 Assign grouped context has Status', event?.groupedChangeContext, 'Status:')
   rec('HIS-03 Assign changeCount >= 1', Number(event?.changeCount) >= 1, `changeCount=${event?.changeCount}`)
 
-  /* HIS-04 Status change events (markInReview / startProgress are STATUS_CHANGE) */
-  event = await latestHistoryEvent(srv, bugID, 'STATUS_CHANGE', entities)
-  expectTruthy('HIS-04 Status change event exists', event, event?.summary || 'missing')
-  expectContains('HIS-05 Status change grouped context has Status', event?.groupedChangeContext, 'Status:')
+  /* HIS-04 Exact Mark In Review and Start Progress events */
+  event = await latestHistoryEvent(srv, bugID, 'MARK_IN_REVIEW', entities)
+  expectTruthy('HIS-04 Mark In Review event exists', event, event?.summary || 'missing')
+  expectContains('HIS-05 Mark In Review grouped context has Status', event?.groupedChangeContext, 'Status:')
+  event = await latestHistoryEvent(srv, bugID, 'START_PROGRESS', entities)
+  expectTruthy('HIS-05b Start Progress event exists', event, event?.summary || 'missing')
 
   /* HIS-06 Request More Information event */
-  event = await latestHistoryEvent(srv, bugID, 'REQUEST_INFO', entities)
+  event = await latestHistoryEvent(srv, bugID, 'REQUEST_MORE_INFORMATION', entities)
   expectTruthy('HIS-06 Request Info event exists', event, event?.summary || 'missing')
   expectTruthy('HIS-07 Request Info reason is present', event?.reason, event?.reason || 'missing reason')
 
   /* HIS-08 Resolve event */
-  event = await latestHistoryEvent(srv, bugID, 'RESOLVE', entities)
+  event = await latestHistoryEvent(srv, bugID, 'RESOLVE_BUG', entities)
   expectTruthy('HIS-08 Resolve event exists', event, event?.summary || 'missing')
   expectContains('HIS-09 Resolve grouped context has Status', event?.groupedChangeContext, 'Status:')
 
   /* HIS-10 Retest event */
-  event = await latestHistoryEvent(srv, bugID, 'RETEST', entities)
+  event = await latestHistoryEvent(srv, bugID, 'SEND_TO_RETEST', entities)
   expectTruthy('HIS-10 Retest event exists', event, event?.summary || 'missing')
 
   /* HIS-11 Close event */
-  event = await latestHistoryEvent(srv, bugID, 'CLOSE', entities)
+  event = await latestHistoryEvent(srv, bugID, 'CLOSE_BUG', entities)
   expectTruthy('HIS-11 Close event exists', event, event?.summary || 'missing')
   expectContains('HIS-12 Close grouped context has Status', event?.groupedChangeContext, 'Status:')
 
   /* HIS-13 Reopen event */
-  event = await latestHistoryEvent(srv, bugID, 'REOPEN', entities)
+  event = await latestHistoryEvent(srv, bugID, 'REOPEN_BUG', entities)
   expectTruthy('HIS-13 Reopen event exists', event, event?.summary || 'missing')
   expectTruthy('HIS-14 Reopen reason is present', event?.reason, event?.reason || 'missing reason')
 
   /* HIS-15 Reject event */
-  event = await latestHistoryEvent(srv, bugID, 'REJECT', entities)
+  event = await latestHistoryEvent(srv, bugID, 'REJECT_BUG', entities)
   expectTruthy('HIS-15 Reject event exists', event, event?.summary || 'missing')
   expectTruthy('HIS-16 Reject reason is present', event?.reason, event?.reason || 'missing reason')
 }

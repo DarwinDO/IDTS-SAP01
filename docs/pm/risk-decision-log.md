@@ -58,6 +58,8 @@ Last updated: 2026-07-23
 | DEC-050 | 2026-07-23 | Treat the official SAP490 workbook structure as a mandatory output contract while keeping the canonical test catalog as the content source. | A normalized-table rewrite passed content checks but removed official sheets, merges, images, and template layout; Google Sheets also exposed a duplicated percent symbol that schema checks did not detect. | Fill official templates in place, protect sheet/merge/image/print contracts with an automated fidelity test, require cross-renderer visual review, and fix renderer-specific findings in source before same-ID Drive update. |
 | DEC-051 | 2026-07-23 | Require a minimum 12pt font for every populated mentor-facing cell in the current SAP490 test workbooks. | Google Sheets exposed unreadably small body text and narrow result fields that split `Passed` across lines even though earlier structural gates passed. | Enforce the rule at generator and validator source, retain official template structure, and require OfficeCLI plus LibreOffice and Google Sheets visual review before same-ID Drive synchronization. |
 
+| DEC-042 | 2026-07-23 | Give every named public Bug workflow OData action that writes History one dedicated ActionType, while retaining all legacy categories and historical rows. | Mentor review requires `HistoryEvents.actionType_code` to identify the initiating command without inferring it from status or child logs. | IDTS-89 maps 11 workflow commands one-to-one, copies the exact code to HistoryLogs, preserves legacy reads and generic-edit categories, and rolls out PostgreSQL code-list rows by dry-run-first idempotent UPSERT without `cds deploy` or data reset. |
+
 ## Risks
 
 | ID | Risk | Likelihood | Impact | Mitigation |

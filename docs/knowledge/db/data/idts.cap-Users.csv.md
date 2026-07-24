@@ -4,101 +4,90 @@
 
 ### What this file is for
 
-Seed dataset for `Users`. Read this file as local/demo data that CAP loads into the database. It affects dropdowns, value helps, sample bugs, workflow labels, and demo behavior.
+This CSV is the safe local/demo identity list for IDTS. CAP imports it into `idts.cap.Users` when a fresh database is deployed. A User represents a person and their application role; it is not yet a Developer assignment profile.
 
-### How to read this file
+IDTS-90 keeps the four original team accounts and adds ten synthetic Developer users under `example.local`. These rows improve assignment, workload and mentor demonstrations without storing real personal data or passwords.
 
-This file belongs to the data layer. It defines schema or seed data consumed through CAP services and Fiori value helps.
+### How the rows flow through IDTS
 
-Read it through three practical questions:
+1. `db/schema.cds` defines the `Users` entity and its `role` association.
+2. CAP matches this CSV name to `idts.cap.Users` and imports the columns.
+3. `DeveloperProfiles.user_ID` links a Developer profile to one of these User IDs.
+4. `srv/bug-service/read-models.js` joins User names with profiles and responsibilities.
+5. Fiori Smart Assign and PM monitoring show the resulting developer names.
 
-- What screen, API, data model, or developer workflow does this file support?
-- Which other layer consumes the output of this file?
-- If this file changes, which service/UI/data/test file must be checked next?
+The login system also reads Users, but this CSV deliberately has no password column. Password hashes are private runtime data and the narrow IDTS-90 UPSERT must preserve them.
 
-### Runtime / project flow
+### Column walkthrough
 
-- During local database deployment, CAP imports this CSV into `Users`.
-- Service projections and value helps expose the seeded rows to the UI.
-- Changing codes/IDs here can change dropdown choices, demo records, and workflow lookups.
+- `ID`: stable UUID used by associations. Never replace an existing ID casually.
+- `displayName`: human-readable name shown in Fiori.
+- `email`: login identity for configured accounts. IDTS-90 demo users use synthetic `example.local` addresses.
+- `role_code`: business role. All new rows use the existing `DEVELOPER` role; no new role type is invented.
+- `active`: inactive users must not be treated as normal working users.
 
-### Main concepts explained
+### Cross-folder links
 
-- This CSV loads `4` seed rows into `Users`.
-- Header columns: `ID, displayName, email, role_code, active`.
-- For code-list CSV files, `code` is often what backend logic compares; do not rename codes casually.
-- For relationship CSV files, foreign-key columns must point to valid IDs from related seed files.
-
-### Important source anchors
-
-These anchors are deliberately short. They are not the main explanation; they only point you back to the most useful source locations after you understand the flow above.
-
-- Line 1: `ID, displayName, email, role_code, active` — The header defines the columns CAP imports into the matching seed entity.
-- Line 2: `10000000-0000-0000-0000-000000000001, DonHV, donhv@example.local, PM, true` — The first data row is a concrete example loaded into the local development database.
-
-### Cross-folder dependency map
-
-This section answers: which file in another main folder is linked, where the link appears, and how the linked files affect each other.
-
-- **CSV filename/entity → `db/schema.cds`**: CAP loads this file into the `Users` entity. Impact: Column names and foreign keys must match the schema.
-- **Seeded values → `srv/service.cds`**: BugService exposes or uses `Users` directly or indirectly. Impact: Changing seed codes/names can change dropdowns, workflow matching, status labels, and demo data.
-- **Value-help data → `app/bug-management-ui/annotations/value-helps.cds`**: Fiori value helps often display these master-data rows. Impact: Missing/inactive seed rows can make dropdowns empty or confusing.
+- `db/schema.cds`, entity `Users`: defines the columns and role association.
+- `srv/auth.js` and authentication helpers: resolve a login identity to a User.
+- `srv/bug-service/read-models.js`: joins `Users.displayName` into `AssignableDevelopers` and workload rows.
+- `app/bug-management-ui/webapp/ext/actions/SmartAssignDeveloper.js`: displays the joined developer identity.
+- `scripts/db/upsert-developer-demo-data.js`: reads only the ten IDTS-90 IDs and performs an idempotent, password-preserving UPSERT.
 
 ### Safe editing checklist
 
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Keep IDs/codes stable unless related service logic, tests, and demo data are updated together.
-- Validate that referenced IDs exist in related seed files.
+- Use synthetic data only for additional demo users.
+- Keep UUIDs unique and preserve the original four team rows.
+- Do not add passwords, password hashes, tokens or real private email addresses.
+- Update DeveloperProfiles and DeveloperResponsibilities together for a new Developer.
+- Run `npm run qa:idts90:developer-demo-data`.
+- On Shared QA, use the narrow UPSERT script; do not run a seed-loading `cds deploy`.
 
 ## Vietnamese
 
 ### File này dùng để làm gì
 
-Seed dataset for `Users`. File này nằm ở lớp dữ liệu. Nó định nghĩa schema hoặc seed data mà service và Fiori dùng thông qua CAP/OData.
+CSV này là danh sách danh tính an toàn cho môi trường local/demo của IDTS. Khi deploy một database mới, CAP import file vào `idts.cap.Users`. Một User biểu diễn một người và role trong ứng dụng; User chưa phải là hồ sơ dùng để phân công Developer.
 
-### Cách đọc file này cho dễ hiểu
+IDTS-90 giữ nguyên bốn tài khoản team ban đầu và thêm mười Developer giả lập dùng domain `example.local`. Các dòng này giúp demo assignment, workload và mentor review phong phú hơn mà không lưu dữ liệu cá nhân thật hoặc password.
 
-- Đừng đọc file này như danh sách dòng code rời rạc.
-- Hãy đọc theo flow: người dùng/UI làm gì, CAP service nhận gì, backend xử lý gì, và dữ liệu nào bị ảnh hưởng.
-- Nếu phần English dài hơn, hãy xem đó là bản giải thích đầy đủ; phần Vietnamese này giúp nắm ý chính trước.
+### Dữ liệu đi qua IDTS như thế nào
 
-### Flow chính
+1. `db/schema.cds` định nghĩa entity `Users` và association tới role.
+2. CAP dựa vào tên CSV để import các cột vào `idts.cap.Users`.
+3. `DeveloperProfiles.user_ID` nối một hồ sơ Developer tới một User ID trong file này.
+4. `srv/bug-service/read-models.js` join tên User với profile và responsibility.
+5. Smart Assign và màn hình PM của Fiori hiển thị danh sách Developer sau khi join.
 
-- During local database deployment, CAP imports this CSV into `Users`.
-- Service projections and value helps expose the seeded rows to the UI.
-- Changing codes/IDs here can change dropdown choices, demo records, and workflow lookups.
+Hệ thống login cũng đọc Users, nhưng CSV này cố ý không có cột password. Password hash là dữ liệu private ở runtime, và UPSERT hẹp của IDTS-90 phải giữ nguyên password hash hiện có.
 
-### Các ý quan trọng cần hiểu
+### Giải thích từng cột
 
-- This CSV loads `4` seed rows into `Users`.
-- Header columns: `ID, displayName, email, role_code, active`.
-- For code-list CSV files, `code` is often what backend logic compares; do not rename codes casually.
-- For relationship CSV files, foreign-key columns must point to valid IDs from related seed files.
+- `ID`: UUID ổn định để các bảng khác tham chiếu. Không tự ý đổi ID đã tồn tại.
+- `displayName`: tên dễ đọc hiển thị trên Fiori.
+- `email`: danh tính login của account đã được cấu hình. User demo IDTS-90 dùng email giả `example.local`.
+- `role_code`: role nghiệp vụ. Tất cả dòng mới dùng role `DEVELOPER` đã có; không tạo role mới.
+- `active`: user inactive không được coi như user đang làm việc bình thường.
 
 ### Liên kết với file ở folder khác
 
-Phần này nói rõ file này liên kết với file nào, liên kết nằm ở đâu, và nếu sửa một bên thì bên kia bị ảnh hưởng thế nào.
+- `db/schema.cds`, entity `Users`: định nghĩa cột và association role.
+- `srv/auth.js` và auth helpers: tìm User tương ứng với danh tính login.
+- `srv/bug-service/read-models.js`: join `Users.displayName` vào `AssignableDevelopers` và workload.
+- `app/bug-management-ui/webapp/ext/actions/SmartAssignDeveloper.js`: hiển thị danh tính Developer đã join.
+- `scripts/db/upsert-developer-demo-data.js`: chỉ đọc mười ID của IDTS-90 và UPSERT idempotent mà không đụng password.
 
-- **CSV filename/entity → `db/schema.cds`**: CAP loads this file into the `Users` entity. Impact: Column names and foreign keys must match the schema.
-- **Seeded values → `srv/service.cds`**: BugService exposes or uses `Users` directly or indirectly. Impact: Changing seed codes/names can change dropdowns, workflow matching, status labels, and demo data.
-- **Value-help data → `app/bug-management-ui/annotations/value-helps.cds`**: Fiori value helps often display these master-data rows. Impact: Missing/inactive seed rows can make dropdowns empty or confusing.
+### Checklist sửa an toàn
 
-### Khi sửa file này cần chú ý
-
-- Update this knowledge note in the same task whenever the source file changes meaning, dependency, API shape, UI behavior, validation, or seed data.
-- Do not put secrets, AWS keys, passwords, private endpoints, or local-only credential values into the note.
-- After changing linked CAP/Fiori files, verify metadata or UI behavior instead of assuming the service/UI contract still matches.
-- Keep IDs/codes stable unless related service logic, tests, and demo data are updated together.
-- Validate that referenced IDs exist in related seed files.
+- Chỉ dùng dữ liệu giả cho demo user bổ sung.
+- UUID phải unique và phải giữ nguyên bốn user team ban đầu.
+- Không thêm password, password hash, token hoặc email cá nhân thật.
+- Khi thêm Developer phải cập nhật cả DeveloperProfiles và DeveloperResponsibilities.
+- Chạy `npm run qa:idts90:developer-demo-data`.
+- Trên Shared QA chỉ dùng UPSERT hẹp; không chạy `cds deploy` có nạp seed.
 
 ## Metadata
 
-- Source file: `db/data/idts.cap-Users.csv`
-- Knowledge mirror: `docs/knowledge/db/data/idts.cap-Users.csv.md`
-- Source layer: `db`
-- Source type: `.csv`
-- Source line count at documentation time: 5
-- Documentation style: learning-oriented explanation, not line listing only
-- Last reviewed: 2026-06-22
+- Source: `db/data/idts.cap-Users.csv`
+- Rows after IDTS-90: 14
+- Last reviewed: 2026-07-23

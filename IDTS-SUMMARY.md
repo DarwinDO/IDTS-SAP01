@@ -1,5 +1,11 @@
 ---
 
+## One-to-one workflow action audit
+
+The Bug workflow is command-traceable: `assignToDeveloper`, `moveToPendingAssignment`, `markInReview`, `requestMoreInformation`, `resubmitToDeveloper`, `rejectBug`, `startProgress`, `resolveBug`, `sendToRetest`, `closeBug`, and `reopenBug` each persist a distinct ActionType in `HistoryEvents` and `HistoryLogs`. This improves audit meaning only; it does not rename OData actions, change the status lifecycle, change roles, or rewrite legacy history.
+
+Vietnamese: 11 workflow command của Bug được trace 1–1 bằng ActionType riêng trong `HistoryEvents` và `HistoryLogs`. Thay đổi này chỉ làm rõ audit; không đổi endpoint OData, status lifecycle, role hoặc lịch sử cũ.
+
 # **1\. Scope hệ thống**
 
 Tên dự án:

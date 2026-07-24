@@ -4,100 +4,86 @@
 
 ### What this file is for
 
-Seed data for `DeveloperResponsibilities`. This table defines **which developers are responsible for which ComponentCategories** (and optionally scoped by SAP Module).
+This file answers: “For which component/category and optional SAP module is a Developer suitable?” One DeveloperProfile can have several rows. That is why the backend deduplicates candidates before Fiori displays them.
 
-This is the core data used to calculate the list of "Assignable Developers" when a tester wants to assign a bug.
+IDTS-90 adds 22 rows across ten synthetic profiles. The data includes `PRIMARY`, `BACKUP` and `EXPERT` examples and covers Fiori, CAP, database, assignment and integration categories.
 
-### IDTS flow and business meaning
+### Assignment flow
 
-- A developer can be marked as `PRIMARY` or `BACKUP` for a ComponentCategory.
-- When creating/assigning a bug, the system queries DeveloperResponsibilities filtered by the bug's `componentCategory_ID` (and sapModule_ID if present).
-- Only developers with matching active responsibilities appear in the Assign value help.
-- This implements the "Developer Responsibility" concept for fair and correct assignment.
+1. A bug receives an Application Component and Defect Category.
+2. Backend derives/validates one `ComponentCategory`.
+3. `readAssignableDevelopers` filters active responsibilities by that category and optional SAP module.
+4. Smart Assign presents suitable candidates and supporting explanation.
+5. When the user submits an assignee, `validateAssignee` checks the persisted responsibility again. The UI suggestion is not the security/integrity boundary.
 
-### Columns explained
+### Column walkthrough
 
-- `ID`: UUID.
-- `developerProfile_ID`: Link to DeveloperProfiles.
-- `componentCategory_ID`: The assignment key (from ComponentCategories).
-- `sapModule_ID`: Optional scope (null = responsible for all modules in that category).
-- `responsibilityLevel_code`: PRIMARY or BACKUP.
-- `active`: Whether this responsibility is currently valid.
+- `ID`: stable responsibility-row UUID.
+- `developerProfile_ID`: the technical assignee profile.
+- `componentCategory_ID`: assignment key combining application component and defect category.
+- `sapModule_ID`: optional module scope. Empty means the responsibility is not restricted to one module.
+- `responsibilityLevel_code`: `PRIMARY`, `BACKUP` or `EXPERT`; this helps explain suitability but does not auto-assign.
+- `active`: only active rows participate in normal matching.
 
-### Impact if data is wrong or missing
+### Cross-folder links
 
-- No responsibilities for a ComponentCategory → no one appears in the assignee value help; bugs stay in Pending Assignment.
-- Wrong links → unsuitable developers are suggested or correct ones are hidden.
-- Missing PRIMARY entries → demo assignment flows break.
-
-### Cross-folder dependency map
-
-- **db/schema.cds**: Entity `DeveloperResponsibilities` + associations to DeveloperProfiles and ComponentCategories.
-- **srv/service.cds**: Projection + `AssignableDevelopers` read model and `ValidDefectCategories`.
-- **srv/bug-service/read-models.js**: `readAssignableDevelopers` logic filters exactly on this data.
-- **srv/bug-service/bug-write.js**: Validation during assignment.
-- **app/bug-management-ui/annotations/ownership-assignment.cds** and **value-helps.cds**: Display of assignee and filtered value help.
-- **db/data/idts.cap-DeveloperProfiles.csv** and **ComponentCategories.csv**: Foreign keys must be valid.
-- **db/data/idts.cap-Bugs.csv**: Demo bugs have assignee linked to these responsibilities.
+- `db/schema.cds`: defines DeveloperResponsibilities and its associations.
+- `srv/bug-service/read-models.js`, `readAssignableDevelopers`: filters and deduplicates these rows.
+- `srv/bug-service/bug-write.js`, `validateAssignee`: rejects an unsuitable submitted assignee.
+- `srv/service.cds`, `AssignableDevelopers`: safe read-model contract exposed to Fiori.
+- `app/bug-management-ui/webapp/ext/actions/SmartAssignDeveloper.js`: displays capability and availability; it must not auto-select a candidate.
 
 ### Safe editing checklist
 
-- Keep foreign keys consistent with other seed files.
-- When changing responsibilities for demo, also check that the linked bugs and developers still make sense.
-- Changes directly affect the "Assign Developer" experience in Fiori.
-- After edit, test the assignee value help in create and edit flows.
+- Every foreign key must exist in Profiles, ComponentCategories and optional SAPModules.
+- Every new profile should have at least two meaningful rows.
+- Avoid duplicate responsibility tuples that add no meaning.
+- Do not treat responsibility level as permission to bypass backend checks.
+- Test filtered and unfiltered Smart Assign, invalid assignee rejection and workload reads.
 
 ## Vietnamese
 
 ### File này dùng để làm gì
 
-Dữ liệu seed cho `DeveloperResponsibilities`. Bảng này định nghĩa **developer nào chịu trách nhiệm cho ComponentCategory nào** (và có thể giới hạn theo SAP Module).
+File này trả lời câu hỏi: “Developer phù hợp với component/category nào và có bị giới hạn theo SAP module không?” Một DeveloperProfile có thể có nhiều dòng. Vì vậy backend phải deduplicate candidate trước khi Fiori hiển thị.
 
-Đây là dữ liệu cốt lõi để tính danh sách "Assignable Developers" khi tester muốn gán bug.
+IDTS-90 thêm 22 dòng cho mười profile giả lập. Dữ liệu có đủ ví dụ `PRIMARY`, `BACKUP`, `EXPERT` và bao phủ nhóm Fiori, CAP, database, assignment, integration.
 
-### Flow nghiệp vụ IDTS
+### Luồng assignment
 
-- Một developer có thể là `PRIMARY` hoặc `BACKUP` cho một ComponentCategory.
-- Khi tạo/gán bug, hệ thống query DeveloperResponsibilities theo `componentCategory_ID` của bug (và sapModule_ID nếu có).
-- Chỉ developer có responsibility phù hợp mới xuất hiện trong value help Assign.
-- Đây là hiện thực hóa khái niệm "Developer Responsibility" để phân công đúng và công bằng.
+1. Bug được chọn Application Component và Defect Category.
+2. Backend derive hoặc validate một `ComponentCategory`.
+3. `readAssignableDevelopers` lọc responsibility active theo category đó và SAP module nếu có.
+4. Smart Assign trình bày candidate phù hợp cùng lời giải thích.
+5. Khi user submit assignee, `validateAssignee` kiểm tra lại responsibility đã persist. Gợi ý UI không phải ranh giới bảo vệ dữ liệu.
 
-### Giải thích các cột
+### Giải thích từng cột
 
-- `ID`: UUID.
-- `developerProfile_ID`: Liên kết đến DeveloperProfiles.
-- `componentCategory_ID`: Khóa phân công (từ ComponentCategories).
-- `sapModule_ID`: Phạm vi tùy chọn (null = chịu trách nhiệm tất cả module trong category đó).
-- `responsibilityLevel_code`: PRIMARY hoặc BACKUP.
-- `active`: Responsibility này còn hiệu lực không.
+- `ID`: UUID ổn định của một dòng responsibility.
+- `developerProfile_ID`: profile kỹ thuật dùng làm assignee.
+- `componentCategory_ID`: khóa assignment kết hợp application component và defect category.
+- `sapModule_ID`: phạm vi module tùy chọn. Để trống nghĩa là responsibility không bị giới hạn vào một module.
+- `responsibilityLevel_code`: `PRIMARY`, `BACKUP` hoặc `EXPERT`; dùng để giải thích độ phù hợp, không tự động assign.
+- `active`: chỉ dòng active tham gia matching bình thường.
 
-### Ảnh hưởng nếu dữ liệu sai hoặc thiếu
+### Liên kết với file ở folder khác
 
-- Không có responsibility cho một ComponentCategory → không ai xuất hiện trong value help assignee; bug kẹt Pending Assignment.
-- Liên kết sai → gợi ý developer không phù hợp hoặc giấu developer đúng.
-- Thiếu entry PRIMARY → các flow demo assignment hỏng.
+- `db/schema.cds`: định nghĩa DeveloperResponsibilities và association.
+- `srv/bug-service/read-models.js`, `readAssignableDevelopers`: filter và deduplicate các dòng này.
+- `srv/bug-service/bug-write.js`, `validateAssignee`: từ chối assignee được submit nếu không phù hợp.
+- `srv/service.cds`, `AssignableDevelopers`: contract read model an toàn cho Fiori.
+- `app/bug-management-ui/webapp/ext/actions/SmartAssignDeveloper.js`: hiển thị capability và availability; không được tự chọn candidate.
 
-### Liên kết với file/folder khác
+### Checklist sửa an toàn
 
-- **db/schema.cds**: Entity `DeveloperResponsibilities` + association đến DeveloperProfiles và ComponentCategories.
-- **srv/service.cds**: Projection + read model `AssignableDevelopers` và `ValidDefectCategories`.
-- **srv/bug-service/read-models.js**: Logic `readAssignableDevelopers` lọc chính xác trên dữ liệu này.
-- **srv/bug-service/bug-write.js**: Kiểm tra khi gán.
-- **app/bug-management-ui/annotations/ownership-assignment.cds** và **value-helps.cds**: Hiển thị assignee và value help đã lọc.
-- **db/data/idts.cap-DeveloperProfiles.csv** và **ComponentCategories.csv**: Khóa ngoại phải hợp lệ.
-- **db/data/idts.cap-Bugs.csv**: Bug demo có assignee liên kết với các responsibility này.
-
-### Khi sửa file này cần chú ý
-
-- Giữ khóa ngoại nhất quán với các file seed khác.
-- Khi thay đổi responsibility cho demo, kiểm tra bug và developer liên kết vẫn hợp lý.
-- Thay đổi ảnh hưởng trực tiếp trải nghiệm "Assign Developer" trên Fiori.
-- Sau sửa, test value help assignee ở luồng create và edit.
+- Mọi foreign key phải tồn tại trong Profiles, ComponentCategories và SAPModules nếu có.
+- Mỗi profile mới nên có ít nhất hai responsibility có ý nghĩa.
+- Tránh tuple responsibility trùng lặp nhưng không thêm ý nghĩa.
+- Không xem responsibility level là quyền bỏ qua backend validation.
+- Test Smart Assign có/không filter, từ chối assignee sai và workload read.
 
 ## Metadata
 
-- Source file: `db/data/idts.cap-DeveloperResponsibilities.csv`
-- Knowledge mirror: `docs/knowledge/db/data/idts.cap-DeveloperResponsibilities.csv.md`
-- Source layer: `db/data`
-- Documentation style: learning-oriented + IDTS domain impact
-- Last reviewed: 2026-06-22
+- Source: `db/data/idts.cap-DeveloperResponsibilities.csv`
+- Rows after IDTS-90: 30
+- Last reviewed: 2026-07-23

@@ -130,20 +130,20 @@ module.exports = class BugService extends cds.ApplicationService {
     this.on('addComment', req => addComment(req, entities))
     this.on('moveToPendingAssignment', req => transitionBug(req, entities, {
       status: STATUS.PENDING_ASSIGNMENT,
-      actionType: ACTION.REASSIGN,
+      actionType: ACTION.MOVE_TO_PENDING_ASSIGNMENT,
       reason: req.data.reason,
       clearAssignee: true,
       requireReason: false
     }))
     this.on('markInReview', req => transitionBug(req, entities, {
       status: STATUS.IN_REVIEW,
-      actionType: ACTION.STATUS_CHANGE,
+      actionType: ACTION.MARK_IN_REVIEW,
       reason: req.data.note,
       requireAssignee: true
     }))
     this.on('requestMoreInformation', req => transitionBug(req, entities, {
       status: STATUS.NEED_MORE_INFORMATION,
-      actionType: ACTION.REQUEST_INFO,
+      actionType: ACTION.REQUEST_MORE_INFORMATION,
       reason: req.data.reason,
       requireAssignee: true,
       requireReason: true
@@ -151,37 +151,37 @@ module.exports = class BugService extends cds.ApplicationService {
     this.on('resubmitToDeveloper', req => resubmitToDeveloper(req, entities))
     this.on('rejectBug', req => transitionBug(req, entities, {
       status: STATUS.REJECTED,
-      actionType: ACTION.REJECT,
+      actionType: ACTION.REJECT_BUG,
       reason: req.data.reason,
       requireAssignee: true,
       requireReason: true
     }))
     this.on('startProgress', req => transitionBug(req, entities, {
       status: STATUS.IN_PROGRESS,
-      actionType: ACTION.STATUS_CHANGE,
+      actionType: ACTION.START_PROGRESS,
       reason: req.data.note,
       requireAssignee: true
     }))
     this.on('resolveBug', req => transitionBug(req, entities, {
       status: STATUS.RESOLVED,
-      actionType: ACTION.RESOLVE,
+      actionType: ACTION.RESOLVE_BUG,
       reason: req.data.note,
       requireAssignee: true,
       requireReason: true
     }))
     this.on('sendToRetest', req => transitionBug(req, entities, {
       status: STATUS.RETEST_REQUIRED,
-      actionType: ACTION.RETEST,
+      actionType: ACTION.SEND_TO_RETEST,
       reason: req.data.note
     }))
     this.on('closeBug', req => transitionBug(req, entities, {
       status: STATUS.CLOSED,
-      actionType: ACTION.CLOSE,
+      actionType: ACTION.CLOSE_BUG,
       reason: req.data.note
     }))
     this.on('reopenBug', req => transitionBug(req, entities, {
       status: STATUS.REOPENED,
-      actionType: ACTION.REOPEN,
+      actionType: ACTION.REOPEN_BUG,
       reason: req.data.reason,
       requireReason: true
     }))

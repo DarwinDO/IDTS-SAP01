@@ -39,7 +39,7 @@ async function assignToDeveloper (req, entities) {
 
   return transitionBug(req, entities, {
     status: STATUS.ASSIGNED,
-    actionType: ACTION.ASSIGN,
+    actionType: ACTION.ASSIGN_TO_DEVELOPER,
     reason: req.data.note,
     assigneeID,
     clearRejectionReason: true
@@ -125,7 +125,7 @@ async function resubmitToDeveloper (req, entities) {
   await writeHistoryEvent(req, entities, {
     bugID,
     actorID: actorUser?.ID || oldBug.reporter_ID,
-    actionType: ACTION.STATUS_CHANGE,
+    actionType: ACTION.RESUBMIT_TO_DEVELOPER,
     reason: note,
     summary: 'Resubmitted bug to the assigned developer after additional information was provided.',
     changes: historyChanges

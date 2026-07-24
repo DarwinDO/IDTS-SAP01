@@ -10,6 +10,7 @@ Vietnamese: Chi dung board nay de theo doi trang thai cap cao. Chi tiet cong vie
 
 | ID | Task | Output |
 | --- | --- | --- |
+| IDTS-90 | Expand demo Developer accounts and responsibility coverage | PR #165 merged; Shared QA now has 12 Developers with varied availability/workload and 30 responsibility rows; narrow UPSERT and authenticated read-model verification passed. |
 | PM-001 | Create PM delivery pack | `docs/pm/` structure, status files, work packages, Sprint 1 plan. |
 | BA-001 | Create BA documentation pack | `docs/ba/` baseline. |
 | BA-002 | Create BRD deliverables | `docs/ba/brd/brd.en.md`, `docs/ba/brd/brd.vi.md`, `docs/ba/brd/brd.en.docx`, `docs/ba/brd/brd.vi.docx`. |
@@ -148,6 +149,7 @@ Vietnamese:
 | IDTS-82 | Establish code ownership and knowledge-gate governance | DonHV | In progress. Effective 2026-07-13: ownership map, Debug Labs, daily PR/Jira gate, and source-comment retrofit workstream are being added. IDTS-83 to IDTS-85 block IDTS-86. |
 | IDTS-88 | Sprint 5 mentor readiness, ownership governance, and Shared QA closure | DonHV / team | Epic created on Jira with due date 2026-07-25. All 11 Sprint 5 issues are attached as children. Current Jira status: 5 In Progress, 6 To Do, 0 Done, 5 overdue; overall At Risk. |
 | DOC-20260725 | SAP490 mentor-readiness remediation | DonHV | Documentation remediation is CONDITIONALLY READY. The 12 current test workbooks fill the official SAP490 templates and pass all stated local/Drive/Google Sheets gates. Blueprint v0.3 EN/VI local candidates now fill the exact tracked Blueprint template and pass schema, runtime-truth content, fidelity, parity, and 37/37-page visual gates; their Drive update is intentionally pending DonHV review. 12 executed cases passed, 9 remain Not Run, 6 UAT cases remain Prepared, 6/6 exact npm suites passed with 160 checks, and 12 real defects are traceable. Governance closeout stays In Progress in the dedicated learning thread; no Knowledge Gate result, UAT/sign-off, Final Report completion, Jira learning transition, or runtime change is claimed. |
+| IDTS-89 | Trace each Bug workflow OData action with a dedicated audit ActionType | DonHV / NhanT support | Done. PR #163 and deploy `dep-d9gtkhrrjlhs73d4mhqg` run exact merge SHA `97792e8`; health, database preservation, 11/11 exact codes, 11/11 legacy codes, error-log checks, and authenticated reversible exact-action smoke all pass. |
 
 Vietnamese:
 
@@ -171,6 +173,7 @@ Vietnamese:
 | IDTS-81 | Sua fallback deep link email Shared QA | DonHV | Dang lam. Mail that trong Inbox phat hien Fiori route da retired. Fix map root/current/legacy `baseUrl` sang app entry page hien tai; cho PR, Render deploy va click-test mail moi. |
 | IDTS-82 | Thiet lap code ownership va knowledge-gate governance | DonHV | Dang lam. Hieu luc 2026-07-13: dang them ownership map, Debug Lab, gate PR/Jira hang ngay va workstream retrofit source comment. IDTS-83 den IDTS-85 block IDTS-86. |
 | DOC-20260725 | Remediation SAP490 cho mentor review | DonHV | Phần tài liệu đạt CONDITIONALLY READY. 12 workbook test hiện hành đã pass đầy đủ các gate local/Drive/Google Sheets đã công bố. Blueprint v0.3 EN/VI local hiện điền từ exact template Blueprint được track và pass schema, content bám runtime, fidelity, parity cùng visual 37/37 trang; chưa update Drive để chờ DonHV review. 12 case đã chạy đều PASS, 9 case còn Not Run, 6 UAT case giữ Prepared, 6/6 npm suite PASS với 160 check và 12 defect thật được truy vết. Governance/Knowledge Gate vẫn do task học tập xử lý; không claim UAT/sign-off, Final Report, Jira learning transition hoặc runtime change. |
+| IDTS-89 | Trace 1-1 OData workflow action bang audit ActionType rieng | DonHV / NhanT ho tro | Done. PR #163 va deploy `dep-d9gtkhrrjlhs73d4mhqg` chay dung merge SHA `97792e8`; health, bao toan database, 11/11 exact code, 11/11 legacy code, error-log va authenticated reversible exact-action smoke deu pass. |
 
 
 ## Blocked

@@ -17,7 +17,7 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 }
 
 const cds = require('@sap/cds')
-const { INSERT, SELECT, UPDATE } = cds.ql
+const { DELETE, INSERT, SELECT, UPDATE } = cds.ql
 
 const RESULTS = []
 let PASS = 0
@@ -208,6 +208,19 @@ async function main () {
 }
 
 async function seedWorkloadScenario (db) {
+  // Keep this focused legacy fixture deterministic after IDTS-90 expands the normal demo seed.
+  // Remove only the synthetic IDTS-90 rows from the isolated in-memory test database.
+  const idts90ResponsibilityIDs = Array.from({ length: 22 }, (_, index) =>
+    `70000000-0000-0000-0000-${String(index + 9).padStart(12, '0')}`)
+  const idts90ProfileIDs = Array.from({ length: 10 }, (_, index) =>
+    `20000000-0000-0000-0000-${String(index + 3).padStart(12, '0')}`)
+  const idts90UserIDs = Array.from({ length: 10 }, (_, index) =>
+    `10000000-0000-0000-0000-${String(index + 5).padStart(12, '0')}`)
+
+  await db.run(DELETE.from('idts.cap.DeveloperResponsibilities').where({ ID: { in: idts90ResponsibilityIDs } }))
+  await db.run(DELETE.from('idts.cap.DeveloperProfiles').where({ ID: { in: idts90ProfileIDs } }))
+  await db.run(DELETE.from('idts.cap.Users').where({ ID: { in: idts90UserIDs } }))
+
   const dates = {
     overdueMinus4: dateOffset(-4),
     overdueMinus3: dateOffset(-3),
