@@ -4,289 +4,2900 @@
   "generatedFor": "SAP490 mentor test-documentation remediation",
   "asOf": "2026-07-23T10:59:20+07:00",
   "knowledgeGate": "IN PROGRESS — handled in dedicated learning thread",
-  "statusValues": ["PASSED", "FAILED", "BLOCKED", "NOT_RUN", "PREPARED", "N/A"],
+  "statusValues": [
+    "PASSED",
+    "FAILED",
+    "BLOCKED",
+    "NOT_RUN",
+    "PREPARED",
+    "N/A"
+  ],
   "requirements": [
-    {"id":"SRS-FR-BUG-001","flow":"Create bug","priority":"Must"},
-    {"id":"SRS-FR-BUG-002","flow":"Required-field validation","priority":"Must"},
-    {"id":"SRS-FR-BUG-003","flow":"Duplicate checking support","priority":"Must"},
-    {"id":"SRS-FR-CLASS-001","flow":"Classification concepts","priority":"Must"},
-    {"id":"SRS-FR-CLASS-003","flow":"Required classification","priority":"Must"},
-    {"id":"SRS-FR-CLASS-004","flow":"Component Category validation","priority":"Must"},
-    {"id":"SRS-FR-ASSIGN-001","flow":"Responsibility-aware assignment","priority":"Must"},
-    {"id":"SRS-FR-ASSIGN-003","flow":"Pending Assignment","priority":"Must"},
-    {"id":"SRS-FR-ASSIGN-004","flow":"Reassignment history","priority":"Must"},
-    {"id":"SRS-FR-STATUS-001","flow":"Developer review","priority":"Must"},
-    {"id":"SRS-FR-STATUS-002","flow":"Request More Information","priority":"Must"},
-    {"id":"SRS-FR-STATUS-003","flow":"Controlled rejection","priority":"Must"},
-    {"id":"SRS-FR-STATUS-004","flow":"Rejected follow-up","priority":"Must"},
-    {"id":"SRS-FR-STATUS-005","flow":"In Progress and Resolved","priority":"Must"},
-    {"id":"SRS-FR-STATUS-006","flow":"Retest Required","priority":"Must"},
-    {"id":"SRS-FR-STATUS-007","flow":"Close and reopen","priority":"Must"},
-    {"id":"SRS-FR-STATUS-008","flow":"Backend transition validation","priority":"Must"},
-    {"id":"SRS-FR-STATUS-009","flow":"Current action owner","priority":"Must"},
-    {"id":"SRS-FR-COMMENT-001","flow":"Comments","priority":"Must"},
-    {"id":"SRS-FR-COMMENT-002","flow":"Comment does not change status","priority":"Must"},
-    {"id":"SRS-FR-AUDIT-001","flow":"History and audit","priority":"Must"},
-    {"id":"SRS-FR-NOTIF-001","flow":"In-app notifications","priority":"Must"},
-    {"id":"SRS-FR-NOTIF-002","flow":"Email outbox","priority":"Must"},
-    {"id":"SRS-FR-DELIVERY-001","flow":"Asynchronous delivery isolation","priority":"Must"},
-    {"id":"SRS-FR-AUTH-001","flow":"Login and session creation","priority":"Must"},
-    {"id":"SRS-FR-AUTH-002","flow":"Bearer authorization","priority":"Must"},
-    {"id":"SRS-FR-PM-001","flow":"PM filters","priority":"Must"},
-    {"id":"SRS-FR-PM-002","flow":"Developer workload","priority":"Must"},
-    {"id":"SRS-FR-PM-003","flow":"PM action queues","priority":"Must"},
-    {"id":"SRS-FR-AI-002","flow":"AI cannot mutate bug","priority":"Must"},
-    {"id":"SRS-FR-AI-003","flow":"AI safe data boundary","priority":"Must"},
-    {"id":"SRS-DATA-007","flow":"Attachment persistence","priority":"Must"}
+    {
+      "id": "SRS-FR-BUG-001",
+      "flow": "Create bug",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-BUG-002",
+      "flow": "Required-field validation",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-BUG-003",
+      "flow": "Duplicate checking support",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-CLASS-001",
+      "flow": "Classification concepts",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-CLASS-003",
+      "flow": "Required classification",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-CLASS-004",
+      "flow": "Component Category validation",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-ASSIGN-001",
+      "flow": "Responsibility-aware assignment",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-ASSIGN-003",
+      "flow": "Pending Assignment",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-ASSIGN-004",
+      "flow": "Reassignment history",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-STATUS-001",
+      "flow": "Developer review",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-STATUS-002",
+      "flow": "Request More Information",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-STATUS-003",
+      "flow": "Controlled rejection",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-STATUS-004",
+      "flow": "Rejected follow-up",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-STATUS-005",
+      "flow": "In Progress and Resolved",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-STATUS-006",
+      "flow": "Retest Required",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-STATUS-007",
+      "flow": "Close and reopen",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-STATUS-008",
+      "flow": "Backend transition validation",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-STATUS-009",
+      "flow": "Current action owner",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-COMMENT-001",
+      "flow": "Comments",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-COMMENT-002",
+      "flow": "Comment does not change status",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-AUDIT-001",
+      "flow": "History and audit",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-NOTIF-001",
+      "flow": "In-app notifications",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-NOTIF-002",
+      "flow": "Email outbox",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-DELIVERY-001",
+      "flow": "Asynchronous delivery isolation",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-AUTH-001",
+      "flow": "Login and session creation",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-AUTH-002",
+      "flow": "Bearer authorization",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-PM-001",
+      "flow": "PM filters",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-PM-002",
+      "flow": "Developer workload",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-PM-003",
+      "flow": "PM action queues",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-AI-002",
+      "flow": "AI cannot mutate bug",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-FR-AI-003",
+      "flow": "AI safe data boundary",
+      "priority": "Must"
+    },
+    {
+      "id": "SRS-DATA-007",
+      "flow": "Attachment persistence",
+      "priority": "Must"
+    }
   ],
   "executionRuns": [
     {
-      "runId":"REG-AUTH-20260723","caseId":"REG-AUTH-001","testType":"PROGRAMMATIC_REGRESSION",
-      "command":"npm run qa:auth:programmatic","status":"PASSED","exitCode":0,"passed":28,"failed":0,"skipped":0,
-      "environment":"Local Node.js; CAP; in-memory SQLite","executor":"DonHV","executionDate":"2026-07-23T10:58:30+07:00",
-      "actualResult":{"en":"28 checks passed: login, safe rejection, hashed session, bearer mapping, me, logout, revocation and sanitized internal failures.","vi":"28 kiểm tra đạt: login, từ chối an toàn, session đã băm, bearer mapping, me, logout, revoke và lỗi nội bộ đã sanitize."},
-      "limitations":{"en":"Local seeded identities only; no production identity provider claim. Raw transient token output is excluded from mentor artifacts.","vi":"Chỉ dùng identity seed local; không tuyên bố provider identity production. Raw token tạm thời không được đưa vào artifact mentor."},
-      "evidenceLinks":["scripts/qa/test-auth-foundation-programmatic.js"]
+      "runId": "REG-AUTH-20260723",
+      "caseId": "REG-AUTH-001",
+      "testType": "PROGRAMMATIC_REGRESSION",
+      "command": "npm run qa:auth:programmatic",
+      "status": "PASSED",
+      "exitCode": 0,
+      "passed": 28,
+      "failed": 0,
+      "skipped": 0,
+      "environment": "Local Node.js; CAP; in-memory SQLite",
+      "executor": "DonHV",
+      "executionDate": "2026-07-23T10:58:30+07:00",
+      "actualResult": {
+        "en": "28 checks passed: login, safe rejection, hashed session, bearer mapping, me, logout, revocation and sanitized internal failures.",
+        "vi": "28 kiểm tra đạt: login, từ chối an toàn, session đã băm, bearer mapping, me, logout, revoke và lỗi nội bộ đã sanitize."
+      },
+      "limitations": {
+        "en": "Local seeded identities only; no production identity provider claim. Raw transient token output is excluded from mentor artifacts.",
+        "vi": "Chỉ dùng identity seed local; không tuyên bố provider identity production. Raw token tạm thời không được đưa vào artifact mentor."
+      },
+      "evidenceLinks": [
+        "scripts/qa/test-auth-foundation-programmatic.js"
+      ]
     },
     {
-      "runId":"REG-EMAIL-20260723","caseId":"REG-EMAIL-001","testType":"PROGRAMMATIC_REGRESSION",
-      "command":"npm run qa:email-outbox:programmatic","status":"PASSED","exitCode":0,"passed":58,"failed":0,"skipped":0,
-      "environment":"Local Node.js; CAP; in-memory SQLite; fake mail transport","executor":"DonHV","executionDate":"2026-07-23T10:58:52+07:00",
-      "actualResult":{"en":"58 assertion calls passed for configuration, safe templates/deep links, PENDING/SENT/FAILED/SKIPPED, retry, sanitized failure, read-only OData, uniqueness and rollback.","vi":"58 assertion đạt cho cấu hình, template/deep link an toàn, PENDING/SENT/FAILED/SKIPPED, retry, lỗi đã sanitize, OData read-only, uniqueness và rollback."},
-      "limitations":{"en":"No live SMTP/Brevo delivery was attempted; provider success used a controlled fake transport. Local disabled delivery remains SKIPPED, not live-provider PASS.","vi":"Không thử gửi SMTP/Brevo live; provider success dùng fake transport có kiểm soát. Delivery local bị tắt vẫn là SKIPPED, không phải PASS provider live."},
-      "evidenceLinks":["scripts/qa/test-email-outbox-programmatic.js"]
+      "runId": "REG-EMAIL-20260723",
+      "caseId": "REG-EMAIL-001",
+      "testType": "PROGRAMMATIC_REGRESSION",
+      "command": "npm run qa:email-outbox:programmatic",
+      "status": "PASSED",
+      "exitCode": 0,
+      "passed": 58,
+      "failed": 0,
+      "skipped": 0,
+      "environment": "Local Node.js; CAP; in-memory SQLite; fake mail transport",
+      "executor": "DonHV",
+      "executionDate": "2026-07-23T10:58:52+07:00",
+      "actualResult": {
+        "en": "58 assertion calls passed for configuration, safe templates/deep links, PENDING/SENT/FAILED/SKIPPED, retry, sanitized failure, read-only OData, uniqueness and rollback.",
+        "vi": "58 assertion đạt cho cấu hình, template/deep link an toàn, PENDING/SENT/FAILED/SKIPPED, retry, lỗi đã sanitize, OData read-only, uniqueness và rollback."
+      },
+      "limitations": {
+        "en": "No live SMTP/Brevo delivery was attempted; provider success used a controlled fake transport. Local disabled delivery remains SKIPPED, not live-provider PASS.",
+        "vi": "Không thử gửi SMTP/Brevo live; provider success dùng fake transport có kiểm soát. Delivery local bị tắt vẫn là SKIPPED, không phải PASS provider live."
+      },
+      "evidenceLinks": [
+        "scripts/qa/test-email-outbox-programmatic.js"
+      ]
     },
     {
-      "runId":"REG-PM-20260723","caseId":"REG-PM-001","testType":"PROGRAMMATIC_REGRESSION",
-      "command":"npm run qa:pm-monitoring:programmatic","status":"PASSED","exitCode":0,"passed":20,"failed":0,"skipped":0,
-      "environment":"Local Node.js; CAP; in-memory SQLite","executor":"DonHV","executionDate":"2026-07-23T10:59:01+07:00",
-      "actualResult":{"en":"20 checks passed for overdue, pending assignment, rejected follow-up, retest queue filters and readable current action owner.","vi":"20 kiểm tra đạt cho overdue, pending assignment, rejected follow-up, retest queue filter và current action owner dễ đọc."},
-      "limitations":{"en":"Backend calculation/filter evidence only; no fresh browser dashboard review in this run.","vi":"Chỉ là bằng chứng tính toán/filter backend; chưa review dashboard bằng browser trong lượt này."},
-      "evidenceLinks":["scripts/qa/test-pm-monitoring-programmatic.js"]
+      "runId": "REG-PM-20260723",
+      "caseId": "REG-PM-001",
+      "testType": "PROGRAMMATIC_REGRESSION",
+      "command": "npm run qa:pm-monitoring:programmatic",
+      "status": "PASSED",
+      "exitCode": 0,
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0,
+      "environment": "Local Node.js; CAP; in-memory SQLite",
+      "executor": "DonHV",
+      "executionDate": "2026-07-23T10:59:01+07:00",
+      "actualResult": {
+        "en": "20 checks passed for overdue, pending assignment, rejected follow-up, retest queue filters and readable current action owner.",
+        "vi": "20 kiểm tra đạt cho overdue, pending assignment, rejected follow-up, retest queue filter và current action owner dễ đọc."
+      },
+      "limitations": {
+        "en": "Backend calculation/filter evidence only; no fresh browser dashboard review in this run.",
+        "vi": "Chỉ là bằng chứng tính toán/filter backend; chưa review dashboard bằng browser trong lượt này."
+      },
+      "evidenceLinks": [
+        "scripts/qa/test-pm-monitoring-programmatic.js"
+      ]
     },
     {
-      "runId":"REG-CATALOG-20260723","caseId":"REG-CATALOG-001","testType":"PROGRAMMATIC_REGRESSION",
-      "command":"npm run qa:idts41:programmatic","status":"PASSED","exitCode":0,"passed":18,"failed":0,"skipped":0,
-      "environment":"Local Node.js; CAP; in-memory SQLite","executor":"DonHV","executionDate":"2026-07-23T10:59:07+07:00",
-      "actualResult":{"en":"18 checks passed for valid create, invalid/blank/inactive catalogs, persistence after rejection, draft validation and create authorization.","vi":"18 kiểm tra đạt cho create hợp lệ, catalog sai/rỗng/inactive, persistence sau khi bị từ chối, draft validation và quyền create."},
-      "limitations":{"en":"Programmatic service evidence; no fresh Fiori form rendering review.","vi":"Bằng chứng service programmatic; chưa review render Fiori form mới trong lượt này."},
-      "evidenceLinks":["scripts/qa/test-idts41-code-list-validation.js"]
+      "runId": "REG-CATALOG-20260723",
+      "caseId": "REG-CATALOG-001",
+      "testType": "PROGRAMMATIC_REGRESSION",
+      "command": "npm run qa:idts41:programmatic",
+      "status": "PASSED",
+      "exitCode": 0,
+      "passed": 18,
+      "failed": 0,
+      "skipped": 0,
+      "environment": "Local Node.js; CAP; in-memory SQLite",
+      "executor": "DonHV",
+      "executionDate": "2026-07-23T10:59:07+07:00",
+      "actualResult": {
+        "en": "18 checks passed for valid create, invalid/blank/inactive catalogs, persistence after rejection, draft validation and create authorization.",
+        "vi": "18 kiểm tra đạt cho create hợp lệ, catalog sai/rỗng/inactive, persistence sau khi bị từ chối, draft validation và quyền create."
+      },
+      "limitations": {
+        "en": "Programmatic service evidence; no fresh Fiori form rendering review.",
+        "vi": "Bằng chứng service programmatic; chưa review render Fiori form mới trong lượt này."
+      },
+      "evidenceLinks": [
+        "scripts/qa/test-idts41-code-list-validation.js"
+      ]
     },
     {
-      "runId":"REG-COMMENT-20260723","caseId":"REG-COMMENT-001","testType":"PROGRAMMATIC_REGRESSION",
-      "command":"npm run qa:comments-attachments:programmatic","status":"PASSED","exitCode":0,"passed":2,"failed":0,"skipped":0,
-      "environment":"Local Node.js; CAP; file-backed SQLite","executor":"DonHV","executionDate":"2026-07-23T10:59:13+07:00",
-      "actualResult":{"en":"Comment creation passed and the same row remained after reconnecting to the SQLite file.","vi":"Tạo comment đạt và cùng record vẫn tồn tại sau khi kết nối lại file SQLite."},
-      "limitations":{"en":"The command did not execute attachment upload. Attachment draft HTTP persistence/history remains NOT_RUN in this remediation.","vi":"Command không chạy upload attachment. Persistence/history attachment qua draft HTTP vẫn NOT_RUN trong remediation này."},
-      "evidenceLinks":["scripts/qa/test-comments-attachments-programmatic.js"]
+      "runId": "REG-COMMENT-20260723",
+      "caseId": "REG-COMMENT-001",
+      "testType": "PROGRAMMATIC_REGRESSION",
+      "command": "npm run qa:comments-attachments:programmatic",
+      "status": "PASSED",
+      "exitCode": 0,
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "environment": "Local Node.js; CAP; file-backed SQLite",
+      "executor": "DonHV",
+      "executionDate": "2026-07-23T10:59:13+07:00",
+      "actualResult": {
+        "en": "Comment creation passed and the same row remained after reconnecting to the SQLite file.",
+        "vi": "Tạo comment đạt và cùng record vẫn tồn tại sau khi kết nối lại file SQLite."
+      },
+      "limitations": {
+        "en": "The command did not execute attachment upload. Attachment draft HTTP persistence/history remains NOT_RUN in this remediation.",
+        "vi": "Command không chạy upload attachment. Persistence/history attachment qua draft HTTP vẫn NOT_RUN trong remediation này."
+      },
+      "evidenceLinks": [
+        "scripts/qa/test-comments-attachments-programmatic.js"
+      ]
     },
     {
-      "runId":"REG-AI-20260723","caseId":"REG-AI-001","testType":"PROGRAMMATIC_REGRESSION",
-      "command":"npm run qa:idts64:programmatic","status":"PASSED","exitCode":0,"passed":34,"failed":0,"skipped":0,
-      "environment":"Local Node.js; mock/fake provider seam; no live key","executor":"DonHV","executionDate":"2026-07-23T10:59:19+07:00",
-      "actualResult":{"en":"34 checks passed for disabled-by-default behavior, mock chat/structured/embedding, safe error/timeout/config handling, OpenAI request shaping and secret redaction.","vi":"34 kiểm tra đạt cho mặc định disabled, mock chat/structured/embedding, xử lý error/timeout/config an toàn, OpenAI request shaping và redaction secret."},
-      "limitations":{"en":"No live OpenAI provider call and no full Fiori human-review flow were executed.","vi":"Không gọi OpenAI live và chưa chạy đầy đủ flow human-review trên Fiori."},
-      "evidenceLinks":["scripts/qa/test-idts64-ai-provider.js"]
+      "runId": "REG-AI-20260723",
+      "caseId": "REG-AI-001",
+      "testType": "PROGRAMMATIC_REGRESSION",
+      "command": "npm run qa:idts64:programmatic",
+      "status": "PASSED",
+      "exitCode": 0,
+      "passed": 34,
+      "failed": 0,
+      "skipped": 0,
+      "environment": "Local Node.js; mock/fake provider seam; no live key",
+      "executor": "DonHV",
+      "executionDate": "2026-07-23T10:59:19+07:00",
+      "actualResult": {
+        "en": "34 checks passed for disabled-by-default behavior, mock chat/structured/embedding, safe error/timeout/config handling, OpenAI request shaping and secret redaction.",
+        "vi": "34 kiểm tra đạt cho mặc định disabled, mock chat/structured/embedding, xử lý error/timeout/config an toàn, OpenAI request shaping và redaction secret."
+      },
+      "limitations": {
+        "en": "No live OpenAI provider call and no full Fiori human-review flow were executed.",
+        "vi": "Không gọi OpenAI live và chưa chạy đầy đủ flow human-review trên Fiori."
+      },
+      "evidenceLinks": [
+        "scripts/qa/test-idts64-ai-provider.js"
+      ]
     }
   ],
   "cases": [
     {
-      "caseId":"UT-AI-001","testType":"UNIT","requirementIds":["SRS-FR-AI-003"],"classification":"NEGATIVE","priority":"HIGH",
-      "title":{"en":"AI configuration is disabled by default","vi":"Cấu hình AI mặc định bị tắt"},
-      "objective":{"en":"Verify the provider wrapper returns a safe no-op result without invoking a provider.","vi":"Xác minh provider wrapper trả kết quả no-op an toàn mà không gọi provider."},
-      "role":"N/A — module test","preconditions":{"en":"Private AI configuration is absent.","vi":"Không có cấu hình AI riêng tư."},
-      "testData":{"en":"Default configuration object.","vi":"Object cấu hình mặc định."},
-      "steps":{"en":["Load AI configuration.","Call chat through the wrapper.","Inspect success/status and sanitized result."],"vi":["Load cấu hình AI.","Gọi chat qua wrapper.","Kiểm tra success/status và kết quả đã sanitize."]},
-      "expectedResult":{"en":"enabled=false; result is AI_DISABLED; no exception or unsafe diagnostic.","vi":"enabled=false; kết quả là AI_DISABLED; không exception hoặc diagnostic không an toàn."},
-      "actualResult":{"en":"Passed in REG-AI-20260723.","vi":"Đạt trong REG-AI-20260723."},"status":"PASSED",
-      "environment":"Local Node.js module test","executor":"DonHV","executionDate":"2026-07-23T10:59:19+07:00","automationCommand":"npm run qa:idts64:programmatic",
-      "evidenceLinks":["scripts/qa/test-idts64-ai-provider.js"],"defectIds":[],"limitations":{"en":"No live provider.","vi":"Không dùng provider live."},"postcondition":{"en":"No business data changed.","vi":"Không đổi business data."}
+      "caseId": "UT-AI-001",
+      "testType": "UNIT",
+      "requirementIds": [
+        "SRS-FR-AI-003"
+      ],
+      "classification": "NEGATIVE",
+      "priority": "HIGH",
+      "title": {
+        "en": "AI configuration is disabled by default",
+        "vi": "Cấu hình AI mặc định bị tắt"
+      },
+      "objective": {
+        "en": "Verify the provider wrapper returns a safe no-op result without invoking a provider.",
+        "vi": "Xác minh provider wrapper trả kết quả no-op an toàn mà không gọi provider."
+      },
+      "role": "N/A — module test",
+      "preconditions": {
+        "en": "Private AI configuration is absent.",
+        "vi": "Không có cấu hình AI riêng tư."
+      },
+      "testData": {
+        "en": "Default configuration object.",
+        "vi": "Object cấu hình mặc định."
+      },
+      "steps": {
+        "en": [
+          "Load AI configuration.",
+          "Call chat through the wrapper.",
+          "Inspect success/status and sanitized result."
+        ],
+        "vi": [
+          "Load cấu hình AI.",
+          "Gọi chat qua wrapper.",
+          "Kiểm tra success/status và kết quả đã sanitize."
+        ]
+      },
+      "expectedResult": {
+        "en": "enabled=false; result is AI_DISABLED; no exception or unsafe diagnostic.",
+        "vi": "enabled=false; kết quả là AI_DISABLED; không exception hoặc diagnostic không an toàn."
+      },
+      "actualResult": {
+        "en": "Passed in REG-AI-20260723.",
+        "vi": "Đạt trong REG-AI-20260723."
+      },
+      "status": "PASSED",
+      "environment": "Local Node.js module test",
+      "executor": "DonHV",
+      "executionDate": "2026-07-23T10:59:19+07:00",
+      "automationCommand": "npm run qa:idts64:programmatic",
+      "evidenceLinks": [
+        "scripts/qa/test-idts64-ai-provider.js"
+      ],
+      "defectIds": [],
+      "limitations": {
+        "en": "No live provider.",
+        "vi": "Không dùng provider live."
+      },
+      "postcondition": {
+        "en": "No business data changed.",
+        "vi": "Không đổi business data."
+      }
     },
     {
-      "caseId":"UT-AI-002","testType":"UNIT","requirementIds":["SRS-FR-AI-003"],"classification":"POSITIVE","priority":"HIGH",
-      "title":{"en":"Mock chat and structured response mapping","vi":"Mapping mock chat và structured response"},
-      "objective":{"en":"Verify deterministic provider output is mapped without leaking redacted input.","vi":"Xác minh output provider deterministic được map mà không lộ input đã redact."},
-      "role":"N/A — module test","preconditions":{"en":"Mock mode is enabled.","vi":"Mock mode được bật."},"testData":{"en":"Safe text and ClassificationSuggestion schema.","vi":"Text an toàn và schema ClassificationSuggestion."},
-      "steps":{"en":["Configure mock provider.","Call chat and structured operations.","Compare mapped model, text and schema."],"vi":["Cấu hình mock provider.","Gọi chat và structured operation.","So sánh model, text và schema đã map."]},
-      "expectedResult":{"en":"Both operations succeed and excluded source secrets stay absent.","vi":"Cả hai operation thành công và secret nguồn bị loại không xuất hiện."},
-      "actualResult":{"en":"Passed in REG-AI-20260723.","vi":"Đạt trong REG-AI-20260723."},"status":"PASSED","environment":"Local Node.js module test","executor":"DonHV","executionDate":"2026-07-23T10:59:19+07:00","automationCommand":"npm run qa:idts64:programmatic","evidenceLinks":["scripts/qa/test-idts64-ai-provider.js"],"defectIds":[],"limitations":{"en":"Deterministic mock only.","vi":"Chỉ dùng mock deterministic."},"postcondition":{"en":"No business data changed.","vi":"Không đổi business data."}
+      "caseId": "UT-AI-002",
+      "testType": "UNIT",
+      "requirementIds": [
+        "SRS-FR-AI-003"
+      ],
+      "classification": "POSITIVE",
+      "priority": "HIGH",
+      "title": {
+        "en": "Mock chat and structured response mapping",
+        "vi": "Mapping mock chat và structured response"
+      },
+      "objective": {
+        "en": "Verify deterministic provider output is mapped without leaking redacted input.",
+        "vi": "Xác minh output provider deterministic được map mà không lộ input đã redact."
+      },
+      "role": "N/A — module test",
+      "preconditions": {
+        "en": "Mock mode is enabled.",
+        "vi": "Mock mode được bật."
+      },
+      "testData": {
+        "en": "Safe text and ClassificationSuggestion schema.",
+        "vi": "Text an toàn và schema ClassificationSuggestion."
+      },
+      "steps": {
+        "en": [
+          "Configure mock provider.",
+          "Call chat and structured operations.",
+          "Compare mapped model, text and schema."
+        ],
+        "vi": [
+          "Cấu hình mock provider.",
+          "Gọi chat và structured operation.",
+          "So sánh model, text và schema đã map."
+        ]
+      },
+      "expectedResult": {
+        "en": "Both operations succeed and excluded source secrets stay absent.",
+        "vi": "Cả hai operation thành công và secret nguồn bị loại không xuất hiện."
+      },
+      "actualResult": {
+        "en": "Passed in REG-AI-20260723.",
+        "vi": "Đạt trong REG-AI-20260723."
+      },
+      "status": "PASSED",
+      "environment": "Local Node.js module test",
+      "executor": "DonHV",
+      "executionDate": "2026-07-23T10:59:19+07:00",
+      "automationCommand": "npm run qa:idts64:programmatic",
+      "evidenceLinks": [
+        "scripts/qa/test-idts64-ai-provider.js"
+      ],
+      "defectIds": [],
+      "limitations": {
+        "en": "Deterministic mock only.",
+        "vi": "Chỉ dùng mock deterministic."
+      },
+      "postcondition": {
+        "en": "No business data changed.",
+        "vi": "Không đổi business data."
+      }
     },
     {
-      "caseId":"UT-AI-003","testType":"UNIT","requirementIds":["SRS-FR-AI-003"],"classification":"BOUNDARY","priority":"MEDIUM",
-      "title":{"en":"Embedding dimensions and model mapping","vi":"Mapping model và số chiều embedding"},
-      "objective":{"en":"Verify configured dimensions equal the returned vector length.","vi":"Xác minh số chiều cấu hình bằng độ dài vector trả về."},
-      "role":"N/A — module test","preconditions":{"en":"Mock embedding dimensions are configured.","vi":"Đã cấu hình số chiều mock embedding."},"testData":{"en":"Six-dimensional mock vector.","vi":"Vector mock sáu chiều."},
-      "steps":{"en":["Configure dimension=6.","Request an embedding.","Compare dimensions, vector length and model alias."],"vi":["Cấu hình dimension=6.","Yêu cầu embedding.","So sánh dimension, độ dài vector và model alias."]},
-      "expectedResult":{"en":"Success with exactly six values and the embedding-specific model alias.","vi":"Thành công với đúng sáu giá trị và model alias riêng cho embedding."},
-      "actualResult":{"en":"Passed in REG-AI-20260723.","vi":"Đạt trong REG-AI-20260723."},"status":"PASSED","environment":"Local Node.js module test","executor":"DonHV","executionDate":"2026-07-23T10:59:19+07:00","automationCommand":"npm run qa:idts64:programmatic","evidenceLinks":["scripts/qa/test-idts64-ai-provider.js"],"defectIds":[],"limitations":{"en":"Mock vector, not semantic-quality evaluation.","vi":"Vector mock, không đánh giá chất lượng semantic."},"postcondition":{"en":"No business data changed.","vi":"Không đổi business data."}
+      "caseId": "UT-AI-003",
+      "testType": "UNIT",
+      "requirementIds": [
+        "SRS-FR-AI-003"
+      ],
+      "classification": "BOUNDARY",
+      "priority": "MEDIUM",
+      "title": {
+        "en": "Embedding dimensions and model mapping",
+        "vi": "Mapping model và số chiều embedding"
+      },
+      "objective": {
+        "en": "Verify configured dimensions equal the returned vector length.",
+        "vi": "Xác minh số chiều cấu hình bằng độ dài vector trả về."
+      },
+      "role": "N/A — module test",
+      "preconditions": {
+        "en": "Mock embedding dimensions are configured.",
+        "vi": "Đã cấu hình số chiều mock embedding."
+      },
+      "testData": {
+        "en": "Six-dimensional mock vector.",
+        "vi": "Vector mock sáu chiều."
+      },
+      "steps": {
+        "en": [
+          "Configure dimension=6.",
+          "Request an embedding.",
+          "Compare dimensions, vector length and model alias."
+        ],
+        "vi": [
+          "Cấu hình dimension=6.",
+          "Yêu cầu embedding.",
+          "So sánh dimension, độ dài vector và model alias."
+        ]
+      },
+      "expectedResult": {
+        "en": "Success with exactly six values and the embedding-specific model alias.",
+        "vi": "Thành công với đúng sáu giá trị và model alias riêng cho embedding."
+      },
+      "actualResult": {
+        "en": "Passed in REG-AI-20260723.",
+        "vi": "Đạt trong REG-AI-20260723."
+      },
+      "status": "PASSED",
+      "environment": "Local Node.js module test",
+      "executor": "DonHV",
+      "executionDate": "2026-07-23T10:59:19+07:00",
+      "automationCommand": "npm run qa:idts64:programmatic",
+      "evidenceLinks": [
+        "scripts/qa/test-idts64-ai-provider.js"
+      ],
+      "defectIds": [],
+      "limitations": {
+        "en": "Mock vector, not semantic-quality evaluation.",
+        "vi": "Vector mock, không đánh giá chất lượng semantic."
+      },
+      "postcondition": {
+        "en": "No business data changed.",
+        "vi": "Không đổi business data."
+      }
     },
     {
-      "caseId":"UT-AI-004","testType":"UNIT","requirementIds":["SRS-FR-AI-002","SRS-FR-AI-003"],"classification":"NEGATIVE","priority":"HIGH",
-      "title":{"en":"Provider error and timeout are sanitized","vi":"Provider error và timeout được sanitize"},
-      "objective":{"en":"Verify failure returns stable codes without raw SQL, token, key or stack detail.","vi":"Xác minh failure trả code ổn định mà không có raw SQL, token, key hoặc stack."},
-      "role":"N/A — module test","preconditions":{"en":"Controlled provider error and timeout modes are available.","vi":"Có mode provider error và timeout được kiểm soát."},"testData":{"en":"MOCK_PROVIDER_ERROR and delayed embedding.","vi":"MOCK_PROVIDER_ERROR và embedding bị delay."},
-      "steps":{"en":["Trigger provider error.","Trigger timeout.","Inspect retryable flags and public diagnostic text."],"vi":["Kích hoạt provider error.","Kích hoạt timeout.","Kiểm tra retryable flag và diagnostic public."]},
-      "expectedResult":{"en":"AI_PROVIDER_ERROR/AI_TIMEOUT are safe and retryability is preserved.","vi":"AI_PROVIDER_ERROR/AI_TIMEOUT an toàn và giữ đúng retryability."},
-      "actualResult":{"en":"Passed in REG-AI-20260723.","vi":"Đạt trong REG-AI-20260723."},"status":"PASSED","environment":"Local Node.js module test","executor":"DonHV","executionDate":"2026-07-23T10:59:19+07:00","automationCommand":"npm run qa:idts64:programmatic","evidenceLinks":["scripts/qa/test-idts64-ai-provider.js"],"defectIds":[],"limitations":{"en":"Controlled failure only.","vi":"Chỉ là failure có kiểm soát."},"postcondition":{"en":"Normal non-AI workflow remains untouched.","vi":"Workflow không dùng AI không bị ảnh hưởng."}
+      "caseId": "UT-AI-004",
+      "testType": "UNIT",
+      "requirementIds": [
+        "SRS-FR-AI-002",
+        "SRS-FR-AI-003"
+      ],
+      "classification": "NEGATIVE",
+      "priority": "HIGH",
+      "title": {
+        "en": "Provider error and timeout are sanitized",
+        "vi": "Provider error và timeout được sanitize"
+      },
+      "objective": {
+        "en": "Verify failure returns stable codes without raw SQL, token, key or stack detail.",
+        "vi": "Xác minh failure trả code ổn định mà không có raw SQL, token, key hoặc stack."
+      },
+      "role": "N/A — module test",
+      "preconditions": {
+        "en": "Controlled provider error and timeout modes are available.",
+        "vi": "Có mode provider error và timeout được kiểm soát."
+      },
+      "testData": {
+        "en": "MOCK_PROVIDER_ERROR and delayed embedding.",
+        "vi": "MOCK_PROVIDER_ERROR và embedding bị delay."
+      },
+      "steps": {
+        "en": [
+          "Trigger provider error.",
+          "Trigger timeout.",
+          "Inspect retryable flags and public diagnostic text."
+        ],
+        "vi": [
+          "Kích hoạt provider error.",
+          "Kích hoạt timeout.",
+          "Kiểm tra retryable flag và diagnostic public."
+        ]
+      },
+      "expectedResult": {
+        "en": "AI_PROVIDER_ERROR/AI_TIMEOUT are safe and retryability is preserved.",
+        "vi": "AI_PROVIDER_ERROR/AI_TIMEOUT an toàn và giữ đúng retryability."
+      },
+      "actualResult": {
+        "en": "Passed in REG-AI-20260723.",
+        "vi": "Đạt trong REG-AI-20260723."
+      },
+      "status": "PASSED",
+      "environment": "Local Node.js module test",
+      "executor": "DonHV",
+      "executionDate": "2026-07-23T10:59:19+07:00",
+      "automationCommand": "npm run qa:idts64:programmatic",
+      "evidenceLinks": [
+        "scripts/qa/test-idts64-ai-provider.js"
+      ],
+      "defectIds": [],
+      "limitations": {
+        "en": "Controlled failure only.",
+        "vi": "Chỉ là failure có kiểm soát."
+      },
+      "postcondition": {
+        "en": "Normal non-AI workflow remains untouched.",
+        "vi": "Workflow không dùng AI không bị ảnh hưởng."
+      }
     },
     {
-      "caseId":"UT-AI-005","testType":"UNIT","requirementIds":["SRS-FR-AI-003"],"classification":"SECURITY","priority":"HIGH",
-      "title":{"en":"Secret redactor masks representative keys","vi":"Secret redactor che các key đại diện"},
-      "objective":{"en":"Verify representative AWS and Brevo key patterns are masked.","vi":"Xác minh pattern key AWS và Brevo đại diện được che."},
-      "role":"N/A — module test","preconditions":{"en":"Redactor is loaded.","vi":"Redactor đã được load."},"testData":{"en":"Synthetic AWS access key and Brevo API key patterns.","vi":"Pattern AWS access key và Brevo API key giả lập."},
-      "steps":{"en":["Pass synthetic key-shaped strings to the redactor.","Inspect returned text."],"vi":["Truyền chuỗi giả lập có dạng key vào redactor.","Kiểm tra text trả về."]},
-      "expectedResult":{"en":"Both representative secrets are masked.","vi":"Cả hai secret đại diện đều được che."},
-      "actualResult":{"en":"Passed in REG-AI-20260723.","vi":"Đạt trong REG-AI-20260723."},"status":"PASSED","environment":"Local Node.js module test","executor":"DonHV","executionDate":"2026-07-23T10:59:19+07:00","automationCommand":"npm run qa:idts64:programmatic","evidenceLinks":["scripts/qa/test-idts64-ai-provider.js"],"defectIds":[],"limitations":{"en":"Representative patterns only; not proof against every possible secret format.","vi":"Chỉ pattern đại diện; không chứng minh mọi định dạng secret."},"postcondition":{"en":"Synthetic data discarded.","vi":"Dữ liệu giả lập được bỏ."}
+      "caseId": "UT-AI-005",
+      "testType": "UNIT",
+      "requirementIds": [
+        "SRS-FR-AI-003"
+      ],
+      "classification": "SECURITY",
+      "priority": "HIGH",
+      "title": {
+        "en": "Secret redactor masks representative keys",
+        "vi": "Secret redactor che các key đại diện"
+      },
+      "objective": {
+        "en": "Verify representative AWS and Brevo key patterns are masked.",
+        "vi": "Xác minh pattern key AWS và Brevo đại diện được che."
+      },
+      "role": "N/A — module test",
+      "preconditions": {
+        "en": "Redactor is loaded.",
+        "vi": "Redactor đã được load."
+      },
+      "testData": {
+        "en": "Synthetic AWS access key and Brevo API key patterns.",
+        "vi": "Pattern AWS access key và Brevo API key giả lập."
+      },
+      "steps": {
+        "en": [
+          "Pass synthetic key-shaped strings to the redactor.",
+          "Inspect returned text."
+        ],
+        "vi": [
+          "Truyền chuỗi giả lập có dạng key vào redactor.",
+          "Kiểm tra text trả về."
+        ]
+      },
+      "expectedResult": {
+        "en": "Both representative secrets are masked.",
+        "vi": "Cả hai secret đại diện đều được che."
+      },
+      "actualResult": {
+        "en": "Passed in REG-AI-20260723.",
+        "vi": "Đạt trong REG-AI-20260723."
+      },
+      "status": "PASSED",
+      "environment": "Local Node.js module test",
+      "executor": "DonHV",
+      "executionDate": "2026-07-23T10:59:19+07:00",
+      "automationCommand": "npm run qa:idts64:programmatic",
+      "evidenceLinks": [
+        "scripts/qa/test-idts64-ai-provider.js"
+      ],
+      "defectIds": [],
+      "limitations": {
+        "en": "Representative patterns only; not proof against every possible secret format.",
+        "vi": "Chỉ pattern đại diện; không chứng minh mọi định dạng secret."
+      },
+      "postcondition": {
+        "en": "Synthetic data discarded.",
+        "vi": "Dữ liệu giả lập được bỏ."
+      }
     },
     {
-      "caseId":"FT-CREATE-001","testType":"FUNCTIONAL_API","requirementIds":["SRS-FR-BUG-001","SRS-FR-CLASS-003"],"classification":"POSITIVE","priority":"HIGH",
-      "title":{"en":"Create a valid bug through the service","vi":"Tạo bug hợp lệ qua service"},"objective":{"en":"Prove valid active catalog codes create a persisted bug.","vi":"Chứng minh mã catalog active hợp lệ tạo được bug đã persist."},"role":"Tester",
-      "preconditions":{"en":"Tester is authenticated; active priority, severity and environment codes exist.","vi":"Tester đã đăng nhập; có priority, severity và environment active."},"testData":{"en":"Complete sanitized bug payload with active codes.","vi":"Payload bug đầy đủ đã sanitize với code active."},
-      "steps":{"en":["Submit a valid create request.","Read the created bug by ID.","Check required business values."],"vi":["Gửi create request hợp lệ.","Đọc bug đã tạo theo ID.","Kiểm tra business value bắt buộc."]},
-      "expectedResult":{"en":"Create succeeds and the bug is persisted with valid values.","vi":"Create thành công và bug được persist với giá trị hợp lệ."},"actualResult":{"en":"Passed: valid active catalog codes created a bug.","vi":"Đạt: mã catalog active hợp lệ đã tạo bug."},"status":"PASSED","environment":"Local CAP service; in-memory SQLite","executor":"DonHV","executionDate":"2026-07-23T10:59:07+07:00","automationCommand":"npm run qa:idts41:programmatic","evidenceLinks":["scripts/qa/test-idts41-code-list-validation.js"],"defectIds":["IDTS-32"],"limitations":{"en":"No fresh Fiori UI or reload evidence.","vi":"Chưa có evidence Fiori UI/reload mới."},"postcondition":{"en":"Created test data remains only in the in-memory database.","vi":"Dữ liệu test chỉ tồn tại trong database in-memory."}
+      "caseId": "FT-CREATE-001",
+      "testType": "FUNCTIONAL_API",
+      "requirementIds": [
+        "SRS-FR-BUG-001",
+        "SRS-FR-CLASS-003"
+      ],
+      "classification": "POSITIVE",
+      "priority": "HIGH",
+      "title": {
+        "en": "Create a valid bug through the service",
+        "vi": "Tạo bug hợp lệ qua service"
+      },
+      "objective": {
+        "en": "Prove valid active catalog codes create a persisted bug.",
+        "vi": "Chứng minh mã catalog active hợp lệ tạo được bug đã persist."
+      },
+      "role": "Tester",
+      "preconditions": {
+        "en": "Tester is authenticated; active priority, severity and environment codes exist.",
+        "vi": "Tester đã đăng nhập; có priority, severity và environment active."
+      },
+      "testData": {
+        "en": "Complete sanitized bug payload with active codes.",
+        "vi": "Payload bug đầy đủ đã sanitize với code active."
+      },
+      "steps": {
+        "en": [
+          "Submit a valid create request.",
+          "Read the created bug by ID.",
+          "Check required business values."
+        ],
+        "vi": [
+          "Gửi create request hợp lệ.",
+          "Đọc bug đã tạo theo ID.",
+          "Kiểm tra business value bắt buộc."
+        ]
+      },
+      "expectedResult": {
+        "en": "Create succeeds and the bug is persisted with valid values.",
+        "vi": "Create thành công và bug được persist với giá trị hợp lệ."
+      },
+      "actualResult": {
+        "en": "Passed: valid active catalog codes created a bug.",
+        "vi": "Đạt: mã catalog active hợp lệ đã tạo bug."
+      },
+      "status": "PASSED",
+      "environment": "Local CAP service; in-memory SQLite",
+      "executor": "DonHV",
+      "executionDate": "2026-07-23T10:59:07+07:00",
+      "automationCommand": "npm run qa:idts41:programmatic",
+      "evidenceLinks": [
+        "scripts/qa/test-idts41-code-list-validation.js"
+      ],
+      "defectIds": [
+        "IDTS-32"
+      ],
+      "limitations": {
+        "en": "No fresh Fiori UI or reload evidence.",
+        "vi": "Chưa có evidence Fiori UI/reload mới."
+      },
+      "postcondition": {
+        "en": "Created test data remains only in the in-memory database.",
+        "vi": "Dữ liệu test chỉ tồn tại trong database in-memory."
+      }
     },
     {
-      "caseId":"FT-VALID-001","testType":"FUNCTIONAL_API","requirementIds":["SRS-FR-BUG-002","SRS-FR-CLASS-003","SRS-FR-STATUS-008"],"classification":"NEGATIVE_BOUNDARY","priority":"HIGH",
-      "title":{"en":"Reject invalid, blank and inactive catalog values","vi":"Từ chối catalog sai, rỗng và inactive"},"objective":{"en":"Prove backend validation blocks malformed catalog values without persistence drift.","vi":"Chứng minh backend chặn catalog sai mà không làm lệch persistence."},"role":"Tester",
-      "preconditions":{"en":"Tester is authenticated; valid and inactive reference values exist.","vi":"Tester đã đăng nhập; có reference value hợp lệ và inactive."},"testData":{"en":"Numeric-like, wrong-case, whitespace, unknown and inactive codes.","vi":"Code dạng số, sai hoa/thường, whitespace, unknown và inactive."},
-      "steps":{"en":["Submit each invalid create/update/draft variant.","Check 400 response and target field.","Reload persisted row after rejected update."],"vi":["Gửi từng biến thể create/update/draft sai.","Kiểm tra response 400 và target field.","Reload record sau update bị từ chối."]},
-      "expectedResult":{"en":"Every invalid value is rejected and stored valid state remains unchanged.","vi":"Mọi giá trị sai bị từ chối và state hợp lệ đã lưu không đổi."},"actualResult":{"en":"Passed across invalid create, update and draft checks.","vi":"Đạt cho các check create, update và draft sai."},"status":"PASSED","environment":"Local CAP service; in-memory SQLite","executor":"DonHV","executionDate":"2026-07-23T10:59:07+07:00","automationCommand":"npm run qa:idts41:programmatic","evidenceLinks":["scripts/qa/test-idts41-code-list-validation.js"],"defectIds":["IDTS-32"],"limitations":{"en":"UI value-state presentation not rerun.","vi":"Chưa chạy lại UI value-state."},"postcondition":{"en":"Rejected inputs are not persisted.","vi":"Input bị từ chối không được persist."}
+      "caseId": "FT-VALID-001",
+      "testType": "FUNCTIONAL_API",
+      "requirementIds": [
+        "SRS-FR-BUG-002",
+        "SRS-FR-CLASS-003",
+        "SRS-FR-STATUS-008"
+      ],
+      "classification": "NEGATIVE_BOUNDARY",
+      "priority": "HIGH",
+      "title": {
+        "en": "Reject invalid, blank and inactive catalog values",
+        "vi": "Từ chối catalog sai, rỗng và inactive"
+      },
+      "objective": {
+        "en": "Prove backend validation blocks malformed catalog values without persistence drift.",
+        "vi": "Chứng minh backend chặn catalog sai mà không làm lệch persistence."
+      },
+      "role": "Tester",
+      "preconditions": {
+        "en": "Tester is authenticated; valid and inactive reference values exist.",
+        "vi": "Tester đã đăng nhập; có reference value hợp lệ và inactive."
+      },
+      "testData": {
+        "en": "Numeric-like, wrong-case, whitespace, unknown and inactive codes.",
+        "vi": "Code dạng số, sai hoa/thường, whitespace, unknown và inactive."
+      },
+      "steps": {
+        "en": [
+          "Submit each invalid create/update/draft variant.",
+          "Check 400 response and target field.",
+          "Reload persisted row after rejected update."
+        ],
+        "vi": [
+          "Gửi từng biến thể create/update/draft sai.",
+          "Kiểm tra response 400 và target field.",
+          "Reload record sau update bị từ chối."
+        ]
+      },
+      "expectedResult": {
+        "en": "Every invalid value is rejected and stored valid state remains unchanged.",
+        "vi": "Mọi giá trị sai bị từ chối và state hợp lệ đã lưu không đổi."
+      },
+      "actualResult": {
+        "en": "Passed across invalid create, update and draft checks.",
+        "vi": "Đạt cho các check create, update và draft sai."
+      },
+      "status": "PASSED",
+      "environment": "Local CAP service; in-memory SQLite",
+      "executor": "DonHV",
+      "executionDate": "2026-07-23T10:59:07+07:00",
+      "automationCommand": "npm run qa:idts41:programmatic",
+      "evidenceLinks": [
+        "scripts/qa/test-idts41-code-list-validation.js"
+      ],
+      "defectIds": [
+        "IDTS-32"
+      ],
+      "limitations": {
+        "en": "UI value-state presentation not rerun.",
+        "vi": "Chưa chạy lại UI value-state."
+      },
+      "postcondition": {
+        "en": "Rejected inputs are not persisted.",
+        "vi": "Input bị từ chối không được persist."
+      }
     },
     {
-      "caseId":"FT-AUTHZ-001","testType":"FUNCTIONAL_API","requirementIds":["SRS-FR-AUTH-002","SRS-FR-BUG-001"],"classification":"AUTHORIZATION","priority":"HIGH",
-      "title":{"en":"Only Tester or PM can start a bug draft","vi":"Chỉ Tester hoặc PM được bắt đầu bug draft"},"objective":{"en":"Verify create authorization at the root draft boundary.","vi":"Xác minh quyền create tại boundary root draft."},"role":"Developer / Tester / PM",
-      "preconditions":{"en":"Seeded users for all three roles.","vi":"Có user seed cho cả ba role."},"testData":{"en":"Root draft NEW request per role.","vi":"Root draft NEW request cho từng role."},
-      "steps":{"en":["Call root draft NEW as Developer.","Repeat as Tester.","Repeat as PM."],"vi":["Gọi root draft NEW bằng Developer.","Lặp lại bằng Tester.","Lặp lại bằng PM."]},
-      "expectedResult":{"en":"Developer receives 403; Tester and PM are allowed.","vi":"Developer nhận 403; Tester và PM được phép."},"actualResult":{"en":"Passed for all three role checks.","vi":"Đạt cho cả ba role."},"status":"PASSED","environment":"Local CAP service; in-memory SQLite","executor":"DonHV","executionDate":"2026-07-23T10:59:07+07:00","automationCommand":"npm run qa:idts41:programmatic","evidenceLinks":["scripts/qa/test-idts41-code-list-validation.js"],"defectIds":["IDTS-41"],"limitations":{"en":"No fresh button-visibility browser check.","vi":"Chưa check button visibility bằng browser mới."},"postcondition":{"en":"Unauthorized draft does not exist.","vi":"Draft không được phép không tồn tại."}
+      "caseId": "FT-AUTHZ-001",
+      "testType": "FUNCTIONAL_API",
+      "requirementIds": [
+        "SRS-FR-AUTH-002",
+        "SRS-FR-BUG-001"
+      ],
+      "classification": "AUTHORIZATION",
+      "priority": "HIGH",
+      "title": {
+        "en": "Only Tester or PM can start a bug draft",
+        "vi": "Chỉ Tester hoặc PM được bắt đầu bug draft"
+      },
+      "objective": {
+        "en": "Verify create authorization at the root draft boundary.",
+        "vi": "Xác minh quyền create tại boundary root draft."
+      },
+      "role": "Developer / Tester / PM",
+      "preconditions": {
+        "en": "Seeded users for all three roles.",
+        "vi": "Có user seed cho cả ba role."
+      },
+      "testData": {
+        "en": "Root draft NEW request per role.",
+        "vi": "Root draft NEW request cho từng role."
+      },
+      "steps": {
+        "en": [
+          "Call root draft NEW as Developer.",
+          "Repeat as Tester.",
+          "Repeat as PM."
+        ],
+        "vi": [
+          "Gọi root draft NEW bằng Developer.",
+          "Lặp lại bằng Tester.",
+          "Lặp lại bằng PM."
+        ]
+      },
+      "expectedResult": {
+        "en": "Developer receives 403; Tester and PM are allowed.",
+        "vi": "Developer nhận 403; Tester và PM được phép."
+      },
+      "actualResult": {
+        "en": "Passed for all three role checks.",
+        "vi": "Đạt cho cả ba role."
+      },
+      "status": "PASSED",
+      "environment": "Local CAP service; in-memory SQLite",
+      "executor": "DonHV",
+      "executionDate": "2026-07-23T10:59:07+07:00",
+      "automationCommand": "npm run qa:idts41:programmatic",
+      "evidenceLinks": [
+        "scripts/qa/test-idts41-code-list-validation.js"
+      ],
+      "defectIds": [
+        "IDTS-41"
+      ],
+      "limitations": {
+        "en": "No fresh button-visibility browser check.",
+        "vi": "Chưa check button visibility bằng browser mới."
+      },
+      "postcondition": {
+        "en": "Unauthorized draft does not exist.",
+        "vi": "Draft không được phép không tồn tại."
+      }
     },
     {
-      "caseId":"FT-AUTH-SESSION-001","testType":"PROGRAMMATIC_REGRESSION","requirementIds":["SRS-FR-AUTH-001","SRS-FR-AUTH-002"],"classification":"POSITIVE_NEGATIVE_AUTHORIZATION","priority":"HIGH",
-      "title":{"en":"Authentication, bearer session and logout boundary","vi":"Ranh giới xác thực, bearer session và đăng xuất"},"objective":{"en":"Verify successful login, safe rejection, hashed sessions, bearer mapping, current-user lookup, logout and revocation.","vi":"Xác minh login thành công, từ chối an toàn, session đã băm, bearer mapping, tra cứu user hiện tại, logout và revoke."},"role":"Anonymous / authenticated user",
-      "preconditions":{"en":"Local CAP service with seeded identities; no production identity provider.","vi":"CAP local có identity seed; không dùng identity provider production."},"testData":{"en":"Seeded valid, invalid and revoked-session inputs; raw transient token values are excluded from artifacts.","vi":"Input hợp lệ, sai và session bị revoke từ dữ liệu seed; raw token tạm thời không đưa vào artifact."},
-      "steps":{"en":["Run npm run qa:auth:programmatic.","Review the 28 login, rejection, session, bearer, me, logout, revocation and sanitization checks.","Confirm exit code 0 and no failed/skipped check."],"vi":["Chạy npm run qa:auth:programmatic.","Review 28 check về login, từ chối, session, bearer, me, logout, revoke và sanitize.","Xác nhận exit code 0 và không có check fail/skip."]},
-      "expectedResult":{"en":"All 28 local authentication/session checks pass; failures are sanitized and revoked sessions cannot be reused.","vi":"Cả 28 check xác thực/session local đều đạt; lỗi được sanitize và session đã revoke không dùng lại được."},"actualResult":{"en":"28 passed, 0 failed, 0 skipped; exit code 0.","vi":"28 đạt, 0 lỗi, 0 bỏ qua; exit code 0."},"status":"PASSED","environment":"Local Node.js; CAP; in-memory SQLite","executor":"DonHV","executionDate":"2026-07-23T10:58:30+07:00","automationCommand":"npm run qa:auth:programmatic","evidenceLinks":["scripts/qa/test-auth-foundation-programmatic.js"],"defectIds":["IDTS-35","IDTS-52","IDTS-53"],"limitations":{"en":"No current browser login/profile UAT and no production identity-provider claim.","vi":"Chưa có UAT browser login/profile hiện tại và không claim identity provider production."},"postcondition":{"en":"Test sessions are revoked or remain only in the in-memory database.","vi":"Session test được revoke hoặc chỉ còn trong database in-memory."}
+      "caseId": "FT-AUTH-SESSION-001",
+      "testType": "PROGRAMMATIC_REGRESSION",
+      "requirementIds": [
+        "SRS-FR-AUTH-001",
+        "SRS-FR-AUTH-002"
+      ],
+      "classification": "POSITIVE_NEGATIVE_AUTHORIZATION",
+      "priority": "HIGH",
+      "title": {
+        "en": "Authentication, bearer session and logout boundary",
+        "vi": "Ranh giới xác thực, bearer session và đăng xuất"
+      },
+      "objective": {
+        "en": "Verify successful login, safe rejection, hashed sessions, bearer mapping, current-user lookup, logout and revocation.",
+        "vi": "Xác minh login thành công, từ chối an toàn, session đã băm, bearer mapping, tra cứu user hiện tại, logout và revoke."
+      },
+      "role": "Anonymous / authenticated user",
+      "preconditions": {
+        "en": "Local CAP service with seeded identities; no production identity provider.",
+        "vi": "CAP local có identity seed; không dùng identity provider production."
+      },
+      "testData": {
+        "en": "Seeded valid, invalid and revoked-session inputs; raw transient token values are excluded from artifacts.",
+        "vi": "Input hợp lệ, sai và session bị revoke từ dữ liệu seed; raw token tạm thời không đưa vào artifact."
+      },
+      "steps": {
+        "en": [
+          "Run npm run qa:auth:programmatic.",
+          "Review the 28 login, rejection, session, bearer, me, logout, revocation and sanitization checks.",
+          "Confirm exit code 0 and no failed/skipped check."
+        ],
+        "vi": [
+          "Chạy npm run qa:auth:programmatic.",
+          "Review 28 check về login, từ chối, session, bearer, me, logout, revoke và sanitize.",
+          "Xác nhận exit code 0 và không có check fail/skip."
+        ]
+      },
+      "expectedResult": {
+        "en": "All 28 local authentication/session checks pass; failures are sanitized and revoked sessions cannot be reused.",
+        "vi": "Cả 28 check xác thực/session local đều đạt; lỗi được sanitize và session đã revoke không dùng lại được."
+      },
+      "actualResult": {
+        "en": "28 passed, 0 failed, 0 skipped; exit code 0.",
+        "vi": "28 đạt, 0 lỗi, 0 bỏ qua; exit code 0."
+      },
+      "status": "PASSED",
+      "environment": "Local Node.js; CAP; in-memory SQLite",
+      "executor": "DonHV",
+      "executionDate": "2026-07-23T10:58:30+07:00",
+      "automationCommand": "npm run qa:auth:programmatic",
+      "evidenceLinks": [
+        "scripts/qa/test-auth-foundation-programmatic.js"
+      ],
+      "defectIds": [
+        "IDTS-35",
+        "IDTS-52",
+        "IDTS-53"
+      ],
+      "limitations": {
+        "en": "No current browser login/profile UAT and no production identity-provider claim.",
+        "vi": "Chưa có UAT browser login/profile hiện tại và không claim identity provider production."
+      },
+      "postcondition": {
+        "en": "Test sessions are revoked or remain only in the in-memory database.",
+        "vi": "Session test được revoke hoặc chỉ còn trong database in-memory."
+      }
     },
     {
-      "caseId":"FT-DUP-001","testType":"FUNCTIONAL_UI_API","requirementIds":["SRS-FR-BUG-003"],"classification":"POSITIVE_NEGATIVE","priority":"HIGH",
-      "title":{"en":"Duplicate-checking support before create","vi":"Hỗ trợ kiểm tra trùng trước khi tạo"},"objective":{"en":"Verify similar candidates are reviewable and do not create a duplicate link automatically.","vi":"Xác minh candidate tương tự có thể review và không tự tạo duplicate link."},"role":"Tester",
-      "preconditions":{"en":"Authenticated Tester; at least one similar and one unrelated bug.","vi":"Tester đã đăng nhập; có ít nhất một bug tương tự và một bug không liên quan."},"testData":{"en":"A new login-failure description and classification context.","vi":"Mô tả lỗi login mới và classification context."},
-      "steps":{"en":["Open Create Bug.","Run similar-bug check.","Review candidates and ignore the suggestion.","Confirm no new DuplicateLinks row and continue create."],"vi":["Mở Create Bug.","Chạy kiểm tra bug tương tự.","Review candidate và bỏ qua suggestion.","Xác nhận không có DuplicateLinks mới và tiếp tục create."]},
-      "expectedResult":{"en":"Relevant candidates are shown as advice; ignoring them does not mutate data or block create.","vi":"Candidate liên quan hiển thị dạng gợi ý; bỏ qua không đổi dữ liệu hoặc chặn create."},"actualResult":{"en":"","vi":""},"status":"NOT_RUN","environment":"Shared QA Fiori + OData","executor":"","executionDate":"","automationCommand":"","evidenceLinks":[],"defectIds":[],"limitations":{"en":"No fresh UI/API duplicate review execution in this remediation.","vi":"Chưa chạy mới duplicate review UI/API trong remediation này."},"postcondition":{"en":"No automatic duplicate relation exists.","vi":"Không có quan hệ duplicate tự động."}
+      "caseId": "FT-DUP-001",
+      "testType": "FUNCTIONAL_UI_API",
+      "requirementIds": [
+        "SRS-FR-BUG-003"
+      ],
+      "classification": "POSITIVE_NEGATIVE",
+      "priority": "HIGH",
+      "title": {
+        "en": "Duplicate-checking support before create",
+        "vi": "Hỗ trợ kiểm tra trùng trước khi tạo"
+      },
+      "objective": {
+        "en": "Verify similar candidates are reviewable and do not create a duplicate link automatically.",
+        "vi": "Xác minh candidate tương tự có thể review và không tự tạo duplicate link."
+      },
+      "role": "Tester",
+      "preconditions": {
+        "en": "Authenticated Tester; at least one similar and one unrelated bug.",
+        "vi": "Tester đã đăng nhập; có ít nhất một bug tương tự và một bug không liên quan."
+      },
+      "testData": {
+        "en": "A new login-failure description and classification context.",
+        "vi": "Mô tả lỗi login mới và classification context."
+      },
+      "steps": {
+        "en": [
+          "Open Create Bug.",
+          "Run similar-bug check.",
+          "Review candidates and ignore the suggestion.",
+          "Confirm no new DuplicateLinks row and continue create."
+        ],
+        "vi": [
+          "Mở Create Bug.",
+          "Chạy kiểm tra bug tương tự.",
+          "Review candidate và bỏ qua suggestion.",
+          "Xác nhận không có DuplicateLinks mới và tiếp tục create."
+        ]
+      },
+      "expectedResult": {
+        "en": "Relevant candidates are shown as advice; ignoring them does not mutate data or block create.",
+        "vi": "Candidate liên quan hiển thị dạng gợi ý; bỏ qua không đổi dữ liệu hoặc chặn create."
+      },
+      "actualResult": {
+        "en": "Passed on Render Shared QA. The API and Fiori dialog returned review-only duplicate guidance, covered the no-result state, and did not mutate Bug workflow data.",
+        "vi": "??t tr?n Render Shared QA. API v? h?p tho?i Fiori tr? g?i ? tr?ng l?p ch? ?? review, bao ph? tr?ng th?i kh?ng c? k?t qu? v? kh?ng thay ??i d? li?u workflow c?a Bug."
+      },
+      "status": "PASSED",
+      "environment": "Render Shared QA",
+      "executor": "IDTS-100 automated acceptance under DonHV",
+      "executionDate": "2026-07-24T20:42:48+07:00",
+      "automationCommand": "node scripts/qa/test-idts100-shared-qa-lifecycle.js and focused browser/API harnesses",
+      "evidenceLinks": [
+        "docs/pm/evidence/idts-100/shared-qa-ai/render-ai-smoke.json",
+        "docs/pm/evidence/idts-100/shared-qa-ai-browser/all-review-actions/shared-qa-ai-browser.json"
+      ],
+      "defectIds": [],
+      "limitations": {
+        "en": "Agent-executed acceptance evidence; formal human UAT sign-off is tracked separately.",
+        "vi": "Evidence acceptance do agent th?c thi; x?c nh?n UAT ch?nh th?c c?a con ng??i ???c theo d?i ri?ng."
+      },
+      "postcondition": {
+        "en": "No automatic duplicate relation exists.",
+        "vi": "Không có quan hệ duplicate tự động."
+      }
     },
     {
-      "caseId":"FT-CLASS-ASSIGN-001","testType":"FUNCTIONAL_UI_API","requirementIds":["SRS-FR-CLASS-001","SRS-FR-CLASS-004","SRS-FR-ASSIGN-001"],"classification":"POSITIVE_BOUNDARY","priority":"HIGH",
-      "title":{"en":"Classify and assign by active responsibility","vi":"Phân loại và assign theo responsibility active"},"objective":{"en":"Verify dependent classification and the suitable Developer candidate list.","vi":"Xác minh classification phụ thuộc và danh sách Developer phù hợp."},"role":"Tester",
-      "preconditions":{"en":"Active classification pairs and Developer Responsibilities exist.","vi":"Có classification pair và Developer Responsibility active."},"testData":{"en":"Application Component=Bug Management; Defect Category=Fiori/UI5; one suitable and one unsuitable Developer.","vi":"Application Component=Bug Management; Defect Category=Fiori/UI5; một Developer phù hợp và một không phù hợp."},
-      "steps":{"en":["Open Create Bug.","Select Application Component and Defect Category.","Open Smart Assign/Assignee candidates.","Select the suitable Developer and save.","Reload the bug."],"vi":["Mở Create Bug.","Chọn Application Component và Defect Category.","Mở candidate Smart Assign/Assignee.","Chọn Developer phù hợp và lưu.","Reload bug."]},
-      "expectedResult":{"en":"Only responsible active candidates are selectable; saved bug is Assigned and ownership persists after reload.","vi":"Chỉ candidate active có responsibility được chọn; bug lưu ở Assigned và ownership còn sau reload."},"actualResult":{"en":"","vi":""},"status":"NOT_RUN","environment":"Shared QA Fiori + OData","executor":"","executionDate":"","automationCommand":"","evidenceLinks":[],"defectIds":["IDTS-56"],"limitations":{"en":"Needs fresh browser and persistence evidence.","vi":"Cần evidence browser và persistence mới."},"postcondition":{"en":"Assigned Developer is the technical owner.","vi":"Developer được assign là technical owner."}
+      "caseId": "FT-CLASS-ASSIGN-001",
+      "testType": "FUNCTIONAL_UI_API",
+      "requirementIds": [
+        "SRS-FR-CLASS-001",
+        "SRS-FR-CLASS-004",
+        "SRS-FR-ASSIGN-001"
+      ],
+      "classification": "POSITIVE_BOUNDARY",
+      "priority": "HIGH",
+      "title": {
+        "en": "Classify and assign by active responsibility",
+        "vi": "Phân loại và assign theo responsibility active"
+      },
+      "objective": {
+        "en": "Verify dependent classification and the suitable Developer candidate list.",
+        "vi": "Xác minh classification phụ thuộc và danh sách Developer phù hợp."
+      },
+      "role": "Tester",
+      "preconditions": {
+        "en": "Active classification pairs and Developer Responsibilities exist.",
+        "vi": "Có classification pair và Developer Responsibility active."
+      },
+      "testData": {
+        "en": "Application Component=Bug Management; Defect Category=Fiori/UI5; one suitable and one unsuitable Developer.",
+        "vi": "Application Component=Bug Management; Defect Category=Fiori/UI5; một Developer phù hợp và một không phù hợp."
+      },
+      "steps": {
+        "en": [
+          "Open Create Bug.",
+          "Select Application Component and Defect Category.",
+          "Open Smart Assign/Assignee candidates.",
+          "Select the suitable Developer and save.",
+          "Reload the bug."
+        ],
+        "vi": [
+          "Mở Create Bug.",
+          "Chọn Application Component và Defect Category.",
+          "Mở candidate Smart Assign/Assignee.",
+          "Chọn Developer phù hợp và lưu.",
+          "Reload bug."
+        ]
+      },
+      "expectedResult": {
+        "en": "Only responsible active candidates are selectable; saved bug is Assigned and ownership persists after reload.",
+        "vi": "Chỉ candidate active có responsibility được chọn; bug lưu ở Assigned và ownership còn sau reload."
+      },
+      "actualResult": {
+        "en": "Passed on Render Shared QA. Active classification mapping was accepted, an eligible Developer was assigned, direct Developer self-assignment was denied, and the manual Smart Assign review remained available.",
+        "vi": "??t tr?n Render Shared QA. Mapping ph?n lo?i active ???c ch?p nh?n, Developer ph? h?p ???c assign, Developer t? assign qua API b? ch?n, v? Smart Assign v?n gi? quy?t ??nh th? c?ng."
+      },
+      "status": "PASSED",
+      "environment": "Render Shared QA",
+      "executor": "IDTS-100 automated acceptance under DonHV",
+      "executionDate": "2026-07-24T20:42:48+07:00",
+      "automationCommand": "node scripts/qa/test-idts100-shared-qa-lifecycle.js and focused browser/API harnesses",
+      "evidenceLinks": [
+        "docs/pm/evidence/idts-100/shared-qa-lifecycle/shared-qa-lifecycle.json",
+        "docs/pm/evidence/idts-100/shared-qa-ai-browser/assignment/idts72-ai-browser-smoke.json"
+      ],
+      "defectIds": [
+        "IDTS-56"
+      ],
+      "limitations": {
+        "en": "Agent-executed acceptance evidence; formal human UAT sign-off is tracked separately.",
+        "vi": "Evidence acceptance do agent th?c thi; x?c nh?n UAT ch?nh th?c c?a con ng??i ???c theo d?i ri?ng."
+      },
+      "postcondition": {
+        "en": "Assigned Developer is the technical owner.",
+        "vi": "Developer được assign là technical owner."
+      }
     },
     {
-      "caseId":"FT-PENDING-001","testType":"FUNCTIONAL_UI_API","requirementIds":["SRS-FR-ASSIGN-003","SRS-FR-STATUS-009"],"classification":"BOUNDARY","priority":"HIGH",
-      "title":{"en":"Create without an assignee","vi":"Tạo bug không có assignee"},"objective":{"en":"Verify the system does not auto-pick a Developer and creates Pending Assignment.","vi":"Xác minh hệ thống không tự chọn Developer và tạo Pending Assignment."},"role":"Tester",
-      "preconditions":{"en":"Tester is authenticated and all required bug fields are valid.","vi":"Tester đã đăng nhập và mọi field bắt buộc hợp lệ."},"testData":{"en":"Valid bug with no selected assignee.","vi":"Bug hợp lệ nhưng không chọn assignee."},
-      "steps":{"en":["Create a valid bug.","Leave assignee unselected.","Submit and reload.","Inspect status and Current Action Owner."],"vi":["Tạo bug hợp lệ.","Không chọn assignee.","Submit và reload.","Kiểm tra status và Current Action Owner."]},
-      "expectedResult":{"en":"Bug is Pending Assignment; no Developer is selected automatically; PM/Tester queue owns the next action.","vi":"Bug ở Pending Assignment; không Developer nào được tự chọn; PM/Tester queue nhận action tiếp theo."},"actualResult":{"en":"","vi":""},"status":"NOT_RUN","environment":"Shared QA Fiori + OData","executor":"","executionDate":"","automationCommand":"","evidenceLinks":[],"defectIds":[],"limitations":{"en":"Needs fresh create/reload evidence.","vi":"Cần evidence create/reload mới."},"postcondition":{"en":"Bug awaits explicit assignment.","vi":"Bug chờ assignment rõ ràng."}
+      "caseId": "FT-PENDING-001",
+      "testType": "FUNCTIONAL_UI_API",
+      "requirementIds": [
+        "SRS-FR-ASSIGN-003",
+        "SRS-FR-STATUS-009"
+      ],
+      "classification": "BOUNDARY",
+      "priority": "HIGH",
+      "title": {
+        "en": "Create without an assignee",
+        "vi": "Tạo bug không có assignee"
+      },
+      "objective": {
+        "en": "Verify the system does not auto-pick a Developer and creates Pending Assignment.",
+        "vi": "Xác minh hệ thống không tự chọn Developer và tạo Pending Assignment."
+      },
+      "role": "Tester",
+      "preconditions": {
+        "en": "Tester is authenticated and all required bug fields are valid.",
+        "vi": "Tester đã đăng nhập và mọi field bắt buộc hợp lệ."
+      },
+      "testData": {
+        "en": "Valid bug with no selected assignee.",
+        "vi": "Bug hợp lệ nhưng không chọn assignee."
+      },
+      "steps": {
+        "en": [
+          "Create a valid bug.",
+          "Leave assignee unselected.",
+          "Submit and reload.",
+          "Inspect status and Current Action Owner."
+        ],
+        "vi": [
+          "Tạo bug hợp lệ.",
+          "Không chọn assignee.",
+          "Submit và reload.",
+          "Kiểm tra status và Current Action Owner."
+        ]
+      },
+      "expectedResult": {
+        "en": "Bug is Pending Assignment; no Developer is selected automatically; PM/Tester queue owns the next action.",
+        "vi": "Bug ở Pending Assignment; không Developer nào được tự chọn; PM/Tester queue nhận action tiếp theo."
+      },
+      "actualResult": {
+        "en": "Passed on Render Shared QA. Activating a valid draft without an assignee produced PENDING_ASSIGNMENT, no assignee, and PM as the next processing role.",
+        "vi": "??t tr?n Render Shared QA. Activate draft h?p l? kh?ng c? assignee t?o tr?ng th?i PENDING_ASSIGNMENT, kh?ng c? assignee v? PM l? vai tr? x? l? ti?p theo."
+      },
+      "status": "PASSED",
+      "environment": "Render Shared QA",
+      "executor": "IDTS-100 automated acceptance under DonHV",
+      "executionDate": "2026-07-24T20:42:48+07:00",
+      "automationCommand": "node scripts/qa/test-idts100-shared-qa-lifecycle.js and focused browser/API harnesses",
+      "evidenceLinks": [
+        "docs/pm/evidence/idts-100/shared-qa-lifecycle/shared-qa-lifecycle.json"
+      ],
+      "defectIds": [],
+      "limitations": {
+        "en": "Agent-executed acceptance evidence; formal human UAT sign-off is tracked separately.",
+        "vi": "Evidence acceptance do agent th?c thi; x?c nh?n UAT ch?nh th?c c?a con ng??i ???c theo d?i ri?ng."
+      },
+      "postcondition": {
+        "en": "Bug awaits explicit assignment.",
+        "vi": "Bug chờ assignment rõ ràng."
+      }
     },
     {
-      "caseId":"FT-REASSIGN-001","testType":"FUNCTIONAL_UI_API","requirementIds":["SRS-FR-ASSIGN-004","SRS-FR-AUDIT-001"],"classification":"POSITIVE_AUTHORIZATION","priority":"HIGH",
-      "title":{"en":"Reassign with history","vi":"Reassign có history"},"objective":{"en":"Verify authorized reassignment replaces one technical owner and records history.","vi":"Xác minh reassign có quyền thay một technical owner và ghi history."},"role":"Tester / PM",
-      "preconditions":{"en":"Assigned bug and a second suitable Developer exist.","vi":"Có bug đã assign và Developer phù hợp thứ hai."},"testData":{"en":"Reason: workload balancing.","vi":"Lý do: cân bằng workload."},
-      "steps":{"en":["Open the assigned bug.","Choose another suitable Developer.","Save with reassignment reason.","Reload ownership and History."],"vi":["Mở bug đã assign.","Chọn Developer phù hợp khác.","Lưu kèm lý do reassign.","Reload ownership và History."]},
-      "expectedResult":{"en":"Exactly one assignee remains; history names actor, old/new owner, reason and timestamp.","vi":"Chỉ còn một assignee; history có actor, owner cũ/mới, lý do và timestamp."},"actualResult":{"en":"","vi":""},"status":"NOT_RUN","environment":"Shared QA Fiori + OData","executor":"","executionDate":"","automationCommand":"","evidenceLinks":[],"defectIds":[],"limitations":{"en":"PM direct-reassign authorization remains a documented decision dependency; execute with a role allowed by current runtime.","vi":"Quyền PM reassign trực tiếp vẫn phụ thuộc decision đã ghi; chạy bằng role runtime hiện cho phép."},"postcondition":{"en":"New Developer is technical owner.","vi":"Developer mới là technical owner."}
+      "caseId": "FT-REASSIGN-001",
+      "testType": "FUNCTIONAL_UI_API",
+      "requirementIds": [
+        "SRS-FR-ASSIGN-004",
+        "SRS-FR-AUDIT-001"
+      ],
+      "classification": "POSITIVE_AUTHORIZATION",
+      "priority": "HIGH",
+      "title": {
+        "en": "Reassign with history",
+        "vi": "Reassign có history"
+      },
+      "objective": {
+        "en": "Verify authorized reassignment replaces one technical owner and records history.",
+        "vi": "Xác minh reassign có quyền thay một technical owner và ghi history."
+      },
+      "role": "Tester / PM",
+      "preconditions": {
+        "en": "Assigned bug and a second suitable Developer exist.",
+        "vi": "Có bug đã assign và Developer phù hợp thứ hai."
+      },
+      "testData": {
+        "en": "Reason: workload balancing.",
+        "vi": "Lý do: cân bằng workload."
+      },
+      "steps": {
+        "en": [
+          "Open the assigned bug.",
+          "Choose another suitable Developer.",
+          "Save with reassignment reason.",
+          "Reload ownership and History."
+        ],
+        "vi": [
+          "Mở bug đã assign.",
+          "Chọn Developer phù hợp khác.",
+          "Lưu kèm lý do reassign.",
+          "Reload ownership và History."
+        ]
+      },
+      "expectedResult": {
+        "en": "Exactly one assignee remains; history names actor, old/new owner, reason and timestamp.",
+        "vi": "Chỉ còn một assignee; history có actor, owner cũ/mới, lý do và timestamp."
+      },
+      "actualResult": {
+        "en": "Passed on Render Shared QA. The bug moved through rejection to Pending Assignment, cleared the assignee, was reassigned, and retained exact history action types.",
+        "vi": "??t tr?n Render Shared QA. Bug ?i t? Rejected v? Pending Assignment, x?a assignee, ???c assign l?i v? gi? ??ng action type trong history."
+      },
+      "status": "PASSED",
+      "environment": "Render Shared QA",
+      "executor": "IDTS-100 automated acceptance under DonHV",
+      "executionDate": "2026-07-24T20:42:48+07:00",
+      "automationCommand": "node scripts/qa/test-idts100-shared-qa-lifecycle.js and focused browser/API harnesses",
+      "evidenceLinks": [
+        "docs/pm/evidence/idts-100/shared-qa-lifecycle/shared-qa-lifecycle.json"
+      ],
+      "defectIds": [],
+      "limitations": {
+        "en": "Agent-executed acceptance evidence; formal human UAT sign-off is tracked separately.",
+        "vi": "Evidence acceptance do agent th?c thi; x?c nh?n UAT ch?nh th?c c?a con ng??i ???c theo d?i ri?ng."
+      },
+      "postcondition": {
+        "en": "New Developer is technical owner.",
+        "vi": "Developer mới là technical owner."
+      }
     },
     {
-      "caseId":"FT-DEV-INFO-001","testType":"FUNCTIONAL_UI_API","requirementIds":["SRS-FR-STATUS-001","SRS-FR-STATUS-002","SRS-FR-STATUS-009"],"classification":"POSITIVE_NEGATIVE_AUTHORIZATION","priority":"HIGH",
-      "title":{"en":"Developer review and Request More Information","vi":"Developer review và Request More Information"},"objective":{"en":"Verify only the assigned/authorized Developer can request information and a reason is required.","vi":"Xác minh chỉ Developer được assign/có quyền mới request information và bắt buộc reason."},"role":"Developer",
-      "preconditions":{"en":"Assigned bug; assigned and non-assigned Developer accounts.","vi":"Bug đã assign; có account Developer được assign và không được assign."},"testData":{"en":"Reason: missing browser version and exact reproduction step.","vi":"Lý do: thiếu phiên bản browser và bước tái hiện chính xác."},
-      "steps":{"en":["Open as non-assigned Developer and try the action.","Open as assigned Developer and submit blank reason.","Submit the valid reason.","Reload status, owner, notification and history."],"vi":["Mở bằng Developer không được assign và thử action.","Mở bằng Developer được assign và gửi reason rỗng.","Gửi reason hợp lệ.","Reload status, owner, notification và history."]},
-      "expectedResult":{"en":"Wrong role/owner and blank reason are blocked; valid action sets Need More Information and Tester action ownership with audit/notification.","vi":"Sai role/owner và reason rỗng bị chặn; action hợp lệ set Need More Information và Tester action owner cùng audit/notification."},"actualResult":{"en":"","vi":""},"status":"NOT_RUN","environment":"Shared QA Fiori + OData","executor":"","executionDate":"","automationCommand":"","evidenceLinks":[],"defectIds":[],"limitations":{"en":"Needs fresh role matrix and reload evidence.","vi":"Cần evidence role matrix và reload mới."},"postcondition":{"en":"Tester must provide information and resubmit.","vi":"Tester phải bổ sung thông tin và resubmit."}
+      "caseId": "FT-DEV-INFO-001",
+      "testType": "FUNCTIONAL_UI_API",
+      "requirementIds": [
+        "SRS-FR-STATUS-001",
+        "SRS-FR-STATUS-002",
+        "SRS-FR-STATUS-009"
+      ],
+      "classification": "POSITIVE_NEGATIVE_AUTHORIZATION",
+      "priority": "HIGH",
+      "title": {
+        "en": "Developer review and Request More Information",
+        "vi": "Developer review và Request More Information"
+      },
+      "objective": {
+        "en": "Verify only the assigned/authorized Developer can request information and a reason is required.",
+        "vi": "Xác minh chỉ Developer được assign/có quyền mới request information và bắt buộc reason."
+      },
+      "role": "Developer",
+      "preconditions": {
+        "en": "Assigned bug; assigned and non-assigned Developer accounts.",
+        "vi": "Bug đã assign; có account Developer được assign và không được assign."
+      },
+      "testData": {
+        "en": "Reason: missing browser version and exact reproduction step.",
+        "vi": "Lý do: thiếu phiên bản browser và bước tái hiện chính xác."
+      },
+      "steps": {
+        "en": [
+          "Open as non-assigned Developer and try the action.",
+          "Open as assigned Developer and submit blank reason.",
+          "Submit the valid reason.",
+          "Reload status, owner, notification and history."
+        ],
+        "vi": [
+          "Mở bằng Developer không được assign và thử action.",
+          "Mở bằng Developer được assign và gửi reason rỗng.",
+          "Gửi reason hợp lệ.",
+          "Reload status, owner, notification và history."
+        ]
+      },
+      "expectedResult": {
+        "en": "Wrong role/owner and blank reason are blocked; valid action sets Need More Information and Tester action ownership with audit/notification.",
+        "vi": "Sai role/owner và reason rỗng bị chặn; action hợp lệ set Need More Information và Tester action owner cùng audit/notification."
+      },
+      "actualResult": {
+        "en": "Passed on Render Shared QA. The assigned Developer requested more information, a blank reason returned 400, and the Tester resubmitted the bug to the same Developer.",
+        "vi": "??t tr?n Render Shared QA. Developer ???c assign y?u c?u th?m th?ng tin, reason r?ng tr? 400 v? Tester resubmit Bug v? ??ng Developer."
+      },
+      "status": "PASSED",
+      "environment": "Render Shared QA",
+      "executor": "IDTS-100 automated acceptance under DonHV",
+      "executionDate": "2026-07-24T20:42:48+07:00",
+      "automationCommand": "node scripts/qa/test-idts100-shared-qa-lifecycle.js and focused browser/API harnesses",
+      "evidenceLinks": [
+        "docs/pm/evidence/idts-100/shared-qa-lifecycle/shared-qa-lifecycle.json",
+        "docs/pm/evidence/idts-100/shared-qa-email-brevo-20260724.md"
+      ],
+      "defectIds": [],
+      "limitations": {
+        "en": "Agent-executed acceptance evidence; formal human UAT sign-off is tracked separately.",
+        "vi": "Evidence acceptance do agent th?c thi; x?c nh?n UAT ch?nh th?c c?a con ng??i ???c theo d?i ri?ng."
+      },
+      "postcondition": {
+        "en": "Tester must provide information and resubmit.",
+        "vi": "Tester phải bổ sung thông tin và resubmit."
+      }
     },
     {
-      "caseId":"FT-REJECT-001","testType":"FUNCTIONAL_UI_API","requirementIds":["SRS-FR-STATUS-003","SRS-FR-STATUS-004","SRS-FR-STATUS-009"],"classification":"POSITIVE_NEGATIVE","priority":"HIGH",
-      "title":{"en":"Reject, correct and reassign","vi":"Reject, sửa và reassign"},"objective":{"en":"Verify rejection is non-terminal and requires reason plus follow-up ownership.","vi":"Xác minh rejection không phải terminal và cần reason cùng follow-up owner."},"role":"Developer / Tester",
-      "preconditions":{"en":"Assigned bug with unsuitable classification or owner.","vi":"Bug đã assign nhưng classification hoặc owner không phù hợp."},"testData":{"en":"Reason: component is Notification, not Dashboard.","vi":"Lý do: component là Notification, không phải Dashboard."},
-      "steps":{"en":["Reject without reason and confirm validation.","Reject with the specific reason.","Reload status/history/current owner.","As Tester, correct classification and reassign or choose Pending Assignment.","Reload again."],"vi":["Reject không reason và xác nhận validation.","Reject với reason cụ thể.","Reload status/history/current owner.","Bằng Tester, sửa classification và reassign hoặc chọn Pending Assignment.","Reload lại."]},
-      "expectedResult":{"en":"Blank reason is blocked; valid rejection records follow-up; correction leaves Rejected through Assigned or Pending Assignment, never directly Need More Information.","vi":"Reason rỗng bị chặn; rejection hợp lệ ghi follow-up; sau sửa rời Rejected qua Assigned hoặc Pending Assignment, không đi thẳng Need More Information."},"actualResult":{"en":"","vi":""},"status":"NOT_RUN","environment":"Shared QA Fiori + OData","executor":"","executionDate":"","automationCommand":"","evidenceLinks":[],"defectIds":[],"limitations":{"en":"Needs full UI/API lifecycle evidence.","vi":"Cần evidence lifecycle UI/API đầy đủ."},"postcondition":{"en":"Bug has a clear next technical/queue owner.","vi":"Bug có technical/queue owner tiếp theo rõ ràng."}
+      "caseId": "FT-REJECT-001",
+      "testType": "FUNCTIONAL_UI_API",
+      "requirementIds": [
+        "SRS-FR-STATUS-003",
+        "SRS-FR-STATUS-004",
+        "SRS-FR-STATUS-009"
+      ],
+      "classification": "POSITIVE_NEGATIVE",
+      "priority": "HIGH",
+      "title": {
+        "en": "Reject, correct and reassign",
+        "vi": "Reject, sửa và reassign"
+      },
+      "objective": {
+        "en": "Verify rejection is non-terminal and requires reason plus follow-up ownership.",
+        "vi": "Xác minh rejection không phải terminal và cần reason cùng follow-up owner."
+      },
+      "role": "Developer / Tester",
+      "preconditions": {
+        "en": "Assigned bug with unsuitable classification or owner.",
+        "vi": "Bug đã assign nhưng classification hoặc owner không phù hợp."
+      },
+      "testData": {
+        "en": "Reason: component is Notification, not Dashboard.",
+        "vi": "Lý do: component là Notification, không phải Dashboard."
+      },
+      "steps": {
+        "en": [
+          "Reject without reason and confirm validation.",
+          "Reject with the specific reason.",
+          "Reload status/history/current owner.",
+          "As Tester, correct classification and reassign or choose Pending Assignment.",
+          "Reload again."
+        ],
+        "vi": [
+          "Reject không reason và xác nhận validation.",
+          "Reject với reason cụ thể.",
+          "Reload status/history/current owner.",
+          "Bằng Tester, sửa classification và reassign hoặc chọn Pending Assignment.",
+          "Reload lại."
+        ]
+      },
+      "expectedResult": {
+        "en": "Blank reason is blocked; valid rejection records follow-up; correction leaves Rejected through Assigned or Pending Assignment, never directly Need More Information.",
+        "vi": "Reason rỗng bị chặn; rejection hợp lệ ghi follow-up; sau sửa rời Rejected qua Assigned hoặc Pending Assignment, không đi thẳng Need More Information."
+      },
+      "actualResult": {
+        "en": "Passed on Render Shared QA. The assigned Developer rejected with a reason; PM returned the bug to the assignment queue and completed correction follow-up by reassigning it.",
+        "vi": "??t tr?n Render Shared QA. Developer ???c assign reject k?m l? do; PM ??a Bug v? h?ng ??i assignment v? ho?n t?t correction follow-up b?ng reassign."
+      },
+      "status": "PASSED",
+      "environment": "Render Shared QA",
+      "executor": "IDTS-100 automated acceptance under DonHV",
+      "executionDate": "2026-07-24T20:42:48+07:00",
+      "automationCommand": "node scripts/qa/test-idts100-shared-qa-lifecycle.js and focused browser/API harnesses",
+      "evidenceLinks": [
+        "docs/pm/evidence/idts-100/shared-qa-lifecycle/shared-qa-lifecycle.json",
+        "docs/pm/evidence/idts-100/shared-qa-email-brevo-20260724.md"
+      ],
+      "defectIds": [],
+      "limitations": {
+        "en": "Agent-executed acceptance evidence; formal human UAT sign-off is tracked separately.",
+        "vi": "Evidence acceptance do agent th?c thi; x?c nh?n UAT ch?nh th?c c?a con ng??i ???c theo d?i ri?ng."
+      },
+      "postcondition": {
+        "en": "Bug has a clear next technical/queue owner.",
+        "vi": "Bug có technical/queue owner tiếp theo rõ ràng."
+      }
     },
     {
-      "caseId":"FT-LIFECYCLE-001","testType":"FUNCTIONAL_UI_API","requirementIds":["SRS-FR-STATUS-005","SRS-FR-STATUS-006","SRS-FR-STATUS-007","SRS-FR-STATUS-008"],"classification":"POSITIVE_NEGATIVE","priority":"HIGH",
-      "title":{"en":"Resolve, retest, close and reopen","vi":"Resolve, retest, close và reopen"},"objective":{"en":"Verify the controlled end-of-life flow and retest outcomes.","vi":"Xác minh flow cuối vòng đời có kiểm soát và kết quả retest."},"role":"Developer / Tester / PM",
-      "preconditions":{"en":"Bug is In Progress and reproducible.","vi":"Bug đang In Progress và tái hiện được."},"testData":{"en":"Resolution note plus one passing and one failing retest observation.","vi":"Resolution note cùng một observation retest pass và một fail."},
-      "steps":{"en":["Developer resolves with note.","Tester/PM moves to Retest Required.","Record passing retest and close; reload.","On a second bug, record failing retest and reopen; reload."],"vi":["Developer resolve kèm note.","Tester/PM chuyển Retest Required.","Ghi retest pass và close; reload.","Trên bug thứ hai, ghi retest fail và reopen; reload."]},
-      "expectedResult":{"en":"Pass reaches Closed; fail reaches Reopened; required notes, owners and audit remain consistent after reload.","vi":"Pass đến Closed; fail đến Reopened; note bắt buộc, owner và audit nhất quán sau reload."},"actualResult":{"en":"","vi":""},"status":"NOT_RUN","environment":"Shared QA Fiori + OData","executor":"","executionDate":"","automationCommand":"","evidenceLinks":[],"defectIds":[],"limitations":{"en":"No fresh full lifecycle execution in this remediation.","vi":"Chưa chạy mới full lifecycle trong remediation này."},"postcondition":{"en":"Closed has no next processor; Reopened returns to active handling.","vi":"Closed không có next processor; Reopened quay lại xử lý active."}
+      "caseId": "FT-LIFECYCLE-001",
+      "testType": "FUNCTIONAL_UI_API",
+      "requirementIds": [
+        "SRS-FR-STATUS-005",
+        "SRS-FR-STATUS-006",
+        "SRS-FR-STATUS-007",
+        "SRS-FR-STATUS-008"
+      ],
+      "classification": "POSITIVE_NEGATIVE",
+      "priority": "HIGH",
+      "title": {
+        "en": "Resolve, retest, close and reopen",
+        "vi": "Resolve, retest, close và reopen"
+      },
+      "objective": {
+        "en": "Verify the controlled end-of-life flow and retest outcomes.",
+        "vi": "Xác minh flow cuối vòng đời có kiểm soát và kết quả retest."
+      },
+      "role": "Developer / Tester / PM",
+      "preconditions": {
+        "en": "Bug is In Progress and reproducible.",
+        "vi": "Bug đang In Progress và tái hiện được."
+      },
+      "testData": {
+        "en": "Resolution note plus one passing and one failing retest observation.",
+        "vi": "Resolution note cùng một observation retest pass và một fail."
+      },
+      "steps": {
+        "en": [
+          "Developer resolves with note.",
+          "Tester/PM moves to Retest Required.",
+          "Record passing retest and close; reload.",
+          "On a second bug, record failing retest and reopen; reload."
+        ],
+        "vi": [
+          "Developer resolve kèm note.",
+          "Tester/PM chuyển Retest Required.",
+          "Ghi retest pass và close; reload.",
+          "Trên bug thứ hai, ghi retest fail và reopen; reload."
+        ]
+      },
+      "expectedResult": {
+        "en": "Pass reaches Closed; fail reaches Reopened; required notes, owners and audit remain consistent after reload.",
+        "vi": "Pass đến Closed; fail đến Reopened; note bắt buộc, owner và audit nhất quán sau reload."
+      },
+      "actualResult": {
+        "en": "Passed on Render Shared QA across PM, Tester and Developer sessions: assign, review, progress, information request, resubmit, resolve, retest, close, reopen, reject and reassign all persisted with exact history and notification side effects.",
+        "vi": "??t tr?n Render Shared QA v?i session PM, Tester v? Developer: assign, review, progress, y?u c?u th?ng tin, resubmit, resolve, retest, close, reopen, reject v? reassign ??u persist c?ng history ch?nh x?c v? notification side effect."
+      },
+      "status": "PASSED",
+      "environment": "Render Shared QA",
+      "executor": "IDTS-100 automated acceptance under DonHV",
+      "executionDate": "2026-07-24T20:42:48+07:00",
+      "automationCommand": "node scripts/qa/test-idts100-shared-qa-lifecycle.js and focused browser/API harnesses",
+      "evidenceLinks": [
+        "docs/pm/evidence/idts-100/shared-qa-lifecycle/shared-qa-lifecycle.json",
+        "docs/pm/evidence/idts-100/shared-qa-email-brevo-20260724.md"
+      ],
+      "defectIds": [],
+      "limitations": {
+        "en": "Agent-executed acceptance evidence; formal human UAT sign-off is tracked separately.",
+        "vi": "Evidence acceptance do agent th?c thi; x?c nh?n UAT ch?nh th?c c?a con ng??i ???c theo d?i ri?ng."
+      },
+      "postcondition": {
+        "en": "Closed has no next processor; Reopened returns to active handling.",
+        "vi": "Closed không có next processor; Reopened quay lại xử lý active."
+      }
     },
     {
-      "caseId":"FT-COMMENT-001","testType":"FUNCTIONAL_API","requirementIds":["SRS-FR-COMMENT-001","SRS-FR-COMMENT-002"],"classification":"POSITIVE_PERSISTENCE","priority":"HIGH",
-      "title":{"en":"Add comment and retain it after reconnect","vi":"Thêm comment và giữ lại sau reconnect"},"objective":{"en":"Verify comment creation and file-backed SQLite persistence without changing status.","vi":"Xác minh tạo comment và persistence SQLite file mà không đổi status."},"role":"Tester",
-      "preconditions":{"en":"Existing bug and file-backed test database.","vi":"Có bug và test database dạng file."},"testData":{"en":"Unique sanitized comment marker.","vi":"Comment marker duy nhất đã sanitize."},
-      "steps":{"en":["Add a comment through the bound action.","Read the comment row.","Reconnect to the same SQLite file.","Read the row again and compare bug status."],"vi":["Thêm comment qua bound action.","Đọc comment row.","Kết nối lại cùng file SQLite.","Đọc lại row và so sánh status bug."]},
-      "expectedResult":{"en":"Comment remains after reconnect and does not directly change bug status.","vi":"Comment còn sau reconnect và không trực tiếp đổi status bug."},"actualResult":{"en":"Passed: row created and retained after reconnect.","vi":"Đạt: row được tạo và còn sau reconnect."},"status":"PASSED","environment":"Local CAP; file-backed SQLite","executor":"DonHV","executionDate":"2026-07-23T10:59:13+07:00","automationCommand":"npm run qa:comments-attachments:programmatic","evidenceLinks":["scripts/qa/test-comments-attachments-programmatic.js"],"defectIds":["IDTS-55"],"limitations":{"en":"No fresh Fiori visual comment evidence.","vi":"Chưa có evidence visual comment Fiori mới."},"postcondition":{"en":"Test database remains under ignored .tmp.","vi":"Test database nằm trong .tmp bị ignore."}
+      "caseId": "FT-COMMENT-001",
+      "testType": "FUNCTIONAL_API",
+      "requirementIds": [
+        "SRS-FR-COMMENT-001",
+        "SRS-FR-COMMENT-002"
+      ],
+      "classification": "POSITIVE_PERSISTENCE",
+      "priority": "HIGH",
+      "title": {
+        "en": "Add comment and retain it after reconnect",
+        "vi": "Thêm comment và giữ lại sau reconnect"
+      },
+      "objective": {
+        "en": "Verify comment creation and file-backed SQLite persistence without changing status.",
+        "vi": "Xác minh tạo comment và persistence SQLite file mà không đổi status."
+      },
+      "role": "Tester",
+      "preconditions": {
+        "en": "Existing bug and file-backed test database.",
+        "vi": "Có bug và test database dạng file."
+      },
+      "testData": {
+        "en": "Unique sanitized comment marker.",
+        "vi": "Comment marker duy nhất đã sanitize."
+      },
+      "steps": {
+        "en": [
+          "Add a comment through the bound action.",
+          "Read the comment row.",
+          "Reconnect to the same SQLite file.",
+          "Read the row again and compare bug status."
+        ],
+        "vi": [
+          "Thêm comment qua bound action.",
+          "Đọc comment row.",
+          "Kết nối lại cùng file SQLite.",
+          "Đọc lại row và so sánh status bug."
+        ]
+      },
+      "expectedResult": {
+        "en": "Comment remains after reconnect and does not directly change bug status.",
+        "vi": "Comment còn sau reconnect và không trực tiếp đổi status bug."
+      },
+      "actualResult": {
+        "en": "Passed: row created and retained after reconnect.",
+        "vi": "Đạt: row được tạo và còn sau reconnect."
+      },
+      "status": "PASSED",
+      "environment": "Local CAP; file-backed SQLite",
+      "executor": "DonHV",
+      "executionDate": "2026-07-23T10:59:13+07:00",
+      "automationCommand": "npm run qa:comments-attachments:programmatic",
+      "evidenceLinks": [
+        "scripts/qa/test-comments-attachments-programmatic.js"
+      ],
+      "defectIds": [
+        "IDTS-55"
+      ],
+      "limitations": {
+        "en": "No fresh Fiori visual comment evidence.",
+        "vi": "Chưa có evidence visual comment Fiori mới."
+      },
+      "postcondition": {
+        "en": "Test database remains under ignored .tmp.",
+        "vi": "Test database nằm trong .tmp bị ignore."
+      }
     },
     {
-      "caseId":"FT-ATTACH-001","testType":"FUNCTIONAL_HTTP_UI","requirementIds":["SRS-DATA-007","SRS-FR-AUDIT-001"],"classification":"POSITIVE_NEGATIVE_PERSISTENCE","priority":"HIGH",
-      "title":{"en":"Upload, download, reload and delete an attachment","vi":"Upload, download, reload và xóa attachment"},"objective":{"en":"Verify draft-root attachment persistence, MIME/size validation, history and cleanup.","vi":"Xác minh persistence attachment qua draft root, MIME/size validation, history và cleanup."},"role":"Tester",
-      "preconditions":{"en":"Authenticated Tester, existing bug and allowed small evidence file.","vi":"Tester đã đăng nhập, có bug và file evidence nhỏ được phép."},"testData":{"en":"Small text/image file, disallowed MIME variant and over-limit boundary file.","vi":"File text/image nhỏ, biến thể MIME không cho phép và file vượt giới hạn."},
-      "steps":{"en":["Edit the root draft and upload allowed evidence.","Activate and reload.","Download and compare content.","Try invalid MIME/size variants.","Delete and verify metadata/object/history cleanup."],"vi":["Edit root draft và upload evidence hợp lệ.","Activate và reload.","Download và so sánh nội dung.","Thử biến thể MIME/size sai.","Xóa và kiểm tra cleanup metadata/object/history."]},
-      "expectedResult":{"en":"Allowed evidence persists and downloads; invalid variants are blocked; delete cleans storage and records history.","vi":"Evidence hợp lệ persist và download được; biến thể sai bị chặn; delete dọn storage và ghi history."},"actualResult":{"en":"","vi":""},"status":"NOT_RUN","environment":"Local/shared QA HTTP + configured storage","executor":"","executionDate":"","automationCommand":"npm run qa:comments-attachments:http","evidenceLinks":["scripts/qa/test-comments-attachments.ps1"],"defectIds":["IDTS-55"],"limitations":{"en":"The required HTTP command was not run in this remediation; the programmatic comments suite only printed an attachment note.","vi":"Command HTTP bắt buộc chưa chạy trong remediation; suite comments programmatic chỉ in note attachment."},"postcondition":{"en":"No orphan attachment remains.","vi":"Không còn attachment mồ côi."}
+      "caseId": "FT-ATTACH-001",
+      "testType": "FUNCTIONAL_HTTP_UI",
+      "requirementIds": [
+        "SRS-DATA-007",
+        "SRS-FR-AUDIT-001"
+      ],
+      "classification": "POSITIVE_NEGATIVE_PERSISTENCE",
+      "priority": "HIGH",
+      "title": {
+        "en": "Upload, download, reload and delete an attachment",
+        "vi": "Upload, download, reload và xóa attachment"
+      },
+      "objective": {
+        "en": "Verify draft-root attachment persistence, MIME/size validation, history and cleanup.",
+        "vi": "Xác minh persistence attachment qua draft root, MIME/size validation, history và cleanup."
+      },
+      "role": "Tester",
+      "preconditions": {
+        "en": "Authenticated Tester, existing bug and allowed small evidence file.",
+        "vi": "Tester đã đăng nhập, có bug và file evidence nhỏ được phép."
+      },
+      "testData": {
+        "en": "Small text/image file, disallowed MIME variant and over-limit boundary file.",
+        "vi": "File text/image nhỏ, biến thể MIME không cho phép và file vượt giới hạn."
+      },
+      "steps": {
+        "en": [
+          "Edit the root draft and upload allowed evidence.",
+          "Activate and reload.",
+          "Download and compare content.",
+          "Try invalid MIME/size variants.",
+          "Delete and verify metadata/object/history cleanup."
+        ],
+        "vi": [
+          "Edit root draft và upload evidence hợp lệ.",
+          "Activate và reload.",
+          "Download và so sánh nội dung.",
+          "Thử biến thể MIME/size sai.",
+          "Xóa và kiểm tra cleanup metadata/object/history."
+        ]
+      },
+      "expectedResult": {
+        "en": "Allowed evidence persists and downloads; invalid variants are blocked; delete cleans storage and records history.",
+        "vi": "Evidence hợp lệ persist và download được; biến thể sai bị chặn; delete dọn storage và ghi history."
+      },
+      "actualResult": {
+        "en": "Passed on Render Shared QA. Two files selected before save were uploaded after activation, downloaded with matching SHA-256, persisted after redeploy, and one attachment was deleted with the subsequent download returning 404.",
+        "vi": "??t tr?n Render Shared QA. Hai file ch?n tr??c khi save ???c upload sau activation, download c? SHA-256 kh?p, c?n sau redeploy; m?t attachment ???c x?a v? l?n download sau tr? 404."
+      },
+      "status": "PASSED",
+      "environment": "Render Shared QA",
+      "executor": "IDTS-100 automated acceptance under DonHV",
+      "executionDate": "2026-07-24T20:42:48+07:00",
+      "automationCommand": "npm run qa:idts73:browser + supported OData delete verification",
+      "evidenceLinks": [
+        "docs/pm/evidence/idts-100/shared-qa-attachments/idts73-create-attachments-browser.json",
+        "docs/pm/evidence/idts-100/shared-qa-attachments/delete-verification-20260724.md"
+      ],
+      "defectIds": [
+        "IDTS-55"
+      ],
+      "limitations": {
+        "en": "Agent-executed acceptance evidence; formal human UAT sign-off is tracked separately.",
+        "vi": "Evidence acceptance do agent th?c thi; x?c nh?n UAT ch?nh th?c c?a con ng??i ???c theo d?i ri?ng."
+      },
+      "postcondition": {
+        "en": "No orphan attachment remains.",
+        "vi": "Không còn attachment mồ côi."
+      }
     },
     {
-      "caseId":"FT-NOTIF-001","testType":"FUNCTIONAL_INTEGRATION","requirementIds":["SRS-FR-NOTIF-001","SRS-FR-NOTIF-002","SRS-FR-DELIVERY-001"],"classification":"POSITIVE_NEGATIVE_FAILURE_RECOVERY","priority":"HIGH",
-      "title":{"en":"Notification outbox success, failure, retry and rollback isolation","vi":"Notification outbox success, failure, retry và rollback isolation"},"objective":{"en":"Verify in-app notification and email delivery states remain transactionally safe.","vi":"Xác minh notification trong app và trạng thái email delivery an toàn theo transaction."},"role":"System / Tester",
-      "preconditions":{"en":"Seeded bug and recipient; controlled fake transport.","vi":"Có bug và recipient seed; fake transport có kiểm soát."},"testData":{"en":"Enabled, disabled, inactive-recipient, success and secret-bearing failure variants.","vi":"Biến thể enabled, disabled, recipient inactive, success và failure chứa secret giả."},
-      "steps":{"en":["Create notification/outbox rows.","Process success and failure variants.","Advance retry and process again.","Inspect sanitized fields and OData shape.","Force business rollback and confirm rows roll back."],"vi":["Tạo notification/outbox row.","Xử lý biến thể success và failure.","Đến thời điểm retry và xử lý lại.","Kiểm tra field đã sanitize và OData shape.","Ép business rollback và xác nhận row rollback."]},
-      "expectedResult":{"en":"States are PENDING/SENT/FAILED/SKIPPED as applicable; retry succeeds; provider failure does not expose secrets or corrupt workflow.","vi":"State là PENDING/SENT/FAILED/SKIPPED phù hợp; retry thành công; lỗi provider không lộ secret hoặc làm hỏng workflow."},"actualResult":{"en":"Passed with 58 assertion calls using controlled transport.","vi":"Đạt với 58 assertion bằng transport có kiểm soát."},"status":"PASSED","environment":"Local CAP; in-memory SQLite; fake transport","executor":"DonHV","executionDate":"2026-07-23T10:58:52+07:00","automationCommand":"npm run qa:email-outbox:programmatic","evidenceLinks":["scripts/qa/test-email-outbox-programmatic.js"],"defectIds":[],"limitations":{"en":"Live provider delivery was not run; local disabled delivery is SKIPPED.","vi":"Không chạy provider live; delivery local bị tắt là SKIPPED."},"postcondition":{"en":"Only controlled local rows existed.","vi":"Chỉ có row local được kiểm soát."}
+      "caseId": "FT-NOTIF-001",
+      "testType": "FUNCTIONAL_INTEGRATION",
+      "requirementIds": [
+        "SRS-FR-NOTIF-001",
+        "SRS-FR-NOTIF-002",
+        "SRS-FR-DELIVERY-001"
+      ],
+      "classification": "POSITIVE_NEGATIVE_FAILURE_RECOVERY",
+      "priority": "HIGH",
+      "title": {
+        "en": "Notification outbox success, failure, retry and rollback isolation",
+        "vi": "Notification outbox success, failure, retry và rollback isolation"
+      },
+      "objective": {
+        "en": "Verify in-app notification and email delivery states remain transactionally safe.",
+        "vi": "Xác minh notification trong app và trạng thái email delivery an toàn theo transaction."
+      },
+      "role": "System / Tester",
+      "preconditions": {
+        "en": "Seeded bug and recipient; controlled fake transport.",
+        "vi": "Có bug và recipient seed; fake transport có kiểm soát."
+      },
+      "testData": {
+        "en": "Enabled, disabled, inactive-recipient, success and secret-bearing failure variants.",
+        "vi": "Biến thể enabled, disabled, recipient inactive, success và failure chứa secret giả."
+      },
+      "steps": {
+        "en": [
+          "Create notification/outbox rows.",
+          "Process success and failure variants.",
+          "Advance retry and process again.",
+          "Inspect sanitized fields and OData shape.",
+          "Force business rollback and confirm rows roll back."
+        ],
+        "vi": [
+          "Tạo notification/outbox row.",
+          "Xử lý biến thể success và failure.",
+          "Đến thời điểm retry và xử lý lại.",
+          "Kiểm tra field đã sanitize và OData shape.",
+          "Ép business rollback và xác nhận row rollback."
+        ]
+      },
+      "expectedResult": {
+        "en": "States are PENDING/SENT/FAILED/SKIPPED as applicable; retry succeeds; provider failure does not expose secrets or corrupt workflow.",
+        "vi": "State là PENDING/SENT/FAILED/SKIPPED phù hợp; retry thành công; lỗi provider không lộ secret hoặc làm hỏng workflow."
+      },
+      "actualResult": {
+        "en": "Passed with 58 assertion calls using controlled transport.",
+        "vi": "Đạt với 58 assertion bằng transport có kiểm soát."
+      },
+      "status": "PASSED",
+      "environment": "Local CAP; in-memory SQLite; fake transport",
+      "executor": "DonHV",
+      "executionDate": "2026-07-23T10:58:52+07:00",
+      "automationCommand": "npm run qa:email-outbox:programmatic",
+      "evidenceLinks": [
+        "scripts/qa/test-email-outbox-programmatic.js"
+      ],
+      "defectIds": [],
+      "limitations": {
+        "en": "Live provider delivery was not run; local disabled delivery is SKIPPED.",
+        "vi": "Không chạy provider live; delivery local bị tắt là SKIPPED."
+      },
+      "postcondition": {
+        "en": "Only controlled local rows existed.",
+        "vi": "Chỉ có row local được kiểm soát."
+      }
     },
     {
-      "caseId":"FT-PM-001","testType":"FUNCTIONAL_API","requirementIds":["SRS-FR-PM-001","SRS-FR-PM-002","SRS-FR-PM-003","SRS-FR-STATUS-009"],"classification":"POSITIVE_BOUNDARY","priority":"HIGH",
-      "title":{"en":"PM monitoring flags, queues and current action owner","vi":"Flag, queue và current action owner cho PM"},"objective":{"en":"Verify monitoring calculations and OData filters for representative states.","vi":"Xác minh calculation monitoring và OData filter cho state đại diện."},"role":"PM",
-      "preconditions":{"en":"Seeded open, closed, pending and rejected bugs.","vi":"Có bug seed open, closed, pending và rejected."},"testData":{"en":"BUG-0001..0004 and one closed QA bug.","vi":"BUG-0001..0004 và một QA bug đã closed."},
-      "steps":{"en":["Read calculated flags.","Filter each monitoring queue.","Read currentActionOwnerDisplayName with sparse selection.","Compare closed-bug boundary behavior."],"vi":["Đọc calculated flag.","Filter từng monitoring queue.","Đọc currentActionOwnerDisplayName với sparse selection.","So sánh boundary bug closed."]},
-      "expectedResult":{"en":"Twenty expected flag/filter/owner checks match; closed bug is not overdue or pending.","vi":"Hai mươi check flag/filter/owner khớp; bug closed không overdue hoặc pending."},"actualResult":{"en":"20/20 passed.","vi":"Đạt 20/20."},"status":"PASSED","environment":"Local CAP; in-memory SQLite","executor":"DonHV","executionDate":"2026-07-23T10:59:01+07:00","automationCommand":"npm run qa:pm-monitoring:programmatic","evidenceLinks":["scripts/qa/test-pm-monitoring-programmatic.js"],"defectIds":[],"limitations":{"en":"No fresh dashboard visual/UX check.","vi":"Chưa check visual/UX dashboard mới."},"postcondition":{"en":"Read-only monitoring changed no business data.","vi":"Monitoring read-only không đổi business data."}
+      "caseId": "FT-PM-001",
+      "testType": "FUNCTIONAL_API",
+      "requirementIds": [
+        "SRS-FR-PM-001",
+        "SRS-FR-PM-002",
+        "SRS-FR-PM-003",
+        "SRS-FR-STATUS-009"
+      ],
+      "classification": "POSITIVE_BOUNDARY",
+      "priority": "HIGH",
+      "title": {
+        "en": "PM monitoring flags, queues and current action owner",
+        "vi": "Flag, queue và current action owner cho PM"
+      },
+      "objective": {
+        "en": "Verify monitoring calculations and OData filters for representative states.",
+        "vi": "Xác minh calculation monitoring và OData filter cho state đại diện."
+      },
+      "role": "PM",
+      "preconditions": {
+        "en": "Seeded open, closed, pending and rejected bugs.",
+        "vi": "Có bug seed open, closed, pending và rejected."
+      },
+      "testData": {
+        "en": "BUG-0001..0004 and one closed QA bug.",
+        "vi": "BUG-0001..0004 và một QA bug đã closed."
+      },
+      "steps": {
+        "en": [
+          "Read calculated flags.",
+          "Filter each monitoring queue.",
+          "Read currentActionOwnerDisplayName with sparse selection.",
+          "Compare closed-bug boundary behavior."
+        ],
+        "vi": [
+          "Đọc calculated flag.",
+          "Filter từng monitoring queue.",
+          "Đọc currentActionOwnerDisplayName với sparse selection.",
+          "So sánh boundary bug closed."
+        ]
+      },
+      "expectedResult": {
+        "en": "Twenty expected flag/filter/owner checks match; closed bug is not overdue or pending.",
+        "vi": "Hai mươi check flag/filter/owner khớp; bug closed không overdue hoặc pending."
+      },
+      "actualResult": {
+        "en": "20/20 passed.",
+        "vi": "Đạt 20/20."
+      },
+      "status": "PASSED",
+      "environment": "Local CAP; in-memory SQLite",
+      "executor": "DonHV",
+      "executionDate": "2026-07-23T10:59:01+07:00",
+      "automationCommand": "npm run qa:pm-monitoring:programmatic",
+      "evidenceLinks": [
+        "scripts/qa/test-pm-monitoring-programmatic.js"
+      ],
+      "defectIds": [],
+      "limitations": {
+        "en": "No fresh dashboard visual/UX check.",
+        "vi": "Chưa check visual/UX dashboard mới."
+      },
+      "postcondition": {
+        "en": "Read-only monitoring changed no business data.",
+        "vi": "Monitoring read-only không đổi business data."
+      }
     },
     {
-      "caseId":"FT-AI-REVIEW-001","testType":"FUNCTIONAL_UI_API","requirementIds":["SRS-FR-AI-002","SRS-FR-AI-003"],"classification":"POSITIVE_NEGATIVE_FAILURE_RECOVERY","priority":"HIGH",
-      "title":{"en":"Human reviews AI suggestion without automatic mutation","vi":"Con người review AI suggestion mà không tự động mutation"},"objective":{"en":"Verify accept/ignore/failure paths remain advisory and auditable.","vi":"Xác minh path accept/ignore/failure vẫn advisory và audit được."},"role":"Tester / PM",
-      "preconditions":{"en":"Authenticated user; AI disabled and controlled suggestion modes available.","vi":"User đã đăng nhập; có mode AI disabled và suggestion có kiểm soát."},"testData":{"en":"Similar/classification/handoff suggestion with safe and malformed variants.","vi":"Suggestion similar/classification/handoff với biến thể safe và malformed."},
-      "steps":{"en":["Capture bug values before suggestion.","Open review suggestion.","Ignore it and reload.","Repeat failure/malformed mode.","Confirm bug values unchanged and safe audit/feedback."],"vi":["Ghi giá trị bug trước suggestion.","Mở review suggestion.","Bỏ qua và reload.","Lặp lại mode failure/malformed.","Xác nhận giá trị bug không đổi và audit/feedback an toàn."]},
-      "expectedResult":{"en":"Suggestion never changes assignment, classification or lifecycle automatically; normal workflow remains usable.","vi":"Suggestion không tự đổi assignment, classification hoặc lifecycle; workflow bình thường vẫn dùng được."},"actualResult":{"en":"","vi":""},"status":"NOT_RUN","environment":"Shared QA Fiori + OData","executor":"","executionDate":"","automationCommand":"","evidenceLinks":[],"defectIds":["IDTS-78"],"limitations":{"en":"REG-AI-20260723 proves provider safety only, not this full human-review business flow.","vi":"REG-AI-20260723 chỉ chứng minh provider safety, không phải full business flow human-review này."},"postcondition":{"en":"Bug remains unchanged unless an authorized user separately applies a normal action.","vi":"Bug không đổi trừ khi user có quyền thực hiện action bình thường riêng."}
+      "caseId": "FT-AI-REVIEW-001",
+      "testType": "FUNCTIONAL_UI_API",
+      "requirementIds": [
+        "SRS-FR-AI-002",
+        "SRS-FR-AI-003"
+      ],
+      "classification": "POSITIVE_NEGATIVE_FAILURE_RECOVERY",
+      "priority": "HIGH",
+      "title": {
+        "en": "Human reviews AI suggestion without automatic mutation",
+        "vi": "Con người review AI suggestion mà không tự động mutation"
+      },
+      "objective": {
+        "en": "Verify accept/ignore/failure paths remain advisory and auditable.",
+        "vi": "Xác minh path accept/ignore/failure vẫn advisory và audit được."
+      },
+      "role": "Tester / PM",
+      "preconditions": {
+        "en": "Authenticated user; AI disabled and controlled suggestion modes available.",
+        "vi": "User đã đăng nhập; có mode AI disabled và suggestion có kiểm soát."
+      },
+      "testData": {
+        "en": "Similar/classification/handoff suggestion with safe and malformed variants.",
+        "vi": "Suggestion similar/classification/handoff với biến thể safe và malformed."
+      },
+      "steps": {
+        "en": [
+          "Capture bug values before suggestion.",
+          "Open review suggestion.",
+          "Ignore it and reload.",
+          "Repeat failure/malformed mode.",
+          "Confirm bug values unchanged and safe audit/feedback."
+        ],
+        "vi": [
+          "Ghi giá trị bug trước suggestion.",
+          "Mở review suggestion.",
+          "Bỏ qua và reload.",
+          "Lặp lại mode failure/malformed.",
+          "Xác nhận giá trị bug không đổi và audit/feedback an toàn."
+        ]
+      },
+      "expectedResult": {
+        "en": "Suggestion never changes assignment, classification or lifecycle automatically; normal workflow remains usable.",
+        "vi": "Suggestion không tự đổi assignment, classification hoặc lifecycle; workflow bình thường vẫn dùng được."
+      },
+      "actualResult": {
+        "en": "Passed for disabled-provider acceptance on Render Shared QA. Similar Bugs, Classification, Handoff Summary and Smart Assignment were review-only, safe, browser-visible and did not mutate workflow. Live OpenAI provider remains NOT ACCEPTED by decision.",
+        "vi": "??t acceptance khi provider b? t?t tr?n Render Shared QA. Similar Bugs, Classification, Handoff Summary v? Smart Assignment ??u ch? ?? review, an to?n, hi?n th? tr?n browser v? kh?ng thay ??i workflow. OpenAI live v?n NOT ACCEPTED theo quy?t ??nh."
+      },
+      "status": "PASSED",
+      "environment": "Render Shared QA",
+      "executor": "IDTS-100 automated acceptance under DonHV",
+      "executionDate": "2026-07-24T20:42:48+07:00",
+      "automationCommand": "node scripts/qa/test-idts100-shared-qa-lifecycle.js and focused browser/API harnesses",
+      "evidenceLinks": [
+        "docs/pm/evidence/idts-100/shared-qa-ai/render-ai-smoke.json",
+        "docs/pm/evidence/idts-100/shared-qa-ai-browser/all-review-actions/shared-qa-ai-browser.json",
+        "docs/pm/evidence/idts-100/shared-qa-ai-browser/assignment/idts72-ai-browser-smoke.json"
+      ],
+      "defectIds": [
+        "IDTS-78"
+      ],
+      "limitations": {
+        "en": "Agent-executed acceptance evidence; formal human UAT sign-off is tracked separately.",
+        "vi": "Evidence acceptance do agent th?c thi; x?c nh?n UAT ch?nh th?c c?a con ng??i ???c theo d?i ri?ng."
+      },
+      "postcondition": {
+        "en": "Bug remains unchanged unless an authorized user separately applies a normal action.",
+        "vi": "Bug không đổi trừ khi user có quyền thực hiện action bình thường riêng."
+      }
     },
     {
-      "caseId":"UAT-001","testType":"UAT","requirementIds":["SRS-FR-BUG-001","SRS-FR-BUG-002","SRS-FR-CLASS-003","SRS-FR-ASSIGN-003"],"classification":"ACCEPTANCE","priority":"HIGH",
-      "title":{"en":"Create and classify a bug","vi":"Tạo và phân loại bug"},"objective":{"en":"Confirm a Tester can create a complete bug with explicit assignment choice.","vi":"Xác nhận Tester tạo bug đầy đủ với lựa chọn assignment rõ ràng."},"role":"Tester","preconditions":{"en":"Mentor/user has a Tester account and clean test data.","vi":"Mentor/user có account Tester và test data sạch."},"testData":{"en":"UI issue in Bug Management; valid priority/severity; no assignee for the Pending variant.","vi":"Lỗi UI trong Bug Management; priority/severity hợp lệ; không assignee cho biến thể Pending."},"steps":{"en":["Open Create Bug.","Enter all required data.","Select classification.","Submit once with an assignee and once without.","Reload both bugs."],"vi":["Mở Create Bug.","Nhập đủ dữ liệu bắt buộc.","Chọn classification.","Submit một lần có assignee và một lần không.","Reload cả hai bug."]},"expectedResult":{"en":"Assigned/Pending Assignment match the explicit choice; no automatic Developer selection; data persists.","vi":"Assigned/Pending Assignment khớp lựa chọn; không tự chọn Developer; dữ liệu persist."},"actualResult":{"en":"","vi":""},"status":"PREPARED","environment":"Mentor-approved UAT environment","executor":"","executionDate":"","automationCommand":"","evidenceLinks":[],"defectIds":[],"limitations":{"en":"Actual result, decision, tester/date and sign-off intentionally blank until UAT.","vi":"Actual result, decision, tester/date và sign-off cố ý để trống tới khi UAT."},"acceptanceCriteria":{"en":"PASS only if both variants persist correctly after reload with no P1 error.","vi":"Chỉ PASS nếu cả hai biến thể persist đúng sau reload và không có lỗi P1."},"postcondition":{"en":"Created UAT bugs are labelled for cleanup.","vi":"Bug UAT được đánh dấu để cleanup."}
+      "caseId": "UAT-001",
+      "testType": "UAT",
+      "requirementIds": [
+        "SRS-FR-BUG-001",
+        "SRS-FR-BUG-002",
+        "SRS-FR-CLASS-003",
+        "SRS-FR-ASSIGN-003"
+      ],
+      "classification": "ACCEPTANCE",
+      "priority": "HIGH",
+      "title": {
+        "en": "Create and classify a bug",
+        "vi": "Tạo và phân loại bug"
+      },
+      "objective": {
+        "en": "Confirm a Tester can create a complete bug with explicit assignment choice.",
+        "vi": "Xác nhận Tester tạo bug đầy đủ với lựa chọn assignment rõ ràng."
+      },
+      "role": "Tester",
+      "preconditions": {
+        "en": "Mentor/user has a Tester account and clean test data.",
+        "vi": "Mentor/user có account Tester và test data sạch."
+      },
+      "testData": {
+        "en": "UI issue in Bug Management; valid priority/severity; no assignee for the Pending variant.",
+        "vi": "Lỗi UI trong Bug Management; priority/severity hợp lệ; không assignee cho biến thể Pending."
+      },
+      "steps": {
+        "en": [
+          "Open Create Bug.",
+          "Enter all required data.",
+          "Select classification.",
+          "Submit once with an assignee and once without.",
+          "Reload both bugs."
+        ],
+        "vi": [
+          "Mở Create Bug.",
+          "Nhập đủ dữ liệu bắt buộc.",
+          "Chọn classification.",
+          "Submit một lần có assignee và một lần không.",
+          "Reload cả hai bug."
+        ]
+      },
+      "expectedResult": {
+        "en": "Assigned/Pending Assignment match the explicit choice; no automatic Developer selection; data persists.",
+        "vi": "Assigned/Pending Assignment khớp lựa chọn; không tự chọn Developer; dữ liệu persist."
+      },
+      "actualResult": {
+        "en": "",
+        "vi": ""
+      },
+      "status": "PREPARED",
+      "environment": "Mentor-approved UAT environment",
+      "executor": "",
+      "executionDate": "",
+      "automationCommand": "",
+      "evidenceLinks": [
+        "docs/pm/evidence/idts-100/shared-qa-lifecycle/shared-qa-lifecycle.json",
+        "docs/pm/evidence/idts-100/shared-qa-attachments/idts73-create-attachments-browser.json"
+      ],
+      "defectIds": [],
+      "limitations": {
+        "en": "PREPARED ? human execution, decision, date and signature remain required.",
+        "vi": "PREPARED ? v?n c?n ng??i th?t th?c thi, ??a ra quy?t ??nh, ng?y v? ch? k?."
+      },
+      "acceptanceCriteria": {
+        "en": "PASS only if both variants persist correctly after reload with no P1 error.",
+        "vi": "Chỉ PASS nếu cả hai biến thể persist đúng sau reload và không có lỗi P1."
+      },
+      "postcondition": {
+        "en": "Created UAT bugs are labelled for cleanup.",
+        "vi": "Bug UAT được đánh dấu để cleanup."
+      }
     },
     {
-      "caseId":"UAT-002","testType":"UAT","requirementIds":["SRS-FR-STATUS-001","SRS-FR-STATUS-002","SRS-FR-STATUS-003","SRS-FR-STATUS-004"],"classification":"ACCEPTANCE_AUTHORIZATION","priority":"HIGH",
-      "title":{"en":"Developer review, information request and rejection","vi":"Developer review, request information và rejection"},"objective":{"en":"Confirm controlled Developer actions and clear follow-up ownership.","vi":"Xác nhận action Developer có kiểm soát và follow-up owner rõ ràng."},"role":"Developer / Tester","preconditions":{"en":"One suitable and one unsuitable assigned bug.","vi":"Một bug assign phù hợp và một bug không phù hợp."},"testData":{"en":"Specific missing-information reason and rejection reason.","vi":"Reason thiếu thông tin và reason rejection cụ thể."},"steps":{"en":["As assigned Developer, review both bugs.","Request information on one with reason.","Reject the other with reason.","As Tester, resubmit/correct and reassign.","Reload history and ownership."],"vi":["Bằng Developer được assign, review hai bug.","Request information cho một bug kèm reason.","Reject bug còn lại kèm reason.","Bằng Tester, resubmit/sửa và reassign.","Reload history và ownership."]},"expectedResult":{"en":"Required reasons, allowed transitions, notifications, history and Current Action Owner are correct.","vi":"Reason bắt buộc, transition hợp lệ, notification, history và Current Action Owner đúng."},"actualResult":{"en":"","vi":""},"status":"PREPARED","environment":"Mentor-approved UAT environment","executor":"","executionDate":"","automationCommand":"","evidenceLinks":[],"defectIds":[],"limitations":{"en":"No execution/sign-off claim.","vi":"Không claim execution/sign-off."},"acceptanceCriteria":{"en":"PASS only if wrong-owner actions are blocked and valid follow-up survives reload.","vi":"Chỉ PASS nếu action sai owner bị chặn và follow-up hợp lệ còn sau reload."},"postcondition":{"en":"Both bugs have clear next owners.","vi":"Cả hai bug có next owner rõ ràng."}
+      "caseId": "UAT-002",
+      "testType": "UAT",
+      "requirementIds": [
+        "SRS-FR-STATUS-001",
+        "SRS-FR-STATUS-002",
+        "SRS-FR-STATUS-003",
+        "SRS-FR-STATUS-004"
+      ],
+      "classification": "ACCEPTANCE_AUTHORIZATION",
+      "priority": "HIGH",
+      "title": {
+        "en": "Developer review, information request and rejection",
+        "vi": "Developer review, request information và rejection"
+      },
+      "objective": {
+        "en": "Confirm controlled Developer actions and clear follow-up ownership.",
+        "vi": "Xác nhận action Developer có kiểm soát và follow-up owner rõ ràng."
+      },
+      "role": "Developer / Tester",
+      "preconditions": {
+        "en": "One suitable and one unsuitable assigned bug.",
+        "vi": "Một bug assign phù hợp và một bug không phù hợp."
+      },
+      "testData": {
+        "en": "Specific missing-information reason and rejection reason.",
+        "vi": "Reason thiếu thông tin và reason rejection cụ thể."
+      },
+      "steps": {
+        "en": [
+          "As assigned Developer, review both bugs.",
+          "Request information on one with reason.",
+          "Reject the other with reason.",
+          "As Tester, resubmit/correct and reassign.",
+          "Reload history and ownership."
+        ],
+        "vi": [
+          "Bằng Developer được assign, review hai bug.",
+          "Request information cho một bug kèm reason.",
+          "Reject bug còn lại kèm reason.",
+          "Bằng Tester, resubmit/sửa và reassign.",
+          "Reload history và ownership."
+        ]
+      },
+      "expectedResult": {
+        "en": "Required reasons, allowed transitions, notifications, history and Current Action Owner are correct.",
+        "vi": "Reason bắt buộc, transition hợp lệ, notification, history và Current Action Owner đúng."
+      },
+      "actualResult": {
+        "en": "",
+        "vi": ""
+      },
+      "status": "PREPARED",
+      "environment": "Mentor-approved UAT environment",
+      "executor": "",
+      "executionDate": "",
+      "automationCommand": "",
+      "evidenceLinks": [
+        "docs/pm/evidence/idts-100/shared-qa-lifecycle/shared-qa-lifecycle.json",
+        "docs/pm/evidence/idts-100/shared-qa-email-brevo-20260724.md"
+      ],
+      "defectIds": [],
+      "limitations": {
+        "en": "PREPARED ? human execution, decision, date and signature remain required.",
+        "vi": "PREPARED ? v?n c?n ng??i th?t th?c thi, ??a ra quy?t ??nh, ng?y v? ch? k?."
+      },
+      "acceptanceCriteria": {
+        "en": "PASS only if wrong-owner actions are blocked and valid follow-up survives reload.",
+        "vi": "Chỉ PASS nếu action sai owner bị chặn và follow-up hợp lệ còn sau reload."
+      },
+      "postcondition": {
+        "en": "Both bugs have clear next owners.",
+        "vi": "Cả hai bug có next owner rõ ràng."
+      }
     },
     {
-      "caseId":"UAT-003","testType":"UAT","requirementIds":["SRS-FR-STATUS-005","SRS-FR-STATUS-006","SRS-FR-STATUS-007"],"classification":"ACCEPTANCE","priority":"HIGH",
-      "title":{"en":"Resolve, retest, close and reopen","vi":"Resolve, retest, close và reopen"},"objective":{"en":"Confirm accepted and failed retest outcomes.","vi":"Xác nhận outcome retest được chấp nhận và thất bại."},"role":"Developer / Tester / PM","preconditions":{"en":"Two bugs are In Progress.","vi":"Hai bug đang In Progress."},"testData":{"en":"Resolution notes plus one pass and one fail observation.","vi":"Resolution note cùng một observation pass và một fail."},"steps":{"en":["Resolve both bugs.","Move both to Retest Required.","Close the passing bug.","Reopen the failing bug.","Reload status/history/owners."],"vi":["Resolve cả hai bug.","Chuyển cả hai sang Retest Required.","Close bug pass.","Reopen bug fail.","Reload status/history/owner."]},"expectedResult":{"en":"Pass closes; fail reopens; no unsupported post-retest information-request branch appears.","vi":"Pass đóng; fail mở lại; không xuất hiện nhánh request information không được hỗ trợ sau retest."},"actualResult":{"en":"","vi":""},"status":"PREPARED","environment":"Mentor-approved UAT environment","executor":"","executionDate":"","automationCommand":"","evidenceLinks":[],"defectIds":[],"limitations":{"en":"No execution/sign-off claim.","vi":"Không claim execution/sign-off."},"acceptanceCriteria":{"en":"PASS only when both outcomes and audit survive reload.","vi":"Chỉ PASS khi cả hai outcome và audit còn đúng sau reload."},"postcondition":{"en":"One Closed and one Reopened UAT bug.","vi":"Một bug UAT Closed và một Reopened."}
+      "caseId": "UAT-003",
+      "testType": "UAT",
+      "requirementIds": [
+        "SRS-FR-STATUS-005",
+        "SRS-FR-STATUS-006",
+        "SRS-FR-STATUS-007"
+      ],
+      "classification": "ACCEPTANCE",
+      "priority": "HIGH",
+      "title": {
+        "en": "Resolve, retest, close and reopen",
+        "vi": "Resolve, retest, close và reopen"
+      },
+      "objective": {
+        "en": "Confirm accepted and failed retest outcomes.",
+        "vi": "Xác nhận outcome retest được chấp nhận và thất bại."
+      },
+      "role": "Developer / Tester / PM",
+      "preconditions": {
+        "en": "Two bugs are In Progress.",
+        "vi": "Hai bug đang In Progress."
+      },
+      "testData": {
+        "en": "Resolution notes plus one pass and one fail observation.",
+        "vi": "Resolution note cùng một observation pass và một fail."
+      },
+      "steps": {
+        "en": [
+          "Resolve both bugs.",
+          "Move both to Retest Required.",
+          "Close the passing bug.",
+          "Reopen the failing bug.",
+          "Reload status/history/owners."
+        ],
+        "vi": [
+          "Resolve cả hai bug.",
+          "Chuyển cả hai sang Retest Required.",
+          "Close bug pass.",
+          "Reopen bug fail.",
+          "Reload status/history/owner."
+        ]
+      },
+      "expectedResult": {
+        "en": "Pass closes; fail reopens; no unsupported post-retest information-request branch appears.",
+        "vi": "Pass đóng; fail mở lại; không xuất hiện nhánh request information không được hỗ trợ sau retest."
+      },
+      "actualResult": {
+        "en": "",
+        "vi": ""
+      },
+      "status": "PREPARED",
+      "environment": "Mentor-approved UAT environment",
+      "executor": "",
+      "executionDate": "",
+      "automationCommand": "",
+      "evidenceLinks": [
+        "docs/pm/evidence/idts-100/shared-qa-lifecycle/shared-qa-lifecycle.json",
+        "docs/pm/evidence/idts-100/shared-qa-email-brevo-20260724.md"
+      ],
+      "defectIds": [],
+      "limitations": {
+        "en": "PREPARED ? human execution, decision, date and signature remain required.",
+        "vi": "PREPARED ? v?n c?n ng??i th?t th?c thi, ??a ra quy?t ??nh, ng?y v? ch? k?."
+      },
+      "acceptanceCriteria": {
+        "en": "PASS only when both outcomes and audit survive reload.",
+        "vi": "Chỉ PASS khi cả hai outcome và audit còn đúng sau reload."
+      },
+      "postcondition": {
+        "en": "One Closed and one Reopened UAT bug.",
+        "vi": "Một bug UAT Closed và một Reopened."
+      }
     },
     {
-      "caseId":"UAT-004","testType":"UAT","requirementIds":["SRS-FR-COMMENT-001","SRS-DATA-007","SRS-FR-AUDIT-001"],"classification":"ACCEPTANCE_PERSISTENCE","priority":"HIGH",
-      "title":{"en":"Comments and attachment evidence","vi":"Comment và attachment evidence"},"objective":{"en":"Confirm business users can collaborate and retain evidence after reload.","vi":"Xác nhận business user cộng tác và giữ evidence sau reload."},"role":"Tester / Developer","preconditions":{"en":"Existing bug and allowed small file.","vi":"Có bug và file nhỏ hợp lệ."},"testData":{"en":"Specific comment and a sanitized evidence file.","vi":"Comment cụ thể và file evidence đã sanitize."},"steps":{"en":["Add a comment.","Upload evidence through edit/draft.","Save and reload.","Download and compare.","Delete and confirm cleanup/history."],"vi":["Thêm comment.","Upload evidence qua edit/draft.","Lưu và reload.","Download và so sánh.","Xóa và xác nhận cleanup/history."]},"expectedResult":{"en":"Comment and evidence persist; download works; cleanup and history are correct.","vi":"Comment và evidence persist; download được; cleanup và history đúng."},"actualResult":{"en":"","vi":""},"status":"PREPARED","environment":"Mentor-approved UAT environment","executor":"","executionDate":"","automationCommand":"","evidenceLinks":[],"defectIds":[],"limitations":{"en":"No execution/sign-off claim.","vi":"Không claim execution/sign-off."},"acceptanceCriteria":{"en":"PASS only with reload/download proof and no orphan file.","vi":"Chỉ PASS khi có proof reload/download và không có file mồ côi."},"postcondition":{"en":"Attachment cleanup follows the UAT plan.","vi":"Attachment được cleanup theo kế hoạch UAT."}
+      "caseId": "UAT-004",
+      "testType": "UAT",
+      "requirementIds": [
+        "SRS-FR-COMMENT-001",
+        "SRS-DATA-007",
+        "SRS-FR-AUDIT-001"
+      ],
+      "classification": "ACCEPTANCE_PERSISTENCE",
+      "priority": "HIGH",
+      "title": {
+        "en": "Comments and attachment evidence",
+        "vi": "Comment và attachment evidence"
+      },
+      "objective": {
+        "en": "Confirm business users can collaborate and retain evidence after reload.",
+        "vi": "Xác nhận business user cộng tác và giữ evidence sau reload."
+      },
+      "role": "Tester / Developer",
+      "preconditions": {
+        "en": "Existing bug and allowed small file.",
+        "vi": "Có bug và file nhỏ hợp lệ."
+      },
+      "testData": {
+        "en": "Specific comment and a sanitized evidence file.",
+        "vi": "Comment cụ thể và file evidence đã sanitize."
+      },
+      "steps": {
+        "en": [
+          "Add a comment.",
+          "Upload evidence through edit/draft.",
+          "Save and reload.",
+          "Download and compare.",
+          "Delete and confirm cleanup/history."
+        ],
+        "vi": [
+          "Thêm comment.",
+          "Upload evidence qua edit/draft.",
+          "Lưu và reload.",
+          "Download và so sánh.",
+          "Xóa và xác nhận cleanup/history."
+        ]
+      },
+      "expectedResult": {
+        "en": "Comment and evidence persist; download works; cleanup and history are correct.",
+        "vi": "Comment và evidence persist; download được; cleanup và history đúng."
+      },
+      "actualResult": {
+        "en": "",
+        "vi": ""
+      },
+      "status": "PREPARED",
+      "environment": "Mentor-approved UAT environment",
+      "executor": "",
+      "executionDate": "",
+      "automationCommand": "",
+      "evidenceLinks": [
+        "docs/pm/evidence/idts-100/shared-qa-attachments/idts73-create-attachments-browser.json",
+        "docs/pm/evidence/idts-100/shared-qa-attachments/delete-verification-20260724.md"
+      ],
+      "defectIds": [],
+      "limitations": {
+        "en": "PREPARED ? human execution, decision, date and signature remain required.",
+        "vi": "PREPARED ? v?n c?n ng??i th?t th?c thi, ??a ra quy?t ??nh, ng?y v? ch? k?."
+      },
+      "acceptanceCriteria": {
+        "en": "PASS only with reload/download proof and no orphan file.",
+        "vi": "Chỉ PASS khi có proof reload/download và không có file mồ côi."
+      },
+      "postcondition": {
+        "en": "Attachment cleanup follows the UAT plan.",
+        "vi": "Attachment được cleanup theo kế hoạch UAT."
+      }
     },
     {
-      "caseId":"UAT-005","testType":"UAT","requirementIds":["SRS-FR-PM-001","SRS-FR-PM-002","SRS-FR-PM-003"],"classification":"ACCEPTANCE","priority":"HIGH",
-      "title":{"en":"PM monitoring and action ownership","vi":"PM monitoring và action ownership"},"objective":{"en":"Confirm PM can understand queues, workload, overdue and current action ownership.","vi":"Xác nhận PM hiểu queue, workload, overdue và current action ownership."},"role":"PM","preconditions":{"en":"Representative bugs exist in each monitored state.","vi":"Có bug đại diện cho từng state cần monitor."},"testData":{"en":"Pending, overdue, rejected, retest, closed and assigned bugs.","vi":"Bug pending, overdue, rejected, retest, closed và assigned."},"steps":{"en":["Open PM monitoring views.","Apply each queue/filter.","Compare counts to source bugs.","Open representative rows and inspect owners.","Reload the dashboard."],"vi":["Mở PM monitoring view.","Áp dụng từng queue/filter.","So sánh count với bug nguồn.","Mở record đại diện và kiểm tra owner.","Reload dashboard."]},"expectedResult":{"en":"Counts, filters and owner wording are understandable and remain consistent after reload.","vi":"Count, filter và wording owner dễ hiểu và nhất quán sau reload."},"actualResult":{"en":"","vi":""},"status":"PREPARED","environment":"Mentor-approved UAT environment","executor":"","executionDate":"","automationCommand":"","evidenceLinks":[],"defectIds":[],"limitations":{"en":"No execution/sign-off claim.","vi":"Không claim execution/sign-off."},"acceptanceCriteria":{"en":"PASS only when sampled counts match data and no misleading owner label exists.","vi":"Chỉ PASS khi count mẫu khớp dữ liệu và không có label owner gây hiểu nhầm."},"postcondition":{"en":"Monitoring remains read-only.","vi":"Monitoring vẫn read-only."}
+      "caseId": "UAT-005",
+      "testType": "UAT",
+      "requirementIds": [
+        "SRS-FR-PM-001",
+        "SRS-FR-PM-002",
+        "SRS-FR-PM-003"
+      ],
+      "classification": "ACCEPTANCE",
+      "priority": "HIGH",
+      "title": {
+        "en": "PM monitoring and action ownership",
+        "vi": "PM monitoring và action ownership"
+      },
+      "objective": {
+        "en": "Confirm PM can understand queues, workload, overdue and current action ownership.",
+        "vi": "Xác nhận PM hiểu queue, workload, overdue và current action ownership."
+      },
+      "role": "PM",
+      "preconditions": {
+        "en": "Representative bugs exist in each monitored state.",
+        "vi": "Có bug đại diện cho từng state cần monitor."
+      },
+      "testData": {
+        "en": "Pending, overdue, rejected, retest, closed and assigned bugs.",
+        "vi": "Bug pending, overdue, rejected, retest, closed và assigned."
+      },
+      "steps": {
+        "en": [
+          "Open PM monitoring views.",
+          "Apply each queue/filter.",
+          "Compare counts to source bugs.",
+          "Open representative rows and inspect owners.",
+          "Reload the dashboard."
+        ],
+        "vi": [
+          "Mở PM monitoring view.",
+          "Áp dụng từng queue/filter.",
+          "So sánh count với bug nguồn.",
+          "Mở record đại diện và kiểm tra owner.",
+          "Reload dashboard."
+        ]
+      },
+      "expectedResult": {
+        "en": "Counts, filters and owner wording are understandable and remain consistent after reload.",
+        "vi": "Count, filter và wording owner dễ hiểu và nhất quán sau reload."
+      },
+      "actualResult": {
+        "en": "",
+        "vi": ""
+      },
+      "status": "PREPARED",
+      "environment": "Mentor-approved UAT environment",
+      "executor": "",
+      "executionDate": "",
+      "automationCommand": "",
+      "evidenceLinks": [
+        "docs/pm/evidence/idts-100/shared-qa-lifecycle/shared-qa-lifecycle.json",
+        "docs/pm/evidence/idts-100/local-fast/"
+      ],
+      "defectIds": [],
+      "limitations": {
+        "en": "PREPARED ? human execution, decision, date and signature remain required.",
+        "vi": "PREPARED ? v?n c?n ng??i th?t th?c thi, ??a ra quy?t ??nh, ng?y v? ch? k?."
+      },
+      "acceptanceCriteria": {
+        "en": "PASS only when sampled counts match data and no misleading owner label exists.",
+        "vi": "Chỉ PASS khi count mẫu khớp dữ liệu và không có label owner gây hiểu nhầm."
+      },
+      "postcondition": {
+        "en": "Monitoring remains read-only.",
+        "vi": "Monitoring vẫn read-only."
+      }
     },
     {
-      "caseId":"UAT-006","testType":"UAT","requirementIds":["SRS-FR-AI-002","SRS-FR-AI-003"],"classification":"ACCEPTANCE_FAILURE_RECOVERY","priority":"HIGH",
-      "title":{"en":"Advisory AI and safe fallback","vi":"AI advisory và fallback an toàn"},"objective":{"en":"Confirm suggestions require human review and failure does not block normal work.","vi":"Xác nhận suggestion cần human review và failure không chặn công việc bình thường."},"role":"Tester / PM","preconditions":{"en":"Controlled suggestion and disabled/failure modes are available.","vi":"Có mode suggestion và disabled/failure được kiểm soát."},"testData":{"en":"Similar/classification/handoff suggestion on a test bug.","vi":"Suggestion similar/classification/handoff trên test bug."},"steps":{"en":["Record bug values.","Open and ignore a suggestion.","Reload and compare values.","Trigger disabled/failure mode.","Continue a normal authorized bug action."],"vi":["Ghi giá trị bug.","Mở và bỏ qua suggestion.","Reload và so sánh giá trị.","Kích hoạt mode disabled/failure.","Tiếp tục action bug bình thường có quyền."]},"expectedResult":{"en":"No automatic mutation; safe message is shown; normal action remains available.","vi":"Không mutation tự động; hiển thị message an toàn; action bình thường vẫn dùng được."},"actualResult":{"en":"","vi":""},"status":"PREPARED","environment":"Mentor-approved UAT environment","executor":"","executionDate":"","automationCommand":"","evidenceLinks":[],"defectIds":[],"limitations":{"en":"No execution/sign-off claim and no live provider requirement.","vi":"Không claim execution/sign-off và không yêu cầu provider live."},"acceptanceCriteria":{"en":"PASS only if values remain unchanged until a separate authorized user action.","vi":"Chỉ PASS nếu giá trị không đổi tới khi có action user có quyền riêng."},"postcondition":{"en":"Test bug remains under human control.","vi":"Bug test vẫn do con người kiểm soát."}
+      "caseId": "UAT-006",
+      "testType": "UAT",
+      "requirementIds": [
+        "SRS-FR-AI-002",
+        "SRS-FR-AI-003"
+      ],
+      "classification": "ACCEPTANCE_FAILURE_RECOVERY",
+      "priority": "HIGH",
+      "title": {
+        "en": "Advisory AI and safe fallback",
+        "vi": "AI advisory và fallback an toàn"
+      },
+      "objective": {
+        "en": "Confirm suggestions require human review and failure does not block normal work.",
+        "vi": "Xác nhận suggestion cần human review và failure không chặn công việc bình thường."
+      },
+      "role": "Tester / PM",
+      "preconditions": {
+        "en": "Controlled suggestion and disabled/failure modes are available.",
+        "vi": "Có mode suggestion và disabled/failure được kiểm soát."
+      },
+      "testData": {
+        "en": "Similar/classification/handoff suggestion on a test bug.",
+        "vi": "Suggestion similar/classification/handoff trên test bug."
+      },
+      "steps": {
+        "en": [
+          "Record bug values.",
+          "Open and ignore a suggestion.",
+          "Reload and compare values.",
+          "Trigger disabled/failure mode.",
+          "Continue a normal authorized bug action."
+        ],
+        "vi": [
+          "Ghi giá trị bug.",
+          "Mở và bỏ qua suggestion.",
+          "Reload và so sánh giá trị.",
+          "Kích hoạt mode disabled/failure.",
+          "Tiếp tục action bug bình thường có quyền."
+        ]
+      },
+      "expectedResult": {
+        "en": "No automatic mutation; safe message is shown; normal action remains available.",
+        "vi": "Không mutation tự động; hiển thị message an toàn; action bình thường vẫn dùng được."
+      },
+      "actualResult": {
+        "en": "",
+        "vi": ""
+      },
+      "status": "PREPARED",
+      "environment": "Mentor-approved UAT environment",
+      "executor": "",
+      "executionDate": "",
+      "automationCommand": "",
+      "evidenceLinks": [
+        "docs/pm/evidence/idts-100/shared-qa-ai/render-ai-smoke.json",
+        "docs/pm/evidence/idts-100/shared-qa-ai-browser/all-review-actions/shared-qa-ai-browser.json",
+        "docs/pm/evidence/idts-100/shared-qa-ai-browser/assignment/idts72-ai-browser-smoke.json"
+      ],
+      "defectIds": [],
+      "limitations": {
+        "en": "PREPARED ? human execution, decision, date and signature remain required.",
+        "vi": "PREPARED ? v?n c?n ng??i th?t th?c thi, ??a ra quy?t ??nh, ng?y v? ch? k?."
+      },
+      "acceptanceCriteria": {
+        "en": "PASS only if values remain unchanged until a separate authorized user action.",
+        "vi": "Chỉ PASS nếu giá trị không đổi tới khi có action user có quyền riêng."
+      },
+      "postcondition": {
+        "en": "Test bug remains under human control.",
+        "vi": "Bug test vẫn do con người kiểm soát."
+      }
     }
   ],
   "defects": [
-    {"defectId":"IDTS-13","summary":{"en":"Object Page stale after lifecycle action","vi":"Object Page không làm mới sau lifecycle action"},"classification":"Product defect","stepsToReproduce":{"en":"Run a lifecycle action and observe stale bound data.","vi":"Chạy lifecycle action và quan sát bound data cũ."},"preconditions":{"en":"Open Object Page for an actionable bug.","vi":"Mở Object Page của bug có action."},"expectedResult":{"en":"Status, ownership and related sections refresh.","vi":"Status, ownership và section liên quan được refresh."},"actualResult":{"en":"Bound data stayed stale.","vi":"Bound data vẫn cũ."},"environment":"Fiori Elements OData V4","severity":"High","priority":"High","reporter":"IDTS team","owner":"DatDT / DonHV","discoveredDate":"2026-06-27","status":"Closed","rootCause":{"en":"Side effects targeted properties instead of the bound entity.","vi":"Side effect target property thay vì bound entity."},"fixDescription":{"en":"Use TargetEntities [$self].","vi":"Dùng TargetEntities [$self]."},"requirementIds":["SRS-FR-STATUS-008"],"testCaseIds":["FT-LIFECYCLE-001"],"evidenceLinks":["docs/pm/status/datdt.md"],"retestCommand":"Browser lifecycle UAT plus CAP compile","retestResult":{"en":"Passed in historical browser UAT; fresh full lifecycle remains NOT_RUN in this remediation.","vi":"Đã đạt trong browser UAT lịch sử; full lifecycle mới vẫn NOT_RUN trong remediation."},"retestDate":"2026-06-28","closedDate":"2026-06-28","remainingAction":{"en":"Run FT-LIFECYCLE-001 for current mentor evidence.","vi":"Chạy FT-LIFECYCLE-001 cho evidence mentor hiện tại."}},
-    {"defectId":"IDTS-19","summary":{"en":"History Timeline fails when text exists","vi":"History Timeline lỗi khi có text"},"classification":"Product defect","stepsToReproduce":{"en":"Open a bug with textual history in the custom timeline.","vi":"Mở bug có history text trong custom timeline."},"preconditions":{"en":"History event contains text.","vi":"History event có text."},"expectedResult":{"en":"Readable timeline renders.","vi":"Timeline dễ đọc được render."},"actualResult":{"en":"UI5 FormatException occurred.","vi":"Xảy ra UI5 FormatException."},"environment":"SAPUI5 Object Page","severity":"High","priority":"High","reporter":"IDTS team","owner":"SangVN / DonHV","discoveredDate":"2026-06-28","status":"Closed","rootCause":{"en":"Invalid nested expression binding.","vi":"Expression binding lồng không hợp lệ."},"fixDescription":{"en":"Replaced invalid expression and retested timeline.","vi":"Thay expression sai và retest timeline."},"requirementIds":["SRS-FR-AUDIT-001"],"testCaseIds":["FT-REASSIGN-001","FT-DEV-INFO-001"],"evidenceLinks":["docs/pm/status/sangvn.md"],"retestCommand":"Browser history UAT","retestResult":{"en":"Passed historically.","vi":"Đã đạt trong lịch sử."},"retestDate":"2026-06-28","closedDate":"2026-06-28","remainingAction":{"en":"Capture fresh UAT evidence when executed.","vi":"Chụp evidence UAT mới khi thực thi."}},
-    {"defectId":"IDTS-32","summary":{"en":"Invalid catalog values accepted","vi":"Chấp nhận catalog value không hợp lệ"},"classification":"Product defect","stepsToReproduce":{"en":"Submit numeric-like, unknown, blank or inactive priority/severity/environment values.","vi":"Submit priority/severity/environment dạng số, unknown, blank hoặc inactive."},"preconditions":{"en":"Authorized create/update request.","vi":"Request create/update có quyền."},"expectedResult":{"en":"Backend rejects invalid values and preserves state.","vi":"Backend từ chối giá trị sai và giữ state."},"actualResult":{"en":"Invalid values could be accepted before the fix.","vi":"Giá trị sai có thể được nhận trước fix."},"environment":"CAP service","severity":"High","priority":"High","reporter":"IDTS QA","owner":"DonHV","discoveredDate":"2026-06-29","status":"Closed","rootCause":{"en":"Catalog activity/format validation was incomplete.","vi":"Validation format/activity của catalog chưa đủ."},"fixDescription":{"en":"Added target, active-code and draft validation.","vi":"Thêm target, active-code và draft validation."},"requirementIds":["SRS-FR-BUG-002","SRS-FR-CLASS-003"],"testCaseIds":["FT-VALID-001","FT-CREATE-001"],"evidenceLinks":["scripts/qa/test-idts41-code-list-validation.js"],"retestCommand":"npm run qa:idts41:programmatic","retestResult":{"en":"18 passed, 0 failed.","vi":"18 đạt, 0 lỗi."},"retestDate":"2026-07-23","closedDate":"2026-07-23","remainingAction":{"en":"UI UAT remains prepared.","vi":"UI UAT vẫn ở Prepared."}},
-    {"defectId":"IDTS-35","summary":{"en":"Blank app after successful login","vi":"Ứng dụng trắng sau login thành công"},"classification":"Product defect","stepsToReproduce":{"en":"Log in, then load the protected Fiori app.","vi":"Login rồi load Fiori app được bảo vệ."},"preconditions":{"en":"Valid user credentials.","vi":"Credential user hợp lệ."},"expectedResult":{"en":"Metadata loads with bearer token and the app renders.","vi":"Metadata load kèm bearer token và app render."},"actualResult":{"en":"Metadata request preceded the interceptor and returned 401.","vi":"Metadata request chạy trước interceptor và trả 401."},"environment":"SAPUI5 + custom CAP auth","severity":"Critical","priority":"High","reporter":"DatDT","owner":"DatDT","discoveredDate":"2026-06-30","status":"Closed","rootCause":{"en":"Bearer interceptor installed after UI5 OData startup.","vi":"Bearer interceptor cài sau khi OData UI5 khởi động."},"fixDescription":{"en":"Install auth guard/interceptor before UI5 bootstrap.","vi":"Cài auth guard/interceptor trước UI5 bootstrap."},"requirementIds":["SRS-FR-AUTH-001","SRS-FR-AUTH-002"],"testCaseIds":["FT-AUTH-SESSION-001"],"evidenceLinks":["docs/pm/status/datdt.md"],"retestCommand":"npm run qa:auth:programmatic","retestResult":{"en":"28 passed, 0 failed for backend auth; current browser login UAT not rerun.","vi":"28 đạt, 0 lỗi cho backend auth; chưa rerun browser login UAT hiện tại."},"retestDate":"2026-07-23","closedDate":"2026-06-30","remainingAction":{"en":"Fresh browser UAT if required by mentor.","vi":"Chạy browser UAT mới nếu mentor yêu cầu."}},
-    {"defectId":"IDTS-41","summary":{"en":"Developer can start unauthorized root draft","vi":"Developer có thể tạo root draft không có quyền"},"classification":"Product defect","stepsToReproduce":{"en":"Call root draft NEW as Developer.","vi":"Gọi root draft NEW bằng Developer."},"preconditions":{"en":"Authenticated Developer.","vi":"Developer đã đăng nhập."},"expectedResult":{"en":"403 and no draft.","vi":"403 và không có draft."},"actualResult":{"en":"Draft creation was not blocked before the fix.","vi":"Tạo draft chưa bị chặn trước fix."},"environment":"CAP draft service","severity":"High","priority":"High","reporter":"IDTS QA","owner":"DonHV","discoveredDate":"2026-06-29","status":"Closed","rootCause":{"en":"Authorization was missing at root draft NEW.","vi":"Thiếu authorization tại root draft NEW."},"fixDescription":{"en":"Added backend role check before draft creation.","vi":"Thêm role check backend trước tạo draft."},"requirementIds":["SRS-FR-AUTH-002","SRS-FR-BUG-001"],"testCaseIds":["FT-AUTHZ-001"],"evidenceLinks":["scripts/qa/test-idts41-code-list-validation.js"],"retestCommand":"npm run qa:idts41:programmatic","retestResult":{"en":"Developer denied; Tester and PM allowed.","vi":"Developer bị từ chối; Tester và PM được phép."},"retestDate":"2026-07-23","closedDate":"2026-07-23","remainingAction":{"en":"Fresh UI action-visibility UAT.","vi":"UAT mới về action visibility UI."}},
-    {"defectId":"IDTS-49","summary":{"en":"Draft activation rejects missing reporter","vi":"Draft activation từ chối do thiếu reporter"},"classification":"Product defect","stepsToReproduce":{"en":"Activate an authorized draft without client-supplied reporter.","vi":"Activate draft có quyền nhưng client không gửi reporter."},"preconditions":{"en":"PM/Tester creates a root draft.","vi":"PM/Tester tạo root draft."},"expectedResult":{"en":"Backend derives reporter before validation.","vi":"Backend derive reporter trước validation."},"actualResult":{"en":"Required-field validation ran before derivation.","vi":"Validation required-field chạy trước derivation."},"environment":"CAP draft service","severity":"High","priority":"High","reporter":"IDTS QA","owner":"DonHV","discoveredDate":"2026-07-02","status":"Closed","rootCause":{"en":"Reporter derived too late in active CREATE.","vi":"Reporter được derive quá muộn ở active CREATE."},"fixDescription":{"en":"Initialize reporter during draft NEW/SAVE.","vi":"Khởi tạo reporter trong draft NEW/SAVE."},"requirementIds":["SRS-FR-BUG-001"],"testCaseIds":["FT-CREATE-001"],"evidenceLinks":["docs/pm/status/donhv.md"],"retestCommand":"npm run qa:draft-reporter:programmatic","retestResult":{"en":"Passed historically; not rerun in this six-suite remediation.","vi":"Đã đạt trước đây; không rerun trong sáu suite remediation này."},"retestDate":"2026-07-02","closedDate":"2026-07-02","remainingAction":{"en":"No new claim beyond historical evidence.","vi":"Không claim mới ngoài evidence lịch sử."}},
-    {"defectId":"IDTS-52","summary":{"en":"UI5 login page renders blank","vi":"Trang login UI5 hiển thị trắng"},"classification":"Product defect","stepsToReproduce":{"en":"Open the custom login page on the affected build.","vi":"Mở custom login page trên build bị ảnh hưởng."},"preconditions":{"en":"Unauthenticated browser.","vi":"Browser chưa đăng nhập."},"expectedResult":{"en":"Login controls and safe validation render.","vi":"Control login và validation an toàn render."},"actualResult":{"en":"Undefined enum access stopped rendering.","vi":"Truy cập enum undefined làm dừng render."},"environment":"SAPUI5 login page","severity":"High","priority":"High","reporter":"IDTS QA","owner":"DatDT / DonHV","discoveredDate":"2026-07-03","status":"Closed","rootCause":{"en":"Unstable UI5 enum access.","vi":"Truy cập enum UI5 không ổn định."},"fixDescription":{"en":"Use stable string enum values.","vi":"Dùng giá trị enum dạng chuỗi ổn định."},"requirementIds":["SRS-FR-AUTH-001"],"testCaseIds":["FT-AUTH-SESSION-001"],"evidenceLinks":["docs/pm/status/donhv.md"],"retestCommand":"Browser login smoke","retestResult":{"en":"Passed historically; current browser UAT not rerun.","vi":"Đã đạt trước đây; chưa rerun browser UAT hiện tại."},"retestDate":"2026-07-03","closedDate":"2026-07-03","remainingAction":{"en":"Fresh browser evidence if mentor requests it.","vi":"Evidence browser mới nếu mentor yêu cầu."}},
-    {"defectId":"IDTS-53","summary":{"en":"Profile overlay intercepts Sign Out","vi":"Profile overlay chặn Sign Out"},"classification":"Product defect","stepsToReproduce":{"en":"Open profile popover and click Sign Out in the affected layout.","vi":"Mở profile popover và click Sign Out trên layout bị ảnh hưởng."},"preconditions":{"en":"Authenticated app.","vi":"App đã đăng nhập."},"expectedResult":{"en":"Sign Out is clickable and revokes the session.","vi":"Sign Out click được và revoke session."},"actualResult":{"en":"Fixed overlay intercepted pointer events.","vi":"Overlay fixed chặn pointer event."},"environment":"SAPUI5 shell","severity":"Medium","priority":"High","reporter":"IDTS QA","owner":"DatDT / DonHV","discoveredDate":"2026-07-03","status":"Closed","rootCause":{"en":"Pointer-event handling on fixed host.","vi":"Xử lý pointer-event trên host fixed."},"fixDescription":{"en":"Adjusted pointer events for host and button.","vi":"Điều chỉnh pointer event cho host và button."},"requirementIds":["SRS-FR-AUTH-002"],"testCaseIds":["FT-AUTH-SESSION-001"],"evidenceLinks":["docs/pm/status/donhv.md"],"retestCommand":"Browser profile/logout smoke","retestResult":{"en":"Passed historically; backend logout/revocation passed fresh.","vi":"Browser đã đạt trước đây; backend logout/revoke đạt mới."},"retestDate":"2026-07-23","closedDate":"2026-07-03","remainingAction":{"en":"Fresh browser click evidence remains outside this run.","vi":"Evidence browser click mới nằm ngoài lượt này."}},
-    {"defectId":"IDTS-55","summary":{"en":"Comments and attachments interaction defects","vi":"Lỗi tương tác Comments và Attachments"},"classification":"Product defect","stepsToReproduce":{"en":"Post a comment or remove an attachment from the affected Object Page fragments.","vi":"Post comment hoặc xóa attachment từ fragment Object Page bị ảnh hưởng."},"preconditions":{"en":"Existing bug with child sections.","vi":"Có bug với child section."},"expectedResult":{"en":"Correct context, immediate refresh and safe deletion.","vi":"Context đúng, refresh ngay và delete an toàn."},"actualResult":{"en":"Context/refresh/root detection was incorrect.","vi":"Context/refresh/root detection sai."},"environment":"Fiori Object Page + CAP attachments","severity":"High","priority":"High","reporter":"IDTS QA","owner":"DonHV","discoveredDate":"2026-07-04","status":"Closed","rootCause":{"en":"Lost binding context, unsupported refresh and child/root confusion.","vi":"Mất binding context, refresh không hỗ trợ và nhầm child/root."},"fixDescription":{"en":"Propagate context, use supported refresh and strict root detection.","vi":"Truyền context, dùng refresh được hỗ trợ và root detection chặt."},"requirementIds":["SRS-FR-COMMENT-001","SRS-DATA-007"],"testCaseIds":["FT-COMMENT-001","FT-ATTACH-001"],"evidenceLinks":["docs/pm/status/donhv.md"],"retestCommand":"npm run qa:comments-attachments:programmatic; npm run qa:comments-attachments:http","retestResult":{"en":"Fresh comment persistence passed; attachment HTTP remains NOT_RUN.","vi":"Comment persistence mới đạt; attachment HTTP vẫn NOT_RUN."},"retestDate":"2026-07-23","closedDate":"2026-07-04","remainingAction":{"en":"Run FT-ATTACH-001 before claiming current attachment PASS.","vi":"Chạy FT-ATTACH-001 trước khi claim attachment PASS hiện tại."}},
-    {"defectId":"IDTS-56","summary":{"en":"Smart Assign treats hidden classification as missing","vi":"Smart Assign coi classification ẩn là thiếu"},"classification":"Product defect","stepsToReproduce":{"en":"Open Smart Assign when component category was not selected in the Object Page payload.","vi":"Mở Smart Assign khi component category không có trong payload Object Page."},"preconditions":{"en":"Classified bug with sparse UI selection.","vi":"Bug đã classify với UI selection dạng sparse."},"expectedResult":{"en":"Valid classification context is derived and candidates load.","vi":"Classification context hợp lệ được derive và candidate load."},"actualResult":{"en":"UI reported missing context.","vi":"UI báo thiếu context."},"environment":"Fiori Smart Assign","severity":"High","priority":"High","reporter":"IDTS QA","owner":"DonHV","discoveredDate":"2026-07-05","status":"Closed","rootCause":{"en":"UI depended on an internal field not always selected.","vi":"UI phụ thuộc field nội bộ không luôn được select."},"fixDescription":{"en":"Corrected context derivation and tests.","vi":"Sửa context derivation và test."},"requirementIds":["SRS-FR-ASSIGN-001"],"testCaseIds":["FT-CLASS-ASSIGN-001"],"evidenceLinks":["docs/pm/status/donhv.md"],"retestCommand":"npm run qa:idts56:programmatic","retestResult":{"en":"Passed historically; fresh Smart Assign execution not part of this run.","vi":"Đã đạt trước đây; không chạy Smart Assign mới trong lượt này."},"retestDate":"2026-07-05","closedDate":"2026-07-05","remainingAction":{"en":"Execute FT-CLASS-ASSIGN-001 for current mentor evidence.","vi":"Chạy FT-CLASS-ASSIGN-001 cho evidence mentor hiện tại."}},
-    {"defectId":"IDTS-58","summary":{"en":"Profile/comment/attachment UX defects","vi":"Lỗi UX profile/comment/attachment"},"classification":"Product defect","stepsToReproduce":{"en":"Use dashboard profile, comment feed and attachment delete while a draft exists.","vi":"Dùng dashboard profile, comment feed và attachment delete khi có draft."},"preconditions":{"en":"Authenticated app and editable bug.","vi":"App đã đăng nhập và bug có thể edit."},"expectedResult":{"en":"No overlap/duplicate author and delete is disabled during draft.","vi":"Không overlap/lặp author và delete disabled khi có draft."},"actualResult":{"en":"Profile overlapped, author repeated, delete stayed enabled.","vi":"Profile overlap, author lặp, delete vẫn bật."},"environment":"SAPUI5/Fiori","severity":"Medium","priority":"High","reporter":"DatDT","owner":"DatDT","discoveredDate":"2026-07-05","status":"Closed","rootCause":{"en":"Header placement, feed formatting and draft-state guard defects.","vi":"Lỗi header placement, feed format và draft-state guard."},"fixDescription":{"en":"Moved action, normalized feed and disabled delete during draft.","vi":"Di chuyển action, chuẩn hóa feed và disable delete khi draft."},"requirementIds":["SRS-FR-COMMENT-001","SRS-DATA-007"],"testCaseIds":["FT-COMMENT-001","FT-ATTACH-001"],"evidenceLinks":["docs/pm/status/datdt.md"],"retestCommand":"Local browser smoke","retestResult":{"en":"Passed historically; attachment current execution remains NOT_RUN.","vi":"Đã đạt trước đây; execution attachment hiện tại vẫn NOT_RUN."},"retestDate":"2026-07-05","closedDate":"2026-07-05","remainingAction":{"en":"Current browser/UAT evidence pending.","vi":"Evidence browser/UAT hiện tại còn pending."}},
-    {"defectId":"IDTS-78","summary":{"en":"Standalone AI sections outside business context","vi":"AI section độc lập ngoài business context"},"classification":"Product UX defect","stepsToReproduce":{"en":"Open the Object Page and locate standalone AI sections.","vi":"Mở Object Page và tìm AI section độc lập."},"preconditions":{"en":"AI review UI build before placement fix.","vi":"Build AI review UI trước placement fix."},"expectedResult":{"en":"Review actions appear near the related business context.","vi":"Review action nằm gần business context liên quan."},"actualResult":{"en":"Standalone titled sections remained visible.","vi":"Standalone section có title vẫn hiển thị."},"environment":"Fiori Object Page","severity":"Medium","priority":"High","reporter":"IDTS QA","owner":"DonHV","discoveredDate":"2026-07-11","status":"Closed","rootCause":{"en":"Manifest custom sections remained after placement polish.","vi":"Manifest custom section còn sau placement polish."},"fixDescription":{"en":"Removed standalone sections and kept review actions inline.","vi":"Xóa standalone section và giữ review action inline."},"requirementIds":["SRS-FR-AI-002"],"testCaseIds":["FT-AI-REVIEW-001","UAT-006"],"evidenceLinks":["docs/pm/status/donhv.md"],"retestCommand":"Deployed AI UI smoke","retestResult":{"en":"Passed historically; fresh full human-review flow remains NOT_RUN.","vi":"Đã đạt trước đây; full human-review flow mới vẫn NOT_RUN."},"retestDate":"2026-07-11","closedDate":"2026-07-11","remainingAction":{"en":"Execute FT-AI-REVIEW-001 or UAT-006 for current evidence.","vi":"Chạy FT-AI-REVIEW-001 hoặc UAT-006 cho evidence hiện tại."}}
+    {
+      "defectId": "IDTS-13",
+      "summary": {
+        "en": "Object Page stale after lifecycle action",
+        "vi": "Object Page không làm mới sau lifecycle action"
+      },
+      "classification": "Product defect",
+      "stepsToReproduce": {
+        "en": "Run a lifecycle action and observe stale bound data.",
+        "vi": "Chạy lifecycle action và quan sát bound data cũ."
+      },
+      "preconditions": {
+        "en": "Open Object Page for an actionable bug.",
+        "vi": "Mở Object Page của bug có action."
+      },
+      "expectedResult": {
+        "en": "Status, ownership and related sections refresh.",
+        "vi": "Status, ownership và section liên quan được refresh."
+      },
+      "actualResult": {
+        "en": "Bound data stayed stale.",
+        "vi": "Bound data vẫn cũ."
+      },
+      "environment": "Fiori Elements OData V4",
+      "severity": "High",
+      "priority": "High",
+      "reporter": "IDTS team",
+      "owner": "DatDT / DonHV",
+      "discoveredDate": "2026-06-27",
+      "status": "Closed",
+      "rootCause": {
+        "en": "Side effects targeted properties instead of the bound entity.",
+        "vi": "Side effect target property thay vì bound entity."
+      },
+      "fixDescription": {
+        "en": "Use TargetEntities [$self].",
+        "vi": "Dùng TargetEntities [$self]."
+      },
+      "requirementIds": [
+        "SRS-FR-STATUS-008"
+      ],
+      "testCaseIds": [
+        "FT-LIFECYCLE-001"
+      ],
+      "evidenceLinks": [
+        "docs/pm/status/datdt.md"
+      ],
+      "retestCommand": "Browser lifecycle UAT plus CAP compile",
+      "retestResult": {
+        "en": "Passed in historical browser UAT; fresh full lifecycle remains NOT_RUN in this remediation.",
+        "vi": "Đã đạt trong browser UAT lịch sử; full lifecycle mới vẫn NOT_RUN trong remediation."
+      },
+      "retestDate": "2026-06-28",
+      "closedDate": "2026-06-28",
+      "remainingAction": {
+        "en": "Run FT-LIFECYCLE-001 for current mentor evidence.",
+        "vi": "Chạy FT-LIFECYCLE-001 cho evidence mentor hiện tại."
+      }
+    },
+    {
+      "defectId": "IDTS-19",
+      "summary": {
+        "en": "History Timeline fails when text exists",
+        "vi": "History Timeline lỗi khi có text"
+      },
+      "classification": "Product defect",
+      "stepsToReproduce": {
+        "en": "Open a bug with textual history in the custom timeline.",
+        "vi": "Mở bug có history text trong custom timeline."
+      },
+      "preconditions": {
+        "en": "History event contains text.",
+        "vi": "History event có text."
+      },
+      "expectedResult": {
+        "en": "Readable timeline renders.",
+        "vi": "Timeline dễ đọc được render."
+      },
+      "actualResult": {
+        "en": "UI5 FormatException occurred.",
+        "vi": "Xảy ra UI5 FormatException."
+      },
+      "environment": "SAPUI5 Object Page",
+      "severity": "High",
+      "priority": "High",
+      "reporter": "IDTS team",
+      "owner": "SangVN / DonHV",
+      "discoveredDate": "2026-06-28",
+      "status": "Closed",
+      "rootCause": {
+        "en": "Invalid nested expression binding.",
+        "vi": "Expression binding lồng không hợp lệ."
+      },
+      "fixDescription": {
+        "en": "Replaced invalid expression and retested timeline.",
+        "vi": "Thay expression sai và retest timeline."
+      },
+      "requirementIds": [
+        "SRS-FR-AUDIT-001"
+      ],
+      "testCaseIds": [
+        "FT-REASSIGN-001",
+        "FT-DEV-INFO-001"
+      ],
+      "evidenceLinks": [
+        "docs/pm/status/sangvn.md"
+      ],
+      "retestCommand": "Browser history UAT",
+      "retestResult": {
+        "en": "Passed historically.",
+        "vi": "Đã đạt trong lịch sử."
+      },
+      "retestDate": "2026-06-28",
+      "closedDate": "2026-06-28",
+      "remainingAction": {
+        "en": "Capture fresh UAT evidence when executed.",
+        "vi": "Chụp evidence UAT mới khi thực thi."
+      }
+    },
+    {
+      "defectId": "IDTS-32",
+      "summary": {
+        "en": "Invalid catalog values accepted",
+        "vi": "Chấp nhận catalog value không hợp lệ"
+      },
+      "classification": "Product defect",
+      "stepsToReproduce": {
+        "en": "Submit numeric-like, unknown, blank or inactive priority/severity/environment values.",
+        "vi": "Submit priority/severity/environment dạng số, unknown, blank hoặc inactive."
+      },
+      "preconditions": {
+        "en": "Authorized create/update request.",
+        "vi": "Request create/update có quyền."
+      },
+      "expectedResult": {
+        "en": "Backend rejects invalid values and preserves state.",
+        "vi": "Backend từ chối giá trị sai và giữ state."
+      },
+      "actualResult": {
+        "en": "Invalid values could be accepted before the fix.",
+        "vi": "Giá trị sai có thể được nhận trước fix."
+      },
+      "environment": "CAP service",
+      "severity": "High",
+      "priority": "High",
+      "reporter": "IDTS QA",
+      "owner": "DonHV",
+      "discoveredDate": "2026-06-29",
+      "status": "Closed",
+      "rootCause": {
+        "en": "Catalog activity/format validation was incomplete.",
+        "vi": "Validation format/activity của catalog chưa đủ."
+      },
+      "fixDescription": {
+        "en": "Added target, active-code and draft validation.",
+        "vi": "Thêm target, active-code và draft validation."
+      },
+      "requirementIds": [
+        "SRS-FR-BUG-002",
+        "SRS-FR-CLASS-003"
+      ],
+      "testCaseIds": [
+        "FT-VALID-001",
+        "FT-CREATE-001"
+      ],
+      "evidenceLinks": [
+        "scripts/qa/test-idts41-code-list-validation.js"
+      ],
+      "retestCommand": "npm run qa:idts41:programmatic",
+      "retestResult": {
+        "en": "18 passed, 0 failed.",
+        "vi": "18 đạt, 0 lỗi."
+      },
+      "retestDate": "2026-07-23",
+      "closedDate": "2026-07-23",
+      "remainingAction": {
+        "en": "UI UAT remains prepared.",
+        "vi": "UI UAT vẫn ở Prepared."
+      }
+    },
+    {
+      "defectId": "IDTS-35",
+      "summary": {
+        "en": "Blank app after successful login",
+        "vi": "Ứng dụng trắng sau login thành công"
+      },
+      "classification": "Product defect",
+      "stepsToReproduce": {
+        "en": "Log in, then load the protected Fiori app.",
+        "vi": "Login rồi load Fiori app được bảo vệ."
+      },
+      "preconditions": {
+        "en": "Valid user credentials.",
+        "vi": "Credential user hợp lệ."
+      },
+      "expectedResult": {
+        "en": "Metadata loads with bearer token and the app renders.",
+        "vi": "Metadata load kèm bearer token và app render."
+      },
+      "actualResult": {
+        "en": "Metadata request preceded the interceptor and returned 401.",
+        "vi": "Metadata request chạy trước interceptor và trả 401."
+      },
+      "environment": "SAPUI5 + custom CAP auth",
+      "severity": "Critical",
+      "priority": "High",
+      "reporter": "DatDT",
+      "owner": "DatDT",
+      "discoveredDate": "2026-06-30",
+      "status": "Closed",
+      "rootCause": {
+        "en": "Bearer interceptor installed after UI5 OData startup.",
+        "vi": "Bearer interceptor cài sau khi OData UI5 khởi động."
+      },
+      "fixDescription": {
+        "en": "Install auth guard/interceptor before UI5 bootstrap.",
+        "vi": "Cài auth guard/interceptor trước UI5 bootstrap."
+      },
+      "requirementIds": [
+        "SRS-FR-AUTH-001",
+        "SRS-FR-AUTH-002"
+      ],
+      "testCaseIds": [
+        "FT-AUTH-SESSION-001"
+      ],
+      "evidenceLinks": [
+        "docs/pm/status/datdt.md"
+      ],
+      "retestCommand": "npm run qa:auth:programmatic",
+      "retestResult": {
+        "en": "28 passed, 0 failed for backend auth; current browser login UAT not rerun.",
+        "vi": "28 đạt, 0 lỗi cho backend auth; chưa rerun browser login UAT hiện tại."
+      },
+      "retestDate": "2026-07-23",
+      "closedDate": "2026-06-30",
+      "remainingAction": {
+        "en": "Fresh browser UAT if required by mentor.",
+        "vi": "Chạy browser UAT mới nếu mentor yêu cầu."
+      }
+    },
+    {
+      "defectId": "IDTS-41",
+      "summary": {
+        "en": "Developer can start unauthorized root draft",
+        "vi": "Developer có thể tạo root draft không có quyền"
+      },
+      "classification": "Product defect",
+      "stepsToReproduce": {
+        "en": "Call root draft NEW as Developer.",
+        "vi": "Gọi root draft NEW bằng Developer."
+      },
+      "preconditions": {
+        "en": "Authenticated Developer.",
+        "vi": "Developer đã đăng nhập."
+      },
+      "expectedResult": {
+        "en": "403 and no draft.",
+        "vi": "403 và không có draft."
+      },
+      "actualResult": {
+        "en": "Draft creation was not blocked before the fix.",
+        "vi": "Tạo draft chưa bị chặn trước fix."
+      },
+      "environment": "CAP draft service",
+      "severity": "High",
+      "priority": "High",
+      "reporter": "IDTS QA",
+      "owner": "DonHV",
+      "discoveredDate": "2026-06-29",
+      "status": "Closed",
+      "rootCause": {
+        "en": "Authorization was missing at root draft NEW.",
+        "vi": "Thiếu authorization tại root draft NEW."
+      },
+      "fixDescription": {
+        "en": "Added backend role check before draft creation.",
+        "vi": "Thêm role check backend trước tạo draft."
+      },
+      "requirementIds": [
+        "SRS-FR-AUTH-002",
+        "SRS-FR-BUG-001"
+      ],
+      "testCaseIds": [
+        "FT-AUTHZ-001"
+      ],
+      "evidenceLinks": [
+        "scripts/qa/test-idts41-code-list-validation.js"
+      ],
+      "retestCommand": "npm run qa:idts41:programmatic",
+      "retestResult": {
+        "en": "Developer denied; Tester and PM allowed.",
+        "vi": "Developer bị từ chối; Tester và PM được phép."
+      },
+      "retestDate": "2026-07-23",
+      "closedDate": "2026-07-23",
+      "remainingAction": {
+        "en": "Fresh UI action-visibility UAT.",
+        "vi": "UAT mới về action visibility UI."
+      }
+    },
+    {
+      "defectId": "IDTS-49",
+      "summary": {
+        "en": "Draft activation rejects missing reporter",
+        "vi": "Draft activation từ chối do thiếu reporter"
+      },
+      "classification": "Product defect",
+      "stepsToReproduce": {
+        "en": "Activate an authorized draft without client-supplied reporter.",
+        "vi": "Activate draft có quyền nhưng client không gửi reporter."
+      },
+      "preconditions": {
+        "en": "PM/Tester creates a root draft.",
+        "vi": "PM/Tester tạo root draft."
+      },
+      "expectedResult": {
+        "en": "Backend derives reporter before validation.",
+        "vi": "Backend derive reporter trước validation."
+      },
+      "actualResult": {
+        "en": "Required-field validation ran before derivation.",
+        "vi": "Validation required-field chạy trước derivation."
+      },
+      "environment": "CAP draft service",
+      "severity": "High",
+      "priority": "High",
+      "reporter": "IDTS QA",
+      "owner": "DonHV",
+      "discoveredDate": "2026-07-02",
+      "status": "Closed",
+      "rootCause": {
+        "en": "Reporter derived too late in active CREATE.",
+        "vi": "Reporter được derive quá muộn ở active CREATE."
+      },
+      "fixDescription": {
+        "en": "Initialize reporter during draft NEW/SAVE.",
+        "vi": "Khởi tạo reporter trong draft NEW/SAVE."
+      },
+      "requirementIds": [
+        "SRS-FR-BUG-001"
+      ],
+      "testCaseIds": [
+        "FT-CREATE-001"
+      ],
+      "evidenceLinks": [
+        "docs/pm/status/donhv.md"
+      ],
+      "retestCommand": "npm run qa:draft-reporter:programmatic",
+      "retestResult": {
+        "en": "Passed historically; not rerun in this six-suite remediation.",
+        "vi": "Đã đạt trước đây; không rerun trong sáu suite remediation này."
+      },
+      "retestDate": "2026-07-02",
+      "closedDate": "2026-07-02",
+      "remainingAction": {
+        "en": "No new claim beyond historical evidence.",
+        "vi": "Không claim mới ngoài evidence lịch sử."
+      }
+    },
+    {
+      "defectId": "IDTS-52",
+      "summary": {
+        "en": "UI5 login page renders blank",
+        "vi": "Trang login UI5 hiển thị trắng"
+      },
+      "classification": "Product defect",
+      "stepsToReproduce": {
+        "en": "Open the custom login page on the affected build.",
+        "vi": "Mở custom login page trên build bị ảnh hưởng."
+      },
+      "preconditions": {
+        "en": "Unauthenticated browser.",
+        "vi": "Browser chưa đăng nhập."
+      },
+      "expectedResult": {
+        "en": "Login controls and safe validation render.",
+        "vi": "Control login và validation an toàn render."
+      },
+      "actualResult": {
+        "en": "Undefined enum access stopped rendering.",
+        "vi": "Truy cập enum undefined làm dừng render."
+      },
+      "environment": "SAPUI5 login page",
+      "severity": "High",
+      "priority": "High",
+      "reporter": "IDTS QA",
+      "owner": "DatDT / DonHV",
+      "discoveredDate": "2026-07-03",
+      "status": "Closed",
+      "rootCause": {
+        "en": "Unstable UI5 enum access.",
+        "vi": "Truy cập enum UI5 không ổn định."
+      },
+      "fixDescription": {
+        "en": "Use stable string enum values.",
+        "vi": "Dùng giá trị enum dạng chuỗi ổn định."
+      },
+      "requirementIds": [
+        "SRS-FR-AUTH-001"
+      ],
+      "testCaseIds": [
+        "FT-AUTH-SESSION-001"
+      ],
+      "evidenceLinks": [
+        "docs/pm/status/donhv.md"
+      ],
+      "retestCommand": "Browser login smoke",
+      "retestResult": {
+        "en": "Passed historically; current browser UAT not rerun.",
+        "vi": "Đã đạt trước đây; chưa rerun browser UAT hiện tại."
+      },
+      "retestDate": "2026-07-03",
+      "closedDate": "2026-07-03",
+      "remainingAction": {
+        "en": "Fresh browser evidence if mentor requests it.",
+        "vi": "Evidence browser mới nếu mentor yêu cầu."
+      }
+    },
+    {
+      "defectId": "IDTS-53",
+      "summary": {
+        "en": "Profile overlay intercepts Sign Out",
+        "vi": "Profile overlay chặn Sign Out"
+      },
+      "classification": "Product defect",
+      "stepsToReproduce": {
+        "en": "Open profile popover and click Sign Out in the affected layout.",
+        "vi": "Mở profile popover và click Sign Out trên layout bị ảnh hưởng."
+      },
+      "preconditions": {
+        "en": "Authenticated app.",
+        "vi": "App đã đăng nhập."
+      },
+      "expectedResult": {
+        "en": "Sign Out is clickable and revokes the session.",
+        "vi": "Sign Out click được và revoke session."
+      },
+      "actualResult": {
+        "en": "Fixed overlay intercepted pointer events.",
+        "vi": "Overlay fixed chặn pointer event."
+      },
+      "environment": "SAPUI5 shell",
+      "severity": "Medium",
+      "priority": "High",
+      "reporter": "IDTS QA",
+      "owner": "DatDT / DonHV",
+      "discoveredDate": "2026-07-03",
+      "status": "Closed",
+      "rootCause": {
+        "en": "Pointer-event handling on fixed host.",
+        "vi": "Xử lý pointer-event trên host fixed."
+      },
+      "fixDescription": {
+        "en": "Adjusted pointer events for host and button.",
+        "vi": "Điều chỉnh pointer event cho host và button."
+      },
+      "requirementIds": [
+        "SRS-FR-AUTH-002"
+      ],
+      "testCaseIds": [
+        "FT-AUTH-SESSION-001"
+      ],
+      "evidenceLinks": [
+        "docs/pm/status/donhv.md"
+      ],
+      "retestCommand": "Browser profile/logout smoke",
+      "retestResult": {
+        "en": "Passed historically; backend logout/revocation passed fresh.",
+        "vi": "Browser đã đạt trước đây; backend logout/revoke đạt mới."
+      },
+      "retestDate": "2026-07-23",
+      "closedDate": "2026-07-03",
+      "remainingAction": {
+        "en": "Fresh browser click evidence remains outside this run.",
+        "vi": "Evidence browser click mới nằm ngoài lượt này."
+      }
+    },
+    {
+      "defectId": "IDTS-55",
+      "summary": {
+        "en": "Comments and attachments interaction defects",
+        "vi": "Lỗi tương tác Comments và Attachments"
+      },
+      "classification": "Product defect",
+      "stepsToReproduce": {
+        "en": "Post a comment or remove an attachment from the affected Object Page fragments.",
+        "vi": "Post comment hoặc xóa attachment từ fragment Object Page bị ảnh hưởng."
+      },
+      "preconditions": {
+        "en": "Existing bug with child sections.",
+        "vi": "Có bug với child section."
+      },
+      "expectedResult": {
+        "en": "Correct context, immediate refresh and safe deletion.",
+        "vi": "Context đúng, refresh ngay và delete an toàn."
+      },
+      "actualResult": {
+        "en": "Context/refresh/root detection was incorrect.",
+        "vi": "Context/refresh/root detection sai."
+      },
+      "environment": "Fiori Object Page + CAP attachments",
+      "severity": "High",
+      "priority": "High",
+      "reporter": "IDTS QA",
+      "owner": "DonHV",
+      "discoveredDate": "2026-07-04",
+      "status": "Closed",
+      "rootCause": {
+        "en": "Lost binding context, unsupported refresh and child/root confusion.",
+        "vi": "Mất binding context, refresh không hỗ trợ và nhầm child/root."
+      },
+      "fixDescription": {
+        "en": "Propagate context, use supported refresh and strict root detection.",
+        "vi": "Truyền context, dùng refresh được hỗ trợ và root detection chặt."
+      },
+      "requirementIds": [
+        "SRS-FR-COMMENT-001",
+        "SRS-DATA-007"
+      ],
+      "testCaseIds": [
+        "FT-COMMENT-001",
+        "FT-ATTACH-001"
+      ],
+      "evidenceLinks": [
+        "docs/pm/status/donhv.md"
+      ],
+      "retestCommand": "npm run qa:comments-attachments:programmatic; npm run qa:comments-attachments:http",
+      "retestResult": {
+        "en": "Fresh comment persistence passed; attachment HTTP remains NOT_RUN.",
+        "vi": "Comment persistence mới đạt; attachment HTTP vẫn NOT_RUN."
+      },
+      "retestDate": "2026-07-23",
+      "closedDate": "2026-07-04",
+      "remainingAction": {
+        "en": "Run FT-ATTACH-001 before claiming current attachment PASS.",
+        "vi": "Chạy FT-ATTACH-001 trước khi claim attachment PASS hiện tại."
+      }
+    },
+    {
+      "defectId": "IDTS-56",
+      "summary": {
+        "en": "Smart Assign treats hidden classification as missing",
+        "vi": "Smart Assign coi classification ẩn là thiếu"
+      },
+      "classification": "Product defect",
+      "stepsToReproduce": {
+        "en": "Open Smart Assign when component category was not selected in the Object Page payload.",
+        "vi": "Mở Smart Assign khi component category không có trong payload Object Page."
+      },
+      "preconditions": {
+        "en": "Classified bug with sparse UI selection.",
+        "vi": "Bug đã classify với UI selection dạng sparse."
+      },
+      "expectedResult": {
+        "en": "Valid classification context is derived and candidates load.",
+        "vi": "Classification context hợp lệ được derive và candidate load."
+      },
+      "actualResult": {
+        "en": "UI reported missing context.",
+        "vi": "UI báo thiếu context."
+      },
+      "environment": "Fiori Smart Assign",
+      "severity": "High",
+      "priority": "High",
+      "reporter": "IDTS QA",
+      "owner": "DonHV",
+      "discoveredDate": "2026-07-05",
+      "status": "Closed",
+      "rootCause": {
+        "en": "UI depended on an internal field not always selected.",
+        "vi": "UI phụ thuộc field nội bộ không luôn được select."
+      },
+      "fixDescription": {
+        "en": "Corrected context derivation and tests.",
+        "vi": "Sửa context derivation và test."
+      },
+      "requirementIds": [
+        "SRS-FR-ASSIGN-001"
+      ],
+      "testCaseIds": [
+        "FT-CLASS-ASSIGN-001"
+      ],
+      "evidenceLinks": [
+        "docs/pm/status/donhv.md"
+      ],
+      "retestCommand": "npm run qa:idts56:programmatic",
+      "retestResult": {
+        "en": "Passed historically; fresh Smart Assign execution not part of this run.",
+        "vi": "Đã đạt trước đây; không chạy Smart Assign mới trong lượt này."
+      },
+      "retestDate": "2026-07-05",
+      "closedDate": "2026-07-05",
+      "remainingAction": {
+        "en": "Execute FT-CLASS-ASSIGN-001 for current mentor evidence.",
+        "vi": "Chạy FT-CLASS-ASSIGN-001 cho evidence mentor hiện tại."
+      }
+    },
+    {
+      "defectId": "IDTS-58",
+      "summary": {
+        "en": "Profile/comment/attachment UX defects",
+        "vi": "Lỗi UX profile/comment/attachment"
+      },
+      "classification": "Product defect",
+      "stepsToReproduce": {
+        "en": "Use dashboard profile, comment feed and attachment delete while a draft exists.",
+        "vi": "Dùng dashboard profile, comment feed và attachment delete khi có draft."
+      },
+      "preconditions": {
+        "en": "Authenticated app and editable bug.",
+        "vi": "App đã đăng nhập và bug có thể edit."
+      },
+      "expectedResult": {
+        "en": "No overlap/duplicate author and delete is disabled during draft.",
+        "vi": "Không overlap/lặp author và delete disabled khi có draft."
+      },
+      "actualResult": {
+        "en": "Profile overlapped, author repeated, delete stayed enabled.",
+        "vi": "Profile overlap, author lặp, delete vẫn bật."
+      },
+      "environment": "SAPUI5/Fiori",
+      "severity": "Medium",
+      "priority": "High",
+      "reporter": "DatDT",
+      "owner": "DatDT",
+      "discoveredDate": "2026-07-05",
+      "status": "Closed",
+      "rootCause": {
+        "en": "Header placement, feed formatting and draft-state guard defects.",
+        "vi": "Lỗi header placement, feed format và draft-state guard."
+      },
+      "fixDescription": {
+        "en": "Moved action, normalized feed and disabled delete during draft.",
+        "vi": "Di chuyển action, chuẩn hóa feed và disable delete khi draft."
+      },
+      "requirementIds": [
+        "SRS-FR-COMMENT-001",
+        "SRS-DATA-007"
+      ],
+      "testCaseIds": [
+        "FT-COMMENT-001",
+        "FT-ATTACH-001"
+      ],
+      "evidenceLinks": [
+        "docs/pm/status/datdt.md"
+      ],
+      "retestCommand": "Local browser smoke",
+      "retestResult": {
+        "en": "Passed historically; attachment current execution remains NOT_RUN.",
+        "vi": "Đã đạt trước đây; execution attachment hiện tại vẫn NOT_RUN."
+      },
+      "retestDate": "2026-07-05",
+      "closedDate": "2026-07-05",
+      "remainingAction": {
+        "en": "Current browser/UAT evidence pending.",
+        "vi": "Evidence browser/UAT hiện tại còn pending."
+      }
+    },
+    {
+      "defectId": "IDTS-78",
+      "summary": {
+        "en": "Standalone AI sections outside business context",
+        "vi": "AI section độc lập ngoài business context"
+      },
+      "classification": "Product UX defect",
+      "stepsToReproduce": {
+        "en": "Open the Object Page and locate standalone AI sections.",
+        "vi": "Mở Object Page và tìm AI section độc lập."
+      },
+      "preconditions": {
+        "en": "AI review UI build before placement fix.",
+        "vi": "Build AI review UI trước placement fix."
+      },
+      "expectedResult": {
+        "en": "Review actions appear near the related business context.",
+        "vi": "Review action nằm gần business context liên quan."
+      },
+      "actualResult": {
+        "en": "Standalone titled sections remained visible.",
+        "vi": "Standalone section có title vẫn hiển thị."
+      },
+      "environment": "Fiori Object Page",
+      "severity": "Medium",
+      "priority": "High",
+      "reporter": "IDTS QA",
+      "owner": "DonHV",
+      "discoveredDate": "2026-07-11",
+      "status": "Closed",
+      "rootCause": {
+        "en": "Manifest custom sections remained after placement polish.",
+        "vi": "Manifest custom section còn sau placement polish."
+      },
+      "fixDescription": {
+        "en": "Removed standalone sections and kept review actions inline.",
+        "vi": "Xóa standalone section và giữ review action inline."
+      },
+      "requirementIds": [
+        "SRS-FR-AI-002"
+      ],
+      "testCaseIds": [
+        "FT-AI-REVIEW-001",
+        "UAT-006"
+      ],
+      "evidenceLinks": [
+        "docs/pm/status/donhv.md"
+      ],
+      "retestCommand": "Deployed AI UI smoke",
+      "retestResult": {
+        "en": "Passed historically; fresh full human-review flow remains NOT_RUN.",
+        "vi": "Đã đạt trước đây; full human-review flow mới vẫn NOT_RUN."
+      },
+      "retestDate": "2026-07-11",
+      "closedDate": "2026-07-11",
+      "remainingAction": {
+        "en": "Execute FT-AI-REVIEW-001 or UAT-006 for current evidence.",
+        "vi": "Chạy FT-AI-REVIEW-001 hoặc UAT-006 cho evidence hiện tại."
+      }
+    }
   ]
 }

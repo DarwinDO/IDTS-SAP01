@@ -13,15 +13,15 @@ from openpyxl.styles import Alignment
 ROOT = Path(__file__).resolve().parents[2]
 TEMPLATE = ROOT / "docs" / "sap490" / "templates" / "Deliverable_template" / "Functional_Specification.xlsx"
 OUT = ROOT / "docs" / "sap490" / "generated"
-DATE = date(2026, 7, 10)
-VERSION = "0.3"
+DATE = date(2026, 7, 24)
+VERSION = "0.4"
 
 
 LABELS = {
     "en": {
         "title": "Functional Specification",
         "name": "IDTS CAP/Fiori MVP review baseline",
-        "history": "Refresh for SAP490 review: current implemented workflow, draft attachments, PM monitoring, and advisory-AI human-review behavior.",
+        "history": "Mentor-ready refresh: deployed OData paths, draft/active write lifecycle, exact action audit, expanded developer data, attachments, monitoring, and advisory-AI human-review behavior.",
         "overview": [
             "IDTS supports structured defect reporting for Tester, Developer, and PM roles.",
             "The system validates classification and responsibility-aware assignment, then controls lifecycle actions through CAP backend authority.",
@@ -37,12 +37,12 @@ LABELS = {
         ],
         "screen": "List Report and Object Page expose Bug Summary, Classification/Assignment, Reproduction, Evidence/Attachments, Comments, History, Notifications, PM monitoring, and context-local AI review actions.",
         "messages": [("IDTS-FS-001", "Required/invalid catalog data is rejected by CAP.", "Create/update validation"), ("IDTS-FS-002", "Only an authorized role can run this lifecycle action.", "Action authorization"), ("IDTS-FS-003", "AI suggestion requires human review and does not update the bug automatically.", "AI review")],
-        "processing": "CAP validates inputs and role/status permissions, derives system-owned values, writes history/notification side effects, and returns safe OData responses. Fiori UI renders readable review information without exposing private configuration or provider diagnostics.",
+        "processing": "Fiori calls AuthService at /odata/v4/auth/ and BugService at /odata/v4/bug/. Create uses draft NEW, repeated PATCH and SAVE/CREATE; active editing uses EDIT, PATCH and UPDATE. CAP validates inputs and role/status permissions, derives system-owned values, writes exact-action history and notification side effects, and returns safe OData responses. PostgreSQL stores business metadata, S3 stores attachment bytes, and AiSuggestions stores only normalized PENDING advisory audit rows. The live AI provider remains disabled.",
     },
     "vi": {
         "title": "Đặc tả chức năng",
         "name": "IDTS CAP/Fiori MVP review baseline",
-        "history": "Refresh SAP490 review: workflow đã triển khai, draft attachment, PM monitoring và AI advisory có human review.",
+        "history": "Cập nhật mentor-ready: endpoint OData đã deploy, vòng đời ghi draft/active, exact action audit, dữ liệu Developer mở rộng, attachment, monitoring và AI advisory có human review.",
         "overview": [
             "IDTS hỗ trợ defect reporting có cấu trúc cho role Tester, Developer và PM.",
             "Hệ thống validate classification và assignment theo responsibility, sau đó kiểm soát lifecycle action bằng CAP backend authority.",
@@ -58,7 +58,7 @@ LABELS = {
         ],
         "screen": "List Report và Object Page có Bug Summary, Classification/Assignment, Reproduction, Evidence/Attachments, Comments, History, Notifications, PM monitoring và AI review action tại đúng context.",
         "messages": [("IDTS-FS-001", "CAP từ chối catalog data thiếu hoặc không hợp lệ.", "Create/update validation"), ("IDTS-FS-002", "Chỉ role được phép mới chạy lifecycle action này.", "Action authorization"), ("IDTS-FS-003", "AI suggestion cần human review và không tự update bug.", "AI review")],
-        "processing": "CAP validate input và quyền role/status, derive system-owned value, ghi history/notification side effect và trả OData response an toàn. Fiori UI render review information dễ đọc, không lộ private configuration hoặc provider diagnostic.",
+        "processing": "Fiori gọi AuthService tại /odata/v4/auth/ và BugService tại /odata/v4/bug/. Tạo mới dùng draft NEW, PATCH lặp lại và SAVE/CREATE; sửa Bug active dùng EDIT, PATCH và UPDATE. CAP validate input và quyền role/status, derive system-owned value, ghi history exact-action và notification side effect rồi trả OData response an toàn. PostgreSQL lưu metadata nghiệp vụ, S3 lưu binary attachment và AiSuggestions chỉ lưu audit tư vấn đã chuẩn hóa ở PENDING. Live AI provider vẫn bị tắt.",
     },
 }
 

@@ -1258,8 +1258,22 @@ def generate_report(catalog, lang):
     trim_sheet(cover_ws, 17, 6, print_area="A1:F17", orientation="landscape")
     trim_sheet(test_cases, 35, 6, freeze="B9", auto_filter="B8:F35", print_area="B1:F35", orientation="landscape", title_rows="1:8")
     trim_sheet(stats, 29, 8, freeze="B10", auto_filter="B10:H14", print_area="B1:H29", orientation="landscape", title_rows="1:10")
-    trim_sheet(wb["Feature 1"], 23, 18, freeze="A11", auto_filter="A10:O23", print_area="A1:O23", orientation="landscape", fit_width=2, title_rows="1:10")
-    trim_sheet(wb["Feature 2"], 26, 18, freeze="A11", auto_filter="A10:O26", print_area="A1:O26", orientation="landscape", fit_width=2, title_rows="1:10")
+    # The executed/pending split changes as evidence matures. Keep every
+    # canonical case instead of trimming Feature 1 to the old 12-case baseline.
+    feature_one_last_row = max(23, 11 + len(executed_cases))
+    feature_two_last_row = max(26, 11 + len(pending_cases))
+    trim_sheet(
+        wb["Feature 1"], feature_one_last_row, 18,
+        freeze="A11", auto_filter=f"A10:O{feature_one_last_row}",
+        print_area=f"A1:O{feature_one_last_row}", orientation="landscape",
+        fit_width=2, title_rows="1:10",
+    )
+    trim_sheet(
+        wb["Feature 2"], feature_two_last_row, 18,
+        freeze="A11", auto_filter=f"A10:O{feature_two_last_row}",
+        print_area=f"A1:O{feature_two_last_row}", orientation="landscape",
+        fit_width=2, title_rows="1:10",
+    )
     save(wb, output, "Test Report", lang, version)
     return output
 

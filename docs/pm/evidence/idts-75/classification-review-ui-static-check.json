@@ -1,6 +1,6 @@
 {
   "task": "IDTS-75",
-  "checkedAt": "2026-07-11T00:39:52.152Z",
+  "checkedAt": "2026-07-24T13:19:56.220Z",
   "checks": [
     {
       "label": "classification review field opens the review dialog",
