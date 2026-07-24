@@ -3,10 +3,10 @@
 Project: Issue and Defect Tracking System in SAP
 Document type: Functional Requirements Specification (FRS)
 Language: English
-Status: Draft v1.5
-Last updated: 2026-07-22
+Status: Draft v1.6
+Last updated: 2026-07-24
 Prepared for: SAP490 project delivery, mentor review, implementation evidence, and QA test design
-Document style: SAP490 hybrid, function-detail-first, aligned with BRD v1.5 and SRS v1.4
+Document style: SAP490 hybrid, function-detail-first, aligned with BRD v1.6 and SRS v1.5
 
 ## 1. Document Control
 
@@ -20,6 +20,7 @@ Document style: SAP490 hybrid, function-detail-first, aligned with BRD v1.5 and 
 | v1.3 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Synced real draft attachment behavior and optional advisory-AI review behavior with the implemented CAP/Fiori baseline. | Draft |
 | v1.4 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Replaced eight review-facing Mermaid blocks with rendered workflow figures and closed the visual-submission open issue. | Draft |
 | v1.5 | 2026-07-22 | IDTS Project Team | Mentor / Supervisor | Aligned authentication/session, shared QA data/storage, asynchronous email-outbox, and normalized human-reviewed AI audit behavior with the current implementation baseline. | Draft |
+| v1.6 | 2026-07-24 | IDTS Project Team | Mentor / Supervisor | Aligned OData/draft handler traceability and exact action audit codes; corrected AI review-state wording to the implemented PENDING-only audit behavior. | Draft |
 
 ### 1.2 Review and Sign-Off
 
@@ -337,6 +338,24 @@ The FRS is more detailed than the BRD and more workflow-oriented than the SRS. I
 | Acceptance criteria | History answers who did what, when, and why where applicable. |
 | Traceability | SRS-FR-AUDIT-001, SRS-FR-AUDIT-002. |
 
+The deployed audit baseline keeps one exact action code for each bound workflow command so a reviewer can trace the OData request to the stored event without translating it into a broader legacy label:
+
+| Bound OData action | Persisted exact `ActionTypes.code` |
+| --- | --- |
+| `assignToDeveloper` | `ASSIGN_TO_DEVELOPER` |
+| `moveToPendingAssignment` | `MOVE_TO_PENDING_ASSIGNMENT` |
+| `markInReview` | `MARK_IN_REVIEW` |
+| `requestMoreInformation` | `REQUEST_MORE_INFORMATION` |
+| `resubmitToDeveloper` | `RESUBMIT_TO_DEVELOPER` |
+| `rejectBug` | `REJECT_BUG` |
+| `startProgress` | `START_PROGRESS` |
+| `resolveBug` | `RESOLVE_BUG` |
+| `sendToRetest` | `SEND_TO_RETEST` |
+| `closeBug` | `CLOSE_BUG` |
+| `reopenBug` | `REOPEN_BUG` |
+
+The runtime also preserves legacy action categories for historical compatibility. New exact-command evidence must use the exact code above.
+
 ### 5.16 FRS-NOTIF-001 - Notification Records
 
 | Field | Specification |
@@ -403,7 +422,7 @@ The FRS is more detailed than the BRD and more workflow-oriented than the SRS. I
 | Primary actor | Tester, Developer, PM. |
 | Trigger | An authorized user explicitly requests an AI suggestion from its relevant business context. |
 | Preconditions | The feature is enabled with approved private configuration, or the UI presents the safe unavailable state while the normal workflow remains usable. |
-| Main flow | CAP allowlists and sanitizes permitted bug/context fields; the provider returns normalized advisory output; the UI renders it as text requiring review; source-linked output is stored as a safe `AiSuggestions` audit row; the user may accept, reject, ignore, or use normal authorized actions to make a decision. |
+| Main flow | CAP allowlists and sanitizes permitted bug/context fields; the provider or deterministic fallback returns normalized advisory output; the UI renders it as text requiring review; source-linked output is stored as a safe `AiSuggestions` audit row in `PENDING`. The user may review or ignore the displayed advice and may separately use a normal authorized CAP action. The current service does not persist accept/reject/ignore review outcomes. |
 | Validation rules | AI cannot bypass role authorization, catalog validation, Developer Responsibility eligibility, required reasons, or status transition rules. It does not create, edit, assign, reclassify, or transition bugs. |
 | Data protection | Do not send credentials, tokens, private endpoints, attachment bytes, raw logs, or unnecessary personal data. Do not persist raw prompts/provider responses or hidden reasoning. |
 | Acceptance criteria | Disabled, timeout, malformed, unsafe, and provider-failure states are safe; suggestions are visibly review-only; `AiSuggestions` contains normalized review/audit data but no raw prompt, raw provider response, attachment content, credential, or hidden reasoning; normal non-AI workflow continues. |
@@ -452,7 +471,7 @@ The FRS is more detailed than the BRD and more workflow-oriented than the SRS. I
 | FRS-DATA-RULE-009 | History log must record important actions. |
 | FRS-DATA-RULE-010 | `AuthSessions` stores session lifecycle data without plain-text passwords; revoked or expired sessions cannot authorize BugService requests. |
 | FRS-DATA-RULE-011 | `NotificationDeliveries` is a separate email outbox; provider failure does not roll back the originating bug action or in-app notification. |
-| FRS-DATA-RULE-012 | `AiSuggestions` stores only normalized safe suggestion and human-review/audit state. |
+| FRS-DATA-RULE-012 | `AiSuggestions` stores only normalized safe suggestion/audit data. Current source-linked rows are persisted in `PENDING`; no public action currently persists `ACCEPTED`, `REJECTED`, or `IGNORED`. |
 | FRS-DATA-RULE-013 | Attachment content uses the configured DB fallback or external object store; no storage credential is exposed in user-visible data. |
 
 ## 7. Acceptance Criteria Summary

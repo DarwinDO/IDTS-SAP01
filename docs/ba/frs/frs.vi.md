@@ -3,10 +3,10 @@
 Dự án: Issue and Defect Tracking System in SAP
 Loại tài liệu: Functional Requirements Specification (FRS)
 Ngôn ngữ: Tiếng Việt
-Trạng thái: Draft v1.5
-Cập nhật lần cuối: 2026-07-22
+Trạng thái: Draft v1.6
+Cập nhật lần cuối: 2026-07-24
 Chuẩn bị cho: SAP490 project delivery, mentor review, bằng chứng implementation và QA test design
-Phong cách tài liệu: SAP490 hybrid, ưu tiên functional detail, aligned với BRD v1.5 và SRS v1.4
+Phong cách tài liệu: SAP490 hybrid, ưu tiên functional detail, aligned với BRD v1.6 và SRS v1.5
 
 ## 1. Kiểm soát tài liệu
 
@@ -20,6 +20,7 @@ Phong cách tài liệu: SAP490 hybrid, ưu tiên functional detail, aligned v�
 | v1.3 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Đồng bộ hành vi draft attachment thực và hành vi AI advisory review tùy chọn với baseline CAP/Fiori đã triển khai. | Draft |
 | v1.4 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Thay tám Mermaid block dùng khi review bằng workflow figure đã render và đóng open issue về visual submission. | Draft |
 | v1.5 | 2026-07-22 | IDTS Project Team | Mentor / Supervisor | Đồng bộ authentication/session, dữ liệu/storage shared QA, email outbox bất đồng bộ và AI audit có human review với baseline implementation hiện tại. | Draft |
+| v1.6 | 2026-07-24 | IDTS Project Team | Mentor / Supervisor | Đồng bộ traceability OData/draft handler và exact action audit code; sửa wording AI review state theo audit behavior hiện chỉ PENDING. | Draft |
 
 ### 1.2 Review và phê duyệt
 
@@ -337,6 +338,24 @@ FRS chi tiết hơn BRD và thiên về workflow hơn SRS. Tài liệu dùng cho
 | Acceptance criteria | History trả lời được ai làm gì, khi nào và vì sao khi áp dụng. |
 | Traceability | SRS-FR-AUDIT-001, SRS-FR-AUDIT-002. |
 
+Baseline audit đã deploy giữ một exact action code cho mỗi bound workflow command để reviewer trace trực tiếp từ OData request tới event đã lưu mà không phải quy đổi sang legacy label rộng hơn:
+
+| Bound OData action | Exact `ActionTypes.code` được persist |
+| --- | --- |
+| `assignToDeveloper` | `ASSIGN_TO_DEVELOPER` |
+| `moveToPendingAssignment` | `MOVE_TO_PENDING_ASSIGNMENT` |
+| `markInReview` | `MARK_IN_REVIEW` |
+| `requestMoreInformation` | `REQUEST_MORE_INFORMATION` |
+| `resubmitToDeveloper` | `RESUBMIT_TO_DEVELOPER` |
+| `rejectBug` | `REJECT_BUG` |
+| `startProgress` | `START_PROGRESS` |
+| `resolveBug` | `RESOLVE_BUG` |
+| `sendToRetest` | `SEND_TO_RETEST` |
+| `closeBug` | `CLOSE_BUG` |
+| `reopenBug` | `REOPEN_BUG` |
+
+Runtime vẫn giữ legacy action category để tương thích history cũ. Evidence mới theo exact command phải dùng exact code trong bảng trên.
+
 ### 5.16 FRS-NOTIF-001 - Notification Records
 
 | Field | Specification |
@@ -403,7 +422,7 @@ FRS chi tiết hơn BRD và thiên về workflow hơn SRS. Tài liệu dùng cho
 | Primary actor | Tester, Developer, PM. |
 | Trigger | User có quyền chủ động yêu cầu AI suggestion từ business context tương ứng. |
 | Preconditions | Feature được bật với private configuration đã duyệt, hoặc UI hiển thị safe unavailable state trong khi normal workflow vẫn dùng được. |
-| Main flow | CAP allowlist và sanitize các field bug/context được phép; provider trả advisory output đã chuẩn hóa; UI render dưới dạng text cần review; source-linked output được lưu thành safe audit row trong `AiSuggestions`; user có thể accept, reject, ignore hoặc dùng normal action có authorization để quyết định. |
+| Main flow | CAP allowlist và sanitize các field bug/context được phép; provider hoặc deterministic fallback trả advisory output đã chuẩn hóa; UI render dưới dạng text cần review; source-linked output được lưu thành safe audit row trong `AiSuggestions` ở `PENDING`. User có thể review hoặc bỏ qua advice hiển thị và có thể thực hiện riêng một CAP action thông thường đã được cấp quyền. Service hiện chưa persist kết quả accept/reject/ignore suggestion. |
 | Validation rules | AI không được bypass role authorization, catalog validation, Developer Responsibility eligibility, required reason hoặc status transition rule. AI không create, edit, assign, reclassify hoặc transition bug. |
 | Data protection | Không gửi credential, token, private endpoint, attachment bytes, raw log hoặc personal data không cần thiết. Không persist raw prompt/provider response hoặc hidden reasoning. |
 | Acceptance criteria | State disabled, timeout, malformed, unsafe và provider-failure đều an toàn; suggestion hiển thị review-only; `AiSuggestions` chỉ chứa review/audit data đã chuẩn hóa, không chứa raw prompt, raw provider response, attachment content, credential hoặc hidden reasoning; workflow không-AI vẫn tiếp tục. |
@@ -452,7 +471,7 @@ FRS chi tiết hơn BRD và thiên về workflow hơn SRS. Tài liệu dùng cho
 | FRS-DATA-RULE-009 | History log phải record important actions. |
 | FRS-DATA-RULE-010 | `AuthSessions` lưu session lifecycle data mà không lưu plain-text password; revoked hoặc expired session không authorize được BugService request. |
 | FRS-DATA-RULE-011 | `NotificationDeliveries` là email outbox riêng; provider failure không rollback bug action gốc hoặc in-app notification. |
-| FRS-DATA-RULE-012 | `AiSuggestions` chỉ lưu suggestion đã chuẩn hóa, an toàn cùng human-review/audit state. |
+| FRS-DATA-RULE-012 | `AiSuggestions` chỉ lưu suggestion/audit data đã chuẩn hóa, an toàn. Source-linked row hiện persist ở `PENDING`; chưa có public action lưu `ACCEPTED`, `REJECTED` hoặc `IGNORED`. |
 | FRS-DATA-RULE-013 | Attachment content dùng configured DB fallback hoặc external object store; không expose storage credential trong user-visible data. |
 
 ## 7. Acceptance Criteria Summary

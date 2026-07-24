@@ -6,7 +6,8 @@ const fs = require('fs')
 const path = require('path')
 
 const root = path.resolve(__dirname, '..', '..')
-const read = relativePath => fs.readFileSync(path.join(root, relativePath), 'utf8')
+// Normalize Windows line endings so contract checks validate CDS content, not checkout formatting.
+const read = relativePath => fs.readFileSync(path.join(root, relativePath), 'utf8').replace(/\r\n/g, '\n')
 
 const service = read('srv/service.cds')
 const summaryBackend = read('srv/ai/bug-summary.js')
