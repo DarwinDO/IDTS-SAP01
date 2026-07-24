@@ -134,6 +134,9 @@ Vietnamese:
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
+| IDTS-91 | Add explicit AI suggestion review actions | DatDT | Implementation and focused QA complete on green PR #167; `19/0` passed and Jira evidence comment is `10648`. Await human review, merge, and Jira closure. |
+| IDTS-92 | Add persisted review controls to existing AI dialogs | DatDT | Green PR #167 is open; static QA and both local browser suites passed, and Jira evidence comment is `10649`. Await human review, merge, and Jira closure. |
+| IDTS-93 | Apply accepted classification suggestion safely | DatDT | Green PR #167 includes Tester/PM-only validated apply plus stale/idempotent/history/rollback coverage; `35/0` passed and Jira evidence comment is `10650`. Await human review, merge, and Jira closure. |
 | IDTS-100 | Execute SAP490 mentor-ready acceptance and Drive synchronization | DonHV | Current artifacts and Shared QA evidence are refreshed; Drive same-ID synchronization and readback pass. Status remains conditional because 6 human UAT cases are Prepared, mentor approval/signature is pending, and OpenAI live is disabled/not accepted. |
 | IDTS-74 | Add duplicate and similar bug AI review panel | DonHV | Done. PR #130 squash-merged into `dev` at `d5e9549`; Render deploy `dep-d97p0sq8qa3s73f4tagg` is `live`; local static QA passed 133 checks, local browser smoke passed 6/6, authenticated Render AI smoke passed 25/25, and shared-QA browser evidence shows the deployed Similar Bugs dialog with a candidate and safe review-only copy. |
 | IDTS-68 | Backend grounded bug/handoff summary | SangVN / DonHV support | Done at repository handoff level. PR #115 merged into `dev` at `d5e4297`; focused QA passed `28/0`, AI regression IDTS-64 to IDTS-68 passed, and Jira evidence comment is `10431`. Jira closure transition is handled after this closure sync. |
@@ -156,6 +159,9 @@ Vietnamese:
 
 | ID | Cong viec | Thanh vien chinh | Ghi chu |
 | --- | --- | --- | --- |
+| IDTS-91 | Them action review AI suggestion ro rang | DatDT | Implementation va focused QA da xong tren PR #167 dang green; pass `19/0`, Jira evidence comment `10648`. Cho human review, merge va Jira closure. |
+| IDTS-92 | Them persisted review control vao dialog AI hien co | DatDT | PR #167 dang green; static QA va hai browser suite local pass, Jira evidence comment `10649`. Cho human review, merge va Jira closure. |
+| IDTS-93 | Apply classification suggestion da Accept an toan | DatDT | PR #167 dang green voi action chi Tester/PM va validation stale/idempotent/history/rollback; pass `35/0`, Jira evidence comment `10650`. Cho human review, merge va Jira closure. |
 | IDTS-100 | Thuc thi acceptance SAP490 mentor-ready va dong bo Drive | DonHV | Artifact hien hanh va evidence Shared QA da duoc lam moi; dong bo Drive giu nguyen ID va readback da pass. Van la conditional vi 6 UAT can nguoi thuc hien con Prepared, mentor approval/signature dang cho, va OpenAI live dang tat/chua duoc nghiem thu. |
 | IDTS-74 | Them panel review AI duplicate va similar bug | DonHV | Done. PR #130 da squash-merge vao `dev` tai `d5e9549`; Render deploy `dep-d97p0sq8qa3s73f4tagg` da `live`; static QA local pass 133 check, browser local pass 6/6, authenticated Render AI smoke pass 25/25, va shared-QA browser evidence cho thay dialog Similar Bugs da deploy voi candidate cung copy review-only an toan. |
 | IDTS-57 | Browser regression va SAP Fiori UX review cho cac man hinh da redesign | NhanT | PR #77 da merge browser QA harness dau tien vao `dev`, nhung task van chua dong vi coverage hien tap trung PM. Can tiep tuc role matrix Tester/Developer/PM va manual/browser regression qua IDTS-60 va phan IDTS-57 con lai. |

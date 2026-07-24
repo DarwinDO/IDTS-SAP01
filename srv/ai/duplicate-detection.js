@@ -75,7 +75,10 @@ async function suggestSimilarBugs (req, entities, dependencies = {}) {
     embeddingUsed: candidate.embeddingUsed
   }))
 
-  await recordSuggestionAudit({ req, tx, entities, input, result, ranked, ranking, provider })
+  const audit = await recordSuggestionAudit({ req, tx, entities, input, result, ranked, ranking, provider })
+  if (audit?.ID) {
+    for (const row of result) row.suggestionID = audit.ID
+  }
   return result
 }
 
@@ -366,7 +369,7 @@ async function recordSuggestionAudit ({ req, tx, entities, input, result, ranked
   const requester = await resolveRequestUser(req, entities)
   if (!requester) return
   const best = ranked[0]
-  await createAiSuggestion(tx, {
+  return createAiSuggestion(tx, {
     bugID: input.sourceBugID,
     requestedByID: requester.ID,
     featureType: FEATURE_TYPES.DUPLICATE_DETECTION,

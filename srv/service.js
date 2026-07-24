@@ -45,7 +45,16 @@ const {
   handleDraftSave
 } = require('./bug-service/drafts')
 const { startEmailWorker } = require('./email/worker')
-const { suggestSimilarBugs, suggestClassification, summarizeBugHandoff, explainSmartAssignment } = require('./ai')
+const {
+  suggestSimilarBugs,
+  suggestClassification,
+  summarizeBugHandoff,
+  explainSmartAssignment,
+  acceptAiSuggestion,
+  rejectAiSuggestion,
+  ignoreAiSuggestion,
+  applyClassificationSuggestion
+} = require('./ai')
 
 module.exports = class BugService extends cds.ApplicationService {
   async init () {
@@ -120,6 +129,12 @@ module.exports = class BugService extends cds.ApplicationService {
     this.on('suggestClassification', req => suggestClassification(req, entities))
     this.on('summarizeBugHandoff', req => summarizeBugHandoff(req, entities))
     this.on('explainSmartAssignment', req => explainSmartAssignment(req, entities))
+    // Ba action review chỉ chốt trạng thái audit PENDING bằng actor đã xác thực.
+    // Action apply riêng chỉ cho Tester/PM và vẫn kiểm lại payload/catalog trước khi sửa classification.
+    this.on('acceptAiSuggestion', req => acceptAiSuggestion(req, entities))
+    this.on('rejectAiSuggestion', req => rejectAiSuggestion(req, entities))
+    this.on('ignoreAiSuggestion', req => ignoreAiSuggestion(req, entities))
+    this.on('applyClassificationSuggestion', req => applyClassificationSuggestion(req, entities))
     // `SAVE` là ranh giới draft → active. `handleDraftSave` validate lần cuối, gọi `next()` để CAP persist,
     // rồi mới ghi history/attachment side effects. Breakpoint tại đây phân biệt lỗi trước save với lỗi sau persist.
     this.on('SAVE', Bugs.drafts, (req, next) => handleDraftSave(req, entities, next))

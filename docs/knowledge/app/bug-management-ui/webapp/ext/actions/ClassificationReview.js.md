@@ -9,7 +9,7 @@
 
 This file opens the user-visible classification suggestion dialog on the Bug Object Page.
 
-It calls the existing CAP action `BugService.suggestClassification`, then shows the current and suggested SAP Module, Application Component, Defect Category, Priority, and Severity values. It does not write any value back to the Bug.
+It calls the existing CAP action `BugService.suggestClassification`, then shows the current and suggested SAP Module, Application Component, Defect Category, Priority, and Severity values. It can persist Accept/Reject/Ignore on the suggestion audit, but it does not write classification back to the Bug.
 
 ### Beginner explanation
 
@@ -22,7 +22,7 @@ This file connects that backend capability to the Fiori screen. The dialog lets 
 - the confidence and review status;
 - a short, safe reason.
 
-The dialog has only a Close action. This is deliberate: AI may help a person review classification, but it cannot silently change business data.
+The dialog has Accept, Reject, Ignore, and Close actions. The first three review only the suggestion audit; applying classification remains a separate CAP-authorized Tester/PM operation.
 
 ### Flow inside IDTS
 
@@ -33,7 +33,7 @@ The dialog has only a Close action. This is deliberate: AI may help a person rev
 5. Persisted bugs send `sourceBugID`; a new unsaved Bug sends its entered fields without pretending that an active Bug already exists.
 6. `enrichSuggestion(...)` converts backend rows into safe current/suggested/review columns.
 7. `buildDialog(...)` renders the rows with SAPUI5 `Dialog`, `Table`, and `ObjectStatus`.
-8. Closing the dialog performs no Save, PATCH, status transition, or classification update.
+8. A review decision updates only the suggestion audit; closing performs no Bug Save, PATCH, status transition, or classification update.
 
 ### Important source anchors
 
@@ -81,7 +81,7 @@ The dialog has only a Close action. This is deliberate: AI may help a person rev
 
 File này mở dialog gợi ý phân loại mà user nhìn thấy trên Bug Object Page.
 
-Nó gọi CAP action có sẵn `BugService.suggestClassification`, sau đó hiển thị giá trị hiện tại và giá trị được gợi ý cho SAP Module, Application Component, Defect Category, Priority và Severity. File này không ghi ngược bất kỳ giá trị nào vào Bug.
+Nó gọi CAP action có sẵn `BugService.suggestClassification`, sau đó hiển thị giá trị hiện tại và giá trị được gợi ý cho SAP Module, Application Component, Defect Category, Priority và Severity. File có thể lưu Accept/Reject/Ignore trên audit suggestion nhưng không ghi classification vào Bug.
 
 ### Giải thích cho người mới
 
@@ -94,7 +94,7 @@ File này nối capability backend đó vào màn hình Fiori. Dialog giúp ngư
 - confidence và trạng thái cần review;
 - một lý do ngắn, an toàn.
 
-Dialog chỉ có nút Close. Đây là chủ ý: AI hỗ trợ người dùng review, nhưng không được âm thầm đổi dữ liệu nghiệp vụ.
+Dialog có Accept, Reject, Ignore và Close. Ba nút đầu chỉ review audit suggestion; việc apply classification thuộc action CAP Tester/PM riêng.
 
 ### Flow trong IDTS
 
@@ -105,7 +105,7 @@ Dialog chỉ có nút Close. Đây là chủ ý: AI hỗ trợ người dùng re
 5. Bug đã lưu gửi `sourceBugID`; Bug mới chưa lưu gửi các field user đã nhập và không giả vờ rằng active Bug đã tồn tại.
 6. `enrichSuggestion(...)` chuyển row backend thành các cột current/suggested/review an toàn.
 7. `buildDialog(...)` render bằng SAPUI5 `Dialog`, `Table` và `ObjectStatus`.
-8. Đóng dialog không Save, không PATCH, không đổi status và không đổi classification.
+8. Review decision chỉ đổi audit suggestion; đóng dialog không Save Bug, không PATCH, không đổi status và không đổi classification.
 
 ### Anchor quan trọng
 
@@ -159,3 +159,17 @@ Dialog chỉ có nút Close. Đây là chủ ý: AI hỗ trợ người dùng re
 **English.** Fragment press → `openDialog()` → `findBugContext()` → `readBugData()` → missing properties are requested from the OData binding → `readClassificationSuggestions()` binds and invokes `suggestBugClassification(...)` → CAP service delegates to backend AI/classification code → result returns → `enrichSuggestion()` combines current and suggested values → `buildDialog()` updates a named JSONModel. Observe context path, Bug ID/draft flags, request parameters, provider status/confidence, and final rows. There is deliberately no `setProperty`, PATCH, submitBatch, or save side effect.
 
 **Tiếng Việt.** Nhấn nút fragment → `openDialog()` → `findBugContext()` → `readBugData()` → property thiếu được request từ OData binding → `readClassificationSuggestions()` bind và invoke `suggestBugClassification(...)` → CAP service chuyển sang backend AI/classification → result quay về → `enrichSuggestion()` ghép giá trị hiện tại và gợi ý → `buildDialog()` cập nhật named JSONModel. Quan sát context path, Bug ID/cờ draft, parameter request, provider status/confidence và row cuối. Cố ý không có `setProperty`, PATCH, submitBatch hay save.
+
+## IDTS-92 persisted review decisions
+
+### English
+
+The dialog now provides Accept, Reject, and Ignore for a saved Bug suggestion. It sends only the backend-issued `suggestionID`, displays the persisted state and reviewer/time, disables repeated decisions, shows a generic failure message, and clears busy state. Reviewing still does not apply classification; IDTS-93 owns that separate Tester/PM CAP action.
+
+Primary owner: DatDT. Backup: DonHV. Debug at the button callback and `AiSuggestionReview.submit()`, then inspect the returned `reviewStateCode`, reviewer/time formatting, and `/reviewActionEnabled`. Check with `srv/ai/review.js`, `classification-apply.js`, both i18n files, IDTS-92 static QA, and IDTS-75 browser smoke. Do not put a direct Bug PATCH or client-side catalog trust into this dialog.
+
+### Vietnamese
+
+Dialog hiện có Accept, Reject và Ignore cho suggestion của Bug đã lưu. Nó chỉ gửi `suggestionID` do backend cấp, hiển thị trạng thái đã persist cùng reviewer/time, khóa quyết định lặp lại, dùng thông báo lỗi chung và tắt busy state. Review vẫn không áp dụng classification; IDTS-93 quản lý action CAP Tester/PM riêng cho việc đó.
+
+Owner chính: DatDT. Backup: DonHV. Khi debug, bắt đầu tại callback nút và `AiSuggestionReview.submit()`, rồi xem `reviewStateCode` trả về, format reviewer/time và `/reviewActionEnabled`. Kiểm cùng `srv/ai/review.js`, `classification-apply.js`, hai file i18n, static QA IDTS-92 và browser smoke IDTS-75. Không thêm direct Bug PATCH hoặc tin catalog ở client vào dialog này.

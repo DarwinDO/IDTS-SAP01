@@ -159,3 +159,13 @@ Nếu AI bị tắt, timeout, lỗi hoặc trả vector sai định dạng, modu
 - Luôn test ví dụ không liên quan khi đổi trọng số hoặc threshold.
 - Giữ khả năng chạy trên SQLite và PostgreSQL. Cách scan theo request hiện tại được giới hạn cho bộ dữ liệu QA nhỏ; trước khi dùng ở quy mô production, pgvector hoặc vector index bền vững khác phải có task hạ tầng riêng được review.
 - Cập nhật mirror này và mirror service khi đổi contract action.
+
+## IDTS-92 persisted review ID
+
+### English
+
+For a saved source Bug, `recordSuggestionAudit()` now returns the created audit row and `suggestSimilarBugs()` adds that row's `suggestionID` to every candidate. The UI uses this ID only to review the persisted suggestion; it is not a Bug ID and does not authorize a duplicate link. Primary owner: DonHV; backup: DatDT. Debug at the audit call and confirm every returned row shares the same ID. Check with `review.js`, `DuplicateReview.js`, and IDTS-66/91/92 tests.
+
+### Vietnamese
+
+Với Bug nguồn đã lưu, `recordSuggestionAudit()` hiện trả audit row vừa tạo và `suggestSimilarBugs()` gắn `suggestionID` đó vào mọi candidate. UI chỉ dùng ID này để review suggestion đã persist; đây không phải Bug ID và không cho quyền tạo duplicate link. Owner chính: DonHV; backup: DatDT. Khi debug, dừng tại lời gọi audit và xác nhận mọi row trả về dùng cùng một ID. Kiểm cùng `review.js`, `DuplicateReview.js` và test IDTS-66/91/92.

@@ -120,17 +120,31 @@ async function main () {
   expectEqual('provider-backed component suggestion resolves catalog ID', positive.find(row => row.field === 'applicationComponent')?.valueID, COMPONENT_ID)
   expectEqual('high-confidence valid provider suggestion status', positive.find(row => row.field === 'defectCategory')?.status, 'SUGGESTED')
   expectEqual('classification suggestions always require human review', positive.every(row => row.requiresReview === true), true)
+  expectTruthy('persisted source classification returns suggestion audit ID', positive[0]?.suggestionID)
+  expectEqual('all classification rows share one review audit ID', positive.every(row => row.suggestionID === positive[0]?.suggestionID), true)
   expectNoUnsafeDiagnostic('positive response contains no unsafe diagnostic text', positive)
 
   const auditRows = await db.run(
     SELECT.from('idts.cap.AiSuggestions')
-      .columns('bug_ID', 'featureType_code', 'reviewState_code', 'suggestionPayload')
+      .columns('ID', 'bug_ID', 'featureType_code', 'reviewState_code', 'suggestionPayload')
       .where({ bug_ID: BUG_ID, featureType_code: 'CLASSIFICATION' })
   )
   expectEqual('source-linked classification writes one AI audit row', auditRows.length, 1)
+  expectEqual('classification review ID matches persisted audit row', positive[0]?.suggestionID, auditRows[0]?.ID)
   expectEqual('classification audit starts pending review', auditRows[0]?.reviewState_code, 'PENDING')
   const auditPayload = JSON.parse(auditRows[0]?.suggestionPayload || '{}')
   expectEqual('classification audit records provider status', auditPayload.providerStatus, 'SUCCESS')
+  expectEqual(
+    'classification audit snapshots source values for stale-apply protection',
+    JSON.stringify(auditPayload.sourceClassification),
+    JSON.stringify({
+      sapModuleID: SAP_MODULE_ID,
+      applicationComponentID: COMPONENT_ID,
+      defectCategoryID: CATEGORY_ID,
+      priorityCode: 'HIGH',
+      severityCode: 'MAJOR'
+    })
+  )
   expectNoUnsafeDiagnostic('classification audit payload is sanitized', auditPayload)
 
   const bugBeforeInvalid = await db.run(SELECT.one.from('idts.cap.Bugs').columns('priority_code').where({ ID: BUG_ID }))
@@ -175,10 +189,11 @@ async function main () {
     SELECT.one.from('idts.cap.AiSuggestions').columns('count(*) as count').where({ featureType_code: 'CLASSIFICATION' })
   )
   aiConfig(validProviderOutput())
-  await invoke(service, {
+  const preCreate = await invoke(service, {
     title: 'Create form classification suggestion before save',
     description: 'The user wants classification help before the bug is persisted.'
   })
+  expectEqual('pre-create classification has no persisted review ID', preCreate.every(row => !row.suggestionID), true)
   const auditAfterPreCreateAgain = await db.run(
     SELECT.one.from('idts.cap.AiSuggestions').columns('count(*) as count').where({ featureType_code: 'CLASSIFICATION' })
   )

@@ -19,7 +19,8 @@ sap.ui.define([
     "sap/m/VBox",
     "sap/m/MessageBox",
     "sap/ui/model/json/JSONModel",
-    "../ai/AiReviewUi"
+    "../ai/AiReviewUi",
+    "../ai/AiSuggestionReview"
 ], function (
     Dialog,
     Button,
@@ -33,7 +34,8 @@ sap.ui.define([
     VBox,
     MessageBox,
     JSONModel,
-    AiReviewUi
+    AiReviewUi,
+    AiSuggestionReview
 ) {
     "use strict";
 
@@ -180,8 +182,18 @@ sap.ui.define([
         var state = new JSONModel({
             rows: [],
             busy: true,
-            noDataText: getText(view, "duplicateReviewNoCandidates")
+            noDataText: getText(view, "duplicateReviewNoCandidates"),
+            suggestionID: null,
+            reviewStateText: getText(view, "aiSuggestionReviewPending"),
+            reviewStateState: "Information",
+            reviewedByText: "",
+            reviewActionEnabled: false
         });
+        function submitReview(actionName) {
+            return AiSuggestionReview.submit(model, state, actionName, function (key, args) {
+                return getText(view, key, args);
+            });
+        }
 
         var table = new Table({
             growing: true,
@@ -264,16 +276,53 @@ sap.ui.define([
                             type: "Information",
                             showIcon: true
                         }),
+                        new VBox({
+                            items: [
+                                new ObjectStatus({
+                                    text: "{duplicateReview>/reviewStateText}",
+                                    state: "{duplicateReview>/reviewStateState}"
+                                }),
+                                new Text({
+                                    text: "{duplicateReview>/reviewedByText}",
+                                    wrapping: true
+                                })
+                            ]
+                        }).addStyleClass("sapUiSmallMarginTopBottom"),
                         table
                     ]
                 }).addStyleClass("sapUiSmallMargin")
             ],
-            endButton: new Button({
-                text: getText(view, "duplicateReviewCloseButton"),
-                press: function () {
-                    dialog.close();
-                }
-            }),
+            buttons: [
+                new Button({
+                    text: getText(view, "aiSuggestionAcceptButton"),
+                    type: "Accept",
+                    enabled: "{duplicateReview>/reviewActionEnabled}",
+                    press: function () {
+                        return submitReview("acceptAiSuggestion");
+                    }
+                }),
+                new Button({
+                    text: getText(view, "aiSuggestionRejectButton"),
+                    type: "Reject",
+                    enabled: "{duplicateReview>/reviewActionEnabled}",
+                    press: function () {
+                        return submitReview("rejectAiSuggestion");
+                    }
+                }),
+                new Button({
+                    text: getText(view, "aiSuggestionIgnoreButton"),
+                    enabled: "{duplicateReview>/reviewActionEnabled}",
+                    press: function () {
+                        return submitReview("ignoreAiSuggestion");
+                    }
+                }),
+                new Button({
+                    text: getText(view, "duplicateReviewCloseButton"),
+                    press: function () {
+                        dialog.close();
+                    }
+                })
+            ],
             afterClose: function () {
                 dialog.destroy();
             }
@@ -287,6 +336,15 @@ sap.ui.define([
                 state.setProperty("/rows", rows.map(function (row) {
                     return enrichCandidate(row, view);
                 }));
+                var suggestionID = rows[0] && rows[0].suggestionID;
+                state.setProperty("/suggestionID", suggestionID || null);
+                state.setProperty("/reviewActionEnabled", Boolean(suggestionID));
+                state.setProperty(
+                    "/reviewStateText",
+                    suggestionID
+                        ? getText(view, "aiSuggestionReviewPending")
+                        : getText(view, "aiSuggestionReviewAfterSave")
+                );
             })
             .catch(function () {
                 MessageBox.error(getText(view, "duplicateReviewLoadFailed"));

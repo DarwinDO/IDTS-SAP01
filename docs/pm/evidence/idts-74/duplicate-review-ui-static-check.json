@@ -1,6 +1,6 @@
 {
   "task": "IDTS-74",
-  "checkedAt": "2026-07-24T13:19:55.848Z",
+  "checkedAt": "2026-07-24T17:28:08.820Z",
   "checks": [
     {
       "label": "Similar bug review field opens duplicate review from product UI",
@@ -195,6 +195,14 @@
       "pass": true
     },
     {
+      "label": "controller literal \"aiSuggestionReviewPending\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"Information\" is not dev-facing copy",
+      "pass": true
+    },
+    {
       "label": "controller literal \"{duplicateReview>/noDataText}\" is not dev-facing copy",
       "pass": true
     },
@@ -311,7 +319,67 @@
       "pass": true
     },
     {
+      "label": "controller literal \"{duplicateReview>/reviewStateText}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>/reviewStateState}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>/reviewedByText}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"sapUiSmallMarginTopBottom\" is not dev-facing copy",
+      "pass": true
+    },
+    {
       "label": "controller literal \"sapUiSmallMargin\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"aiSuggestionAcceptButton\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"Accept\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>/reviewActionEnabled}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"acceptAiSuggestion\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"aiSuggestionRejectButton\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"Reject\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>/reviewActionEnabled}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"rejectAiSuggestion\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"aiSuggestionIgnoreButton\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>/reviewActionEnabled}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"ignoreAiSuggestion\" is not dev-facing copy",
       "pass": true
     },
     {
@@ -320,6 +388,14 @@
     },
     {
       "label": "controller literal \"duplicateReview\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"aiSuggestionReviewPending\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"aiSuggestionReviewAfterSave\" is not dev-facing copy",
       "pass": true
     },
     {

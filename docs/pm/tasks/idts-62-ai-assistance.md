@@ -1,6 +1,6 @@
 # IDTS-62 - AI Assistance Work Package
 
-Last updated: 2026-07-09
+Last updated: 2026-07-24
 
 ## Purpose
 
@@ -20,6 +20,7 @@ Vietnamese: Work package này theo dõi các khả năng AI suggestion đã duy�
 | 6 | IDTS-71 | DonHV | Security and prompt-misuse review |
 | 7 | IDTS-72 | NhanT | Final QA acceptance |
 | 8 | IDTS-74 to IDTS-77 | DonHV / FE support | Product UI panels and placement polish for duplicate/similar detection, classification suggestion, and handoff summary if full visual AI acceptance is required |
+| 9 | IDTS-91 to IDTS-93 | DatDT | Persist explicit review decisions in the existing dialogs, then apply accepted classification through a separate validated Tester/PM action |
 
 Vietnamese:
 
@@ -33,6 +34,7 @@ Vietnamese:
 | 6 | IDTS-71 | DonHV | Review security và prompt misuse |
 | 7 | IDTS-72 | NhanT | QA acceptance cuối |
 | 8 | IDTS-74 den IDTS-77 | DonHV / FE support | Product UI panel va placement polish cho duplicate/similar detection, classification suggestion va handoff summary neu can acceptance AI day du theo UI visual |
+| 9 | IDTS-91 den IDTS-93 | DatDT | Luu quyet dinh review trong cac dialog hien co, sau do apply classification da Accept qua action Tester/PM rieng co validation |
 
 ## Sprint decision
 
@@ -59,6 +61,9 @@ Vietnamese: Chỉ IDTS-63 được đưa vào Sprint 4. Phần runtime bắt đ�
 - IDTS-78 correction: DonHV clarified that the IDTS-77 row style is acceptable, but AI actions must not appear as standalone titled Object Page sections. Follow-up implementation removes the standalone `Similar Bug Check`, `Classification Assistance`, and `Handoff Summary` sections; keeps Similar/Classification as untitled action rows near their business context; and moves Handoff Summary into the History fragment. Static QA now asserts the old standalone section keys are absent.
 - IDTS-78 shared QA: PR #138 was merged into `dev`; Render deploy `dep-d97u1ii8qa3s73fdk630` is live at commit `fbfcd7e`. Deployed manifest/static asset verification confirms the old standalone AI section keys are absent and the History fragment owns `HandoffSummaryReview.openDialog`.
 - IDTS-79: DonHV reported that the untitled Similar Bug and Classification rows still looked separate because they were registered as Object Page sections. The follow-up moves them into the existing Bug Summary and Classification FieldGroups through standard Fiori `controlConfiguration` custom fields. The final UI keeps concise labels and review buttons only, so no long helper text is squeezed into a Form cell. Local static checks, UI5 build, CAP compile, secret scan, and both focused browser smokes pass. No AI runtime, action contract, or data model change is required.
+- IDTS-91: Implementation complete on green PR #167. CAP exposes Accept/Reject/Ignore with authenticated reviewer/time persistence, conflict-safe `PENDING` updates, rollback evidence, and no Bug/workflow mutation. Focused QA passed `19/0`; Jira evidence comment is `10648`.
+- IDTS-92: Implementation complete on green PR #167. Existing Similar Bugs and Classification dialogs expose Accept/Reject/Ignore, display persisted state/reviewer/time, disable repeat decisions, keep generic failures, and clear busy state. Static QA passed 47 checks; both local browser suites passed on a fresh temporary SQLite schema; Jira evidence comment is `10649`.
+- IDTS-93: Implementation complete on green PR #167. A separate Tester/PM action applies only accepted, current, catalog-grounded classification fields with stale protection, idempotency, grouped history, and transaction rollback. Focused QA passed `35/0`; IDTS-67, IDTS-91, and IDTS-41 regressions remain green; Jira evidence comment is `10650`. Await human review, merge, and Jira closure before board-level Done.
 - No runtime AI dependency, API, CDS entity, or UI has been added under IDTS-63.
 
 Vietnamese:
@@ -80,4 +85,7 @@ Vietnamese:
 - IDTS-78 correction: DonHV làm rõ rằng kiểu row của IDTS-77 là được, nhưng action AI không được xuất hiện thành các section Object Page có title riêng. Follow-up implementation bỏ các section riêng `Similar Bug Check`, `Classification Assistance`, và `Handoff Summary`; giữ Similar/Classification thành action row không title gần đúng ngữ cảnh nghiệp vụ; và chuyển Handoff Summary vào History fragment. Static QA hiện assert các section key cũ không còn tồn tại.
 - IDTS-78 shared QA: PR #138 đã merge vào `dev`; Render deploy `dep-d97u1ii8qa3s73fdk630` đang live ở commit `fbfcd7e`. Verify static asset trên deploy xác nhận các section key AI riêng cũ không còn và History fragment đang chứa `HandoffSummaryReview.openDialog`.
 - IDTS-79: DonHV phát hiện hai row Similar Bug và Classification dù không có title vẫn trông như block riêng vì chúng còn được đăng ký là Object Page section. Follow-up chuyển chúng vào FieldGroup Bug Summary và Classification có sẵn bằng custom field chuẩn của Fiori `controlConfiguration`. UI cuối chỉ giữ label ngắn và nút review để không có helper text dài bị bó trong Form cell. Static check, UI5 build, CAP compile, secret scan và hai browser smoke tập trung đều pass local. Không đổi AI runtime, action contract hoặc data model.
+- IDTS-91: Implementation da xong tren PR #167 dang green. CAP expose Accept/Reject/Ignore, persist reviewer/time da xac thuc, conditional update `PENDING`, co rollback evidence va khong doi Bug/workflow. Focused QA pass `19/0`; Jira evidence comment `10648`.
+- IDTS-92: Implementation da xong tren PR #167 dang green. Hai dialog Similar Bugs va Classification co Accept/Reject/Ignore, hien state/reviewer/time da persist, khoa quyet dinh lap, giu loi chung va tat busy state. Static QA pass 47 check; hai browser suite local deu pass tren SQLite tam co schema moi; Jira evidence comment `10649`.
+- IDTS-93: Implementation da xong tren PR #167 dang green. Action Tester/PM rieng chi apply classification da Accept, con hieu luc va grounded voi catalog; co stale protection, idempotency, grouped history va rollback transaction. Focused QA pass `35/0`; regression IDTS-67, IDTS-91 va IDTS-41 van green; Jira evidence comment `10650`. Cho human review, merge va Jira closure truoc khi chuyen Done cap board.
 - IDTS-63 không thêm dependency AI runtime, API, CDS entity hoặc UI mới.

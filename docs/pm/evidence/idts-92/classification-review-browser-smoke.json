@@ -1,0 +1,39 @@
+{
+  "task": "IDTS-75",
+  "checkedAt": "2026-07-24T10:15:03.204Z",
+  "target": "http://localhost:4004",
+  "results": [
+    {
+      "check": "entry-point-visible",
+      "passed": true
+    },
+    {
+      "check": "positive-review-rows",
+      "passed": true
+    },
+    {
+      "check": "safe-manual-review-copy",
+      "passed": true
+    },
+    {
+      "check": "reject-review-persisted",
+      "passed": true
+    },
+    {
+      "check": "invalid-and-low-confidence-guarded",
+      "passed": true
+    },
+    {
+      "check": "safe-failure-state",
+      "passed": true
+    },
+    {
+      "check": "no-classification-mutation",
+      "passed": true
+    },
+    {
+      "check": "tester-role-review",
+      "passed": true
+    }
+  ]
+}
