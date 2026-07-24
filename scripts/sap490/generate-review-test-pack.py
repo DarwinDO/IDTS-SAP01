@@ -14,10 +14,11 @@ from copy import copy
 from datetime import datetime
 from pathlib import Path
 
-from openpyxl import load_workbook
+from openpyxl import Workbook, load_workbook
 from openpyxl.cell.cell import MergedCell
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.hyperlink import Hyperlink
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -36,18 +37,18 @@ FILES = {
     ),
     "unit": (
         TEMPLATE_DIR / "Unit_Test.xlsx",
-        "Unit_Test_IDTS_SAP01_{lang}_v0.3.xlsx",
-        "0.3",
+        "Unit_Test_IDTS_SAP01_{lang}_v0.4.xlsx",
+        "0.4",
     ),
     "functional": (
         TEMPLATE_DIR / "Functional_Test.xlsx",
-        "Functional_Test_IDTS_SAP01_{lang}_v0.2.xlsx",
-        "0.2",
+        "Functional_Test_IDTS_SAP01_{lang}_v0.3.xlsx",
+        "0.3",
     ),
     "report": (
         REPORT_TEMPLATE,
-        "Test_Report_IDTS_SAP01_{lang}_v0.3.xlsx",
-        "0.3",
+        "Test_Report_IDTS_SAP01_{lang}_v0.4.xlsx",
+        "0.4",
     ),
     "uat": (
         TEMPLATE_DIR / "UAT.xlsx",
@@ -229,6 +230,9 @@ def write(
 ):
     target = anchor(ws, coordinate)
     target.value = value
+    # A copied SAP490 template cell may carry an old sample hyperlink. Generated
+    # text must start clean; callers add a verified link explicitly when needed.
+    target.hyperlink = None
     old = copy(target.alignment)
     target.alignment = Alignment(
         horizontal="center" if center else (old.horizontal or "left"),
@@ -239,14 +243,116 @@ def write(
         indent=old.indent,
     )
     if bold is not None or font_size is not None:
-        old_font = copy(target.font)
-        target.font = Font(
-            name=old_font.name,
-            size=font_size or old_font.size,
-            bold=old_font.bold if bold is None else bold,
-            italic=old_font.italic,
-            color=old_font.color,
-        )
+        new_font = copy(target.font)
+        if bold is not None:
+            new_font.bold = bold
+        if font_size is not None:
+            new_font.sz = font_size
+        target.font = new_font
+
+
+def add_hyperlink(cell, target, *, display=None):
+    """Add a real hyperlink without changing the template font family/size."""
+    if display is not None:
+        cell.value = display
+    cell.hyperlink = target
+    link_font = copy(cell.font)
+    link_font.color = "0563C1"
+    link_font.underline = "single"
+    cell.font = link_font
+
+
+def add_internal_hyperlink(wb, cell, sheet_name, coordinate="A1"):
+    """Fail generation when an internal target is missing or blank."""
+    if sheet_name not in wb.sheetnames:
+        raise ValueError(f"Missing hyperlink target sheet: {sheet_name}")
+    if wb[sheet_name][coordinate].value in (None, ""):
+        raise ValueError(f"Blank hyperlink target: {sheet_name}!{coordinate}")
+    # Use an OOXML location-only hyperlink. Assigning a string beginning with
+    # ``#`` makes OpenPyXL create an external relationship; LibreOffice then
+    # rewrites it to a relative file URL that Google Sheets cannot follow.
+    cell.hyperlink = Hyperlink(
+        ref=cell.coordinate,
+        location=f"'{sheet_name}'!{coordinate}",
+        display=str(cell.value or sheet_name),
+    )
+    link_font = copy(cell.font)
+    link_font.color = "0563C1"
+    link_font.underline = "single"
+    cell.font = link_font
+
+
+def evidence_artifact_path(case, catalog):
+    """Return the strongest reviewable artifact, never a command or source file."""
+    case_id = case["caseId"]
+    if case_id.startswith("UT-AI-"):
+        return "docs/pm/evidence/idts-100/shared-qa-ai/idts72-ai-acceptance.json"
+    for path in case.get("evidenceLinks", []):
+        if not path.startswith("scripts/") and not path.endswith("/"):
+            return path
+    return catalog["evidenceBaseline"]["defaultEvidencePath"]
+
+
+def evidence_url(catalog, path):
+    baseline = catalog["evidenceBaseline"]
+    return (
+        f"{baseline['repositoryUrl']}/blob/"
+        f"{baseline['evidenceCommitSha']}/{path}"
+    )
+
+
+def source_url(catalog, path):
+    baseline = catalog["evidenceBaseline"]
+    return (
+        f"{baseline['repositoryUrl']}/blob/"
+        f"{baseline['runtimeCommitSha']}/{path}"
+    )
+
+
+def run_for_case(case, catalog):
+    command = case.get("automationCommand") or ""
+    for run in catalog["executionRuns"]:
+        if command and command == run["command"]:
+            return run
+    return None
+
+
+def evidence_record(case, catalog):
+    baseline = catalog["evidenceBaseline"]
+    run = run_for_case(case, catalog)
+    executed = case["status"] in {"PASSED", "FAILED", "BLOCKED"}
+    artifact_path = evidence_artifact_path(case, catalog)
+    is_shared_qa = "shared-qa" in artifact_path
+    return {
+        "evidenceId": f"EVD-{case['caseId']}",
+        "caseId": case["caseId"],
+        "runId": run["runId"] if run else (
+            "SHARED-QA-20260724" if executed else "UAT-NOT-EXECUTED"
+        ),
+        "command": case.get("automationCommand") or "Manual UAT pending",
+        "baseline": baseline["runtimeCommitSha"],
+        "deploy": (
+            f"{baseline['renderDeployId']}\n{baseline['runtimeCommitSha']}"
+            if is_shared_qa
+            else "N/A — local/programmatic evidence"
+        ),
+        "context": (
+            f"{case.get('environment') or baseline['environment']} | "
+            f"{case.get('executor') or 'Pending human executor'} | "
+            f"{case.get('executionDate') or 'Not executed'}"
+        ),
+        "result": (
+            f"{case['status']}"
+            + (
+                f" | P/F/S {run['passed']}/{run['failed']}/{run['skipped']} | exit {run['exitCode']}"
+                if run else ""
+            )
+        ),
+        "actual": local(case.get("actualResult", {}), "en") or "Not executed; prepared only.",
+        "limitation": local(case.get("limitations", {}), "en") or "None recorded.",
+        "artifactPath": artifact_path,
+        "artifactUrl": evidence_url(catalog, artifact_path),
+    }
 
 
 def clear_values(ws, min_row, max_row, min_col, max_col):
@@ -267,6 +373,20 @@ def copy_row_style(ws, source_row, target_row, max_col):
             target._style = copy(source._style)
         if source.number_format:
             target.number_format = source.number_format
+
+
+def clone_merged_row_block(ws, source_start, source_end, target_start, max_col):
+    """Clone an official template row block, including shifted merged ranges."""
+    offset = target_start - source_start
+    for source_row in range(source_start, source_end + 1):
+        copy_row_style(ws, source_row, source_row + offset, max_col)
+    for merged in list(ws.merged_cells.ranges):
+        if merged.min_row >= source_start and merged.max_row <= source_end:
+            shifted = (
+                f"{get_column_letter(merged.min_col)}{merged.min_row + offset}:"
+                f"{get_column_letter(merged.max_col)}{merged.max_row + offset}"
+            )
+            ensure_merge(ws, shifted)
 
 
 def ensure_merge(ws, cell_range):
@@ -639,6 +759,8 @@ def generate_unit(catalog, lang):
         for coordinate in (f"B{row}", f"E{row}", f"Y{row}", f"AX{row}", f"BD{row}", f"BJ{row}", f"BL{row}"):
             write(ws, coordinate, None)
     for row, case in enumerate(cases, 8):
+        evidence_row = row - 6
+        record = evidence_record(case, catalog)
         write(ws, f"B{row}", case["caseId"], center=True)
         write(
             ws,
@@ -662,21 +784,25 @@ def generate_unit(catalog, lang):
             ws,
             f"BL{row}",
             f"{label('Command', 'Lệnh', lang)}: {case['automationCommand']}\n"
-            f"{label('Evidence', 'Bằng chứng', lang)}: {joined(case['evidenceLinks'])}",
+            f"{label('Evidence', 'Bằng chứng', lang)}: {record['evidenceId']}",
             font_size=12,
         )
         ws.row_dimensions[row].height = 125
 
     evidence = wb["Evidence"]
-    clear_values(evidence, 1, max(evidence.max_row, 20), 1, 8)
+    clear_values(evidence, 1, max(evidence.max_row, 20), 1, 12)
     headers = [
+        label("Evidence ID", "Mã bằng chứng", lang),
+        label("Case ID", "Mã ca kiểm thử", lang),
         label("Run ID", "Run ID", lang),
         label("Exact command", "Lệnh chính xác", lang),
-        label("Status", "Trạng thái", lang),
-        label("Exit code", "Exit code", lang),
-        label("Pass / Fail / Skip", "Pass / Fail / Skip", lang),
-        label("Environment / timestamp", "Môi trường / thời điểm", lang),
-        label("Evidence / limitation", "Bằng chứng / giới hạn", lang),
+        label("Baseline commit", "Commit baseline", lang),
+        label("Deploy ID / SHA", "Deploy ID / SHA", lang),
+        label("Environment / executor / time", "Môi trường / người chạy / thời điểm", lang),
+        label("Exit / result", "Exit / kết quả", lang),
+        label("Actual result", "Kết quả thực tế", lang),
+        label("Limitation", "Giới hạn", lang),
+        label("Artifact", "Artifact", lang),
     ]
     for column, header_text in enumerate(headers, 1):
         cell = evidence.cell(1, column, header_text)
@@ -684,26 +810,41 @@ def generate_unit(catalog, lang):
         cell.fill = PatternFill("solid", fgColor=BLUE)
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
         cell.border = Border(left=THIN_GRAY, right=THIN_GRAY, top=THIN_GRAY, bottom=THIN_GRAY)
-    for row, run in enumerate(catalog["executionRuns"], 2):
+    for row, case in enumerate(cases, 2):
+        record = evidence_record(case, catalog)
         values = [
-            run["runId"],
-            run["command"],
-            run["status"],
-            run["exitCode"],
-            f"{run['passed']} / {run['failed']} / {run['skipped']}",
-            f"{run['environment']}\n{run['executionDate']}",
-            f"{joined(run['evidenceLinks'])}\n{local(run['limitations'], lang)}",
+            record["evidenceId"],
+            record["caseId"],
+            record["runId"],
+            record["command"],
+            record["baseline"],
+            record["deploy"],
+            record["context"],
+            record["result"],
+            local(case.get("actualResult", {}), lang) or label("Not executed", "Chưa thực thi", lang),
+            local(case.get("limitations", {}), lang) or label("None recorded", "Không ghi nhận", lang),
+            record["artifactPath"],
         ]
         for column, value in enumerate(values, 1):
             cell = evidence.cell(row, column, value)
             cell.alignment = Alignment(vertical="top", wrap_text=True, text_rotation=0)
             cell.border = Border(left=THIN_GRAY, right=THIN_GRAY, top=THIN_GRAY, bottom=THIN_GRAY)
+            cell.font = Font(name="Arial", size=12)
+        add_hyperlink(evidence.cell(row, 11), record["artifactUrl"])
         evidence.row_dimensions[row].height = 72
-    for column, width in enumerate((22, 42, 14, 12, 18, 38, 52), 1):
+    for row, _case in enumerate(cases, 8):
+        evidence_row = row - 6
+        add_internal_hyperlink(
+            wb,
+            anchor(ws, f"BL{row}"),
+            "Evidence",
+            f"A{evidence_row}",
+        )
+    for column, width in enumerate((22, 18, 24, 42, 52, 54, 44, 28, 56, 48, 58), 1):
         evidence.column_dimensions[evidence.cell(1, column).column_letter].width = width
     evidence.freeze_panes = "A2"
-    evidence.auto_filter.ref = f"A1:G{len(catalog['executionRuns']) + 1}"
-    evidence.print_area = f"A1:G{len(catalog['executionRuns']) + 1}"
+    evidence.auto_filter.ref = f"A1:K{len(cases) + 1}"
+    evidence.print_area = f"A1:K{len(cases) + 1}"
     evidence.page_setup.orientation = "landscape"
     evidence.page_setup.fitToWidth = 1
     evidence.page_setup.fitToHeight = 0
@@ -711,7 +852,7 @@ def generate_unit(catalog, lang):
     trim_sheet(wb["Cover"], 20, 43, print_area="B8:AO20", orientation="landscape")
     trim_sheet(wb["Histories"], 3, 7, freeze="B3", auto_filter="B2:G3", print_area="B2:G3", orientation="landscape", title_rows="2:2")
     trim_sheet(ws, 12, 74, freeze="B8", auto_filter="B7:BV12", print_area="B2:BV12", orientation="landscape", fit_width=1, title_rows="6:7")
-    trim_sheet(evidence, 7, 7, freeze="A2", auto_filter="A1:G7", print_area="A1:G7", orientation="landscape", title_rows="1:1")
+    trim_sheet(evidence, len(cases) + 1, 11, freeze="A2", auto_filter=f"A1:K{len(cases) + 1}", print_area=f"A1:K{len(cases) + 1}", orientation="landscape", fit_width=2, title_rows="1:1")
     save(wb, output, "Unit Test", lang, version)
     return output
 
@@ -814,10 +955,16 @@ def generate_functional(catalog, lang):
     ):
         write(runs, coordinate, value, center=True)
     runs.row_dimensions[4].height = 36
-    clear_values(runs, 7, 30, 2, 70)
-    groups = (("B", "K"), ("L", "AN"), ("AO", "AW"), ("AX", "BD"), ("BE", "BK"), ("BL", "BR"))
-    for row, run in enumerate(catalog["executionRuns"], 8):
-        add_group_merges(runs, row, groups)
+    # Rows 5-6 are the official two-row Test Result block. Reuse that exact
+    # merge/style signature for every run instead of placing data below it.
+    clear_values(runs, 5, 40, 2, 70)
+    for merged in list(runs.merged_cells.ranges):
+        if merged.min_row >= 7:
+            runs.unmerge_cells(str(merged))
+    for index, run in enumerate(catalog["executionRuns"]):
+        row = 5 + index * 2
+        if index:
+            clone_merged_row_block(runs, 5, 6, row, 70)
         write(runs, f"B{row}", f"{run['runId']}\n{run['command']}")
         write(
             runs,
@@ -833,8 +980,19 @@ def generate_functional(catalog, lang):
             f"{run['status']}\nP/F/S: {run['passed']}/{run['failed']}/{run['skipped']}",
             center=True,
         )
-        write(runs, f"BL{row}", joined(run["evidenceLinks"]))
-        set_case_row_height(runs, row, 80)
+        matching_case = next(
+            (
+                case for case in catalog["cases"]
+                if case.get("automationCommand") == run["command"]
+            ),
+            None,
+        )
+        artifact_path = (
+            evidence_artifact_path(matching_case, catalog)
+            if matching_case else catalog["evidenceBaseline"]["defaultEvidencePath"]
+        )
+        write(runs, f"BL{row}", artifact_path)
+        add_hyperlink(anchor(runs, f"BL{row}"), evidence_url(catalog, artifact_path))
 
     data = wb["Test Data Description"]
     for coordinate, value in (
@@ -907,7 +1065,8 @@ def generate_functional(catalog, lang):
     trim_sheet(wb["Cover"], 20, 43, print_area="B8:AO20", orientation="landscape")
     trim_sheet(wb["Histories"], 3, 7, freeze="B3", auto_filter="B2:G3", print_area="B2:G3", orientation="landscape", title_rows="2:2")
     trim_sheet(ws, 23, 74, freeze="B8", auto_filter="B7:BV23", print_area="B2:BV23", orientation="landscape", fit_width=1, title_rows="6:7")
-    trim_sheet(runs, 13, 70, freeze="B8", auto_filter="B7:BR13", print_area="B4:BR13", orientation="landscape", fit_width=1, title_rows="4:7")
+    last_run_row = 4 + len(catalog["executionRuns"]) * 2
+    trim_sheet(runs, last_run_row, 70, freeze="B5", auto_filter=None, print_area=f"B4:BR{last_run_row}", orientation="landscape", fit_width=1, title_rows="4:4")
     trim_sheet(data, 12, 70, freeze="B8", auto_filter="B7:BR12", print_area="B2:BR12", orientation="landscape", fit_width=1, title_rows="2:4")
     save(wb, output, "Functional Test", lang, version)
     return output
@@ -957,6 +1116,8 @@ def fill_feature_sheet(ws, cases, feature_name, requirement_text, lang, header_r
     count_row = 3 if ws.title == "Feature 1" else 4
     round_header_row = 4 if ws.title == "Feature 1" else 5
     round_one_row = 5 if ws.title == "Feature 1" else 6
+    # Test Report links always target A1; keep that anchor non-empty and stable.
+    write(ws, "A1", feature_name)
     write(ws, f"B{name_row}", feature_name)
     write(ws, f"B{description_row}", requirement_text)
     write(ws, "A11", label("Cases", "Ca kiểm thử", lang), bold=True)
@@ -1162,12 +1323,20 @@ def generate_report(catalog, lang):
         write(test_cases, f"B{row}", row - 8, center=True)
         write(test_cases, f"C{row}", f"{case['caseId']} — {local(case['title'], lang)}")
         write(test_cases, f"D{row}", sheet_name)
+        test_cases[f"D{row}"].font = copy(test_cases[f"F{row}"].font)
+        add_internal_hyperlink(wb, test_cases[f"D{row}"], sheet_name)
         write(
             test_cases,
             f"E{row}",
             f"{joined(case['requirementIds'])}\n{case['testType']} / {case['status']}",
         )
         write(test_cases, f"F{row}", local(case["preconditions"], lang))
+        # Requirement/status text is plain text unless it has a real target.
+        # Copy the neighboring template font so it cannot look clickable.
+        normal_font = copy(test_cases[f"F{row}"].font)
+        normal_font.color = "000000"
+        normal_font.underline = None
+        test_cases[f"E{row}"].font = normal_font
         set_case_row_height(test_cases, row, 66)
     for column, width in {"B": 7, "C": 48, "D": 16, "E": 40, "F": 55}.items():
         test_cases.column_dimensions[column].width = width
@@ -1604,11 +1773,9 @@ def enforce_mentor_readability(wb, minimum_font_size=12):
                     ws.column_dimensions[column].width or 0,
                     3,
                 )
-            for row_number in range(8, ws.max_row + 1):
-                ws.row_dimensions[row_number].height = max(
-                    ws.row_dimensions[row_number].height or 15,
-                    95,
-                )
+            # Preserve the official two-row result block heights cloned from
+            # rows 5-6; changing every generated row to one uniform height
+            # would break the template signature again.
 
         if ws.title == "Cover" and ws.max_column == 6:
             ws.row_dimensions[6].height = max(
@@ -1675,6 +1842,86 @@ def remove_all_filters(wb):
             table.autoFilter = None
 
 
+def generate_integration_evidence_index(catalog):
+    """Create the mentor-facing cross-workbook evidence catalog."""
+    output = OUTPUT_DIR / "Integration_Evidence_Index_IDTS_SAP01_v0.1.xlsx"
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Evidence Index"
+    headers = [
+        "Evidence ID / Mã bằng chứng",
+        "Case ID / Mã ca",
+        "Run ID",
+        "Command / Lệnh",
+        "Baseline commit",
+        "Deploy ID / SHA",
+        "Environment / executor / time",
+        "Result / Kết quả",
+        "Actual result / Kết quả thực tế",
+        "Limitation / Giới hạn",
+        "Evidence artifact / Bằng chứng",
+        "Source or test at baseline / Nguồn hoặc test",
+    ]
+    for column, value in enumerate(headers, 1):
+        cell = ws.cell(1, column, value)
+        cell.font = Font(name="Arial", size=12, bold=True, color="FFFFFF")
+        cell.fill = PatternFill("solid", fgColor=BLUE)
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        cell.border = Border(left=THIN_GRAY, right=THIN_GRAY, top=THIN_GRAY, bottom=THIN_GRAY)
+    baseline = catalog["evidenceBaseline"]
+    commit_url = f"{baseline['repositoryUrl']}/commit/{baseline['runtimeCommitSha']}"
+    for row, case in enumerate(catalog["cases"], 2):
+        record = evidence_record(case, catalog)
+        source_path = next(
+            (
+                path for path in case.get("evidenceLinks", [])
+                if path.startswith("scripts/") and not path.endswith("/")
+            ),
+            None,
+        )
+        values = [
+            record["evidenceId"],
+            record["caseId"],
+            record["runId"],
+            record["command"],
+            record["baseline"],
+            record["deploy"],
+            record["context"],
+            record["result"],
+            record["actual"],
+            record["limitation"],
+            record["artifactPath"],
+            source_path or "N/A — manual or artifact-based verification",
+        ]
+        for column, value in enumerate(values, 1):
+            cell = ws.cell(row, column, value)
+            cell.font = Font(name="Arial", size=12)
+            cell.alignment = Alignment(vertical="top", wrap_text=True)
+            cell.border = Border(left=THIN_GRAY, right=THIN_GRAY, top=THIN_GRAY, bottom=THIN_GRAY)
+        add_hyperlink(ws.cell(row, 5), commit_url)
+        add_hyperlink(ws.cell(row, 11), record["artifactUrl"])
+        if source_path:
+            add_hyperlink(ws.cell(row, 12), source_url(catalog, source_path))
+        ws.row_dimensions[row].height = 78
+    widths = (23, 22, 25, 43, 52, 54, 48, 32, 62, 52, 62, 58)
+    for column, width in enumerate(widths, 1):
+        ws.column_dimensions[get_column_letter(column)].width = width
+    ws.row_dimensions[1].height = 42
+    ws.freeze_panes = "A2"
+    ws.auto_filter.ref = f"A1:L{len(catalog['cases']) + 1}"
+    ws.print_area = f"A1:L{len(catalog['cases']) + 1}"
+    ws.print_title_rows = "1:1"
+    ws.page_setup.orientation = "landscape"
+    ws.page_setup.fitToWidth = 2
+    ws.page_setup.fitToHeight = 0
+    ws.sheet_properties.pageSetUpPr.fitToPage = True
+    wb.properties.title = "IDTS SAP490 Integration Evidence Index v0.1"
+    wb.properties.creator = "IDTS SAP01 Team"
+    wb.properties.lastModifiedBy = "IDTS SAP01 Team"
+    wb.save(output)
+    return output
+
+
 def main():
     catalog = load_catalog()
     outputs = []
@@ -1689,6 +1936,7 @@ def main():
     for lang in ("en", "vi"):
         for generator in generators:
             outputs.append(generator(catalog, lang))
+    outputs.append(generate_integration_evidence_index(catalog))
     for output in outputs:
         print(output.relative_to(ROOT))
 

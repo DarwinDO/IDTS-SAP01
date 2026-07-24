@@ -3,6 +3,15 @@
   "project": "IDTS-SAP01",
   "generatedFor": "SAP490 mentor test-documentation remediation",
   "asOf": "2026-07-23T10:59:20+07:00",
+  "evidenceBaseline": {
+    "runtimeCommitSha": "c953cd7ad3683fc2a891ad3d09708f236f157902",
+    "evidenceCommitSha": "dc3dc09d111df2970070ff872a1bf024550c64e4",
+    "renderDeployId": "dep-d9hmfko4n6ts73b5egsg",
+    "renderDeployStatus": "LIVE",
+    "environment": "Render Shared QA",
+    "repositoryUrl": "https://github.com/DarwinDO/IDTS-SAP01",
+    "defaultEvidencePath": "docs/pm/evidence/idts-100/shared-qa-acceptance-summary-20260724.md"
+  },
   "knowledgeGate": "IN PROGRESS — handled in dedicated learning thread",
   "statusValues": [
     "PASSED",

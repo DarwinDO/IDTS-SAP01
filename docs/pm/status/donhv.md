@@ -3119,3 +3119,28 @@ Vietnamese:
 - Symptom: the optional PowerShell sort of `git diff --numstat` emitted conversion errors for binary files because Git represents their line counts as `-` rather than integers.
 - Classification: tooling issue. The normal `git diff --stat` and file-size inventory completed; no file was modified by the failed sort expression.
 - Status: resolved for review by ignoring binary `-` entries and inspecting the text/script changes directly. This is not a product or SAP490 artifact defect.
+
+### 2026-07-24 — IDTS-100 test-pack evidence remediation tooling findings
+
+| Classification | Symptom | Root cause / resolution | Verification |
+| --- | --- | --- | --- |
+| Documentation tooling issue | Initial focused regression test failed on the existing Functional Test, Test Report, and Unit Test workbooks. | The current pack placed Functional runs after an unused template block, contained broken or cosmetic blue links, and did not provide one complete evidence record per Unit case. The generator and validator were remediated rather than editing cells manually. | `python scripts/sap490/test-test-pack-evidence-contract.py` now passes. |
+| Documentation tooling issue | First regeneration stopped with `UnboundLocalError: record`; the new fail-fast hyperlink check then stopped on a blank `Feature 2!A1`. | The evidence-record variables were initially inserted in the wrong loop, and the target sheet had no stable anchor value. Both generator defects were corrected; `Feature 1!A1` and `Feature 2!A1` are now populated before links are created. | Generator and content validator complete with exit code `0`. |
+| Documentation tooling issue | OpenPyXL did not preserve calculated formula caches and produced OpenXML font-child ordering rejected by OfficeCLI 1.0.141. | This is a spreadsheet-package compatibility issue, not an IDTS product defect. Generated workbooks were round-tripped through LibreOffice and passed through the existing OpenXML normalizer. | OfficeCLI validation passes for every remediated workbook and the new Integration Evidence Index. |
+| Tooling issue | LibreOffice prints the environment warning `Could not find platform independent libraries <prefix>` although conversion succeeds. | Local LibreOffice environment warning; output files were still created correctly. | All expected round-tripped files exist and pass OfficeCLI plus content validation. |
+| Tooling issue | A Python read of multilingual artifact-review JSON failed under the Windows CP1252 console. | Console encoding could not represent Vietnamese characters. Rerun with `PYTHONUTF8=1`; workbook bytes were unaffected. | UTF-8 readback completed and artifact-tool found no formula-error cells in the reviewed ranges. |
+
+- Visual result: Functional Test starts in the official row 5–6 block; Test Report only colors real links blue; Unit Evidence and Integration Evidence Index show full baseline/deploy metadata, result, limitation, and artifact links.
+- Scope safety: no runtime file under `app/`, `srv/`, or `db/` is changed by this remediation.
+
+### 2026-07-24 — IDTS-100 live hyperlink verification findings
+
+| Classification | Symptom | Root cause / resolution | Verification |
+| --- | --- | --- | --- |
+| Documentation issue | The first internal workbook hyperlinks opened an invalid relative URL in Google Sheets instead of navigating to the target sheet. | OpenPyXL's `#Sheet!A1` string was serialized as an external target. The generator now creates location-only OOXML hyperlinks, and the validator rejects internal hyperlinks with an external target. | Test Report VI navigated from the test row to `Feature 1!A1`; Unit Test VI exposes the correct internal formula targeting `Evidence!A2`. |
+| Tooling issue | Google Sheets API returned `FAILED_PRECONDITION` when asked to read the uploaded XLSX workbooks. | The connector's cell API supports native Google Sheets, not Office XLSX stored on Drive. No workbook content was damaged. | Verified representative external and internal links through the real Google Sheets UI in Chrome instead. |
+| Tooling issue | One Drive metadata request failed because field `inheritedFrom` is not accepted by the connector's Drive v3 field projection. | Retried with supported metadata fields. | Readback confirms the Integration Evidence Index is in the correct folder and has `anyone/reader` permission. |
+
+- Selected evidence: `docs/pm/evidence/idts-100/test-pack-evidence-remediation-20260724.md`.
+- Drive result: six workbooks updated in place; one Integration Evidence Index uploaded; IDs, parent, MIME type and existing sharing preserved.
+- Test truth remains 21 `PASSED` + 6 `UAT PREPARED`; human UAT and mentor approval remain open.
