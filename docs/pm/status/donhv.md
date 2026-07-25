@@ -3163,3 +3163,39 @@ Vietnamese:
 | Product migration-helper defect | The IDTS-97 helper quoted CDS-style CamelCase table and column names, while CAP PostgreSQL physical identifiers are unquoted and folded to lower case. Its verification query would therefore fail on Render. | Changed the helper to use `idts_cap_aisuggestions`, `operationstatus`, and `latencyms`, matching fresh CAP PostgreSQL compilation and the live schema. Added focused regression assertions for the physical names. | `cds compile db --to sql --dialect postgres` and Render `pg_attribute` both confirm lower-case physical identifiers; the live table still contains 59 rows. |
 | Environment/tooling issue | The first focused verification in the fresh migration-fix worktree could not load `@sap/cds`, `pg`, or `@cap-js/attachments`. | Fresh Git worktrees do not contain their own untracked `node_modules`. Reuse the already installed root dependency directory for verification, without changing tracked project files. | Initial failure occurred before test execution or database access; rerun evidence is recorded with the final PR verification. |
 | Product migration defect | After the table migration and runtime deploy, authenticated reads of `BugService.AiSuggestions` returned HTTP 500 because the existing PostgreSQL service view still exposed only its original 20 columns. | Refreshed `bugservice_aisuggestions` additively, preserving all existing columns in order and appending `operationstatus` and `latencyms`. Extended the migration helper so future environments update and verify both the base table and service view in one transaction. | Authenticated `AiSuggestions` read now returns HTTP 200; PM `readAiOperationalMetrics(30)` returns HTTP 200 with four safe aggregate rows; no new Render error log appeared after the correction. |
+
+### 2026-07-25 — IDTS-101 specification workbook OpenXML normalization
+
+| Classification | Symptom | Root cause / resolution | Verification |
+| --- | --- | --- | --- |
+| Documentation tooling issue | OfficeCLI `1.0.141` rejected all six regenerated XLSX specifications although the three untouched official templates passed schema validation. | `openpyxl 3.1.5` rewrote font and drawing XML children in an order/namespace that strict OpenXML validation rejects. The content remained readable, but the generated packages were not acceptable as final mentor artifacts. Added a narrow native-Excel finalization step that performs one save after generation; it does not rebuild sheets, alter official-template structure, or patch the Configuration Note drawing defect directly. | A one-workbook proof passed OfficeCLI with zero schema errors. The complete six-workbook rerun and template-fidelity comparison are the next verification gate before PR/Drive synchronization. |
+
+### 2026-07-25 — IDTS-101 Blueprint TOC native-finalization tooling issue
+
+| Classification | Symptom | Root cause / resolution | Verification |
+| --- | --- | --- | --- |
+| Documentation tooling issue | Word COM updated and saved the EN Blueprint TOC, then returned `RPC server is unavailable (0x800706BA)` before opening the VI Blueprint. | The long-lived Word COM process terminated after the first document. This is a local Office automation issue, not a Blueprint content or template defect. The finalizer is being changed to isolate each document in its own Word process, so one failed COM instance cannot skip the other language. | EN save completed before the RPC failure. VI will be rerun through the isolated process and both DOCX files will be revalidated/rendered before any PR or Drive update. |
+
+- Resolution: the isolated Word run updated both TOCs, but Word/WPS rewrote the official style catalog from stable template IDs to numeric IDs and reduced the style count from 161 to 159. Because template fidelity has higher priority, those native-saved files were rejected and regenerated from the official template. The final Blueprint keeps a real auto-refresh TOC field and now also stores a reviewed cached TOC with dot leaders and page numbers; no native Office resave is used in the accepted generation path.
+
+### 2026-07-25 — IDTS-101 PDF contact-sheet runtime limitation
+
+| Classification | Symptom | Root cause / resolution | Verification |
+| --- | --- | --- | --- |
+| Tooling issue | The first PDF contact-sheet command failed with `ModuleNotFoundError: No module named 'fitz'`. | The default Windows Python does not include PyMuPDF. No project dependency was installed or changed. The visual-review command was rerouted to the Codex bundled document runtime, which provides the required PDF/image libraries. | The failed command did not modify any SAP490 artifact; final page rendering/contact-sheet evidence is generated only by the bundled runtime. |
+
+### 2026-07-25 — IDTS-101 Google Drive Chrome preview timeout
+
+| Classification | Symptom | Root cause / resolution | Verification |
+| --- | --- | --- | --- |
+| Tooling issue | Reloading four large Drive Office previews concurrently exceeded the Chrome-control timeout. | The parallel UI verification was too expensive for the connected browser session. The raw Drive updates had already succeeded and byte readback matched all eight local SHA-256 values. Preview verification was reduced to one representative artifact at a time. | No Drive mutation occurred during the timed-out read-only preview step; connector metadata and raw-byte readback remained valid. |
+
+### 2026-07-25 — IDTS-101 Drive footer-cache correction and closure
+
+| Classification | Symptom | Root cause / resolution | Verification |
+| --- | --- | --- | --- |
+| Documentation issue | The refreshed Blueprint Drive preview reported 26 EN pages but rendered the footer as `Confidential 1/46`; the same stale total existed in VI. | The official template's `NUMPAGES` field retained a cached result of `46`. Word/LibreOffice recalculated it during local rendering, while Google Drive preview initially displayed the inherited cache. The generator now updates only the cached `NUMPAGES` result (`26` EN, `25` VI) while preserving the field instruction, three sections, footer layout, and template styles. | OfficeCLI and the strict specification validator pass. LibreOffice renders EN `1/26…26/26` and VI `1/25…25/25`. Same-ID Drive readback hashes match local, and forced Drive preview reload shows `1/26` EN and `1/25` VI without `/46`; EN last-page navigation shows `26/26`. |
+| Tooling issue | The first local footer-render command was rejected because it combined a recursive temporary-directory cleanup with rendering. | The safety policy blocked the cleanup before any file changed. A new uniquely named temporary directory was used instead, without deletion. | Both PDFs were produced successfully and inspected; no SAP490 artifact was changed by the rejected command. |
+| Tooling issue | Chrome navigation to the VI last page changed the page-number input to `25 of 25`, but the follow-up Enter press exceeded the control deadline before the virtual document exposed the last-page paragraph. | Large Drive Office previews virtualize page content and can delay browser-control operations. | VI first-page Drive preview is correct and contains no stale `/46`; independent LibreOffice/PDF verification confirms the last footer is `25/25`. EN Drive preview verifies both `1/26` and `26/26`. |
+
+- IDTS-101 final state: all eight specification artifacts are synchronized on Drive at their existing IDs; metadata, permissions, size, and raw bytes were verified. No runtime file under `app/`, `srv/`, or `db/` changed.

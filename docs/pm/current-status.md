@@ -218,6 +218,13 @@ Vietnamese clean note: Trường Assignee hiện chọn được qua value help,
 
 Vietnamese clean note: Nút `Assign Developer` riêng đã được bỏ khỏi Object Page để tránh hai luồng assign cạnh tranh nhau. User assign/reassign bằng field `Assignee`; khi save draft, backend tự chuyển status sang `Assigned`, cập nhật `nextProcessor`, ghi history và tạo notification.
 
+## 2026-07-25 SAP490 specification remediation
+
+- `IDTS-101` regenerated eight Blueprint, Functional Specification, Technical Specification, and Configuration Note EN/VI artifacts from their official templates.
+- OfficeCLI, strict template/content validation, complete sheet coverage, EN/VI parity, and 105/105-page visual review passed.
+- All eight existing Drive files were updated in place with IDs, parents, MIME types, and sharing preserved; raw-byte readback matched local artifacts.
+- Blueprint Drive preview now reports 26 EN pages and 25 VI pages with matching `Confidential current/total` footers. Mentor review/approval remains Pending and live OpenAI remains disabled/not accepted.
+
 ## Next Handover Instruction
 
 Any new agent or developer should identify their member name first, then read this file, `task-board.md`, the relevant member file under `status/*.md`, and the relevant `tasks/*.md` before making changes.
