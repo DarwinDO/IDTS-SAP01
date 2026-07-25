@@ -65,9 +65,11 @@ No abnormal blank page, `###`, vertical text, obvious clipping, or raw prose dum
 | Tooling limitation | LibreOffice printed `Could not find platform independent libraries <prefix>`. | Conversion completed successfully; all 50 pages were generated and reviewed. |
 | Documentation issue | Stale print areas created 28/59-page outputs with large blank regions. | Generator now bounds print areas; final output is 12/13 pages. |
 | Tooling issue | Recursive removal of local `tmp/` evidence was blocked by command policy. | No workaround attempted; `tmp/` is explicitly excluded from staging and commit. |
+| Tooling issue | Atlassian Rovo returned `Internal error` for both the IDTS-103 comment and accessible-resource lookup. | Jira content was not changed. PR/evidence links remain available in the repository; Jira synchronization is pending connector recovery. |
 
 ## Pending gates
 
 - Final `git diff --check` and PR QA Depth check.
 - DonHV local workbook review.
 - Same-ID Google Drive update and readback after approval.
+- Jira evidence comment after Atlassian Rovo connector recovery.
