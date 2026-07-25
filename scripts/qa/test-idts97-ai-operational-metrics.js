@@ -27,7 +27,8 @@ const { containsUnsafeDiagnosticText } = require('../../srv/ai/safety')
 const {
   physicalColumns,
   physicalTable,
-  statements: migrationStatements
+  statements: migrationStatements,
+  viewStatement
 } = require('../db/migrate-idts97-ai-metrics')
 
 const RESULTS = []
@@ -85,6 +86,9 @@ async function main () {
     physicalTable, 'idts_cap_aisuggestions')
   expectEqual('migration targets lower-case PostgreSQL physical column names',
     physicalColumns.join(','), 'operationstatus,latencyms')
+  expectTruthy('migration refreshes the CAP service view with both safe metric columns',
+    viewStatement.includes('CREATE OR REPLACE VIEW bugservice_aisuggestions') &&
+    physicalColumns.every(column => viewStatement.includes(`a.${column}`)))
   expectTruthy('migration is explicit execute and dry-run by default',
     migrationSource.includes("process.argv.includes('--execute')") &&
     migrationSource.includes("mode: 'dry-run'"))

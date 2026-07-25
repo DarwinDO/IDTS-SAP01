@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-07-09T03:25:00.723Z",
+  "generatedAt": "2026-07-25T01:09:06.901Z",
   "baseUrl": "https://idts-sap01-qa.onrender.com",
-  "qaUser": "do***@example.local",
+  "qaUser": "do***@fpt.edu.vn",
   "sourceBug": {
-    "ID": "792a32bf-31e0-4512-82fd-40d6fcbe8fc1",
-    "bugNumber": "BUG-0005",
-    "status_code": "NEED_MORE_INFORMATION"
+    "ID": "0fccb660-da5d-4670-9216-8e3a2609b0d8",
+    "bugNumber": "BUG-0011",
+    "status_code": "RESOLVED"
   },
   "checks": [
     {
@@ -66,12 +66,12 @@
     {
       "label": "Render has an active source bug for source-linked AI smoke",
       "ok": true,
-      "detail": "actual=\"792a32bf-31e0-4512-82fd-40d6fcbe8fc1\""
+      "detail": "actual=\"0fccb660-da5d-4670-9216-8e3a2609b0d8\""
     },
     {
       "label": "source bug has componentCategory for assignment explanation",
       "ok": true,
-      "detail": "actual=\"60000000-0000-0000-0000-000000000001\""
+      "detail": "actual=\"60000000-0000-0000-0000-000000000002\""
     },
     {
       "label": "summary action returns 200",
@@ -116,12 +116,12 @@
     {
       "label": "AI smoke does not mutate source bug status",
       "ok": true,
-      "detail": "actual=\"NEED_MORE_INFORMATION\" expected=\"NEED_MORE_INFORMATION\""
+      "detail": "actual=\"RESOLVED\" expected=\"RESOLVED\""
     },
     {
       "label": "AI smoke does not mutate source bug assignee",
       "ok": true,
-      "detail": "actual=\"20000000-0000-0000-0000-000000000002\" expected=\"20000000-0000-0000-0000-000000000002\""
+      "detail": "actual=\"20000000-0000-0000-0000-000000000001\" expected=\"20000000-0000-0000-0000-000000000001\""
     },
     {
       "label": "Render exposes AI suggestion audit rows for review",
@@ -143,6 +143,6 @@
     "assignmentStatuses": [
       "AI_DISABLED"
     ],
-    "auditCount": 4
+    "auditCount": 10
   }
 }

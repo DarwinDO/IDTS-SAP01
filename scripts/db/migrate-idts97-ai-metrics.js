@@ -14,6 +14,23 @@ const statements = [
   `ALTER TABLE ${physicalTable} ADD COLUMN IF NOT EXISTS ${physicalColumns[0]} VARCHAR(40)`,
   `ALTER TABLE ${physicalTable} ADD COLUMN IF NOT EXISTS ${physicalColumns[1]} INTEGER`
 ]
+const viewStatement = `
+  CREATE OR REPLACE VIEW bugservice_aisuggestions AS
+  SELECT
+    a.id, a.createdat, a.modifiedat, a.bug_id, a.featuretype_code,
+    ft.name AS featuretypename,
+    a.requestedby_id, requester.displayname AS requestedbydisplayname,
+    a.provideralias, a.modelalias, a.confidence, a.suggestionpayload, a.summary,
+    a.reviewstate_code, rs.name AS reviewstatename,
+    a.reviewedby_id, reviewer.displayname AS reviewedbydisplayname,
+    a.reviewedat, a.expiresat, a.correlationid,
+    a.operationstatus, a.latencyms
+  FROM idts_cap_aisuggestions a
+  LEFT JOIN idts_cap_aisuggestionfeaturetypes ft ON a.featuretype_code = ft.code
+  LEFT JOIN idts_cap_users requester ON a.requestedby_id = requester.id
+  LEFT JOIN idts_cap_aisuggestionreviewstates rs ON a.reviewstate_code = rs.code
+  LEFT JOIN idts_cap_users reviewer ON a.reviewedby_id = reviewer.id
+`
 
 async function main () {
   if (process.argv.includes('--help') || process.argv.includes('-h')) {
@@ -28,6 +45,7 @@ async function main () {
       table: physicalTable,
       columns: physicalColumns,
       statementCount: statements.length,
+      refreshesServiceView: true,
       note: 'No database connection was opened and no SQL was executed.'
     }, null, 2))
     return
@@ -48,6 +66,7 @@ async function main () {
   try {
     await client.query('BEGIN')
     for (const statement of statements) await client.query(statement)
+    await client.query(viewStatement)
     const verification = await client.query(`
       SELECT column_name AS "columnName", data_type AS "dataType", is_nullable AS "isNullable"
       FROM information_schema.columns
@@ -60,11 +79,23 @@ async function main () {
     if (verification.rows.length !== 2) {
       throw new Error('IDTS-97 migration verification did not find both expected columns.')
     }
+    const viewVerification = await client.query(`
+      SELECT column_name AS "columnName"
+      FROM information_schema.columns
+      WHERE table_schema = current_schema()
+        AND table_name = 'bugservice_aisuggestions'
+        AND column_name = ANY($1::text[])
+      ORDER BY column_name
+    `, [physicalColumns])
+    if (viewVerification.rows.length !== 2) {
+      throw new Error('IDTS-97 migration verification did not expose both columns through BugService_AiSuggestions.')
+    }
     await client.query('COMMIT')
     console.log(JSON.stringify({
       mode: 'execute',
       migratedColumnCount: verification.rows.length,
       columns: verification.rows,
+      exposedViewColumnCount: viewVerification.rows.length,
       note: 'Database URL and credentials were not printed.'
     }, null, 2))
   } catch (error) {
@@ -95,7 +126,8 @@ Execute explicitly:
   IDTS_RENDER_DATABASE_URL=<private-url> node scripts/db/migrate-idts97-ai-metrics.js --execute
 
 The helper only adds nullable operationStatus and latencyMs columns with
-ADD COLUMN IF NOT EXISTS inside one transaction.`)
+ADD COLUMN IF NOT EXISTS and refreshes the existing read-only
+BugService_AiSuggestions view inside one transaction.`)
 }
 
 function safeErrorMessage (error) {
@@ -115,5 +147,6 @@ module.exports = {
   readBoolean,
   readInteger,
   safeErrorMessage,
-  statements
+  statements,
+  viewStatement
 }
