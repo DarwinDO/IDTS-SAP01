@@ -13,12 +13,12 @@ $outputDirectory = if ([System.IO.Path]::IsPathRooted($GeneratedDirectory)) {
 }
 
 $workbookNames = @(
-    "Functional_Specification_IDTS_SAP01_en_v0.5.xlsx",
-    "Functional_Specification_IDTS_SAP01_vi_v0.5.xlsx",
-    "Technical_Specification_IDTS_SAP01_en_v0.4.xlsx",
-    "Technical_Specification_IDTS_SAP01_vi_v0.4.xlsx",
-    "Configuration_Note_IDTS_SAP01_en_v0.4.xlsx",
-    "Configuration_Note_IDTS_SAP01_vi_v0.4.xlsx"
+    "Functional_Specification_IDTS_SAP01_en_v0.6.xlsx",
+    "Functional_Specification_IDTS_SAP01_vi_v0.6.xlsx",
+    "Technical_Specification_IDTS_SAP01_en_v0.5.xlsx",
+    "Technical_Specification_IDTS_SAP01_vi_v0.5.xlsx",
+    "Configuration_Note_IDTS_SAP01_en_v0.5.xlsx",
+    "Configuration_Note_IDTS_SAP01_vi_v0.5.xlsx"
 )
 
 $templateByPrefix = @{
@@ -94,6 +94,10 @@ try {
                         throw "$name/$($templateSheet.Name): cannot copy PageSetup.$property - $($_.Exception.Message)"
                     }
                 }
+                # The official template contains an incomplete footer token
+                # (`&P / `). Keep the template position/style but complete the
+                # page-total field so mentor printouts show `current / total`.
+                $targetSetup.RightFooter = '&P / &N'
                 [System.Runtime.InteropServices.Marshal]::ReleaseComObject($targetSetup) | Out-Null
                 [System.Runtime.InteropServices.Marshal]::ReleaseComObject($sourceSetup) | Out-Null
                 [System.Runtime.InteropServices.Marshal]::ReleaseComObject($targetSheet) | Out-Null

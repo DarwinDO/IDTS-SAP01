@@ -225,6 +225,12 @@ Vietnamese clean note: Nút `Assign Developer` riêng đã được bỏ khỏi 
 - All eight existing Drive files were updated in place with IDs, parents, MIME types, and sharing preserved; raw-byte readback matched local artifacts.
 - Blueprint Drive preview now reports 26 EN pages and 25 VI pages with matching `Confidential current/total` footers. Mentor review/approval remains Pending and live OpenAI remains disabled/not accepted.
 
+## 2026-07-25 SAP490 specification quality follow-up
+
+- `IDTS-102` corrected runtime traceability, content completeness, and formal layout findings discovered after the IDTS-101 merge.
+- Eight specification artifacts were regenerated from official templates and updated at their existing Drive IDs. OfficeCLI 8/8, strict specification validation, and visual review of 102/102 rendered pages pass.
+- No runtime files changed. Six human UAT cases, mentor approval/signature, and live OpenAI acceptance remain open and are not claimed as PASS.
+
 ## Next Handover Instruction
 
 Any new agent or developer should identify their member name first, then read this file, `task-board.md`, the relevant member file under `status/*.md`, and the relevant `tasks/*.md` before making changes.
