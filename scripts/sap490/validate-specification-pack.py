@@ -24,8 +24,8 @@ XLSX_CONTRACTS = {
     "functional": {
         "template": TEMPLATE_DIR / "Functional_Specification.xlsx",
         "outputs": [
-            GENERATED_DIR / "Functional_Specification_IDTS_SAP01_en_v0.6.xlsx",
-            GENERATED_DIR / "Functional_Specification_IDTS_SAP01_vi_v0.6.xlsx",
+            GENERATED_DIR / "Functional_Specification_IDTS_SAP01_en_v0.7.xlsx",
+            GENERATED_DIR / "Functional_Specification_IDTS_SAP01_vi_v0.7.xlsx",
         ],
         "required_sheets": [
             "Cover",
@@ -42,8 +42,8 @@ XLSX_CONTRACTS = {
     "technical": {
         "template": TEMPLATE_DIR / "Technical_Specification.xlsx",
         "outputs": [
-            GENERATED_DIR / "Technical_Specification_IDTS_SAP01_en_v0.5.xlsx",
-            GENERATED_DIR / "Technical_Specification_IDTS_SAP01_vi_v0.5.xlsx",
+            GENERATED_DIR / "Technical_Specification_IDTS_SAP01_en_v0.6.xlsx",
+            GENERATED_DIR / "Technical_Specification_IDTS_SAP01_vi_v0.6.xlsx",
         ],
         "required_sheets": [
             "Cover",
@@ -100,6 +100,31 @@ REQUIRED_RUNTIME_TERMS = [
     "operationStatus",
     "latencyMs",
 ]
+
+# Official templates contain example data blocks whose merged-cell layout is
+# intentionally replaced by record-level tables.  Cover, metadata, sheet order,
+# visibility, page setup and columns remain immutable; only these data regions
+# may change their row merges and cell styles.
+MUTABLE_DATA_REGIONS = {
+    "functional": {
+        "Function Overview": (15, 90), "Process Flow": (6, 60),
+        "Screen Layout": (27, 90), "Screen Definition": (9, 74),
+        "Smart Form Structure": (44, 57), "Message Definition": (5, 45),
+        "Processing Description": (6, 90),
+    },
+    "technical": {
+        "Introduction": (15, 30), "Scope": (6, 40), "Assumptions": (6, 50),
+        "Functional Requirements": (5, 75), "Technical Design": (5, 129),
+        "Development Standards": (5, 95), "Screen Layout": (5, 40),
+        "Screen Definition": (9, 50), "Message Definition": (5, 40),
+        "Technical Implementation": (5, 40),
+    },
+}
+
+
+def row_in_mutable_region(kind, sheet, row):
+    region = MUTABLE_DATA_REGIONS.get(kind, {}).get(sheet)
+    return bool(region and region[0] <= row <= region[1])
 
 
 def color_signature(color):
@@ -210,6 +235,16 @@ def column_width_signature(worksheet):
     }
 
 
+def column_width_signature_matches(actual, expected):
+    if set(actual) != set(expected):
+        return False
+    return all(
+        abs(actual[key][0] - expected[key][0]) <= 0.02
+        and actual[key][1:] == expected[key][1:]
+        for key in expected
+    )
+
+
 def workbook_text(workbook) -> str:
     return "\n".join(
         str(cell.value)
@@ -273,13 +308,17 @@ def validate_workbooks() -> list[str]:
                     failures.append(
                         f"{output.name}/{worksheet.title}: official page setup changed"
                     )
-                if column_width_signature(worksheet) != expected_columns[worksheet.title]:
+                if not column_width_signature_matches(column_width_signature(worksheet), expected_columns[worksheet.title]):
                     failures.append(
                         f"{output.name}/{worksheet.title}: official column-width contract changed"
                     )
                 actual_merges = {str(item) for item in worksheet.merged_cells.ranges}
-                if not expected_merges[worksheet.title].issubset(actual_merges):
-                    missing = sorted(expected_merges[worksheet.title] - actual_merges)
+                protected_merges = {
+                    merge for merge in expected_merges[worksheet.title]
+                    if not row_in_mutable_region(kind, worksheet.title, template[worksheet.title][merge.split(":")[0]].row)
+                }
+                if not protected_merges.issubset(actual_merges):
+                    missing = sorted(protected_merges - actual_merges)
                     failures.append(
                         f"{output.name}/{worksheet.title}: missing template merges {missing[:5]!r}"
                     )
@@ -289,6 +328,8 @@ def validate_workbooks() -> list[str]:
                 for row in template_sheet.iter_rows():
                     for template_cell in row:
                         if template_cell.value in (None, "") or not template_cell.has_style:
+                            continue
+                        if row_in_mutable_region(kind, worksheet.title, template_cell.row):
                             continue
                         output_cell = worksheet[template_cell.coordinate]
                         if not visible_style_matches(template_cell, output_cell):

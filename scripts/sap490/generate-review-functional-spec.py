@@ -12,12 +12,14 @@ from openpyxl.cell.cell import MergedCell
 from openpyxl.drawing.image import Image as XLImage
 from openpyxl.styles import Alignment
 
+from specification_catalog import FUNCTIONS, MESSAGES, PROCESS_STEPS, SCREENS, TECH_FLOWS
+
 
 ROOT = Path(__file__).resolve().parents[2]
 TEMPLATE = ROOT / "docs" / "sap490" / "templates" / "Deliverable_template" / "Functional_Specification.xlsx"
 OUT = ROOT / "docs" / "sap490" / "generated"
 DATE = date(2026, 7, 25)
-VERSION = "0.6"
+VERSION = "0.7"
 
 
 GROUPS = [
@@ -180,6 +182,62 @@ def clear_rows(ws, start, end):
                 cell.value = None
 
 
+def unmerge_region(ws, min_row, max_row, min_col, max_col):
+    """Remove template merges only inside a generated table body."""
+    for merged in list(ws.merged_cells.ranges):
+        if not (
+            merged.max_row < min_row or merged.min_row > max_row
+            or merged.max_col < min_col or merged.min_col > max_col
+        ):
+            ws.unmerge_cells(str(merged))
+
+
+def copy_style(source, target):
+    target._style = copy(source._style)
+    target.number_format = source.number_format
+    target.protection = copy(source.protection)
+
+
+def write_formal_table(ws, start_row, groups, headers, rows, *, header_source, data_source, row_height=42):
+    """Write one record per row using logical column groups from the official grid."""
+    end_row = start_row + len(rows)
+    min_col = min(ws[f"{start}1"].column for start, _ in groups)
+    max_col = max(ws[f"{end}1"].column for _, end in groups)
+    unmerge_region(ws, start_row, end_row, min_col, max_col)
+    clear_rows(ws, start_row, end_row)
+
+    header_template = ws[header_source]
+    data_template = ws[data_source]
+    for row_offset, values in enumerate([headers, *rows]):
+        row = start_row + row_offset
+        is_header = row_offset == 0
+        template = header_template if is_header else data_template
+        for (start, end), value in zip(groups, values):
+            start_col = ws[f"{start}1"].column
+            end_col = ws[f"{end}1"].column
+            for column in range(start_col, end_col + 1):
+                cell = ws.cell(row, column)
+                copy_style(template, cell)
+                cell.alignment = Alignment(
+                    horizontal="center" if is_header else "left",
+                    vertical="center" if is_header else "top",
+                    wrap_text=True,
+                    shrink_to_fit=False,
+                )
+            if start != end:
+                ws.merge_cells(f"{start}{row}:{end}{row}")
+            ws[f"{start}{row}"] = value
+        ws.row_dimensions[row].height = 30 if is_header else row_height
+    return end_row
+
+
+def set_print_region(ws, area, *, title_rows=None):
+    ws.print_area = area
+    ws.sheet_properties.pageSetUpPr.fitToPage = True
+    ws.page_setup.fitToWidth = 1
+    ws.page_setup.fitToHeight = 0
+
+
 def remove_broken_defined_names(workbook):
     broken = [
         name
@@ -234,6 +292,40 @@ def metadata(ws):
             continue
 
 
+def localize_visible_functional_labels(workbook):
+    translations = {
+        "Functional Specification": "Đặc tả chức năng",
+        "FUNCTIONAL SPECIFICATION": "ĐẶC TẢ CHỨC NĂNG",
+        "Function Overview": "Tổng quan chức năng",
+        "Process Flow": "Luồng quy trình",
+        "Screen Layout": "Bố cục màn hình",
+        "Screen Definition": "Định nghĩa màn hình",
+        "Smart Form Structure": "Cấu trúc Smart Form",
+        "Message Definition": "Định nghĩa thông báo",
+        "Processing Description": "Mô tả xử lý",
+        "Function ID": "Mã chức năng",
+        "Function Name": "Tên chức năng",
+        "Created Date": "Ngày tạo",
+        "Last Update Date": "Ngày cập nhật cuối",
+        "Creator": "Người tạo",
+        "Reviewer": "Người review",
+        "Approver": "Người phê duyệt",
+        "Version": "Phiên bản",
+        "Description": "Mô tả",
+        "Modified date": "Ngày sửa",
+        "Modified by": "Người sửa",
+        "Pending": "Chờ duyệt",
+    }
+    for ws in workbook.worksheets:
+        for row in ws.iter_rows():
+            for cell in row:
+                if not isinstance(cell, MergedCell) and isinstance(cell.value, str):
+                    normalized = cell.value.strip()
+                    if normalized in translations:
+                        leading = cell.value[: len(cell.value) - len(cell.value.lstrip())]
+                        cell.value = leading + translations[normalized]
+
+
 def build(language):
     labels = TEXT[language]
     output = OUT / f"Functional_Specification_IDTS_SAP01_{language}_v{VERSION}.xlsx"
@@ -254,6 +346,7 @@ def build(language):
         "U17": "Pending",
     }.items():
         write(cover, coordinate, value)
+    set_print_region(cover, "B1:BH24")
 
     history = workbook["Histories"]
     clear_rows(history, 3, 10)
@@ -265,6 +358,7 @@ def build(language):
             ("0.4", "AI advisory baseline", "Human-review AI functions and boundaries", date(2026, 7, 24)),
             ("0.5", "Official-template remediation", "All 9 sheets; SAP sample residue removed", date(2026, 7, 25)),
             ("0.6", labels["history"], "Runtime trace, completeness and formality", DATE),
+            ("0.7", "Formal table and traceability remediation", "Function, process, screen, message and processing tables", DATE),
         ],
         "vi": [
             ("0.1", "Nền đặc tả chức năng ban đầu", "Trang bìa và phạm vi quy trình ban đầu", date(2026, 6, 21)),
@@ -273,6 +367,7 @@ def build(language):
             ("0.4", "Nền AI tư vấn", "Chức năng AI có con người đánh giá và ranh giới", date(2026, 7, 24)),
             ("0.5", "Khắc phục theo template chính thức", "Đủ 9 sheet; loại nội dung mẫu SAP", date(2026, 7, 25)),
             ("0.6", labels["history"], "Truy vết runtime, độ đầy đủ và tính trang trọng", DATE),
+            ("0.7", "Chuẩn hóa bảng và truy vết", "Bảng chức năng, quy trình, màn hình, thông báo và xử lý", DATE),
         ],
     }[language]
     for index, (version, summary, affected, changed_date) in enumerate(history_rows, 3):
@@ -286,62 +381,75 @@ def build(language):
         }.items():
             write(history, coordinate, value)
         history.row_dimensions[index].height = 34
+    set_print_region(history, "B1:G10", title_rows="1:2")
 
     overview = workbook["Function Overview"]
     metadata(overview)
     write(overview, "I3", "IDTS-FS")
     write(overview, "AB3", labels["name"])
     write(overview, "AB6", "SRS-FR-AUTH; SRS-FR-BUG; SRS-FR-ASG; SRS-FR-LIFE; SRS-FR-COLLAB; SRS-FR-MON; SRS-FR-NOTIFY; SRS-FR-AI")
-    for row, pair_start in enumerate(range(0, len(GROUPS), 2), 15):
-        lines = []
-        for code, name, requirement, endpoint, handler, test in GROUPS[pair_start:pair_start + 2]:
-            lines.append(f"{code} — {name} | {requirement} | {endpoint} | {handler} | {test}")
-        merge_row(overview, row, "B", "BH")
-        write_wrapped(overview, f"B{row}", "\n".join(lines))
-        overview.row_dimensions[row].height = 42
-    merge_row(overview, 19, "B", "BH")
-    write_wrapped(overview, "B19", "AI review/apply symbols: " + ", ".join(AI_SYMBOLS))
-    overview.row_dimensions[19].height = 42
-    merge_row(overview, 21, "B", "BH")
-    write_wrapped(
-        overview,
-        "B21",
-        "Runtime baseline: 8009b2a6a72d73db28f190b3a0bcbb65b1ff4740; documentation baseline: "
-        "origin/dev 9eee79cbb741962403b2d35ee33efc2eb3d18c46; Render deploy dep-d9i0r537uimc73as0be0. "
-        "Each function traces to a requirement, OData contract, exact source handler and focused evidence.",
+    function_headers = {
+        "en": ["Function ID", "Function name", "Business objective", "Actor", "Trigger", "Expected result", "Requirement"],
+        "vi": ["Mã chức năng", "Tên chức năng", "Mục tiêu nghiệp vụ", "Vai trò", "Điểm kích hoạt", "Kết quả mong đợi", "Yêu cầu"],
+    }[language]
+    function_rows = [
+        [item["id"], item["name"][language], item["objective"][language], item["actors"],
+         item["trigger"][language], item["result"][language], item["requirement"]]
+        for item in FUNCTIONS
+    ]
+    end_row = write_formal_table(
+        overview, 15,
+        [("B", "F"), ("G", "N"), ("O", "Z"), ("AA", "AE"), ("AF", "AJ"), ("AK", "AS"), ("AT", "BH")],
+        function_headers, function_rows, header_source="B14", data_source="B15", row_height=54,
     )
-    overview.row_dimensions[21].height = 48
+    write_wrapped(
+        overview, f"B{end_row + 2}",
+        ("Baseline and evidence are frozen in the IDTS-103 evidence report; every function maps to an exact source and focused test."
+         if language == "en" else
+         "Baseline và bằng chứng được cố định trong báo cáo IDTS-103; mỗi chức năng được map tới source và test tập trung chính xác."),
+    )
+    merge_row(overview, end_row + 2, "B", "BH")
+    overview.row_dimensions[end_row + 2].height = 36
+    set_print_region(overview, f"B1:BH{end_row + 2}", title_rows="1:14")
 
     process = workbook["Process Flow"]
     metadata(process)
     process._images = []
-    flow_rows = [
-        "1. Sign in → AuthService validates account/session → open protected Fiori shell.",
-        "2. Tester/PM creates draft: NEW → PATCH → SAVE/CREATE; backend validation remains authoritative.",
-        "3. Select valid Developer → Assigned; leave empty → Pending Assignment.",
-        "4. Developer actions: " + ", ".join(LIFECYCLE_ACTIONS[2:7]) + ".",
-        "5. Tester/PM follow-up: resubmit, retest, close or reopen; exact history and notifications are persisted.",
-        "6. Comments and attachments support evidence; PostgreSQL stores metadata and S3 stores binary content.",
-        "7. AI suggestions are reviewed first; apply/duplicate confirmation are explicit authorized actions; OpenAI live is disabled.",
-    ]
-    if language == "vi":
-        flow_rows = [
-            "1. Đăng nhập → AuthService kiểm tra account/session → mở Fiori shell được bảo vệ.",
-            "2. Tester/PM tạo draft: NEW → PATCH → SAVE/CREATE; backend luôn là nơi validation cuối.",
-            "3. Chọn Developer hợp lệ → Assigned; để trống → Pending Assignment.",
-            "4. Developer xử lý qua các action có kiểm quyền và điều kiện trạng thái.",
-            "5. Tester/PM resubmit, retest, close hoặc reopen; history exact-action và notification được persist.",
-            "6. Comment/attachment lưu bằng chứng; PostgreSQL lưu metadata và S3 lưu binary.",
-            "7. AI suggestion phải review; apply/xác nhận duplicate là action riêng có kiểm quyền; OpenAI live đang tắt.",
-        ]
-    for row, text in enumerate(flow_rows, 6):
-        merge_row(process, row, "B", "AH")
-        write_wrapped(process, f"B{row}", text)
-        process.row_dimensions[row].height = 38
+    process_headers = {
+        "en": ["Step", "Actor", "Action", "Status before", "Status after", "Next processor", "Side effect"],
+        "vi": ["Bước", "Vai trò", "Hành động", "Trạng thái trước", "Trạng thái sau", "Người xử lý tiếp", "Side effect"],
+    }[language]
+    process_rows = []
+    for step, actor, action, before, after, next_processor, side_effect in PROCESS_STEPS:
+        if language == "vi":
+            action = {
+                "Sign in": "Đăng nhập", "Create Bug draft and save": "Tạo draft Bug và lưu",
+                "Review and work on assigned Bug": "Review và xử lý Bug được giao",
+                "Request more information": "Yêu cầu thêm thông tin",
+                "Resubmit corrected information": "Gửi lại thông tin đã sửa",
+                "Resolve Bug": "Resolve Bug", "Retest and close or reopen": "Retest rồi đóng hoặc mở lại",
+            }.get(action, action)
+            next_processor = {
+                "Authenticated user/session": "Người dùng/phiên đã xác thực", "Developer or Tester/PM": "Developer hoặc Tester/PM",
+                "Developer": "Developer", "Reporter Tester": "Tester báo lỗi", "Tester / PM": "Tester / PM", "None / Developer": "Không có / Developer",
+            }.get(next_processor, next_processor)
+            side_effect = {
+                "Auth session token issued once": "Token phiên xác thực được cấp một lần",
+                "Bug, history and notification commit": "Commit Bug, lịch sử và thông báo",
+                "Exact action history": "Lịch sử action chính xác", "Notification to reporter": "Thông báo cho reporter",
+                "History and notification": "Lịch sử và thông báo", "Resolution history and notification": "Lịch sử resolve và thông báo",
+                "Final or reopened history": "Lịch sử đóng hoặc mở lại",
+            }.get(side_effect, side_effect)
+        process_rows.append([step, actor, action, before, after, next_processor, side_effect])
+    process_end = write_formal_table(
+        process, 6,
+        [("B", "E"), ("F", "J"), ("K", "R"), ("S", "W"), ("X", "AB"), ("AC", "AH"), ("AI", "AP")],
+        process_headers, process_rows, header_source="B5", data_source="B6", row_height=46,
+    )
     flow_image = XLImage(ROOT / "docs" / "diagrams" / "rendered" / "png" / "04-end-to-end-defect-flow.png")
-    flow_image.width = 720
-    flow_image.height = 405
-    process.add_image(flow_image, "AJ6")
+    flow_image.width = 560
+    flow_image.height = 315
+    process.add_image(flow_image, "AR6")
     write(process, "B44", "Supplement / Bổ sung: source baseline 8009b2a6a72d73db28f190b3a0bcbb65b1ff4740")
     process_supplement = [
         "Role flow: Tester/PM creates and assigns; the assigned Developer reviews and resolves; Tester/PM retests, closes or reopens.",
@@ -360,63 +468,47 @@ def build(language):
         merge_row(process, row, "B", "BG")
         write_wrapped(process, f"B{row}", text)
         process.row_dimensions[row].height = 34
+    set_print_region(process, f"B1:BH{max(process_end, 48)}", title_rows="1:5")
 
     layout = workbook["Screen Layout"]
     metadata(layout)
     clear_rows(layout, 28, 78)
-    additional_sections = [
-        ("Comments", "Comments section/controller extension", "Threaded collaboration after Bug creation"),
-        ("Attachments", "Attachment control + provider seam", "Draft upload, S3 persistence, download and delete"),
-        ("History", "HistoryEvents/HistoryLogs fragment", "Exact action, actor, status and changed fields"),
-        ("Notifications", "Notification section/profile popover", "In-app read state and delivery visibility"),
-        ("Classification", "annotation value helps", "Active SAP module/component/category controls"),
-        ("Assignment", "Assignment section + smart value help", "Explicit valid Developer selection; no auto-assign"),
-        ("Lifecycle actions", "actions.cds + controller extensions", "Role/status-aware bound actions"),
-        ("Monitoring filters", "Dashboard/List Report filters", "Pending, overdue, rejected and retest queues"),
-        ("Empty/error states", "Fiori messages and busy handling", "Human-readable recovery without dev-facing text"),
-        ("Responsive/accessibility", "UI5 layout and semantic controls", "Desktop/tablet, keyboard focus and labels"),
-    ]
-    if language == "vi":
-        additional_sections = [
-            ("Bình luận", "Comments section/controller extension", "Trao đổi theo luồng sau khi Bug được tạo"),
-            ("Tệp đính kèm", "Attachment control + provider seam", "Upload draft, lưu S3, download và delete"),
-            ("Lịch sử", "HistoryEvents/HistoryLogs fragment", "Exact action, actor, status và field thay đổi"),
-            ("Thông báo", "Notification section/profile popover", "Trạng thái đọc trong ứng dụng và delivery"),
-            ("Phân loại", "annotation value helps", "Kiểm soát SAP module/component/category active"),
-            ("Phân công", "Assignment section + smart value help", "Chọn Developer hợp lệ rõ ràng; không auto-assign"),
-            ("Action vòng đời", "actions.cds + controller extensions", "Bound action theo role/status"),
-            ("Bộ lọc monitoring", "Dashboard/List Report filters", "Hàng đợi pending, overdue, rejected và retest"),
-            ("Trạng thái rỗng/lỗi", "Fiori messages and busy handling", "Hướng phục hồi dễ hiểu, không có text nội bộ"),
-            ("Responsive/accessibility", "UI5 layout and semantic controls", "Desktop/tablet, keyboard focus và label"),
-        ]
-    record_rows = [28, 29, 30, 31, 33, 35, 37, 38, 39, 41, 43, 45, 47, 49, 50, 51, 52]
-    all_sections = labels["screen_sections"] + additional_sections
-    for index, ((name, technical, purpose), row) in enumerate(zip(all_sections, record_rows), 1):
-        write(layout, f"C{row}", index)
-        write(layout, f"F{row}", name)
-        if not isinstance(layout[f"N{row}"], MergedCell):
-            write(layout, f"N{row}", technical)
-        write(layout, f"S{row}", "Fiori Object Page/shell")
-        write(layout, f"AA{row}", purpose)
-        layout.row_dimensions[row].height = max(layout.row_dimensions[row].height or 19.5, 34)
-        visible_cells = [f"C{row}", f"F{row}", f"S{row}", f"AA{row}"]
-        if not isinstance(layout[f"N{row}"], MergedCell):
-            visible_cells.append(f"N{row}")
-        make_text_visible(layout, visible_cells)
-    make_text_visible(layout, ["C27", "F27", "N27", "S27", "AA27"])
-    screen_supplement = [
-        "Navigation: login → role-aware dashboard/List Report → Bug Object Page → focused dialog/action → refreshed OData state.",
-        "UX/security boundary: Fiori Elements remains the standard List/Object Page shell; custom SAPUI5 is limited to focused experiences, and UI visibility never replaces backend authorization or validation.",
-    ]
-    if language == "vi":
-        screen_supplement = [
-            "Điều hướng: đăng nhập → dashboard/List Report theo role → Bug Object Page → dialog/action tập trung → refresh trạng thái OData.",
-            "Ranh giới UX/bảo mật: Fiori Elements giữ vai trò shell chuẩn; custom SAPUI5 chỉ dùng cho trải nghiệm cần thiết, và ẩn/hiện UI không thay thế authorization hoặc validation backend.",
-        ]
-    for row, text in enumerate(screen_supplement, 94):
-        merge_row(layout, row, "B", "BG")
-        write_wrapped(layout, f"B{row}", text)
-        layout.row_dimensions[row].height = 40
+    screen_headers = {
+        "en": ["Screen ID", "Screen name", "Page type", "Role", "Main controls/areas", "Navigation", "Technical binding"],
+        "vi": ["Mã màn hình", "Tên màn hình", "Loại trang", "Vai trò", "Control/khu vực chính", "Điều hướng", "Binding kỹ thuật"],
+    }[language]
+    screen_rows = []
+    for screen_id, name_en, name_vi, page_type, entry, controller, binding, role, main_areas, navigation in SCREENS:
+        if language == "vi":
+            page_type = {
+                "Custom SAPUI5 page": "Trang SAPUI5 tùy chỉnh", "SAPUI5 popover": "Popover SAPUI5",
+                "Fiori Elements List Report": "Fiori Elements List Report", "Fiori Elements Object Page": "Fiori Elements Object Page",
+                "Object Page section": "Section Object Page", "Application section/popover": "Section/popover ứng dụng",
+                "Dialog/value help": "Dialog/value help", "Dialog": "Dialog",
+            }.get(page_type, page_type)
+            main_areas = {
+                "Email, password, safe message": "Email, password, thông báo an toàn", "Name, email, role, Sign Out": "Tên, email, role, Đăng xuất",
+                "KPI cards, queues, workload": "KPI card, hàng đợi, workload", "Filters, table, Create": "Bộ lọc, bảng, Tạo",
+                "Summary, classification, assignment, lifecycle": "Tóm tắt, phân loại, phân công, vòng đời",
+                "Thread and Add Comment": "Luồng bình luận và Thêm bình luận", "Upload, download, delete": "Tải lên, tải xuống, xóa",
+                "Timeline and Show More": "Timeline và Xem thêm", "Read state and delivery status": "Trạng thái đọc và delivery",
+                "Search, workload, responsibility, explanation": "Tìm kiếm, workload, responsibility, giải thích",
+                "Accept, reject, ignore, apply": "Chấp nhận, từ chối, bỏ qua, áp dụng", "Candidates, review, confirm": "Ứng viên, review, xác nhận",
+                "Grounded summary and review": "Tóm tắt có căn cứ và review",
+            }.get(main_areas, main_areas)
+            navigation = {
+                "Dashboard / protected app": "Dashboard / ứng dụng được bảo vệ", "Login after logout": "Đăng nhập sau khi logout",
+                "Bug List Report": "Bug List Report", "Bug Object Page": "Bug Object Page", "Focused sections/dialogs": "Section/dialog chuyên trách",
+                "Same Object Page": "Cùng Object Page", "Related Bug": "Bug liên quan", "Assignment section": "Section phân công",
+                "Classification section": "Section phân loại", "Bug summary": "Tóm tắt Bug", "History section": "Section lịch sử",
+            }.get(navigation, navigation)
+        screen_rows.append([screen_id, name_en if language == "en" else name_vi, page_type, role, main_areas, navigation, f"{entry}; {controller}; {binding}"])
+    layout_end = write_formal_table(
+        layout, 27,
+        [("B", "E"), ("F", "M"), ("N", "R"), ("S", "Z"), ("AA", "AH"), ("AI", "AP"), ("AQ", "BH")],
+        screen_headers, screen_rows, header_source="C27", data_source="C28", row_height=54,
+    )
+    set_print_region(layout, f"B1:BH{layout_end}", title_rows="1:27")
 
     definition = workbook["Screen Definition"]
     metadata(definition)
@@ -448,6 +540,35 @@ def build(language):
     field_rows = [13, 14, 15, 17, 20, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38]
     for index, (record, row) in enumerate(zip(fields, field_rows), 1):
         name, kind, io, cardinality, binding, length, required, fmt, help_flag, remark = record
+        if language == "vi":
+            name = {
+                "Title": "Tiêu đề", "Description": "Mô tả", "Steps to Reproduce": "Các bước tái hiện",
+                "Actual Result": "Kết quả thực tế", "Expected Result": "Kết quả mong đợi", "Priority": "Độ ưu tiên",
+                "Severity": "Mức độ nghiêm trọng", "Environment": "Môi trường", "Application Component": "Application Component",
+                "Defect Category": "Defect Category", "SAP Module": "SAP Module", "Assignee": "Người được phân công",
+                "Status": "Trạng thái", "Current Action Owner": "Người xử lý hiện tại", "Comment": "Bình luận",
+                "Attachment": "Tệp đính kèm", "History": "Lịch sử", "Notification": "Thông báo",
+                "Lifecycle Actions": "Action vòng đời", "AI Review": "Review AI",
+            }[name]
+            required = "Có" if required == "Yes" else "Không"
+            help_flag = "Có" if help_flag == "Yes" else "Không"
+            remark = {
+                "Required; backend validated": "Bắt buộc; backend kiểm tra",
+                "Required during activation": "Bắt buộc khi activate",
+                "Active code only": "Chỉ nhận code active",
+                "Active classification": "Chỉ nhận phân loại active",
+                "Must match Component Category": "Phải khớp Component Category",
+                "Optional assignment context": "Ngữ cảnh phân công tùy chọn",
+                "Tester/PM; responsibility validated": "Tester/PM; kiểm tra responsibility",
+                "Backend-owned": "Backend quản lý",
+                "Distinct from technical assignee": "Khác với technical assignee",
+                "Hidden during create; available after save": "Ẩn khi create; có sau khi save",
+                "Pending client memory → API → PostgreSQL/S3": "Bộ nhớ tạm client → API → PostgreSQL/S3",
+                "Exact action, actor and changed fields": "Action, actor và field thay đổi chính xác",
+                "In-app plus email delivery state": "Trạng thái trong ứng dụng và email delivery",
+                "Visibility advisory; backend authorizes": "Visibility chỉ hỗ trợ UX; backend phân quyền",
+                "Review does not mutate Bug workflow": "Review không mutation workflow Bug",
+            }[remark]
         values = {
             f"B{row}": index,
             f"C{row}": name,
@@ -470,6 +591,7 @@ def build(language):
         ["B9", "B10", "R10", "AW10", "C11", "I11", "M11", "O11", "R11", "U11",
          "X11", "AA11", "AE11", "AI11", "AM11", "AQ11", "B12"],
     )
+    set_print_region(definition, "B1:BH38", title_rows="1:12")
 
     smart = workbook["Smart Form Structure"]
     smart._images = []
@@ -479,7 +601,6 @@ def build(language):
     write_wrapped(smart, "B4", labels["n_a_smart"])
     smart.row_dimensions[2].height = 28
     smart.row_dimensions[4].height = 52
-    smart.print_area = "B1:AG57"
     clear_rows(smart, 44, 57)
     write(smart, "B44", 1)
     write(smart, "E44", "Applicability")
@@ -487,51 +608,65 @@ def build(language):
     write(smart, "R44", "Entire sheet")
     write(smart, "Z44", labels["n_a_smart"])
     smart.row_dimensions[44].height = 54
+    set_print_region(smart, "B1:AG44", title_rows="1:4")
 
     messages = workbook["Message Definition"]
     metadata(messages)
     clear_rows(messages, 6, 40)
-    for row, record in enumerate(labels["messages"], 6):
-        message_id, message, http_status, handler, target, role, rollback, ui_log = record
-        write(messages, f"B{row}", message_id)
-        write(messages, f"F{row}", "EN" if language == "en" else "VI")
-        write(messages, f"J{row}", f"{message} [HTTP {http_status}]")
-        write(messages, f"AG{row}", f"Handler: {handler}; target: {target}; role/context: {role}; rollback: {rollback}; UI/log: {ui_log}")
-        messages.row_dimensions[row].height = 58
+    message_headers = {
+        "en": ["Message ID", "User message", "Business trigger", "Screen/target", "Role", "Timing", "Expected UI behavior"],
+        "vi": ["Mã thông báo", "Nội dung người dùng", "Điều kiện nghiệp vụ", "Màn hình/target", "Vai trò", "Thời điểm", "Hành vi UI mong đợi"],
+    }[language]
+    message_rows = [
+        [item["id"], item["message"][language], item["trigger"][language], f"{item['screen']} / {item['target']}",
+         item["role"], item["timing"][language], item["ui"][language]]
+        for item in MESSAGES
+    ]
+    message_end = write_formal_table(
+        messages, 5,
+        [("B", "E"), ("F", "N"), ("O", "Z"), ("AA", "AF"), ("AG", "AM"), ("AN", "AV"), ("AW", "BH")],
+        message_headers, message_rows, header_source="B5", data_source="B6", row_height=58,
+    )
+    set_print_region(messages, f"B1:BH{message_end}", title_rows="1:5")
 
     processing = workbook["Processing Description"]
     metadata(processing)
     clear_rows(processing, 6, 80)
-    function_records = [
-        (code, requirement, endpoint, handler, labels["processing"][code], test)
-        for code, _, requirement, endpoint, handler, test in GROUPS
-    ]
-    function_records.extend(
-        (
-            f"LIFE-{action}",
-            "SRS-FR-LIFE",
-            f"/odata/v4/bug/Bugs(...)/BugService.{action}",
-            "srv/service.js → srv/bug-service/actions.js",
-            f"Bound action {action} rechecks role/state and commits permitted Bug/history/notification changes in the request transaction.",
-            "qa:idts89:programmatic",
-        )
-        for action in LIFECYCLE_ACTIONS
+    processing_headers = {
+        "en": ["Flow ID", "UI trigger", "OData operation", "Business validation", "Result", "Side effect", "Evidence"],
+        "vi": ["Mã luồng", "Điểm kích hoạt UI", "Thao tác OData", "Kiểm tra nghiệp vụ", "Kết quả", "Side effect", "Bằng chứng"],
+    }[language]
+    processing_rows = []
+    for flow_id, trigger, http, _service, handler, _transaction, effect, response, evidence in TECH_FLOWS:
+        if language == "vi":
+            trigger = {
+                "FLOW-AUTH": "Gửi biểu mẫu đăng nhập", "FLOW-DRAFT-CREATE": "Tạo và chỉnh draft", "FLOW-ACTIVE-EDIT": "Chỉnh Bug active và lưu",
+                "FLOW-ASSIGN": "Xác nhận Developer", "FLOW-LIFECYCLE": "Gọi action vòng đời", "FLOW-COLLAB": "Thêm bình luận hoặc tệp",
+                "FLOW-MON": "Mở dashboard/bộ lọc", "FLOW-EMAIL": "Xử lý dòng outbox", "FLOW-AI": "Yêu cầu/review/apply hỗ trợ AI",
+            }[flow_id]
+            effect = {
+                "FLOW-AUTH": "Đọc Users; thêm AuthSessions", "FLOW-DRAFT-CREATE": "Thêm Bugs; lịch sử/thông báo",
+                "FLOW-ACTIVE-EDIT": "Cập nhật Bugs; lịch sử/thông báo", "FLOW-ASSIGN": "Bug/next processor/lịch sử/thông báo",
+                "FLOW-LIFECYCLE": "Bug/trạng thái/lịch sử/thông báo", "FLOW-COLLAB": "Bộ nhớ tạm client; metadata PostgreSQL; binary S3",
+                "FLOW-MON": "Không mutation", "FLOW-EMAIL": "Trạng thái/retry NotificationDeliveries",
+                "FLOW-AI": "AiSuggestions.operationStatus/latencyMs; tùy chọn mutation Bug/DuplicateLink rõ ràng",
+            }[flow_id]
+            response = {
+                "FLOW-AUTH": "Token chỉ trả một lần hoặc 401 an toàn", "FLOW-DRAFT-CREATE": "Bug active hoặc lỗi validation an toàn",
+                "FLOW-ACTIVE-EDIT": "Bug active đã cập nhật", "FLOW-ASSIGN": "Assigned hoặc 400/403 an toàn",
+                "FLOW-LIFECYCLE": "Transition chính xác được cho phép", "FLOW-COLLAB": "Evidence được lưu hoặc lỗi an toàn",
+                "FLOW-MON": "KPI theo vai trò", "FLOW-EMAIL": "SENT/FAILED/SKIPPED", "FLOW-AI": "Kết quả review hoặc fallback an toàn",
+            }[flow_id]
+        processing_rows.append([flow_id, trigger, http, handler, response, effect, evidence])
+    processing_end = write_formal_table(
+        processing, 6,
+        [("B", "F"), ("G", "O"), ("P", "W"), ("X", "AE"), ("AF", "AM"), ("AN", "AV"), ("AW", "BH")],
+        processing_headers, processing_rows, header_source="B4", data_source="B6", row_height=60,
     )
-    function_records.extend([
-        ("AI-review", "SRS-FR-AI", "/odata/v4/bug/<accept|reject|ignore>AiSuggestion", "srv/ai/review.js", "Persist reviewer decision only; no automatic Bug mutation.", "qa:idts91:programmatic"),
-        ("AI-classification", "SRS-FR-AI", "/odata/v4/bug/applyClassificationSuggestion", "srv/ai/classification-apply.js", "Apply only an accepted, current classification suggestion through normal CAP validation.", "qa:idts92:programmatic"),
-        ("AI-duplicate", "SRS-FR-AI", "/odata/v4/bug/confirmDuplicateSuggestion", "srv/ai/duplicate-confirmation.js", "Confirm an accepted candidate without self/reverse duplicate and without lifecycle mutation.", "qa:idts95:programmatic"),
-        ("AI-metrics", "SRS-FR-AI", "/odata/v4/bug/readAiOperationalMetrics", "srv/ai/metrics.js", "PM-only sanitized operational counts/latency; no prompt, response, email or secret.", "qa:idts97:programmatic"),
-    ])
-    for index, (code, requirement, endpoint, handler, description, test) in enumerate(function_records, 1):
-        row = 5 + (index * 2)
-        merge_row(processing, row, "B", "AP")
-        merge_row(processing, row + 1, "B", "AP")
-        write_wrapped(processing, f"B{row}", f"{code} | {requirement} | {endpoint}", vertical="center")
-        write_wrapped(processing, f"B{row + 1}", f"{description} Source: {handler}. Transaction/storage/evidence boundary: {test}.")
-        processing.row_dimensions[row].height = 24
-        processing.row_dimensions[row + 1].height = 72
+    set_print_region(processing, f"B1:BH{processing_end}", title_rows="1:6")
 
+    if language == "vi":
+        localize_visible_functional_labels(workbook)
     workbook.properties.title = f"IDTS SAP490 Functional Specification {language.upper()} v{VERSION}"
     workbook.properties.subject = "Official-template functional baseline for CAP/Fiori"
     workbook.properties.creator = "IDTS SAP01 Team"
