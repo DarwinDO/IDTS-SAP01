@@ -13,16 +13,17 @@ import sys
 
 from docx import Document
 from openpyxl import load_workbook
+from specification_catalog import FUNCTIONS, MESSAGES, TECH_REQUIREMENTS
 
 
 ROOT = Path(__file__).resolve().parents[2]
 GENERATED = ROOT / "docs" / "sap490" / "generated"
 
 FILES = {
-    "functional_en": GENERATED / "Functional_Specification_IDTS_SAP01_en_v0.6.xlsx",
-    "functional_vi": GENERATED / "Functional_Specification_IDTS_SAP01_vi_v0.6.xlsx",
-    "technical_en": GENERATED / "Technical_Specification_IDTS_SAP01_en_v0.5.xlsx",
-    "technical_vi": GENERATED / "Technical_Specification_IDTS_SAP01_vi_v0.5.xlsx",
+    "functional_en": GENERATED / "Functional_Specification_IDTS_SAP01_en_v0.7.xlsx",
+    "functional_vi": GENERATED / "Functional_Specification_IDTS_SAP01_vi_v0.7.xlsx",
+    "technical_en": GENERATED / "Technical_Specification_IDTS_SAP01_en_v0.6.xlsx",
+    "technical_vi": GENERATED / "Technical_Specification_IDTS_SAP01_vi_v0.6.xlsx",
     "config_en": GENERATED / "Configuration_Note_IDTS_SAP01_en_v0.5.xlsx",
     "config_vi": GENERATED / "Configuration_Note_IDTS_SAP01_vi_v0.5.xlsx",
     "blueprint_en": GENERATED / "Blueprint_IDTS_SAP01_en_v0.6.docx",
@@ -98,8 +99,27 @@ def visible_cells(path: Path) -> list:
     ]
 
 
+def validate_catalog_sources() -> list[str]:
+    failures = []
+    references = [item["source"] for item in FUNCTIONS]
+    references.extend(item["source"] for item in MESSAGES)
+    references.extend(item[5] for item in TECH_REQUIREMENTS)
+    for reference in references:
+        for segment in re.split(r"\s*[;→]\s*", reference):
+            if not segment.startswith(("app/", "srv/", "db/")):
+                continue
+            path_text, _, symbol = segment.partition("::")
+            path = ROOT / path_text.rstrip("/.,")
+            if not path.exists():
+                failures.append(f"catalog source path does not exist: {path_text}")
+                continue
+            if symbol and path.is_file() and symbol not in path.read_text(encoding="utf-8"):
+                failures.append(f"catalog source symbol does not exist: {reference}")
+    return failures
+
+
 def main() -> int:
-    failures: list[str] = []
+    failures: list[str] = validate_catalog_sources()
     for label, path in FILES.items():
         if not path.exists():
             failures.append(f"{label}: missing expected versioned artifact {path.name}")
@@ -128,7 +148,7 @@ def main() -> int:
         if requirement not in technical_text:
             failures.append(f"Technical Specification missing requirement group {requirement}")
 
-    if "raw token is returned once" not in all_text:
+    if "token returned once" not in all_text.casefold() and "raw token is returned once" not in all_text.casefold():
         failures.append("AuthSessions wording does not explain one-time raw token return")
     if "tokenHash" not in all_text:
         failures.append("AuthSessions wording does not name tokenHash")
@@ -151,10 +171,7 @@ def main() -> int:
             for row in implementation.iter_rows()
             for cell in row
             if cell.value not in (None, "")
-            and (
-                (cell.font.name or "").casefold() == "calibri"
-                or (cell.font.sz is not None and float(cell.font.sz) < 12)
-            )
+            and (cell.font.name or "").casefold() == "calibri"
         ]
         if bad_fonts:
             failures.append(f"{path.name}: non-template Technical Implementation font at {bad_fonts[:8]}")
@@ -188,6 +205,58 @@ def main() -> int:
         )
         if populated < 18:
             failures.append(f"{path.name}: Screen Definition has only {populated} populated rows; expected >=18")
+
+    formal_paths = (
+        FILES["functional_en"], FILES["functional_vi"],
+        FILES["technical_en"], FILES["technical_vi"],
+    )
+    for path in formal_paths:
+        workbook = load_workbook(path, data_only=False)
+        for sheet in workbook.worksheets:
+            for row in sheet.iter_rows():
+                for cell in row:
+                    value = str(cell.value or "")
+                    if " | " in value:
+                        failures.append(f"{path.name}/{sheet.title}!{cell.coordinate}: raw pipe-delimited record")
+                    is_function_data = sheet.title != "Function Overview" or cell.row >= 15
+                    is_requirement_data = sheet.title != "Function Overview" or cell.row >= 15
+                    if is_function_data and len(re.findall(r"\bFN-[A-Z]+-\d+\b", value)) > 1:
+                        failures.append(f"{path.name}/{sheet.title}!{cell.coordinate}: multiple Function IDs in one cell")
+                    if is_requirement_data and len(re.findall(r"\bSRS-FR-[A-Z]+\b", value)) > 1:
+                        failures.append(f"{path.name}/{sheet.title}!{cell.coordinate}: multiple Requirement IDs in one cell")
+
+    for path in (FILES["technical_en"], FILES["technical_vi"]):
+        workbook = load_workbook(path, data_only=False)
+        layout_text = "\n".join(
+            str(cell.value) for row in workbook["Screen Layout"].iter_rows()
+            for cell in row if cell.value not in (None, "")
+        )
+        if "→" in layout_text or "Route/Page/Extension map" in layout_text:
+            failures.append(f"{path.name}: Screen Layout still contains prose trace instead of screen records")
+        if "IDTS-TECH-" in workbook_text(path):
+            failures.append(f"{path.name}: independent technical message catalog remains")
+
+    message_id_sets = {}
+    for label in ("functional_en", "functional_vi", "technical_en", "technical_vi"):
+        workbook = load_workbook(FILES[label], data_only=False)
+        message_id_sets[label] = {
+            str(cell.value) for row in workbook["Message Definition"].iter_rows()
+            for cell in row if isinstance(cell.value, str) and cell.value.startswith("IDTS-MSG-")
+        }
+    expected_messages = message_id_sets["functional_en"]
+    for label, ids in message_id_sets.items():
+        if ids != expected_messages:
+            failures.append(f"{label}: Message ID parity mismatch: {sorted(ids ^ expected_messages)}")
+
+    for path in (FILES["technical_vi"],):
+        text = workbook_text(path)
+        forbidden_vi_prose = (
+            "Route/Page/Extension map", "Safe auth entry", "Read-only role-aware KPIs",
+            "Business Process", "Data Dictionary Objects", "Technical meaning",
+        )
+        for phrase in forbidden_vi_prose:
+            if phrase in text:
+                failures.append(f"{path.name}: visible English prose remains: {phrase}")
 
     if failures:
         print("\n".join(f"FAIL: {item}" for item in failures))

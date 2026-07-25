@@ -3218,3 +3218,18 @@ Vietnamese:
 - Root cause: the delete-branch flow made GitHub CLI attempt a local checkout of `dev`, which is correctly owned by the root worktree.
 - Resolution: remove the local branch-deletion request and perform the remote PR merge from the root worktree; remote branch cleanup can be handled separately after merge.
 - Final verification: PR #181 had already merged remotely before the local cleanup error was returned. Merge commit `3d4e2d0c50156ecc2d7b53643caedbb5945c5d8a` is present in `origin/dev`; no bypass was used.
+
+### 2026-07-25 — IDTS-103 formal specification tables
+
+- Work completed: regenerated Functional Specification EN/VI v0.7 and Technical Specification EN/VI v0.6 with shared structured catalogs and formal template-styled tables. One function, requirement, screen, message, or implementation flow is represented by one record instead of raw prose or long joined lists.
+- Template scope: official sheet names/order/visibility, merged template headings, page setup, and style signatures are retained. No `app/`, `srv/`, or `db/` file changed.
+- Visual result: Functional EN/VI render to 12 pages each; Technical EN/VI render to 13 pages each. Fifty pages were reviewed without abnormal blank pages, obvious clipping, vertical text, `###`, or raw prose dumps.
+- Documentation issue found and fixed: stale template print areas produced 28/59-page renders with large blank regions. Generator print areas are now bounded to populated formal tables.
+- Tooling issues: one no-match `rg` exit code, one direct-import path error, one CP1252 diagnostic print error, combined-validator timeout, strict OfficeCLI XML ordering errors after openpyxl serialization, LibreOffice `<prefix>` warning, and a policy-blocked recursive `tmp/` cleanup. Each was isolated or resolved without runtime/Drive mutation; `tmp/` remains excluded from commit.
+- Evidence: `docs/pm/evidence/idts-103/formal-specification-remediation-20260725.md`.
+- Remaining: final gates, PR review, DonHV local approval, then same-ID Drive update/readback. Mentor approval and live OpenAI acceptance remain Pending.
+- Final local gates: OfficeCLI 4/4, specification validator, quality/source/message/parity contract, secret scan, agent rules, QA Depth 15/15, ownership gate 5/5, AI DevKit 5/5, and ponytail simplicity review all pass.
+- Tooling issue: Atlassian Rovo returned `Internal error` for both the Jira comment and Cloud-resource lookup. Jira was not mutated; the IDTS-103 evidence comment remains pending connector recovery.
+- Process gate correction: DonHV's progress file already contained genuine 90% PASS records for IDTS-89 and IDTS-90, including Critical, Debug, Teach-back, and Result PASS. PR #183 was corrected to reference those evidence files and marked Ready. Rerunning the old GitHub Actions run reused the original event payload and still saw Pending; this status/evidence commit is used to trigger a fresh synchronize event, with no bypass.
+- Tooling issue: the first two PowerShell attempts to replace the PR body failed because of exact newline matching and multiline-array handling. The replacement was completed by joining CLI output and replacing between Markdown headings; `gh pr view` confirms the corrected declaration. No workbook or runtime artifact changed.
+- Local approval: DonHV approved Functional Specification EN/VI v0.7 and Technical Specification EN/VI v0.6 on 2026-07-25. OfficeCLI 1.0.141 validates 4/4; specification, quality, secret, agent, QA Depth self-test, ownership runner, AI DevKit, and `git diff --check` gates pass locally.

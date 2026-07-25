@@ -232,6 +232,11 @@ Vietnamese clean note: Nút `Assign Developer` riêng đã được bỏ khỏi 
 - No runtime files changed. Six human UAT cases, mentor approval/signature, and live OpenAI acceptance remain open and are not claimed as PASS.
 - PR #181 passed the required QA Depth Gate and merged normally into `dev` at `3d4e2d0c50156ecc2d7b53643caedbb5945c5d8a`.
 
+## 2026-07-25 SAP490 formal specification table follow-up
+
+- `IDTS-103` is preparing Functional Specification EN/VI v0.7 and Technical Specification EN/VI v0.6 as formal one-record-per-row tables backed by shared bilingual catalogs.
+- Local structural and 50-page visual review pass; Drive remains unchanged until DonHV reviews the local candidates and the final repository/document gates pass.
+
 ## Next Handover Instruction
 
 Any new agent or developer should identify their member name first, then read this file, `task-board.md`, the relevant member file under `status/*.md`, and the relevant `tasks/*.md` before making changes.

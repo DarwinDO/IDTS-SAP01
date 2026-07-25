@@ -10,40 +10,17 @@ import shutil
 from openpyxl import load_workbook
 from openpyxl.cell.cell import MergedCell
 from openpyxl.drawing.image import Image as XLImage
-from openpyxl.styles import Alignment, Font
+from openpyxl.styles import Alignment
+
+from specification_catalog import MESSAGES, SCREENS, TECH_FLOWS, TECH_REQUIREMENTS
 
 
 ROOT = Path(__file__).resolve().parents[2]
 TEMPLATES = ROOT / "docs" / "sap490" / "templates" / "Deliverable_template"
 OUT = ROOT / "docs" / "sap490" / "generated"
 DATE = date(2026, 7, 25)
-TECH_VERSION = "0.5"
+TECH_VERSION = "0.6"
 CONFIG_VERSION = "0.5"
-
-AI_SYMBOLS = [
-    "acceptAiSuggestion",
-    "rejectAiSuggestion",
-    "ignoreAiSuggestion",
-    "applyClassificationSuggestion",
-    "confirmDuplicateSuggestion",
-    "readAiOperationalMetrics",
-    "operationStatus",
-    "latencyMs",
-]
-
-EXACT_ACTIONS = [
-    "assignToDeveloper",
-    "moveToPendingAssignment",
-    "markInReview",
-    "requestMoreInformation",
-    "resubmitToDeveloper",
-    "rejectBug",
-    "startProgress",
-    "resolveBug",
-    "sendToRetest",
-    "closeBug",
-    "reopenBug",
-]
 
 TECH_TEXT = {
     "en": {
@@ -192,6 +169,59 @@ def clear_rows(ws, start, end):
                 cell.value = None
 
 
+def unmerge_region(ws, min_row, max_row, min_col, max_col):
+    for merged in list(ws.merged_cells.ranges):
+        if not (
+            merged.max_row < min_row or merged.min_row > max_row
+            or merged.max_col < min_col or merged.min_col > max_col
+        ):
+            ws.unmerge_cells(str(merged))
+
+
+def copy_style(source, target):
+    target._style = copy(source._style)
+    target.number_format = source.number_format
+    target.protection = copy(source.protection)
+
+
+def write_formal_table(ws, start_row, groups, headers, rows, *, header_source, data_source, row_height=44):
+    end_row = start_row + len(rows)
+    min_col = min(ws[f"{start}1"].column for start, _ in groups)
+    max_col = max(ws[f"{end}1"].column for _, end in groups)
+    unmerge_region(ws, start_row, end_row, min_col, max_col)
+    clear_rows(ws, start_row, end_row)
+    header_template = ws[header_source]
+    data_template = ws[data_source]
+    for row_offset, values in enumerate([headers, *rows]):
+        row = start_row + row_offset
+        is_header = row_offset == 0
+        template = header_template if is_header else data_template
+        for (start, end), value in zip(groups, values):
+            start_col = ws[f"{start}1"].column
+            end_col = ws[f"{end}1"].column
+            for column in range(start_col, end_col + 1):
+                cell = ws.cell(row, column)
+                copy_style(template, cell)
+                cell.alignment = Alignment(
+                    horizontal="center" if is_header else "left",
+                    vertical="center" if is_header else "top",
+                    wrap_text=True,
+                    shrink_to_fit=False,
+                )
+            if start != end:
+                ws.merge_cells(f"{start}{row}:{end}{row}")
+            ws[f"{start}{row}"] = value
+        ws.row_dimensions[row].height = 30 if is_header else row_height
+    return end_row
+
+
+def set_print_region(ws, area, *, title_rows=None):
+    ws.print_area = area
+    ws.sheet_properties.pageSetUpPr.fitToPage = True
+    ws.page_setup.fitToWidth = 1
+    ws.page_setup.fitToHeight = 0
+
+
 def remove_broken_defined_names(workbook):
     broken = [
         name
@@ -228,11 +258,50 @@ def metadata(ws, function_id="IDTS-TECH", function_name="IDTS CAP/Fiori"):
             pass
 
 
-def write_lines(ws, start_row, lines, height=36, *, start_column="B", end_column="BG"):
-    for row, line in enumerate(lines, start_row):
-        merge_row(ws, row, start_column, end_column)
-        write_wrapped(ws, f"{start_column}{row}", line)
-        ws.row_dimensions[row].height = height
+def localize_visible_technical_labels(workbook):
+    translations = {
+        "Technical Specification": "Đặc tả kỹ thuật",
+        "TECHNICAL SPECIFICATION": "ĐẶC TẢ KỸ THUẬT",
+        "Introduction": "Giới thiệu",
+        "Scope": "Phạm vi",
+        "Assumptions": "Giả định",
+        "Functional Requirements": "Yêu cầu chức năng",
+        "Technical Design": "Thiết kế kỹ thuật",
+        "Development Standards": "Tiêu chuẩn phát triển",
+        "Screen Layout": "Bố cục màn hình",
+        "Screen Definition": "Định nghĩa màn hình",
+        "Message Definition": "Định nghĩa thông báo",
+        "Technical Implementation": "Triển khai kỹ thuật",
+        "Function ID": "Mã chức năng",
+        "Function Name": "Tên chức năng",
+        "Created Date": "Ngày tạo",
+        "Last Update Date": "Ngày cập nhật cuối",
+        "Creator": "Người tạo",
+        "Reviewer": "Người review",
+        "Approver": "Người phê duyệt",
+        "Version": "Phiên bản",
+        "Description": "Mô tả",
+        "Modified date": "Ngày sửa",
+        "Modified by": "Người sửa",
+        "Created by:": "Người tạo:",
+        "Created date:": "Ngày tạo:",
+        "Updated by:": "Người cập nhật:",
+        "Updated date:": "Ngày cập nhật:",
+        "Function Type": "Loại chức năng",
+        "Business Process": "Quy trình nghiệp vụ",
+        "Data Dictionary Objects": "Đối tượng từ điển dữ liệu",
+        "Function Group": "Nhóm hàm (Function Group)",
+        "Function Module": "Module hàm (Function Module)",
+        "Pending": "Chờ duyệt",
+    }
+    for ws in workbook.worksheets:
+        for row in ws.iter_rows():
+            for cell in row:
+                if not isinstance(cell, MergedCell) and isinstance(cell.value, str):
+                    normalized = cell.value.strip()
+                    if normalized in translations:
+                        leading = cell.value[: len(cell.value) - len(cell.value.lstrip())]
+                        cell.value = leading + translations[normalized]
 
 
 def technical(language):
@@ -256,6 +325,7 @@ def technical(language):
         "U19": "Pending",
     }.items():
         write(cover, coordinate, value)
+    set_print_region(cover, "B1:BG24")
 
     history = workbook["Histories"]
     clear_rows(history, 3, 10)
@@ -266,6 +336,7 @@ def technical(language):
             ("0.3", "Security and AI boundary", "Authentication, safe error and advisory AI", date(2026, 7, 24)),
             ("0.4", "Official-template remediation", "All 12 sheets and exact action inventory", date(2026, 7, 25)),
             ("0.5", labels["history"], "Trace, completeness and formal layout", DATE),
+            ("0.6", "Formal table and bilingual remediation", "Structured catalogs, shared messages and Vietnamese parity", DATE),
         ],
         "vi": [
             ("0.1", "Nền kỹ thuật ban đầu", "Phạm vi kiến trúc, service và persistence", date(2026, 6, 21)),
@@ -273,6 +344,7 @@ def technical(language):
             ("0.3", "Ranh giới bảo mật và AI", "Xác thực, lỗi an toàn và AI tư vấn", date(2026, 7, 24)),
             ("0.4", "Khắc phục theo template chính thức", "Đủ 12 sheet và danh mục action chính xác", date(2026, 7, 25)),
             ("0.5", labels["history"], "Truy vết, độ đầy đủ và bố cục trang trọng", DATE),
+            ("0.6", "Chuẩn hóa bảng và song ngữ", "Catalog có cấu trúc, message dùng chung và parity tiếng Việt", DATE),
         ],
     }[language]
     for index, (version, summary, affected, changed_date) in enumerate(history_rows, 3):
@@ -286,6 +358,7 @@ def technical(language):
         }.items():
             write(history, coordinate, value)
         history.row_dimensions[index].height = 34
+    set_print_region(history, "B1:G10", title_rows="1:2")
 
     for name in (
         "Introduction",
@@ -301,266 +374,304 @@ def technical(language):
         metadata(workbook[name])
 
     intro = workbook["Introduction"]
-    clear_rows(intro, 15, 15)
-    write_lines(intro, 15, labels["intro"], 44, start_column="C")
+    clear_rows(intro, 15, 28)
+    intro_headers = (
+        ["Item", "Value", "Technical meaning"] if language == "en"
+        else ["Hạng mục", "Giá trị", "Ý nghĩa kỹ thuật"]
+    )
+    intro_rows = [
+        ("Architecture", "SAP CAP Node.js + OData V4", labels["intro"][0]),
+        ("User interface", "SAP Fiori Elements / SAPUI5", labels["intro"][1]),
+        ("Purpose", "Merged runtime baseline", "Describe implementation and control boundaries without changing runtime."),
+    ]
+    if language == "vi":
+        intro_rows = [
+            ("Kiến trúc", "SAP CAP Node.js + OData V4", labels["intro"][0]),
+            ("Giao diện", "SAP Fiori Elements / SAPUI5", labels["intro"][1]),
+            ("Mục đích", "Baseline runtime đã merge", "Mô tả cách triển khai và ranh giới kiểm soát mà không thay đổi runtime."),
+        ]
+    write_formal_table(intro, 15, [("C", "N"), ("O", "AA"), ("AB", "BG")], intro_headers, intro_rows, header_source="C15", data_source="C15")
+    set_print_region(intro, "B1:BG18", title_rows="1:15")
 
     scope = workbook["Scope"]
-    clear_rows(scope, 6, 30)
-    write_lines(scope, 6, labels["scope"], 44)
-    scope_supplement = [
-        "Runtime boundary: shared QA is a mentor/demo environment, not the final production architecture.",
-        "Control boundary: UI visibility never replaces CAP authorization, validation or transaction checks.",
-        "Change boundary: this specification documents the merged runtime and does not authorize a runtime or schema change.",
+    clear_rows(scope, 6, 35)
+    scope_headers = (
+        ["Scope ID", "Classification", "Content", "Reason / limitation"] if language == "en"
+        else ["Mã phạm vi", "Phân loại", "Nội dung", "Lý do / giới hạn"]
+    )
+    scope_rows = [
+        ("SCP-01", "In scope", "AuthService, BugService, draft/active writes and eleven lifecycle actions", "Core merged CAP runtime"),
+        ("SCP-02", "In scope", "Comments, attachments, history, notifications and monitoring", "Supported collaboration and operational visibility"),
+        ("SCP-03", "In scope", "Human-reviewed AI suggestions, decisions, explicit apply/confirm and metrics", "Advisory AI with authorization and no autonomous workflow mutation"),
+        ("SCP-04", "Out of scope", "ABAP/RAP and SAP Transport Requests", "IDTS is implemented with CAP Node.js and Git/PR deployment control"),
+        ("SCP-05", "Out of scope", "Final production topology and live OpenAI acceptance", "Shared QA is for mentor/demo; live OpenAI remains disabled"),
     ]
     if language == "vi":
-        scope_supplement = [
-            "Ranh giới runtime: Shared QA là môi trường mentor/demo, chưa phải kiến trúc production cuối cùng.",
-            "Ranh giới kiểm soát: ẩn/hiện UI không thay thế authorization, validation hoặc transaction check của CAP.",
-            "Ranh giới thay đổi: tài liệu này mô tả runtime đã merge và không tự cho phép thay đổi runtime/schema.",
+        scope_rows = [
+            ("SCP-01", "Trong phạm vi", "AuthService, BugService, ghi draft/active và mười một action vòng đời", "Runtime CAP lõi đã merge"),
+            ("SCP-02", "Trong phạm vi", "Bình luận, tệp đính kèm, lịch sử, thông báo và giám sát", "Hỗ trợ cộng tác và khả năng quan sát vận hành"),
+            ("SCP-03", "Trong phạm vi", "Suggestion AI có review, quyết định, apply/confirm rõ ràng và metrics", "AI tư vấn có phân quyền và không tự động mutation workflow"),
+            ("SCP-04", "Ngoài phạm vi", "ABAP/RAP và SAP Transport Request", "IDTS dùng CAP Node.js và kiểm soát deploy bằng Git/PR"),
+            ("SCP-05", "Ngoài phạm vi", "Topology production cuối và nghiệm thu OpenAI live", "Shared QA phục vụ mentor/demo; OpenAI live vẫn tắt"),
         ]
-    write_lines(scope, 32, scope_supplement, 40)
+    write_formal_table(scope, 6, [("B", "H"), ("I", "O"), ("P", "AL"), ("AM", "BG")], scope_headers, scope_rows, header_source="B6", data_source="B6")
+    set_print_region(scope, "B1:BG11", title_rows="1:6")
 
     assumptions = workbook["Assumptions"]
-    clear_rows(assumptions, 6, 41)
-    write_lines(assumptions, 6, labels["assumptions"], 44)
-    assumption_supplement = [
-        "Operational assumption: Render deployment is manual and must identify the exact Git commit before acceptance evidence is recorded.",
-        "Persistence assumption: PostgreSQL migrations are additive/idempotent; broad seed reload is not part of shared-QA rollout.",
-        "Provider assumption: S3/Brevo credentials remain private; live OpenAI is disabled and deterministic fallback evidence is labelled accurately.",
+    clear_rows(assumptions, 6, 45)
+    assumption_headers = (
+        ["ID", "Assumption", "Environment", "Impact", "Verification"] if language == "en"
+        else ["Mã", "Giả định", "Môi trường", "Ảnh hưởng", "Cách xác minh"]
+    )
+    assumption_rows = [
+        ("ASM-01", "SQLite is used only for local development", "Local", "Local data is not Shared QA evidence", "Resolve CAP profile and run focused tests"),
+        ("ASM-02", "Shared QA uses PostgreSQL on Render", "Shared QA", "Acceptance data must persist after restart", "Read back record after restart/redeploy"),
+        ("ASM-03", "Schema migration is additive and idempotent", "Shared QA", "Broad seed reload is forbidden", "Dry-run, run twice and compare schema/data"),
+        ("ASM-04", "S3 and Brevo credentials remain private", "Shared QA", "Evidence must not expose provider secrets", "Secret scan and sanitized integration evidence"),
+        ("ASM-05", "Live OpenAI is disabled / not accepted", "All", "Mock/fallback PASS is not provider-live PASS", "Check configuration and label evidence accurately"),
+        ("ASM-06", "Render deployment is manual and commit-frozen", "Shared QA", "Evidence is valid only for the recorded SHA", "Compare Git SHA with Render deploy SHA"),
     ]
     if language == "vi":
-        assumption_supplement = [
-            "Giả định vận hành: Render deploy thủ công và phải xác định đúng Git commit trước khi ghi evidence nghiệm thu.",
-            "Giả định persistence: migration PostgreSQL phải cộng thêm/idempotent; không chạy broad seed reload khi rollout Shared QA.",
-            "Giả định provider: credential S3/Brevo luôn private; OpenAI live đang tắt và evidence fallback deterministic phải được ghi đúng.",
+        assumption_rows = [
+            ("ASM-01", "SQLite chỉ dùng cho phát triển local", "Local", "Dữ liệu local không phải evidence Shared QA", "Xác định CAP profile và chạy test tập trung"),
+            ("ASM-02", "Shared QA dùng PostgreSQL trên Render", "Shared QA", "Dữ liệu nghiệm thu phải còn sau restart", "Đọc lại record sau restart/redeploy"),
+            ("ASM-03", "Migration schema phải cộng thêm và idempotent", "Shared QA", "Cấm nạp lại seed diện rộng", "Dry-run, chạy hai lần và so sánh schema/data"),
+            ("ASM-04", "Credential S3 và Brevo luôn riêng tư", "Shared QA", "Evidence không được lộ secret provider", "Secret scan và evidence tích hợp đã làm sạch"),
+            ("ASM-05", "OpenAI live đang tắt / chưa nghiệm thu", "Mọi môi trường", "PASS mock/fallback không phải PASS provider live", "Kiểm tra cấu hình và ghi nhãn evidence chính xác"),
+            ("ASM-06", "Render deploy thủ công theo commit cố định", "Shared QA", "Evidence chỉ hợp lệ cho SHA đã ghi", "So sánh Git SHA với Render deploy SHA"),
         ]
-    write_lines(assumptions, 43, assumption_supplement, 40)
+    write_formal_table(assumptions, 6, [("B", "F"), ("G", "U"), ("V", "AC"), ("AD", "AP"), ("AQ", "BG")], assumption_headers, assumption_rows, header_source="B6", data_source="B6")
+    set_print_region(assumptions, "B1:BG12", title_rows="1:6")
 
     requirements = workbook["Functional Requirements"]
     clear_rows(requirements, 5, 70)
-    requirement_rows = [
-        "SRS-FR-AUTH | AuthService | /odata/v4/auth/ | srv/auth.js::login/logout/me; srv/auth/custom-auth.js resolves bearer sessions. Raw token is returned once; only AuthSessions.tokenHash is stored.",
-        "SRS-FR-BUG | BugService.Bugs | draft NEW/PATCH/SAVE→CREATE; active EDIT/PATCH/SAVE→UPDATE | srv/service.js; srv/bug-service/bug-write.js; srv/bug-service/drafts.js.",
-        "SRS-FR-ASG | AssignableDevelopers and assignment actions | srv/bug-service/actions.js plus permission/assignee validators | validates active DeveloperResponsibilities; no assignee produces Pending Assignment.",
-        "SRS-FR-LIFE | Bound actions | " + ", ".join(EXACT_ACTIONS) + " | srv/service.js and srv/bug-service/actions.js; exact action history is persisted.",
-        "SRS-FR-COLLAB | Comments/Attachments | BugCollaboration.js holds pendingCreateAttachmentsByBugId before activation; srv/bug-service/content.js validates writes; PostgreSQL metadata and S3 binary.",
-        "SRS-FR-MON | DeveloperWorkloads and PM queues | srv/bug-service/monitoring.js::readDeveloperWorkloads and related read-model enrichment | read-only role-aware monitoring.",
-        "SRS-FR-NOTIFY | Notifications/NotificationDeliveries | transaction writer in history flow plus asynchronous srv/email/worker.js; provider failure does not roll back Bug workflow.",
-        "SRS-FR-AI | Human review/apply/confirm/metrics | " + ", ".join(AI_SYMBOLS) + " | stale/already-reviewed conflicts return 409 only in AI review/apply paths.",
-    ]
-    write_lines(requirements, 6, requirement_rows, 54, end_column="AP")
+    requirement_headers = (
+        ["Requirement ID", "Goal", "Role", "Service / API", "Processing rule", "Source component", "Data / side effect", "Evidence"]
+        if language == "en" else
+        ["Mã yêu cầu", "Mục tiêu", "Vai trò", "Service / API", "Quy tắc xử lý", "Thành phần nguồn", "Dữ liệu / side effect", "Evidence"]
+    )
+    requirement_rows = []
+    for req_id, goal, role, api, rule, source, data, evidence in TECH_REQUIREMENTS:
+        if language == "vi":
+            translations = {
+                "SRS-FR-AUTH": ("Xác thực người dùng và kiểm soát phiên bearer", "Kiểm tra password hash; lưu tokenHash; resolve user cho request được bảo vệ"),
+                "SRS-FR-BUG": ("Tạo/cập nhật Bug hợp lệ qua draft và active write", "Kiểm tra field bắt buộc, catalog active và phân loại dẫn xuất trước commit"),
+                "SRS-FR-ASG": ("Phân công Developer đủ điều kiện", "Kiểm tra role, Developer active và DeveloperResponsibilities"),
+                "SRS-FR-LIFE": ("Kiểm soát mười một action vòng đời chính xác", "Kiểm tra role, status, reason, assignee và xác định next processor"),
+                "SRS-FR-COLLAB": ("Lưu bình luận và evidence tệp đính kèm", "Phân quyền cộng tác trên Bug active và tách metadata khỏi binary storage"),
+                "SRS-FR-MON": ("Trả về workload và hàng đợi theo vai trò", "Tạo KPI/filter chỉ đọc từ ownership và ngày của Bug hiện tại"),
+                "SRS-FR-NOTIFY": ("Lưu thông báo và trạng thái delivery outbox", "Commit notification cùng workflow; gửi ngoài transaction với retry/lock"),
+                "SRS-FR-AI": ("Cung cấp hỗ trợ AI có human review", "Dùng dữ liệu allowlist, lưu review state và yêu cầu apply/confirm rõ ràng"),
+            }
+            goal, rule = translations[req_id]
+        requirement_rows.append((req_id, goal, role, api, rule, source, data, evidence))
+    write_formal_table(
+        requirements, 5,
+        [("B", "F"), ("G", "Q"), ("R", "V"), ("W", "AB"), ("AC", "AN"), ("AO", "AV"), ("AW", "BC"), ("BD", "BG")],
+        requirement_headers, requirement_rows, header_source="B5", data_source="B5", row_height=58,
+    )
+    set_print_region(requirements, "B1:BG13", title_rows="1:5")
 
     design = workbook["Technical Design"]
     clear_rows(design, 6, 129)
-    design_rows = {
-        5: "Business Process",
-        6: "Fiori/UI5 → OData V4 → CAP service → handler/validator → request transaction → PostgreSQL/S3/Brevo/AI provider → safe response.",
-        7: "WBS & Timeline",
-        8: "Runtime baseline: 8009b2a6a72d73db28f190b3a0bcbb65b1ff4740; documentation baseline origin/dev 9eee79cbb741962403b2d35ee33efc2eb3d18c46; Render deploy dep-d9i0r537uimc73as0be0.",
-        9: "Data Dictionary Objects",
-        10: "Package",
-        11: "N/A — CAP project modules are organized by app/, srv/ and db/ rather than an ABAP package.",
-        12: "Tables",
-        13: "Bugs owns classifications, assignee and nextProcessor. Compositions link Comments, Attachments, HistoryEvents/HistoryLogs and Notifications. Users/AuthSessions provide identity; NotificationDeliveries is the email outbox; DuplicateLinks/AiSuggestions hold reviewed AI outcomes.",
-        16: "Domain",
-        17: "CDS types, status/action constants, roles and code lists define the bounded domain values.",
-        32: "Data Element",
-        33: "CDS scalar fields and associations define technical types, nullability and relationships.",
-        48: "View",
-        49: "BugService projections, AssignableDevelopers, DeveloperWorkloads from srv/bug-service/monitoring.js, and PM/AI operational read models.",
-        50: "Table Type",
-        51: "N/A — CAP CDS entities/projections replace classic ABAP table types.",
-        52: "Data Definition",
-        53: "db/schema.cds defines persistence; srv/service.cds defines the public OData contract.",
-        57: "CDS Metadata Extension",
-        58: "app/bug-management-ui/annotations/*.cds supplies Fiori UI, value help and action annotations.",
-        60: "Service Definition",
-        61: "AuthService (/odata/v4/auth/) and BugService (/odata/v4/bug/).",
-        62: "Service Binding",
-        63: "CAP Node.js OData V4 runtime binds the CDS services; no classic SAP service binding object is used.",
-        64: "Annotation Model",
-        65: "Fiori Elements consumes service metadata plus annotation CDS and manifest routing.",
-        66: "Function Group",
-        67: "N/A — JavaScript modules under srv/ replace classic ABAP Function Groups.",
-        68: "Function Module",
-        69: "N/A — CAP event handlers and helpers replace classic ABAP Function Modules.",
-        74: "Screens",
-        75: "Login, profile shell, dashboard, List Report, Object Page and SAPUI5 extension dialogs.",
-        76: "Includes",
-        77: "srv/service.js registers handlers from srv/bug-service; AuthService is implemented in srv/auth.js; custom bearer middleware is in srv/auth/custom-auth.js; provider modules live under srv/email and srv/ai.",
-        79: "Enhancement Implementation",
-        80: "SAPUI5 controller extensions and fragments are used only where Fiori Elements annotations are insufficient.",
-        85: "Class",
-        86: "BugService extends cds.ApplicationService; focused JavaScript modules encapsulate domain operations.",
-        87: "Message Class",
-        88: "N/A — CAP returns sanitized OData errors and a documented message catalog instead of an ABAP Message Class.",
-        89: "Number Range Object",
-        90: "N/A — Bug numbers are generated by the CAP backend; no classic SAP number-range object is used.",
-        91: "Smart Forms",
-        92: "N/A — IDTS uses Fiori Elements/SAPUI5 pages and does not generate SAP Smart Forms.",
-        93: "Smartform Style",
-        94: "N/A — no SAP Smart Form is generated, so no Smartform Style applies.",
-        95: "Workflow Scenario",
-        96: "CAP bound actions implement assignment and lifecycle transitions; exact action types are recorded in HistoryEvents.",
-        97: "Container Element",
-        98: "N/A — CAP request data, entity state and transaction context replace classic workflow container elements.",
-        99: "Task",
-        100: "Lifecycle actions validate role, state, assignee and reason before committing Bug, history and notification side effects.",
-        101: "Provider",
-        102: "Private provider seams support AWS S3, Brevo email and optional OpenAI. Attachment metadata is transactional in PostgreSQL while binary content is external; email uses bounded retry/locking; secrets and raw provider errors are never exposed.",
-        103: "Navigation Target Object",
-        104: "Fiori routes and semantic navigation open dashboard, List Report and Bug Object Page targets.",
-        105: "Graphic",
-        106: "Official IDTS architecture/process diagrams are generated from maintained diagram sources and inserted without changing business meaning.",
-        107: "Catalogs",
-        108: "Priority, severity, environment, application component, defect category and responsibility code lists are validated as active.",
-        109: "Roles",
-        110: "Tester, Developer and PM authorization is resolved server-side from the authenticated IDTS user and rechecked for every mutation.",
-    }
-    for row, value in design_rows.items():
-        write(design, f"B{row}", value)
-        design.row_dimensions[row].height = 38 if row % 2 == 0 or row in (11, 13, 17, 33, 49, 51, 53, 58, 61, 63, 65, 67, 69, 75, 77, 80, 86) else 24
+    design_tables = [
+        (
+            "Component Map" if language == "en" else "Bản đồ thành phần",
+            ["Component", "Responsibility", "Public boundary", "Source"] if language == "en" else ["Thành phần", "Trách nhiệm", "Ranh giới công khai", "Source"],
+            [
+                ("AuthService", "Authentication and bearer session lifecycle" if language == "en" else "Xác thực và vòng đời phiên bearer", "/odata/v4/auth/", "srv/auth.js; srv/auth/custom-auth.js"),
+                ("BugService", "Bug workflow, collaboration, monitoring and AI actions" if language == "en" else "Workflow Bug, cộng tác, giám sát và action AI", "/odata/v4/bug/", "srv/service.cds; srv/service.js"),
+                ("Fiori application", "Role-aware user experience" if language == "en" else "Trải nghiệm người dùng theo vai trò", "UI routes and OData bindings" if language == "en" else "Route UI và OData binding", "app/bug-management-ui"),
+            ],
+        ),
+        (
+            "Entity Relationship" if language == "en" else "Quan hệ entity",
+            ["Parent", "Relationship", "Child / target", "Purpose"] if language == "en" else ["Entity cha", "Quan hệ", "Entity con / đích", "Mục đích"],
+            [
+                ("Bugs", "composition", "Comments; Attachments; HistoryEvents; Notifications", "Lifecycle-owned collaboration and audit" if language == "en" else "Cộng tác và audit thuộc vòng đời Bug"),
+                ("Users", "association", "AuthSessions; Bugs reporter/assignee/nextProcessor", "Identity and ownership" if language == "en" else "Danh tính và ownership"),
+                ("Notifications", "composition", "NotificationDeliveries", "Outbox delivery tracking" if language == "en" else "Theo dõi delivery outbox"),
+                ("AiSuggestions", "association", "Bugs; DuplicateLinks", "Human-reviewed AI outcomes" if language == "en" else "Kết quả AI có human review"),
+            ],
+        ),
+        (
+            "Module Dependency" if language == "en" else "Phụ thuộc module",
+            ["Caller", "Callee", "Contract", "Reason"] if language == "en" else ["Bên gọi", "Bên được gọi", "Contract", "Lý do"],
+            [
+                ("srv/service.js", "srv/bug-service/*", "Registered CAP handlers" if language == "en" else "CAP handler đã đăng ký", "Keep service bootstrap small" if language == "en" else "Giữ service bootstrap gọn"),
+                ("Bug actions", "history/notification helpers", "Transaction-scoped side effects" if language == "en" else "Side effect trong transaction", "Atomic workflow audit" if language == "en" else "Audit workflow atomic"),
+                ("Fiori controllers", "OData V4 model", "Metadata/actions/entities", "No direct database access" if language == "en" else "Không truy cập database trực tiếp"),
+            ],
+        ),
+        (
+            "Transaction Boundary" if language == "en" else "Ranh giới transaction",
+            ["Operation", "In transaction", "Outside transaction", "Failure behavior"] if language == "en" else ["Thao tác", "Trong transaction", "Ngoài transaction", "Hành vi khi lỗi"],
+            [
+                ("Bug lifecycle", "Bug, next processor, history, notification", "Email provider send" if language == "en" else "Gửi qua email provider", "Rollback business data when audit write fails" if language == "en" else "Rollback dữ liệu nghiệp vụ khi ghi audit lỗi"),
+                ("Attachment", "PostgreSQL metadata", "S3 binary provider", "Sanitize provider error; keep Bug" if language == "en" else "Làm sạch lỗi provider; giữ Bug"),
+                ("AI review/apply", "AiSuggestions and explicit authorized mutation" if language == "en" else "AiSuggestions và mutation rõ ràng đã cấp quyền", "Optional provider request" if language == "en" else "Request provider tùy chọn", "No autonomous workflow mutation" if language == "en" else "Không tự động mutation workflow"),
+            ],
+        ),
+        (
+            "External Integration" if language == "en" else "Tích hợp bên ngoài",
+            ["Provider", "Purpose", "Private configuration", "Verification"] if language == "en" else ["Provider", "Mục đích", "Cấu hình riêng tư", "Cách xác minh"],
+            [
+                ("AWS S3", "Attachment binary storage" if language == "en" else "Lưu binary tệp đính kèm", "Environment binding" if language == "en" else "Binding môi trường", "Upload/download/hash/reload/delete"),
+                ("Brevo", "Email delivery" if language == "en" else "Gửi email", "Environment binding" if language == "en" else "Binding môi trường", "PENDING → SENT and inbox evidence" if language == "en" else "PENDING → SENT và evidence inbox"),
+                ("OpenAI", "Optional AI provider" if language == "en" else "Provider AI tùy chọn", "Disabled" if language == "en" else "Đã tắt", "NOT ACCEPTED; fallback/no-mutation only" if language == "en" else "CHƯA NGHIỆM THU; chỉ fallback/no-mutation"),
+                ("Render PostgreSQL", "Shared QA persistence" if language == "en" else "Persistence Shared QA", "Database binding" if language == "en" else "Binding database", "Readback after restart/redeploy" if language == "en" else "Readback sau restart/redeploy"),
+            ],
+        ),
+    ]
+    design_groups = [("B", "J"), ("K", "V"), ("W", "AM"), ("AN", "BG")]
+    design_row = 6
+    for title, headers, rows in design_tables:
+        merge_row(design, design_row, "B", "BG")
+        write_wrapped(design, f"B{design_row}", title, vertical="center")
+        design.row_dimensions[design_row].height = 26
+        design_row = write_formal_table(design, design_row + 1, design_groups, headers, rows, header_source="B5", data_source="B6", row_height=46) + 2
     design._images = []
     architecture = XLImage(ROOT / "docs" / "diagrams" / "rendered" / "png" / "02-cap-fiori-architecture.png")
-    architecture.width = 1050
-    architecture.height = 760
-    design.add_image(architecture, "AQ5")
+    architecture.width = 720
+    architecture.height = 520
+    design.add_image(architecture, f"B{design_row}")
+    set_print_region(design, f"B1:BG{design_row + 26}", title_rows="1:5")
 
     standards = workbook["Development Standards"]
-    for heading, detail in labels["standards"]:
-        target_row = None
-        for row in range(5, 90):
-            if str(standards[f"B{row}"].value or "").strip().lower() == heading.lower():
-                target_row = row
-                break
-        if target_row is None:
-            continue
-        write(standards, f"C{target_row + 1}", detail)
-        standards.row_dimensions[target_row + 1].height = 42
+    clear_rows(standards, 5, 90)
+    standard_headers = (
+        ["Standard ID", "Area", "Rule", "Applies to", "Verification"] if language == "en"
+        else ["Mã quy tắc", "Lĩnh vực", "Quy tắc", "Phạm vi áp dụng", "Cách xác minh"]
+    )
+    standard_rows = [
+        (f"STD-{index:02d}", heading, detail, "app/; srv/; db/; scripts/", "Review + lint + focused test" if language == "en" else "Review + lint + test tập trung")
+        for index, (heading, detail) in enumerate(labels["standards"], 1)
+    ]
+    write_formal_table(
+        standards, 5,
+        [("B", "F"), ("G", "N"), ("O", "AM"), ("AN", "AT"), ("AU", "BG")],
+        standard_headers, standard_rows, header_source="B5", data_source="B6", row_height=48,
+    )
+    set_print_region(standards, f"B1:BG{5 + len(standard_rows)}", title_rows="1:5")
 
     layout = workbook["Screen Layout"]
-    clear_rows(layout, 5, 15)
-    layout_rows = [
-        "login.html + login-page.js + ext/login/LoginController.js → AuthService.login in srv/auth.js → protected application entry",
-        "ext/login/ProfileShell.js → AuthService.me/logout → signed-in identity and safe sign-out",
-        "dashboard.html + dashboard-page.js → BugService read models in srv/bug-service/monitoring.js → role-aware KPI and monitoring queues",
-        "manifest.json + annotations → Bug List Report → filter, create and navigate",
-        "annotations/actions.cds → Bug Object Page → summary, classification, assignment, lifecycle and evidence",
-        "BugCollaboration.js and focused fragments/controllers → smart assign, comments, attachments, history, ClassificationReview.js, DuplicateReview.js, HandoffSummaryReview.js and SmartAssignDeveloper.js",
-        "Every action refreshes OData state; backend authorization/validation remains authoritative.",
-    ]
-    if language == "vi":
-        layout_rows = [
-            "login.html + login-page.js + ext/login/LoginController.js → AuthService.login trong srv/auth.js → điểm vào ứng dụng được bảo vệ",
-            "ext/login/ProfileShell.js → AuthService.me/logout → danh tính đăng nhập và đăng xuất an toàn",
-            "dashboard.html + dashboard-page.js → BugService read model trong srv/bug-service/monitoring.js → KPI/hàng đợi giám sát theo vai trò",
-            "manifest.json + annotations → Bug List Report → lọc, tạo và điều hướng",
-            "annotations/actions.cds → Bug Object Page → summary, classification, assignment, lifecycle và evidence",
-            "BugCollaboration.js và fragment/controller chuyên trách → smart assign, bình luận, tệp đính kèm, lịch sử, ClassificationReview.js, DuplicateReview.js, HandoffSummaryReview.js và SmartAssignDeveloper.js",
-            "Mọi action refresh trạng thái OData; authorization/validation backend luôn là lớp quyết định.",
-        ]
-    for coordinate, value in {
-        "F3": "IDTS-UI",
-        "U3": "IDTS Fiori Application",
-        "G3": None,
-        "V3": None,
-        "B5": "Route/Page/Extension map",
-    }.items():
-        write(layout, coordinate, value)
-    for row, value in enumerate(layout_rows, 6):
-        merge_row(layout, row, "B", "BG")
-        write_wrapped(layout, f"B{row}", value)
-        layout.row_dimensions[row].height = 34
-    supplement = (
-        "Supplement: custom SAPUI5 is limited to interaction-rich surfaces; standard List/Object Page behavior remains Fiori Elements."
-        if language == "en"
-        else "Bổ sung: custom SAPUI5 chỉ dùng cho vùng tương tác cần thiết; List/Object Page chuẩn vẫn do Fiori Elements cung cấp."
+    clear_rows(layout, 5, 35)
+    layout_headers = (
+        ["Screen ID", "Route / entry", "Page / view", "Controller / extension", "OData binding", "Major controls", "Role"]
+        if language == "en" else
+        ["Mã màn hình", "Route / entry", "Trang / view", "Controller / extension", "OData binding", "Control chính", "Vai trò"]
     )
-    merge_row(layout, 17, "B", "BG")
-    write_wrapped(layout, "B17", supplement)
-    layout.row_dimensions[17].height = 40
+    layout_rows = []
+    for screen_id, name_en, name_vi, page_type, route, controller, binding, role, controls, navigation in SCREENS:
+        if language == "vi":
+            controls = {
+                "Email, password, safe message": "Email, password, thông báo an toàn", "Name, email, role, Sign Out": "Tên, email, role, Đăng xuất",
+                "KPI cards, queues, workload": "KPI card, hàng đợi, workload", "Filters, table, Create": "Bộ lọc, bảng, Tạo",
+                "Summary, classification, assignment, lifecycle": "Tóm tắt, phân loại, phân công, vòng đời",
+                "Thread and Add Comment": "Luồng bình luận và Thêm bình luận", "Upload, download, delete": "Tải lên, tải xuống, xóa",
+                "Timeline and Show More": "Timeline và Xem thêm", "Read state and delivery status": "Trạng thái đọc và delivery",
+                "Search, workload, responsibility, explanation": "Tìm kiếm, workload, responsibility, giải thích",
+                "Accept, reject, ignore, apply": "Chấp nhận, từ chối, bỏ qua, áp dụng", "Candidates, review, confirm": "Ứng viên, review, xác nhận",
+                "Grounded summary and review": "Tóm tắt có căn cứ và review",
+            }.get(controls, controls)
+        layout_rows.append((screen_id, route, name_en if language == "en" else name_vi, controller, binding, controls, role))
+    write_formal_table(
+        layout, 5,
+        [("B", "F"), ("G", "M"), ("N", "U"), ("V", "AF"), ("AG", "AN"), ("AO", "AX"), ("AY", "BG")],
+        layout_headers, layout_rows, header_source="B5", data_source="B6", row_height=50,
+    )
+    set_print_region(layout, f"B1:BG{5 + len(layout_rows)}", title_rows="1:5")
 
     definition = workbook["Screen Definition"]
     clear_rows(definition, 9, 41)
-    write(definition, "B2", "Screen Definition")
-    write(definition, "F3", "IDTS-UI")
-    write(definition, "U3", "IDTS Fiori Application")
-    write(definition, "G3", None)
-    write(definition, "V3", None)
-    write(definition, "B9", "1. Fiori Elements and SAPUI5")
-    write(definition, "B10", "No")
-    write(definition, "R10", "Screen items / binding")
-    write(definition, "AW10", "Annotation/manifest/handler and behavior")
-    screen_rows = [
-        ("Login", "AuthService.login", "login.html / login-page.js / LoginController.js", "Safe auth entry; no raw SQL/stack trace"),
-        ("Profile", "AuthService.me/logout", "ProfileShell.js", "Identity, role and sign-out"),
-        ("Dashboard", "Bugs/DeveloperWorkloads", "dashboard.html / dashboard-page.js", "Read-only role-aware KPIs"),
-        ("List Report", "BugService.Bugs", "manifest.json + annotations", "Filter, create and navigate"),
-        ("Object Page Summary", "BugService.Bugs", "annotations/actions.cds", "Business summary and validation state"),
-        ("Classification", "ApplicationComponents/DefectCategories", "annotations value helps", "Active compatible values"),
-        ("Assignment", "AssignableDevelopers", "SmartAssignDeveloper.js", "No automatic assignment; backend revalidates"),
-        ("Lifecycle Actions", "BugService.<bound action>", "annotations/actions.cds + service.js", "Role/state/reason checked"),
-        ("Comments", "Bugs.comments", "BugCollaboration.js / CommentsSection.fragment.xml", "Hidden in create; available after save"),
-        ("Attachments", "Bugs.attachments", "BugCollaboration.js / AttachmentsSection.fragment.xml", "Client pending memory then attachment API"),
-        ("History", "HistoryEvents/HistoryLogs", "History section control/fragment", "Exact action and changed fields; bounded loading"),
-        ("Notifications", "Notifications/NotificationDeliveries", "notification section/profile shell", "In-app/read state and delivery status"),
-        ("Classification AI", "AiSuggestions/actions", "ClassificationReview.js", "Review first; apply explicit"),
-        ("Duplicate AI", "AiSuggestions/DuplicateLinks", "DuplicateReview.js", "Review then explicit confirmation"),
-        ("Handoff AI", "AiSuggestions", "HandoffSummaryReview.js", "Review-only summary"),
-        ("Smart Assign AI", "AiSuggestions/AssignableDevelopers", "SmartAssignDeveloper.js", "Explanation only; no auto assignment"),
-    ]
-    for row, (name, binding, technical, remark) in enumerate(screen_rows, 11):
-        write(definition, f"B{row}", row - 10)
-        write(definition, f"C{row}", name)
-        write(definition, f"R{row}", binding)
-        write(definition, f"AI{row}", technical)
-        write(definition, f"AW{row}", remark)
-        definition.row_dimensions[row].height = 36
+    definition_headers = (
+        ["Screen ID", "UI element", "Annotation / manifest binding", "Handler", "OData operation", "Authorization", "Failure behavior"]
+        if language == "en" else
+        ["Mã màn hình", "Thành phần UI", "Annotation / manifest binding", "Handler", "Thao tác OData", "Phân quyền", "Hành vi khi lỗi"]
+    )
+    definition_rows = []
+    for screen_id, name_en, name_vi, page_type, route, controller, binding, role, controls, navigation in SCREENS:
+        failure = "Safe message; no unauthorized mutation" if language == "en" else "Thông báo an toàn; không mutation trái quyền"
+        definition_rows.append((screen_id, name_en if language == "en" else name_vi, route, controller, binding, role, failure))
+    write_formal_table(
+        definition, 9,
+        [("B", "F"), ("G", "N"), ("O", "W"), ("X", "AG"), ("AH", "AO"), ("AP", "AW"), ("AX", "BG")],
+        definition_headers, definition_rows, header_source="B10", data_source="B11", row_height=50,
+    )
+    set_print_region(definition, f"B1:BG{9 + len(definition_rows)}", title_rows="1:9")
 
     messages = workbook["Message Definition"]
     clear_rows(messages, 5, 31)
-    write(messages, "B5", "Message ID")
-    write(messages, "H5", "Language")
-    write(messages, "M5", "Sanitized message / source")
-    write(messages, "AQ5", "HTTP/status and log behavior")
+    message_headers = (
+        ["Message ID", "HTTP / status", "Exact source", "Target", "Rollback", "Sanitized logging", "Frontend handling / evidence"]
+        if language == "en" else
+        ["Mã thông báo", "HTTP / trạng thái", "Source chính xác", "Target", "Rollback", "Log đã làm sạch", "Xử lý frontend / evidence"]
+    )
     message_rows = [
-        ("IDTS-TECH-400", "EN/VI", "prepareBugWrite/code-list/classification/attachment validators; field or action target", "400; request transaction rolls back; no mutation"),
-        ("IDTS-TECH-401", "EN/VI", "srv/auth/custom-auth.js: missing, expired or revoked AuthSession", "401; no raw token/session detail"),
-        ("IDTS-TECH-403", "EN/VI", "enforceBugCreatePermission/enforceBugWritePermission/enforceActionPermission", "403; safe actor/action log; no mutation"),
-        ("IDTS-TECH-409-AI", "EN/VI", "srv/ai/review.js or srv/ai/classification-apply.js: stale/already-reviewed suggestion", "409 only for AI conflict; transaction not committed"),
-        ("IDTS-TECH-ATTACH", "EN/VI", "BugCollaboration.js/content.js/provider seam", "400/502 sanitized; attachment write rolls back"),
-        ("IDTS-TECH-EMAIL", "EN/VI", "Provider error sanitized in NotificationDeliveries", "Bug workflow remains committed; delivery retry/FAILED tracked"),
-        ("IDTS-TECH-AI", "EN/VI", "Provider disabled/error/no-result fallback", "No raw prompt/response; no autonomous workflow mutation"),
+        (item["id"], item["http"], item["source"], item["target"], item["rollback"][language], item["log"][language], f"{item['ui'][language]}; {item['evidence']}")
+        for item in MESSAGES
     ]
-    for row, record in enumerate(message_rows, 6):
-        for coordinate, value in zip((f"B{row}", f"H{row}", f"M{row}", f"AQ{row}"), record):
-            write(messages, coordinate, value)
-        messages.row_dimensions[row].height = 38
+    write_formal_table(
+        messages, 5,
+        [("B", "G"), ("H", "L"), ("M", "V"), ("W", "AB"), ("AC", "AL"), ("AM", "AV"), ("AW", "BG")],
+        message_headers, message_rows, header_source="B5", data_source="B6", row_height=56,
+    )
+    set_print_region(messages, f"B1:BG{5 + len(message_rows)}", title_rows="1:5")
 
     implementation = workbook["Technical Implementation"]
-    write(implementation, "B3", "Technical Implementation")
+    clear_rows(implementation, 5, 35)
+    write(implementation, "B3", "Technical Implementation" if language == "en" else "Triển khai kỹ thuật")
     write(implementation, "B4", "IDTS-TECH")
     write(implementation, "L4", labels["name"])
-    write(implementation, "B5", "Entry trace")
-    implementation_rows = [
-        "Authentication flow: login-page.js/LoginController.js → POST /odata/v4/auth/login → srv/auth.js::login → Users/password verification → AuthSessions.tokenHash insert → raw token returned once. ProfileShell.js calls me/logout; custom-auth.js resolves bearer sessions.",
-        "Draft create flow: editFlow.createDocument → POST Bugs (draft NEW) → repeated PATCH Bugs.drafts → SAVE/activation → CREATE active Bugs. srv/service.js registers prepareDraftNew/prepareDraftPatch/handleDraftSave and prepareBugWrite validates before commit.",
-        "Active edit flow: Fiori EDIT creates a draft copy → PATCH Bugs.drafts → SAVE → UPDATE active Bugs. Request transaction keeps Bug, nextProcessor, HistoryEvents/HistoryLogs and Notifications consistent.",
-        "Assignment flow: UI value help reads AssignableDevelopers → explicit user selection → assignToDeveloper or create/update write → permission and DeveloperResponsibilities validation → Assigned or Pending Assignment → exact history/notification.",
-        "Lifecycle flow: bound action HTTP request → srv/service.js registration → srv/bug-service/actions.js transition helper → permission/status/reason/assignee checks → transaction update → determineNextProcessor → history and notification side effects.",
-        "Collaboration flow: comments become available after save. BugCollaboration.js holds pendingCreateAttachmentsByBugId in client memory before create SAVE; after activation it calls the attachment API. PostgreSQL stores metadata; S3 stores binary; authorized delete removes both references.",
-        "Monitoring flow: dashboard-page.js → OData reads → srv/bug-service/monitoring.js::readDeveloperWorkloads and related enrichment → role-aware read-only KPIs/queues; monitoring alone never mutates a Bug.",
-        "Email flow: committed business event creates Notifications/NotificationDeliveries → worker claims eligible rows with lock/retry fields → Brevo/SMTP provider → SENT/FAILED/SKIPPED. Provider failure never rolls back the Bug transaction.",
-        "AI flow: focused review controllers call suggestion/review actions → srv/ai handlers validate reviewer and current suggestion → review status persists. applyClassificationSuggestion and confirmDuplicateSuggestion are separate authorized mutations; HTTP 409 is limited to stale/already-reviewed AI state.",
-        "Migration/deployment: schema changes use additive idempotent migration and database backup/readback; Render deploy is manual against a frozen commit; verify health/auth/OData/logs and rollback runtime independently when needed.",
-        "Evidence baseline: 21 PASSED + 6 UAT PREPARED; Shared QA lifecycle 40/40 PASS; AI 25/25 PASS in disabled-provider/fallback mode; S3 and Brevo live integration evidence PASS; OpenAI live DISABLED / NOT ACCEPTED.",
-    ]
-    for row, text in enumerate(implementation_rows, 6):
-        merge_row(implementation, row, "B", "W")
-        write_wrapped(implementation, f"B{row}", text)
-        writable(implementation, f"B{row}").font = Font(name="Times New Roman", size=12)
-        implementation.row_dimensions[row].height = 56
+    implementation_headers = (
+        ["Flow ID", "UI trigger", "HTTP / OData", "Service", "Handler / helper", "Transaction", "Storage / provider effect", "Response / evidence"]
+        if language == "en" else
+        ["Mã luồng", "Trigger UI", "HTTP / OData", "Service", "Handler / helper", "Transaction", "Ảnh hưởng storage / provider", "Response / evidence"]
+    )
+    implementation_rows = []
+    for flow_id, trigger, request, service, handler, transaction, effect, response, evidence in TECH_FLOWS:
+        if language == "vi":
+            trigger = {
+                "FLOW-AUTH": "Gửi biểu mẫu đăng nhập", "FLOW-DRAFT-CREATE": "Tạo và chỉnh draft", "FLOW-ACTIVE-EDIT": "Chỉnh Bug active và lưu",
+                "FLOW-ASSIGN": "Xác nhận Developer", "FLOW-LIFECYCLE": "Gọi action vòng đời", "FLOW-COLLAB": "Thêm bình luận hoặc tệp",
+                "FLOW-MON": "Mở dashboard/bộ lọc", "FLOW-EMAIL": "Xử lý dòng outbox", "FLOW-AI": "Yêu cầu/review/apply hỗ trợ AI",
+            }[flow_id]
+            response = {
+                "FLOW-AUTH": "Token chỉ trả một lần hoặc 401 an toàn", "FLOW-DRAFT-CREATE": "Bug active hoặc lỗi validation an toàn",
+                "FLOW-ACTIVE-EDIT": "Bug active đã cập nhật", "FLOW-ASSIGN": "Assigned hoặc 400/403 an toàn",
+                "FLOW-LIFECYCLE": "Transition chính xác được cho phép", "FLOW-COLLAB": "Evidence được lưu hoặc lỗi an toàn",
+                "FLOW-MON": "KPI theo vai trò", "FLOW-EMAIL": "SENT/FAILED/SKIPPED", "FLOW-AI": "Kết quả review hoặc fallback an toàn",
+            }[flow_id]
+            transaction = {
+                "FLOW-AUTH": "Transaction của request", "FLOW-DRAFT-CREATE": "Transaction request CAP", "FLOW-ACTIVE-EDIT": "Transaction request CAP",
+                "FLOW-ASSIGN": "Transaction request CAP", "FLOW-LIFECYCLE": "Transaction request CAP",
+                "FLOW-COLLAB": "Ranh giới request CAP + provider S3", "FLOW-MON": "Request chỉ đọc",
+                "FLOW-EMAIL": "Transaction worker sau workflow commit", "FLOW-AI": "Transaction của action",
+            }[flow_id]
+            effect = {
+                "FLOW-AUTH": "Đọc Users; thêm AuthSessions", "FLOW-DRAFT-CREATE": "Thêm Bugs; lịch sử/thông báo",
+                "FLOW-ACTIVE-EDIT": "Cập nhật Bugs; lịch sử/thông báo", "FLOW-ASSIGN": "Bug/next processor/lịch sử/thông báo",
+                "FLOW-LIFECYCLE": "Bug/trạng thái/lịch sử/thông báo", "FLOW-COLLAB": "Bộ nhớ tạm client; metadata PostgreSQL; binary S3",
+                "FLOW-MON": "Không mutation", "FLOW-EMAIL": "Trạng thái/retry NotificationDeliveries",
+                "FLOW-AI": "AiSuggestions.operationStatus/latencyMs; tùy chọn mutation Bug/DuplicateLink rõ ràng",
+            }[flow_id]
+        implementation_rows.append((flow_id, trigger, request, service, handler, transaction, effect, f"{response}; {evidence}"))
+    implementation_end = write_formal_table(
+        implementation, 5,
+        [("B", "D"), ("E", "G"), ("H", "J"), ("K", "M"), ("N", "P"), ("Q", "S"), ("T", "V"), ("W", "Y")],
+        implementation_headers, implementation_rows, header_source="B5", data_source="B6", row_height=66,
+    )
+    for row in range(6, implementation_end + 1):
+        for column in ("B", "E", "H", "K", "N", "Q", "T", "W"):
+            cell = implementation[f"{column}{row}"]
+            font = copy(cell.font)
+            font.name = "Times New Roman"
+            font.sz = 12
+            cell.font = font
+    set_print_region(implementation, f"B1:Y{implementation_end}", title_rows="1:5")
 
+    if language == "vi":
+        localize_visible_technical_labels(workbook)
     workbook.properties.title = f"IDTS SAP490 Technical Specification {language.upper()} v{TECH_VERSION}"
     workbook.properties.subject = "Official-template technical baseline for CAP/Fiori"
     workbook.properties.creator = "IDTS SAP01 Team"
