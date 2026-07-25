@@ -3144,3 +3144,12 @@ Vietnamese:
 - Selected evidence: `docs/pm/evidence/idts-100/test-pack-evidence-remediation-20260724.md`.
 - Drive result: six workbooks updated in place; one Integration Evidence Index uploaded; IDs, parent, MIME type and existing sharing preserved.
 - Test truth remains 21 `PASSED` + 6 `UAT PREPARED`; human UAT and mentor approval remain open.
+
+### 2026-07-25 — IDTS-91–94 integration closure sync
+
+| Classification | Symptom | Root cause / resolution | Verification |
+| --- | --- | --- | --- |
+| Process/status issue | Jira still showed IDTS-91–94 In Progress and repository PM docs still said the PRs were awaiting merge although PR #167 and #168 were already merged and fully verified. | DonHV added merge/test evidence comments, transitioned IDTS-91–94 to Done, and prepared a separate documentation-only synchronization branch so the closure update is not trapped inside blocked IDTS-95/97 runtime PRs. | Jira comments `10676`–`10679`; live JQL returns IDTS-91–94 `Done`; PR #167 merge SHA `442b958b28ff268920260bbdef8bd94dc56f9341`; PR #168 merge SHA `9e041dac56f9adfd9294521d5c2e7e8f3c1597cb`. |
+| Process blocker | IDTS-95 and IDTS-97 are technically verified but cannot be merged or deployed. | Both remain Draft/In Progress because SangVN has not completed the dedicated Knowledge Gates; IDTS-97 must also resync after IDTS-95 merges. No PASS evidence was fabricated. | Draft PR #172 and #173; Jira IDTS-97 comment `10675`; GitHub gate failures are limited to missing real Knowledge Gate fields after PR-body sections were corrected. |
+
+- Next handoff: merge this PM-only sync PR normally, then SangVN completes the IDTS-95 duplicate-confirmation gate followed by the IDTS-97 metrics/privacy gate.
