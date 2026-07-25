@@ -3233,3 +3233,11 @@ Vietnamese:
 - Process gate correction: DonHV's progress file already contained genuine 90% PASS records for IDTS-89 and IDTS-90, including Critical, Debug, Teach-back, and Result PASS. PR #183 was corrected to reference those evidence files and marked Ready. Rerunning the old GitHub Actions run reused the original event payload and still saw Pending; this status/evidence commit is used to trigger a fresh synchronize event, with no bypass.
 - Tooling issue: the first two PowerShell attempts to replace the PR body failed because of exact newline matching and multiline-array handling. The replacement was completed by joining CLI output and replacing between Markdown headings; `gh pr view` confirms the corrected declaration. No workbook or runtime artifact changed.
 - Local approval: DonHV approved Functional Specification EN/VI v0.7 and Technical Specification EN/VI v0.6 on 2026-07-25. OfficeCLI 1.0.141 validates 4/4; specification, quality, secret, agent, QA Depth self-test, ownership runner, AI DevKit, and `git diff --check` gates pass locally.
+
+### 2026-07-25 — IDTS-103 merge and Drive closeout
+
+- PR #183 passed fresh QA Depth workflow run `30154286241` and merged normally into `dev` at `5092035015937d23e389c2f4c8336b1dccf81e26`; no bypass was used.
+- Functional Specification EN/VI v0.7 and Technical Specification EN/VI v0.6 were updated in place at their four official Drive IDs. Existing parents, XLSX MIME type, permissions, and IDs were preserved; no duplicate was created.
+- Exact-byte readback matched all four approved local SHA-256 values. Chrome Drive preview confirmed 9/9 Functional tabs, 12/12 Technical tabs, and a readable formal Vietnamese `Screen Layout` table.
+- Tooling limitation: the Google Sheets cell API returned zero sheet metadata for raw XLSX Drive files because they are external Office binaries rather than native Google Sheets. This did not affect content; byte-identical readback plus the real Drive preview were used instead.
+- Jira synchronization resumed after the earlier connector error. IDTS-103 receives the merge/Drive evidence and can move to Done; mentor approval/signature and live OpenAI acceptance remain outside this task.

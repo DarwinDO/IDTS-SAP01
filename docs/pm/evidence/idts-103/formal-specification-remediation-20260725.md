@@ -7,7 +7,7 @@
 - Artifacts:
   - Functional Specification EN/VI v0.7.
   - Technical Specification EN/VI v0.6.
-- Google Drive: unchanged pending DonHV local review.
+- Google Drive: four official workbooks updated in place after DonHV approval and PR #183 merge; existing file IDs, parents, MIME type, and permissions were preserved.
 
 ## Implemented corrections
 
@@ -69,10 +69,18 @@ No abnormal blank page, `###`, vertical text, obvious clipping, or raw prose dum
 | Process gate | PR #183 initially declared the Knowledge Gate as Pending even though `docs/learning/progress/donhv.md` already contained genuine IDTS-89/90 90% PASS records. | Corrected the PR declaration to reference the existing evidence. A rerun of the old workflow still read the original pull-request event payload, so this repository update is pushed to generate a fresh synchronize event; no gate is bypassed. |
 | Tooling issue | Two initial PowerShell PR-body replacements failed because one assumed an exact newline representation and the next treated the multiline CLI output as a scalar string. | Joined the GitHub CLI output explicitly, replaced the section by heading boundaries, and verified the corrected body through `gh pr view`. No repository artifact or runtime behavior was affected. |
 
-## Pending gates
+## Repository and Drive closeout
 
-- Final `git diff --check` and PR QA Depth check.
 - DonHV local workbook review: PASS/approved on 2026-07-25.
-- Same-ID Google Drive update and readback after approval.
-- Jira evidence comment after Atlassian Rovo connector recovery.
 - DonHV Ownership Knowledge Gate: PASS at 90% for IDTS-89/90, with Critical questions, Debug exercise, Teach-back, and Result all PASS.
+- PR #183 fresh `qa-depth-gate`: PASS, workflow run `30154286241`.
+- PR #183 merge commit: `5092035015937d23e389c2f4c8336b1dccf81e26`; no admin bypass.
+- Same-ID Google Drive update: PASS for Functional Specification EN/VI v0.7 and Technical Specification EN/VI v0.6.
+- Raw-byte readback: PASS; all four Drive binaries match the approved local SHA-256 values.
+- Representative Drive preview: Functional EN shows 9/9 tabs; Technical VI shows 12/12 tabs and a readable formal `Screen Layout` table.
+- Jira connector recovered; closure evidence was added to IDTS-103.
+
+## Remaining external gates
+
+- Human mentor review and approval/signature.
+- Live OpenAI provider acceptance remains `DISABLED / NOT ACCEPTED`.
