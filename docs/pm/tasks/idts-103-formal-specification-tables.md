@@ -2,7 +2,7 @@
 
 ## Status
 
-Ready for merge gate — local artifacts are generated, verified, and approved by DonHV; the existing IDTS-89/90 Knowledge Gate evidence records 90% PASS with Critical, Debug, and Teach-back PASS. PR #183 is awaiting a fresh QA Depth Gate run on the corrected declaration before merge and Google Drive synchronization.
+Done — PR #183 passed the fresh QA Depth Gate and merged normally into `dev` at `5092035015937d23e389c2f4c8336b1dccf81e26`. The four approved workbooks were updated in place at their existing Google Drive file IDs and verified by metadata, exact-byte readback, and representative Drive preview.
 
 ## Scope
 
@@ -29,9 +29,10 @@ Ready for merge gate — local artifacts are generated, verified, and approved b
 - Quality/source/message/parity contract: PASS.
 - Secret scan, agent rules, QA Depth 15/15, ownership gate 5/5, and AI DevKit 5/5: PASS.
 - Ponytail simplicity review: `Lean already. Ship.`
-- PR #183 is Ready and mergeable. Its body now references the genuine IDTS-89/90 Knowledge Gate PASS evidence; a fresh synchronize-triggered QA Depth Gate is required because rerunning the old GitHub Actions run reused its original PR-event payload.
+- PR #183 passed fresh GitHub Actions run `30154286241` and merged normally; no bypass was used.
 - DonHV approved all four local workbooks on 2026-07-25.
-- Drive update: not started; same-ID update/readback begins only after PR #183 merges.
+- Drive update: PASS. Existing file IDs, parent folders, XLSX MIME type, and permissions were preserved; raw-byte readback matched the four approved local SHA-256 values.
+- Drive preview: Functional EN displays 9/9 tabs; Technical VI displays 12/12 tabs, and the representative `Screen Layout` tab renders as a formal Vietnamese table without the prior raw prose trace.
 
 ## Known limitations
 
@@ -41,4 +42,4 @@ Ready for merge gate — local artifacts are generated, verified, and approved b
 
 ## Next handoff
 
-Push the evidence/status correction to trigger a fresh PR event, merge PR #183 after the required gate passes, then update the four existing Google Drive files in place and verify readback.
+Use the synchronized Drive workbooks for mentor review. Mentor approval/signature and live OpenAI acceptance remain external pending gates and are not claimed by IDTS-103.

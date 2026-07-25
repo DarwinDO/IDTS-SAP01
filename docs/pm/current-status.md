@@ -234,8 +234,8 @@ Vietnamese clean note: Nút `Assign Developer` riêng đã được bỏ khỏi 
 
 ## 2026-07-25 SAP490 formal specification table follow-up
 
-- `IDTS-103` is preparing Functional Specification EN/VI v0.7 and Technical Specification EN/VI v0.6 as formal one-record-per-row tables backed by shared bilingual catalogs.
-- Local structural and 50-page visual review pass; Drive remains unchanged until DonHV reviews the local candidates and the final repository/document gates pass.
+- `IDTS-103` is complete: PR #183 merged at `5092035`, and Functional Specification EN/VI v0.7 plus Technical Specification EN/VI v0.6 were updated in place at their existing Drive IDs.
+- OfficeCLI 4/4, strict structural/source/message/parity validation, 50/50-page local visual review, exact-byte Drive readback, and representative Functional 9/9-tab plus Technical 12/12-tab Drive previews pass. Mentor approval/signature and live OpenAI acceptance remain external pending gates.
 
 ## Next Handover Instruction
 
