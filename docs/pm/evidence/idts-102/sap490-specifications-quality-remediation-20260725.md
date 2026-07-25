@@ -2,7 +2,7 @@
 
 ## Verdict
 
-`IMPLEMENTATION AND DRIVE SYNC VERIFIED — PR MERGE AND MENTOR APPROVAL PENDING`
+`REPOSITORY AND DRIVE SYNCHRONIZATION VERIFIED — MENTOR APPROVAL PENDING`
 
 ## Baseline and Scope
 
@@ -78,7 +78,7 @@ All eight files were updated in place. Drive readback bytes matched local files,
 
 ## Remaining Acceptance Conditions
 
-- Pull request must pass the repository `qa-depth-gate` and merge normally into `dev`.
+- PR #181 passed `qa-depth-gate` and merged normally into `dev` at `3d4e2d0c50156ecc2d7b53643caedbb5945c5d8a`.
 - Mentor review, approval, and signatures remain Pending.
 - Six human UAT cases remain Prepared and are not represented as executed.
 - Live OpenAI acceptance remains explicitly disabled/not accepted.

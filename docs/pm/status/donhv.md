@@ -3210,3 +3210,11 @@ Vietnamese:
 - Tooling issues: the combined OfficeCLI loop timed out and was split into eight successful calls; Windows CP1252 could not print one Vietnamese row; LibreOffice emitted a harmless `<prefix>` warning; one recursive temp cleanup was blocked and replaced with a unique temp directory; a Jira wrapper call failed and direct connector calls were used. None changed runtime or artifact content.
 - Remaining: PR merge, mentor review/signature, six human UAT executions, and live OpenAI acceptance. OpenAI remains disabled/not accepted.
 - Evidence: `docs/pm/evidence/idts-102/sap490-specifications-quality-remediation-20260725.md`.
+
+### 2026-07-25 — IDTS-102 PR merge CLI worktree issue
+
+- Symptom: `gh pr merge 181 --merge --delete-branch` stopped with `dev is already used by worktree at E:/IDTS-SAP01` after confirming the PR was CLEAN and the QA Depth Gate had passed.
+- Classification: tooling/worktree issue; PR #181 remained open and no branch, commit, Drive artifact, or runtime state changed.
+- Root cause: the delete-branch flow made GitHub CLI attempt a local checkout of `dev`, which is correctly owned by the root worktree.
+- Resolution: remove the local branch-deletion request and perform the remote PR merge from the root worktree; remote branch cleanup can be handled separately after merge.
+- Final verification: PR #181 had already merged remotely before the local cleanup error was returned. Merge commit `3d4e2d0c50156ecc2d7b53643caedbb5945c5d8a` is present in `origin/dev`; no bypass was used.
