@@ -91,6 +91,8 @@
     "qa:idts93:programmatic": "node scripts/qa/test-idts93-apply-classification.js",
     "qa:idts94:programmatic": "node scripts/qa/test-idts94-ai-review-controls.js",
     "qa:idts95:programmatic": "node scripts/qa/test-idts95-confirm-duplicate-suggestion.js",
+    "qa:idts98:evaluation": "node scripts/qa/test-idts98-ai-evaluation.js",
+    "qa:idts99:shared-qa-live": "node scripts/qa/test-idts99-shared-qa-live.js",
     "qa:idts97:programmatic": "node scripts/qa/test-idts97-ai-operational-metrics.js",
     "qa:idts73:programmatic": "node scripts/qa/test-idts73-create-attachments-ui.js",
     "qa:idts73:browser": "node scripts/qa/test-idts73-create-attachments-browser.js",

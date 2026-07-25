@@ -1,0 +1,50 @@
+{
+  "generatedAt": "2026-07-25T04:00:08.824Z",
+  "target": "Render Shared QA (Live Provider)",
+  "bug": {
+    "ID": "1cb269fa-c2fa-421e-bd6d-23d6e415113e",
+    "bugNumber": "BUG-0013"
+  },
+  "results": [
+    {
+      "check": "Similar Bugs entry point is visible in its business section",
+      "passed": true
+    },
+    {
+      "check": "Similar Bugs dialog rendered live provider response safely",
+      "passed": true
+    },
+    {
+      "check": "Similar Bugs dialog contains explicit review/decision actions",
+      "passed": true
+    },
+    {
+      "check": "Classification Suggestions entry point is visible in its business section",
+      "passed": true
+    },
+    {
+      "check": "Classification Suggestions dialog rendered live provider response safely",
+      "passed": true
+    },
+    {
+      "check": "Classification Suggestions dialog contains explicit review/decision actions",
+      "passed": true
+    },
+    {
+      "check": "Handoff Summary entry point is visible in its business section",
+      "passed": true
+    },
+    {
+      "check": "Handoff Summary dialog rendered live provider response safely",
+      "passed": true
+    },
+    {
+      "check": "Handoff Summary dialog contains explicit review/decision actions",
+      "passed": true
+    },
+    {
+      "check": "All AI review actions leave workflow and ownership unchanged",
+      "passed": true
+    }
+  ]
+}
