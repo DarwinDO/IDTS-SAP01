@@ -3230,3 +3230,4 @@ Vietnamese:
 - Remaining: final gates, PR review, DonHV local approval, then same-ID Drive update/readback. Mentor approval and live OpenAI acceptance remain Pending.
 - Final local gates: OfficeCLI 4/4, specification validator, quality/source/message/parity contract, secret scan, agent rules, QA Depth 15/15, ownership gate 5/5, AI DevKit 5/5, and ponytail simplicity review all pass.
 - Tooling issue: Atlassian Rovo returned `Internal error` for both the Jira comment and Cloud-resource lookup. Jira was not mutated; the IDTS-103 evidence comment remains pending connector recovery.
+- Process gate: Draft PR #183 is mergeable, but `qa-depth-gate` correctly failed only because the DonHV Ownership Knowledge Gate remains In Progress. Required missing proof is a score from 80–100% plus PASS for Critical questions, Debug exercise, Teach-back, and Result. No PASS was fabricated; merge and Drive sync remain blocked.

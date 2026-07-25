@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress — local artifacts are generated and verified; DonHV review and Google Drive synchronization remain pending.
+Blocked at merge gate — local artifacts are generated and verified; DonHV review and Ownership Knowledge Gate completion remain required before merge and Google Drive synchronization.
 
 ## Scope
 
@@ -29,6 +29,7 @@ In Progress — local artifacts are generated and verified; DonHV review and Goo
 - Quality/source/message/parity contract: PASS.
 - Secret scan, agent rules, QA Depth 15/15, ownership gate 5/5, and AI DevKit 5/5: PASS.
 - Ponytail simplicity review: `Lean already. Ship.`
+- Draft PR #183 is mergeable, but `qa-depth-gate` correctly fails only because the DonHV Ownership Knowledge Gate is still In Progress.
 - Drive update: not started; local approval is required first.
 
 ## Known limitations
