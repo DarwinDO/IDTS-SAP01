@@ -5,9 +5,14 @@
 // columns. It never runs cds deploy, reloads seed data, or prints the DB URL.
 const { Client } = require('pg')
 
+// CAP compiles unquoted CDS identifiers to PostgreSQL identifiers. PostgreSQL
+// folds those physical identifiers to lower case, so this helper must use the
+// same lower-case names that CAP created in the Render database.
+const physicalTable = 'idts_cap_aisuggestions'
+const physicalColumns = ['operationstatus', 'latencyms']
 const statements = [
-  'ALTER TABLE "idts_cap_AiSuggestions" ADD COLUMN IF NOT EXISTS "operationStatus" VARCHAR(40)',
-  'ALTER TABLE "idts_cap_AiSuggestions" ADD COLUMN IF NOT EXISTS "latencyMs" INTEGER'
+  `ALTER TABLE ${physicalTable} ADD COLUMN IF NOT EXISTS ${physicalColumns[0]} VARCHAR(40)`,
+  `ALTER TABLE ${physicalTable} ADD COLUMN IF NOT EXISTS ${physicalColumns[1]} INTEGER`
 ]
 
 async function main () {
@@ -20,8 +25,8 @@ async function main () {
   if (!execute) {
     console.log(JSON.stringify({
       mode: 'dry-run',
-      table: 'idts_cap_AiSuggestions',
-      columns: ['operationStatus', 'latencyMs'],
+      table: physicalTable,
+      columns: physicalColumns,
       statementCount: statements.length,
       note: 'No database connection was opened and no SQL was executed.'
     }, null, 2))
@@ -47,10 +52,10 @@ async function main () {
       SELECT column_name AS "columnName", data_type AS "dataType", is_nullable AS "isNullable"
       FROM information_schema.columns
       WHERE table_schema = current_schema()
-        AND table_name = 'idts_cap_AiSuggestions'
-        AND column_name = ANY($1::text[])
+        AND table_name = $1
+        AND column_name = ANY($2::text[])
       ORDER BY column_name
-    `, [['latencyMs', 'operationStatus']])
+    `, [physicalTable, physicalColumns])
 
     if (verification.rows.length !== 2) {
       throw new Error('IDTS-97 migration verification did not find both expected columns.')
@@ -104,4 +109,11 @@ if (require.main === module) main().catch(error => {
   process.exit(1)
 })
 
-module.exports = { readBoolean, readInteger, safeErrorMessage, statements }
+module.exports = {
+  physicalTable,
+  physicalColumns,
+  readBoolean,
+  readInteger,
+  safeErrorMessage,
+  statements
+}
