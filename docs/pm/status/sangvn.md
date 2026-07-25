@@ -2,6 +2,12 @@
 
 Last updated: 2026-07-08
 
+## 2026-07-25 - IDTS-95 emergency integration verification
+
+| Classification | Symptom | Resolution | Verification |
+| --- | --- | --- | --- |
+| Tooling issue | The first UI5 build was invoked from the repository root with the app config path, so UI5 CLI inspected the root `package.json` and reported a missing `name`. This did not test application behavior. | Rerun `npx ui5 build --config ui5.yaml` from `app/bug-management-ui`. DonHV's deadline exception remains separate from a learner PASS. | IDTS-95 `31/0`; IDTS-66 `34/0`; IDTS-71 `31/0`; IDTS-91 `19/0`; IDTS-93 `35/0`; security/process gates PASS before the corrected UI5 build. |
+
 Vietnamese: Trạng thái của SangVN - hỗ trợ Fiori/UI5 cho Sprint 02.
 
 ## Member Identity
