@@ -59,7 +59,7 @@ function deterministicEmbedding (text, dimensions) {
   const hash = crypto.createHash('sha256').update(String(text)).digest()
   const values = []
   for (let i = 0; i < dimensions; i++) {
-    values.push(Number(((hash[i] / 255) * 2 - 1).toFixed(6)))
+    values.push(Number(((hash[i % hash.length] / 255) * 2 - 1).toFixed(6)))
   }
   return values
 }
