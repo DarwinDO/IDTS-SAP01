@@ -24,7 +24,11 @@ const {
   safeOperationalMetric
 } = require('../../srv/ai')
 const { containsUnsafeDiagnosticText } = require('../../srv/ai/safety')
-const { statements: migrationStatements } = require('../db/migrate-idts97-ai-metrics')
+const {
+  physicalColumns,
+  physicalTable,
+  statements: migrationStatements
+} = require('../db/migrate-idts97-ai-metrics')
 
 const RESULTS = []
 let PASS = 0
@@ -77,6 +81,10 @@ async function main () {
   expectTruthy('migration uses exactly two additive idempotent columns',
     migrationStatements.length === 2 &&
     migrationStatements.every(statement => statement.includes('ADD COLUMN IF NOT EXISTS')))
+  expectEqual('migration targets the CAP PostgreSQL physical table name',
+    physicalTable, 'idts_cap_aisuggestions')
+  expectEqual('migration targets lower-case PostgreSQL physical column names',
+    physicalColumns.join(','), 'operationstatus,latencyms')
   expectTruthy('migration is explicit execute and dry-run by default',
     migrationSource.includes("process.argv.includes('--execute')") &&
     migrationSource.includes("mode: 'dry-run'"))
