@@ -237,6 +237,11 @@ Vietnamese clean note: Nút `Assign Developer` riêng đã được bỏ khỏi 
 - `IDTS-103` is complete: PR #183 merged at `5092035`, and Functional Specification EN/VI v0.7 plus Technical Specification EN/VI v0.6 were updated in place at their existing Drive IDs.
 - OfficeCLI 4/4, strict structural/source/message/parity validation, 50/50-page local visual review, exact-byte Drive readback, and representative Functional 9/9-tab plus Technical 12/12-tab Drive previews pass. Mentor approval/signature and live OpenAI acceptance remain external pending gates.
 
+## 2026-07-25 NhanT AI QA PR review
+
+- IDTS-96 and IDTS-98 are In Progress; IDTS-99 remains To Do because OpenAI live is disabled. PR #177 needs IDTS-94 no-mutation/reload and genuine Knowledge Gate evidence; PR #178 needs a real four-capability evaluation rewrite and removal of unrelated/unsafe files; PR #179 must be relabeled as disabled-provider fallback evidence and complete the required role/action/browser matrix.
+- GitHub and Jira review comments were posted. None of PR #177–#179 is approved for merge yet, even where the current GitHub check is green.
+
 ## Next Handover Instruction
 
 Any new agent or developer should identify their member name first, then read this file, `task-board.md`, the relevant member file under `status/*.md`, and the relevant `tasks/*.md` before making changes.
