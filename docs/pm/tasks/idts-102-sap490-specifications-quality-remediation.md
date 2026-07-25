@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress — implementation and Drive synchronization completed; PR verification and merge remain.
+Done — PR #181 merged normally into `dev` at `3d4e2d0c50156ecc2d7b53643caedbb5945c5d8a`; Drive synchronization and all documentation gates passed.
 
 ## Objective
 
@@ -33,7 +33,7 @@ Correct runtime traceability, content completeness, and formal presentation in t
 - [x] Visual review finds no clipping, overlap, `###`, broken footer, or abnormal blank page.
 - [x] Existing Drive IDs, parent folders, MIME types, and permissions are preserved.
 - [x] No runtime file is changed.
-- [ ] PR passes the repository QA Depth Gate and merges normally into `dev`.
+- [x] PR passes the repository QA Depth Gate and merges normally into `dev`.
 
 ## Verification
 

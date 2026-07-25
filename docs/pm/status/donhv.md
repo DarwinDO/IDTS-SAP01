@@ -3217,3 +3217,4 @@ Vietnamese:
 - Classification: tooling/worktree issue; PR #181 remained open and no branch, commit, Drive artifact, or runtime state changed.
 - Root cause: the delete-branch flow made GitHub CLI attempt a local checkout of `dev`, which is correctly owned by the root worktree.
 - Resolution: remove the local branch-deletion request and perform the remote PR merge from the root worktree; remote branch cleanup can be handled separately after merge.
+- Final verification: PR #181 had already merged remotely before the local cleanup error was returned. Merge commit `3d4e2d0c50156ecc2d7b53643caedbb5945c5d8a` is present in `origin/dev`; no bypass was used.
