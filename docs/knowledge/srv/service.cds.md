@@ -1,5 +1,19 @@
 # Knowledge: `srv/service.cds`
 
+## IDTS-95 confirmation contract
+
+### English
+
+`confirmDuplicateSuggestion(suggestionID, candidateBugID)` is an unbound OData action returning `DuplicateLinks`. Its public input deliberately contains only two UUIDs. Candidate membership and relation type are resolved from the persisted accepted suggestion by the backend; clients cannot submit arbitrary candidate content.
+
+Primary owner: SangVN. Backup: DonHV. If the endpoint is absent or its request is rejected before the handler, inspect this declaration and compiled EDMX before debugging `srv/service.js`.
+
+### Vietnamese
+
+`confirmDuplicateSuggestion(suggestionID, candidateBugID)` là unbound OData action trả về `DuplicateLinks`. Input public cố ý chỉ có hai UUID. Backend lấy candidate membership và relation type từ suggestion đã Accept và persist; client không được gửi candidate content tùy ý.
+
+Owner chính: SangVN. Backup: DonHV. Nếu endpoint không có hoặc request bị reject trước handler, hãy kiểm declaration này và EDMX đã compile trước khi debug `srv/service.js`.
+
 ## Beginner-first OData contract map (2026-07-18)
 
 ### English

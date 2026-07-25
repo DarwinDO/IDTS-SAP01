@@ -90,6 +90,7 @@
     "qa:idts92:programmatic": "node scripts/qa/test-idts92-ai-review-ui.js",
     "qa:idts93:programmatic": "node scripts/qa/test-idts93-apply-classification.js",
     "qa:idts94:programmatic": "node scripts/qa/test-idts94-ai-review-controls.js",
+    "qa:idts95:programmatic": "node scripts/qa/test-idts95-confirm-duplicate-suggestion.js",
     "qa:idts73:programmatic": "node scripts/qa/test-idts73-create-attachments-ui.js",
     "qa:idts73:browser": "node scripts/qa/test-idts73-create-attachments-browser.js",
     "qa:auth-email:playwright": "node scripts/qa/test-idts38-auth-email-playwright.js",

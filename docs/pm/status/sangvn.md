@@ -2,6 +2,12 @@
 
 Last updated: 2026-07-08
 
+## 2026-07-25 - IDTS-95 emergency integration verification
+
+| Classification | Symptom | Resolution | Verification |
+| --- | --- | --- | --- |
+| Tooling issue | The first UI5 build was invoked from the repository root with the app config path, so UI5 CLI inspected the root `package.json` and reported a missing `name`. This did not test application behavior. | Rerun `npx ui5 build --config ui5.yaml` from `app/bug-management-ui`. DonHV's deadline exception remains separate from a learner PASS. | IDTS-95 `31/0`; IDTS-66 `34/0`; IDTS-71 `31/0`; IDTS-91 `19/0`; IDTS-93 `35/0`; security/process gates PASS before the corrected UI5 build. |
+
 Vietnamese: Trạng thái của SangVN - hỗ trợ Fiori/UI5 cho Sprint 02.
 
 ## Member Identity
@@ -205,3 +211,15 @@ Vietnamese:
 | 2026-07-25 | IDTS-94 isolated browser integration setup | Ran the Smart Assign browser regression after all focused IDTS-94/56/68/69/76 checks passed. | Programmatic integration remained green. | **Environment/data blocker:** the fresh worktree's ignored local SQLite file had no `idts_cap_DeveloperProfiles` table, so fixture setup failed before browser behavior was exercised. | Use the documented local-only `cds deploy --to sqlite` in this isolated worktree, then rerun both browser suites. This does not touch Shared QA or committed seed files. | `npm run qa:idts56:browser` stopped at fixture SELECT with `no such table: idts_cap_DeveloperProfiles`; no product assertion failed. | Deploy the isolated local schema and rerun Smart Assign plus Handoff browser checks. |
 | 2026-07-25 | IDTS-94 isolated browser server setup | Deployed the local SQLite schema and retried the Smart Assign browser suite. | Fixture schema is now present. | **Environment blocker:** the browser script expects the CAP/UI5 server at localhost:4004, but no watcher was running, so navigation failed with `ERR_CONNECTION_REFUSED`. | Start the isolated worktree CAP watcher hidden, verify port/health, then rerun. This is not a UI regression. | `npx cds deploy --to sqlite` exit 0; browser failed only at initial `page.goto` before UI assertions. | Start and verify the isolated server, rerun both browser suites, then stop the exact process tree. |
 | 2026-07-25 | IDTS-94 browser target isolation | Started the local CAP/UI5 watcher and reran browser regressions. | Smart Assign browser passed all seven scenarios against localhost. | **Environment/configuration issue:** a machine-level `IDTS_QA_BASE_URL` still pointed to Shared QA, so the Handoff fixture guard correctly refused to modify a non-local target. | Override `IDTS_QA_BASE_URL=http://localhost:4004` for the isolated test process only, then rerun Handoff. No Render data or environment setting is changed. | Smart Assign `RESULT: PASS`; Handoff stopped before fixture creation with the explicit localhost safety message. | Rerun Handoff with the local process override and retain the guard. |
+
+## 2026-07-25 - IDTS-95 integration handoff
+
+| Date | Task/WP | Work done | Completed part | Blockers/Bugs found | Fix status | Evidence/command | Next handoff |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-07-25 | IDTS-95 duplicate confirmation integration | DonHV integrated the shared IDTS-95 branch with the merged IDTS-91–94 baseline while preserving the latest Sprint 5 PM state and the IDTS-95 runtime/evidence scope. | Dependency integration and conflict curation are in progress. | **Process blocker:** the dedicated SangVN duplicate-confirmation Knowledge Gate is not yet recorded as PASS. This is distinct from the IDTS-94 review-control gate and cannot be inferred or copied. | Runtime/test preparation may continue, but PR merge and Jira Done remain blocked until SangVN completes the gate. | Branch `feature/idts-95-confirm-duplicate-suggestion-sangvn`; baseline `origin/dev` after PR #168. | Run fresh focused/regression checks, prepare the PR, and keep it Draft/blocked if the dedicated gate remains absent. |
+
+Vietnamese:
+
+| Ngay | Task/WP | Da lam gi | Phan da xong | Kho khan/Bug phat hien | Trang thai fix | Bang chung/Lenh da chay | Handoff tiep theo |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-07-25 | IDTS-95 integration xac nhan duplicate | DonHV tich hop branch IDTS-95 dung chung voi baseline IDTS-91–94 da merge, dong thoi giu PM state Sprint 5 moi nhat va dung scope runtime/evidence cua IDTS-95. | Dang hoan tat dependency integration va curate conflict. | **Process blocker:** chua co ban ghi PASS cho Knowledge Gate rieng cua SangVN ve duplicate confirmation. Gate nay khac gate review-control cua IDTS-94 va khong duoc suy dien hay sao chep. | Co the tiep tuc chuan bi runtime/test, nhung PR khong duoc merge va Jira khong duoc Done truoc khi SangVN hoan thanh gate. | Branch `feature/idts-95-confirm-duplicate-suggestion-sangvn`; baseline `origin/dev` sau PR #168. | Chay lai focused/regression, chuan bi PR va giu Draft/blocked neu gate rieng van thieu. |

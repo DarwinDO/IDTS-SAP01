@@ -27,6 +27,7 @@ const {
   ignoreAiSuggestion
 } = require('./review')
 const { applyClassificationSuggestion } = require('./classification-apply')
+const { confirmDuplicateSuggestion } = require('./duplicate-confirmation')
 const { redactSensitiveText, sanitizeErrorSummary } = require('./safety')
 
 // Nhóm export gồm config/provider/audit dùng chung, bốn feature entry point và các pure builder để test.
@@ -49,5 +50,6 @@ module.exports = {
   acceptAiSuggestion,
   rejectAiSuggestion,
   ignoreAiSuggestion,
-  applyClassificationSuggestion
+  applyClassificationSuggestion,
+  confirmDuplicateSuggestion
 }
