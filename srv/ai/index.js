@@ -27,6 +27,7 @@ const {
   ignoreAiSuggestion
 } = require('./review')
 const { applyClassificationSuggestion } = require('./classification-apply')
+const { confirmDuplicateSuggestion } = require('./duplicate-confirmation')
 const {
   aggregateAiOperationalMetrics,
   emitAiOperationalMetric,
@@ -56,6 +57,7 @@ module.exports = {
   rejectAiSuggestion,
   ignoreAiSuggestion,
   applyClassificationSuggestion,
+  confirmDuplicateSuggestion,
   aggregateAiOperationalMetrics,
   emitAiOperationalMetric,
   readAiOperationalMetrics,

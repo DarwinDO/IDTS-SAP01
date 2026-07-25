@@ -4,6 +4,12 @@
 
 The barrel exports the safe metric builder/emitter, aggregate helper, and PM read handler from `metrics.js`. `srv/service.js` imports the read handler through this stable boundary; focused QA imports pure helpers without reaching into service wiring.
 
+## IDTS-95 duplicate confirmation export
+
+The same barrel exports `confirmDuplicateSuggestion` from `duplicate-confirmation.js`. `srv/service.js` imports it through this stable entry point. The export itself does not call AI or write data.
+
+Vietnamese: Barrel này cũng export `confirmDuplicateSuggestion` từ `duplicate-confirmation.js`. `srv/service.js` import qua entry point chung này. Bản thân export không gọi AI hoặc ghi dữ liệu.
+
 ## Beginner-first module map (2026-07-18)
 
 ### English

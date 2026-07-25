@@ -4,6 +4,12 @@
 
 `readAiOperationalMetrics(windowDays)` is a PM-only read function. It returns typed counts grouped by feature/provider/model and never exposes `suggestionPayload`, prompt, response, error text, user email, endpoint, token, or credential. The reporting window defaults to 30 days and is capped at 90 days by the runtime handler.
 
+## IDTS-95 confirmation contract
+
+`confirmDuplicateSuggestion(suggestionID, candidateBugID)` is an unbound OData action returning `DuplicateLinks`. The backend resolves candidate membership and relation type from the persisted accepted suggestion; clients cannot submit arbitrary candidate content.
+
+Vietnamese: `confirmDuplicateSuggestion(suggestionID, candidateBugID)` là unbound OData action trả về `DuplicateLinks`. Backend lấy candidate và relation type từ suggestion đã Accept và persist; client không được tự gửi candidate content.
+
 ## Beginner-first OData contract map (2026-07-18)
 
 ### English

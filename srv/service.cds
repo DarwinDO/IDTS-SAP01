@@ -137,11 +137,16 @@ service BugService @(requires: 'authenticated-user') {
     limit                : Integer
   ) returns array of SmartAssignmentExplanationCandidate;
 
-  // Human review actions chỉ đổi audit row đang PENDING; không update Bug, assignment, duplicate link hoặc workflow.
+  // Human review actions chỉ đổi audit row đang PENDING; hai action phía sau mới được apply dữ liệu đã Accept.
   action acceptAiSuggestion(suggestionID : UUID) returns AiSuggestionReviewResult;
   action rejectAiSuggestion(suggestionID : UUID) returns AiSuggestionReviewResult;
   action ignoreAiSuggestion(suggestionID : UUID) returns AiSuggestionReviewResult;
   action applyClassificationSuggestion(suggestionID : UUID) returns Bugs;
+  // Chỉ nhận hai UUID; relation type và candidate membership luôn lấy từ suggestion payload đã persist.
+  action confirmDuplicateSuggestion(
+    suggestionID  : UUID,
+    candidateBugID : UUID
+  ) returns DuplicateLinks;
 
   // PM-only operational aggregate; reads allowlisted audit metadata and never exposes prompt/response/error detail.
   @(requires: 'PM')

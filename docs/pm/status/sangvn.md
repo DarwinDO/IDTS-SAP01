@@ -2,6 +2,12 @@
 
 Last updated: 2026-07-08
 
+## 2026-07-25 - IDTS-95/97 emergency integration decision
+
+| Classification | Observation | Resolution | Verification / follow-up |
+| --- | --- | --- | --- |
+| Process exception | The dedicated SangVN Knowledge Gates for duplicate confirmation and metrics/privacy were not complete before the 2026-07-26 morning QA deadline. | DonHV explicitly approved an emergency merge exception. No learner PASS is claimed or fabricated; both learning gates remain post-release follow-ups. | IDTS-95 technical suites passed before PR #172 merge. IDTS-97 must be fully rerun after combining the final IDTS-95 baseline. |
+
 Vietnamese: Trạng thái của SangVN - hỗ trợ Fiori/UI5 cho Sprint 02.
 
 ## Member Identity

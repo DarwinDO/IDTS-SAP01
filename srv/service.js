@@ -54,6 +54,7 @@ const {
   rejectAiSuggestion,
   ignoreAiSuggestion,
   applyClassificationSuggestion,
+  confirmDuplicateSuggestion,
   readAiOperationalMetrics
 } = require('./ai')
 
@@ -136,6 +137,8 @@ module.exports = class BugService extends cds.ApplicationService {
     this.on('rejectAiSuggestion', req => rejectAiSuggestion(req, entities))
     this.on('ignoreAiSuggestion', req => ignoreAiSuggestion(req, entities))
     this.on('applyClassificationSuggestion', req => applyClassificationSuggestion(req, entities))
+    // Confirmation không tin candidate content từ client và không đổi status của hai Bug.
+    this.on('confirmDuplicateSuggestion', req => confirmDuplicateSuggestion(req, entities))
     this.on('readAiOperationalMetrics', req => readAiOperationalMetrics(req))
     // `SAVE` là ranh giới draft → active. `handleDraftSave` validate lần cuối, gọi `next()` để CAP persist,
     // rồi mới ghi history/attachment side effects. Breakpoint tại đây phân biệt lỗi trước save với lỗi sau persist.
