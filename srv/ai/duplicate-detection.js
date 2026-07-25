@@ -120,6 +120,7 @@ async function resolveSearchInput (tx, req, data) {
 
 async function rankSimilarBugCandidates ({ input, candidates, provider, limit = DEFAULT_LIMIT, minScore = DEFAULT_MIN_SCORE }) {
   // Xin embeddings theo batch khi provider sẵn sàng, sau đó chấm từng candidate; provider lỗi vẫn dùng lexical/classification fallback.
+  const started = Date.now()
   const sourceText = embeddingText(input)
   const sourceEmbeddingResult = await provider.embedding({
     featureType: FEATURE_TYPES.DUPLICATE_DETECTION,
@@ -160,7 +161,8 @@ async function rankSimilarBugCandidates ({ input, candidates, provider, limit = 
     providerStatus: sourceEmbedding ? providerStatus : fallbackProviderStatus(providerStatus),
     correlationId: sourceEmbeddingResult?.correlationId || null,
     providerAlias: sourceEmbeddingResult?.providerAlias || provider?.config?.provider || null,
-    modelAlias: sourceEmbeddingResult?.modelAlias || provider?.config?.embeddingModelAlias || provider?.config?.modelAlias || null
+    modelAlias: sourceEmbeddingResult?.modelAlias || provider?.config?.embeddingModelAlias || provider?.config?.modelAlias || null,
+    durationMs: Date.now() - started
   }
 }
 
@@ -375,6 +377,8 @@ async function recordSuggestionAudit ({ req, tx, entities, input, result, ranked
     featureType: FEATURE_TYPES.DUPLICATE_DETECTION,
     providerAlias: ranking.providerAlias || provider?.config?.provider || null,
     modelAlias: ranking.modelAlias || provider?.config?.embeddingModelAlias || provider?.config?.modelAlias || null,
+    operationStatus: ranking.providerStatus || 'AI_PROVIDER_ERROR',
+    latencyMs: ranking.durationMs,
     confidence: best?.score ?? null,
     correlationId: ranking.correlationId || req.id,
     summary: result.length

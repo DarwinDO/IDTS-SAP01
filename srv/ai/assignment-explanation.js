@@ -263,6 +263,11 @@ async function recordAssignmentAudit ({ tx, req, entities, input, provider, prov
     featureType: FEATURE_TYPES.ASSIGNMENT_EXPLANATION,
     providerAlias: providerResult?.providerAlias || provider?.config?.provider || null,
     modelAlias: providerResult?.modelAlias || provider?.config?.modelAlias || null,
+    operationStatus: result.find(row => row.providerStatus && row.providerStatus !== 'SUCCESS')?.providerStatus ||
+      result[0]?.providerStatus ||
+      providerResult?.status ||
+      'AI_PROVIDER_ERROR',
+    latencyMs: providerResult?.durationMs,
     confidence: bestConfidence,
     correlationId: providerResult?.correlationId || req.id,
     summary: summarizeResult(result),

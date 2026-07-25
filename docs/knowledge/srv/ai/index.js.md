@@ -1,18 +1,14 @@
 # `srv/ai/index.js`
 
+## IDTS-97 metrics exports
+
+The barrel exports the safe metric builder/emitter, aggregate helper, and PM read handler from `metrics.js`. `srv/service.js` imports the read handler through this stable boundary; focused QA imports pure helpers without reaching into service wiring.
+
 ## IDTS-95 duplicate confirmation export
 
-### English
+The same barrel exports `confirmDuplicateSuggestion` from `duplicate-confirmation.js`. `srv/service.js` imports it through this stable entry point. The export itself does not call AI or write data.
 
-The public AI module entry point now exports `confirmDuplicateSuggestion` from `duplicate-confirmation.js`. `srv/service.js` imports it only through this index, keeping the service wiring independent of the feature file path. The export changes no provider configuration and does not call AI by itself.
-
-Primary owner: SangVN. Backup: DonHV. Debug from the `confirmDuplicateSuggestion` import/export here to its registration in `srv/service.js`, then into `srv/ai/duplicate-confirmation.js`.
-
-### Vietnamese
-
-Entry point chung của AI hiện export `confirmDuplicateSuggestion` từ `duplicate-confirmation.js`. `srv/service.js` chỉ import qua index này để wiring của service không phụ thuộc trực tiếp đường dẫn file feature. Export này không đổi provider config và tự nó không gọi AI.
-
-Owner chính: SangVN. Backup: DonHV. Khi debug, trace từ import/export `confirmDuplicateSuggestion` tại đây sang registration trong `srv/service.js`, sau đó vào `srv/ai/duplicate-confirmation.js`.
+Vietnamese: Barrel này cũng export `confirmDuplicateSuggestion` từ `duplicate-confirmation.js`. `srv/service.js` import qua entry point chung này. Bản thân export không gọi AI hoặc ghi dữ liệu.
 
 ## Beginner-first module map (2026-07-18)
 

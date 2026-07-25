@@ -127,12 +127,14 @@ async function main () {
 
   const auditRows = await db.run(
     SELECT.from('idts.cap.AiSuggestions')
-      .columns('ID', 'featureType_code', 'reviewState_code', 'suggestionPayload')
+      .columns('ID', 'featureType_code', 'operationStatus', 'latencyMs', 'reviewState_code', 'suggestionPayload')
       .where({ bug_ID: BUG_ID, featureType_code: 'ASSIGNMENT_EXPLANATION' })
   )
   assert.strictEqual(auditRows.length, 1)
   assert.strictEqual(dat.suggestionID, auditRows[0].ID)
   assert.strictEqual(auditRows[0].reviewState_code, 'PENDING')
+  assert.strictEqual(auditRows[0].operationStatus, 'SUCCESS')
+  assert(auditRows[0].latencyMs >= 0)
   const auditPayload = JSON.parse(auditRows[0].suggestionPayload)
   assert.strictEqual(auditPayload.providerStatus, 'SUCCESS')
   rec('source-linked assignment explanation writes sanitized AI audit row', true)

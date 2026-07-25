@@ -156,12 +156,14 @@ async function main () {
 
   const auditRows = await db.run(
     SELECT.from('idts.cap.AiSuggestions')
-      .columns('ID', 'bug_ID', 'featureType_code', 'confidence', 'suggestionPayload', 'reviewState_code')
+      .columns('ID', 'bug_ID', 'featureType_code', 'operationStatus', 'latencyMs', 'confidence', 'suggestionPayload', 'reviewState_code')
       .where({ bug_ID: SOURCE_ID, featureType_code: 'DUPLICATE_DETECTION' })
   )
   expectEqual('source-linked search writes one audit row', auditRows.length, 1)
   expectEqual('candidate review ID matches persisted audit row', positive[0]?.suggestionID, auditRows[0]?.ID)
   expectEqual('audit row starts in pending review', auditRows[0]?.reviewState_code, 'PENDING')
+  expectEqual('duplicate audit persists final operation status', auditRows[0]?.operationStatus, 'SUCCESS')
+  expectTruthy('duplicate audit persists non-negative latency', auditRows[0]?.latencyMs >= 0)
   const positiveAuditPayload = JSON.parse(auditRows[0]?.suggestionPayload || '{}')
   expectEqual('audit payload records provider status', positiveAuditPayload.providerStatus, 'SUCCESS')
   expectNoUnsafeDiagnostic('audit payload contains no prompt, credential, or raw provider response', positiveAuditPayload)

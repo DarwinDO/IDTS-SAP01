@@ -126,12 +126,14 @@ async function main () {
 
   const auditRows = await db.run(
     SELECT.from('idts.cap.AiSuggestions')
-      .columns('ID', 'bug_ID', 'featureType_code', 'reviewState_code', 'suggestionPayload')
+      .columns('ID', 'bug_ID', 'featureType_code', 'operationStatus', 'latencyMs', 'reviewState_code', 'suggestionPayload')
       .where({ bug_ID: BUG_ID, featureType_code: 'CLASSIFICATION' })
   )
   expectEqual('source-linked classification writes one AI audit row', auditRows.length, 1)
   expectEqual('classification review ID matches persisted audit row', positive[0]?.suggestionID, auditRows[0]?.ID)
   expectEqual('classification audit starts pending review', auditRows[0]?.reviewState_code, 'PENDING')
+  expectEqual('classification audit persists final operation status', auditRows[0]?.operationStatus, 'SUCCESS')
+  expectTruthy('classification audit persists non-negative latency', auditRows[0]?.latencyMs >= 0)
   const auditPayload = JSON.parse(auditRows[0]?.suggestionPayload || '{}')
   expectEqual('classification audit records provider status', auditPayload.providerStatus, 'SUCCESS')
   expectEqual(

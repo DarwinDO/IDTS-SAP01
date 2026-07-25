@@ -8,6 +8,7 @@ const {
   redactSensitiveText,
   sanitizeDiagnosticToken
 } = require('./safety')
+const { normalizeLatency } = require('./metrics')
 
 const FEATURE_TYPES = Object.freeze({
   DUPLICATE_DETECTION: 'DUPLICATE_DETECTION',
@@ -149,6 +150,8 @@ async function createAiSuggestion (tx, data) {
     requestedBy_ID: requestedByID,
     providerAlias: cleanText(data.providerAlias, 80),
     modelAlias: cleanText(data.modelAlias, 80),
+    operationStatus: normalizeCode(data.operationStatus, 'UNKNOWN'),
+    latencyMs: normalizeLatency(data.latencyMs),
     confidence: normalizeConfidence(data.confidence),
     suggestionPayload: serializeSuggestionPayload(data.suggestionPayload || data.payload || data.suggestion),
     summary: cleanText(data.summary, 500),

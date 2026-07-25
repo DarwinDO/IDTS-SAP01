@@ -476,6 +476,8 @@ async function recordSummaryAudit ({ tx, req, entities, context, provider, provi
     featureType: FEATURE_TYPES.BUG_SUMMARY,
     providerAlias: providerResult?.providerAlias || provider?.config?.provider || null,
     modelAlias: providerResult?.modelAlias || provider?.config?.modelAlias || null,
+    operationStatus: result.providerStatus || providerResult?.status || 'AI_PROVIDER_ERROR',
+    latencyMs: providerResult?.durationMs,
     confidence: result.confidence,
     correlationId: providerResult?.correlationId || req.id,
     summary: cleanText(result.summary, 500),

@@ -1,18 +1,14 @@
 # Knowledge: `srv/service.js`
 
+## IDTS-97 metrics wiring
+
+`BugService.init()` registers `readAiOperationalMetrics` and delegates all aggregation behavior to `srv/ai/metrics.js`. Keep authorization in the CDS contract and privacy/aggregation logic in the focused module; this file remains wiring only.
+
 ## IDTS-95 confirmation wiring
 
-### English
+`BugService.init()` also registers `confirmDuplicateSuggestion`. Authorization, stored-payload grounding, pair checks and transaction insert remain in `srv/ai/duplicate-confirmation.js`.
 
-`BugService.init()` registers `confirmDuplicateSuggestion` beside the explicit AI review/apply actions. The service file only dispatches the request; authorization, stored-payload grounding, pair checks, and insert transaction remain in `srv/ai/duplicate-confirmation.js`.
-
-Primary owner: SangVN. Backup: DonHV. Debug the OData request at this registration, then step into `confirmDuplicateSuggestion`. A matching action declaration must remain in `srv/service.cds`.
-
-### Vietnamese
-
-`BugService.init()` đăng ký `confirmDuplicateSuggestion` cạnh các action AI review/apply rõ ràng. Service file chỉ dispatch request; authorization, kiểm payload đã lưu, kiểm pair và transaction insert nằm trong `srv/ai/duplicate-confirmation.js`.
-
-Owner chính: SangVN. Backup: DonHV. Debug OData request tại registration này rồi step vào `confirmDuplicateSuggestion`. Phải luôn có action declaration tương ứng trong `srv/service.cds`.
+Vietnamese: `BugService.init()` cũng đăng ký `confirmDuplicateSuggestion`. Kiểm quyền, kiểm payload đã lưu, kiểm cặp Bug và transaction insert vẫn nằm trong `srv/ai/duplicate-confirmation.js`.
 
 ## IDTS-89 exact workflow audit mapping
 

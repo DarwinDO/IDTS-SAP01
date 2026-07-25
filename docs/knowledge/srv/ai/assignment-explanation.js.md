@@ -1,5 +1,9 @@
 # `srv/ai/assignment-explanation.js`
 
+## IDTS-97 operational evidence
+
+`recordAssignmentAudit()` stores only normalized provider status and duration for the feature-level audit. Candidate personal/contact data, prompt, raw response, and error detail are not operational metric fields.
+
 ## Beginner-first execution map (2026-07-18)
 
 ### English

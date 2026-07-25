@@ -247,6 +247,8 @@ entity AiSuggestions : cuid, managed {
   requestedBy       : Association to Users not null;
   providerAlias     : String(80);
   modelAlias        : String(80);
+  operationStatus   : String(40);
+  latencyMs         : Integer;
   confidence        : Decimal(5,4);
   suggestionPayload : LargeString not null;
   summary           : String(500);
