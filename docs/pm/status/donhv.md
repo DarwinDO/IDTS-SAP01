@@ -3163,3 +3163,88 @@ Vietnamese:
 | Product migration-helper defect | The IDTS-97 helper quoted CDS-style CamelCase table and column names, while CAP PostgreSQL physical identifiers are unquoted and folded to lower case. Its verification query would therefore fail on Render. | Changed the helper to use `idts_cap_aisuggestions`, `operationstatus`, and `latencyms`, matching fresh CAP PostgreSQL compilation and the live schema. Added focused regression assertions for the physical names. | `cds compile db --to sql --dialect postgres` and Render `pg_attribute` both confirm lower-case physical identifiers; the live table still contains 59 rows. |
 | Environment/tooling issue | The first focused verification in the fresh migration-fix worktree could not load `@sap/cds`, `pg`, or `@cap-js/attachments`. | Fresh Git worktrees do not contain their own untracked `node_modules`. Reuse the already installed root dependency directory for verification, without changing tracked project files. | Initial failure occurred before test execution or database access; rerun evidence is recorded with the final PR verification. |
 | Product migration defect | After the table migration and runtime deploy, authenticated reads of `BugService.AiSuggestions` returned HTTP 500 because the existing PostgreSQL service view still exposed only its original 20 columns. | Refreshed `bugservice_aisuggestions` additively, preserving all existing columns in order and appending `operationstatus` and `latencyms`. Extended the migration helper so future environments update and verify both the base table and service view in one transaction. | Authenticated `AiSuggestions` read now returns HTTP 200; PM `readAiOperationalMetrics(30)` returns HTTP 200 with four safe aggregate rows; no new Render error log appeared after the correction. |
+
+### 2026-07-25 — IDTS-101 specification workbook OpenXML normalization
+
+| Classification | Symptom | Root cause / resolution | Verification |
+| --- | --- | --- | --- |
+| Documentation tooling issue | OfficeCLI `1.0.141` rejected all six regenerated XLSX specifications although the three untouched official templates passed schema validation. | `openpyxl 3.1.5` rewrote font and drawing XML children in an order/namespace that strict OpenXML validation rejects. The content remained readable, but the generated packages were not acceptable as final mentor artifacts. Added a narrow native-Excel finalization step that performs one save after generation; it does not rebuild sheets, alter official-template structure, or patch the Configuration Note drawing defect directly. | A one-workbook proof passed OfficeCLI with zero schema errors. The complete six-workbook rerun and template-fidelity comparison are the next verification gate before PR/Drive synchronization. |
+
+### 2026-07-25 — IDTS-101 Blueprint TOC native-finalization tooling issue
+
+| Classification | Symptom | Root cause / resolution | Verification |
+| --- | --- | --- | --- |
+| Documentation tooling issue | Word COM updated and saved the EN Blueprint TOC, then returned `RPC server is unavailable (0x800706BA)` before opening the VI Blueprint. | The long-lived Word COM process terminated after the first document. This is a local Office automation issue, not a Blueprint content or template defect. The finalizer is being changed to isolate each document in its own Word process, so one failed COM instance cannot skip the other language. | EN save completed before the RPC failure. VI will be rerun through the isolated process and both DOCX files will be revalidated/rendered before any PR or Drive update. |
+
+- Resolution: the isolated Word run updated both TOCs, but Word/WPS rewrote the official style catalog from stable template IDs to numeric IDs and reduced the style count from 161 to 159. Because template fidelity has higher priority, those native-saved files were rejected and regenerated from the official template. The final Blueprint keeps a real auto-refresh TOC field and now also stores a reviewed cached TOC with dot leaders and page numbers; no native Office resave is used in the accepted generation path.
+
+### 2026-07-25 — IDTS-101 PDF contact-sheet runtime limitation
+
+| Classification | Symptom | Root cause / resolution | Verification |
+| --- | --- | --- | --- |
+| Tooling issue | The first PDF contact-sheet command failed with `ModuleNotFoundError: No module named 'fitz'`. | The default Windows Python does not include PyMuPDF. No project dependency was installed or changed. The visual-review command was rerouted to the Codex bundled document runtime, which provides the required PDF/image libraries. | The failed command did not modify any SAP490 artifact; final page rendering/contact-sheet evidence is generated only by the bundled runtime. |
+
+### 2026-07-25 — IDTS-101 Google Drive Chrome preview timeout
+
+| Classification | Symptom | Root cause / resolution | Verification |
+| --- | --- | --- | --- |
+| Tooling issue | Reloading four large Drive Office previews concurrently exceeded the Chrome-control timeout. | The parallel UI verification was too expensive for the connected browser session. The raw Drive updates had already succeeded and byte readback matched all eight local SHA-256 values. Preview verification was reduced to one representative artifact at a time. | No Drive mutation occurred during the timed-out read-only preview step; connector metadata and raw-byte readback remained valid. |
+
+### 2026-07-25 — IDTS-101 Drive footer-cache correction and closure
+
+| Classification | Symptom | Root cause / resolution | Verification |
+| --- | --- | --- | --- |
+| Documentation issue | The refreshed Blueprint Drive preview reported 26 EN pages but rendered the footer as `Confidential 1/46`; the same stale total existed in VI. | The official template's `NUMPAGES` field retained a cached result of `46`. Word/LibreOffice recalculated it during local rendering, while Google Drive preview initially displayed the inherited cache. The generator now updates only the cached `NUMPAGES` result (`26` EN, `25` VI) while preserving the field instruction, three sections, footer layout, and template styles. | OfficeCLI and the strict specification validator pass. LibreOffice renders EN `1/26…26/26` and VI `1/25…25/25`. Same-ID Drive readback hashes match local, and forced Drive preview reload shows `1/26` EN and `1/25` VI without `/46`; EN last-page navigation shows `26/26`. |
+| Tooling issue | The first local footer-render command was rejected because it combined a recursive temporary-directory cleanup with rendering. | The safety policy blocked the cleanup before any file changed. A new uniquely named temporary directory was used instead, without deletion. | Both PDFs were produced successfully and inspected; no SAP490 artifact was changed by the rejected command. |
+| Tooling issue | Chrome navigation to the VI last page changed the page-number input to `25 of 25`, but the follow-up Enter press exceeded the control deadline before the virtual document exposed the last-page paragraph. | Large Drive Office previews virtualize page content and can delay browser-control operations. | VI first-page Drive preview is correct and contains no stale `/46`; independent LibreOffice/PDF verification confirms the last footer is `25/25`. EN Drive preview verifies both `1/26` and `26/26`. |
+
+- IDTS-101 final state: all eight specification artifacts are synchronized on Drive at their existing IDs; metadata, permissions, size, and raw bytes were verified. No runtime file under `app/`, `srv/`, or `db/` changed.
+
+### 2026-07-25 — IDTS-102 SAP490 specification quality remediation
+
+- Work completed: regenerated Blueprint v0.6, Functional Specification v0.6, Technical Specification v0.5, and Configuration Note v0.5 in EN/VI from the official templates; corrected runtime traces, test truth, attachment/auth/AI wording, coverage, and formal layout.
+- Drive: updated all eight existing file IDs in place and verified readback hashes, metadata, parents, MIME types, and permissions.
+- Verification: OfficeCLI 1.0.141 passed 8/8; strict quality contract and specification validator passed; visual review passed 102/102 pages; secret scan, agent rules, QA Depth self-test 15/15, AI DevKit 5/5, and `git diff --check` passed. No `app/`, `srv/`, or `db/` changes exist.
+- Documentation issue found and fixed: Blueprint history rows initially cloned a merged spacer row and displayed only the version column. The generator now clones the real six-cell row; v0.1–v0.6 details are present locally and on Drive.
+- Documentation sync issue found and fixed: prior Drive/repository binary size differences were removed by same-ID regeneration/readback from the current repository templates.
+- Tooling issues: the combined OfficeCLI loop timed out and was split into eight successful calls; Windows CP1252 could not print one Vietnamese row; LibreOffice emitted a harmless `<prefix>` warning; one recursive temp cleanup was blocked and replaced with a unique temp directory; a Jira wrapper call failed and direct connector calls were used. None changed runtime or artifact content.
+- Remaining: PR merge, mentor review/signature, six human UAT executions, and live OpenAI acceptance. OpenAI remains disabled/not accepted.
+- Evidence: `docs/pm/evidence/idts-102/sap490-specifications-quality-remediation-20260725.md`.
+
+### 2026-07-25 — IDTS-102 PR merge CLI worktree issue
+
+- Symptom: `gh pr merge 181 --merge --delete-branch` stopped with `dev is already used by worktree at E:/IDTS-SAP01` after confirming the PR was CLEAN and the QA Depth Gate had passed.
+- Classification: tooling/worktree issue; PR #181 remained open and no branch, commit, Drive artifact, or runtime state changed.
+- Root cause: the delete-branch flow made GitHub CLI attempt a local checkout of `dev`, which is correctly owned by the root worktree.
+- Resolution: remove the local branch-deletion request and perform the remote PR merge from the root worktree; remote branch cleanup can be handled separately after merge.
+- Final verification: PR #181 had already merged remotely before the local cleanup error was returned. Merge commit `3d4e2d0c50156ecc2d7b53643caedbb5945c5d8a` is present in `origin/dev`; no bypass was used.
+
+### 2026-07-25 — IDTS-103 formal specification tables
+
+- Work completed: regenerated Functional Specification EN/VI v0.7 and Technical Specification EN/VI v0.6 with shared structured catalogs and formal template-styled tables. One function, requirement, screen, message, or implementation flow is represented by one record instead of raw prose or long joined lists.
+- Template scope: official sheet names/order/visibility, merged template headings, page setup, and style signatures are retained. No `app/`, `srv/`, or `db/` file changed.
+- Visual result: Functional EN/VI render to 12 pages each; Technical EN/VI render to 13 pages each. Fifty pages were reviewed without abnormal blank pages, obvious clipping, vertical text, `###`, or raw prose dumps.
+- Documentation issue found and fixed: stale template print areas produced 28/59-page renders with large blank regions. Generator print areas are now bounded to populated formal tables.
+- Tooling issues: one no-match `rg` exit code, one direct-import path error, one CP1252 diagnostic print error, combined-validator timeout, strict OfficeCLI XML ordering errors after openpyxl serialization, LibreOffice `<prefix>` warning, and a policy-blocked recursive `tmp/` cleanup. Each was isolated or resolved without runtime/Drive mutation; `tmp/` remains excluded from commit.
+- Evidence: `docs/pm/evidence/idts-103/formal-specification-remediation-20260725.md`.
+- Remaining: final gates, PR review, DonHV local approval, then same-ID Drive update/readback. Mentor approval and live OpenAI acceptance remain Pending.
+- Final local gates: OfficeCLI 4/4, specification validator, quality/source/message/parity contract, secret scan, agent rules, QA Depth 15/15, ownership gate 5/5, AI DevKit 5/5, and ponytail simplicity review all pass.
+- Tooling issue: Atlassian Rovo returned `Internal error` for both the Jira comment and Cloud-resource lookup. Jira was not mutated; the IDTS-103 evidence comment remains pending connector recovery.
+- Process gate correction: DonHV's progress file already contained genuine 90% PASS records for IDTS-89 and IDTS-90, including Critical, Debug, Teach-back, and Result PASS. PR #183 was corrected to reference those evidence files and marked Ready. Rerunning the old GitHub Actions run reused the original event payload and still saw Pending; this status/evidence commit is used to trigger a fresh synchronize event, with no bypass.
+- Tooling issue: the first two PowerShell attempts to replace the PR body failed because of exact newline matching and multiline-array handling. The replacement was completed by joining CLI output and replacing between Markdown headings; `gh pr view` confirms the corrected declaration. No workbook or runtime artifact changed.
+- Local approval: DonHV approved Functional Specification EN/VI v0.7 and Technical Specification EN/VI v0.6 on 2026-07-25. OfficeCLI 1.0.141 validates 4/4; specification, quality, secret, agent, QA Depth self-test, ownership runner, AI DevKit, and `git diff --check` gates pass locally.
+
+### 2026-07-25 — IDTS-103 merge and Drive closeout
+
+- PR #183 passed fresh QA Depth workflow run `30154286241` and merged normally into `dev` at `5092035015937d23e389c2f4c8336b1dccf81e26`; no bypass was used.
+- Functional Specification EN/VI v0.7 and Technical Specification EN/VI v0.6 were updated in place at their four official Drive IDs. Existing parents, XLSX MIME type, permissions, and IDs were preserved; no duplicate was created.
+- Exact-byte readback matched all four approved local SHA-256 values. Chrome Drive preview confirmed 9/9 Functional tabs, 12/12 Technical tabs, and a readable formal Vietnamese `Screen Layout` table.
+- Tooling limitation: the Google Sheets cell API returned zero sheet metadata for raw XLSX Drive files because they are external Office binaries rather than native Google Sheets. This did not affect content; byte-identical readback plus the real Drive preview were used instead.
+- Jira synchronization resumed after the earlier connector error. IDTS-103 receives the merge/Drive evidence and can move to Done; mentor approval/signature and live OpenAI acceptance remain outside this task.
+
+### 2026-07-25 — NhanT PR #177–#179 review and Jira correction
+
+- PR #177 / IDTS-96: Changes Required. Existing IDTS-91/93/95 evidence is useful, but IDTS-94 Handoff/Smart Assign no-mutation and reload coverage plus Knowledge Gate answers/debug/teach-back are absent. GitHub review comment `5078149225`; Jira comment `10697`; Jira moved from To Do to In Progress.
+- PR #178 / IDTS-98: Changes Required. Diff includes unrelated `LICENSE`, `bin/gh.exe`, `gh.zip`, `temp_body.md`, lockfile noise and a hardcoded Basic credential. The harness determines PASS from scenario metadata instead of invoking the four real AI capability paths. GitHub review comment `5078149292`; Jira comment `10698`; Jira corrected from Done to In Progress.
+- PR #179 / IDTS-99: Changes Required. Evidence is disabled-provider/fallback UI smoke, not live-provider acceptance; role/action/persistence/metrics/browser coverage is incomplete and Smart Assign absence is only a warning. GitHub review comment `5078149350`; Jira comment `10699`; Jira remains To Do while OpenAI live is disabled.
+- Tooling issue: the first combined branch-switch/search command returned exit code 1 after the branch switch succeeded because `rg` found no existing IDTS-96/98/99 PM-board rows. No file or branch content was lost; focused inspection confirmed the rows were absent and this handover update adds them.
