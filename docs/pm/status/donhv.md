@@ -3199,3 +3199,14 @@ Vietnamese:
 | Tooling issue | Chrome navigation to the VI last page changed the page-number input to `25 of 25`, but the follow-up Enter press exceeded the control deadline before the virtual document exposed the last-page paragraph. | Large Drive Office previews virtualize page content and can delay browser-control operations. | VI first-page Drive preview is correct and contains no stale `/46`; independent LibreOffice/PDF verification confirms the last footer is `25/25`. EN Drive preview verifies both `1/26` and `26/26`. |
 
 - IDTS-101 final state: all eight specification artifacts are synchronized on Drive at their existing IDs; metadata, permissions, size, and raw bytes were verified. No runtime file under `app/`, `srv/`, or `db/` changed.
+
+### 2026-07-25 — IDTS-102 SAP490 specification quality remediation
+
+- Work completed: regenerated Blueprint v0.6, Functional Specification v0.6, Technical Specification v0.5, and Configuration Note v0.5 in EN/VI from the official templates; corrected runtime traces, test truth, attachment/auth/AI wording, coverage, and formal layout.
+- Drive: updated all eight existing file IDs in place and verified readback hashes, metadata, parents, MIME types, and permissions.
+- Verification: OfficeCLI 1.0.141 passed 8/8; strict quality contract and specification validator passed; visual review passed 102/102 pages; secret scan, agent rules, QA Depth self-test 15/15, AI DevKit 5/5, and `git diff --check` passed. No `app/`, `srv/`, or `db/` changes exist.
+- Documentation issue found and fixed: Blueprint history rows initially cloned a merged spacer row and displayed only the version column. The generator now clones the real six-cell row; v0.1–v0.6 details are present locally and on Drive.
+- Documentation sync issue found and fixed: prior Drive/repository binary size differences were removed by same-ID regeneration/readback from the current repository templates.
+- Tooling issues: the combined OfficeCLI loop timed out and was split into eight successful calls; Windows CP1252 could not print one Vietnamese row; LibreOffice emitted a harmless `<prefix>` warning; one recursive temp cleanup was blocked and replaced with a unique temp directory; a Jira wrapper call failed and direct connector calls were used. None changed runtime or artifact content.
+- Remaining: PR merge, mentor review/signature, six human UAT executions, and live OpenAI acceptance. OpenAI remains disabled/not accepted.
+- Evidence: `docs/pm/evidence/idts-102/sap490-specifications-quality-remediation-20260725.md`.

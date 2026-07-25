@@ -27,13 +27,13 @@ from docx.text.paragraph import Paragraph
 ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = ROOT / "docs" / "sap490" / "generated"
 TEMPLATE = ROOT / "docs" / "sap490" / "templates" / "Deliverable_template" / "Blueprint_Template.docx"
-VERSION = "v0.5"
+VERSION = "v0.6"
 DATE = "2026-07-25"
 
 
 EN = {
     "language": "English",
-    "output": "Blueprint_IDTS_SAP01_en_v0.5.docx",
+    "output": "Blueprint_IDTS_SAP01_en_v0.6.docx",
     "page_count": 26,
     "title": "Issue and Defect Tracking System in SAP",
     "subtitle": "SAP490 Business Blueprint",
@@ -207,7 +207,7 @@ EN = {
 
 VI = {
     "language": "Vietnamese",
-    "output": "Blueprint_IDTS_SAP01_vi_v0.5.docx",
+    "output": "Blueprint_IDTS_SAP01_vi_v0.6.docx",
     "page_count": 25,
     "title": "Hệ thống Quản lý Issue và Defect trong SAP",
     "subtitle": "Business Blueprint SAP490",
@@ -516,22 +516,22 @@ VI_INTERFACE_ROWS = [
 ]
 
 TRACE_ROWS = [
-    ["BP-01", "Auth and role boundary", "BRD/SRS auth requirements; AuthService", "qa:auth:programmatic", "Executed PASS"],
-    ["BP-02–BP-09", "Core defect lifecycle", "Business rules BR-01–BR-46; FRS workflows", "Current test scenarios plus three broader suites", "Partly executed; three suites Pending"],
-    ["BP-10", "Comments and attachments", "SRS/FRS collaboration and storage rules", "Comments/attachments regression", "Pending in current Test Report"],
-    ["BP-11", "Notification outbox", "NotificationDeliveries rules", "qa:email-outbox:programmatic", "Executed PASS; provider disabled/SKIPPED"],
+    ["BP-01", "Auth and role boundary", "BRD/SRS auth requirements; AuthService", "21-case accepted catalog and authentication evidence", "21 PASSED catalog includes auth baseline"],
+    ["BP-02–BP-09", "Core defect lifecycle", "Business rules BR-01–BR-46; FRS workflows", "Shared QA lifecycle acceptance", "40/40 PASS"],
+    ["BP-10", "Comments and attachments", "SRS/FRS collaboration and storage rules", "Shared QA S3 upload/download/hash/reload/delete", "PASSED"],
+    ["BP-11", "Notification outbox", "NotificationDeliveries rules", "Shared QA Brevo delivery readback", "SENT; workflow isolation verified"],
     ["BP-12", "PM monitoring", "PM reporting requirements", "qa:pm-monitoring:programmatic", "Executed PASS"],
-    ["BP-13", "AI human-review boundary", "AI canonical rules and AiSuggestions", "AI provider/human-review regression", "Pending in current Test Report"],
-    ["Acceptance", "Mentor/UAT/sign-off", "UAT and final-report artifacts", "Mentor/user execution", "Not complete; UAT Prepared only"],
+    ["BP-13", "AI human-review boundary", "AI canonical rules and AiSuggestions", "Shared QA AI acceptance", "25/25 PASS in disabled-provider/fallback mode; OpenAI live DISABLED / NOT ACCEPTED"],
+    ["Acceptance", "Mentor/UAT/sign-off", "UAT and final-report artifacts", "Human execution", "6 UAT PREPARED; mentor approval Pending"],
 ]
 VI_TRACE_ROWS = [
-    ["BP-01", "Ranh giới xác thực và vai trò", "Yêu cầu xác thực BRD/SRS; AuthService", "qa:auth:programmatic", "Đã chạy và PASS"],
-    ["BP-02–BP-09", "Vòng đời defect cốt lõi", "Quy tắc BR-01–BR-46; luồng FRS", "Các kịch bản hiện tại và ba bộ kiểm thử mở rộng", "Đã chạy một phần; ba bộ còn Pending"],
-    ["BP-10", "Bình luận và tệp đính kèm", "Quy tắc trao đổi/lưu trữ trong SRS/FRS", "Kiểm thử hồi quy bình luận/tệp", "Pending trong Test Report hiện tại"],
-    ["BP-11", "Hộp thư đi thông báo", "Quy tắc NotificationDeliveries", "qa:email-outbox:programmatic", "Đã chạy và PASS; nhà cung cấp tắt/SKIPPED"],
+    ["BP-01", "Ranh giới xác thực và vai trò", "Yêu cầu xác thực BRD/SRS; AuthService", "Danh mục 21 case đã nghiệm thu và bằng chứng xác thực", "Danh mục 21 PASSED có nền xác thực"],
+    ["BP-02–BP-09", "Vòng đời defect cốt lõi", "Quy tắc BR-01–BR-46; luồng FRS", "Nghiệm thu vòng đời trên Shared QA", "40/40 PASS"],
+    ["BP-10", "Bình luận và tệp đính kèm", "Quy tắc trao đổi/lưu trữ trong SRS/FRS", "S3 Shared QA: upload/download/hash/reload/delete", "ĐÃ ĐẠT"],
+    ["BP-11", "Hộp thư đi thông báo", "Quy tắc NotificationDeliveries", "Readback giao email Brevo trên Shared QA", "SENT; đã xác minh cô lập lỗi workflow"],
     ["BP-12", "PM giám sát", "Yêu cầu báo cáo PM", "qa:pm-monitoring:programmatic", "Đã chạy và PASS"],
-    ["BP-13", "Ranh giới AI để con người đánh giá", "Quy tắc AI chuẩn và AiSuggestions", "Kiểm thử hồi quy AI/đánh giá của con người", "Pending trong Test Report hiện tại"],
-    ["Nghiệm thu", "Người hướng dẫn/UAT/ký xác nhận", "UAT và Final Project Report", "Người hướng dẫn/người dùng thực hiện", "Chưa hoàn tất; UAT mới ở trạng thái Prepared"],
+    ["BP-13", "Ranh giới AI để con người đánh giá", "Quy tắc AI chuẩn và AiSuggestions", "Nghiệm thu AI trên Shared QA", "25/25 PASS ở chế độ provider tắt/fallback; OpenAI live DISABLED / NOT ACCEPTED"],
+    ["Nghiệm thu", "Người hướng dẫn/UAT/ký xác nhận", "UAT và Final Project Report", "Con người thực hiện", "6 UAT PREPARED; người hướng dẫn chưa phê duyệt"],
 ]
 
 
@@ -700,14 +700,14 @@ def lifecycle_table_spec(content: dict) -> tuple[str, list[str], list[list[str]]
 def report_table_specs(content: dict) -> list[tuple[str, list[str], list[list[str]], list[float]]]:
     source = TRACE_ROWS if content is EN else VI_TRACE_ROWS
     if content is EN:
-        gaps = ["None in current local run", "Three broader suites remain Pending", "Current report still Pending", "Live provider disabled / SKIPPED", "None in current local run", "Provider/human-review test Pending", "UAT execution and sign-off Pending"]
+        gaps = ["Human UAT remains Prepared", "Human UAT remains Prepared", "Human UAT remains Prepared", "Inbox evidence is accepted; mentor sign-off Pending", "Human UAT remains Prepared", "Live OpenAI is not accepted", "UAT execution and mentor sign-off Pending"]
         limitation_impacts = ["No formal acceptance", "No user acceptance result", "Email acceptance incomplete", "Attachment acceptance incomplete", "AI acceptance incomplete", "No production-readiness claim"]
         mitigations = ["Keep Draft/Pending labels", "Keep UAT Prepared", "Use in-app/outbox evidence only", "Require binding and persistence proof", "Keep live OpenAI disabled; test review/apply/metrics through the approved deterministic baseline", "Limit claims to educational/shared QA"]
         owners = ["Mentor / DonHV", "Mentor / users", "Operations / DonHV", "Operations / QA", "DonHV / QA", "PM / architecture"]
         titles = ["Verification and acceptance status", "Known limitations"]
         headers = [["Area", "Verification method", "Current evidence", "Status", "Remaining gap"], ["ID", "Limitation", "Impact", "Current mitigation", "Follow-up / Owner"]]
     else:
-        gaps = ["Không còn khoảng trống trong lần chạy local hiện tại", "Ba bộ kiểm thử mở rộng còn Pending", "Báo cáo hiện tại vẫn Pending", "Nhà cung cấp thực tắt / SKIPPED", "Không còn khoảng trống trong lần chạy local hiện tại", "Kiểm thử nhà cung cấp/người đánh giá còn Pending", "UAT và ký xác nhận còn Pending"]
+        gaps = ["UAT do con người thực hiện vẫn ở trạng thái Prepared", "UAT do con người thực hiện vẫn ở trạng thái Prepared", "UAT do con người thực hiện vẫn ở trạng thái Prepared", "Đã có bằng chứng inbox; chờ người hướng dẫn xác nhận", "UAT do con người thực hiện vẫn ở trạng thái Prepared", "OpenAI live chưa được nghiệm thu", "UAT và ký xác nhận của người hướng dẫn còn Pending"]
         limitation_impacts = ["Chưa có nghiệm thu chính thức", "Chưa có kết quả chấp nhận của người dùng", "Nghiệm thu email chưa đầy đủ", "Nghiệm thu tệp chưa đầy đủ", "Nghiệm thu AI chưa đầy đủ", "Không được tuyên bố sẵn sàng production"]
         mitigations = ["Giữ nhãn Bản nháp/Đang chờ", "Giữ UAT ở trạng thái Prepared", "Chỉ dùng bằng chứng trong ứng dụng/hộp thư đi", "Yêu cầu bằng chứng liên kết và lưu bền", "Giữ provider live tắt; kiểm thử review/apply/metrics bằng baseline deterministic đã duyệt", "Giới hạn tuyên bố ở nền giáo dục/QA dùng chung"]
         owners = ["Người hướng dẫn / DonHV", "Người hướng dẫn / người dùng", "Vận hành / DonHV", "Vận hành / QA", "DonHV / QA", "PM / kiến trúc"]
@@ -731,17 +731,8 @@ def copy_element_property(target, source, property_name: str) -> None:
 
 
 def add_wrap_opportunities(text: str) -> str:
-    """Add invisible breaks only at slash or CamelCase/entity boundaries."""
-    value = str(text)
-    value = re.sub(r"/(?=\S)", "/\u200b", value)
-
-    def polish_token(match: re.Match[str]) -> str:
-        token = match.group(0)
-        if len(token) < 12:
-            return token
-        return re.sub(r"(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])", "\u200b", token)
-
-    return re.sub(r"[A-Za-z][A-Za-z0-9]*", polish_token, value)
+    """Keep technical identifiers byte-visible; column sizing handles wrapping."""
+    return str(text)
 
 
 def fill_new_table_cell(cell, text: str, prototype_cell) -> None:
@@ -1031,6 +1022,20 @@ def resize_rows(table, count: int) -> None:
         table._tbl.remove(table.rows[-1]._tr)
 
 
+def resize_rows_from_template(table, count: int, template_row_index: int) -> None:
+    """Resize a template table by cloning a known non-merged data row.
+
+    Some official-template tables end with a merged spacer row.  Cloning the
+    last row would therefore collapse every added record into one cell.  The
+    caller identifies the real data-row signature that must be preserved.
+    """
+    template_row = deepcopy(table.rows[template_row_index]._tr)
+    while len(table.rows) > template_row_index + 1:
+        table._tbl.remove(table.rows[-1]._tr)
+    while len(table.rows) < count:
+        table._tbl.append(deepcopy(template_row))
+
+
 def keep_row_together(row, repeat_header: bool = False) -> None:
     row_properties = row._tr.get_or_add_trPr()
     if row_properties.find(qn("w:cantSplit")) is None:
@@ -1162,15 +1167,24 @@ def fill_control_tables(doc: Document, content: dict) -> None:
         fill_template_cell(history.cell(1, index), label)
     history_rows = (
         [
-            [DATE, "Official-template baseline", "Consolidated IDTS content in the official SAP490 template", "DonHV", "C", "v0.3"],
-            [DATE, "Table-layout remediation", "Converted ten approved content sections to true Word tables; business meaning unchanged", "DonHV", "C", VERSION],
+            ["2026-06-21", "Initial Blueprint", "Established IDTS business scope and roles", "DonHV", "A", "v0.1"],
+            ["2026-07-02", "Shared QA baseline", "Added PostgreSQL, S3, email and deployment boundaries", "DonHV", "C", "v0.2"],
+            ["2026-07-23", "Official-template baseline", "Mapped verified IDTS content into the official SAP490 template", "DonHV", "C", "v0.3"],
+            ["2026-07-23", "Table-layout remediation", "Converted approved content sections to template-derived Word tables", "DonHV", "C", "v0.4"],
+            ["2026-07-25", "Runtime feature alignment", "Added exact AI actions, developer dataset and current integration scope", "DonHV", "C", "v0.5"],
+            [DATE, "Quality remediation", "Corrected acceptance truth, version continuity, identifiers and diagram explanations", "DonHV", "C", VERSION],
         ]
         if content is EN
         else [
-            [DATE, "Bản chuẩn theo template chính thức", "Tổng hợp nội dung IDTS trong template SAP490 chính thức", "DonHV", "C", "v0.3"],
-            [DATE, "Khắc phục cách trình bày bằng bảng", "Chuyển mười phần nội dung đã duyệt sang bảng Word thật; không thay đổi ý nghĩa nghiệp vụ", "DonHV", "C", VERSION],
+            ["2026-06-21", "Blueprint ban đầu", "Thiết lập phạm vi nghiệp vụ và vai trò IDTS", "DonHV", "A", "v0.1"],
+            ["2026-07-02", "Nền Shared QA", "Bổ sung ranh giới PostgreSQL, S3, email và triển khai", "DonHV", "C", "v0.2"],
+            ["2026-07-23", "Nền theo template chính thức", "Đưa nội dung IDTS đã xác minh vào template SAP490 chính thức", "DonHV", "C", "v0.3"],
+            ["2026-07-23", "Khắc phục cách trình bày bằng bảng", "Chuyển các phần nội dung đã duyệt sang bảng Word kế thừa template", "DonHV", "C", "v0.4"],
+            ["2026-07-25", "Đồng bộ tính năng runtime", "Bổ sung action AI chính xác, bộ dữ liệu developer và phạm vi tích hợp", "DonHV", "C", "v0.5"],
+            [DATE, "Khắc phục chất lượng", "Sửa sự thật nghiệm thu, lịch sử phiên bản, identifier và diễn giải diagram", "DonHV", "C", VERSION],
         ]
     )
+    resize_rows_from_template(history, len(history_rows) + 2, template_row_index=3)
     for row_index, values in enumerate(history_rows, 2):
         for column_index, value in enumerate(values):
             fill_template_cell(history.cell(row_index, column_index), value)

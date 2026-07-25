@@ -24,8 +24,8 @@ XLSX_CONTRACTS = {
     "functional": {
         "template": TEMPLATE_DIR / "Functional_Specification.xlsx",
         "outputs": [
-            GENERATED_DIR / "Functional_Specification_IDTS_SAP01_en_v0.5.xlsx",
-            GENERATED_DIR / "Functional_Specification_IDTS_SAP01_vi_v0.5.xlsx",
+            GENERATED_DIR / "Functional_Specification_IDTS_SAP01_en_v0.6.xlsx",
+            GENERATED_DIR / "Functional_Specification_IDTS_SAP01_vi_v0.6.xlsx",
         ],
         "required_sheets": [
             "Cover",
@@ -42,8 +42,8 @@ XLSX_CONTRACTS = {
     "technical": {
         "template": TEMPLATE_DIR / "Technical_Specification.xlsx",
         "outputs": [
-            GENERATED_DIR / "Technical_Specification_IDTS_SAP01_en_v0.4.xlsx",
-            GENERATED_DIR / "Technical_Specification_IDTS_SAP01_vi_v0.4.xlsx",
+            GENERATED_DIR / "Technical_Specification_IDTS_SAP01_en_v0.5.xlsx",
+            GENERATED_DIR / "Technical_Specification_IDTS_SAP01_vi_v0.5.xlsx",
         ],
         "required_sheets": [
             "Cover",
@@ -63,8 +63,8 @@ XLSX_CONTRACTS = {
     "configuration": {
         "template": TEMPLATE_DIR / "Configuration_Note.xlsx",
         "outputs": [
-            GENERATED_DIR / "Configuration_Note_IDTS_SAP01_en_v0.4.xlsx",
-            GENERATED_DIR / "Configuration_Note_IDTS_SAP01_vi_v0.4.xlsx",
+            GENERATED_DIR / "Configuration_Note_IDTS_SAP01_en_v0.5.xlsx",
+            GENERATED_DIR / "Configuration_Note_IDTS_SAP01_vi_v0.5.xlsx",
         ],
         "required_sheets": ["Cover", "Record of change", "Checklist", "4", "5"],
     },
@@ -72,8 +72,8 @@ XLSX_CONTRACTS = {
 
 BLUEPRINT_TEMPLATE = TEMPLATE_DIR / "Blueprint_Template.docx"
 BLUEPRINT_OUTPUTS = [
-    GENERATED_DIR / "Blueprint_IDTS_SAP01_en_v0.5.docx",
-    GENERATED_DIR / "Blueprint_IDTS_SAP01_vi_v0.5.docx",
+    GENERATED_DIR / "Blueprint_IDTS_SAP01_en_v0.6.docx",
+    GENERATED_DIR / "Blueprint_IDTS_SAP01_vi_v0.6.docx",
 ]
 
 FORBIDDEN_RESIDUE = [
@@ -188,6 +188,17 @@ def page_signature(worksheet):
     )
 
 
+def page_signature_matches(actual, expected):
+    """Permit only the approved repair of the template's incomplete footer."""
+    if actual == expected:
+        return True
+    return (
+        actual[:-1] == expected[:-1]
+        and expected[-1] in {None, "&P / "}
+        and actual[-1] == "&P / &N"
+    )
+
+
 def column_width_signature(worksheet):
     return {
         key: (
@@ -258,7 +269,7 @@ def validate_workbooks() -> list[str]:
                     f"{output.name}: sheet visibility changed: {actual_states!r}"
                 )
             for worksheet in workbook.worksheets:
-                if page_signature(worksheet) != expected_pages[worksheet.title]:
+                if not page_signature_matches(page_signature(worksheet), expected_pages[worksheet.title]):
                     failures.append(
                         f"{output.name}/{worksheet.title}: official page setup changed"
                     )
