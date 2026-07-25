@@ -66,12 +66,13 @@ No abnormal blank page, `###`, vertical text, obvious clipping, or raw prose dum
 | Documentation issue | Stale print areas created 28/59-page outputs with large blank regions. | Generator now bounds print areas; final output is 12/13 pages. |
 | Tooling issue | Recursive removal of local `tmp/` evidence was blocked by command policy. | No workaround attempted; `tmp/` is explicitly excluded from staging and commit. |
 | Tooling issue | Atlassian Rovo returned `Internal error` for both the IDTS-103 comment and accessible-resource lookup. | Jira content was not changed. PR/evidence links remain available in the repository; Jira synchronization is pending connector recovery. |
-| Process gate | Draft PR #183 `qa-depth-gate` failed because DonHV's score is Pending and Critical questions, Debug exercise, Teach-back, and Result are not PASS. | Expected and correctly enforced. No learner result was fabricated; merge and Drive sync remain blocked until the real gate is completed. |
+| Process gate | PR #183 initially declared the Knowledge Gate as Pending even though `docs/learning/progress/donhv.md` already contained genuine IDTS-89/90 90% PASS records. | Corrected the PR declaration to reference the existing evidence. A rerun of the old workflow still read the original pull-request event payload, so this repository update is pushed to generate a fresh synchronize event; no gate is bypassed. |
+| Tooling issue | Two initial PowerShell PR-body replacements failed because one assumed an exact newline representation and the next treated the multiline CLI output as a scalar string. | Joined the GitHub CLI output explicitly, replaced the section by heading boundaries, and verified the corrected body through `gh pr view`. No repository artifact or runtime behavior was affected. |
 
 ## Pending gates
 
 - Final `git diff --check` and PR QA Depth check.
-- DonHV local workbook review.
+- DonHV local workbook review: PASS/approved on 2026-07-25.
 - Same-ID Google Drive update and readback after approval.
 - Jira evidence comment after Atlassian Rovo connector recovery.
-- DonHV Ownership Knowledge Gate score 80–100% with Critical questions, Debug exercise, Teach-back, and Result all PASS.
+- DonHV Ownership Knowledge Gate: PASS at 90% for IDTS-89/90, with Critical questions, Debug exercise, Teach-back, and Result all PASS.

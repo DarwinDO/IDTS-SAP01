@@ -2,7 +2,7 @@
 
 ## Status
 
-Blocked at merge gate — local artifacts are generated and verified; DonHV review and Ownership Knowledge Gate completion remain required before merge and Google Drive synchronization.
+Ready for merge gate — local artifacts are generated, verified, and approved by DonHV; the existing IDTS-89/90 Knowledge Gate evidence records 90% PASS with Critical, Debug, and Teach-back PASS. PR #183 is awaiting a fresh QA Depth Gate run on the corrected declaration before merge and Google Drive synchronization.
 
 ## Scope
 
@@ -29,8 +29,9 @@ Blocked at merge gate — local artifacts are generated and verified; DonHV revi
 - Quality/source/message/parity contract: PASS.
 - Secret scan, agent rules, QA Depth 15/15, ownership gate 5/5, and AI DevKit 5/5: PASS.
 - Ponytail simplicity review: `Lean already. Ship.`
-- Draft PR #183 is mergeable, but `qa-depth-gate` correctly fails only because the DonHV Ownership Knowledge Gate is still In Progress.
-- Drive update: not started; local approval is required first.
+- PR #183 is Ready and mergeable. Its body now references the genuine IDTS-89/90 Knowledge Gate PASS evidence; a fresh synchronize-triggered QA Depth Gate is required because rerunning the old GitHub Actions run reused its original PR-event payload.
+- DonHV approved all four local workbooks on 2026-07-25.
+- Drive update: not started; same-ID update/readback begins only after PR #183 merges.
 
 ## Known limitations
 
@@ -40,4 +41,4 @@ Blocked at merge gate — local artifacts are generated and verified; DonHV revi
 
 ## Next handoff
 
-Run the final repository/document gates, create the review PR, obtain DonHV local approval, then update the four existing Google Drive files in place and verify readback.
+Push the evidence/status correction to trigger a fresh PR event, merge PR #183 after the required gate passes, then update the four existing Google Drive files in place and verify readback.
