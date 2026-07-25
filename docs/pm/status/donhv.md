@@ -3241,3 +3241,10 @@ Vietnamese:
 - Exact-byte readback matched all four approved local SHA-256 values. Chrome Drive preview confirmed 9/9 Functional tabs, 12/12 Technical tabs, and a readable formal Vietnamese `Screen Layout` table.
 - Tooling limitation: the Google Sheets cell API returned zero sheet metadata for raw XLSX Drive files because they are external Office binaries rather than native Google Sheets. This did not affect content; byte-identical readback plus the real Drive preview were used instead.
 - Jira synchronization resumed after the earlier connector error. IDTS-103 receives the merge/Drive evidence and can move to Done; mentor approval/signature and live OpenAI acceptance remain outside this task.
+
+### 2026-07-25 — NhanT PR #177–#179 review and Jira correction
+
+- PR #177 / IDTS-96: Changes Required. Existing IDTS-91/93/95 evidence is useful, but IDTS-94 Handoff/Smart Assign no-mutation and reload coverage plus Knowledge Gate answers/debug/teach-back are absent. GitHub review comment `5078149225`; Jira comment `10697`; Jira moved from To Do to In Progress.
+- PR #178 / IDTS-98: Changes Required. Diff includes unrelated `LICENSE`, `bin/gh.exe`, `gh.zip`, `temp_body.md`, lockfile noise and a hardcoded Basic credential. The harness determines PASS from scenario metadata instead of invoking the four real AI capability paths. GitHub review comment `5078149292`; Jira comment `10698`; Jira corrected from Done to In Progress.
+- PR #179 / IDTS-99: Changes Required. Evidence is disabled-provider/fallback UI smoke, not live-provider acceptance; role/action/persistence/metrics/browser coverage is incomplete and Smart Assign absence is only a warning. GitHub review comment `5078149350`; Jira comment `10699`; Jira remains To Do while OpenAI live is disabled.
+- Tooling issue: the first combined branch-switch/search command returned exit code 1 after the branch switch succeeded because `rg` found no existing IDTS-96/98/99 PM-board rows. No file or branch content was lost; focused inspection confirmed the rows were absent and this handover update adds them.
