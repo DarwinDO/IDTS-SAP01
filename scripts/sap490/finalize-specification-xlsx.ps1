@@ -15,8 +15,8 @@ $outputDirectory = if ([System.IO.Path]::IsPathRooted($GeneratedDirectory)) {
 $workbookNames = @(
     "Functional_Specification_IDTS_SAP01_en_v0.7.xlsx",
     "Functional_Specification_IDTS_SAP01_vi_v0.7.xlsx",
-    "Technical_Specification_IDTS_SAP01_en_v0.6.xlsx",
-    "Technical_Specification_IDTS_SAP01_vi_v0.6.xlsx",
+    "Technical_Specification_IDTS_SAP01_en_v0.7.xlsx",
+    "Technical_Specification_IDTS_SAP01_vi_v0.7.xlsx",
     "Configuration_Note_IDTS_SAP01_en_v0.5.xlsx",
     "Configuration_Note_IDTS_SAP01_vi_v0.5.xlsx"
 )
@@ -69,7 +69,7 @@ try {
                 # Native Excel may normalize omitted/default XML values during
                 # Save. Reapply the official-template print contract explicitly
                 # so orientation, printable width and repeated titles stay exact.
-                foreach ($property in @(
+                $pageSetupProperties = @(
                     "Orientation", "PaperSize", "Zoom",
                     "FitToPagesWide", "FitToPagesTall",
                     "LeftMargin", "RightMargin", "TopMargin", "BottomMargin",
@@ -78,7 +78,16 @@ try {
                     "PrintArea", "PrintTitleRows", "PrintTitleColumns",
                     "LeftHeader", "CenterHeader", "RightHeader",
                     "LeftFooter", "CenterFooter", "RightFooter"
-                )) {
+                )
+                if ($name.StartsWith("Technical_Specification_")) {
+                    # The generator deliberately narrows each technical tab to
+                    # the populated official-template region. Preserve those
+                    # per-tab print areas and repeated-title rows during the
+                    # native Excel package normalization.
+                    $pageSetupProperties = $pageSetupProperties |
+                        Where-Object { $_ -notin @("PrintArea", "FitToPagesTall") }
+                }
+                foreach ($property in $pageSetupProperties) {
                     try {
                         $value = $sourceSetup.$property
                         if ($value -is [bool]) {

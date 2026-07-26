@@ -43,3 +43,13 @@ Done — PR #183 passed the fresh QA Depth Gate and merged normally into `dev` a
 ## Next handoff
 
 Use the synchronized Drive workbooks for mentor review. Mentor approval/signature and live OpenAI acceptance remain external pending gates and are not claimed by IDTS-103.
+
+## 2026-07-26 follow-up — Technical Specification template fidelity
+
+- Regenerated Technical Specification EN/VI as v0.7 from a fresh official-template copy.
+- Restored the official inner layouts for Screen Layout, Screen Definition and Message Definition instead of retaining custom replacement tables.
+- Corrected the Screen Definition Type/I/O mapping and moved deep code trace into Technical Implementation.
+- Replaced stale historical screenshots with current Shared QA evidence.
+- OfficeCLI 1.0.141, the full specification validator and final LibreOffice visual review pass locally.
+- Evidence: `docs/pm/evidence/idts-103/technical-spec-template-fidelity-remediation-20260726.md`.
+- Drive remains unchanged until this follow-up PR is merged.

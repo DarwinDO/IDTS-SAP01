@@ -8,22 +8,24 @@ runtime trace, test status, version history, or Vietnamese content is stale.
 from __future__ import annotations
 
 from pathlib import Path
+from functools import lru_cache
 import re
 import sys
 
 from docx import Document
 from openpyxl import load_workbook
-from specification_catalog import FUNCTIONS, MESSAGES, TECH_REQUIREMENTS
+from specification_catalog import FUNCTIONS, LIFECYCLE_ACTIONS, MESSAGES, TECH_REQUIREMENTS
 
 
 ROOT = Path(__file__).resolve().parents[2]
 GENERATED = ROOT / "docs" / "sap490" / "generated"
+TECHNICAL_TEMPLATE = ROOT / "docs" / "sap490" / "templates" / "Deliverable_template" / "Technical_Specification.xlsx"
 
 FILES = {
     "functional_en": GENERATED / "Functional_Specification_IDTS_SAP01_en_v0.7.xlsx",
     "functional_vi": GENERATED / "Functional_Specification_IDTS_SAP01_vi_v0.7.xlsx",
-    "technical_en": GENERATED / "Technical_Specification_IDTS_SAP01_en_v0.6.xlsx",
-    "technical_vi": GENERATED / "Technical_Specification_IDTS_SAP01_vi_v0.6.xlsx",
+    "technical_en": GENERATED / "Technical_Specification_IDTS_SAP01_en_v0.7.xlsx",
+    "technical_vi": GENERATED / "Technical_Specification_IDTS_SAP01_vi_v0.7.xlsx",
     "config_en": GENERATED / "Configuration_Note_IDTS_SAP01_en_v0.5.xlsx",
     "config_vi": GENERATED / "Configuration_Note_IDTS_SAP01_vi_v0.5.xlsx",
     "blueprint_en": GENERATED / "Blueprint_IDTS_SAP01_en_v0.6.docx",
@@ -64,6 +66,7 @@ REQUIRED_TEST_TRUTH = {
 }
 
 
+@lru_cache(maxsize=None)
 def workbook_text(path: Path) -> str:
     workbook = load_workbook(path, data_only=False)
     return "\n".join(
@@ -75,6 +78,7 @@ def workbook_text(path: Path) -> str:
     )
 
 
+@lru_cache(maxsize=None)
 def document_text(path: Path) -> str:
     document = Document(path)
     values = [paragraph.text for paragraph in document.paragraphs]
@@ -97,6 +101,75 @@ def visible_cells(path: Path) -> list:
         for cell in row
         if cell.value not in (None, "")
     ]
+
+
+def validate_technical_template_contract(path: Path, language: str) -> list[str]:
+    """Protect the official inner layouts, not only tab names and outer styling."""
+    failures = []
+    template = load_workbook(TECHNICAL_TEMPLATE, data_only=False)
+    workbook = load_workbook(path, data_only=False)
+    expected_sheets = template.sheetnames
+    if workbook.sheetnames != expected_sheets:
+        failures.append(f"{path.name}: sheet order differs from official template")
+    for name in expected_sheets:
+        if workbook[name].sheet_state != template[name].sheet_state:
+            failures.append(f"{path.name}/{name}: visibility differs from official template")
+
+    layout = workbook["Screen Layout"]
+    template_layout = template["Screen Layout"]
+    required_layout_merges = {"B5:BG5", "B6:BG6", "B7:BG7", "C8:BG8"}
+    if not required_layout_merges.issubset({str(item) for item in layout.merged_cells.ranges}):
+        failures.append(f"{path.name}: Screen Layout official merged blocks were not preserved")
+    if len(layout._images) < 2:
+        failures.append(f"{path.name}: Screen Layout must contain two implemented-screen images")
+    layout_text = "\n".join(str(cell.value) for row in layout.iter_rows() for cell in row if cell.value)
+    for forbidden in ("Route / entry", "Controller / extension", "OData binding"):
+        if forbidden in layout_text:
+            failures.append(f"{path.name}: Screen Layout still contains custom source-map table header {forbidden!r}")
+
+    definition = workbook["Screen Definition"]
+    if str(definition["B9"].value or "").startswith("Screen ID"):
+        failures.append(f"{path.name}: Screen Definition custom table replaced the official field grid")
+    for coordinate in ("B10", "C11", "I11", "M11", "O11", "R11", "AW10"):
+        if definition[coordinate].value in (None, ""):
+            failures.append(f"{path.name}: Screen Definition official header {coordinate} is empty")
+
+    messages = workbook["Message Definition"]
+    expected_message_merges = {"B5:G5", "H5:L5", "M5:AP5", "AQ5:BG5"}
+    if not expected_message_merges.issubset({str(item) for item in messages.merged_cells.ranges}):
+        failures.append(f"{path.name}: Message Definition no longer uses the official four-column grid")
+    message_text = "\n".join(
+        str(cell.value) for row in messages.iter_rows()
+        for cell in row if cell.value not in (None, "")
+    )
+    if any(value in message_text for value in ("Exact source", "Sanitized logging", "Frontend handling / evidence")):
+        failures.append(f"{path.name}: technical trace leaked back into the four-column Message Definition")
+
+    implementation_text = "\n".join(
+        str(cell.value) for row in workbook["Technical Implementation"].iter_rows()
+        for cell in row if cell.value not in (None, "")
+    )
+    required_flows = {
+        "FLOW-COMMENT-CREATE", "FLOW-ATTACH-QUEUE", "FLOW-ATTACH-UPLOAD",
+        "FLOW-ATTACH-DOWNLOAD", "FLOW-ATTACH-DELETE",
+    }
+    required_flows.update(f"FLOW-{action.upper()}" for action, *_ in LIFECYCLE_ACTIONS)
+    for flow in sorted(required_flows):
+        if flow not in implementation_text:
+            failures.append(f"{path.name}: missing exact implementation flow {flow}")
+    for forbidden in ("Add comment or attachment", "POST/PUT/DELETE /odata/v4/bug child entity", "qa:"):
+        if forbidden in implementation_text:
+            failures.append(f"{path.name}: generic or command-only implementation evidence remains: {forbidden}")
+    full_text = workbook_text(path)
+    for forbidden in ("WS92400001", "Credit Memo Request", "NamNH", "HuyNB", "ThaoML9"):
+        if forbidden in full_text:
+            failures.append(f"{path.name}: official-template sample residue remains: {forbidden}")
+
+    if language == "vi":
+        for forbidden in ("Route / entry", "Page / view", "Role-scoped", "Signed-in user", "Bug participants", "Anonymous"):
+            if forbidden in workbook_text(path):
+                failures.append(f"{path.name}: visible English reader-facing label remains: {forbidden}")
+    return failures
 
 
 def validate_catalog_sources() -> list[str]:
@@ -127,6 +200,9 @@ def main() -> int:
     if failures:
         print("\n".join(f"FAIL: {item}" for item in failures))
         return 1
+
+    failures.extend(validate_technical_template_contract(FILES["technical_en"], "en"))
+    failures.extend(validate_technical_template_contract(FILES["technical_vi"], "vi"))
 
     functional_text = workbook_text(FILES["functional_en"]) + "\n" + workbook_text(FILES["functional_vi"])
     technical_text = workbook_text(FILES["technical_en"]) + "\n" + workbook_text(FILES["technical_vi"])
