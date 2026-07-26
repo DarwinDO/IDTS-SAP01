@@ -30,7 +30,7 @@ This does not replace code review, QA Depth Gate, CAP/Fiori checks, or Jira perm
 
 Store sanitized notes in `docs/learning/progress/` or `docs/pm/evidence/`; a Jira Done comment must state `Ownership Knowledge Gate: PASS` and link the PR/evidence. Never store password, token, private endpoint, API key, or full personal data.
 
-- 2026-07-26: SangVN passed the IDTS-85 Assignment/Comments/Attachments gate 4/4 (100%), with critical authorization/data-integrity, controlled debug, and teach-back all PASS after mentored equivalent retests. Evidence: `docs/pm/evidence/idts-85/knowledge-gate-sangvn-2026-07-26.md`.
+- 2026-07-26: SangVN passed the IDTS-85 Assignment/Comments/Attachments gate 4/4 (100%), with critical authorization/data-integrity, controlled debug, and teach-back all PASS after mentored equivalent retests. Evidence: `docs/pm/evidence/idts-85/knowledge-gate-sangvn-2026-07-26.md`; PR #186.
 
 ## Vietnamese
 
@@ -62,4 +62,4 @@ Không thay code review, QA Depth Gate, CAP/Fiori check hoặc Jira permission. 
 
 Lưu ghi chú đã sanitize ở `docs/learning/progress/` hoặc `docs/pm/evidence/`; comment Jira Done phải ghi `Ownership Knowledge Gate: PASS` và dẫn PR/evidence. Không lưu password, token, endpoint private, API key hoặc dữ liệu cá nhân đầy đủ.
 
-- 26/07/2026: SangVN pass gate IDTS-85 Assignment/Comments/Attachments 4/4 (100%); critical authorization/data-integrity, controlled debug và teach-back đều PASS sau mentored equivalent retest. Evidence: `docs/pm/evidence/idts-85/knowledge-gate-sangvn-2026-07-26.md`.
+- 26/07/2026: SangVN pass gate IDTS-85 Assignment/Comments/Attachments 4/4 (100%); critical authorization/data-integrity, controlled debug và teach-back đều PASS sau mentored equivalent retest. Evidence: `docs/pm/evidence/idts-85/knowledge-gate-sangvn-2026-07-26.md`; PR #186.
