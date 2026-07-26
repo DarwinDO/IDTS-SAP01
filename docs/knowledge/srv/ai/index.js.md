@@ -1,5 +1,15 @@
 # `srv/ai/index.js`
 
+## IDTS-97 metrics exports
+
+The barrel exports the safe metric builder/emitter, aggregate helper, and PM read handler from `metrics.js`. `srv/service.js` imports the read handler through this stable boundary; focused QA imports pure helpers without reaching into service wiring.
+
+## IDTS-95 duplicate confirmation export
+
+The same barrel exports `confirmDuplicateSuggestion` from `duplicate-confirmation.js`. `srv/service.js` imports it through this stable entry point. The export itself does not call AI or write data.
+
+Vietnamese: Barrel này cũng export `confirmDuplicateSuggestion` từ `duplicate-confirmation.js`. `srv/service.js` import qua entry point chung này. Bản thân export không gọi AI hoặc ghi dữ liệu.
+
 ## Beginner-first module map (2026-07-18)
 
 ### English
@@ -162,3 +172,13 @@ The explanation logic remains in `srv/ai/assignment-explanation.js`. This index 
 IDTS-69 export them `explainSmartAssignment` cho CAP service handler va `buildAssignmentExplanations` cho focused backend verification.
 
 Logic giai thich assignment van nam trong `srv/ai/assignment-explanation.js`. File index nay chi giu import boundary on dinh de `srv/service.js` import tu `srv/ai` thay vi import sau vao tung feature file.
+
+## IDTS-91/93 review and apply exports
+
+### English
+
+The barrel now exports the three review actions from `review.js` and the accepted-classification apply action from `classification-apply.js`. Primary owner: DonHV; backup: DatDT. Debug from the exported action name into its focused module, then confirm `srv/service.js` registers the same name and `srv/service.cds` declares the matching OData action. Keep these exports explicit; removing or renaming one can leave metadata and runtime wiring out of sync.
+
+### Vietnamese
+
+Barrel hiện export ba review action từ `review.js` và action áp dụng classification đã Accept từ `classification-apply.js`. Owner chính: DonHV; backup: DatDT. Khi debug, đi từ tên action được export vào module tập trung, rồi xác nhận `srv/service.js` đăng ký đúng tên và `srv/service.cds` khai báo OData action tương ứng. Giữ export rõ ràng; xóa hoặc đổi tên một action có thể làm metadata lệch runtime wiring.

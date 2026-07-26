@@ -3,8 +3,8 @@
 Project: Issue and Defect Tracking System in SAP
 Document type: Software Requirements Specification (SRS)
 Language: English
-Status: Draft v1.4
-Last updated: 2026-07-22
+Status: Draft v1.5
+Last updated: 2026-07-24
 Prepared for: SAP490 project delivery, mentor review, implementation evidence, and QA test design
 Document style: Traditional SRS outline with ISO/IEC/IEEE 29148-style requirement quality, traceability, and verification discipline
 
@@ -19,6 +19,7 @@ Document style: Traditional SRS outline with ISO/IEC/IEEE 29148-style requiremen
 | v1.2 | 2026-07-10 | IDTS Project Team | Mentor / Supervisor | Synced the implemented attachment and optional advisory-AI baseline, with explicit human-review, privacy, and no-workflow-authority constraints. | Draft |
 | v1.3 | 2026-07-11 | IDTS Project Team | Mentor / Supervisor | Replaced the review-facing system-context source block with a rendered, traceable figure and Diagram Pack reference. | Draft |
 | v1.4 | 2026-07-22 | IDTS Project Team | Mentor / Supervisor | Aligned authentication/session, shared PostgreSQL/Render, attachment object storage, email outbox, and human-reviewed AI audit requirements with the implemented mentor-review baseline. | Draft |
+| v1.5 | 2026-07-24 | IDTS Project Team | Mentor / Supervisor | Added deployed OData base paths, exact workflow-action audit codes, and the current `AiSuggestions` PENDING-only review-state limitation. | Draft |
 
 ### 1.2 Review and Sign-Off
 
@@ -243,7 +244,7 @@ Verification methods:
 | SRS-FR-AI-001 | DISC-002 | IDTS may provide similar-bug, classification, bug/handoff summary, and Smart Assign explanation suggestions only as reviewable advisory output. | Should | Test and demonstration | FRS-AI-001 |
 | SRS-FR-AI-002 | DISC-002 | AI output shall not create, edit, assign, reclassify, transition, close, reopen, or otherwise mutate a bug; the normal authorized action remains the only decision path. | Must | Test | FRS-AI-001 |
 | SRS-FR-AI-003 | DISC-002 | AI requests, responses, audit records, and user-visible failures shall exclude credentials, tokens, private endpoints, attachment bytes, raw provider output, and unnecessary personal data. | Must | Inspection and test | FRS-AI-001 |
-| SRS-FR-AI-004 | DISC-002 | Source-linked suggestions shall persist only normalized safe data in `AiSuggestions`, including review status where applicable; the audit row shall not represent an autonomous workflow decision. | Must | Inspection and test | FRS-AI-001 |
+| SRS-FR-AI-004 | DISC-002 | Source-linked suggestions shall persist only normalized safe data in `AiSuggestions`. The current implementation creates the audit row in `PENDING` and exposes no public action that persists `ACCEPTED`, `REJECTED`, or `IGNORED`; the row shall not represent an autonomous workflow decision. | Must | Inspection and test | FRS-AI-001 |
 
 ## 8. Data Requirements
 
@@ -259,8 +260,8 @@ Verification methods:
 | SRS-DATA-008 | Notifications | IDTS shall store in-app notification event type, recipient, channel, delivery status, timestamp, and parent bug reference. | Must | Inspection |
 | SRS-DATA-009 | Authentication sessions | IDTS shall store hashed/token-safe session records with user, expiry, and revocation state in `AuthSessions`; bearer tokens and passwords shall not be committed to source. | Must | Inspection and test |
 | SRS-DATA-010 | Email delivery outbox | IDTS shall store safe payload snapshots, attempts, retry timing, status, locking, and sanitized failure details in `NotificationDeliveries`. | Must | Inspection and test |
-| SRS-DATA-011 | AI suggestion audit | IDTS shall store normalized source-linked suggestion and human-review state in `AiSuggestions` without raw prompts, raw provider responses, credentials, attachment content, or hidden reasoning. | Must | Inspection and test |
-| SRS-DATA-009 | HistoryLogs | IDTS shall store history logs as bug-owned audit records. | Must | Inspection |
+| SRS-DATA-011 | AI suggestion audit | IDTS shall store normalized source-linked suggestion data in `AiSuggestions` without raw prompts, raw provider responses, credentials, attachment content, or hidden reasoning. Current source-linked rows begin and remain in `PENDING` until a separately approved review-state feature exists. | Must | Inspection and test |
+| SRS-DATA-012 | HistoryLogs | IDTS shall store history logs as bug-owned audit records. | Must | Inspection |
 
 ## 9. External Interface and UI Interface Requirements
 
@@ -271,6 +272,9 @@ Verification methods:
 | SRS-IF-ODATA-001 | IDTS shall expose core bug tracking data through OData V4 services suitable for Fiori Elements consumption. | Must | Inspection and compile |
 | SRS-IF-ODATA-002 | IDTS shall expose value-help data required for SAP Module, Application Component, Defect Category, Component Category, Developer, priority, severity, and status selection. | Must | Inspection and demonstration |
 | SRS-IF-ODATA-003 | IDTS shall expose actions or update operations for business-critical status transitions when simple field updates are not sufficient to enforce rules. | Should | Inspection and test |
+| SRS-IF-ODATA-004 | The deployed authentication service base path shall be `/odata/v4/auth/`, and the protected bug-management service base path shall be `/odata/v4/bug/`. | Must | Metadata inspection and HTTP test |
+| SRS-IF-ODATA-005 | Draft creation/editing shall use CAP draft events (`NEW`, repeated `PATCH`, and `SAVE`), while active persistence shall continue through `CREATE` for a new active Bug and `UPDATE` for an edited active Bug. | Must | Handler trace and integration test |
+| SRS-IF-ODATA-006 | The audit catalog shall distinguish the 11 exact workflow commands: `ASSIGN_TO_DEVELOPER`, `MOVE_TO_PENDING_ASSIGNMENT`, `MARK_IN_REVIEW`, `REQUEST_MORE_INFORMATION`, `RESUBMIT_TO_DEVELOPER`, `REJECT_BUG`, `START_PROGRESS`, `RESOLVE_BUG`, `SEND_TO_RETEST`, `CLOSE_BUG`, and `REOPEN_BUG`. | Must | Database inspection and IDTS-89 regression |
 
 ### 9.2 Fiori UI Interface
 

@@ -24,7 +24,7 @@
     {
       "id": "03",
       "asset": "03-use-case",
-      "title": "02 - Use Case Diagram",
+      "title": "Use Case Diagram",
       "format": "plantuml",
       "sourceDocument": "docs/diagrams/02-use-cases.md",
       "sourceAsset": "docs/diagrams/rendered/source/03-use-case.puml",
@@ -74,7 +74,7 @@
     {
       "id": "08",
       "asset": "08-status-lifecycle",
-      "title": "04 - Bug Status Lifecycle",
+      "title": "Bug Status Lifecycle",
       "format": "mermaid",
       "sourceDocument": "docs/diagrams/04-status-lifecycle.md",
       "sourceAsset": "docs/diagrams/rendered/source/08-status-lifecycle.mmd",
@@ -84,7 +84,7 @@
     {
       "id": "09",
       "asset": "09-conceptual-data-model",
-      "title": "05 - Conceptual Data Model",
+      "title": "Conceptual Data Model",
       "format": "mermaid",
       "sourceDocument": "docs/diagrams/05-conceptual-data-model.md",
       "sourceAsset": "docs/diagrams/rendered/source/09-conceptual-data-model.mmd",
@@ -124,7 +124,7 @@
     {
       "id": "13",
       "asset": "13-srs-system-context",
-      "title": "07 - SRS System Context",
+      "title": "SRS System Context",
       "format": "mermaid",
       "sourceDocument": "docs/diagrams/07-srs-system-context.md",
       "sourceAsset": "docs/diagrams/rendered/source/13-srs-system-context.mmd",

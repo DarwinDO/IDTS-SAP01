@@ -98,3 +98,17 @@ Dialog giup PM/Tester chon developer de hon value help mac dinh. Tu IDTS-61, dia
 **English.** Value-help event → root Bug context → request missing classification fields → read `AssignableDevelopers` → optionally invoke `explainSmartAssignment` → sanitize/decorate candidates → client search/filter → user selects one row → `executeAssignment()` invokes the backend assignment operation and refreshes the Bug. Selection and AI explanation are review aids only; no auto-assignment occurs. Watch Bug classification, candidate profile ID, availability/workload, selected row, action response, and refreshed assignee/current action owner.
 
 **Tiếng Việt.** Event value help → root Bug context → request classification field còn thiếu → đọc `AssignableDevelopers` → có thể invoke `explainSmartAssignment` → sanitize/decorate candidate → search/filter client → user chọn một row → `executeAssignment()` invoke operation backend và refresh Bug. Selection và AI explanation chỉ hỗ trợ review; không auto-assign. Quan sát classification Bug, candidate profile ID, availability/workload, row chọn, action response và assignee/current action owner sau refresh.
+
+## IDTS-94 explanation review controls (2026-07-24)
+
+### English
+
+The Smart Assign dialog treats one explanation request as one review unit. `applyAssignmentExplanations()` takes the shared `suggestionID`, enables contextual Accept/Reject/Ignore buttons, and shows persisted state plus reviewer/time through `AiSuggestionReview.submit`. These controls sit beside the AI explanation notice, separate from the footer Assign button.
+
+Accepting an explanation records only the audit decision. It does not select a candidate, set `selectedCandidate`, enable assignment, write `assignee_ID`, or call `assignToDeveloper`. Empty/provider-error results keep review disabled and show a safe unavailable state. Assignment/load failures use localized generic messages rather than caught backend detail.
+
+### Vietnamese
+
+Dialog Smart Assign xem một request explanation là một review unit. `applyAssignmentExplanations()` lấy `suggestionID` dùng chung, enable các nút Accept/Reject/Ignore theo ngữ cảnh, và hiện state đã persist kèm reviewer/time qua `AiSuggestionReview.submit`. Các nút này nằm cạnh notice AI, tách khỏi nút Assign ở footer.
+
+Accept explanation chỉ ghi quyết định audit. Nó không chọn candidate, không set `selectedCandidate`, không enable assignment, không ghi `assignee_ID`, và không gọi `assignToDeveloper`. Kết quả rỗng/lỗi provider giữ review bị disable và hiện state unavailable an toàn. Lỗi load/assign dùng thông báo i18n chung thay vì chi tiết backend bị catch.

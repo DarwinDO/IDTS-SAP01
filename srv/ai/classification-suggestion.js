@@ -89,7 +89,7 @@ async function suggestClassification (req, entities, dependencies = {}) {
     providerResult
   })
 
-  await recordClassificationAudit({
+  const audit = await recordClassificationAudit({
     tx,
     req,
     entities,
@@ -98,6 +98,9 @@ async function suggestClassification (req, entities, dependencies = {}) {
     providerResult,
     result
   })
+  if (audit?.ID) {
+    for (const row of result) row.suggestionID = audit.ID
+  }
 
   return result
 }
@@ -308,17 +311,29 @@ async function recordClassificationAudit ({ tx, req, entities, input, provider, 
   const validRows = result.filter(row => row.valueCode || row.valueID)
   const bestConfidence = validRows.reduce((max, row) => Math.max(max, Number(row.confidence || 0)), 0) || null
 
-  await createAiSuggestion(tx, {
+  return createAiSuggestion(tx, {
     bugID: input.sourceBugID,
     requestedByID: requester.ID,
     featureType: FEATURE_TYPES.CLASSIFICATION,
     providerAlias: providerResult?.providerAlias || provider?.config?.provider || null,
     modelAlias: providerResult?.modelAlias || provider?.config?.modelAlias || null,
+    operationStatus: result.find(row => row.providerStatus && row.providerStatus !== 'SUCCESS')?.providerStatus ||
+      result[0]?.providerStatus ||
+      providerResult?.status ||
+      'AI_PROVIDER_ERROR',
+    latencyMs: providerResult?.durationMs,
     confidence: bestConfidence,
     correlationId: providerResult?.correlationId || req.id,
     summary: summarizeResult(result),
     suggestionPayload: {
       providerStatus: providerResult?.status || 'AI_PROVIDER_ERROR',
+      sourceClassification: {
+        sapModuleID: input.sapModule_ID || null,
+        applicationComponentID: input.applicationComponent_ID || null,
+        defectCategoryID: input.defectCategory_ID || null,
+        priorityCode: input.priority_code || null,
+        severityCode: input.severity_code || null
+      },
       suggestions: result.map(row => ({
         field: row.field,
         valueID: row.valueID || null,

@@ -174,19 +174,7 @@ async function deriveOrValidateComponentCategory (req, entities, bug) {
   // Backend tra cặp đó rồi tự gắn `componentCategory_ID`, không yêu cầu UI tự biết ID trung gian.
   if (!bug.applicationComponent_ID || !bug.defectCategory_ID) return
 
-  const componentCategory = await SELECT.one.from(entities.ComponentCategories).where({
-    component_ID: bug.applicationComponent_ID,
-    defectCategory_ID: bug.defectCategory_ID,
-    active: true
-  })
-
-  if (!componentCategory) {
-    return req.reject(
-      400,
-      'The selected Application Component and Defect Category are not a valid Component Category.',
-      'defectCategory'
-    )
-  }
+  const componentCategory = await resolveComponentCategory(req, entities, bug)
 
   if (bug.componentCategory_ID && bug.componentCategory_ID !== componentCategory.ID) {
     return req.reject(
@@ -199,6 +187,27 @@ async function deriveOrValidateComponentCategory (req, entities, bug) {
   // Ghi vào cả payload (`req.data`) lẫn bản merged (`bug`) để validator chạy sau nhìn cùng kết quả.
   req.data.componentCategory_ID = componentCategory.ID
   bug.componentCategory_ID = componentCategory.ID
+}
+
+async function resolveComponentCategory (req, entities, bug) {
+  // Helper dùng chung trả về cặp component/category active; caller quyết định cách ghi ID đã derive.
+  if (!bug.applicationComponent_ID || !bug.defectCategory_ID) return null
+
+  const componentCategory = await cds.tx(req).run(
+    SELECT.one.from(entities.ComponentCategories).where({
+      component_ID: bug.applicationComponent_ID,
+      defectCategory_ID: bug.defectCategory_ID,
+      active: true
+    })
+  )
+  if (!componentCategory) {
+    return req.reject(
+      400,
+      'The selected Application Component and Defect Category are not a valid Component Category.',
+      'defectCategory'
+    )
+  }
+  return componentCategory
 }
 
 async function validateAssignee (req, entities, bug) {
@@ -281,6 +290,7 @@ async function determineNextProcessor (req, entities, bug) {
 module.exports = {
   prepareBugWrite,
   determineNextProcessor,
+  resolveComponentCategory,
   validateActiveCodeLists,
   validateRequiredBugFields,
   validateAssignee,

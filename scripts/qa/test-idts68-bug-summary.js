@@ -83,6 +83,12 @@ async function invoke (service, sourceBugID) {
   }, tx => tx.send('summarizeBugHandoff', { sourceBugID }))
 }
 
+async function reviewSuggestion (service, suggestionID, action = 'acceptAiSuggestion') {
+  return service.tx({
+    user: new cds.User({ id: 'DonHV', roles: ['PM', 'authenticated-user'] })
+  }, tx => tx.send(action, { suggestionID }))
+}
+
 function bugEntry (overrides = {}) {
   return {
     ID: BUG_ID,
@@ -235,19 +241,25 @@ async function main () {
   expectIncludes('summary includes provider handoff content', positive.summary, 'waiting for the tester')
   expectIncludes('next expected action is explicit', positive.nextExpectedAction, 'resubmit')
   expectEqual('summary always requires human review', positive.requiresReview, true)
+  expectTruthy('summary returns its persisted suggestion ID', positive.suggestionID)
   expectTruthy('summary includes generated timestamp', positive.generatedAt)
   expectNoUnsafeDiagnostic('positive summary response contains no unsafe diagnostic text', positive)
 
   const auditRows = await db.run(
     SELECT.from('idts.cap.AiSuggestions')
-      .columns('bug_ID', 'featureType_code', 'reviewState_code', 'suggestionPayload')
+      .columns('ID', 'bug_ID', 'featureType_code', 'operationStatus', 'latencyMs', 'reviewState_code', 'suggestionPayload')
       .where({ bug_ID: BUG_ID, featureType_code: 'BUG_SUMMARY' })
   )
   expectEqual('source-linked summary writes one AI audit row', auditRows.length, 1)
+  expectEqual('summary response points to the persisted audit row', positive.suggestionID, auditRows[0]?.ID)
   expectEqual('summary audit starts pending review', auditRows[0]?.reviewState_code, 'PENDING')
+  expectEqual('summary audit persists final operation status', auditRows[0]?.operationStatus, 'SUCCESS')
+  expectTruthy('summary audit persists non-negative latency', auditRows[0]?.latencyMs >= 0)
   const auditPayload = JSON.parse(auditRows[0]?.suggestionPayload || '{}')
   expectEqual('summary audit records provider status', auditPayload.providerStatus, 'SUCCESS')
   expectNoUnsafeDiagnostic('summary audit payload is sanitized', auditPayload)
+  const reviewedSummary = await reviewSuggestion(service, positive.suggestionID)
+  expectEqual('summary review action persists ACCEPTED', reviewedSummary?.reviewStateCode, 'ACCEPTED')
 
   aiConfig(providerOutput())
   const sparse = await invoke(service, SPARSE_BUG_ID)

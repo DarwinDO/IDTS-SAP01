@@ -1,5 +1,9 @@
 # `srv/ai/provider.js`
 
+## IDTS-97 operational emission
+
+Every normalized provider result is passed to `emitAiOperationalMetric()`. The emitted record is allowlisted and contains feature, operation, provider/model alias, status/outcome, and latency only. A logger/sink failure is swallowed, so telemetry cannot change the AI fallback result or normal Bug workflow.
+
 ## Beginner-first execution map (2026-07-18)
 
 ### English

@@ -9,7 +9,7 @@
 
 This file adds the user-visible review dialog for duplicate or similar bug suggestions on the Bug Object Page.
 
-It does not create duplicate links, change the bug status, assign work, or save any user decision. Its only job is to call the existing backend action `BugService.suggestSimilarBugs`, show the returned candidates in a SAPUI5 dialog, and remind the user that the final decision is manual.
+It does not create duplicate links, change the bug status, or assign work. It calls `BugService.suggestSimilarBugs`, shows the candidates, and lets the user persist Accept/Reject/Ignore only for the suggestion audit. The final duplicate-link decision remains manual and separate.
 
 This is the IDTS-74 UI layer for the backend capability delivered in IDTS-66.
 
@@ -30,7 +30,7 @@ The important rule is that this is a review surface, not an automation surface. 
 5. It invokes the existing OData V4 action `/suggestSimilarBugs(...)` as a direct user-triggered request.
 6. It maps each returned row through `AiReviewUi.decorateResult` so confidence/status wording stays consistent with other AI suggestion UI.
 7. It shows candidates in a `sap.m.Dialog` with a responsive `sap.m.Table`.
-8. Closing the dialog changes nothing in the database.
+8. Accept/Reject/Ignore updates only the persisted suggestion review state; closing changes nothing else.
 
 ### Important source anchors
 
@@ -77,7 +77,7 @@ The important rule is that this is a review surface, not an automation surface. 
 
 File này thêm dialog review bug trùng hoặc bug tương tự trên Bug Object Page.
 
-Nó không tạo duplicate link, không đổi status của bug, không assign việc, và không lưu quyết định của user. Nhiệm vụ duy nhất của nó là gọi backend action đã có sẵn `BugService.suggestSimilarBugs`, hiển thị các candidate trả về trong một dialog SAPUI5, và nhắc user rằng quyết định cuối cùng vẫn là thủ công.
+Nó không tạo duplicate link, không đổi status của bug và không assign việc. File gọi `BugService.suggestSimilarBugs`, hiển thị candidate và cho phép lưu Accept/Reject/Ignore chỉ trên audit suggestion. Quyết định duplicate link cuối vẫn là thao tác thủ công riêng.
 
 Đây là lớp UI của IDTS-74 cho capability backend đã làm ở IDTS-66.
 
@@ -98,7 +98,7 @@ Quy tắc quan trọng là đây chỉ là màn hình review, không phải auto
 5. Nó gọi trực tiếp OData V4 action đã có `/suggestSimilarBugs(...)` khi user bấm nút.
 6. Nó map từng row trả về qua `AiReviewUi.decorateResult` để wording confidence/status thống nhất với các UI suggestion khác.
 7. Nó hiển thị candidate bằng `sap.m.Dialog` và `sap.m.Table` responsive.
-8. Đóng dialog không làm thay đổi dữ liệu trong database.
+8. Accept/Reject/Ignore chỉ đổi review state của suggestion đã lưu; đóng dialog không đổi dữ liệu khác.
 
 ### Anchor quan trọng
 
@@ -151,3 +151,17 @@ Quy tắc quan trọng là đây chỉ là màn hình review, không phải auto
 **English.** Bug Summary button → `openDialog()` → root context discovery → `requestMissingBugProperties()` → `readSimilarBugs()` invokes `findSimilarBugs(...)` → backend embedding/similarity service returns candidates → `enrichCandidate()` sanitizes and decorates each row → `buildDialog()` displays review evidence. Watch source Bug text/ID, candidate IDs/scores, provider status, and row count. Empty/unavailable results must leave the Bug unchanged; this module never creates `DuplicateLinks`.
 
 **Tiếng Việt.** Nút trong Bug Summary → `openDialog()` → tìm root context → `requestMissingBugProperties()` → `readSimilarBugs()` invoke `findSimilarBugs(...)` → backend embedding/similarity trả candidate → `enrichCandidate()` sanitize/decorate từng row → `buildDialog()` hiển thị evidence để review. Quan sát text/ID Bug nguồn, candidate ID/score, provider status và số row. Kết quả rỗng/unavailable phải giữ Bug nguyên; module không bao giờ tạo `DuplicateLinks`.
+
+## IDTS-92 persisted review decisions
+
+### English
+
+The dialog now shows Accept, Reject, and Ignore for a persisted `suggestionID`. A decision invokes the matching unbound review action, replaces Pending with the persisted state plus reviewer/time, disables all three decision buttons, and always clears busy state. Close remains available. No decision creates `DuplicateLinks` or changes the Bug.
+
+Primary owner: DatDT. Backup: DonHV. Debug at the button callback and `AiSuggestionReview.submit()`; inspect the suggestion ID, returned review state, reviewer/time, and `/reviewActionEnabled`. Check with `srv/ai/review.js`, i18n files, IDTS-92 static QA, and IDTS-74 browser smoke. Keep errors generic and never display raw OData/backend details.
+
+### Vietnamese
+
+Dialog hiện có Accept, Reject và Ignore khi kết quả có `suggestionID` đã persist. Một quyết định gọi review action tương ứng, thay Pending bằng trạng thái đã lưu kèm reviewer/time, khóa cả ba nút quyết định và luôn tắt busy state. Nút Close vẫn dùng được. Không quyết định nào tạo `DuplicateLinks` hoặc đổi Bug.
+
+Owner chính: DatDT. Backup: DonHV. Khi debug, bắt đầu tại callback nút và `AiSuggestionReview.submit()`; xem suggestion ID, review state trả về, reviewer/time và `/reviewActionEnabled`. Kiểm cùng `srv/ai/review.js`, file i18n, static QA IDTS-92 và browser smoke IDTS-74. Giữ lỗi chung, không hiển thị raw OData/backend detail.

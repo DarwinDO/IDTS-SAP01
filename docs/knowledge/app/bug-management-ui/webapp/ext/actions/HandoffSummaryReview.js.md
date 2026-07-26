@@ -149,3 +149,19 @@ Quy tac quan trong: text AI khong bao gio la quyet dinh workflow. Nguoi dung van
 **English.** History button → `openDialog()` → root Bug context → request `ID` → `readHandoffSummary()` invokes `summarizeBugHandoff(...)` → backend reads persisted Bug/history context and produces grounded text → `enrichSummary()` sanitizes fields → `buildDialog()` updates its JSONModel. Observe Bug ID, provider/grounding status, missing-information text, latest events, and next action. The dialog is read-only: no comment, history, status, owner, or database row is written.
 
 **Tiếng Việt.** Nút trong History → `openDialog()` → root Bug context → request `ID` → `readHandoffSummary()` invoke `summarizeBugHandoff(...)` → backend đọc Bug/history đã lưu và tạo text grounded → `enrichSummary()` sanitize field → `buildDialog()` cập nhật JSONModel. Quan sát Bug ID, provider/grounding status, missing-information, latest events và next action. Dialog chỉ đọc: không ghi comment, history, status, owner hay row database.
+
+## IDTS-94 explicit review controls (2026-07-24)
+
+Responsive note: Bug metadata and the provider/confidence status are vertically stacked so long localized text wraps instead of widening the dialog on phone-sized viewports.
+
+### English
+
+The dialog now reads `suggestionID` from `summarizeBugHandoff`, shows the persisted review state plus reviewer/time, and delegates Accept/Reject/Ignore to `AiSuggestionReview.submit`. Buttons remain disabled while loading, when no persisted result exists, and immediately after the first decision. The notice explicitly says that reviewing the summary does not change the Bug or create comment/history content.
+
+Debug order: summary action response `suggestionID` → JSONModel `/suggestionID` and `/reviewActionEnabled` → review action network call → returned `reviewStateCode`, reviewer, and timestamp → disabled controls. The only write is the `AiSuggestions` review audit update.
+
+### Vietnamese
+
+Dialog giờ đọc `suggestionID` từ `summarizeBugHandoff`, hiện review state đã persist kèm reviewer/time, và giao Accept/Reject/Ignore cho `AiSuggestionReview.submit`. Button bị disable khi đang load, khi không có result đã persist, và ngay sau quyết định đầu tiên. Notice nói rõ review summary không đổi Bug và không tạo comment/history.
+
+Thứ tự debug: `suggestionID` trong response → JSONModel `/suggestionID` và `/reviewActionEnabled` → request review action → `reviewStateCode`, reviewer, timestamp trả về → controls bị khóa. Write duy nhất là update review audit trong `AiSuggestions`.

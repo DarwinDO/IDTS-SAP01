@@ -2,22 +2,24 @@
 
 The template under ``docs/sap490/templates`` is read-only.  Each output starts
 as a byte-for-byte copy and retains its cover, sections, headers/footers,
-styles, numbering, and eight-table layout before sample content is replaced.
+styles, numbering, and eight core tables before approved content tables are added.
 """
 
 from __future__ import annotations
 
 from copy import deepcopy
 from pathlib import Path
+import re
 import shutil
 
 from PIL import Image
 from docx import Document
 from docx.enum.section import WD_SECTION
-from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT, WD_TABLE_ALIGNMENT
+from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
+from docx.opc.constants import RELATIONSHIP_TYPE as RT
 from docx.shared import Cm, Inches, Pt, RGBColor
 from docx.text.paragraph import Paragraph
 
@@ -25,13 +27,14 @@ from docx.text.paragraph import Paragraph
 ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = ROOT / "docs" / "sap490" / "generated"
 TEMPLATE = ROOT / "docs" / "sap490" / "templates" / "Deliverable_template" / "Blueprint_Template.docx"
-VERSION = "v0.3"
-DATE = "2026-07-23"
+VERSION = "v0.6"
+DATE = "2026-07-25"
 
 
 EN = {
     "language": "English",
-    "output": "Blueprint_IDTS_SAP01_en_v0.3.docx",
+    "output": "Blueprint_IDTS_SAP01_en_v0.6.docx",
+    "page_count": 26,
     "title": "Issue and Defect Tracking System in SAP",
     "subtitle": "SAP490 Business Blueprint",
     "status": "Draft for mentor review",
@@ -91,11 +94,11 @@ EN = {
     ],
     "baseline_rows": [
         ["Application", "SAP CAP Node.js, OData V4, SAP Fiori Elements/SAPUI5"],
-        ["Authentication", "AuthService login with server-managed AuthSessions; backend role checks remain authoritative"],
+        ["Authentication", "AuthService at /odata/v4/auth/ manages login and AuthSessions; BugService at /odata/v4/bug/ remains protected by backend role checks"],
         ["Data profiles", "SQLite for local development; Render-hosted shared QA uses PostgreSQL through the integration profile"],
         ["Attachments", "@cap-js/attachments with local DB fallback and externally bound S3 object storage for shared QA"],
         ["Notifications", "In-app Notifications plus asynchronous NotificationDeliveries email outbox; provider failure does not roll back workflow"],
-        ["Advisory AI", "Optional suggestions stored as normalized AiSuggestions audit rows; human review is mandatory and normal CAP actions remain authoritative"],
+        ["Advisory AI", "Human review persists ACCEPTED, REJECTED or IGNORED through acceptAiSuggestion, rejectAiSuggestion and ignoreAiSuggestion. applyClassificationSuggestion and confirmDuplicateSuggestion are separate authorized mutations; readAiOperationalMetrics is PM-only. operationStatus and latencyMs store sanitized telemetry. Live OpenAI remains disabled/not accepted."],
     ],
     "in_scope_items": [
         "Structured defect creation, duplicate support, SAP-context classification, assignment and reassignment.",
@@ -204,7 +207,8 @@ EN = {
 
 VI = {
     "language": "Vietnamese",
-    "output": "Blueprint_IDTS_SAP01_vi_v0.3.docx",
+    "output": "Blueprint_IDTS_SAP01_vi_v0.6.docx",
+    "page_count": 25,
     "title": "Hệ thống Quản lý Issue và Defect trong SAP",
     "subtitle": "Business Blueprint SAP490",
     "status": "Bản nháp chờ người hướng dẫn đánh giá",
@@ -265,11 +269,11 @@ VI = {
     ],
     "baseline_rows": [
         ["Ứng dụng", "SAP CAP Node.js, OData V4, SAP Fiori Elements/SAPUI5"],
-        ["Xác thực", "AuthService đăng nhập với AuthSessions do máy chủ quản lý; kiểm tra vai trò ở backend là lớp quyết định cuối"],
+        ["Xác thực", "AuthService tại /odata/v4/auth/ quản lý đăng nhập và AuthSessions; BugService tại /odata/v4/bug/ được bảo vệ bằng kiểm tra role ở backend"],
         ["Hồ sơ dữ liệu", "SQLite dùng cho phát triển cục bộ; môi trường QA dùng chung trên Render sử dụng PostgreSQL qua cấu hình integration"],
         ["Tệp đính kèm", "@cap-js/attachments dùng cơ sở dữ liệu cục bộ dự phòng và kho đối tượng S3 được liên kết ngoài cho môi trường QA dùng chung"],
         ["Thông báo", "Notifications trong ứng dụng và hộp thư đi bất đồng bộ NotificationDeliveries; lỗi nhà cung cấp không hoàn tác quy trình nghiệp vụ"],
-        ["AI tư vấn", "Gợi ý tùy chọn được lưu thành bản ghi AiSuggestions đã chuẩn hóa ở trạng thái PENDING; CAP vẫn quyết định mọi thao tác nghiệp vụ"],
+        ["AI tư vấn", "Human review lưu ACCEPTED, REJECTED hoặc IGNORED qua acceptAiSuggestion, rejectAiSuggestion và ignoreAiSuggestion. applyClassificationSuggestion và confirmDuplicateSuggestion là mutation riêng có kiểm quyền; readAiOperationalMetrics chỉ dành cho PM. operationStatus và latencyMs là telemetry đã làm sạch. OpenAI live vẫn disabled/not accepted."],
     ],
     "in_scope_items": [
         "Tạo defect có cấu trúc, hỗ trợ kiểm tra trùng lặp, phân loại theo ngữ cảnh SAP, phân công và phân công lại.",
@@ -362,7 +366,7 @@ VI = {
         "UAT mới ở trạng thái Prepared và chưa ký xác nhận. Final Project Report vẫn là mẫu đang chờ, chưa được tuyên bố hoàn tất.",
         "Không tuyên bố gửi email thành công qua nhà cung cấp thực khi chưa có cấu hình riêng được duyệt và bằng chứng.",
         "Nghiệm thu cuối cho tệp đính kèm trên môi trường QA dùng chung phụ thuộc liên kết PostgreSQL/S3 đang hoạt động và bằng chứng lưu/tải.",
-        "AI tùy chọn mặc định tắt; hệ thống hiện chưa có thao tác cập nhật trạng thái đánh giá AiSuggestions từ PENDING sang ACCEPTED, REJECTED hoặc IGNORED.",
+        "OpenAI live mặc định tắt; các suggestion vẫn được lưu để người dùng có thẩm quyền review thành PENDING, ACCEPTED, REJECTED hoặc IGNORED trước khi có thao tác apply/confirm riêng.",
         "Nền giáo dục/QA dùng chung hiện tại không phải kiến trúc vận hành doanh nghiệp cuối, cam kết sẵn sàng hoặc chứng nhận hiệu năng.",
     ],
     "glossary_rows": [
@@ -371,7 +375,7 @@ VI = {
         ["Component Category", "Cặp Application Component và Defect Category hợp lệ dùng cho phân công"],
         ["Developer Responsibility", "Ánh xạ năng lực Developer theo Component Category và SAP Module tùy chọn"],
         ["NotificationDeliveries", "Hộp thư đi email và bản ghi lần thử giao nhận bất đồng bộ riêng"],
-        ["AiSuggestions", "Bản ghi AI tư vấn an toàn đã chuẩn hóa; trạng thái hiện tại được lưu là PENDING"],
+        ["AiSuggestions", "Bản ghi AI tư vấn an toàn đã chuẩn hóa; lưu trạng thái review, operationStatus và latencyMs đã làm sạch"],
     ],
 }
 
@@ -452,7 +456,7 @@ EN_PROCESS_DETAILS = [
     ("BP-10", "Comments and attachments", "Preserve collaboration and evidence without bypassing lifecycle controls.", "Authorized comment text or attachment metadata/content through the configured storage profile.", "Comment or attachment linked to the defect and available to authorized readers.", "Tester, Developer, PM according to permission", "Comment role, file constraints, safe metadata, storage binding, and no-secret rule.", "No direct status change.", "Current lifecycle owner remains unchanged.", "Append collaboration/evidence history where applicable.", "Notify interested users only according to configured event rules."),
     ("BP-11", "Notifications and email outbox", "Record in-app events and attempt email delivery without coupling provider failure to workflow success.", "Committed business event and eligible active recipient.", "Notifications row plus NotificationDeliveries status/attempt data.", "System", "Recipient eligibility, private provider configuration, bounded retry, sanitized failure details.", "No independent status change; delivery failure never rolls back the business transaction.", "Recipient or operational retry owner.", "Delivery status, attempts, timing and safe error classification.", "In-app is persisted; email may be SENT, FAILED or SKIPPED. Local disabled provider remains SKIPPED."),
     ("BP-12", "PM monitoring and escalation", "Give PM an operational view of workload, queues, overdue items and current action ownership.", "Defect states, assignee, nextProcessor, due dates, workload and history.", "Role-aware workload, overdue, pending, rejected and retest views.", "PM", "Backend-filtered data and consistent current-action-owner calculation.", "Monitoring alone does not change status; authorized coordination actions use normal transitions.", "PM decides follow-up or escalation without becoming a second assignee.", "Any subsequent assignment/status action is audited normally.", "Escalation or queue notifications only when configured."),
-    ("BP-13", "AI suggestions for human consideration", "Offer bounded assistance while keeping every business decision human and CAP-authoritative.", "Minimum allowlisted defect fields; no credentials, private email, attachments or storage references.", "Sanitized suggestion and confidence/explanation; a persisted audit row starts in PENDING.", "Authorized user", "AI disabled by default, timeout/failure isolation, output validation, no raw prompt/response persistence.", "No autonomous assignment, classification, duplicate confirmation or lifecycle change.", "The user reviews the displayed suggestion and may separately perform a normal authorized business action. The current service exposes no suggestion-state update action.", "AiSuggestions records the normalized request/result audit in PENDING; current actions do not persist ACCEPTED, REJECTED or IGNORED reviewer outcomes.", "No notification is created by the suggestion itself."),
+    ("BP-13", "AI suggestions for human consideration", "Offer bounded assistance while keeping every business decision human and CAP-authoritative.", "Minimum allowlisted defect fields; no credentials, private email, attachments or storage references.", "Sanitized suggestion, explanation, operationStatus and latencyMs.", "Authorized user", "AI disabled by default, timeout/failure isolation, output validation, no raw prompt/response persistence.", "No autonomous assignment, lifecycle change or silent classification/duplicate mutation.", "The user can persist ACCEPTED, REJECTED or IGNORED with acceptAiSuggestion, rejectAiSuggestion or ignoreAiSuggestion. Applying classification requires applyClassificationSuggestion; confirming a duplicate requires confirmDuplicateSuggestion.", "AiSuggestions stores review state and sanitized telemetry. PM may read aggregate metrics through readAiOperationalMetrics.", "No notification is created by the suggestion itself."),
 ]
 
 VI_PROCESS_DETAILS = [
@@ -468,7 +472,7 @@ VI_PROCESS_DETAILS = [
     ("BP-10", "Bình luận và tệp đính kèm", "Lưu trao đổi và bằng chứng mà không bỏ qua kiểm soát vòng đời.", "Nội dung bình luận hoặc tệp qua cấu hình lưu trữ.", "Bình luận/tệp gắn với defect và chỉ người có quyền đọc được.", "Tester, Developer, PM theo quyền", "Kiểm tra vai trò, giới hạn tệp, siêu dữ liệu an toàn và cấu hình lưu trữ.", "Không trực tiếp đổi trạng thái.", "Người chịu trách nhiệm vòng đời không đổi.", "Bổ sung lịch sử trao đổi/bằng chứng khi áp dụng.", "Chỉ thông báo theo quy tắc sự kiện đã cấu hình."),
     ("BP-11", "Thông báo và hộp thư đi", "Ghi thông báo và thử gửi email mà không để lỗi nhà cung cấp làm hỏng quy trình.", "Sự kiện nghiệp vụ đã commit và người nhận hợp lệ.", "Notifications và dữ liệu trạng thái/lần thử trong NotificationDeliveries.", "Hệ thống", "Kiểm tra người nhận, cấu hình riêng tư, số lần thử và chi tiết lỗi đã làm sạch.", "Không tự đổi trạng thái; lỗi gửi không hoàn tác giao dịch nghiệp vụ.", "Người nhận hoặc người phụ trách thử lại.", "Lưu trạng thái giao, số lần thử, thời gian và loại lỗi an toàn.", "Trong ứng dụng được lưu; email là SENT, FAILED hoặc SKIPPED."),
     ("BP-12", "PM giám sát và điều phối", "Cho PM thấy khối lượng, hàng đợi, quá hạn và người xử lý hành động hiện tại.", "Trạng thái, assignee, nextProcessor, hạn, tải và lịch sử.", "Khung nhìn theo vai trò cho khối lượng, quá hạn và hàng đợi.", "PM", "Backend lọc dữ liệu và tính người xử lý hiện tại nhất quán.", "Giám sát không tự đổi trạng thái; điều phối dùng thao tác được phép.", "PM quyết định bước tiếp theo mà không trở thành assignee thứ hai.", "Các thay đổi phân công/trạng thái sau đó được lưu vết.", "Chỉ gửi cảnh báo khi đã cấu hình."),
-    ("BP-13", "Gợi ý AI để con người cân nhắc", "Cung cấp tư vấn có giới hạn; CAP và con người vẫn quyết định nghiệp vụ.", "Các trường defect tối thiểu trong danh sách cho phép; không gửi thông tin bí mật hoặc tệp.", "Gợi ý đã làm sạch, độ tin cậy, giải thích và bản ghi AiSuggestions ở trạng thái PENDING.", "Người dùng được phép", "AI mặc định tắt; cô lập lỗi; kiểm tra đầu ra; không lưu prompt hoặc response thô.", "Không tự phân công, phân loại, xác nhận trùng hoặc đổi vòng đời.", "Người dùng chỉ đánh giá nội dung hiển thị và có thể thực hiện riêng một thao tác nghiệp vụ thông thường được phép; dịch vụ hiện chưa có thao tác cập nhật trạng thái đánh giá.", "AiSuggestions lưu kết quả đã chuẩn hóa ở PENDING; chưa lưu ACCEPTED, REJECTED hoặc IGNORED.", "Bản thân gợi ý không tạo thông báo."),
+    ("BP-13", "Gợi ý AI để con người cân nhắc", "Cung cấp tư vấn có giới hạn; CAP và con người vẫn quyết định nghiệp vụ.", "Các trường defect tối thiểu trong danh sách cho phép; không gửi thông tin bí mật hoặc tệp.", "Gợi ý, giải thích, operationStatus và latencyMs đã được làm sạch.", "Người dùng được phép", "AI mặc định tắt; cô lập lỗi; kiểm tra đầu ra; không lưu prompt hoặc response thô.", "Không tự phân công, đổi vòng đời hoặc âm thầm áp dụng phân loại/xác nhận trùng.", "Người dùng lưu ACCEPTED, REJECTED hoặc IGNORED qua acceptAiSuggestion, rejectAiSuggestion hoặc ignoreAiSuggestion. Áp dụng phân loại dùng applyClassificationSuggestion; xác nhận trùng dùng confirmDuplicateSuggestion.", "AiSuggestions lưu trạng thái review và telemetry an toàn. PM đọc số liệu tổng hợp qua readAiOperationalMetrics.", "Bản thân gợi ý không tạo thông báo."),
 ]
 
 EN_DATA_OWNERSHIP = [
@@ -478,7 +482,7 @@ EN_DATA_OWNERSHIP = [
     ["HistoryEvents / HistoryLogs", "System", "Append-only audit evidence", "Do not overwrite to hide prior values"],
     ["Notifications / deliveries", "System", "Operational communication record", "Keep safe status/attempt data; never provider secrets"],
     ["AuthSessions", "System", "Security session data", "Token hash only; expire/revoke according to policy"],
-    ["AiSuggestions", "System plus human reviewer", "Advisory audit record", "Normalized output only; no raw prompt/response"],
+    ["AiSuggestions", "System plus human reviewer", "Advisory audit and review state", "Normalized output, ACCEPTED/REJECTED/IGNORED, operationStatus and latencyMs; no raw prompt/response"],
 ]
 VI_DATA_OWNERSHIP = [
     ["Bugs và dữ liệu phân loại", "Tester tạo; PM quản trị việc hiệu chỉnh", "Dữ liệu nghiệp vụ của ứng dụng", "Giữ để kiểm tra dự án; mọi thay đổi có lịch sử"],
@@ -487,7 +491,7 @@ VI_DATA_OWNERSHIP = [
     ["HistoryEvents / HistoryLogs", "Hệ thống", "Bằng chứng lưu vết chỉ bổ sung", "Không ghi đè để che giá trị trước đó"],
     ["Notifications / NotificationDeliveries", "Hệ thống", "Bản ghi truyền thông vận hành", "Chỉ giữ trạng thái/lần thử an toàn; không lưu bí mật nhà cung cấp"],
     ["AuthSessions", "Hệ thống", "Dữ liệu phiên bảo mật", "Chỉ giữ token băm; hết hạn hoặc thu hồi theo chính sách"],
-    ["AiSuggestions", "Hệ thống", "Bản ghi tư vấn", "Chỉ giữ đầu ra đã chuẩn hóa ở PENDING; không lưu prompt/response thô"],
+    ["AiSuggestions", "Hệ thống và người review", "Bản ghi tư vấn và trạng thái review", "Đầu ra chuẩn hóa, ACCEPTED/REJECTED/IGNORED, operationStatus và latencyMs; không lưu prompt/response thô"],
 ]
 
 EN_INTERFACE_ROWS = [
@@ -512,76 +516,260 @@ VI_INTERFACE_ROWS = [
 ]
 
 TRACE_ROWS = [
-    ["BP-01", "Auth and role boundary", "BRD/SRS auth requirements; AuthService", "qa:auth:programmatic", "Executed PASS"],
-    ["BP-02–BP-09", "Core defect lifecycle", "Business rules BR-01–BR-46; FRS workflows", "Current test scenarios plus three broader suites", "Partly executed; three suites Pending"],
-    ["BP-10", "Comments and attachments", "SRS/FRS collaboration and storage rules", "Comments/attachments regression", "Pending in current Test Report"],
-    ["BP-11", "Notification outbox", "NotificationDeliveries rules", "qa:email-outbox:programmatic", "Executed PASS; provider disabled/SKIPPED"],
+    ["BP-01", "Auth and role boundary", "BRD/SRS auth requirements; AuthService", "21-case accepted catalog and authentication evidence", "21 PASSED catalog includes auth baseline"],
+    ["BP-02–BP-09", "Core defect lifecycle", "Business rules BR-01–BR-46; FRS workflows", "Shared QA lifecycle acceptance", "40/40 PASS"],
+    ["BP-10", "Comments and attachments", "SRS/FRS collaboration and storage rules", "Shared QA S3 upload/download/hash/reload/delete", "PASSED"],
+    ["BP-11", "Notification outbox", "NotificationDeliveries rules", "Shared QA Brevo delivery readback", "SENT; workflow isolation verified"],
     ["BP-12", "PM monitoring", "PM reporting requirements", "qa:pm-monitoring:programmatic", "Executed PASS"],
-    ["BP-13", "AI human-review boundary", "AI canonical rules and AiSuggestions", "AI provider/human-review regression", "Pending in current Test Report"],
-    ["Acceptance", "Mentor/UAT/sign-off", "UAT and final-report artifacts", "Mentor/user execution", "Not complete; UAT Prepared only"],
+    ["BP-13", "AI human-review boundary", "AI canonical rules and AiSuggestions", "Shared QA AI acceptance", "25/25 PASS in disabled-provider/fallback mode; OpenAI live DISABLED / NOT ACCEPTED"],
+    ["Acceptance", "Mentor/UAT/sign-off", "UAT and final-report artifacts", "Human execution", "6 UAT PREPARED; mentor approval Pending"],
 ]
 VI_TRACE_ROWS = [
-    ["BP-01", "Ranh giới xác thực và vai trò", "Yêu cầu xác thực BRD/SRS; AuthService", "qa:auth:programmatic", "Đã chạy và PASS"],
-    ["BP-02–BP-09", "Vòng đời defect cốt lõi", "Quy tắc BR-01–BR-46; luồng FRS", "Các kịch bản hiện tại và ba bộ kiểm thử mở rộng", "Đã chạy một phần; ba bộ còn Pending"],
-    ["BP-10", "Bình luận và tệp đính kèm", "Quy tắc trao đổi/lưu trữ trong SRS/FRS", "Kiểm thử hồi quy bình luận/tệp", "Pending trong Test Report hiện tại"],
-    ["BP-11", "Hộp thư đi thông báo", "Quy tắc NotificationDeliveries", "qa:email-outbox:programmatic", "Đã chạy và PASS; nhà cung cấp tắt/SKIPPED"],
+    ["BP-01", "Ranh giới xác thực và vai trò", "Yêu cầu xác thực BRD/SRS; AuthService", "Danh mục 21 case đã nghiệm thu và bằng chứng xác thực", "Danh mục 21 PASSED có nền xác thực"],
+    ["BP-02–BP-09", "Vòng đời defect cốt lõi", "Quy tắc BR-01–BR-46; luồng FRS", "Nghiệm thu vòng đời trên Shared QA", "40/40 PASS"],
+    ["BP-10", "Bình luận và tệp đính kèm", "Quy tắc trao đổi/lưu trữ trong SRS/FRS", "S3 Shared QA: upload/download/hash/reload/delete", "ĐÃ ĐẠT"],
+    ["BP-11", "Hộp thư đi thông báo", "Quy tắc NotificationDeliveries", "Readback giao email Brevo trên Shared QA", "SENT; đã xác minh cô lập lỗi workflow"],
     ["BP-12", "PM giám sát", "Yêu cầu báo cáo PM", "qa:pm-monitoring:programmatic", "Đã chạy và PASS"],
-    ["BP-13", "Ranh giới AI để con người đánh giá", "Quy tắc AI chuẩn và AiSuggestions", "Kiểm thử hồi quy AI/đánh giá của con người", "Pending trong Test Report hiện tại"],
-    ["Nghiệm thu", "Người hướng dẫn/UAT/ký xác nhận", "UAT và Final Project Report", "Người hướng dẫn/người dùng thực hiện", "Chưa hoàn tất; UAT mới ở trạng thái Prepared"],
+    ["BP-13", "Ranh giới AI để con người đánh giá", "Quy tắc AI chuẩn và AiSuggestions", "Nghiệm thu AI trên Shared QA", "25/25 PASS ở chế độ provider tắt/fallback; OpenAI live DISABLED / NOT ACCEPTED"],
+    ["Nghiệm thu", "Người hướng dẫn/UAT/ký xác nhận", "UAT và Final Project Report", "Con người thực hiện", "6 UAT PREPARED; người hướng dẫn chưa phê duyệt"],
 ]
 
 
-def set_cell_text(cell, text: str, bold: bool = False) -> None:
-    cell.text = ""
+def overview_table_specs(content: dict) -> list[tuple[str, list[str], list[list[str]], list[float]]]:
+    if content is EN:
+        baseline_purpose = [
+            "CAP/Fiori application and OData service",
+            "Authenticated identity and backend role boundary",
+            "Local development and shared-QA persistence",
+            "Store and retrieve defect evidence",
+            "In-app events and asynchronous email attempts",
+            "Optional review-only assistance",
+        ]
+        baseline_limits = [
+            "Educational/shared-QA baseline; no production certification",
+            "Custom bearer sessions; not enterprise SSO",
+            "Continuity remains environment-dependent",
+            "Shared-QA acceptance needs active S3 evidence",
+            "Live-provider success is not claimed",
+            "Live provider disabled; review states persist as PENDING/ACCEPTED/REJECTED/IGNORED",
+        ]
+        capability_roles = ["Tester", "Tester / reviewer", "Tester / PM", "Tester / PM", "All business roles", "All business roles", "System", "PM", "Authorized user"]
+        capability_processes = ["BP-02", "BP-03", "BP-04", "BP-05", "BP-06–BP-09", "BP-10", "BP-11", "BP-12", "BP-13"]
+        object_sources = ["Tester / PM", "System / PM", "PM / reference data", "PM", "Authorized users", "System", "System", "Human decision / System"]
+        object_uses = ["All business roles", "Authentication and authorization", "Classification and assignment", "Assignment", "Collaboration and QA", "Audit", "Recipients and operations", "Duplicate/AI review"]
+        object_methods = ["CAP entity / OData V4", "AuthService and bearer session", "Associations and value help", "CAP responsibility lookup", "Composition; DB/S3 attachments", "Append-only compositions", "Database outbox / worker", "Confirmed link / read-only audit"]
+        integration_owners = ["Developer environment", "Platform configuration", "System / operations", "System / authorized user"]
+        integration_uses = ["Local verification", "Shared QA", "Notification recipients", "Advisory actions"]
+        integration_methods = ["CAP SQLite adapter", "HTTPS/OData V4; PostgreSQL/S3 bindings", "NotificationDeliveries worker / SMTP", "Server-side allowlisted provider request"]
+        ownership_storage = ["PostgreSQL / SQLite", "Relational master data", "Database and configured S3", "Relational append-only records", "Database outbox", "Database token hashes", "Database normalized audit"]
+        ownership_security = ["Role-filtered access", "PM-maintained", "Authorized readers only", "Do not overwrite prior evidence", "No provider secrets", "No raw password or token", "No raw prompt/response; reviewed states only"]
+        interface_callers = ["Browser user", "Fiori/Auth clients", "Browser login", "CAP runtime", "CAP runtime", "Attachment service", "CAP event / worker", "CAP AI action"]
+        interface_receivers = ["CAP BugService", "CAP services", "AuthService / AuthSessions", "SQLite", "PostgreSQL", "S3 object store", "Email provider", "AI provider"]
+        titles = ["Current solution baseline", "Functional capabilities", "Information objects and integrations", "Data ownership and retention", "Interfaces and control boundaries"]
+        headers = [
+            ["Layer", "Current implementation", "Purpose", "Current limitation"],
+            ["Capability ID", "Capability", "Primary role", "Main result", "Related process"],
+            ["Object / System", "Stored information", "Source / Owner", "Used by", "Integration method"],
+            ["Data object", "Business owner", "Technical storage", "Retention / current handling", "Security note"],
+            ["Boundary", "Caller", "Receiver", "Protocol / Interface", "Validation / Control"],
+        ]
+    else:
+        baseline_purpose = [
+            "Ứng dụng CAP/Fiori và dịch vụ OData",
+            "Xác lập danh tính và ranh giới vai trò ở backend",
+            "Lưu trữ cho phát triển cục bộ và QA dùng chung",
+            "Lưu và truy xuất bằng chứng defect",
+            "Ghi sự kiện trong ứng dụng và lần thử email bất đồng bộ",
+            "Hỗ trợ tùy chọn để con người đánh giá",
+        ]
+        baseline_limits = [
+            "Nền giáo dục/QA dùng chung; chưa chứng nhận production",
+            "Phiên bearer tùy chỉnh; không phải SSO doanh nghiệp",
+            "Tính liên tục phụ thuộc môi trường",
+            "Nghiệm thu QA cần bằng chứng S3 đang hoạt động",
+            "Chưa tuyên bố thành công qua nhà cung cấp thực",
+            "Provider live đang tắt; trạng thái review lưu PENDING/ACCEPTED/REJECTED/IGNORED",
+        ]
+        capability_roles = ["Tester", "Tester / người đánh giá", "Tester / PM", "Tester / PM", "Các vai trò nghiệp vụ", "Các vai trò nghiệp vụ", "Hệ thống", "PM", "Người dùng được phép"]
+        capability_processes = ["BP-02", "BP-03", "BP-04", "BP-05", "BP-06–BP-09", "BP-10", "BP-11", "BP-12", "BP-13"]
+        object_sources = ["Tester / PM", "Hệ thống / PM", "PM / dữ liệu tham chiếu", "PM", "Người dùng được phép", "Hệ thống", "Hệ thống", "Quyết định của con người / Hệ thống"]
+        object_uses = ["Các vai trò nghiệp vụ", "Xác thực và phân quyền", "Phân loại và phân công", "Phân công", "Cộng tác và QA", "Kiểm toán", "Người nhận và vận hành", "Đánh giá trùng lặp/AI"]
+        object_methods = ["CAP entity / OData V4", "AuthService và bearer session", "Association và value help", "Tra cứu trách nhiệm trong CAP", "Composition; tệp trong DB/S3", "Composition chỉ bổ sung", "Hộp thư đi / worker", "Liên kết đã xác nhận / audit chỉ đọc"]
+        integration_owners = ["Môi trường Developer", "Cấu hình nền tảng", "Hệ thống / vận hành", "Hệ thống / người dùng được phép"]
+        integration_uses = ["Xác minh cục bộ", "QA dùng chung", "Người nhận thông báo", "Thao tác AI tư vấn"]
+        integration_methods = ["CAP SQLite adapter", "HTTPS/OData V4; liên kết PostgreSQL/S3", "NotificationDeliveries worker / SMTP", "Yêu cầu phía máy chủ theo danh sách cho phép"]
+        ownership_storage = ["PostgreSQL / SQLite", "Dữ liệu chủ quan hệ", "Cơ sở dữ liệu và S3 đã cấu hình", "Bản ghi quan hệ chỉ bổ sung", "Hộp thư đi trong cơ sở dữ liệu", "Token băm trong cơ sở dữ liệu", "Audit đã chuẩn hóa trong cơ sở dữ liệu"]
+        ownership_security = ["Truy cập được lọc theo vai trò", "PM bảo trì", "Chỉ người đọc được phép", "Không ghi đè bằng chứng cũ", "Không lưu bí mật nhà cung cấp", "Không lưu mật khẩu hoặc token thô", "Không lưu prompt/response thô; chỉ lưu trạng thái review"]
+        interface_callers = ["Người dùng trình duyệt", "Fiori/Auth client", "Màn hình đăng nhập", "CAP runtime", "CAP runtime", "Dịch vụ tệp đính kèm", "Sự kiện CAP / worker", "Thao tác AI của CAP"]
+        interface_receivers = ["CAP BugService", "Các dịch vụ CAP", "AuthService / AuthSessions", "SQLite", "PostgreSQL", "Kho đối tượng S3", "Nhà cung cấp email", "Nhà cung cấp AI"]
+        titles = ["Hiện trạng giải pháp", "Các năng lực chức năng", "Đối tượng thông tin và tích hợp", "Quyền sở hữu và lưu giữ dữ liệu", "Giao diện và ranh giới kiểm soát"]
+        headers = [
+            ["Lớp", "Hiện trạng triển khai", "Mục đích", "Giới hạn hiện tại"],
+            ["Mã năng lực", "Năng lực", "Vai trò chính", "Kết quả chính", "Quy trình liên quan"],
+            ["Đối tượng / Hệ thống", "Thông tin lưu trữ", "Nguồn / Chủ sở hữu", "Bên sử dụng", "Phương thức tích hợp"],
+            ["Đối tượng dữ liệu", "Chủ sở hữu nghiệp vụ", "Lưu trữ kỹ thuật", "Lưu giữ / xử lý hiện tại", "Lưu ý bảo mật"],
+            ["Ranh giới", "Bên gọi", "Bên nhận", "Giao thức / Giao diện", "Kiểm tra / Kiểm soát"],
+        ]
+
+    baseline_rows = [row + [baseline_purpose[index], baseline_limits[index]] for index, row in enumerate(content["baseline_rows"])]
+    capability_rows = [[row[0], f"{row[1]} ({row[3]})", capability_roles[index], row[2], capability_processes[index]] for index, row in enumerate(content["capability_rows"])]
+    object_rows = [row + [object_sources[index], object_uses[index], object_methods[index]] for index, row in enumerate(content["entity_rows"])]
+    for index, row in enumerate(content["integration_rows"]):
+        object_rows.append([row[0], f"{row[1]}; {row[2]}", integration_owners[index], integration_uses[index], integration_methods[index]])
+    ownership_source = EN_DATA_OWNERSHIP if content is EN else VI_DATA_OWNERSHIP
+    ownership_rows = [[row[0], row[1], ownership_storage[index], row[3], ownership_security[index]] for index, row in enumerate(ownership_source)]
+    interface_source = EN_INTERFACE_ROWS if content is EN else VI_INTERFACE_ROWS
+    interface_rows = [[row[0], interface_callers[index], interface_receivers[index], row[2], row[3]] for index, row in enumerate(interface_source)]
+    rows = [baseline_rows, capability_rows, object_rows, ownership_rows, interface_rows]
+    widths = [[1.5, 2.0, 1.8, 1.8], [1.1, 1.5, 1.15, 1.9, 1.45], [1.65, 1.8, 1.15, 1.0, 1.5], [1.2, 1.2, 1.4, 1.9, 1.4], [1.2, 1.0, 1.0, 1.6, 2.3]]
+    return list(zip(titles, headers, rows, widths, strict=True))
+
+
+def organization_table_specs(content: dict) -> list[tuple[str, list[str], list[list[str]], list[float]]]:
+    if content is EN:
+        allowed = [
+            "Create/classify; supply information; retest; close/reopen",
+            "Review assigned work; request information; reject; resolve",
+            "Monitor and coordinate queues, assignment and escalation",
+            "Validate, persist, audit and deliver configured events",
+        ]
+        restricted = [
+            "Cannot bypass validation or act as an unassigned Developer",
+            "Cannot process unassigned work or bypass transition rules",
+            "Cannot become a second assignee or bypass backend controls",
+            "No autonomous business or AI decision",
+        ]
+        titles = ["Roles and responsibilities", "RACI responsibility matrix"]
+        role_headers = ["Role", "Main responsibilities", "Allowed actions", "Restricted actions"]
+    else:
+        allowed = [
+            "Tạo/phân loại; bổ sung thông tin; kiểm thử lại; đóng/mở lại",
+            "Đánh giá việc được phân công; yêu cầu thông tin; từ chối; xử lý",
+            "Giám sát và điều phối hàng đợi, phân công và cảnh báo",
+            "Kiểm tra, lưu, ghi nhật ký và giao sự kiện đã cấu hình",
+        ]
+        restricted = [
+            "Không bỏ qua validation hoặc xử lý như Developer chưa được phân công",
+            "Không xử lý việc chưa được phân công hoặc bỏ qua quy tắc chuyển trạng thái",
+            "Không trở thành assignee thứ hai hoặc bỏ qua kiểm soát backend",
+            "Không tự quyết định nghiệp vụ hoặc quyết định AI",
+        ]
+        titles = ["Vai trò và trách nhiệm", "Ma trận trách nhiệm RACI"]
+        role_headers = ["Vai trò", "Trách nhiệm chính", "Thao tác được phép", "Thao tác bị hạn chế"]
+    role_rows = [[row[0], row[1], allowed[index], restricted[index]] for index, row in enumerate(content["role_rows"])]
+    return [
+        (titles[0], role_headers, role_rows, [1.0, 2.4, 2.1, 1.6]),
+        (titles[1], ["Activity" if content is EN else "Hoạt động", "Tester", "Developer", "PM", "System" if content is EN else "Hệ thống"], content["raci_rows"], [2.7, 1.0, 1.25, 0.9, 1.25]),
+    ]
+
+
+def lifecycle_table_spec(content: dict) -> tuple[str, list[str], list[list[str]], list[float]]:
+    if content is EN:
+        rows = [
+            ["Create", "Submit valid defect", "Tester / PM", "Assigned or Pending Assignment", "Set valid Developer or remain empty", "Developer or Tester/PM queue"],
+            ["New", "Legacy/import handling only", "System", "No normal-flow claim", "Preserve imported value", "As imported"],
+            ["Pending Assignment", "Assign valid Developer", "Tester / PM", "Assigned", "Set Developer", "Developer"],
+            ["Assigned", "Start technical review", "Assigned Developer", "In Review / In Progress", "Unchanged", "Developer"],
+            ["Assigned / In Review / In Progress", "Request more information", "Assigned Developer", "Need More Information", "Unchanged", "Tester / PM"],
+            ["Need More Information", "Resubmit information", "Tester / PM", "Assigned", "Keep existing Developer", "Developer"],
+            ["Assigned / In Review / In Progress", "Reject with reason", "Assigned Developer", "Rejected", "Preserve until correction", "Tester / PM"],
+            ["Rejected", "Correct and assign/reassign", "Tester / PM", "Assigned or Pending Assignment", "Set valid Developer or clear", "Developer or Tester/PM queue"],
+            ["In Review / In Progress", "Resolve with required context", "Assigned Developer", "Resolved", "Unchanged", "Tester / PM"],
+            ["Resolved", "Retest / accept / reopen", "Tester / PM", "Retest Required / Closed / Reopened", "Follow authorized flow", "Tester / PM or Developer"],
+            ["Retest Required", "Record pass or failure", "Tester / PM", "Closed or Reopened", "Follow authorized flow", "Tester / PM or Developer"],
+            ["Closed", "Reopen with reason", "Tester / PM", "Reopened", "Follow authorized assignment flow", "Tester / PM or Developer"],
+        ]
+        return "Bug lifecycle, status transition and next processor", ["Current status", "User action", "Allowed role", "Next status", "Assignee effect", "Next processor"], rows, [1.25, 1.2, 1.1, 1.2, 1.15, 1.2]
+    rows = [
+        ["Tạo mới", "Gửi defect hợp lệ", "Tester / PM", "Assigned hoặc Pending Assignment", "Gán Developer hợp lệ hoặc để trống", "Developer hoặc hàng đợi Tester/PM"],
+        ["New", "Chỉ xử lý dữ liệu cũ/nhập", "Hệ thống", "Không tuyên bố luồng thường", "Giữ giá trị đã nhập", "Theo dữ liệu nhập"],
+        ["Pending Assignment", "Phân công Developer hợp lệ", "Tester / PM", "Assigned", "Gán Developer", "Developer"],
+        ["Assigned", "Bắt đầu đánh giá kỹ thuật", "Developer được phân công", "In Review / In Progress", "Không đổi", "Developer"],
+        ["Assigned / In Review / In Progress", "Yêu cầu thêm thông tin", "Developer được phân công", "Need More Information", "Không đổi", "Tester / PM"],
+        ["Need More Information", "Gửi lại thông tin", "Tester / PM", "Assigned", "Giữ Developer hiện hữu", "Developer"],
+        ["Assigned / In Review / In Progress", "Từ chối kèm lý do", "Developer được phân công", "Rejected", "Giữ tới khi hiệu chỉnh", "Tester / PM"],
+        ["Rejected", "Hiệu chỉnh và phân công lại", "Tester / PM", "Assigned hoặc Pending Assignment", "Gán Developer hợp lệ hoặc xóa", "Developer hoặc hàng đợi Tester/PM"],
+        ["In Review / In Progress", "Xác nhận xử lý với thông tin bắt buộc", "Developer được phân công", "Resolved", "Không đổi", "Tester / PM"],
+        ["Resolved", "Kiểm thử lại / chấp nhận / mở lại", "Tester / PM", "Retest Required / Closed / Reopened", "Theo luồng được phép", "Tester / PM hoặc Developer"],
+        ["Retest Required", "Ghi kết quả đạt hoặc không đạt", "Tester / PM", "Closed hoặc Reopened", "Theo luồng được phép", "Tester / PM hoặc Developer"],
+        ["Closed", "Mở lại kèm lý do", "Tester / PM", "Reopened", "Theo luồng phân công được phép", "Tester / PM hoặc Developer"],
+    ]
+    return "Vòng đời bug, chuyển trạng thái và người xử lý tiếp", ["Trạng thái hiện tại", "Thao tác người dùng", "Vai trò được phép", "Trạng thái tiếp theo", "Ảnh hưởng assignee", "Người xử lý tiếp"], rows, [1.25, 1.2, 1.1, 1.2, 1.15, 1.2]
+
+
+def report_table_specs(content: dict) -> list[tuple[str, list[str], list[list[str]], list[float]]]:
+    source = TRACE_ROWS if content is EN else VI_TRACE_ROWS
+    if content is EN:
+        gaps = ["Human UAT remains Prepared", "Human UAT remains Prepared", "Human UAT remains Prepared", "Inbox evidence is accepted; mentor sign-off Pending", "Human UAT remains Prepared", "Live OpenAI is not accepted", "UAT execution and mentor sign-off Pending"]
+        limitation_impacts = ["No formal acceptance", "No user acceptance result", "Email acceptance incomplete", "Attachment acceptance incomplete", "AI acceptance incomplete", "No production-readiness claim"]
+        mitigations = ["Keep Draft/Pending labels", "Keep UAT Prepared", "Use in-app/outbox evidence only", "Require binding and persistence proof", "Keep live OpenAI disabled; test review/apply/metrics through the approved deterministic baseline", "Limit claims to educational/shared QA"]
+        owners = ["Mentor / DonHV", "Mentor / users", "Operations / DonHV", "Operations / QA", "DonHV / QA", "PM / architecture"]
+        titles = ["Verification and acceptance status", "Known limitations"]
+        headers = [["Area", "Verification method", "Current evidence", "Status", "Remaining gap"], ["ID", "Limitation", "Impact", "Current mitigation", "Follow-up / Owner"]]
+    else:
+        gaps = ["UAT do con người thực hiện vẫn ở trạng thái Prepared", "UAT do con người thực hiện vẫn ở trạng thái Prepared", "UAT do con người thực hiện vẫn ở trạng thái Prepared", "Đã có bằng chứng inbox; chờ người hướng dẫn xác nhận", "UAT do con người thực hiện vẫn ở trạng thái Prepared", "OpenAI live chưa được nghiệm thu", "UAT và ký xác nhận của người hướng dẫn còn Pending"]
+        limitation_impacts = ["Chưa có nghiệm thu chính thức", "Chưa có kết quả chấp nhận của người dùng", "Nghiệm thu email chưa đầy đủ", "Nghiệm thu tệp chưa đầy đủ", "Nghiệm thu AI chưa đầy đủ", "Không được tuyên bố sẵn sàng production"]
+        mitigations = ["Giữ nhãn Bản nháp/Đang chờ", "Giữ UAT ở trạng thái Prepared", "Chỉ dùng bằng chứng trong ứng dụng/hộp thư đi", "Yêu cầu bằng chứng liên kết và lưu bền", "Giữ provider live tắt; kiểm thử review/apply/metrics bằng baseline deterministic đã duyệt", "Giới hạn tuyên bố ở nền giáo dục/QA dùng chung"]
+        owners = ["Người hướng dẫn / DonHV", "Người hướng dẫn / người dùng", "Vận hành / DonHV", "Vận hành / QA", "DonHV / QA", "PM / kiến trúc"]
+        titles = ["Trạng thái kiểm chứng và nghiệm thu", "Các giới hạn đã biết"]
+        headers = [["Phạm vi", "Phương pháp kiểm chứng", "Bằng chứng hiện tại", "Trạng thái", "Khoảng trống còn lại"], ["Mã", "Giới hạn", "Ảnh hưởng", "Biện pháp hiện tại", "Theo dõi / Chủ sở hữu"]]
+    verification_rows = [[row[1], row[3], row[2], row[4], gaps[index]] for index, row in enumerate(source)]
+    limitation_rows = [[f"LIM-{index + 1:02d}", item, limitation_impacts[index], mitigations[index], owners[index]] for index, item in enumerate(content["limitation_items"])]
+    return [
+        (titles[0], headers[0], verification_rows, [1.2, 1.6, 1.6, 1.0, 1.7]),
+        (titles[1], headers[1], limitation_rows, [0.55, 2.0, 1.3, 1.9, 1.35]),
+    ]
+
+
+def copy_element_property(target, source, property_name: str) -> None:
+    target_property = getattr(target, property_name, None)
+    if target_property is not None:
+        target.remove(target_property)
+    source_property = getattr(source, property_name, None)
+    if source_property is not None:
+        target.insert(0, deepcopy(source_property))
+
+
+def add_wrap_opportunities(text: str) -> str:
+    """Keep technical identifiers byte-visible; column sizing handles wrapping."""
+    return str(text)
+
+
+def fill_new_table_cell(cell, text: str, prototype_cell) -> None:
+    """Fill a new cell while inheriting the official Reports-table formatting."""
+    copy_element_property(cell._tc, prototype_cell._tc, "tcPr")
     paragraph = cell.paragraphs[0]
-    paragraph.paragraph_format.space_after = Pt(0)
-    run = paragraph.add_run(str(text))
-    run.bold = bold
-    run.font.name = "Arial"
-    run.font.size = Pt(9)
-    cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+    prototype_paragraph = prototype_cell.paragraphs[0]
+    for extra in cell.paragraphs[1:]:
+        cell._tc.remove(extra._p)
+    for child in list(paragraph._p):
+        if child.tag in {qn("w:r"), qn("w:hyperlink"), qn("w:pPr")}:
+            paragraph._p.remove(child)
+    if prototype_paragraph._p.pPr is not None:
+        paragraph._p.insert(0, deepcopy(prototype_paragraph._p.pPr))
+    run = paragraph.add_run(add_wrap_opportunities(text))
+    prototype_run = prototype_paragraph.runs[0] if prototype_paragraph.runs else None
+    if prototype_run is not None and prototype_run._r.rPr is not None:
+        run._r.insert(0, deepcopy(prototype_run._r.rPr))
 
 
-def shade_cell(cell, fill: str) -> None:
-    tc_pr = cell._tc.get_or_add_tcPr()
-    shd = tc_pr.find(qn("w:shd"))
-    if shd is None:
-        shd = OxmlElement("w:shd")
-        tc_pr.insert_element_before(
-            shd,
-            "w:noWrap",
-            "w:tcMar",
-            "w:textDirection",
-            "w:tcFitText",
-            "w:vAlign",
-            "w:hideMark",
-            "w:headers",
-            "w:cellIns",
-            "w:cellDel",
-            "w:cellMerge",
-            "w:tcPrChange",
-        )
-    shd.set(qn("w:val"), "clear")
-    shd.set(qn("w:color"), "auto")
-    shd.set(qn("w:fill"), fill)
-
-
-def add_table(doc: Document, headers: list[str], rows: list[list[str]], widths: list[float] | None = None):
+def add_table(doc: Document, headers: list[str], rows: list[list[str]], widths: list[float] | None = None, prototype_table=None):
     table = doc.add_table(rows=1, cols=len(headers))
-    table.style = "Table Grid"
-    table.alignment = WD_TABLE_ALIGNMENT.CENTER
-    table.autofit = False
+    if prototype_table is None:
+        raise ValueError("Approved Blueprint content tables require an official-template prototype table")
+    copy_element_property(table._tbl, prototype_table._tbl, "tblPr")
     for index, header in enumerate(headers):
-        set_cell_text(table.rows[0].cells[index], header, bold=True)
-        shade_cell(table.rows[0].cells[index], "D9EAF7")
+        prototype_cell = prototype_table.rows[0].cells[min(index, len(prototype_table.columns) - 1)]
+        fill_new_table_cell(table.rows[0].cells[index], header, prototype_cell)
+    keep_row_together(table.rows[0], repeat_header=True)
     for values in rows:
         cells = table.add_row().cells
         for index in range(len(headers)):
-            set_cell_text(cells[index], values[index] if index < len(values) else "")
+            prototype_column = 0 if index == 0 else min(index, len(prototype_table.columns) - 1)
+            fill_new_table_cell(cells[index], values[index] if index < len(values) else "", prototype_table.rows[1].cells[prototype_column])
+        keep_row_together(table.rows[-1])
     if widths:
-        for row in table.rows:
-            for index, width in enumerate(widths):
-                row.cells[index].width = Inches(width)
+        set_table_grid_widths(table, widths)
     return table
 
 
@@ -702,6 +890,39 @@ def enable_field_updates(doc: Document) -> None:
     existing.set(qn("w:val"), "1")
 
 
+def update_cached_numpages(doc: Document, page_count: int) -> None:
+    """Update only the cached NUMPAGES result used by Google Drive preview.
+
+    Word and LibreOffice recalculate the field when they open the document.
+    Google Drive can instead display the value cached in the official
+    template. The field instruction and footer formatting remain unchanged.
+    """
+    for relationship in doc.part.rels.values():
+        if relationship.reltype != RT.FOOTER:
+            continue
+        in_field = False
+        instruction = ""
+        replace_result = False
+        for element in relationship.target_part.element.iter():
+            if element.tag == qn("w:fldChar"):
+                field_type = element.get(qn("w:fldCharType"))
+                if field_type == "begin":
+                    in_field = True
+                    instruction = ""
+                    replace_result = False
+                elif field_type == "separate" and in_field:
+                    replace_result = "NUMPAGES" in instruction.upper()
+                elif field_type == "end":
+                    in_field = False
+                    instruction = ""
+                    replace_result = False
+            elif in_field and element.tag == qn("w:instrText"):
+                instruction += element.text or ""
+            elif replace_result and element.tag == qn("w:t"):
+                element.text = str(page_count)
+                replace_result = False
+
+
 def configure_styles(doc: Document) -> None:
     normal = doc.styles["Normal"]
     normal.font.name = "Arial"
@@ -801,6 +1022,20 @@ def resize_rows(table, count: int) -> None:
         table._tbl.remove(table.rows[-1]._tr)
 
 
+def resize_rows_from_template(table, count: int, template_row_index: int) -> None:
+    """Resize a template table by cloning a known non-merged data row.
+
+    Some official-template tables end with a merged spacer row.  Cloning the
+    last row would therefore collapse every added record into one cell.  The
+    caller identifies the real data-row signature that must be preserved.
+    """
+    template_row = deepcopy(table.rows[template_row_index]._tr)
+    while len(table.rows) > template_row_index + 1:
+        table._tbl.remove(table.rows[-1]._tr)
+    while len(table.rows) < count:
+        table._tbl.append(deepcopy(template_row))
+
+
 def keep_row_together(row, repeat_header: bool = False) -> None:
     row_properties = row._tr.get_or_add_trPr()
     if row_properties.find(qn("w:cantSplit")) is None:
@@ -854,14 +1089,45 @@ def set_table_grid_widths(table, widths: list[float]) -> None:
             set_cell_width(cell, width)
 
 
-def insert_picture_after(doc: Document, anchor: Paragraph, asset: str, caption: str, width: float = 5.8) -> Paragraph:
+def block_element(block):
+    return block._p if hasattr(block, "_p") else block._tbl
+
+
+def set_table_title(paragraph: Paragraph, text: str, heading_level: int) -> None:
+    set_template_paragraph(paragraph, text, f"Heading {heading_level}")
+    paragraph.paragraph_format.keep_with_next = True
+
+
+def add_table_series_after(
+    doc: Document,
+    anchor: Paragraph,
+    specs: list[tuple[str, list[str], list[list[str]], list[float]]],
+    prototype_table,
+    heading_level: int,
+):
+    """Place approved content tables after an existing template paragraph."""
+    current = anchor
+    for index, (title, headers, rows, widths) in enumerate(specs):
+        if index == 0:
+            title_paragraph = anchor
+        else:
+            title_paragraph = doc.add_paragraph()
+            block_element(current).addnext(title_paragraph._p)
+        set_table_title(title_paragraph, title, heading_level)
+        table = add_table(doc, headers, rows, widths, prototype_table)
+        title_paragraph._p.addnext(table._tbl)
+        current = table
+    return current
+
+
+def insert_picture_after(doc: Document, anchor, asset: str, caption: str, width: float = 5.8) -> Paragraph:
     image_path = ROOT / "docs" / "diagrams" / "rendered" / "png" / f"{asset}.png"
     if not image_path.exists() or image_path.stat().st_size == 0:
         raise FileNotFoundError(f"Missing Blueprint diagram image: {image_path}")
     picture_paragraph = doc.add_paragraph()
     picture_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
     picture_paragraph.add_run().add_picture(str(image_path), width=Inches(width))
-    anchor._p.addnext(picture_paragraph._p)
+    block_element(anchor).addnext(picture_paragraph._p)
     caption_paragraph = doc.add_paragraph()
     caption_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
     caption_run = caption_paragraph.add_run(caption)
@@ -901,15 +1167,24 @@ def fill_control_tables(doc: Document, content: dict) -> None:
         fill_template_cell(history.cell(1, index), label)
     history_rows = (
         [
-            [DATE, "IDTS content baseline", "Consolidated IDTS business content and evidence boundary", "DonHV", "C", "v0.2"],
-            [DATE, "Official-template remediation", "Filled from the untouched SAP490 template; preserved sections, headers/footers, styles, numbering and tables", "DonHV", "C", VERSION],
+            ["2026-06-21", "Initial Blueprint", "Established IDTS business scope and roles", "DonHV", "A", "v0.1"],
+            ["2026-07-02", "Shared QA baseline", "Added PostgreSQL, S3, email and deployment boundaries", "DonHV", "C", "v0.2"],
+            ["2026-07-23", "Official-template baseline", "Mapped verified IDTS content into the official SAP490 template", "DonHV", "C", "v0.3"],
+            ["2026-07-23", "Table-layout remediation", "Converted approved content sections to template-derived Word tables", "DonHV", "C", "v0.4"],
+            ["2026-07-25", "Runtime feature alignment", "Added exact AI actions, developer dataset and current integration scope", "DonHV", "C", "v0.5"],
+            [DATE, "Quality remediation", "Corrected acceptance truth, version continuity, identifiers and diagram explanations", "DonHV", "C", VERSION],
         ]
         if content is EN
         else [
-            [DATE, "Nền nội dung IDTS", "Nội dung nghiệp vụ và ranh giới bằng chứng đã được tổng hợp", "DonHV", "C", "v0.2"],
-            [DATE, "Khắc phục theo template chính thức", "Điền từ template SAP490 nguyên bản; giữ section, đầu/chân trang, style, numbering và bảng", "DonHV", "C", VERSION],
+            ["2026-06-21", "Blueprint ban đầu", "Thiết lập phạm vi nghiệp vụ và vai trò IDTS", "DonHV", "A", "v0.1"],
+            ["2026-07-02", "Nền Shared QA", "Bổ sung ranh giới PostgreSQL, S3, email và triển khai", "DonHV", "C", "v0.2"],
+            ["2026-07-23", "Nền theo template chính thức", "Đưa nội dung IDTS đã xác minh vào template SAP490 chính thức", "DonHV", "C", "v0.3"],
+            ["2026-07-23", "Khắc phục cách trình bày bằng bảng", "Chuyển các phần nội dung đã duyệt sang bảng Word kế thừa template", "DonHV", "C", "v0.4"],
+            ["2026-07-25", "Đồng bộ tính năng runtime", "Bổ sung action AI chính xác, bộ dữ liệu developer và phạm vi tích hợp", "DonHV", "C", "v0.5"],
+            [DATE, "Khắc phục chất lượng", "Sửa sự thật nghiệm thu, lịch sử phiên bản, identifier và diễn giải diagram", "DonHV", "C", VERSION],
         ]
     )
+    resize_rows_from_template(history, len(history_rows) + 2, template_row_index=3)
     for row_index, values in enumerate(history_rows, 2):
         for column_index, value in enumerate(values):
             fill_template_cell(history.cell(row_index, column_index), value)
@@ -966,7 +1241,7 @@ def fill_glossary(doc: Document, content: dict) -> None:
             ["AuthSessions", "Bản ghi phiên xác thực do máy chủ quản lý", "Không lưu mật khẩu thô"],
             ["NotificationDeliveries", "Hộp thư đi phục vụ giao email bất đồng bộ", "Lỗi nhà cung cấp không hoàn tác quy trình"],
             ["nextProcessor", "Người hoặc hàng đợi cần thực hiện thao tác tiếp theo", "Không thay thế assignee kỹ thuật"],
-            ["AiSuggestions", "Bản ghi AI tư vấn đã chuẩn hóa", "Hiện chỉ lưu trạng thái PENDING"],
+            ["AiSuggestions", "Bản ghi AI tư vấn đã chuẩn hóa", "Lưu trạng thái review và telemetry đã làm sạch"],
         ]
     )
     rows = [list(row) + [""] if len(row) == 2 else list(row) for row in content["glossary_rows"]]
@@ -1026,63 +1301,73 @@ def fill_reports_table(doc: Document, content: dict) -> None:
 
 def fill_template_body(doc: Document, content: dict) -> None:
     paragraphs = doc.paragraphs
+    content_table_prototype = doc.tables[7]
     toc_lines = (
-        ["OVERVIEW", "• Glossary", "• IDTS Solution Context and Scope", "ORGANIZATIONAL STRUCTURE", "BUSINESS PROCESS", "• IDTS-BP-01 Issue and Defect Management", "• Process Flow", "• Process Description", "REPORTS"]
+        [
+            "OVERVIEW ................................................................ 6",
+            "  Glossary .............................................................. 6",
+            "  IDTS Solution Context and Scope ....................................... 6",
+            "ORGANIZATIONAL STRUCTURE ............................................... 14",
+            "BUSINESS PROCESS ....................................................... 15",
+            "  IDTS-BP-01 Issue and Defect Management ............................... 15",
+            "  Process Flow ......................................................... 15",
+            "  Process Description .................................................. 19",
+            "REPORTS ................................................................. 24",
+        ]
         if content is EN
-        else ["TỔNG QUAN (OVERVIEW)", "• Thuật ngữ", "• Bối cảnh giải pháp và phạm vi IDTS", "CƠ CẤU TỔ CHỨC", "QUY TRÌNH NGHIỆP VỤ", "• IDTS-BP-01 Quản lý Issue và Defect", "• Luồng quy trình", "• Mô tả quy trình", "BÁO CÁO (REPORTS)"]
+        else [
+            "TỔNG QUAN (OVERVIEW) .................................................... 6",
+            "  Thuật ngữ ............................................................. 6",
+            "  Bối cảnh giải pháp và phạm vi IDTS .................................... 6",
+            "CƠ CẤU TỔ CHỨC ........................................................ 14",
+            "QUY TRÌNH NGHIỆP VỤ .................................................... 15",
+            "  IDTS-BP-01 Quản lý Issue và Defect ................................... 15",
+            "  Luồng quy trình ...................................................... 15",
+            "  Mô tả quy trình ....................................................... 19",
+            "BÁO CÁO (REPORTS) ....................................................... 23",
+        ]
     )
-    set_template_paragraph(paragraphs[23], "\n".join(toc_lines))
+    set_template_paragraph(paragraphs[23], "")
+    add_toc(paragraphs[23], "\n".join(toc_lines))
     set_template_paragraph(paragraphs[25], "OVERVIEW" if content is EN else "TỔNG QUAN (OVERVIEW)", "Heading 1")
     set_template_paragraph(paragraphs[26], "Glossary" if content is EN else "Thuật ngữ", "Heading 2")
     set_template_paragraph(paragraphs[27], "IDTS Solution Context and Scope" if content is EN else "Bối cảnh giải pháp và phạm vi IDTS", "Heading 2")
     objective_label = "Business objectives" if content is EN else "Mục tiêu nghiệp vụ"
     scope_label = "In scope" if content is EN else "Trong phạm vi"
     out_label = "Out of scope" if content is EN else "Ngoài phạm vi"
-    baseline_label = "Current solution baseline" if content is EN else "Nền giải pháp hiện tại"
-    capability_label = "Functional capabilities" if content is EN else "Năng lực chức năng"
-    information_label = "Information objects and integrations" if content is EN else "Đối tượng thông tin và tích hợp"
     set_template_paragraph(paragraphs[28], content["purpose_text"])
     set_template_paragraph(paragraphs[29], objective_label + ":\n" + "\n".join(f"• {item}" for item in content["objectives_items"]) + "\n\n" + scope_label + ":\n" + "\n".join(f"• {item}" for item in content["in_scope_items"]) + "\n\n" + out_label + ":\n" + "\n".join(f"• {item}" for item in content["out_scope_items"]))
-    ownership_label = "Data ownership and retention" if content is EN else "Quyền sở hữu và lưu giữ dữ liệu"
-    interface_label = "Interfaces and control boundaries" if content is EN else "Giao diện và ranh giới kiểm soát"
-    ownership_rows = EN_DATA_OWNERSHIP if content is EN else VI_DATA_OWNERSHIP
-    interface_rows = EN_INTERFACE_ROWS if content is EN else VI_INTERFACE_ROWS
-    set_template_paragraph(
-        paragraphs[30],
-        baseline_label + ":\n" + rows_to_lines(content["baseline_rows"])
-        + "\n\n" + capability_label + ":\n" + rows_to_lines(content["capability_rows"])
-        + "\n\n" + information_label + ":\n" + rows_to_lines(content["entity_rows"]) + "\n" + rows_to_lines(content["integration_rows"])
-        + "\n\n" + ownership_label + ":\n" + rows_to_lines(ownership_rows)
-        + "\n\n" + interface_label + ":\n" + rows_to_lines(interface_rows),
-    )
+    overview_anchor = add_table_series_after(doc, paragraphs[30], overview_table_specs(content), content_table_prototype, 3)
+    set_template_paragraph(paragraphs[31], "", "Normal")
 
     set_template_paragraph(paragraphs[32], "ORGANIZATIONAL STRUCTURE" if content is EN else "CƠ CẤU TỔ CHỨC (ORGANIZATIONAL STRUCTURE)", "Heading 1")
-    role_label = "Roles and responsibilities" if content is EN else "Vai trò và trách nhiệm"
-    set_template_paragraph(paragraphs[33], content["organization_text"] + "\n\n" + role_label + ":\n" + rows_to_lines(content["role_rows"]) + "\n\nRACI:\n" + rows_to_lines(content["raci_rows"], " | "))
+    set_template_paragraph(paragraphs[33], content["organization_text"])
+    organization_anchor = add_table_series_after(doc, paragraphs[33], organization_table_specs(content), content_table_prototype, 2)
 
     set_template_paragraph(paragraphs[34], "BUSINESS PROCESS" if content is EN else "QUY TRÌNH NGHIỆP VỤ (BUSINESS PROCESS)", "Heading 1")
     set_template_paragraph(paragraphs[35], "IDTS-BP-01 Issue and Defect Management" if content is EN else "IDTS-BP-01 Quản lý Issue và Defect", "Heading 2")
     set_template_paragraph(paragraphs[36], "Process Flow" if content is EN else "Luồng quy trình", "Heading 2")
-    lifecycle_label = "Lifecycle and ownership rules" if content is EN else "Quy tắc vòng đời và quyền sở hữu"
-    set_template_paragraph(paragraphs[37], content["process_intro"] + "\n\n" + lifecycle_label + ":\n" + rows_to_lines(content["status_rows"], " | "))
+    set_template_paragraph(paragraphs[37], content["process_intro"])
+    lifecycle_anchor = add_table_series_after(doc, paragraphs[37], [lifecycle_table_spec(content)], content_table_prototype, 3)
     set_template_paragraph(paragraphs[38], "Process Description" if content is EN else "Mô tả quy trình", "Heading 2")
     paragraphs[38].paragraph_format.page_break_before = True
 
     set_template_paragraph(paragraphs[39], "REPORTS" if content is EN else "BÁO CÁO (REPORTS)", "Heading 1")
     paragraphs[39].paragraph_format.page_break_before = True
     set_template_paragraph(paragraphs[40], "The following IDTS views support operational monitoring and mentor review." if content is EN else "Các khung nhìn IDTS sau hỗ trợ theo dõi vận hành và việc người hướng dẫn đánh giá.")
-    acceptance_rows = TRACE_ROWS if content is EN else VI_TRACE_ROWS
-    acceptance_lines = "\n".join(f"{row[0]} — {row[-1]}" for row in acceptance_rows)
     supplemental = (
-        "Security, quality and controls:\n" + rows_to_lines(content["quality_rows"]) + "\n\nTraceability and evidence:\n" + rows_to_lines(content["trace_rows"]) + "\n\nCurrent verification status:\n" + acceptance_lines + "\n\nKnown limitations and pending acceptance:\n" + "\n".join(f"• {item}" for item in content["limitation_items"])
+        "Security, quality and controls:\n" + rows_to_lines(content["quality_rows"]) + "\n\nTraceability and evidence:\n" + rows_to_lines(content["trace_rows"])
         if content is EN
-        else "An toàn, chất lượng và kiểm soát:\n" + rows_to_lines(content["quality_rows"]) + "\n\nTruy vết và bằng chứng:\n" + rows_to_lines(content["trace_rows"]) + "\n\nTrạng thái xác minh hiện tại:\n" + acceptance_lines + "\n\nGiới hạn đã biết và nội dung chờ nghiệm thu:\n" + "\n".join(f"• {item}" for item in content["limitation_items"])
+        else "An toàn, chất lượng và kiểm soát:\n" + rows_to_lines(content["quality_rows"]) + "\n\nTruy vết và bằng chứng:\n" + rows_to_lines(content["trace_rows"])
     )
     set_template_paragraph(paragraphs[41], supplemental)
+    report_anchor = add_table_series_after(doc, paragraphs[41], report_table_specs(content), content_table_prototype, 2)
 
-    insert_picture_after(doc, paragraphs[30], "01-system-context", "Figure 1 — IDTS system context and external boundaries" if content is EN else "Hình 1 — Bối cảnh hệ thống và ranh giới bên ngoài của IDTS")
-    anchor = insert_picture_after(doc, paragraphs[37], "20-frs-resolve-retest-close-reopen", "Figure 2 — Resolve, retest, close and reopen flow" if content is EN else "Hình 2 — Luồng xác nhận xử lý, kiểm thử lại, đóng và mở lại")
+    insert_picture_after(doc, overview_anchor, "01-system-context", "Figure 1 — IDTS system context and external boundaries" if content is EN else "Hình 1 — Bối cảnh hệ thống và ranh giới bên ngoài của IDTS")
+    anchor = insert_picture_after(doc, lifecycle_anchor, "20-frs-resolve-retest-close-reopen", "Figure 2 — Resolve, retest, close and reopen flow" if content is EN else "Hình 2 — Luồng xác nhận xử lý, kiểm thử lại, đóng và mở lại")
     insert_picture_after(doc, anchor, "07-developer-review", "Figure 3 — Developer review and controlled follow-up" if content is EN else "Hình 3 — Developer đánh giá và xử lý tiếp có kiểm soát")
+    if len(doc.tables) != 18:
+        raise ValueError(f"Blueprint output contract changed: expected 8 preserved template tables plus 10 approved content tables, found {len(doc.tables)}")
 
 
 def build(content: dict) -> Path:
@@ -1110,11 +1395,12 @@ def build(content: dict) -> Path:
         "AAAA": "DonHV",
         "Nguyen Hoang Group": "Prepared by DonHV",
     }
-    for section in doc.sections:
-        for header in (section.header, section.first_page_header, section.even_page_header):
-            replace_part_text(header.part, replacements)
-        for footer in (section.footer, section.first_page_footer, section.even_page_footer):
-            replace_part_text(footer.part, {"Confidental": "Confidential"})
+    for relationship in doc.part.rels.values():
+        if relationship.reltype == RT.HEADER:
+            replace_part_text(relationship.target_part, replacements)
+        elif relationship.reltype == RT.FOOTER:
+            replace_part_text(relationship.target_part, {"Confidental": "Confidential"})
+    update_cached_numpages(doc, content["page_count"])
     doc.core_properties.title = f"IDTS SAP490 Blueprint {content['language']} {VERSION}"
     doc.core_properties.subject = "Official-template-filled IDTS SAP490 Blueprint"
     doc.core_properties.author = "IDTS SAP01 Team"

@@ -12,19 +12,21 @@ const {
   sanitizeDiagnosticToken,
   sanitizeErrorSummary
 } = require('./safety')
+const { emitAiOperationalMetric } = require('./metrics')
 
 const LOG = cds.log('idts-ai')
 
-function createAiProvider (config = getAiConfig()) {
+function createAiProvider (config = getAiConfig(), dependencies = {}) {
   // Factory public luôn trả SafeAiProvider, để mọi feature dùng cùng timeout/redaction/fallback contract.
-  return new SafeAiProvider(config)
+  return new SafeAiProvider(config, dependencies)
 }
 
 class SafeAiProvider {
   // Wrapper bảo vệ delegate thật/mock: sanitize input, giới hạn thời gian và chuyển mọi lỗi thành result an toàn.
-  constructor (config) {
+  constructor (config, dependencies = {}) {
     this.config = config
     this.delegate = createDelegate(config)
+    this.metricsLogger = dependencies.metricsLogger
   }
 
   chat (request = {}) {
@@ -45,7 +47,7 @@ class SafeAiProvider {
     const featureType = safeFeatureType(request.featureType)
 
     if (!this.config.enabled) {
-      return failureResult({
+      return this.#complete(failureResult({
         operation,
         featureType,
         correlationId,
@@ -54,11 +56,11 @@ class SafeAiProvider {
         summary: 'AI assistance is disabled.',
         retryable: false,
         config: this.config
-      })
+      }))
     }
 
     if (this.config.unsupported) {
-      return failureResult({
+      return this.#complete(failureResult({
         operation,
         featureType,
         correlationId,
@@ -67,11 +69,11 @@ class SafeAiProvider {
         summary: 'Configured AI provider is not supported by this IDTS build.',
         retryable: false,
         config: this.config
-      })
+      }))
     }
 
     if (!this.config.ready) {
-      return failureResult({
+      return this.#complete(failureResult({
         operation,
         featureType,
         correlationId,
@@ -80,19 +82,19 @@ class SafeAiProvider {
         summary: 'AI assistance is not configured completely.',
         retryable: false,
         config: this.config
-      })
+      }))
     }
 
     try {
       const data = await withTimeout(execute(), this.config.timeoutMs)
-      return successResult({
+      return this.#complete(successResult({
         operation,
         featureType,
         correlationId,
         durationMs: Date.now() - started,
         data,
         config: this.config
-      })
+      }))
     } catch (error) {
       const code = error?.code === 'AI_TIMEOUT' ? 'AI_TIMEOUT' : 'AI_PROVIDER_ERROR'
       LOG.warn('AI provider operation failed', {
@@ -105,7 +107,7 @@ class SafeAiProvider {
           retryable: Boolean(error?.retryable || code === 'AI_TIMEOUT')
         }
       })
-      return failureResult({
+      return this.#complete(failureResult({
         operation,
         featureType,
         correlationId,
@@ -114,8 +116,13 @@ class SafeAiProvider {
         summary: sanitizeErrorSummary(error),
         retryable: Boolean(error?.retryable || code === 'AI_TIMEOUT'),
         config: this.config
-      })
+      }))
     }
+  }
+
+  #complete (result) {
+    emitAiOperationalMetric(result, this.metricsLogger)
+    return result
   }
 }
 

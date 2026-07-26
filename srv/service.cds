@@ -5,6 +5,7 @@ using idts.cap as db from '../db/schema';
 service BugService @(requires: 'authenticated-user') {
   // Các type sau là response tạm của action AI review-only, không phải table được persist.
   type SimilarBugCandidate {
+    suggestionID     : UUID;
     rank             : Integer;
     bugID            : UUID;
     bugNumber        : String(30);
@@ -19,6 +20,7 @@ service BugService @(requires: 'authenticated-user') {
   };
 
   type ClassificationSuggestionCandidate {
+    suggestionID     : UUID;
     field            : String(40);
     fieldLabel       : String(120);
     valueID          : UUID;
@@ -32,6 +34,7 @@ service BugService @(requires: 'authenticated-user') {
   };
 
   type BugHandoffSummaryResult {
+    suggestionID          : UUID;
     bugID                 : UUID;
     bugNumber             : String(30);
     generatedAt           : Timestamp;
@@ -49,6 +52,7 @@ service BugService @(requires: 'authenticated-user') {
   };
 
   type SmartAssignmentExplanationCandidate {
+    suggestionID       : UUID;
     developerProfileID : UUID;
     developerName      : String(120);
     explanation        : String(700);
@@ -61,6 +65,37 @@ service BugService @(requires: 'authenticated-user') {
     workloadLimit      : Integer;
     isOverloaded       : Boolean;
     requiresReview     : Boolean;
+  };
+
+  type AiSuggestionReviewResult {
+    suggestionID            : UUID;
+    bugID                   : UUID;
+    featureTypeCode         : String(40);
+    reviewStateCode         : String(40);
+    reviewStateName         : String(120);
+    reviewedByID            : UUID;
+    reviewedByDisplayName   : String(120);
+    reviewedAt              : Timestamp;
+  };
+
+  type AiOperationalMetric {
+    windowStart        : Timestamp;
+    windowEnd          : Timestamp;
+    featureTypeCode    : String(40);
+    providerAlias      : String(80);
+    modelAlias         : String(80);
+    requestCount       : Integer;
+    successCount       : Integer;
+    failureCount       : Integer;
+    timeoutCount       : Integer;
+    unavailableCount   : Integer;
+    acceptedCount      : Integer;
+    rejectedCount      : Integer;
+    ignoredCount       : Integer;
+    pendingCount       : Integer;
+    latencySampleCount : Integer;
+    averageLatencyMs   : Integer;
+    maxLatencyMs       : Integer;
   };
 
   // Unbound AI actions nhận context tối thiểu và trả suggestion; handler phải ground/audit nhưng không tự sửa Bug.
@@ -101,6 +136,21 @@ service BugService @(requires: 'authenticated-user') {
     sapModuleID          : UUID,
     limit                : Integer
   ) returns array of SmartAssignmentExplanationCandidate;
+
+  // Human review actions chỉ đổi audit row đang PENDING; hai action phía sau mới được apply dữ liệu đã Accept.
+  action acceptAiSuggestion(suggestionID : UUID) returns AiSuggestionReviewResult;
+  action rejectAiSuggestion(suggestionID : UUID) returns AiSuggestionReviewResult;
+  action ignoreAiSuggestion(suggestionID : UUID) returns AiSuggestionReviewResult;
+  action applyClassificationSuggestion(suggestionID : UUID) returns Bugs;
+  // Chỉ nhận hai UUID; relation type và candidate membership luôn lấy từ suggestion payload đã persist.
+  action confirmDuplicateSuggestion(
+    suggestionID  : UUID,
+    candidateBugID : UUID
+  ) returns DuplicateLinks;
+
+  // PM-only operational aggregate; reads allowlisted audit metadata and never exposes prompt/response/error detail.
+  @(requires: 'PM')
+  function readAiOperationalMetrics(windowDays : Integer) returns array of AiOperationalMetric;
 
   // Projection Bugs expose aggregate chính, thêm field tính/virtual cho UX; dữ liệu gốc vẫn ở db.Bugs.
   entity Bugs as projection on db.Bugs {
@@ -242,6 +292,8 @@ service BugService @(requires: 'authenticated-user') {
     requestedBy.displayName as requestedByDisplayName,
     providerAlias,
     modelAlias,
+    operationStatus,
+    latencyMs,
     confidence,
     suggestionPayload,
     summary,

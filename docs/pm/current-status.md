@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-07-23
+Last updated: 2026-07-24
 
 ## Snapshot
 
@@ -9,8 +9,12 @@ Last updated: 2026-07-23
 | Project phase | Sprint 5 is active and currently At Risk. Jira Epic `IDTS-88` now consolidates all 11 current Sprint 5 issues for mentor readiness, Shared QA/infrastructure closure, security follow-up, and ownership governance. |
 | Product baseline | CAP/Fiori MVP, attachment/audit/notification/PM flows, and advisory-AI review baseline are implemented; BRD v1.5, SRS v1.4, and FRS v1.5 EN/VI are synchronized to the AuthService/AuthSessions, Render/PostgreSQL, attachment/S3, notification outbox, and human-reviewed AiSuggestions baseline. |
 | Current sprint | `IDTS Sprint 5`: 11 issues as of 2026-07-22 — 5 In Progress, 6 To Do, 0 Done, and 5 overdue before the report date. All 11 are children of Epic `IDTS-88`; DonHV owns 9 and SangVN owns 2, so capacity and status reconciliation are immediate risks. |
-| Recommended next action | Use the reorganized SAP490 pack for mentor review with the disclosed conditional limitations. The 12 current test workbooks now pass canonical content validation, OfficeCLI, EN/VI parity, LibreOffice/native visual review, Drive same-ID readback, and Google Sheets inspection. Current test truth is 27 planned, 12 executed/passed, 0 failed/blocked, 9 Not Run, 6 UAT Prepared, 6/6 npm suites, and 160 checks. Complete UAT/mentor sign-off and the dedicated learning-thread Knowledge Gate separately; do not infer either result from document quality. |
+| Recommended next action | Use the synchronized SAP490 pack for mentor review with disclosed limitations. IDTS-100 refreshed the current artifacts and Shared QA evidence, updated Drive artifacts in place, and verified 27 planned cases as 21 Passed plus 6 human UAT cases still Prepared. Complete those six UAT executions and mentor sign-off separately; OpenAI live remains disabled and must not be presented as accepted. |
 | Active implementation note | IDTS-72 visual evidence audit has repository evidence merged through PR #126. IDTS-74 is complete and deployed. IDTS-75 is complete at implementation, PR, Render, and shared-QA evidence level. IDTS-76 is complete at implementation, PR, Render, and shared-QA evidence level: it reuses `summarizeBugHandoff` and `AiReviewUi`, adds a review-only Handoff Summary Object Page section/dialog, and has local plus shared-QA evidence for positive, sparse-data, unsafe-output, safe-failure, no-workflow-mutation, deployed API smoke, and deployed browser smoke. |
+| Completed DatDT AI review foundation | IDTS-91/92/93 merged through PR #167 at `442b958b28ff268920260bbdef8bd94dc56f9341`. Explicit suggestion review, persisted Similar Bugs/Classification controls, and validated Tester/PM classification apply passed the integrated regression and fresh GitHub gate. Jira comments `10676`–`10678` record closure evidence; all three issues are Done. |
+| Completed SangVN AI review controls | IDTS-94 merged through PR #168 at `9e041dac56f9adfd9294521d5c2e7e8f3c1597cb`. Handoff Summary and Smart Assign explanation persist review decisions without workflow/assignee mutation; focused, desktop/mobile browser, build and gate evidence passed. SangVN's 3/3 Knowledge Gate remains linked; Jira comment `10679` records closure and the issue is Done. |
+| Active SangVN duplicate confirmation | IDTS-95 is technically verified on PR #172. The Tester/PM action confirms only an accepted stored Similar Bugs candidate, rejects self/reverse/repeated links, uses the request transaction, and does not mutate Bug lifecycle. DonHV approved an emergency deadline exception for the still-missing dedicated Knowledge Gate; the exception is recorded transparently and is not a fabricated PASS. |
+| Active SangVN AI operational metrics | IDTS-97 adds allowlisted best-effort operation status/latency fields and a PM-only bounded aggregate without exposing prompts, responses, raw errors, emails, endpoints or secrets. DonHV approved the same emergency deadline exception for the missing metrics/privacy Knowledge Gate; the exception is not a learner PASS. |
 | Main implementation risk | Shared QA still depends on private Render/Brevo/AWS/PostgreSQL environment variables staying out of repo, Jira, and logs. The Render PostgreSQL free-instance expiry remains the main time-bound infrastructure risk; IDTS-45 now documents a private logical-backup helper and recommends upgrading Render PostgreSQL before expiry if shared QA remains needed. Sprint 04 is tracked both through the real Jira sprint `IDTS Sprint 4` and planning epic `IDTS-51`; `IDTS-40` remains a deferred AWS-native follow-up rather than a blocker for Render QA. |
 | Knowledge readiness | `IDTS-82` is In Progress. From 2026-07-13, every member must pass the ownership Knowledge Gate before nontrivial work and before PR merge/Jira Done. Debug Labs, a progress register, and a PR-body validator are being added; source-comment retrofit is split into IDTS-83 to IDTS-85 and QA validation is IDTS-86. |
 | Active audit refactor | `IDTS-89` is complete: Knowledge Gate 90% PASS; PR #163 merged normally and runtime-only deploy `dep-d9gtkhrrjlhs73d4mhqg` is live at merge SHA `97792e8`. Database preservation, 11/11 exact ActionTypes, 11/11 legacy ActionTypes, health, protected-route, error-log, and authenticated reversible exact-action smoke checks pass. Auto-deploy remains off and pre-deploy remains `true`. |
@@ -213,6 +217,30 @@ Vietnamese: Giao diá»‡n Fiori Elements cho luá»“ng táº¡o bug (Option 
 Vietnamese clean note: Trường Assignee hiện chọn được qua value help, popup hiển thị cột nghiệp vụ, và trên runtime đã verify thì ô input của action `Assign Developer` hiện hiển thị tên developer đã chọn thay vì UUID. Các popup value list phổ biến cũng đã có label nghiệp vụ, ví dụ `Priority Code` và `Priority`. Lần verify này dùng Playwright CLI, không dùng Playwright MCP.
 
 Vietnamese clean note: Nút `Assign Developer` riêng đã được bỏ khỏi Object Page để tránh hai luồng assign cạnh tranh nhau. User assign/reassign bằng field `Assignee`; khi save draft, backend tự chuyển status sang `Assigned`, cập nhật `nextProcessor`, ghi history và tạo notification.
+
+## 2026-07-25 SAP490 specification remediation
+
+- `IDTS-101` regenerated eight Blueprint, Functional Specification, Technical Specification, and Configuration Note EN/VI artifacts from their official templates.
+- OfficeCLI, strict template/content validation, complete sheet coverage, EN/VI parity, and 105/105-page visual review passed.
+- All eight existing Drive files were updated in place with IDs, parents, MIME types, and sharing preserved; raw-byte readback matched local artifacts.
+- Blueprint Drive preview now reports 26 EN pages and 25 VI pages with matching `Confidential current/total` footers. Mentor review/approval remains Pending and live OpenAI remains disabled/not accepted.
+
+## 2026-07-25 SAP490 specification quality follow-up
+
+- `IDTS-102` corrected runtime traceability, content completeness, and formal layout findings discovered after the IDTS-101 merge.
+- Eight specification artifacts were regenerated from official templates and updated at their existing Drive IDs. OfficeCLI 8/8, strict specification validation, and visual review of 102/102 rendered pages pass.
+- No runtime files changed. Six human UAT cases, mentor approval/signature, and live OpenAI acceptance remain open and are not claimed as PASS.
+- PR #181 passed the required QA Depth Gate and merged normally into `dev` at `3d4e2d0c50156ecc2d7b53643caedbb5945c5d8a`.
+
+## 2026-07-25 SAP490 formal specification table follow-up
+
+- `IDTS-103` is complete: PR #183 merged at `5092035`, and Functional Specification EN/VI v0.7 plus Technical Specification EN/VI v0.6 were updated in place at their existing Drive IDs.
+- OfficeCLI 4/4, strict structural/source/message/parity validation, 50/50-page local visual review, exact-byte Drive readback, and representative Functional 9/9-tab plus Technical 12/12-tab Drive previews pass. Mentor approval/signature and live OpenAI acceptance remain external pending gates.
+
+## 2026-07-25 NhanT AI QA PR review
+
+- IDTS-96 and IDTS-98 are In Progress; IDTS-99 remains To Do because OpenAI live is disabled. PR #177 needs IDTS-94 no-mutation/reload and genuine Knowledge Gate evidence; PR #178 needs a real four-capability evaluation rewrite and removal of unrelated/unsafe files; PR #179 must be relabeled as disabled-provider fallback evidence and complete the required role/action/browser matrix.
+- GitHub and Jira review comments were posted. None of PR #177–#179 is approved for merge yet, even where the current GitHub check is green.
 
 ## Next Handover Instruction
 

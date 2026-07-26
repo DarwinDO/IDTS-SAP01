@@ -1,5 +1,15 @@
 # Knowledge: `srv/service.cds`
 
+## IDTS-97 PM operational aggregate
+
+`readAiOperationalMetrics(windowDays)` is a PM-only read function. It returns typed counts grouped by feature/provider/model and never exposes `suggestionPayload`, prompt, response, error text, user email, endpoint, token, or credential. The reporting window defaults to 30 days and is capped at 90 days by the runtime handler.
+
+## IDTS-95 confirmation contract
+
+`confirmDuplicateSuggestion(suggestionID, candidateBugID)` is an unbound OData action returning `DuplicateLinks`. The backend resolves candidate membership and relation type from the persisted accepted suggestion; clients cannot submit arbitrary candidate content.
+
+Vietnamese: `confirmDuplicateSuggestion(suggestionID, candidateBugID)` là unbound OData action trả về `DuplicateLinks`. Backend lấy candidate và relation type từ suggestion đã Accept và persist; client không được tự gửi candidate content.
+
 ## Beginner-first OData contract map (2026-07-18)
 
 ### English
@@ -380,3 +390,31 @@ IDTS-68 them unbound action `summarizeBugHandoff(sourceBugID)` va result type `B
 Action nay nam trong `srv/service.cds` vi day la contract OData public, khong phai helper noi bo. Client goi no khi can mot ban summary co the review cho bug da ton tai. Action tra ve status, current action owner, thong tin con thieu, su kien quan trong gan day, next expected action, provider status, grounding status, confidence va co bat buoc human review.
 
 Action nay khong expose write API. No khong doi lifecycle cua bug. Runtime behavior nam trong `srv/ai/bug-summary.js` va duoc noi trong `srv/service.js`.
+
+## IDTS-91/92/93 AI review contracts
+
+### English
+
+The service contract now exposes `suggestionID` on duplicate/classification candidate rows, the safe `AiSuggestionReviewResult`, three explicit review actions, and `applyClassificationSuggestion(suggestionID)`. Review actions update only suggestion audit state. The apply action returns the affected `Bugs` row but may change only validated classification fields after Tester/PM authorization.
+
+Primary owner: DonHV. Backup: DatDT. Debug the action name and parameter in generated metadata, then follow the same name through `srv/service.js` into `srv/ai/review.js` or `srv/ai/classification-apply.js`. A contract rename requires updating UI callers and focused QA.
+
+### Vietnamese
+
+Service contract hiện expose `suggestionID` trên candidate duplicate/classification, result an toàn `AiSuggestionReviewResult`, ba review action rõ ràng và `applyClassificationSuggestion(suggestionID)`. Review action chỉ đổi trạng thái audit của suggestion. Apply action trả Bug bị tác động nhưng chỉ được đổi các field classification đã validate sau khi kiểm quyền Tester/PM.
+
+Owner chính: DonHV. Backup: DatDT. Khi debug, xem tên action và parameter trong metadata đã generate, rồi lần theo cùng tên qua `srv/service.js` tới `srv/ai/review.js` hoặc `srv/ai/classification-apply.js`. Đổi contract phải cập nhật UI caller và focused QA.
+
+## IDTS-94 review-control response bridge (2026-07-24)
+
+### English
+
+`BugHandoffSummaryResult` and `SmartAssignmentExplanationCandidate` now expose `suggestionID`. The value is the UUID of the sanitized `AiSuggestions` row created for that exact response. Handoff returns one ID on its result. Every Smart Assign explanation row from one request carries the same ID because the request is persisted as one review unit.
+
+The UI sends only this ID to `acceptAiSuggestion`, `rejectAiSuggestion`, or `ignoreAiSuggestion`. Adding the ID does not make Accept apply a summary, create history, select a developer, or assign anyone.
+
+### Vietnamese
+
+`BugHandoffSummaryResult` và `SmartAssignmentExplanationCandidate` giờ expose `suggestionID`. Giá trị này là UUID của row `AiSuggestions` đã sanitize được tạo cho chính response đó. Handoff trả một ID trên result. Mỗi explanation row của cùng một request Smart Assign mang cùng ID vì request được persist thành một review unit.
+
+UI chỉ gửi ID này cho `acceptAiSuggestion`, `rejectAiSuggestion`, hoặc `ignoreAiSuggestion`. Việc thêm ID không làm Accept áp dụng summary, tạo history, chọn developer, hoặc assign bất kỳ ai.

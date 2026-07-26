@@ -1,5 +1,15 @@
 # Knowledge: `srv/service.js`
 
+## IDTS-97 metrics wiring
+
+`BugService.init()` registers `readAiOperationalMetrics` and delegates all aggregation behavior to `srv/ai/metrics.js`. Keep authorization in the CDS contract and privacy/aggregation logic in the focused module; this file remains wiring only.
+
+## IDTS-95 confirmation wiring
+
+`BugService.init()` also registers `confirmDuplicateSuggestion`. Authorization, stored-payload grounding, pair checks and transaction insert remain in `srv/ai/duplicate-confirmation.js`.
+
+Vietnamese: `BugService.init()` cũng đăng ký `confirmDuplicateSuggestion`. Kiểm quyền, kiểm payload đã lưu, kiểm cặp Bug và transaction insert vẫn nằm trong `srv/ai/duplicate-confirmation.js`.
+
 ## IDTS-89 exact workflow audit mapping
 
 The 11 public Bug workflow actions registered here now pass a unique `ACTION` value into `actions.js` or `transitionBug`. The complete action → handler → ActionType → permission table and breakpoint order are in `docs/ai/implementation/knowledge-one-to-one-action-audit.md`. Keep the OData names and status lifecycle unchanged. When adding a future workflow action that writes History, add its dedicated ActionType, code-list row, summary, actor fallback, permission mapping, direct API test, and database rollout in the same change.
@@ -390,3 +400,13 @@ IDTS-68 cap nhat file wiring runtime nay de dang ky `this.on('summarizeBugHandof
 Khai bao service nam trong `srv/service.cds`, nhung CAP van can registration JavaScript nay de OData action goi vao dung `srv/ai/bug-summary.js`. Cach nay giu service entry point nhat quan voi hai AI action hien co la `suggestSimilarBugs` va `suggestClassification`.
 
 Neu bo registration nay, metadata co the van thay action, nhung runtime action se khong chay dung.
+
+## IDTS-91/93 runtime wiring
+
+### English
+
+`BugService.init()` now registers Accept, Reject, Ignore, and Apply Classification handlers from `srv/ai`. The first three are review-only. `applyClassificationSuggestion` is the separate guarded write path for an already accepted classification suggestion. Primary owner: DonHV; backup: DatDT. Start debugging at the matching `this.on(...)`, then step into `review.js` or `classification-apply.js`. Keep this file as wiring only; authorization, catalog checks, stale protection, and history belong in the focused modules.
+
+### Vietnamese
+
+`BugService.init()` hiện đăng ký handler Accept, Reject, Ignore và Apply Classification từ `srv/ai`. Ba action đầu chỉ review. `applyClassificationSuggestion` là đường ghi riêng có guard cho classification suggestion đã Accept. Owner chính: DonHV; backup: DatDT. Khi debug, bắt đầu tại `this.on(...)` tương ứng rồi đi vào `review.js` hoặc `classification-apply.js`. Giữ file này chỉ làm wiring; quyền, catalog check, stale protection và history nằm trong module tập trung.

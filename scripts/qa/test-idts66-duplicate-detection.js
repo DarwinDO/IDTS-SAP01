@@ -142,6 +142,8 @@ async function main () {
   expectTruthy('top candidate includes a concise human-review reason', /human review/i.test(positive[0]?.reason || ''))
   expectEqual('successful provider path uses an embedding', positive[0]?.embeddingUsed, true)
   expectEqual('successful provider path reports SUCCESS', positive[0]?.providerStatus, 'SUCCESS')
+  expectTruthy('persisted source search returns suggestion audit ID', positive[0]?.suggestionID)
+  expectEqual('all similar candidates share one review audit ID', positive.every(row => row.suggestionID === positive[0]?.suggestionID), true)
   expectEqual('source bug is excluded from its own candidates', positive.some(row => row.bugID === SOURCE_ID), false)
   expectNoUnsafeDiagnostic('positive response contains no unsafe diagnostic text', positive)
 
@@ -154,11 +156,14 @@ async function main () {
 
   const auditRows = await db.run(
     SELECT.from('idts.cap.AiSuggestions')
-      .columns('bug_ID', 'featureType_code', 'confidence', 'suggestionPayload', 'reviewState_code')
+      .columns('ID', 'bug_ID', 'featureType_code', 'operationStatus', 'latencyMs', 'confidence', 'suggestionPayload', 'reviewState_code')
       .where({ bug_ID: SOURCE_ID, featureType_code: 'DUPLICATE_DETECTION' })
   )
   expectEqual('source-linked search writes one audit row', auditRows.length, 1)
+  expectEqual('candidate review ID matches persisted audit row', positive[0]?.suggestionID, auditRows[0]?.ID)
   expectEqual('audit row starts in pending review', auditRows[0]?.reviewState_code, 'PENDING')
+  expectEqual('duplicate audit persists final operation status', auditRows[0]?.operationStatus, 'SUCCESS')
+  expectTruthy('duplicate audit persists non-negative latency', auditRows[0]?.latencyMs >= 0)
   const positiveAuditPayload = JSON.parse(auditRows[0]?.suggestionPayload || '{}')
   expectEqual('audit payload records provider status', positiveAuditPayload.providerStatus, 'SUCCESS')
   expectNoUnsafeDiagnostic('audit payload contains no prompt, credential, or raw provider response', positiveAuditPayload)
@@ -172,6 +177,7 @@ async function main () {
     componentCategoryID: COMPONENT_CATEGORY_ID
   })
   expectTruthy('pre-create search works without a persisted source bug', preCreate.length)
+  expectEqual('pre-create search has no persisted review ID', preCreate.every(row => !row.suggestionID), true)
   const auditAfterPreCreate = await db.run(
     SELECT.one.from('idts.cap.AiSuggestions').columns('count(*) as count').where({ featureType_code: 'DUPLICATE_DETECTION' })
   )
