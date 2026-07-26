@@ -52,4 +52,5 @@ Use the synchronized Drive workbooks for mentor review. Mentor approval/signatur
 - Replaced stale historical screenshots with current Shared QA evidence.
 - OfficeCLI 1.0.141, the full specification validator and final LibreOffice visual review pass locally.
 - Evidence: `docs/pm/evidence/idts-103/technical-spec-template-fidelity-remediation-20260726.md`.
-- Drive remains unchanged until this follow-up PR is merged.
+- PR #189 merged normally at `aa7b708922d689a127e8ba892799c303881abc12` after QA Depth PASS.
+- EN/VI v0.7 were updated in place at the two official Drive IDs; parent and XLSX MIME were preserved and metadata/size readback passed.

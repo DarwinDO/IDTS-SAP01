@@ -2,7 +2,7 @@
 
 ## Kết luận
 
-`LOCAL REVIEW READY — Google Drive chưa cập nhật.`
+`DRIVE SYNCHRONIZATION VERIFIED — mentor approval remains Pending.`
 
 Hai workbook Technical Specification được sinh lại từ official template, không vá tay trên bản cũ:
 
@@ -44,6 +44,8 @@ Hai workbook Technical Specification được sinh lại từ official template,
 
 ## Giới hạn và handoff
 
-- Google Drive chưa được cập nhật trong lượt này.
 - Mentor review/approval vẫn Pending.
-- Sau khi PR merge, update tại chỗ đúng hai Drive file ID cũ và readback hash/metadata.
+- PR #189 merge bình thường vào `dev` tại `aa7b708922d689a127e8ba892799c303881abc12`; QA Depth PASS, không bypass.
+- EN được update tại chỗ, giữ file ID `1nAmUQb3852G4-hxJ0BOK6OHGLDs6Kq1P`, parent `1ZurfJj-whcezlM-9dgTZyTj_LRCaJ268`, XLSX MIME và size readback `2311951` bytes.
+- VI được update tại chỗ, giữ file ID `1nwuWiW6-gjTVKmA_HuI_Un3075Kgf2fN`, cùng parent/XLSX MIME và size readback `2312629` bytes.
+- Không tạo duplicate, không đổi parent và không chuyển thành Google-native Sheet.
