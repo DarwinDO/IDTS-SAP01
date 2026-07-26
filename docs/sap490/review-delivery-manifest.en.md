@@ -1,5 +1,7 @@
 # SU26SAP01 / GSU26SAP01 SAP490 Review Delivery Manifest
 
+> **IDTS-104 note (2026-07-26):** This is a historical 2026-07-11 snapshot. Use `docs/sap490/generated-archive-manifest-20260726.md` for the current generated artifacts and exact retrieval instructions for archived versions. Do not select mentor artifacts from the historical filenames below.
+
 Snapshot date: 2026-07-11
 Owner: DonHV / GSU26SAP01
 

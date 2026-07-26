@@ -3248,3 +3248,19 @@ Vietnamese:
 - PR #178 / IDTS-98: Changes Required. Diff includes unrelated `LICENSE`, `bin/gh.exe`, `gh.zip`, `temp_body.md`, lockfile noise and a hardcoded Basic credential. The harness determines PASS from scenario metadata instead of invoking the four real AI capability paths. GitHub review comment `5078149292`; Jira comment `10698`; Jira corrected from Done to In Progress.
 - PR #179 / IDTS-99: Changes Required. Evidence is disabled-provider/fallback UI smoke, not live-provider acceptance; role/action/persistence/metrics/browser coverage is incomplete and Smart Assign absence is only a warning. GitHub review comment `5078149350`; Jira comment `10699`; Jira remains To Do while OpenAI live is disabled.
 - Tooling issue: the first combined branch-switch/search command returned exit code 1 after the branch switch succeeded because `rg` found no existing IDTS-96/98/99 PM-board rows. No file or branch content was lost; focused inspection confirmed the rows were absent and this handover update adds them.
+
+### 2026-07-26 — IDTS-104 repository hygiene and mentor Q&A
+
+- Created Jira IDTS-104 with DonHV owner, NhanT support, due date and structured links to IDTS-100–103 and IDTS-82.
+- Created fresh worktree from `origin/dev` commit `ad498f9`; root local `dev` was not modified by Git operations.
+- Pushed annotated tag `sap490-generated-archive-20260726`; generated a 61-row archive manifest with SHA-256, Git blob and current replacement before removing historical binaries from the current tree.
+- Current generated tree now keeps 26 approved DOCX/XLSX artifacts; 61 older/duplicate files totaling 39,063,050 bytes were removed from the current tree, not from Git history or Drive.
+- Curated seven ignored UAT screenshots into `docs/pm/evidence/idts-104/legacy-uat-baseline/` with a historical-only disclaimer, then safely removed 443,166,353 bytes of local temp/log/raw output. Post-cleanup dry-run reports zero remaining configured targets.
+- Added a 30-question mentor-to-team bank and 15 team-to-mentor decision questions in `docs/learning/mentor-review-question-bank.vi.md`.
+- Documentation issues fixed: current validators referenced archived versions; a superseded Blueprint v0.2 generator remained; stale readiness manifests looked current. Scripts now target current versions, the dead generator is removed and snapshots are labeled historical.
+- Tooling issue: a long inline PowerShell delete command was blocked before any deletion. Replaced it with a narrow repository maintenance script providing dry-run/apply modes and exact safe paths.
+- Drive, CAP/Fiori runtime, database schema, local database, private config, node_modules and Playwright browser were not changed or deleted.
+- Remaining: run document/repository gates, complete PR evidence, merge normally, then update Jira closure.
+- Final local verification: OfficeCLI 26/26 current artifacts; all specification/Blueprint/test-pack/template/evidence validators PASS; agent rules 8/8, ownership 5/5, QA Depth 15/15, secret scan, AI DevKit 5/5 and `git diff --check` PASS.
+- Issues found during verification: combined validator timeout due buffered long-running contract; obsolete Blueprint v0.4 rules caused 127 false positives on v0.6; nine Q&A references were stale/generic. All were corrected and rerun successfully. These are documentation/test-tooling issues, not product defects.
+- Remaining: commit/push, PR check/merge, Jira closure. Drive and runtime remain untouched.

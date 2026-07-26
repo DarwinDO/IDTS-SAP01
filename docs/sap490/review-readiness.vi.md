@@ -1,5 +1,7 @@
 # Sổ đăng ký mức sẵn sàng SAP490 Review của SU26SAP01 / GSU26SAP01
 
+> **Lưu ý IDTS-104 (2026-07-26):** Đây là snapshot readiness lịch sử ngày 2026-07-10. Trạng thái/version hiện hành được quản lý bởi PM handover, test pack hiện hành và `docs/sap490/generated-archive-manifest-20260726.md`; không dùng các version cũ bên dưới để tuyên bố mentor-ready.
+
 Ngày snapshot: 2026-07-10
 Owner: DonHV / IDTS SAP01 Team
 Trạng thái review: bản nháp có bằng chứng, không phải tuyên bố final submission
