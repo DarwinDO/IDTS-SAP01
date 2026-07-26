@@ -439,6 +439,7 @@ def trim_sheet(
         ws.page_setup.orientation = orientation
     ws.page_setup.fitToWidth = fit_width
     ws.page_setup.fitToHeight = 0
+    ws.sheet_properties.pageSetUpPr.fitToPage = True
     ws.print_title_rows = title_rows
 
 
@@ -708,6 +709,60 @@ def generate_scenario(catalog, lang):
     return output
 
 
+def planned_unit_cases():
+    """Return review-ready unit cases that still require executable unit harnesses."""
+    specs = [
+        ("UT-AUTH-001", "SRS-FR-AUTH-001", "SECURITY", "HIGH", "Raw session token is hashed before persistence", "Token phiên được băm trước khi lưu", "srv/auth.js:hashToken", "Database receives tokenHash and never the raw bearer token.", "Database chỉ nhận tokenHash, không nhận raw bearer token."),
+        ("UT-AUTH-002", "SRS-FR-AUTH-002", "NEGATIVE", "HIGH", "Expired or revoked session is rejected", "Session hết hạn hoặc bị thu hồi phải bị từ chối", "srv/auth/custom-auth.js", "Authentication returns an unauthorized result without exposing session data.", "Xác thực trả kết quả không được phép và không lộ dữ liệu session."),
+        ("UT-AUTH-003", "SRS-FR-AUTH-001", "SECURITY", "HIGH", "Internal login error is sanitized", "Lỗi đăng nhập nội bộ được làm sạch", "srv/auth.js", "Public response contains a generic safe error and no SQL, stack or schema detail.", "Response công khai chỉ có lỗi an toàn, không chứa SQL, stack hoặc chi tiết schema."),
+        ("UT-AUTH-004", "SRS-FR-AUTH-001", "NEGATIVE", "MEDIUM", "Inactive user cannot receive a session", "User không active không được nhận session", "srv/auth.js", "No session row or bearer token is created.", "Không tạo session row hoặc bearer token."),
+        ("UT-VAL-001", "SRS-FR-BUG-001", "NEGATIVE", "HIGH", "Required Bug fields reject empty values", "Trường Bug bắt buộc từ chối giá trị rỗng", "srv/bug-service/bug-write.js:validateRequiredBugFields", "Request is rejected with a field-targeted 400 result.", "Request bị từ chối bằng lỗi 400 đúng field."),
+        ("UT-VAL-002", "SRS-FR-BUG-001", "BOUNDARY", "HIGH", "Whitespace catalog code is rejected", "Mã catalog có khoảng trắng bị từ chối", "srv/bug-service/bug-write.js:validateActiveCodeLists", "Whitespace or unknown code cannot pass catalog validation.", "Mã có khoảng trắng hoặc không tồn tại không qua validation catalog."),
+        ("UT-VAL-003", "SRS-FR-BUG-001", "NEGATIVE", "HIGH", "Inactive catalog entry is rejected", "Giá trị catalog không active bị từ chối", "srv/bug-service/bug-write.js:validateActiveCodeLists", "Inactive Priority, Severity or Environment returns 400.", "Priority, Severity hoặc Environment không active trả 400."),
+        ("UT-VAL-004", "SRS-FR-BUG-002", "NEGATIVE", "HIGH", "Component and category mismatch is rejected", "Component và category không khớp bị từ chối", "srv/bug-service/bug-write.js:deriveOrValidateComponentCategory", "Mismatched category is rejected; missing category may be derived from the valid pair.", "Category sai bị từ chối; category thiếu có thể được suy ra từ cặp hợp lệ."),
+        ("UT-PERM-001", "SRS-FR-AUTH-003", "AUTHORIZATION", "HIGH", "Developer cannot create a Bug", "Developer không được tạo Bug", "srv/bug-service/permissions.js:enforceBugCreatePermission", "Developer receives 403 while Tester and PM remain allowed.", "Developer nhận 403; Tester và PM vẫn được phép."),
+        ("UT-PERM-002", "SRS-FR-ASG-001", "AUTHORIZATION", "HIGH", "Unauthorized assignee mutation is blocked", "Thay đổi assignee trái quyền bị chặn", "srv/bug-service/permissions.js:enforceBugWritePermission", "Direct PATCH cannot bypass assignment authorization.", "PATCH trực tiếp không thể bỏ qua quyền phân công."),
+        ("UT-PERM-003", "SRS-FR-LIFE-001", "AUTHORIZATION", "HIGH", "Lifecycle action permission is enforced", "Quyền action vòng đời được kiểm soát", "srv/bug-service/permissions.js:enforceActionPermission", "Wrong role receives 403 before any status or history mutation.", "Sai vai trò nhận 403 trước khi status hoặc history thay đổi."),
+        ("UT-LIFE-001", "SRS-FR-LIFE-001", "POSITIVE", "HIGH", "Allowed lifecycle transition passes", "Transition vòng đời hợp lệ được chấp nhận", "srv/bug-service/bug-write.js:validateTransition", "A target status listed for the source status is accepted.", "Status đích nằm trong danh sách cho phép được chấp nhận."),
+        ("UT-LIFE-002", "SRS-FR-LIFE-001", "NEGATIVE", "HIGH", "Invalid lifecycle transition returns 400", "Transition vòng đời sai trả 400", "srv/bug-service/bug-write.js:validateTransition", "Unsupported transition is rejected before persistence.", "Transition không hỗ trợ bị từ chối trước khi lưu."),
+        ("UT-LIFE-003", "SRS-FR-LIFE-001", "BOUNDARY", "MEDIUM", "Same-status validation is a no-op", "Kiểm tra cùng status là no-op", "srv/bug-service/bug-write.js:validateTransition", "Equal source and target statuses do not create an invalid-transition error.", "Status nguồn và đích giống nhau không tạo lỗi transition sai."),
+        ("UT-LIFE-004", "SRS-FR-ASG-001", "BOUNDARY", "HIGH", "Missing assignee derives Pending Assignment", "Thiếu assignee suy ra Chờ phân công", "srv/bug-service/bug-write.js:determineNextProcessor", "No assignee produces Pending Assignment and a PM next processor.", "Không có assignee tạo trạng thái Chờ phân công và next processor là PM."),
+        ("UT-HIST-001", "SRS-FR-HIST-001", "POSITIVE", "HIGH", "Changed business fields create history changes", "Business field thay đổi tạo history change", "srv/bug-service/history.js:writeHistoryEvent", "Only fields whose old and new values differ are written to history changes.", "Chỉ field có old/new khác nhau được ghi vào history changes."),
+        ("UT-HIST-002", "SRS-FR-HIST-001", "NEGATIVE", "HIGH", "History failure rolls back the transaction", "Lỗi history rollback transaction", "srv/bug-service/history.js:writeHistoryEvent", "Bug mutation is not committed when mandatory history persistence fails.", "Thay đổi Bug không commit khi lưu history bắt buộc thất bại."),
+        ("UT-ATT-001", "SRS-FR-ATT-001", "NEGATIVE", "HIGH", "Unsafe attachment type is rejected", "Loại attachment không an toàn bị từ chối", "srv/bug-service/content.js:prepareAttachmentWrite", "Unsupported content type is rejected before metadata or S3 write.", "Content type không hỗ trợ bị từ chối trước khi ghi metadata hoặc S3."),
+        ("UT-ATT-002", "SRS-FR-ATT-001", "BOUNDARY", "HIGH", "Oversized attachment is rejected", "Attachment quá kích thước bị từ chối", "srv/bug-service/content.js:prepareAttachmentWrite", "Payload above the configured limit is rejected safely.", "Payload vượt giới hạn cấu hình bị từ chối an toàn."),
+        ("UT-MAIL-001", "SRS-FR-NOTIFY-001", "BOUNDARY", "HIGH", "Email worker selects only eligible deliveries", "Email worker chỉ chọn delivery đủ điều kiện", "srv/email/outbox.js:processEmailOutboxBatch", "Future retry, active lock and exhausted-attempt rows are excluded.", "Delivery chưa tới retry, đang lock hoặc hết lượt thử bị loại."),
+        ("UT-MAIL-002", "SRS-FR-NOTIFY-001", "CONCURRENCY", "HIGH", "Delivery claim prevents duplicate workers", "Claim delivery ngăn worker xử lý trùng", "srv/email/outbox.js:processEmailOutboxBatch", "Only one worker obtains the conditional lock token for a delivery.", "Chỉ một worker lấy được lock token có điều kiện cho một delivery."),
+    ]
+    cases = []
+    for case_id, requirement, classification, priority, title_en, title_vi, unit, expected_en, expected_vi in specs:
+        cases.append({
+            "caseId": case_id,
+            "testType": "UNIT",
+            "requirementIds": [requirement],
+            "classification": classification,
+            "priority": priority,
+            "title": {"en": title_en, "vi": title_vi},
+            "objective": {"en": f"Verify the isolated rule in {unit}.", "vi": f"Xác minh rule độc lập trong {unit}."},
+            "role": "N/A — module test",
+            "preconditions": {"en": "Target module is importable and external dependencies are stubbed.", "vi": "Module đích import được và dependency bên ngoài được stub."},
+            "testData": {"en": f"Unit under test: {unit}", "vi": f"Đơn vị được kiểm thử: {unit}"},
+            "steps": {"en": ["Arrange isolated inputs and stubs.", "Invoke the target function.", "Assert return/rejection and side effects."], "vi": ["Chuẩn bị input và stub độc lập.", "Gọi hàm đích.", "Đối chiếu return/rejection và side effect."]},
+            "expectedResult": {"en": expected_en, "vi": expected_vi},
+            "actualResult": {"en": "Not executed; unit harness is pending.", "vi": "Chưa thực thi; unit harness đang chờ triển khai."},
+            "status": "NOT_RUN",
+            "environment": "Planned local Node.js unit test",
+            "executor": "",
+            "executionDate": "",
+            "automationCommand": "",
+            "evidenceLinks": [],
+            "defectIds": [],
+            "limitations": {"en": "Prepared specification only; not evidence of PASS.", "vi": "Chỉ là đặc tả đã chuẩn bị; không phải bằng chứng PASS."},
+            "postcondition": {"en": "No business data is persisted.", "vi": "Không lưu business data."},
+        })
+    return cases
+
+
 def generate_unit(catalog, lang):
     wb, output, version = prepare("unit", lang)
     cover(
@@ -728,7 +783,7 @@ def generate_unit(catalog, lang):
         "UT, Evidence",
         catalog,
     )
-    cases = [case for case in catalog["cases"] if case["testType"] == "UNIT"]
+    cases = [case for case in catalog["cases"] if case["testType"] == "UNIT"] + planned_unit_cases()
     ws = wb["UT"]
     for coordinate, value in (
         ("B3", "IDTS-SAP490-UNIT"),
@@ -737,7 +792,10 @@ def generate_unit(catalog, lang):
         ("AX3", datetime.fromisoformat(catalog["asOf"]).date()),
     ):
         write(ws, coordinate, value)
-    for row in range(8, 17):
+    last_case_row = 7 + len(cases)
+    for row in range(8, last_case_row + 1):
+        if row > 16:
+            copy_row_style(ws, 16, row, 74)
         add_group_merges(
             ws,
             row,
@@ -851,7 +909,7 @@ def generate_unit(catalog, lang):
 
     trim_sheet(wb["Cover"], 20, 43, print_area="B8:AO20", orientation="landscape")
     trim_sheet(wb["Histories"], 3, 7, freeze="B3", auto_filter="B2:G3", print_area="B2:G3", orientation="landscape", title_rows="2:2")
-    trim_sheet(ws, 12, 74, freeze="B8", auto_filter="B7:BV12", print_area="B2:BV12", orientation="landscape", fit_width=1, title_rows="6:7")
+    trim_sheet(ws, last_case_row, 74, freeze="B8", auto_filter=f"B7:BV{last_case_row}", print_area=f"B2:BV{last_case_row}", orientation="landscape", fit_width=1, title_rows="6:7")
     trim_sheet(evidence, len(cases) + 1, 11, freeze="A2", auto_filter=f"A1:K{len(cases) + 1}", print_area=f"A1:K{len(cases) + 1}", orientation="landscape", fit_width=2, title_rows="1:1")
     save(wb, output, "Unit Test", lang, version)
     return output

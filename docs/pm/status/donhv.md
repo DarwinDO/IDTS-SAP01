@@ -3281,3 +3281,14 @@ Vietnamese:
 - Final local result: Technical Specification EN/VI v0.7 retain 12/12 official tabs and inner template grids. OfficeCLI 1.0.141 and the full specification validator PASS; LibreOffice renders 17 pages per language and focused visual review PASS.
 - Evidence: `docs/pm/evidence/idts-103/technical-spec-template-fidelity-remediation-20260726.md`. Drive remains unchanged pending normal PR merge.
 - Release closeout: PR #189 passed QA Depth and merged normally at `aa7b708922d689a127e8ba892799c303881abc12`. Technical Specification EN/VI v0.7 were then updated in place at their existing Drive IDs; parent and XLSX MIME were preserved and metadata/size readback matched the uploaded files. No duplicate was created.
+
+### 2026-07-26 — Unit Test workbook coverage expansion
+
+- Documentation issue fixed: the official Unit Test EN/VI workbooks contained only five AI-focused unit cases, which was too narrow to represent the implemented project areas.
+- Expanded each workbook to 26 cases: five previously evidenced AI cases remain `Passed`; 21 new authentication, validation, authorization, lifecycle, history, attachment, and email/outbox cases remain truthfully `Pending / Not Run`.
+- Updated the reproducible generator and both official generated workbooks. No CAP/Fiori runtime or database artifact changed.
+- Verification: OfficeCLI 1.0.141 PASS for EN/VI; SAP490 test-pack validator PASS with 0 warnings/errors; evidence contract, template fidelity, secret scan, and `git diff --check` PASS.
+- Tooling issue fixed: native Excel removed explicit `fitToWidth=1` while saving. The package setting was restored and template-fidelity validation reran successfully.
+- Tooling limitation: Google Sheets cell APIs do not support raw XLSX Drive files. Drive update/readback used file metadata and exact local byte sizes instead.
+- Drive updated in place at the existing EN/VI IDs; no duplicate was created and permissions/parent/MIME were preserved.
+- Evidence: `docs/pm/evidence/idts-103/unit-test-coverage-expansion-20260726.md`.
