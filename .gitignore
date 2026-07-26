@@ -13,6 +13,15 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 .tmp/
+/tmp/
+/output/
+/.tmp-*.log
+.~lock.*#
+~$*
+*.tmp.pdf
+*.tmp.png
+.office-render-cache/
+.libreoffice-cache/
 .playwright-cli/
 .playwright-mcp/
 __pycache__/

@@ -4,7 +4,6 @@ from copy import copy
 from datetime import date
 from pathlib import Path
 import re
-import shutil
 
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
@@ -78,9 +77,7 @@ def extract_status_entries(member_id):
 
 
 def refresh_contributions():
-    source = GENERATED / "Team_Contribution_Matrix_IDTS_SAP01_20260722.xlsx"
     output = GENERATED / "Team_Contribution_Matrix_IDTS_SAP01_20260724.xlsx"
-    shutil.copy2(source, output)
     wb = load_workbook(output)
     summary = wb["Summary"]
     summary["A1"] = "SU26SAP01_GSU26SAP01 — Team Contribution Matrix — 2026-07-24"
@@ -137,9 +134,7 @@ def parse_risk_rows():
 
 
 def refresh_pm_matrices():
-    source = GENERATED / "SAP490_Review_Matrices_IDTS_SAP01_20260722.xlsx"
     output = GENERATED / "SAP490_Review_Matrices_IDTS_SAP01_20260724.xlsx"
-    shutil.copy2(source, output)
     wb = load_workbook(output)
     summary = wb["Summary"]
     summary["B2"] = RUN_DATE

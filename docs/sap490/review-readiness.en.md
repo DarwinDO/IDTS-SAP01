@@ -1,5 +1,7 @@
 # SU26SAP01 / GSU26SAP01 SAP490 Review Readiness Register
 
+> **IDTS-104 note (2026-07-26):** This is a historical 2026-07-10 readiness snapshot. Current versions/status are governed by PM handover, the current test pack, and `docs/sap490/generated-archive-manifest-20260726.md`; do not use the old versions below as a mentor-ready claim.
+
 Snapshot date: 2026-07-10
 Owner: DonHV / IDTS SAP01 Team
 Review status: evidence-backed draft; not a final-submission declaration

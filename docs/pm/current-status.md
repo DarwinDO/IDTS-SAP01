@@ -1,11 +1,12 @@
 # Current Project Status
 
-Last updated: 2026-07-24
+Last updated: 2026-07-26
 
 ## Snapshot
 
 | Field | Current value |
 | --- | --- |
+| Repository hygiene | IDTS-104 is active in a fresh `origin/dev` worktree. Historical SAP490 binaries are preserved by tag `sap490-generated-archive-20260726` and a hash/blob manifest; current tree keeps only approved latest artifacts. Local temp/log/raw-UAT output was cleaned after useful screenshots were curated and labeled. Drive and runtime are unchanged. |
 | Project phase | Sprint 5 is active and currently At Risk. Jira Epic `IDTS-88` now consolidates all 11 current Sprint 5 issues for mentor readiness, Shared QA/infrastructure closure, security follow-up, and ownership governance. |
 | Product baseline | CAP/Fiori MVP, attachment/audit/notification/PM flows, and advisory-AI review baseline are implemented; BRD v1.5, SRS v1.4, and FRS v1.5 EN/VI are synchronized to the AuthService/AuthSessions, Render/PostgreSQL, attachment/S3, notification outbox, and human-reviewed AiSuggestions baseline. |
 | Current sprint | `IDTS Sprint 5`: 11 issues as of 2026-07-22 — 5 In Progress, 6 To Do, 0 Done, and 5 overdue before the report date. All 11 are children of Epic `IDTS-88`; DonHV owns 9 and SangVN owns 2, so capacity and status reconciliation are immediate risks. |

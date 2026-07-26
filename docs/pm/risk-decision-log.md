@@ -146,3 +146,11 @@ Record a new decision here when it changes scope, ownership, entity meaning, sta
 - Enforcement: preserve the template's three sections, header/footer pairs, style and numbering sets, page geometry, cover/control system, eight body-table contract and four main business sections. Replace sample content only on the working copy, then require schema, semantic fidelity, EN/VI parity and page-by-page visual gates.
 - Delivery control: local review precedes any same-ID Drive update. The untouched template hash is part of the evidence, and Drive synchronization requires explicit DonHV approval of the local candidates.
 - Evidence: `docs/pm/evidence/sap490-blueprint-template-remediation-20260723.md`.
+
+### DEC-054 — Keep only current SAP490 generated artifacts in the working tree
+
+- Date: 2026-07-26
+- Decision: `docs/sap490/generated/` keeps one current artifact per deliverable/language. Historical binaries are removed from the current tree only after an annotated Git tag and SHA-256/Git-blob manifest make them retrievable.
+- Safety: do not rewrite Git history, delete official templates, change Google Drive artifacts, or treat the archive tag as a current mentor candidate.
+- Enforcement: generators/validators target current filenames; temp/render/log output belongs under ignored `.tmp/`, `/tmp/`, or `/output/` paths and must not be committed.
+- Evidence: `docs/sap490/generated-archive-manifest-20260726.md` and `docs/pm/evidence/idts-104/repository-cleanup-report.md`.

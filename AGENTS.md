@@ -836,8 +836,7 @@ Formal BA deliverables and SAP490 submission artifacts are explicit exceptions t
 - `docs/ba/brd/brd.en.md` and `docs/ba/brd/brd.vi.md`
 - `docs/ba/srs/srs.en.md` and `docs/ba/srs/srs.vi.md`
 - `docs/ba/frs/frs.en.md` and `docs/ba/frs/frs.vi.md`
-- SAP490 examples: `Blueprint_IDTS_SAP01_en_v0.1.docx` and `Blueprint_IDTS_SAP01_vi_v0.1.docx`
-- SAP490 examples: `Test_Report_IDTS_SAP01_en_v0.1.xlsx` and `Test_Report_IDTS_SAP01_vi_v0.1.xlsx`
+- SAP490 examples: use the current EN/VI filenames recorded in `docs/sap490/generated-archive-manifest-20260726.md`; do not hardcode historical versions here.
 
 Do not mix English and Vietnamese in the same SAP490 deliverable unless the school-provided template itself requires a bilingual field or the user explicitly approves a one-off exception. If an exception is needed, record the reason in the final response and the relevant PM status file.
 
@@ -856,8 +855,7 @@ Các deliverable BA chính thức và artifact nộp SAP490 là ngoại lệ rõ
 - `docs/ba/brd/brd.en.md` và `docs/ba/brd/brd.vi.md`
 - `docs/ba/srs/srs.en.md` và `docs/ba/srs/srs.vi.md`
 - `docs/ba/frs/frs.en.md` và `docs/ba/frs/frs.vi.md`
-- Ví dụ SAP490: `Blueprint_IDTS_SAP01_en_v0.1.docx` và `Blueprint_IDTS_SAP01_vi_v0.1.docx`
-- Ví dụ SAP490: `Test_Report_IDTS_SAP01_en_v0.1.xlsx` và `Test_Report_IDTS_SAP01_vi_v0.1.xlsx`
+- Ví dụ SAP490: dùng tên file EN/VI hiện hành trong `docs/sap490/generated-archive-manifest-20260726.md`; không hardcode version lịch sử tại đây.
 
 Không trộn tiếng Anh và tiếng Việt trong cùng một deliverable SAP490, trừ khi template do trường cung cấp bắt buộc có field song ngữ hoặc user duyệt rõ một ngoại lệ riêng. Nếu cần ngoại lệ, phải ghi rõ lý do trong final response và file PM status liên quan.
 

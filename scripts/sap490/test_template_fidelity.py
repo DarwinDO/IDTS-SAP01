@@ -26,22 +26,22 @@ ARTIFACTS = {
     "unit": {
         "template": TEMPLATE_DIR / "Unit_Test.xlsx",
         "outputs": [
-            OUTPUT_DIR / "Unit_Test_IDTS_SAP01_en_v0.3.xlsx",
-            OUTPUT_DIR / "Unit_Test_IDTS_SAP01_vi_v0.3.xlsx",
+            OUTPUT_DIR / "Unit_Test_IDTS_SAP01_en_v0.4.xlsx",
+            OUTPUT_DIR / "Unit_Test_IDTS_SAP01_vi_v0.4.xlsx",
         ],
     },
     "functional": {
         "template": TEMPLATE_DIR / "Functional_Test.xlsx",
         "outputs": [
-            OUTPUT_DIR / "Functional_Test_IDTS_SAP01_en_v0.2.xlsx",
-            OUTPUT_DIR / "Functional_Test_IDTS_SAP01_vi_v0.2.xlsx",
+            OUTPUT_DIR / "Functional_Test_IDTS_SAP01_en_v0.3.xlsx",
+            OUTPUT_DIR / "Functional_Test_IDTS_SAP01_vi_v0.3.xlsx",
         ],
     },
     "report": {
         "template": REPORT_TEMPLATE,
         "outputs": [
-            OUTPUT_DIR / "Test_Report_IDTS_SAP01_en_v0.3.xlsx",
-            OUTPUT_DIR / "Test_Report_IDTS_SAP01_vi_v0.3.xlsx",
+            OUTPUT_DIR / "Test_Report_IDTS_SAP01_en_v0.4.xlsx",
+            OUTPUT_DIR / "Test_Report_IDTS_SAP01_vi_v0.4.xlsx",
         ],
     },
     "uat": {

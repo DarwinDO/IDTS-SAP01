@@ -1,5 +1,7 @@
 # Manifest bàn giao SAP490 Review của SU26SAP01 / GSU26SAP01
 
+> **Lưu ý IDTS-104 (2026-07-26):** Đây là snapshot lịch sử ngày 2026-07-11. Danh sách artifact generated hiện hành và cách truy xuất version cũ nằm tại `docs/sap490/generated-archive-manifest-20260726.md`. Không dùng filename/version trong snapshot này để chọn file mentor hiện hành.
+
 Ngày snapshot: 2026-07-11
 Owner: DonHV / GSU26SAP01
 
