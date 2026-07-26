@@ -134,7 +134,7 @@ Vietnamese:
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
-| IDTS-104 | Remove temporary artifacts and curate mentor-review repository outputs | DonHV / NhanT support | In Progress: archive tag and generated-artifact manifest created; local temp cleanup, current-tree curation, Mentor Review Q&A and verification are being completed in a fresh worktree. Drive is out of scope. |
+| IDTS-104 | Remove temporary artifacts and curate mentor-review repository outputs | DonHV / NhanT support | Done: PR #187 merged with QA Depth PASS; archive/tag manifest, local cleanup, current-tree curation, Mentor Review Q&A and verification are complete. Drive was unchanged. |
 | IDTS-91 | Add explicit AI suggestion review actions | DatDT | Done: PR #167 merged at `442b958`; focused QA `19/0`, integrated regression and fresh QA Depth Gate passed. Jira closure evidence comment `10676`. |
 | IDTS-92 | Add persisted review controls to existing AI dialogs | DatDT | Done: PR #167 merged at `442b958`; 47 static checks plus integrated UI/build regression passed. Jira closure evidence comment `10677`. |
 | IDTS-93 | Apply accepted classification suggestion safely | DatDT | Done: PR #167 merged at `442b958`; Tester/PM validation, stale/idempotent/history/rollback coverage and `35/0` focused QA passed. Jira closure evidence comment `10678`. |
@@ -169,7 +169,7 @@ Vietnamese:
 
 | ID | Cong viec | Thanh vien chinh | Ghi chu |
 | --- | --- | --- | --- |
-| IDTS-104 | Don file tam va chon loc output phuc vu mentor review | DonHV / NhanT ho tro | Dang lam: da tao archive tag/manifest; dang don local temp, giu latest artifact, tao bo Q&A va chay gate trong fresh worktree. Khong thay doi Drive. |
+| IDTS-104 | Don file tam va chon loc output phuc vu mentor review | DonHV / NhanT ho tro | Da xong: PR #187 da merge sau khi QA Depth PASS; archive/tag manifest, cleanup local, chon latest artifact, bo Q&A va verification da hoan tat. Khong thay doi Drive. |
 | IDTS-91 | Them action review AI suggestion ro rang | DatDT | Done: PR #167 merge tai `442b958`; focused QA `19/0`, integrated regression va fresh QA Depth Gate da pass. Jira closure evidence comment `10676`. |
 | IDTS-92 | Them persisted review control vao dialog AI hien co | DatDT | Done: PR #167 merge tai `442b958`; 47 static check va integrated UI/build regression da pass. Jira closure evidence comment `10677`. |
 | IDTS-93 | Apply classification suggestion da Accept an toan | DatDT | Done: PR #167 merge tai `442b958`; validation Tester/PM, stale/idempotent/history/rollback va focused QA `35/0` da pass. Jira closure evidence comment `10678`. |

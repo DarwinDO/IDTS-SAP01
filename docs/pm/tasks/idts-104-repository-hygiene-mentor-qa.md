@@ -31,7 +31,7 @@
 - [x] Mentor Review Q&A created with 30 mentor questions and 15 team questions.
 - [x] Current SAP490 validators and OfficeCLI pass.
 - [x] Secret/agent/QA Depth/AI DevKit/git gates pass.
-- [ ] PR merged and Jira closed.
+- [x] PR merged and Jira closed.
 
 ## Issues observed
 
@@ -42,3 +42,4 @@
 - Documentation/test-tooling issue: the legacy Blueprint validator enforced v0.4 table shapes and zero-width wrapping against v0.6, causing 127 false positives. Resolution: reduced it to stable current invariants already appropriate for cleanup: official-template section/style identity, table-count parity, version, placeholder and BP coverage.
 - Documentation issue: nine initial Q&A references used stale/generic paths or wildcards. Resolution: replaced each with a real file/symbol at the frozen baseline; the reference check now reports zero broken paths.
 - Process/test-harness issue: the first PR check rejected a backtick-wrapped Knowledge Gate evidence path because the validator requires the path to start after whitespace. Resolution: removed Markdown backticks from that PR field and pushed this audit update to trigger a fresh pull-request event; no check bypass was used.
+- Process correction: the initial closure comment incorrectly treated the optional 10-question mentor rehearsal as a new Knowledge Gate. DonHV had already passed IDTS-89 and IDTS-90 at 90% with Critical/Debug/Teach-back PASS. Jira comment 10705 supersedes that statement; rehearsal remains optional and IDTS-104 is Done.
