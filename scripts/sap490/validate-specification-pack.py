@@ -42,8 +42,8 @@ XLSX_CONTRACTS = {
     "technical": {
         "template": TEMPLATE_DIR / "Technical_Specification.xlsx",
         "outputs": [
-            GENERATED_DIR / "Technical_Specification_IDTS_SAP01_en_v0.6.xlsx",
-            GENERATED_DIR / "Technical_Specification_IDTS_SAP01_vi_v0.6.xlsx",
+            GENERATED_DIR / "Technical_Specification_IDTS_SAP01_en_v0.7.xlsx",
+            GENERATED_DIR / "Technical_Specification_IDTS_SAP01_vi_v0.7.xlsx",
         ],
         "required_sheets": [
             "Cover",

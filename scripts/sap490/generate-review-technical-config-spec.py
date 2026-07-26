@@ -13,6 +13,7 @@ from openpyxl.drawing.image import Image as XLImage
 from openpyxl.styles import Alignment
 
 from specification_catalog import MESSAGES, SCREENS, TECH_FLOWS, TECH_REQUIREMENTS
+from technical_specification_template import generate_technical_specification
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -766,7 +767,7 @@ def configuration(language):
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     for language in ("en", "vi"):
-        print(technical(language).relative_to(ROOT))
+        print(generate_technical_specification(language).relative_to(ROOT))
         print(configuration(language).relative_to(ROOT))
 
 
