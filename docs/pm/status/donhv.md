@@ -3264,3 +3264,4 @@ Vietnamese:
 - Final local verification: OfficeCLI 26/26 current artifacts; all specification/Blueprint/test-pack/template/evidence validators PASS; agent rules 8/8, ownership 5/5, QA Depth 15/15, secret scan, AI DevKit 5/5 and `git diff --check` PASS.
 - Issues found during verification: combined validator timeout due buffered long-running contract; obsolete Blueprint v0.4 rules caused 127 false positives on v0.6; nine Q&A references were stale/generic. All were corrected and rerun successfully. These are documentation/test-tooling issues, not product defects.
 - Remaining: commit/push, PR check/merge, Jira closure. Drive and runtime remain untouched.
+- PR #187 first `qa-depth-gate` run failed only at PR-body parsing: the Knowledge Gate evidence path was wrapped in Markdown backticks, while the validator accepts a plain path following whitespace. The PR body was corrected and this follow-up commit triggers a fresh check; no bypass or runtime change was used.
