@@ -3280,3 +3280,4 @@ Vietnamese:
 - Visual finding fixed in-session: one final Screen Definition record was pushed onto an almost-empty page. Labels and multiplicity values were made concise and the official grid now renders on one page without manually reducing font size.
 - Final local result: Technical Specification EN/VI v0.7 retain 12/12 official tabs and inner template grids. OfficeCLI 1.0.141 and the full specification validator PASS; LibreOffice renders 17 pages per language and focused visual review PASS.
 - Evidence: `docs/pm/evidence/idts-103/technical-spec-template-fidelity-remediation-20260726.md`. Drive remains unchanged pending normal PR merge.
+- Release closeout: PR #189 passed QA Depth and merged normally at `aa7b708922d689a127e8ba892799c303881abc12`. Technical Specification EN/VI v0.7 were then updated in place at their existing Drive IDs; parent and XLSX MIME were preserved and metadata/size readback matched the uploaded files. No duplicate was created.
