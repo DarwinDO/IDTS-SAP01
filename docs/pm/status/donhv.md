@@ -7,6 +7,7 @@
 - Issue observed: PowerShell displayed UTF-8 Vietnamese as mojibake in console output. Classification: tooling/display issue. File-level UTF-8 verification found zero replacement or mojibake characters; no source content repair was required.
 - Verification: OfficeCLI `1.0.142` preflight PASS; UTF-8 read check PASS. Full repository/process gates and PR are still pending.
 - Handoff: commit and merge the briefing first. DonHV, SangVN, DatDT and NhanT must each read that exact commit and add their own Jira acknowledgment; the agent must not sign for them.
+- Tooling issue: `gh pr merge 192 --merge --delete-branch` stopped before merge because local branch `dev` is owned by root worktree `E:/IDTS-SAP01`. PR #192 itself was `CLEAN`, `MERGEABLE`, and its QA Depth Gate passed. Resolution: use the GitHub merge API with normal `merge` method from the clean PR head; do not detach, reset, or alter the root worktree.
 
 ## 2026-07-24 - IDTS-100 Shared QA lifecycle harness corrections
 
