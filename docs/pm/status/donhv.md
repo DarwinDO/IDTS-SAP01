@@ -1,5 +1,13 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-07-27 - IDTS-105 mentor-review briefing and EN-only governance
+
+- Work: created the complete Vietnamese mentor-feedback briefing, added the mandatory read/acknowledgment gate to `AGENTS.md`, created unsigned acknowledgment evidence, and prepared work packages for IDTS-105 through IDTS-112.
+- Jira: created and linked IDTS-105–112; moved IDTS-105 to In Progress. Downstream work remains blocked by the human read gate and EN-only cleanup.
+- Issue observed: PowerShell displayed UTF-8 Vietnamese as mojibake in console output. Classification: tooling/display issue. File-level UTF-8 verification found zero replacement or mojibake characters; no source content repair was required.
+- Verification: OfficeCLI `1.0.142` preflight PASS; UTF-8 read check PASS. Full repository/process gates and PR are still pending.
+- Handoff: commit and merge the briefing first. DonHV, SangVN, DatDT and NhanT must each read that exact commit and add their own Jira acknowledgment; the agent must not sign for them.
+
 ## 2026-07-24 - IDTS-100 Shared QA lifecycle harness corrections
 
 | Classification | Symptom / finding | Root cause | Status / verification / handoff |

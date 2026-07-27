@@ -17,6 +17,28 @@ For every task that creates, reads, edits, reviews, moves, synchronizes, or dele
 | Tests, security, configuration, deployment, or release claims | `testing-security-and-release.md` |
 | Code ownership, beginner debugging, learning recap, task-start knowledge gate, or PR/Jira learning evidence | `ownership-learning-and-debug.md` |
 
+## Mandatory SAP490 Mentor-Review Briefing Gate
+
+Before starting any new SAP490 submission task, the executing member and agent must read
+[`docs/sap490/mentor-review-technical-spec-and-test-requirements.vi.md`](docs/sap490/mentor-review-technical-spec-and-test-requirements.vi.md)
+at the exact commit used as the task baseline.
+
+The human member must then record an acknowledgment in
+`docs/pm/evidence/idts-105/member-read-acknowledgements.md` and add the matching Jira
+comment. The acknowledgment must name the member, commit SHA, read date, understood
+ownership, and unresolved questions. An agent must never sign or acknowledge on behalf
+of DonHV, SangVN, DatDT, or NhanT.
+
+Until the acknowledgment exists, the agent may prepare a read-only inventory or a
+clearly labeled candidate package, but must not mark the SAP490 task PASS, claim member
+approval, synchronize the candidate to the official Mentor Current Drive file, or
+transition the Jira issue to Done.
+
+Current SAP490 submission policy is English-only. Internal learning and briefing
+material may remain Vietnamese. Do not create, regenerate, update, or upload a
+Vietnamese SAP490 submission artifact unless a later explicit project decision
+reverses this policy.
+
 ## Role
 
 You are a SAP CAP + SAP Fiori/UI5 coding agent for this repository. Work as a conservative enterprise application engineer: read the local project context first, prefer SAP-supported patterns, and keep the solution inside the documented project scope.

@@ -243,6 +243,13 @@ Vietnamese clean note: Nút `Assign Developer` riêng đã được bỏ khỏi 
 - IDTS-96 and IDTS-98 are In Progress; IDTS-99 remains To Do because OpenAI live is disabled. PR #177 needs IDTS-94 no-mutation/reload and genuine Knowledge Gate evidence; PR #178 needs a real four-capability evaluation rewrite and removal of unrelated/unsafe files; PR #179 must be relabeled as disabled-provider fallback evidence and complete the required role/action/browser matrix.
 - GitHub and Jira review comments were posted. None of PR #177–#179 is approved for merge yet, even where the current GitHub check is green.
 
+## 2026-07-27 SAP490 EN-only mentor remediation
+
+- `IDTS-105` is In Progress. The Vietnamese internal briefing now captures the mentor feedback, exact purpose of all 12 Technical Specification tabs, SAP/CAP equivalents, official-template rules, numbering, evidence rules, ownership, and the three human-approval gates.
+- Jira tasks `IDTS-106`–`IDTS-112` exist with explicit dependencies. They remain blocked until the committed briefing is personally acknowledged by the relevant members.
+- The official SAP490 submission direction is English-only. Vietnamese learning/briefing documents remain allowed, but no new VI submission artifact may be generated or synchronized.
+- No member acknowledgment, candidate approval, Unit/UAT result, Drive Trash operation, or mentor-ready completion has been fabricated or claimed.
+
 ## Next Handover Instruction
 
 Any new agent or developer should identify their member name first, then read this file, `task-board.md`, the relevant member file under `status/*.md`, and the relevant `tasks/*.md` before making changes.
