@@ -154,3 +154,12 @@ Record a new decision here when it changes scope, ownership, entity meaning, sta
 - Safety: do not rewrite Git history, delete official templates, change Google Drive artifacts, or treat the archive tag as a current mentor candidate.
 - Enforcement: generators/validators target current filenames; temp/render/log output belongs under ignored `.tmp/`, `/tmp/`, or `/output/` paths and must not be committed.
 - Evidence: `docs/sap490/generated-archive-manifest-20260726.md` and `docs/pm/evidence/idts-104/repository-cleanup-report.md`.
+
+### DEC-055 — Maintain English-only SAP490 submission artifacts with human approval gates
+
+- Date: 2026-07-27
+- Decision: official SAP490 submission artifacts in Mentor Current are maintained in English only. Vietnamese internal learning, briefing and knowledge material remain allowed.
+- Drive safety: VI files in `00_MENTOR_REVIEW_CURRENT` may be moved to Trash only after recursive inventory, EN-counterpart verification and a raw backup. Trash is not emptied and archive/template/reference/previous-version/POC/workshop folders are out of scope.
+- Repository safety: current-tree VI submission artifacts are removed only after an annotated Git tag and hash/path manifest preserve retrieval. Git history is not rewritten.
+- Human gate: the agent prepares candidate content and evidence, but named members personally acknowledge the briefing and approve their ownership package before DonHV integrates or synchronizes the official artifact.
+- Test truth: Unit Test/UAT require case-level actual results and selected image evidence. OpenAI live remains `BLOCKED / NOT ACCEPTED — provider disabled`; mock/fallback results are not provider-live acceptance.

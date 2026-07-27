@@ -134,6 +134,7 @@ Vietnamese:
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
+| IDTS-105 | Consolidate mentor review requirements and enforce team acknowledgment | DonHV | In Progress. Briefing, AGENTS gate, Jira dependency graph and unsigned acknowledgment register are prepared. Completion still requires each member to read the committed briefing and add their own Jira acknowledgment. |
 | IDTS-104 | Remove temporary artifacts and curate mentor-review repository outputs | DonHV / NhanT support | Done: PR #187 merged with QA Depth PASS; archive/tag manifest, local cleanup, current-tree curation, Mentor Review Q&A and verification are complete. Drive was unchanged. |
 | IDTS-91 | Add explicit AI suggestion review actions | DatDT | Done: PR #167 merged at `442b958`; focused QA `19/0`, integrated regression and fresh QA Depth Gate passed. Jira closure evidence comment `10676`. |
 | IDTS-92 | Add persisted review controls to existing AI dialogs | DatDT | Done: PR #167 merged at `442b958`; 47 static checks plus integrated UI/build regression passed. Jira closure evidence comment `10677`. |
@@ -169,6 +170,7 @@ Vietnamese:
 
 | ID | Cong viec | Thanh vien chinh | Ghi chu |
 | --- | --- | --- | --- |
+| IDTS-105 | Tong hop yeu cau mentor review va bat buoc team xac nhan da doc | DonHV | Dang lam. Da chuan bi briefing, rule AGENTS, lien ket dependency Jira va bang acknowledgment chua ky. Chi hoan tat khi tung member tu doc briefing tai commit da merge va tu comment xac nhan tren Jira. |
 | IDTS-104 | Don file tam va chon loc output phuc vu mentor review | DonHV / NhanT ho tro | Da xong: PR #187 da merge sau khi QA Depth PASS; archive/tag manifest, cleanup local, chon latest artifact, bo Q&A va verification da hoan tat. Khong thay doi Drive. |
 | IDTS-91 | Them action review AI suggestion ro rang | DatDT | Done: PR #167 merge tai `442b958`; focused QA `19/0`, integrated regression va fresh QA Depth Gate da pass. Jira closure evidence comment `10676`. |
 | IDTS-92 | Them persisted review control vao dialog AI hien co | DatDT | Done: PR #167 merge tai `442b958`; 47 static check va integrated UI/build regression da pass. Jira closure evidence comment `10677`. |
@@ -208,12 +210,26 @@ Vietnamese:
 
 | ID | Task | Blocker | Required decision |
 | --- | --- | --- | --- |
+| IDTS-106 | Retire Vietnamese Mentor Current artifacts and enforce English-only SAP490 output | Blocked by IDTS-105 and member acknowledgments. Read-only Drive inventory may be prepared, but no official Trash/current-tree cleanup is accepted yet. | All members acknowledge the committed briefing; then DonHV executes backup, manifest, archive tag and non-permanent Drive Trash. |
+| IDTS-107 | Rebuild Technical Design, database dictionary, and persistence evidence | Blocked by IDTS-105 and IDTS-106. | DonHV acknowledges the briefing and the EN-only baseline is frozen. |
+| IDTS-108 | Rebuild screen definitions and collaboration implementation evidence | Blocked by IDTS-105 and IDTS-106. | SangVN acknowledges the briefing before candidate package approval. |
+| IDTS-109 | Rebuild standards, message catalog, and monitoring/AI implementation traces | Blocked by IDTS-105 and IDTS-106. | DatDT acknowledges the briefing before candidate package approval. |
+| IDTS-110 | Expand SAP490 Unit Test catalog and capture case-level evidence | Blocked by IDTS-105/106 and DonHV catalog approval. | NhanT acknowledges the briefing; DonHV approves the atomic test catalog before execution. |
+| IDTS-111 | Execute SAP490 UAT and publish case-level image evidence | Blocked by IDTS-105/106 and DonHV catalog approval. | NhanT acknowledges the briefing; UAT stays unexecuted until the catalog is approved. |
+| IDTS-112 | Integrate approved Technical Specification and synchronize same-ID Drive artifact | Blocked by IDTS-105–109. | Three human-approved candidate packages and all local/PR gates must PASS. |
 | IDTS-72 | Full visual AI acceptance | Duplicate/similar review is deployed through IDTS-74, classification suggestion review is deployed through IDTS-75, and handoff summary review is deployed through IDTS-76. | Closure is unblocked; record final Jira evidence and transition IDTS-72 if the Jira workflow allows. |
 
 Vietnamese:
 
 | ID | Cong viec | Blocker | Quyet dinh can co |
 | --- | --- | --- | --- |
+| IDTS-106 | Loai artifact VI khoi Mentor Current va ap dung SAP490 chi tieng Anh | Bi block boi IDTS-105 va acknowledgment cua member. Chi duoc lap inventory Drive read-only, chua duoc claim Trash/cleanup chinh thuc. | Tat ca member xac nhan da doc briefing da commit; sau do DonHV backup, lap manifest, tao archive tag va dua VI vao Trash khong permanent-delete. |
+| IDTS-107 | Lam lai Technical Design, database dictionary va persistence evidence | Bi block boi IDTS-105 va IDTS-106. | DonHV xac nhan da doc briefing va freeze baseline EN-only. |
+| IDTS-108 | Lam lai screen definition va collaboration implementation evidence | Bi block boi IDTS-105 va IDTS-106. | SangVN xac nhan da doc briefing truoc khi duyet candidate package. |
+| IDTS-109 | Lam lai standard, message catalog va monitoring/AI trace | Bi block boi IDTS-105 va IDTS-106. | DatDT xac nhan da doc briefing truoc khi duyet candidate package. |
+| IDTS-110 | Mo rong Unit Test catalog va thu evidence theo tung case | Bi block boi IDTS-105/106 va phe duyet catalog cua DonHV. | NhanT xac nhan da doc; DonHV duyet atomic test catalog truoc khi chay. |
+| IDTS-111 | Chay UAT SAP490 va cong bo hinh anh theo tung case | Bi block boi IDTS-105/106 va phe duyet catalog cua DonHV. | NhanT xac nhan da doc; UAT khong duoc claim executed truoc khi catalog duoc duyet. |
+| IDTS-112 | Tich hop Technical Specification da duyet va sync dung Drive ID | Bi block boi IDTS-105–109. | Can ba candidate package duoc member that duyet va tat ca local/PR gate PASS. |
 | IDTS-72 | Acceptance AI visual day du | Duplicate/similar review da deploy qua IDTS-74, classification suggestion review da deploy qua IDTS-75, va handoff summary review da deploy qua IDTS-76. | Da unblock closure; ghi final Jira evidence va transition IDTS-72 neu Jira workflow cho phep. |
 
 ## Update Rules
