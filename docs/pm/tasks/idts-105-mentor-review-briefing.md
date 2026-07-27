@@ -23,3 +23,5 @@ candidate approval, UAT execution, mentor sign-off or OpenAI live acceptance.
 - OfficeCLI preflight.
 - Markdown/path checks.
 - Agent rules, secret scan, AI DevKit and `git diff --check`.
+- PR #192 body validation: PASS with 11 required QA Depth sections and DonHV's
+  existing 90% PASS Knowledge Gate evidence from IDTS-89/IDTS-90.
