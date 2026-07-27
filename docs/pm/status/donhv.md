@@ -1,5 +1,16 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-07-27 - IDTS-106 English-only Drive inventory
+
+- Work: started the read-only recursive inventory for Vietnamese artifacts inside `00_MENTOR_REVIEW_CURRENT` from merged briefing baseline `4b4c93c`.
+- Result so far: 13 VI submission artifacts have been identified with EN counterparts. Raw backups for all 13 files were downloaded outside the repository to `E:\IDTS-SAP01-backups\drive-vi-before-trash-20260727-232917`; Drive byte sizes matched and SHA-256 values were recorded in `docs/pm/evidence/idts-106/drive-vi-inventory-candidate.md`.
+- Safety state: no file has been moved to Trash and no repository artifact has been deleted because member acknowledgments remain pending.
+- Tooling issue: the earlier `gh pr merge 192 --merge --delete-branch` merged PR #192 successfully but returned an error when local cleanup tried to use `dev`, which is owned by root worktree `E:/IDTS-SAP01`. Verified merge SHA `4b4c93c`; no root worktree was changed.
+- Tooling issue: `gws --version` and `gws auth status` failed because `gws` is not installed/in PATH. Classification: tooling issue. Google Drive connector remains available for inventory/readback; raw backup requires connector/Chrome download or a separately verified Drive CLI path.
+- Tooling issue: a direct browser download from a blank tab was blocked by Chrome's origin-safety policy, and a visible Google Docs menu download did not complete within the bounded browser session. No file changed. Resolved by using the Drive connector's temporary raw-file reference and saving it directly into the external backup folder; temporary download URLs were not written to repository evidence.
+- Jira coordination: added the exact merged briefing commit and personal-acknowledgment requirement to IDTS-106 through IDTS-112. These comments notify the assigned owners without signing or approving on their behalf.
+- Handoff: request personal acknowledgments for merged briefing commit `4b4c93c1d8b45024677653e1f890d52e742b2aaf`. Do not Trash files, update Mentor Index, remove VI from the current Git tree, or claim IDTS-106 PASS until the acknowledgments exist.
+
 ## 2026-07-27 - IDTS-105 mentor-review briefing and EN-only governance
 
 - Work: created the complete Vietnamese mentor-feedback briefing, added the mandatory read/acknowledgment gate to `AGENTS.md`, created unsigned acknowledgment evidence, and prepared work packages for IDTS-105 through IDTS-112.

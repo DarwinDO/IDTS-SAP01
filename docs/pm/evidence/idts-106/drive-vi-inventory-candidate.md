@@ -1,0 +1,49 @@
+# IDTS-106 — Vietnamese Mentor-Current Artifact Inventory
+
+Status: `BACKUP VERIFIED — NOT TRASHED`
+
+## Scope and baseline
+
+- Drive scope: `SU26SAP01_GSU26SAP01_00_MENTOR_REVIEW_CURRENT`
+- Scope folder ID: `11W8P8jM07L_tmcQGZe9tbKhk4xCUbWHO`
+- Git baseline: `4b4c93c1d8b45024677653e1f890d52e742b2aaf`
+- Inventory date: `2026-07-27`
+- Raw backup location outside the repository:
+  `E:\IDTS-SAP01-backups\drive-vi-before-trash-20260727-232917`
+- Backup rule: every VI artifact below was downloaded as raw Office bytes and hashed
+  before any Trash action.
+- Current state: no file below has been moved to Google Drive Trash.
+- Excluded from this inventory: `99_ARCHIVE_LEGACY`, templates, references, previous
+  versions, POC artifacts and workshop material.
+
+## Verified inventory
+
+| # | VI artifact | VI Drive ID | Parent ID | MIME | Bytes | Modified UTC | Backup SHA-256 | Verified EN counterpart |
+| ---: | --- | --- | --- | --- | ---: | --- | --- | --- |
+| 1 | `SU26SAP01_GSU26SAP01_BRD_VI_v1_5_20260724.docx` | `1Ov_38u0tY-79c7TtQTUty9xRpdu9j4Sd` | `1bqpRLdXbIAkWnHabyV9lVAeedF4NfR62` | DOCX | 548850 | 2026-07-25T09:28:24.846Z | `83AEA880928E3EC09A21DC19DA5BB650F3B15149DDEF6841269E08CB073DB438` | `SU26SAP01_GSU26SAP01_BRD_EN_v1_5_20260724.docx` — `1jvh-iUtb9Ts_ar7AIV7tLUk0zF6DA0LL` |
+| 2 | `SU26SAP01_GSU26SAP01_SRS_VI_v1_4_20260724.docx` | `1jCzCY5XHw7seMqn_EpYhyg5qiWOkH6Xs` | `1g02WBFTISRUxNme3eYoWC55lm84V5Zvr` | DOCX | 99069 | 2026-07-24T14:23:14.386Z | `57683907F11B3313D1BE2962E957771D4EEFA95DB49B7C2315495E9ACEACA409` | `SU26SAP01_GSU26SAP01_SRS_EN_v1_4_20260724.docx` — `1bksuH7hSRWynt9cqA03jjG0KRVp6lHV0` |
+| 3 | `SU26SAP01_GSU26SAP01_FRS_VI_v1_5_20260724.docx` | `1BIld30ZRYaRtdTAu8RJBWOrhWB2Gs3d9` | `1O4ef4Wekgjf9S_3u4VpMGOdoU9BdZbdQ` | DOCX | 428175 | 2026-07-25T09:33:50.190Z | `18E41E781914666E45C3C9C715A1A42F040859A0D8B1B0D38C2B21CB11C9F679` | `SU26SAP01_GSU26SAP01_FRS_EN_v1_5_20260724.docx` — `1OZwgmVasJyxRRGpa-x8uSVrlVfyIcykb` |
+| 4 | `SU26SAP01_GSU26SAP01_Blueprint_VI_v0_6_20260725.docx` | `1pLFomBiPJvZkOYmzmUZwcSm1HDejyUrV` | `1oKcBvd8TudJW0Gw51ANZioHHhmd9zAjo` | DOCX | 389536 | 2026-07-25T06:44:33.118Z | `3DE7B969192138645FFE749C0469EB367EDC586995F49D091B772E673F256C5A` | `SU26SAP01_GSU26SAP01_Blueprint_EN_v0_6_20260725.docx` — `1WDuPtIdTjyvopPVpsa1Ob90cXKsqkN5n` |
+| 5 | `SU26SAP01_GSU26SAP01_Functional_Specification_VI_v0_7_20260725.xlsx` | `1s0EbohIdtIY_GxML-7PLDUd5GfImBOIp` | `1F3bohptztIz1mntQC_r-2Xy7BU9iX-ud` | XLSX | 1309539 | 2026-07-25T10:22:52.830Z | `34E50C99E5F0182340129FDB90884641FF4D0EEF6B3DE838DD5C22E956B549F9` | `SU26SAP01_GSU26SAP01_Functional_Specification_EN_v0_7_20260725.xlsx` — `1VMVGhKXkLiJh-ME2WRtkQjc6VPW8SGuI` |
+| 6 | `SU26SAP01_GSU26SAP01_Technical_Specification_VI_v0_7_20260726.xlsx` | `1nwuWiW6-gjTVKmA_HuI_Un3075Kgf2fN` | `1ZurfJj-whcezlM-9dgTZyTj_LRCaJ268` | XLSX | 813823 | 2026-07-26T06:42:33.554Z | `69E8E839F5117610E1E8EF61990B11A7129602567DA37546E76A15B75C2207F2` | `SU26SAP01_GSU26SAP01_Technical_Specification_EN_v0_7_20260726.xlsx` — `1nAmUQb3852G4-hxJ0BOK6OHGLDs6Kq1P` |
+| 7 | `SU26SAP01_GSU26SAP01_Configuration_Note_VI_v0_5_20260725.xlsx` | `1ClD-QkoxLYyw5fAw5vHtPe34JsG1p3kh` | `1Jo7yMiz0p6C9nPk8kSnvWueRsfs_qizO` | XLSX | 523797 | 2026-07-25T06:36:30.764Z | `0E00ECB0B204CD5D1F8F8D218BB7DAE7A72886EA03237C9ACA351B436BF96264` | `SU26SAP01_GSU26SAP01_Configuration_Note_EN_v0_5_20260725.xlsx` — `1np2rfeSEe-Cz4HI4cWU1s4P_SNqpEtv-` |
+| 8 | `SU26SAP01_GSU26SAP01_Test_Scenario_VI_v0_3_20260724.xlsx` | `1vxufjbEuFbrn2AJ0E0uwLXDytmGGZ8io` | `18ZRfuTSjKRJOj-MNv0dRv2TRPwaK6xsW` | XLSX | 379038 | 2026-07-24T14:57:17.803Z | `343274157F2EA63D8E012D07B2AC476F5914D48163C113F97CE9999D25FED745` | `SU26SAP01_GSU26SAP01_Test_Scenario_EN_v0_3_20260724.xlsx` — `1z_P8xYfiEf4-B5wv2h8Vipj_tdcVKBSx` |
+| 9 | `SU26SAP01_GSU26SAP01_Unit_Test_VI_v0_4_20260726.xlsx` | `1hqAdhMYZHo2Ah4J_OYNfmVV7ZhG2_KF6` | `1p3TZlRhqLGlUu99bEhQelN-ym4fgAI05` | XLSX | 40561 | 2026-07-26T07:03:02.362Z | `136D10869BC00C7A38B417160D675D5AA443B1C138526EEA14B8E24733BD896E` | `SU26SAP01_GSU26SAP01_Unit_Test_EN_v0_4_20260726.xlsx` — `1wyno-7uTUudV_T_cB2VWSSP6a8yWsA0T` |
+| 10 | `SU26SAP01_GSU26SAP01_Functional_Test_VI_v0_3_20260724.xlsx` | `1dnVVOtHv8mVwxYNM3_AKPeEdDy3xwwJF` | `10XNelMsW0klAy3QKLnIMeNRpEUZ0F1aK` | XLSX | 61285 | 2026-07-24T16:14:27.433Z | `FDADE574294012B3FF84ABDB46569F28A60C53CC053C59A58351D5781B60CA34` | `SU26SAP01_GSU26SAP01_Functional_Test_EN_v0_3_20260724.xlsx` — `10euD4971cy857onC-wd5wDE-paAVPPne` |
+| 11 | `SU26SAP01_GSU26SAP01_Test_Report_VI_v0_4_20260724.xlsx` | `14QABwYHkir1cHuYpYqJyeKRquAzVH7aS` | `162rR33I0UKnN6Z6bWY42lSSq10ARuLIk` | XLSX | 49118 | 2026-07-24T16:14:37.319Z | `CDF7E251BBA68AABFAEA1A718CA6876CA2F05D4DA1515759AF5A5FF94D502B86` | `SU26SAP01_GSU26SAP01_Test_Report_EN_v0_4_20260724.xlsx` — `12ysnM_7KekEbwM5mCmgeacwCUEqIrOb_` |
+| 12 | `SU26SAP01_GSU26SAP01_UAT_VI_PREPARED_v0_2_20260724.xlsx` | `1Yy21d944EDhvc0m8UfDRYVJUzDWaptZQ` | `1nderYMNvpXLSasJEJRUidBHUIK6xUbPA` | XLSX | 348231 | 2026-07-24T15:05:20.948Z | `371A5624BBB92B99CC2703380EBB8330E8D83B9D75EB393BA465D184A518922F` | `SU26SAP01_GSU26SAP01_UAT_EN_PREPARED_v0_2_20260724.xlsx` — `1p4l2i3DAn6ingrRdSJ2pmw4Kan6X2hWR` |
+| 13 | `SU26SAP01_GSU26SAP01_Test_And_Fix_Bug_VI_v0_5_20260724.xlsx` | `1r1-Zeif2Vq9RMQ8fDQ8BtOMz_QPBiG6G` | `1D7eUWiRFSCULfndaR0nFoEfnIU1IfHjU` | XLSX | 13571 | 2026-07-24T14:26:22.499Z | `529293DA736E923C1C6907B33BACC760DCA43E4232086E5E81ED96AF7490710E` | `SU26SAP01_GSU26SAP01_Test_And_Fix_Bug_EN_v0_5_20260724.xlsx` — `1fIs5OVOgXw1VoWDSzbcTMJiASr3cYZy5` |
+
+## Gate status
+
+- [x] Recursive Mentor Current inventory completed.
+- [x] Every VI item has a verified EN counterpart.
+- [x] Raw backup completed outside the repository.
+- [x] Backup byte size matches Drive metadata for all 13 files.
+- [x] SHA-256 recorded for all 13 backups.
+- [ ] DonHV, SangVN, DatDT and NhanT have acknowledged the merged briefing commit.
+- [ ] Mentor Index has been updated to remove VI references.
+- [ ] VI items have been moved to Google Drive Trash.
+- [ ] Post-Trash recursive readback confirms zero VI artifacts in Mentor Current.
+
+No task completion or mentor-ready claim is allowed while the unchecked gates remain.
