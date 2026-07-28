@@ -9,9 +9,11 @@ const {
   OMITTED_ENTITIES,
   decodeRows,
   encodeRows,
+  entityKeyColumns,
   mapPostgresRowToCds,
   postgresTableName,
-  prepareRowsForTarget
+  prepareRowsForTarget,
+  rowKey
 } = require('../btp/lib/hana-migration')
 
 let passed = 0
@@ -97,15 +99,39 @@ test('attachment binary can be encoded and decoded without byte changes', () => 
   assert.equal(Buffer.compare(decoded[0].content, original), 0)
 })
 
+test('composition keys use their flattened persistence columns', () => {
+  assert.deepEqual(entityKeyColumns({
+    keys: {
+      up_: {
+        isAssociation: true,
+        keys: [{ ref: ['ID'] }]
+      },
+      ID: {}
+    }
+  }), ['up__ID', 'ID'])
+})
+
+test('HANA uppercase result columns verify against logical key names', () => {
+  assert.equal(rowKey({ CODE: 'PM' }, ['code']), '["PM"]')
+  assert.equal(
+    rowKey({ UP__ID: 'BUG-1', ID: 'ATTACHMENT-1' }, ['up__ID', 'ID']),
+    '["BUG-1","ATTACHMENT-1"]'
+  )
+})
+
 test('import requires explicit execute and one transaction', () => {
   const source = fs.readFileSync(path.join(__dirname, '../btp/import-hana.js'), 'utf8')
+  const helperSource = fs.readFileSync(path.join(__dirname, '../btp/lib/hana-migration.js'), 'utf8')
   assert.match(source, /args\.execute === true/)
   assert.match(source, /await db\.tx\(async tx =>/)
+  assert.match(source, /\[\.\.\.ENTITY_ORDER\]\.reverse\(\)/)
+  assert.match(source, /await tx\.run\(DELETE\.from\(entity\)\)/)
+  assert.ok(source.indexOf('DELETE.from(entity)') < source.indexOf('UPSERT.into(entity)'))
   assert.match(source, /UPSERT\.into\(entity\)/)
   assert.match(source, /await tx\.run\(SELECT\.from\(entity\)/)
-  assert.match(source, /definition\?\.keys/)
+  assert.match(source, /entityKeyColumns\(definition\)/)
   assert.match(source, /targetRows\.length !== rows\.length/)
-  assert.match(source, /MIGRATION_SOURCE_KEY_MISSING/)
+  assert.match(helperSource, /MIGRATION_SOURCE_KEY_MISSING/)
   assert.match(source, /MIGRATION_TARGET_KEY_MISMATCH/)
   assert.doesNotMatch(source, /cds deploy|child_process/)
 })

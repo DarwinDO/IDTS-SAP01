@@ -174,7 +174,8 @@
       "objectStore": {
         "[production]": {
           "vcap": {
-            "name": "idts-sap01-external-services"
+            "name": "idts-sap01-external-services",
+            "label": false
           }
         }
       },

@@ -3,12 +3,14 @@
 const fs = require('node:fs')
 const path = require('node:path')
 const cds = require('@sap/cds')
-const { SELECT, UPSERT } = cds.ql
+const { DELETE, SELECT, UPSERT } = cds.ql
 
 const {
   ENTITY_ORDER,
   decodeRows,
+  entityKeyColumns,
   parseArgs,
+  rowKey,
   sha256
 } = require('./lib/hana-migration')
 
@@ -45,6 +47,12 @@ async function main () {
   }
   const verification = []
   await db.tx(async tx => {
+    // The HDI deployer loads reference seed rows. Replace them in reverse
+    // dependency order so Render UUIDs and relationships remain authoritative.
+    for (const entity of [...ENTITY_ORDER].reverse()) {
+      await tx.run(DELETE.from(entity))
+    }
+
     for (const entity of ENTITY_ORDER) {
       const entry = manifest.entities.find(candidate => candidate.entity === entity)
       const rows = decodeRows(JSON.parse(fs.readFileSync(path.join(input, entry.file), 'utf8')))
@@ -52,7 +60,7 @@ async function main () {
         await tx.run(UPSERT.into(entity).entries(rows.slice(offset, offset + BATCH_SIZE)))
       }
       const definition = model.definitions[entity]
-      const keyColumns = Object.keys(definition?.keys || {})
+      const keyColumns = entityKeyColumns(definition)
       if (!keyColumns.length) {
         throw Object.assign(new Error(`No key definition found for ${entity}.`), {
           code: 'MIGRATION_TARGET_KEY_MISSING'
@@ -76,16 +84,6 @@ async function main () {
     targetKind: cds.env.requires.db?.kind || 'unknown',
     verification
   }, null, 2))
-}
-
-function rowKey (row, keyColumns) {
-  const values = keyColumns.map(column => row[column])
-  if (values.some(value => value === undefined || value === null)) {
-    throw Object.assign(new Error('Migration row is missing a required key.'), {
-      code: 'MIGRATION_SOURCE_KEY_MISSING'
-    })
-  }
-  return JSON.stringify(values)
 }
 
 function validateManifest (input, manifest) {
