@@ -3965,3 +3965,16 @@ Vietnamese:
   trailing-space sequences in the new native-picker evidence header.
   Classification: documentation formatting issue. They were replaced with
   blank-line-separated metadata fields before the final staged diff check.
+- IDTS-113 final-container clarification completed. The user-facing confusion
+  came from comparing the earlier POC HDI container with the final
+  `idts-sap01-db` application container. A Database Explorer key was created
+  without exposing credentials, and the final container was added to Explorer.
+  Explorer first showed a transient service-key retrieval message and later a
+  security-audit error while expanding the container; both are classified as
+  environment/tooling issues rather than migration defects. A read-only Cloud
+  Foundry task against the bound final database succeeded and returned 14
+  users: three approved FPT member identities, ten intentional
+  `@example.local` demo developers and one other approved PM identity.
+  DatDT/SangVN are active Developers and NhanT is an active Tester. No HANA
+  write, runtime deploy or Render change occurred. Evidence:
+  `docs/pm/evidence/idts-113/hana-final-container-user-classification-20260728.md`.
