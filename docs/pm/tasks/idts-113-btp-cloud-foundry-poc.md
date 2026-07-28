@@ -58,3 +58,23 @@ change the Render Shared QA deployment.
 Undeploy the MTA, delete its HDI service if requested, then delete the isolated
 HANA Cloud instance. Render Shared QA requires no rollback because it was not
 modified.
+
+## Migration increment - XSUAA, AppRouter, and HTML5 repository
+
+The migration branch extends the validated POC without changing the current
+Render deployment:
+
+- Production CAP auth is XSUAA; development and the Render
+  `production+integration` profile keep custom auth.
+- AppRouter owns BTP login/logout and forwards the user token to CAP.
+- The browser never receives or stores the XSUAA JWT.
+- `AuthService.me` maps JWT identity to an active IDTS user and requires the
+  XSUAA business role to match `Users.role_code`.
+- The Fiori app is packaged for the HTML5 Application Repository.
+- AWS S3, Brevo, and the disabled/mock AI boundary remain unchanged in this
+  increment.
+
+Local verification covers profile separation, CAP compile, UI5 build, focused
+auth/history/comment regression, and MTA packaging. Authenticated BTP browser
+smoke is deferred until the combined HANA/integration deployment is ready, so
+this increment does not claim deployed XSUAA acceptance.

@@ -1,4 +1,3 @@
-<!-- Entry point Fiori: browser chạy auth-guard trước; chỉ khi có session mới bootstrap Component/manifest/OData. -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,33 +12,13 @@
         }
     </style>
 
-    <!--
-        IDTS-35 auth-guard.js must load SYNCHRONOUSLY and BEFORE the UI5
-        bootstrap so the XHR interceptor is active before the first
-        OData $metadata request fires.
-        CSP note: external src="" script – not inline – satisfies enterprise CSP.
-    -->
-    <!-- Breakpoint auth đầu tiên: file này redirect login hoặc gắn Bearer token cho mọi OData XHR. -->
+    <!-- Resolve custom bearer auth or AppRouter/XSUAA before UI5 sends OData requests. -->
     <script src="auth-guard.js"></script>
-
-    <!-- UI5 bootstrap đọc resource root, tạo Component.js rồi manifest.json quyết định page/service. -->
-    <script
-        id="sap-ui-bootstrap"
-        src="resources/sap-ui-core.js"
-        data-sap-ui-theme="sap_horizon"
-        data-sap-ui-resource-roots='{
-            "idts.bugmanagementui": "./"
-        }'
-        data-sap-ui-on-init="module:sap/ui/core/ComponentSupport"
-        data-sap-ui-compat-version="edge"
-        data-sap-ui-async="true"
-        data-sap-ui-frame-options="trusted"
-    ></script>
+    <script src="bootstrap-ui5.js"></script>
 </head>
 <body class="sapUiBody sapUiSizeCompact" id="content">
-    <!-- ProfileShell.js đặt avatar/menu vào host riêng, không chạm DOM generated của Fiori Elements. -->
+    <div id="idtsAuthError" role="alert" hidden></div>
     <div id="idtsProfileShellHost"></div>
-    <!-- ComponentSupport đặt Fiori Elements app vào container này. -->
     <div
         data-sap-ui-component
         data-name="idts.bugmanagementui"

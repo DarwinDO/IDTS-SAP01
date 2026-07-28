@@ -140,3 +140,25 @@ Cách này tránh việc app gửi request OData metadata đầu tiên khi chưa
 **English.** Browser → `index.html` → synchronous `auth-guard.js` → UI5 bootstrap → `Component.js` → `manifest.json` → Fiori Elements OData model. The profile host is consumed by `ProfileShell.js`; the component host is consumed by `ComponentSupport`. Watch Network: `auth-guard.js` must run before the first `$metadata` request. This file owns load order only; it does not authenticate credentials or query the database.
 
 **Tiếng Việt.** Browser → `index.html` → `auth-guard.js` chạy đồng bộ → UI5 bootstrap → `Component.js` → `manifest.json` → OData model của Fiori Elements. Profile host được `ProfileShell.js` dùng; component host được `ComponentSupport` dùng. Hãy xem Network: `auth-guard.js` phải chạy trước request `$metadata` đầu tiên. File này chỉ giữ thứ tự nạp; nó không kiểm password và không query database.
+
+## IDTS-113 update - deferred UI5 bootstrap
+
+### English
+
+`index.html` no longer starts ComponentSupport directly from the UI5 script
+tag. It loads UI5 with deferred startup and then lets `bootstrap-ui5.js` wait
+for `window.idtsAuthReady`. This ordering supports both custom bearer auth and
+the BTP AppRouter cookie without exposing platform tokens to browser code.
+
+Debug in this order: `auth-guard.js` -> `AuthService.me` (BTP only) ->
+`bootstrap-ui5.js` -> ComponentSupport -> first `$metadata` request.
+
+### Vietnamese
+
+`index.html` khong con khoi dong ComponentSupport truc tiep tu UI5 script tag.
+UI5 duoc nap theo che do deferred, sau do `bootstrap-ui5.js` doi
+`window.idtsAuthReady`. Thu tu nay ho tro ca custom bearer auth va BTP
+AppRouter cookie ma khong dua platform token vao code browser.
+
+Thu tu debug: `auth-guard.js` -> `AuthService.me` (chi BTP) ->
+`bootstrap-ui5.js` -> ComponentSupport -> request `$metadata` dau tien.

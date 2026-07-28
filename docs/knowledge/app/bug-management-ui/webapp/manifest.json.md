@@ -510,3 +510,19 @@ The first form-field version used long helper text inside the custom fragment. B
 ### Vietnamese
 
 Phiên bản field đầu tiên dùng helper text dài bên trong custom fragment. Evidence browser cho thấy một Fiori Form cell chuẩn quá hẹp cho layout đó. Manifest cuối cùng vì vậy cung cấp label i18n ngắn (`Similar bugs` và `Classification suggestions`) và để fragment chỉ render action button.
+
+## IDTS-113 update - HTML5 repository service declaration
+
+### English
+
+The manifest now declares `sap.cloud.service: idts.sap01`. The MTA HTML5
+content module uses this stable service name when it packages the UI into the
+SAP HTML5 Application Repository. OData data-source paths remain unchanged;
+AppRouter routes `/odata/*` to the CAP service and forwards the XSUAA token.
+
+### Vietnamese
+
+Manifest khai bao `sap.cloud.service: idts.sap01`. HTML5 content module trong
+MTA dung service name on dinh nay de dong goi UI vao SAP HTML5 Application
+Repository. Duong dan OData khong doi; AppRouter route `/odata/*` den CAP
+service va forward XSUAA token.
