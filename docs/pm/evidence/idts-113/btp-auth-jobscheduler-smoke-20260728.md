@@ -52,6 +52,12 @@ disabled-provider/fallback smoke and HANA/S3 persistence readback after restart.
   attempt. The storage adapter itself is now accepted by the independent
   application-context smoke; the full browser upload/download/delete flow
   remains pending Chrome upload permission.
+- A second native-picker attempt on baseline
+  `9e53434b4a5a600681ab27027f05906316179708` reproduced the same safe blocker.
+  The enabled file input accepted the expected evidence MIME types, but the
+  plugin again returned `Not allowed`; the settled UI remained empty. Detailed
+  sanitized evidence is stored in
+  `btp-native-attachment-picker-attempt-20260728.md`.
 - The earlier HANA timeout occurred while the Free Tier database was stopped;
   after restart, the authenticated application and data reads succeeded.
 

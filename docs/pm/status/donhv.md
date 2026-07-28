@@ -3936,3 +3936,32 @@ Vietnamese:
   Git/worktree tooling issue, not a PR conflict. Readback verified merge commit
   `0b2363f551e96106ddca1d6d298ea14cf4b8409b`; no API retry or branch-protection
   bypass was used.
+- IDTS-113 native attachment browser smoke initially called the obsolete
+  Chrome-control helper `chrome.tabs.open`, which is not exposed by the current
+  browser runtime. This is a tooling issue only: no page navigation, product
+  request or data mutation occurred. Continue with the documented current tab
+  API after inspecting the connected browser object's available methods.
+- IDTS-113 native attachment picker retry reached the real BTP Object Page,
+  opened the native chooser from `Upload Evidence`, and targeted the approved
+  220-byte text fixture, but the Chrome plugin rejected
+  `fileChooser.setFiles(...)` with `Not allowed`. A settled DOM readback still
+  showed `No evidence files uploaded yet`, so no attachment, HANA metadata, or
+  S3 object was created by this attempt. Classification: test-harness/tooling
+  issue. Product API/S3 acceptance remains covered only by the independent CF
+  task evidence; native-picker acceptance remains pending until Chrome Uploads
+  permission permits the file handoff.
+- A follow-up CLI readback tried the non-existent command
+  `cf task <app> <id>` to inspect one task in detail. Cloud Foundry CLI correctly
+  reported that only `cf tasks` is available in this client. Classification:
+  tooling issue, fixed by retaining `cf tasks idts-sap01-srv` as the current
+  state proof and using the already-sanitized persisted evidence for task
+  output; no Cloud Foundry or application state changed.
+- The first PR-body depth check rejected the valid Knowledge Gate evidence path
+  because Markdown backticks around the field value prevented the gate parser
+  from recognizing its required prefix. Classification: test-harness formatting
+  issue. The body was corrected to use the same plain repository path without
+  changing the underlying PASS evidence, then the check was rerun.
+- The first staged `git diff --cached --check` found three Markdown hard-break
+  trailing-space sequences in the new native-picker evidence header.
+  Classification: documentation formatting issue. They were replaced with
+  blank-line-separated metadata fields before the final staged diff check.
