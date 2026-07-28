@@ -59,6 +59,19 @@ function entityKeyColumns (definition) {
   })
 }
 
+function rowKey (row, keyColumns) {
+  const valuesByName = new Map(
+    Object.entries(row).map(([name, value]) => [name.toLowerCase(), value])
+  )
+  const values = keyColumns.map(column => valuesByName.get(column.toLowerCase()))
+  if (values.some(value => value === undefined || value === null)) {
+    throw Object.assign(new Error('Migration row is missing a required key.'), {
+      code: 'MIGRATION_SOURCE_KEY_MISSING'
+    })
+  }
+  return JSON.stringify(values)
+}
+
 function mapPostgresRowToCds (definition, row) {
   const columnMap = {}
   for (const [name, element] of Object.entries(definition?.elements || {})) {
@@ -193,6 +206,7 @@ module.exports = {
   parseArgs,
   postgresTableName,
   prepareRowsForTarget,
+  rowKey,
   safeFileName,
   sha256,
   stableJson

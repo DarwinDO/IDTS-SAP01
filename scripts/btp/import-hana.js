@@ -10,6 +10,7 @@ const {
   decodeRows,
   entityKeyColumns,
   parseArgs,
+  rowKey,
   sha256
 } = require('./lib/hana-migration')
 
@@ -83,16 +84,6 @@ async function main () {
     targetKind: cds.env.requires.db?.kind || 'unknown',
     verification
   }, null, 2))
-}
-
-function rowKey (row, keyColumns) {
-  const values = keyColumns.map(column => row[column])
-  if (values.some(value => value === undefined || value === null)) {
-    throw Object.assign(new Error('Migration row is missing a required key.'), {
-      code: 'MIGRATION_SOURCE_KEY_MISSING'
-    })
-  }
-  return JSON.stringify(values)
 }
 
 function validateManifest (input, manifest) {
