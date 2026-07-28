@@ -136,6 +136,13 @@ this increment does not claim deployed XSUAA acceptance.
   e-mails exactly match the approved identities, while their existing
   `DEVELOPER`, `DEVELOPER` and `TESTER` roles remain active. No HANA update was
   needed or executed.
+- A fresh read-only verification distinguished the final
+  `idts-sap01-db` container from the earlier POC container. Application-context
+  readback returned 14 users: three approved FPT member identities, ten
+  intentional `@example.local` demo developers and one other approved PM
+  identity. DatDT/SangVN remain active Developers and NhanT remains an active
+  Tester. No HANA write or runtime deployment occurred. Evidence:
+  `docs/pm/evidence/idts-113/hana-final-container-user-classification-20260728.md`.
 - `npm run qa:idts113:btp-auth` passed 12/12 role-alignment, mismatch-denial,
   profile-separation and AppRouter/XSUAA checks.
 - BUG-0018 assignment, HANA history and Notifications UI readback passed.
