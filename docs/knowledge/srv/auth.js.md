@@ -135,3 +135,44 @@ File service CDS khai bao "API nao ton tai"; file JavaScript service implement "
 - Source file: `srv/auth.js`
 - Knowledge mirror: `docs/knowledge/srv/auth.js.md`
 - Last reviewed: 2026-07-03
+
+## IDTS-113 update - dual authentication runtime
+
+### English
+
+`AuthService` now has two intentional runtime paths:
+
+- Local development and Render integration keep the existing custom
+  email/password login and hashed `AuthSessions`.
+- SAP BTP production uses AppRouter/XSUAA. In this mode `login` is rejected
+  with HTTP 405, `logout` is handled by AppRouter, and `me` maps the JWT
+  identity to an active IDTS `Users` row.
+
+After the database user is found, `me` calls the platform-role validator. The
+XSUAA business role must match `Users.role_code`; otherwise the request is
+rejected. This prevents a BTP role assignment and the IDTS business role from
+silently disagreeing.
+
+Breakpoint order on BTP: `me(req)` -> JWT identity candidates ->
+`activeUserFromCandidate()` -> `enforcePlatformRoleAlignment()` ->
+`publicUser()`. Observe only the presence of identity claims and the resolved
+user ID/role. Never print a JWT, password hash, or full credential.
+
+### Vietnamese
+
+`AuthService` co hai duong chay co chu dich:
+
+- Local va Render integration tiep tuc dung login email/password va
+  `AuthSessions` luu token da bam.
+- SAP BTP production dung AppRouter/XSUAA. O day `login` tra HTTP 405,
+  AppRouter xu ly logout, con `me` anh xa danh tinh JWT vao mot dong `Users`
+  dang active.
+
+Sau khi tim duoc user trong database, `me` kiem tra role BTP co trung voi
+`Users.role_code` hay khong. Neu khong trung, request bi tu choi de tranh viec
+quyen tren BTP va quyen nghiep vu IDTS mau thuan.
+
+Thu tu breakpoint tren BTP: `me(req)` -> cac identity candidate trong JWT ->
+`activeUserFromCandidate()` -> `enforcePlatformRoleAlignment()` ->
+`publicUser()`. Chi quan sat viec claim co ton tai va user ID/role da resolve;
+khong in JWT, password hash hoac credential.

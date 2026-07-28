@@ -5,7 +5,8 @@
     "@cap-js/postgres": "^2",
     "@sap/cds": "^9.9.1",
     "nodemailer": "^9.0.1",
-    "pg": "^8.21.0"
+    "pg": "^8.21.0",
+    "@sap/xssec": "^4"
   },
   "engines": {
     "node": ">=20 <23"
@@ -108,6 +109,7 @@
     "db:idts97-ai-metrics:migrate": "node scripts/db/migrate-idts97-ai-metrics.js --execute",
     "db:idts97-ai-metrics:dry-run": "node scripts/db/migrate-idts97-ai-metrics.js --dry-run",
     "qa:idts90:developer-demo-data": "node scripts/qa/test-idts90-developer-demo-data.js",
+    "qa:idts113:btp-auth": "node scripts/qa/test-idts113-btp-auth.js",
     "dev:auth:set-password": "node scripts/dev/set-local-user-password.js",
     "integration:db:env": "cds env requires.db --profile integration",
     "integration:db:deploy": "cds deploy --profile integration",
@@ -166,12 +168,17 @@
         "[development]": {
           "impl": "./srv/auth/custom-auth.js"
         },
-        "[integration]": {
-          "impl": "./srv/auth/custom-auth.js"
-        },
         "[production]": {
+          "kind": "xsuaa"
+        },
+        "[integration]": {
+          "kind": "mocked",
           "impl": "./srv/auth/custom-auth.js"
         }
+      },
+      "[production]": {
+        "destinations": true,
+        "html5-repo": true
       }
     },
     "idts": {

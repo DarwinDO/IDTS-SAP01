@@ -1,4 +1,3 @@
-<!-- Entry point dashboard: auth-guard bảo vệ session, dashboard-page.js tự đọc OData và dựng model theo role. -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,25 +12,12 @@
         }
     </style>
 
-    <!-- Nếu token thiếu, script này redirect trước khi UI5/dashboard gọi API. -->
+    <!-- Resolve custom bearer auth or AppRouter/XSUAA before loading the dashboard. -->
     <script src="auth-guard.js"></script>
-
-    <script
-        id="sap-ui-bootstrap"
-        src="resources/sap-ui-core.js"
-        data-sap-ui-theme="sap_horizon"
-        data-sap-ui-resource-roots='{
-            "idts.bugmanagementui": "./"
-        }'
-        data-sap-ui-compat-version="edge"
-        data-sap-ui-async="true"
-        data-sap-ui-frame-options="trusted"
-    ></script>
-    <!-- Sau UI5 bootstrap, module này gọi Bugs + DeveloperWorkloads và placeAt dashboardContent. -->
-    <script src="dashboard-page.js"></script>
+    <script src="bootstrap-ui5.js"></script>
 </head>
 <body class="sapUiBody sapUiSizeCompact">
-    <!-- Hai host tách biệt: một cho profile shell, một cho dashboard page. -->
+    <div id="idtsAuthError" role="alert" hidden></div>
     <div id="idtsProfileShellHost"></div>
     <div id="dashboardContent"></div>
 </body>

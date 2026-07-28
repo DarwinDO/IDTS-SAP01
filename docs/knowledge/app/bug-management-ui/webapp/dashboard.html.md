@@ -106,3 +106,20 @@ Page này vẫn được bảo vệ. `auth-guard.js` chạy trước SAPUI5, nê
 **English.** Browser → `auth-guard.js` → UI5 bootstrap → `dashboard-page.js`. The script places a custom SAPUI5 page in `#dashboardContent` and ProfileShell uses the separate profile host. If the dashboard is blank, check token redirect, UI5 resources, then `loadDashboard()`. This HTML contains no role filtering and no KPI calculation.
 
 **Tiếng Việt.** Browser → `auth-guard.js` → UI5 bootstrap → `dashboard-page.js`. Script đặt custom SAPUI5 page vào `#dashboardContent`, còn ProfileShell dùng host riêng. Dashboard trắng thì kiểm redirect/token, UI5 resource, rồi `loadDashboard()`. HTML này không lọc role và không tính KPI.
+
+## IDTS-113 update - BTP-safe dashboard startup
+
+### English
+
+The dashboard uses the same deferred authentication gate as the main app.
+`auth-guard.js` first resolves either the custom session or the AppRouter/XSUAA
+session; only then does `bootstrap-ui5.js` start UI5 and load
+`dashboard-page.js`. The dashboard therefore does not need a second auth
+implementation.
+
+### Vietnamese
+
+Dashboard dung cung authentication gate deferred voi main app.
+`auth-guard.js` resolve custom session hoac AppRouter/XSUAA session truoc;
+`bootstrap-ui5.js` sau do moi start UI5 va load `dashboard-page.js`. Vi vay
+dashboard khong can mot auth implementation rieng.

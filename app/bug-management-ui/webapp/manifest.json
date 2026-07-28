@@ -26,6 +26,10 @@
       }
     }
   },
+  "sap.cloud": {
+    "public": true,
+    "service": "idts.sap01"
+  },
   "sap.ui": {
     "technology": "UI5",
     "icons": {

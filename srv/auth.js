@@ -10,10 +10,16 @@ const {
   hashToken,
   addMinutes
 } = require('./auth/passwords')
+const {
+  enforcePlatformRoleAlignment,
+  isXsuaaRuntime
+} = require('./auth/platform-role')
 
 const DEFAULT_SESSION_TTL_MINUTES = 8 * 60
 const INVALID_CREDENTIALS_MESSAGE = 'Invalid email or password.'
 const LOGIN_TEMPORARILY_UNAVAILABLE_MESSAGE = 'Sign-in is temporarily unavailable. Please try again later.'
+const BTP_LOGIN_MESSAGE = 'Use your SAP BTP account to sign in to this environment.'
+const BTP_USER_NOT_REGISTERED_MESSAGE = 'Your SAP BTP identity is not registered in IDTS.'
 const LOG = cds.log('idts-auth')
 
 class AuthService extends cds.ApplicationService {
@@ -28,6 +34,10 @@ class AuthService extends cds.ApplicationService {
 }
 
 async function login (req) {
+  if (isXsuaaRuntime()) {
+    return req.reject(405, BTP_LOGIN_MESSAGE)
+  }
+
   // UI login gửi email/password vào action này. Hàm normalize email, đọc user active, verify hash,
   // tạo session token dạng thô cho client nhưng chỉ lưu hash token vào database.
   const email = normalizeEmail(req.data.email)
@@ -83,6 +93,8 @@ async function login (req) {
 }
 
 async function logout (req) {
+  if (isXsuaaRuntime()) return true
+
   // Lấy bearer token hiện tại, hash lại và vô hiệu session tương ứng; không cần lưu raw token để tìm row.
   const sessionID = req.user?.attr?.session_ID
   if (!sessionID) return false
@@ -97,6 +109,8 @@ async function logout (req) {
 }
 
 async function me (req) {
+  if (isXsuaaRuntime()) return btpUserProfile(req)
+
   // Trả profile public của session đã được custom-auth xác thực; không trả passwordHash/tokenHash.
   const userID = req.user?.attr?.user_ID
   if (!userID) return req.reject(401, 'Authentication token is required.')
@@ -110,6 +124,37 @@ async function me (req) {
 
   if (!user) return req.reject(401, 'Authentication token is no longer valid.')
   return publicUser(tx, user)
+}
+
+async function btpUserProfile (req) {
+  const tx = cds.tx(req)
+  const candidates = new Set(requestUserCandidates(req).map(value => value.trim().toLowerCase()))
+  const users = await tx.run(
+    SELECT.from('idts.cap.Users')
+      .columns('ID', 'displayName', 'email', 'role_code', 'active')
+      .where({ active: true })
+  )
+  const user = users.find(row =>
+    [row.ID, row.email, row.displayName]
+      .filter(Boolean)
+      .some(value => candidates.has(String(value).trim().toLowerCase()))
+  )
+
+  if (!user) return req.reject(403, BTP_USER_NOT_REGISTERED_MESSAGE)
+  return publicUser(tx, enforcePlatformRoleAlignment(req, user))
+}
+
+function requestUserCandidates (req) {
+  const attributes = req.user?.attr || {}
+  return [
+    req.user?.id,
+    attributes.email,
+    attributes.user_name,
+    attributes.login_name,
+    attributes.name
+  ]
+    .flatMap(value => Array.isArray(value) ? value : [value])
+    .filter(Boolean)
 }
 
 async function publicUser (tx, user) {
@@ -184,7 +229,10 @@ module.exports = AuthService
 module.exports.__test = {
   INVALID_CREDENTIALS_MESSAGE,
   LOGIN_TEMPORARILY_UNAVAILABLE_MESSAGE,
+  BTP_LOGIN_MESSAGE,
+  BTP_USER_NOT_REGISTERED_MESSAGE,
   isExpectedClientAuthReject,
+  requestUserCandidates,
   safeAuthErrorDiagnostic,
   safeDiagnosticToken
 }

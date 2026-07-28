@@ -2,6 +2,7 @@
 const cds = require('@sap/cds')
 
 const { SELECT } = cds.ql
+const { enforcePlatformRoleAlignment } = require('../auth/platform-role')
 
 async function readBug (req, entities, bugID) {
   // Helper chung đọc một Bug trong transaction của request; caller nhận row hoặc undefined, không tự reject.
@@ -14,7 +15,7 @@ async function resolveRequestUser (req, entities) {
   // cho permission, reporter, author và history; không dùng role/email do payload nghiệp vụ gửi lên.
   for (const candidate of requestUserCandidates(req)) {
     const user = await activeUserFromCandidate(req, entities, candidate)
-    if (user) return user
+    if (user) return enforcePlatformRoleAlignment(req, user)
   }
 
   return null
