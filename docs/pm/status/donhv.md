@@ -3924,3 +3924,9 @@ Vietnamese:
   `git commit`. The whitespace was removed, the issue was recorded here and
   the local commit was amended before any push. The corrected staged and
   committed diffs both pass `git diff --check`.
+- PR preparation found a test-harness invocation issue: passing
+  `--body-file` through `npm run qa:depth:pr-body -- ...` was consumed as npm
+  configuration, so the checker received an empty body and correctly reported
+  all required sections missing. No PR was created. The retry uses
+  `node scripts/qa/check-pr-depth.js --body-file <file>` directly and must PASS
+  before `gh pr create`.
