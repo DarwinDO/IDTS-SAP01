@@ -23,6 +23,7 @@ email and related Technical Implementation.
 - Generator: `scripts/sap490/generate-idts107-database-candidate.js`.
 - Candidate narrative: `docs/pm/evidence/idts-107/technical-spec/database-persistence-candidate.md`.
 - Generated physical dictionary: `docs/pm/evidence/idts-107/technical-spec/database-dictionary.csv`.
+- Draft PR: https://github.com/DarwinDO/IDTS-SAP01/pull/208.
 - CDS/HANA compile inventory: 35 physical tables and 326 physical columns.
 - Candidate covers HANA/HDI, draft and active persistence, transaction/rollback,
   PostgreSQL rollback baseline, S3 metadata/binary boundary, AuthSessions,

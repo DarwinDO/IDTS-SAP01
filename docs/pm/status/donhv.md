@@ -3999,6 +3999,10 @@ Vietnamese:
   `docs/pm/evidence/idts-107/technical-spec/`. This is not an approval or final
   workbook update; DonHV acknowledgment/review and IDTS-112 integration remain
   pending.
+- IDTS-107 candidate commit `b5a9058` was pushed and opened as Draft PR #208.
+  The local PR-body depth check passed all 11 required sections. The PR remains
+  Draft intentionally so review cannot be mistaken for DonHV's personal
+  approval or permission to update the official workbook/Google Drive.
 - The first IDTS-107 CAP MCP model query in the fresh worktree could not resolve
   `@cap-js/attachments` because the worktree did not have its own dependency
   tree. Classification: tooling issue. A local-only `node_modules` junction to
