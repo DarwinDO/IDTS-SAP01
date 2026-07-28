@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@cap-js/attachments": "^3.12.2",
+    "@cap-js/hana": "^2",
     "@cap-js/postgres": "^2",
     "@sap/cds": "^9.9.1",
     "nodemailer": "^9.0.1",
@@ -137,6 +138,9 @@
             "url": "db.sqlite"
           }
         },
+        "[production]": {
+          "kind": "hana"
+        },
         "[integration]": {
           "kind": "postgres",
           "credentials": {
@@ -145,6 +149,10 @@
         }
       },
       "attachments": {
+        "[production]": {
+          "kind": "db",
+          "scan": false
+        },
         "[integration]": {
           "kind": "standard",
           "scan": false,

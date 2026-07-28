@@ -250,6 +250,12 @@ Vietnamese clean note: Nút `Assign Developer` riêng đã được bỏ khỏi 
 - The official SAP490 submission direction is English-only. Vietnamese learning/briefing documents remain allowed, but no new VI submission artifact may be generated or synchronized.
 - No member acknowledgment, candidate approval, Unit/UAT result, Drive Trash operation, or mentor-ready completion has been fabricated or claimed.
 
+## 2026-07-28 isolated SAP BTP Cloud Foundry POC
+
+- `IDTS-113` deployed an isolated CAP copy to SAP BTP Trial Cloud Foundry with SAP HANA Cloud and a dedicated HDI container. The app is running and health, public auth metadata, anonymous denial, authenticated read, logout, and revoked-token checks pass.
+- Render Shared QA, Render PostgreSQL, AWS S3, Brevo, OpenAI configuration, and real user data were not changed or copied.
+- This result proves technical deployability only. XSUAA/AppRouter adoption, provider integration, migration, and production readiness remain separate decisions.
+
 ## Next Handover Instruction
 
 Any new agent or developer should identify their member name first, then read this file, `task-board.md`, the relevant member file under `status/*.md`, and the relevant `tasks/*.md` before making changes.

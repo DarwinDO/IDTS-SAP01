@@ -134,6 +134,7 @@ Vietnamese:
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
+| IDTS-113 | Deploy isolated IDTS CAP proof of concept to SAP BTP Cloud Foundry | DonHV | In Progress: isolated HANA Cloud + HDI + CAP MTA deployment and authenticated smoke PASS. Render Shared QA/data were not changed. PR and final review remain. |
 | IDTS-105 | Consolidate mentor review requirements and enforce team acknowledgment | DonHV | In Progress. Briefing, AGENTS gate, Jira dependency graph and unsigned acknowledgment register are prepared. Completion still requires each member to read the committed briefing and add their own Jira acknowledgment. |
 | IDTS-104 | Remove temporary artifacts and curate mentor-review repository outputs | DonHV / NhanT support | Done: PR #187 merged with QA Depth PASS; archive/tag manifest, local cleanup, current-tree curation, Mentor Review Q&A and verification are complete. Drive was unchanged. |
 | IDTS-91 | Add explicit AI suggestion review actions | DatDT | Done: PR #167 merged at `442b958`; focused QA `19/0`, integrated regression and fresh QA Depth Gate passed. Jira closure evidence comment `10676`. |
@@ -170,6 +171,7 @@ Vietnamese:
 
 | ID | Cong viec | Thanh vien chinh | Ghi chu |
 | --- | --- | --- | --- |
+| IDTS-113 | Deploy POC IDTS CAP tach biet len SAP BTP Cloud Foundry | DonHV | Dang lam: HANA Cloud + HDI + CAP MTA tach biet va authenticated smoke da PASS. Khong thay doi Render Shared QA/data. Con PR va review cuoi. |
 | IDTS-105 | Tong hop yeu cau mentor review va bat buoc team xac nhan da doc | DonHV | Dang lam. Da chuan bi briefing, rule AGENTS, lien ket dependency Jira va bang acknowledgment chua ky. Chi hoan tat khi tung member tu doc briefing tai commit da merge va tu comment xac nhan tren Jira. |
 | IDTS-104 | Don file tam va chon loc output phuc vu mentor review | DonHV / NhanT ho tro | Da xong: PR #187 da merge sau khi QA Depth PASS; archive/tag manifest, cleanup local, chon latest artifact, bo Q&A va verification da hoan tat. Khong thay doi Drive. |
 | IDTS-91 | Them action review AI suggestion ro rang | DatDT | Done: PR #167 merge tai `442b958`; focused QA `19/0`, integrated regression va fresh QA Depth Gate da pass. Jira closure evidence comment `10676`. |
