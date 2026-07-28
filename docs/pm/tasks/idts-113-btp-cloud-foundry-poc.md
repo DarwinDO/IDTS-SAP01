@@ -1,7 +1,7 @@
 # IDTS-113 — SAP BTP Cloud Foundry migration and cutover
 
 - Owner: DonHV
-- Status: In Progress — XSUAA/AppRouter baseline merged; HANA migration and retained integrations under verification
+- Status: In Progress — BTP runtime, HANA migration and retained integrations verified; final role/rollback/documentation gates remain
 - Due date: 2026-08-10
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-113
 
@@ -118,14 +118,35 @@ this increment does not claim deployed XSUAA acceptance.
 - Linked-model audit: zero unknown source columns; all 14 user password hashes
   are cleared, and the 32-entity/679-row import package passes dry-run
   validation.
+- Runtime fix PR #201 merged normally at
+  `3504931d2689e4d56c0de3f5977342fc7cf57e4a` and was deployed without rerunning
+  the HDI deployer.
+- Cloud Foundry CAP service and AppRouter are healthy at 1/1 instances.
+- DonHV/PM authenticated browser smoke passed through AppRouter/XSUAA.
+- BUG-0018 assignment, HANA history and Notifications UI readback passed.
+- Job Scheduler job `IDTSEmailOutboxHourly` is active with one hourly schedule.
+- A fresh email delivery moved from PENDING to SENT through a Scheduler run,
+  with HANA and Brevo provider readback.
+- The production-bound AWS S3 adapter passed temporary upload, HANA metadata,
+  download, SHA-256, existence and full cleanup checks.
+- All four AI entry points passed browser smoke in disabled-provider/fallback
+  mode, and BUG-0018 status, assignee and current action owner did not mutate.
+- The same CAP droplet was restarted and returned healthy at 1/1. A temporary
+  S3 attachment retained identical HANA metadata, byte length and SHA-256 after
+  restart, then passed final metadata/object cleanup.
+- After restart, BUG-0018 remained Assigned to DatDT, History reloaded four
+  events and Notifications reloaded two Assigned/In App/Sent rows.
+- Job `IDTSEmailOutboxHourly` and its single recurring schedule remained Active
+  after the runtime restart.
+- Recent CAP web-process log scan found zero serious error/5xx/timeout findings.
 
 ## Remaining acceptance
 
-- Merge the HANA/integration increment into `dev`.
-- Deploy the final MTA and import the frozen archive into HDI/HANA.
-- Assign XSUAA role collections and run Tester/Developer/PM browser matrix.
-- Configure and manually invoke the hourly email outbox job.
-- Verify PostgreSQL-to-HANA counts/IDs, S3 upload/download/hash, one new Brevo
-  delivery and AI disabled/fallback behavior.
-- Cut over the mentor/demo URL and keep Render available as read-only rollback
-  for seven days.
+- Capture separate Tester and Developer XSUAA identity/role-matrix evidence;
+  the current authenticated browser evidence proves PM only.
+- Re-run the attachment flow through the actual Fiori file picker after Chrome
+  Uploads permission is allowed. The storage adapter itself is accepted.
+- Document and verify the Render/PostgreSQL rollback drill and seven-day
+  rollback window.
+- Synchronize PM handover, knowledge mirrors and Technical Specification EN
+  before final cutover acceptance.

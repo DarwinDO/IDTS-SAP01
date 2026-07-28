@@ -256,6 +256,23 @@ Vietnamese clean note: Nút `Assign Developer` riêng đã được bỏ khỏi 
 - Render Shared QA, Render PostgreSQL, AWS S3, Brevo, OpenAI configuration, and real user data were not changed or copied.
 - This result proves technical deployability only. XSUAA/AppRouter adoption, provider integration, migration, and production readiness remain separate decisions.
 
+## 2026-07-28 SAP BTP migration acceptance increment
+
+- `IDTS-113` now runs the migrated CAP service and AppRouter on SAP BTP Cloud
+  Foundry with HANA data, XSUAA PM access, retained AWS S3, retained Brevo and
+  SAP Job Scheduling Service.
+- Runtime SHA `3504931d2689e4d56c0de3f5977342fc7cf57e4a` is deployed. PM browser
+  assignment/history/notification smoke, S3 adapter upload/download/hash/delete
+  and a fresh Scheduler-driven Brevo SENT delivery passed.
+- Four AI entry points passed browser smoke in disabled-provider/fallback mode
+  without changing BUG-0018 workflow or assignment. The same CAP droplet was
+  restarted; HANA metadata, S3 bytes/hash, Bug state, four History events and
+  two Notifications persisted, and the hourly Job Scheduler schedule remained
+  Active.
+- Full cutover is not yet signed off: Tester/Developer BTP identities, actual
+  browser file-picker evidence, the rollback drill and final
+  knowledge/Technical Specification synchronization remain open.
+
 ## Next Handover Instruction
 
 Any new agent or developer should identify their member name first, then read this file, `task-board.md`, the relevant member file under `status/*.md`, and the relevant `tasks/*.md` before making changes.
