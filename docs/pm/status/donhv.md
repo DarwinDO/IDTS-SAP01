@@ -3989,3 +3989,18 @@ Vietnamese:
   acceptance: a Developer member must complete their own interactive sign-in
   smoke; the agent must not impersonate them. Evidence:
   `docs/pm/evidence/idts-113/btp-developer-role-collection-remediation-20260729.md`.
+- IDTS-107 Gate 1 candidate preparation started on the current SAP BTP baseline
+  `362ace2a39a82d19c4acc723fe96a15bf7373f5e`. The CAP model was compiled for
+  the HANA dialect and produced a reproducible inventory of 35 physical tables
+  and 326 columns. The generated candidate documents HANA/HDI persistence,
+  transaction and rollback boundaries, the retained PostgreSQL rollback
+  baseline, S3 attachment storage, AuthSessions, history, notifications, Brevo
+  and Job Scheduler. Evidence is stored under
+  `docs/pm/evidence/idts-107/technical-spec/`. This is not an approval or final
+  workbook update; DonHV acknowledgment/review and IDTS-112 integration remain
+  pending.
+- The first IDTS-107 CAP MCP model query in the fresh worktree could not resolve
+  `@cap-js/attachments` because the worktree did not have its own dependency
+  tree. Classification: tooling issue. A local-only `node_modules` junction to
+  the already-installed root dependencies restored the model query; no package,
+  source, database or runtime state was changed.
