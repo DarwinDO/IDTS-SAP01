@@ -1,7 +1,7 @@
 # IDTS-113 SAP BTP authenticated and Job Scheduler smoke
 
-Date: 2026-07-28  
-Environment: SAP BTP Cloud Foundry, `dev` space  
+Date: 2026-07-28
+Environment: SAP BTP Cloud Foundry, `dev` space
 Evidence status: PASS for the available Project Manager identity, CAP email
 outbox, SAP Job Scheduling Service, Brevo transactional delivery and the bound
 AWS S3 attachment adapter. The same deployed runtime also passed AI

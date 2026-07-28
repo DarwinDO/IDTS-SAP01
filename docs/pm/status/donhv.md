@@ -3820,3 +3820,8 @@ Vietnamese:
   earlier successful HTTP/UI textual evidence and remove any screenshot
   reference that is not backed by a tracked file unless a later recapture
   succeeds.
+- 2026-07-28 IDTS-113 final documentation gate initially found trailing
+  whitespace in two evidence-report metadata lines (documentation issue,
+  resolved). The affected lines were normalized without changing evidence
+  meaning; `git diff --check`, secret scan, agent rules, QA Depth self-test and
+  AI DevKit lint were rerun successfully.
