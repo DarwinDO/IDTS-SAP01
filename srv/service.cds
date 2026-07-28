@@ -98,6 +98,12 @@ service BugService @(requires: 'authenticated-user') {
     maxLatencyMs       : Integer;
   };
 
+  type EmailOutboxRunResult {
+    sent    : Integer;
+    failed  : Integer;
+    skipped : Integer;
+  };
+
   // Unbound AI actions nhận context tối thiểu và trả suggestion; handler phải ground/audit nhưng không tự sửa Bug.
   action suggestSimilarBugs(
     sourceBugID            : UUID,
@@ -151,6 +157,9 @@ service BugService @(requires: 'authenticated-user') {
   // PM-only operational aggregate; reads allowlisted audit metadata and never exposes prompt/response/error detail.
   @(requires: 'PM')
   function readAiOperationalMetrics(windowDays : Integer) returns array of AiOperationalMetric;
+
+  @(requires: 'OutboxProcessor')
+  action processEmailOutbox() returns EmailOutboxRunResult;
 
   // Projection Bugs expose aggregate chính, thêm field tính/virtual cho UX; dữ liệu gốc vẫn ở db.Bugs.
   entity Bugs as projection on db.Bugs {

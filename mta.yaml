@@ -22,6 +22,8 @@ modules:
       disk-quota: 1G
       health-check-type: http
       health-check-http-endpoint: /health
+    properties:
+      IDTS_EMAIL_WORKER_MODE: scheduler
     build-parameters:
       builder: npm-ci
     provides:
@@ -32,6 +34,8 @@ modules:
       - name: idts-sap01-auth
       - name: idts-sap01-db
       - name: idts-sap01-destination
+      - name: idts-sap01-jobscheduler
+      - name: idts-sap01-external-services
 
   - name: idts-sap01-db-deployer
     type: hdb
@@ -142,3 +146,18 @@ resources:
     parameters:
       service: html5-apps-repo
       service-plan: app-runtime
+
+  - name: idts-sap01-jobscheduler
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: jobscheduler
+      service-plan: free
+      config:
+        authentication: xsuaa
+
+  # DonHV creates/updates this private UPS before deployment. It contains the
+  # existing AWS S3 and Brevo credentials; no secret is stored in this file.
+  - name: idts-sap01-external-services
+    type: org.cloudfoundry.existing-service
+    parameters:
+      service-name: idts-sap01-external-services
