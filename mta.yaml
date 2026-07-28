@@ -1,0 +1,43 @@
+_schema-version: 3.3.0
+ID: idts-113-btp-cloud-foundry-poc-donhv
+version: 1.0.0
+description: "Isolated IDTS CAP proof of concept for SAP BTP Cloud Foundry."
+parameters:
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
+        - node scripts/btp/prepare-cap-poc-ui.js
+modules:
+  - name: idts-113-btp-cloud-foundry-poc-donhv-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      instances: 1
+      buildpack: nodejs_buildpack
+    build-parameters:
+      builder: npm-ci
+    provides:
+      - name: srv-api # required by consumers of CAP services (e.g. approuter)
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: idts-113-btp-cloud-foundry-poc-donhv-db
+
+  - name: idts-113-btp-cloud-foundry-poc-donhv-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+    requires:
+      - name: idts-113-btp-cloud-foundry-poc-donhv-db
+
+resources:
+  - name: idts-113-btp-cloud-foundry-poc-donhv-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
