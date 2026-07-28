@@ -14,7 +14,10 @@
     },
     {
       "name": "$XSAPPNAME.OutboxProcessor",
-      "description": "Invoke the protected email outbox processing endpoint"
+      "description": "Invoke the protected email outbox processing endpoint",
+      "grant-as-authority-to-apps": [
+        "$XSSERVICENAME(idts-sap01-jobscheduler)"
+      ]
     }
   ],
   "attributes": [],

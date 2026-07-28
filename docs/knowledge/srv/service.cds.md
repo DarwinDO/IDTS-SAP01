@@ -1,5 +1,18 @@
 # Knowledge: `srv/service.cds`
 
+## IDTS-113 email scheduler contract
+
+`processEmailOutbox()` is a technical unbound OData action. It returns only
+`sent`, `failed`, and `skipped` counts through `EmailOutboxRunResult`. The
+`@requires: 'OutboxProcessor'` contract prevents normal Tester, Developer, or
+PM users from running background delivery manually. XSUAA grants that scope
+only to the bound SAP Job Scheduling Service instance.
+
+Vietnamese: `processEmailOutbox()` là unbound OData action kỹ thuật, chỉ trả
+về số lượng `sent`, `failed` và `skipped`. Contract
+`@requires: 'OutboxProcessor'` chặn Tester, Developer và PM gọi xử lý email nền
+thủ công. XSUAA chỉ cấp scope này cho SAP Job Scheduling Service đã bind.
+
 ## IDTS-97 PM operational aggregate
 
 `readAiOperationalMetrics(windowDays)` is a PM-only read function. It returns typed counts grouped by feature/provider/model and never exposes `suggestionPayload`, prompt, response, error text, user email, endpoint, token, or credential. The reporting window defaults to 30 days and is capped at 90 days by the runtime handler.

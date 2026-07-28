@@ -1,5 +1,21 @@
 # Knowledge: `srv/service.js`
 
+## IDTS-113 Job Scheduler wiring
+
+`BugService.init()` registers `processEmailOutbox` and delegates one batch to
+`processEmailOutboxBatch({ tx: cds.db })`. CAP supplies the request context and
+transaction boundary; the detailed locking, retry and delivery rules remain
+in the email modules. After `super.init()`, the legacy polling worker starts
+only when `shouldStartEmailWorker()` permits it. Render permits polling; SAP
+BTP scheduler mode does not.
+
+Vietnamese: `BugService.init()` đăng ký `processEmailOutbox` và giao một batch
+cho `processEmailOutboxBatch({ tx: cds.db })`. CAP cung cấp request context và
+transaction boundary; rule lock, retry và delivery chi tiết vẫn nằm trong các
+module email. Sau `super.init()`, polling worker cũ chỉ chạy khi
+`shouldStartEmailWorker()` cho phép. Render cho phép polling; chế độ scheduler
+trên SAP BTP thì không.
+
 ## IDTS-97 metrics wiring
 
 `BugService.init()` registers `readAiOperationalMetrics` and delegates all aggregation behavior to `srv/ai/metrics.js`. Keep authorization in the CDS contract and privacy/aggregation logic in the focused module; this file remains wiring only.

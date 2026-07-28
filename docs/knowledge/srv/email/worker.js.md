@@ -1,5 +1,30 @@
 # Knowledge: `srv/email/worker.js`
 
+## IDTS-113 SAP BTP scheduling mode
+
+### English
+
+Render still uses the in-process polling loop. SAP BTP sets
+`IDTS_EMAIL_WORKER_MODE=scheduler`, so `shouldStartEmailWorker()` returns
+`false` and no duplicate timer starts inside the CAP process. SAP Job
+Scheduling Service instead calls the protected `processEmailOutbox` OData
+action. That action calls `processEmailOutboxBatch({ tx })`, which creates one
+sender, processes one due batch with the current CAP transaction, and closes
+the sender. Debug in this order: Job Scheduler run log -> HTTP action request
+-> `srv/service.js` action registration -> `processEmailOutboxBatch()` ->
+`processEmailDeliveries()`.
+
+### Vietnamese
+
+Render vẫn dùng vòng lặp polling bên trong process. Trên SAP BTP,
+`IDTS_EMAIL_WORKER_MODE=scheduler` làm `shouldStartEmailWorker()` trả về
+`false`, vì vậy CAP không tự tạo timer trùng lặp. SAP Job Scheduling Service
+sẽ gọi OData action được bảo vệ `processEmailOutbox`. Action này gọi
+`processEmailOutboxBatch({ tx })` để tạo sender, xử lý một batch đến hạn trong
+transaction CAP hiện tại rồi đóng sender. Thứ tự debug: Job Scheduler run log
+-> HTTP action request -> đăng ký action trong `srv/service.js` ->
+`processEmailOutboxBatch()` -> `processEmailDeliveries()`.
+
 ## Beginner-first execution map (2026-07-18)
 
 ### English

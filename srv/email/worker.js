@@ -1,4 +1,3 @@
-// Học nhanh (DonHV): worker chạy SAU transaction workflow. Email lỗi không được rollback việc assign/resolve/close bug.
 'use strict'
 
 const cds = require('@sap/cds')
@@ -11,9 +10,31 @@ const LOG = cds.log('idts-email')
 let job
 let sender
 
+function shouldStartEmailWorker () {
+  // Render keeps polling. SAP BTP sets `scheduler`, so the Job Scheduling
+  // service invokes the protected CAP action instead of starting a timer.
+  return String(process.env.IDTS_EMAIL_WORKER_MODE || 'poll').toLowerCase() !== 'scheduler'
+}
+
+async function processEmailOutboxBatch ({ tx }) {
+  const config = getEmailConfig()
+  if (!config.enabled || !config.ready) {
+    return { sent: 0, failed: 0, skipped: 0 }
+  }
+
+  const batchSender = createEmailSender(config)
+  try {
+    return await processEmailDeliveries({
+      tx,
+      config,
+      sendMail: message => batchSender.sendMail(message)
+    })
+  } finally {
+    batchSender.close()
+  }
+}
+
 function startEmailWorker () {
-  // `service.js` gọi một lần khi startup. `cds.spawn` chạy poll định kỳ với transaction riêng,
-  // đọc outbox qua `processEmailDeliveries`; email failure chỉ được log/schedule retry, không dừng CAP service.
   if (job) return job
 
   const config = getEmailConfig()
@@ -27,7 +48,6 @@ function startEmailWorker () {
   }
 
   sender = createEmailSender(config)
-  // `cds.spawn` tạo transaction riêng cho polling; breakpoint callback này khi delivery bị kẹt PENDING/FAILED.
   job = cds.spawn({
     user: cds.User.privileged,
     every: config.pollIntervalMs
@@ -58,5 +78,7 @@ function startEmailWorker () {
 }
 
 module.exports = {
+  processEmailOutboxBatch,
+  shouldStartEmailWorker,
   startEmailWorker
 }

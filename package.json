@@ -108,6 +108,11 @@
     "db:developer-demo:upsert": "node scripts/db/upsert-developer-demo-data.js",
     "db:idts97-ai-metrics:migrate": "node scripts/db/migrate-idts97-ai-metrics.js --execute",
     "db:idts97-ai-metrics:dry-run": "node scripts/db/migrate-idts97-ai-metrics.js --dry-run",
+    "btp:external-services:bind": "powershell -ExecutionPolicy Bypass -File scripts/btp/upsert-external-services.ps1",
+    "btp:migration:export": "node scripts/btp/export-shared-qa.js --render-postgres-id=dpg-d92j3g4vikkc738fu670-a --output=.tmp/idts-113-migration/shared-qa-export",
+    "btp:migration:import": "node scripts/btp/import-hana.js --input=.tmp/idts-113-migration/shared-qa-export",
+    "qa:idts113:migration": "node scripts/qa/test-idts113-hana-migration.js",
+    "qa:idts113:outbox-scheduler": "node scripts/qa/test-idts113-outbox-scheduler.js",
     "qa:idts90:developer-demo-data": "node scripts/qa/test-idts90-developer-demo-data.js",
     "qa:idts113:btp-auth": "node scripts/qa/test-idts113-btp-auth.js",
     "dev:auth:set-password": "node scripts/dev/set-local-user-password.js",
@@ -152,14 +157,24 @@
       },
       "attachments": {
         "[production]": {
-          "kind": "db",
-          "scan": false
+          "kind": "s3",
+          "scan": false,
+          "objectStore": {
+            "kind": "shared"
+          }
         },
         "[integration]": {
           "kind": "standard",
           "scan": false,
           "objectStore": {
             "kind": "shared"
+          }
+        }
+      },
+      "objectStore": {
+        "[production]": {
+          "vcap": {
+            "name": "idts-sap01-external-services"
           }
         }
       },

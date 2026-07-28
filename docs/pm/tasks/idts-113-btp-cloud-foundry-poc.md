@@ -1,18 +1,20 @@
-# IDTS-113 — Isolated SAP BTP Cloud Foundry POC
+# IDTS-113 — SAP BTP Cloud Foundry migration and cutover
 
 - Owner: DonHV
-- Status: In Progress — deployed and smoke-tested; PR/review pending
-- Due date: 2026-07-29
+- Status: In Progress — XSUAA/AppRouter baseline merged; HANA migration and retained integrations under verification
+- Due date: 2026-08-10
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-113
 
 ## Scope
 
-Deploy an isolated copy of IDTS to the SAP BTP Trial Cloud Foundry `dev`
-space. The POC uses SAP HANA Cloud and a dedicated HDI container. It does not
-migrate Render PostgreSQL data, copy Render/Brevo/AWS/OpenAI credentials, or
-change the Render Shared QA deployment.
+Move IDTS Shared QA from Render to the SAP BTP Trial Cloud Foundry `dev`
+space. The target uses SAP HANA Cloud/HDI, XSUAA, a standalone AppRouter,
+HTML5 Application Repository, Destination service and SAP Job Scheduling
+Service. Existing AWS S3 and Brevo providers are retained through one private
+user-provided service. OpenAI live remains disabled/mock. Render remains the
+rollback source during the cutover window.
 
-## Implementation
+## POC baseline implementation
 
 - Production CAP profile uses `@cap-js/hana`.
 - Integration profile continues to use PostgreSQL for Render.
@@ -78,3 +80,52 @@ Local verification covers profile separation, CAP compile, UI5 build, focused
 auth/history/comment regression, and MTA packaging. Authenticated BTP browser
 smoke is deferred until the combined HANA/integration deployment is ready, so
 this increment does not claim deployed XSUAA acceptance.
+
+## Migration increment — HANA data and retained integrations
+
+- The exporter uses the authenticated Render CLI instead of copying a
+  PostgreSQL password into the repository. The frozen Shared QA archive
+  contains 32 explicitly listed entities and 679 rows.
+- `AuthSessions` is intentionally excluded and `Users.passwordHash` is cleared
+  because BTP authentication is owned by XSUAA.
+- UUIDs and relationships are preserved. Historical `PENDING`/`FAILED` email
+  deliveries are changed to `SKIPPED` in the migration archive so cutover
+  cannot resend old notifications.
+- Production attachments use the existing AWS S3 bucket through the private
+  `idts-sap01-external-services` binding. Brevo settings are read from the same
+  binding under `credentials.email`.
+- Render continues to poll its email outbox. BTP disables the process-local
+  timer and exposes `processEmailOutbox()` to SAP Job Scheduling Service under
+  the technical `OutboxProcessor` XSUAA scope.
+- The source export is read-only and Git-ignored. Import remains dry-run by
+  default and requires explicit `--execute`; it runs inside one HANA
+  transaction and verifies migrated IDs.
+
+## Current verification
+
+- HANA migration policy, physical-column mapping and byte-preservation checks:
+  8/8 PASS.
+- Job Scheduler/S3 binding checks: 6/6 PASS.
+- XSUAA/AppRouter checks: 11/11 PASS.
+- Existing email outbox regression: PASS.
+- CAP compile: PASS.
+- MTA build with CAP service, HDI deployer, UI, AppRouter and HTML5 content:
+  PASS.
+- Private BTP service binding: created without printing secrets; temporary
+  credentials file removed.
+- Shared QA export: 32 entities, 679 rows; manifest checksum recorded in
+  ignored migration evidence.
+- Linked-model audit: zero unknown source columns; all 14 user password hashes
+  are cleared, and the 32-entity/679-row import package passes dry-run
+  validation.
+
+## Remaining acceptance
+
+- Merge the HANA/integration increment into `dev`.
+- Deploy the final MTA and import the frozen archive into HDI/HANA.
+- Assign XSUAA role collections and run Tester/Developer/PM browser matrix.
+- Configure and manually invoke the hourly email outbox job.
+- Verify PostgreSQL-to-HANA counts/IDs, S3 upload/download/hash, one new Brevo
+  delivery and AI disabled/fallback behavior.
+- Cut over the mentor/demo URL and keep Render available as read-only rollback
+  for seven days.

@@ -17,7 +17,11 @@ const DEFAULTS = Object.freeze({
 
 function getEmailConfig () {
   // Đọc `cds.env.idts.email` và trả config đã normalize; caller không đọc process.env rải rác.
-  return normalizeEmailConfig(cds.env.idts?.email || {})
+  const bindingEmail = cds.env.requires?.objectStore?.credentials?.email || {}
+  return normalizeEmailConfig({
+    ...(cds.env.idts?.email || {}),
+    ...bindingEmail
+  })
 }
 
 function normalizeEmailConfig (raw = {}) {
