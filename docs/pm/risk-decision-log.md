@@ -163,3 +163,18 @@ Record a new decision here when it changes scope, ownership, entity meaning, sta
 - Repository safety: current-tree VI submission artifacts are removed only after an annotated Git tag and hash/path manifest preserve retrieval. Git history is not rewritten.
 - Human gate: the agent prepares candidate content and evidence, but named members personally acknowledge the briefing and approve their ownership package before DonHV integrates or synchronizes the official artifact.
 - Test truth: Unit Test/UAT require case-level actual results and selected image evidence. OpenAI live remains `BLOCKED / NOT ACCEPTED — provider disabled`; mock/fallback results are not provider-live acceptance.
+
+### DEC-056 — Use SAP BTP as the Shared QA target and retain Render as a time-bounded manual rollback baseline
+
+- Date: 2026-07-28
+- Decision: SAP BTP Cloud Foundry, AppRouter/XSUAA and SAP HANA Cloud are the active IDTS Shared QA target. Keep Render/PostgreSQL available through at least 2026-08-04 as a manual previous-baseline fallback.
+- Retained integrations: AWS S3 and Brevo remain external providers through private bindings. AI remains disabled/mock; no SAP DMS, SAP mail service or SAP AI service is added.
+- Data limitation: Render is not a hot HANA replica. A lossless rollback requires a write freeze, HANA-delta inventory and reviewed PostgreSQL reconciliation. Skipping reconciliation is an explicit data-loss decision.
+- Safety: do not delete BTP or Render resources, run broad `cds deploy`, reload seed data, expose credentials or claim a fixed lossless RTO without a reverse-data rehearsal.
+- Evidence: `docs/deployment/idts-113-btp-cutover-rollback.md` and `docs/pm/evidence/idts-113/btp-render-rollback-drill-20260728.md`.
+
+### RISK-033 — Render rollback may lose post-cutover HANA changes because there is no reverse replication
+
+- Likelihood: Medium
+- Impact: High
+- Mitigation: keep the seven-day fallback window, stop new writes before rollback, inventory affected HANA records, reconcile the delta transactionally into PostgreSQL, and require DonHV to accept any rollback that intentionally omits reconciliation.

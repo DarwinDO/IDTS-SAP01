@@ -3825,3 +3825,102 @@ Vietnamese:
   resolved). The affected lines were normalized without changing evidence
   meaning; `git diff --check`, secret scan, agent rules, QA Depth self-test and
   AI DevKit lint were rerun successfully.
+
+### 2026-07-28 — IDTS-113 cutover closeout continuation
+
+- Confirmed the current Cloud Foundry target and sanitized resource inventory:
+  CAP and AppRouter are started `1/1`; HANA HDI, XSUAA, Destination, HTML5
+  Repository, Job Scheduling Service and the private external-services binding
+  exist. No credential payload was read or printed.
+- Fresh BTP route checks passed: CAP health `200`, AppRouter anonymous entry
+  `302` to the protected application path, and anonymous protected OData `401`.
+- Fresh Render rollback checks passed against deploy
+  `dep-d9i0r537uimc73as0be0`: AuthService metadata, login and app routes return
+  `200`; anonymous protected OData returns `401`. No Render deploy or data
+  mutation was triggered.
+- Documentation issue fixed: the IDTS-113 work package still presented the
+  isolated custom-auth/S3-isolated POC limitations as if they were current.
+  The POC section is now labeled historical, while the XSUAA/AppRouter,
+  HANA/S3/Brevo/Job Scheduler state is authoritative.
+- Rollback risk documented: Render is operational but is older than the BTP
+  runtime and PostgreSQL is not reverse-replicated from HANA. The runbook now
+  requires a write freeze and HANA-delta reconciliation for a lossless return.
+- Tooling issue fixed in-session: a Windows `rg` command used wildcard paths
+  such as `status/*.md`, which PowerShell passed as an invalid filename. The
+  required files were inspected with explicit paths instead; no repository or
+  external state changed.
+- Technical Specification dependency remains open by design: final EN v0.8
+  integration belongs to IDTS-112 and is blocked by the member acknowledgment
+  and candidate-approval gates. IDTS-113 may prepare a BTP architecture delta,
+  but must not bypass those human approvals or overwrite the workbook.
+- Prepared the source-aligned BTP Technical Specification delta candidate at
+  `docs/pm/evidence/idts-113/technical-spec-btp-delta-candidate.md`. It maps
+  XSUAA/AppRouter, HANA/HDI, S3, Job Scheduler/Brevo, AI fallback and rollback
+  to exact repository files and symbols. It remains a candidate for IDTS-112,
+  not a member-approved or Drive-synchronized artifact.
+- IDTS-113 verification first run found a tooling issue: the fresh evidence
+  worktree had no `node_modules`, so the BTP auth and outbox-scheduler suites
+  could not resolve `@sap/cds`. The dependency-free migration suite still
+  passed 10/10. This is not a product failure; reuse the already installed root
+  dependency tree through a local worktree junction, rerun both affected
+  suites, and keep the junction out of Git.
+- IDTS-113 member-identity readback found a browser-tooling limitation:
+  `encodeURIComponent` was unavailable inside the controlled page-evaluation
+  sandbox while building a focused OData filter. No application request or
+  mutation failed. The check was retried with a pre-encoded, fixed read-only
+  query; this is classified as a tooling issue, not a product defect.
+- IDTS-113 BTP user onboarding found a UI/tool timing issue: after entering
+  the SangVN user name, the cockpit auto-copied it into E-Mail while the
+  automation also filled E-Mail, temporarily duplicating the value. The value
+  was corrected and read back exactly before submission; no malformed user was
+  created. This is classified as a tooling/UI timing issue.
+- IDTS-113 HANA identity readback first attempt failed before task creation
+  (tooling issue): PowerShell split the inline `node -e` payload passed to
+  `cf run-task`, so Cloud Foundry rejected the CLI arguments and no HANA query
+  or mutation ran. The retry will avoid nested shell quoting by using a
+  temporary command file or an environment-driven helper; product/runtime data
+  remains unchanged by this failed attempt.
+- IDTS-113 HANA identity readback task 22 reached the bound database but failed
+  read-only with `invalid column name: ISACTIVE` (test-harness issue). The
+  query used `isActive`, while the canonical `db.Users` field is `active`.
+  No row was changed. Correct the selected field to `active`, rerun the
+  readback, and only then execute the narrow identity update.
+- IDTS-113 local target-email hash preparation first used the newer static
+  `.NET SHA256.HashData` API, which is unavailable in this Windows PowerShell
+  runtime (tooling issue). No external call or data mutation occurred. The
+  retry will use `SHA256.Create().ComputeHash(...)`, which is compatible with
+  the installed runtime.
+- IDTS-113 BTP auth regression rerun again found no `node_modules` link in the
+  fresh evidence worktree, so Node could not resolve `@sap/cds` (tooling issue,
+  no product request executed). Recreate the local-only junction to the
+  already-installed root dependency tree, keep it outside Git, and rerun the
+  suite before making any authorization claim.
+- IDTS-113 anonymous AppRouter status-only probe was initially misleading
+  (test-harness issue): both the application entry and protected OData URL
+  returned HTTP `200`, but the response was the 733-byte XSUAA login-bootstrap
+  HTML, not application content or OData metadata. The stronger check now
+  verifies `Content-Type` and body purpose; anonymous access remains protected,
+  and no authorization bypass was observed.
+- IDTS-113 member identity onboarding completed at provisioning/alignment
+  level. BTP now assigns SangVN and DatDT to `IDTS_DEVELOPER`, and NhanT to
+  `IDTS_TESTER`. HANA task sequence 25 verified exact approved e-mail hashes,
+  active state and the expected `DEVELOPER`, `DEVELOPER`, `TESTER` roles; no
+  HANA update was needed. The XSUAA alignment suite passed 12/12, and the
+  current DonHV browser session still identifies as Project Manager managed by
+  SAP BTP. Live sign-in evidence for each member remains member-owned because
+  the agent did not impersonate their SAP identities.
+- Final closeout-branch verification passed: OfficeCLI `1.0.142`,
+  `qa:idts113:btp-auth` 12/12, `qa:idts113:migration` 10/10,
+  `qa:idts113:outbox-scheduler` 6/6, CAP compile, secret scan, agent rules,
+  QA Depth self-test, AI DevKit 5/5 and `git diff --check`. The final
+  `ponytail-review` found no avoidable abstraction or duplicate implementation
+  because this branch contains only distinct runbook/evidence/PM updates.
+  Remaining acceptance is intentionally not marked PASS: member-owned
+  Developer/Tester interactive sign-ins, the native browser file-picker smoke
+  and IDTS-112 Technical Specification integration.
+- Commit preparation found and fixed a process issue: the first staged
+  `git diff --check` reported two Markdown hard-break spaces and a blank line at
+  EOF, but the semicolon-separated PowerShell command still continued into
+  `git commit`. The whitespace was removed, the issue was recorded here and
+  the local commit was amended before any push. The corrected staged and
+  committed diffs both pass `git diff --check`.
