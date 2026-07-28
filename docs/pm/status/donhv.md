@@ -3338,3 +3338,485 @@ Vietnamese:
 - Test-harness display issue fixed in-session: adding the Render CLI table-mapping check increased the HANA migration suite to seven assertions, while its summary denominator remained hardcoded at six and printed `7/6 PASS`. The footer now derives both values from the executed counter; no migration behavior or data changed.
 - Migration data-mapping issue fixed before import: Render CLI JSON uses lowercase PostgreSQL column names, while CAP/HANA UPSERT requires CDS names and casing. The first archive therefore failed the new key-coverage audit and was rejected; it was never imported. The exporter now derives a strict physical-to-CDS map from the linked CAP model, including managed-association foreign keys such as `applicationComponent_ID` and `up__ID`, before clearing password hashes or applying delivery policy.
 - Migration mapping verification complete: the corrected archive was regenerated read-only from Render with 32 entities and 679 rows. Migration checks pass 8/8; linked-model audit reports zero unknown columns; all 14 user password hashes are cleared without retaining the lowercase physical key; manifest dry-run accepts the complete package. Manifest SHA-256: `3B9BCC0A6E6B110B4D41F34A2CDE713B977CDFED51C0BAADA6B64A9EF7D99F97`.
+- 2026-07-28 IDTS-113 deployment blocker (environment/deployment issue): initial
+  deployment operation `a1198099-8a6c-11f1-9906-eeee0a9f845e` provisioned the
+  BTP service instances and started the AppRouter, but `idts-sap01-srv` failed
+  repeatedly during the buildpack compile phase. No Render cutover or HANA data
+  import was performed. Root cause: the generated `gen/srv/package.json`
+  retained the repository engine range `>=20 <23`, which SAP BTP Node.js
+  buildpack 1.9.2 rejects as an improper constraint. Status: fix the generated
+  CF package to `22.x` through the MTA build, verify locally, merge normally,
+  then retry the existing deployment operation.
+- 2026-07-28 IDTS-113 merge tooling issue fixed in-session: `gh pr merge 197`
+  was first invoked from the feature worktree and GitHub CLI attempted a local
+  checkout of `dev`, which failed because `dev` is already attached to
+  `E:\IDTS-SAP01`. PR #197 itself remained CLEAN with `qa-depth-gate` PASS.
+  The merge is retried through the GitHub API/from outside the repository so no
+  local worktree or branch is moved.
+- 2026-07-28 IDTS-113 migration-runner packaging issue fixed in-session: the
+  first local package copy used `Copy-Item -LiteralPath` with a wildcard, so
+  PowerShell did not expand the archive files and the importer failed closed
+  with `MIGRATION_PACKAGE_MISSING`. No HANA transaction started. The archive is
+  copied by enumerating the verified source files explicitly before rerunning
+  dry-run validation.
+- 2026-07-28 IDTS-113 diagnostic tooling issue fixed in-session: the first
+  inline `cf run-task ... node -e` probe was rejected by CF CLI because nested
+  PowerShell quotes split the JavaScript into an unexpected argument. The task
+  was never submitted. A small ignored diagnostic file is packaged instead so
+  only safe binding/model metadata is printed.
+- 2026-07-28 IDTS-113 HANA import issue under investigation: the first bound
+  one-off import task failed and returned the intentionally generic
+  `BTP_MIGRATION_IMPORT_FAILED`. The import is transaction-wrapped, so no
+  partial migration was retained. A follow-up safe diagnostic task confirmed
+  `dbKind=hana`, one HDI binding, a loadable 130-definition model, successful
+  HANA connection and readable `Users`; the remaining failure is narrowed to
+  entity UPSERT/verification and is diagnosed without printing connection
+  values.
+- 2026-07-28 IDTS-113 local tooling issue fixed in-session: after creating the
+  seed-conflict fix worktree successfully, the same shell command attempted to
+  read migration files from the root worktree instead of the new worktree and
+  returned `path not found`. No source or runtime state changed; inspection
+  continues from the correct fresh worktree.
+- 2026-07-28 IDTS-113 verification issue under investigation: the combined
+  seed-conflict gate stopped at `cds compile srv --to edmx` after migration
+  checks passed 8/8, but that invocation redirected all compile output and did
+  not preserve enough diagnostic detail. The incomplete aggregate is rejected
+  as evidence; CAP compile is rerun alone with visible output before any
+  additional source change. Root cause was command usage: the project exposes
+  both AuthService and BugService, so EDMX compilation requires `-s all`.
+  This is a tooling-command issue, not a CDS model defect; the corrected
+  command is used for final evidence.
+- 2026-07-28 IDTS-113 migration data issue under investigation: after PR #198
+  merged and the runner importer blob was verified identical to the merged Git
+  blob, the atomic replacement passed the former HANA 301 seed conflict but
+  failed closed with `MIGRATION_SOURCE_KEY_MISSING`. The transaction rolled
+  back all target deletes/imports. An offline linked-model audit now identifies
+  the exact entity/key mismatch before another HANA write attempt.
+- 2026-07-28 IDTS-113 test-harness issue fixed in-session: the new flattened
+  composition-key behavior test passed, but an older source-shape assertion
+  still required `definition?.keys` to appear directly inside
+  `import-hana.js`. The implementation now delegates that concern to the tested
+  `entityKeyColumns()` helper, so the stale assertion failed although the
+  required behavior was present. The assertion is updated to verify the helper
+  call instead of coupling the test to the former inline implementation; the
+  full migration suite is rerun before another HANA import.
+- 2026-07-28 IDTS-113 worktree dependency issue fixed in-session: CAP compile
+  in the fresh composition-key worktree initially failed because
+  `@cap-js/attachments` was absent from that worktree's `node_modules`. This was
+  an environment/bootstrap issue rather than a CDS defect. `npm ci` is run from
+  the committed lockfile and CAP compile is rerun with `-s all` before the PR is
+  opened.
+- 2026-07-28 IDTS-113 security-tool observation: `npm ci` completed from the
+  existing lockfile but reported 24 dependency audit findings (1 low,
+  9 moderate, 13 high and 1 critical). No dependency or lockfile was changed by
+  this migration fix. The pre-existing dependency review remains separate from
+  the HANA key-mapping patch; secret scan and the repository's release gates
+  still run before merge.
+- 2026-07-28 IDTS-113 compile warning observed: CAP compilation passed, with the
+  existing warning that `NonUpdateableProperties` is not recognized under
+  `@Capabilities.UpdateRestrictions` for `BugService.Bugs_attachments`. This
+  patch does not touch annotations or runtime UI behavior; the warning is not a
+  blocker for the HANA migration-key fix and remains a separate annotation
+  cleanup candidate.
+- 2026-07-28 IDTS-113 local packaging-path issue under investigation: after PR
+  #199 merged, the release worktree still contained the temporary migration
+  runner scripts but the verified Render archive was not present at the
+  assumed `.tmp/idts-113-migration/shared-qa-export` path. No CF task or HANA
+  write was started. The package is located by its manifest/checksum and copied
+  only after matching the previously frozen archive identity.
+- 2026-07-28 IDTS-113 blob-verification tooling issue fixed in-session: the
+  first expected Git hashes for the merged importer were calculated by piping
+  `git show` text through PowerShell, which normalized line endings and produced
+  hashes different from the copied files. No runner push or HANA task was
+  started. Verification is corrected to use `git rev-parse
+  <merge-sha>:<path>` so the expected value is the repository blob ID itself.
+- 2026-07-28 IDTS-113 security incident fixed in-session: an operator
+  diagnostic used `cf env` on the temporary migration runner and printed its
+  HDI binding credentials to the local tool output. The values are not copied
+  into Jira, repo evidence, or final reporting. The temporary runner is
+  immediately unbound and rebound to rotate that binding credential before
+  staging/import; subsequent checks use service names/counts only and never
+  print `VCAP_SERVICES`.
+- 2026-07-28 IDTS-113 CF binding race under investigation: the HDI unbind
+  request was accepted asynchronously, and the immediate rebind was rejected
+  because deletion of the previous binding was still in progress. No import
+  task was started. Execution waits for the old binding to disappear, then
+  creates a new binding and stages the runner with the rotated credential.
+- 2026-07-28 IDTS-113 HANA import remains blocked: PR #199 merged normally and
+  the runner was restaged with the exact merged importer plus the frozen
+  32-entity/679-row archive, but task
+  `idts113-hana-import-final-199` ended `FAILED`. The importer remains wrapped in
+  one CAP transaction, so the target replacement was rolled back. Sanitized
+  task logs are inspected for the failure code before any further write
+  attempt; no source/target credentials or row content are logged.
+- 2026-07-28 IDTS-113 HANA result-casing root cause identified: a rollback-only
+  diagnostic reached `idts.cap.UserRoles` target verification and showed that
+  requesting logical key `code` returned the physical result property `CODE`.
+  Source rows contain the key; no data was missing. The verifier therefore
+  misclassified an uppercase HANA result column as
+  `MIGRATION_SOURCE_KEY_MISSING`. A CQN projection alias is tested so HANA
+  returns the requested logical key name before the production importer is
+  changed.
+- 2026-07-28 IDTS-113 HANA alias experiment completed: explicitly projecting
+  `{ ref: ['code'], as: 'code' }` still returned result property `CODE` through
+  the bound HDI/HANA service. The diagnostic transaction rolled back by design.
+  The production fix will therefore compare result-object key names
+  case-insensitively while retaining exact key values, row counts and
+  transaction rollback semantics.
+- 2026-07-28 IDTS-113 test-harness relocation issue fixed in-session: after
+  moving `rowKey()` into the shared migration helper for direct testing, the
+  behavior tests passed but an old source-shape assertion still searched
+  `import-hana.js` for `MIGRATION_SOURCE_KEY_MISSING`. The assertion is pointed
+  at the helper that now owns the error; no runtime behavior is changed by this
+  test correction.
+- 2026-07-28 IDTS-113 identity-mapping data issue under remediation: SAP BTP
+  role collections `IDTS_PM`, `IDTS_TESTER` and `IDTS_DEVELOPER` were created
+  from the deployed XSUAA roles, and the current BTP user received only
+  `IDTS_PM`. AppRouter authentication reached the IDTS application, but backend
+  access was denied because that BTP identity does not match any imported HANA
+  `Users.email`. The approved correction preserves the stable DonHV PM user ID
+  and updates only its login email; no historical notification recipient or
+  business row is rewritten.
+- 2026-07-28 IDTS-113 deployment/tooling issue under investigation: the first
+  one-off task `idts113-map-platform-pm` failed because the migration runner's
+  active droplet did not contain the newly added temporary
+  `scripts/btp/map-platform-user.js`, even though the local staging directory
+  contained it. No HANA row was changed. The next step explicitly identifies
+  the latest ready CF package, stages that exact package, assigns its droplet,
+  and reruns the transaction-safe mapping task without printing credentials or
+  the account email.
+- 2026-07-28 IDTS-113 HANA connectivity blocker under investigation: after the
+  correct new runner droplet was explicitly assigned, both the identity-mapping
+  task and an independent HANA readback task timed out before obtaining a
+  database resource. Neither transaction changed data. A first PowerShell
+  health-probe command also had a local pipeline syntax error before making any
+  HTTP request; the probe is rewritten as a simple bounded loop and rerun.
+- 2026-07-28 IDTS-113 diagnostic command issue fixed in-session: the first
+  no-secret CF TCP probe was rejected locally by `cf run-task` because nested
+  JavaScript quotes were split into extra CLI arguments. No task was created and
+  no endpoint or credential was printed. The probe payload is base64-encoded so
+  Cloud Foundry receives one bounded command argument.
+- 2026-07-28 IDTS-113 diagnostic quoting issue fixed in-session: the first
+  base64 TCP task was created, but the outer JavaScript expression lost its
+  shell quotes and Bash rejected it before execution. No network connection was
+  attempted and no credential was exposed. The final command wraps the complete
+  `node -e` expression in shell-safe single quotes.
+- 2026-07-28 IDTS-113 TCP probe test-harness limitation: two further inline
+  `node -e` variants were rejected before network access because CF/Bash removed
+  nested expression quotes. They exposed no credentials and do not add product
+  evidence. The diagnostic is stopped rather than expanding a temporary shell
+  harness; the authoritative checks remain the sanitized CAP readback task,
+  HANA Cloud runtime state, and service-binding status.
+- 2026-07-28 IDTS-113 HANA connectivity root cause identified: the official
+  service parameters report `serviceStopped=true` for the HANA Cloud Free Tier
+  instance. The HDI container bindings therefore remain in `Created` state
+  while SQL connection acquisition times out. All failed readback/mapping tasks
+  were fail-closed. The instance is started with the supported CF
+  `update-service` operation, then readback and identity mapping are rerun.
+- 2026-07-28 IDTS-113 CF parameter quoting issue fixed in-session: the first
+  inline PowerShell `update-service -c` payload was rejected locally as invalid
+  JSON, so no HANA state change occurred. The same minimal non-secret parameter
+  is supplied through an ignored JSON file, matching SAP's documented Windows
+  guidance.
+- 2026-07-28 IDTS-113 identity-mapping HANA casing issue under remediation:
+  after HANA restart, the complete 32-entity/679-row readback passed, but the
+  mapping task reported the stable PM user as missing. The imported user exists;
+  HANA returns physical result properties such as `ID`, `ROLE_CODE`, and
+  `ACTIVE` with database casing while the temporary script expected logical
+  JavaScript property casing. No update was attempted. The one-off mapper is
+  changed to read selected properties case-insensitively, matching the importer
+  verification behavior already proven for HANA.
+- 2026-07-28 IDTS-113 identity-mapping boolean-shape issue under remediation:
+  the first casing-safe mapper still failed before `UPDATE`. The frozen source
+  confirms the stable PM row and role, so the remaining mismatch is the HANA
+  driver representation of Boolean `active` rather than missing business data.
+  The one-off verifier now accepts only explicit true representations
+  (`true`, `1`, or `"true"`/`"1"`) and still rejects inactive or ambiguous rows.
+- 2026-07-28 IDTS-113 CF packaging command yielded before completion: the
+  combined upload-and-stage shell cell exceeded its local 30-second timeout, so
+  no completion claim is made. The app remains stopped and production runtime
+  is unaffected. Package and droplet state are inspected separately before any
+  mapper task is rerun.
+- 2026-07-28 IDTS-113 HANA recovery and readback completed: the SAP HANA Cloud
+  Free Tier instance was started with the supported service update, then the
+  bound CAP readback verified all 32 imported entities and 679 rows. The stable
+  DonHV PM row was mapped transactionally to the authenticated SAP BTP identity
+  without printing the email or any binding credential.
+- 2026-07-28 IDTS-113 authenticated BTP smoke passed for the available PM
+  identity: AppRouter SSO opened the protected Fiori application, the profile
+  showed DonHV with Project Manager role and SAP BTP-managed session, and the
+  List Report loaded 17 Bugs plus PM-specific queues from HANA. Auth `me`,
+  OData metadata, service root and batch reads returned HTTP 200 after HANA was
+  running.
+- 2026-07-28 IDTS-113 Job Scheduling Service smoke passed: the active
+  `IDTSEmailOutboxHourly` job retained one hourly schedule. A temporary one-time
+  schedule invoked `POST /odata/v4/bug/processEmailOutbox`; the scheduler showed
+  1 successful execution, 0 failed and no recent run errors, while Cloud
+  Foundry routing logs recorded HTTP 200. The temporary schedule was deleted
+  after verification and the hourly schedule remains active.
+- 2026-07-28 IDTS-113 process issue fixed in-session: an environment cleanup
+  check used `cf env ... | Out-Null` after unsetting the temporary platform
+  email. No environment value reached terminal output, Jira or evidence, but
+  future verification must use `cf env`-free service/environment name checks
+  and never inspect full application environment output.
+- 2026-07-28 IDTS-113 CF diagnostic command issue fixed in-session: the first
+  read-only `cf run-task` attempt for sanitized email-delivery readback was
+  rejected locally because PowerShell split the inline `node -e` payload into
+  unexpected CLI arguments. No Cloud Foundry task was created, no database
+  query ran, and no credential or recipient address was printed. The readback
+  is rerun with the complete command passed as one argument.
+- 2026-07-28 IDTS-113 browser timing issue fixed in-session
+  (test-harness issue): immediately after a full Object Page reload, the
+  Reproduction, History, and Notifications sections briefly rendered empty
+  while their OData batch requests were still running. After waiting for the
+  requests to settle, all three reproduction fields, both history events, and
+  the in-app notification reappeared; CAP logs recorded HTTP 200 for the active
+  Bug and association reads. No HANA data was lost and this is not classified
+  as a product persistence defect.
+- 2026-07-28 IDTS-113 Smart Assign and in-app notification smoke passed on SAP
+  BTP: BUG-0018 was assigned from Pending Assignment to DatDT through the Smart
+  Assign dialog. The active Bug retained DatDT as assignee/current action
+  owner, History recorded the Assign to Developer event, and the DatDT
+  Assigned in-app notification was persisted as Sent after reload. No
+  recipient address or credential is stored in this evidence entry.
+- 2026-07-28 IDTS-113 Brevo acceptance is still under investigation: a
+  temporary one-time Job Scheduler execution completed successfully with HTTP
+  200, but its sanitized result was `sent=0`, `failed=0`, `skipped=0`, and the
+  Brevo event report contained no new transactional event. This proves the
+  scheduler endpoint works but does not prove provider delivery. The email
+  outbox row and effective runtime configuration are being inspected before
+  any Brevo PASS claim.
+- 2026-07-28 IDTS-113 HANA Explorer privilege finding (environment blocker):
+  DBADMIN can inspect the HDI schemas and table metadata, but direct `SELECT`
+  against the application-owned `IDTS_CAP_NOTIFICATIONDELIVERIES` table is
+  rejected with `insufficient privilege`. This is expected HDI isolation, not
+  data corruption. Readback will use the HDI-bound application context or an
+  HDI container connection rather than granting DBADMIN broad access.
+- 2026-07-28 IDTS-113 email binding root cause confirmed (configuration
+  issue): the bound `idts-sap01-external-services` user-provided service is
+  present in `VCAP_SERVICES`, but CAP does not populate
+  `cds.env.requires.objectStore.credentials`. Consequently the email worker
+  resolves `enabled=false`, `ready=false`, and the new BUG-0018 delivery is
+  persisted as `SKIPPED / EMAIL_DISABLED`. No historical delivery is being
+  resent. The remediation is limited to deterministic CAP VCAP matching for
+  the existing service instance; no credential value or provider setting is
+  changed.
+- 2026-07-28 IDTS-113 local binding-fixture preflight failed safely
+  (test-harness issue): the fresh fix worktree intentionally has no local
+  `node_modules`, so the first isolated `node -e` check could not resolve
+  `@sap/cds`. No source, BTP runtime, service binding, or database state was
+  changed. The fixture is rerun using the already-installed root dependency
+  while keeping the clean worktree as the project/config baseline.
+- 2026-07-28 IDTS-113 clean-worktree CAP build preflight failed safely
+  (test-harness issue): invoking the root CDS executable from the fresh
+  worktree could not resolve the sibling project's
+  `@cap-js/attachments` dependency. Compilation stopped before producing a
+  deployable artifact and no runtime state changed. Verification will use a
+  temporary ignored `node_modules` junction to the already-installed root
+  dependencies, then remove that junction after inspection.
+- 2026-07-28 IDTS-113 dependency-junction cleanup was blocked locally
+  (tooling issue): the environment policy rejected automatic removal of the
+  verified worktree-local `node_modules` junction. The junction points only to
+  the existing root dependencies, is Git-ignored, and is absent from the
+  staged/runtime diff. It may be removed manually after the fix worktree is no
+  longer needed; no product or BTP state is affected.
+- 2026-07-28 IDTS-113 runtime-only rollout command yielded early (tooling
+  issue): the combined production build and rolling `cf push` exceeded the
+  local shell timeout before a terminal result was returned. The command does
+  not invoke the HDI deployer or alter HANA schema/data. Cloud Foundry app,
+  package and event state are inspected before any retry or deployment claim.
+- 2026-07-28 IDTS-113 runtime-only staging failed safely (environment/release
+  blocker): Cloud Foundry Node.js buildpack 1.9.2 rejected the generated
+  `engines.node` range `>=20 <23` as an improper/dangerous constraint. Rolling
+  deployment did not replace or stop the healthy existing instance, and HANA
+  was not invoked. The previously prepared IDTS-113 Node engine compatibility
+  fix is inspected and integrated rather than duplicating a workaround in the
+  binding PR.
+- 2026-07-28 IDTS-113 post-deploy config diagnostic failed before result
+  (test-harness issue): the first read-only task on the new droplet exited
+  before emitting its sanitized config marker. The web process remains 1/1
+  healthy. Package layout and the task-specific error are checked before a
+  corrected diagnostic is rerun; no provider PASS claim is made yet.
+- 2026-07-28 IDTS-113 external-service binding fix deployed but provider
+  validation remains blocked (configuration issue): the corrected runtime now
+  resolves the bound email settings with `enabled=true`, SMTP provider,
+  `hasBaseUrl=true`, and test mode enabled. Configuration is still not ready
+  because `replyTo` alone fails the safe-address requirement. The value is not
+  printed; a boolean-only check will distinguish missing from malformed before
+  any narrowly scoped UPS update.
+- 2026-07-28 IDTS-113 first post-restart lifecycle smoke returned HTTP 401
+  (environment/session issue): the Object Page still displayed the pre-restart
+  session, but submitting Move to Pending Assignment after the CAP rolling
+  restart was rejected before business mutation. No status/history/outbox row
+  changed. Reopening the AppRouter route retained the readable Object Page but
+  the write retry still returned 401, so this is now under investigation as
+  AppRouter token-forwarding/session or request-auth behavior rather than a
+  stale-page-only issue. No further mutation is attempted until route logs
+  identify the rejecting layer.
+- 2026-07-28 IDTS-113 AppRouter session recovery verified: an explicit
+  AppRouter logout followed by the existing SAP SSO session renewed the
+  browser session. The same BUG-0018 Move to Pending Assignment request then
+  succeeded, and a subsequent Smart Assign selected DatDT with the UI
+  confirming `Assigned to DatDT`. No password or saved browser credential was
+  inspected. The earlier HTTP 401 is resolved as a stale browser/AppRouter
+  session after the rolling backend restart.
+- 2026-07-28 IDTS-113 first HANA application-context readback task failed
+  before execution (test-harness issue): the generated `cf run-task` command
+  passed an unquoted Node `eval(...)` expression to Bash, which rejected the
+  opening parenthesis. The task made no database or provider change. The
+  readback is being rerun through the previously verified base64-to-file task
+  pattern.
+- 2026-07-28 IDTS-113 Object Page collaboration readback mismatch (product
+  defect under investigation): after the successful reassignment, HANA
+  application-context readback found four BUG-0018 HistoryEvents (including
+  `MOVE_TO_PENDING_ASSIGNMENT` and the new `ASSIGN_TO_DEVELOPER`) and two
+  `ASSIGNED` Notifications, while the reloaded Object Page still rendered
+  `No history events yet` and an empty Notifications table. The underlying
+  workflow side effects exist; the remaining investigation is limited to the
+  OData composition/read model or UI binding. No runtime fix is mixed into the
+  email/S3 acceptance until the affected read path is isolated.
+- 2026-07-28 IDTS-113 Job Scheduler browser locator became ambiguous
+  (test-harness issue): after waiting for the one-time schedule, the exact
+  description text appeared in four dashboard regions and the strict browser
+  selector refused to click. The schedule itself remained available and no
+  service state was changed by the failed selector. Verification continues
+  using the schedule link role/identifier instead of visible text alone.
+- 2026-07-28 IDTS-113 BTP email acceptance PASS: after the external-service
+  binding and safe reply-to correction, a fresh BUG-0018 assignment created a
+  `PENDING` delivery. SAP Job Scheduling Service completed the one-time run
+  with HTTP 200 and `sent=1`, `failed=0`, `skipped=0`. HANA readback confirmed
+  `SENT`, `attemptCount=1`, `sentAt` and provider message ID, while Brevo MCP
+  independently reported the matching `[IDTS] BUG-0018 - Assigned` event as
+  delivered. The temporary one-time schedule was deleted; the recurring
+  hourly schedule remains active. No recipient address or provider credential
+  is stored in the evidence.
+- 2026-07-28 IDTS-113 Chrome attachment upload handoff failed safely
+  (test-harness issue): the Chrome Playwright bridge opened the native Windows
+  file picker, but the separate Browser Plugin `browser_file_upload` tool
+  reported no related modal state. No file was uploaded and no S3/database
+  state changed. The same picker is completed with narrowly scoped Windows
+  computer control, then verification returns to Chrome and HANA readback.
+- 2026-07-28 IDTS-113 collaboration readback correction: a later settled DOM
+  snapshot on the same active BUG-0018 Object Page displayed all four expected
+  History events. The earlier `No history events yet` result was a transient
+  lazy-binding/timing state, not missing HANA data. The Notifications table
+  still needs its own UI readback check because the latest snapshot remained
+  empty even though HANA contains the notification rows.
+- 2026-07-28 IDTS-113 Chrome upload permission blocker (test-harness issue):
+  the supported Chrome bridge flow `waitForEvent("filechooser")` successfully
+  captured the IDTS uploader, but `fileChooser.setFiles(...)` returned
+  `Not allowed`. This isolates the blocker to the Chrome plugin Uploads
+  permission, not IDTS validation, CAP, HANA, or S3. No file, database row, or
+  S3 object was created. Continue only after upload permission is allowed for
+  the BTP AppRouter site, or use a separately approved authenticated API smoke.
+- 2026-07-28 IDTS-113 first direct S3 adapter task command failed before task
+  creation (tooling issue): CF CLI rejected the unsupported long option
+  `--memory`. No BTP task, HANA row, or S3 object was created. The verified CLI
+  help requires the short option `-m`; rerun the same sanitized smoke with
+  `-m 512M` and a unique task name.
+- 2026-07-28 IDTS-113 second direct S3 adapter task command failed before task
+  creation (tooling issue): after correcting the memory flag, Cloud Foundry
+  rejected the base64 command because it exceeded the 4097-character task
+  command limit. No application code ran and no HANA/S3 state changed. Compress
+  the same reviewed script before base64 transport so the task command remains
+  below the platform limit.
+- 2026-07-28 IDTS-113 direct S3 adapter smoke task 16 failed during execution
+  (test-harness issue, resolved). The compressed command passed CF task creation
+  and started, but the diagnostic had assigned the raw CSN model to `cds.model`.
+  CAP Query Builder therefore rejected the attachment target before HANA or S3
+  mutation. The diagnostic now uses `cds.linked(...)` and an explicit privileged
+  task context. Rerun task 17 completed successfully: S3 upload, HANA metadata,
+  download, SHA-256 comparison, object existence and final metadata/object
+  cleanup all reported PASS.
+- 2026-07-28 IDTS-113 attachment-library delete log is misleading (tooling
+  issue, open upstream limitation): AWS S3 returned HTTP 204 and the subsequent
+  object existence check returned false, but `@cap-js/attachments` still logged
+  `File was not deleted from S3`. No data leak or orphan object remains; task 17
+  verified both S3 object and HANA metadata were deleted. Keep the read-after-
+  delete check as acceptance evidence and do not classify this warning as a
+  failed deletion.
+- 2026-07-28 IDTS-113 direct CF CLI OAuth diagnostic was rejected with HTTP
+  401 (test-harness issue): the Cloud Foundry CLI token is not a valid
+  application-tenant end-user token for the protected BugService route. No
+  application or database state changed. Continue the Notifications diagnosis
+  through the authenticated AppRouter browser session and application-context
+  readback; do not weaken XSUAA or mint a bypass token.
+- 2026-07-28 IDTS-113 direct OData navigation tab was blocked by Edge
+  `ERR_BLOCKED_BY_CLIENT` (test-harness issue): opening the protected AppRouter
+  notification navigation URL as a top-level browser document was blocked by
+  the browser policy before CAP returned content. The normal Fiori XHR route
+  remains authenticated and operational. Continue by reproducing through the
+  Object Page binding and correlating CAP/router logs instead of changing
+  browser or service security.
+- 2026-07-28 IDTS-113 Notifications UI readback PASS: after a full Object Page
+  reload and explicit navigation to the Notifications section, Fiori displayed
+  both expected BUG-0018 records with recipient DatDT, event Assigned, channel
+  In App and delivery status Sent. The earlier empty table was another
+  transient lazy-binding state, not an OData composition or HANA defect.
+- 2026-07-28 IDTS-113 first BTP Similar Bugs browser action timed out
+  (test-harness issue under investigation): after changing Object Page section,
+  the Chrome bridge did not complete the `Find Similar Bugs` role lookup within
+  three seconds and reported a CDP Runtime.evaluate timeout. No AI action or
+  business mutation is claimed. Re-snapshot the settled page and invoke the
+  visible control only after confirming its current locator.
+- 2026-07-28 IDTS-113 work-package preflight used the stale root worktree
+  (tooling issue, resolved): the first read attempted
+  `docs/pm/tasks/idts-113-btp-cloud-foundry-poc.md` from root `dev`, where that
+  path is not present because root is 23 commits behind `origin/dev`. No file
+  or external state changed. The same file was then read from the dedicated
+  evidence worktree, which is the authoritative location for this session.
+- 2026-07-28 IDTS-113 Smart Assign screenshot redaction timed out
+  (test-harness issue): the dialog loaded and its disabled-provider
+  explanations were readable, but the Chrome bridge exceeded its three-second
+  selector deadline while replacing visible email text for a sanitized
+  screenshot. No business action, assignment or review decision was submitted.
+  Retain the sanitized textual result and do not store an unredacted screenshot.
+- 2026-07-28 IDTS-113 persistence cleanup command first used the wrong temporary
+  artifact path (tooling issue, resolved): the deletion task was not created
+  because `.tmp/idts113-s3-persistence.gz.b64` was not present in the evidence
+  worktree. No HANA metadata or S3 object changed. Locate the already reviewed
+  compressed diagnostic payload from the successful Cloud Foundry task command,
+  then run only the cleanup mode and verify both metadata and object absence.
+- 2026-07-28 IDTS-113 persistence cleanup could not recover the reviewed
+  diagnostic payload with the first narrow marker (tooling issue, resolved):
+  the marker assumed a `Buffer.from(...)` command, while the successful task
+  actually used `echo <compressed payload> | base64 -d | gzip -d`. No cleanup
+  task was submitted in that attempt. The exact successful task command was
+  then reused with only its final mode changed from `check` to `delete`.
+- 2026-07-28 IDTS-113 persistence cleanup `cf run-task` submission was rejected
+  by the local CLI argument parser (tooling issue, resolved): the
+  embedded `node -e` command was split at its quoted JavaScript body and no task
+  was created. HANA metadata and the temporary S3 object remained unchanged.
+  The exact reviewed command was then submitted through the Cloud Foundry v3
+  task JSON API, preserving it as one command string.
+- 2026-07-28 IDTS-113 first v3 cleanup submission wrapper failed locally before
+  the HTTP request (tooling issue, resolved): PowerShell could not parse the
+  over-escaped regular-expression literal used to switch the reviewed task from
+  `check` to `delete`. No Cloud Foundry task was created and no HANA/S3 state
+  changed. Replace the exact mode substring with simple string replacement and
+  retry the v3 task request.
+- 2026-07-28 SAP Job Scheduling Service displayed an upcoming API pagination
+  notice (environment/platform notice): from 2026-10-26, calls to
+  `GET /scheduler/jobs` must supply `page_size`. The current IDTS job and hourly
+  schedule remain Active, and the application only exposes the configured
+  outbox action as the job target. Verify the repository has no custom direct
+  call to that dashboard API; create a follow-up only if such a caller exists.
+- 2026-07-28 IDTS-113 BTP AI and restart persistence acceptance completed for
+  the available PM identity. Similar Bugs, Classification Suggestions, Handoff
+  Summary and Smart Assign explanations all reached the deployed CAP actions in
+  disabled-provider/fallback mode; BUG-0018 remained Assigned to DatDT with no
+  workflow or assignment mutation. The same CAP droplet was restarted, after
+  which HANA attachment metadata and the 76-byte S3 object retained SHA-256
+  `0BD05E3BA48891B6808B7CBE42F7513C0D8DB85665F4BA89ECEC3558DBD3BEA0`.
+  The temporary metadata/object cleanup then passed. Browser reload confirmed
+  four History events, two Assigned/In App/Sent Notifications and unchanged
+  Bug ownership. Job `IDTSEmailOutboxHourly` and its one recurring schedule
+  remained Active. OpenAI live-provider acceptance is still not claimed.
+- 2026-07-28 IDTS-113 Similar Bugs evidence recapture timed out
+  (test-harness issue): after navigating back from Notifications to Bug Summary,
+  the Chrome bridge could identify the unique `Find Similar Bugs` button but
+  exceeded its interaction deadline before the click completed. No review
+  action or Bug mutation is claimed from this recapture attempt. Keep the
+  earlier successful HTTP/UI textual evidence and remove any screenshot
+  reference that is not backed by a tracked file unless a later recapture
+  succeeds.
