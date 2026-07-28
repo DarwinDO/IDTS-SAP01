@@ -137,6 +137,15 @@ check('MTA contains CAP, HANA, AppRouter, HTML5 repository, XSUAA, and Destinati
   assert.ok(!mta.includes('prepare-cap-poc-ui.js'))
 })
 
+check('Cloud Foundry build pins only the generated service package to Node 22', () => {
+  const mta = read('mta.yaml')
+  const pinScript = read('scripts/btp/pin-cf-node-engine.js')
+  const pkg = JSON.parse(read('package.json'))
+  assert.ok(mta.includes('node scripts/btp/pin-cf-node-engine.js'))
+  assert.ok(pinScript.includes("node: '22.x'"))
+  assert.equal(pkg.engines.node, '>=20 <23')
+})
+
 check('HTML5 application and standalone AppRouter both protect OData with XSUAA', () => {
   const appRoutes = JSON.parse(read('app/bug-management-ui/xs-app.json'))
   const routerRoutes = JSON.parse(read('app/router/xs-app.json'))
@@ -170,5 +179,5 @@ else cds.env.requires.auth.impl = originalImpl
 if (process.exitCode) {
   console.error(`IDTS-113 BTP auth checks failed after ${passed} passes.`)
 } else {
-  console.log(`IDTS-113 BTP auth checks passed: ${passed}/11.`)
+  console.log(`IDTS-113 BTP auth checks passed: ${passed}/12.`)
 }
