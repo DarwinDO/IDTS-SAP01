@@ -8,6 +8,7 @@ const { DELETE, SELECT, UPSERT } = cds.ql
 const {
   ENTITY_ORDER,
   decodeRows,
+  entityKeyColumns,
   parseArgs,
   sha256
 } = require('./lib/hana-migration')
@@ -58,7 +59,7 @@ async function main () {
         await tx.run(UPSERT.into(entity).entries(rows.slice(offset, offset + BATCH_SIZE)))
       }
       const definition = model.definitions[entity]
-      const keyColumns = Object.keys(definition?.keys || {})
+      const keyColumns = entityKeyColumns(definition)
       if (!keyColumns.length) {
         throw Object.assign(new Error(`No key definition found for ${entity}.`), {
           code: 'MIGRATION_TARGET_KEY_MISSING'
