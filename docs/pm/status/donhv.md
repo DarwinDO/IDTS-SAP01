@@ -3930,3 +3930,9 @@ Vietnamese:
   all required sections missing. No PR was created. The retry uses
   `node scripts/qa/check-pr-depth.js --body-file <file>` directly and must PASS
   before `gh pr create`.
+- The first normal merge command for PR #203 was blocked locally before merge
+  because GitHub CLI tried to use branch `dev`, which is already attached to
+  the root worktree `E:\IDTS-SAP01`. This is a Git/worktree tooling issue, not a
+  PR conflict; PR #203 was still open and clean. After recording this finding,
+  merge must be performed through the GitHub merge API without checking out or
+  bypassing the protected `dev` branch.
