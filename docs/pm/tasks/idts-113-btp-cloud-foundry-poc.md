@@ -162,7 +162,11 @@ this increment does not claim deployed XSUAA acceptance.
   each member; only the current PM browser session has authenticated evidence,
   because the agent must not impersonate the member identities.
 - Re-run the attachment flow through the actual Fiori file picker after Chrome
-  Uploads permission is allowed. The storage adapter itself is accepted.
+  Uploads permission is allowed. Two authenticated attempts reached the enabled
+  native chooser but were rejected by the browser bridge with `Not allowed`;
+  the settled UI remained empty and no CAP/HANA/S3 mutation occurred. The
+  storage adapter itself is accepted. See
+  `docs/pm/evidence/idts-113/btp-native-attachment-picker-attempt-20260728.md`.
 - The Render/PostgreSQL platform-readiness drill and seven-day window are now
   documented. Lossless data reversal remains conditional on manual HANA-delta
   reconciliation because Render is not a hot replica.
