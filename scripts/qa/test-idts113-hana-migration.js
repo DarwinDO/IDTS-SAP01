@@ -9,6 +9,7 @@ const {
   OMITTED_ENTITIES,
   decodeRows,
   encodeRows,
+  entityKeyColumns,
   mapPostgresRowToCds,
   postgresTableName,
   prepareRowsForTarget
@@ -97,6 +98,18 @@ test('attachment binary can be encoded and decoded without byte changes', () => 
   assert.equal(Buffer.compare(decoded[0].content, original), 0)
 })
 
+test('composition keys use their flattened persistence columns', () => {
+  assert.deepEqual(entityKeyColumns({
+    keys: {
+      up_: {
+        isAssociation: true,
+        keys: [{ ref: ['ID'] }]
+      },
+      ID: {}
+    }
+  }), ['up__ID', 'ID'])
+})
+
 test('import requires explicit execute and one transaction', () => {
   const source = fs.readFileSync(path.join(__dirname, '../btp/import-hana.js'), 'utf8')
   assert.match(source, /args\.execute === true/)
@@ -106,7 +119,7 @@ test('import requires explicit execute and one transaction', () => {
   assert.ok(source.indexOf('DELETE.from(entity)') < source.indexOf('UPSERT.into(entity)'))
   assert.match(source, /UPSERT\.into\(entity\)/)
   assert.match(source, /await tx\.run\(SELECT\.from\(entity\)/)
-  assert.match(source, /definition\?\.keys/)
+  assert.match(source, /entityKeyColumns\(definition\)/)
   assert.match(source, /targetRows\.length !== rows\.length/)
   assert.match(source, /MIGRATION_SOURCE_KEY_MISSING/)
   assert.match(source, /MIGRATION_TARGET_KEY_MISMATCH/)
