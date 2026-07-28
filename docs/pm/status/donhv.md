@@ -4008,3 +4008,9 @@ Vietnamese:
   tree. Classification: tooling issue. A local-only `node_modules` junction to
   the already-installed root dependencies restored the model query; no package,
   source, database or runtime state was changed.
+- IDTS-113 native attachment-picker retry on 2026-07-29 reached the live BTP
+  Object Page as the authenticated DonHV PM, captured the enabled chooser and
+  offered a harmless text fixture. Chrome again rejected the file handoff with
+  `Not allowed`; the DOM showed no new row, so no HANA/S3 mutation occurred.
+  Classification: test-harness/tooling issue, not product defect. Evidence was
+  appended to `docs/pm/evidence/idts-113/btp-native-attachment-picker-attempt-20260728.md`.

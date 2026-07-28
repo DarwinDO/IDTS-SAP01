@@ -66,3 +66,22 @@ same Object Page sequence:
 
 No credential, token, database URL, service key, private recipient, or provider
 secret is present in this evidence.
+
+## Retry on 2026-07-29
+
+Baseline Git SHA: `362ace2a39a82d19c4acc723fe96a15bf7373f5e`
+
+The authenticated DonHV Project Manager session reached the live BTP Object
+Page and the `Evidence / Attachments` section. The `Upload Evidence` control
+was unique and enabled, and the native file chooser was captured. A fresh
+non-sensitive text fixture was offered to the chooser, but the Chrome bridge
+again rejected `fileChooser.setFiles(...)` with `Not allowed`.
+
+The post-attempt DOM contained the pre-existing evidence row only; it did not
+contain the new fixture. Therefore no browser upload request, HANA metadata row
+or S3 object was created by this retry. The live endpoint checks in the same
+session returned health `200` and anonymous protected OData `401`.
+
+Classification: `test-harness/tooling issue — Chrome upload permission`.
+The original independent Cloud Foundry S3/HANA persistence evidence remains
+valid; native-picker acceptance is still pending a permitted browser upload.
