@@ -132,6 +132,14 @@ this increment does not claim deployed XSUAA acceptance.
 - SangVN, DatDT and NhanT exist in the BTP subaccount's Default identity
   provider. SangVN and DatDT are assigned to `IDTS_DEVELOPER`; NhanT is
   assigned to `IDTS_TESTER`.
+- Live BTP CLI inspection found that `IDTS_DEVELOPER` referenced the unrelated
+  HTML5 Application Frontend Developer role instead of the application XSUAA
+  Developer role. The collection was corrected in SAP BTP Cockpit while
+  preserving both member assignments. Sanitized BTP CLI readback now confirms
+  that the `IDTS_PM`, `IDTS_TESTER` and `IDTS_DEVELOPER` collections each
+  reference the corresponding role from the deployed IDTS XSUAA application.
+  Configuration remediation is PASS; member-owned interactive Developer
+  sign-in remains pending.
 - HANA task sequence 25 verified by SHA-256 comparison that all three stored
   e-mails exactly match the approved identities, while their existing
   `DEVELOPER`, `DEVELOPER` and `TESTER` roles remain active. No HANA update was

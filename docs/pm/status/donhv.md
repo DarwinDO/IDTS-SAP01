@@ -3978,3 +3978,14 @@ Vietnamese:
   DatDT/SangVN are active Developers and NhanT is an active Tester. No HANA
   write, runtime deploy or Render change occurred. Evidence:
   `docs/pm/evidence/idts-113/hana-final-container-user-classification-20260728.md`.
+- IDTS-113 live role-collection readback found and resolved an
+  environment/configuration defect. `IDTS_DEVELOPER` referenced the unrelated
+  HTML5 Application Frontend Developer role even though both intended
+  Developer members were assigned to the collection. The collection now
+  references only the deployed IDTS XSUAA `Developer` role; both assignments
+  were preserved. Sanitized BTP CLI readback confirms `IDTS_PM` (1 user),
+  `IDTS_TESTER` (1 user) and `IDTS_DEVELOPER` (2 users) all reference their
+  corresponding IDTS XSUAA roles. Configuration remediation: PASS. Remaining
+  acceptance: a Developer member must complete their own interactive sign-in
+  smoke; the agent must not impersonate them. Evidence:
+  `docs/pm/evidence/idts-113/btp-developer-role-collection-remediation-20260729.md`.
