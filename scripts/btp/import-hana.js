@@ -3,7 +3,7 @@
 const fs = require('node:fs')
 const path = require('node:path')
 const cds = require('@sap/cds')
-const { SELECT, UPSERT } = cds.ql
+const { DELETE, SELECT, UPSERT } = cds.ql
 
 const {
   ENTITY_ORDER,
@@ -45,6 +45,12 @@ async function main () {
   }
   const verification = []
   await db.tx(async tx => {
+    // The HDI deployer loads reference seed rows. Replace them in reverse
+    // dependency order so Render UUIDs and relationships remain authoritative.
+    for (const entity of [...ENTITY_ORDER].reverse()) {
+      await tx.run(DELETE.from(entity))
+    }
+
     for (const entity of ENTITY_ORDER) {
       const entry = manifest.entities.find(candidate => candidate.entity === entity)
       const rows = decodeRows(JSON.parse(fs.readFileSync(path.join(input, entry.file), 'utf8')))
