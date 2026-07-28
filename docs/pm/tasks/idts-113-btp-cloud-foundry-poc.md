@@ -14,7 +14,12 @@ Service. Existing AWS S3 and Brevo providers are retained through one private
 user-provided service. OpenAI live remains disabled/mock. Render remains the
 rollback source during the cutover window.
 
-## POC baseline implementation
+## Historical POC baseline implementation
+
+This section describes the first isolated POC only. It is retained for audit
+history and is not the current BTP architecture. The authoritative current
+state starts at **Migration increment - XSUAA, AppRouter, and HTML5
+repository** below.
 
 - Production CAP profile uses `@cap-js/hana`.
 - Integration profile continues to use PostgreSQL for Render.
@@ -46,20 +51,21 @@ rollback source during the cutover window.
 
 ## Known limitations
 
-- The POC uses custom auth and does not yet integrate XSUAA/AppRouter.
+- The historical POC used custom auth and did not integrate XSUAA/AppRouter.
 - No reusable POC user password is published or committed.
-- Email and live OpenAI remain disabled; no external provider secrets were
-  copied.
-- Attachments remain isolated in HANA for this POC; AWS S3 is not copied.
+- Live OpenAI remains disabled and is not accepted.
+- The first POC attachment store was isolated; the current BTP runtime retains
+  AWS S3 through a private binding.
 - Baseline dependency audit remains open under IDTS-46.
 - CAP build still reports the existing attachment
   `NonUpdateableProperties` annotation warning.
 
-## Rollback
+## Historical POC rollback
 
-Undeploy the MTA, delete its HDI service if requested, then delete the isolated
-HANA Cloud instance. Render Shared QA requires no rollback because it was not
-modified.
+The isolated POC could be removed without changing Render. The current cutover
+must instead follow `docs/deployment/idts-113-btp-cutover-rollback.md`; do not
+delete HANA, HDI, XSUAA, AppRouter, HTML5, Destination, Job Scheduler, Render
+or PostgreSQL as part of the rollback drill.
 
 ## Migration increment - XSUAA, AppRouter, and HTML5 repository
 
@@ -123,6 +129,15 @@ this increment does not claim deployed XSUAA acceptance.
   the HDI deployer.
 - Cloud Foundry CAP service and AppRouter are healthy at 1/1 instances.
 - DonHV/PM authenticated browser smoke passed through AppRouter/XSUAA.
+- SangVN, DatDT and NhanT exist in the BTP subaccount's Default identity
+  provider. SangVN and DatDT are assigned to `IDTS_DEVELOPER`; NhanT is
+  assigned to `IDTS_TESTER`.
+- HANA task sequence 25 verified by SHA-256 comparison that all three stored
+  e-mails exactly match the approved identities, while their existing
+  `DEVELOPER`, `DEVELOPER` and `TESTER` roles remain active. No HANA update was
+  needed or executed.
+- `npm run qa:idts113:btp-auth` passed 12/12 role-alignment, mismatch-denial,
+  profile-separation and AppRouter/XSUAA checks.
 - BUG-0018 assignment, HANA history and Notifications UI readback passed.
 - Job Scheduler job `IDTSEmailOutboxHourly` is active with one hourly schedule.
 - A fresh email delivery moved from PENDING to SENT through a Scheduler run,
@@ -142,11 +157,18 @@ this increment does not claim deployed XSUAA acceptance.
 
 ## Remaining acceptance
 
-- Capture separate Tester and Developer XSUAA identity/role-matrix evidence;
-  the current authenticated browser evidence proves PM only.
+- Provisioning and static/backend role alignment for Tester and Developer are
+  complete. Capture one interactive login and live authorization matrix for
+  each member; only the current PM browser session has authenticated evidence,
+  because the agent must not impersonate the member identities.
 - Re-run the attachment flow through the actual Fiori file picker after Chrome
   Uploads permission is allowed. The storage adapter itself is accepted.
-- Document and verify the Render/PostgreSQL rollback drill and seven-day
-  rollback window.
-- Synchronize PM handover, knowledge mirrors and Technical Specification EN
-  before final cutover acceptance.
+- The Render/PostgreSQL platform-readiness drill and seven-day window are now
+  documented. Lossless data reversal remains conditional on manual HANA-delta
+  reconciliation because Render is not a hot replica.
+- PM handover and the deployment knowledge mirror are synchronized. The final
+  Technical Specification EN update remains governed by IDTS-112 and its human
+  approval dependencies. The source-aligned BTP delta candidate is available
+  at
+  `docs/pm/evidence/idts-113/technical-spec-btp-delta-candidate.md`; it is
+  explicitly not an approved workbook update.

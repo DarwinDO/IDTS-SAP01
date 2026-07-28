@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-07-26
+Last updated: 2026-07-28
 
 ## Snapshot
 
@@ -10,7 +10,7 @@ Last updated: 2026-07-26
 | Project phase | Sprint 5 is active and currently At Risk. Jira Epic `IDTS-88` now consolidates all 11 current Sprint 5 issues for mentor readiness, Shared QA/infrastructure closure, security follow-up, and ownership governance. |
 | Product baseline | CAP/Fiori MVP, attachment/audit/notification/PM flows, and advisory-AI review baseline are implemented; BRD v1.5, SRS v1.4, and FRS v1.5 EN/VI are synchronized to the AuthService/AuthSessions, Render/PostgreSQL, attachment/S3, notification outbox, and human-reviewed AiSuggestions baseline. |
 | Current sprint | `IDTS Sprint 5`: 11 issues as of 2026-07-22 — 5 In Progress, 6 To Do, 0 Done, and 5 overdue before the report date. All 11 are children of Epic `IDTS-88`; DonHV owns 9 and SangVN owns 2, so capacity and status reconciliation are immediate risks. |
-| Recommended next action | Use the synchronized SAP490 pack for mentor review with disclosed limitations. IDTS-100 refreshed the current artifacts and Shared QA evidence, updated Drive artifacts in place, and verified 27 planned cases as 21 Passed plus 6 human UAT cases still Prepared. Complete those six UAT executions and mentor sign-off separately; OpenAI live remains disabled and must not be presented as accepted. |
+| Recommended next action | Have SangVN, DatDT and NhanT complete one interactive SAP-identity sign-in each, then capture the live Developer/Tester authorization matrix and rerun the native Fiori attachment picker when Chrome upload permission is available. Their BTP users, role collections and HANA business identities are already aligned and verified. The BTP Technical Specification delta is prepared for IDTS-112 but must still pass its named-member approval workflow. OpenAI live remains disabled and must not be presented as accepted. |
 | Active implementation note | IDTS-72 visual evidence audit has repository evidence merged through PR #126. IDTS-74 is complete and deployed. IDTS-75 is complete at implementation, PR, Render, and shared-QA evidence level. IDTS-76 is complete at implementation, PR, Render, and shared-QA evidence level: it reuses `summarizeBugHandoff` and `AiReviewUi`, adds a review-only Handoff Summary Object Page section/dialog, and has local plus shared-QA evidence for positive, sparse-data, unsafe-output, safe-failure, no-workflow-mutation, deployed API smoke, and deployed browser smoke. |
 | Completed DatDT AI review foundation | IDTS-91/92/93 merged through PR #167 at `442b958b28ff268920260bbdef8bd94dc56f9341`. Explicit suggestion review, persisted Similar Bugs/Classification controls, and validated Tester/PM classification apply passed the integrated regression and fresh GitHub gate. Jira comments `10676`–`10678` record closure evidence; all three issues are Done. |
 | Completed SangVN AI review controls | IDTS-94 merged through PR #168 at `9e041dac56f9adfd9294521d5c2e7e8f3c1597cb`. Handoff Summary and Smart Assign explanation persist review decisions without workflow/assignee mutation; focused, desktop/mobile browser, build and gate evidence passed. SangVN's 3/3 Knowledge Gate remains linked; Jira comment `10679` records closure and the issue is Done. |
@@ -269,9 +269,14 @@ Vietnamese clean note: Nút `Assign Developer` riêng đã được bỏ khỏi 
   restarted; HANA metadata, S3 bytes/hash, Bug state, four History events and
   two Notifications persisted, and the hourly Job Scheduler schedule remained
   Active.
-- Full cutover is not yet signed off: Tester/Developer BTP identities, actual
-  browser file-picker evidence, the rollback drill and final
-  knowledge/Technical Specification synchronization remain open.
+- The Render rollback platform-readiness drill is documented and fresh route
+  checks pass. Render is a previous baseline, not a synchronized HANA replica;
+  a lossless return requires manual HANA-delta reconciliation.
+- Full cutover is not yet signed off: the Tester/Developer identities and role
+  collections are provisioned, but each member still needs one interactive
+  sign-in/authorization check. Native browser file-picker evidence and the
+  final Technical Specification EN integration under IDTS-112 also remain
+  open.
 
 ## Next Handover Instruction
 
