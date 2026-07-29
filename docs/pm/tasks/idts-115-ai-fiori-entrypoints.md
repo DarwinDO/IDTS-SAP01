@@ -104,7 +104,7 @@ backend-derived Component Category, and the earlier Defect Category
 | Tester interactive cases | PENDING member-owned sign-in |
 | Developer interactive 403 cases | PENDING member-owned sign-in |
 | Qwen embedding primary | PASS observed |
-| Qwen structured primary | NOT PASS; safe fallback/provider error |
+| Qwen structured primary | PASS technical criterion: Classification, Handoff and Smart Assign each have at least one real primary-model `SUCCESS`; intermittent provider failure remains safely handled |
 | PM Create Bug browser console and persistence | PASS after cache-busted deployment acceptance |
 | Tester/Developer Create Bug role evidence | PENDING member-owned sign-in |
 
