@@ -131,7 +131,11 @@ async function main () {
   }), {
     fetchImpl: async (url, options) => {
       const body = JSON.parse(options.body)
-      compatibilityRequests.push({ model: body.model, format: body.response_format })
+      compatibilityRequests.push({
+        model: body.model,
+        format: body.response_format,
+        systemInstruction: body.messages?.[0]?.content
+      })
       if (body.response_format?.type === 'json_schema') {
         return jsonResponse(400, {
           error: {
@@ -155,11 +159,12 @@ async function main () {
       compatibilityRequests.every(request => request.model === 'alibaba/qwen3.7-flash')
   )
   check(
-    'compatibility retry uses Vercel legacy JSON structured format',
+    'compatibility retry omits response_format and adds a bounded JSON-only instruction',
     compatibilityRequests[0]?.format?.type === 'json_schema' &&
-      compatibilityRequests[1]?.format?.type === 'json' &&
-      compatibilityRequests[1]?.format?.name === 'IdtsCompatibilityContract' &&
-      compatibilityRequests[1]?.format?.schema?.type === 'object'
+      compatibilityRequests[1]?.format === undefined &&
+      compatibilityRequests[1]?.systemInstruction?.includes('IdtsCompatibilityContract') &&
+      compatibilityRequests[1]?.systemInstruction?.includes('valid JSON object only') &&
+      compatibilityRequests[1]?.systemInstruction?.includes('Do not use Markdown')
   )
   check(
     'successful compatibility retry remains primary Qwen without fallback',
@@ -167,6 +172,125 @@ async function main () {
       compatibilityResult.data.json.compatible === true &&
       compatibilityResult.modelAlias === 'alibaba/qwen3.7-flash' &&
       compatibilityResult.fallbackUsed === false
+  )
+
+  const malformedCompatibilityRequests = []
+  const malformedCompatibilityProvider = createAiProvider(gatewayConfig({
+    fallbackEnabled: true,
+    fallbackModelAlias: 'openai/gpt-5.4-nano'
+  }), {
+    fetchImpl: async (url, options) => {
+      const body = JSON.parse(options.body)
+      malformedCompatibilityRequests.push({ model: body.model, format: body.response_format })
+      if (body.model === 'openai/gpt-5.4-nano') {
+        return jsonResponse(200, { choices: [{ message: { content: '{"safeFallback":true}' } }] })
+      }
+      if (body.response_format?.type === 'json_schema') {
+        return jsonResponse(400, {
+          error: {
+            code: 'unsupported_response_format',
+            message: 'The selected model does not support response_format json_schema.'
+          }
+        })
+      }
+      return jsonResponse(200, { choices: [{ message: { content: 'not-json' } }] })
+    }
+  })
+  const malformedCompatibilityResult = await malformedCompatibilityProvider.structured({
+    featureType: 'classification',
+    schemaName: 'IdtsMalformedCompatibilityContract',
+    instruction: 'Return JSON only.',
+    input: { title: 'Synthetic malformed compatibility test' }
+  })
+  check(
+    'malformed prompt-only Qwen output uses only the existing bounded fallback',
+    malformedCompatibilityRequests.length === 3 &&
+      malformedCompatibilityRequests[0].model === 'alibaba/qwen3.7-flash' &&
+      malformedCompatibilityRequests[1].model === 'alibaba/qwen3.7-flash' &&
+      malformedCompatibilityRequests[1].format === undefined &&
+      malformedCompatibilityRequests[2].model === 'openai/gpt-5.4-nano'
+  )
+  check(
+    'fallback after malformed Qwen output remains sanitized and parseable',
+    malformedCompatibilityResult.ok &&
+      malformedCompatibilityResult.data.json.safeFallback === true &&
+      malformedCompatibilityResult.modelAlias === 'openai/gpt-5.4-nano' &&
+      malformedCompatibilityResult.fallbackUsed === true
+  )
+
+  const repeatedCompatibilityFailureRequests = []
+  const repeatedCompatibilityFailureProvider = createAiProvider(gatewayConfig({
+    fallbackEnabled: true,
+    fallbackModelAlias: 'openai/gpt-5.4-nano'
+  }), {
+    fetchImpl: async (url, options) => {
+      const body = JSON.parse(options.body)
+      repeatedCompatibilityFailureRequests.push(body.model)
+      return jsonResponse(400, {
+        error: {
+          code: body.response_format ? 'unsupported_response_format' : 'invalid_request',
+          message: body.response_format
+            ? 'The selected model does not support response_format json_schema.'
+            : 'The prompt-only request is invalid.'
+        }
+      })
+    }
+  })
+  const repeatedCompatibilityFailureResult = await repeatedCompatibilityFailureProvider.structured({
+    featureType: 'classification',
+    schemaName: 'IdtsRepeatedCompatibilityFailure',
+    instruction: 'Return JSON only.',
+    input: { title: 'Synthetic repeated compatibility failure' }
+  })
+  check(
+    'prompt-only compatibility failure does not cause a third request or fallback',
+    repeatedCompatibilityFailureRequests.length === 2 &&
+      repeatedCompatibilityFailureRequests.every(model => model === 'alibaba/qwen3.7-flash')
+  )
+  check(
+    'prompt-only compatibility failure remains sanitized',
+    repeatedCompatibilityFailureResult.ok === false &&
+      repeatedCompatibilityFailureResult.status === 'AI_PROVIDER_ERROR' &&
+      !containsUnsafeDiagnosticText(repeatedCompatibilityFailureResult)
+  )
+
+  const fallbackCompatibilityRequests = []
+  const fallbackCompatibilityProvider = createAiProvider(gatewayConfig({
+    fallbackEnabled: true,
+    fallbackModelAlias: 'openai/gpt-5.4-nano'
+  }), {
+    fetchImpl: async (url, options) => {
+      const body = JSON.parse(options.body)
+      fallbackCompatibilityRequests.push({ model: body.model, format: body.response_format })
+      if (body.model === 'alibaba/qwen3.7-flash') {
+        return jsonResponse(503, { error: { message: 'temporary upstream outage' } })
+      }
+      return jsonResponse(400, {
+        error: {
+          code: 'unsupported_response_format',
+          message: 'The fallback model rejected response_format json_schema.'
+        }
+      })
+    }
+  })
+  const fallbackCompatibilityResult = await fallbackCompatibilityProvider.structured({
+    featureType: 'classification',
+    schemaName: 'IdtsFallbackCompatibilityContract',
+    instruction: 'Return JSON only.',
+    input: { title: 'Synthetic fallback compatibility test' }
+  })
+  check(
+    'fallback model never enters the Qwen prompt-only compatibility path',
+    fallbackCompatibilityRequests.length === 2 &&
+      fallbackCompatibilityRequests[0].model === 'alibaba/qwen3.7-flash' &&
+      fallbackCompatibilityRequests[1].model === 'openai/gpt-5.4-nano' &&
+      fallbackCompatibilityRequests[1].format?.type === 'json_schema'
+  )
+  check(
+    'fallback response-format failure remains sanitized',
+    fallbackCompatibilityResult.ok === false &&
+      fallbackCompatibilityResult.status === 'AI_PROVIDER_ERROR' &&
+      !containsUnsafeDiagnosticText(fallbackCompatibilityResult)
   )
 
   const genericBadRequestModels = []

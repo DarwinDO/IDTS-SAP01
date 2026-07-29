@@ -4378,6 +4378,32 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   secret scan, agent rules, QA Depth self-test, AI DevKit and `git diff
   --check` also PASS. This is local technical evidence only; Qwen feature-level
   SUCCESS on SAP BTP is still pending merge and selective service deployment.
+- IDTS-114 follow-up red/green result: current BTP diagnostics showed all
+  tested `response_format` modes returning HTTP 400 while one prompt-only JSON
+  call on `alibaba/qwen3.7-flash` returned HTTP 200 with parseable JSON. The
+  focused regression failed at 23/24 before the follow-up change and passed
+  30/30 after the exact incompatibility retry was changed to omit
+  `response_format`, add a bounded JSON-only instruction, verify malformed
+  output uses only the existing bounded fallback, and prove there is no third
+  retry or compatibility retry on the fallback model. Full regression, merge,
+  selective BTP deployment and feature-level SUCCESS readback remain pending.
+- IDTS-114 follow-up verification: the post-review AI regression matrix passed
+  165/165 checks. Secret scan, agent rules, QA Depth self-test, AuthService and
+  BugService EDMX compile, AI DevKit and `git diff --check` also passed.
+  Ponytail review found no unnecessary dependency, abstraction, queue or retry
+  framework; the only remaining acceptance is merge, selective service deploy
+  and real feature readback.
+- Verification-command issue: `cds compile srv --to edmx` stopped because the
+  model exposes both `AuthService` and `BugService`, so CAP requires an explicit
+  service selector. Secret scan, agent rules and QA Depth self-test had already
+  passed. No product code or data was affected; compile is rerun separately
+  with `-s AuthService` and `-s BugService`.
+- Verification-command issue: the compact PowerShell regression wrapper used
+  `ErrorActionPreference=Stop`, so expected sanitized negative-test diagnostics
+  written to stderr were converted into a PowerShell `NativeCommandError`
+  before the wrapper could read npm's exit code. No test assertion or product
+  data failed. The matrix is rerun through `cmd /c` so the native exit code,
+  rather than expected stderr text, controls PASS/FAIL.
 - Git process issue: a PowerShell command used semicolon-separated
   `git diff --cached --check` and `git commit`, so the commit continued after
   the check reported Markdown trailing whitespace. The branch had not been

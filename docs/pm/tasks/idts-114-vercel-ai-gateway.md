@@ -28,14 +28,17 @@ Add a minimal Vercel AI Gateway provider adapter to the existing safe AI abstrac
   stable, the deployed UI has no Apply Classification action, no Duplicate
   Confirmation action, and no Operational Metrics page, and Tester/Developer
   role evidence still requires their approved interactive identities.
-- Qwen structured remediation is in progress on
-  `fix/idts-114-qwen-structured-primary-donhv`. Focused red tests proved the
-  adapter did not distinguish a response-format HTTP 400. The minimal fix keeps
-  `json_schema` first, adds one same-Qwen legacy JSON compatibility retry only
-  for a classified response-format incompatibility, distinguishes transient
-  429 from budget exhaustion, and keeps diagnostics sanitized. Local focused
-  provider result: 24/24 PASS; wider regression and BTP feature acceptance are
-  still required before this item can claim primary Qwen success.
+- PR #216 merged the first Qwen error-classification remediation at merge SHA
+  `8be1081f83b903e78a8b2e8728aa1a0d927e8103`. Selective SAP BTP deployment
+  proved that the current Qwen route still rejects all tested
+  `response_format` variants, including the legacy JSON format.
+- A bounded synthetic BTP diagnostic returned HTTP 200 with parseable JSON on
+  the same `alibaba/qwen3.7-flash` model when `response_format` was omitted.
+  Follow-up branch `fix/idts-114-qwen-prompt-json-compat-donhv` therefore keeps
+  `json_schema` first and changes only the exact incompatibility retry to one
+  prompt-only JSON request. Generic HTTP 400, transient 429, exhausted budget
+  and OpenAI fallback policy remain unchanged. Local focused result is 30/30
+  PASS; feature-level BTP acceptance remains required.
 
 ## BTP browser acceptance handoff
 

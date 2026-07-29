@@ -45,16 +45,21 @@ class VercelGatewayProvider {
           error?.gatewayReason === 'response_format_incompatible'
         if (!canUseCompatibilityFormat) throw error
 
-        // Vercel documents this legacy structured format for model/provider
-        // compatibility. Retry only the primary Qwen call and only after a
-        // specifically classified response-format HTTP 400.
+        // A controlled BTP smoke observed parseable JSON when the current Qwen
+        // route omitted response_format. Retry only the primary model and only
+        // after the specifically classified response-format HTTP 400.
         response = await this.#chatCompletion(model, {
-          messages,
-          response_format: {
-            type: 'json',
-            name: normalizedSchemaName,
-            schema
-          }
+          messages: [
+            {
+              role: 'system',
+              content: [
+                instruction,
+                `Return one valid JSON object only for contract ${normalizedSchemaName}.`,
+                'Do not use Markdown, code fences, comments, or text outside the JSON object.'
+              ].filter(Boolean).join('\n\n')
+            },
+            messages[1]
+          ]
         })
       }
       try {
