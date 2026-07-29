@@ -23,6 +23,13 @@ function safeToken (value, fallback, maxLength) {
   return sanitizeDiagnosticToken(redacted || fallback, fallback).slice(0, maxLength)
 }
 
+function safeModelAlias (value, fallback = 'not-configured') {
+  // Model ID is operational metadata, not a URL or secret. Keep `provider/model` readable for audit.
+  const redacted = redactSensitiveText(value, 120).trim().toLowerCase()
+  if (/^[a-z0-9][a-z0-9_.\/-]{0,119}$/.test(redacted) && !redacted.includes('..')) return redacted
+  return safeToken(value, fallback, 120)
+}
+
 function normalizeLatency (value) {
   if (value === null || value === undefined || value === '') return null
   const number = Number(value)
@@ -44,7 +51,7 @@ function safeOperationalMetric (result = {}) {
     featureType: safeToken(result.featureType, 'GENERAL', 40).toUpperCase(),
     operation: safeToken(result.operation, 'unknown', 40).toLowerCase(),
     providerAlias: safeToken(result.providerAlias, 'not-configured', 80),
-    modelAlias: safeToken(result.modelAlias, 'not-configured', 80),
+    modelAlias: safeModelAlias(result.modelAlias),
     status,
     outcome: outcomeForStatus(status),
     latencyMs: normalizeLatency(result.durationMs)
@@ -72,7 +79,7 @@ function aggregateAiOperationalMetrics (rows = [], { windowStart, windowEnd } = 
   for (const row of rows) {
     const featureTypeCode = safeToken(row.featureType_code, 'UNKNOWN', 40).toUpperCase()
     const providerAlias = safeToken(row.providerAlias, 'not-configured', 80)
-    const modelAlias = safeToken(row.modelAlias, 'not-configured', 80)
+    const modelAlias = safeModelAlias(row.modelAlias)
     const key = `${featureTypeCode}\u0000${providerAlias}\u0000${modelAlias}`
     const group = groups.get(key) || {
       windowStart,
@@ -162,5 +169,6 @@ module.exports = {
   normalizeWindowDays,
   outcomeForStatus,
   readAiOperationalMetrics,
+  safeModelAlias,
   safeOperationalMetric
 }
