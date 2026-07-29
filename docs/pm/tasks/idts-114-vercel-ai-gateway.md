@@ -13,7 +13,7 @@ Add a minimal Vercel AI Gateway provider adapter to the existing safe AI abstrac
 - Implemented a native-fetch Vercel adapter with structured chat, embeddings, bounded timeout, and one safe fallback attempt.
 - Added non-secret runtime override names and private configuration example placeholders.
 - Completed deterministic provider and existing AI regressions; see `docs/pm/evidence/idts-114/README.md`.
-- PR #209 merged into `dev` at `d9a1df1b157f3c50c75b6861259cfb284455c147`.
+- PR #211 merged into `dev` at `016a6067de1c3c7725b6f74f23b90ef6b8b5f7fa`.
 - SAP BTP now uses Qwen `alibaba/qwen3.7-flash` for structured generation and
   `alibaba/qwen3-embedding-0.6b` for embeddings. One bounded OpenAI fallback is
   enabled with `openai/gpt-5.4-nano` and `openai/text-embedding-3-small`.
@@ -22,7 +22,24 @@ Add a minimal Vercel AI Gateway provider adapter to the existing safe AI abstrac
   plain chat connectivity passed, but Ling JSON-Schema structured output
   returned HTTP 400 and was not selected as the production primary model.
 - No secret is committed or copied into evidence. Full authenticated browser
-  acceptance of the four AI actions remains a separate final check.
+  acceptance of the four AI actions is now partially executed on the SAP BTP
+  AppRouter. Review-state persistence and no-mutation checks passed for the
+  PM flow, but IDTS-114 remains In Progress because provider calls were not
+  stable, the deployed UI has no Apply Classification action, no Duplicate
+  Confirmation action, and no Operational Metrics page, and Tester/Developer
+  role evidence still requires their approved interactive identities.
+
+## BTP browser acceptance handoff
+
+- Evidence root: `docs/pm/evidence/idts-114/btp-browser/`.
+- Test object: `BUG-0018`; no new business Bug was created or deleted.
+- Baseline SHA: `016a6067de1c3c7725b6f74f23b90ef6b8b5f7fa`.
+- Primary models: Qwen structured `alibaba/qwen3.7-flash`; embedding `alibaba/qwen3-embedding-0.6b`.
+- Bounded fallbacks: OpenAI structured `openai/gpt-5.4-nano`; embedding `openai/text-embedding-3-small`.
+- Result truth: Similar Bugs, Classification review, Handoff Summary and Smart Assign UI entry points were exercised by PM; review audit persisted and Bug workflow fields did not mutate. Provider-live structured success is not claimed where the UI used safe fallback.
+- Blockers: Apply Classification, Duplicate Confirmation and Operational Metrics have no deployed UI entry point; Tester/Developer role matrix requires member-owned SAP identities.
+- Follow-up bug: IDTS-115 tracks the missing Fiori UI entry points and is linked to IDTS-114, IDTS-93, IDTS-95 and IDTS-97.
+- Security: selected evidence excludes credentials, tokens, cookies, DB URLs, private endpoints, full email addresses and raw provider payloads.
 
 ## Out of scope
 

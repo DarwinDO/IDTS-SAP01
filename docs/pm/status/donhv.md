@@ -4105,3 +4105,111 @@ Vietnamese:
   failures after rebuilding `better-sqlite3`. Remaining acceptance is an
   authenticated browser smoke across the four AI actions; no full feature PASS
   is claimed yet.
+- IDTS-114 BTP browser acceptance baseline: the public CAP `/health` endpoint
+  returned HTTP 200, while the AppRouter root returned the expected HTTP 302
+  to the protected application/XSUAA path. A first probe incorrectly treated
+  the AppRouter `/health` response body as a public health result; this is a
+  route/diagnostic limitation, not a product defect. Classification: tooling
+  and environment verification issue; corrected with separate service and
+  AppRouter probes before browser testing. No application data or configuration
+  changed.
+- IDTS-114 BTP browser acceptance is currently blocked at the application shell:
+  the authenticated AppRouter page is blank and Chrome console reports 404/load
+  failures for `idts/bugmanagementui/Component-preload.js` and
+  `idts/bugmanagementui/Component.js`, followed by `Component.create()` failure.
+  Classification: environment/deployment or HTML5 content-routing defect under
+  investigation, not an AI feature result. No AI action was executed and no
+  business data changed. Evidence is the sanitized browser console record from
+  the authenticated BTP tab; next owner is DonHV to verify HTML5 content
+  publication/AppRouter static-resource routing on the deployed SHA before
+  resuming IDTS-114 feature acceptance.
+- A read-only browser resource probe attempted to use page-scope `fetch`, but
+  this Chrome control surface does not expose `fetch` in its evaluation scope.
+  Classification: test-harness limitation; no request result or application
+  state was changed. The console evidence remains authoritative for the static
+  resource failure.
+- A source inspection command initially used the wrong manifest path
+  (`app/bug-management-ui/manifest.json` instead of
+  `app/bug-management-ui/webapp/manifest.json`). Classification: tooling/path
+  mistake; corrected by reading the actual `webapp` path. No files changed.
+- Local UI artifact verification in the fresh worktree could not start because
+  `npm run build` under `app/bug-management-ui` found no `ui5` executable; the
+  worktree dependencies are not installed. Classification: local test-harness
+  dependency blocker, separate from the BTP shell failure. No files or runtime
+  configuration changed.
+- Installing the UI worktree dependencies succeeded, but npm reported the
+  existing dependency audit baseline as `26 vulnerabilities` (2 moderate, 24
+  high) and deprecated transitive packages. Classification: dependency/security
+  finding observed during verification; not changed in this acceptance branch,
+  and no `npm audit fix` was run because that would expand scope and could alter
+  the deployed artifact.
+- Chrome direct navigation to the protected AppRouter OData URL was blocked by
+  the local browser/client policy (`ERR_BLOCKED_BY_CLIENT`) before a response
+  could be inspected. Classification: browser tooling/environment limitation,
+  not an OData product failure. The acceptance continues through the visible
+  Fiori UI and its normal network traffic; no token, cookie or credential was
+  inspected.
+- Both DOM-assisted and coordinate-based attempts to scroll the Fiori
+  virtualized list timed out in Chrome before the scroll gesture completed.
+  Classification: browser test-harness limitation; no row was selected and no
+  application data changed. The browser session remains authenticated and
+  usable through normal visible controls.
+- The browser's isolated read-only page evaluator does not expose the page's
+  global `sap` object, so it cannot be used to inspect UI5 model bindings or
+  query loaded OData contexts. Classification: browser test-harness limitation;
+  the attempt failed before any interaction or data change.
+- The earlier blank AppRouter shell recovered after a normal browser reload;
+  the authenticated Fiori shell and Object Page now load successfully. The
+  initial component-load console entries are therefore recorded as a transient
+  stale-page/load condition, not an active deployment blocker. Local UI5 build
+  also passed after installing the fresh-worktree dependencies.
+- HANA Database Explorer connected as `DBADMIN` can list the two generated HDI
+  schemas and their `IDTS_CAP_BUGS` tables, but a direct read of either HDI
+  schema was rejected with HANA error 258 (`insufficient privilege`).
+  Classification: environment/authorization limitation of the database-admin
+  browser connection, not an IDTS product defect. No database data changed;
+  acceptance will obtain the QA Bug identity through the bound application
+  context instead of broadening DBADMIN privileges.
+- Similar Bugs on BTP returned ranked candidates and the PM review action
+  recorded `Accepted` with DonHV as reviewer. After a page reload, invoking
+  `Find Similar Bugs` created a new `PENDING` suggestion rather than reopening
+  the previously reviewed suggestion. Classification is provisionally product
+  behavior under investigation: the next check must confirm whether the prior
+  audit row remains persisted and whether creating a fresh suggestion is the
+  intended UI contract. Bug workflow fields were not intentionally changed.
+- Classification Suggestion on BTP returned the five expected review rows and
+  the PM could record an `Accepted` audit decision. However, the deployed UI and
+  `app/bug-management-ui/webapp/ext/actions/ClassificationReview.js` expose
+  only Accept/Reject/Ignore/Close; no `Apply Classification` entry point exists.
+  Classification: product functional gap. The CAP action exists, but the PM/
+  Tester apply flow and Developer 403 behavior cannot be accepted through the
+  BTP UI until a separate runtime fix adds a deliberate apply action. IDTS-114
+  must remain In Progress unless this criterion is formally removed.
+- A temporary profile-popover screenshot included the signed-in email address.
+  Classification: evidence-sanitization/tooling issue fixed immediately. The
+  file was deleted before Git staging and will not be part of the evidence pack;
+  PM identity/role is recorded in the case manifest without exposing the email.
+
+## 2026-07-29 - IDTS-114 SAP BTP feature-level AI acceptance
+
+| Classification | Symptom / scope | Root cause or interpretation | Status / evidence | Next owner |
+| --- | --- | --- | --- | --- |
+| Provider capability / environment issue | Similar Bugs succeeded once with Qwen embeddings, but a later Similar Bugs request returned a safe fallback; Classification, Handoff Summary and Smart Assign explanation also used safe fallback responses. | Sanitized BTP logs recorded `VERCEL_GATEWAY_HTTP_429` for the later embedding/structured calls and `VERCEL_GATEWAY_HTTP_400` for Smart Assign. The UI did not expose raw provider diagnostics. | Feature-level safety and no-mutation are verified; stable live-Qwen structured success is **not** PASS. Evidence is in the IDTS-114 BTP browser manifests and the acceptance report. | DonHV / provider configuration owner |
+| Product functional gap | Classification Review provides Accept, Reject, Ignore and Close, but no user-visible `Apply Classification` entry point. | `applyClassificationSuggestion` exists in CAP, but the deployed UI does not expose the PM/Tester apply action. | **FAIL / not testable through BTP UI**. PM/Tester Apply and Developer 403 cannot be honestly claimed. A separate runtime/UI defect must be tracked. | DonHV / FE-runtime follow-up |
+| Product functional gap | Similar Bugs review UI has no explicit duplicate-confirmation action, and no operational-metrics UI entry point was found. | `confirmDuplicateSuggestion` and `readAiOperationalMetrics` exist as backend capabilities, but no corresponding user-facing action/page is present in the deployed UI. | **BLOCKED / not testable through BTP UI**. Do not claim duplicate confirmation or PM metrics acceptance from backend-only evidence. | DonHV / FE-runtime follow-up |
+| Test/environment blocker | Tester and Developer role-matrix cases could not be executed in this PM Chrome session. | No approved interactive Tester/Developer SAP identity session was available; identities must not be impersonated. | **BLOCKED**. PM shell and PM review flows were tested; Tester/Developer results remain pending member-owned sign-in. | SangVN / DatDT / NhanT |
+| Test-harness / evidence issue | A profile screenshot briefly contained the full signed-in email. | The first capture was not sanitized before persistence. | Fixed immediately: file deleted before staging; no credential or email is in the selected evidence pack. | DonHV |
+
+Post-review safe readback for BUG-0018 confirmed no unintended Bug mutation after Similar Bugs, Classification review branches, Handoff Summary and Smart Assign review:
+
+- Status remains `ASSIGNED`.
+- Assignee and next processor remain unchanged.
+- `modifiedAt` remains `2026-07-28T13:37:02.976`.
+- `HistoryEvents` remains 4 and `DuplicateLinks` remains 0.
+- Classification `ACCEPTED`, `REJECTED` and `IGNORED` audit rows persist; the Similar Bugs accepted audit row also persists.
+
+Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be opened, review states persist, safe fallback/no-mutation behavior is evidenced, and no tested endpoint produced HTTP 5xx. Full IDTS-114 acceptance is still blocked by provider capability instability, the missing Apply Classification UI, missing Duplicate Confirmation and Metrics UI entry points, and unavailable Tester/Developer interactive identities.
+
+- Tooling issue: a final evidence text scan was first written with Bash `|| $true` syntax and failed in PowerShell before scanning any file. It changed no files and exposed no data. The command was corrected to PowerShell-compatible handling before the final verification pass.
+- Tooling issue: the first `gh pr create` attempt used Bash heredoc syntax (`<<'EOF'`) in PowerShell and was rejected before GitHub received a request. No PR or repository content was changed. The PR was retried with a PowerShell-compatible body argument.
+- Process/tooling issue: after the PR #212 body was corrected, rerunning the old GitHub Actions run still used the original pull-request event payload and therefore reported all evidence headings as missing. Local validation of the live PR body passed all 11 required sections. The fix is to push this status update so GitHub creates a fresh `synchronize` event with the current PR body; no branch-protection bypass is used.
