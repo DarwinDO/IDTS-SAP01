@@ -4492,3 +4492,9 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   the existing lockfile-installed dependency tree, and is not part of the Git
   diff or deployment source. It will be removed together with this isolated
   worktree after release verification.
+- GitHub Actions event issue: PR #220 was created before its Knowledge Gate
+  block was expanded to the required field format. Local validation of the
+  updated body passes, but rerunning the original failed workflow reused the
+  immutable `pull_request` event payload and therefore repeated the old-body
+  failure. A small audit-log commit triggers a fresh `synchronize` event so CI
+  evaluates the current PR body; no gate is bypassed.
