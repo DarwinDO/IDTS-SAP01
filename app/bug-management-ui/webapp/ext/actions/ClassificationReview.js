@@ -17,9 +17,11 @@ sap.ui.define([
     "sap/m/MessageStrip",
     "sap/m/VBox",
     "sap/m/MessageBox",
+    "sap/m/MessageToast",
     "sap/ui/model/json/JSONModel",
     "../ai/AiReviewUi",
-    "../ai/AiSuggestionReview"
+    "../ai/AiSuggestionReview",
+    "../login/LoginController"
 ], function (
     Dialog,
     Button,
@@ -31,9 +33,11 @@ sap.ui.define([
     MessageStrip,
     VBox,
     MessageBox,
+    MessageToast,
     JSONModel,
     AiReviewUi,
-    AiSuggestionReview
+    AiSuggestionReview,
+    LoginSession
 ) {
     "use strict";
 
@@ -107,6 +111,30 @@ sap.ui.define([
         return function (key, args) {
             return getText(view, key, args);
         };
+    }
+
+    function isPmOrTester() {
+        // Chỉ quyết định visibility trên UI; CAP vẫn là lớp phân quyền cuối cho action Apply.
+        var user = LoginSession.getUser && LoginSession.getUser();
+        return !!user && (user.role_code === "PM" || user.role_code === "TESTER");
+    }
+
+    function refreshBugContext(bugContext, model) {
+        // Sau Apply, đọc lại Bug từ backend để UI không tự đoán field nào đã thay đổi.
+        if (bugContext && typeof bugContext.requestRefresh === "function") {
+            return bugContext.requestRefresh();
+        }
+        if (model && typeof model.refresh === "function") {
+            model.refresh();
+        }
+        return Promise.resolve();
+    }
+
+    function applyClassification(model, suggestionID) {
+        // Gọi action đã có; backend kiểm role, review state, expiry, catalog và stale source.
+        var operation = model.bindContext("/applyClassificationSuggestion(...)", undefined, { $$ownRequest: true });
+        operation.setParameter("suggestionID", suggestionID);
+        return operation.invoke("$direct");
     }
 
     function normalizeResult(result) {
@@ -265,7 +293,7 @@ sap.ui.define([
         };
     }
 
-    function buildDialog(view, model, bug) {
+    function buildDialog(view, model, bug, bugContext) {
         // Tạo JSONModel + Table, invoke action, rồi cập nhật rows. Lỗi chỉ hiện MessageBox.
         var state = new JSONModel({
             rows: [],
@@ -275,11 +303,56 @@ sap.ui.define([
             reviewStateText: getText(view, "aiSuggestionReviewPending"),
             reviewStateState: "Information",
             reviewedByText: "",
-            reviewActionEnabled: false
+            reviewActionEnabled: false,
+            applyActionVisible: isPmOrTester(),
+            applyActionEnabled: false
         });
         function submitReview(actionName) {
             return AiSuggestionReview.submit(model, state, actionName, function (key, args) {
                 return getText(view, key, args);
+            }).then(function (result) {
+                var reviewStateCode = result && result.reviewStateCode;
+                state.setProperty(
+                    "/applyActionEnabled",
+                    isPmOrTester() && reviewStateCode === "ACCEPTED"
+                );
+                return result;
+            });
+        }
+
+        function confirmApply() {
+            MessageBox.confirm(getText(view, "classificationApplyConfirm"), {
+                actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+                emphasizedAction: MessageBox.Action.OK,
+                onClose: function (action) {
+                    if (action !== MessageBox.Action.OK || !state.getProperty("/applyActionEnabled")) {
+                        return;
+                    }
+
+                    state.setProperty("/busy", true);
+                    state.setProperty("/applyActionEnabled", false);
+                    var applyCompleted = false;
+                    applyClassification(model, state.getProperty("/suggestionID"))
+                        .then(function () {
+                            applyCompleted = true;
+                            return refreshBugContext(bugContext, model);
+                        })
+                        .then(function () {
+                            MessageToast.show(getText(view, "classificationApplySuccess"));
+                        })
+                        .catch(function () {
+                            if (!applyCompleted) {
+                                state.setProperty("/applyActionEnabled", true);
+                            }
+                            MessageBox.error(getText(
+                                view,
+                                applyCompleted ? "classificationRefreshFailed" : "classificationApplyFailed"
+                            ));
+                        })
+                        .finally(function () {
+                            state.setProperty("/busy", false);
+                        });
+                }
             });
         }
 
@@ -393,6 +466,13 @@ sap.ui.define([
                     }
                 }),
                 new Button({
+                    text: getText(view, "classificationApplyButton"),
+                    type: "Emphasized",
+                    visible: "{classificationReview>/applyActionVisible}",
+                    enabled: "{classificationReview>/applyActionEnabled}",
+                    press: confirmApply
+                }),
+                new Button({
                     text: getText(view, "classificationReviewCloseButton"),
                     press: function () {
                         dialog.close();
@@ -444,7 +524,7 @@ sap.ui.define([
             }
 
             return readBugData(bugContext).then(function (bug) {
-                var dialog = buildDialog(view, bugContext.getModel(), bug);
+                var dialog = buildDialog(view, bugContext.getModel(), bug, bugContext);
                 dialog.open();
                 return dialog;
             });

@@ -295,3 +295,6 @@ English bundle vẫn mirror helper text, label nút, label dialog, safe failure 
 ## IDTS-94 English review-decision copy
 
 This locale mirrors `aiSuggestionReviewUnavailable`, `handoffSummaryReviewNotice`, and `smartAssignReviewNotice` from the base bundle. Keep both bundles aligned so the review-only/no-mutation meaning is never replaced by a raw key in English locale.
+## IDTS-115 additions
+
+The new Classification Apply, Duplicate Confirmation, and PM AI Activity labels are defined in this bundle. They are user-facing text only; no provider, prompt, token, SQL, endpoint, or raw diagnostic is exposed. The default bundle keeps the same keys for parity.

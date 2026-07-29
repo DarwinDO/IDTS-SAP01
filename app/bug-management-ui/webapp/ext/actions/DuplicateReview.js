@@ -18,9 +18,11 @@ sap.ui.define([
     "sap/m/MessageStrip",
     "sap/m/VBox",
     "sap/m/MessageBox",
+    "sap/m/MessageToast",
     "sap/ui/model/json/JSONModel",
     "../ai/AiReviewUi",
-    "../ai/AiSuggestionReview"
+    "../ai/AiSuggestionReview",
+    "../login/LoginController"
 ], function (
     Dialog,
     Button,
@@ -33,9 +35,11 @@ sap.ui.define([
     MessageStrip,
     VBox,
     MessageBox,
+    MessageToast,
     JSONModel,
     AiReviewUi,
-    AiSuggestionReview
+    AiSuggestionReview,
+    LoginSession
 ) {
     "use strict";
 
@@ -84,6 +88,31 @@ sap.ui.define([
         return function (key, args) {
             return getText(view, key, args);
         };
+    }
+
+    function isPmOrTester() {
+        // UI chỉ ẩn/hiện action; backend vẫn kiểm quyền và candidate một lần nữa.
+        var user = LoginSession.getUser && LoginSession.getUser();
+        return !!user && (user.role_code === "PM" || user.role_code === "TESTER");
+    }
+
+    function refreshBugContext(bugContext, model) {
+        // Đọc lại association DuplicateLinks sau khi backend xác nhận thành công.
+        if (bugContext && typeof bugContext.requestRefresh === "function") {
+            return bugContext.requestRefresh();
+        }
+        if (model && typeof model.refresh === "function") {
+            model.refresh();
+        }
+        return Promise.resolve();
+    }
+
+    function confirmDuplicate(model, suggestionID, candidateBugID) {
+        // Chỉ gửi hai ID; CAP tự xác minh suggestion đã Accept và candidate thuộc kết quả đã lưu.
+        var operation = model.bindContext("/confirmDuplicateSuggestion(...)", undefined, { $$ownRequest: true });
+        operation.setParameter("suggestionID", suggestionID);
+        operation.setParameter("candidateBugID", candidateBugID);
+        return operation.invoke("$direct");
     }
 
     function normalizeResult(result) {
@@ -177,7 +206,7 @@ sap.ui.define([
         }).then(normalizeResult);
     }
 
-    function buildDialog(view, model, bug) {
+    function buildDialog(view, model, bug, bugContext) {
         // Dựng dialog trước ở trạng thái busy, sau đó nạp rows hoặc hiện lỗi thân thiện.
         var state = new JSONModel({
             rows: [],
@@ -187,18 +216,88 @@ sap.ui.define([
             reviewStateText: getText(view, "aiSuggestionReviewPending"),
             reviewStateState: "Information",
             reviewedByText: "",
-            reviewActionEnabled: false
+            reviewActionEnabled: false,
+            confirmActionVisible: isPmOrTester(),
+            confirmActionEnabled: false,
+            selectedCandidateBugID: null,
+            selectedCandidateBugNumber: "",
+            reviewAccepted: false,
+            duplicateConfirmed: false
         });
+        function updateConfirmEnabled() {
+            state.setProperty(
+                "/confirmActionEnabled",
+                isPmOrTester() &&
+                    state.getProperty("/reviewAccepted") === true &&
+                    Boolean(state.getProperty("/selectedCandidateBugID")) &&
+                    state.getProperty("/duplicateConfirmed") !== true &&
+                    state.getProperty("/busy") !== true
+            );
+        }
         function submitReview(actionName) {
             return AiSuggestionReview.submit(model, state, actionName, function (key, args) {
                 return getText(view, key, args);
+            }).then(function (result) {
+                var reviewStateCode = result && result.reviewStateCode;
+                state.setProperty("/reviewAccepted", reviewStateCode === "ACCEPTED");
+                updateConfirmEnabled();
+                return result;
+            });
+        }
+
+        function confirmSelectedDuplicate() {
+            var candidateBugNumber = state.getProperty("/selectedCandidateBugNumber");
+            MessageBox.confirm(getText(view, "duplicateConfirmPrompt", [candidateBugNumber]), {
+                actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+                emphasizedAction: MessageBox.Action.OK,
+                onClose: function (action) {
+                    if (action !== MessageBox.Action.OK || !state.getProperty("/confirmActionEnabled")) {
+                        return;
+                    }
+
+                    state.setProperty("/busy", true);
+                    state.setProperty("/confirmActionEnabled", false);
+                    confirmDuplicate(
+                        model,
+                        state.getProperty("/suggestionID"),
+                        state.getProperty("/selectedCandidateBugID")
+                    )
+                        .then(function () {
+                            state.setProperty("/duplicateConfirmed", true);
+                            return refreshBugContext(bugContext, model);
+                        })
+                        .then(function () {
+                            MessageToast.show(getText(view, "duplicateConfirmSuccess", [candidateBugNumber]));
+                        })
+                        .catch(function () {
+                            MessageBox.error(getText(
+                                view,
+                                state.getProperty("/duplicateConfirmed")
+                                    ? "duplicateRefreshFailed"
+                                    : "duplicateConfirmFailed"
+                            ));
+                        })
+                        .finally(function () {
+                            state.setProperty("/busy", false);
+                            updateConfirmEnabled();
+                        });
+                }
             });
         }
 
         var table = new Table({
+            mode: "SingleSelectMaster",
             growing: true,
             growingThreshold: 5,
             noDataText: "{duplicateReview>/noDataText}",
+            selectionChange: function (event) {
+                var item = event.getParameter("listItem");
+                var context = item && item.getBindingContext("duplicateReview");
+                var candidate = context && context.getObject();
+                state.setProperty("/selectedCandidateBugID", candidate && candidate.bugID || null);
+                state.setProperty("/selectedCandidateBugNumber", candidate && candidate.bugNumber || "");
+                updateConfirmEnabled();
+            },
             columns: [
                 new Column({
                     width: "14rem",
@@ -317,6 +416,13 @@ sap.ui.define([
                     }
                 }),
                 new Button({
+                    text: getText(view, "duplicateConfirmButton"),
+                    type: "Emphasized",
+                    visible: "{duplicateReview>/confirmActionVisible}",
+                    enabled: "{duplicateReview>/confirmActionEnabled}",
+                    press: confirmSelectedDuplicate
+                }),
+                new Button({
                     text: getText(view, "duplicateReviewCloseButton"),
                     press: function () {
                         dialog.close();
@@ -351,6 +457,7 @@ sap.ui.define([
             })
             .finally(function () {
                 state.setProperty("/busy", false);
+                updateConfirmEnabled();
             });
 
         return dialog;
@@ -370,7 +477,7 @@ sap.ui.define([
             return bugContext.requestObject().then(function (bug) {
                 return requestMissingBugProperties(bugContext, bug || {});
             }).then(function (bug) {
-                var dialog = buildDialog(view, bugContext.getModel(), bug);
+                var dialog = buildDialog(view, bugContext.getModel(), bug, bugContext);
                 dialog.open();
                 return dialog;
             });

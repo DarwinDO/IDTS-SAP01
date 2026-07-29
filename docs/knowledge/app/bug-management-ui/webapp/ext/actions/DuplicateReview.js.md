@@ -165,3 +165,12 @@ Primary owner: DatDT. Backup: DonHV. Debug at the button callback and `AiSuggest
 Dialog hiện có Accept, Reject và Ignore khi kết quả có `suggestionID` đã persist. Một quyết định gọi review action tương ứng, thay Pending bằng trạng thái đã lưu kèm reviewer/time, khóa cả ba nút quyết định và luôn tắt busy state. Nút Close vẫn dùng được. Không quyết định nào tạo `DuplicateLinks` hoặc đổi Bug.
 
 Owner chính: DatDT. Backup: DonHV. Khi debug, bắt đầu tại callback nút và `AiSuggestionReview.submit()`; xem suggestion ID, review state trả về, reviewer/time và `/reviewActionEnabled`. Kiểm cùng `srv/ai/review.js`, file i18n, static QA IDTS-92 và browser smoke IDTS-74. Giữ lỗi chung, không hiển thị raw OData/backend detail.
+## IDTS-115 — Confirm Duplicate
+
+English: The existing Similar Bugs dialog uses single selection and stores `selectedCandidateBugID`. `confirmSelectedDuplicate()` is enabled only after an `ACCEPTED` suggestion, one candidate selection, PM/Tester visibility, and an idle dialog. It calls `confirmDuplicateSuggestion` with two IDs, refreshes the Bug, and disables the action after success. Opening, selecting, or accepting alone never creates `DuplicateLinks`. On failure, busy is cleared and a safe retry is restored.
+
+Debug order: `openDialog()` → `readSimilarBugs()` → table `selectionChange` → `updateConfirmEnabled()` → `confirmSelectedDuplicate()` → `confirmDuplicate()` → Network → CAP self-link/candidate/reverse-link validation → refresh. Observe candidate ID, review state, busy, HTTP status, and DuplicateLinks count.
+
+Tiếng Việt: Dialog Similar Bugs dùng chọn một candidate và lưu `selectedCandidateBugID`. Nút Confirm chỉ bật sau `ACCEPTED`, chọn đúng một dòng, role PM/Tester và dialog không busy. UI gọi action CAP bằng hai ID, refresh Bug và khóa nút sau khi thành công; không tự tạo DuplicateLinks khi chỉ mở/chọn/review. Khi lỗi, busy phải tắt và retry an toàn được khôi phục.
+
+Retry boundary: `finally` clears busy before recalculating the button. A failed CAP confirmation can be retried, while a successful confirmation followed by refresh failure remains disabled through `/duplicateConfirmed` to avoid a duplicate request.
