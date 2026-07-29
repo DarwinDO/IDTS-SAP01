@@ -63,6 +63,14 @@ Local PM acceptance created `BUG-0005` on the first attempt and confirmed all
 three reproduction fields after reload. Evidence:
 `docs/pm/evidence/idts-115/create-draft-binding/`.
 
+The same source fix was selectively deployed to SAP BTP at merge SHA
+`4fa1eaa45a7e56c71ea628127ebf9172ef02c14e`. A cache-busted PM browser run
+created `BUG-0022` on the first attempt. All reproduction fields remained
+visible after reload, HANA readback confirmed their values and the
+backend-derived Component Category, and the earlier Defect Category
+`invalid segment` warning did not recur. Evidence:
+`docs/pm/evidence/idts-115/create-draft-binding/btp/`.
+
 ## Local verification
 
 | Gate | Result |
@@ -97,6 +105,7 @@ three reproduction fields after reload. Evidence:
 | Developer interactive 403 cases | PENDING member-owned sign-in |
 | Qwen embedding primary | PASS observed |
 | Qwen structured primary | NOT PASS; safe fallback/provider error |
-| Browser console clean | PARTIAL; create-flow binding errors require follow-up |
+| PM Create Bug browser console and persistence | PASS after cache-busted deployment acceptance |
+| Tester/Developer Create Bug role evidence | PENDING member-owned sign-in |
 
 Evidence: `docs/pm/evidence/idts-115/`.
