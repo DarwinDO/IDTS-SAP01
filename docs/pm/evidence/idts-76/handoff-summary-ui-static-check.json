@@ -1,6 +1,6 @@
 {
   "task": "IDTS-76",
-  "checkedAt": "2026-07-24T17:34:45.367Z",
+  "checkedAt": "2026-07-29T17:35:18.302Z",
   "checks": [
     {
       "label": "history section opens the handoff review dialog",

@@ -96,6 +96,11 @@ sap.ui.define([
         return !!user && (user.role_code === "PM" || user.role_code === "TESTER");
     }
 
+    function hasPersistedBugSource(bug) {
+        // Root create drafts have no active Bug row yet, so their transient ID must never be sent as sourceBugID.
+        return !!bug && (bug.IsActiveEntity === true || bug.HasActiveEntity === true);
+    }
+
     function refreshBugContext(bugContext, model) {
         // Đọc lại association DuplicateLinks sau khi backend xác nhận thành công.
         if (bugContext && typeof bugContext.requestRefresh === "function") {
@@ -161,6 +166,8 @@ sap.ui.define([
 
         var properties = [
             "ID",
+            "IsActiveEntity",
+            "HasActiveEntity",
             "title",
             "description",
             "status_code",
@@ -186,7 +193,7 @@ sap.ui.define([
         // Gọi CAP action findSimilarBugs; action chỉ tìm/gợi ý, không tạo DuplicateLinks.
         // Breakpoint ở đây và Network khi danh sách rỗng/sai.
         var operation = model.bindContext("/suggestSimilarBugs(...)", undefined, { $$ownRequest: true });
-        operation.setParameter("sourceBugID", bug.ID || null);
+        operation.setParameter("sourceBugID", hasPersistedBugSource(bug) ? bug.ID : null);
         operation.setParameter("title", bug.title || null);
         operation.setParameter("description", bug.description || null);
         operation.setParameter("statusCode", bug.status_code || null);
@@ -477,6 +484,10 @@ sap.ui.define([
             return bugContext.requestObject().then(function (bug) {
                 return requestMissingBugProperties(bugContext, bug || {});
             }).then(function (bug) {
+                if (!hasPersistedBugSource(bug)) {
+                    MessageToast.show(getText(view, "duplicateReviewAfterSave"));
+                    return null;
+                }
                 var dialog = buildDialog(view, bugContext.getModel(), bug, bugContext);
                 dialog.open();
                 return dialog;

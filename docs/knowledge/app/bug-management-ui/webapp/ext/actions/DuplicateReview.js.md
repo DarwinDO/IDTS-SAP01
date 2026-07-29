@@ -1,5 +1,11 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/actions/DuplicateReview.js`
 
+## IDTS-115 persisted-source boundary
+
+`hasPersistedBugSource()` permits `sourceBugID` only for an active Bug or an edit draft with `HasActiveEntity=true`. A root create draft stops before the dialog/backend call and shows a save-first message. This prevents a transient draft UUID from being looked up in active `Bugs`.
+
+Vietnamese: `hasPersistedBugSource()` chỉ cho gửi `sourceBugID` khi Bug active hoặc edit draft có active source. Root create draft dừng trước backend để tránh tìm transient draft UUID trong bảng Bug active.
+
 > **Ownership / debug anchor:** DatDT owns similar-bug presentation (backup: DonHV). A no-result or unavailable response is safe and must not mutate bug workflow.
 > **Ownership / điểm debug:** DatDT sở hữu phần hiển thị bug tương tự (backup: DonHV). No-result hoặc unavailable là an toàn và không được làm đổi workflow bug.
 

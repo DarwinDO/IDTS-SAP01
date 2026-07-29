@@ -1,5 +1,11 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/actions/ClassificationReview.js`
 
+## IDTS-115 result and error states
+
+The action is source-linked and is blocked for a root create draft. `requestOperationResult()` accepts CAP/UI5 action results returned directly or through the operation result context before normalizing array shapes. HTTP 200 fallback/no-result stays in the dialog. HTTP 400 is shown as a missing-context information strip; retryable authorization/network/server failures use a safe strip plus Retry without exposing technical diagnostics.
+
+Vietnamese: Action cần Bug source đã lưu. Hàm result hỗ trợ cả direct response và result context. Fallback/no-result HTTP 200 không bị báo lỗi; HTTP 400 hiển thị thiếu context; lỗi tải có thông báo an toàn và Retry.
+
 > **Ownership / debug anchor:** DatDT owns the review dialog (backup: DonHV). It displays suggestions only; a persisted classification change belongs in the CAP contract and handler.
 > **Ownership / điểm debug:** DatDT sở hữu dialog review (backup: DonHV). Nó chỉ hiển thị suggestion; thay đổi classification được lưu thuộc CAP contract và handler.
 

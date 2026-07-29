@@ -1,5 +1,11 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/fragment/ClassificationReviewField.fragment.xml`
 
+## IDTS-115 create-draft guard
+
+The complete custom field is hidden for a root create draft and remains visible for an active Bug or an edit draft that has an active source. The action also repeats this check in JavaScript so an out-of-band trigger cannot call source-linked AI for a transient draft ID.
+
+Vietnamese: Toàn bộ custom field bị ẩn trên root create draft, nhưng vẫn hiện với Bug active hoặc edit draft có active source. JavaScript kiểm lại để trigger ngoài UI cũng không gửi transient draft ID.
+
 > **Ownership / debug anchor:** DatDT owns this Classification field extension (backup: SangVN). The button opens review UI in the existing business section; it is not a new workflow action.
 > **Ownership / điểm debug:** DatDT sở hữu field extension Classification này (backup: SangVN). Nút mở review UI trong business section có sẵn, không phải workflow action mới.
 
