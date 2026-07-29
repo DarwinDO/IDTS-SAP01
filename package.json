@@ -61,6 +61,7 @@
     "qa:ownership-gate": "node scripts/qa/test-ownership-gate-runner.js",
     "qa:idts64:openai-live": "node scripts/qa/test-idts64-openai-live.js",
     "qa:idts114:programmatic": "node scripts/qa/test-idts114-vercel-gateway-provider.js",
+    "qa:idts114:hana-pool": "node scripts/qa/test-idts114-hana-pool.js",
     "qa:idts114:ling-live": "node scripts/qa/test-idts114-ling-live.js",
     "qa:idts41:programmatic": "node scripts/qa/test-idts41-code-list-validation.js",
     "qa:idts43:programmatic": "node scripts/qa/test-idts43-fiori-ux.js",
@@ -149,7 +150,10 @@
           }
         },
         "[production]": {
-          "kind": "hana"
+          "kind": "hana",
+          "pool": {
+            "acquireTimeoutMillis": 10000
+          }
         },
         "[integration]": {
           "kind": "postgres",

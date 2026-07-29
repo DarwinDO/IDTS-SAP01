@@ -76,6 +76,12 @@ passwords.
   lifecycle without an authorized human action. The service module declares a
   45-second per-model timeout through `IDTS_AI_TIMEOUT_MS`; provider keys remain
   private service configuration.
+- The production HANA connection pool allows up to 10 seconds to acquire or
+  establish a database connection. This changes only the wait boundary after
+  idle/restart; it does not increase the pool size or change a query,
+  transaction, schema, or business rule. If a read fails before its handler
+  reaches the first query, inspect the CAP `ResourceRequest timed out` log and
+  the effective `cds.requires.db.pool.acquireTimeoutMillis` value first.
 
 ## Verification order
 

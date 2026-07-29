@@ -39,6 +39,14 @@ Add a minimal Vercel AI Gateway provider adapter to the existing safe AI abstrac
   prompt-only JSON request. Generic HTTP 400, transient 429, exhausted budget
   and OpenAI fallback policy remain unchanged. Local focused result is 30/30
   PASS; feature-level BTP acceptance remains required.
+- PR #218 merged the exact one-level Qwen schema-envelope normalization at
+  merge SHA `112a7356c1828736051002275c6c5ca604e498fa`. BTP audit evidence now
+  contains primary-Qwen `SUCCESS` for Classification, Handoff Summary, Smart
+  Assign and Similar Bugs embedding. The next Smart Assign UI read was blocked
+  before the provider call by a cold HANA connection-acquisition timeout. A
+  separate production-only follow-up raises that boundary from the CAP default
+  of 1000 ms to 10000 ms; selective deployment and cold-read/Scheduler
+  acceptance are still required.
 
 ## BTP browser acceptance handoff
 
