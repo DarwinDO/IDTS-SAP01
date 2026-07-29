@@ -28,6 +28,14 @@ Add a minimal Vercel AI Gateway provider adapter to the existing safe AI abstrac
   stable, the deployed UI has no Apply Classification action, no Duplicate
   Confirmation action, and no Operational Metrics page, and Tester/Developer
   role evidence still requires their approved interactive identities.
+- Qwen structured remediation is in progress on
+  `fix/idts-114-qwen-structured-primary-donhv`. Focused red tests proved the
+  adapter did not distinguish a response-format HTTP 400. The minimal fix keeps
+  `json_schema` first, adds one same-Qwen legacy JSON compatibility retry only
+  for a classified response-format incompatibility, distinguishes transient
+  429 from budget exhaustion, and keeps diagnostics sanitized. Local focused
+  provider result: 24/24 PASS; wider regression and BTP feature acceptance are
+  still required before this item can claim primary Qwen success.
 
 ## BTP browser acceptance handoff
 

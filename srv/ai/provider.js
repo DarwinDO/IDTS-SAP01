@@ -102,15 +102,25 @@ class SafeAiProvider {
       }))
     } catch (error) {
       const code = error?.code === 'AI_TIMEOUT' ? 'AI_TIMEOUT' : 'AI_PROVIDER_ERROR'
+      const diagnostic = {
+        name: sanitizeDiagnosticToken(error?.name, 'Error'),
+        code: sanitizeDiagnosticToken(error?.code, code),
+        retryable: Boolean(error?.retryable || code === 'AI_TIMEOUT')
+      }
+      if (error?.gatewayReason) {
+        diagnostic.gatewayReason = sanitizeDiagnosticToken(error.gatewayReason, 'provider_error')
+      }
+      if (error?.providerErrorCode) {
+        diagnostic.providerErrorCode = sanitizeDiagnosticToken(error.providerErrorCode, 'provider_error')
+      }
+      if (Number.isInteger(error?.retryAfterSeconds)) {
+        diagnostic.retryAfterSeconds = Math.min(Math.max(error.retryAfterSeconds, 0), 86400)
+      }
       LOG.warn('AI provider operation failed', {
         operation,
         featureType,
         correlationId,
-        diagnostic: {
-          name: sanitizeDiagnosticToken(error?.name, 'Error'),
-          code: sanitizeDiagnosticToken(error?.code, code),
-          retryable: Boolean(error?.retryable || code === 'AI_TIMEOUT')
-        }
+        diagnostic
       })
       return this.#complete(failureResult({
         operation,

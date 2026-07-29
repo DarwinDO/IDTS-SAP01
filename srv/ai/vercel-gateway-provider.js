@@ -19,21 +19,44 @@ class VercelGatewayProvider {
   }
 
   async structured ({ schemaName = 'Suggestion', instruction = '', input = null } = {}) {
+    const normalizedSchemaName = safeSchemaName(schemaName)
+    const schema = { type: 'object', additionalProperties: true }
     return this.#withFallback(this.config.modelAlias, this.config.fallbackModelAlias, async model => {
-      const response = await this.#chatCompletion(model, {
-        messages: [
-          { role: 'system', content: instruction },
-          { role: 'user', content: JSON.stringify(input || {}) }
-        ],
-        response_format: {
-          type: 'json_schema',
-          json_schema: {
-            name: safeSchemaName(schemaName),
-            strict: false,
-            schema: { type: 'object', additionalProperties: true }
+      const messages = [
+        { role: 'system', content: instruction },
+        { role: 'user', content: JSON.stringify(input || {}) }
+      ]
+      let response
+      try {
+        response = await this.#chatCompletion(model, {
+          messages,
+          response_format: {
+            type: 'json_schema',
+            json_schema: {
+              name: normalizedSchemaName,
+              strict: false,
+              schema
+            }
           }
-        }
-      })
+        })
+      } catch (error) {
+        const canUseCompatibilityFormat =
+          model === this.config.modelAlias &&
+          error?.gatewayReason === 'response_format_incompatible'
+        if (!canUseCompatibilityFormat) throw error
+
+        // Vercel documents this legacy structured format for model/provider
+        // compatibility. Retry only the primary Qwen call and only after a
+        // specifically classified response-format HTTP 400.
+        response = await this.#chatCompletion(model, {
+          messages,
+          response_format: {
+            type: 'json',
+            name: normalizedSchemaName,
+            schema
+          }
+        })
+      }
       try {
         return { json: JSON.parse(messageContent(response)) }
       } catch {
@@ -92,7 +115,9 @@ class VercelGatewayProvider {
         signal: controller.signal
       })
       const payload = await response.json().catch(() => null)
-      if (!response.ok) throw httpError(response.status, payload)
+      if (!response.ok) {
+        throw httpError(response.status, payload, response.headers?.get?.('Retry-After'))
+      }
       return payload
     } catch (error) {
       if (error?.name === 'AbortError') throw providerError('AI_TIMEOUT', { retryable: true, fallbackEligible: true })
@@ -114,20 +139,35 @@ function providerResult (modelAlias, fallbackUsed, data) {
   }
 }
 
-function httpError (status, payload) {
+function httpError (status, payload, retryAfterValue = null) {
   const budgetExhausted = isBudgetExhausted(payload)
+  const responseFormatIncompatible = status === 400 && isResponseFormatIncompatible(payload)
   const retryable = (status === 429 && !budgetExhausted) || status >= 500
   return providerError(`VERCEL_GATEWAY_HTTP_${status}`, {
     retryable,
-    fallbackEligible: retryable && !budgetExhausted
+    fallbackEligible: retryable && !budgetExhausted,
+    gatewayReason: responseFormatIncompatible
+      ? 'response_format_incompatible'
+      : (budgetExhausted ? 'budget_exhausted' : (status === 429 ? 'rate_limited' : 'http_error')),
+    providerErrorCode: safeProviderErrorCode(payload),
+    retryAfterSeconds: parseRetryAfterSeconds(retryAfterValue)
   })
 }
 
-function providerError (code, { retryable, fallbackEligible }) {
+function providerError (code, {
+  retryable,
+  fallbackEligible,
+  gatewayReason = null,
+  providerErrorCode = null,
+  retryAfterSeconds = null
+}) {
   return Object.assign(new Error('Vercel AI Gateway request failed.'), {
     code,
     retryable: Boolean(retryable),
-    fallbackEligible: Boolean(fallbackEligible)
+    fallbackEligible: Boolean(fallbackEligible),
+    gatewayReason,
+    providerErrorCode,
+    retryAfterSeconds
   })
 }
 
@@ -138,6 +178,37 @@ function isFallbackEligible (error) {
 function isBudgetExhausted (payload) {
   // Inspect only to choose retry policy; never retain or log the provider body.
   return /budget|quota|balance|billing|spend limit/i.test(JSON.stringify(payload || {}))
+}
+
+function isResponseFormatIncompatible (payload) {
+  // Inspect only to choose one documented compatibility retry. The raw
+  // provider message is discarded and never attached to the thrown error.
+  const code = safeProviderErrorCode(payload)
+  if ([
+    'unsupported_response_format',
+    'response_format_unsupported',
+    'invalid_response_format'
+  ].includes(code)) return true
+
+  const message = String(payload?.error?.message || '')
+  return /response[_ -]?format|json[_ -]?schema/i.test(message) &&
+    /unsupported|not support|incompatible|invalid/i.test(message)
+}
+
+function safeProviderErrorCode (payload) {
+  const value = payload?.error?.code || payload?.error?.type
+  const normalized = String(value || '').trim().toLowerCase()
+  return /^[a-z0-9_.-]{1,64}$/.test(normalized) ? normalized : null
+}
+
+function parseRetryAfterSeconds (value) {
+  if (value === null || value === undefined || value === '') return null
+  const numeric = Number(value)
+  if (Number.isFinite(numeric) && numeric >= 0) return Math.min(Math.ceil(numeric), 86400)
+
+  const retryAt = Date.parse(String(value))
+  if (!Number.isFinite(retryAt)) return null
+  return Math.min(Math.max(Math.ceil((retryAt - Date.now()) / 1000), 0), 86400)
 }
 
 function messageContent (response) {
@@ -156,5 +227,8 @@ module.exports = {
   httpError,
   isBudgetExhausted,
   isFallbackEligible,
+  isResponseFormatIncompatible,
+  parseRetryAfterSeconds,
+  safeProviderErrorCode,
   safeSchemaName
 }

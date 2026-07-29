@@ -90,6 +90,21 @@ The factory now selects `VercelGatewayProvider` only when the normalized provide
 
 Breakpoint order for a live issue: `SafeAiProvider.#run()` -> `createDelegate()` -> `VercelGatewayProvider.#withFallback()` -> `#request()`. Observe operation, safe model ID, status, and `fallbackUsed`; never inspect headers because they contain the private bearer key. A provider error remains a safe result and does not alter a Bug, assignee, lifecycle status, or review decision.
 
+For Vercel failures, `SafeAiProvider.#run()` may log three additional bounded
+fields supplied by the adapter: `gatewayReason`, an allowlisted
+`providerErrorCode`, and `retryAfterSeconds`. They distinguish temporary rate
+limits, exhausted budget, response-format incompatibility and generic HTTP
+errors without exposing the provider message, request body, prompt, endpoint
+or credential. The public feature/UI result remains the same sanitized
+`AI_PROVIDER_ERROR` envelope.
+
+Vietnamese: Với lỗi Vercel, `SafeAiProvider.#run()` chỉ có thể log thêm ba
+trường đã giới hạn: `gatewayReason`, `providerErrorCode` thuộc allowlist và
+`retryAfterSeconds`. Các trường này giúp phân biệt rate limit tạm thời, hết
+budget, lỗi tương thích response format và HTTP error chung. Chúng không chứa
+provider message, request body, prompt, endpoint hoặc credential; UI vẫn chỉ
+nhận envelope `AI_PROVIDER_ERROR` đã sanitize.
+
 ### Safe editing checklist
 
 - Do not throw provider failures into business workflow unless the caller explicitly opts into failure.
