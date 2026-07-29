@@ -4011,3 +4011,97 @@ Vietnamese:
   `app/bug-management-ui` because the root has no `ui5.yaml`. Both correct
   commands passed; classification: test-harness/tooling issue, not a CAP or
   UI product defect.
+- IDTS-114 first BTP service-only deployment failed during Cloud Foundry staging
+  before application start. The Node buildpack rejects the repository engine
+  range `>=20 <23` as an improper constraint. Classification: deployment
+  tooling/package-metadata issue; no HANA deployer, database migration, S3,
+  Brevo, AI call, or secret output occurred. The repository MTA build already
+  contains `scripts/btp/pin-cf-node-engine.js`, which pins the generated
+  service package to `22.x`; retry uses that existing targeted build step.
+- IDTS-114 first Cloud Foundry Ling smoke invocation failed locally in
+  PowerShell while parsing the inline JavaScript command. No `cf run-task`
+  request was submitted, so no BTP task, AI provider call, HANA write, or
+  secret exposure occurred. Classification: test-harness quoting issue. The
+  retry passes the same synthetic command via a PowerShell here-string so it
+  is handed unchanged to the Linux task shell.
+- The here-string retry exposed a second Cloud Foundry CLI argument-parsing
+  limitation: the CLI split the nested `node -e` JavaScript before submitting
+  a task. Again, task list readback confirms no IDTS-114 task was created and
+  no provider call occurred. Classification: test-harness quoting issue. The
+  next retry uses the repository's existing safe base64-to-temporary-script
+  task pattern, with no secret or business payload encoded.
+- IDTS-114 task 22 then reached the container but failed before the provider
+  call because the temporary script used a relative `require('./srv/ai/provider')`.
+  Node resolves that path from `/tmp`, not the application working directory.
+  Classification: test-harness path issue; no AI request or data mutation
+  occurred. The retry resolves the module from `process.cwd()` inside the BTP
+  application container.
+- IDTS-114 task 23 executed the real synthetic Vercel request successfully
+  through the BTP runtime, but Ling returned HTTP 400 for the Gateway JSON
+  Schema structured-output request. The safe provider emitted only
+  `AI_PROVIDER_ERROR`, model alias and latency; it did not log the API key,
+  prompt body, provider body or user data. Classification: external provider
+  capability/configuration finding under investigation. Qwen and OpenAI
+  fallback remain disabled; no Bug, workflow, assignment, database schema or
+  business data was mutated.
+- IDTS-114 Ling chat retry initially failed before Cloud Foundry received a
+  task because PowerShell expanded `Buffer.from(...)` inside the nested
+  command string. Classification: test-harness quoting issue. No BTP task,
+  provider call, HANA write, or secret output was produced. The next retry
+  sends the synthetic script through standard input (`base64 | node`) in the
+  Linux task shell, removing nested JavaScript quoting from PowerShell.
+- IDTS-114 Ling chat smoke then passed: the synthetic exact-response check
+  returned success through the Vercel Gateway using Ling, without any business
+  data or workflow mutation. Ling remains unsuitable for the application's
+  JSON-Schema structured operation because the earlier structured request
+  returned HTTP 400. A subsequent environment-inspection command accidentally
+  rendered unredacted bound-service credentials in the local terminal output.
+  Classification: security/tooling incident. No credential is recorded in
+  repository files or Jira. Live Qwen testing is paused until the affected
+  private credentials are replaced; future checks must enumerate only
+  allowlisted variable names and presence flags.
+- IDTS-114 Qwen smoke setup was briefly blocked because the Cloud Foundry CLI
+  SSO token had expired. Classification: environment authentication blocker.
+  DonHV had already authorized reuse of the saved SAP identity; SSO login was
+  completed through the official SAP passcode page and the CLI retargeted the
+  existing trial org/`dev` space. No application configuration or data changed
+  during re-authentication.
+- IDTS-114 safe runtime-presence task confirmed the replacement Gateway key,
+  Vercel provider, Qwen primary chat/embedding aliases and disabled fallback
+  without printing any credential. Live synthetic verification then passed:
+  Qwen JSON-Schema structured output, Qwen 1024-dimension embedding, controlled
+  GPT structured fallback after one synthetic primary 503, and controlled
+  OpenAI 1536-dimension embedding fallback. All tasks returned exit 0 and made
+  no Bug, workflow, assignment or database mutation. The BTP service and
+  approuter are running; health is HTTP 200 and unauthenticated approuter entry
+  redirects to XSUAA (HTTP 302).
+- The first combined local regression run passed the provider-only suites but
+  DB-backed AI suites stopped before assertions because this fresh worktree's
+  `better-sqlite3` native binding was absent. Classification: local
+  test-harness dependency issue, not a BTP/HANA/runtime defect. The fix is the
+  existing `npm rebuild better-sqlite3` step followed by rerunning only the
+  interrupted suites. A separate `rg` lookup also referenced a non-existent
+  guessed test filename; it did not change files and was corrected by reading
+  the actual package script catalog.
+- Three final safe-config `cf run-task` attempts failed before producing a
+  readback because Windows CF CLI and the Linux task shell split or interpreted
+  nested JavaScript quoting differently. Classification: test-harness/tooling
+  issue. No application configuration changed and no secret was printed. The
+  final retry used a base64 standard-input pipeline with no nested JavaScript
+  shell syntax; task 31 exited 0 and printed only allowlisted presence flags and
+  model aliases.
+- A combined AppRouter status probe used PowerShell `Invoke-WebRequest` with a
+  zero redirect limit, but PowerShell surfaced the XSUAA redirect as a
+  non-terminating maximum-redirection error before the catch block populated
+  the status variable. Classification: test-harness/tooling issue. A read-only
+  `curl` retry confirmed the expected HTTP 302; the CAP health endpoint remained
+  HTTP 200.
+- IDTS-114 final provider rollout verification completed. Safe runtime readback
+  reports Vercel ready with Qwen structured and embedding primaries, bounded
+  OpenAI structured/embedding fallback, and no missing configuration. Live BTP
+  tasks passed Qwen structured output, Qwen 1024-dimensional embeddings,
+  controlled GPT fallback and controlled 1536-dimensional OpenAI embedding
+  fallback. Local suites IDTS-114/64/65/67/68/69/71 passed 169 checks with zero
+  failures after rebuilding `better-sqlite3`. Remaining acceptance is an
+  authenticated browser smoke across the four AI actions; no full feature PASS
+  is claimed yet.

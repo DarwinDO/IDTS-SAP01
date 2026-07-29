@@ -13,7 +13,16 @@ Add a minimal Vercel AI Gateway provider adapter to the existing safe AI abstrac
 - Implemented a native-fetch Vercel adapter with structured chat, embeddings, bounded timeout, and one safe fallback attempt.
 - Added non-secret runtime override names and private configuration example placeholders.
 - Completed deterministic provider and existing AI regressions; see `docs/pm/evidence/idts-114/README.md`.
-- Live provider acceptance is pending private BTP configuration after review/merge. No secret is committed.
+- PR #209 merged into `dev` at `d9a1df1b157f3c50c75b6861259cfb284455c147`.
+- SAP BTP now uses Qwen `alibaba/qwen3.7-flash` for structured generation and
+  `alibaba/qwen3-embedding-0.6b` for embeddings. One bounded OpenAI fallback is
+  enabled with `openai/gpt-5.4-nano` and `openai/text-embedding-3-small`.
+- Live synthetic BTP tasks passed for Qwen structured output, Qwen embeddings,
+  controlled structured fallback, and controlled embedding fallback. Ling
+  plain chat connectivity passed, but Ling JSON-Schema structured output
+  returned HTTP 400 and was not selected as the production primary model.
+- No secret is committed or copied into evidence. Full authenticated browser
+  acceptance of the four AI actions remains a separate final check.
 
 ## Out of scope
 
