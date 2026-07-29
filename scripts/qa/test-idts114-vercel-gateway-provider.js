@@ -13,7 +13,7 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 }
 
 const { createAiProvider, normalizeAiConfig } = require('../../srv/ai')
-const { API_BASE_URL } = require('../../srv/ai/vercel-gateway-provider')
+const { API_BASE_URL, httpError } = require('../../srv/ai/vercel-gateway-provider')
 const { containsUnsafeDiagnosticText } = require('../../srv/ai/safety')
 
 let pass = 0
@@ -24,8 +24,16 @@ function check (label, condition) {
   console.log(`  ${condition ? 'PASS' : 'FAIL'}  ${label}`)
 }
 
-function jsonResponse (status, payload) {
-  return { ok: status >= 200 && status < 300, status, json: async () => payload }
+function jsonResponse (status, payload, headers = {}) {
+  const normalizedHeaders = Object.fromEntries(
+    Object.entries(headers).map(([key, value]) => [key.toLowerCase(), String(value)])
+  )
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    headers: { get: name => normalizedHeaders[String(name).toLowerCase()] || null },
+    json: async () => payload
+  }
 }
 
 function gatewayConfig (overrides = {}) {
@@ -115,6 +123,124 @@ async function main () {
   const budgetResult = await budgetProvider.chat({ featureType: 'summary', messages: [{ role: 'user', content: 'Synthetic budget test' }] })
   check('budget exhaustion does not attempt fallback', budgetRequests.length === 1)
   check('budget exhaustion remains a sanitized failure', budgetResult.ok === false && !containsUnsafeDiagnosticText(budgetResult))
+
+  const compatibilityRequests = []
+  const compatibilityProvider = createAiProvider(gatewayConfig({
+    fallbackEnabled: true,
+    fallbackModelAlias: 'openai/gpt-5.4-nano'
+  }), {
+    fetchImpl: async (url, options) => {
+      const body = JSON.parse(options.body)
+      compatibilityRequests.push({ model: body.model, format: body.response_format })
+      if (body.response_format?.type === 'json_schema') {
+        return jsonResponse(400, {
+          error: {
+            code: 'unsupported_response_format',
+            message: 'The selected model does not support response_format json_schema.'
+          }
+        })
+      }
+      return jsonResponse(200, { choices: [{ message: { content: '{"compatible":true}' } }] })
+    }
+  })
+  const compatibilityResult = await compatibilityProvider.structured({
+    featureType: 'classification',
+    schemaName: 'IdtsCompatibilityContract',
+    instruction: 'Return JSON only.',
+    input: { title: 'Synthetic compatibility test' }
+  })
+  check(
+    'response-format 400 retries exactly once on the same Qwen model',
+    compatibilityRequests.length === 2 &&
+      compatibilityRequests.every(request => request.model === 'alibaba/qwen3.7-flash')
+  )
+  check(
+    'compatibility retry uses Vercel legacy JSON structured format',
+    compatibilityRequests[0]?.format?.type === 'json_schema' &&
+      compatibilityRequests[1]?.format?.type === 'json' &&
+      compatibilityRequests[1]?.format?.name === 'IdtsCompatibilityContract' &&
+      compatibilityRequests[1]?.format?.schema?.type === 'object'
+  )
+  check(
+    'successful compatibility retry remains primary Qwen without fallback',
+    compatibilityResult.ok &&
+      compatibilityResult.data.json.compatible === true &&
+      compatibilityResult.modelAlias === 'alibaba/qwen3.7-flash' &&
+      compatibilityResult.fallbackUsed === false
+  )
+
+  const genericBadRequestModels = []
+  const genericBadRequestProvider = createAiProvider(gatewayConfig({
+    fallbackEnabled: true,
+    fallbackModelAlias: 'openai/gpt-5.4-nano'
+  }), {
+    fetchImpl: async (url, options) => {
+      genericBadRequestModels.push(JSON.parse(options.body).model)
+      return jsonResponse(400, { error: { code: 'invalid_request', message: 'Malformed input payload.' } })
+    }
+  })
+  const genericBadRequestResult = await genericBadRequestProvider.structured({
+    featureType: 'handoff_summary',
+    schemaName: 'IdtsGenericBadRequest',
+    instruction: 'Return JSON only.',
+    input: { title: 'Synthetic invalid request' }
+  })
+  check('generic HTTP 400 does not compatibility-retry or use fallback', genericBadRequestModels.length === 1)
+  check('generic HTTP 400 remains sanitized', genericBadRequestResult.ok === false && !containsUnsafeDiagnosticText(genericBadRequestResult))
+
+  const transientRateLimitRequests = []
+  const transientRateLimitProvider = createAiProvider(gatewayConfig({
+    fallbackEnabled: true,
+    fallbackModelAlias: 'openai/gpt-5.4-nano'
+  }), {
+    fetchImpl: async (url, options) => {
+      const body = JSON.parse(options.body)
+      transientRateLimitRequests.push(body.model)
+      if (body.model === 'alibaba/qwen3.7-flash') {
+        return jsonResponse(
+          429,
+          { error: { code: 'rate_limit_exceeded', message: 'Please retry later.' } },
+          { 'Retry-After': '30' }
+        )
+      }
+      return jsonResponse(200, { choices: [{ message: { content: '{"fallback":true}' } }] })
+    }
+  })
+  const transientRateLimitResult = await transientRateLimitProvider.structured({
+    featureType: 'smart_assignment',
+    schemaName: 'IdtsRateLimitContract',
+    instruction: 'Return JSON only.',
+    input: { title: 'Synthetic rate limit test' }
+  })
+  check(
+    'transient 429 remains eligible for exactly one configured fallback',
+    transientRateLimitRequests.join(',') === 'alibaba/qwen3.7-flash,openai/gpt-5.4-nano'
+  )
+  check(
+    'transient 429 fallback result records the fallback model safely',
+    transientRateLimitResult.ok &&
+      transientRateLimitResult.modelAlias === 'openai/gpt-5.4-nano' &&
+      transientRateLimitResult.fallbackUsed === true
+  )
+  const transientRateLimitError = httpError(
+    429,
+    { error: { code: 'rate_limit_exceeded', message: 'Please retry later.' } },
+    '30'
+  )
+  check(
+    'transient 429 carries only bounded safe retry metadata',
+    transientRateLimitError.gatewayReason === 'rate_limited' &&
+      transientRateLimitError.providerErrorCode === 'rate_limit_exceeded' &&
+      transientRateLimitError.retryAfterSeconds === 30 &&
+      !containsUnsafeDiagnosticText(transientRateLimitError)
+  )
+  const budgetError = httpError(429, { error: { code: 'quota_exceeded', message: 'Spend quota exceeded.' } }, '120')
+  check(
+    'budget 429 is distinguished from a transient rate limit',
+    budgetError.gatewayReason === 'budget_exhausted' &&
+      budgetError.retryable === false &&
+      budgetError.fallbackEligible === false
+  )
 
   const embeddingRequests = []
   const embeddingProvider = createAiProvider(gatewayConfig({

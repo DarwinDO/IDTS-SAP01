@@ -4348,3 +4348,49 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
 - Role-matrix blocker: Tester and Developer browser sessions require
   member-owned SAP identities. The agent did not impersonate users or read
   passwords/tokens; interactive positive/403 evidence remains pending.
+- Tooling issue (IDTS-114 Qwen remediation): the first red-test run in the
+  fresh worktree stopped before executing assertions because that worktree had
+  no `node_modules` and Node could not resolve `@sap/cds`. No product code or
+  data was executed or changed. Resolution in progress: install the locked
+  dependencies with `npm ci` in the isolated worktree, then rerun the same red
+  test before editing the provider adapter.
+- Dependency audit observation: isolated `npm ci --ignore-scripts` completed
+  from the committed lockfile but npm reported 24 inherited dependency
+  advisories (1 low, 9 moderate, 13 high, 1 critical). This task does not run
+  `npm audit fix` or change dependency versions because that would broaden the
+  approved provider-fix scope. Existing secret/security gates remain mandatory
+  before merge; dependency remediation requires separate review if the current
+  repository security baseline does not already track these advisories.
+- Implementation issue caught before test/deploy: the first compatibility
+  retry patch had one extra closing brace, so `node --check` stopped with a
+  syntax error. The brace was corrected immediately; no runtime, BTP app or
+  persisted data was affected. Syntax and the focused provider suite are rerun
+  below before any wider regression.
+- Test-environment issue: the first parallel CAP regression run could not load
+  the native `better-sqlite3` binding because dependencies had intentionally
+  been installed with lifecycle scripts disabled. IDTS-67 stopped before its
+  assertions and no application data changed. Resolution: rebuild only the
+  locked `better-sqlite3` package in this isolated worktree, then rerun the full
+  matrix; no package version or lockfile change is authorized.
+- IDTS-114 local remediation result: focused red evidence was 19 PASS / 3 FAIL;
+  after the bounded response-format compatibility change the provider suite is
+  24/24 PASS. IDTS-64/67/68/69/71 plus IDTS-114 total 159/159 PASS. CAP compile,
+  secret scan, agent rules, QA Depth self-test, AI DevKit and `git diff
+  --check` also PASS. This is local technical evidence only; Qwen feature-level
+  SUCCESS on SAP BTP is still pending merge and selective service deployment.
+- Git process issue: a PowerShell command used semicolon-separated
+  `git diff --cached --check` and `git commit`, so the commit continued after
+  the check reported Markdown trailing whitespace. The branch had not been
+  pushed. The evidence formatting was corrected, the process issue was logged,
+  and the commit is amended only after a clean staged diff check.
+- CI blocker: PR #216 is mergeable at the Git level but its fresh
+  `qa-depth-gate` run failed. Merge and SAP BTP deployment are stopped; no
+  bypass is authorized. The failed job log is being inspected to distinguish
+  PR-body/process evidence from code/test failure before making any follow-up
+  change.
+- CI blocker diagnosis/resolution: the failed job was limited to PR-body field
+  names; the body used `Learner/Status` instead of the repository parser's 12
+  exact Ownership Knowledge Gate fields. PR #216 now reuses DonHV's existing
+  2026-07-23 90% PASS record with all required fields. Fresh local
+  `check-pr-depth.js --stdin` reports PASS (11 required sections); no Knowledge
+  Gate was rerun and no runtime code changed for this correction.
