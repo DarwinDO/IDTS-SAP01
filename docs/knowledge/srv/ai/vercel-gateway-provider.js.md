@@ -10,8 +10,7 @@ runtime configuration and approved model aliases.
 ## Execution flow
 
 1. `SafeAiProvider` selects this delegate only for ready `vercel` configuration.
-2. `chat()` and `structured()` use the fixed OpenAI-compatible
-   `/v1/chat/completions` path.
+2. `chat()` and `structured()` use the fixed `/v1/chat/completions` path.
 3. `embedding()` uses `/v1/embeddings` only when an embedding model exists.
 4. `#request()` sends the key in memory, parses the required response shape and
    discards the raw response body.
@@ -20,18 +19,25 @@ runtime configuration and approved model aliases.
    configured fallback.
 6. Generic 400/401/403/404 and quota/budget 429 do not use fallback.
 7. A response-format-specific HTTP 400 is the one compatibility exception:
-   `structured()` retries the same primary Qwen model once with Vercel's
-   documented legacy JSON structured format.
-8. The adapter returns only text/JSON/vector data plus safe model/fallback
+   `structured()` retries the same primary Qwen model once without
+   `response_format`, using a bounded JSON-only system instruction.
+8. The adapter parses the returned text as JSON. Malformed JSON becomes a safe
+   provider failure and may use the existing bounded fallback.
+9. The adapter returns only text/JSON/vector data plus safe model/fallback
    metadata. The wrapper converts errors to a stable public result.
 
 ## Qwen structured compatibility
 
-Vercel recommends `json_schema` and documents
-`{ type: "json", name, schema }` as a backward-compatible format. IDTS sends
-`json_schema` first. The legacy format is used only when the primary Qwen 400
-is identified as response-format incompatibility. This is one bounded retry on
-the same model, not a model switch or a general retry loop.
+IDTS sends `json_schema` first. Live SAP BTP diagnostics showed that the
+current Qwen route rejected `json_schema`, legacy JSON and `json_object`, while
+the same model returned a parseable JSON object when no `response_format` was
+sent. The compatibility path therefore adds one JSON-only system instruction
+and retries once without `response_format`, only when the first Qwen 400 is
+identified as response-format incompatibility.
+
+This is one bounded retry on the same model, not a model switch or a general
+retry loop. The existing JSON parser and feature validator still reject
+malformed, ungrounded or unsafe output.
 
 HTTP 429 is classified before fallback. A temporary rate limit is retryable;
 spend quota/budget exhaustion is not. `Retry-After` is bounded to 0–86400
@@ -46,7 +52,7 @@ Use this breakpoint order:
 2. `#chatCompletion()`
 3. `#request()`
 4. `httpError()`
-5. optional same-Qwen compatibility call
+5. optional same-Qwen prompt-only compatibility call
 6. `#withFallback()`
 
 Inspect only operation, safe model alias, HTTP status, `gatewayReason`,
@@ -68,9 +74,9 @@ adapter has no Bug transaction or OData mutation code.
 
 ### File này làm gì
 
-Đây là adapter backend hẹp nối IDTS với Vercel AI Gateway. Feature AI chỉ đưa
-dữ liệu đã được lọc qua `srv/ai/provider.js` vào adapter. File này không được
-tự sửa Bug, assignee, next processor hoặc lifecycle.
+Đây là adapter backend gọn để nối IDTS với Vercel AI Gateway. Feature AI chỉ
+đưa dữ liệu đã được lọc qua `srv/ai/provider.js` vào adapter. File này không
+được tự sửa Bug, assignee, next processor hoặc lifecycle.
 
 ### Luồng xử lý
 
@@ -81,15 +87,18 @@ tự sửa Bug, assignee, next processor hoặc lifecycle.
 5. `#withFallback()` chỉ dùng fallback một lần với lỗi retryable.
 6. HTTP 400 chung, lỗi quyền và hết budget không được fallback.
 7. Nếu Qwen trả HTTP 400 được xác định rõ là không tương thích
-   `response_format`, `structured()` mới thử lại đúng một lần trên chính Qwen
-   bằng legacy JSON format do Vercel hỗ trợ.
+   `response_format`, `structured()` mới thử lại đúng một lần trên chính Qwen,
+   bỏ `response_format` và thêm yêu cầu chỉ trả về một JSON object hợp lệ.
+8. Kết quả vẫn phải qua `JSON.parse()` và validator của từng feature. JSON lỗi,
+   nội dung không grounded hoặc không an toàn không được đưa thẳng lên UI.
 
 ### Cách debug
 
 Đặt breakpoint theo thứ tự `structured()` → `#request()` → `httpError()` →
-compatibility retry → `#withFallback()`. Chỉ xem status, model alias, lý do an
-toàn, mã lỗi allowlist, `Retry-After`, latency và fallback flag. Không xem hoặc
-ghi API key, prompt, dữ liệu Bug, endpoint private hay raw provider response.
+prompt-only compatibility retry → `#withFallback()`. Chỉ xem status, model
+alias, lý do an toàn, mã lỗi allowlist, `Retry-After`, latency và fallback flag.
+Không xem hoặc ghi API key, prompt, dữ liệu Bug, endpoint private hay raw
+provider response.
 
 ### Checklist sửa an toàn
 
