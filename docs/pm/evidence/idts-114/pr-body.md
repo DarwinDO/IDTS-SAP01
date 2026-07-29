@@ -38,8 +38,9 @@ Used native Node `fetch` and `AbortController`; no Vercel SDK, AI SDK, backgroun
 
 ## Known Gaps
 
-- Ling live-provider smoke is intentionally not executed until a private `AI_GATEWAY_API_KEY` is configured through the SAP BTP runtime after merge.
-- Qwen primary and OpenAI fallback remain disabled until Ling acceptance is reviewed; mock/fallback evidence is not presented as provider-live acceptance.
+- Ling plain-chat connectivity passed through the Gateway, but Ling JSON-Schema structured output returned HTTP 400; Qwen is therefore the structured primary model.
+- Authenticated browser smoke of Similar Bugs, Classification Suggestion, Handoff Summary and Smart Assign Explanation remains open, including review persistence and no workflow/assignment mutation.
+- Controlled fallback evidence proves routing after a synthetic retryable failure; it does not claim a naturally occurring Qwen outage.
 
 ## Ownership Knowledge Gate
 
@@ -60,4 +61,5 @@ Result: PASS
 
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-114
 - Repository evidence: `docs/pm/evidence/idts-114/README.md`
+- Live BTP evidence: `docs/pm/evidence/idts-114/btp-live-provider-verification-20260729.md`
 - Knowledge mirrors: `docs/knowledge/srv/ai/config.js.md`, `docs/knowledge/srv/ai/provider.js.md`, `docs/knowledge/srv/ai/vercel-gateway-provider.js.md`, and `docs/knowledge/srv/ai/metrics.js.md`.
