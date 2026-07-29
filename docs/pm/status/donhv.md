@@ -4466,3 +4466,29 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   of the Git diff, package lock or deployment artifact declaration. It remains
   local for the controlled MTA build and will be removed with the isolated
   worktree after release verification.
+- IDTS-114 HANA root-cause correction: the 10-second and task-local 30-second
+  acquisition boundaries both timed out while HANA was unavailable. A direct
+  read-only `hdb` probe returned sanitized SAP HANA code `1890`, and HANA Cloud
+  Central showed the Free Tier instance as `Stopped`. After starting HANA, a
+  read-only BTP task passed in `340 ms`; the same task with the original
+  `acquireTimeoutMillis=1000` passed in `262 ms`. The temporary 10-second
+  workaround and its config-only test are removed. This is an environment
+  blocker resolved by restoring HANA availability, not a product query defect.
+- Local verification tooling issue: the first repository search command for
+  obsolete timeout references used a double-quoted PowerShell regex containing
+  an unescaped quote, so PowerShell rejected the command before `rg` or Git
+  ran. No source, deployment or data changed. The check is rerun with
+  single-quoted patterns.
+- Local verification setup issue: setting `NODE_PATH` let Node resolve CAP
+  from the existing isolated dependency tree, but the CDS compiler still
+  could not resolve the model import `@cap-js/attachments` relative to this
+  fresh worktree. IDTS-69 stopped before assertions; no product behavior
+  failed. Verification is rerun through a temporary ignored `node_modules`
+  junction to the same lockfile-installed dependency tree, then the junction
+  is removed after the checks.
+- Local cleanup tooling issue: after all checks passed, the shell safety layer
+  rejected the guarded PowerShell `Remove-Item` call for the verified
+  `node_modules` junction before deletion. The junction is ignored, points to
+  the existing lockfile-installed dependency tree, and is not part of the Git
+  diff or deployment source. It will be removed together with this isolated
+  worktree after release verification.

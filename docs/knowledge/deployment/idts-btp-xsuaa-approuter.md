@@ -76,12 +76,11 @@ passwords.
   lifecycle without an authorized human action. The service module declares a
   45-second per-model timeout through `IDTS_AI_TIMEOUT_MS`; provider keys remain
   private service configuration.
-- The production HANA connection pool allows up to 10 seconds to acquire or
-  establish a database connection. This changes only the wait boundary after
-  idle/restart; it does not increase the pool size or change a query,
-  transaction, schema, or business rule. If a read fails before its handler
-  reaches the first query, inspect the CAP `ResourceRequest timed out` log and
-  the effective `cds.requires.db.pool.acquireTimeoutMillis` value first.
+- HANA Cloud Free Tier can stop while idle. If unrelated database-backed flows
+  fail together, first verify the instance state in HANA Cloud Central. A
+  direct sanitized driver probe can distinguish a stopped instance (SAP HANA
+  error `1890`) from a CAP query defect. Do not increase the CAP pool timeout
+  unless a running-database test proves the default boundary is insufficient.
 
 ## Verification order
 

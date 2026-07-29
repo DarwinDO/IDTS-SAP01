@@ -43,10 +43,11 @@ Add a minimal Vercel AI Gateway provider adapter to the existing safe AI abstrac
   merge SHA `112a7356c1828736051002275c6c5ca604e498fa`. BTP audit evidence now
   contains primary-Qwen `SUCCESS` for Classification, Handoff Summary, Smart
   Assign and Similar Bugs embedding. The next Smart Assign UI read was blocked
-  before the provider call by a cold HANA connection-acquisition timeout. A
-  separate production-only follow-up raises that boundary from the CAP default
-  of 1000 ms to 10000 ms; selective deployment and cold-read/Scheduler
-  acceptance are still required.
+  before the provider call while the HANA Free Tier database was stopped. SAP
+  HANA error `1890` and HANA Cloud Central independently confirmed the stopped
+  state. After restart, read-only BTP checks passed in `340 ms` and in `262 ms`
+  with the original 1000 ms acquisition boundary. The temporary 10-second
+  workaround is being removed; Smart Assign UI acceptance remains required.
 
 ## BTP browser acceptance handoff
 
