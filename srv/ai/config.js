@@ -10,16 +10,22 @@ const DEFAULTS = Object.freeze({
   maxInputChars: 8000,
   modelAlias: null,
   embeddingModelAlias: null,
+  fallbackEnabled: false,
+  fallbackModelAlias: null,
+  fallbackEmbeddingModelAlias: null,
   mockMode: 'success',
   mockEmbeddingDimensions: 8
 })
 
-const SUPPORTED_PROVIDERS = Object.freeze(['mock', 'openai'])
+const SUPPORTED_PROVIDERS = Object.freeze(['mock', 'openai', 'vercel'])
 const SUPPORTED_MOCK_MODES = Object.freeze(['success', 'error', 'timeout'])
 
 function getAiConfig () {
   // Đọc CAP private config và trả bản normalize; feature modules không đọc API key trực tiếp.
-  return normalizeAiConfig(cds.env.idts?.ai || {})
+  return normalizeAiConfig({
+    ...(cds.env.idts?.ai || {}),
+    ...runtimeOverrides(process.env)
+  })
 }
 
 function normalizeAiConfig (raw = {}) {
@@ -31,8 +37,15 @@ function normalizeAiConfig (raw = {}) {
     provider,
     timeoutMs: toPositiveInteger(raw.timeoutMs, DEFAULTS.timeoutMs),
     maxInputChars: toPositiveInteger(raw.maxInputChars, DEFAULTS.maxInputChars),
-    modelAlias: safeAlias(raw.modelAlias) || DEFAULTS.modelAlias,
-    embeddingModelAlias: safeAlias(raw.embeddingModelAlias) || safeAlias(raw.modelAlias) || DEFAULTS.embeddingModelAlias,
+    modelAlias: safeModelId(raw.modelAlias) || DEFAULTS.modelAlias,
+    // `null` explicit cho phép pha Ling tắt embedding: Similar Bugs vẫn dùng lexical fallback hiện có.
+    // Khi field không được cấu hình (`undefined`), giữ compatibility cũ: dùng model chat làm default alias.
+    embeddingModelAlias: raw.embeddingModelAlias === null
+      ? null
+      : safeModelId(raw.embeddingModelAlias) || safeModelId(raw.modelAlias) || DEFAULTS.embeddingModelAlias,
+    fallbackEnabled: toBoolean(raw.fallbackEnabled, DEFAULTS.fallbackEnabled),
+    fallbackModelAlias: safeModelId(raw.fallbackModelAlias) || DEFAULTS.fallbackModelAlias,
+    fallbackEmbeddingModelAlias: safeModelId(raw.fallbackEmbeddingModelAlias) || DEFAULTS.fallbackEmbeddingModelAlias,
     mockMode,
     mockResponseText: toStringOrNull(raw.mockResponseText),
     mockStructuredOutput: normalizeMockStructuredOutput(raw.mockStructuredOutput),
@@ -42,14 +55,35 @@ function normalizeAiConfig (raw = {}) {
   config.openaiApiKey = config.provider === 'openai'
     ? toStringOrNull(raw.openaiApiKey) || toStringOrNull(process.env.OPENAI_API_KEY)
     : null
+  config.gatewayApiKey = config.provider === 'vercel'
+    ? toStringOrNull(raw.gatewayApiKey) || toStringOrNull(raw.aiGatewayApiKey) || toStringOrNull(process.env.AI_GATEWAY_API_KEY)
+    : null
 
   config.unsupported = config.enabled && !SUPPORTED_PROVIDERS.includes(config.provider)
   config.missing = []
   if (config.unsupported) config.missing.push('supportedProvider')
   if (config.enabled && config.provider === 'openai' && !config.openaiApiKey) config.missing.push('openaiApiKey')
   if (config.enabled && config.provider === 'openai' && !config.modelAlias) config.missing.push('modelAlias')
+  if (config.enabled && config.provider === 'vercel' && !config.gatewayApiKey) config.missing.push('gatewayApiKey')
+  if (config.enabled && config.provider === 'vercel' && !config.modelAlias) config.missing.push('modelAlias')
+  if (config.enabled && config.provider !== 'vercel' && config.fallbackEnabled) config.missing.push('vercelFallbackProvider')
+  if (config.enabled && config.provider === 'vercel' && config.fallbackEnabled && !config.fallbackModelAlias) config.missing.push('fallbackModelAlias')
   config.ready = config.enabled && config.missing.length === 0
   return Object.freeze(config)
+}
+
+function runtimeOverrides (env = {}) {
+  return Object.fromEntries([
+    ['enabled', env.IDTS_AI_ENABLED],
+    ['provider', env.IDTS_AI_PROVIDER],
+    ['modelAlias', env.IDTS_AI_MODEL],
+    ['embeddingModelAlias', env.IDTS_AI_EMBEDDING_MODEL],
+    ['fallbackEnabled', env.IDTS_AI_FALLBACK_ENABLED],
+    ['fallbackModelAlias', env.IDTS_AI_FALLBACK_MODEL],
+    ['fallbackEmbeddingModelAlias', env.IDTS_AI_EMBEDDING_FALLBACK_MODEL],
+    ['timeoutMs', env.IDTS_AI_TIMEOUT_MS],
+    ['maxInputChars', env.IDTS_AI_MAX_INPUT_CHARS]
+  ].filter(([, value]) => value !== undefined))
 }
 
 function normalizeProvider (value) {
@@ -81,6 +115,13 @@ function safeAlias (value) {
   return alias || null
 }
 
+function safeModelId (value) {
+  if (value === undefined || value === null) return null
+  const model = String(value).trim().toLowerCase()
+  if (!model || model.includes('://') || model.includes('..')) return null
+  return /^[a-z0-9][a-z0-9_.\/-]{0,119}$/.test(model) ? model : null
+}
+
 function toBoolean (value, fallback) {
   // Parse env boolean chính xác, tránh chuỗi `'false'` bị coi là true.
   if (typeof value === 'boolean') return value
@@ -108,5 +149,7 @@ module.exports = {
   DEFAULTS,
   SUPPORTED_PROVIDERS,
   getAiConfig,
-  normalizeAiConfig
+  normalizeAiConfig,
+  runtimeOverrides,
+  safeModelId
 }

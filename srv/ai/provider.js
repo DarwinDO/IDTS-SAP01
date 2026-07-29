@@ -6,6 +6,7 @@ const cds = require('@sap/cds')
 const { getAiConfig } = require('./config')
 const { MockAiProvider } = require('./mock-provider')
 const { OpenAiProvider } = require('./openai-provider')
+const { VercelGatewayProvider } = require('./vercel-gateway-provider')
 const {
   redactSensitiveText,
   safeFeatureType,
@@ -25,7 +26,7 @@ class SafeAiProvider {
   // Wrapper bảo vệ delegate thật/mock: sanitize input, giới hạn thời gian và chuyển mọi lỗi thành result an toàn.
   constructor (config, dependencies = {}) {
     this.config = config
-    this.delegate = createDelegate(config)
+    this.delegate = createDelegate(config, dependencies)
     this.metricsLogger = dependencies.metricsLogger
   }
 
@@ -86,13 +87,17 @@ class SafeAiProvider {
     }
 
     try {
-      const data = await withTimeout(execute(), this.config.timeoutMs)
+      const delegateResult = await withTimeout(execute(), operationTimeoutMs(this.config))
+      const normalized = normalizeDelegateResult(delegateResult)
       return this.#complete(successResult({
         operation,
         featureType,
         correlationId,
         durationMs: Date.now() - started,
-        data,
+        data: normalized.data,
+        providerAlias: normalized.providerAlias,
+        modelAlias: normalized.modelAlias,
+        fallbackUsed: normalized.fallbackUsed,
         config: this.config
       }))
     } catch (error) {
@@ -126,13 +131,16 @@ class SafeAiProvider {
   }
 }
 
-function createDelegate (config) {
+function createDelegate (config, dependencies = {}) {
   // Chọn OpenAI, mock hoặc disabled delegate theo config; feature code không phụ thuộc SDK cụ thể.
   if (config.enabled && config.provider === 'mock' && !config.unsupported) {
     return new MockAiProvider(config)
   }
   if (config.enabled && config.provider === 'openai' && !config.unsupported && config.ready) {
-    return new OpenAiProvider(config)
+    return new OpenAiProvider(config, dependencies.fetchImpl)
+  }
+  if (config.enabled && config.provider === 'vercel' && !config.unsupported && config.ready) {
+    return new VercelGatewayProvider(config, dependencies.fetchImpl)
   }
   return {
     chat: async () => null,
@@ -185,7 +193,7 @@ function redactSensitiveObject (value, maxLength) {
   return null
 }
 
-function successResult ({ operation, featureType, correlationId, durationMs, data, config }) {
+function successResult ({ operation, featureType, correlationId, durationMs, data, providerAlias, modelAlias, fallbackUsed, config }) {
   // Chuẩn hóa response thành envelope thành công có metadata an toàn; không expose raw SDK response.
   return Object.freeze({
     ok: true,
@@ -194,10 +202,29 @@ function successResult ({ operation, featureType, correlationId, durationMs, dat
     featureType,
     correlationId,
     durationMs,
-    providerAlias: config.provider,
-    modelAlias: modelAliasFor(operation, config),
+    providerAlias: providerAlias || config.provider,
+    modelAlias: modelAlias || modelAliasFor(operation, config),
+    fallbackUsed: Boolean(fallbackUsed),
     data
   })
+}
+
+function normalizeDelegateResult (value) {
+  if (value?.__idtsProviderMeta === true) {
+    return {
+      data: value.data,
+      providerAlias: value.providerAlias,
+      modelAlias: value.modelAlias,
+      fallbackUsed: value.fallbackUsed
+    }
+  }
+  return { data: value, providerAlias: null, modelAlias: null, fallbackUsed: false }
+}
+
+function operationTimeoutMs (config) {
+  return config.provider === 'vercel' && config.fallbackEnabled
+    ? config.timeoutMs * 2 + 50
+    : config.timeoutMs
 }
 
 function failureResult ({ operation, featureType, correlationId, durationMs, code, summary, retryable, config }) {
@@ -242,6 +269,9 @@ function withTimeout (promise, timeoutMs) {
 module.exports = {
   SafeAiProvider,
   createAiProvider,
+  createDelegate,
+  normalizeDelegateResult,
+  operationTimeoutMs,
   sanitizeChatRequest,
   sanitizeEmbeddingRequest,
   sanitizeStructuredRequest

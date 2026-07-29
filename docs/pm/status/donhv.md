@@ -3989,3 +3989,25 @@ Vietnamese:
   acceptance: a Developer member must complete their own interactive sign-in
   smoke; the agent must not impersonate them. Evidence:
   `docs/pm/evidence/idts-113/btp-developer-role-collection-remediation-20260729.md`.
+- IDTS-114 Vercel AI Gateway integration started from clean `origin/dev`
+  baseline `362ace2a39a82d19c4acc723fe96a15bf7373f5e`. The code adds a native
+  fetch adapter for the Gateway, disabled-by-default private configuration,
+  Ling-first staged model support, bounded Qwen-to-OpenAI fallback, and safe
+  model metadata. No API key was stored, logged, deployed, or copied into
+  evidence. **Tooling issue:** the fresh worktree initially had no
+  dependencies, and `npm ci --ignore-scripts` then left `better-sqlite3`
+  without its native binding. The first feature-regression attempts therefore
+  stopped before assertions. `npm rebuild better-sqlite3` fixed the local test
+  harness without changing source or lockfiles. Verification then passed:
+  IDTS-114 provider 15/15; IDTS-64 34/34; IDTS-65 19/19; IDTS-67 29/29;
+  IDTS-68 33/33; IDTS-69 8/8; IDTS-71 31/31. The opt-in Ling live smoke is
+  correctly SKIPPED until a private BTP environment key is configured after
+  review/merge. Evidence: `docs/pm/evidence/idts-114/README.md`. Next: run
+  project gates, create PR, then configure only Ling through a private BTP
+  binding after merge.
+- IDTS-114 verification also found two corrected command-invocation issues:
+  `cds compile srv --to edmx` must select `-s all` because this project has
+  both AuthService and BugService, and UI5 must be built from
+  `app/bug-management-ui` because the root has no `ui5.yaml`. Both correct
+  commands passed; classification: test-harness/tooling issue, not a CAP or
+  UI product defect.

@@ -261,6 +261,11 @@ Vietnamese clean note: Nút `Assign Developer` riêng đã được bỏ khỏi 
 - `IDTS-113` now runs the migrated CAP service and AppRouter on SAP BTP Cloud
   Foundry with HANA data, XSUAA PM access, retained AWS S3, retained Brevo and
   SAP Job Scheduling Service.
+- `IDTS-114` is in progress: the repository has a staged Vercel AI Gateway
+  adapter behind disabled-by-default private configuration. Deterministic
+  provider and existing AI regressions pass; Ling live acceptance remains
+  intentionally pending a private BTP environment configuration after review
+  and merge. Qwen and OpenAI fallback are not enabled yet.
 - Runtime SHA `3504931d2689e4d56c0de3f5977342fc7cf57e4a` is deployed. PM browser
   assignment/history/notification smoke, S3 adapter upload/download/hash/delete
   and a fresh Scheduler-driven Brevo SENT delivery passed.

@@ -82,6 +82,14 @@ The delegates are the deterministic mock provider and the optional real OpenAI p
 - `docs/ba/discovery/idts-63-ai-assistance-guardrails.md`: defines fallback and no-autonomy rules.
 - Future `db/schema.cds` changes in `IDTS-65`: should store only safe normalized result data returned by this wrapper.
 
+## IDTS-114 Vercel delegate and fallback (2026-07-29)
+
+The factory now selects `VercelGatewayProvider` only when the normalized provider is `vercel` and its private configuration is ready. The business feature still receives exactly the same `SafeAiProvider` envelope: `{ ok, status, data/error, providerAlias, modelAlias, fallbackUsed }`. No feature handler gets a raw HTTP response or a gateway credential.
+
+`operationTimeoutMs()` intentionally gives a Vercel call roughly two single-attempt windows only when fallback is enabled: one primary attempt and at most one fallback attempt. This is a bound retry policy, not an unbounded retry loop. `normalizeDelegateResult()` preserves the actual model selected by the Vercel adapter for safe audit/metrics; for example, an accepted Qwen primary is recorded as Qwen, while a retryable outage followed by the configured OpenAI fallback is recorded as the fallback model with `fallbackUsed: true`.
+
+Breakpoint order for a live issue: `SafeAiProvider.#run()` -> `createDelegate()` -> `VercelGatewayProvider.#withFallback()` -> `#request()`. Observe operation, safe model ID, status, and `fallbackUsed`; never inspect headers because they contain the private bearer key. A provider error remains a safe result and does not alter a Bug, assignee, lifecycle status, or review decision.
+
 ### Safe editing checklist
 
 - Do not throw provider failures into business workflow unless the caller explicitly opts into failure.

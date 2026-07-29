@@ -24,3 +24,7 @@ This module is the privacy boundary for IDTS AI operational metrics. It creates 
 - Called by `srv/ai/provider.js` and `srv/service.js`.
 - Reads `idts.cap.AiSuggestions`.
 - Verify with `npm run qa:idts97:programmatic`, AI regressions, CAP compile, and secret scan.
+
+## IDTS-114 model-ID preservation (2026-07-29)
+
+`safeModelAlias()` now preserves a validated `provider/model` identifier in operational metrics. This matters because `alibaba/qwen3.7-flash` and `openai/gpt-5.4-nano` must remain distinguishable during staged rollout. It still redacts unsafe text and rejects path traversal, URLs, tokens, prompts, and arbitrary diagnostic strings. The metric remains allowlisted metadata only; it cannot reveal a gateway key or a provider response.

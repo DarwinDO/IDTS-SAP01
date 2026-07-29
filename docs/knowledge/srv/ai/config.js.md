@@ -70,6 +70,14 @@ CAP loads project configuration into `cds.env`. IDTS already uses this pattern f
 - `srv/ai/provider.js`: consumes the normalized config.
 - `docs/ba/discovery/idts-63-ai-assistance-guardrails.md`: defines why AI must be disabled by default and human-reviewed.
 
+## IDTS-114 Vercel AI Gateway update (2026-07-29)
+
+`vercel` is now an allowed provider, but it is still disabled by default. `runtimeOverrides()` allows only named, non-secret settings such as `IDTS_AI_PROVIDER`, `IDTS_AI_MODEL`, timeout, and fallback switches. The only secret read by this module is the runtime-only `AI_GATEWAY_API_KEY` (or an equivalent private CAP binding property); it must never appear in `package.json`, evidence, or a suggestion audit row.
+
+Model IDs are deliberately not handled by `safeAlias()`: Vercel uses IDs such as `inclusionai/ling-3.0-flash-free` and `alibaba/qwen3.7-flash`. `safeModelId()` preserves the single `provider/model` slash but rejects a URL and `..` path traversal. An explicit `embeddingModelAlias: null` disables embeddings for the low-cost Ling proving phase, so Similar Bugs can use its existing deterministic lexical fallback instead of incorrectly sending a chat model to the embedding endpoint.
+
+Breakpoints: start at `getAiConfig()` to inspect only `enabled`, `provider`, model IDs, `fallbackEnabled`, and `ready`; then enter `normalizeAiConfig()` to see which missing field made a configuration unavailable. Never inspect or copy the gateway key. The next file is `srv/ai/provider.js`.
+
 ### Safe editing checklist
 
 - Keep `enabled` default as `false`.
