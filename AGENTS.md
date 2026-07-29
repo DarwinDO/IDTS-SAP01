@@ -397,7 +397,7 @@ Subagent output is an untrusted draft until the primary agent:
 
 Report which subagent model/reasoning level was used, its assigned scope, useful result, rejected findings, and verification performed by the primary agent. A subagent must never mark its own work as final acceptance.
 
-Vietnamese: Agent chinh duoc phep chu dong goi subagent khi task co tu hai phan doc lap co the chay song song. Mac dinh dung Terra Medium cho viec phu ro rang va Terra High cho security, kien truc, CAP/Fiori cross-layer, debug kho va review truoc merge. Ket qua subagent chi la ban nhap; agent chinh bat buoc review diff, doi chieu source/Jira/rule, chay lai test/gate va tu chiu trach nhiem cuoi cung cho commit, PR, merge, deploy va ket luan PASS.
+Vietnamese: Agent chính được phép chủ động gọi subagent khi task có từ hai phần độc lập có thể chạy song song. Mặc định dùng Terra Medium cho việc phụ rõ ràng và Terra High cho security, kiến trúc, CAP/Fiori cross-layer, debug khó và review trước merge. Kết quả subagent chỉ là bản nháp; agent chính bắt buộc review diff, đối chiếu source/Jira/rule, chạy lại test/gate và tự chịu trách nhiệm cuối cùng cho commit, PR, merge, deploy và kết luận PASS.
 
 ## Always-On Karpathy Guidelines
 
