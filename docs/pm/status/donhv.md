@@ -4011,3 +4011,9 @@ Vietnamese:
   `app/bug-management-ui` because the root has no `ui5.yaml`. Both correct
   commands passed; classification: test-harness/tooling issue, not a CAP or
   UI product defect.
+- IDTS-114 initial `gh pr merge --merge --delete-branch` was blocked before any
+  remote mutation because GitHub CLI attempted to use local `dev`, which is
+  already attached to root worktree `E:\IDTS-SAP01`. Classification: tooling
+  issue. The PR itself remained clean and `qa-depth-gate` had passed. The
+  approved remote merge is performed through the GitHub pull-request merge API
+  instead; no branch-protection bypass or source change is involved.
