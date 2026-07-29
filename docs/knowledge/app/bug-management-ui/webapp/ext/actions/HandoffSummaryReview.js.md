@@ -1,5 +1,11 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/actions/HandoffSummaryReview.js`
 
+## IDTS-114 readability and comment summary
+
+The dialog now orders content as Summary, Current State, Missing Information, Comment Summary, Recent Important Events, and Next Expected Action. Long prose uses `ExpandableText`; comments and events use separate `sap.m.List` controls; the next action is highlighted with a `MessageStrip`. `splitLines()` converts each already-sanitized backend line into a display item, so a legitimate term such as “access token expired” cannot hide the whole section. It does not infer or mutate business state.
+
+Vietnamese: Dialog hiện sắp xếp Summary, Current State, Missing Information, Comment Summary, Recent Important Events và Next Expected Action. Đoạn dài dùng `ExpandableText`; comment và event dùng hai `sap.m.List`; bước tiếp theo được nhấn bằng `MessageStrip`. `splitLines()` chỉ chuyển chuỗi backend đã làm sạch thành item hiển thị, không suy diễn hay thay đổi trạng thái nghiệp vụ.
+
 > **Ownership / debug anchor:** DatDT owns handoff-summary review UI (backup: DonHV). It must never write history, assignee, or status merely by opening the dialog.
 > **Ownership / điểm debug:** DatDT sở hữu UI review handoff summary (backup: DonHV). Mở dialog không được tự ghi history, assignee hoặc status.
 

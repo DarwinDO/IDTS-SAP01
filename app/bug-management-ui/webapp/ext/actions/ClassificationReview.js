@@ -14,6 +14,7 @@ sap.ui.define([
     "sap/m/Text",
     "sap/m/ColumnListItem",
     "sap/m/ObjectStatus",
+    "sap/m/ExpandableText",
     "sap/m/MessageStrip",
     "sap/m/VBox",
     "sap/m/MessageBox",
@@ -30,6 +31,7 @@ sap.ui.define([
     Text,
     ColumnListItem,
     ObjectStatus,
+    ExpandableText,
     MessageStrip,
     VBox,
     MessageBox,
@@ -332,8 +334,7 @@ sap.ui.define([
             confidenceText: Number.isFinite(confidence)
                 ? getText(view, "classificationReviewConfidence", [Math.round(confidence * 100)])
                 : "",
-            reason: review.explanation,
-            decisionHint: review.decisionHint
+            reason: review.explanation
         };
     }
 
@@ -452,26 +453,26 @@ sap.ui.define([
             noDataText: "{classificationReview>/noDataText}",
             columns: [
                 new Column({
-                    width: "11rem",
+                    width: "10rem",
                     header: new Text({ text: getText(view, "classificationReviewFieldColumn") })
                 }),
                 new Column({
-                    width: "12rem",
-                    minScreenWidth: "Tablet",
+                    width: "11rem",
+                    minScreenWidth: "Desktop",
                     demandPopin: true,
                     header: new Text({ text: getText(view, "classificationReviewCurrentColumn") })
                 }),
                 new Column({
-                    width: "12rem",
+                    width: "16rem",
                     minScreenWidth: "Tablet",
                     demandPopin: true,
                     header: new Text({ text: getText(view, "classificationReviewSuggestedColumn") })
                 }),
                 new Column({
-                    width: "24rem",
+                    width: "8rem",
                     minScreenWidth: "Desktop",
                     demandPopin: true,
-                    header: new Text({ text: getText(view, "classificationReviewReviewColumn") })
+                    header: new Text({ text: getText(view, "classificationReviewConfidenceColumn") })
                 })
             ]
         });
@@ -483,16 +484,23 @@ sap.ui.define([
                 cells: [
                     new Text({ text: "{classificationReview>fieldLabel}", wrapping: true }),
                     new Text({ text: "{classificationReview>currentValue}", wrapping: true }),
-                    new Text({ text: "{classificationReview>suggestedValue}", wrapping: true }),
+                    new VBox({
+                        items: [
+                            new Text({ text: "{classificationReview>suggestedValue}", wrapping: true }),
+                            new ExpandableText({
+                                text: "{classificationReview>reason}",
+                                maxCharacters: 180,
+                                overflowMode: "InPlace"
+                            }).addStyleClass("sapUiTinyMarginTop")
+                        ]
+                    }),
                     new VBox({
                         items: [
                             new ObjectStatus({
                                 text: "{classificationReview>statusText}",
                                 state: "{classificationReview>statusState}"
                             }),
-                            new Text({ text: "{classificationReview>confidenceText}", wrapping: true }),
-                            new Text({ text: "{classificationReview>reason}", wrapping: true }),
-                            new Text({ text: "{classificationReview>decisionHint}", wrapping: true })
+                            new Text({ text: "{classificationReview>confidenceText}", wrapping: true })
                         ]
                     })
                 ]
@@ -501,7 +509,7 @@ sap.ui.define([
 
         var dialog = new Dialog({
             title: getText(view, "classificationReviewDialogTitle"),
-            contentWidth: "62rem",
+            contentWidth: "58rem",
             contentHeight: "32rem",
             resizable: true,
             draggable: true,

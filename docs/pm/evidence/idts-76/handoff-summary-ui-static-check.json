@@ -1,6 +1,6 @@
 {
   "task": "IDTS-76",
-  "checkedAt": "2026-07-29T17:35:18.302Z",
+  "checkedAt": "2026-07-29T18:44:58.813Z",
   "checks": [
     {
       "label": "history section opens the handoff review dialog",
@@ -31,11 +31,27 @@
       "pass": true
     },
     {
+      "label": "handoff review uses SAPUI5 lists for comments and events",
+      "pass": true
+    },
+    {
+      "label": "handoff review uses expandable text for long content",
+      "pass": true
+    },
+    {
       "label": "handoff review shows summary",
       "pass": true
     },
     {
       "label": "handoff review shows missing information",
+      "pass": true
+    },
+    {
+      "label": "handoff review shows grounded comment summary",
+      "pass": true
+    },
+    {
+      "label": "handoff list keeps backend-sanitized technical terms as business data",
       "pass": true
     },
     {
@@ -112,6 +128,14 @@
     },
     {
       "label": "i18n.properties has handoffSummaryMissingLabel",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummaryCommentsLabel",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummaryNoComments",
       "pass": true
     },
     {
@@ -195,6 +219,14 @@
       "pass": true
     },
     {
+      "label": "i18n.properties handoffSummaryCommentsLabel is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummaryNoComments is user-facing",
+      "pass": true
+    },
+    {
       "label": "i18n.properties handoffSummaryEventsLabel is user-facing",
       "pass": true
     },
@@ -268,6 +300,14 @@
     },
     {
       "label": "i18n_en.properties has handoffSummaryMissingLabel",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummaryCommentsLabel",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has handoffSummaryNoComments",
       "pass": true
     },
     {
@@ -348,6 +388,14 @@
     },
     {
       "label": "i18n_en.properties handoffSummaryMissingLabel is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummaryCommentsLabel is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummaryNoComments is user-facing",
       "pass": true
     },
     {

@@ -1,5 +1,11 @@
 # Knowledge: `srv/service.cds`
 
+## IDTS-114 handoff comment-summary contract
+
+`BugHandoffSummaryResult.commentSummary` is a transient `LargeString` in the OData action result. It is not a column and does not create a HANA migration. The value is populated by `srv/ai/bug-summary.js` from bounded stored comments when `summarizeBugHandoff` runs.
+
+Vietnamese: `BugHandoffSummaryResult.commentSummary` là chuỗi tạm trong response OData, không phải cột database và không cần migration HANA. `srv/ai/bug-summary.js` tạo giá trị này từ tập comment đã lưu có giới hạn khi action `summarizeBugHandoff` chạy.
+
 ## IDTS-113 email scheduler contract
 
 `processEmailOutbox()` is a technical unbound OData action. It returns only
