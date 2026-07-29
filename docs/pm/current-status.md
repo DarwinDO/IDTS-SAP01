@@ -261,19 +261,25 @@ Vietnamese clean note: Nút `Assign Developer` riêng đã được bỏ khỏi 
 - `IDTS-113` now runs the migrated CAP service and AppRouter on SAP BTP Cloud
   Foundry with HANA data, XSUAA PM access, retained AWS S3, retained Brevo and
   SAP Job Scheduling Service.
-- `IDTS-114` is in progress: PR #209 is merged and SAP BTP uses Qwen structured
+- `IDTS-114` is in progress: PR #211 is merged at
+  `016a6067de1c3c7725b6f74f23b90ef6b8b5f7fa` and SAP BTP uses Qwen structured
   generation/embeddings with one bounded OpenAI fallback. Live synthetic BTP
-  tasks passed for Qwen and both fallback paths; Ling plain chat passed but its
-  JSON-Schema structured request returned HTTP 400. Provider-level acceptance
-  is complete; authenticated browser action smoke remains.
+  tasks and 169 local regression checks passed; Ling plain chat passed but its
+  JSON-Schema structured request returned HTTP 400. PM browser acceptance
+  verified Similar Bugs, Classification review, Handoff Summary and Smart
+  Assign no-mutation/audit persistence, but later sanitized gateway 429/400
+  responses mean stable provider-live feature success is not claimed.
 - Runtime SHA `3504931d2689e4d56c0de3f5977342fc7cf57e4a` is deployed. PM browser
   assignment/history/notification smoke, S3 adapter upload/download/hash/delete
   and a fresh Scheduler-driven Brevo SENT delivery passed.
-- Four AI entry points passed browser smoke in disabled-provider/fallback mode
-  without changing BUG-0018 workflow or assignment. The same CAP droplet was
-  restarted; HANA metadata, S3 bytes/hash, Bug state, four History events and
-  two Notifications persisted, and the hourly Job Scheduler schedule remained
-  Active.
+- Four visible AI entry points were exercised in the PM BTP browser session for
+  `BUG-0018` without changing its workflow or assignment. Accept/Reject/Ignore
+  review states and Similar Bugs acceptance persisted. Full acceptance remains
+  blocked because Apply Classification, Confirm Duplicate and Operational
+  Metrics have no deployed UI entry point, and Tester/Developer interactive
+  identity evidence is still unavailable. Evidence is under
+  `docs/pm/evidence/idts-114/btp-browser/`; follow-up bug `IDTS-115` tracks the
+  missing UI capabilities.
 - The Render rollback platform-readiness drill is documented and fresh route
   checks pass. Render is a previous baseline, not a synchronized HANA replica;
   a lossless return requires manual HANA-delta reconciliation.
