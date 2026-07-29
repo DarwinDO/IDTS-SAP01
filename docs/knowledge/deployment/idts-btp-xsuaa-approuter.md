@@ -24,9 +24,11 @@ role.
 - Render rollback environment: PostgreSQL + custom bearer auth through the `integration` profile.
 - Local development: SQLite + custom bearer auth.
 
-S3 and Brevo are intentionally retained as private external integrations. AI
-remains disabled/mock. SAP Job Scheduling Service invokes the protected outbox
-operation; the BTP profile does not also start the process-local outbox timer.
+S3 and Brevo are intentionally retained as private external integrations.
+Vercel AI Gateway is configured privately for the accepted AI flows; Qwen is
+the primary model and OpenAI is a bounded fallback. SAP Job Scheduling Service
+invokes the protected outbox operation; the BTP profile does not also start
+the process-local outbox timer.
 
 ## Deployed BTP resources
 
@@ -40,7 +42,7 @@ operation; the BTP profile does not also start the process-local outbox timer.
 | `idts-sap01-html5-repo-host` | Deployed Fiori content |
 | `idts-sap01-html5-repo-runtime` | Runtime access to Fiori content |
 | `idts-sap01-jobscheduler` | Hourly email-outbox invocation |
-| `idts-sap01-external-services` | Private retained S3/Brevo configuration |
+| `idts-sap01-external-services` | Private retained S3/Brevo/AI configuration |
 
 The Job Scheduling dashboard shows one job,
 `IDTSEmailOutboxHourly`, with one active hourly schedule. Authentication is
@@ -70,8 +72,10 @@ passwords.
 - Historical retryable email deliveries were made non-retryable before import.
 - Attachment metadata is stored in HANA; attachment bytes remain in AWS S3.
 - Brevo remains the transactional email provider.
-- AI stays disabled/mock and cannot change assignment, classification or
-  lifecycle without an authorized human action.
+- AI review remains advisory and cannot change assignment, classification or
+  lifecycle without an authorized human action. The service module declares a
+  45-second per-model timeout through `IDTS_AI_TIMEOUT_MS`; provider keys remain
+  private service configuration.
 
 ## Verification order
 
@@ -84,7 +88,8 @@ passwords.
 7. Confirm the Job Scheduler job has exactly one active schedule.
 8. Verify S3 bytes and HANA metadata across an application restart.
 9. Verify one fresh Brevo delivery reaches `SENT`.
-10. Verify AI disabled/fallback paths do not mutate the Bug.
+10. Verify primary/fallback AI paths do not mutate the Bug without an
+    authorized explicit action.
 
 ## Security notes
 

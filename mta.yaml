@@ -25,6 +25,7 @@ modules:
       health-check-http-endpoint: /health
     properties:
       IDTS_EMAIL_WORKER_MODE: scheduler
+      IDTS_AI_TIMEOUT_MS: 45000
     build-parameters:
       builder: npm-ci
     provides:

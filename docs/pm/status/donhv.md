@@ -4420,3 +4420,19 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   2026-07-23 90% PASS record with all required fields. Fresh local
   `check-pr-depth.js --stdin` reports PASS (11 required sections); no Knowledge
   Gate was rerun and no runtime code changed for this correction.
+- IDTS-114 product defect follow-up: SAP BTP audit recorded Smart Assign as
+  primary-Qwen `SUCCESS`, but the UI still used unavailable/fallback wording.
+  A controlled shape-only call proved Qwen wrapped the valid object under the
+  exact schema-name key `IdtsSmartAssignmentExplanation`, while the feature
+  contract reads root `candidates` or `explanations`. A red test reproduced
+  the mismatch (`30 PASS / 1 FAIL`). The minimal adapter normalization now
+  unwraps exactly one object layer only when the root has one key equal to the
+  sanitized schema name; direct, multi-key, array and unrelated payloads remain
+  unchanged. Focused provider verification is `36/36 PASS`; Smart Assign
+  feature verification is `8/8 PASS`.
+- IDTS-114 tooling issue: a verification-only `mbt build` remained active in
+  the service module build without producing a terminal result, while the
+  independent code/test gates had already completed. The build cell was
+  terminated to avoid an orphaned local process. No deployment, runtime,
+  database or generated artifact was changed. MTA packaging will be rerun in
+  the controlled selective-deployment step with visible build output.

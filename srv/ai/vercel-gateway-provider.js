@@ -63,7 +63,8 @@ class VercelGatewayProvider {
         })
       }
       try {
-        return { json: JSON.parse(messageContent(response)) }
+        const parsed = JSON.parse(messageContent(response))
+        return { json: unwrapSchemaEnvelope(parsed, normalizedSchemaName) }
       } catch {
         throw providerError('VERCEL_GATEWAY_MALFORMED_OUTPUT', { retryable: true, fallbackEligible: true })
       }
@@ -226,6 +227,23 @@ function safeSchemaName (value) {
   return String(value || 'Suggestion').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 64) || 'Suggestion'
 }
 
+function unwrapSchemaEnvelope (json, schemaName) {
+  if (!json || typeof json !== 'object' || Array.isArray(json)) return json
+
+  const key = safeSchemaName(schemaName)
+  const keys = Object.keys(json)
+  const wrapped = json[key]
+  if (
+    keys.length === 1 &&
+    Object.prototype.hasOwnProperty.call(json, key) &&
+    wrapped &&
+    typeof wrapped === 'object' &&
+    !Array.isArray(wrapped)
+  ) return wrapped
+
+  return json
+}
+
 module.exports = {
   API_BASE_URL,
   VercelGatewayProvider,
@@ -235,5 +253,6 @@ module.exports = {
   isResponseFormatIncompatible,
   parseRetryAfterSeconds,
   safeProviderErrorCode,
-  safeSchemaName
+  safeSchemaName,
+  unwrapSchemaEnvelope
 }
