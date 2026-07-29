@@ -4213,3 +4213,10 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
 - Tooling issue: a final evidence text scan was first written with Bash `|| $true` syntax and failed in PowerShell before scanning any file. It changed no files and exposed no data. The command was corrected to PowerShell-compatible handling before the final verification pass.
 - Tooling issue: the first `gh pr create` attempt used Bash heredoc syntax (`<<'EOF'`) in PowerShell and was rejected before GitHub received a request. No PR or repository content was changed. The PR was retried with a PowerShell-compatible body argument.
 - Process/tooling issue: after the PR #212 body was corrected, rerunning the old GitHub Actions run still used the original pull-request event payload and therefore reported all evidence headings as missing. Local validation of the live PR body passed all 11 required sections. The fix is to push this status update so GitHub creates a fresh `synchronize` event with the current PR body; no branch-protection bypass is used.
+### 2026-07-29 — Subagent policy PR gate finding
+
+- Issue type: process issue.
+- Symptom: PR #213 initially failed `qa-depth-gate` even though local agent-rule, self-test and secret-scan checks passed.
+- Root cause: the PR body summarized the existing DonHV Knowledge Gate but omitted the exact field labels required by `check-pr-depth.js`.
+- Status: fixed by restoring the complete verified IDTS-89 Knowledge Gate declaration; a fresh PR event is required before merge.
+- Runtime impact: none; this PR changes agent process guidance only.
