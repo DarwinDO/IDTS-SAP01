@@ -5,7 +5,8 @@ Owner: DonHV
 Support: DatDT (classification UI), SangVN (similar-bug/assignment UI), NhanT (QA acceptance)
 Status: In Progress
 Due: 2026-08-05
-Baseline: `65eec9ed1271bdd97192f030b15dc93a4889f848`
+Implementation baseline: `65eec9ed1271bdd97192f030b15dc93a4889f848`
+Merged runtime baseline: `ae209c8f82227e4dedca09247db96c0b47097d92`
 
 ## Scope
 
@@ -34,7 +35,16 @@ No CAP contract, database schema, provider configuration, model, S3, Brevo, or l
 
 ## Current implementation note
 
-The FE changes are prepared in branch `fix/idts-115-ai-fiori-entrypoints-donhv`. Focused verification is complete; final repository gates, PR review, SAP BTP deployment, and browser/provider acceptance remain required before IDTS-115 can be closed.
+PR #214 merged normally and the selected service, app-content and AppRouter
+modules are deployed on SAP BTP at merge SHA
+`ae209c8f82227e4dedca09247db96c0b47097d92`. PM browser acceptance passed
+Apply Classification, Confirm Duplicate and AI Activity. HANA readback confirms
+the duplicate relationship and review audit persistence.
+
+IDTS-115 remains In Progress because Tester/Developer member-owned browser
+sessions are still missing. IDTS-114 also remains In Progress because Qwen
+structured primary calls did not produce `SUCCESS` for Classification, Handoff
+Summary or Smart Assign in this run.
 
 ## Local verification
 
@@ -54,3 +64,21 @@ The FE changes are prepared in branch `fix/idts-115-ai-fiori-entrypoints-donhv`.
 | Secret scan, agent rules, QA-depth self-test | PASS |
 | AI DevKit and `git diff --check` | PASS |
 | Ponytail simplicity | `Lean already. Ship.` |
+
+## SAP BTP acceptance
+
+| Gate | Result |
+| --- | --- |
+| Selective deploy without DB deployer | PASS |
+| Service/AppRouter started and health/redirect checks | PASS |
+| PM Apply Classification and reload | PASS |
+| PM Confirm Duplicate and HANA readback | PASS |
+| PM AI Activity | PASS |
+| PM review/no-mutation | PASS |
+| Tester interactive cases | PENDING member-owned sign-in |
+| Developer interactive 403 cases | PENDING member-owned sign-in |
+| Qwen embedding primary | PASS observed |
+| Qwen structured primary | NOT PASS; safe fallback/provider error |
+| Browser console clean | PARTIAL; create-flow binding errors require follow-up |
+
+Evidence: `docs/pm/evidence/idts-115/`.
