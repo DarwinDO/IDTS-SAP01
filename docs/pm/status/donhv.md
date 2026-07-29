@@ -4773,3 +4773,12 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   the authoritative cache-busted R3 screenshots (`04`–`06`). The three older
   diagnostic images remain untracked in the evidence directory and will be
   excluded from staging.
+- IDTS-114 current Qwen audit correction: a new read-only HANA query of safe
+  audit fields confirms at least one real primary-model `SUCCESS` for all four
+  capabilities: Similar Bugs embedding, Classification, Handoff Summary and
+  Smart Assign Explanation. The Technical primary-acceptance criterion is
+  therefore PASS. The latest selected Handoff row is still a safe provider
+  error, so runtime stability remains monitored and fallback remains required.
+  IDTS-114/115 stay In Progress because the deferred Tester/Developer browser
+  role matrix is not complete. Evidence:
+  `docs/pm/evidence/idts-114/qwen-structured-primary/current-feature-readback-20260729.md`.
