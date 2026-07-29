@@ -4017,3 +4017,9 @@ Vietnamese:
   issue. The PR itself remained clean and `qa-depth-gate` had passed. The
   approved remote merge is performed through the GitHub pull-request merge API
   instead; no branch-protection bypass or source change is involved.
+- The follow-up handover-log PR initially had an abbreviated body and its
+  `qa-depth-gate` failed before review. Its body was corrected with every
+  required evidence section. GitHub reruns retain the original pull-request
+  event payload, so a small documentation follow-up commit is required to
+  trigger a fresh gate event. Classification: CI/test-harness event-payload
+  behavior; no product or release configuration was changed.
