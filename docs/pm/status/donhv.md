@@ -4383,3 +4383,14 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   the check reported Markdown trailing whitespace. The branch had not been
   pushed. The evidence formatting was corrected, the process issue was logged,
   and the commit is amended only after a clean staged diff check.
+- CI blocker: PR #216 is mergeable at the Git level but its fresh
+  `qa-depth-gate` run failed. Merge and SAP BTP deployment are stopped; no
+  bypass is authorized. The failed job log is being inspected to distinguish
+  PR-body/process evidence from code/test failure before making any follow-up
+  change.
+- CI blocker diagnosis/resolution: the failed job was limited to PR-body field
+  names; the body used `Learner/Status` instead of the repository parser's 12
+  exact Ownership Knowledge Gate fields. PR #216 now reuses DonHV's existing
+  2026-07-23 90% PASS record with all required fields. Fresh local
+  `check-pr-depth.js --stdin` reports PASS (11 required sections); no Knowledge
+  Gate was rerun and no runtime code changed for this correction.
