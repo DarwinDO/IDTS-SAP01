@@ -13,7 +13,11 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 }
 
 const { createAiProvider, normalizeAiConfig } = require('../../srv/ai')
-const { API_BASE_URL, httpError } = require('../../srv/ai/vercel-gateway-provider')
+const {
+  API_BASE_URL,
+  httpError,
+  unwrapSchemaEnvelope
+} = require('../../srv/ai/vercel-gateway-provider')
 const { containsUnsafeDiagnosticText } = require('../../srv/ai/safety')
 
 let pass = 0
@@ -49,6 +53,37 @@ function gatewayConfig (overrides = {}) {
 
 async function main () {
   console.log('\nIDTS-114 Vercel AI Gateway provider verification')
+
+  const directCandidates = { candidates: [{ developerProfileID: 'candidate-1' }] }
+  check(
+    'direct structured payload remains unchanged',
+    unwrapSchemaEnvelope(directCandidates, 'IdtsSmartAssignmentExplanation') === directCandidates
+  )
+  check(
+    'exact object schema wrapper unwraps once',
+    unwrapSchemaEnvelope(
+      { IdtsSmartAssignmentExplanation: directCandidates },
+      'IdtsSmartAssignmentExplanation'
+    ) === directCandidates
+  )
+  const multiKeyEnvelope = {
+    IdtsSmartAssignmentExplanation: directCandidates,
+    metadata: { source: 'provider' }
+  }
+  check(
+    'multi-key provider payload is not unwrapped',
+    unwrapSchemaEnvelope(multiKeyEnvelope, 'IdtsSmartAssignmentExplanation') === multiKeyEnvelope
+  )
+  const arrayEnvelope = { IdtsSmartAssignmentExplanation: [] }
+  check(
+    'array schema wrapper is not unwrapped',
+    unwrapSchemaEnvelope(arrayEnvelope, 'IdtsSmartAssignmentExplanation') === arrayEnvelope
+  )
+  const unrelatedEnvelope = { DifferentContract: directCandidates }
+  check(
+    'unrelated one-key provider payload is not unwrapped',
+    unwrapSchemaEnvelope(unrelatedEnvelope, 'IdtsSmartAssignmentExplanation') === unrelatedEnvelope
+  )
 
   const incomplete = normalizeAiConfig({ enabled: true, provider: 'vercel', modelAlias: 'inclusionai/ling-3.0-flash-free' })
   check('Vercel config requires the private gateway key', incomplete.ready === false && incomplete.missing.includes('gatewayApiKey'))
@@ -172,6 +207,44 @@ async function main () {
       compatibilityResult.data.json.compatible === true &&
       compatibilityResult.modelAlias === 'alibaba/qwen3.7-flash' &&
       compatibilityResult.fallbackUsed === false
+  )
+
+  const wrappedCompatibilityProvider = createAiProvider(gatewayConfig(), {
+    fetchImpl: async (url, options) => {
+      const body = JSON.parse(options.body)
+      if (body.response_format?.type === 'json_schema') {
+        return jsonResponse(400, {
+          error: {
+            code: 'unsupported_response_format',
+            message: 'The selected model does not support response_format json_schema.'
+          }
+        })
+      }
+      return jsonResponse(200, {
+        choices: [{
+          message: {
+            content: JSON.stringify({
+              IdtsSmartAssignmentExplanation: {
+                candidates: [{ developerProfileID: '11111111-1111-1111-1111-111111111111', explanation: 'Synthetic fit.' }]
+              }
+            })
+          }
+        }]
+      })
+    }
+  })
+  const wrappedCompatibilityResult = await wrappedCompatibilityProvider.structured({
+    featureType: 'assignment_explanation',
+    schemaName: 'IdtsSmartAssignmentExplanation',
+    instruction: 'Return JSON only.',
+    input: { title: 'Synthetic wrapped compatibility test' }
+  })
+  check(
+    'exact schema-name wrapper is removed before feature validation',
+    wrappedCompatibilityResult.ok &&
+      Array.isArray(wrappedCompatibilityResult.data.json.candidates) &&
+      wrappedCompatibilityResult.data.json.candidates.length === 1 &&
+      wrappedCompatibilityResult.data.json.IdtsSmartAssignmentExplanation === undefined
   )
 
   const malformedCompatibilityRequests = []

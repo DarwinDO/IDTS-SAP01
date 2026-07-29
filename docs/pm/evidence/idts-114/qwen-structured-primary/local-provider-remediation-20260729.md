@@ -111,3 +111,50 @@ IDTS-64 `34/34`, IDTS-67 `29/29`, IDTS-68 `33/33`, IDTS-69 `8/8`,
 IDTS-71 `31/31` and IDTS-114 `30/30`. CAP compile for both services, secret
 scan, agent rules, QA Depth self-test, AI DevKit and `git diff --check` also
 passed.
+
+## Smart Assign schema-envelope follow-up
+
+The post-cooldown SAP BTP call reached primary Qwen successfully:
+
+| Capability | Safe result | Model | Latency |
+| --- | --- | --- | ---: |
+| Similar Bugs embedding | `SUCCESS` | `alibaba/qwen3-embedding-0.6b` | 6,982 ms |
+| Classification | `SUCCESS` | `alibaba/qwen3.7-flash` | 27,029 ms |
+| Handoff Summary | `SUCCESS` | `alibaba/qwen3.7-flash` | 19,932 ms |
+| Smart Assign before cooldown | rate limited | `alibaba/qwen3.7-flash` | 3,569 ms |
+| Smart Assign after cooldown | `SUCCESS` | `alibaba/qwen3.7-flash` | 32,780 ms |
+
+The Smart Assign UI nevertheless displayed unavailable/fallback wording.
+A controlled shape-only call found one exact schema-name envelope:
+
+```text
+top-level key: IdtsSmartAssignmentExplanation
+nested candidate array: candidates
+```
+
+The feature reads root `candidates` or `explanations`; therefore the provider
+audit could be `SUCCESS` while feature mapping ignored the nested rows. No raw
+prompt, response body, credential, endpoint or personal data was retained.
+
+Red evidence:
+
+```text
+30 PASS / 1 FAIL
+FAIL exact schema-name wrapper is removed before feature validation
+```
+
+Green evidence after the single-layer normalization:
+
+```text
+IDTS-114 provider: 36/36 PASS
+IDTS-69 Smart Assign: 8/8 PASS
+AI regression total: 171/171 PASS
+Secret scan: PASS
+CAP compile: PASS
+```
+
+`mta.yaml` now persists `IDTS_AI_TIMEOUT_MS: 45000` for `idts-sap01-srv`.
+This does not add a retry or change any OData/CDS/HANA contract. Browser
+acceptance remains pending until the merged service is selectively deployed
+and Smart Assign shows the grounded provider explanation after reload without
+changing Bug status, assignee, next processor or lifecycle history.

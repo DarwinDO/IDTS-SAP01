@@ -107,3 +107,40 @@ provider response.
 - Không fallback cho lỗi payload 400 chung hoặc hết budget.
 - Không đưa provider diagnostic thô lên UI.
 - Không lưu raw prompt hoặc raw provider response.
+
+## Qwen schema-envelope compatibility
+
+Some Qwen responses contain valid JSON but wrap the result once under the
+requested schema name:
+
+```json
+{
+  "IdtsSmartAssignmentExplanation": {
+    "candidates": []
+  }
+}
+```
+
+After `JSON.parse()`, `unwrapSchemaEnvelope()` removes that wrapper only when
+the root has exactly one property, its name equals the sanitized schema name,
+and its value is an object. It does not unwrap recursively. Direct feature
+payloads, arrays, primitives, multi-key objects and unrelated wrappers remain
+unchanged. Feature-level validation still decides whether candidate IDs,
+catalog values and explanations are grounded.
+
+The SAP BTP module declares `IDTS_AI_TIMEOUT_MS: 45000` in `mta.yaml`. This is
+the deadline for one model call, not permission to add another retry loop.
+Browser acceptance must still verify that the full OData request completes
+within the client/router deadline.
+
+## Giải thích tiếng Việt
+
+Qwen có thể trả JSON hợp lệ nhưng bọc kết quả dưới đúng tên schema, ví dụ
+`IdtsSmartAssignmentExplanation`. Adapter chỉ gỡ đúng một lớp khi object ngoài
+cùng có đúng một key trùng với tên schema đã chuẩn hóa và giá trị bên trong là
+object. Payload trực tiếp, array, object nhiều key hoặc wrapper sai tên được
+giữ nguyên.
+
+Sau bước này, validator của từng tính năng vẫn kiểm tra candidate ID, catalog
+value và dữ liệu grounding. Vì vậy provider trả `SUCCESS` không có nghĩa hệ
+thống tự động tin, assign hoặc áp dụng nội dung AI.
