@@ -4436,3 +4436,33 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   terminated to avoid an orphaned local process. No deployment, runtime,
   database or generated artifact was changed. MTA packaging will be rerun in
   the controlled selective-deployment step with visible build output.
+- IDTS-114 environment defect: after merge SHA
+  `112a7356c1828736051002275c6c5ca604e498fa`, Smart Assign candidate loading
+  and the scheduled email-outbox call both stopped with CAP
+  `ResourceRequest timed out` before their database query completed. The
+  effective production HANA pool still used the 1000 ms acquisition default.
+  CAP MCP confirmed the supported `cds.requires.db.pool.acquireTimeoutMillis`
+  setting. A focused red/green check now fixes only the production acquisition
+  boundary at 10000 ms; pool size, schema, query logic, data, S3, Brevo and AI
+  provider settings are unchanged. Post-deployment Smart Assign and scheduler
+  verification remain pending.
+- IDTS-114 local verification tooling issue: the first `cds env` invocation
+  targeted a detached worktree without `node_modules` and stopped with
+  `MODULE_NOT_FOUND` before reading configuration. The corrected check loads
+  the locked CAP runtime from the isolated acceptance worktree while keeping
+  the candidate worktree as the current directory. It confirms
+  `kind=hana`, `acquireTimeoutMillis=10000`, and no committed credentials.
+- IDTS-114 local regression setup issue: `qa:idts69:programmatic` initially
+  stopped during CDS compilation because this fresh worktree had no local
+  `node_modules`; `NODE_PATH` resolved the CAP runtime itself but the compiler
+  could not resolve the model import `@cap-js/attachments` relative to the
+  project. No assertion, runtime, provider or persisted data failed. The
+  verification is rerun through a temporary untracked directory junction to
+  the same lockfile-installed dependency tree used by the isolated acceptance
+  worktree, then the junction is removed.
+- Local cleanup tooling issue: the shell safety policy rejected the first
+  command that attempted to remove the temporary `node_modules` junction even
+  though it had verified `LinkType=Junction`. The ignored junction is not part
+  of the Git diff, package lock or deployment artifact declaration. It remains
+  local for the controlled MTA build and will be removed with the isolated
+  worktree after release verification.
