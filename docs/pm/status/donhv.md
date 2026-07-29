@@ -4210,6 +4210,12 @@ Post-review safe readback for BUG-0018 confirmed no unintended Bug mutation afte
 
 Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be opened, review states persist, safe fallback/no-mutation behavior is evidenced, and no tested endpoint produced HTTP 5xx. Full IDTS-114 acceptance is still blocked by provider capability instability, the missing Apply Classification UI, missing Duplicate Confirmation and Metrics UI entry points, and unavailable Tester/Developer interactive identities.
 
+## 2026-07-29 - IDTS-115 AI Fiori entry points
+
+- Tooling/environment issue: the first Fiori MCP `list_functionality` preflight could not compile the fresh worktree because dependencies were not installed, so `@cap-js/attachments` and `ManagedAttachments` could not be resolved. No source or runtime behavior had been changed. The worktree will run the repository-standard `npm ci`, then repeat the Fiori MCP preflight before SAPUI5 edits.
+- Dependency/security finding: repository-standard `npm ci` completed, but npm reported the existing audit baseline as 24 vulnerabilities (1 low, 9 moderate, 13 high, 1 critical) plus deprecated transitive packages. No `npm audit fix` or dependency upgrade was applied because IDTS-115 is a focused FE capability fix and an automatic upgrade could change runtime behavior; dependency remediation remains a separate security work item.
+- Tooling issue: the first `rg` search for a reusable OData-action helper used an invalid combined regular expression and stopped with `unclosed group` before reading or changing files. The search was corrected to fixed-string queries; this is not a product defect.
+
 - Tooling issue: a final evidence text scan was first written with Bash `|| $true` syntax and failed in PowerShell before scanning any file. It changed no files and exposed no data. The command was corrected to PowerShell-compatible handling before the final verification pass.
 - Tooling issue: the first `gh pr create` attempt used Bash heredoc syntax (`<<'EOF'`) in PowerShell and was rejected before GitHub received a request. No PR or repository content was changed. The PR was retried with a PowerShell-compatible body argument.
 - Process/tooling issue: after the PR #212 body was corrected, rerunning the old GitHub Actions run still used the original pull-request event payload and therefore reported all evidence headings as missing. Local validation of the live PR body passed all 11 required sections. The fix is to push this status update so GitHub creates a fresh `synchronize` event with the current PR body; no branch-protection bypass is used.
@@ -4220,3 +4226,69 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
 - Root cause: the PR body summarized the existing DonHV Knowledge Gate but omitted the exact field labels required by `check-pr-depth.js`.
 - Status: fixed by restoring the complete verified IDTS-89 Knowledge Gate declaration; a fresh PR event is required before merge.
 - Runtime impact: none; this PR changes agent process guidance only.
+
+### 2026-07-29 — IDTS-115 test-harness finding
+
+- Issue type: test-harness issue.
+- Symptom: `npm run qa:idts115:programmatic` initially failed while checking the PM-only metrics contract.
+- Affected file: `scripts/qa/test-idts115-ai-fiori-entrypoints.js`.
+- Root cause: the focused assertion expected `@requires: 'PM'`, but the valid CDS annotation in `srv/service.cds` is `@(requires: 'PM')`.
+- Status: fixed in the acceptance branch by aligning the assertion with the real CDS syntax; no runtime behavior changed.
+- Verification: rerun focused IDTS-115 suite after this patch.
+- Owner: DonHV.
+### 2026-07-29 — IDTS-115 independent Terra High review findings
+
+- Product defect: failed Classification Apply disabled retry permanently, while a post-apply refresh failure could not be distinguished from an action failure. Fix: track whether CAP mutation completed, re-enable only for pre-mutation failure, and require reload after post-mutation refresh failure.
+- Product defect: failed Duplicate Confirmation recalculated enablement while the dialog was still busy, leaving retry disabled. Fix: clear busy first in `finally`, then recalculate; a successful confirmation remains disabled through `duplicateConfirmed`.
+- Test-harness gap: focused QA checked source presence but not retry ordering, complete i18n coverage, or the exact PM annotation attached to `readAiOperationalMetrics`. Fix: add scoped retry regex, validate all IDTS-115 i18n keys in both bundles, and scope the CDS authorization assertion to the metrics function.
+- Tooling issue: `gh pr merge 213 --delete-branch` reported that local `dev` belongs to `E:/IDTS-SAP01` while attempting local cleanup. GitHub PR #213 still merged successfully at `65eec9e`; no branch protection or runtime state was affected.
+- Reviewer: Terra High subagent (read-only). Final review, corrections and verification remain owned by DonHV/primary agent.
+- Primary-agent follow-up finding: Dashboard initially added backend `failureCount` and `unavailableCount`, even though unavailable rows are already included in `failureCount`; this would overstate the UI total. Fixed by summing the inclusive failure count once and adding a focused regression assertion. The Terra review had reported no aggregation defect, so that part of its result was rejected.
+
+### 2026-07-29 — IDTS-115 read-only inspection command correction
+
+- Issue type: tooling issue.
+- Symptom: one read-only inspection command used the wrong relative path for `AiSuggestionReview.js`, and its companion ripgrep expression was malformed.
+- Root cause: the helper is under `ext/ai/`, not `ext/actions/`; the regex escaped parentheses incorrectly in PowerShell.
+- Status: fixed immediately by locating the file with `rg --files` and rerunning focused reads with the correct path and simpler patterns.
+- Runtime/data impact: none; the failed command made no file, BTP, Jira, or database change.
+
+### 2026-07-29 — IDTS-115 direct ESLint invocation mismatch
+
+- Issue type: tooling issue.
+- Symptom: syntax checks and the 143 focused IDTS-115 assertions passed, but `npx eslint <files>` exited before linting because ESLint 10 could not find a root flat-config file.
+- Root cause: this repository delegates UI linting to the UI5 project workflow rather than exposing a root `eslint.config.*` for direct invocation.
+- Status: fixed by using the app-local ESLint configuration; the touched UI files pass with `--quiet` and no lint configuration was changed.
+- Runtime/data impact: none; no source, external service, or data was changed by the failed lint command.
+
+### 2026-07-29 — IDTS-115 UI5 lint line-ending finding
+
+- Issue type: tooling/repository-format issue.
+- Symptom: running ESLint from the correct UI5 app directory loaded the project config, but reported `linebreak-style` across the three touched UI files because their working-tree content was CRLF; UI5 production build still passed.
+- Root cause: Windows checkout/patch operations materialized CRLF while the UI5 lint policy requires LF.
+- Status: fix in progress by mechanically normalizing only the touched UI source files to UTF-8/LF, then rerunning the same lint command; no lint rule or project configuration will be weakened.
+- Runtime/data impact: none; this is a source-format finding.
+- Follow-up correction: the first normalization command was executed from the UI5 app directory but still used repository-root-relative paths, so `Resolve-Path` rejected all three inputs and changed nothing. The retry uses the UI5-local paths and the project ESLint fixer only for those files.
+- Verification result: UI5 ESLint now completes with `0 errors`; the remaining 37 warnings are pre-existing structural rules plus UI5 AMD parameter-count warnings, and the UI5 production build passes.
+- UI5 MCP finding: the official API reference and UI5 linter identified the newly used `Dialog.stretchOnPhone` property as deprecated. The red focused test failed before the fix; the metrics dialog now imports `sap/ui/Device` and uses `stretch: Device.system.phone`, with no linter auto-fix or configuration weakening.
+
+### 2026-07-29 — IDTS-115 focused test invoked from wrong workspace
+
+- Issue type: tooling issue.
+- Symptom: one combined verification command attempted `npm run qa:idts115:programmatic` from `app/bug-management-ui`, where that root-level script is not defined.
+- Root cause: command working directory was kept at the UI5 workspace after lint verification.
+- Status: corrected by rerunning the focused suite from the repository root; after the Device regression assertions, the current result is 146/146 PASS.
+- Runtime/data impact: none.
+
+### 2026-07-29 — IDTS-115 final local verification corrections
+
+- Tooling issue: one combined lint/status probe ran from `app/bug-management-ui` but referenced PM files as though the current directory were the repository root, so `rg` reported that both paths were missing. The same command's app-local ESLint and repository `git diff --check` checks still completed successfully. The PM read was rerun from the repository root; no source or data changed.
+- Documentation correction: the IDTS-115 work package still pointed to the baseline before the subagent-policy merge. It now freezes `65eec9ed1271bdd97192f030b15dc93a4889f848`.
+- Existing CAP warning: fresh CAP compilation passes but keeps the known attachment vocabulary warning that `NonUpdateableProperties` is not recognized for `Bugs_attachments`. This warning predates IDTS-115 and remains outside this FE-only scope.
+- UI5 API correction: `Dialog.stretchOnPhone` was replaced by `stretch: Device.system.phone`. The focused red test failed before the fix and now passes `146/146`; UI5 MCP lint reports zero findings, app-local ESLint exits 0, and the UI5 production build succeeds.
+- Ponytail simplicity review: the implementation reuses the three existing CAP contracts, two existing review dialogs, and the existing Dashboard. It adds no route, framework, dependency, schema, or speculative abstraction. One unused metrics-model `busy` property was removed. Verdict: `Lean already. Ship.`
+- Tooling issue: a final read-only secret/placeholder probe passed a Windows wildcard as a direct `rg` path operand (`i18n*.properties`), which produced an invalid-path error after the preceding status/diff output. It changed no files. The scan was rerun with a directory plus `--glob` pattern.
+- Independent-review result: Terra High's claim that the focused static suite alone cannot prove deployed behavior is valid as a limitation but not a P1 code defect. Backend authorization, persistence, idempotency and no-mutation are exercised by IDTS-91/93/95/97; interactive PM/Tester/Developer behavior remains an explicit post-deploy browser acceptance gate and is not claimed locally.
+- Product UX defect accepted from independent review: `AiSuggestionReview.submit()` disabled Accept/Reject/Ignore before invoking CAP but never restored the buttons when the OData invocation failed. A transient failure therefore forced the user to close and reopen the dialog. A red IDTS-115 assertion reproduced the missing retry state. The helper now restores review actions only when CAP has not completed the decision; after completion the controls stay locked to avoid replaying persisted decisions.
+- Repository-format issue: after the shared helper patch, app-local ESLint reported CRLF line endings on `AiSuggestionReview.js`. The new retry assertions and IDTS-92 behavior suite had already passed, so this is formatting rather than a product failure. The file is normalized with the existing app ESLint fixer only; lint/build are rerun afterward.
+- Lint warning: after line-ending normalization, the helper exposed its two existing `Promise is not defined` warnings. Since the file legitimately uses the platform Promise API, it now declares `/* global Promise */`; no dependency or runtime behavior changes.

@@ -173,3 +173,12 @@ Primary owner: DatDT. Backup: DonHV. Debug at the button callback and `AiSuggest
 Dialog hiện có Accept, Reject và Ignore cho suggestion của Bug đã lưu. Nó chỉ gửi `suggestionID` do backend cấp, hiển thị trạng thái đã persist cùng reviewer/time, khóa quyết định lặp lại, dùng thông báo lỗi chung và tắt busy state. Review vẫn không áp dụng classification; IDTS-93 quản lý action CAP Tester/PM riêng cho việc đó.
 
 Owner chính: DatDT. Backup: DonHV. Khi debug, bắt đầu tại callback nút và `AiSuggestionReview.submit()`, rồi xem `reviewStateCode` trả về, format reviewer/time và `/reviewActionEnabled`. Kiểm cùng `srv/ai/review.js`, `classification-apply.js`, hai file i18n, static QA IDTS-92 và browser smoke IDTS-75. Không thêm direct Bug PATCH hoặc tin catalog ở client vào dialog này.
+## IDTS-115 — Apply Classification
+
+English: `buildDialog(view, model, bug, bugContext)` owns the Apply button inside the existing Classification dialog. It is visible only for PM/Tester and enabled only after a persisted `ACCEPTED` review. `confirmApply()` calls `applyClassificationSuggestion` with `suggestionID`, refreshes the Bug context, and shows safe success/failure copy. Backend authorization, expiry, catalog, and stale-source validation remain authoritative.
+
+Debug order: fragment button → `openDialog()` → `buildDialog()` → `submitReview()` → `confirmApply()` → `applyClassification()` → OData response → CAP validation → refresh. Observe `suggestionID`, `reviewStateCode`, `/applyActionEnabled`, busy state, and Bug fields before/after. Review-only actions must not mutate the Bug.
+
+Tiếng Việt: Nút Apply nằm trong dialog Classification hiện có. Nút chỉ hiện cho PM/Tester và chỉ bật sau review `ACCEPTED`; khi xác nhận, UI gọi action CAP bằng `suggestionID`, refresh Bug và hiển thị thông báo an toàn. Backend vẫn quyết định quyền, expiry, catalog và stale source. Debug theo thứ tự fragment → `openDialog()` → `buildDialog()` → review → confirm → Network → CAP → refresh.
+
+Retry boundary: if the CAP action fails before mutation, Apply is re-enabled after busy clears. If CAP succeeds but context refresh fails, Apply stays disabled and the user is instructed to reload; this prevents replaying a successful mutation.

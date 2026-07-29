@@ -5,6 +5,7 @@
  * Standalone SAPUI5 page protected by auth-guard.js. It reads existing OData
  * data and renders a read-only overview for Tester, Developer, and PM roles.
  */
+/* global Promise */
 (function () {
     "use strict";
 
@@ -35,6 +36,12 @@
         "sap/m/App",
         "sap/m/Page",
         "sap/m/Button",
+        "sap/m/Dialog",
+        "sap/m/Table",
+        "sap/m/Column",
+        "sap/m/Text",
+        "sap/m/ColumnListItem",
+        "sap/m/ObjectStatus",
         "sap/m/VBox",
         "sap/m/FlexBox",
         "sap/m/Panel",
@@ -44,14 +51,23 @@
         "sap/m/NumericContent",
         "sap/m/List",
         "sap/m/StandardListItem",
+        "sap/m/MessageBox",
         "sap/m/MessageToast",
         "sap/ui/model/json/JSONModel",
+        "sap/ui/model/resource/ResourceModel",
+        "sap/ui/Device",
         "idts/bugmanagementui/ext/login/ProfileShell",
         "idts/bugmanagementui/ext/login/LoginController"
     ], function (
         App,
         Page,
         Button,
+        Dialog,
+        Table,
+        Column,
+        Text,
+        ColumnListItem,
+        ObjectStatus,
         VBox,
         FlexBox,
         Panel,
@@ -61,16 +77,31 @@
         NumericContent,
         List,
         StandardListItem,
+        MessageBox,
         MessageToast,
         JSONModel,
+        ResourceModel,
+        Device,
         ProfileShell,
         LoginSession
     ) {
+        var textModel = new ResourceModel({
+            bundleName: "idts.bugmanagementui.i18n.i18n",
+            async: true
+        });
+        var page;
         var headerContent = [
             new Button({
                 icon: "sap-icon://refresh",
                 text: "Refresh",
                 press: loadDashboard
+            }),
+            new Button({
+                id: "dashboardAiActivityButton",
+                icon: "sap-icon://activity-items",
+                text: "{i18n>dashboardAiActivityButton}",
+                visible: Boolean(LoginSession.getUser() && LoginSession.getUser().role_code === "PM"),
+                press: openAiActivity
             })
         ];
         var profileHeaderButton = ProfileShell.createHeaderButton();
@@ -86,9 +117,7 @@
             showWorkload: false
         });
 
-        var app = new App({
-            pages: [
-                new Page({
+        page = new Page({
                     title: "Dashboard",
                     showNavButton: true,
                     navButtonPress: openBugList,
@@ -168,11 +197,14 @@
                             ]
                         }).addStyleClass("sapUiResponsiveContentPadding idtsDashboardPage")
                     ]
-                })
-            ]
+                });
+
+        var app = new App({
+            pages: [page]
         });
 
         app.setModel(dashboardModel, "dashboard");
+        app.setModel(textModel, "i18n");
         app.placeAt("dashboardContent");
         loadDashboard();
 
@@ -217,6 +249,145 @@
                 }
                 return response.json();
             });
+        }
+
+        // Chỉ PM được mở metrics; backend vẫn kiểm quyền lần nữa khi nhận function call.
+        function openAiActivity() {
+            var user = LoginSession.getUser();
+            if (!user || user.role_code !== "PM") {
+                return;
+            }
+
+            var metricsModel = new JSONModel({
+                rows: []
+            });
+            var dialog = new Dialog({
+                title: "{i18n>dashboardAiActivityTitle}",
+                contentWidth: "70rem",
+                resizable: true,
+                stretch: Device.system.phone,
+                busy: true,
+                content: [
+                    new Table({
+                        growing: true,
+                        noDataText: "{i18n>dashboardAiActivityNoData}",
+                        columns: [
+                            new Column({ header: new Text({ text: "{i18n>dashboardAiActivityCapability}" }) }),
+                            new Column({ header: new Text({ text: "{i18n>dashboardAiActivityRequests}" }) }),
+                            new Column({ header: new Text({ text: "{i18n>dashboardAiActivitySuccessful}" }) }),
+                            new Column({ header: new Text({ text: "{i18n>dashboardAiActivityUnavailable}" }) }),
+                            new Column({ header: new Text({ text: "{i18n>dashboardAiActivityAverageLatency}" }) }),
+                            new Column({ header: new Text({ text: "{i18n>dashboardAiActivityReviewDecisions}" }) })
+                        ],
+                        items: {
+                            path: "aiMetrics>/rows",
+                            template: new ColumnListItem({
+                                cells: [
+                                    new Text({ text: "{aiMetrics>featureName}" }),
+                                    new Text({ text: "{aiMetrics>requestCount}" }),
+                                    new ObjectStatus({ text: "{aiMetrics>successCount}", state: "Success" }),
+                                    new ObjectStatus({ text: "{aiMetrics>unavailableCount}", state: "Warning" }),
+                                    new Text({ text: "{aiMetrics>averageLatencyText}" }),
+                                    new Text({ text: "{aiMetrics>reviewDecisionsText}" })
+                                ]
+                            })
+                        }
+                    })
+                ],
+                endButton: new Button({
+                    text: "{i18n>dashboardAiActivityClose}",
+                    press: function () {
+                        dialog.close();
+                    }
+                }),
+                afterClose: function () {
+                    dialog.destroy();
+                }
+            });
+
+            dialog.setModel(metricsModel, "aiMetrics");
+            dialog.setModel(textModel, "i18n");
+            page.addDependent(dialog);
+            dialog.open();
+
+            Promise.all([
+                fetchOData("/odata/v4/bug/readAiOperationalMetrics(windowDays=30)"),
+                Promise.resolve(textModel.getResourceBundle())
+            ]).then(function (results) {
+                var bundle = results[1];
+                var rows = aggregateAiMetrics((results[0].value || []), bundle);
+                metricsModel.setProperty("/rows", rows);
+            }).catch(function () {
+                Promise.resolve(textModel.getResourceBundle()).then(function (bundle) {
+                    MessageBox.error(bundle.getText("dashboardAiActivityLoadFailed"));
+                });
+            }).finally(function () {
+                dialog.setBusy(false);
+            });
+        }
+
+        // Gộp các dòng backend theo capability để không lộ provider/model lên giao diện PM.
+        function aggregateAiMetrics(rows, bundle) {
+            var groups = {};
+            (rows || []).forEach(function (row) {
+                var featureCode = String(row.featureTypeCode || "UNKNOWN").toUpperCase();
+                var group = groups[featureCode] || {
+                    featureCode: featureCode,
+                    requestCount: 0,
+                    successCount: 0,
+                    unavailableCount: 0,
+                    latencyTotal: 0,
+                    latencySamples: 0,
+                    acceptedCount: 0,
+                    rejectedCount: 0,
+                    ignoredCount: 0,
+                    pendingCount: 0
+                };
+                group.requestCount += Number(row.requestCount || 0);
+                group.successCount += Number(row.successCount || 0);
+                // Backend failureCount đã gồm timeout/unavailable; không cộng unavailableCount lần hai.
+                group.unavailableCount += Number(row.failureCount || 0);
+                if (row.averageLatencyMs !== null && row.averageLatencyMs !== undefined) {
+                    var samples = Number(row.latencySampleCount || 0);
+                    group.latencyTotal += Number(row.averageLatencyMs) * samples;
+                    group.latencySamples += samples;
+                }
+                group.acceptedCount += Number(row.acceptedCount || 0);
+                group.rejectedCount += Number(row.rejectedCount || 0);
+                group.ignoredCount += Number(row.ignoredCount || 0);
+                group.pendingCount += Number(row.pendingCount || 0);
+                groups[featureCode] = group;
+            });
+
+            return Object.keys(groups).sort().map(function (featureCode) {
+                var group = groups[featureCode];
+                var latencyText = group.latencySamples
+                    ? bundle.getText("dashboardAiActivityLatency", [Math.round(group.latencyTotal / group.latencySamples)])
+                    : bundle.getText("dashboardAiActivityNoLatency");
+                return {
+                    featureName: featureName(featureCode, bundle),
+                    requestCount: group.requestCount,
+                    successCount: group.successCount,
+                    unavailableCount: group.unavailableCount,
+                    averageLatencyText: latencyText,
+                    reviewDecisionsText: bundle.getText("dashboardAiActivityReviewCounts", [
+                        group.acceptedCount,
+                        group.rejectedCount,
+                        group.ignoredCount,
+                        group.pendingCount
+                    ])
+                };
+            });
+        }
+
+        function featureName(featureCode, bundle) {
+            var keys = {
+                DUPLICATE_DETECTION: "dashboardAiActivitySimilarBugs",
+                CLASSIFICATION: "dashboardAiActivityClassification",
+                BUG_SUMMARY: "dashboardAiActivityHandoff",
+                ASSIGNMENT_EXPLANATION: "dashboardAiActivitySmartAssign"
+            };
+            return bundle.getText(keys[featureCode] || "dashboardAiActivityOther");
         }
 
         // Router thuần chọn model Tester/Developer/PM; không ghi DB hay gọi API tại đây.
