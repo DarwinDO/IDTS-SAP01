@@ -66,9 +66,7 @@ Add a minimal Vercel AI Gateway provider adapter to the existing safe AI abstrac
   and dead per-row guidance state was removed. The provider-success injection
   fixture now proves that a malicious comment cannot replace trusted next
   action or audit events.
-- Remaining work is selective SAP BTP service/UI deployment of the final merge
-  SHA, browser visual/no-mutation verification, and the deferred Tester/
-  Developer role matrix. IDTS-114 therefore remains In Progress.
+- PR #225 merged at `d12ceef22ce8cae62987430a08fca4f11a5af088` and the selective SAP BTP rollout completed successfully through MTA operation `0246e01f-8b80-11f1-abdb-eeee0a953fee`. The service/AppRouter health and deployed `commentSummary` metadata checks passed without a database deployer or broad `cds deploy`. Remaining work is browser visual/no-mutation verification and the deferred Tester/Developer role matrix. IDTS-114 therefore remains In Progress.
 
 ## BTP browser acceptance handoff
 
