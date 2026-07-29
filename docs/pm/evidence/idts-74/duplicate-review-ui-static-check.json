@@ -1,6 +1,6 @@
 {
   "task": "IDTS-74",
-  "checkedAt": "2026-07-29T17:35:17.215Z",
+  "checkedAt": "2026-07-29T18:44:58.035Z",
   "checks": [
     {
       "label": "Similar bug review field opens duplicate review from product UI",
@@ -31,11 +31,11 @@
       "pass": true
     },
     {
-      "label": "duplicate review renders SAPUI5 responsive Table",
+      "label": "duplicate review renders a responsive SAPUI5 List",
       "pass": true
     },
     {
-      "label": "duplicate review keeps human decision explicit",
+      "label": "duplicate review keeps human decision guidance once in the dialog",
       "pass": true
     },
     {
@@ -275,55 +275,23 @@
       "pass": true
     },
     {
-      "label": "controller literal \"14rem\" is not dev-facing copy",
-      "pass": true
-    },
-    {
-      "label": "controller literal \"duplicateReviewBugColumn\" is not dev-facing copy",
-      "pass": true
-    },
-    {
-      "label": "controller literal \"10rem\" is not dev-facing copy",
-      "pass": true
-    },
-    {
-      "label": "controller literal \"Tablet\" is not dev-facing copy",
-      "pass": true
-    },
-    {
-      "label": "controller literal \"duplicateReviewStatusColumn\" is not dev-facing copy",
-      "pass": true
-    },
-    {
-      "label": "controller literal \"8rem\" is not dev-facing copy",
-      "pass": true
-    },
-    {
-      "label": "controller literal \"Tablet\" is not dev-facing copy",
-      "pass": true
-    },
-    {
-      "label": "controller literal \"duplicateReviewMatchColumn\" is not dev-facing copy",
-      "pass": true
-    },
-    {
-      "label": "controller literal \"20rem\" is not dev-facing copy",
-      "pass": true
-    },
-    {
-      "label": "controller literal \"Desktop\" is not dev-facing copy",
-      "pass": true
-    },
-    {
-      "label": "controller literal \"duplicateReviewReasonColumn\" is not dev-facing copy",
-      "pass": true
-    },
-    {
       "label": "controller literal \"duplicateReview\" is not dev-facing copy",
       "pass": true
     },
     {
       "label": "controller literal \"duplicateReview>/rows\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"100%\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"SpaceBetween\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"Start\" is not dev-facing copy",
       "pass": true
     },
     {
@@ -335,10 +303,6 @@
       "pass": true
     },
     {
-      "label": "controller literal \"{duplicateReview>statusName}\" is not dev-facing copy",
-      "pass": true
-    },
-    {
       "label": "controller literal \"{duplicateReview>scoreText}\" is not dev-facing copy",
       "pass": true
     },
@@ -347,7 +311,31 @@
       "pass": true
     },
     {
+      "label": "controller literal \"Wrap\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>statusName}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"None\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"sapUiTinyMarginEnd\" is not dev-facing copy",
+      "pass": true
+    },
+    {
       "label": "controller literal \"{duplicateReview>relationType}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"Information\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"sapUiTinyMarginTop\" is not dev-facing copy",
       "pass": true
     },
     {
@@ -355,7 +343,11 @@
       "pass": true
     },
     {
-      "label": "controller literal \"{duplicateReview>decisionHint}\" is not dev-facing copy",
+      "label": "controller literal \"InPlace\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"sapUiTinyMarginTop\" is not dev-facing copy",
       "pass": true
     },
     {

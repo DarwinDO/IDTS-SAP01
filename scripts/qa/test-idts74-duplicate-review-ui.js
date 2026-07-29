@@ -38,6 +38,10 @@ function parseProperties (relativePath) {
 }
 
 const controller = read('app/bug-management-ui/webapp/ext/actions/DuplicateReview.js')
+
+assert(controller.includes('"sap/m/List"'), 'similar bugs must use a readable SAPUI5 List')
+assert(controller.includes('"sap/m/ExpandableText"'), 'similar bug reasons must use SAPUI5 ExpandableText')
+assert(!controller.includes('"sap/m/Table"'), 'similar bugs must not use the old horizontally wide table')
 const fragment = read('app/bug-management-ui/webapp/ext/fragment/SimilarBugReviewField.fragment.xml')
 const i18nFiles = [
   'app/bug-management-ui/webapp/i18n/i18n.properties',
@@ -59,8 +63,8 @@ const checks = [
   expectIncludes('duplicate review sends source bug id when available', controller, 'operation.setParameter("sourceBugID"'),
   expectIncludes('duplicate review uses reusable AI review copy/state mapping', controller, 'AiReviewUi.decorateResult'),
   expectIncludes('duplicate review renders SAPUI5 Dialog', controller, '"sap/m/Dialog"'),
-  expectIncludes('duplicate review renders SAPUI5 responsive Table', controller, '"sap/m/Table"'),
-  expectIncludes('duplicate review keeps human decision explicit', controller, 'decisionHint'),
+  expectIncludes('duplicate review renders a responsive SAPUI5 List', controller, '"sap/m/List"'),
+  expectIncludes('duplicate review keeps human decision guidance once in the dialog', controller, 'duplicateReviewIntroMessage'),
   expectNotMatches('duplicate review does not show raw caught error messages', controller, /MessageBox\.error\([^)]*error\.message/i),
   expectNotMatches('duplicate review controller does not embed raw HTML', controller, /<(div|span|style|table)\b/i)
 ]

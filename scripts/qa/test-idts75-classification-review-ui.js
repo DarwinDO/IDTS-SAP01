@@ -39,6 +39,12 @@ function parseProperties (relativePath) {
 
 const controller = read('app/bug-management-ui/webapp/ext/actions/ClassificationReview.js')
 const fragment = read('app/bug-management-ui/webapp/ext/fragment/ClassificationReviewField.fragment.xml')
+
+assert(controller.includes('"sap/m/ExpandableText"'), 'classification reason must use SAPUI5 ExpandableText')
+assert(controller.includes('classificationReviewConfidenceColumn'), 'classification table must expose a dedicated confidence column')
+assert(!/new Text\(\{ text: "\{classificationReview>decisionHint\}"/.test(controller), 'classification rows must not repeat generic review guidance')
+assert(!/decisionHint:\s*review\.decisionHint/.test(controller), 'classification rows must not keep dead per-row review guidance state')
+assert(/minScreenWidth:\s*"Desktop"/.test(controller), 'secondary classification columns must pop in before tablet portrait widths')
 const manifest = JSON.parse(read('app/bug-management-ui/webapp/manifest.json'))
 const i18nFiles = [
   'app/bug-management-ui/webapp/i18n/i18n.properties',
@@ -60,7 +66,7 @@ const checks = [
   expectIncludes('classification review shows current values', controller, 'currentValue'),
   expectIncludes('classification review shows suggested values', controller, 'suggestedValue'),
   expectIncludes('classification review shows confidence metadata', controller, 'confidenceText'),
-  expectIncludes('classification review keeps manual decision guidance', controller, 'decisionHint'),
+  expectIncludes('classification review keeps one dialog-level manual decision guidance', controller, 'classificationReviewIntroMessage'),
   expectNotMatches(
     'classification review has no OData update request',
     controller,

@@ -1,5 +1,11 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/actions/ClassificationReview.js`
 
+## IDTS-114 readability update
+
+Each classification row now separates Field, Current Value, Suggested Value with an expandable reason, and Confidence. Generic review guidance appears once in the dialog MessageStrip instead of being repeated in every row. Review and Apply actions keep their existing backend authorization and confirmation behavior.
+
+Vietnamese: Mỗi dòng phân loại hiện tách Field, Current Value, Suggested Value kèm reason có thể mở rộng, và Confidence. Hướng dẫn review chung chỉ xuất hiện một lần trong MessageStrip thay vì lặp ở từng dòng. Review và Apply vẫn giữ nguyên phân quyền và bước xác nhận backend.
+
 ## IDTS-115 result and error states
 
 The action is source-linked and is blocked for a root create draft. `requestOperationResult()` accepts CAP/UI5 action results returned directly or through the operation result context before normalizing array shapes. HTTP 200 fallback/no-result stays in the dialog. HTTP 400 is shown as a missing-context information strip; retryable authorization/network/server failures use a safe strip plus Retry without exposing technical diagnostics.

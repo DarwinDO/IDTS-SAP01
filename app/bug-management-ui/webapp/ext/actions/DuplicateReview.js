@@ -9,10 +9,11 @@
 sap.ui.define([
     "sap/m/Dialog",
     "sap/m/Button",
-    "sap/m/Table",
-    "sap/m/Column",
+    "sap/m/List",
     "sap/m/Text",
-    "sap/m/ColumnListItem",
+    "sap/m/CustomListItem",
+    "sap/m/HBox",
+    "sap/m/ExpandableText",
     "sap/m/ObjectIdentifier",
     "sap/m/ObjectStatus",
     "sap/m/MessageStrip",
@@ -26,10 +27,11 @@ sap.ui.define([
 ], function (
     Dialog,
     Button,
-    Table,
-    Column,
+    List,
     Text,
-    ColumnListItem,
+    CustomListItem,
+    HBox,
+    ExpandableText,
     ObjectIdentifier,
     ObjectStatus,
     MessageStrip,
@@ -153,8 +155,7 @@ sap.ui.define([
             scoreText: Number.isFinite(score)
                 ? getText(view, "duplicateReviewScore", [Math.round(score * 100)])
                 : review.meta,
-            reviewState: review.state,
-            decisionHint: review.decisionHint
+            reviewState: review.state
         };
     }
 
@@ -292,7 +293,7 @@ sap.ui.define([
             });
         }
 
-        var table = new Table({
+        var list = new List({
             mode: "SingleSelectMaster",
             growing: true,
             growingThreshold: 5,
@@ -304,62 +305,49 @@ sap.ui.define([
                 state.setProperty("/selectedCandidateBugID", candidate && candidate.bugID || null);
                 state.setProperty("/selectedCandidateBugNumber", candidate && candidate.bugNumber || "");
                 updateConfirmEnabled();
-            },
-            columns: [
-                new Column({
-                    width: "14rem",
-                    header: new Text({ text: getText(view, "duplicateReviewBugColumn") })
-                }),
-                new Column({
-                    width: "10rem",
-                    minScreenWidth: "Tablet",
-                    demandPopin: true,
-                    header: new Text({ text: getText(view, "duplicateReviewStatusColumn") })
-                }),
-                new Column({
-                    width: "8rem",
-                    minScreenWidth: "Tablet",
-                    demandPopin: true,
-                    header: new Text({ text: getText(view, "duplicateReviewMatchColumn") })
-                }),
-                new Column({
-                    width: "20rem",
-                    minScreenWidth: "Desktop",
-                    demandPopin: true,
-                    header: new Text({ text: getText(view, "duplicateReviewReasonColumn") })
-                })
-            ]
+            }
         });
 
-        table.setModel(state, "duplicateReview");
-        table.bindItems({
+        list.setModel(state, "duplicateReview");
+        list.bindItems({
             path: "duplicateReview>/rows",
-            template: new ColumnListItem({
-                cells: [
-                    new ObjectIdentifier({
-                        title: "{duplicateReview>bugNumber}",
-                        text: "{duplicateReview>title}"
-                    }),
-                    new Text({ text: "{duplicateReview>statusName}" }),
+            template: new CustomListItem({
+                content: [
                     new VBox({
+                        width: "100%",
                         items: [
-                            new ObjectStatus({
-                                text: "{duplicateReview>scoreText}",
-                                state: "{duplicateReview>reviewState}"
+                            new HBox({
+                                justifyContent: "SpaceBetween",
+                                alignItems: "Start",
+                                items: [
+                                    new ObjectIdentifier({
+                                        title: "{duplicateReview>bugNumber}",
+                                        text: "{duplicateReview>title}"
+                                    }),
+                                    new ObjectStatus({
+                                        text: "{duplicateReview>scoreText}",
+                                        state: "{duplicateReview>reviewState}"
+                                    })
+                                ]
                             }),
-                            new Text({ text: "{duplicateReview>relationType}" })
-                        ]
-                    }),
-                    new VBox({
-                        items: [
-                            new Text({
+                            new HBox({
+                                wrap: "Wrap",
+                                items: [
+                                    new ObjectStatus({
+                                        text: "{duplicateReview>statusName}",
+                                        state: "None"
+                                    }).addStyleClass("sapUiTinyMarginEnd"),
+                                    new ObjectStatus({
+                                        text: "{duplicateReview>relationType}",
+                                        state: "Information"
+                                    })
+                                ]
+                            }).addStyleClass("sapUiTinyMarginTop"),
+                            new ExpandableText({
                                 text: "{duplicateReview>reason}",
-                                wrapping: true
-                            }),
-                            new Text({
-                                text: "{duplicateReview>decisionHint}",
-                                wrapping: true
-                            })
+                                maxCharacters: 220,
+                                overflowMode: "InPlace"
+                            }).addStyleClass("sapUiTinyMarginTop")
                         ]
                     })
                 ]
@@ -394,7 +382,7 @@ sap.ui.define([
                                 })
                             ]
                         }).addStyleClass("sapUiSmallMarginTopBottom"),
-                        table
+                        list
                     ]
                 }).addStyleClass("sapUiSmallMargin")
             ],

@@ -48,6 +48,27 @@ Add a minimal Vercel AI Gateway provider adapter to the existing safe AI abstrac
   state. After restart, read-only BTP checks passed in `340 ms` and in `262 ms`
   with the original 1000 ms acquisition boundary. The temporary 10-second
   workaround is being removed; Smart Assign UI acceptance remains required.
+- The current follow-up branch improves the three AI review dialogs without
+  adding a new section or framework: Similar Bugs is now a selectable list,
+  Classification separates confidence from an expandable reason, and Handoff
+  Summary uses dedicated lists for comments and events. The handoff action now
+  returns a transient, deterministic `commentSummary` grounded in up to five
+  recent sanitized comments. No database schema or workflow behavior changes.
+- Fresh local verification on 2026-07-30 passed IDTS-56/66/67/68/69,
+  IDTS-74/75/76, IDTS-93/95, IDTS-114/115, CAP compile, UI5 production build,
+  targeted ESLint, secret scan, agent rules and QA-depth self-test. Evidence:
+  `docs/pm/evidence/idts-114/review-readability/` and
+  `docs/pm/evidence/idts-114/handoff-comment-summary/`.
+- Independent review findings were corrected before PR: raw comment text is
+  excluded from provider input; workflow advice and important events are
+  derived from trusted status/history; comment lines are concise, redacted and
+  chronological; Classification secondary columns pop in at desktop width;
+  and dead per-row guidance state was removed. The provider-success injection
+  fixture now proves that a malicious comment cannot replace trusted next
+  action or audit events.
+- Remaining work is selective SAP BTP service/UI deployment of the final merge
+  SHA, browser visual/no-mutation verification, and the deferred Tester/
+  Developer role matrix. IDTS-114 therefore remains In Progress.
 
 ## BTP browser acceptance handoff
 

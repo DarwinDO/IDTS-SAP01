@@ -1,6 +1,6 @@
 {
   "task": "IDTS-75",
-  "checkedAt": "2026-07-29T17:35:17.752Z",
+  "checkedAt": "2026-07-29T18:44:58.488Z",
   "checks": [
     {
       "label": "classification review field opens the review dialog",
@@ -51,7 +51,7 @@
       "pass": true
     },
     {
-      "label": "classification review keeps manual decision guidance",
+      "label": "classification review keeps one dialog-level manual decision guidance",
       "pass": true
     },
     {
@@ -200,6 +200,10 @@
     },
     {
       "label": "i18n.properties classificationReviewReviewColumn is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewConfidenceColumn is user-facing",
       "pass": true
     },
     {
@@ -376,6 +380,10 @@
     },
     {
       "label": "i18n_en.properties classificationReviewReviewColumn is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewConfidenceColumn is user-facing",
       "pass": true
     },
     {

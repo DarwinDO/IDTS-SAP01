@@ -36,7 +36,8 @@ async function summarizeBugHandoff (req, entities, dependencies = {}) {
     correlationId: req.id,
     instruction: [
       'Generate a concise IDTS bug handoff summary only from the provided bug data.',
-      'Include current status, current action owner, missing information, important recent events, and next expected action.',
+      'Summarize the current state and missing information for human review.',
+      'Comment detail, audit events, and the next workflow action are added separately from trusted stored data.',
       'If data is missing, say it is missing. Do not invent root cause, private data, attachment contents, or workflow decisions.',
       'Return business-facing text for human review.'
     ].join(' '),
@@ -252,8 +253,7 @@ function normalizeProviderSummary (providerResult, context, generatedAt) {
   if (!payload || typeof payload !== 'object') return null
 
   const summary = cleanText(payload.summary || payload.handoffSummary, MAX_TEXT)
-  const nextExpectedAction = cleanText(payload.nextExpectedAction || payload.nextAction, MAX_TEXT)
-  if (!summary || !nextExpectedAction) return null
+  if (!summary) return null
 
   const result = baseResult(context, generatedAt, providerResult.status || 'SUCCESS')
   const fallbackMissing = fallbackMissingInformation(context)
@@ -264,8 +264,11 @@ function normalizeProviderSummary (providerResult, context, generatedAt) {
     missingInformation: groundingStatus(context) === 'PARTIAL_DATA'
       ? joinDistinctText(providerMissing, fallbackMissing)
       : (providerMissing || fallbackMissing),
-    latestImportantEvents: normalizeEvents(payload.latestImportantEvents || payload.importantEvents) || fallbackLatestEvents(context),
-    nextExpectedAction,
+    commentSummary: fallbackCommentSummary(context),
+    // Event cards must remain traceable to stored audit data; provider prose is not authoritative for actor/action/change.
+    latestImportantEvents: fallbackLatestEvents(context),
+    // Workflow advice is derived from trusted status/ownership, never from provider or user-entered comments.
+    nextExpectedAction: fallbackNextAction(context),
     groundingStatus: groundingStatus(context),
     confidence: normalizeConfidence(payload.confidence, 0.72)
   }
@@ -284,6 +287,7 @@ function deterministicSummary (context, generatedAt, providerStatus) {
     ...result,
     summary: fallbackSummary(context),
     missingInformation: fallbackMissingInformation(context),
+    commentSummary: fallbackCommentSummary(context),
     latestImportantEvents: fallbackLatestEvents(context),
     nextExpectedAction: fallbackNextAction(context),
     groundingStatus: groundingStatus(context),
@@ -330,12 +334,8 @@ function providerInput (context) {
       testCaseRef: cleanText(bug.testCaseRef, 80),
       testRunRef: cleanText(bug.testRunRef, 80)
     },
-    comments: context.comments.map(comment => ({
-      author: comment.authorDisplayName,
-      authorRoleCode: comment.authorRole_code || null,
-      content: cleanText(comment.content, 600),
-      createdAt: comment.createdAt || null
-    })),
+    // Comment text is summarized locally after the provider call so it cannot become an instruction to the model.
+    commentCount: context.comments.length,
     historyEvents: context.historyEvents.map(event => ({
       actionTypeCode: event.actionType_code,
       actor: event.actorDisplayName,
@@ -386,6 +386,33 @@ function fallbackMissingInformation (context) {
   return `Missing or empty handoff data: ${missing.join(', ')}.`
 }
 
+function fallbackCommentSummary (context) {
+  // Comment remains untrusted business data: sanitize it and summarize deterministically so it cannot instruct the model.
+  if (!context.comments.length) return 'No comments are recorded for this bug yet.'
+  return context.comments
+    .slice(-5)
+    .map(comment => {
+      const content = summarizeCommentContent(comment.content)
+      const actor = cleanText(comment.authorDisplayName, 120) || 'Unknown user'
+      const role = cleanText(comment.authorRole_code, 40)
+      const date = comment.createdAt ? new Date(comment.createdAt) : null
+      const timestamp = date && !Number.isNaN(date.getTime()) ? date.toISOString() : null
+      return [
+        timestamp ? `[${timestamp}]` : null,
+        `${actor}${role ? ` (${role})` : ''}:`,
+        content || 'Comment content is unavailable.'
+      ].filter(Boolean).join(' ')
+    })
+    .join('\n')
+}
+
+function summarizeCommentContent (value) {
+  const text = cleanText(value, 320)?.replace(/\s+/g, ' ')
+  if (!text) return null
+  const firstSentence = text.match(/^.*?(?:[.!?](?:\s|$)|$)/)?.[0] || text
+  return firstSentence.trim().slice(0, 180)
+}
+
 function fallbackLatestEvents (context) {
   // Chọn vài event mới nhất đã sanitize làm handoff context.
   if (!context.historyEvents.length) return 'No history events are recorded for this bug yet.'
@@ -394,12 +421,24 @@ function fallbackLatestEvents (context) {
     .map(event => {
       const changes = event.logs
         .slice(0, 3)
-        .map(log => [log.fieldLabel, log.oldValueDisplay, log.newValueDisplay].filter(Boolean).join(': '))
+        .map(log => {
+          const field = cleanText(log.fieldLabel || log.fieldName, 120) || 'Field'
+          const oldValue = cleanText(log.oldValueDisplay, 180) || 'not set'
+          const newValue = cleanText(log.newValueDisplay, 180) || 'not set'
+          return `${field}: ${oldValue} -> ${newValue}`
+        })
         .filter(Boolean)
+      const date = event.createdAt ? new Date(event.createdAt) : null
+      const timestamp = date && !Number.isNaN(date.getTime()) ? date.toISOString() : null
+      const actor = cleanText(event.actorDisplayName, 120) || 'Unknown user'
+      const role = cleanText(event.actorRole_code, 40)
+      const action = cleanText(event.actionType_code, 80) || 'UPDATE'
       return [
-        event.summary,
-        event.actorDisplayName ? `by ${event.actorDisplayName}` : null,
-        changes.length ? `changes: ${changes.join('; ')}` : null
+        timestamp ? `[${timestamp}]` : null,
+        `${actor}${role ? ` (${role})` : ''}`,
+        `— ${action}:`,
+        cleanText(event.summary, 400) || 'History event recorded.',
+        changes.length ? `Changes: ${changes.join('; ')}` : null
       ].filter(Boolean).join(' ')
     })
     .join('\n')
@@ -449,15 +488,6 @@ function providerPayload (providerResult) {
   return data && typeof data === 'object' ? data : {}
 }
 
-function normalizeEvents (value) {
-  // Chuẩn hóa event array provider, giới hạn count/text và bỏ item không hợp lệ.
-  if (Array.isArray(value)) {
-    const text = value.map(item => cleanText(item?.summary || item?.text || item, 400)).filter(Boolean).join('\n')
-    return text || null
-  }
-  return cleanText(value, MAX_TEXT)
-}
-
 function normalizeConfidence (value, fallback) {
   // Ép confidence 0..1 hoặc fallback deterministic.
   const number = Number(value)
@@ -489,6 +519,7 @@ async function recordSummaryAudit ({ tx, req, entities, context, provider, provi
       currentStatus: result.currentStatus,
       currentActionOwner: result.currentActionOwner,
       missingInformation: result.missingInformation,
+      commentSummary: result.commentSummary,
       latestImportantEvents: result.latestImportantEvents,
       nextExpectedAction: result.nextExpectedAction,
       generatedAt: result.generatedAt
