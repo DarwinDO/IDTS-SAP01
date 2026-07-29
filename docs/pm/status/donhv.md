@@ -4292,3 +4292,59 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
 - Product UX defect accepted from independent review: `AiSuggestionReview.submit()` disabled Accept/Reject/Ignore before invoking CAP but never restored the buttons when the OData invocation failed. A transient failure therefore forced the user to close and reopen the dialog. A red IDTS-115 assertion reproduced the missing retry state. The helper now restores review actions only when CAP has not completed the decision; after completion the controls stay locked to avoid replaying persisted decisions.
 - Repository-format issue: after the shared helper patch, app-local ESLint reported CRLF line endings on `AiSuggestionReview.js`. The new retry assertions and IDTS-92 behavior suite had already passed, so this is formatting rather than a product failure. The file is normalized with the existing app ESLint fixer only; lint/build are rerun afterward.
 - Lint warning: after line-ending normalization, the helper exposed its two existing `Promise is not defined` warnings. Since the file legitimately uses the platform Promise API, it now declares `/* global Promise */`; no dependency or runtime behavior changes.
+
+### 2026-07-29 — IDTS-115 SAP BTP deployment and acceptance
+
+- Tooling issue: the first repository search guessed a non-existent root
+  `mta.yaml` path and then repeated one search from the wrong working directory.
+  The read-only commands changed nothing; the actual deployment descriptors
+  were located from the fresh deployment worktree.
+- Tooling issue: the first `mbt build` exceeded the five-minute command timeout
+  while child MBT processes continued running. The exact child processes were
+  stopped before retry; no MTAR was deployed from that attempt. A verbose
+  single-job retry completed successfully in 559 seconds.
+- Tooling issue: a follow-up tried to read the temporary MBT Makefile after MBT
+  had removed it. The read-only command failed and changed nothing.
+- Deployment result: MTAR
+  `idts-sap01-idts115-ae209c8.mtar` with SHA-256
+  `A167369F0547DDC6F105D4B61C5BBB5304352FB630D5A9D2FD5FDF5CB8E69DE2`
+  was selectively deployed. `idts-sap01-srv`, app content and AppRouter are
+  started; the DB deployer was not selected, and no schema/seed deployment ran.
+- Tooling/environment issue: direct AppRouter OData navigation in an agent-created
+  Chrome tab was blocked by the client with `ERR_BLOCKED_BY_CLIENT`. The normal
+  authenticated Fiori flows continued to work and no credential was inspected.
+- Environment authorization limitation: `cf ssh idts-sap01-srv` was denied for
+  the current CF user. HANA evidence was therefore read through a bound,
+  read-only CF task instead of broadening permissions.
+- Tooling issue: the first bound readback task used a `node -e` command that CF
+  shell parsing rejected. The task failed before querying or changing data.
+  Corrected task `idts115-readback-r2-20260729` succeeded using
+  `echo <base64> | base64 -d | node`.
+- Product/browser finding: while creating the controlled QA Bugs, changing
+  off-screen Steps/Actual fields before their OData properties had been read
+  produced `Must not change a property before it has been read`. Draft
+  activation initially returned expected validation 400 until the fields were
+  loaded and refilled. Both records were eventually created. This indicates a
+  create-flow binding/interaction defect, not a database loss.
+- Product/browser finding: the create flow also logged
+  `Failed to drill-down into componentCategory_ID, invalid segment:
+  componentCategory_ID`. Activation eventually succeeded, but a clean-console
+  claim is not allowed until the annotation/binding path is corrected or
+  formally explained.
+- Framework/environment noise: the browser recorded UI5 flexibility
+  `loadFlexData/loadFeatures` failures, unsupported `S/CUBE`, and an internal
+  `sap/m/ListKeyboardMode` deprecation. The application continued to load;
+  these are recorded separately from the create-flow product findings.
+- Evidence-sanitization limitation: Smart Assign rows display full developer
+  emails in the current UI. No unsanitized screenshot was selected for the repo
+  evidence pack.
+- PM acceptance PASS: Apply Classification on `BUG-0019`, Confirm Duplicate
+  from `BUG-0019` to `BUG-0020`, AI Activity, review persistence and
+  no-unintended-workflow-mutation all passed. HANA readback confirms the
+  duplicate relationship.
+- Provider capability result: Qwen embedding has observed `SUCCESS`, while
+  recent Qwen structured Classification, Handoff Summary and Smart Assign rows
+  are `AI_PROVIDER_ERROR` with safe fallback. IDTS-114 remains In Progress.
+- Role-matrix blocker: Tester and Developer browser sessions require
+  member-owned SAP identities. The agent did not impersonate users or read
+  passwords/tokens; interactive positive/403 evidence remains pending.

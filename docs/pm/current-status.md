@@ -272,14 +272,20 @@ Vietnamese clean note: Nút `Assign Developer` riêng đã được bỏ khỏi 
 - Runtime SHA `3504931d2689e4d56c0de3f5977342fc7cf57e4a` is deployed. PM browser
   assignment/history/notification smoke, S3 adapter upload/download/hash/delete
   and a fresh Scheduler-driven Brevo SENT delivery passed.
-- Four visible AI entry points were exercised in the PM BTP browser session for
-  `BUG-0018` without changing its workflow or assignment. Accept/Reject/Ignore
-  review states and Similar Bugs acceptance persisted. Full acceptance remains
-  blocked because Apply Classification, Confirm Duplicate and Operational
-  Metrics have no deployed UI entry point, and Tester/Developer interactive
-  identity evidence is still unavailable. Evidence is under
-  `docs/pm/evidence/idts-114/btp-browser/`; follow-up bug `IDTS-115` tracks the
-  missing UI capabilities.
+- IDTS-115 PR #214 is merged and selectively deployed at
+  `ae209c8f82227e4dedca09247db96c0b47097d92` without running the DB deployer.
+  PM browser acceptance passed Apply Classification, Confirm Duplicate and
+  PM-only AI Activity. HANA readback confirms the `BUG-0019` to `BUG-0020`
+  duplicate relationship; review/apply operations did not change status,
+  assignee or next processor unexpectedly. Evidence is under
+  `docs/pm/evidence/idts-115/`.
+- Full AI acceptance remains open. Qwen embedding produced observed `SUCCESS`,
+  but recent structured Classification, Handoff and Smart Assign audits are
+  safe fallback/provider-error outcomes. Tester/Developer interactive browser
+  role evidence is also pending member-owned sign-in. The controlled create
+  flow emitted binding errors for off-screen fields and `componentCategory_ID`;
+  both QA bugs were eventually created, but the console finding requires
+  follow-up before a clean-browser claim.
 - The Render rollback platform-readiness drill is documented and fresh route
   checks pass. Render is a previous baseline, not a synchronized HANA replica;
   a lossless return requires manual HANA-delta reconciliation.
