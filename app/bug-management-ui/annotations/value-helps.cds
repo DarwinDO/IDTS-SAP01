@@ -138,11 +138,6 @@ annotate service.Bugs:defectCategory.ID with @Common.Text : defectCategory.name 
         ValueListProperty : 'defectCategoryID'
       },
       {
-        $Type : 'Common.ValueListParameterOut',
-        LocalDataProperty : componentCategory_ID,
-        ValueListProperty : 'componentCategoryID'
-      },
-      {
         $Type : 'Common.ValueListParameterDisplayOnly',
         ValueListProperty : 'defectCategoryCode'
       },

@@ -97,6 +97,7 @@
     "qa:idts95:programmatic": "node scripts/qa/test-idts95-confirm-duplicate-suggestion.js",
     "qa:idts97:programmatic": "node scripts/qa/test-idts97-ai-operational-metrics.js",
     "qa:idts115:programmatic": "node scripts/qa/test-idts115-ai-fiori-entrypoints.js",
+    "qa:idts115:create-binding": "node scripts/qa/test-idts115-create-draft-binding.js",
     "qa:idts73:programmatic": "node scripts/qa/test-idts73-create-attachments-ui.js",
     "qa:idts73:browser": "node scripts/qa/test-idts73-create-attachments-browser.js",
     "qa:auth-email:playwright": "node scripts/qa/test-idts38-auth-email-playwright.js",

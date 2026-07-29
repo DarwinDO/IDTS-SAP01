@@ -46,6 +46,23 @@ sessions are still missing. IDTS-114 also remains In Progress because Qwen
 structured primary calls did not produce `SUCCESS` for Classification, Handoff
 Summary or Smart Assign in this run.
 
+## Create-flow follow-up
+
+The Create Bug investigation isolated two separate concerns:
+
+- The Defect Category value help had a redundant output mapping for
+  backend-derived `componentCategory_ID`. The focused fix removes that mapping;
+  CAP continues to derive the active component/category pair during draft
+  PATCH and validate it during active write.
+- Fiori Elements lazy-binds the Reproduction section. Browser automation must
+  open `Reproduction and Test Context` and wait for field bindings before
+  entering Steps, Actual and Expected. Directly filling off-screen controls is
+  a test-harness error; no Object Page controller workaround is retained.
+
+Local PM acceptance created `BUG-0005` on the first attempt and confirmed all
+three reproduction fields after reload. Evidence:
+`docs/pm/evidence/idts-115/create-draft-binding/`.
+
 ## Local verification
 
 | Gate | Result |
@@ -59,7 +76,8 @@ Summary or Smart Assign in this run.
 | IDTS-114 provider integration | 15 PASS / 0 FAIL |
 | IDTS-115 focused FE checks | 149 PASS |
 | UI5 app ESLint and production build | PASS |
-| UI5 MCP linter | 0 findings |
+| UI5 MCP manifest validation | PASS |
+| UI5 MCP linter | Pre-existing manifest-v2 and legacy QUnit migration findings; no IDTS-115 annotation finding |
 | CAP service compile | PASS with the pre-existing attachment vocabulary warning |
 | Secret scan, agent rules, QA-depth self-test | PASS |
 | AI DevKit and `git diff --check` | PASS |

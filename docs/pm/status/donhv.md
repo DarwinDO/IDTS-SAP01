@@ -4498,3 +4498,170 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   immutable `pull_request` event payload and therefore repeated the old-body
   failure. A small audit-log commit triggers a fresh `synchronize` event so CI
   evaluates the current PR body; no gate is bypassed.
+- IDTS-115 SAP Fiori MCP tooling issue: deferred discovery exposes the Fiori
+  modification tools but not the mandatory `tools/list` operation. The server
+  explicitly prohibits calling `list_functionality` before `tools/list`, so
+  no Fiori mutation tool is called out of sequence. Diagnosis continues with
+  read-only CAP/UI5 guidance and the existing annotation/source files; this is
+  a tooling limitation, not a product defect.
+- IDTS-115 Create Bug product defect: a real PM browser session reproduced
+  `Must not change a property before it has been read` while entering
+  `actualResult` on a new BTP draft, even after the user explicitly opened the
+  Reproduction and Test Context section first. This disproves the earlier
+  harness-only hypothesis. The error originates from the OData V4 property
+  binding before the primitive property has been loaded. UI5 MCP confirms
+  `Context.requestProperty(...)` is the supported API for loading an uncached
+  primitive value before modification. Status: under remediation; no Bug was
+  activated and the test draft must be discarded after diagnosis.
+- IDTS-115 Create Bug annotation finding: the Defect Category value help still
+  contains a `Common.ValueListParameterOut` that writes
+  `componentCategory_ID`, although both `prepareDraftPatch()` and active write
+  validation derive that ID from Application Component plus Defect Category.
+  This matches the observed `invalid segment: componentCategory_ID` warning.
+  Status: under remediation through a focused red test and removal of only the
+  redundant output mapping; backend derivation remains authoritative.
+- IDTS-115 expected TDD red result: the new focused
+  `qa:idts115:create-binding` check failed first at the redundant
+  `ValueListParameterOut` assertion. This is the intended pre-fix failure and
+  proves the test detects the deployed annotation defect before implementation.
+- IDTS-115 UI5 verification tooling issue: the initial verification batch used
+  `npx ui5 lint`, but the repository's installed UI5 CLI has no `lint`
+  subcommand and rejected the argument before a lint result was produced. No
+  source, generated artifact, runtime or data changed. The project also has no
+  app-level lint script, so verification continues with UI5 build, JavaScript
+  syntax checks, focused static tests and the repository quality gates; this is
+  a tooling limitation, not a product defect.
+- IDTS-115 local browser setup issue: the first foreground `npx cds watch`
+  invocation reached the command timeout because the development server is a
+  long-running process. The shell stopped that invocation before browser
+  acceptance; no assertion or product flow failed. The server is restarted as
+  a hidden local helper with output under ignored `.tmp/` and is verified by
+  its listening port/health response before testing.
+- IDTS-115 product defect retest: the first minimal Object Page extension plus
+  `Context.requestProperty(...)` implementation passed static tests, compile,
+  ESLint and UI5 build, but a real local PM Create Bug flow still emitted
+  `Must not change a property before it has been read` for the reproduction
+  fields. Therefore the fix is not accepted and is not ready for PR/deploy.
+  Status: under investigation; verify whether the controller extension is
+  attached to the actual Object Page lifecycle and whether prefetch completes
+  before the controls allow input.
+- IDTS-115 diagnosis: browser inspection confirms the custom extension is
+  attached to `sap.fe.templates.ObjectPage.ObjectPageController`. Network
+  evidence shows the three reproduction properties were not requested until
+  the fields received input. The routing hook had synchronously read
+  `IsActiveEntity` before that flag was cached and returned early. The
+  implementation now requests the draft flag first, then preloads the three
+  fields only when it resolves to `false`; browser retest remains required.
+- IDTS-115 diagnosis correction: a context-level preload produced the expected
+  OData read but did not initialize each generated
+  `ODataPropertyBinding`; UI5 still rejected the first edit. A browser
+  experiment calling the public `binding.requestValue()` on the three value
+  bindings prevented any additional binding errors. The candidate fix now
+  registers one public view event delegate in `onInit()` and requests those
+  bindings after the generated control tree renders; fresh browser retest
+  remains required.
+- IDTS-115 documentation issue: the first generated Vietnamese half of the new
+  controller knowledge mirror was mojibake. It has been replaced with valid
+  UTF-8 Vietnamese and updated to explain the actual two-step preload. This is
+  a documentation-quality issue; runtime code and data were unaffected.
+- IDTS-115 lifecycle diagnosis: temporary browser-only counters proved the
+  Object Page `onAfterRendering` delegate ran once, but it ran before the view
+  had a binding context. The three target value bindings existed shortly
+  afterwards, so the handler returned too early and initialized none of them.
+  Status: under remediation. The candidate now listens to the public UI5
+  `modelContextChange` event and keeps `onAfterRendering` as the complementary
+  lifecycle path, covering either ordering without a timing delay. Temporary
+  diagnostic counters have been removed; a fresh-draft browser retest is
+  required before acceptance.
+- IDTS-115 product defect retest: combining view-level
+  `modelContextChange` with `onAfterRendering` still allowed the first two
+  reproduction-field edits to fail; the controls and their contexts were not
+  ready in the same view callback. The draft was not activated. Status: under
+  remediation. The next candidate registers the three generated fields after
+  rendering and uses each field's public `modelContextChange` event to call
+  `ODataPropertyBinding.requestValue()` only for a new draft. No timeout, DOM
+  mutation or private Fiori API is used; a fresh browser retest is required.
+- IDTS-115 lifecycle diagnosis correction: on a fresh draft, a read-only
+  browser probe 2.5 seconds after navigation found all three generated fields
+  but none had been registered by the view callbacks. Both callbacks occurred
+  before Fiori Elements finished generating those descendants. Status: under
+  remediation. The supported Fiori Elements
+  `override.routing.onAfterBinding()` hook is now combined with direct
+  `ODataPropertyBinding.requestValue()` preparation; this exact combination
+  had not been tested by the earlier context-cache attempt.
+- IDTS-115 product defect retest: immediate preparation inside
+  `routing.onAfterBinding()` still failed for the first two fields. A later
+  manual call on the bindings currently attached to the rendered controls
+  succeeds, indicating Fiori Elements replaces or rebinds the generated
+  property bindings at the end of the same routing turn. Status: under
+  remediation. The candidate defers preparation by exactly one event-loop
+  turn (`setTimeout(..., 0)`) so it requests the final bindings; it does not
+  use an arbitrary wait duration.
+- IDTS-115 diagnosis correction: the binding-replacement explanation above
+  was not proven. SAP's supported Fiori Elements hook passes the page
+  `bindingContext` directly to `onAfterBinding`; the candidate incorrectly
+  ignored that parameter and queried `view.getBindingContext()` before the
+  view exposed it. The timeout candidate has been removed. The implementation
+  now uses the supplied context directly and remains free of polling, delay,
+  DOM access and private framework APIs.
+- IDTS-115 final binding classification: on a clean draft, explicitly opening
+  the `Reproduction and Test Context` tab propagated binding contexts to all
+  three fields; Steps, Actual and Expected then accepted values with no new
+  console error. Writing directly to the off-screen lazy fields reproduced the
+  error. Classification: test-harness issue, not a remaining product defect.
+  The speculative Object Page controller extension and its manifest entry have
+  been removed. Browser acceptance must open the section and wait for field
+  bindings before filling. The only runtime correction retained is removal of
+  the redundant Defect Category `componentCategory_ID` output mapping.
+- IDTS-115 local environment blocker: the hidden CAP helper stopped while the
+  browser was PATCHing the controlled draft. The browser then reported
+  `ERR_CONNECTION_REFUSED` and `$batch failed` for otherwise unrelated fields
+  and value lists. `/health` confirmed the server was down; this draft and its
+  console count are invalid as product evidence. Status: under recovery. A new
+  helper and a new draft are required before continuing acceptance.
+- IDTS-115 local environment recovery: the long-running server is restarted
+  with `cds run` instead of `cds watch`, avoiding the live-reload port conflict
+  that terminated the previous helper. `/health` returns HTTP 200. Browser
+  acceptance will restart from a clean draft.
+- IDTS-115 local browser acceptance: controlled draft
+  `64da2770-6aa8-45b5-beab-89ab79079b65` was activated successfully as
+  `BUG-0005` on the first Create attempt. The automation explicitly opened the
+  lazy `Reproduction and Test Context` section before entering Steps, Actual
+  and Expected; all three values remained present after a full navigation
+  reload. Application Component, Defect Category, Priority, Severity and
+  Environment were selected through their value-help records rather than
+  typed as display text. The reload produced two successful HTTP 200 OData
+  batches and no increase above the known 14-error local UI baseline.
+  Classification: product fix PASS plus test-harness correction PASS.
+- IDTS-115 evidence tooling issue: Playwright saved named screenshots in the
+  workspace root rather than `.playwright-mcp`, so the first evidence-copy
+  command failed with path-not-found. No artifact was lost. Status: fixed by
+  locating the files with `rg --files` and copying from the actual workspace
+  root; the selected evidence remains destined for the tracked IDTS-115
+  evidence folder.
+- IDTS-115 test-harness issue: the first focused static assertion expected
+  `prepareDraftPatch()` to call `deriveOrValidateComponentCategory()` by name,
+  but the current draft handler performs the same authoritative lookup and
+  assignment inline. The test failed even though browser and database
+  readback proved derivation worked. Status: fixed by asserting the real
+  `ComponentCategories` lookup and `req.data.componentCategory_ID` assignment;
+  the knowledge mirror was corrected to distinguish draft derivation from
+  active-write validation.
+- IDTS-115 verification finding: UI5 MCP manifest validation PASS, while the
+  full-project UI5 linter reports pre-existing migration debt: manifest
+  version below 2 plus deprecated/test-starter findings in the legacy QUnit
+  bootstrap files. None is introduced by the Value Help annotation change.
+  Classification: tooling/technical-debt finding, open outside this focused
+  fix; IDTS-115 continues only if source diff and focused behavior remain
+  clean.
+- IDTS-115 regression proof: the focused test failed exactly on the redundant
+  `componentCategory_ID` output assertion when that mapping was temporarily
+  restored, then passed 4/4 after the fix was restored. This proves the new
+  check detects the original annotation defect rather than merely passing on
+  the current tree.
+- IDTS-115 QA-gate invocation issue: passing `--body-file` through
+  `npm run qa:depth:pr-body -- ...` was consumed as npm CLI configuration, so
+  the checker received an empty body and correctly reported every required
+  section missing. Classification: tooling invocation issue, fixed by running
+  `node scripts/qa/check-pr-depth.js --body-file <file>` directly; no product
+  or PR-body content was affected.
