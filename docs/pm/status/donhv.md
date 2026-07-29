@@ -4782,3 +4782,15 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   IDTS-114/115 stay In Progress because the deferred Tester/Developer browser
   role matrix is not complete. Evidence:
   `docs/pm/evidence/idts-114/qwen-structured-primary/current-feature-readback-20260729.md`.
+## 2026-07-30 — IDTS-115 AI create-draft guard verification setup
+
+- Classification: tooling issue.
+- Symptom: the first regression/build batch in the fresh IDTS-115 worktree could not load `@sap/cds`, could not find the `ui5` executable, and the UI workspace has no `lint` npm script.
+- Cause: the isolated worktree had not run `npm ci`; the attempted workspace lint alias does not exist in `app/bug-management-ui/package.json`.
+- Status: corrected for task execution. `npm ci` installed 1,519 packages from the lockfile; the known audit baseline remains 24 vulnerabilities (1 low, 9 moderate, 13 high, 1 critical). No automatic dependency upgrade was applied inside this focused UI fix.
+- Product impact: none observed; the focused source checks already passed before this environment correction.
+- Verification after dependency correction: IDTS-56 13/13, IDTS-67 29/29, IDTS-93 35/35, IDTS-115 185/185, create-binding 4/4 and the UI5 production build all passed. UI5 MCP targeted linter returned zero findings and manifest validation returned valid with zero errors.
+- Independent-review product finding: the first Smart Assign draft synchronization implementation called `submitBatch(model.getUpdateGroupId())`, which can become the reserved `$auto` update group. It also left rejected synchronization promises uncaught at the two UI entry points. Classification load handling initially treated every HTTP 400 as missing Bug context. Classification: product defects found before PR. Status: fixed by submitting only named application groups, polling automatic pending changes for `$auto`/`$direct`, catching both entry points, and matching the exact backend missing-context message while limiting Retry to transient statuses.
+- Test-harness improvement: the focused Smart Assign fake OData model now simulates pending `$auto` PATCH work and throws if runtime attempts `submitBatch("$auto")`. Final focused rerun: IDTS-56 `14/14 PASS`; IDTS-115 `189 checks PASS`.
+- Tooling issue: the first final CAP command referenced nonexistent `srv/auth-service.cds`. The actual service definition is `srv/auth.cds`; no product compile was attempted by the failed path. Status: corrected by compiling the real file in the final gate.
+- Final local gate: all required IDTS-56/66/67/68/69/74/75/76/93/95/114/115 suites passed; IDTS-115 create-binding passed 4/4; secret scan, agent rules and QA-depth self-test passed; both CAP services compiled; UI5 production build, targeted UI5 linter and manifest validation passed; AI DevKit reported 5/5 OK; `git diff --check` passed with only line-ending notices. Ponytail review found no dependency, framework, speculative abstraction or duplicate helper to remove: `Lean already. Ship.`

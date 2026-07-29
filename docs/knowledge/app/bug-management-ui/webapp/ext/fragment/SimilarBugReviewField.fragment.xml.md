@@ -1,5 +1,11 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/fragment/SimilarBugReviewField.fragment.xml`
 
+## IDTS-115 create-draft guard
+
+The wrapper is visible only when `IsActiveEntity` or `HasActiveEntity` is true. A brand-new root draft has neither an active source Bug nor a stable audit target, so the complete label/button row stays hidden. An edit draft of an existing active Bug keeps the action visible.
+
+Vietnamese: Wrapper chỉ hiện khi `IsActiveEntity` hoặc `HasActiveEntity` là true. Root draft mới chưa có Bug active làm nguồn/audit target nên ẩn toàn bộ label/nút; edit draft của Bug active vẫn dùng được.
+
 > **Ownership / debug anchor:** DatDT owns this Bug Summary extension (backup: SangVN). It opens candidate review only and cannot create `DuplicateLinks` by itself.
 > **Ownership / điểm debug:** DatDT sở hữu extension Bug Summary này (backup: SangVN). Nó chỉ mở candidate review và không thể tự tạo `DuplicateLinks`.
 

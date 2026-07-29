@@ -18,6 +18,22 @@ Expose the already-implemented CAP capabilities through the existing SAPUI5/Fior
 
 No CAP contract, database schema, provider configuration, model, S3, Brevo, or lifecycle behavior changes are in scope.
 
+## 2026-07-30 create-draft and AI review hotfix
+
+- Root create drafts hide the Similar Bugs and Classification AI custom fields; active Bugs and edit drafts with an active source keep them.
+- Defensive action guards prevent transient draft UUIDs from being sent as active `sourceBugID` values.
+- Classification distinguishes HTTP 200 fallback/no-result, missing context, and retryable load errors.
+- Smart Assign submits only named application update groups; for reserved `$auto`/`$direct` groups it waits for automatic PATCH completion, refreshes the Bug context, then reads the backend-derived component category before loading candidates.
+
+## 2026-07-30 create-draft AI guard follow-up
+
+- Root new drafts hide Similar Bugs and Classification review because they do not yet have a persisted source Bug. Edit drafts backed by an active Bug keep the entry points.
+- Duplicate and Classification controller guards also reject draft-only invocation defensively.
+- Classification distinguishes safe HTTP 200 fallback/no-result, the exact backend missing-context HTTP 400, and genuine authorization/network/server failures.
+- Smart Assign waits for backend derivation without submitting the reserved `$auto` group and catches synchronization failures at both UI entry points.
+- Focused verification after the independent review: IDTS-56 `14/14 PASS`; IDTS-115 `189 checks PASS`.
+- Focused red test failed on the missing draft visibility guard, then passed after the implementation. IDTS-56, IDTS-67, IDTS-93, IDTS-115 focused checks and UI5 production build pass locally.
+
 ## Implementation trace
 
 | UI entry point | Source | Existing CAP contract | Safety boundary |

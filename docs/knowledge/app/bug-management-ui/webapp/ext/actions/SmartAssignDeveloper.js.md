@@ -1,5 +1,11 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/actions/SmartAssignDeveloper.js`
 
+## IDTS-115 draft classification synchronization
+
+Before candidate lookup, `synchronizeAssignmentContext()` submits pending changes through the model update group, refreshes the Bug context, and re-reads `applicationComponent_ID`, `defectCategory_ID`, and backend-derived `componentCategory_ID`. A missing pair and an invalid active mapping use different user messages. An already-derived component category remains authoritative and opens the picker without unnecessary rejection.
+
+Vietnamese: Trước khi tìm Developer, helper chờ PATCH, refresh context và đọc lại cặp classification cùng `componentCategory_ID` do backend derive. Thiếu lựa chọn và mapping không hợp lệ có thông báo riêng.
+
 > **Ownership / debug anchor:** SangVN owns the candidate-selection dialog (backup: DonHV). The dialog may explain/filter candidates, but a human selects and CAP validates the final assignee.
 > **Ownership / điểm debug:** SangVN sở hữu dialog chọn candidate (backup: DonHV). Dialog có thể giải thích/lọc candidate, nhưng người dùng chọn và CAP validate assignee cuối cùng.
 
@@ -106,6 +112,20 @@ Dialog giup PM/Tester chon developer de hon value help mac dinh. Tu IDTS-61, dia
 The Smart Assign dialog treats one explanation request as one review unit. `applyAssignmentExplanations()` takes the shared `suggestionID`, enables contextual Accept/Reject/Ignore buttons, and shows persisted state plus reviewer/time through `AiSuggestionReview.submit`. These controls sit beside the AI explanation notice, separate from the footer Assign button.
 
 Accepting an explanation records only the audit decision. It does not select a candidate, set `selectedCandidate`, enable assignment, write `assignee_ID`, or call `assignToDeveloper`. Empty/provider-error results keep review disabled and show a safe unavailable state. Assignment/load failures use localized generic messages rather than caught backend detail.
+
+## IDTS-115 draft synchronization guard (2026-07-30)
+
+### English
+
+Before Smart Assign validates `componentCategory_ID`, `flushPendingChanges()` lets pending draft PATCH work finish. It submits only a named application update group. CAP OData V4 reserves groups such as `$auto` and `$direct`, so the module must never call `submitBatch("$auto")`; it polls `hasPendingChanges()` until the automatic submission completes instead. The Bug context is then refreshed and the three classification properties are read again. This keeps `prepareDraftPatch()` and `deriveOrValidateComponentCategory()` in the backend as the source of truth.
+
+If synchronization fails, both Smart Assign entry points catch the rejected promise and show a localized safe message. A complete component/category pair without a derived mapping is reported differently from an incomplete pair.
+
+### Vietnamese
+
+Trước khi Smart Assign kiểm tra `componentCategory_ID`, `flushPendingChanges()` chờ PATCH của draft hoàn tất. Hàm chỉ submit một application update group có tên. Các group như `$auto` và `$direct` là group dành riêng của CAP OData V4, vì vậy module tuyệt đối không gọi `submitBatch("$auto")`; thay vào đó nó kiểm tra `hasPendingChanges()` cho đến khi cơ chế tự động gửi xong. Sau đó Bug context được refresh và ba thuộc tính classification được đọc lại. Backend `prepareDraftPatch()` và `deriveOrValidateComponentCategory()` vẫn là nguồn quyết định cuối cùng.
+
+Nếu đồng bộ thất bại, cả hai entry point của Smart Assign đều bắt rejected promise và hiển thị thông báo i18n an toàn. Trường hợp đã chọn đủ component/category nhưng không có mapping được báo riêng với trường hợp còn thiếu lựa chọn.
 
 ### Vietnamese
 

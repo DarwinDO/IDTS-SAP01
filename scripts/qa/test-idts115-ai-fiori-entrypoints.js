@@ -10,6 +10,9 @@ const read = relativePath => fs.readFileSync(path.join(root, relativePath), 'utf
 
 const classification = read('app/bug-management-ui/webapp/ext/actions/ClassificationReview.js')
 const duplicate = read('app/bug-management-ui/webapp/ext/actions/DuplicateReview.js')
+const smartAssign = read('app/bug-management-ui/webapp/ext/actions/SmartAssignDeveloper.js')
+const classificationField = read('app/bug-management-ui/webapp/ext/fragment/ClassificationReviewField.fragment.xml')
+const similarBugField = read('app/bug-management-ui/webapp/ext/fragment/SimilarBugReviewField.fragment.xml')
 const reviewHelper = read('app/bug-management-ui/webapp/ext/ai/AiSuggestionReview.js')
 const dashboard = read('app/bug-management-ui/webapp/dashboard-page.js')
 const manifest = read('app/bug-management-ui/webapp/manifest.json')
@@ -44,6 +47,31 @@ includes('classification prevents repeated Apply', classification, '/applyAction
 includes('classification distinguishes an applied mutation from a refresh failure', classification, 'var applyCompleted = false')
 includes('classification restores retry only before the mutation succeeds', classification, 'if (!applyCompleted)')
 includes('classification reports refresh failure without replaying Apply', classification, 'applyCompleted ? "classificationRefreshFailed"')
+includes(
+  'classification field hides AI on a root create draft',
+  classificationField,
+  'visible="{= ${IsActiveEntity} === true || ${HasActiveEntity} === true }"'
+)
+includes(
+  'classification has a defensive persisted-source guard',
+  classification,
+  'hasPersistedBugSource'
+)
+includes(
+  'classification normalizes the direct invocation result before reading the result context',
+  classification,
+  'invocationResult'
+)
+includes(
+  'classification distinguishes missing context from a load failure',
+  classification,
+  'classificationReviewMissingContext'
+)
+includes(
+  'classification exposes a safe retry action for retryable load failures',
+  classification,
+  'classificationReviewRetryButton'
+)
 
 includes('similar bugs uses single selection', duplicate, 'mode: "SingleSelectMaster"')
 includes('similar bugs stores the selected candidate', duplicate, '/selectedCandidateBugID')
@@ -58,6 +86,62 @@ matches(
   /duplicateRefreshFailed[\s\S]{0,500}?\.finally\(function \(\) \{\s*state\.setProperty\("\/busy", false\);\s*updateConfirmEnabled\(\);\s*\}\)/
 )
 includes('similar bugs distinguishes confirmation from refresh failure', duplicate, 'duplicateRefreshFailed')
+includes(
+  'similar bugs field hides AI on a root create draft',
+  similarBugField,
+  'visible="{= ${IsActiveEntity} === true || ${HasActiveEntity} === true }"'
+)
+includes(
+  'similar bugs sends a source ID only for an active bug or its edit draft',
+  duplicate,
+  'hasPersistedBugSource(bug) ? bug.ID : null'
+)
+includes(
+  'similar bugs has a defensive persisted-source guard',
+  duplicate,
+  'hasPersistedBugSource'
+)
+
+matches(
+  'Smart Assign waits for pending draft PATCH requests before checking the derived mapping',
+  smartAssign,
+  /updateGroupId\.charAt\(0\) !== "\$"[\s\S]*?submitBatch\(updateGroupId\)[\s\S]*?waitForAutoSubmit/
+)
+notIncludes(
+  'Smart Assign never submits the reserved auto group manually',
+  smartAssign,
+  'submitBatch(model.getUpdateGroupId())'
+)
+includes(
+  'Smart Assign refreshes the Bug context before re-reading componentCategory_ID',
+  smartAssign,
+  'requestRefresh'
+)
+includes(
+  'Smart Assign distinguishes an incomplete classification pair',
+  smartAssign,
+  'smartAssignIncompleteClassification'
+)
+includes(
+  'Smart Assign distinguishes an invalid active mapping',
+  smartAssign,
+  'smartAssignInvalidClassificationMapping'
+)
+matches(
+  'Smart Assign catches synchronization failures at both entry points',
+  smartAssign,
+  /openAssigneePicker[\s\S]*?\.catch\(function \(\) \{[\s\S]*?smartAssignLoadFailed[\s\S]*?openDialog[\s\S]*?\.catch\(function \(\) \{[\s\S]*?smartAssignLoadFailed/
+)
+includes(
+  'classification recognizes only the exact missing-context backend message',
+  classification,
+  'Provide a bug title, description, reproduction context, or source bug'
+)
+includes(
+  'classification retries only transient load statuses',
+  classification,
+  'status === 408 || status === 429 || status >= 500'
+)
 
 includes('review helper tracks whether the backend decision completed', reviewHelper, 'var reviewCompleted = false')
 includes('review helper marks completion only after action invocation', reviewHelper, 'reviewCompleted = true')
@@ -84,6 +168,12 @@ const idts115I18nKeys = [
   'classificationApplySuccess',
   'classificationApplyFailed',
   'classificationRefreshFailed',
+  'classificationReviewMissingContext',
+  'classificationReviewRetryButton',
+  'classificationReviewRetryableLoadFailed',
+  'duplicateReviewAfterSave',
+  'smartAssignIncompleteClassification',
+  'smartAssignInvalidClassificationMapping',
   'duplicateConfirmButton',
   'duplicateConfirmPrompt',
   'duplicateConfirmSuccess',

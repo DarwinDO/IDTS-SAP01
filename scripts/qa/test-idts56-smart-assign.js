@@ -127,6 +127,7 @@ function loadSmartAssignModule(roleCode, modelHooks = {}) {
     console,
     Error,
     Promise,
+    setTimeout,
     sap: {
       ui: {
         define(dependencies, factory) {
@@ -296,6 +297,17 @@ async function verifyUiActionModule() {
   ]
 
   const model = {
+    pendingChecks: 0,
+    hasPendingChanges() {
+      this.pendingChecks += 1
+      return this.pendingChecks === 1
+    },
+    getUpdateGroupId() {
+      return '$auto'
+    },
+    submitBatch() {
+      throw new Error('submitBatch must not be called for $auto')
+    },
     bindList(pathName, unusedContext, unusedSorters, filters) {
       bindListPath = pathName
       bindListFilters = filters
@@ -384,6 +396,18 @@ async function verifyUiActionModule() {
         sapModule_ID: null,
         assigneeDisplayName: null
       })
+    },
+    requestRefresh() {
+      hooks.refreshed = true
+      return Promise.resolve()
+    },
+    requestProperty(propertyName) {
+      const values = {
+        applicationComponent_ID: '40000000-0000-0000-0000-000000000001',
+        defectCategory_ID: '50000000-0000-0000-0000-000000000001',
+        componentCategory_ID: COMPONENT_CATEGORY_1
+      }
+      return Promise.resolve(values[propertyName])
     }
   }
 
@@ -392,7 +416,10 @@ async function verifyUiActionModule() {
   assert.strictEqual(bindListPath, '/AssignableDevelopers')
   assert(bindListFilters.some(filter => filter.pathName === 'componentCategoryID' && filter.value === COMPONENT_CATEGORY_1))
   assert.strictEqual(hooks.dialog, dialog)
+  assert.strictEqual(hooks.refreshed, true)
+  assert.strictEqual(model.pendingChecks >= 2, true)
   rec('dialog loads assignable developers filtered by bug component category', true)
+  rec('auto-group draft PATCH completes without submitBatch($auto)', true)
 
   await new Promise(resolve => setImmediate(resolve))
   await new Promise(resolve => setImmediate(resolve))

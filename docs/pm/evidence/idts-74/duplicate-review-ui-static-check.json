@@ -1,6 +1,6 @@
 {
   "task": "IDTS-74",
-  "checkedAt": "2026-07-24T17:28:08.820Z",
+  "checkedAt": "2026-07-29T17:35:17.215Z",
   "checks": [
     {
       "label": "Similar bug review field opens duplicate review from product UI",
@@ -87,6 +87,34 @@
       "pass": true
     },
     {
+      "label": "controller literal \"PM\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"TESTER\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"function\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"function\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"suggestionID\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"candidateBugID\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"$direct\" is not dev-facing copy",
+      "pass": true
+    },
+    {
       "label": "controller literal \"duplicateReviewUnknownBug\" is not dev-facing copy",
       "pass": true
     },
@@ -112,6 +140,14 @@
     },
     {
       "label": "controller literal \"ID\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"IsActiveEntity\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"HasActiveEntity\" is not dev-facing copy",
       "pass": true
     },
     {
@@ -203,7 +239,39 @@
       "pass": true
     },
     {
+      "label": "controller literal \"ACCEPTED\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateConfirmPrompt\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateConfirmSuccess\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateRefreshFailed\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateConfirmFailed\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"SingleSelectMaster\" is not dev-facing copy",
+      "pass": true
+    },
+    {
       "label": "controller literal \"{duplicateReview>/noDataText}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"listItem\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReview\" is not dev-facing copy",
       "pass": true
     },
     {
@@ -383,6 +451,22 @@
       "pass": true
     },
     {
+      "label": "controller literal \"duplicateConfirmButton\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"Emphasized\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>/confirmActionVisible}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>/confirmActionEnabled}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
       "label": "controller literal \"duplicateReviewCloseButton\" is not dev-facing copy",
       "pass": true
     },
@@ -404,6 +488,10 @@
     },
     {
       "label": "controller literal \"duplicateReviewLoadFailed\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReviewAfterSave\" is not dev-facing copy",
       "pass": true
     },
     {
@@ -508,6 +596,10 @@
     },
     {
       "label": "i18n.properties duplicateReviewLoadFailed has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties duplicateReviewAfterSave has user-facing copy",
       "pass": true
     },
     {
@@ -616,6 +708,10 @@
     },
     {
       "label": "i18n_en.properties duplicateReviewLoadFailed has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties duplicateReviewAfterSave has user-facing copy",
       "pass": true
     },
     {

@@ -8,7 +8,9 @@
   xmlns:section="idts.bugmanagementui.ext.controls"
 >
   <!-- Wrapper giữ cách đặt text bên trái/nút bên phải theo SAP Fiori section pattern. -->
-  <section:SmartAssignmentSection>
+  <section:SmartAssignmentSection
+    visible="{= ${IsActiveEntity} === true || ${HasActiveEntity} === true }"
+  >
     <Button
       core:require="{ ClassificationReview: 'idts/bugmanagementui/ext/actions/ClassificationReview' }"
       text="{i18n>classificationReviewOpenButton}"
