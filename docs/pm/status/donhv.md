@@ -4665,3 +4665,111 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   section missing. Classification: tooling invocation issue, fixed by running
   `node scripts/qa/check-pr-depth.js --body-file <file>` directly; no product
   or PR-body content was affected.
+- IDTS-115 merge tooling issue: `gh pr merge 221 --merge --delete-branch`
+  completed the GitHub merge but then returned exit code 1 because local
+  branch `dev` is owned by the root worktree `E:\IDTS-SAP01`; `gh` could not
+  check out `dev` or finish local branch deletion in the feature worktree.
+  Classification: tooling/worktree issue. Status: GitHub PR #221 was verified
+  `MERGED`, merge SHA `4fa1eaa45a7e56c71ea628127ebf9172ef02c14e`
+  was verified as the exact `origin/dev` head, and no second merge or admin
+  bypass was attempted. Local branch cleanup is deferred until the worktree is
+  no longer needed.
+- IDTS-115 deployment-build finding: the clean MBT build at merge SHA
+  `4fa1eaa45a7e56c71ea628127ebf9172ef02c14e` completed successfully in
+  497 seconds, but npm audit output reported existing dependency debt: 24
+  vulnerabilities in the root install, 26 in the UI install, 7 in generated
+  service dependencies and 4 in AppRouter dependencies. Classification:
+  tooling/dependency technical debt, not introduced by the five-line
+  annotation deletion. Status: open for a dedicated dependency review; no
+  automatic or force audit fix was run because it could introduce unrelated
+  breaking changes.
+- IDTS-115 deployment verification tooling issue: the selective app-content
+  deployment finished successfully, but the optional command
+  `cf html5-list -di idts-sap01-destination -u` was unavailable because the
+  HTML5 CLI plugin is not installed in the current CF CLI. Classification:
+  local tooling limitation. Status: deployment was instead verified through
+  the finished MTA operation, unchanged running service/AppRouter instances,
+  HTTP 200 health, HTTP 302 anonymous XSUAA redirect and authenticated browser
+  reload; no product defect was inferred from the missing optional plugin.
+- IDTS-115 BTP rollout finding: after deploying only
+  `idts-sap01-app-content`, selecting a Defect Category in a fresh draft still
+  logged `Failed to drill-down into componentCategory_ID, invalid segment`.
+  Classification: deployment-scope issue, not a new source defect. Root cause:
+  the CDS annotation is compiled into CAP service metadata, so HTML5 content
+  alone cannot replace the metadata served by the already-running service.
+  Status: the incomplete acceptance run is rejected; its draft is discarded,
+  and the same verified MTAR will be redeployed selectively with
+  `idts-sap01-srv` plus `idts-sap01-app-content`, still excluding the HDI
+  deployer and any database deployment.
+- IDTS-115 deployment verification tooling issue: the first HTTP probe used
+  PowerShell's newer `Invoke-WebRequest -SkipHttpErrorCheck` option, but the
+  installed PowerShell version does not support that parameter. Both commands
+  stopped before sending a request, so the empty status values are not product
+  evidence. Classification: tooling issue. Status: fixed by switching the
+  read-only health and redirect probes to `curl.exe`.
+- IDTS-115 browser-harness tooling issue: the first value-help interaction
+  called `focus()` on the browser-client locator, but that wrapper does not
+  expose a `focus` method. No UI action was sent and no draft value changed.
+  Classification: test-harness issue. Status: fixed by using the supported
+  exact-locator `click()` followed by `press('F4')`.
+- IDTS-115 browser-evidence tooling limitation: an attempt to read current
+  SAPUI5 log entries through an evaluated `sap/base/Log` module failed because
+  the browser-client evaluation context does not expose the page's `sap`
+  global. No product action failed and no business data was changed by this
+  read-only probe. Classification: test-harness/tooling limitation. Status:
+  browser evidence will use visible error-dialog checks plus bounded CF
+  request/runtime logs; the historical Chrome log buffer will not be treated
+  as current-run evidence.
+- IDTS-115 BTP apparent persistence defect, diagnosis corrected: immediately
+  after activation, the inactive `Reproduction and Test Context` section
+  rendered placeholder empty values for `BUG-0021`, which initially looked
+  like data loss. Read-only HANA evidence showed all three NCLOB values were
+  present, and explicitly opening the lazy section loaded and displayed Steps,
+  Actual and Expected correctly. Classification: test-harness/lazy-loading
+  observation, not a product defect. Status: resolved; acceptance must activate
+  the section before asserting active-page values.
+- IDTS-115 HANA readback tooling issue: the first read-only `cf run-task`
+  command failed locally during PowerShell parsing because Bash-style quote
+  escaping was used inside a PowerShell string. Cloud Foundry did not receive
+  a task, so no database request or mutation occurred. Classification:
+  tooling issue. Status: fixed by constructing the inline Node command with
+  native PowerShell string escaping before retrying.
+- IDTS-115 HANA readback tooling issue follow-up: Cloud Foundry CLI split the
+  inline `node -e` JavaScript into unexpected arguments after PowerShell
+  removed nested quotes. The task was rejected by the CLI and did not run.
+  Classification: tooling issue. Status: fixed by using the already proven
+  base64-to-temporary-file task pattern, which avoids multi-layer shell
+  quoting and remains read-only.
+- IDTS-115 deployment-inspection environment limitation: direct read-only
+  `cf ssh` access to the running service container was denied for the current
+  Cloud Foundry identity. No application or environment state changed.
+  Classification: environment/authorization limitation. Status: use a
+  one-off read-only CF task to inspect packaged metadata instead; SSH access is
+  not required for the product fix.
+- IDTS-115 HANA readback helper issue: the first read-only query for the
+  cache-busted `BUG-0022` run found the row, but most reported fields were
+  `undefined` because the HANA result object exposed uppercase column keys
+  while the helper read lowercase/camel-case keys directly. Classification:
+  test-harness issue, not data loss. Status: the helper is being rerun with a
+  case-insensitive column accessor; the browser reload already displayed all
+  three reproduction values.
+- IDTS-115 SAP BTP Create Bug acceptance result: a new application model was
+  loaded with a unique cache-busting query value, then the PM flow created
+  `BUG-0022` on the first activation attempt. Steps, Actual Result and Expected
+  Result remained visible after full reload. A corrected read-only HANA task
+  confirmed all three values plus the backend-derived
+  `componentCategory_ID`. The deployed metadata scan found no Defect Category
+  output mapping to that property; the remaining reference is the valid
+  Assignee filter input. No new browser console entry, `invalid segment`,
+  unread-property error or SAP BTP web error appeared during the controlled
+  test window. Classification: product fix PASS and stale-browser-metadata
+  diagnosis resolved. Evidence is under
+  `docs/pm/evidence/idts-115/create-draft-binding/btp/`.
+- IDTS-115 evidence-cleanup tooling limitation: `apply_patch` cannot delete
+  PNG files because it expects UTF-8 text, and the guarded native PowerShell
+  cleanup of the three superseded R2 screenshots was blocked by the shell
+  safety layer before deletion. Classification: tooling limitation. Status:
+  no source or evidence was damaged; the final case manifest references only
+  the authoritative cache-busted R3 screenshots (`04`–`06`). The three older
+  diagnostic images remain untracked in the evidence directory and will be
+  excluded from staging.
