@@ -1,5 +1,42 @@
 # Knowledge: `app/bug-management-ui/annotations/value-helps.cds`
 
+## IDTS-115 create-flow correction
+
+The Defect Category value help no longer writes `componentCategory_ID` back to
+the draft. That property is an internal assignment key derived by
+`prepareDraftPatch()` for draft PATCH requests and validated again by the
+active-write component/category rules. Keeping the redundant
+`ValueListParameterOut` made UI5 drill into a property path that was not part of
+the value-help field context and produced an `invalid segment` warning.
+
+Value help still returns the selected `defectCategory_ID`. CAP remains the
+source of truth for deriving and validating `componentCategory_ID`, including
+direct API calls that bypass the UI.
+
+Create Bug's Reproduction section is lazy-bound by Fiori Elements. A real user
+opens that section before editing its fields. Browser automation must reproduce
+the same interaction and wait for the field binding context before filling;
+writing directly to an off-screen lazy field is a harness error and must not be
+fixed with a runtime controller workaround.
+
+### Cập nhật IDTS-115
+
+Value help Defect Category không còn ghi ngược `componentCategory_ID` vào
+draft. Đây là khóa assignment nội bộ do `prepareDraftPatch()` suy ra trong
+draft PATCH và được kiểm tra lại bởi rule component/category của active write.
+`ValueListParameterOut` dư làm UI5 drill vào property
+không thuộc context của field value help và sinh warning `invalid segment`.
+
+Value help vẫn trả `defectCategory_ID` mà người dùng chọn. CAP tiếp tục là
+source of truth để derive và validate `componentCategory_ID`, kể cả request API
+gọi trực tiếp mà không qua UI.
+
+Phần Reproduction của Create Bug được Fiori Elements bind theo cơ chế lazy.
+Người dùng thật phải mở section trước khi nhập. Browser automation cũng phải
+thực hiện đúng tương tác đó và chờ binding context của field trước khi điền;
+ghi trực tiếp vào field off-screen là lỗi test harness, không phải lý do để
+thêm controller workaround vào runtime.
+
 > **Ownership / debug anchor:** SangVN owns catalog value-help UX (backup: DonHV). A value help narrows choices, but invalid values must still be rejected by CAP validation.
 > **Ownership / điểm debug:** SangVN sở hữu UX value help catalog (backup: DonHV). Value help thu hẹp lựa chọn, nhưng giá trị sai vẫn phải bị CAP validation chặn.
 
