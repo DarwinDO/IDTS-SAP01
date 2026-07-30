@@ -4883,3 +4883,9 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   evidence paths into the current PR body, then triggering a fresh synchronize
   event after that edit; the new run must pass normally before merge, with no
   admin bypass.
+- 2026-07-30 PR #231 merge-client finding: `gh pr merge --merge` stopped before
+  contacting GitHub because its local Git step tried to check out `dev`, which
+  is already owned by the root worktree. Classification: GitHub CLI/worktree
+  tooling issue; the PR remains clean and no branch, app, or data changed.
+  Status: merge through GitHub's server-side pull-request API after the final
+  green check, preserving normal merge rules and avoiding local checkout.
