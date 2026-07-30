@@ -330,11 +330,23 @@ sap.ui.define([
             var aiReview = explanation
                 ? AiReviewUi.decorateResult(explanation, getAiText(view))
                 : AiReviewUi.unavailable(getAiText(view));
+            var isAiGenerated = explanation && explanation.explanationSource === "AI";
+            var isRulesBased = explanation && explanation.explanationSource === "RULES";
 
             return Object.assign({}, candidate, {
                 aiExplanation: aiReview.explanation,
-                aiExplanationMeta: aiReview.meta,
-                aiExplanationState: aiReview.state,
+                aiExplanationMeta: isAiGenerated
+                    ? aiReview.meta
+                    : isRulesBased
+                        ? getText(view, "smartAssignRulesReviewRequired")
+                        : aiReview.meta,
+                aiExplanationState: isAiGenerated ? aiReview.state : isRulesBased ? "Warning" : aiReview.state,
+                aiExplanationSource: isAiGenerated
+                    ? getText(view, "smartAssignExplanationSourceAi")
+                    : isRulesBased
+                        ? getText(view, "smartAssignExplanationSourceRules")
+                        : getText(view, "smartAssignExplanationSourceUnavailable"),
+                aiExplanationSourceState: isAiGenerated ? "Information" : isRulesBased ? "Warning" : "None",
                 aiWarnings: aiReview.warnings,
                 hasAiWarnings: aiReview.hasWarnings,
                 aiDecisionHint: aiReview.decisionHint
@@ -569,6 +581,10 @@ sap.ui.define([
                             new Text({
                                 text: "{smartAssign>aiExplanation}",
                                 wrapping: true
+                            }),
+                            new ObjectStatus({
+                                text: "{smartAssign>aiExplanationSource}",
+                                state: "{smartAssign>aiExplanationSourceState}"
                             }),
                             new ObjectStatus({
                                 text: "{smartAssign>aiExplanationMeta}",

@@ -11,6 +11,7 @@ const read = relativePath => fs.readFileSync(path.join(root, relativePath), 'utf
 const classification = read('app/bug-management-ui/webapp/ext/actions/ClassificationReview.js')
 const duplicate = read('app/bug-management-ui/webapp/ext/actions/DuplicateReview.js')
 const smartAssign = read('app/bug-management-ui/webapp/ext/actions/SmartAssignDeveloper.js')
+const handoff = read('app/bug-management-ui/webapp/ext/actions/HandoffSummaryReview.js')
 const classificationField = read('app/bug-management-ui/webapp/ext/fragment/ClassificationReviewField.fragment.xml')
 const similarBugField = read('app/bug-management-ui/webapp/ext/fragment/SimilarBugReviewField.fragment.xml')
 const reviewHelper = read('app/bug-management-ui/webapp/ext/ai/AiSuggestionReview.js')
@@ -147,6 +148,10 @@ includes(
   smartAssign,
   'smartAssignInvalidClassificationMapping'
 )
+includes('Smart Assign visibly distinguishes AI-generated explanations from rules-based guidance', smartAssign, 'aiExplanationSource')
+includes('classification visibly distinguishes AI suggestions from rules-based fallback', classification, 'suggestionSourceText')
+includes('handoff identifies the generated overview separately from verified stored data', handoff, 'handoffSummaryGeneratedOverviewLabel')
+includes('handoff identifies verified comments separately from generated summary text', handoff, 'handoffSummaryVerifiedCommentsLabel')
 matches(
   'Smart Assign catches synchronization failures at both entry points',
   smartAssign,
@@ -194,10 +199,21 @@ const idts115I18nKeys = [
   'duplicateReviewAfterSave',
   'smartAssignIncompleteClassification',
   'smartAssignInvalidClassificationMapping',
+  'smartAssignExplanationSourceAi',
+  'smartAssignExplanationSourceRules',
+  'smartAssignRulesReviewRequired',
   'duplicateConfirmButton',
   'duplicateConfirmPrompt',
   'duplicateConfirmSuccess',
   'duplicateConfirmFailed',
+  'classificationReviewSourceAi',
+  'classificationReviewSourceRules',
+  'classificationReviewSourceUnavailable',
+  'smartAssignExplanationSourceUnavailable',
+  'handoffSummaryGeneratedOverviewLabel',
+  'handoffSummaryVerifiedDataLabel',
+  'handoffSummaryVerifiedCommentsLabel',
+  'handoffSummaryVerifiedEventsLabel',
   'duplicateRefreshFailed',
   'dashboardAiActivityButton',
   'dashboardAiActivityTitle',

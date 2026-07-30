@@ -16,7 +16,10 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 
 const cds = require('@sap/cds')
 const { INSERT, SELECT } = cds.ql
-const { SMART_ASSIGNMENT_PROVIDER_DEADLINE_MS } = require('../../srv/ai/assignment-explanation')
+const {
+  SMART_ASSIGNMENT_PROVIDER_DEADLINE_MS,
+  buildProviderInput
+} = require('../../srv/ai/assignment-explanation')
 
 const BUG_ID = '94000000-0000-0000-0000-000000000001'
 const DONHV_ID = '10000000-0000-0000-0000-000000000001'
@@ -108,7 +111,7 @@ async function main () {
   aiConfig({
     candidates: [
       {
-        developerProfileID: DEV_DAT,
+        candidateRef: 'C1',
         explanation: 'Provider explanation: matches this component/category and has available capacity.',
         confidence: 0.84
       }
@@ -122,11 +125,13 @@ async function main () {
   assert(positive.some(row => row.developerProfileID === DEV_DAT))
   const dat = positive.find(row => row.developerProfileID === DEV_DAT)
   assert.strictEqual(dat.providerStatus, 'SUCCESS')
+  assert.strictEqual(dat.explanationSource, 'AI')
   assert(dat.explanation.includes('Provider explanation') || dat.explanation.includes('Matches'))
   assert.strictEqual(dat.requiresReview, true)
   assert(dat.suggestionID)
   assert(positive.every(row => row.suggestionID === dat.suggestionID))
   rec('provider success returns reviewable explanation for assignable candidate', true)
+  rec('provider explanation is explicitly labelled as AI-generated', true)
   rec('all explanations return the same persisted suggestion ID', true)
 
   const auditRows = await db.run(
@@ -155,7 +160,19 @@ async function main () {
   assert(disabled.length > 0)
   assert(disabled.every(row => row.providerStatus === 'AI_DISABLED'))
   assert(disabled.every(row => row.explanation && row.requiresReview === true))
+  assert(disabled.every(row => row.explanationSource === 'RULES'))
   rec('disabled AI provider falls back without breaking Smart Assign', true)
+  rec('rules fallback is explicitly labelled instead of being presented as AI output', true)
+
+  const providerInput = buildProviderInput({}, [{
+    candidateRef: 'C1',
+    developerProfileID: DEV_DAT,
+    developerName: 'DatDT',
+    workload: {}
+  }])
+  assert.strictEqual(providerInput.candidates[0].candidateRef, 'C1')
+  assert.strictEqual(Object.hasOwn(providerInput.candidates[0], 'developerProfileID'), false)
+  rec('provider receives a short candidate reference instead of a developer UUID', true)
 
   let rejectedMissingClassification = false
   try {

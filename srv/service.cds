@@ -29,6 +29,7 @@ service BugService @(requires: 'authenticated-user') {
     confidence       : Decimal(5,4);
     reason           : String(500);
     status           : String(40);
+    suggestionSource : String(20);
     providerStatus   : String(40);
     requiresReview   : Boolean;
   };
@@ -60,6 +61,7 @@ service BugService @(requires: 'authenticated-user') {
     warnings           : String(500);
     confidence         : Decimal(5,4);
     status             : String(40);
+    explanationSource  : String(20);
     providerStatus     : String(40);
     groundingStatus    : String(40);
     workloadOpenCount  : Integer;

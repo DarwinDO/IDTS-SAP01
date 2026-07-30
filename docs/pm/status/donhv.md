@@ -4956,3 +4956,28 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   destructive-file-operation policy, so they remain untracked and will not be
   committed. Status: diagnose/rebuild before BTP rollout; do not claim package
   verification PASS yet.
+
+- 2026-07-30 IDTS-114 AI result-grounding remediation: browser evidence showed
+  that Smart Assign and several Classification rows were presenting deterministic
+  fallback text as if it were an AI result. Root cause: provider-output mapping
+  depended on UUID/display labels rather than stable short references; Handoff
+  also did not visibly distinguish its generated overview from the trusted
+  comments/history read from storage. Classification: product UX/grounding
+  defect. Status: the focused fix uses short references and explicit source
+  labels; no workflow, HANA schema, provider key, or deployment has changed yet.
+- 2026-07-30 focused local test setup: the fresh worktree intentionally has no
+  `node_modules`, so IDTS-67/69 could not resolve `@sap/cds` on their first
+  red-test run. Classification: tooling/environment issue, not a product test
+  failure. Status: rerun will use the existing root dependency runtime via
+  a local junction to the existing root dependency runtime; no package
+  installation or lockfile change is required.
+- 2026-07-30 verification follow-up: focused AI suites passed after the local
+  dependency junction was used (`IDTS-69 12/12`, `IDTS-67 33/33`, `IDTS-68
+  45/45`, `IDTS-115 UI checks 241`). Two generic validation commands exposed
+  baseline tooling defects: `cds compile srv --to edmx` is ambiguous because
+  the project has both `AuthService` and `BugService`; the required explicit
+  `-s all` variant will be used. The UI5 build cannot resolve the task declared
+  by the existing `app/bug-management-ui/ui5.yaml`, `ui5-task-zipper`, because
+  it is absent from the root dependency runtime. Classification: tooling/configuration
+  issue, not a product regression. Status: UI5 MCP lint passed for all changed
+  controllers; do not add or change dependencies in this urgent product patch.

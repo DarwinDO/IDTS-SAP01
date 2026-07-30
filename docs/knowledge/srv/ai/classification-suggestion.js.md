@@ -1,5 +1,11 @@
 # `srv/ai/classification-suggestion.js`
 
+## IDTS-114 catalog references and result provenance (2026-07-30)
+
+The provider receives a short field-scoped catalog reference (`SM1`, `AC1`, `DC1`, `P1`, or `S1`) instead of a catalog UUID. It must return `catalogRef`; `findCatalogRow()` maps that ref to an active stored row before UI output. Code/name matching remains compatibility-only and cannot accept an unknown catalog value.
+
+Each response row carries `suggestionSource`: `AI` for a validated model choice, `RULES` for a deterministic baseline, and `NONE` for no safe choice. This source is also recorded in the sanitized audit payload. Debug path: `buildProviderCatalogInput()` -> provider `catalogRef` -> `findCatalogRow()` -> `suggestionSource`.
+
 ## 2026-07-30 rate-limited fallback wording
 
 ### English

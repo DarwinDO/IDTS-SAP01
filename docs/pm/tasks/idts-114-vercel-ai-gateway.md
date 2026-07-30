@@ -1,6 +1,13 @@
 # IDTS-114 — Backend: Integrate staged Vercel AI Gateway into SAP BTP AI assistance
 
 Owner: DonHV
+
+## 2026-07-30 result-grounding remediation in progress
+
+- Browser review found a product UX/grounding defect: Smart Assign deterministic 55%/72% explanations and Classification fallback rows could look like AI output. The focused fix uses short backend references (`C1`, `SM1`, `AC1`, etc.), maps results to trusted candidates/catalog rows server-side, and exposes explicit `AI`, `RULES`, or `NONE` provenance to the UI.
+- Handoff now labels its generated advisory overview separately from verified comments/history/current-state data. No lifecycle, assignee, classification, HANA schema, provider model, key, or configuration is changed.
+- Local focused verification passed: IDTS-69 12/12, IDTS-67 33/33, IDTS-68 45/45, and IDTS-115 static UI 241 checks. BTP deployment/browser verification remains pending a normal PR review and merge.
+
 Due: 2026-08-03
 Jira: https://dutassociation.atlassian.net/browse/IDTS-114
 

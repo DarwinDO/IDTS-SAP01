@@ -1,5 +1,9 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/actions/HandoffSummaryReview.js`
 
+## IDTS-114 generated versus verified handoff data (2026-07-30)
+
+The dialog labels the top summary **AI overview (advisory)**. It separately labels comments, history, status, and current owner as **verified stored bug data**. Those record sections are deliberately deterministic evidence for reviewing the generated overview; they are not rewritten by the model and do not mutate the Bug.
+
 ## IDTS-114 localized timeline metadata
 
 `formatTimelineItems()` accepts stored timeline rows that start directly with `[timestamp]` or add a bullet/number before it. The timestamp is removed from the business text and formatted through `sap.ui.core.format.DateFormat`, so the dialog follows the user's UI5 locale instead of exposing ISO storage notation. Invalid dates remain visible as source text rather than being silently discarded.

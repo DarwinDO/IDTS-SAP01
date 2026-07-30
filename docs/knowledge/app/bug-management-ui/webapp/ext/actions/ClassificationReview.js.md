@@ -1,5 +1,9 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/actions/ClassificationReview.js`
 
+## IDTS-114 suggestion provenance (2026-07-30)
+
+`enrichSuggestion()` labels a validated provider result as **AI suggestion**, deterministic fallback as **Rules-based baseline (not an AI proposal)**, and no safe choice as **No safe suggestion**. It displays numerical confidence only for `AI`; no review action in this dialog PATCHes the Bug.
+
 ## IDTS-114 readability update
 
 Each classification row now separates Field, Current Value, Suggested Value with an expandable reason, and Confidence. Generic review guidance appears once in the dialog MessageStrip instead of being repeated in every row. Review and Apply actions keep their existing backend authorization and confirmation behavior.
