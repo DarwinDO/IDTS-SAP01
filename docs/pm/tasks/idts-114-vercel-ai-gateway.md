@@ -7,6 +7,7 @@ Owner: DonHV
 - Browser review found a product UX/grounding defect: Smart Assign deterministic 55%/72% explanations and Classification fallback rows could look like AI output. The focused fix uses short backend references (`C1`, `SM1`, `AC1`, etc.), maps results to trusted candidates/catalog rows server-side, and exposes explicit `AI`, `RULES`, or `NONE` provenance to the UI.
 - Handoff now labels its generated advisory overview separately from verified comments/history/current-state data. No lifecycle, assignee, classification, HANA schema, provider model, key, or configuration is changed.
 - Local focused verification passed: IDTS-69 12/12, IDTS-67 33/33, IDTS-68 45/45, and IDTS-115 static UI 241 checks. BTP deployment/browser verification remains pending a normal PR review and merge.
+- PR #234 merged at `c39468b636f695031ab7f4130b71112962408873` and selective MTA operation `38f256db-8c0f-11f1-82db-eeee0a91e4f4` deployed `idts-sap01-srv` plus `idts-sap01-app-content`. The HDI deployer was not selected; health is HTTP 200 and protected OData is HTTP 401 anonymously. User-browser hard-refresh/visual verification remains pending.
 
 Due: 2026-08-03
 Jira: https://dutassociation.atlassian.net/browse/IDTS-114

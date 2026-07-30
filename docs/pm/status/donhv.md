@@ -4991,3 +4991,26 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   (`docs/learning/progress/donhv.md` and IDTS-90 evidence); local
   `check-pr-depth --stdin` PASS. Fresh remote gate is pending. Classification:
   process issue fixed; no product/runtime change.
+- 2026-07-30 merge tooling observation: PR #234 is `CLEAN` with
+  `qa-depth-gate` PASS, but `gh pr merge` attempted a local checkout of `dev`
+  and failed because the root worktree already owns that branch. Classification:
+  local GitHub CLI/worktree tooling issue, not a PR or product failure. Status:
+  use GitHub's pull-request merge API for the same normal merge semantics; no
+  protection bypass or force operation is permitted.
+- 2026-07-30 BTP build observation: after PR #234 merged normally, a clean
+  `mbt build -p cf` ran the UI build successfully (including
+  `ui5-task-zipper`) but did not finish MTA cleanup/packaging before the
+  10-minute execution timeout. Classification: build tooling/environment
+  blocker, not a UI/product failure. Status: no incomplete MTAR will be
+  deployed; inspect for a completed archive or rebuild with a bounded recovery
+  path before any selective Cloud Foundry deployment.
+- 2026-07-30 IDTS-114 result-grounding rollout: PR #234 merged at
+  `c39468b636f695031ab7f4130b71112962408873`; archive integrity was verified
+  (`idts-sap01_1.0.0.mtar`, SHA-256 `8574EFDFCC3349F608538FA1536F20DEDD7892E65FF547210482A340F8A42690`). Selective MTA operation
+  `38f256db-8c0f-11f1-82db-eeee0a91e4f4` deployed only `idts-sap01-srv` and
+  `idts-sap01-app-content`; the HDI database deployer was not selected and no
+  broad `cds deploy`, schema migration, or data change was run. Verification:
+  service and AppRouter started 1/1; `/health` HTTP 200; anonymous protected
+  OData HTTP 401. Browser visual verification after a hard refresh remains
+  pending in the user-owned session. Classification: deployment PASS, browser
+  acceptance pending; no claim of provider-live acceptance is made.
