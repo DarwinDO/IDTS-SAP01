@@ -168,3 +168,19 @@ No S3, Brevo, database schema, UI workflow, automatic classification/assignment,
   UI5 production build, secret scan, agent rules, QA-depth self-test, AI DevKit
   and `git diff --check`. Evidence:
   `docs/pm/evidence/idts-114/btp-ai-config-binding/local-verification-20260730.md`.
+
+## 2026-07-30 durable Z.AI structured-primary correction
+
+- Cloud Foundry revision history proved that revision 5 used
+  `zai/glm-4.7-flash`, but later MTA deployments restored
+  `alibaba/qwen3.7-flash` because `mta.yaml` still declared Qwen as the
+  structured default.
+- The live SAP BTP service is corrected back to `zai/glm-4.7-flash`, and the
+  MTA declaration now matches that runtime choice so a future deploy does not
+  silently revert it.
+- Similar Bugs continues to use `alibaba/qwen3-embedding-0.6b`; this change only
+  replaces the structured model used by Classification, Handoff Summary and
+  Smart Assign explanations. OpenAI remains the bounded fallback.
+- No key, endpoint, HANA schema/data, OData contract or business workflow was
+  changed. Fresh feature-level acceptance is still required before IDTS-114
+  can close.

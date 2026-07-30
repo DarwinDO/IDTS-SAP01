@@ -5014,3 +5014,13 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   OData HTTP 401. Browser visual verification after a hard refresh remains
   pending in the user-owned session. Classification: deployment PASS, browser
   acceptance pending; no claim of provider-live acceptance is made.
+
+- 2026-07-30 IDTS-114 structured-model configuration drift: Vercel Gateway
+  showed new production calls still using `alibaba/qwen3.7-flash` after the
+  team had evaluated Z.AI. Classification: deployment/configuration issue.
+  Root cause: Cloud Foundry revision 5 temporarily used
+  `zai/glm-4.7-flash`, but subsequent deployments reapplied the Qwen value
+  still declared in `mta.yaml`. Status: live `idts-sap01-srv` was corrected to
+  Z.AI and restarted successfully at 1/1; the source MTA default is corrected
+  in the dedicated IDTS-114 branch. Qwen embedding remains intentional for
+  Similar Bugs. No secret, HANA data/schema or API contract changed.
