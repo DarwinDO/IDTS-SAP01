@@ -16,6 +16,7 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 
 const cds = require('@sap/cds')
 const { INSERT, SELECT } = cds.ql
+const { SMART_ASSIGNMENT_PROVIDER_DEADLINE_MS } = require('../../srv/ai/assignment-explanation')
 
 const BUG_ID = '94000000-0000-0000-0000-000000000001'
 const DONHV_ID = '10000000-0000-0000-0000-000000000001'
@@ -75,6 +76,9 @@ async function main () {
   console.log(' IDTS-69 Smart Assignment Explanation Verification')
   console.log(' ' + new Date().toISOString())
   console.log('===================================================')
+
+  assert.strictEqual(SMART_ASSIGNMENT_PROVIDER_DEADLINE_MS, 24_000)
+  rec('Smart Assign keeps its provider work inside the AppRouter response budget', true)
 
   const csn = await cds.load('srv/service.cds')
   const db = await cds.connect.to('db', { kind: 'sqlite', credentials: { url: ':memory:' } })

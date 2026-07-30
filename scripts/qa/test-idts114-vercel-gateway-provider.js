@@ -577,6 +577,58 @@ async function main () {
   check('malformed structured output does not call OpenAI fallback', malformedStructuredModels.length === 1)
   check('malformed structured output uses safe feature fallback status', malformedStructuredResult.ok === false && malformedStructuredResult.status === 'AI_PROVIDER_ERROR')
 
+  const deadlineModels = []
+  const deadlineProvider = createAiProvider(gatewayConfig({
+    timeoutMs: 40,
+    fallbackEnabled: true,
+    fallbackModelAlias: 'openai/gpt-5.4-nano'
+  }), {
+    fetchImpl: async (url, options) => {
+      deadlineModels.push(JSON.parse(options.body).model)
+      return new Promise((resolve, reject) => {
+        options.signal.addEventListener('abort', () => {
+          reject(Object.assign(new Error('Synthetic deadline abort'), { name: 'AbortError' }))
+        }, { once: true })
+      })
+    }
+  })
+  const deadlineStarted = Date.now()
+  const deadlineResult = await deadlineProvider.structured({
+    featureType: 'assignment_explanation',
+    schemaName: 'IdtsSmartAssignmentDeadline',
+    instruction: 'Return JSON only.',
+    input: { title: 'Synthetic deadline test' },
+    deadlineMs: 10
+  })
+  check('feature deadline aborts only the primary request', deadlineModels.join(',') === 'alibaba/qwen3.7-flash')
+  check('feature deadline returns a safe timeout envelope', deadlineResult.ok === false && deadlineResult.status === 'AI_TIMEOUT')
+  check('feature deadline returns before the configured primary-plus-fallback window', Date.now() - deadlineStarted < 60)
+
+  const boundedFallbackModels = []
+  const boundedFallbackProvider = createAiProvider(gatewayConfig({
+    timeoutMs: 100,
+    fallbackEnabled: true,
+    fallbackModelAlias: 'openai/gpt-5.4-nano'
+  }), {
+    fetchImpl: async (url, options) => {
+      const model = JSON.parse(options.body).model
+      boundedFallbackModels.push(model)
+      if (model === 'alibaba/qwen3.7-flash') {
+        return jsonResponse(503, { error: { message: 'Synthetic upstream outage' } })
+      }
+      return jsonResponse(200, { choices: [{ message: { content: '{"fallback":true}' } }] })
+    }
+  })
+  const boundedFallbackResult = await boundedFallbackProvider.structured({
+    featureType: 'assignment_explanation',
+    schemaName: 'IdtsSmartAssignmentDeadlineFallback',
+    instruction: 'Return JSON only.',
+    input: { title: 'Synthetic bounded fallback test' },
+    deadlineMs: 50
+  })
+  check('fast HTTP 5xx may still use one fallback inside the feature deadline', boundedFallbackModels.join(',') === 'alibaba/qwen3.7-flash,openai/gpt-5.4-nano')
+  check('bounded fallback reports its actual model', boundedFallbackResult.ok === true && boundedFallbackResult.fallbackUsed === true && boundedFallbackResult.modelAlias === 'openai/gpt-5.4-nano')
+
   const embeddingRequests = []
   const embeddingProvider = createAiProvider(gatewayConfig({
     fallbackEnabled: true,

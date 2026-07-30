@@ -23,9 +23,12 @@ class VercelGatewayProvider {
     })
   }
 
-  async structured ({ schemaName = 'Suggestion', instruction = '', input = null } = {}) {
+  async structured ({ schemaName = 'Suggestion', instruction = '', input = null, deadlineMs = null } = {}) {
     const normalizedSchemaName = safeSchemaName(schemaName)
     const schema = { type: 'object', additionalProperties: true }
+    const deadlineAt = Number.isFinite(Number(deadlineMs)) && Number(deadlineMs) > 0
+      ? this.now() + Number(deadlineMs)
+      : null
     return this.#withFallback(this.config.modelAlias, this.config.fallbackModelAlias, async model => {
       const messages = [
         { role: 'system', content: instruction },
@@ -43,7 +46,7 @@ class VercelGatewayProvider {
               schema
             }
           }
-        })
+        }, deadlineAt)
       } catch (error) {
         const canUseCompatibilityFormat =
           model === this.config.modelAlias &&
@@ -65,7 +68,7 @@ class VercelGatewayProvider {
             },
             messages[1]
           ]
-        })
+        }, deadlineAt)
       }
       try {
         const parsed = JSON.parse(messageContent(response))
@@ -76,7 +79,7 @@ class VercelGatewayProvider {
         // deterministic result instead of spending a second-model request.
         throw providerError('VERCEL_GATEWAY_MALFORMED_OUTPUT', { retryable: false, fallbackEligible: false })
       }
-    })
+    }, deadlineAt)
   }
 
   async embedding ({ text = '' } = {}) {
@@ -114,19 +117,20 @@ class VercelGatewayProvider {
     }
   }
 
-  async #chatCompletion (model, request) {
+  async #chatCompletion (model, request, deadlineAt = null) {
     return this.#request('/chat/completions', {
       model,
       stream: false,
       ...request
-    })
+    }, deadlineAt)
   }
 
-  async #withFallback (primaryModel, fallbackModel, execute) {
+  async #withFallback (primaryModel, fallbackModel, execute, deadlineAt = null) {
     try {
       return providerResult(primaryModel, false, await execute(primaryModel))
     } catch (primaryError) {
       if (!this.config.fallbackEnabled || !fallbackModel || !isFallbackEligible(primaryError)) throw primaryError
+      if (deadlineAt && deadlineAt <= this.now()) throw deadlineExceededError()
       try {
         return providerResult(fallbackModel, true, await execute(fallbackModel))
       } catch (fallbackError) {
@@ -136,7 +140,7 @@ class VercelGatewayProvider {
     }
   }
 
-  async #request (path, body) {
+  async #request (path, body, deadlineAt = null) {
     const cooldownSeconds = remainingCooldownSeconds(this.now())
     if (cooldownSeconds > 0) {
       throw providerError('AI_RATE_LIMITED', {
@@ -146,8 +150,9 @@ class VercelGatewayProvider {
         retryAfterSeconds: cooldownSeconds
       })
     }
+    const requestBudget = requestBudgetFor(deadlineAt, this.now(), this.config.timeoutMs)
     const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), this.config.timeoutMs)
+    const timer = setTimeout(() => controller.abort(), requestBudget.timeoutMs)
     try {
       const response = await this.fetch(`${API_BASE_URL}${path}`, {
         method: 'POST',
@@ -166,13 +171,32 @@ class VercelGatewayProvider {
       }
       return payload
     } catch (error) {
-      if (error?.name === 'AbortError') throw providerError('AI_TIMEOUT', { retryable: true, fallbackEligible: true })
+      if (error?.name === 'AbortError') {
+        throw providerError('AI_TIMEOUT', {
+          retryable: true,
+          fallbackEligible: !requestBudget.deadlineLimited
+        })
+      }
       if (error?.code?.startsWith('VERCEL_GATEWAY_') || error?.code === 'AI_TIMEOUT') throw error
       throw providerError('VERCEL_GATEWAY_NETWORK_ERROR', { retryable: true, fallbackEligible: true })
     } finally {
       clearTimeout(timer)
     }
   }
+}
+
+function requestBudgetFor (deadlineAt, now, providerTimeoutMs) {
+  if (!deadlineAt) return { timeoutMs: providerTimeoutMs, deadlineLimited: false }
+  const remainingMs = Math.ceil(deadlineAt - now)
+  if (remainingMs <= 0) throw deadlineExceededError()
+  return {
+    timeoutMs: Math.max(1, Math.min(providerTimeoutMs, remainingMs)),
+    deadlineLimited: true
+  }
+}
+
+function deadlineExceededError () {
+  return providerError('AI_TIMEOUT', { retryable: true, fallbackEligible: false })
 }
 
 function providerResult (modelAlias, fallbackUsed, data) {
