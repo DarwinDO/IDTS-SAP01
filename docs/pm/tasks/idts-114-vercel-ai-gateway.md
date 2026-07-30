@@ -83,3 +83,25 @@ Add a minimal Vercel AI Gateway provider adapter to the existing safe AI abstrac
 ## Out of scope
 
 No S3, Brevo, database schema, UI workflow, automatic classification/assignment, or BTP deployment configuration changes in this branch.
+
+## 2026-07-30 rate-limit request-bounding follow-up
+
+- Branch `fix/idts-114-ai-rate-limit-request-bounding-donhv` now limits Similar
+  Bugs embeddings to the deterministic top ten candidates while preserving the
+  existing 50-row database scan.
+- A single batch of at most eleven sanitized texts is preferred. Unsupported
+  array input may use only the bounded sequential compatibility path with
+  concurrency one; malformed batches use deterministic ranking directly.
+- Transient HTTP 429 activates a shared in-memory cooldown and does not call the
+  OpenAI fallback. Only timeout, network failure, and HTTP 5xx remain fallback
+  eligible. Generic 400, budget exhaustion, and malformed output are not.
+- Focused local evidence is PASS at
+  `docs/pm/evidence/idts-114/rate-limit-request-bounding/local-verification-20260730.md`.
+- Final local verification includes IDTS-114 `53/53`, IDTS-66 `45/45`,
+  IDTS-64 `36/36`, the related AI/UI regressions, CAP compile, UI5 production
+  build, secret/process gates, AI DevKit `5/5` and `git diff --check`. An
+  independent correctness pass also prevents generic batch HTTP 400 from
+  expanding into scalar requests and removes workflow status from provider
+  embedding input. Ponytail review result: `Lean already. Ship.`
+- SAP BTP synthetic batch proof, selective service deployment, sequential live
+  acceptance, and responsive UI PR remain pending. IDTS-114 stays In Progress.

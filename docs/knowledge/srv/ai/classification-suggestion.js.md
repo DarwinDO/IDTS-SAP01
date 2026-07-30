@@ -1,5 +1,21 @@
 # `srv/ai/classification-suggestion.js`
 
+## 2026-07-30 rate-limited fallback wording
+
+### English
+
+When the shared Gateway cooldown returns `AI_RATE_LIMITED`, classification still
+builds review-only deterministic rows. A no-match row explains that AI is
+temporarily busy and safe local suggestions are shown. It never exposes HTTP
+429, provider names, quota details, or raw diagnostics.
+
+### Tiếng Việt
+
+Khi cooldown dùng chung của Gateway trả `AI_RATE_LIMITED`, classification vẫn
+tạo các row deterministic chỉ để review. Row không match giải thích rằng AI
+đang tạm bận và hệ thống đang hiển thị gợi ý local an toàn. Nó không lộ HTTP
+429, tên provider, chi tiết quota hoặc raw diagnostic.
+
 ## IDTS-97 operational evidence
 
 `recordClassificationAudit()` copies only normalized provider status and duration into the audit row. Classification inputs, catalog payloads, raw provider output, and error detail are not operational metric fields.

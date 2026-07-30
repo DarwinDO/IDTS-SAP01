@@ -1,5 +1,43 @@
 # `srv/ai/vercel-gateway-provider.js`
 
+## 2026-07-30 rate-limit and embedding-batch boundary
+
+### English
+
+`embeddingBatch()` sends one bounded embeddings request for at most eleven
+sanitized texts. It rejects a wrong vector count, unstable index mapping,
+mixed dimensions, or non-finite numbers as one whole batch. An HTTP 400 on the
+array contract becomes `AI_EMBEDDING_BATCH_UNSUPPORTED`, allowing the Similar
+Bugs feature to use its bounded sequential compatibility path.
+
+All Vercel operations share one in-memory cooldown. A transient HTTP 429 uses
+`Retry-After`, or 60 seconds when the header is absent, clamped to 1–900
+seconds. Calls during cooldown do not reach the network. HTTP 429, budget
+errors, generic 400, and malformed output never spend an OpenAI fallback call;
+only timeout, network, and HTTP 5xx may use the single configured fallback.
+
+Debug order: `#request()` → `httpError()` → `activateGatewayCooldown()` → the
+safe provider envelope. Inspect only status, safe model alias, retry seconds,
+latency, and fallback flag. Never inspect Authorization or raw response data.
+
+### Tiếng Việt
+
+`embeddingBatch()` gửi một request embedding đã giới hạn tối đa mười một đoạn
+text được làm sạch. Nếu số vector sai, index không ổn định, dimension khác nhau
+hoặc có số không hữu hạn thì toàn bộ batch bị loại. HTTP 400 của array contract
+được đổi thành `AI_EMBEDDING_BATCH_UNSUPPORTED`, để Similar Bugs chuyển sang
+đường tương thích tuần tự đã giới hạn.
+
+Mọi thao tác Vercel dùng chung một cooldown trong bộ nhớ. HTTP 429 tạm thời dùng
+`Retry-After`, hoặc mặc định 60 giây khi thiếu header, và bị chặn trong khoảng
+1–900 giây. Trong cooldown không có request mạng mới. HTTP 429, lỗi budget,
+HTTP 400 chung và output sai cấu trúc không gọi OpenAI fallback; chỉ timeout,
+lỗi mạng và HTTP 5xx mới được dùng đúng một fallback đã cấu hình.
+
+Thứ tự debug: `#request()` → `httpError()` → `activateGatewayCooldown()` →
+provider envelope an toàn. Chỉ xem status, model alias an toàn, retry seconds,
+latency và fallback flag; không mở Authorization hoặc raw response.
+
 ## Purpose
 
 This is the thin server-side adapter for Vercel AI Gateway. UI code never calls

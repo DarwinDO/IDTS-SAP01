@@ -42,6 +42,15 @@ class SafeAiProvider {
     return this.#run('embedding', request, () => this.delegate.embedding(sanitizeEmbeddingRequest(request, this.config)))
   }
 
+  embeddingBatch (request = {}) {
+    return this.#run('embeddingBatch', request, () => {
+      if (typeof this.delegate.embeddingBatch !== 'function') {
+        throw unsupportedEmbeddingBatchError()
+      }
+      return this.delegate.embeddingBatch(sanitizeEmbeddingBatchRequest(request, this.config))
+    })
+  }
+
   async #run (operation, request, execute) {
     const started = Date.now()
     const correlationId = request.correlationId || cds.utils.uuid()
@@ -101,7 +110,7 @@ class SafeAiProvider {
         config: this.config
       }))
     } catch (error) {
-      const code = error?.code === 'AI_TIMEOUT' ? 'AI_TIMEOUT' : 'AI_PROVIDER_ERROR'
+      const code = safeFailureCode(error)
       const diagnostic = {
         name: sanitizeDiagnosticToken(error?.name, 'Error'),
         code: sanitizeDiagnosticToken(error?.code, code),
@@ -128,7 +137,7 @@ class SafeAiProvider {
         correlationId,
         durationMs: Date.now() - started,
         code,
-        summary: sanitizeErrorSummary(error),
+        summary: safeFailureSummary(code, error),
         retryable: Boolean(error?.retryable || code === 'AI_TIMEOUT'),
         config: this.config
       }))
@@ -150,12 +159,13 @@ function createDelegate (config, dependencies = {}) {
     return new OpenAiProvider(config, dependencies.fetchImpl)
   }
   if (config.enabled && config.provider === 'vercel' && !config.unsupported && config.ready) {
-    return new VercelGatewayProvider(config, dependencies.fetchImpl)
+    return new VercelGatewayProvider(config, dependencies.fetchImpl, dependencies.now)
   }
   return {
     chat: async () => null,
     structured: async () => null,
-    embedding: async () => null
+    embedding: async () => null,
+    embeddingBatch: async () => null
   }
 }
 
@@ -184,6 +194,33 @@ function sanitizeEmbeddingRequest (request, config) {
   return {
     text: redactSensitiveText(request.text, config.maxInputChars)
   }
+}
+
+function sanitizeEmbeddingBatchRequest (request, config) {
+  const texts = Array.isArray(request.texts) ? request.texts : []
+  return {
+    texts: texts.slice(0, 11).map(text => redactSensitiveText(text, Math.min(config.maxInputChars, 2000)))
+  }
+}
+
+function safeFailureCode (error) {
+  if (error?.code === 'AI_TIMEOUT') return 'AI_TIMEOUT'
+  if (error?.code === 'AI_RATE_LIMITED' || error?.gatewayReason === 'rate_limited') return 'AI_RATE_LIMITED'
+  if (error?.code === 'AI_EMBEDDING_BATCH_UNSUPPORTED') return 'AI_EMBEDDING_BATCH_UNSUPPORTED'
+  return 'AI_PROVIDER_ERROR'
+}
+
+function safeFailureSummary (code, error) {
+  if (code === 'AI_RATE_LIMITED') return 'AI is temporarily busy. Safe local suggestions are shown. Try again later.'
+  if (code === 'AI_EMBEDDING_BATCH_UNSUPPORTED') return 'Batch embeddings are not supported by the configured provider route.'
+  return sanitizeErrorSummary(error)
+}
+
+function unsupportedEmbeddingBatchError () {
+  return Object.assign(new Error('Batch embeddings are not supported by this provider adapter.'), {
+    code: 'AI_EMBEDDING_BATCH_UNSUPPORTED',
+    retryable: false
+  })
 }
 
 function redactSensitiveObject (value, maxLength) {
@@ -258,7 +295,7 @@ function failureResult ({ operation, featureType, correlationId, durationMs, cod
 
 function modelAliasFor (operation, config) {
   // Chọn alias model theo operation chat/structured/embedding cho audit, không trả model endpoint/key.
-  return operation === 'embedding'
+  return operation.startsWith('embedding')
     ? (config.embeddingModelAlias || config.modelAlias || 'not-configured')
     : (config.modelAlias || 'not-configured')
 }
@@ -283,6 +320,7 @@ module.exports = {
   normalizeDelegateResult,
   operationTimeoutMs,
   sanitizeChatRequest,
+  sanitizeEmbeddingBatchRequest,
   sanitizeEmbeddingRequest,
   sanitizeStructuredRequest
 }

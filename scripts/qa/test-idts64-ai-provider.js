@@ -174,6 +174,14 @@ async function main () {
     modelAlias: 'review-model',
     embeddingModelAlias: 'embedding-model'
   })
+  const safeOpenAiProvider = createAiProvider(openAiConfig, { fetchImpl: fakeFetch })
+  const openAiBatchUnsupported = await safeOpenAiProvider.embeddingBatch({
+    featureType: 'duplicate_detection',
+    texts: ['Synthetic source', 'Synthetic candidate']
+  })
+  expectEqual('OpenAI adapter without batch support returns compatibility status', openAiBatchUnsupported.status, 'AI_EMBEDDING_BATCH_UNSUPPORTED')
+  expectEqual('unsupported OpenAI batch does not issue a network request', requests.length, 0)
+
   const openAiProvider = new OpenAiProvider(openAiConfig, fakeFetch)
   const openAiStructured = await openAiProvider.structured({
     schemaName: 'Idts Classification',

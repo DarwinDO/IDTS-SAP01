@@ -496,6 +496,7 @@ function defaultReason (field, row, confidence) {
 function safeProviderReason (providerStatus) {
   // Chuyển trạng thái provider thành lời giải thích user-facing không lộ diagnostic.
   if (providerStatus === 'AI_DISABLED') return 'AI assistance is disabled, so only deterministic fallback was available.'
+  if (providerStatus === 'AI_RATE_LIMITED') return 'AI is temporarily busy. Safe local suggestions are shown. Try again later.'
   if (providerStatus === 'AI_TIMEOUT') return 'AI assistance timed out, so only deterministic fallback was available.'
   if (providerStatus === 'AI_PROVIDER_UNSUPPORTED') return 'AI provider is not supported in this environment.'
   if (providerStatus === 'AI_PROVIDER_ERROR') return 'AI provider failed safely; no provider details are exposed.'
