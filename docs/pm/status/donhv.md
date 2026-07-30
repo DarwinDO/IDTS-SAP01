@@ -4877,6 +4877,9 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   PR-body validation because the Ownership Knowledge Gate section summarized
   DonHV's existing PASS but omitted the parser's exact twelve field labels.
   Classification: process issue; no code/build gate ran and no product defect
-  was introduced. Status: fixed by copying the complete existing DonHV PASS
-  declaration and evidence paths into the PR body; rerun must pass normally
-  before merge, with no admin bypass.
+  was introduced. The second synchronize run captured the same old PR-body
+  snapshot because its push event occurred before `gh pr edit` completed.
+  Status: fixed by copying the complete existing DonHV PASS declaration and
+  evidence paths into the current PR body, then triggering a fresh synchronize
+  event after that edit; the new run must pass normally before merge, with no
+  admin bypass.
