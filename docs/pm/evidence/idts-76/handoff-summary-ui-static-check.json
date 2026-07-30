@@ -1,7 +1,11 @@
 {
   "task": "IDTS-76",
-  "checkedAt": "2026-07-30T05:49:00.494Z",
+  "checkedAt": "2026-07-30T06:42:30.449Z",
   "checks": [
+    {
+      "label": "handoff timestamp parser accepts plain, bullet and numbered rows",
+      "pass": true
+    },
     {
       "label": "history section opens the handoff review dialog",
       "pass": true
@@ -39,11 +43,23 @@
       "pass": true
     },
     {
+      "label": "handoff review uses the locale-aware UI5 date formatter",
+      "pass": true
+    },
+    {
       "label": "handoff dialog prevents horizontal scrolling",
       "pass": true
     },
     {
       "label": "handoff timeline converts stored timestamps to locale display",
+      "pass": true
+    },
+    {
+      "label": "handoff timeline accepts bullet-prefixed stored rows",
+      "pass": true
+    },
+    {
+      "label": "handoff timeline does not render dates through the browser native formatter",
       "pass": true
     },
     {

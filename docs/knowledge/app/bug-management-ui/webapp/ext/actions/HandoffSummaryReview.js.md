@@ -1,5 +1,11 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/actions/HandoffSummaryReview.js`
 
+## IDTS-114 localized timeline metadata
+
+`formatTimelineItems()` accepts stored timeline rows that start directly with `[timestamp]` or add a bullet/number before it. The timestamp is removed from the business text and formatted through `sap.ui.core.format.DateFormat`, so the dialog follows the user's UI5 locale instead of exposing ISO storage notation. Invalid dates remain visible as source text rather than being silently discarded.
+
+Vietnamese: `formatTimelineItems()` nhận cả dòng bắt đầu trực tiếp bằng `[timestamp]` lẫn dòng có bullet/số thứ tự phía trước. Timestamp được tách khỏi nội dung nghiệp vụ và format bằng `sap.ui.core.format.DateFormat`, nên dialog theo locale UI5 của người dùng thay vì lộ định dạng ISO của dữ liệu nguồn. Ngày không hợp lệ vẫn được giữ để người dùng thấy, không bị xóa âm thầm.
+
 ## IDTS-114 responsive timeline readability
 
 `formatTimelineItems()` keeps the existing string OData contract but separates each sanitized line into localized time, actor/role, action and detail for the UI5 list. The dialog disables horizontal scrolling and still never infers or writes business state.

@@ -4850,3 +4850,26 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
 - 2026-07-30 IDTS-114 Similar Bugs retry-state review finding: the first responsive retry implementation did not clear a previously loaded suggestion/candidate before starting the next request. If a retry then failed, stale review actions could remain available against old data. Classification: product UI/state defect found before PR. Status: fixed by clearing candidate, selection, suggestion and review state before every load attempt; the new assertion failed before the fix and IDTS-74 now passes `188/188`.
 - 2026-07-30 IDTS-114 independent Terra High review findings: Classification Retry could preserve an accepted stale suggestion and Apply state; Classification combined `autoPopinMode` with manual `minScreenWidth`/`demandPopin` values that UI5 documents as overwritten; Similar Bugs offered Retry for non-retryable authorization/context failures. Classification: product UI/state and error-UX defects found before PR. Status: fixed by clearing Classification rows/review/apply state before every load, letting column importance exclusively drive auto-pop-in, and limiting Similar Bugs Retry to network/408/429/5xx. Red assertions failed before the correction; IDTS-74 now passes `205/205` and IDTS-75 passes `113/113`. UI5 API reference confirmed the auto-pop-in behavior.
 - 2026-07-30 IDTS-114 staged evidence formatting issue: `git diff --cached --check` found three trailing-space line breaks in the new local verification Markdown. Classification: documentation formatting issue. Status: fixed immediately by removing the trailing spaces and rerunning the staged diff gate; no runtime or evidence content changed.
+- 2026-07-30 IDTS-114/115 post-deploy browser findings: the New Bug
+  Object Page hides both AI buttons but still renders the Fiori
+  Elements-generated labels `Similar bugs` and `Classification suggestions`;
+  Handoff comment/event rows can expose ISO timestamps when a stored row has a
+  bullet or number before `[timestamp]`. Classification: product UX defects.
+  Root causes: fragment visibility does not own the generated form label, and
+  the timeline parser accepted only a timestamp at character zero. Status:
+  focused fixes and regression checks are in progress on
+  `fix/idts-114-115-btp-browser-findings-donhv`; no workflow, OData, provider,
+  database or authorization behavior is being changed.
+- 2026-07-30 IDTS-114/115 isolated-worktree dependency baseline: `npm ci`
+  installed 1,519 lockfile packages and reported the existing 24 dependency
+  findings (1 low, 9 moderate, 13 high, 1 critical). Classification:
+  dependency/security debt, not introduced by this focused UI fix. Status: no
+  automatic upgrade or `npm audit fix --force` is mixed into this PR; keep for
+  separate dependency review.
+- 2026-07-30 IDTS-114 targeted ESLint formatting finding: the first local
+  ESLint run found 439 `linebreak-style` errors because Windows patching left
+  `HandoffSummaryReview.js` with CRLF while the UI workspace requires LF.
+  Classification: repository-formatting/tooling issue. Status: fixed by
+  normalizing only this edited file with the configured ESLint fixer. The
+  targeted rerun exits `0`; only the pre-existing `max-params` warning remains,
+  and the semantic diff stays limited to the timestamp parser/formatter.

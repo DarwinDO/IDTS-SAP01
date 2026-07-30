@@ -46,8 +46,21 @@ const i18nFiles = [
 ]
 const forbiddenUserCopy = /\b(prompt|token|model|provider|architecture|debug|stack|sql|password|credential|secret|api key|bearer|endpoint|XSUAA|BTP)\b/i
 const section = manifest['sap.ui5'].routing.targets.BugsObjectPage.options.settings.content.body.sections
+const timelinePatternLiteral = controller.match(/var TIMELINE_PREFIX_PATTERN = (\/.*\/);/)
+assert(timelinePatternLiteral, 'handoff controller must declare TIMELINE_PREFIX_PATTERN')
+const timelinePrefixPattern = Function(`return ${timelinePatternLiteral[1]}`)()
+for (const row of [
+  '[2026-07-11T10:25:35.913Z] DonHV (PM): Updated the bug.',
+  '- [2026-07-11T10:25:35.913Z] DonHV (PM): Updated the bug.',
+  '1. [2026-07-11T10:25:35.913Z] DonHV (PM): Updated the bug.'
+]) {
+  const match = row.match(timelinePrefixPattern)
+  assert(match, `handoff timeline must parse ${row}`)
+  assert.strictEqual(match[1], '2026-07-11T10:25:35.913Z')
+}
 
 const checks = [
+  { label: 'handoff timestamp parser accepts plain, bullet and numbered rows', pass: true },
   expectIncludes('history section opens the handoff review dialog', fragment, 'HandoffSummaryReview.openDialog'),
   expectIncludes('history section loads the UI5 action module', fragment, 'idts/bugmanagementui/ext/actions/HandoffSummaryReview'),
   expectIncludes('handoff review calls the existing CAP action', controller, '/summarizeBugHandoff(...)'),
@@ -57,8 +70,11 @@ const checks = [
   expectIncludes('handoff review renders safe status', controller, '"sap/m/ObjectStatus"'),
   expectIncludes('handoff review uses SAPUI5 lists for comments and events', controller, '"sap/m/List"'),
   expectIncludes('handoff review uses expandable text for long content', controller, '"sap/m/ExpandableText"'),
+  expectIncludes('handoff review uses the locale-aware UI5 date formatter', controller, '"sap/ui/core/format/DateFormat"'),
   expectIncludes('handoff dialog prevents horizontal scrolling', controller, 'horizontalScrolling: false'),
   expectIncludes('handoff timeline converts stored timestamps to locale display', controller, 'formatTimelineItems'),
+  expectIncludes('handoff timeline accepts bullet-prefixed stored rows', controller, 'TIMELINE_PREFIX_PATTERN'),
+  expectNotMatches('handoff timeline does not render dates through the browser native formatter', controller, /\.toLocaleString\s*\(/),
   expectIncludes('handoff timeline separates actor metadata from event detail', controller, 'handoffSummary>actor'),
   expectIncludes('handoff timeline shows localized time separately', controller, 'handoffSummary>time'),
   expectIncludes('handoff review shows summary', controller, 'handoffSummarySummaryLabel'),
