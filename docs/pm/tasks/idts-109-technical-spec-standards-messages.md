@@ -77,5 +77,7 @@ login/profile, dashboard/monitoring, notification UI and AI traces.
   `readAiOperationalMetrics`, and disabled/not-accepted live OpenAI.
 - Approval permits commit, merge and DonHV final-workbook integration. It does not
   authorize overwriting the official Drive artifact from this branch.
-- Next handoff: commit the approved package, then provide it to DonHV for merge and
-  final workbook integration.
+- Approved package commit: `9fec741`.
+- Jira commit/verification evidence: IDTS-109 comment `10764`.
+- Next handoff: provide the branch to DonHV for merge and final workbook
+  integration.
