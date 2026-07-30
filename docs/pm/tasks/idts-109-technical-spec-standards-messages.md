@@ -81,3 +81,24 @@ login/profile, dashboard/monitoring, notification UI and AI traces.
 - Jira commit/verification evidence: IDTS-109 comment `10764`.
 - Next handoff: provide the branch to DonHV for merge and final workbook
   integration.
+
+## 2026-07-31 latest-dev reconciliation before PR
+
+- Fetched and merged `origin/dev`
+  `69f6d06310df90a31afd63f05b7c0f2b102fe860`; the branch had been 109 commits
+  behind and merged without conflict.
+- The newer IDTS-114/115 source invalidated three approved known-gap statements:
+  application UI now invokes `applyClassificationSuggestion`,
+  `confirmDuplicateSuggestion` and `readAiOperationalMetrics`.
+- Refreshed TI-AI-08/09/10 with current frontend triggers, confirmation/success/
+  failure/refresh behavior and IDTS-115 evidence.
+- Refreshed message scan counts to 96 CAP message call sites, 19 explicit throw
+  sites, 62 UI feedback sites and 485 i18n entries; added Apply, Confirm Duplicate,
+  AI Activity and Vercel Gateway rows for a current 82-row candidate catalog.
+- Updated provider wording: direct OpenAI live is not accepted by this candidate;
+  Vercel Gateway evidence is staged but IDTS-115 remains `PARTIAL PASS` because the
+  interactive role matrix and provider-primary structured-output acceptance are
+  incomplete.
+- This material delta occurred after DatDT approval comment `10763`; the PR must be
+  treated as needing DatDT delta confirmation and DonHV review before final
+  integration.

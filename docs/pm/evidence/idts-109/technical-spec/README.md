@@ -1,6 +1,6 @@
 # IDTS-109 Technical Specification Candidate
 
-Status: `CANDIDATE APPROVED FOR COMMIT/HANDOFF — DO NOT SYNC TO MENTOR CURRENT`
+Status: `CANDIDATE APPROVED AT COMMENT 10763 — POST-DEV-SYNC DELTA REVIEW REQUIRED — DO NOT SYNC TO MENTOR CURRENT`
 
 Owner: DatDT
 
@@ -15,6 +15,10 @@ DatDT candidate approval: Jira IDTS-109 comment `10763`
 Prepared: 2026-07-31
 
 Submission language: English only
+
+Current source baseline: `origin/dev` commit
+`69f6d06310df90a31afd63f05b7c0f2b102fe860`, merged into this branch by commit
+`72a5501d3baa54313eeb54861a01523457e243cd`.
 
 ## Purpose
 
@@ -39,6 +43,7 @@ workbook and not evidence that the task has passed.
 - `srv/bug-service/monitoring.js`, `srv/bug-service/history.js`
 - `srv/email/`
 - `srv/ai/`
+- `srv/ai/vercel-gateway-provider.js`
 - `app/bug-management-ui/webapp/login-page.js`
 - `app/bug-management-ui/webapp/auth-guard.js`
 - `app/bug-management-ui/webapp/dashboard-page.js`
@@ -47,6 +52,9 @@ workbook and not evidence that the task has passed.
 - `app/bug-management-ui/webapp/ext/ai/`
 - `app/bug-management-ui/webapp/i18n/i18n_en.properties`
 - `package.json` QA command definitions
+- `scripts/qa/test-idts115-ai-fiori-entrypoints.js`
+- `docs/pm/evidence/idts-114/`
+- `docs/pm/evidence/idts-115/`
 
 ## Candidate boundaries
 
@@ -54,8 +62,12 @@ workbook and not evidence that the task has passed.
 - No Drive file is changed.
 - No provider secret, private endpoint, raw prompt or raw provider response is
   included.
-- OpenAI live acceptance is recorded as
-  `BLOCKED / NOT ACCEPTED — provider disabled`.
-- DatDT reviewed and approved this candidate in IDTS-109 comment `10763`.
+- Direct OpenAI live acceptance remains
+  `BLOCKED / NOT ACCEPTED` for this candidate. The later Vercel AI Gateway path is
+  separately recorded as staged with partial runtime acceptance; it must not be
+  described as complete provider-primary acceptance.
+- DatDT reviewed and approved the pre-sync candidate in IDTS-109 comment `10763`.
+  The latest `dev` added three UI entry points and a Vercel provider path after that
+  approval; the corresponding delta requires review before final integration.
 - DonHV remains responsible for final workbook integration, generation, visual
   review and upload under the current shared-artifact workflow.

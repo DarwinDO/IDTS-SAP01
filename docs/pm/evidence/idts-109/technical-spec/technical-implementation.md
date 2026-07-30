@@ -127,10 +127,16 @@ the field was omitted.
 
 ## AI suggestion, review and operational traces
 
-Current live-provider status for every AI row:
-`BLOCKED / NOT ACCEPTED — provider disabled`.
-The deterministic mock/fallback and review controls have programmatic/browser
-evidence; they do not prove a live OpenAI call.
+Provider acceptance status:
+
+- Direct OpenAI live acceptance for this candidate remains
+  `BLOCKED / NOT ACCEPTED`.
+- The later Vercel AI Gateway path has staged configuration and selected live
+  evidence, but IDTS-115 records `PARTIAL PASS`: PM positive flows passed while the
+  interactive role matrix and provider-primary structured-output acceptance remain
+  incomplete.
+- Deterministic/safe fallback and review controls must not be presented as proof of
+  complete live-provider acceptance.
 
 ### TI-AI-01 — suggestSimilarBugs
 
@@ -256,48 +262,48 @@ evidence; they do not prove a live OpenAI call.
 1. **Function name:** `applyClassificationSuggestion`
 2. **Purpose:** Explicitly apply allowlisted values from an accepted current classification suggestion.
 3. **Actor/precondition:** Tester/PM; accepted current classification suggestion for an accessible Bug.
-4. **UI trigger:** None found in current UI source; backend action is programmatically verified.
-5. **Frontend source:** None currently traced.
+4. **UI trigger:** Apply Classification after the user accepts a persisted classification suggestion.
+5. **Frontend source:** `app/bug-management-ui/webapp/ext/actions/ClassificationReview.js::confirmApply/applyClassification`.
 6. **HTTP/OData request:** `POST /odata/v4/bug/applyClassificationSuggestion` with suggestionID.
 7. **Service contract:** Unbound action returning Bugs.
 8. **CAP handler/helper:** `srv/ai/classification-apply.js::applyClassificationSuggestion`; Bug write permission/history helpers.
 9. **Validation/authorization:** Coordinator role, suggestion type/state/expiry, source snapshot, payload allow-list, active catalogs and ID/code consistency.
 10. **Transaction:** Bug update and grouped history in one request transaction.
 11. **Database/provider side effect:** Update permitted classification fields and HistoryEvents/HistoryLogs; status/assignee remain unchanged.
-12. **Response/UI refresh:** Returns updated Bug. A future UI must refresh classification/history explicitly.
-13. **Failure/rollback:** Any invalid/stale value rolls back all Bug/history changes.
-14. **Test/evidence:** `qa:idts93:programmatic`; **missing current UI/network screenshot**.
+12. **Response/UI refresh:** Show confirmation, invoke Apply, refresh the bound Bug from backend and show `Classification updated.`; a post-commit refresh failure tells the user to reload.
+13. **Failure/rollback:** Any invalid/stale value rolls back all Bug/history changes. UI uses separate safe text for apply failure versus refresh-after-success failure.
+14. **Test/evidence:** `qa:idts93:programmatic`, `qa:idts115:programmatic`, `docs/pm/evidence/idts-115/classification-apply/`.
 
 ### TI-AI-09 — confirmDuplicateSuggestion
 
 1. **Function name:** `confirmDuplicateSuggestion`
 2. **Purpose:** Explicitly create a duplicate/similar relationship from an accepted current suggestion.
 3. **Actor/precondition:** Tester/PM; accepted Similar Bugs suggestion; candidate belongs to persisted candidate set.
-4. **UI trigger:** None found in current UI source; backend action is programmatically verified.
-5. **Frontend source:** None currently traced.
+4. **UI trigger:** Confirm Duplicate after the user accepts a persisted Similar Bugs suggestion and selects a candidate.
+5. **Frontend source:** `app/bug-management-ui/webapp/ext/actions/DuplicateReview.js::confirmDuplicate` and the confirmation handler.
 6. **HTTP/OData request:** `POST /odata/v4/bug/confirmDuplicateSuggestion` with suggestionID and candidateBugID.
 7. **Service contract:** Unbound action returning DuplicateLinks.
 8. **CAP handler/helper:** `srv/ai/duplicate-confirmation.js::confirmDuplicateSuggestion`.
 9. **Validation/authorization:** Coordinator role, suggestion type/state/expiry, accessible source/candidate, no self-link, accepted candidate membership and active relation type.
 10. **Transaction:** DuplicateLink insert in CAP request transaction with conflict handling.
 11. **Database/provider side effect:** Insert one allowed DuplicateLink; no workflow status or assignment change.
-12. **Response/UI refresh:** Returns created/existing relationship result. A future UI must refresh related links.
-13. **Failure/rollback:** Invalid or racing duplicate returns 400/409 and creates no duplicate row.
-14. **Test/evidence:** `qa:idts95:programmatic`; **missing current UI/network screenshot**.
+12. **Response/UI refresh:** Show confirmation, create the link, refresh the Bug/duplicate association and show `Duplicate link to {0} created.`; a post-commit refresh failure instructs reload.
+13. **Failure/rollback:** Invalid or racing duplicate returns 400/409 and creates no duplicate row. UI distinguishes confirm failure from refresh-after-success failure.
+14. **Test/evidence:** `qa:idts95:programmatic`, `qa:idts115:programmatic`, `docs/pm/evidence/idts-115/duplicate-confirmation/`.
 
 ### TI-AI-10 — readAiOperationalMetrics
 
 1. **Function name:** `readAiOperationalMetrics`
 2. **Purpose:** Return PM-only aggregates for provider outcome, review state and latency.
 3. **Actor/precondition:** PM; windowDays defaults to 30 and is capped at 90.
-4. **UI trigger:** None found in current UI source.
-5. **Frontend source:** None currently traced.
+4. **UI trigger:** PM selects AI Activity on the role dashboard.
+5. **Frontend source:** `app/bug-management-ui/webapp/dashboard-page.js::openAiActivity/aggregateAiMetrics`.
 6. **HTTP/OData request:** `GET /odata/v4/bug/readAiOperationalMetrics(windowDays=...)`.
 7. **Service contract:** `@requires: 'PM' function readAiOperationalMetrics` returning AiOperationalMetric rows.
 8. **CAP handler/helper:** `srv/ai/metrics.js::readAiOperationalMetrics/aggregateAiOperationalMetrics`.
 9. **Validation/authorization:** CAP PM requirement; normalize time window and sanitize feature/provider/model/status/latency values.
 10. **Transaction:** Read-only request.
 11. **Database/provider side effect:** Read allowlisted AiSuggestions metadata only; no mutation and no provider call.
-12. **Response/UI refresh:** Returns aggregate rows; no current application screen consumes them.
-13. **Failure/rollback:** Read failure performs no mutation; raw prompts, responses and error details are never returned.
-14. **Test/evidence:** `qa:idts97:programmatic`; **missing current UI/network screenshot**.
+12. **Response/UI refresh:** Open a PM-only 30-day AI Activity dialog, aggregate rows by capability and show requests, successes, unavailable/failed totals, latency and review decisions without exposing provider/model details.
+13. **Failure/rollback:** Read failure performs no mutation and shows `AI activity is not available right now.` Raw prompts, responses and error details are never returned.
+14. **Test/evidence:** `qa:idts97:programmatic`, `qa:idts115:programmatic`, `docs/pm/evidence/idts-115/operational-metrics/`.
