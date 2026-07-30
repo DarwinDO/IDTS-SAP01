@@ -72,9 +72,11 @@ async function suggestClassification (req, entities, dependencies = {}) {
   }
 
   const catalogs = await readCatalogs(tx, entities)
+  const providerCatalogs = buildProviderCatalogInput(catalogs)
   const providerResult = await provider.structured({
     featureType: FEATURE_TYPES.CLASSIFICATION,
     schemaName: 'IdtsClassificationSuggestion',
+    schema: buildClassificationOutputSchema(providerCatalogs),
     correlationId: req.id,
     instruction: [
       'Suggest existing IDTS catalog values for bug classification.',
@@ -85,7 +87,7 @@ async function suggestClassification (req, entities, dependencies = {}) {
     ].join(' '),
     input: {
       bug: buildProviderBugInput(input),
-      catalogs: buildProviderCatalogInput(catalogs)
+      catalogs: providerCatalogs
     }
   })
 
@@ -460,6 +462,37 @@ function catalogRefFor (field, index) {
   return field && field.referencePrefix ? `${field.referencePrefix}${index + 1}` : ''
 }
 
+function buildClassificationOutputSchema (providerCatalogs) {
+  const properties = {}
+  const required = []
+
+  for (const field of FIELD_DEFS) {
+    const refs = (providerCatalogs?.[field.catalogKey] || [])
+      .map(row => row.catalogRef)
+      .filter(Boolean)
+    if (!refs.length) continue
+
+    properties[field.key] = {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        catalogRef: { type: 'string', enum: refs },
+        confidence: { type: 'number', minimum: 0, maximum: 1 },
+        reason: { type: 'string', maxLength: 300 }
+      },
+      required: ['catalogRef', 'confidence', 'reason']
+    }
+    required.push(field.key)
+  }
+
+  return {
+    type: 'object',
+    additionalProperties: false,
+    properties,
+    required
+  }
+}
+
 function suggestionRow ({ field, row = null, providerStatus, confidence = null, status, suggestionSource, reason, requiresReview }) {
   // Dựng response row thống nhất; `requiresReview` luôn bảo vệ quyết định cuối của user.
   return {
@@ -571,5 +604,6 @@ module.exports = {
   buildClassificationSuggestions,
   extractProviderValue,
   findCatalogRow,
-  buildProviderCatalogInput
+  buildProviderCatalogInput,
+  buildClassificationOutputSchema
 }

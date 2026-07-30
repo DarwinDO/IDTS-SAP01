@@ -1,5 +1,13 @@
 # `srv/ai/assignment-explanation.js`
 
+## Candidate-reference JSON Schema (2026-07-30)
+
+`buildAssignmentOutputSchema()` constrains the structured result to short references created for the current request (`C1`, `C2`, ...). Each returned item must contain `candidateRef`, `explanation` and `confidence`. The provider never receives a developer profile UUID and cannot create a candidate outside the backend list.
+
+Debug order: candidate query → assign short references → `buildAssignmentOutputSchema()` → provider call → `providerRowsByCandidateRef()` → deterministic fallback for missing rows. AI remains advisory; the Assign action and backend authorization/validation remain mandatory.
+
+Tiếng Việt: backend cấp mã tạm `C1`, `C2`; model chỉ giải thích theo các mã này rồi backend ghép lại với Developer thật. AI không thể tự thêm người ngoài danh sách hoặc tự assign.
+
 ## IDTS-114 stable candidate-reference contract (2026-07-30)
 
 The provider no longer receives `developerProfileID` UUID values. After IDTS reads and sorts eligible candidates, it assigns backend-only references `C1`, `C2`, and so on. `buildProviderInput()` sends only `candidateRef` plus allow-listed facts. The provider must return that exact ref; `buildAssignmentExplanations()` maps it back to the real candidate in memory.

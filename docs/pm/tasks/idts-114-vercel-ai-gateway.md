@@ -184,3 +184,11 @@ No S3, Brevo, database schema, UI workflow, automatic classification/assignment,
 - No key, endpoint, HANA schema/data, OData contract or business workflow was
   changed. Fresh feature-level acceptance is still required before IDTS-114
   can close.
+
+## 2026-07-30 feature-specific structured contracts
+
+- Live BTP logs proved that Classification, Handoff Summary and Smart Assign all reached `zai/glm-4.7-flash` and returned provider-level `SUCCESS`. The rules-based Classification and Smart Assign rows were therefore not a model-selection problem.
+- Root cause: the shared Gateway adapter requested only a generic JSON object, so parseable provider output could still omit the exact catalog/candidate keys required by the feature parsers.
+- The focused remediation forwards a bounded per-feature JSON Schema. Classification can select only active short catalog references (`SM/AC/DC/P/S`), and Smart Assign can explain only backend-issued candidate references (`C1..Cn`). UUIDs remain backend-only.
+- Local verification PASS: provider 59/59, Classification 36/36, Smart Assign 13/13, AI provider 38/38, Handoff 45/45, AI security 31/31, CAP compile, secret/process gates, AI DevKit 5/5 and `git diff --check`.
+- No provider/model/key, OData contract, HANA schema, role, workflow or UI contract changed. Fresh BTP feature calls remain required before declaring the visual defect closed.

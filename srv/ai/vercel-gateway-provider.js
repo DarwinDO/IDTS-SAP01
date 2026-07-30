@@ -23,9 +23,11 @@ class VercelGatewayProvider {
     })
   }
 
-  async structured ({ schemaName = 'Suggestion', instruction = '', input = null, deadlineMs = null } = {}) {
+  async structured ({ schemaName = 'Suggestion', schema: requestedSchema = null, instruction = '', input = null, deadlineMs = null } = {}) {
     const normalizedSchemaName = safeSchemaName(schemaName)
-    const schema = { type: 'object', additionalProperties: true }
+    const schema = requestedSchema && typeof requestedSchema === 'object' && !Array.isArray(requestedSchema)
+      ? requestedSchema
+      : { type: 'object', additionalProperties: true }
     const deadlineAt = Number.isFinite(Number(deadlineMs)) && Number(deadlineMs) > 0
       ? this.now() + Number(deadlineMs)
       : null

@@ -189,9 +189,22 @@ function sanitizeStructuredRequest (request, config) {
   // Chuẩn hóa request JSON-schema/structured output; schema name và payload đều bị giới hạn.
   return {
     schemaName: sanitizeDiagnosticToken(request.schemaName, 'Suggestion'),
+    schema: sanitizeJsonSchema(request.schema),
     instruction: redactSensitiveText(request.instruction, config.maxInputChars),
     input: redactSensitiveObject(request.input, config.maxInputChars),
     deadlineMs: boundedDeadlineMs(request.deadlineMs, config.timeoutMs)
+  }
+}
+
+function sanitizeJsonSchema (schema) {
+  if (!schema || typeof schema !== 'object' || Array.isArray(schema)) return null
+  try {
+    const serialized = JSON.stringify(schema)
+    if (serialized.length > 20_000) return null
+    const cloned = JSON.parse(serialized)
+    return cloned && typeof cloned === 'object' && !Array.isArray(cloned) ? cloned : null
+  } catch {
+    return null
   }
 }
 
@@ -336,5 +349,6 @@ module.exports = {
   sanitizeChatRequest,
   sanitizeEmbeddingBatchRequest,
   sanitizeEmbeddingRequest,
+  sanitizeJsonSchema,
   sanitizeStructuredRequest
 }
