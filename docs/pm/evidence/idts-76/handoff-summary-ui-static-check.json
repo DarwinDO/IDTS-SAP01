@@ -1,6 +1,6 @@
 {
   "task": "IDTS-76",
-  "checkedAt": "2026-07-30T06:42:30.449Z",
+  "checkedAt": "2026-07-30T13:57:54.716Z",
   "checks": [
     {
       "label": "handoff timestamp parser accepts plain, bullet and numbered rows",
@@ -71,7 +71,7 @@
       "pass": true
     },
     {
-      "label": "handoff review shows summary",
+      "label": "handoff review shows the AI synthesis",
       "pass": true
     },
     {
@@ -87,11 +87,15 @@
       "pass": true
     },
     {
-      "label": "handoff review shows important events",
+      "label": "handoff review shows verified important events",
       "pass": true
     },
     {
       "label": "handoff review shows next action",
+      "pass": true
+    },
+    {
+      "label": "handoff review keeps AI comment insights separate from verified comments",
       "pass": true
     },
     {
@@ -120,6 +124,10 @@
     },
     {
       "label": "handoff review controller does not embed raw HTML",
+      "pass": true
+    },
+    {
+      "label": "handoff review places next action before raw source evidence",
       "pass": true
     },
     {
@@ -168,6 +176,10 @@
     },
     {
       "label": "i18n.properties has handoffSummaryNoComments",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has handoffSummaryNoCommentInsights",
       "pass": true
     },
     {
@@ -239,6 +251,14 @@
       "pass": true
     },
     {
+      "label": "i18n.properties handoffSummaryGeneratedOverviewLabel is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummaryVerifiedDataLabel is user-facing",
+      "pass": true
+    },
+    {
       "label": "i18n.properties handoffSummaryStatusLabel is user-facing",
       "pass": true
     },
@@ -255,11 +275,23 @@
       "pass": true
     },
     {
+      "label": "i18n.properties handoffSummaryVerifiedCommentsLabel is user-facing",
+      "pass": true
+    },
+    {
       "label": "i18n.properties handoffSummaryNoComments is user-facing",
       "pass": true
     },
     {
+      "label": "i18n.properties handoffSummaryNoCommentInsights is user-facing",
+      "pass": true
+    },
+    {
       "label": "i18n.properties handoffSummaryEventsLabel is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties handoffSummaryVerifiedEventsLabel is user-facing",
       "pass": true
     },
     {
@@ -343,6 +375,10 @@
       "pass": true
     },
     {
+      "label": "i18n_en.properties has handoffSummaryNoCommentInsights",
+      "pass": true
+    },
+    {
       "label": "i18n_en.properties has handoffSummaryEventsLabel",
       "pass": true
     },
@@ -411,6 +447,14 @@
       "pass": true
     },
     {
+      "label": "i18n_en.properties handoffSummaryGeneratedOverviewLabel is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummaryVerifiedDataLabel is user-facing",
+      "pass": true
+    },
+    {
       "label": "i18n_en.properties handoffSummaryStatusLabel is user-facing",
       "pass": true
     },
@@ -427,11 +471,23 @@
       "pass": true
     },
     {
+      "label": "i18n_en.properties handoffSummaryVerifiedCommentsLabel is user-facing",
+      "pass": true
+    },
+    {
       "label": "i18n_en.properties handoffSummaryNoComments is user-facing",
       "pass": true
     },
     {
+      "label": "i18n_en.properties handoffSummaryNoCommentInsights is user-facing",
+      "pass": true
+    },
+    {
       "label": "i18n_en.properties handoffSummaryEventsLabel is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties handoffSummaryVerifiedEventsLabel is user-facing",
       "pass": true
     },
     {

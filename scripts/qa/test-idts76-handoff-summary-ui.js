@@ -77,12 +77,13 @@ const checks = [
   expectNotMatches('handoff timeline does not render dates through the browser native formatter', controller, /\.toLocaleString\s*\(/),
   expectIncludes('handoff timeline separates actor metadata from event detail', controller, 'handoffSummary>actor'),
   expectIncludes('handoff timeline shows localized time separately', controller, 'handoffSummary>time'),
-  expectIncludes('handoff review shows summary', controller, 'handoffSummarySummaryLabel'),
+  expectIncludes('handoff review shows the AI synthesis', controller, 'handoffSummaryGeneratedOverviewLabel'),
   expectIncludes('handoff review shows missing information', controller, 'handoffSummaryMissingLabel'),
   expectIncludes('handoff review shows grounded comment summary', controller, 'handoffSummaryCommentsLabel'),
   expectIncludes('handoff list keeps backend-sanitized technical terms as business data', controller, 'String(value || "").trim()'),
-  expectIncludes('handoff review shows important events', controller, 'handoffSummaryEventsLabel'),
+  expectIncludes('handoff review shows verified important events', controller, 'handoffSummaryVerifiedEventsLabel'),
   expectIncludes('handoff review shows next action', controller, 'handoffSummaryNextActionLabel'),
+  expectIncludes('handoff review keeps AI comment insights separate from verified comments', controller, 'result.verifiedComments'),
   expectIncludes('handoff review keeps manual decision guidance', controller, 'decisionHint'),
   expectIncludes('handoff review protects user copy', controller, 'INTERNAL_COPY_PATTERN'),
   expectNotMatches(
@@ -95,6 +96,12 @@ const checks = [
   expectNotMatches('handoff review does not expose caught error messages', controller, /MessageBox\.error\([^)]*error\.message/i),
   expectNotMatches('handoff review controller does not embed raw HTML', controller, /<(div|span|style|table)\b/i)
 ]
+
+assert(
+  controller.indexOf('handoffSummaryNextActionLabel') < controller.indexOf('handoffSummaryVerifiedCommentsLabel'),
+  'handoff review must place the next expected action before raw source comments'
+)
+checks.push({ label: 'handoff review places next action before raw source evidence', pass: true })
 
 assert(!section.IdtsHandoffSummary, 'manifest must not register standalone IdtsHandoffSummary section')
 checks.push({ label: 'manifest no longer registers standalone handoff summary section', pass: true })
@@ -112,6 +119,7 @@ const requiredI18nKeys = [
   'handoffSummaryMissingLabel',
   'handoffSummaryCommentsLabel',
   'handoffSummaryNoComments',
+  'handoffSummaryNoCommentInsights',
   'handoffSummaryEventsLabel',
   'handoffSummaryNextActionLabel',
   'handoffSummaryUnknownBug',

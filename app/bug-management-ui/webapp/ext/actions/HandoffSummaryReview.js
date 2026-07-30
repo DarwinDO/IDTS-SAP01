@@ -238,7 +238,8 @@ sap.ui.define([
             currentStatus: safeText(result.currentStatus, getText(view, "handoffSummaryNoDetails")),
             currentActionOwner: safeText(result.currentActionOwner, getText(view, "handoffSummaryNoDetails")),
             missingInformation: safeText(result.missingInformation, getText(view, "handoffSummaryNoMissingInfo")),
-            commentItems: formatTimelineItems(result.commentSummary, getText(view, "handoffSummaryNoComments")),
+            commentSummary: safeText(result.commentSummary, getText(view, "handoffSummaryNoCommentInsights")),
+            commentItems: formatTimelineItems(result.verifiedComments, getText(view, "handoffSummaryNoComments")),
             eventItems: formatTimelineItems(result.latestImportantEvents, getText(view, "handoffSummaryNoEvents")),
             nextExpectedAction: safeText(result.nextExpectedAction, getText(view, "handoffSummaryNoNextAction")),
             decisionHint: review.decisionHint
@@ -258,6 +259,7 @@ sap.ui.define([
             currentStatus: "",
             currentActionOwner: "",
             missingInformation: "",
+            commentSummary: "",
             commentItems: [],
             eventItems: [],
             nextExpectedAction: "",
@@ -353,8 +355,7 @@ sap.ui.define([
                             ]
                         }).addStyleClass("sapUiSmallMarginBottom"),
                         section(getText(view, "handoffSummaryMissingLabel"), "{handoffSummary>/missingInformation}"),
-                        listSection(getText(view, "handoffSummaryVerifiedCommentsLabel"), "handoffSummary>/commentItems"),
-                        listSection(getText(view, "handoffSummaryVerifiedEventsLabel"), "handoffSummary>/eventItems"),
+                        section(getText(view, "handoffSummaryCommentsLabel"), "{handoffSummary>/commentSummary}"),
                         new Label({
                             text: getText(view, "handoffSummaryNextActionLabel"),
                             design: "Bold"
@@ -364,6 +365,8 @@ sap.ui.define([
                             type: "Information",
                             showIcon: true
                         }).addStyleClass("sapUiTinyMarginTop sapUiSmallMarginBottom"),
+                        listSection(getText(view, "handoffSummaryVerifiedCommentsLabel"), "handoffSummary>/commentItems"),
+                        listSection(getText(view, "handoffSummaryVerifiedEventsLabel"), "handoffSummary>/eventItems"),
                         new Text({
                             text: "{handoffSummary>/decisionHint}",
                             wrapping: true
