@@ -103,15 +103,21 @@ No S3, Brevo, database schema, UI workflow, automatic classification/assignment,
   independent correctness pass also prevents generic batch HTTP 400 from
   expanding into scalar requests and removes workflow status from provider
   embedding input. Ponytail review result: `Lean already. Ship.`
-- SAP BTP synthetic batch proof, selective service deployment, sequential live
-  acceptance, and responsive UI PR remain pending. IDTS-114 stays In Progress.
+- The application content and service runtime are deployed at merge SHA
+  `5476479312986412739fbff3cfa6da29acc7905d`; the deployment controller also
+  refreshed declared service bindings, while the HDI deployer and broad `cds
+  deploy` were not selected. Synthetic batch proof and sequential live
+  acceptance remain pending. IDTS-114 stays In Progress. Evidence:
+  `docs/pm/evidence/idts-114/rate-limit-request-bounding/btp-runtime-rollout-20260730.md`.
 
 ## 2026-07-30 Smart Assign AppRouter timeout follow-up
 
 - Sequential PM acceptance proved Qwen completed `ASSIGNMENT_EXPLANATION` successfully in `30,495 ms`, but AppRouter returned HTTP 504 at approximately 30 seconds before the CAP result reached the UI.
 - The minimal local correction gives Smart Assign a shared 24-second provider deadline, limits provider input to ten candidates and a compact workload allowlist, and returns deterministic explanations when the deadline expires. Deadline exhaustion does not start OpenAI; an early HTTP 5xx can still use one bounded fallback while time remains.
 - Focused tests pass at IDTS-114 `58/58` and IDTS-69 `9/9`; all requested AI regressions, CAP compile, secret/process gates, AI DevKit and `git diff --check` pass. Evidence: `docs/pm/evidence/idts-114/smart-assign-timeout/local-verification-20260730.md`.
-- Selective service deployment and PM browser re-test remain pending. Tester/Developer role evidence remains deferred, so IDTS-114 stays In Progress.
+- Selective service deployment is complete at merge SHA
+  `5476479312986412739fbff3cfa6da29acc7905d`. PM browser re-test and
+  Tester/Developer role evidence remain pending, so IDTS-114 stays In Progress.
 
 ## 2026-07-30 responsive AI review follow-up
 
@@ -120,7 +126,10 @@ No S3, Brevo, database schema, UI workflow, automatic classification/assignment,
 - Handoff Summary now parses trusted timeline lines into separate actor, action, localized time and expandable detail controls. Comment and event contracts remain unchanged.
 - `AI_RATE_LIMITED` is shown as a safe temporary-busy warning rather than a provider diagnostic.
 - Local focused and integrated regressions, CAP compile, UI5 build, manifest validation, targeted UI5 lint, targeted ESLint, secret/process gates, AI DevKit and `git diff --check` pass. The existing pre-V2 manifest warning remains separate application debt.
-- SAP BTP UI deployment, PM browser visual/no-mutation evidence and the deferred Tester/Developer matrix remain open; IDTS-114 stays In Progress.
+- SAP BTP application content and runtime deployment are complete at merge SHA
+  `5476479312986412739fbff3cfa6da29acc7905d`. PM browser visual/no-mutation
+  evidence and the deferred Tester/Developer matrix remain open; IDTS-114
+  stays In Progress.
 
 ## 2026-07-30 post-deploy Handoff timestamp follow-up
 

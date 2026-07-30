@@ -4883,3 +4883,27 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   evidence paths into the current PR body, then triggering a fresh synchronize
   event after that edit; the new run must pass normally before merge, with no
   admin bypass.
+
+- 2026-07-30 IDTS-114/115 final SAP BTP runtime rollout: the application
+  content and service runtime from merged SHA
+  `5476479312986412739fbff3cfa6da29acc7905d` deployed successfully. The runtime
+  MTA operation was `43705495-8be6-11f1-bda2-eeee0a8ff2ce`; service and
+  AppRouter are started 1/1, health is HTTP 200, and the filtered recent runtime
+  log scan found no unhandled/fatal entry. Classification: release verification.
+  Important scope note: selecting the runtime did not select the HDI deployer,
+  broad `cds deploy`, deletion or schema/data migration, but the MTA controller
+  did process the declared authentication, destination and job-scheduler
+  resources and refresh their runtime bindings. Status: deployment PASS; browser
+  AI acceptance and Tester/Developer role evidence remain open. Evidence:
+  `docs/pm/evidence/idts-114/rate-limit-request-bounding/btp-runtime-rollout-20260730.md`.
+- 2026-07-30 IDTS-114 browser-control verification limitation: connected Chrome
+  loaded the PM List Report successfully without changing the user-owned New Bug
+  draft. Grid-cell interaction did not navigate to an Object Page, and a
+  separate direct read-only OData navigation was blocked by the browser client
+  with `ERR_BLOCKED_BY_CLIENT`. Classification: browser tooling limitation, not
+  a product failure. Status: agent tabs released; request explicit approval
+  before a controlled AI call because it creates provider/audit activity.
+- 2026-07-30 local verification command issue: a PowerShell excerpt command used
+  `$f:$start` without delimiting the variable name, so PowerShell rejected it
+  before reading any file. Classification: tooling issue. Status: corrected to
+  `${f}:$start`; no source, deployment or data changed.
