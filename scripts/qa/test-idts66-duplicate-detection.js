@@ -245,6 +245,88 @@ async function main () {
   expectEqual('malformed embedding is not treated as used', malformed[0]?.embeddingUsed, false)
   expectEqual('malformed embedding status is explicit and safe', malformed[0]?.providerStatus, 'AI_EMBEDDING_INVALID')
 
+  const manyCandidates = Array.from({ length: 50 }, (_, index) => ({
+    ID: `92000000-0000-0000-0000-${String(index + 1).padStart(12, '0')}`,
+    bugNumber: `BUG-BOUND-${String(index + 1).padStart(3, '0')}`,
+    title: index < 12 ? `Payment approval disabled candidate ${index + 1}` : `Unrelated telemetry candidate ${index + 1}`,
+    description: index < 12
+      ? 'Valid invoice submission keeps the payment approval button disabled.'
+      : 'Unrelated dashboard telemetry and visual formatting observation.',
+    status_code: 'PENDING_ASSIGNMENT',
+    applicationComponent_ID: index < 12 ? COMPONENT_ID : null,
+    defectCategory_ID: index < 12 ? CATEGORY_ID : null,
+    componentCategory_ID: index < 12 ? COMPONENT_CATEGORY_ID : null
+  }))
+  let batchCalls = 0
+  let scalarCalls = 0
+  let boundedBatchTexts = []
+  const batchRanking = await rankSimilarBugCandidates({
+    input: {
+      title: 'Payment approval disabled',
+      description: `${'Valid invoice submission keeps approval disabled. '.repeat(100)}private tail`,
+      applicationComponentID: COMPONENT_ID,
+      defectCategoryID: CATEGORY_ID,
+      componentCategoryID: COMPONENT_CATEGORY_ID
+    },
+    candidates: manyCandidates,
+    provider: {
+      embeddingBatch: async ({ texts }) => {
+        batchCalls += 1
+        boundedBatchTexts = texts
+        return {
+          ok: true,
+          status: 'SUCCESS',
+          correlationId: 'bounded-batch',
+          providerAlias: 'mock',
+          modelAlias: 'bounded-embedding',
+          data: { embeddings: texts.map((text, index) => [1, index / 100, 0.5]) }
+        }
+      },
+      embedding: async () => {
+        scalarCalls += 1
+        return { ok: true, status: 'SUCCESS', data: { embedding: [1, 0, 0.5] } }
+      }
+    },
+    limit: 10,
+    minScore: 0
+  })
+  expectEqual('50 candidates use one bounded embedding batch', batchCalls, 1)
+  expectEqual('supported batch path does not issue scalar embeddings', scalarCalls, 0)
+  expectEqual('embedding batch contains source plus at most ten candidates', boundedBatchTexts.length, 11)
+  expectEqual('every embedding text is bounded to 2000 characters', boundedBatchTexts.every(text => text.length <= 2000), true)
+  expectEqual('embedding text excludes workflow status outside the approved content allowlist', boundedBatchTexts.every(text => !text.includes('Status:')), true)
+  expectEqual('ranking remains bounded to ten results', batchRanking.candidates.length, 10)
+
+  let activeScalarCalls = 0
+  let maxActiveScalarCalls = 0
+  let sequentialScalarCalls = 0
+  const sequentialRanking = await rankSimilarBugCandidates({
+    input: {
+      title: 'Payment approval disabled',
+      description: 'Valid invoice submission keeps approval disabled.',
+      applicationComponentID: COMPONENT_ID,
+      defectCategoryID: CATEGORY_ID,
+      componentCategoryID: COMPONENT_CATEGORY_ID
+    },
+    candidates: manyCandidates,
+    provider: {
+      embeddingBatch: async () => ({ ok: false, status: 'AI_EMBEDDING_BATCH_UNSUPPORTED' }),
+      embedding: async () => {
+        sequentialScalarCalls += 1
+        activeScalarCalls += 1
+        maxActiveScalarCalls = Math.max(maxActiveScalarCalls, activeScalarCalls)
+        await new Promise(resolve => setTimeout(resolve, 1))
+        activeScalarCalls -= 1
+        return { ok: true, status: 'SUCCESS', data: { embedding: [1, 0, 0.5] } }
+      }
+    },
+    limit: 10,
+    minScore: 0
+  })
+  expectEqual('unsupported batch compatibility path makes at most eleven scalar calls', sequentialScalarCalls, 11)
+  expectEqual('unsupported batch compatibility path uses concurrency one', maxActiveScalarCalls, 1)
+  expectEqual('unsupported batch compatibility ranking still returns bounded results', sequentialRanking.candidates.length, 10)
+
   let rejectedEmptyInput = false
   try {
     await invoke(service, {})

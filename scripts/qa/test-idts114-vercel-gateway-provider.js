@@ -15,7 +15,10 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 const { createAiProvider, normalizeAiConfig } = require('../../srv/ai')
 const {
   API_BASE_URL,
+  activateGatewayCooldown,
   httpError,
+  remainingCooldownSeconds,
+  resetGatewayCooldownForTest,
   unwrapSchemaEnvelope
 } = require('../../srv/ai/vercel-gateway-provider')
 const { containsUnsafeDiagnosticText } = require('../../srv/ai/safety')
@@ -276,19 +279,17 @@ async function main () {
     input: { title: 'Synthetic malformed compatibility test' }
   })
   check(
-    'malformed prompt-only Qwen output uses only the existing bounded fallback',
-    malformedCompatibilityRequests.length === 3 &&
+    'malformed prompt-only Qwen output stops after the bounded Qwen compatibility retry',
+    malformedCompatibilityRequests.length === 2 &&
       malformedCompatibilityRequests[0].model === 'alibaba/qwen3.7-flash' &&
       malformedCompatibilityRequests[1].model === 'alibaba/qwen3.7-flash' &&
-      malformedCompatibilityRequests[1].format === undefined &&
-      malformedCompatibilityRequests[2].model === 'openai/gpt-5.4-nano'
+      malformedCompatibilityRequests[1].format === undefined
   )
   check(
-    'fallback after malformed Qwen output remains sanitized and parseable',
-    malformedCompatibilityResult.ok &&
-      malformedCompatibilityResult.data.json.safeFallback === true &&
-      malformedCompatibilityResult.modelAlias === 'openai/gpt-5.4-nano' &&
-      malformedCompatibilityResult.fallbackUsed === true
+    'malformed Qwen output is sanitized for deterministic feature fallback',
+    malformedCompatibilityResult.ok === false &&
+      malformedCompatibilityResult.status === 'AI_PROVIDER_ERROR' &&
+      malformedCompatibilityResult.modelAlias === 'alibaba/qwen3.7-flash'
   )
 
   const repeatedCompatibilityFailureRequests = []
@@ -385,15 +386,18 @@ async function main () {
   check('generic HTTP 400 does not compatibility-retry or use fallback', genericBadRequestModels.length === 1)
   check('generic HTTP 400 remains sanitized', genericBadRequestResult.ok === false && !containsUnsafeDiagnosticText(genericBadRequestResult))
 
+  resetGatewayCooldownForTest()
+  let now = 1_000_000
   const transientRateLimitRequests = []
   const transientRateLimitProvider = createAiProvider(gatewayConfig({
     fallbackEnabled: true,
     fallbackModelAlias: 'openai/gpt-5.4-nano'
   }), {
+    now: () => now,
     fetchImpl: async (url, options) => {
       const body = JSON.parse(options.body)
       transientRateLimitRequests.push(body.model)
-      if (body.model === 'alibaba/qwen3.7-flash') {
+      if (transientRateLimitRequests.length === 1) {
         return jsonResponse(
           429,
           { error: { code: 'rate_limit_exceeded', message: 'Please retry later.' } },
@@ -410,15 +414,32 @@ async function main () {
     input: { title: 'Synthetic rate limit test' }
   })
   check(
-    'transient 429 remains eligible for exactly one configured fallback',
-    transientRateLimitRequests.join(',') === 'alibaba/qwen3.7-flash,openai/gpt-5.4-nano'
+    'transient 429 does not call the configured fallback',
+    transientRateLimitRequests.join(',') === 'alibaba/qwen3.7-flash'
   )
   check(
-    'transient 429 fallback result records the fallback model safely',
-    transientRateLimitResult.ok &&
-      transientRateLimitResult.modelAlias === 'openai/gpt-5.4-nano' &&
-      transientRateLimitResult.fallbackUsed === true
+    'transient 429 returns the safe rate-limited status',
+    transientRateLimitResult.ok === false &&
+      transientRateLimitResult.status === 'AI_RATE_LIMITED' &&
+      transientRateLimitResult.error?.retryable === true
   )
+  const cooldownResult = await transientRateLimitProvider.structured({
+    featureType: 'handoff_summary',
+    schemaName: 'IdtsCooldownContract',
+    instruction: 'Return JSON only.',
+    input: { title: 'Synthetic cooldown test' }
+  })
+  check('request during cooldown does not call the network', transientRateLimitRequests.length === 1)
+  check('request during cooldown returns AI_RATE_LIMITED', cooldownResult.status === 'AI_RATE_LIMITED')
+  now += 31_000
+  const afterCooldownResult = await transientRateLimitProvider.structured({
+    featureType: 'handoff_summary',
+    schemaName: 'IdtsCooldownRecovery',
+    instruction: 'Return JSON only.',
+    input: { title: 'Synthetic cooldown recovery' }
+  })
+  check('request after cooldown reaches Qwen again', transientRateLimitRequests.length === 2 && transientRateLimitRequests[1] === 'alibaba/qwen3.7-flash')
+  check('request after cooldown can succeed without fallback', afterCooldownResult.ok === true && afterCooldownResult.fallbackUsed === false)
   const transientRateLimitError = httpError(
     429,
     { error: { code: 'rate_limit_exceeded', message: 'Please retry later.' } },
@@ -438,6 +459,123 @@ async function main () {
       budgetError.retryable === false &&
       budgetError.fallbackEligible === false
   )
+
+  resetGatewayCooldownForTest()
+  activateGatewayCooldown(null, 2_000_000)
+  check('missing Retry-After uses the safe 60-second default', remainingCooldownSeconds(2_000_000) === 60)
+  resetGatewayCooldownForTest()
+  activateGatewayCooldown(9999, 2_000_000)
+  check('Retry-After cooldown is clamped to 900 seconds', remainingCooldownSeconds(2_000_000) === 900)
+
+  resetGatewayCooldownForTest()
+  const batchRequests = []
+  const batchProvider = createAiProvider(gatewayConfig(), {
+    fetchImpl: async (url, options) => {
+      const body = JSON.parse(options.body)
+      batchRequests.push(body)
+      return jsonResponse(200, {
+        data: body.input.map((text, index) => ({ index, embedding: [index + 0.1, index + 0.2, index + 0.3] }))
+      })
+    }
+  })
+  const batchResult = await batchProvider.embeddingBatch({
+    featureType: 'duplicate_detection',
+    texts: ['Synthetic source', 'Synthetic candidate one', 'Synthetic candidate two']
+  })
+  check('embedding batch sends one HTTP request with three inputs', batchRequests.length === 1 && batchRequests[0].input.length === 3)
+  check('embedding batch preserves input order and vector dimensions', batchResult.ok && batchResult.data.embeddings.length === 3 && batchResult.data.embeddings.every(vector => vector.length === 3))
+
+  resetGatewayCooldownForTest()
+  const malformedBatchProvider = createAiProvider(gatewayConfig(), {
+    fetchImpl: async () => jsonResponse(200, {
+      data: [
+        { index: 0, embedding: [0.1, 0.2] },
+        { index: 1, embedding: [0.3] }
+      ]
+    })
+  })
+  const malformedBatchResult = await malformedBatchProvider.embeddingBatch({
+    featureType: 'duplicate_detection',
+    texts: ['Synthetic source', 'Synthetic candidate']
+  })
+  check('embedding batch with mixed dimensions fails safely', malformedBatchResult.ok === false && malformedBatchResult.status === 'AI_PROVIDER_ERROR')
+
+  resetGatewayCooldownForTest()
+  const unsupportedBatchModels = []
+  const unsupportedBatchProvider = createAiProvider(gatewayConfig({
+    fallbackEnabled: true,
+    fallbackModelAlias: 'openai/gpt-5.4-nano',
+    fallbackEmbeddingModelAlias: 'openai/text-embedding-3-small'
+  }), {
+    fetchImpl: async (url, options) => {
+      unsupportedBatchModels.push(JSON.parse(options.body).model)
+      return jsonResponse(400, { error: { code: 'invalid_input', message: 'Array input is not supported.' } })
+    }
+  })
+  const unsupportedBatchResult = await unsupportedBatchProvider.embeddingBatch({
+    featureType: 'duplicate_detection',
+    texts: ['Synthetic source', 'Synthetic candidate']
+  })
+  check('batch HTTP 400 does not spend an embedding fallback request', unsupportedBatchModels.length === 1)
+  check('batch HTTP 400 exposes only the compatibility status', unsupportedBatchResult.status === 'AI_EMBEDDING_BATCH_UNSUPPORTED')
+
+  resetGatewayCooldownForTest()
+  const genericBatchBadRequestModels = []
+  const genericBatchBadRequestProvider = createAiProvider(gatewayConfig({
+    fallbackEnabled: true,
+    fallbackModelAlias: 'openai/gpt-5.4-nano',
+    fallbackEmbeddingModelAlias: 'openai/text-embedding-3-small'
+  }), {
+    fetchImpl: async (url, options) => {
+      genericBatchBadRequestModels.push(JSON.parse(options.body).model)
+      return jsonResponse(400, { error: { code: 'invalid_request', message: 'Malformed embedding payload.' } })
+    }
+  })
+  const genericBatchBadRequestResult = await genericBatchBadRequestProvider.embeddingBatch({
+    featureType: 'duplicate_detection',
+    texts: ['Synthetic source', 'Synthetic candidate']
+  })
+  check('generic embedding batch HTTP 400 does not retry or use fallback', genericBatchBadRequestModels.length === 1)
+  check('generic embedding batch HTTP 400 remains a sanitized provider error', genericBatchBadRequestResult.status === 'AI_PROVIDER_ERROR' && !containsUnsafeDiagnosticText(genericBatchBadRequestResult))
+
+  resetGatewayCooldownForTest()
+  const embeddingRateLimitModels = []
+  const embeddingRateLimitProvider = createAiProvider(gatewayConfig({
+    fallbackEnabled: true,
+    fallbackModelAlias: 'openai/gpt-5.4-nano',
+    fallbackEmbeddingModelAlias: 'openai/text-embedding-3-small'
+  }), {
+    fetchImpl: async (url, options) => {
+      embeddingRateLimitModels.push(JSON.parse(options.body).model)
+      return jsonResponse(429, { error: { code: 'rate_limit_exceeded', message: 'Please retry later.' } }, { 'Retry-After': '5' })
+    }
+  })
+  const embeddingRateLimitResult = await embeddingRateLimitProvider.embedding({
+    featureType: 'duplicate_detection',
+    text: 'Synthetic rate-limited embedding'
+  })
+  check('embedding 429 does not call OpenAI fallback', embeddingRateLimitModels.length === 1)
+  check('embedding 429 returns AI_RATE_LIMITED', embeddingRateLimitResult.status === 'AI_RATE_LIMITED')
+
+  resetGatewayCooldownForTest()
+  const malformedStructuredModels = []
+  const malformedStructuredProvider = createAiProvider(gatewayConfig({
+    fallbackEnabled: true,
+    fallbackModelAlias: 'openai/gpt-5.4-nano'
+  }), {
+    fetchImpl: async (url, options) => {
+      malformedStructuredModels.push(JSON.parse(options.body).model)
+      return jsonResponse(200, { choices: [{ message: { content: 'not-json' } }] })
+    }
+  })
+  const malformedStructuredResult = await malformedStructuredProvider.structured({
+    featureType: 'classification',
+    schemaName: 'IdtsMalformedContract',
+    instruction: 'Return JSON only.',
+    input: { title: 'Synthetic malformed response' }
+  })
+  check('malformed structured output does not call OpenAI fallback', malformedStructuredModels.length === 1)
+  check('malformed structured output uses safe feature fallback status', malformedStructuredResult.ok === false && malformedStructuredResult.status === 'AI_PROVIDER_ERROR')
 
   const embeddingRequests = []
   const embeddingProvider = createAiProvider(gatewayConfig({

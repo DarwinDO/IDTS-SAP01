@@ -3,12 +3,17 @@
 // ponytail: native fetch/AbortController cover Gateway HTTP; add an SDK only if the REST contract becomes insufficient.
 // Vercel AI Gateway is OpenAI-compatible. This adapter receives already-sanitized data from provider.js.
 const API_BASE_URL = 'https://ai-gateway.vercel.sh/v1'
+const DEFAULT_COOLDOWN_SECONDS = 60
+const MIN_COOLDOWN_SECONDS = 1
+const MAX_COOLDOWN_SECONDS = 900
+let gatewayCooldownUntil = 0
 
 class VercelGatewayProvider {
-  constructor (config, fetchImpl = globalThis.fetch) {
+  constructor (config, fetchImpl = globalThis.fetch, now = Date.now) {
     if (typeof fetchImpl !== 'function') throw new Error('A fetch implementation is required for the Vercel AI Gateway provider.')
     this.config = config
     this.fetch = fetchImpl
+    this.now = now
   }
 
   async chat ({ messages = [] } = {}) {
@@ -66,7 +71,10 @@ class VercelGatewayProvider {
         const parsed = JSON.parse(messageContent(response))
         return { json: unwrapSchemaEnvelope(parsed, normalizedSchemaName) }
       } catch {
-        throw providerError('VERCEL_GATEWAY_MALFORMED_OUTPUT', { retryable: true, fallbackEligible: true })
+        // Provider output that cannot satisfy the JSON contract is a content
+        // failure, not an availability failure. Let the feature use its safe
+        // deterministic result instead of spending a second-model request.
+        throw providerError('VERCEL_GATEWAY_MALFORMED_OUTPUT', { retryable: false, fallbackEligible: false })
       }
     })
   }
@@ -79,10 +87,31 @@ class VercelGatewayProvider {
       const response = await this.#request('/embeddings', { model, input: text })
       const embedding = response?.data?.[0]?.embedding
       if (!Array.isArray(embedding)) {
-        throw providerError('VERCEL_GATEWAY_EMBEDDING_INVALID', { retryable: true, fallbackEligible: true })
+        throw providerError('VERCEL_GATEWAY_EMBEDDING_INVALID', { retryable: false, fallbackEligible: false })
       }
       return { embedding, dimensions: embedding.length }
     })
+  }
+
+  async embeddingBatch ({ texts = [] } = {}) {
+    if (!this.config.embeddingModelAlias) {
+      throw providerError('VERCEL_GATEWAY_EMBEDDING_MODEL_MISSING', { retryable: false, fallbackEligible: false })
+    }
+    try {
+      return await this.#withFallback(this.config.embeddingModelAlias, this.config.fallbackEmbeddingModelAlias, async model => {
+        const response = await this.#request('/embeddings', { model, input: texts })
+        return normalizeEmbeddingBatch(response, texts.length)
+      })
+    } catch (error) {
+      if (error?.gatewayReason === 'embedding_batch_unsupported' && !error?.fallbackAttempted) {
+        throw providerError('AI_EMBEDDING_BATCH_UNSUPPORTED', {
+          retryable: false,
+          fallbackEligible: false,
+          gatewayReason: 'embedding_batch_unsupported'
+        })
+      }
+      throw error
+    }
   }
 
   async #chatCompletion (model, request) {
@@ -108,6 +137,15 @@ class VercelGatewayProvider {
   }
 
   async #request (path, body) {
+    const cooldownSeconds = remainingCooldownSeconds(this.now())
+    if (cooldownSeconds > 0) {
+      throw providerError('AI_RATE_LIMITED', {
+        retryable: true,
+        fallbackEligible: false,
+        gatewayReason: 'rate_limited',
+        retryAfterSeconds: cooldownSeconds
+      })
+    }
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), this.config.timeoutMs)
     try {
@@ -122,7 +160,9 @@ class VercelGatewayProvider {
       })
       const payload = await response.json().catch(() => null)
       if (!response.ok) {
-        throw httpError(response.status, payload, response.headers?.get?.('Retry-After'))
+        const error = httpError(response.status, payload, response.headers?.get?.('Retry-After'))
+        if (error.gatewayReason === 'rate_limited') activateGatewayCooldown(error.retryAfterSeconds, this.now())
+        throw error
       }
       return payload
     } catch (error) {
@@ -148,16 +188,61 @@ function providerResult (modelAlias, fallbackUsed, data) {
 function httpError (status, payload, retryAfterValue = null) {
   const budgetExhausted = isBudgetExhausted(payload)
   const responseFormatIncompatible = status === 400 && isResponseFormatIncompatible(payload)
+  const embeddingBatchUnsupported = status === 400 && isEmbeddingBatchUnsupported(payload)
   const retryable = (status === 429 && !budgetExhausted) || status >= 500
   return providerError(`VERCEL_GATEWAY_HTTP_${status}`, {
     retryable,
-    fallbackEligible: retryable && !budgetExhausted,
+    fallbackEligible: status >= 500,
     gatewayReason: responseFormatIncompatible
       ? 'response_format_incompatible'
-      : (budgetExhausted ? 'budget_exhausted' : (status === 429 ? 'rate_limited' : 'http_error')),
+      : (embeddingBatchUnsupported
+          ? 'embedding_batch_unsupported'
+          : (budgetExhausted ? 'budget_exhausted' : (status === 429 ? 'rate_limited' : 'http_error'))),
     providerErrorCode: safeProviderErrorCode(payload),
     retryAfterSeconds: parseRetryAfterSeconds(retryAfterValue)
   })
+}
+
+function normalizeEmbeddingBatch (response, expectedCount) {
+  const rows = Array.isArray(response?.data) ? response.data : null
+  if (!rows || rows.length !== expectedCount || expectedCount < 1) {
+    throw providerError('VERCEL_GATEWAY_EMBEDDING_BATCH_INVALID', { retryable: false, fallbackEligible: false })
+  }
+
+  const indexed = rows.every(row => Number.isInteger(row?.index))
+  const ordered = indexed
+    ? [...rows].sort((left, right) => left.index - right.index)
+    : rows
+  if (indexed && ordered.some((row, index) => row.index !== index)) {
+    throw providerError('VERCEL_GATEWAY_EMBEDDING_BATCH_INVALID', { retryable: false, fallbackEligible: false })
+  }
+
+  const embeddings = ordered.map(row => row?.embedding)
+  const dimensions = embeddings[0]?.length
+  if (
+    !Number.isInteger(dimensions) || dimensions < 2 ||
+    embeddings.some(vector => !Array.isArray(vector) || vector.length !== dimensions || vector.some(value => !Number.isFinite(Number(value))))
+  ) {
+    throw providerError('VERCEL_GATEWAY_EMBEDDING_BATCH_INVALID', { retryable: false, fallbackEligible: false })
+  }
+  return { embeddings: embeddings.map(vector => vector.map(Number)), dimensions }
+}
+
+function activateGatewayCooldown (retryAfterSeconds, now = Date.now()) {
+  const hasRetryAfter = retryAfterSeconds !== null && retryAfterSeconds !== undefined && retryAfterSeconds !== ''
+  const seconds = Math.min(
+    Math.max(hasRetryAfter && Number.isFinite(Number(retryAfterSeconds)) ? Math.ceil(Number(retryAfterSeconds)) : DEFAULT_COOLDOWN_SECONDS, MIN_COOLDOWN_SECONDS),
+    MAX_COOLDOWN_SECONDS
+  )
+  gatewayCooldownUntil = Math.max(gatewayCooldownUntil, now + seconds * 1000)
+}
+
+function remainingCooldownSeconds (now = Date.now()) {
+  return Math.max(Math.ceil((gatewayCooldownUntil - now) / 1000), 0)
+}
+
+function resetGatewayCooldownForTest () {
+  gatewayCooldownUntil = 0
 }
 
 function providerError (code, {
@@ -220,7 +305,17 @@ function parseRetryAfterSeconds (value) {
 function messageContent (response) {
   const content = response?.choices?.[0]?.message?.content
   if (typeof content === 'string' && content.trim()) return content
-  throw providerError('VERCEL_GATEWAY_RESPONSE_TEXT_MISSING', { retryable: true, fallbackEligible: true })
+  throw providerError('VERCEL_GATEWAY_RESPONSE_TEXT_MISSING', { retryable: false, fallbackEligible: false })
+}
+
+function isEmbeddingBatchUnsupported (payload) {
+  // Chỉ mở compatibility path khi Gateway nói rõ array/batch input không
+  // được hỗ trợ. Generic HTTP 400 phải dừng, không biến thành 11 request mới.
+  const code = safeProviderErrorCode(payload)
+  if (['batch_not_supported', 'unsupported_batch', 'unsupported_input_array'].includes(code)) return true
+
+  const message = String(payload?.error?.message || '')
+  return /(array|batch).{0,48}(unsupported|not supported|not accept|invalid)|(?:unsupported|not supported).{0,48}(array|batch)/i.test(message)
 }
 
 function safeSchemaName (value) {
@@ -247,11 +342,15 @@ function unwrapSchemaEnvelope (json, schemaName) {
 module.exports = {
   API_BASE_URL,
   VercelGatewayProvider,
+  activateGatewayCooldown,
   httpError,
   isBudgetExhausted,
+  isEmbeddingBatchUnsupported,
   isFallbackEligible,
   isResponseFormatIncompatible,
   parseRetryAfterSeconds,
+  remainingCooldownSeconds,
+  resetGatewayCooldownForTest,
   safeProviderErrorCode,
   safeSchemaName,
   unwrapSchemaEnvelope

@@ -14,6 +14,7 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 
 const cds = require('@sap/cds')
 const { INSERT, SELECT, UPDATE } = cds.ql
+const { buildClassificationSuggestions } = require('../../srv/ai')
 const { containsUnsafeDiagnosticText } = require('../../srv/ai/safety')
 
 const RESULTS = []
@@ -104,6 +105,20 @@ async function main () {
   console.log(' IDTS-67 AI Classification Suggestion Verification')
   console.log(' ' + new Date().toISOString())
   console.log('========================================================')
+
+  const rateLimitedRows = buildClassificationSuggestions({
+    input: {},
+    catalogs: {
+      sapModules: [],
+      applicationComponents: [],
+      defectCategories: [],
+      priorityValues: [],
+      severityValues: []
+    },
+    providerResult: { ok: false, status: 'AI_RATE_LIMITED' }
+  })
+  expectEqual('rate-limited classification uses explicit safe local fallback wording', rateLimitedRows.every(row => row.reason === 'AI is temporarily busy. Safe local suggestions are shown. Try again later.'), true)
+  expectNoUnsafeDiagnostic('rate-limited classification wording contains no provider diagnostic', rateLimitedRows)
 
   const csn = await cds.load('srv/service.cds')
   const db = await cds.connect.to('db', { kind: 'sqlite', credentials: { url: ':memory:' } })

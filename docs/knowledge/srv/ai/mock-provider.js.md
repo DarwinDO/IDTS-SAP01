@@ -1,5 +1,19 @@
 # `srv/ai/mock-provider.js`
 
+## 2026-07-30 batch fixture
+
+### English
+
+`embeddingBatch()` maps each input text to one deterministic vector in the same
+order. It is a local contract fixture only; it does not prove the live Gateway
+supports batch input or that a model produces useful semantic vectors.
+
+### Tiếng Việt
+
+`embeddingBatch()` map từng text đầu vào thành một vector deterministic theo
+đúng thứ tự. Đây chỉ là fixture contract local; nó không chứng minh Gateway
+thật hỗ trợ batch hoặc model tạo vector ngữ nghĩa có chất lượng.
+
 ## Beginner-first execution map (2026-07-18)
 
 ### English

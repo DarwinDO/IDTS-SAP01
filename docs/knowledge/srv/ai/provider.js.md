@@ -1,5 +1,27 @@
 # `srv/ai/provider.js`
 
+## 2026-07-30 bounded batch and safe rate-limit status
+
+### English
+
+`SafeAiProvider.embeddingBatch()` applies the same redaction and result envelope
+as other AI operations. It keeps at most eleven texts and at most 2,000
+characters per text. `AI_RATE_LIMITED` is returned with business-safe wording;
+feature code receives no HTTP status, endpoint, key, prompt, or raw body.
+When a legacy delegate has no batch method, the wrapper returns
+`AI_EMBEDDING_BATCH_UNSUPPORTED` so Similar Bugs can preserve its bounded scalar
+compatibility path instead of losing embeddings with a generic error.
+
+### Tiếng Việt
+
+`SafeAiProvider.embeddingBatch()` dùng cùng cơ chế redact và result envelope như
+các thao tác AI khác. Nó chỉ giữ tối đa mười một text và tối đa 2.000 ký tự cho
+mỗi text. `AI_RATE_LIMITED` được trả bằng wording an toàn cho nghiệp vụ; feature
+không nhận HTTP status, endpoint, key, prompt hoặc raw body.
+Nếu delegate cũ chưa có batch method, wrapper trả
+`AI_EMBEDDING_BATCH_UNSUPPORTED` để Similar Bugs giữ đường scalar tương thích đã
+giới hạn thay vì mất embedding vì một lỗi chung.
+
 ## IDTS-97 operational emission
 
 Every normalized provider result is passed to `emitAiOperationalMetric()`. The emitted record is allowlisted and contains feature, operation, provider/model alias, status/outcome, and latency only. A logger/sink failure is swallowed, so telemetry cannot change the AI fallback result or normal Bug workflow.
