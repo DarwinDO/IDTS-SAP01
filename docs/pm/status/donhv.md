@@ -4922,3 +4922,37 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   process/parser-format issue. Status: removed only the backticks from the
   twelve-field declaration, retained the same evidence locations, and pushed a
   documentation-only synchronize event; no product or evidence content changed.
+
+- 2026-07-30 IDTS-114 BTP AI configuration binding: browser Classification now
+  avoids a generic load dialog but returned deterministic fallback because the
+  deployed runtime recorded AI disabled with the mock provider. Presence-only
+  BTP inspection found no AI enablement/model settings or dedicated AI key
+  binding after the latest MTA rollout. Classification: deployment configuration
+  defect, not a Qwen quality result. Status: a minimal durable configuration
+  binding is implemented locally; no provider call, workflow mutation, database
+  migration or secret read was performed.
+- The MTA now supplies non-secret model/settings and binds a separate
+  user-provided service named `idts-sap01-ai-gateway`. `srv/ai/config.js` reads
+  that exact VCAP binding only; it does not inspect the retained S3/Brevo
+  binding. An empty BTP service was created and requires DonHV to add the
+  private key directly before deployment. Evidence:
+  `docs/pm/evidence/idts-114/btp-ai-config-binding/local-verification-20260730.md`.
+- Verification: IDTS-64 provider regression `38/38`, IDTS-114 adapter
+  regression `58/58`, CAP compile, UI5 production build, secret scan, agent
+  rules, QA-depth self-test, AI DevKit and `git diff --check` PASS. The isolated
+  worktree `npm ci` reported the existing 24 dependency findings; no dependency
+  update is mixed into this change.
+- Tooling issues recorded and corrected: the fresh worktree initially lacked
+  dependencies; a source search included a non-existent top-level `test` path;
+  one skill lookup used an obsolete local path; and a local post-merge `git`
+  checkout warning was caused by the root worktree already owning `dev`.
+  Classification: tooling/process issues, not product defects. No source,
+  credential, or runtime data was changed by the failed commands.
+- MTA packaging limitation: two local `mbt build -p cf` attempts exceeded the
+  command timeout without producing a package result. Classification: build
+  tooling/environment investigation, not a failed application check. YAML
+  parsing, CAP compile and UI build pass independently. The attempt generated
+  temporary local build files; automated removal was blocked by this session's
+  destructive-file-operation policy, so they remain untracked and will not be
+  committed. Status: diagnose/rebuild before BTP rollout; do not claim package
+  verification PASS yet.

@@ -25,6 +25,13 @@ modules:
       health-check-http-endpoint: /health
     properties:
       IDTS_EMAIL_WORKER_MODE: scheduler
+      IDTS_AI_ENABLED: true
+      IDTS_AI_PROVIDER: vercel
+      IDTS_AI_MODEL: alibaba/qwen3.7-flash
+      IDTS_AI_EMBEDDING_MODEL: alibaba/qwen3-embedding-0.6b
+      IDTS_AI_FALLBACK_ENABLED: true
+      IDTS_AI_FALLBACK_MODEL: openai/gpt-5.4-nano
+      IDTS_AI_EMBEDDING_FALLBACK_MODEL: openai/text-embedding-3-small
       IDTS_AI_TIMEOUT_MS: 45000
     build-parameters:
       builder: npm-ci
@@ -38,6 +45,7 @@ modules:
       - name: idts-sap01-destination
       - name: idts-sap01-jobscheduler
       - name: idts-sap01-external-services
+      - name: idts-sap01-ai-gateway
 
   - name: idts-sap01-db-deployer
     type: hdb
@@ -163,3 +171,8 @@ resources:
     type: org.cloudfoundry.existing-service
     parameters:
       service-name: idts-sap01-external-services
+
+  - name: idts-sap01-ai-gateway
+    type: org.cloudfoundry.existing-service
+    parameters:
+      service-name: idts-sap01-ai-gateway
