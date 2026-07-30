@@ -175,3 +175,15 @@ Quy tac quan trong: AI chi ho tro giai thich, con IDTS van dung backend validati
 ### Vietnamese
 
 `recordAssignmentAudit()` giờ trả một audit row đã sanitize của request explanation. `explainSmartAssignment()` copy UUID của row đó vào mỗi candidate dưới field `suggestionID`. Vì vậy dialog review cả tập explanation như một unit; Accept không chọn table row và không gọi `assignToDeveloper`.
+
+## SAP BTP response budget
+
+`explainSmartAssignment()` sends at most ten candidates and passes `SMART_ASSIGNMENT_PROVIDER_DEADLINE_MS = 24000` to the provider wrapper. The provider input keeps only the Bug classification/title and a compact workload summary. If Qwen cannot complete inside 24 seconds, the provider returns `AI_TIMEOUT` and `buildAssignmentExplanations()` immediately uses the existing deterministic explanation. This keeps the OData response below the approximately 30-second AppRouter boundary.
+
+Expected execution order: read grounded candidates → call structured provider with the 24-second deadline → validate provider rows or build deterministic rows → write one sanitized audit row → return candidate explanations. No branch updates `Bugs`, assignment history, notifications or email.
+
+### Giải thích tiếng Việt
+
+`explainSmartAssignment()` gửi tối đa mười candidate và truyền `SMART_ASSIGNMENT_PROVIDER_DEADLINE_MS = 24000` vào provider wrapper. Input chỉ giữ title/classification của Bug và workload summary gọn. Nếu Qwen chưa xong trong 24 giây, provider trả `AI_TIMEOUT`; hàm lập tức dùng explanation deterministic sẵn có để OData trả trước ngưỡng AppRouter khoảng 30 giây.
+
+Thứ tự chạy mong đợi: đọc candidate có grounding → gọi provider với deadline 24 giây → validate kết quả hoặc dựng fallback deterministic → ghi một audit row đã sanitize → trả explanation. Không nhánh nào sửa `Bugs`, history phân công, notification hoặc email.

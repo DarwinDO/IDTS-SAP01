@@ -15,7 +15,8 @@ const { resolveRequestUser } = require('../bug-service/helpers')
 const { buildAssignableDeveloperRows } = require('../bug-service/read-models')
 
 const DEFAULT_LIMIT = 10
-const MAX_LIMIT = 20
+const MAX_LIMIT = 10
+const SMART_ASSIGNMENT_PROVIDER_DEADLINE_MS = 24_000
 
 async function explainSmartAssignment (req, entities, dependencies = {}) {
   // OData action entry point: resolve Bug/candidate context, gọi provider nếu bật, dựng explanation grounded,
@@ -40,7 +41,9 @@ async function explainSmartAssignment (req, entities, dependencies = {}) {
       'Do not invent skills, availability, workload, or personal information.',
       'Return one short business-facing explanation per candidate.'
     ].join(' '),
-    input: buildProviderInput(input, candidates)
+    input: buildProviderInput(input, candidates),
+    // Trả deterministic explanation trước ngưỡng AppRouter thay vì để request bị cắt ở khoảng 30 giây.
+    deadlineMs: SMART_ASSIGNMENT_PROVIDER_DEADLINE_MS
   })
 
   const result = buildAssignmentExplanations({ input, candidates, providerResult })
@@ -306,7 +309,12 @@ function buildProviderInput (input, candidates) {
       defectCategoryName: candidate.defectCategoryName,
       sapModuleName: candidate.sapModuleName,
       responsibilityLevelName: candidate.responsibilityLevelName,
-      workload: candidate.workload
+      workload: {
+        openOwnedBugCount: candidate.workload?.openOwnedBugCount || 0,
+        workloadLimit: candidate.workload?.workloadLimit ?? null,
+        overdueOwnedBugCount: candidate.workload?.overdueOwnedBugCount || 0,
+        isOverloaded: Boolean(candidate.workload?.isOverloaded)
+      }
     }))
   }
 }
@@ -432,6 +440,7 @@ function safeText (value, maxLength) {
 }
 
 module.exports = {
+  SMART_ASSIGNMENT_PROVIDER_DEADLINE_MS,
   explainSmartAssignment,
   buildAssignmentExplanations
 }

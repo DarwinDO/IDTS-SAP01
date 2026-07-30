@@ -35,7 +35,12 @@ class SafeAiProvider {
   }
 
   structured (request = {}) {
-    return this.#run('structured', request, () => this.delegate.structured(sanitizeStructuredRequest(request, this.config)))
+    return this.#run(
+      'structured',
+      request,
+      () => this.delegate.structured(sanitizeStructuredRequest(request, this.config)),
+      operationTimeoutMs(this.config, request)
+    )
   }
 
   embedding (request = {}) {
@@ -51,7 +56,7 @@ class SafeAiProvider {
     })
   }
 
-  async #run (operation, request, execute) {
+  async #run (operation, request, execute, timeoutMs = operationTimeoutMs(this.config)) {
     const started = Date.now()
     const correlationId = request.correlationId || cds.utils.uuid()
     const featureType = safeFeatureType(request.featureType)
@@ -96,7 +101,7 @@ class SafeAiProvider {
     }
 
     try {
-      const delegateResult = await withTimeout(execute(), operationTimeoutMs(this.config))
+      const delegateResult = await withTimeout(execute(), timeoutMs)
       const normalized = normalizeDelegateResult(delegateResult)
       return this.#complete(successResult({
         operation,
@@ -185,7 +190,8 @@ function sanitizeStructuredRequest (request, config) {
   return {
     schemaName: sanitizeDiagnosticToken(request.schemaName, 'Suggestion'),
     instruction: redactSensitiveText(request.instruction, config.maxInputChars),
-    input: redactSensitiveObject(request.input, config.maxInputChars)
+    input: redactSensitiveObject(request.input, config.maxInputChars),
+    deadlineMs: boundedDeadlineMs(request.deadlineMs, config.timeoutMs)
   }
 }
 
@@ -268,10 +274,18 @@ function normalizeDelegateResult (value) {
   return { data: value, providerAlias: null, modelAlias: null, fallbackUsed: false }
 }
 
-function operationTimeoutMs (config) {
+function operationTimeoutMs (config, request = {}) {
+  const deadlineMs = boundedDeadlineMs(request.deadlineMs, config.timeoutMs)
+  if (deadlineMs) return deadlineMs + 50
   return config.provider === 'vercel' && config.fallbackEnabled
     ? config.timeoutMs * 2 + 50
     : config.timeoutMs
+}
+
+function boundedDeadlineMs (value, providerTimeoutMs) {
+  const number = Number(value)
+  if (!Number.isFinite(number) || number <= 0) return null
+  return Math.max(1, Math.min(Math.floor(number), providerTimeoutMs))
 }
 
 function failureResult ({ operation, featureType, correlationId, durationMs, code, summary, retryable, config }) {

@@ -171,6 +171,18 @@ the deadline for one model call, not permission to add another retry loop.
 Browser acceptance must still verify that the full OData request completes
 within the client/router deadline.
 
+## Shared request deadline
+
+Structured calls may provide an internal absolute deadline. Every Qwen compatibility retry and the single allowed OpenAI fallback reuses the remaining time from that same deadline; it does not receive a fresh timeout window. When the remaining time reaches zero, `AbortController` stops the active request and marks the timeout as not fallback-eligible. A fast HTTP 5xx can still use one fallback while time remains.
+
+Breakpoint order: `structured()` → `#withFallback()` → `#chatCompletion()` → `#request()` → `requestBudgetFor()`. Watch only the bounded deadline, remaining milliseconds, model alias, HTTP status and fallback flag; never inspect or log key, prompt or raw response.
+
+### Deadline dùng chung
+
+Structured request có thể truyền deadline nội bộ. Qwen compatibility retry và một OpenAI fallback được phép phải dùng phần thời gian còn lại của cùng deadline, không được nhận thêm một cửa sổ timeout mới. Khi hết thời gian, `AbortController` hủy request hiện tại và timeout không còn đủ điều kiện fallback. HTTP 5xx xảy ra sớm vẫn có thể fallback một lần nếu deadline còn thời gian.
+
+Thứ tự breakpoint: `structured()` → `#withFallback()` → `#chatCompletion()` → `#request()` → `requestBudgetFor()`. Chỉ quan sát deadline đã giới hạn, thời gian còn lại, model alias, HTTP status và fallback flag; không xem hoặc log key, prompt hay raw response.
+
 ## Giải thích tiếng Việt
 
 Qwen có thể trả JSON hợp lệ nhưng bọc kết quả dưới đúng tên schema, ví dụ

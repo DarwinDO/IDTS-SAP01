@@ -197,3 +197,15 @@ Trong IDTS-64, delegate duy nhất là mock provider. Provider thật phải đ�
 - Giữ error summary đã sanitize.
 - Không thêm provider thật nếu chưa có private config, test và security review.
 - Không persist raw prompt hoặc raw provider response ở đây.
+
+## Per-feature structured deadline
+
+`SafeAiProvider.structured()` accepts an internal `deadlineMs` supplied by trusted feature code. The value is bounded by the configured provider timeout, copied only to the provider adapter, and never placed in the model input. The outer safety timer allows a small cleanup margin so the adapter can abort its HTTP request and return the normalized `AI_TIMEOUT` envelope first.
+
+For Smart Assign this prevents SAP BTP AppRouter from returning HTTP 504 while a slow provider call is still running. The feature receives a safe failure envelope and builds deterministic candidate explanations; it still does not assign a developer.
+
+### Giải thích tiếng Việt
+
+`SafeAiProvider.structured()` nhận `deadlineMs` nội bộ từ code tính năng đáng tin cậy. Giá trị này bị giới hạn bởi timeout cấu hình, chỉ chuyển tới provider adapter và không nằm trong dữ liệu gửi cho model. Timer bên ngoài chừa một khoảng nhỏ để adapter hủy HTTP request rồi trả envelope `AI_TIMEOUT` an toàn.
+
+Với Smart Assign, cơ chế này giúp backend trả explanation deterministic trước khi AppRouter cắt request thành HTTP 504. Nó không tự chọn hoặc tự assign Developer.

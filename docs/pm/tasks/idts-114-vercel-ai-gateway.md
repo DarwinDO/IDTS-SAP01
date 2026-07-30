@@ -105,3 +105,10 @@ No S3, Brevo, database schema, UI workflow, automatic classification/assignment,
   embedding input. Ponytail review result: `Lean already. Ship.`
 - SAP BTP synthetic batch proof, selective service deployment, sequential live
   acceptance, and responsive UI PR remain pending. IDTS-114 stays In Progress.
+
+## 2026-07-30 Smart Assign AppRouter timeout follow-up
+
+- Sequential PM acceptance proved Qwen completed `ASSIGNMENT_EXPLANATION` successfully in `30,495 ms`, but AppRouter returned HTTP 504 at approximately 30 seconds before the CAP result reached the UI.
+- The minimal local correction gives Smart Assign a shared 24-second provider deadline, limits provider input to ten candidates and a compact workload allowlist, and returns deterministic explanations when the deadline expires. Deadline exhaustion does not start OpenAI; an early HTTP 5xx can still use one bounded fallback while time remains.
+- Focused tests pass at IDTS-114 `58/58` and IDTS-69 `9/9`; all requested AI regressions, CAP compile, secret/process gates, AI DevKit and `git diff --check` pass. Evidence: `docs/pm/evidence/idts-114/smart-assign-timeout/local-verification-20260730.md`.
+- Selective service deployment and PM browser re-test remain pending. Tester/Developer role evidence remains deferred, so IDTS-114 stays In Progress.
