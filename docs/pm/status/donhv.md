@@ -4981,3 +4981,13 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   it is absent from the root dependency runtime. Classification: tooling/configuration
   issue, not a product regression. Status: UI5 MCP lint passed for all changed
   controllers; do not add or change dependencies in this urgent product patch.
+- 2026-07-30 PR gate observation: PR #234 `qa-depth-gate` failed after the
+  local verification passed. Classification: process/CI gate investigation,
+  not yet a product defect. Status: merge and BTP deployment are paused while
+  the exact GitHub Action log is inspected; no bypass will be used.
+- 2026-07-30 PR gate resolution: the GitHub log showed only missing structured
+  `Ownership Knowledge Gate` fields in the PR body. The code and evidence did
+  not fail. The PR body now records the existing DonHV 90% PASS evidence
+  (`docs/learning/progress/donhv.md` and IDTS-90 evidence); local
+  `check-pr-depth --stdin` PASS. Fresh remote gate is pending. Classification:
+  process issue fixed; no product/runtime change.
