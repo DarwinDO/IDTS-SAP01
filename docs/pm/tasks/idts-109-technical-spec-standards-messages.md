@@ -105,7 +105,19 @@ login/profile, dashboard/monitoring, notification UI and AI traces.
 - Branch push succeeded:
   `origin/docs/idts-109-drive-doc-review-datdt` at reconciliation commit
   `b54319d`.
-- Draft PR creation is temporarily blocked because the GitHub CLI token is invalid
-  and the Codex in-app browser requires DatDT to sign in. No credential should be
-  shared in chat. After sign-in, create the Draft PR against `dev`, request DonHV,
-  and link it from IDTS-109.
+- GitHub CLI authentication remains invalid, but DatDT signed in through the Codex
+  in-app browser, which removed the PR-creation blocker without exposing credentials.
+
+## 2026-07-31 Draft PR and DonHV review handoff
+
+- Created Draft PR
+  [#240](https://github.com/DarwinDO/IDTS-SAP01/pull/240) from
+  `docs/idts-109-drive-doc-review-datdt` into `dev`.
+- Requested review from GitHub user `DarwinDO` (DonHV); GitHub shows
+  `Awaiting requested review from DarwinDO`.
+- The PR remains Draft and retains the post-`dev`-sync delta-review, OfficeCLI and
+  IDTS-115 partial-acceptance limitations.
+- No official Google Drive artifact was modified. DonHV remains the final workbook
+  integrator and Drive synchronizer after review.
+- Next handoff: DatDT confirms the post-`dev`-sync delta; DonHV reviews PR #240 and
+  decides final workbook integration and Drive synchronization.
