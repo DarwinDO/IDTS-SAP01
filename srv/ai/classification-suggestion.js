@@ -21,6 +21,7 @@ const FIELD_DEFS = [
   {
     key: 'sapModule',
     label: 'SAP Module',
+    referencePrefix: 'SM',
     catalogKey: 'sapModules',
     sourceID: 'sapModule_ID',
     providerKeys: ['sapModule', 'sapModuleID', 'sapModuleCode', 'sapModuleName']
@@ -28,6 +29,7 @@ const FIELD_DEFS = [
   {
     key: 'applicationComponent',
     label: 'Application Component',
+    referencePrefix: 'AC',
     catalogKey: 'applicationComponents',
     sourceID: 'applicationComponent_ID',
     providerKeys: ['applicationComponent', 'applicationComponentID', 'applicationComponentCode', 'applicationComponentName']
@@ -35,6 +37,7 @@ const FIELD_DEFS = [
   {
     key: 'defectCategory',
     label: 'Defect Category',
+    referencePrefix: 'DC',
     catalogKey: 'defectCategories',
     sourceID: 'defectCategory_ID',
     providerKeys: ['defectCategory', 'defectCategoryID', 'defectCategoryCode', 'defectCategoryName']
@@ -42,6 +45,7 @@ const FIELD_DEFS = [
   {
     key: 'priority',
     label: 'Priority',
+    referencePrefix: 'P',
     catalogKey: 'priorityValues',
     sourceCode: 'priority_code',
     providerKeys: ['priority', 'priorityCode', 'priorityName']
@@ -49,6 +53,7 @@ const FIELD_DEFS = [
   {
     key: 'severity',
     label: 'Severity',
+    referencePrefix: 'S',
     catalogKey: 'severityValues',
     sourceCode: 'severity_code',
     providerKeys: ['severity', 'severityCode', 'severityName']
@@ -74,6 +79,7 @@ async function suggestClassification (req, entities, dependencies = {}) {
     instruction: [
       'Suggest existing IDTS catalog values for bug classification.',
       'Return only values from the provided catalogs.',
+      'For each selected value, return the exact catalogRef from its field catalog. Do not return UUIDs or free-text values.',
       'Include confidence between 0 and 1 and short business-facing reasons.',
       'Do not invent catalog values and do not include private data.'
     ].join(' '),
@@ -179,7 +185,7 @@ function buildClassificationSuggestions ({ input, catalogs, providerResult }) {
 
 function resolveProviderSuggestion ({ field, raw, catalogs, providerStatus }) {
   // Parse output của một field, tìm row catalog thật và tạo confidence/reason an toàn.
-  const row = findCatalogRow(catalogs[field.catalogKey], raw)
+  const row = findCatalogRow(catalogs[field.catalogKey], raw, field)
   const confidence = confidenceFor(raw)
 
   if (!row) {
@@ -188,6 +194,7 @@ function resolveProviderSuggestion ({ field, raw, catalogs, providerStatus }) {
       providerStatus,
       confidence,
       status: 'INVALID_PROVIDER_VALUE',
+      suggestionSource: 'NONE',
       reason: `${field.label} suggestion is not an active IDTS catalog value.`,
       requiresReview: true
     })
@@ -199,6 +206,7 @@ function resolveProviderSuggestion ({ field, raw, catalogs, providerStatus }) {
       providerStatus,
       confidence,
       status: 'INVALID_PROVIDER_VALUE',
+      suggestionSource: 'NONE',
       reason: `${field.label} suggestion exists but is inactive.`,
       requiresReview: true
     })
@@ -211,6 +219,7 @@ function resolveProviderSuggestion ({ field, raw, catalogs, providerStatus }) {
     providerStatus,
     confidence,
     status,
+    suggestionSource: 'AI',
     reason: safeReason(raw.reason) || defaultReason(field, row, confidence),
     requiresReview: true
   })
@@ -220,7 +229,7 @@ function fallbackSuggestion ({ field, input, catalogs, providerStatus }) {
   // Chấm keyword/context local khi provider unavailable; vẫn yêu cầu user review trước khi áp dụng.
   const sourceValue = sourceValueFor(field, input)
   if (sourceValue) {
-    const existing = findCatalogRow(catalogs[field.catalogKey], { id: sourceValue, code: sourceValue, name: sourceValue })
+    const existing = findCatalogRow(catalogs[field.catalogKey], { id: sourceValue, code: sourceValue, name: sourceValue }, field)
     if (existing?.active !== false) {
       return suggestionRow({
         field,
@@ -228,6 +237,7 @@ function fallbackSuggestion ({ field, input, catalogs, providerStatus }) {
         providerStatus,
         confidence: 0.52,
         status: 'LOW_CONFIDENCE',
+        suggestionSource: 'RULES',
         reason: `Uses the current ${field.label.toLowerCase()} on the bug as a review starting point.`,
         requiresReview: true
       })
@@ -249,6 +259,7 @@ function fallbackSuggestion ({ field, input, catalogs, providerStatus }) {
       field,
       providerStatus,
       status: providerStatus === 'SUCCESS' ? 'NO_SUGGESTION' : providerStatus,
+      suggestionSource: 'NONE',
       reason: providerStatus === 'SUCCESS'
         ? `No safe ${field.label.toLowerCase()} suggestion met the review threshold.`
         : safeProviderReason(providerStatus),
@@ -263,6 +274,7 @@ function fallbackSuggestion ({ field, input, catalogs, providerStatus }) {
     providerStatus,
     confidence,
     status: 'LOW_CONFIDENCE',
+    suggestionSource: 'RULES',
     reason: `Deterministic fallback matched bug text to ${field.label.toLowerCase()} catalog terms.`,
     requiresReview: true
   })
@@ -341,6 +353,7 @@ async function recordClassificationAudit ({ tx, req, entities, input, provider, 
         valueName: row.valueName || null,
         confidence: row.confidence ?? null,
         status: row.status,
+        suggestionSource: row.suggestionSource,
         reason: row.reason
       }))
     }
@@ -364,11 +377,13 @@ function normalizeProviderValue (value) {
     return { hasValue: true, code: cleanCode(value), name: cleanText(value), confidence: null, reason: null }
   }
   if (typeof value !== 'object') return { hasValue: false }
+  const catalogRef = cleanCode(value.catalogRef || value.reference)
   const id = cleanText(value.ID || value.id || value.valueID)
   const code = cleanCode(value.code || value.valueCode || value.Code)
   const name = cleanText(value.name || value.valueName || value.label || value.text)
   return {
-    hasValue: Boolean(id || code || name),
+    hasValue: Boolean(catalogRef || id || code || name),
+    catalogRef,
     id,
     code,
     name,
@@ -377,11 +392,21 @@ function normalizeProviderValue (value) {
   }
 }
 
-function findCatalogRow (rows, raw) {
-  // Match provider code/name không phân biệt hoa thường nhưng chỉ return row active đã đọc từ DB.
+function findCatalogRow (rows, raw, field) {
+  // Ưu tiên catalogRef ngắn; code/name chỉ giữ tương thích mock/legacy, không gửi ID cho provider mới.
+  const catalogRef = cleanCode(raw.catalogRef)
   const id = cleanText(raw.id)
   const code = cleanCode(raw.code)
   const name = normalizeText(raw.name)
+
+  const activeRows = rows.filter(row => row.active !== false)
+  const referenced = activeRows.find((row, index) => catalogRefFor(field, index) === catalogRef)
+  if (
+    catalogRef &&
+    referenced &&
+    (!code || cleanCode(referenced.code) === code) &&
+    (!name || normalizeText(referenced.name) === name)
+  ) return referenced
 
   return rows.find(row => {
     if (id && normalizeText(row.ID) === normalizeText(id)) return true
@@ -417,13 +442,13 @@ function buildProviderBugInput (input) {
 }
 
 function buildProviderCatalogInput (catalogs) {
-  // Gửi danh sách code/name active để model chọn trong closed set thay vì tự bịa code.
-  return Object.fromEntries(Object.entries(catalogs).map(([key, rows]) => [
-    key,
-    rows
+  // Provider chỉ nhận ref ngắn + label/code; UUID ở catalog không cần rời khỏi backend.
+  return Object.fromEntries(FIELD_DEFS.map(field => [
+    field.catalogKey,
+    (catalogs[field.catalogKey] || [])
       .filter(row => row.active !== false)
-      .map(row => ({
-        ID: row.ID || null,
+      .map((row, index) => ({
+        catalogRef: catalogRefFor(field, index),
         code: row.code || null,
         name: row.name || null,
         type: row.componentType || row.categoryType || null
@@ -431,7 +456,11 @@ function buildProviderCatalogInput (catalogs) {
   ]))
 }
 
-function suggestionRow ({ field, row = null, providerStatus, confidence = null, status, reason, requiresReview }) {
+function catalogRefFor (field, index) {
+  return field && field.referencePrefix ? `${field.referencePrefix}${index + 1}` : ''
+}
+
+function suggestionRow ({ field, row = null, providerStatus, confidence = null, status, suggestionSource, reason, requiresReview }) {
   // Dựng response row thống nhất; `requiresReview` luôn bảo vệ quyết định cuối của user.
   return {
     field: field.key,
@@ -442,6 +471,7 @@ function suggestionRow ({ field, row = null, providerStatus, confidence = null, 
     confidence: confidence === null || Number.isNaN(Number(confidence)) ? null : roundConfidence(confidence),
     reason: safeReason(reason),
     status,
+    suggestionSource: suggestionSource === 'AI' ? 'AI' : suggestionSource === 'RULES' ? 'RULES' : 'NONE',
     providerStatus,
     requiresReview: Boolean(requiresReview)
   }
@@ -540,5 +570,6 @@ module.exports = {
   suggestClassification,
   buildClassificationSuggestions,
   extractProviderValue,
-  findCatalogRow
+  findCatalogRow,
+  buildProviderCatalogInput
 }

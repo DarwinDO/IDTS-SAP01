@@ -1,5 +1,9 @@
 # `srv/service.cds` - IDTS-69 Smart Assignment Explanation supplemental note
 
+## IDTS-114 response provenance fields (2026-07-30)
+
+`SmartAssignmentExplanationCandidate.explanationSource` and `ClassificationSuggestionCandidate.suggestionSource` are additive response-only fields. They do not add a HANA column. `AI` means a validated provider row mapped through a short backend reference; `RULES` means deterministic guidance; `NONE` means no safe suggestion. UI uses them only for provenance, never authorization or mutation.
+
 ## English
 
 ### Why this supplemental note exists

@@ -323,9 +323,10 @@ sap.ui.define([
                                 })
                             ]
                         }).addStyleClass("sapUiSmallMarginBottom"),
-                        section(getText(view, "handoffSummarySummaryLabel"), "{handoffSummary>/summary}"),
+                        section(getText(view, "handoffSummaryGeneratedOverviewLabel"), "{handoffSummary>/summary}"),
                         new VBox({
                             items: [
+                                new Label({ text: getText(view, "handoffSummaryVerifiedDataLabel"), design: "Bold" }),
                                 new HBox({
                                     wrap: "Wrap",
                                     items: [
@@ -352,8 +353,8 @@ sap.ui.define([
                             ]
                         }).addStyleClass("sapUiSmallMarginBottom"),
                         section(getText(view, "handoffSummaryMissingLabel"), "{handoffSummary>/missingInformation}"),
-                        listSection(getText(view, "handoffSummaryCommentsLabel"), "handoffSummary>/commentItems"),
-                        listSection(getText(view, "handoffSummaryEventsLabel"), "handoffSummary>/eventItems"),
+                        listSection(getText(view, "handoffSummaryVerifiedCommentsLabel"), "handoffSummary>/commentItems"),
+                        listSection(getText(view, "handoffSummaryVerifiedEventsLabel"), "handoffSummary>/eventItems"),
                         new Label({
                             text: getText(view, "handoffSummaryNextActionLabel"),
                             design: "Bold"

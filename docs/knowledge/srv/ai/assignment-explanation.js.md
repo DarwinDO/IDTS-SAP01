@@ -1,5 +1,11 @@
 # `srv/ai/assignment-explanation.js`
 
+## IDTS-114 stable candidate-reference contract (2026-07-30)
+
+The provider no longer receives `developerProfileID` UUID values. After IDTS reads and sorts eligible candidates, it assigns backend-only references `C1`, `C2`, and so on. `buildProviderInput()` sends only `candidateRef` plus allow-listed facts. The provider must return that exact ref; `buildAssignmentExplanations()` maps it back to the real candidate in memory.
+
+Returned OData rows retain `developerProfileID` for the final user-selected assignment, but now include `explanationSource`: `AI` only for a mapped provider explanation and `RULES` for deterministic guidance. Debug `buildProviderInput()` then `providerRowsByCandidateRef()`; never infer model output merely from 55% or 72% confidence.
+
 ## IDTS-97 operational evidence
 
 `recordAssignmentAudit()` stores only normalized provider status and duration for the feature-level audit. Candidate personal/contact data, prompt, raw response, and error detail are not operational metric fields.

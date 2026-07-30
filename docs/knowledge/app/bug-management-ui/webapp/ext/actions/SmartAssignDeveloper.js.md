@@ -1,5 +1,9 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/actions/SmartAssignDeveloper.js`
 
+## IDTS-114 explanation provenance (2026-07-30)
+
+`applyAssignmentExplanations()` now renders **AI-generated explanation** only when backend returns `explanationSource = AI`. A deterministic row renders **Rules-based guidance** and does not display a model-confidence claim. This is display-only: selecting a candidate still requires the explicit Assign action and CAP validation.
+
 ## IDTS-115 draft classification synchronization
 
 Before candidate lookup, `synchronizeAssignmentContext()` submits pending changes through the model update group, refreshes the Bug context, and re-reads `applicationComponent_ID`, `defectCategory_ID`, and backend-derived `componentCategory_ID`. A missing pair and an invalid active mapping use different user messages. An already-derived component category remains authoritative and opens the picker without unnecessary rejection.

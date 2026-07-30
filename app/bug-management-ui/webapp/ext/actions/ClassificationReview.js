@@ -315,6 +315,26 @@ sap.ui.define([
         return getText(view, "classificationReviewNotSet");
     }
 
+    function sourcePresentation(row, view) {
+        // Fallback là safety net theo rule, không được trình bày như đề xuất do AI sinh ra.
+        if (row.suggestionSource === "AI") {
+            return {
+                text: getText(view, "classificationReviewSourceAi"),
+                state: "Information"
+            };
+        }
+        if (row.suggestionSource === "RULES") {
+            return {
+                text: getText(view, "classificationReviewSourceRules"),
+                state: "Warning"
+            };
+        }
+        return {
+            text: getText(view, "classificationReviewSourceUnavailable"),
+            state: "None"
+        };
+    }
+
     function enrichSuggestion(row, bug, view) {
         // Ghép kết quả backend với giá trị hiện tại thành một row dialog; không mutate Bug context.
         var review = AiReviewUi.decorateResult({
@@ -325,6 +345,7 @@ sap.ui.define([
         var current = bug.currentValues && bug.currentValues[row.field];
         var suggested = row.valueName || row.valueCode;
         var confidence = Number(row.confidence);
+        var source = sourcePresentation(row, view);
 
         return {
             fieldLabel: row.fieldLabel || getText(view, "classificationReviewUnknownField"),
@@ -332,7 +353,9 @@ sap.ui.define([
             suggestedValue: suggested || getText(view, "classificationReviewNoSafeSuggestion"),
             statusText: statusText(row, view),
             statusState: stateFor(row),
-            confidenceText: Number.isFinite(confidence)
+            suggestionSourceText: source.text,
+            suggestionSourceState: source.state,
+            confidenceText: row.suggestionSource === "AI" && Number.isFinite(confidence)
                 ? getText(view, "classificationReviewConfidence", [Math.round(confidence * 100)])
                 : "",
             reason: review.explanation
@@ -499,6 +522,10 @@ sap.ui.define([
                     }),
                     new VBox({
                         items: [
+                            new ObjectStatus({
+                                text: "{classificationReview>suggestionSourceText}",
+                                state: "{classificationReview>suggestionSourceState}"
+                            }),
                             new ObjectStatus({
                                 text: "{classificationReview>statusText}",
                                 state: "{classificationReview>statusState}"
