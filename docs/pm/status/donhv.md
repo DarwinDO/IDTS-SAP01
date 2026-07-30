@@ -4915,3 +4915,10 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   issue, not an evidence or product failure. Status: corrected to the existing
   DonHV 90% PASS declaration and a documentation-only follow-up push will
   trigger the fresh normal gate; no Knowledge Gate is repeated or bypassed.
+- 2026-07-30 PR #232 QA-depth evidence-format finding: the corrected Evidence
+  line still wrapped each repository path in Markdown backticks. The gate's
+  strict path check expects whitespace or start-of-line immediately before
+  `docs/`, so the paths were valid but not machine-recognized. Classification:
+  process/parser-format issue. Status: removed only the backticks from the
+  twelve-field declaration, retained the same evidence locations, and pushed a
+  documentation-only synchronize event; no product or evidence content changed.
