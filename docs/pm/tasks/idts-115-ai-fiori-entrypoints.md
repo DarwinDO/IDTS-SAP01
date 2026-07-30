@@ -144,4 +144,6 @@ Evidence: `docs/pm/evidence/idts-115/`.
   drafts backed by an active Bug retain the AI entry points.
 - Red regression evidence failed before the correction and IDTS-115 now passes
   `193/193`. Manifest validation and the UI5 production build pass locally.
-- SAP BTP visual verification remains pending; IDTS-115 stays In Progress.
+- The matching SAP BTP application content and service runtime are deployed at
+  merge SHA `5476479312986412739fbff3cfa6da29acc7905d`. PM visual verification
+  remains pending; IDTS-115 stays In Progress.
