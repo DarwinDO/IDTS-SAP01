@@ -131,3 +131,17 @@ Evidence: `docs/pm/evidence/idts-115/`.
 - The manifest-level custom field definitions now use the draft-state expression `IsActiveEntity === true || HasActiveEntity === true`. This hides both the AI button and its generated label on a root New Bug draft while preserving the actions for active Bugs and edit drafts backed by an active Bug.
 - Existing controller guards remain in place, so a draft-only UUID cannot be submitted as an active AI source even if an action is triggered outside the normal UI.
 - Local IDTS-115 checks, UI5 production build and manifest validation pass. PM browser verification after the selective UI deployment remains required; Tester/Developer role evidence is still deferred, so IDTS-115 stays In Progress.
+
+## 2026-07-30 post-deploy generated-label follow-up
+
+- Browser review confirmed that the fragment-level buttons were hidden on a
+  root New Bug draft, but Fiori Elements still rendered the generated custom
+  field labels. The label is owned by the manifest field definition, not by
+  the fragment control.
+- The manifest now applies the same draft-state condition to both the field
+  label and the existing field visibility:
+  `IsActiveEntity === true || HasActiveEntity === true`. Active Bugs and edit
+  drafts backed by an active Bug retain the AI entry points.
+- Red regression evidence failed before the correction and IDTS-115 now passes
+  `193/193`. Manifest validation and the UI5 production build pass locally.
+- SAP BTP visual verification remains pending; IDTS-115 stays In Progress.

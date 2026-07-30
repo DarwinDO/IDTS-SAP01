@@ -57,6 +57,11 @@ matches(
   manifest,
   /"IdtsClassificationReview"\s*:\s*\{[\s\S]{0,180}?"visible"\s*:\s*"\{= \$\{IsActiveEntity\} === true \|\| \$\{HasActiveEntity\} === true \}"/
 )
+matches(
+  'classification label follows the persisted-source draft state',
+  manifest,
+  /"IdtsClassificationReview"\s*:\s*\{[\s\S]{0,180}?"label"\s*:\s*"\{= \$\{IsActiveEntity\} === true \|\| \$\{HasActiveEntity\} === true \? \$\{i18n>classificationReviewFieldLabel\} : '' \}"/
+)
 includes(
   'classification has a defensive persisted-source guard',
   classification,
@@ -100,6 +105,11 @@ matches(
   'manifest hides the complete Similar Bugs custom field and its label on a root create draft',
   manifest,
   /"IdtsSimilarBugReview"\s*:\s*\{[\s\S]{0,180}?"visible"\s*:\s*"\{= \$\{IsActiveEntity\} === true \|\| \$\{HasActiveEntity\} === true \}"/
+)
+matches(
+  'similar bugs label follows the persisted-source draft state',
+  manifest,
+  /"IdtsSimilarBugReview"\s*:\s*\{[\s\S]{0,180}?"label"\s*:\s*"\{= \$\{IsActiveEntity\} === true \|\| \$\{HasActiveEntity\} === true \? \$\{i18n>similarBugReviewFieldLabel\} : '' \}"/
 )
 includes(
   'similar bugs sends a source ID only for an active bug or its edit draft',

@@ -20,6 +20,7 @@ sap.ui.define([
     "sap/m/ExpandableText",
     "sap/m/MessageBox",
     "sap/ui/model/json/JSONModel",
+    "sap/ui/core/format/DateFormat",
     "sap/ui/Device",
     "../ai/AiReviewUi",
     "../ai/AiSuggestionReview"
@@ -37,6 +38,7 @@ sap.ui.define([
     ExpandableText,
     MessageBox,
     JSONModel,
+    DateFormat,
     Device,
     AiReviewUi,
     AiSuggestionReview
@@ -44,6 +46,8 @@ sap.ui.define([
     "use strict";
 
     var INTERNAL_COPY_PATTERN = /\b(prompt|token|model|provider|architecture|debug|stack|sql|password|credential|secret|api key|bearer|endpoint)\b/i;
+    var TIMELINE_DATE_FORMAT = DateFormat.getDateTimeInstance({ style: "medium/short" });
+    var TIMELINE_PREFIX_PATTERN = /^(?:[-*\u2022]|\d+[.)])?\s*\[([^\]]+)\]\s*(.*)$/;
 
     function isBugContext(context) {
         // Chỉ nhận root /Bugs(...) để summary luôn thuộc Bug đang mở.
@@ -132,7 +136,7 @@ sap.ui.define([
         if (Number.isNaN(date.getTime())) {
             return String(value);
         }
-        return date.toLocaleString();
+        return TIMELINE_DATE_FORMAT.format(date);
     }
 
     function section(labelKey, textPath) {
@@ -153,7 +157,7 @@ sap.ui.define([
         var text = String(value || "").trim();
         var items = text.split(/\r?\n/).map(function (line) {
             var normalized = line.trim();
-            var timestampMatch = normalized.match(/^\[([^\]]+)\]\s*(.*)$/);
+            var timestampMatch = normalized.match(TIMELINE_PREFIX_PATTERN);
             var body = timestampMatch ? timestampMatch[2] : normalized;
             var actorMatch = body.match(/^(.+?)(?:\s+\(([^)]+)\))?(?:\s+(?:\u00e2\u20ac\u201d|\u2014|-)\s+([^:]+))?:\s*(.*)$/);
             return {

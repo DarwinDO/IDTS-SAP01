@@ -121,3 +121,17 @@ No S3, Brevo, database schema, UI workflow, automatic classification/assignment,
 - `AI_RATE_LIMITED` is shown as a safe temporary-busy warning rather than a provider diagnostic.
 - Local focused and integrated regressions, CAP compile, UI5 build, manifest validation, targeted UI5 lint, targeted ESLint, secret/process gates, AI DevKit and `git diff --check` pass. The existing pre-V2 manifest warning remains separate application debt.
 - SAP BTP UI deployment, PM browser visual/no-mutation evidence and the deferred Tester/Developer matrix remain open; IDTS-114 stays In Progress.
+
+## 2026-07-30 post-deploy Handoff timestamp follow-up
+
+- Browser review found that comment/event lines prefixed by a bullet or list
+  number could bypass the existing `[timestamp]` parser and display raw ISO
+  text. The finding is a presentation defect only; the handoff contract,
+  grounding rules and lifecycle behavior are unchanged.
+- The focused correction accepts optional bullet/number prefixes and formats
+  valid timestamps with the UI5 locale-aware `DateFormat` API. Invalid or
+  missing timestamps continue to render without technical exceptions.
+- Red regression evidence failed before the correction and IDTS-76 now passes
+  `118/118`. UI5 production build, manifest validation, targeted lint and the
+  integrated AI regressions also pass locally.
+- SAP BTP visual verification remains pending; IDTS-114 stays In Progress.

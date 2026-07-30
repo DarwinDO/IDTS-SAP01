@@ -1,5 +1,19 @@
 # Knowledge: `app/bug-management-ui/webapp/manifest.json`
 
+## IDTS-115 root-create AI label guard
+
+### English
+
+Fiori Elements renders a custom field label separately from the fragment content. Hiding only `SimilarBugReviewField.fragment.xml` or `ClassificationReviewField.fragment.xml` therefore leaves an empty label on a brand-new draft. The two custom-field `label` bindings now use the same persisted-source condition as their content: the label is present for an active Bug or an edit draft with an active source, and resolves to an empty string for a root create draft.
+
+Debug order: inspect `IsActiveEntity` and `HasActiveEntity` on the Object Page context, then inspect the custom field `label` binding, and finally inspect the fragment wrapper `visible` binding. Do not use DOM hiding or CSS selectors; those approaches bypass Fiori Elements form and accessibility behavior.
+
+### Vietnamese
+
+Fiori Elements sinh label của custom field tách riêng khỏi nội dung fragment. Vì vậy, nếu chỉ ẩn `SimilarBugReviewField.fragment.xml` hoặc `ClassificationReviewField.fragment.xml`, màn hình tạo Bug mới vẫn còn label rỗng. Hai binding `label` giờ dùng cùng điều kiện nguồn đã lưu như nội dung: label hiện với Bug active hoặc edit draft có active source, và trở thành chuỗi rỗng với root create draft.
+
+Thứ tự debug: xem `IsActiveEntity` và `HasActiveEntity` trên Object Page context, xem binding `label` của custom field, rồi xem binding `visible` của fragment wrapper. Không ẩn bằng DOM hoặc CSS selector vì sẽ đi vòng qua form/accessibility của Fiori Elements.
+
 ## English
 
 ### What this file is for
