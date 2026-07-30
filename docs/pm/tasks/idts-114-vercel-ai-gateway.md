@@ -192,3 +192,17 @@ No S3, Brevo, database schema, UI workflow, automatic classification/assignment,
 - The focused remediation forwards a bounded per-feature JSON Schema. Classification can select only active short catalog references (`SM/AC/DC/P/S`), and Smart Assign can explain only backend-issued candidate references (`C1..Cn`). UUIDs remain backend-only.
 - Local verification PASS: provider 59/59, Classification 36/36, Smart Assign 13/13, AI provider 38/38, Handoff 45/45, AI security 31/31, CAP compile, secret/process gates, AI DevKit 5/5 and `git diff --check`.
 - No provider/model/key, OData contract, HANA schema, role, workflow or UI contract changed. Fresh BTP feature calls remain required before declaring the visual defect closed.
+
+## 2026-07-30 Z.AI feature-contract live result
+
+- PR #237 merged at `4dada2eb198d139bdab5e50b0102b540102406c3`
+  and the focused CAP service rollout is healthy.
+- Fresh PM browser calls prove the feature contracts work:
+  Classification returns AI proposals for all five fields with individual
+  reasons/confidence, and eligible Smart Assign candidates return grounded
+  AI-generated explanations instead of the generic rules-based guidance.
+- Historical suggestion records remain unchanged by design; users must invoke
+  the feature again after deployment to create a suggestion under the new
+  contract.
+- No-mutation verification passed. The remaining blocker for closing IDTS-114
+  is the deferred Tester/Developer role matrix.

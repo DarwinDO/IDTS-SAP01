@@ -5031,3 +5031,24 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
 | Product defect | Live Z.AI calls for Classification and Smart Assign were audited as `SUCCESS`, but the UI still showed rules-based rows. Handoff Summary displayed AI content. | The shared Vercel adapter requested only a generic JSON object. Z.AI returned parseable JSON, but Classification could not map exact catalog references and Smart Assign could not map backend-issued candidate references. | Fixed locally with feature-specific JSON Schema using short catalog references (`SM1`, `AC1`, etc.) and candidate references (`C1`, `C2`, etc.). Backend remains responsible for mapping to real IDs and validating business data. | Focused/integrated local suites PASS. Deploy service only after merge, then verify fresh BTP feature calls before closing the visual defect. |
 | Tooling issue | The first focused test run in the fresh worktree failed with `Cannot find module '@sap/cds'`. | The isolated worktree did not have `node_modules` installed. | Fixed by running `npm ci`; no product behavior or configuration was changed. | Focused rerun PASS: provider 59/59, Classification 36/36 and Smart Assign 13/13. |
 | Security/dependency finding | `npm ci` completed but npm audit reported 24 findings in the existing dependency graph: 1 low, 9 moderate, 13 high and 1 critical. | These findings come from the locked baseline dependency tree; this fix adds no dependency and does not alter `package-lock.json`. | Open baseline debt; not auto-fixed because `npm audit fix --force` could introduce unrelated breaking changes. | `npm run qa:secret-scan` PASS. Handle dependency upgrades in a separate reviewed work item. |
+
+## 2026-07-30 IDTS-114 Z.AI structured contract live verification
+
+- PR #237 merged normally at `4dada2eb198d139bdab5e50b0102b540102406c3`.
+  The CAP service was rebuilt from that SHA and deployed without the database
+  deployer or broad `cds deploy`. Health is HTTP 200 and protected anonymous
+  OData is HTTP 401.
+- Deployment tooling issue: the focused `cf push --no-route` removed the
+  existing direct route. The previous hostname was mapped back immediately and
+  reverified. Classification: deployment tooling issue, fixed in session; no
+  HANA schema or business-data impact.
+- PM browser acceptance PASS for fresh suggestions on `BUG-0011`.
+  Classification now returns five AI proposal rows with feature-specific
+  reasons and confidence 80–95%. Eligible Smart Assign candidates now show
+  candidate-specific `AI-generated explanation`; the unavailable backup
+  remains rules-based when no accepted AI explanation exists.
+- No-mutation PASS: no Developer was assigned, the temporary edit draft was
+  discarded, and the active Bug was not saved. Evidence:
+  `docs/pm/evidence/idts-114/zai-structured-contract/btp-live-verification-20260730.md`.
+- IDTS-114 remains In Progress only because the deferred Tester/Developer role
+  matrix is still incomplete.
