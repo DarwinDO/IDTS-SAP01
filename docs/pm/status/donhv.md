@@ -4873,3 +4873,10 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   normalizing only this edited file with the configured ESLint fixer. The
   targeted rerun exits `0`; only the pre-existing `max-params` warning remains,
   and the semantic diff stays limited to the timestamp parser/formatter.
+- 2026-07-30 PR #231 QA-depth declaration finding: the first CI run stopped at
+  PR-body validation because the Ownership Knowledge Gate section summarized
+  DonHV's existing PASS but omitted the parser's exact twelve field labels.
+  Classification: process issue; no code/build gate ran and no product defect
+  was introduced. Status: fixed by copying the complete existing DonHV PASS
+  declaration and evidence paths into the PR body; rerun must pass normally
+  before merge, with no admin bypass.
