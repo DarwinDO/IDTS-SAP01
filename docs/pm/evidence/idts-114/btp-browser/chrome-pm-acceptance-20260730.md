@@ -65,3 +65,37 @@ Screenshots were reviewed interactively in the connected Chrome session. They we
 - Functional hotfix behavior is verified for the PM flow.
 - A follow-up UI PR is required for the responsive/readability defects.
 - Tester/Developer role evidence remains mandatory and deferred.
+
+## Classification fallback root-cause follow-up
+
+A read-only HANA audit after the Chrome run inspected only feature type,
+operation status, model alias, latency and creation time. The two latest
+Classification requests were `AI_PROVIDER_ERROR` for
+`alibaba/qwen3.7-flash`, with latencies of 1,164 ms and 1,385 ms. Earlier
+Classification requests include real Qwen `SUCCESS` rows at 25,766 ms and
+35,628 ms, so the integration is capable of returning primary-model output.
+
+Sanitized application diagnostics for the two failed Classification calls
+identify `VERCEL_GATEWAY_HTTP_429`, gateway reason `rate_limited`, and provider
+code `rate_limit_exceeded`. The runtime configuration is present and ready:
+Vercel provider enabled, Qwen primary enabled, OpenAI fallback enabled and a
+45-second timeout. No secret value was read.
+
+The request pattern contributes directly to this condition. Similar Bugs can
+currently send one source embedding request followed by embedding requests for
+up to 50 candidates with concurrency four. That burst occurred immediately
+before Classification in the PM run. Because the configured fallback also
+uses the same Vercel Gateway, it did not recover the final gateway-level rate
+limit. The UI therefore received the intentional deterministic safety fallback
+instead of a primary-model Classification result.
+
+Recommended order:
+
+1. Batch or aggressively prefilter Similar Bugs embeddings so one user action
+   cannot issue dozens of provider requests.
+2. Treat gateway rate-limit responses as a cooldown condition; do not amplify
+   the same Gateway limit with immediate fallback/retry requests.
+3. After cooldown, test Classification first and verify a new HANA audit row
+   with `operationStatus=SUCCESS` and the Qwen model alias.
+4. Then fix the dialog overflow, empty Create labels and Handoff date/copy
+   findings before completing the deferred role matrix.
