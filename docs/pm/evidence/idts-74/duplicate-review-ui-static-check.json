@@ -1,6 +1,6 @@
 {
   "task": "IDTS-74",
-  "checkedAt": "2026-07-29T18:44:58.035Z",
+  "checkedAt": "2026-07-30T05:49:00.416Z",
   "checks": [
     {
       "label": "Similar bug review field opens duplicate review from product UI",
@@ -239,6 +239,10 @@
       "pass": true
     },
     {
+      "label": "controller literal \"Information\" is not dev-facing copy",
+      "pass": true
+    },
+    {
       "label": "controller literal \"ACCEPTED\" is not dev-facing copy",
       "pass": true
     },
@@ -287,19 +291,15 @@
       "pass": true
     },
     {
-      "label": "controller literal \"SpaceBetween\" is not dev-facing copy",
-      "pass": true
-    },
-    {
-      "label": "controller literal \"Start\" is not dev-facing copy",
-      "pass": true
-    },
-    {
       "label": "controller literal \"{duplicateReview>bugNumber}\" is not dev-facing copy",
       "pass": true
     },
     {
       "label": "controller literal \"{duplicateReview>title}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"Wrap\" is not dev-facing copy",
       "pass": true
     },
     {
@@ -311,7 +311,7 @@
       "pass": true
     },
     {
-      "label": "controller literal \"Wrap\" is not dev-facing copy",
+      "label": "controller literal \"sapUiTinyMarginEnd\" is not dev-facing copy",
       "pass": true
     },
     {
@@ -351,15 +351,51 @@
       "pass": true
     },
     {
+      "label": "controller literal \"aiSuggestionReviewPending\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"Information\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"aiSuggestionReviewPending\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"aiSuggestionReviewAfterSave\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReviewLoadFailed\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"Error\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReviewUnauthorized\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReviewInvalidContext\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"Information\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReviewRetryableLoadFailed\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"Warning\" is not dev-facing copy",
+      "pass": true
+    },
+    {
       "label": "controller literal \"duplicateReviewDialogTitle\" is not dev-facing copy",
-      "pass": true
-    },
-    {
-      "label": "controller literal \"54rem\" is not dev-facing copy",
-      "pass": true
-    },
-    {
-      "label": "controller literal \"30rem\" is not dev-facing copy",
       "pass": true
     },
     {
@@ -376,6 +412,22 @@
     },
     {
       "label": "controller literal \"Information\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>/loadMessageText}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>/loadMessageType}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>/loadMessageVisible}\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"sapUiTinyMarginTop\" is not dev-facing copy",
       "pass": true
     },
     {
@@ -396,6 +448,14 @@
     },
     {
       "label": "controller literal \"sapUiSmallMargin\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"duplicateReviewRetryButton\" is not dev-facing copy",
+      "pass": true
+    },
+    {
+      "label": "controller literal \"{duplicateReview>/retryVisible}\" is not dev-facing copy",
       "pass": true
     },
     {
@@ -467,18 +527,6 @@
       "pass": true
     },
     {
-      "label": "controller literal \"aiSuggestionReviewPending\" is not dev-facing copy",
-      "pass": true
-    },
-    {
-      "label": "controller literal \"aiSuggestionReviewAfterSave\" is not dev-facing copy",
-      "pass": true
-    },
-    {
-      "label": "controller literal \"duplicateReviewLoadFailed\" is not dev-facing copy",
-      "pass": true
-    },
-    {
       "label": "controller literal \"duplicateReviewLoadFailed\" is not dev-facing copy",
       "pass": true
     },
@@ -528,6 +576,22 @@
     },
     {
       "label": "i18n.properties has duplicateReviewLoadFailed",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has duplicateReviewRetryableLoadFailed",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has duplicateReviewUnauthorized",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has duplicateReviewInvalidContext",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties has duplicateReviewRetryButton",
       "pass": true
     },
     {
@@ -591,6 +655,22 @@
       "pass": true
     },
     {
+      "label": "i18n.properties duplicateReviewRetryableLoadFailed has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties duplicateReviewUnauthorized has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties duplicateReviewInvalidContext has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties duplicateReviewRetryButton has user-facing copy",
+      "pass": true
+    },
+    {
       "label": "i18n.properties duplicateReviewAfterSave has user-facing copy",
       "pass": true
     },
@@ -640,6 +720,22 @@
     },
     {
       "label": "i18n_en.properties has duplicateReviewLoadFailed",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has duplicateReviewRetryableLoadFailed",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has duplicateReviewUnauthorized",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has duplicateReviewInvalidContext",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties has duplicateReviewRetryButton",
       "pass": true
     },
     {
@@ -700,6 +796,22 @@
     },
     {
       "label": "i18n_en.properties duplicateReviewLoadFailed has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties duplicateReviewRetryableLoadFailed has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties duplicateReviewUnauthorized has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties duplicateReviewInvalidContext has user-facing copy",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties duplicateReviewRetryButton has user-facing copy",
       "pass": true
     },
     {

@@ -197,6 +197,7 @@
                   "fields": {
                     "IdtsSimilarBugReview": {
                       "label": "{i18n>similarBugReviewFieldLabel}",
+                      "visible": "{= ${IsActiveEntity} === true || ${HasActiveEntity} === true }",
                       "template": "idts.bugmanagementui.ext.fragment.SimilarBugReviewField",
                       "position": {
                         "anchor": "DataField::description",
@@ -209,6 +210,7 @@
                   "fields": {
                     "IdtsClassificationReview": {
                       "label": "{i18n>classificationReviewFieldLabel}",
+                      "visible": "{= ${IsActiveEntity} === true || ${HasActiveEntity} === true }",
                       "template": "idts.bugmanagementui.ext.fragment.ClassificationReviewField",
                       "position": {
                         "anchor": "DataField::defectCategory_ID",

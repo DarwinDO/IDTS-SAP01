@@ -489,6 +489,8 @@ IDTS-79 uses native `controlConfiguration` field extensions instead:
 
 This keeps the review dialogs and backend contracts unchanged while placing each entry point inside the form where users need it.
 
+On a brand-new root draft, Fiori Elements creates the custom-field label outside the XML fragment. The manifest therefore applies the persisted-source visibility expression to the whole custom field, while the fragment keeps the same defensive visibility. This hides both the label and button until the draft has an active source Bug; edit drafts of active Bugs remain supported.
+
 ### Vietnamese
 
 IDTS-78 đã bỏ title nhìn thấy được của hai action row Similar Bug và Classification, nhưng manifest vẫn đăng ký chúng trong `content.body.sections`. Vì vậy Fiori Elements vẫn render mỗi row thành một block Object Page riêng.

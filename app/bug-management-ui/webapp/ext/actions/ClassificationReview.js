@@ -281,6 +281,7 @@ sap.ui.define([
         }
         if (
             status === "AI_DISABLED" ||
+            status === "AI_RATE_LIMITED" ||
             status === "AI_TIMEOUT" ||
             status === "AI_PROVIDER_ERROR" ||
             status === "AI_OUTPUT_UNSAFE" ||
@@ -407,6 +408,13 @@ sap.ui.define([
 
         function loadSuggestions() {
             state.setProperty("/busy", true);
+            state.setProperty("/rows", []);
+            state.setProperty("/suggestionID", null);
+            state.setProperty("/reviewActionEnabled", false);
+            state.setProperty("/applyActionEnabled", false);
+            state.setProperty("/reviewStateText", getText(view, "aiSuggestionReviewPending"));
+            state.setProperty("/reviewStateState", "Information");
+            state.setProperty("/reviewedByText", "");
             state.setProperty("/loadMessageVisible", false);
             state.setProperty("/retryVisible", false);
             return readClassificationSuggestions(model, bug)
@@ -448,30 +456,25 @@ sap.ui.define([
         }
 
         var table = new Table({
+            autoPopinMode: true,
             growing: true,
             growingThreshold: 5,
             noDataText: "{classificationReview>/noDataText}",
             columns: [
                 new Column({
-                    width: "10rem",
+                    importance: "High",
                     header: new Text({ text: getText(view, "classificationReviewFieldColumn") })
                 }),
                 new Column({
-                    width: "11rem",
-                    minScreenWidth: "Desktop",
-                    demandPopin: true,
+                    importance: "Medium",
                     header: new Text({ text: getText(view, "classificationReviewCurrentColumn") })
                 }),
                 new Column({
-                    width: "16rem",
-                    minScreenWidth: "Tablet",
-                    demandPopin: true,
+                    importance: "High",
                     header: new Text({ text: getText(view, "classificationReviewSuggestedColumn") })
                 }),
                 new Column({
-                    width: "8rem",
-                    minScreenWidth: "Desktop",
-                    demandPopin: true,
+                    importance: "Low",
                     header: new Text({ text: getText(view, "classificationReviewConfidenceColumn") })
                 })
             ]
@@ -509,10 +512,9 @@ sap.ui.define([
 
         var dialog = new Dialog({
             title: getText(view, "classificationReviewDialogTitle"),
-            contentWidth: "58rem",
-            contentHeight: "32rem",
             resizable: true,
             draggable: true,
+            horizontalScrolling: false,
             busy: "{classificationReview>/busy}",
             content: [
                 new VBox({

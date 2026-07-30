@@ -136,6 +136,16 @@ sap.ui.define([
         return [];
     }
 
+    function errorStatus(error) {
+        var status = error && (
+            error.status ||
+            error.statusCode ||
+            error.httpStatus ||
+            error.cause && (error.cause.status || error.cause.statusCode)
+        );
+        return Number(status) || 0;
+    }
+
     function enrichCandidate(row, view) {
         // Chuyển candidate backend thành row an toàn; explanation/status đi qua AiReviewUi.
         var review = AiReviewUi.decorateResult({
@@ -230,7 +240,11 @@ sap.ui.define([
             selectedCandidateBugID: null,
             selectedCandidateBugNumber: "",
             reviewAccepted: false,
-            duplicateConfirmed: false
+            duplicateConfirmed: false,
+            loadMessageVisible: false,
+            loadMessageText: "",
+            loadMessageType: "Information",
+            retryVisible: false
         });
         function updateConfirmEnabled() {
             state.setProperty(
@@ -316,23 +330,17 @@ sap.ui.define([
                     new VBox({
                         width: "100%",
                         items: [
-                            new HBox({
-                                justifyContent: "SpaceBetween",
-                                alignItems: "Start",
-                                items: [
-                                    new ObjectIdentifier({
-                                        title: "{duplicateReview>bugNumber}",
-                                        text: "{duplicateReview>title}"
-                                    }),
-                                    new ObjectStatus({
-                                        text: "{duplicateReview>scoreText}",
-                                        state: "{duplicateReview>reviewState}"
-                                    })
-                                ]
+                            new ObjectIdentifier({
+                                title: "{duplicateReview>bugNumber}",
+                                text: "{duplicateReview>title}"
                             }),
                             new HBox({
                                 wrap: "Wrap",
                                 items: [
+                                    new ObjectStatus({
+                                        text: "{duplicateReview>scoreText}",
+                                        state: "{duplicateReview>reviewState}"
+                                    }).addStyleClass("sapUiTinyMarginEnd"),
                                     new ObjectStatus({
                                         text: "{duplicateReview>statusName}",
                                         state: "None"
@@ -354,12 +362,68 @@ sap.ui.define([
             })
         });
 
+        function loadCandidates() {
+            state.setProperty("/busy", true);
+            state.setProperty("/rows", []);
+            state.setProperty("/suggestionID", null);
+            state.setProperty("/reviewActionEnabled", false);
+            state.setProperty("/reviewAccepted", false);
+            state.setProperty("/duplicateConfirmed", false);
+            state.setProperty("/selectedCandidateBugID", null);
+            state.setProperty("/selectedCandidateBugNumber", "");
+            state.setProperty("/reviewStateText", getText(view, "aiSuggestionReviewPending"));
+            state.setProperty("/reviewStateState", "Information");
+            state.setProperty("/reviewedByText", "");
+            state.setProperty("/loadMessageVisible", false);
+            state.setProperty("/retryVisible", false);
+            list.removeSelections(true);
+            return readSimilarBugs(model, bug)
+                .then(function (rows) {
+                    state.setProperty("/rows", rows.map(function (row) {
+                        return enrichCandidate(row, view);
+                    }));
+                    var suggestionID = rows[0] && rows[0].suggestionID;
+                    state.setProperty("/suggestionID", suggestionID || null);
+                    state.setProperty("/reviewActionEnabled", Boolean(suggestionID));
+                    state.setProperty(
+                        "/reviewStateText",
+                        suggestionID
+                            ? getText(view, "aiSuggestionReviewPending")
+                            : getText(view, "aiSuggestionReviewAfterSave")
+                    );
+                })
+                .catch(function (error) {
+                    var status = errorStatus(error);
+                    var unauthorized = status === 401 || status === 403;
+                    var invalidContext = status === 400;
+                    var retryable = status === 0 || status === 408 || status === 429 || status >= 500;
+                    var messageKey = "duplicateReviewLoadFailed";
+                    var messageType = "Error";
+                    if (unauthorized) {
+                        messageKey = "duplicateReviewUnauthorized";
+                    } else if (invalidContext) {
+                        messageKey = "duplicateReviewInvalidContext";
+                        messageType = "Information";
+                    } else if (retryable) {
+                        messageKey = "duplicateReviewRetryableLoadFailed";
+                        messageType = "Warning";
+                    }
+                    state.setProperty("/loadMessageText", getText(view, messageKey));
+                    state.setProperty("/loadMessageType", messageType);
+                    state.setProperty("/loadMessageVisible", true);
+                    state.setProperty("/retryVisible", retryable);
+                })
+                .finally(function () {
+                    state.setProperty("/busy", false);
+                    updateConfirmEnabled();
+                });
+        }
+
         var dialog = new Dialog({
             title: getText(view, "duplicateReviewDialogTitle"),
-            contentWidth: "54rem",
-            contentHeight: "30rem",
             resizable: true,
             draggable: true,
+            horizontalScrolling: false,
             busy: "{duplicateReview>/busy}",
             content: [
                 new VBox({
@@ -370,6 +434,12 @@ sap.ui.define([
                             type: "Information",
                             showIcon: true
                         }),
+                        new MessageStrip({
+                            text: "{duplicateReview>/loadMessageText}",
+                            type: "{duplicateReview>/loadMessageType}",
+                            showIcon: true,
+                            visible: "{duplicateReview>/loadMessageVisible}"
+                        }).addStyleClass("sapUiTinyMarginTop"),
                         new VBox({
                             items: [
                                 new ObjectStatus({
@@ -387,6 +457,11 @@ sap.ui.define([
                 }).addStyleClass("sapUiSmallMargin")
             ],
             buttons: [
+                new Button({
+                    text: getText(view, "duplicateReviewRetryButton"),
+                    visible: "{duplicateReview>/retryVisible}",
+                    press: loadCandidates
+                }),
                 new Button({
                     text: getText(view, "aiSuggestionAcceptButton"),
                     type: "Accept",
@@ -432,28 +507,7 @@ sap.ui.define([
         dialog.setModel(state, "duplicateReview");
         view.addDependent(dialog);
 
-        readSimilarBugs(model, bug)
-            .then(function (rows) {
-                state.setProperty("/rows", rows.map(function (row) {
-                    return enrichCandidate(row, view);
-                }));
-                var suggestionID = rows[0] && rows[0].suggestionID;
-                state.setProperty("/suggestionID", suggestionID || null);
-                state.setProperty("/reviewActionEnabled", Boolean(suggestionID));
-                state.setProperty(
-                    "/reviewStateText",
-                    suggestionID
-                        ? getText(view, "aiSuggestionReviewPending")
-                        : getText(view, "aiSuggestionReviewAfterSave")
-                );
-            })
-            .catch(function () {
-                MessageBox.error(getText(view, "duplicateReviewLoadFailed"));
-            })
-            .finally(function () {
-                state.setProperty("/busy", false);
-                updateConfirmEnabled();
-            });
+        loadCandidates();
 
         return dialog;
     }

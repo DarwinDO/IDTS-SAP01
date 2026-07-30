@@ -1,6 +1,6 @@
 {
   "task": "IDTS-75",
-  "checkedAt": "2026-07-29T18:44:58.488Z",
+  "checkedAt": "2026-07-30T05:49:00.552Z",
   "checks": [
     {
       "label": "classification review field opens the review dialog",
@@ -76,6 +76,10 @@
     },
     {
       "label": "manifest uses the classification review field fragment",
+      "pass": true
+    },
+    {
+      "label": "manifest hides the complete classification custom field on a root create draft",
       "pass": true
     },
     {

@@ -149,14 +149,23 @@ sap.ui.define([
         }).addStyleClass("sapUiSmallMarginBottom");
     }
 
-    function splitLines(value, fallback) {
+    function formatTimelineItems(value, fallback) {
         var text = String(value || "").trim();
         var items = text.split(/\r?\n/).map(function (line) {
-            return { text: line.trim() };
+            var normalized = line.trim();
+            var timestampMatch = normalized.match(/^\[([^\]]+)\]\s*(.*)$/);
+            var body = timestampMatch ? timestampMatch[2] : normalized;
+            var actorMatch = body.match(/^(.+?)(?:\s+\(([^)]+)\))?(?:\s+(?:\u00e2\u20ac\u201d|\u2014|-)\s+([^:]+))?:\s*(.*)$/);
+            return {
+                actor: actorMatch ? [actorMatch[1], actorMatch[2]].filter(Boolean).join(" · ") : "",
+                action: actorMatch && actorMatch[3] || "",
+                time: timestampMatch ? formatDate(timestampMatch[1]) : "",
+                text: actorMatch ? actorMatch[4] : body
+            };
         }).filter(function (item) {
             return Boolean(item.text);
         });
-        return items.length ? items : [{ text: fallback }];
+        return items.length ? items : [{ actor: "", action: "", time: "", text: fallback }];
     }
 
     function listSection(label, path) {
@@ -165,10 +174,34 @@ sap.ui.define([
             path: path,
             template: new CustomListItem({
                 content: [
-                    new ExpandableText({
-                        text: "{handoffSummary>text}",
-                        maxCharacters: 240,
-                        overflowMode: "InPlace"
+                    new VBox({
+                        items: [
+                            new HBox({
+                                wrap: "Wrap",
+                                items: [
+                                    new ObjectStatus({
+                                        text: "{handoffSummary>actor}",
+                                        state: "Information",
+                                        visible: "{= !!%{handoffSummary>actor} }"
+                                    }).addStyleClass("sapUiTinyMarginEnd"),
+                                    new ObjectStatus({
+                                        text: "{handoffSummary>action}",
+                                        state: "None",
+                                        visible: "{= !!%{handoffSummary>action} }"
+                                    }).addStyleClass("sapUiTinyMarginEnd"),
+                                    new Text({
+                                        text: "{handoffSummary>time}",
+                                        wrapping: true,
+                                        visible: "{= !!%{handoffSummary>time} }"
+                                    })
+                                ]
+                            }),
+                            new ExpandableText({
+                                text: "{handoffSummary>text}",
+                                maxCharacters: 240,
+                                overflowMode: "InPlace"
+                            }).addStyleClass("sapUiTinyMarginTop")
+                        ]
                     }).addStyleClass("sapUiTinyMargin")
                 ]
             })
@@ -201,8 +234,8 @@ sap.ui.define([
             currentStatus: safeText(result.currentStatus, getText(view, "handoffSummaryNoDetails")),
             currentActionOwner: safeText(result.currentActionOwner, getText(view, "handoffSummaryNoDetails")),
             missingInformation: safeText(result.missingInformation, getText(view, "handoffSummaryNoMissingInfo")),
-            commentItems: splitLines(result.commentSummary, getText(view, "handoffSummaryNoComments")),
-            eventItems: splitLines(result.latestImportantEvents, getText(view, "handoffSummaryNoEvents")),
+            commentItems: formatTimelineItems(result.commentSummary, getText(view, "handoffSummaryNoComments")),
+            eventItems: formatTimelineItems(result.latestImportantEvents, getText(view, "handoffSummaryNoEvents")),
             nextExpectedAction: safeText(result.nextExpectedAction, getText(view, "handoffSummaryNoNextAction")),
             decisionHint: review.decisionHint
         };
@@ -244,6 +277,7 @@ sap.ui.define([
             resizable: true,
             draggable: true,
             stretch: Device.system.phone,
+            horizontalScrolling: false,
             busy: "{handoffSummary>/busy}",
             content: [
                 new VBox({
