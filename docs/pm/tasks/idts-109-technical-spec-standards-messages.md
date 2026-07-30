@@ -102,3 +102,10 @@ login/profile, dashboard/monitoring, notification UI and AI traces.
 - This material delta occurred after DatDT approval comment `10763`; the PR must be
   treated as needing DatDT delta confirmation and DonHV review before final
   integration.
+- Branch push succeeded:
+  `origin/docs/idts-109-drive-doc-review-datdt` at reconciliation commit
+  `b54319d`.
+- Draft PR creation is temporarily blocked because the GitHub CLI token is invalid
+  and the Codex in-app browser requires DatDT to sign in. No credential should be
+  shared in chat. After sign-in, create the Draft PR against `dev`, request DonHV,
+  and link it from IDTS-109.
