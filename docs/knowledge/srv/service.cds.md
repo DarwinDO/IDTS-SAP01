@@ -2,7 +2,7 @@
 
 ## IDTS-114 handoff comment-summary contract
 
-`BugHandoffSummaryResult.commentSummary` is a transient `LargeString` in the OData action result. It is not a column and does not create a HANA migration. The value is populated by `srv/ai/bug-summary.js` from bounded stored comments when `summarizeBugHandoff` runs.
+`BugHandoffSummaryResult.commentSummary` and `verifiedComments` are transient `LargeString` fields in the OData action result. They are not columns and do not create a HANA migration. `commentSummary` contains grounded advisory insights, while `verifiedComments` keeps the bounded sanitized source lines for human comparison.
 
 Vietnamese: `BugHandoffSummaryResult.commentSummary` là chuỗi tạm trong response OData, không phải cột database và không cần migration HANA. `srv/ai/bug-summary.js` tạo giá trị này từ tập comment đã lưu có giới hạn khi action `summarizeBugHandoff` chạy.
 

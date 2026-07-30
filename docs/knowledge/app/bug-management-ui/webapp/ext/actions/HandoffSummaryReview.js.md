@@ -1,8 +1,8 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/actions/HandoffSummaryReview.js`
 
-## IDTS-114 generated versus verified handoff data (2026-07-30)
+## IDTS-114 synthesis-first handoff layout (2026-07-30)
 
-The dialog labels the top summary **AI overview (advisory)**. It separately labels comments, history, status, and current owner as **verified stored bug data**. Those record sections are deliberately deterministic evidence for reviewing the generated overview; they are not rewritten by the model and do not mutate the Bug.
+The dialog now presents the decision-support information before the raw evidence: **What happened (AI advisory)**, **Current state (verified)**, **Risks and missing information**, **Comment insights (AI advisory)**, and **Next expected action**. Verified source comments and history follow underneath for traceability. `verifiedComments` is deliberately separate from the AI `commentSummary`, and the next action remains backend-derived. Opening or reviewing this dialog cannot mutate the Bug.
 
 ## IDTS-114 localized timeline metadata
 

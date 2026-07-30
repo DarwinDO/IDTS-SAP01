@@ -45,6 +45,7 @@ service BugService @(requires: 'authenticated-user') {
     currentActionOwner    : String(120);
     missingInformation    : LargeString;
     commentSummary        : LargeString;
+    verifiedComments      : LargeString;
     latestImportantEvents : LargeString;
     nextExpectedAction    : LargeString;
     groundingStatus       : String(40);

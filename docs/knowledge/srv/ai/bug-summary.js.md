@@ -1,8 +1,8 @@
 # `srv/ai/bug-summary.js`
 
-## IDTS-114 grounded Comment Summary
+## IDTS-114 handoff synthesis and verified source separation
 
-`fallbackCommentSummary()` selects at most the five newest comments from the already bounded context, preserves chronological order, sanitizes every actor/role/timestamp/content value, and returns one short extractive line per comment. Raw comment text is deliberately excluded from `providerInput()`; only `commentCount` is sent. The same deterministic result is used on provider success and fallback so a comment cannot become an instruction to the model. `fallbackLatestEvents()` and `fallbackNextAction()` likewise keep actor/action/change and workflow advice tied to persisted audit/status data. Empty comments return an explicit empty state. The action remains review-only and does not write comments, history, status, assignment, notification, or email.
+The provider now receives a bounded list of sanitized comments explicitly labelled as untrusted quoted business data. A feature-specific JSON Schema asks it for four advisory fields: what happened, missing information, comment insights, and confidence. `isGroundedCommentSummary()` accepts comment insights only when they overlap meaningful terms from stored comments; otherwise `fallbackCommentInsights()` is used. The response separately exposes `verifiedComments`, while `fallbackLatestEvents()` and `fallbackNextAction()` remain fully deterministic. This separation lets the UI show a useful synthesis without presenting model prose as authoritative history or allowing AI to decide workflow.
 
 Vietnamese: `fallbackCommentSummary()` lấy tối đa năm comment mới nhất từ context đã giới hạn, giữ thứ tự thời gian, làm sạch actor/role/timestamp/nội dung và trả một dòng trích yếu ngắn cho mỗi comment. Nội dung comment thô cố ý không đi vào `providerInput()`; provider chỉ nhận `commentCount`. Cùng kết quả deterministic được dùng cả khi provider thành công lẫn fallback để comment không thể trở thành chỉ dẫn cho model. `fallbackLatestEvents()` và `fallbackNextAction()` cũng giữ actor/action/change và lời khuyên workflow bám vào audit/status đã lưu. Không có comment thì trả empty state rõ ràng. Action vẫn chỉ để review và không ghi comment, history, status, assignment, notification hoặc email.
 
@@ -51,7 +51,7 @@ The AI provider is optional. If AI is disabled, fails, times out, or returns mal
 1. An authenticated client calls `POST /odata/v4/bug/summarizeBugHandoff` with `sourceBugID`.
 2. The module reads the bug from `idts.cap.Bugs`.
 3. It reads bounded context: latest comments, latest history events, and latest field-change logs.
-4. It builds an allowlisted provider input. Raw comments, attachment binary content, credentials, tokens, and private storage references are not included.
+4. It builds an allowlisted provider input. At most eight sanitized comment records are included as untrusted quoted data; attachment binary content, credentials, tokens, and private storage references are excluded.
 5. It calls the configured AI provider through `srv/ai/provider.js`.
 6. If provider output is usable and safe, the module returns it with IDTS status/owner metadata.
 7. If provider output is missing, unsafe, malformed, or the provider is disabled, the module returns a deterministic fallback.
