@@ -4907,3 +4907,11 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   `$f:$start` without delimiting the variable name, so PowerShell rejected it
   before reading any file. Classification: tooling issue. Status: corrected to
   `${f}:$start`; no source, deployment or data changed.
+- 2026-07-30 PR #232 QA-depth declaration finding: the first body used bullets
+  and near-equivalent labels (`Inactive questions`, `Debug`) in the Ownership
+  Knowledge Gate block. The repository parser requires its exact twelve
+  unbulleted field names, including `Inactive-day questions`,
+  `Additional-flow questions`, and `Debug exercise`. Classification: process
+  issue, not an evidence or product failure. Status: corrected to the existing
+  DonHV 90% PASS declaration and a documentation-only follow-up push will
+  trigger the fresh normal gate; no Knowledge Gate is repeated or bypassed.
