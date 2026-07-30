@@ -24,7 +24,8 @@ function getAiConfig () {
   // Đọc CAP private config và trả bản normalize; feature modules không đọc API key trực tiếp.
   return normalizeAiConfig({
     ...(cds.env.idts?.ai || {}),
-    ...runtimeOverrides(process.env)
+    ...runtimeOverrides(process.env),
+    gatewayApiKey: toStringOrNull(process.env.AI_GATEWAY_API_KEY) || readGatewayApiKeyFromVcap(process.env)
   })
 }
 
@@ -84,6 +85,33 @@ function runtimeOverrides (env = {}) {
     ['timeoutMs', env.IDTS_AI_TIMEOUT_MS],
     ['maxInputChars', env.IDTS_AI_MAX_INPUT_CHARS]
   ].filter(([, value]) => value !== undefined))
+}
+
+function readGatewayApiKeyFromVcap (env = {}) {
+  // Trust only the dedicated AI binding, never the retained S3/Brevo binding.
+  const services = parseVcapServices(env.VCAP_SERVICES)
+  for (const instances of Object.values(services)) {
+    if (!Array.isArray(instances)) continue
+    const binding = instances.find(instance => instance?.name === 'idts-sap01-ai-gateway')
+    const credentials = binding?.credentials
+    if (!credentials || typeof credentials !== 'object') continue
+    return toStringOrNull(credentials.gatewayApiKey) ||
+      toStringOrNull(credentials.aiGatewayApiKey) ||
+      toStringOrNull(credentials.AI_GATEWAY_API_KEY)
+  }
+  return null
+}
+
+function parseVcapServices (value) {
+  if (!value) return {}
+  if (typeof value === 'object' && !Array.isArray(value)) return value
+  if (typeof value !== 'string') return {}
+  try {
+    const parsed = JSON.parse(value)
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {}
+  } catch {
+    return {}
+  }
 }
 
 function normalizeProvider (value) {
@@ -151,5 +179,6 @@ module.exports = {
   getAiConfig,
   normalizeAiConfig,
   runtimeOverrides,
+  readGatewayApiKeyFromVcap,
   safeModelId
 }

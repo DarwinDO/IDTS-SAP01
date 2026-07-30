@@ -15,6 +15,7 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 const {
   createAiProvider,
   normalizeAiConfig,
+  readGatewayApiKeyFromVcap,
   redactSensitiveText
 } = require('../../srv/ai')
 const { containsUnsafeDiagnosticText } = require('../../srv/ai/safety')
@@ -53,6 +54,17 @@ async function main () {
   const disabledConfig = normalizeAiConfig({})
   expectEqual('AI is disabled by default', disabledConfig.enabled, false)
   expectEqual('default provider is mock', disabledConfig.provider, 'mock')
+
+  const vcapGatewayKey = readGatewayApiKeyFromVcap({
+    VCAP_SERVICES: JSON.stringify({
+      'user-provided': [
+        { name: 'idts-sap01-external-services', credentials: { gatewayApiKey: 'must-not-be-read' } },
+        { name: 'idts-sap01-ai-gateway', credentials: { gatewayApiKey: 'test-only-vcap-gateway-key' } }
+      ]
+    })
+  })
+  expectEqual('dedicated VCAP binding supplies the gateway key', vcapGatewayKey, 'test-only-vcap-gateway-key')
+  expectEqual('invalid VCAP input does not throw or invent a key', readGatewayApiKeyFromVcap({ VCAP_SERVICES: '{not-json' }), null)
 
   const disabledProvider = createAiProvider(disabledConfig)
   const disabledResult = await disabledProvider.chat({

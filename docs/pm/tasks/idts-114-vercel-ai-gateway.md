@@ -144,3 +144,19 @@ No S3, Brevo, database schema, UI workflow, automatic classification/assignment,
   `118/118`. UI5 production build, manifest validation, targeted lint and the
   integrated AI regressions also pass locally.
 - SAP BTP visual verification remains pending; IDTS-114 stays In Progress.
+
+## 2026-07-30 durable BTP configuration binding follow-up
+
+- Root cause evidence changed the current browser result classification: the
+  fallback on Classification is caused by AI-disabled/mock configuration in the
+  deployed runtime, not by a primary-Qwen provider response. The focused branch
+  adds a dedicated existing BTP user-provided service binding, plus non-secret
+  MTA properties for the approved Qwen primary and bounded OpenAI fallback.
+- The service-side lookup accepts a gateway key only from the exact named binding
+  or an already private direct environment variable. It never scans the retained
+  S3/Brevo binding. The empty service exists in BTP; DonHV must add the key
+  directly before deployment. No key is committed or copied to evidence.
+- Local verification is PASS: IDTS-64 `38/38`, IDTS-114 `58/58`, CAP compile,
+  UI5 production build, secret scan, agent rules, QA-depth self-test, AI DevKit
+  and `git diff --check`. Evidence:
+  `docs/pm/evidence/idts-114/btp-ai-config-binding/local-verification-20260730.md`.

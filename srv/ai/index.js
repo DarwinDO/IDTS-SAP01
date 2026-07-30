@@ -2,7 +2,7 @@
 // File không gọi provider hay ghi DB; nó chỉ re-export contract nội bộ đã được safety/audit module bảo vệ.
 'use strict'
 
-const { getAiConfig, normalizeAiConfig } = require('./config')
+const { getAiConfig, normalizeAiConfig, readGatewayApiKeyFromVcap } = require('./config')
 const { createAiSuggestion, serializeSuggestionPayload } = require('./audit')
 const { createAiProvider } = require('./provider')
 const {
@@ -42,6 +42,7 @@ module.exports = {
   createAiProvider,
   getAiConfig,
   normalizeAiConfig,
+  readGatewayApiKeyFromVcap,
   redactSensitiveText,
   serializeSuggestionPayload,
   sanitizeErrorSummary,

@@ -42,7 +42,8 @@ the process-local outbox timer.
 | `idts-sap01-html5-repo-host` | Deployed Fiori content |
 | `idts-sap01-html5-repo-runtime` | Runtime access to Fiori content |
 | `idts-sap01-jobscheduler` | Hourly email-outbox invocation |
-| `idts-sap01-external-services` | Private retained S3/Brevo/AI configuration |
+| `idts-sap01-external-services` | Private retained S3/Brevo configuration |
+| `idts-sap01-ai-gateway` | Separate user-provided binding for the Vercel AI Gateway key |
 
 The Job Scheduling dashboard shows one job,
 `IDTSEmailOutboxHourly`, with one active hourly schedule. Authentication is
