@@ -13,9 +13,14 @@ sap.ui.define([
     "sap/m/ObjectStatus",
     "sap/m/MessageStrip",
     "sap/m/VBox",
+    "sap/m/HBox",
     "sap/m/Label",
+    "sap/m/List",
+    "sap/m/CustomListItem",
+    "sap/m/ExpandableText",
     "sap/m/MessageBox",
     "sap/ui/model/json/JSONModel",
+    "sap/ui/core/format/DateFormat",
     "sap/ui/Device",
     "../ai/AiReviewUi",
     "../ai/AiSuggestionReview"
@@ -26,9 +31,14 @@ sap.ui.define([
     ObjectStatus,
     MessageStrip,
     VBox,
+    HBox,
     Label,
+    List,
+    CustomListItem,
+    ExpandableText,
     MessageBox,
     JSONModel,
+    DateFormat,
     Device,
     AiReviewUi,
     AiSuggestionReview
@@ -36,6 +46,8 @@ sap.ui.define([
     "use strict";
 
     var INTERNAL_COPY_PATTERN = /\b(prompt|token|model|provider|architecture|debug|stack|sql|password|credential|secret|api key|bearer|endpoint)\b/i;
+    var TIMELINE_DATE_FORMAT = DateFormat.getDateTimeInstance({ style: "medium/short" });
+    var TIMELINE_PREFIX_PATTERN = /^(?:[-*\u2022]|\d+[.)])?\s*\[([^\]]+)\]\s*(.*)$/;
 
     function isBugContext(context) {
         // Chỉ nhận root /Bugs(...) để summary luôn thuộc Bug đang mở.
@@ -124,7 +136,7 @@ sap.ui.define([
         if (Number.isNaN(date.getTime())) {
             return String(value);
         }
-        return date.toLocaleString();
+        return TIMELINE_DATE_FORMAT.format(date);
     }
 
     function section(labelKey, textPath) {
@@ -132,10 +144,76 @@ sap.ui.define([
         return new VBox({
             items: [
                 new Label({ text: labelKey, design: "Bold" }),
-                new Text({
+                new ExpandableText({
                     text: textPath,
-                    wrapping: true
+                    maxCharacters: 320,
+                    overflowMode: "InPlace"
                 }).addStyleClass("sapUiTinyMarginTop")
+            ]
+        }).addStyleClass("sapUiSmallMarginBottom");
+    }
+
+    function formatTimelineItems(value, fallback) {
+        var text = String(value || "").trim();
+        var items = text.split(/\r?\n/).map(function (line) {
+            var normalized = line.trim();
+            var timestampMatch = normalized.match(TIMELINE_PREFIX_PATTERN);
+            var body = timestampMatch ? timestampMatch[2] : normalized;
+            var actorMatch = body.match(/^(.+?)(?:\s+\(([^)]+)\))?(?:\s+(?:\u00e2\u20ac\u201d|\u2014|-)\s+([^:]+))?:\s*(.*)$/);
+            return {
+                actor: actorMatch ? [actorMatch[1], actorMatch[2]].filter(Boolean).join(" · ") : "",
+                action: actorMatch && actorMatch[3] || "",
+                time: timestampMatch ? formatDate(timestampMatch[1]) : "",
+                text: actorMatch ? actorMatch[4] : body
+            };
+        }).filter(function (item) {
+            return Boolean(item.text);
+        });
+        return items.length ? items : [{ actor: "", action: "", time: "", text: fallback }];
+    }
+
+    function listSection(label, path) {
+        var list = new List({ showSeparators: "Inner" });
+        list.bindItems({
+            path: path,
+            template: new CustomListItem({
+                content: [
+                    new VBox({
+                        items: [
+                            new HBox({
+                                wrap: "Wrap",
+                                items: [
+                                    new ObjectStatus({
+                                        text: "{handoffSummary>actor}",
+                                        state: "Information",
+                                        visible: "{= !!%{handoffSummary>actor} }"
+                                    }).addStyleClass("sapUiTinyMarginEnd"),
+                                    new ObjectStatus({
+                                        text: "{handoffSummary>action}",
+                                        state: "None",
+                                        visible: "{= !!%{handoffSummary>action} }"
+                                    }).addStyleClass("sapUiTinyMarginEnd"),
+                                    new Text({
+                                        text: "{handoffSummary>time}",
+                                        wrapping: true,
+                                        visible: "{= !!%{handoffSummary>time} }"
+                                    })
+                                ]
+                            }),
+                            new ExpandableText({
+                                text: "{handoffSummary>text}",
+                                maxCharacters: 240,
+                                overflowMode: "InPlace"
+                            }).addStyleClass("sapUiTinyMarginTop")
+                        ]
+                    }).addStyleClass("sapUiTinyMargin")
+                ]
+            })
+        });
+        return new VBox({
+            items: [
+                new Label({ text: label, design: "Bold" }),
+                list
             ]
         }).addStyleClass("sapUiSmallMarginBottom");
     }
@@ -146,7 +224,7 @@ sap.ui.define([
             explanation: result.summary,
             confidence: result.confidence,
             providerStatus: result.providerStatus,
-            warnings: result.groundingStatus === "SPARSE" ? getText(view, "handoffSummarySparseWarning") : ""
+            warnings: result.groundingStatus === "PARTIAL_DATA" ? getText(view, "handoffSummarySparseWarning") : ""
         }, getAiText(view));
 
         return {
@@ -160,7 +238,9 @@ sap.ui.define([
             currentStatus: safeText(result.currentStatus, getText(view, "handoffSummaryNoDetails")),
             currentActionOwner: safeText(result.currentActionOwner, getText(view, "handoffSummaryNoDetails")),
             missingInformation: safeText(result.missingInformation, getText(view, "handoffSummaryNoMissingInfo")),
-            latestImportantEvents: safeText(result.latestImportantEvents, getText(view, "handoffSummaryNoEvents")),
+            commentSummary: safeText(result.commentSummary, getText(view, "handoffSummaryNoCommentInsights")),
+            commentItems: formatTimelineItems(result.verifiedComments, getText(view, "handoffSummaryNoComments")),
+            eventItems: formatTimelineItems(result.latestImportantEvents, getText(view, "handoffSummaryNoEvents")),
             nextExpectedAction: safeText(result.nextExpectedAction, getText(view, "handoffSummaryNoNextAction")),
             decisionHint: review.decisionHint
         };
@@ -179,7 +259,9 @@ sap.ui.define([
             currentStatus: "",
             currentActionOwner: "",
             missingInformation: "",
-            latestImportantEvents: "",
+            commentSummary: "",
+            commentItems: [],
+            eventItems: [],
             nextExpectedAction: "",
             decisionHint: getText(view, "aiReviewDecisionHint"),
             suggestionID: null,
@@ -201,6 +283,7 @@ sap.ui.define([
             resizable: true,
             draggable: true,
             stretch: Device.system.phone,
+            horizontalScrolling: false,
             busy: "{handoffSummary>/busy}",
             content: [
                 new VBox({
@@ -242,12 +325,48 @@ sap.ui.define([
                                 })
                             ]
                         }).addStyleClass("sapUiSmallMarginBottom"),
-                        section(getText(view, "handoffSummarySummaryLabel"), "{handoffSummary>/summary}"),
-                        section(getText(view, "handoffSummaryStatusLabel"), "{handoffSummary>/currentStatus}"),
-                        section(getText(view, "handoffSummaryOwnerLabel"), "{handoffSummary>/currentActionOwner}"),
+                        section(getText(view, "handoffSummaryGeneratedOverviewLabel"), "{handoffSummary>/summary}"),
+                        new VBox({
+                            items: [
+                                new Label({ text: getText(view, "handoffSummaryVerifiedDataLabel"), design: "Bold" }),
+                                new HBox({
+                                    wrap: "Wrap",
+                                    items: [
+                                        new VBox({
+                                            items: [
+                                                new Label({ text: getText(view, "handoffSummaryStatusLabel"), design: "Bold" }),
+                                                new ObjectStatus({
+                                                    text: "{handoffSummary>/currentStatus}",
+                                                    state: "Information"
+                                                }).addStyleClass("sapUiTinyMarginTop")
+                                            ]
+                                        }).addStyleClass("sapUiSmallMarginEnd"),
+                                        new VBox({
+                                            items: [
+                                                new Label({ text: getText(view, "handoffSummaryOwnerLabel"), design: "Bold" }),
+                                                new Text({
+                                                    text: "{handoffSummary>/currentActionOwner}",
+                                                    wrapping: true
+                                                }).addStyleClass("sapUiTinyMarginTop")
+                                            ]
+                                        })
+                                    ]
+                                })
+                            ]
+                        }).addStyleClass("sapUiSmallMarginBottom"),
                         section(getText(view, "handoffSummaryMissingLabel"), "{handoffSummary>/missingInformation}"),
-                        section(getText(view, "handoffSummaryEventsLabel"), "{handoffSummary>/latestImportantEvents}"),
-                        section(getText(view, "handoffSummaryNextActionLabel"), "{handoffSummary>/nextExpectedAction}"),
+                        section(getText(view, "handoffSummaryCommentsLabel"), "{handoffSummary>/commentSummary}"),
+                        new Label({
+                            text: getText(view, "handoffSummaryNextActionLabel"),
+                            design: "Bold"
+                        }),
+                        new MessageStrip({
+                            text: "{handoffSummary>/nextExpectedAction}",
+                            type: "Information",
+                            showIcon: true
+                        }).addStyleClass("sapUiTinyMarginTop sapUiSmallMarginBottom"),
+                        listSection(getText(view, "handoffSummaryVerifiedCommentsLabel"), "handoffSummary>/commentItems"),
+                        listSection(getText(view, "handoffSummaryVerifiedEventsLabel"), "handoffSummary>/eventItems"),
                         new Text({
                             text: "{handoffSummary>/decisionHint}",
                             wrapping: true

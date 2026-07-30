@@ -122,3 +122,29 @@ Với cải thiện UX Sprint 4, file này cố ý không render UI5 controls tr
 **English.** (1) top-level token lookup decides redirect or continue; (2) patched `open()` remembers the URL; (3) patched `send()` injects the bearer token only for `/odata/v4/`; (4) CAP custom auth validates that token; (5) `idtsLogout()` posts logout, clears all three session keys, and redirects; (6) `readStoredUser()` safely parses the profile. Observe `url`, token presence (never its full value), HTTP status, and the safe user object. Failure before step 3 is browser/session; failure after a header is present belongs in backend auth.
 
 **Tiếng Việt.** (1) đoạn đọc token đầu file quyết định redirect hay đi tiếp; (2) `open()` đã patch ghi nhớ URL; (3) `send()` đã patch chỉ gắn bearer token cho `/odata/v4/`; (4) CAP custom auth kiểm token; (5) `idtsLogout()` gọi logout, xóa đủ ba session key và redirect; (6) `readStoredUser()` parse profile an toàn. Quan sát `url`, việc token có/không (không xem/in toàn bộ token), HTTP status và safe user object. Lỗi trước bước 3 thuộc browser/session; đã có header mà vẫn lỗi thì qua backend auth.
+
+## IDTS-113 update - AppRouter/XSUAA browser path
+
+### English
+
+The guard now detects two supported session models. If a custom token exists,
+it preserves the Render/local behavior and injects the bearer token into OData
+requests. If there is no custom token, it calls `AuthService.me`; a successful
+response means AppRouter already authenticated the browser through its secure
+session cookie.
+
+In BTP mode no JWT is copied to JavaScript or `sessionStorage`. Logout redirects
+to `/do/logout`, which is owned by AppRouter. `window.idtsAuthReady` resolves
+only after the safe user profile is available, allowing `bootstrap-ui5.js` to
+start UI5 without racing the first protected OData request.
+
+### Vietnamese
+
+Guard ho tro hai kieu session. Neu co custom token, no giu flow local/Render va
+gan bearer token vao OData. Neu khong co custom token, no goi `AuthService.me`;
+neu thanh cong thi AppRouter da xac thuc browser bang secure session cookie.
+
+Trong BTP mode, JWT khong duoc dua vao JavaScript hay `sessionStorage`. Logout
+chuyen den `/do/logout` do AppRouter xu ly. Promise `window.idtsAuthReady` chi
+hoan tat khi da co safe user profile, sau do `bootstrap-ui5.js` moi khoi dong
+UI5 de tranh request OData dau tien chay qua som.

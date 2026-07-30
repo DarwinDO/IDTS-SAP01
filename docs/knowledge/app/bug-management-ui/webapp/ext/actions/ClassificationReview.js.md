@@ -1,5 +1,23 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/actions/ClassificationReview.js`
 
+## IDTS-114 suggestion provenance (2026-07-30)
+
+`enrichSuggestion()` labels a validated provider result as **AI suggestion**, deterministic fallback as **Rules-based baseline (not an AI proposal)**, and no safe choice as **No safe suggestion**. It displays numerical confidence only for `AI`; no review action in this dialog PATCHes the Bug.
+
+## IDTS-114 readability update
+
+Each classification row now separates Field, Current Value, Suggested Value with an expandable reason, and Confidence. Generic review guidance appears once in the dialog MessageStrip instead of being repeated in every row. Review and Apply actions keep their existing backend authorization and confirmation behavior.
+
+The table now uses automatic pop-in: Field and Suggested Value remain primary, while Current Value and Confidence move below the row when space is limited. The dialog no longer owns a fixed desktop width or horizontal scrolling. `AI_RATE_LIMITED` is presented as temporary busy fallback content, not as a transport failure or a real classification decision.
+
+Vietnamese: Mỗi dòng phân loại hiện tách Field, Current Value, Suggested Value kèm reason có thể mở rộng, và Confidence. Hướng dẫn review chung chỉ xuất hiện một lần trong MessageStrip thay vì lặp ở từng dòng. Review và Apply vẫn giữ nguyên phân quyền và bước xác nhận backend.
+
+## IDTS-115 result and error states
+
+The action is source-linked and is blocked for a root create draft. `requestOperationResult()` accepts CAP/UI5 action results returned directly or through the operation result context before normalizing array shapes. HTTP 200 fallback/no-result stays in the dialog. HTTP 400 is shown as a missing-context information strip; retryable authorization/network/server failures use a safe strip plus Retry without exposing technical diagnostics.
+
+Vietnamese: Action cần Bug source đã lưu. Hàm result hỗ trợ cả direct response và result context. Fallback/no-result HTTP 200 không bị báo lỗi; HTTP 400 hiển thị thiếu context; lỗi tải có thông báo an toàn và Retry.
+
 > **Ownership / debug anchor:** DatDT owns the review dialog (backup: DonHV). It displays suggestions only; a persisted classification change belongs in the CAP contract and handler.
 > **Ownership / điểm debug:** DatDT sở hữu dialog review (backup: DonHV). Nó chỉ hiển thị suggestion; thay đổi classification được lưu thuộc CAP contract và handler.
 
@@ -173,3 +191,18 @@ Primary owner: DatDT. Backup: DonHV. Debug at the button callback and `AiSuggest
 Dialog hiện có Accept, Reject và Ignore cho suggestion của Bug đã lưu. Nó chỉ gửi `suggestionID` do backend cấp, hiển thị trạng thái đã persist cùng reviewer/time, khóa quyết định lặp lại, dùng thông báo lỗi chung và tắt busy state. Review vẫn không áp dụng classification; IDTS-93 quản lý action CAP Tester/PM riêng cho việc đó.
 
 Owner chính: DatDT. Backup: DonHV. Khi debug, bắt đầu tại callback nút và `AiSuggestionReview.submit()`, rồi xem `reviewStateCode` trả về, format reviewer/time và `/reviewActionEnabled`. Kiểm cùng `srv/ai/review.js`, `classification-apply.js`, hai file i18n, static QA IDTS-92 và browser smoke IDTS-75. Không thêm direct Bug PATCH hoặc tin catalog ở client vào dialog này.
+## IDTS-115 — Apply Classification
+
+English: `buildDialog(view, model, bug, bugContext)` owns the Apply button inside the existing Classification dialog. It is visible only for PM/Tester and enabled only after a persisted `ACCEPTED` review. `confirmApply()` calls `applyClassificationSuggestion` with `suggestionID`, refreshes the Bug context, and shows safe success/failure copy. Backend authorization, expiry, catalog, and stale-source validation remain authoritative.
+
+Debug order: fragment button → `openDialog()` → `buildDialog()` → `submitReview()` → `confirmApply()` → `applyClassification()` → OData response → CAP validation → refresh. Observe `suggestionID`, `reviewStateCode`, `/applyActionEnabled`, busy state, and Bug fields before/after. Review-only actions must not mutate the Bug.
+
+Tiếng Việt: Nút Apply nằm trong dialog Classification hiện có. Nút chỉ hiện cho PM/Tester và chỉ bật sau review `ACCEPTED`; khi xác nhận, UI gọi action CAP bằng `suggestionID`, refresh Bug và hiển thị thông báo an toàn. Backend vẫn quyết định quyền, expiry, catalog và stale source. Debug theo thứ tự fragment → `openDialog()` → `buildDialog()` → review → confirm → Network → CAP → refresh.
+
+Retry boundary: if the CAP action fails before mutation, Apply is re-enabled after busy clears. If CAP succeeds but context refresh fails, Apply stays disabled and the user is instructed to reload; this prevents replaying a successful mutation.
+
+## IDTS-114 responsive and retry-state boundary
+
+**English.** The Classification table enables `autoPopinMode` and uses only column `importance`; UI5 therefore owns the responsive breakpoints and the controller does not set ignored `minScreenWidth` or `demandPopin` values. Before every initial load or Retry, `loadSuggestions()` clears rows, suggestion ID, reviewer text, review buttons and Apply state. A failed retry can never leave an accepted stale suggestion available for Apply.
+
+**Tiếng Việt.** Bảng Classification bật `autoPopinMode` và chỉ dùng `importance` cho từng cột; UI5 tự quyết định breakpoint responsive, controller không đặt `minScreenWidth` hay `demandPopin` vốn sẽ bị bỏ qua. Trước mỗi lần tải hoặc Retry, `loadSuggestions()` xóa row, suggestion ID, reviewer, nút review và trạng thái Apply. Vì vậy Retry thất bại không thể để lại suggestion cũ đã Accept cho người dùng Apply.

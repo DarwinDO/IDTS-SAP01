@@ -31,7 +31,7 @@ Hệ thống bao gồm các phạm vi sau:
 * Comment giữa Tester, Developer và PM trong từng bug report.  
 * Notification cho các sự kiện quan trọng.  
 * Lưu history/audit log cho các thay đổi quan trọng.
-* AI hỗ trợ dạng suggestion-only cho tìm bug trùng/tương tự, gợi ý phân loại, tóm tắt bug/handoff và giải thích Smart Assign. Mọi kết quả phải được người dùng review; AI không tự thay đổi dữ liệu hoặc workflow.
+* AI hỗ trợ dạng suggestion-only cho tìm bug trùng/tương tự, gợi ý phân loại, tóm tắt bug/handoff (bao gồm tóm tắt comment có căn cứ) và giải thích Smart Assign. Mọi kết quả phải được người dùng review; AI không tự thay đổi dữ liệu hoặc workflow.
 
 ## **Out of scope**
 

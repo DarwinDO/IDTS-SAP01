@@ -39,6 +39,20 @@ function parseProperties (relativePath) {
 
 const controller = read('app/bug-management-ui/webapp/ext/actions/ClassificationReview.js')
 const fragment = read('app/bug-management-ui/webapp/ext/fragment/ClassificationReviewField.fragment.xml')
+
+assert(controller.includes('"sap/m/ExpandableText"'), 'classification reason must use SAPUI5 ExpandableText')
+assert(controller.includes('classificationReviewConfidenceColumn'), 'classification table must expose a dedicated confidence column')
+assert(controller.includes('autoPopinMode: true'), 'classification table must automatically adapt columns to available width')
+assert(controller.includes('horizontalScrolling: false'), 'classification dialog must not allow horizontal scrolling')
+assert(!controller.includes('contentWidth: "58rem"'), 'classification dialog must not keep the old fixed width')
+assert(!/new Text\(\{ text: "\{classificationReview>decisionHint\}"/.test(controller), 'classification rows must not repeat generic review guidance')
+assert(!/decisionHint:\s*review\.decisionHint/.test(controller), 'classification rows must not keep dead per-row review guidance state')
+assert(!/minScreenWidth\s*:/.test(controller), 'auto pop-in must own responsive breakpoints instead of ignored manual widths')
+assert(!/demandPopin\s*:/.test(controller), 'auto pop-in must own demand-pop-in behavior')
+assert(
+  /function loadSuggestions\(\)\s*\{[\s\S]{0,650}?setProperty\("\/rows", \[\]\)[\s\S]{0,650}?setProperty\("\/suggestionID", null\)[\s\S]{0,650}?setProperty\("\/reviewActionEnabled", false\)[\s\S]{0,650}?setProperty\("\/applyActionEnabled", false\)/.test(controller),
+  'classification reload must clear stale suggestions and review/apply actions before a retry'
+)
 const manifest = JSON.parse(read('app/bug-management-ui/webapp/manifest.json'))
 const i18nFiles = [
   'app/bug-management-ui/webapp/i18n/i18n.properties',
@@ -60,7 +74,7 @@ const checks = [
   expectIncludes('classification review shows current values', controller, 'currentValue'),
   expectIncludes('classification review shows suggested values', controller, 'suggestedValue'),
   expectIncludes('classification review shows confidence metadata', controller, 'confidenceText'),
-  expectIncludes('classification review keeps manual decision guidance', controller, 'decisionHint'),
+  expectIncludes('classification review keeps one dialog-level manual decision guidance', controller, 'classificationReviewIntroMessage'),
   expectNotMatches(
     'classification review has no OData update request',
     controller,
@@ -79,6 +93,11 @@ assert.strictEqual(
   'idts.bugmanagementui.ext.fragment.ClassificationReviewField'
 )
 checks.push({ label: 'manifest uses the classification review field fragment', pass: true })
+assert.strictEqual(
+  fields.IdtsClassificationReview.visible,
+  '{= ${IsActiveEntity} === true || ${HasActiveEntity} === true }'
+)
+checks.push({ label: 'manifest hides the complete classification custom field on a root create draft', pass: true })
 assert.deepStrictEqual(fields.IdtsClassificationReview.position, { anchor: 'DataField::defectCategory_ID', placement: 'After' })
 checks.push({ label: 'classification review is positioned after Defect Category inside Classification', pass: true })
 assert(!section.IdtsClassificationAssistance, 'manifest must not register standalone IdtsClassificationAssistance section')

@@ -41,6 +41,9 @@ sap.ui.define([], function () {
         if (code === "AI_DISABLED" || code === "DISABLED") {
             return getText("aiReviewStatusDisabled");
         }
+        if (code === "AI_RATE_LIMITED") {
+            return getText("aiReviewStatusBusy");
+        }
         if (code === "AI_TIMEOUT" || code === "AI_PROVIDER_ERROR" || code === "AI_OUTPUT_UNSAFE" || code === "AI_PROVIDER_UNSUPPORTED") {
             return getText("aiReviewStatusUnavailable");
         }
@@ -50,7 +53,7 @@ sap.ui.define([], function () {
     function stateFor(status, confidence, warnings) {
         // Chọn semantic color Information/Warning để người dùng biết cần review kỹ.
         var code = String(status || "").toUpperCase();
-        if (code === "AI_TIMEOUT" || code === "AI_PROVIDER_ERROR" || code === "AI_OUTPUT_UNSAFE" || code === "AI_PROVIDER_UNSUPPORTED") {
+        if (code === "AI_RATE_LIMITED" || code === "AI_TIMEOUT" || code === "AI_PROVIDER_ERROR" || code === "AI_OUTPUT_UNSAFE" || code === "AI_PROVIDER_UNSUPPORTED") {
             return "Warning";
         }
         if (code === "AI_DISABLED" || code === "DISABLED") {

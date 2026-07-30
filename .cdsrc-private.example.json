@@ -51,6 +51,10 @@
       "modelAlias": "mock-chat",
       "embeddingModelAlias": "mock-embedding",
       "openaiApiKey": "<private-openai-api-key-or-use-OPENAI_API_KEY>",
+      "gatewayApiKey": "<private-vercel-ai-gateway-key-or-use-AI_GATEWAY_API_KEY>",
+      "fallbackEnabled": false,
+      "fallbackModelAlias": "openai/gpt-5.4-nano",
+      "fallbackEmbeddingModelAlias": "openai/text-embedding-3-small",
       "mockMode": "success",
       "mockEmbeddingDimensions": 8
     }

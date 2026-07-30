@@ -5,7 +5,7 @@
  * The dialog improves candidate discovery, while CAP remains the final
  * authority for role, responsibility, and availability validation.
  */
-/* global Promise */
+/* global Promise, setTimeout */
 /* eslint-disable max-params */
 sap.ui.define([
     "sap/m/Dialog",
@@ -330,11 +330,23 @@ sap.ui.define([
             var aiReview = explanation
                 ? AiReviewUi.decorateResult(explanation, getAiText(view))
                 : AiReviewUi.unavailable(getAiText(view));
+            var isAiGenerated = explanation && explanation.explanationSource === "AI";
+            var isRulesBased = explanation && explanation.explanationSource === "RULES";
 
             return Object.assign({}, candidate, {
                 aiExplanation: aiReview.explanation,
-                aiExplanationMeta: aiReview.meta,
-                aiExplanationState: aiReview.state,
+                aiExplanationMeta: isAiGenerated
+                    ? aiReview.meta
+                    : isRulesBased
+                        ? getText(view, "smartAssignRulesReviewRequired")
+                        : aiReview.meta,
+                aiExplanationState: isAiGenerated ? aiReview.state : isRulesBased ? "Warning" : aiReview.state,
+                aiExplanationSource: isAiGenerated
+                    ? getText(view, "smartAssignExplanationSourceAi")
+                    : isRulesBased
+                        ? getText(view, "smartAssignExplanationSourceRules")
+                        : getText(view, "smartAssignExplanationSourceUnavailable"),
+                aiExplanationSourceState: isAiGenerated ? "Information" : isRulesBased ? "Warning" : "None",
                 aiWarnings: aiReview.warnings,
                 hasAiWarnings: aiReview.hasWarnings,
                 aiDecisionHint: aiReview.decisionHint
@@ -391,6 +403,8 @@ sap.ui.define([
         }
 
         var propertyNames = [
+            "applicationComponent_ID",
+            "defectCategory_ID",
             "componentCategory_ID",
             "sapModule_ID",
             "IsActiveEntity",
@@ -411,6 +425,79 @@ sap.ui.define([
         return Promise.all(requests).then(function () {
             return bug;
         });
+    }
+
+    function waitForAutoSubmit(model, attemptsRemaining) {
+        if (!model || typeof model.hasPendingChanges !== "function" || !model.hasPendingChanges()) {
+            return Promise.resolve();
+        }
+        if (attemptsRemaining <= 0) {
+            return Promise.reject(new Error("Draft changes did not finish in time."));
+        }
+        return new Promise(function (resolve) {
+            setTimeout(resolve, 50);
+        }).then(function () {
+            return waitForAutoSubmit(model, attemptsRemaining - 1);
+        });
+    }
+
+    function flushPendingChanges(model) {
+        if (!model || typeof model.hasPendingChanges !== "function" || !model.hasPendingChanges()) {
+            return Promise.resolve();
+        }
+        var updateGroupId = typeof model.getUpdateGroupId === "function"
+            ? model.getUpdateGroupId()
+            : "$auto";
+        if (
+            updateGroupId.charAt(0) !== "$" &&
+            typeof model.submitBatch === "function"
+        ) {
+            return model.submitBatch(updateGroupId);
+        }
+        // UI5 submits $auto itself. Wait for that request instead of calling submitBatch("$auto"), which is invalid.
+        return waitForAutoSubmit(model, 40);
+    }
+
+    function synchronizeAssignmentContext(bugContext, bug) {
+        // CAP derives componentCategory_ID during PATCH; wait for that PATCH, refresh, then read the authoritative value.
+        var model = bugContext && bugContext.getModel && bugContext.getModel();
+        return flushPendingChanges(model)
+            .then(function () {
+                if (bugContext && typeof bugContext.requestRefresh === "function") {
+                    return bugContext.requestRefresh();
+                }
+                return null;
+            })
+            .then(function () {
+                var properties = [
+                    "applicationComponent_ID",
+                    "defectCategory_ID",
+                    "componentCategory_ID"
+                ];
+                return Promise.all(properties.map(function (propertyName) {
+                    if (!bugContext || typeof bugContext.requestProperty !== "function") {
+                        return null;
+                    }
+                    return bugContext.requestProperty(propertyName).then(function (value) {
+                        bug[propertyName] = value;
+                    });
+                }));
+            })
+            .then(function () {
+                return requestMissingAssignmentProperties(bugContext, bug);
+            });
+    }
+
+    function validateAssignmentClassification(view, bug) {
+        if (bug.componentCategory_ID) {
+            return true;
+        }
+        if (!bug.applicationComponent_ID || !bug.defectCategory_ID) {
+            MessageToast.show(getText(view, "smartAssignIncompleteClassification"));
+            return false;
+        }
+        MessageToast.show(getText(view, "smartAssignInvalidClassificationMapping"));
+        return false;
     }
 
     function buildDialog(view, model, bugContext, bug, sourceControl) {
@@ -494,6 +581,10 @@ sap.ui.define([
                             new Text({
                                 text: "{smartAssign>aiExplanation}",
                                 wrapping: true
+                            }),
+                            new ObjectStatus({
+                                text: "{smartAssign>aiExplanationSource}",
+                                state: "{smartAssign>aiExplanationSourceState}"
                             }),
                             new ObjectStatus({
                                 text: "{smartAssign>aiExplanationMeta}",
@@ -705,23 +796,32 @@ sap.ui.define([
             }
 
             var model = bugContext.getModel();
+            if (typeof source.setBusy === "function") {
+                source.setBusy(true);
+            }
 
             return bugContext.requestObject().then(function (bug) {
-                return requestMissingAssignmentProperties(bugContext, bug || {});
+                return synchronizeAssignmentContext(bugContext, bug || {});
             }).then(function (bug) {
                 if (!bug || (bug.IsActiveEntity === true && bug.canAssign === false)) {
                     MessageToast.show(getText(view, "smartAssignUnavailableAction"));
                     return null;
                 }
 
-                if (!bug.componentCategory_ID) {
-                    MessageToast.show(getText(view, "smartAssignMissingClassification"));
+                if (!validateAssignmentClassification(view, bug)) {
                     return null;
                 }
 
                 var dialog = buildDialog(view, model, bugContext, bug, source);
                 dialog.open();
                 return dialog;
+            }).catch(function () {
+                MessageBox.error(getText(view, "smartAssignLoadFailed"));
+                return null;
+            }).finally(function () {
+                if (typeof source.setBusy === "function") {
+                    source.setBusy(false);
+                }
             });
         },
 
@@ -735,21 +835,23 @@ sap.ui.define([
             var model = bugContext.getModel();
 
             return bugContext.requestObject().then(function (bug) {
-                return requestMissingAssignmentProperties(bugContext, bug || {});
+                return synchronizeAssignmentContext(bugContext, bug || {});
             }).then(function (bug) {
                 if (!bug || (bug.IsActiveEntity === true && bug.canAssign === false)) {
                     MessageToast.show(getText(view, "smartAssignUnavailableAction"));
                     return null;
                 }
 
-                if (!bug.componentCategory_ID) {
-                    MessageToast.show(getText(view, "smartAssignMissingClassification"));
+                if (!validateAssignmentClassification(view, bug)) {
                     return null;
                 }
 
                 var dialog = buildDialog(view, model, bugContext, bug);
                 dialog.open();
                 return dialog;
+            }).catch(function () {
+                MessageBox.error(getText(view, "smartAssignLoadFailed"));
+                return null;
             });
         }
     };

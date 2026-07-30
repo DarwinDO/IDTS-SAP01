@@ -1,5 +1,25 @@
 # Knowledge: `srv/email/config.js`
 
+## IDTS-113 private BTP binding
+
+### English
+
+On SAP BTP, the user-provided service `idts-sap01-external-services` exposes
+AWS S3 fields at the credential root and the retained Brevo email settings
+under `credentials.email`. `getEmailConfig()` merges that nested email object
+over the normal private CAP config before normalization. Secret values remain
+inside `VCAP_SERVICES`; only readiness and missing-field names may be logged.
+Render keeps reading its existing `cds.env.idts.email` configuration.
+
+### Vietnamese
+
+Trên SAP BTP, user-provided service `idts-sap01-external-services` cung cấp
+các field AWS S3 ở gốc credentials và cấu hình email Brevo hiện hữu trong
+`credentials.email`. `getEmailConfig()` merge object email lồng này vào cấu
+hình CAP private trước khi normalize. Giá trị secret chỉ nằm trong
+`VCAP_SERVICES`; log chỉ được ghi trạng thái sẵn sàng và tên field còn thiếu.
+Render vẫn đọc cấu hình `cds.env.idts.email` hiện tại.
+
 ## Beginner-first execution map (2026-07-18)
 
 ### English

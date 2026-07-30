@@ -26,6 +26,10 @@
       }
     }
   },
+  "sap.cloud": {
+    "public": true,
+    "service": "idts.sap01"
+  },
   "sap.ui": {
     "technology": "UI5",
     "icons": {
@@ -192,7 +196,8 @@
                 "@com.sap.vocabularies.UI.v1.FieldGroup#GeneralInfo": {
                   "fields": {
                     "IdtsSimilarBugReview": {
-                      "label": "{i18n>similarBugReviewFieldLabel}",
+                      "label": "{= ${IsActiveEntity} === true || ${HasActiveEntity} === true ? ${i18n>similarBugReviewFieldLabel} : '' }",
+                      "visible": "{= ${IsActiveEntity} === true || ${HasActiveEntity} === true }",
                       "template": "idts.bugmanagementui.ext.fragment.SimilarBugReviewField",
                       "position": {
                         "anchor": "DataField::description",
@@ -204,7 +209,8 @@
                 "@com.sap.vocabularies.UI.v1.FieldGroup#Classification": {
                   "fields": {
                     "IdtsClassificationReview": {
-                      "label": "{i18n>classificationReviewFieldLabel}",
+                      "label": "{= ${IsActiveEntity} === true || ${HasActiveEntity} === true ? ${i18n>classificationReviewFieldLabel} : '' }",
+                      "visible": "{= ${IsActiveEntity} === true || ${HasActiveEntity} === true }",
                       "template": "idts.bugmanagementui.ext.fragment.ClassificationReviewField",
                       "position": {
                         "anchor": "DataField::defectCategory_ID",

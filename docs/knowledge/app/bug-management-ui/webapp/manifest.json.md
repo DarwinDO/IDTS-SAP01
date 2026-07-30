@@ -1,5 +1,19 @@
 # Knowledge: `app/bug-management-ui/webapp/manifest.json`
 
+## IDTS-115 root-create AI label guard
+
+### English
+
+Fiori Elements renders a custom field label separately from the fragment content. Hiding only `SimilarBugReviewField.fragment.xml` or `ClassificationReviewField.fragment.xml` therefore leaves an empty label on a brand-new draft. The two custom-field `label` bindings now use the same persisted-source condition as their content: the label is present for an active Bug or an edit draft with an active source, and resolves to an empty string for a root create draft.
+
+Debug order: inspect `IsActiveEntity` and `HasActiveEntity` on the Object Page context, then inspect the custom field `label` binding, and finally inspect the fragment wrapper `visible` binding. Do not use DOM hiding or CSS selectors; those approaches bypass Fiori Elements form and accessibility behavior.
+
+### Vietnamese
+
+Fiori Elements sinh label của custom field tách riêng khỏi nội dung fragment. Vì vậy, nếu chỉ ẩn `SimilarBugReviewField.fragment.xml` hoặc `ClassificationReviewField.fragment.xml`, màn hình tạo Bug mới vẫn còn label rỗng. Hai binding `label` giờ dùng cùng điều kiện nguồn đã lưu như nội dung: label hiện với Bug active hoặc edit draft có active source, và trở thành chuỗi rỗng với root create draft.
+
+Thứ tự debug: xem `IsActiveEntity` và `HasActiveEntity` trên Object Page context, xem binding `label` của custom field, rồi xem binding `visible` của fragment wrapper. Không ẩn bằng DOM hoặc CSS selector vì sẽ đi vòng qua form/accessibility của Fiori Elements.
+
 ## English
 
 ### What this file is for
@@ -489,6 +503,8 @@ IDTS-79 uses native `controlConfiguration` field extensions instead:
 
 This keeps the review dialogs and backend contracts unchanged while placing each entry point inside the form where users need it.
 
+On a brand-new root draft, Fiori Elements creates the custom-field label outside the XML fragment. The manifest therefore applies the persisted-source visibility expression to the whole custom field, while the fragment keeps the same defensive visibility. This hides both the label and button until the draft has an active source Bug; edit drafts of active Bugs remain supported.
+
 ### Vietnamese
 
 IDTS-78 đã bỏ title nhìn thấy được của hai action row Similar Bug và Classification, nhưng manifest vẫn đăng ký chúng trong `content.body.sections`. Vì vậy Fiori Elements vẫn render mỗi row thành một block Object Page riêng.
@@ -510,3 +526,19 @@ The first form-field version used long helper text inside the custom fragment. B
 ### Vietnamese
 
 Phiên bản field đầu tiên dùng helper text dài bên trong custom fragment. Evidence browser cho thấy một Fiori Form cell chuẩn quá hẹp cho layout đó. Manifest cuối cùng vì vậy cung cấp label i18n ngắn (`Similar bugs` và `Classification suggestions`) và để fragment chỉ render action button.
+
+## IDTS-113 update - HTML5 repository service declaration
+
+### English
+
+The manifest now declares `sap.cloud.service: idts.sap01`. The MTA HTML5
+content module uses this stable service name when it packages the UI into the
+SAP HTML5 Application Repository. OData data-source paths remain unchanged;
+AppRouter routes `/odata/*` to the CAP service and forwards the XSUAA token.
+
+### Vietnamese
+
+Manifest khai bao `sap.cloud.service: idts.sap01`. HTML5 content module trong
+MTA dung service name on dinh nay de dong goi UI vao SAP HTML5 Application
+Repository. Duong dan OData khong doi; AppRouter route `/odata/*` den CAP
+service va forward XSUAA token.

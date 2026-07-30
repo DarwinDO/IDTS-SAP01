@@ -44,7 +44,11 @@ const {
   prepareDraftPatch,
   handleDraftSave
 } = require('./bug-service/drafts')
-const { startEmailWorker } = require('./email/worker')
+const {
+  processEmailOutboxBatch,
+  shouldStartEmailWorker,
+  startEmailWorker
+} = require('./email/worker')
 const {
   suggestSimilarBugs,
   suggestClassification,
@@ -140,6 +144,7 @@ module.exports = class BugService extends cds.ApplicationService {
     // Confirmation không tin candidate content từ client và không đổi status của hai Bug.
     this.on('confirmDuplicateSuggestion', req => confirmDuplicateSuggestion(req, entities))
     this.on('readAiOperationalMetrics', req => readAiOperationalMetrics(req))
+    this.on('processEmailOutbox', () => processEmailOutboxBatch({ tx: cds.db }))
     // `SAVE` là ranh giới draft → active. `handleDraftSave` validate lần cuối, gọi `next()` để CAP persist,
     // rồi mới ghi history/attachment side effects. Breakpoint tại đây phân biệt lỗi trước save với lỗi sau persist.
     this.on('SAVE', Bugs.drafts, (req, next) => handleDraftSave(req, entities, next))
@@ -209,6 +214,6 @@ module.exports = class BugService extends cds.ApplicationService {
     // `super.init()` cho CAP hoàn tất đăng ký service sau khi custom handler đã được gắn.
     // Worker email khởi động sau đó và đọc outbox đã commit, không gửi mail trong transaction của action Bug.
     await super.init()
-    startEmailWorker()
+    if (shouldStartEmailWorker()) startEmailWorker()
   }
 }

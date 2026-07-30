@@ -14,6 +14,11 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 
 const cds = require('@sap/cds')
 const { INSERT, SELECT, UPDATE } = cds.ql
+const { buildClassificationSuggestions } = require('../../srv/ai')
+const {
+  buildClassificationOutputSchema,
+  buildProviderCatalogInput
+} = require('../../srv/ai/classification-suggestion')
 const { containsUnsafeDiagnosticText } = require('../../srv/ai/safety')
 
 const RESULTS = []
@@ -89,11 +94,11 @@ function bugEntry () {
 
 function validProviderOutput (overrides = {}) {
   return {
-    sapModule: { code: 'FI', confidence: 0.81, reason: 'Financial approval context is mentioned.' },
-    applicationComponent: { code: 'IDTS_FIORI_UI', confidence: 0.88, reason: 'The issue is visible on a Fiori screen.' },
-    defectCategory: { code: 'FIORI_UI5', confidence: 0.86, reason: 'The failure is UI-facing.' },
-    priority: { code: 'HIGH', confidence: 0.83, reason: 'Login impact is serious for QA.' },
-    severity: { code: 'MAJOR', confidence: 0.84, reason: 'The defect blocks a normal user flow.' },
+    sapModule: { catalogRef: 'SM1', code: 'FI', confidence: 0.81, reason: 'Financial approval context is mentioned.' },
+    applicationComponent: { catalogRef: 'AC1', code: 'IDTS_FIORI_UI', confidence: 0.88, reason: 'The issue is visible on a Fiori screen.' },
+    defectCategory: { catalogRef: 'DC1', code: 'FIORI_UI5', confidence: 0.86, reason: 'The failure is UI-facing.' },
+    priority: { catalogRef: 'P1', code: 'HIGH', confidence: 0.83, reason: 'Login impact is serious for QA.' },
+    severity: { catalogRef: 'S1', code: 'MAJOR', confidence: 0.84, reason: 'The defect blocks a normal user flow.' },
     ...overrides
   }
 }
@@ -104,6 +109,32 @@ async function main () {
   console.log(' IDTS-67 AI Classification Suggestion Verification')
   console.log(' ' + new Date().toISOString())
   console.log('========================================================')
+
+  const schemaCatalogs = buildProviderCatalogInput({
+    sapModules: [{ code: 'FI', name: 'Financial Accounting', active: true }],
+    applicationComponents: [{ code: 'IDTS_UI', name: 'IDTS UI', active: true }],
+    defectCategories: [{ code: 'UI', name: 'UI defect', active: true }],
+    priorityValues: [{ code: 'HIGH', name: 'High', active: true }],
+    severityValues: [{ code: 'MAJOR', name: 'Major', active: true }]
+  })
+  const classificationSchema = buildClassificationOutputSchema(schemaCatalogs)
+  expectEqual('classification schema requires all five grounded fields', classificationSchema.required.length, 5)
+  expectEqual('classification schema constrains SAP Module to a short catalog reference', classificationSchema.properties.sapModule.properties.catalogRef.enum[0], 'SM1')
+  expectEqual('classification schema does not expose catalog UUIDs', JSON.stringify(classificationSchema).includes(SAP_MODULE_ID), false)
+
+  const rateLimitedRows = buildClassificationSuggestions({
+    input: {},
+    catalogs: {
+      sapModules: [],
+      applicationComponents: [],
+      defectCategories: [],
+      priorityValues: [],
+      severityValues: []
+    },
+    providerResult: { ok: false, status: 'AI_RATE_LIMITED' }
+  })
+  expectEqual('rate-limited classification uses explicit safe local fallback wording', rateLimitedRows.every(row => row.reason === 'AI is temporarily busy. Safe local suggestions are shown. Try again later.'), true)
+  expectNoUnsafeDiagnostic('rate-limited classification wording contains no provider diagnostic', rateLimitedRows)
 
   const csn = await cds.load('srv/service.cds')
   const db = await cds.connect.to('db', { kind: 'sqlite', credentials: { url: ':memory:' } })
@@ -119,6 +150,7 @@ async function main () {
   expectEqual('provider-backed severity suggestion uses active catalog code', positive.find(row => row.field === 'severity')?.valueCode, 'MAJOR')
   expectEqual('provider-backed component suggestion resolves catalog ID', positive.find(row => row.field === 'applicationComponent')?.valueID, COMPONENT_ID)
   expectEqual('high-confidence valid provider suggestion status', positive.find(row => row.field === 'defectCategory')?.status, 'SUGGESTED')
+  expectEqual('provider-backed rows are explicitly labelled as AI suggestions', positive.every(row => row.suggestionSource === 'AI'), true)
   expectEqual('classification suggestions always require human review', positive.every(row => row.requiresReview === true), true)
   expectTruthy('persisted source classification returns suggestion audit ID', positive[0]?.suggestionID)
   expectEqual('all classification rows share one review audit ID', positive.every(row => row.suggestionID === positive[0]?.suggestionID), true)
@@ -179,6 +211,7 @@ async function main () {
   aiConfig({}, { enabled: false })
   const disabled = await invoke(service, { sourceBugID: BUG_ID })
   expectEqual('disabled provider is exposed as safe provider status', disabled[0]?.providerStatus, 'AI_DISABLED')
+  expectEqual('disabled provider rows are explicitly labelled as rules-based fallback', disabled.every(row => row.suggestionSource === 'RULES'), true)
   expectTruthy('disabled provider still returns review-safe fallback rows', disabled.length)
   expectNoUnsafeDiagnostic('disabled provider response has no unsafe diagnostic text', disabled)
 

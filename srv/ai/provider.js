@@ -6,6 +6,7 @@ const cds = require('@sap/cds')
 const { getAiConfig } = require('./config')
 const { MockAiProvider } = require('./mock-provider')
 const { OpenAiProvider } = require('./openai-provider')
+const { VercelGatewayProvider } = require('./vercel-gateway-provider')
 const {
   redactSensitiveText,
   safeFeatureType,
@@ -25,7 +26,7 @@ class SafeAiProvider {
   // Wrapper bảo vệ delegate thật/mock: sanitize input, giới hạn thời gian và chuyển mọi lỗi thành result an toàn.
   constructor (config, dependencies = {}) {
     this.config = config
-    this.delegate = createDelegate(config)
+    this.delegate = createDelegate(config, dependencies)
     this.metricsLogger = dependencies.metricsLogger
   }
 
@@ -34,14 +35,28 @@ class SafeAiProvider {
   }
 
   structured (request = {}) {
-    return this.#run('structured', request, () => this.delegate.structured(sanitizeStructuredRequest(request, this.config)))
+    return this.#run(
+      'structured',
+      request,
+      () => this.delegate.structured(sanitizeStructuredRequest(request, this.config)),
+      operationTimeoutMs(this.config, request)
+    )
   }
 
   embedding (request = {}) {
     return this.#run('embedding', request, () => this.delegate.embedding(sanitizeEmbeddingRequest(request, this.config)))
   }
 
-  async #run (operation, request, execute) {
+  embeddingBatch (request = {}) {
+    return this.#run('embeddingBatch', request, () => {
+      if (typeof this.delegate.embeddingBatch !== 'function') {
+        throw unsupportedEmbeddingBatchError()
+      }
+      return this.delegate.embeddingBatch(sanitizeEmbeddingBatchRequest(request, this.config))
+    })
+  }
+
+  async #run (operation, request, execute, timeoutMs = operationTimeoutMs(this.config)) {
     const started = Date.now()
     const correlationId = request.correlationId || cds.utils.uuid()
     const featureType = safeFeatureType(request.featureType)
@@ -86,26 +101,40 @@ class SafeAiProvider {
     }
 
     try {
-      const data = await withTimeout(execute(), this.config.timeoutMs)
+      const delegateResult = await withTimeout(execute(), timeoutMs)
+      const normalized = normalizeDelegateResult(delegateResult)
       return this.#complete(successResult({
         operation,
         featureType,
         correlationId,
         durationMs: Date.now() - started,
-        data,
+        data: normalized.data,
+        providerAlias: normalized.providerAlias,
+        modelAlias: normalized.modelAlias,
+        fallbackUsed: normalized.fallbackUsed,
         config: this.config
       }))
     } catch (error) {
-      const code = error?.code === 'AI_TIMEOUT' ? 'AI_TIMEOUT' : 'AI_PROVIDER_ERROR'
+      const code = safeFailureCode(error)
+      const diagnostic = {
+        name: sanitizeDiagnosticToken(error?.name, 'Error'),
+        code: sanitizeDiagnosticToken(error?.code, code),
+        retryable: Boolean(error?.retryable || code === 'AI_TIMEOUT')
+      }
+      if (error?.gatewayReason) {
+        diagnostic.gatewayReason = sanitizeDiagnosticToken(error.gatewayReason, 'provider_error')
+      }
+      if (error?.providerErrorCode) {
+        diagnostic.providerErrorCode = sanitizeDiagnosticToken(error.providerErrorCode, 'provider_error')
+      }
+      if (Number.isInteger(error?.retryAfterSeconds)) {
+        diagnostic.retryAfterSeconds = Math.min(Math.max(error.retryAfterSeconds, 0), 86400)
+      }
       LOG.warn('AI provider operation failed', {
         operation,
         featureType,
         correlationId,
-        diagnostic: {
-          name: sanitizeDiagnosticToken(error?.name, 'Error'),
-          code: sanitizeDiagnosticToken(error?.code, code),
-          retryable: Boolean(error?.retryable || code === 'AI_TIMEOUT')
-        }
+        diagnostic
       })
       return this.#complete(failureResult({
         operation,
@@ -113,7 +142,7 @@ class SafeAiProvider {
         correlationId,
         durationMs: Date.now() - started,
         code,
-        summary: sanitizeErrorSummary(error),
+        summary: safeFailureSummary(code, error),
         retryable: Boolean(error?.retryable || code === 'AI_TIMEOUT'),
         config: this.config
       }))
@@ -126,18 +155,22 @@ class SafeAiProvider {
   }
 }
 
-function createDelegate (config) {
+function createDelegate (config, dependencies = {}) {
   // Chọn OpenAI, mock hoặc disabled delegate theo config; feature code không phụ thuộc SDK cụ thể.
   if (config.enabled && config.provider === 'mock' && !config.unsupported) {
     return new MockAiProvider(config)
   }
   if (config.enabled && config.provider === 'openai' && !config.unsupported && config.ready) {
-    return new OpenAiProvider(config)
+    return new OpenAiProvider(config, dependencies.fetchImpl)
+  }
+  if (config.enabled && config.provider === 'vercel' && !config.unsupported && config.ready) {
+    return new VercelGatewayProvider(config, dependencies.fetchImpl, dependencies.now)
   }
   return {
     chat: async () => null,
     structured: async () => null,
-    embedding: async () => null
+    embedding: async () => null,
+    embeddingBatch: async () => null
   }
 }
 
@@ -156,8 +189,22 @@ function sanitizeStructuredRequest (request, config) {
   // Chuẩn hóa request JSON-schema/structured output; schema name và payload đều bị giới hạn.
   return {
     schemaName: sanitizeDiagnosticToken(request.schemaName, 'Suggestion'),
+    schema: sanitizeJsonSchema(request.schema),
     instruction: redactSensitiveText(request.instruction, config.maxInputChars),
-    input: redactSensitiveObject(request.input, config.maxInputChars)
+    input: redactSensitiveObject(request.input, config.maxInputChars),
+    deadlineMs: boundedDeadlineMs(request.deadlineMs, config.timeoutMs)
+  }
+}
+
+function sanitizeJsonSchema (schema) {
+  if (!schema || typeof schema !== 'object' || Array.isArray(schema)) return null
+  try {
+    const serialized = JSON.stringify(schema)
+    if (serialized.length > 20_000) return null
+    const cloned = JSON.parse(serialized)
+    return cloned && typeof cloned === 'object' && !Array.isArray(cloned) ? cloned : null
+  } catch {
+    return null
   }
 }
 
@@ -166,6 +213,33 @@ function sanitizeEmbeddingRequest (request, config) {
   return {
     text: redactSensitiveText(request.text, config.maxInputChars)
   }
+}
+
+function sanitizeEmbeddingBatchRequest (request, config) {
+  const texts = Array.isArray(request.texts) ? request.texts : []
+  return {
+    texts: texts.slice(0, 11).map(text => redactSensitiveText(text, Math.min(config.maxInputChars, 2000)))
+  }
+}
+
+function safeFailureCode (error) {
+  if (error?.code === 'AI_TIMEOUT') return 'AI_TIMEOUT'
+  if (error?.code === 'AI_RATE_LIMITED' || error?.gatewayReason === 'rate_limited') return 'AI_RATE_LIMITED'
+  if (error?.code === 'AI_EMBEDDING_BATCH_UNSUPPORTED') return 'AI_EMBEDDING_BATCH_UNSUPPORTED'
+  return 'AI_PROVIDER_ERROR'
+}
+
+function safeFailureSummary (code, error) {
+  if (code === 'AI_RATE_LIMITED') return 'AI is temporarily busy. Safe local suggestions are shown. Try again later.'
+  if (code === 'AI_EMBEDDING_BATCH_UNSUPPORTED') return 'Batch embeddings are not supported by the configured provider route.'
+  return sanitizeErrorSummary(error)
+}
+
+function unsupportedEmbeddingBatchError () {
+  return Object.assign(new Error('Batch embeddings are not supported by this provider adapter.'), {
+    code: 'AI_EMBEDDING_BATCH_UNSUPPORTED',
+    retryable: false
+  })
 }
 
 function redactSensitiveObject (value, maxLength) {
@@ -185,7 +259,7 @@ function redactSensitiveObject (value, maxLength) {
   return null
 }
 
-function successResult ({ operation, featureType, correlationId, durationMs, data, config }) {
+function successResult ({ operation, featureType, correlationId, durationMs, data, providerAlias, modelAlias, fallbackUsed, config }) {
   // Chuẩn hóa response thành envelope thành công có metadata an toàn; không expose raw SDK response.
   return Object.freeze({
     ok: true,
@@ -194,10 +268,37 @@ function successResult ({ operation, featureType, correlationId, durationMs, dat
     featureType,
     correlationId,
     durationMs,
-    providerAlias: config.provider,
-    modelAlias: modelAliasFor(operation, config),
+    providerAlias: providerAlias || config.provider,
+    modelAlias: modelAlias || modelAliasFor(operation, config),
+    fallbackUsed: Boolean(fallbackUsed),
     data
   })
+}
+
+function normalizeDelegateResult (value) {
+  if (value?.__idtsProviderMeta === true) {
+    return {
+      data: value.data,
+      providerAlias: value.providerAlias,
+      modelAlias: value.modelAlias,
+      fallbackUsed: value.fallbackUsed
+    }
+  }
+  return { data: value, providerAlias: null, modelAlias: null, fallbackUsed: false }
+}
+
+function operationTimeoutMs (config, request = {}) {
+  const deadlineMs = boundedDeadlineMs(request.deadlineMs, config.timeoutMs)
+  if (deadlineMs) return deadlineMs + 50
+  return config.provider === 'vercel' && config.fallbackEnabled
+    ? config.timeoutMs * 2 + 50
+    : config.timeoutMs
+}
+
+function boundedDeadlineMs (value, providerTimeoutMs) {
+  const number = Number(value)
+  if (!Number.isFinite(number) || number <= 0) return null
+  return Math.max(1, Math.min(Math.floor(number), providerTimeoutMs))
 }
 
 function failureResult ({ operation, featureType, correlationId, durationMs, code, summary, retryable, config }) {
@@ -221,7 +322,7 @@ function failureResult ({ operation, featureType, correlationId, durationMs, cod
 
 function modelAliasFor (operation, config) {
   // Chọn alias model theo operation chat/structured/embedding cho audit, không trả model endpoint/key.
-  return operation === 'embedding'
+  return operation.startsWith('embedding')
     ? (config.embeddingModelAlias || config.modelAlias || 'not-configured')
     : (config.modelAlias || 'not-configured')
 }
@@ -242,7 +343,12 @@ function withTimeout (promise, timeoutMs) {
 module.exports = {
   SafeAiProvider,
   createAiProvider,
+  createDelegate,
+  normalizeDelegateResult,
+  operationTimeoutMs,
   sanitizeChatRequest,
+  sanitizeEmbeddingBatchRequest,
   sanitizeEmbeddingRequest,
+  sanitizeJsonSchema,
   sanitizeStructuredRequest
 }

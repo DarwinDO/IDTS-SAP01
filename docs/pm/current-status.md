@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-07-26
+Last updated: 2026-07-28
 
 ## Snapshot
 
@@ -10,7 +10,7 @@ Last updated: 2026-07-26
 | Project phase | Sprint 5 is active and currently At Risk. Jira Epic `IDTS-88` now consolidates all 11 current Sprint 5 issues for mentor readiness, Shared QA/infrastructure closure, security follow-up, and ownership governance. |
 | Product baseline | CAP/Fiori MVP, attachment/audit/notification/PM flows, and advisory-AI review baseline are implemented; BRD v1.5, SRS v1.4, and FRS v1.5 EN/VI are synchronized to the AuthService/AuthSessions, Render/PostgreSQL, attachment/S3, notification outbox, and human-reviewed AiSuggestions baseline. |
 | Current sprint | `IDTS Sprint 5`: 11 issues as of 2026-07-22 — 5 In Progress, 6 To Do, 0 Done, and 5 overdue before the report date. All 11 are children of Epic `IDTS-88`; DonHV owns 9 and SangVN owns 2, so capacity and status reconciliation are immediate risks. |
-| Recommended next action | Use the synchronized SAP490 pack for mentor review with disclosed limitations. IDTS-100 refreshed the current artifacts and Shared QA evidence, updated Drive artifacts in place, and verified 27 planned cases as 21 Passed plus 6 human UAT cases still Prepared. Complete those six UAT executions and mentor sign-off separately; OpenAI live remains disabled and must not be presented as accepted. |
+| Recommended next action | Have SangVN, DatDT and NhanT complete one interactive SAP-identity sign-in each, then capture the live Developer/Tester authorization matrix and rerun the native Fiori attachment picker when Chrome upload permission is available. Their BTP users, role collections and HANA business identities are already aligned and verified. The BTP Technical Specification delta is prepared for IDTS-112 but must still pass its named-member approval workflow. OpenAI live remains disabled and must not be presented as accepted. |
 | Active implementation note | IDTS-72 visual evidence audit has repository evidence merged through PR #126. IDTS-74 is complete and deployed. IDTS-75 is complete at implementation, PR, Render, and shared-QA evidence level. IDTS-76 is complete at implementation, PR, Render, and shared-QA evidence level: it reuses `summarizeBugHandoff` and `AiReviewUi`, adds a review-only Handoff Summary Object Page section/dialog, and has local plus shared-QA evidence for positive, sparse-data, unsafe-output, safe-failure, no-workflow-mutation, deployed API smoke, and deployed browser smoke. |
 | Completed DatDT AI review foundation | IDTS-91/92/93 merged through PR #167 at `442b958b28ff268920260bbdef8bd94dc56f9341`. Explicit suggestion review, persisted Similar Bugs/Classification controls, and validated Tester/PM classification apply passed the integrated regression and fresh GitHub gate. Jira comments `10676`–`10678` record closure evidence; all three issues are Done. |
 | Completed SangVN AI review controls | IDTS-94 merged through PR #168 at `9e041dac56f9adfd9294521d5c2e7e8f3c1597cb`. Handoff Summary and Smart Assign explanation persist review decisions without workflow/assignee mutation; focused, desktop/mobile browser, build and gate evidence passed. SangVN's 3/3 Knowledge Gate remains linked; Jira comment `10679` records closure and the issue is Done. |
@@ -249,6 +249,51 @@ Vietnamese clean note: Nút `Assign Developer` riêng đã được bỏ khỏi 
 - Jira tasks `IDTS-106`–`IDTS-112` exist with explicit dependencies. They remain blocked until the committed briefing is personally acknowledged by the relevant members.
 - The official SAP490 submission direction is English-only. Vietnamese learning/briefing documents remain allowed, but no new VI submission artifact may be generated or synchronized.
 - No member acknowledgment, candidate approval, Unit/UAT result, Drive Trash operation, or mentor-ready completion has been fabricated or claimed.
+
+## 2026-07-28 isolated SAP BTP Cloud Foundry POC
+
+- `IDTS-113` deployed an isolated CAP copy to SAP BTP Trial Cloud Foundry with SAP HANA Cloud and a dedicated HDI container. The app is running and health, public auth metadata, anonymous denial, authenticated read, logout, and revoked-token checks pass.
+- Render Shared QA, Render PostgreSQL, AWS S3, Brevo, OpenAI configuration, and real user data were not changed or copied.
+- This result proves technical deployability only. XSUAA/AppRouter adoption, provider integration, migration, and production readiness remain separate decisions.
+
+## 2026-07-28 SAP BTP migration acceptance increment
+
+- `IDTS-113` now runs the migrated CAP service and AppRouter on SAP BTP Cloud
+  Foundry with HANA data, XSUAA PM access, retained AWS S3, retained Brevo and
+  SAP Job Scheduling Service.
+- `IDTS-114` is in progress: PR #211 is merged at
+  `016a6067de1c3c7725b6f74f23b90ef6b8b5f7fa` and SAP BTP uses Qwen structured
+  generation/embeddings with one bounded OpenAI fallback. Live synthetic BTP
+  tasks and 169 local regression checks passed; Ling plain chat passed but its
+  JSON-Schema structured request returned HTTP 400. PM browser acceptance
+  verified Similar Bugs, Classification review, Handoff Summary and Smart
+  Assign no-mutation/audit persistence, but later sanitized gateway 429/400
+  responses mean stable provider-live feature success is not claimed.
+- Runtime SHA `3504931d2689e4d56c0de3f5977342fc7cf57e4a` is deployed. PM browser
+  assignment/history/notification smoke, S3 adapter upload/download/hash/delete
+  and a fresh Scheduler-driven Brevo SENT delivery passed.
+- IDTS-115 PR #214 is merged and selectively deployed at
+  `ae209c8f82227e4dedca09247db96c0b47097d92` without running the DB deployer.
+  PM browser acceptance passed Apply Classification, Confirm Duplicate and
+  PM-only AI Activity. HANA readback confirms the `BUG-0019` to `BUG-0020`
+  duplicate relationship; review/apply operations did not change status,
+  assignee or next processor unexpectedly. Evidence is under
+  `docs/pm/evidence/idts-115/`.
+- Full AI acceptance remains open. Qwen embedding produced observed `SUCCESS`,
+  but recent structured Classification, Handoff and Smart Assign audits are
+  safe fallback/provider-error outcomes. Tester/Developer interactive browser
+  role evidence is also pending member-owned sign-in. The controlled create
+  flow emitted binding errors for off-screen fields and `componentCategory_ID`;
+  both QA bugs were eventually created, but the console finding requires
+  follow-up before a clean-browser claim.
+- The Render rollback platform-readiness drill is documented and fresh route
+  checks pass. Render is a previous baseline, not a synchronized HANA replica;
+  a lossless return requires manual HANA-delta reconciliation.
+- Full cutover is not yet signed off: the Tester/Developer identities and role
+  collections are provisioned, but each member still needs one interactive
+  sign-in/authorization check. Native browser file-picker evidence and the
+  final Technical Specification EN integration under IDTS-112 also remain
+  open.
 
 ## Next Handover Instruction
 

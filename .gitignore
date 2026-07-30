@@ -5,6 +5,7 @@ default-env-admin.json
 node_modules/
 gen/
 app/bug-management-ui/dist/
+mta_archives/
 .DS_Store
 logs/
 *.log

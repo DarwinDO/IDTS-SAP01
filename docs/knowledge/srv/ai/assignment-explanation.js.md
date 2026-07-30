@@ -1,5 +1,19 @@
 # `srv/ai/assignment-explanation.js`
 
+## Candidate-reference JSON Schema (2026-07-30)
+
+`buildAssignmentOutputSchema()` constrains the structured result to short references created for the current request (`C1`, `C2`, ...). Each returned item must contain `candidateRef`, `explanation` and `confidence`. The provider never receives a developer profile UUID and cannot create a candidate outside the backend list.
+
+Debug order: candidate query → assign short references → `buildAssignmentOutputSchema()` → provider call → `providerRowsByCandidateRef()` → deterministic fallback for missing rows. AI remains advisory; the Assign action and backend authorization/validation remain mandatory.
+
+Tiếng Việt: backend cấp mã tạm `C1`, `C2`; model chỉ giải thích theo các mã này rồi backend ghép lại với Developer thật. AI không thể tự thêm người ngoài danh sách hoặc tự assign.
+
+## IDTS-114 stable candidate-reference contract (2026-07-30)
+
+The provider no longer receives `developerProfileID` UUID values. After IDTS reads and sorts eligible candidates, it assigns backend-only references `C1`, `C2`, and so on. `buildProviderInput()` sends only `candidateRef` plus allow-listed facts. The provider must return that exact ref; `buildAssignmentExplanations()` maps it back to the real candidate in memory.
+
+Returned OData rows retain `developerProfileID` for the final user-selected assignment, but now include `explanationSource`: `AI` only for a mapped provider explanation and `RULES` for deterministic guidance. Debug `buildProviderInput()` then `providerRowsByCandidateRef()`; never infer model output merely from 55% or 72% confidence.
+
 ## IDTS-97 operational evidence
 
 `recordAssignmentAudit()` stores only normalized provider status and duration for the feature-level audit. Candidate personal/contact data, prompt, raw response, and error detail are not operational metric fields.
@@ -175,3 +189,15 @@ Quy tac quan trong: AI chi ho tro giai thich, con IDTS van dung backend validati
 ### Vietnamese
 
 `recordAssignmentAudit()` giờ trả một audit row đã sanitize của request explanation. `explainSmartAssignment()` copy UUID của row đó vào mỗi candidate dưới field `suggestionID`. Vì vậy dialog review cả tập explanation như một unit; Accept không chọn table row và không gọi `assignToDeveloper`.
+
+## SAP BTP response budget
+
+`explainSmartAssignment()` sends at most ten candidates and passes `SMART_ASSIGNMENT_PROVIDER_DEADLINE_MS = 24000` to the provider wrapper. The provider input keeps only the Bug classification/title and a compact workload summary. If Qwen cannot complete inside 24 seconds, the provider returns `AI_TIMEOUT` and `buildAssignmentExplanations()` immediately uses the existing deterministic explanation. This keeps the OData response below the approximately 30-second AppRouter boundary.
+
+Expected execution order: read grounded candidates → call structured provider with the 24-second deadline → validate provider rows or build deterministic rows → write one sanitized audit row → return candidate explanations. No branch updates `Bugs`, assignment history, notifications or email.
+
+### Giải thích tiếng Việt
+
+`explainSmartAssignment()` gửi tối đa mười candidate và truyền `SMART_ASSIGNMENT_PROVIDER_DEADLINE_MS = 24000` vào provider wrapper. Input chỉ giữ title/classification của Bug và workload summary gọn. Nếu Qwen chưa xong trong 24 giây, provider trả `AI_TIMEOUT`; hàm lập tức dùng explanation deterministic sẵn có để OData trả trước ngưỡng AppRouter khoảng 30 giây.
+
+Thứ tự chạy mong đợi: đọc candidate có grounding → gọi provider với deadline 24 giây → validate kết quả hoặc dựng fallback deterministic → ghi một audit row đã sanitize → trả explanation. Không nhánh nào sửa `Bugs`, history phân công, notification hoặc email.

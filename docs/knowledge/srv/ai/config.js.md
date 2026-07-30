@@ -70,12 +70,26 @@ CAP loads project configuration into `cds.env`. IDTS already uses this pattern f
 - `srv/ai/provider.js`: consumes the normalized config.
 - `docs/ba/discovery/idts-63-ai-assistance-guardrails.md`: defines why AI must be disabled by default and human-reviewed.
 
+## IDTS-114 Vercel AI Gateway update (2026-07-29)
+
+`vercel` is now an allowed provider, but it is still disabled by default. `runtimeOverrides()` allows only named, non-secret settings such as `IDTS_AI_PROVIDER`, `IDTS_AI_MODEL`, timeout, and fallback switches. The only secret read by this module is the runtime-only `AI_GATEWAY_API_KEY` (or an equivalent private CAP binding property); it must never appear in `package.json`, evidence, or a suggestion audit row.
+
+Model IDs are deliberately not handled by `safeAlias()`: Vercel uses IDs such as `inclusionai/ling-3.0-flash-free` and `alibaba/qwen3.7-flash`. `safeModelId()` preserves the single `provider/model` slash but rejects a URL and `..` path traversal. An explicit `embeddingModelAlias: null` disables embeddings for the low-cost Ling proving phase, so Similar Bugs can use its existing deterministic lexical fallback instead of incorrectly sending a chat model to the embedding endpoint.
+
+Breakpoints: start at `getAiConfig()` to inspect only `enabled`, `provider`, model IDs, `fallbackEnabled`, and `ready`; then enter `normalizeAiConfig()` to see which missing field made a configuration unavailable. Never inspect or copy the gateway key. The next file is `srv/ai/provider.js`.
+
 ### Safe editing checklist
 
 - Keep `enabled` default as `false`.
 - Do not add real provider keys, endpoints, tokens, or account IDs.
 - OpenAI uses the real adapter in `srv/ai/openai-provider.js`; keep its key private and leave `enabled` false in committed defaults.
 - Keep aliases sanitized; they are allowed in logs/audit only because they must not contain private endpoint or credential text.
+
+## IDTS-114 BTP dedicated AI binding (2026-07-30)
+
+On SAP BTP, `getAiConfig()` first honors a directly injected `AI_GATEWAY_API_KEY` for local/private compatibility. If it is absent, it reads only the credentials of the user-provided service named `idts-sap01-ai-gateway` from `VCAP_SERVICES`. It accepts `gatewayApiKey`, `aiGatewayApiKey`, or `AI_GATEWAY_API_KEY`.
+
+This exact-name lookup is intentional. `idts-sap01-external-services` remains the retained S3/Brevo binding and is never searched for AI credentials. A malformed or missing VCAP document returns no key, so the provider stays safely unavailable instead of crashing the Bug service. Breakpoints: `getAiConfig()` and `readGatewayApiKeyFromVcap()`; inspect only enabled/provider/aliases/ready, never the key value.
 
 ## Tiếng Việt
 

@@ -2,6 +2,7 @@
  * Dùng chung việc gọi review action và cập nhật state cho các dialog AI.
  * Backend vẫn là nơi xác thực reviewer và quyết định trạng thái hợp lệ.
  */
+/* global Promise */
 sap.ui.define([
     "sap/m/MessageBox",
     "sap/ui/core/format/DateFormat"
@@ -43,9 +44,11 @@ sap.ui.define([
         state.setProperty("/reviewActionEnabled", false);
         var operation = model.bindContext("/" + actionName + "(...)", undefined, { $$ownRequest: true });
         operation.setParameter("suggestionID", suggestionID);
+        var reviewCompleted = false;
 
         return operation.invoke("$direct")
             .then(function () {
+                reviewCompleted = true;
                 return requestResult(operation);
             })
             .then(function (result) {
@@ -61,6 +64,9 @@ sap.ui.define([
                 return result;
             })
             .catch(function () {
+                if (!reviewCompleted) {
+                    state.setProperty("/reviewActionEnabled", true);
+                }
                 MessageBox.error(getText("aiSuggestionReviewFailed"));
                 return null;
             })

@@ -1,5 +1,35 @@
 # `srv/ai/classification-suggestion.js`
 
+## Feature-specific structured output contract (2026-07-30)
+
+`suggestClassification()` builds the active catalog input once and derives a JSON Schema from the same short references. The provider must return each available classification field with an exact `catalogRef`, a confidence from 0 to 1 and a short reason. UUIDs never enter the schema or provider payload. `findCatalogRow()` still maps each reference to an active backend catalog row; unknown or inactive values remain rejected.
+
+Debug order: `buildProviderCatalogInput()` → `buildClassificationOutputSchema()` → `provider.structured()` → `extractProviderValue()` → `findCatalogRow()`. Provider `SUCCESS` alone is insufficient: a row must resolve to the active catalog before the UI labels it as an AI suggestion.
+
+Tiếng Việt: schema ép model chọn mã ngắn như `SM1`, `AC1`, `DC1`, `P1`, `S1`, thay vì đoán UUID hoặc trả object tự do. Backend vẫn ánh xạ mã ngắn sang catalog thật và là lớp quyết định cuối cùng.
+
+## IDTS-114 catalog references and result provenance (2026-07-30)
+
+The provider receives a short field-scoped catalog reference (`SM1`, `AC1`, `DC1`, `P1`, or `S1`) instead of a catalog UUID. It must return `catalogRef`; `findCatalogRow()` maps that ref to an active stored row before UI output. Code/name matching remains compatibility-only and cannot accept an unknown catalog value.
+
+Each response row carries `suggestionSource`: `AI` for a validated model choice, `RULES` for a deterministic baseline, and `NONE` for no safe choice. This source is also recorded in the sanitized audit payload. Debug path: `buildProviderCatalogInput()` -> provider `catalogRef` -> `findCatalogRow()` -> `suggestionSource`.
+
+## 2026-07-30 rate-limited fallback wording
+
+### English
+
+When the shared Gateway cooldown returns `AI_RATE_LIMITED`, classification still
+builds review-only deterministic rows. A no-match row explains that AI is
+temporarily busy and safe local suggestions are shown. It never exposes HTTP
+429, provider names, quota details, or raw diagnostics.
+
+### Tiếng Việt
+
+Khi cooldown dùng chung của Gateway trả `AI_RATE_LIMITED`, classification vẫn
+tạo các row deterministic chỉ để review. Row không match giải thích rằng AI
+đang tạm bận và hệ thống đang hiển thị gợi ý local an toàn. Nó không lộ HTTP
+429, tên provider, chi tiết quota hoặc raw diagnostic.
+
 ## IDTS-97 operational evidence
 
 `recordClassificationAudit()` copies only normalized provider status and duration into the audit row. Classification inputs, catalog payloads, raw provider output, and error detail are not operational metric fields.

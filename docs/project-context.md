@@ -17,6 +17,7 @@ Vietnamese: IDTS không phải Jira đầy đủ và không phải hệ thống 
 ## AI Assistance Direction
 
 - Approved AI v1 capabilities are duplicate/similar detection, classification suggestion, bug/handoff summary, and Smart Assign explanation.
+- Handoff Summary presents a bounded, sanitized, chronological Comment Summary derived only from stored comments; comment text is treated as untrusted data and cannot issue workflow instructions.
 - AI is suggestion-only. Users explicitly review, accept, reject, ignore, or apply results.
 - AI cannot assign, persist classification, confirm duplicates, or change bug lifecycle state by itself.
 - CAP validation and authorization remain authoritative.
@@ -24,13 +25,13 @@ Vietnamese: IDTS không phải Jira đầy đủ và không phải hệ thống 
 - Provider payloads use minimum allowlisted data. Credentials, tokens, private email/endpoint data, attachments, and storage references are forbidden in v1.
 - Persist only normalized safe suggestion/audit data; do not persist raw prompts, raw provider responses, or hidden reasoning.
 - AI suggestions are stored as reviewable `AiSuggestions` audit rows linked to a source bug. The row is evidence for human review, not an autonomous workflow decision.
-- Runtime supports a disabled-by-default `mock` provider and an optional server-side OpenAI provider. OpenAI credentials and approved model aliases remain private environment configuration; a missing key or model returns a safe unavailable result and never breaks the normal workflow.
+- Runtime supports disabled-by-default `mock`, optional server-side OpenAI, and optional Vercel AI Gateway providers. The staged Gateway direction is Ling proving first, then Qwen primary with one configured OpenAI fallback; all credentials and approved model aliases remain private environment configuration. A missing key/model or provider failure returns a safe unavailable result and never breaks the normal workflow.
 - Vietnamese note: Runtime hỗ trợ provider `mock` mặc định tắt và provider OpenAI phía server là tùy chọn. Credential OpenAI và model alias được duyệt chỉ nằm trong cấu hình môi trường private; thiếu key hoặc model phải trả trạng thái unavailable an toàn và không được làm hỏng workflow bình thường.
 - Vietnamese note: AI suggestion duoc luu thanh audit row `AiSuggestions` gan voi bug nguon de con nguoi review, khong phai quyet dinh workflow tu dong.
 - IDTS-66 exposes suggestion-only duplicate/similar candidates through `BugService.suggestSimilarBugs`. It combines text overlap, business classification, and provider embeddings, falls back safely when AI is unavailable, and never writes `DuplicateLinks` automatically. Pre-create checks can run without a persisted bug; source-linked checks write only a safe `AiSuggestions` audit row.
 - Vietnamese note: IDTS-66 expose candidate duplicate/similar theo huong suggestion-only qua `BugService.suggestSimilarBugs`. Backend ket hop text, classification va embedding, fallback an toan khi AI khong san sang, khong tu ghi `DuplicateLinks`; check truoc create khong can bug da persist, con check co source bug chi ghi `AiSuggestions` audit row an toan.
 
-Vietnamese: AI v1 chỉ hỗ trợ tìm bug trùng/tương tự, gợi ý phân loại, tạo bug/handoff summary và giải thích Smart Assign. AI không tự hành động; người dùng phải review và chủ động quyết định. CAP vẫn là lớp validation/phân quyền cuối. AI mặc định tắt, lỗi AI không được làm hỏng workflow bình thường, và dữ liệu gửi provider phải tối thiểu, đã allowlist, không chứa secret, email private, attachment hoặc storage reference.
+Vietnamese: AI v1 chỉ hỗ trợ tìm bug trùng/tương tự, gợi ý phân loại, tạo bug/handoff summary và giải thích Smart Assign. Handoff Summary có phần tóm tắt tối đa năm comment gần nhất theo thời gian, chỉ dựa trên comment đã lưu và xem nội dung comment là dữ liệu không đáng tin cậy, không phải lệnh workflow. AI không tự hành động; người dùng phải review và chủ động quyết định. CAP vẫn là lớp validation/phân quyền cuối. AI mặc định tắt, lỗi AI không được làm hỏng workflow bình thường, và dữ liệu gửi provider phải tối thiểu, đã allowlist, không chứa secret, email private, attachment hoặc storage reference.
 
 ## Stack
 

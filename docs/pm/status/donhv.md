@@ -3289,3 +3289,1755 @@ Vietnamese:
 - Final local result: Technical Specification EN/VI v0.7 retain 12/12 official tabs and inner template grids. OfficeCLI 1.0.141 and the full specification validator PASS; LibreOffice renders 17 pages per language and focused visual review PASS.
 - Evidence: `docs/pm/evidence/idts-103/technical-spec-template-fidelity-remediation-20260726.md`. Drive remains unchanged pending normal PR merge.
 - Release closeout: PR #189 passed QA Depth and merged normally at `aa7b708922d689a127e8ba892799c303881abc12`. Technical Specification EN/VI v0.7 were then updated in place at their existing Drive IDs; parent and XLSX MIME were preserved and metadata/size readback matched the uploaded files. No duplicate was created.
+
+### 2026-07-28 — IDTS-113 isolated SAP BTP Cloud Foundry POC
+
+- Started IDTS-113 on fresh worktree `chore/idts-113-btp-cloud-foundry-poc-donhv` from `origin/dev` commit `4b4c93c1d8b45024677653e1f890d52e742b2aaf`; root local `dev` and Render Shared QA were not modified.
+- SAP BTP Trial read-only baseline: Cloud Foundry region `ap21`, target space `dev`, no pre-existing app, service instance or route. The intended deployment remains an isolated, reversible POC with no real-data migration.
+- Tooling issue fixed in-session: CAP MCP model inspection initially failed because the fresh worktree had no installed `@cap-js/attachments` package. `npm ci` completed successfully and restored the project dependency graph; no source file changed.
+- Security/dependency risk observed: baseline `npm ci` reports 21 audit findings (1 critical, 10 high, 9 moderate and 1 low). No automatic or force upgrade was applied because that would be a separate dependency-remediation scope and could introduce breaking changes. Existing Security task IDTS-46 remains the appropriate follow-up.
+- OfficeCLI preflight for this documentation update: `officecli --version` returned `1.0.142`.
+- CAP MCP guidance confirms the supported Cloud Foundry preparation path is `cds add hana` plus `cds add mta`; XSUAA is a separate authentication facet and is not being introduced into this custom-auth POC without a separate decision.
+- Tooling issue fixed in-session: a combined verification command containing recursive removal of generated output was blocked by policy before execution. No file was deleted; the follow-up relies on CAP's own `cds build --production` target management instead.
+- Test-harness issue fixed in-session: the first UI5 verification passed CLI arguments incorrectly through `npm exec`; UI5 reported unknown arguments while the surrounding PowerShell command still printed a misleading aggregate PASS line. That aggregate line is rejected as evidence. The UI5 build is rerun directly from the app directory with explicit exit-code enforcement.
+- Test-harness path issue fixed in-session: the direct UI5 build itself succeeded, but its first target path went one parent level above the worktree, so the output assertion looked in the wrong directory. The rerun writes to the worktree-local ignored `.tmp/idts-113-ui5-build` directory and verifies the built `index.html` there.
+- BTP build tooling blocker under remediation: MBT `1.2.47` parsed the MTA descriptor but could not execute its generated Makefile because `make` was not installed on Windows. No MTAR was produced and no Cloud Foundry resource was changed. GNU Make is installed and verified before rerunning the same build.
+- BTP build tooling issue under investigation: the first MBT rerun with GNU Make exceeded the five-minute command timeout without returning buffered output. No Cloud Foundry deploy had started. Process state, generated archive and Makefile steps are inspected before deciding whether to wait or correct the build.
+- BTP build tooling issue resolved: the timed-out parent shell left MBT/Make running normally in the background. Process inspection showed active module builds, and the build subsequently completed without manual termination. The resulting ignored artifact `.tmp/idts-113-mta/idts-113-btp-poc.mtar` is 26,940,007 bytes; no Cloud Foundry deploy had started.
+- BTP provisioning issue resolved: the first HANA request omitted broker JSON and the second requested 32 GB while the current trial quota permits 16 GB. Both failed instances were deleted; a 16 GB `hana-free` instance then reached `create succeeded`.
+- BTP staging issue resolved: the regional Node buildpack rejected the repository engine expression `>=20 <23`, then confirmed Node 20 was unavailable. The generated CF package is now pinned to Node 22 only; the repository-wide engine range and Render profile remain unchanged.
+- Network-boundary issue resolved: a local HDI-bound password smoke timed out because direct HANA access was not opened to the workstation. No whitelist was relaxed. The existing env-only password helper was packaged and run as a one-off CF task inside the app boundary instead.
+- Final BTP POC result: HANA Cloud and the dedicated HDI container are ready; the MTA deployment completed; the CAP app is started at 1/1 instance. Health, login page and AuthService metadata return 200; anonymous BugService returns 401; login/protected read/logout/revoked-token smoke returns 200/200/200/401.
+- Temporary password and email environment variables were removed immediately after smoke. No reusable credential, provider secret, Render data or real user email was committed or copied.
+- Final local regression: auth 28/28, catalog/authorization 18/18, comments persistence, CAP compile, UI5 build, secret scan, agent rules, QA Depth self-test 15/15, AI DevKit 5/5 and `git diff --check` all PASS. Production profile resolves to HANA while integration and Render-effective profiles still resolve to PostgreSQL.
+- Evidence: `docs/pm/evidence/idts-113/btp-cloud-foundry-poc-verification-20260728.md`. Work package: `docs/pm/tasks/idts-113-btp-cloud-foundry-poc.md`.
+
+### 2026-07-28 — IDTS-113 SAP BTP migration implementation
+
+- PR #194 was merged normally into `dev` at `a42cb618bf940072c0819fb77621fea0dbfd53c8`; the required QA Depth gate passed and no administrator bypass was used.
+- Jira IDTS-113 is the single migration task, assigned to DonHV with due date 2026-08-10. Its scope now covers XSUAA, standalone AppRouter, HTML5 Application Repository, HANA migration, retained S3/Brevo integrations, Job Scheduling Service, acceptance and rollback.
+- Started the XSUAA/AppRouter increment on fresh worktree `feature/idts-113-btp-xsuaa-approuter-donhv` from the merged `origin/dev` baseline. The root `dev`, Render Shared QA and production data were not modified.
+- Tooling issue under remediation: the first SAP Fiori MCP functionality scan could not compile the CAP model because the fresh worktree did not yet have `@cap-js/attachments` installed. This is a local dependency-state issue, not a product defect. `npm ci` is run before retrying the read-only MCP scan; no source or deployment state was changed by the failed scan.
+- Tooling issue fixed in-session: an initial PowerShell `rg` inspection command for `manifest.json` failed because the quoted search pattern was not escaped correctly. No file or runtime state changed; the inspection was rerun with PowerShell-safe quoting.
+- Configuration issue fixed in-session: the first generated production XSUAA profile was also visible when Render combined `NODE_ENV=production` with `CDS_ENV=integration`. The integration auth profile now explicitly overrides the kind and keeps `srv/auth/custom-auth.js`; effective profile readback proves BTP uses XSUAA while Render continues using custom auth with PostgreSQL.
+- Tooling/dependency issue under remediation: root `npm ci` completed, but clean installs for the generated AppRouter and UI modules failed because those folders did not yet have module-local lockfiles. The same install reported 24 dependency advisories (1 low, 9 moderate, 13 high, 1 critical). No automatic or force upgrade was applied; deterministic module lockfiles are generated here, while dependency remediation remains in the existing security-review scope.
+- Test-tooling issue under remediation: the successful MBT build ran production installs from npm workspace module folders and left the root local `node_modules` without `@sap/cds`; the first post-build auth regression therefore stopped at module resolution before executing any assertion. Root dependencies are restored with `npm ci`, regression is rerun, and this pre-test failure is not classified as a product defect.
+- Test-harness/dependency issue under remediation: root dependencies were restored with `npm ci --ignore-scripts`, which intentionally skipped the native `better-sqlite3` build. The first combined regression command printed suite headers and later emitted missing-native-binding errors, while legacy harness processes still returned exit code 0. The aggregate PASS marker is rejected as evidence. The native module is rebuilt and each suite is rerun with explicit output/error checks.
+- Browser-tooling issue under remediation: the first hidden local-server launcher attempted to spawn `npx.cmd` directly as a detached Windows child and failed with `spawn EINVAL`; no server or browser session started. The launcher is changed to use the Windows command host while retaining hidden, detached execution and workspace-local logs.
+- Browser-tooling issue under remediation: the second launcher reached the CDS CLI but loaded `@sap/cds` from both the worktree and the user-level CDS-DK installation, so CAP stopped before listening. The process was terminated and the next attempt invokes the project-local `@sap/cds/bin/serve.js` directly to guarantee one runtime copy.
+- Build-tooling issue under remediation: a short-timeout MBT verification call left its MBT/Make/npm process tree running in the background, while an earlier local `cds watch` process also remained alive. A second MTAR build then failed before compilation with Windows `EPERM` on `node_modules/@ui5`. This is a local process-lock issue, not a CAP/UI product defect; only the exact worktree-owned process IDs are stopped before reinstall/build is retried.
+- Build-tooling issue resolved: the exact worktree-owned process tree was stopped, `npm ci` restored dependencies, and the full MBT 1.2.47 build completed. The ignored MTAR is 33,957,153 bytes and root `@sap/cds` remains loadable.
+- XSUAA/AppRouter local verification: BTP auth checks 11/11, existing custom auth 28/28, comments persistence PASS, history 16/16, CAP compile PASS, UI5 build PASS, secret scan PASS, agent rules PASS, QA Depth self-test 15/15, ownership runner 5/5, AI DevKit 5/5 and `git diff --check` PASS.
+- Effective profile readback proves BTP production uses XSUAA/HANA while integration and the combined Render profile retain custom auth/PostgreSQL. No Render service, BTP runtime, external provider or production data was changed by this increment.
+- Ponytail review found one repeated Users-query path in BTP profile mapping; it was simplified to one query plus in-memory identity matching. No additional framework or speculative abstraction remains.
+- Evidence: `docs/pm/evidence/idts-113/btp-xsuaa-approuter-local-verification-20260728.md`.
+- Test-tooling issue under remediation: the first HANA migration verification was launched in parallel with `mbt build`. MBT ran its own `npm ci` while the other suites were loading root dependencies, leaving `node_modules/call-bind-apply-helpers/functionApply` temporarily missing. This is a local concurrent-install race, not a product defect. The incomplete run is rejected as evidence; dependencies are restored once and all checks are rerun sequentially.
+- Tooling compatibility issue resolved: the first private external-service binding attempt stopped before calling Cloud Foundry because Windows PowerShell 5.1 does not recognize `Set-Content -Encoding utf8NoBOM`; subsequent probes also exposed PowerShell's native stderr behavior. No user-provided service or secret changed in the failed attempts. The helper now writes UTF-8 without BOM through the .NET file API and detects existing instances from `cf services`. The `idts-sap01-external-services` user-provided service was created successfully, no secret was printed, and the temporary credential file was removed.
+- Migration environment issue resolved: the first read-only Shared QA export used only the integration profile and therefore lacked the private PostgreSQL host/user/password; the current workstation IP was also absent from Render's allow list, and the local private PostgreSQL password was stale. No source or HANA data changed during diagnosis. The current `/32` was added while all previous allow-list entries were retained. Rather than copying or rotating the database password, the exporter now uses authenticated Render CLI read-only queries. The frozen ignored archive contains 32 entities and 679 rows with manifest checksum evidence.
+- Tooling inspection typo fixed in-session: a PowerShell capability probe used JavaScript-style `Boolean(...)`, so the boolean field failed while the same command still confirmed Render CLI `2.21.0` and its PostgreSQL session commands are installed. No project, Render or database state changed; subsequent checks use PowerShell's `[bool]` cast.
+- Test-harness display issue fixed in-session: adding the Render CLI table-mapping check increased the HANA migration suite to seven assertions, while its summary denominator remained hardcoded at six and printed `7/6 PASS`. The footer now derives both values from the executed counter; no migration behavior or data changed.
+- Migration data-mapping issue fixed before import: Render CLI JSON uses lowercase PostgreSQL column names, while CAP/HANA UPSERT requires CDS names and casing. The first archive therefore failed the new key-coverage audit and was rejected; it was never imported. The exporter now derives a strict physical-to-CDS map from the linked CAP model, including managed-association foreign keys such as `applicationComponent_ID` and `up__ID`, before clearing password hashes or applying delivery policy.
+- Migration mapping verification complete: the corrected archive was regenerated read-only from Render with 32 entities and 679 rows. Migration checks pass 8/8; linked-model audit reports zero unknown columns; all 14 user password hashes are cleared without retaining the lowercase physical key; manifest dry-run accepts the complete package. Manifest SHA-256: `3B9BCC0A6E6B110B4D41F34A2CDE713B977CDFED51C0BAADA6B64A9EF7D99F97`.
+- 2026-07-28 IDTS-113 deployment blocker (environment/deployment issue): initial
+  deployment operation `a1198099-8a6c-11f1-9906-eeee0a9f845e` provisioned the
+  BTP service instances and started the AppRouter, but `idts-sap01-srv` failed
+  repeatedly during the buildpack compile phase. No Render cutover or HANA data
+  import was performed. Root cause: the generated `gen/srv/package.json`
+  retained the repository engine range `>=20 <23`, which SAP BTP Node.js
+  buildpack 1.9.2 rejects as an improper constraint. Status: fix the generated
+  CF package to `22.x` through the MTA build, verify locally, merge normally,
+  then retry the existing deployment operation.
+- 2026-07-28 IDTS-113 merge tooling issue fixed in-session: `gh pr merge 197`
+  was first invoked from the feature worktree and GitHub CLI attempted a local
+  checkout of `dev`, which failed because `dev` is already attached to
+  `E:\IDTS-SAP01`. PR #197 itself remained CLEAN with `qa-depth-gate` PASS.
+  The merge is retried through the GitHub API/from outside the repository so no
+  local worktree or branch is moved.
+- 2026-07-28 IDTS-113 migration-runner packaging issue fixed in-session: the
+  first local package copy used `Copy-Item -LiteralPath` with a wildcard, so
+  PowerShell did not expand the archive files and the importer failed closed
+  with `MIGRATION_PACKAGE_MISSING`. No HANA transaction started. The archive is
+  copied by enumerating the verified source files explicitly before rerunning
+  dry-run validation.
+- 2026-07-28 IDTS-113 diagnostic tooling issue fixed in-session: the first
+  inline `cf run-task ... node -e` probe was rejected by CF CLI because nested
+  PowerShell quotes split the JavaScript into an unexpected argument. The task
+  was never submitted. A small ignored diagnostic file is packaged instead so
+  only safe binding/model metadata is printed.
+- 2026-07-28 IDTS-113 HANA import issue under investigation: the first bound
+  one-off import task failed and returned the intentionally generic
+  `BTP_MIGRATION_IMPORT_FAILED`. The import is transaction-wrapped, so no
+  partial migration was retained. A follow-up safe diagnostic task confirmed
+  `dbKind=hana`, one HDI binding, a loadable 130-definition model, successful
+  HANA connection and readable `Users`; the remaining failure is narrowed to
+  entity UPSERT/verification and is diagnosed without printing connection
+  values.
+- 2026-07-28 IDTS-113 local tooling issue fixed in-session: after creating the
+  seed-conflict fix worktree successfully, the same shell command attempted to
+  read migration files from the root worktree instead of the new worktree and
+  returned `path not found`. No source or runtime state changed; inspection
+  continues from the correct fresh worktree.
+- 2026-07-28 IDTS-113 verification issue under investigation: the combined
+  seed-conflict gate stopped at `cds compile srv --to edmx` after migration
+  checks passed 8/8, but that invocation redirected all compile output and did
+  not preserve enough diagnostic detail. The incomplete aggregate is rejected
+  as evidence; CAP compile is rerun alone with visible output before any
+  additional source change. Root cause was command usage: the project exposes
+  both AuthService and BugService, so EDMX compilation requires `-s all`.
+  This is a tooling-command issue, not a CDS model defect; the corrected
+  command is used for final evidence.
+- 2026-07-28 IDTS-113 migration data issue under investigation: after PR #198
+  merged and the runner importer blob was verified identical to the merged Git
+  blob, the atomic replacement passed the former HANA 301 seed conflict but
+  failed closed with `MIGRATION_SOURCE_KEY_MISSING`. The transaction rolled
+  back all target deletes/imports. An offline linked-model audit now identifies
+  the exact entity/key mismatch before another HANA write attempt.
+- 2026-07-28 IDTS-113 test-harness issue fixed in-session: the new flattened
+  composition-key behavior test passed, but an older source-shape assertion
+  still required `definition?.keys` to appear directly inside
+  `import-hana.js`. The implementation now delegates that concern to the tested
+  `entityKeyColumns()` helper, so the stale assertion failed although the
+  required behavior was present. The assertion is updated to verify the helper
+  call instead of coupling the test to the former inline implementation; the
+  full migration suite is rerun before another HANA import.
+- 2026-07-28 IDTS-113 worktree dependency issue fixed in-session: CAP compile
+  in the fresh composition-key worktree initially failed because
+  `@cap-js/attachments` was absent from that worktree's `node_modules`. This was
+  an environment/bootstrap issue rather than a CDS defect. `npm ci` is run from
+  the committed lockfile and CAP compile is rerun with `-s all` before the PR is
+  opened.
+- 2026-07-28 IDTS-113 security-tool observation: `npm ci` completed from the
+  existing lockfile but reported 24 dependency audit findings (1 low,
+  9 moderate, 13 high and 1 critical). No dependency or lockfile was changed by
+  this migration fix. The pre-existing dependency review remains separate from
+  the HANA key-mapping patch; secret scan and the repository's release gates
+  still run before merge.
+- 2026-07-28 IDTS-113 compile warning observed: CAP compilation passed, with the
+  existing warning that `NonUpdateableProperties` is not recognized under
+  `@Capabilities.UpdateRestrictions` for `BugService.Bugs_attachments`. This
+  patch does not touch annotations or runtime UI behavior; the warning is not a
+  blocker for the HANA migration-key fix and remains a separate annotation
+  cleanup candidate.
+- 2026-07-28 IDTS-113 local packaging-path issue under investigation: after PR
+  #199 merged, the release worktree still contained the temporary migration
+  runner scripts but the verified Render archive was not present at the
+  assumed `.tmp/idts-113-migration/shared-qa-export` path. No CF task or HANA
+  write was started. The package is located by its manifest/checksum and copied
+  only after matching the previously frozen archive identity.
+- 2026-07-28 IDTS-113 blob-verification tooling issue fixed in-session: the
+  first expected Git hashes for the merged importer were calculated by piping
+  `git show` text through PowerShell, which normalized line endings and produced
+  hashes different from the copied files. No runner push or HANA task was
+  started. Verification is corrected to use `git rev-parse
+  <merge-sha>:<path>` so the expected value is the repository blob ID itself.
+- 2026-07-28 IDTS-113 security incident fixed in-session: an operator
+  diagnostic used `cf env` on the temporary migration runner and printed its
+  HDI binding credentials to the local tool output. The values are not copied
+  into Jira, repo evidence, or final reporting. The temporary runner is
+  immediately unbound and rebound to rotate that binding credential before
+  staging/import; subsequent checks use service names/counts only and never
+  print `VCAP_SERVICES`.
+- 2026-07-28 IDTS-113 CF binding race under investigation: the HDI unbind
+  request was accepted asynchronously, and the immediate rebind was rejected
+  because deletion of the previous binding was still in progress. No import
+  task was started. Execution waits for the old binding to disappear, then
+  creates a new binding and stages the runner with the rotated credential.
+- 2026-07-28 IDTS-113 HANA import remains blocked: PR #199 merged normally and
+  the runner was restaged with the exact merged importer plus the frozen
+  32-entity/679-row archive, but task
+  `idts113-hana-import-final-199` ended `FAILED`. The importer remains wrapped in
+  one CAP transaction, so the target replacement was rolled back. Sanitized
+  task logs are inspected for the failure code before any further write
+  attempt; no source/target credentials or row content are logged.
+- 2026-07-28 IDTS-113 HANA result-casing root cause identified: a rollback-only
+  diagnostic reached `idts.cap.UserRoles` target verification and showed that
+  requesting logical key `code` returned the physical result property `CODE`.
+  Source rows contain the key; no data was missing. The verifier therefore
+  misclassified an uppercase HANA result column as
+  `MIGRATION_SOURCE_KEY_MISSING`. A CQN projection alias is tested so HANA
+  returns the requested logical key name before the production importer is
+  changed.
+- 2026-07-28 IDTS-113 HANA alias experiment completed: explicitly projecting
+  `{ ref: ['code'], as: 'code' }` still returned result property `CODE` through
+  the bound HDI/HANA service. The diagnostic transaction rolled back by design.
+  The production fix will therefore compare result-object key names
+  case-insensitively while retaining exact key values, row counts and
+  transaction rollback semantics.
+- 2026-07-28 IDTS-113 test-harness relocation issue fixed in-session: after
+  moving `rowKey()` into the shared migration helper for direct testing, the
+  behavior tests passed but an old source-shape assertion still searched
+  `import-hana.js` for `MIGRATION_SOURCE_KEY_MISSING`. The assertion is pointed
+  at the helper that now owns the error; no runtime behavior is changed by this
+  test correction.
+- 2026-07-28 IDTS-113 identity-mapping data issue under remediation: SAP BTP
+  role collections `IDTS_PM`, `IDTS_TESTER` and `IDTS_DEVELOPER` were created
+  from the deployed XSUAA roles, and the current BTP user received only
+  `IDTS_PM`. AppRouter authentication reached the IDTS application, but backend
+  access was denied because that BTP identity does not match any imported HANA
+  `Users.email`. The approved correction preserves the stable DonHV PM user ID
+  and updates only its login email; no historical notification recipient or
+  business row is rewritten.
+- 2026-07-28 IDTS-113 deployment/tooling issue under investigation: the first
+  one-off task `idts113-map-platform-pm` failed because the migration runner's
+  active droplet did not contain the newly added temporary
+  `scripts/btp/map-platform-user.js`, even though the local staging directory
+  contained it. No HANA row was changed. The next step explicitly identifies
+  the latest ready CF package, stages that exact package, assigns its droplet,
+  and reruns the transaction-safe mapping task without printing credentials or
+  the account email.
+- 2026-07-28 IDTS-113 HANA connectivity blocker under investigation: after the
+  correct new runner droplet was explicitly assigned, both the identity-mapping
+  task and an independent HANA readback task timed out before obtaining a
+  database resource. Neither transaction changed data. A first PowerShell
+  health-probe command also had a local pipeline syntax error before making any
+  HTTP request; the probe is rewritten as a simple bounded loop and rerun.
+- 2026-07-28 IDTS-113 diagnostic command issue fixed in-session: the first
+  no-secret CF TCP probe was rejected locally by `cf run-task` because nested
+  JavaScript quotes were split into extra CLI arguments. No task was created and
+  no endpoint or credential was printed. The probe payload is base64-encoded so
+  Cloud Foundry receives one bounded command argument.
+- 2026-07-28 IDTS-113 diagnostic quoting issue fixed in-session: the first
+  base64 TCP task was created, but the outer JavaScript expression lost its
+  shell quotes and Bash rejected it before execution. No network connection was
+  attempted and no credential was exposed. The final command wraps the complete
+  `node -e` expression in shell-safe single quotes.
+- 2026-07-28 IDTS-113 TCP probe test-harness limitation: two further inline
+  `node -e` variants were rejected before network access because CF/Bash removed
+  nested expression quotes. They exposed no credentials and do not add product
+  evidence. The diagnostic is stopped rather than expanding a temporary shell
+  harness; the authoritative checks remain the sanitized CAP readback task,
+  HANA Cloud runtime state, and service-binding status.
+- 2026-07-28 IDTS-113 HANA connectivity root cause identified: the official
+  service parameters report `serviceStopped=true` for the HANA Cloud Free Tier
+  instance. The HDI container bindings therefore remain in `Created` state
+  while SQL connection acquisition times out. All failed readback/mapping tasks
+  were fail-closed. The instance is started with the supported CF
+  `update-service` operation, then readback and identity mapping are rerun.
+- 2026-07-28 IDTS-113 CF parameter quoting issue fixed in-session: the first
+  inline PowerShell `update-service -c` payload was rejected locally as invalid
+  JSON, so no HANA state change occurred. The same minimal non-secret parameter
+  is supplied through an ignored JSON file, matching SAP's documented Windows
+  guidance.
+- 2026-07-28 IDTS-113 identity-mapping HANA casing issue under remediation:
+  after HANA restart, the complete 32-entity/679-row readback passed, but the
+  mapping task reported the stable PM user as missing. The imported user exists;
+  HANA returns physical result properties such as `ID`, `ROLE_CODE`, and
+  `ACTIVE` with database casing while the temporary script expected logical
+  JavaScript property casing. No update was attempted. The one-off mapper is
+  changed to read selected properties case-insensitively, matching the importer
+  verification behavior already proven for HANA.
+- 2026-07-28 IDTS-113 identity-mapping boolean-shape issue under remediation:
+  the first casing-safe mapper still failed before `UPDATE`. The frozen source
+  confirms the stable PM row and role, so the remaining mismatch is the HANA
+  driver representation of Boolean `active` rather than missing business data.
+  The one-off verifier now accepts only explicit true representations
+  (`true`, `1`, or `"true"`/`"1"`) and still rejects inactive or ambiguous rows.
+- 2026-07-28 IDTS-113 CF packaging command yielded before completion: the
+  combined upload-and-stage shell cell exceeded its local 30-second timeout, so
+  no completion claim is made. The app remains stopped and production runtime
+  is unaffected. Package and droplet state are inspected separately before any
+  mapper task is rerun.
+- 2026-07-28 IDTS-113 HANA recovery and readback completed: the SAP HANA Cloud
+  Free Tier instance was started with the supported service update, then the
+  bound CAP readback verified all 32 imported entities and 679 rows. The stable
+  DonHV PM row was mapped transactionally to the authenticated SAP BTP identity
+  without printing the email or any binding credential.
+- 2026-07-28 IDTS-113 authenticated BTP smoke passed for the available PM
+  identity: AppRouter SSO opened the protected Fiori application, the profile
+  showed DonHV with Project Manager role and SAP BTP-managed session, and the
+  List Report loaded 17 Bugs plus PM-specific queues from HANA. Auth `me`,
+  OData metadata, service root and batch reads returned HTTP 200 after HANA was
+  running.
+- 2026-07-28 IDTS-113 Job Scheduling Service smoke passed: the active
+  `IDTSEmailOutboxHourly` job retained one hourly schedule. A temporary one-time
+  schedule invoked `POST /odata/v4/bug/processEmailOutbox`; the scheduler showed
+  1 successful execution, 0 failed and no recent run errors, while Cloud
+  Foundry routing logs recorded HTTP 200. The temporary schedule was deleted
+  after verification and the hourly schedule remains active.
+- 2026-07-28 IDTS-113 process issue fixed in-session: an environment cleanup
+  check used `cf env ... | Out-Null` after unsetting the temporary platform
+  email. No environment value reached terminal output, Jira or evidence, but
+  future verification must use `cf env`-free service/environment name checks
+  and never inspect full application environment output.
+- 2026-07-28 IDTS-113 CF diagnostic command issue fixed in-session: the first
+  read-only `cf run-task` attempt for sanitized email-delivery readback was
+  rejected locally because PowerShell split the inline `node -e` payload into
+  unexpected CLI arguments. No Cloud Foundry task was created, no database
+  query ran, and no credential or recipient address was printed. The readback
+  is rerun with the complete command passed as one argument.
+- 2026-07-28 IDTS-113 browser timing issue fixed in-session
+  (test-harness issue): immediately after a full Object Page reload, the
+  Reproduction, History, and Notifications sections briefly rendered empty
+  while their OData batch requests were still running. After waiting for the
+  requests to settle, all three reproduction fields, both history events, and
+  the in-app notification reappeared; CAP logs recorded HTTP 200 for the active
+  Bug and association reads. No HANA data was lost and this is not classified
+  as a product persistence defect.
+- 2026-07-28 IDTS-113 Smart Assign and in-app notification smoke passed on SAP
+  BTP: BUG-0018 was assigned from Pending Assignment to DatDT through the Smart
+  Assign dialog. The active Bug retained DatDT as assignee/current action
+  owner, History recorded the Assign to Developer event, and the DatDT
+  Assigned in-app notification was persisted as Sent after reload. No
+  recipient address or credential is stored in this evidence entry.
+- 2026-07-28 IDTS-113 Brevo acceptance is still under investigation: a
+  temporary one-time Job Scheduler execution completed successfully with HTTP
+  200, but its sanitized result was `sent=0`, `failed=0`, `skipped=0`, and the
+  Brevo event report contained no new transactional event. This proves the
+  scheduler endpoint works but does not prove provider delivery. The email
+  outbox row and effective runtime configuration are being inspected before
+  any Brevo PASS claim.
+- 2026-07-28 IDTS-113 HANA Explorer privilege finding (environment blocker):
+  DBADMIN can inspect the HDI schemas and table metadata, but direct `SELECT`
+  against the application-owned `IDTS_CAP_NOTIFICATIONDELIVERIES` table is
+  rejected with `insufficient privilege`. This is expected HDI isolation, not
+  data corruption. Readback will use the HDI-bound application context or an
+  HDI container connection rather than granting DBADMIN broad access.
+- 2026-07-28 IDTS-113 email binding root cause confirmed (configuration
+  issue): the bound `idts-sap01-external-services` user-provided service is
+  present in `VCAP_SERVICES`, but CAP does not populate
+  `cds.env.requires.objectStore.credentials`. Consequently the email worker
+  resolves `enabled=false`, `ready=false`, and the new BUG-0018 delivery is
+  persisted as `SKIPPED / EMAIL_DISABLED`. No historical delivery is being
+  resent. The remediation is limited to deterministic CAP VCAP matching for
+  the existing service instance; no credential value or provider setting is
+  changed.
+- 2026-07-28 IDTS-113 local binding-fixture preflight failed safely
+  (test-harness issue): the fresh fix worktree intentionally has no local
+  `node_modules`, so the first isolated `node -e` check could not resolve
+  `@sap/cds`. No source, BTP runtime, service binding, or database state was
+  changed. The fixture is rerun using the already-installed root dependency
+  while keeping the clean worktree as the project/config baseline.
+- 2026-07-28 IDTS-113 clean-worktree CAP build preflight failed safely
+  (test-harness issue): invoking the root CDS executable from the fresh
+  worktree could not resolve the sibling project's
+  `@cap-js/attachments` dependency. Compilation stopped before producing a
+  deployable artifact and no runtime state changed. Verification will use a
+  temporary ignored `node_modules` junction to the already-installed root
+  dependencies, then remove that junction after inspection.
+- 2026-07-28 IDTS-113 dependency-junction cleanup was blocked locally
+  (tooling issue): the environment policy rejected automatic removal of the
+  verified worktree-local `node_modules` junction. The junction points only to
+  the existing root dependencies, is Git-ignored, and is absent from the
+  staged/runtime diff. It may be removed manually after the fix worktree is no
+  longer needed; no product or BTP state is affected.
+- 2026-07-28 IDTS-113 runtime-only rollout command yielded early (tooling
+  issue): the combined production build and rolling `cf push` exceeded the
+  local shell timeout before a terminal result was returned. The command does
+  not invoke the HDI deployer or alter HANA schema/data. Cloud Foundry app,
+  package and event state are inspected before any retry or deployment claim.
+- 2026-07-28 IDTS-113 runtime-only staging failed safely (environment/release
+  blocker): Cloud Foundry Node.js buildpack 1.9.2 rejected the generated
+  `engines.node` range `>=20 <23` as an improper/dangerous constraint. Rolling
+  deployment did not replace or stop the healthy existing instance, and HANA
+  was not invoked. The previously prepared IDTS-113 Node engine compatibility
+  fix is inspected and integrated rather than duplicating a workaround in the
+  binding PR.
+- 2026-07-28 IDTS-113 post-deploy config diagnostic failed before result
+  (test-harness issue): the first read-only task on the new droplet exited
+  before emitting its sanitized config marker. The web process remains 1/1
+  healthy. Package layout and the task-specific error are checked before a
+  corrected diagnostic is rerun; no provider PASS claim is made yet.
+- 2026-07-28 IDTS-113 external-service binding fix deployed but provider
+  validation remains blocked (configuration issue): the corrected runtime now
+  resolves the bound email settings with `enabled=true`, SMTP provider,
+  `hasBaseUrl=true`, and test mode enabled. Configuration is still not ready
+  because `replyTo` alone fails the safe-address requirement. The value is not
+  printed; a boolean-only check will distinguish missing from malformed before
+  any narrowly scoped UPS update.
+- 2026-07-28 IDTS-113 first post-restart lifecycle smoke returned HTTP 401
+  (environment/session issue): the Object Page still displayed the pre-restart
+  session, but submitting Move to Pending Assignment after the CAP rolling
+  restart was rejected before business mutation. No status/history/outbox row
+  changed. Reopening the AppRouter route retained the readable Object Page but
+  the write retry still returned 401, so this is now under investigation as
+  AppRouter token-forwarding/session or request-auth behavior rather than a
+  stale-page-only issue. No further mutation is attempted until route logs
+  identify the rejecting layer.
+- 2026-07-28 IDTS-113 AppRouter session recovery verified: an explicit
+  AppRouter logout followed by the existing SAP SSO session renewed the
+  browser session. The same BUG-0018 Move to Pending Assignment request then
+  succeeded, and a subsequent Smart Assign selected DatDT with the UI
+  confirming `Assigned to DatDT`. No password or saved browser credential was
+  inspected. The earlier HTTP 401 is resolved as a stale browser/AppRouter
+  session after the rolling backend restart.
+- 2026-07-28 IDTS-113 first HANA application-context readback task failed
+  before execution (test-harness issue): the generated `cf run-task` command
+  passed an unquoted Node `eval(...)` expression to Bash, which rejected the
+  opening parenthesis. The task made no database or provider change. The
+  readback is being rerun through the previously verified base64-to-file task
+  pattern.
+- 2026-07-28 IDTS-113 Object Page collaboration readback mismatch (product
+  defect under investigation): after the successful reassignment, HANA
+  application-context readback found four BUG-0018 HistoryEvents (including
+  `MOVE_TO_PENDING_ASSIGNMENT` and the new `ASSIGN_TO_DEVELOPER`) and two
+  `ASSIGNED` Notifications, while the reloaded Object Page still rendered
+  `No history events yet` and an empty Notifications table. The underlying
+  workflow side effects exist; the remaining investigation is limited to the
+  OData composition/read model or UI binding. No runtime fix is mixed into the
+  email/S3 acceptance until the affected read path is isolated.
+- 2026-07-28 IDTS-113 Job Scheduler browser locator became ambiguous
+  (test-harness issue): after waiting for the one-time schedule, the exact
+  description text appeared in four dashboard regions and the strict browser
+  selector refused to click. The schedule itself remained available and no
+  service state was changed by the failed selector. Verification continues
+  using the schedule link role/identifier instead of visible text alone.
+- 2026-07-28 IDTS-113 BTP email acceptance PASS: after the external-service
+  binding and safe reply-to correction, a fresh BUG-0018 assignment created a
+  `PENDING` delivery. SAP Job Scheduling Service completed the one-time run
+  with HTTP 200 and `sent=1`, `failed=0`, `skipped=0`. HANA readback confirmed
+  `SENT`, `attemptCount=1`, `sentAt` and provider message ID, while Brevo MCP
+  independently reported the matching `[IDTS] BUG-0018 - Assigned` event as
+  delivered. The temporary one-time schedule was deleted; the recurring
+  hourly schedule remains active. No recipient address or provider credential
+  is stored in the evidence.
+- 2026-07-28 IDTS-113 Chrome attachment upload handoff failed safely
+  (test-harness issue): the Chrome Playwright bridge opened the native Windows
+  file picker, but the separate Browser Plugin `browser_file_upload` tool
+  reported no related modal state. No file was uploaded and no S3/database
+  state changed. The same picker is completed with narrowly scoped Windows
+  computer control, then verification returns to Chrome and HANA readback.
+- 2026-07-28 IDTS-113 collaboration readback correction: a later settled DOM
+  snapshot on the same active BUG-0018 Object Page displayed all four expected
+  History events. The earlier `No history events yet` result was a transient
+  lazy-binding/timing state, not missing HANA data. The Notifications table
+  still needs its own UI readback check because the latest snapshot remained
+  empty even though HANA contains the notification rows.
+- 2026-07-28 IDTS-113 Chrome upload permission blocker (test-harness issue):
+  the supported Chrome bridge flow `waitForEvent("filechooser")` successfully
+  captured the IDTS uploader, but `fileChooser.setFiles(...)` returned
+  `Not allowed`. This isolates the blocker to the Chrome plugin Uploads
+  permission, not IDTS validation, CAP, HANA, or S3. No file, database row, or
+  S3 object was created. Continue only after upload permission is allowed for
+  the BTP AppRouter site, or use a separately approved authenticated API smoke.
+- 2026-07-28 IDTS-113 first direct S3 adapter task command failed before task
+  creation (tooling issue): CF CLI rejected the unsupported long option
+  `--memory`. No BTP task, HANA row, or S3 object was created. The verified CLI
+  help requires the short option `-m`; rerun the same sanitized smoke with
+  `-m 512M` and a unique task name.
+- 2026-07-28 IDTS-113 second direct S3 adapter task command failed before task
+  creation (tooling issue): after correcting the memory flag, Cloud Foundry
+  rejected the base64 command because it exceeded the 4097-character task
+  command limit. No application code ran and no HANA/S3 state changed. Compress
+  the same reviewed script before base64 transport so the task command remains
+  below the platform limit.
+- 2026-07-28 IDTS-113 direct S3 adapter smoke task 16 failed during execution
+  (test-harness issue, resolved). The compressed command passed CF task creation
+  and started, but the diagnostic had assigned the raw CSN model to `cds.model`.
+  CAP Query Builder therefore rejected the attachment target before HANA or S3
+  mutation. The diagnostic now uses `cds.linked(...)` and an explicit privileged
+  task context. Rerun task 17 completed successfully: S3 upload, HANA metadata,
+  download, SHA-256 comparison, object existence and final metadata/object
+  cleanup all reported PASS.
+- 2026-07-28 IDTS-113 attachment-library delete log is misleading (tooling
+  issue, open upstream limitation): AWS S3 returned HTTP 204 and the subsequent
+  object existence check returned false, but `@cap-js/attachments` still logged
+  `File was not deleted from S3`. No data leak or orphan object remains; task 17
+  verified both S3 object and HANA metadata were deleted. Keep the read-after-
+  delete check as acceptance evidence and do not classify this warning as a
+  failed deletion.
+- 2026-07-28 IDTS-113 direct CF CLI OAuth diagnostic was rejected with HTTP
+  401 (test-harness issue): the Cloud Foundry CLI token is not a valid
+  application-tenant end-user token for the protected BugService route. No
+  application or database state changed. Continue the Notifications diagnosis
+  through the authenticated AppRouter browser session and application-context
+  readback; do not weaken XSUAA or mint a bypass token.
+- 2026-07-28 IDTS-113 direct OData navigation tab was blocked by Edge
+  `ERR_BLOCKED_BY_CLIENT` (test-harness issue): opening the protected AppRouter
+  notification navigation URL as a top-level browser document was blocked by
+  the browser policy before CAP returned content. The normal Fiori XHR route
+  remains authenticated and operational. Continue by reproducing through the
+  Object Page binding and correlating CAP/router logs instead of changing
+  browser or service security.
+- 2026-07-28 IDTS-113 Notifications UI readback PASS: after a full Object Page
+  reload and explicit navigation to the Notifications section, Fiori displayed
+  both expected BUG-0018 records with recipient DatDT, event Assigned, channel
+  In App and delivery status Sent. The earlier empty table was another
+  transient lazy-binding state, not an OData composition or HANA defect.
+- 2026-07-28 IDTS-113 first BTP Similar Bugs browser action timed out
+  (test-harness issue under investigation): after changing Object Page section,
+  the Chrome bridge did not complete the `Find Similar Bugs` role lookup within
+  three seconds and reported a CDP Runtime.evaluate timeout. No AI action or
+  business mutation is claimed. Re-snapshot the settled page and invoke the
+  visible control only after confirming its current locator.
+- 2026-07-28 IDTS-113 work-package preflight used the stale root worktree
+  (tooling issue, resolved): the first read attempted
+  `docs/pm/tasks/idts-113-btp-cloud-foundry-poc.md` from root `dev`, where that
+  path is not present because root is 23 commits behind `origin/dev`. No file
+  or external state changed. The same file was then read from the dedicated
+  evidence worktree, which is the authoritative location for this session.
+- 2026-07-28 IDTS-113 Smart Assign screenshot redaction timed out
+  (test-harness issue): the dialog loaded and its disabled-provider
+  explanations were readable, but the Chrome bridge exceeded its three-second
+  selector deadline while replacing visible email text for a sanitized
+  screenshot. No business action, assignment or review decision was submitted.
+  Retain the sanitized textual result and do not store an unredacted screenshot.
+- 2026-07-28 IDTS-113 persistence cleanup command first used the wrong temporary
+  artifact path (tooling issue, resolved): the deletion task was not created
+  because `.tmp/idts113-s3-persistence.gz.b64` was not present in the evidence
+  worktree. No HANA metadata or S3 object changed. Locate the already reviewed
+  compressed diagnostic payload from the successful Cloud Foundry task command,
+  then run only the cleanup mode and verify both metadata and object absence.
+- 2026-07-28 IDTS-113 persistence cleanup could not recover the reviewed
+  diagnostic payload with the first narrow marker (tooling issue, resolved):
+  the marker assumed a `Buffer.from(...)` command, while the successful task
+  actually used `echo <compressed payload> | base64 -d | gzip -d`. No cleanup
+  task was submitted in that attempt. The exact successful task command was
+  then reused with only its final mode changed from `check` to `delete`.
+- 2026-07-28 IDTS-113 persistence cleanup `cf run-task` submission was rejected
+  by the local CLI argument parser (tooling issue, resolved): the
+  embedded `node -e` command was split at its quoted JavaScript body and no task
+  was created. HANA metadata and the temporary S3 object remained unchanged.
+  The exact reviewed command was then submitted through the Cloud Foundry v3
+  task JSON API, preserving it as one command string.
+- 2026-07-28 IDTS-113 first v3 cleanup submission wrapper failed locally before
+  the HTTP request (tooling issue, resolved): PowerShell could not parse the
+  over-escaped regular-expression literal used to switch the reviewed task from
+  `check` to `delete`. No Cloud Foundry task was created and no HANA/S3 state
+  changed. Replace the exact mode substring with simple string replacement and
+  retry the v3 task request.
+- 2026-07-28 SAP Job Scheduling Service displayed an upcoming API pagination
+  notice (environment/platform notice): from 2026-10-26, calls to
+  `GET /scheduler/jobs` must supply `page_size`. The current IDTS job and hourly
+  schedule remain Active, and the application only exposes the configured
+  outbox action as the job target. Verify the repository has no custom direct
+  call to that dashboard API; create a follow-up only if such a caller exists.
+- 2026-07-28 IDTS-113 BTP AI and restart persistence acceptance completed for
+  the available PM identity. Similar Bugs, Classification Suggestions, Handoff
+  Summary and Smart Assign explanations all reached the deployed CAP actions in
+  disabled-provider/fallback mode; BUG-0018 remained Assigned to DatDT with no
+  workflow or assignment mutation. The same CAP droplet was restarted, after
+  which HANA attachment metadata and the 76-byte S3 object retained SHA-256
+  `0BD05E3BA48891B6808B7CBE42F7513C0D8DB85665F4BA89ECEC3558DBD3BEA0`.
+  The temporary metadata/object cleanup then passed. Browser reload confirmed
+  four History events, two Assigned/In App/Sent Notifications and unchanged
+  Bug ownership. Job `IDTSEmailOutboxHourly` and its one recurring schedule
+  remained Active. OpenAI live-provider acceptance is still not claimed.
+- 2026-07-28 IDTS-113 Similar Bugs evidence recapture timed out
+  (test-harness issue): after navigating back from Notifications to Bug Summary,
+  the Chrome bridge could identify the unique `Find Similar Bugs` button but
+  exceeded its interaction deadline before the click completed. No review
+  action or Bug mutation is claimed from this recapture attempt. Keep the
+  earlier successful HTTP/UI textual evidence and remove any screenshot
+  reference that is not backed by a tracked file unless a later recapture
+  succeeds.
+- 2026-07-28 IDTS-113 final documentation gate initially found trailing
+  whitespace in two evidence-report metadata lines (documentation issue,
+  resolved). The affected lines were normalized without changing evidence
+  meaning; `git diff --check`, secret scan, agent rules, QA Depth self-test and
+  AI DevKit lint were rerun successfully.
+
+### 2026-07-28 — IDTS-113 cutover closeout continuation
+
+- Confirmed the current Cloud Foundry target and sanitized resource inventory:
+  CAP and AppRouter are started `1/1`; HANA HDI, XSUAA, Destination, HTML5
+  Repository, Job Scheduling Service and the private external-services binding
+  exist. No credential payload was read or printed.
+- Fresh BTP route checks passed: CAP health `200`, AppRouter anonymous entry
+  `302` to the protected application path, and anonymous protected OData `401`.
+- Fresh Render rollback checks passed against deploy
+  `dep-d9i0r537uimc73as0be0`: AuthService metadata, login and app routes return
+  `200`; anonymous protected OData returns `401`. No Render deploy or data
+  mutation was triggered.
+- Documentation issue fixed: the IDTS-113 work package still presented the
+  isolated custom-auth/S3-isolated POC limitations as if they were current.
+  The POC section is now labeled historical, while the XSUAA/AppRouter,
+  HANA/S3/Brevo/Job Scheduler state is authoritative.
+- Rollback risk documented: Render is operational but is older than the BTP
+  runtime and PostgreSQL is not reverse-replicated from HANA. The runbook now
+  requires a write freeze and HANA-delta reconciliation for a lossless return.
+- Tooling issue fixed in-session: a Windows `rg` command used wildcard paths
+  such as `status/*.md`, which PowerShell passed as an invalid filename. The
+  required files were inspected with explicit paths instead; no repository or
+  external state changed.
+- Technical Specification dependency remains open by design: final EN v0.8
+  integration belongs to IDTS-112 and is blocked by the member acknowledgment
+  and candidate-approval gates. IDTS-113 may prepare a BTP architecture delta,
+  but must not bypass those human approvals or overwrite the workbook.
+- Prepared the source-aligned BTP Technical Specification delta candidate at
+  `docs/pm/evidence/idts-113/technical-spec-btp-delta-candidate.md`. It maps
+  XSUAA/AppRouter, HANA/HDI, S3, Job Scheduler/Brevo, AI fallback and rollback
+  to exact repository files and symbols. It remains a candidate for IDTS-112,
+  not a member-approved or Drive-synchronized artifact.
+- IDTS-113 verification first run found a tooling issue: the fresh evidence
+  worktree had no `node_modules`, so the BTP auth and outbox-scheduler suites
+  could not resolve `@sap/cds`. The dependency-free migration suite still
+  passed 10/10. This is not a product failure; reuse the already installed root
+  dependency tree through a local worktree junction, rerun both affected
+  suites, and keep the junction out of Git.
+- IDTS-113 member-identity readback found a browser-tooling limitation:
+  `encodeURIComponent` was unavailable inside the controlled page-evaluation
+  sandbox while building a focused OData filter. No application request or
+  mutation failed. The check was retried with a pre-encoded, fixed read-only
+  query; this is classified as a tooling issue, not a product defect.
+- IDTS-113 BTP user onboarding found a UI/tool timing issue: after entering
+  the SangVN user name, the cockpit auto-copied it into E-Mail while the
+  automation also filled E-Mail, temporarily duplicating the value. The value
+  was corrected and read back exactly before submission; no malformed user was
+  created. This is classified as a tooling/UI timing issue.
+- IDTS-113 HANA identity readback first attempt failed before task creation
+  (tooling issue): PowerShell split the inline `node -e` payload passed to
+  `cf run-task`, so Cloud Foundry rejected the CLI arguments and no HANA query
+  or mutation ran. The retry will avoid nested shell quoting by using a
+  temporary command file or an environment-driven helper; product/runtime data
+  remains unchanged by this failed attempt.
+- IDTS-113 HANA identity readback task 22 reached the bound database but failed
+  read-only with `invalid column name: ISACTIVE` (test-harness issue). The
+  query used `isActive`, while the canonical `db.Users` field is `active`.
+  No row was changed. Correct the selected field to `active`, rerun the
+  readback, and only then execute the narrow identity update.
+- IDTS-113 local target-email hash preparation first used the newer static
+  `.NET SHA256.HashData` API, which is unavailable in this Windows PowerShell
+  runtime (tooling issue). No external call or data mutation occurred. The
+  retry will use `SHA256.Create().ComputeHash(...)`, which is compatible with
+  the installed runtime.
+- IDTS-113 BTP auth regression rerun again found no `node_modules` link in the
+  fresh evidence worktree, so Node could not resolve `@sap/cds` (tooling issue,
+  no product request executed). Recreate the local-only junction to the
+  already-installed root dependency tree, keep it outside Git, and rerun the
+  suite before making any authorization claim.
+- IDTS-113 anonymous AppRouter status-only probe was initially misleading
+  (test-harness issue): both the application entry and protected OData URL
+  returned HTTP `200`, but the response was the 733-byte XSUAA login-bootstrap
+  HTML, not application content or OData metadata. The stronger check now
+  verifies `Content-Type` and body purpose; anonymous access remains protected,
+  and no authorization bypass was observed.
+- IDTS-113 member identity onboarding completed at provisioning/alignment
+  level. BTP now assigns SangVN and DatDT to `IDTS_DEVELOPER`, and NhanT to
+  `IDTS_TESTER`. HANA task sequence 25 verified exact approved e-mail hashes,
+  active state and the expected `DEVELOPER`, `DEVELOPER`, `TESTER` roles; no
+  HANA update was needed. The XSUAA alignment suite passed 12/12, and the
+  current DonHV browser session still identifies as Project Manager managed by
+  SAP BTP. Live sign-in evidence for each member remains member-owned because
+  the agent did not impersonate their SAP identities.
+- Final closeout-branch verification passed: OfficeCLI `1.0.142`,
+  `qa:idts113:btp-auth` 12/12, `qa:idts113:migration` 10/10,
+  `qa:idts113:outbox-scheduler` 6/6, CAP compile, secret scan, agent rules,
+  QA Depth self-test, AI DevKit 5/5 and `git diff --check`. The final
+  `ponytail-review` found no avoidable abstraction or duplicate implementation
+  because this branch contains only distinct runbook/evidence/PM updates.
+  Remaining acceptance is intentionally not marked PASS: member-owned
+  Developer/Tester interactive sign-ins, the native browser file-picker smoke
+  and IDTS-112 Technical Specification integration.
+- Commit preparation found and fixed a process issue: the first staged
+  `git diff --check` reported two Markdown hard-break spaces and a blank line at
+  EOF, but the semicolon-separated PowerShell command still continued into
+  `git commit`. The whitespace was removed, the issue was recorded here and
+  the local commit was amended before any push. The corrected staged and
+  committed diffs both pass `git diff --check`.
+- PR preparation found a test-harness invocation issue: passing
+  `--body-file` through `npm run qa:depth:pr-body -- ...` was consumed as npm
+  configuration, so the checker received an empty body and correctly reported
+  all required sections missing. No PR was created. The retry uses
+  `node scripts/qa/check-pr-depth.js --body-file <file>` directly and must PASS
+  before `gh pr create`.
+- The normal merge command for PR #203 merged the PR remotely, then returned a
+  non-zero exit while GitHub CLI attempted local branch cleanup because `dev`
+  is already attached to root worktree `E:\IDTS-SAP01`. This is a local
+  Git/worktree tooling issue, not a PR conflict. Readback verified merge commit
+  `0b2363f551e96106ddca1d6d298ea14cf4b8409b`; no API retry or branch-protection
+  bypass was used.
+- IDTS-113 native attachment browser smoke initially called the obsolete
+  Chrome-control helper `chrome.tabs.open`, which is not exposed by the current
+  browser runtime. This is a tooling issue only: no page navigation, product
+  request or data mutation occurred. Continue with the documented current tab
+  API after inspecting the connected browser object's available methods.
+- IDTS-113 native attachment picker retry reached the real BTP Object Page,
+  opened the native chooser from `Upload Evidence`, and targeted the approved
+  220-byte text fixture, but the Chrome plugin rejected
+  `fileChooser.setFiles(...)` with `Not allowed`. A settled DOM readback still
+  showed `No evidence files uploaded yet`, so no attachment, HANA metadata, or
+  S3 object was created by this attempt. Classification: test-harness/tooling
+  issue. Product API/S3 acceptance remains covered only by the independent CF
+  task evidence; native-picker acceptance remains pending until Chrome Uploads
+  permission permits the file handoff.
+- A follow-up CLI readback tried the non-existent command
+  `cf task <app> <id>` to inspect one task in detail. Cloud Foundry CLI correctly
+  reported that only `cf tasks` is available in this client. Classification:
+  tooling issue, fixed by retaining `cf tasks idts-sap01-srv` as the current
+  state proof and using the already-sanitized persisted evidence for task
+  output; no Cloud Foundry or application state changed.
+- The first PR-body depth check rejected the valid Knowledge Gate evidence path
+  because Markdown backticks around the field value prevented the gate parser
+  from recognizing its required prefix. Classification: test-harness formatting
+  issue. The body was corrected to use the same plain repository path without
+  changing the underlying PASS evidence, then the check was rerun.
+- The first staged `git diff --cached --check` found three Markdown hard-break
+  trailing-space sequences in the new native-picker evidence header.
+  Classification: documentation formatting issue. They were replaced with
+  blank-line-separated metadata fields before the final staged diff check.
+- IDTS-113 final-container clarification completed. The user-facing confusion
+  came from comparing the earlier POC HDI container with the final
+  `idts-sap01-db` application container. A Database Explorer key was created
+  without exposing credentials, and the final container was added to Explorer.
+  Explorer first showed a transient service-key retrieval message and later a
+  security-audit error while expanding the container; both are classified as
+  environment/tooling issues rather than migration defects. A read-only Cloud
+  Foundry task against the bound final database succeeded and returned 14
+  users: three approved FPT member identities, ten intentional
+  `@example.local` demo developers and one other approved PM identity.
+  DatDT/SangVN are active Developers and NhanT is an active Tester. No HANA
+  write, runtime deploy or Render change occurred. Evidence:
+  `docs/pm/evidence/idts-113/hana-final-container-user-classification-20260728.md`.
+- IDTS-113 live role-collection readback found and resolved an
+  environment/configuration defect. `IDTS_DEVELOPER` referenced the unrelated
+  HTML5 Application Frontend Developer role even though both intended
+  Developer members were assigned to the collection. The collection now
+  references only the deployed IDTS XSUAA `Developer` role; both assignments
+  were preserved. Sanitized BTP CLI readback confirms `IDTS_PM` (1 user),
+  `IDTS_TESTER` (1 user) and `IDTS_DEVELOPER` (2 users) all reference their
+  corresponding IDTS XSUAA roles. Configuration remediation: PASS. Remaining
+  acceptance: a Developer member must complete their own interactive sign-in
+  smoke; the agent must not impersonate them. Evidence:
+  `docs/pm/evidence/idts-113/btp-developer-role-collection-remediation-20260729.md`.
+- IDTS-114 Vercel AI Gateway integration started from clean `origin/dev`
+  baseline `362ace2a39a82d19c4acc723fe96a15bf7373f5e`. The code adds a native
+  fetch adapter for the Gateway, disabled-by-default private configuration,
+  Ling-first staged model support, bounded Qwen-to-OpenAI fallback, and safe
+  model metadata. No API key was stored, logged, deployed, or copied into
+  evidence. **Tooling issue:** the fresh worktree initially had no
+  dependencies, and `npm ci --ignore-scripts` then left `better-sqlite3`
+  without its native binding. The first feature-regression attempts therefore
+  stopped before assertions. `npm rebuild better-sqlite3` fixed the local test
+  harness without changing source or lockfiles. Verification then passed:
+  IDTS-114 provider 15/15; IDTS-64 34/34; IDTS-65 19/19; IDTS-67 29/29;
+  IDTS-68 33/33; IDTS-69 8/8; IDTS-71 31/31. The opt-in Ling live smoke is
+  correctly SKIPPED until a private BTP environment key is configured after
+  review/merge. Evidence: `docs/pm/evidence/idts-114/README.md`. Next: run
+  project gates, create PR, then configure only Ling through a private BTP
+  binding after merge.
+- IDTS-114 verification also found two corrected command-invocation issues:
+  `cds compile srv --to edmx` must select `-s all` because this project has
+  both AuthService and BugService, and UI5 must be built from
+  `app/bug-management-ui` because the root has no `ui5.yaml`. Both correct
+  commands passed; classification: test-harness/tooling issue, not a CAP or
+  UI product defect.
+- IDTS-114 first BTP service-only deployment failed during Cloud Foundry staging
+  before application start. The Node buildpack rejects the repository engine
+  range `>=20 <23` as an improper constraint. Classification: deployment
+  tooling/package-metadata issue; no HANA deployer, database migration, S3,
+  Brevo, AI call, or secret output occurred. The repository MTA build already
+  contains `scripts/btp/pin-cf-node-engine.js`, which pins the generated
+  service package to `22.x`; retry uses that existing targeted build step.
+- IDTS-114 first Cloud Foundry Ling smoke invocation failed locally in
+  PowerShell while parsing the inline JavaScript command. No `cf run-task`
+  request was submitted, so no BTP task, AI provider call, HANA write, or
+  secret exposure occurred. Classification: test-harness quoting issue. The
+  retry passes the same synthetic command via a PowerShell here-string so it
+  is handed unchanged to the Linux task shell.
+- The here-string retry exposed a second Cloud Foundry CLI argument-parsing
+  limitation: the CLI split the nested `node -e` JavaScript before submitting
+  a task. Again, task list readback confirms no IDTS-114 task was created and
+  no provider call occurred. Classification: test-harness quoting issue. The
+  next retry uses the repository's existing safe base64-to-temporary-script
+  task pattern, with no secret or business payload encoded.
+- IDTS-114 task 22 then reached the container but failed before the provider
+  call because the temporary script used a relative `require('./srv/ai/provider')`.
+  Node resolves that path from `/tmp`, not the application working directory.
+  Classification: test-harness path issue; no AI request or data mutation
+  occurred. The retry resolves the module from `process.cwd()` inside the BTP
+  application container.
+- IDTS-114 task 23 executed the real synthetic Vercel request successfully
+  through the BTP runtime, but Ling returned HTTP 400 for the Gateway JSON
+  Schema structured-output request. The safe provider emitted only
+  `AI_PROVIDER_ERROR`, model alias and latency; it did not log the API key,
+  prompt body, provider body or user data. Classification: external provider
+  capability/configuration finding under investigation. Qwen and OpenAI
+  fallback remain disabled; no Bug, workflow, assignment, database schema or
+  business data was mutated.
+- IDTS-114 Ling chat retry initially failed before Cloud Foundry received a
+  task because PowerShell expanded `Buffer.from(...)` inside the nested
+  command string. Classification: test-harness quoting issue. No BTP task,
+  provider call, HANA write, or secret output was produced. The next retry
+  sends the synthetic script through standard input (`base64 | node`) in the
+  Linux task shell, removing nested JavaScript quoting from PowerShell.
+- IDTS-114 Ling chat smoke then passed: the synthetic exact-response check
+  returned success through the Vercel Gateway using Ling, without any business
+  data or workflow mutation. Ling remains unsuitable for the application's
+  JSON-Schema structured operation because the earlier structured request
+  returned HTTP 400. A subsequent environment-inspection command accidentally
+  rendered unredacted bound-service credentials in the local terminal output.
+  Classification: security/tooling incident. No credential is recorded in
+  repository files or Jira. Live Qwen testing is paused until the affected
+  private credentials are replaced; future checks must enumerate only
+  allowlisted variable names and presence flags.
+- IDTS-114 Qwen smoke setup was briefly blocked because the Cloud Foundry CLI
+  SSO token had expired. Classification: environment authentication blocker.
+  DonHV had already authorized reuse of the saved SAP identity; SSO login was
+  completed through the official SAP passcode page and the CLI retargeted the
+  existing trial org/`dev` space. No application configuration or data changed
+  during re-authentication.
+- IDTS-114 safe runtime-presence task confirmed the replacement Gateway key,
+  Vercel provider, Qwen primary chat/embedding aliases and disabled fallback
+  without printing any credential. Live synthetic verification then passed:
+  Qwen JSON-Schema structured output, Qwen 1024-dimension embedding, controlled
+  GPT structured fallback after one synthetic primary 503, and controlled
+  OpenAI 1536-dimension embedding fallback. All tasks returned exit 0 and made
+  no Bug, workflow, assignment or database mutation. The BTP service and
+  approuter are running; health is HTTP 200 and unauthenticated approuter entry
+  redirects to XSUAA (HTTP 302).
+- The first combined local regression run passed the provider-only suites but
+  DB-backed AI suites stopped before assertions because this fresh worktree's
+  `better-sqlite3` native binding was absent. Classification: local
+  test-harness dependency issue, not a BTP/HANA/runtime defect. The fix is the
+  existing `npm rebuild better-sqlite3` step followed by rerunning only the
+  interrupted suites. A separate `rg` lookup also referenced a non-existent
+  guessed test filename; it did not change files and was corrected by reading
+  the actual package script catalog.
+- Three final safe-config `cf run-task` attempts failed before producing a
+  readback because Windows CF CLI and the Linux task shell split or interpreted
+  nested JavaScript quoting differently. Classification: test-harness/tooling
+  issue. No application configuration changed and no secret was printed. The
+  final retry used a base64 standard-input pipeline with no nested JavaScript
+  shell syntax; task 31 exited 0 and printed only allowlisted presence flags and
+  model aliases.
+- A combined AppRouter status probe used PowerShell `Invoke-WebRequest` with a
+  zero redirect limit, but PowerShell surfaced the XSUAA redirect as a
+  non-terminating maximum-redirection error before the catch block populated
+  the status variable. Classification: test-harness/tooling issue. A read-only
+  `curl` retry confirmed the expected HTTP 302; the CAP health endpoint remained
+  HTTP 200.
+- IDTS-114 final provider rollout verification completed. Safe runtime readback
+  reports Vercel ready with Qwen structured and embedding primaries, bounded
+  OpenAI structured/embedding fallback, and no missing configuration. Live BTP
+  tasks passed Qwen structured output, Qwen 1024-dimensional embeddings,
+  controlled GPT fallback and controlled 1536-dimensional OpenAI embedding
+  fallback. Local suites IDTS-114/64/65/67/68/69/71 passed 169 checks with zero
+  failures after rebuilding `better-sqlite3`. Remaining acceptance is an
+  authenticated browser smoke across the four AI actions; no full feature PASS
+  is claimed yet.
+- IDTS-114 BTP browser acceptance baseline: the public CAP `/health` endpoint
+  returned HTTP 200, while the AppRouter root returned the expected HTTP 302
+  to the protected application/XSUAA path. A first probe incorrectly treated
+  the AppRouter `/health` response body as a public health result; this is a
+  route/diagnostic limitation, not a product defect. Classification: tooling
+  and environment verification issue; corrected with separate service and
+  AppRouter probes before browser testing. No application data or configuration
+  changed.
+- IDTS-114 BTP browser acceptance is currently blocked at the application shell:
+  the authenticated AppRouter page is blank and Chrome console reports 404/load
+  failures for `idts/bugmanagementui/Component-preload.js` and
+  `idts/bugmanagementui/Component.js`, followed by `Component.create()` failure.
+  Classification: environment/deployment or HTML5 content-routing defect under
+  investigation, not an AI feature result. No AI action was executed and no
+  business data changed. Evidence is the sanitized browser console record from
+  the authenticated BTP tab; next owner is DonHV to verify HTML5 content
+  publication/AppRouter static-resource routing on the deployed SHA before
+  resuming IDTS-114 feature acceptance.
+- A read-only browser resource probe attempted to use page-scope `fetch`, but
+  this Chrome control surface does not expose `fetch` in its evaluation scope.
+  Classification: test-harness limitation; no request result or application
+  state was changed. The console evidence remains authoritative for the static
+  resource failure.
+- A source inspection command initially used the wrong manifest path
+  (`app/bug-management-ui/manifest.json` instead of
+  `app/bug-management-ui/webapp/manifest.json`). Classification: tooling/path
+  mistake; corrected by reading the actual `webapp` path. No files changed.
+- Local UI artifact verification in the fresh worktree could not start because
+  `npm run build` under `app/bug-management-ui` found no `ui5` executable; the
+  worktree dependencies are not installed. Classification: local test-harness
+  dependency blocker, separate from the BTP shell failure. No files or runtime
+  configuration changed.
+- Installing the UI worktree dependencies succeeded, but npm reported the
+  existing dependency audit baseline as `26 vulnerabilities` (2 moderate, 24
+  high) and deprecated transitive packages. Classification: dependency/security
+  finding observed during verification; not changed in this acceptance branch,
+  and no `npm audit fix` was run because that would expand scope and could alter
+  the deployed artifact.
+- Chrome direct navigation to the protected AppRouter OData URL was blocked by
+  the local browser/client policy (`ERR_BLOCKED_BY_CLIENT`) before a response
+  could be inspected. Classification: browser tooling/environment limitation,
+  not an OData product failure. The acceptance continues through the visible
+  Fiori UI and its normal network traffic; no token, cookie or credential was
+  inspected.
+- Both DOM-assisted and coordinate-based attempts to scroll the Fiori
+  virtualized list timed out in Chrome before the scroll gesture completed.
+  Classification: browser test-harness limitation; no row was selected and no
+  application data changed. The browser session remains authenticated and
+  usable through normal visible controls.
+- The browser's isolated read-only page evaluator does not expose the page's
+  global `sap` object, so it cannot be used to inspect UI5 model bindings or
+  query loaded OData contexts. Classification: browser test-harness limitation;
+  the attempt failed before any interaction or data change.
+- The earlier blank AppRouter shell recovered after a normal browser reload;
+  the authenticated Fiori shell and Object Page now load successfully. The
+  initial component-load console entries are therefore recorded as a transient
+  stale-page/load condition, not an active deployment blocker. Local UI5 build
+  also passed after installing the fresh-worktree dependencies.
+- HANA Database Explorer connected as `DBADMIN` can list the two generated HDI
+  schemas and their `IDTS_CAP_BUGS` tables, but a direct read of either HDI
+  schema was rejected with HANA error 258 (`insufficient privilege`).
+  Classification: environment/authorization limitation of the database-admin
+  browser connection, not an IDTS product defect. No database data changed;
+  acceptance will obtain the QA Bug identity through the bound application
+  context instead of broadening DBADMIN privileges.
+- Similar Bugs on BTP returned ranked candidates and the PM review action
+  recorded `Accepted` with DonHV as reviewer. After a page reload, invoking
+  `Find Similar Bugs` created a new `PENDING` suggestion rather than reopening
+  the previously reviewed suggestion. Classification is provisionally product
+  behavior under investigation: the next check must confirm whether the prior
+  audit row remains persisted and whether creating a fresh suggestion is the
+  intended UI contract. Bug workflow fields were not intentionally changed.
+- Classification Suggestion on BTP returned the five expected review rows and
+  the PM could record an `Accepted` audit decision. However, the deployed UI and
+  `app/bug-management-ui/webapp/ext/actions/ClassificationReview.js` expose
+  only Accept/Reject/Ignore/Close; no `Apply Classification` entry point exists.
+  Classification: product functional gap. The CAP action exists, but the PM/
+  Tester apply flow and Developer 403 behavior cannot be accepted through the
+  BTP UI until a separate runtime fix adds a deliberate apply action. IDTS-114
+  must remain In Progress unless this criterion is formally removed.
+- A temporary profile-popover screenshot included the signed-in email address.
+  Classification: evidence-sanitization/tooling issue fixed immediately. The
+  file was deleted before Git staging and will not be part of the evidence pack;
+  PM identity/role is recorded in the case manifest without exposing the email.
+
+## 2026-07-29 - IDTS-114 SAP BTP feature-level AI acceptance
+
+| Classification | Symptom / scope | Root cause or interpretation | Status / evidence | Next owner |
+| --- | --- | --- | --- | --- |
+| Provider capability / environment issue | Similar Bugs succeeded once with Qwen embeddings, but a later Similar Bugs request returned a safe fallback; Classification, Handoff Summary and Smart Assign explanation also used safe fallback responses. | Sanitized BTP logs recorded `VERCEL_GATEWAY_HTTP_429` for the later embedding/structured calls and `VERCEL_GATEWAY_HTTP_400` for Smart Assign. The UI did not expose raw provider diagnostics. | Feature-level safety and no-mutation are verified; stable live-Qwen structured success is **not** PASS. Evidence is in the IDTS-114 BTP browser manifests and the acceptance report. | DonHV / provider configuration owner |
+| Product functional gap | Classification Review provides Accept, Reject, Ignore and Close, but no user-visible `Apply Classification` entry point. | `applyClassificationSuggestion` exists in CAP, but the deployed UI does not expose the PM/Tester apply action. | **FAIL / not testable through BTP UI**. PM/Tester Apply and Developer 403 cannot be honestly claimed. A separate runtime/UI defect must be tracked. | DonHV / FE-runtime follow-up |
+| Product functional gap | Similar Bugs review UI has no explicit duplicate-confirmation action, and no operational-metrics UI entry point was found. | `confirmDuplicateSuggestion` and `readAiOperationalMetrics` exist as backend capabilities, but no corresponding user-facing action/page is present in the deployed UI. | **BLOCKED / not testable through BTP UI**. Do not claim duplicate confirmation or PM metrics acceptance from backend-only evidence. | DonHV / FE-runtime follow-up |
+| Test/environment blocker | Tester and Developer role-matrix cases could not be executed in this PM Chrome session. | No approved interactive Tester/Developer SAP identity session was available; identities must not be impersonated. | **BLOCKED**. PM shell and PM review flows were tested; Tester/Developer results remain pending member-owned sign-in. | SangVN / DatDT / NhanT |
+| Test-harness / evidence issue | A profile screenshot briefly contained the full signed-in email. | The first capture was not sanitized before persistence. | Fixed immediately: file deleted before staging; no credential or email is in the selected evidence pack. | DonHV |
+
+Post-review safe readback for BUG-0018 confirmed no unintended Bug mutation after Similar Bugs, Classification review branches, Handoff Summary and Smart Assign review:
+
+- Status remains `ASSIGNED`.
+- Assignee and next processor remain unchanged.
+- `modifiedAt` remains `2026-07-28T13:37:02.976`.
+- `HistoryEvents` remains 4 and `DuplicateLinks` remains 0.
+- Classification `ACCEPTED`, `REJECTED` and `IGNORED` audit rows persist; the Similar Bugs accepted audit row also persists.
+
+Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be opened, review states persist, safe fallback/no-mutation behavior is evidenced, and no tested endpoint produced HTTP 5xx. Full IDTS-114 acceptance is still blocked by provider capability instability, the missing Apply Classification UI, missing Duplicate Confirmation and Metrics UI entry points, and unavailable Tester/Developer interactive identities.
+
+## 2026-07-29 - IDTS-115 AI Fiori entry points
+
+- Tooling/environment issue: the first Fiori MCP `list_functionality` preflight could not compile the fresh worktree because dependencies were not installed, so `@cap-js/attachments` and `ManagedAttachments` could not be resolved. No source or runtime behavior had been changed. The worktree will run the repository-standard `npm ci`, then repeat the Fiori MCP preflight before SAPUI5 edits.
+- Dependency/security finding: repository-standard `npm ci` completed, but npm reported the existing audit baseline as 24 vulnerabilities (1 low, 9 moderate, 13 high, 1 critical) plus deprecated transitive packages. No `npm audit fix` or dependency upgrade was applied because IDTS-115 is a focused FE capability fix and an automatic upgrade could change runtime behavior; dependency remediation remains a separate security work item.
+- Tooling issue: the first `rg` search for a reusable OData-action helper used an invalid combined regular expression and stopped with `unclosed group` before reading or changing files. The search was corrected to fixed-string queries; this is not a product defect.
+
+- Tooling issue: a final evidence text scan was first written with Bash `|| $true` syntax and failed in PowerShell before scanning any file. It changed no files and exposed no data. The command was corrected to PowerShell-compatible handling before the final verification pass.
+- Tooling issue: the first `gh pr create` attempt used Bash heredoc syntax (`<<'EOF'`) in PowerShell and was rejected before GitHub received a request. No PR or repository content was changed. The PR was retried with a PowerShell-compatible body argument.
+- Process/tooling issue: after the PR #212 body was corrected, rerunning the old GitHub Actions run still used the original pull-request event payload and therefore reported all evidence headings as missing. Local validation of the live PR body passed all 11 required sections. The fix is to push this status update so GitHub creates a fresh `synchronize` event with the current PR body; no branch-protection bypass is used.
+### 2026-07-29 — Subagent policy PR gate finding
+
+- Issue type: process issue.
+- Symptom: PR #213 initially failed `qa-depth-gate` even though local agent-rule, self-test and secret-scan checks passed.
+- Root cause: the PR body summarized the existing DonHV Knowledge Gate but omitted the exact field labels required by `check-pr-depth.js`.
+- Status: fixed by restoring the complete verified IDTS-89 Knowledge Gate declaration; a fresh PR event is required before merge.
+- Runtime impact: none; this PR changes agent process guidance only.
+
+### 2026-07-29 — IDTS-115 test-harness finding
+
+- Issue type: test-harness issue.
+- Symptom: `npm run qa:idts115:programmatic` initially failed while checking the PM-only metrics contract.
+- Affected file: `scripts/qa/test-idts115-ai-fiori-entrypoints.js`.
+- Root cause: the focused assertion expected `@requires: 'PM'`, but the valid CDS annotation in `srv/service.cds` is `@(requires: 'PM')`.
+- Status: fixed in the acceptance branch by aligning the assertion with the real CDS syntax; no runtime behavior changed.
+- Verification: rerun focused IDTS-115 suite after this patch.
+- Owner: DonHV.
+### 2026-07-29 — IDTS-115 independent Terra High review findings
+
+- Product defect: failed Classification Apply disabled retry permanently, while a post-apply refresh failure could not be distinguished from an action failure. Fix: track whether CAP mutation completed, re-enable only for pre-mutation failure, and require reload after post-mutation refresh failure.
+- Product defect: failed Duplicate Confirmation recalculated enablement while the dialog was still busy, leaving retry disabled. Fix: clear busy first in `finally`, then recalculate; a successful confirmation remains disabled through `duplicateConfirmed`.
+- Test-harness gap: focused QA checked source presence but not retry ordering, complete i18n coverage, or the exact PM annotation attached to `readAiOperationalMetrics`. Fix: add scoped retry regex, validate all IDTS-115 i18n keys in both bundles, and scope the CDS authorization assertion to the metrics function.
+- Tooling issue: `gh pr merge 213 --delete-branch` reported that local `dev` belongs to `E:/IDTS-SAP01` while attempting local cleanup. GitHub PR #213 still merged successfully at `65eec9e`; no branch protection or runtime state was affected.
+- Reviewer: Terra High subagent (read-only). Final review, corrections and verification remain owned by DonHV/primary agent.
+- Primary-agent follow-up finding: Dashboard initially added backend `failureCount` and `unavailableCount`, even though unavailable rows are already included in `failureCount`; this would overstate the UI total. Fixed by summing the inclusive failure count once and adding a focused regression assertion. The Terra review had reported no aggregation defect, so that part of its result was rejected.
+
+### 2026-07-29 — IDTS-115 read-only inspection command correction
+
+- Issue type: tooling issue.
+- Symptom: one read-only inspection command used the wrong relative path for `AiSuggestionReview.js`, and its companion ripgrep expression was malformed.
+- Root cause: the helper is under `ext/ai/`, not `ext/actions/`; the regex escaped parentheses incorrectly in PowerShell.
+- Status: fixed immediately by locating the file with `rg --files` and rerunning focused reads with the correct path and simpler patterns.
+- Runtime/data impact: none; the failed command made no file, BTP, Jira, or database change.
+
+### 2026-07-29 — IDTS-115 direct ESLint invocation mismatch
+
+- Issue type: tooling issue.
+- Symptom: syntax checks and the 143 focused IDTS-115 assertions passed, but `npx eslint <files>` exited before linting because ESLint 10 could not find a root flat-config file.
+- Root cause: this repository delegates UI linting to the UI5 project workflow rather than exposing a root `eslint.config.*` for direct invocation.
+- Status: fixed by using the app-local ESLint configuration; the touched UI files pass with `--quiet` and no lint configuration was changed.
+- Runtime/data impact: none; no source, external service, or data was changed by the failed lint command.
+
+### 2026-07-29 — IDTS-115 UI5 lint line-ending finding
+
+- Issue type: tooling/repository-format issue.
+- Symptom: running ESLint from the correct UI5 app directory loaded the project config, but reported `linebreak-style` across the three touched UI files because their working-tree content was CRLF; UI5 production build still passed.
+- Root cause: Windows checkout/patch operations materialized CRLF while the UI5 lint policy requires LF.
+- Status: fix in progress by mechanically normalizing only the touched UI source files to UTF-8/LF, then rerunning the same lint command; no lint rule or project configuration will be weakened.
+- Runtime/data impact: none; this is a source-format finding.
+- Follow-up correction: the first normalization command was executed from the UI5 app directory but still used repository-root-relative paths, so `Resolve-Path` rejected all three inputs and changed nothing. The retry uses the UI5-local paths and the project ESLint fixer only for those files.
+- Verification result: UI5 ESLint now completes with `0 errors`; the remaining 37 warnings are pre-existing structural rules plus UI5 AMD parameter-count warnings, and the UI5 production build passes.
+- UI5 MCP finding: the official API reference and UI5 linter identified the newly used `Dialog.stretchOnPhone` property as deprecated. The red focused test failed before the fix; the metrics dialog now imports `sap/ui/Device` and uses `stretch: Device.system.phone`, with no linter auto-fix or configuration weakening.
+
+### 2026-07-29 — IDTS-115 focused test invoked from wrong workspace
+
+- Issue type: tooling issue.
+- Symptom: one combined verification command attempted `npm run qa:idts115:programmatic` from `app/bug-management-ui`, where that root-level script is not defined.
+- Root cause: command working directory was kept at the UI5 workspace after lint verification.
+- Status: corrected by rerunning the focused suite from the repository root; after the Device regression assertions, the current result is 146/146 PASS.
+- Runtime/data impact: none.
+
+### 2026-07-29 — IDTS-115 final local verification corrections
+
+- Tooling issue: one combined lint/status probe ran from `app/bug-management-ui` but referenced PM files as though the current directory were the repository root, so `rg` reported that both paths were missing. The same command's app-local ESLint and repository `git diff --check` checks still completed successfully. The PM read was rerun from the repository root; no source or data changed.
+- Documentation correction: the IDTS-115 work package still pointed to the baseline before the subagent-policy merge. It now freezes `65eec9ed1271bdd97192f030b15dc93a4889f848`.
+- Existing CAP warning: fresh CAP compilation passes but keeps the known attachment vocabulary warning that `NonUpdateableProperties` is not recognized for `Bugs_attachments`. This warning predates IDTS-115 and remains outside this FE-only scope.
+- UI5 API correction: `Dialog.stretchOnPhone` was replaced by `stretch: Device.system.phone`. The focused red test failed before the fix and now passes `146/146`; UI5 MCP lint reports zero findings, app-local ESLint exits 0, and the UI5 production build succeeds.
+- Ponytail simplicity review: the implementation reuses the three existing CAP contracts, two existing review dialogs, and the existing Dashboard. It adds no route, framework, dependency, schema, or speculative abstraction. One unused metrics-model `busy` property was removed. Verdict: `Lean already. Ship.`
+- Tooling issue: a final read-only secret/placeholder probe passed a Windows wildcard as a direct `rg` path operand (`i18n*.properties`), which produced an invalid-path error after the preceding status/diff output. It changed no files. The scan was rerun with a directory plus `--glob` pattern.
+- Independent-review result: Terra High's claim that the focused static suite alone cannot prove deployed behavior is valid as a limitation but not a P1 code defect. Backend authorization, persistence, idempotency and no-mutation are exercised by IDTS-91/93/95/97; interactive PM/Tester/Developer behavior remains an explicit post-deploy browser acceptance gate and is not claimed locally.
+- Product UX defect accepted from independent review: `AiSuggestionReview.submit()` disabled Accept/Reject/Ignore before invoking CAP but never restored the buttons when the OData invocation failed. A transient failure therefore forced the user to close and reopen the dialog. A red IDTS-115 assertion reproduced the missing retry state. The helper now restores review actions only when CAP has not completed the decision; after completion the controls stay locked to avoid replaying persisted decisions.
+- Repository-format issue: after the shared helper patch, app-local ESLint reported CRLF line endings on `AiSuggestionReview.js`. The new retry assertions and IDTS-92 behavior suite had already passed, so this is formatting rather than a product failure. The file is normalized with the existing app ESLint fixer only; lint/build are rerun afterward.
+- Lint warning: after line-ending normalization, the helper exposed its two existing `Promise is not defined` warnings. Since the file legitimately uses the platform Promise API, it now declares `/* global Promise */`; no dependency or runtime behavior changes.
+
+### 2026-07-29 — IDTS-115 SAP BTP deployment and acceptance
+
+- Tooling issue: the first repository search guessed a non-existent root
+  `mta.yaml` path and then repeated one search from the wrong working directory.
+  The read-only commands changed nothing; the actual deployment descriptors
+  were located from the fresh deployment worktree.
+- Tooling issue: the first `mbt build` exceeded the five-minute command timeout
+  while child MBT processes continued running. The exact child processes were
+  stopped before retry; no MTAR was deployed from that attempt. A verbose
+  single-job retry completed successfully in 559 seconds.
+- Tooling issue: a follow-up tried to read the temporary MBT Makefile after MBT
+  had removed it. The read-only command failed and changed nothing.
+- Deployment result: MTAR
+  `idts-sap01-idts115-ae209c8.mtar` with SHA-256
+  `A167369F0547DDC6F105D4B61C5BBB5304352FB630D5A9D2FD5FDF5CB8E69DE2`
+  was selectively deployed. `idts-sap01-srv`, app content and AppRouter are
+  started; the DB deployer was not selected, and no schema/seed deployment ran.
+- Tooling/environment issue: direct AppRouter OData navigation in an agent-created
+  Chrome tab was blocked by the client with `ERR_BLOCKED_BY_CLIENT`. The normal
+  authenticated Fiori flows continued to work and no credential was inspected.
+- Environment authorization limitation: `cf ssh idts-sap01-srv` was denied for
+  the current CF user. HANA evidence was therefore read through a bound,
+  read-only CF task instead of broadening permissions.
+- Tooling issue: the first bound readback task used a `node -e` command that CF
+  shell parsing rejected. The task failed before querying or changing data.
+  Corrected task `idts115-readback-r2-20260729` succeeded using
+  `echo <base64> | base64 -d | node`.
+- Product/browser finding: while creating the controlled QA Bugs, changing
+  off-screen Steps/Actual fields before their OData properties had been read
+  produced `Must not change a property before it has been read`. Draft
+  activation initially returned expected validation 400 until the fields were
+  loaded and refilled. Both records were eventually created. This indicates a
+  create-flow binding/interaction defect, not a database loss.
+- Product/browser finding: the create flow also logged
+  `Failed to drill-down into componentCategory_ID, invalid segment:
+  componentCategory_ID`. Activation eventually succeeded, but a clean-console
+  claim is not allowed until the annotation/binding path is corrected or
+  formally explained.
+- Framework/environment noise: the browser recorded UI5 flexibility
+  `loadFlexData/loadFeatures` failures, unsupported `S/CUBE`, and an internal
+  `sap/m/ListKeyboardMode` deprecation. The application continued to load;
+  these are recorded separately from the create-flow product findings.
+- Evidence-sanitization limitation: Smart Assign rows display full developer
+  emails in the current UI. No unsanitized screenshot was selected for the repo
+  evidence pack.
+- PM acceptance PASS: Apply Classification on `BUG-0019`, Confirm Duplicate
+  from `BUG-0019` to `BUG-0020`, AI Activity, review persistence and
+  no-unintended-workflow-mutation all passed. HANA readback confirms the
+  duplicate relationship.
+- Provider capability result: Qwen embedding has observed `SUCCESS`, while
+  recent Qwen structured Classification, Handoff Summary and Smart Assign rows
+  are `AI_PROVIDER_ERROR` with safe fallback. IDTS-114 remains In Progress.
+- Role-matrix blocker: Tester and Developer browser sessions require
+  member-owned SAP identities. The agent did not impersonate users or read
+  passwords/tokens; interactive positive/403 evidence remains pending.
+- Tooling issue (IDTS-114 Qwen remediation): the first red-test run in the
+  fresh worktree stopped before executing assertions because that worktree had
+  no `node_modules` and Node could not resolve `@sap/cds`. No product code or
+  data was executed or changed. Resolution in progress: install the locked
+  dependencies with `npm ci` in the isolated worktree, then rerun the same red
+  test before editing the provider adapter.
+- Dependency audit observation: isolated `npm ci --ignore-scripts` completed
+  from the committed lockfile but npm reported 24 inherited dependency
+  advisories (1 low, 9 moderate, 13 high, 1 critical). This task does not run
+  `npm audit fix` or change dependency versions because that would broaden the
+  approved provider-fix scope. Existing secret/security gates remain mandatory
+  before merge; dependency remediation requires separate review if the current
+  repository security baseline does not already track these advisories.
+- Implementation issue caught before test/deploy: the first compatibility
+  retry patch had one extra closing brace, so `node --check` stopped with a
+  syntax error. The brace was corrected immediately; no runtime, BTP app or
+  persisted data was affected. Syntax and the focused provider suite are rerun
+  below before any wider regression.
+- Test-environment issue: the first parallel CAP regression run could not load
+  the native `better-sqlite3` binding because dependencies had intentionally
+  been installed with lifecycle scripts disabled. IDTS-67 stopped before its
+  assertions and no application data changed. Resolution: rebuild only the
+  locked `better-sqlite3` package in this isolated worktree, then rerun the full
+  matrix; no package version or lockfile change is authorized.
+- IDTS-114 local remediation result: focused red evidence was 19 PASS / 3 FAIL;
+  after the bounded response-format compatibility change the provider suite is
+  24/24 PASS. IDTS-64/67/68/69/71 plus IDTS-114 total 159/159 PASS. CAP compile,
+  secret scan, agent rules, QA Depth self-test, AI DevKit and `git diff
+  --check` also PASS. This is local technical evidence only; Qwen feature-level
+  SUCCESS on SAP BTP is still pending merge and selective service deployment.
+- IDTS-114 follow-up red/green result: current BTP diagnostics showed all
+  tested `response_format` modes returning HTTP 400 while one prompt-only JSON
+  call on `alibaba/qwen3.7-flash` returned HTTP 200 with parseable JSON. The
+  focused regression failed at 23/24 before the follow-up change and passed
+  30/30 after the exact incompatibility retry was changed to omit
+  `response_format`, add a bounded JSON-only instruction, verify malformed
+  output uses only the existing bounded fallback, and prove there is no third
+  retry or compatibility retry on the fallback model. Full regression, merge,
+  selective BTP deployment and feature-level SUCCESS readback remain pending.
+- IDTS-114 follow-up verification: the post-review AI regression matrix passed
+  165/165 checks. Secret scan, agent rules, QA Depth self-test, AuthService and
+  BugService EDMX compile, AI DevKit and `git diff --check` also passed.
+  Ponytail review found no unnecessary dependency, abstraction, queue or retry
+  framework; the only remaining acceptance is merge, selective service deploy
+  and real feature readback.
+- Verification-command issue: `cds compile srv --to edmx` stopped because the
+  model exposes both `AuthService` and `BugService`, so CAP requires an explicit
+  service selector. Secret scan, agent rules and QA Depth self-test had already
+  passed. No product code or data was affected; compile is rerun separately
+  with `-s AuthService` and `-s BugService`.
+- Verification-command issue: the compact PowerShell regression wrapper used
+  `ErrorActionPreference=Stop`, so expected sanitized negative-test diagnostics
+  written to stderr were converted into a PowerShell `NativeCommandError`
+  before the wrapper could read npm's exit code. No test assertion or product
+  data failed. The matrix is rerun through `cmd /c` so the native exit code,
+  rather than expected stderr text, controls PASS/FAIL.
+- Git process issue: a PowerShell command used semicolon-separated
+  `git diff --cached --check` and `git commit`, so the commit continued after
+  the check reported Markdown trailing whitespace. The branch had not been
+  pushed. The evidence formatting was corrected, the process issue was logged,
+  and the commit is amended only after a clean staged diff check.
+- CI blocker: PR #216 is mergeable at the Git level but its fresh
+  `qa-depth-gate` run failed. Merge and SAP BTP deployment are stopped; no
+  bypass is authorized. The failed job log is being inspected to distinguish
+  PR-body/process evidence from code/test failure before making any follow-up
+  change.
+- CI blocker diagnosis/resolution: the failed job was limited to PR-body field
+  names; the body used `Learner/Status` instead of the repository parser's 12
+  exact Ownership Knowledge Gate fields. PR #216 now reuses DonHV's existing
+  2026-07-23 90% PASS record with all required fields. Fresh local
+  `check-pr-depth.js --stdin` reports PASS (11 required sections); no Knowledge
+  Gate was rerun and no runtime code changed for this correction.
+- IDTS-114 product defect follow-up: SAP BTP audit recorded Smart Assign as
+  primary-Qwen `SUCCESS`, but the UI still used unavailable/fallback wording.
+  A controlled shape-only call proved Qwen wrapped the valid object under the
+  exact schema-name key `IdtsSmartAssignmentExplanation`, while the feature
+  contract reads root `candidates` or `explanations`. A red test reproduced
+  the mismatch (`30 PASS / 1 FAIL`). The minimal adapter normalization now
+  unwraps exactly one object layer only when the root has one key equal to the
+  sanitized schema name; direct, multi-key, array and unrelated payloads remain
+  unchanged. Focused provider verification is `36/36 PASS`; Smart Assign
+  feature verification is `8/8 PASS`.
+- IDTS-114 tooling issue: a verification-only `mbt build` remained active in
+  the service module build without producing a terminal result, while the
+  independent code/test gates had already completed. The build cell was
+  terminated to avoid an orphaned local process. No deployment, runtime,
+  database or generated artifact was changed. MTA packaging will be rerun in
+  the controlled selective-deployment step with visible build output.
+- IDTS-114 environment defect: after merge SHA
+  `112a7356c1828736051002275c6c5ca604e498fa`, Smart Assign candidate loading
+  and the scheduled email-outbox call both stopped with CAP
+  `ResourceRequest timed out` before their database query completed. The
+  effective production HANA pool still used the 1000 ms acquisition default.
+  CAP MCP confirmed the supported `cds.requires.db.pool.acquireTimeoutMillis`
+  setting. A focused red/green check now fixes only the production acquisition
+  boundary at 10000 ms; pool size, schema, query logic, data, S3, Brevo and AI
+  provider settings are unchanged. Post-deployment Smart Assign and scheduler
+  verification remain pending.
+- IDTS-114 local verification tooling issue: the first `cds env` invocation
+  targeted a detached worktree without `node_modules` and stopped with
+  `MODULE_NOT_FOUND` before reading configuration. The corrected check loads
+  the locked CAP runtime from the isolated acceptance worktree while keeping
+  the candidate worktree as the current directory. It confirms
+  `kind=hana`, `acquireTimeoutMillis=10000`, and no committed credentials.
+- IDTS-114 local regression setup issue: `qa:idts69:programmatic` initially
+  stopped during CDS compilation because this fresh worktree had no local
+  `node_modules`; `NODE_PATH` resolved the CAP runtime itself but the compiler
+  could not resolve the model import `@cap-js/attachments` relative to the
+  project. No assertion, runtime, provider or persisted data failed. The
+  verification is rerun through a temporary untracked directory junction to
+  the same lockfile-installed dependency tree used by the isolated acceptance
+  worktree, then the junction is removed.
+- Local cleanup tooling issue: the shell safety policy rejected the first
+  command that attempted to remove the temporary `node_modules` junction even
+  though it had verified `LinkType=Junction`. The ignored junction is not part
+  of the Git diff, package lock or deployment artifact declaration. It remains
+  local for the controlled MTA build and will be removed with the isolated
+  worktree after release verification.
+- IDTS-114 HANA root-cause correction: the 10-second and task-local 30-second
+  acquisition boundaries both timed out while HANA was unavailable. A direct
+  read-only `hdb` probe returned sanitized SAP HANA code `1890`, and HANA Cloud
+  Central showed the Free Tier instance as `Stopped`. After starting HANA, a
+  read-only BTP task passed in `340 ms`; the same task with the original
+  `acquireTimeoutMillis=1000` passed in `262 ms`. The temporary 10-second
+  workaround and its config-only test are removed. This is an environment
+  blocker resolved by restoring HANA availability, not a product query defect.
+- Local verification tooling issue: the first repository search command for
+  obsolete timeout references used a double-quoted PowerShell regex containing
+  an unescaped quote, so PowerShell rejected the command before `rg` or Git
+  ran. No source, deployment or data changed. The check is rerun with
+  single-quoted patterns.
+- Local verification setup issue: setting `NODE_PATH` let Node resolve CAP
+  from the existing isolated dependency tree, but the CDS compiler still
+  could not resolve the model import `@cap-js/attachments` relative to this
+  fresh worktree. IDTS-69 stopped before assertions; no product behavior
+  failed. Verification is rerun through a temporary ignored `node_modules`
+  junction to the same lockfile-installed dependency tree, then the junction
+  is removed after the checks.
+- Local cleanup tooling issue: after all checks passed, the shell safety layer
+  rejected the guarded PowerShell `Remove-Item` call for the verified
+  `node_modules` junction before deletion. The junction is ignored, points to
+  the existing lockfile-installed dependency tree, and is not part of the Git
+  diff or deployment source. It will be removed together with this isolated
+  worktree after release verification.
+- GitHub Actions event issue: PR #220 was created before its Knowledge Gate
+  block was expanded to the required field format. Local validation of the
+  updated body passes, but rerunning the original failed workflow reused the
+  immutable `pull_request` event payload and therefore repeated the old-body
+  failure. A small audit-log commit triggers a fresh `synchronize` event so CI
+  evaluates the current PR body; no gate is bypassed.
+- IDTS-115 SAP Fiori MCP tooling issue: deferred discovery exposes the Fiori
+  modification tools but not the mandatory `tools/list` operation. The server
+  explicitly prohibits calling `list_functionality` before `tools/list`, so
+  no Fiori mutation tool is called out of sequence. Diagnosis continues with
+  read-only CAP/UI5 guidance and the existing annotation/source files; this is
+  a tooling limitation, not a product defect.
+- IDTS-115 Create Bug product defect: a real PM browser session reproduced
+  `Must not change a property before it has been read` while entering
+  `actualResult` on a new BTP draft, even after the user explicitly opened the
+  Reproduction and Test Context section first. This disproves the earlier
+  harness-only hypothesis. The error originates from the OData V4 property
+  binding before the primitive property has been loaded. UI5 MCP confirms
+  `Context.requestProperty(...)` is the supported API for loading an uncached
+  primitive value before modification. Status: under remediation; no Bug was
+  activated and the test draft must be discarded after diagnosis.
+- IDTS-115 Create Bug annotation finding: the Defect Category value help still
+  contains a `Common.ValueListParameterOut` that writes
+  `componentCategory_ID`, although both `prepareDraftPatch()` and active write
+  validation derive that ID from Application Component plus Defect Category.
+  This matches the observed `invalid segment: componentCategory_ID` warning.
+  Status: under remediation through a focused red test and removal of only the
+  redundant output mapping; backend derivation remains authoritative.
+- IDTS-115 expected TDD red result: the new focused
+  `qa:idts115:create-binding` check failed first at the redundant
+  `ValueListParameterOut` assertion. This is the intended pre-fix failure and
+  proves the test detects the deployed annotation defect before implementation.
+- IDTS-115 UI5 verification tooling issue: the initial verification batch used
+  `npx ui5 lint`, but the repository's installed UI5 CLI has no `lint`
+  subcommand and rejected the argument before a lint result was produced. No
+  source, generated artifact, runtime or data changed. The project also has no
+  app-level lint script, so verification continues with UI5 build, JavaScript
+  syntax checks, focused static tests and the repository quality gates; this is
+  a tooling limitation, not a product defect.
+- IDTS-115 local browser setup issue: the first foreground `npx cds watch`
+  invocation reached the command timeout because the development server is a
+  long-running process. The shell stopped that invocation before browser
+  acceptance; no assertion or product flow failed. The server is restarted as
+  a hidden local helper with output under ignored `.tmp/` and is verified by
+  its listening port/health response before testing.
+- IDTS-115 product defect retest: the first minimal Object Page extension plus
+  `Context.requestProperty(...)` implementation passed static tests, compile,
+  ESLint and UI5 build, but a real local PM Create Bug flow still emitted
+  `Must not change a property before it has been read` for the reproduction
+  fields. Therefore the fix is not accepted and is not ready for PR/deploy.
+  Status: under investigation; verify whether the controller extension is
+  attached to the actual Object Page lifecycle and whether prefetch completes
+  before the controls allow input.
+- IDTS-115 diagnosis: browser inspection confirms the custom extension is
+  attached to `sap.fe.templates.ObjectPage.ObjectPageController`. Network
+  evidence shows the three reproduction properties were not requested until
+  the fields received input. The routing hook had synchronously read
+  `IsActiveEntity` before that flag was cached and returned early. The
+  implementation now requests the draft flag first, then preloads the three
+  fields only when it resolves to `false`; browser retest remains required.
+- IDTS-115 diagnosis correction: a context-level preload produced the expected
+  OData read but did not initialize each generated
+  `ODataPropertyBinding`; UI5 still rejected the first edit. A browser
+  experiment calling the public `binding.requestValue()` on the three value
+  bindings prevented any additional binding errors. The candidate fix now
+  registers one public view event delegate in `onInit()` and requests those
+  bindings after the generated control tree renders; fresh browser retest
+  remains required.
+- IDTS-115 documentation issue: the first generated Vietnamese half of the new
+  controller knowledge mirror was mojibake. It has been replaced with valid
+  UTF-8 Vietnamese and updated to explain the actual two-step preload. This is
+  a documentation-quality issue; runtime code and data were unaffected.
+- IDTS-115 lifecycle diagnosis: temporary browser-only counters proved the
+  Object Page `onAfterRendering` delegate ran once, but it ran before the view
+  had a binding context. The three target value bindings existed shortly
+  afterwards, so the handler returned too early and initialized none of them.
+  Status: under remediation. The candidate now listens to the public UI5
+  `modelContextChange` event and keeps `onAfterRendering` as the complementary
+  lifecycle path, covering either ordering without a timing delay. Temporary
+  diagnostic counters have been removed; a fresh-draft browser retest is
+  required before acceptance.
+- IDTS-115 product defect retest: combining view-level
+  `modelContextChange` with `onAfterRendering` still allowed the first two
+  reproduction-field edits to fail; the controls and their contexts were not
+  ready in the same view callback. The draft was not activated. Status: under
+  remediation. The next candidate registers the three generated fields after
+  rendering and uses each field's public `modelContextChange` event to call
+  `ODataPropertyBinding.requestValue()` only for a new draft. No timeout, DOM
+  mutation or private Fiori API is used; a fresh browser retest is required.
+- IDTS-115 lifecycle diagnosis correction: on a fresh draft, a read-only
+  browser probe 2.5 seconds after navigation found all three generated fields
+  but none had been registered by the view callbacks. Both callbacks occurred
+  before Fiori Elements finished generating those descendants. Status: under
+  remediation. The supported Fiori Elements
+  `override.routing.onAfterBinding()` hook is now combined with direct
+  `ODataPropertyBinding.requestValue()` preparation; this exact combination
+  had not been tested by the earlier context-cache attempt.
+- IDTS-115 product defect retest: immediate preparation inside
+  `routing.onAfterBinding()` still failed for the first two fields. A later
+  manual call on the bindings currently attached to the rendered controls
+  succeeds, indicating Fiori Elements replaces or rebinds the generated
+  property bindings at the end of the same routing turn. Status: under
+  remediation. The candidate defers preparation by exactly one event-loop
+  turn (`setTimeout(..., 0)`) so it requests the final bindings; it does not
+  use an arbitrary wait duration.
+- IDTS-115 diagnosis correction: the binding-replacement explanation above
+  was not proven. SAP's supported Fiori Elements hook passes the page
+  `bindingContext` directly to `onAfterBinding`; the candidate incorrectly
+  ignored that parameter and queried `view.getBindingContext()` before the
+  view exposed it. The timeout candidate has been removed. The implementation
+  now uses the supplied context directly and remains free of polling, delay,
+  DOM access and private framework APIs.
+- IDTS-115 final binding classification: on a clean draft, explicitly opening
+  the `Reproduction and Test Context` tab propagated binding contexts to all
+  three fields; Steps, Actual and Expected then accepted values with no new
+  console error. Writing directly to the off-screen lazy fields reproduced the
+  error. Classification: test-harness issue, not a remaining product defect.
+  The speculative Object Page controller extension and its manifest entry have
+  been removed. Browser acceptance must open the section and wait for field
+  bindings before filling. The only runtime correction retained is removal of
+  the redundant Defect Category `componentCategory_ID` output mapping.
+- IDTS-115 local environment blocker: the hidden CAP helper stopped while the
+  browser was PATCHing the controlled draft. The browser then reported
+  `ERR_CONNECTION_REFUSED` and `$batch failed` for otherwise unrelated fields
+  and value lists. `/health` confirmed the server was down; this draft and its
+  console count are invalid as product evidence. Status: under recovery. A new
+  helper and a new draft are required before continuing acceptance.
+- IDTS-115 local environment recovery: the long-running server is restarted
+  with `cds run` instead of `cds watch`, avoiding the live-reload port conflict
+  that terminated the previous helper. `/health` returns HTTP 200. Browser
+  acceptance will restart from a clean draft.
+- IDTS-115 local browser acceptance: controlled draft
+  `64da2770-6aa8-45b5-beab-89ab79079b65` was activated successfully as
+  `BUG-0005` on the first Create attempt. The automation explicitly opened the
+  lazy `Reproduction and Test Context` section before entering Steps, Actual
+  and Expected; all three values remained present after a full navigation
+  reload. Application Component, Defect Category, Priority, Severity and
+  Environment were selected through their value-help records rather than
+  typed as display text. The reload produced two successful HTTP 200 OData
+  batches and no increase above the known 14-error local UI baseline.
+  Classification: product fix PASS plus test-harness correction PASS.
+- IDTS-115 evidence tooling issue: Playwright saved named screenshots in the
+  workspace root rather than `.playwright-mcp`, so the first evidence-copy
+  command failed with path-not-found. No artifact was lost. Status: fixed by
+  locating the files with `rg --files` and copying from the actual workspace
+  root; the selected evidence remains destined for the tracked IDTS-115
+  evidence folder.
+- IDTS-115 test-harness issue: the first focused static assertion expected
+  `prepareDraftPatch()` to call `deriveOrValidateComponentCategory()` by name,
+  but the current draft handler performs the same authoritative lookup and
+  assignment inline. The test failed even though browser and database
+  readback proved derivation worked. Status: fixed by asserting the real
+  `ComponentCategories` lookup and `req.data.componentCategory_ID` assignment;
+  the knowledge mirror was corrected to distinguish draft derivation from
+  active-write validation.
+- IDTS-115 verification finding: UI5 MCP manifest validation PASS, while the
+  full-project UI5 linter reports pre-existing migration debt: manifest
+  version below 2 plus deprecated/test-starter findings in the legacy QUnit
+  bootstrap files. None is introduced by the Value Help annotation change.
+  Classification: tooling/technical-debt finding, open outside this focused
+  fix; IDTS-115 continues only if source diff and focused behavior remain
+  clean.
+- IDTS-115 regression proof: the focused test failed exactly on the redundant
+  `componentCategory_ID` output assertion when that mapping was temporarily
+  restored, then passed 4/4 after the fix was restored. This proves the new
+  check detects the original annotation defect rather than merely passing on
+  the current tree.
+- IDTS-115 QA-gate invocation issue: passing `--body-file` through
+  `npm run qa:depth:pr-body -- ...` was consumed as npm CLI configuration, so
+  the checker received an empty body and correctly reported every required
+  section missing. Classification: tooling invocation issue, fixed by running
+  `node scripts/qa/check-pr-depth.js --body-file <file>` directly; no product
+  or PR-body content was affected.
+- IDTS-115 merge tooling issue: `gh pr merge 221 --merge --delete-branch`
+  completed the GitHub merge but then returned exit code 1 because local
+  branch `dev` is owned by the root worktree `E:\IDTS-SAP01`; `gh` could not
+  check out `dev` or finish local branch deletion in the feature worktree.
+  Classification: tooling/worktree issue. Status: GitHub PR #221 was verified
+  `MERGED`, merge SHA `4fa1eaa45a7e56c71ea628127ebf9172ef02c14e`
+  was verified as the exact `origin/dev` head, and no second merge or admin
+  bypass was attempted. Local branch cleanup is deferred until the worktree is
+  no longer needed.
+- IDTS-115 deployment-build finding: the clean MBT build at merge SHA
+  `4fa1eaa45a7e56c71ea628127ebf9172ef02c14e` completed successfully in
+  497 seconds, but npm audit output reported existing dependency debt: 24
+  vulnerabilities in the root install, 26 in the UI install, 7 in generated
+  service dependencies and 4 in AppRouter dependencies. Classification:
+  tooling/dependency technical debt, not introduced by the five-line
+  annotation deletion. Status: open for a dedicated dependency review; no
+  automatic or force audit fix was run because it could introduce unrelated
+  breaking changes.
+- IDTS-115 deployment verification tooling issue: the selective app-content
+  deployment finished successfully, but the optional command
+  `cf html5-list -di idts-sap01-destination -u` was unavailable because the
+  HTML5 CLI plugin is not installed in the current CF CLI. Classification:
+  local tooling limitation. Status: deployment was instead verified through
+  the finished MTA operation, unchanged running service/AppRouter instances,
+  HTTP 200 health, HTTP 302 anonymous XSUAA redirect and authenticated browser
+  reload; no product defect was inferred from the missing optional plugin.
+- IDTS-115 BTP rollout finding: after deploying only
+  `idts-sap01-app-content`, selecting a Defect Category in a fresh draft still
+  logged `Failed to drill-down into componentCategory_ID, invalid segment`.
+  Classification: deployment-scope issue, not a new source defect. Root cause:
+  the CDS annotation is compiled into CAP service metadata, so HTML5 content
+  alone cannot replace the metadata served by the already-running service.
+  Status: the incomplete acceptance run is rejected; its draft is discarded,
+  and the same verified MTAR will be redeployed selectively with
+  `idts-sap01-srv` plus `idts-sap01-app-content`, still excluding the HDI
+  deployer and any database deployment.
+- IDTS-115 deployment verification tooling issue: the first HTTP probe used
+  PowerShell's newer `Invoke-WebRequest -SkipHttpErrorCheck` option, but the
+  installed PowerShell version does not support that parameter. Both commands
+  stopped before sending a request, so the empty status values are not product
+  evidence. Classification: tooling issue. Status: fixed by switching the
+  read-only health and redirect probes to `curl.exe`.
+- IDTS-115 browser-harness tooling issue: the first value-help interaction
+  called `focus()` on the browser-client locator, but that wrapper does not
+  expose a `focus` method. No UI action was sent and no draft value changed.
+  Classification: test-harness issue. Status: fixed by using the supported
+  exact-locator `click()` followed by `press('F4')`.
+- IDTS-115 browser-evidence tooling limitation: an attempt to read current
+  SAPUI5 log entries through an evaluated `sap/base/Log` module failed because
+  the browser-client evaluation context does not expose the page's `sap`
+  global. No product action failed and no business data was changed by this
+  read-only probe. Classification: test-harness/tooling limitation. Status:
+  browser evidence will use visible error-dialog checks plus bounded CF
+  request/runtime logs; the historical Chrome log buffer will not be treated
+  as current-run evidence.
+- IDTS-115 BTP apparent persistence defect, diagnosis corrected: immediately
+  after activation, the inactive `Reproduction and Test Context` section
+  rendered placeholder empty values for `BUG-0021`, which initially looked
+  like data loss. Read-only HANA evidence showed all three NCLOB values were
+  present, and explicitly opening the lazy section loaded and displayed Steps,
+  Actual and Expected correctly. Classification: test-harness/lazy-loading
+  observation, not a product defect. Status: resolved; acceptance must activate
+  the section before asserting active-page values.
+- IDTS-115 HANA readback tooling issue: the first read-only `cf run-task`
+  command failed locally during PowerShell parsing because Bash-style quote
+  escaping was used inside a PowerShell string. Cloud Foundry did not receive
+  a task, so no database request or mutation occurred. Classification:
+  tooling issue. Status: fixed by constructing the inline Node command with
+  native PowerShell string escaping before retrying.
+- IDTS-115 HANA readback tooling issue follow-up: Cloud Foundry CLI split the
+  inline `node -e` JavaScript into unexpected arguments after PowerShell
+  removed nested quotes. The task was rejected by the CLI and did not run.
+  Classification: tooling issue. Status: fixed by using the already proven
+  base64-to-temporary-file task pattern, which avoids multi-layer shell
+  quoting and remains read-only.
+- IDTS-115 deployment-inspection environment limitation: direct read-only
+  `cf ssh` access to the running service container was denied for the current
+  Cloud Foundry identity. No application or environment state changed.
+  Classification: environment/authorization limitation. Status: use a
+  one-off read-only CF task to inspect packaged metadata instead; SSH access is
+  not required for the product fix.
+- IDTS-115 HANA readback helper issue: the first read-only query for the
+  cache-busted `BUG-0022` run found the row, but most reported fields were
+  `undefined` because the HANA result object exposed uppercase column keys
+  while the helper read lowercase/camel-case keys directly. Classification:
+  test-harness issue, not data loss. Status: the helper is being rerun with a
+  case-insensitive column accessor; the browser reload already displayed all
+  three reproduction values.
+- IDTS-115 SAP BTP Create Bug acceptance result: a new application model was
+  loaded with a unique cache-busting query value, then the PM flow created
+  `BUG-0022` on the first activation attempt. Steps, Actual Result and Expected
+  Result remained visible after full reload. A corrected read-only HANA task
+  confirmed all three values plus the backend-derived
+  `componentCategory_ID`. The deployed metadata scan found no Defect Category
+  output mapping to that property; the remaining reference is the valid
+  Assignee filter input. No new browser console entry, `invalid segment`,
+  unread-property error or SAP BTP web error appeared during the controlled
+  test window. Classification: product fix PASS and stale-browser-metadata
+  diagnosis resolved. Evidence is under
+  `docs/pm/evidence/idts-115/create-draft-binding/btp/`.
+- IDTS-115 evidence-cleanup tooling limitation: `apply_patch` cannot delete
+  PNG files because it expects UTF-8 text, and the guarded native PowerShell
+  cleanup of the three superseded R2 screenshots was blocked by the shell
+  safety layer before deletion. Classification: tooling limitation. Status:
+  no source or evidence was damaged; the final case manifest references only
+  the authoritative cache-busted R3 screenshots (`04`–`06`). The three older
+  diagnostic images remain untracked in the evidence directory and will be
+  excluded from staging.
+- IDTS-114 current Qwen audit correction: a new read-only HANA query of safe
+  audit fields confirms at least one real primary-model `SUCCESS` for all four
+  capabilities: Similar Bugs embedding, Classification, Handoff Summary and
+  Smart Assign Explanation. The Technical primary-acceptance criterion is
+  therefore PASS. The latest selected Handoff row is still a safe provider
+  error, so runtime stability remains monitored and fallback remains required.
+  IDTS-114/115 stay In Progress because the deferred Tester/Developer browser
+  role matrix is not complete. Evidence:
+  `docs/pm/evidence/idts-114/qwen-structured-primary/current-feature-readback-20260729.md`.
+## 2026-07-30 — IDTS-115 AI create-draft guard verification setup
+
+- Classification: tooling issue.
+- Symptom: the first regression/build batch in the fresh IDTS-115 worktree could not load `@sap/cds`, could not find the `ui5` executable, and the UI workspace has no `lint` npm script.
+- Cause: the isolated worktree had not run `npm ci`; the attempted workspace lint alias does not exist in `app/bug-management-ui/package.json`.
+- Status: corrected for task execution. `npm ci` installed 1,519 packages from the lockfile; the known audit baseline remains 24 vulnerabilities (1 low, 9 moderate, 13 high, 1 critical). No automatic dependency upgrade was applied inside this focused UI fix.
+- Product impact: none observed; the focused source checks already passed before this environment correction.
+- Verification after dependency correction: IDTS-56 13/13, IDTS-67 29/29, IDTS-93 35/35, IDTS-115 185/185, create-binding 4/4 and the UI5 production build all passed. UI5 MCP targeted linter returned zero findings and manifest validation returned valid with zero errors.
+- Independent-review product finding: the first Smart Assign draft synchronization implementation called `submitBatch(model.getUpdateGroupId())`, which can become the reserved `$auto` update group. It also left rejected synchronization promises uncaught at the two UI entry points. Classification load handling initially treated every HTTP 400 as missing Bug context. Classification: product defects found before PR. Status: fixed by submitting only named application groups, polling automatic pending changes for `$auto`/`$direct`, catching both entry points, and matching the exact backend missing-context message while limiting Retry to transient statuses.
+- Test-harness improvement: the focused Smart Assign fake OData model now simulates pending `$auto` PATCH work and throws if runtime attempts `submitBatch("$auto")`. Final focused rerun: IDTS-56 `14/14 PASS`; IDTS-115 `189 checks PASS`.
+- Tooling issue: the first final CAP command referenced nonexistent `srv/auth-service.cds`. The actual service definition is `srv/auth.cds`; no product compile was attempted by the failed path. Status: corrected by compiling the real file in the final gate.
+- Final local gate: all required IDTS-56/66/67/68/69/74/75/76/93/95/114/115 suites passed; IDTS-115 create-binding passed 4/4; secret scan, agent rules and QA-depth self-test passed; both CAP services compiled; UI5 production build, targeted UI5 linter and manifest validation passed; AI DevKit reported 5/5 OK; `git diff --check` passed with only line-ending notices. Ponytail review found no dependency, framework, speculative abstraction or duplicate helper to remove: `Lean already. Ship.`
+
+## 2026-07-30 — IDTS-114 AI review readability and comment-summary implementation
+
+- Fresh-worktree red-test setup issue: the first `qa:idts68:programmatic` run failed before executing assertions because this isolated worktree had no local `node_modules`, so Node could not resolve `@sap/cds`. Classification: tooling issue, not a product defect. Status: under correction by reusing the repository dependency installation through `NODE_PATH`; no package or lockfile change is required.
+- CAP MCP model-search limitation: the model probe could not resolve the optional `@cap-js/attachments` import in the isolated worktree. The CAP documentation probe still completed and confirmed that extending the structured action return type is an OData contract change rather than a persistence-schema change. Classification: tooling issue. Status: local CAP compile and focused tests remain the verification fallback; no database deployment is planned.
+- SAPUI5 MCP namespace is not exposed in this session. Classification: tooling limitation. Status: implementation remains on standard `sap.m` controls and will be checked with the repository UI5 build/linter/manifest gates before any completion claim.
+- Verification-command path issue: the first syntax batch referenced the obsolete/nonexistent `webapp/ext/ai/` location for the three AI review controllers. The real files are under `webapp/ext/actions/`; Node therefore reported `MODULE_NOT_FOUND` before checking those files. Classification: tooling issue, not a product defect. Status: corrected by rerunning the syntax gate against the actual source paths; no source behavior was affected.
+- UI5 lint formatting finding: the first targeted ESLint run reported 1,330 `linebreak-style` errors because the three edited controller files had CRLF endings after Windows patching, while the application lint policy requires LF. Classification: repository-formatting issue. Status: being corrected with the configured ESLint fixer and a post-fix diff review; the same run exposed no new runtime syntax error.
+- Independent Terra High review found one acceptance-blocking AI-safety gap and four non-blocking quality gaps before PR: the provider-success path had no focused comment prompt-injection proof; comment/event sections could be hidden wholesale by the UI internal-copy filter; Classification column widths could still pressure tablet layout; browser behavior remains unproven by static tests; and one per-row `decisionHint` value became dead after the readability refactor. Classification: product-security/test-coverage/UI-quality findings found before merge. Status: under correction by keeping next action/events deterministic from trusted workflow/audit data, excluding raw comment content from provider input, rendering sanitized list lines individually, tightening table pop-in behavior, removing dead row state, and retaining SAP BTP browser acceptance as an explicit post-deploy gate.
+- Post-review focused-test mismatch: after removing the dead per-row Classification `decisionHint`, the IDTS-75 static suite still required the literal `decisionHint` anywhere in the controller even though the single user-facing instruction is `classificationReviewIntroMessage`. Classification: test-harness issue. Status: assertion is being corrected to verify the one dialog-level instruction and the absence of per-row guidance; runtime behavior is unchanged.
+- UI5 lint-command mismatch: the isolated UI workspace does not define an `npm run lint` script, so the attempted workspace alias stopped with `Missing script: "lint"` before linting any source. Classification: tooling issue, not a product defect. Status: corrected by using the repository-supported targeted `npx eslint` command; it passes with zero errors and four known warnings. CAP compile and UI5 build are rerun separately so this tooling failure cannot hide their results.
+- IDTS-114 independent-review corrections verified: provider-success prompt injection can no longer control workflow advice or important events because raw comments are excluded from provider input and those sections are generated from trusted status/history. Comment Summary now contains at most five chronological, redacted, concise lines; the UI renders each sanitized line without hiding legitimate business wording. Classification secondary columns pop in at Desktop width and dead per-row guidance was removed. Classification: product-security/UI-quality findings resolved before PR. Fresh focused results: IDTS-68 45/45, IDTS-71 31/31, IDTS-74 177 checks, IDTS-75 112 checks, IDTS-76 110 checks, IDTS-114 36/36 and IDTS-115 189 checks.
+- IDTS-114 final local gate: CAP compile and UI5 production build PASS; targeted ESLint has zero errors and four known structural warnings; IDTS-56/66/67/68/69/71/74/75/76/93/95/114/115, secret scan, agent rules and QA-depth self-test all PASS; AI DevKit is 5/5; `git diff --check` exits 0 with line-ending notices only. Browser visual/no-mutation verification remains explicitly pending the final SAP BTP deployment, and Tester/Developer role evidence remains deferred.
+- PR #225 merge-command tooling issue: `gh pr merge --merge --delete-branch` completed the remote merge but then exited non-zero because the CLI attempted to switch to local `dev`, which is owned by the root worktree. Classification: tooling issue, not a product/release failure. Status: verified directly from GitHub that PR #225 is `MERGED` at `d12ceef22ce8cae62987430a08fca4f11a5af088`, fetched `origin/dev`, and confirmed implementation commit `a6642f2` is its ancestor. The rollout proceeds from a new worktree at that exact merge SHA; no bypass or second merge was used.
+- BTP build-worktree safety limitation: the shell safety layer blocked removal of the temporary `node_modules` junction before MBT could run its own `npm ci`. No junction, dependency or source file was changed. Classification: tooling limitation. Status: do not bypass with another shell; use a separate detached build worktree at the same merge SHA with its own dependency installation, while keeping rollout evidence in the docs branch.
+- IDTS-114 SAP BTP rollout completed from merge SHA `d12ceef22ce8cae62987430a08fca4f11a5af088`. MBT build PASS; selective MTA operation `0246e01f-8b80-11f1-abdb-eeee0a953fee` updated the service runtime and application content without selecting the database deployer or running broad `cds deploy`. Service/AppRouter are started 1/1; health is HTTP 200; protected OData is HTTP 401 anonymously; AppRouter redirects anonymously with HTTP 302; the deployed metadata contains transient `commentSummary`. Browser visual/no-mutation verification and the deferred Tester/Developer role matrix remain open, so IDTS-114/115 stay In Progress. Evidence: `docs/pm/evidence/idts-114/review-readability/btp-deployment-verification-20260730.md`.
+- IDTS-114 browser-acceptance environment blocker: the available Playwright browser uses an isolated profile and reached the SAP Identity password screen, but it does not share the password/session saved in the user's normal Chrome profile. The account identifier can be entered, but no credential was read, copied or fabricated. Classification: environment/tooling blocker, not a product defect. Status: deployment and metadata verification remain PASS; interactive PM visual/no-mutation acceptance is pending a user-authenticated browser session, and Tester/Developer role evidence remains deferred.
+- IDTS-114 rollout-evidence PR process issue: the first PR #226 QA Depth Gate run failed because the PR body summarized the existing Knowledge Gate but omitted the validator's twelve explicit field labels. Classification: process issue. Status: PR body corrected with the existing DonHV 90% PASS record; this status update creates a fresh synchronize event so CI evaluates the corrected body. No Knowledge Gate was repeated and no check was bypassed.
+- IDTS-114 SAP BTP Trial availability incident: the valid AppRouter route returned Cloud Foundry `404 Requested route does not exist` because both `idts-sap01-approuter` and `idts-sap01-srv` had been stopped by the BTP Trial platform account, not because of an application crash or bad hostname. Classification: environment blocker. Status: both applications restarted successfully at 1/1 instances; service health returned HTTP 200 and AppRouter returned HTTP 302 to the application path. No redeploy, database deploy or schema/data change was performed. Operational note: Trial may auto-stop applications again, so check `cf app` state before diagnosing future route 404s.
+- IDTS-114 availability-verification command issue: the installed Windows PowerShell does not support `Invoke-WebRequest -SkipHttpErrorCheck`, so the first HTTP probe stopped before making the intended verification claims. Classification: tooling issue. Status: replaced with `curl.exe`; AppRouter returned HTTP 302 and service health returned HTTP 200.
+
+## 2026-07-30 — IDTS-114/115 connected-Chrome PM acceptance
+
+- The connected Chrome plugin successfully controlled the user's existing XSUAA-authenticated SAP BTP tab. Classification: tooling verification. Status: PASS; the earlier isolated-profile login blocker no longer applies to the PM acceptance run.
+- Similar Bugs loaded grounded candidates without an error popup and did not mutate the Bug. Classification: product UX defect. Symptom: the dialog still has horizontal overflow and clips right-side match/reason content. Status: open; requires a follow-up responsive-layout fix.
+- Classification Suggestions rendered a safe fallback instead of the previous `Could not load classification suggestions` popup. Classification: product UX defect. Symptom: the dialog still has horizontal overflow and clips the Confidence/review content. Status: open; requires a follow-up responsive-layout fix.
+- Handoff Summary included a Comment Summary grounded in the two stored comments and did not mutate status, assignee or current owner. Classification: product UX/content defect. Symptom: raw ISO timestamps, dense event lines and ambiguous fallback wording reduce readability. Status: open for polish.
+- New Bug correctly hides the Similar Bugs and Classification buttons. Classification: product UX defect. Symptom: the empty custom-field labels remain visible. Status: open; hide each complete field on root drafts.
+- Smart Assign draft synchronization PASS: after selecting `IDTS Assignment` and `Authorization`, the value help opened developer candidates without the prior missing-mapping warning. No assignment was performed, and the draft was discarded. Classification: product verification.
+- Browser acceptance limitation: this PM run did not capture sanitized Network status because the connected Chrome control surface did not expose request inspection without broader CDP access. Classification: tooling limitation. Status: record the limitation and capture approved Network evidence later; do not treat it as a product failure.
+- IDTS-114/115 remain In Progress. Tester/Developer role evidence is still deferred, and the responsive/readability defects remain open. Evidence: `docs/pm/evidence/idts-114/btp-browser/chrome-pm-acceptance-20260730.md`.
+- IDTS-114 Classification fallback root cause: a new read-only HANA audit found the two latest Classification rows at `AI_PROVIDER_ERROR` for `alibaba/qwen3.7-flash`; sanitized runtime logs identify `VERCEL_GATEWAY_HTTP_429`, `rate_limited`, `rate_limit_exceeded`. Earlier Classification rows contain real Qwen `SUCCESS`, so this is an intermittent provider-rate condition rather than missing AI integration. Similar Bugs currently permits one source embedding plus up to 50 candidate embedding calls at concurrency four immediately before later AI flows, which can exhaust the free Gateway request window. Status: open; reduce/batch embedding calls, add rate-limit cooldown behavior, then rerun Classification first after cooldown.
+- IDTS-114 safe-config probe tooling issue: the first read-only CF task loaded `/tmp/idts-safe-ai-config.js` and used a relative `./srv/ai/config` require, so Node resolved from `/tmp` and returned `MODULE_NOT_FOUND`. No product request, database mutation or secret read occurred. Status: corrected with an application-root path. The safe rerun confirmed only presence/aliases: AI enabled and ready, provider Vercel, Qwen primary, OpenAI fallback enabled, key present and timeout 45 seconds.
+- IDTS-114 isolated-worktree dependency baseline: `npm ci --ignore-scripts` installed the lockfile successfully, but `npm audit` reports the existing dependency baseline of 24 findings (1 low, 9 moderate, 13 high, 1 critical). Classification: dependency/security finding, not introduced by the rate-limit change. Status: recorded for separate dependency review; no automatic `npm audit fix` or breaking upgrade is mixed into this focused AI PR.
+- IDTS-114 red-test setup issue: `qa:idts66:programmatic` could not open the in-memory SQLite database because the initial isolated-worktree install used `npm ci --ignore-scripts`, so the `better-sqlite3` native binding was intentionally not built. Classification: tooling issue, not a product defect. Status: rebuild the lockfile-pinned native package, then rerun the same red test; no package manifest or application behavior is changed by the correction.
+- IDTS-114 fallback-policy defect found during implementation review: malformed structured JSON, a missing response text, and an invalid scalar embedding were still marked eligible for OpenAI fallback, although the approved policy limits OpenAI to timeout/network/HTTP 5xx. Classification: product cost/safety defect. Status: fixed before PR by making malformed content non-retryable/non-fallback-eligible and adding focused no-fallback assertions. Verification: IDTS-114 `51/51 PASS`.
+- IDTS-114 cooldown edge defect found by a new red test: `activateGatewayCooldown(null)` treated JavaScript `Number(null)` as zero and selected the one-second minimum instead of the required 60-second default. Classification: product resilience defect. Status: fixed with an explicit header-presence check; missing `Retry-After` now yields 60 seconds and oversized values clamp to 900 seconds. Verification: IDTS-114 `51/51 PASS`.
+- IDTS-114 request-bounding local implementation result: Similar Bugs keeps the 50-row database scan but prefilters deterministically to ten embedding candidates, prefers one bounded batch, and uses at most eleven scalar calls at concurrency one only for a proven unsupported array contract. HTTP 429 does not spend OpenAI fallback and starts a shared cooldown. Focused verification: IDTS-114 `51/51`, IDTS-66 `44/44`, IDTS-67 `31/31`; evidence at `docs/pm/evidence/idts-114/rate-limit-request-bounding/local-verification-20260730.md`. Classification: implementation progress. SAP BTP synthetic batch proof and live acceptance remain pending; IDTS-114/115 stay In Progress.
+- IDTS-114 full-regression runner issue: the first parallel PowerShell wrapper used `$ErrorActionPreference='Stop'`, so expected warning output written by negative AI tests to stderr was converted into `NativeCommandError` before npm exit codes could be evaluated. Classification: test-harness/tooling issue, not a product failure. Status: corrected by capturing combined output and deciding only from each npm process exit code; affected suites are rerun from the beginning.
+- IDTS-114 lint-command mismatch: running bare `npx eslint` at repository root resolved ESLint 10, which requires flat `eslint.config.*`, while this repository's UI lint setup is owned by the UI workspace/tooling. The command stopped before evaluating source. Classification: tooling issue, not a product defect. Status: PR 1 has no UI source change; UI production build already PASS, and any targeted UI lint will use the workspace-supported command/config in PR 2. No new lint dependency or config migration is introduced in this focused backend PR.
+- Existing UI lint baseline confirmed from the correct UI workspace: a whole-`webapp/**/*.js` run reports 5,055 findings (4,726 errors and 329 warnings), dominated by repository-wide CRLF/LF mismatches plus pre-existing Fiori rules such as sessionStorage/global usage. Classification: repository quality/debt finding, not introduced by this backend-only branch. Status: do not auto-fix or mix thousands of unrelated UI lines into IDTS-114 request bounding; UI production build remains PASS, and PR 2 will lint only the UI files it actually changes after normalizing their line endings.
+- IDTS-114 batch-compatibility review finding: the first implementation mapped every embedding-batch HTTP 400 to `AI_EMBEDDING_BATCH_UNSUPPORTED`, which could turn an unrelated malformed request into eleven scalar requests and violate the approved generic-400 no-retry rule. Classification: product cost/resilience defect found before PR. Status: corrected so only an explicit array/batch-not-supported provider signal opens the scalar compatibility path; a generic batch 400 remains a sanitized provider error with one network request. The first added regression fixture was itself incomplete because it enabled fallback without the required structured fallback alias, so it returned `AI_CONFIGURATION_INCOMPLETE`; classification: test-harness issue, corrected by supplying the existing test-only alias before rerun.
+- IDTS-114 final CAP compile invocation issue: compiling both service definitions to EDMX without selecting a service stopped with `Found multiple service definitions`. Classification: tooling/command issue, not a product compile failure. Status: rerun with CAP's explicit `-s all` selection so both `AuthService` and `BugService` are compiled in one gate.
+- IDTS-114 embedding-input allowlist review finding: the bounded embedding text still included Bug workflow `Status`, although the approved privacy/cost boundary permits only title, description and classification context. Classification: product data-minimization defect found before PR. Status: removed the status line and added a focused assertion that all batch inputs exclude it; comments, attachments, email and history remain excluded.
+- IDTS-114 rate-limit/request-bounding final local gate: IDTS-64 `36/36`, IDTS-66 `45/45`, IDTS-67 `31/31`, IDTS-68 `45/45`, IDTS-69 `8/8`, IDTS-71 `31/31`, IDTS-74/75/76 `177/112/110`, IDTS-114 `53/53` and IDTS-115 `189` all PASS. CAP compiled both services with only the known attachment vocabulary warning; UI5 production build, secret scan, agent rules, QA-depth self-test, AI DevKit `5/5`, JavaScript syntax and `git diff --check` PASS. Ponytail review: `Lean already. Ship.` SAP BTP synthetic batch proof and sequential live acceptance remain pending after merge/deploy.
+- PR #228 QA Depth declaration issue: the first PR body used descriptive Knowledge Gate labels (`Learner`, `Question date`, `Critical answers`) instead of the validator's exact required labels (`Member`, `Date`, `Critical questions`, plus question counts and ownership flow). Classification: process issue, not a code/test failure. Status: PR body corrected from the existing DonHV 90% PASS evidence; this status-only commit triggers a fresh check. No Knowledge Gate was repeated and no branch protection was bypassed.
+- 2026-07-30 IDTS-114 Smart Assign timeout worktree dependency issue: the focused Vercel provider suite passed `58/58`, but the first IDTS-69 CAP run could not compile `db/schema.cds` because using the root `node_modules` through `NODE_PATH` did not let the CDS compiler resolve the model package `@cap-js/attachments` from this fresh worktree. Classification: tooling/setup issue, not a product failure. Status: install the lockfile dependencies inside the isolated worktree and rerun IDTS-69; no package manifest or runtime behavior is changed by the correction.
+- 2026-07-30 IDTS-114 Smart Assign timeout local correction: a 24-second per-feature structured deadline now aborts slow Qwen work before the AppRouter boundary and does not spend OpenAI fallback after the deadline. Fast HTTP 5xx can still use one fallback inside the remaining shared budget. Smart Assign provider input is limited to ten candidates with compact workload fields. Classification: product/integration defect fixed locally. Verification: IDTS-114 `58/58`, IDTS-69 `9/9`, all requested AI regressions, CAP compile, secret/process gates, AI DevKit `5/5` and `git diff --check` PASS. Selective SAP BTP service deployment and PM browser retest remain pending; no workflow mutation or schema/API change was introduced.
+- 2026-07-30 IDTS-114 Smart Assign post-hotfix SAP BTP verification: the PM value help on `BUG-0020` returned Developer suggestions without AppRouter HTTP 504. A sanitized HANA readback recorded `ASSIGNMENT_EXPLANATION`, `operationStatus=SUCCESS`, `modelAlias=alibaba/qwen3.7-flash`, and `latencyMs=23256`, below the 24-second feature deadline. No Assign action was submitted. Classification: product/integration defect resolved for PM retest; Tester/Developer role evidence remains deferred.
+- 2026-07-30 IDTS-114 HANA readback command issue: the first read-only CF task lost nested `node -e` quoting and failed before querying; a later filter also used `ASSIGNMENT` instead of the stored feature code `ASSIGNMENT_EXPLANATION`. Classification: tooling/query issue, not product failure. Status: corrected with a base64-encoded temporary script and the exact feature code; no credential or raw AI payload was printed.
+- 2026-07-30 IDTS-114/115 responsive-polish findings: red tests reproduced fixed-width horizontal overflow, dense Handoff timeline rows, and custom-field labels that remained visible because visibility existed only inside the fragments while Fiori Elements rendered labels from `manifest.json`. Classification: product UX defects. Status: fixed locally by vertical candidate layout, Classification auto-pop-in, disabled horizontal dialog scrolling, localized timeline metadata, and whole-field manifest visibility. Focused static suites pass; full UI5/regression gates and BTP browser verification remain pending.
+- 2026-07-30 IDTS-114 responsive-polish Git verification command issue: the first combined command used Bash-style `&&`, which Windows PowerShell in this environment rejected during parsing before any Git command ran. Classification: tooling issue, not a product or repository failure. Status: corrected by running the verification commands independently with PowerShell-compatible invocations; no source or Git state was changed by the failed command.
+- 2026-07-30 IDTS-114 responsive-polish UI5 lint baseline: targeted UI5 MCP lint reports that the application manifest still uses a pre-V2 manifest version and recommends a full Manifest V2 migration. Classification: repository technical debt, not introduced by this task; the edited manifest remains schema-valid with zero validation errors and the UI5 production build passes. Status: open for a separate application-wide migration; do not mix a broad manifest-version conversion into this focused AI visibility/readability fix.
+- 2026-07-30 IDTS-114 Similar Bugs retry-state review finding: the first responsive retry implementation did not clear a previously loaded suggestion/candidate before starting the next request. If a retry then failed, stale review actions could remain available against old data. Classification: product UI/state defect found before PR. Status: fixed by clearing candidate, selection, suggestion and review state before every load attempt; the new assertion failed before the fix and IDTS-74 now passes `188/188`.
+- 2026-07-30 IDTS-114 independent Terra High review findings: Classification Retry could preserve an accepted stale suggestion and Apply state; Classification combined `autoPopinMode` with manual `minScreenWidth`/`demandPopin` values that UI5 documents as overwritten; Similar Bugs offered Retry for non-retryable authorization/context failures. Classification: product UI/state and error-UX defects found before PR. Status: fixed by clearing Classification rows/review/apply state before every load, letting column importance exclusively drive auto-pop-in, and limiting Similar Bugs Retry to network/408/429/5xx. Red assertions failed before the correction; IDTS-74 now passes `205/205` and IDTS-75 passes `113/113`. UI5 API reference confirmed the auto-pop-in behavior.
+- 2026-07-30 IDTS-114 staged evidence formatting issue: `git diff --cached --check` found three trailing-space line breaks in the new local verification Markdown. Classification: documentation formatting issue. Status: fixed immediately by removing the trailing spaces and rerunning the staged diff gate; no runtime or evidence content changed.
+- 2026-07-30 IDTS-114/115 post-deploy browser findings: the New Bug
+  Object Page hides both AI buttons but still renders the Fiori
+  Elements-generated labels `Similar bugs` and `Classification suggestions`;
+  Handoff comment/event rows can expose ISO timestamps when a stored row has a
+  bullet or number before `[timestamp]`. Classification: product UX defects.
+  Root causes: fragment visibility does not own the generated form label, and
+  the timeline parser accepted only a timestamp at character zero. Status:
+  focused fixes and regression checks are in progress on
+  `fix/idts-114-115-btp-browser-findings-donhv`; no workflow, OData, provider,
+  database or authorization behavior is being changed.
+- 2026-07-30 IDTS-114/115 isolated-worktree dependency baseline: `npm ci`
+  installed 1,519 lockfile packages and reported the existing 24 dependency
+  findings (1 low, 9 moderate, 13 high, 1 critical). Classification:
+  dependency/security debt, not introduced by this focused UI fix. Status: no
+  automatic upgrade or `npm audit fix --force` is mixed into this PR; keep for
+  separate dependency review.
+- 2026-07-30 IDTS-114 targeted ESLint formatting finding: the first local
+  ESLint run found 439 `linebreak-style` errors because Windows patching left
+  `HandoffSummaryReview.js` with CRLF while the UI workspace requires LF.
+  Classification: repository-formatting/tooling issue. Status: fixed by
+  normalizing only this edited file with the configured ESLint fixer. The
+  targeted rerun exits `0`; only the pre-existing `max-params` warning remains,
+  and the semantic diff stays limited to the timestamp parser/formatter.
+- 2026-07-30 PR #231 QA-depth declaration finding: the first CI run stopped at
+  PR-body validation because the Ownership Knowledge Gate section summarized
+  DonHV's existing PASS but omitted the parser's exact twelve field labels.
+  Classification: process issue; no code/build gate ran and no product defect
+  was introduced. The second synchronize run captured the same old PR-body
+  snapshot because its push event occurred before `gh pr edit` completed.
+  Status: fixed by copying the complete existing DonHV PASS declaration and
+  evidence paths into the current PR body, then triggering a fresh synchronize
+  event after that edit; the new run must pass normally before merge, with no
+  admin bypass.
+
+- 2026-07-30 IDTS-114/115 final SAP BTP runtime rollout: the application
+  content and service runtime from merged SHA
+  `5476479312986412739fbff3cfa6da29acc7905d` deployed successfully. The runtime
+  MTA operation was `43705495-8be6-11f1-bda2-eeee0a8ff2ce`; service and
+  AppRouter are started 1/1, health is HTTP 200, and the filtered recent runtime
+  log scan found no unhandled/fatal entry. Classification: release verification.
+  Important scope note: selecting the runtime did not select the HDI deployer,
+  broad `cds deploy`, deletion or schema/data migration, but the MTA controller
+  did process the declared authentication, destination and job-scheduler
+  resources and refresh their runtime bindings. Status: deployment PASS; browser
+  AI acceptance and Tester/Developer role evidence remain open. Evidence:
+  `docs/pm/evidence/idts-114/rate-limit-request-bounding/btp-runtime-rollout-20260730.md`.
+- 2026-07-30 IDTS-114 browser-control verification limitation: connected Chrome
+  loaded the PM List Report successfully without changing the user-owned New Bug
+  draft. Grid-cell interaction did not navigate to an Object Page, and a
+  separate direct read-only OData navigation was blocked by the browser client
+  with `ERR_BLOCKED_BY_CLIENT`. Classification: browser tooling limitation, not
+  a product failure. Status: agent tabs released; request explicit approval
+  before a controlled AI call because it creates provider/audit activity.
+- 2026-07-30 local verification command issue: a PowerShell excerpt command used
+  `$f:$start` without delimiting the variable name, so PowerShell rejected it
+  before reading any file. Classification: tooling issue. Status: corrected to
+  `${f}:$start`; no source, deployment or data changed.
+- 2026-07-30 PR #232 QA-depth declaration finding: the first body used bullets
+  and near-equivalent labels (`Inactive questions`, `Debug`) in the Ownership
+  Knowledge Gate block. The repository parser requires its exact twelve
+  unbulleted field names, including `Inactive-day questions`,
+  `Additional-flow questions`, and `Debug exercise`. Classification: process
+  issue, not an evidence or product failure. Status: corrected to the existing
+  DonHV 90% PASS declaration and a documentation-only follow-up push will
+  trigger the fresh normal gate; no Knowledge Gate is repeated or bypassed.
+- 2026-07-30 PR #232 QA-depth evidence-format finding: the corrected Evidence
+  line still wrapped each repository path in Markdown backticks. The gate's
+  strict path check expects whitespace or start-of-line immediately before
+  `docs/`, so the paths were valid but not machine-recognized. Classification:
+  process/parser-format issue. Status: removed only the backticks from the
+  twelve-field declaration, retained the same evidence locations, and pushed a
+  documentation-only synchronize event; no product or evidence content changed.
+
+- 2026-07-30 IDTS-114 BTP AI configuration binding: browser Classification now
+  avoids a generic load dialog but returned deterministic fallback because the
+  deployed runtime recorded AI disabled with the mock provider. Presence-only
+  BTP inspection found no AI enablement/model settings or dedicated AI key
+  binding after the latest MTA rollout. Classification: deployment configuration
+  defect, not a Qwen quality result. Status: a minimal durable configuration
+  binding is implemented locally; no provider call, workflow mutation, database
+  migration or secret read was performed.
+- The MTA now supplies non-secret model/settings and binds a separate
+  user-provided service named `idts-sap01-ai-gateway`. `srv/ai/config.js` reads
+  that exact VCAP binding only; it does not inspect the retained S3/Brevo
+  binding. An empty BTP service was created and requires DonHV to add the
+  private key directly before deployment. Evidence:
+  `docs/pm/evidence/idts-114/btp-ai-config-binding/local-verification-20260730.md`.
+- Verification: IDTS-64 provider regression `38/38`, IDTS-114 adapter
+  regression `58/58`, CAP compile, UI5 production build, secret scan, agent
+  rules, QA-depth self-test, AI DevKit and `git diff --check` PASS. The isolated
+  worktree `npm ci` reported the existing 24 dependency findings; no dependency
+  update is mixed into this change.
+- Tooling issues recorded and corrected: the fresh worktree initially lacked
+  dependencies; a source search included a non-existent top-level `test` path;
+  one skill lookup used an obsolete local path; and a local post-merge `git`
+  checkout warning was caused by the root worktree already owning `dev`.
+  Classification: tooling/process issues, not product defects. No source,
+  credential, or runtime data was changed by the failed commands.
+- MTA packaging limitation: two local `mbt build -p cf` attempts exceeded the
+  command timeout without producing a package result. Classification: build
+  tooling/environment investigation, not a failed application check. YAML
+  parsing, CAP compile and UI build pass independently. The attempt generated
+  temporary local build files; automated removal was blocked by this session's
+  destructive-file-operation policy, so they remain untracked and will not be
+  committed. Status: diagnose/rebuild before BTP rollout; do not claim package
+  verification PASS yet.
+
+- 2026-07-30 IDTS-114 AI result-grounding remediation: browser evidence showed
+  that Smart Assign and several Classification rows were presenting deterministic
+  fallback text as if it were an AI result. Root cause: provider-output mapping
+  depended on UUID/display labels rather than stable short references; Handoff
+  also did not visibly distinguish its generated overview from the trusted
+  comments/history read from storage. Classification: product UX/grounding
+  defect. Status: the focused fix uses short references and explicit source
+  labels; no workflow, HANA schema, provider key, or deployment has changed yet.
+- 2026-07-30 focused local test setup: the fresh worktree intentionally has no
+  `node_modules`, so IDTS-67/69 could not resolve `@sap/cds` on their first
+  red-test run. Classification: tooling/environment issue, not a product test
+  failure. Status: rerun will use the existing root dependency runtime via
+  a local junction to the existing root dependency runtime; no package
+  installation or lockfile change is required.
+- 2026-07-30 verification follow-up: focused AI suites passed after the local
+  dependency junction was used (`IDTS-69 12/12`, `IDTS-67 33/33`, `IDTS-68
+  45/45`, `IDTS-115 UI checks 241`). Two generic validation commands exposed
+  baseline tooling defects: `cds compile srv --to edmx` is ambiguous because
+  the project has both `AuthService` and `BugService`; the required explicit
+  `-s all` variant will be used. The UI5 build cannot resolve the task declared
+  by the existing `app/bug-management-ui/ui5.yaml`, `ui5-task-zipper`, because
+  it is absent from the root dependency runtime. Classification: tooling/configuration
+  issue, not a product regression. Status: UI5 MCP lint passed for all changed
+  controllers; do not add or change dependencies in this urgent product patch.
+- 2026-07-30 PR gate observation: PR #234 `qa-depth-gate` failed after the
+  local verification passed. Classification: process/CI gate investigation,
+  not yet a product defect. Status: merge and BTP deployment are paused while
+  the exact GitHub Action log is inspected; no bypass will be used.
+- 2026-07-30 PR gate resolution: the GitHub log showed only missing structured
+  `Ownership Knowledge Gate` fields in the PR body. The code and evidence did
+  not fail. The PR body now records the existing DonHV 90% PASS evidence
+  (`docs/learning/progress/donhv.md` and IDTS-90 evidence); local
+  `check-pr-depth --stdin` PASS. Fresh remote gate is pending. Classification:
+  process issue fixed; no product/runtime change.
+- 2026-07-30 merge tooling observation: PR #234 is `CLEAN` with
+  `qa-depth-gate` PASS, but `gh pr merge` attempted a local checkout of `dev`
+  and failed because the root worktree already owns that branch. Classification:
+  local GitHub CLI/worktree tooling issue, not a PR or product failure. Status:
+  use GitHub's pull-request merge API for the same normal merge semantics; no
+  protection bypass or force operation is permitted.
+- 2026-07-30 BTP build observation: after PR #234 merged normally, a clean
+  `mbt build -p cf` ran the UI build successfully (including
+  `ui5-task-zipper`) but did not finish MTA cleanup/packaging before the
+  10-minute execution timeout. Classification: build tooling/environment
+  blocker, not a UI/product failure. Status: no incomplete MTAR will be
+  deployed; inspect for a completed archive or rebuild with a bounded recovery
+  path before any selective Cloud Foundry deployment.
+- 2026-07-30 IDTS-114 result-grounding rollout: PR #234 merged at
+  `c39468b636f695031ab7f4130b71112962408873`; archive integrity was verified
+  (`idts-sap01_1.0.0.mtar`, SHA-256 `8574EFDFCC3349F608538FA1536F20DEDD7892E65FF547210482A340F8A42690`). Selective MTA operation
+  `38f256db-8c0f-11f1-82db-eeee0a91e4f4` deployed only `idts-sap01-srv` and
+  `idts-sap01-app-content`; the HDI database deployer was not selected and no
+  broad `cds deploy`, schema migration, or data change was run. Verification:
+  service and AppRouter started 1/1; `/health` HTTP 200; anonymous protected
+  OData HTTP 401. Browser visual verification after a hard refresh remains
+  pending in the user-owned session. Classification: deployment PASS, browser
+  acceptance pending; no claim of provider-live acceptance is made.
+
+- 2026-07-30 IDTS-114 structured-model configuration drift: Vercel Gateway
+  showed new production calls still using `alibaba/qwen3.7-flash` after the
+  team had evaluated Z.AI. Classification: deployment/configuration issue.
+  Root cause: Cloud Foundry revision 5 temporarily used
+  `zai/glm-4.7-flash`, but subsequent deployments reapplied the Qwen value
+  still declared in `mta.yaml`. Status: live `idts-sap01-srv` was corrected to
+  Z.AI and restarted successfully at 1/1; the source MTA default is corrected
+  in the dedicated IDTS-114 branch. Qwen embedding remains intentional for
+  Similar Bugs. No secret, HANA data/schema or API contract changed.
+# 2026-07-30 - Z.AI structured output contract remediation
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product defect | Live Z.AI calls for Classification and Smart Assign were audited as `SUCCESS`, but the UI still showed rules-based rows. Handoff Summary displayed AI content. | The shared Vercel adapter requested only a generic JSON object. Z.AI returned parseable JSON, but Classification could not map exact catalog references and Smart Assign could not map backend-issued candidate references. | Fixed locally with feature-specific JSON Schema using short catalog references (`SM1`, `AC1`, etc.) and candidate references (`C1`, `C2`, etc.). Backend remains responsible for mapping to real IDs and validating business data. | Focused/integrated local suites PASS. Deploy service only after merge, then verify fresh BTP feature calls before closing the visual defect. |
+| Tooling issue | The first focused test run in the fresh worktree failed with `Cannot find module '@sap/cds'`. | The isolated worktree did not have `node_modules` installed. | Fixed by running `npm ci`; no product behavior or configuration was changed. | Focused rerun PASS: provider 59/59, Classification 36/36 and Smart Assign 13/13. |
+| Security/dependency finding | `npm ci` completed but npm audit reported 24 findings in the existing dependency graph: 1 low, 9 moderate, 13 high and 1 critical. | These findings come from the locked baseline dependency tree; this fix adds no dependency and does not alter `package-lock.json`. | Open baseline debt; not auto-fixed because `npm audit fix --force` could introduce unrelated breaking changes. | `npm run qa:secret-scan` PASS. Handle dependency upgrades in a separate reviewed work item. |
+
+# 2026-07-30 - Handoff Summary synthesis remediation
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product/UX defect | Handoff Summary was accurate but read like a raw Bug/comment/history dump; the useful next action appeared after long evidence lists. | The backend only accepted provider `summary`; comment summary and workflow guidance were always deterministic raw extracts, and the UI ordered raw evidence before next action. | Fixed locally by separating advisory synthesis from verified source comments, adding grounded comment insights, and moving next action before raw evidence. | IDTS-68 47/47, IDTS-76 132/132, IDTS-114 provider 59/59, CAP compile and UI5 build PASS. BTP browser acceptance remains required after merge/deploy. |
+| Tooling issue | First focused test in the fresh worktree failed with `Cannot find module '@sap/cds'`. | Fresh worktree had no installed dependencies. | Fixed with `npm ci`; no product file was changed by the install. | Focused and regression tests subsequently PASS. |
+| Tooling issue | App-level `npm run lint` and root `ui5 lint` commands are unavailable in the current package scripts/UI5 CLI. | The app declares no `lint` script and the installed UI5 CLI does not expose a `lint` subcommand; `@ui5/linter` is not installed. | Recorded as baseline tooling limitation; no dependency was added during the urgent patch. | Static UI suite 132/132 and UI5 production build PASS. Add a supported lint tool only in a separate reviewed tooling task. |
+| Process issue | PR #239 QA Depth Gate initially reported all Knowledge Gate fields missing. | The first PR-body update passed multiline text through a PowerShell array, collapsing required Markdown sections into one line. | Fixed by sending a complete multiline body through `gh pr edit --body-file -`; local PR-depth validation PASS. | Push this status correction to trigger a fresh remote gate against the corrected PR body; no bypass. |
+| Security/dependency finding | `npm ci` reported 24 locked dependency findings (1 low, 9 moderate, 13 high, 1 critical). | Existing baseline dependency graph; this patch adds no package. | Open baseline debt; no unsafe force-upgrade during urgent review preparation. | Secret scan PASS; track dependency remediation separately. |

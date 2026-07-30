@@ -1,5 +1,33 @@
 # `srv/ai/provider.js`
 
+## Structured schema safety boundary (2026-07-30)
+
+`sanitizeStructuredRequest()` carries an optional feature JSON Schema through the safe provider wrapper. `sanitizeJsonSchema()` clones it and rejects non-object or oversized contracts. Schemas describe output shape only; they must not contain Bug text, user data, credentials or private endpoints.
+
+Tiếng Việt: provider wrapper cho phép schema của từng tính năng đi qua, nhưng clone và giới hạn kích thước trước khi gọi adapter. Schema chỉ mô tả cấu trúc output, không chứa dữ liệu nghiệp vụ.
+
+## 2026-07-30 bounded batch and safe rate-limit status
+
+### English
+
+`SafeAiProvider.embeddingBatch()` applies the same redaction and result envelope
+as other AI operations. It keeps at most eleven texts and at most 2,000
+characters per text. `AI_RATE_LIMITED` is returned with business-safe wording;
+feature code receives no HTTP status, endpoint, key, prompt, or raw body.
+When a legacy delegate has no batch method, the wrapper returns
+`AI_EMBEDDING_BATCH_UNSUPPORTED` so Similar Bugs can preserve its bounded scalar
+compatibility path instead of losing embeddings with a generic error.
+
+### Tiếng Việt
+
+`SafeAiProvider.embeddingBatch()` dùng cùng cơ chế redact và result envelope như
+các thao tác AI khác. Nó chỉ giữ tối đa mười một text và tối đa 2.000 ký tự cho
+mỗi text. `AI_RATE_LIMITED` được trả bằng wording an toàn cho nghiệp vụ; feature
+không nhận HTTP status, endpoint, key, prompt hoặc raw body.
+Nếu delegate cũ chưa có batch method, wrapper trả
+`AI_EMBEDDING_BATCH_UNSUPPORTED` để Similar Bugs giữ đường scalar tương thích đã
+giới hạn thay vì mất embedding vì một lỗi chung.
+
 ## IDTS-97 operational emission
 
 Every normalized provider result is passed to `emitAiOperationalMetric()`. The emitted record is allowlisted and contains feature, operation, provider/model alias, status/outcome, and latency only. A logger/sink failure is swallowed, so telemetry cannot change the AI fallback result or normal Bug workflow.
@@ -82,6 +110,29 @@ The delegates are the deterministic mock provider and the optional real OpenAI p
 - `docs/ba/discovery/idts-63-ai-assistance-guardrails.md`: defines fallback and no-autonomy rules.
 - Future `db/schema.cds` changes in `IDTS-65`: should store only safe normalized result data returned by this wrapper.
 
+## IDTS-114 Vercel delegate and fallback (2026-07-29)
+
+The factory now selects `VercelGatewayProvider` only when the normalized provider is `vercel` and its private configuration is ready. The business feature still receives exactly the same `SafeAiProvider` envelope: `{ ok, status, data/error, providerAlias, modelAlias, fallbackUsed }`. No feature handler gets a raw HTTP response or a gateway credential.
+
+`operationTimeoutMs()` intentionally gives a Vercel call roughly two single-attempt windows only when fallback is enabled: one primary attempt and at most one fallback attempt. This is a bound retry policy, not an unbounded retry loop. `normalizeDelegateResult()` preserves the actual model selected by the Vercel adapter for safe audit/metrics; for example, an accepted Qwen primary is recorded as Qwen, while a retryable outage followed by the configured OpenAI fallback is recorded as the fallback model with `fallbackUsed: true`.
+
+Breakpoint order for a live issue: `SafeAiProvider.#run()` -> `createDelegate()` -> `VercelGatewayProvider.#withFallback()` -> `#request()`. Observe operation, safe model ID, status, and `fallbackUsed`; never inspect headers because they contain the private bearer key. A provider error remains a safe result and does not alter a Bug, assignee, lifecycle status, or review decision.
+
+For Vercel failures, `SafeAiProvider.#run()` may log three additional bounded
+fields supplied by the adapter: `gatewayReason`, an allowlisted
+`providerErrorCode`, and `retryAfterSeconds`. They distinguish temporary rate
+limits, exhausted budget, response-format incompatibility and generic HTTP
+errors without exposing the provider message, request body, prompt, endpoint
+or credential. The public feature/UI result remains the same sanitized
+`AI_PROVIDER_ERROR` envelope.
+
+Vietnamese: Với lỗi Vercel, `SafeAiProvider.#run()` chỉ có thể log thêm ba
+trường đã giới hạn: `gatewayReason`, `providerErrorCode` thuộc allowlist và
+`retryAfterSeconds`. Các trường này giúp phân biệt rate limit tạm thời, hết
+budget, lỗi tương thích response format và HTTP error chung. Chúng không chứa
+provider message, request body, prompt, endpoint hoặc credential; UI vẫn chỉ
+nhận envelope `AI_PROVIDER_ERROR` đã sanitize.
+
 ### Safe editing checklist
 
 - Do not throw provider failures into business workflow unless the caller explicitly opts into failure.
@@ -152,3 +203,15 @@ Trong IDTS-64, delegate duy nhất là mock provider. Provider thật phải đ�
 - Giữ error summary đã sanitize.
 - Không thêm provider thật nếu chưa có private config, test và security review.
 - Không persist raw prompt hoặc raw provider response ở đây.
+
+## Per-feature structured deadline
+
+`SafeAiProvider.structured()` accepts an internal `deadlineMs` supplied by trusted feature code. The value is bounded by the configured provider timeout, copied only to the provider adapter, and never placed in the model input. The outer safety timer allows a small cleanup margin so the adapter can abort its HTTP request and return the normalized `AI_TIMEOUT` envelope first.
+
+For Smart Assign this prevents SAP BTP AppRouter from returning HTTP 504 while a slow provider call is still running. The feature receives a safe failure envelope and builds deterministic candidate explanations; it still does not assign a developer.
+
+### Giải thích tiếng Việt
+
+`SafeAiProvider.structured()` nhận `deadlineMs` nội bộ từ code tính năng đáng tin cậy. Giá trị này bị giới hạn bởi timeout cấu hình, chỉ chuyển tới provider adapter và không nằm trong dữ liệu gửi cho model. Timer bên ngoài chừa một khoảng nhỏ để adapter hủy HTTP request rồi trả envelope `AI_TIMEOUT` an toàn.
+
+Với Smart Assign, cơ chế này giúp backend trả explanation deterministic trước khi AppRouter cắt request thành HTTP 504. Nó không tự chọn hoặc tự assign Developer.

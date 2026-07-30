@@ -15,7 +15,8 @@ const { resolveRequestUser } = require('../bug-service/helpers')
 const { buildAssignableDeveloperRows } = require('../bug-service/read-models')
 
 const DEFAULT_LIMIT = 10
-const MAX_LIMIT = 20
+const MAX_LIMIT = 10
+const SMART_ASSIGNMENT_PROVIDER_DEADLINE_MS = 24_000
 
 async function explainSmartAssignment (req, entities, dependencies = {}) {
   // OData action entry point: resolve Bug/candidate context, gọi provider nếu bật, dựng explanation grounded,
@@ -28,19 +29,26 @@ async function explainSmartAssignment (req, entities, dependencies = {}) {
     return req.reject(400, 'Select an application component and defect category before requesting assignment explanations.')
   }
 
-  const candidates = await readCandidateContext(tx, entities, input)
+  const candidates = (await readCandidateContext(tx, entities, input)).map((candidate, index) => ({
+    ...candidate,
+    candidateRef: `C${index + 1}`
+  }))
   const providerResult = await provider.structured({
     featureType: FEATURE_TYPES.ASSIGNMENT_EXPLANATION,
     schemaName: 'IdtsSmartAssignmentExplanation',
+    schema: buildAssignmentOutputSchema(candidates),
     correlationId: req.id,
     instruction: [
       'Explain why each existing IDTS developer candidate may fit the bug assignment.',
       'Use only the supplied candidate and bug facts.',
       'Do not choose the assignee automatically.',
       'Do not invent skills, availability, workload, or personal information.',
-      'Return one short business-facing explanation per candidate.'
+      'Return one short business-facing explanation per candidate.',
+      'For every candidate, return the exact supplied candidateRef. Never return a UUID, developer name, or a candidate that was not supplied.'
     ].join(' '),
-    input: buildProviderInput(input, candidates)
+    input: buildProviderInput(input, candidates),
+    // Trả deterministic explanation trước ngưỡng AppRouter thay vì để request bị cắt ở khoảng 30 giây.
+    deadlineMs: SMART_ASSIGNMENT_PROVIDER_DEADLINE_MS
   })
 
   const result = buildAssignmentExplanations({ input, candidates, providerResult })
@@ -159,12 +167,12 @@ function buildAssignmentExplanations ({ input, candidates, providerResult }) {
   const providerStatus = providerResult?.status || 'AI_PROVIDER_ERROR'
   const payload = providerPayload(providerResult)
   const unsafeProviderOutput = containsUnsafeDiagnosticText(payload)
-  const providerRows = unsafeProviderOutput ? new Map() : providerRowsByCandidateID(payload)
+  const providerRows = unsafeProviderOutput ? new Map() : providerRowsByCandidateRef(payload)
   const effectiveProviderStatus = unsafeProviderOutput ? 'AI_OUTPUT_UNSAFE' : providerStatus
 
   return candidates.map(candidate => {
     const providerRow = providerResult?.ok && !unsafeProviderOutput
-      ? providerRows.get(candidate.developerProfileID)
+      ? providerRows.get(candidate.candidateRef)
       : null
     const fallback = fallbackExplanation(input, candidate)
 
@@ -176,6 +184,7 @@ function buildAssignmentExplanations ({ input, candidates, providerResult }) {
         confidence: confidenceFor(providerRow.confidence, fallback.confidence),
         providerStatus: effectiveProviderStatus,
         status: providerRow.status || fallback.status,
+        explanationSource: 'AI',
         groundingStatus: fallback.groundingStatus,
         requiresReview: true
       })
@@ -188,6 +197,7 @@ function buildAssignmentExplanations ({ input, candidates, providerResult }) {
       confidence: fallback.confidence,
       providerStatus: effectiveProviderStatus,
       status: fallback.status,
+      explanationSource: 'RULES',
       groundingStatus: fallback.groundingStatus,
       requiresReview: true
     })
@@ -278,6 +288,7 @@ async function recordAssignmentAudit ({ tx, req, entities, input, provider, prov
         developerName: row.developerName,
         confidence: row.confidence,
         status: row.status,
+        explanationSource: row.explanationSource,
         groundingStatus: row.groundingStatus,
         explanation: row.explanation,
         warnings: row.warnings
@@ -298,7 +309,7 @@ function buildProviderInput (input, candidates) {
       sapModuleName: input.sapModuleName
     },
     candidates: candidates.map(candidate => ({
-      developerProfileID: candidate.developerProfileID,
+      candidateRef: candidate.candidateRef,
       developerName: candidate.developerName,
       availabilityStatusName: candidate.availabilityStatusName,
       availabilityCriticality: candidate.availabilityCriticality,
@@ -306,7 +317,12 @@ function buildProviderInput (input, candidates) {
       defectCategoryName: candidate.defectCategoryName,
       sapModuleName: candidate.sapModuleName,
       responsibilityLevelName: candidate.responsibilityLevelName,
-      workload: candidate.workload
+      workload: {
+        openOwnedBugCount: candidate.workload?.openOwnedBugCount || 0,
+        workloadLimit: candidate.workload?.workloadLimit ?? null,
+        overdueOwnedBugCount: candidate.workload?.overdueOwnedBugCount || 0,
+        isOverloaded: Boolean(candidate.workload?.isOverloaded)
+      }
     }))
   }
 }
@@ -318,8 +334,8 @@ function providerPayload (providerResult) {
   return data && typeof data === 'object' ? data : {}
 }
 
-function providerRowsByCandidateID (payload) {
-  // Index output theo candidate ID và bỏ row không khớp candidate thật để chống hallucination ID.
+function providerRowsByCandidateRef (payload) {
+  // Index output theo ref ngắn do backend cấp; provider không cần và không được thấy UUID profile.
   const rows = Array.isArray(payload?.candidates)
     ? payload.candidates
     : Array.isArray(payload?.explanations)
@@ -330,9 +346,9 @@ function providerRowsByCandidateID (payload) {
 
   const mapped = new Map()
   for (const row of rows) {
-    const id = cleanID(row?.developerProfileID || row?.candidateID || row?.ID)
-    if (!id) continue
-    mapped.set(id, {
+    const candidateRef = cleanCandidateRef(row?.candidateRef)
+    if (!candidateRef) continue
+    mapped.set(candidateRef, {
       explanation: safeText(row.explanation || row.reason || row.summary, 700),
       warnings: safeText(row.warnings || row.warning, 500),
       confidence: row.confidence ?? row.score,
@@ -342,7 +358,7 @@ function providerRowsByCandidateID (payload) {
   return mapped
 }
 
-function explanationRow ({ candidate, explanation, warnings, confidence, providerStatus, status, groundingStatus, requiresReview }) {
+function explanationRow ({ candidate, explanation, warnings, confidence, providerStatus, status, explanationSource, groundingStatus, requiresReview }) {
   // Dựng row public thống nhất cho UI, luôn đánh dấu review khi suggestion không phải quyết định tự động.
   return {
     developerProfileID: candidate.developerProfileID,
@@ -351,12 +367,44 @@ function explanationRow ({ candidate, explanation, warnings, confidence, provide
     warnings: safeText(warnings, 500),
     confidence: roundConfidence(confidence),
     status: cleanCode(status) || 'REVIEW_RECOMMENDED',
+    explanationSource: explanationSource === 'AI' ? 'AI' : 'RULES',
     providerStatus,
     groundingStatus,
     workloadOpenCount: Number(candidate.workload?.openOwnedBugCount || 0),
     workloadLimit: candidate.workload?.workloadLimit ?? null,
     isOverloaded: Boolean(candidate.workload?.isOverloaded),
     requiresReview: Boolean(requiresReview)
+  }
+}
+
+function cleanCandidateRef (value) {
+  const ref = String(value || '').trim().toUpperCase()
+  return /^C[1-9]\d*$/.test(ref) ? ref : null
+}
+
+function buildAssignmentOutputSchema (candidates) {
+  const refs = (candidates || []).map(candidate => candidate.candidateRef).filter(Boolean)
+  return {
+    type: 'object',
+    additionalProperties: false,
+    properties: {
+      candidates: {
+        type: 'array',
+        minItems: refs.length ? 1 : 0,
+        maxItems: refs.length,
+        items: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            candidateRef: refs.length ? { type: 'string', enum: refs } : { type: 'string' },
+            explanation: { type: 'string', maxLength: 500 },
+            confidence: { type: 'number', minimum: 0, maximum: 1 }
+          },
+          required: ['candidateRef', 'explanation', 'confidence']
+        }
+      }
+    },
+    required: ['candidates']
   }
 }
 
@@ -432,6 +480,9 @@ function safeText (value, maxLength) {
 }
 
 module.exports = {
+  SMART_ASSIGNMENT_PROVIDER_DEADLINE_MS,
   explainSmartAssignment,
-  buildAssignmentExplanations
+  buildAssignmentExplanations,
+  buildProviderInput,
+  buildAssignmentOutputSchema
 }

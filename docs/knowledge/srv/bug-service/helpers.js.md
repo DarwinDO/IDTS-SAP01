@@ -103,3 +103,35 @@ Thay đổi logic resolve user ảnh hưởng toàn bộ permission và history.
 - Source type: `.js`
 - Documentation style: learning-oriented explanation
 - Last reviewed: 2026-06-22
+
+## IDTS-113 update - XSUAA role alignment
+
+### English
+
+`resolveRequestUser()` still maps the request identity to the canonical IDTS
+`Users` record. In an XSUAA production runtime it now performs one additional
+check after that mapping: the single effective XSUAA business role must equal
+the database `role_code`.
+
+The check belongs here because all BugService permissions and history actor
+resolution pass through this helper. It does not replace the existing business
+permission rules; it prevents an incorrectly assigned platform role from
+entering those rules as a trusted actor.
+
+Debug order: inspect the sanitized `req.user` claim names, the resolved
+database user ID, then the role-alignment result in
+`srv/auth/platform-role.js`. Never inspect or log the raw JWT.
+
+### Vietnamese
+
+`resolveRequestUser()` van anh xa danh tinh request vao dong `Users` chinh
+thuc cua IDTS. Khi chay production voi XSUAA, helper kiem tra them rang role
+nghiep vu XSUAA duy nhat phai trung voi `role_code` trong database.
+
+Kiem tra nay nam o day vi moi permission cua BugService va viec xac dinh actor
+ghi history deu di qua helper. No khong thay the business permission hien co;
+no chan mot platform role gan sai truoc khi actor duoc tin cay.
+
+Thu tu debug: xem ten claim da sanitize trong `req.user`, user ID resolve tu
+database, roi ket qua role alignment trong `srv/auth/platform-role.js`. Khong
+xem hoac log JWT tho.

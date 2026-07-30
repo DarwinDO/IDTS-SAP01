@@ -138,3 +138,19 @@ Cách này an toàn hơn vì:
 **English.** `Component.init()` calls `ProfileShell.init()` → it finds the stable HTML host and safe current user → `render()` places the button → `createProfileButton()` creates avatar/popover/sign-out → sign-out calls `window.idtsLogout()` from auth guard. `safeUserText`, `initialsFrom`, and `formatExpiry` only prepare display values. Watch `host`, safe `user`, and the rendered flag; backend authorization remains independent of this display.
 
 **Tiếng Việt.** `Component.init()` gọi `ProfileShell.init()` → tìm HTML host ổn định và current user an toàn → `render()` đặt button → `createProfileButton()` tạo avatar/popover/sign-out → sign-out gọi `window.idtsLogout()` từ auth guard. `safeUserText`, `initialsFrom`, `formatExpiry` chỉ chuẩn bị dữ liệu hiển thị. Quan sát `host`, safe `user` và cờ đã render; authorization backend hoàn toàn độc lập với phần hiển thị này.
+
+## IDTS-113 update - platform-managed session label
+
+### English
+
+When the current safe profile reports `authMode: "xsuaa"`, the popover shows
+`Session managed by SAP BTP` instead of a custom token expiry. Sign Out still
+calls `window.idtsLogout()`, but the guard routes it to AppRouter `/do/logout`.
+The shell never reads or displays a JWT.
+
+### Vietnamese
+
+Khi safe profile co `authMode: "xsuaa"`, popover hien `Session managed by SAP
+BTP` thay vi custom token expiry. Sign Out van goi `window.idtsLogout()`, nhung
+guard se chuyen den AppRouter `/do/logout`. Profile shell khong doc hay hien
+JWT.

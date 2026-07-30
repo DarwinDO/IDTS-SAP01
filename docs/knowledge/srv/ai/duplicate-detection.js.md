@@ -1,5 +1,33 @@
 # `srv/ai/duplicate-detection.js`
 
+## 2026-07-30 request-bounded Similar Bugs flow
+
+### English
+
+The database query remains capped at 50 Bugs, but only the best ten candidates
+reach embeddings. `prefilterCandidates()` scores 80% lexical title/description
+and 20% classification similarity, then uses `bugNumber` as a stable tie-break.
+The provider receives one source text plus at most ten candidate texts; each is
+limited to title, description, classification context, and 2,000 characters.
+
+`resolveBoundedEmbeddings()` prefers one batch. A proven unsupported array
+contract may use at most eleven scalar calls sequentially with concurrency one.
+A malformed batch never mixes vectors across Bugs and falls back directly to
+deterministic ranking. No path creates `DuplicateLinks`.
+
+### Tiếng Việt
+
+Query database vẫn giới hạn 50 Bug, nhưng chỉ mười candidate tốt nhất được gửi
+đi embedding. `prefilterCandidates()` chấm 80% theo title/description và 20%
+theo classification, sau đó dùng `bugNumber` để phá hòa ổn định. Provider chỉ
+nhận một source text và tối đa mười candidate text; mỗi text chỉ có title,
+description, classification context và tối đa 2.000 ký tự.
+
+`resolveBoundedEmbeddings()` ưu tiên một batch. Khi array contract đã được xác
+định là không hỗ trợ, đường tương thích chỉ gọi tối đa mười một request tuần tự,
+concurrency một. Batch sai không bao giờ ghép vector nhầm Bug mà chuyển thẳng
+sang deterministic ranking. Không đường nào tự tạo `DuplicateLinks`.
+
 ## IDTS-97 duration evidence
 
 Duplicate ranking measures total ranking duration for its persisted feature-level audit row and stores the final safe provider status. Individual embedding calls also emit provider-level operational logs. Neither path stores embedding vectors or input text in metrics.
@@ -47,9 +75,9 @@ If AI is disabled, times out, fails, or returns an invalid vector, the module fa
 ### Flow in IDTS
 
 1. An authenticated client calls `POST /odata/v4/bug/suggestSimilarBugs`.
-2. The request contains either a persisted `sourceBugID`, or draft-like title, description, status, and classification values before create.
+2. The request contains either a persisted `sourceBugID`, or draft-like title, description and classification values before create; workflow status is not sent to the embedding provider.
 3. The module reads up to 50 recently modified existing bugs and excludes the source bug itself. This is the bounded, database-portable MVP fallback while no vector index exists.
-4. Code-list IDs are resolved to readable status, module, component, and category context before embedding requests are built.
+4. Classification code-list IDs are resolved to readable module, component and category context before embedding requests are built; status may still be used in the returned candidate display but is outside the provider input allowlist.
 5. `srv/ai/provider.js` sanitizes and runs embedding calls with a maximum concurrency of four.
 6. This module calculates the hybrid score, removes low-confidence results, sorts candidates, and returns at most ten.
 7. If a persisted source bug exists, a safe `AiSuggestions` audit row is written. A pre-create search does not invent a fake bug link, so it does not write an audit row yet.
@@ -117,9 +145,9 @@ Nếu AI bị tắt, timeout, lỗi hoặc trả vector sai định dạng, modu
 ### Flow hoạt động trong IDTS
 
 1. Client đã đăng nhập gọi `POST /odata/v4/bug/suggestSimilarBugs`.
-2. Request gửi `sourceBugID` của bug đã lưu, hoặc gửi title, description, status và classification giống dữ liệu draft trước khi create.
+2. Request gửi `sourceBugID` của bug đã lưu, hoặc gửi title, description và classification giống dữ liệu draft trước khi create; workflow status không được gửi sang embedding provider.
 3. Module đọc tối đa 50 bug hiện có được sửa gần nhất và loại chính bug nguồn khỏi danh sách. Đây là fallback MVP có giới hạn, chạy được trên nhiều database khi chưa có vector index.
-4. ID code list được đổi thành context dễ đọc về status, module, component và category trước khi tạo embedding request.
+4. ID classification được đổi thành context dễ đọc về module, component và category trước khi tạo embedding request; status vẫn có thể dùng để hiển thị candidate trả về nhưng nằm ngoài allowlist gửi provider.
 5. `srv/ai/provider.js` sanitize và chạy embedding call với tối đa bốn call đồng thời.
 6. Module tính điểm hybrid, loại kết quả điểm thấp, sắp xếp ứng viên và trả tối đa mười kết quả.
 7. Nếu có bug nguồn đã lưu, hệ thống ghi một `AiSuggestions` audit row an toàn. Tìm kiếm trước khi create không tạo bug link giả nên chưa ghi audit row.

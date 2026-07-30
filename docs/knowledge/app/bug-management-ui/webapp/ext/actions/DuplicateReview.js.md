@@ -1,5 +1,19 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/actions/DuplicateReview.js`
 
+## IDTS-114 readability update
+
+Similar Bugs now uses a single-selection `sap.m.List`. Each item groups bug number/title, match status, relation type, current status, and an expandable reason without repeating generic guidance. Selection and Confirm Duplicate rules are unchanged: Accept plus one selected candidate is still required, and CAP remains authoritative.
+
+The responsive follow-up removes the fixed dialog width and disables horizontal scrolling. Candidate content is stacked vertically so a long title or reason wraps inside the available width. A transport failure is shown in a safe in-dialog `MessageStrip` with Retry; an HTTP 200 no-result or deterministic fallback remains ordinary review content rather than an error popup.
+
+Vietnamese: Similar Bugs hiện dùng `sap.m.List` chọn một item. Mỗi item nhóm bug number/title, match, relation type, current status và reason có thể mở rộng mà không lặp hướng dẫn chung. Quy tắc chọn và Confirm Duplicate không đổi: vẫn cần Accept và chọn đúng một candidate, còn CAP là lớp quyết định cuối.
+
+## IDTS-115 persisted-source boundary
+
+`hasPersistedBugSource()` permits `sourceBugID` only for an active Bug or an edit draft with `HasActiveEntity=true`. A root create draft stops before the dialog/backend call and shows a save-first message. This prevents a transient draft UUID from being looked up in active `Bugs`.
+
+Vietnamese: `hasPersistedBugSource()` chỉ cho gửi `sourceBugID` khi Bug active hoặc edit draft có active source. Root create draft dừng trước backend để tránh tìm transient draft UUID trong bảng Bug active.
+
 > **Ownership / debug anchor:** DatDT owns similar-bug presentation (backup: DonHV). A no-result or unavailable response is safe and must not mutate bug workflow.
 > **Ownership / điểm debug:** DatDT sở hữu phần hiển thị bug tương tự (backup: DonHV). No-result hoặc unavailable là an toàn và không được làm đổi workflow bug.
 
@@ -17,7 +31,7 @@ This is the IDTS-74 UI layer for the backend capability delivered in IDTS-66.
 
 The backend already knows how to compare the current bug with other bugs and return possible matches. Before IDTS-74, that capability was only visible through API/programmatic evidence. A tester or PM could not open the normal Fiori app and see the result directly.
 
-This file bridges that gap. When the user presses `Find Similar Bugs`, the UI reads the current Bug binding context, calls `/suggestSimilarBugs(...)`, and displays a small table with the candidate bug number, title, status, match score, relation type, and reason.
+This file bridges that gap. When the user presses `Find Similar Bugs`, the UI reads the current Bug binding context, calls `/suggestSimilarBugs(...)`, and displays a compact list with the candidate bug number, title, status, match score, relation type, and reason.
 
 The important rule is that this is a review surface, not an automation surface. The user still decides what to do next.
 
@@ -29,7 +43,7 @@ The important rule is that this is a review surface, not an automation surface. 
 4. It requests missing Bug properties that Fiori may not have loaded yet.
 5. It invokes the existing OData V4 action `/suggestSimilarBugs(...)` as a direct user-triggered request.
 6. It maps each returned row through `AiReviewUi.decorateResult` so confidence/status wording stays consistent with other AI suggestion UI.
-7. It shows candidates in a `sap.m.Dialog` with a responsive `sap.m.Table`.
+7. It shows candidates in a `sap.m.Dialog` with a single-selection `sap.m.List`.
 8. Accept/Reject/Ignore updates only the persisted suggestion review state; closing changes nothing else.
 
 ### Important source anchors
@@ -52,7 +66,7 @@ The important rule is that this is a review surface, not an automation surface. 
 - **Location**: `buildDialog(...)`
   **IDTS concept**: Shows suggestions as a temporary review dialog, not a new workflow page.
   **Impact if broken**: The UI can become too heavy, look inconsistent with Fiori, or imply that the system has already confirmed a duplicate.
-  **Must check together**: SAP Fiori dialog/table guidance and `scripts/qa/test-idts74-duplicate-review-ui.js`.
+  **Must check together**: SAP Fiori dialog/list guidance and `scripts/qa/test-idts74-duplicate-review-ui.js`.
 
 ### Cross-folder impact
 
@@ -97,7 +111,7 @@ Quy tắc quan trọng là đây chỉ là màn hình review, không phải auto
 4. Nó request thêm các field Bug mà Fiori có thể chưa load.
 5. Nó gọi trực tiếp OData V4 action đã có `/suggestSimilarBugs(...)` khi user bấm nút.
 6. Nó map từng row trả về qua `AiReviewUi.decorateResult` để wording confidence/status thống nhất với các UI suggestion khác.
-7. Nó hiển thị candidate bằng `sap.m.Dialog` và `sap.m.Table` responsive.
+7. Nó hiển thị candidate bằng `sap.m.Dialog` và `sap.m.List` chọn một item.
 8. Accept/Reject/Ignore chỉ đổi review state của suggestion đã lưu; đóng dialog không đổi dữ liệu khác.
 
 ### Anchor quan trọng
@@ -120,7 +134,7 @@ Quy tắc quan trọng là đây chỉ là màn hình review, không phải auto
 - **Vị trí**: `buildDialog(...)`
   **Khái niệm IDTS**: Hiển thị suggestion trong dialog review tạm thời, không tạo thêm workflow page.
   **Ảnh hưởng nếu sai**: UI có thể trở nên quá nặng, lệch Fiori, hoặc làm user hiểu nhầm rằng hệ thống đã xác nhận duplicate.
-  **Phải kiểm tra cùng**: guideline SAP Fiori cho dialog/table và `scripts/qa/test-idts74-duplicate-review-ui.js`.
+  **Phải kiểm tra cùng**: guideline SAP Fiori cho dialog/list và `scripts/qa/test-idts74-duplicate-review-ui.js`.
 
 ### Liên kết với folder/file khác
 
@@ -165,3 +179,18 @@ Primary owner: DatDT. Backup: DonHV. Debug at the button callback and `AiSuggest
 Dialog hiện có Accept, Reject và Ignore khi kết quả có `suggestionID` đã persist. Một quyết định gọi review action tương ứng, thay Pending bằng trạng thái đã lưu kèm reviewer/time, khóa cả ba nút quyết định và luôn tắt busy state. Nút Close vẫn dùng được. Không quyết định nào tạo `DuplicateLinks` hoặc đổi Bug.
 
 Owner chính: DatDT. Backup: DonHV. Khi debug, bắt đầu tại callback nút và `AiSuggestionReview.submit()`; xem suggestion ID, review state trả về, reviewer/time và `/reviewActionEnabled`. Kiểm cùng `srv/ai/review.js`, file i18n, static QA IDTS-92 và browser smoke IDTS-74. Giữ lỗi chung, không hiển thị raw OData/backend detail.
+## IDTS-115 — Confirm Duplicate
+
+English: The existing Similar Bugs dialog uses single selection and stores `selectedCandidateBugID`. `confirmSelectedDuplicate()` is enabled only after an `ACCEPTED` suggestion, one candidate selection, PM/Tester visibility, and an idle dialog. It calls `confirmDuplicateSuggestion` with two IDs, refreshes the Bug, and disables the action after success. Opening, selecting, or accepting alone never creates `DuplicateLinks`. On failure, busy is cleared and a safe retry is restored.
+
+Debug order: `openDialog()` → `readSimilarBugs()` → list `selectionChange` → `updateConfirmEnabled()` → `confirmSelectedDuplicate()` → `confirmDuplicate()` → Network → CAP self-link/candidate/reverse-link validation → refresh. Observe candidate ID, review state, busy, HTTP status, and DuplicateLinks count.
+
+Tiếng Việt: Dialog Similar Bugs dùng chọn một candidate và lưu `selectedCandidateBugID`. Nút Confirm chỉ bật sau `ACCEPTED`, chọn đúng một dòng, role PM/Tester và dialog không busy. UI gọi action CAP bằng hai ID, refresh Bug và khóa nút sau khi thành công; không tự tạo DuplicateLinks khi chỉ mở/chọn/review. Khi lỗi, busy phải tắt và retry an toàn được khôi phục.
+
+Retry boundary: `finally` clears busy before recalculating the button. A failed CAP confirmation can be retried, while a successful confirmation followed by refresh failure remains disabled through `/duplicateConfirmed` to avoid a duplicate request.
+
+## IDTS-114 responsive retry state
+
+**English.** `loadCandidates()` clears the previous rows, selected candidate, suggestion ID, review decision, reviewer text, and confirmation state before every initial load or Retry. This prevents a failed retry from leaving old review or Confirm Duplicate actions active against stale data. Only network, timeout, rate-limit and server failures expose Retry. Authorization denial, invalid context and other failures use safe non-retryable messages without exposing the raw OData/provider error.
+
+**Tiếng Việt.** Trước mỗi lần tải đầu tiên hoặc Retry, `loadCandidates()` xóa danh sách cũ, candidate đã chọn, suggestion ID, quyết định review, reviewer và trạng thái xác nhận. Nhờ đó, một lần Retry thất bại không thể để lại nút review hay Confirm Duplicate đang hoạt động trên dữ liệu cũ. Chỉ lỗi mạng, timeout, rate limit hoặc server mới hiện Retry; lỗi quyền, context không hợp lệ và lỗi cố định dùng thông báo an toàn không thể retry, không lộ lỗi OData/provider thô.

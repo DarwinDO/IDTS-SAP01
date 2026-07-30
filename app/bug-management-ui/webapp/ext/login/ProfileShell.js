@@ -64,7 +64,9 @@ sap.ui.define([
         var displayName = safeUserText(user.displayName || user.email || "IDTS User");
         var email = safeUserText(user.email || "No email stored");
         var role = safeUserText(user.roleName || user.role_code || "Role not available");
-        var expires = safeUserText(formatExpiry(sessionStorage.getItem(EXPIRES_KEY)));
+        var expires = window.__IDTS_AUTH_MODE__ === "xsuaa"
+            ? "Session managed by SAP BTP"
+            : safeUserText(formatExpiry(sessionStorage.getItem(EXPIRES_KEY)));
 
         var profilePopover = new ResponsivePopover({
             placement: PlacementType.Bottom,

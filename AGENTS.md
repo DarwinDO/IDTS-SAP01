@@ -375,6 +375,30 @@ Với BRD/SRS/FRS và DOCX, trước khi viết hoặc chỉnh sửa hãy ưu ti
 
 Với cộng tác tài liệu Google Workspace, ưu tiên `gws` làm lớp automation lặp lại cho team sau khi đã cài và cấu hình. Dùng Google Drive connector như fallback tương tác để đọc nhanh, review nhanh, hoặc cập nhật một lần trong Codex. Giữ Markdown/DOCX/XLSX trong repo là source of truth; Google Docs và Google Sheets chỉ là bản review/collaboration, không phải nguồn canonical.
 
+## Proactive Subagent Delegation and Final Review
+
+The primary agent is authorized to use Codex subagents proactively when a nontrivial task contains two or more independent, well-scoped workstreams that can safely run in parallel. Delegation is optional, not mandatory; keep urgent critical-path work local.
+
+Default routing:
+
+- Use `gpt-5.6-terra` with `medium` reasoning for bounded repository inspection, documentation checks, focused test execution, evidence review, and other routine sidecar work.
+- Use `gpt-5.6-terra` with `high` reasoning for security, authorization, architecture, CAP/Fiori cross-layer review, difficult debugging, conflict analysis, and pre-merge code review.
+- Use another model only when the user explicitly requests it or a concrete task-specific reason is recorded.
+
+Every delegated task must have a concrete output, a narrow read/write scope, and a disjoint write set from other active agents. Do not delegate secrets, credentials, destructive operations, Jira/Drive/production mutations, the immediate blocker on the critical path, or final release authority. Do not duplicate the same unresolved work in both the primary agent and a subagent.
+
+Subagent output is an untrusted draft until the primary agent:
+
+1. Reviews the result and every changed file.
+2. Verifies it against the user request, repository rules, source code, Jira scope, and SAP-supported patterns.
+3. Runs the relevant tests, builds, scans, and gates again from the integrated branch.
+4. Corrects or rejects incomplete, unsafe, conflicting, or unsupported work.
+5. Makes the final decision to commit, create a PR, merge, deploy, update Jira, or claim PASS/completion.
+
+Report which subagent model/reasoning level was used, its assigned scope, useful result, rejected findings, and verification performed by the primary agent. A subagent must never mark its own work as final acceptance.
+
+Vietnamese: Agent chính được phép chủ động gọi subagent khi task có từ hai phần độc lập có thể chạy song song. Mặc định dùng Terra Medium cho việc phụ rõ ràng và Terra High cho security, kiến trúc, CAP/Fiori cross-layer, debug khó và review trước merge. Kết quả subagent chỉ là bản nháp; agent chính bắt buộc review diff, đối chiếu source/Jira/rule, chạy lại test/gate và tự chịu trách nhiệm cuối cùng cho commit, PR, merge, deploy và kết luận PASS.
+
 ## Always-On Karpathy Guidelines
 
 Treat `.agents/skills/karpathy-guidelines` as an always-on behavior guardrail for this repository.

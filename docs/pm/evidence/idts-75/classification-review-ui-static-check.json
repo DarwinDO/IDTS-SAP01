@@ -1,6 +1,6 @@
 {
   "task": "IDTS-75",
-  "checkedAt": "2026-07-24T17:28:09.261Z",
+  "checkedAt": "2026-07-30T05:49:00.552Z",
   "checks": [
     {
       "label": "classification review field opens the review dialog",
@@ -51,7 +51,7 @@
       "pass": true
     },
     {
-      "label": "classification review keeps manual decision guidance",
+      "label": "classification review keeps one dialog-level manual decision guidance",
       "pass": true
     },
     {
@@ -76,6 +76,10 @@
     },
     {
       "label": "manifest uses the classification review field fragment",
+      "pass": true
+    },
+    {
+      "label": "manifest hides the complete classification custom field on a root create draft",
       "pass": true
     },
     {
@@ -203,6 +207,10 @@
       "pass": true
     },
     {
+      "label": "i18n.properties classificationReviewConfidenceColumn is user-facing",
+      "pass": true
+    },
+    {
       "label": "i18n.properties classificationReviewNotSet is user-facing",
       "pass": true
     },
@@ -220,6 +228,18 @@
     },
     {
       "label": "i18n.properties classificationReviewLoadFailed is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewMissingContext is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewRetryableLoadFailed is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n.properties classificationReviewRetryButton is user-facing",
       "pass": true
     },
     {
@@ -367,6 +387,10 @@
       "pass": true
     },
     {
+      "label": "i18n_en.properties classificationReviewConfidenceColumn is user-facing",
+      "pass": true
+    },
+    {
       "label": "i18n_en.properties classificationReviewNotSet is user-facing",
       "pass": true
     },
@@ -384,6 +408,18 @@
     },
     {
       "label": "i18n_en.properties classificationReviewLoadFailed is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewMissingContext is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewRetryableLoadFailed is user-facing",
+      "pass": true
+    },
+    {
+      "label": "i18n_en.properties classificationReviewRetryButton is user-facing",
       "pass": true
     },
     {

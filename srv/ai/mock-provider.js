@@ -35,6 +35,14 @@ class MockAiProvider {
     }
   }
 
+  async embeddingBatch ({ texts = [] } = {}) {
+    await this.#maybeFail()
+    return {
+      embeddings: texts.map(text => deterministicEmbedding(text, this.config.mockEmbeddingDimensions)),
+      dimensions: this.config.mockEmbeddingDimensions
+    }
+  }
+
   async #maybeFail () {
     if (this.config.mockMode === 'error') {
       throw Object.assign(

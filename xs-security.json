@@ -1,0 +1,58 @@
+{
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.TESTER",
+      "description": "Create, clarify, retest, close, and reopen defect reports"
+    },
+    {
+      "name": "$XSAPPNAME.DEVELOPER",
+      "description": "Review and resolve assigned defect reports"
+    },
+    {
+      "name": "$XSAPPNAME.PM",
+      "description": "Coordinate assignment, monitoring, and governance"
+    },
+    {
+      "name": "$XSAPPNAME.OutboxProcessor",
+      "description": "Invoke the protected email outbox processing endpoint",
+      "grant-as-authority-to-apps": [
+        "$XSSERVICENAME(idts-sap01-jobscheduler)"
+      ]
+    }
+  ],
+  "attributes": [],
+  "role-templates": [
+    {
+      "name": "Tester",
+      "description": "IDTS Tester",
+      "scope-references": [
+        "$XSAPPNAME.TESTER"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "Developer",
+      "description": "IDTS Developer",
+      "scope-references": [
+        "$XSAPPNAME.DEVELOPER"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "PM",
+      "description": "IDTS Project Manager",
+      "scope-references": [
+        "$XSAPPNAME.PM"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "OutboxProcessor",
+      "description": "IDTS technical email outbox processor",
+      "scope-references": [
+        "$XSAPPNAME.OutboxProcessor"
+      ],
+      "attribute-references": []
+    }
+  ]
+}

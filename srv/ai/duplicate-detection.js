@@ -12,7 +12,8 @@ const DEFAULT_LIMIT = 5
 const MAX_LIMIT = 10
 const DEFAULT_MIN_SCORE = 0.35
 const MAX_CANDIDATES = 50
-const EMBEDDING_CONCURRENCY = 4
+const MAX_EMBEDDING_CANDIDATES = 10
+const MAX_EMBEDDING_TEXT = 2000
 const MAX_SEARCH_TEXT = 8000
 
 const STOP_WORDS = new Set([
@@ -121,36 +122,19 @@ async function resolveSearchInput (tx, req, data) {
 async function rankSimilarBugCandidates ({ input, candidates, provider, limit = DEFAULT_LIMIT, minScore = DEFAULT_MIN_SCORE }) {
   // Xin embeddings theo batch khi provider sẵn sàng, sau đó chấm từng candidate; provider lỗi vẫn dùng lexical/classification fallback.
   const started = Date.now()
-  const sourceText = embeddingText(input)
-  const sourceEmbeddingResult = await provider.embedding({
-    featureType: FEATURE_TYPES.DUPLICATE_DETECTION,
-    text: sourceText
-  })
-  const sourceEmbedding = validEmbedding(sourceEmbeddingResult?.data?.embedding)
-  const providerStatus = sourceEmbeddingResult?.status || 'AI_PROVIDER_ERROR'
+  const boundedCandidates = prefilterCandidates(input, candidates).slice(0, MAX_EMBEDDING_CANDIDATES)
+  const embeddingResult = await resolveBoundedEmbeddings({ input, candidates: boundedCandidates, provider })
+  const sourceEmbedding = embeddingResult.sourceEmbedding
+  const providerStatus = embeddingResult.providerStatus
+  const candidateEmbeddings = embeddingResult.candidateEmbeddings
 
-  let candidateEmbeddings = []
-  if (sourceEmbedding) {
-    candidateEmbeddings = await mapWithConcurrency(candidates, EMBEDDING_CONCURRENCY, async candidate => {
-      const response = await provider.embedding({
-        featureType: FEATURE_TYPES.DUPLICATE_DETECTION,
-        correlationId: sourceEmbeddingResult.correlationId,
-        text: embeddingText(candidate)
-      })
-      return {
-        embedding: validEmbedding(response?.data?.embedding),
-        status: response?.status || 'AI_PROVIDER_ERROR'
-      }
-    })
-  }
-
-  const ranked = candidates
+  const ranked = boundedCandidates
     .map((candidate, index) => scoreCandidate({
       input,
       candidate,
       sourceEmbedding,
-      candidateEmbedding: candidateEmbeddings[index]?.embedding,
-      providerStatus: candidateEmbeddings[index]?.status || providerStatus
+      candidateEmbedding: candidateEmbeddings[index],
+      providerStatus
     }))
     .filter(candidate => candidate.score >= minScore)
     .sort((left, right) => right.score - left.score || String(left.bugNumber).localeCompare(String(right.bugNumber)))
@@ -159,11 +143,88 @@ async function rankSimilarBugCandidates ({ input, candidates, provider, limit = 
   return {
     candidates: ranked,
     providerStatus: sourceEmbedding ? providerStatus : fallbackProviderStatus(providerStatus),
-    correlationId: sourceEmbeddingResult?.correlationId || null,
-    providerAlias: sourceEmbeddingResult?.providerAlias || provider?.config?.provider || null,
-    modelAlias: sourceEmbeddingResult?.modelAlias || provider?.config?.embeddingModelAlias || provider?.config?.modelAlias || null,
+    correlationId: embeddingResult.correlationId,
+    providerAlias: embeddingResult.providerAlias || provider?.config?.provider || null,
+    modelAlias: embeddingResult.modelAlias || provider?.config?.embeddingModelAlias || provider?.config?.modelAlias || null,
     durationMs: Date.now() - started
   }
+}
+
+function prefilterCandidates (input, candidates) {
+  return candidates
+    .map(candidate => {
+      const titleSimilarity = tokenSimilarity(input.title, candidate.title)
+      const descriptionSimilarity = tokenSimilarity(input.description, candidate.description)
+      const lexicalScore = (titleSimilarity * 0.72) + (descriptionSimilarity * 0.28)
+      const classificationScore = classificationSimilarity(input, candidate).score
+      return { candidate, score: (lexicalScore * 0.80) + (classificationScore * 0.20) }
+    })
+    .sort((left, right) => right.score - left.score || String(left.candidate.bugNumber).localeCompare(String(right.candidate.bugNumber)))
+    .map(row => row.candidate)
+}
+
+async function resolveBoundedEmbeddings ({ input, candidates, provider }) {
+  const texts = [embeddingText(input), ...candidates.map(embeddingText)]
+  if (typeof provider.embeddingBatch === 'function') {
+    const batch = await provider.embeddingBatch({
+      featureType: FEATURE_TYPES.DUPLICATE_DETECTION,
+      texts
+    })
+    const embeddings = validEmbeddingBatch(batch?.data?.embeddings, texts.length)
+    if (embeddings) {
+      return embeddingResolution({ response: batch, sourceEmbedding: embeddings[0], candidateEmbeddings: embeddings.slice(1) })
+    }
+    if (batch?.status !== 'AI_EMBEDDING_BATCH_UNSUPPORTED') {
+      return embeddingResolution({
+        response: batch,
+        providerStatus: fallbackProviderStatus(batch?.status === 'SUCCESS' ? 'AI_EMBEDDING_INVALID' : batch?.status)
+      })
+    }
+  }
+  return resolveSequentialEmbeddings({ texts, provider })
+}
+
+async function resolveSequentialEmbeddings ({ texts, provider }) {
+  const sourceResponse = await provider.embedding({
+    featureType: FEATURE_TYPES.DUPLICATE_DETECTION,
+    text: texts[0]
+  })
+  const sourceEmbedding = validEmbedding(sourceResponse?.data?.embedding)
+  if (!sourceEmbedding) {
+    return embeddingResolution({ response: sourceResponse, providerStatus: fallbackProviderStatus(sourceResponse?.status) })
+  }
+
+  const candidateEmbeddings = []
+  let providerStatus = sourceResponse?.status || 'AI_PROVIDER_ERROR'
+  for (const text of texts.slice(1)) {
+    const response = await provider.embedding({
+      featureType: FEATURE_TYPES.DUPLICATE_DETECTION,
+      correlationId: sourceResponse.correlationId,
+      text
+    })
+    candidateEmbeddings.push(validEmbedding(response?.data?.embedding))
+    if (response?.status !== 'SUCCESS') providerStatus = response?.status || 'AI_PROVIDER_ERROR'
+  }
+  return embeddingResolution({ response: sourceResponse, sourceEmbedding, candidateEmbeddings, providerStatus })
+}
+
+function embeddingResolution ({ response, sourceEmbedding = null, candidateEmbeddings = [], providerStatus = null }) {
+  return {
+    sourceEmbedding,
+    candidateEmbeddings,
+    providerStatus: providerStatus || response?.status || 'AI_PROVIDER_ERROR',
+    correlationId: response?.correlationId || null,
+    providerAlias: response?.providerAlias || null,
+    modelAlias: response?.modelAlias || null
+  }
+}
+
+function validEmbeddingBatch (value, expectedCount) {
+  if (!Array.isArray(value) || value.length !== expectedCount) return null
+  const embeddings = value.map(validEmbedding)
+  const dimensions = embeddings[0]?.length
+  if (!dimensions || embeddings.some(vector => !vector || vector.length !== dimensions)) return null
+  return embeddings
 }
 
 function scoreCandidate ({ input, candidate, sourceEmbedding, candidateEmbedding, providerStatus }) {
@@ -262,13 +323,12 @@ function embeddingText (bug) {
   // Ghép title/description/classification đã giới hạn thành text gửi embedding, không gửi comment/attachment.
   return [
     `Title: ${cleanText(bug.title) || ''}`,
-    `Description: ${cleanText(bug.description) || ''}`,
-    `Status: ${cleanText(bug.statusContext || bug.statusCode || bug.status_code) || 'not provided'}`,
+    `Description: ${cleanText(bug.description, 1400) || ''}`,
     `SAP module: ${cleanText(bug.sapModuleContext) || 'not provided'}`,
     `Application component: ${cleanText(bug.applicationComponentContext) || 'not provided'}`,
     `Defect category: ${cleanText(bug.defectCategoryContext) || 'not provided'}`,
     `Component category: ${cleanText(bug.componentCategoryContext) || 'not provided'}`
-  ].join('\n')
+  ].join('\n').slice(0, MAX_EMBEDDING_TEXT)
 }
 
 async function enrichSemanticContext (tx, input, candidates) {
@@ -413,21 +473,6 @@ async function readStatusNames (tx, codes) {
   return new Map(rows.map(row => [row.code, row.name]))
 }
 
-async function mapWithConcurrency (items, concurrency, mapper) {
-  // Chạy mapper theo worker pool nhỏ để embedding nhiều candidate không tạo quá nhiều request đồng thời.
-  const result = new Array(items.length)
-  let cursor = 0
-  async function worker () {
-    while (cursor < items.length) {
-      const index = cursor
-      cursor += 1
-      result[index] = await mapper(items[index], index)
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, () => worker()))
-  return result
-}
-
 function normalizeLimit (value) {
   // Ép limit vào khoảng an toàn để client không yêu cầu quét/trả toàn bộ Bugs.
   const parsed = Number(value)
@@ -466,6 +511,8 @@ module.exports = {
   rankSimilarBugCandidates,
   tokenSimilarity,
   cosineSimilarity,
+  prefilterCandidates,
   relationTypeFor,
+  validEmbeddingBatch,
   validEmbedding
 }

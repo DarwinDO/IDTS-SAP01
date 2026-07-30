@@ -14,12 +14,15 @@ sap.ui.define([
     "sap/m/Text",
     "sap/m/ColumnListItem",
     "sap/m/ObjectStatus",
+    "sap/m/ExpandableText",
     "sap/m/MessageStrip",
     "sap/m/VBox",
     "sap/m/MessageBox",
+    "sap/m/MessageToast",
     "sap/ui/model/json/JSONModel",
     "../ai/AiReviewUi",
-    "../ai/AiSuggestionReview"
+    "../ai/AiSuggestionReview",
+    "../login/LoginController"
 ], function (
     Dialog,
     Button,
@@ -28,12 +31,15 @@ sap.ui.define([
     Text,
     ColumnListItem,
     ObjectStatus,
+    ExpandableText,
     MessageStrip,
     VBox,
     MessageBox,
+    MessageToast,
     JSONModel,
     AiReviewUi,
-    AiSuggestionReview
+    AiSuggestionReview,
+    LoginSession
 ) {
     "use strict";
 
@@ -109,6 +115,35 @@ sap.ui.define([
         };
     }
 
+    function isPmOrTester() {
+        // Chỉ quyết định visibility trên UI; CAP vẫn là lớp phân quyền cuối cho action Apply.
+        var user = LoginSession.getUser && LoginSession.getUser();
+        return !!user && (user.role_code === "PM" || user.role_code === "TESTER");
+    }
+
+    function hasPersistedBugSource(bug) {
+        // AI review is source-linked. A root create draft has no stable active Bug row to audit yet.
+        return !!bug && (bug.IsActiveEntity === true || bug.HasActiveEntity === true);
+    }
+
+    function refreshBugContext(bugContext, model) {
+        // Sau Apply, đọc lại Bug từ backend để UI không tự đoán field nào đã thay đổi.
+        if (bugContext && typeof bugContext.requestRefresh === "function") {
+            return bugContext.requestRefresh();
+        }
+        if (model && typeof model.refresh === "function") {
+            model.refresh();
+        }
+        return Promise.resolve();
+    }
+
+    function applyClassification(model, suggestionID) {
+        // Gọi action đã có; backend kiểm role, review state, expiry, catalog và stale source.
+        var operation = model.bindContext("/applyClassificationSuggestion(...)", undefined, { $$ownRequest: true });
+        operation.setParameter("suggestionID", suggestionID);
+        return operation.invoke("$direct");
+    }
+
     function normalizeResult(result) {
         // CAP action có thể trả object trực tiếp hoặc bọc trong value; chuẩn hóa trước khi render.
         if (Array.isArray(result)) {
@@ -121,6 +156,49 @@ sap.ui.define([
             return result.value.value;
         }
         return [];
+    }
+
+    function requestOperationResult(operation, invocationResult) {
+        // Some UI5/CAP combinations expose the action result directly, others expose it through the result context.
+        if (normalizeResult(invocationResult).length > 0) {
+            return Promise.resolve(invocationResult);
+        }
+        var resultContext = operation.getBoundContext && operation.getBoundContext();
+        if (!resultContext || typeof resultContext.requestObject !== "function") {
+            return Promise.resolve(invocationResult || []);
+        }
+        return resultContext.requestObject().catch(function (error) {
+            if (invocationResult !== undefined && invocationResult !== null) {
+                return invocationResult;
+            }
+            throw error;
+        });
+    }
+
+    function errorStatus(error) {
+        var status = error && (
+            error.status ||
+            error.statusCode ||
+            error.httpStatus ||
+            error.cause && (error.cause.status || error.cause.statusCode)
+        );
+        return Number(status) || 0;
+    }
+
+    function errorMessage(error) {
+        return String(error && error.message || "");
+    }
+
+    function isMissingContextError(error) {
+        return errorStatus(error) === 400 &&
+            errorMessage(error).indexOf(
+                "Provide a bug title, description, reproduction context, or source bug"
+            ) >= 0;
+    }
+
+    function isRetryableLoadError(error) {
+        var status = errorStatus(error);
+        return status === 0 || status === 408 || status === 429 || status >= 500;
     }
 
     function requestProperty(bugContext, bug, propertyName) {
@@ -181,12 +259,8 @@ sap.ui.define([
         operation.setParameter("priorityCode", bug.priority_code || null);
         operation.setParameter("severityCode", bug.severity_code || null);
 
-        return operation.invoke("$direct").then(function () {
-            var resultContext = operation.getBoundContext && operation.getBoundContext();
-            if (resultContext && typeof resultContext.requestObject === "function") {
-                return resultContext.requestObject();
-            }
-            return [];
+        return operation.invoke("$direct").then(function (invocationResult) {
+            return requestOperationResult(operation, invocationResult);
         }).then(normalizeResult);
     }
 
@@ -207,6 +281,7 @@ sap.ui.define([
         }
         if (
             status === "AI_DISABLED" ||
+            status === "AI_RATE_LIMITED" ||
             status === "AI_TIMEOUT" ||
             status === "AI_PROVIDER_ERROR" ||
             status === "AI_OUTPUT_UNSAFE" ||
@@ -240,6 +315,26 @@ sap.ui.define([
         return getText(view, "classificationReviewNotSet");
     }
 
+    function sourcePresentation(row, view) {
+        // Fallback là safety net theo rule, không được trình bày như đề xuất do AI sinh ra.
+        if (row.suggestionSource === "AI") {
+            return {
+                text: getText(view, "classificationReviewSourceAi"),
+                state: "Information"
+            };
+        }
+        if (row.suggestionSource === "RULES") {
+            return {
+                text: getText(view, "classificationReviewSourceRules"),
+                state: "Warning"
+            };
+        }
+        return {
+            text: getText(view, "classificationReviewSourceUnavailable"),
+            state: "None"
+        };
+    }
+
     function enrichSuggestion(row, bug, view) {
         // Ghép kết quả backend với giá trị hiện tại thành một row dialog; không mutate Bug context.
         var review = AiReviewUi.decorateResult({
@@ -250,6 +345,7 @@ sap.ui.define([
         var current = bug.currentValues && bug.currentValues[row.field];
         var suggested = row.valueName || row.valueCode;
         var confidence = Number(row.confidence);
+        var source = sourcePresentation(row, view);
 
         return {
             fieldLabel: row.fieldLabel || getText(view, "classificationReviewUnknownField"),
@@ -257,15 +353,16 @@ sap.ui.define([
             suggestedValue: suggested || getText(view, "classificationReviewNoSafeSuggestion"),
             statusText: statusText(row, view),
             statusState: stateFor(row),
-            confidenceText: Number.isFinite(confidence)
+            suggestionSourceText: source.text,
+            suggestionSourceState: source.state,
+            confidenceText: row.suggestionSource === "AI" && Number.isFinite(confidence)
                 ? getText(view, "classificationReviewConfidence", [Math.round(confidence * 100)])
                 : "",
-            reason: review.explanation,
-            decisionHint: review.decisionHint
+            reason: review.explanation
         };
     }
 
-    function buildDialog(view, model, bug) {
+    function buildDialog(view, model, bug, bugContext) {
         // Tạo JSONModel + Table, invoke action, rồi cập nhật rows. Lỗi chỉ hiện MessageBox.
         var state = new JSONModel({
             rows: [],
@@ -275,40 +372,133 @@ sap.ui.define([
             reviewStateText: getText(view, "aiSuggestionReviewPending"),
             reviewStateState: "Information",
             reviewedByText: "",
-            reviewActionEnabled: false
+            reviewActionEnabled: false,
+            applyActionVisible: isPmOrTester(),
+            applyActionEnabled: false,
+            loadMessageVisible: false,
+            loadMessageText: "",
+            loadMessageType: "Information",
+            retryVisible: false
         });
         function submitReview(actionName) {
             return AiSuggestionReview.submit(model, state, actionName, function (key, args) {
                 return getText(view, key, args);
+            }).then(function (result) {
+                var reviewStateCode = result && result.reviewStateCode;
+                state.setProperty(
+                    "/applyActionEnabled",
+                    isPmOrTester() && reviewStateCode === "ACCEPTED"
+                );
+                return result;
             });
         }
 
+        function confirmApply() {
+            MessageBox.confirm(getText(view, "classificationApplyConfirm"), {
+                actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+                emphasizedAction: MessageBox.Action.OK,
+                onClose: function (action) {
+                    if (action !== MessageBox.Action.OK || !state.getProperty("/applyActionEnabled")) {
+                        return;
+                    }
+
+                    state.setProperty("/busy", true);
+                    state.setProperty("/applyActionEnabled", false);
+                    var applyCompleted = false;
+                    applyClassification(model, state.getProperty("/suggestionID"))
+                        .then(function () {
+                            applyCompleted = true;
+                            return refreshBugContext(bugContext, model);
+                        })
+                        .then(function () {
+                            MessageToast.show(getText(view, "classificationApplySuccess"));
+                        })
+                        .catch(function () {
+                            if (!applyCompleted) {
+                                state.setProperty("/applyActionEnabled", true);
+                            }
+                            MessageBox.error(getText(
+                                view,
+                                applyCompleted ? "classificationRefreshFailed" : "classificationApplyFailed"
+                            ));
+                        })
+                        .finally(function () {
+                            state.setProperty("/busy", false);
+                        });
+                }
+            });
+        }
+
+        function loadSuggestions() {
+            state.setProperty("/busy", true);
+            state.setProperty("/rows", []);
+            state.setProperty("/suggestionID", null);
+            state.setProperty("/reviewActionEnabled", false);
+            state.setProperty("/applyActionEnabled", false);
+            state.setProperty("/reviewStateText", getText(view, "aiSuggestionReviewPending"));
+            state.setProperty("/reviewStateState", "Information");
+            state.setProperty("/reviewedByText", "");
+            state.setProperty("/loadMessageVisible", false);
+            state.setProperty("/retryVisible", false);
+            return readClassificationSuggestions(model, bug)
+                .then(function (rows) {
+                    state.setProperty("/rows", rows.map(function (row) {
+                        return enrichSuggestion(row, bug, view);
+                    }));
+                    var suggestionID = rows[0] && rows[0].suggestionID;
+                    state.setProperty("/suggestionID", suggestionID || null);
+                    state.setProperty("/reviewActionEnabled", Boolean(suggestionID));
+                    state.setProperty(
+                        "/reviewStateText",
+                        suggestionID
+                            ? getText(view, "aiSuggestionReviewPending")
+                            : getText(view, "aiSuggestionReviewAfterSave")
+                    );
+                })
+                .catch(function (error) {
+                    var missingContext = isMissingContextError(error);
+                    var retryable = isRetryableLoadError(error);
+                    state.setProperty(
+                        "/loadMessageText",
+                        getText(
+                            view,
+                            missingContext
+                                ? "classificationReviewMissingContext"
+                                : retryable
+                                    ? "classificationReviewRetryableLoadFailed"
+                                    : "classificationReviewLoadFailed"
+                        )
+                    );
+                    state.setProperty("/loadMessageType", missingContext ? "Information" : "Error");
+                    state.setProperty("/loadMessageVisible", true);
+                    state.setProperty("/retryVisible", retryable);
+                })
+                .finally(function () {
+                    state.setProperty("/busy", false);
+                });
+        }
+
         var table = new Table({
+            autoPopinMode: true,
             growing: true,
             growingThreshold: 5,
             noDataText: "{classificationReview>/noDataText}",
             columns: [
                 new Column({
-                    width: "11rem",
+                    importance: "High",
                     header: new Text({ text: getText(view, "classificationReviewFieldColumn") })
                 }),
                 new Column({
-                    width: "12rem",
-                    minScreenWidth: "Tablet",
-                    demandPopin: true,
+                    importance: "Medium",
                     header: new Text({ text: getText(view, "classificationReviewCurrentColumn") })
                 }),
                 new Column({
-                    width: "12rem",
-                    minScreenWidth: "Tablet",
-                    demandPopin: true,
+                    importance: "High",
                     header: new Text({ text: getText(view, "classificationReviewSuggestedColumn") })
                 }),
                 new Column({
-                    width: "24rem",
-                    minScreenWidth: "Desktop",
-                    demandPopin: true,
-                    header: new Text({ text: getText(view, "classificationReviewReviewColumn") })
+                    importance: "Low",
+                    header: new Text({ text: getText(view, "classificationReviewConfidenceColumn") })
                 })
             ]
         });
@@ -320,16 +510,27 @@ sap.ui.define([
                 cells: [
                     new Text({ text: "{classificationReview>fieldLabel}", wrapping: true }),
                     new Text({ text: "{classificationReview>currentValue}", wrapping: true }),
-                    new Text({ text: "{classificationReview>suggestedValue}", wrapping: true }),
                     new VBox({
                         items: [
+                            new Text({ text: "{classificationReview>suggestedValue}", wrapping: true }),
+                            new ExpandableText({
+                                text: "{classificationReview>reason}",
+                                maxCharacters: 180,
+                                overflowMode: "InPlace"
+                            }).addStyleClass("sapUiTinyMarginTop")
+                        ]
+                    }),
+                    new VBox({
+                        items: [
+                            new ObjectStatus({
+                                text: "{classificationReview>suggestionSourceText}",
+                                state: "{classificationReview>suggestionSourceState}"
+                            }),
                             new ObjectStatus({
                                 text: "{classificationReview>statusText}",
                                 state: "{classificationReview>statusState}"
                             }),
-                            new Text({ text: "{classificationReview>confidenceText}", wrapping: true }),
-                            new Text({ text: "{classificationReview>reason}", wrapping: true }),
-                            new Text({ text: "{classificationReview>decisionHint}", wrapping: true })
+                            new Text({ text: "{classificationReview>confidenceText}", wrapping: true })
                         ]
                     })
                 ]
@@ -338,10 +539,9 @@ sap.ui.define([
 
         var dialog = new Dialog({
             title: getText(view, "classificationReviewDialogTitle"),
-            contentWidth: "62rem",
-            contentHeight: "32rem",
             resizable: true,
             draggable: true,
+            horizontalScrolling: false,
             busy: "{classificationReview>/busy}",
             content: [
                 new VBox({
@@ -352,6 +552,12 @@ sap.ui.define([
                             type: "Information",
                             showIcon: true
                         }),
+                        new MessageStrip({
+                            text: "{classificationReview>/loadMessageText}",
+                            type: "{classificationReview>/loadMessageType}",
+                            showIcon: true,
+                            visible: "{classificationReview>/loadMessageVisible}"
+                        }).addStyleClass("sapUiTinyMarginTop"),
                         new VBox({
                             items: [
                                 new ObjectStatus({
@@ -393,6 +599,18 @@ sap.ui.define([
                     }
                 }),
                 new Button({
+                    text: getText(view, "classificationApplyButton"),
+                    type: "Emphasized",
+                    visible: "{classificationReview>/applyActionVisible}",
+                    enabled: "{classificationReview>/applyActionEnabled}",
+                    press: confirmApply
+                }),
+                new Button({
+                    text: getText(view, "classificationReviewRetryButton"),
+                    visible: "{classificationReview>/retryVisible}",
+                    press: loadSuggestions
+                }),
+                new Button({
                     text: getText(view, "classificationReviewCloseButton"),
                     press: function () {
                         dialog.close();
@@ -407,27 +625,7 @@ sap.ui.define([
         dialog.setModel(state, "classificationReview");
         view.addDependent(dialog);
 
-        readClassificationSuggestions(model, bug)
-            .then(function (rows) {
-                state.setProperty("/rows", rows.map(function (row) {
-                    return enrichSuggestion(row, bug, view);
-                }));
-                var suggestionID = rows[0] && rows[0].suggestionID;
-                state.setProperty("/suggestionID", suggestionID || null);
-                state.setProperty("/reviewActionEnabled", Boolean(suggestionID));
-                state.setProperty(
-                    "/reviewStateText",
-                    suggestionID
-                        ? getText(view, "aiSuggestionReviewPending")
-                        : getText(view, "aiSuggestionReviewAfterSave")
-                );
-            })
-            .catch(function () {
-                MessageBox.error(getText(view, "classificationReviewLoadFailed"));
-            })
-            .finally(function () {
-                state.setProperty("/busy", false);
-            });
+        loadSuggestions();
 
         return dialog;
     }
@@ -444,7 +642,11 @@ sap.ui.define([
             }
 
             return readBugData(bugContext).then(function (bug) {
-                var dialog = buildDialog(view, bugContext.getModel(), bug);
+                if (!hasPersistedBugSource(bug)) {
+                    MessageToast.show(getText(view, "classificationReviewMissingContext"));
+                    return null;
+                }
+                var dialog = buildDialog(view, bugContext.getModel(), bug, bugContext);
                 dialog.open();
                 return dialog;
             });

@@ -29,6 +29,7 @@ service BugService @(requires: 'authenticated-user') {
     confidence       : Decimal(5,4);
     reason           : String(500);
     status           : String(40);
+    suggestionSource : String(20);
     providerStatus   : String(40);
     requiresReview   : Boolean;
   };
@@ -43,6 +44,8 @@ service BugService @(requires: 'authenticated-user') {
     currentStatus         : String(120);
     currentActionOwner    : String(120);
     missingInformation    : LargeString;
+    commentSummary        : LargeString;
+    verifiedComments      : LargeString;
     latestImportantEvents : LargeString;
     nextExpectedAction    : LargeString;
     groundingStatus       : String(40);
@@ -59,6 +62,7 @@ service BugService @(requires: 'authenticated-user') {
     warnings           : String(500);
     confidence         : Decimal(5,4);
     status             : String(40);
+    explanationSource  : String(20);
     providerStatus     : String(40);
     groundingStatus    : String(40);
     workloadOpenCount  : Integer;
@@ -96,6 +100,12 @@ service BugService @(requires: 'authenticated-user') {
     latencySampleCount : Integer;
     averageLatencyMs   : Integer;
     maxLatencyMs       : Integer;
+  };
+
+  type EmailOutboxRunResult {
+    sent    : Integer;
+    failed  : Integer;
+    skipped : Integer;
   };
 
   // Unbound AI actions nhận context tối thiểu và trả suggestion; handler phải ground/audit nhưng không tự sửa Bug.
@@ -151,6 +161,9 @@ service BugService @(requires: 'authenticated-user') {
   // PM-only operational aggregate; reads allowlisted audit metadata and never exposes prompt/response/error detail.
   @(requires: 'PM')
   function readAiOperationalMetrics(windowDays : Integer) returns array of AiOperationalMetric;
+
+  @(requires: 'OutboxProcessor')
+  action processEmailOutbox() returns EmailOutboxRunResult;
 
   // Projection Bugs expose aggregate chính, thêm field tính/virtual cho UX; dữ liệu gốc vẫn ở db.Bugs.
   entity Bugs as projection on db.Bugs {
