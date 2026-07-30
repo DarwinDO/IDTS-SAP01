@@ -4,6 +4,8 @@
 
 Each classification row now separates Field, Current Value, Suggested Value with an expandable reason, and Confidence. Generic review guidance appears once in the dialog MessageStrip instead of being repeated in every row. Review and Apply actions keep their existing backend authorization and confirmation behavior.
 
+The table now uses automatic pop-in: Field and Suggested Value remain primary, while Current Value and Confidence move below the row when space is limited. The dialog no longer owns a fixed desktop width or horizontal scrolling. `AI_RATE_LIMITED` is presented as temporary busy fallback content, not as a transport failure or a real classification decision.
+
 Vietnamese: Mỗi dòng phân loại hiện tách Field, Current Value, Suggested Value kèm reason có thể mở rộng, và Confidence. Hướng dẫn review chung chỉ xuất hiện một lần trong MessageStrip thay vì lặp ở từng dòng. Review và Apply vẫn giữ nguyên phân quyền và bước xác nhận backend.
 
 ## IDTS-115 result and error states
@@ -194,3 +196,9 @@ Debug order: fragment button → `openDialog()` → `buildDialog()` → `submitR
 Tiếng Việt: Nút Apply nằm trong dialog Classification hiện có. Nút chỉ hiện cho PM/Tester và chỉ bật sau review `ACCEPTED`; khi xác nhận, UI gọi action CAP bằng `suggestionID`, refresh Bug và hiển thị thông báo an toàn. Backend vẫn quyết định quyền, expiry, catalog và stale source. Debug theo thứ tự fragment → `openDialog()` → `buildDialog()` → review → confirm → Network → CAP → refresh.
 
 Retry boundary: if the CAP action fails before mutation, Apply is re-enabled after busy clears. If CAP succeeds but context refresh fails, Apply stays disabled and the user is instructed to reload; this prevents replaying a successful mutation.
+
+## IDTS-114 responsive and retry-state boundary
+
+**English.** The Classification table enables `autoPopinMode` and uses only column `importance`; UI5 therefore owns the responsive breakpoints and the controller does not set ignored `minScreenWidth` or `demandPopin` values. Before every initial load or Retry, `loadSuggestions()` clears rows, suggestion ID, reviewer text, review buttons and Apply state. A failed retry can never leave an accepted stale suggestion available for Apply.
+
+**Tiếng Việt.** Bảng Classification bật `autoPopinMode` và chỉ dùng `importance` cho từng cột; UI5 tự quyết định breakpoint responsive, controller không đặt `minScreenWidth` hay `demandPopin` vốn sẽ bị bỏ qua. Trước mỗi lần tải hoặc Retry, `loadSuggestions()` xóa row, suggestion ID, reviewer, nút review và trạng thái Apply. Vì vậy Retry thất bại không thể để lại suggestion cũ đã Accept cho người dùng Apply.

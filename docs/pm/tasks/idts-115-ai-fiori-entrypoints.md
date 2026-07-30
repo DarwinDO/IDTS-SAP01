@@ -125,3 +125,9 @@ backend-derived Component Category, and the earlier Defect Category
 | Tester/Developer Create Bug role evidence | PENDING member-owned sign-in |
 
 Evidence: `docs/pm/evidence/idts-115/`.
+
+## 2026-07-30 New Bug whole-field visibility follow-up
+
+- The manifest-level custom field definitions now use the draft-state expression `IsActiveEntity === true || HasActiveEntity === true`. This hides both the AI button and its generated label on a root New Bug draft while preserving the actions for active Bugs and edit drafts backed by an active Bug.
+- Existing controller guards remain in place, so a draft-only UUID cannot be submitted as an active AI source even if an action is triggered outside the normal UI.
+- Local IDTS-115 checks, UI5 production build and manifest validation pass. PM browser verification after the selective UI deployment remains required; Tester/Developer role evidence is still deferred, so IDTS-115 stays In Progress.

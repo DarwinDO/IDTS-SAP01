@@ -1,5 +1,9 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/actions/HandoffSummaryReview.js`
 
+## IDTS-114 responsive timeline readability
+
+`formatTimelineItems()` keeps the existing string OData contract but separates each sanitized line into localized time, actor/role, action and detail for the UI5 list. The dialog disables horizontal scrolling and still never infers or writes business state.
+
 ## IDTS-114 readability and comment summary
 
 The dialog now orders content as Summary, Current State, Missing Information, Comment Summary, Recent Important Events, and Next Expected Action. Long prose uses `ExpandableText`; comments and events use separate `sap.m.List` controls; the next action is highlighted with a `MessageStrip`. `splitLines()` converts each already-sanitized backend line into a display item, so a legitimate term such as “access token expired” cannot hide the whole section. It does not infer or mutate business state.

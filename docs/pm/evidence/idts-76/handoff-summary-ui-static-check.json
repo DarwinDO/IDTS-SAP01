@@ -1,6 +1,6 @@
 {
   "task": "IDTS-76",
-  "checkedAt": "2026-07-29T18:44:58.813Z",
+  "checkedAt": "2026-07-30T05:49:00.494Z",
   "checks": [
     {
       "label": "history section opens the handoff review dialog",
@@ -36,6 +36,22 @@
     },
     {
       "label": "handoff review uses expandable text for long content",
+      "pass": true
+    },
+    {
+      "label": "handoff dialog prevents horizontal scrolling",
+      "pass": true
+    },
+    {
+      "label": "handoff timeline converts stored timestamps to locale display",
+      "pass": true
+    },
+    {
+      "label": "handoff timeline separates actor metadata from event detail",
+      "pass": true
+    },
+    {
+      "label": "handoff timeline shows localized time separately",
       "pass": true
     },
     {

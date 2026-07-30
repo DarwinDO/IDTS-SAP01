@@ -112,3 +112,12 @@ No S3, Brevo, database schema, UI workflow, automatic classification/assignment,
 - The minimal local correction gives Smart Assign a shared 24-second provider deadline, limits provider input to ten candidates and a compact workload allowlist, and returns deterministic explanations when the deadline expires. Deadline exhaustion does not start OpenAI; an early HTTP 5xx can still use one bounded fallback while time remains.
 - Focused tests pass at IDTS-114 `58/58` and IDTS-69 `9/9`; all requested AI regressions, CAP compile, secret/process gates, AI DevKit and `git diff --check` pass. Evidence: `docs/pm/evidence/idts-114/smart-assign-timeout/local-verification-20260730.md`.
 - Selective service deployment and PM browser re-test remain pending. Tester/Developer role evidence remains deferred, so IDTS-114 stays In Progress.
+
+## 2026-07-30 responsive AI review follow-up
+
+- Similar Bugs now uses a vertical candidate list, wraps metadata, expands long reasons in place, disables horizontal dialog scrolling, and clears all candidate/review state before each initial load or Retry so a failed retry cannot leave stale actions enabled.
+- Classification now uses `sap.m.Table` auto-pop-in with the current value and confidence moved into desktop pop-ins when space is constrained. Fixed dialog width/height and horizontal scrolling were removed.
+- Handoff Summary now parses trusted timeline lines into separate actor, action, localized time and expandable detail controls. Comment and event contracts remain unchanged.
+- `AI_RATE_LIMITED` is shown as a safe temporary-busy warning rather than a provider diagnostic.
+- Local focused and integrated regressions, CAP compile, UI5 build, manifest validation, targeted UI5 lint, targeted ESLint, secret/process gates, AI DevKit and `git diff --check` pass. The existing pre-V2 manifest warning remains separate application debt.
+- SAP BTP UI deployment, PM browser visual/no-mutation evidence and the deferred Tester/Developer matrix remain open; IDTS-114 stays In Progress.

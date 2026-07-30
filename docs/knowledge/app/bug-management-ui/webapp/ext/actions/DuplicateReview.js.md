@@ -4,6 +4,8 @@
 
 Similar Bugs now uses a single-selection `sap.m.List`. Each item groups bug number/title, match status, relation type, current status, and an expandable reason without repeating generic guidance. Selection and Confirm Duplicate rules are unchanged: Accept plus one selected candidate is still required, and CAP remains authoritative.
 
+The responsive follow-up removes the fixed dialog width and disables horizontal scrolling. Candidate content is stacked vertically so a long title or reason wraps inside the available width. A transport failure is shown in a safe in-dialog `MessageStrip` with Retry; an HTTP 200 no-result or deterministic fallback remains ordinary review content rather than an error popup.
+
 Vietnamese: Similar Bugs hiện dùng `sap.m.List` chọn một item. Mỗi item nhóm bug number/title, match, relation type, current status và reason có thể mở rộng mà không lặp hướng dẫn chung. Quy tắc chọn và Confirm Duplicate không đổi: vẫn cần Accept và chọn đúng một candidate, còn CAP là lớp quyết định cuối.
 
 ## IDTS-115 persisted-source boundary
@@ -186,3 +188,9 @@ Debug order: `openDialog()` → `readSimilarBugs()` → list `selectionChange` �
 Tiếng Việt: Dialog Similar Bugs dùng chọn một candidate và lưu `selectedCandidateBugID`. Nút Confirm chỉ bật sau `ACCEPTED`, chọn đúng một dòng, role PM/Tester và dialog không busy. UI gọi action CAP bằng hai ID, refresh Bug và khóa nút sau khi thành công; không tự tạo DuplicateLinks khi chỉ mở/chọn/review. Khi lỗi, busy phải tắt và retry an toàn được khôi phục.
 
 Retry boundary: `finally` clears busy before recalculating the button. A failed CAP confirmation can be retried, while a successful confirmation followed by refresh failure remains disabled through `/duplicateConfirmed` to avoid a duplicate request.
+
+## IDTS-114 responsive retry state
+
+**English.** `loadCandidates()` clears the previous rows, selected candidate, suggestion ID, review decision, reviewer text, and confirmation state before every initial load or Retry. This prevents a failed retry from leaving old review or Confirm Duplicate actions active against stale data. Only network, timeout, rate-limit and server failures expose Retry. Authorization denial, invalid context and other failures use safe non-retryable messages without exposing the raw OData/provider error.
+
+**Tiếng Việt.** Trước mỗi lần tải đầu tiên hoặc Retry, `loadCandidates()` xóa danh sách cũ, candidate đã chọn, suggestion ID, quyết định review, reviewer và trạng thái xác nhận. Nhờ đó, một lần Retry thất bại không thể để lại nút review hay Confirm Duplicate đang hoạt động trên dữ liệu cũ. Chỉ lỗi mạng, timeout, rate limit hoặc server mới hiện Retry; lỗi quyền, context không hợp lệ và lỗi cố định dùng thông báo an toàn không thể retry, không lộ lỗi OData/provider thô.

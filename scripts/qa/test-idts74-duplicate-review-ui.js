@@ -42,6 +42,20 @@ const controller = read('app/bug-management-ui/webapp/ext/actions/DuplicateRevie
 assert(controller.includes('"sap/m/List"'), 'similar bugs must use a readable SAPUI5 List')
 assert(controller.includes('"sap/m/ExpandableText"'), 'similar bug reasons must use SAPUI5 ExpandableText')
 assert(!controller.includes('"sap/m/Table"'), 'similar bugs must not use the old horizontally wide table')
+assert(controller.includes('horizontalScrolling: false'), 'similar bugs dialog must not allow horizontal scrolling')
+assert(!controller.includes('contentWidth: "54rem"'), 'similar bugs dialog must not keep the old fixed width')
+assert(
+  /function loadCandidates\(\)\s*\{[\s\S]{0,500}?setProperty\("\/rows", \[\]\)[\s\S]{0,500}?setProperty\("\/suggestionID", null\)[\s\S]{0,500}?setProperty\("\/reviewActionEnabled", false\)/.test(controller),
+  'similar bugs reload must clear stale candidates and review actions before a retry'
+)
+assert(
+  /status === 401 \|\| status === 403/.test(controller),
+  'similar bugs must distinguish authorization denial from retryable failures'
+)
+assert(
+  /status === 0 \|\| status === 408 \|\| status === 429 \|\| status >= 500/.test(controller),
+  'similar bugs must offer Retry only for network, timeout, rate-limit, or server failures'
+)
 const fragment = read('app/bug-management-ui/webapp/ext/fragment/SimilarBugReviewField.fragment.xml')
 const i18nFiles = [
   'app/bug-management-ui/webapp/i18n/i18n.properties',
@@ -85,6 +99,10 @@ const requiredI18nKeys = [
   'duplicateReviewScore',
   'duplicateReviewNoCandidates',
   'duplicateReviewLoadFailed',
+  'duplicateReviewRetryableLoadFailed',
+  'duplicateReviewUnauthorized',
+  'duplicateReviewInvalidContext',
+  'duplicateReviewRetryButton',
   'duplicateReviewCloseButton'
 ]
 

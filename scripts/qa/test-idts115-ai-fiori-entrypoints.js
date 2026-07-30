@@ -52,6 +52,11 @@ includes(
   classificationField,
   'visible="{= ${IsActiveEntity} === true || ${HasActiveEntity} === true }"'
 )
+matches(
+  'manifest hides the complete Classification custom field and its label on a root create draft',
+  manifest,
+  /"IdtsClassificationReview"\s*:\s*\{[\s\S]{0,180}?"visible"\s*:\s*"\{= \$\{IsActiveEntity\} === true \|\| \$\{HasActiveEntity\} === true \}"/
+)
 includes(
   'classification has a defensive persisted-source guard',
   classification,
@@ -90,6 +95,11 @@ includes(
   'similar bugs field hides AI on a root create draft',
   similarBugField,
   'visible="{= ${IsActiveEntity} === true || ${HasActiveEntity} === true }"'
+)
+matches(
+  'manifest hides the complete Similar Bugs custom field and its label on a root create draft',
+  manifest,
+  /"IdtsSimilarBugReview"\s*:\s*\{[\s\S]{0,180}?"visible"\s*:\s*"\{= \$\{IsActiveEntity\} === true \|\| \$\{HasActiveEntity\} === true \}"/
 )
 includes(
   'similar bugs sends a source ID only for an active bug or its edit draft',
