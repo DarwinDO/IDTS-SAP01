@@ -1,5 +1,13 @@
 # `srv/ai/classification-suggestion.js`
 
+## Feature-specific structured output contract (2026-07-30)
+
+`suggestClassification()` builds the active catalog input once and derives a JSON Schema from the same short references. The provider must return each available classification field with an exact `catalogRef`, a confidence from 0 to 1 and a short reason. UUIDs never enter the schema or provider payload. `findCatalogRow()` still maps each reference to an active backend catalog row; unknown or inactive values remain rejected.
+
+Debug order: `buildProviderCatalogInput()` → `buildClassificationOutputSchema()` → `provider.structured()` → `extractProviderValue()` → `findCatalogRow()`. Provider `SUCCESS` alone is insufficient: a row must resolve to the active catalog before the UI labels it as an AI suggestion.
+
+Tiếng Việt: schema ép model chọn mã ngắn như `SM1`, `AC1`, `DC1`, `P1`, `S1`, thay vì đoán UUID hoặc trả object tự do. Backend vẫn ánh xạ mã ngắn sang catalog thật và là lớp quyết định cuối cùng.
+
 ## IDTS-114 catalog references and result provenance (2026-07-30)
 
 The provider receives a short field-scoped catalog reference (`SM1`, `AC1`, `DC1`, `P1`, or `S1`) instead of a catalog UUID. It must return `catalogRef`; `findCatalogRow()` maps that ref to an active stored row before UI output. Code/name matching remains compatibility-only and cannot accept an unknown catalog value.

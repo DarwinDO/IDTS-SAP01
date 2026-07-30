@@ -5024,3 +5024,10 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
   Z.AI and restarted successfully at 1/1; the source MTA default is corrected
   in the dedicated IDTS-114 branch. Qwen embedding remains intentional for
   Similar Bugs. No secret, HANA data/schema or API contract changed.
+# 2026-07-30 - Z.AI structured output contract remediation
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product defect | Live Z.AI calls for Classification and Smart Assign were audited as `SUCCESS`, but the UI still showed rules-based rows. Handoff Summary displayed AI content. | The shared Vercel adapter requested only a generic JSON object. Z.AI returned parseable JSON, but Classification could not map exact catalog references and Smart Assign could not map backend-issued candidate references. | Fixed locally with feature-specific JSON Schema using short catalog references (`SM1`, `AC1`, etc.) and candidate references (`C1`, `C2`, etc.). Backend remains responsible for mapping to real IDs and validating business data. | Focused/integrated local suites PASS. Deploy service only after merge, then verify fresh BTP feature calls before closing the visual defect. |
+| Tooling issue | The first focused test run in the fresh worktree failed with `Cannot find module '@sap/cds'`. | The isolated worktree did not have `node_modules` installed. | Fixed by running `npm ci`; no product behavior or configuration was changed. | Focused rerun PASS: provider 59/59, Classification 36/36 and Smart Assign 13/13. |
+| Security/dependency finding | `npm ci` completed but npm audit reported 24 findings in the existing dependency graph: 1 low, 9 moderate, 13 high and 1 critical. | These findings come from the locked baseline dependency tree; this fix adds no dependency and does not alter `package-lock.json`. | Open baseline debt; not auto-fixed because `npm audit fix --force` could introduce unrelated breaking changes. | `npm run qa:secret-scan` PASS. Handle dependency upgrades in a separate reviewed work item. |

@@ -1,5 +1,11 @@
 # `srv/ai/provider.js`
 
+## Structured schema safety boundary (2026-07-30)
+
+`sanitizeStructuredRequest()` carries an optional feature JSON Schema through the safe provider wrapper. `sanitizeJsonSchema()` clones it and rejects non-object or oversized contracts. Schemas describe output shape only; they must not contain Bug text, user data, credentials or private endpoints.
+
+Tiếng Việt: provider wrapper cho phép schema của từng tính năng đi qua, nhưng clone và giới hạn kích thước trước khi gọi adapter. Schema chỉ mô tả cấu trúc output, không chứa dữ liệu nghiệp vụ.
+
 ## 2026-07-30 bounded batch and safe rate-limit status
 
 ### English

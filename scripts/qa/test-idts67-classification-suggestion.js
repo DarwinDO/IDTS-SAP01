@@ -15,6 +15,10 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 const cds = require('@sap/cds')
 const { INSERT, SELECT, UPDATE } = cds.ql
 const { buildClassificationSuggestions } = require('../../srv/ai')
+const {
+  buildClassificationOutputSchema,
+  buildProviderCatalogInput
+} = require('../../srv/ai/classification-suggestion')
 const { containsUnsafeDiagnosticText } = require('../../srv/ai/safety')
 
 const RESULTS = []
@@ -105,6 +109,18 @@ async function main () {
   console.log(' IDTS-67 AI Classification Suggestion Verification')
   console.log(' ' + new Date().toISOString())
   console.log('========================================================')
+
+  const schemaCatalogs = buildProviderCatalogInput({
+    sapModules: [{ code: 'FI', name: 'Financial Accounting', active: true }],
+    applicationComponents: [{ code: 'IDTS_UI', name: 'IDTS UI', active: true }],
+    defectCategories: [{ code: 'UI', name: 'UI defect', active: true }],
+    priorityValues: [{ code: 'HIGH', name: 'High', active: true }],
+    severityValues: [{ code: 'MAJOR', name: 'Major', active: true }]
+  })
+  const classificationSchema = buildClassificationOutputSchema(schemaCatalogs)
+  expectEqual('classification schema requires all five grounded fields', classificationSchema.required.length, 5)
+  expectEqual('classification schema constrains SAP Module to a short catalog reference', classificationSchema.properties.sapModule.properties.catalogRef.enum[0], 'SM1')
+  expectEqual('classification schema does not expose catalog UUIDs', JSON.stringify(classificationSchema).includes(SAP_MODULE_ID), false)
 
   const rateLimitedRows = buildClassificationSuggestions({
     input: {},

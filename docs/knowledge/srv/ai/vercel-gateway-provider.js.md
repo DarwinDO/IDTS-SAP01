@@ -1,5 +1,13 @@
 # `srv/ai/vercel-gateway-provider.js`
 
+## Per-feature JSON Schema forwarding (2026-07-30)
+
+`structured()` accepts the sanitized JSON Schema produced by a feature and forwards it as `response_format.json_schema.schema`. The old generic object contract only proved parseable JSON; it could not guarantee the keys needed by Classification or Smart Assign. The generic schema remains a compatibility default for callers without a feature contract.
+
+The adapter still does not make business decisions. It parses JSON and returns it to feature grounding code; catalog mapping, candidate mapping and authorization remain in the backend feature modules.
+
+Tiếng Việt: adapter chuyển schema cụ thể tới Gateway để model trả đúng hình dạng. `SUCCESS` ở adapter chưa đủ; backend vẫn phải kiểm tra catalog/candidate thật.
+
 ## 2026-07-30 rate-limit and embedding-batch boundary
 
 ### English

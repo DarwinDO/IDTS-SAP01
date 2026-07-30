@@ -36,6 +36,7 @@ async function explainSmartAssignment (req, entities, dependencies = {}) {
   const providerResult = await provider.structured({
     featureType: FEATURE_TYPES.ASSIGNMENT_EXPLANATION,
     schemaName: 'IdtsSmartAssignmentExplanation',
+    schema: buildAssignmentOutputSchema(candidates),
     correlationId: req.id,
     instruction: [
       'Explain why each existing IDTS developer candidate may fit the bug assignment.',
@@ -381,6 +382,32 @@ function cleanCandidateRef (value) {
   return /^C[1-9]\d*$/.test(ref) ? ref : null
 }
 
+function buildAssignmentOutputSchema (candidates) {
+  const refs = (candidates || []).map(candidate => candidate.candidateRef).filter(Boolean)
+  return {
+    type: 'object',
+    additionalProperties: false,
+    properties: {
+      candidates: {
+        type: 'array',
+        minItems: refs.length ? 1 : 0,
+        maxItems: refs.length,
+        items: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            candidateRef: refs.length ? { type: 'string', enum: refs } : { type: 'string' },
+            explanation: { type: 'string', maxLength: 500 },
+            confidence: { type: 'number', minimum: 0, maximum: 1 }
+          },
+          required: ['candidateRef', 'explanation', 'confidence']
+        }
+      }
+    },
+    required: ['candidates']
+  }
+}
+
 function summarizeResult (result) {
   // Tạo summary nhỏ cho audit/telemetry, không chép toàn bộ explanation nhạy cảm.
   if (!result.length) return 'Smart assignment explanation found no eligible developer candidates.'
@@ -456,5 +483,6 @@ module.exports = {
   SMART_ASSIGNMENT_PROVIDER_DEADLINE_MS,
   explainSmartAssignment,
   buildAssignmentExplanations,
-  buildProviderInput
+  buildProviderInput,
+  buildAssignmentOutputSchema
 }

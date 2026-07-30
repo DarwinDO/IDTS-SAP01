@@ -102,6 +102,12 @@ async function main () {
   const lingResult = await lingProvider.structured({
     featureType: 'classification',
     schemaName: 'IdtsLingContract',
+    schema: {
+      type: 'object',
+      additionalProperties: false,
+      properties: { catalogRef: { type: 'string', enum: ['SM1'] } },
+      required: ['catalogRef']
+    },
     instruction: 'Return a JSON object only.',
     input: { title: 'Synthetic safe test' }
   })
@@ -110,6 +116,7 @@ async function main () {
   check('Ling structured call succeeds through the safe envelope', lingResult.ok && lingResult.data.json.ok === true)
   check('Ling call uses fixed Vercel chat-completions endpoint', lingRequests[0]?.url === `${API_BASE_URL}/chat/completions`)
   check('Ling call requests JSON Schema output', lingRequests[0]?.body?.response_format?.type === 'json_schema')
+  check('feature-specific JSON Schema reaches the gateway unchanged', lingRequests[0]?.body?.response_format?.json_schema?.schema?.properties?.catalogRef?.enum?.[0] === 'SM1')
   check('Ling result does not expose the gateway key', !JSON.stringify(lingResult).includes('test-only-gateway-key-not-for-network'))
 
   const fallbackRequests = []

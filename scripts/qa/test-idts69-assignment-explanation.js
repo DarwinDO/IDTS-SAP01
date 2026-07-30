@@ -18,7 +18,8 @@ const cds = require('@sap/cds')
 const { INSERT, SELECT } = cds.ql
 const {
   SMART_ASSIGNMENT_PROVIDER_DEADLINE_MS,
-  buildProviderInput
+  buildProviderInput,
+  buildAssignmentOutputSchema
 } = require('../../srv/ai/assignment-explanation')
 
 const BUG_ID = '94000000-0000-0000-0000-000000000001'
@@ -173,6 +174,13 @@ async function main () {
   assert.strictEqual(providerInput.candidates[0].candidateRef, 'C1')
   assert.strictEqual(Object.hasOwn(providerInput.candidates[0], 'developerProfileID'), false)
   rec('provider receives a short candidate reference instead of a developer UUID', true)
+  const assignmentSchema = buildAssignmentOutputSchema([
+    { candidateRef: 'C1' },
+    { candidateRef: 'C2' }
+  ])
+  assert.deepStrictEqual(assignmentSchema.properties.candidates.items.properties.candidateRef.enum, ['C1', 'C2'])
+  assert.strictEqual(JSON.stringify(assignmentSchema).includes(DEV_DAT), false)
+  rec('Smart Assign schema constrains output to backend-issued candidate references', true)
 
   let rejectedMissingClassification = false
   try {
