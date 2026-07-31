@@ -427,8 +427,12 @@ sap.ui.define([
         });
     }
 
-    function waitForAutoSubmit(model, attemptsRemaining) {
-        if (!model || typeof model.hasPendingChanges !== "function" || !model.hasPendingChanges()) {
+    function waitForAutoSubmit(model, updateGroupId, attemptsRemaining) {
+        if (
+            !model ||
+            typeof model.hasPendingChanges !== "function" ||
+            !model.hasPendingChanges(updateGroupId)
+        ) {
             return Promise.resolve();
         }
         if (attemptsRemaining <= 0) {
@@ -437,17 +441,23 @@ sap.ui.define([
         return new Promise(function (resolve) {
             setTimeout(resolve, 50);
         }).then(function () {
-            return waitForAutoSubmit(model, attemptsRemaining - 1);
+            return waitForAutoSubmit(model, updateGroupId, attemptsRemaining - 1);
         });
     }
 
     function flushPendingChanges(model) {
-        if (!model || typeof model.hasPendingChanges !== "function" || !model.hasPendingChanges()) {
+        if (!model || typeof model.hasPendingChanges !== "function") {
             return Promise.resolve();
         }
         var updateGroupId = typeof model.getUpdateGroupId === "function"
             ? model.getUpdateGroupId()
             : "$auto";
+        // Scope the check to the application's update group. A global check
+        // also sees UI5 value-help contexts in its internal "donotsubmit"
+        // group and can otherwise block Smart Assign even when $auto is clean.
+        if (!model.hasPendingChanges(updateGroupId)) {
+            return Promise.resolve();
+        }
         if (
             updateGroupId.charAt(0) !== "$" &&
             typeof model.submitBatch === "function"
@@ -455,7 +465,7 @@ sap.ui.define([
             return model.submitBatch(updateGroupId);
         }
         // UI5 submits $auto itself. Wait for that request instead of calling submitBatch("$auto"), which is invalid.
-        return waitForAutoSubmit(model, 40);
+        return waitForAutoSubmit(model, updateGroupId, 40);
     }
 
     function synchronizeAssignmentContext(bugContext, bug) {

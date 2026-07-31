@@ -147,3 +147,18 @@ Evidence: `docs/pm/evidence/idts-115/`.
 - The matching SAP BTP application content and service runtime are deployed at
   merge SHA `5476479312986412739fbff3cfa6da29acc7905d`. PM visual verification
   remains pending; IDTS-115 stays In Progress.
+
+## 2026-07-31 Smart Assign pending-group fix
+
+- Runtime debugging showed that opening the Assignee picker stopped before the
+  `/AssignableDevelopers` request with `Draft changes did not finish in time`.
+- The application update group `$auto` was already clean. The global OData
+  pending state was only held by UI5's internal value-help group
+  `donotsubmit`.
+- Smart Assign now checks and polls only `model.getUpdateGroupId()`. It does
+  not submit, reset, or wait for `donotsubmit`.
+- A focused regression covers an `$auto` PATCH completing while an unrelated
+  global pending group remains active.
+- Local verification passes. IDTS-115 remains In Progress until the fix is
+  merged, selectively deployed, and browser-verified for new and edit drafts.
+- Review handoff: PR #241; Jira audit comment `10767`.
