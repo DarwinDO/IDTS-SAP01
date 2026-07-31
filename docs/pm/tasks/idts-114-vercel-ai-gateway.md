@@ -241,3 +241,26 @@ No S3, Brevo, database schema, UI workflow, automatic classification/assignment,
 - No exact HTTP 429 route response occurred in the sequence. The fifth-call local guard remains covered by focused regression.
 - IDTS-114 remains In Progress pending the deferred Tester/Developer interactive role matrix.
 - Evidence: `docs/pm/evidence/idts-114/qwen-sequential-acceptance/btp-sequential-live-verification-20260731.md`.
+
+## 2026-07-31 feature-specific routing browser acceptance
+
+- SAP HANA Cloud was found stopped during the first authenticated browser
+  check. It was started without HDI deployment, schema change or data reset,
+  and a read-only bound task returned `DB_PROBE_OK`.
+- A fresh PM browser sequence on `BUG-0011` completed without HTTP 429:
+  Classification → Handoff Summary → Smart Assign → Similar Bugs.
+- Safe HANA audit readback confirms:
+  - Classification: `SUCCESS`, `openai/gpt-5.4-nano`.
+  - Handoff: `SUCCESS`, `minimax/minimax-m2.5`.
+  - Smart Assign: `SUCCESS`, `zai/glm-4.7-flash`.
+  - Similar Bugs: `SUCCESS`, `alibaba/qwen3-embedding-0.6b`.
+- Classification, Handoff and Similar Bugs passed the PM UI review. Smart
+  Assign remains partial because only one of three displayed candidates
+  received model-generated prose; the other rows clearly retained rules-based
+  guidance.
+- No review decision, Apply, Confirm Duplicate, Assign, Save or lifecycle
+  mutation was executed.
+- Evidence:
+  `docs/pm/evidence/idts-114/feature-model-routing/btp-browser-live-acceptance-20260731.md`.
+- IDTS-114 remains In Progress for Smart Assign candidate coverage and the
+  deferred Tester/Developer role matrix.
