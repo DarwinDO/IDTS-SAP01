@@ -193,18 +193,18 @@ Provider acceptance status:
 
 1. **Function name:** `explainSmartAssignment`
 2. **Purpose:** Explain fit, workload and availability for assignable developers without ranking or assigning automatically.
-3. **Actor/precondition:** Tester/PM assignment context; Application Component and Defect Category selected.
-4. **UI trigger:** Open Smart Assign.
-5. **Frontend source:** `ext/actions/SmartAssignDeveloper.js::loadAiExplanations`.
+3. **Actor/precondition:** Tester/PM assignment context; Application Component and Defect Category selected; any application draft PATCH must finish before candidate read.
+4. **UI trigger:** Open Smart Assign from a new or existing Bug draft.
+5. **Frontend source:** `ext/actions/SmartAssignDeveloper.js::openAssigneePicker/openDialog`, `synchronizeAssignmentContext`, `flushPendingChanges`, `waitForAutoSubmit` and `loadAiExplanations`.
 6. **HTTP/OData request:** `POST /odata/v4/bug/explainSmartAssignment`.
 7. **Service contract:** Unbound action returning SmartAssignmentExplanationCandidate rows.
 8. **CAP handler/helper:** `srv/ai/assignment-explanation.js::explainSmartAssignment`; assignable-developer read model and provider/audit helpers.
-9. **Validation/authorization:** Validate classification/source; candidates must come from assignable developer rows; human choice remains required.
-10. **Transaction:** Read/audit transaction; assignment is a separate action.
+9. **Validation/authorization:** Scope pending-change checks to the application update group so unrelated UI5 `donotsubmit` value-help contexts do not block Smart Assign; refresh derived classification; candidates must come from authorized assignable-developer rows; human choice remains required.
+10. **Transaction:** Wait for the application draft PATCH (`$auto`) or submit a custom update group, then refresh before the read/audit request; assignment remains a separate action.
 11. **Database/provider side effect:** Read responsibilities/workload/Bug; persist suggestion audit; optional provider call.
-12. **Response/UI refresh:** Add explanation, warnings, confidence and review status to Smart Assign candidates.
-13. **Failure/rollback:** Show fallback explanation and preserve normal manual/value-help assignment.
-14. **Test/evidence:** `qa:idts69:programmatic`, `qa:idts70:programmatic`, `qa:idts72:browser`.
+12. **Response/UI refresh:** Refresh authoritative classification, load assignable candidates, then add explanation, warnings, confidence and review status; unrelated UI5 pending groups do not block the dialog.
+13. **Failure/rollback:** An application-group timeout, refresh failure or candidate-read failure maps to `smartAssignLoadFailed`; no assignment is applied. Provider-only explanation failure uses the safe fallback and preserves manual assignment.
+14. **Test/evidence:** `qa:idts56:programmatic`, `qa:idts69:programmatic`, `qa:idts70:programmatic`, `qa:idts72:browser`, `docs/pm/evidence/idts-115/smart-assign-pending-group/rollout.md`.
 
 ### TI-AI-05 — acceptAiSuggestion
 

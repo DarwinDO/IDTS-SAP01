@@ -1,6 +1,6 @@
 # IDTS-109 Technical Specification Candidate
 
-Status: `CANDIDATE APPROVED AT COMMENT 10763 — POST-DEV-SYNC DELTA REVIEW REQUIRED — DO NOT SYNC TO MENTOR CURRENT`
+Status: `CANDIDATE UPDATED FROM LATEST DEV — DATDT JIRA DELTA CONFIRMATION REQUIRED — DO NOT SYNC TO MENTOR CURRENT`
 
 Owner: DatDT
 
@@ -17,8 +17,8 @@ Prepared: 2026-07-31
 Submission language: English only
 
 Current source baseline: `origin/dev` commit
-`69f6d06310df90a31afd63f05b7c0f2b102fe860`, merged into this branch by commit
-`72a5501d3baa54313eeb54861a01523457e243cd`.
+`a77b3796acb8494b4c4a58060613b0f20eaf7639`, merged into this branch by commit
+`2c4bc050e83023c1509207072d37d2c09d444b58`.
 
 ## Purpose
 
@@ -67,7 +67,9 @@ workbook and not evidence that the task has passed.
   separately recorded as staged with partial runtime acceptance; it must not be
   described as complete provider-primary acceptance.
 - DatDT reviewed and approved the pre-sync candidate in IDTS-109 comment `10763`.
-  The latest `dev` added three UI entry points and a Vercel provider path after that
-  approval; the corresponding delta requires review before final integration.
+  Later `dev` updates added three AI UI entry points, a Vercel provider path and
+  Smart Assign update-group scoping after that approval. The candidate has been
+  technically reconciled, but DatDT's Jira delta confirmation is still required
+  before final integration.
 - DonHV remains responsible for final workbook integration, generation, visual
   review and upload under the current shared-artifact workflow.

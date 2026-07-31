@@ -121,3 +121,23 @@ login/profile, dashboard/monitoring, notification UI and AI traces.
   integrator and Drive synchronizer after review.
 - Next handoff: DatDT confirms the post-`dev`-sync delta; DonHV reviews PR #240 and
   decides final workbook integration and Drive synchronization.
+
+## 2026-07-31 DonHV comment 10769 latest-dev reconciliation
+
+- Fetched `origin/dev` and confirmed the branch was behind by six commits.
+- Merged `origin/dev` at `a77b379` without rebase, force-push or conflict; merge
+  commit: `2c4bc05`.
+- Reviewed the IDTS-115 Smart Assign delta. The runtime change scopes draft
+  pending checks to the application update group, preventing unrelated UI5
+  `donotsubmit` contexts from blocking candidate loading.
+- Updated TI-AI-04 with the wait/refresh/read sequence, failure behavior and source
+  symbols. Added the source-derived safe load error and internal timeout family,
+  bringing the candidate message catalog from 82 to 84 rows.
+- No business requirement, backend contract, authorization boundary or official
+  Google Drive workbook changed.
+- Fresh local verification passed: 17/17 traces with all 14 fields, 84 message
+  rows, source manifest `96/19/62/485`, Smart Assign `14/0`, assignment
+  explanation `13/0`, IDTS-115 `241`, secret scan, AI DevKit lint
+  `5 ok / 0 miss / 0 warn` and `git diff --check`.
+- DatDT's Jira delta-confirmation comment remains a required human handoff after
+  fresh checks and final commit SHA are available.
