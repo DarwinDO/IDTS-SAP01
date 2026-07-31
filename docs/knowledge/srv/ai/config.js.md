@@ -1,5 +1,26 @@
 # `srv/ai/config.js`
 
+## 2026-07-31 request-budget settings
+
+### English
+
+`requestLimit` and `requestWindowSeconds` normalize
+`IDTS_AI_REQUEST_LIMIT` and `IDTS_AI_REQUEST_WINDOW_SECONDS`. A zero limit
+disables proactive limiting for local/default configuration. SAP BTP sets
+`4/60`, meaning at most four outbound requests per model in sixty seconds.
+These values contain no credential and may be inspected safely; the Gateway
+key must still never be opened or logged.
+
+Flow: BTP environment → `runtimeOverrides()` → `normalizeAiConfig()` →
+`VercelGatewayProvider.reserveModelRequest()`.
+
+### Tiếng Việt
+
+`requestLimit` và `requestWindowSeconds` đọc hai biến môi trường giới hạn
+request. Giá trị `0` tắt giới hạn chủ động ở cấu hình mặc định/local. SAP BTP
+dùng `4/60`: tối đa bốn request cho từng model trong sáu mươi giây. Có thể
+kiểm tra hai số này khi debug, nhưng không được xem hoặc ghi Gateway key.
+
 ## Beginner-first execution map (2026-07-18)
 
 ### English

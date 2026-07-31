@@ -192,3 +192,23 @@ No S3, Brevo, database schema, UI workflow, automatic classification/assignment,
 - The focused remediation forwards a bounded per-feature JSON Schema. Classification can select only active short catalog references (`SM/AC/DC/P/S`), and Smart Assign can explain only backend-issued candidate references (`C1..Cn`). UUIDs remain backend-only.
 - Local verification PASS: provider 59/59, Classification 36/36, Smart Assign 13/13, AI provider 38/38, Handoff 45/45, AI security 31/31, CAP compile, secret/process gates, AI DevKit 5/5 and `git diff --check`.
 - No provider/model/key, OData contract, HANA schema, role, workflow or UI contract changed. Fresh BTP feature calls remain required before declaring the visual defect closed.
+
+## 2026-07-31 proactive per-model request budget
+
+- Browser/Gateway evidence showed that Z.AI could complete several structured
+  calls and then return HTTP 429. The existing protection only started after
+  that first upstream 429.
+- The focused correction reserves provider capacity before each call and
+  limits each model alias to four requests in a rolling sixty-second window on
+  the current application instance. Z.AI structured calls and Qwen embedding
+  calls therefore do not consume each other's local budget.
+- A locally rejected fifth structured call returns the existing safe
+  `AI_RATE_LIMITED` result and does not trigger OpenAI. This prevents the
+  predictable upstream 429 but does not claim to increase provider quota.
+- Fresh local results pass IDTS-64 `38/38`, IDTS-66 `45/45`, IDTS-67 `36/36`,
+  IDTS-68 `47/47`, IDTS-69 `13/13`, IDTS-71 `31/31`, IDTS-114 `63/63`, CAP
+  compile, MTA parse, secret/process gates, AI DevKit and `git diff --check`.
+  Evidence:
+  `docs/pm/evidence/idts-114/rate-limit-request-bounding/proactive-model-budget-20260731.md`.
+- Selective SAP BTP rollout and sequential live verification remain pending;
+  IDTS-114 stays In Progress.

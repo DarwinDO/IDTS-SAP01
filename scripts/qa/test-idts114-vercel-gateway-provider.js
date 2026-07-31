@@ -468,6 +468,61 @@ async function main () {
   )
 
   resetGatewayCooldownForTest()
+  let proactiveNow = 3_000_000
+  const proactiveRequests = []
+  const proactiveProvider = createAiProvider(gatewayConfig({
+    modelAlias: 'zai/glm-4.7-flash',
+    requestLimit: 2,
+    requestWindowSeconds: 60
+  }), {
+    now: () => proactiveNow,
+    fetchImpl: async (url, options) => {
+      proactiveRequests.push(JSON.parse(options.body).model)
+      return jsonResponse(200, { choices: [{ message: { content: '{"ok":true}' } }] })
+    }
+  })
+  const proactiveCall = title => proactiveProvider.structured({
+    featureType: 'classification',
+    schemaName: 'IdtsProactiveRateLimit',
+    instruction: 'Return JSON only.',
+    input: { title }
+  })
+  await proactiveCall('Synthetic request one')
+  await proactiveCall('Synthetic request two')
+  const proactivelyLimited = await proactiveCall('Synthetic request three')
+  check('configured request limit reaches the provider only twice', proactiveRequests.length === 2)
+  check(
+    'request beyond the local model budget returns safe AI_RATE_LIMITED',
+    proactivelyLimited.ok === false && proactivelyLimited.status === 'AI_RATE_LIMITED'
+  )
+
+  const isolatedEmbeddingProvider = createAiProvider(gatewayConfig({
+    modelAlias: 'zai/glm-4.7-flash',
+    embeddingModelAlias: 'alibaba/qwen3-embedding-0.6b',
+    requestLimit: 2,
+    requestWindowSeconds: 60
+  }), {
+    now: () => proactiveNow,
+    fetchImpl: async (url, options) => {
+      const body = JSON.parse(options.body)
+      proactiveRequests.push(body.model)
+      return jsonResponse(200, { data: [{ index: 0, embedding: [0.1, 0.2, 0.3] }] })
+    }
+  })
+  const isolatedEmbedding = await isolatedEmbeddingProvider.embedding({
+    featureType: 'duplicate_detection',
+    text: 'Synthetic embedding remains isolated'
+  })
+  check(
+    'Z.AI structured budget does not block the separate Qwen embedding model',
+    isolatedEmbedding.ok === true && proactiveRequests.at(-1) === 'alibaba/qwen3-embedding-0.6b'
+  )
+
+  proactiveNow += 61_000
+  const recoveredProactiveCall = await proactiveCall('Synthetic request after window')
+  check('request budget recovers after its configured window', recoveredProactiveCall.ok === true && proactiveRequests.filter(model => model === 'zai/glm-4.7-flash').length === 3)
+
+  resetGatewayCooldownForTest()
   activateGatewayCooldown(null, 2_000_000)
   check('missing Retry-After uses the safe 60-second default', remainingCooldownSeconds(2_000_000) === 60)
   resetGatewayCooldownForTest()

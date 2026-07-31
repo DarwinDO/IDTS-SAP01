@@ -13,6 +13,8 @@ const DEFAULTS = Object.freeze({
   fallbackEnabled: false,
   fallbackModelAlias: null,
   fallbackEmbeddingModelAlias: null,
+  requestLimit: 0,
+  requestWindowSeconds: 60,
   mockMode: 'success',
   mockEmbeddingDimensions: 8
 })
@@ -47,6 +49,8 @@ function normalizeAiConfig (raw = {}) {
     fallbackEnabled: toBoolean(raw.fallbackEnabled, DEFAULTS.fallbackEnabled),
     fallbackModelAlias: safeModelId(raw.fallbackModelAlias) || DEFAULTS.fallbackModelAlias,
     fallbackEmbeddingModelAlias: safeModelId(raw.fallbackEmbeddingModelAlias) || DEFAULTS.fallbackEmbeddingModelAlias,
+    requestLimit: toNonNegativeInteger(raw.requestLimit, DEFAULTS.requestLimit),
+    requestWindowSeconds: toPositiveInteger(raw.requestWindowSeconds, DEFAULTS.requestWindowSeconds),
     mockMode,
     mockResponseText: toStringOrNull(raw.mockResponseText),
     mockStructuredOutput: normalizeMockStructuredOutput(raw.mockStructuredOutput),
@@ -82,6 +86,8 @@ function runtimeOverrides (env = {}) {
     ['fallbackEnabled', env.IDTS_AI_FALLBACK_ENABLED],
     ['fallbackModelAlias', env.IDTS_AI_FALLBACK_MODEL],
     ['fallbackEmbeddingModelAlias', env.IDTS_AI_EMBEDDING_FALLBACK_MODEL],
+    ['requestLimit', env.IDTS_AI_REQUEST_LIMIT],
+    ['requestWindowSeconds', env.IDTS_AI_REQUEST_WINDOW_SECONDS],
     ['timeoutMs', env.IDTS_AI_TIMEOUT_MS],
     ['maxInputChars', env.IDTS_AI_MAX_INPUT_CHARS]
   ].filter(([, value]) => value !== undefined))
@@ -164,6 +170,11 @@ function toPositiveInteger (value, fallback) {
   // Parse timeout/limit dương và fallback khi invalid.
   const parsed = Number(value)
   return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback
+}
+
+function toNonNegativeInteger (value, fallback) {
+  const parsed = Number(value)
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : fallback
 }
 
 function toStringOrNull (value) {
