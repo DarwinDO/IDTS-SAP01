@@ -297,10 +297,12 @@ async function verifyUiActionModule() {
   ]
 
   const model = {
-    pendingChecks: 0,
-    hasPendingChanges() {
-      this.pendingChecks += 1
-      return this.pendingChecks === 1
+    pendingGroups: [],
+    hasPendingChanges(groupId) {
+      this.pendingGroups.push(groupId)
+      // UI5 value-help bindings may keep their internal "donotsubmit" group
+      // pending while the application update group completes normally.
+      return groupId === '$auto' ? this.pendingGroups.length === 1 : true
     },
     getUpdateGroupId() {
       return '$auto'
@@ -417,9 +419,9 @@ async function verifyUiActionModule() {
   assert(bindListFilters.some(filter => filter.pathName === 'componentCategoryID' && filter.value === COMPONENT_CATEGORY_1))
   assert.strictEqual(hooks.dialog, dialog)
   assert.strictEqual(hooks.refreshed, true)
-  assert.strictEqual(model.pendingChecks >= 2, true)
+  assert.deepStrictEqual(model.pendingGroups, ['$auto', '$auto'])
   rec('dialog loads assignable developers filtered by bug component category', true)
-  rec('auto-group draft PATCH completes without submitBatch($auto)', true)
+  rec('unrelated UI5 pending groups do not block the auto-group candidate read', true)
 
   await new Promise(resolve => setImmediate(resolve))
   await new Promise(resolve => setImmediate(resolve))

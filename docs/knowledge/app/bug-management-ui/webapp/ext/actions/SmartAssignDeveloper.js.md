@@ -125,6 +125,20 @@ Before Smart Assign validates `componentCategory_ID`, `flushPendingChanges()` le
 
 If synchronization fails, both Smart Assign entry points catch the rejected promise and show a localized safe message. A complete component/category pair without a derived mapping is reported differently from an incomplete pair.
 
+The pending check is scoped to `model.getUpdateGroupId()` (normally `$auto`).
+UI5 value-help bindings may retain transient recommendation contexts in the
+internal `donotsubmit` group. That unrelated group must never delay, submit, or
+reset Smart Assign. When global pending is `true` but `$auto` pending is
+`false`, the flow refreshes the Bug context and requests
+`/AssignableDevelopers` immediately.
+
+Vietnamese: Kiem tra pending phai gioi han theo
+`model.getUpdateGroupId()` (thuong la `$auto`). Value help cua UI5 co the giu
+transient context trong group noi bo `donotsubmit`; Smart Assign khong duoc
+cho, submit hoac reset group nay. Neu global pending la `true` nhung `$auto`
+pending la `false`, flow phai refresh Bug context va doc
+`/AssignableDevelopers` ngay.
+
 ### Vietnamese
 
 Trước khi Smart Assign kiểm tra `componentCategory_ID`, `flushPendingChanges()` chờ PATCH của draft hoàn tất. Hàm chỉ submit một application update group có tên. Các group như `$auto` và `$direct` là group dành riêng của CAP OData V4, vì vậy module tuyệt đối không gọi `submitBatch("$auto")`; thay vào đó nó kiểm tra `hasPendingChanges()` cho đến khi cơ chế tự động gửi xong. Sau đó Bug context được refresh và ba thuộc tính classification được đọc lại. Backend `prepareDraftPatch()` và `deriveOrValidateComponentCategory()` vẫn là nguồn quyết định cuối cùng.
