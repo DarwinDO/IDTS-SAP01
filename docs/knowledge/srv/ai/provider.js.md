@@ -6,9 +6,16 @@
 the Vercel delegate. The public feature contract does not change; only the
 private model metadata sent to the delegate changes:
 
-- `CLASSIFICATION` -> GPT-5.6 Luna.
-- `BUG_SUMMARY` -> DeepSeek V4 Flash with the dedicated Handoff backup.
+- `CLASSIFICATION` -> OpenAI GPT-5.4 Nano.
+- `BUG_SUMMARY` -> MiniMax M2.5 with one dedicated Grok 4.1 backup.
 - `ASSIGNMENT_EXPLANATION` -> Z.AI GLM 4.7 Flash.
+
+Similar Bugs remains on Qwen embedding and does not use this structured-model
+route. The Handoff backup is permitted only for the allowlisted
+`no_providers_available`/model-route denial and the existing eligible
+network/5xx conditions. HTTP 429 never switches models. A generic account/key
+`access_denied` response also remains visible as a sanitized failure instead
+of being hidden by Grok.
 
 `successResult()` and `failureResult()` use the same route when recording the
 safe model alias, so audit evidence identifies the attempted/actual feature

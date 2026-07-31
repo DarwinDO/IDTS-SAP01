@@ -93,28 +93,33 @@ async function main () {
   check('Vercel config requires the private gateway key', incomplete.ready === false && incomplete.missing.includes('gatewayApiKey'))
 
   const routedConfig = gatewayConfig({
-    classificationModelAlias: 'openai/gpt-5.6-luna',
-    handoffModelAlias: 'deepseek/deepseek-v4-flash',
+    modelAlias: 'zai/glm-4.7-flash',
+    classificationModelAlias: 'openai/gpt-5.4-nano',
+    handoffModelAlias: 'minimax/minimax-m2.5',
     assignmentModelAlias: 'zai/glm-4.7-flash',
     fallbackEnabled: true,
     fallbackModelAlias: 'openai/gpt-5.4-nano',
     handoffFallbackModelAlias: 'xai/grok-4.1-fast-non-reasoning'
   })
-  check('classification keeps its dedicated model alias', routedConfig.classificationModelAlias === 'openai/gpt-5.6-luna')
-  check('handoff keeps its dedicated primary model alias', routedConfig.handoffModelAlias === 'deepseek/deepseek-v4-flash')
-  check('Smart Assign keeps its dedicated model alias', routedConfig.assignmentModelAlias === 'zai/glm-4.7-flash')
-  check('handoff keeps exactly one dedicated backup alias', routedConfig.handoffFallbackModelAlias === 'xai/grok-4.1-fast-non-reasoning')
+  check('classification uses the approved GPT nano primary', routedConfig.classificationModelAlias === 'openai/gpt-5.4-nano')
+  check('handoff uses the approved MiniMax primary', routedConfig.handoffModelAlias === 'minimax/minimax-m2.5')
+  check('Smart Assign keeps the proven Z.AI primary', routedConfig.assignmentModelAlias === 'zai/glm-4.7-flash')
+  check('handoff keeps exactly one dedicated Grok backup', routedConfig.handoffFallbackModelAlias === 'xai/grok-4.1-fast-non-reasoning')
   const routedEnvironment = runtimeOverrides({
-    IDTS_AI_CLASSIFICATION_MODEL: 'openai/gpt-5.6-luna',
-    IDTS_AI_HANDOFF_MODEL: 'deepseek/deepseek-v4-flash',
+    IDTS_AI_MODEL: 'zai/glm-4.7-flash',
+    IDTS_AI_CLASSIFICATION_MODEL: 'openai/gpt-5.4-nano',
+    IDTS_AI_HANDOFF_MODEL: 'minimax/minimax-m2.5',
     IDTS_AI_ASSIGNMENT_MODEL: 'zai/glm-4.7-flash',
+    IDTS_AI_FALLBACK_MODEL: 'openai/gpt-5.4-nano',
     IDTS_AI_HANDOFF_FALLBACK_MODEL: 'xai/grok-4.1-fast-non-reasoning'
   })
   check(
     'SAP BTP environment names map to every feature route',
-    routedEnvironment.classificationModelAlias === 'openai/gpt-5.6-luna' &&
-      routedEnvironment.handoffModelAlias === 'deepseek/deepseek-v4-flash' &&
+    routedEnvironment.modelAlias === 'zai/glm-4.7-flash' &&
+      routedEnvironment.classificationModelAlias === 'openai/gpt-5.4-nano' &&
+      routedEnvironment.handoffModelAlias === 'minimax/minimax-m2.5' &&
       routedEnvironment.assignmentModelAlias === 'zai/glm-4.7-flash' &&
+      routedEnvironment.fallbackModelAlias === 'openai/gpt-5.4-nano' &&
       routedEnvironment.handoffFallbackModelAlias === 'xai/grok-4.1-fast-non-reasoning'
   )
 
@@ -145,8 +150,8 @@ async function main () {
     input: { title: 'Synthetic assignment route' }
   })
   check(
-    'structured features route to Luna, DeepSeek, and ZAI without changing their public contract',
-    routedRequests.join(',') === 'openai/gpt-5.6-luna,deepseek/deepseek-v4-flash,zai/glm-4.7-flash'
+    'structured features route to GPT nano, MiniMax, and Z.AI without changing their public contract',
+    routedRequests.join(',') === 'openai/gpt-5.4-nano,minimax/minimax-m2.5,zai/glm-4.7-flash'
   )
 
   const handoffDeniedModels = []
@@ -154,10 +159,10 @@ async function main () {
     fetchImpl: async (url, options) => {
       const model = JSON.parse(options.body).model
       handoffDeniedModels.push(model)
-      if (model === 'deepseek/deepseek-v4-flash') {
+      if (model === 'minimax/minimax-m2.5') {
         return jsonResponse(403, {
           error: {
-            code: 'model_access_denied',
+            type: 'no_providers_available',
             message: 'The requested model is not available for this route.'
           }
         })
@@ -172,8 +177,8 @@ async function main () {
     input: { title: 'Synthetic model access denial' }
   })
   check(
-    'model-specific DeepSeek denial uses Grok exactly once',
-    handoffDeniedModels.join(',') === 'deepseek/deepseek-v4-flash,xai/grok-4.1-fast-non-reasoning'
+    'MiniMax no-provider denial uses Grok exactly once',
+    handoffDeniedModels.join(',') === 'minimax/minimax-m2.5,xai/grok-4.1-fast-non-reasoning'
   )
   check(
     'handoff backup records the actual Grok model',
@@ -187,7 +192,7 @@ async function main () {
     fetchImpl: async (url, options) => {
       const model = JSON.parse(options.body).model
       handoffUnavailableModels.push(model)
-      if (model === 'deepseek/deepseek-v4-flash') {
+      if (model === 'minimax/minimax-m2.5') {
         return jsonResponse(503, { error: { code: 'upstream_unavailable', message: 'Temporary outage.' } })
       }
       return jsonResponse(200, { choices: [{ message: { content: '{"backup":true}' } }] })
@@ -201,7 +206,7 @@ async function main () {
   })
   check(
     'handoff 5xx uses the dedicated Grok backup exactly once',
-    handoffUnavailableModels.join(',') === 'deepseek/deepseek-v4-flash,xai/grok-4.1-fast-non-reasoning'
+    handoffUnavailableModels.join(',') === 'minimax/minimax-m2.5,xai/grok-4.1-fast-non-reasoning'
   )
   check(
     'handoff 5xx backup reports the actual Grok model',
@@ -224,7 +229,7 @@ async function main () {
     instruction: 'Return JSON only.',
     input: { title: 'Synthetic rate limit' }
   })
-  check('handoff 429 never spends the Grok backup', handoffRateLimitedModels.join(',') === 'deepseek/deepseek-v4-flash')
+  check('handoff 429 never spends the Grok backup', handoffRateLimitedModels.join(',') === 'minimax/minimax-m2.5')
   check('handoff 429 returns the safe cooldown status', handoffRateLimitedResult.status === 'AI_RATE_LIMITED')
   resetGatewayCooldownForTest()
 

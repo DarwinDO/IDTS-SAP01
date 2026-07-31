@@ -2,8 +2,8 @@
 
 ## Baseline
 
-- Source branch: `fix/idts-114-feature-model-routing-donhv`
-- Frozen base SHA: `96c5ea60467f80b7b6f9d6b4f0d59f7f1810c2bf`
+- Source branch: `fix/idts-114-feature-model-routing-fallbacks-donhv`
+- Frozen base SHA: `9a61926fc26feb245dcf86b16dae550c074a1ee5`
 - Environment: local isolated worktree
 - Secret handling: no key, credential, endpoint, prompt, or raw provider body was read or written
 
@@ -12,13 +12,19 @@
 | Capability | Primary model | Bounded backup behavior |
 | --- | --- | --- |
 | Similar Bugs | `alibaba/qwen3-embedding-0.6b` | Existing embedding policy |
-| Classification | `openai/gpt-5.6-luna` | Existing eligible global fallback policy |
-| Handoff Summary | `deepseek/deepseek-v4-flash` | One `xai/grok-4.1-fast-non-reasoning` attempt for eligible model-route denial, timeout, network failure, or HTTP 5xx |
+| Classification | `openai/gpt-5.4-nano` | No model-access fallback; safe deterministic result remains available |
+| Handoff Summary | `minimax/minimax-m2.5` | One `xai/grok-4.1-fast-non-reasoning` attempt for eligible model-route denial, timeout, network failure, or HTTP 5xx |
 | Smart Assign Explanation | `zai/glm-4.7-flash` | Existing eligible global fallback policy |
 
 HTTP 429 never calls another model. Generic HTTP 403 never calls another model.
-Only explicit allowlisted model-route denial codes enable the Handoff-specific
-Grok backup.
+Only explicit allowlisted model-route denial codes, including Vercel's
+`no_providers_available`, enable the Handoff-specific Grok backup. A generic
+account/key `access_denied` response does not.
+
+GPT-5.6 Luna and DeepSeek V4 Flash are excluded from the active route because
+the current Vercel Hobby team returned HTTP 403 `no_providers_available`
+before inference. A bounded same-key probe returned HTTP 200 for MiniMax M2.5,
+so MiniMax is the Handoff primary while Grok remains its backup.
 
 ## Focused evidence
 
