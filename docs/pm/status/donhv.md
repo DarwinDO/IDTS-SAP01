@@ -5068,6 +5068,13 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
 | Tooling issue | The first multi-suite regression command could not resolve `@sap/cds` in the fresh worktree. | Git worktrees do not include `node_modules`, and the wrapper command did not propagate the intended shared `NODE_PATH` into each npm process. | Resolved by prefixing each verification command with the existing dependency runtime path; no install, package or lockfile change is required. | Rerun every selected suite separately and report its fresh exit code. |
 | Tooling issue | CDS compile suites still could not resolve `@cap-js/attachments` through `NODE_PATH` alone. | The CDS compiler resolves this package from the worktree dependency tree. | Resolved with a temporary local `node_modules` junction to the existing installed dependency tree. The junction is removed before commit and is not a repository change. | Related suites and CAP compile now PASS. |
 
+## 2026-07-31 - Handoff audit storage overflow found during BTP acceptance
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product defect | A live `summarizeBugHandoff` call on `BUG-0012` reached Z.AI successfully, but the OData action returned HTTP 500 and the dialog stayed at `Preparing summary...`. | `redactSensitiveText(value, 500)` retained 500 source characters and appended a 12-character truncation marker. HANA therefore rejected the resulting value for `AiSuggestions.summary : String(500)`. This is an audit-persistence defect, not a provider 429. | Fixed locally on `fix/idts-114-ai-audit-text-bound-donhv` by counting the truncation marker inside the requested maximum length. | Red test reproduced `512 != 500`; corrected IDTS-64 suite passes `40/40`. Run the Handoff/AI regressions, merge normally, selectively redeploy the service, then repeat the same BTP call. |
+| Tooling issue | The first focused run in the fresh worktree could not resolve `@sap/cds`. | Fresh worktrees do not contain dependencies, and the root dependency directory was incomplete. | Resolved with a temporary junction to an existing locked dependency tree; no dependency or lockfile changed. | Remove the junction before commit. |
+
 Local result: proactive per-model request budgeting passes the focused provider
 suite `63/63` and the IDTS-64/66/67/68/69/71 regressions. CAP compile, MTA YAML
 parse, secret/process gates, AI DevKit and `git diff --check` pass. Selective

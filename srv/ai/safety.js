@@ -36,7 +36,9 @@ function redactSensitiveText (value, maxLength = 8000) {
     text = text.replace(pattern.regex, `[redacted:${pattern.name}]`)
   }
   if (text.length > maxLength) {
-    return `${text.slice(0, maxLength)}…[truncated]`
+    const marker = '...[truncated]'
+    if (maxLength <= marker.length) return text.slice(0, maxLength)
+    return `${text.slice(0, maxLength - marker.length)}${marker}`
   }
   return text
 }
