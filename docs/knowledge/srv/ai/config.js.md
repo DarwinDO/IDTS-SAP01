@@ -10,6 +10,18 @@ embedding alias for Similar Bugs. `runtimeOverrides()` maps the corresponding
 SAP BTP environment variables. Handoff also has one dedicated backup alias;
 the private Gateway key is still shared only in memory and is never returned.
 
+The active SAP BTP routing is:
+
+- Classification: `openai/gpt-5.4-nano`.
+- Handoff Summary: `minimax/minimax-m2.5`.
+- Handoff bounded backup: `xai/grok-4.1-fast-non-reasoning`.
+- Smart Assign Explanation: `zai/glm-4.7-flash`.
+- Similar Bugs embedding: `alibaba/qwen3-embedding-0.6b`.
+
+Only Handoff may use the dedicated Grok backup, and only for an allowlisted
+model-route denial or the existing eligible network/5xx conditions. HTTP 429
+continues to enter cooldown and never spends another model.
+
 Flow: SAP BTP environment -> `runtimeOverrides()` -> `normalizeAiConfig()` ->
 `SafeAiProvider.structured()` -> feature route.
 

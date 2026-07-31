@@ -344,12 +344,15 @@ function isFallbackEligible (error, { allowModelAccessFallback = false } = {}) {
 }
 
 function isModelAccessDenied (payload) {
-  // Generic `access_denied` can indicate a key/team/account restriction.
-  // Only explicit model-route denial codes may use the one Handoff backup.
+  // Generic `access_denied` can indicate a key/team/account restriction and
+  // must stay visible. Vercel uses `no_providers_available` when the selected
+  // model has no eligible upstream route; that specific condition may spend
+  // one bounded structured fallback request.
   return [
     'model_access_denied',
     'model_not_allowed',
-    'provider_model_access_denied'
+    'provider_model_access_denied',
+    'no_providers_available'
   ].includes(safeProviderErrorCode(payload))
 }
 
