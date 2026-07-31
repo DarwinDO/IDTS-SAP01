@@ -35,10 +35,14 @@ class SafeAiProvider {
   }
 
   structured (request = {}) {
+    const route = structuredModelRoute(this.config, request.featureType)
     return this.#run(
       'structured',
       request,
-      () => this.delegate.structured(sanitizeStructuredRequest(request, this.config)),
+      () => this.delegate.structured({
+        ...sanitizeStructuredRequest(request, this.config),
+        ...route
+      }),
       operationTimeoutMs(this.config, request)
     )
   }
@@ -269,7 +273,7 @@ function successResult ({ operation, featureType, correlationId, durationMs, dat
     correlationId,
     durationMs,
     providerAlias: providerAlias || config.provider,
-    modelAlias: modelAlias || modelAliasFor(operation, config),
+    modelAlias: modelAlias || modelAliasFor(operation, config, featureType),
     fallbackUsed: Boolean(fallbackUsed),
     data
   })
@@ -311,7 +315,7 @@ function failureResult ({ operation, featureType, correlationId, durationMs, cod
     correlationId,
     durationMs,
     providerAlias: config.provider,
-    modelAlias: modelAliasFor(operation, config),
+    modelAlias: modelAliasFor(operation, config, featureType),
     error: Object.freeze({
       code,
       summary,
@@ -320,11 +324,41 @@ function failureResult ({ operation, featureType, correlationId, durationMs, cod
   })
 }
 
-function modelAliasFor (operation, config) {
+function modelAliasFor (operation, config, featureType = 'GENERAL') {
   // Chọn alias model theo operation chat/structured/embedding cho audit, không trả model endpoint/key.
-  return operation.startsWith('embedding')
-    ? (config.embeddingModelAlias || config.modelAlias || 'not-configured')
-    : (config.modelAlias || 'not-configured')
+  if (operation.startsWith('embedding')) return config.embeddingModelAlias || config.modelAlias || 'not-configured'
+  if (operation === 'structured') return structuredModelRoute(config, featureType).modelAlias || 'not-configured'
+  return config.modelAlias || 'not-configured'
+}
+
+function structuredModelRoute (config, featureType) {
+  const normalized = safeFeatureType(featureType)
+  if (normalized === 'CLASSIFICATION') {
+    return {
+      modelAlias: config.classificationModelAlias || config.modelAlias,
+      fallbackModelAlias: config.fallbackModelAlias,
+      allowModelAccessFallback: false
+    }
+  }
+  if (normalized === 'BUG_SUMMARY' || normalized === 'HANDOFF_SUMMARY') {
+    return {
+      modelAlias: config.handoffModelAlias || config.modelAlias,
+      fallbackModelAlias: config.handoffFallbackModelAlias || config.fallbackModelAlias,
+      allowModelAccessFallback: true
+    }
+  }
+  if (normalized === 'ASSIGNMENT_EXPLANATION' || normalized === 'SMART_ASSIGNMENT') {
+    return {
+      modelAlias: config.assignmentModelAlias || config.modelAlias,
+      fallbackModelAlias: config.fallbackModelAlias,
+      allowModelAccessFallback: false
+    }
+  }
+  return {
+    modelAlias: config.modelAlias,
+    fallbackModelAlias: config.fallbackModelAlias,
+    allowModelAccessFallback: false
+  }
 }
 
 function withTimeout (promise, timeoutMs) {
@@ -350,5 +384,6 @@ module.exports = {
   sanitizeEmbeddingBatchRequest,
   sanitizeEmbeddingRequest,
   sanitizeJsonSchema,
-  sanitizeStructuredRequest
+  sanitizeStructuredRequest,
+  structuredModelRoute
 }

@@ -14,10 +14,16 @@ Jira: https://dutassociation.atlassian.net/browse/IDTS-114
 
 ## Scope
 
-Add a minimal Vercel AI Gateway provider adapter to the existing safe AI abstraction. The staged configuration is Ling first, Qwen primary later, then one OpenAI fallback. The AI functions remain advisory and human-reviewed.
+Add a minimal Vercel AI Gateway provider adapter to the existing safe AI abstraction. The current SAP BTP configuration routes each capability to a separately bounded model while preserving the same advisory, human-reviewed business contract.
 
 ## Current progress
 
+- Feature-specific model routing is under verification on 2026-07-31:
+  - Similar Bugs embedding: `alibaba/qwen3-embedding-0.6b`.
+  - Classification: `openai/gpt-5.6-luna`.
+  - Handoff Summary: `deepseek/deepseek-v4-flash`, with one dedicated `xai/grok-4.1-fast-non-reasoning` backup for eligible route/model denial, timeout, network failure, or HTTP 5xx.
+  - Smart Assign Explanation: `zai/glm-4.7-flash`.
+  - HTTP 429 never spends another model. Generic HTTP 403 also stops safely because it may indicate a key, account, or team permission problem rather than a model-specific outage.
 - Implemented a native-fetch Vercel adapter with structured chat, embeddings, bounded timeout, and one safe fallback attempt.
 - Added non-secret runtime override names and private configuration example placeholders.
 - Completed deterministic provider and existing AI regressions; see `docs/pm/evidence/idts-114/README.md`.
