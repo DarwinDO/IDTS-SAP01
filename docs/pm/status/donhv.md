@@ -5109,3 +5109,5 @@ generic HTTP 403 do not switch models. Focused routing is 77/77 PASS; AI
 feature regressions, secret/process gates, CAP compile/build, MTA parse, AI
 DevKit and `git diff --check` pass. SAP BTP deployment/live provider acceptance
 remains pending normal PR merge.
+
+| Process issue | PR #246 initially failed `qa-depth-gate` although all evidence sections existed. | The Ownership Knowledge Gate section summarized prior PASS evidence in prose instead of the exact twelve `Field: value` lines required by `check-pr-depth.js`. | Fixed in the PR body using the existing IDTS-89/90 PASS evidence; no gate was invented or repeated. | Push the status/evidence correction and wait for a fresh PR synchronize check. |
