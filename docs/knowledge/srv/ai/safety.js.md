@@ -62,6 +62,22 @@ Bug text is user input. A user may accidentally paste a token, database URL, SMT
 - Never log raw provider request/response just to debug a failure.
 - Keep user-facing error text generic.
 
+## 2026-07-31 storage-bound correction
+
+`redactSensitiveText()` previously kept `maxLength` source characters and then
+appended a truncation marker. A 500-character audit value therefore became 512
+characters and HANA rejected `AiSuggestions.summary : String(500)`. The helper
+now reserves space for the marker, so the complete returned string never
+exceeds the caller's limit. Break here when an AI operation succeeds but its
+audit insert fails with a column-length error.
+
+`redactSensitiveText()` trước đây giữ đủ `maxLength` ký tự rồi mới nối thêm dấu
+đã cắt. Vì vậy giá trị audit giới hạn 500 ký tự lại dài thành 512 ký tự và HANA
+từ chối ghi vào `AiSuggestions.summary : String(500)`. Helper hiện chừa sẵn chỗ
+cho dấu đã cắt, nên toàn bộ chuỗi trả về không bao giờ vượt giới hạn caller yêu
+cầu. Hãy đặt breakpoint tại đây khi provider trả SUCCESS nhưng bước ghi audit
+bị lỗi độ dài cột.
+
 ## Tiếng Việt
 
 ### File này dùng để làm gì

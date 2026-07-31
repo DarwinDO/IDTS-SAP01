@@ -212,3 +212,16 @@ No S3, Brevo, database schema, UI workflow, automatic classification/assignment,
   `docs/pm/evidence/idts-114/rate-limit-request-bounding/proactive-model-budget-20260731.md`.
 - Selective SAP BTP rollout and sequential live verification remain pending;
   IDTS-114 stays In Progress.
+
+## 2026-07-31 live acceptance follow-up: bounded audit text
+
+- The proactive Z.AI request budget deployed successfully at merge SHA
+  `809f963376467c7542665991b54de3bd0daea955`.
+- Live Classification returned grounded Z.AI suggestions successfully.
+- The following Handoff call also returned provider-level `SUCCESS`, proving
+  the new request budget did not cause a provider 429. Persistence then failed
+  separately because the sanitized audit summary exceeded the HANA
+  `String(500)` column after its truncation marker was appended.
+- The focused correction makes every sanitized value, including its marker,
+  fit within the caller's declared maximum. IDTS-114 remains In Progress until
+  the correction is deployed and the sequential browser check is repeated.

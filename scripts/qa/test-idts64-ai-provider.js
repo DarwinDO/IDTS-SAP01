@@ -210,6 +210,9 @@ async function main () {
   const redacted = redactSensitiveText(`AWS key AKIA${'1'.repeat(16)} and xkeysib-${'1'.repeat(30)}`)
   expectTruthy('redactor masks AWS access key', redacted.includes('[redacted:awsAccessKey]'))
   expectTruthy('redactor masks Brevo API key', redacted.includes('[redacted:brevoApiKey]'))
+  const boundedRedaction = redactSensitiveText('x'.repeat(700), 500)
+  expectEqual('redactor output stays within the requested persistence limit', boundedRedaction.length, 500)
+  expectTruthy('bounded redaction keeps an explicit truncation marker', boundedRedaction.endsWith('...[truncated]'))
 
   console.log('')
   console.log('==============================================')
