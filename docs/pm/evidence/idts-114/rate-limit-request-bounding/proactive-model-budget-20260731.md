@@ -76,6 +76,11 @@ distributed lock, cache service, or database state.
 
 ## Pending live verification
 
+- The first remote QA Depth run used an incomplete Knowledge Gate block. The PR
+  body was corrected to the repository's exact field schema. Re-running the
+  old workflow attempt reused its original event payload, so a normal follow-up
+  documentation commit is used to trigger a fresh `synchronize` event; no gate
+  is bypassed.
 - Merge the normal PR after fresh QA Depth Gate passes.
 - Selectively deploy `idts-sap01-srv`; do not select the HDI deployer.
 - Verify health and protected OData behavior.

@@ -5072,3 +5072,5 @@ Local result: proactive per-model request budgeting passes the focused provider
 suite `63/63` and the IDTS-64/66/67/68/69/71 regressions. CAP compile, MTA YAML
 parse, secret/process gates, AI DevKit and `git diff --check` pass. Selective
 SAP BTP deployment remains pending.
+
+| Process issue | PR #243 QA Depth initially failed after the Ownership Knowledge Gate block omitted fields required by the current parser. A failed-run rerun continued to use the original PR event payload after the body was corrected. | PR body / GitHub Actions event behavior | Corrected the body to the exact repository schema and pushed this evidence update to create a fresh synchronize event. No bypass or invented gate result is used. | Await fresh remote gate |
