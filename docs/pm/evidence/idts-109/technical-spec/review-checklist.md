@@ -58,7 +58,7 @@ comment `10763`.
 - [x] `npm.cmd run qa:secret-scan`: PASS.
 - [x] `npx.cmd ai-devkit@latest lint --json`: 5 ok / 0 miss / 0 warn.
 - [x] `git diff --check`: PASS.
-- [ ] GitHub `qa-depth-gate` passes on the final pushed head.
+- [x] GitHub `qa-depth-gate` run `30600409435` passed on candidate head `5e493eb`.
 
 ## Final integration gate
 

@@ -139,5 +139,8 @@ login/profile, dashboard/monitoring, notification UI and AI traces.
   rows, source manifest `96/19/62/485`, Smart Assign `14/0`, assignment
   explanation `13/0`, IDTS-115 `241`, secret scan, AI DevKit lint
   `5 ok / 0 miss / 0 warn` and `git diff --check`.
+- Candidate head `5e493eb` passed GitHub `qa-depth-gate` run `30600409435`
+  in 40 seconds. The remaining Node.js 20 deprecation annotation is a
+  non-blocking CI-maintenance warning already recorded in DatDT status.
 - DatDT's Jira delta-confirmation comment remains a required human handoff after
   fresh checks and final commit SHA are available.
