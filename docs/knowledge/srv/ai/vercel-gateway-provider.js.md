@@ -1,5 +1,26 @@
 # `srv/ai/vercel-gateway-provider.js`
 
+## 2026-07-31 Handoff-only backup boundary
+
+`structured()` accepts the already-sanitized primary and backup model aliases
+from `SafeAiProvider`. The adapter still performs at most one backup call.
+
+For Handoff Summary, DeepSeek may switch once to Grok when the primary attempt
+fails with timeout, network error, HTTP 5xx, or an explicit allowlisted
+model-route denial code. A generic HTTP 403 such as `access_denied` does not
+switch models because it can represent a key, account, or team permission
+problem. HTTP 429 never switches models and continues to activate the existing
+cooldown. Classification and Smart Assign do not enable the model-denial
+exception.
+
+Debug order: safe feature type -> selected primary alias -> allowlisted
+`gatewayReason` -> optional backup alias -> final `fallbackUsed`. Never inspect
+Authorization or the raw provider body.
+
+Tiếng Việt: chỉ Handoff được dùng Grok đúng một lần trong các lỗi đủ điều kiện.
+429 và lỗi 403 chung không gọi model khác để tránh tốn quota hoặc che lỗi quyền
+tài khoản.
+
 ## 2026-07-31 proactive per-model request budget
 
 ### English

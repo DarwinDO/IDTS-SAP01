@@ -5092,3 +5092,22 @@ verification.
 - Tooling issues: the first MTA build exceeded the command timeout and left a generated dependency tree locked; a clean detached worktree completed the build. Windows PowerShell did not support `SkipHttpErrorCheck`, so HTTP status verification used `curl.exe`.
 - Evidence: `docs/pm/evidence/idts-114/qwen-sequential-acceptance/btp-sequential-live-verification-20260731.md`.
 - Remaining: Tester/Developer interactive role matrix remains deferred; IDTS-114 and IDTS-115 stay In Progress.
+
+## 2026-07-31 — Feature-specific AI model routing
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling issue | The first red-test command in the fresh worktree stopped before assertions with `Cannot find module '@sap/cds'`. | The root `node_modules` directory exists but does not contain the locked CAP dependency, so a junction to it is insufficient. | Fixed by removing the ineffective junction and running locked `npm ci` in the isolated worktree; no product dependency changed. | Focused routing test now passes 77/77. |
+| Security/dependency finding | Locked `npm ci` completed but npm audit reported 24 findings: 1 low, 9 moderate, 13 high and 1 critical. | Existing `package-lock.json` dependency graph; feature routing introduces no package. | Open baseline debt; no `npm audit fix --force` is mixed into this focused change. | Run the repository secret scan and preserve the unchanged lockfile; dependency upgrades require a separate reviewed task. |
+| Tooling issue | The first CAP EDMX compile command failed with “Found multiple service definitions”. | The verification command omitted the service selector while the model contains both `AuthService` and `BugService`. | Fixed command; this is not a product defect. | Rerun compilation with `-s all`, then continue the remaining gates. |
+| Product/model warning | CAP compile passes but reports the existing annotation warning that `NonUpdateableProperties` is unknown under `@Capabilities.UpdateRestrictions` for `BugService.Bugs_attachments`. | Baseline `db/schema.cds` attachment annotation, outside this model-routing diff. | Open baseline warning; not changed or hidden in this task. | Track separately when attachment capability annotations are next revised; current AI routing compilation remains PASS. |
+
+Local implementation result: Classification routes to GPT-5.6 Luna, Handoff
+routes to DeepSeek V4 Flash with one bounded Grok backup, Smart Assign routes
+to Z.AI GLM 4.7 Flash, and Similar Bugs retains Qwen embeddings. HTTP 429 and
+generic HTTP 403 do not switch models. Focused routing is 77/77 PASS; AI
+feature regressions, secret/process gates, CAP compile/build, MTA parse, AI
+DevKit and `git diff --check` pass. SAP BTP deployment/live provider acceptance
+remains pending normal PR merge.
+
+| Process issue | PR #246 initially failed `qa-depth-gate` although all evidence sections existed. | The Ownership Knowledge Gate section summarized prior PASS evidence in prose instead of the exact twelve `Field: value` lines required by `check-pr-depth.js`. | Fixed in the PR body using the existing IDTS-89/90 PASS evidence; no gate was invented or repeated. | Push the status/evidence correction and wait for a fresh PR synchronize check. |

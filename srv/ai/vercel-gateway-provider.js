@@ -25,7 +25,18 @@ class VercelGatewayProvider {
     })
   }
 
-  async structured ({ schemaName = 'Suggestion', schema: requestedSchema = null, instruction = '', input = null, deadlineMs = null } = {}) {
+  async structured ({
+    schemaName = 'Suggestion',
+    schema: requestedSchema = null,
+    instruction = '',
+    input = null,
+    deadlineMs = null,
+    modelAlias = null,
+    fallbackModelAlias = null,
+    allowModelAccessFallback = false
+  } = {}) {
+    const primaryModel = modelAlias || this.config.modelAlias
+    const backupModel = fallbackModelAlias || this.config.fallbackModelAlias
     const normalizedSchemaName = safeSchemaName(schemaName)
     const schema = requestedSchema && typeof requestedSchema === 'object' && !Array.isArray(requestedSchema)
       ? requestedSchema
@@ -33,7 +44,7 @@ class VercelGatewayProvider {
     const deadlineAt = Number.isFinite(Number(deadlineMs)) && Number(deadlineMs) > 0
       ? this.now() + Number(deadlineMs)
       : null
-    return this.#withFallback(this.config.modelAlias, this.config.fallbackModelAlias, async model => {
+    return this.#withFallback(primaryModel, backupModel, async model => {
       const messages = [
         { role: 'system', content: instruction },
         { role: 'user', content: JSON.stringify(input || {}) }
@@ -53,7 +64,7 @@ class VercelGatewayProvider {
         }, deadlineAt)
       } catch (error) {
         const canUseCompatibilityFormat =
-          model === this.config.modelAlias &&
+          model === primaryModel &&
           error?.gatewayReason === 'response_format_incompatible'
         if (!canUseCompatibilityFormat) throw error
 
@@ -83,7 +94,7 @@ class VercelGatewayProvider {
         // deterministic result instead of spending a second-model request.
         throw providerError('VERCEL_GATEWAY_MALFORMED_OUTPUT', { retryable: false, fallbackEligible: false })
       }
-    }, deadlineAt)
+    }, deadlineAt, { allowModelAccessFallback })
   }
 
   async embedding ({ text = '' } = {}) {
@@ -129,11 +140,11 @@ class VercelGatewayProvider {
     }, deadlineAt)
   }
 
-  async #withFallback (primaryModel, fallbackModel, execute, deadlineAt = null) {
+  async #withFallback (primaryModel, fallbackModel, execute, deadlineAt = null, options = {}) {
     try {
       return providerResult(primaryModel, false, await execute(primaryModel))
     } catch (primaryError) {
-      if (!this.config.fallbackEnabled || !fallbackModel || !isFallbackEligible(primaryError)) throw primaryError
+      if (!this.config.fallbackEnabled || !fallbackModel || !isFallbackEligible(primaryError, options)) throw primaryError
       if (deadlineAt && deadlineAt <= this.now()) throw deadlineExceededError()
       try {
         return providerResult(fallbackModel, true, await execute(fallbackModel))
@@ -220,15 +231,18 @@ function httpError (status, payload, retryAfterValue = null) {
   const budgetExhausted = isBudgetExhausted(payload)
   const responseFormatIncompatible = status === 400 && isResponseFormatIncompatible(payload)
   const embeddingBatchUnsupported = status === 400 && isEmbeddingBatchUnsupported(payload)
-  const retryable = (status === 429 && !budgetExhausted) || status >= 500
+  const modelAccessDenied = status === 403 && isModelAccessDenied(payload)
+  const retryable = (status === 429 && !budgetExhausted) || status >= 500 || modelAccessDenied
   return providerError(`VERCEL_GATEWAY_HTTP_${status}`, {
     retryable,
-    fallbackEligible: status >= 500,
+    fallbackEligible: status >= 500 || modelAccessDenied,
     gatewayReason: responseFormatIncompatible
       ? 'response_format_incompatible'
       : (embeddingBatchUnsupported
           ? 'embedding_batch_unsupported'
-          : (budgetExhausted ? 'budget_exhausted' : (status === 429 ? 'rate_limited' : 'http_error'))),
+          : (modelAccessDenied
+              ? 'model_access_denied'
+              : (budgetExhausted ? 'budget_exhausted' : (status === 429 ? 'rate_limited' : 'http_error')))),
     providerErrorCode: safeProviderErrorCode(payload),
     retryAfterSeconds: parseRetryAfterSeconds(retryAfterValue)
   })
@@ -322,8 +336,21 @@ function providerError (code, {
   })
 }
 
-function isFallbackEligible (error) {
+function isFallbackEligible (error, { allowModelAccessFallback = false } = {}) {
+  if (error?.gatewayReason === 'model_access_denied') {
+    return Boolean(allowModelAccessFallback && error?.fallbackEligible && error?.retryable)
+  }
   return Boolean(error?.fallbackEligible && error?.retryable)
+}
+
+function isModelAccessDenied (payload) {
+  // Generic `access_denied` can indicate a key/team/account restriction.
+  // Only explicit model-route denial codes may use the one Handoff backup.
+  return [
+    'model_access_denied',
+    'model_not_allowed',
+    'provider_model_access_denied'
+  ].includes(safeProviderErrorCode(payload))
 }
 
 function isBudgetExhausted (payload) {
@@ -407,6 +434,7 @@ module.exports = {
   isBudgetExhausted,
   isEmbeddingBatchUnsupported,
   isFallbackEligible,
+  isModelAccessDenied,
   isResponseFormatIncompatible,
   parseRetryAfterSeconds,
   reserveModelRequest,

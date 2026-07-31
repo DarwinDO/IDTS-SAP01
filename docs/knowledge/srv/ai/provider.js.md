@@ -1,5 +1,23 @@
 # `srv/ai/provider.js`
 
+## 2026-07-31 feature route selection
+
+`SafeAiProvider.structured()` calls `structuredModelRoute()` before invoking
+the Vercel delegate. The public feature contract does not change; only the
+private model metadata sent to the delegate changes:
+
+- `CLASSIFICATION` -> GPT-5.6 Luna.
+- `BUG_SUMMARY` -> DeepSeek V4 Flash with the dedicated Handoff backup.
+- `ASSIGNMENT_EXPLANATION` -> Z.AI GLM 4.7 Flash.
+
+`successResult()` and `failureResult()` use the same route when recording the
+safe model alias, so audit evidence identifies the attempted/actual feature
+model without exposing a key or endpoint.
+
+Tiếng Việt: wrapper chọn model theo `featureType`, nhưng vẫn trả cùng envelope
+an toàn cho feature. Việc đổi model không cho AI tự apply classification, assign
+Developer hoặc thay đổi lifecycle.
+
 ## Structured schema safety boundary (2026-07-30)
 
 `sanitizeStructuredRequest()` carries an optional feature JSON Schema through the safe provider wrapper. `sanitizeJsonSchema()` clones it and rejects non-object or oversized contracts. Schemas describe output shape only; they must not contain Bug text, user data, credentials or private endpoints.

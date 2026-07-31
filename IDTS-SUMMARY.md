@@ -50,6 +50,8 @@ Hệ thống **không tập trung vào**:
 
 **English clarification:** AI assistance is optional and advisory. CAP validation, role authorization, and explicit human actions remain authoritative. AI failure must not block the normal IDTS workflow. Persisted `AiSuggestions` are audit/review records only; they do not mean AI has applied a workflow decision.
 
+**Runtime model-routing clarification (2026-07-31):** SAP BTP uses feature-specific Vercel Gateway models to reduce shared-model rate-limit contention: Qwen embeddings for Similar Bugs, GPT-5.6 Luna for Classification, DeepSeek V4 Flash for Handoff Summary, and Z.AI GLM 4.7 Flash for Smart Assign. Handoff may use Grok once for an eligible model-route failure, timeout, network error, or HTTP 5xx. HTTP 429 and generic HTTP 403 never trigger another model. This routing is a technical resilience decision and does not change the advisory-only business contract.
+
 **Tiếng Việt:** AI là tính năng hỗ trợ tùy chọn. Validation CAP, phân quyền role và hành động rõ ràng của người dùng vẫn là nguồn quyết định cuối. AI lỗi không được chặn workflow IDTS bình thường.
 
 **IDTS-66 runtime clarification:** Duplicate/similar checking is exposed as an authenticated suggestion action. It ranks existing bugs using text, classification context, and embeddings when available; deterministic fallback remains available when AI is disabled or fails. The action never confirms a duplicate or writes `DuplicateLinks` automatically.

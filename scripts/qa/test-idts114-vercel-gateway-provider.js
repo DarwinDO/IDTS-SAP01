@@ -13,6 +13,7 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 }
 
 const { createAiProvider, normalizeAiConfig } = require('../../srv/ai')
+const { runtimeOverrides } = require('../../srv/ai/config')
 const {
   API_BASE_URL,
   activateGatewayCooldown,
@@ -90,6 +91,158 @@ async function main () {
 
   const incomplete = normalizeAiConfig({ enabled: true, provider: 'vercel', modelAlias: 'inclusionai/ling-3.0-flash-free' })
   check('Vercel config requires the private gateway key', incomplete.ready === false && incomplete.missing.includes('gatewayApiKey'))
+
+  const routedConfig = gatewayConfig({
+    classificationModelAlias: 'openai/gpt-5.6-luna',
+    handoffModelAlias: 'deepseek/deepseek-v4-flash',
+    assignmentModelAlias: 'zai/glm-4.7-flash',
+    fallbackEnabled: true,
+    fallbackModelAlias: 'openai/gpt-5.4-nano',
+    handoffFallbackModelAlias: 'xai/grok-4.1-fast-non-reasoning'
+  })
+  check('classification keeps its dedicated model alias', routedConfig.classificationModelAlias === 'openai/gpt-5.6-luna')
+  check('handoff keeps its dedicated primary model alias', routedConfig.handoffModelAlias === 'deepseek/deepseek-v4-flash')
+  check('Smart Assign keeps its dedicated model alias', routedConfig.assignmentModelAlias === 'zai/glm-4.7-flash')
+  check('handoff keeps exactly one dedicated backup alias', routedConfig.handoffFallbackModelAlias === 'xai/grok-4.1-fast-non-reasoning')
+  const routedEnvironment = runtimeOverrides({
+    IDTS_AI_CLASSIFICATION_MODEL: 'openai/gpt-5.6-luna',
+    IDTS_AI_HANDOFF_MODEL: 'deepseek/deepseek-v4-flash',
+    IDTS_AI_ASSIGNMENT_MODEL: 'zai/glm-4.7-flash',
+    IDTS_AI_HANDOFF_FALLBACK_MODEL: 'xai/grok-4.1-fast-non-reasoning'
+  })
+  check(
+    'SAP BTP environment names map to every feature route',
+    routedEnvironment.classificationModelAlias === 'openai/gpt-5.6-luna' &&
+      routedEnvironment.handoffModelAlias === 'deepseek/deepseek-v4-flash' &&
+      routedEnvironment.assignmentModelAlias === 'zai/glm-4.7-flash' &&
+      routedEnvironment.handoffFallbackModelAlias === 'xai/grok-4.1-fast-non-reasoning'
+  )
+
+  const routedRequests = []
+  const routedProvider = createAiProvider(routedConfig, {
+    fetchImpl: async (url, options) => {
+      const body = JSON.parse(options.body)
+      routedRequests.push(body.model)
+      return jsonResponse(200, { choices: [{ message: { content: '{"ok":true}' } }] })
+    }
+  })
+  await routedProvider.structured({
+    featureType: 'CLASSIFICATION',
+    schemaName: 'IdtsClassificationRouting',
+    instruction: 'Return JSON only.',
+    input: { title: 'Synthetic classification route' }
+  })
+  await routedProvider.structured({
+    featureType: 'BUG_SUMMARY',
+    schemaName: 'IdtsHandoffRouting',
+    instruction: 'Return JSON only.',
+    input: { title: 'Synthetic handoff route' }
+  })
+  await routedProvider.structured({
+    featureType: 'ASSIGNMENT_EXPLANATION',
+    schemaName: 'IdtsAssignmentRouting',
+    instruction: 'Return JSON only.',
+    input: { title: 'Synthetic assignment route' }
+  })
+  check(
+    'structured features route to Luna, DeepSeek, and ZAI without changing their public contract',
+    routedRequests.join(',') === 'openai/gpt-5.6-luna,deepseek/deepseek-v4-flash,zai/glm-4.7-flash'
+  )
+
+  const handoffDeniedModels = []
+  const handoffDeniedProvider = createAiProvider(routedConfig, {
+    fetchImpl: async (url, options) => {
+      const model = JSON.parse(options.body).model
+      handoffDeniedModels.push(model)
+      if (model === 'deepseek/deepseek-v4-flash') {
+        return jsonResponse(403, {
+          error: {
+            code: 'model_access_denied',
+            message: 'The requested model is not available for this route.'
+          }
+        })
+      }
+      return jsonResponse(200, { choices: [{ message: { content: '{"backup":true}' } }] })
+    }
+  })
+  const handoffDeniedResult = await handoffDeniedProvider.structured({
+    featureType: 'BUG_SUMMARY',
+    schemaName: 'IdtsHandoffModelDenied',
+    instruction: 'Return JSON only.',
+    input: { title: 'Synthetic model access denial' }
+  })
+  check(
+    'model-specific DeepSeek denial uses Grok exactly once',
+    handoffDeniedModels.join(',') === 'deepseek/deepseek-v4-flash,xai/grok-4.1-fast-non-reasoning'
+  )
+  check(
+    'handoff backup records the actual Grok model',
+    handoffDeniedResult.ok === true &&
+      handoffDeniedResult.modelAlias === 'xai/grok-4.1-fast-non-reasoning' &&
+      handoffDeniedResult.fallbackUsed === true
+  )
+
+  const handoffUnavailableModels = []
+  const handoffUnavailableProvider = createAiProvider(routedConfig, {
+    fetchImpl: async (url, options) => {
+      const model = JSON.parse(options.body).model
+      handoffUnavailableModels.push(model)
+      if (model === 'deepseek/deepseek-v4-flash') {
+        return jsonResponse(503, { error: { code: 'upstream_unavailable', message: 'Temporary outage.' } })
+      }
+      return jsonResponse(200, { choices: [{ message: { content: '{"backup":true}' } }] })
+    }
+  })
+  const handoffUnavailableResult = await handoffUnavailableProvider.structured({
+    featureType: 'BUG_SUMMARY',
+    schemaName: 'IdtsHandoffUnavailable',
+    instruction: 'Return JSON only.',
+    input: { title: 'Synthetic provider outage' }
+  })
+  check(
+    'handoff 5xx uses the dedicated Grok backup exactly once',
+    handoffUnavailableModels.join(',') === 'deepseek/deepseek-v4-flash,xai/grok-4.1-fast-non-reasoning'
+  )
+  check(
+    'handoff 5xx backup reports the actual Grok model',
+    handoffUnavailableResult.ok === true &&
+      handoffUnavailableResult.modelAlias === 'xai/grok-4.1-fast-non-reasoning' &&
+      handoffUnavailableResult.fallbackUsed === true
+  )
+
+  resetGatewayCooldownForTest()
+  const handoffRateLimitedModels = []
+  const handoffRateLimitedProvider = createAiProvider(routedConfig, {
+    fetchImpl: async (url, options) => {
+      handoffRateLimitedModels.push(JSON.parse(options.body).model)
+      return jsonResponse(429, { error: { code: 'rate_limit_exceeded', message: 'Too many requests.' } }, { 'retry-after': '2' })
+    }
+  })
+  const handoffRateLimitedResult = await handoffRateLimitedProvider.structured({
+    featureType: 'BUG_SUMMARY',
+    schemaName: 'IdtsHandoffRateLimited',
+    instruction: 'Return JSON only.',
+    input: { title: 'Synthetic rate limit' }
+  })
+  check('handoff 429 never spends the Grok backup', handoffRateLimitedModels.join(',') === 'deepseek/deepseek-v4-flash')
+  check('handoff 429 returns the safe cooldown status', handoffRateLimitedResult.status === 'AI_RATE_LIMITED')
+  resetGatewayCooldownForTest()
+
+  const genericDeniedModels = []
+  const genericDeniedProvider = createAiProvider(routedConfig, {
+    fetchImpl: async (url, options) => {
+      genericDeniedModels.push(JSON.parse(options.body).model)
+      return jsonResponse(403, { error: { type: 'access_denied', message: 'Forbidden.' } })
+    }
+  })
+  const genericDeniedResult = await genericDeniedProvider.structured({
+    featureType: 'BUG_SUMMARY',
+    schemaName: 'IdtsHandoffAccountDenied',
+    instruction: 'Return JSON only.',
+    input: { title: 'Synthetic account denial' }
+  })
+  check('generic account/key 403 does not hide the fault behind Grok', genericDeniedModels.length === 1)
+  check('generic 403 remains sanitized', genericDeniedResult.ok === false && !containsUnsafeDiagnosticText(genericDeniedResult))
 
   const lingConfig = gatewayConfig({ modelAlias: 'inclusionai/ling-3.0-flash-free', embeddingModelAlias: null })
   const lingRequests = []

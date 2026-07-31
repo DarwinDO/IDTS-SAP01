@@ -1,5 +1,29 @@
 # `srv/ai/config.js`
 
+## 2026-07-31 feature-specific model aliases
+
+### English
+
+`normalizeAiConfig()` now keeps separate structured-model aliases for
+Classification, Handoff Summary, and Smart Assign while retaining the existing
+embedding alias for Similar Bugs. `runtimeOverrides()` maps the corresponding
+SAP BTP environment variables. Handoff also has one dedicated backup alias;
+the private Gateway key is still shared only in memory and is never returned.
+
+Flow: SAP BTP environment -> `runtimeOverrides()` -> `normalizeAiConfig()` ->
+`SafeAiProvider.structured()` -> feature route.
+
+Debug only `classificationModelAlias`, `handoffModelAlias`,
+`assignmentModelAlias`, `handoffFallbackModelAlias`, and `ready`. Never inspect
+the Gateway key.
+
+### Tiếng Việt
+
+`normalizeAiConfig()` giữ model riêng cho Classification, Handoff Summary và
+Smart Assign; Similar Bugs tiếp tục dùng model embedding riêng. Handoff có đúng
+một model dự phòng. Chỉ kiểm tra alias và cờ `ready` khi debug, không mở hoặc
+ghi Gateway key.
+
 ## 2026-07-31 request-budget settings
 
 ### English
