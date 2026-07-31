@@ -5123,6 +5123,15 @@ remains pending normal PR merge.
 | Tooling issue | First focused test in the isolated worktree could not resolve `@sap/cds`. | Fresh worktree had no installed dependency tree. | Resolved with locked `npm ci`; no package or lockfile change. | IDTS-114 rerun PASS `77/77`. |
 | Security/dependency finding | Locked install reported 24 existing audit findings (1 low, 9 moderate, 13 high, 1 critical). | Existing dependency baseline; this routing patch adds no dependency. | Open baseline debt; no force-upgrade mixed into the provider-routing change. | Secret scan and broader gates must pass before merge. |
 
+## 2026-07-31 — Feature-specific model routing rollout
+
+| Classification | Symptom / event | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Release event | PR #247 merged model routing but SAP BTP was still running the previous service revision. | A source merge does not update the Cloud Foundry application until a selective deployment is completed. | Resolved. Clean MTAR built from merge SHA `5807313f232db91acc55cc1f6aca6378891044b1`; selective MTA operation `2f9643d5-8cd7-11f1-ada0-eeee0a9d0408` deployed only `idts-sap01-srv`. HDI deployer and broad `cds deploy` were not run. | Service and AppRouter are `1/1 running`; health is HTTP 200; anonymous protected OData is HTTP 401. Runtime aliases confirm Classification GPT-5.4 Nano, Handoff MiniMax M2.5 with Grok backup, Smart Assign Z.AI, and Similar Bugs Qwen embedding. |
+| Tooling issue | The first MBT invocation exceeded the command wait and ended after producing only a temporary service archive. | Packaging the Node service tree on Windows took longer than the initial bounded command window. | Resolved by verifying that no build process remained and rebuilding once with a longer wait. The incomplete artifact was not deployed. | Final MTAR SHA-256 is `826973CE15D94D3052E34BFC06C47DE82A00A976ABC697EBBBE528AA593A95B4`. |
+| Environment blocker | Authenticated browser acceptance could not initially start from the automation connection. | The signed-in application session was in Edge while the browser connector first looked for Google Chrome. | Resolved by reconnecting the installed Chrome integration to the existing Edge session; no account or application setting changed. | The later entries record the completed PM browser sequence. |
+| Security/dependency finding | MBT installs reported the existing locked dependency findings in root, service, UI, and AppRouter packages. | Existing dependency baseline; this rollout changes no package or lockfile. | Open baseline debt; no force upgrade was mixed into the release. | CAP/UI5 production builds passed. Track dependency remediation separately. |
+
 ## 2026-07-31 — SAP BTP browser acceptance database blocker
 
 | Classification | Symptom | Root cause | Fix status | Verification / next action |
