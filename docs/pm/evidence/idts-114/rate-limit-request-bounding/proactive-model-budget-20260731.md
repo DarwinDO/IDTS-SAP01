@@ -80,7 +80,9 @@ distributed lock, cache service, or database state.
   body was corrected to the repository's exact field schema. Re-running the
   old workflow attempt reused its original event payload, so a normal follow-up
   documentation commit is used to trigger a fresh `synchronize` event; no gate
-  is bypassed.
+  is bypassed. That fresh event then proved PowerShell had flattened the PR
+  Markdown passed through `--body`; the final correction uses `--body-file` and
+  preserves all eleven required headings as separate lines.
 - Merge the normal PR after fresh QA Depth Gate passes.
 - Selectively deploy `idts-sap01-srv`; do not select the HDI deployer.
 - Verify health and protected OData behavior.
