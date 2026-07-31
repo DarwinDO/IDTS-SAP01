@@ -225,3 +225,13 @@ No S3, Brevo, database schema, UI workflow, automatic classification/assignment,
 - The focused correction makes every sanitized value, including its marker,
   fit within the caller's declared maximum. IDTS-114 remains In Progress until
   the correction is deployed and the sequential browser check is repeated.
+## 2026-07-31 sequential SAP BTP verification
+
+- PR #243 introduced a process-local, per-model request window (`4` requests per `60` seconds on BTP) and preserved separate budgets for ZAI structured calls and Qwen embeddings.
+- PR #244 corrected the Handoff Summary audit-text bound so a successful provider response fits the existing HANA `AiSuggestions.summary` column.
+- Selective service deployment at merge SHA `f000ce170abf716ca18d7586f5e2ce0e5c1f8487` completed without HDI/database deployment.
+- PM browser sequence PASS: Classification → Handoff Summary → Smart Assign Explanation → Similar Bugs.
+- ZAI structured metrics were `SUCCESS` for Classification, Handoff, and Smart Assign. Qwen embedding batch was `SUCCESS` for Similar Bugs.
+- No exact HTTP 429 route response occurred in the sequence. The fifth-call local guard remains covered by focused regression.
+- IDTS-114 remains In Progress pending the deferred Tester/Developer interactive role matrix.
+- Evidence: `docs/pm/evidence/idts-114/qwen-sequential-acceptance/btp-sequential-live-verification-20260731.md`.

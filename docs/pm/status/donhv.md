@@ -5077,8 +5077,18 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
 
 Local result: proactive per-model request budgeting passes the focused provider
 suite `63/63` and the IDTS-64/66/67/68/69/71 regressions. CAP compile, MTA YAML
-parse, secret/process gates, AI DevKit and `git diff --check` pass. Selective
-SAP BTP deployment remains pending.
+parse, secret/process gates, AI DevKit and `git diff --check` pass. The later
+2026-07-31 entry records the completed selective SAP BTP deployment and live
+verification.
 
 | Process issue | PR #243 QA Depth initially failed after the Ownership Knowledge Gate block omitted fields required by the current parser. A failed-run rerun continued to use the original PR event payload after the body was corrected. | PR body / GitHub Actions event behavior | Corrected the body to the exact repository schema and pushed this evidence update to create a fresh synchronize event. No bypass or invented gate result is used. | Await fresh remote gate |
 | Process issue | The next PR #243 event reported every required section missing although the body text was present. | PowerShell flattened multiline Markdown passed directly to `gh pr edit --body`, so headings no longer started on their own lines. | Replaced the body through `gh pr edit --body-file`; all eleven required headings now remain separate lines. | Push this evidence correction to run the gate against the properly formatted body |
+### 2026-07-31 — IDTS-114 ZAI rate-limit control and Handoff persistence verification
+
+- Completed: merged PR #243 for per-model request bounding and PR #244 for the Handoff audit-text storage bound.
+- Deployment: selectively deployed only `idts-sap01-srv` at merge SHA `f000ce170abf716ca18d7586f5e2ce0e5c1f8487`; HDI/database deploy was not run.
+- Live verification: Classification, Handoff Summary, Smart Assign Explanation, and Similar Bugs completed sequentially on SAP BTP with provider metrics `SUCCESS`; no exact HTTP 429 route response occurred in the sequence.
+- Product defect found and fixed: successful Handoff output exceeded the HANA `AiSuggestions.summary` limit because the truncation marker was appended after slicing. PR #244 now bounds the complete sanitized string and the live Handoff request returns HTTP 200.
+- Tooling issues: the first MTA build exceeded the command timeout and left a generated dependency tree locked; a clean detached worktree completed the build. Windows PowerShell did not support `SkipHttpErrorCheck`, so HTTP status verification used `curl.exe`.
+- Evidence: `docs/pm/evidence/idts-114/qwen-sequential-acceptance/btp-sequential-live-verification-20260731.md`.
+- Remaining: Tester/Developer interactive role matrix remains deferred; IDTS-114 and IDTS-115 stay In Progress.
