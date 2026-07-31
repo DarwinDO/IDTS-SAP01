@@ -147,3 +147,37 @@ Evidence: `docs/pm/evidence/idts-115/`.
 - The matching SAP BTP application content and service runtime are deployed at
   merge SHA `5476479312986412739fbff3cfa6da29acc7905d`. PM visual verification
   remains pending; IDTS-115 stays In Progress.
+
+## 2026-07-31 Smart Assign pending-group fix
+
+- Runtime debugging showed that opening the Assignee picker stopped before the
+  `/AssignableDevelopers` request with `Draft changes did not finish in time`.
+- The application update group `$auto` was already clean. The global OData
+  pending state was only held by UI5's internal value-help group
+  `donotsubmit`.
+- Smart Assign now checks and polls only `model.getUpdateGroupId()`. It does
+  not submit, reset, or wait for `donotsubmit`.
+- A focused regression covers an `$auto` PATCH completing while an unrelated
+  global pending group remains active.
+- Local verification passes. IDTS-115 remains In Progress until the fix is
+  merged, selectively deployed, and browser-verified for new and edit drafts.
+- Review handoff: PR #241; Jira audit comment `10767`.
+
+## 2026-07-31 Smart Assign rollout result
+
+- PR #241 merged normally into `dev` at
+  `4a32c821127ae61685d7c2c909ac4b239db33696`.
+- A clean MTAR was built from that exact merge SHA. The selective deployment
+  included only `idts-sap01-app-content`; the HDI deployer, schema migration,
+  seed reload and broad `cds deploy` were not run.
+- BTP operation `28dfa061-8c81-11f1-ad50-eeee0a8d3d75` finished successfully.
+- SAP BTP Trial stopped the service and AppRouter after deployment. Both were
+  restarted and verified at `1/1 running`; service health returned HTTP 200.
+- Authenticated browser verification on the existing `BUG-0011` edit draft
+  opened the Smart Assign dialog, loaded three developer candidates and showed
+  no `Could not load assignable developers` popup. The dialog was cancelled,
+  so assignee and Bug workflow data were not changed.
+- Evidence:
+  `docs/pm/evidence/idts-115/smart-assign-pending-group/rollout.md`.
+- IDTS-115 remains In Progress for the previously deferred Tester/Developer
+  role matrix; the DonHV Smart Assign blocker is resolved.
