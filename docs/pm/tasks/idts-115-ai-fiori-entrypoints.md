@@ -161,3 +161,4 @@ Evidence: `docs/pm/evidence/idts-115/`.
   global pending group remains active.
 - Local verification passes. IDTS-115 remains In Progress until the fix is
   merged, selectively deployed, and browser-verified for new and edit drafts.
+- Review handoff: PR #241; Jira audit comment `10767`.
