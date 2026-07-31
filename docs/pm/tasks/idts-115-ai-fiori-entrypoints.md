@@ -162,3 +162,22 @@ Evidence: `docs/pm/evidence/idts-115/`.
 - Local verification passes. IDTS-115 remains In Progress until the fix is
   merged, selectively deployed, and browser-verified for new and edit drafts.
 - Review handoff: PR #241; Jira audit comment `10767`.
+
+## 2026-07-31 Smart Assign rollout result
+
+- PR #241 merged normally into `dev` at
+  `4a32c821127ae61685d7c2c909ac4b239db33696`.
+- A clean MTAR was built from that exact merge SHA. The selective deployment
+  included only `idts-sap01-app-content`; the HDI deployer, schema migration,
+  seed reload and broad `cds deploy` were not run.
+- BTP operation `28dfa061-8c81-11f1-ad50-eeee0a8d3d75` finished successfully.
+- SAP BTP Trial stopped the service and AppRouter after deployment. Both were
+  restarted and verified at `1/1 running`; service health returned HTTP 200.
+- Authenticated browser verification on the existing `BUG-0011` edit draft
+  opened the Smart Assign dialog, loaded three developer candidates and showed
+  no `Could not load assignable developers` popup. The dialog was cancelled,
+  so assignee and Bug workflow data were not changed.
+- Evidence:
+  `docs/pm/evidence/idts-115/smart-assign-pending-group/rollout.md`.
+- IDTS-115 remains In Progress for the previously deferred Tester/Developer
+  role matrix; the DonHV Smart Assign blocker is resolved.
