@@ -7,6 +7,12 @@
   },
   "routes": [
     {
+      "source": "^/login\\.html$",
+      "localDir": "resources",
+      "authenticationType": "xsuaa",
+      "cacheControl": "no-cache, no-store, must-revalidate"
+    },
+    {
       "source": "^/logged-out\\.html$",
       "localDir": "resources",
       "authenticationType": "none",

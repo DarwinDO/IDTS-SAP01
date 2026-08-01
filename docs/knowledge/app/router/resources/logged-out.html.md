@@ -12,7 +12,7 @@ starting the next SAP BTP login.
 | --- | --- | --- | --- |
 | Document metadata | Browser loads `/logged-out.html`. | Accessible English title and responsive viewport. | Check the page is rendered rather than redirected. |
 | Signed-out message | AppRouter has ended the application session. | Tells the user the IDTS session ended. | Do not claim the whole SAP identity-provider session was destroyed. |
-| Sign-in link | User explicitly chooses to return. | Opens `/idtsbugmanagementui/index.html`, a protected route. | Network should then enter XSUAA, not a custom password form. |
+| Sign-in link | User explicitly chooses to return. | Opens the protected `/login.html` bridge; after XSUAA establishes a session, that page forwards to the Fiori entry. | Network must complete top-level XSUAA navigation before `AuthService.me` runs. |
 
 This file deliberately has no JavaScript, password field, token storage or
 custom login request.
@@ -21,4 +21,4 @@ custom login request.
 
 Đây chỉ là trang tĩnh xác nhận session ứng dụng IDTS đã kết thúc. Nó không tự
 đăng nhập, không giữ token và không thu mật khẩu. Khi user bấm link đăng nhập,
-trình duyệt mới quay lại route Fiori được XSUAA bảo vệ.
+trình duyệt đi qua `/login.html` được XSUAA bảo vệ trước, rồi mới quay lại Fiori.

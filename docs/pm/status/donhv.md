@@ -2,6 +2,36 @@
 
 ## 2026-08-01 - IDTS-117 SAP BTP explicit re-login
 
+- Product defect found during repeated live verification: the first signed-out
+  landing page worked, but a fresh re-entry could load the UI shell while
+  `/odata/v4/auth/me()` followed an XSUAA redirect and returned a 731-byte HTML
+  login document with HTTP 200. `auth-guard.js` attempted JSON parsing and showed
+  the misleading safe access-denied message. HANA was running and the CAP route
+  itself was healthy; this was not a missing IDTS user mapping.
+- Follow-up fix in progress: route the Sign in link through an XSUAA-protected
+  `/login.html` bridge, and make the guard detect non-JSON success responses and
+  navigate the whole browser to that bridge. No credential, role, HANA data,
+  OData contract or custom local/Render login behavior changes.
+- TDD: the expanded IDTS-117 test failed first because the protected bridge did
+  not exist. Verification and a second selective AppRouter rollout remain.
+- Jira IDTS-117 comment `10803` now records the finding without credentials or
+  private endpoints. UI5 manifest validation and targeted auth-guard lint pass
+  with zero findings; the issue remains open pending two live round trips.
+- Fresh follow-up gates: IDTS-117 PASS; BTP auth 12/12; custom auth 28/28;
+  depth self-test 15/15; secret scan, agent rules, CAP compile, UI5 build,
+  AI DevKit and diff check PASS. CAP compile retains one unrelated pre-existing
+  attachment capability warning. Ponytail review found no unnecessary layer.
+- Tooling issue: PR #254 was initially created with literal `\\n` characters in
+  its body because of PowerShell/GitHub CLI argument quoting, so QA Depth Gate
+  reported every heading missing. The PR body was corrected through the GitHub
+  API; a follow-up synchronize event is required because rerunning the original
+  workflow reuses its original event payload. No product code is affected.
+- Process issue: the next fresh gate correctly read the headings but rejected
+  the abbreviated Knowledge Gate sentence. The validator requires all exact
+  structured fields (`Member`, `Date`, question counts, score and PASS results).
+  PR #254 now reuses the existing DonHV 90% PASS evidence in that exact format;
+  no learning gate was repeated and no bypass was used.
+
 - Product defect: after AppRouter `/do/logout`, `logoutPage` pointed to `/`,
   which is protected by XSUAA. A valid identity-provider session could therefore
   authenticate the same SAP user immediately. Root cause is AppRouter route
