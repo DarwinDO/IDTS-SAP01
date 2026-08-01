@@ -1,5 +1,28 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-08-01 - IDTS-117 BTP rollout and browser acceptance complete
+
+- Product defect resolved: a repeated BTP re-entry could return the HTML XSUAA
+  sign-in page to `AuthService.me` with HTTP 200, which the UI previously
+  misreported as an IDTS access denial.
+- PR #254 merged normally at
+  `d73377163056728a513eacc70aaa1a926afdfb3c`; QA Depth passed without bypass.
+- Selective MTA operation `fae23f46-8d99-11f1-8630-eeee0a801182` deployed only
+  the AppRouter application module. No HDI deployer, broad `cds deploy`, schema
+  migration, or data reload was run.
+- Browser acceptance passed two consecutive complete cycles: Sign Out → public
+  signed-out page → protected `/login.html` bridge → XSUAA → Fiori. Both final
+  `AuthService.me` checks returned HTTP 200 JSON and parsed successfully.
+- Tooling issue observed and resolved during evidence capture: the browser
+  connection was temporarily unstable while claiming the user tab. A separate
+  controlled tab was used; this did not affect application behavior or expose
+  credentials.
+- Evidence:
+  `docs/pm/evidence/idts-117/btp-rollout/roundtrip-verification.md`.
+- Handoff: merge this evidence-only update, then transition Jira IDTS-117 to
+  Done and remove its blocker from IDTS-108. No Knowledge Gate reassessment is
+  required; DonHV's existing PASS remains valid.
+
 ## 2026-08-01 - IDTS-117 SAP BTP explicit re-login
 
 - Product defect found during repeated live verification: the first signed-out
