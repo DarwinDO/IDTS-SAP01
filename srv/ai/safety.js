@@ -11,12 +11,6 @@ const SECRET_PATTERNS = Object.freeze([
 ])
 
 const UNSAFE_ERROR_TOKENS = Object.freeze([
-  'select',
-  'insert',
-  'update',
-  'delete',
-  'from ',
-  'where ',
   'passwordhash',
   'tokenhash',
   'xkeysib-',
@@ -26,6 +20,13 @@ const UNSAFE_ERROR_TOKENS = Object.freeze([
   'aws_secret_access_key',
   'secret_access_key',
   'stack'
+])
+
+const SQL_DIAGNOSTIC_PATTERNS = Object.freeze([
+  /\bselect\b[\s\S]{0,500}\bfrom\b/i,
+  /\binsert\s+into\b/i,
+  /\bupdate\s+(?:"[^"]+"|`[^`]+`|\[[^\]]+\]|[a-z_][\w.]*)\s+set\b/i,
+  /\bdelete\s+from\b/i
 ])
 
 function redactSensitiveText (value, maxLength = 8000) {
@@ -69,6 +70,7 @@ function containsUnsafeDiagnosticText (value) {
   const raw = JSON.stringify(value || {})
   const lower = raw.toLowerCase()
   return UNSAFE_ERROR_TOKENS.some(token => lower.includes(token)) ||
+    SQL_DIAGNOSTIC_PATTERNS.some(pattern => pattern.test(raw)) ||
     SECRET_PATTERNS.some(pattern => {
       pattern.regex.lastIndex = 0
       return pattern.regex.test(raw)

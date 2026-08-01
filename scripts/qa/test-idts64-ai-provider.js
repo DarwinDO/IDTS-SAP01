@@ -54,6 +54,16 @@ async function main () {
   const disabledConfig = normalizeAiConfig({})
   expectEqual('AI is disabled by default', disabledConfig.enabled, false)
   expectEqual('default provider is mock', disabledConfig.provider, 'mock')
+  expectEqual(
+    'ordinary assignment wording containing select remains safe',
+    containsUnsafeDiagnosticText({ explanation: 'Review fit and select this candidate manually.' }),
+    false
+  )
+  expectEqual(
+    'actual SQL SELECT diagnostic remains unsafe',
+    containsUnsafeDiagnosticText({ explanation: 'SELECT passwordHash FROM Users WHERE ID = 1' }),
+    true
+  )
 
   const vcapGatewayKey = readGatewayApiKeyFromVcap({
     VCAP_SERVICES: JSON.stringify({
