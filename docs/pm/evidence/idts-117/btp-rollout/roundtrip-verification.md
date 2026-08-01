@@ -50,4 +50,3 @@ Two consecutive fresh logout and re-login cycles completed successfully.
 - SAP BTP Trial can stop applications after inactivity. Starting the AppRouter
   and service is an environment operation and is separate from authentication
   correctness.
-
