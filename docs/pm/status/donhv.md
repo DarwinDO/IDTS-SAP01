@@ -1,5 +1,40 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-08-01 - IDTS-117 SAP BTP explicit re-login
+
+- Product defect: after AppRouter `/do/logout`, `logoutPage` pointed to `/`,
+  which is protected by XSUAA. A valid identity-provider session could therefore
+  authenticate the same SAP user immediately. Root cause is AppRouter route
+  configuration, not the HANA `Users` mapping or custom local login.
+- Fix: add public `/logged-out.html`, place its `authenticationType: none` route
+  before the protected catch-all, and make the explicit sign-in link return to
+  the Fiori entry. No password field, token handling, XSUAA role, OData, HANA or
+  custom local/Render auth behavior changes.
+- TDD evidence: the new IDTS-117 test first failed on the old `logoutPage: /`
+  and now passes. Existing `qa:idts113:btp-auth` passes 12/12.
+- Tooling issue fixed in-session: the fresh worktree had no `node_modules`, so
+  the existing CAP test initially could not resolve `@sap/cds`. Verification
+  reused an existing clean dependency runtime through `NODE_PATH`; no package
+  install or lockfile change was made.
+- Tooling issue fixed in-session: PowerShell `Remove-Item` threw an internal
+  null-reference error while removing the temporary `node_modules` junction.
+  The target/path was verified as a reparse point inside this worktree before
+  cleanup; no dependency target content or source file was removed.
+- Environment blocker: the Cloud Foundry CLI token expired during live log/app
+  inspection. Local completion can continue, but selective deploy and live
+  browser evidence require a fresh `cf login --sso`; no token is stored in the
+  repository or Jira.
+- Existing UI5 lint debt (not introduced by IDTS-117): manifest schema
+  validation passes and the production build succeeds, while UI5 Linter still
+  reports the pre-existing manifest-version finding plus deprecated bootstrap
+  attributes/Test Starter recommendations under `webapp/test/`. Classification:
+  tooling/technical-debt finding; out of scope for this AppRouter-only fix and
+  still open for a dedicated UI5 modernization task.
+- OfficeCLI preflight for Markdown updates: `officecli --version` returned
+  `1.0.143`.
+- Handoff: finish repository gates and PR, then selectively deploy AppRouter and
+  verify Sign Out → public page → explicit Sign in → XSUAA.
+
 ## 2026-08-01 - IDTS-114 Smart Assign output-safety live closure
 
 - PR #251 merged normally at `39e3b5a4d756f3b6702406a8456cb89ba8cbc0fb`; the exact merge SHA was selectively deployed to `idts-sap01-srv` through MTA operation `4517f9e8-8d5d-11f1-8632-eeee0a8bed2f`. No HDI deployer or broad `cds deploy` ran.

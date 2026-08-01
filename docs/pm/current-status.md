@@ -295,6 +295,17 @@ Vietnamese clean note: Nút `Assign Developer` riêng đã được bỏ khỏi 
   final Technical Specification EN integration under IDTS-112 also remain
   open.
 
+## 2026-08-01 SAP BTP explicit re-login follow-up
+
+- `IDTS-117` is In Progress. The logout endpoint worked, but its landing page
+  was the protected root route, allowing a valid SAP identity-provider session
+  to authenticate the same user immediately.
+- The local fix redirects AppRouter logout to a small public signed-out page
+  with an explicit SAP BTP sign-in link. It does not add custom BTP credentials
+  or change local/Render authentication, HANA users, role collections or OData.
+- Focused IDTS-117 and existing IDTS-113 auth checks pass. Selective AppRouter
+  deployment and browser verification remain before closure.
+
 ## Next Handover Instruction
 
 Any new agent or developer should identify their member name first, then read this file, `task-board.md`, the relevant member file under `status/*.md`, and the relevant `tasks/*.md` before making changes.
