@@ -66,6 +66,9 @@ issue In Progress until two complete post-deployment round trips pass.
 - `git diff --check`: PASS with line-ending warnings only.
 - Ponytail review: PASS. The fix adds one protected route, one static bridge and
   one content-type guard; no dependency, framework or duplicate auth layer.
+- PR #254 QA Depth Gate initially failed because the GitHub CLI submission
+  escaped newlines as literal `\\n`; the corrected PR body contains all required
+  headings. This is a tooling/evidence-format issue, not a runtime test failure.
 
 ## Dependencies and security
 

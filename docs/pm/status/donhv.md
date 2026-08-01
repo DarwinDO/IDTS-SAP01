@@ -21,6 +21,11 @@
   depth self-test 15/15; secret scan, agent rules, CAP compile, UI5 build,
   AI DevKit and diff check PASS. CAP compile retains one unrelated pre-existing
   attachment capability warning. Ponytail review found no unnecessary layer.
+- Tooling issue: PR #254 was initially created with literal `\\n` characters in
+  its body because of PowerShell/GitHub CLI argument quoting, so QA Depth Gate
+  reported every heading missing. The PR body was corrected through the GitHub
+  API; a follow-up synchronize event is required because rerunning the original
+  workflow reuses its original event payload. No product code is affected.
 
 - Product defect: after AppRouter `/do/logout`, `logoutPage` pointed to `/`,
   which is protected by XSUAA. A valid identity-provider session could therefore
