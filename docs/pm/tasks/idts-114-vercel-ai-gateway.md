@@ -282,3 +282,20 @@ No S3, Brevo, database schema, UI workflow, automatic classification/assignment,
   role matrix still keeps IDTS-114 In Progress.
 - Evidence:
   `docs/pm/evidence/idts-114/smart-assign-output-safety/programmatic-and-live-verification-20260801.md`.
+
+## 2026-08-01 Smart Assign output-safety live verification
+
+- PR #251 merged normally at
+  `39e3b5a4d756f3b6702406a8456cb89ba8cbc0fb` after the fresh QA Depth Gate
+  passed.
+- Selective MTA operation `4517f9e8-8d5d-11f1-8632-eeee0a8bed2f` deployed
+  only `idts-sap01-srv`; no HDI deployer or broad `cds deploy` ran.
+- One authenticated PM Smart Assign request on `BUG-0011` displayed three
+  provider-generated candidate explanations with distinct confidence values
+  (40%, 88%, and 55%). No row fell back to rules-based guidance.
+- The dialog was closed with Cancel. No Assign, review decision, Save or
+  lifecycle action was submitted, so the focused check was non-mutating.
+- The output-safety defect is resolved for the PM flow. Tester/Developer
+  interactive role evidence remains deferred, so IDTS-114 stays In Progress.
+- Evidence:
+  `docs/pm/evidence/idts-114/smart-assign-output-safety/programmatic-and-live-verification-20260801.md`.

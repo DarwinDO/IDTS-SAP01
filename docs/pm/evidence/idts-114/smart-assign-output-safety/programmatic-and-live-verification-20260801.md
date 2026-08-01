@@ -51,12 +51,45 @@ The negative test still marks
 shared safety boundary still rejects unsafe AI output and does not change Bug
 status, assignee, classification, or `modifiedAt`.
 
+## Merge and selective SAP BTP rollout
+
+- PR: `#251`, merged normally without an administrative bypass.
+- Merge SHA: `39e3b5a4d756f3b6702406a8456cb89ba8cbc0fb`.
+- Selective MTA operation: `4517f9e8-8d5d-11f1-8632-eeee0a8bed2f`.
+- Deployed module: `idts-sap01-srv` only; no HDI deployer or broad
+  `cds deploy` was run.
+- MTAR SHA-256:
+  `8331BC76816A9C8203775C92523B157AEC03AD3ABFC3079CFCE637B901F80235`.
+- Service and AppRouter were started `1/1`; health returned HTTP 200 and
+  protected anonymous OData returned HTTP 401.
+
+## Focused PM browser acceptance
+
+One authenticated Smart Assign request was executed on controlled Bug
+`BUG-0011` after the selective rollout. The dialog showed three candidates and
+all three retained provider-generated explanations:
+
+| Candidate | Displayed provenance | Displayed confidence | Result |
+| --- | --- | ---: | --- |
+| Backup Developer | `AI-generated explanation` | 40% | PASS |
+| CAP Developer 01 | `AI-generated explanation` | 88% | PASS |
+| SangVN | `AI-generated explanation` | 55% | PASS |
+
+The dialog was closed with **Cancel**. No candidate was selected and no
+`Assign`, `Accept`, `Reject`, `Ignore`, `Save`, or lifecycle action was
+submitted. The visible assignee remained SangVN, the current action owner
+remained NhanT, and the Bug remained in Retest Required state.
+
+Screenshot: `smart-assign-ai-generated-explanations-20260801.png`.
+
+The browser console still contains existing SAPUI5/Lrep environment messages
+about unsupported S/CUBE, unavailable flex-data/features storage, and a
+deprecated pseudo-module import. They were emitted during application startup,
+not by the Smart Assign request, and did not block this acceptance. They remain
+a separate baseline tooling/environment finding.
+
 ## Remaining acceptance
 
-After normal PR merge, selectively deploy only `idts-sap01-srv` at the exact
-merge SHA. Open Smart Assign once on the same controlled Bug, verify that the
-three validated provider explanations remain AI-generated, and cancel the
-dialog. Do not assign a Developer or perform any unrelated workflow mutation.
-
+The Smart Assign output-safety defect is verified fixed for the PM flow.
 Tester/Developer role-matrix acceptance remains deferred, so IDTS-114 stays
-In Progress even if this focused PM check passes.
+In Progress.

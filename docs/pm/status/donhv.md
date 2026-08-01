@@ -1,5 +1,13 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-08-01 - IDTS-114 Smart Assign output-safety live closure
+
+- PR #251 merged normally at `39e3b5a4d756f3b6702406a8456cb89ba8cbc0fb`; the exact merge SHA was selectively deployed to `idts-sap01-srv` through MTA operation `4517f9e8-8d5d-11f1-8632-eeee0a8bed2f`. No HDI deployer or broad `cds deploy` ran.
+- Focused PM browser acceptance on `BUG-0011` PASS: Backup Developer, CAP Developer 01 and SangVN each retained an `AI-generated explanation` with distinct confidence values of 40%, 88% and 55%. The dialog was closed with Cancel; no Assign, review decision, Save or lifecycle action was submitted.
+- Product defect status: resolved for the PM flow. The contextual SQL patterns continue to reject actual SQL while allowing ordinary business wording such as “review and select this candidate”. IDTS-114 remains In Progress only for the deferred Tester/Developer interactive role matrix.
+- Environment/tooling finding: browser startup logged existing SAPUI5/Lrep messages for unsupported S/CUBE, unavailable flex-data/features storage and a deprecated pseudo-module import. These messages predate and do not block Smart Assign; they are not classified as a new Smart Assign product defect.
+- Verification: IDTS-64 `42/42`, IDTS-69 `13/13`, IDTS-67 `36/36`, IDTS-68 `47/47`, IDTS-71 `31/31`, IDTS-114 `77/77`, secret/agent/depth/ownership gates, CAP compile, AI DevKit and `git diff --check` PASS. Live evidence: `docs/pm/evidence/idts-114/smart-assign-output-safety/programmatic-and-live-verification-20260801.md`.
+
 ## 2026-08-01 - IDTS-114 Smart Assign candidate explanation coverage
 
 - Product defect reproduced: a successful Smart Assign provider call could return an AI explanation for only one of several eligible candidates, while the remaining rows silently used rules-based guidance. Root cause: `buildAssignmentOutputSchema()` allowed `minItems: 1`, so a partial provider array was schema-valid even when the backend sent multiple candidate references.
