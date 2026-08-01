@@ -26,6 +26,11 @@
   reported every heading missing. The PR body was corrected through the GitHub
   API; a follow-up synchronize event is required because rerunning the original
   workflow reuses its original event payload. No product code is affected.
+- Process issue: the next fresh gate correctly read the headings but rejected
+  the abbreviated Knowledge Gate sentence. The validator requires all exact
+  structured fields (`Member`, `Date`, question counts, score and PASS results).
+  PR #254 now reuses the existing DonHV 90% PASS evidence in that exact format;
+  no learning gate was repeated and no bypass was used.
 
 - Product defect: after AppRouter `/do/logout`, `logoutPage` pointed to `/`,
   which is protected by XSUAA. A valid identity-provider session could therefore

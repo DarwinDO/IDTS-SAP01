@@ -69,6 +69,9 @@ issue In Progress until two complete post-deployment round trips pass.
 - PR #254 QA Depth Gate initially failed because the GitHub CLI submission
   escaped newlines as literal `\\n`; the corrected PR body contains all required
   headings. This is a tooling/evidence-format issue, not a runtime test failure.
+- A subsequent gate required the full structured Ownership Knowledge Gate
+  fields rather than a short reference. The PR body now records the existing
+  DonHV 90% PASS result with exact parser labels; no reassessment was performed.
 
 ## Dependencies and security
 
