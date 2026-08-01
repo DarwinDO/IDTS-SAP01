@@ -1,5 +1,17 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-08-01 - IDTS-114 Smart Assign candidate explanation coverage
+
+- Product defect reproduced: a successful Smart Assign provider call could return an AI explanation for only one of several eligible candidates, while the remaining rows silently used rules-based guidance. Root cause: `buildAssignmentOutputSchema()` allowed `minItems: 1`, so a partial provider array was schema-valid even when the backend sent multiple candidate references.
+- Fix in progress: the structured schema now requires exactly one output row per backend-issued candidate slot (`minItems = maxItems = candidate count`). The model still receives only short references such as `C1`; real Developer profile UUIDs remain backend-only, assignment remains manual, and missing/unsafe output still falls back safely.
+- Verification: the new red assertion failed with `1 !== 2` before the fix; `npm run qa:idts69:programmatic` now passes 13/13 after the one-line schema correction.
+- Tooling/security observation: fresh-worktree `npm ci` completed, but the existing dependency baseline reports 24 audit findings (1 critical, 13 high, 9 moderate, 1 low). No automatic or force upgrade was applied because dependency remediation is outside IDTS-114.
+- Verification tooling issue fixed in-session: `npx cds compile srv --to edmx` stopped because the model exposes both `AuthService` and `BugService`; CAP requires an explicit service selection. No source was affected. The compile gate is rerun with `-s all`.
+- Process-gate issue under correction: PR #250's first QA Depth run used an incomplete Knowledge Gate declaration. The PR body was corrected with the previously approved DonHV fields, but rerunning the same GitHub Actions run reused the original cached pull-request event payload and repeated the stale failure. A normal follow-up status commit is used to trigger a fresh pull-request event; no bypass or force-push is used.
+- OfficeCLI preflight for the Markdown status/mirror update: `officecli --version` returned `1.0.143`.
+- Verification gate result: IDTS-56 `14/14`, IDTS-69 `13/13`, IDTS-71 `31/31`, IDTS-114 `77/77`, CAP compile, secret scan, agent rules, depth self-test, AI DevKit and `git diff --check` all PASS.
+- Remaining handoff: merge and deploy the service-only SHA, then repeat one sequential Smart Assign browser call to confirm all displayed candidates are AI-grounded or explicitly safe-fallback; IDTS-114 remains In Progress.
+
 ## 2026-07-27 - IDTS-105 mentor-review briefing and EN-only governance
 
 - Work: created the complete Vietnamese mentor-feedback briefing, added the mandatory read/acknowledgment gate to `AGENTS.md`, created unsigned acknowledgment evidence, and prepared work packages for IDTS-105 through IDTS-112.

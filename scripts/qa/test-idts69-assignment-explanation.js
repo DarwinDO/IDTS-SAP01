@@ -179,8 +179,10 @@ async function main () {
     { candidateRef: 'C2' }
   ])
   assert.deepStrictEqual(assignmentSchema.properties.candidates.items.properties.candidateRef.enum, ['C1', 'C2'])
+  assert.strictEqual(assignmentSchema.properties.candidates.minItems, 2)
+  assert.strictEqual(assignmentSchema.properties.candidates.maxItems, 2)
   assert.strictEqual(JSON.stringify(assignmentSchema).includes(DEV_DAT), false)
-  rec('Smart Assign schema constrains output to backend-issued candidate references', true)
+  rec('Smart Assign schema requires one provider row for every backend-issued candidate reference', true)
 
   let rejectedMissingClassification = false
   try {
