@@ -161,3 +161,16 @@ is entered again.
 Tiếng Việt: guard vẫn chỉ gọi `/do/logout`. AppRouter chịu trách nhiệm chuyển
 sang trang public đã đăng xuất. Chỉ khi user bấm link quay lại ứng dụng thì
 XSUAA mới chạy lại; flow local/Render dùng bearer token không thay đổi.
+
+## IDTS-117 follow-up - protected login bridge and HTML response recovery
+
+After a complete AppRouter logout, an OData `fetch()` can follow the XSUAA
+redirect and receive the identity-provider HTML document with HTTP 200. That is
+not an IDTS profile response. The guard now checks `content-type` before parsing
+JSON and performs a top-level navigation to `/login.html`. AppRouter protects
+that bridge with XSUAA; only after authentication does it forward to the app.
+
+Vietnamese: Sau logout hoàn toàn, request nền có thể nhận HTML đăng nhập XSUAA
+với HTTP 200. Guard không còn parse HTML như JSON hoặc hiện nhầm lỗi “account
+cannot access”. Nó chuyển cả tab tới `/login.html` để SAP hoàn tất session, rồi
+mới quay lại app và gọi `AuthService.me`.

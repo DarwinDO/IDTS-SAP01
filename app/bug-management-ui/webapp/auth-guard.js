@@ -60,6 +60,10 @@
             headers: { "Accept": "application/json" }
         })
             .then(function (response) {
+                var contentType = response.headers.get("content-type") || "";
+                if (response.ok && contentType.indexOf("application/json") === -1) {
+                    return redirectToBtpLogin();
+                }
                 if (!response.ok) {
                     var error = new Error("Authentication is required.");
                     error.status = response.status;
@@ -78,7 +82,7 @@
             })
             .catch(function (error) {
                 if (error && error.status === 401) {
-                    redirectToCustomLogin();
+                    return redirectToBtpLogin();
                 } else {
                     showSafeAccessError();
                 }
@@ -131,6 +135,13 @@
             .replace(/\/(?:index|dashboard)\.html$/, "")
             .replace(/\/$/, "");
         window.location.replace(base + "/login.html");
+    }
+
+    function redirectToBtpLogin() {
+        window.location.replace("/login.html");
+        // Navigation replaces this page. Keeping the auth promise pending avoids
+        // rendering a false access-denied state while XSUAA establishes a session.
+        return new Promise(function () {});
     }
 
     function showSafeAccessError() {
