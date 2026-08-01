@@ -119,6 +119,7 @@
     "qa:idts113:outbox-scheduler": "node scripts/qa/test-idts113-outbox-scheduler.js",
     "qa:idts90:developer-demo-data": "node scripts/qa/test-idts90-developer-demo-data.js",
     "qa:idts113:btp-auth": "node scripts/qa/test-idts113-btp-auth.js",
+    "qa:idts117:btp-relogin": "node scripts/qa/test-idts117-btp-relogin.js",
     "dev:auth:set-password": "node scripts/dev/set-local-user-password.js",
     "integration:db:env": "cds env requires.db --profile integration",
     "integration:db:deploy": "cds deploy --profile integration",

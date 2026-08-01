@@ -3,9 +3,15 @@
   "authenticationMethod": "route",
   "logout": {
     "logoutEndpoint": "/do/logout",
-    "logoutPage": "/"
+    "logoutPage": "/logged-out.html"
   },
   "routes": [
+    {
+      "source": "^/logged-out\\.html$",
+      "localDir": "resources",
+      "authenticationType": "none",
+      "cacheControl": "no-cache, no-store, must-revalidate"
+    },
     {
       "source": "^/odata/(.*)$",
       "target": "/odata/$1",

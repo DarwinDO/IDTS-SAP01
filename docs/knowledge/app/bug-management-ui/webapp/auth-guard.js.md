@@ -148,3 +148,16 @@ Trong BTP mode, JWT khong duoc dua vao JavaScript hay `sessionStorage`. Logout
 chuyen den `/do/logout` do AppRouter xu ly. Promise `window.idtsAuthReady` chi
 hoan tat khi da co safe user profile, sau do `bootstrap-ui5.js` moi khoi dong
 UI5 de tranh request OData dau tien chay qua som.
+
+## IDTS-117 update - public post-logout boundary
+
+`auth-guard.js` still sends the XSUAA browser to `/do/logout`; it does not own
+the landing page. AppRouter now redirects to the public
+`/logged-out.html`. This prevents the protected root route from immediately
+starting XSUAA again before the user chooses to sign in. Debug this flow in
+Browser Network, then continue to `AuthService.me` only after the protected app
+is entered again.
+
+Tiếng Việt: guard vẫn chỉ gọi `/do/logout`. AppRouter chịu trách nhiệm chuyển
+sang trang public đã đăng xuất. Chỉ khi user bấm link quay lại ứng dụng thì
+XSUAA mới chạy lại; flow local/Render dùng bearer token không thay đổi.
