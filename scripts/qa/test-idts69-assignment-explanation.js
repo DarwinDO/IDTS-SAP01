@@ -113,7 +113,7 @@ async function main () {
     candidates: [
       {
         candidateRef: 'C1',
-        explanation: 'Provider explanation: matches this component/category and has available capacity.',
+        explanation: 'Provider explanation: matches this component/category; review and select this candidate manually.',
         confidence: 0.84
       }
     ]

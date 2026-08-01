@@ -264,3 +264,21 @@ No S3, Brevo, database schema, UI workflow, automatic classification/assignment,
   `docs/pm/evidence/idts-114/feature-model-routing/btp-browser-live-acceptance-20260731.md`.
 - IDTS-114 remains In Progress for Smart Assign candidate coverage and the
   deferred Tester/Developer role matrix.
+
+## 2026-08-01 Smart Assign output-safety correction
+
+- The candidate-coverage schema was deployed at source SHA
+  `aebb45edc762b3b6b478af9a2ac5a33fa35a6a9e`; a single PM browser call returned
+  HTTP 200 and safe audit status `SUCCESS` for `zai/glm-4.7-flash`.
+- All candidate rows still used rules-based guidance because
+  `containsUnsafeDiagnosticText()` classified the ordinary word `select` as
+  SQL and discarded the otherwise valid provider output.
+- The focused correction requires contextual SQL shapes while retaining
+  credential, secret and stack-trace detection. IDTS-64 `42/42`, IDTS-69
+  `13/13`, IDTS-67 `36/36`, IDTS-68 `47/47`, IDTS-71 `31/31` and IDTS-114
+  `77/77` pass locally.
+- Remaining: normal merge, selective service deployment at the exact merge
+  SHA, and one PM Smart Assign open/cancel check. The deferred Tester/Developer
+  role matrix still keeps IDTS-114 In Progress.
+- Evidence:
+  `docs/pm/evidence/idts-114/smart-assign-output-safety/programmatic-and-live-verification-20260801.md`.
