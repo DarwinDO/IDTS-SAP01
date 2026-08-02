@@ -363,10 +363,11 @@ hash/metadata và preview.
 
 | Member | Ownership |
 | --- | --- |
-| DonHV | Database/persistence, architecture assumptions, data dictionary, transaction/rollback, PostgreSQL, S3, AuthSessions, history, outbox/email và final integration |
+| DonHV | Database/persistence, architecture assumptions, data dictionary, transaction/rollback, PostgreSQL, S3, AuthSessions, history, outbox/email; đồng thời sở hữu/phê duyệt catalog Unit Test/UAT, sinh workbook EN, review evidence và tích hợp cuối lên Drive |
 | SangVN | Screen Layout/Definition, classification, assignment/Smart Assign, lifecycle UI, comments, attachments UI, history UI và Object Page evidence |
 | DatDT | Business-level requirements, Development Standards, naming matrix, exhaustive messages, login/profile, dashboard/monitoring, notification UI và AI traces |
-| NhanT | Unit Test EN catalog/execution/evidence và UAT EN catalog/execution/evidence |
+| NhanT | Thực thi Unit Test đã được duyệt và các UAT case vai trò Tester; ghi actual result và evidence riêng theo case |
+| SangVN / DatDT | Thực thi các UAT case vai trò Developer được DonHV phân công bằng SAP identity của chính thành viên |
 
 ## 18. Acknowledgment
 

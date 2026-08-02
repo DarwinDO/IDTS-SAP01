@@ -1,0 +1,4224 @@
+{
+  "schemaVersion": 1,
+  "catalog": "IDTS-111 SAP490 UAT EN v0.3 candidate",
+  "baselineSha": "447da1dab80418847d806040e6b2060b0916cb63",
+  "generatedAt": "2026-08-02",
+  "owner": "DonHV",
+  "approvalStatus": "APPROVED_FOR_EXECUTION",
+  "executionTruth": {
+    "prepared": 90,
+    "executed": 0,
+    "passed": 0,
+    "failed": 0,
+    "blocked": 0
+  },
+  "policy": {
+    "enOnly": true,
+    "workbookGeneratedAfterExecution": true,
+    "perCaseImageRequired": true,
+    "agentCannotApproveOrExecuteForMember": true,
+    "mentorSignoff": "PENDING"
+  },
+  "cases": [
+    {
+      "caseId": "UAT-AUTH-001",
+      "displayNumber": "1",
+      "language": "EN",
+      "domain": "Authentication",
+      "journey": "Sign in and session",
+      "title": "Tester signs in through XSUAA",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "POSITIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Active Tester SAP identity is mapped to one active IDTS Tester.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open the AppRouter URL.",
+        "Complete SAP sign-in.",
+        "Open the profile menu."
+      ],
+      "expectedResult": "The List Report opens and the profile identifies the mapped Tester without exposing token or session internals.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/auth.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/login-page.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AUTH-002",
+      "displayNumber": "2",
+      "language": "EN",
+      "domain": "Authentication",
+      "journey": "Sign in and session",
+      "title": "Unmapped SAP identity is denied safely",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "AUTHORIZATION",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Use a valid SAP identity with no active IDTS mapping.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open the AppRouter URL.",
+        "Complete SAP sign-in."
+      ],
+      "expectedResult": "Access is denied with a safe business message and no Bug data is shown.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/auth.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/login-page.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AUTH-003",
+      "displayNumber": "3",
+      "language": "EN",
+      "domain": "Authentication",
+      "journey": "Sign in and session",
+      "title": "Role mismatch is denied safely",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "AUTHORIZATION",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Platform role and mapped IDTS role intentionally differ.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open the AppRouter URL.",
+        "Complete SAP sign-in."
+      ],
+      "expectedResult": "HTTP 403 is handled safely; role internals and protected data are not exposed.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/auth.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/login-page.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AUTH-004",
+      "displayNumber": "4",
+      "language": "EN",
+      "domain": "Authentication",
+      "journey": "Sign in and session",
+      "title": "Expired session redirects to sign-in",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "RECOVERY",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Tester session is expired.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Reload a protected application route.",
+        "Complete sign-in again."
+      ],
+      "expectedResult": "The user is redirected to SAP sign-in and can resume without a blank page or raw error.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/auth.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/login-page.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AUTH-005",
+      "displayNumber": "5",
+      "language": "EN",
+      "domain": "Authentication",
+      "journey": "Sign in and session",
+      "title": "Logout ends the current session",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Tester is signed in.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose Logout.",
+        "Reopen a protected route."
+      ],
+      "expectedResult": "The old session cannot access protected data and SAP sign-in is required again.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/auth.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/login-page.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-BUG-001",
+      "displayNumber": "6",
+      "language": "EN",
+      "domain": "Bug creation",
+      "journey": "Create and save Bug",
+      "title": "Create a valid Bug without assignee",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Tester is signed in and active code-list values exist.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose Create Bug.",
+        "Enter all required values without an assignee.",
+        "Save.",
+        "Reload the Bug."
+      ],
+      "expectedResult": "One active Bug is created as Pending Assignment; reporter and next processor are server-derived and values survive reload.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/drafts.js"
+        },
+        {
+          "file": "srv/bug-service/bug-write.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-BUG-002",
+      "displayNumber": "7",
+      "language": "EN",
+      "domain": "Bug creation",
+      "journey": "Create and save Bug",
+      "title": "Create a valid Bug with assignee",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "A matching available Developer exists.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose Create Bug.",
+        "Enter required values and choose the Developer.",
+        "Save and reload."
+      ],
+      "expectedResult": "One active Assigned Bug is created with the selected assignee and Developer as next processor.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/drafts.js"
+        },
+        {
+          "file": "srv/bug-service/bug-write.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-BUG-003",
+      "displayNumber": "8",
+      "language": "EN",
+      "domain": "Bug creation",
+      "journey": "Create and save Bug",
+      "title": "Required title prevents save",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "NEGATIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "New Bug draft is open.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Leave Title empty.",
+        "Complete the other required values.",
+        "Choose Create."
+      ],
+      "expectedResult": "Save is blocked with a field-targeted safe validation message; no active Bug is created.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/drafts.js"
+        },
+        {
+          "file": "srv/bug-service/bug-write.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-BUG-004",
+      "displayNumber": "9",
+      "language": "EN",
+      "domain": "Bug creation",
+      "journey": "Create and save Bug",
+      "title": "Required description prevents save",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "NEGATIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "New Bug draft is open.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Leave Description empty.",
+        "Complete the other required values.",
+        "Choose Create."
+      ],
+      "expectedResult": "Save is blocked with a field-targeted safe validation message; no active Bug is created.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/drafts.js"
+        },
+        {
+          "file": "srv/bug-service/bug-write.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-BUG-005",
+      "displayNumber": "10",
+      "language": "EN",
+      "domain": "Bug creation",
+      "journey": "Create and save Bug",
+      "title": "Invalid classification pair prevents save",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "NEGATIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "New Bug draft is open.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose an Application Component and incompatible Defect Category.",
+        "Complete other required values.",
+        "Choose Create."
+      ],
+      "expectedResult": "HTTP 400 is shown as a safe field message and no invalid active Bug is stored.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/drafts.js"
+        },
+        {
+          "file": "srv/bug-service/bug-write.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-BUG-006",
+      "displayNumber": "11",
+      "language": "EN",
+      "domain": "Bug creation",
+      "journey": "Create and save Bug",
+      "title": "Draft preserves entered reproduction fields",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "New Bug draft is open.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Enter Steps to Reproduce, Actual Result, and Expected Result.",
+        "Navigate between sections.",
+        "Save and reload."
+      ],
+      "expectedResult": "All three values persist exactly once without a property-not-read error.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/drafts.js"
+        },
+        {
+          "file": "srv/bug-service/bug-write.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-BUG-007",
+      "displayNumber": "12",
+      "language": "EN",
+      "domain": "Bug creation",
+      "journey": "Create and save Bug",
+      "title": "Discard new draft creates no active Bug",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "NEGATIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "New Bug draft contains unsaved values.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose Discard Draft.",
+        "Confirm discard.",
+        "Search for the entered title."
+      ],
+      "expectedResult": "No active Bug is created and the abandoned draft does not block later create/edit flows.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/drafts.js"
+        },
+        {
+          "file": "srv/bug-service/bug-write.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-BUG-008",
+      "displayNumber": "13",
+      "language": "EN",
+      "domain": "Bug creation",
+      "journey": "Create and save Bug",
+      "title": "Edit an active Bug and save one field",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "An active editable Bug exists.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose Edit.",
+        "Change only the title.",
+        "Save and reload."
+      ],
+      "expectedResult": "Only the intended value changes; unrelated values remain unchanged and one grouped edit audit is visible.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/drafts.js"
+        },
+        {
+          "file": "srv/bug-service/bug-write.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-BUG-009",
+      "displayNumber": "14",
+      "language": "EN",
+      "domain": "Bug creation",
+      "journey": "Create and save Bug",
+      "title": "Browser back and forward do not corrupt a draft",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "RECOVERY",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "An edit draft is open.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Change a noncritical field.",
+        "Use browser Back then Forward.",
+        "Return to the Bug."
+      ],
+      "expectedResult": "The app recovers safely without blank page, cross-Bug draft leakage, or hidden save.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/drafts.js"
+        },
+        {
+          "file": "srv/bug-service/bug-write.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-CLS-001",
+      "displayNumber": "15",
+      "language": "EN",
+      "domain": "Classification",
+      "journey": "Classify a Bug",
+      "title": "Value helps return active classification values",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "POSITIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "New or edit draft is open.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open Application Component value help.",
+        "Open Defect Category value help."
+      ],
+      "expectedResult": "Only active selectable values are shown and no invalid-segment warning appears.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/bug-write.js"
+        },
+        {
+          "file": "srv/ai/classification-suggestion.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-CLS-002",
+      "displayNumber": "16",
+      "language": "EN",
+      "domain": "Classification",
+      "journey": "Classify a Bug",
+      "title": "Valid component and category derive the internal mapping",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "A known valid pair exists.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose the valid pair.",
+        "Wait for draft update.",
+        "Open Assignment."
+      ],
+      "expectedResult": "The mapping is derived by the backend and assignment candidates can be loaded.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/bug-write.js"
+        },
+        {
+          "file": "srv/ai/classification-suggestion.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-CLS-003",
+      "displayNumber": "17",
+      "language": "EN",
+      "domain": "Classification",
+      "journey": "Classify a Bug",
+      "title": "Inactive code-list value is rejected",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "NEGATIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "An inactive classification value is available through a controlled direct request.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Submit the inactive value.",
+        "Observe the response and reload."
+      ],
+      "expectedResult": "The request is rejected safely and stored classification remains unchanged.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/bug-write.js"
+        },
+        {
+          "file": "srv/ai/classification-suggestion.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-CLS-004",
+      "displayNumber": "18",
+      "language": "EN",
+      "domain": "Classification",
+      "journey": "Classify a Bug",
+      "title": "Classification remains unchanged after unrelated edit",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Active Bug has valid classification.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Edit only Description.",
+        "Save and reload."
+      ],
+      "expectedResult": "All classification fields remain unchanged.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/bug-write.js"
+        },
+        {
+          "file": "srv/ai/classification-suggestion.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-ASG-001",
+      "displayNumber": "19",
+      "language": "EN",
+      "domain": "Assignment",
+      "journey": "Assign or reassign Developer",
+      "title": "Assignable Developer list matches classification",
+      "actorRole": "PM",
+      "executionOwner": "DonHV",
+      "classification": "POSITIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Bug has a valid derived component category.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open Assignee value help.",
+        "Inspect candidate capability and availability."
+      ],
+      "expectedResult": "Matching Developers are shown with capability, workload, availability, and safe advisory explanation.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/read-models.js"
+        },
+        {
+          "file": "srv/ai/assignment-explanation.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-ASG-002",
+      "displayNumber": "20",
+      "language": "EN",
+      "domain": "Assignment",
+      "journey": "Assign or reassign Developer",
+      "title": "Missing classification blocks assignment clearly",
+      "actorRole": "PM",
+      "executionOwner": "DonHV",
+      "classification": "NEGATIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Draft lacks Application Component or Defect Category.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open Assignee value help."
+      ],
+      "expectedResult": "A precise business message requests the missing classification and no assignment occurs.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/read-models.js"
+        },
+        {
+          "file": "srv/ai/assignment-explanation.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-ASG-003",
+      "displayNumber": "21",
+      "language": "EN",
+      "domain": "Assignment",
+      "journey": "Assign or reassign Developer",
+      "title": "Invalid classification mapping blocks assignment clearly",
+      "actorRole": "PM",
+      "executionOwner": "DonHV",
+      "classification": "NEGATIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Draft contains a pair with no active mapping.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open Assignee value help."
+      ],
+      "expectedResult": "A precise invalid-pair message appears; no generic load error or assignment occurs.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/read-models.js"
+        },
+        {
+          "file": "srv/ai/assignment-explanation.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-ASG-004",
+      "displayNumber": "22",
+      "language": "EN",
+      "domain": "Assignment",
+      "journey": "Assign or reassign Developer",
+      "title": "Assign an available responsible Developer",
+      "actorRole": "PM",
+      "executionOwner": "DonHV",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Bug is Pending Assignment and a matching available Developer exists.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose the Developer.",
+        "Confirm Assign.",
+        "Reload the Bug."
+      ],
+      "expectedResult": "Assignee, status, next processor, history, and notification reflect the confirmed assignment.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/read-models.js"
+        },
+        {
+          "file": "srv/ai/assignment-explanation.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-ASG-005",
+      "displayNumber": "23",
+      "language": "EN",
+      "domain": "Assignment",
+      "journey": "Assign or reassign Developer",
+      "title": "Unavailable Developer cannot be assigned",
+      "actorRole": "PM",
+      "executionOwner": "DonHV",
+      "classification": "NEGATIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Candidate is marked unavailable.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Select the unavailable candidate.",
+        "Attempt Assign."
+      ],
+      "expectedResult": "Backend blocks assignment; Bug state and history remain unchanged.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/read-models.js"
+        },
+        {
+          "file": "srv/ai/assignment-explanation.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-ASG-006",
+      "displayNumber": "24",
+      "language": "EN",
+      "domain": "Assignment",
+      "journey": "Assign or reassign Developer",
+      "title": "Unsuitable Developer cannot be assigned",
+      "actorRole": "PM",
+      "executionOwner": "DonHV",
+      "classification": "NEGATIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Candidate lacks responsibility for the Bug classification.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Attempt direct assignment to the unsuitable Developer."
+      ],
+      "expectedResult": "HTTP 400 is handled safely; assignee and workflow remain unchanged.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/read-models.js"
+        },
+        {
+          "file": "srv/ai/assignment-explanation.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-ASG-007",
+      "displayNumber": "25",
+      "language": "EN",
+      "domain": "Assignment",
+      "journey": "Assign or reassign Developer",
+      "title": "Reassign to another valid Developer",
+      "actorRole": "PM",
+      "executionOwner": "DonHV",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Bug is assigned and another matching available Developer exists.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Edit the assignee.",
+        "Choose the new Developer.",
+        "Save and reload."
+      ],
+      "expectedResult": "Assignee and next processor change to the new Developer and the audit records the reassignment.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/read-models.js"
+        },
+        {
+          "file": "srv/ai/assignment-explanation.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-ASG-008",
+      "displayNumber": "26",
+      "language": "EN",
+      "domain": "Assignment",
+      "journey": "Assign or reassign Developer",
+      "title": "Developer cannot reassign through a forbidden direct request",
+      "actorRole": "DEVELOPER",
+      "executionOwner": "SangVN",
+      "classification": "AUTHORIZATION",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Developer is signed in.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Attempt to change assignee through the protected request."
+      ],
+      "expectedResult": "HTTP 403 is returned and assignment state does not change.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/read-models.js"
+        },
+        {
+          "file": "srv/ai/assignment-explanation.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-LIFE-001",
+      "displayNumber": "27",
+      "language": "EN",
+      "domain": "Lifecycle",
+      "journey": "Progress Bug status",
+      "actorRole": "TESTER/PM",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Controlled Bug is in Assigned and the actor is authorized.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose moveToPendingAssignment.",
+        "Enter a reason when requested.",
+        "Confirm the action.",
+        "Reload the Bug."
+      ],
+      "expectedResult": "Status becomes Pending Assignment; next processor role becomes PM; exact action history and intended notification persist.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/permissions.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-LIFE-002",
+      "displayNumber": "28",
+      "language": "EN",
+      "domain": "Lifecycle",
+      "journey": "Progress Bug status",
+      "actorRole": "TESTER/PM",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Controlled Bug is in Assigned and the actor is authorized.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose markInReview.",
+        "Enter a reason when requested.",
+        "Confirm the action.",
+        "Reload the Bug."
+      ],
+      "expectedResult": "Status becomes In Review; next processor role becomes Tester; exact action history and intended notification persist.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/permissions.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-LIFE-003",
+      "displayNumber": "29",
+      "language": "EN",
+      "domain": "Lifecycle",
+      "journey": "Progress Bug status",
+      "actorRole": "TESTER/PM",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Controlled Bug is in In Review and the actor is authorized.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose requestMoreInformation.",
+        "Enter a reason when requested.",
+        "Confirm the action.",
+        "Reload the Bug."
+      ],
+      "expectedResult": "Status becomes Need More Information; next processor role becomes Tester; exact action history and intended notification persist.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/permissions.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-LIFE-004",
+      "displayNumber": "30",
+      "language": "EN",
+      "domain": "Lifecycle",
+      "journey": "Progress Bug status",
+      "actorRole": "TESTER/PM",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Controlled Bug is in Need More Information and the actor is authorized.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose resubmitToDeveloper.",
+        "Enter a reason when requested.",
+        "Confirm the action.",
+        "Reload the Bug."
+      ],
+      "expectedResult": "Status becomes Assigned; next processor role becomes Developer; exact action history and intended notification persist.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/permissions.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-LIFE-005",
+      "displayNumber": "31",
+      "language": "EN",
+      "domain": "Lifecycle",
+      "journey": "Progress Bug status",
+      "actorRole": "TESTER/PM",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Controlled Bug is in In Review and the actor is authorized.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose rejectBug.",
+        "Enter a reason when requested.",
+        "Confirm the action.",
+        "Reload the Bug."
+      ],
+      "expectedResult": "Status becomes Rejected; next processor role becomes Tester; exact action history and intended notification persist.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/permissions.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-LIFE-006",
+      "displayNumber": "32",
+      "language": "EN",
+      "domain": "Lifecycle",
+      "journey": "Progress Bug status",
+      "actorRole": "DEVELOPER",
+      "executionOwner": "SangVN",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Controlled Bug is in Assigned and the actor is authorized.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose startProgress.",
+        "Enter a reason when requested.",
+        "Confirm the action.",
+        "Reload the Bug."
+      ],
+      "expectedResult": "Status becomes In Progress; next processor role becomes Developer; exact action history and intended notification persist.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/permissions.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-LIFE-007",
+      "displayNumber": "33",
+      "language": "EN",
+      "domain": "Lifecycle",
+      "journey": "Progress Bug status",
+      "actorRole": "DEVELOPER",
+      "executionOwner": "DatDT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Controlled Bug is in In Progress and the actor is authorized.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose resolveBug.",
+        "Enter a reason when requested.",
+        "Confirm the action.",
+        "Reload the Bug."
+      ],
+      "expectedResult": "Status becomes Resolved; next processor role becomes Tester; exact action history and intended notification persist.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/permissions.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-LIFE-008",
+      "displayNumber": "34",
+      "language": "EN",
+      "domain": "Lifecycle",
+      "journey": "Progress Bug status",
+      "actorRole": "TESTER/PM",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Controlled Bug is in Resolved and the actor is authorized.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose sendToRetest.",
+        "Enter a reason when requested.",
+        "Confirm the action.",
+        "Reload the Bug."
+      ],
+      "expectedResult": "Status becomes Retest Required; next processor role becomes Tester; exact action history and intended notification persist.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/permissions.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-LIFE-009",
+      "displayNumber": "35",
+      "language": "EN",
+      "domain": "Lifecycle",
+      "journey": "Progress Bug status",
+      "actorRole": "TESTER/PM",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Controlled Bug is in Retest Required and the actor is authorized.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose closeBug.",
+        "Enter a reason when requested.",
+        "Confirm the action.",
+        "Reload the Bug."
+      ],
+      "expectedResult": "Status becomes Closed; next processor role becomes PM; exact action history and intended notification persist.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/permissions.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-LIFE-010",
+      "displayNumber": "36",
+      "language": "EN",
+      "domain": "Lifecycle",
+      "journey": "Progress Bug status",
+      "actorRole": "TESTER/PM",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Controlled Bug is in Closed and the actor is authorized.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose reopenBug.",
+        "Enter a reason when requested.",
+        "Confirm the action.",
+        "Reload the Bug."
+      ],
+      "expectedResult": "Status becomes Reopened; next processor role becomes Developer; exact action history and intended notification persist.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/permissions.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-LIFE-011",
+      "displayNumber": "37",
+      "language": "EN",
+      "domain": "Lifecycle",
+      "journey": "Progress Bug status",
+      "title": "Invalid lifecycle transition is rejected",
+      "actorRole": "DEVELOPER",
+      "executionOwner": "DatDT",
+      "classification": "NEGATIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Bug status does not allow the selected action.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Attempt the invalid action through the protected request.",
+        "Reload the Bug."
+      ],
+      "expectedResult": "HTTP 400 is handled safely; status, assignee, next processor, and history remain unchanged.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/permissions.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-LIFE-012",
+      "displayNumber": "38",
+      "language": "EN",
+      "domain": "Lifecycle",
+      "journey": "Progress Bug status",
+      "title": "Unauthorized lifecycle action is rejected",
+      "actorRole": "DEVELOPER",
+      "executionOwner": "DatDT",
+      "classification": "AUTHORIZATION",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Signed-in Developer does not own the Bug or action.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Attempt the protected lifecycle action.",
+        "Reload the Bug."
+      ],
+      "expectedResult": "HTTP 403 is returned and no workflow side effect is persisted.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/permissions.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-LIFE-013",
+      "displayNumber": "39",
+      "language": "EN",
+      "domain": "Lifecycle",
+      "journey": "Progress Bug status",
+      "title": "Repeated lifecycle action is idempotently rejected",
+      "actorRole": "DEVELOPER",
+      "executionOwner": "DatDT",
+      "classification": "BOUNDARY",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "A lifecycle action has just completed.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Submit the same action again.",
+        "Reload the Bug."
+      ],
+      "expectedResult": "The second request is rejected safely and does not duplicate history or notification.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/permissions.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-COM-001",
+      "displayNumber": "40",
+      "language": "EN",
+      "domain": "Comments",
+      "journey": "Collaborate on a Bug",
+      "title": "Post a valid comment",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Active Bug is open.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Enter a clear comment.",
+        "Choose Post Comment.",
+        "Reload the Bug."
+      ],
+      "expectedResult": "The sanitized comment, actor, role, and timestamp persist once.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/content.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-COM-002",
+      "displayNumber": "41",
+      "language": "EN",
+      "domain": "Comments",
+      "journey": "Collaborate on a Bug",
+      "title": "Empty comment is rejected",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "NEGATIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Active Bug is open.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Leave comment empty.",
+        "Choose Post Comment."
+      ],
+      "expectedResult": "No comment is stored and a safe validation message is shown.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/content.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-COM-003",
+      "displayNumber": "42",
+      "language": "EN",
+      "domain": "Comments",
+      "journey": "Collaborate on a Bug",
+      "title": "Oversized comment is rejected",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "BOUNDARY",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Active Bug is open.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Enter text beyond the supported limit.",
+        "Choose Post Comment."
+      ],
+      "expectedResult": "The request is rejected safely and no truncated or partial comment is stored.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/content.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-COM-004",
+      "displayNumber": "43",
+      "language": "EN",
+      "domain": "Comments",
+      "journey": "Collaborate on a Bug",
+      "title": "Comment text is displayed as data, not executable markup",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "SECURITY",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Active Bug is open.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Post controlled markup-like text.",
+        "Reload and inspect it."
+      ],
+      "expectedResult": "The text is rendered safely and no script or HTML is executed.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/content.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-ATT-001",
+      "displayNumber": "44",
+      "language": "EN",
+      "domain": "Attachments",
+      "journey": "Manage Bug evidence",
+      "title": "Upload a supported attachment",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "INTEGRATION",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Active Bug is open and S3 is available.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose Upload Evidence.",
+        "Select a supported file.",
+        "Wait for completion.",
+        "Reload."
+      ],
+      "expectedResult": "Metadata persists in HANA, binary persists in S3, and the same attachment appears after reload.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/content.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-ATT-002",
+      "displayNumber": "45",
+      "language": "EN",
+      "domain": "Attachments",
+      "journey": "Manage Bug evidence",
+      "title": "Download preserves attachment bytes",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "INTEGRATION",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "A controlled attachment exists.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Download the attachment.",
+        "Compare its SHA-256 with the original."
+      ],
+      "expectedResult": "Downloaded bytes match the original hash and filename/content type are safe.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/content.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-ATT-003",
+      "displayNumber": "46",
+      "language": "EN",
+      "domain": "Attachments",
+      "journey": "Manage Bug evidence",
+      "title": "Delete removes attachment access",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "INTEGRATION",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "A controlled attachment exists.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Delete the attachment.",
+        "Confirm.",
+        "Reload and attempt the old download."
+      ],
+      "expectedResult": "UI entry, HANA metadata, and S3 object access are removed according to the supported delete contract.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/content.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-ATT-004",
+      "displayNumber": "47",
+      "language": "EN",
+      "domain": "Attachments",
+      "journey": "Manage Bug evidence",
+      "title": "Unsupported file type is rejected",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "NEGATIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Active Bug is open.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Select an unsupported file type."
+      ],
+      "expectedResult": "Upload is blocked with a safe message and no metadata or object is created.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/content.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-ATT-005",
+      "displayNumber": "48",
+      "language": "EN",
+      "domain": "Attachments",
+      "journey": "Manage Bug evidence",
+      "title": "Oversized file is rejected",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "BOUNDARY",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Active Bug is open.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Select a file larger than the allowed limit."
+      ],
+      "expectedResult": "Upload is blocked before unsafe persistence and the Bug remains usable.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/content.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-ATT-006",
+      "displayNumber": "49",
+      "language": "EN",
+      "domain": "Attachments",
+      "journey": "Manage Bug evidence",
+      "title": "S3 failure does not create broken attachment metadata",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "RECOVERY",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Controlled test makes storage unavailable.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Attempt upload.",
+        "Reload the Bug."
+      ],
+      "expectedResult": "A safe error is shown and no downloadable orphan metadata is presented.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/content.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AUD-001",
+      "displayNumber": "50",
+      "language": "EN",
+      "domain": "Audit and notification",
+      "journey": "Verify side effects",
+      "title": "History shows exact action, actor and changes",
+      "actorRole": "PM",
+      "executionOwner": "DonHV",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "A controlled lifecycle action has completed.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open History.",
+        "Expand the newest event."
+      ],
+      "expectedResult": "Exact action type, actor, timestamp, summary, and changed fields match the performed action.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/history.js"
+        },
+        {
+          "file": "srv/bug-service/history-read-models.js"
+        },
+        {
+          "file": "srv/email/outbox.js"
+        },
+        {
+          "file": "srv/email/worker.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AUD-002",
+      "displayNumber": "51",
+      "language": "EN",
+      "domain": "Audit and notification",
+      "journey": "Verify side effects",
+      "title": "Failed workflow transaction leaves no partial history",
+      "actorRole": "PM",
+      "executionOwner": "DonHV",
+      "classification": "RECOVERY",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Controlled invalid action is ready.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Submit the invalid action.",
+        "Reload Bug and History."
+      ],
+      "expectedResult": "Neither Bug state nor partial HistoryEvent/HistoryLog is persisted.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/history.js"
+        },
+        {
+          "file": "srv/bug-service/history-read-models.js"
+        },
+        {
+          "file": "srv/email/outbox.js"
+        },
+        {
+          "file": "srv/email/worker.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-NOT-001",
+      "displayNumber": "52",
+      "language": "EN",
+      "domain": "Audit and notification",
+      "journey": "Verify side effects",
+      "title": "In-app notification reaches the intended processor",
+      "actorRole": "PM",
+      "executionOwner": "DonHV",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "An action that notifies the next processor is ready.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Perform the action.",
+        "Sign in as the intended recipient.",
+        "Open Notifications."
+      ],
+      "expectedResult": "One safe notification with the correct Bug link and read state is visible only to the intended recipient.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/history.js"
+        },
+        {
+          "file": "srv/bug-service/history-read-models.js"
+        },
+        {
+          "file": "srv/email/outbox.js"
+        },
+        {
+          "file": "srv/email/worker.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-NOT-002",
+      "displayNumber": "53",
+      "language": "EN",
+      "domain": "Audit and notification",
+      "journey": "Verify side effects",
+      "title": "Reading a notification persists after reload",
+      "actorRole": "PM",
+      "executionOwner": "DonHV",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Unread notification exists.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open or mark it read.",
+        "Reload Notifications."
+      ],
+      "expectedResult": "Read state remains persisted and the unread counter is correct.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/history.js"
+        },
+        {
+          "file": "srv/bug-service/history-read-models.js"
+        },
+        {
+          "file": "srv/email/outbox.js"
+        },
+        {
+          "file": "srv/email/worker.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-EMAIL-001",
+      "displayNumber": "54",
+      "language": "EN",
+      "domain": "Audit and notification",
+      "journey": "Verify side effects",
+      "title": "Email outbox delivery reaches SENT",
+      "actorRole": "PM",
+      "executionOwner": "DonHV",
+      "classification": "INTEGRATION",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Brevo and Job Scheduler are available and an email-producing action is ready.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Perform the action.",
+        "Wait for the worker.",
+        "Inspect sanitized delivery evidence and recipient inbox/spam."
+      ],
+      "expectedResult": "Delivery progresses PENDING to SENT once; no secret or raw provider diagnostic is exposed.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/history.js"
+        },
+        {
+          "file": "srv/bug-service/history-read-models.js"
+        },
+        {
+          "file": "srv/email/outbox.js"
+        },
+        {
+          "file": "srv/email/worker.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-EMAIL-002",
+      "displayNumber": "55",
+      "language": "EN",
+      "domain": "Audit and notification",
+      "journey": "Verify side effects",
+      "title": "Temporary email failure retries without rolling back Bug workflow",
+      "actorRole": "PM",
+      "executionOwner": "DonHV",
+      "classification": "RECOVERY",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Controlled provider failure is available.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Perform the workflow action.",
+        "Observe delivery retry state.",
+        "Reload the Bug."
+      ],
+      "expectedResult": "Bug workflow remains committed; delivery records a bounded retry/failure state without duplicate business history.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/history.js"
+        },
+        {
+          "file": "srv/bug-service/history-read-models.js"
+        },
+        {
+          "file": "srv/email/outbox.js"
+        },
+        {
+          "file": "srv/email/worker.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-MON-001",
+      "displayNumber": "56",
+      "language": "EN",
+      "domain": "Monitoring",
+      "journey": "PM monitors work",
+      "title": "PM Dashboard shows role-scoped workload",
+      "actorRole": "PM",
+      "executionOwner": "DonHV",
+      "classification": "POSITIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "PM is signed in and controlled Bugs exist.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open Dashboard.",
+        "Compare workload counts with the controlled data."
+      ],
+      "expectedResult": "Counts and Developer workload reflect the current persisted state.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/monitoring.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/dashboard-page.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-MON-002",
+      "displayNumber": "57",
+      "language": "EN",
+      "domain": "Monitoring",
+      "journey": "PM monitors work",
+      "title": "Pending Assignment queue filters correctly",
+      "actorRole": "PM",
+      "executionOwner": "DonHV",
+      "classification": "POSITIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Pending and non-pending Bugs exist.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open Pending Assignment tab."
+      ],
+      "expectedResult": "Only Bugs awaiting assignment are shown.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/monitoring.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/dashboard-page.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-MON-003",
+      "displayNumber": "58",
+      "language": "EN",
+      "domain": "Monitoring",
+      "journey": "PM monitors work",
+      "title": "Overdue queue uses due date correctly",
+      "actorRole": "PM",
+      "executionOwner": "DonHV",
+      "classification": "BOUNDARY",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Past, today, future, and empty due dates exist.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open Overdue tab.",
+        "Compare the four boundary records."
+      ],
+      "expectedResult": "Only genuinely overdue unresolved Bugs appear.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/monitoring.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/dashboard-page.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-MON-004",
+      "displayNumber": "59",
+      "language": "EN",
+      "domain": "Monitoring",
+      "journey": "PM monitors work",
+      "title": "Rejected follow-up and retest queues remain distinct",
+      "actorRole": "PM",
+      "executionOwner": "DonHV",
+      "classification": "POSITIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Rejected and Retest Required Bugs exist.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open each queue tab."
+      ],
+      "expectedResult": "Each queue contains only its intended workflow state.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/monitoring.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/dashboard-page.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-MON-005",
+      "displayNumber": "60",
+      "language": "EN",
+      "domain": "Monitoring",
+      "journey": "PM monitors work",
+      "title": "Developer cannot access PM-only operational metrics",
+      "actorRole": "DEVELOPER",
+      "executionOwner": "DatDT",
+      "classification": "AUTHORIZATION",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Developer is signed in.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Attempt the PM metrics function directly."
+      ],
+      "expectedResult": "HTTP 403 is returned and no operational metrics are disclosed.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/monitoring.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/dashboard-page.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AI-001",
+      "displayNumber": "61",
+      "language": "EN",
+      "domain": "AI advisory",
+      "journey": "Review AI assistance",
+      "title": "Similar Bugs returns reviewable candidates or safe no-result",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "POSITIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Active Bug has sufficient summary data.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose Find Similar Bugs.",
+        "Inspect candidates and reasons."
+      ],
+      "expectedResult": "The dialog shows grounded candidates with safe reasons, or a clear no-result state; it does not mutate the Bug.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/ai/duplicate-detection.js"
+        },
+        {
+          "file": "srv/ai/duplicate-confirmation.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AI-002",
+      "displayNumber": "62",
+      "language": "EN",
+      "domain": "AI advisory",
+      "journey": "Review AI assistance",
+      "title": "Confirm an accepted duplicate candidate",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Accepted Similar Bugs suggestion and selected valid candidate exist.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose Confirm Duplicate.",
+        "Confirm.",
+        "Reload."
+      ],
+      "expectedResult": "One DuplicateLink persists; status, assignee, next processor, and lifecycle history do not change.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/ai/duplicate-detection.js"
+        },
+        {
+          "file": "srv/ai/duplicate-confirmation.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AI-003",
+      "displayNumber": "63",
+      "language": "EN",
+      "domain": "AI advisory",
+      "journey": "Review AI assistance",
+      "title": "Developer cannot confirm duplicate",
+      "actorRole": "DEVELOPER",
+      "executionOwner": "DatDT",
+      "classification": "AUTHORIZATION",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Developer has an accepted suggestion ID.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Call confirmDuplicateSuggestion directly."
+      ],
+      "expectedResult": "HTTP 403 is returned and no DuplicateLink is created.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/ai/duplicate-detection.js"
+        },
+        {
+          "file": "srv/ai/duplicate-confirmation.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AI-004",
+      "displayNumber": "64",
+      "language": "EN",
+      "domain": "AI advisory",
+      "journey": "Review AI assistance",
+      "title": "Classification suggestion is grounded in active catalogs",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "POSITIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Active Bug has sufficient classification context.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose Review Classification Suggestions.",
+        "Inspect values, confidence, source label, and reason."
+      ],
+      "expectedResult": "AI proposals use active catalog values; rules-based baselines are clearly labelled and no automatic apply occurs.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/ai/classification-suggestion.js"
+        },
+        {
+          "file": "srv/ai/classification-apply.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AI-005",
+      "displayNumber": "65",
+      "language": "EN",
+      "domain": "AI advisory",
+      "journey": "Review AI assistance",
+      "title": "Accept classification suggestion then apply it",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Tester has a pending valid classification suggestion.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Accept the suggestion.",
+        "Choose Apply Classification.",
+        "Confirm and reload."
+      ],
+      "expectedResult": "Only allowlisted classification fields update; workflow ownership and lifecycle remain unchanged.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/ai/classification-suggestion.js"
+        },
+        {
+          "file": "srv/ai/classification-apply.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AI-006",
+      "displayNumber": "66",
+      "language": "EN",
+      "domain": "AI advisory",
+      "journey": "Review AI assistance",
+      "title": "Developer cannot apply classification",
+      "actorRole": "DEVELOPER",
+      "executionOwner": "DatDT",
+      "classification": "AUTHORIZATION",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Developer has an accepted suggestion ID.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Call applyClassificationSuggestion directly."
+      ],
+      "expectedResult": "HTTP 403 is returned and Bug classification does not change.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/ai/classification-suggestion.js"
+        },
+        {
+          "file": "srv/ai/classification-apply.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AI-007",
+      "displayNumber": "67",
+      "language": "EN",
+      "domain": "AI advisory",
+      "journey": "Review AI assistance",
+      "title": "Handoff Summary is grounded in Bug comments and history",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "POSITIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Active Bug has comments and lifecycle history.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose Review Handoff Summary.",
+        "Compare overview, comments, events, missing data, and next action with stored records."
+      ],
+      "expectedResult": "The advisory summary is concise and grounded; no invented comment/event or workflow mutation occurs.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/ai/bug-summary.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AI-008",
+      "displayNumber": "68",
+      "language": "EN",
+      "domain": "AI advisory",
+      "journey": "Review AI assistance",
+      "title": "Handoff Summary handles sparse Bug data",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "BOUNDARY",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Active Bug intentionally lacks comments or history.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open Handoff Summary."
+      ],
+      "expectedResult": "Missing information is stated explicitly and no content is invented.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/ai/bug-summary.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AI-009",
+      "displayNumber": "69",
+      "language": "EN",
+      "domain": "AI advisory",
+      "journey": "Review AI assistance",
+      "title": "Smart Assign explanation supports manual choice only",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "POSITIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Active Bug has valid classification and matching Developers.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open Smart Assign.",
+        "Inspect candidate capability, availability, workload, confidence, and explanation.",
+        "Cancel."
+      ],
+      "expectedResult": "Explanations are grounded in candidate data and cancelling causes no assignment/history/notification mutation.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/read-models.js"
+        },
+        {
+          "file": "srv/ai/assignment-explanation.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AI-010",
+      "displayNumber": "70",
+      "language": "EN",
+      "domain": "AI advisory",
+      "journey": "Review AI assistance",
+      "title": "AI review decision survives reload",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "A pending AI suggestion exists.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Accept, Reject, or Ignore the suggestion.",
+        "Reload and reopen the dialog."
+      ],
+      "expectedResult": "Review state, reviewer, and timestamp persist; the same decision cannot be applied twice.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/ai/provider.js"
+        },
+        {
+          "file": "srv/ai/review.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AI-011",
+      "displayNumber": "71",
+      "language": "EN",
+      "domain": "AI advisory",
+      "journey": "Review AI assistance",
+      "title": "Rate-limited provider uses safe local fallback",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "RECOVERY",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Controlled provider rate limit or active cooldown is available.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open one AI feature.",
+        "Observe result and Network.",
+        "Avoid repeated retry."
+      ],
+      "expectedResult": "Safe local output is identified clearly, no raw 429/provider diagnostic appears, and no unintended mutation occurs.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/ai/provider.js"
+        },
+        {
+          "file": "srv/ai/review.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AI-012",
+      "displayNumber": "72",
+      "language": "EN",
+      "domain": "AI advisory",
+      "journey": "Review AI assistance",
+      "title": "Prompt-injection text is treated as Bug data",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "SECURITY",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Controlled Bug text contains an instruction-like phrase.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Run each affected advisory flow.",
+        "Inspect output and side effects."
+      ],
+      "expectedResult": "The phrase does not override system constraints, expose secrets, or trigger an action.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/ai/provider.js"
+        },
+        {
+          "file": "srv/ai/review.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AI-013",
+      "displayNumber": "73",
+      "language": "EN",
+      "domain": "AI advisory",
+      "journey": "Review AI assistance",
+      "title": "PM reads sanitized AI operational metrics",
+      "actorRole": "PM",
+      "executionOwner": "DonHV",
+      "classification": "POSITIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "PM is signed in and AI audit rows exist.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open AI Activity.",
+        "Compare aggregate counts with sanitized readback."
+      ],
+      "expectedResult": "Metrics show capability-level counts and latency without prompt, response, raw error, endpoint, key, or private identity.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/ai/metrics.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-ROLE-001",
+      "displayNumber": "74",
+      "language": "EN",
+      "domain": "Role coverage",
+      "journey": "Cross-role business acceptance",
+      "title": "PM signs in and sees PM actions",
+      "actorRole": "PM",
+      "executionOwner": "DonHV",
+      "classification": "POSITIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Active PM SAP identity is mapped to one IDTS PM.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open AppRouter and sign in.",
+        "Open List Report and Dashboard."
+      ],
+      "expectedResult": "PM-only monitoring and permitted business actions are visible without Developer-only ownership behavior.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/auth.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/login-page.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-ROLE-002",
+      "displayNumber": "75",
+      "language": "EN",
+      "domain": "Role coverage",
+      "journey": "Cross-role business acceptance",
+      "title": "Developer signs in and sees owned work only",
+      "actorRole": "DEVELOPER",
+      "executionOwner": "SangVN",
+      "classification": "POSITIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Active Developer SAP identity is mapped to one IDTS Developer.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open AppRouter and sign in.",
+        "Open assigned and unassigned Bugs."
+      ],
+      "expectedResult": "Developer can work only within backend ownership/role rules; hidden UI does not replace backend authorization.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/auth.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/login-page.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-BUG-010",
+      "displayNumber": "76",
+      "language": "EN",
+      "domain": "Bug creation",
+      "journey": "Create and save Bug",
+      "title": "PM creates a valid Bug",
+      "actorRole": "PM",
+      "executionOwner": "DonHV",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "PM is signed in and active code-list values exist.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose Create Bug.",
+        "Enter required values.",
+        "Save and reload."
+      ],
+      "expectedResult": "One active Bug is created with PM as authenticated reporter and server-derived workflow state.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/drafts.js"
+        },
+        {
+          "file": "srv/bug-service/bug-write.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-BUG-011",
+      "displayNumber": "77",
+      "language": "EN",
+      "domain": "Bug creation",
+      "journey": "Create and save Bug",
+      "title": "Developer cannot create a new Bug",
+      "actorRole": "DEVELOPER",
+      "executionOwner": "DatDT",
+      "classification": "AUTHORIZATION",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Developer is signed in.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Attempt the NEW draft request."
+      ],
+      "expectedResult": "HTTP 403 is returned and no draft or active Bug is created.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/drafts.js"
+        },
+        {
+          "file": "srv/bug-service/bug-write.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-ASG-009",
+      "displayNumber": "78",
+      "language": "EN",
+      "domain": "Assignment",
+      "journey": "Assign or reassign Developer",
+      "title": "No matching Developer produces an explicit empty state",
+      "actorRole": "PM",
+      "executionOwner": "DonHV",
+      "classification": "BOUNDARY",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Bug classification has no active matching Developer responsibility.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open Assignee value help."
+      ],
+      "expectedResult": "An explicit no-candidate state is shown; no arbitrary Developer is selected and the Bug remains unassigned.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/read-models.js"
+        },
+        {
+          "file": "srv/ai/assignment-explanation.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-LIFE-014",
+      "displayNumber": "79",
+      "language": "EN",
+      "domain": "Lifecycle",
+      "journey": "Progress Bug status",
+      "title": "Required lifecycle reason prevents submission when empty",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "NEGATIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "A reason-required lifecycle action is available.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open the action.",
+        "Leave Reason empty.",
+        "Confirm."
+      ],
+      "expectedResult": "The action is blocked with a field-targeted message and no status/history/notification change occurs.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/permissions.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-LIFE-015",
+      "displayNumber": "80",
+      "language": "EN",
+      "domain": "Lifecycle",
+      "journey": "Progress Bug status",
+      "title": "Rejected Bug correction can return to the intended processor",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Rejected Bug contains the required correction information.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Perform the supported correction/follow-up action.",
+        "Reload the Bug."
+      ],
+      "expectedResult": "The documented follow-up state and next processor persist with one exact audit event.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/actions.js"
+        },
+        {
+          "file": "srv/bug-service/permissions.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-ATT-007",
+      "displayNumber": "81",
+      "language": "EN",
+      "domain": "Attachments",
+      "journey": "Manage Bug evidence",
+      "title": "Unauthorized attachment deletion is rejected",
+      "actorRole": "DEVELOPER",
+      "executionOwner": "SangVN",
+      "classification": "AUTHORIZATION",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Attachment exists and Developer lacks delete permission for the context.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Attempt the protected delete request.",
+        "Reload the Bug."
+      ],
+      "expectedResult": "HTTP 403 is returned and both metadata and binary remain accessible to authorized users.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/content.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AUD-003",
+      "displayNumber": "82",
+      "language": "EN",
+      "domain": "Audit and notification",
+      "journey": "Inspect audit history",
+      "title": "History show-more loads older events in order",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Bug has more history events than the initial display limit.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open History.",
+        "Choose Show More.",
+        "Compare ordering and event count."
+      ],
+      "expectedResult": "Older events load once in chronological presentation order without duplicates or missing change details.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/history.js"
+        },
+        {
+          "file": "srv/bug-service/history-read-models.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AI-014",
+      "displayNumber": "83",
+      "language": "EN",
+      "domain": "AI advisory",
+      "journey": "Review AI assistance",
+      "title": "Reject AI suggestion persists without business mutation",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Pending AI suggestion exists.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose Reject.",
+        "Confirm and reload."
+      ],
+      "expectedResult": "Review state becomes REJECTED once; Bug fields, workflow, duplicate links, history, and notifications remain unchanged.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/ai/provider.js"
+        },
+        {
+          "file": "srv/ai/review.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AI-015",
+      "displayNumber": "84",
+      "language": "EN",
+      "domain": "AI advisory",
+      "journey": "Review AI assistance",
+      "title": "Ignore AI suggestion persists without business mutation",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Pending AI suggestion exists.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Choose Ignore.",
+        "Confirm and reload."
+      ],
+      "expectedResult": "Review state becomes IGNORED once; Bug fields, workflow, duplicate links, history, and notifications remain unchanged.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/ai/provider.js"
+        },
+        {
+          "file": "srv/ai/review.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-AI-016",
+      "displayNumber": "85",
+      "language": "EN",
+      "domain": "AI advisory",
+      "journey": "Review AI assistance",
+      "title": "Stale accepted classification cannot overwrite newer Bug data",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "NEGATIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "An accepted suggestion exists and source classification has since changed.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Attempt Apply Classification.",
+        "Reload the Bug."
+      ],
+      "expectedResult": "The stale apply is rejected safely and the newer classification remains unchanged.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/ai/classification-suggestion.js"
+        },
+        {
+          "file": "srv/ai/classification-apply.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-UX-001",
+      "displayNumber": "86",
+      "language": "EN",
+      "domain": "Usability",
+      "journey": "Cross-cutting browser behavior",
+      "title": "Desktop layout remains readable at 100 percent zoom",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "POSITIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "List Report and Object Page are available.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Review major screens and dialogs at 100% zoom."
+      ],
+      "expectedResult": "No clipping, horizontal overflow, vertical word breaking, or unreachable action is present.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/drafts.js"
+        },
+        {
+          "file": "srv/bug-service/bug-write.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-UX-002",
+      "displayNumber": "87",
+      "language": "EN",
+      "domain": "Usability",
+      "journey": "Cross-cutting browser behavior",
+      "title": "Tablet layout keeps primary actions usable",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "POSITIVE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Supported tablet viewport is available.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Open List Report, Object Page, and AI dialogs.",
+        "Navigate all primary actions."
+      ],
+      "expectedResult": "Responsive pop-ins/wrapping preserve labels, values, and actions.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/drafts.js"
+        },
+        {
+          "file": "srv/bug-service/bug-write.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-UX-003",
+      "displayNumber": "88",
+      "language": "EN",
+      "domain": "Usability",
+      "journey": "Cross-cutting browser behavior",
+      "title": "Keyboard and focus order support core flows",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "BOUNDARY",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Desktop browser is open.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Use keyboard navigation through create, comment, and one dialog.",
+        "Close the dialog."
+      ],
+      "expectedResult": "Focus order is logical, visible, and returns to the triggering control.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/drafts.js"
+        },
+        {
+          "file": "srv/bug-service/bug-write.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-UX-004",
+      "displayNumber": "89",
+      "language": "EN",
+      "domain": "Usability",
+      "journey": "Cross-cutting browser behavior",
+      "title": "Unexpected backend error is sanitized",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "RECOVERY",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "Controlled safe server failure is available.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Trigger the failure.",
+        "Inspect UI, Console, and Network status."
+      ],
+      "expectedResult": "The UI shows a safe actionable message without SQL, stack trace, provider body, token, or private endpoint.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/drafts.js"
+        },
+        {
+          "file": "srv/bug-service/bug-write.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "sanitized Network status or safe error screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    },
+    {
+      "caseId": "UAT-UX-005",
+      "displayNumber": "90",
+      "language": "EN",
+      "domain": "Usability",
+      "journey": "Cross-cutting browser behavior",
+      "title": "Reload does not lose committed business state",
+      "actorRole": "TESTER",
+      "executionOwner": "NhanT",
+      "classification": "PERSISTENCE",
+      "priority": "HIGH",
+      "requirementReferences": [],
+      "preconditions": "A controlled action has just succeeded.",
+      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+      "steps": [
+        "Reload the page.",
+        "Reopen the affected section."
+      ],
+      "expectedResult": "Committed state and audit remain present and no action is duplicated.",
+      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/drafts.js"
+        },
+        {
+          "file": "srv/bug-service/bug-write.js"
+        }
+      ],
+      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+      "evidenceRequirements": [
+        "case-specific UI screenshot",
+        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+        "before/after and reload/readback screenshot"
+      ],
+      "execution": {
+        "status": "PREPARED",
+        "executor": null,
+        "executedAt": null,
+        "deploySha": null,
+        "actualResult": null,
+        "evidenceIds": [],
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "limitation": null
+    }
+  ]
+}
