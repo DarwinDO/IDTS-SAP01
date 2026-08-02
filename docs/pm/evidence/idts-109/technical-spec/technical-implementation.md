@@ -9,7 +9,7 @@ the field was omitted.
 ### TI-AUTH-01 — login
 
 1. **Function name:** `AuthService.login`
-2. **Purpose:** Authenticate an active user and issue a single raw bearer token.
+2. **Purpose:** Authenticate an active user and issue a single raw bearer token in the local/custom-auth deployment profile.
 3. **Actor/precondition:** Anonymous user; valid active account and password.
 4. **UI trigger:** Sign In button or Enter on `login.html`.
 5. **Frontend source:** `app/bug-management-ui/webapp/login-page.js::submitLogin`.
@@ -27,15 +27,15 @@ the field was omitted.
 
 1. **Function name:** `AuthService.me`
 2. **Purpose:** Return the safe profile for the current authenticated session.
-3. **Actor/precondition:** Authenticated Tester, Developer or PM with a valid bearer session.
+3. **Actor/precondition:** Authenticated Tester, Developer or PM with either a valid custom bearer session or an AppRouter/XSUAA identity.
 4. **UI trigger:** Protected shell initialization and profile button rendering.
 5. **Frontend source:** `auth-guard.js`; `ext/login/ProfileShell.js::currentUser/createProfileButton`.
 6. **HTTP/OData request:** Protected identity resolution; `GET /odata/v4/auth/me` when explicitly requested.
 7. **Service contract:** `srv/auth.cds`, `@requires: 'authenticated-user' function me() returns AuthUser`.
-8. **CAP handler/helper:** `srv/auth.js::me`; `srv/auth/custom-auth.js`.
-9. **Validation/authorization:** Bearer token must map to a valid active session/user; response excludes password/token hashes and session internals.
+8. **CAP handler/helper:** `srv/auth.js::me`; dual-mode resolution in `srv/auth/custom-auth.js`; BTP role alignment in `srv/auth/platform-role.js`.
+9. **Validation/authorization:** Custom bearer mode requires a valid active session/user. BTP mode requires exactly one supported XSUAA role that matches `Users.role_code`. The response excludes password/token hashes and session internals.
 10. **Transaction:** Read-only request.
-11. **Database/provider side effect:** Read session/user only; no mutation.
+11. **Database/provider side effect:** Read user and, in custom mode, session only; no mutation.
 12. **Response/UI refresh:** Show display name, email, role and formatted expiry in SAPUI5 profile popover.
 13. **Failure/rollback:** Clear/redirect on invalid session; no business mutation.
 14. **Test/evidence:** `npm run qa:auth:programmatic`; protected-shell/profile browser check.
@@ -43,19 +43,53 @@ the field was omitted.
 ### TI-AUTH-03 — logout
 
 1. **Function name:** `AuthService.logout`
-2. **Purpose:** Revoke the current server session and clear the browser session.
-3. **Actor/precondition:** Authenticated user with a bearer token.
+2. **Purpose:** End the current custom session or AppRouter/XSUAA browser session without changing business data.
+3. **Actor/precondition:** Authenticated user in the active deployment profile.
 4. **UI trigger:** Sign Out in the profile popover.
 5. **Frontend source:** `ext/login/ProfileShell.js`; `ext/login/LoginController.js`; `auth-guard.js`.
-6. **HTTP/OData request:** `POST /odata/v4/auth/logout` with bearer token.
+6. **HTTP/OData request:** Custom mode uses `POST /odata/v4/auth/logout`; BTP mode uses AppRouter `/do/logout` and redirects to public `/logged-out.html`.
 7. **Service contract:** `srv/auth.cds`, authenticated `logout() returns Boolean`.
 8. **CAP handler/helper:** `srv/auth.js::logout`.
 9. **Validation/authorization:** Auth middleware resolves the session; client never sends a user ID to choose which session to revoke.
 10. **Transaction:** CAP request transaction.
-11. **Database/provider side effect:** Revoke/delete the matching AuthSession according to handler behavior.
-12. **Response/UI refresh:** Clear local token/user/expiry and navigate to Sign In even when provider/network cleanup cannot complete.
+11. **Database/provider side effect:** Custom mode revokes/deletes the matching AuthSession. BTP mode ends the platform session and does not mutate `AuthSessions`.
+12. **Response/UI refresh:** Custom mode clears local token/user/expiry. BTP mode shows the signed-out page with a `Sign in with SAP BTP` link.
 13. **Failure/rollback:** No Bug data is involved; local logout remains safe and no token is displayed.
 14. **Test/evidence:** `npm run qa:auth:programmatic`; logout browser flow.
+
+### TI-AUTH-04 — SAP BTP XSUAA sign-in and role alignment
+
+1. **Function name:** AppRouter/XSUAA sign-in and `assertPlatformRoleMatchesUser`
+2. **Purpose:** Establish a BTP browser identity and reject ambiguous or mismatched platform/business roles before IDTS access.
+3. **Actor/precondition:** Browser user deployed through the SAP BTP AppRouter; active XSUAA assignment and matching IDTS `Users` record.
+4. **UI trigger:** Open the protected application or choose `Sign in with SAP BTP` after logout.
+5. **Frontend source:** `app/router/resources/login.html`, `logged-out.html`; `app/bug-management-ui/webapp/auth-guard.js`.
+6. **HTTP/OData request:** AppRouter authenticates protected routes and forwards the JWT to `/odata`; login redirect is handled by XSUAA.
+7. **Service contract:** Protected application/OData routes in `app/router/xs-app.json`; CAP authenticated-user contracts.
+8. **CAP handler/helper:** `srv/auth/platform-role.js::assertPlatformRoleMatchesUser`; dual-mode guard in `srv/auth/custom-auth.js`.
+9. **Validation/authorization:** Require exactly one supported IDTS platform role and equality with `Users.role_code`; reject invalid assignment or mismatch with safe 403 messages.
+10. **Transaction:** Read-only identity resolution before protected business handling.
+11. **Database/provider side effect:** Read the internal user profile; no identity or business mutation.
+12. **Response/UI refresh:** Continue to the protected Fiori app on success; show safe account-access or platform-starting guidance on failure.
+13. **Failure/rollback:** Protected business handling does not start. Tokens, claims, private endpoints and stack details are not displayed or persisted.
+14. **Test/evidence:** `npm run qa:idts117:btp-relogin`; BTP XSUAA/AppRouter browser evidence and source review.
+
+### TI-PLATFORM-01 — HANA-backed readiness
+
+1. **Function name:** `GET /ready`
+2. **Purpose:** Distinguish an available CAP/HANA deployment from a stopped or unavailable database dependency.
+3. **Actor/precondition:** Platform health probe or operator; CAP process is reachable.
+4. **UI trigger:** None; platform/operations health check.
+5. **Frontend source:** None.
+6. **HTTP/OData request:** `GET /ready`.
+7. **Service contract:** Express readiness endpoint registered by `server.js`.
+8. **CAP handler/helper:** `server.js`; `cds.connect.to('db')`; read from `idts.cap.Users`.
+9. **Validation/authorization:** Executes a bounded database read and returns only safe status categories.
+10. **Transaction:** Read-only database request.
+11. **Database/provider side effect:** Reads the bound HANA HDI container in BTP; no mutation.
+12. **Response/UI refresh:** HTTP 200 with `UP/database: UP`, or HTTP 503 with `DOWN/database: DOWN`.
+13. **Failure/rollback:** No business data changes; database exception detail is not returned to the caller.
+14. **Test/evidence:** CAP compile; BTP/HANA deployment runbook and readiness/live evidence.
 
 ### TI-DASH-01 — role dashboard
 
@@ -131,10 +165,12 @@ Provider acceptance status:
 
 - Direct OpenAI live acceptance for this candidate remains
   `BLOCKED / NOT ACCEPTED`.
-- The later Vercel AI Gateway path has staged configuration and selected live
-  evidence, but IDTS-115 records `PARTIAL PASS`: PM positive flows passed while the
-  interactive role matrix and provider-primary structured-output acceptance remain
-  incomplete.
+- The SAP BTP Vercel AI Gateway path has PM live positive evidence for
+  Classification, Handoff, Similar Bugs and Smart Assign. Classification routes to
+  an OpenAI model behind the Gateway; this does not accept the standalone
+  `provider=openai` path.
+- Tester/Developer interactive role coverage remains incomplete, so PM evidence is
+  not generalized to every role or to final IDTS-114 acceptance.
 - Deterministic/safe fallback and review controls must not be presented as proof of
   complete live-provider acceptance.
 
@@ -150,7 +186,7 @@ Provider acceptance status:
 8. **CAP handler/helper:** `srv/ai/duplicate-detection.js::suggestSimilarBugs`; safe provider and audit helpers.
 9. **Validation/authorization:** Validate input/source Bug; redact/limit provider input; returned candidates come from accessible Bug data.
 10. **Transaction:** Request transaction for audit persistence; no Bug workflow mutation.
-11. **Database/provider side effect:** Read Bugs; persist an AiSuggestion audit row when applicable; optional mock/OpenAI provider call.
+11. **Database/provider side effect:** Read Bugs; persist a sanitized AiSuggestion audit row when applicable; call the configured safe route (mock, standalone provider or Vercel Gateway). In BTP, Similar Bugs uses the Qwen embedding route with only the documented embedding fallback.
 12. **Response/UI refresh:** Populate Similar Bugs dialog with candidates, reasons, score and review controls.
 13. **Failure/rollback:** Safe no-result/unavailable state; no DuplicateLink is created.
 14. **Test/evidence:** `qa:idts66:programmatic`, `qa:idts74:programmatic`, `qa:idts74:browser`.
@@ -167,7 +203,7 @@ Provider acceptance status:
 8. **CAP handler/helper:** `srv/ai/classification-suggestion.js::suggestClassification`; provider, safety and audit helpers.
 9. **Validation/authorization:** Validate context; ground output against active catalogs; mark unsafe/low-confidence values for review.
 10. **Transaction:** Request/audit transaction; no automatic Bug change.
-11. **Database/provider side effect:** Read Bug/catalogs; persist AiSuggestion audit; optional provider call.
+11. **Database/provider side effect:** Read Bug/catalogs; persist sanitized AiSuggestion audit; call the configured safe route. In BTP, Classification uses `openai/gpt-5.4-nano` through Vercel Gateway and has no model-access fallback.
 12. **Response/UI refresh:** Populate field/current/suggested/review rows.
 13. **Failure/rollback:** Safe unavailable/no-suggestion state; classification remains unchanged.
 14. **Test/evidence:** `qa:idts67:programmatic`, `qa:idts75:programmatic`, `qa:idts75:browser`.
@@ -184,7 +220,7 @@ Provider acceptance status:
 8. **CAP handler/helper:** `srv/ai/bug-summary.js::summarizeBugHandoff`.
 9. **Validation/authorization:** Validate source ID/access; use allowlisted Bug, comment and history context; redact/limit input.
 10. **Transaction:** Read/audit transaction; no Bug mutation.
-11. **Database/provider side effect:** Read Bug/comments/history; persist AiSuggestion audit; optional provider call.
+11. **Database/provider side effect:** Read Bug/comments/history; persist a sanitized, field-bounded AiSuggestion audit; call the configured safe route. In BTP, Handoff uses MiniMax with one documented Grok fallback only for eligible route denial, timeout, network or 5xx failure.
 12. **Response/UI refresh:** Show summary, status, owner, missing information, recent events and next action.
 13. **Failure/rollback:** Generic load failure or safe fallback; no comment/history/status is created.
 14. **Test/evidence:** `qa:idts68:programmatic`, `qa:idts76:programmatic`, `qa:idts76:browser`.
@@ -199,12 +235,12 @@ Provider acceptance status:
 6. **HTTP/OData request:** `POST /odata/v4/bug/explainSmartAssignment`.
 7. **Service contract:** Unbound action returning SmartAssignmentExplanationCandidate rows.
 8. **CAP handler/helper:** `srv/ai/assignment-explanation.js::explainSmartAssignment`; assignable-developer read model and provider/audit helpers.
-9. **Validation/authorization:** Scope pending-change checks to the application update group so unrelated UI5 `donotsubmit` value-help contexts do not block Smart Assign; refresh derived classification; candidates must come from authorized assignable-developer rows; human choice remains required.
+9. **Validation/authorization:** Scope pending-change checks to the application update group so unrelated UI5 `donotsubmit` value-help contexts do not block Smart Assign; refresh derived classification; use at most 10 authorized candidates and send temporary references (`C1`...) rather than developer UUIDs; require safe output covering every candidate; human choice remains required.
 10. **Transaction:** Wait for the application draft PATCH (`$auto`) or submit a custom update group, then refresh before the read/audit request; assignment remains a separate action.
-11. **Database/provider side effect:** Read responsibilities/workload/Bug; persist suggestion audit; optional provider call.
+11. **Database/provider side effect:** Read responsibilities/workload/Bug; persist sanitized suggestion audit; call the configured safe route. In BTP, Smart Assign uses `zai/glm-4.7-flash` with bounded provider handling.
 12. **Response/UI refresh:** Refresh authoritative classification, load assignable candidates, then add explanation, warnings, confidence and review status; unrelated UI5 pending groups do not block the dialog.
-13. **Failure/rollback:** An application-group timeout, refresh failure or candidate-read failure maps to `smartAssignLoadFailed`; no assignment is applied. Provider-only explanation failure uses the safe fallback and preserves manual assignment.
-14. **Test/evidence:** `qa:idts56:programmatic`, `qa:idts69:programmatic`, `qa:idts70:programmatic`, `qa:idts72:browser`, `docs/pm/evidence/idts-115/smart-assign-pending-group/rollout.md`.
+13. **Failure/rollback:** An application-group timeout, refresh failure or candidate-read failure maps to `smartAssignLoadFailed`; unsafe, incomplete or missing provider output maps to deterministic explanations. No assignment is applied; manual choice remains available.
+14. **Test/evidence:** `qa:idts56:programmatic`, `qa:idts69:programmatic`, `qa:idts70:programmatic`, `qa:idts72:browser`, Smart Assign candidate-coverage/output-safety evidence and `docs/pm/evidence/idts-115/smart-assign-pending-group/rollout.md`.
 
 ### TI-AI-05 — acceptAiSuggestion
 

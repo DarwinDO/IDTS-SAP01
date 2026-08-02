@@ -144,3 +144,30 @@ login/profile, dashboard/monitoring, notification UI and AI traces.
   non-blocking CI-maintenance warning already recorded in DatDT status.
 - DatDT's Jira delta-confirmation comment remains a required human handoff after
   fresh checks and final commit SHA are available.
+
+## 2026-08-02 DonHV comment 10834 current-dev refresh
+
+- Completed the refreshed DatDT Ownership Knowledge Gate before implementation:
+  7/7 final answers after guided corrections, critical security/data boundary PASS,
+  controlled provider-timeout debug PASS and teach-back PASS.
+- Fetched `origin/dev` at `fbea12c` and merged normally without rebase,
+  force-push or conflict; merge commit `c633770`.
+- Regenerated the English candidate from current source with 19 separate 14-part
+  traces and 93 source-derived message rows. New coverage includes SAP BTP
+  AppRouter/XSUAA role alignment, HANA-backed readiness, feature-specific Gateway
+  routes/request budgets, bounded safe output and complete Smart Assign candidate
+  coverage using temporary references rather than developer UUIDs.
+- Retained the correct provider distinction: standalone `provider=openai` is not
+  accepted, while PM live evidence exists for an OpenAI classification model and
+  the other approved feature models behind Vercel Gateway. Tester/Developer
+  interactive role coverage remains open.
+- Fresh local verification: source manifest `96/18/62/485`; 19/19 traces contain
+  fields 1-14; BTP auth 12/12; relogin/readiness PASS; provider 77/0; Smart Assign
+  14/0; assignment explanation 13/0; AI UI 241; CAP compile exit 0; secret scan,
+  agent-rule check, QA depth self-test, AI DevKit `5/0/0`, English-only scan and
+  `git diff --check` PASS.
+- OfficeCLI remains unavailable, so workbook/template validation is not claimed.
+  No official Drive file was changed. DonHV remains the final workbook integrator.
+- Next handoff: commit and push the candidate, obtain a fresh GitHub
+  `qa-depth-gate`, post automated technical evidence to Jira, then ask DatDT to
+  personally approve the exact candidate commit.

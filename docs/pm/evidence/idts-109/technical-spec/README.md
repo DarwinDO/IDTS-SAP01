@@ -1,6 +1,6 @@
 # IDTS-109 Technical Specification Candidate
 
-Status: `CANDIDATE UPDATED FROM LATEST DEV — DATDT JIRA DELTA CONFIRMATION REQUIRED — DO NOT SYNC TO MENTOR CURRENT`
+Status: `CANDIDATE REFRESHED FROM CURRENT DEV — NEW EXACT-HEAD DATDT APPROVAL REQUIRED — DO NOT SYNC TO MENTOR CURRENT`
 
 Owner: DatDT
 
@@ -12,13 +12,13 @@ DatDT briefing acknowledgment: Jira IDTS-109 comment `10762`
 
 DatDT candidate approval: Jira IDTS-109 comment `10763`
 
-Prepared: 2026-07-31
+Prepared: 2026-07-31; refreshed: 2026-08-02
 
 Submission language: English only
 
 Current source baseline: `origin/dev` commit
-`a77b3796acb8494b4c4a58060613b0f20eaf7639`, merged into this branch by commit
-`2c4bc050e83023c1509207072d37d2c09d444b58`.
+`fbea12cd996d8c1e13bd834fd6e054c8a37c32e6`, merged into this branch by commit
+`c633770551e9d7eb52ec002e6a78cfa8774f86d7`.
 
 ## Purpose
 
@@ -39,6 +39,8 @@ workbook and not evidence that the task has passed.
 ## Source baseline
 
 - `srv/auth.js`, `srv/auth/custom-auth.js`
+- `srv/auth/platform-role.js`, `app/router/xs-app.json`, `app/router/resources/`
+- `mta.yaml`, `server.js`
 - `srv/service.cds`, `srv/service.js`
 - `srv/bug-service/monitoring.js`, `srv/bug-service/history.js`
 - `srv/email/`
@@ -62,14 +64,12 @@ workbook and not evidence that the task has passed.
 - No Drive file is changed.
 - No provider secret, private endpoint, raw prompt or raw provider response is
   included.
-- Direct OpenAI live acceptance remains
-  `BLOCKED / NOT ACCEPTED` for this candidate. The later Vercel AI Gateway path is
-  separately recorded as staged with partial runtime acceptance; it must not be
-  described as complete provider-primary acceptance.
-- DatDT reviewed and approved the pre-sync candidate in IDTS-109 comment `10763`.
-  Later `dev` updates added three AI UI entry points, a Vercel provider path and
-  Smart Assign update-group scoping after that approval. The candidate has been
-  technically reconciled, but DatDT's Jira delta confirmation is still required
-  before final integration.
+- The standalone `provider=openai` live path remains `BLOCKED / NOT ACCEPTED` for
+  this candidate. The SAP BTP Vercel AI Gateway route has PM live acceptance for
+  Classification, Handoff, Similar Bugs and Smart Assign, including an OpenAI
+  classification model behind the Gateway. Tester/Developer interactive role
+  coverage remains open; neither result is generalized into full acceptance.
+- Earlier DatDT approval in IDTS-109 comment `10763` predates the current source
+  baseline. A new personal approval naming the final candidate commit is required.
 - DonHV remains responsible for final workbook integration, generation, visual
   review and upload under the current shared-artifact workflow.
