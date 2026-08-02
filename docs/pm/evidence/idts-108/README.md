@@ -6,7 +6,7 @@
 | --- | --- |
 | Owner | SangVN |
 | Support | DonHV for database and provider-side evidence |
-| Baseline | `5807313` (`origin/dev`, 2026-07-31) |
+| Baseline | `fbea12c` (`origin/dev`, refreshed 2026-08-03) |
 | Package state | Ready for handoff with documented blockers; not full PASS/Done and not approved |
 | Human briefing acknowledgment | `READ` — Jira IDTS-108 comment `10780` and repository acknowledgment row verified |
 | Final integration owner | DonHV through IDTS-112 |
@@ -284,7 +284,7 @@ were opened only for evidence and dismissed without submission. BUG-0003 remaine
 
 ## 5. Review and approval checklist
 
-- [x] Candidate package is based on current `origin/dev` baseline `5807313`.
+- [x] Candidate package is based on refreshed `origin/dev` baseline `fbea12c`.
 - [x] Runtime `app/`, `srv/`, and `db/` are unchanged by this task.
 - [x] Natural numbering is used for mentor-visible entries.
 - [x] Screen Layout inventory covers runtime pages, dialogs, sections and necessary
