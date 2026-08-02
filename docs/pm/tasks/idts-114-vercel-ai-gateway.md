@@ -241,3 +241,61 @@ No S3, Brevo, database schema, UI workflow, automatic classification/assignment,
 - No exact HTTP 429 route response occurred in the sequence. The fifth-call local guard remains covered by focused regression.
 - IDTS-114 remains In Progress pending the deferred Tester/Developer interactive role matrix.
 - Evidence: `docs/pm/evidence/idts-114/qwen-sequential-acceptance/btp-sequential-live-verification-20260731.md`.
+
+## 2026-07-31 feature-specific routing browser acceptance
+
+- SAP HANA Cloud was found stopped during the first authenticated browser
+  check. It was started without HDI deployment, schema change or data reset,
+  and a read-only bound task returned `DB_PROBE_OK`.
+- A fresh PM browser sequence on `BUG-0011` completed without HTTP 429:
+  Classification → Handoff Summary → Smart Assign → Similar Bugs.
+- Safe HANA audit readback confirms:
+  - Classification: `SUCCESS`, `openai/gpt-5.4-nano`.
+  - Handoff: `SUCCESS`, `minimax/minimax-m2.5`.
+  - Smart Assign: `SUCCESS`, `zai/glm-4.7-flash`.
+  - Similar Bugs: `SUCCESS`, `alibaba/qwen3-embedding-0.6b`.
+- Classification, Handoff and Similar Bugs passed the PM UI review. Smart
+  Assign remains partial because only one of three displayed candidates
+  received model-generated prose; the other rows clearly retained rules-based
+  guidance.
+- No review decision, Apply, Confirm Duplicate, Assign, Save or lifecycle
+  mutation was executed.
+- Evidence:
+  `docs/pm/evidence/idts-114/feature-model-routing/btp-browser-live-acceptance-20260731.md`.
+- IDTS-114 remains In Progress for Smart Assign candidate coverage and the
+  deferred Tester/Developer role matrix.
+
+## 2026-08-01 Smart Assign output-safety correction
+
+- The candidate-coverage schema was deployed at source SHA
+  `aebb45edc762b3b6b478af9a2ac5a33fa35a6a9e`; a single PM browser call returned
+  HTTP 200 and safe audit status `SUCCESS` for `zai/glm-4.7-flash`.
+- All candidate rows still used rules-based guidance because
+  `containsUnsafeDiagnosticText()` classified the ordinary word `select` as
+  SQL and discarded the otherwise valid provider output.
+- The focused correction requires contextual SQL shapes while retaining
+  credential, secret and stack-trace detection. IDTS-64 `42/42`, IDTS-69
+  `13/13`, IDTS-67 `36/36`, IDTS-68 `47/47`, IDTS-71 `31/31` and IDTS-114
+  `77/77` pass locally.
+- Remaining: normal merge, selective service deployment at the exact merge
+  SHA, and one PM Smart Assign open/cancel check. The deferred Tester/Developer
+  role matrix still keeps IDTS-114 In Progress.
+- Evidence:
+  `docs/pm/evidence/idts-114/smart-assign-output-safety/programmatic-and-live-verification-20260801.md`.
+
+## 2026-08-01 Smart Assign output-safety live verification
+
+- PR #251 merged normally at
+  `39e3b5a4d756f3b6702406a8456cb89ba8cbc0fb` after the fresh QA Depth Gate
+  passed.
+- Selective MTA operation `4517f9e8-8d5d-11f1-8632-eeee0a8bed2f` deployed
+  only `idts-sap01-srv`; no HDI deployer or broad `cds deploy` ran.
+- One authenticated PM Smart Assign request on `BUG-0011` displayed three
+  provider-generated candidate explanations with distinct confidence values
+  (40%, 88%, and 55%). No row fell back to rules-based guidance.
+- The dialog was closed with Cancel. No Assign, review decision, Save or
+  lifecycle action was submitted, so the focused check was non-mutating.
+- The output-safety defect is resolved for the PM flow. Tester/Developer
+  interactive role evidence remains deferred, so IDTS-114 stays In Progress.
+- Evidence:
+  `docs/pm/evidence/idts-114/smart-assign-output-safety/programmatic-and-live-verification-20260801.md`.

@@ -148,3 +148,44 @@ Trong BTP mode, JWT khong duoc dua vao JavaScript hay `sessionStorage`. Logout
 chuyen den `/do/logout` do AppRouter xu ly. Promise `window.idtsAuthReady` chi
 hoan tat khi da co safe user profile, sau do `bootstrap-ui5.js` moi khoi dong
 UI5 de tranh request OData dau tien chay qua som.
+
+## IDTS-117 update - public post-logout boundary
+
+`auth-guard.js` still sends the XSUAA browser to `/do/logout`; it does not own
+the landing page. AppRouter now redirects to the public
+`/logged-out.html`. This prevents the protected root route from immediately
+starting XSUAA again before the user chooses to sign in. Debug this flow in
+Browser Network, then continue to `AuthService.me` only after the protected app
+is entered again.
+
+Tiếng Việt: guard vẫn chỉ gọi `/do/logout`. AppRouter chịu trách nhiệm chuyển
+sang trang public đã đăng xuất. Chỉ khi user bấm link quay lại ứng dụng thì
+XSUAA mới chạy lại; flow local/Render dùng bearer token không thay đổi.
+
+## IDTS-117 follow-up - protected login bridge and HTML response recovery
+
+After a complete AppRouter logout, an OData `fetch()` can follow the XSUAA
+redirect and receive the identity-provider HTML document with HTTP 200. That is
+not an IDTS profile response. The guard now checks `content-type` before parsing
+JSON and performs a top-level navigation to `/login.html`. AppRouter protects
+that bridge with XSUAA; only after authentication does it forward to the app.
+
+## IDTS-117 follow-up - availability is not authorization
+
+`AuthService.me` now has a 15-second browser timeout and three explicit outcomes:
+HTTP 401 navigates through the protected login bridge, HTTP 403 displays the
+account/role denial, and network/5xx/timeout failures display a temporary
+platform-unavailable message with Retry. The guard never displays raw backend
+or database diagnostics. Operators must check CAP `/ready`, which touches the
+configured database, instead of assuming `/health` proves HANA is available.
+
+Vietnamese: `AuthService.me` co timeout 15 giay. 401 chuyen qua login bridge,
+403 moi la loi account/role, con network/5xx/timeout hien thong bao platform tam
+thoi chua san sang kem nut Retry. Guard khong hien raw error. Khi debug, kiem
+`/ready` vi endpoint nay cham database that; `/health` chi chung minh process
+Node con song.
+
+Vietnamese: Sau logout hoàn toàn, request nền có thể nhận HTML đăng nhập XSUAA
+với HTTP 200. Guard không còn parse HTML như JSON hoặc hiện nhầm lỗi “account
+cannot access”. Nó chuyển cả tab tới `/login.html` để SAP hoàn tất session, rồi
+mới quay lại app và gọi `AuthService.me`.

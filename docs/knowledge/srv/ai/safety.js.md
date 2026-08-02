@@ -62,6 +62,51 @@ Bug text is user input. A user may accidentally paste a token, database URL, SMT
 - Never log raw provider request/response just to debug a failure.
 - Keep user-facing error text generic.
 
+## 2026-08-01 contextual SQL detection
+
+### English
+
+`containsUnsafeDiagnosticText()` must distinguish an actual SQL diagnostic from
+ordinary business language. A plain word such as `select`, `update`, or
+`delete` is not sufficient evidence of SQL: Smart Assign can legitimately say
+"review and select this candidate". The guard now requires contextual SQL
+shapes such as `SELECT ... FROM`, `INSERT INTO`, `UPDATE <table> SET`, or
+`DELETE FROM`. Secret names, stack traces, credentials, and configured secret
+patterns remain blocked.
+
+Caller -> current function -> consequence:
+
+1. An AI feature receives validated provider output.
+2. The feature calls `containsUnsafeDiagnosticText()` before using it.
+3. Ordinary explanation text continues to feature-level grounding.
+4. SQL/secret/stack-like output is rejected and the feature uses its safe
+   deterministic fallback.
+
+Debug here when provider metrics say `SUCCESS` but every feature row is still
+labelled rules-based. Inspect the exact boolean returned for the already
+sanitized payload; never print the raw prompt, response, key, or private data.
+
+### Tiếng Việt
+
+`containsUnsafeDiagnosticText()` phải phân biệt câu SQL thật với ngôn ngữ nghiệp
+vụ bình thường. Chỉ gặp từ `select`, `update` hoặc `delete` chưa đủ để kết luận
+là SQL: Smart Assign có thể hợp lệ khi ghi "review and select this candidate".
+Guard hiện yêu cầu đúng ngữ cảnh như `SELECT ... FROM`, `INSERT INTO`,
+`UPDATE <table> SET` hoặc `DELETE FROM`. Tên secret, stack trace, credential và
+các pattern secret đã cấu hình vẫn bị chặn.
+
+Caller -> hàm hiện tại -> kết quả:
+
+1. AI feature nhận output provider đã qua validation.
+2. Feature gọi `containsUnsafeDiagnosticText()` trước khi sử dụng output.
+3. Explanation nghiệp vụ bình thường tiếp tục qua bước grounding của feature.
+4. Output giống SQL/secret/stack bị loại và feature dùng deterministic fallback
+   an toàn.
+
+Đặt breakpoint tại đây khi metric provider là `SUCCESS` nhưng tất cả row vẫn bị
+gắn nhãn rules-based. Chỉ quan sát kết quả boolean trên payload đã sanitize;
+không in raw prompt, response, API key hoặc dữ liệu riêng tư.
+
 ## 2026-07-31 storage-bound correction
 
 `redactSensitiveText()` previously kept `maxLength` source characters and then

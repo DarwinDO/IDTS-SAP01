@@ -390,7 +390,8 @@ function buildAssignmentOutputSchema (candidates) {
     properties: {
       candidates: {
         type: 'array',
-        minItems: refs.length ? 1 : 0,
+        // Provider phải trả đủ từng ref; nếu chỉ cho phép 1 row thì model có thể bỏ sót các candidate còn lại.
+        minItems: refs.length,
         maxItems: refs.length,
         items: {
           type: 'object',

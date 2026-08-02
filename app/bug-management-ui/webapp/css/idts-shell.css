@@ -72,3 +72,23 @@
     width: 100%;
   }
 }
+#idtsAuthError {
+  max-width: 42rem;
+  margin: 2rem auto;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--sapWarningBorderColor, #e9730c);
+  border-radius: 0.25rem;
+  background: var(--sapWarningBackground, #fff3cd);
+  color: var(--sapTextColor, #1d2d3e);
+  font-family: var(--sapFontFamily, Arial, sans-serif);
+}
+
+#idtsAuthError button {
+  min-height: 2.25rem;
+  padding: 0 1rem;
+  border: 1px solid var(--sapButton_BorderColor, #0070f2);
+  border-radius: 0.25rem;
+  background: var(--sapButton_Emphasized_Background, #0070f2);
+  color: var(--sapButton_Emphasized_TextColor, #fff);
+  cursor: pointer;
+}

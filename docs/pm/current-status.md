@@ -295,6 +295,19 @@ Vietnamese clean note: Nút `Assign Developer` riêng đã được bỏ khỏi 
   final Technical Specification EN integration under IDTS-112 also remain
   open.
 
+## 2026-08-01 SAP BTP explicit re-login follow-up
+
+- `IDTS-117` is complete. PR #254 merged at `d733771`; the exact release was
+  selectively deployed to the standalone AppRouter without an HDI/database
+  deployment.
+- The public signed-out page and protected `/login.html` bridge passed two
+  consecutive browser round trips through XSUAA back to the Fiori application.
+  Both final `AuthService.me` checks returned HTTP 200 JSON and parsed cleanly.
+- The fix does not add custom BTP credentials or change local/Render auth,
+  HANA users, role collections, OData contracts, schema or business data.
+- Evidence is in `docs/pm/evidence/idts-117/btp-rollout/`. IDTS-108 can now be
+  reconsidered without the IDTS-117 blocker.
+
 ## Next Handover Instruction
 
 Any new agent or developer should identify their member name first, then read this file, `task-board.md`, the relevant member file under `status/*.md`, and the relevant `tasks/*.md` before making changes.

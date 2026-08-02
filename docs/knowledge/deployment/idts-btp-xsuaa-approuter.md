@@ -97,6 +97,36 @@ passwords.
 10. Verify primary/fallback AI paths do not mutate the Bug without an
     authorized explicit action.
 
+## Logout and re-login flow
+
+`Sign Out` does not return directly to `/`. The root route is protected by
+XSUAA, so sending the browser there immediately can authenticate the same SAP
+identity again while its identity-provider session is still valid.
+
+The supported flow is:
+
+1. `ProfileShell.js` calls `window.idtsLogout()`.
+2. `auth-guard.js` redirects the browser to AppRouter `/do/logout`.
+3. AppRouter clears its application session and redirects to
+   `/logged-out.html`.
+4. `app/router/xs-app.json` serves that page through an explicit public route
+   with `authenticationType: none`.
+5. The user chooses **Sign in with SAP BTP** to enter the protected Fiori app
+   again. XSUAA then starts or resumes the SAP identity-provider login flow.
+
+The public page contains no login form, password field, token handling or
+custom authentication logic. Local and Render profiles continue to use the
+existing custom login flow.
+
+### Giải thích ngắn bằng tiếng Việt
+
+`/do/logout` chỉ kết thúc session ứng dụng của AppRouter. Nếu redirect ngay về
+route `/` đang được XSUAA bảo vệ, phiên đăng nhập SAP ở identity provider có thể
+đưa cùng user vào lại ngay. Vì vậy IDTS chuyển tới trang public
+`/logged-out.html`; user chỉ quay lại flow XSUAA khi chủ động bấm **Sign in with
+SAP BTP**. Thay đổi này không thêm form đăng nhập riêng và không ảnh hưởng flow
+custom auth của local/Render.
+
 ## Security notes
 
 Do not commit service keys, JWTs, destination credentials or external-provider secrets. A successful AppRouter login is not sufficient: the IDTS user row must be active and its `role_code` must match the XSUAA role.
