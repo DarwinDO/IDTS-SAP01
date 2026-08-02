@@ -136,3 +136,19 @@ SAP BTP Trial and HANA Cloud Free Tier remain non-production environments with
 automatic stop behavior and no SLA. A separate operational readiness runbook,
 DB-backed readiness check and pre-demo verification are required; this finding
 must not be mislabeled as an XSUAA role denial.
+
+## 2026-08-02 demo-readiness hotfix
+
+The first live recovery run exposed a Windows PowerShell compatibility issue:
+`Set-Content -Encoding utf8` added a BOM to the temporary HANA service parameter
+file, and the Cloud Foundry CLI rejected it as invalid JSON. The script now
+writes UTF-8 without BOM using the .NET standard library, retains the existing
+`finally` cleanup, and adds a focused regression assertion. No schema deploy,
+seed load, database reset, credential readback or runtime contract change is
+included.
+
+The source merge was selectively deployed through MTA operation
+`2a6a26e0-8e7a-11f1-830b-eeee0a9aaf82`. CAP and AppRouter are started `1/1`,
+`/health` and `/ready` return HTTP 200, the protected API returns HTTP 401
+without a session, and the web entry returns HTTP 200. Evidence:
+`docs/pm/evidence/idts-117/demo-readiness/live-verification-20260802.md`.

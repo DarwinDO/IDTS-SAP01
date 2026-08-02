@@ -101,9 +101,9 @@ if ($snapshot.ReadyStatus -ne 200) {
   Write-Host "Database readiness failed. Requesting a supported start for $HanaService..."
   $parameterFile = Join-Path ([IO.Path]::GetTempPath()) "idts-hana-start-$([guid]::NewGuid().ToString('N')).json"
   try {
-    @{ data = @{ serviceStopped = $false } } |
-      ConvertTo-Json -Depth 3 |
-      Set-Content -LiteralPath $parameterFile -Encoding utf8
+    $parameterJson = @{ data = @{ serviceStopped = $false } } | ConvertTo-Json -Depth 3
+    $utf8WithoutBom = New-Object System.Text.UTF8Encoding($false)
+    [IO.File]::WriteAllText($parameterFile, $parameterJson, $utf8WithoutBom)
     Invoke-Cf -Arguments @('update-service', $HanaService, '-c', $parameterFile) | Out-Null
   } finally {
     Remove-Item -LiteralPath $parameterFile -Force -ErrorAction SilentlyContinue
