@@ -1,5 +1,75 @@
 # `srv/ai/vercel-gateway-provider.js`
 
+## 2026-07-31 Handoff-only backup boundary
+
+`structured()` accepts the already-sanitized primary and backup model aliases
+from `SafeAiProvider`. The adapter still performs at most one backup call.
+
+For Handoff Summary, DeepSeek may switch once to Grok when the primary attempt
+fails with timeout, network error, HTTP 5xx, or an explicit allowlisted
+model-route denial code. A generic HTTP 403 such as `access_denied` does not
+switch models because it can represent a key, account, or team permission
+problem. HTTP 429 never switches models and continues to activate the existing
+cooldown. Classification and Smart Assign do not enable the model-denial
+exception.
+
+Debug order: safe feature type -> selected primary alias -> allowlisted
+`gatewayReason` -> optional backup alias -> final `fallbackUsed`. Never inspect
+Authorization or the raw provider body.
+
+Tiếng Việt: chỉ Handoff được dùng Grok đúng một lần trong các lỗi đủ điều kiện.
+429 và lỗi 403 chung không gọi model khác để tránh tốn quota hoặc che lỗi quyền
+tài khoản.
+
+## 2026-07-31 proactive per-model request budget
+
+### English
+
+The reactive `Retry-After` cooldown remains, but it is now keyed by model
+instead of blocking every Gateway capability. Before `#request()` performs
+network I/O, `reserveModelRequest()` applies the optional sliding-window
+budget from `requestLimit` and `requestWindowSeconds`.
+
+On SAP BTP the deployment declares four requests per model in sixty seconds.
+The fifth Z.AI request in the same window returns the existing safe
+`AI_RATE_LIMITED` envelope without reaching Vercel or invoking OpenAI. The
+separate Qwen embedding model has its own window, so a Z.AI structured limit
+does not disable Similar Bugs embeddings.
+
+Caller → current function → callee:
+
+`Classification/Handoff/Smart Assign` → `structured()` → `#request()` →
+`reserveModelRequest()` → Vercel only when budget remains.
+
+Debug in this order:
+
+1. Check the safe model alias and configured limit/window.
+2. Break at `reserveModelRequest()` and inspect only timestamp counts.
+3. If a network 429 still occurs, inspect allowlisted status,
+   `gatewayReason` and `retryAfterSeconds`.
+4. Confirm no fallback call follows `AI_RATE_LIMITED`.
+
+The state is process memory only and resets when the single BTP application
+instance restarts. It is intentionally not a queue, scheduler or database
+rate-limit table.
+
+### Tiếng Việt
+
+Cooldown theo `Retry-After` vẫn được giữ, nhưng giới hạn được tách theo từng
+model. Trước khi `#request()` gọi mạng, `reserveModelRequest()` kiểm tra số lần
+gọi trong cửa sổ thời gian cấu hình.
+
+Trên SAP BTP, mỗi model được phép tối đa bốn request trong sáu mươi giây.
+Request Z.AI thứ năm sẽ trả `AI_RATE_LIMITED` an toàn ngay trong backend, không
+gọi Vercel và không chuyển sang OpenAI. Model Qwen embedding có cửa sổ riêng,
+vì vậy Z.AI bị giới hạn không làm hỏng Similar Bugs.
+
+Luồng: feature AI → `structured()` → `#request()` →
+`reserveModelRequest()` → chỉ gọi Gateway khi còn ngân sách request.
+
+State chỉ nằm trong memory của process và reset khi ứng dụng BTP restart.
+Không có queue, scheduler hoặc bảng database mới.
+
 ## Per-feature JSON Schema forwarding (2026-07-30)
 
 `structured()` accepts the sanitized JSON Schema produced by a feature and forwards it as `response_format.json_schema.schema`. The old generic object contract only proved parseable JSON; it could not guarantee the keys needed by Classification or Smart Assign. The generic schema remains a compatibility default for callers without a feature contract.
@@ -18,7 +88,7 @@ mixed dimensions, or non-finite numbers as one whole batch. An HTTP 400 on the
 array contract becomes `AI_EMBEDDING_BATCH_UNSUPPORTED`, allowing the Similar
 Bugs feature to use its bounded sequential compatibility path.
 
-All Vercel operations share one in-memory cooldown. A transient HTTP 429 uses
+Each model uses its own in-memory cooldown. A transient HTTP 429 uses
 `Retry-After`, or 60 seconds when the header is absent, clamped to 1–900
 seconds. Calls during cooldown do not reach the network. HTTP 429, budget
 errors, generic 400, and malformed output never spend an OpenAI fallback call;
@@ -60,9 +130,8 @@ runtime configuration and approved model aliases.
 3. `embedding()` uses `/v1/embeddings` only when an embedding model exists.
 4. `#request()` sends the key in memory, parses the required response shape and
    discards the raw response body.
-5. `#withFallback()` attempts the primary model first. Timeout, network error,
-   retryable 5xx, transient non-budget 429 or malformed output may use the one
-   configured fallback.
+5. `#withFallback()` attempts the primary model first. Only timeout, network
+   error and retryable 5xx may use the one configured fallback.
 6. Generic 400/401/403/404 and quota/budget 429 do not use fallback.
 7. A response-format-specific HTTP 400 is the one compatibility exception:
    `structured()` retries the same primary Qwen model once without

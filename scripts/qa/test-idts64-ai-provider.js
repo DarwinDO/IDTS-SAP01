@@ -54,6 +54,16 @@ async function main () {
   const disabledConfig = normalizeAiConfig({})
   expectEqual('AI is disabled by default', disabledConfig.enabled, false)
   expectEqual('default provider is mock', disabledConfig.provider, 'mock')
+  expectEqual(
+    'ordinary assignment wording containing select remains safe',
+    containsUnsafeDiagnosticText({ explanation: 'Review fit and select this candidate manually.' }),
+    false
+  )
+  expectEqual(
+    'actual SQL SELECT diagnostic remains unsafe',
+    containsUnsafeDiagnosticText({ explanation: 'SELECT passwordHash FROM Users WHERE ID = 1' }),
+    true
+  )
 
   const vcapGatewayKey = readGatewayApiKeyFromVcap({
     VCAP_SERVICES: JSON.stringify({
@@ -210,6 +220,9 @@ async function main () {
   const redacted = redactSensitiveText(`AWS key AKIA${'1'.repeat(16)} and xkeysib-${'1'.repeat(30)}`)
   expectTruthy('redactor masks AWS access key', redacted.includes('[redacted:awsAccessKey]'))
   expectTruthy('redactor masks Brevo API key', redacted.includes('[redacted:brevoApiKey]'))
+  const boundedRedaction = redactSensitiveText('x'.repeat(700), 500)
+  expectEqual('redactor output stays within the requested persistence limit', boundedRedaction.length, 500)
+  expectTruthy('bounded redaction keeps an explicit truncation marker', boundedRedaction.endsWith('...[truncated]'))
 
   console.log('')
   console.log('==============================================')

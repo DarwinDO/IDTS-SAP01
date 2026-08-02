@@ -14,10 +14,16 @@ Jira: https://dutassociation.atlassian.net/browse/IDTS-114
 
 ## Scope
 
-Add a minimal Vercel AI Gateway provider adapter to the existing safe AI abstraction. The staged configuration is Ling first, Qwen primary later, then one OpenAI fallback. The AI functions remain advisory and human-reviewed.
+Add a minimal Vercel AI Gateway provider adapter to the existing safe AI abstraction. The current SAP BTP configuration routes each capability to a separately bounded model while preserving the same advisory, human-reviewed business contract.
 
 ## Current progress
 
+- Feature-specific model routing is under verification on 2026-07-31:
+  - Similar Bugs embedding: `alibaba/qwen3-embedding-0.6b`.
+  - Classification: `openai/gpt-5.6-luna`.
+  - Handoff Summary: `deepseek/deepseek-v4-flash`, with one dedicated `xai/grok-4.1-fast-non-reasoning` backup for eligible route/model denial, timeout, network failure, or HTTP 5xx.
+  - Smart Assign Explanation: `zai/glm-4.7-flash`.
+  - HTTP 429 never spends another model. Generic HTTP 403 also stops safely because it may indicate a key, account, or team permission problem rather than a model-specific outage.
 - Implemented a native-fetch Vercel adapter with structured chat, embeddings, bounded timeout, and one safe fallback attempt.
 - Added non-secret runtime override names and private configuration example placeholders.
 - Completed deterministic provider and existing AI regressions; see `docs/pm/evidence/idts-114/README.md`.
@@ -192,3 +198,104 @@ No S3, Brevo, database schema, UI workflow, automatic classification/assignment,
 - The focused remediation forwards a bounded per-feature JSON Schema. Classification can select only active short catalog references (`SM/AC/DC/P/S`), and Smart Assign can explain only backend-issued candidate references (`C1..Cn`). UUIDs remain backend-only.
 - Local verification PASS: provider 59/59, Classification 36/36, Smart Assign 13/13, AI provider 38/38, Handoff 45/45, AI security 31/31, CAP compile, secret/process gates, AI DevKit 5/5 and `git diff --check`.
 - No provider/model/key, OData contract, HANA schema, role, workflow or UI contract changed. Fresh BTP feature calls remain required before declaring the visual defect closed.
+
+## 2026-07-31 proactive per-model request budget
+
+- Browser/Gateway evidence showed that Z.AI could complete several structured
+  calls and then return HTTP 429. The existing protection only started after
+  that first upstream 429.
+- The focused correction reserves provider capacity before each call and
+  limits each model alias to four requests in a rolling sixty-second window on
+  the current application instance. Z.AI structured calls and Qwen embedding
+  calls therefore do not consume each other's local budget.
+- A locally rejected fifth structured call returns the existing safe
+  `AI_RATE_LIMITED` result and does not trigger OpenAI. This prevents the
+  predictable upstream 429 but does not claim to increase provider quota.
+- Fresh local results pass IDTS-64 `38/38`, IDTS-66 `45/45`, IDTS-67 `36/36`,
+  IDTS-68 `47/47`, IDTS-69 `13/13`, IDTS-71 `31/31`, IDTS-114 `63/63`, CAP
+  compile, MTA parse, secret/process gates, AI DevKit and `git diff --check`.
+  Evidence:
+  `docs/pm/evidence/idts-114/rate-limit-request-bounding/proactive-model-budget-20260731.md`.
+- Selective SAP BTP rollout and sequential live verification remain pending;
+  IDTS-114 stays In Progress.
+
+## 2026-07-31 live acceptance follow-up: bounded audit text
+
+- The proactive Z.AI request budget deployed successfully at merge SHA
+  `809f963376467c7542665991b54de3bd0daea955`.
+- Live Classification returned grounded Z.AI suggestions successfully.
+- The following Handoff call also returned provider-level `SUCCESS`, proving
+  the new request budget did not cause a provider 429. Persistence then failed
+  separately because the sanitized audit summary exceeded the HANA
+  `String(500)` column after its truncation marker was appended.
+- The focused correction makes every sanitized value, including its marker,
+  fit within the caller's declared maximum. IDTS-114 remains In Progress until
+  the correction is deployed and the sequential browser check is repeated.
+## 2026-07-31 sequential SAP BTP verification
+
+- PR #243 introduced a process-local, per-model request window (`4` requests per `60` seconds on BTP) and preserved separate budgets for ZAI structured calls and Qwen embeddings.
+- PR #244 corrected the Handoff Summary audit-text bound so a successful provider response fits the existing HANA `AiSuggestions.summary` column.
+- Selective service deployment at merge SHA `f000ce170abf716ca18d7586f5e2ce0e5c1f8487` completed without HDI/database deployment.
+- PM browser sequence PASS: Classification → Handoff Summary → Smart Assign Explanation → Similar Bugs.
+- ZAI structured metrics were `SUCCESS` for Classification, Handoff, and Smart Assign. Qwen embedding batch was `SUCCESS` for Similar Bugs.
+- No exact HTTP 429 route response occurred in the sequence. The fifth-call local guard remains covered by focused regression.
+- IDTS-114 remains In Progress pending the deferred Tester/Developer interactive role matrix.
+- Evidence: `docs/pm/evidence/idts-114/qwen-sequential-acceptance/btp-sequential-live-verification-20260731.md`.
+
+## 2026-07-31 feature-specific routing browser acceptance
+
+- SAP HANA Cloud was found stopped during the first authenticated browser
+  check. It was started without HDI deployment, schema change or data reset,
+  and a read-only bound task returned `DB_PROBE_OK`.
+- A fresh PM browser sequence on `BUG-0011` completed without HTTP 429:
+  Classification → Handoff Summary → Smart Assign → Similar Bugs.
+- Safe HANA audit readback confirms:
+  - Classification: `SUCCESS`, `openai/gpt-5.4-nano`.
+  - Handoff: `SUCCESS`, `minimax/minimax-m2.5`.
+  - Smart Assign: `SUCCESS`, `zai/glm-4.7-flash`.
+  - Similar Bugs: `SUCCESS`, `alibaba/qwen3-embedding-0.6b`.
+- Classification, Handoff and Similar Bugs passed the PM UI review. Smart
+  Assign remains partial because only one of three displayed candidates
+  received model-generated prose; the other rows clearly retained rules-based
+  guidance.
+- No review decision, Apply, Confirm Duplicate, Assign, Save or lifecycle
+  mutation was executed.
+- Evidence:
+  `docs/pm/evidence/idts-114/feature-model-routing/btp-browser-live-acceptance-20260731.md`.
+- IDTS-114 remains In Progress for Smart Assign candidate coverage and the
+  deferred Tester/Developer role matrix.
+
+## 2026-08-01 Smart Assign output-safety correction
+
+- The candidate-coverage schema was deployed at source SHA
+  `aebb45edc762b3b6b478af9a2ac5a33fa35a6a9e`; a single PM browser call returned
+  HTTP 200 and safe audit status `SUCCESS` for `zai/glm-4.7-flash`.
+- All candidate rows still used rules-based guidance because
+  `containsUnsafeDiagnosticText()` classified the ordinary word `select` as
+  SQL and discarded the otherwise valid provider output.
+- The focused correction requires contextual SQL shapes while retaining
+  credential, secret and stack-trace detection. IDTS-64 `42/42`, IDTS-69
+  `13/13`, IDTS-67 `36/36`, IDTS-68 `47/47`, IDTS-71 `31/31` and IDTS-114
+  `77/77` pass locally.
+- Remaining: normal merge, selective service deployment at the exact merge
+  SHA, and one PM Smart Assign open/cancel check. The deferred Tester/Developer
+  role matrix still keeps IDTS-114 In Progress.
+- Evidence:
+  `docs/pm/evidence/idts-114/smart-assign-output-safety/programmatic-and-live-verification-20260801.md`.
+
+## 2026-08-01 Smart Assign output-safety live verification
+
+- PR #251 merged normally at
+  `39e3b5a4d756f3b6702406a8456cb89ba8cbc0fb` after the fresh QA Depth Gate
+  passed.
+- Selective MTA operation `4517f9e8-8d5d-11f1-8632-eeee0a8bed2f` deployed
+  only `idts-sap01-srv`; no HDI deployer or broad `cds deploy` ran.
+- One authenticated PM Smart Assign request on `BUG-0011` displayed three
+  provider-generated candidate explanations with distinct confidence values
+  (40%, 88%, and 55%). No row fell back to rules-based guidance.
+- The dialog was closed with Cancel. No Assign, review decision, Save or
+  lifecycle action was submitted, so the focused check was non-mutating.
+- The output-safety defect is resolved for the PM flow. Tester/Developer
+  interactive role evidence remains deferred, so IDTS-114 stays In Progress.
+- Evidence:
+  `docs/pm/evidence/idts-114/smart-assign-output-safety/programmatic-and-live-verification-20260801.md`.

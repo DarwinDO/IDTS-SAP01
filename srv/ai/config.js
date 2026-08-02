@@ -10,9 +10,15 @@ const DEFAULTS = Object.freeze({
   maxInputChars: 8000,
   modelAlias: null,
   embeddingModelAlias: null,
+  classificationModelAlias: null,
+  handoffModelAlias: null,
+  assignmentModelAlias: null,
   fallbackEnabled: false,
   fallbackModelAlias: null,
   fallbackEmbeddingModelAlias: null,
+  handoffFallbackModelAlias: null,
+  requestLimit: 0,
+  requestWindowSeconds: 60,
   mockMode: 'success',
   mockEmbeddingDimensions: 8
 })
@@ -44,9 +50,15 @@ function normalizeAiConfig (raw = {}) {
     embeddingModelAlias: raw.embeddingModelAlias === null
       ? null
       : safeModelId(raw.embeddingModelAlias) || safeModelId(raw.modelAlias) || DEFAULTS.embeddingModelAlias,
+    classificationModelAlias: safeModelId(raw.classificationModelAlias) || safeModelId(raw.modelAlias) || DEFAULTS.classificationModelAlias,
+    handoffModelAlias: safeModelId(raw.handoffModelAlias) || safeModelId(raw.modelAlias) || DEFAULTS.handoffModelAlias,
+    assignmentModelAlias: safeModelId(raw.assignmentModelAlias) || safeModelId(raw.modelAlias) || DEFAULTS.assignmentModelAlias,
     fallbackEnabled: toBoolean(raw.fallbackEnabled, DEFAULTS.fallbackEnabled),
     fallbackModelAlias: safeModelId(raw.fallbackModelAlias) || DEFAULTS.fallbackModelAlias,
     fallbackEmbeddingModelAlias: safeModelId(raw.fallbackEmbeddingModelAlias) || DEFAULTS.fallbackEmbeddingModelAlias,
+    handoffFallbackModelAlias: safeModelId(raw.handoffFallbackModelAlias) || safeModelId(raw.fallbackModelAlias) || DEFAULTS.handoffFallbackModelAlias,
+    requestLimit: toNonNegativeInteger(raw.requestLimit, DEFAULTS.requestLimit),
+    requestWindowSeconds: toPositiveInteger(raw.requestWindowSeconds, DEFAULTS.requestWindowSeconds),
     mockMode,
     mockResponseText: toStringOrNull(raw.mockResponseText),
     mockStructuredOutput: normalizeMockStructuredOutput(raw.mockStructuredOutput),
@@ -79,9 +91,15 @@ function runtimeOverrides (env = {}) {
     ['provider', env.IDTS_AI_PROVIDER],
     ['modelAlias', env.IDTS_AI_MODEL],
     ['embeddingModelAlias', env.IDTS_AI_EMBEDDING_MODEL],
+    ['classificationModelAlias', env.IDTS_AI_CLASSIFICATION_MODEL],
+    ['handoffModelAlias', env.IDTS_AI_HANDOFF_MODEL],
+    ['assignmentModelAlias', env.IDTS_AI_ASSIGNMENT_MODEL],
     ['fallbackEnabled', env.IDTS_AI_FALLBACK_ENABLED],
     ['fallbackModelAlias', env.IDTS_AI_FALLBACK_MODEL],
     ['fallbackEmbeddingModelAlias', env.IDTS_AI_EMBEDDING_FALLBACK_MODEL],
+    ['handoffFallbackModelAlias', env.IDTS_AI_HANDOFF_FALLBACK_MODEL],
+    ['requestLimit', env.IDTS_AI_REQUEST_LIMIT],
+    ['requestWindowSeconds', env.IDTS_AI_REQUEST_WINDOW_SECONDS],
     ['timeoutMs', env.IDTS_AI_TIMEOUT_MS],
     ['maxInputChars', env.IDTS_AI_MAX_INPUT_CHARS]
   ].filter(([, value]) => value !== undefined))
@@ -164,6 +182,11 @@ function toPositiveInteger (value, fallback) {
   // Parse timeout/limit dương và fallback khi invalid.
   const parsed = Number(value)
   return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback
+}
+
+function toNonNegativeInteger (value, fallback) {
+  const parsed = Number(value)
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : fallback
 }
 
 function toStringOrNull (value) {

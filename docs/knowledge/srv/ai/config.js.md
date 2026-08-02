@@ -1,5 +1,62 @@
 # `srv/ai/config.js`
 
+## 2026-07-31 feature-specific model aliases
+
+### English
+
+`normalizeAiConfig()` now keeps separate structured-model aliases for
+Classification, Handoff Summary, and Smart Assign while retaining the existing
+embedding alias for Similar Bugs. `runtimeOverrides()` maps the corresponding
+SAP BTP environment variables. Handoff also has one dedicated backup alias;
+the private Gateway key is still shared only in memory and is never returned.
+
+The active SAP BTP routing is:
+
+- Classification: `openai/gpt-5.4-nano`.
+- Handoff Summary: `minimax/minimax-m2.5`.
+- Handoff bounded backup: `xai/grok-4.1-fast-non-reasoning`.
+- Smart Assign Explanation: `zai/glm-4.7-flash`.
+- Similar Bugs embedding: `alibaba/qwen3-embedding-0.6b`.
+
+Only Handoff may use the dedicated Grok backup, and only for an allowlisted
+model-route denial or the existing eligible network/5xx conditions. HTTP 429
+continues to enter cooldown and never spends another model.
+
+Flow: SAP BTP environment -> `runtimeOverrides()` -> `normalizeAiConfig()` ->
+`SafeAiProvider.structured()` -> feature route.
+
+Debug only `classificationModelAlias`, `handoffModelAlias`,
+`assignmentModelAlias`, `handoffFallbackModelAlias`, and `ready`. Never inspect
+the Gateway key.
+
+### Tiếng Việt
+
+`normalizeAiConfig()` giữ model riêng cho Classification, Handoff Summary và
+Smart Assign; Similar Bugs tiếp tục dùng model embedding riêng. Handoff có đúng
+một model dự phòng. Chỉ kiểm tra alias và cờ `ready` khi debug, không mở hoặc
+ghi Gateway key.
+
+## 2026-07-31 request-budget settings
+
+### English
+
+`requestLimit` and `requestWindowSeconds` normalize
+`IDTS_AI_REQUEST_LIMIT` and `IDTS_AI_REQUEST_WINDOW_SECONDS`. A zero limit
+disables proactive limiting for local/default configuration. SAP BTP sets
+`4/60`, meaning at most four outbound requests per model in sixty seconds.
+These values contain no credential and may be inspected safely; the Gateway
+key must still never be opened or logged.
+
+Flow: BTP environment → `runtimeOverrides()` → `normalizeAiConfig()` →
+`VercelGatewayProvider.reserveModelRequest()`.
+
+### Tiếng Việt
+
+`requestLimit` và `requestWindowSeconds` đọc hai biến môi trường giới hạn
+request. Giá trị `0` tắt giới hạn chủ động ở cấu hình mặc định/local. SAP BTP
+dùng `4/60`: tối đa bốn request cho từng model trong sáu mươi giây. Có thể
+kiểm tra hai số này khi debug, nhưng không được xem hoặc ghi Gateway key.
+
 ## Beginner-first execution map (2026-07-18)
 
 ### English

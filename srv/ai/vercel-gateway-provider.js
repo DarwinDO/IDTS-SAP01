@@ -6,7 +6,9 @@ const API_BASE_URL = 'https://ai-gateway.vercel.sh/v1'
 const DEFAULT_COOLDOWN_SECONDS = 60
 const MIN_COOLDOWN_SECONDS = 1
 const MAX_COOLDOWN_SECONDS = 900
-let gatewayCooldownUntil = 0
+const GLOBAL_MODEL_KEY = '*'
+const gatewayCooldownUntilByModel = new Map()
+const gatewayRequestTimesByModel = new Map()
 
 class VercelGatewayProvider {
   constructor (config, fetchImpl = globalThis.fetch, now = Date.now) {
@@ -23,7 +25,18 @@ class VercelGatewayProvider {
     })
   }
 
-  async structured ({ schemaName = 'Suggestion', schema: requestedSchema = null, instruction = '', input = null, deadlineMs = null } = {}) {
+  async structured ({
+    schemaName = 'Suggestion',
+    schema: requestedSchema = null,
+    instruction = '',
+    input = null,
+    deadlineMs = null,
+    modelAlias = null,
+    fallbackModelAlias = null,
+    allowModelAccessFallback = false
+  } = {}) {
+    const primaryModel = modelAlias || this.config.modelAlias
+    const backupModel = fallbackModelAlias || this.config.fallbackModelAlias
     const normalizedSchemaName = safeSchemaName(schemaName)
     const schema = requestedSchema && typeof requestedSchema === 'object' && !Array.isArray(requestedSchema)
       ? requestedSchema
@@ -31,7 +44,7 @@ class VercelGatewayProvider {
     const deadlineAt = Number.isFinite(Number(deadlineMs)) && Number(deadlineMs) > 0
       ? this.now() + Number(deadlineMs)
       : null
-    return this.#withFallback(this.config.modelAlias, this.config.fallbackModelAlias, async model => {
+    return this.#withFallback(primaryModel, backupModel, async model => {
       const messages = [
         { role: 'system', content: instruction },
         { role: 'user', content: JSON.stringify(input || {}) }
@@ -51,7 +64,7 @@ class VercelGatewayProvider {
         }, deadlineAt)
       } catch (error) {
         const canUseCompatibilityFormat =
-          model === this.config.modelAlias &&
+          model === primaryModel &&
           error?.gatewayReason === 'response_format_incompatible'
         if (!canUseCompatibilityFormat) throw error
 
@@ -81,7 +94,7 @@ class VercelGatewayProvider {
         // deterministic result instead of spending a second-model request.
         throw providerError('VERCEL_GATEWAY_MALFORMED_OUTPUT', { retryable: false, fallbackEligible: false })
       }
-    }, deadlineAt)
+    }, deadlineAt, { allowModelAccessFallback })
   }
 
   async embedding ({ text = '' } = {}) {
@@ -127,11 +140,11 @@ class VercelGatewayProvider {
     }, deadlineAt)
   }
 
-  async #withFallback (primaryModel, fallbackModel, execute, deadlineAt = null) {
+  async #withFallback (primaryModel, fallbackModel, execute, deadlineAt = null, options = {}) {
     try {
       return providerResult(primaryModel, false, await execute(primaryModel))
     } catch (primaryError) {
-      if (!this.config.fallbackEnabled || !fallbackModel || !isFallbackEligible(primaryError)) throw primaryError
+      if (!this.config.fallbackEnabled || !fallbackModel || !isFallbackEligible(primaryError, options)) throw primaryError
       if (deadlineAt && deadlineAt <= this.now()) throw deadlineExceededError()
       try {
         return providerResult(fallbackModel, true, await execute(fallbackModel))
@@ -143,7 +156,9 @@ class VercelGatewayProvider {
   }
 
   async #request (path, body, deadlineAt = null) {
-    const cooldownSeconds = remainingCooldownSeconds(this.now())
+    const modelAlias = body?.model || GLOBAL_MODEL_KEY
+    const now = this.now()
+    const cooldownSeconds = remainingCooldownSeconds(now, modelAlias)
     if (cooldownSeconds > 0) {
       throw providerError('AI_RATE_LIMITED', {
         retryable: true,
@@ -152,7 +167,8 @@ class VercelGatewayProvider {
         retryAfterSeconds: cooldownSeconds
       })
     }
-    const requestBudget = requestBudgetFor(deadlineAt, this.now(), this.config.timeoutMs)
+    reserveModelRequest(modelAlias, this.config.requestLimit, this.config.requestWindowSeconds, now)
+    const requestBudget = requestBudgetFor(deadlineAt, now, this.config.timeoutMs)
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), requestBudget.timeoutMs)
     try {
@@ -168,7 +184,7 @@ class VercelGatewayProvider {
       const payload = await response.json().catch(() => null)
       if (!response.ok) {
         const error = httpError(response.status, payload, response.headers?.get?.('Retry-After'))
-        if (error.gatewayReason === 'rate_limited') activateGatewayCooldown(error.retryAfterSeconds, this.now())
+        if (error.gatewayReason === 'rate_limited') activateGatewayCooldown(error.retryAfterSeconds, this.now(), modelAlias)
         throw error
       }
       return payload
@@ -215,15 +231,18 @@ function httpError (status, payload, retryAfterValue = null) {
   const budgetExhausted = isBudgetExhausted(payload)
   const responseFormatIncompatible = status === 400 && isResponseFormatIncompatible(payload)
   const embeddingBatchUnsupported = status === 400 && isEmbeddingBatchUnsupported(payload)
-  const retryable = (status === 429 && !budgetExhausted) || status >= 500
+  const modelAccessDenied = status === 403 && isModelAccessDenied(payload)
+  const retryable = (status === 429 && !budgetExhausted) || status >= 500 || modelAccessDenied
   return providerError(`VERCEL_GATEWAY_HTTP_${status}`, {
     retryable,
-    fallbackEligible: status >= 500,
+    fallbackEligible: status >= 500 || modelAccessDenied,
     gatewayReason: responseFormatIncompatible
       ? 'response_format_incompatible'
       : (embeddingBatchUnsupported
           ? 'embedding_batch_unsupported'
-          : (budgetExhausted ? 'budget_exhausted' : (status === 429 ? 'rate_limited' : 'http_error'))),
+          : (modelAccessDenied
+              ? 'model_access_denied'
+              : (budgetExhausted ? 'budget_exhausted' : (status === 429 ? 'rate_limited' : 'http_error')))),
     providerErrorCode: safeProviderErrorCode(payload),
     retryAfterSeconds: parseRetryAfterSeconds(retryAfterValue)
   })
@@ -254,21 +273,50 @@ function normalizeEmbeddingBatch (response, expectedCount) {
   return { embeddings: embeddings.map(vector => vector.map(Number)), dimensions }
 }
 
-function activateGatewayCooldown (retryAfterSeconds, now = Date.now()) {
+function activateGatewayCooldown (retryAfterSeconds, now = Date.now(), modelAlias = GLOBAL_MODEL_KEY) {
   const hasRetryAfter = retryAfterSeconds !== null && retryAfterSeconds !== undefined && retryAfterSeconds !== ''
   const seconds = Math.min(
     Math.max(hasRetryAfter && Number.isFinite(Number(retryAfterSeconds)) ? Math.ceil(Number(retryAfterSeconds)) : DEFAULT_COOLDOWN_SECONDS, MIN_COOLDOWN_SECONDS),
     MAX_COOLDOWN_SECONDS
   )
-  gatewayCooldownUntil = Math.max(gatewayCooldownUntil, now + seconds * 1000)
+  const key = modelAlias || GLOBAL_MODEL_KEY
+  gatewayCooldownUntilByModel.set(
+    key,
+    Math.max(gatewayCooldownUntilByModel.get(key) || 0, now + seconds * 1000)
+  )
 }
 
-function remainingCooldownSeconds (now = Date.now()) {
-  return Math.max(Math.ceil((gatewayCooldownUntil - now) / 1000), 0)
+function remainingCooldownSeconds (now = Date.now(), modelAlias = GLOBAL_MODEL_KEY) {
+  const modelCooldown = gatewayCooldownUntilByModel.get(modelAlias || GLOBAL_MODEL_KEY) || 0
+  const globalCooldown = gatewayCooldownUntilByModel.get(GLOBAL_MODEL_KEY) || 0
+  return Math.max(Math.ceil((Math.max(modelCooldown, globalCooldown) - now) / 1000), 0)
 }
 
 function resetGatewayCooldownForTest () {
-  gatewayCooldownUntil = 0
+  gatewayCooldownUntilByModel.clear()
+  gatewayRequestTimesByModel.clear()
+}
+
+function reserveModelRequest (modelAlias, requestLimit, requestWindowSeconds, now = Date.now()) {
+  const limit = Number(requestLimit)
+  if (!Number.isInteger(limit) || limit <= 0) return
+
+  const windowSeconds = Number(requestWindowSeconds)
+  const windowMs = (Number.isFinite(windowSeconds) && windowSeconds > 0 ? windowSeconds : DEFAULT_COOLDOWN_SECONDS) * 1000
+  const key = modelAlias || GLOBAL_MODEL_KEY
+  const recent = (gatewayRequestTimesByModel.get(key) || []).filter(timestamp => timestamp > now - windowMs)
+  if (recent.length >= limit) {
+    const retryAfterSeconds = Math.max(Math.ceil((recent[0] + windowMs - now) / 1000), MIN_COOLDOWN_SECONDS)
+    activateGatewayCooldown(retryAfterSeconds, now, key)
+    throw providerError('AI_RATE_LIMITED', {
+      retryable: true,
+      fallbackEligible: false,
+      gatewayReason: 'rate_limited',
+      retryAfterSeconds
+    })
+  }
+  recent.push(now)
+  gatewayRequestTimesByModel.set(key, recent)
 }
 
 function providerError (code, {
@@ -288,8 +336,24 @@ function providerError (code, {
   })
 }
 
-function isFallbackEligible (error) {
+function isFallbackEligible (error, { allowModelAccessFallback = false } = {}) {
+  if (error?.gatewayReason === 'model_access_denied') {
+    return Boolean(allowModelAccessFallback && error?.fallbackEligible && error?.retryable)
+  }
   return Boolean(error?.fallbackEligible && error?.retryable)
+}
+
+function isModelAccessDenied (payload) {
+  // Generic `access_denied` can indicate a key/team/account restriction and
+  // must stay visible. Vercel uses `no_providers_available` when the selected
+  // model has no eligible upstream route; that specific condition may spend
+  // one bounded structured fallback request.
+  return [
+    'model_access_denied',
+    'model_not_allowed',
+    'provider_model_access_denied',
+    'no_providers_available'
+  ].includes(safeProviderErrorCode(payload))
 }
 
 function isBudgetExhausted (payload) {
@@ -373,8 +437,10 @@ module.exports = {
   isBudgetExhausted,
   isEmbeddingBatchUnsupported,
   isFallbackEligible,
+  isModelAccessDenied,
   isResponseFormatIncompatible,
   parseRetryAfterSeconds,
+  reserveModelRequest,
   remainingCooldownSeconds,
   resetGatewayCooldownForTest,
   safeProviderErrorCode,

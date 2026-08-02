@@ -1,5 +1,113 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-08-01 - IDTS-117 BTP rollout and browser acceptance complete
+
+- Product defect resolved: a repeated BTP re-entry could return the HTML XSUAA
+  sign-in page to `AuthService.me` with HTTP 200, which the UI previously
+  misreported as an IDTS access denial.
+- PR #254 merged normally at
+  `d73377163056728a513eacc70aaa1a926afdfb3c`; QA Depth passed without bypass.
+- Selective MTA operation `fae23f46-8d99-11f1-8630-eeee0a801182` deployed only
+  the AppRouter application module. No HDI deployer, broad `cds deploy`, schema
+  migration, or data reload was run.
+- Browser acceptance passed two consecutive complete cycles: Sign Out → public
+  signed-out page → protected `/login.html` bridge → XSUAA → Fiori. Both final
+  `AuthService.me` checks returned HTTP 200 JSON and parsed successfully.
+- Tooling issue observed and resolved during evidence capture: the browser
+  connection was temporarily unstable while claiming the user tab. A separate
+  controlled tab was used; this did not affect application behavior or expose
+  credentials.
+- Evidence:
+  `docs/pm/evidence/idts-117/btp-rollout/roundtrip-verification.md`.
+- Handoff: merge this evidence-only update, then transition Jira IDTS-117 to
+  Done and remove its blocker from IDTS-108. No Knowledge Gate reassessment is
+  required; DonHV's existing PASS remains valid.
+
+## 2026-08-01 - IDTS-117 SAP BTP explicit re-login
+
+- Product defect found during repeated live verification: the first signed-out
+  landing page worked, but a fresh re-entry could load the UI shell while
+  `/odata/v4/auth/me()` followed an XSUAA redirect and returned a 731-byte HTML
+  login document with HTTP 200. `auth-guard.js` attempted JSON parsing and showed
+  the misleading safe access-denied message. HANA was running and the CAP route
+  itself was healthy; this was not a missing IDTS user mapping.
+- Follow-up fix in progress: route the Sign in link through an XSUAA-protected
+  `/login.html` bridge, and make the guard detect non-JSON success responses and
+  navigate the whole browser to that bridge. No credential, role, HANA data,
+  OData contract or custom local/Render login behavior changes.
+- TDD: the expanded IDTS-117 test failed first because the protected bridge did
+  not exist. Verification and a second selective AppRouter rollout remain.
+- Jira IDTS-117 comment `10803` now records the finding without credentials or
+  private endpoints. UI5 manifest validation and targeted auth-guard lint pass
+  with zero findings; the issue remains open pending two live round trips.
+- Fresh follow-up gates: IDTS-117 PASS; BTP auth 12/12; custom auth 28/28;
+  depth self-test 15/15; secret scan, agent rules, CAP compile, UI5 build,
+  AI DevKit and diff check PASS. CAP compile retains one unrelated pre-existing
+  attachment capability warning. Ponytail review found no unnecessary layer.
+- Tooling issue: PR #254 was initially created with literal `\\n` characters in
+  its body because of PowerShell/GitHub CLI argument quoting, so QA Depth Gate
+  reported every heading missing. The PR body was corrected through the GitHub
+  API; a follow-up synchronize event is required because rerunning the original
+  workflow reuses its original event payload. No product code is affected.
+- Process issue: the next fresh gate correctly read the headings but rejected
+  the abbreviated Knowledge Gate sentence. The validator requires all exact
+  structured fields (`Member`, `Date`, question counts, score and PASS results).
+  PR #254 now reuses the existing DonHV 90% PASS evidence in that exact format;
+  no learning gate was repeated and no bypass was used.
+
+- Product defect: after AppRouter `/do/logout`, `logoutPage` pointed to `/`,
+  which is protected by XSUAA. A valid identity-provider session could therefore
+  authenticate the same SAP user immediately. Root cause is AppRouter route
+  configuration, not the HANA `Users` mapping or custom local login.
+- Fix: add public `/logged-out.html`, place its `authenticationType: none` route
+  before the protected catch-all, and make the explicit sign-in link return to
+  the Fiori entry. No password field, token handling, XSUAA role, OData, HANA or
+  custom local/Render auth behavior changes.
+- TDD evidence: the new IDTS-117 test first failed on the old `logoutPage: /`
+  and now passes. Existing `qa:idts113:btp-auth` passes 12/12.
+- Tooling issue fixed in-session: the fresh worktree had no `node_modules`, so
+  the existing CAP test initially could not resolve `@sap/cds`. Verification
+  reused an existing clean dependency runtime through `NODE_PATH`; no package
+  install or lockfile change was made.
+- Tooling issue fixed in-session: PowerShell `Remove-Item` threw an internal
+  null-reference error while removing the temporary `node_modules` junction.
+  The target/path was verified as a reparse point inside this worktree before
+  cleanup; no dependency target content or source file was removed.
+- Environment blocker: the Cloud Foundry CLI token expired during live log/app
+  inspection. Local completion can continue, but selective deploy and live
+  browser evidence require a fresh `cf login --sso`; no token is stored in the
+  repository or Jira.
+- Existing UI5 lint debt (not introduced by IDTS-117): manifest schema
+  validation passes and the production build succeeds, while UI5 Linter still
+  reports the pre-existing manifest-version finding plus deprecated bootstrap
+  attributes/Test Starter recommendations under `webapp/test/`. Classification:
+  tooling/technical-debt finding; out of scope for this AppRouter-only fix and
+  still open for a dedicated UI5 modernization task.
+- OfficeCLI preflight for Markdown updates: `officecli --version` returned
+  `1.0.143`.
+- Handoff: finish repository gates and PR, then selectively deploy AppRouter and
+  verify Sign Out → public page → explicit Sign in → XSUAA.
+
+## 2026-08-01 - IDTS-114 Smart Assign output-safety live closure
+
+- PR #251 merged normally at `39e3b5a4d756f3b6702406a8456cb89ba8cbc0fb`; the exact merge SHA was selectively deployed to `idts-sap01-srv` through MTA operation `4517f9e8-8d5d-11f1-8632-eeee0a8bed2f`. No HDI deployer or broad `cds deploy` ran.
+- Focused PM browser acceptance on `BUG-0011` PASS: Backup Developer, CAP Developer 01 and SangVN each retained an `AI-generated explanation` with distinct confidence values of 40%, 88% and 55%. The dialog was closed with Cancel; no Assign, review decision, Save or lifecycle action was submitted.
+- Product defect status: resolved for the PM flow. The contextual SQL patterns continue to reject actual SQL while allowing ordinary business wording such as “review and select this candidate”. IDTS-114 remains In Progress only for the deferred Tester/Developer interactive role matrix.
+- Environment/tooling finding: browser startup logged existing SAPUI5/Lrep messages for unsupported S/CUBE, unavailable flex-data/features storage and a deprecated pseudo-module import. These messages predate and do not block Smart Assign; they are not classified as a new Smart Assign product defect.
+- Verification: IDTS-64 `42/42`, IDTS-69 `13/13`, IDTS-67 `36/36`, IDTS-68 `47/47`, IDTS-71 `31/31`, IDTS-114 `77/77`, secret/agent/depth/ownership gates, CAP compile, AI DevKit and `git diff --check` PASS. Live evidence: `docs/pm/evidence/idts-114/smart-assign-output-safety/programmatic-and-live-verification-20260801.md`.
+
+## 2026-08-01 - IDTS-114 Smart Assign candidate explanation coverage
+
+- Product defect reproduced: a successful Smart Assign provider call could return an AI explanation for only one of several eligible candidates, while the remaining rows silently used rules-based guidance. Root cause: `buildAssignmentOutputSchema()` allowed `minItems: 1`, so a partial provider array was schema-valid even when the backend sent multiple candidate references.
+- Fix in progress: the structured schema now requires exactly one output row per backend-issued candidate slot (`minItems = maxItems = candidate count`). The model still receives only short references such as `C1`; real Developer profile UUIDs remain backend-only, assignment remains manual, and missing/unsafe output still falls back safely.
+- Verification: the new red assertion failed with `1 !== 2` before the fix; `npm run qa:idts69:programmatic` now passes 13/13 after the one-line schema correction.
+- Tooling/security observation: fresh-worktree `npm ci` completed, but the existing dependency baseline reports 24 audit findings (1 critical, 13 high, 9 moderate, 1 low). No automatic or force upgrade was applied because dependency remediation is outside IDTS-114.
+- Verification tooling issue fixed in-session: `npx cds compile srv --to edmx` stopped because the model exposes both `AuthService` and `BugService`; CAP requires an explicit service selection. No source was affected. The compile gate is rerun with `-s all`.
+- Process-gate issue under correction: PR #250's first QA Depth run used an incomplete Knowledge Gate declaration. The PR body was corrected with the previously approved DonHV fields, but rerunning the same GitHub Actions run reused the original cached pull-request event payload and repeated the stale failure. A normal follow-up status commit is used to trigger a fresh pull-request event; no bypass or force-push is used.
+- OfficeCLI preflight for the Markdown status/mirror update: `officecli --version` returned `1.0.143`.
+- Verification gate result: IDTS-56 `14/14`, IDTS-69 `13/13`, IDTS-71 `31/31`, IDTS-114 `77/77`, CAP compile, secret scan, agent rules, depth self-test, AI DevKit and `git diff --check` all PASS.
+- Remaining handoff: merge and deploy the service-only SHA, then repeat one sequential Smart Assign browser call to confirm all displayed candidates are AI-grounded or explicitly safe-fallback; IDTS-114 remains In Progress.
+
 ## 2026-07-27 - IDTS-105 mentor-review briefing and EN-only governance
 
 - Work: created the complete Vietnamese mentor-feedback briefing, added the mandatory read/acknowledgment gate to `AGENTS.md`, created unsigned acknowledgment evidence, and prepared work packages for IDTS-105 through IDTS-112.
@@ -5059,3 +5167,188 @@ Verdict: `PARTIAL / NOT READY TO CLOSE`. The four visible AI entry points can be
 | Environment blocker | Immediately after app-content deployment, both `idts-sap01-srv` and `idts-sap01-approuter` were `stopped`, and the route returned 404 / Edge `ERR_BLOCKED_BY_CLIENT`. | SAP BTP Trial application auto-stop; the selective content deployment did not deploy or crash either application. | Resolved operationally by starting both applications. | Both apps returned to `1/1 running`; service health returned HTTP 200 and the authenticated app loaded successfully. Trial may stop them again. |
 | Process issue | Documentation PR #242 initially failed QA Depth Gate although the rollout evidence was valid. | The first PR body used bulleted Knowledge Gate labels and shortened `Critical`/`Debug` labels; the parser requires exact unbulleted field names such as `Critical questions` and `Debug exercise`. | Fixed by replacing the section with the exact structured fields already used by PR #241. | A documentation-only follow-up commit triggers a fresh remote gate; no bypass is used. |
 | Security/dependency finding | Clean MBT packaging reported the existing dependency audit findings in root, service, UI and AppRouter installs. | Locked baseline dependencies; this focused UI fix adds no package. | Open baseline debt; no force upgrade was mixed into the rollout. | MTAR SHA-256 `6245AF788E24C6ABAE817528787D9E625B4A2B693EC18727032F2237FF8BDD48`; HDI deployer and broad `cds deploy` were not run. |
+
+# 2026-07-31 - Z.AI upstream rate-limit investigation
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Provider operational limitation / product resilience gap | Z.AI structured features usually complete five to six live requests and then receive HTTP 429 until the upstream window recovers. The existing safe fallback appears only after the first rejected request. | Each successful feature currently sends one Gateway request; the compatibility retry is used only after a specifically classified HTTP 400. The shared adapter has reactive `Retry-After` cooldown but no proactive request budget, so it still reaches the Bedrock-hosted Z.AI limit. | Under implementation on `fix/idts-114-zai-rate-limit-control-donhv`: add a small per-model sliding-window guard before network I/O. It must fail safe locally without invoking OpenAI on 429 and must not block the separate Qwen embedding model. | Add red tests for request count, proactive blocking, recovery, model isolation and sanitized output; then run the AI regression/gates before any selective BTP service rollout. |
+| Tooling issue | The first multi-suite regression command could not resolve `@sap/cds` in the fresh worktree. | Git worktrees do not include `node_modules`, and the wrapper command did not propagate the intended shared `NODE_PATH` into each npm process. | Resolved by prefixing each verification command with the existing dependency runtime path; no install, package or lockfile change is required. | Rerun every selected suite separately and report its fresh exit code. |
+| Tooling issue | CDS compile suites still could not resolve `@cap-js/attachments` through `NODE_PATH` alone. | The CDS compiler resolves this package from the worktree dependency tree. | Resolved with a temporary local `node_modules` junction to the existing installed dependency tree. The junction is removed before commit and is not a repository change. | Related suites and CAP compile now PASS. |
+
+## 2026-07-31 - Handoff audit storage overflow found during BTP acceptance
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product defect | A live `summarizeBugHandoff` call on `BUG-0012` reached Z.AI successfully, but the OData action returned HTTP 500 and the dialog stayed at `Preparing summary...`. | `redactSensitiveText(value, 500)` retained 500 source characters and appended a 12-character truncation marker. HANA therefore rejected the resulting value for `AiSuggestions.summary : String(500)`. This is an audit-persistence defect, not a provider 429. | Fixed locally on `fix/idts-114-ai-audit-text-bound-donhv` by counting the truncation marker inside the requested maximum length. | Red test reproduced `512 != 500`; corrected IDTS-64 suite passes `40/40`. Run the Handoff/AI regressions, merge normally, selectively redeploy the service, then repeat the same BTP call. |
+| Tooling issue | The first focused run in the fresh worktree could not resolve `@sap/cds`. | Fresh worktrees do not contain dependencies, and the root dependency directory was incomplete. | Resolved with a temporary junction to an existing locked dependency tree; no dependency or lockfile changed. | Remove the junction before commit. |
+
+Local result: proactive per-model request budgeting passes the focused provider
+suite `63/63` and the IDTS-64/66/67/68/69/71 regressions. CAP compile, MTA YAML
+parse, secret/process gates, AI DevKit and `git diff --check` pass. The later
+2026-07-31 entry records the completed selective SAP BTP deployment and live
+verification.
+
+| Process issue | PR #243 QA Depth initially failed after the Ownership Knowledge Gate block omitted fields required by the current parser. A failed-run rerun continued to use the original PR event payload after the body was corrected. | PR body / GitHub Actions event behavior | Corrected the body to the exact repository schema and pushed this evidence update to create a fresh synchronize event. No bypass or invented gate result is used. | Await fresh remote gate |
+| Process issue | The next PR #243 event reported every required section missing although the body text was present. | PowerShell flattened multiline Markdown passed directly to `gh pr edit --body`, so headings no longer started on their own lines. | Replaced the body through `gh pr edit --body-file`; all eleven required headings now remain separate lines. | Push this evidence correction to run the gate against the properly formatted body |
+### 2026-07-31 — IDTS-114 ZAI rate-limit control and Handoff persistence verification
+
+- Completed: merged PR #243 for per-model request bounding and PR #244 for the Handoff audit-text storage bound.
+- Deployment: selectively deployed only `idts-sap01-srv` at merge SHA `f000ce170abf716ca18d7586f5e2ce0e5c1f8487`; HDI/database deploy was not run.
+- Live verification: Classification, Handoff Summary, Smart Assign Explanation, and Similar Bugs completed sequentially on SAP BTP with provider metrics `SUCCESS`; no exact HTTP 429 route response occurred in the sequence.
+- Product defect found and fixed: successful Handoff output exceeded the HANA `AiSuggestions.summary` limit because the truncation marker was appended after slicing. PR #244 now bounds the complete sanitized string and the live Handoff request returns HTTP 200.
+- Tooling issues: the first MTA build exceeded the command timeout and left a generated dependency tree locked; a clean detached worktree completed the build. Windows PowerShell did not support `SkipHttpErrorCheck`, so HTTP status verification used `curl.exe`.
+- Evidence: `docs/pm/evidence/idts-114/qwen-sequential-acceptance/btp-sequential-live-verification-20260731.md`.
+- Remaining: Tester/Developer interactive role matrix remains deferred; IDTS-114 and IDTS-115 stay In Progress.
+
+## 2026-07-31 — Feature-specific AI model routing
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling issue | The first red-test command in the fresh worktree stopped before assertions with `Cannot find module '@sap/cds'`. | The root `node_modules` directory exists but does not contain the locked CAP dependency, so a junction to it is insufficient. | Fixed by removing the ineffective junction and running locked `npm ci` in the isolated worktree; no product dependency changed. | Focused routing test now passes 77/77. |
+| Security/dependency finding | Locked `npm ci` completed but npm audit reported 24 findings: 1 low, 9 moderate, 13 high and 1 critical. | Existing `package-lock.json` dependency graph; feature routing introduces no package. | Open baseline debt; no `npm audit fix --force` is mixed into this focused change. | Run the repository secret scan and preserve the unchanged lockfile; dependency upgrades require a separate reviewed task. |
+| Tooling issue | The first CAP EDMX compile command failed with “Found multiple service definitions”. | The verification command omitted the service selector while the model contains both `AuthService` and `BugService`. | Fixed command; this is not a product defect. | Rerun compilation with `-s all`, then continue the remaining gates. |
+| Product/model warning | CAP compile passes but reports the existing annotation warning that `NonUpdateableProperties` is unknown under `@Capabilities.UpdateRestrictions` for `BugService.Bugs_attachments`. | Baseline `db/schema.cds` attachment annotation, outside this model-routing diff. | Open baseline warning; not changed or hidden in this task. | Track separately when attachment capability annotations are next revised; current AI routing compilation remains PASS. |
+
+Local implementation result: Classification routes to GPT-5.6 Luna, Handoff
+routes to DeepSeek V4 Flash with one bounded Grok backup, Smart Assign routes
+to Z.AI GLM 4.7 Flash, and Similar Bugs retains Qwen embeddings. HTTP 429 and
+generic HTTP 403 do not switch models. Focused routing is 77/77 PASS; AI
+feature regressions, secret/process gates, CAP compile/build, MTA parse, AI
+DevKit and `git diff --check` pass. SAP BTP deployment/live provider acceptance
+remains pending normal PR merge.
+
+| Process issue | PR #246 initially failed `qa-depth-gate` although all evidence sections existed. | The Ownership Knowledge Gate section summarized prior PASS evidence in prose instead of the exact twelve `Field: value` lines required by `check-pr-depth.js`. | Fixed in the PR body using the existing IDTS-89/90 PASS evidence; no gate was invented or repeated. | Push the status/evidence correction and wait for a fresh PR synchronize check. |
+| Tooling issue | The first read-only CF plain-chat probe did not start because PowerShell split the inline `node -e` command into unexpected CLI arguments. | Nested shell quoting in `cf run-task --command`; no request reached Vercel and no application behavior was exercised. | Resolved by running the same bounded synthetic probe locally with the BTP-bound key held only in process memory. | Safe result: Luna and DeepSeek return HTTP 403 `no_providers_available` even without JSON Schema; MiniMax M2.5 returns HTTP 200 with the same request shape. |
+| Provider capability issue | GPT-5.6 Luna and DeepSeek V4 Flash both fail before inference with HTTP 403 `no_providers_available`; Vercel request detail shows zero tokens, zero cost, and `No routing attempts found`. | Not caused by SAP BTP, the API key, quota, team ZDR/allowlists, or the structured-output schema. The current Hobby team has no eligible upstream route for these model aliases; Luna is additionally a limited-preview model. | Diagnosed; no runtime setting or model was changed in this investigation. | Keep the two aliases out of the active route unless Vercel later grants an eligible route; use a model proven available on this team. |
+
+## 2026-07-31 — Feature routing replacement after provider-access diagnosis
+
+| Classification | Symptom / decision | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Provider capability issue | Luna and DeepSeek could not serve the current Vercel team, while a bounded MiniMax M2.5 probe returned HTTP 200. | Vercel returned `no_providers_available` before inference for Luna/DeepSeek; this is not a CAP, BTP, key, prompt, or schema defect. | Active routing changed locally: Classification → GPT-5.4 Nano; Handoff → MiniMax M2.5 with one bounded Grok backup; Smart Assign remains Z.AI; Similar Bugs remains Qwen embedding. | Focused IDTS-114 `77/77`, AI feature regressions, CAP compile/build, MTA parse, secret/process gates, OfficeCLI `1.0.143`, AI DevKit and diff check PASS. Normal PR/deploy and sequential live acceptance remain. |
+| Product resilience fix | Vercel's exact `no_providers_available` code was not recognized by the Handoff model-access fallback classifier. | The adapter only allowlisted older model-access denial aliases, so a MiniMax route outage would not reach the approved Grok backup. | Added exact allowlist support for `no_providers_available`; generic account/key `access_denied` remains non-fallback and HTTP 429 still never switches models. | Focused tests prove MiniMax denial/5xx uses Grok once, while 429 and generic access denial do not. |
+| Tooling issue | First focused test in the isolated worktree could not resolve `@sap/cds`. | Fresh worktree had no installed dependency tree. | Resolved with locked `npm ci`; no package or lockfile change. | IDTS-114 rerun PASS `77/77`. |
+| Security/dependency finding | Locked install reported 24 existing audit findings (1 low, 9 moderate, 13 high, 1 critical). | Existing dependency baseline; this routing patch adds no dependency. | Open baseline debt; no force-upgrade mixed into the provider-routing change. | Secret scan and broader gates must pass before merge. |
+
+## 2026-07-31 — Feature-specific model routing rollout
+
+| Classification | Symptom / event | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Release event | PR #247 merged model routing but SAP BTP was still running the previous service revision. | A source merge does not update the Cloud Foundry application until a selective deployment is completed. | Resolved. Clean MTAR built from merge SHA `5807313f232db91acc55cc1f6aca6378891044b1`; selective MTA operation `2f9643d5-8cd7-11f1-ada0-eeee0a9d0408` deployed only `idts-sap01-srv`. HDI deployer and broad `cds deploy` were not run. | Service and AppRouter are `1/1 running`; health is HTTP 200; anonymous protected OData is HTTP 401. Runtime aliases confirm Classification GPT-5.4 Nano, Handoff MiniMax M2.5 with Grok backup, Smart Assign Z.AI, and Similar Bugs Qwen embedding. |
+| Tooling issue | The first MBT invocation exceeded the command wait and ended after producing only a temporary service archive. | Packaging the Node service tree on Windows took longer than the initial bounded command window. | Resolved by verifying that no build process remained and rebuilding once with a longer wait. The incomplete artifact was not deployed. | Final MTAR SHA-256 is `826973CE15D94D3052E34BFC06C47DE82A00A976ABC697EBBBE528AA593A95B4`. |
+| Environment blocker | Authenticated browser acceptance could not initially start from the automation connection. | The signed-in application session was in Edge while the browser connector first looked for Google Chrome. | Resolved by reconnecting the installed Chrome integration to the existing Edge session; no account or application setting changed. | The later entries record the completed PM browser sequence. |
+| Security/dependency finding | MBT installs reported the existing locked dependency findings in root, service, UI, and AppRouter packages. | Existing dependency baseline; this rollout changes no package or lockfile. | Open baseline debt; no force upgrade was mixed into the release. | CAP/UI5 production builds passed. Track dependency remediation separately. |
+
+## 2026-07-31 — SAP BTP browser acceptance database blocker
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Environment/database availability blocker | The AppRouter page displayed `Your account cannot access IDTS`, while `GET /odata/v4/auth/me()` waited 60 seconds and returned HTTP 500. | CAP could not acquire an HDI/HANA connection because the SAP HANA database service was stopped. A direct `hdb` probe returned SAP HANA code `1890` (`ERR_URS_INSTANCE_STOPPED`). This was not an XSUAA identity denial or AI-provider error; the earlier `cf service` message was stale operation state. | Resolved operationally. Restarting only `idts-sap01-srv` did not help. The HANA instance was started with the SAP-supported `serviceStopped=false` update and reached `update succeeded` / `All pods are running`. No database deploy, schema change or data reset was performed. | The post-start Cloud Foundry task executed `SELECT 1 FROM DUMMY` through the app binding and returned `DB_PROBE_OK`; resume authenticated Edge acceptance. |
+| Tooling issue | The first read-only Cloud Foundry DB probe did not start. | PowerShell parsed JavaScript arrow functions inside the nested `cf run-task --command` string. No task was created and no database request ran. | Under correction; use an argument-safe command without PowerShell-sensitive inline syntax. | Rerun the same read-only probe and record only PASS/FAIL without exposing service credentials. |
+| Tooling issue | The first successfully created Cloud Foundry DB probe task failed while copying the application droplet and never executed SQL. | The diagnostic task was given only 256 MB disk, which is smaller than the deployed Node.js droplet; staging reported `No space left on device`. | Correct the diagnostic task to use the application's normal 1 GB disk allocation. | Rerun the read-only probe; do not interpret this staging failure as a HANA result. |
+| Tooling issue | A native-driver diagnostic attempt did not run because the deployed dependency tree uses `hdb` through `@cap-js/hana`, not `@sap/hana-client`. | The probe selected a driver that is not present in the application droplet. | Corrected by probing with the actual `hdb` driver; no dependency was added. | The corrected driver probe returned code `1890`, enabling the HANA stopped-state diagnosis. |
+
+## 2026-07-31 — Feature-specific AI browser acceptance after HANA recovery
+
+| Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Acceptance result | Classification, Handoff Summary and Similar Bugs returned usable AI results in one sequential PM browser run. | The deployed feature routing used GPT-5.4 Nano, MiniMax M2.5 and Qwen embedding respectively. | PASS for the PM browser path; no review/apply/assign/lifecycle mutation was executed. | Safe HANA readback recorded `SUCCESS` for all three features. Evidence: `docs/pm/evidence/idts-114/feature-model-routing/btp-browser-live-acceptance-20260731.md`. |
+| Product/model quality finding | Smart Assign loaded three candidates successfully, but only CAP Developer 01 received an AI-generated explanation; Backup Developer and SangVN retained rules-based guidance. | The Z.AI request succeeded, but the model output mapped to only one candidate. This is candidate-coverage quality debt, not a transport, 429, authorization or value-help failure. | Open; IDTS-114 remains In Progress. | HANA audit: `ASSIGNMENT_EXPLANATION`, `SUCCESS`, `zai/glm-4.7-flash`, 4328 ms. Improve deterministic candidate keys/output validation before claiming full Smart Assign quality acceptance. |
+| Provider operational result | Four feature calls were executed sequentially without HTTP 429 or fallback switching. | Per-feature routing spreads structured calls across available provider routes; Similar Bugs retains its separate embedding model. | PASS for this bounded run only; it does not prove unlimited sustained throughput. | Preserve sequential demo behavior and do not spam retry. Continue monitoring repeated-session limits. |
+| Tooling issue | The first safe HANA audit task failed before Node execution with a shell syntax error. | The task command used unquoted `eval(...)` through Bash after PowerShell argument handling. | Fixed by using the already-proven `echo <base64> \| base64 -d \| node` command form. | Replacement task `idts114-audit-194654` completed successfully and printed only allowlisted audit fields. |
+
+## 2026-08-01 — Smart Assign output safety false positive
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product defect | SAP BTP returned `SUCCESS` for Smart Assign with `zai/glm-4.7-flash`, but all three candidates still displayed rules-based guidance. | The shared AI safety guard treated the standalone business word `select` as SQL. A normal sentence such as "review and select this candidate" therefore discarded the complete provider payload as `AI_OUTPUT_UNSAFE`. | Fixed locally by requiring contextual SQL shapes (`SELECT ... FROM`, `INSERT INTO`, `UPDATE ... SET`, `DELETE FROM`) while retaining secret, credential and stack-trace checks. | Red test failed before the fix. IDTS-64 now passes 42/42 and Smart Assign IDTS-69 passes 13/13 with the exact ordinary `select` wording. Shared AI regressions IDTS-67 36/36, IDTS-68 47/47, IDTS-71 31/31 and IDTS-114 77/77 pass. Merge/deploy and one non-mutating BTP dialog check remain. |
+| Environment blocker | After the selective service deployment, the BTP Trial AppRouter route returned a blank/404 page because `idts-sap01-approuter` had auto-stopped. | SAP BTP Trial application auto-stop; the service deployment did not crash or remove the route. | Resolved operationally with `cf start idts-sap01-approuter`; no code, binding or database change. | AppRouter returned to 1/1 running and the authenticated IDTS page loaded. Trial may stop it again. |
+| Tooling issue | The fresh worktree could not compile CAP because `@cap-js/attachments` was not resolvable through `NODE_PATH` alone. | CDS package resolution expects a dependency tree under the active worktree. | Resolved locally with an ignored `node_modules` junction to the already locked dependency installation; no package or lockfile changed. | CAP EDMX compile passes for both services. Commit only source, tests, mirror and evidence. |
+
+## 2026-08-01 — IDTS-117 cross-account re-login investigation
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product/authentication defect under investigation | SangVN reported that a fresh Tester round trip could authenticate with SAP Identity after switching accounts, but the protected Fiori entry then stayed blank or showed the safe IDTS access alert. Same-identity DonHV logout/re-login had previously passed twice. | Not confirmed. Current candidates are an unmatched XSUAA identity claim, a missing/multiple/mismatched IDTS role collection, or stale browser auth state. The AppRouter and CAP service are both running 1/1, so this is not an application-stop symptom. | Reopened IDTS-117 and created isolated branch `fix/idts-117-cross-account-session-donhv`. | Capture the failing `AuthService.me` status/body without tokens, test A→B and B→A, then fix only the proven boundary. Existing static IDTS-117 checks do not cover cross-account switching. |
+| Environment blocker | The hourly Job Scheduler call to `processEmailOutbox` returned HTTP 500 after waiting 60 seconds. | CAP timed out acquiring a pooled database resource (`generic-pool ResourceRequest timed out`). This was observed while filtering recent service logs and is separate from the browser identity symptom. | Open and recorded; no email/runtime change is mixed into the IDTS-117 auth investigation. | Check HANA/service pool health and the next scheduler execution in the appropriate operational follow-up. |
+| Tooling issue | A read-only BTP CLI role-collection readback could not run because the local BTP CLI session had expired (`Unknown session`). | Local CLI authentication state expired; Cloud Foundry CLI remains authenticated and application runtime is unaffected. | No configuration was changed. | Use the already requested member-owned `AuthService.me` evidence first; reauthenticate BTP CLI only if a fresh role-collection readback is still required. |
+## 2026-08-01 — IDTS-117 recurring HANA availability diagnosis
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Environment/database availability blocker | The protected Fiori page alternated between a blank screen and the generic `Your account cannot access IDTS` message. Two post-restart `GET /odata/v4/auth/me()` requests waited 60 seconds and returned HTTP 500. | CAP could not acquire a HANA connection. A fresh read-only CDS probe timed out and a direct `hdb` probe returned code `1890`, confirming that the HANA Free Tier instance had stopped again. The AppRouter and CAP processes themselves remained running 1/1. | Recovered operationally without schema deployment or data mutation. The HANA broker update reached `HanaService is ready. All pods are running` at `2026-08-01T15:19:01Z`; CAP was restarted once after the database became ready. | Cloud Foundry task `idts117-db-probe-after-start-2221` executed `SELECT 1 FROM DUMMY` through the real HDI binding and returned `DB_PROBE_OK`. The durable follow-up is a pre-demo readiness runbook/checker plus a DB-backed readiness endpoint; Trial cannot provide always-on availability. |
+| Product/UX defect | The auth guard presents every non-401 backend failure as an account-access denial, so a HANA outage is reported as an authorization problem and may first appear as a blank page while the 60-second request is pending. | `auth-guard.js` does not distinguish 403 identity/role denial from 5xx/504 service unavailability. | Open; do not mix the UI correction into the immediate HANA recovery. | After service recovery, add a focused follow-up so 403 retains the access message while 5xx/504 shows a temporary service-unavailable message with Retry. |
+| Tooling issue | The first attempt to inspect one Cloud Foundry task used the nonexistent singular command `cf task`. | Cloud Foundry CLI exposes `cf tasks` for this installation. | Fixed in-session by using `cf tasks` and filtered recent application logs. | No product, database or remote configuration impact. |
+| Tooling issue | The first HANA start command was rejected locally as invalid JSON for `-c`. | PowerShell/native argument handling removed or altered quoting in the inline JSON argument. The service update did not start. | Fixed by passing an ignored temporary JSON parameter file; the file was removed immediately after the broker accepted the request. | The broker reached `All pods are running`; the post-start DB probe passed. No secret or service credential was written to the file. |
+| Tooling issue | Fresh IDTS-113/auth regression commands stopped before test execution with `Cannot find module '@sap/cds'`. | This worktree's ignored `node_modules` junction still targeted the root dependency folder, but that target no longer contained the locked installation. | Fixed as a worktree-only dependency-link repair; no package or lockfile change. The replacement dependency tree has the exact same `package-lock.json` SHA-256. | IDTS-113 BTP auth rerun passed 12/12 and auth foundation passed 28/28. |
+| Tooling issue | The first CAP compile command exited because the combined model contains both `BugService` and `AuthService`. | The command omitted the required service selector; this was command usage, not a CDS compile defect. | Fixed in-session by compiling with `-s all`. | Rerun the complete compile and retain its exit code before deployment. |
+
+## 2026-08-02 — BTP demo-readiness implementation
+
+| Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product/operations improvement | A running CAP process could still serve a misleading auth failure while HANA Free Tier was stopped. | Process health alone did not prove that the bound HDI database accepted queries. | Implemented a sanitized `/ready` endpoint that performs a bounded read through the CAP database binding and returns only `UP` or `DOWN`. | Local IDTS-117, auth, CAP compile, UI5 build/lint, secret/process and AI DevKit gates PASS. Deploy after normal PR merge, then require `/ready` HTTP 200 before demo. |
+| Product/UX improvement | HANA startup delay or a 5xx from `AuthService.me` appeared as a permanent account-access denial. | The bootstrap guard grouped every non-401 failure into the authorization error state. | 401 still redirects to XSUAA, 403 keeps the access-denied message, and timeout/network/5xx now show a retryable temporary-unavailability panel. | Targeted UI5 lint and production build PASS; browser acceptance remains after BTP deployment. |
+| Operations improvement | Manual recovery required several commands and was easy to perform incompletely. | Trial auto-stop affects HANA and Cloud Foundry apps independently. | Added `npm run btp:demo:check` for read-only status and `npm run btp:demo:prepare` for bounded start/wait/readiness recovery. The script does not deploy schema, load seed data or expose credentials. | OfficeCLI preflight PASS `1.0.143`; runbook added under `docs/runbooks/`. |
+| Tooling/environment blocker | The first live `btp:demo:check` could not inspect Cloud Foundry because the local CF OAuth token had expired. | Local CLI session expiry; deployed applications and data were not changed. | Pending user-owned `cf login --sso`; no password or long-lived credential is requested or stored. | After re-login, rerun check, merge/deploy normally, then capture live readiness evidence. |
+| Process issue | PR #257 initially failed QA Depth Gate although the implementation tests passed; the second run then saw all headings collapsed onto one line. | First, the body used descriptive Knowledge Gate labels instead of the validator's exact structured labels. Second, passing a multiline PowerShell value directly to GitHub CLI collapsed line breaks, so headings were no longer recognized. | Corrected from the existing DonHV 90% PASS evidence and uploaded through `--body-file`; no reassessment or bypass was performed. | Push this status correction to trigger a fresh remote gate and require PASS before merge. |
+
+## 2026-08-02 — BTP demo-readiness HANA start parameter hotfix
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling issue | `npm run btp:demo:prepare` started CAP and AppRouter, but `cf update-service ... -c <file>` rejected the HANA start parameter as invalid JSON. | Windows PowerShell 5 `Set-Content -Encoding utf8` wrote a UTF-8 BOM. The Cloud Foundry CLI parameter parser rejected that file before the service broker received it. | Fixed locally by writing the same non-secret JSON with `System.Text.UTF8Encoding($false)` and `File.WriteAllText`; the temporary file is still removed in `finally`. | Red test failed before the fix; the focused IDTS-117 test and PowerShell parser pass afterward. A live rerun reached the broker successfully and then waited on the still-undeployed `/ready` endpoint, confirming that the JSON rejection is gone. |
+| Tooling issue | The first MTA build in the hotfix worktree failed with `ENOTEMPTY` under `node_modules`. | An earlier interrupted build left an incomplete generated dependency tree in that isolated worktree. | Avoided without deleting user files by creating a clean detached build worktree at merge SHA `67b1bf8`. | Selective MTA operation `2a6a26e0-8e7a-11f1-830b-eeee0a9aaf82` finished for service, app content and AppRouter; the HDI deployer was excluded. Final `btp:demo:check` returned `DEMO READY`. |
+
+Live evidence: `docs/pm/evidence/idts-117/demo-readiness/live-verification-20260802.md`.
+
+## 2026-08-02 — IDTS-110 catalog source-trace validation
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- |
+| Tooling/documentation issue | The first IDTS-110 catalog generation stopped because its source-trace validator could not find `resolvePlatformRole` or `uploadPendingAttachments`. | The candidate catalog used descriptive names inferred from the flow instead of the real exported symbols. The current code uses `enforcePlatformRoleAlignment` and `flushPendingCreateAttachments`. | Corrected in the catalog source; no runtime, workbook, Jira, Drive, or execution result changed. | Regenerate and rerun `node scripts/qa/generate-idts110-unit-test-catalog.js --check`; every file/symbol reference must resolve before DonHV review. |
+
+## 2026-08-02 — Delegation policy and IDTS-110 child-task review
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Process improvement | The existing `AGENTS.md` policy covered proactive subagents but did not require an explicit delegation assessment for every task, distinguish child tasks from subagents, or constrain model selection to the user-approved GPT-5.6 range. | The earlier rule was written for parallel sidecar review only and defaulted almost all delegated work to Terra. | Updated the existing section rather than adding a duplicate policy. Delegation remains optional; the primary task must choose child task/subagent/direct execution based on measurable benefit and remains accountable for final verification. | Agent rules, QA Depth self-test, secret scan, AI DevKit and `git diff --check` PASS. Normal PR review remains before merge. |
+| Review finding | The completed IDTS-110 child task produced a useful 126-row draft and correctly inventoried 66 QA scripts, five current UNIT rows and 11 lifecycle actions, but described the catalog as fully atomic. | Several proposed rows still combine multiple denial/boundary branches, and the draft mixes pure unit, CAP component, OData contract and mandatory-BTP integration cases. | Accepted as a planning source, not as the final approved Unit Test catalog. DonHV must approve taxonomy, row expansion and execution baseline before workbook generation or execution. | Fresh read-only inventory independently confirmed the three source counts; no test result was marked PASS and no Jira/Drive artifact was changed. |
+| Tooling issue | The first read-only command used to verify the completed IDTS-110 child-task inventory stopped before reading the catalog. | The installed Windows PowerShell version does not support the `??` null-coalescing operator used in the one-off command. | Fixed in-session by replacing the operator with PowerShell-compatible property selection; no product, test artifact, Jira, Drive, or remote state was changed. | Rerun the inventory against the fresh `origin/dev` worktree and report verified counts separately from the child task's draft conclusions. |
+
+## 2026-08-02 — IDTS-110 atomic Unit Test catalog candidate
+
+| Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| QA planning result | The previous canonical catalog had only five historical UNIT rows and mixed other test levels into the same 27-record file. | IDTS-110 requires a detailed English-only condition-branch catalog before NhanT executes tests or DonHV generates the workbook. | Generated a 188-case candidate with explicit `PURE_UNIT`, `UI_COMPONENT`, `CAP_COMPONENT`, `ODATA_CONTRACT`, and `BTP_INTEGRATION` levels. Every case is `NOT_RUN`; no old PASS state was inherited. | DonHV reviews `docs/qa/idts-110-unit-test-catalog.json` and `docs/pm/evidence/idts-110/unit-test-catalog-review.md`. Only after approval may NhanT execute cases and attach case-specific evidence. |
+
+## 2026-08-02 — IDTS-110 catalog approval
+
+| Classification | Decision | Result | Verification | Next owner |
+| --- | --- | --- | --- | --- |
+| QA governance | DonHV approved the 188-case English Unit Test catalog for execution. Approval does not convert any `NOT_RUN` case to PASS and does not approve workbook or Drive synchronization. | Approval evidence, work package, task board and PR body were updated. | Catalog remains 188 unique cases, all `NOT_RUN`; fresh local and remote gates must pass on the approval commit. | NhanT executes each approved case and captures sanitized case-specific image evidence; DonHV reviews results before generating Unit Test EN v0.5. |
+| Documentation/source-trace correction | The first attachment draft described MIME and 10 MB rejection as if the backend enforced both rules. | Current `prepareAttachmentWrite()` enforces actor role and records content length, while MIME and 10 MB checks are implemented in the SAPUI5 collaboration controller. | Reclassified those two cases as `UI_COMPONENT` and removed the unsupported backend-4xx claim. This changes only test documentation, not runtime behavior. | Source-trace validation and deterministic catalog regeneration PASS. A future backend hardening change would require its own Jira/runtime PR and new tests. |
+| Tooling issue | The first one-off catalog audit incorrectly reported that every case lacked image evidence. | The audit expected an `imageRequired` property on each case, while the schema correctly stores the concrete `case-specific result image` requirement in each case and the boolean policy once at catalog level. | Corrected the read-only audit without changing the catalog schema. | Rerun PASS: 188 unique EN cases, all `NOT_RUN`, each contains the case-specific image requirement, and the catalog-level image policy is enabled. |
+
+## 2026-08-02 — IDTS-111 atomic SAP BTP UAT catalog candidate
+
+| Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| QA planning result | The current UAT artifact has only six broad PREPARED rows, each combining multiple business outcomes, and still describes a generic/legacy environment. | Mentor review requires one observable outcome per case, current SAP BTP targeting, case-specific image evidence and honest human execution truth. | Generated a deterministic 90-case English-only candidate. Every row is `PREPARED`; no historical PASS or screenshot was inherited, and no workbook/Drive artifact was changed. | DonHV reviews `docs/qa/idts-111-uat-catalog.json` and `docs/pm/evidence/idts-111/uat-catalog-review.md`. Execution must not begin before explicit approval. |
+| Process/ownership correction | Existing briefing/work-package text assigned NhanT ownership of catalog generation and final Drive update. | DonHV subsequently decided to own both Unit/UAT catalogs, approvals, workbook generation and final integration; NhanT and other members only execute assigned role cases. | Updated the work package, task board and mentor briefing ownership table. Agent/member approval is not fabricated. | After DonHV approval, NhanT executes Tester cases, SangVN/DatDT execute assigned Developer cases, and DonHV executes PM/database/integration cases. |
+| Independent review finding | A read-only GPT-5.6 Terra audit found stale Render references, historical evidence contamination risk, generic environment wording and insufficient atomicity. | The old workbook predates the BTP/HANA/XSUAA submission baseline and EN-only process. | Accepted the verified inventory and expanded the candidate to 90 cases; parent independently generated and validated the structured source. | Freeze live AppRouter/deploy/readiness and member-owned identities only immediately before execution. |
+
+## 2026-08-02 — IDTS-111 catalog approval
+
+| Classification | Decision | Result | Verification / next action |
+| --- | --- | --- | --- |
+| QA governance | DonHV explicitly approved the 90-case English-only SAP BTP UAT catalog for execution. | Approval evidence and planning records now distinguish human catalog approval from test execution. All 90 cases remain PREPARED; workbook and Drive remain unchanged. | Rerun deterministic generation, local/remote gates and merge normally. After merge, freeze live BTP deploy/readiness before assigning execution. |
+
+## 2026-08-02 — IDTS-111 execution baseline publication
+
+| Classification | Result | Verification | Next action |
+| --- | --- | --- | --- |
+| QA execution readiness | PR #261 merged normally at `6f01affc2c2945e51d18199137c8a89a20c77600`. A scoped comparison found no runtime-relevant difference between deployed SHA `67b1bf86169e9696c9365ef4846b99ffae30d4e2` and catalog source baseline `447da1dab80418847d806040e6b2060b0916cb63`. | Fresh `npm run btp:demo:check` returned `DEMO READY`: CAP/AppRouter 1/1, liveness/readiness/web HTTP 200 and anonymous protected API HTTP 401 as expected. | Assigned members may execute only their catalog cases with their own SAP identities and sanitized case-specific evidence. All cases remain PREPARED until DonHV reviews actual results. |
+| Environment limitation | SAP BTP Trial and HANA Cloud Free Tier can auto-stop after the point-in-time readiness check. | The execution baseline requires a fresh readiness check at the start of every test session and bounded recovery by DonHV if needed. | Classify a later auto-stop as an environment blocker; do not misreport it as a product-test failure without diagnosis. |
+| Tooling issue | The deterministic catalog `--check` reported `OUTDATED` immediately after a clean Windows checkout although regeneration produced no Git diff. | The checker compared LF output with the CRLF working-tree representation byte-for-byte. | Normalized line endings only for the comparison; catalog content and execution truth are unchanged. Rerun `node scripts/qa/generate-idts111-uat-catalog.js --check` on the clean checkout. |
