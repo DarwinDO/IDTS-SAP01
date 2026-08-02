@@ -2,9 +2,11 @@
 
 ## Verdict
 
-`DRAFT FOR DONHV CONTENT APPROVAL — NOT EXECUTED`
+`APPROVED BY DONHV FOR EXECUTION — NOT EXECUTED`
 
-The generated catalog is an English-only SAP BTP UAT candidate. It replaces the six broad historic Prepared rows with 90 atomic business-observable cases. It does not import the old 21 PASS regression results and does not claim that any current BTP UAT was executed.
+DonHV approved the generated English-only SAP BTP UAT catalog in the dedicated Codex working thread on 2026-08-02. The approval authorizes assigned members to execute their cases only after the live BTP baseline/readiness is frozen. It does not mark any case as PASS and does not approve workbook or Drive synchronization.
+
+The catalog replaces the six broad historic Prepared rows with 90 atomic business-observable cases. It does not import the old 21 PASS regression results and does not claim that any current BTP UAT was executed.
 
 ## Baseline and ownership
 
@@ -19,7 +21,8 @@ The generated catalog is an English-only SAP BTP UAT candidate. It replaces the 
 | Developer-role execution | SangVN and DatDT, assigned per case |
 | PM/database/integration execution | DonHV |
 | Knowledge Gate | `PASS — DonHV; do not reopen` |
-| Workbook/Drive state | Unchanged |
+| Approval | DonHV approved in the dedicated working thread on 2026-08-02 |
+| Workbook/Drive state | Unchanged; generation remains after reviewed execution |
 
 ## Execution truth
 

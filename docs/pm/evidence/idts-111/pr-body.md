@@ -2,7 +2,7 @@
 
 - Add a deterministic English-only IDTS-111 SAP BTP UAT candidate with 90 atomic cases.
 - Correct ownership so DonHV owns catalog approval/workbook integration while members execute assigned role cases.
-- Preserve test truth: 90 PREPARED, 0 executed, 0 PASS/FAIL/BLOCKED; workbook and Drive unchanged.
+- Record DonHV approval while preserving test truth: 90 PREPARED, 0 executed, 0 PASS/FAIL/BLOCKED; workbook and Drive unchanged.
 
 ## Positive Evidence
 
@@ -57,8 +57,8 @@ Result: PASS
 
 ## Known Gaps
 
-- DonHV content approval is pending; execution must not begin before approval.
-- BTP deploy SHA, service readiness, member-owned identities and controlled QA records must be frozen before execution.
+- DonHV approved the catalog on 2026-08-02; this approval does not mark any case PASS.
+- BTP deploy SHA, service readiness, member-owned identities and controlled QA records must still be frozen before execution.
 - Unit Test/UAT workbook generation and same-ID Drive update remain later DonHV steps after reviewed evidence.
 
 ## Jira/Evidence Links

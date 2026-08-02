@@ -259,7 +259,7 @@ const result = {
   baselineSha: BASELINE_SHA,
   generatedAt: '2026-08-02',
   owner: 'DonHV',
-  approvalStatus: 'PENDING_DONHV_REVIEW',
+  approvalStatus: 'APPROVED_FOR_EXECUTION',
   executionTruth: { prepared: cases.length, executed: 0, passed: 0, failed: 0, blocked: 0 },
   policy: {
     enOnly: true,
