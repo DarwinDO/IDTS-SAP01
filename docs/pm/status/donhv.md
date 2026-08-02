@@ -5303,6 +5303,12 @@ remains pending normal PR merge.
 
 Live evidence: `docs/pm/evidence/idts-117/demo-readiness/live-verification-20260802.md`.
 
+## 2026-08-02 — IDTS-110 catalog source-trace validation
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- |
+| Tooling/documentation issue | The first IDTS-110 catalog generation stopped because its source-trace validator could not find `resolvePlatformRole` or `uploadPendingAttachments`. | The candidate catalog used descriptive names inferred from the flow instead of the real exported symbols. The current code uses `enforcePlatformRoleAlignment` and `flushPendingCreateAttachments`. | Corrected in the catalog source; no runtime, workbook, Jira, Drive, or execution result changed. | Regenerate and rerun `node scripts/qa/generate-idts110-unit-test-catalog.js --check`; every file/symbol reference must resolve before DonHV review. |
+
 ## 2026-08-02 — Delegation policy and IDTS-110 child-task review
 
 | Classification | Symptom | Root cause | Fix status | Verification / next action |
@@ -5310,3 +5316,17 @@ Live evidence: `docs/pm/evidence/idts-117/demo-readiness/live-verification-20260
 | Process improvement | The existing `AGENTS.md` policy covered proactive subagents but did not require an explicit delegation assessment for every task, distinguish child tasks from subagents, or constrain model selection to the user-approved GPT-5.6 range. | The earlier rule was written for parallel sidecar review only and defaulted almost all delegated work to Terra. | Updated the existing section rather than adding a duplicate policy. Delegation remains optional; the primary task must choose child task/subagent/direct execution based on measurable benefit and remains accountable for final verification. | Agent rules, QA Depth self-test, secret scan, AI DevKit and `git diff --check` PASS. Normal PR review remains before merge. |
 | Review finding | The completed IDTS-110 child task produced a useful 126-row draft and correctly inventoried 66 QA scripts, five current UNIT rows and 11 lifecycle actions, but described the catalog as fully atomic. | Several proposed rows still combine multiple denial/boundary branches, and the draft mixes pure unit, CAP component, OData contract and mandatory-BTP integration cases. | Accepted as a planning source, not as the final approved Unit Test catalog. DonHV must approve taxonomy, row expansion and execution baseline before workbook generation or execution. | Fresh read-only inventory independently confirmed the three source counts; no test result was marked PASS and no Jira/Drive artifact was changed. |
 | Tooling issue | The first read-only command used to verify the completed IDTS-110 child-task inventory stopped before reading the catalog. | The installed Windows PowerShell version does not support the `??` null-coalescing operator used in the one-off command. | Fixed in-session by replacing the operator with PowerShell-compatible property selection; no product, test artifact, Jira, Drive, or remote state was changed. | Rerun the inventory against the fresh `origin/dev` worktree and report verified counts separately from the child task's draft conclusions. |
+
+## 2026-08-02 — IDTS-110 atomic Unit Test catalog candidate
+
+| Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| QA planning result | The previous canonical catalog had only five historical UNIT rows and mixed other test levels into the same 27-record file. | IDTS-110 requires a detailed English-only condition-branch catalog before NhanT executes tests or DonHV generates the workbook. | Generated a 188-case candidate with explicit `PURE_UNIT`, `UI_COMPONENT`, `CAP_COMPONENT`, `ODATA_CONTRACT`, and `BTP_INTEGRATION` levels. Every case is `NOT_RUN`; no old PASS state was inherited. | DonHV reviews `docs/qa/idts-110-unit-test-catalog.json` and `docs/pm/evidence/idts-110/unit-test-catalog-review.md`. Only after approval may NhanT execute cases and attach case-specific evidence. |
+
+## 2026-08-02 — IDTS-110 catalog approval
+
+| Classification | Decision | Result | Verification | Next owner |
+| --- | --- | --- | --- | --- |
+| QA governance | DonHV approved the 188-case English Unit Test catalog for execution. Approval does not convert any `NOT_RUN` case to PASS and does not approve workbook or Drive synchronization. | Approval evidence, work package, task board and PR body were updated. | Catalog remains 188 unique cases, all `NOT_RUN`; fresh local and remote gates must pass on the approval commit. | NhanT executes each approved case and captures sanitized case-specific image evidence; DonHV reviews results before generating Unit Test EN v0.5. |
+| Documentation/source-trace correction | The first attachment draft described MIME and 10 MB rejection as if the backend enforced both rules. | Current `prepareAttachmentWrite()` enforces actor role and records content length, while MIME and 10 MB checks are implemented in the SAPUI5 collaboration controller. | Reclassified those two cases as `UI_COMPONENT` and removed the unsupported backend-4xx claim. This changes only test documentation, not runtime behavior. | Source-trace validation and deterministic catalog regeneration PASS. A future backend hardening change would require its own Jira/runtime PR and new tests. |
+| Tooling issue | The first one-off catalog audit incorrectly reported that every case lacked image evidence. | The audit expected an `imageRequired` property on each case, while the schema correctly stores the concrete `case-specific result image` requirement in each case and the boolean policy once at catalog level. | Corrected the read-only audit without changing the catalog schema. | Rerun PASS: 188 unique EN cases, all `NOT_RUN`, each contains the case-specific image requirement, and the catalog-level image policy is enabled. |
