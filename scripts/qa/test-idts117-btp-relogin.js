@@ -51,4 +51,33 @@ assert.match(guard, /window\.location\.replace\("\/do\/logout"\)/)
 assert.match(guard, /content-type/i)
 assert.match(guard, /window\.location\.replace\("\/login\.html"\)/)
 
-console.log('IDTS-117 BTP re-login checks passed: logout page, protected login bridge and HTML-response recovery are configured.')
+// A database outage is an availability failure, not an authorization denial.
+assert.match(guard, /AbortController/)
+assert.match(guard, /error\.status === 403/)
+assert.match(guard, /showServiceUnavailable/)
+assert.match(guard, /IDTS is temporarily unavailable/)
+assert.match(guard, /Retry/)
+
+const server = read('server.js')
+assert.match(server, /app\.get\('\/ready'/)
+assert.match(server, /cds\.connect\.to\('db'\)/)
+assert.match(server, /status\(503\)/)
+assert.doesNotMatch(server, /res\.(?:send|json)\([^\n]*(?:error\.message|stack)/)
+
+const demoReadiness = read('scripts/btp/prepare-demo.ps1')
+assert.match(demoReadiness, /\[switch\]\$CheckOnly/)
+assert.match(demoReadiness, /serviceStopped/)
+assert.match(demoReadiness, /cf start/)
+assert.match(demoReadiness, /\/ready/)
+assert.doesNotMatch(demoReadiness, /password|api[_-]?key|clientsecret/i)
+
+const packageJson = readJson('package.json')
+assert.match(packageJson.scripts['btp:demo:check'], /prepare-demo\.ps1 -CheckOnly/)
+assert.match(packageJson.scripts['btp:demo:prepare'], /prepare-demo\.ps1/)
+
+const runbook = read('docs/runbooks/btp-trial-demo-readiness.md')
+assert.match(runbook, /HANA Cloud Free Tier/i)
+assert.match(runbook, /30(?:–|-)45 minutes/i)
+assert.match(runbook, /DB_PROBE_OK|database readiness/i)
+
+console.log('IDTS-117 checks passed: re-login, availability error classification, DB readiness and demo preflight are configured.')

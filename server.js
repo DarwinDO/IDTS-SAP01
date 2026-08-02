@@ -6,6 +6,20 @@ const LEGACY_APP_PREFIX = '/bug-management-ui/webapp'
 const CANONICAL_APP_PREFIX = '/idts.bugmanagementui'
 const UI5_CDN_BASE = 'https://sapui5.hana.ondemand.com/1.148.0'
 const WEBAPP_ROOT = path.join(__dirname, 'app', 'bug-management-ui', 'webapp')
+const READINESS_TIMEOUT_MS = 12000
+
+function timeoutAfter (milliseconds) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('Database readiness timed out')), milliseconds)
+    timer.unref?.()
+  })
+}
+
+async function verifyDatabaseReadiness () {
+  const db = await cds.connect.to('db')
+  const query = cds.ql.SELECT.from('idts.cap.Users').columns('ID').limit(1)
+  await Promise.race([db.run(query), timeoutAfter(READINESS_TIMEOUT_MS)])
+}
 
 function splitPathAndQuery(originalUrl) {
   const queryIndex = originalUrl.indexOf('?')
@@ -26,6 +40,18 @@ function canonicalAppPathFor(legacyPath) {
 }
 
 cds.on('bootstrap', app => {
+  // `/health` proves that the Node process is alive. `/ready` additionally
+  // touches the configured CAP database so operators do not mistake a stopped
+  // HANA instance for a healthy application.
+  app.get('/ready', async (_req, res) => {
+    try {
+      await verifyDatabaseReadiness()
+      return res.status(200).json({ status: 'UP', checks: { database: 'UP' } })
+    } catch (_error) {
+      return res.status(503).json({ status: 'DOWN', checks: { database: 'DOWN' } })
+    }
+  })
+
   app.use(`${CANONICAL_APP_PREFIX}/resources`, (req, res) => {
     return res.redirect(302, `${UI5_CDN_BASE}/resources${req.url}`)
   })

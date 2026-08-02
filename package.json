@@ -113,6 +113,8 @@
     "db:idts97-ai-metrics:migrate": "node scripts/db/migrate-idts97-ai-metrics.js --execute",
     "db:idts97-ai-metrics:dry-run": "node scripts/db/migrate-idts97-ai-metrics.js --dry-run",
     "btp:external-services:bind": "powershell -ExecutionPolicy Bypass -File scripts/btp/upsert-external-services.ps1",
+    "btp:demo:check": "powershell -ExecutionPolicy Bypass -File scripts/btp/prepare-demo.ps1 -CheckOnly",
+    "btp:demo:prepare": "powershell -ExecutionPolicy Bypass -File scripts/btp/prepare-demo.ps1",
     "btp:migration:export": "node scripts/btp/export-shared-qa.js --render-postgres-id=dpg-d92j3g4vikkc738fu670-a --output=.tmp/idts-113-migration/shared-qa-export",
     "btp:migration:import": "node scripts/btp/import-hana.js --input=.tmp/idts-113-migration/shared-qa-export",
     "qa:idts113:migration": "node scripts/qa/test-idts113-hana-migration.js",

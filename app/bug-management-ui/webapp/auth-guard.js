@@ -14,6 +14,7 @@
     var USER_KEY = "idts_auth_user";
     var EXPIRES_KEY = "idts_auth_expires";
     var AUTH_ME = "/odata/v4/auth/me()";
+    var AUTH_TIMEOUT_MS = 15000;
 
     var token = sessionStorage.getItem(TOKEN_KEY);
     window.__IDTS_AUTH_MODE__ = token ? "custom" : "xsuaa";
@@ -54,10 +55,16 @@
     };
 
     function loadBtpUser() {
+        var controller = new AbortController();
+        var timeout = setTimeout(function () {
+            controller.abort();
+        }, AUTH_TIMEOUT_MS);
+
         return fetch(AUTH_ME, {
             method: "GET",
             credentials: "same-origin",
-            headers: { "Accept": "application/json" }
+            headers: { "Accept": "application/json" },
+            signal: controller.signal
         })
             .then(function (response) {
                 var contentType = response.headers.get("content-type") || "";
@@ -74,7 +81,9 @@
             .then(function (payload) {
                 var user = payload && payload.value ? payload.value : payload;
                 if (!user || !user.ID || !user.role_code) {
-                    throw new Error("The signed-in profile is unavailable.");
+                    var profileError = new Error("The signed-in profile is unavailable.");
+                    profileError.status = 403;
+                    throw profileError;
                 }
                 sessionStorage.setItem(USER_KEY, JSON.stringify(user));
                 sessionStorage.removeItem(EXPIRES_KEY);
@@ -83,10 +92,15 @@
             .catch(function (error) {
                 if (error && error.status === 401) {
                     return redirectToBtpLogin();
-                } else {
+                } else if (error && error.status === 403) {
                     showSafeAccessError();
+                } else {
+                    showServiceUnavailable();
                 }
                 throw error;
+            })
+            .finally(function () {
+                clearTimeout(timeout);
             });
     }
 
@@ -145,10 +159,41 @@
     }
 
     function showSafeAccessError() {
+        renderSafeError(
+            "Your account cannot access IDTS. Please contact the project administrator.",
+            false
+        );
+    }
+
+    function showServiceUnavailable() {
+        renderSafeError(
+            "IDTS is temporarily unavailable while a platform service is starting. Please try again.",
+            true
+        );
+    }
+
+    function renderSafeError(message, retryAllowed) {
         function render() {
             var host = document.getElementById("idtsAuthError");
+            var text;
+            var retry;
             if (!host) return;
-            host.textContent = "Your account cannot access IDTS. Please contact the project administrator.";
+
+            host.replaceChildren();
+            text = document.createElement("p");
+            text.textContent = message;
+            host.appendChild(text);
+
+            if (retryAllowed) {
+                retry = document.createElement("button");
+                retry.type = "button";
+                retry.textContent = "Retry";
+                retry.addEventListener("click", function () {
+                    window.location.reload();
+                });
+                host.appendChild(retry);
+            }
+
             host.hidden = false;
         }
 
