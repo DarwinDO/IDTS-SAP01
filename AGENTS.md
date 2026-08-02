@@ -375,29 +375,44 @@ Với BRD/SRS/FRS và DOCX, trước khi viết hoặc chỉnh sửa hãy ưu ti
 
 Với cộng tác tài liệu Google Workspace, ưu tiên `gws` làm lớp automation lặp lại cho team sau khi đã cài và cấu hình. Dùng Google Drive connector như fallback tương tác để đọc nhanh, review nhanh, hoặc cập nhật một lần trong Codex. Giữ Markdown/DOCX/XLSX trong repo là source of truth; Google Docs và Google Sheets chỉ là bản review/collaboration, không phải nguồn canonical.
 
-## Proactive Subagent Delegation and Final Review
+## Delegation, Child Tasks, Subagents, and Final Review
 
-The primary agent is authorized to use Codex subagents proactively when a nontrivial task contains two or more independent, well-scoped workstreams that can safely run in parallel. Delegation is optional, not mandatory; keep urgent critical-path work local.
+At the start of every task, the primary agent must explicitly assess whether support from a child task or subagent would materially improve correctness, speed, independent verification, evidence quality, or resistance to confirmation bias and overrating its own work. Delegation is optional, not automatic. Keep the work in the primary task when it is trivial, tightly coupled, the immediate critical-path blocker, or cheaper to complete directly than to coordinate.
 
-Default routing:
+Choose the mechanism that fits the intended outcome:
 
-- Use `gpt-5.6-terra` with `medium` reasoning for bounded repository inspection, documentation checks, focused test execution, evidence review, and other routine sidecar work.
-- Use `gpt-5.6-terra` with `high` reasoning for security, authorization, architecture, CAP/Fiori cross-layer review, difficult debugging, conflict analysis, and pre-merge code review.
-- Use another model only when the user explicitly requests it or a concrete task-specific reason is recorded.
+- Use a **child task** for long-running, user-visible work that benefits from its own durable context, worktree/branch, handoff, or later direct follow-up by the user.
+- Use a **subagent** for bounded analysis, disjoint implementation, test execution, evidence collection, falsification, or independent review that feeds back into the current primary task.
+- Do not delegate merely to appear thorough, manufacture consensus, or duplicate the same unresolved work. Parallel work must have disjoint write scopes unless the primary agent provides an explicit integration plan.
 
-Every delegated task must have a concrete output, a narrow read/write scope, and a disjoint write set from other active agents. Do not delegate secrets, credentials, destructive operations, Jira/Drive/production mutations, the immediate blocker on the critical path, or final release authority. Do not duplicate the same unresolved work in both the primary agent and a subagent.
+Every delegated assignment must state its objective, authority, read/write scope, expected output, evidence requirement, prohibited actions, and return condition. Do not delegate secrets, credentials, destructive operations, Jira/Drive/production mutations, the immediate critical-path blocker, or final release authority.
 
-Subagent output is an untrusted draft until the primary agent:
+Model and reasoning policy:
 
-1. Reviews the result and every changed file.
+- When a child task or subagent model is explicitly selected, use only an available GPT-5.6 model in the approved range from `gpt-5.6-luna` (smallest) through `gpt-5.6-terra` (highest), unless the user explicitly approves an exception.
+- Prefer the smallest model that can reliably complete the delegated scope. Use Luna for narrow inventory, extraction, mechanical checks, and low-risk bounded work; use Terra for complex cross-layer analysis, implementation, difficult debugging, security/authorization review, architecture, or independent final review.
+- Select reasoning effort proportionally to ambiguity, risk, cross-layer coupling, and verification burden. Do not default every task to the highest model or reasoning level.
+- If the current delegation mechanism cannot enforce the requested model or reasoning level, report that limitation instead of claiming the override occurred.
+
+Child-task and subagent output is an untrusted draft until the primary agent:
+
+1. Reviews the result, cited evidence, assumptions, and every changed file.
 2. Verifies it against the user request, repository rules, source code, Jira scope, and SAP-supported patterns.
-3. Runs the relevant tests, builds, scans, and gates again from the integrated branch.
-4. Corrects or rejects incomplete, unsafe, conflicting, or unsupported work.
-5. Makes the final decision to commit, create a PR, merge, deploy, update Jira, or claim PASS/completion.
+3. Re-runs the relevant tests, builds, scans, and gates from the integrated branch when changes are involved.
+4. Reconciles disagreements and corrects or rejects incomplete, unsafe, conflicting, unsupported, or self-congratulatory conclusions.
+5. Makes the final decision to commit, create a PR, merge, deploy, update Jira/Drive, or claim PASS/completion.
 
-Report which subagent model/reasoning level was used, its assigned scope, useful result, rejected findings, and verification performed by the primary agent. A subagent must never mark its own work as final acceptance.
+The primary agent must report transparently which work was delegated, why that mechanism was chosen, the model/reasoning used when controllable, useful results, rejected or corrected findings, verification performed, and unresolved limitations. A child task or subagent must never mark its own work as final acceptance.
 
-Vietnamese: Agent chính được phép chủ động gọi subagent khi task có từ hai phần độc lập có thể chạy song song. Mặc định dùng Terra Medium cho việc phụ rõ ràng và Terra High cho security, kiến trúc, CAP/Fiori cross-layer, debug khó và review trước merge. Kết quả subagent chỉ là bản nháp; agent chính bắt buộc review diff, đối chiếu source/Jira/rule, chạy lại test/gate và tự chịu trách nhiệm cuối cùng cho commit, PR, merge, deploy và kết luận PASS.
+Vietnamese:
+
+Khi bắt đầu mọi task, agent chính phải tự đánh giá rõ việc dùng task con hoặc subagent có thực sự giúp tăng độ chính xác, tốc độ, tính độc lập của review, chất lượng evidence, giảm tải và giảm confirmation bias/tự đánh giá quá cao kết quả của chính mình hay không. Delegation là tùy nhu cầu, không phải bắt buộc. Giữ việc ở task chính nếu việc đó đơn giản, liên kết chặt, là blocker trực tiếp trên critical path, hoặc chi phí điều phối lớn hơn lợi ích.
+
+- Dùng **task con** cho công việc dài, user nhìn thấy và có thể cần context/worktree/branch/handoff riêng hoặc cần user tiếp tục trao đổi trực tiếp sau này.
+- Dùng **subagent** cho phân tích, implementation có write scope tách biệt, chạy test, thu evidence, falsification hoặc independent review phục vụ trực tiếp task chính.
+- Không delegate để tạo cảm giác nhiều người đồng ý, không giao trùng cùng một vấn đề chưa giải quyết, và không để các agent cùng sửa một write scope khi chưa có integration plan.
+- Khi chủ động chọn model, chỉ dùng model GPT-5.6 khả dụng trong khoảng từ Luna đến Terra; chọn model nhỏ nhất đủ làm việc và chọn reasoning theo độ khó, độ mơ hồ, rủi ro và nhu cầu verify. Nếu công cụ không cho điều khiển model/reasoning thì phải nói rõ, không được tuyên bố đã chọn thành công.
+- Kết quả task con/subagent chỉ là draft. Agent chính luôn phải review minh bạch, đối chiếu source/rule/Jira, kiểm diff/evidence, chạy lại gate phù hợp, sửa hoặc bác bỏ finding sai, và chịu trách nhiệm cuối cùng cho commit, PR, merge, deploy, cập nhật Jira/Drive và mọi kết luận PASS.
 
 ## Always-On Karpathy Guidelines
 
