@@ -4,7 +4,7 @@
 - Workbook generator and final integrator: DonHV
 - Test executor and case-evidence owner: NhanT
 - Due: 2026-08-02
-- Status: Catalog candidate prepared; pending DonHV content approval
+- Status: Catalog approved by DonHV; ready for NhanT execution and case-level evidence capture
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-110
 
 ## Workflow
@@ -23,5 +23,6 @@
 - Cases: 188
 - Execution truth: 188 `NOT_RUN`; no historical PASS was inherited
 - Review evidence: `docs/pm/evidence/idts-110/unit-test-catalog-review.md`
+- Approval: DonHV, 2026-08-02; execution truth remains 188 `NOT_RUN`
 
 No Unit Test VI is created. No command-only, script-only, shared-only, or unsanitized evidence is accepted.

@@ -43,7 +43,7 @@
 ## Ponytail Simplicity
 
 - One dependency-free Node generator is used because 188 structured rows must remain deterministic and reviewable.
-- No spreadsheet generator, execution harness, dependency, or runtime abstraction was added before catalog approval.
+- No spreadsheet generator, execution harness, dependency, or runtime abstraction was added during catalog preparation or approval.
 - Ponytail review: Lean already.
 
 ## Ownership Knowledge Gate
@@ -63,7 +63,7 @@ Result: PASS
 
 ## Known Gaps
 
-- DonHV content approval is still required before NhanT executes any case.
+- DonHV approved the 188-case catalog on 2026-08-02. NhanT execution and case-level evidence capture have not started.
 - The Unit Test EN v0.5 workbook and Drive artifact are intentionally unchanged.
 - Existing QA scripts remain mixed regression suites; they are not treated as one-case-per-row evidence automatically.
 

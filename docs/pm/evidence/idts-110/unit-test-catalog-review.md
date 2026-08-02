@@ -2,7 +2,9 @@
 
 ## Verdict
 
-`DRAFT FOR DONHV CONTENT APPROVAL — NOT EXECUTED`
+`APPROVED BY DONHV FOR EXECUTION — NOT EXECUTED`
+
+DonHV approved this 188-case catalog in the dedicated Codex working thread on 2026-08-02. The approval authorizes NhanT to begin execution and evidence capture; it does not mark any case as PASS and does not approve a workbook or Drive update.
 
 This candidate is a planning catalog, not a test report. All 188 cases start as `NOT_RUN`. The five historical Unit Test rows in `docs/qa/test-catalog.json` were used only as coverage input; their prior PASS state was not copied.
 
@@ -73,4 +75,4 @@ Commands, script names, local paths, or one shared screenshot are not sufficient
 
 A GPT-5.6 Terra subagent with high reasoning independently reviewed source coverage and overlap. The parent review accepted the source inventory and atomicity findings only after checking the current files. The attachment finding above was independently confirmed against `srv/bug-service/content.js` and `app/bug-management-ui/webapp/ext/sections/BugCollaboration.js`.
 
-No test was executed, no PASS was created, and no Jira, workbook, or Drive artifact was changed during catalog preparation.
+No test was executed, no PASS was created, and no workbook or Drive artifact was changed during catalog preparation or approval. Jira IDTS-110 records the approved handoff to execution.
