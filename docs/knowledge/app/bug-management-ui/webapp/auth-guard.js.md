@@ -170,6 +170,21 @@ not an IDTS profile response. The guard now checks `content-type` before parsing
 JSON and performs a top-level navigation to `/login.html`. AppRouter protects
 that bridge with XSUAA; only after authentication does it forward to the app.
 
+## IDTS-117 follow-up - availability is not authorization
+
+`AuthService.me` now has a 15-second browser timeout and three explicit outcomes:
+HTTP 401 navigates through the protected login bridge, HTTP 403 displays the
+account/role denial, and network/5xx/timeout failures display a temporary
+platform-unavailable message with Retry. The guard never displays raw backend
+or database diagnostics. Operators must check CAP `/ready`, which touches the
+configured database, instead of assuming `/health` proves HANA is available.
+
+Vietnamese: `AuthService.me` co timeout 15 giay. 401 chuyen qua login bridge,
+403 moi la loi account/role, con network/5xx/timeout hien thong bao platform tam
+thoi chua san sang kem nut Retry. Guard khong hien raw error. Khi debug, kiem
+`/ready` vi endpoint nay cham database that; `/health` chi chung minh process
+Node con song.
+
 Vietnamese: Sau logout hoàn toàn, request nền có thể nhận HTML đăng nhập XSUAA
 với HTTP 200. Guard không còn parse HTML như JSON hoặc hiện nhầm lỗi “account
 cannot access”. Nó chuyển cả tab tới `/login.html` để SAP hoàn tất session, rồi
