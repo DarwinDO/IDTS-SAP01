@@ -274,7 +274,10 @@ const result = {
 const json = `${JSON.stringify(result, null, 2)}\n`
 if (process.argv.includes('--check')) {
   const current = fs.existsSync(OUTPUT) ? fs.readFileSync(OUTPUT, 'utf8') : ''
-  if (current !== json) {
+  // Git may check the tracked JSON out with CRLF on Windows while Node emits
+  // LF. Compare content, not platform line endings.
+  const normalizeEol = value => value.replace(/\r\n/g, '\n')
+  if (normalizeEol(current) !== normalizeEol(json)) {
     console.error(`OUTDATED: ${path.relative(ROOT, OUTPUT)}`)
     process.exit(1)
   }
