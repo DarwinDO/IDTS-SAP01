@@ -5344,3 +5344,11 @@ Live evidence: `docs/pm/evidence/idts-117/demo-readiness/live-verification-20260
 | Classification | Decision | Result | Verification / next action |
 | --- | --- | --- | --- |
 | QA governance | DonHV explicitly approved the 90-case English-only SAP BTP UAT catalog for execution. | Approval evidence and planning records now distinguish human catalog approval from test execution. All 90 cases remain PREPARED; workbook and Drive remain unchanged. | Rerun deterministic generation, local/remote gates and merge normally. After merge, freeze live BTP deploy/readiness before assigning execution. |
+
+## 2026-08-02 — IDTS-111 execution baseline publication
+
+| Classification | Result | Verification | Next action |
+| --- | --- | --- | --- |
+| QA execution readiness | PR #261 merged normally at `6f01affc2c2945e51d18199137c8a89a20c77600`. A scoped comparison found no runtime-relevant difference between deployed SHA `67b1bf86169e9696c9365ef4846b99ffae30d4e2` and catalog source baseline `447da1dab80418847d806040e6b2060b0916cb63`. | Fresh `npm run btp:demo:check` returned `DEMO READY`: CAP/AppRouter 1/1, liveness/readiness/web HTTP 200 and anonymous protected API HTTP 401 as expected. | Assigned members may execute only their catalog cases with their own SAP identities and sanitized case-specific evidence. All cases remain PREPARED until DonHV reviews actual results. |
+| Environment limitation | SAP BTP Trial and HANA Cloud Free Tier can auto-stop after the point-in-time readiness check. | The execution baseline requires a fresh readiness check at the start of every test session and bounded recovery by DonHV if needed. | Classify a later auto-stop as an environment blocker; do not misreport it as a product-test failure without diagnosis. |
+| Tooling issue | The deterministic catalog `--check` reported `OUTDATED` immediately after a clean Windows checkout although regeneration produced no Git diff. | The checker compared LF output with the CRLF working-tree representation byte-for-byte. | Normalized line endings only for the comparison; catalog content and execution truth are unchanged. Rerun `node scripts/qa/generate-idts111-uat-catalog.js --check` on the clean checkout. |
