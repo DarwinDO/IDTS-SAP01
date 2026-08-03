@@ -54,7 +54,6 @@
         "sap.m": {},
         "sap.ui.core": {},
         "sap.ui.layout": {},
-        "sap.ui.unified": {},
         "sap.fe.templates": {}
       }
     },
@@ -247,14 +246,6 @@
                       "visible": "{= ${IsActiveEntity} === true || ${HasActiveEntity} === true }",
                       "position": {
                         "anchor": "IdtsSmartAssignment",
-                        "placement": "After"
-                      }
-                    },
-                    "IdtsAttachmentsCustom": {
-                      "title": "{i18n>attachmentsSectionTitle}",
-                      "template": "idts.bugmanagementui.ext.fragment.AttachmentsSection",
-                      "position": {
-                        "anchor": "IdtsCommentsCustom",
                         "placement": "After"
                       }
                     },

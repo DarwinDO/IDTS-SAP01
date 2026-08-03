@@ -4,7 +4,7 @@
 - Workbook generator and final integrator: DonHV
 - Test executor and case-evidence owner: NhanT
 - Due: 2026-08-05
-- Status: Remediation candidate verified; PR #269 is ready for DonHV review with 175 local candidate PASS and 13 explicit BTP blockers
+- Status: Remediation candidate rebased onto latest dev; PR #269 has 173 candidate PASS, 0 FAIL, 13 BTP blockers, and 2 SAP-standard attachment UI rebaseline/runtime blockers
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-110
 
 ## Workflow
@@ -28,10 +28,10 @@
 ## NhanT remediation progress — 2026-08-03
 
 - All 188 approved cases now have individual candidate packages under `docs/pm/evidence/idts-110/cases/`.
-- Current candidate truth: 175 PASS, 0 FAIL, and 13 BLOCKED.
-- Exact LOCAL result: 40 PASS / 0 FAIL / 0 BLOCKED. `UT-AUTH-004` now returns a safe HTTP 400 contract with no session mutation; `UT-ATT-007/008` execute the production UI validation function in the isolated component harness.
+- Current candidate truth: 173 PASS, 0 FAIL, and 15 BLOCKED.
+- Exact LOCAL result: 38 PASS / 0 FAIL / 2 BLOCKED. `UT-AUTH-004` returns a safe HTTP 400 contract with no session mutation; `UT-ATT-007/008` require generated-control runtime proof/rebaseline after latest dev retired the approved custom handler.
 - Corrected local-primary result: 135/135 mapped candidates have fresh passing domain-suite evidence; DonHV retains case-level acceptance ownership.
-- The 13 true BTP integration cases remain blocked because `cf`/authorized BTP readiness, controlled identities, S3 injection, and Job Scheduler proof are unavailable. The two UI component cases are resolved locally; the signed-in deployed List Report is healthy, while a full local Fiori render is limited by the unreachable UI5 CDN redirect.
+- The 13 true BTP integration cases remain blocked because `cf`/authorized BTP readiness, controlled identities, S3 injection, and Job Scheduler proof are unavailable. The two attachment UI cases have valid replacement CDS contracts but no fresh generated-control runtime evidence on the merged head.
 - Evidence inventory: 188 manifests, 278 PNGs, and 0 SVGs. Duplicate SVG sources were removed and structured JSON evidence is linked from manifests.
 - DonHV review is pending. The approved catalog remains 188 `NOT_RUN`, and `Unit_Test_EN`/Drive have not been changed by NhanT/agent.
 - Jira handoff comments: previous `10861`; final remediation handoff `10924` after commit `c409335` and PR #269 QA-depth PASS.

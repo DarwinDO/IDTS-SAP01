@@ -2,17 +2,17 @@
 
 - Apply DonHV's corrected 175 local-primary / 13 BTP-only taxonomy to the IDTS-110 execution package.
 - Rerun 40 exact LOCAL cases and 135 corrected local-primary cases; the final exact-head verification used Node.js 24 after rebuilding the local `better-sqlite3` native module for the matching ABI.
-- Publish current truth: 175 candidate PASS, 0 FAIL and 13 BTP BLOCKED; keep the approved catalog `NOT_RUN` until DonHV accepts results.
+- Publish current truth after merging latest dev: 173 candidate PASS, 0 FAIL and 15 BLOCKED (13 BTP plus 2 SAP-standard attachment UI rebaseline/runtime cases); keep the approved catalog `NOT_RUN` until DonHV accepts results.
 - Remove 278 duplicate SVG evidence sources and retain 188 manifests, 278 PNGs and structured JSON evidence.
 
 ## Positive Evidence
 
-- Exact LOCAL runner: 40 cases — 40 PASS / 0 FAIL / 0 BLOCKED.
+- Exact LOCAL runner: 40 cases — 38 PASS / 0 FAIL / 2 BLOCKED.
 - Local-primary suite runner: 135 mappings — 135 candidate PASS / 0 failed mappings across 19 domain suites.
 - Corrected `UT-VAL-REPORTER`: unresolved actor rejected with no Bug/history/notification/delivery mutation.
 - `UT-ATT-009`: anonymous OData attachment create returns 401; attachment metadata remains unchanged.
 - `UT-AI-027`: controlled 429 returns safe `AI_RATE_LIMITED`, one provider call and no business mutation.
-- `UT-ATT-007/008`: real UI component validation returns the exact safe MIME/10 MB messages, clears rejected selections, and never enters the upload path.
+- Latest dev's SAP-standard attachment facet declares the supported MIME and 10 MB CDS contracts; static contract checks pass without misrepresenting them as generated-control runtime proof.
 
 ## Negative Evidence
 
@@ -22,8 +22,8 @@
 ## Edge/Boundary Evidence
 
 - Non-string auth input, unresolved reporter, invalid/partial classification, notification retry/concurrency and controlled AI 429 paths have fresh local evidence.
-- `UT-ATT-007` and `UT-ATT-008` pass through an isolated component harness executing `BugCollaboration.onAttachmentSelected` with controlled `File` objects.
-- The 13 BTP-only cases remain environment BLOCKED after `btp:demo:check` failed because `cf` is unavailable.
+- `UT-ATT-007` and `UT-ATT-008` are BLOCKED because their approved source trace targets the retired custom handler; the replacement generated control needs DonHV rebaseline/runtime evidence.
+- The other 13 cases remain BTP environment BLOCKED after `btp:demo:check` failed because `cf` is unavailable.
 
 ## Roles/Authorization
 
@@ -42,11 +42,11 @@
 
 - 278 PNGs were rendered and 278 duplicate SVG sources were removed; manifests contain no SVG references.
 - Generated cards are described only as summaries of JSON/runtime evidence, not browser proof.
-- The deployed SAP List Report was observed healthy in the signed-in NhanT session. Local full-browser bootstrap remains limited by the unreachable UI5 CDN redirect, so the two client-only validation cases use deterministic component evidence instead.
+- The deployed SAP List Report was observed healthy before the latest dev attachment architecture merge. Local full-browser bootstrap remains limited by the unreachable UI5 CDN redirect, so no stale screenshot/component result is used for the generated SAP-standard attachment control.
 
 ## Ponytail Simplicity
 
-- Reuse existing domain suites, the exact HTTP harness, and one small isolated UI component harness.
+- Reuse existing domain suites and the exact HTTP harness; remove the obsolete custom-handler component harness after dev adopted the SAP-standard attachment facet.
 - The only production behavior change is a service-scoped CAP error sanitizer for malformed AuthService input; no new project dependency or deployment configuration was added.
 - No production dependency or lockfile change was made. The final local gate rebuilt only the installed `better-sqlite3` binary in `node_modules` to match the active Node.js 24 ABI.
 
@@ -71,6 +71,7 @@ Ownership: NhanT executes and packages truthful evidence; DonHV reviews results 
 ## Known Gaps
 
 - Thirteen BTP integration cases require an authorized Cloud Foundry/BTP session.
+- Two attachment UI cases require catalog rebaseline or runtime proof against the generated SAP-standard control.
 - The official English `Unit_Test_EN` workbook and Drive file are unchanged because OfficeCLI/authorized integration is unavailable and DonHV owns final synchronization.
 
 ## Jira/Evidence Links

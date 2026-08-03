@@ -54,10 +54,6 @@ sap.ui.define([
                 hideOnCreate: {
                     type: "boolean",
                     defaultValue: false
-                },
-                uploadPendingAttachmentsOnActive: {
-                    type: "boolean",
-                    defaultValue: false
                 }
             }
         },
@@ -77,9 +73,6 @@ sap.ui.define([
                 setNearestObjectPageSubSectionVisible(this, visible);
             }
 
-            if (this.getUploadPendingAttachmentsOnActive && this.getUploadPendingAttachmentsOnActive()) {
-                Collaboration.flushPendingCreateAttachments(this, parentContext);
-            }
         },
 
         onModelContextChange: function () {

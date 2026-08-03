@@ -172,7 +172,7 @@ async function runCase (caseId, assertions, execute) {
   }
 }
 
-async function runStaticBlockedCase (caseId, assertions, execute) {
+async function runStaticBlockedCase (caseId, assertions, execute, blockedReason) {
   const startedAt = new Date().toISOString()
   const definition = catalogCase(caseId)
   try {
@@ -180,7 +180,7 @@ async function runStaticBlockedCase (caseId, assertions, execute) {
     RESULTS.push({
       caseId,
       status: 'BLOCKED',
-      actualResult: 'Static UI guard assertions passed, but browser runtime execution is unavailable; the UI behavior is not promoted to PASS.',
+      actualResult: blockedReason || 'Static UI guard assertions passed, but browser runtime execution is unavailable; the UI behavior is not promoted to PASS.',
       assertions,
       sourceAssertions: definition.sourceTrace.map(trace => `${trace.file}#${trace.symbol}`),
       startedAt,
@@ -304,32 +304,24 @@ async function main () {
     assert.equal((await db.run(SELECT.from('idts.cap.Comments'))).length, before)
   })
 
-  const attachmentFragment = fs.readFileSync(path.join(process.cwd(), 'app/bug-management-ui/webapp/ext/fragment/AttachmentsSection.fragment.xml'), 'utf8')
+  const attachmentSchema = fs.readFileSync(path.join(process.cwd(), 'db/schema.cds'), 'utf8')
+  const attachmentAnnotations = fs.readFileSync(path.join(process.cwd(), 'app/bug-management-ui/annotations/object-page.cds'), 'utf8')
+  const attachmentManifest = fs.readFileSync(path.join(process.cwd(), 'app/bug-management-ui/webapp/manifest.json'), 'utf8')
   const attachmentController = fs.readFileSync(path.join(process.cwd(), 'app/bug-management-ui/webapp/ext/sections/BugCollaboration.js'), 'utf8')
-  execFileSync(process.execPath, [path.join(process.cwd(), 'scripts/qa/test-idts110-attachment-ui-component.js')], { stdio: 'pipe' })
-  const attachmentUiResults = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'docs/pm/evidence/idts-110/ui-component-results.json'), 'utf8'))
-  const attachmentUiByCase = new Map(attachmentUiResults.results.map(result => [result.caseId, result]))
-  await runCase('UT-ATT-007', ['UI allowlist declares permitted MIME types', 'selection handler shows the safe unsupported-MIME message', 'rejected selection is cleared before upload'], async () => {
-    assert.match(attachmentFragment, /mimeType="text\/plain,application\/pdf,image\/png,image\/jpeg"/)
-    assert.match(attachmentController, /!ALLOWED_MIME_TYPES\[file\.type\]/)
-    const result = attachmentUiByCase.get('UT-ATT-007')
-    assert.equal(result?.status, 'PASS')
-    assert.equal(result?.assertions?.selectionCleared, true)
-    assert.equal(result?.assertions?.uploadPathNotEntered, true)
-    assert.match(result?.assertions?.safeMessage || '', /file type is not supported/i)
-    return result
-  })
-  await runCase('UT-ATT-008', ['UI declares 10 MB maximum', 'selection handler shows the safe 10 MB message', 'rejected selection is cleared before upload'], async () => {
-    assert.match(attachmentFragment, /maximumFileSize="10"/)
-    assert.match(attachmentController, /MAX_ATTACHMENT_BYTES = 10 \* 1024 \* 1024/)
-    assert.match(attachmentController, /file\.size > MAX_ATTACHMENT_BYTES/)
-    const result = attachmentUiByCase.get('UT-ATT-008')
-    assert.equal(result?.status, 'PASS')
-    assert.equal(result?.assertions?.selectionCleared, true)
-    assert.equal(result?.assertions?.uploadPathNotEntered, true)
-    assert.match(result?.assertions?.safeMessage || '', /up to 10 MB/i)
-    return result
-  })
+  await runStaticBlockedCase('UT-ATT-007', ['latest dev uses the SAP-standard generated attachment facet', 'retired custom MIME selection handler is absent', 'replacement AcceptableMediaTypes contract is declared'], async () => {
+    assert.match(attachmentSchema, /from '@cap-js\/attachments'/)
+    assert.match(attachmentAnnotations, /attachments\/@UI\.LineItem/)
+    assert.doesNotMatch(attachmentManifest, /AttachmentsSection\.fragment|IdtsAttachmentsCustom/)
+    assert.doesNotMatch(attachmentController, /onAttachmentSelected|ALLOWED_MIME_TYPES/)
+    assert.match(attachmentSchema, /@Core\.AcceptableMediaTypes\s*:\s*\[/)
+  }, 'Latest dev replaced the approved custom UI allowlist with the SAP-standard attachment facet and an AcceptableMediaTypes contract. Static metadata passes, but the generated control rejection/message has no fresh runtime proof; DonHV must rebaseline or rerun before PASS.')
+  await runStaticBlockedCase('UT-ATT-008', ['latest dev uses the SAP-standard generated attachment facet', 'retired custom 10 MB selection handler is absent', 'replacement Validation.Maximum contract is declared'], async () => {
+    assert.match(attachmentSchema, /from '@cap-js\/attachments'/)
+    assert.match(attachmentAnnotations, /attachments\/@UI\.LineItem/)
+    assert.doesNotMatch(attachmentManifest, /AttachmentsSection\.fragment|IdtsAttachmentsCustom/)
+    assert.doesNotMatch(attachmentController, /onAttachmentSelected|MAX_ATTACHMENT_BYTES/)
+    assert.match(attachmentSchema, /@Validation\.Maximum\s*:\s*'10MB'/)
+  }, 'Latest dev replaced the approved custom 10 MB handler with the SAP-standard attachment facet and a Validation.Maximum 10MB contract. Static metadata passes, but the generated control rejection/message has no fresh runtime proof; DonHV must rebaseline or rerun before PASS.')
   await runCase('UT-ATT-009', ['anonymous attachment CREATE is rejected with 401/403', 'attachment metadata remains unchanged'], async () => {
     const result = runLocalHttpContracts().attachment
     assert.ok([401, 403].includes(result.status))
