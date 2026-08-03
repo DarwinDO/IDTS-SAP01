@@ -78,8 +78,8 @@ sap.ui.define([
             ? commentsFeed.getBinding("items")
             : null;
 
-        if (itemsBinding && typeof itemsBinding.refresh === "function") {
-            return itemsBinding.refresh("$direct");
+        if (itemsBinding && typeof itemsBinding.requestRefresh === "function") {
+            return itemsBinding.requestRefresh("$direct");
         }
         return window.Promise.resolve();
     }
@@ -132,7 +132,7 @@ sap.ui.define([
             );
             operation.setParameter("content", content);
 
-            operation.invoke()
+            operation.invoke("$auto")
                 .then(function () {
                     if (textArea) {
                         textArea.setValue("");

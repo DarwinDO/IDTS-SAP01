@@ -47,10 +47,14 @@ root cause of these two write failures.
 - [x] CAP compile and UI5 production build pass.
 - [x] Comment invocation uses the model's normal update group so UI5 manages
   batching and CSRF instead of issuing a direct operation request.
+- [x] The comments list uses Promise-returning `requestRefresh()`; a committed
+  action cannot be misreported as failed because a non-Promise refresh was awaited.
 - [x] Comment action success is separated from the comments-list refresh result.
 - [x] Compiled CDS metadata contains exactly one attachment facet.
 - [x] HTML5 application/package version is aligned at `0.0.2` to invalidate the
   stale cached manifest that still registered `IdtsAttachmentsCustom`.
+- [x] AppRouter applies no-store/revalidation policy to HTML5 entry assets so
+  future app-content changes are not hidden behind a stale browser manifest.
 - [ ] PR passes the fresh QA Depth Gate and merges normally into `dev`.
 - [ ] The exact merge SHA is selectively deployed without HDI/database deploy.
 - [ ] Comment post → reload → persisted comment/history passes on BTP.

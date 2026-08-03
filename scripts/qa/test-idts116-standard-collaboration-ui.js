@@ -28,6 +28,7 @@ assert(/\.invoke\(|\.execute\(/.test(controller), 'Comment must invoke the actio
 assert(!controller.includes('invoke("$direct")'), 'Comment action must use the model update group so UI5 can manage CSRF through the OData batch lifecycle')
 assert(controller.includes('idtsCommentsFeed'), 'Comment success must refresh the comments feed, not the complete Object Page context')
 assert(controller.includes('getBinding("items")'), 'Comment refresh must use the public list binding API')
+assert(controller.includes('requestRefresh("$direct")'), 'Comment refresh must use the Promise-returning OData V4 requestRefresh API')
 assert(!controller.includes('new XMLHttpRequest()'), 'Collaboration writes must not use raw XMLHttpRequest')
 assert(!controller.includes('pendingCreateAttachmentsByBugId'), 'Custom browser-memory attachment queue must be retired')
 assert(!controller.includes('BugService.draftEdit'), 'Attachment handling must not manually orchestrate draftEdit')
@@ -42,6 +43,8 @@ assert(!/ID\s*:\s*'Attachments'[\s\S]{0,180}!\[@UI\.Hidden\]\s*:\s*true/.test(an
 
 assert(routerXsApp.includes('"csrfProtection": true'), 'AppRouter OData route must keep CSRF protection enabled')
 assert(uiXsApp.includes('"csrfProtection": true'), 'UI OData route must keep CSRF protection enabled')
+assert(routerXsApp.includes('index\\\\.html|manifest\\\\.json|Component\\\\.js|Component-preload\\\\.js'), 'AppRouter must route HTML5 entry assets through an explicit cache-control rule')
+assert(routerXsApp.includes('"cacheControl": "no-cache, no-store, must-revalidate"'), 'HTML5 entry assets must be revalidated after app-content rollout')
 assert.strictEqual(uiManifest['sap.app'].applicationVersion.version, uiPackage.version, 'UI manifest and package versions must stay aligned for HTML5 app-content cache invalidation')
 assert.notStrictEqual(uiPackage.version, '0.0.1', 'Changed HTML5 app content must not reuse the original 0.0.1 application version')
 
@@ -92,7 +95,7 @@ async function verifyCommentOperation (options = {}) {
   const commentsFeed = {
     getId: () => 'view--idtsCommentsFeed',
     getBinding: name => name === 'items' ? {
-      refresh: groupId => {
+      requestRefresh: groupId => {
         calls.listRefreshed = groupId
         return options.refreshReject ? Promise.reject(new Error('simulated refresh failure')) : Promise.resolve()
       }
@@ -135,7 +138,7 @@ async function verifyCommentOperation (options = {}) {
 
   assert.strictEqual(calls.path, bugContext.getPath() + '/BugService.addComment(...)')
   assert.deepStrictEqual(calls.parameters, { content: 'verified comment' })
-  assert.strictEqual(calls.invoked, 'default')
+  assert.strictEqual(calls.invoked, '$auto')
   assert.strictEqual(calls.rootRefreshed, false)
   assert.strictEqual(calls.enabled, true)
 
