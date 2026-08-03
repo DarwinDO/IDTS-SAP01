@@ -10,10 +10,10 @@ Effective from 2026-07-13 (Asia/Bangkok), this map defines both file ownership a
 | --- | --- | --- |
 | DonHV | NhanT | `db/schema.cds`; every runtime file under `srv/` (service wiring, auth, bug-service, email, and AI). |
 | DatDT | SangVN | `app/services.cds`; `app/bug-management-ui/annotations.cds`; annotations `labels.cds`, `list-report.cds`, `pm-monitoring.cds`; `webapp/index.html`, `login.html`, `dashboard.html`, `Component.js`, `auth-guard.js`, `login-page.js`, `dashboard-page.js`, both CSS files; `ext/ai/AiReviewUi.js`; all `ext/login/`; `ClassificationReview.js`, `DuplicateReview.js`, `HandoffSummaryReview.js`; `ClassificationReviewField.fragment.xml`, `SimilarBugReviewField.fragment.xml`. |
-| SangVN | DatDT | annotations `actions.cds`, `capabilities.cds`, `history-notifications.cds`, `object-page.cds`, `ownership-assignment.cds`, `value-helps.cds`; `ext/sections/BugCollaboration.js`; both `ext/controls/`; `BugListActions.js`, `SmartAssignDeveloper.js`; `AttachmentsSection.fragment.xml`, `CommentsSection.fragment.xml`, `HistoryTimeline.fragment.xml`, `SmartAssignmentSection.fragment.xml`. |
+| SangVN | DatDT | annotations `actions.cds`, `capabilities.cds`, `history-notifications.cds`, `object-page.cds`, `ownership-assignment.cds`, `value-helps.cds`; `ext/sections/BugCollaboration.js`; both `ext/controls/`; `BugListActions.js`, `SmartAssignDeveloper.js`; `CommentsSection.fragment.xml`, `HistoryTimeline.fragment.xml`, `SmartAssignmentSection.fragment.xml`. Attachment UI is generated from `object-page.cds` by `@cap-js/attachments`; there is no custom attachment fragment. |
 | NhanT | DonHV | Every QA/browser harness and integration-test file under `scripts/qa/` and `app/bug-management-ui/webapp/test/`. These files are outside the 72-file runtime-comment retrofit, but remain code ownership. |
 
-The three runtime groups above contain exactly 72 non-generated JS/CDS/XML/HTML/CSS files. A source file has one primary owner only; a runtime behavior can have several contributors.
+The three runtime groups above contain exactly 71 non-generated JS/CDS/XML/HTML/CSS files after the custom attachment fragment was retired. A source file has one primary owner only; a runtime behavior can have several contributors.
 
 ### End-to-end flow ownership
 
@@ -37,10 +37,10 @@ Từ 13/07/2026 (Asia/Bangkok), map này định nghĩa đồng thời file owne
 | --- | --- | --- |
 | DonHV | NhanT | `db/schema.cds`; mọi runtime file trong `srv/` gồm service wiring, auth, bug-service, email và AI. |
 | DatDT | SangVN | `app/services.cds`; `app/bug-management-ui/annotations.cds`; annotation `labels.cds`, `list-report.cds`, `pm-monitoring.cds`; `webapp/index.html`, `login.html`, `dashboard.html`, `Component.js`, `auth-guard.js`, `login-page.js`, `dashboard-page.js`, hai file CSS; `ext/ai/AiReviewUi.js`; toàn bộ `ext/login/`; `ClassificationReview.js`, `DuplicateReview.js`, `HandoffSummaryReview.js`; `ClassificationReviewField.fragment.xml`, `SimilarBugReviewField.fragment.xml`. |
-| SangVN | DatDT | annotation `actions.cds`, `capabilities.cds`, `history-notifications.cds`, `object-page.cds`, `ownership-assignment.cds`, `value-helps.cds`; `ext/sections/BugCollaboration.js`; hai file `ext/controls/`; `BugListActions.js`, `SmartAssignDeveloper.js`; `AttachmentsSection.fragment.xml`, `CommentsSection.fragment.xml`, `HistoryTimeline.fragment.xml`, `SmartAssignmentSection.fragment.xml`. |
+| SangVN | DatDT | annotation `actions.cds`, `capabilities.cds`, `history-notifications.cds`, `object-page.cds`, `ownership-assignment.cds`, `value-helps.cds`; `ext/sections/BugCollaboration.js`; hai file `ext/controls/`; `BugListActions.js`, `SmartAssignDeveloper.js`; `CommentsSection.fragment.xml`, `HistoryTimeline.fragment.xml`, `SmartAssignmentSection.fragment.xml`. UI attachment được sinh từ `object-page.cds` bởi `@cap-js/attachments`; không còn custom attachment fragment. |
 | NhanT | DonHV | Mọi QA/browser harness và integration-test trong `scripts/qa/` và `app/bug-management-ui/webapp/test/`. Những file này không thuộc đợt comment 72 runtime file nhưng vẫn thuộc code ownership. |
 
-Ba nhóm runtime phía trên chứa đúng 72 file JS/CDS/XML/HTML/CSS không generated. Mỗi source file chỉ có một primary owner; một runtime behavior có thể có nhiều contributor.
+Ba nhóm runtime phía trên chứa đúng 71 file JS/CDS/XML/HTML/CSS không generated sau khi bỏ custom attachment fragment. Mỗi source file chỉ có một primary owner; một runtime behavior có thể có nhiều contributor.
 
 ### Ownership theo flow end-to-end
 

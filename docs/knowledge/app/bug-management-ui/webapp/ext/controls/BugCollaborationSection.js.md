@@ -185,3 +185,9 @@ Các anchor quan trọng:
 **English.** Fiori places this VBox inside a generated ObjectPageSubSection. `_syncIdtsCollaborationState()` copies the nearest root Bug binding context, hides the full Comments subsection during NEW draft, and asks collaboration logic to flush queued files after activation. UI5 calls it on model-context change and before rendering. Observe parent context path, draft flags, visibility, and pending upload guard. The control has no database logic itself.
 
 **Tiếng Việt.** Fiori đặt VBox này trong ObjectPageSubSection generated. `_syncIdtsCollaborationState()` copy root Bug binding context gần nhất, ẩn cả Comments subsection khi NEW draft và gọi collaboration logic flush file chờ sau activation. UI5 gọi nó khi model context đổi và trước render. Quan sát parent context path, draft flags, visibility và pending upload guard. Control không tự xử lý database.
+
+## IDTS-116 current responsibility (2026-08-03)
+
+This control now supports only the custom Comments subsection: it copies the root Bug context and hides Comments on a brand-new draft. The retired `uploadPendingAttachmentsOnActive` property and attachment flush callback no longer exist because the standard Fiori Elements attachment facet owns the draft lifecycle.
+
+Control này hiện chỉ đồng bộ context và visibility cho Comments. Attachment không còn đi qua custom control này.

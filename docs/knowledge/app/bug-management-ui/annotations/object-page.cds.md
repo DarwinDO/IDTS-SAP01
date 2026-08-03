@@ -171,3 +171,9 @@ Các anchor quan trọng:
 **English.** `manifest.json` selects the Bugs Object Page; Fiori reads this file's HeaderInfo, HeaderFacets, Facets, FieldGroups, and Identification metadata. Facet order becomes section order; each target points to a field group, navigation LineItem, or custom fragment. Field values come from `BugService.Bugs`; draft save remains CAP-owned. Debug missing section by tracing facet target → target annotation/fragment → compiled metadata → OData data.
 
 **Tiếng Việt.** `manifest.json` chọn Bugs Object Page; Fiori đọc HeaderInfo, HeaderFacets, Facets, FieldGroups và Identification từ file này. Thứ tự facet thành thứ tự section; mỗi target trỏ tới field group, navigation LineItem hoặc custom fragment. Giá trị field đến từ `BugService.Bugs`; draft save vẫn do CAP quản lý. Debug section mất theo chuỗi facet target → annotation/fragment đích → metadata compile → dữ liệu OData.
+
+## IDTS-116 generated attachment facet (2026-08-03)
+
+The `Attachments` ReferenceFacet is no longer hidden. Its target remains `attachments/@UI.LineItem`, allowing Fiori Elements and `@cap-js/attachments` to render the SAP-standard draft attachment UI. The Comments collection facet remains hidden because IDTS still uses the separate custom Comments section.
+
+Facet `Attachments` đã được mở lại để Fiori Elements và CAP attachment plugin render UI chuẩn; custom Comments không thay đổi.
