@@ -1,5 +1,83 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-08-03 - IDTS-107 dependency verification issue
+
+- Classification: dependency/security issue.
+- Symptom: `npm ci` was required because the fresh worktree lacked `@cap-js/attachments`; installation completed but `npm audit` reported 24 dependency findings (1 low, 9 moderate, 13 high, 1 critical).
+- Root cause: the worktree had no installed dependency tree; the vulnerability findings belong to the resolved dependency graph and were not introduced by the documentation candidate.
+- Status: compile dependency blocker resolved locally; vulnerability remediation remains out of scope and unmodified because automatic `npm audit fix` could change the lockfile/runtime behavior.
+- Verification: `npm ci` exit 0, 1,519 packages installed; no `package.json` or `package-lock.json` change is expected from this check.
+- Owner/next action: dependency/security owner should review `npm audit` separately. IDTS-107 may use the installed tree only for read-only CAP compilation and source-trace verification.
+
+- Classification: tooling/command issue.
+- Symptom: the first post-install `cds compile srv --to edmx` stopped because the model exposes both `AuthService` and `BugService`.
+- Root cause: the command omitted the required service selector; the earlier missing-attachment dependency error was no longer present.
+- Status: corrected by rerunning with `-s all`; no source or model change was made.
+- Verification/next action: use `npx cds compile srv --to edmx -s all` as the authoritative compile command for this two-service project.
+
+## 2026-08-03 - IDTS-107 technical specification database/persistence candidate audit
+
+- Tooling/dependency issue (resolved): the fresh worktree initially lacked its
+  installed dependency tree, so CAP MCP could not resolve
+  `@cap-js/attachments`. `npm ci` restored the pinned dependency graph without
+  changing `package.json` or `package-lock.json`. CAP MCP model search then
+  succeeded, and `npx cds compile srv --to edmx -s all` passed with only the
+  pre-existing attachment vocabulary warning.
+- Generated-model verification (PASS): `npx cds compile db --to hana` generated
+  35 `.hdbtable` artifacts. A corrected DDL parser compared all generated
+  columns with the candidate dictionary: 326 matched, zero missing, zero extra.
+  No HDI deploy, database change, seed load, or Drive update occurred.
+- Tooling/parser issue (resolved): the first comparison attempted to parse
+  `.hdbtable` files as JSON and produced unusable counts. HANA compiler output
+  is SQL DDL, not JSON. The result was discarded; a DDL parser with quoted-name
+  handling was used for the authoritative 35-table/326-column comparison.
+- Tooling issue (resolved): a read-only configuration inventory attempted to
+  open `.cdsrc.json`, which is not present in this repository. `package.json`
+  and `mta.yaml` provide the required CAP profile and BTP deployment truth;
+  no configuration or runtime behavior is missing because of this absent
+  optional file.
+- Tooling issue (resolved): a PowerShell preview piped `git show` through
+  `Select-Object -First 2`, which closed the pipeline after the requested
+  header rows and returned exit 1 despite producing the expected dictionary
+  header. The source branch remains readable; avoid early-closing previews
+  when collecting Git evidence.
+- Documentation issue (open, not changed by IDTS-107): OfficeCLI
+  `view ... issues` on `Technical_Specification_IDTS_SAP01_en_v0.7.xlsx`
+  found two invalid `A` named ranges with `#REF!` bodies and 23 text-overflow
+  warnings across Histories, Introduction, Scope, Assumptions, Screen Layout,
+  and Screen Definition. The targeted Technical Design candidate was not
+  written into the workbook; IDTS-112/template integration must repair or
+  formally disposition these workbook defects before final acceptance.
+- Documentation tooling issue (resolved): the first candidate dictionary copy
+  from the stale branch was truncated at 167 of 327 lines by the command-output
+  boundary. It was replaced through seven bounded Git-read chunks; the final
+  candidate has 327 lines and the same Git blob as the stale reviewed
+  dictionary. It remains a candidate, pending a fresh successful CAP/HDI
+  generation against the current environment.
+
+### Vietnamese
+
+- Lỗi tooling/dependency đã xử lý: worktree mới chưa có dependency tree nên CAP
+  MCP không resolve được `@cap-js/attachments`. Sau `npm ci`, CAP MCP hoạt động
+  và `npx cds compile srv --to edmx -s all` PASS; không đổi source hoặc lockfile.
+- Generate HANA từ CDS PASS: 35 `.hdbtable`, 326 cột; so sánh với dictionary
+  khớp 326, thiếu 0, dư 0. Không deploy HDI, không đổi DB/seed/Drive.
+- Lỗi parser đã xử lý: lần đầu đọc nhầm `.hdbtable` như JSON nên kết quả bị loại.
+  Parser DDL có xử lý tên quoted được dùng cho kết quả authoritative.
+- Lỗi tooling đã xử lý: `.cdsrc.json` không tồn tại nhưng không bắt buộc;
+  `package.json` và `mta.yaml` cung cấp đầy đủ truth về profile CAP/BTP. Một
+  preview PowerShell dùng pipeline đóng sớm cũng trả exit 1 dù đã đọc header;
+  không dùng cách preview đó khi thu thập Git evidence.
+- Lỗi documentation còn mở, không do IDTS-107 tạo: OfficeCLI phát hiện hai
+  named range `A` có `#REF!` và 23 cảnh báo text overflow trong workbook EN
+  v0.7. Candidate không ghi vào workbook; IDTS-112/template integration phải
+  sửa hoặc ghi nhận chính thức trước Gate cuối.
+- Lỗi tooling documentation (đã xử lý): lần copy dictionary candidate đầu tiên
+  bị cắt ở 167/327 dòng do giới hạn output. File đã được thay bằng bảy Git-read
+  chunk có giới hạn; candidate cuối có 327 dòng và cùng Git blob với dictionary
+  stale đã review. Nó vẫn là candidate cho đến khi CAP/HDI generate lại thành
+  công trong môi trường hiện tại.
+
 ## 2026-08-01 - IDTS-117 BTP rollout and browser acceptance complete
 
 - Product defect resolved: a repeated BTP re-entry could return the HTML XSUAA
