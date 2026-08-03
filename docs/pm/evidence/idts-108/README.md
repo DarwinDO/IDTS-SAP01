@@ -6,7 +6,7 @@
 | --- | --- |
 | Owner | SangVN |
 | Support | DonHV for database and provider-side evidence |
-| Baseline | `39f6f87` (`origin/dev`, refreshed 2026-08-03) |
+| Baseline | `1e2390a` (`origin/dev`, refreshed 2026-08-03) |
 | Package state | Refresh in review with documented known limitations; not full PASS/Done and exact-head approval pending |
 | Human briefing acknowledgment | `READ` — Jira IDTS-108 comments `10876` and `10877` for briefing SHA `3e78b495`; repository register integration remains DonHV-owned under IDTS-105 |
 | Final integration owner | DonHV through IDTS-112 |
@@ -30,7 +30,8 @@ explicit external blockers; that handoff is not a full PASS/Done claim.
   actions, AI actions, and collaboration entities after locked dependencies were
   installed in the isolated worktree.
 - CAP MCP re-confirmed `BugService` at `srv/service.cds:5`, its OData V4 path and
-  the current Bug/action/collaboration projections after the `39f6f87` merge.
+  the current Bug/action/collaboration projections before the docs-only `1e2390a`
+  refresh; the refresh changes no `app/`, `srv/`, or `db/` source.
 - UI5 MCP returned the project identity and current async-module/data-binding
   guidelines. Fiori MCP exposes read tools but not its mandatory `tools/list`
   protocol in this session, so no Fiori call was made; local manifest, annotations,
@@ -291,7 +292,7 @@ were opened only for evidence and dismissed without submission. BUG-0003 remaine
 
 ## 5. Review and approval checklist
 
-- [x] Candidate package is based on refreshed `origin/dev` baseline `39f6f87`.
+- [x] Candidate package is based on refreshed `origin/dev` baseline `1e2390a`.
 - [x] Runtime `app/`, `srv/`, and `db/` are unchanged by this task.
 - [x] Natural numbering is used for mentor-visible entries.
 - [x] Screen Layout inventory covers runtime pages, dialogs, sections and necessary

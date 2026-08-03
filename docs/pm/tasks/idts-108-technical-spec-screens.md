@@ -3,7 +3,7 @@
 - Owner: SangVN
 - Support: DonHV for database evidence
 - Due: 2026-07-30
-- Status: In Progress — current-baseline refresh requested in Jira comment `10897`
+- Status: In Progress — exact-head refresh and approval pending
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-108
 
 ## Gate sequence
@@ -21,7 +21,7 @@ history UI, Object Page sections and UI/network/role evidence.
 
 - Jira execution state: `In Progress`; IDTS-106 is Done, while final integration remains gated by current-baseline review, exact-head SangVN approval and IDTS-112.
 - Branch: `docs/idts-108-screen-definitions-sangvn`
-- Baseline: refreshed `origin/dev` commit `39f6f87` merged normally on 2026-08-03 with merge commit `d88f930`
+- Baseline: refreshed `origin/dev` commit `1e2390a` merged normally on 2026-08-03 with merge commit `3364fc2`
 - Candidate package: `docs/pm/evidence/idts-108/README.md`
 - Prepared: natural-numbered Screen Layout inventory, field/action-level Screen Definition inventory, Technical Implementation source trace, evidence register, and SangVN review checklist.
 - Developer, Tester and PM evidence prepared as partial: fifty-one sanitized BTP screenshots covering login/validation states, bidirectional Tester/Developer account switching, three role List Report/dashboard/Object Page variants, PM monitoring and AI Activity, lifecycle-action visibility and five parameter dialogs, comments, attachments, history, notifications, the post-rollout access regression, both Pending Assignment and Assigned Create/Reload variants, read-only Similar Bugs, Classification Suggestions, Handoff Summary and Smart Assign dialogs, and the BUG-0024 OData `$batch` reload response/headers.
@@ -47,6 +47,7 @@ history UI, Object Page sections and UI/network/role evidence.
 - Four additional sanitized PM UI captures were added as screenshots 48–51. They close the missing PM role-view slice only; database rows, object storage, provider delivery, remaining Network coverage and final IDTS-112 integration stay owned by DonHV. Because these files create a new exact PR HEAD, SangVN's earlier approval does not apply to that future commit until SangVN posts a fresh exact-HEAD approval.
 - DonHV requested a current-baseline refresh in Jira comment `10833`. `origin/dev` commit `fbea12c` was merged normally with merge commit `f78d207`; there was no rebase, force-push or merge conflict, and screenshots 48–51 retained their exact SHA-256 hashes. Full source/evidence and PR gates must pass again before the refreshed head is submitted for SangVN approval.
 - DonHV requested a second current-baseline refresh in Jira comment `10897`. `origin/dev` commit `39f6f87` was merged normally with merge commit `d88f930`; there was no rebase, force-push or merge conflict. The refresh aligns architecture wording to BTP/XSUAA/HANA/HDI/Job Scheduling/S3/Brevo/Vercel Gateway and treats Render/PostgreSQL as rollback/reference only. All gates and exact-head approval must be renewed.
+- After the SangVN handoff in Jira comment `10904`, DonHV merged the docs-only stale-work disposition PR #273 and advanced `origin/dev` to `1e2390a`. SangVN merged that baseline normally at `3364fc2` without conflict, rebase or force-push. The upstream delta changes only PM/status/evidence files for IDTS-96–99 and does not change IDTS-108 screenshots or runtime `app/`, `srv/`, or `db/`; exact-head gates and approval must still be renewed.
 
 ## Verification evidence — 2026-07-31
 
@@ -60,3 +61,4 @@ history UI, Object Page sections and UI/network/role evidence.
 - Current BTP evidence: fifty-one accepted PNG files under `docs/pm/evidence/idts-108/screenshots/`; login captures contain only blank fields or `developer@example.invalid`, with no password/token/real identifier visible. The incorrect standalone-IDTS Tester capture was withdrawn. Tester/Developer captures 22–47 contain no credential-bearing page. Screenshot 27 records the post-switch access blocker; 28–33 prove direct login plus BUG-0023 Pending Assignment create/reload; 34 proves Similar Bugs; 35–38 prove BUG-0024 Assigned create/reload; 39–40 prove its OData `$batch` response/headers; 41–42 prove a fresh Tester shell and Classification Suggestions; 43–44 prove Tester→Developer role shell/dashboard; 45 proves Handoff Summary; 46 proves Developer→Tester dashboard; 47 proves filtered Smart Assign; 48–51 prove the sanitized PM List Report, monitoring dashboard, authorized AI Activity dialog and BUG-0024 role view. Authorized Developer comment/upload attempts failed without persistence. Five lifecycle dialogs were dismissed without submission; BUG-0003 remained `In Progress` and BUG-0011 remained `Retest Required`.
 - Refreshed-baseline verification on 2026-08-03: PNG/register/source-anchor checks PASS; `git diff --check` exit 0; CAP compile exit 0 with the existing attachment vocabulary warning; UI5 build exit 0; secret scan, agent rules and AI DevKit lint all exit 0.
 - Second-refresh verification against `origin/dev=39f6f87` on 2026-08-03: 51 PNGs and screenshots 48–51 hashes PASS; zero `MISSING EVIDENCE` labels remain; 54 known-limitation/deferred-owner labels are explicit; required sections, source anchors and natural numbering PASS; CAP compile and UI5 build exit 0; secret scan, agent rules, AI DevKit and `git diff --check` exit 0. UI5 manifest schema validation passes, while pre-existing linter migration debt is isolated in linked Jira task IDTS-121.
+- Third-refresh verification against docs-only `origin/dev=1e2390a` on 2026-08-03: 51 PNGs remain byte-identical to the prior exact head; screenshots 48–51 SHA-256 hashes PASS; zero `MISSING EVIDENCE` labels and 53 explicit known-limitation/deferred-owner labels; required sections and selected source paths PASS; CAP compile, UI5 build, secret scan, agent rules, AI DevKit, QA Depth self-test and `git diff --check` exit 0. No runtime or evidence claim changed.
