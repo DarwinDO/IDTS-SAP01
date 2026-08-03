@@ -112,8 +112,7 @@ annotate service.Bugs with @(
       $Type  : 'UI.ReferenceFacet',
       ID     : 'Attachments',
       Label  : 'Evidence / Attachments',
-      Target : 'attachments/@UI.LineItem',
-      ![@UI.Hidden] : true
+      Target : 'attachments/@UI.LineItem'
     },
     {
       $Type  : 'UI.CollectionFacet',

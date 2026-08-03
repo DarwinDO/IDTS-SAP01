@@ -1,5 +1,7 @@
 # IDTS-73 - FE pending attachments during Create Bug
 
+> Superseded for the current SAP BTP runtime by IDTS-116. The browser-memory queue below is retained as historical implementation evidence only. The current UI uses the generated `@cap-js/attachments` Fiori Elements facet and CAP draft persistence; comments use a UI5 OData V4 bound action.
+
 ## Summary
 
 Implement create-time attachment selection for the Bug Object Page and hide the Comments section during Create Bug.
