@@ -389,10 +389,14 @@ Every delegated assignment must state its objective, authority, read/write scope
 
 Model and reasoning policy:
 
-- When a child task or subagent model is explicitly selected, use only an available GPT-5.6 model in the approved range from `gpt-5.6-luna` (smallest) through `gpt-5.6-terra` (highest), unless the user explicitly approves an exception.
-- Prefer the smallest model that can reliably complete the delegated scope. Use Luna for narrow inventory, extraction, mechanical checks, and low-risk bounded work; use Terra for complex cross-layer analysis, implementation, difficult debugging, security/authorization review, architecture, or independent final review.
-- Select reasoning effort proportionally to ambiguity, risk, cross-layer coupling, and verification burden. Do not default every task to the highest model or reasoning level.
-- If the current delegation mechanism cannot enforce the requested model or reasoning level, report that limitation instead of claiming the override occurred.
+- When a child task or subagent model is explicitly selected for the current approved workstream, use only `gpt-5.6-luna` or `gpt-5.6-terra`, unless the user explicitly approves an exception.
+- `gpt-5.6-terra` may use reasoning up to `high` only. Never run Terra with `xhigh`, `ultra`, or `max`.
+- `gpt-5.6-luna` may run only at `xhigh`, `ultra`, or `max`. If a requested level such as `ultra` is unavailable in the current tool, use another allowed Luna level; do not silently downgrade below `xhigh`.
+- Do not run delegated work in a UI or service mode labeled `Fast`, and do not explicitly request the `priority` service tier. Model, reasoning effort, and service tier are separate controls: satisfying the model/reasoning rule does not authorize Fast/priority execution.
+- Before dispatch, verify that the mechanism can enforce both the required model/reasoning pair and a non-Fast service mode. If it cannot, keep the work in the primary task or use a child-task mechanism that exposes a non-Fast mode, and report the limitation.
+- Prefer the smallest permitted model that can reliably complete the delegated scope. Use Luna for narrow inventory, extraction, mechanical checks, and low-risk bounded work; use Terra for complex cross-layer analysis, implementation, difficult debugging, security/authorization review, architecture, or independent final review.
+- Select reasoning effort proportionally to ambiguity, risk, cross-layer coupling, and verification burden within the permitted ranges. Do not default every task to the highest reasoning level.
+- If the current delegation mechanism cannot enforce model, reasoning level, or non-Fast service mode, report that limitation instead of claiming the override occurred.
 
 Child-task and subagent output is an untrusted draft until the primary agent:
 

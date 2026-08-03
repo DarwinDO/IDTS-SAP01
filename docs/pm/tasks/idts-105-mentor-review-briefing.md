@@ -2,7 +2,7 @@
 
 - Owner: DonHV
 - Support: SangVN, DatDT, NhanT
-- Due: 2026-07-27
+- Due: 2026-08-04
 - Status: In Progress
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-105
 
@@ -16,7 +16,7 @@
 ## Acceptance boundary
 
 This task may prepare rules and templates. It must not fabricate member acknowledgment,
-candidate approval, UAT execution, mentor sign-off or OpenAI live acceptance.
+candidate approval, test execution, mentor sign-off or provider-live acceptance.
 
 ## Verification
 
@@ -37,3 +37,26 @@ candidate approval, UAT execution, mentor sign-off or OpenAI live acceptance.
 - Reminder comments were added to IDTS-105, IDTS-108, IDTS-109, IDTS-110, and
   IDTS-111. The task remains In Progress and downstream approval/Drive gates
   remain blocked; the agent did not acknowledge for any member.
+
+## 2026-08-03 current-baseline remediation
+
+- Audited the mandatory briefing against SAP BTP/HANA/XSUAA/AppRouter/HTML5 Repository,
+  Job Scheduler, S3/Brevo and feature-specific Vercel AI Gateway routing.
+- Corrected Unit Test/UAT ownership and test truth to `188 NOT_RUN` and `90 PREPARED`.
+- Preserved EN-only submission, official-template fidelity, natural numbering and the
+  decision not to continue Functional Specification remediation.
+- Evidence: `docs/pm/evidence/idts-105/briefing-current-truth-audit-20260803.md`.
+- Human gate is unchanged: DonHV must personally read the merged briefing SHA and add
+  the matching repository acknowledgment and Jira comment. The agent did not sign.
+
+## 2026-08-03 DonHV acknowledgment and team notification
+
+- DonHV personally confirmed `READ` for the briefing at merge SHA
+  `3e78b495cb8feb56188cc446b827d47e040e1b98`, understood the assigned ownership and
+  reported no unresolved questions.
+- Jira IDTS-105 comment `10866` records the same human confirmation and reminds the
+  remaining members that an agent must not acknowledge for them.
+- Jira reminders were also added to IDTS-108 (`10867`), IDTS-109 (`10868`),
+  IDTS-110 (`10869`) and IDTS-111 (`10870`) so each owner sees the latest briefing
+  baseline and performs their own acknowledgment.
+- IDTS-105 remains In Progress until SangVN, DatDT and NhanT personally acknowledge.
