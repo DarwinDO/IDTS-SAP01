@@ -5303,6 +5303,14 @@ remains pending normal PR merge.
 
 Live evidence: `docs/pm/evidence/idts-117/demo-readiness/live-verification-20260802.md`.
 
+## 2026-08-03 — IDTS-105 human acknowledgment and delegation-mode correction
+
+| Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Process gate | DonHV personally confirmed reading the current IDTS-105 briefing at merge SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`, understood ownership and had no unresolved questions. | This is the required human READ gate; it is not candidate approval, test PASS or Knowledge Gate completion. | Repository acknowledgment updated and matching Jira comment `10866` created. Team reminders were added to IDTS-108–111 as comments `10867`–`10870`. | SangVN, DatDT and NhanT must still acknowledge personally; IDTS-105 remains In Progress. |
+| Process/tooling issue | Delegated GPT-5.6 subagents appeared with the UI mode `Fast` even though only model and reasoning were requested. | The subagent runtime exposes GPT-5.6 through a priority/Fast execution tier independently of the selected model and reasoning effort; the delegation prompts did not explicitly prohibit that service tier. | Governance now prohibits Fast/priority delegated runs and requires pre-dispatch verification of model, reasoning and service mode. | If a mechanism cannot enforce non-Fast mode, do not use it for delegated work; run locally in the primary task or use a non-Fast child task. |
+| Tooling issue | `gh pr merge --delete-branch` reported that local branch `dev` was already used by another worktree after PR #266 merged. | Git could not perform the optional local branch cleanup because the root worktree owns `dev`; the remote merge itself had already succeeded. | No destructive workaround used. The merge SHA was independently verified as an ancestor of `origin/dev`. | Remove stale worktree/branch only through a separate safe cleanup when no active work depends on it. |
+
 ## 2026-08-03 — IDTS-105 current-baseline briefing remediation
 
 | Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |

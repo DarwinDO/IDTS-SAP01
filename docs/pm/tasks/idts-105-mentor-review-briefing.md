@@ -48,3 +48,15 @@ candidate approval, test execution, mentor sign-off or provider-live acceptance.
 - Evidence: `docs/pm/evidence/idts-105/briefing-current-truth-audit-20260803.md`.
 - Human gate is unchanged: DonHV must personally read the merged briefing SHA and add
   the matching repository acknowledgment and Jira comment. The agent did not sign.
+
+## 2026-08-03 DonHV acknowledgment and team notification
+
+- DonHV personally confirmed `READ` for the briefing at merge SHA
+  `3e78b495cb8feb56188cc446b827d47e040e1b98`, understood the assigned ownership and
+  reported no unresolved questions.
+- Jira IDTS-105 comment `10866` records the same human confirmation and reminds the
+  remaining members that an agent must not acknowledge for them.
+- Jira reminders were also added to IDTS-108 (`10867`), IDTS-109 (`10868`),
+  IDTS-110 (`10869`) and IDTS-111 (`10870`) so each owner sees the latest briefing
+  baseline and performs their own acknowledgment.
+- IDTS-105 remains In Progress until SangVN, DatDT and NhanT personally acknowledge.
