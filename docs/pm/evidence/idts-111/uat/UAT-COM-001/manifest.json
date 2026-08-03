@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "UAT-COM-001",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T15:25:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "testRecord": {
+    "bugNumber": "BUG-0025",
+    "title": "IDTS-111 UAT-BUG-001 NhanT 20260803-1446",
+    "comment": "IDTS-111 UAT-COM-001 NhanT persistence check 20260803-1525"
+  },
+  "expectedResult": "The sanitized comment, actor, role, and timestamp persist once.",
+  "actualResult": "The controlled comment was entered and Post Comment was invoked. SAP displayed the safe error 'The comment could not be posted. Please refresh and try again.' The input remained populated and the list remained 'No comments yet.', so no comment, actor, role, or timestamp persisted.",
+  "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
+  "reviewBoundary": "This is a candidate failure finding, not an approved FAIL. DonHV must classify the underlying comment-action failure and decide the Jira/catalog result.",
+  "evidence": [
+    {
+      "id": "UAT-COM-001-E01",
+      "file": "01-before-post.png",
+      "description": "Controlled comment entered before posting while the list still shows No comments yet.",
+      "sha256": "54B904B98EBD7159C605D8F0FBDCDB18D08054A6B40E654183A5D03B1FD1007D"
+    },
+    {
+      "id": "UAT-COM-001-E02",
+      "file": "02-post-failure.png",
+      "description": "Safe SAP error after Post Comment with the input retained and no stored comment.",
+      "sha256": "75BAC5242D660564AF0DC2991BCEDC987F3B0F2CB4160E5858374F37BDC0D526"
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "The retained screenshots contain controlled UAT data only and no email, credential, cookie, token, or private endpoint text."
+  },
+  "issueClassification": "product defect or deployed-environment integration blocker - addComment request failure",
+  "limitations": [
+    "The UI exposes only a sanitized error; the approved Browser surface does not expose the response status/body, and no session/network internals were inspected.",
+    "UAT-COM-003 and UAT-COM-004 depend on the same posting path and cannot receive a positive persistence result until this failure is resolved."
+  ]
+}

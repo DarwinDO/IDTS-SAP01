@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "UAT-UX-003",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T15:42:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "expectedResult": "Focus order is logical, visible, and returns to the triggering control.",
+  "actualResult": "Keyboard Enter opened Similar Bugs and Escape closed it; focus visibly returned to Find Similar Bugs. However, eight Tab key attempts from the focused trigger and one direct locator Tab press did not advance focus to the next control, so logical sequential navigation through classification, assignment, and comment could not be demonstrated.",
+  "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
+  "reviewBoundary": "This is a candidate keyboard-navigation failure with a Browser translation limitation noted. DonHV should reproduce manually before an approved FAIL/Jira decision.",
+  "evidence": [
+    {"id":"UAT-UX-003-E01","file":"01-focus-return-after-keyboard-dialog.png","description":"Visible focus returned to Find Similar Bugs after keyboard-opened dialog was closed with Escape.","sha256":"4493FF9E511A68DEBF408285F96555F73C5AFDB0FE0D02AD1D83AF6479E984E9"}
+  ],
+  "keyboardTrace": {
+    "enterOpensDialog": true,
+    "escapeClosesDialog": true,
+    "focusReturnsToTrigger": true,
+    "tabAttempts": 9,
+    "tabAdvanced": false
+  },
+  "privacyReview": {"status":"PASS","notes":"Controlled UAT data only; no email, credential, cookie, token, or private endpoint text."},
+  "limitations": ["The approved Browser surface may translate Tab differently from a physical keyboard; DonHV manual confirmation is required before treating this as a confirmed accessibility defect."]
+}

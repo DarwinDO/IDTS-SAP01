@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "UAT-AUTH-001",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T14:35:54+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "expectedResult": "The List Report opens and the profile identifies the mapped Tester without exposing token or session internals.",
+  "actualResult": "The SAP BTP AppRouter opened the IDTS List Report. The profile dialog identified NhanT with role Tester and stated that the session is managed by SAP BTP. The Bugs grid rendered 27 records. No token or session internals were displayed.",
+  "candidateOutcome": "MEETS_EXPECTED_RESULT",
+  "reviewBoundary": "DonHV must review the execution and sanitized evidence before the catalog or final workbook can record PASS.",
+  "evidence": [
+    {
+      "id": "UAT-AUTH-001-E01",
+      "file": "01-authenticated-list-report.png",
+      "description": "Privacy-safe authenticated List Report after closing the profile dialog; the NhanT profile button and rendered Bugs grid remain visible.",
+      "sha256": "1186F149A500717A3AF387686ABC041FC86FCDDED08D25F5362D500D52F4C44A",
+      "width": 1256,
+      "height": 912
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "The first capture containing the full account email and two invalid crop attempts were rejected and replaced. The retained image contains no email, credential, cookie, token, or private endpoint text."
+  },
+  "limitations": [
+    "Cloud Foundry CLI readiness could not run in this environment because the cf command is unavailable.",
+    "This package records NhanT execution truth only and is not reviewer approval or user acceptance sign-off."
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "UAT-BUG-008",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T15:50:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "testRecord": {"bugNumber":"BUG-0025","oldTitle":"IDTS-111 UAT-BUG-001 NhanT 20260803-1446","newTitle":"IDTS-111 UAT-BUG-008 NhanT title edit 20260803-1550"},
+  "expectedResult": "Only the intended value changes; unrelated values remain unchanged and one grouped edit audit is visible.",
+  "actualResult": "The new title persisted after reload, while Description, IDTS Bug Report component, SAP CAP Backend category, priority, severity, and ownership fields remained unchanged. History displayed two identical Edit events ('Updated title.') by NhanT at the same timestamp instead of one grouped edit audit.",
+  "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
+  "reviewBoundary": "Business state persistence passed, but duplicate audit events violate the expected single grouped audit. DonHV must review before approved FAIL/Jira disposition.",
+  "evidence": [
+    {"id":"UAT-BUG-008-E01","file":"01-before-edit.png","description":"Active BUG-0025 state before the title-only edit.","sha256":"C8E79AE33C2CE3F9A52DA28145C49C0DCAF3C71D7C3E41BD147DEFC908510BFC"},
+    {"id":"UAT-BUG-008-E02","file":"02-title-draft.png","description":"Edit draft with only the new title entered.","sha256":"2BC8FC18E5F79939F1F1F5FD15AF9754A965901DFD14B5B8623B76A4D3B1C8D0"},
+    {"id":"UAT-BUG-008-E03","file":"03-after-reload-duplicate-audit.png","description":"Reloaded History showing two duplicate title Edit events at the same timestamp.","sha256":"0BE9BE5DD099D010AE27D2DC044437A00F3F63E4697FAFA7F3FCD5D5909E3EFC"}
+  ],
+  "privacyReview": {"status":"PASS","notes":"Controlled UAT data only; no email, credential, cookie, token, or private endpoint text."},
+  "issueClassification": "product defect candidate - duplicate edit audit events",
+  "limitations": []
+}

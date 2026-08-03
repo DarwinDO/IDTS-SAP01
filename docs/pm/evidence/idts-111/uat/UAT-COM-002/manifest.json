@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "UAT-COM-002",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T15:20:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "testRecord": {
+    "bugNumber": "BUG-0025",
+    "title": "IDTS-111 UAT-BUG-001 NhanT 20260803-1446"
+  },
+  "expectedResult": "No comment is stored and a safe validation message is shown.",
+  "actualResult": "Post Comment was chosen once with an empty comment. The field entered an error state with the safe message 'Enter a comment before posting.', and the Comments list still showed 'No comments yet.'.",
+  "candidateOutcome": "MEETS_EXPECTED_RESULT",
+  "reviewBoundary": "DonHV must review this complete candidate package before any PASS decision or catalog update.",
+  "evidence": [
+    {
+      "id": "UAT-COM-002-E01",
+      "file": "01-empty-comment-rejected.png",
+      "description": "Empty Add comment field with visible safe validation message and unchanged No comments yet state.",
+      "sha256": "057CBC82BBF6153047EAFBE6F2FE00F828A243FA6A7A52FD980B4A85998C8126"
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "The retained screenshot contains controlled UAT data only and no email, credential, cookie, token, or private endpoint text."
+  },
+  "limitations": [
+    "The catalog permits a sanitized Network status or a safe error screenshot; this package uses the visible safe error screenshot and does not inspect session/network internals."
+  ]
+}

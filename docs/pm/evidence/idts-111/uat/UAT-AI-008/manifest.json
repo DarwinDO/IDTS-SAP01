@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "UAT-AI-008",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T15:11:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "testRecord": {
+    "bugNumber": "BUG-0025",
+    "title": "IDTS-111 UAT-BUG-001 NhanT 20260803-1446"
+  },
+  "expectedResult": "Missing information is stated explicitly and no content is invented.",
+  "actualResult": "The Handoff Summary explicitly stated that no comments were recorded and showed the single CREATE history event. However, its verified Current Action Owner and risk text named DonHV while the Bug Object Page displayed Project Manager as Current Action Owner and Action Owner Role. This visible source mismatch does not meet the grounding expectation.",
+  "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
+  "reviewBoundary": "This is a candidate failure finding, not an approved FAIL. DonHV must confirm the source-field interpretation and decide whether to record a product defect or catalog FAIL.",
+  "evidence": [
+    {
+      "id": "UAT-AI-008-E01",
+      "file": "01-handoff-sparse-grounding-mismatch.png",
+      "description": "Handoff Summary for sparse BUG-0025 showing no comments, one CREATE event, and DonHV as Current Action Owner, conflicting with the Object Page's Project Manager owner display.",
+      "sha256": "640CFCB414B0ABC2E8E18E2199E945736E5BCF0B9D393AAAD98B673AC9AE6316"
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "The retained screenshot contains controlled UAT data only and no email, credential, cookie, token, or private endpoint text."
+  },
+  "issueClassification": "product defect candidate - AI advisory grounding inconsistency",
+  "limitations": [
+    "No Accept, Reject, or Ignore review action was selected; the dialog was inspected read-only for this case.",
+    "DonHV must verify whether the underlying stored owner ID is intended to resolve to a person while the Object Page intentionally shows only the role."
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "UAT-LIFE-010",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T16:18:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "testRecord": {"bugNumber":"BUG-0011","startingStatus":"Closed","endingStatus":"Reopened","reason":"IDTS-111 UAT-LIFE-010 controlled reopen verification"},
+  "expectedResult": "An authorized Tester can reopen a Closed bug with a controlled reason, and the Reopened state persists after browser refresh.",
+  "actualResult": "BUG-0011 changed from Closed to Reopened after NhanT submitted the reason. A visible Ctrl+R refresh retained BUG-0011 and status Reopened with no raw error.",
+  "candidateOutcome": "MEETS_EXPECTED_RESULT",
+  "reviewBoundary": "Candidate only; DonHV must review before changing the catalog or final workbook.",
+  "evidence": [
+    {"id":"UAT-LIFE-010-E01","file":"01-reopened-before-reload.png","description":"BUG-0011 displayed Reopened immediately after the controlled transition.","sha256":"298036E7EBDADDD91ACBE0FA53695DED32E3995A958CFE17F2D4BC90A387C82D"},
+    {"id":"UAT-LIFE-010-E02","file":"02-reopened-after-reload.png","description":"BUG-0011 remained Reopened after a visible browser refresh.","sha256":"298036E7EBDADDD91ACBE0FA53695DED32E3995A958CFE17F2D4BC90A387C82D"}
+  ],
+  "privacyReview": {"status":"PASS","notes":"Controlled SAP UAT data only; no email, credential, cookie, token, or private endpoint text."},
+  "issueClassification": "none",
+  "limitations": ["The two screenshots are byte-identical because the committed state and viewport were unchanged across refresh; the fresh post-refresh DOM independently confirmed BUG-0011 and Reopened."]
+}
