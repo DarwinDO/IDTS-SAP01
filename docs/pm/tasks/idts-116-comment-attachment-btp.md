@@ -2,8 +2,9 @@
 
 ## Status
 
-In Progress — SAP-standard implementation and local regression are complete;
-PR review, selective BTP rollout and browser acceptance remain.
+In Progress — post-deployment root causes are confirmed and the SAP-standard
+follow-up passes local regression; PR review, selective HTML5/AppRouter rollout
+and browser acceptance remain.
 
 ## Context
 
@@ -44,6 +45,12 @@ root cause of these two write failures.
 - [x] Existing comment authorization and validation remain backend-enforced.
 - [x] Focused IDTS-116 and attachment regressions pass locally.
 - [x] CAP compile and UI5 production build pass.
+- [x] Comment invocation uses the model's normal update group so UI5 manages
+  batching and CSRF instead of issuing a direct operation request.
+- [x] Comment action success is separated from the comments-list refresh result.
+- [x] Compiled CDS metadata contains exactly one attachment facet.
+- [x] HTML5 application/package version is aligned at `0.0.2` to invalidate the
+  stale cached manifest that still registered `IdtsAttachmentsCustom`.
 - [ ] PR passes the fresh QA Depth Gate and merges normally into `dev`.
 - [ ] The exact merge SHA is selectively deployed without HDI/database deploy.
 - [ ] Comment post → reload → persisted comment/history passes on BTP.
@@ -62,6 +69,12 @@ root cause of these two write failures.
 - Secret scan, agent rules and depth self-test: PASS; depth self-test 15/15.
 - AI DevKit lint: PASS 5/5.
 - `git diff --check`: PASS with line-ending warnings only.
+- Post-deployment diagnostic: the old `invoke("$direct")` request returned HTTP
+  403 before CAP because it did not carry a CSRF token; HANA readback confirmed
+  no comment persistence.
+- Post-deployment diagnostic: BTP metadata and local compiled CDS each expose
+  one attachment facet, while the browser loaded the old manifest from disk
+  cache. The duplicate tab was therefore stale app content, not duplicate CDS.
 
 ## Known limitations and evidence status
 
