@@ -53,8 +53,8 @@ root cause of these two write failures.
 - [x] A synchronous `requestRefresh()` throw is normalized into the refresh-warning path and cannot be misreported as an action failure.
 - [x] Expired XSUAA sessions are detected for both UI5 XHR and Dashboard `fetch()` OData calls only after the initial `AuthService.me` succeeds.
 - [x] Session recovery performs one top-level reload and never replays a failed comment/upload write.
-- [x] Compiled CDS metadata contains exactly one attachment facet.
-- [x] HTML5 application/package version is aligned at `0.0.2` to invalidate the
+- [x] Compiled CDS metadata contains exactly one plugin-owned attachment facet with ID `attachments_attachments`.
+- [x] HTML5 application/package version is aligned at `0.0.3` to invalidate the
   stale cached manifest that still registered `IdtsAttachmentsCustom`.
 - [x] AppRouter applies no-store/revalidation policy to HTML5 entry assets so
   future app-content changes are not hidden behind a stale browser manifest.
@@ -113,6 +113,16 @@ root cause of these two write failures.
 - A fresh-session `addComment` action returned inner HTTP 200 and persisted, but the relative `comments` list did not refresh because it lacked UI5 `$$ownRequest`.
 - SAP-standard correction: declare `$$ownRequest: true` for the relative comments binding and use a one-shot top-level XSUAA recovery on OData 401. Never replay a failed write automatically.
 - Remaining browser proof: immediate comment-feed update, reload persistence, attachment download SHA-256, delete and reload absence.
+
+## Active attachment reload correction — 2026-08-04
+
+- BTP readback disproved persistence loss: active navigation, Fiori-shaped navigation and parent `$expand` each returned HTTP 200 with both attachment rows.
+- CF access logs showed that the active Object Page hard reload did not initiate an attachment navigation request; draft attachment navigation still requested and rendered correctly.
+- `@cap-js/attachments` plugin source confirms that an application-declared facet targeting `attachments/@UI.LineItem` prevents generation of the standard `attachments_attachments` facet.
+- The application-owned facet and attachment table override were removed. The plugin now owns the generated facet and table lifecycle.
+- RED test failed while the competing facet remained; GREEN test confirms exactly one compiled plugin-owned facet.
+- Local verification PASS: IDTS-116, IDTS-73, comment/attachment programmatic QA, CAP compile, UI5 production build and manifest schema validation.
+- BTP browser acceptance remains mandatory after normal PR merge and selective UI/app-content rollout. No HDI, database deploy or seed operation is permitted.
 
 ## Local remediation verification — 2026-08-03
 
