@@ -13,6 +13,7 @@
 - QA record: `BUG-0019`.
 - Executor: DonHV.
 - Timestamp: 2026-08-04, Asia/Bangkok.
+- Jira evidence comment: `IDTS-116` comment `10935`.
 
 ## Controlled check
 
