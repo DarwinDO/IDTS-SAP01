@@ -1,5 +1,12 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-08-04 — IDTS-116 deployed comment auto-refresh acceptance
+
+| Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product/UI acceptance | The previous browser bundle could report that the comment was posted but ask the user to refresh the page. | The deployed `0.0.3` bundle now gives the relative comments binding its own request and refreshes it after the successful OData action. | PASS; no further source patch is required for comment refresh. | On `BUG-0019`, the controlled marker appeared immediately with toast `Comment posted.` and remained after hard reload. Evidence: `docs/pm/evidence/idts-116/comment-auto-refresh/`. |
+| UI/UX observation | Immediately after a hard reload, the independent comments read briefly showed the empty-state copy before the request completed. | This is asynchronous loading of the relative comments binding, not loss of the committed comment. | Non-blocking; no behavior change made in this evidence task. | Consider a dedicated busy-state polish only if mentor/user review finds the transient empty state confusing. Full attachment acceptance remains next. |
+
 ## 2026-08-03 — IDTS-111 candidate execution review
 
 | Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |

@@ -2,9 +2,10 @@
 
 ## Status
 
-In Progress — post-deployment root causes are confirmed and the SAP-standard
-follow-up passes local regression; PR review, selective HTML5/AppRouter rollout
-and browser acceptance remain.
+In Progress — the SAP-standard implementation is merged and deployed as app
+version `0.0.3`. Comment post, immediate feed refresh and hard-reload
+persistence pass on BTP; full attachment upload/download/delete acceptance
+remains.
 
 ## Context
 
@@ -58,12 +59,29 @@ root cause of these two write failures.
   stale cached manifest that still registered `IdtsAttachmentsCustom`.
 - [x] AppRouter applies no-store/revalidation policy to HTML5 entry assets so
   future app-content changes are not hidden behind a stale browser manifest.
-- [ ] PR passes the fresh QA Depth Gate and merges normally into `dev`.
-- [ ] The exact merge SHA is selectively deployed without HDI/database deploy.
+- [x] PR passes the fresh QA Depth Gate and merges normally into `dev`.
+- [x] The exact merge SHA is selectively deployed without HDI/database deploy.
 - [ ] Comment post → reload → persisted comment/history passes on BTP.
 - [ ] Attachment upload → save → reload → download/hash → delete passes on BTP.
 - [ ] Browser Network/Console evidence contains no token, cookie, credential or
   raw private endpoint.
+
+## Comment auto-refresh acceptance — 2026-08-04
+
+- PR #278 merged normally at
+  `37446970eabb0eedfcc15b9de2868449ed2bcc6f` and app version `0.0.3` was
+  selectively deployed without HDI, database, schema or seed deployment.
+- A controlled PM browser check on QA record `BUG-0019` posted comment marker
+  `IDTS-116 auto-refresh verification 3744697`.
+- The success toast was `Comment posted.` and the new record appeared as the
+  first comment immediately, without a page refresh.
+- A hard reload fetched the same marker again, confirming persistence.
+- The earlier `Refresh the page to see it` warning belongs to an older browser
+  bundle and was not reproduced on the deployed `0.0.3` bundle.
+- Evidence: `docs/pm/evidence/idts-116/comment-auto-refresh/`.
+- The combined comment/history checkbox remains open until the expected
+  comment-history contract is explicitly confirmed; this browser check proves
+  comment write, immediate read refresh and reload persistence only.
 
 ## Verification completed locally
 
