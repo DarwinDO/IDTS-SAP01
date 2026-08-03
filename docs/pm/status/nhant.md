@@ -144,6 +144,9 @@ Tooling note: two quick PowerShell scan commands for old XML binding syntax fail
 
 ## Update Rule
 
+- 2026-08-03 IDTS-111 remediation follow-up — tooling issue: the first scoped cherry-pick of NhanT's latest personal briefing acknowledgment failed because the sandbox could not create the shared worktree `index.lock` under the main repository `.git/worktrees` directory. No branch content changed. Retry requires the already authorized narrow Git operation outside the sandbox; do not change global safe-directory configuration.
+- 2026-08-03 IDTS-111 targeted rerun blocker — environment/deployment issue: the signed-in deployed SAP URL renders a blank page after one controlled reload. Browser console records `Unexpected token '<'` for `auth-guard.js` and `bootstrap-ui5.js`; direct asset navigation is blocked by the browser client. No targeted UAT case was rerun or promoted. DonHV's 19 accepted / 13 negative / 25 blocked review matrix remains authoritative until the SAP surface is healthy; `UAT-UX-003` still requires human physical-keyboard confirmation.
+
 - NhanT updates this file after each work session.
 - Record what was tested, what passed, what failed, bugs/errors found, whether they were fixed, and evidence commands/results.
 - Do not edit other members' status files unless coordinating with DonHV.

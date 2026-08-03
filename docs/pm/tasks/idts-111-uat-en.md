@@ -3,7 +3,7 @@
 - Catalog owner/approver and final integrator: DonHV
 - Execution support: NhanT, SangVN and DatDT
 - Due: 2026-08-03
-- Status: NhanT candidate package complete; 57/57 assigned cases are packaged for one DonHV review, including explicit precondition-blocked cases
+- Status: DonHV disposition recorded; targeted reruns are blocked by the blank deployed SAP surface and one physical-keyboard confirmation remains human-only
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-111
 
 ## Workflow
@@ -22,6 +22,9 @@
 - Approval: DonHV approved for execution on 2026-08-02.
 - Approved catalog truth remains unchanged: 90 `PREPARED`, 0 reviewer-approved PASS, 0 reviewer-approved FAIL.
 - NhanT candidate execution batch: 57/57 packaged; 32 `EXECUTED_PENDING_DONHV_REVIEW` (19 candidate `MEETS_EXPECTED_RESULT`, 13 candidate `DOES_NOT_MEET_EXPECTED_RESULT`) and 25 `EXECUTION_BLOCKED_PENDING_PRECONDITION`. No NhanT-assigned case remains unattempted or unpackaged. The case manifests and consolidated summary preserve exact evidence, blockers, and rerun conditions; none changes the approved catalog before DonHV review.
+- DonHV disposition: 19 positive evidence packages accepted; 25 blockers accepted without PASS; 13 negatives split into 3 confirmed product defects (`UAT-AUTH-005`, `UAT-BUG-008`, `UAT-UX-002`), 5 catalog mismatches, 1 environment/session blocker, 3 targeted reruns, and 1 test-harness limitation. See `docs/pm/evidence/idts-111/donhv-execution-review-matrix.md`.
+- Current rerun blocker: the deployed SAP page is blank after controlled reload and reports JavaScript parse errors for `auth-guard.js` and `bootstrap-ui5.js`. No targeted rerun was promoted. `UAT-UX-003` requires NhanT to confirm physical Tab-key behavior manually.
+- Knowledge gate: NhanT acknowledged briefing SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`; Jira comments `10908` (IDTS-110) and `10909` (IDTS-111).
 - Candidate execution summary: `docs/pm/evidence/idts-111/execution-summary.md`.
 - Catalog merge SHA: `6f01affc2c2945e51d18199137c8a89a20c77600`.
 - BTP runtime SHA: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`.
