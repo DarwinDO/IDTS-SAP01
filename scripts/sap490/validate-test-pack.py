@@ -479,7 +479,7 @@ def validate_ids_and_parity(catalog, result):
 
 def validate_case_content(catalog, result):
     case_by_id = {case["caseId"]: case for case in catalog["cases"]}
-    for lang in ("en", "vi"):
+    for lang in ("en",):
         scenario_path = OUTPUT_DIR / FILE_PATTERNS["scenario"].format(lang=lang)
         scenario = load_workbook(scenario_path, data_only=False)["Test Cases"]
         for row in range(8, 29):
@@ -616,7 +616,7 @@ def validate_report_metrics(catalog, result):
         "E16": executed / planned,
         "E17": passed / executed if executed else 0,
     }
-    for lang in ("en", "vi"):
+    for lang in ("en",):
         path = OUTPUT_DIR / FILE_PATTERNS["report"].format(lang=lang)
         formula_book = load_workbook(path, data_only=False, read_only=True)
         formula_sheet = formula_book["Test Statistics"]
@@ -695,7 +695,7 @@ def validate_evidence_contract(catalog, result):
     if not re.fullmatch(r"[0-9a-f]{40}", evidence_sha):
         result.fail("Catalog evidence baseline has missing/placeholder evidence commit SHA")
 
-    for lang in ("en", "vi"):
+    for lang in ("en",):
         functional_path = OUTPUT_DIR / FILE_PATTERNS["functional"].format(lang=lang)
         functional_book = load_workbook(functional_path, data_only=False)
         runs = functional_book["Test Result"]
@@ -776,14 +776,15 @@ def main():
     paths = [
         OUTPUT_DIR / pattern.format(lang=lang)
         for pattern in FILE_PATTERNS.values()
-        for lang in ("en", "vi")
+        for lang in ("en",)
     ]
     for path in paths:
         if not path.exists():
             result.fail(f"Missing workbook: {path.name}")
         else:
             validate_workbook(path, result)
-    validate_ids_and_parity(catalog, result)
+    # IDTS-106 retires Vietnamese submission artifacts.  Record-level catalog
+    # validation remains, but EN/VI workbook parity is no longer a release gate.
     validate_case_content(catalog, result)
     validate_report_metrics(catalog, result)
     validate_evidence_contract(catalog, result)

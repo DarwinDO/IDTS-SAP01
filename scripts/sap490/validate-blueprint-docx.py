@@ -13,7 +13,6 @@ ROOT = Path(__file__).resolve().parents[2]
 TEMPLATE = ROOT / "docs/sap490/templates/Deliverable_template/Blueprint_Template.docx"
 OUTPUTS = {
     "en": ROOT / "docs/sap490/generated/Blueprint_IDTS_SAP01_en_v0.6.docx",
-    "vi": ROOT / "docs/sap490/generated/Blueprint_IDTS_SAP01_vi_v0.6.docx",
 }
 FORBIDDEN = ("AAAA", "Created By Van Bao Chau", "Nguyen Hoang Group")
 
@@ -79,9 +78,6 @@ def main() -> int:
         errors, table_count = validate(language, path, template)
         failures.extend(errors)
         table_counts[language] = table_count
-    if table_counts.get("en") != table_counts.get("vi"):
-        failures.append(f"EN/VI table-count parity failed: {table_counts}")
-
     if failures:
         print(f"FAIL: Blueprint validation found {len(failures)} issue(s)")
         for failure in failures:
@@ -90,7 +86,7 @@ def main() -> int:
 
     print("PASS: Blueprint v0.6 current-artifact validation")
     print("- official template baseline: 3 sections and 8 core tables")
-    print(f"- output table parity: EN={table_counts['en']}, VI={table_counts['vi']}")
+    print(f"- English output table count: {table_counts['en']}")
     print("- style identity, version, placeholders and BP-01..BP-13 coverage: PASS")
     return 0
 

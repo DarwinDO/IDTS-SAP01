@@ -250,6 +250,13 @@ Vietnamese clean note: Nút `Assign Developer` riêng đã được bỏ khỏi 
 - The official SAP490 submission direction is English-only. Vietnamese learning/briefing documents remain allowed, but no new VI submission artifact may be generated or synchronized.
 - No member acknowledgment, candidate approval, Unit/UAT result, Drive Trash operation, or mentor-ready completion has been fabricated or claimed.
 
+## 2026-08-03 IDTS-106 EN-only cleanup execution
+
+- DonHV's briefing READ and the approved/merged IDTS-107 Gate 2 removed the two cleanup prerequisites.
+- IDTS-106 backed up and hashed 13 VI Drive artifacts, moved exactly those files to Trash without emptying it, and verified all EN counterparts remain present.
+- The repository EN-only pipeline retires 11 generated VI artifacts while preserving internal Vietnamese material and historical Git/archive truth.
+- The Mentor Index is EN-only and records the current versions and truthful ownership/test limitations. PR #264 still requires final gates and normal merge before Jira closure.
+
 ## 2026-07-28 isolated SAP BTP Cloud Foundry POC
 
 - `IDTS-113` deployed an isolated CAP copy to SAP BTP Trial Cloud Foundry with SAP HANA Cloud and a dedicated HDI container. The app is running and health, public auth metadata, anonymous denial, authenticated read, logout, and revoked-token checks pass.

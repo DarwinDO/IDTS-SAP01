@@ -199,7 +199,7 @@ def _fill_intro_scope_assumptions(workbook, language):
     _set_metadata(intro, titles[0], language)
     processing = {
         "H6": "Online", "P6": "Dialog / OData service", "V6": "IDTS SRS and approved Jira baseline",
-        "H10": "Yes — English and Vietnamese specifications",
+        "H10": "Yes — English-only mentor submission",
     }
     if language == "vi":
         processing.update({"H6": "Trực tuyến", "P6": "Dialog / OData service", "V6": "IDTS SRS và Jira baseline đã duyệt", "H10": "Có — đặc tả tiếng Anh và tiếng Việt"})

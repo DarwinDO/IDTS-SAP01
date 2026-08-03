@@ -1933,7 +1933,7 @@ def main():
         generate_uat,
         generate_defect,
     )
-    for lang in ("en", "vi"):
+    for lang in ("en",):
         for generator in generators:
             outputs.append(generator(catalog, lang))
     outputs.append(generate_integration_evidence_index(catalog))
