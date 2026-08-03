@@ -8,10 +8,10 @@ member personally confirms the exact commit and adds the Jira comment.
 
 | Member | Read status | Commit SHA read | Date read | Ownership understood | Questions / unclear points | Jira issue/comment |
 | --- | --- | --- | --- | --- | --- | --- |
-| DonHV | PENDING | — | — | Database/persistence, integration and Drive | — | IDTS-105 / pending |
-| SangVN | PENDING | — | — | Screen/collaboration Technical Specification | — | IDTS-108 / pending |
-| DatDT | PENDING | — | — | Standards/messages/monitoring/AI Technical Specification | — | IDTS-109 / pending |
-| NhanT | READ | 4b4c93c1d8b45024677653e1f890d52e742b2aaf | 2026-08-03 | I understand that I execute the approved IDTS-110 Unit Test cases and the 57 approved IDTS-111 Tester UAT cases using my own SAP identity, collecting truthful case-specific sanitized evidence; DonHV owns catalog/result approval and final Unit_Test_EN/UAT_EN_PREPARED workbook integration. | None | IDTS-110 / comment 10844; IDTS-111 / comment 10863 |
+| DonHV | READ | `3e78b495cb8feb56188cc446b827d47e040e1b98` | 2026-08-03 | Technical Specification database/persistence; Unit Test/UAT catalog ownership and approval; EN workbook generation, evidence review and Drive integration | None | IDTS-105 / comment `10866` |
+| SangVN | PENDING | — | — | Screen/collaboration Technical Specification and assigned Developer UAT execution with own SAP identity | — | IDTS-108 and IDTS-111 / pending |
+| DatDT | PENDING | — | — | Standards/messages/monitoring/AI Technical Specification and assigned Developer UAT execution with own SAP identity | — | IDTS-109 and IDTS-111 / pending |
+| NhanT | READ | `4b4c93c1d8b45024677653e1f890d52e742b2aaf` | 2026-08-03 | Execute the approved IDTS-110 Unit Test cases and 57 approved IDTS-111 Tester UAT cases with own SAP identity and truthful case-specific sanitized evidence; DonHV owns catalog/result approval and final EN workbook integration | None | IDTS-110 / comment `10844`; IDTS-111 / comment `10863` |
 
 ## Required member comment format
 

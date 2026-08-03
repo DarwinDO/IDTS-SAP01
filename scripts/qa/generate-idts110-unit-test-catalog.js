@@ -345,7 +345,7 @@ const catalog = {
   language: 'EN',
   owner: 'DonHV',
   executor: 'NhanT',
-  status: 'DRAFT_FOR_DONHV_REVIEW',
+  status: 'APPROVED_FOR_EXECUTION',
   baselineSha: BASELINE_SHA,
   generatedAt: '2026-08-02',
   knowledgeGate: 'PASS — DonHV; do not reopen',
@@ -374,8 +374,9 @@ const catalog = {
 }
 
 const serialized = `${JSON.stringify(catalog, null, 2)}\n`
+const normalizeLineEndings = value => value.replace(/\r\n/g, '\n')
 if (process.argv.includes('--check')) {
-  if (!fs.existsSync(OUTPUT) || fs.readFileSync(OUTPUT, 'utf8').replace(/\r\n/g, '\n') !== serialized) {
+  if (!fs.existsSync(OUTPUT) || normalizeLineEndings(fs.readFileSync(OUTPUT, 'utf8')) !== serialized) {
     console.error(`Catalog is stale: ${path.relative(ROOT, OUTPUT)}`)
     process.exit(1)
   }

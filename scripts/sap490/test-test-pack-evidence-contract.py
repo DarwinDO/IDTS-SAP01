@@ -84,7 +84,7 @@ def validate_unit(language: str, errors: list[str]) -> None:
 
 def main() -> int:
     errors: list[str] = []
-    for language in ("en", "vi"):
+    for language in ("en",):
         validate_functional(language, errors)
         validate_report(language, errors)
         validate_unit(language, errors)

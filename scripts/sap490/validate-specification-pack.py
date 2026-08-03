@@ -1,7 +1,7 @@
-"""Validate the mentor-facing SAP490 specification pack.
+"""Validate the English-only mentor-facing SAP490 specification pack.
 
 The validator is intentionally strict about official-template fidelity.  It
-checks the eight generated EN/VI artifacts without modifying them.
+checks the four generated English artifacts without modifying them.
 """
 
 from __future__ import annotations
@@ -25,7 +25,6 @@ XLSX_CONTRACTS = {
         "template": TEMPLATE_DIR / "Functional_Specification.xlsx",
         "outputs": [
             GENERATED_DIR / "Functional_Specification_IDTS_SAP01_en_v0.7.xlsx",
-            GENERATED_DIR / "Functional_Specification_IDTS_SAP01_vi_v0.7.xlsx",
         ],
         "required_sheets": [
             "Cover",
@@ -43,7 +42,6 @@ XLSX_CONTRACTS = {
         "template": TEMPLATE_DIR / "Technical_Specification.xlsx",
         "outputs": [
             GENERATED_DIR / "Technical_Specification_IDTS_SAP01_en_v0.7.xlsx",
-            GENERATED_DIR / "Technical_Specification_IDTS_SAP01_vi_v0.7.xlsx",
         ],
         "required_sheets": [
             "Cover",
@@ -64,7 +62,6 @@ XLSX_CONTRACTS = {
         "template": TEMPLATE_DIR / "Configuration_Note.xlsx",
         "outputs": [
             GENERATED_DIR / "Configuration_Note_IDTS_SAP01_en_v0.5.xlsx",
-            GENERATED_DIR / "Configuration_Note_IDTS_SAP01_vi_v0.5.xlsx",
         ],
         "required_sheets": ["Cover", "Record of change", "Checklist", "4", "5"],
     },
@@ -73,7 +70,6 @@ XLSX_CONTRACTS = {
 BLUEPRINT_TEMPLATE = TEMPLATE_DIR / "Blueprint_Template.docx"
 BLUEPRINT_OUTPUTS = [
     GENERATED_DIR / "Blueprint_IDTS_SAP01_en_v0.6.docx",
-    GENERATED_DIR / "Blueprint_IDTS_SAP01_vi_v0.6.docx",
 ]
 
 FORBIDDEN_RESIDUE = [
