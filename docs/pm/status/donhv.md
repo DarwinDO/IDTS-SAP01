@@ -1,5 +1,14 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-08-03 — IDTS-111 candidate execution review
+
+| Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| QA review result | PR #270 contains 57 candidate UAT executions: 19 meet the catalog expectation, 13 do not, and 25 are blocked by current preconditions. | Candidate outcome labels do not by themselves distinguish product defects from catalog mismatch, environment/session blockers, or insufficient evidence. | Reviewed all 57 manifests and 61 referenced images; produced `docs/pm/evidence/idts-111/donhv-execution-review-matrix.md`. | 0 missing evidence files and 0 SHA mismatch. Keep final UAT workbook and Drive unchanged. |
+| Product defect | One title-only draft save produced two identical Edit history events at the same timestamp. | Draft-save audit and generic active UPDATE audit can both record the same activation change. | Confirmed by source and screenshot; runtime remains unchanged in this docs/evidence review. | Tracked by IDTS-119; fix through a separate runtime PR. |
+| Product defect | Tablet Object Page/action and Similar Bugs reason text are clipped at the specified viewport. | Current responsive layout does not preserve all labels/reason wrapping. | Confirmed by direct visual review; runtime remains unchanged. | Tracked by IDTS-120; fix through a separate FE PR. |
+| Process gate | NhanT has not personally acknowledged the current briefing SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`. | The execution package references earlier governance context; an agent or PR check cannot acknowledge for NhanT. | Jira reminder already exists; no fabricated acknowledgment was added. | Keep PR #270 Draft/unmerged until NhanT READ and fresh exact-head gate PASS. |
+
 ## 2026-08-03 - IDTS-106 EN-only Drive cleanup execution
 
 - Classification: documentation/process result.
