@@ -216,8 +216,8 @@ Vietnamese:
 
 | ID | Task | Blocker | Required decision |
 | --- | --- | --- | --- |
-| IDTS-106 | Retire Vietnamese Mentor Current artifacts and enforce English-only SAP490 output | Blocked by IDTS-105 and member acknowledgments. Read-only Drive inventory may be prepared, but no official Trash/current-tree cleanup is accepted yet. | All members acknowledge the committed briefing; then DonHV executes backup, manifest, archive tag and non-permanent Drive Trash. |
-| IDTS-107 | Rebuild Technical Design, database dictionary, and persistence evidence | Blocked by IDTS-105 and IDTS-106. | DonHV acknowledges the briefing and the EN-only baseline is frozen. |
+| IDTS-106 | Retire Vietnamese Mentor Current artifacts and enforce English-only SAP490 output | Final cleanup is blocked by DonHV's IDTS-105 acknowledgment and IDTS-107 Gate-2 database/document review. Read-only Drive inventory may continue, but no official Trash/current-tree cleanup is accepted yet. | After both gates, DonHV verifies backup/hash and the exact 13-file ID list, then performs non-permanent Drive Trash. Other members still acknowledge before their own SAP490 package approval. |
+| IDTS-107 | Rebuild Technical Design, database dictionary, and persistence evidence | Candidate remediation is blocked by DonHV personally acknowledging the merged IDTS-105 briefing SHA. | After DonHV `READ`, correct PR #265 against production HANA build truth and hold Gate 2 for DonHV approval. |
 | IDTS-108 | Rebuild screen definitions and collaboration implementation evidence | Blocked by IDTS-105 and IDTS-106. | SangVN acknowledges the briefing before candidate package approval. |
 | IDTS-109 | Rebuild standards, message catalog, and monitoring/AI implementation traces | Blocked by IDTS-105 and IDTS-106. | DatDT acknowledges the briefing before candidate package approval. |
 | IDTS-110 | Expand SAP490 Unit Test catalog and capture case-level evidence | In Progress — DonHV approved the 188-case EN catalog; execution has not started. | NhanT executes the approved cases and captures case-specific sanitized evidence; DonHV reviews results before workbook generation. |
@@ -229,8 +229,8 @@ Vietnamese:
 
 | ID | Cong viec | Blocker | Quyet dinh can co |
 | --- | --- | --- | --- |
-| IDTS-106 | Loai artifact VI khoi Mentor Current va ap dung SAP490 chi tieng Anh | Bi block boi IDTS-105 va acknowledgment cua member. Chi duoc lap inventory Drive read-only, chua duoc claim Trash/cleanup chinh thuc. | Tat ca member xac nhan da doc briefing da commit; sau do DonHV backup, lap manifest, tao archive tag va dua VI vao Trash khong permanent-delete. |
-| IDTS-107 | Lam lai Technical Design, database dictionary va persistence evidence | Bi block boi IDTS-105 va IDTS-106. | DonHV xac nhan da doc briefing va freeze baseline EN-only. |
+| IDTS-106 | Loai artifact VI khoi Mentor Current va ap dung SAP490 chi tieng Anh | Cleanup cuoi bi block boi DonHV acknowledgment IDTS-105 va Gate 2 cua IDTS-107. Inventory Drive read-only van duoc phep, nhung chua duoc claim Trash/cleanup chinh thuc. | Sau hai gate, DonHV verify backup/hash va dung danh sach 13 file ID roi moi dua VI vao Trash khong permanent-delete. Member khac van phai acknowledge truoc khi duyet package cua ho. |
+| IDTS-107 | Lam lai Technical Design, database dictionary va persistence evidence | Candidate remediation bi block toi khi DonHV tu acknowledge merge SHA cua briefing IDTS-105. | Sau DonHV `READ`, sua PR #265 theo production HANA build truth va giu Gate 2 cho DonHV duyet. |
 | IDTS-108 | Lam lai screen definition va collaboration implementation evidence | Bi block boi IDTS-105 va IDTS-106. | SangVN xac nhan da doc briefing truoc khi duyet candidate package. |
 | IDTS-109 | Lam lai standard, message catalog va monitoring/AI trace | Bi block boi IDTS-105 va IDTS-106. | DatDT xac nhan da doc briefing truoc khi duyet candidate package. |
 | IDTS-110 | Mo rong Unit Test catalog va thu evidence theo tung case | Dang thuc hien — DonHV da duyet catalog EN 188 case; chua chay test. | NhanT chay cac case da duyet va thu evidence rieng da sanitize; DonHV review truoc khi sinh workbook. |
