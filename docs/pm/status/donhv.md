@@ -1,5 +1,22 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-08-03 - IDTS-106 audit session issue log
+
+- Classification: documentation/inventory issue.
+- Symptom: the first Drive audit reported 12 VI/EN pairs while the earlier project inventory reported 13.
+- Root cause: `Test And Fix Bug` is nested under the `Test Report` folder, so a direct-child family count omitted it.
+- Status: fixed in the candidate evidence; a fresh recursive Drive readback confirms 13 VI artifacts and 13 matching EN counterparts. No Drive write, Trash, rename, move, or delete was performed.
+- Verification: Google Drive metadata readback of the nested folder `SU26SAP01_GSU26SAP01_Test_And_Fix_Bug` confirmed both `Test_And_Fix_Bug_VI_v0_5_20260724.xlsx` and its EN counterpart.
+- Owner/next action: DonHV must retain the 13-file inventory for backup/Trash planning after IDTS-105 human acknowledgments are complete.
+
+- Classification: tooling/verification issue.
+- Symptom: the first bounded group command for `python scripts/sap490/validate-specification-pack.py`, `validate-test-pack.py`, `test-specification-quality-contract.py`, `test-test-pack-evidence-contract.py`, and `test_template_fidelity.py` exceeded the 124-second command limit before a terminal result was returned.
+- Root cause: the validators were run sequentially in one shell wrapper and at least one workbook-heavy check exceeded the combined timeout; no individual validator result is inferred from the timeout.
+- Status: open for this audit evidence; rerun each check separately with a bounded timeout before any completion claim.
+- Runtime/artifact impact: none observed; the command was read-only and no source, generated artifact, Drive file, database, or deployment state changed.
+- Owner/next action: DonHV audit handoff; collect separate validator results or record the specific slow validator as an evidence limitation.
+- Follow-up: `python scripts/sap490/validate-specification-pack.py` exited 0 with specification PASS; `python scripts/sap490/validate-test-pack.py` exited 0 with 12 workbooks, 0 warnings, 0 errors; `test-test-pack-evidence-contract.py` and `test_template_fidelity.py` PASS. A final rerun of `python scripts/sap490/test-specification-quality-contract.py` with an adequate timeout completed in 110.1 seconds and PASS. The original timeout is resolved as a command-budget issue.
+
 ## 2026-08-01 - IDTS-117 BTP rollout and browser acceptance complete
 
 - Product defect resolved: a repeated BTP re-entry could return the HTML XSUAA
