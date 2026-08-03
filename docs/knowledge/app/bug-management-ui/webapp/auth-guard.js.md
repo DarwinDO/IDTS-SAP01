@@ -1,5 +1,11 @@
 # Knowledge: `app/bug-management-ui/webapp/auth-guard.js`
 
+## IDTS-116/117 update — expired XSUAA session during OData writes
+
+In BTP/XSUAA mode, AppRouter returns HTTP 401 to an AJAX/OData request when the browser session has expired. After `AuthService.me` has confirmed a valid session, the guard monitors both OData XHR and `fetch()` completion and performs one top-level reload, allowing AppRouter to renew the XSUAA flow. A session-storage guard prevents a reload loop and is cleared after `AuthService.me` succeeds. The failed write is deliberately not replayed because replaying a comment or upload could create duplicate business side effects.
+
+Vietnamese: Khi phiên XSUAA hết hạn, request OData nền nhận 401. Guard chỉ reload trang một lần để AppRouter xác thực lại; không tự gửi lại POST comment/upload nhằm tránh tạo dữ liệu trùng.
+
 > **Ownership / debug anchor:** DatDT owns the browser-side auth guard (backup: DonHV). A `401` means trace token storage, header injection, then the backend middleware; never print the token.
 > **Ownership / điểm debug:** DatDT sở hữu auth guard phía browser (backup: DonHV). Lỗi `401` cần lần theo token storage, header injection rồi middleware backend; không in token.
 
