@@ -56,7 +56,8 @@
       items="{
         path: 'comments',
         parameters: {
-          $orderby: 'createdAt desc'
+          $orderby: 'createdAt desc',
+          $$ownRequest: true
         }
       }"
       showSeparators="Inner"

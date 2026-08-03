@@ -15,6 +15,7 @@ function exists (relativePath) {
 }
 
 const controller = read('app/bug-management-ui/webapp/ext/sections/BugCollaboration.js')
+const commentsFragment = read('app/bug-management-ui/webapp/ext/fragment/CommentsSection.fragment.xml')
 const manifest = read('app/bug-management-ui/webapp/manifest.json')
 const annotations = read('app/bug-management-ui/annotations/object-page.cds')
 const routerXsApp = read('app/router/xs-app.json')
@@ -29,6 +30,7 @@ assert(!controller.includes('invoke("$direct")'), 'Comment action must use the m
 assert(controller.includes('idtsCommentsFeed'), 'Comment success must refresh the comments feed, not the complete Object Page context')
 assert(controller.includes('getBinding("items")'), 'Comment refresh must use the public list binding API')
 assert(controller.includes('requestRefresh("$direct")'), 'Comment refresh must use the Promise-returning OData V4 requestRefresh API')
+assert(commentsFragment.includes('$$ownRequest: true'), 'The relative comments list binding must own its request before requestRefresh() is supported')
 assert(!controller.includes('new XMLHttpRequest()'), 'Collaboration writes must not use raw XMLHttpRequest')
 assert(!controller.includes('pendingCreateAttachmentsByBugId'), 'Custom browser-memory attachment queue must be retired')
 assert(!controller.includes('BugService.draftEdit'), 'Attachment handling must not manually orchestrate draftEdit')

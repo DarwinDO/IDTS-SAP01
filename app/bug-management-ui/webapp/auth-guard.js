@@ -13,6 +13,7 @@
     var TOKEN_KEY = "idts_auth_token";
     var USER_KEY = "idts_auth_user";
     var EXPIRES_KEY = "idts_auth_expires";
+    var XSUAA_RECOVERY_KEY = "idts_xsuaa_recovery";
     var AUTH_ME = "/odata/v4/auth/me()";
     var AUTH_TIMEOUT_MS = 15000;
 
@@ -23,6 +24,7 @@
         installBearerInterceptor();
         window.idtsAuthReady = Promise.resolve(readStoredUser());
     } else {
+        installXsuaaSessionMonitor();
         window.idtsAuthReady = loadBtpUser();
     }
 
@@ -87,6 +89,7 @@
                 }
                 sessionStorage.setItem(USER_KEY, JSON.stringify(user));
                 sessionStorage.removeItem(EXPIRES_KEY);
+                sessionStorage.removeItem(XSUAA_RECOVERY_KEY);
                 return user;
             })
             .catch(function (error) {
@@ -125,6 +128,42 @@
             }
             originalSend.apply(this, arguments);
         };
+    }
+
+    function installXsuaaSessionMonitor() {
+        var originalOpen;
+        var originalSend;
+
+        if (window.__IDTS_XSUAA_SESSION_MONITOR__) return;
+        window.__IDTS_XSUAA_SESSION_MONITOR__ = true;
+
+        originalOpen = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function (method, url) {
+            this.__idtsUrl = url ? String(url) : "";
+            originalOpen.apply(this, arguments);
+        };
+
+        originalSend = XMLHttpRequest.prototype.send;
+        XMLHttpRequest.prototype.send = function () {
+            var request = this;
+            request.addEventListener("loadend", function () {
+                if (request.status === 401 &&
+                    (request.__idtsUrl || "").indexOf("/odata/v4/") !== -1) {
+                    recoverExpiredXsuaaSession();
+                }
+            }, { once: true });
+            originalSend.apply(request, arguments);
+        };
+    }
+
+    function recoverExpiredXsuaaSession() {
+        if (sessionStorage.getItem(XSUAA_RECOVERY_KEY) === "1") return;
+
+        sessionStorage.setItem(XSUAA_RECOVERY_KEY, "1");
+        clearBrowserSession();
+        // A top-level request lets AppRouter renew XSUAA. Replaying the failed
+        // write automatically would risk duplicate business side effects.
+        window.location.reload();
     }
 
     function readStoredUser() {

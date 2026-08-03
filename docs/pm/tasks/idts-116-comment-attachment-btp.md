@@ -101,3 +101,24 @@ root cause of these two write failures.
 - Canonical business documents require no change because roles, workflow and
   business behavior are unchanged; only the supported UI/OData implementation
   path is corrected.
+## Post-deployment browser diagnosis — 2026-08-03
+
+- Controlled file: `idts-116-browser-evidence.txt`; SHA-256 `046C17DABAA0BDA53A4CC3CE8217B3E8645FE90E12CEC3309A3B40BD1D68B821`.
+- Baseline/deploy SHA: `511e1a09fc28195c46dd665ec499591d1645ac5a`.
+- The first comment/upload attempt was invalidated by an expired AppRouter/XSUAA session (`$batch` outer HTTP 401); the request did not reach CAP.
+- Fresh-session retry reached the generated `@cap-js/attachments` facet, displayed the draft file row, completed Save/activation and persisted the active attachment.
+- HANA readback found the active attachment row for `BUG-0019`; active navigation and S3-backed content GET returned HTTP 200 with the controlled 193-byte file. The earlier empty browser snapshot was not an attachment-persistence defect.
+- A fresh-session `addComment` action returned inner HTTP 200 and persisted, but the relative `comments` list did not refresh because it lacked UI5 `$$ownRequest`.
+- SAP-standard correction: declare `$$ownRequest: true` for the relative comments binding and use a one-shot top-level XSUAA recovery on OData 401. Never replay a failed write automatically.
+- Remaining browser proof: immediate comment-feed update, reload persistence, attachment download SHA-256, delete and reload absence.
+
+## Local remediation verification — 2026-08-03
+
+- Red tests reproduced both missing contracts before implementation: `$$ownRequest` was absent and no mid-session XSUAA OData 401 recovery existed.
+- `qa:idts116:programmatic`: PASS.
+- `qa:idts117:btp-relogin`: PASS.
+- `qa:comments-attachments:programmatic`: PASS.
+- CAP compile: PASS.
+- UI5 production build: PASS.
+- Secret scan, agent rules, QA Depth self-test, AI DevKit and `git diff --check`: PASS.
+- Focused full-file ESLint is not an accepted gate for this legacy pre-bootstrap auth bridge because it reports pre-existing global/session-storage policy findings and repository CRLF conversion. The supported UI5 production build and focused behavior checks pass; no lint rule was disabled in source.

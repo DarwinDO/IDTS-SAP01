@@ -50,6 +50,12 @@ const guard = read('app/bug-management-ui/webapp/auth-guard.js')
 assert.match(guard, /window\.location\.replace\("\/do\/logout"\)/)
 assert.match(guard, /content-type/i)
 assert.match(guard, /window\.location\.replace\("\/login\.html"\)/)
+assert.match(guard, /installXsuaaSessionMonitor/)
+assert.match(guard, /XSUAA_RECOVERY_KEY/)
+assert.match(guard, /status\s*===\s*401/)
+assert.match(guard, /\/odata\/v4\//)
+assert.match(guard, /window\.location\.reload\(\)/)
+assert.match(guard, /sessionStorage\.removeItem\(XSUAA_RECOVERY_KEY\)/)
 
 // A database outage is an availability failure, not an authorization denial.
 assert.match(guard, /AbortController/)
