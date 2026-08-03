@@ -50,6 +50,7 @@ root cause of these two write failures.
 - [x] The comments list uses Promise-returning `requestRefresh()`; a committed
   action cannot be misreported as failed because a non-Promise refresh was awaited.
 - [x] Comment action success is separated from the comments-list refresh result.
+- [x] A synchronous `requestRefresh()` throw is normalized into the refresh-warning path and cannot be misreported as an action failure.
 - [x] Compiled CDS metadata contains exactly one attachment facet.
 - [x] HTML5 application/package version is aligned at `0.0.2` to invalidate the
   stale cached manifest that still registered `IdtsAttachmentsCustom`.

@@ -5,7 +5,7 @@
 IDTS keeps comment and attachment writes inside SAPUI5/CAP-managed OData flows.
 
 - `Post Comment` binds the existing `BugService.addComment` operation through the OData V4 model. It invokes the action with the explicit `$auto` batch group, so UI5 owns the normal batch and CSRF-token lifecycle. Do not use `invoke("$direct")` for this AppRouter-protected write.
-- After the action succeeds, refresh only the `idtsCommentsFeed` items binding with `requestRefresh("$direct")`. This API returns a Promise. If that read refresh fails, the comment is still treated as committed and the user is asked to refresh the page; the UI must not report a failed post.
+- After the action succeeds, refresh only the `idtsCommentsFeed` items binding with `requestRefresh("$direct")`. Invoke that refresh inside a Promise boundary because UI5 may reject asynchronously or throw synchronously before returning its Promise. Either refresh failure is display-only: the comment remains committed and the UI must never report a failed post.
 - Attachments use the single `@cap-js/attachments` Fiori Elements facet. Do not restore the retired custom uploader or manual `draftEdit` / binary upload / `draftActivate` chain.
 - When HTML5 content changes, keep the package and `sap.app.applicationVersion` versions aligned and incremented. AppRouter marks `index.html`, `manifest.json`, `Component.js` and `Component-preload.js` as no-store entry assets. Together these controls stop an older manifest from continuing to display a retired custom section beside the generated facet.
 
