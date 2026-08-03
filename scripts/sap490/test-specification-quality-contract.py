@@ -1,8 +1,8 @@
 """Red/green quality contract for the mentor-facing SAP490 specifications.
 
 This test intentionally checks content truth in addition to Office file
-validity.  It prevents a schema-valid workbook from being accepted when its
-runtime trace, test status, version history, or Vietnamese content is stale.
+validity. It prevents a schema-valid English submission from being accepted
+when its runtime trace, test status, or version history is stale.
 """
 
 from __future__ import annotations
@@ -23,13 +23,9 @@ TECHNICAL_TEMPLATE = ROOT / "docs" / "sap490" / "templates" / "Deliverable_templ
 
 FILES = {
     "functional_en": GENERATED / "Functional_Specification_IDTS_SAP01_en_v0.7.xlsx",
-    "functional_vi": GENERATED / "Functional_Specification_IDTS_SAP01_vi_v0.7.xlsx",
     "technical_en": GENERATED / "Technical_Specification_IDTS_SAP01_en_v0.7.xlsx",
-    "technical_vi": GENERATED / "Technical_Specification_IDTS_SAP01_vi_v0.7.xlsx",
     "config_en": GENERATED / "Configuration_Note_IDTS_SAP01_en_v0.5.xlsx",
-    "config_vi": GENERATED / "Configuration_Note_IDTS_SAP01_vi_v0.5.xlsx",
     "blueprint_en": GENERATED / "Blueprint_IDTS_SAP01_en_v0.6.docx",
-    "blueprint_vi": GENERATED / "Blueprint_IDTS_SAP01_vi_v0.6.docx",
 }
 
 FORBIDDEN_TRACES = {
@@ -202,12 +198,10 @@ def main() -> int:
         return 1
 
     failures.extend(validate_technical_template_contract(FILES["technical_en"], "en"))
-    failures.extend(validate_technical_template_contract(FILES["technical_vi"], "vi"))
-
-    functional_text = workbook_text(FILES["functional_en"]) + "\n" + workbook_text(FILES["functional_vi"])
-    technical_text = workbook_text(FILES["technical_en"]) + "\n" + workbook_text(FILES["technical_vi"])
-    config_text = workbook_text(FILES["config_en"]) + "\n" + workbook_text(FILES["config_vi"])
-    blueprint_text = document_text(FILES["blueprint_en"]) + "\n" + document_text(FILES["blueprint_vi"])
+    functional_text = workbook_text(FILES["functional_en"])
+    technical_text = workbook_text(FILES["technical_en"])
+    config_text = workbook_text(FILES["config_en"])
+    blueprint_text = document_text(FILES["blueprint_en"])
     all_text = "\n".join((functional_text, technical_text, config_text, blueprint_text))
 
     for trace in sorted(FORBIDDEN_TRACES):
@@ -239,7 +233,7 @@ def main() -> int:
     if any(pattern in all_text for pattern in generic_409_patterns):
         failures.append("HTTP 409 is still described as a generic lifecycle response")
 
-    for path in (FILES["technical_en"], FILES["technical_vi"]):
+    for path in (FILES["technical_en"],):
         workbook = load_workbook(path, data_only=False)
         implementation = workbook["Technical Implementation"]
         bad_fonts = [
@@ -252,18 +246,6 @@ def main() -> int:
         if bad_fonts:
             failures.append(f"{path.name}: non-template Technical Implementation font at {bad_fonts[:8]}")
 
-    for path in (FILES["config_vi"],):
-        text = workbook_text(path)
-        repeated = text.count("No secrets in this workbook")
-        if repeated:
-            failures.append(f"{path.name}: repeated English no-secret note remains ({repeated})")
-        english_sentences = re.findall(
-            r"\b(?:Initial|Shared QA configuration|Security and AI controls|Configured|Required per schema change)\b",
-            text,
-        )
-        if english_sentences:
-            failures.append(f"{path.name}: visible English residue remains: {sorted(set(english_sentences))}")
-
     for path in FILES.values():
         text = workbook_text(path) if path.suffix == ".xlsx" else document_text(path)
         if "###" in text:
@@ -271,7 +253,7 @@ def main() -> int:
         if "Created bDonHV" in text or "IDTSIDTS-TECH" in text:
             failures.append(f"{path.name}: contains concatenated metadata")
 
-    for path in (FILES["functional_en"], FILES["functional_vi"]):
+    for path in (FILES["functional_en"],):
         workbook = load_workbook(path, data_only=False)
         definition = workbook["Screen Definition"]
         populated = sum(
@@ -282,10 +264,7 @@ def main() -> int:
         if populated < 18:
             failures.append(f"{path.name}: Screen Definition has only {populated} populated rows; expected >=18")
 
-    formal_paths = (
-        FILES["functional_en"], FILES["functional_vi"],
-        FILES["technical_en"], FILES["technical_vi"],
-    )
+    formal_paths = (FILES["functional_en"], FILES["technical_en"])
     for path in formal_paths:
         workbook = load_workbook(path, data_only=False)
         for sheet in workbook.worksheets:
@@ -301,7 +280,7 @@ def main() -> int:
                     if is_requirement_data and len(re.findall(r"\bSRS-FR-[A-Z]+\b", value)) > 1:
                         failures.append(f"{path.name}/{sheet.title}!{cell.coordinate}: multiple Requirement IDs in one cell")
 
-    for path in (FILES["technical_en"], FILES["technical_vi"]):
+    for path in (FILES["technical_en"],):
         workbook = load_workbook(path, data_only=False)
         layout_text = "\n".join(
             str(cell.value) for row in workbook["Screen Layout"].iter_rows()
@@ -313,7 +292,7 @@ def main() -> int:
             failures.append(f"{path.name}: independent technical message catalog remains")
 
     message_id_sets = {}
-    for label in ("functional_en", "functional_vi", "technical_en", "technical_vi"):
+    for label in ("functional_en", "technical_en"):
         workbook = load_workbook(FILES[label], data_only=False)
         message_id_sets[label] = {
             str(cell.value) for row in workbook["Message Definition"].iter_rows()
@@ -323,16 +302,6 @@ def main() -> int:
     for label, ids in message_id_sets.items():
         if ids != expected_messages:
             failures.append(f"{label}: Message ID parity mismatch: {sorted(ids ^ expected_messages)}")
-
-    for path in (FILES["technical_vi"],):
-        text = workbook_text(path)
-        forbidden_vi_prose = (
-            "Route/Page/Extension map", "Safe auth entry", "Read-only role-aware KPIs",
-            "Business Process", "Data Dictionary Objects", "Technical meaning",
-        )
-        for phrase in forbidden_vi_prose:
-            if phrase in text:
-                failures.append(f"{path.name}: visible English prose remains: {phrase}")
 
     if failures:
         print("\n".join(f"FAIL: {item}" for item in failures))

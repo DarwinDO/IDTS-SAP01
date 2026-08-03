@@ -1,5 +1,20 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-08-03 - IDTS-106 EN-only Drive cleanup execution
+
+- Classification: documentation/process result.
+- Result: after DonHV's IDTS-105 READ and the approved IDTS-107 Gate 2 were satisfied, the EN-only pipeline was implemented. Eleven generated VI artifacts are retired from the current repo tree, with bytes preserved by Git history and annotated tag `sap490-english-only-pre-cleanup-20260803`.
+- Drive control: all 13 VI Mentor Current artifacts were downloaded to `E:\IDTS-SAP01-backups\drive-vi-before-trash-20260803-1625`, hashed and Office-ZIP checked before being moved to Trash. No folder was trashed and Trash was not emptied.
+- Verification: fresh parent-folder readback reports no VI item and one EN counterpart for all 13 families. The same-ID Mentor Index contains no VI row/link and records the English-only policy, current versions and truthful pending acknowledgments/test execution.
+- Evidence: `docs/pm/evidence/idts-106/drive-vi-pre-trash-manifest-20260803.md` and `docs/sap490/generated-vi-retirement-manifest-20260803.md`.
+- Next action: finish local/security/process gates, update PR #264, merge normally without bypass, verify `origin/dev`, then close IDTS-106 in Jira. SangVN, DatDT and NhanT still acknowledge IDTS-105 before approving their own packages.
+
+- Classification: tooling issue (resolved).
+- Symptom: the first browser automation loop opened the selected Drive row's action affordance before the row selection toolbar was fully active, so `Move to bin` was not exposed; later bulk attempts occasionally timed out while the Drive grid rerendered.
+- Root cause: Google Drive lazily renders row actions and replaces the selected row after each operation.
+- Fix status: resolved by requiring an exact single filename match, selecting the row, then using the supported Delete shortcut for Move to bin and verifying the row disappeared before continuing.
+- Impact: no wrong file or folder was moved; exact-ID manifest and post-operation folder readback confirm the approved 13-file scope.
+
 ## 2026-08-03 - IDTS-106 merge synchronization issue
 
 - Classification: process/merge issue.

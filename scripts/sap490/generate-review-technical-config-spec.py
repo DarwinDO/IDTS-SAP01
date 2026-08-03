@@ -766,7 +766,7 @@ def configuration(language):
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    for language in ("en", "vi"):
+    for language in ("en",):
         print(generate_technical_specification(language).relative_to(ROOT))
         print(configuration(language).relative_to(ROOT))
 

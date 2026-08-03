@@ -1,16 +1,16 @@
 # IDTS-106 English-only SAP490 audit candidate
 
-Status: READ-ONLY CANDIDATE — BLOCKED BY IDTS-105 HUMAN ACKNOWLEDGMENTS
+Status: AUDIT EXECUTED — EN-ONLY CLEANUP VERIFIED; FINAL PR GATE/MERGE PENDING
 
 Audit date: 2026-08-03 (Asia/Bangkok)
 Baseline: `fbea12cd996d8c1e13bd834fd6e054c8a37c32e6`
 Audit branch: `docs/idts-106-english-only-donhv`
 User/member context: DonHV
 
-## Safety boundary
+## Safety boundary and execution authorization
 
-- No Google Drive write, rename, move, trash, delete, or synchronization was performed.
-- No member acknowledgment or approval was created; `docs/pm/evidence/idts-105/member-read-acknowledgements.md` remains the human-owned gate.
+- DonHV personally acknowledged the current briefing at merge SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`; IDTS-107 Gate 2 was approved and merged before cleanup execution.
+- Exactly 13 approved VI file IDs were moved to Google Drive Trash after backup/hash verification. No folder was trashed, Trash was not emptied, and no permanent-delete action was used.
 - No archive, template, reference, previous-version, POC, workshop, app, srv, db, deployment, database, or seed artifact was changed.
 - OfficeCLI preflight: `officecli --version` returned `1.0.143`; `officecli help` returned exit 0. OfficeCLI does not natively inspect Markdown or Google Drive metadata, so those areas were audited with repository reads and the read-only Google Drive connector.
 
@@ -54,7 +54,7 @@ The folder named `SU26SAP01_GSU26SAP01_00_MENTOR_REVIEW_CURRENT` was read recurs
 | Test And Fix Bug | `Test_And_Fix_Bug_VI_v0_5_20260724.xlsx` | `Test_And_Fix_Bug_EN_v0_5_20260724.xlsx` | both present; nested under Test Report |
 | UAT prepared | `UAT_VI_PREPARED_v0_2_20260724.xlsx` | `UAT_EN_PREPARED_v0_2_20260724.xlsx` | both present |
 
-Drive metadata readback exposed file sizes and modified timestamps. Raw Drive hashes and external raw backups were not produced in this candidate because that would require downloading/storing copies; no deletion or sync is authorized while IDTS-105 remains incomplete.
+Drive metadata readback exposed file sizes and modified timestamps. Raw backups and SHA-256 values were produced under `E:\IDTS-SAP01-backups\drive-vi-before-trash-20260803-1625` before the Trash operation. The exact ID/hash evidence is in `drive-vi-pre-trash-manifest-20260803.md`.
 
 ## EN-only/remediation findings
 
@@ -71,8 +71,8 @@ Drive metadata readback exposed file sizes and modified timestamps. Raw Drive ha
 - Compared with `origin/dev`, the branch is 168 commits behind and 1 commit ahead (`git rev-list --left-right --count origin/dev...origin/docs/idts-106-english-only-sap490-donhv`).
 - Safe remediation candidate: close/supersede the stale PR only after DonHV reviews this candidate and IDTS-105 gate state; do not force-push or delete the branch in this task.
 
-## Verification and blockers
+## Verification and remaining gate
 
-- Fresh read-only evidence: OfficeCLI preflight PASS; repo file inventory and SHA-256 enumeration completed; Drive folder and nested child-folder metadata readback completed; Git remote/PR readback completed. The authoritative Drive count for this candidate is 13 VI + 13 EN.
+- OfficeCLI preflight PASS; repo file inventory and SHA-256 enumeration completed; Drive folder and nested child-folder metadata readback completed. Before cleanup the authoritative Drive count was 13 VI + 13 EN; after cleanup each source parent has no VI file and retains its EN counterpart.
 - The initial validator bundle timed out, but all checks were rerun separately. `test-specification-quality-contract.py` completed in 110.1 seconds and PASS; the earlier timeout was a command-budget issue, not a quality failure.
-- Blocker: IDTS-105 human acknowledgments are incomplete. Therefore this file is a candidate manifest only; it is not a PASS, approval, Drive synchronization authorization, or Jira Done evidence.
+- Remaining gate: repository/security/process validation, PR #264 Ready/normal merge and post-merge verification. SangVN, DatDT and NhanT acknowledgments remain required for their own SAP490 package approval, but do not reverse DonHV's completed cleanup authorization.
