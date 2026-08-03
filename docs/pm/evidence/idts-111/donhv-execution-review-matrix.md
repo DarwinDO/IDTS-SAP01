@@ -7,7 +7,7 @@
 - Execution baseline: `fbea12cd996d8c1e13bd834fd6e054c8a37c32e6`.
 - Deployed runtime: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`.
 - Reviewer: DonHV, with independent read-only agent reviews used only as advisory input.
-- Evidence integrity: 57 manifests, 61 referenced images, 0 missing file, 0 SHA-256 mismatch.
+- Evidence integrity: 57 manifests, 63 referenced images after targeted reruns, pending fresh exact-head verification.
 
 `ACCEPTED_EVIDENCE` means that the submitted evidence truthfully supports the observed result. It does not mean that a blocked case passed, that a product defect is fixed, or that the final UAT workbook is approved.
 
@@ -90,4 +90,4 @@ The PR #270 evidence package is internally consistent and may be retained as tru
 
 ## Current rerun state
 
-NhanT recorded the required acknowledgment in the repository and Jira comments `10908`/`10909`. The targeted reruns remain blocked because the deployed SAP page is blank and returns JavaScript parse errors for `auth-guard.js` and `bootstrap-ui5.js`; no candidate result was promoted. `UAT-UX-003` still requires physical-keyboard confirmation. The workbook and Drive artifact remain unchanged.
+NhanT recorded the required acknowledgment in the repository and Jira comments `10908`/`10909`. The deployed SAP application is now usable. Fresh `UAT-COM-001` and `UAT-ATT-001` reruns reproduced their existing safe failures and added sanitized screenshots without promoting either result. The approved Browser surface still does not expose the sanitized response status/body, immutable suggestion ID, or Network trace required to close the root-cause questions for `UAT-COM-001`, `UAT-ATT-001`, `UAT-AI-005`, and `UAT-AI-009`; IDTS-113/114/115/116 remain the diagnostic owners. `UAT-UX-003` still requires physical-keyboard confirmation. The workbook and Drive artifact remain unchanged.

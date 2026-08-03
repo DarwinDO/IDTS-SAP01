@@ -142,6 +142,10 @@ DonHV đã siết lại IDTS-24 UAT evidence: script Playwright hiện fail khi 
 
 Tooling note: two quick PowerShell scan commands for old XML binding syntax failed because `{`, `$`, and `|` were quoted incorrectly for PowerShell. The scan was rerun with `Select-String` using separate safe patterns and passed. This was a transient verification-command issue, not a product defect.
 
+- 2026-08-03 IDTS-111 targeted rerun closure: the deployed SAP UI was usable. Fresh `UAT-COM-001` and `UAT-ATT-001` runs reproduced their existing safe failures; comment text remained unpersisted and the supported synthetic file created no attachment/orphan row. Added two sanitized screenshots and updated the manifests without promoting either candidate result.
+- Remaining IDTS-111 limits: the approved Browser surface does not expose the sanitized response status/body, immutable suggestion ID, or Network trace requested for `UAT-COM-001`, `UAT-ATT-001`, `UAT-AI-005`, and `UAT-AI-009`; IDTS-113/114/115/116 remain diagnostic owners. `UAT-UX-003` still requires NhanT's physical-keyboard confirmation. No workbook/Drive artifact was changed.
+- Fresh verification: 57 manifests / 63 evidence references / 0 missing / 0 SHA-256 mismatch; secret scan PASS; QA-depth self-test 15/15; AI DevKit lint PASS (`5 ok`, `0 requiredFailures`); `git diff --check` PASS. Next handoff: push PR #270 update and request DonHV review of the truthful rerun evidence and remaining blockers.
+
 ## Update Rule
 
 - 2026-08-03 IDTS-111 remediation follow-up — tooling issue: the first scoped cherry-pick of NhanT's latest personal briefing acknowledgment failed because the sandbox could not create the shared worktree `index.lock` under the main repository `.git/worktrees` directory. No branch content changed. Retry requires the already authorized narrow Git operation outside the sandbox; do not change global safe-directory configuration.
@@ -156,3 +160,4 @@ Vietnamese:
 - NhanT cập nhật file này sau mỗi phiên làm việc.
 - Ghi rõ đã test gì, pass phần nào, fail phần nào, bug/error phát hiện, đã fix hay chưa và bằng chứng command/kết quả.
 - Không chỉnh file status của thành viên khác trừ khi phối hợp với DonHV.
+- 2026-08-03 PR-body gate issue: the first refreshed IDTS-111 body used Markdown backticks around both Ownership Knowledge Gate evidence paths, while `check-pr-depth.js` requires a whitespace-delimited `docs/...` path. The body content was complete but the parser returned FAIL. Classification: documentation/gate-format issue. Status: remove backticks only from the Evidence field and rerun the actual body gate; secret scan and diff check passed in the same batch.

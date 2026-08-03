@@ -14,7 +14,7 @@ Deployed runtime: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`
   - `MEETS_EXPECTED_RESULT`: 19.
   - `DOES_NOT_MEET_EXPECTED_RESULT`: 13.
 - `EXECUTION_BLOCKED_PENDING_PRECONDITION`: 25 cases.
-- Retained visual evidence: 61 PNG files; every manifest reference and SHA-256 verified.
+- Retained visual evidence: 63 PNG files after the targeted comment/upload reruns; every manifest reference and SHA-256 verified.
 - Reviewer-approved PASS/FAIL: none. The approved catalog remains unchanged at 90 `PREPARED`.
 - Final `UAT_EN_PREPARED` workbook and Google Drive: unchanged; DonHV remains final integrator.
 
@@ -23,7 +23,7 @@ Deployed runtime: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`
 | Case | Candidate finding |
 | --- | --- |
 | `UAT-AI-008` | Handoff Summary named DonHV as verified current owner while the Object Page showed Project Manager. |
-| `UAT-COM-001` | A valid controlled comment returned a safe posting error and was not stored. |
+| `UAT-COM-001` | A fresh valid controlled comment rerun again returned the safe posting error, retained the input, and stored no comment. |
 | `UAT-UX-002` | Tablet Object Page/dialog text clipped instead of wrapping. |
 | `UAT-UX-003` | Enter/Escape/focus return worked, but Tab did not advance across nine attempts; manual keyboard confirmation remains required. |
 | `UAT-BUG-008` | One title Save produced two identical Edit audit events. |
@@ -32,7 +32,7 @@ Deployed runtime: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`
 | `UAT-AI-014` | Reject did not persist once; business state remained unchanged. |
 | `UAT-AI-015` | Ignore did not persist once; business state remained unchanged. |
 | `UAT-AI-005` | Accepted classification could not be applied; safe error shown and no partial mutation occurred. |
-| `UAT-ATT-001` | Supported 54-byte text upload failed safely and created no metadata. |
+| `UAT-ATT-001` | A fresh supported 47-byte text upload rerun failed safely and created no orphan metadata. |
 | `UAT-AI-009` | Smart Assign exposed `Communication error: 401 error` while the protected session remained valid. |
 | `UAT-AUTH-005` | Logout ended the session, but reopening the protected route rendered a blank page instead of SAP sign-in. |
 
@@ -59,7 +59,7 @@ Each blocked manifest records the exact missing precondition, why the NhanT sess
 ## Verification
 
 - 57 manifests parsed successfully.
-- 61 evidence references exist and match their recorded SHA-256; minimum image dimensions are 834 x 901 and minimum file size is 8,406 bytes.
+- 63 evidence references exist and match their recorded SHA-256.
 - `npm.cmd run qa:secret-scan` -> PASS.
 - `git diff --check` -> PASS.
 - Catalog integrity -> 90/90 `PREPARED`; catalog file has no diff.
@@ -71,3 +71,10 @@ Each blocked manifest records the exact missing precondition, why the NhanT sess
 2. Decide whether `UAT-ATT-006` is sufficient with inferred storage failure or requires a controlled S3 outage rerun.
 3. Provision the identities, roles, state fixtures, service fixes, and direct-request controls listed in the 25 blocked manifests, then assign reruns where required.
 4. Only after reviewer decisions, update the approved catalog and generate/synchronize the final English `UAT_EN_PREPARED` workbook.
+
+## Targeted rerun closure (2026-08-03)
+
+- `UAT-COM-001`: rerun completed; the same safe posting failure reproduced and no comment persisted. The Browser surface exposed no sanitized response status/body, so IDTS-116 still owns root-cause diagnosis.
+- `UAT-ATT-001`: rerun completed with a fresh synthetic supported file; the same safe upload failure reproduced and no orphan row appeared. The Browser surface could not distinguish metadata, binary, S3, session, or CSRF stage, so IDTS-113 remains open.
+- `UAT-AI-005` and `UAT-AI-009`: no new outcome was promoted because the approved Browser surface does not expose the required immutable suggestion ID or sanitized Network response evidence. Existing candidate evidence remains truthful; IDTS-114/115 retain the diagnostic follow-up.
+- `UAT-UX-003`: remains a physical-keyboard-only confirmation; automation must not be represented as a human Tab-key result.

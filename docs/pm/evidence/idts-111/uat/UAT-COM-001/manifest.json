@@ -5,17 +5,17 @@
   "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
   "executor": "NhanT",
   "actorRole": "TESTER",
-  "executedAt": "2026-08-03T15:25:00+07:00",
+  "executedAt": "2026-08-03T20:57:42+07:00",
   "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
   "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
   "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
   "testRecord": {
     "bugNumber": "BUG-0025",
     "title": "IDTS-111 UAT-BUG-001 NhanT 20260803-1446",
-    "comment": "IDTS-111 UAT-COM-001 NhanT persistence check 20260803-1525"
+    "comment": "IDTS-111 UAT-COM-001 rerun NhanT 20260803-2054"
   },
   "expectedResult": "The sanitized comment, actor, role, and timestamp persist once.",
-  "actualResult": "The controlled comment was entered and Post Comment was invoked. SAP displayed the safe error 'The comment could not be posted. Please refresh and try again.' The input remained populated and the list remained 'No comments yet.', so no comment, actor, role, or timestamp persisted.",
+  "actualResult": "The controlled comment was entered and Post Comment was invoked in a fresh targeted rerun. SAP again displayed the safe error 'The comment could not be posted. Please refresh and try again.' The input remained populated and the list remained 'No comments yet.', so no comment, actor, role, or timestamp persisted.",
   "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
   "reviewBoundary": "This is a candidate failure finding, not an approved FAIL. DonHV must classify the underlying comment-action failure and decide the Jira/catalog result.",
   "evidence": [
@@ -30,6 +30,12 @@
       "file": "02-post-failure.png",
       "description": "Safe SAP error after Post Comment with the input retained and no stored comment.",
       "sha256": "75BAC5242D660564AF0DC2991BCEDC987F3B0F2CB4160E5858374F37BDC0D526"
+    },
+    {
+      "id": "UAT-COM-001-E03",
+      "file": "03-rerun-safe-post-failure.png",
+      "description": "Fresh 2026-08-03 targeted rerun: safe post failure, retained input, and no persisted comment.",
+      "sha256": "E0399525FE40E1092044C53BDE8E5D1534822423DA35769FA2FFD09EFCF9535A"
     }
   ],
   "privacyReview": {

@@ -3,7 +3,7 @@
 - Catalog owner/approver and final integrator: DonHV
 - Execution support: NhanT, SangVN and DatDT
 - Due: 2026-08-04
-- Status: DonHV disposition recorded; targeted reruns are blocked by the blank deployed SAP surface and one physical-keyboard confirmation remains human-only
+- Status: DonHV disposition recorded; comment/upload targeted reruns reproduced safely, diagnostic Network gaps and one physical-keyboard confirmation remain
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-111
 
 ## Workflow
@@ -23,7 +23,7 @@
 - Approved catalog truth remains unchanged: 90 `PREPARED`, 0 reviewer-approved PASS, 0 reviewer-approved FAIL.
 - NhanT candidate execution batch: 57/57 packaged; 32 `EXECUTED_PENDING_DONHV_REVIEW` (19 candidate `MEETS_EXPECTED_RESULT`, 13 candidate `DOES_NOT_MEET_EXPECTED_RESULT`) and 25 `EXECUTION_BLOCKED_PENDING_PRECONDITION`. No NhanT-assigned case remains unattempted or unpackaged. The case manifests and consolidated summary preserve exact evidence, blockers, and rerun conditions; none changes the approved catalog before DonHV review.
 - DonHV disposition: 19 positive evidence packages accepted; 25 blockers accepted without PASS; 13 negatives split into 3 confirmed product defects (`UAT-AUTH-005`, `UAT-BUG-008`, `UAT-UX-002`), 5 catalog mismatches, 1 environment/session blocker, 3 targeted reruns, and 1 test-harness limitation. See `docs/pm/evidence/idts-111/donhv-execution-review-matrix.md`.
-- Current rerun blocker: the deployed SAP page is blank after controlled reload and reports JavaScript parse errors for `auth-guard.js` and `bootstrap-ui5.js`. No targeted rerun was promoted. `UAT-UX-003` requires NhanT to confirm physical Tab-key behavior manually.
+- Current rerun state: the deployed SAP page is usable. Fresh `UAT-COM-001` and `UAT-ATT-001` reruns reproduced the same safe failures without comment/attachment persistence or orphan metadata. The approved Browser surface cannot expose the sanitized HTTP/Network details or immutable suggestion ID required to close `UAT-AI-005`/`UAT-AI-009` and root-cause IDTS-113/114/115/116. No candidate result was promoted. `UAT-UX-003` still requires NhanT to confirm physical Tab-key behavior manually.
 - Knowledge gate: NhanT acknowledged briefing SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`; Jira comments `10908` (IDTS-110) and `10909` (IDTS-111).
 - Candidate execution summary: `docs/pm/evidence/idts-111/execution-summary.md`.
 - Catalog merge SHA: `6f01affc2c2945e51d18199137c8a89a20c77600`.
@@ -35,4 +35,4 @@
 
 Assigned members may now execute after running the readiness check for their session. No UAT VI, fabricated sign-off, shared member session, or historical Render evidence is allowed. AI provider-primary success and safe fallback must be reported separately.
 
-NhanT's completed candidate package uses the authenticated SAP BTP UI and member-owned Tester identity. It contains 61 hash-verified sanitized screenshots, 57 manifests, explicit candidate outcomes for 32 executed cases, and case-specific rerun conditions for 25 cases whose required identity, role, state, service, or fixture was unavailable. The session was signed out after the final auth case. DonHV still owns review, catalog result decisions, Jira disposition, final workbook generation, and same-ID Drive synchronization.
+NhanT's completed candidate package uses the authenticated SAP BTP UI and member-owned Tester identity. It contains 63 sanitized screenshots referenced by 57 manifests after the targeted comment/upload reruns, explicit candidate outcomes for 32 executed cases, and case-specific rerun conditions for 25 cases whose required identity, role, state, service, or fixture was unavailable. DonHV still owns review, catalog result decisions, Jira disposition, final workbook generation, and same-ID Drive synchronization.
