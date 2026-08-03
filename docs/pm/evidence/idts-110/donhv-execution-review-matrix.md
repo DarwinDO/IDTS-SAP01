@@ -32,21 +32,28 @@ The candidate conflates optional BTP confirmation with the environment required 
 
 | Primary boundary | Cases | Required environment |
 | --- | ---: | --- |
-| Pure unit | 10 | Local |
+| Pure unit | 7 | Local |
 | UI component | 2 | Local browser/component harness |
-| CAP component | 146 | Local isolated CAP fixture |
-| OData contract | 13 | Local CAP HTTP/OData harness |
-| BTP integration | 17 | SAP BTP/HANA/XSUAA/external integration |
-| **Total** | **188** | **171 local + 17 BTP** |
+| CAP component | 150 | Local isolated CAP fixture; selected cases may be repeated on HANA |
+| OData contract | 16 | Local CAP HTTP/OData harness; selected cases may be repeated through AppRouter |
+| BTP integration | 13 | SAP BTP/HANA/XSUAA/external integration |
+| **Total** | **188** | **175 local-primary + 13 BTP-only** |
 
-Therefore, 133 cases labeled `HYBRID_BTP` are not legitimately blocked from their primary local result. They require local execution first; BTP confirmation is additional evidence only where the assertion calls for it.
+Therefore, the catalog now distinguishes 175 locally executable primary assertions from 13 BTP-only integrations. Cases marked `HYBRID_BTP` require local execution first; BTP confirmation is additional evidence rather than a prerequisite for the primary Unit Test result.
 
-The 17 true BTP integration cases are:
+The 13 true BTP integration cases are:
 
 - `UT-AUTH-011`–`UT-AUTH-015`: XSUAA/deployed identity behavior.
-- `UT-ATT-003`–`UT-ATT-006` and `UT-ATT-009`–`UT-ATT-012`: HANA/S3 persistence and deployed attachment behavior.
-- `UT-NTF-012`–`UT-NTF-013`: deployed worker concurrency and Job Scheduler behavior.
-- `UT-AI-026`–`UT-AI-027`: deployed PM metrics and live-provider rate-limit behavior.
+- `UT-ATT-003`–`UT-ATT-006` and `UT-ATT-010`–`UT-ATT-012`: production HANA/S3 persistence and injected storage failure behavior.
+- `UT-NTF-013`: bound Job Scheduler authorization and deployed invocation.
+
+The independent taxonomy audit also found and the canonical catalog now corrects these over-classifications:
+
+- `UT-ATT-009`: local OData authorization denial occurs before storage access.
+- `UT-NTF-009`–`UT-NTF-011`: they use CAP transactions/persistence and are CAP component tests, not pure unit tests.
+- `UT-NTF-012`: controlled two-worker compare-and-set is locally executable, with optional HANA parity evidence.
+- `UT-AI-026`: operational metrics are a local OData contract, with optional deployed-role confirmation.
+- `UT-AI-027`: injected HTTP 429 is a local provider component test; a naturally observed live quota response belongs to acceptance evidence.
 
 ## Two candidate FAIL results
 
@@ -98,9 +105,9 @@ Required cleanup:
 
 1. NhanT personally reads and acknowledges briefing SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`.
 2. DonHV's correction branch updates the two canonical catalog expectations above; no execution result is rewritten to manufacture PASS.
-3. NhanT reruns the 133 falsely blocked local CAP/OData cases with the correct local harness.
+3. NhanT reruns the falsely blocked local CAP/OData cases with the correct primary harness.
 4. NhanT runs the two UI component cases with a working UI component/browser harness.
-5. Only 17 cases remain BTP-required; run them in controlled batches after `btp:demo:check` reports READY.
+5. Only 13 cases remain BTP-required; run them in controlled batches after `btp:demo:check` reports READY.
 6. Evidence duplicates and misleading proof labels are removed.
 7. PR body is refreshed and `qa-depth-gate` reruns on the exact final head.
 

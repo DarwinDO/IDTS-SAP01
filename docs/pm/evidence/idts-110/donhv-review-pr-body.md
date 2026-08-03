@@ -11,7 +11,7 @@ Review PR #269 at exact head `8957cbaa20f9c629818901f9b988884337a7ff82`, correct
 ## Negative Evidence
 
 - PR #269 reports two FAIL results; both are catalog expectation mismatches, not demonstrated product defects.
-- PR #269 reports 152 BLOCKED cases, including 133 cases whose primary CAP/OData boundary is locally executable.
+- PR #269 reports 152 BLOCKED cases while the corrected catalog has only 13 true BTP-only integrations.
 
 ## Edge/Boundary Evidence
 
@@ -41,7 +41,7 @@ Review PR #269 at exact head `8957cbaa20f9c629818901f9b988884337a7ff82`, correct
 ## Known Gaps
 
 - NhanT must personally acknowledge briefing SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`.
-- The 133 falsely blocked local cases and 17 true BTP cases still require accepted reruns.
+- The falsely blocked local cases and 13 true BTP cases still require accepted reruns.
 - Duplicate SVG evidence in PR #269 still requires cleanup.
 
 ## Jira/Evidence Links

@@ -56,16 +56,16 @@
       "Validation": 16
     },
     "byTestLevel": {
-      "BTP_INTEGRATION": 17,
-      "CAP_COMPONENT": 145,
-      "ODATA_CONTRACT": 14,
-      "PURE_UNIT": 10,
+      "BTP_INTEGRATION": 13,
+      "CAP_COMPONENT": 150,
+      "ODATA_CONTRACT": 16,
+      "PURE_UNIT": 7,
       "UI_COMPONENT": 2
     },
     "byEnvironment": {
-      "BTP_REQUIRED": 17,
-      "HYBRID_BTP": 133,
-      "LOCAL": 38
+      "BTP_REQUIRED": 13,
+      "HYBRID_BTP": 135,
+      "LOCAL": 40
     },
     "execution": {
       "NOT_RUN": 188
@@ -7418,8 +7418,8 @@
       "objective": "Verify unauthenticated attachment write is denied.",
       "classification": "ROLE",
       "priority": "HIGH",
-      "testLevel": "BTP_INTEGRATION",
-      "environment": "BTP_REQUIRED",
+      "testLevel": "ODATA_CONTRACT",
+      "environment": "LOCAL",
       "requirementIds": [
         "SRS-DATA-007"
       ],
@@ -7440,7 +7440,7 @@
         "Assert the response, persisted state, side effects, and safe error boundary described below.",
         "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "HTTP 401/403 is returned and existing attachment state is unchanged.",
+      "expectedResult": "HTTP 401/403 is returned before storage access and existing attachment state is unchanged.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/content.js",
@@ -7452,8 +7452,7 @@
         "sanitized case manifest",
         "sanitized HTTP request/response image",
         "before/after database image",
-        "reload/readback image",
-        "sanitized platform/provider evidence"
+        "reload/readback image"
       ],
       "execution": {
         "status": "NOT_RUN",
@@ -8571,7 +8570,7 @@
       "objective": "Verify delivery before nextAttemptAt is not retried.",
       "classification": "BOUNDARY",
       "priority": "HIGH",
-      "testLevel": "PURE_UNIT",
+      "testLevel": "CAP_COMPONENT",
       "environment": "LOCAL",
       "requirementIds": [
         "SRS-FR-NOTIF-001",
@@ -8586,10 +8585,10 @@
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
-      "input": "Evaluate a FAILED row whose nextAttemptAt is in the future.",
+      "input": "Evaluate a FAILED row whose nextAttemptAt is in the future through processEmailDeliveries.",
       "steps": [
         "Prepare the stated precondition and capture the before-state.",
-        "Execute only this branch using: Evaluate a FAILED row whose nextAttemptAt is in the future.",
+        "Execute only this branch using: Evaluate a FAILED row whose nextAttemptAt is in the future through processEmailDeliveries.",
         "Assert the response, persisted state, side effects, and safe error boundary described below.",
         "Reload or read back state when persistence is part of the case."
       ],
@@ -8636,7 +8635,7 @@
       "objective": "Verify delivery at or after nextAttemptAt is retried.",
       "classification": "POSITIVE",
       "priority": "HIGH",
-      "testLevel": "PURE_UNIT",
+      "testLevel": "CAP_COMPONENT",
       "environment": "LOCAL",
       "requirementIds": [
         "SRS-FR-NOTIF-001",
@@ -8651,10 +8650,10 @@
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
-      "input": "Evaluate a FAILED row whose nextAttemptAt has elapsed.",
+      "input": "Evaluate a FAILED row whose nextAttemptAt has elapsed through processEmailDeliveries.",
       "steps": [
         "Prepare the stated precondition and capture the before-state.",
-        "Execute only this branch using: Evaluate a FAILED row whose nextAttemptAt has elapsed.",
+        "Execute only this branch using: Evaluate a FAILED row whose nextAttemptAt has elapsed through processEmailDeliveries.",
         "Assert the response, persisted state, side effects, and safe error boundary described below.",
         "Reload or read back state when persistence is part of the case."
       ],
@@ -8701,7 +8700,7 @@
       "objective": "Verify delivery at max attempts remains failed.",
       "classification": "BOUNDARY",
       "priority": "HIGH",
-      "testLevel": "PURE_UNIT",
+      "testLevel": "CAP_COMPONENT",
       "environment": "LOCAL",
       "requirementIds": [
         "SRS-FR-NOTIF-001",
@@ -8716,10 +8715,10 @@
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
-      "input": "Evaluate a FAILED row whose attemptCount reached maxAttempts.",
+      "input": "Evaluate a FAILED row whose attemptCount reached maxAttempts through processEmailDeliveries.",
       "steps": [
         "Prepare the stated precondition and capture the before-state.",
-        "Execute only this branch using: Evaluate a FAILED row whose attemptCount reached maxAttempts.",
+        "Execute only this branch using: Evaluate a FAILED row whose attemptCount reached maxAttempts through processEmailDeliveries.",
         "Assert the response, persisted state, side effects, and safe error boundary described below.",
         "Reload or read back state when persistence is part of the case."
       ],
@@ -8766,8 +8765,8 @@
       "objective": "Verify two workers cannot send the same delivery twice.",
       "classification": "BOUNDARY",
       "priority": "HIGH",
-      "testLevel": "BTP_INTEGRATION",
-      "environment": "BTP_REQUIRED",
+      "testLevel": "CAP_COMPONENT",
+      "environment": "HYBRID_BTP",
       "requirementIds": [
         "SRS-FR-NOTIF-001",
         "SRS-FR-NOTIF-002",
@@ -8781,14 +8780,14 @@
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
-      "input": "Start two workers against the same eligible delivery.",
+      "input": "Start two controlled workers against the same eligible delivery.",
       "steps": [
         "Prepare the stated precondition and capture the before-state.",
-        "Execute only this branch using: Start two workers against the same eligible delivery.",
+        "Execute only this branch using: Start two controlled workers against the same eligible delivery.",
         "Assert the response, persisted state, side effects, and safe error boundary described below.",
         "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "Only one compare-and-set claim succeeds and exactly one provider send occurs.",
+      "expectedResult": "Only one compare-and-set claim succeeds and exactly one provider send occurs; repeat on HANA for production-parity evidence.",
       "sourceTrace": [
         {
           "file": "srv/email/outbox.js",
@@ -8810,10 +8809,8 @@
       "evidenceRequirements": [
         "case-specific result image",
         "sanitized case manifest",
-        "sanitized HTTP request/response image",
         "before/after database image",
-        "reload/readback image",
-        "sanitized platform/provider evidence"
+        "reload/readback image"
       ],
       "execution": {
         "status": "NOT_RUN",
@@ -10907,8 +10904,8 @@
       "objective": "Verify pM reads allowlisted operational metrics only.",
       "classification": "ROLE",
       "priority": "HIGH",
-      "testLevel": "BTP_INTEGRATION",
-      "environment": "BTP_REQUIRED",
+      "testLevel": "ODATA_CONTRACT",
+      "environment": "HYBRID_BTP",
       "requirementIds": [
         "SRS-FR-AI-002",
         "SRS-FR-AI-003"
@@ -10924,14 +10921,14 @@
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
-      "input": "Read 30-day metrics as PM.",
+      "input": "Read 30-day metrics as PM through the OData function.",
       "steps": [
         "Prepare the stated precondition and capture the before-state.",
-        "Execute only this branch using: Read 30-day metrics as PM.",
+        "Execute only this branch using: Read 30-day metrics as PM through the OData function.",
         "Assert the response, persisted state, side effects, and safe error boundary described below.",
         "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "Only aggregate capability/status/latency/review counts are returned; prompt/response/error/secret fields are absent.",
+      "expectedResult": "Only aggregate capability/status/latency/review counts are returned; prompt/response/error/secret fields are absent. Repeat on BTP for deployed-role confirmation.",
       "sourceTrace": [
         {
           "file": "srv/ai/review.js",
@@ -10947,8 +10944,7 @@
         "sanitized case manifest",
         "sanitized HTTP request/response image",
         "before/after database image",
-        "reload/readback image",
-        "sanitized platform/provider evidence"
+        "reload/readback image"
       ],
       "execution": {
         "status": "NOT_RUN",
@@ -10964,12 +10960,12 @@
     {
       "caseId": "UT-AI-027",
       "domain": "AI",
-      "title": "live provider rate limit preserves safe no-mutation fallback",
-      "objective": "Verify live provider rate limit preserves safe no-mutation fallback.",
+      "title": "controlled provider rate limit preserves safe no-mutation fallback",
+      "objective": "Verify controlled provider rate limit preserves safe no-mutation fallback.",
       "classification": "BOUNDARY",
       "priority": "HIGH",
-      "testLevel": "BTP_INTEGRATION",
-      "environment": "BTP_REQUIRED",
+      "testLevel": "CAP_COMPONENT",
+      "environment": "LOCAL",
       "requirementIds": [
         "SRS-FR-AI-002",
         "SRS-FR-AI-003"
@@ -10985,14 +10981,14 @@
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
-      "input": "Trigger a controlled or naturally observed HTTP 429 within approved quota testing.",
+      "input": "Inject a controlled HTTP 429 provider response.",
       "steps": [
         "Prepare the stated precondition and capture the before-state.",
-        "Execute only this branch using: Trigger a controlled or naturally observed HTTP 429 within approved quota testing.",
+        "Execute only this branch using: Inject a controlled HTTP 429 provider response.",
         "Assert the response, persisted state, side effects, and safe error boundary described below.",
         "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "The documented cooldown/fallback result is recorded without retry storm or business mutation.",
+      "expectedResult": "The documented cooldown/fallback result is recorded without retry storm or business mutation; live quota behavior is acceptance evidence, not a prerequisite for this component case.",
       "sourceTrace": [
         {
           "file": "srv/ai/provider.js",
@@ -11006,10 +11002,8 @@
       "evidenceRequirements": [
         "case-specific result image",
         "sanitized case manifest",
-        "sanitized HTTP request/response image",
         "before/after database image",
-        "reload/readback image",
-        "sanitized platform/provider evidence"
+        "reload/readback image"
       ],
       "execution": {
         "status": "NOT_RUN",

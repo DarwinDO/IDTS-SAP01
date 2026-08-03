@@ -12,11 +12,11 @@
   "counts": {
     "total": 188,
     "byTestLevel": {
-      "CAP_COMPONENT": 145,
-      "ODATA_CONTRACT": 14,
-      "BTP_INTEGRATION": 17,
+      "CAP_COMPONENT": 150,
+      "ODATA_CONTRACT": 16,
+      "BTP_INTEGRATION": 13,
       "UI_COMPONENT": 2,
-      "PURE_UNIT": 10
+      "PURE_UNIT": 7
     },
     "byCandidateStatus": {
       "PASS": 34,
@@ -24,14 +24,14 @@
       "BLOCKED": 152
     },
     "byRequiredEnvironment": {
-      "LOCAL": 171,
-      "SAP_BTP": 17
+      "LOCAL": 175,
+      "SAP_BTP": 13
     },
     "byReviewDecision": {
       "REVIEW_CANDIDATE_RESULT": 34,
       "CATALOG_EXPECTATION_MISMATCH": 2,
-      "RERUN_AT_LOCAL_PRIMARY_BOUNDARY": 135,
-      "RERUN_ON_BTP": 17
+      "RERUN_AT_LOCAL_PRIMARY_BOUNDARY": 139,
+      "RERUN_ON_BTP": 13
     }
   },
   "cases": [
@@ -2085,13 +2085,13 @@
     },
     {
       "caseId": "UT-ATT-009",
-      "testLevel": "BTP_INTEGRATION",
-      "catalogEnvironment": "BTP_REQUIRED",
-      "primaryExecutionBoundary": "BTP_REQUIRED",
-      "requiredEnvironment": "SAP_BTP",
+      "testLevel": "ODATA_CONTRACT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "ODATA_CONTRACT",
+      "requiredEnvironment": "LOCAL",
       "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_ON_BTP",
-      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
       "evidenceFiles": [
         "result.png",
         "result.svg"
@@ -2389,9 +2389,9 @@
     },
     {
       "caseId": "UT-NTF-009",
-      "testLevel": "PURE_UNIT",
+      "testLevel": "CAP_COMPONENT",
       "catalogEnvironment": "LOCAL",
-      "primaryExecutionBoundary": "PURE_UNIT",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
       "reviewDecision": "REVIEW_CANDIDATE_RESULT",
@@ -2411,9 +2411,9 @@
     },
     {
       "caseId": "UT-NTF-010",
-      "testLevel": "PURE_UNIT",
+      "testLevel": "CAP_COMPONENT",
       "catalogEnvironment": "LOCAL",
-      "primaryExecutionBoundary": "PURE_UNIT",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
       "reviewDecision": "REVIEW_CANDIDATE_RESULT",
@@ -2433,9 +2433,9 @@
     },
     {
       "caseId": "UT-NTF-011",
-      "testLevel": "PURE_UNIT",
+      "testLevel": "CAP_COMPONENT",
       "catalogEnvironment": "LOCAL",
-      "primaryExecutionBoundary": "PURE_UNIT",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
       "reviewDecision": "REVIEW_CANDIDATE_RESULT",
@@ -2455,13 +2455,13 @@
     },
     {
       "caseId": "UT-NTF-012",
-      "testLevel": "BTP_INTEGRATION",
-      "catalogEnvironment": "BTP_REQUIRED",
-      "primaryExecutionBoundary": "BTP_REQUIRED",
-      "requiredEnvironment": "SAP_BTP",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
       "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_ON_BTP",
-      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
       "evidenceFiles": [
         "result.png",
         "result.svg"
@@ -3047,13 +3047,13 @@
     },
     {
       "caseId": "UT-AI-026",
-      "testLevel": "BTP_INTEGRATION",
-      "catalogEnvironment": "BTP_REQUIRED",
-      "primaryExecutionBoundary": "BTP_REQUIRED",
-      "requiredEnvironment": "SAP_BTP",
+      "testLevel": "ODATA_CONTRACT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "ODATA_CONTRACT",
+      "requiredEnvironment": "LOCAL",
       "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_ON_BTP",
-      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
       "evidenceFiles": [
         "result.png",
         "result.svg"
@@ -3063,13 +3063,13 @@
     },
     {
       "caseId": "UT-AI-027",
-      "testLevel": "BTP_INTEGRATION",
-      "catalogEnvironment": "BTP_REQUIRED",
-      "primaryExecutionBoundary": "BTP_REQUIRED",
-      "requiredEnvironment": "SAP_BTP",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
       "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_ON_BTP",
-      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
       "evidenceFiles": [
         "result.png",
         "result.svg"
