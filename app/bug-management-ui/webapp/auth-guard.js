@@ -24,8 +24,10 @@
         installBearerInterceptor();
         window.idtsAuthReady = Promise.resolve(readStoredUser());
     } else {
-        installXsuaaSessionMonitor();
-        window.idtsAuthReady = loadBtpUser();
+        window.idtsAuthReady = loadBtpUser().then(function (user) {
+            installXsuaaSessionMonitor();
+            return user;
+        });
     }
 
     window.idtsLogout = function () {
@@ -133,6 +135,7 @@
     function installXsuaaSessionMonitor() {
         var originalOpen;
         var originalSend;
+        var originalFetch;
 
         if (window.__IDTS_XSUAA_SESSION_MONITOR__) return;
         window.__IDTS_XSUAA_SESSION_MONITOR__ = true;
@@ -154,6 +157,22 @@
             }, { once: true });
             originalSend.apply(request, arguments);
         };
+
+        if (typeof window.fetch === "function") {
+            originalFetch = window.fetch;
+            window.fetch = function (input) {
+                var url = typeof input === "string"
+                    ? input
+                    : (input && input.url ? String(input.url) : "");
+
+                return originalFetch.apply(this, arguments).then(function (response) {
+                    if (response.status === 401 && url.indexOf("/odata/v4/") !== -1) {
+                        recoverExpiredXsuaaSession();
+                    }
+                    return response;
+                });
+            };
+        }
     }
 
     function recoverExpiredXsuaaSession() {

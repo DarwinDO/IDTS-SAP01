@@ -51,6 +51,8 @@ root cause of these two write failures.
   action cannot be misreported as failed because a non-Promise refresh was awaited.
 - [x] Comment action success is separated from the comments-list refresh result.
 - [x] A synchronous `requestRefresh()` throw is normalized into the refresh-warning path and cannot be misreported as an action failure.
+- [x] Expired XSUAA sessions are detected for both UI5 XHR and Dashboard `fetch()` OData calls only after the initial `AuthService.me` succeeds.
+- [x] Session recovery performs one top-level reload and never replays a failed comment/upload write.
 - [x] Compiled CDS metadata contains exactly one attachment facet.
 - [x] HTML5 application/package version is aligned at `0.0.2` to invalidate the
   stale cached manifest that still registered `IdtsAttachmentsCustom`.
@@ -117,6 +119,7 @@ root cause of these two write failures.
 - Red tests reproduced both missing contracts before implementation: `$$ownRequest` was absent and no mid-session XSUAA OData 401 recovery existed.
 - `qa:idts116:programmatic`: PASS.
 - `qa:idts117:btp-relogin`: PASS.
+- IDTS-117 behavioral VM coverage: XHR and `fetch()` OData 401 each trigger exactly one reload; a successful bootstrap clears the stale recovery guard.
 - `qa:comments-attachments:programmatic`: PASS.
 - CAP compile: PASS.
 - UI5 production build: PASS.
