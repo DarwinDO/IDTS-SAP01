@@ -542,3 +542,7 @@ Manifest khai bao `sap.cloud.service: idts.sap01`. HTML5 content module trong
 MTA dung service name on dinh nay de dong goi UI vao SAP HTML5 Application
 Repository. Duong dan OData khong doi; AppRouter route `/odata/*` den CAP
 service va forward XSUAA token.
+
+## IDTS-116 attachment section registration (2026-08-03)
+
+`IdtsAttachmentsCustom` and the unused `sap.ui.unified` dependency were removed. The manifest still configures `attachments/@UI.LineItem` as a responsive table, while the Object Page section itself comes from the visible CDS ReferenceFacet. This prevents duplicate attachment sections and lets the SAP-supported Fiori Elements/plugin controls own CSRF, draft Save/Discard, upload, download and delete.
