@@ -4,8 +4,8 @@
   "candidateExecutionStatus": "PASS",
   "reviewStatus": "PENDING_DONHV_REVIEW",
   "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-03T12:43:10.565Z",
-  "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae",
+  "executedAt": "2026-08-03T13:52:18.552Z",
+  "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831",
   "deploySha": null,
   "environment": "LOCAL",
   "runtime": "Node.js v22.23.1, win32 x64",
@@ -31,6 +31,5 @@
     "after-database.png",
     "reload-readback.png"
   ],
-  "limitations": "Uses isolated deterministic local fixtures. No BTP acceptance is claimed. Final catalog/workbook integration belongs to DonHV.",
-  "structuredEvidenceFile": "../../local-execution-results.json"
+  "limitations": "Uses isolated deterministic local fixtures. No BTP acceptance is claimed. Final catalog/workbook integration belongs to DonHV."
 }

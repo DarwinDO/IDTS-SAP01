@@ -1,8 +1,8 @@
 {
   "runner": "IDTS-110 LOCAL exact-case runner",
-  "startedAt": "2026-08-03T12:43:09.223Z",
-  "completedAt": "2026-08-03T12:43:12.508Z",
-  "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae",
+  "startedAt": "2026-08-03T14:19:43.582Z",
+  "completedAt": "2026-08-03T14:19:46.343Z",
+  "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831",
   "catalogBaselineSha": "bc0c47e522ae208384d4b23dda21535dcc683683",
   "results": [
     {
@@ -41,9 +41,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:10.476Z",
-      "completedAt": "2026-08-03T12:43:10.565Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:44.649Z",
+      "completedAt": "2026-08-03T14:19:44.700Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-AUTH-002",
@@ -81,9 +81,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:10.565Z",
-      "completedAt": "2026-08-03T12:43:10.572Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:44.700Z",
+      "completedAt": "2026-08-03T14:19:44.706Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-AUTH-003",
@@ -121,14 +121,14 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:10.572Z",
-      "completedAt": "2026-08-03T12:43:10.578Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:44.706Z",
+      "completedAt": "2026-08-03T14:19:44.711Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-AUTH-004",
-      "status": "FAIL",
-      "actualResult": "Public HTTP 400 exposes CAP type-validation internals.",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
       "assertions": [
         "rejects a non-string password at the CDS contract boundary",
         "does not expose stack/type internals",
@@ -142,7 +142,8 @@
         "status": 400,
         "before": 31,
         "after": 31,
-        "unsafeDetailExposed": true
+        "safeContractError": true,
+        "unsafeDetailExposed": false
       },
       "beforeState": {
         "Bugs": 4,
@@ -168,9 +169,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:10.578Z",
-      "completedAt": "2026-08-03T12:43:11.983Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:44.711Z",
+      "completedAt": "2026-08-03T14:19:46.040Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-AUTH-005",
@@ -183,9 +184,9 @@
         "srv/auth.js#login",
         "srv/auth.js#me"
       ],
-      "startedAt": "2026-08-03T12:43:11.983Z",
-      "completedAt": "2026-08-03T12:43:12.054Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.040Z",
+      "completedAt": "2026-08-03T14:19:46.073Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-AUTH-006",
@@ -223,9 +224,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.054Z",
-      "completedAt": "2026-08-03T12:43:12.064Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.073Z",
+      "completedAt": "2026-08-03T14:19:46.079Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-VAL-TITLE",
@@ -263,9 +264,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.064Z",
-      "completedAt": "2026-08-03T12:43:12.089Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.079Z",
+      "completedAt": "2026-08-03T14:19:46.092Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-VAL-DESCRIPTION",
@@ -303,9 +304,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.089Z",
-      "completedAt": "2026-08-03T12:43:12.107Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.092Z",
+      "completedAt": "2026-08-03T14:19:46.100Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-VAL-STEPS",
@@ -343,9 +344,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.107Z",
-      "completedAt": "2026-08-03T12:43:12.125Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.100Z",
+      "completedAt": "2026-08-03T14:19:46.108Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-VAL-ACTUAL",
@@ -383,9 +384,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.126Z",
-      "completedAt": "2026-08-03T12:43:12.142Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.108Z",
+      "completedAt": "2026-08-03T14:19:46.116Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-VAL-EXPECTED",
@@ -423,9 +424,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.143Z",
-      "completedAt": "2026-08-03T12:43:12.158Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.116Z",
+      "completedAt": "2026-08-03T14:19:46.123Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-VAL-PRIORITY",
@@ -463,9 +464,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.158Z",
-      "completedAt": "2026-08-03T12:43:12.170Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.123Z",
+      "completedAt": "2026-08-03T14:19:46.131Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-VAL-SEVERITY",
@@ -503,9 +504,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.170Z",
-      "completedAt": "2026-08-03T12:43:12.182Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.131Z",
+      "completedAt": "2026-08-03T14:19:46.139Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-VAL-COMPONENT",
@@ -543,9 +544,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.182Z",
-      "completedAt": "2026-08-03T12:43:12.195Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.139Z",
+      "completedAt": "2026-08-03T14:19:46.146Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-VAL-CATEGORY",
@@ -583,9 +584,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.195Z",
-      "completedAt": "2026-08-03T12:43:12.208Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.146Z",
+      "completedAt": "2026-08-03T14:19:46.153Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-VAL-REPORTER",
@@ -623,9 +624,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.208Z",
-      "completedAt": "2026-08-03T12:43:12.233Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.153Z",
+      "completedAt": "2026-08-03T14:19:46.167Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-VAL-WHITESPACE",
@@ -663,9 +664,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.233Z",
-      "completedAt": "2026-08-03T12:43:12.254Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.167Z",
+      "completedAt": "2026-08-03T14:19:46.175Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-VAL-CODE-UNKNOWN",
@@ -703,9 +704,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.255Z",
-      "completedAt": "2026-08-03T12:43:12.268Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.175Z",
+      "completedAt": "2026-08-03T14:19:46.181Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-VAL-CODE-INACTIVE",
@@ -743,9 +744,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.268Z",
-      "completedAt": "2026-08-03T12:43:12.285Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.181Z",
+      "completedAt": "2026-08-03T14:19:46.185Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-VAL-CODE-SPACES",
@@ -783,9 +784,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.285Z",
-      "completedAt": "2026-08-03T12:43:12.295Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.185Z",
+      "completedAt": "2026-08-03T14:19:46.191Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-VAL-CODE-EMPTY",
@@ -823,9 +824,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.295Z",
-      "completedAt": "2026-08-03T12:43:12.309Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.191Z",
+      "completedAt": "2026-08-03T14:19:46.196Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-VAL-CODE-TYPE",
@@ -863,9 +864,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.309Z",
-      "completedAt": "2026-08-03T12:43:12.321Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.196Z",
+      "completedAt": "2026-08-03T14:19:46.202Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-VAL-PAIR-MISMATCH",
@@ -903,9 +904,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.322Z",
-      "completedAt": "2026-08-03T12:43:12.337Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.202Z",
+      "completedAt": "2026-08-03T14:19:46.208Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-CMT-004",
@@ -943,9 +944,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.337Z",
-      "completedAt": "2026-08-03T12:43:12.345Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.208Z",
+      "completedAt": "2026-08-03T14:19:46.212Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-CMT-005",
@@ -983,9 +984,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.345Z",
-      "completedAt": "2026-08-03T12:43:12.354Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.212Z",
+      "completedAt": "2026-08-03T14:19:46.215Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-CMT-008",
@@ -1023,39 +1024,59 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.354Z",
-      "completedAt": "2026-08-03T12:43:12.370Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.215Z",
+      "completedAt": "2026-08-03T14:19:46.223Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-ATT-007",
-      "status": "BLOCKED",
-      "actualResult": "Static UI guard assertions passed, but browser runtime execution is unavailable; the UI behavior is not promoted to PASS.",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
       "assertions": [
         "UI allowlist declares permitted MIME types",
-        "selection handler contains unsupported-MIME rejection"
+        "selection handler shows the safe unsupported-MIME message",
+        "rejected selection is cleared before upload"
       ],
       "sourceAssertions": [
         "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js#MAX_ATTACHMENT_BYTES"
       ],
-      "startedAt": "2026-08-03T12:43:12.371Z",
-      "completedAt": "2026-08-03T12:43:12.371Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "runtimeEvidence": {
+        "caseId": "UT-ATT-007",
+        "status": "PASS",
+        "assertions": {
+          "safeMessage": "This file type is not supported. Please upload a text, PDF, PNG, or JPEG file.",
+          "selectionCleared": true,
+          "uploadPathNotEntered": true
+        }
+      },
+      "startedAt": "2026-08-03T14:19:46.284Z",
+      "completedAt": "2026-08-03T14:19:46.284Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-ATT-008",
-      "status": "BLOCKED",
-      "actualResult": "Static UI guard assertions passed, but browser runtime execution is unavailable; the UI behavior is not promoted to PASS.",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
       "assertions": [
         "UI declares 10 MB maximum",
-        "selection handler contains the byte-limit rejection"
+        "selection handler shows the safe 10 MB message",
+        "rejected selection is cleared before upload"
       ],
       "sourceAssertions": [
         "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js#MAX_ATTACHMENT_BYTES"
       ],
-      "startedAt": "2026-08-03T12:43:12.371Z",
-      "completedAt": "2026-08-03T12:43:12.371Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "runtimeEvidence": {
+        "caseId": "UT-ATT-008",
+        "status": "PASS",
+        "assertions": {
+          "safeMessage": "The selected file is too large. Please upload a file up to 10 MB.",
+          "selectionCleared": true,
+          "uploadPathNotEntered": true
+        }
+      },
+      "startedAt": "2026-08-03T14:19:46.284Z",
+      "completedAt": "2026-08-03T14:19:46.284Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-ATT-009",
@@ -1097,9 +1118,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T12:43:12.371Z",
-      "completedAt": "2026-08-03T12:43:12.378Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.284Z",
+      "completedAt": "2026-08-03T14:19:46.287Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-NTF-009",
@@ -1139,9 +1160,9 @@
         "Notifications": 1,
         "NotificationDeliveries": 1
       },
-      "startedAt": "2026-08-03T12:43:12.378Z",
-      "completedAt": "2026-08-03T12:43:12.401Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.287Z",
+      "completedAt": "2026-08-03T14:19:46.298Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-NTF-010",
@@ -1181,9 +1202,9 @@
         "Notifications": 2,
         "NotificationDeliveries": 2
       },
-      "startedAt": "2026-08-03T12:43:12.401Z",
-      "completedAt": "2026-08-03T12:43:12.429Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.298Z",
+      "completedAt": "2026-08-03T14:19:46.309Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-NTF-011",
@@ -1223,9 +1244,9 @@
         "Notifications": 3,
         "NotificationDeliveries": 3
       },
-      "startedAt": "2026-08-03T12:43:12.429Z",
-      "completedAt": "2026-08-03T12:43:12.456Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.309Z",
+      "completedAt": "2026-08-03T14:19:46.318Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-AI-001",
@@ -1239,9 +1260,9 @@
         "srv/ai/provider.js#SafeAiProvider",
         "srv/ai/safety.js#redactSensitiveText"
       ],
-      "startedAt": "2026-08-03T12:43:12.456Z",
-      "completedAt": "2026-08-03T12:43:12.460Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.318Z",
+      "completedAt": "2026-08-03T14:19:46.319Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-AI-002",
@@ -1254,9 +1275,9 @@
         "srv/ai/provider.js#SafeAiProvider",
         "srv/ai/safety.js#redactSensitiveText"
       ],
-      "startedAt": "2026-08-03T12:43:12.460Z",
-      "completedAt": "2026-08-03T12:43:12.462Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.319Z",
+      "completedAt": "2026-08-03T14:19:46.320Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-AI-003",
@@ -1269,9 +1290,9 @@
         "srv/ai/provider.js#SafeAiProvider",
         "srv/ai/safety.js#redactSensitiveText"
       ],
-      "startedAt": "2026-08-03T12:43:12.462Z",
-      "completedAt": "2026-08-03T12:43:12.463Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.320Z",
+      "completedAt": "2026-08-03T14:19:46.320Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-AI-004",
@@ -1284,9 +1305,9 @@
         "srv/ai/provider.js#SafeAiProvider",
         "srv/ai/safety.js#redactSensitiveText"
       ],
-      "startedAt": "2026-08-03T12:43:12.463Z",
-      "completedAt": "2026-08-03T12:43:12.482Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.320Z",
+      "completedAt": "2026-08-03T14:19:46.334Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-AI-005",
@@ -1299,9 +1320,9 @@
         "srv/ai/provider.js#SafeAiProvider",
         "srv/ai/safety.js#redactSensitiveText"
       ],
-      "startedAt": "2026-08-03T12:43:12.483Z",
-      "completedAt": "2026-08-03T12:43:12.484Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.334Z",
+      "completedAt": "2026-08-03T14:19:46.335Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-AI-006",
@@ -1314,9 +1335,9 @@
         "srv/ai/provider.js#SafeAiProvider",
         "srv/ai/safety.js#redactSensitiveText"
       ],
-      "startedAt": "2026-08-03T12:43:12.484Z",
-      "completedAt": "2026-08-03T12:43:12.484Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.335Z",
+      "completedAt": "2026-08-03T14:19:46.335Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-AI-007",
@@ -1329,9 +1350,9 @@
         "srv/ai/provider.js#SafeAiProvider",
         "srv/ai/safety.js#redactSensitiveText"
       ],
-      "startedAt": "2026-08-03T12:43:12.484Z",
-      "completedAt": "2026-08-03T12:43:12.485Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.335Z",
+      "completedAt": "2026-08-03T14:19:46.335Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     },
     {
       "caseId": "UT-AI-027",
@@ -1370,15 +1391,15 @@
         "Notifications": 3,
         "NotificationDeliveries": 3
       },
-      "startedAt": "2026-08-03T12:43:12.485Z",
-      "completedAt": "2026-08-03T12:43:12.508Z",
-      "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae"
+      "startedAt": "2026-08-03T14:19:46.335Z",
+      "completedAt": "2026-08-03T14:19:46.343Z",
+      "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831"
     }
   ],
   "totals": {
     "total": 40,
-    "passed": 37,
-    "failed": 1,
-    "blocked": 2
+    "passed": 40,
+    "failed": 0,
+    "blocked": 0
   }
 }

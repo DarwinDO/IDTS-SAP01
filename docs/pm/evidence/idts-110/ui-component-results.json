@@ -1,0 +1,26 @@
+{
+  "task": "IDTS-110",
+  "harness": "isolated-ui-component",
+  "source": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js#onAttachmentSelected",
+  "checkedAt": "2026-08-03T14:20:12.922Z",
+  "results": [
+    {
+      "caseId": "UT-ATT-007",
+      "status": "PASS",
+      "assertions": {
+        "safeMessage": "This file type is not supported. Please upload a text, PDF, PNG, or JPEG file.",
+        "selectionCleared": true,
+        "uploadPathNotEntered": true
+      }
+    },
+    {
+      "caseId": "UT-ATT-008",
+      "status": "PASS",
+      "assertions": {
+        "safeMessage": "The selected file is too large. Please upload a file up to 10 MB.",
+        "selectionCleared": true,
+        "uploadPathNotEntered": true
+      }
+    }
+  ]
+}

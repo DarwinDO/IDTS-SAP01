@@ -1,11 +1,11 @@
 {
   "caseId": "UT-AUTH-004",
   "title": "non-string password is rejected at the CDS type boundary",
-  "candidateExecutionStatus": "FAIL",
+  "candidateExecutionStatus": "PASS",
   "reviewStatus": "PENDING_DONHV_REVIEW",
   "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-03T12:43:11.983Z",
-  "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae",
+  "executedAt": "2026-08-03T13:52:19.968Z",
+  "baselineSha": "bd5152e19e6587fb10f9a185117fc42a8297f831",
   "deploySha": null,
   "environment": "LOCAL",
   "runtime": "Node.js v22.23.1, win32 x64",
@@ -14,7 +14,7 @@
     "srv/auth.cds#login",
     "srv/auth.js#login"
   ],
-  "actualResult": "Public HTTP 400 exposes CAP type-validation internals.",
+  "actualResult": "Exact local assertion passed.",
   "assertions": [
     "rejects a non-string password at the CDS contract boundary",
     "does not expose stack/type internals",
@@ -32,6 +32,5 @@
     "after-database.png",
     "reload-readback.png"
   ],
-  "limitations": "Observed behavior does not match the approved expected result. DonHV must triage the product/security boundary or catalog expectation before acceptance.",
-  "structuredEvidenceFile": "../../local-execution-results.json"
+  "limitations": "Uses isolated deterministic local fixtures. No BTP acceptance is claimed. Final catalog/workbook integration belongs to DonHV."
 }

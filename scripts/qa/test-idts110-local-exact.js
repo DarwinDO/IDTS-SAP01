@@ -306,16 +306,29 @@ async function main () {
 
   const attachmentFragment = fs.readFileSync(path.join(process.cwd(), 'app/bug-management-ui/webapp/ext/fragment/AttachmentsSection.fragment.xml'), 'utf8')
   const attachmentController = fs.readFileSync(path.join(process.cwd(), 'app/bug-management-ui/webapp/ext/sections/BugCollaboration.js'), 'utf8')
-  await runStaticBlockedCase('UT-ATT-007', ['UI allowlist declares permitted MIME types', 'selection handler contains unsupported-MIME rejection'], async () => {
+  execFileSync(process.execPath, [path.join(process.cwd(), 'scripts/qa/test-idts110-attachment-ui-component.js')], { stdio: 'pipe' })
+  const attachmentUiResults = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'docs/pm/evidence/idts-110/ui-component-results.json'), 'utf8'))
+  const attachmentUiByCase = new Map(attachmentUiResults.results.map(result => [result.caseId, result]))
+  await runCase('UT-ATT-007', ['UI allowlist declares permitted MIME types', 'selection handler shows the safe unsupported-MIME message', 'rejected selection is cleared before upload'], async () => {
     assert.match(attachmentFragment, /mimeType="text\/plain,application\/pdf,image\/png,image\/jpeg"/)
     assert.match(attachmentController, /!ALLOWED_MIME_TYPES\[file\.type\]/)
-    assert.match(attachmentController, /file type is not supported/i)
+    const result = attachmentUiByCase.get('UT-ATT-007')
+    assert.equal(result?.status, 'PASS')
+    assert.equal(result?.assertions?.selectionCleared, true)
+    assert.equal(result?.assertions?.uploadPathNotEntered, true)
+    assert.match(result?.assertions?.safeMessage || '', /file type is not supported/i)
+    return result
   })
-  await runStaticBlockedCase('UT-ATT-008', ['UI declares 10 MB maximum', 'selection handler contains the byte-limit rejection'], async () => {
+  await runCase('UT-ATT-008', ['UI declares 10 MB maximum', 'selection handler shows the safe 10 MB message', 'rejected selection is cleared before upload'], async () => {
     assert.match(attachmentFragment, /maximumFileSize="10"/)
     assert.match(attachmentController, /MAX_ATTACHMENT_BYTES = 10 \* 1024 \* 1024/)
     assert.match(attachmentController, /file\.size > MAX_ATTACHMENT_BYTES/)
-    assert.match(attachmentController, /up to 10 MB/i)
+    const result = attachmentUiByCase.get('UT-ATT-008')
+    assert.equal(result?.status, 'PASS')
+    assert.equal(result?.assertions?.selectionCleared, true)
+    assert.equal(result?.assertions?.uploadPathNotEntered, true)
+    assert.match(result?.assertions?.safeMessage || '', /up to 10 MB/i)
+    return result
   })
   await runCase('UT-ATT-009', ['anonymous attachment CREATE is rejected with 401/403', 'attachment metadata remains unchanged'], async () => {
     const result = runLocalHttpContracts().attachment

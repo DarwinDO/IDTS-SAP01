@@ -21,6 +21,7 @@ const EVIDENCE_DIR = process.env.IDTS_QA_EVIDENCE_DIR ||
 const ALLOW_MUTATION = /^true$/i.test(process.env.IDTS_QA_ALLOW_MUTATION || '')
 const FULL_UPLOAD = !/^false$/i.test(process.env.IDTS_QA_UPLOAD_FULL_E2E || '')
 const IS_LOCAL = /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/i.test(BASE_URL)
+const UI_READY_TIMEOUT_MS = Number(process.env.IDTS_QA_UI_READY_TIMEOUT_MS) || 90000
 
 const PM_USER = {
   ID: '10000000-0000-0000-0000-000000000001',
@@ -121,10 +122,16 @@ function bugPayload(bugID, label) {
 }
 
 async function createDraft(page, token, bugID, label) {
-  const response = await page.request.post(`${BASE_URL}/odata/v4/bug/Bugs`, {
-    headers: { Authorization: `Bearer ${token}` },
-    data: bugPayload(bugID, label)
-  })
+  let response
+  try {
+    response = await page.request.post(`${BASE_URL}/odata/v4/bug/Bugs`, {
+      headers: { Authorization: `Bearer ${token}` },
+      data: bugPayload(bugID, label)
+    })
+  } catch (error) {
+    void error
+    throw new Error('Create QA draft could not reach the configured CAP service.')
+  }
   if (!response.ok()) {
     throw new Error(`Create QA draft failed with HTTP ${response.status()}: ${(await response.text()).slice(0, 300)}`)
   }
@@ -160,7 +167,19 @@ function uploader(page) {
 
 async function assertCreateSections(page) {
   const attachmentHeading = page.getByRole('heading', { name: /Evidence \/ Attachments/i }).first()
-  await attachmentHeading.waitFor({ state: 'visible', timeout: 90000 })
+  try {
+    await attachmentHeading.waitFor({ state: 'visible', timeout: UI_READY_TIMEOUT_MS })
+  } catch (error) {
+    const state = await page.evaluate(() => ({
+      hasStoredToken: Boolean(sessionStorage.getItem('idts_auth_token')),
+      authMode: window.__IDTS_AUTH_MODE__ || null,
+      readyState: document.readyState,
+      hasSapUi: Boolean(window.sap?.ui),
+      scripts: Array.from(document.scripts).slice(0, 10).map(script => script.src || 'inline'),
+      visibleText: String(document.body?.innerText || '').replace(/\s+/g, ' ').slice(0, 300)
+    }))
+    throw new Error(`Create-page attachment section did not render: ${JSON.stringify({ url: page.url(), ...state })}`, { cause: error })
+  }
 
   const commentHeading = page.getByRole('heading', { name: /^Comments$/i }).first()
   if (await commentHeading.isVisible().catch(() => false)) {
@@ -185,6 +204,26 @@ async function selectPendingFiles(page, files) {
   }
 }
 
+async function assertRejectedFile(page, harness, file, expectedMessage, evidenceName) {
+  await uploader(page).setInputFiles(file)
+  const message = page.getByText(expectedMessage, { exact: true }).first()
+  await message.waitFor({ state: 'visible', timeout: 15000 })
+  if (await page.getByText(file.name, { exact: true }).isVisible().catch(() => false)) {
+    throw new Error(`${file.name} was added to pending evidence.`)
+  }
+  await harness.screenshot(evidenceName)
+
+  const dialog = page
+    .locator('[role="dialog"], .sapMDialog, .sapMMessageBox')
+    .filter({ hasText: expectedMessage })
+    .first()
+  const close = dialog.getByRole('button', { name: /^(Close|OK)$/i }).first()
+  if (await close.isVisible().catch(() => false)) {
+    await close.click()
+    await dialog.waitFor({ state: 'hidden', timeout: 15000 })
+  }
+}
+
 async function clickSave(page) {
   const save = page.getByRole('button', { name: /^(Create|Save)$/i }).first()
   await save.waitFor({ state: 'visible', timeout: 30000 })
@@ -199,6 +238,8 @@ async function runHappyFlow(page, harness, session, bugIDs, results) {
     waitUntil: 'domcontentloaded',
     timeout: 90000
   })
+  await page.waitForTimeout(2000)
+  await harness.assertNoBlockingSignals('IDTS-110 create draft bootstrap')
   await assertCreateSections(page)
   await harness.assertNoBlockingSignals('IDTS-73 create draft load')
 
@@ -220,28 +261,20 @@ async function runHappyFlow(page, harness, session, bugIDs, results) {
   pass('two selected files remain visible in the pending list before save')
   results.push({ check: 'pending-files-before-save', passed: true, count: files.length })
 
-  await uploader(page).setInputFiles({
+  await assertRejectedFile(page, harness, {
     name: 'blocked-evidence.exe',
     mimeType: 'application/octet-stream',
     buffer: Buffer.from('blocked', 'utf8')
-  })
-  await page.waitForTimeout(800)
-  if (await page.getByText('blocked-evidence.exe', { exact: true }).isVisible().catch(() => false)) {
-    throw new Error('Unsupported file type was added to pending evidence.')
-  }
-  pass('unsupported file type is not added to pending evidence')
+  }, 'This file type is not supported. Please upload a text, PDF, PNG, or JPEG file.', 'idts110_ut_att_007_unsupported_mime')
+  pass('unsupported file type is rejected with the safe supported-type message')
   results.push({ check: 'unsupported-file-rejected', passed: true })
 
-  await uploader(page).setInputFiles({
+  await assertRejectedFile(page, harness, {
     name: 'oversized-evidence.txt',
     mimeType: 'text/plain',
     buffer: Buffer.alloc(10 * 1024 * 1024 + 1, 65)
-  })
-  await page.waitForTimeout(800)
-  if (await page.getByText('oversized-evidence.txt', { exact: true }).isVisible().catch(() => false)) {
-    throw new Error('Oversized file was added to pending evidence.')
-  }
-  pass('file above 10 MB is not added to pending evidence')
+  }, 'The selected file is too large. Please upload a file up to 10 MB.', 'idts110_ut_att_008_over_10mb')
+  pass('file above 10 MB is rejected with the safe size-limit message')
   results.push({ check: 'oversized-file-rejected', passed: true })
 
   if (!FULL_UPLOAD) return
@@ -338,13 +371,23 @@ async function runSafeFailureFlow(page, harness, session, bugIDs, results) {
 
 async function cleanupLocal(db, bugIDs, sessionID) {
   for (const bugID of bugIDs) {
-    await db.run(DELETE.from('idts.cap.Bugs.attachments.drafts').where({ up__ID: bugID })).catch(() => {})
-    await db.run(DELETE.from('idts.cap.Bugs.attachments').where({ up__ID: bugID })).catch(() => {})
-    await db.run(DELETE.from('idts.cap.Bugs.drafts').where({ ID: bugID })).catch(() => {})
-    await db.run(DELETE.from('idts.cap.Bugs').where({ ID: bugID })).catch(() => {})
+    const draft = await db.run(
+      SELECT.one.from('BugService.Bugs.drafts')
+        .columns('DraftAdministrativeData_DraftUUID')
+        .where({ ID: bugID })
+    )
+    await db.run(DELETE.from('BugService.Bugs.attachments.drafts').where({ up__ID: bugID }))
+    await db.run(DELETE.from('idts.cap.Bugs.attachments').where({ up__ID: bugID }))
+    await db.run(DELETE.from('BugService.Bugs.drafts').where({ ID: bugID }))
+    await db.run(DELETE.from('idts.cap.Bugs').where({ ID: bugID }))
+    if (draft?.DraftAdministrativeData_DraftUUID) {
+      await db.run(DELETE.from('DRAFT.DraftAdministrativeData').where({
+        DraftUUID: draft.DraftAdministrativeData_DraftUUID
+      }))
+    }
   }
   if (sessionID) {
-    await db.run(DELETE.from('idts.cap.AuthSessions').where({ ID: sessionID })).catch(() => {})
+    await db.run(DELETE.from('idts.cap.AuthSessions').where({ ID: sessionID }))
   }
 }
 

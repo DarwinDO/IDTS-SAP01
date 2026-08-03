@@ -17,6 +17,7 @@ const {
 
 const DEFAULT_SESSION_TTL_MINUTES = 8 * 60
 const INVALID_CREDENTIALS_MESSAGE = 'Invalid email or password.'
+const INVALID_LOGIN_REQUEST_MESSAGE = 'The sign-in request is invalid.'
 const LOGIN_TEMPORARILY_UNAVAILABLE_MESSAGE = 'Sign-in is temporarily unavailable. Please try again later.'
 const BTP_LOGIN_MESSAGE = 'Use your SAP BTP account to sign in to this environment.'
 const BTP_USER_NOT_REGISTERED_MESSAGE = 'Your SAP BTP identity is not registered in IDTS.'
@@ -25,12 +26,25 @@ const LOG = cds.log('idts-auth')
 class AuthService extends cds.ApplicationService {
   // CAP gọi `init()` khi publish AuthService; ba action login/logout/me được nối tới handler bên dưới.
   async init () {
+    this.on('error', error => sanitizeLoginContractError(error))
     this.on('login', req => login(req))
     this.on('logout', req => logout(req))
     this.on('me', req => me(req))
 
     return super.init()
   }
+}
+
+function sanitizeLoginContractError (error) {
+  if (error?.code !== 'ASSERT_DATA_TYPE' || !['email', 'password'].includes(error.target)) return
+
+  error.code = 'INVALID_LOGIN_REQUEST'
+  error.message = INVALID_LOGIN_REQUEST_MESSAGE
+  error.statusCode = 400
+  delete error.args
+  delete error.target
+  delete error.path
+  delete error.details
 }
 
 async function login (req) {
@@ -228,11 +242,13 @@ function safeDiagnosticToken (value, fallback) {
 module.exports = AuthService
 module.exports.__test = {
   INVALID_CREDENTIALS_MESSAGE,
+  INVALID_LOGIN_REQUEST_MESSAGE,
   LOGIN_TEMPORARILY_UNAVAILABLE_MESSAGE,
   BTP_LOGIN_MESSAGE,
   BTP_USER_NOT_REGISTERED_MESSAGE,
   isExpectedClientAuthReject,
   requestUserCandidates,
+  sanitizeLoginContractError,
   safeAuthErrorDiagnostic,
   safeDiagnosticToken
 }

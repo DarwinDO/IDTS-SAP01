@@ -29,6 +29,7 @@ async function main () {
     body: JSON.stringify({ email: 'donhv@example.local', password: 7 })
   })
   const authBody = await authResponse.text()
+  const authError = JSON.parse(authBody).error
   const authAfter = (await db.run(SELECT.from('idts.cap.AuthSessions').columns('ID'))).length
 
   const attachmentBefore = (await db.run(SELECT.from('idts.cap.Bugs.attachments').columns('ID'))).length
@@ -44,6 +45,7 @@ async function main () {
       status: authResponse.status,
       before: authBefore,
       after: authAfter,
+      safeContractError: authError?.code === 'INVALID_LOGIN_REQUEST' && authError?.message === 'The sign-in request is invalid.',
       unsafeDetailExposed: /stack|srv[\\/]auth|node_modules|ASSERT_DATA_TYPE|String\(255\)|Value 7/i.test(authBody)
     },
     attachment: {
@@ -55,7 +57,7 @@ async function main () {
   process.stdout.write(`IDTS110_RESULT ${JSON.stringify(result)}\n`)
   await cds.shutdown()
 
-  if (result.auth.status !== 400 || result.auth.after !== result.auth.before || result.auth.unsafeDetailExposed ||
+  if (result.auth.status !== 400 || result.auth.after !== result.auth.before || !result.auth.safeContractError || result.auth.unsafeDetailExposed ||
       ![401, 403].includes(result.attachment.status) || result.attachment.after !== result.attachment.before) process.exitCode = 1
 }
 
