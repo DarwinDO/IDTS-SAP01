@@ -79,7 +79,9 @@ sap.ui.define([
             : null;
 
         if (itemsBinding && typeof itemsBinding.requestRefresh === "function") {
-            return itemsBinding.requestRefresh("$direct");
+            return window.Promise.resolve().then(function () {
+                return itemsBinding.requestRefresh("$direct");
+            });
         }
         return window.Promise.resolve();
     }
@@ -142,8 +144,7 @@ sap.ui.define([
                     }, function () {
                         MessageToast.show("Comment posted. Refresh the page to see it.");
                     });
-                })
-                .catch(function () {
+                }, function () {
                     showSafeError("The comment could not be posted. Please refresh and try again.");
                 })
                 .finally(function () {

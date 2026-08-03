@@ -97,6 +97,7 @@ async function verifyCommentOperation (options = {}) {
     getBinding: name => name === 'items' ? {
       requestRefresh: groupId => {
         calls.listRefreshed = groupId
+        if (options.refreshThrow) throw new Error('simulated synchronous refresh failure')
         return options.refreshReject ? Promise.reject(new Error('simulated refresh failure')) : Promise.resolve()
       }
     } : null,
@@ -155,13 +156,14 @@ async function verifyCommentOperation (options = {}) {
   assert.strictEqual(calls.error, undefined)
   assert.strictEqual(
     calls.toast,
-    options.refreshReject ? 'Comment posted. Refresh the page to see it.' : 'Comment posted.'
+    options.refreshReject || options.refreshThrow ? 'Comment posted. Refresh the page to see it.' : 'Comment posted.'
   )
 }
 
 verifyCompiledAttachmentFacet()
   .then(() => verifyCommentOperation())
   .then(() => verifyCommentOperation({ refreshReject: true }))
+  .then(() => verifyCommentOperation({ refreshThrow: true }))
   .then(() => verifyCommentOperation({ actionReject: true }))
   .then(() => console.log('IDTS-116 SAP-standard collaboration UI checks passed.'))
   .catch(error => {
