@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <style>
+    .bg { fill: #101b30; }
+    .frame { fill: none; stroke: #f0a000; stroke-width: 3; }
+    .eyebrow { fill: #ffc83d; font: 28px 'Segoe UI', Arial, sans-serif; }
+    .case { fill: #ffffff; font: 700 44px 'Segoe UI', Arial, sans-serif; }
+    .title { fill: #d7deeb; font: 28px 'Segoe UI', Arial, sans-serif; }
+    .status { fill: #ffffff; font: 700 26px 'Segoe UI', Arial, sans-serif; }
+    .body { fill: #d7deeb; font: 22px Consolas, monospace; }
+    .meta { fill: #9aa9bf; font: 19px 'Segoe UI', Arial, sans-serif; }
+  </style>
+  <rect class="bg" width="1280" height="720"/>
+  <rect class="frame" x="63" y="55" width="1154" height="610" rx="25"/>
+  <text x="104" y="125" class="eyebrow">IDTS-110 · LOCAL EXACT-CASE EVIDENCE</text>
+  <text x="104" y="180" class="case">UT-ATT-008</text>
+  <text x="104" y="210" class="title">file above ten megabytes is blocked by the UI limit</text>
+  <rect x="104" y="350" width="210" height="58" rx="29" fill="#9a5b00"/>
+  <text x="140" y="389" class="status">BLOCKED</text>
+  <text x="104" y="465" class="body">Static UI guard assertions passed, but browser runtime execution is</text>
+  <text x="104" y="499" class="body">unavailable; the UI behavior is not promoted to PASS.</text>
+  <text x="104" y="595" class="meta">Node.js 22.23.2 · 2026-08-03T02:46:42.087Z · Baseline fbea12cd996d</text>
+  <text x="104" y="635" class="meta">Candidate result — pending DonHV evidence and catalog review</text>
+</svg>

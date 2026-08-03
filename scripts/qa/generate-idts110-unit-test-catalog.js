@@ -375,7 +375,7 @@ const catalog = {
 
 const serialized = `${JSON.stringify(catalog, null, 2)}\n`
 if (process.argv.includes('--check')) {
-  if (!fs.existsSync(OUTPUT) || fs.readFileSync(OUTPUT, 'utf8') !== serialized) {
+  if (!fs.existsSync(OUTPUT) || fs.readFileSync(OUTPUT, 'utf8').replace(/\r\n/g, '\n') !== serialized) {
     console.error(`Catalog is stale: ${path.relative(ROOT, OUTPUT)}`)
     process.exit(1)
   }

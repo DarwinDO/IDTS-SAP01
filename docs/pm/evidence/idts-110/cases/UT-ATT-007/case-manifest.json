@@ -1,0 +1,29 @@
+{
+  "caseId": "UT-ATT-007",
+  "title": "unsupported MIME is blocked by the UI allowlist",
+  "candidateExecutionStatus": "BLOCKED",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "executor": "NhanT (agent-assisted)",
+  "executedAt": "2026-08-03T02:46:42.087Z",
+  "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deploySha": null,
+  "environment": "LOCAL",
+  "runtime": "Node.js v22.23.2, win32 x64",
+  "testCommand": "node scripts/qa/test-idts110-local-exact.js --output docs/pm/evidence/idts-110/local-execution-results.json",
+  "sourceAssertions": [
+    "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js#MAX_ATTACHMENT_BYTES"
+  ],
+  "actualResult": "Static UI guard assertions passed, but browser runtime execution is unavailable; the UI behavior is not promoted to PASS.",
+  "assertions": [
+    "UI allowlist declares permitted MIME types",
+    "selection handler contains unsupported-MIME rejection"
+  ],
+  "evidenceIds": [
+    "IDTS110-UT-ATT-007-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "result.svg"
+  ],
+  "limitations": "Static UI guards were verified, but browser runtime evidence is unavailable because the approved browser surface could not start. No runtime UI PASS is claimed."
+}

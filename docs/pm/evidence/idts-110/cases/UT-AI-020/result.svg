@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <style>
+    .bg { fill: #101b30; }
+    .frame { fill: none; stroke: #f0a000; stroke-width: 3; }
+    .eyebrow { fill: #ffc83d; font: 28px 'Segoe UI', Arial, sans-serif; }
+    .case { fill: #ffffff; font: 700 44px 'Segoe UI', Arial, sans-serif; }
+    .title { fill: #d7deeb; font: 28px 'Segoe UI', Arial, sans-serif; }
+    .status { fill: #ffffff; font: 700 26px 'Segoe UI', Arial, sans-serif; }
+    .body { fill: #d7deeb; font: 23px Consolas, monospace; }
+    .meta { fill: #9aa9bf; font: 19px 'Segoe UI', Arial, sans-serif; }
+  </style>
+  <rect class="bg" width="1280" height="720"/>
+  <rect class="frame" x="63" y="55" width="1154" height="610" rx="25"/>
+  <text x="104" y="125" class="eyebrow">IDTS-110 · HYBRID_BTP EXECUTION EVIDENCE</text>
+  <text x="104" y="180" class="case">UT-AI-020</text>
+  <text x="104" y="210" class="title">expired suggestion review is rejected</text>
+  <rect x="104" y="350" width="210" height="58" rx="29" fill="#9a5b00"/>
+  <text x="150" y="389" class="status">BLOCKED</text>
+  <text x="104" y="455" class="body">No authorized BTP target/session is available.</text>
+  <text x="104" y="495" class="body">CF CLI: unavailable · BTP/QA target variables: absent</text>
+  <text x="104" y="555" class="meta">Baseline fbea12cd996d · 2026-08-03T02:27:20.209Z</text>
+  <text x="104" y="595" class="meta">Truthful blocker record — no local result is promoted to BTP acceptance</text>
+</svg>

@@ -1,0 +1,1268 @@
+{
+  "runner": "IDTS-110 LOCAL exact-case runner",
+  "startedAt": "2026-08-03T02:46:40.403Z",
+  "completedAt": "2026-08-03T02:46:42.146Z",
+  "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "catalogBaselineSha": "bc0c47e522ae208384d4b23dda21535dcc683683",
+  "results": [
+    {
+      "caseId": "UT-AUTH-001",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "normalizes padded/mixed-case email",
+        "creates exactly one hashed session"
+      ],
+      "sourceAssertions": [
+        "srv/auth.js#login",
+        "srv/auth.js#me"
+      ],
+      "beforeState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 0,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:41.699Z",
+      "completedAt": "2026-08-03T02:46:41.787Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-AUTH-002",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "returns generic HTTP 401",
+        "does not insert an AuthSession"
+      ],
+      "sourceAssertions": [
+        "srv/auth.js#login",
+        "srv/auth.js#me"
+      ],
+      "beforeState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:41.787Z",
+      "completedAt": "2026-08-03T02:46:41.794Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-AUTH-003",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "returns generic HTTP 401",
+        "does not insert an AuthSession"
+      ],
+      "sourceAssertions": [
+        "srv/auth.js#login",
+        "srv/auth.js#me"
+      ],
+      "beforeState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:41.794Z",
+      "completedAt": "2026-08-03T02:46:41.800Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-AUTH-004",
+      "status": "FAIL",
+      "actualResult": "The validation function is expected to return \"true\". Received false\n\nCaught error:\n\nValidationError: ASSERT_DATA_TYPE",
+      "assertions": [
+        "returns generic HTTP 401",
+        "does not insert an AuthSession"
+      ],
+      "sourceAssertions": [
+        "srv/auth.js#login",
+        "srv/auth.js#me"
+      ],
+      "startedAt": "2026-08-03T02:46:41.800Z",
+      "completedAt": "2026-08-03T02:46:41.802Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-AUTH-005",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "unknown and wrong-password responses are indistinguishable"
+      ],
+      "sourceAssertions": [
+        "srv/auth.js#login",
+        "srv/auth.js#me"
+      ],
+      "startedAt": "2026-08-03T02:46:41.802Z",
+      "completedAt": "2026-08-03T02:46:41.869Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-AUTH-006",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "inactive user returns 401",
+        "no session is persisted"
+      ],
+      "sourceAssertions": [
+        "srv/auth.js#login",
+        "srv/auth.js#me"
+      ],
+      "beforeState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:41.869Z",
+      "completedAt": "2026-08-03T02:46:41.877Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-VAL-TITLE",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "missing title returns HTTP 400",
+        "no Bug row is inserted"
+      ],
+      "sourceAssertions": [
+        "srv/bug-service/bug-write.js#prepareBugWrite",
+        "srv/bug-service/bug-write.js#validateRequiredBugFields"
+      ],
+      "beforeState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:41.877Z",
+      "completedAt": "2026-08-03T02:46:41.894Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-VAL-DESCRIPTION",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "missing description returns HTTP 400",
+        "no Bug row is inserted"
+      ],
+      "sourceAssertions": [
+        "srv/bug-service/bug-write.js#prepareBugWrite",
+        "srv/bug-service/bug-write.js#validateRequiredBugFields"
+      ],
+      "beforeState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:41.894Z",
+      "completedAt": "2026-08-03T02:46:41.905Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-VAL-STEPS",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "missing stepsToReproduce returns HTTP 400",
+        "no Bug row is inserted"
+      ],
+      "sourceAssertions": [
+        "srv/bug-service/bug-write.js#prepareBugWrite",
+        "srv/bug-service/bug-write.js#validateRequiredBugFields"
+      ],
+      "beforeState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:41.905Z",
+      "completedAt": "2026-08-03T02:46:41.916Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-VAL-ACTUAL",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "missing actualResult returns HTTP 400",
+        "no Bug row is inserted"
+      ],
+      "sourceAssertions": [
+        "srv/bug-service/bug-write.js#prepareBugWrite",
+        "srv/bug-service/bug-write.js#validateRequiredBugFields"
+      ],
+      "beforeState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:41.916Z",
+      "completedAt": "2026-08-03T02:46:41.927Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-VAL-EXPECTED",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "missing expectedResult returns HTTP 400",
+        "no Bug row is inserted"
+      ],
+      "sourceAssertions": [
+        "srv/bug-service/bug-write.js#prepareBugWrite",
+        "srv/bug-service/bug-write.js#validateRequiredBugFields"
+      ],
+      "beforeState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:41.927Z",
+      "completedAt": "2026-08-03T02:46:41.940Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-VAL-PRIORITY",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "missing priority_code returns HTTP 400",
+        "no Bug row is inserted"
+      ],
+      "sourceAssertions": [
+        "srv/bug-service/bug-write.js#prepareBugWrite",
+        "srv/bug-service/bug-write.js#validateRequiredBugFields"
+      ],
+      "beforeState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:41.940Z",
+      "completedAt": "2026-08-03T02:46:41.951Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-VAL-SEVERITY",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "missing severity_code returns HTTP 400",
+        "no Bug row is inserted"
+      ],
+      "sourceAssertions": [
+        "srv/bug-service/bug-write.js#prepareBugWrite",
+        "srv/bug-service/bug-write.js#validateRequiredBugFields"
+      ],
+      "beforeState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:41.951Z",
+      "completedAt": "2026-08-03T02:46:41.960Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-VAL-COMPONENT",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "missing applicationComponent_ID returns HTTP 400",
+        "no Bug row is inserted"
+      ],
+      "sourceAssertions": [
+        "srv/bug-service/bug-write.js#prepareBugWrite",
+        "srv/bug-service/bug-write.js#validateRequiredBugFields"
+      ],
+      "beforeState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:41.960Z",
+      "completedAt": "2026-08-03T02:46:41.970Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-VAL-CATEGORY",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "missing defectCategory_ID returns HTTP 400",
+        "no Bug row is inserted"
+      ],
+      "sourceAssertions": [
+        "srv/bug-service/bug-write.js#prepareBugWrite",
+        "srv/bug-service/bug-write.js#validateRequiredBugFields"
+      ],
+      "beforeState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:41.970Z",
+      "completedAt": "2026-08-03T02:46:41.980Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-VAL-REPORTER",
+      "status": "FAIL",
+      "actualResult": "Missing expected rejection.",
+      "assertions": [
+        "missing reporter_ID returns HTTP 400",
+        "no Bug row is inserted"
+      ],
+      "sourceAssertions": [
+        "srv/bug-service/bug-write.js#prepareBugWrite",
+        "srv/bug-service/bug-write.js#validateRequiredBugFields"
+      ],
+      "beforeState": {
+        "Bugs": 4,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 0,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:41.980Z",
+      "completedAt": "2026-08-03T02:46:42.000Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-VAL-WHITESPACE",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "whitespace required text returns HTTP 400",
+        "no Bug row is inserted"
+      ],
+      "sourceAssertions": [
+        "srv/bug-service/bug-write.js#prepareBugWrite",
+        "srv/bug-service/bug-write.js#validateRequiredBugFields"
+      ],
+      "beforeState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:42.000Z",
+      "completedAt": "2026-08-03T02:46:42.010Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-VAL-CODE-UNKNOWN",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "invalid code-list value returns HTTP 400",
+        "no Bug row is inserted"
+      ],
+      "sourceAssertions": [
+        "srv/bug-service/bug-write.js#deriveOrValidateComponentCategory",
+        "srv/bug-service/bug-write.js#validateActiveCodeLists"
+      ],
+      "beforeState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:42.011Z",
+      "completedAt": "2026-08-03T02:46:42.019Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-VAL-CODE-INACTIVE",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "invalid code-list value returns HTTP 400",
+        "no Bug row is inserted"
+      ],
+      "sourceAssertions": [
+        "srv/bug-service/bug-write.js#deriveOrValidateComponentCategory",
+        "srv/bug-service/bug-write.js#validateActiveCodeLists"
+      ],
+      "beforeState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:42.019Z",
+      "completedAt": "2026-08-03T02:46:42.030Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-VAL-CODE-SPACES",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "invalid code-list value returns HTTP 400",
+        "no Bug row is inserted"
+      ],
+      "sourceAssertions": [
+        "srv/bug-service/bug-write.js#deriveOrValidateComponentCategory",
+        "srv/bug-service/bug-write.js#validateActiveCodeLists"
+      ],
+      "beforeState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:42.030Z",
+      "completedAt": "2026-08-03T02:46:42.038Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-VAL-CODE-EMPTY",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "invalid code-list value returns HTTP 400",
+        "no Bug row is inserted"
+      ],
+      "sourceAssertions": [
+        "srv/bug-service/bug-write.js#deriveOrValidateComponentCategory",
+        "srv/bug-service/bug-write.js#validateActiveCodeLists"
+      ],
+      "beforeState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:42.038Z",
+      "completedAt": "2026-08-03T02:46:42.046Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-VAL-CODE-TYPE",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "invalid code-list value returns HTTP 400",
+        "no Bug row is inserted"
+      ],
+      "sourceAssertions": [
+        "srv/bug-service/bug-write.js#deriveOrValidateComponentCategory",
+        "srv/bug-service/bug-write.js#validateActiveCodeLists"
+      ],
+      "beforeState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:42.046Z",
+      "completedAt": "2026-08-03T02:46:42.055Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-VAL-PAIR-MISMATCH",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "mismatching Component Category returns HTTP 400",
+        "no Bug row is inserted"
+      ],
+      "sourceAssertions": [
+        "srv/bug-service/bug-write.js#deriveOrValidateComponentCategory",
+        "srv/bug-service/bug-write.js#validateActiveCodeLists"
+      ],
+      "beforeState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:42.055Z",
+      "completedAt": "2026-08-03T02:46:42.066Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-CMT-004",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "invalid content returns HTTP 400",
+        "no Comment row is inserted"
+      ],
+      "sourceAssertions": [
+        "srv/bug-service/content.js#prepareCommentCreate",
+        "srv/bug-service/actions.js#addComment"
+      ],
+      "beforeState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:42.066Z",
+      "completedAt": "2026-08-03T02:46:42.071Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-CMT-005",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "invalid content returns HTTP 400",
+        "no Comment row is inserted"
+      ],
+      "sourceAssertions": [
+        "srv/bug-service/content.js#prepareCommentCreate",
+        "srv/bug-service/actions.js#addComment"
+      ],
+      "beforeState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:42.071Z",
+      "completedAt": "2026-08-03T02:46:42.076Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-CMT-008",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "inactive/invalid comment actor returns HTTP 400",
+        "no Comment row is inserted"
+      ],
+      "sourceAssertions": [
+        "srv/bug-service/content.js#prepareCommentCreate",
+        "srv/bug-service/actions.js#addComment"
+      ],
+      "beforeState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "reloadState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "startedAt": "2026-08-03T02:46:42.076Z",
+      "completedAt": "2026-08-03T02:46:42.086Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-ATT-007",
+      "status": "BLOCKED",
+      "actualResult": "Static UI guard assertions passed, but browser runtime execution is unavailable; the UI behavior is not promoted to PASS.",
+      "assertions": [
+        "UI allowlist declares permitted MIME types",
+        "selection handler contains unsupported-MIME rejection"
+      ],
+      "sourceAssertions": [
+        "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js#MAX_ATTACHMENT_BYTES"
+      ],
+      "startedAt": "2026-08-03T02:46:42.086Z",
+      "completedAt": "2026-08-03T02:46:42.087Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-ATT-008",
+      "status": "BLOCKED",
+      "actualResult": "Static UI guard assertions passed, but browser runtime execution is unavailable; the UI behavior is not promoted to PASS.",
+      "assertions": [
+        "UI declares 10 MB maximum",
+        "selection handler contains the byte-limit rejection"
+      ],
+      "sourceAssertions": [
+        "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js#MAX_ATTACHMENT_BYTES"
+      ],
+      "startedAt": "2026-08-03T02:46:42.087Z",
+      "completedAt": "2026-08-03T02:46:42.087Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-NTF-009",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "delivery before nextAttemptAt is not sent",
+        "attempt count remains unchanged"
+      ],
+      "sourceAssertions": [
+        "srv/email/outbox.js#processEmailDeliveries",
+        "srv/email/worker.js#processEmailOutboxBatch",
+        "srv/bug-service/history.js#writeHistoryEvent",
+        "srv/bug-service/history.js#recordBugChangeSideEffects"
+      ],
+      "beforeState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 0,
+        "NotificationDeliveries": 0
+      },
+      "afterState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 1,
+        "NotificationDeliveries": 1
+      },
+      "reloadState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 1,
+        "NotificationDeliveries": 1
+      },
+      "startedAt": "2026-08-03T02:46:42.087Z",
+      "completedAt": "2026-08-03T02:46:42.101Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-NTF-010",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "due delivery is retried once",
+        "successful retry persists SENT and attemptCount"
+      ],
+      "sourceAssertions": [
+        "srv/email/outbox.js#processEmailDeliveries",
+        "srv/email/worker.js#processEmailOutboxBatch",
+        "srv/bug-service/history.js#writeHistoryEvent",
+        "srv/bug-service/history.js#recordBugChangeSideEffects"
+      ],
+      "beforeState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 1,
+        "NotificationDeliveries": 1
+      },
+      "afterState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 2,
+        "NotificationDeliveries": 2
+      },
+      "reloadState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 2,
+        "NotificationDeliveries": 2
+      },
+      "startedAt": "2026-08-03T02:46:42.101Z",
+      "completedAt": "2026-08-03T02:46:42.119Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-NTF-011",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "max-attempt delivery remains FAILED",
+        "nextAttemptAt is cleared"
+      ],
+      "sourceAssertions": [
+        "srv/email/outbox.js#processEmailDeliveries",
+        "srv/email/worker.js#processEmailOutboxBatch",
+        "srv/bug-service/history.js#writeHistoryEvent",
+        "srv/bug-service/history.js#recordBugChangeSideEffects"
+      ],
+      "beforeState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 2,
+        "NotificationDeliveries": 2
+      },
+      "afterState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 3,
+        "NotificationDeliveries": 3
+      },
+      "reloadState": {
+        "Bugs": 5,
+        "Comments": 0,
+        "AuthSessions": 1,
+        "HistoryEvents": 1,
+        "Notifications": 3,
+        "NotificationDeliveries": 3
+      },
+      "startedAt": "2026-08-03T02:46:42.119Z",
+      "completedAt": "2026-08-03T02:46:42.132Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-AI-001",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "disabled provider returns AI_DISABLED",
+        "fetch delegate is never called"
+      ],
+      "sourceAssertions": [
+        "srv/ai/provider.js#SafeAiProvider",
+        "srv/ai/safety.js#redactSensitiveText"
+      ],
+      "startedAt": "2026-08-03T02:46:42.132Z",
+      "completedAt": "2026-08-03T02:46:42.134Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-AI-002",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "mock structured result preserves configured safe fields"
+      ],
+      "sourceAssertions": [
+        "srv/ai/provider.js#SafeAiProvider",
+        "srv/ai/safety.js#redactSensitiveText"
+      ],
+      "startedAt": "2026-08-03T02:46:42.134Z",
+      "completedAt": "2026-08-03T02:46:42.134Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-AI-003",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "embedding vector length equals configured dimensions"
+      ],
+      "sourceAssertions": [
+        "srv/ai/provider.js#SafeAiProvider",
+        "srv/ai/safety.js#redactSensitiveText"
+      ],
+      "startedAt": "2026-08-03T02:46:42.134Z",
+      "completedAt": "2026-08-03T02:46:42.135Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-AI-004",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "timeout yields safe retryable AI_TIMEOUT"
+      ],
+      "sourceAssertions": [
+        "srv/ai/provider.js#SafeAiProvider",
+        "srv/ai/safety.js#redactSensitiveText"
+      ],
+      "startedAt": "2026-08-03T02:46:42.135Z",
+      "completedAt": "2026-08-03T02:46:42.144Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-AI-005",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "provider error yields safe retryable error"
+      ],
+      "sourceAssertions": [
+        "srv/ai/provider.js#SafeAiProvider",
+        "srv/ai/safety.js#redactSensitiveText"
+      ],
+      "startedAt": "2026-08-03T02:46:42.144Z",
+      "completedAt": "2026-08-03T02:46:42.145Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-AI-006",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "malformed Bug Summary payload falls back to deterministic safe summary"
+      ],
+      "sourceAssertions": [
+        "srv/ai/provider.js#SafeAiProvider",
+        "srv/ai/safety.js#redactSensitiveText"
+      ],
+      "startedAt": "2026-08-03T02:46:42.145Z",
+      "completedAt": "2026-08-03T02:46:42.145Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    },
+    {
+      "caseId": "UT-AI-007",
+      "status": "PASS",
+      "actualResult": "Exact local assertion passed.",
+      "assertions": [
+        "redactor masks representative credential patterns"
+      ],
+      "sourceAssertions": [
+        "srv/ai/provider.js#SafeAiProvider",
+        "srv/ai/safety.js#redactSensitiveText"
+      ],
+      "startedAt": "2026-08-03T02:46:42.145Z",
+      "completedAt": "2026-08-03T02:46:42.145Z",
+      "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6"
+    }
+  ],
+  "totals": {
+    "total": 38,
+    "passed": 34,
+    "failed": 2,
+    "blocked": 2
+  }
+}

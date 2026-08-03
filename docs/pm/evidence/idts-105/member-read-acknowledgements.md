@@ -11,7 +11,7 @@ member personally confirms the exact commit and adds the Jira comment.
 | DonHV | PENDING | — | — | Database/persistence, integration and Drive | — | IDTS-105 / pending |
 | SangVN | PENDING | — | — | Screen/collaboration Technical Specification | — | IDTS-108 / pending |
 | DatDT | PENDING | — | — | Standards/messages/monitoring/AI Technical Specification | — | IDTS-109 / pending |
-| NhanT | PENDING | — | — | Unit Test and UAT catalogs/execution/evidence | — | IDTS-110 and IDTS-111 / pending |
+| NhanT | READ | 4b4c93c1d8b45024677653e1f890d52e742b2aaf | 2026-08-03 | I understand that I execute the approved IDTS-110 Unit Test cases and the 57 approved IDTS-111 Tester UAT cases using my own SAP identity, collecting truthful case-specific sanitized evidence; DonHV owns catalog/result approval and final Unit_Test_EN/UAT_EN_PREPARED workbook integration. | None | IDTS-110 / comment 10844; IDTS-111 / comment 10863 |
 
 ## Required member comment format
 

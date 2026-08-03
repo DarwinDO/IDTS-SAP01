@@ -1,0 +1,39 @@
+{
+  "caseId": "UT-VAL-CODE-UNKNOWN",
+  "title": "unknown code-list value is rejected",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "executor": "NhanT (agent-assisted)",
+  "executedAt": "2026-08-03T02:46:42.019Z",
+  "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deploySha": null,
+  "environment": "LOCAL",
+  "runtime": "Node.js v22.23.2, win32 x64",
+  "testCommand": "node scripts/qa/test-idts110-local-exact.js --output docs/pm/evidence/idts-110/local-execution-results.json",
+  "sourceAssertions": [
+    "srv/bug-service/bug-write.js#deriveOrValidateComponentCategory",
+    "srv/bug-service/bug-write.js#validateActiveCodeLists"
+  ],
+  "actualResult": "Exact local assertion passed.",
+  "assertions": [
+    "invalid code-list value returns HTTP 400",
+    "no Bug row is inserted"
+  ],
+  "evidenceIds": [
+    "IDTS110-UT-VAL-CODE-UNKNOWN-RESULT",
+    "IDTS110-UT-VAL-CODE-UNKNOWN-BEFORE-DATABASE",
+    "IDTS110-UT-VAL-CODE-UNKNOWN-AFTER-DATABASE",
+    "IDTS110-UT-VAL-CODE-UNKNOWN-RELOAD-READBACK"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "result.svg",
+    "before-database.png",
+    "before-database.svg",
+    "after-database.png",
+    "after-database.svg",
+    "reload-readback.png",
+    "reload-readback.svg"
+  ],
+  "limitations": "Uses isolated deterministic local fixtures. No BTP acceptance is claimed. Final catalog/workbook integration belongs to DonHV."
+}

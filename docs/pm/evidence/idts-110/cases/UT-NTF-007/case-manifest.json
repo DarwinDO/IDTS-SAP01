@@ -1,0 +1,29 @@
+{
+  "caseId": "UT-NTF-007",
+  "title": "worker claims and sends one eligible delivery",
+  "candidateExecutionStatus": "BLOCKED",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "executor": "NhanT (agent-assisted)",
+  "executedAt": "2026-08-03T02:27:20.209Z",
+  "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deploySha": null,
+  "environment": "HYBRID_BTP",
+  "runtime": "node v22.23.2, win32 x64",
+  "testCommand": null,
+  "sourceAssertions": [],
+  "actualResult": "Blocked before final acceptance: the required BTP/HANA repeat cannot run because this workspace has no authorized BTP target, Cloud Foundry session, or target configuration. No local-only result is promoted to PASS.",
+  "assertions": [
+    "Cloud Foundry CLI available: false",
+    "Authorized BTP/QA target configuration available: false",
+    "BTP execution attempted: false (target unavailable)",
+    "Local-only result promoted to BTP acceptance: false"
+  ],
+  "evidenceIds": [
+    "IDTS110-UT-NTF-007-BLOCKER"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "result.svg"
+  ],
+  "limitations": "Environment blocker only; this is not a product failure. DonHV must provide an authorized BTP target/session before the case can be executed and accepted."
+}
