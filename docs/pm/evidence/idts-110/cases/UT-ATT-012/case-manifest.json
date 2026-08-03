@@ -11,19 +11,18 @@
   "runtime": "node v22.23.2, win32 x64",
   "testCommand": null,
   "sourceAssertions": [],
-  "actualResult": "Blocked before execution: this case requires a bound SAP BTP or live external service, but this workspace has no authorized BTP target, Cloud Foundry session, or target configuration.",
+  "actualResult": "Blocked before execution: `npm run btp:demo:check` cannot start because the Cloud Foundry CLI is unavailable on this host. No BTP request, deployment, database/seed change, or integration assertion ran.",
   "assertions": [
     "Cloud Foundry CLI available: false",
-    "Authorized BTP/QA target configuration available: false",
-    "BTP execution attempted: false (target unavailable)",
-    "Local-only result promoted to BTP acceptance: false"
+    "BTP readiness command exit code: 1",
+    "BTP integration assertion executed: false",
+    "Product failure claimed: false"
   ],
   "evidenceIds": [
     "IDTS110-UT-ATT-012-BLOCKER"
   ],
   "evidenceFiles": [
-    "result.png",
-    "result.svg"
+    "result.png"
   ],
-  "limitations": "Environment blocker only; this is not a product failure. DonHV must provide an authorized BTP target/session before the case can be executed and accepted."
+  "limitations": "Environment blocker only. These 13 cases require an authorized Cloud Foundry/BTP session; DonHV owns final BTP execution review and workbook integration."
 }

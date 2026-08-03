@@ -1,29 +1,67 @@
 {
   "caseId": "UT-AI-021",
   "title": "accepted current Classification suggestion applies allowlisted fields",
-  "candidateExecutionStatus": "BLOCKED",
+  "candidateExecutionStatus": "PASS",
   "reviewStatus": "PENDING_DONHV_REVIEW",
   "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-03T02:27:20.209Z",
-  "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "executedAt": "2026-08-03T12:39:12.015Z",
+  "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae",
   "deploySha": null,
   "environment": "HYBRID_BTP",
-  "runtime": "node v22.23.2, win32 x64",
-  "testCommand": null,
-  "sourceAssertions": [],
-  "actualResult": "Blocked before final acceptance: the required BTP/HANA repeat cannot run because this workspace has no authorized BTP target, Cloud Foundry session, or target configuration. No local-only result is promoted to PASS.",
+  "runtime": "Node.js v22.23.1, win32 x64",
+  "testCommand": "node scripts/qa/test-idts110-local-primary-suites.js --output=docs/pm/evidence/idts-110/local-primary-suite-results.json",
+  "sourceAssertions": [
+    "srv/ai/classification-suggestion.js#suggestClassification",
+    "srv/ai/classification-apply.js#applyClassificationSuggestion"
+  ],
+  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
   "assertions": [
-    "Cloud Foundry CLI available: false",
-    "Authorized BTP/QA target configuration available: false",
-    "BTP execution attempted: false (target unavailable)",
-    "Local-only result promoted to BTP acceptance: false"
+    "aiApply: PASS  Tester can apply an accepted classification suggestion | actual=\"95000000-0000-0000-0000-000000000001\" expected=\"95000000-0000-0000-0000-000000000001\"",
+    "aiApply: PASS  applies SAP Module from grounded suggestion | actual=\"30000000-0000-0000-0000-000000000002\" expected=\"30000000-0000-0000-0000-000000000002\"",
+    "aiApply: PASS  applies Application Component from grounded suggestion | actual=\"40000000-0000-0000-0000-000000000006\" expected=\"40000000-0000-0000-0000-000000000006\"",
+    "aiApply: PASS  applies Defect Category from grounded suggestion | actual=\"50000000-0000-0000-0000-000000000002\" expected=\"50000000-0000-0000-0000-000000000002\"",
+    "aiApply: PASS  derives matching Component Category | actual=\"60000000-0000-0000-0000-000000000011\" expected=\"60000000-0000-0000-0000-000000000011\"",
+    "aiApply: PASS  applies Priority code | actual=\"CRITICAL\" expected=\"CRITICAL\"",
+    "aiApply: PASS  applies Severity code | actual=\"BLOCKER\" expected=\"BLOCKER\"",
+    "aiApply: PASS  does not change workflow status | actual=\"PENDING_ASSIGNMENT\" expected=\"PENDING_ASSIGNMENT\"",
+    "aiApply: PASS  does not assign the Bug | actual=null expected=null",
+    "aiApply: PASS  writes one grouped history event | actual=1 expected=1",
+    "aiApply: PASS  writes one history log per changed classification field | actual=6 expected=6",
+    "aiApply: PASS  history summary identifies accepted classification application | actual=true",
+    "aiApply: PASS  PM repeat application is idempotent | actual=\"95000000-0000-0000-0000-000000000001\" expected=\"95000000-0000-0000-0000-000000000001\"",
+    "aiApply: PASS  idempotent repeat does not duplicate history | actual=1 expected=1",
+    "aiApply: PASS  pending suggestion cannot be applied | status=409 message=Only an accepted, current classification suggestion can be applied.",
+    "aiApply: PASS  rejected suggestion cannot be applied | status=409 message=Only an accepted, current classification suggestion can be applied.",
+    "aiApply: PASS  ignored suggestion cannot be applied | status=409 message=Only an accepted, current classification suggestion can be applied.",
+    "aiApply: PASS  non-classification suggestion cannot be applied | status=400 message=This AI suggestion is not a classification suggestion.",
+    "aiApply: PASS  malformed suggestion payload is rejected | status=400 message=AI suggestion payload is not valid.",
+    "aiApply: PASS  field outside the classification allow-list is rejected | status=400 message=AI suggestion contains an unsupported or duplicate classification field.",
+    "aiApply: PASS  inactive catalog target is rejected at apply time | status=400 message=AI suggestion catalog value is inactive or unavailable.",
+    "aiApply: PASS  stale source classification is not overwritten | status=409 message=The Bug classification changed after this suggestion was created.",
+    "aiApply: PASS  stale rejection preserves the later manual value | actual=\"LOW\" expected=\"LOW\"",
+    "aiApply: PASS  Developer cannot apply classification suggestion | status=403 message=Only Tester or PM users can apply classification suggestions.",
+    "aiApply: PASS  unauthorized request leaves classification unchanged | actual=\"HIGH\" expected=\"HIGH\"",
+    "aiApply: PASS  missing suggestion returns safe 404 | status=404 message=AI suggestion was not found.",
+    "aiApply: PASS  invalid suggestion ID returns 400 | status=400 message=A valid AI suggestion ID is required.",
+    "aiApply: PASS  expired accepted suggestion cannot be applied | status=409 message=Only an accepted, current classification suggestion can be applied.",
+    "aiApply: PASS  accepted payload without applicable values is rejected | status=400 message=AI suggestion does not contain an applicable classification value.",
+    "aiApply: PASS  catalog ID and code mismatch is rejected | status=400 message=AI suggestion catalog ID and code do not match.",
+    "aiApply: PASS  active but invalid component/category pair is rejected | status=400 message=The selected Application Component and Defect Category are not a valid Component Category.",
+    "aiApply: PASS  incomplete source snapshot is rejected as malformed | status=400 message=AI suggestion payload is not valid.",
+    "aiApply: PASS  post-handler failure rejects apply action | status=500 message=Forced post-handler failure for rollback verification.",
+    "aiApply: PASS  failed request rolls Bug classification back | actual=\"HIGH\" expected=\"HIGH\"",
+    "aiApply: PASS  failed request rolls history back | actual=0 expected=0",
+    "aiApply: TOTAL: 35 PASS  |  0 FAIL  |  35 checks"
   ],
   "evidenceIds": [
-    "IDTS110-UT-AI-021-BLOCKER"
+    "IDTS110-UT-AI-021-LOCAL-PRIMARY-RESULT"
   ],
   "evidenceFiles": [
-    "result.png",
-    "result.svg"
+    "result.png"
   ],
-  "limitations": "Environment blocker only; this is not a product failure. DonHV must provide an authorized BTP target/session before the case can be executed and accepted."
+  "limitations": "This is a local-primary candidate result from mapped domain suites. It is not BTP acceptance evidence; DonHV owns final case-level review and workbook integration.",
+  "suiteKeys": [
+    "aiApply"
+  ],
+  "structuredEvidenceFile": "../../local-primary-suite-results.json"
 }

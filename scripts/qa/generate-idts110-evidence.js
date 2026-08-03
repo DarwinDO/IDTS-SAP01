@@ -147,7 +147,7 @@ function writeLocalEvidence(resultsPath) {
     const caseDir = path.join(evidenceRoot, testCase.caseId)
     fs.mkdirSync(caseDir, { recursive: true })
     const needsState = testCase.evidenceRequirements.some(item => /before\/after database|reload\/readback/.test(item))
-    const evidenceFiles = ['result.png', 'result.svg']
+    const evidenceFiles = ['result.png']
     const evidenceIds = [`IDTS110-${testCase.caseId}-RESULT`]
     if (needsState) {
       for (const [name, label, state] of [
@@ -157,7 +157,7 @@ function writeLocalEvidence(resultsPath) {
       ]) {
         if (!state) throw new Error(`Missing ${label} for ${testCase.caseId}`)
         fs.writeFileSync(path.join(caseDir, `${name}.svg`), stateSvg(testCase, label, state, result), 'utf8')
-        evidenceFiles.push(`${name}.png`, `${name}.svg`)
+        evidenceFiles.push(`${name}.png`)
         evidenceIds.push(`IDTS110-${testCase.caseId}-${name.toUpperCase()}`)
       }
     }
@@ -171,7 +171,7 @@ function writeLocalEvidence(resultsPath) {
       baselineSha: result.baselineSha,
       deploySha: null,
       environment: 'LOCAL',
-      runtime: 'Node.js v22.23.2, win32 x64',
+      runtime: `Node.js ${process.version}, ${process.platform} ${process.arch}`,
       testCommand: 'node scripts/qa/test-idts110-local-exact.js --output docs/pm/evidence/idts-110/local-execution-results.json',
       sourceAssertions: result.sourceAssertions,
       actualResult: result.actualResult,
@@ -232,7 +232,7 @@ function writeBlockedBtpEvidence() {
         'Local-only result promoted to BTP acceptance: false'
       ],
       evidenceIds: [`IDTS110-${testCase.caseId}-BLOCKER`],
-      evidenceFiles: ['result.png', 'result.svg'],
+      evidenceFiles: ['result.png'],
       limitations: 'Environment blocker only; this is not a product failure. DonHV must provide an authorized BTP target/session before the case can be executed and accepted.'
     }
     fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8')

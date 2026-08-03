@@ -1,30 +1,37 @@
 {
   "caseId": "UT-AUTH-004",
-  "title": "non-string password is rejected safely",
+  "title": "non-string password is rejected at the CDS type boundary",
   "candidateExecutionStatus": "FAIL",
   "reviewStatus": "PENDING_DONHV_REVIEW",
   "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-03T02:46:41.802Z",
-  "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "executedAt": "2026-08-03T12:43:11.983Z",
+  "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae",
   "deploySha": null,
   "environment": "LOCAL",
-  "runtime": "Node.js v22.23.2, win32 x64",
+  "runtime": "Node.js v22.23.1, win32 x64",
   "testCommand": "node scripts/qa/test-idts110-local-exact.js --output docs/pm/evidence/idts-110/local-execution-results.json",
   "sourceAssertions": [
-    "srv/auth.js#login",
-    "srv/auth.js#me"
+    "srv/auth.cds#login",
+    "srv/auth.js#login"
   ],
-  "actualResult": "The validation function is expected to return \"true\". Received false\n\nCaught error:\n\nValidationError: ASSERT_DATA_TYPE",
+  "actualResult": "Public HTTP 400 exposes CAP type-validation internals.",
   "assertions": [
-    "returns generic HTTP 401",
+    "rejects a non-string password at the CDS contract boundary",
+    "does not expose stack/type internals",
     "does not insert an AuthSession"
   ],
   "evidenceIds": [
-    "IDTS110-UT-AUTH-004-RESULT"
+    "IDTS110-UT-AUTH-004-RESULT",
+    "IDTS110-UT-AUTH-004-BEFORE-DATABASE",
+    "IDTS110-UT-AUTH-004-AFTER-DATABASE",
+    "IDTS110-UT-AUTH-004-RELOAD-READBACK"
   ],
   "evidenceFiles": [
     "result.png",
-    "result.svg"
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
   ],
-  "limitations": "Observed behavior does not match the approved expected result. DonHV must triage the product/security boundary or catalog expectation before acceptance."
+  "limitations": "Observed behavior does not match the approved expected result. DonHV must triage the product/security boundary or catalog expectation before acceptance.",
+  "structuredEvidenceFile": "../../local-execution-results.json"
 }

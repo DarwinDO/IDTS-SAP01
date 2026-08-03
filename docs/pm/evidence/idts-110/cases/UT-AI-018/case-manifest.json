@@ -1,29 +1,51 @@
 {
   "caseId": "UT-AI-018",
   "title": "Ignore pending suggestion records one terminal review",
-  "candidateExecutionStatus": "BLOCKED",
+  "candidateExecutionStatus": "PASS",
   "reviewStatus": "PENDING_DONHV_REVIEW",
   "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-03T02:27:20.209Z",
-  "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "executedAt": "2026-08-03T12:39:12.015Z",
+  "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae",
   "deploySha": null,
   "environment": "HYBRID_BTP",
-  "runtime": "node v22.23.2, win32 x64",
-  "testCommand": null,
-  "sourceAssertions": [],
-  "actualResult": "Blocked before final acceptance: the required BTP/HANA repeat cannot run because this workspace has no authorized BTP target, Cloud Foundry session, or target configuration. No local-only result is promoted to PASS.",
+  "runtime": "Node.js v22.23.1, win32 x64",
+  "testCommand": "node scripts/qa/test-idts110-local-primary-suites.js --output=docs/pm/evidence/idts-110/local-primary-suite-results.json",
+  "sourceAssertions": [
+    "srv/ai/review.js#reviewAiSuggestion",
+    "srv/ai/metrics.js#readAiOperationalMetrics"
+  ],
+  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
   "assertions": [
-    "Cloud Foundry CLI available: false",
-    "Authorized BTP/QA target configuration available: false",
-    "BTP execution attempted: false (target unavailable)",
-    "Local-only result promoted to BTP acceptance: false"
+    "aiReview: PASS  accept returns the reviewed suggestion ID | actual=\"3f104921-397f-40e5-8a8d-51d442dcdee0\" expected=\"3f104921-397f-40e5-8a8d-51d442dcdee0\"",
+    "aiReview: PASS  accept returns ACCEPTED state | actual=\"ACCEPTED\" expected=\"ACCEPTED\"",
+    "aiReview: PASS  accept returns reviewer display name | actual=\"DonHV\" expected=\"DonHV\"",
+    "aiReview: PASS  accept returns review timestamp | actual=\"2026-08-03T12:39:04.289Z\"",
+    "aiReview: PASS  accept persists ACCEPTED state | actual=\"ACCEPTED\" expected=\"ACCEPTED\"",
+    "aiReview: PASS  accept persists authenticated reviewer | actual=\"10000000-0000-0000-0000-000000000001\" expected=\"10000000-0000-0000-0000-000000000001\"",
+    "aiReview: PASS  accept persists reviewedAt | actual=\"2026-08-03T12:39:04.289Z\"",
+    "aiReview: PASS  review action does not mutate Bug business data | actual=\"{\\\"status_code\\\":\\\"PENDING_ASSIGNMENT\\\",\\\"assignee_ID\\\":null,\\\"sapModule_ID\\\":null,\\\"applicationComponent_ID\\\":\\\"40000000-0000-0000-0000-000000000005\\\",\\\"defectCategory_ID\\\":\\\"50000000-0000-0000-0000-000000000001\\\",\\\"componentCategory_ID\\\":\\\"60000000-0000-0000-0000-000000000009\\\",\\\"priority_code\\\":\\\"HIGH\\\",\\\"severity_code\\\":\\\"MAJOR\\\"}\" expected=\"{\\\"status_code\\\":\\\"PENDING_ASSIGNMENT\\\",\\\"assignee_ID\\\":null,\\\"sapModule_ID\\\":null,\\\"applicationComponent_ID\\\":\\\"40000000-0000-0000-0000-000000000005\\\",\\\"defectCategory_ID\\\":\\\"50000000-0000-0000-0000-000000000001\\\",\\\"componentCategory_ID\\\":\\\"60000000-0000-0000-0000-000000000009\\\",\\\"priority_code\\\":\\\"HIGH\\\",\\\"severity_code\\\":\\\"MAJOR\\\"}\"",
+    "aiReview: PASS  a second decision on the same suggestion is rejected safely | status=409 message=This AI suggestion is no longer pending review.",
+    "aiReview: PASS  repeat decision keeps the original state | actual=\"ACCEPTED\" expected=\"ACCEPTED\"",
+    "aiReview: PASS  reject persists REJECTED state | actual=\"REJECTED\" expected=\"REJECTED\"",
+    "aiReview: PASS  Developer can review a readable suggestion | actual=\"DatDT\" expected=\"DatDT\"",
+    "aiReview: PASS  Developer review uses authenticated reviewer ID | actual=\"10000000-0000-0000-0000-000000000003\" expected=\"10000000-0000-0000-0000-000000000003\"",
+    "aiReview: PASS  ignore persists IGNORED state | actual=\"IGNORED\" expected=\"IGNORED\"",
+    "aiReview: PASS  missing suggestion returns safe 404 | status=404 message=AI suggestion was not found.",
+    "aiReview: PASS  missing suggestion ID returns 400 | status=400 message=A valid AI suggestion ID is required.",
+    "aiReview: PASS  unknown authenticated identity cannot review suggestions | status=403 message=You are not allowed to review this AI suggestion.",
+    "aiReview: PASS  post-handler failure rejects the action | status=500 message=Forced post-handler failure for rollback verification.",
+    "aiReview: PASS  failed request rolls review update back to PENDING | actual=\"PENDING\" expected=\"PENDING\"",
+    "aiReview: TOTAL: 19 PASS  |  0 FAIL  |  19 checks"
   ],
   "evidenceIds": [
-    "IDTS110-UT-AI-018-BLOCKER"
+    "IDTS110-UT-AI-018-LOCAL-PRIMARY-RESULT"
   ],
   "evidenceFiles": [
-    "result.png",
-    "result.svg"
+    "result.png"
   ],
-  "limitations": "Environment blocker only; this is not a product failure. DonHV must provide an authorized BTP target/session before the case can be executed and accepted."
+  "limitations": "This is a local-primary candidate result from mapped domain suites. It is not BTP acceptance evidence; DonHV owns final case-level review and workbook integration.",
+  "suiteKeys": [
+    "aiReview"
+  ],
+  "structuredEvidenceFile": "../../local-primary-suite-results.json"
 }

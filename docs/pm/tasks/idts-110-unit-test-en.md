@@ -4,7 +4,7 @@
 - Workbook generator and final integrator: DonHV
 - Test executor and case-evidence owner: NhanT
 - Due: 2026-08-05
-- Status: Execution candidate under DonHV remediation; PR #269 is not merge-ready
+- Status: Remediation candidate prepared; PR #269 remains not merge-ready pending DonHV review, one FAIL, and 15 environment blockers
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-110
 
 ## Workflow
@@ -25,15 +25,16 @@
 - Review evidence: `docs/pm/evidence/idts-110/unit-test-catalog-review.md`
 - Approval: DonHV, 2026-08-02; execution truth remains 188 `NOT_RUN`
 
-## NhanT execution progress — 2026-08-03
+## NhanT remediation progress — 2026-08-03
 
 - All 188 approved cases now have individual candidate packages under `docs/pm/evidence/idts-110/cases/`.
-- Execution truth: 34 PASS, 2 FAIL, and 152 BLOCKED.
-- The two FAIL cases are `UT-AUTH-004` and `UT-VAL-REPORTER`; details are in `docs/pm/evidence/idts-110/execution-summary.md`.
-- Of the blocked cases, 150 require BTP/HANA/live-service execution without an authorized target/session, and 2 LOCAL attachment UI cases require an approved browser runtime.
-- Evidence inventory: 188 manifests, 269 PNGs, and 269 SVGs. Persistence cases include before/after and reload/readback images.
+- Current candidate truth: 172 PASS, 1 FAIL, and 15 BLOCKED.
+- Exact LOCAL result: 37 PASS / 1 FAIL / 2 BLOCKED. The remaining FAIL is `UT-AUTH-004`; `UT-VAL-REPORTER` now passes the corrected unresolved-actor assertion.
+- Corrected local-primary result: 135/135 mapped candidates have fresh passing domain-suite evidence; DonHV retains case-level acceptance ownership.
+- The 13 true BTP integration cases remain blocked because `cf`/authorized BTP readiness is unavailable; the two UI component cases remain blocked by the blank SAP deployment.
+- Evidence inventory: 188 manifests, 278 PNGs, and 0 SVGs. Duplicate SVG sources were removed and structured JSON evidence is linked from manifests.
 - DonHV review is pending. The approved catalog remains 188 `NOT_RUN`, and `Unit_Test_EN`/Drive have not been changed by NhanT/agent.
-- Consolidated Jira handoff comment: `IDTS-110` comment `10861`.
+- Previous Jira handoff comment: `10861`; a new remediation comment is required after exact-head verification/push.
 
 No Unit Test VI is created. No command-only, script-only, shared-only, or unsanitized evidence is accepted.
 

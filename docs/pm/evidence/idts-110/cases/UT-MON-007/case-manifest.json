@@ -1,29 +1,74 @@
 {
   "caseId": "UT-MON-007",
   "title": "non-PM cannot read AI operational metrics",
-  "candidateExecutionStatus": "BLOCKED",
+  "candidateExecutionStatus": "PASS",
   "reviewStatus": "PENDING_DONHV_REVIEW",
   "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-03T02:27:20.209Z",
-  "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "executedAt": "2026-08-03T12:39:12.015Z",
+  "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae",
   "deploySha": null,
   "environment": "HYBRID_BTP",
-  "runtime": "node v22.23.2, win32 x64",
-  "testCommand": null,
-  "sourceAssertions": [],
-  "actualResult": "Blocked before final acceptance: the required BTP/HANA repeat cannot run because this workspace has no authorized BTP target, Cloud Foundry session, or target configuration. No local-only result is promoted to PASS.",
+  "runtime": "Node.js v22.23.1, win32 x64",
+  "testCommand": "node scripts/qa/test-idts110-local-primary-suites.js --output=docs/pm/evidence/idts-110/local-primary-suite-results.json",
+  "sourceAssertions": [
+    "srv/ai/review.js#reviewAiSuggestion",
+    "srv/ai/metrics.js#readAiOperationalMetrics"
+  ],
+  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
   "assertions": [
-    "Cloud Foundry CLI available: false",
-    "Authorized BTP/QA target configuration available: false",
-    "BTP execution attempted: false (target unavailable)",
-    "Local-only result promoted to BTP acceptance: false"
+    "aiMetrics: PASS  migration uses exactly two additive idempotent columns | actual=true",
+    "aiMetrics: PASS  migration targets the CAP PostgreSQL physical table name | actual=\"idts_cap_aisuggestions\" expected=\"idts_cap_aisuggestions\"",
+    "aiMetrics: PASS  migration targets lower-case PostgreSQL physical column names | actual=\"operationstatus,latencyms\" expected=\"operationstatus,latencyms\"",
+    "aiMetrics: PASS  migration refreshes the CAP service view with both safe metric columns | actual=true",
+    "aiMetrics: PASS  migration is explicit execute and dry-run by default | actual=true",
+    "aiMetrics: PASS  migration does not invoke CAP deploy or a child process | actual=true",
+    "aiMetrics: PASS  migration redacts PostgreSQL URLs | actual=true",
+    "aiMetrics: PASS  provider request succeeds while emitting metrics | actual=\"SUCCESS\" expected=\"SUCCESS\"",
+    "aiMetrics: PASS  provider emits exactly one operational metric | actual=1 expected=1",
+    "aiMetrics: PASS  metric captures feature type | actual=\"BUG_SUMMARY\" expected=\"BUG_SUMMARY\"",
+    "aiMetrics: PASS  metric captures safe provider alias | actual=\"mock\" expected=\"mock\"",
+    "aiMetrics: PASS  metric captures success outcome | actual=\"SUCCESS\" expected=\"SUCCESS\"",
+    "aiMetrics: PASS  metric captures non-negative latency | actual=true",
+    "aiMetrics: PASS  metric log excludes prompt and secret text | no unsafe detail detected",
+    "aiMetrics: PASS  metrics sink failure does not change provider success | actual=\"SUCCESS\" expected=\"SUCCESS\"",
+    "aiMetrics: PASS  metrics sink failure still returns provider data | actual=\"Mock AI response for: Normal Bug workflow must continue.\"",
+    "aiMetrics: PASS  timeout remains a distinct outcome | actual=\"TIMEOUT\" expected=\"TIMEOUT\"",
+    "aiMetrics: PASS  latency is normalized to an integer | actual=13 expected=13",
+    "aiMetrics: PASS  safe metric allowlist drops raw fields and redacts aliases | no unsafe detail detected",
+    "aiMetrics: PASS  safe metric does not copy rawPrompt | actual=false expected=false",
+    "aiMetrics: PASS  audit persists operation status | actual=\"SUCCESS\" expected=\"SUCCESS\"",
+    "aiMetrics: PASS  audit persists latency | actual=10 expected=10",
+    "aiMetrics: PASS  read-only projection exposes safe operation status | actual=\"SUCCESS\" expected=\"SUCCESS\"",
+    "aiMetrics: PASS  read-only projection exposes safe latency | actual=10 expected=10",
+    "aiMetrics: PASS  aggregate counts all audited feature requests | actual=4 expected=4",
+    "aiMetrics: PASS  aggregate counts successes | actual=1 expected=1",
+    "aiMetrics: PASS  aggregate counts failures | actual=3 expected=3",
+    "aiMetrics: PASS  aggregate distinguishes timeout | actual=1 expected=1",
+    "aiMetrics: PASS  aggregate distinguishes provider unavailable | actual=1 expected=1",
+    "aiMetrics: PASS  aggregate counts accepted review | actual=1 expected=1",
+    "aiMetrics: PASS  aggregate counts rejected review | actual=1 expected=1",
+    "aiMetrics: PASS  aggregate counts ignored review | actual=1 expected=1",
+    "aiMetrics: PASS  aggregate counts pending review | actual=1 expected=1",
+    "aiMetrics: PASS  aggregate counts latency samples only | actual=3 expected=3",
+    "aiMetrics: PASS  aggregate calculates average latency | actual=15 expected=15",
+    "aiMetrics: PASS  aggregate calculates max latency | actual=30 expected=30",
+    "aiMetrics: PASS  aggregate output contains allowlisted metadata only | no unsafe detail detected",
+    "aiMetrics: PASS  PM can read operational aggregate | actual=1 expected=1",
+    "aiMetrics: PASS  PM aggregate reads persisted request count | actual=4 expected=4",
+    "aiMetrics: PASS  PM aggregate reads review outcomes | actual=1 expected=1",
+    "aiMetrics: PASS  PM aggregate API exposes no sensitive content | no unsafe detail detected",
+    "aiMetrics: PASS  non-PM cannot read operational aggregate | actual=true expected=true",
+    "aiMetrics: TOTAL: 42 PASS  |  0 FAIL  |  42 checks"
   ],
   "evidenceIds": [
-    "IDTS110-UT-MON-007-BLOCKER"
+    "IDTS110-UT-MON-007-LOCAL-PRIMARY-RESULT"
   ],
   "evidenceFiles": [
-    "result.png",
-    "result.svg"
+    "result.png"
   ],
-  "limitations": "Environment blocker only; this is not a product failure. DonHV must provide an authorized BTP target/session before the case can be executed and accepted."
+  "limitations": "This is a local-primary candidate result from mapped domain suites. It is not BTP acceptance evidence; DonHV owns final case-level review and workbook integration.",
+  "suiteKeys": [
+    "aiMetrics"
+  ],
+  "structuredEvidenceFile": "../../local-primary-suite-results.json"
 }

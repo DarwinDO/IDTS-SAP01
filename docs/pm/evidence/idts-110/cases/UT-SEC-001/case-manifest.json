@@ -1,29 +1,62 @@
 {
   "caseId": "UT-SEC-001",
   "title": "anonymous BugService request is rejected",
-  "candidateExecutionStatus": "BLOCKED",
+  "candidateExecutionStatus": "PASS",
   "reviewStatus": "PENDING_DONHV_REVIEW",
   "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-03T02:27:20.209Z",
-  "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "executedAt": "2026-08-03T12:39:12.015Z",
+  "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae",
   "deploySha": null,
   "environment": "HYBRID_BTP",
-  "runtime": "node v22.23.2, win32 x64",
-  "testCommand": null,
-  "sourceAssertions": [],
-  "actualResult": "Blocked before final acceptance: the required BTP/HANA repeat cannot run because this workspace has no authorized BTP target, Cloud Foundry session, or target configuration. No local-only result is promoted to PASS.",
+  "runtime": "Node.js v22.23.1, win32 x64",
+  "testCommand": "node scripts/qa/test-idts110-local-primary-suites.js --output=docs/pm/evidence/idts-110/local-primary-suite-results.json",
+  "sourceAssertions": [
+    "srv/bug-service/guards.js#registerReadOnlyEntityGuards",
+    "srv/ai/safety.js#containsUnsafeDiagnosticText",
+    "srv/bug-service/permissions.js#enforceActionPermission",
+    "srv/bug-service/permissions.js#enforceBugWritePermission"
+  ],
+  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
   "assertions": [
-    "Cloud Foundry CLI available: false",
-    "Authorized BTP/QA target configuration available: false",
-    "BTP execution attempted: false (target unavailable)",
-    "Local-only result promoted to BTP acceptance: false"
+    "auth: PASS  active login token type | actual=\"Bearer\" expected=\"Bearer\"",
+    "auth: PASS  active login returns token | actual=\"uSbQ9of4kofecNdMbOUbsk0nxUx60eMOZTAz1cBwK1I\"",
+    "auth: PASS  active login maps user ID | actual=\"10000000-0000-0000-0000-000000000001\" expected=\"10000000-0000-0000-0000-000000000001\"",
+    "auth: PASS  active login maps role | actual=\"PM\" expected=\"PM\"",
+    "auth: PASS  active login returns expiry | actual=\"2026-08-03T20:38:44.606Z\"",
+    "auth: PASS  wrong password is denied safely | code=401 message=Invalid email or password.",
+    "auth: PASS  inactive user is denied safely | code=401 message=Invalid email or password.",
+    "auth: PASS  unexpected login diagnostic excludes raw SQL details | no unsafe detail detected",
+    "auth: PASS  unexpected login error response is sanitized | code=500 message=Sign-in is temporarily unavailable. Please try again later.",
+    "auth: PASS  session row created | actual=\"e2f42f39-d346-4f5a-ac4e-e7451368e002\"",
+    "auth: PASS  raw token is not stored | actual=false expected=false",
+    "auth: PASS  stored hash matches token | actual=\"3cd227dcac781ed39b2787e8971933ffb4f563c59d64eaa9344d36b27e9f182e\" expected=\"3cd227dcac781ed39b2787e8971933ffb4f563c59d64eaa9344d36b27e9f182e\"",
+    "auth: PASS  session starts unrevoked | actual=null expected=null",
+    "auth: PASS  middleware accepts valid token | actual=null expected=null",
+    "auth: PASS  middleware maps user id to email | actual=\"donhv@example.local\" expected=\"donhv@example.local\"",
+    "auth: PASS  middleware maps authenticated-user role | actual=true expected=true",
+    "auth: PASS  middleware maps business role | actual=true expected=true",
+    "auth: PASS  middleware maps IDTS user attribute | actual=\"10000000-0000-0000-0000-000000000001\" expected=\"10000000-0000-0000-0000-000000000001\"",
+    "auth: PASS  middleware maps session attribute | actual=\"e2f42f39-d346-4f5a-ac4e-e7451368e002\" expected=\"e2f42f39-d346-4f5a-ac4e-e7451368e002\"",
+    "auth: PASS  me returns current user ID | actual=\"10000000-0000-0000-0000-000000000001\" expected=\"10000000-0000-0000-0000-000000000001\"",
+    "auth: PASS  me returns current user email | actual=\"donhv@example.local\" expected=\"donhv@example.local\"",
+    "auth: PASS  me returns current user role | actual=\"PM\" expected=\"PM\"",
+    "auth: PASS  logout returns true for active session | actual=true expected=true",
+    "auth: PASS  logout sets revokedAt | actual=\"2026-08-03T12:38:44.692Z\"",
+    "auth: PASS  middleware rejects revoked token | actual=401 expected=401",
+    "auth: PASS  middleware internal auth error status is generic | actual=500 expected=500",
+    "auth: PASS  middleware internal auth error code is generic | actual=\"AUTHENTICATION_UNAVAILABLE\" expected=\"AUTHENTICATION_UNAVAILABLE\"",
+    "auth: PASS  middleware internal auth error response excludes raw SQL details | no unsafe detail detected",
+    "auth: TOTAL: 28 PASS  |  0 FAIL  |  28 checks"
   ],
   "evidenceIds": [
-    "IDTS110-UT-SEC-001-BLOCKER"
+    "IDTS110-UT-SEC-001-LOCAL-PRIMARY-RESULT"
   ],
   "evidenceFiles": [
-    "result.png",
-    "result.svg"
+    "result.png"
   ],
-  "limitations": "Environment blocker only; this is not a product failure. DonHV must provide an authorized BTP target/session before the case can be executed and accepted."
+  "limitations": "This is a local-primary candidate result from mapped domain suites. It is not BTP acceptance evidence; DonHV owns final case-level review and workbook integration.",
+  "suiteKeys": [
+    "auth"
+  ],
+  "structuredEvidenceFile": "../../local-primary-suite-results.json"
 }

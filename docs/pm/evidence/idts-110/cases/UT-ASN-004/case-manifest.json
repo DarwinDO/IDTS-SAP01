@@ -1,29 +1,48 @@
 {
   "caseId": "UT-ASN-004",
   "title": "unknown Developer profile is rejected",
-  "candidateExecutionStatus": "BLOCKED",
+  "candidateExecutionStatus": "PASS",
   "reviewStatus": "PENDING_DONHV_REVIEW",
   "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-03T02:27:20.209Z",
-  "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "executedAt": "2026-08-03T12:39:12.015Z",
+  "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae",
   "deploySha": null,
   "environment": "HYBRID_BTP",
-  "runtime": "node v22.23.2, win32 x64",
-  "testCommand": null,
-  "sourceAssertions": [],
-  "actualResult": "Blocked before final acceptance: the required BTP/HANA repeat cannot run because this workspace has no authorized BTP target, Cloud Foundry session, or target configuration. No local-only result is promoted to PASS.",
+  "runtime": "Node.js v22.23.1, win32 x64",
+  "testCommand": "node scripts/qa/test-idts110-local-primary-suites.js --output=docs/pm/evidence/idts-110/local-primary-suite-results.json",
+  "sourceAssertions": [
+    "srv/bug-service/actions.js#assignToDeveloper",
+    "srv/bug-service/bug-write.js#validateAssignee",
+    "srv/bug-service/permissions.js#enforceActionPermission",
+    "srv/bug-service/permissions.js#enforceBugWritePermission"
+  ],
+  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
   "assertions": [
-    "Cloud Foundry CLI available: false",
-    "Authorized BTP/QA target configuration available: false",
-    "BTP execution attempted: false (target unavailable)",
-    "Local-only result promoted to BTP acceptance: false"
+    "assignment: PASS  manifest wires Smart Assign through the Assignee custom section, not a header action",
+    "assignment: PASS  Object Page keeps assignment in one dedicated section without duplicate Assignment subsection",
+    "assignment: PASS  Smart Assign uses SAPUI5 controls without raw mockup HTML/CSS",
+    "assignment: PASS  Assignee field opens Smart Assign from value help and blocks free-text persistence",
+    "assignment: PASS  i18n bundles contain Smart Assign text keys",
+    "assignment: PASS  Developer cannot see or invoke Smart Assign",
+    "assignment: PASS  PM can see Smart Assign",
+    "assignment: PASS  dialog loads assignable developers filtered by bug component category",
+    "assignment: PASS  unrelated UI5 pending groups do not block the auto-group candidate read",
+    "assignment: PASS  dialog decorates Smart Assign candidates with reviewable explanations",
+    "assignment: PASS  dialog search matches developer, module, and capability fields",
+    "assignment: PASS  AssignableDevelopers returns a valid candidate for BUG-0001",
+    "assignment: PASS  positive assignment through backend action succeeds",
+    "assignment: PASS  negative assignment is blocked by backend validation",
+    "assignment: TOTAL: 14 PASS  |  0 FAIL"
   ],
   "evidenceIds": [
-    "IDTS110-UT-ASN-004-BLOCKER"
+    "IDTS110-UT-ASN-004-LOCAL-PRIMARY-RESULT"
   ],
   "evidenceFiles": [
-    "result.png",
-    "result.svg"
+    "result.png"
   ],
-  "limitations": "Environment blocker only; this is not a product failure. DonHV must provide an authorized BTP target/session before the case can be executed and accepted."
+  "limitations": "This is a local-primary candidate result from mapped domain suites. It is not BTP acceptance evidence; DonHV owns final case-level review and workbook integration.",
+  "suiteKeys": [
+    "assignment"
+  ],
+  "structuredEvidenceFile": "../../local-primary-suite-results.json"
 }

@@ -4,11 +4,11 @@
   "candidateExecutionStatus": "PASS",
   "reviewStatus": "PENDING_DONHV_REVIEW",
   "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-03T02:46:42.144Z",
-  "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "executedAt": "2026-08-03T12:43:12.482Z",
+  "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae",
   "deploySha": null,
   "environment": "LOCAL",
-  "runtime": "Node.js v22.23.2, win32 x64",
+  "runtime": "Node.js v22.23.1, win32 x64",
   "testCommand": "node scripts/qa/test-idts110-local-exact.js --output docs/pm/evidence/idts-110/local-execution-results.json",
   "sourceAssertions": [
     "srv/ai/provider.js#SafeAiProvider",
@@ -22,8 +22,8 @@
     "IDTS110-UT-AI-004-RESULT"
   ],
   "evidenceFiles": [
-    "result.png",
-    "result.svg"
+    "result.png"
   ],
-  "limitations": "Uses isolated deterministic local fixtures. No BTP acceptance is claimed. Final catalog/workbook integration belongs to DonHV."
+  "limitations": "Uses isolated deterministic local fixtures. No BTP acceptance is claimed. Final catalog/workbook integration belongs to DonHV.",
+  "structuredEvidenceFile": "../../local-execution-results.json"
 }

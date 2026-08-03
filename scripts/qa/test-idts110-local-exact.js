@@ -14,7 +14,7 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 }
 
 const assert = require('node:assert/strict')
-const { execFileSync } = require('node:child_process')
+const { execFileSync, spawnSync } = require('node:child_process')
 const fs = require('node:fs')
 const path = require('node:path')
 const cds = require('@sap/cds')
@@ -24,6 +24,7 @@ const { normalizeAiConfig } = require('../../srv/ai/config')
 const { createAiProvider } = require('../../srv/ai/provider')
 const { redactSensitiveText } = require('../../srv/ai/safety')
 const { buildBugHandoffSummary } = require('../../srv/ai/bug-summary')
+const { resetGatewayCooldownForTest } = require('../../srv/ai/vercel-gateway-provider')
 const { prepareCommentCreate } = require('../../srv/bug-service/content')
 const { validateRequiredBugFields, validateActiveCodeLists, prepareBugWrite } = require('../../srv/bug-service/bug-write')
 const { normalizeEmailConfig } = require('../../srv/email/config')
@@ -63,10 +64,10 @@ async function expectReject (action, target) {
   await assert.rejects(action, error => Number(error.code || error.statusCode || error.status) === 400 && (!target || error.target === target))
 }
 
-async function dispatchCreate (service, data) {
+async function dispatchCreate (service, data, user = tester()) {
   return service.dispatch(new cds.Request({
     method: 'POST', event: 'CREATE', target: service.entities.Bugs,
-    query: INSERT.into(service.entities.Bugs).entries(data), data, user: tester()
+    query: INSERT.into(service.entities.Bugs).entries(data), data, user
   }))
 }
 
@@ -99,6 +100,34 @@ function emailConfig () {
   })
 }
 
+function jsonResponse (status, payload, headers = {}) {
+  const normalizedHeaders = Object.fromEntries(Object.entries(headers).map(([key, value]) => [key.toLowerCase(), String(value)]))
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    headers: { get: name => normalizedHeaders[String(name).toLowerCase()] || null },
+    json: async () => payload
+  }
+}
+
+let localHttpContractResult
+function runLocalHttpContracts () {
+  if (localHttpContractResult) return localHttpContractResult
+  const child = spawnSync(process.execPath, [path.join(__dirname, 'test-idts110-attachment-auth-http.js')], {
+    cwd: process.cwd(),
+    encoding: 'utf8',
+    env: { ...process.env, CDS_TEST_FAKE: 'true' },
+    timeout: 120000,
+    maxBuffer: 8 * 1024 * 1024
+  })
+  if (child.error) throw child.error
+  const output = child.stdout || ''
+  const marker = output.split(/\r?\n/).find(line => line.startsWith('IDTS110_RESULT '))
+  if (!marker) throw new Error('IDTS-110 HTTP harness did not emit its sanitized result.')
+  localHttpContractResult = JSON.parse(marker.slice('IDTS110_RESULT '.length))
+  return localHttpContractResult
+}
+
 async function notification (db, suffix) {
   const bug = await db.run(SELECT.one.from('idts.cap.Bugs').columns('ID'))
   const recipient = await db.run(SELECT.one.from('idts.cap.Users').columns('ID').where({ active: true }))
@@ -128,14 +157,14 @@ async function runCase (caseId, assertions, execute) {
   if (process.env.IDTS110_TRACE === 'true') console.error(`[idts110-trace] START ${caseId}`)
   try {
     beforeState = needsState ? await safeDbSnapshot() : undefined
-    await execute()
+    const runtimeEvidence = await execute()
     const afterState = needsState ? await safeDbSnapshot() : undefined
     const reloadState = needsState ? await safeDbSnapshot() : undefined
-    RESULTS.push({ caseId, status: 'PASS', actualResult: 'Exact local assertion passed.', assertions, sourceAssertions: definition.sourceTrace.map(trace => `${trace.file}#${trace.symbol}`), ...(needsState ? { beforeState, afterState, reloadState } : {}), startedAt, completedAt: new Date().toISOString(), baselineSha: CURRENT_BASELINE_SHA })
+    RESULTS.push({ caseId, status: 'PASS', actualResult: 'Exact local assertion passed.', assertions, sourceAssertions: definition.sourceTrace.map(trace => `${trace.file}#${trace.symbol}`), ...(runtimeEvidence ? { runtimeEvidence } : {}), ...(needsState ? { beforeState, afterState, reloadState } : {}), startedAt, completedAt: new Date().toISOString(), baselineSha: CURRENT_BASELINE_SHA })
   } catch (error) {
     const afterState = needsState ? await safeDbSnapshot() : undefined
     const reloadState = needsState ? await safeDbSnapshot() : undefined
-    RESULTS.push({ caseId, status: 'FAIL', actualResult: String(error.message || error).replace(/(password|token|key)\s*[:=]\s*[^\s,;]+/gi, '$1=[REDACTED]').slice(0, 300), assertions, sourceAssertions: definition.sourceTrace.map(trace => `${trace.file}#${trace.symbol}`), ...(needsState ? { beforeState, afterState, reloadState } : {}), startedAt, completedAt: new Date().toISOString(), baselineSha: CURRENT_BASELINE_SHA })
+    RESULTS.push({ caseId, status: 'FAIL', actualResult: String(error.message || error).replace(/(password|token|key)\s*[:=]\s*[^\s,;]+/gi, '$1=[REDACTED]').slice(0, 300), assertions, sourceAssertions: definition.sourceTrace.map(trace => `${trace.file}#${trace.symbol}`), ...(error.runtimeEvidence ? { runtimeEvidence: error.runtimeEvidence } : {}), ...(needsState ? { beforeState, afterState, reloadState } : {}), startedAt, completedAt: new Date().toISOString(), baselineSha: CURRENT_BASELINE_SHA })
   }
   if (process.env.IDTS110_TRACE === 'true') {
     const result = RESULTS.at(-1)
@@ -197,12 +226,20 @@ async function main () {
     assert.ok(session); assert.notEqual(session.tokenHash, result.token)
   })
   for (const [caseId, payload] of [
-    ['UT-AUTH-002', { password: activePassword }], ['UT-AUTH-003', { email: activeEmail, password: '' }],
-    ['UT-AUTH-004', { email: activeEmail, password: 7 }]
+    ['UT-AUTH-002', { password: activePassword }], ['UT-AUTH-003', { email: activeEmail, password: '' }]
   ]) await runCase(caseId, ['returns generic HTTP 401', 'does not insert an AuthSession'], async () => {
     const before = await db.run(SELECT.from('idts.cap.AuthSessions'))
     await assert.rejects(() => auth.send('login', payload), error => Number(error.code) === 401 && error.message === 'Invalid email or password.')
     assert.equal((await db.run(SELECT.from('idts.cap.AuthSessions'))).length, before.length)
+  })
+  await runCase('UT-AUTH-004', ['rejects a non-string password at the CDS contract boundary', 'does not expose stack/type internals', 'does not insert an AuthSession'], async () => {
+    const result = runLocalHttpContracts().auth
+    assert.equal(result.status, 400)
+    assert.equal(result.after, result.before)
+    if (result.unsafeDetailExposed) {
+      throw Object.assign(new Error('Public HTTP 400 exposes CAP type-validation internals.'), { runtimeEvidence: result })
+    }
+    return result
   })
   await runCase('UT-AUTH-005', ['unknown and wrong-password responses are indistinguishable'], async () => {
     const messages = []
@@ -217,11 +254,20 @@ async function main () {
     assert.equal((await db.run(SELECT.from('idts.cap.AuthSessions').where({ user_ID: inactiveId }))).length, before.length)
   })
 
-  const required = [['UT-VAL-TITLE', 'title'], ['UT-VAL-DESCRIPTION', 'description'], ['UT-VAL-STEPS', 'stepsToReproduce'], ['UT-VAL-ACTUAL', 'actualResult'], ['UT-VAL-EXPECTED', 'expectedResult'], ['UT-VAL-PRIORITY', 'priority_code'], ['UT-VAL-SEVERITY', 'severity_code'], ['UT-VAL-COMPONENT', 'applicationComponent_ID'], ['UT-VAL-CATEGORY', 'defectCategory_ID'], ['UT-VAL-REPORTER', 'reporter_ID']]
+  const required = [['UT-VAL-TITLE', 'title'], ['UT-VAL-DESCRIPTION', 'description'], ['UT-VAL-STEPS', 'stepsToReproduce'], ['UT-VAL-ACTUAL', 'actualResult'], ['UT-VAL-EXPECTED', 'expectedResult'], ['UT-VAL-PRIORITY', 'priority_code'], ['UT-VAL-SEVERITY', 'severity_code'], ['UT-VAL-COMPONENT', 'applicationComponent_ID'], ['UT-VAL-CATEGORY', 'defectCategory_ID']]
   for (const [caseId, field] of required) await runCase(caseId, [`missing ${field} returns HTTP 400`, 'no Bug row is inserted'], async () => {
     const data = bugData(); delete data[field]
     await expectReject(() => dispatchCreate(bugService, data), field)
     await assertNoBug(db, data.ID)
+  })
+  await runCase('UT-VAL-REPORTER', ['rejects an authenticated actor that cannot resolve to an active IDTS user', 'does not persist Bug/history/notification/delivery side effects'], async () => {
+    const data = bugData(); delete data.reporter_ID
+    const before = await safeDbSnapshot()
+    const unresolvedActor = new cds.User({ id: 'unresolved-idts110@example.local', roles: ['TESTER', 'authenticated-user'] })
+    await assert.rejects(() => dispatchCreate(bugService, data, unresolvedActor), error => Number(error.code || error.statusCode || error.status) === 403)
+    await assertNoBug(db, data.ID)
+    const after = await safeDbSnapshot()
+    for (const table of ['Bugs', 'HistoryEvents', 'Notifications', 'NotificationDeliveries']) assert.equal(after[table], before[table])
   })
   await runCase('UT-VAL-WHITESPACE', ['whitespace required text returns HTTP 400', 'no Bug row is inserted'], async () => {
     const data = bugData({ title: '   ' }); await expectReject(() => dispatchCreate(bugService, data), 'title'); await assertNoBug(db, data.ID)
@@ -271,6 +317,12 @@ async function main () {
     assert.match(attachmentController, /file\.size > MAX_ATTACHMENT_BYTES/)
     assert.match(attachmentController, /up to 10 MB/i)
   })
+  await runCase('UT-ATT-009', ['anonymous attachment CREATE is rejected with 401/403', 'attachment metadata remains unchanged'], async () => {
+    const result = runLocalHttpContracts().attachment
+    assert.ok([401, 403].includes(result.status))
+    assert.equal(result.after, result.before)
+    return result
+  })
 
   await runCase('UT-NTF-009', ['delivery before nextAttemptAt is not sent', 'attempt count remains unchanged'], async () => {
     const record = await notification(db, 'not-due'); const due = '2026-08-03T01:00:00.000Z'
@@ -314,6 +366,30 @@ async function main () {
   await runCase('UT-AI-007', ['redactor masks representative credential patterns'], async () => {
     const output = redactSensitiveText(`AKIA${'1'.repeat(16)} xkeysib-${'2'.repeat(30)} Bearer ${'a'.repeat(30)} postgresql://user:pass@host/db`)
     assert.match(output, /\[redacted:awsAccessKey\]/); assert.match(output, /\[redacted:brevoApiKey\]/); assert.match(output, /\[redacted:bearerToken\]/); assert.match(output, /\[redacted:databaseUrl\]/)
+  })
+  await runCase('UT-AI-027', ['controlled HTTP 429 returns the safe cooldown status', 'does not retry or expose raw provider diagnostics', 'does not mutate business state'], async () => {
+    resetGatewayCooldownForTest()
+    let calls = 0
+    const before = await safeDbSnapshot()
+    const provider = createAiProvider(normalizeAiConfig({
+      enabled: true,
+      provider: 'vercel',
+      gatewayApiKey: 'test-only-gateway-key-not-for-network',
+      modelAlias: 'zai/glm-4.7-flash',
+      handoffModelAlias: 'minimax/minimax-m2.5'
+    }), {
+      fetchImpl: async () => {
+        calls++
+        return jsonResponse(429, { error: { code: 'rate_limit_exceeded', message: 'controlled sensitive diagnostic' } }, { 'retry-after': '2' })
+      }
+    })
+    const result = await provider.structured({ featureType: 'BUG_SUMMARY', schemaName: 'Idts110RateLimit', instruction: 'Return JSON only.', input: { title: 'Controlled fixture' } })
+    assert.equal(result.status, 'AI_RATE_LIMITED')
+    assert.equal(result.ok, false)
+    assert.equal(calls, 1)
+    assert.equal(/controlled sensitive diagnostic|rate_limit_exceeded/i.test(JSON.stringify(result)), false)
+    assert.deepEqual(await safeDbSnapshot(), before)
+    resetGatewayCooldownForTest()
   })
 
   const localIds = CATALOG.cases.filter(item => item.environment === 'LOCAL').map(item => item.caseId)

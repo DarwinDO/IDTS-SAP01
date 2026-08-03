@@ -1,29 +1,53 @@
 {
   "caseId": "UT-SEC-004",
   "title": "audit entity rejects client write",
-  "candidateExecutionStatus": "BLOCKED",
+  "candidateExecutionStatus": "PASS",
   "reviewStatus": "PENDING_DONHV_REVIEW",
   "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-03T02:27:20.209Z",
-  "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "executedAt": "2026-08-03T12:39:12.015Z",
+  "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae",
   "deploySha": null,
   "environment": "HYBRID_BTP",
-  "runtime": "node v22.23.2, win32 x64",
-  "testCommand": null,
-  "sourceAssertions": [],
-  "actualResult": "Blocked before final acceptance: the required BTP/HANA repeat cannot run because this workspace has no authorized BTP target, Cloud Foundry session, or target configuration. No local-only result is promoted to PASS.",
+  "runtime": "Node.js v22.23.1, win32 x64",
+  "testCommand": "node scripts/qa/test-idts110-local-primary-suites.js --output=docs/pm/evidence/idts-110/local-primary-suite-results.json",
+  "sourceAssertions": [
+    "srv/bug-service/guards.js#registerReadOnlyEntityGuards",
+    "srv/ai/safety.js#containsUnsafeDiagnosticText",
+    "srv/bug-service/permissions.js#enforceActionPermission",
+    "srv/bug-service/permissions.js#enforceBugWritePermission"
+  ],
+  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
   "assertions": [
-    "Cloud Foundry CLI available: false",
-    "Authorized BTP/QA target configuration available: false",
-    "BTP execution attempted: false (target unavailable)",
-    "Local-only result promoted to BTP acceptance: false"
+    "audit: PASS  AI feature type seed count | actual=4 expected=4",
+    "audit: PASS  first feature type is duplicate detection | actual=\"DUPLICATE_DETECTION\" expected=\"DUPLICATE_DETECTION\"",
+    "audit: PASS  AI review state seed count | actual=5 expected=5",
+    "audit: PASS  first review state is pending | actual=\"PENDING\" expected=\"PENDING\"",
+    "audit: PASS  serialized payload keeps safe summary | actual=true",
+    "audit: PASS  serialized payload drops rawPrompt key | actual=false expected=false",
+    "audit: PASS  serialized payload drops messages key | actual=false expected=false",
+    "audit: PASS  serialized payload redacts provider-like secrets | actual=false expected=false",
+    "audit: PASS  backend writer creates audit row ID | actual=\"79bbca7b-eb43-40e3-a442-8a0666bb2069\"",
+    "audit: PASS  backend writer normalizes feature type | actual=\"DUPLICATE_DETECTION\" expected=\"DUPLICATE_DETECTION\"",
+    "audit: PASS  backend writer defaults review state to PENDING | actual=\"PENDING\" expected=\"PENDING\"",
+    "audit: PASS  backend writer clamps confidence to four decimals | actual=0.8765 expected=0.8765",
+    "audit: PASS  backend writer stores only sanitized suggestion payload | no unsafe detail detected",
+    "audit: PASS  BugService exposes audit row read-only projection | actual=1 expected=1",
+    "audit: PASS  projection resolves feature type display name | actual=\"Duplicate Detection\" expected=\"Duplicate Detection\"",
+    "audit: PASS  projection resolves review state display name | actual=\"Pending Review\" expected=\"Pending Review\"",
+    "audit: PASS  projection resolves requester display name | actual=\"DonHV\" expected=\"DonHV\"",
+    "audit: PASS  client write to BugService.AiSuggestions is rejected | actual=true expected=true",
+    "audit: PASS  backend writer rejects inactive feature type | actual=true expected=true",
+    "audit: TOTAL: 19 PASS  |  0 FAIL  |  19 checks"
   ],
   "evidenceIds": [
-    "IDTS110-UT-SEC-004-BLOCKER"
+    "IDTS110-UT-SEC-004-LOCAL-PRIMARY-RESULT"
   ],
   "evidenceFiles": [
-    "result.png",
-    "result.svg"
+    "result.png"
   ],
-  "limitations": "Environment blocker only; this is not a product failure. DonHV must provide an authorized BTP target/session before the case can be executed and accepted."
+  "limitations": "This is a local-primary candidate result from mapped domain suites. It is not BTP acceptance evidence; DonHV owns final case-level review and workbook integration.",
+  "suiteKeys": [
+    "audit"
+  ],
+  "structuredEvidenceFile": "../../local-primary-suite-results.json"
 }

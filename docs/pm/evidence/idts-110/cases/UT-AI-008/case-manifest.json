@@ -1,29 +1,77 @@
 {
   "caseId": "UT-AI-008",
   "title": "Similar Bugs ranks grounded candidates without self-match",
-  "candidateExecutionStatus": "BLOCKED",
+  "candidateExecutionStatus": "PASS",
   "reviewStatus": "PENDING_DONHV_REVIEW",
   "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-03T02:27:20.209Z",
-  "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "executedAt": "2026-08-03T12:39:12.015Z",
+  "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae",
   "deploySha": null,
   "environment": "HYBRID_BTP",
-  "runtime": "node v22.23.2, win32 x64",
-  "testCommand": null,
-  "sourceAssertions": [],
-  "actualResult": "Blocked before final acceptance: the required BTP/HANA repeat cannot run because this workspace has no authorized BTP target, Cloud Foundry session, or target configuration. No local-only result is promoted to PASS.",
+  "runtime": "Node.js v22.23.1, win32 x64",
+  "testCommand": "node scripts/qa/test-idts110-local-primary-suites.js --output=docs/pm/evidence/idts-110/local-primary-suite-results.json",
+  "sourceAssertions": [
+    "srv/ai/duplicate-detection.js#suggestSimilarBugs",
+    "srv/ai/duplicate-confirmation.js#confirmDuplicateSuggestion"
+  ],
+  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
   "assertions": [
-    "Cloud Foundry CLI available: false",
-    "Authorized BTP/QA target configuration available: false",
-    "BTP execution attempted: false (target unavailable)",
-    "Local-only result promoted to BTP acceptance: false"
+    "aiDuplicate: PASS  positive search returns at least one candidate | actual=1",
+    "aiDuplicate: PASS  similar seeded bug is ranked first | actual=\"91000000-0000-0000-0000-000000000002\" expected=\"91000000-0000-0000-0000-000000000002\"",
+    "aiDuplicate: PASS  top candidate has a bounded score | actual=true",
+    "aiDuplicate: PASS  top candidate includes a concise human-review reason | actual=true",
+    "aiDuplicate: PASS  successful provider path uses an embedding | actual=true expected=true",
+    "aiDuplicate: PASS  successful provider path reports SUCCESS | actual=\"SUCCESS\" expected=\"SUCCESS\"",
+    "aiDuplicate: PASS  persisted source search returns suggestion audit ID | actual=\"e648423f-4e38-40a2-802f-fb7a352cfab6\"",
+    "aiDuplicate: PASS  all similar candidates share one review audit ID | actual=true expected=true",
+    "aiDuplicate: PASS  source bug is excluded from its own candidates | actual=false expected=false",
+    "aiDuplicate: PASS  positive response contains no unsafe diagnostic text | no unsafe detail detected",
+    "aiDuplicate: PASS  unrelated bug is absent or remains below similar confidence | not returned",
+    "aiDuplicate: PASS  source-linked search writes one audit row | actual=1 expected=1",
+    "aiDuplicate: PASS  candidate review ID matches persisted audit row | actual=\"e648423f-4e38-40a2-802f-fb7a352cfab6\" expected=\"e648423f-4e38-40a2-802f-fb7a352cfab6\"",
+    "aiDuplicate: PASS  audit row starts in pending review | actual=\"PENDING\" expected=\"PENDING\"",
+    "aiDuplicate: PASS  duplicate audit persists final operation status | actual=\"SUCCESS\" expected=\"SUCCESS\"",
+    "aiDuplicate: PASS  duplicate audit persists non-negative latency | actual=true",
+    "aiDuplicate: PASS  audit payload records provider status | actual=\"SUCCESS\" expected=\"SUCCESS\"",
+    "aiDuplicate: PASS  audit payload contains no prompt, credential, or raw provider response | no unsafe detail detected",
+    "aiDuplicate: PASS  pre-create search works without a persisted source bug | actual=2",
+    "aiDuplicate: PASS  pre-create search has no persisted review ID | actual=true expected=true",
+    "aiDuplicate: PASS  pre-create search does not invent an audit bug link | actual=1 expected=1",
+    "aiDuplicate: PASS  disabled provider falls back to deterministic matching | actual=1",
+    "aiDuplicate: PASS  disabled provider exposes a safe status | actual=\"AI_DISABLED\" expected=\"AI_DISABLED\"",
+    "aiDuplicate: PASS  disabled provider marks embedding as unused | actual=false expected=false",
+    "aiDuplicate: PASS  provider failure falls back without breaking the action | actual=1",
+    "aiDuplicate: PASS  provider failure is reported generically | actual=\"AI_PROVIDER_ERROR\" expected=\"AI_PROVIDER_ERROR\"",
+    "aiDuplicate: PASS  provider failure response excludes raw SQL and secrets | no unsafe detail detected",
+    "aiDuplicate: PASS  audit records disabled-provider fallback status | actual=true",
+    "aiDuplicate: PASS  audit records provider-error fallback status | actual=true",
+    "aiDuplicate: PASS  unrelated high-threshold search returns no misleading result | actual=0 expected=0",
+    "aiDuplicate: PASS  malformed embedding output falls back to lexical matching | actual=1",
+    "aiDuplicate: PASS  malformed embedding is not treated as used | actual=false expected=false",
+    "aiDuplicate: PASS  malformed embedding status is explicit and safe | actual=\"AI_EMBEDDING_INVALID\" expected=\"AI_EMBEDDING_INVALID\"",
+    "aiDuplicate: PASS  50 candidates use one bounded embedding batch | actual=1 expected=1",
+    "aiDuplicate: PASS  supported batch path does not issue scalar embeddings | actual=0 expected=0",
+    "aiDuplicate: PASS  embedding batch contains source plus at most ten candidates | actual=11 expected=11",
+    "aiDuplicate: PASS  every embedding text is bounded to 2000 characters | actual=true expected=true",
+    "aiDuplicate: PASS  embedding text excludes workflow status outside the approved content allowlist | actual=true expected=true",
+    "aiDuplicate: PASS  ranking remains bounded to ten results | actual=10 expected=10",
+    "aiDuplicate: PASS  unsupported batch compatibility path makes at most eleven scalar calls | actual=11 expected=11",
+    "aiDuplicate: PASS  unsupported batch compatibility path uses concurrency one | actual=1 expected=1",
+    "aiDuplicate: PASS  unsupported batch compatibility ranking still returns bounded results | actual=10 expected=10",
+    "aiDuplicate: PASS  empty search input is rejected with 400 | actual=true expected=true",
+    "aiDuplicate: PASS  unknown source bug is rejected with 404 | actual=true expected=true",
+    "aiDuplicate: PASS  suggestions never create DuplicateLinks automatically | actual=0 expected=0",
+    "aiDuplicate: TOTAL: 45 PASS  |  0 FAIL  |  45 checks"
   ],
   "evidenceIds": [
-    "IDTS110-UT-AI-008-BLOCKER"
+    "IDTS110-UT-AI-008-LOCAL-PRIMARY-RESULT"
   ],
   "evidenceFiles": [
-    "result.png",
-    "result.svg"
+    "result.png"
   ],
-  "limitations": "Environment blocker only; this is not a product failure. DonHV must provide an authorized BTP target/session before the case can be executed and accepted."
+  "limitations": "This is a local-primary candidate result from mapped domain suites. It is not BTP acceptance evidence; DonHV owns final case-level review and workbook integration.",
+  "suiteKeys": [
+    "aiDuplicate"
+  ],
+  "structuredEvidenceFile": "../../local-primary-suite-results.json"
 }

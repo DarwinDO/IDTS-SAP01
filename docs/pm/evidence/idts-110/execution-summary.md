@@ -1,75 +1,78 @@
-# IDTS-110 execution summary for DonHV review
+# IDTS-110 remediation execution summary for DonHV review
 
 - Executor: NhanT (agent-assisted)
 - Execution date: 2026-08-03
-- Repository baseline: `fbea12cd996d8c1e13bd834fd6e054c8a37c32e6`
+- Branch baseline before remediation commit: `e500436`
 - Approved catalog: `docs/qa/idts-110-unit-test-catalog.json`
 - Catalog size: 188 English cases
-- Review state: `READY_FOR_DONHV_REVIEW_WITH_BLOCKERS`
-- Jira handoff comment: `10861`
-- Final workbook/Drive state: not changed; DonHV remains the integration owner
+- Review state: `READY_FOR_DONHV_REVIEW_WITH_OPEN_FINDING_AND_ENVIRONMENT_BLOCKERS`
+- Final workbook/Drive state: unchanged; DonHV remains the integration owner
 
-## Execution truth
+## Current execution truth
 
 | Candidate status | Cases | Meaning |
 | --- | ---: | --- |
-| PASS | 34 | Exact LOCAL assertion and required sanitized state evidence passed. |
-| FAIL | 2 | Observed behavior did not match the approved expected result. |
-| BLOCKED | 152 | 150 cases require unavailable BTP/HANA/live-service acceptance; 2 LOCAL UI cases lack approved browser-runtime evidence. |
-| Total | 188 | Every approved case has an individual manifest and image package. |
+| PASS | 172 | 37 exact LOCAL cases plus 135 corrected local-primary candidates have passing runtime/domain-suite evidence. The 135 mappings remain subject to DonHV case-level review. |
+| FAIL | 1 | `UT-AUTH-004` returns HTTP 400 with no session mutation, but exposes CAP type-validation internals in the public response. |
+| BLOCKED | 15 | Two UI component cases are blocked by the blank SAP browser deployment; 13 true BTP integration cases are blocked because Cloud Foundry CLI/session readiness is unavailable. |
+| Total | 188 | Every approved case has a manifest and PNG package. |
 
-## FAIL cases requiring DonHV triage
+The approved catalog remains `NOT_RUN` until DonHV accepts individual results and integrates the official Unit Test EN workbook.
 
-### UT-AUTH-004
+## Open FAIL — UT-AUTH-004
 
-- Expected: a non-string password returns the same safe HTTP 401 login boundary.
-- Actual: CAP request validation returned `ASSERT_DATA_TYPE` before the login handler.
-- Classification: product/security-boundary candidate or catalog-boundary clarification.
-- Evidence: `cases/UT-AUTH-004/`.
+- Expected: malformed non-string password is rejected through a safe HTTP 400 boundary without type internals, and no `AuthSessions` row is inserted.
+- Actual: HTTP 400; `AuthSessions` count remains unchanged; response body exposes `ASSERT_DATA_TYPE`, `String(255)`, and the rejected value.
+- Classification: product/security-boundary finding.
+- Evidence: `local-execution-results.json` and `cases/UT-AUTH-004/`.
+- Owner: DonHV/product owner decides whether to sanitize the public CAP validation response or revise the accepted boundary.
 
-### UT-VAL-REPORTER
+## Corrected cases now covered
 
-- Expected: missing `reporter_ID` is rejected.
-- Actual: authenticated Bug creation derived the server-owned reporter and committed the Bug/history row.
-- Classification: catalog/process inconsistency; the behavior aligns with the separate server-owned reporter cases.
-- Evidence: `cases/UT-VAL-REPORTER/`.
+- `UT-VAL-REPORTER`: PASS. An unresolved authenticated actor is rejected before Bug/history/notification/delivery persistence; omission remains valid when the actor resolves.
+- `UT-ATT-009`: PASS. Local CAP HTTP/OData returns 401 for anonymous attachment create and attachment metadata count remains unchanged.
+- `UT-AI-027`: PASS. Controlled provider HTTP 429 yields safe `AI_RATE_LIMITED`, exactly one provider call, sanitized output, and unchanged business-state counts.
+- `UT-NTF-009`–`UT-NTF-012`, `UT-AI-026`, and the remaining corrected local-primary cases are mapped to passing domain suites in `local-primary-suite-results.json`.
 
-## BTP blocker
+## Environment blockers
 
-- Catalog environments: 133 `HYBRID_BTP`, 17 `BTP_REQUIRED`.
-- Cloud Foundry CLI was not available.
-- No authorized BTP/QA target or session configuration was present.
-- No LOCAL result was promoted to BTP acceptance.
-- Each affected case has a sanitized `BLOCKED` manifest and case-specific blocker image.
-- Required resolution: DonHV/environment owner supplies an authorized BTP target/session, then NhanT reruns the affected cases.
+### UI component — 2 cases
 
-## LOCAL browser blocker
+- `UT-ATT-007` and `UT-ATT-008` have passing static guard checks only.
+- The deployed SAP page is blank after controlled reload.
+- Browser console reports `Unexpected token '<'` for `auth-guard.js` and `bootstrap-ui5.js`, consistent with HTML being returned for JavaScript asset requests.
+- Direct asset inspection was blocked by the browser client, so no HTTP body/status claim is made.
+- No UI runtime PASS is claimed.
 
-- `UT-ATT-007` and `UT-ATT-008` passed static source-guard checks only.
-- The approved in-app Browser runtime could not start because Windows denied access during startup.
-- Standalone Playwright was not used as a bypass.
-- Both cases remain `BLOCKED` until their MIME and 10 MB rejection behavior is executed in an approved browser surface.
+### BTP integration — 13 cases
+
+- Cases: `UT-AUTH-011`–`UT-AUTH-015`, `UT-ATT-003`–`UT-ATT-006`, `UT-ATT-010`–`UT-ATT-012`, and `UT-NTF-013`.
+- `npm.cmd run btp:demo:check` exits 1 because `cf` is unavailable.
+- No BTP request, deployment, database/seed change, or integration assertion ran.
+- These are environment blockers, not product failures.
 
 ## Evidence inventory
 
 - 188 `case-manifest.json` files.
-- 269 PNG images and 269 SVG source images.
-- All PNG images verified at 1280 x 720.
-- Persistence cases include before/after database count images and reload/readback images.
-- LOCAL raw summary: `local-execution-results.json`.
+- 278 PNG files.
+- 0 SVG files; 278 duplicate/intermediate SVG sources were removed after PNG rendering and manifest cleanup.
+- Exact 40-case result payload: `local-execution-results.json` — 37 PASS / 1 FAIL / 2 BLOCKED.
+- Corrected 135-case suite payload: `local-primary-suite-results.json` — 135 candidate PASS / 0 failed suite mappings.
 - Case packages: `cases/<caseId>/`.
+
+Generated PNG cards summarize the structured/runtime evidence; they are not described as browser or BTP proof.
 
 ## Tool and format limitations
 
-- Mandatory OfficeCLI preflight result: `OFFICECLI_NOT_FOUND`; no OfficeCLI workbook readback or edit was possible.
-- CAP MCP was not exposed in this session. No CAP product artifact under `srv/`, `db/`, or `app/` was modified.
-- Bundled `sharp` rendered all PNGs but emitted non-blocking fontconfig cache warnings.
-- Browser runtime was unavailable because of the previously recorded Windows `EPERM` startup issue; UI LOCAL cases use exact static UI assertions, not fabricated browser screenshots.
+- Mandatory OfficeCLI preflight: command not found; no workbook readback/edit or Drive synchronization occurred.
+- CAP MCP namespace was unavailable after discovery. The harness follows official `cds.test` guidance and no product artifact under `srv/`, `db/`, or `app/` was modified.
+- Codex bundled `sharp` rendered 278 PNGs and emitted non-blocking fontconfig cache warnings.
+- System Node 24 was incompatible with the tracked native SQLite binary; tests used checksum-verified portable Node.js 22.23.1 without dependency/lockfile changes.
 
 ## DonHV review actions
 
-1. Review all 188 manifests and selected images.
-2. Decide whether `UT-AUTH-004` is a product fix or an approved expected-boundary change.
-3. Reconcile `UT-VAL-REPORTER` with server-owned reporter behavior.
-4. Provide/coordinate an authorized BTP target for the 150 blocked cases.
-5. After accepted reruns, integrate approved results into Unit Test EN v0.5 and update the same Drive file ID.
+1. Review the 172 PASS candidates, especially the 135 suite-to-case mappings.
+2. Triage `UT-AUTH-004` as a public error-sanitization finding.
+3. Restore a healthy SAP browser deployment and rerun the two UI cases.
+4. Provide an authorized Cloud Foundry/BTP session and rerun the 13 true integration cases.
+5. After acceptance, integrate approved results into the same Unit Test EN v0.5 Drive file.

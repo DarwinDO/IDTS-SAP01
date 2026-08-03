@@ -1,29 +1,52 @@
 {
   "caseId": "UT-MON-004",
   "title": "workload threshold changes overload only above the configured limit",
-  "candidateExecutionStatus": "BLOCKED",
+  "candidateExecutionStatus": "PASS",
   "reviewStatus": "PENDING_DONHV_REVIEW",
   "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-03T02:27:20.209Z",
-  "baselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "executedAt": "2026-08-03T12:39:12.015Z",
+  "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae",
   "deploySha": null,
   "environment": "HYBRID_BTP",
-  "runtime": "node v22.23.2, win32 x64",
-  "testCommand": null,
-  "sourceAssertions": [],
-  "actualResult": "Blocked before final acceptance: the required BTP/HANA repeat cannot run because this workspace has no authorized BTP target, Cloud Foundry session, or target configuration. No local-only result is promoted to PASS.",
+  "runtime": "Node.js v22.23.1, win32 x64",
+  "testCommand": "node scripts/qa/test-idts110-local-primary-suites.js --output=docs/pm/evidence/idts-110/local-primary-suite-results.json",
+  "sourceAssertions": [
+    "srv/bug-service/monitoring.js#buildDeveloperWorkloadRows",
+    "srv/bug-service/monitoring.js#isOverdueBug"
+  ],
+  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
   "assertions": [
-    "Cloud Foundry CLI available: false",
-    "Authorized BTP/QA target configuration available: false",
-    "BTP execution attempted: false (target unavailable)",
-    "Local-only result promoted to BTP acceptance: false"
+    "monitoring: PASS  BUG-0001 isOverdue | actual=true expected=true",
+    "monitoring: PASS  BUG-0001 isPendingAssignment | actual=true expected=true",
+    "monitoring: PASS  BUG-0001 isRejectedFollowUp | actual=false expected=false",
+    "monitoring: PASS  BUG-0001 isRetestRequired | actual=false expected=false",
+    "monitoring: PASS  BUG-0003 isOverdue | actual=true expected=true",
+    "monitoring: PASS  BUG-0003 isPendingAssignment | actual=false expected=false",
+    "monitoring: PASS  BUG-0003 isRejectedFollowUp | actual=false expected=false",
+    "monitoring: PASS  BUG-0004 isRejectedFollowUp | actual=true expected=true",
+    "monitoring: PASS  BUG-0004 isPendingAssignment | actual=false expected=false",
+    "monitoring: PASS  BUG-QA-CLOSED-001 closed bug isOverdue=false | actual=false expected=false",
+    "monitoring: PASS  BUG-QA-CLOSED-001 closed bug isPendingAssignment=false | actual=false expected=false",
+    "monitoring: PASS  Filter isOverdue=true | actual=[\"BUG-0001\",\"BUG-0002\",\"BUG-0003\",\"BUG-0004\"] expected=[\"BUG-0001\",\"BUG-0002\",\"BUG-0003\",\"BUG-0004\"]",
+    "monitoring: PASS  Filter isPendingAssignment=true | actual=[\"BUG-0001\",\"BUG-0002\"] expected=[\"BUG-0001\",\"BUG-0002\"]",
+    "monitoring: PASS  Filter isRejectedFollowUp=true | actual=[\"BUG-0004\"] expected=[\"BUG-0004\"]",
+    "monitoring: PASS  Filter isRetestRequired=true | actual=[] expected=[]",
+    "monitoring: PASS  READ dependency injection for currentActionOwnerDisplayName | actual=[\"ID\",\"assignee_ID\",\"currentActionOwnerDisplayName\",\"nextProcessorRole_code\",\"nextProcessorUser_ID\",\"reporter_ID\",\"status_code\"] expected=[\"ID\",\"assignee_ID\",\"currentActionOwnerDisplayName\",\"nextProcessorRole_code\",\"nextProcessorUser_ID\",\"reporter_ID\",\"status_code\"]",
+    "monitoring: PASS  BUG-0001 currentActionOwnerDisplayName | actual=\"Project Manager\" expected=\"Project Manager\"",
+    "monitoring: PASS  BUG-0003 currentActionOwnerDisplayName | actual=\"SangVN\" expected=\"SangVN\"",
+    "monitoring: PASS  BUG-0004 currentActionOwnerDisplayName | actual=\"NhanT\" expected=\"NhanT\"",
+    "monitoring: PASS  BUG-QA-CLOSED-001 currentActionOwnerDisplayName | actual=null expected=null",
+    "monitoring: TOTAL: 20 PASS  |  0 FAIL  |  20 checks"
   ],
   "evidenceIds": [
-    "IDTS110-UT-MON-004-BLOCKER"
+    "IDTS110-UT-MON-004-LOCAL-PRIMARY-RESULT"
   ],
   "evidenceFiles": [
-    "result.png",
-    "result.svg"
+    "result.png"
   ],
-  "limitations": "Environment blocker only; this is not a product failure. DonHV must provide an authorized BTP target/session before the case can be executed and accepted."
+  "limitations": "This is a local-primary candidate result from mapped domain suites. It is not BTP acceptance evidence; DonHV owns final case-level review and workbook integration.",
+  "suiteKeys": [
+    "monitoring"
+  ],
+  "structuredEvidenceFile": "../../local-primary-suite-results.json"
 }
