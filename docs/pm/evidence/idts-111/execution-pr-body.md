@@ -1,75 +1,76 @@
 ## Summary
 
-- Publish the approved IDTS-111 SAP BTP execution baseline and exact member assignments.
-- Confirm that the deployed runtime is compatible with the 90-case catalog without redeployment.
-- Preserve execution truth: 90 PREPARED, 0 executed, 0 PASS/FAIL/BLOCKED; workbook and Drive unchanged.
+- Publish NhanT's complete IDTS-111 Tester UAT candidate package for one DoNHV review.
+- Package all 57 assigned cases: 32 executed candidates and 25 explicit precondition-blocked cases, with 61 retained PNGs.
+- Keep the approved 90-case catalog at `PREPARED`; no candidate is promoted to PASS/FAIL before reviewer disposition.
 
 ## Positive Evidence
 
-- `npm run btp:demo:check`: PASS, `DEMO READY` at `2026-08-02T23:06:59+07:00`.
-- CAP and AppRouter started 1/1; liveness, database readiness and web entry HTTP 200.
-- Scoped Git comparison found no runtime-relevant changes between deployed SHA `67b1bf86169e9696c9365ef4846b99ffae30d4e2` and catalog source baseline `447da1dab80418847d806040e6b2060b0916cb63`.
-- `node scripts/qa/generate-idts111-uat-catalog.js --check`: PASS, 90 PREPARED cases.
-- OfficeCLI `1.0.143` preflight PASS.
+- 57 manifests parse successfully with 57 unique case IDs and zero missing evidence references.
+- All 61 PNG SHA-256 values match their manifests.
+- 32 cases are `EXECUTED_PENDING_DONHV_REVIEW`: 19 meet and 13 do not meet the expected result.
+- `npm.cmd run qa:secret-scan`: PASS; branch diff check: PASS.
 
 ## Negative Evidence
 
-- Anonymous protected OData returns HTTP 401 as expected.
-- No member execution, result approval, workbook generation, Drive update, schema deployment, seed load or database reset occurred.
-- The catalog checker initially produced a false `OUTDATED` result on CRLF checkout; a content-equivalent regeneration produced no diff, and comparison now normalizes only line endings.
+- Thirteen executed candidates disclose observed failures, including comment posting, empty close reason acceptance, duplicate audit events, AI decision persistence/apply failures, supported attachment upload failure, Smart Assign 401 feedback and protected-route blank rendering after logout.
+- Failed actions were checked for partial mutation and reload behavior where applicable.
+- No candidate failure was relabeled as an environment blocker merely to improve the result.
 
 ## Edge/Boundary Evidence
 
-- The baseline distinguishes point-in-time readiness from the BTP Trial/HANA Free Tier auto-stop limitation.
-- Every execution session must rerun readiness and report a later auto-stop as an environment blocker until diagnosed.
+- Twenty-five cases remain `EXECUTION_BLOCKED_PENDING_PRECONDITION` with the missing identity, role, fixture, state chain or direct-request control recorded per manifest.
+- Tablet clipping, keyboard Tab navigation, oversized/unsupported attachment selection and inferred storage-failure boundaries remain explicit.
+- `UAT-ATT-006` is disclosed as an inferred storage-like failure pending DoNHV's decision on a controlled S3 outage rerun.
 
 ## Roles/Authorization
 
-- NhanT: 57 Tester/end-user cases.
-- DonHV: 21 PM/database/integration cases.
-- DatDT: 8 Developer cases.
-- SangVN: 4 Developer cases.
-- Members must use their own SAP identities; agents cannot approve or execute for them.
+- NhanT executed only the 57 Tester-assigned cases with NhanT's own SAP identity.
+- PM/Developer/platform-identity cases requiring another actor remain blocked; the agent did not impersonate another member.
+- Authentication evidence distinguishes expected rejected access from the unexpected blank protected route after logout.
 
 ## Persistence/Reload
 
-- Persistence and integration cases retain their before/after, reload and readback evidence requirements.
-- This PR changes no runtime, HANA data, S3 object, email delivery or authentication state.
+- Bug creation, edit, discard/navigation, classification and lifecycle candidates include reload/readback evidence where the case requires it.
+- AI Reject/Ignore state loss and duplicate audit events were retained as negative persistence evidence.
+- No final workbook, HANA reset, S3 cleanup or Drive synchronization was performed.
 
 ## UI/UX Review
 
-- No application UI is changed.
-- Case-specific screenshots and safe-error/Network evidence remain mandatory according to each catalog row.
+- Sixty-one sanitized screenshots cover desktop/tablet layouts, dialogs, validation feedback, persistence readbacks and safe-error states.
+- Candidate UI findings include tablet text clipping, failed Tab traversal and a blank protected route after logout.
+- Screenshots containing unsafe identity details were rejected before the retained evidence set was finalized.
 
 ## Ponytail Simplicity
 
-- Two Markdown evidence files publish the baseline and assignments; no test framework, queue, scheduler or spreadsheet abstraction is added.
-- The existing generator receives only an EOL-tolerant deterministic check needed for Windows clones.
+- Used one manifest per assigned case and existing PNG evidence; no new UAT framework, dependency, queue or spreadsheet abstraction was added.
+- Final catalog/workbook integration remains a reviewer-owned step instead of being automated prematurely.
 
 ## Ownership Knowledge Gate
 
-Member: DonHV
-Date: 2026-07-23
-Ownership flow: Bug create/lifecycle and exact workflow action audit
+Member: NhanT
+Date: 2026-08-03
+Ownership flow: QA authentication, authorization, persistence/reload, and notification outbox verification
 Base questions: 3
 Inactive-day questions: 0
 Additional-flow questions: 0
-Score: 90%
+Score: 100%
 Critical questions: PASS
 Debug exercise: PASS
 Teach-back: PASS
-Evidence: docs/learning/progress/donhv.md and docs/pm/evidence/idts-89/knowledge-gate-donhv-2026-07-23.md and docs/pm/evidence/idts-90/knowledge-gate-donhv-2026-07-23.md
+Evidence: docs/pm/evidence/idts-105/knowledge-gate-nhant-qa-2026-08-03.md and docs/learning/progress/nhant.md
 Result: PASS
 
 ## Known Gaps
 
-- All 90 cases remain PREPARED until assigned humans execute them and DonHV reviews the evidence.
-- BTP Trial/HANA Free Tier do not provide an always-on SLA.
-- UAT EN v0.3 generation and same-ID Drive synchronization remain blocked until reviewed execution is complete.
+- Twenty-five assigned cases require identities, roles, fixtures, service fixes or direct-request controls before truthful execution.
+- DoNHV must review the 32 executed candidates and decide reruns/disposition for the 13 negative outcomes.
+- The final English `UAT_EN_PREPARED` workbook and Drive artifact are unchanged; OfficeCLI is unavailable on this host.
 
 ## Jira/Evidence Links
 
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-111
-- Catalog PR: https://github.com/DarwinDO/IDTS-SAP01/pull/261
-- Baseline: `docs/pm/evidence/idts-111/execution-baseline.md`
-- Assignment: `docs/pm/evidence/idts-111/execution-assignment.md`
+- Jira execution comment: https://dutassociation.atlassian.net/browse/IDTS-111?focusedCommentId=10881
+- Execution summary: `docs/pm/evidence/idts-111/execution-summary.md`
+- Case evidence: `docs/pm/evidence/idts-111/uat/`
+- Knowledge Gate: `docs/pm/evidence/idts-105/knowledge-gate-nhant-qa-2026-08-03.md`
