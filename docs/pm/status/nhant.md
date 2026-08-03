@@ -139,6 +139,16 @@ DonHV đã siết lại IDTS-24 UAT evidence: script Playwright hiện fail khi 
 
 Tooling note: two quick PowerShell scan commands for old XML binding syntax failed because `{`, `$`, and `|` were quoted incorrectly for PowerShell. The scan was rerun with `Select-String` using separate safe patterns and passed. This was a transient verification-command issue, not a product defect.
 
+### Session issue — 2026-08-03 — IDTS-110/IDTS-111 review remediation
+
+- Classification: tooling issue.
+- Symptom: Git commands against `C:\tmp\idts111-uat-nhant` were rejected as a dubious-ownership worktree under the Codex sandbox identity.
+- Root cause: the worktree belongs to the interactive `ADMIN` account while commands run under the sandbox account.
+- Status/fix: mitigated without changing global Git configuration by using the scoped `git -c safe.directory=C:/tmp/idts111-uat-nhant ...` form for this worktree.
+- Verification/owner: rerun branch/status inspection with the scoped option; NhanT remains owner of the IDTS-111 branch.
+
+Vietnamese: Git trong sandbox từ chối worktree IDTS-111 do khác tài khoản sở hữu. Đây là tooling issue, không phải product defect. Phiên này dùng `git -c safe.directory=...` theo từng lệnh, không đổi global configuration.
+
 ## Update Rule
 
 - NhanT updates this file after each work session.
