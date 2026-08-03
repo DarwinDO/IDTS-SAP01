@@ -255,7 +255,7 @@ Vietnamese clean note: Nút `Assign Developer` riêng đã được bỏ khỏi 
 - DonHV's briefing READ and the approved/merged IDTS-107 Gate 2 removed the two cleanup prerequisites.
 - IDTS-106 backed up and hashed 13 VI Drive artifacts, moved exactly those files to Trash without emptying it, and verified all EN counterparts remain present.
 - The repository EN-only pipeline retires 11 generated VI artifacts while preserving internal Vietnamese material and historical Git/archive truth.
-- The Mentor Index is EN-only and records the current versions and truthful ownership/test limitations. PR #264 still requires final gates and normal merge before Jira closure.
+- The Mentor Index is EN-only and records the current versions and truthful ownership/test limitations. PR #264 passed the fresh gate and merged normally at `cd03aedde4fa2d3d146b54ec76d400e4de3f670b`; Jira IDTS-106 is Done with evidence comment `10882`.
 
 ## 2026-07-28 isolated SAP BTP Cloud Foundry POC
 
