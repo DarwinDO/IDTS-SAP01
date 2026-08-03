@@ -3,6 +3,7 @@ const path = require('path')
 const assert = require('assert')
 const vm = require('vm')
 const cds = require('@sap/cds')
+require('@cap-js/attachments')
 
 const root = path.resolve(__dirname, '..', '..')
 
@@ -40,8 +41,8 @@ assert(!controller.includes('onAttachmentSelected'), 'Custom attachment upload h
 assert(!manifest.includes('IdtsAttachmentsCustom'), 'Manifest must not register the custom attachment section')
 assert(!manifest.includes('AttachmentsSection.fragment'), 'Manifest must use the generated attachment facet')
 assert(!exists('app/bug-management-ui/webapp/ext/fragment/AttachmentsSection.fragment.xml'), 'Retired custom attachment fragment must be removed')
-assert(annotations.includes("Target : 'attachments/@UI.LineItem'"), 'Generated attachment facet must target the attachment LineItem')
-assert(!/ID\s*:\s*'Attachments'[\s\S]{0,180}!\[@UI\.Hidden\]\s*:\s*true/.test(annotations), 'Generated attachment facet must not be hidden')
+assert(!annotations.includes("Target : 'attachments/@UI.LineItem'"), 'Application annotations must not compete with the attachment plugin-owned facet')
+assert(!uiManifest['sap.ui5']?.routing?.targets?.BugObjectPage?.options?.settings?.controlConfiguration?.['attachments/@com.sap.vocabularies.UI.v1.LineItem'], 'Manifest must not override the attachment plugin-owned table configuration')
 
 assert(routerXsApp.includes('"csrfProtection": true'), 'AppRouter OData route must keep CSRF protection enabled')
 assert(uiXsApp.includes('"csrfProtection": true'), 'UI OData route must keep CSRF protection enabled')
@@ -52,6 +53,7 @@ assert.notStrictEqual(uiPackage.version, '0.0.1', 'Changed HTML5 app content mus
 
 async function verifyCompiledAttachmentFacet () {
   const model = await cds.load('*')
+  cds.compile.to.edmx(model, { service: 'BugService' })
   const bugs = model.definitions['BugService.Bugs']
   const facets = bugs && bugs['@UI.Facets'] ? bugs['@UI.Facets'] : []
   const attachmentFacets = facets.filter(facet =>
@@ -59,6 +61,7 @@ async function verifyCompiledAttachmentFacet () {
   )
 
   assert.strictEqual(attachmentFacets.length, 1, 'Compiled BugService metadata must expose exactly one attachment facet')
+  assert.strictEqual(attachmentFacets[0].ID, 'attachments_attachments', 'Compiled metadata must use the attachment plugin-owned facet ID')
 }
 
 async function verifyCommentOperation (options = {}) {
