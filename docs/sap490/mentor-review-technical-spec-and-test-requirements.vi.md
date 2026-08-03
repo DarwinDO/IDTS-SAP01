@@ -45,16 +45,32 @@ debug lab hoặc briefing tiếng Việt.
 
 - Submission SAP490 từ thời điểm này chỉ có tiếng Anh.
 - Không tạo, regenerate, update hoặc upload artifact VI mới.
-- Artifact VI trong `00_MENTOR_REVIEW_CURRENT` được backup, lập manifest và đưa vào
-  Google Drive Trash; không empty Trash.
+- Artifact VI trong `00_MENTOR_REVIEW_CURRENT` phải được backup, lập manifest và đưa
+  vào Google Drive Trash theo IDTS-106 sau khi gate được duyệt; không empty Trash.
 - Archive, official template, reference, previous version, POC và workshop không nằm
   trong phạm vi xóa.
 - Repo current tree chỉ giữ artifact submission EN hiện hành. Bản VI cũ được bảo toàn
   bằng Git tag/history và archive manifest; không rewrite Git history.
-- Target:
+- Planned target (không phải current-version claim):
   - Technical Specification EN `v0.8`.
   - Unit Test EN `v0.5`.
   - UAT EN `v0.3`.
+
+### 3.1. Deployed architecture baseline
+
+Technical Specification và test evidence phải dùng deployed source of truth hiện tại:
+
+- SAP BTP Cloud Foundry chạy CAP service và AppRouter.
+- XSUAA bảo vệ route và map SAP identity/role collection.
+- SAP HANA Cloud/HDI là deployed database baseline; SAP HANA Database Explorer dùng
+  cho sanitized schema/data evidence.
+- HTML5 Application Repository giữ application content.
+- SAP Job Scheduling Service gọi protected CAP endpoint để kích hoạt outbox processing.
+- AWS S3 giữ attachment binary; HANA giữ metadata/storage reference.
+- Brevo gửi transactional email; custom delivery outbox chịu trách nhiệm retry/lock/status.
+- Vercel AI Gateway dùng private service binding và feature-specific model routing.
+- SQLite là local development profile. Render/PostgreSQL chỉ là rollback/reference,
+  không phải hot replica hoặc deployed source of truth hiện tại.
 
 ## 4. Quy tắc official template
 
@@ -90,7 +106,7 @@ Cấm:
 | 2 | `Histories` | Lịch sử thay đổi tài liệu | Version, date, changed section, reason, author/reviewer | Lịch sử runtime Bug hoặc changelog Git thô |
 | 3 | `Introduction` | Mục tiêu và cách đọc Technical Specification | CAP Node.js, OData V4, Fiori Elements/UI5, phạm vi tài liệu | Dump source code hoặc danh sách file dài |
 | 4 | `Scope` | Ranh giới kỹ thuật in-scope/out-of-scope | Scope item, lý do, limitation, môi trường | Yêu cầu nghiệp vụ chi tiết hoặc claim production |
-| 5 | `Assumptions` | Giả định kỹ thuật cần kiểm chứng | SQLite local, PostgreSQL QA, S3, Brevo, OpenAI disabled, cách verify | Credential hoặc giả định không có owner |
+| 5 | `Assumptions` | Giả định kỹ thuật cần kiểm chứng | SQLite cho local profile; SAP BTP Cloud Foundry, XSUAA, HANA Cloud/HDI, AppRouter, HTML5 Application Repository và Job Scheduling Service cho deployed baseline; S3/Brevo/Vercel AI Gateway là external integration; Render/PostgreSQL chỉ là rollback/reference; cách verify và owner | Credential, private endpoint hoặc giả định không có owner |
 | 6 | `Functional Requirements` | Hệ thống phải làm gì ở mức nghiệp vụ | Number, business requirement, actor, precondition, outcome, related feature | Source path, code snippet, SQL, raw handler trace trong mô tả nghiệp vụ |
 | 7 | `Technical Design` | Cấu trúc giải pháp và quan hệ thành phần | Diagram theo function, component map, entity/association, draft/active, transaction, integration, table dictionary | Paragraph raw thay diagram/bảng; ABAP section bị bỏ trống |
 | 8 | `Development Standards` | Quy tắc xây dựng và kiểm soát chất lượng | SAP naming, CAP/Fiori equivalents, auth, validation, errors, comments, tests, evidence, secrets | Generic slogan không có verification |
@@ -107,12 +123,13 @@ Không xóa mục cổ điển. Điền nội dung tương đương:
 | --- | --- | --- |
 | ABAP package | npm/CAP project modules và namespace `idts.cap` | Ghi module/folder/source-of-truth, không bịa package SAP |
 | T-code / customizing | CAP profile, private environment variables, seed/code list và service configuration | Ghi rõ không có T-code và nêu cơ chế thay thế |
-| Transport Request | Git branch, PR review, protected `dev`, Render deploy | Ghi `N/A` cho SAP TR và mô tả control thay thế |
+| Transport Request | Git branch, PR review, protected `dev`, MTA build và Cloud Foundry/HTML5 deployment | Ghi `N/A` cho SAP TR và mô tả đầy đủ control thay thế trên BTP |
 | ABAP class/interface | CAP service class, handler module, helper module | Dùng exact file/symbol trong cột kỹ thuật |
-| DDIC table | CDS entity và physical PostgreSQL table | Có logical/physical mapping và full column dictionary |
+| DDIC table | CDS entity và physical SAP HANA HDI artifact | Có logical/physical mapping, full column dictionary và source/evidence; SQLite local và PostgreSQL rollback/reference phải ghi riêng |
 | SAP authorization object | Custom role/session mapping và CAP authorization checks | Ghi role, handler/guard và HTTP denial |
 | Smart Form | Fiori Elements/Object Page/notification-email template nếu phù hợp | Ghi N/A có lý do khi không dùng Smart Form |
-| Background job | Email outbox worker polling/retry/locking | Ghi worker lifecycle, lock, retry và failure isolation |
+| Background job | SAP Job Scheduling Service gọi protected CAP outbox-processing endpoint; CAP worker xử lý delivery retry/lock/failure isolation | Ghi scheduler authentication, protected endpoint, worker lifecycle, lock, retry và failure isolation |
+| Database viewer | SAP HANA Database Explorer | Ghi schema/HDI container, sanitized object/data readback và không lộ database credential |
 
 ## 7. Naming convention
 
@@ -129,10 +146,13 @@ CAP/Fiori convention của IDTS:
 - Constant/code: UPPER_SNAKE_CASE.
 - Boolean: ưu tiên `is*`, `has*`, `can*`.
 - UI business label tách khỏi technical action.
-- Physical PostgreSQL persistence phân biệt:
-  - business tables `idts_cap_*`;
-  - CAP draft/service tables;
-  - framework/outbox tables.
+- Physical SAP HANA/HDI persistence phải phân biệt:
+  - domain/business và code-list artifacts do CDS sinh;
+  - CAP draft tables và `DRAFT.DraftAdministrativeData`;
+  - service/helper persistence artifacts có trong production build;
+  - custom `NotificationDeliveries` và CAP transactional outbox `cds.outbox.Messages`.
+- SQLite chỉ là local development profile. Render/PostgreSQL chỉ được dùng làm rollback/reference,
+  không được mô tả là deployed source of truth hiện tại.
 
 Visible numbering của workbook:
 
@@ -170,6 +190,7 @@ Database dictionary phải có:
 - Association/composition.
 - Business purpose.
 - Owner/retention.
+- CDS source file/symbol.
 - Database evidence.
 
 ## 9. Screen Layout và Screen Definition
@@ -190,9 +211,10 @@ Screen Layout phải bao phủ:
 - History timeline.
 - Notifications.
 - AI Similar Bugs, Classification, Handoff Summary và Smart Assign explanation review.
-- Operational third-party screens chỉ khi cần chứng minh integration: Render, S3,
-  Brevo/email inbox và PostgreSQL viewer; phải ghi đây là operational evidence, không
-  phải màn hình IDTS runtime.
+- Operational screens chỉ khi cần chứng minh integration: SAP BTP Cockpit/Cloud Foundry,
+  SAP HANA Database Explorer, Job Scheduling Service, Vercel AI Gateway, S3 và
+  Brevo/email inbox. Render/PostgreSQL chỉ được dùng làm rollback/reference evidence.
+  Phải ghi đây là operational evidence, không phải màn hình IDTS runtime.
 
 Screen Definition phải tách từng field/action. Không được dùng một dòng đại diện cho cả
 section. Mỗi row phải có binding, data type, required/read-only, role visibility,
@@ -252,7 +274,19 @@ Không dùng tên script, command hoặc local path đơn lẻ làm bằng chứ
 
 ## 12. Unit Test EN v0.5
 
-NhanT phải lập catalog trước; DonHV duyệt catalog rồi mới thực thi. Coverage tối thiểu:
+DonHV sở hữu, lập và phê duyệt catalog; DonHV cũng là người sinh/tích hợp workbook.
+NhanT chỉ thực thi catalog đã duyệt và thu actual result cùng evidence theo từng case.
+Baseline hiện tại có **188 case `NOT_RUN`**; chưa case nào trong catalog mới được phép
+thừa hưởng trạng thái PASS lịch sử. Coverage tối thiểu:
+
+Mục đích các tab Unit Test:
+
+| Tab | Mục đích |
+| --- | --- |
+| `Cover` | Danh tính workbook, version, author và trạng thái review/approval thật |
+| `Histories` | Lịch sử thay đổi workbook, không phải lịch sử Bug/runtime |
+| `UT` | Catalog và kết quả từng atomic Unit Test case |
+| `Evidence` | Evidence register liên kết đúng case/run, baseline, actual result và artifact mở được |
 
 - Authentication/session.
 - Draft create/patch/save và active create/update.
@@ -287,6 +321,23 @@ Mỗi condition branch là một test case riêng. Mỗi row có:
 
 ## 13. UAT EN v0.3
 
+DonHV sở hữu/phê duyệt catalog, sinh workbook và tích hợp kết quả. Baseline hiện tại có
+**90 case `PREPARED`**, chưa có case executed/PASS/FAIL/BLOCKED. Phân công thực thi:
+
+- NhanT: các case vai trò Tester.
+- SangVN và DatDT: các case vai trò Developer được giao, bằng SAP identity của chính họ.
+- DonHV: các case PM, database và integration.
+
+Mục đích các tab UAT:
+
+| Tab | Mục đích |
+| --- | --- |
+| `Cover` | Danh tính workbook, version, execution baseline và trạng thái sign-off thật |
+| `Histories` | Lịch sử thay đổi workbook |
+| `Test Scenario` | Business scenario, actor, precondition và acceptance intent |
+| `Test Cases` | Các UAT case atomic với steps/expected result/ownership/evidence requirement |
+| `Test Result` | Actual execution result, executor, timestamp, status, limitation và case-specific evidence |
+
 UAT phải tách chi tiết:
 
 - Login/logout/session expiry.
@@ -306,11 +357,31 @@ UAT phải tách chi tiết:
 - Desktop/tablet/keyboard/focus.
 
 Mỗi case có ít nhất một ảnh riêng. Case nhiều bước phải có before/after/reload hoặc
-network/error evidence. OpenAI live ghi:
+network/error evidence. Test truth lịch sử `21 PASSED + 6 PREPARED` chỉ được nhắc như
+legacy history, không được nhập vào catalog 188/90 mới.
 
-`BLOCKED / NOT ACCEPTED — provider disabled`
+AI deployed baseline dùng feature-specific routing:
 
-Không được đổi fallback/mock PASS thành provider-live PASS.
+- Similar Bugs embedding primary: `alibaba/qwen3-embedding-0.6b`; eligible transient
+  fallback: `openai/text-embedding-3-small`.
+- Classification primary: `openai/gpt-5.4-nano`; bounded retry cùng alias, không phải
+  cross-model failover.
+- Handoff Summary primary: `minimax/minimax-m2.5`; đúng một eligible fallback attempt
+  tới `xai/grok-4.1-fast-non-reasoning`.
+- Smart Assign/general structured primary: `zai/glm-4.7-flash`; eligible early transient
+  fallback: `openai/gpt-5.4-nano`, vẫn bị giới hạn bởi feature deadline.
+
+Rate limit/cooldown là per-model trong process hiện tại: tối đa 4 request trong rolling
+60 giây. HTTP 429 trả `AI_RATE_LIMITED`, tôn trọng cooldown/`Retry-After`, không queue và
+không gọi model fallback để tiêu thêm quota. Restart process reset in-memory cooldown.
+
+Mỗi kết quả phải phân biệt `primary-provider PASS`, `provider fallback PASS`,
+`deterministic fallback PASS`, `rate-limited` hoặc `blocked`. Provider-live PASS phải
+có feature type, provider/model alias, operation status, correlation ID/latency và
+case/role evidence đã sanitize. Không được đổi
+fallback/mock/deterministic PASS thành primary-provider PASS. Mọi AI output là advisory,
+phải được human review và không được tự mutation status, assignee, next processor hoặc
+lifecycle history.
 
 ## 14. Evidence policy
 
@@ -352,8 +423,10 @@ hash/metadata và preview.
 ## 16. Claims bị cấm
 
 - UAT PASS khi chưa có người thực thi và actual result.
+- Unit Test PASS khi thiếu executor, actual result, baseline và case-specific evidence.
+- Technical Specification complete/approved khi còn missing evidence, chưa có human owner approval hoặc Drive readback.
 - Mentor/user sign-off do agent tự điền.
-- OpenAI live accepted khi provider đang disabled.
+- Primary-provider accepted khi evidence chỉ chứng minh provider fallback, deterministic fallback hoặc rate-limit handling.
 - Evidence chỉ là command, script name hoặc local path.
 - “Đủ message/screen/table” khi chưa có inventory/validator.
 - “Đúng template” chỉ vì OfficeCLI schema PASS.
@@ -363,7 +436,7 @@ hash/metadata và preview.
 
 | Member | Ownership |
 | --- | --- |
-| DonHV | Database/persistence, architecture assumptions, data dictionary, transaction/rollback, PostgreSQL, S3, AuthSessions, history, outbox/email; đồng thời sở hữu/phê duyệt catalog Unit Test/UAT, sinh workbook EN, review evidence và tích hợp cuối lên Drive |
+| DonHV | Database/persistence, architecture assumptions, data dictionary, transaction/rollback, SAP HANA/HDI, S3, AuthSessions, history, outbox/email; đồng thời sở hữu/phê duyệt catalog Unit Test/UAT, sinh workbook EN, review evidence và tích hợp cuối lên Drive |
 | SangVN | Screen Layout/Definition, classification, assignment/Smart Assign, lifecycle UI, comments, attachments UI, history UI và Object Page evidence |
 | DatDT | Business-level requirements, Development Standards, naming matrix, exhaustive messages, login/profile, dashboard/monitoring, notification UI và AI traces |
 | NhanT | Thực thi Unit Test đã được duyệt và các UAT case vai trò Tester; ghi actual result và evidence riêng theo case |

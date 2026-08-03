@@ -5303,6 +5303,14 @@ remains pending normal PR merge.
 
 Live evidence: `docs/pm/evidence/idts-117/demo-readiness/live-verification-20260802.md`.
 
+## 2026-08-03 — IDTS-105 current-baseline briefing remediation
+
+| Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Documentation issue | The mandatory SAP490 briefing still described PostgreSQL/Render as the active shared-QA baseline, marked OpenAI/provider live as disabled, assigned Unit Test catalog creation to NhanT, and omitted the approved 188/90 atomic-catalog truth. | The briefing was written before the SAP BTP/HANA migration, current feature-specific AI routing, and DonHV's updated Unit Test/UAT ownership decisions. | Corrected on the isolated IDTS-105 branch; no runtime, test result, acknowledgment or Drive artifact was changed. | Review `docs/pm/evidence/idts-105/briefing-current-truth-audit-20260803.md`, run documentation/process gates, merge normally, then DonHV personally reads and acknowledges the merge SHA. |
+| Process/tooling issue | The first four read-only subagents stopped immediately instead of auditing because their prompts did not explicitly repeat the already-known member identity. | Repo instructions require the member identity at task start; fresh subagent contexts did not inherit it. | Corrected by closing those attempts and respawning with `Member: donhv`, the frozen SHA and explicit read-only scope. | Primary agent independently reviews every returned finding; no agent-created approval or consensus is accepted. |
+| Environment readiness result | IDTS-105 evidence needed a fresh BTP point-in-time baseline. | Read-only readiness check was required before relying on deployed architecture claims. | PASS; no recovery action was needed. | `npm run btp:demo:check`: CAP/AppRouter 1/1, `/health` and `/ready` 200, anonymous protected API 401, web 200, `DEMO READY`; HDI broker status `create succeeded`. No DB deploy/seed/migration. |
+
 ## 2026-08-02 — IDTS-110 catalog source-trace validation
 
 | Classification | Symptom | Root cause | Fix status | Verification / next action |

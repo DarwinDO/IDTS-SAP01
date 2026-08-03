@@ -228,12 +228,12 @@ Các trigger notification:
 * Tester cập nhật bug report đã submit.  
 * Developer cập nhật trạng thái bug.
 
-**Approved SMTP baseline / Baseline SMTP đã duyệt:**
+**Approved email-delivery baseline / Baseline gửi email đã duyệt:**
 
 * `Notifications` là source event hiển thị trong IDTS; email không thay thế notification trong app.
-* Email thật được gửi qua SMTP bằng Nodemailer và cấu hình private, không phụ thuộc SAP BTP/XSUAA.
+* SAP BTP dùng private provider configuration cho Brevo API; local/integration profile vẫn có thể chọn SMTP/Nodemailer. Credential không nằm trong source hoặc tài liệu.
 * Mỗi email có outbox/delivery status riêng: `PENDING`, `SENT`, `FAILED`, `SKIPPED`.
-* Worker gửi email sau khi business transaction đã commit; SMTP fail không được làm hỏng action xử lý bug.
+* SAP Job Scheduling Service gọi protected CAP outbox-processing endpoint; provider fail chỉ đổi delivery status và không được rollback action xử lý Bug đã commit.
 * Core scope không bao gồm message broker riêng như Redis, RabbitMQ hoặc BullMQ; CAP database outbox là đủ cho v1.
 
 **Approved AI assistance baseline / Baseline AI assistance đã duyệt:**
@@ -242,7 +242,7 @@ Các trigger notification:
 * AI chỉ đưa ra suggestion; người dùng phải review và chủ động apply, ignore hoặc reject.
 * AI không được tự assign, tạo duplicate link, sửa classification, close, reject hoặc chuyển status.
 * CAP validation, role authorization và workflow hiện tại vẫn là lớp quyết định cuối.
-* AI mặc định tắt; lỗi provider, timeout hoặc output sai không được làm hỏng workflow không dùng AI.
+* Local/default profile có thể tắt AI hoặc dùng mock; SAP BTP hiện bật Vercel AI Gateway theo route từng feature. Lỗi provider, timeout hoặc output sai không được làm hỏng workflow không dùng AI.
 * Không gửi credential, token, email private, private endpoint, attachment content hoặc dữ liệu không cần thiết cho AI provider.
 * Duplicate/similar detection v1 dùng OData action suggestion-only với hybrid text/classification/embedding scoring và fallback deterministic. Runtime candidate không tự persist vào `DuplicateLinks`; chỉ check gắn với bug đã lưu mới ghi `AiSuggestions` audit row an toàn.
 * Duplicate/similar detection v1 uses a suggestion-only OData action with hybrid text/classification/embedding scoring and deterministic fallback. Runtime candidates are never auto-persisted as `DuplicateLinks`; only a check linked to a persisted source bug writes a safe `AiSuggestions` audit row.
@@ -279,7 +279,7 @@ Các trigger notification:
 | API Exposure | CAP Service APIs |
 | Workflow | SAP Build Process Automation, optional |
 | Notification | SAP BTP services / third-party webhook integration |
-| Authentication | Near-term custom CAP Node.js login with `AuthService`, `Users.passwordHash`, server-side `AuthSessions`, and bearer-token request mapping. XSUAA remains optional/future if a SAP BTP account path is approved later. |
+| Authentication | SAP BTP AppRouter/XSUAA with SAP identity-to-IDTS-role alignment; custom `AuthService`/`AuthSessions` bearer authentication remains for local and Render/integration profiles. |
 
 ---
 
@@ -378,9 +378,9 @@ Không xây full test management module trong scope hiện tại.
 
 ## **7.7. Database modeling baseline for WP1**
 
-**English:** The implementation model for WP1 must follow `docs/ba/09-database-model-review.md`. This keeps IDTS aligned with SAP CAP/CDS and avoids turning the data model into a generic issue tracker. The core baseline is: UUID remains the technical key; `bugNumber` is added for readable tracking; Application Component and Defect Category are selected by users; Component Category is derived or validated for assignment; SAP Module is optional; `nextProcessor` supports role/queue ownership and specific user ownership when known; Rejected bugs store both latest display reason and historical audit reason; attachment handling uses `@cap-js/attachments`, with SQLite fallback locally and external object storage for the shared PostgreSQL integration/deployment target; duplicate checking stores confirmed links only.
+**English:** The implementation model for WP1 must follow `docs/ba/09-database-model-review.md`. This keeps IDTS aligned with SAP CAP/CDS and avoids turning the data model into a generic issue tracker. The core baseline is: UUID remains the technical key; `bugNumber` is added for readable tracking; Application Component and Defect Category are selected by users; Component Category is derived or validated for assignment; SAP Module is optional; `nextProcessor` supports role/queue ownership and specific user ownership when known; Rejected bugs store both latest display reason and historical audit reason; attachment handling uses `@cap-js/attachments`, with SQLite locally, SAP HANA/HDI on BTP, PostgreSQL for rollback/integration, and bound external object storage for binary content; duplicate checking stores confirmed links only.
 
-**Vietnamese:** Implementation model cho WP1 phải đi theo `docs/ba/09-database-model-review.md`. Điều này giữ IDTS đúng hướng SAP CAP/CDS và tránh biến data model thành issue tracker generic. Baseline chính là: UUID vẫn là technical key; thêm `bugNumber` để tracking dễ đọc; Application Component và Defect Category do user chọn; Component Category được derive hoặc validate để assignment; SAP Module là optional; `nextProcessor` hỗ trợ ownership theo role/queue và user cụ thể khi biết rõ; bug Rejected lưu cả reason mới nhất để hiển thị và reason lịch sử để audit; attachment dùng `@cap-js/attachments`, local dùng SQLite fallback và shared PostgreSQL integration/deployment target dùng external object storage; duplicate checking chỉ lưu link đã xác nhận.
+**Vietnamese:** Implementation model cho WP1 phải đi theo `docs/ba/09-database-model-review.md`. Baseline chính là UUID + `bugNumber`, Component Category được derive/validate, SAP Module optional, `nextProcessor` hỗ trợ role/queue và user, attachment dùng `@cap-js/attachments`; local dùng SQLite, BTP dùng SAP HANA/HDI, PostgreSQL chỉ cho rollback/integration, còn binary nằm trong external object storage. Duplicate checking chỉ lưu link đã xác nhận.
 
 ## **7.8. Still out of scope**
 

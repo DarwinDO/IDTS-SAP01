@@ -8,10 +8,10 @@ member personally confirms the exact commit and adds the Jira comment.
 
 | Member | Read status | Commit SHA read | Date read | Ownership understood | Questions / unclear points | Jira issue/comment |
 | --- | --- | --- | --- | --- | --- | --- |
-| DonHV | PENDING | — | — | Database/persistence, integration and Drive | — | IDTS-105 / pending |
-| SangVN | PENDING | — | — | Screen/collaboration Technical Specification | — | IDTS-108 / pending |
-| DatDT | PENDING | — | — | Standards/messages/monitoring/AI Technical Specification | — | IDTS-109 / pending |
-| NhanT | PENDING | — | — | Unit Test and UAT catalogs/execution/evidence | — | IDTS-110 and IDTS-111 / pending |
+| DonHV | PENDING | — | — | Technical Specification database/persistence; Unit Test/UAT catalog ownership and approval; EN workbook generation, evidence review and Drive integration | — | IDTS-105 / pending |
+| SangVN | PENDING | — | — | Screen/collaboration Technical Specification and assigned Developer UAT execution with own SAP identity | — | IDTS-108 and IDTS-111 / pending |
+| DatDT | PENDING | — | — | Standards/messages/monitoring/AI Technical Specification and assigned Developer UAT execution with own SAP identity | — | IDTS-109 and IDTS-111 / pending |
+| NhanT | PENDING | — | — | Execute approved Unit Test cases and Tester UAT cases; capture actual result and case-specific evidence | — | IDTS-110 and IDTS-111 / pending |
 
 ## Required member comment format
 

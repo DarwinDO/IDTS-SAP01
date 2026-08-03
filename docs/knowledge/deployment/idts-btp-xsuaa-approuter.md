@@ -15,7 +15,7 @@ role.
 | `mta.yaml` | CAP, HDI deployer, AppRouter, HTML5 content and managed-service bindings |
 | `xs-security.json` | XSUAA scopes and role templates |
 | `app/router/xs-app.json` | Browser entry, logout and protected OData forwarding |
-| `app/bug-management-ui/xs-app.json` | HTML5 app routes for UI5 resources and CAP OData |
+| `app/bug-management-ui` | UI5/Fiori application packaged into HTML5 content; AppRouter routing remains owned by `app/router/xs-app.json` |
 | `package.json` | XSUAA production profile and custom-auth integration profile |
 
 ## Environment separation
