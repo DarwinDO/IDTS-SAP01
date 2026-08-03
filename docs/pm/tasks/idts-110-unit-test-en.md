@@ -31,11 +31,11 @@ No Unit Test VI is created. No command-only, script-only, shared-only, or unsani
 
 - Exact reviewed head: `8957cbaa20f9c629818901f9b988884337a7ff82`
 - Candidate result: `34 PASS / 2 FAIL / 152 BLOCKED`
-- Correct primary taxonomy: 171 locally executable cases and 17 true BTP integration cases
+- Corrected primary taxonomy: 175 locally executable cases and 13 true BTP integration cases
 - `UT-AUTH-004`: catalog corrected so malformed CDS type is verified through the OData 400 boundary, while wrong string credentials retain generic 401
 - `UT-VAL-REPORTER`: catalog corrected to test unresolved authenticated actor; client omission remains valid because reporter is server-owned
 - Evidence cards are generated summaries, not browser/runtime proof by themselves
-- Required before merge: latest briefing acknowledgment, catalog correction by DonHV, local rerun of false blockers, controlled BTP rerun of the 17 integration cases, evidence cleanup and fresh QA Depth Gate
+- Required before merge: latest briefing acknowledgment, local rerun of false blockers, controlled BTP rerun of the 13 integration cases, evidence cleanup and fresh QA Depth Gate
 
 Evidence:
 
