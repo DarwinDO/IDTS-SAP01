@@ -3,7 +3,7 @@
 - Owner: DonHV
 - Support: NhanT
 - Due: 2026-08-06
-- Status: In Progress — implementation and Drive cleanup verified; pending PR gate/merge and Jira closure
+- Status: Done — PR #264 merged at `cd03aedde4fa2d3d146b54ec76d400e4de3f670b`; Jira closed with evidence comment `10882`
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-106
 
 ## Planned output
@@ -32,5 +32,6 @@ not rewrite history or permanently delete Drive files.
 - Backed up all 13 Drive VI files outside the repo and verified SHA-256/Office ZIP integrity.
 - Moved exactly 13 VI file IDs to Drive Trash; no folder was trashed and Trash was not emptied. Readback confirms the EN counterpart remains in every source family.
 - Updated the same-ID Mentor Index to EN-only control, current versions and current briefing gate truth; no VI row/link remains.
+- PR #264 passed the fresh `qa-depth-gate` and merged normally into `dev` at `cd03aedde4fa2d3d146b54ec76d400e4de3f670b`; Jira IDTS-106 was transitioned to Done after comment `10882` recorded the verified result.
 - Evidence: `docs/pm/evidence/idts-106/drive-vi-pre-trash-manifest-20260803.md` and `docs/sap490/generated-vi-retirement-manifest-20260803.md`.
 - Remaining: final repository gates, PR #264 Ready/merge, post-merge verification and Jira closure. SangVN, DatDT and NhanT still acknowledge IDTS-105 before approval of their own SAP490 packages.

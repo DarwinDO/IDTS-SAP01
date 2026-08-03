@@ -7,7 +7,7 @@
 - Drive control: all 13 VI Mentor Current artifacts were downloaded to `E:\IDTS-SAP01-backups\drive-vi-before-trash-20260803-1625`, hashed and Office-ZIP checked before being moved to Trash. No folder was trashed and Trash was not emptied.
 - Verification: fresh parent-folder readback reports no VI item and one EN counterpart for all 13 families. The same-ID Mentor Index contains no VI row/link and records the English-only policy, current versions and truthful pending acknowledgments/test execution.
 - Evidence: `docs/pm/evidence/idts-106/drive-vi-pre-trash-manifest-20260803.md` and `docs/sap490/generated-vi-retirement-manifest-20260803.md`.
-- Next action: finish local/security/process gates, update PR #264, merge normally without bypass, verify `origin/dev`, then close IDTS-106 in Jira. SangVN, DatDT and NhanT still acknowledge IDTS-105 before approving their own packages.
+- Closeout: local/security/process gates passed; PR #264 merged normally at `cd03aedde4fa2d3d146b54ec76d400e4de3f670b`; `origin/dev` contains the cleanup commit; Jira IDTS-106 is Done with evidence comment `10882`. SangVN, DatDT and NhanT still acknowledge IDTS-105 before approving their own packages.
 
 - Classification: tooling issue (resolved).
 - Symptom: the first browser automation loop opened the selected Drive row's action affordance before the row selection toolbar was fully active, so `Move to bin` was not exposed; later bulk attempts occasionally timed out while the Drive grid rerendered.
