@@ -34,7 +34,7 @@
 - The 13 true BTP integration cases remain blocked because `cf`/authorized BTP readiness, controlled identities, S3 injection, and Job Scheduler proof are unavailable. The two UI component cases are resolved locally; the signed-in deployed List Report is healthy, while a full local Fiori render is limited by the unreachable UI5 CDN redirect.
 - Evidence inventory: 188 manifests, 278 PNGs, and 0 SVGs. Duplicate SVG sources were removed and structured JSON evidence is linked from manifests.
 - DonHV review is pending. The approved catalog remains 188 `NOT_RUN`, and `Unit_Test_EN`/Drive have not been changed by NhanT/agent.
-- Previous Jira handoff comment: `10861`; a final remediation comment is required after this exact-head verification is pushed.
+- Jira handoff comments: previous `10861`; final remediation handoff `10924` after commit `c409335` and PR #269 QA-depth PASS.
 
 No Unit Test VI is created. No command-only, script-only, shared-only, or unsanitized evidence is accepted.
 
