@@ -161,3 +161,4 @@ Vietnamese:
 - Ghi rõ đã test gì, pass phần nào, fail phần nào, bug/error phát hiện, đã fix hay chưa và bằng chứng command/kết quả.
 - Không chỉnh file status của thành viên khác trừ khi phối hợp với DonHV.
 - 2026-08-03 PR-body gate issue: the first refreshed IDTS-111 body used Markdown backticks around both Ownership Knowledge Gate evidence paths, while `check-pr-depth.js` requires a whitespace-delimited `docs/...` path. The body content was complete but the parser returned FAIL. Classification: documentation/gate-format issue. Status: remove backticks only from the Evidence field and rerun the actual body gate; secret scan and diff check passed in the same batch.
+- External handoff completed: commit `adb66e8` pushed to PR #270, QA-depth-compliant body updated and read back, and Jira IDTS-111 comment `10925` posted with the two fresh reruns, 57/63 integrity result, and remaining IDTS-113/114/115/116 plus physical-keyboard boundaries.

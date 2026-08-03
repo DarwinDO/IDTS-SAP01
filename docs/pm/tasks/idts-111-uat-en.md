@@ -25,6 +25,7 @@
 - DonHV disposition: 19 positive evidence packages accepted; 25 blockers accepted without PASS; 13 negatives split into 3 confirmed product defects (`UAT-AUTH-005`, `UAT-BUG-008`, `UAT-UX-002`), 5 catalog mismatches, 1 environment/session blocker, 3 targeted reruns, and 1 test-harness limitation. See `docs/pm/evidence/idts-111/donhv-execution-review-matrix.md`.
 - Current rerun state: the deployed SAP page is usable. Fresh `UAT-COM-001` and `UAT-ATT-001` reruns reproduced the same safe failures without comment/attachment persistence or orphan metadata. The approved Browser surface cannot expose the sanitized HTTP/Network details or immutable suggestion ID required to close `UAT-AI-005`/`UAT-AI-009` and root-cause IDTS-113/114/115/116. No candidate result was promoted. `UAT-UX-003` still requires NhanT to confirm physical Tab-key behavior manually.
 - Knowledge gate: NhanT acknowledged briefing SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`; Jira comments `10908` (IDTS-110) and `10909` (IDTS-111).
+- Final targeted-rerun handoff: commit `adb66e8`, PR #270 body refreshed, Jira IDTS-111 comment `10925`.
 - Candidate execution summary: `docs/pm/evidence/idts-111/execution-summary.md`.
 - Catalog merge SHA: `6f01affc2c2945e51d18199137c8a89a20c77600`.
 - BTP runtime SHA: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`.
