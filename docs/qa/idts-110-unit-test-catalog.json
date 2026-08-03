@@ -57,8 +57,8 @@
     },
     "byTestLevel": {
       "BTP_INTEGRATION": 17,
-      "CAP_COMPONENT": 146,
-      "ODATA_CONTRACT": 13,
+      "CAP_COMPONENT": 145,
+      "ODATA_CONTRACT": 14,
       "PURE_UNIT": 10,
       "UI_COMPONENT": 2
     },
@@ -242,11 +242,11 @@
     {
       "caseId": "UT-AUTH-004",
       "domain": "Authentication",
-      "title": "non-string password is rejected safely",
-      "objective": "Verify non-string password is rejected safely.",
+      "title": "non-string password is rejected at the CDS type boundary",
+      "objective": "Verify non-string password is rejected at the CDS type boundary.",
       "classification": "BOUNDARY",
       "priority": "HIGH",
-      "testLevel": "CAP_COMPONENT",
+      "testLevel": "ODATA_CONTRACT",
       "environment": "LOCAL",
       "requirementIds": [
         "SRS-FR-AUTH-001"
@@ -256,30 +256,34 @@
       ],
       "coverage": [
         "BOUNDARY",
-        "SANITIZATION"
+        "SANITIZATION",
+        "PERSISTENCE"
       ],
       "preconditions": "Use an isolated authentication fixture at baseline bc0c47e522ae; capture the relevant before-state.",
-      "input": "Call login with a non-string password value.",
+      "input": "Call the AuthService.login OData endpoint with a non-string password value.",
       "steps": [
         "Prepare the stated precondition and capture the before-state.",
-        "Execute only this branch using: Call login with a non-string password value.",
+        "Execute only this branch using: Call the AuthService.login OData endpoint with a non-string password value.",
         "Assert the response, persisted state, side effects, and safe error boundary described below.",
         "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "HTTP 401 is returned without type details, stack trace, or session mutation.",
+      "expectedResult": "The malformed request is rejected by safe HTTP 400 validation without type internals or stack trace, and no AuthSession row is inserted. Wrong string credentials remain covered separately by the generic HTTP 401 boundary.",
       "sourceTrace": [
         {
-          "file": "srv/auth.js",
+          "file": "srv/auth.cds",
           "symbol": "login"
         },
         {
           "file": "srv/auth.js",
-          "symbol": "me"
+          "symbol": "login"
         }
       ],
       "evidenceRequirements": [
         "case-specific result image",
-        "sanitized case manifest"
+        "sanitized case manifest",
+        "sanitized HTTP request/response image",
+        "before/after database image",
+        "reload/readback image"
       ],
       "execution": {
         "status": "NOT_RUN",
@@ -2059,31 +2063,33 @@
     {
       "caseId": "UT-VAL-REPORTER",
       "domain": "Validation",
-      "title": "missing required field reporter_ID is rejected",
-      "objective": "Verify missing required field reporter_ID is rejected.",
-      "classification": "NEGATIVE",
+      "title": "server-owned reporter derivation rejects an unresolved authenticated actor",
+      "objective": "Verify server-owned reporter derivation rejects an unresolved authenticated actor.",
+      "classification": "ROLE",
       "priority": "HIGH",
       "testLevel": "CAP_COMPONENT",
       "environment": "LOCAL",
       "requirementIds": [
-        "SRS-FR-BUG-002"
+        "SRS-FR-BUG-001"
       ],
       "roles": [
-        "N/A"
+        "TESTER",
+        "PM"
       ],
       "coverage": [
-        "NEGATIVE",
-        "PERSISTENCE"
+        "ROLE",
+        "PERSISTENCE",
+        "SANITIZATION"
       ],
       "preconditions": "Use an isolated validation fixture at baseline bc0c47e522ae; capture the relevant before-state.",
-      "input": "SAVE or CREATE a Bug with reporter_ID omitted.",
+      "input": "SAVE or CREATE a Bug when the authenticated actor cannot be resolved to one active IDTS user.",
       "steps": [
         "Prepare the stated precondition and capture the before-state.",
-        "Execute only this branch using: SAVE or CREATE a Bug with reporter_ID omitted.",
+        "Execute only this branch using: SAVE or CREATE a Bug when the authenticated actor cannot be resolved to one active IDTS user.",
         "Assert the response, persisted state, side effects, and safe error boundary described below.",
         "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "HTTP 400 targets reporter_ID; no active write, history, notification, or delivery is committed.",
+      "expectedResult": "The write is rejected safely before persistence; no Bug, history, notification, or delivery is committed. A client omission of reporter_ID remains valid when the authenticated actor resolves.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/bug-write.js",

@@ -1,0 +1,3209 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "reviewedPullRequest": 269,
+  "reviewedHeadSha": "8957cbaa20f9c629818901f9b988884337a7ff82",
+  "reviewPolicy": {
+    "primaryResultOwner": "DonHV",
+    "candidateExecutor": "NhanT (agent-assisted)",
+    "generatedCardsAreRuntimeProof": false,
+    "latestBriefingAcknowledgementRequired": true
+  },
+  "counts": {
+    "total": 188,
+    "byTestLevel": {
+      "CAP_COMPONENT": 145,
+      "ODATA_CONTRACT": 14,
+      "BTP_INTEGRATION": 17,
+      "UI_COMPONENT": 2,
+      "PURE_UNIT": 10
+    },
+    "byCandidateStatus": {
+      "PASS": 34,
+      "FAIL": 2,
+      "BLOCKED": 152
+    },
+    "byRequiredEnvironment": {
+      "LOCAL": 171,
+      "SAP_BTP": 17
+    },
+    "byReviewDecision": {
+      "REVIEW_CANDIDATE_RESULT": 34,
+      "CATALOG_EXPECTATION_MISMATCH": 2,
+      "RERUN_AT_LOCAL_PRIMARY_BOUNDARY": 135,
+      "RERUN_ON_BTP": 17
+    }
+  },
+  "cases": [
+    {
+      "caseId": "UT-AUTH-001",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AUTH-002",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AUTH-003",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AUTH-004",
+      "testLevel": "ODATA_CONTRACT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "ODATA_CONTRACT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "FAIL",
+      "reviewDecision": "CATALOG_EXPECTATION_MISMATCH",
+      "reviewRationale": "A non-string password is rejected by the CDS type boundary before the login handler. Expect a safe 400-style validation response; retain 401 for a wrong string credential.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AUTH-005",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AUTH-006",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AUTH-007",
+      "testLevel": "ODATA_CONTRACT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "ODATA_CONTRACT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AUTH-008",
+      "testLevel": "ODATA_CONTRACT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "ODATA_CONTRACT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AUTH-009",
+      "testLevel": "ODATA_CONTRACT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "ODATA_CONTRACT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AUTH-010",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AUTH-011",
+      "testLevel": "BTP_INTEGRATION",
+      "catalogEnvironment": "BTP_REQUIRED",
+      "primaryExecutionBoundary": "BTP_REQUIRED",
+      "requiredEnvironment": "SAP_BTP",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_ON_BTP",
+      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AUTH-012",
+      "testLevel": "BTP_INTEGRATION",
+      "catalogEnvironment": "BTP_REQUIRED",
+      "primaryExecutionBoundary": "BTP_REQUIRED",
+      "requiredEnvironment": "SAP_BTP",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_ON_BTP",
+      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AUTH-013",
+      "testLevel": "BTP_INTEGRATION",
+      "catalogEnvironment": "BTP_REQUIRED",
+      "primaryExecutionBoundary": "BTP_REQUIRED",
+      "requiredEnvironment": "SAP_BTP",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_ON_BTP",
+      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AUTH-014",
+      "testLevel": "BTP_INTEGRATION",
+      "catalogEnvironment": "BTP_REQUIRED",
+      "primaryExecutionBoundary": "BTP_REQUIRED",
+      "requiredEnvironment": "SAP_BTP",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_ON_BTP",
+      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AUTH-015",
+      "testLevel": "BTP_INTEGRATION",
+      "catalogEnvironment": "BTP_REQUIRED",
+      "primaryExecutionBoundary": "BTP_REQUIRED",
+      "requiredEnvironment": "SAP_BTP",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_ON_BTP",
+      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-BUG-001",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-BUG-002",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-BUG-003",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-BUG-004",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-BUG-005",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-BUG-006",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-BUG-007",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-BUG-008",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-BUG-009",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-BUG-010",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-BUG-011",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-VAL-TITLE",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-VAL-DESCRIPTION",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-VAL-STEPS",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-VAL-ACTUAL",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-VAL-EXPECTED",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-VAL-PRIORITY",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-VAL-SEVERITY",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-VAL-COMPONENT",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-VAL-CATEGORY",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-VAL-REPORTER",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "FAIL",
+      "reviewDecision": "CATALOG_EXPECTATION_MISMATCH",
+      "reviewRationale": "reporter_ID is server-owned and derived from the authenticated actor before required-field validation. Omission by the client is valid when the actor resolves.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-VAL-WHITESPACE",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-VAL-CODE-UNKNOWN",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-VAL-CODE-INACTIVE",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-VAL-CODE-SPACES",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-VAL-CODE-EMPTY",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-VAL-CODE-TYPE",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-VAL-PAIR-VALID",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-VAL-PAIR-NOMAP",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-VAL-PAIR-MISMATCH",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-VAL-PAIR-CHANGE",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-VAL-PAIR-PARTIAL",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ASN-001",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ASN-002",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ASN-003",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ASN-004",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ASN-005",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ASN-006",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ASN-007",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ASN-008",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ASN-009",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ASN-010",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ASN-011",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-01A",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-01B",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-01C",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-01D",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-02A",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-02B",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-02C",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-03A",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-03B",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-03C",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-03D",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-04A",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-04B",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-04C",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-04D",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-04E",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-05A",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-05B",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-05C",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-05D",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-05E",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-06A",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-06B",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-06C",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-06D",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-06E",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-07A",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-07B",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-07C",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-07D",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-08A",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-08B",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-08C",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-08D",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-08E",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-09A",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-09B",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-09C",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-10A",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-10B",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-10C",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-11A",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-11B",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-11C",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-LC-11D",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-CMT-001",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-CMT-002",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-CMT-003",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-CMT-004",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-CMT-005",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-CMT-006",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-CMT-007",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-CMT-008",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ATT-001",
+      "testLevel": "ODATA_CONTRACT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "ODATA_CONTRACT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ATT-002",
+      "testLevel": "ODATA_CONTRACT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "ODATA_CONTRACT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ATT-003",
+      "testLevel": "BTP_INTEGRATION",
+      "catalogEnvironment": "BTP_REQUIRED",
+      "primaryExecutionBoundary": "BTP_REQUIRED",
+      "requiredEnvironment": "SAP_BTP",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_ON_BTP",
+      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ATT-004",
+      "testLevel": "BTP_INTEGRATION",
+      "catalogEnvironment": "BTP_REQUIRED",
+      "primaryExecutionBoundary": "BTP_REQUIRED",
+      "requiredEnvironment": "SAP_BTP",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_ON_BTP",
+      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ATT-005",
+      "testLevel": "BTP_INTEGRATION",
+      "catalogEnvironment": "BTP_REQUIRED",
+      "primaryExecutionBoundary": "BTP_REQUIRED",
+      "requiredEnvironment": "SAP_BTP",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_ON_BTP",
+      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ATT-006",
+      "testLevel": "BTP_INTEGRATION",
+      "catalogEnvironment": "BTP_REQUIRED",
+      "primaryExecutionBoundary": "BTP_REQUIRED",
+      "requiredEnvironment": "SAP_BTP",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_ON_BTP",
+      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ATT-007",
+      "testLevel": "UI_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "UI_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ATT-008",
+      "testLevel": "UI_COMPONENT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "UI_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ATT-009",
+      "testLevel": "BTP_INTEGRATION",
+      "catalogEnvironment": "BTP_REQUIRED",
+      "primaryExecutionBoundary": "BTP_REQUIRED",
+      "requiredEnvironment": "SAP_BTP",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_ON_BTP",
+      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ATT-010",
+      "testLevel": "BTP_INTEGRATION",
+      "catalogEnvironment": "BTP_REQUIRED",
+      "primaryExecutionBoundary": "BTP_REQUIRED",
+      "requiredEnvironment": "SAP_BTP",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_ON_BTP",
+      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ATT-011",
+      "testLevel": "BTP_INTEGRATION",
+      "catalogEnvironment": "BTP_REQUIRED",
+      "primaryExecutionBoundary": "BTP_REQUIRED",
+      "requiredEnvironment": "SAP_BTP",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_ON_BTP",
+      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-ATT-012",
+      "testLevel": "BTP_INTEGRATION",
+      "catalogEnvironment": "BTP_REQUIRED",
+      "primaryExecutionBoundary": "BTP_REQUIRED",
+      "requiredEnvironment": "SAP_BTP",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_ON_BTP",
+      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-HIS-001",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-HIS-002",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-HIS-003",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-HIS-004",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-HIS-005",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-HIS-006",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-HIS-007",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-NTF-001",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-NTF-002",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-NTF-003",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-NTF-004",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-NTF-005",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-NTF-006",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-NTF-007",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-NTF-008",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-NTF-009",
+      "testLevel": "PURE_UNIT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "PURE_UNIT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-NTF-010",
+      "testLevel": "PURE_UNIT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "PURE_UNIT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-NTF-011",
+      "testLevel": "PURE_UNIT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "PURE_UNIT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg",
+        "before-database.png",
+        "before-database.svg",
+        "after-database.png",
+        "after-database.svg",
+        "reload-readback.png",
+        "reload-readback.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-NTF-012",
+      "testLevel": "BTP_INTEGRATION",
+      "catalogEnvironment": "BTP_REQUIRED",
+      "primaryExecutionBoundary": "BTP_REQUIRED",
+      "requiredEnvironment": "SAP_BTP",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_ON_BTP",
+      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-NTF-013",
+      "testLevel": "BTP_INTEGRATION",
+      "catalogEnvironment": "BTP_REQUIRED",
+      "primaryExecutionBoundary": "BTP_REQUIRED",
+      "requiredEnvironment": "SAP_BTP",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_ON_BTP",
+      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-MON-001",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-MON-002",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-MON-003",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-MON-004",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-MON-005",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-MON-006",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-MON-007",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-001",
+      "testLevel": "PURE_UNIT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "PURE_UNIT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-002",
+      "testLevel": "PURE_UNIT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "PURE_UNIT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-003",
+      "testLevel": "PURE_UNIT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "PURE_UNIT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-004",
+      "testLevel": "PURE_UNIT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "PURE_UNIT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-005",
+      "testLevel": "PURE_UNIT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "PURE_UNIT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-006",
+      "testLevel": "PURE_UNIT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "PURE_UNIT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-007",
+      "testLevel": "PURE_UNIT",
+      "catalogEnvironment": "LOCAL",
+      "primaryExecutionBoundary": "PURE_UNIT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "PASS",
+      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
+      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-008",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-009",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-010",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-011",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-012",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-013",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-014",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-015",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-016",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-017",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-018",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-019A",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-019B",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-019C",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-020",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-021",
+      "testLevel": "ODATA_CONTRACT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "ODATA_CONTRACT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-022",
+      "testLevel": "ODATA_CONTRACT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "ODATA_CONTRACT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-023",
+      "testLevel": "ODATA_CONTRACT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "ODATA_CONTRACT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-024",
+      "testLevel": "ODATA_CONTRACT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "ODATA_CONTRACT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-025A",
+      "testLevel": "ODATA_CONTRACT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "ODATA_CONTRACT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-025B",
+      "testLevel": "ODATA_CONTRACT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "ODATA_CONTRACT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-026",
+      "testLevel": "BTP_INTEGRATION",
+      "catalogEnvironment": "BTP_REQUIRED",
+      "primaryExecutionBoundary": "BTP_REQUIRED",
+      "requiredEnvironment": "SAP_BTP",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_ON_BTP",
+      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-AI-027",
+      "testLevel": "BTP_INTEGRATION",
+      "catalogEnvironment": "BTP_REQUIRED",
+      "primaryExecutionBoundary": "BTP_REQUIRED",
+      "requiredEnvironment": "SAP_BTP",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_ON_BTP",
+      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-SEC-001",
+      "testLevel": "ODATA_CONTRACT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "ODATA_CONTRACT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-SEC-002",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-SEC-003",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-SEC-004",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-SEC-005",
+      "testLevel": "ODATA_CONTRACT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "ODATA_CONTRACT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-SEC-006",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-SEC-007",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    },
+    {
+      "caseId": "UT-SEC-008",
+      "testLevel": "CAP_COMPONENT",
+      "catalogEnvironment": "HYBRID_BTP",
+      "primaryExecutionBoundary": "CAP_COMPONENT",
+      "requiredEnvironment": "LOCAL",
+      "candidateStatus": "BLOCKED",
+      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
+      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "evidenceFiles": [
+        "result.png",
+        "result.svg"
+      ],
+      "evidenceNature": "GENERATED_RESULT_CARD",
+      "humanReviewer": "DonHV"
+    }
+  ]
+}
