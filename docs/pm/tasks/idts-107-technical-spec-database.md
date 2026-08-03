@@ -2,7 +2,7 @@
 
 - Owner: DonHV
 - Due: 2026-07-30
-- Status: Gate 1 remediation in progress; IDTS-105 DonHV acknowledgment resolved; Gate 2 owner approval pending
+- Status: Gate 2 approved by DonHV at content head `4cca4c0bc575469810c881b1757e6eb3f519437c`; PR merge and IDTS-112 handoff in progress
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-107
 
 ## Gate sequence
@@ -39,7 +39,9 @@ email and related Technical Implementation.
   `3e78b495cb8feb56188cc446b827d47e040e1b98` with Jira comment `10866`.
 - Sanitized live HANA readback is complete: read-only CF task 23 matched the
   production build at 48 tables/578 columns without DB deploy, seed or migration.
-  Gate 2 now requires DonHV owner review and approval before IDTS-112 integration.
+  DonHV approved Gate 2 at content head
+  `4cca4c0bc575469810c881b1757e6eb3f519437c`; the package is ready for PR merge
+  and IDTS-112 integration.
   The calculated-helper persistence finding is isolated in
   [IDTS-118](https://dutassociation.atlassian.net/browse/IDTS-118); this
   documentation PR records current truth and does not modify runtime CDS.
@@ -58,6 +60,6 @@ email and related Technical Implementation.
 - Workbook hiện tại có hai lỗi named range `#REF!` và 23 cảnh báo overflow ở
   ngoài các cell candidate. IDTS-112 phải sửa hoặc ghi nhận chính thức trước
   khi chấp nhận template cuối cùng.
-- Gate 2 vẫn cần readback HANA đã sanitize, Database Explorer evidence và DonHV
-  duyệt package. Hai helper entity đang sinh bảng vật lý là runtime finding riêng,
-  không được sửa CDS trong PR tài liệu này.
+- Readback HANA đã sanitize đã khớp 48/578 và DonHV đã duyệt Gate 2 tại content
+  head `4cca4c0bc575469810c881b1757e6eb3f519437c`. Hai helper entity đang sinh bảng
+  vật lý thuộc IDTS-118 riêng; PR tài liệu này không sửa CDS.

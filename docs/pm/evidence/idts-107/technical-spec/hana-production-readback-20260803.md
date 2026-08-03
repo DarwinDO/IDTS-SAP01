@@ -58,5 +58,6 @@ Selected control counts:
 
 The complete 48-table/578-column mapping is in
 [`database-dictionary.en.csv`](database-dictionary.en.csv). The generated DDL
-and live metadata now agree. This does not approve the workbook or Gate 2; DonHV
-still performs the human content/template/evidence review.
+and live metadata now agree. DonHV subsequently approved the IDTS-107 Gate 2
+candidate at content head `4cca4c0bc575469810c881b1757e6eb3f519437c`.
+Official workbook/template/Drive acceptance remains part of IDTS-112.

@@ -1,11 +1,13 @@
 # IDTS-107 — Technical Specification EN database and persistence candidate refresh
 
-> Gate status: **GATE 1 CANDIDATE ONLY — human acknowledgment, owner approval,
-> IDTS-112 integration, and Drive synchronization remain pending.**
+> Gate status: **GATE 2 APPROVED BY DONHV at content head
+> `4cca4c0bc575469810c881b1757e6eb3f519437c`; IDTS-112 integration and Drive
+> synchronization remain pending.**
 >
 > This is a source-trace and workbook-cell proposal for the English Technical
-> Specification. It does not modify the official workbook, approve Gate 2,
-> update Drive, deploy a database, or run seed data.
+> Specification. It does not modify the official workbook, update Drive,
+> deploy a database, or run seed data. Approval evidence is recorded in
+> `gate-2-approval-donhv-20260803.md`.
 
 ## Baseline and scope
 
@@ -117,7 +119,7 @@ that an HDI deployment or live HANA readback was performed.
 | RUNTIME FINDING — [IDTS-118](https://dutassociation.atlassian.net/browse/IDTS-118) | `AssignableDevelopers` and `DeveloperWorkloads` are calculated by custom READ handlers but currently generate physical tables. IDTS-118 owns the separate CAP-supported persistence decision and safe migration analysis; this documentation PR must not mutate CDS/runtime. |
 | RESOLVED FOR GATE 2 REVIEW | Cloud Foundry task `idts107-hana-metadata-20260803` read sanitized live HANA metadata and matched the generated dictionary at 48 tables/578 columns. See `hana-production-readback-20260803.md`. A Database Explorer screenshot may be added as visual supporting evidence but is no longer the sole proof. |
 | REQUIRED BEFORE FINAL ACCEPTANCE | Capture the native Fiori attachment-picker upload/download/reload/delete evidence with approved browser permissions. |
-| REQUIRED BEFORE IDTS-112 | DonHV reviews the text/dictionary, records approval in Jira and repo evidence, then hands the approved package to IDTS-112. |
+| APPROVED FOR IDTS-112 | DonHV approved Gate 2 at content head `4cca4c0bc575469810c881b1757e6eb3f519437c`. Jira and repository approval evidence hand the package to IDTS-112; official workbook/template/Drive acceptance remains downstream. |
 
 No official workbook or Drive file was modified. The English-only format is
 intentional because this is a candidate for the English Technical Specification;
