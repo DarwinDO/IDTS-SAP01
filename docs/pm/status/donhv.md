@@ -1,5 +1,12 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-08-04 — IDTS-116 attachment download-disposition defect
+
+| Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product/UI defect | Selecting an uploaded attachment opened its raw content in a browser tab but did not create a file in the user's Downloads folder. | `@cap-js/attachments` 3.13.1 annotates attachment `content` with `@Core.ContentDisposition.Type: 'inline'`; IDTS did not override that plugin default. Upload, save, reload and byte readback passed, but the download acceptance criterion did not. | Fix in progress on `fix/idts-116-attachment-download-disposition-donhv`: override only the content-disposition type to `attachment` while retaining the plugin-owned Fiori facet and S3 storage flow. The new red test reproduced `actual=inline`, `expected=attachment`. | Rerun CAP/model regression, deploy without DB/seed changes, then prove a real browser download event, local file SHA-256 match, reload persistence and controlled-file deletion. |
+| Test-environment blocker | `npm run qa:idts60:browser` could not execute because `QA_PASSWORD` is not present in the fresh worktree environment. | The legacy browser harness requires a private QA credential; the failure occurred before browser assertions and is not evidence of a product regression. | Recorded; no credential was copied into the branch or logs. Focused model, collaboration, CAP compile, secret, rule and depth checks passed. | Use the signed-in BTP browser session for post-deploy acceptance and never commit/share the password. |
+
 ## 2026-08-04 — IDTS-116 deployed comment auto-refresh acceptance
 
 | Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |

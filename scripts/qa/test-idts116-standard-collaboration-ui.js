@@ -62,6 +62,14 @@ async function verifyCompiledAttachmentFacet () {
 
   assert.strictEqual(attachmentFacets.length, 1, 'Compiled BugService metadata must expose exactly one attachment facet')
   assert.strictEqual(attachmentFacets[0].ID, 'attachments_attachments', 'Compiled metadata must use the attachment plugin-owned facet ID')
+
+  const attachmentEntity = model.definitions[bugs.elements.attachments.target]
+  assert(attachmentEntity, 'Compiled model must expose the plugin-managed attachment entity')
+  assert.strictEqual(
+    attachmentEntity.elements.content['@Core.ContentDisposition.Type'],
+    'attachment',
+    'Attachment content must force a browser download instead of opening an inline preview tab'
+  )
 }
 
 async function verifyCommentOperation (options = {}) {
