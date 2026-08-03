@@ -19,6 +19,7 @@ An `entity` becomes persisted database structure; an `Association` stores/uses a
 - `DeveloperProfiles` extends a User for assignment. `ComponentCategories` bridges component/category; `DeveloperResponsibilities` links a DeveloperProfile to that bridge and optional SAP module.
 - `Bugs` is the aggregate root. Reporter, assignee and next processor are different concepts. Comments, attachments, history, notifications, duplicate links and AI suggestions are child/related records.
 - Attachment metadata/storage reference is database data, while binary content is managed by the attachment storage adapter (S3 in Shared QA).
+- Attachment `content` uses `@Core.ContentDisposition.Type: 'attachment'` so the standard plugin facet downloads evidence files instead of previewing raw content inline.
 - `HistoryEvents/HistoryLogs` are immutable audit meaning: one event per user action, child logs per changed field.
 - `Notifications/NotificationDeliveries` separate business notification from provider delivery/outbox retry.
 - `DuplicateLinks` records a human-confirmed relation; `AiSuggestions` records review evidence. Neither is the AI model itself.
@@ -44,6 +45,7 @@ Một `entity` trở thành cấu trúc được persist trong database; `Associ
 - `DeveloperProfiles` mở rộng User cho assignment. `ComponentCategories` nối component/category; `DeveloperResponsibilities` nối DeveloperProfile với bridge đó và SAP module tùy chọn.
 - `Bugs` là aggregate root. Reporter, assignee và next processor là ba khái niệm khác nhau. Comment, attachment, history, notification, duplicate link và AI suggestion là dữ liệu con/liên quan.
 - Metadata/storage reference attachment nằm trong database, còn binary content do attachment storage adapter quản lý (S3 trên Shared QA).
+- `content` của attachment dùng `@Core.ContentDisposition.Type: 'attachment'` để facet chuẩn của plugin tải evidence file thật thay vì preview raw content inline.
 - `HistoryEvents/HistoryLogs` là audit bất biến về ý nghĩa: một event cho một thao tác user, child log cho từng field đổi.
 - `Notifications/NotificationDeliveries` tách notification nghiệp vụ khỏi provider delivery/outbox retry.
 - `DuplicateLinks` ghi quan hệ đã được người dùng xác nhận; `AiSuggestions` ghi evidence review. Không entity nào là AI model.

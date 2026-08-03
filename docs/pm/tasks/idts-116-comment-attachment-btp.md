@@ -79,6 +79,13 @@ root cause of these two write failures.
 - The earlier `Refresh the page to see it` warning belongs to an older browser
   bundle and was not reproduced on the deployed `0.0.3` bundle.
 - Evidence: `docs/pm/evidence/idts-116/comment-auto-refresh/`.
+
+### Attachment download-disposition follow-up (2026-08-04)
+
+- Browser acceptance proved upload, save, reload and byte-for-byte content readback, but selecting the filename opened an inline raw-content tab rather than saving a file.
+- Root cause: the pinned `@cap-js/attachments` 3.13.1 model defaults `content` to `@Core.ContentDisposition.Type: 'inline'`.
+- Approved SAP/CAP-aligned remediation: preserve the plugin-owned Fiori Elements facet and override only the application model annotation to `attachment`.
+- Completion requires a real browser download event, SHA-256 equality with the controlled source file, reload persistence, delete cleanup and no DB/seed deployment.
 - The combined comment/history checkbox remains open until the expected
   comment-history contract is explicitly confirmed; this browser check proves
   comment write, immediate read refresh and reload persistence only.
