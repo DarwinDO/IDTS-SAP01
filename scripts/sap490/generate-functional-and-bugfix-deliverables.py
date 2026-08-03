@@ -450,7 +450,7 @@ def generate_bugfix(language: str) -> Path:
 
 def main():
     outputs = []
-    for language in ("en", "vi"):
+    for language in ("en",):
         outputs.append(generate_functional_spec(language))
         outputs.append(generate_bugfix(language))
     for output in outputs:

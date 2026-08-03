@@ -74,7 +74,7 @@ Developer **không phải người tạo bug chính** và **không trực tiếp
 
 ## **BR-02A - Authentication source and session rule**
 
-Near-term IDTS authentication uses custom CAP Node.js login instead of requiring SAP BTP/XSUAA.
+SAP BTP uses AppRouter/XSUAA platform authentication and maps the authenticated SAP identity to the active IDTS user/role. Local and Render/integration profiles use the custom CAP Node.js login.
 
 Rules:
 
@@ -87,7 +87,7 @@ Rules:
 
 Vietnamese:
 
-Huong authentication gan han cua IDTS dung custom login trong CAP Node.js, khong bat buoc SAP BTP/XSUAA.
+Tren SAP BTP, IDTS dung AppRouter/XSUAA va map SAP identity toi user/role IDTS dang active. Local va Render/integration dung custom login trong CAP Node.js.
 
 Rule:
 

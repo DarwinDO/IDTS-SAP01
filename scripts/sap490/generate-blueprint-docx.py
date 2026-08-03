@@ -1411,7 +1411,9 @@ def build(content: dict) -> Path:
 
 
 def main() -> None:
-    for content in (EN, VI):
+    # Mentor Current is English-only from IDTS-106 onward.  Keep the VI
+    # structured source as historical/internal reference, but do not emit it.
+    for content in (EN,):
         output = build(content)
         print(output.relative_to(ROOT))
 
