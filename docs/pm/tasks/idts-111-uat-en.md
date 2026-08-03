@@ -2,7 +2,7 @@
 
 - Catalog owner/approver and final integrator: DonHV
 - Execution support: NhanT, SangVN and DatDT
-- Due: 2026-08-03
+- Due: 2026-08-04
 - Status: DonHV disposition recorded; targeted reruns are blocked by the blank deployed SAP surface and one physical-keyboard confirmation remains human-only
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-111
 
