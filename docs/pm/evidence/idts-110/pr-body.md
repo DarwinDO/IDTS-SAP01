@@ -1,84 +1,77 @@
 ## Summary
 
-- Add a deterministic English-only IDTS-110 Unit Test catalog candidate with 188 atomic test cases.
-- Separate pure unit, UI component, CAP component, OData contract, and BTP integration levels so evidence is not overstated.
-- Record DonHV/NhanT ownership and keep every execution result `NOT_RUN` until case-specific evidence exists.
+- Publish the IDTS-110 candidate Unit Test execution package for DoNHV review.
+- Add an exact 38-case LOCAL runner plus 188 case manifests, 269 PNGs and 269 SVGs.
+- Preserve execution truth: 34 candidate PASS, 2 FAIL and 152 BLOCKED; the approved catalog remains 188 `NOT_RUN` until review.
 
 ## Positive Evidence
 
-- `node scripts/qa/generate-idts110-unit-test-catalog.js --check`: PASS, 188 cases and every source file/symbol resolved.
-- Catalog audit: PASS, 188 unique English cases, all `NOT_RUN`, case-specific image evidence required.
-- `npm run qa:agent-rules`: PASS, 8 required rules.
-- `npm run qa:depth:self-test`: PASS, 15/15.
-- `npm run qa:secret-scan`: PASS.
-- `npx ai-devkit@latest lint --json`: PASS, 5/5.
+- Portable Node.js 22.23.2 exact runner: 38 total, 34 PASS, 2 FAIL and 2 browser-runtime BLOCKED.
+- Catalog validator: 188 manifests, 188 unique case IDs and zero missing evidence references.
+- Evidence inventory: 269 PNG and 269 SVG files.
+- `npm.cmd run qa:secret-scan`: PASS.
+- `git diff --check`: PASS.
 
 ## Negative Evidence
 
-- The source-trace validator rejected two inferred symbol names before generation; both were replaced with the real symbols and the rerun passed.
-- A first read-only audit incorrectly expected a per-row boolean instead of the concrete per-row image requirement; the corrected audit passed and the tooling issue is recorded.
-- Historical PASS values from the five old UNIT rows were deliberately not inherited.
+- `UT-AUTH-004` remains FAIL because CAP returns `ASSERT_DATA_TYPE` before the login handler instead of the expected generic HTTP 401 path.
+- `UT-VAL-REPORTER` remains FAIL because authenticated create derives the server-owned reporter rather than rejecting a missing client reporter.
+- No FAIL or BLOCKED result is hidden or promoted to an accepted catalog result.
 
 ## Edge/Boundary Evidence
 
-- Eleven lifecycle actions have separate success, unauthorized actor, illegal source status, and mandatory-input cases where applicable.
-- AI terminal review states and forward/reverse duplicate-link boundaries are separate cases.
-- MIME and 10 MB attachment checks are classified as UI behavior, not falsely claimed as backend validation.
+- `UT-ATT-007` and `UT-ATT-008` passed static MIME/10 MB guard assertions but remain BLOCKED without approved browser-runtime evidence.
+- Notification retry timing, max-attempt behavior, AI timeout/provider error and code-list boundary cases are represented by separate atomic manifests.
+- All 150 HYBRID_BTP/BTP_REQUIRED cases remain explicit BLOCKED packages because no authorized target/session was available.
 
 ## Roles/Authorization
 
-- Role expectations are recorded per case for Tester, Developer, PM, unauthenticated users, and platform identity where applicable.
-- No role test has been executed in this planning PR; every result remains `NOT_RUN`.
+- LOCAL evidence covers authenticated Tester behavior, invalid credentials and unauthorized action/comment paths where the approved case permits deterministic execution.
+- PM, Developer, platform-identity and cross-role BTP acceptance cases remain BLOCKED rather than being executed with the wrong identity.
+- NhanT did not approve results on behalf of DoNHV.
 
 ## Persistence/Reload
 
-- Cases that require persistence explicitly request before/after and reload/readback evidence.
-- No database, workbook, Jira, or Drive state is changed by this PR.
+- Applicable LOCAL packages include before-state, after-state and reload/readback evidence for Bug, Comment and Notification persistence.
+- The two truthful FAIL cases retain their observed state snapshots.
+- No production/BTP database, workbook or Drive state was changed.
 
 ## UI/UX Review
 
-- UI-only attachment boundaries use the explicit `UI_COMPONENT` level.
-- No application UI is changed by this PR.
+- Every candidate package has a readable 1280 × 720 result image; applicable LOCAL state cases include additional before/after/reload images.
+- Attachment runtime UI behavior remains BLOCKED because static source evidence is not treated as browser acceptance.
+- No application UI code is changed by this PR.
 
 ## Ponytail Simplicity
 
-- One dependency-free Node generator is used because 188 structured rows must remain deterministic and reviewable.
-- No spreadsheet generator, execution harness, dependency, or runtime abstraction was added during catalog preparation or approval.
-- Ponytail review: Lean already.
+- Reused one self-contained exact runner and one evidence generator; no new dependency, framework or runtime abstraction was added.
+- Final workbook generation and Drive synchronization were intentionally left to DoNHV after review.
 
 ## Ownership Knowledge Gate
 
-Member: DonHV
-Date: 2026-07-23
-Ownership flow: Bug create/lifecycle and exact workflow action audit
+Member: NhanT
+Date: 2026-08-03
+Ownership flow: QA authentication, authorization, persistence/reload, and notification outbox verification
 Base questions: 3
 Inactive-day questions: 0
 Additional-flow questions: 0
-Score: 90%
+Score: 100%
 Critical questions: PASS
 Debug exercise: PASS
 Teach-back: PASS
-Evidence: docs/learning/progress/donhv.md and docs/pm/evidence/idts-89/knowledge-gate-donhv-2026-07-23.md and docs/pm/evidence/idts-90/knowledge-gate-donhv-2026-07-23.md
+Evidence: docs/pm/evidence/idts-105/knowledge-gate-nhant-qa-2026-08-03.md and docs/learning/progress/nhant.md
 Result: PASS
 
 ## Known Gaps
 
-- DonHV approved the 188-case catalog on 2026-08-02. NhanT execution and case-level evidence capture have not started.
-- The Unit Test EN v0.5 workbook and Drive artifact are intentionally unchanged.
-- Existing QA scripts remain mixed regression suites; they are not treated as one-case-per-row evidence automatically.
+- Two LOCAL cases remain FAIL and require DoNHV disposition.
+- Two LOCAL attachment UI cases and 150 BTP/HYBRID cases remain BLOCKED pending approved runtime access.
+- The final English `Unit_Test_EN` workbook and Drive artifact are unchanged; OfficeCLI is unavailable on this host.
 
 ## Jira/Evidence Links
 
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-110
-- Catalog review: `docs/pm/evidence/idts-110/unit-test-catalog-review.md`
-- Catalog: `docs/qa/idts-110-unit-test-catalog.json`
-
-## Checklist
-
-- [x] I tested at least one non-happy path in the catalog validator.
-- [x] I recorded role/authorization expectations without claiming execution.
-- [x] I recorded persistence/reload evidence requirements without claiming execution.
-- [x] I checked UI versus backend rule ownership for attachment limits.
-- [x] I applied the required Ponytail skill.
-- [x] I reused DonHV's existing valid Ownership Knowledge Gate PASS evidence.
-- [x] I recorded all observed documentation/tooling issues in DonHV status.
+- Execution summary: `docs/pm/evidence/idts-110/execution-summary.md`
+- Case evidence: `docs/pm/evidence/idts-110/cases/`
+- Exact result payload: `docs/pm/evidence/idts-110/local-execution-results.json`
+- Knowledge Gate: `docs/pm/evidence/idts-105/knowledge-gate-nhant-qa-2026-08-03.md`
