@@ -1,5 +1,122 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-08-03 - IDTS-106 EN-only Drive cleanup execution
+
+- Classification: documentation/process result.
+- Result: after DonHV's IDTS-105 READ and the approved IDTS-107 Gate 2 were satisfied, the EN-only pipeline was implemented. Eleven generated VI artifacts are retired from the current repo tree, with bytes preserved by Git history and annotated tag `sap490-english-only-pre-cleanup-20260803`.
+- Drive control: all 13 VI Mentor Current artifacts were downloaded to `E:\IDTS-SAP01-backups\drive-vi-before-trash-20260803-1625`, hashed and Office-ZIP checked before being moved to Trash. No folder was trashed and Trash was not emptied.
+- Verification: fresh parent-folder readback reports no VI item and one EN counterpart for all 13 families. The same-ID Mentor Index contains no VI row/link and records the English-only policy, current versions and truthful pending acknowledgments/test execution.
+- Evidence: `docs/pm/evidence/idts-106/drive-vi-pre-trash-manifest-20260803.md` and `docs/sap490/generated-vi-retirement-manifest-20260803.md`.
+- Closeout: local/security/process gates passed; PR #264 merged normally at `cd03aedde4fa2d3d146b54ec76d400e4de3f670b`; `origin/dev` contains the cleanup commit; Jira IDTS-106 is Done with evidence comment `10882`. SangVN, DatDT and NhanT still acknowledge IDTS-105 before approving their own packages.
+
+- Classification: tooling issue (resolved).
+- Symptom: the first browser automation loop opened the selected Drive row's action affordance before the row selection toolbar was fully active, so `Move to bin` was not exposed; later bulk attempts occasionally timed out while the Drive grid rerendered.
+- Root cause: Google Drive lazily renders row actions and replaces the selected row after each operation.
+- Fix status: resolved by requiring an exact single filename match, selecting the row, then using the supported Delete shortcut for Move to bin and verifying the row disappeared before continuing.
+- Impact: no wrong file or folder was moved; exact-ID manifest and post-operation folder readback confirm the approved 13-file scope.
+
+## 2026-08-03 - IDTS-106 merge synchronization issue
+
+- Classification: process/merge issue.
+- Symptom: merging the latest `origin/dev` into the IDTS-106 branch produced one content conflict in this status file because IDTS-106 and IDTS-107 had both prepended session entries.
+- Root cause: two documentation workstreams updated the same shared chronological log before IDTS-107 merged.
+- Status: resolved by preserving both IDTS-106 and IDTS-107 entries in full; no runtime, Drive, generated artifact, or database content was changed by the resolution.
+- Verification/next action: `git diff --check` and the final branch gate must pass before merge; continue IDTS-106 from the newly synchronized `origin/dev` baseline.
+
+## 2026-08-03 - IDTS-106 audit session issue log
+
+- Classification: documentation/inventory issue.
+- Symptom: the first Drive audit reported 12 VI/EN pairs while the earlier project inventory reported 13.
+- Root cause: `Test And Fix Bug` is nested under the `Test Report` folder, so a direct-child family count omitted it.
+- Status: fixed in the candidate evidence; a fresh recursive Drive readback confirms 13 VI artifacts and 13 matching EN counterparts. No Drive write, Trash, rename, move, or delete was performed.
+- Verification: Google Drive metadata readback of the nested folder `SU26SAP01_GSU26SAP01_Test_And_Fix_Bug` confirmed both `Test_And_Fix_Bug_VI_v0_5_20260724.xlsx` and its EN counterpart.
+- Owner/next action: DonHV must retain the 13-file inventory for backup/Trash planning after IDTS-105 human acknowledgments are complete.
+
+- Classification: tooling/verification issue.
+- Symptom: the first bounded group command for `python scripts/sap490/validate-specification-pack.py`, `validate-test-pack.py`, `test-specification-quality-contract.py`, `test-test-pack-evidence-contract.py`, and `test_template_fidelity.py` exceeded the 124-second command limit before a terminal result was returned.
+- Root cause: the validators were run sequentially in one shell wrapper and at least one workbook-heavy check exceeded the combined timeout; no individual validator result is inferred from the timeout.
+- Status: open for this audit evidence; rerun each check separately with a bounded timeout before any completion claim.
+- Runtime/artifact impact: none observed; the command was read-only and no source, generated artifact, Drive file, database, or deployment state changed.
+- Owner/next action: DonHV audit handoff; collect separate validator results or record the specific slow validator as an evidence limitation.
+- Follow-up: `python scripts/sap490/validate-specification-pack.py` exited 0 with specification PASS; `python scripts/sap490/validate-test-pack.py` exited 0 with 12 workbooks, 0 warnings, 0 errors; `test-test-pack-evidence-contract.py` and `test_template_fidelity.py` PASS. A final rerun of `python scripts/sap490/test-specification-quality-contract.py` with an adequate timeout completed in 110.1 seconds and PASS. The original timeout is resolved as a command-budget issue.
+## 2026-08-03 - IDTS-107 dependency verification issue
+
+- Classification: dependency/security issue.
+- Symptom: `npm ci` was required because the fresh worktree lacked `@cap-js/attachments`; installation completed but `npm audit` reported 24 dependency findings (1 low, 9 moderate, 13 high, 1 critical).
+- Root cause: the worktree had no installed dependency tree; the vulnerability findings belong to the resolved dependency graph and were not introduced by the documentation candidate.
+- Status: compile dependency blocker resolved locally; vulnerability remediation remains out of scope and unmodified because automatic `npm audit fix` could change the lockfile/runtime behavior.
+- Verification: `npm ci` exit 0, 1,519 packages installed; no `package.json` or `package-lock.json` change is expected from this check.
+- Owner/next action: dependency/security owner should review `npm audit` separately. IDTS-107 may use the installed tree only for read-only CAP compilation and source-trace verification.
+
+- Classification: tooling/command issue.
+- Symptom: the first post-install `cds compile srv --to edmx` stopped because the model exposes both `AuthService` and `BugService`.
+- Root cause: the command omitted the required service selector; the earlier missing-attachment dependency error was no longer present.
+- Status: corrected by rerunning with `-s all`; no source or model change was made.
+- Verification/next action: use `npx cds compile srv --to edmx -s all` as the authoritative compile command for this two-service project.
+
+## 2026-08-03 - IDTS-107 technical specification database/persistence candidate audit
+
+- Tooling/dependency issue (resolved): the fresh worktree initially lacked its
+  installed dependency tree, so CAP MCP could not resolve
+  `@cap-js/attachments`. `npm ci` restored the pinned dependency graph without
+  changing `package.json` or `package-lock.json`. CAP MCP model search then
+  succeeded, and `npx cds compile srv --to edmx -s all` passed with only the
+  pre-existing attachment vocabulary warning.
+- Generated-model verification (PASS): `npx cds compile db --to hana` generated
+  35 `.hdbtable` artifacts. A corrected DDL parser compared all generated
+  columns with the candidate dictionary: 326 matched, zero missing, zero extra.
+  No HDI deploy, database change, seed load, or Drive update occurred.
+- Tooling/parser issue (resolved): the first comparison attempted to parse
+  `.hdbtable` files as JSON and produced unusable counts. HANA compiler output
+  is SQL DDL, not JSON. The result was discarded; a DDL parser with quoted-name
+  handling was used for the authoritative 35-table/326-column comparison.
+- Tooling issue (resolved): a read-only configuration inventory attempted to
+  open `.cdsrc.json`, which is not present in this repository. `package.json`
+  and `mta.yaml` provide the required CAP profile and BTP deployment truth;
+  no configuration or runtime behavior is missing because of this absent
+  optional file.
+- Tooling issue (resolved): a PowerShell preview piped `git show` through
+  `Select-Object -First 2`, which closed the pipeline after the requested
+  header rows and returned exit 1 despite producing the expected dictionary
+  header. The source branch remains readable; avoid early-closing previews
+  when collecting Git evidence.
+- Documentation issue (open, not changed by IDTS-107): OfficeCLI
+  `view ... issues` on `Technical_Specification_IDTS_SAP01_en_v0.7.xlsx`
+  found two invalid `A` named ranges with `#REF!` bodies and 23 text-overflow
+  warnings across Histories, Introduction, Scope, Assumptions, Screen Layout,
+  and Screen Definition. The targeted Technical Design candidate was not
+  written into the workbook; IDTS-112/template integration must repair or
+  formally disposition these workbook defects before final acceptance.
+- Documentation tooling issue (resolved): the first candidate dictionary copy
+  from the stale branch was truncated at 167 of 327 lines by the command-output
+  boundary. It was replaced through seven bounded Git-read chunks; the final
+  candidate has 327 lines and the same Git blob as the stale reviewed
+  dictionary. It remains a candidate, pending a fresh successful CAP/HDI
+  generation against the current environment.
+
+### Vietnamese
+
+- Lỗi tooling/dependency đã xử lý: worktree mới chưa có dependency tree nên CAP
+  MCP không resolve được `@cap-js/attachments`. Sau `npm ci`, CAP MCP hoạt động
+  và `npx cds compile srv --to edmx -s all` PASS; không đổi source hoặc lockfile.
+- Generate HANA từ CDS PASS: 35 `.hdbtable`, 326 cột; so sánh với dictionary
+  khớp 326, thiếu 0, dư 0. Không deploy HDI, không đổi DB/seed/Drive.
+- Lỗi parser đã xử lý: lần đầu đọc nhầm `.hdbtable` như JSON nên kết quả bị loại.
+  Parser DDL có xử lý tên quoted được dùng cho kết quả authoritative.
+- Lỗi tooling đã xử lý: `.cdsrc.json` không tồn tại nhưng không bắt buộc;
+  `package.json` và `mta.yaml` cung cấp đầy đủ truth về profile CAP/BTP. Một
+  preview PowerShell dùng pipeline đóng sớm cũng trả exit 1 dù đã đọc header;
+  không dùng cách preview đó khi thu thập Git evidence.
+- Lỗi documentation còn mở, không do IDTS-107 tạo: OfficeCLI phát hiện hai
+  named range `A` có `#REF!` và 23 cảnh báo text overflow trong workbook EN
+  v0.7. Candidate không ghi vào workbook; IDTS-112/template integration phải
+  sửa hoặc ghi nhận chính thức trước Gate cuối.
+- Lỗi tooling documentation (đã xử lý): lần copy dictionary candidate đầu tiên
+  bị cắt ở 167/327 dòng do giới hạn output. File đã được thay bằng bảy Git-read
+  chunk có giới hạn; candidate cuối có 327 dòng và cùng Git blob với dictionary
+  stale đã review. Nó vẫn là candidate cho đến khi CAP/HDI generate lại thành
+  công trong môi trường hiện tại.
+
 ## 2026-08-01 - IDTS-117 BTP rollout and browser acceptance complete
 
 - Product defect resolved: a repeated BTP re-entry could return the HTML XSUAA
@@ -5303,6 +5420,35 @@ remains pending normal PR merge.
 
 Live evidence: `docs/pm/evidence/idts-117/demo-readiness/live-verification-20260802.md`.
 
+## 2026-08-03 — IDTS-105 human acknowledgment and delegation-mode correction
+
+| Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Process gate | DonHV personally confirmed reading the current IDTS-105 briefing at merge SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`, understood ownership and had no unresolved questions. | This is the required human READ gate; it is not candidate approval, test PASS or Knowledge Gate completion. | Repository acknowledgment updated and matching Jira comment `10866` created. Team reminders were added to IDTS-108–111 as comments `10867`–`10870`. | SangVN, DatDT and NhanT must still acknowledge personally; IDTS-105 remains In Progress. |
+| Process/tooling issue | Delegated GPT-5.6 subagents appeared with the UI mode `Fast` even though only model and reasoning were requested. | The subagent runtime exposes GPT-5.6 through a priority/Fast execution tier independently of the selected model and reasoning effort; the delegation prompts did not explicitly prohibit that service tier. | Governance now prohibits Fast/priority delegated runs and requires pre-dispatch verification of model, reasoning and service mode. | If a mechanism cannot enforce non-Fast mode, do not use it for delegated work; run locally in the primary task or use a non-Fast child task. |
+| Tooling issue | `gh pr merge --delete-branch` reported that local branch `dev` was already used by another worktree after PR #266 merged. | Git could not perform the optional local branch cleanup because the root worktree owns `dev`; the remote merge itself had already succeeded. | No destructive workaround used. The merge SHA was independently verified as an ancestor of `origin/dev`. | Remove stale worktree/branch only through a separate safe cleanup when no active work depends on it. |
+
+## 2026-08-03 — IDTS-105 current-baseline briefing remediation
+
+| Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Documentation issue | The mandatory SAP490 briefing still described PostgreSQL/Render as the active shared-QA baseline, marked OpenAI/provider live as disabled, assigned Unit Test catalog creation to NhanT, and omitted the approved 188/90 atomic-catalog truth. | The briefing was written before the SAP BTP/HANA migration, current feature-specific AI routing, and DonHV's updated Unit Test/UAT ownership decisions. | Corrected on the isolated IDTS-105 branch; no runtime, test result, acknowledgment or Drive artifact was changed. | Review `docs/pm/evidence/idts-105/briefing-current-truth-audit-20260803.md`, run documentation/process gates, merge normally, then DonHV personally reads and acknowledges the merge SHA. |
+| Process/tooling issue | The first four read-only subagents stopped immediately instead of auditing because their prompts did not explicitly repeat the already-known member identity. | Repo instructions require the member identity at task start; fresh subagent contexts did not inherit it. | Corrected by closing those attempts and respawning with `Member: donhv`, the frozen SHA and explicit read-only scope. | Primary agent independently reviews every returned finding; no agent-created approval or consensus is accepted. |
+| Environment readiness result | IDTS-105 evidence needed a fresh BTP point-in-time baseline. | Read-only readiness check was required before relying on deployed architecture claims. | PASS; no recovery action was needed. | `npm run btp:demo:check`: CAP/AppRouter 1/1, `/health` and `/ready` 200, anonymous protected API 401, web 200, `DEMO READY`; HDI broker status `create succeeded`. No DB deploy/seed/migration. |
+
+## 2026-08-03 — IDTS-107 complete HANA dictionary remediation
+
+| Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Documentation issue | The PR #265 candidate claimed the HANA dictionary was complete at 35 tables/326 columns. | It used `cds compile db --to hana`, which excludes service draft/helper artifacts and CAP outbox model content included by the effective production build. | Corrected candidate and deterministic generator to cover 48 physical tables/578 column declarations. | Fresh `cds build --production` and generated CSV both return 48/578 with zero missing source/evidence fields. Keep PR Draft for DonHV Gate 2 approval. |
+| Runtime finding | `AssignableDevelopers` and `DeveloperWorkloads` are calculated by custom READ handlers but the production build creates physical tables for them. | Their service entities lack `@cds.persistence.skip`. | Open and intentionally not fixed in the documentation PR; tracked by [IDTS-118](https://dutassociation.atlassian.net/browse/IDTS-118), related to IDTS-107. | IDTS-118 owns CAP pattern confirmation and safe migration/deployment analysis; current Technical Specification documents current HANA truth until runtime changes. |
+| Documentation issue | The attachment persistence wording implied metadata/reference only and did not state the exact create/saved-Bug sequence or generated `content BLOB` column. | Earlier candidate abstracted the external S3 adapter too aggressively. | Corrected: new-Bug files remain in browser memory until save; saved Bug upload uses edit draft → POST metadata → PUT binary → activate. Dictionary includes the generated HANA `content BLOB`. | Verify native browser upload/download/reload/delete evidence before IDTS-112 final integration. |
+| Evidence result | Generated inventory needed live HANA falsification. | Gate 2 requires production truth, not compiler output alone. | PASS: read-only CF task 23 queried only HANA metadata and matched 48 tables/578 columns. | Evidence: `docs/pm/evidence/idts-107/technical-spec/hana-production-readback-20260803.md`. No DB deploy, seed or migration occurred. |
+| Existing CAP compiler warning | Fresh `cds build --production` and service compilation pass but repeat the known `NonUpdateableProperties` vocabulary warning on `BugService.Bugs_attachments`. | Existing `@cap-js/attachments`/CAP vocabulary compatibility warning; not introduced by IDTS-107 documentation or dictionary generation. | Logged again for this session and left unchanged; it is non-blocking because compilation succeeds and IDTS-107 must not alter runtime annotations. | Preserve the warning in Gate 2 evidence. Handle only through a dedicated attachment/model follow-up if runtime behaviour or supported CAP guidance requires a change. |
+| Test-harness issue | The first one-off CSV cross-check reported 578 rows but only one table even though the generator had just reported 48 tables. | The ad-hoc verifier searched for header `Physical HANA Artifact`; the generated CSV contract uses `Physical HANA Table`, so the missing index caused every row to resolve to the same undefined field. | Rejected as evidence and corrected in-session without changing the dictionary contract or runtime. | Rerun with exact header validation and require 578 rows, 48 distinct tables, and zero missing source/evidence values before accepting the gate. |
+| Human approval | DonHV explicitly approved IDTS-107 Gate 2 at content head `4cca4c0bc575469810c881b1757e6eb3f519437c`. | Human review gate was intentionally kept separate from agent verification and GitHub checks. | Approved; repository approval evidence added without changing the approved dictionary/content truth. | Merge PR #265 normally, update Jira, and hand the package to IDTS-112. Official workbook and Drive synchronization remain downstream. |
+| Process-gate issue | Two post-approval GitHub `qa-depth-gate` runs reported that ownership evidence was not detectable although the files existed. | The first event used backtick/comma formatting unsupported by the validator. The second workflow was triggered by the corrective commit before `gh pr edit` finished, so its immutable pull-request event payload still contained the old body even though the live PR body was already corrected. | Merge stopped both times; no bypass attempted. The live PR body now uses the validator-supported plain `Evidence: docs/...` form before the next synchronize event. | Push this updated session record only after the PR body is correct, then accept the new gate result only from that fresh synchronize event. |
+
 ## 2026-08-02 — IDTS-110 catalog source-trace validation
 
 | Classification | Symptom | Root cause | Fix status | Verification / next action |
@@ -5352,3 +5498,10 @@ Live evidence: `docs/pm/evidence/idts-117/demo-readiness/live-verification-20260
 | QA execution readiness | PR #261 merged normally at `6f01affc2c2945e51d18199137c8a89a20c77600`. A scoped comparison found no runtime-relevant difference between deployed SHA `67b1bf86169e9696c9365ef4846b99ffae30d4e2` and catalog source baseline `447da1dab80418847d806040e6b2060b0916cb63`. | Fresh `npm run btp:demo:check` returned `DEMO READY`: CAP/AppRouter 1/1, liveness/readiness/web HTTP 200 and anonymous protected API HTTP 401 as expected. | Assigned members may execute only their catalog cases with their own SAP identities and sanitized case-specific evidence. All cases remain PREPARED until DonHV reviews actual results. |
 | Environment limitation | SAP BTP Trial and HANA Cloud Free Tier can auto-stop after the point-in-time readiness check. | The execution baseline requires a fresh readiness check at the start of every test session and bounded recovery by DonHV if needed. | Classify a later auto-stop as an environment blocker; do not misreport it as a product-test failure without diagnosis. |
 | Tooling issue | The deterministic catalog `--check` reported `OUTDATED` immediately after a clean Windows checkout although regeneration produced no Git diff. | The checker compared LF output with the CRLF working-tree representation byte-for-byte. | Normalized line endings only for the comparison; catalog content and execution truth are unchanged. Rerun `node scripts/qa/generate-idts111-uat-catalog.js --check` on the clean checkout. |
+
+## 2026-08-03 — BTP readiness recovery and IDTS-105 acknowledgment audit
+
+| Classification | Symptom / result | Root cause / action | Verification / next action |
+| --- | --- | --- | --- |
+| Environment availability | CAP and AppRouter were stopped 0/1, so the first `btp:demo:check` returned 404 for liveness, readiness, auth, and web. HANA itself reported ready. | Ran the bounded repository recovery script. It started only CAP/AppRouter and did not deploy DB, load seed, migrate schema, or expose credentials. | `npm run btp:demo:prepare` exited 0; a fresh `npm run btp:demo:check` exited 0 with CAP/AppRouter 1/1, `/health` and `/ready` 200, protected API 401, web 200, and `DEMO READY`. |
+| Process blocker | IDTS-105 still had no completed human briefing acknowledgment although downstream documentation work had progressed. | Live Jira and repository audit confirmed all four members remain `PENDING`. Added truthful reminder comments to IDTS-105/108/109/110/111; no agent-signed acknowledgment was created. | Jira comment IDs `10845`–`10849`. Wait for DonHV, SangVN, DatDT, and NhanT to personally acknowledge commit `4b4c93c1d8b45024677653e1f890d52e742b2aaf`; keep IDTS-105 In Progress and approval/Drive gates blocked. |
