@@ -75,3 +75,9 @@ Generated PNG cards summarize the structured/runtime evidence; they are not desc
 3. Rebaseline or runtime-rerun `UT-ATT-007/008` against the generated SAP-standard attachment control.
 4. Provide an authorized Cloud Foundry/BTP session and rerun the 13 true integration cases.
 5. After acceptance, integrate approved results into the same Unit Test EN v0.5 Drive file.
+
+## Generated attachment runtime closure (2026-08-04)
+
+- `UT-ATT-007`: candidate PASS on the deployed generated control; a controlled `.exe` produced a safe unsupported-format message and no row.
+- `UT-ATT-008`: candidate PASS; a controlled 10 MB + 1 byte file produced `AttachmentSizeExceeded` and no row.
+- Current review inventory is **40 atomic candidate PASS / 135 mapping-only candidates / 0 FAIL / 13 BTP BLOCKED**. DonHV still owns approval and workbook synchronization.

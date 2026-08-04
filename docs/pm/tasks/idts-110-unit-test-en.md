@@ -43,6 +43,12 @@ No Unit Test VI is created. No command-only, script-only, shared-only, or unsani
 
 - Exact reviewed head: `8957cbaa20f9c629818901f9b988884337a7ff82`
 - Candidate result: `34 PASS / 2 FAIL / 152 BLOCKED`
+
+## 2026-08-04 generated-control runtime update
+
+- NhanT completed `UT-ATT-007/008` on deployed SAP BTP; both are candidate PASS with screenshot hashes in their manifests.
+- Current review truth is `40 atomic candidate PASS / 135 MAPPING_ONLY_CANDIDATE / 0 FAIL / 13 BTP BLOCKED`.
+- Remaining action is DonHV review plus an authorized CF/BTP rerun of the 13 integrations. `Unit_Test_EN` and Drive remain unchanged.
 - Corrected primary taxonomy: 175 locally executable cases and 13 true BTP integration cases
 - `UT-AUTH-004`: catalog corrected so malformed CDS type is verified through the OData 400 boundary, while wrong string credentials retain generic 401
 - `UT-VAL-REPORTER`: catalog corrected to test unresolved authenticated actor; client omission remains valid because reporter is server-owned

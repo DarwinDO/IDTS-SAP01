@@ -81,3 +81,10 @@ Ownership: NhanT executes and packages truthful evidence; DonHV reviews results 
 - Exact LOCAL payload: `docs/pm/evidence/idts-110/local-execution-results.json`
 - Local-primary suite payload: `docs/pm/evidence/idts-110/local-primary-suite-results.json`
 - Case evidence: `docs/pm/evidence/idts-110/cases/`
+
+### Current runtime delta (2026-08-04)
+
+- `UT-ATT-007/008` now have fresh generated-control runtime proof on controlled `BUG-0025` and are candidate PASS.
+- Unsupported `.exe` and 10 MB + 1 byte fixtures were rejected safely without creating their rows.
+- Current package truth: **40 atomic candidate PASS / 135 mapping-only candidates / 0 FAIL / 13 BTP BLOCKED**.
+- The 13 BTP cases remain blocked by missing authorized CF/BTP readiness; no workbook/Drive change or final PASS is claimed.
