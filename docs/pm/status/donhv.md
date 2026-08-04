@@ -5632,3 +5632,41 @@ Live evidence: `docs/pm/evidence/idts-117/demo-readiness/live-verification-20260
 | Product/UI defect | The active Object Page did not request or render persisted attachment rows after hard reload, although three OData read shapes returned HTTP 200 with the same two rows. | Project-owned facet metadata prevented `@cap-js/attachments` from adding its standard plugin-owned facet; the manifest also overrode that table unnecessarily. | Local correction complete; BTP acceptance pending. | `qa:idts116`, `qa:idts73`, comment/attachment programmatic QA, CAP compile, UI5 build and manifest schema validation pass. Deploy without HDI/database/seed changes, then repeat the full browser flow. |
 | Tooling issue | The first focused test invocation in the fresh worktree failed with `MODULE_NOT_FOUND: @sap/cds`; a later combined PowerShell command continued after one failed test because commands were separated without exit checks. | The isolated worktree initially had no dependency installation, and the first orchestration did not stop on a nonzero child exit code. | Corrected by using the lockfile-matched dependency tree and rerunning every gate with explicit `$LASTEXITCODE` checks. | All focused suites now pass independently; retain the first failures as tooling evidence, not product defects. |
 | Pre-existing UI5 quality finding | UI5 MCP linter reports Manifest Version 1 and legacy QUnit bootstrap findings. | These findings already exist outside the attachment metadata change; manifest schema validation itself passes. | Not expanded into IDTS-116 to avoid unrelated migration risk. | Track a separate UI5 modernization task; do not suppress the linter or migrate the whole manifest during this narrow release fix. |
+### 2026-08-04 — IDTS-108/109 package validation dependency finding
+
+- **Classification:** tooling/security dependency issue.
+- **Symptom:** CAP compile in the cleaned local workspace initially failed because `@cap-js/attachments` was declared in `package.json`/`package-lock.json` but absent from `node_modules`. Running `npm ci --ignore-scripts` restored the locked dependency set; npm then reported 26 dependency advisories (1 low, 10 moderate, 14 high, 1 critical).
+- **Action/status:** dependency installation was limited to the ignored local `node_modules`; no lockfile, runtime source, BTP service, database, seed or schema was changed. No automatic `npm audit fix` or breaking upgrade was attempted in this documentation workstream.
+- **Verification/next owner:** rerun CAP compile and UI5 build after installation. Review the npm audit tree in a separate Security/DevOps work item before any dependency upgrade claim.
+
+### 2026-08-04 — IDTS-109 isolated-worktree native test binding
+
+- **Classification:** tooling issue.
+- **Symptom:** `npm run qa:email-outbox:programmatic` stopped before executing assertions because the isolated worktree could not load the native `better-sqlite3` binding.
+- **Root cause:** dependencies had been restored with `npm ci --ignore-scripts`, so the native addon build/install script was intentionally skipped. This result does not indicate an email-outbox product failure.
+- **Fix status:** fixed locally by rebuilding only the locked `better-sqlite3` dependency; no package, lockfile, runtime, HANA, seed or schema change was made.
+- **Verification/next action:** `npm rebuild better-sqlite3` succeeded, then `npm run qa:email-outbox:programmatic` passed. Keep the initial setup failure separate from the passing product test.
+
+### 2026-08-04 — IDTS-109 exact-head falsification findings
+
+- **Classification:** documentation issue.
+- **Symptom:** independent review of PR #240 head `df7cceb04cecefc78485a3f4396fd00e5e461de2` found one nonexistent CAP helper name, three exact authentication messages missing from the catalog, and one HTTP status described as 503-style although the handler returns 500.
+- **Root cause:** the curated semantic catalog and trace normalization retained an earlier helper label and grouped authentication behavior too broadly.
+- **Fix status:** corrected the trace to `enforcePlatformRoleAlignment`, changed the custom-auth unavailable response to HTTP 500, and added separate catalog rows for BTP-login 405, unregistered-BTP-user 403, and invalid/expired-token 401 behavior. Catalog total is now 145 unique records.
+- **Verification/next action:** rerun source/catalog checks and the fresh GitHub QA Depth gate on the remediation head. Do not merge until both pass; no runtime, schema, database or Drive change is involved.
+
+### 2026-08-04 — IDTS-109 AI DevKit command routing
+
+- **Classification:** tooling issue.
+- **Symptom:** the first remediation verification invoked nonexistent npm script `ai:devkit`, so that parallel command group stopped before returning the other command outputs.
+- **Root cause:** the AI DevKit CLI is exposed through `npx ai-devkit@latest lint --json`, not a repository npm script.
+- **Fix status:** command routing corrected; no product or document content was implicated.
+- **Verification/next action:** rerun OfficeCLI, the three repository QA scripts, and AI DevKit with the documented CLI command as separate checks.
+
+### 2026-08-04 — PR #240 Knowledge Gate evidence parsing
+
+- **Classification:** process/tooling issue.
+- **Symptom:** fresh GitHub run `30900508795` failed although the PR body visibly referenced the DatDT learning evidence.
+- **Root cause:** the QA Depth parser requires whitespace or string start immediately before `docs/...`; Markdown backticks around the evidence path prevented the regular expression from recognizing it.
+- **Fix status:** remove only the backticks from the structured `Evidence:` value; the evidence path and human gate result are unchanged.
+- **Verification/next action:** publish the corrected body, push this status-only follow-up to trigger a new exact-head run, and merge only after that run passes.

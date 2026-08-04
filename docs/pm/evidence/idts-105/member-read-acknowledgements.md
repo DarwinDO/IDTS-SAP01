@@ -9,8 +9,8 @@ member personally confirms the exact commit and adds the Jira comment.
 | Member | Read status | Commit SHA read | Date read | Ownership understood | Questions / unclear points | Jira issue/comment |
 | --- | --- | --- | --- | --- | --- | --- |
 | DonHV | READ | `3e78b495cb8feb56188cc446b827d47e040e1b98` | 2026-08-03 | Technical Specification database/persistence; Unit Test/UAT catalog ownership and approval; EN workbook generation, evidence review and Drive integration | None | IDTS-105 / comment `10866` |
-| SangVN | READ  | 3e78b495cb8feb56188cc446b827d47e040e1b98 | 2026-08-03 | Screen/collaboration Technical Specification and assigned Developer UAT execution with own SAP identity; DonHV owns final integration and Drive | None  | IDTS-108 comments `10876`, `10877` |
-| DatDT | PENDING | — | — | Standards/messages/monitoring/AI Technical Specification and assigned Developer UAT execution with own SAP identity | — | IDTS-109 and IDTS-111 / pending |
+| SangVN | READ | `3e78b495cb8feb56188cc446b827d47e040e1b98` | 2026-08-03 | Screen/collaboration Technical Specification and assigned Developer UAT execution with own SAP identity; DonHV owns final integration and Drive | None | IDTS-108 comments `10876`, `10877` |
+| DatDT | READ | `3e78b495cb8feb56188cc446b827d47e040e1b98` | 2026-08-04 | Business-level requirements, Development Standards, naming matrix, exhaustive messages, login/profile, dashboard/monitoring, notification UI, AI traces, and assigned Developer-role UAT execution with own SAP identity | None | IDTS-109 / comment `10944` |
 | NhanT | PENDING | — | — | Execute approved Unit Test cases and Tester UAT cases; capture actual result and case-specific evidence | — | IDTS-110 and IDTS-111 / pending |
 
 ## Required member comment format
