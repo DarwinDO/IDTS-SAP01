@@ -10,7 +10,7 @@ member personally confirms the exact commit and adds the Jira comment.
 | --- | --- | --- | --- | --- | --- | --- |
 | DonHV | PENDING | — | — | Database/persistence, integration and Drive | — | IDTS-105 / pending |
 | SangVN | PENDING | — | — | Screen/collaboration Technical Specification | — | IDTS-108 / pending |
-| DatDT | READ | 4b4c93c13e78b495cb8feb56188cc446b827d47e040e1b988b45024677653e1f890d52e742b2aaf | 2026-08-04 | Business-level requirements, Development Standards, naming matrix, exhaustive messages, login/profile, dashboard/monitoring, notification UI, AI traces, and assigned Developer-role UAT execution | None | IDTS-109 / comment 10944 |
+| DatDT | READ | 3e78b495cb8feb56188cc446b827d47e040e1b98 | 2026-08-04 | Business-level requirements, Development Standards, naming matrix, exhaustive messages, login/profile, dashboard/monitoring, notification UI, AI traces, and assigned Developer-role UAT execution | None | IDTS-109 / comment 10944 |
 | NhanT | PENDING | — | — | Unit Test and UAT catalogs/execution/evidence | — | IDTS-110 and IDTS-111 / pending |
 
 ## Required member comment format
