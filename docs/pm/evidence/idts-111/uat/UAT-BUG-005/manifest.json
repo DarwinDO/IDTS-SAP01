@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTION_BLOCKED_PENDING_PRECONDITION",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T17:20:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "caseId": "UAT-BUG-005",
+  "expectedResult": "A deliberately incompatible Application Component and Defect Category must reach the application validation path.",
+  "actualResult": "The Fiori value helps filter categories to the selected component, and direct text entry does not resolve inactive/incompatible keys. No approved direct request fixture was available.",
+  "candidateOutcome": "NOT_EXECUTABLE_WITH_CURRENT_PRECONDITION",
+  "reviewBoundary": "Use a controlled API request or seeded incompatible-pair fixture without altering shared master data.",
+  "evidence": [],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "No unauthorized identity, mutation, request, comment, attachment, or unrelated user data was used."
+  },
+  "issueClassification": "incompatible-pair injection path unavailable",
+  "limitations": [
+    "The Fiori value helps filter categories to the selected component, and direct text entry does not resolve inactive/incompatible keys. No approved direct request fixture was available."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10962",
+    "reviewDate": "2026-08-04",
+    "category": "VALID_PRECONDITION_BLOCKER",
+    "currentStatus": "BLOCKED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
+}

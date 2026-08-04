@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "1.0",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-04T16:43:26+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "caseId": "UAT-COM-003",
+  "expectedResult": "Input beyond the supported 1000-character limit is rejected safely and no truncated or partial comment is stored.",
+  "actualResult": "A 1006-character controlled comment was accepted with 'Comment posted' and remained listed after reload instead of being rejected. The UI collapses it behind MORE, so the boundary contract is violated.",
+  "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
+  "reviewBoundary": "Current-runtime candidate defect; DonHV must review and route product ownership before approved FAIL.",
+  "evidence": [
+    {
+      "id": "UAT-COM-003-E01",
+      "file": "01-current-runtime-posted.png",
+      "description": "Oversized controlled comment accepted by the UI.",
+      "sha256": "B674BD1894D8C4D0BC67D6BCB45DF74FC685BDC858F282FB9BEFC7BB533C1B1C"
+    },
+    {
+      "id": "UAT-COM-003-E02",
+      "file": "02-current-runtime-reload.png",
+      "description": "Oversized comment remains listed after reload.",
+      "sha256": "E2D63B68FCA474765EEC6AD4FE619959197F1EE0774FF103F6D586BBA559BB25"
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "No unauthorized identity, mutation, request, comment, attachment, or unrelated user data was used."
+  },
+  "issueClassification": "product defect candidate - oversized comment accepted and persisted",
+  "limitations": [
+    "The collapsed UI does not expose the complete stored value without opening MORE; acceptance and post-reload presence are sufficient to prove rejection did not occur."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10962",
+    "reviewDate": "2026-08-04",
+    "category": "CURRENT_RUNTIME_NEGATIVE",
+    "currentStatus": "CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
+}

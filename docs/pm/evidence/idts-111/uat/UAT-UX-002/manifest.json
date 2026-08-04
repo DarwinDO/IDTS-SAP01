@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "UAT-UX-002",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T15:39:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "viewport": {
+    "width": 834,
+    "height": 1112
+  },
+  "expectedResult": "Responsive pop-ins/wrapping preserve labels, values, and actions.",
+  "actualResult": "Current-runtime partial recheck at 834 x 1112 measured the Review Classification Suggestions button at 246 px client/scroll width fully inside the 834 px viewport, so the former action-label clipping was not reproduced. Similar Bugs opened with reachable footer actions but returned no candidates, so reason-text wrapping could not be revalidated; full-case PASS is not claimed.",
+  "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
+  "reviewBoundary": "One former symptom is resolved; candidate-row wrapping remains unexecuted because the controlled bug returned no similar candidates. DonHV must decide whether IDTS-120 needs another fixture-specific recheck.",
+  "evidence": [
+    {
+      "id": "UAT-UX-002-E01",
+      "file": "01-tablet-list-report.png",
+      "description": "Tablet List Report with responsive filters, tabs, and row actions.",
+      "sha256": "40F7232F8495431B8A129AC716625704EED524D08E2259F1C10E1CC4D4A3F959"
+    },
+    {
+      "id": "UAT-UX-002-E02",
+      "file": "02-tablet-object-page.png",
+      "description": "Tablet Object Page showing the clipped Review Classification Suggestions label.",
+      "sha256": "2226EA2C8718FE29F36FE0E2E40AD3F2356CCA5C05609333ECF8DC3D2C5371F6"
+    },
+    {
+      "id": "UAT-UX-002-E03",
+      "file": "03-tablet-ai-dialog.png",
+      "description": "Tablet Similar Bugs dialog with reachable actions but horizontally clipped reason text.",
+      "sha256": "1E8163566E0E2FA1E5E16281CD3B24783D427733FCAB7DB2EC48C270973EFAF8"
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "Controlled UAT data only; no email, credential, cookie, token, or private endpoint text."
+  },
+  "issueClassification": "historical responsive defect partially resolved; candidate-reason wrapping recheck blocked by no-result fixture",
+  "limitations": [
+    "Screenshot capture timed out on the current object page, so the current recheck retains measured DOM geometry and accessible action availability rather than a new PNG."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10962",
+    "reviewDate": "2026-08-04",
+    "category": "CURRENT_RUNTIME_PARTIAL_RECHECK",
+    "currentStatus": "CURRENT_RUNTIME_PARTIAL_RECHECK_NEEDS_CANDIDATE_FIXTURE",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "UAT-ATT-001",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-04T16:41:51+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "testRecord": {
+    "bugNumber": "BUG-0025",
+    "file": "idts-uat-supported.txt",
+    "sizeBytes": 44,
+    "type": "text/plain"
+  },
+  "expectedResult": "Metadata persists, binary persists in storage, and the same attachment appears after reload.",
+  "actualResult": "The supported controlled file appeared in the generated attachment draft and Save produced an active-row/history signal, but the attachment disappeared after a fresh reload. Therefore metadata/binary persistence is not proven and the case still does not meet its expected result.",
+  "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
+  "reviewBoundary": "BUG-0025 still failed persistence, while the same deployed runtime has IDTS-116 controlled BUG-0019 upload/reload/download/delete proof. This narrows the finding away from a universal storage outage but does not identify whether BUG-0025 state, generated-facet lifecycle, or another scoped runtime condition caused it. DonHV must classify the candidate.",
+  "evidence": [
+    {
+      "id": "UAT-ATT-001-E01",
+      "file": "01-supported-upload-failure.png",
+      "description": "Safe upload failure for a supported 54-byte text file.",
+      "sha256": "6115E8D1A6E5425526E77D0710068F608367DF7F250E658273EF3C426B1DF6BE"
+    },
+    {
+      "id": "UAT-ATT-001-E02",
+      "file": "02-no-metadata-after-reload.png",
+      "description": "No attachment metadata after refresh.",
+      "sha256": "A1406D72F54653AA344039E8C31FFD5ED569BFBF2A0F5958390D1AA466ABCA43"
+    },
+    {
+      "id": "UAT-ATT-001-E03",
+      "file": "03-rerun-supported-upload-failure.png",
+      "description": "Fresh 2026-08-03 targeted rerun: safe upload failure and empty evidence grid for a synthetic 47-byte text file.",
+      "sha256": "DA6D54AAB9310A12F17107C33ABBD4F4FF1D00D7FB6B7BEDA76CD366220B241D"
+    },
+    {
+      "id": "UAT-ATT-001-E04",
+      "file": "04-current-runtime-draft-upload.png",
+      "description": "Current runtime shows the supported file in the generated draft attachment row.",
+      "sha256": "119FCD187BF03BCA432B4AB58EC7420A6106A3E38494222745D7584BB87C599F"
+    },
+    {
+      "id": "UAT-ATT-001-E05",
+      "file": "05-current-runtime-reload-empty.png",
+      "description": "Fresh reload shows no attachment row, proving persistence failure.",
+      "sha256": "31E229856A0DA0538F0CC425F0AE0306852ADC1549EB7A3EC4B9D2635B4D7AE8"
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "A synthetic 54-byte text fixture only; no personal or project-secret content."
+  },
+  "issueClassification": "product defect or deployed-environment storage blocker candidate",
+  "limitations": [
+    "No direct HANA/S3 diagnostic access was available; root cause cannot be assigned from UI evidence alone.",
+    "Cross-record investigation reference: docs/pm/evidence/idts-116/attachment-end-to-end-sangvn-20260804/README.md proves the same runtime succeeds on controlled BUG-0019, so this is not evidence of a universal provider outage."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10962",
+    "reviewDate": "2026-08-04",
+    "category": "FIXTURE_PROVENANCE_INCONSISTENT",
+    "currentStatus": "BLOCKED_FIXTURE_PROVENANCE_INCONSISTENT",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
+}

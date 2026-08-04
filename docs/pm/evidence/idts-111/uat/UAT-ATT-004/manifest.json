@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "UAT-ATT-004",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTION_BLOCKED_PENDING_PRECONDITION",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T16:55:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "testRecord": {
+    "bugNumber": "BUG-0026",
+    "file": "controlled CSV",
+    "sizeBytes": 34
+  },
+  "expectedResult": "Unsupported file type is blocked with a safe message and no metadata/object is created.",
+  "actualResult": "The HTML/Browser file chooser accept filter refused the CSV before the SAP upload handler received it. No metadata was created, but the application-level safe message could not be exercised in this Browser surface.",
+  "candidateOutcome": "NOT_EXECUTABLE_WITH_CURRENT_PRECONDITION",
+  "reviewBoundary": "Use a native/manual chooser or controlled direct request that can bypass the client accept filter while remaining safe.",
+  "evidence": [
+    {
+      "id": "UAT-ATT-004-E01",
+      "file": "01-browser-filtered-unsupported-file.png",
+      "description": "Evidence section remained empty after the Browser chooser filtered the unsupported file.",
+      "sha256": "C97C56A689232A42586AFB8867AB4B0792853CAE9483F06D51D4CFDB87743402"
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "Synthetic 34-byte CSV only; no content was transmitted to the app handler."
+  },
+  "issueClassification": "test-harness limitation",
+  "limitations": [
+    "Client accept filter prevents application-level unsupported-type validation in this automation surface."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10962",
+    "reviewDate": "2026-08-04",
+    "category": "VALID_PRECONDITION_BLOCKER",
+    "currentStatus": "BLOCKED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
+}

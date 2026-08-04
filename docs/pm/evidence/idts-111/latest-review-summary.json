@@ -1,0 +1,29 @@
+{
+  "jiraCommentId": "10962",
+  "reviewDate": "2026-08-04",
+  "curatedAtBaselineHead": "70fb5558ba11cf5c8aa977d797b5690fb42b07f4",
+  "manifests": 57,
+  "evidenceReferences": 77,
+  "uniqueEvidenceHashes": 64,
+  "currentDisposition": {
+    "MEETS_EXPECTED_RESULT": 22,
+    "DOES_NOT_MEET_EXPECTED_RESULT": 12,
+    "BLOCKED": 23
+  },
+  "counts": {
+    "RETAINED_TRUTHFUL_POSITIVE": 19,
+    "VALID_PRECONDITION_BLOCKER": 20,
+    "AI_DIAGNOSTIC_RERUN": 2,
+    "STALE_PREREQUISITE_RERUN_REQUIRED": 3,
+    "CATALOG_SEMANTIC_CORRECTION": 5,
+    "FIXTURE_PROVENANCE_INCONSISTENT": 1,
+    "CURRENT_RUNTIME_POSITIVE": 3,
+    "CONFIRMED_DEFECT_RECHECK": 1,
+    "CURRENT_RUNTIME_NEGATIVE": 1,
+    "CURRENT_RUNTIME_PARTIAL_RECHECK": 1,
+    "PHYSICAL_KEYBOARD_LIMITATION": 1
+  },
+  "runtimeRerunPerformed": true,
+  "runtimeRerunLimitation": "AI immutable suggestion IDs and sanitized Network responses remain unavailable; UAT-UX-002 candidate-row wrapping still needs a matching fixture and UAT-UX-003 still needs NhanT physical-keyboard confirmation.",
+  "workbookAndDriveChanged": false
+}
