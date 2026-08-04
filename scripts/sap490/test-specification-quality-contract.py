@@ -20,10 +20,11 @@ from specification_catalog import FUNCTIONS, LIFECYCLE_ACTIONS, MESSAGES, TECH_R
 ROOT = Path(__file__).resolve().parents[2]
 GENERATED = ROOT / "docs" / "sap490" / "generated"
 TECHNICAL_TEMPLATE = ROOT / "docs" / "sap490" / "templates" / "Deliverable_template" / "Technical_Specification.xlsx"
+TECHNICAL_MESSAGE_SOURCE = ROOT / "docs" / "pm" / "evidence" / "idts-109" / "technical-spec" / "message-catalog.md"
 
 FILES = {
     "functional_en": GENERATED / "Functional_Specification_IDTS_SAP01_en_v0.7.xlsx",
-    "technical_en": GENERATED / "Technical_Specification_IDTS_SAP01_en_v0.7.xlsx",
+    "technical_en": GENERATED / "Technical_Specification_IDTS_SAP01_en_v0.8.xlsx",
     "config_en": GENERATED / "Configuration_Note_IDTS_SAP01_en_v0.5.xlsx",
     "blueprint_en": GENERATED / "Blueprint_IDTS_SAP01_en_v0.6.docx",
 }
@@ -54,11 +55,14 @@ REQUIRED_TRACES = {
 }
 
 REQUIRED_TEST_TRUTH = {
-    "21 PASSED",
-    "6 UAT PREPARED",
-    "40/40 PASS",
-    "25/25 PASS",
-    "DISABLED / NOT ACCEPTED",
+    "38 accepted candidates",
+    "2 held",
+    "135 mapping-only",
+    "13 blocked",
+    "22 MEETS",
+    "12 DOES_NOT_MEET",
+    "23 BLOCKED",
+    "not final acceptance claims",
 }
 
 
@@ -131,29 +135,54 @@ def validate_technical_template_contract(path: Path, language: str) -> list[str]
             failures.append(f"{path.name}: Screen Definition official header {coordinate} is empty")
 
     messages = workbook["Message Definition"]
-    expected_message_merges = {"B5:G5", "H5:L5", "M5:AP5", "AQ5:BG5"}
-    if not expected_message_merges.issubset({str(item) for item in messages.merged_cells.ranges}):
-        failures.append(f"{path.name}: Message Definition no longer uses the official four-column grid")
-    message_text = "\n".join(
-        str(cell.value) for row in messages.iter_rows()
-        for cell in row if cell.value not in (None, "")
-    )
-    if any(value in message_text for value in ("Exact source", "Sanitized logging", "Frontend handling / evidence")):
-        failures.append(f"{path.name}: technical trace leaked back into the four-column Message Definition")
+    expected_headers = {
+        "Message ID", "User-facing text / safe summary", "Exact trigger / source",
+        "HTTP / status", "Target", "Role / context", "Rollback behavior",
+        "Sanitized logging", "Frontend handling", "Evidence",
+    }
+    actual_headers = {
+        str(cell.value) for cell in messages[5] if cell.value not in (None, "")
+    }
+    if actual_headers != expected_headers:
+        failures.append(
+            f"{path.name}: Message Definition formal ten-column catalog is incomplete: "
+            f"{sorted(expected_headers ^ actual_headers)}"
+        )
+    message_ids = [
+        str(messages.cell(row, 2).value)
+        for row in range(6, messages.max_row + 1)
+        if str(messages.cell(row, 2).value or "").startswith("MSG-")
+    ]
+    source_message_ids = {
+        match.group(1)
+        for match in re.finditer(r"^\|\s*(MSG-[A-Z0-9-]+)\s*\|", TECHNICAL_MESSAGE_SOURCE.read_text(encoding="utf-8"), re.MULTILINE)
+    }
+    if set(message_ids) != source_message_ids or len(message_ids) != len(set(message_ids)):
+        failures.append(
+            f"{path.name}: Message Definition differs from its current source catalog; "
+            f"workbook={len(message_ids)} rows/{len(set(message_ids))} unique, "
+            f"source={len(source_message_ids)} unique, delta={sorted(set(message_ids) ^ source_message_ids)}"
+        )
+    for row in range(6, messages.max_row + 1):
+        if not str(messages.cell(row, 2).value or "").startswith("MSG-"):
+            continue
+        values = [messages.cell(row, col).value for col in (2, 7, 17, 26, 30, 34, 38, 42, 47, 53)]
+        if any(value in (None, "") for value in values):
+            failures.append(f"{path.name}: incomplete Message Definition record at row {row}")
 
     implementation_text = "\n".join(
         str(cell.value) for row in workbook["Technical Implementation"].iter_rows()
         for cell in row if cell.value not in (None, "")
     )
-    required_flows = {
-        "FLOW-COMMENT-CREATE", "FLOW-ATTACH-QUEUE", "FLOW-ATTACH-UPLOAD",
-        "FLOW-ATTACH-DOWNLOAD", "FLOW-ATTACH-DELETE",
-    }
+    required_flows = {"FLOW-COMMENT-CREATE", "TI-COLLAB-02"}
     required_flows.update(f"FLOW-{action.upper()}" for action, *_ in LIFECYCLE_ACTIONS)
     for flow in sorted(required_flows):
         if flow not in implementation_text:
             failures.append(f"{path.name}: missing exact implementation flow {flow}")
-    for forbidden in ("Add comment or attachment", "POST/PUT/DELETE /odata/v4/bug child entity", "qa:"):
+    for retired_flow in ("FLOW-ATTACH-QUEUE", "FLOW-ATTACH-UPLOAD"):
+        if retired_flow in implementation_text:
+            failures.append(f"{path.name}: retired attachment flow remains: {retired_flow}")
+    for forbidden in ("Add comment or attachment", "POST/PUT/DELETE /odata/v4/bug child entity"):
         if forbidden in implementation_text:
             failures.append(f"{path.name}: generic or command-only implementation evidence remains: {forbidden}")
     full_text = workbook_text(path)
@@ -211,8 +240,8 @@ def main() -> int:
         if trace not in all_text:
             failures.append(f"missing exact runtime trace: {trace}")
     for truth in sorted(REQUIRED_TEST_TRUTH):
-        if truth not in blueprint_text:
-            failures.append(f"Blueprint missing current test truth: {truth}")
+        if truth not in technical_text:
+            failures.append(f"Technical Specification missing current reviewed test truth: {truth}")
 
     for requirement in ("SRS-FR-ASG", "SRS-FR-MON"):
         if requirement not in technical_text:
@@ -222,8 +251,12 @@ def main() -> int:
         failures.append("AuthSessions wording does not explain one-time raw token return")
     if "tokenHash" not in all_text:
         failures.append("AuthSessions wording does not name tokenHash")
-    if "pendingCreateAttachmentsByBugId" not in functional_text + technical_text:
-        failures.append("Attachment create flow does not trace pending client-memory storage")
+    for attachment_trace in ("@cap-js/attachments", "BugAttachments"):
+        if attachment_trace not in technical_text:
+            failures.append(f"Technical Specification missing standard attachment trace: {attachment_trace}")
+    for retired_trace in ("pendingCreateAttachmentsByBugId", "queuePendingCreateAttachments", "uploadFilesToSavedBug"):
+        if retired_trace in technical_text:
+            failures.append(f"Technical Specification contains retired custom attachment trace: {retired_trace}")
 
     generic_409_patterns = (
         "Stale/repeated transition",
@@ -291,17 +324,10 @@ def main() -> int:
         if "IDTS-TECH-" in workbook_text(path):
             failures.append(f"{path.name}: independent technical message catalog remains")
 
-    message_id_sets = {}
-    for label in ("functional_en", "technical_en"):
-        workbook = load_workbook(FILES[label], data_only=False)
-        message_id_sets[label] = {
-            str(cell.value) for row in workbook["Message Definition"].iter_rows()
-            for cell in row if isinstance(cell.value, str) and cell.value.startswith("IDTS-MSG-")
-        }
-    expected_messages = message_id_sets["functional_en"]
-    for label, ids in message_id_sets.items():
-        if ids != expected_messages:
-            failures.append(f"{label}: Message ID parity mismatch: {sorted(ids ^ expected_messages)}")
+    # Functional Specification is no longer a required mentor artifact.  The
+    # Technical Specification owns the exhaustive current message catalog and
+    # is validated above against its 145-row source inventory instead of a
+    # frozen legacy Functional workbook.
 
     if failures:
         print("\n".join(f"FAIL: {item}" for item in failures))
