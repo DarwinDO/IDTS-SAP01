@@ -115,8 +115,10 @@ Until these steps complete, PR #269 remains a truthful candidate package but is 
 
 ## NhanT remediation status — 2026-08-04
 
-This section does not overwrite DonHV's historical review above. After merging current `origin/dev`, NhanT reran the package at `56b4a4f3d92ef2f9558869caab4b393b07d8b5e7` and corrected the evidence semantics to **38 atomic candidate PASS / 135 mapping-only candidates / 0 FAIL / 15 BLOCKED**. All 188 manifests use the exact tested SHA; 278 PNGs exist, 0 references are missing, and generated cards are not described as browser/BTP proof. `UT-ATT-007/008` and the 13 BTP integrations remain blocked pending their required controlled runtime.
+This section preserves DonHV's historical review above. The immutable local payload at `56b4a4f3d92ef2f9558869caab4b393b07d8b5e7` contains **38 atomic candidate PASS / 135 mapping-only candidates / 0 FAIL / 15 BLOCKED**. It is not the current combined total because `UT-ATT-007/008` were later executed separately on the deployed runtime.
 
 ### 2026-08-04 generated-control runtime addendum
 
 NhanT supplied the missing runtime proof for `UT-ATT-007/008` on the deployed SAP-standard generated control. Both controlled negative fixtures were rejected without creating their filename rows. The current package is therefore **40 atomic candidate PASS / 135 mapping-only candidates / 0 FAIL / 13 BTP BLOCKED**, pending DonHV review.
+
+The two attachment manifests now trace to `db/schema.cds:170-180` and record deployed runtime SHA `67b1bf86169e9696c9365ef4846b99ffae30d4e2`. The inventory is 188 manifests / 280 PNGs / 0 missing references. A fresh controlled readiness run still stopped before the 13 BTP cases because `cf` is unavailable; those cases remain `BLOCKED`, not FAIL or PASS.

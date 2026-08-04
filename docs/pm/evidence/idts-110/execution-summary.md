@@ -2,7 +2,7 @@
 
 - Executor: NhanT (agent-assisted)
 - Execution date: 2026-08-04
-- Exact tested branch baseline: `56b4a4f3d92ef2f9558869caab4b393b07d8b5e7`
+- Immutable local-run baseline: `56b4a4f3d92ef2f9558869caab4b393b07d8b5e7`; generated-control runtime supplement deploy SHA: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`
 - Approved catalog: `docs/qa/idts-110-unit-test-catalog.json`
 - Catalog size: 188 English cases
 - Review state: `READY_FOR_DONHV_REVIEW_WITH_BTP_AND_UI_REBASELINE_BLOCKERS`
@@ -12,10 +12,10 @@
 
 | Candidate status | Cases | Meaning |
 | --- | ---: | --- |
-| PASS | 38 | Atomic exact LOCAL executions at the tested branch SHA. |
+| PASS | 40 | Thirty-eight atomic exact LOCAL executions plus two separate generated-control runtime executions (`UT-ATT-007/008`). |
 | MAPPING_ONLY_CANDIDATE | 135 | Broad suite-to-case traceability mappings. These are not atomic executions, browser/BTP proof, or candidate PASS results. |
 | FAIL | 0 | No open LOCAL candidate failure remains after the scoped login error-sanitization fix and regression. |
-| BLOCKED | 15 | Thirteen true BTP integrations remain unavailable; two UI cases require generated SAP-standard attachment runtime proof/rebaseline after latest dev retired their approved custom handler. |
+| BLOCKED | 13 | The true BTP integrations remain unavailable; fresh readiness rerun stopped before case execution because `cf` is not installed/on PATH. |
 | Total | 188 | Every approved case has a manifest and PNG package. |
 
 The approved catalog remains `NOT_RUN` until DonHV accepts individual results and integrates the official Unit Test EN workbook.
@@ -38,7 +38,7 @@ The approved catalog remains `NOT_RUN` until DonHV accepts individual results an
 
 ## Environment blockers
 
-### SAP-standard attachment UI — 2 rebaseline/runtime blockers
+### SAP-standard attachment UI — 2 runtime candidate PASS results
 
 - Latest dev removed the custom attachment fragment and `onAttachmentSelected` handler and uses the generated SAP-standard attachment facet.
 - The replacement MIME and 10 MB CDS contracts exist, but the deployed environment observed earlier does not represent this merged head and local full-browser Fiori cannot reach its UI5 CDN. No stale component result is substituted for generated-control runtime proof.
@@ -53,7 +53,7 @@ The approved catalog remains `NOT_RUN` until DonHV accepts individual results an
 ## Evidence inventory
 
 - 188 `case-manifest.json` files.
-- 278 PNG files.
+- 280 PNG files.
 - 0 SVG files; 278 duplicate/intermediate SVG sources were removed after PNG rendering and manifest cleanup.
 - Exact 40-case result payload: `local-execution-results.json` — 38 PASS / 0 FAIL / 2 BLOCKED.
 - Corrected 135-case suite payload: `local-primary-suite-results.json` — 135 `MAPPING_ONLY_CANDIDATE` / 0 failed mappings.
@@ -70,9 +70,9 @@ Generated PNG cards summarize the structured/runtime evidence; they are not desc
 
 ## DonHV review actions
 
-1. Review the 38 atomic PASS candidates and the separate 135 mapping-only traceability records.
+1. Review the 40 atomic PASS candidates and the separate 135 mapping-only traceability records.
 2. Review the scoped `UT-AUTH-004` sanitization fix and its HTTP/auth regressions.
-3. Rebaseline or runtime-rerun `UT-ATT-007/008` against the generated SAP-standard attachment control.
+3. Review the separate deployed-runtime proof for `UT-ATT-007/008` and its current CDS source trace.
 4. Provide an authorized Cloud Foundry/BTP session and rerun the 13 true integration cases.
 5. After acceptance, integrate approved results into the same Unit Test EN v0.5 Drive file.
 

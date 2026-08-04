@@ -2,8 +2,8 @@
 
 - Apply DonHV's corrected 175 local-primary / 13 BTP-only taxonomy to the IDTS-110 execution package.
 - Rerun 40 exact LOCAL cases and 135 corrected local-primary cases; the final exact-head verification used Node.js 24 after rebuilding the local `better-sqlite3` native module for the matching ABI.
-- Publish current truth at exact tested SHA `56b4a4f3d92ef2f9558869caab4b393b07d8b5e7`: 38 atomic candidate PASS, 135 mapping-only candidates, 0 FAIL and 15 BLOCKED (13 BTP plus 2 SAP-standard attachment UI runtime cases); keep the approved catalog `NOT_RUN` until DonHV accepts results.
-- Remove 278 duplicate SVG evidence sources and retain 188 manifests, 278 PNGs and structured JSON evidence.
+- Publish the combined current truth: 40 atomic candidate PASS, 135 mapping-only candidates, 0 FAIL and 13 BTP BLOCKED; keep the approved catalog `NOT_RUN` until DonHV accepts results.
+- Remove 278 duplicate SVG evidence sources and retain 188 manifests, 280 PNGs and structured JSON evidence.
 
 ## Positive Evidence
 
@@ -22,7 +22,7 @@
 ## Edge/Boundary Evidence
 
 - Non-string auth input, unresolved reporter, invalid/partial classification, notification retry/concurrency and controlled AI 429 paths have fresh local evidence.
-- `UT-ATT-007` and `UT-ATT-008` are BLOCKED because their approved source trace targets the retired custom handler; the replacement generated control needs DonHV rebaseline/runtime evidence.
+- `UT-ATT-007` and `UT-ATT-008` have separate deployed-runtime candidate PASS evidence; their source traces now point to `db/schema.cds` MIME/10 MB contracts rather than the retired custom handler.
 - The other 13 cases remain BTP environment BLOCKED after `btp:demo:check` failed because `cf` is unavailable.
 
 ## Roles/Authorization
@@ -71,7 +71,7 @@ Ownership: NhanT executes and packages truthful evidence; DonHV reviews results 
 ## Known Gaps
 
 - Thirteen BTP integration cases require an authorized Cloud Foundry/BTP session.
-- Two attachment UI cases require catalog rebaseline or runtime proof against the generated SAP-standard control.
+- Two attachment UI cases have generated SAP-standard control runtime proof and remain pending DonHV acceptance.
 - The official English `Unit_Test_EN` workbook and Drive file are unchanged because OfficeCLI/authorized integration is unavailable and DonHV owns final synchronization.
 
 ## Jira/Evidence Links
