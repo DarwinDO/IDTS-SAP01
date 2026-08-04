@@ -33,5 +33,13 @@
   "limitations": [
     "No Accept, Reject, or Ignore review action was selected; the dialog was inspected read-only for this case.",
     "DonHV must verify whether the underlying stored owner ID is intended to resolve to a person while the Object Page intentionally shows only the role."
-  ]
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10942",
+    "reviewDate": "2026-08-04",
+    "category": "CATALOG_SEMANTIC_CORRECTION",
+    "currentStatus": "REVIEW_CORRECTION_REQUIRED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
 }

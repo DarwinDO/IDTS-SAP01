@@ -3,7 +3,7 @@
 - Catalog owner/approver and final integrator: DonHV
 - Execution support: NhanT, SangVN and DatDT
 - Due: 2026-08-04
-- Status: DonHV disposition recorded; comment/upload targeted reruns reproduced safely, diagnostic Network gaps and one physical-keyboard confirmation remain
+- Status: DonHV latest disposition applied; current package retains 19 positives and 20 valid blockers, marks 5 stale blockers plus 2 old-runtime negatives for rerun, and keeps diagnostic/manual limitations explicit
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-111
 
 ## Workflow
@@ -21,9 +21,9 @@
 - Cases: 90 atomic English-only cases.
 - Approval: DonHV approved for execution on 2026-08-02.
 - Approved catalog truth remains unchanged: 90 `PREPARED`, 0 reviewer-approved PASS, 0 reviewer-approved FAIL.
-- NhanT candidate execution batch: 57/57 packaged; 32 `EXECUTED_PENDING_DONHV_REVIEW` (19 candidate `MEETS_EXPECTED_RESULT`, 13 candidate `DOES_NOT_MEET_EXPECTED_RESULT`) and 25 `EXECUTION_BLOCKED_PENDING_PRECONDITION`. No NhanT-assigned case remains unattempted or unpackaged. The case manifests and consolidated summary preserve exact evidence, blockers, and rerun conditions; none changes the approved catalog before DonHV review.
+- NhanT package: 57/57 manifests preserved. DonHV's latest review partition is 19 retained candidate positives, 20 valid blockers, 5 stale blockers, 3 defect rechecks, 5 semantic corrections, 1 physical-keyboard limitation, 2 AI diagnostic reruns and 2 historical old-runtime negatives. No category is final UAT PASS and the approved catalog remains unchanged.
 - DonHV disposition: 19 positive evidence packages accepted; 25 blockers accepted without PASS; 13 negatives split into 3 confirmed product defects (`UAT-AUTH-005`, `UAT-BUG-008`, `UAT-UX-002`), 5 catalog mismatches, 1 environment/session blocker, 3 targeted reruns, and 1 test-harness limitation. See `docs/pm/evidence/idts-111/donhv-execution-review-matrix.md`.
-- Current rerun state: the deployed SAP page is usable. Fresh `UAT-COM-001` and `UAT-ATT-001` reruns reproduced the same safe failures without comment/attachment persistence or orphan metadata. The approved Browser surface cannot expose the sanitized HTTP/Network details or immutable suggestion ID required to close `UAT-AI-005`/`UAT-AI-009` and root-cause IDTS-113/114/115/116. No candidate result was promoted. `UAT-UX-003` still requires NhanT to confirm physical Tab-key behavior manually.
+- Current rerun state: `UAT-COM-001` and `UAT-ATT-001` are historical old-runtime negatives after IDTS-116; five stale blockers also require current-runtime execution. AI diagnostics still require immutable suggestion ID plus sanitized Network/audit and no-mutation proof. The required Browser control tool is unavailable in this session, so no current-runtime result was fabricated or promoted. `UAT-UX-003` still requires NhanT's physical Tab-key confirmation.
 - Knowledge gate: NhanT acknowledged briefing SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`; Jira comments `10908` (IDTS-110) and `10909` (IDTS-111).
 - Final targeted-rerun handoff: commit `adb66e8`, PR #270 body refreshed, Jira IDTS-111 comment `10925`.
 - Candidate execution summary: `docs/pm/evidence/idts-111/execution-summary.md`.

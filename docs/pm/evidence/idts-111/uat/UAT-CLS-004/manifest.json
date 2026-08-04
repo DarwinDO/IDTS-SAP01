@@ -1,6 +1,50 @@
 {
-  "schemaVersion":"1.0","caseId":"UAT-CLS-004","catalogStatus":"PREPARED","candidateExecutionStatus":"EXECUTED_PENDING_DONHV_REVIEW","executor":"NhanT","actorRole":"TESTER","executedAt":"2026-08-03T16:14:00+07:00","catalogMergeSha":"6f01affc2c2945e51d18199137c8a89a20c77600","executionBaselineSha":"fbea12cd996d8c1e13bd834fd6e054c8a37c32e6","deployedRuntimeSha":"67b1bf86169e9696c9365ef4846b99ffae30d4e2",
-  "testRecord":{"bugNumber":"BUG-0026","editedField":"Description","componentBeforeAfter":"IDTS Bug Report","categoryBeforeAfter":"SAP CAP Backend"},"expectedResult":"All classification fields remain unchanged after an unrelated Description edit.","actualResult":"Only Description was changed and saved. After browser refresh, BUG-0026 still displayed IDTS Bug Report and SAP CAP Backend; no classification warning or unintended ownership change appeared.","candidateOutcome":"MEETS_EXPECTED_RESULT","reviewBoundary":"Candidate only; DonHV must review.",
-  "evidence":[{"id":"UAT-CLS-004-E01","file":"01-before-description-edit.png","description":"Edit draft before changing Description, with original classification visible.","sha256":"EE87933D02C22D1279451DED8A87FE48179FA9040C353AEF513FF2ACFF025B60"},{"id":"UAT-CLS-004-E02","file":"02-classification-after-reload.png","description":"Reloaded Object Page showing the changed Description and unchanged classification.","sha256":"623B4C0C4C5CFBDFC70FABC6D9B3072F2553F8E8FDEDD559CAC347954438EB62"}],
-  "privacyReview":{"status":"PASS","notes":"Controlled UAT values only."},"issueClassification":"none","limitations":[]
+  "schemaVersion": "1.0",
+  "caseId": "UAT-CLS-004",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T16:14:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "testRecord": {
+    "bugNumber": "BUG-0026",
+    "editedField": "Description",
+    "componentBeforeAfter": "IDTS Bug Report",
+    "categoryBeforeAfter": "SAP CAP Backend"
+  },
+  "expectedResult": "All classification fields remain unchanged after an unrelated Description edit.",
+  "actualResult": "Only Description was changed and saved. After browser refresh, BUG-0026 still displayed IDTS Bug Report and SAP CAP Backend; no classification warning or unintended ownership change appeared.",
+  "candidateOutcome": "MEETS_EXPECTED_RESULT",
+  "reviewBoundary": "Candidate only; DonHV must review.",
+  "evidence": [
+    {
+      "id": "UAT-CLS-004-E01",
+      "file": "01-before-description-edit.png",
+      "description": "Edit draft before changing Description, with original classification visible.",
+      "sha256": "EE87933D02C22D1279451DED8A87FE48179FA9040C353AEF513FF2ACFF025B60"
+    },
+    {
+      "id": "UAT-CLS-004-E02",
+      "file": "02-classification-after-reload.png",
+      "description": "Reloaded Object Page showing the changed Description and unchanged classification.",
+      "sha256": "623B4C0C4C5CFBDFC70FABC6D9B3072F2553F8E8FDEDD559CAC347954438EB62"
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "Controlled UAT values only."
+  },
+  "issueClassification": "none",
+  "limitations": [],
+  "donhvLatestReview": {
+    "jiraCommentId": "10942",
+    "reviewDate": "2026-08-04",
+    "category": "RETAINED_TRUTHFUL_POSITIVE",
+    "currentStatus": "CANDIDATE_EVIDENCE_RETAINED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
 }

@@ -31,5 +31,13 @@
   },
   "limitations": [
     "The catalog permits a sanitized Network status or a safe error screenshot; this package uses the visible safe error screenshot and does not inspect session/network internals."
-  ]
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10942",
+    "reviewDate": "2026-08-04",
+    "category": "RETAINED_TRUTHFUL_POSITIVE",
+    "currentStatus": "CANDIDATE_EVIDENCE_RETAINED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
 }

@@ -1,22 +1,22 @@
 ## Summary
 
 - Preserve the approved English-only 90-case IDTS-111 UAT catalog and add NhanT's complete 57-case candidate execution package.
-- Publish current candidate truth: 32 executed (`19 MEETS`, `13 DOES_NOT_MEET`) and 25 blocked by explicit identity, fixture, service, or environment preconditions.
-- Add fresh `UAT-COM-001` and `UAT-ATT-001` rerun evidence; both safe failures reproduced without comment/attachment persistence or orphan metadata.
+- Publish DonHV's current partition from Jira comment `10942`: 19 retained candidate positives, 20 valid blockers, 5 stale blockers requiring rerun, 3 defect rechecks, 5 semantic corrections, 1 physical-keyboard limitation, 2 AI diagnostics and 2 historical old-runtime negatives.
+- Preserve the old `UAT-COM-001` and `UAT-ATT-001` evidence as historical only; do not present those failures as current behavior after IDTS-116.
 - Keep reviewer approval, final `UAT_EN_PREPARED` workbook generation, and same-ID Drive synchronization with DonHV.
 
 ## Positive Evidence
 
 - 57/57 NhanT-assigned cases have manifests; no assigned case is unattempted or unpackaged.
-- DonHV accepted evidence for 19 positive executions and accepted the truth of 25 blockers without converting them to PASS.
+- DonHV retained 19 truthful positive candidates and 20 valid blockers without converting them to PASS; 5 formerly blocked prerequisites now require current-runtime rerun.
 - Fresh integrity check: 57 manifests, 63 referenced PNGs, 0 missing files, and 0 SHA-256 mismatch.
 - Safe error/no-partial-mutation behavior is retained for comment, attachment, AI, lifecycle, and authorization findings.
 
 ## Negative Evidence
 
-- Three confirmed product defects remain explicit: `UAT-AUTH-005`, `UAT-BUG-008`, and `UAT-UX-002`.
+- Three confirmed product defects remain explicit but require current-runtime recheck: `UAT-AUTH-005`, `UAT-BUG-008`, and `UAT-UX-002`.
 - Five catalog/semantic mismatches remain separated from product defects: `UAT-AI-008`, `UAT-AI-010`, `UAT-AI-014`, `UAT-AI-015`, and `UAT-LIFE-014`.
-- `UAT-COM-001` and `UAT-ATT-001` reproduced safe failures in fresh reruns; the Browser surface does not expose the sanitized response stage needed for root-cause assignment.
+- `UAT-COM-001` and `UAT-ATT-001` are labeled historical old-runtime negatives after IDTS-116; a fresh current-runtime rerun is still required.
 - No blocked or candidate result is presented as reviewer-approved PASS/FAIL.
 
 ## Edge/Boundary Evidence
@@ -39,8 +39,8 @@
 
 ## UI/UX Review
 
-- The signed-in deployed SAP application was usable for the targeted reruns.
-- The comment and upload failures display safe user-facing messages and leave the Object Page usable.
+- Historical screenshots show the earlier signed-in runtime; they are not claimed as current IDTS-116 behavior.
+- Current runtime UI/UX verification remains pending because the required Browser control tool is unavailable in this session.
 - Tablet clipping remains the confirmed UI defect; physical keyboard focus behavior remains a manual confirmation.
 
 ## Ponytail Simplicity
@@ -71,7 +71,7 @@ Ownership: NhanT executes and packages truthful evidence; DonHV owns result appr
 
 - Diagnostic Network/root-cause evidence remains under IDTS-113/114/115/116 for `UAT-ATT-001`, `UAT-COM-001`, `UAT-AI-005`, and `UAT-AI-009`.
 - `UAT-UX-003` still needs NhanT's physical-keyboard Tab confirmation.
-- Twenty-five role/identity/fixture/service preconditions remain blocked; they require the named owner/environment rather than substitute execution.
+- Twenty valid/still-applicable role, identity, fixture or service preconditions remain blocked; five stale prerequisites require a current-runtime rerun after IDTS-116.
 - OfficeCLI is unavailable on this host, so the final English `UAT_EN_PREPARED` workbook and Drive artifact remain unchanged.
 
 ## Jira/Evidence Links

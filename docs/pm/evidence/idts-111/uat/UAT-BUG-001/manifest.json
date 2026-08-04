@@ -50,5 +50,13 @@
   "limitations": [
     "Cloud Foundry CLI readiness could not run because the cf command is unavailable; authenticated UI readiness was verified instead.",
     "The earlier Browser screenshot timeout was recovered by restarting the approved Codex Browser surface; the retained reload image was freshly captured and privacy-reviewed."
-  ]
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10942",
+    "reviewDate": "2026-08-04",
+    "category": "RETAINED_TRUTHFUL_POSITIVE",
+    "currentStatus": "CANDIDATE_EVIDENCE_RETAINED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
 }

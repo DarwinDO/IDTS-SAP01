@@ -1,5 +1,45 @@
 {
-  "schemaVersion":"1.0","caseId":"UAT-AI-009","catalogStatus":"PREPARED","candidateExecutionStatus":"EXECUTED_PENDING_DONHV_REVIEW","executor":"NhanT","actorRole":"TESTER","executedAt":"2026-08-03T17:12:00+07:00","catalogMergeSha":"6f01affc2c2945e51d18199137c8a89a20c77600","executionBaselineSha":"fbea12cd996d8c1e13bd834fd6e054c8a37c32e6","deployedRuntimeSha":"67b1bf86169e9696c9365ef4846b99ffae30d4e2",
-  "testRecord":{"bugNumber":"BUG-0026","classification":"IDTS Bug Report / SAP CAP Backend","assignee":"SangVN"},"expectedResult":"Smart Assign explanations are grounded in candidate capability, availability, workload, and confidence; cancelling causes no assignment/history/notification mutation.","actualResult":"Opening Smart Assign on the valid assigned BUG-0026 returned a visible raw-like `Communication error: 401 error` instead of candidate explanations, so Cancel could not be exercised. After closing and refreshing, BUG-0026 remained Assigned to SangVN with unchanged classification.","candidateOutcome":"DOES_NOT_MEET_EXPECTED_RESULT","reviewBoundary":"The protected Object Page remained authenticated after refresh, so this is scoped to the Smart Assign request rather than evidence of an expired application session. DonHV must classify provider/service authorization root cause.",
-  "evidence":[{"id":"UAT-AI-009-E01","file":"01-smart-assign-401-error.png","description":"Smart Assign opening failed with a visible 401 communication error.","sha256":"48DC47B11A9E49267AFB6B7C03E2B02EB76BDD6000A46FC9661E18162C0CF75C"}],"privacyReview":{"status":"PASS","notes":"Screenshot shows controlled Bug values and generic 401 text; no endpoint, token, email, or session identifier."},"issueClassification":"product or deployed-service authorization defect candidate","limitations":["No network trace or provider credential access was used; root cause is not assigned."]
+  "schemaVersion": "1.0",
+  "caseId": "UAT-AI-009",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T17:12:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "testRecord": {
+    "bugNumber": "BUG-0026",
+    "classification": "IDTS Bug Report / SAP CAP Backend",
+    "assignee": "SangVN"
+  },
+  "expectedResult": "Smart Assign explanations are grounded in candidate capability, availability, workload, and confidence; cancelling causes no assignment/history/notification mutation.",
+  "actualResult": "Opening Smart Assign on the valid assigned BUG-0026 returned a visible raw-like `Communication error: 401 error` instead of candidate explanations, so Cancel could not be exercised. After closing and refreshing, BUG-0026 remained Assigned to SangVN with unchanged classification.",
+  "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
+  "reviewBoundary": "The protected Object Page remained authenticated after refresh, so this is scoped to the Smart Assign request rather than evidence of an expired application session. DonHV must classify provider/service authorization root cause.",
+  "evidence": [
+    {
+      "id": "UAT-AI-009-E01",
+      "file": "01-smart-assign-401-error.png",
+      "description": "Smart Assign opening failed with a visible 401 communication error.",
+      "sha256": "48DC47B11A9E49267AFB6B7C03E2B02EB76BDD6000A46FC9661E18162C0CF75C"
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "Screenshot shows controlled Bug values and generic 401 text; no endpoint, token, email, or session identifier."
+  },
+  "issueClassification": "product or deployed-service authorization defect candidate",
+  "limitations": [
+    "No network trace or provider credential access was used; root cause is not assigned."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10942",
+    "reviewDate": "2026-08-04",
+    "category": "AI_DIAGNOSTIC_RERUN",
+    "currentStatus": "RERUN_REQUIRES_IMMUTABLE_ID_NETWORK_AUDIT",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
 }

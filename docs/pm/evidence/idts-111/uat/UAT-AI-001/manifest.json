@@ -31,5 +31,13 @@
   },
   "limitations": [
     "No Accept, Reject, Ignore, candidate selection, or Confirm Duplicate action was submitted; mutation avoidance was verified by remaining in review-only state."
-  ]
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10942",
+    "reviewDate": "2026-08-04",
+    "category": "RETAINED_TRUTHFUL_POSITIVE",
+    "currentStatus": "CANDIDATE_EVIDENCE_RETAINED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
 }

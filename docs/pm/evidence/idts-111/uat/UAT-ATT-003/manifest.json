@@ -1,4 +1,33 @@
 {
-  "schemaVersion":"1.0","caseId":"UAT-ATT-003","catalogStatus":"PREPARED","candidateExecutionStatus":"EXECUTION_BLOCKED_PENDING_PRECONDITION","executor":"NhanT","actorRole":"TESTER","executedAt":"2026-08-03T17:04:00+07:00","catalogMergeSha":"6f01affc2c2945e51d18199137c8a89a20c77600","executionBaselineSha":"fbea12cd996d8c1e13bd834fd6e054c8a37c32e6","deployedRuntimeSha":"67b1bf86169e9696c9365ef4846b99ffae30d4e2",
-  "expectedResult":"UI entry, metadata, and storage-object access are removed according to the supported delete contract.","actualResult":"Not executable: UAT-ATT-001 could not create a controlled attachment. Deleting an unrelated existing attachment was not authorized and would be destructive to team evidence.","candidateOutcome":"NOT_EXECUTABLE_WITH_CURRENT_PRECONDITION","reviewBoundary":"Rerun after storage is restored and a disposable controlled attachment exists.","evidence":[],"privacyReview":{"status":"PASS","notes":"No unrelated attachment was deleted."},"issueClassification":"blocked by UAT-ATT-001 storage failure","limitations":["Missing disposable controlled attachment precondition."]
+  "schemaVersion": "1.0",
+  "caseId": "UAT-ATT-003",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTION_BLOCKED_PENDING_PRECONDITION",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T17:04:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "expectedResult": "UI entry, metadata, and storage-object access are removed according to the supported delete contract.",
+  "actualResult": "Not executable: UAT-ATT-001 could not create a controlled attachment. Deleting an unrelated existing attachment was not authorized and would be destructive to team evidence.",
+  "candidateOutcome": "NOT_EXECUTABLE_WITH_CURRENT_PRECONDITION",
+  "reviewBoundary": "Rerun after storage is restored and a disposable controlled attachment exists.",
+  "evidence": [],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "No unrelated attachment was deleted."
+  },
+  "issueClassification": "blocked by UAT-ATT-001 storage failure",
+  "limitations": [
+    "Missing disposable controlled attachment precondition."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10942",
+    "reviewDate": "2026-08-04",
+    "category": "STALE_PREREQUISITE_RERUN_REQUIRED",
+    "currentStatus": "RERUN_REQUIRED_CURRENT_RUNTIME",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
 }

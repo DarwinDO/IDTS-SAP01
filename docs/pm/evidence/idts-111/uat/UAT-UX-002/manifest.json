@@ -9,17 +9,46 @@
   "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
   "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
   "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
-  "viewport": {"width":834,"height":1112},
+  "viewport": {
+    "width": 834,
+    "height": 1112
+  },
   "expectedResult": "Responsive pop-ins/wrapping preserve labels, values, and actions.",
   "actualResult": "The tablet List Report preserved filters, tabs, Create Bug, table rows, and row actions. The Object Page preserved its header and primary actions, and the Similar Bugs footer actions remained reachable. However, the Review Classification Suggestions button label was visibly clipped and Similar Bugs reason text extended beyond the dialog content edge instead of wrapping, so labels/values were not fully preserved.",
   "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
   "reviewBoundary": "This is a candidate responsive-layout failure, not an approved FAIL. DonHV must review and decide Jira/catalog disposition.",
   "evidence": [
-    {"id":"UAT-UX-002-E01","file":"01-tablet-list-report.png","description":"Tablet List Report with responsive filters, tabs, and row actions.","sha256":"40F7232F8495431B8A129AC716625704EED524D08E2259F1C10E1CC4D4A3F959"},
-    {"id":"UAT-UX-002-E02","file":"02-tablet-object-page.png","description":"Tablet Object Page showing the clipped Review Classification Suggestions label.","sha256":"2226EA2C8718FE29F36FE0E2E40AD3F2356CCA5C05609333ECF8DC3D2C5371F6"},
-    {"id":"UAT-UX-002-E03","file":"03-tablet-ai-dialog.png","description":"Tablet Similar Bugs dialog with reachable actions but horizontally clipped reason text.","sha256":"1E8163566E0E2FA1E5E16281CD3B24783D427733FCAB7DB2EC48C270973EFAF8"}
+    {
+      "id": "UAT-UX-002-E01",
+      "file": "01-tablet-list-report.png",
+      "description": "Tablet List Report with responsive filters, tabs, and row actions.",
+      "sha256": "40F7232F8495431B8A129AC716625704EED524D08E2259F1C10E1CC4D4A3F959"
+    },
+    {
+      "id": "UAT-UX-002-E02",
+      "file": "02-tablet-object-page.png",
+      "description": "Tablet Object Page showing the clipped Review Classification Suggestions label.",
+      "sha256": "2226EA2C8718FE29F36FE0E2E40AD3F2356CCA5C05609333ECF8DC3D2C5371F6"
+    },
+    {
+      "id": "UAT-UX-002-E03",
+      "file": "03-tablet-ai-dialog.png",
+      "description": "Tablet Similar Bugs dialog with reachable actions but horizontally clipped reason text.",
+      "sha256": "1E8163566E0E2FA1E5E16281CD3B24783D427733FCAB7DB2EC48C270973EFAF8"
+    }
   ],
-  "privacyReview": {"status":"PASS","notes":"Controlled UAT data only; no email, credential, cookie, token, or private endpoint text."},
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "Controlled UAT data only; no email, credential, cookie, token, or private endpoint text."
+  },
   "issueClassification": "product defect candidate - responsive tablet clipping",
-  "limitations": []
+  "limitations": [],
+  "donhvLatestReview": {
+    "jiraCommentId": "10942",
+    "reviewDate": "2026-08-04",
+    "category": "CONFIRMED_DEFECT_RECHECK",
+    "currentStatus": "RERUN_REQUIRED_CURRENT_RUNTIME",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
 }

@@ -1,6 +1,47 @@
 {
-  "schemaVersion":"1.0","caseId":"UAT-BUG-006","catalogStatus":"PREPARED","candidateExecutionStatus":"EXECUTED_PENDING_DONHV_REVIEW","executor":"NhanT","actorRole":"TESTER","executedAt":"2026-08-03T16:02:00+07:00","catalogMergeSha":"6f01affc2c2945e51d18199137c8a89a20c77600","executionBaselineSha":"fbea12cd996d8c1e13bd834fd6e054c8a37c32e6","deployedRuntimeSha":"67b1bf86169e9696c9365ef4846b99ffae30d4e2",
-  "testRecord":{"bugNumber":"BUG-0026"},"expectedResult":"Steps to Reproduce, Actual Result, and Expected Result persist exactly once without a property-not-read error.","actualResult":"All three controlled reproduction values were visible in the draft and remained intact on BUG-0026 after Create and browser refresh; no property-not-read error appeared.","candidateOutcome":"MEETS_EXPECTED_RESULT","reviewBoundary":"Candidate only; DonHV must review.",
-  "evidence":[{"id":"UAT-BUG-006-E01","file":"01-reproduction-draft.png","description":"Controlled reproduction values in the complete draft.","sha256":"658D5C804A7C796E15F06952FCCA48650675B9F14B07311EDC544486E17F5AF8"},{"id":"UAT-BUG-006-E02","file":"02-reproduction-after-reload.png","description":"The same values persisted after refresh.","sha256":"040C3504C98ABB1607EE0416EAC24AB2E83538B5F68C67F3D3A0627E08158466"}],
-  "privacyReview":{"status":"PASS","notes":"Controlled UAT data only."},"issueClassification":"none","limitations":[]
+  "schemaVersion": "1.0",
+  "caseId": "UAT-BUG-006",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T16:02:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "testRecord": {
+    "bugNumber": "BUG-0026"
+  },
+  "expectedResult": "Steps to Reproduce, Actual Result, and Expected Result persist exactly once without a property-not-read error.",
+  "actualResult": "All three controlled reproduction values were visible in the draft and remained intact on BUG-0026 after Create and browser refresh; no property-not-read error appeared.",
+  "candidateOutcome": "MEETS_EXPECTED_RESULT",
+  "reviewBoundary": "Candidate only; DonHV must review.",
+  "evidence": [
+    {
+      "id": "UAT-BUG-006-E01",
+      "file": "01-reproduction-draft.png",
+      "description": "Controlled reproduction values in the complete draft.",
+      "sha256": "658D5C804A7C796E15F06952FCCA48650675B9F14B07311EDC544486E17F5AF8"
+    },
+    {
+      "id": "UAT-BUG-006-E02",
+      "file": "02-reproduction-after-reload.png",
+      "description": "The same values persisted after refresh.",
+      "sha256": "040C3504C98ABB1607EE0416EAC24AB2E83538B5F68C67F3D3A0627E08158466"
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "Controlled UAT data only."
+  },
+  "issueClassification": "none",
+  "limitations": [],
+  "donhvLatestReview": {
+    "jiraCommentId": "10942",
+    "reviewDate": "2026-08-04",
+    "category": "RETAINED_TRUTHFUL_POSITIVE",
+    "currentStatus": "CANDIDATE_EVIDENCE_RETAINED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
 }

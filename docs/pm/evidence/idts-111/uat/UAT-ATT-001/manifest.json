@@ -1,6 +1,59 @@
 {
-  "schemaVersion":"1.0","caseId":"UAT-ATT-001","catalogStatus":"PREPARED","candidateExecutionStatus":"EXECUTED_PENDING_DONHV_REVIEW","executor":"NhanT","actorRole":"TESTER","executedAt":"2026-08-03T20:59:20+07:00","catalogMergeSha":"6f01affc2c2945e51d18199137c8a89a20c77600","executionBaselineSha":"fbea12cd996d8c1e13bd834fd6e054c8a37c32e6","deployedRuntimeSha":"67b1bf86169e9696c9365ef4846b99ffae30d4e2",
-  "testRecord":{"bugNumber":"BUG-0025","file":"idts111-uat-att-001-rerun.txt","sizeBytes":47,"type":"text/plain"},"expectedResult":"Metadata persists, binary persists in storage, and the same attachment appears after reload.","actualResult":"A fresh targeted rerun selected a synthetic supported 47-byte text file. SAP again displayed the safe error 'The file could not be uploaded. Please refresh and try again.' The evidence grid remained empty, so no orphan attachment metadata was created.","candidateOutcome":"DOES_NOT_MEET_EXPECTED_RESULT","reviewBoundary":"Safe failure/no orphan passed, but successful upload/persistence failed; DonHV must classify product versus deployed-storage environment.",
-  "evidence":[{"id":"UAT-ATT-001-E01","file":"01-supported-upload-failure.png","description":"Safe upload failure for a supported 54-byte text file.","sha256":"6115E8D1A6E5425526E77D0710068F608367DF7F250E658273EF3C426B1DF6BE"},{"id":"UAT-ATT-001-E02","file":"02-no-metadata-after-reload.png","description":"No attachment metadata after refresh.","sha256":"A1406D72F54653AA344039E8C31FFD5ED569BFBF2A0F5958390D1AA466ABCA43"},{"id":"UAT-ATT-001-E03","file":"03-rerun-supported-upload-failure.png","description":"Fresh 2026-08-03 targeted rerun: safe upload failure and empty evidence grid for a synthetic 47-byte text file.","sha256":"DA6D54AAB9310A12F17107C33ABBD4F4FF1D00D7FB6B7BEDA76CD366220B241D"}],
-  "privacyReview":{"status":"PASS","notes":"A synthetic 54-byte text fixture only; no personal or project-secret content."},"issueClassification":"product defect or deployed-environment storage blocker candidate","limitations":["No direct HANA/S3 diagnostic access was available; root cause cannot be assigned from the safe UI message alone."]
+  "schemaVersion": "1.0",
+  "caseId": "UAT-ATT-001",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T20:59:20+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "testRecord": {
+    "bugNumber": "BUG-0025",
+    "file": "idts111-uat-att-001-rerun.txt",
+    "sizeBytes": 47,
+    "type": "text/plain"
+  },
+  "expectedResult": "Metadata persists, binary persists in storage, and the same attachment appears after reload.",
+  "actualResult": "A fresh targeted rerun selected a synthetic supported 47-byte text file. SAP again displayed the safe error 'The file could not be uploaded. Please refresh and try again.' The evidence grid remained empty, so no orphan attachment metadata was created.",
+  "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
+  "reviewBoundary": "Safe failure/no orphan passed, but successful upload/persistence failed; DonHV must classify product versus deployed-storage environment.",
+  "evidence": [
+    {
+      "id": "UAT-ATT-001-E01",
+      "file": "01-supported-upload-failure.png",
+      "description": "Safe upload failure for a supported 54-byte text file.",
+      "sha256": "6115E8D1A6E5425526E77D0710068F608367DF7F250E658273EF3C426B1DF6BE"
+    },
+    {
+      "id": "UAT-ATT-001-E02",
+      "file": "02-no-metadata-after-reload.png",
+      "description": "No attachment metadata after refresh.",
+      "sha256": "A1406D72F54653AA344039E8C31FFD5ED569BFBF2A0F5958390D1AA466ABCA43"
+    },
+    {
+      "id": "UAT-ATT-001-E03",
+      "file": "03-rerun-supported-upload-failure.png",
+      "description": "Fresh 2026-08-03 targeted rerun: safe upload failure and empty evidence grid for a synthetic 47-byte text file.",
+      "sha256": "DA6D54AAB9310A12F17107C33ABBD4F4FF1D00D7FB6B7BEDA76CD366220B241D"
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "A synthetic 54-byte text fixture only; no personal or project-secret content."
+  },
+  "issueClassification": "product defect or deployed-environment storage blocker candidate",
+  "limitations": [
+    "No direct HANA/S3 diagnostic access was available; root cause cannot be assigned from the safe UI message alone."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10942",
+    "reviewDate": "2026-08-04",
+    "category": "HISTORICAL_OLD_RUNTIME_NEGATIVE",
+    "currentStatus": "RERUN_REQUIRED_CURRENT_RUNTIME",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false,
+    "historicalEvidenceOnly": true
+  }
 }

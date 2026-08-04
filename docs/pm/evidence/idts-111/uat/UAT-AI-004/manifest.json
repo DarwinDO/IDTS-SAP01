@@ -38,5 +38,13 @@
   "limitations": [
     "The proposed Workflow reason interprets the controlled no-assignee scenario as an incorrect outcome even though this Bug was intentionally created to verify Pending Assignment. Human review remains necessary; this quality concern did not violate the case's active-value/source-label/no-auto-apply acceptance focus.",
     "No Accept, Reject, Ignore, row selection, or Apply Classification action was submitted."
-  ]
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10942",
+    "reviewDate": "2026-08-04",
+    "category": "RETAINED_TRUTHFUL_POSITIVE",
+    "currentStatus": "CANDIDATE_EVIDENCE_RETAINED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
 }

@@ -9,15 +9,38 @@
   "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
   "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
   "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
-  "testRecord": {"bugNumber":"BUG-0011","startingStatus":"Retest Required","endingStatus":"Closed","developerNote":""},
+  "testRecord": {
+    "bugNumber": "BUG-0011",
+    "startingStatus": "Retest Required",
+    "endingStatus": "Closed",
+    "developerNote": ""
+  },
   "expectedResult": "A close transition with an empty required reason is rejected with field-targeted validation and the status remains unchanged.",
   "actualResult": "Submitting Close Bug with Developer Note left empty closed BUG-0011 immediately. The dialog disappeared and the Object Page displayed status Closed.",
   "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
   "reviewBoundary": "DonHV must review the missing required-reason enforcement before approving FAIL or creating/updating a Jira defect.",
   "evidence": [
-    {"id":"UAT-LIFE-014-E01","file":"01-empty-reason-accepted.png","description":"BUG-0011 displayed as Closed immediately after submitting the Close Bug dialog with an empty Developer Note.","sha256":"B60CBCC0201471AFE0DA0055C88CAFE06DA89D4FF0D7DC35DD6CEFF085CC3FE8"}
+    {
+      "id": "UAT-LIFE-014-E01",
+      "file": "01-empty-reason-accepted.png",
+      "description": "BUG-0011 displayed as Closed immediately after submitting the Close Bug dialog with an empty Developer Note.",
+      "sha256": "B60CBCC0201471AFE0DA0055C88CAFE06DA89D4FF0D7DC35DD6CEFF085CC3FE8"
+    }
   ],
-  "privacyReview": {"status":"PASS","notes":"Controlled SAP UAT state only; no email, credential, cookie, token, or private endpoint text."},
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "Controlled SAP UAT state only; no email, credential, cookie, token, or private endpoint text."
+  },
   "issueClassification": "product defect candidate - required transition reason not enforced",
-  "limitations": ["The pre-action screenshot remains Browser-temporary only and is not included because the post-action image plus manifest records the controlled starting status from the fresh DOM snapshot."]
+  "limitations": [
+    "The pre-action screenshot remains Browser-temporary only and is not included because the post-action image plus manifest records the controlled starting status from the fresh DOM snapshot."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10942",
+    "reviewDate": "2026-08-04",
+    "category": "CATALOG_SEMANTIC_CORRECTION",
+    "currentStatus": "REVIEW_CORRECTION_REQUIRED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
 }

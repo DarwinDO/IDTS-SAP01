@@ -9,15 +9,42 @@
   "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
   "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
   "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
-  "testRecord": {"bugNumber":"BUG-0025","draftField":"Environment Detail","draftValue":"IDTS-111 UAT-BUG-009 navigation recovery"},
+  "testRecord": {
+    "bugNumber": "BUG-0025",
+    "draftField": "Environment Detail",
+    "draftValue": "IDTS-111 UAT-BUG-009 navigation recovery"
+  },
   "expectedResult": "The app recovers safely without blank page, cross-Bug draft leakage, or hidden save.",
   "actualResult": "Back returned to the List Report without a blank page. Forward reopened the same BUG-0025 edit draft with the Environment Detail value preserved and no cross-Bug data. The draft was then explicitly discarded, returning to the active Bug with no hidden save.",
   "candidateOutcome": "MEETS_EXPECTED_RESULT",
   "reviewBoundary": "DonHV must review this complete candidate package before any PASS or catalog update.",
   "evidence": [
-    {"id":"UAT-BUG-009-E01","file":"01-draft-before-back.png","description":"BUG-0025 draft with controlled Environment Detail before Back.","sha256":"72F80B4FC591F20702DF4322C6CF7A4BAF69DD15C11848641F8FF1CFEA7A1319"},
-    {"id":"UAT-BUG-009-E02","file":"02-draft-after-forward.png","description":"Same BUG-0025 draft and value recovered after Forward.","sha256":"4C83D4E01C7E40910F035EF636DCC415DA160F9682D381E67A308493B3202DE5"}
+    {
+      "id": "UAT-BUG-009-E01",
+      "file": "01-draft-before-back.png",
+      "description": "BUG-0025 draft with controlled Environment Detail before Back.",
+      "sha256": "72F80B4FC591F20702DF4322C6CF7A4BAF69DD15C11848641F8FF1CFEA7A1319"
+    },
+    {
+      "id": "UAT-BUG-009-E02",
+      "file": "02-draft-after-forward.png",
+      "description": "Same BUG-0025 draft and value recovered after Forward.",
+      "sha256": "4C83D4E01C7E40910F035EF636DCC415DA160F9682D381E67A308493B3202DE5"
+    }
   ],
-  "privacyReview": {"status":"PASS","notes":"Controlled UAT data only; no email, credential, cookie, token, or private endpoint text."},
-  "limitations": ["The Fiori discard confirmation appears as a small popover and was confirmed through the freshly observed visible DOM control."]
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "Controlled UAT data only; no email, credential, cookie, token, or private endpoint text."
+  },
+  "limitations": [
+    "The Fiori discard confirmation appears as a small popover and was confirmed through the freshly observed visible DOM control."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10942",
+    "reviewDate": "2026-08-04",
+    "category": "RETAINED_TRUTHFUL_POSITIVE",
+    "currentStatus": "CANDIDATE_EVIDENCE_RETAINED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
 }

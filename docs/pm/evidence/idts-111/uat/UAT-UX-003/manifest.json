@@ -14,7 +14,12 @@
   "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
   "reviewBoundary": "This is a candidate keyboard-navigation failure with a Browser translation limitation noted. DonHV should reproduce manually before an approved FAIL/Jira decision.",
   "evidence": [
-    {"id":"UAT-UX-003-E01","file":"01-focus-return-after-keyboard-dialog.png","description":"Visible focus returned to Find Similar Bugs after keyboard-opened dialog was closed with Escape.","sha256":"4493FF9E511A68DEBF408285F96555F73C5AFDB0FE0D02AD1D83AF6479E984E9"}
+    {
+      "id": "UAT-UX-003-E01",
+      "file": "01-focus-return-after-keyboard-dialog.png",
+      "description": "Visible focus returned to Find Similar Bugs after keyboard-opened dialog was closed with Escape.",
+      "sha256": "4493FF9E511A68DEBF408285F96555F73C5AFDB0FE0D02AD1D83AF6479E984E9"
+    }
   ],
   "keyboardTrace": {
     "enterOpensDialog": true,
@@ -23,6 +28,19 @@
     "tabAttempts": 9,
     "tabAdvanced": false
   },
-  "privacyReview": {"status":"PASS","notes":"Controlled UAT data only; no email, credential, cookie, token, or private endpoint text."},
-  "limitations": ["The approved Browser surface may translate Tab differently from a physical keyboard; DonHV manual confirmation is required before treating this as a confirmed accessibility defect."]
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "Controlled UAT data only; no email, credential, cookie, token, or private endpoint text."
+  },
+  "limitations": [
+    "The approved Browser surface may translate Tab differently from a physical keyboard; DonHV manual confirmation is required before treating this as a confirmed accessibility defect."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10942",
+    "reviewDate": "2026-08-04",
+    "category": "PHYSICAL_KEYBOARD_LIMITATION",
+    "currentStatus": "MEMBER_MANUAL_CONFIRMATION_REQUIRED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
 }

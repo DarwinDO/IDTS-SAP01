@@ -46,5 +46,14 @@
   "limitations": [
     "The UI exposes only a sanitized error; the approved Browser surface does not expose the response status/body, and no session/network internals were inspected.",
     "UAT-COM-003 and UAT-COM-004 depend on the same posting path and cannot receive a positive persistence result until this failure is resolved."
-  ]
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10942",
+    "reviewDate": "2026-08-04",
+    "category": "HISTORICAL_OLD_RUNTIME_NEGATIVE",
+    "currentStatus": "RERUN_REQUIRED_CURRENT_RUNTIME",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false,
+    "historicalEvidenceOnly": true
+  }
 }

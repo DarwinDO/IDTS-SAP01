@@ -1,5 +1,50 @@
 {
-  "schemaVersion":"1.0","caseId":"UAT-ATT-006","catalogStatus":"PREPARED","candidateExecutionStatus":"EXECUTED_PENDING_DONHV_REVIEW","executor":"NhanT","actorRole":"TESTER","executedAt":"2026-08-03T17:03:00+07:00","catalogMergeSha":"6f01affc2c2945e51d18199137c8a89a20c77600","executionBaselineSha":"fbea12cd996d8c1e13bd834fd6e054c8a37c32e6","deployedRuntimeSha":"67b1bf86169e9696c9365ef4846b99ffae30d4e2",
-  "testRecord":{"bugNumber":"BUG-0026","observedFailure":"supported upload returned safe error"},"expectedResult":"A safe error is shown and no downloadable orphan metadata is presented when storage is unavailable.","actualResult":"A supported controlled text upload returned a safe generic error. After refresh, the table still showed No evidence files uploaded yet, so no orphan metadata/download action was presented.","candidateOutcome":"MEETS_EXPECTED_RESULT","reviewBoundary":"Safety behavior meets expectation, but storage unavailability was inferred rather than activated through a controlled toggle; DonHV must decide whether to accept or rerun with an explicit storage-failure control.",
-  "evidence":[{"id":"UAT-ATT-006-E01","file":"01-safe-storage-like-failure.png","description":"Safe upload error with no raw backend/storage details.","sha256":"6115E8D1A6E5425526E77D0710068F608367DF7F250E658273EF3C426B1DF6BE"},{"id":"UAT-ATT-006-E02","file":"02-no-orphan-after-reload.png","description":"No attachment metadata or download action after refresh.","sha256":"A1406D72F54653AA344039E8C31FFD5ED569BFBF2A0F5958390D1AA466ABCA43"}],"privacyReview":{"status":"PASS","notes":"Synthetic controlled file only."},"issueClassification":"observed safe failure; root cause unconfirmed","limitations":["No controlled S3 toggle or direct storage diagnostic was available."]
+  "schemaVersion": "1.0",
+  "caseId": "UAT-ATT-006",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T17:03:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "testRecord": {
+    "bugNumber": "BUG-0026",
+    "observedFailure": "supported upload returned safe error"
+  },
+  "expectedResult": "A safe error is shown and no downloadable orphan metadata is presented when storage is unavailable.",
+  "actualResult": "A supported controlled text upload returned a safe generic error. After refresh, the table still showed No evidence files uploaded yet, so no orphan metadata/download action was presented.",
+  "candidateOutcome": "MEETS_EXPECTED_RESULT",
+  "reviewBoundary": "Safety behavior meets expectation, but storage unavailability was inferred rather than activated through a controlled toggle; DonHV must decide whether to accept or rerun with an explicit storage-failure control.",
+  "evidence": [
+    {
+      "id": "UAT-ATT-006-E01",
+      "file": "01-safe-storage-like-failure.png",
+      "description": "Safe upload error with no raw backend/storage details.",
+      "sha256": "6115E8D1A6E5425526E77D0710068F608367DF7F250E658273EF3C426B1DF6BE"
+    },
+    {
+      "id": "UAT-ATT-006-E02",
+      "file": "02-no-orphan-after-reload.png",
+      "description": "No attachment metadata or download action after refresh.",
+      "sha256": "A1406D72F54653AA344039E8C31FFD5ED569BFBF2A0F5958390D1AA466ABCA43"
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "Synthetic controlled file only."
+  },
+  "issueClassification": "observed safe failure; root cause unconfirmed",
+  "limitations": [
+    "No controlled S3 toggle or direct storage diagnostic was available."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10942",
+    "reviewDate": "2026-08-04",
+    "category": "RETAINED_TRUTHFUL_POSITIVE",
+    "currentStatus": "CANDIDATE_EVIDENCE_RETAINED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
 }
