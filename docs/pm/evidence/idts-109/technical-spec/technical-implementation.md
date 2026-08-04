@@ -70,9 +70,9 @@ the field was omitted.
 9. **Validation/authorization:** Require exactly one supported IDTS platform role and equality with `Users.role_code`; reject invalid assignment or mismatch with safe 403 messages.
 10. **Transaction:** Read-only identity resolution before protected business handling.
 11. **Database/provider side effect:** Read the internal user profile; no identity or business mutation.
-12. **Response/UI refresh:** Continue to the protected Fiori app on success; show safe account-access or platform-starting guidance on failure.
-13. **Failure/rollback:** Protected business handling does not start. Tokens, claims, private endpoints and stack details are not displayed or persisted.
-14. **Test/evidence:** `npm run qa:idts117:btp-relogin`; BTP XSUAA/AppRouter browser evidence and source review.
+12. **Response/UI refresh:** Continue to the protected Fiori app on success. The UI monitor observes OData XHR/fetch responses; after an OData 401 it clears browser session state and performs one top-level reload so AppRouter can renew XSUAA.
+13. **Failure/rollback:** Protected business handling does not start. The failed request is deliberately not replayed because replaying a write could duplicate business side effects. Tokens, claims, private endpoints and stack details are not displayed or persisted.
+14. **Test/evidence:** `npm run qa:idts117:btp-relogin`; `app/bug-management-ui/webapp/auth-guard.js::installXsuaaSessionMonitor/recoverExpiredXsuaaSession`; BTP XSUAA/AppRouter browser evidence.
 
 ### TI-PLATFORM-01 — HANA-backed readiness
 
