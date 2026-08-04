@@ -1,6 +1,12 @@
 # SangVN Status - Fiori/UI5 Support
 
-Last updated: 2026-07-08
+Last updated: 2026-08-04
+
+## 2026-08-04 - IDTS-116 attachment browser acceptance support
+
+| Date | Task | Work and result | Bugs/errors found | Fix status and verification | Handoff |
+| --- | --- | --- | --- | --- | --- |
+| 2026-08-04 | IDTS-116 | Executed the authorized PM browser flow on controlled `BUG-0019`: upload, parent Save/activation, hard reload, real download, SHA-256 comparison, controlled-row Delete, Save, and final reload absence. Result PASS for the scoped UI flow; four sanitized screenshots are registered under `docs/pm/evidence/idts-116/attachment-end-to-end-sangvn-20260804/`. | **Tooling issues, resolved:** the first PM-file lookup used the stale main worktree and missed the branch-only IDTS-108 work package; a Fiori row click missed its coordinate; an attachment-region locator timed out during screenshot cropping; the browser-control download event timed out because the link used a transient new tab; and the Delete overlay appeared to wait until the confirmation dialog was found in the full snapshot. No product data was lost and no product failure was inferred from these tooling symptoms. | Corrected the file lookup to a current dedicated worktree, used the visible Details action and exact filename row, cropped through bounded DOM coordinates, verified the actual 236-byte downloaded file with SHA-256 `303F802CED28A74E5E3F3363FE5BCDA6A109C801EF4EA5E2BB6BAD9E69ABE59E`, and confirmed final active count 4 with only the controlled filename absent. Jira IDTS-116 comment `10945`. | DonHV reviews/integrates the candidate evidence and decides IDTS-116 closure. SangVN does not transition Jira, merge another owner's PR, or upload the final artifact. |
 
 ## 2026-07-25 - IDTS-95/97 emergency integration decision
 
