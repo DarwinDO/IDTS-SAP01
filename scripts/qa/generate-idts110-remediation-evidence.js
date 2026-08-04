@@ -30,6 +30,19 @@ function resultSvg (testCase, result) {
 </svg>\n`
 }
 
+function blockedSvg (testCase, manifest) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect width="1280" height="720" fill="#fff8eb"/>
+  <rect x="56" y="48" width="1168" height="624" rx="24" fill="#ffffff" stroke="#b26a00" stroke-width="4"/>
+  <text x="104" y="120" font-family="Arial, sans-serif" font-size="30" font-weight="700" fill="#8a5200">IDTS-110 BTP READINESS BLOCKER</text>
+  <text x="104" y="185" font-family="Arial, sans-serif" font-size="46" font-weight="700" fill="#162a22">${xml(testCase.caseId)} - BLOCKED</text>
+  <text x="104" y="250" font-family="Arial, sans-serif" font-size="26" fill="#284b3b">${xml(testCase.title).slice(0, 82)}</text>
+  <text x="104" y="350" font-family="Arial, sans-serif" font-size="24" fill="#284b3b">Cloud Foundry CLI unavailable; no BTP request or integration assertion ran.</text>
+  <text x="104" y="410" font-family="Arial, sans-serif" font-size="24" fill="#284b3b">Environment blocker only; no product failure or PASS is claimed.</text>
+  <text x="104" y="610" font-family="Arial, sans-serif" font-size="18" fill="#557568">Tested baseline ${xml(manifest.baselineSha)}</text>
+</svg>\n`
+}
+
 let updated = 0
 for (const testCase of catalog.cases.filter(testCase => testCase.environment === 'HYBRID_BTP')) {
   const result = resultById.get(testCase.caseId)
@@ -85,6 +98,7 @@ for (const testCase of catalog.cases) {
       'Product failure claimed: false'
     ]
     manifest.limitations = 'Environment blocker only. These 13 cases require an authorized Cloud Foundry/BTP session; DonHV owns final BTP execution review and workbook integration.'
+    fs.writeFileSync(path.join(evidenceRoot, testCase.caseId, 'result.svg'), blockedSvg(testCase, manifest), 'utf8')
   }
   fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8')
 }
