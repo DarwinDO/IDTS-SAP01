@@ -8,6 +8,7 @@ const evidenceRoot = path.resolve('docs/pm/evidence/idts-111/uat')
 const summaryPath = path.resolve('docs/pm/evidence/idts-111/latest-review-summary.json')
 const reviewCommentId = '10942'
 const reviewDate = '2026-08-04'
+const checkOnly = process.argv.includes('--check')
 
 const stalePrerequisite = new Set(['UAT-AI-007', 'UAT-ATT-002', 'UAT-ATT-003', 'UAT-COM-003', 'UAT-COM-004'])
 const historicalOldRuntime = new Set(['UAT-ATT-001', 'UAT-COM-001'])
@@ -37,7 +38,7 @@ const counts = {}
 for (const manifestPath of manifests) {
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
   const [category, currentStatus] = classify(manifest)
-  manifest.donhvLatestReview = {
+  const expectedReview = {
     jiraCommentId: reviewCommentId,
     reviewDate,
     category,
@@ -45,8 +46,15 @@ for (const manifestPath of manifests) {
     preservesHistoricalCandidateTruth: true,
     finalPassApproved: false
   }
-  if (historicalOldRuntime.has(manifest.caseId)) manifest.donhvLatestReview.historicalEvidenceOnly = true
-  fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8')
+  if (historicalOldRuntime.has(manifest.caseId)) expectedReview.historicalEvidenceOnly = true
+  if (checkOnly) {
+    if (JSON.stringify(manifest.donhvLatestReview) !== JSON.stringify(expectedReview)) {
+      throw new Error(`Review metadata mismatch: ${manifest.caseId}`)
+    }
+  } else {
+    manifest.donhvLatestReview = expectedReview
+    fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8')
+  }
   counts[category] = (counts[category] || 0) + 1
 }
 
@@ -76,5 +84,5 @@ const summary = {
   workbookAndDriveChanged: false
 }
 
-fs.writeFileSync(summaryPath, `${JSON.stringify(summary, null, 2)}\n`, 'utf8')
-console.log(JSON.stringify(summary))
+if (!checkOnly) fs.writeFileSync(summaryPath, `${JSON.stringify(summary, null, 2)}\n`, 'utf8')
+console.log(JSON.stringify({ ...summary, mode: checkOnly ? 'CHECK_ONLY' : 'WRITE' }))
