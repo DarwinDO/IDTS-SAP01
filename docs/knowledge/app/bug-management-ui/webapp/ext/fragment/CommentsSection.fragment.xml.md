@@ -1,5 +1,11 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/fragment/CommentsSection.fragment.xml`
 
+## IDTS-116 update — refreshable relative OData binding
+
+The comments feed is relative to the current Bug context. It declares `$$ownRequest: true` so UI5 OData V4 supports `requestRefresh("$direct")` after `addComment` succeeds. Without this parameter, the write can persist while the visible feed remains stale. This is a read-refresh setting only; CAP remains responsible for creating the comment and history event.
+
+Vietnamese: Feed comment bind tương đối theo Bug hiện tại. `$$ownRequest: true` cho phép UI5 đọc lại riêng feed sau khi ghi thành công; nó không thay đổi logic lưu comment ở backend.
+
 > **Ownership / debug anchor:** SangVN owns comments UI (backup: DonHV). Comments require a saved bug key; the create page hides this section so no orphan comment can be created.
 > **Ownership / điểm debug:** SangVN sở hữu UI comments (backup: DonHV). Comment cần bug key đã lưu; trang create ẩn section này để không tạo comment mồ côi.
 
