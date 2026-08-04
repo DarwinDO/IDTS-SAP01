@@ -1,13 +1,13 @@
 ## Summary
 
 - Preserve NhanT's complete 57-case Tester UAT package and add DonHV's case-by-case disposition.
-- Record 19 accepted positive evidence packages, 25 accepted blockers, and the reviewed classification of 13 negative outcomes.
+- Publish the current 57-case partition: 22 candidate MEETS, 12 candidate DOES_NOT_MEET and 23 BLOCKED, all pending DonHV's final disposition.
 - Keep the approved 90-case catalog at `PREPARED`; no candidate is promoted to final UAT PASS/FAIL before workbook integration.
 
 ## Positive Evidence
 
 - 57 manifests and 77 PNG references form the current candidate evidence inventory; final gate verification is required before handoff.
-- DonHV accepted evidence for 19 positive executions.
+- Current review package records 22 candidate MEETS; these remain candidates rather than final workbook PASS results.
 - NhanT personally acknowledged briefing SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`; Jira comments are `10908` and `10909`.
 
 ## Negative Evidence
@@ -19,9 +19,9 @@
 
 ## Edge/Boundary Evidence
 
-- Twenty-five blocker packages remain accepted as truthful blockers without PASS.
+- Twenty-three blocker packages remain truthful blockers without PASS.
 - `UAT-UX-003` is a test-harness limitation: Enter/Escape/focus return evidence is retained, but physical Tab-key confirmation is still required.
-- Targeted SAP reruns are currently blocked because the deployed app renders blank and JavaScript assets fail parsing.
+- Targeted SAP reruns recovered on the current deployed surface: AUTH-005 is candidate positive, BUG-008 is candidate negative, and current comment/attachment checks retain their recorded candidate outcomes. The remaining blockers are evidence/fixture/identity prerequisites, not the earlier blank-page incident.
 
 ## Roles/Authorization
 
@@ -38,8 +38,8 @@
 ## UI/UX Review
 
 - The retained 77 PNG references remain the candidate visual set.
-- Current deployed SAP surface is blank after reload; browser logs `Unexpected token '<'` for `auth-guard.js` and `bootstrap-ui5.js`.
-- No new UI screenshot or targeted PASS is claimed while the surface is unhealthy.
+- Current deployed SAP reruns produced sanitized PNG evidence for AUTH-005 and BUG-008; the package contains 77 unique hash-verified PNG references with no missing/hash mismatch.
+- UX-002 remains fixture-limited and UX-003 still needs NhanT's physical Tab-key confirmation; no final PASS is inferred from those incomplete boundaries.
 
 ## Ponytail Simplicity
 
@@ -66,9 +66,10 @@ Ownership: NhanT executes truthful Tester evidence; DonHV approves results and o
 
 ## Known Gaps
 
-- A healthy deployed SAP/browser surface is required for three targeted reruns plus the AI session/network rerun.
+- AI-005/AI-009 still require immutable-ID, sanitized Network and matching audit diagnostics; the retained current UI observations are not sufficient final proof.
+- Candidate negatives COM-003, ATT-001 and BUG-008 remain disclosed for DonHV disposition.
 - `UAT-UX-003` requires NhanT's physical-keyboard confirmation.
-- Twenty-five accepted blockers still need their exact identities/fixtures/services before final approval.
+- Twenty-three blockers still need their exact identities, fixtures, services or diagnostic proof before final approval.
 - The final English `UAT_EN_PREPARED` workbook and Drive artifact remain unchanged; OfficeCLI is unavailable.
 
 ## Jira/Evidence Links

@@ -22,7 +22,7 @@
 ## Edge/Boundary Evidence
 
 - Required fields, invalid classification mapping, unavailable/unsuitable assignee, repeated lifecycle action, attachment size/type/storage failure, sparse/stale AI data, reload, and browser recovery remain separate cases.
-- `UAT-AI-005` and `UAT-AI-009` retain their existing evidence because the approved Browser surface cannot expose the immutable suggestion ID or sanitized Network response DonHV requested.
+- `UAT-AI-005` and `UAT-AI-009` retain diagnostic evidence, but it does not prove the immutable suggestion ID, sanitized Network response and matching audit record DonHV requested; both remain explicit gaps rather than Browser-tool blockers.
 - `UAT-UX-003` remains a physical-keyboard confirmation; automation output is not substituted for NhanT's Tab-key observation.
 
 ## Roles/Authorization
@@ -40,7 +40,7 @@
 ## UI/UX Review
 
 - Historical screenshots show the earlier signed-in runtime; they are not claimed as current IDTS-116 behavior.
-- Current runtime UI/UX verification remains pending because the required Browser control tool is unavailable in this session.
+- Current browser reruns supplied AUTH-005 sign-out/protected-route and BUG-008 duplicate-History evidence. UX-002 still needs a matching wrapping fixture, and UX-003 still requires NhanT's physical Tab-key confirmation.
 - Tablet clipping remains the confirmed UI defect; physical keyboard focus behavior remains a manual confirmation.
 
 ## Ponytail Simplicity
