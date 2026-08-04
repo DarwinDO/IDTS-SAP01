@@ -38,7 +38,7 @@ CAP service files declare "what APIs exist"; JavaScript service files implement 
 4. It creates an `AuthSessions` row with a hash of the token, not the raw token.
 5. If login fails because the email/password is wrong or the user is inactive, the service returns the same safe 401 message.
 6. If login fails because the database/runtime has an unexpected error, the service logs only sanitized diagnostic fields and returns a generic 500 message. This prevents raw SQL, table names, column names, tokens, passwords, or hostnames from appearing in the login UI.
-7. If CAP rejects a malformed `login` payload at the CDS type boundary, the AuthService error hook keeps HTTP 400 but replaces CAP type names, rejected values, and validation internals with the stable `INVALID_LOGIN_REQUEST` response.
+7. CAP validates malformed `login` parameters before dispatching `AuthService.login`. A post-adapter middleware registered in `server.js` therefore rewrites only `ASSERT_DATA_TYPE` failures for `email` or `password` on `POST /odata/v4/auth/login` to the stable HTTP 400 `INVALID_LOGIN_REQUEST` response. Other routes and errors pass through unchanged.
 8. `logout` revokes the session by setting `revokedAt`.
 9. `me` returns safe current-user profile data.
 
@@ -94,7 +94,7 @@ File service CDS khai bao "API nao ton tai"; file JavaScript service implement "
 4. Tao row `AuthSessions` voi hash cua token, khong luu raw token.
 5. Neu login fail vi sai email/password hoac user inactive, service tra cung mot message 401 an toan.
 6. Neu login fail vi loi database/runtime bat ngo, service chi log cac field diagnostic da sanitize va tra message 500 chung chung. Cach nay ngan raw SQL, ten bang, ten cot, token, password hoac hostname hien ra tren man hinh login.
-7. Neu CAP tu choi payload `login` sai kieu ngay tai bien CDS, error hook cua AuthService van giu HTTP 400 nhung thay ten kieu, gia tri bi tu choi va chi tiet validation noi bo bang response `INVALID_LOGIN_REQUEST` on dinh.
+7. CAP validate tham so `login` sai kieu truoc khi dispatch `AuthService.login`. Vi vay middleware sau OData adapter duoc dang ky trong `server.js` chi rewrite `ASSERT_DATA_TYPE` cua `email` hoac `password` tren `POST /odata/v4/auth/login` thanh response HTTP 400 `INVALID_LOGIN_REQUEST` on dinh. Route va loi khac van duoc chuyen tiep nguyen trang.
 8. `logout` revoke session bang cach set `revokedAt`.
 9. `me` tra safe current-user profile data.
 
@@ -136,7 +136,7 @@ File service CDS khai bao "API nao ton tai"; file JavaScript service implement "
 
 - Source file: `srv/auth.js`
 - Knowledge mirror: `docs/knowledge/srv/auth.js.md`
-- Last reviewed: 2026-08-03
+- Last reviewed: 2026-08-04
 
 ## IDTS-113 update - dual authentication runtime
 
