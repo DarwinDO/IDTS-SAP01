@@ -170,6 +170,9 @@ entity HistoryEvents : cuid, managed {
 annotate Bugs.attachments with {
   // Binary tối đa 10MB và chỉ nhận MIME allow-list. Metadata nằm PostgreSQL; storage adapter giữ nội dung ở S3/cloud storage.
   content @Validation.Maximum : '10MB'
+          // Force a real browser download. The plugin default is inline preview,
+          // which opens text/PDF content in a new tab instead of saving the file.
+          @Core.ContentDisposition.Type : 'attachment'
           @Core.AcceptableMediaTypes : [
             'image/jpeg',
             'image/png',

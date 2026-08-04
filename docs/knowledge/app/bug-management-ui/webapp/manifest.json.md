@@ -545,4 +545,10 @@ service va forward XSUAA token.
 
 ## IDTS-116 attachment section registration (2026-08-03)
 
-`IdtsAttachmentsCustom` and the unused `sap.ui.unified` dependency were removed. The manifest still configures `attachments/@UI.LineItem` as a responsive table, while the Object Page section itself comes from the visible CDS ReferenceFacet. This prevents duplicate attachment sections and lets the SAP-supported Fiori Elements/plugin controls own CSRF, draft Save/Discard, upload, download and delete.
+`IdtsAttachmentsCustom` and the unused `sap.ui.unified` dependency were removed.
+
+Superseded on 2026-08-04: the manifest must also avoid a `controlConfiguration` override for `attachments/@com.sap.vocabularies.UI.v1.LineItem`. The CAP attachment plugin owns the generated `attachments_attachments` facet and table lifecycle. IDTS keeps only the custom Comments section.
+
+Do not fix attachment reload by adding a raw request, custom `UploadSet`, hard-coded generated control ID, or custom CAP `READ` handler. First verify the active navigation response, then verify that the generated facet initiates its list request.
+
+Cập nhật ngày 2026-08-04: manifest không override table attachment. Facet `attachments_attachments` và vòng đời bảng do CAP attachment plugin quản lý; IDTS chỉ giữ custom Comments section.

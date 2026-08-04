@@ -15,8 +15,8 @@ const controller = read('app/bug-management-ui/webapp/ext/sections/BugCollaborat
 
 assert(schema.includes("from '@cap-js/attachments'"), 'Attachment entity must use the CAP attachment plugin')
 assert(schema.includes('Composition of many BugAttachments'), 'Bug must own attachment drafts through a composition')
-assert(annotations.includes("Target : 'attachments/@UI.LineItem'"), 'Object Page must expose the generated attachment facet')
-assert(!/ID\s*:\s*'Attachments'[\s\S]{0,180}!\[@UI\.Hidden\]\s*:\s*true/.test(annotations), 'Generated attachment facet must be visible')
+assert(!annotations.includes("Target : 'attachments/@UI.LineItem'"), 'Application annotations must leave the attachment facet to the CAP attachment plugin')
+assert(!manifest.includes('attachments/@com.sap.vocabularies.UI.v1.LineItem'), 'Manifest must not override the plugin-owned attachment table')
 assert(!manifest.includes('IdtsAttachmentsCustom'), 'Custom attachment section must not duplicate the generated facet')
 assert(!manifest.includes('AttachmentsSection.fragment'), 'Custom FileUploader fragment must be retired')
 assert(!controller.includes('pendingCreateAttachmentsByBugId'), 'Files must use CAP draft persistence instead of a browser-memory queue')
