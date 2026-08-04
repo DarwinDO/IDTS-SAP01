@@ -20,42 +20,36 @@ ARTIFACTS = {
         "template": TEMPLATE_DIR / "Test_Scenario.xlsx",
         "outputs": [
             OUTPUT_DIR / "Test_Scenario_IDTS_SAP01_en_v0.3.xlsx",
-            OUTPUT_DIR / "Test_Scenario_IDTS_SAP01_vi_v0.3.xlsx",
         ],
     },
     "unit": {
         "template": TEMPLATE_DIR / "Unit_Test.xlsx",
         "outputs": [
             OUTPUT_DIR / "Unit_Test_IDTS_SAP01_en_v0.4.xlsx",
-            OUTPUT_DIR / "Unit_Test_IDTS_SAP01_vi_v0.4.xlsx",
         ],
     },
     "functional": {
         "template": TEMPLATE_DIR / "Functional_Test.xlsx",
         "outputs": [
             OUTPUT_DIR / "Functional_Test_IDTS_SAP01_en_v0.3.xlsx",
-            OUTPUT_DIR / "Functional_Test_IDTS_SAP01_vi_v0.3.xlsx",
         ],
     },
     "report": {
         "template": REPORT_TEMPLATE,
         "outputs": [
             OUTPUT_DIR / "Test_Report_IDTS_SAP01_en_v0.4.xlsx",
-            OUTPUT_DIR / "Test_Report_IDTS_SAP01_vi_v0.4.xlsx",
         ],
     },
     "uat": {
         "template": TEMPLATE_DIR / "UAT.xlsx",
         "outputs": [
             OUTPUT_DIR / "UAT_IDTS_SAP01_en_prepared_v0.2.xlsx",
-            OUTPUT_DIR / "UAT_IDTS_SAP01_vi_prepared_v0.2.xlsx",
         ],
     },
     "defect": {
         "template": TEMPLATE_DIR / "Test_And_Fix_Bug.xlsx",
         "outputs": [
             OUTPUT_DIR / "Test_And_Fix_Bug_IDTS_SAP01_en_v0.5.xlsx",
-            OUTPUT_DIR / "Test_And_Fix_Bug_IDTS_SAP01_vi_v0.5.xlsx",
         ],
         # The original task explicitly requires removing unused Issue 2 / Issue 4 remnants.
         "allowed_sheets": ["Fix and bugs"],

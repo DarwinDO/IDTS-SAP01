@@ -1,5 +1,146 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-08-04 — IDTS-116 attachment download-disposition defect
+
+| Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product/UI defect | Selecting an uploaded attachment opened its raw content in a browser tab but did not create a file in the user's Downloads folder. | `@cap-js/attachments` 3.13.1 annotates attachment `content` with `@Core.ContentDisposition.Type: 'inline'`; IDTS did not override that plugin default. Upload, save, reload and byte readback passed, but the download acceptance criterion did not. | Fix in progress on `fix/idts-116-attachment-download-disposition-donhv`: override only the content-disposition type to `attachment` while retaining the plugin-owned Fiori facet and S3 storage flow. The new red test reproduced `actual=inline`, `expected=attachment`. | Rerun CAP/model regression, deploy without DB/seed changes, then prove a real browser download event, local file SHA-256 match, reload persistence and controlled-file deletion. |
+| Test-environment blocker | `npm run qa:idts60:browser` could not execute because `QA_PASSWORD` is not present in the fresh worktree environment. | The legacy browser harness requires a private QA credential; the failure occurred before browser assertions and is not evidence of a product regression. | Recorded; no credential was copied into the branch or logs. Focused model, collaboration, CAP compile, secret, rule and depth checks passed. | Use the signed-in BTP browser session for post-deploy acceptance and never commit/share the password. |
+| Process issue | The first PR #280 QA Depth run failed because its Ownership Knowledge Gate section summarized the existing PASS instead of including every parser-required field. | The PR gate validates an exact structured declaration even when the member's gate is already valid. Re-running the old workflow retained the original pull-request event payload. | PR body corrected with DonHV's existing 90% PASS declaration and evidence path; no gate was repeated or fabricated. | Push this status correction to create a fresh `synchronize` event, then require the new exact-head gate to PASS before merge. |
+
+## 2026-08-04 — IDTS-116 deployed comment auto-refresh acceptance
+
+| Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product/UI acceptance | The previous browser bundle could report that the comment was posted but ask the user to refresh the page. | The deployed `0.0.3` bundle now gives the relative comments binding its own request and refreshes it after the successful OData action. | PASS; no further source patch is required for comment refresh. | On `BUG-0019`, the controlled marker appeared immediately with toast `Comment posted.` and remained after hard reload. Evidence: `docs/pm/evidence/idts-116/comment-auto-refresh/`. |
+| UI/UX observation | Immediately after a hard reload, the independent comments read briefly showed the empty-state copy before the request completed. | This is asynchronous loading of the relative comments binding, not loss of the committed comment. | Non-blocking; no behavior change made in this evidence task. | Consider a dedicated busy-state polish only if mentor/user review finds the transient empty state confusing. Full attachment acceptance remains next. |
+
+## 2026-08-03 — IDTS-111 candidate execution review
+
+| Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| QA review result | PR #270 contains 57 candidate UAT executions: 19 meet the catalog expectation, 13 do not, and 25 are blocked by current preconditions. | Candidate outcome labels do not by themselves distinguish product defects from catalog mismatch, environment/session blockers, or insufficient evidence. | Reviewed all 57 manifests and 61 referenced images; produced `docs/pm/evidence/idts-111/donhv-execution-review-matrix.md`. | 0 missing evidence files and 0 SHA mismatch. Keep final UAT workbook and Drive unchanged. |
+| Product defect | One title-only draft save produced two identical Edit history events at the same timestamp. | Draft-save audit and generic active UPDATE audit can both record the same activation change. | Confirmed by source and screenshot; runtime remains unchanged in this docs/evidence review. | Tracked by IDTS-119; fix through a separate runtime PR. |
+| Product defect | Tablet Object Page/action and Similar Bugs reason text are clipped at the specified viewport. | Current responsive layout does not preserve all labels/reason wrapping. | Confirmed by direct visual review; runtime remains unchanged. | Tracked by IDTS-120; fix through a separate FE PR. |
+| Process gate | NhanT has not personally acknowledged the current briefing SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`. | The execution package references earlier governance context; an agent or PR check cannot acknowledge for NhanT. | Jira reminder already exists; no fabricated acknowledgment was added. | Keep PR #270 Draft/unmerged until NhanT READ and fresh exact-head gate PASS. |
+
+## 2026-08-03 - IDTS-106 EN-only Drive cleanup execution
+
+- Classification: documentation/process result.
+- Result: after DonHV's IDTS-105 READ and the approved IDTS-107 Gate 2 were satisfied, the EN-only pipeline was implemented. Eleven generated VI artifacts are retired from the current repo tree, with bytes preserved by Git history and annotated tag `sap490-english-only-pre-cleanup-20260803`.
+- Drive control: all 13 VI Mentor Current artifacts were downloaded to `E:\IDTS-SAP01-backups\drive-vi-before-trash-20260803-1625`, hashed and Office-ZIP checked before being moved to Trash. No folder was trashed and Trash was not emptied.
+- Verification: fresh parent-folder readback reports no VI item and one EN counterpart for all 13 families. The same-ID Mentor Index contains no VI row/link and records the English-only policy, current versions and truthful pending acknowledgments/test execution.
+- Evidence: `docs/pm/evidence/idts-106/drive-vi-pre-trash-manifest-20260803.md` and `docs/sap490/generated-vi-retirement-manifest-20260803.md`.
+- Closeout: local/security/process gates passed; PR #264 merged normally at `cd03aedde4fa2d3d146b54ec76d400e4de3f670b`; `origin/dev` contains the cleanup commit; Jira IDTS-106 is Done with evidence comment `10882`. SangVN, DatDT and NhanT still acknowledge IDTS-105 before approving their own packages.
+
+- Classification: tooling issue (resolved).
+- Symptom: the first browser automation loop opened the selected Drive row's action affordance before the row selection toolbar was fully active, so `Move to bin` was not exposed; later bulk attempts occasionally timed out while the Drive grid rerendered.
+- Root cause: Google Drive lazily renders row actions and replaces the selected row after each operation.
+- Fix status: resolved by requiring an exact single filename match, selecting the row, then using the supported Delete shortcut for Move to bin and verifying the row disappeared before continuing.
+- Impact: no wrong file or folder was moved; exact-ID manifest and post-operation folder readback confirm the approved 13-file scope.
+
+## 2026-08-03 - IDTS-106 merge synchronization issue
+
+- Classification: process/merge issue.
+- Symptom: merging the latest `origin/dev` into the IDTS-106 branch produced one content conflict in this status file because IDTS-106 and IDTS-107 had both prepended session entries.
+- Root cause: two documentation workstreams updated the same shared chronological log before IDTS-107 merged.
+- Status: resolved by preserving both IDTS-106 and IDTS-107 entries in full; no runtime, Drive, generated artifact, or database content was changed by the resolution.
+- Verification/next action: `git diff --check` and the final branch gate must pass before merge; continue IDTS-106 from the newly synchronized `origin/dev` baseline.
+
+## 2026-08-03 - IDTS-106 audit session issue log
+
+- Classification: documentation/inventory issue.
+- Symptom: the first Drive audit reported 12 VI/EN pairs while the earlier project inventory reported 13.
+- Root cause: `Test And Fix Bug` is nested under the `Test Report` folder, so a direct-child family count omitted it.
+- Status: fixed in the candidate evidence; a fresh recursive Drive readback confirms 13 VI artifacts and 13 matching EN counterparts. No Drive write, Trash, rename, move, or delete was performed.
+- Verification: Google Drive metadata readback of the nested folder `SU26SAP01_GSU26SAP01_Test_And_Fix_Bug` confirmed both `Test_And_Fix_Bug_VI_v0_5_20260724.xlsx` and its EN counterpart.
+- Owner/next action: DonHV must retain the 13-file inventory for backup/Trash planning after IDTS-105 human acknowledgments are complete.
+
+- Classification: tooling/verification issue.
+- Symptom: the first bounded group command for `python scripts/sap490/validate-specification-pack.py`, `validate-test-pack.py`, `test-specification-quality-contract.py`, `test-test-pack-evidence-contract.py`, and `test_template_fidelity.py` exceeded the 124-second command limit before a terminal result was returned.
+- Root cause: the validators were run sequentially in one shell wrapper and at least one workbook-heavy check exceeded the combined timeout; no individual validator result is inferred from the timeout.
+- Status: open for this audit evidence; rerun each check separately with a bounded timeout before any completion claim.
+- Runtime/artifact impact: none observed; the command was read-only and no source, generated artifact, Drive file, database, or deployment state changed.
+- Owner/next action: DonHV audit handoff; collect separate validator results or record the specific slow validator as an evidence limitation.
+- Follow-up: `python scripts/sap490/validate-specification-pack.py` exited 0 with specification PASS; `python scripts/sap490/validate-test-pack.py` exited 0 with 12 workbooks, 0 warnings, 0 errors; `test-test-pack-evidence-contract.py` and `test_template_fidelity.py` PASS. A final rerun of `python scripts/sap490/test-specification-quality-contract.py` with an adequate timeout completed in 110.1 seconds and PASS. The original timeout is resolved as a command-budget issue.
+## 2026-08-03 - IDTS-107 dependency verification issue
+
+- Classification: dependency/security issue.
+- Symptom: `npm ci` was required because the fresh worktree lacked `@cap-js/attachments`; installation completed but `npm audit` reported 24 dependency findings (1 low, 9 moderate, 13 high, 1 critical).
+- Root cause: the worktree had no installed dependency tree; the vulnerability findings belong to the resolved dependency graph and were not introduced by the documentation candidate.
+- Status: compile dependency blocker resolved locally; vulnerability remediation remains out of scope and unmodified because automatic `npm audit fix` could change the lockfile/runtime behavior.
+- Verification: `npm ci` exit 0, 1,519 packages installed; no `package.json` or `package-lock.json` change is expected from this check.
+- Owner/next action: dependency/security owner should review `npm audit` separately. IDTS-107 may use the installed tree only for read-only CAP compilation and source-trace verification.
+
+- Classification: tooling/command issue.
+- Symptom: the first post-install `cds compile srv --to edmx` stopped because the model exposes both `AuthService` and `BugService`.
+- Root cause: the command omitted the required service selector; the earlier missing-attachment dependency error was no longer present.
+- Status: corrected by rerunning with `-s all`; no source or model change was made.
+- Verification/next action: use `npx cds compile srv --to edmx -s all` as the authoritative compile command for this two-service project.
+
+## 2026-08-03 - IDTS-107 technical specification database/persistence candidate audit
+
+- Tooling/dependency issue (resolved): the fresh worktree initially lacked its
+  installed dependency tree, so CAP MCP could not resolve
+  `@cap-js/attachments`. `npm ci` restored the pinned dependency graph without
+  changing `package.json` or `package-lock.json`. CAP MCP model search then
+  succeeded, and `npx cds compile srv --to edmx -s all` passed with only the
+  pre-existing attachment vocabulary warning.
+- Generated-model verification (PASS): `npx cds compile db --to hana` generated
+  35 `.hdbtable` artifacts. A corrected DDL parser compared all generated
+  columns with the candidate dictionary: 326 matched, zero missing, zero extra.
+  No HDI deploy, database change, seed load, or Drive update occurred.
+- Tooling/parser issue (resolved): the first comparison attempted to parse
+  `.hdbtable` files as JSON and produced unusable counts. HANA compiler output
+  is SQL DDL, not JSON. The result was discarded; a DDL parser with quoted-name
+  handling was used for the authoritative 35-table/326-column comparison.
+- Tooling issue (resolved): a read-only configuration inventory attempted to
+  open `.cdsrc.json`, which is not present in this repository. `package.json`
+  and `mta.yaml` provide the required CAP profile and BTP deployment truth;
+  no configuration or runtime behavior is missing because of this absent
+  optional file.
+- Tooling issue (resolved): a PowerShell preview piped `git show` through
+  `Select-Object -First 2`, which closed the pipeline after the requested
+  header rows and returned exit 1 despite producing the expected dictionary
+  header. The source branch remains readable; avoid early-closing previews
+  when collecting Git evidence.
+- Documentation issue (open, not changed by IDTS-107): OfficeCLI
+  `view ... issues` on `Technical_Specification_IDTS_SAP01_en_v0.7.xlsx`
+  found two invalid `A` named ranges with `#REF!` bodies and 23 text-overflow
+  warnings across Histories, Introduction, Scope, Assumptions, Screen Layout,
+  and Screen Definition. The targeted Technical Design candidate was not
+  written into the workbook; IDTS-112/template integration must repair or
+  formally disposition these workbook defects before final acceptance.
+- Documentation tooling issue (resolved): the first candidate dictionary copy
+  from the stale branch was truncated at 167 of 327 lines by the command-output
+  boundary. It was replaced through seven bounded Git-read chunks; the final
+  candidate has 327 lines and the same Git blob as the stale reviewed
+  dictionary. It remains a candidate, pending a fresh successful CAP/HDI
+  generation against the current environment.
+
+### Vietnamese
+
+- Lỗi tooling/dependency đã xử lý: worktree mới chưa có dependency tree nên CAP
+  MCP không resolve được `@cap-js/attachments`. Sau `npm ci`, CAP MCP hoạt động
+  và `npx cds compile srv --to edmx -s all` PASS; không đổi source hoặc lockfile.
+- Generate HANA từ CDS PASS: 35 `.hdbtable`, 326 cột; so sánh với dictionary
+  khớp 326, thiếu 0, dư 0. Không deploy HDI, không đổi DB/seed/Drive.
+- Lỗi parser đã xử lý: lần đầu đọc nhầm `.hdbtable` như JSON nên kết quả bị loại.
+  Parser DDL có xử lý tên quoted được dùng cho kết quả authoritative.
+- Lỗi tooling đã xử lý: `.cdsrc.json` không tồn tại nhưng không bắt buộc;
+  `package.json` và `mta.yaml` cung cấp đầy đủ truth về profile CAP/BTP. Một
+  preview PowerShell dùng pipeline đóng sớm cũng trả exit 1 dù đã đọc header;
+  không dùng cách preview đó khi thu thập Git evidence.
+- Lỗi documentation còn mở, không do IDTS-107 tạo: OfficeCLI phát hiện hai
+  named range `A` có `#REF!` và 23 cảnh báo text overflow trong workbook EN
+  v0.7. Candidate không ghi vào workbook; IDTS-112/template integration phải
+  sửa hoặc ghi nhận chính thức trước Gate cuối.
+- Lỗi tooling documentation (đã xử lý): lần copy dictionary candidate đầu tiên
+  bị cắt ở 167/327 dòng do giới hạn output. File đã được thay bằng bảy Git-read
+  chunk có giới hạn; candidate cuối có 327 dòng và cùng Git blob với dictionary
+  stale đã review. Nó vẫn là candidate cho đến khi CAP/HDI generate lại thành
+  công trong môi trường hiện tại.
+
 ## 2026-08-01 - IDTS-117 BTP rollout and browser acceptance complete
 
 - Product defect resolved: a repeated BTP re-entry could return the HTML XSUAA
@@ -5303,6 +5444,35 @@ remains pending normal PR merge.
 
 Live evidence: `docs/pm/evidence/idts-117/demo-readiness/live-verification-20260802.md`.
 
+## 2026-08-03 — IDTS-105 human acknowledgment and delegation-mode correction
+
+| Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Process gate | DonHV personally confirmed reading the current IDTS-105 briefing at merge SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`, understood ownership and had no unresolved questions. | This is the required human READ gate; it is not candidate approval, test PASS or Knowledge Gate completion. | Repository acknowledgment updated and matching Jira comment `10866` created. Team reminders were added to IDTS-108–111 as comments `10867`–`10870`. | SangVN, DatDT and NhanT must still acknowledge personally; IDTS-105 remains In Progress. |
+| Process/tooling issue | Delegated GPT-5.6 subagents appeared with the UI mode `Fast` even though only model and reasoning were requested. | The subagent runtime exposes GPT-5.6 through a priority/Fast execution tier independently of the selected model and reasoning effort; the delegation prompts did not explicitly prohibit that service tier. | Governance now prohibits Fast/priority delegated runs and requires pre-dispatch verification of model, reasoning and service mode. | If a mechanism cannot enforce non-Fast mode, do not use it for delegated work; run locally in the primary task or use a non-Fast child task. |
+| Tooling issue | `gh pr merge --delete-branch` reported that local branch `dev` was already used by another worktree after PR #266 merged. | Git could not perform the optional local branch cleanup because the root worktree owns `dev`; the remote merge itself had already succeeded. | No destructive workaround used. The merge SHA was independently verified as an ancestor of `origin/dev`. | Remove stale worktree/branch only through a separate safe cleanup when no active work depends on it. |
+
+## 2026-08-03 — IDTS-105 current-baseline briefing remediation
+
+| Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Documentation issue | The mandatory SAP490 briefing still described PostgreSQL/Render as the active shared-QA baseline, marked OpenAI/provider live as disabled, assigned Unit Test catalog creation to NhanT, and omitted the approved 188/90 atomic-catalog truth. | The briefing was written before the SAP BTP/HANA migration, current feature-specific AI routing, and DonHV's updated Unit Test/UAT ownership decisions. | Corrected on the isolated IDTS-105 branch; no runtime, test result, acknowledgment or Drive artifact was changed. | Review `docs/pm/evidence/idts-105/briefing-current-truth-audit-20260803.md`, run documentation/process gates, merge normally, then DonHV personally reads and acknowledges the merge SHA. |
+| Process/tooling issue | The first four read-only subagents stopped immediately instead of auditing because their prompts did not explicitly repeat the already-known member identity. | Repo instructions require the member identity at task start; fresh subagent contexts did not inherit it. | Corrected by closing those attempts and respawning with `Member: donhv`, the frozen SHA and explicit read-only scope. | Primary agent independently reviews every returned finding; no agent-created approval or consensus is accepted. |
+| Environment readiness result | IDTS-105 evidence needed a fresh BTP point-in-time baseline. | Read-only readiness check was required before relying on deployed architecture claims. | PASS; no recovery action was needed. | `npm run btp:demo:check`: CAP/AppRouter 1/1, `/health` and `/ready` 200, anonymous protected API 401, web 200, `DEMO READY`; HDI broker status `create succeeded`. No DB deploy/seed/migration. |
+
+## 2026-08-03 — IDTS-107 complete HANA dictionary remediation
+
+| Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Documentation issue | The PR #265 candidate claimed the HANA dictionary was complete at 35 tables/326 columns. | It used `cds compile db --to hana`, which excludes service draft/helper artifacts and CAP outbox model content included by the effective production build. | Corrected candidate and deterministic generator to cover 48 physical tables/578 column declarations. | Fresh `cds build --production` and generated CSV both return 48/578 with zero missing source/evidence fields. Keep PR Draft for DonHV Gate 2 approval. |
+| Runtime finding | `AssignableDevelopers` and `DeveloperWorkloads` are calculated by custom READ handlers but the production build creates physical tables for them. | Their service entities lack `@cds.persistence.skip`. | Open and intentionally not fixed in the documentation PR; tracked by [IDTS-118](https://dutassociation.atlassian.net/browse/IDTS-118), related to IDTS-107. | IDTS-118 owns CAP pattern confirmation and safe migration/deployment analysis; current Technical Specification documents current HANA truth until runtime changes. |
+| Documentation issue | The attachment persistence wording implied metadata/reference only and did not state the exact create/saved-Bug sequence or generated `content BLOB` column. | Earlier candidate abstracted the external S3 adapter too aggressively. | Corrected: new-Bug files remain in browser memory until save; saved Bug upload uses edit draft → POST metadata → PUT binary → activate. Dictionary includes the generated HANA `content BLOB`. | Verify native browser upload/download/reload/delete evidence before IDTS-112 final integration. |
+| Evidence result | Generated inventory needed live HANA falsification. | Gate 2 requires production truth, not compiler output alone. | PASS: read-only CF task 23 queried only HANA metadata and matched 48 tables/578 columns. | Evidence: `docs/pm/evidence/idts-107/technical-spec/hana-production-readback-20260803.md`. No DB deploy, seed or migration occurred. |
+| Existing CAP compiler warning | Fresh `cds build --production` and service compilation pass but repeat the known `NonUpdateableProperties` vocabulary warning on `BugService.Bugs_attachments`. | Existing `@cap-js/attachments`/CAP vocabulary compatibility warning; not introduced by IDTS-107 documentation or dictionary generation. | Logged again for this session and left unchanged; it is non-blocking because compilation succeeds and IDTS-107 must not alter runtime annotations. | Preserve the warning in Gate 2 evidence. Handle only through a dedicated attachment/model follow-up if runtime behaviour or supported CAP guidance requires a change. |
+| Test-harness issue | The first one-off CSV cross-check reported 578 rows but only one table even though the generator had just reported 48 tables. | The ad-hoc verifier searched for header `Physical HANA Artifact`; the generated CSV contract uses `Physical HANA Table`, so the missing index caused every row to resolve to the same undefined field. | Rejected as evidence and corrected in-session without changing the dictionary contract or runtime. | Rerun with exact header validation and require 578 rows, 48 distinct tables, and zero missing source/evidence values before accepting the gate. |
+| Human approval | DonHV explicitly approved IDTS-107 Gate 2 at content head `4cca4c0bc575469810c881b1757e6eb3f519437c`. | Human review gate was intentionally kept separate from agent verification and GitHub checks. | Approved; repository approval evidence added without changing the approved dictionary/content truth. | Merge PR #265 normally, update Jira, and hand the package to IDTS-112. Official workbook and Drive synchronization remain downstream. |
+| Process-gate issue | Two post-approval GitHub `qa-depth-gate` runs reported that ownership evidence was not detectable although the files existed. | The first event used backtick/comma formatting unsupported by the validator. The second workflow was triggered by the corrective commit before `gh pr edit` finished, so its immutable pull-request event payload still contained the old body even though the live PR body was already corrected. | Merge stopped both times; no bypass attempted. The live PR body now uses the validator-supported plain `Evidence: docs/...` form before the next synchronize event. | Push this updated session record only after the PR body is correct, then accept the new gate result only from that fresh synchronize event. |
+
 ## 2026-08-02 — IDTS-110 catalog source-trace validation
 
 | Classification | Symptom | Root cause | Fix status | Verification / next action |
@@ -5351,4 +5521,120 @@ Live evidence: `docs/pm/evidence/idts-117/demo-readiness/live-verification-20260
 | --- | --- | --- | --- |
 | QA execution readiness | PR #261 merged normally at `6f01affc2c2945e51d18199137c8a89a20c77600`. A scoped comparison found no runtime-relevant difference between deployed SHA `67b1bf86169e9696c9365ef4846b99ffae30d4e2` and catalog source baseline `447da1dab80418847d806040e6b2060b0916cb63`. | Fresh `npm run btp:demo:check` returned `DEMO READY`: CAP/AppRouter 1/1, liveness/readiness/web HTTP 200 and anonymous protected API HTTP 401 as expected. | Assigned members may execute only their catalog cases with their own SAP identities and sanitized case-specific evidence. All cases remain PREPARED until DonHV reviews actual results. |
 | Environment limitation | SAP BTP Trial and HANA Cloud Free Tier can auto-stop after the point-in-time readiness check. | The execution baseline requires a fresh readiness check at the start of every test session and bounded recovery by DonHV if needed. | Classify a later auto-stop as an environment blocker; do not misreport it as a product-test failure without diagnosis. |
+
+## 2026-08-03 — IDTS-110 PR #269 execution review
+
+| Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| QA taxonomy issue | PR #269 reports 152 blocked Unit Test cases although independent source review reduces the true BTP-only set to 13. | The execution harness treated optional `HYBRID_BTP` confirmation and several locally injectable integration branches as BTP prerequisites. | Open; PR #269 remains Draft and must not merge yet. DonHV corrected the catalog and generated a 188-case review taxonomy showing 175 local-primary and 13 BTP-only cases. | NhanT reruns the false blockers at their approved primary boundary; use BTP only for the 13 integration cases. Evidence: `docs/pm/evidence/idts-110/donhv-case-taxonomy.json`. |
+| QA catalog issue | `UT-AUTH-004` failed because a non-string password produced CDS type validation rather than the expected 401. | CAP validates `String(255)` before the login handler; malformed input and wrong string credentials are different security boundaries. | Catalog correction required; not classified as a runtime defect. | Expect safe 400-style validation for malformed type and generic 401 for wrong string credentials; both must avoid session insertion. |
+| QA catalog issue | `UT-VAL-REPORTER` failed because the candidate expected omitted `reporter_ID` to be rejected. | Reporter is server-owned and is derived from the authenticated actor before required-field validation in active and draft flows. | Catalog correction required; not classified as a runtime defect. | Client omission passes when actor resolution succeeds; retain a distinct unresolved-actor negative case. |
+| Evidence/process issue | PR #269 includes 269 PNG plus 269 SVG generated result cards and treats blocked cards as evidence. | The execution package mechanically created two visual formats per recorded assertion; these are summaries rather than browser/runtime proof, and SVG text contains encoding artifacts. | Cleanup required before merge. | Keep manifests and one useful PNG, remove unused duplicate SVGs, and attach real product evidence only where the assertion requires it. |
+| Environment readiness | IDTS-110 review required a fresh deployed baseline before planning BTP reruns. | Readiness may change because SAP BTP Trial applications can auto-stop. | PASS at the reviewed session; no recovery action was needed. | `npm run btp:demo:check` returned `DEMO READY`: HANA ready, CAP/AppRouter 1/1, `/health` and `/ready` 200, anonymous Auth 401 and Web 200. No DB/seed deploy. |
 | Tooling issue | The deterministic catalog `--check` reported `OUTDATED` immediately after a clean Windows checkout although regeneration produced no Git diff. | The checker compared LF output with the CRLF working-tree representation byte-for-byte. | Normalized line endings only for the comparison; catalog content and execution truth are unchanged. Rerun `node scripts/qa/generate-idts111-uat-catalog.js --check` on the clean checkout. |
+
+## 2026-08-03 — BTP readiness recovery and IDTS-105 acknowledgment audit
+
+| Classification | Symptom / result | Root cause / action | Verification / next action |
+| --- | --- | --- | --- |
+| Environment availability | CAP and AppRouter were stopped 0/1, so the first `btp:demo:check` returned 404 for liveness, readiness, auth, and web. HANA itself reported ready. | Ran the bounded repository recovery script. It started only CAP/AppRouter and did not deploy DB, load seed, migrate schema, or expose credentials. | `npm run btp:demo:prepare` exited 0; a fresh `npm run btp:demo:check` exited 0 with CAP/AppRouter 1/1, `/health` and `/ready` 200, protected API 401, web 200, and `DEMO READY`. |
+| Process blocker | IDTS-105 still had no completed human briefing acknowledgment although downstream documentation work had progressed. | Live Jira and repository audit confirmed all four members remain `PENDING`. Added truthful reminder comments to IDTS-105/108/109/110/111; no agent-signed acknowledgment was created. | Jira comment IDs `10845`–`10849`. Wait for DonHV, SangVN, DatDT, and NhanT to personally acknowledge commit `4b4c93c1d8b45024677653e1f890d52e742b2aaf`; keep IDTS-105 In Progress and approval/Drive gates blocked. |
+
+## 2026-08-03 — IDTS-96/98/99 stale AI work audit
+
+| Classification | Symptom / result | Root cause / action | Verification / next action |
+| --- | --- | --- | --- |
+| Tooling issue | The first attempt to run the current AI regression suites in the fresh detached `origin/dev` audit worktree stopped with `MODULE_NOT_FOUND: @sap/cds`; a second attempt using only `NODE_PATH` loaded CDS but compilation could not resolve `@cap-js/attachments`. | The isolated audit worktree intentionally had no local `node_modules`, and CDS package-module resolution requires a workspace-local dependency tree; this is not a product defect and no source or lockfile was changed. | Temporarily junction the audit worktree's ignored `node_modules` to an existing verified installation, rerun the current IDTS-68/69/91/93/95 suites, secret scan and agent rules, then remove the junction and use the results to disposition stale PRs #177/#178. |
+| QA/stale-work result | Current `origin/dev` already provides deeper coverage than PR #177, while PR #178 remains conflicting and uses unsafe/weak evaluation heuristics. | IDTS-68/69/91/93/95 all exited 0 on SHA `39f6f87c4330ed8e1e0152463345fb9ab97e8132`; secret scan and agent rules passed. The old IDTS-98 branch also contains unrelated files and full result-payload logging. | Close PR #177 as superseded without porting; close PR #178 without merge and only reuse its scenario ideas in a future clean rewrite if needed. IDTS-99 is superseded by IDTS-114/115 and the SAP BTP acceptance baseline. |
+## 2026-08-03 — BTP comment and attachment write failures under investigation
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product defect | SangVN reported and DonHV reproduced on active `BUG-0019` in SAP BTP: `Post Comment` ends with the safe UI message `The comment could not be posted`, and `Upload Evidence` ends with `The file could not be uploaded`; neither result appears after the operation. | Confirmed from AppRouter logs: every direct collaboration write is rejected before CAP with HTTP 403 `The request does not contain a x-csrf-token`. `BugCollaboration.js` uses raw `XMLHttpRequest`; `auth-guard.js` adds only the bearer token, while both AppRouter OData routes enable `csrfProtection`. Comment fails at `BugService.addComment`; attachment fails at the first `BugService.draftEdit`, so S3 is not reached. | Root cause confirmed. The initial narrow CSRF-token recommendation was reviewed and explicitly superseded by DonHV's SAP-standard decision below; no HANA/S3/seed mutation occurred during diagnosis. | Implement the bound UI5 OData V4 comment action and generated `@cap-js/attachments` facet, then deploy only the required service/UI/AppRouter artifacts after normal PR merge. |
+| Environment blocker (separate transient incident) | Earlier in the same BTP session, Job Scheduler `processEmailOutbox` and subsequent auth/readiness requests timed out, and `/ready` briefly returned 503. | HANA connection acquisition timed out in `generic-pool` after 60 seconds. This is separate from the deterministic 403 CSRF failures reproduced after the app recovered. | Recovered without DB deploy or seed; current readiness is green. Root cause of the transient pool starvation remains a separate investigation and must not be used to explain the comment/attachment 403 defect. | Current `npm run btp:demo:check` returns CAP/AppRouter 1/1, `/health` 200, `/ready` 200, protected API 401 and Web 200. Track recurrence through sanitized CAP/Job Scheduler evidence. |
+| Security/tooling issue | A diagnostic `cf env` filter returned full binding credentials in terminal output although only binding names were needed. | `cf env` emits complete VCAP and user-provided service credentials before PowerShell filtering; the command was too broad for safe diagnostics. | Command pattern prohibited for the remainder of the session; credential values will not be copied into reports, Jira, evidence or commits. | Rotate the affected application/service credentials after the immediate blocker is handled, then restage/rebind and verify with presence-only checks. |
+
+## 2026-08-03 — IDTS-116 SAP-standard collaboration remediation
+
+| Classification | Symptom / decision | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Security/tooling issue | Installing the locked workspace dependencies in the isolated IDTS-116 worktree completed, but `npm ci --ignore-scripts` reported 24 dependency-audit findings: 1 low, 9 moderate, 13 high and 1 critical. | This is the existing lockfile dependency posture, not a defect introduced by the collaboration change. Automatically running `npm audit fix` could change the dependency graph outside IDTS-116. | Logged and left unchanged in this runtime-fix branch. | Run the project secret scan and focused build/tests here; triage dependency upgrades in a separate Security task/PR instead of mixing them into the comment/attachment fix. |
+| Product-design decision | DonHV rejected the narrow raw-XHR CSRF-token patch and selected the SAP-standard implementation. | The custom attachment UI duplicated CAP draft/media orchestration and all custom writes bypassed the OData V4 model's automatic CSRF handling. | In progress: move `addComment` to a bound OData V4 operation and restore the generated `@cap-js/attachments` Fiori Elements facet; retire the custom in-memory attachment queue and manual draft edit/upload/activate chain. | Add red checks first, then run CAP compile, UI5 lint/build, focused collaboration regression and BTP browser acceptance. No DB deploy or seed operation is authorized. |
+| Tooling issue | The first local comments/attachments programmatic rerun stopped before assertions because `better-sqlite3.node` was absent. | Dependencies had intentionally been installed with `npm ci --ignore-scripts`, so the native SQLite binding was not compiled; this is not a product failure. | Under repair by rebuilding only the existing locked `better-sqlite3` package; no dependency version or source file is being changed. | Rerun the same programmatic suite after the native binding is present and report the test result separately from this setup failure. |
+| Tooling issue | The first targeted ESLint pass reported only CRLF-vs-LF errors in the edited collaboration control plus one `Promise` global warning. | The worktree checkout used CRLF while the UI5 lint rule requires LF, and the new fallback used the global name instead of `window.Promise`. | Fixed in-session with ESLint's mechanical line-ending normalization and `window.Promise`; no runtime behavior changed. | Targeted ESLint rerun exited 0. |
+| Tooling issue | A combined verification command invoked ESLint 10 directly for CommonJS QA harnesses and attempted a non-existent `lint` script inside `app/bug-management-ui`. | The repository's UI lint configuration applies to UI extension files from the root; QA harnesses use Node syntax checks, and the UI package exposes `build` but no `lint` script. | No product code was changed for this tooling mismatch. Verification was rerouted to root targeted ESLint, `node --check`, UI5 build, manifest validation and the repository QA gates. | Keep using repository-defined commands; do not classify the missing package script as a product defect. |
+| Test-harness issue | The first IDTS-116 attachment browser smoke selected the remote-login path and failed with HTTP 500 although the local CAP server was running. | The workstation already had `IDTS_QA_BASE_URL` set to a remote target, overriding the harness default. | No runtime fix was made. The rerun explicitly pins `IDTS_QA_BASE_URL=http://localhost:4004`; credentials are not printed or reused. | Evidence must record the actual target so a remote environment failure cannot be reported as a local product defect. |
+| Test-harness issue | The corrected local IDTS-116 browser smoke reached the local branch but could not insert its isolated auth session because the worktree local SQLite database has no deployed schema. | The browser harness previously assumed a pre-deployed local `db.sqlite`; this work item explicitly avoids database deploy/seed. Static/dynamic UI contract tests and CAP persistence tests still pass. | Browser acceptance is deferred to the deployed BTP AppRouter after merge. The harness was rewritten for the generated attachment facet, but no local DB deploy was performed to force a green result. | Verify upload, Save/Discard, reload, download hash and delete on BTP; do not claim browser PASS before that evidence exists. |
+# 2026-08-03 — IDTS-116 final verification command composition issue
+
+- Classification: tooling issue.
+- Symptom: the first parallel syntax-check invocation passed a literal PowerShell
+  `` `n `` sequence to Node, so Node interpreted the following command text as
+  part of the JavaScript file path and returned `MODULE_NOT_FOUND`.
+- Root cause: command orchestration quoting, not product code or a missing QA
+  script.
+- Status: fixed by running each `node --check` as a separate command; all three
+  syntax checks and the IDTS-116/IDTS-73 collaboration suites passed.
+
+## 2026-08-03 — IDTS-116 SAP490 scope-gate finding
+
+- Classification: documentation/process issue, resolved in branch.
+- Symptom: the SAP490 quality contract correctly failed because structured
+  source described the new standard attachment flow while the current generated
+  Technical Specification still documented the retired queue.
+- Root cause: runtime remediation and SAP490 artifact regeneration had been
+  mixed in one candidate diff even though IDTS-116 explicitly excludes workbook
+  regeneration/synchronization.
+- Fix status: the four SAP490 source/validator edits were removed from this
+  runtime branch. The current SAP490 contract passes again; the verified runtime
+  change remains an input finding for the later IDTS-112 integration.
+- Verification: `python scripts/sap490/test-specification-quality-contract.py`
+  exits 0. No workbook or Drive artifact was changed.
+
+## 2026-08-03 — IDTS-116 post-deployment collaboration findings
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product defect | On the SAP BTP build at merge SHA `eff7bea2f35303d33daf5bc261d3c4bde0c7e997`, `Post Comment` returns the safe UI error and the comment is absent after reload. | Browser Network capture proved the bound action was sent as a direct POST by `invoke("$direct")` without an `x-csrf-token`; AppRouter returned HTTP 403 `Forbidden` before CAP. Read-only HANA also confirmed the controlled marker was not committed. | Fix implemented locally: use the OData V4 model update group through `invoke()` so UI5 owns the batch/CSRF lifecycle; refresh only the comments list binding and keep action success separate from refresh failure. No CSRF bypass or database mutation was added. | Focused red/green test passes locally. Run full gates, deploy the exact merged app content, then verify POST, reload persistence and history on BTP. |
+| Product/UI defect | The deployed Object Page displayed duplicate Evidence / Attachments navigation/facet entries after the SAP-standard attachment rollout. | BTP `$metadata` and local compiled model each contain exactly one attachment facet. The browser loaded an old manifest from disk cache; that stale manifest still registered `IdtsAttachmentsCustom`, while current metadata rendered the generated facet. | Fix implemented locally: keep only the generated facet and increment/aligned HTML5 application/package version from `0.0.1` to `0.0.2` so changed app content is deployed and cache-invalidated as a new version. | After merge/deploy, capture served manifest with no `IdtsAttachmentsCustom`, served metadata with one attachment facet, and browser DOM with one Evidence / Attachments tab. |
+| Tooling issue | Read-only HANA diagnostic tasks #24–#26 failed before producing a trustworthy comment count. | The first query variants used an invalid or unsupported text comparison against NCLOB content and one attempt timed out. | Fixed in the diagnostic procedure; no product or database content changed. | Task #27 used `TO_NVARCHAR(CONTENT)` and completed successfully with count `0`; use this corrected read-only pattern for follow-up verification. |
+| Tooling issue | A repeated targeted lint invocation stopped with `ENOSPC` before evaluating source. | The Windows `C:` drive was full and `npx` could not write its npm cache; repository source, BTP runtime and HANA were not involved. | Cleared only the local npm cache with `npm cache clean --force`; no source, evidence, database or installed dependency was removed. | Confirm free space, rerun the exact lint/syntax/focused checks, and report their results separately from this setup failure. |
+| Tooling issue | A follow-up verification command called non-existent npm script `qa:idts113:programmatic` after the focused IDTS-116 test, lint and build had already passed. | The repository contains `scripts/qa/test-idts113-btp-auth.js` but does not expose that filename as an npm script. | No product code changed for this command mismatch; reroute to the existing Node harness directly. | Run `node scripts/qa/test-idts113-btp-auth.js` and keep its result separate from the failed command composition. |
+| Product/UI correctness finding | Independent Terra/high review found that `ODataListBinding.refresh()` was incorrectly awaited even though it does not return a Promise, so a committed comment could fall into the post-failure UI path. The same review found that a version bump alone did not define revalidation for HTML5 entry assets. | The focused mock incorrectly returned a Promise from `refresh()`, and the AppRouter HTML5 catch-all had no explicit cache policy for entry files. | Fixed before merge: use UI5 `requestRefresh("$direct")`, invoke the action explicitly through `$auto`, add no-store/revalidation for `index.html`, `manifest.json`, `Component.js` and `Component-preload.js`, and update the red tests. | UI5 API reference confirms `requestRefresh()` returns `Promise<void>` and `invoke("$auto")` is batched; focused test, UI5 lint/build, IDTS-113 auth route checks and release gates pass. BTP response-header/browser acceptance remains post-merge. |
+| Process/tooling issue | The first GitHub QA Depth run on PR #275 evaluated the body created before the full Knowledge Gate fields were added and failed, although the corrected live PR body passed the same checker locally. | The push triggered CI before the subsequent `gh pr edit` completed; editing a PR body did not automatically rerun the already-failed workflow. | Keep the corrected body, push this status-only follow-up to trigger a fresh exact-head run, and do not bypass the failed check. | Merge only when the new GitHub `qa-depth-gate` run passes against the current body and head. |
+
+## 2026-08-03 — IDTS-116 committed comment misreported as failed
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product/UI defect | On the SAP BTP build at merge SHA `23af49979496fda23ebe406bc077605d54576c4f`, the bound `addComment` request completed with inner OData HTTP 200 and the comment persisted, but the UI displayed `The comment could not be posted`. | The follow-up `ODataListBinding.requestRefresh("$direct")` can throw synchronously. That throw escaped into the operation's outer rejection handler, so a read-refresh failure was incorrectly reported as a write failure. | Under fix on `fix/idts-116-comment-refresh-outcome-donhv`: wrap refresh invocation in a Promise boundary and use separate action-success/action-failure callbacks. | Add a regression where `requestRefresh` throws synchronously; then rerun the IDTS-116 collaboration gates, deploy the exact merge SHA selectively, and verify post/reload persistence without a false error dialog. Browser readback already confirmed two controlled comments through both `Comments` and the Bug navigation. |
+| Tooling issue | The first focused regression invocation in the fresh follow-up worktree stopped with `MODULE_NOT_FOUND: @sap/cds` before evaluating assertions. | The isolated worktree has no local dependency tree; this is test setup, not a product regression. | Under repair using the already installed, lockfile-matched workspace dependencies without changing package versions. | Verify the dependency source and rerun the exact focused command; report its result separately from this setup failure. |
+| Tooling issue | Focused IDTS-116/73 tests passed after dependency setup, but the first targeted ESLint invocation reported only CRLF-versus-LF violations in `BugCollaboration.js`. | Windows checkout line endings differ from the UI lint contract; no semantic lint error was reported. | Normalize this edited UI file mechanically with the repository ESLint formatter. | Rerun targeted lint, focused tests, syntax check and `git diff --check`; keep the result separate from product behavior. |
+| Tooling issue | The combined release verification completed CAP compile and UI5 production build, then stopped because `qa:manifest` is not a repository npm script. | The command name was assumed instead of read from the current `package.json`; this is orchestration error, not a manifest or product failure. | Reroute to the repository's existing manifest validation command after inspecting the script list. | Rerun the omitted validation and independently capture all parallel gate results. |
+| Tooling issue | PowerShell `Remove-Item` threw an internal null-reference error while removing the verified local `node_modules` junction after tests. | Windows PowerShell junction handling failed; the dependency target and lockfile had already been verified and no target content was removed. | Remove only the junction object through the .NET directory API after re-verifying its absolute target. | Confirm the link path no longer exists and the dependency source remains intact. |
+| Process/tooling issue | The first GitHub QA Depth run on PR #276 failed because the Ownership Knowledge Gate section stated that DonHV had passed but omitted the gate's required structured fields. | The PR body summarized prior evidence instead of reproducing the mandatory Member/Date/flow/question/score/evidence/result fields. Product tests and source were not implicated. | Update the live PR body with the exact previously accepted DonHV gate fields and push this status follow-up to trigger a new exact-head workflow. | Do not merge until the fresh GitHub `qa-depth-gate` passes; no gate bypass is allowed. |
+| Process/tooling issue | The second PR #276 gate run saw the entire PR body flattened onto one line and therefore could not detect any Markdown section. | PowerShell captured the multiline body as an array and `gh pr edit --body` joined it with spaces. | Replace the body from an apply-patch-created UTF-8 Markdown file, verify section line breaks from GitHub, and push this status follow-up for a fresh run. | Merge only after the exact-head GitHub gate passes. |
+## 2026-08-03 — IDTS-116 SAP-standard comment/attachment browser diagnosis
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Environment/auth condition | A controlled comment/upload attempt on `BUG-0019` failed in `$batch` with outer HTTP 401. | The already-open AppRouter/XSUAA browser session had expired. The request never reached the CAP action or attachment handler. | Fixed locally by a one-shot XSUAA session monitor: an OData 401 triggers a top-level reload so AppRouter can renew authentication; failed writes are never replayed automatically. | Deploy UI/AppRouter selectively and verify expired-session recovery without duplicate comment or attachment side effects. |
+| Product/UI refresh defect | A fresh-session `addComment` invocation returned inner HTTP 200 and persisted, but the comment feed did not issue a follow-up read and stayed stale until page reload. | The `comments` list is a relative OData V4 binding. UI5 supports `requestRefresh()` for that binding only when it declares `$$ownRequest`; the fragment lacked this parameter. | Fixed locally by adding `$$ownRequest: true`; focused red/green test now passes. | Deploy exact merge SHA and verify Post Comment updates the feed immediately and remains present after reload. |
+| Product/UI metadata defect | After attachment upload and parent activation, HANA, CAP navigation and S3-backed content read all retained two attachment rows, but a hard reload of the active Object Page showed an empty attachment facet and emitted no attachment navigation request. | The application declared its own `attachments/@UI.LineItem` facet and manifest table override. `@cap-js/attachments` detects that target and skips generation of its plugin-owned `attachments_attachments` facet, leaving the active-page binding lifecycle outside the supported plugin-owned metadata path. | Fixed locally on `fix/idts-116-attachment-activation-read-donhv`: remove the competing facet/table override and let the CAP attachment plugin generate the single facet. No CAP handler, HANA schema, S3 object or business flow was changed. | Focused red/green metadata tests, CAP compile and UI5 build pass. Selectively deploy the exact merge SHA and rerun upload -> activate -> active reload -> download/hash -> delete/reload browser acceptance before closing IDTS-116. |
+| Tooling limitation | A read-only attempt to inspect the running CAP container with `cf ssh idts-sap01-srv` was rejected as unauthorized. | SSH is not enabled/authorized for the current SAP BTP Trial app identity. | No product or environment state was changed. | Use sanitized application logs, CAP/OData readback, and the existing HANA evidence workflow instead of changing SSH policy during this fix. |
+| Verification orchestration issue | The first combined verification invoked CAP compile from the UI subdirectory; a later focused ESLint command also reported repository-wide CRLF and pre-existing auth-bridge policy violations instead of isolating this patch. | The orchestration selected the wrong working directory and an unsuitable full-file lint entry point. Product code was not implicated. | Corrected by rerunning CAP compile from the repository root and the supported UI5 production build plus focused regression/release gates. All rerun commands passed. | Keep the CRLF warnings as existing repository line-ending behavior; do not rewrite the whole auth guard or suppress Fiori security rules merely to make a narrow lint command green. |
+| Independent review finding | Exact-head review found that the XSUAA recovery monitor covered XHR only, while Dashboard OData reads use `fetch()`; the existing test only checked source text and could not prove one-shot behavior. | The first implementation installed a narrow XHR interceptor before bootstrap and lacked an executable browser-transport simulation. | Fixed before merge: install the monitor only after successful `AuthService.me`, wrap both XHR and `fetch()`, and retain the same session-storage one-shot guard without replaying failed writes. | A new VM behavioral test first failed for `fetch` with `0 !== 1`, then passed for both XHR and `fetch`; focused IDTS-116 and Comment/Attachment regressions also pass. |
+
+## 2026-08-04 — IDTS-116 active attachment facet ownership correction
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product/UI defect | The active Object Page did not request or render persisted attachment rows after hard reload, although three OData read shapes returned HTTP 200 with the same two rows. | Project-owned facet metadata prevented `@cap-js/attachments` from adding its standard plugin-owned facet; the manifest also overrode that table unnecessarily. | Local correction complete; BTP acceptance pending. | `qa:idts116`, `qa:idts73`, comment/attachment programmatic QA, CAP compile, UI5 build and manifest schema validation pass. Deploy without HDI/database/seed changes, then repeat the full browser flow. |
+| Tooling issue | The first focused test invocation in the fresh worktree failed with `MODULE_NOT_FOUND: @sap/cds`; a later combined PowerShell command continued after one failed test because commands were separated without exit checks. | The isolated worktree initially had no dependency installation, and the first orchestration did not stop on a nonzero child exit code. | Corrected by using the lockfile-matched dependency tree and rerunning every gate with explicit `$LASTEXITCODE` checks. | All focused suites now pass independently; retain the first failures as tooling evidence, not product defects. |
+| Pre-existing UI5 quality finding | UI5 MCP linter reports Manifest Version 1 and legacy QUnit bootstrap findings. | These findings already exist outside the attachment metadata change; manifest schema validation itself passes. | Not expanded into IDTS-116 to avoid unrelated migration risk. | Track a separate UI5 modernization task; do not suppress the linter or migrate the whole manifest during this narrow release fix. |
+### 2026-08-04 — IDTS-108/109 package validation dependency finding
+
+- **Classification:** tooling/security dependency issue.
+- **Symptom:** CAP compile in the cleaned local workspace initially failed because `@cap-js/attachments` was declared in `package.json`/`package-lock.json` but absent from `node_modules`. Running `npm ci --ignore-scripts` restored the locked dependency set; npm then reported 26 dependency advisories (1 low, 10 moderate, 14 high, 1 critical).
+- **Action/status:** dependency installation was limited to the ignored local `node_modules`; no lockfile, runtime source, BTP service, database, seed or schema was changed. No automatic `npm audit fix` or breaking upgrade was attempted in this documentation workstream.
+- **Verification/next owner:** rerun CAP compile and UI5 build after installation. Review the npm audit tree in a separate Security/DevOps work item before any dependency upgrade claim.

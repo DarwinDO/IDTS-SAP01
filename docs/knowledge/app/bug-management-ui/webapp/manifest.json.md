@@ -542,3 +542,13 @@ Manifest khai bao `sap.cloud.service: idts.sap01`. HTML5 content module trong
 MTA dung service name on dinh nay de dong goi UI vao SAP HTML5 Application
 Repository. Duong dan OData khong doi; AppRouter route `/odata/*` den CAP
 service va forward XSUAA token.
+
+## IDTS-116 attachment section registration (2026-08-03)
+
+`IdtsAttachmentsCustom` and the unused `sap.ui.unified` dependency were removed.
+
+Superseded on 2026-08-04: the manifest must also avoid a `controlConfiguration` override for `attachments/@com.sap.vocabularies.UI.v1.LineItem`. The CAP attachment plugin owns the generated `attachments_attachments` facet and table lifecycle. IDTS keeps only the custom Comments section.
+
+Do not fix attachment reload by adding a raw request, custom `UploadSet`, hard-coded generated control ID, or custom CAP `READ` handler. First verify the active navigation response, then verify that the generated facet initiates its list request.
+
+Cập nhật ngày 2026-08-04: manifest không override table attachment. Facet `attachments_attachments` và vòng đời bảng do CAP attachment plugin quản lý; IDTS chỉ giữ custom Comments section.

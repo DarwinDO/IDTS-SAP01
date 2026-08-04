@@ -6,19 +6,19 @@ Owner: DatDT
 
 Final integrator: DonHV
 
-Briefing baseline: `4b4c93c1d8b45024677653e1f890d52e742b2aaf`
+Required briefing baseline: `3e78b495cb8feb56188cc446b827d47e040e1b98`
 
-DatDT briefing acknowledgment: Jira IDTS-109 comment `10762`
+DatDT briefing acknowledgment: `PENDING` for the required briefing baseline; the older Jira comment `10762` does not satisfy this gate
 
-DatDT candidate approval: Jira IDTS-109 comment `10763`
+DatDT candidate approval: `PENDING`; Jira comment `10763` predates the refreshed candidate
 
-Prepared: 2026-07-31; refreshed: 2026-08-02
+Prepared: 2026-07-31; refreshed against current dev: 2026-08-04
 
 Submission language: English only
 
 Current source baseline: `origin/dev` commit
-`fbea12cd996d8c1e13bd834fd6e054c8a37c32e6`, merged into this branch by commit
-`c633770551e9d7eb52ec002e6a78cfa8774f86d7`.
+`cbce7b6196da5cc8ce64dbd36a61709a8f4121c3`, merged normally into this branch.
+The final exact candidate head will be recorded after the refreshed checks pass.
 
 ## Purpose
 

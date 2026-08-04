@@ -240,8 +240,8 @@ Vietnamese clean note: Nút `Assign Developer` riêng đã được bỏ khỏi 
 
 ## 2026-07-25 NhanT AI QA PR review
 
-- IDTS-96 and IDTS-98 are In Progress; IDTS-99 remains To Do because OpenAI live is disabled. PR #177 needs IDTS-94 no-mutation/reload and genuine Knowledge Gate evidence; PR #178 needs a real four-capability evaluation rewrite and removal of unrelated/unsafe files; PR #179 must be relabeled as disabled-provider fallback evidence and complete the required role/action/browser matrix.
-- GitHub and Jira review comments were posted. None of PR #177–#179 is approved for merge yet, even where the current GitHub check is green.
+- IDTS-96 is Done through deeper current-dev IDTS-68/69/91/93/95 regression coverage, and stale PR #177 was closed without merge. IDTS-99 is Done as an explicitly superseded Render/OpenAI-era task; current SAP BTP/provider acceptance remains under IDTS-114/115. IDTS-98 remains In Progress, but stale PR #178 was closed without merge and any retained evaluation scope must be rebuilt from current `dev` with actual feature logic and sanitized evidence.
+- GitHub and Jira disposition comments were posted. PR #177 and PR #178 are closed without merge; PR #179 remains a historical disabled-provider candidate and is not approved for merge into the SAP BTP baseline.
 
 ## 2026-07-27 SAP490 EN-only mentor remediation
 
@@ -249,6 +249,13 @@ Vietnamese clean note: Nút `Assign Developer` riêng đã được bỏ khỏi 
 - Jira tasks `IDTS-106`–`IDTS-112` exist with explicit dependencies. They remain blocked until the committed briefing is personally acknowledged by the relevant members.
 - The official SAP490 submission direction is English-only. Vietnamese learning/briefing documents remain allowed, but no new VI submission artifact may be generated or synchronized.
 - No member acknowledgment, candidate approval, Unit/UAT result, Drive Trash operation, or mentor-ready completion has been fabricated or claimed.
+
+## 2026-08-03 IDTS-106 EN-only cleanup execution
+
+- DonHV's briefing READ and the approved/merged IDTS-107 Gate 2 removed the two cleanup prerequisites.
+- IDTS-106 backed up and hashed 13 VI Drive artifacts, moved exactly those files to Trash without emptying it, and verified all EN counterparts remain present.
+- The repository EN-only pipeline retires 11 generated VI artifacts while preserving internal Vietnamese material and historical Git/archive truth.
+- The Mentor Index is EN-only and records the current versions and truthful ownership/test limitations. PR #264 passed the fresh gate and merged normally at `cd03aedde4fa2d3d146b54ec76d400e4de3f670b`; Jira IDTS-106 is Done with evidence comment `10882`.
 
 ## 2026-07-28 isolated SAP BTP Cloud Foundry POC
 

@@ -171,3 +171,9 @@ Các anchor quan trọng:
 **English.** `manifest.json` selects the Bugs Object Page; Fiori reads this file's HeaderInfo, HeaderFacets, Facets, FieldGroups, and Identification metadata. Facet order becomes section order; each target points to a field group, navigation LineItem, or custom fragment. Field values come from `BugService.Bugs`; draft save remains CAP-owned. Debug missing section by tracing facet target → target annotation/fragment → compiled metadata → OData data.
 
 **Tiếng Việt.** `manifest.json` chọn Bugs Object Page; Fiori đọc HeaderInfo, HeaderFacets, Facets, FieldGroups và Identification từ file này. Thứ tự facet thành thứ tự section; mỗi target trỏ tới field group, navigation LineItem hoặc custom fragment. Giá trị field đến từ `BugService.Bugs`; draft save vẫn do CAP quản lý. Debug section mất theo chuỗi facet target → annotation/fragment đích → metadata compile → dữ liệu OData.
+
+## IDTS-116 generated attachment facet (2026-08-03)
+
+Superseded on 2026-08-04: the application must not declare its own ReferenceFacet for `attachments/@UI.LineItem`. `@cap-js/attachments` detects that target and otherwise skips its standard `attachments_attachments` facet. Keep the composition and attachment LineItem, but let the plugin add the Object Page facet. The Comments collection facet remains application-owned because IDTS still uses the separate custom Comments section.
+
+Cập nhật ngày 2026-08-04: ứng dụng không tự khai báo ReferenceFacet cho `attachments/@UI.LineItem`. Plugin `@cap-js/attachments` phải sở hữu facet chuẩn `attachments_attachments`; nếu target đã tồn tại, plugin sẽ bỏ qua bước sinh facet. Comments vẫn dùng section riêng của IDTS.

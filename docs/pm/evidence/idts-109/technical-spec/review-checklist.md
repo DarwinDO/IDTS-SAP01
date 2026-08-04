@@ -8,8 +8,8 @@ refreshed candidate head. It also does not authorize overwriting the official Dr
 artifact.
 
 Current source baseline: `origin/dev`
-`fbea12cd996d8c1e13bd834fd6e054c8a37c32e6`, merged normally by
-`c633770551e9d7eb52ec002e6a78cfa8774f86d7` without rebase, force-push or conflict.
+`cbce7b6196da5cc8ce64dbd36a61709a8f4121c3`, merged normally into this
+candidate without rebase or force-push. Exact-head DatDT approval remains pending.
 
 ## DatDT technical review
 
@@ -28,7 +28,7 @@ Current source baseline: `origin/dev`
 
 | Gap ID | Gap | Current status | Required owner/action |
 | --- | --- | --- | --- |
-| GAP-01 | OfficeCLI is unavailable in the current environment. | Open environment blocker | Install/configure OfficeCLI and rerun required workbook validation before final workbook PASS. |
+| GAP-01 | OfficeCLI preflight is available (`officecli --version` -> `1.0.143`), but this candidate is Markdown structured source rather than the official workbook. | Preflight PASS; workbook validation pending IDTS-112 | DonHV runs OfficeCLI against the generated Technical Specification EN workbook during final integration. |
 | GAP-02 | Earlier DatDT approval predates the current source baseline. | New exact-head approval pending | After the candidate is committed, DatDT personally comments the exact SHA and verification summary on IDTS-109. |
 | GAP-03 | Interactive Tester/Developer AI role evidence is incomplete. | Open acceptance gap | Do not generalize PM BTP browser PASS to every role; retain programmatic authorization evidence separately. |
 | GAP-04 | Standalone direct OpenAI live execution is not accepted by this candidate. | `BLOCKED / NOT ACCEPTED` for that route | Do not confuse it with the accepted OpenAI classification model behind Vercel Gateway. |
@@ -52,7 +52,7 @@ Current source baseline: `origin/dev`
 - [ ] Candidate is merged to `dev`.
 - [ ] DonHV integrates it into a new English Technical Specification revision.
 - [ ] The official template/tab structure remains intact.
-- [ ] OfficeCLI validation passes.
+- [ ] OfficeCLI workbook validation passes during IDTS-112 integration; current Markdown package has only the `1.0.143` preflight PASS.
 - [ ] Workbook formula/reference and source-trace validation passes.
 - [ ] Visual review covers all 12 tabs and readable expanded content.
 - [ ] Secret scan passes on the integrated artifact package.
