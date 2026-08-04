@@ -184,6 +184,9 @@ login/profile, dashboard/monitoring, notification UI and AI traces.
 - Fresh local workflow-equivalent checks passed: QA Depth self-test `15/0`, CAP
   compile, auth `28/0`, IDTS-41 `18/0`, IDTS-43 `12/0`, email outbox, Fiori build,
   secret scan, AI DevKit `5/0/0` and `git diff --check`.
-- Remaining handoff: push the exact head, require a fresh GitHub `qa-depth-gate`,
-  then DatDT personally reviews and approves or rejects that exact head. DonHV
-  remains the final workbook integrator and Drive synchronizer.
+- Pushed candidate head `8727cdf`; GitHub `qa-depth-gate` run `30889028188` passed
+  in 35 seconds. An evidence-only follow-up commit records this result and must also
+  receive a fresh exact-head gate.
+- Remaining handoff: after the final evidence-only gate passes, DatDT personally
+  reviews and approves or rejects that exact head. DonHV remains the final workbook
+  integrator and Drive synchronizer.
