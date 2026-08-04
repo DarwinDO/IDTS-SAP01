@@ -20,6 +20,8 @@ candidate before integration. An agent must not sign either human gate. SangVN m
 complete and hand off all currently executable UI/source work while the remaining
 Network/mutation coverage and DonHV-owned database/provider evidence remain
 explicit external blockers; that handoff is not a full PASS/Done claim.
+The source-trace corrections in this refresh are documentation-only and require a
+new exact-head human review.
 
 ## Current collaboration acceptance evidence
 
