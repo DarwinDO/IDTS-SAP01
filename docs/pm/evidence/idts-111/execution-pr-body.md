@@ -14,7 +14,7 @@
 
 - Current rechecks: `UAT-AUTH-005` candidate positive; `UAT-BUG-008` candidate negative; `UAT-UX-002` partial pending a matching wrapping fixture.
 - Catalog mismatches: `UAT-AI-008`, `UAT-AI-010`, `UAT-AI-014`, `UAT-AI-015`, `UAT-LIFE-014`.
-- Targeted reruns: `UAT-AI-005`, `UAT-ATT-001`, `UAT-COM-001`; `UAT-AI-009` remains an environment/session blocker.
+- Member evidence still required: ATT-001 fixture reconciliation; AI-005/009 immutable suggestion ID plus sanitized Network/audit; UX-002 matching fixture; UX-003 physical Tab. AI-007/ATT-002/ATT-003 retain stale prerequisites.
 - No negative is relabeled to improve the result.
 
 ## Edge/Boundary Evidence
@@ -38,7 +38,7 @@
 ## UI/UX Review
 
 - The retained 77 PNG references remain the candidate visual set.
-- Current deployed SAP reruns produced sanitized PNG evidence for AUTH-005 and BUG-008; the package contains 77 unique hash-verified PNG references with no missing/hash mismatch.
+- Current deployed SAP reruns produced sanitized PNG evidence for AUTH-005 and BUG-008; the package contains 77 hash-verified PNG references (64 unique hashes) with no missing/hash mismatch.
 - UX-002 remains fixture-limited and UX-003 still needs NhanT's physical Tab-key confirmation; no final PASS is inferred from those incomplete boundaries.
 
 ## Ponytail Simplicity
@@ -67,10 +67,10 @@ Ownership: NhanT executes truthful Tester evidence; DonHV approves results and o
 ## Known Gaps
 
 - AI-005/AI-009 still require immutable-ID, sanitized Network and matching audit diagnostics; the retained current UI observations are not sufficient final proof.
-- Candidate negatives COM-003, ATT-001 and BUG-008 remain disclosed for DonHV disposition.
+- Candidate negatives remain disclosed. ATT-001 is specifically reviewer-blocked because its preserved 44/54/47-byte fixture provenance is inconsistent.
 - `UAT-UX-003` requires NhanT's physical-keyboard confirmation.
 - Twenty-three blockers still need their exact identities, fixtures, services or diagnostic proof before final approval.
-- The final English `UAT_EN_PREPARED` workbook and Drive artifact remain unchanged; OfficeCLI is unavailable.
+- OfficeCLI `1.0.143` preflight PASS. The final English `UAT_EN_PREPARED` workbook and Drive artifact remain unchanged.
 
 ## Jira/Evidence Links
 

@@ -2,7 +2,7 @@
 
 - Preserve the approved English-only 90-case IDTS-111 UAT catalog and add NhanT's complete 57-case candidate execution package.
 - Publish DoNHV's latest partition from Jira comment `10962`: 22 candidate MEETS, 12 candidate DOES_NOT_MEET and 23 BLOCKED, with all 57 cases still pending final review.
-- Preserve old `UAT-COM-001`/`UAT-ATT-001` evidence as historical while presenting only their latest current-runtime outcomes.
+- Preserve NhanT's execution truth unchanged. DonHV separately blocks ATT-001 acceptance because the retained fixture provenance identifies 44-byte, 54-byte and 47-byte inputs.
 - Keep reviewer approval, final `UAT_EN_PREPARED` workbook generation, and same-ID Drive synchronization with DonHV.
 
 ## Positive Evidence
@@ -16,7 +16,7 @@
 
 - Current-runtime disposition is explicit: `UAT-AUTH-005` candidate positive, `UAT-BUG-008` candidate negative, and `UAT-UX-002` partial pending a matching fixture.
 - Five catalog/semantic mismatches remain separated from product defects: `UAT-AI-008`, `UAT-AI-010`, `UAT-AI-014`, `UAT-AI-015`, and `UAT-LIFE-014`.
-- `UAT-COM-001` current rerun is candidate positive; `UAT-ATT-001` current BUG-0025 rerun remains candidate negative and is narrowed by successful IDTS-116 BUG-0019 cross-record evidence.
+- `UAT-COM-001` current rerun is candidate positive. ATT-001 remains a candidate negative but its reviewer disposition is `BLOCKED — fixture provenance inconsistent` until NhanT reconciles the exact file identity and size.
 - No blocked or candidate result is presented as reviewer-approved PASS/FAIL.
 
 ## Edge/Boundary Evidence
@@ -69,10 +69,10 @@ Ownership: NhanT executes and packages truthful evidence; DonHV owns result appr
 
 ## Known Gaps
 
-- Diagnostic Network/root-cause evidence remains under IDTS-113/114/115/116 for `UAT-ATT-001`, `UAT-COM-001`, `UAT-AI-005`, and `UAT-AI-009`.
+- Member-owned evidence remains for ATT-001 fixture reconciliation, AI-005/009 immutable suggestion ID plus sanitized Network/audit, UX-002 matching fixture, and UX-003 physical Tab confirmation.
 - `UAT-UX-003` still needs NhanT's physical-keyboard Tab confirmation.
-- Twenty valid/still-applicable role, identity, fixture or service preconditions remain blocked; five stale prerequisites require a current-runtime rerun after IDTS-116.
-- OfficeCLI is unavailable on this host, so the final English `UAT_EN_PREPARED` workbook and Drive artifact remain unchanged.
+- Only three stale prerequisites remain: `UAT-AI-007`, `UAT-ATT-002`, `UAT-ATT-003`; other blocked cases retain their recorded role, identity, state or fixture prerequisites.
+- OfficeCLI `1.0.143` preflight PASS. The final English `UAT_EN_PREPARED` workbook and Drive artifact remain unchanged.
 
 ## Jira/Evidence Links
 
@@ -85,6 +85,6 @@ Ownership: NhanT executes and packages truthful evidence; DonHV owns result appr
 
 - Completed current reruns for comment, attachment, logout, duplicate audit, tablet action geometry, and AI classification apply.
 - Candidate positives: `UAT-COM-001`, `UAT-COM-004`, `UAT-AUTH-005`.
-- Candidate negatives: `UAT-COM-003`, `UAT-ATT-001`, `UAT-BUG-008`; `UAT-AI-005` reproduced but still lacks immutable-ID/Network diagnostics.
+- Candidate negatives remain visible; ATT-001 is not accepted because fixture provenance is inconsistent, and AI-005/009 still lack immutable-ID/Network/audit diagnostics.
 - Partial: `UAT-UX-002` no longer clips the classification action, but no Similar Bugs candidate existed to recheck reason wrapping.
 - Still human-only: `UAT-UX-003` physical Tab-key observation. Workbook/Drive remain unchanged.

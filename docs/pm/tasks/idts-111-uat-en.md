@@ -3,7 +3,7 @@
 - Catalog owner/approver and final integrator: DonHV
 - Execution support: NhanT, SangVN and DatDT
 - Due: 2026-08-04
-- Status: DonHV latest disposition applied; current package retains 19 positives and 20 valid blockers, marks 5 stale blockers plus 2 old-runtime negatives for rerun, and keeps diagnostic/manual limitations explicit
+- Status: DonHV curation in progress; candidate partition is 22 MEETS / 12 DOES_NOT_MEET / 23 BLOCKED, with ATT-001 reviewer-blocked for inconsistent fixture provenance
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-111
 
 ## Workflow
@@ -21,9 +21,9 @@
 - Cases: 90 atomic English-only cases.
 - Approval: DonHV approved for execution on 2026-08-02.
 - Approved catalog truth remains unchanged: 90 `PREPARED`, 0 reviewer-approved PASS, 0 reviewer-approved FAIL.
-- NhanT package: 57/57 manifests preserved. DonHV's latest review partition is 19 retained candidate positives, 20 valid blockers, 5 stale blockers, 3 defect rechecks, 5 semantic corrections, 1 physical-keyboard limitation, 2 AI diagnostic reruns and 2 historical old-runtime negatives. No category is final UAT PASS and the approved catalog remains unchanged.
-- DonHV disposition: 19 positive evidence packages accepted; 25 blockers accepted without PASS; 13 negatives split into 3 confirmed product defects (`UAT-AUTH-005`, `UAT-BUG-008`, `UAT-UX-002`), 5 catalog mismatches, 1 environment/session blocker, 3 targeted reruns, and 1 test-harness limitation. See `docs/pm/evidence/idts-111/donhv-execution-review-matrix.md`.
-- Current rerun state: `UAT-COM-001` and `UAT-ATT-001` are historical old-runtime negatives after IDTS-116; five stale blockers also require current-runtime execution. AI diagnostics still require immutable suggestion ID plus sanitized Network/audit and no-mutation proof. The required Browser control tool is unavailable in this session, so no current-runtime result was fabricated or promoted. `UAT-UX-003` still requires NhanT's physical Tab-key confirmation.
+- NhanT package: 57/57 manifests preserved with candidate partition 22 MEETS / 12 DOES_NOT_MEET / 23 BLOCKED. No category is final UAT PASS and the approved catalog remains unchanged.
+- DonHV review is kept separate from NhanT's candidate partition. The current curation categories are 19 retained positives, 3 current-runtime positives, 20 accepted precondition blockers, 5 catalog corrections, 3 stale prerequisites, 2 AI diagnostic reruns, 1 fixture-provenance block, 1 current-runtime negative, 1 confirmed defect recheck, 1 partial recheck, and 1 physical-keyboard limitation. These categories do not create final UAT PASS. See `docs/pm/evidence/idts-111/donhv-execution-review-matrix.md`.
+- Current evidence gaps: ATT-001 needs exact fixture identity/size reconciliation; AI-005/009 need immutable suggestion ID plus sanitized Network/audit; UX-002 needs a matching fixture; UX-003 needs NhanT's physical Tab confirmation. Only AI-007, ATT-002 and ATT-003 retain stale prerequisites.
 - Knowledge gate: NhanT acknowledged briefing SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`; Jira comments `10908` (IDTS-110) and `10909` (IDTS-111).
 - Final targeted-rerun handoff: commit `adb66e8`, PR #270 body refreshed, Jira IDTS-111 comment `10925`.
 - Candidate execution summary: `docs/pm/evidence/idts-111/execution-summary.md`.
@@ -43,4 +43,4 @@ Assigned members may now execute after running the readiness check for their ses
 - Remaining gaps: immutable AI suggestion ID plus sanitized Network response, a Similar Bugs candidate fixture for tablet wrapping, NhanT physical-keyboard confirmation, and existing role/service fixtures.
 - DonHV still owns final disposition and `UAT_EN_PREPARED` synchronization.
 
-NhanT's current candidate package uses the authenticated SAP BTP UI and member-owned Tester identity. It contains 77 sanitized, hash-tracked screenshot references across 57 manifests. DoNHV's latest partition is 22 candidate MEETS, 12 candidate DOES_NOT_MEET and 23 BLOCKED; AUTH-005 and BUG-008 now include fresh current-runtime PNGs, while ATT-001 includes the IDTS-116 cross-record investigation boundary. DoNHV still owns review, catalog result decisions, Jira disposition, final workbook generation, and same-ID Drive synchronization.
+NhanT's current candidate package uses the authenticated SAP BTP UI and member-owned Tester identity. It contains 77 sanitized, hash-tracked screenshot references (64 unique hashes) across 57 manifests. DonHV's partition is 22 candidate MEETS, 12 candidate DOES_NOT_MEET and 23 BLOCKED; ATT-001 remains reviewer-blocked because its preserved fixture sizes are inconsistent. DonHV still owns review, catalog decisions, Jira disposition, final workbook generation and same-ID Drive synchronization.

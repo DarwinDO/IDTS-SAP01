@@ -63,8 +63,8 @@
   "donhvLatestReview": {
     "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
-    "category": "CURRENT_RUNTIME_NEGATIVE",
-    "currentStatus": "CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW",
+    "category": "FIXTURE_PROVENANCE_INCONSISTENT",
+    "currentStatus": "BLOCKED_FIXTURE_PROVENANCE_INCONSISTENT",
     "preservesHistoricalCandidateTruth": true,
     "finalPassApproved": false
   }

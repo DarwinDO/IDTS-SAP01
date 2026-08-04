@@ -10,15 +10,14 @@ Deployed runtime: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`
 
 - Assigned to NhanT: 57 cases.
 - Candidate packages prepared: 57/57; no assigned case remains unattempted or unpackaged.
-- 19 truthful candidate positives retained; none is final UAT PASS.
-- 20 valid precondition blockers retained.
-- 5 previously blocked prerequisites are stale after IDTS-116 and require current-runtime rerun.
+- Candidate partition: 22 MEETS / 12 DOES_NOT_MEET / 23 BLOCKED; none is final UAT PASS.
+- Only three stale prerequisites remain: `UAT-AI-007`, `UAT-ATT-002`, `UAT-ATT-003`.
 - Historical defect candidates were rechecked: `UAT-AUTH-005` is a current candidate positive, `UAT-BUG-008` remains a current candidate negative, and `UAT-UX-002` is partial pending a matching wrapping fixture.
 - 5 catalog/semantic corrections are preserved separately from product defects.
 - 1 physical-keyboard limitation still requires NhanT's manual confirmation.
 - 2 AI diagnostic reruns require immutable suggestion ID plus sanitized Network/audit and no-mutation proof.
-- `UAT-COM-001` is now a current candidate positive; `UAT-ATT-001` remains a current candidate negative on BUG-0025 after rerun and cross-record investigation.
-- Retained visual evidence: 77 PNG references after the latest runtime supplements; every manifest reference and SHA-256 must pass the fresh integrity gate.
+- `UAT-COM-001` is a current candidate positive. NhanT's ATT-001 negative remains historically intact, while DonHV blocks acceptance because its 44/54/47-byte fixture provenance is inconsistent.
+- Retained visual evidence: 77 PNG references representing 64 unique SHA-256 values; every manifest reference and hash must pass the fresh integrity gate.
 - Reviewer-approved PASS/FAIL: none. The approved catalog remains unchanged at 90 `PREPARED`.
 - Final `UAT_EN_PREPARED` workbook and Google Drive: unchanged; DonHV remains final integrator.
 
@@ -69,7 +68,7 @@ Each blocked manifest records the exact missing precondition, why the NhanT sess
 - `npm.cmd run qa:secret-scan` -> PASS.
 - `git diff --check` -> PASS.
 - Catalog integrity -> 90/90 `PREPARED`; catalog file has no diff.
-- OfficeCLI preflight limitation -> OfficeCLI is not installed/on PATH, so no OfficeCLI workbook validation or Drive synchronization was performed.
+- OfficeCLI preflight `1.0.143` PASS. No workbook validation or Drive synchronization was needed because this PR changes evidence/metadata only.
 
 ## DonHV review actions
 
@@ -91,7 +90,7 @@ This section is historical. IDTS-116 changed the current runtime after these obs
 
 - All 57 manifests now contain `donhvLatestReview` metadata keyed to Jira comment `10962`; candidate outcomes remain pending DonHV acceptance.
 - Machine-readable partition: `latest-review-summary.json` (19/20/5/3/5/1/2/2 as listed above).
-- A fresh SAP runtime rerun was not performed because this Codex session does not expose the Browser control tool required by the installed Browser skill. No historical result was promoted or fabricated.
+- Current-runtime reruns already captured by NhanT remain preserved; this DonHV curation does not execute or rewrite them.
 - Final workbook and Drive remain unchanged.
 
 ## Current-runtime rerun closure (2026-08-04)
@@ -99,7 +98,7 @@ This section is historical. IDTS-116 changed the current runtime after these obs
 - `UAT-COM-001`: candidate PASS; one NhanT/Tester comment persisted after reload.
 - `UAT-COM-003`: candidate FAIL; a 1006-character comment was accepted and persisted instead of being rejected.
 - `UAT-COM-004`: candidate PASS for sanitization/no execution; markup was stripped and no XSS console marker appeared.
-- `UAT-ATT-001`: current candidate FAIL; a supported file appeared in draft/active state but disappeared after reload.
+- `UAT-ATT-001`: NhanT candidate FAIL preserved; DonHV acceptance BLOCKED because the same manifest/evidence chain identifies 44-byte, 54-byte and 47-byte fixtures.
 - `UAT-AUTH-005`: current candidate PASS; the protected route redirected to SAP Sign In after logout.
 - `UAT-BUG-008`: current candidate FAIL; one title Save again produced two identical audit events.
 - `UAT-UX-002`: partial; action label fits at 834 x 1112, but no Similar Bugs candidates existed to test reason wrapping.
