@@ -14,7 +14,12 @@
   "candidateOutcome": "MEETS_EXPECTED_RESULT",
   "reviewBoundary": "Current-runtime candidate PASS for sanitization/no execution; DonHV decides whether stripped markup text is acceptable product behavior.",
   "evidence": [
-    {"id":"UAT-COM-004-E01","file":"01-current-runtime-reload.png","description":"Reloaded comment shows safe text only; markup did not execute.","sha256":"F28A125CCE1FE650ABDEB06258ED2E4D0625F54C24AEF665372061E11C6C12C2"}
+    {
+      "id": "UAT-COM-004-E01",
+      "file": "01-current-runtime-reload.png",
+      "description": "Reloaded comment shows safe text only; markup did not execute.",
+      "sha256": "F28A125CCE1FE650ABDEB06258ED2E4D0625F54C24AEF665372061E11C6C12C2"
+    }
   ],
   "privacyReview": {
     "status": "PASS",
@@ -25,7 +30,7 @@
     "The sanitizer removes markup and its enclosed text rather than displaying literal tags; DonHV must confirm this UX policy is acceptable."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "CURRENT_RUNTIME_POSITIVE",
     "currentStatus": "CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW",

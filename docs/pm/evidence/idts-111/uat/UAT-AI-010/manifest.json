@@ -40,7 +40,7 @@
     "The UI does not expose an immutable suggestion ID, so DonHV should confirm whether reopening regenerated a new suggestion versus lost the prior suggestion state; either behavior violates this case's same-decision persistence expectation."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "CATALOG_SEMANTIC_CORRECTION",
     "currentStatus": "REVIEW_CORRECTION_REQUIRED",

@@ -23,7 +23,7 @@
     "The inspected controlled Bugs do not expose a Show More control or enough events beyond the initial limit. Creating many lifecycle events is blocked by missing authorized actors/status chain."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "VALID_PRECONDITION_BLOCKER",
     "currentStatus": "BLOCKED",

@@ -42,7 +42,7 @@
     "The two screenshots are byte-identical because the committed state and viewport were unchanged across refresh; the fresh post-refresh DOM independently confirmed BUG-0011 and Reopened."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "RETAINED_TRUTHFUL_POSITIVE",
     "currentStatus": "CANDIDATE_EVIDENCE_RETAINED",

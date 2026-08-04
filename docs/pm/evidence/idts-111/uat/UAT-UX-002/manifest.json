@@ -42,9 +42,11 @@
     "notes": "Controlled UAT data only; no email, credential, cookie, token, or private endpoint text."
   },
   "issueClassification": "historical responsive defect partially resolved; candidate-reason wrapping recheck blocked by no-result fixture",
-  "limitations": ["Screenshot capture timed out on the current object page, so the current recheck retains measured DOM geometry and accessible action availability rather than a new PNG."],
+  "limitations": [
+    "Screenshot capture timed out on the current object page, so the current recheck retains measured DOM geometry and accessible action availability rather than a new PNG."
+  ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "CURRENT_RUNTIME_PARTIAL_RECHECK",
     "currentStatus": "CURRENT_RUNTIME_PARTIAL_RECHECK_NEEDS_CANDIDATE_FIXTURE",

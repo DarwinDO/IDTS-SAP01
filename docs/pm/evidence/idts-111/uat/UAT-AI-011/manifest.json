@@ -23,7 +23,7 @@
     "No provider throttle/cooldown control, safe test tenant toggle, or observable rate-limit fixture was supplied. Repeated calls were intentionally avoided."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "VALID_PRECONDITION_BLOCKER",
     "currentStatus": "BLOCKED",

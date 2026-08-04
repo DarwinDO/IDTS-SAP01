@@ -23,7 +23,7 @@
     "UAT-AI-005 could not apply an accepted suggestion, and UAT-AI-010/014/015 show review state resets after reload. A stable accepted suggestion cannot currently be prepared for a stale-source test."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "VALID_PRECONDITION_BLOCKER",
     "currentStatus": "BLOCKED",

@@ -39,7 +39,7 @@
     "The UI does not expose an active/inactive flag in the value-help table; selectability and absence of inactive rows were verified against the execution-baseline catalog."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "RETAINED_TRUTHFUL_POSITIVE",
     "currentStatus": "CANDIDATE_EVIDENCE_RETAINED",

@@ -39,7 +39,7 @@
     "The List Report search tokenized the IDTS terms and returned two other IDTS-111 rows; the exact discarded title was absent from all returned rows."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "RETAINED_TRUTHFUL_POSITIVE",
     "currentStatus": "CANDIDATE_EVIDENCE_RETAINED",

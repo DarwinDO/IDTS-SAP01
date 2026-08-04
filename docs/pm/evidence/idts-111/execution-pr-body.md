@@ -6,13 +6,13 @@
 
 ## Positive Evidence
 
-- 57 manifests and 61 PNG references remain hash-verified with no missing evidence.
+- 57 manifests and 77 PNG references form the current candidate evidence inventory; final gate verification is required before handoff.
 - DonHV accepted evidence for 19 positive executions.
 - NhanT personally acknowledged briefing SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`; Jira comments are `10908` and `10909`.
 
 ## Negative Evidence
 
-- Confirmed product defects: `UAT-AUTH-005` → IDTS-117, `UAT-BUG-008` → IDTS-119, `UAT-UX-002` → IDTS-120.
+- Current rechecks: `UAT-AUTH-005` candidate positive; `UAT-BUG-008` candidate negative; `UAT-UX-002` partial pending a matching wrapping fixture.
 - Catalog mismatches: `UAT-AI-008`, `UAT-AI-010`, `UAT-AI-014`, `UAT-AI-015`, `UAT-LIFE-014`.
 - Targeted reruns: `UAT-AI-005`, `UAT-ATT-001`, `UAT-COM-001`; `UAT-AI-009` remains an environment/session blocker.
 - No negative is relabeled to improve the result.
@@ -37,7 +37,7 @@
 
 ## UI/UX Review
 
-- The retained 61 PNGs remain the candidate visual set.
+- The retained 77 PNG references remain the candidate visual set.
 - Current deployed SAP surface is blank after reload; browser logs `Unexpected token '<'` for `auth-guard.js` and `bootstrap-ui5.js`.
 - No new UI screenshot or targeted PASS is claimed while the surface is unhealthy.
 

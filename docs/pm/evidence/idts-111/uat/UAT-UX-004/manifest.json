@@ -33,7 +33,7 @@
     "The Browser surface did not expose sanitized response status/body; the catalog allows a safe error screenshot as evidence."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "RETAINED_TRUTHFUL_POSITIVE",
     "currentStatus": "CANDIDATE_EVIDENCE_RETAINED",

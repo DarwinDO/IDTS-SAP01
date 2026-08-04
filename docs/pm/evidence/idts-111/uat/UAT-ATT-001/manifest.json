@@ -18,7 +18,7 @@
   "expectedResult": "Metadata persists, binary persists in storage, and the same attachment appears after reload.",
   "actualResult": "The supported controlled file appeared in the generated attachment draft and Save produced an active-row/history signal, but the attachment disappeared after a fresh reload. Therefore metadata/binary persistence is not proven and the case still does not meet its expected result.",
   "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
-  "reviewBoundary": "Safe failure/no orphan passed, but successful upload/persistence failed; DonHV must classify product versus deployed-storage environment.",
+  "reviewBoundary": "BUG-0025 still failed persistence, while the same deployed runtime has IDTS-116 controlled BUG-0019 upload/reload/download/delete proof. This narrows the finding away from a universal storage outage but does not identify whether BUG-0025 state, generated-facet lifecycle, or another scoped runtime condition caused it. DonHV must classify the candidate.",
   "evidence": [
     {
       "id": "UAT-ATT-001-E01",
@@ -57,10 +57,11 @@
   },
   "issueClassification": "product defect or deployed-environment storage blocker candidate",
   "limitations": [
-    "No direct HANA/S3 diagnostic access was available; root cause cannot be assigned from the safe UI message alone."
+    "No direct HANA/S3 diagnostic access was available; root cause cannot be assigned from UI evidence alone.",
+    "Cross-record investigation reference: docs/pm/evidence/idts-116/attachment-end-to-end-sangvn-20260804/README.md proves the same runtime succeeds on controlled BUG-0019, so this is not evidence of a universal provider outage."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "CURRENT_RUNTIME_NEGATIVE",
     "currentStatus": "CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW",

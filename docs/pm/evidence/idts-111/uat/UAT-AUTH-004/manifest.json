@@ -23,7 +23,7 @@
     "No controlled expiry mechanism or second identity was available. A Smart Assign 401 was investigated, but the protected Object Page remained authenticated after refresh, so it is not evidence of an expired application session."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "VALID_PRECONDITION_BLOCKER",
     "currentStatus": "BLOCKED",

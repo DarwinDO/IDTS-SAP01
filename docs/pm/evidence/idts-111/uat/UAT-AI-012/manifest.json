@@ -23,7 +23,7 @@
     "No dedicated prompt-injection Bug was prepared. Current AI flows also show authorization/apply/review-state failures, which would confound a safety conclusion."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "VALID_PRECONDITION_BLOCKER",
     "currentStatus": "BLOCKED",

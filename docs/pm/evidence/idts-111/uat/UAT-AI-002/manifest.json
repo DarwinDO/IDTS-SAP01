@@ -23,7 +23,7 @@
     "No accepted duplicate suggestion exists. The final Similar Bugs attempt produced no dialog/result, while earlier UAT-AI-001 was deliberately review-only and made no decision."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "VALID_PRECONDITION_BLOCKER",
     "currentStatus": "BLOCKED",

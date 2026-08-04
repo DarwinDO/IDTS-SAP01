@@ -35,7 +35,7 @@
     "No network trace or provider credential access was used; root cause is not assigned."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "AI_DIAGNOSTIC_RERUN",
     "currentStatus": "RERUN_REQUIRES_IMMUTABLE_ID_NETWORK_AUDIT",

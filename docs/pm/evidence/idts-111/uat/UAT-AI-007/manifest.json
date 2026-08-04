@@ -23,7 +23,7 @@
     "BUG-0026 has history, but UAT-COM-001 prevents creating the required controlled comment. Using unrelated comments would weaken grounding/privacy control."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "STALE_PREREQUISITE_RERUN_REQUIRED",
     "currentStatus": "RERUN_REQUIRED_CURRENT_RUNTIME",

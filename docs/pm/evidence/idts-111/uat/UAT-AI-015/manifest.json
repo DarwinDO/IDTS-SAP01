@@ -47,7 +47,7 @@
     "The UI exposes no immutable suggestion ID; DonHV must confirm regeneration versus lost review state."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "CATALOG_SEMANTIC_CORRECTION",
     "currentStatus": "REVIEW_CORRECTION_REQUIRED",

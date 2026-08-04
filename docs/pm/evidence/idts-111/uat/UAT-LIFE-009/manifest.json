@@ -23,7 +23,7 @@
     "BUG-0011 initially satisfied the state but UAT-LIFE-014 intentionally closed it with an empty reason, exposing a defect; it was then reopened for UAT-LIFE-010. No second Retest Required record exists for an independent valid-reason run."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "VALID_PRECONDITION_BLOCKER",
     "currentStatus": "BLOCKED",

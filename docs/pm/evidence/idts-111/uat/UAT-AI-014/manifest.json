@@ -47,7 +47,7 @@
     "Duplicate-link/history/notification non-mutation was observed through unchanged Object Page state; no direct database access was used."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "CATALOG_SEMANTIC_CORRECTION",
     "currentStatus": "REVIEW_CORRECTION_REQUIRED",

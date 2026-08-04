@@ -23,7 +23,7 @@
     "BUG-0026 is Assigned but its current action owner is SangVN; NhanT cannot truthfully act as the authorized processor. No authorized SangVN/PM identity was provided."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "VALID_PRECONDITION_BLOCKER",
     "currentStatus": "BLOCKED",

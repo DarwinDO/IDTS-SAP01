@@ -1,22 +1,22 @@
 ## Summary
 
 - Preserve the approved English-only 90-case IDTS-111 UAT catalog and add NhanT's complete 57-case candidate execution package.
-- Publish DonHV's current partition from Jira comment `10942`: 19 retained candidate positives, 20 valid blockers, 5 stale blockers requiring rerun, 3 defect rechecks, 5 semantic corrections, 1 physical-keyboard limitation, 2 AI diagnostics and 2 historical old-runtime negatives.
-- Preserve the old `UAT-COM-001` and `UAT-ATT-001` evidence as historical only; do not present those failures as current behavior after IDTS-116.
+- Publish DoNHV's latest partition from Jira comment `10962`: 22 candidate MEETS, 12 candidate DOES_NOT_MEET and 23 BLOCKED, with all 57 cases still pending final review.
+- Preserve old `UAT-COM-001`/`UAT-ATT-001` evidence as historical while presenting only their latest current-runtime outcomes.
 - Keep reviewer approval, final `UAT_EN_PREPARED` workbook generation, and same-ID Drive synchronization with DonHV.
 
 ## Positive Evidence
 
 - 57/57 NhanT-assigned cases have manifests; no assigned case is unattempted or unpackaged.
 - DonHV retained 19 truthful positive candidates and 20 valid blockers without converting them to PASS; 5 formerly blocked prerequisites now require current-runtime rerun.
-- Fresh integrity check: 57 manifests, 63 referenced PNGs, 0 missing files, and 0 SHA-256 mismatch.
+- Current inventory: 57 manifests and 77 referenced PNGs; the final exact-head gate verifies 0 missing files and 0 SHA-256 mismatch.
 - Safe error/no-partial-mutation behavior is retained for comment, attachment, AI, lifecycle, and authorization findings.
 
 ## Negative Evidence
 
-- Three confirmed product defects remain explicit but require current-runtime recheck: `UAT-AUTH-005`, `UAT-BUG-008`, and `UAT-UX-002`.
+- Current-runtime disposition is explicit: `UAT-AUTH-005` candidate positive, `UAT-BUG-008` candidate negative, and `UAT-UX-002` partial pending a matching fixture.
 - Five catalog/semantic mismatches remain separated from product defects: `UAT-AI-008`, `UAT-AI-010`, `UAT-AI-014`, `UAT-AI-015`, and `UAT-LIFE-014`.
-- `UAT-COM-001` and `UAT-ATT-001` are labeled historical old-runtime negatives after IDTS-116; a fresh current-runtime rerun is still required.
+- `UAT-COM-001` current rerun is candidate positive; `UAT-ATT-001` current BUG-0025 rerun remains candidate negative and is narrowed by successful IDTS-116 BUG-0019 cross-record evidence.
 - No blocked or candidate result is presented as reviewer-approved PASS/FAIL.
 
 ## Edge/Boundary Evidence

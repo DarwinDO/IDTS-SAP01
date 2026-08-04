@@ -3,11 +3,11 @@
 ## Review baseline
 
 - Candidate PR: `#270`.
-- Candidate head: `44721f53fe2f7588d38f6d6c79ffb0c33026d5d3`.
+- Historical reviewer baseline: `44721f53fe2f7588d38f6d6c79ffb0c33026d5d3`; current post-merge curation baseline: `d299d6aeb7b546effbe817bfc32010b5a1c20c5e`.
 - Execution baseline: `fbea12cd996d8c1e13bd834fd6e054c8a37c32e6`.
 - Deployed runtime: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`.
 - Reviewer: DonHV, with independent read-only agent reviews used only as advisory input.
-- Evidence integrity: 57 manifests, 63 referenced images after targeted reruns, pending fresh exact-head verification.
+- Evidence integrity: 57 manifests, 77 referenced images after the latest runtime supplements, pending fresh exact-head verification.
 
 `ACCEPTED_EVIDENCE` means that the submitted evidence truthfully supports the observed result. It does not mean that a blocked case passed, that a product defect is fixed, or that the final UAT workbook is approved.
 
@@ -95,3 +95,11 @@ NhanT recorded the required acknowledgment in the repository and Jira comments `
 ### 2026-08-04 current-runtime addendum
 
 Current deployed reruns now supersede the old-runtime behavior for `UAT-COM-001` and `UAT-AUTH-005`, which are candidate PASS. `UAT-COM-003`, `UAT-ATT-001`, and `UAT-BUG-008` remain candidate failures with fresh evidence. `UAT-COM-004` passes sanitization/no-execution, `UAT-UX-002` is only partially rechecked, and `UAT-AI-005` still lacks the immutable suggestion ID and sanitized Network response required for diagnostic closure. `UAT-UX-003` remains a physical-keyboard handoff. DonHV still owns final disposition and workbook/Drive synchronization.
+
+### Latest DoNHV comment 10962 remediation (2026-08-04)
+
+- Current reviewer partition remains **22 MEETS / 12 DOES_NOT_MEET / 23 BLOCKED** across 57 manifests; none is final UAT approval.
+- Fresh current-runtime PNGs now document `UAT-AUTH-005` signed-out confirmation plus protected-route SAP Sign In redirect, and `UAT-BUG-008` duplicate History rows.
+- `UAT-ATT-001` remains a candidate negative for BUG-0025. Cross-record IDTS-116 evidence proves the same deployed runtime completes upload/reload/download/delete on BUG-0019, narrowing the issue away from a universal storage outage without inventing a root cause.
+- Remaining human/diagnostic gaps are explicit: AI immutable suggestion ID/Network response, a matching UX-002 wrapping fixture, and NhanT physical-keyboard confirmation for UX-003.
+- Machine-readable curation uses Jira comment `10962`, baseline head `d299d6aeb7b546effbe817bfc32010b5a1c20c5e`, 57 manifests and 77 hash-tracked evidence references. Final commit SHA is recorded in the PR/Jira handoff after commit to avoid self-referential metadata.

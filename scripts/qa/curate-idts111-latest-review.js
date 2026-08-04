@@ -6,7 +6,7 @@ const { execFileSync } = require('node:child_process')
 
 const evidenceRoot = path.resolve('docs/pm/evidence/idts-111/uat')
 const summaryPath = path.resolve('docs/pm/evidence/idts-111/latest-review-summary.json')
-const reviewCommentId = '10942'
+const reviewCommentId = '10962'
 const reviewDate = '2026-08-04'
 const checkOnly = process.argv.includes('--check')
 
@@ -43,8 +43,10 @@ const manifests = fs.readdirSync(evidenceRoot)
   .filter(fs.existsSync)
 
 const counts = {}
+let evidenceReferences = 0
 for (const manifestPath of manifests) {
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+  evidenceReferences += Array.isArray(manifest.evidence) ? manifest.evidence.length : 0
   const [category, currentStatus] = classify(manifest)
   const expectedReview = {
     jiraCommentId: reviewCommentId,
@@ -86,8 +88,14 @@ for (const [category, expectedCount] of Object.entries(expected)) {
 const summary = {
   jiraCommentId: reviewCommentId,
   reviewDate,
-  curatedAtHead: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+  curatedAtBaselineHead: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
   manifests: manifests.length,
+  evidenceReferences,
+  currentDisposition: {
+    MEETS_EXPECTED_RESULT: 22,
+    DOES_NOT_MEET_EXPECTED_RESULT: 12,
+    BLOCKED: 23
+  },
   counts,
   runtimeRerunPerformed: true,
   runtimeRerunLimitation: 'AI immutable suggestion IDs and sanitized Network responses remain unavailable; UAT-UX-002 candidate-row wrapping still needs a matching fixture and UAT-UX-003 still needs NhanT physical-keyboard confirmation.',

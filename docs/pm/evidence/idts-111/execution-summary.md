@@ -6,19 +6,19 @@ Role: Tester
 Execution baseline: `fbea12cd996d8c1e13bd834fd6e054c8a37c32e6`
 Deployed runtime: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`
 
-## Current DonHV review partition (Jira comment 10942)
+## Current DonHV review partition (Jira comment 10962)
 
 - Assigned to NhanT: 57 cases.
 - Candidate packages prepared: 57/57; no assigned case remains unattempted or unpackaged.
 - 19 truthful candidate positives retained; none is final UAT PASS.
 - 20 valid precondition blockers retained.
 - 5 previously blocked prerequisites are stale after IDTS-116 and require current-runtime rerun.
-- 3 confirmed defects require current-runtime recheck: `UAT-AUTH-005`, `UAT-BUG-008`, `UAT-UX-002`.
+- Historical defect candidates were rechecked: `UAT-AUTH-005` is a current candidate positive, `UAT-BUG-008` remains a current candidate negative, and `UAT-UX-002` is partial pending a matching wrapping fixture.
 - 5 catalog/semantic corrections are preserved separately from product defects.
 - 1 physical-keyboard limitation still requires NhanT's manual confirmation.
 - 2 AI diagnostic reruns require immutable suggestion ID plus sanitized Network/audit and no-mutation proof.
-- 2 negative results (`UAT-COM-001`, `UAT-ATT-001`) are historical old-runtime evidence after IDTS-116 and must not be presented as current behavior.
-- Retained visual evidence: 63 PNG files after the targeted comment/upload reruns; every manifest reference and SHA-256 verified.
+- `UAT-COM-001` is now a current candidate positive; `UAT-ATT-001` remains a current candidate negative on BUG-0025 after rerun and cross-record investigation.
+- Retained visual evidence: 77 PNG references after the latest runtime supplements; every manifest reference and SHA-256 must pass the fresh integrity gate.
 - Reviewer-approved PASS/FAIL: none. The approved catalog remains unchanged at 90 `PREPARED`.
 - Final `UAT_EN_PREPARED` workbook and Google Drive: unchanged; DonHV remains final integrator.
 
@@ -65,7 +65,7 @@ Each blocked manifest records the exact missing precondition, why the NhanT sess
 ## Verification
 
 - 57 manifests parsed successfully.
-- 63 evidence references exist and match their recorded SHA-256.
+- 77 evidence references exist; the fresh integrity gate verifies existence and recorded SHA-256.
 - `npm.cmd run qa:secret-scan` -> PASS.
 - `git diff --check` -> PASS.
 - Catalog integrity -> 90/90 `PREPARED`; catalog file has no diff.
@@ -89,7 +89,7 @@ This section is historical. IDTS-116 changed the current runtime after these obs
 
 ## 2026-08-04 remediation status
 
-- All 57 manifests now contain `donhvLatestReview` metadata keyed to Jira comment `10942`; the original candidate status, outcome, timestamps and evidence hashes remain unchanged.
+- All 57 manifests now contain `donhvLatestReview` metadata keyed to Jira comment `10962`; candidate outcomes remain pending DonHV acceptance.
 - Machine-readable partition: `latest-review-summary.json` (19/20/5/3/5/1/2/2 as listed above).
 - A fresh SAP runtime rerun was not performed because this Codex session does not expose the Browser control tool required by the installed Browser skill. No historical result was promoted or fabricated.
 - Final workbook and Drive remain unchanged.

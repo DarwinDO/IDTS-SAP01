@@ -23,7 +23,7 @@
     "The only authorized authenticated identity available is mapped NhanT/Tester. Reusing it cannot test unmapped denial; no alternate identity was supplied."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "VALID_PRECONDITION_BLOCKER",
     "currentStatus": "BLOCKED",

@@ -14,8 +14,18 @@
   "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
   "reviewBoundary": "Current-runtime candidate defect; DonHV must review and route product ownership before approved FAIL.",
   "evidence": [
-    {"id":"UAT-COM-003-E01","file":"01-current-runtime-posted.png","description":"Oversized controlled comment accepted by the UI.","sha256":"B674BD1894D8C4D0BC67D6BCB45DF74FC685BDC858F282FB9BEFC7BB533C1B1C"},
-    {"id":"UAT-COM-003-E02","file":"02-current-runtime-reload.png","description":"Oversized comment remains listed after reload.","sha256":"E2D63B68FCA474765EEC6AD4FE619959197F1EE0774FF103F6D586BBA559BB25"}
+    {
+      "id": "UAT-COM-003-E01",
+      "file": "01-current-runtime-posted.png",
+      "description": "Oversized controlled comment accepted by the UI.",
+      "sha256": "B674BD1894D8C4D0BC67D6BCB45DF74FC685BDC858F282FB9BEFC7BB533C1B1C"
+    },
+    {
+      "id": "UAT-COM-003-E02",
+      "file": "02-current-runtime-reload.png",
+      "description": "Oversized comment remains listed after reload.",
+      "sha256": "E2D63B68FCA474765EEC6AD4FE619959197F1EE0774FF103F6D586BBA559BB25"
+    }
   ],
   "privacyReview": {
     "status": "PASS",
@@ -26,7 +36,7 @@
     "The collapsed UI does not expose the complete stored value without opening MORE; acceptance and post-reload presence are sufficient to prove rejection did not occur."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "CURRENT_RUNTIME_NEGATIVE",
     "currentStatus": "CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW",

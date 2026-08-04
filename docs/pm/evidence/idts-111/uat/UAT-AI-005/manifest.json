@@ -37,9 +37,24 @@
       "description": "Reloaded BUG-0026 with original classification and workflow intact.",
       "sha256": "163EC50B801F234CC3C88949B56C87D745DD2FCEA7A0C9B149CF98F63AF08005"
     },
-    {"id":"UAT-AI-005-E04","file":"04-current-runtime-suggestion.png","description":"Current grounded suggestion values before acceptance.","sha256":"0B0AB4E216CB11550BFC3E6922AD956F0A3CD944E16F432723827993FC624792"},
-    {"id":"UAT-AI-005-E05","file":"05-current-runtime-apply-error.png","description":"Current safe Apply Classification failure.","sha256":"EDD0CB74DBBF8F33CC2E5CB6F7A86769C10EED43ABF06EAEE92650B9FDBD440D"},
-    {"id":"UAT-AI-005-E06","file":"06-current-runtime-reload.png","description":"Current reload proof of no partial mutation.","sha256":"C5658BF54629752C0215FCCFFA451081D85CE7410DB4AD12015E0E96D2FF9EBD"}
+    {
+      "id": "UAT-AI-005-E04",
+      "file": "04-current-runtime-suggestion.png",
+      "description": "Current grounded suggestion values before acceptance.",
+      "sha256": "0B0AB4E216CB11550BFC3E6922AD956F0A3CD944E16F432723827993FC624792"
+    },
+    {
+      "id": "UAT-AI-005-E05",
+      "file": "05-current-runtime-apply-error.png",
+      "description": "Current safe Apply Classification failure.",
+      "sha256": "EDD0CB74DBBF8F33CC2E5CB6F7A86769C10EED43ABF06EAEE92650B9FDBD440D"
+    },
+    {
+      "id": "UAT-AI-005-E06",
+      "file": "06-current-runtime-reload.png",
+      "description": "Current reload proof of no partial mutation.",
+      "sha256": "C5658BF54629752C0215FCCFFA451081D85CE7410DB4AD12015E0E96D2FF9EBD"
+    }
   ],
   "privacyReview": {
     "status": "PASS",
@@ -50,7 +65,7 @@
     "The Browser surface does not expose the immutable suggestion ID or sanitized HTTP Network response; DonHV's diagnostic closure requirement remains unmet."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "AI_DIAGNOSTIC_RERUN",
     "currentStatus": "RERUN_REQUIRES_IMMUTABLE_ID_NETWORK_AUDIT",

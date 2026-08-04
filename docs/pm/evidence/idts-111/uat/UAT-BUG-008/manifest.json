@@ -5,7 +5,7 @@
   "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
   "executor": "NhanT",
   "actorRole": "TESTER",
-  "executedAt": "2026-08-04T16:45:55+07:00",
+  "executedAt": "2026-08-04T18:23:00+07:00",
   "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
   "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
   "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
@@ -36,6 +36,12 @@
       "file": "03-after-reload-duplicate-audit.png",
       "description": "Reloaded History showing two duplicate title Edit events at the same timestamp.",
       "sha256": "0BE9BE5DD099D010AE27D2DC044437A00F3F63E4697FAFA7F3FCD5D5909E3EFC"
+    },
+    {
+      "id": "UAT-BUG-008-E04",
+      "file": "04-current-runtime-history-20260804.png",
+      "description": "Fresh current-runtime readback of BUG-0025 History showing two identical title Edit events at Aug 4, 2026 4:45:55 PM.",
+      "sha256": "F2999C6D833C933AEB7D59663D088D96DE1E64C1702CF59639A9C340F9166965"
     }
   ],
   "privacyReview": {
@@ -45,7 +51,7 @@
   "issueClassification": "product defect candidate - duplicate edit audit events",
   "limitations": [],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "CONFIRMED_DEFECT_RECHECK",
     "currentStatus": "CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW",

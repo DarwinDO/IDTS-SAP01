@@ -23,7 +23,7 @@
     "The Fiori value helps filter categories to the selected component, and direct text entry does not resolve inactive/incompatible keys. No approved direct request fixture was available."
   ],
   "donhvLatestReview": {
-    "jiraCommentId": "10942",
+    "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "VALID_PRECONDITION_BLOCKER",
     "currentStatus": "BLOCKED",
