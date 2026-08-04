@@ -387,13 +387,35 @@ Choose the mechanism that fits the intended outcome:
 
 Every delegated assignment must state its objective, authority, read/write scope, expected output, evidence requirement, prohibited actions, and return condition. Do not delegate secrets, credentials, destructive operations, Jira/Drive/production mutations, the immediate critical-path blocker, or final release authority.
 
+### Subagent Context Packet and Lifecycle
+
+- Create subagents with `fork_context: false` by default. A subagent must not inherit the full parent conversation merely for convenience, because a long parent task can duplicate large session data, preserve irrelevant assumptions, and make the delegated result harder to audit.
+- Use `fork_context: true` only when the user explicitly approves it and the primary agent records why a bounded standalone prompt is insufficient, confirms that the source context is reasonably small, and accepts the storage/privacy cost. Never fork a known long-running or multi-gigabyte parent task.
+- Because a `fork_context: false` subagent receives no hidden conversation context, its initial prompt must be a complete, self-contained delegation packet. Never write prompts such as “continue the plan”, “review the latest task”, or “use the context above”.
+- The delegation packet must include every item needed to perform the task correctly:
+  1. The concrete objective, user intent, and why the subtask matters to the primary result.
+  2. The repository/workspace absolute path, executing member, owner, and decision authority.
+  3. The frozen Git SHA/branch plus relevant Jira keys, PR numbers, Drive IDs, deploy SHA, or environment baseline when applicable.
+  4. Exact mandatory files and rules to read, including `AGENTS.md`, task-matching `.agents/rules/*`, project/PM context, SAP490 briefing, source files, and prior evidence as applicable.
+  5. Current project facts, decisions, assumptions, terminology, known findings, and unresolved questions that came from the parent conversation but are not safely discoverable from repository files.
+  6. Exact in-scope and out-of-scope work, disjoint read/write scope, allowed mutations, prohibited mutations, and integration boundaries.
+  7. Required skills, MCP servers, connectors, commands, preflights, tests, scans, evidence, and expected output format.
+  8. Security/privacy constraints, no-secret rules, credential/session prohibitions, and human-approval boundaries.
+  9. Completion criteria, stop conditions, how to report uncertainty, and the exact return protocol to the primary agent.
+- Prefer exact file paths and immutable SHAs over copying a large transcript. Include a concise decision summary for conversation-only facts. Never paste credentials, cookies, tokens, private endpoints, raw personal data, or an entire chat transcript into a subagent prompt.
+- Keep a delegation register in the primary task containing agent ID/nickname, assigned objective, write scope, baseline, status, result-review state, and a `KEEP` or `CLOSE` decision.
+- When a subagent reaches completed, errored, interrupted, or otherwise final status, the primary agent must retrieve and review the result, preserve any required patch/evidence outside the agent, record accepted/rejected findings, and call `close_agent` immediately.
+- Keep a subagent open only when it remains materially necessary for an imminent follow-up in the same active work package and its retained context avoids meaningful rework. Record the reason and intended next use. Reassess retained agents at every handoff and close them as soon as that follow-up is complete.
+- Before ending a turn or work package, close every subagent that is not explicitly retained. Do not keep completed agents as a visual history; Git, Jira, evidence files, and the primary report are the durable record.
+- If agent management returns `not_found`, treat the backend agent as already closed or unavailable. Do not repeatedly retry shutdown. A stale sidebar entry is a UI/session-state issue and may require restarting Codex; it is not evidence that an agent is still running.
+
 Model and reasoning policy:
 
 - When a child task or subagent model is explicitly selected for the current approved workstream, use only `gpt-5.6-luna` or `gpt-5.6-terra`, unless the user explicitly approves an exception.
 - `gpt-5.6-terra` may use reasoning up to `high` only. Never run Terra with `xhigh`, `ultra`, or `max`.
 - `gpt-5.6-luna` may run only at `xhigh`, `ultra`, or `max`. If a requested level such as `ultra` is unavailable in the current tool, use another allowed Luna level; do not silently downgrade below `xhigh`.
-- Do not run delegated work in a UI or service mode labeled `Fast`, and do not explicitly request the `priority` service tier. Model, reasoning effort, and service tier are separate controls: satisfying the model/reasoning rule does not authorize Fast/priority execution.
-- Before dispatch, verify that the mechanism can enforce both the required model/reasoning pair and a non-Fast service mode. If it cannot, keep the work in the primary task or use a child-task mechanism that exposes a non-Fast mode, and report the limitation.
+- Do not explicitly request a UI/service mode labeled `Fast` or a `priority` service tier. Model, reasoning effort, and service tier are separate controls.
+- If the delegation tool does not expose a Fast/off or service-tier control, delegation may continue when it is otherwise appropriate and authorized. Report that limitation honestly; do not claim that Fast was disabled. The missing control alone is not a reason to make the primary agent work alone.
 - Prefer the smallest permitted model that can reliably complete the delegated scope. Use Luna for narrow inventory, extraction, mechanical checks, and low-risk bounded work; use Terra for complex cross-layer analysis, implementation, difficult debugging, security/authorization review, architecture, or independent final review.
 - Select reasoning effort proportionally to ambiguity, risk, cross-layer coupling, and verification burden within the permitted ranges. Do not default every task to the highest reasoning level.
 - If the current delegation mechanism cannot enforce model, reasoning level, or non-Fast service mode, report that limitation instead of claiming the override occurred.
@@ -417,6 +439,15 @@ Khi bắt đầu mọi task, agent chính phải tự đánh giá rõ việc dù
 - Không delegate để tạo cảm giác nhiều người đồng ý, không giao trùng cùng một vấn đề chưa giải quyết, và không để các agent cùng sửa một write scope khi chưa có integration plan.
 - Khi chủ động chọn model, chỉ dùng model GPT-5.6 khả dụng trong khoảng từ Luna đến Terra; chọn model nhỏ nhất đủ làm việc và chọn reasoning theo độ khó, độ mơ hồ, rủi ro và nhu cầu verify. Nếu công cụ không cho điều khiển model/reasoning thì phải nói rõ, không được tuyên bố đã chọn thành công.
 - Kết quả task con/subagent chỉ là draft. Agent chính luôn phải review minh bạch, đối chiếu source/rule/Jira, kiểm diff/evidence, chạy lại gate phù hợp, sửa hoặc bác bỏ finding sai, và chịu trách nhiệm cuối cùng cho commit, PR, merge, deploy, cập nhật Jira/Drive và mọi kết luận PASS.
+
+Quy tắc bổ sung cho subagent:
+
+- Mặc định luôn tạo subagent với `fork_context: false`. Chỉ được fork toàn bộ context khi user duyệt rõ, context nguồn nhỏ và agent chính đã ghi nhận lý do không thể dùng prompt độc lập. Không fork task dài hoặc session nhiều GB.
+- Khi `fork_context: false`, prompt giao việc phải tự đủ và ghi rõ mục tiêu, context, baseline SHA/branch/Jira/PR/Drive, file/rule bắt buộc phải đọc, quyết định hiện hành, scope, write scope, điều cấm, tool/skill/MCP, test/evidence, security, human approval và điều kiện trả kết quả. Không được giao kiểu “làm tiếp việc trên”.
+- Agent chính phải giữ danh sách agent ID/nickname, task, baseline, write scope, status và quyết định `KEEP/CLOSE`.
+- Sau khi subagent xong/lỗi/bị ngắt, agent chính phải lấy kết quả, review, lưu patch/evidence cần thiết, ghi finding được nhận/bác bỏ, rồi gọi `close_agent` ngay. Chỉ giữ lại agent nếu sắp có follow-up trực tiếp trong cùng work package và phải ghi rõ lý do.
+- Trước khi kết thúc turn/work package, đóng tất cả subagent không được ghi `KEEP`. Nếu tool trả `not_found`, xem agent đã đóng/không còn ở backend; sidebar còn tên là stale UI và có thể cần restart Codex.
+- Nếu tool không có công tắc Fast/off, vẫn được delegate khi phù hợp; phải nói rõ limitation và không được tuyên bố đã tắt Fast. Không vì thiếu công tắc mà bắt agent chính làm một mình.
 
 ## Always-On Karpathy Guidelines
 
