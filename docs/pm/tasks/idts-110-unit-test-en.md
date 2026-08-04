@@ -34,6 +34,7 @@
 - The 13 true BTP integration cases remain blocked because `cf`/authorized BTP readiness, controlled identities, S3 injection, and Job Scheduler proof are unavailable. A fresh `npm.cmd run btp:demo:check` on 2026-08-04 stopped before execution because `cf` is not installed/on PATH.
 - Evidence inventory: 188 manifests, 280 PNGs, and 0 SVGs. Duplicate SVG sources were removed and structured JSON evidence is linked from manifests.
 - The immutable local payload/manifests name tested baseline `56b4a4f3d92ef2f9558869caab4b393b07d8b5e7`; the two runtime supplements record deployed runtime SHA `67b1bf86169e9696c9365ef4846b99ffae30d4e2`. Evidence reconciliation found 0 missing references.
+- Baseline reconciliation is explicit in `docs/pm/evidence/idts-110/baseline-trace.md`: manifests are evidence-curation artifacts at `56b4a4f3d92ef2f9558869caab4b393b07d8b5e7`, the exact local payload records execution at `7c02c56daa7f46661b4d2f778a7a0b2a77d88b8a`, and the two generated-control supplements retain deployed runtime SHA `67b1bf86169e9696c9365ef4846b99ffae30d4e2`. These roles are valid separately and are not double-counted.
 - DonHV review is pending. The approved catalog remains 188 `NOT_RUN`, and `Unit_Test_EN`/Drive have not been changed by NhanT/agent.
 - Jira handoff comments: previous `10861`; final remediation handoff `10924` after commit `c409335` and PR #269 QA-depth PASS.
 

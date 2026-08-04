@@ -3,6 +3,7 @@
 - Apply DonHV's corrected 175 local-primary / 13 BTP-only taxonomy to the IDTS-110 execution package.
 - Rerun 40 exact LOCAL cases and 135 corrected local-primary cases; the final exact-head verification used Node.js 24 after rebuilding the local `better-sqlite3` native module for the matching ABI.
 - Publish the combined current truth: 40 atomic candidate PASS, 135 mapping-only candidates, 0 FAIL and 13 BTP BLOCKED; keep the approved catalog `NOT_RUN` until DonHV accepts results.
+- Add `docs/pm/evidence/idts-110/baseline-trace.md` to explain the catalog, manifest-curation, exact local execution, deployed runtime and final-head verification SHAs without rewriting historical provenance.
 - Remove 278 duplicate SVG evidence sources and retain 188 manifests, 280 PNGs and structured JSON evidence.
 
 ## Positive Evidence
@@ -71,6 +72,7 @@ Ownership: NhanT executes and packages truthful evidence; DonHV reviews results 
 ## Known Gaps
 
 - Thirteen BTP integration cases require an authorized Cloud Foundry/BTP session.
+- The evidence package intentionally retains multiple immutable SHAs for distinct provenance roles; the reconciliation and non-double-counting rule is documented in `baseline-trace.md`.
 - Two attachment UI cases have generated SAP-standard control runtime proof and remain pending DonHV acceptance.
 - The official English `Unit_Test_EN` workbook and Drive file are unchanged because OfficeCLI/authorized integration is unavailable and DonHV owns final synchronization.
 

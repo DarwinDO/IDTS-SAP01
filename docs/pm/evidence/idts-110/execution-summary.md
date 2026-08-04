@@ -2,7 +2,7 @@
 
 - Executor: NhanT (agent-assisted)
 - Execution date: 2026-08-04
-- Immutable local-run baseline: `56b4a4f3d92ef2f9558869caab4b393b07d8b5e7`; generated-control runtime supplement deploy SHA: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`
+- Baseline/runtime provenance: see `baseline-trace.md`. The manifests use evidence-curation SHA `56b4a4f3d92ef2f9558869caab4b393b07d8b5e7`, the exact local payload uses execution SHA `7c02c56daa7f46661b4d2f778a7a0b2a77d88b8a`, and the generated-control supplements use deployed SHA `67b1bf86169e9696c9365ef4846b99ffae30d4e2`.
 - Approved catalog: `docs/qa/idts-110-unit-test-catalog.json`
 - Catalog size: 188 English cases
 - Review state: `READY_FOR_DONHV_REVIEW_WITH_BTP_AND_UI_REBASELINE_BLOCKERS`
@@ -19,6 +19,8 @@
 | Total | 188 | Every approved case has a manifest and PNG package. |
 
 The approved catalog remains `NOT_RUN` until DonHV accepts individual results and integrates the official Unit Test EN workbook.
+
+The differing immutable SHAs are intentional provenance boundaries, not a single-baseline execution claim. `baseline-trace.md` reconciles the frozen catalog, evidence-curation, exact local execution, deployed runtime, and final-head verification roles.
 
 ## Resolved finding — UT-AUTH-004
 
