@@ -198,7 +198,7 @@ login/profile, dashboard/monitoring, notification UI and AI traces.
   no rebase or force-push was used. The shared acknowledgment conflict preserved the
   current member rows and DatDT's existing READ acknowledgment.
 - Refreshed the candidate against SAP BTP/HANA current truth. The package now contains
-  21 complete 14-part implementation traces and 142 semantic message records. The two
+  21 complete 14-part implementation traces and 145 semantic message records. The two
   added traces cover posting a Bug comment and managing attachment metadata/binary.
 - Corrected the email-processing trace: MTA binds Job Scheduling Service and enables
   scheduler mode, while a separately configured scheduled job calls the protected CAP

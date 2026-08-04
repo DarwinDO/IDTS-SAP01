@@ -76,7 +76,7 @@ workbook and not evidence that the task has passed.
   that DatDT personally approved the new head.
 - DonHV remains responsible for final workbook integration, generation, visual
   review and upload under the current shared-artifact workflow.
-- The 142-row Message Catalog is a curated semantic catalog. Repeated call sites that
+- The 145-row Message Catalog is a curated semantic catalog. Repeated call sites that
   produce the same user-visible contract are consolidated under one stable Message
-  ID; source-scan totals are retained separately and are not misreported as 142 raw
+  ID; source-scan totals are retained separately and are not misreported as 145 raw
   call sites.

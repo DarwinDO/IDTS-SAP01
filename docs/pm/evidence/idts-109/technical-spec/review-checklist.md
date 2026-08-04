@@ -38,7 +38,7 @@ candidate without rebase or force-push. Exact-head DatDT approval remains pendin
 
 ## Fresh current-head verification
 
-- [x] Static structure preview: 21 traces expose fields 1 through 14; 142 message rows.
+- [x] Static structure preview: 21 traces expose fields 1 through 14; 145 message rows.
 - [x] Source manifest refreshed: 96 CAP message sites, 23 explicit throw/rejected-error sites, 55 UI feedback sites and 485 i18n entries.
 - [x] Focused BTP auth, provider, Smart Assign and AI UI programmatic tests pass: 12/12, PASS, 77/0, 14/0, 13/0 and 241 checks respectively.
 - [x] CAP compile passes; the pre-existing attachment `NonUpdateableProperties` warning remains logged.

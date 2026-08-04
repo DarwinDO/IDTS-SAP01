@@ -5646,3 +5646,19 @@ Live evidence: `docs/pm/evidence/idts-117/demo-readiness/live-verification-20260
 - **Root cause:** dependencies had been restored with `npm ci --ignore-scripts`, so the native addon build/install script was intentionally skipped. This result does not indicate an email-outbox product failure.
 - **Fix status:** fixed locally by rebuilding only the locked `better-sqlite3` dependency; no package, lockfile, runtime, HANA, seed or schema change was made.
 - **Verification/next action:** `npm rebuild better-sqlite3` succeeded, then `npm run qa:email-outbox:programmatic` passed. Keep the initial setup failure separate from the passing product test.
+
+### 2026-08-04 — IDTS-109 exact-head falsification findings
+
+- **Classification:** documentation issue.
+- **Symptom:** independent review of PR #240 head `df7cceb04cecefc78485a3f4396fd00e5e461de2` found one nonexistent CAP helper name, three exact authentication messages missing from the catalog, and one HTTP status described as 503-style although the handler returns 500.
+- **Root cause:** the curated semantic catalog and trace normalization retained an earlier helper label and grouped authentication behavior too broadly.
+- **Fix status:** corrected the trace to `enforcePlatformRoleAlignment`, changed the custom-auth unavailable response to HTTP 500, and added separate catalog rows for BTP-login 405, unregistered-BTP-user 403, and invalid/expired-token 401 behavior. Catalog total is now 145 unique records.
+- **Verification/next action:** rerun source/catalog checks and the fresh GitHub QA Depth gate on the remediation head. Do not merge until both pass; no runtime, schema, database or Drive change is involved.
+
+### 2026-08-04 — IDTS-109 AI DevKit command routing
+
+- **Classification:** tooling issue.
+- **Symptom:** the first remediation verification invoked nonexistent npm script `ai:devkit`, so that parallel command group stopped before returning the other command outputs.
+- **Root cause:** the AI DevKit CLI is exposed through `npx ai-devkit@latest lint --json`, not a repository npm script.
+- **Fix status:** command routing corrected; no product or document content was implicated.
+- **Verification/next action:** rerun OfficeCLI, the three repository QA scripts, and AI DevKit with the documented CLI command as separate checks.

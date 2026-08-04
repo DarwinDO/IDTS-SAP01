@@ -67,14 +67,14 @@ Technical trace ID: `TI-AUTH-03`
 
 Technical trace ID: `TI-AUTH-04`
 
-1. **Function name:** AppRouter/XSUAA sign-in and `assertPlatformRoleMatchesUser`
+1. **Function name:** AppRouter/XSUAA sign-in and platform-role alignment
 2. **Purpose:** Establish a BTP browser identity and reject ambiguous or mismatched platform/business roles before IDTS access.
 3. **Actor/precondition:** Browser user deployed through the SAP BTP AppRouter; active XSUAA assignment and matching IDTS `Users` record.
 4. **UI trigger:** Open the protected application or choose `Sign in with SAP BTP` after logout.
 5. **Frontend source:** `app/router/resources/login.html`, `logged-out.html`; `app/bug-management-ui/webapp/auth-guard.js`.
 6. **HTTP/OData request:** AppRouter authenticates protected routes and forwards the JWT to `/odata`; login redirect is handled by XSUAA.
 7. **Service contract:** Protected application/OData routes in `app/router/xs-app.json`; CAP authenticated-user contracts.
-8. **CAP handler/helper:** `srv/auth/platform-role.js::assertPlatformRoleMatchesUser`; dual-mode guard in `srv/auth/custom-auth.js`.
+8. **CAP handler/helper:** `srv/auth/platform-role.js::enforcePlatformRoleAlignment`; dual-mode guard in `srv/auth/custom-auth.js`.
 9. **Validation/authorization:** Require exactly one supported IDTS platform role and equality with `Users.role_code`; reject invalid assignment or mismatch with safe 403 messages.
 10. **Transaction:** Read-only identity resolution before protected business handling.
 11. **Database/provider side effect:** Read the internal user profile; no identity or business mutation.
