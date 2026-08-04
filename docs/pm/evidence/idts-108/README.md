@@ -23,6 +23,9 @@ explicit external blockers; that handoff is not a full PASS/Done claim.
 The source-trace corrections in this refresh are documentation-only and require a
 new exact-head human review.
 
+The PR body is synchronized with the structured ownership gate fields required by
+QA validation.
+
 ## Current collaboration acceptance evidence
 
 - Comment acceptance is registered under
