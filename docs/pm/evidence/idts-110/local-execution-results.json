@@ -1,8 +1,8 @@
 {
   "runner": "IDTS-110 LOCAL exact-case runner",
-  "startedAt": "2026-08-03T14:35:38.550Z",
-  "completedAt": "2026-08-03T14:35:41.415Z",
-  "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec",
+  "startedAt": "2026-08-04T09:17:43.050Z",
+  "completedAt": "2026-08-04T09:17:46.869Z",
+  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
   "catalogBaselineSha": "bc0c47e522ae208384d4b23dda21535dcc683683",
   "results": [
     {
@@ -41,9 +41,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:39.671Z",
-      "completedAt": "2026-08-03T14:35:39.721Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:44.781Z",
+      "completedAt": "2026-08-04T09:17:44.834Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AUTH-002",
@@ -81,9 +81,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:39.721Z",
-      "completedAt": "2026-08-03T14:35:39.727Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:44.834Z",
+      "completedAt": "2026-08-04T09:17:44.841Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AUTH-003",
@@ -121,9 +121,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:39.727Z",
-      "completedAt": "2026-08-03T14:35:39.731Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:44.841Z",
+      "completedAt": "2026-08-04T09:17:44.847Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AUTH-004",
@@ -169,9 +169,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:39.731Z",
-      "completedAt": "2026-08-03T14:35:41.123Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:44.847Z",
+      "completedAt": "2026-08-04T09:17:46.621Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AUTH-005",
@@ -184,9 +184,9 @@
         "srv/auth.js#login",
         "srv/auth.js#me"
       ],
-      "startedAt": "2026-08-03T14:35:41.123Z",
-      "completedAt": "2026-08-03T14:35:41.166Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.621Z",
+      "completedAt": "2026-08-04T09:17:46.655Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AUTH-006",
@@ -224,9 +224,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.166Z",
-      "completedAt": "2026-08-03T14:35:41.175Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.655Z",
+      "completedAt": "2026-08-04T09:17:46.661Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-VAL-TITLE",
@@ -264,9 +264,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.175Z",
-      "completedAt": "2026-08-03T14:35:41.198Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.661Z",
+      "completedAt": "2026-08-04T09:17:46.676Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-VAL-DESCRIPTION",
@@ -304,9 +304,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.198Z",
-      "completedAt": "2026-08-03T14:35:41.208Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.676Z",
+      "completedAt": "2026-08-04T09:17:46.684Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-VAL-STEPS",
@@ -344,9 +344,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.208Z",
-      "completedAt": "2026-08-03T14:35:41.217Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.684Z",
+      "completedAt": "2026-08-04T09:17:46.693Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-VAL-ACTUAL",
@@ -384,9 +384,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.217Z",
-      "completedAt": "2026-08-03T14:35:41.227Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.693Z",
+      "completedAt": "2026-08-04T09:17:46.701Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-VAL-EXPECTED",
@@ -424,9 +424,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.227Z",
-      "completedAt": "2026-08-03T14:35:41.236Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.701Z",
+      "completedAt": "2026-08-04T09:17:46.708Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-VAL-PRIORITY",
@@ -464,9 +464,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.236Z",
-      "completedAt": "2026-08-03T14:35:41.244Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.709Z",
+      "completedAt": "2026-08-04T09:17:46.716Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-VAL-SEVERITY",
@@ -504,9 +504,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.245Z",
-      "completedAt": "2026-08-03T14:35:41.253Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.716Z",
+      "completedAt": "2026-08-04T09:17:46.724Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-VAL-COMPONENT",
@@ -544,9 +544,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.253Z",
-      "completedAt": "2026-08-03T14:35:41.263Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.724Z",
+      "completedAt": "2026-08-04T09:17:46.732Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-VAL-CATEGORY",
@@ -584,9 +584,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.263Z",
-      "completedAt": "2026-08-03T14:35:41.272Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.732Z",
+      "completedAt": "2026-08-04T09:17:46.740Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-VAL-REPORTER",
@@ -624,9 +624,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.272Z",
-      "completedAt": "2026-08-03T14:35:41.290Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.740Z",
+      "completedAt": "2026-08-04T09:17:46.752Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-VAL-WHITESPACE",
@@ -664,9 +664,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.290Z",
-      "completedAt": "2026-08-03T14:35:41.298Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.752Z",
+      "completedAt": "2026-08-04T09:17:46.759Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-VAL-CODE-UNKNOWN",
@@ -704,9 +704,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.299Z",
-      "completedAt": "2026-08-03T14:35:41.306Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.760Z",
+      "completedAt": "2026-08-04T09:17:46.766Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-VAL-CODE-INACTIVE",
@@ -744,9 +744,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.306Z",
-      "completedAt": "2026-08-03T14:35:41.311Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.766Z",
+      "completedAt": "2026-08-04T09:17:46.771Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-VAL-CODE-SPACES",
@@ -784,9 +784,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.311Z",
-      "completedAt": "2026-08-03T14:35:41.317Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.771Z",
+      "completedAt": "2026-08-04T09:17:46.777Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-VAL-CODE-EMPTY",
@@ -824,9 +824,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.317Z",
-      "completedAt": "2026-08-03T14:35:41.322Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.777Z",
+      "completedAt": "2026-08-04T09:17:46.782Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-VAL-CODE-TYPE",
@@ -864,9 +864,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.322Z",
-      "completedAt": "2026-08-03T14:35:41.328Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.782Z",
+      "completedAt": "2026-08-04T09:17:46.788Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-VAL-PAIR-MISMATCH",
@@ -904,9 +904,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.328Z",
-      "completedAt": "2026-08-03T14:35:41.335Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.788Z",
+      "completedAt": "2026-08-04T09:17:46.795Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-CMT-004",
@@ -944,9 +944,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.335Z",
-      "completedAt": "2026-08-03T14:35:41.339Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.795Z",
+      "completedAt": "2026-08-04T09:17:46.799Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-CMT-005",
@@ -984,9 +984,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.339Z",
-      "completedAt": "2026-08-03T14:35:41.343Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.799Z",
+      "completedAt": "2026-08-04T09:17:46.803Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-CMT-008",
@@ -1024,9 +1024,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.343Z",
-      "completedAt": "2026-08-03T14:35:41.353Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.803Z",
+      "completedAt": "2026-08-04T09:17:46.811Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-ATT-007",
@@ -1040,9 +1040,9 @@
       "sourceAssertions": [
         "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js#MAX_ATTACHMENT_BYTES"
       ],
-      "startedAt": "2026-08-03T14:35:41.354Z",
-      "completedAt": "2026-08-03T14:35:41.354Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.812Z",
+      "completedAt": "2026-08-04T09:17:46.813Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-ATT-008",
@@ -1056,9 +1056,9 @@
       "sourceAssertions": [
         "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js#MAX_ATTACHMENT_BYTES"
       ],
-      "startedAt": "2026-08-03T14:35:41.354Z",
-      "completedAt": "2026-08-03T14:35:41.355Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.813Z",
+      "completedAt": "2026-08-04T09:17:46.813Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-ATT-009",
@@ -1100,9 +1100,9 @@
         "Notifications": 0,
         "NotificationDeliveries": 0
       },
-      "startedAt": "2026-08-03T14:35:41.355Z",
-      "completedAt": "2026-08-03T14:35:41.358Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.813Z",
+      "completedAt": "2026-08-04T09:17:46.817Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-NTF-009",
@@ -1142,9 +1142,9 @@
         "Notifications": 1,
         "NotificationDeliveries": 1
       },
-      "startedAt": "2026-08-03T14:35:41.358Z",
-      "completedAt": "2026-08-03T14:35:41.371Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.817Z",
+      "completedAt": "2026-08-04T09:17:46.828Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-NTF-010",
@@ -1184,9 +1184,9 @@
         "Notifications": 2,
         "NotificationDeliveries": 2
       },
-      "startedAt": "2026-08-03T14:35:41.371Z",
-      "completedAt": "2026-08-03T14:35:41.383Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.828Z",
+      "completedAt": "2026-08-04T09:17:46.839Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-NTF-011",
@@ -1226,9 +1226,9 @@
         "Notifications": 3,
         "NotificationDeliveries": 3
       },
-      "startedAt": "2026-08-03T14:35:41.383Z",
-      "completedAt": "2026-08-03T14:35:41.393Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.839Z",
+      "completedAt": "2026-08-04T09:17:46.848Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-001",
@@ -1242,9 +1242,9 @@
         "srv/ai/provider.js#SafeAiProvider",
         "srv/ai/safety.js#redactSensitiveText"
       ],
-      "startedAt": "2026-08-03T14:35:41.394Z",
-      "completedAt": "2026-08-03T14:35:41.395Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.848Z",
+      "completedAt": "2026-08-04T09:17:46.850Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-002",
@@ -1257,9 +1257,9 @@
         "srv/ai/provider.js#SafeAiProvider",
         "srv/ai/safety.js#redactSensitiveText"
       ],
-      "startedAt": "2026-08-03T14:35:41.395Z",
-      "completedAt": "2026-08-03T14:35:41.396Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.850Z",
+      "completedAt": "2026-08-04T09:17:46.851Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-003",
@@ -1272,9 +1272,9 @@
         "srv/ai/provider.js#SafeAiProvider",
         "srv/ai/safety.js#redactSensitiveText"
       ],
-      "startedAt": "2026-08-03T14:35:41.396Z",
-      "completedAt": "2026-08-03T14:35:41.396Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.851Z",
+      "completedAt": "2026-08-04T09:17:46.851Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-004",
@@ -1287,9 +1287,9 @@
         "srv/ai/provider.js#SafeAiProvider",
         "srv/ai/safety.js#redactSensitiveText"
       ],
-      "startedAt": "2026-08-03T14:35:41.396Z",
-      "completedAt": "2026-08-03T14:35:41.406Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.851Z",
+      "completedAt": "2026-08-04T09:17:46.859Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-005",
@@ -1302,9 +1302,9 @@
         "srv/ai/provider.js#SafeAiProvider",
         "srv/ai/safety.js#redactSensitiveText"
       ],
-      "startedAt": "2026-08-03T14:35:41.406Z",
-      "completedAt": "2026-08-03T14:35:41.406Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.859Z",
+      "completedAt": "2026-08-04T09:17:46.860Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-006",
@@ -1317,9 +1317,9 @@
         "srv/ai/provider.js#SafeAiProvider",
         "srv/ai/safety.js#redactSensitiveText"
       ],
-      "startedAt": "2026-08-03T14:35:41.406Z",
-      "completedAt": "2026-08-03T14:35:41.406Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.860Z",
+      "completedAt": "2026-08-04T09:17:46.860Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-007",
@@ -1332,9 +1332,9 @@
         "srv/ai/provider.js#SafeAiProvider",
         "srv/ai/safety.js#redactSensitiveText"
       ],
-      "startedAt": "2026-08-03T14:35:41.406Z",
-      "completedAt": "2026-08-03T14:35:41.407Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.860Z",
+      "completedAt": "2026-08-04T09:17:46.860Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-027",
@@ -1373,9 +1373,9 @@
         "Notifications": 3,
         "NotificationDeliveries": 3
       },
-      "startedAt": "2026-08-03T14:35:41.407Z",
-      "completedAt": "2026-08-03T14:35:41.415Z",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "startedAt": "2026-08-04T09:17:46.860Z",
+      "completedAt": "2026-08-04T09:17:46.869Z",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     }
   ],
   "totals": {

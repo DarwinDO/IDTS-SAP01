@@ -1,11 +1,11 @@
 {
   "caseId": "UT-ASN-009",
   "title": "module-neutral responsibility remains eligible",
-  "candidateExecutionStatus": "PASS",
+  "candidateExecutionStatus": "MAPPING_ONLY_CANDIDATE",
   "reviewStatus": "PENDING_DONHV_REVIEW",
   "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-03T12:39:12.015Z",
-  "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae",
+  "executedAt": "2026-08-04T09:15:45.802Z",
+  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
   "deploySha": null,
   "environment": "HYBRID_BTP",
   "runtime": "Node.js v22.23.1, win32 x64",
@@ -16,7 +16,7 @@
     "srv/bug-service/permissions.js#enforceActionPermission",
     "srv/bug-service/permissions.js#enforceBugWritePermission"
   ],
-  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
+  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
   "assertions": [
     "assignment: PASS  manifest wires Smart Assign through the Assignee custom section, not a header action",
     "assignment: PASS  Object Page keeps assignment in one dedicated section without duplicate Assignment subsection",
@@ -40,7 +40,7 @@
   "evidenceFiles": [
     "result.png"
   ],
-  "limitations": "This is a local-primary candidate result from mapped domain suites. It is not BTP acceptance evidence; DonHV owns final case-level review and workbook integration.",
+  "limitations": "This is broad suite-to-case traceability only. It is not an atomic case execution, browser proof, BTP acceptance evidence, or candidate PASS. DonHV owns final case-level review and workbook integration.",
   "suiteKeys": [
     "assignment"
   ],

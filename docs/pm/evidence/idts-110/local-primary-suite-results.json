@@ -2,11 +2,11 @@
   "schemaVersion": "1.0",
   "jiraKey": "IDTS-110",
   "purpose": "Fresh local-primary domain-suite rerun evidence for the 135 HYBRID_BTP cases corrected by DonHV.",
-  "startedAt": "2026-08-03T14:37:10.424Z",
-  "completedAt": "2026-08-03T14:37:10.426Z",
-  "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec",
+  "startedAt": "2026-08-04T09:15:45.801Z",
+  "completedAt": "2026-08-04T09:15:45.802Z",
+  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
   "policy": {
-    "candidatePassIsFinalPass": false,
+    "mappingOnlyIsAtomicExecution": false,
     "humanReviewer": "DonHV",
     "btpConfirmationIsOptionalForPrimaryAssertion": true
   },
@@ -21,29 +21,29 @@
       "passed": true,
       "assertions": [
         "PASS  active login token type | actual=\"Bearer\" expected=\"Bearer\"",
-        "PASS  active login returns token | actual=\"ip16coPvpNTP5Fyzp75pXwx7cDVlERE1KdaKa0T1DKA\"",
+        "PASS  active login returns token | actual=\"RrOOyJG5bk6ETJbE0V872KdkNLFIel4L52NCgbqcH-s\"",
         "PASS  active login maps user ID | actual=\"10000000-0000-0000-0000-000000000001\" expected=\"10000000-0000-0000-0000-000000000001\"",
         "PASS  active login maps role | actual=\"PM\" expected=\"PM\"",
-        "PASS  active login returns expiry | actual=\"2026-08-03T22:36:48.240Z\"",
+        "PASS  active login returns expiry | actual=\"2026-08-04T17:15:17.236Z\"",
         "PASS  wrong password is denied safely | code=401 message=Invalid email or password.",
         "PASS  inactive user is denied safely | code=401 message=Invalid email or password.",
         "PASS  unexpected login diagnostic excludes raw SQL details | no unsafe detail detected",
         "PASS  unexpected login error response is sanitized | code=500 message=Sign-in is temporarily unavailable. Please try again later.",
-        "PASS  session row created | actual=\"6cacf1b5-4048-4195-adde-a96454e1b16f\"",
+        "PASS  session row created | actual=\"8473736e-0764-45bc-aefc-cc597d77d7f2\"",
         "PASS  raw token is not stored | actual=false expected=false",
-        "PASS  stored hash matches token | actual=\"995c5f7f3a049ffed672b341b9e4b70268f13a0010228ce1cd8a5199f49a9aa5\" expected=\"995c5f7f3a049ffed672b341b9e4b70268f13a0010228ce1cd8a5199f49a9aa5\"",
+        "PASS  stored hash matches token | actual=\"6c42674e9f58f3da551a684adbd824357c2cdae329de05d32735be827304206c\" expected=\"6c42674e9f58f3da551a684adbd824357c2cdae329de05d32735be827304206c\"",
         "PASS  session starts unrevoked | actual=null expected=null",
         "PASS  middleware accepts valid token | actual=null expected=null",
         "PASS  middleware maps user id to email | actual=\"donhv@example.local\" expected=\"donhv@example.local\"",
         "PASS  middleware maps authenticated-user role | actual=true expected=true",
         "PASS  middleware maps business role | actual=true expected=true",
         "PASS  middleware maps IDTS user attribute | actual=\"10000000-0000-0000-0000-000000000001\" expected=\"10000000-0000-0000-0000-000000000001\"",
-        "PASS  middleware maps session attribute | actual=\"6cacf1b5-4048-4195-adde-a96454e1b16f\" expected=\"6cacf1b5-4048-4195-adde-a96454e1b16f\"",
+        "PASS  middleware maps session attribute | actual=\"8473736e-0764-45bc-aefc-cc597d77d7f2\" expected=\"8473736e-0764-45bc-aefc-cc597d77d7f2\"",
         "PASS  me returns current user ID | actual=\"10000000-0000-0000-0000-000000000001\" expected=\"10000000-0000-0000-0000-000000000001\"",
         "PASS  me returns current user email | actual=\"donhv@example.local\" expected=\"donhv@example.local\"",
         "PASS  me returns current user role | actual=\"PM\" expected=\"PM\"",
         "PASS  logout returns true for active session | actual=true expected=true",
-        "PASS  logout sets revokedAt | actual=\"2026-08-03T14:36:48.286Z\"",
+        "PASS  logout sets revokedAt | actual=\"2026-08-04T09:15:17.283Z\"",
         "PASS  middleware rejects revoked token | actual=401 expected=401",
         "PASS  middleware internal auth error status is generic | actual=500 expected=500",
         "PASS  middleware internal auth error code is generic | actual=\"AUTHENTICATION_UNAVAILABLE\" expected=\"AUTHENTICATION_UNAVAILABLE\"",
@@ -53,7 +53,7 @@
       "totals": [
         "TOTAL: 28 PASS  |  0 FAIL  |  28 checks"
       ],
-      "outputSha256": "6693125540e7b0eb1e53075619a8c5694a1d6617c861cff9b4e63b6d7d007a01"
+      "outputSha256": "b69059ceb1db97bce76a53d03c5fcb63b4fc344dd713340e55337cbfbf91a55c"
     },
     "bug": {
       "command": [
@@ -92,15 +92,15 @@
         "PASS  SC-11a closeBug on RESOLVED [HTTP 200 exp 200] | CLOSED",
         "PASS  SC-12a HistoryLogs for BUG-0003 [HTTP 200 exp 200] | entries found: 5",
         "PASS  SC-12b HistoryEvents for BUG-0003 [HTTP 200 exp 200] | events found: 3",
-        "PASS  SC-13a updateBug title/description [HTTP 200 exp 200] | QA title update 1785767809801",
-        "PASS  SC-13b title edit writes history [HTTP 200 exp 200] | {\"fieldName\":\"title\",\"newValue\":\"QA title update 1785767809801\"}",
-        "PASS  SC-13c description edit writes history [HTTP 200 exp 200] | {\"fieldName\":\"description\",\"newValue\":\"QA description update 1785767809801\"}",
+        "PASS  SC-13a updateBug title/description [HTTP 200 exp 200] | QA title update 1785834918982",
+        "PASS  SC-13b title edit writes history [HTTP 200 exp 200] | {\"fieldName\":\"title\",\"newValue\":\"QA title update 1785834918982\"}",
+        "PASS  SC-13c description edit writes history [HTTP 200 exp 200] | {\"fieldName\":\"description\",\"newValue\":\"QA description update 1785834918982\"}",
         "TOTAL: 30 PASS  |  0 FAIL  |  30 tests"
       ],
       "totals": [
         "TOTAL: 30 PASS  |  0 FAIL  |  30 tests"
       ],
-      "outputSha256": "8dcf4cb40dafd31e6a4de0f8ab2cce21bc7ef3cc6ec03d42aa0589fd1f548943"
+      "outputSha256": "bb6f2887538da316c2ca6c7ef0a66f563c65bfe49f79454f31f27dd579601993"
     },
     "classification": {
       "command": [
@@ -131,7 +131,7 @@
         "PASS  PM is allowed to start root draft creation"
       ],
       "totals": [],
-      "outputSha256": "3b120ea8fb979a41c5e62dc6740923cc899f730545bd454da0e9094d4b60ecd3"
+      "outputSha256": "9e9f7eeadc70031f8000cb0bb561edcc13814bf292fc345cd47905ae45ac2e2d"
     },
     "assignment": {
       "command": [
@@ -161,7 +161,7 @@
       "totals": [
         "TOTAL: 14 PASS  |  0 FAIL"
       ],
-      "outputSha256": "d410f34df0a2e0ed0348b834fea405e0f039ea868055d5df89263f51543e471a"
+      "outputSha256": "4c4b032c0516552aa439d458bf040cc371b4bc850c386ef189a9228413b20597"
     },
     "lifecycle": {
       "command": [
@@ -202,15 +202,15 @@
         "PASS  SC-11a closeBug on RESOLVED [HTTP 200 exp 200] | CLOSED",
         "PASS  SC-12a HistoryLogs for BUG-0003 [HTTP 200 exp 200] | entries found: 5",
         "PASS  SC-12b HistoryEvents for BUG-0003 [HTTP 200 exp 200] | events found: 3",
-        "PASS  SC-13a updateBug title/description [HTTP 200 exp 200] | QA title update 1785767813567",
-        "PASS  SC-13b title edit writes history [HTTP 200 exp 200] | {\"fieldName\":\"title\",\"newValue\":\"QA title update 1785767813567\"}",
-        "PASS  SC-13c description edit writes history [HTTP 200 exp 200] | {\"fieldName\":\"description\",\"newValue\":\"QA description update 1785767813567\"}",
+        "PASS  SC-13a updateBug title/description [HTTP 200 exp 200] | QA title update 1785834923773",
+        "PASS  SC-13b title edit writes history [HTTP 200 exp 200] | {\"fieldName\":\"title\",\"newValue\":\"QA title update 1785834923773\"}",
+        "PASS  SC-13c description edit writes history [HTTP 200 exp 200] | {\"fieldName\":\"description\",\"newValue\":\"QA description update 1785834923773\"}",
         "TOTAL: 30 PASS  |  0 FAIL  |  30 tests"
       ],
       "totals": [
         "TOTAL: 30 PASS  |  0 FAIL  |  30 tests"
       ],
-      "outputSha256": "917d7c8a06be5fbbc2a595a7af47297a567825535abeeb89da04fa931912d6b7"
+      "outputSha256": "606f35095e452435cb831ff664443ec2ead4229deea4324d596ad82312dfd2b5"
     },
     "collaboration": {
       "command": [
@@ -221,12 +221,12 @@
       "signal": null,
       "passed": true,
       "assertions": [
-        "PASS  comment row created: aea2b995-32b4-483a-8149-6a86990d1817",
+        "PASS  comment row created: 24ffc102-df7a-47fe-9ba4-9978ee1e7777",
         "PASS  comment row still exists after reconnecting to the same SQLite file",
         "RESULT: PASS"
       ],
       "totals": [],
-      "outputSha256": "241d4cd08d400c01e7764a646c4336913bc307b897af887ec762d3dfbef73432"
+      "outputSha256": "ed4d719b50d41fe7f44d60048d9ea709b85663482973b4059c7d39c6e749db79"
     },
     "history": {
       "command": [
@@ -243,7 +243,7 @@
         "PASS  HE-03 assign change count is populated | changeCount=4"
       ],
       "totals": [],
-      "outputSha256": "7ec243cafc1b8509758222399fd34e7821286cf42c62f12792409cb0fede48bf"
+      "outputSha256": "6db22bb3f7bb2e3b2391d8441579fc910c150228286694a85b0055288a85340e"
     },
     "notification": {
       "command": [
@@ -293,7 +293,7 @@
       "totals": [
         "TOTAL: 20 PASS  |  0 FAIL  |  20 checks"
       ],
-      "outputSha256": "287912e17d286e802afeca2bebd0f96bcab691c35dc19fd3ec3cd496f9d3ed5b"
+      "outputSha256": "7144e4f702944900372fd03b4eec9cf6ec297bd02562d79aadab99c42a817dd2"
     },
     "aiDuplicate": {
       "command": [
@@ -310,13 +310,13 @@
         "PASS  top candidate includes a concise human-review reason | actual=true",
         "PASS  successful provider path uses an embedding | actual=true expected=true",
         "PASS  successful provider path reports SUCCESS | actual=\"SUCCESS\" expected=\"SUCCESS\"",
-        "PASS  persisted source search returns suggestion audit ID | actual=\"5e1933b6-6737-4ed9-8b3a-13ac0e667b48\"",
+        "PASS  persisted source search returns suggestion audit ID | actual=\"af4b7914-c1d2-4231-b278-40206c9b337e\"",
         "PASS  all similar candidates share one review audit ID | actual=true expected=true",
         "PASS  source bug is excluded from its own candidates | actual=false expected=false",
         "PASS  positive response contains no unsafe diagnostic text | no unsafe detail detected",
         "PASS  unrelated bug is absent or remains below similar confidence | not returned",
         "PASS  source-linked search writes one audit row | actual=1 expected=1",
-        "PASS  candidate review ID matches persisted audit row | actual=\"5e1933b6-6737-4ed9-8b3a-13ac0e667b48\" expected=\"5e1933b6-6737-4ed9-8b3a-13ac0e667b48\"",
+        "PASS  candidate review ID matches persisted audit row | actual=\"af4b7914-c1d2-4231-b278-40206c9b337e\" expected=\"af4b7914-c1d2-4231-b278-40206c9b337e\"",
         "PASS  audit row starts in pending review | actual=\"PENDING\" expected=\"PENDING\"",
         "PASS  duplicate audit persists final operation status | actual=\"SUCCESS\" expected=\"SUCCESS\"",
         "PASS  duplicate audit persists non-negative latency | actual=true",
@@ -354,7 +354,7 @@
       "totals": [
         "TOTAL: 45 PASS  |  0 FAIL  |  45 checks"
       ],
-      "outputSha256": "8f11a4297f72e29f241c1ca30d4f8e3ce2078bac2d195e95730d3274d4c5f8e9"
+      "outputSha256": "6b8163497cb0e1092fdaeba37a67e8222262b6d1828f7372c479ec52106b6f28"
     },
     "aiClassification": {
       "command": [
@@ -377,11 +377,11 @@
         "PASS  high-confidence valid provider suggestion status | actual=\"SUGGESTED\" expected=\"SUGGESTED\"",
         "PASS  provider-backed rows are explicitly labelled as AI suggestions | actual=true expected=true",
         "PASS  classification suggestions always require human review | actual=true expected=true",
-        "PASS  persisted source classification returns suggestion audit ID | actual=\"5c1f83db-4e9c-437d-99d4-ec39e644e2ff\"",
+        "PASS  persisted source classification returns suggestion audit ID | actual=\"46bf3329-e479-4716-940d-48894643156a\"",
         "PASS  all classification rows share one review audit ID | actual=true expected=true",
         "PASS  positive response contains no unsafe diagnostic text | no unsafe detail detected",
         "PASS  source-linked classification writes one AI audit row | actual=1 expected=1",
-        "PASS  classification review ID matches persisted audit row | actual=\"5c1f83db-4e9c-437d-99d4-ec39e644e2ff\" expected=\"5c1f83db-4e9c-437d-99d4-ec39e644e2ff\"",
+        "PASS  classification review ID matches persisted audit row | actual=\"46bf3329-e479-4716-940d-48894643156a\" expected=\"46bf3329-e479-4716-940d-48894643156a\"",
         "PASS  classification audit starts pending review | actual=\"PENDING\" expected=\"PENDING\"",
         "PASS  classification audit persists final operation status | actual=\"SUCCESS\" expected=\"SUCCESS\"",
         "PASS  classification audit persists non-negative latency | actual=true",
@@ -406,7 +406,7 @@
       "totals": [
         "TOTAL: 36 PASS  |  0 FAIL  |  36 checks"
       ],
-      "outputSha256": "be0f3bcb4159b9a4d25186fa0cb900782a739bc0e38bc78db12d2157f3f0c965"
+      "outputSha256": "3f11a7e5c1cdc959fced91e5bb82644e34a569f99d5395871aafba4d541d9ce3"
     },
     "aiSummary": {
       "command": [
@@ -429,11 +429,11 @@
         "PASS  important events expose the stored field change | actual=\"[2026-07-09T09:10:00.000Z] SangVN (DEVELOPER) — REQUEST_INFO: Requested more information from tester. Changes: Status: Assigned -> Need More Information\\n[2026-07-09T09:15:00.000Z] DonHV (PM) — EDIT: Updated expected result. Changes: Expected Result: No SQL error. -> The page should show a safe business-facing error.\" expected includes=\"Status: Assigned -> Need More Information\"",
         "PASS  next expected action is explicit | actual=\"Tester or PM should provide the requested information, then resubmit the bug to the assigned developer.\" expected includes=\"resubmit\"",
         "PASS  summary always requires human review | actual=true expected=true",
-        "PASS  summary returns its persisted suggestion ID | actual=\"9ecacd3c-c973-4a81-97c4-fce8327eacca\"",
-        "PASS  summary includes generated timestamp | actual=\"2026-08-03T14:37:02.188Z\"",
+        "PASS  summary returns its persisted suggestion ID | actual=\"4eb596d1-f536-465b-9856-68a7d7af0ffa\"",
+        "PASS  summary includes generated timestamp | actual=\"2026-08-04T09:15:34.730Z\"",
         "PASS  positive summary response contains no unsafe diagnostic text | no unsafe detail detected",
         "PASS  source-linked summary writes one AI audit row | actual=1 expected=1",
-        "PASS  summary response points to the persisted audit row | actual=\"9ecacd3c-c973-4a81-97c4-fce8327eacca\" expected=\"9ecacd3c-c973-4a81-97c4-fce8327eacca\"",
+        "PASS  summary response points to the persisted audit row | actual=\"4eb596d1-f536-465b-9856-68a7d7af0ffa\" expected=\"4eb596d1-f536-465b-9856-68a7d7af0ffa\"",
         "PASS  summary audit starts pending review | actual=\"PENDING\" expected=\"PENDING\"",
         "PASS  summary audit persists final operation status | actual=\"SUCCESS\" expected=\"SUCCESS\"",
         "PASS  summary audit persists non-negative latency | actual=true",
@@ -463,13 +463,13 @@
         "PASS  malformed output fallback still explains current action owner | actual=\"BUG-AI-SUMMARY-001: Login form exposes raw SQL text after invalid password. Current status is NEED_MORE_INFORMATION - Need More Information. Current action owner is DonHV. There are 8 recent comment(s) included in this handoff.\" expected includes=\"Current action owner\"",
         "PASS  unknown source bug is rejected with 404 | actual=true expected=true",
         "PASS  summary action never mutates bug status | actual=\"NEED_MORE_INFORMATION\" expected=\"NEED_MORE_INFORMATION\"",
-        "PASS  summary action never updates bug modifiedAt | actual=\"2026-08-03T14:37:02.169Z\" expected=\"2026-08-03T14:37:02.169Z\"",
+        "PASS  summary action never updates bug modifiedAt | actual=\"2026-08-04T09:15:34.709Z\" expected=\"2026-08-04T09:15:34.709Z\"",
         "TOTAL: 47 PASS  |  0 FAIL  |  47 checks"
       ],
       "totals": [
         "TOTAL: 47 PASS  |  0 FAIL  |  47 checks"
       ],
-      "outputSha256": "eedc900b7451dc1587ddc3ca9f156f10b6fab2680adb242e52d40c8347a8fafa"
+      "outputSha256": "03aa3971d877f920e4d23e2590cff248efbbd8b375f0f3e9ae5a73d2fed13ced"
     },
     "aiAssignment": {
       "command": [
@@ -498,7 +498,7 @@
       "totals": [
         "TOTAL: 13 PASS  |  0 FAIL"
       ],
-      "outputSha256": "d5f9e1ce3dd8b7d1860ccbad1cddb4cfd1765152861a344f2f2f9cf4389fa112"
+      "outputSha256": "8144750e6dee89ee91f617621ede015e1b1da5636250c069e3c696f3d9667760"
     },
     "aiReview": {
       "command": [
@@ -509,13 +509,13 @@
       "signal": null,
       "passed": true,
       "assertions": [
-        "PASS  accept returns the reviewed suggestion ID | actual=\"0cb04669-db30-4374-97e3-7e9c8caf0c66\" expected=\"0cb04669-db30-4374-97e3-7e9c8caf0c66\"",
+        "PASS  accept returns the reviewed suggestion ID | actual=\"71bb4387-9582-4660-8c74-1c2266293c5a\" expected=\"71bb4387-9582-4660-8c74-1c2266293c5a\"",
         "PASS  accept returns ACCEPTED state | actual=\"ACCEPTED\" expected=\"ACCEPTED\"",
         "PASS  accept returns reviewer display name | actual=\"DonHV\" expected=\"DonHV\"",
-        "PASS  accept returns review timestamp | actual=\"2026-08-03T14:37:04.503Z\"",
+        "PASS  accept returns review timestamp | actual=\"2026-08-04T09:15:37.837Z\"",
         "PASS  accept persists ACCEPTED state | actual=\"ACCEPTED\" expected=\"ACCEPTED\"",
         "PASS  accept persists authenticated reviewer | actual=\"10000000-0000-0000-0000-000000000001\" expected=\"10000000-0000-0000-0000-000000000001\"",
-        "PASS  accept persists reviewedAt | actual=\"2026-08-03T14:37:04.503Z\"",
+        "PASS  accept persists reviewedAt | actual=\"2026-08-04T09:15:37.837Z\"",
         "PASS  review action does not mutate Bug business data | actual=\"{\\\"status_code\\\":\\\"PENDING_ASSIGNMENT\\\",\\\"assignee_ID\\\":null,\\\"sapModule_ID\\\":null,\\\"applicationComponent_ID\\\":\\\"40000000-0000-0000-0000-000000000005\\\",\\\"defectCategory_ID\\\":\\\"50000000-0000-0000-0000-000000000001\\\",\\\"componentCategory_ID\\\":\\\"60000000-0000-0000-0000-000000000009\\\",\\\"priority_code\\\":\\\"HIGH\\\",\\\"severity_code\\\":\\\"MAJOR\\\"}\" expected=\"{\\\"status_code\\\":\\\"PENDING_ASSIGNMENT\\\",\\\"assignee_ID\\\":null,\\\"sapModule_ID\\\":null,\\\"applicationComponent_ID\\\":\\\"40000000-0000-0000-0000-000000000005\\\",\\\"defectCategory_ID\\\":\\\"50000000-0000-0000-0000-000000000001\\\",\\\"componentCategory_ID\\\":\\\"60000000-0000-0000-0000-000000000009\\\",\\\"priority_code\\\":\\\"HIGH\\\",\\\"severity_code\\\":\\\"MAJOR\\\"}\"",
         "PASS  a second decision on the same suggestion is rejected safely | status=409 message=This AI suggestion is no longer pending review.",
         "PASS  repeat decision keeps the original state | actual=\"ACCEPTED\" expected=\"ACCEPTED\"",
@@ -533,7 +533,7 @@
       "totals": [
         "TOTAL: 19 PASS  |  0 FAIL  |  19 checks"
       ],
-      "outputSha256": "383068baba20327a47474fa7d89cf7f3aef48457f61e523eb1c40fbe2add15bd"
+      "outputSha256": "dd51ebb3d546175eae85c3ac72e97aa16a0a389b1813646dcf973199248243c6"
     },
     "aiApply": {
       "command": [
@@ -584,7 +584,7 @@
       "totals": [
         "TOTAL: 35 PASS  |  0 FAIL  |  35 checks"
       ],
-      "outputSha256": "d54c58b02c859b755caee69186ffe292b85f6c76545d167ff9292568eda8fa3f"
+      "outputSha256": "e98dd36b8faa002126fcc2b5bddb5bfc2e576596b5ccf007ce7dc845be87a66b"
     },
     "aiDuplicateConfirm": {
       "command": [
@@ -631,7 +631,7 @@
       "totals": [
         "TOTAL: 31 PASS  |  0 FAIL  |  31 checks"
       ],
-      "outputSha256": "a55a5780a8cf413230bda597e3132b64b51003ffb700dc4c481c8438c9ee02cf"
+      "outputSha256": "300f1c12e1b0ce67498595d6b4204394e76c6e7187ae4d0864da9b1743732c9f"
     },
     "aiMetrics": {
       "command": [
@@ -689,7 +689,7 @@
       "totals": [
         "TOTAL: 42 PASS  |  0 FAIL  |  42 checks"
       ],
-      "outputSha256": "fa07c6a2e8491b4c6790c6b66d2532c3ba3b66d0f82de1e9457671a8e08e47a3"
+      "outputSha256": "d39dd0f35866f02f010764152ec5286293af3082030cdeea3725d2e7f42153ef"
     },
     "securityAi": {
       "command": [
@@ -727,7 +727,7 @@
         "PASS  AI actions do not assign a developer | actual=null expected=null",
         "PASS  AI actions do not persist classification priority | actual=\"HIGH\" expected=\"HIGH\"",
         "PASS  AI actions do not persist classification severity | actual=\"MAJOR\" expected=\"MAJOR\"",
-        "PASS  AI actions do not touch modifiedAt | actual=\"2026-08-03T14:37:09.238Z\" expected=\"2026-08-03T14:37:09.238Z\"",
+        "PASS  AI actions do not touch modifiedAt | actual=\"2026-08-04T09:15:44.151Z\" expected=\"2026-08-04T09:15:44.151Z\"",
         "PASS  source-linked AI actions write audit rows | actual=true",
         "PASS  AI audit rows contain no raw prompt, SQL, token, or provider secret | no unsafe detail detected",
         "PASS  AI audit rows are review records only | actual=true",
@@ -736,7 +736,7 @@
       "totals": [
         "TOTAL: 31 PASS  |  0 FAIL  |  31 checks"
       ],
-      "outputSha256": "6f3ffce38fcbc90037caf8e77211fb65f7c5c901db544474e6e88bb6952c953b"
+      "outputSha256": "f9eabc765979891080cba235313bd909bf5494c77a12f07055c2920347fc0c7d"
     },
     "audit": {
       "command": [
@@ -755,7 +755,7 @@
         "PASS  serialized payload drops rawPrompt key | actual=false expected=false",
         "PASS  serialized payload drops messages key | actual=false expected=false",
         "PASS  serialized payload redacts provider-like secrets | actual=false expected=false",
-        "PASS  backend writer creates audit row ID | actual=\"6de5d002-a062-4971-91b3-1deaed00dffd\"",
+        "PASS  backend writer creates audit row ID | actual=\"941b36ee-c33f-4255-8806-39d9ee6a88c4\"",
         "PASS  backend writer normalizes feature type | actual=\"DUPLICATE_DETECTION\" expected=\"DUPLICATE_DETECTION\"",
         "PASS  backend writer defaults review state to PENDING | actual=\"PENDING\" expected=\"PENDING\"",
         "PASS  backend writer clamps confidence to four decimals | actual=0.8765 expected=0.8765",
@@ -771,1229 +771,1229 @@
       "totals": [
         "TOTAL: 19 PASS  |  0 FAIL  |  19 checks"
       ],
-      "outputSha256": "0684330d90b7ed24fec5c4c8943340a5cf27d33963e40137bb9818d0c54962b9"
+      "outputSha256": "dfd41eb051c692b1b3b0f351386969e21d2784e2c40cdc06c02aef6b26b4fc5f"
     }
   },
   "caseResults": [
     {
       "caseId": "UT-AUTH-007",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "auth"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AUTH-008",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "auth"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AUTH-009",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "auth"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AUTH-010",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "auth"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-BUG-001",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-BUG-002",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-BUG-003",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-BUG-004",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-BUG-005",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-BUG-006",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-BUG-007",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-BUG-008",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-BUG-009",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-BUG-010",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-BUG-011",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-VAL-PAIR-VALID",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "classification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-VAL-PAIR-NOMAP",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "classification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-VAL-PAIR-CHANGE",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "classification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-VAL-PAIR-PARTIAL",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "classification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-ASN-001",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-ASN-002",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-ASN-003",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-ASN-004",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-ASN-005",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-ASN-006",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-ASN-007",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-ASN-008",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-ASN-009",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-ASN-010",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-ASN-011",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-01A",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-01B",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-01C",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-01D",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-02A",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-02B",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-02C",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-03A",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-03B",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-03C",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-03D",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-04A",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-04B",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-04C",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-04D",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-04E",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-05A",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-05B",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-05C",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-05D",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-05E",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-06A",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-06B",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-06C",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-06D",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-06E",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-07A",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-07B",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-07C",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-07D",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-08A",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-08B",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-08C",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-08D",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-08E",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-09A",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-09B",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-09C",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-10A",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-10B",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-10C",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-11A",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-11B",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-11C",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-LC-11D",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-CMT-001",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "collaboration"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-CMT-002",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "collaboration"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-CMT-003",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "collaboration"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-CMT-006",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "collaboration"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-CMT-007",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "collaboration"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-ATT-001",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "collaboration"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-ATT-002",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "collaboration"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-HIS-001",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "history"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-HIS-002",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "history"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-HIS-003",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "history"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-HIS-004",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "history"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-HIS-005",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "history"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-HIS-006",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "history"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-HIS-007",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "history"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-NTF-001",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "notification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-NTF-002",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "notification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-NTF-003",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "notification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-NTF-004",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "notification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-NTF-005",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "notification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-NTF-006",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "notification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-NTF-007",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "notification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-NTF-008",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "notification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-NTF-012",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "notification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-MON-001",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "monitoring"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-MON-002",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "monitoring"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-MON-003",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "monitoring"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-MON-004",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "monitoring"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-MON-005",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "monitoring"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-MON-006",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "monitoring"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-MON-007",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiMetrics"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-008",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiDuplicate"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-009",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiDuplicate"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-010",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiClassification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-011",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiClassification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-012",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiSummary"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-013",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiSummary"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-014",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiAssignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-015",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiAssignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-016",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiReview"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-017",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiReview"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-018",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiReview"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-019A",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiReview"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-019B",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiReview"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-019C",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiReview"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-020",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiReview"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-021",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiApply"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-022",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiApply"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-023",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiDuplicateConfirm"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-024",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiDuplicateConfirm"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-025A",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiDuplicateConfirm"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-025B",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiDuplicateConfirm"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-AI-026",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiMetrics"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-SEC-001",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "auth"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-SEC-002",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-SEC-003",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "classification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-SEC-004",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "audit"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-SEC-005",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "auth"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-SEC-006",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-SEC-007",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "securityAi"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     },
     {
       "caseId": "UT-SEC-008",
-      "status": "CANDIDATE_PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "history"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
-      "baselineSha": "62f68276683d00445011a441c7e92a51ba22f4ec"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7"
     }
   ],
   "totals": {
     "total": 135,
-    "candidatePassed": 135,
-    "failed": 0
+    "mappingOnly": 135,
+    "failedMappings": 0
   }
 }

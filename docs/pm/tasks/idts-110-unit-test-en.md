@@ -4,7 +4,7 @@
 - Workbook generator and final integrator: DonHV
 - Test executor and case-evidence owner: NhanT
 - Due: 2026-08-05
-- Status: Remediation candidate rebased onto latest dev; PR #269 has 173 candidate PASS, 0 FAIL, 13 BTP blockers, and 2 SAP-standard attachment UI rebaseline/runtime blockers
+- Status: Remediation candidate merged with latest dev; current exact-head package has 38 atomic candidate PASS, 135 mapping-only candidates, 0 FAIL, 13 BTP blockers, and 2 SAP-standard attachment UI runtime blockers
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-110
 
 ## Workflow
@@ -28,11 +28,12 @@
 ## NhanT remediation progress — 2026-08-03
 
 - All 188 approved cases now have individual candidate packages under `docs/pm/evidence/idts-110/cases/`.
-- Current candidate truth: 173 PASS, 0 FAIL, and 15 BLOCKED.
+- Current candidate truth: 38 atomic candidate PASS, 135 `MAPPING_ONLY_CANDIDATE`, 0 FAIL, and 15 BLOCKED.
 - Exact LOCAL result: 38 PASS / 0 FAIL / 2 BLOCKED. `UT-AUTH-004` returns a safe HTTP 400 contract with no session mutation; `UT-ATT-007/008` require generated-control runtime proof/rebaseline after latest dev retired the approved custom handler.
-- Corrected local-primary result: 135/135 mapped candidates have fresh passing domain-suite evidence; DonHV retains case-level acceptance ownership.
+- Corrected local-primary result: 135/135 cases have fresh suite-to-case traceability and 0 failed mappings. They are explicitly not atomic executions or PASS evidence; DonHV retains case-level acceptance ownership.
 - The 13 true BTP integration cases remain blocked because `cf`/authorized BTP readiness, controlled identities, S3 injection, and Job Scheduler proof are unavailable. The two attachment UI cases have valid replacement CDS contracts but no fresh generated-control runtime evidence on the merged head.
 - Evidence inventory: 188 manifests, 278 PNGs, and 0 SVGs. Duplicate SVG sources were removed and structured JSON evidence is linked from manifests.
+- All 188 manifests name exact tested baseline `56b4a4f3d92ef2f9558869caab4b393b07d8b5e7`; evidence reconciliation found 0 missing references.
 - DonHV review is pending. The approved catalog remains 188 `NOT_RUN`, and `Unit_Test_EN`/Drive have not been changed by NhanT/agent.
 - Jira handoff comments: previous `10861`; final remediation handoff `10924` after commit `c409335` and PR #269 QA-depth PASS.
 

@@ -1,8 +1,8 @@
 # IDTS-110 remediation execution summary for DonHV review
 
 - Executor: NhanT (agent-assisted)
-- Execution date: 2026-08-03
-- Branch baseline before remediation commit: `e500436`
+- Execution date: 2026-08-04
+- Exact tested branch baseline: `56b4a4f3d92ef2f9558869caab4b393b07d8b5e7`
 - Approved catalog: `docs/qa/idts-110-unit-test-catalog.json`
 - Catalog size: 188 English cases
 - Review state: `READY_FOR_DONHV_REVIEW_WITH_BTP_AND_UI_REBASELINE_BLOCKERS`
@@ -12,7 +12,8 @@
 
 | Candidate status | Cases | Meaning |
 | --- | ---: | --- |
-| PASS | 173 | 38 exact LOCAL cases plus 135 corrected local-primary candidates have passing runtime/contract/domain-suite evidence. The 135 mappings remain subject to DonHV case-level review. |
+| PASS | 38 | Atomic exact LOCAL executions at the tested branch SHA. |
+| MAPPING_ONLY_CANDIDATE | 135 | Broad suite-to-case traceability mappings. These are not atomic executions, browser/BTP proof, or candidate PASS results. |
 | FAIL | 0 | No open LOCAL candidate failure remains after the scoped login error-sanitization fix and regression. |
 | BLOCKED | 15 | Thirteen true BTP integrations remain unavailable; two UI cases require generated SAP-standard attachment runtime proof/rebaseline after latest dev retired their approved custom handler. |
 | Total | 188 | Every approved case has a manifest and PNG package. |
@@ -33,7 +34,7 @@ The approved catalog remains `NOT_RUN` until DonHV accepts individual results an
 - `UT-ATT-009`: PASS. Local CAP HTTP/OData returns 401 for anonymous attachment create and attachment metadata count remains unchanged.
 - `UT-ATT-007` and `UT-ATT-008`: BLOCKED after merging latest dev. The retired custom handler was replaced by the SAP-standard generated attachment facet with `@Core.AcceptableMediaTypes` and `@Validation.Maximum: '10MB'`; static contracts pass, but the approved cases require generated-control rejection/message runtime proof.
 - `UT-AI-027`: PASS. Controlled provider HTTP 429 yields safe `AI_RATE_LIMITED`, exactly one provider call, sanitized output, and unchanged business-state counts.
-- `UT-NTF-009`–`UT-NTF-012`, `UT-AI-026`, and the remaining corrected local-primary cases are mapped to passing domain suites in `local-primary-suite-results.json`.
+- `UT-NTF-009`–`UT-NTF-012`, `UT-AI-026`, and the remaining local-primary cases have suite traceability in `local-primary-suite-results.json`; this mapping is explicitly not atomic execution evidence.
 
 ## Environment blockers
 
@@ -55,7 +56,7 @@ The approved catalog remains `NOT_RUN` until DonHV accepts individual results an
 - 278 PNG files.
 - 0 SVG files; 278 duplicate/intermediate SVG sources were removed after PNG rendering and manifest cleanup.
 - Exact 40-case result payload: `local-execution-results.json` — 38 PASS / 0 FAIL / 2 BLOCKED.
-- Corrected 135-case suite payload: `local-primary-suite-results.json` — 135 candidate PASS / 0 failed suite mappings.
+- Corrected 135-case suite payload: `local-primary-suite-results.json` — 135 `MAPPING_ONLY_CANDIDATE` / 0 failed mappings.
 - Case packages: `cases/<caseId>/`.
 
 Generated PNG cards summarize the structured/runtime evidence; they are not described as browser or BTP proof.
@@ -69,7 +70,7 @@ Generated PNG cards summarize the structured/runtime evidence; they are not desc
 
 ## DonHV review actions
 
-1. Review the 173 PASS candidates, especially the 135 suite-to-case mappings.
+1. Review the 38 atomic PASS candidates and the separate 135 mapping-only traceability records.
 2. Review the scoped `UT-AUTH-004` sanitization fix and its HTTP/auth regressions.
 3. Rebaseline or runtime-rerun `UT-ATT-007/008` against the generated SAP-standard attachment control.
 4. Provide an authorized Cloud Foundry/BTP session and rerun the 13 true integration cases.

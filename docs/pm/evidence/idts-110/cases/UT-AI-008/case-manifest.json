@@ -1,11 +1,11 @@
 {
   "caseId": "UT-AI-008",
   "title": "Similar Bugs ranks grounded candidates without self-match",
-  "candidateExecutionStatus": "PASS",
+  "candidateExecutionStatus": "MAPPING_ONLY_CANDIDATE",
   "reviewStatus": "PENDING_DONHV_REVIEW",
   "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-03T12:39:12.015Z",
-  "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae",
+  "executedAt": "2026-08-04T09:15:45.802Z",
+  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
   "deploySha": null,
   "environment": "HYBRID_BTP",
   "runtime": "Node.js v22.23.1, win32 x64",
@@ -14,7 +14,7 @@
     "srv/ai/duplicate-detection.js#suggestSimilarBugs",
     "srv/ai/duplicate-confirmation.js#confirmDuplicateSuggestion"
   ],
-  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
+  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
   "assertions": [
     "aiDuplicate: PASS  positive search returns at least one candidate | actual=1",
     "aiDuplicate: PASS  similar seeded bug is ranked first | actual=\"91000000-0000-0000-0000-000000000002\" expected=\"91000000-0000-0000-0000-000000000002\"",
@@ -22,13 +22,13 @@
     "aiDuplicate: PASS  top candidate includes a concise human-review reason | actual=true",
     "aiDuplicate: PASS  successful provider path uses an embedding | actual=true expected=true",
     "aiDuplicate: PASS  successful provider path reports SUCCESS | actual=\"SUCCESS\" expected=\"SUCCESS\"",
-    "aiDuplicate: PASS  persisted source search returns suggestion audit ID | actual=\"e648423f-4e38-40a2-802f-fb7a352cfab6\"",
+    "aiDuplicate: PASS  persisted source search returns suggestion audit ID | actual=\"af4b7914-c1d2-4231-b278-40206c9b337e\"",
     "aiDuplicate: PASS  all similar candidates share one review audit ID | actual=true expected=true",
     "aiDuplicate: PASS  source bug is excluded from its own candidates | actual=false expected=false",
     "aiDuplicate: PASS  positive response contains no unsafe diagnostic text | no unsafe detail detected",
     "aiDuplicate: PASS  unrelated bug is absent or remains below similar confidence | not returned",
     "aiDuplicate: PASS  source-linked search writes one audit row | actual=1 expected=1",
-    "aiDuplicate: PASS  candidate review ID matches persisted audit row | actual=\"e648423f-4e38-40a2-802f-fb7a352cfab6\" expected=\"e648423f-4e38-40a2-802f-fb7a352cfab6\"",
+    "aiDuplicate: PASS  candidate review ID matches persisted audit row | actual=\"af4b7914-c1d2-4231-b278-40206c9b337e\" expected=\"af4b7914-c1d2-4231-b278-40206c9b337e\"",
     "aiDuplicate: PASS  audit row starts in pending review | actual=\"PENDING\" expected=\"PENDING\"",
     "aiDuplicate: PASS  duplicate audit persists final operation status | actual=\"SUCCESS\" expected=\"SUCCESS\"",
     "aiDuplicate: PASS  duplicate audit persists non-negative latency | actual=true",
@@ -69,7 +69,7 @@
   "evidenceFiles": [
     "result.png"
   ],
-  "limitations": "This is a local-primary candidate result from mapped domain suites. It is not BTP acceptance evidence; DonHV owns final case-level review and workbook integration.",
+  "limitations": "This is broad suite-to-case traceability only. It is not an atomic case execution, browser proof, BTP acceptance evidence, or candidate PASS. DonHV owns final case-level review and workbook integration.",
   "suiteKeys": [
     "aiDuplicate"
   ],

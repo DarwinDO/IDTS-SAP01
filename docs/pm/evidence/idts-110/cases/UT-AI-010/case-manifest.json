@@ -1,11 +1,11 @@
 {
   "caseId": "UT-AI-010",
   "title": "Classification suggestions contain only active catalog values",
-  "candidateExecutionStatus": "PASS",
+  "candidateExecutionStatus": "MAPPING_ONLY_CANDIDATE",
   "reviewStatus": "PENDING_DONHV_REVIEW",
   "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-03T12:39:12.015Z",
-  "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae",
+  "executedAt": "2026-08-04T09:15:45.802Z",
+  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
   "deploySha": null,
   "environment": "HYBRID_BTP",
   "runtime": "Node.js v22.23.1, win32 x64",
@@ -14,7 +14,7 @@
     "srv/ai/classification-suggestion.js#suggestClassification",
     "srv/ai/classification-apply.js#applyClassificationSuggestion"
   ],
-  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
+  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
   "assertions": [
     "aiClassification: PASS  classification schema requires all five grounded fields | actual=5 expected=5",
     "aiClassification: PASS  classification schema constrains SAP Module to a short catalog reference | actual=\"SM1\" expected=\"SM1\"",
@@ -28,11 +28,11 @@
     "aiClassification: PASS  high-confidence valid provider suggestion status | actual=\"SUGGESTED\" expected=\"SUGGESTED\"",
     "aiClassification: PASS  provider-backed rows are explicitly labelled as AI suggestions | actual=true expected=true",
     "aiClassification: PASS  classification suggestions always require human review | actual=true expected=true",
-    "aiClassification: PASS  persisted source classification returns suggestion audit ID | actual=\"cecb23ed-ea21-4247-9e0d-c03edc2cace9\"",
+    "aiClassification: PASS  persisted source classification returns suggestion audit ID | actual=\"46bf3329-e479-4716-940d-48894643156a\"",
     "aiClassification: PASS  all classification rows share one review audit ID | actual=true expected=true",
     "aiClassification: PASS  positive response contains no unsafe diagnostic text | no unsafe detail detected",
     "aiClassification: PASS  source-linked classification writes one AI audit row | actual=1 expected=1",
-    "aiClassification: PASS  classification review ID matches persisted audit row | actual=\"cecb23ed-ea21-4247-9e0d-c03edc2cace9\" expected=\"cecb23ed-ea21-4247-9e0d-c03edc2cace9\"",
+    "aiClassification: PASS  classification review ID matches persisted audit row | actual=\"46bf3329-e479-4716-940d-48894643156a\" expected=\"46bf3329-e479-4716-940d-48894643156a\"",
     "aiClassification: PASS  classification audit starts pending review | actual=\"PENDING\" expected=\"PENDING\"",
     "aiClassification: PASS  classification audit persists final operation status | actual=\"SUCCESS\" expected=\"SUCCESS\"",
     "aiClassification: PASS  classification audit persists non-negative latency | actual=true",
@@ -60,7 +60,7 @@
   "evidenceFiles": [
     "result.png"
   ],
-  "limitations": "This is a local-primary candidate result from mapped domain suites. It is not BTP acceptance evidence; DonHV owns final case-level review and workbook integration.",
+  "limitations": "This is broad suite-to-case traceability only. It is not an atomic case execution, browser proof, BTP acceptance evidence, or candidate PASS. DonHV owns final case-level review and workbook integration.",
   "suiteKeys": [
     "aiClassification"
   ],

@@ -1,11 +1,11 @@
 {
   "caseId": "UT-AI-013",
   "title": "Handoff comment prompt injection is treated as data",
-  "candidateExecutionStatus": "PASS",
+  "candidateExecutionStatus": "MAPPING_ONLY_CANDIDATE",
   "reviewStatus": "PENDING_DONHV_REVIEW",
   "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-03T12:39:12.015Z",
-  "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae",
+  "executedAt": "2026-08-04T09:15:45.802Z",
+  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
   "deploySha": null,
   "environment": "HYBRID_BTP",
   "runtime": "Node.js v22.23.1, win32 x64",
@@ -13,7 +13,7 @@
   "sourceAssertions": [
     "srv/ai/bug-summary.js#summarizeBugHandoff"
   ],
-  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
+  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
   "assertions": [
     "aiSummary: PASS  summary action returns the requested bug ID | actual=\"93000000-0000-0000-0000-000000000001\" expected=\"93000000-0000-0000-0000-000000000001\"",
     "aiSummary: PASS  positive provider path reports SUCCESS | actual=\"SUCCESS\" expected=\"SUCCESS\"",
@@ -27,11 +27,11 @@
     "aiSummary: PASS  important events expose the stored field change | actual=\"[2026-07-09T09:10:00.000Z] SangVN (DEVELOPER) — REQUEST_INFO: Requested more information from tester. Changes: Status: Assigned -> Need More Information\\n[2026-07-09T09:15:00.000Z] DonHV (PM) — EDIT: Updated expected result. Changes: Expected Result: No SQL error. -> The page should show a safe business-facing error.\" expected includes=\"Status: Assigned -> Need More Information\"",
     "aiSummary: PASS  next expected action is explicit | actual=\"Tester or PM should provide the requested information, then resubmit the bug to the assigned developer.\" expected includes=\"resubmit\"",
     "aiSummary: PASS  summary always requires human review | actual=true expected=true",
-    "aiSummary: PASS  summary returns its persisted suggestion ID | actual=\"6de4e102-3776-42a3-a29f-7821019a2022\"",
-    "aiSummary: PASS  summary includes generated timestamp | actual=\"2026-08-03T12:39:01.314Z\"",
+    "aiSummary: PASS  summary returns its persisted suggestion ID | actual=\"4eb596d1-f536-465b-9856-68a7d7af0ffa\"",
+    "aiSummary: PASS  summary includes generated timestamp | actual=\"2026-08-04T09:15:34.730Z\"",
     "aiSummary: PASS  positive summary response contains no unsafe diagnostic text | no unsafe detail detected",
     "aiSummary: PASS  source-linked summary writes one AI audit row | actual=1 expected=1",
-    "aiSummary: PASS  summary response points to the persisted audit row | actual=\"6de4e102-3776-42a3-a29f-7821019a2022\" expected=\"6de4e102-3776-42a3-a29f-7821019a2022\"",
+    "aiSummary: PASS  summary response points to the persisted audit row | actual=\"4eb596d1-f536-465b-9856-68a7d7af0ffa\" expected=\"4eb596d1-f536-465b-9856-68a7d7af0ffa\"",
     "aiSummary: PASS  summary audit starts pending review | actual=\"PENDING\" expected=\"PENDING\"",
     "aiSummary: PASS  summary audit persists final operation status | actual=\"SUCCESS\" expected=\"SUCCESS\"",
     "aiSummary: PASS  summary audit persists non-negative latency | actual=true",
@@ -61,7 +61,7 @@
     "aiSummary: PASS  malformed output fallback still explains current action owner | actual=\"BUG-AI-SUMMARY-001: Login form exposes raw SQL text after invalid password. Current status is NEED_MORE_INFORMATION - Need More Information. Current action owner is DonHV. There are 8 recent comment(s) included in this handoff.\" expected includes=\"Current action owner\"",
     "aiSummary: PASS  unknown source bug is rejected with 404 | actual=true expected=true",
     "aiSummary: PASS  summary action never mutates bug status | actual=\"NEED_MORE_INFORMATION\" expected=\"NEED_MORE_INFORMATION\"",
-    "aiSummary: PASS  summary action never updates bug modifiedAt | actual=\"2026-08-03T12:39:01.284Z\" expected=\"2026-08-03T12:39:01.284Z\"",
+    "aiSummary: PASS  summary action never updates bug modifiedAt | actual=\"2026-08-04T09:15:34.709Z\" expected=\"2026-08-04T09:15:34.709Z\"",
     "aiSummary: TOTAL: 47 PASS  |  0 FAIL  |  47 checks"
   ],
   "evidenceIds": [
@@ -70,7 +70,7 @@
   "evidenceFiles": [
     "result.png"
   ],
-  "limitations": "This is a local-primary candidate result from mapped domain suites. It is not BTP acceptance evidence; DonHV owns final case-level review and workbook integration.",
+  "limitations": "This is broad suite-to-case traceability only. It is not an atomic case execution, browser proof, BTP acceptance evidence, or candidate PASS. DonHV owns final case-level review and workbook integration.",
   "suiteKeys": [
     "aiSummary"
   ],

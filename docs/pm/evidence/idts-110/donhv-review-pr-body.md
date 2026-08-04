@@ -54,3 +54,7 @@ Review PR #269 at exact head `8957cbaa20f9c629818901f9b988884337a7ff82`, correct
 ## Ownership Knowledge Gate
 
 DonHV is the approved Unit Test catalog owner/final integrator and personally acknowledged the current IDTS-105 briefing at merge SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`. This review does not acknowledge or approve on behalf of NhanT and does not convert any canonical `NOT_RUN` case to PASS.
+
+## Historical Review Notice
+
+The counts above describe DonHV's review of head `8957cbaa...`. NhanT's 2026-08-04 remediation preserves that record and publishes a separate current package at `56b4a4f3...`: 38 atomic candidate PASS, 135 mapping-only candidates, 0 FAIL and 15 BLOCKED. The mapping-only records must not be presented as case execution or PASS.

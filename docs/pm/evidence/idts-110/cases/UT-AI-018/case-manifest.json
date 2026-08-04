@@ -1,11 +1,11 @@
 {
   "caseId": "UT-AI-018",
   "title": "Ignore pending suggestion records one terminal review",
-  "candidateExecutionStatus": "PASS",
+  "candidateExecutionStatus": "MAPPING_ONLY_CANDIDATE",
   "reviewStatus": "PENDING_DONHV_REVIEW",
   "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-03T12:39:12.015Z",
-  "baselineSha": "e500436a17324001c62c045fa0df8ae5aae65dae",
+  "executedAt": "2026-08-04T09:15:45.802Z",
+  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
   "deploySha": null,
   "environment": "HYBRID_BTP",
   "runtime": "Node.js v22.23.1, win32 x64",
@@ -14,15 +14,15 @@
     "srv/ai/review.js#reviewAiSuggestion",
     "srv/ai/metrics.js#readAiOperationalMetrics"
   ],
-  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.",
+  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
   "assertions": [
-    "aiReview: PASS  accept returns the reviewed suggestion ID | actual=\"3f104921-397f-40e5-8a8d-51d442dcdee0\" expected=\"3f104921-397f-40e5-8a8d-51d442dcdee0\"",
+    "aiReview: PASS  accept returns the reviewed suggestion ID | actual=\"71bb4387-9582-4660-8c74-1c2266293c5a\" expected=\"71bb4387-9582-4660-8c74-1c2266293c5a\"",
     "aiReview: PASS  accept returns ACCEPTED state | actual=\"ACCEPTED\" expected=\"ACCEPTED\"",
     "aiReview: PASS  accept returns reviewer display name | actual=\"DonHV\" expected=\"DonHV\"",
-    "aiReview: PASS  accept returns review timestamp | actual=\"2026-08-03T12:39:04.289Z\"",
+    "aiReview: PASS  accept returns review timestamp | actual=\"2026-08-04T09:15:37.837Z\"",
     "aiReview: PASS  accept persists ACCEPTED state | actual=\"ACCEPTED\" expected=\"ACCEPTED\"",
     "aiReview: PASS  accept persists authenticated reviewer | actual=\"10000000-0000-0000-0000-000000000001\" expected=\"10000000-0000-0000-0000-000000000001\"",
-    "aiReview: PASS  accept persists reviewedAt | actual=\"2026-08-03T12:39:04.289Z\"",
+    "aiReview: PASS  accept persists reviewedAt | actual=\"2026-08-04T09:15:37.837Z\"",
     "aiReview: PASS  review action does not mutate Bug business data | actual=\"{\\\"status_code\\\":\\\"PENDING_ASSIGNMENT\\\",\\\"assignee_ID\\\":null,\\\"sapModule_ID\\\":null,\\\"applicationComponent_ID\\\":\\\"40000000-0000-0000-0000-000000000005\\\",\\\"defectCategory_ID\\\":\\\"50000000-0000-0000-0000-000000000001\\\",\\\"componentCategory_ID\\\":\\\"60000000-0000-0000-0000-000000000009\\\",\\\"priority_code\\\":\\\"HIGH\\\",\\\"severity_code\\\":\\\"MAJOR\\\"}\" expected=\"{\\\"status_code\\\":\\\"PENDING_ASSIGNMENT\\\",\\\"assignee_ID\\\":null,\\\"sapModule_ID\\\":null,\\\"applicationComponent_ID\\\":\\\"40000000-0000-0000-0000-000000000005\\\",\\\"defectCategory_ID\\\":\\\"50000000-0000-0000-0000-000000000001\\\",\\\"componentCategory_ID\\\":\\\"60000000-0000-0000-0000-000000000009\\\",\\\"priority_code\\\":\\\"HIGH\\\",\\\"severity_code\\\":\\\"MAJOR\\\"}\"",
     "aiReview: PASS  a second decision on the same suggestion is rejected safely | status=409 message=This AI suggestion is no longer pending review.",
     "aiReview: PASS  repeat decision keeps the original state | actual=\"ACCEPTED\" expected=\"ACCEPTED\"",
@@ -43,7 +43,7 @@
   "evidenceFiles": [
     "result.png"
   ],
-  "limitations": "This is a local-primary candidate result from mapped domain suites. It is not BTP acceptance evidence; DonHV owns final case-level review and workbook integration.",
+  "limitations": "This is broad suite-to-case traceability only. It is not an atomic case execution, browser proof, BTP acceptance evidence, or candidate PASS. DonHV owns final case-level review and workbook integration.",
   "suiteKeys": [
     "aiReview"
   ],

@@ -2,13 +2,13 @@
 
 - Apply DonHV's corrected 175 local-primary / 13 BTP-only taxonomy to the IDTS-110 execution package.
 - Rerun 40 exact LOCAL cases and 135 corrected local-primary cases; the final exact-head verification used Node.js 24 after rebuilding the local `better-sqlite3` native module for the matching ABI.
-- Publish current truth after merging latest dev: 173 candidate PASS, 0 FAIL and 15 BLOCKED (13 BTP plus 2 SAP-standard attachment UI rebaseline/runtime cases); keep the approved catalog `NOT_RUN` until DonHV accepts results.
+- Publish current truth at exact tested SHA `56b4a4f3d92ef2f9558869caab4b393b07d8b5e7`: 38 atomic candidate PASS, 135 mapping-only candidates, 0 FAIL and 15 BLOCKED (13 BTP plus 2 SAP-standard attachment UI runtime cases); keep the approved catalog `NOT_RUN` until DonHV accepts results.
 - Remove 278 duplicate SVG evidence sources and retain 188 manifests, 278 PNGs and structured JSON evidence.
 
 ## Positive Evidence
 
 - Exact LOCAL runner: 40 cases — 38 PASS / 0 FAIL / 2 BLOCKED.
-- Local-primary suite runner: 135 mappings — 135 candidate PASS / 0 failed mappings across 19 domain suites.
+- Local-primary suite runner: 135 mappings — 135 `MAPPING_ONLY_CANDIDATE` / 0 failed mappings across 19 domain suites. These mappings are not atomic executions or PASS evidence.
 - Corrected `UT-VAL-REPORTER`: unresolved actor rejected with no Bug/history/notification/delivery mutation.
 - `UT-ATT-009`: anonymous OData attachment create returns 401; attachment metadata remains unchanged.
 - `UT-AI-027`: controlled 429 returns safe `AI_RATE_LIMITED`, one provider call and no business mutation.
@@ -27,7 +27,7 @@
 
 ## Roles/Authorization
 
-- Auth/session, Bug ownership, assignment/lifecycle, comment, attachment and AI review role boundaries are mapped to passing domain suites.
+- Auth/session, Bug ownership, assignment/lifecycle, comment, attachment and AI review role boundaries have suite-level traceability mappings; no atomic PASS is inferred from a mapping.
 - Local HTTP evidence confirms anonymous attachment write is denied before metadata mutation.
 - Platform identity/XSUAA cases are not executed using a substitute identity and remain in the 13 BTP blockers.
 
@@ -35,7 +35,7 @@
 
 - Applicable LOCAL manifests include before/after/reload count evidence.
 - `UT-AUTH-004` records unchanged session count and a sanitized public error after the fix.
-- The suite evidence covers transaction rollback, one-to-one history, notification delivery and no-mutation AI fallbacks.
+- The suite mappings identify coverage for transaction rollback, one-to-one history, notification delivery and no-mutation AI fallbacks; only the 38 exact cases are represented as atomic executions.
 - No BTP database, seed, workbook or Drive state was changed.
 
 ## UI/UX Review

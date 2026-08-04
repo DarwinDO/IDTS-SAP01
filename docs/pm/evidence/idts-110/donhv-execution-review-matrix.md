@@ -112,3 +112,7 @@ Required cleanup:
 7. PR body is refreshed and `qa-depth-gate` reruns on the exact final head.
 
 Until these steps complete, PR #269 remains a truthful candidate package but is not merge-ready, and IDTS-110 remains `In Progress`.
+
+## NhanT remediation status — 2026-08-04
+
+This section does not overwrite DonHV's historical review above. After merging current `origin/dev`, NhanT reran the package at `56b4a4f3d92ef2f9558869caab4b393b07d8b5e7` and corrected the evidence semantics to **38 atomic candidate PASS / 135 mapping-only candidates / 0 FAIL / 15 BLOCKED**. All 188 manifests use the exact tested SHA; 278 PNGs exist, 0 references are missing, and generated cards are not described as browser/BTP proof. `UT-ATT-007/008` and the 13 BTP integrations remain blocked pending their required controlled runtime.
