@@ -7,7 +7,7 @@
 | Owner | SangVN |
 | Support | DonHV for database and provider-side evidence |
 | Source baseline | `cbce7b6196da5cc8ce64dbd36a61709a8f4121c3` (`origin/dev`, refreshed 2026-08-04) |
-| Candidate head | `717fd694797f678a4a1f9adca086e57b21497d76` before this evidence refresh; exact-head approval must name the final pushed commit |
+| Candidate head | Exact head is recorded in Jira after this evidence refresh is pushed; approval must name that final pushed commit |
 | Package state | Refresh in review with documented known limitations; not full PASS/Done and exact-head approval pending |
 | Human briefing acknowledgment | `READ` — Jira IDTS-108 comments `10876` and `10877` for briefing SHA `3e78b495`; SangVN personally updated the matching repository register row |
 | Final integration owner | DonHV through IDTS-112 |
@@ -17,9 +17,28 @@ This package is structured source for review. It does not modify runtime UI, CAP
 behavior, the official Technical Specification workbook, or Google Drive. SangVN
 has personally acknowledged the briefing and must separately approve the exact
 candidate before integration. An agent must not sign either human gate. SangVN may
-complete and hand off all currently executable Developer/source work while the
-Tester/PM account captures and DonHV-owned database/provider evidence remain
+complete and hand off all currently executable UI/source work while the remaining
+Network/mutation coverage and DonHV-owned database/provider evidence remain
 explicit external blockers; that handoff is not a full PASS/Done claim.
+
+## Current collaboration acceptance evidence
+
+- Comment acceptance is registered under
+  `docs/pm/evidence/idts-116/comment-auto-refresh/`: the controlled comment
+  appeared immediately and remained present after hard reload. Jira IDTS-116
+  comment `10935` records the scoped PASS. IDTS-108 screenshots 10 and 11 remain
+  historical pre-fix failures only.
+- Attachment acceptance is registered under
+  `docs/pm/evidence/idts-116/attachment-end-to-end-sangvn-20260804/`: four
+  sanitized screenshots prove the before state, Save/active hard-reload state,
+  controlled-row deletion, and final hard-reload absence. The real 236-byte
+  download matched SHA-256
+  `303F802CED28A74E5E3F3363FE5BCDA6A109C801EF4EA5E2BB6BAD9E69ABE59E`.
+  Jira IDTS-116 comments `10945` and `10947` record the scoped PASS and handoff.
+  IDTS-108 screenshot 12 remains a historical pre-fix failure only.
+- These UI/browser results do not independently prove HANA selected rows, S3
+  object deletion, malware scanning, or provider internals. Those operator-side
+  evidence and final-integration decisions remain DonHV-owned.
 
 ## Tool and source baseline
 
@@ -78,7 +97,7 @@ source symbols remain separate trace columns.
 | 18 | Close Bug | Object Page action dialog | Optional Developer Note | Tester/PM | Status becomes Closed; no next processor | Same sources; `closeBug` | PARTIAL / KNOWN LIMITATION — screenshot 25 proves the Tester dialog; request/result/history and reload evidence are open |
 | 19 | Reopen Bug | Object Page action dialog | Required Reason for Reopening | Tester/PM | Status becomes Reopened and processing ownership resumes | Same sources; `reopenBug` | PARTIAL / KNOWN LIMITATION — screenshot 26 proves the Tester dialog and required reason; validation failure, success, Network and persistence are open |
 | 20 | Comments | Object Page Comments section | Comment input, Post, comment list | Tester, Developer, PM; active Bug only | UI5 invokes bound Add Comment, then independently refreshes the comments binding | `CommentsSection.fragment.xml`; `BugCollaboration.onAddComment`; `BugService.addComment` | CURRENT BTP PASS WITH SCOPE — IDTS-116 proves post, immediate list refresh, hard-reload persistence and no duplicate. It does not independently prove that every comment creates a separate history event. Older failure screenshots are historical pre-fix evidence only |
-| 21 | Evidence / Attachments | Generated Fiori Elements attachment facet | Standard attachment table controls for select/upload, Save/Discard, download and delete | Tester, Developer, PM subject to backend access | Attachment changes follow the parent Bug draft lifecycle; CAP persists metadata and the storage adapter handles binary content | `object-page.cds`; `manifest.json`; `@cap-js/attachments`; `content.js` | PARTIAL / KNOWN LIMITATION — IDTS-116 proves upload, Save, active reload and content readback. Real browser download plus SHA-256, delete and reload absence remain pending. The retired custom-uploader failure is historical only |
+| 21 | Evidence / Attachments | Generated Fiori Elements attachment facet | Standard attachment table controls for select/upload, Save/Discard, download and delete | Tester, Developer, PM subject to backend access | Attachment changes follow the parent Bug draft lifecycle; CAP persists metadata and the storage adapter handles binary content | `object-page.cds`; `manifest.json`; `@cap-js/attachments`; `content.js` | CURRENT BTP PASS WITH SCOPE — IDTS-116 proves controlled upload, parent Save/activation, hard-reload persistence, real browser download with exact SHA-256 match, controlled-row delete/Save and final reload absence. HANA/S3/provider internals remain DonHV-owned. The retired custom-uploader failure is historical only |
 | 22 | History Timeline | Object Page History section | Handoff action, growing event list, nested change table, reason/status | Authenticated Bug viewer | Show More pages events that are append-only by service behavior; no UI mutation | `HistoryTimeline.fragment.xml`; `history-read-models.js`; `history.js` | PARTIAL / KNOWN LIMITATION — existing append-only-by-service-behavior events and detail controls are captured; next-page request and expanded nested changes are not |
 | 23 | Handoff Summary review | Open from History section | Grounded summary, status/owner, missing info, comments/events, Accept/Reject/Ignore | Authenticated eligible reviewer | Review updates AiSuggestion audit only; Bug workflow is unchanged | `HandoffSummaryReview.js`; `bug-summary.js`; `review.js` | PARTIAL / KNOWN LIMITATION — screenshot 45 proves grounded advisory output and review controls; fallback, persisted review, audit readback, Network and explicit no-mutation proof remain open |
 | 24 | Notifications | Object Page Notifications facet | Event, recipient, channel, delivery status and timestamps | Authenticated Bug viewer under service authorization | Read-only display; email delivery remains separate outbox state | `history-notifications.cds`; `service.cds::Notifications` | PARTIAL / KNOWN LIMITATION — screenshot 7 proves in-app notification rows; refresh, outbox/provider-state comparison and Network evidence are DonHV/runtime follow-up |
@@ -207,9 +226,9 @@ required before the row can be accepted as executed evidence.
 | 19 | Reopen Bug | Fiori action dialog | Bound `reopenBug` | `transitionBug`; coordinator role and reason required | Status Reopened; processing ownership resumes | PARTIAL / KNOWN LIMITATION — Tester dialog/required reason are captured; negative/positive request and persistence are open |
 | 20 | Add Comment | `BugCollaboration.onAddComment` | Bound `BugService.addComment` | `actions.js::addComment`; participant role and nonblank content | Inserts Comment and refreshes the independently requested comments list | CURRENT BTP PASS WITH SCOPE — post, immediate refresh, hard-reload persistence and no duplicate passed under IDTS-116. Separate history-event evidence remains outside this proof |
 | 21 | Add attachment on create/edit | Generated Fiori Elements attachment facet | Attachment composition draft operations through the OData V4 model | `@cap-js/attachments` plus CAP draft lifecycle and validation | Attachment row participates in parent Bug Save/Discard; no custom browser-memory queue remains | KNOWN LIMITATION — current generated-facet draft behavior is source-verified, but pre-Save/Discard Network evidence was not captured |
-| 22 | Upload attachment | Generated attachment table upload | Attachment metadata plus binary stream under the parent draft | `prepareAttachmentWrite`; attachment plugin validation | Save persists HANA metadata and storage-adapter binary; row appears after reload | PARTIAL / DEFERRED OWNER ACTION — current BTP evidence proves upload, Save, active reload and content readback. HANA/S3 operator evidence and the remaining browser download/delete sequence stay DonHV-owned |
-| 23 | Download attachment | Generated attachment content operation | Attachment content stream GET | Attachment authorization/plugin | Returns binary with safe filename; no write | KNOWN LIMITATION — download/hash evidence remains pending BTP acceptance after IDTS-116 |
-| 24 | Delete attachment | Generated attachment row delete followed by parent Save | Attachment draft DELETE/Save | Attachment authorization/plugin and draft lifecycle | Save deletes metadata/object without deleting Bug; Discard keeps the active row | KNOWN LIMITATION — before/request/Save/after/reload evidence remains pending BTP acceptance after IDTS-116 |
+| 22 | Upload attachment | Generated attachment table upload | Attachment metadata plus binary stream under the parent draft | `prepareAttachmentWrite`; attachment plugin validation | Save persists HANA metadata and storage-adapter binary; row appears after reload | CURRENT BTP PASS WITH SCOPE — the controlled file appeared after parent Save/activation and hard reload. HANA/S3 operator evidence remains DonHV-owned |
+| 23 | Download attachment | Generated attachment content operation | Attachment content stream GET | Attachment authorization/plugin | Returns binary with safe filename; no write | CURRENT BTP PASS WITH SCOPE — the browser wrote a real 236-byte file and its SHA-256 exactly matched the controlled source |
+| 24 | Delete attachment | Generated attachment row delete followed by parent Save | Attachment draft DELETE/Save | Attachment authorization/plugin and draft lifecycle | Save deletes metadata/object without deleting Bug; Discard keeps the active row | CURRENT BTP PASS WITH SCOPE — only the controlled row was deleted; parent Save and final hard reload showed the four original rows and no controlled filename. Provider-side object deletion remains DonHV-owned |
 | 25 | Read history | History fragment growing list | Read `HistoryEvents` and nested `HistoryLogs` | `history-read-models.js` enriches paged read model | Returns grouped events that are append-only by service behavior; Show More requests next page | PARTIAL / KNOWN LIMITATION — existing events/detail controls are captured; next-page request and expanded nested changes are open |
 | 26 | Generate Handoff Summary | `HandoffSummaryReview.openDialog` | Unbound `summarizeBugHandoff` | `bug-summary.js`; source, grounding and safe provider boundary | Returns grounded summary and writes safe review audit only | PARTIAL / KNOWN LIMITATION — screenshot 45 proves grounded output; review persistence, fallback, Network and audit/no-mutation readback are open |
 | 27 | Review AI suggestion | Shared Accept/Reject/Ignore controls | Unbound review action | `review.js`; permission and Pending/current checks | Updates AiSuggestions review fields only | KNOWN LIMITATION — no decision/repeat-conflict mutation was submitted; controls are visible in screenshots 34, 42, 45 and 47 |
@@ -245,7 +264,7 @@ state recorded in the final column.
 | EVID-108-UI-ROLES | List/Object Page/dashboard for Tester, Developer and PM | SangVN | Use demo users; avoid full private email | UI capture PASS — Developer, Tester and PM List Report/dashboard/Object Page variants are captured through the SAP BTP/approuter flow. Screenshots 48–51 add the PM monitoring tabs, workload dashboard, PM-only AI Activity dialog and BUG-0024 coordinator view; no profile-menu screenshot was retained because it exposed a private email |
 | EVID-108-UI-CREATE | New draft, required-field error, Assigned save, Pending Assignment save | SangVN | Sanitize Bug text | UI capture PASS — screenshots 29–33 prove empty draft, nine required-field messages, valid value-help selection, BUG-0023 Pending Assignment creation and reload persistence. Screenshots 35–38 prove BUG-0024 creation as Assigned with SangVN as technical/current owner and the same ID/status/ownership after full reload |
 | EVID-108-UI-LIFECYCLE | Each of 11 actions with dialog, request, result and history | SangVN | Sanitize notes/reasons | PARTIAL — Developer visibility/dialogs captured for Request More Information, Reject Bug and Resolve Bug; Tester visibility/dialogs captured for Close Bug and Reopen Bug for Further Work. All dialogs were dismissed without submission, so request/result/history evidence remains missing |
-| EVID-108-UI-COLLAB | Comment; generated attachment upload/Save/reload/download/delete; history paging | SangVN | No attachment secrets or raw private logs | PARTIAL — current IDTS-116 comment post/immediate-refresh/reload evidence is PASS. Attachment upload/Save/reload/content-readback is proven, while real browser download/SHA-256/delete/reload absence remains pending. Pre-fix failures are retained only as dated historical findings |
+| EVID-108-UI-COLLAB | Comment; generated attachment upload/Save/reload/download/delete; history paging | SangVN | No attachment secrets or raw private logs | PARTIAL OVERALL / CURRENT COLLABORATION PASS — IDTS-116 proves comment post/immediate refresh/reload and the controlled attachment upload/Save/reload/download/SHA-256/delete/Save/reload-absence sequence. History paging and provider-side evidence remain open. Pre-fix failures are retained only as dated historical findings |
 | EVID-108-UI-AI | Similar, classification, handoff and Smart Assign review/apply/confirm/no-mutation | SangVN | No raw prompt/provider payload or private endpoint | PARTIAL — screenshot 34 proves Similar Bugs; screenshot 42 proves Classification Suggestions; screenshot 45 proves Handoff Summary; screenshot 47 proves the filtered Smart Assign candidate explanation with capability, availability, confidence and manual-choice controls. All remained read-only with no Accept/Reject/Ignore/Apply/Assign/Confirm Duplicate action. Fallback, review persistence/no-mutation and AI Network evidence remain missing |
 | EVID-108-NETWORK | Sanitized OData request/response for every traced function | SangVN | Remove bearer token, cookie, private host and full email | PARTIAL — screenshots 39–40 prove the authenticated BUG-0024 reload/read through `POST /odata/v4/bug/$batch` with outer and inner HTTP 200. The response contains BUG-0024, `ASSIGNED`, SangVN technical/current owner, Developer next role and `IsActiveEntity:true`. No Cookie, Authorization, token, password or email is visible. Remaining traced functions still require sanitized request/response evidence |
 | EVID-108-DATABASE | Bug, history, comment, notification, attachment metadata and duplicate/classification side effects | DonHV | No DB URL/credential; use selected rows only | DEFERRED OWNER ACTION — DonHV supplies sanitized selected-row evidence before final integration/acceptance |
@@ -352,11 +371,11 @@ were opened only for evidence and dismissed without submission. BUG-0003 remaine
 5. SangVN can hand off the current package after completing the remaining executable
    trace/review work. Tester evidence now uses the SAP BTP/approuter authentication
    flow; PM UI role captures are now supplied in screenshots 48–51. DonHV owns
-   the deferred database/provider evidence. Until these gaps and IDTS-113/116/117 are
-   supplied, retested, or explicitly accepted, the package remains ready with
+   the deferred database/provider evidence. Until these gaps and linked issue-owner
+   actions are supplied, retested, or explicitly accepted, the package remains ready with
    blockers rather than full PASS/Done. The current package is merged with
-   `cbce7b6`; comment post/immediate refresh/reload acceptance is current, while the
-   remaining attachment download/hash/delete/reload sequence must not be inferred
-   from source or partial runtime evidence.
+   `cbce7b6`; comment post/immediate refresh/reload and the scoped attachment
+   upload/Save/reload/download/hash/delete/Save/reload-absence sequence are current.
+   HANA/S3/provider internals must not be inferred from the browser evidence.
 6. Canonical business documents are unchanged because this package records existing
    runtime behavior and does not change business meaning or scope.

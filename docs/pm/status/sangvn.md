@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-04
 
+## 2026-08-04 - IDTS-108 collaboration evidence integration
+
+| Date | Task/WP | Work done | Completed part | Blockers/Bugs found | Fix status | Evidence/command | Next handoff |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-08-04 | IDTS-108 / IDTS-116 evidence integration | Fast-forwarded the dedicated IDTS-108 worktree to PR #256 head `b1db5028`, integrated the four current attachment acceptance screenshots and their README, and updated the IDTS-108 evidence register/work package so the current comment and attachment browser results are distinguished from historical pre-fix failures. | Comment PASS evidence and the controlled attachment upload/Save/reload/download/hash/delete/Save/reload-absence evidence now live in the same PR #256 candidate branch. HANA/S3/provider internals remain explicitly DonHV-owned. | **Process issue (fixed):** attachment evidence was initially published only in PR #282, leaving PR #256 with stale “download/hash/delete pending” wording. **Documentation merge conflict (fixed):** both branches updated `docs/pm/status/sangvn.md`, causing one cherry-pick conflict. **Tooling issue (fixed):** the first UI5 build invocation ran at repo root and reported an empty package `name`; the project build belongs under `app/bug-management-ui`. No product defect or evidence loss occurred. | Preserved both status histories, resolved the conflict surgically, linked the exact evidence directories/Jira comments, retained scoped wording rather than inferring provider-side results, and reran UI5 from its project directory. OfficeCLI preflight and all fresh local gates PASS; exact-head GitHub QA remains required before approval. | Four attachment PNGs and all 51 IDTS-108 evidence files decode; stale pending phrases 0; IDTS-116/comment-attachment QA, CAP compile, UI5 build, secret scan, agent rules, QA Depth self-test 15/15, AI DevKit 5/5 and `git diff --check` PASS. Controlled SHA-256 `303F802CED28A74E5E3F3363FE5BCDA6A109C801EF4EA5E2BB6BAD9E69ABE59E`; baseline `origin/dev=cbce7b6`. | Push PR #256, require exact-head GitHub QA, mark PR #282 superseded, then request SangVN approval only for the new exact head. DonHV retains final integration/upload/closure. |
+
 ## 2026-08-01 - IDTS-108 Assigned-create evidence completion
 
 | Date | Task/WP | Work done | Completed part | Blockers/Bugs found | Fix status | Evidence/command | Next handoff |
