@@ -21,17 +21,17 @@ Vietnamese: IDTS không phải Jira đầy đủ và không phải hệ thống 
 - AI is suggestion-only. Users explicitly review, accept, reject, ignore, or apply results.
 - AI cannot assign, persist classification, confirm duplicates, or change bug lifecycle state by itself.
 - CAP validation and authorization remain authoritative.
-- AI is disabled by default, and provider failure cannot break the normal bug workflow.
+- Local/default profiles may disable AI or use mock mode; SAP BTP enables the configured Vercel Gateway routes. Provider failure cannot break the normal bug workflow.
 - Provider payloads use minimum allowlisted data. Credentials, tokens, private email/endpoint data, attachments, and storage references are forbidden in v1.
 - Persist only normalized safe suggestion/audit data; do not persist raw prompts, raw provider responses, or hidden reasoning.
 - AI suggestions are stored as reviewable `AiSuggestions` audit rows linked to a source bug. The row is evidence for human review, not an autonomous workflow decision.
-- Runtime supports disabled-by-default `mock`, optional server-side OpenAI, and optional Vercel AI Gateway providers. SAP BTP routes each AI capability to a bounded model: Qwen embeddings for Similar Bugs, GPT-5.6 Luna for Classification, DeepSeek V4 Flash for Handoff Summary, and Z.AI GLM 4.7 Flash for Smart Assign. Handoff may use Grok 4.1 Fast once for an eligible model-route denial, timeout, network failure, or HTTP 5xx; HTTP 429 and generic 403 never trigger that backup. Credentials and approved model aliases remain private environment configuration. A missing key/model or provider failure returns a safe unavailable result and never breaks the normal workflow.
-- Vietnamese note: Runtime hỗ trợ provider `mock` mặc định tắt và provider OpenAI phía server là tùy chọn. Credential OpenAI và model alias được duyệt chỉ nằm trong cấu hình môi trường private; thiếu key hoặc model phải trả trạng thái unavailable an toàn và không được làm hỏng workflow bình thường.
+- Runtime supports disabled-by-default `mock`, optional server-side OpenAI, and Vercel AI Gateway providers. SAP BTP routes each capability to a bounded model: Qwen embeddings for Similar Bugs, GPT-5.4 Nano for Classification, MiniMax M2.5 for Handoff Summary, and Z.AI GLM 4.7 Flash for Smart Assign/general structured output. Handoff may use Grok 4.1 Fast once for an eligible model-route denial, timeout, network failure, or HTTP 5xx; HTTP 429 and generic 403 never trigger that backup. Credentials and approved aliases remain private environment configuration. Missing configuration or provider failure returns a safe feature-specific fallback/unavailable result and never breaks the normal workflow.
+- Vietnamese note: Local profile có thể tắt AI hoặc dùng `mock`; SAP BTP hiện bật Vercel AI Gateway với route theo từng feature như dòng trên. Credential và model alias chỉ nằm trong cấu hình private; thiếu cấu hình, rate limit hoặc provider lỗi phải trả fallback/unavailable an toàn và không làm hỏng workflow bình thường.
 - Vietnamese note: AI suggestion duoc luu thanh audit row `AiSuggestions` gan voi bug nguon de con nguoi review, khong phai quyet dinh workflow tu dong.
 - IDTS-66 exposes suggestion-only duplicate/similar candidates through `BugService.suggestSimilarBugs`. It combines text overlap, business classification, and provider embeddings, falls back safely when AI is unavailable, and never writes `DuplicateLinks` automatically. Pre-create checks can run without a persisted bug; source-linked checks write only a safe `AiSuggestions` audit row.
 - Vietnamese note: IDTS-66 expose candidate duplicate/similar theo huong suggestion-only qua `BugService.suggestSimilarBugs`. Backend ket hop text, classification va embedding, fallback an toan khi AI khong san sang, khong tu ghi `DuplicateLinks`; check truoc create khong can bug da persist, con check co source bug chi ghi `AiSuggestions` audit row an toan.
 
-Vietnamese: AI v1 chỉ hỗ trợ tìm bug trùng/tương tự, gợi ý phân loại, tạo bug/handoff summary và giải thích Smart Assign. Handoff Summary có phần tóm tắt tối đa năm comment gần nhất theo thời gian, chỉ dựa trên comment đã lưu và xem nội dung comment là dữ liệu không đáng tin cậy, không phải lệnh workflow. AI không tự hành động; người dùng phải review và chủ động quyết định. CAP vẫn là lớp validation/phân quyền cuối. AI mặc định tắt, lỗi AI không được làm hỏng workflow bình thường, và dữ liệu gửi provider phải tối thiểu, đã allowlist, không chứa secret, email private, attachment hoặc storage reference.
+Vietnamese: AI v1 chỉ hỗ trợ tìm bug trùng/tương tự, gợi ý phân loại, tạo bug/handoff summary và giải thích Smart Assign. Handoff Summary có phần tóm tắt tối đa năm comment gần nhất theo thời gian, chỉ dựa trên comment đã lưu và xem nội dung comment là dữ liệu không đáng tin cậy, không phải lệnh workflow. AI không tự hành động; người dùng phải review và chủ động quyết định. CAP vẫn là lớp validation/phân quyền cuối. SAP BTP hiện bật Gateway theo route feature-specific; local profile có thể tắt AI hoặc dùng mock. Lỗi AI không được làm hỏng workflow, và dữ liệu gửi provider phải tối thiểu, đã allowlist, không chứa secret, email private, attachment hoặc storage reference.
 
 ## Stack
 
@@ -39,31 +39,31 @@ Vietnamese: AI v1 chỉ hỗ trợ tìm bug trùng/tương tự, gợi ý phân 
 - API: OData V4
 - Frontend: SAP Fiori Elements / SAPUI5
 - Local database: SQLite
-- Team integration database: shared PostgreSQL through CAP profile `integration`
-- Future deployment database: SAP HANA Cloud or PostgreSQL
+- Deployed SAP BTP database: SAP HANA Cloud through the bound HDI container
+- Rollback/integration database: shared PostgreSQL through CAP profile `integration`
 - Current Fiori app: `app/bug-management-ui`
 - Current service: `BugService` at `/odata/v4/bug/`
 
 ## Authentication Direction
 
-- Near-term login does not depend on SAP BTP/XSUAA because the team does not currently have a BTP account path.
-- IDTS uses a custom CAP Node.js auth foundation: `AuthService.login` verifies email/password against `Users.passwordHash`, creates an `AuthSessions` row, and returns a bearer token.
+- SAP BTP uses AppRouter/XSUAA platform authentication. CAP maps the authenticated SAP identity to the active IDTS `Users` row and requires the platform role to match the business role.
+- Local and Render/integration profiles retain the custom CAP Node.js auth foundation: `AuthService.login` verifies email/password against `Users.passwordHash`, creates an `AuthSessions` row, and returns a bearer token.
 - `Users` remains the internal business profile and role source for Tester, Developer, and PM.
-- HTTP requests to `BugService` must send the bearer token; the custom auth middleware maps the token back to `cds.User` with `authenticated-user` plus the IDTS business role.
+- On BTP, AppRouter forwards the XSUAA token. On custom-auth profiles, requests send the bearer token and middleware maps it back to `cds.User`; both paths enforce the IDTS business role.
 - Passwords, tokens, auth secrets, SMTP credentials, and private endpoints must not be committed. Local passwords are set through private environment variables and stored only as hashes.
 
-Vietnamese: Huong login gan han khong phu thuoc SAP BTP/XSUAA. IDTS dung custom auth trong CAP Node.js: `AuthService.login` verify email/password bang `Users.passwordHash`, tao `AuthSessions`, va tra bearer token. `Users` van la nguon profile/role noi bo cho Tester, Developer, PM. Request vao `BugService` gui bearer token; middleware map token thanh `cds.User`. Khong commit password, token, auth secret, SMTP credential hoac private endpoint.
+Vietnamese: Tren SAP BTP, AppRouter/XSUAA xac thuc SAP identity, CAP map identity nay toi `Users` dang active va kiem tra platform role khop business role. Local va Render/integration van dung custom CAP login voi `Users.passwordHash`, `AuthSessions` va bearer token. Khong commit password, token, auth secret, SMTP credential hoac private endpoint.
 
 ## Email Notification Direction
 
 - `Notifications` is the in-app source event. New in-app rows are considered delivered when persisted (`IN_APP/SENT`).
 - `NotificationDeliveries` is the separate email outbox and stores safe payload snapshots, delivery status, attempts, retry timing, sanitized failure detail, and worker locking.
-- Nodemailer sends through real SMTP only when private configuration is explicitly enabled and complete.
-- A CAP `cds.spawn` worker processes outbox rows after the original workflow request. SMTP failure changes delivery status but does not roll back bug assignment or lifecycle work.
+- SAP BTP selects the Brevo API through private provider configuration; local/integration profiles may use SMTP through Nodemailer.
+- SAP Job Scheduling Service invokes the protected CAP outbox-processing endpoint. Provider failure changes delivery status but does not roll back bug assignment or lifecycle work.
 - Existing historical notifications are not automatically emailed after IDTS-36 deployment.
 - Email v1 uses the CAP database outbox; Redis, RabbitMQ, BullMQ, and provider-specific SDKs are not required.
 
-Vietnamese: `Notifications` la source event trong app va record moi duoc xem la `IN_APP/SENT` ngay khi luu thanh cong. `NotificationDeliveries` la email outbox rieng, luu payload snapshot an toan, status, so lan thu, lich retry, loi da lam sach va worker lock. Nodemailer chi gui SMTP that khi private config duoc bat ro rang va day du. Worker CAP `cds.spawn` xu ly outbox sau request workflow ban dau; SMTP fail chi doi delivery status, khong rollback assignment hoac lifecycle action. Notification lich su khong tu dong duoc gui lai. V1 dung CAP database outbox, khong can Redis/RabbitMQ/BullMQ hay provider SDK.
+Vietnamese: `Notifications` la source event trong app; `NotificationDeliveries` la email outbox rieng, luu payload snapshot an toan, status, so lan thu, lich retry, loi da lam sach va worker lock. SAP BTP dung private config cho Brevo API; local/integration co the dung SMTP/Nodemailer. Job Scheduling Service goi protected CAP endpoint de xu ly outbox; provider fail chi doi delivery status, khong rollback assignment hoac lifecycle action. Notification lich su khong tu dong gui lai. V1 khong can Redis/RabbitMQ/BullMQ.
 
 ## Roles
 
@@ -115,7 +115,7 @@ Key baseline decisions:
 - Bug should store Application Component, Defect Category, and Component Category with backend consistency validation.
 - Rejected bugs should keep the latest `rejectionReason` on Bug and immutable rejection reasons in HistoryLogs.
 - User-facing history should be grouped as `HistoryEvents` with a readable summary, while `HistoryLogs` remains the append-only field-level audit trail under each event.
-- The attachment model now uses the SAP-supported `@cap-js/attachments` composition. SQLite/DB fallback remains available for local development, while profile `integration` targets shared PostgreSQL plus bound external object storage. Final external-storage acceptance still requires the shared object-store binding.
+- The attachment model uses the SAP-supported `@cap-js/attachments` composition. SQLite remains available locally; SAP BTP persists attachment metadata/reference in HANA/HDI and stores binary content in the bound external object store. The PostgreSQL `integration` profile is rollback/reference rather than the deployed source of truth. Browser-native picker evidence remains a separate acceptance concern from adapter/storage evidence.
 - Bugs should have a human-readable `bugNumber` in addition to UUID.
 - SAP Module remains optional context and optional assignment filter, not a mandatory field for every bug. For pure IDTS bugs, leave it empty instead of using a pseudo-value such as `Not Applicable`.
 - Duplicate checking stores confirmed Duplicate/Similar/Related links in `DuplicateLinks`; runtime candidates are not persisted in MVP.
@@ -133,7 +133,7 @@ Các quyết định chính:
 - Bug nên lưu Application Component, Defect Category và Component Category, kèm backend consistency validation.
 - Bug bị Rejected nên lưu `rejectionReason` mới nhất trên Bug và lưu reason bất biến trong HistoryLogs.
 - Lich su hien cho nguoi dung nen duoc nhom theo `HistoryEvents` co summary de doc nhanh, con `HistoryLogs` van la audit trail append-only o muc field cho moi event.
-- Model attachment hiện dùng composition của `@cap-js/attachments`. Local development vẫn có SQLite/DB fallback; profile `integration` dùng PostgreSQL chung và external object storage được bind riêng. Acceptance cuối cho external storage còn phụ thuộc shared object-store binding.
+- Model attachment dùng composition của `@cap-js/attachments`. Local dùng SQLite; SAP BTP lưu metadata/reference trong HANA/HDI và binary trong external object store đã bind. PostgreSQL `integration` chỉ là rollback/reference. Evidence storage adapter và evidence browser native picker phải được báo cáo tách biệt.
 - Bug nên có `bugNumber` dễ đọc ngoài UUID.
 - SAP Module là context tùy chọn và filter assignment tùy chọn, không bắt buộc cho mọi bug. Với bug thuần IDTS thì để trống, không dùng giá trị giả như `Not Applicable`.
 - Duplicate checking chỉ lưu link Duplicate/Similar/Related đã xác nhận trong `DuplicateLinks`; candidate runtime không persist trong MVP.

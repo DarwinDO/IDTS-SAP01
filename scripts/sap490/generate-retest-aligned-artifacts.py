@@ -1163,7 +1163,7 @@ def fill_test_report(language: str) -> Path:
 
 def main():
     outputs = []
-    for language in ("en", "vi"):
+    for language in ("en",):
         outputs.append(fill_functional(language))
         outputs.append(fill_bug_log(language))
         outputs.append(fill_test_scenario(language))

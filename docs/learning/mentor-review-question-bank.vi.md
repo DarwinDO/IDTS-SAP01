@@ -86,10 +86,10 @@ Tài liệu này phục vụ đối thoại review, không phải ngân hàng Kn
 
 ### 11. Attachment trước Save nằm ở đâu; sau Save nằm ở đâu?
 
-- **Trả lời 30–60 giây:** Khi tạo bug, `File` object chỉ nằm tạm trong memory của tab browser theo draft ID. Sau khi bug activate thành công, UI mới upload qua attachment API; metadata/reference nằm trong database, binary đi qua `@cap-js/attachments` storage adapter tới S3 trên Shared QA.
-- **Giải thích sâu:** Nếu đóng/refresh tab trước Save, file tạm chưa được persist. Nếu activate thành công nhưng upload lỗi, bug vẫn tồn tại và UI báo upload failure thay vì giả thành công.
-- **Mở đối chiếu:** `BugCollaboration.js::pendingCreateAttachmentsByBugId`; `flushPendingCreateAttachments`; `db/schema.cds::BugAttachments`; `srv/bug-service/content.js`.
-- **Không được nói sai:** Không nói file đã nằm ở S3 ngay khi người dùng chọn file.
+- **Trả lời 30–60 giây:** Attachment dùng draft flow chuẩn của Fiori Elements và `@cap-js/attachments`. Người dùng vào Edit, upload file vào draft rồi Save. Chỉ sau khi draft được activate thì attachment thuộc bản active; metadata/reference nằm trong HANA, còn binary do storage adapter đưa tới S3.
+- **Giải thích sâu:** Fiori Elements sở hữu Save/Discard và CSRF/session. Discard không được tạo attachment active. Đây là CAP draft persistence, không còn là browser-memory queue tự viết.
+- **Mở đối chiếu:** `db/schema.cds::BugAttachments`; `app/bug-management-ui/annotations/object-page.cds::Attachments`; `srv/bug-service/content.js`; package `@cap-js/attachments`.
+- **Không được nói sai:** Không nói custom controller tự gọi `draftEdit`, upload rồi `draftActivate`, hoặc file chỉ nằm trong browser memory tới sau Save.
 - **Mentor có thể hỏi tiếp:** Tại sao không upload S3 trước rồi mới tạo bug?
 
 ### 12. Vì sao attachment dùng PostgreSQL + S3 thay vì lưu toàn bộ trong DB?

@@ -26,6 +26,13 @@
       "csrfProtection": true
     },
     {
+      "source": "^/idtsbugmanagementui/(index\\.html|manifest\\.json|Component\\.js|Component-preload\\.js)$",
+      "target": "/idtsbugmanagementui/$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa",
+      "cacheControl": "no-cache, no-store, must-revalidate"
+    },
+    {
       "source": "^(.*)$",
       "target": "$1",
       "service": "html5-apps-repo-rt",

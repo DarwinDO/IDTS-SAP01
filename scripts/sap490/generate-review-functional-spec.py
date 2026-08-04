@@ -675,7 +675,7 @@ def build(language):
 
 
 def main():
-    for language in ("en", "vi"):
+    for language in ("en",):
         print(build(language).relative_to(ROOT))
 
 
