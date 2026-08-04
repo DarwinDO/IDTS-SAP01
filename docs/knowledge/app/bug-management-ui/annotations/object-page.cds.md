@@ -174,6 +174,6 @@ Các anchor quan trọng:
 
 ## IDTS-116 generated attachment facet (2026-08-03)
 
-The `Attachments` ReferenceFacet is no longer hidden. Its target remains `attachments/@UI.LineItem`, allowing Fiori Elements and `@cap-js/attachments` to render the SAP-standard draft attachment UI. The Comments collection facet remains hidden because IDTS still uses the separate custom Comments section.
+Superseded on 2026-08-04: the application must not declare its own ReferenceFacet for `attachments/@UI.LineItem`. `@cap-js/attachments` detects that target and otherwise skips its standard `attachments_attachments` facet. Keep the composition and attachment LineItem, but let the plugin add the Object Page facet. The Comments collection facet remains application-owned because IDTS still uses the separate custom Comments section.
 
-Facet `Attachments` đã được mở lại để Fiori Elements và CAP attachment plugin render UI chuẩn; custom Comments không thay đổi.
+Cập nhật ngày 2026-08-04: ứng dụng không tự khai báo ReferenceFacet cho `attachments/@UI.LineItem`. Plugin `@cap-js/attachments` phải sở hữu facet chuẩn `attachments_attachments`; nếu target đã tồn tại, plugin sẽ bỏ qua bước sinh facet. Comments vẫn dùng section riêng của IDTS.

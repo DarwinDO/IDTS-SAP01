@@ -72,9 +72,16 @@ sap.ui.define([
         return null;
     }
 
-    function refreshBugContext(context) {
-        if (context && typeof context.requestRefresh === "function") {
-            return context.requestRefresh();
+    function refreshCommentsFeed(control) {
+        var commentsFeed = findControlByLocalId(control, "idtsCommentsFeed");
+        var itemsBinding = commentsFeed && typeof commentsFeed.getBinding === "function"
+            ? commentsFeed.getBinding("items")
+            : null;
+
+        if (itemsBinding && typeof itemsBinding.requestRefresh === "function") {
+            return window.Promise.resolve().then(function () {
+                return itemsBinding.requestRefresh("$direct");
+            });
         }
         return window.Promise.resolve();
     }
@@ -123,23 +130,21 @@ sap.ui.define([
 
             // Use the OData V4 model so UI5 handles CSRF and the bound-action lifecycle.
             var operation = model.bindContext(
-                bugContext.getPath() + "/BugService.addComment(...)",
-                undefined,
-                { $$ownRequest: true }
+                bugContext.getPath() + "/BugService.addComment(...)"
             );
             operation.setParameter("content", content);
 
-            operation.invoke("$direct")
+            operation.invoke("$auto")
                 .then(function () {
                     if (textArea) {
                         textArea.setValue("");
                     }
-                    return refreshBugContext(bugContext);
-                })
-                .then(function () {
-                    MessageToast.show("Comment posted.");
-                })
-                .catch(function () {
+                    return refreshCommentsFeed(source).then(function () {
+                        MessageToast.show("Comment posted.");
+                    }, function () {
+                        MessageToast.show("Comment posted. Refresh the page to see it.");
+                    });
+                }, function () {
                     showSafeError("The comment could not be posted. Please refresh and try again.");
                 })
                 .finally(function () {
