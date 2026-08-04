@@ -2,113 +2,44 @@
 
 ## Review baseline
 
-- Pull request: `#269`
-- Exact candidate head: `8957cbaa20f9c629818901f9b988884337a7ff82`
-- Candidate execution: `34 PASS / 2 FAIL / 152 BLOCKED`
-- Approved catalog: 188 English-only cases
+- Candidate package head: `8fd55bc00199ded91ce294eedc3b4113292fd6ee`
+- Integrated `origin/dev`: `e55a863d0cc4ada6c421ce940c1986162756c176`
+- Approved catalog: 188 English-only cases, still `NOT_RUN`
 - Reviewer: DonHV
-- Review status: remediation required before merge
+- Workbook/Drive: unchanged
 
-The machine-readable 188-case disposition is generated at
-`docs/pm/evidence/idts-110/donhv-case-taxonomy.json`.
+## Candidate truth versus reviewer truth
 
-## BTP readiness at the reviewed head
+| Layer | Accepted/PASS | Held | Mapping-only | Blocked | Meaning |
+| --- | ---: | ---: | ---: | ---: | --- |
+| NhanT candidate package | 40 | 0 | 135 | 13 | Immutable execution/evidence handoff |
+| DonHV review | 38 | 2 | 135 | 13 | Reviewer disposition; not workbook PASS |
 
-`npm run btp:demo:check` returned `DEMO READY` without recovery:
+The two held cases are `UT-ATT-007` and `UT-ATT-008`. Their historical deployed-control proof remains intact, but the deployed SHA differs from the intended exact-head acceptance baseline. They must not be reported as final PASS.
 
-- SAP HANA/HDI readiness: PASS
-- CAP application: `1/1`
-- AppRouter: `1/1`
-- `/health`: HTTP 200
-- `/ready`: HTTP 200
-- Anonymous protected API/Auth boundary: HTTP 401 as expected
-- Web/AppRouter: HTTP 200
+## Reviewer disposition
 
-No database deployment, seed load, schema migration, or credential read occurred.
-
-## Primary execution taxonomy
-
-The candidate conflates optional BTP confirmation with the environment required for the primary assertion.
-
-| Primary boundary | Cases | Required environment |
+| Decision | Count | Cases/meaning |
 | --- | ---: | --- |
-| Pure unit | 7 | Local |
-| UI component | 2 | Local browser/component harness |
-| CAP component | 150 | Local isolated CAP fixture; selected cases may be repeated on HANA |
-| OData contract | 16 | Local CAP HTTP/OData harness; selected cases may be repeated through AppRouter |
-| BTP integration | 13 | SAP BTP/HANA/XSUAA/external integration |
-| **Total** | **188** | **175 local-primary + 13 BTP-only** |
+| `ACCEPTED_CANDIDATE` | 38 | Exact local candidate assertions accepted for later documentation integration |
+| `HELD_FOR_EXACT_HEAD_ACCEPTANCE` | 2 | `UT-ATT-007/008`; historical proof retained, exact-head rerun optional but required for acceptance |
+| `MAPPING_ONLY_NOT_PASS` | 135 | Suite-to-case traceability only |
+| `BLOCKED_PENDING_MEMBER_EVIDENCE` | 13 | HANA/XSUAA/S3/Job Scheduler/deployed-runtime evidence owned by NhanT |
 
-Therefore, the catalog now distinguishes 175 locally executable primary assertions from 13 BTP-only integrations. Cases marked `HYBRID_BTP` require local execution first; BTP confirmation is additional evidence rather than a prerequisite for the primary Unit Test result.
+## Evidence integrity
 
-The 13 true BTP integration cases are:
+- 188 manifests; 188 unique Case IDs.
+- 280 referenced images; all references exist.
+- 280 images now have PNG byte signatures and matching declared hashes where a runtime hash is recorded.
+- Generated cards are trace summaries, not browser proof.
+- Executor, timestamp, actual result, environment, baseline SHA, and deploy SHA were not rewritten.
 
-- `UT-AUTH-011`–`UT-AUTH-015`: XSUAA/deployed identity behavior.
-- `UT-ATT-003`–`UT-ATT-006` and `UT-ATT-010`–`UT-ATT-012`: production HANA/S3 persistence and injected storage failure behavior.
-- `UT-NTF-013`: bound Job Scheduler authorization and deployed invocation.
+## Runtime separation
 
-The independent taxonomy audit also found and the canonical catalog now corrects these over-classifications:
+The malformed-login sanitizer was extracted and merged separately under IDTS-39 through PR #283. PR #269 contains no branch-only `app/`, `srv/`, or `db/` behavior change after syncing current `origin/dev`.
 
-- `UT-ATT-009`: local OData authorization denial occurs before storage access.
-- `UT-NTF-009`–`UT-NTF-011`: they use CAP transactions/persistence and are CAP component tests, not pure unit tests.
-- `UT-NTF-012`: controlled two-worker compare-and-set is locally executable, with optional HANA parity evidence.
-- `UT-AI-026`: operational metrics are a local OData contract, with optional deployed-role confirmation.
-- `UT-AI-027`: injected HTTP 429 is a local provider component test; a naturally observed live quota response belongs to acceptance evidence.
+## Remaining actions
 
-## Two candidate FAIL results
-
-### UT-AUTH-004 — catalog expectation mismatch
-
-The case sends a non-string password but expects generic HTTP 401. `srv/auth.cds` declares the password as `String(255)`, so CAP rejects the malformed type at the CDS contract boundary before `srv/auth.js#login` executes.
-
-Disposition:
-
-- Non-string password: safe validation/HTTP 400-style boundary.
-- Wrong string credential: generic HTTP 401 without account disclosure.
-- No `AuthSessions` row may be inserted in either failure path.
-
-This is a catalog correction, not a runtime defect.
-
-The current local runner also stops at the mismatched status assertion, so its later no-session assertion is not executed. The rerun must verify both the public HTTP response and unchanged `AuthSessions` state instead of treating the thrown validation object alone as complete security evidence.
-
-### UT-VAL-REPORTER — catalog expectation mismatch
-
-The case expects a missing client `reporter_ID` to fail. Current runtime deliberately treats reporter as server-owned:
-
-- `srv/bug-service/bug-write.js#prepareBugWrite` derives it from the authenticated actor before required-field validation.
-- Draft helpers apply the same ownership rule.
-
-Disposition:
-
-- Client omission is valid when the authenticated actor resolves.
-- Keep a separate negative case for an actor that cannot be resolved.
-
-This is also a catalog correction, not a runtime defect.
-
-## Evidence quality and repository size
-
-- All 188 manifests exist.
-- The candidate contains 269 PNG and 269 SVG files.
-- The PNG/SVG pairs are generated result cards, not browser/runtime screenshots by themselves.
-- SVG copies contain encoding artifacts in visible text and duplicate the PNG information.
-- A blocker card proves that the harness recorded a blocker; it does not prove execution of the product flow.
-
-Required cleanup:
-
-1. Keep each case manifest.
-2. Keep one verified PNG result card when it materially helps review.
-3. Remove duplicate SVG copies when no tracked consumer requires them.
-4. Add real runtime/browser/database evidence only for cases whose assertion requires it.
-5. Do not describe generated cards as browser or BTP proof.
-
-## Required remediation before PR #269 can merge
-
-1. NhanT personally reads and acknowledges briefing SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`.
-2. DonHV's correction branch updates the two canonical catalog expectations above; no execution result is rewritten to manufacture PASS.
-3. NhanT reruns the falsely blocked local CAP/OData cases with the correct primary harness.
-4. NhanT runs the two UI component cases with a working UI component/browser harness.
-5. Only 13 cases remain BTP-required; run them in controlled batches after `btp:demo:check` reports READY.
-6. Evidence duplicates and misleading proof labels are removed.
-7. PR body is refreshed and `qa-depth-gate` reruns on the exact final head.
-
-Until these steps complete, PR #269 remains a truthful candidate package but is not merge-ready, and IDTS-110 remains `In Progress`.
+1. NhanT supplies the 13 member-owned BTP integration results when available.
+2. NhanT may rerun `UT-ATT-007/008` on the intended deployed head for exact-head acceptance.
+3. DonHV keeps IDTS-110 In Progress and does not update Unit Test EN v0.5 or Drive in this curation step.

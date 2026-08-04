@@ -1,5 +1,11 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-08-04 — IDTS-39 malformed-login contract follow-up
+
+| Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product/security defect | Malformed numeric `email` or `password` values returned HTTP 400 but exposed CAP validator details such as `ASSERT_DATA_TYPE`, rejected values, CDS type and target/path. | OData parameter validation occurs before the `AuthService.login` event and transaction are dispatched, so an `AuthService.on('error')` handler does not receive the boundary failure. The adapter also retains its original serializer, so mutating the old error still leaked its message template. | Fixed in candidate: a narrowly scoped CAP post-adapter middleware replaces only this login boundary failure with a new minimal public error object. | PASS: both malformed fields return HTTP 400 / `INVALID_LOGIN_REQUEST`, contain no validator details, and create no `AuthSessions`; auth regression 28/28, CAP compile, secret scan, agent rules, depth self-test and `git diff --check` passed. |
+
 ## 2026-08-04 — IDTS-116 attachment download-disposition defect
 
 | Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
@@ -5670,3 +5676,23 @@ Live evidence: `docs/pm/evidence/idts-117/demo-readiness/live-verification-20260
 - **Root cause:** the QA Depth parser requires whitespace or string start immediately before `docs/...`; Markdown backticks around the evidence path prevented the regular expression from recognizing it.
 - **Fix status:** remove only the backticks from the structured `Evidence:` value; the evidence path and human gate result are unchanged.
 - **Verification/next action:** publish the corrected body, push this status-only follow-up to trigger a new exact-head run, and merge only after that run passes.
+## 2026-08-04 — IDTS-39 malformed login contract follow-up
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product/security defect | A malformed `AuthService.login` payload could expose CAP `ASSERT_DATA_TYPE` validation details instead of a stable public 400 response. | CAP rejects the payload at the CDS type boundary before the login handler's normal safe error path. The first service-hook approach was disproved because that hook never receives protocol-boundary failures. | Fixed in the candidate with a route-scoped post-adapter sanitizer; the original execution finding is retained here for chronology. | Focused HTTP regression and the full auth/gate checks passed; merge through a separate IDTS-39 PR before curating PR #269. |
+| Tooling issue | The first focused IDTS-39 test stopped with `MODULE_NOT_FOUND: @sap/cds`. | The fresh isolated worktree had no local `node_modules`; product assertions were not executed. | Resolved by `npm ci` from the frozen lockfile; no package version or lockfile changed. | Focused and auth regression now execute from the isolated dependency tree. |
+| Tooling issue | The lockfile-matched shared dependency tree loaded CAP but failed at runtime because the native `better-sqlite3` binding for Node 22 was absent. | The shared `node_modules` tree was incomplete for the current Node ABI; this is dependency setup, not an auth regression. | Resolved by removing only the verified junction and installing the frozen dependency tree locally. | Focused HTTP and 28-check auth regression passed. |
+
+## 2026-08-04 — IDTS-39 merge command worktree cleanup issue
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling issue | `gh pr merge 283 --merge --delete-branch` reported that local branch `dev` was already used by the root worktree. | The PR merge succeeded remotely, but the optional local branch-cleanup phase attempted to checkout `dev` in the isolated worktree. | No product or repository data was lost; the command was rerun without local branch deletion. | GitHub reports PR #283 merged at `e55a863d0cc4ada6c421ce940c1986162756c176`, and the head is reachable from `origin/dev`. |
+
+## 2026-08-04 — IDTS-110 evidence curation
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Documentation/evidence issue | PR #269 mixed NhanT's 40 candidate PASS records with DonHV acceptance, treated 135 mapping records ambiguously, and carried two JPEG/JFIF files under `.png` names. | Candidate execution truth and reviewer disposition were not modeled as separate layers; the two supplemental screenshots had an extension/byte-signature mismatch. | Curated to 38 accepted, 2 held, 135 mapping-only non-PASS and 13 blocked while preserving NhanT execution fields. The two files were re-encoded as PNG and only their SHA metadata changed. | 188 unique manifests, 280 references, 0 missing, 0 bad PNG signatures and 0 runtime-hash mismatch; secret/agent/depth/diff checks PASS. Await exact-head GitHub gate and independent final review before merge. |
+| Tooling issue | Two Luna/max exact-head review subagents did not return within bounded waits and remained running until explicitly closed. | Codex subagent execution stalled during read-only final review; no result was produced, so silence was not treated as PASS. | Both subagents were closed. Primary review remains the decision owner and uses the completed Unit evidence audit, deterministic 188/280 invariant check, local QA checks and exact-head GitHub gate. | Do not claim an independent Luna/max PASS for PR #269. Merge only if the objective gates remain clean and GitHub reports the exact head mergeable. |

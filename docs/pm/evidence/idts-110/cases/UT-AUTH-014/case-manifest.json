@@ -1,0 +1,28 @@
+{
+  "caseId": "UT-AUTH-014",
+  "title": "XSUAA identity with multiple application roles is denied",
+  "candidateExecutionStatus": "BLOCKED",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "executor": "NhanT (agent-assisted)",
+  "executedAt": "2026-08-04T09:15:58.727Z",
+  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
+  "deploySha": null,
+  "environment": "BTP_REQUIRED",
+  "runtime": "node v22.23.2, win32 x64",
+  "testCommand": "npm.cmd run btp:demo:check",
+  "sourceAssertions": [],
+  "actualResult": "Blocked before execution: `npm run btp:demo:check` cannot start because the Cloud Foundry CLI is unavailable on this host. No BTP request, deployment, database/seed change, or integration assertion ran.",
+  "assertions": [
+    "Cloud Foundry CLI available: false",
+    "BTP readiness command exit code: 1",
+    "BTP integration assertion executed: false",
+    "Product failure claimed: false"
+  ],
+  "evidenceIds": [
+    "IDTS110-UT-AUTH-014-BLOCKER"
+  ],
+  "evidenceFiles": [
+    "result.png"
+  ],
+  "limitations": "Environment blocker only. These 13 cases require an authorized Cloud Foundry/BTP session; DonHV owns final BTP execution review and workbook integration."
+}
