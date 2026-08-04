@@ -5683,3 +5683,15 @@ Live evidence: `docs/pm/evidence/idts-117/demo-readiness/live-verification-20260
 | Product/security defect | A malformed `AuthService.login` payload could expose CAP `ASSERT_DATA_TYPE` validation details instead of a stable public 400 response. | CAP rejects the payload at the CDS type boundary before the login handler's normal safe error path. The first service-hook approach was disproved because that hook never receives protocol-boundary failures. | Fixed in the candidate with a route-scoped post-adapter sanitizer; the original execution finding is retained here for chronology. | Focused HTTP regression and the full auth/gate checks passed; merge through a separate IDTS-39 PR before curating PR #269. |
 | Tooling issue | The first focused IDTS-39 test stopped with `MODULE_NOT_FOUND: @sap/cds`. | The fresh isolated worktree had no local `node_modules`; product assertions were not executed. | Resolved by `npm ci` from the frozen lockfile; no package version or lockfile changed. | Focused and auth regression now execute from the isolated dependency tree. |
 | Tooling issue | The lockfile-matched shared dependency tree loaded CAP but failed at runtime because the native `better-sqlite3` binding for Node 22 was absent. | The shared `node_modules` tree was incomplete for the current Node ABI; this is dependency setup, not an auth regression. | Resolved by removing only the verified junction and installing the frozen dependency tree locally. | Focused HTTP and 28-check auth regression passed. |
+
+## 2026-08-04 — IDTS-39 merge command worktree cleanup issue
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Tooling issue | `gh pr merge 283 --merge --delete-branch` reported that local branch `dev` was already used by the root worktree. | The PR merge succeeded remotely, but the optional local branch-cleanup phase attempted to checkout `dev` in the isolated worktree. | No product or repository data was lost; the command was rerun without local branch deletion. | GitHub reports PR #283 merged at `e55a863d0cc4ada6c421ce940c1986162756c176`, and the head is reachable from `origin/dev`. |
+
+## 2026-08-04 — IDTS-110 evidence curation
+
+| Classification | Symptom | Root cause | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Documentation/evidence issue | PR #269 mixed NhanT's 40 candidate PASS records with DonHV acceptance, treated 135 mapping records ambiguously, and carried two JPEG/JFIF files under `.png` names. | Candidate execution truth and reviewer disposition were not modeled as separate layers; the two supplemental screenshots had an extension/byte-signature mismatch. | Curated to 38 accepted, 2 held, 135 mapping-only non-PASS and 13 blocked while preserving NhanT execution fields. The two files were re-encoded as PNG and only their SHA metadata changed. | 188 unique manifests, 280 references, 0 missing, 0 bad PNG signatures and 0 runtime-hash mismatch; secret/agent/depth/diff checks PASS. Await exact-head GitHub gate and independent final review before merge. |

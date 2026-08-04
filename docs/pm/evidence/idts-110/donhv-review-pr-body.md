@@ -1,60 +1,62 @@
 ## Summary
 
-Review PR #269 at exact head `8957cbaa20f9c629818901f9b988884337a7ff82`, correct two canonical Unit Test expectations, and publish a machine-readable DonHV disposition for all 188 cases. This PR changes QA catalog/evidence only and does not modify runtime behavior.
+Curate PR #269 without rewriting NhanT's execution history. The candidate package records `40 PASS / 135 MAPPING_ONLY_CANDIDATE / 13 BLOCKED`; DonHV's separate review accepts 38 candidates, holds `UT-ATT-007/008` for exact-head acceptance, preserves 135 mapping-only records as non-PASS traceability, and leaves 13 integrations blocked.
 
 ## Positive Evidence
 
-- Candidate package contains 188 manifests and reports 34 candidate PASS results.
-- Catalog regeneration and source-trace validation pass with 188 `NOT_RUN` canonical cases.
-- Fresh SAP BTP readiness check returned `DEMO READY` without DB/seed deployment.
+- 188 unique case manifests and 280 referenced images are present.
+- The 38 exact local candidate executions retained by DonHV have case-specific evidence.
+- The malformed-login sanitizer is no longer hidden in this evidence PR; it merged separately through IDTS-39, PR #283, at `e55a863d0cc4ada6c421ce940c1986162756c176`.
+- Both attachment supplemental files now have real PNG signatures and matching manifest hashes.
 
 ## Negative Evidence
 
-- PR #269 reports two FAIL results; both are catalog expectation mismatches, not demonstrated product defects.
-- PR #269 reports 152 BLOCKED cases while the corrected catalog has only 13 true BTP-only integrations.
+- `UT-ATT-007/008` are historical deployed-control candidate PASS records, but are held until rerun on the intended deployed head.
+- Thirteen BTP integration cases still require member-owned HANA/XSUAA/S3/Job Scheduler evidence.
+- The 135 mapping-only records are not atomic executions and are not PASS.
 
 ## Edge/Boundary Evidence
 
-- `UT-AUTH-004` now separates malformed CDS input (safe HTTP 400 validation) from wrong string credentials (generic HTTP 401).
-- `UT-VAL-REPORTER` now tests unresolved actor derivation instead of treating server-owned `reporter_ID` as client-required.
+- Malformed login types are covered by the separately merged IDTS-39 safe HTTP 400 contract.
+- Attachment MIME and maximum-size boundary evidence remains preserved with immutable executor, timestamp, actual result, deploy SHA, and visual content.
+- Candidate truth and reviewer truth are reported as two separate layers.
 
 ## Roles/Authorization
 
-- Reporter derivation remains server-owned for authorized Tester/PM creation.
-- XSUAA role cases remain among the 17 BTP-required integration cases.
+- NhanT remains the executor/evidence owner; DonHV is the catalog owner, reviewer, and workbook integrator.
+- The 13 BTP cases must use NhanT's own SAP identity. No credential or session is shared.
 
 ## Persistence/Reload
 
-- Corrected cases require no `AuthSessions` or Bug-side-effect mutation on failure.
-- The review requires before/after readback where persistence is part of the assertion.
+- Existing before/after/reload evidence is preserved.
+- No manifest actual result, executor, timestamp, or execution baseline was rewritten by DonHV.
+- No workbook, Drive, database, seed, or schema was changed.
 
 ## UI/UX Review
 
-- Generated PNG/SVG cards are result summaries, not browser proof.
-- Real browser evidence remains required only for UI/runtime assertions.
+- Generated cards are trace summaries, not browser/runtime evidence.
+- The two attachment supplemental artifacts are historical deployed-control evidence, not exact-current-head acceptance.
 
 ## Ponytail Simplicity
 
-- No runtime abstraction or new test framework was added.
-- One deterministic review generator maps the existing catalog and manifests into the 188-case disposition.
+- No runtime code or new test framework remains in this PR.
+- One deterministic reviewer generator produces the 188-case disposition.
+- Evidence-card cleanup is deferred because the current package size is not a merge blocker.
 
 ## Known Gaps
 
-- NhanT must personally acknowledge briefing SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`.
-- The falsely blocked local cases and 13 true BTP cases still require accepted reruns.
-- Duplicate SVG evidence in PR #269 still requires cleanup.
+- `UT-ATT-007/008`: `HELD_FOR_EXACT_HEAD_ACCEPTANCE`.
+- Thirteen integrations: `BLOCKED_PENDING_MEMBER_EVIDENCE`.
+- Official Unit Test EN v0.5 and Google Drive remain unchanged.
 
 ## Jira/Evidence Links
 
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-110
-- Candidate PR: https://github.com/DarwinDO/IDTS-SAP01/pull/269
-- Evidence: `docs/pm/evidence/idts-110/donhv-execution-review-matrix.md`
+- PR: https://github.com/DarwinDO/IDTS-SAP01/pull/269
+- Matrix: `docs/pm/evidence/idts-110/donhv-execution-review-matrix.md`
 - Taxonomy: `docs/pm/evidence/idts-110/donhv-case-taxonomy.json`
+- Runtime sanitizer: PR #283 / IDTS-39
 
 ## Ownership Knowledge Gate
 
-DonHV is the approved Unit Test catalog owner/final integrator and personally acknowledged the current IDTS-105 briefing at merge SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`. This review does not acknowledge or approve on behalf of NhanT and does not convert any canonical `NOT_RUN` case to PASS.
-
-## Historical Review Notice
-
-The counts above describe DonHV's review of head `8957cbaa...`. NhanT's 2026-08-04 remediation preserves that record and publishes a separate current package at `56b4a4f3...`: 38 atomic candidate PASS, 135 mapping-only candidates, 0 FAIL and 15 BLOCKED. The mapping-only records must not be presented as case execution or PASS.
+NhanT's existing QA Knowledge Gate and briefing acknowledgment are preserved. DonHV does not sign or acknowledge for NhanT. Merging this evidence package does not update the canonical `NOT_RUN` catalog or make a final Unit Test acceptance claim.

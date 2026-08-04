@@ -28,6 +28,6 @@
     "result.png",
     "runtime-generated-control.png"
   ],
-  "runtimeEvidenceSha256": "DF22C21C5679B41E691ACAAA85AD00695721FC0518062DE9D0A10EC231A7B24B",
+  "runtimeEvidenceSha256": "1F1D0CBC4B0602D97F7382B44A32607A2AC58550F889A58C929330DDC5478A49",
   "limitations": "The runtime proof covers generated-control rejection and no UI metadata row. The message is a safe localization key rather than friendly end-user copy; direct HANA/S3 inspection is not claimed."
 }

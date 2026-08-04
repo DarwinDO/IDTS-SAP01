@@ -2,11 +2,14 @@
   "schemaVersion": "1.0",
   "jiraKey": "IDTS-110",
   "reviewedPullRequest": 269,
-  "reviewedHeadSha": "8957cbaa20f9c629818901f9b988884337a7ff82",
+  "reviewedCandidateHeadSha": "8fd55bc00199ded91ce294eedc3b4113292fd6ee",
+  "integratedOriginDevSha": "e55a863d0cc4ada6c421ce940c1986162756c176",
   "reviewPolicy": {
     "primaryResultOwner": "DonHV",
     "candidateExecutor": "NhanT (agent-assisted)",
     "generatedCardsAreRuntimeProof": false,
+    "candidateExecutionFieldsAreImmutable": true,
+    "reviewerTotalsAreSeparateFromCandidateTotals": true,
     "latestBriefingAcknowledgementRequired": true
   },
   "counts": {
@@ -19,19 +22,19 @@
       "PURE_UNIT": 7
     },
     "byCandidateStatus": {
-      "PASS": 34,
-      "FAIL": 2,
-      "BLOCKED": 152
+      "PASS": 40,
+      "MAPPING_ONLY_CANDIDATE": 135,
+      "BLOCKED": 13
     },
     "byRequiredEnvironment": {
       "LOCAL": 175,
       "SAP_BTP": 13
     },
     "byReviewDecision": {
-      "REVIEW_CANDIDATE_RESULT": 34,
-      "CATALOG_EXPECTATION_MISMATCH": 2,
-      "RERUN_AT_LOCAL_PRIMARY_BOUNDARY": 139,
-      "RERUN_ON_BTP": 13
+      "ACCEPTED_CANDIDATE": 38,
+      "MAPPING_ONLY_NOT_PASS": 135,
+      "BLOCKED_PENDING_MEMBER_EVIDENCE": 13,
+      "HELD_FOR_EXACT_HEAD_ACCEPTANCE": 2
     }
   },
   "cases": [
@@ -42,19 +45,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -64,19 +63,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -86,19 +81,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -107,14 +98,16 @@
       "catalogEnvironment": "LOCAL",
       "primaryExecutionBoundary": "ODATA_CONTRACT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "FAIL",
-      "reviewDecision": "CATALOG_EXPECTATION_MISMATCH",
-      "reviewRationale": "A non-string password is rejected by the CDS type boundary before the login handler. Expect a safe 400-style validation response; retain 401 for a wrong string credential.",
+      "candidateStatus": "PASS",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg"
+        "before-database.png",
+        "after-database.png",
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -124,13 +117,12 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -140,19 +132,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -161,14 +149,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "ODATA_CONTRACT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -177,14 +164,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "ODATA_CONTRACT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -193,14 +179,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "ODATA_CONTRACT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -209,14 +194,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -226,13 +210,12 @@
       "primaryExecutionBoundary": "BTP_REQUIRED",
       "requiredEnvironment": "SAP_BTP",
       "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_ON_BTP",
-      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "reviewDecision": "BLOCKED_PENDING_MEMBER_EVIDENCE",
+      "reviewRationale": "The assertion still requires member-owned SAP BTP/HANA/XSUAA/external-service evidence and remains blocked.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -242,13 +225,12 @@
       "primaryExecutionBoundary": "BTP_REQUIRED",
       "requiredEnvironment": "SAP_BTP",
       "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_ON_BTP",
-      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "reviewDecision": "BLOCKED_PENDING_MEMBER_EVIDENCE",
+      "reviewRationale": "The assertion still requires member-owned SAP BTP/HANA/XSUAA/external-service evidence and remains blocked.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -258,13 +240,12 @@
       "primaryExecutionBoundary": "BTP_REQUIRED",
       "requiredEnvironment": "SAP_BTP",
       "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_ON_BTP",
-      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "reviewDecision": "BLOCKED_PENDING_MEMBER_EVIDENCE",
+      "reviewRationale": "The assertion still requires member-owned SAP BTP/HANA/XSUAA/external-service evidence and remains blocked.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -274,13 +255,12 @@
       "primaryExecutionBoundary": "BTP_REQUIRED",
       "requiredEnvironment": "SAP_BTP",
       "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_ON_BTP",
-      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "reviewDecision": "BLOCKED_PENDING_MEMBER_EVIDENCE",
+      "reviewRationale": "The assertion still requires member-owned SAP BTP/HANA/XSUAA/external-service evidence and remains blocked.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -290,13 +270,12 @@
       "primaryExecutionBoundary": "BTP_REQUIRED",
       "requiredEnvironment": "SAP_BTP",
       "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_ON_BTP",
-      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "reviewDecision": "BLOCKED_PENDING_MEMBER_EVIDENCE",
+      "reviewRationale": "The assertion still requires member-owned SAP BTP/HANA/XSUAA/external-service evidence and remains blocked.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -305,14 +284,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -321,14 +299,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -337,14 +314,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -353,14 +329,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -369,14 +344,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -385,14 +359,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -401,14 +374,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -417,14 +389,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -433,14 +404,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -449,14 +419,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -465,14 +434,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -482,19 +450,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -504,19 +468,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -526,19 +486,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -548,19 +504,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -570,19 +522,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -592,19 +540,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -614,19 +558,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -636,19 +576,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -658,19 +594,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -679,20 +611,16 @@
       "catalogEnvironment": "LOCAL",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "FAIL",
-      "reviewDecision": "CATALOG_EXPECTATION_MISMATCH",
-      "reviewRationale": "reporter_ID is server-owned and derived from the authenticated actor before required-field validation. Omission by the client is valid when the actor resolves.",
+      "candidateStatus": "PASS",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -702,19 +630,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -724,19 +648,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -746,19 +666,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -768,19 +684,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -790,19 +702,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -812,19 +720,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -833,14 +737,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -849,14 +752,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -866,19 +768,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -887,14 +785,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -903,14 +800,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -919,14 +815,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -935,14 +830,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -951,14 +845,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -967,14 +860,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -983,14 +875,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -999,14 +890,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1015,14 +905,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1031,14 +920,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1047,14 +935,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1063,14 +950,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1079,14 +965,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1095,14 +980,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1111,14 +995,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1127,14 +1010,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1143,14 +1025,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1159,14 +1040,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1175,14 +1055,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1191,14 +1070,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1207,14 +1085,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1223,14 +1100,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1239,14 +1115,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1255,14 +1130,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1271,14 +1145,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1287,14 +1160,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1303,14 +1175,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1319,14 +1190,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1335,14 +1205,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1351,14 +1220,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1367,14 +1235,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1383,14 +1250,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1399,14 +1265,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1415,14 +1280,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1431,14 +1295,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1447,14 +1310,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1463,14 +1325,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1479,14 +1340,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1495,14 +1355,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1511,14 +1370,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1527,14 +1385,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1543,14 +1400,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1559,14 +1415,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1575,14 +1430,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1591,14 +1445,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1607,14 +1460,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1623,14 +1475,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1639,14 +1490,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1655,14 +1505,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1671,14 +1520,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1687,14 +1535,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1703,14 +1550,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1719,14 +1565,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1735,14 +1580,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1751,14 +1595,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1767,14 +1610,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1783,14 +1625,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1799,14 +1640,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1815,14 +1655,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1831,14 +1670,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1847,14 +1685,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1864,19 +1701,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1886,19 +1719,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1907,14 +1736,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1923,14 +1751,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1940,19 +1767,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1961,14 +1784,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "ODATA_CONTRACT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1977,14 +1799,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "ODATA_CONTRACT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -1994,13 +1815,12 @@
       "primaryExecutionBoundary": "BTP_REQUIRED",
       "requiredEnvironment": "SAP_BTP",
       "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_ON_BTP",
-      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "reviewDecision": "BLOCKED_PENDING_MEMBER_EVIDENCE",
+      "reviewRationale": "The assertion still requires member-owned SAP BTP/HANA/XSUAA/external-service evidence and remains blocked.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2010,13 +1830,12 @@
       "primaryExecutionBoundary": "BTP_REQUIRED",
       "requiredEnvironment": "SAP_BTP",
       "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_ON_BTP",
-      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "reviewDecision": "BLOCKED_PENDING_MEMBER_EVIDENCE",
+      "reviewRationale": "The assertion still requires member-owned SAP BTP/HANA/XSUAA/external-service evidence and remains blocked.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2026,13 +1845,12 @@
       "primaryExecutionBoundary": "BTP_REQUIRED",
       "requiredEnvironment": "SAP_BTP",
       "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_ON_BTP",
-      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "reviewDecision": "BLOCKED_PENDING_MEMBER_EVIDENCE",
+      "reviewRationale": "The assertion still requires member-owned SAP BTP/HANA/XSUAA/external-service evidence and remains blocked.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2042,13 +1860,12 @@
       "primaryExecutionBoundary": "BTP_REQUIRED",
       "requiredEnvironment": "SAP_BTP",
       "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_ON_BTP",
-      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "reviewDecision": "BLOCKED_PENDING_MEMBER_EVIDENCE",
+      "reviewRationale": "The assertion still requires member-owned SAP BTP/HANA/XSUAA/external-service evidence and remains blocked.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2057,14 +1874,14 @@
       "catalogEnvironment": "LOCAL",
       "primaryExecutionBoundary": "UI_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "PASS",
+      "reviewDecision": "HELD_FOR_EXACT_HEAD_ACCEPTANCE",
+      "reviewRationale": "Preserve NhanT's historical deployed-control candidate PASS, but do not accept it as exact-head proof until the generated attachment control is rerun on the intended deployed head.",
       "evidenceFiles": [
         "result.png",
-        "result.svg"
+        "runtime-generated-control.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY_PLUS_HISTORICAL_DEPLOYED_CONTROL",
       "humanReviewer": "DonHV"
     },
     {
@@ -2073,14 +1890,14 @@
       "catalogEnvironment": "LOCAL",
       "primaryExecutionBoundary": "UI_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "PASS",
+      "reviewDecision": "HELD_FOR_EXACT_HEAD_ACCEPTANCE",
+      "reviewRationale": "Preserve NhanT's historical deployed-control candidate PASS, but do not accept it as exact-head proof until the generated attachment control is rerun on the intended deployed head.",
       "evidenceFiles": [
         "result.png",
-        "result.svg"
+        "runtime-generated-control.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY_PLUS_HISTORICAL_DEPLOYED_CONTROL",
       "humanReviewer": "DonHV"
     },
     {
@@ -2089,14 +1906,16 @@
       "catalogEnvironment": "LOCAL",
       "primaryExecutionBoundary": "ODATA_CONTRACT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "PASS",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg"
+        "before-database.png",
+        "after-database.png",
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2106,13 +1925,12 @@
       "primaryExecutionBoundary": "BTP_REQUIRED",
       "requiredEnvironment": "SAP_BTP",
       "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_ON_BTP",
-      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "reviewDecision": "BLOCKED_PENDING_MEMBER_EVIDENCE",
+      "reviewRationale": "The assertion still requires member-owned SAP BTP/HANA/XSUAA/external-service evidence and remains blocked.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2122,13 +1940,12 @@
       "primaryExecutionBoundary": "BTP_REQUIRED",
       "requiredEnvironment": "SAP_BTP",
       "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_ON_BTP",
-      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "reviewDecision": "BLOCKED_PENDING_MEMBER_EVIDENCE",
+      "reviewRationale": "The assertion still requires member-owned SAP BTP/HANA/XSUAA/external-service evidence and remains blocked.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2138,13 +1955,12 @@
       "primaryExecutionBoundary": "BTP_REQUIRED",
       "requiredEnvironment": "SAP_BTP",
       "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_ON_BTP",
-      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "reviewDecision": "BLOCKED_PENDING_MEMBER_EVIDENCE",
+      "reviewRationale": "The assertion still requires member-owned SAP BTP/HANA/XSUAA/external-service evidence and remains blocked.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2153,14 +1969,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2169,14 +1984,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2185,14 +1999,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2201,14 +2014,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2217,14 +2029,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2233,14 +2044,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2249,14 +2059,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2265,14 +2074,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2281,14 +2089,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2297,14 +2104,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2313,14 +2119,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2329,14 +2134,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2345,14 +2149,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2361,14 +2164,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2377,14 +2179,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2394,19 +2195,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2416,19 +2213,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2438,19 +2231,15 @@
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg",
         "before-database.png",
-        "before-database.svg",
         "after-database.png",
-        "after-database.svg",
-        "reload-readback.png",
-        "reload-readback.svg"
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2459,14 +2248,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2476,13 +2264,12 @@
       "primaryExecutionBoundary": "BTP_REQUIRED",
       "requiredEnvironment": "SAP_BTP",
       "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_ON_BTP",
-      "reviewRationale": "The assertion depends on live HANA, XSUAA, S3, Job Scheduler, or deployed-provider behavior.",
+      "reviewDecision": "BLOCKED_PENDING_MEMBER_EVIDENCE",
+      "reviewRationale": "The assertion still requires member-owned SAP BTP/HANA/XSUAA/external-service evidence and remains blocked.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2491,14 +2278,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2507,14 +2293,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2523,14 +2308,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2539,14 +2323,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2555,14 +2338,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2571,14 +2353,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2587,14 +2368,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2604,13 +2384,12 @@
       "primaryExecutionBoundary": "PURE_UNIT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2620,13 +2399,12 @@
       "primaryExecutionBoundary": "PURE_UNIT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2636,13 +2414,12 @@
       "primaryExecutionBoundary": "PURE_UNIT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2652,13 +2429,12 @@
       "primaryExecutionBoundary": "PURE_UNIT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2668,13 +2444,12 @@
       "primaryExecutionBoundary": "PURE_UNIT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2684,13 +2459,12 @@
       "primaryExecutionBoundary": "PURE_UNIT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2700,13 +2474,12 @@
       "primaryExecutionBoundary": "PURE_UNIT",
       "requiredEnvironment": "LOCAL",
       "candidateStatus": "PASS",
-      "reviewDecision": "REVIEW_CANDIDATE_RESULT",
-      "reviewRationale": "Retain the candidate result only after DonHV verifies the assertion and case-specific evidence.",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2715,14 +2488,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2731,14 +2503,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2747,14 +2518,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2763,14 +2533,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2779,14 +2548,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2795,14 +2563,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2811,14 +2578,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2827,14 +2593,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2843,14 +2608,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2859,14 +2623,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2875,14 +2638,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2891,14 +2653,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2907,14 +2668,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2923,14 +2683,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2939,14 +2698,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2955,14 +2713,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "ODATA_CONTRACT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2971,14 +2728,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "ODATA_CONTRACT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -2987,14 +2743,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "ODATA_CONTRACT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -3003,14 +2758,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "ODATA_CONTRACT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -3019,14 +2773,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "ODATA_CONTRACT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -3035,14 +2788,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "ODATA_CONTRACT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -3051,14 +2803,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "ODATA_CONTRACT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -3067,14 +2818,16 @@
       "catalogEnvironment": "LOCAL",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "PASS",
+      "reviewDecision": "ACCEPTED_CANDIDATE",
+      "reviewRationale": "DonHV accepted the candidate assertion and its case-specific evidence for documentation integration; this does not update the approved workbook or make a final project acceptance claim.",
       "evidenceFiles": [
         "result.png",
-        "result.svg"
+        "before-database.png",
+        "after-database.png",
+        "reload-readback.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -3083,14 +2836,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "ODATA_CONTRACT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -3099,14 +2851,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -3115,14 +2866,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -3131,14 +2881,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -3147,14 +2896,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "ODATA_CONTRACT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -3163,14 +2911,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -3179,14 +2926,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     },
     {
@@ -3195,14 +2941,13 @@
       "catalogEnvironment": "HYBRID_BTP",
       "primaryExecutionBoundary": "CAP_COMPONENT",
       "requiredEnvironment": "LOCAL",
-      "candidateStatus": "BLOCKED",
-      "reviewDecision": "RERUN_AT_LOCAL_PRIMARY_BOUNDARY",
-      "reviewRationale": "The approved test level is locally executable; HYBRID_BTP confirmation is not a prerequisite for the primary unit/component/contract result.",
+      "candidateStatus": "MAPPING_ONLY_CANDIDATE",
+      "reviewDecision": "MAPPING_ONLY_NOT_PASS",
+      "reviewRationale": "The record proves suite-to-case traceability only. It is not an atomic execution, browser proof, BTP proof, or PASS result.",
       "evidenceFiles": [
-        "result.png",
-        "result.svg"
+        "result.png"
       ],
-      "evidenceNature": "GENERATED_RESULT_CARD",
+      "evidenceNature": "GENERATED_TRACE_SUMMARY",
       "humanReviewer": "DonHV"
     }
   ]
