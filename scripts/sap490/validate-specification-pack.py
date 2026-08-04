@@ -41,7 +41,7 @@ XLSX_CONTRACTS = {
     "technical": {
         "template": TEMPLATE_DIR / "Technical_Specification.xlsx",
         "outputs": [
-            GENERATED_DIR / "Technical_Specification_IDTS_SAP01_en_v0.7.xlsx",
+            GENERATED_DIR / "Technical_Specification_IDTS_SAP01_en_v0.8.xlsx",
         ],
         "required_sheets": [
             "Cover",
@@ -209,8 +209,16 @@ def page_signature(worksheet):
     )
 
 
-def page_signature_matches(actual, expected):
-    """Permit only the approved repair of the template's incomplete footer."""
+def page_signature_matches(actual, expected, *, allowed_title_rows=None):
+    """Permit only approved print-only readability repairs.
+
+    Technical v0.8 repeats its existing template/title-table rows on continuation
+    pages.  This does not add, remove or restyle visible workbook content.
+    """
+    if allowed_title_rows is not None:
+        if actual[8] != allowed_title_rows:
+            return False
+        actual = actual[:8] + (expected[8],) + actual[9:]
     if actual == expected:
         return True
     return (
@@ -300,7 +308,27 @@ def validate_workbooks() -> list[str]:
                     f"{output.name}: sheet visibility changed: {actual_states!r}"
                 )
             for worksheet in workbook.worksheets:
-                if not page_signature_matches(page_signature(worksheet), expected_pages[worksheet.title]):
+                allowed_title_rows = None
+                if kind == "technical":
+                    allowed_title_rows = {
+                        "Cover": None,
+                        "Histories": "$1:$2",
+                        "Introduction": "$1:$4",
+                        "Scope": "$1:$5",
+                        "Assumptions": "$1:$5",
+                        "Functional Requirements": "$1:$5",
+                        "Technical Design": "$1:$4",
+                        "Development Standards": "$1:$4",
+                        "Screen Layout": "$1:$4",
+                        "Screen Definition": "$1:$11",
+                        "Message Definition": "$1:$5",
+                        "Technical Implementation": "$1:$7",
+                    }[worksheet.title]
+                if not page_signature_matches(
+                    page_signature(worksheet),
+                    expected_pages[worksheet.title],
+                    allowed_title_rows=allowed_title_rows,
+                ):
                     failures.append(
                         f"{output.name}/{worksheet.title}: official page setup changed"
                     )
