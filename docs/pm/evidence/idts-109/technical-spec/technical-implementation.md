@@ -6,7 +6,9 @@ the field was omitted.
 
 ## Identity, dashboard and notifications
 
-### TI-AUTH-01 — login
+### 1.1 User login
+
+Technical trace ID: `TI-AUTH-01`
 
 1. **Function name:** `AuthService.login`
 2. **Purpose:** Authenticate an active user and issue a single raw bearer token in the local/custom-auth deployment profile.
@@ -23,7 +25,9 @@ the field was omitted.
 13. **Failure/rollback:** No session on validation/auth failure; 5xx detail maps to generic sign-in unavailable text.
 14. **Test/evidence:** `npm run qa:auth:programmatic`; auth browser evidence where available.
 
-### TI-AUTH-02 — me / profile display
+### 1.2 Current-user profile
+
+Technical trace ID: `TI-AUTH-02`
 
 1. **Function name:** `AuthService.me`
 2. **Purpose:** Return the safe profile for the current authenticated session.
@@ -40,7 +44,9 @@ the field was omitted.
 13. **Failure/rollback:** Clear/redirect on invalid session; no business mutation.
 14. **Test/evidence:** `npm run qa:auth:programmatic`; protected-shell/profile browser check.
 
-### TI-AUTH-03 — logout
+### 1.3 User logout
+
+Technical trace ID: `TI-AUTH-03`
 
 1. **Function name:** `AuthService.logout`
 2. **Purpose:** End the current custom session or AppRouter/XSUAA browser session without changing business data.
@@ -57,7 +63,9 @@ the field was omitted.
 13. **Failure/rollback:** No Bug data is involved; local logout remains safe and no token is displayed.
 14. **Test/evidence:** `npm run qa:auth:programmatic`; logout browser flow.
 
-### TI-AUTH-04 — SAP BTP XSUAA sign-in and role alignment
+### 1.4 SAP BTP sign-in and role alignment
+
+Technical trace ID: `TI-AUTH-04`
 
 1. **Function name:** AppRouter/XSUAA sign-in and `assertPlatformRoleMatchesUser`
 2. **Purpose:** Establish a BTP browser identity and reject ambiguous or mismatched platform/business roles before IDTS access.
@@ -74,7 +82,9 @@ the field was omitted.
 13. **Failure/rollback:** Protected business handling does not start. The failed request is deliberately not replayed because replaying a write could duplicate business side effects. Tokens, claims, private endpoints and stack details are not displayed or persisted.
 14. **Test/evidence:** `npm run qa:idts117:btp-relogin`; `app/bug-management-ui/webapp/auth-guard.js::installXsuaaSessionMonitor/recoverExpiredXsuaaSession`; BTP XSUAA/AppRouter browser evidence.
 
-### TI-PLATFORM-01 — HANA-backed readiness
+### 2.1 HANA-backed readiness
+
+Technical trace ID: `TI-PLATFORM-01`
 
 1. **Function name:** `GET /ready`
 2. **Purpose:** Distinguish an available CAP/HANA deployment from a stopped or unavailable database dependency.
@@ -91,7 +101,9 @@ the field was omitted.
 13. **Failure/rollback:** No business data changes; database exception detail is not returned to the caller.
 14. **Test/evidence:** CAP compile; BTP/HANA deployment runbook and readiness/live evidence.
 
-### TI-DASH-01 — role dashboard
+### 3.1 Role-aware dashboard
+
+Technical trace ID: `TI-DASH-01`
 
 1. **Function name:** `loadDashboard`
 2. **Purpose:** Present role-specific KPI cards and attention items.
@@ -108,7 +120,9 @@ the field was omitted.
 13. **Failure/rollback:** Show generic MessageStrip/Toast, clear dashboard collections and perform no mutation.
 14. **Test/evidence:** `npm run qa:pm-monitoring:programmatic`; `npm run qa:pm-monitoring:http`; dashboard browser evidence.
 
-### TI-MON-01 — DeveloperWorkloads
+### 3.2 Developer workload monitoring
+
+Technical trace ID: `TI-MON-01`
 
 1. **Function name:** `BugService.DeveloperWorkloads READ`
 2. **Purpose:** Return workload, overdue, current-action and status counts per developer.
@@ -125,7 +139,9 @@ the field was omitted.
 13. **Failure/rollback:** Generic dashboard unavailable state; no mutation to ownership or Bug data.
 14. **Test/evidence:** `qa:pm-monitoring:programmatic`, `qa:pm-monitoring:http`, `qa:developer-workload:programmatic`.
 
-### TI-NOTIFY-01 — in-app notification read
+### 4.1 In-app notification read
+
+Technical trace ID: `TI-NOTIFY-01`
 
 1. **Function name:** `BugService.Notifications READ`
 2. **Purpose:** Show committed business-event notifications related to a Bug.
@@ -142,22 +158,62 @@ the field was omitted.
 13. **Failure/rollback:** Read failure does not change Bug or delivery state; standard safe OData handling.
 14. **Test/evidence:** History/notification programmatic tests and Object Page notification screenshot.
 
-### TI-NOTIFY-02 — email outbox worker
+### 4.2 Email outbox processing
 
-1. **Function name:** `startEmailWorker` / outbox delivery processing
+Technical trace ID: `TI-NOTIFY-02`
+
+1. **Function name:** `processEmailOutbox` / `processEmailOutboxBatch`; `startEmailWorker` is local/integration compatibility polling only
 2. **Purpose:** Deliver eligible email notifications after the Bug transaction commits.
-3. **Actor/precondition:** Background worker; persisted NotificationDelivery is eligible and email configuration permits processing.
-4. **UI trigger:** None; workflow events enqueue records, and the worker runs in the service process.
+3. **Actor/precondition:** In BTP, a separately configured SAP Job Scheduling Service job calls with the `OutboxProcessor` scope; an eligible NotificationDelivery and valid email configuration exist. Local/compatibility profiles may use the bounded in-process worker.
+4. **UI trigger:** None; workflow events enqueue records. The BTP scheduler invokes the protected CAP action after commit.
 5. **Frontend source:** None.
-6. **HTTP/OData request:** None for worker execution; provider call is SMTP or Brevo API according to private configuration.
-7. **Service contract:** `NotificationDeliveries` projection exposes sanitized delivery status for observation.
-8. **CAP handler/helper:** `srv/email/outbox.js`, `worker.js`, `sender.js`, `template.js`, `config.js`.
-9. **Validation/authorization:** Enabled/ready config, recipient active/email validity, retry/lock eligibility and safe template data.
+6. **HTTP/OData request:** The configured scheduler job must call `POST /odata/v4/bug/processEmailOutbox`; provider delivery then uses SMTP or Brevo API according to private configuration. The MTA binding alone does not create the job URL or schedule.
+7. **Service contract:** `srv/service.cds::processEmailOutbox` requires `OutboxProcessor`; `NotificationDeliveries` exposes sanitized delivery status for observation.
+8. **CAP handler/helper:** `srv/service.js` action registration for `processEmailOutbox`; `srv/email/worker.js::processEmailOutboxBatch`; `outbox.js`, `sender.js`, `template.js`, `config.js`.
+9. **Validation/authorization:** Scheduler scope, enabled/ready config, active recipient/email validity, retry/lock eligibility and safe template data.
 10. **Transaction:** Delivery-state transaction is independent of the already committed Bug workflow.
 11. **Database/provider side effect:** Update NotificationDeliveries; send through configured provider. No credential is persisted in the row.
-12. **Response/UI refresh:** No direct workflow dialog; delivery status remains observable.
+12. **Response/UI refresh:** The protected action returns bounded run totals; no workflow dialog is opened and delivery status remains observable.
 13. **Failure/rollback:** Bug and in-app Notification remain committed; delivery becomes FAILED/SKIPPED or retryable with sanitized summary.
-14. **Test/evidence:** `npm run qa:email-outbox:programmatic`; integration tests only when private provider configuration is explicitly enabled.
+14. **Test/evidence:** `npm run qa:email-outbox:programmatic`; `mta.yaml` Job Scheduler/XSUAA binding; separately configured BTP job/schedule and invocation evidence; provider integration tests only when private configuration is explicitly enabled.
+
+### 5.1 Post a Bug comment
+
+Technical trace ID: `TI-COLLAB-01`
+
+1. **Function name:** `Bugs.addComment`
+2. **Purpose:** Add a non-empty collaboration comment to an active Bug and attribute it to the authenticated user.
+3. **Actor/precondition:** Tester, Developer or PM; active accessible Bug; no unsaved edit draft for the Bug.
+4. **UI trigger:** Post Comment in the Comments section.
+5. **Frontend source:** `app/bug-management-ui/webapp/ext/sections/BugCollaboration.js::onAddComment` and `app/bug-management-ui/webapp/ext/fragment/CommentsSection.fragment.xml`.
+6. **HTTP/OData request:** Bound action `POST Bugs(...)/BugService.addComment` with `content`; UI5 OData V4 manages CSRF and operation lifecycle.
+7. **Service contract:** `srv/service.cds`, bound action `Bugs.addComment(content) returns Bugs`.
+8. **CAP handler/helper:** `srv/service.js` action registration; `srv/bug-service/actions.js::addComment`; shared actor/content helpers.
+9. **Validation/authorization:** Resolve the authenticated user; allow Tester, Developer or PM; reject missing Bug, empty content or unsupported role; do not accept a client-selected author.
+10. **Transaction:** Comment insert, history and notification side effects execute in the CAP request transaction.
+11. **Database/provider side effect:** Insert Comments metadata/content in HANA and append the corresponding HistoryEvent/HistoryLog and notification side effects; no external provider call is required.
+12. **Response/UI refresh:** Clear the TextArea and refresh the comments feed automatically; if the post commits but refresh fails, show a safe reload instruction.
+13. **Failure/rollback:** Validation, authorization or persistence failure creates no partial comment/history/notification state and returns safe user-facing text.
+14. **Test/evidence:** `npm run qa:comments-attachments:programmatic`; `npm run qa:idts116:programmatic`; signed-in IDTS-116 comment post/reload evidence.
+
+### 5.2 Manage Bug attachments
+
+Technical trace ID: `TI-COLLAB-02`
+
+1. **Function name:** Standard CAP attachment operations on `Bugs.attachments`
+2. **Purpose:** Upload, read/download and delete Bug evidence while keeping metadata and binary storage responsibilities separate.
+3. **Actor/precondition:** Tester, Developer or PM; accessible Bug/draft context; allowed media type and file size at or below 10 MB.
+4. **UI trigger:** Upload Evidence, download filename or Delete in the Evidence / Attachments section generated by the CAP attachment facet.
+5. **Frontend source:** Fiori Elements attachment facet/controls from `@cap-js/attachments`; IDTS visibility and collaboration integration under `app/bug-management-ui/webapp/ext/controls/BugCollaborationSection.js` and annotations.
+6. **HTTP/OData request:** Standard attachment metadata create, binary content upload/download and delete requests on the `Bugs(...)/attachments` composition; no custom IDTS upload action is introduced.
+7. **Service contract:** `db/schema.cds::BugAttachments`, `Bugs.attachments` and the `@cap-js/attachments` service projection exposed through `BugService`.
+8. **CAP handler/helper:** `@cap-js/attachments` runtime handlers plus `srv/service.js` attachment-target registration and `srv/bug-service/content.js::prepareAttachmentWrite`; attachment history is derived by `srv/bug-service/history.js` after draft save.
+9. **Validation/authorization:** Resolve the authenticated actor, enforce Tester/Developer/PM write roles, maximum size and acceptable media types; browser input never bypasses backend validation.
+10. **Transaction:** Metadata mutations follow CAP draft/active transaction boundaries. On create-draft flow, attachment metadata/content is written before Bug activation and attachment history is recorded after successful SAVE.
+11. **Database/provider side effect:** HANA/HDI stores attachment metadata and storage reference; production binary content uses the configured S3 attachment adapter. The binary is not embedded into HistoryLogs.
+12. **Response/UI refresh:** Standard attachment controls refresh committed rows; download uses attachment disposition; delete removes the committed row and reload confirms absence.
+13. **Failure/rollback:** Invalid role/type/size or storage failure returns safe feedback. A failed upload/delete must not create a false committed attachment/history state.
+14. **Test/evidence:** `npm run qa:comments-attachments:programmatic`; `npm run qa:idts116:programmatic`; signed-in IDTS-116 upload → save/activate → reload → download/hash → delete → reload evidence.
 
 ## AI suggestion, review and operational traces
 
@@ -173,8 +229,17 @@ Provider acceptance status:
   not generalized to every role or to final IDTS-114 acceptance.
 - Deterministic/safe fallback and review controls must not be presented as proof of
   complete live-provider acceptance.
+- The Gateway applies a per-model request budget of four requests per 60 seconds.
+  HTTP 429 activates a model-specific in-memory cooldown using `Retry-After` (or a
+  bounded default) and does not spend a fallback-model request. A process restart
+  clears this in-memory cooldown.
+- A provider/model fallback is bounded to one attempt and is eligible only for the
+  route-specific failures documented below. Malformed output, budget exhaustion,
+  ordinary HTTP 400 and HTTP 429 use a deterministic safe result instead.
 
-### TI-AI-01 — suggestSimilarBugs
+### 6.1 Suggest similar Bugs
+
+Technical trace ID: `TI-AI-01`; technical action: `suggestSimilarBugs`
 
 1. **Function name:** `suggestSimilarBugs`
 2. **Purpose:** Return grounded possible duplicate/similar Bug candidates for human review.
@@ -186,12 +251,14 @@ Provider acceptance status:
 8. **CAP handler/helper:** `srv/ai/duplicate-detection.js::suggestSimilarBugs`; safe provider and audit helpers.
 9. **Validation/authorization:** Validate input/source Bug; redact/limit provider input; returned candidates come from accessible Bug data.
 10. **Transaction:** Request transaction for audit persistence; no Bug workflow mutation.
-11. **Database/provider side effect:** Read Bugs; persist a sanitized AiSuggestion audit row when applicable; call the configured safe route (mock, standalone provider or Vercel Gateway). In BTP, Similar Bugs uses the Qwen embedding route with only the documented embedding fallback.
+11. **Database/provider side effect:** Read Bugs; persist a sanitized AiSuggestion audit row when applicable; call the configured safe route (mock, standalone provider or Vercel Gateway). In BTP, Similar Bugs uses `alibaba/qwen3-embedding-0.6b`; the single bounded embedding fallback is `openai/text-embedding-3-small` only when the provider classifies the failure as eligible. HTTP 429, malformed vectors and unsupported batch output do not trigger that fallback.
 12. **Response/UI refresh:** Populate Similar Bugs dialog with candidates, reasons, score and review controls.
-13. **Failure/rollback:** Safe no-result/unavailable state; no DuplicateLink is created.
+13. **Failure/rollback:** The service first tries one batch containing the source Bug and at most ten prefiltered candidates. Unsupported batch format may use the bounded sequential compatibility path; invalid count/order/dimension falls back to deterministic lexical/classification scoring. Rate limit, provider or vector failure produces a safe no-result/local result; no DuplicateLink is created.
 14. **Test/evidence:** `qa:idts66:programmatic`, `qa:idts74:programmatic`, `qa:idts74:browser`.
 
-### TI-AI-02 — suggestClassification
+### 6.2 Suggest Bug classification
+
+Technical trace ID: `TI-AI-02`; technical action: `suggestClassification`
 
 1. **Function name:** `suggestClassification`
 2. **Purpose:** Suggest allowlisted classification values for human review.
@@ -203,12 +270,14 @@ Provider acceptance status:
 8. **CAP handler/helper:** `srv/ai/classification-suggestion.js::suggestClassification`; provider, safety and audit helpers.
 9. **Validation/authorization:** Validate context; ground output against active catalogs; mark unsafe/low-confidence values for review.
 10. **Transaction:** Request/audit transaction; no automatic Bug change.
-11. **Database/provider side effect:** Read Bug/catalogs; persist sanitized AiSuggestion audit; call the configured safe route. In BTP, Classification uses `openai/gpt-5.4-nano` through Vercel Gateway and has no model-access fallback.
+11. **Database/provider side effect:** Read Bug/catalogs; persist sanitized AiSuggestion audit; call `openai/gpt-5.4-nano` through Vercel Gateway. The generic fallback alias is configured but model-access fallback is disabled for this feature. Only one same-model compatibility retry is permitted when the Gateway specifically classifies HTTP 400 as a response-format incompatibility.
 12. **Response/UI refresh:** Populate field/current/suggested/review rows.
-13. **Failure/rollback:** Safe unavailable/no-suggestion state; classification remains unchanged.
+13. **Failure/rollback:** HTTP 429, budget exhaustion, ordinary HTTP 400, malformed output or unsafe catalog values produce a safe unavailable/rules-based result without a second-model request; classification remains unchanged.
 14. **Test/evidence:** `qa:idts67:programmatic`, `qa:idts75:programmatic`, `qa:idts75:browser`.
 
-### TI-AI-03 — summarizeBugHandoff
+### 6.3 Summarize Bug handoff
+
+Technical trace ID: `TI-AI-03`; technical action: `summarizeBugHandoff`
 
 1. **Function name:** `summarizeBugHandoff`
 2. **Purpose:** Produce a grounded handoff summary without adding a comment or changing history/status.
@@ -220,12 +289,14 @@ Provider acceptance status:
 8. **CAP handler/helper:** `srv/ai/bug-summary.js::summarizeBugHandoff`.
 9. **Validation/authorization:** Validate source ID/access; use allowlisted Bug, comment and history context; redact/limit input.
 10. **Transaction:** Read/audit transaction; no Bug mutation.
-11. **Database/provider side effect:** Read Bug/comments/history; persist a sanitized, field-bounded AiSuggestion audit; call the configured safe route. In BTP, Handoff uses MiniMax with one documented Grok fallback only for eligible route denial, timeout, network or 5xx failure.
+11. **Database/provider side effect:** Read Bug/comments/history; persist a sanitized, field-bounded AiSuggestion audit; call `minimax/minimax-m2.5` through Vercel Gateway. One bounded `xai/grok-4.1-fast-non-reasoning` fallback is allowed for an eligible model-route denial, timeout, network failure or HTTP 5xx.
 12. **Response/UI refresh:** Show summary, status, owner, missing information, recent events and next action.
-13. **Failure/rollback:** Generic load failure or safe fallback; no comment/history/status is created.
+13. **Failure/rollback:** HTTP 429, budget exhaustion, ordinary HTTP 400 or malformed output bypasses the model fallback and uses the grounded deterministic handoff. Eligible route/availability failure may spend one Grok request. No comment/history/status is created.
 14. **Test/evidence:** `qa:idts68:programmatic`, `qa:idts76:programmatic`, `qa:idts76:browser`.
 
-### TI-AI-04 — explainSmartAssignment
+### 6.4 Explain Smart Assignment
+
+Technical trace ID: `TI-AI-04`; technical action: `explainSmartAssignment`
 
 1. **Function name:** `explainSmartAssignment`
 2. **Purpose:** Explain fit, workload and availability for assignable developers without ranking or assigning automatically.
@@ -237,12 +308,14 @@ Provider acceptance status:
 8. **CAP handler/helper:** `srv/ai/assignment-explanation.js::explainSmartAssignment`; assignable-developer read model and provider/audit helpers.
 9. **Validation/authorization:** Scope pending-change checks to the application update group so unrelated UI5 `donotsubmit` value-help contexts do not block Smart Assign; refresh derived classification; use at most 10 authorized candidates and send temporary references (`C1`...) rather than developer UUIDs; require safe output covering every candidate; human choice remains required.
 10. **Transaction:** Wait for the application draft PATCH (`$auto`) or submit a custom update group, then refresh before the read/audit request; assignment remains a separate action.
-11. **Database/provider side effect:** Read responsibilities/workload/Bug; persist sanitized suggestion audit; call the configured safe route. In BTP, Smart Assign uses `zai/glm-4.7-flash` with bounded provider handling.
+11. **Database/provider side effect:** Read responsibilities/workload/Bug; persist sanitized suggestion audit; call `zai/glm-4.7-flash` through Vercel Gateway. The generic fallback alias is `openai/gpt-5.4-nano`, but model-access fallback is disabled for Smart Assign; an eligible timeout, network failure or HTTP 5xx may spend at most one fallback request.
 12. **Response/UI refresh:** Refresh authoritative classification, load assignable candidates, then add explanation, warnings, confidence and review status; unrelated UI5 pending groups do not block the dialog.
-13. **Failure/rollback:** An application-group timeout, refresh failure or candidate-read failure maps to `smartAssignLoadFailed`; unsafe, incomplete or missing provider output maps to deterministic explanations. No assignment is applied; manual choice remains available.
+13. **Failure/rollback:** An application-group timeout, refresh failure or candidate-read failure maps to `smartAssignLoadFailed`. HTTP 429, budget exhaustion, ordinary HTTP 400, denied model access, unsafe/incomplete output or malformed JSON maps to deterministic grounded explanations without autonomous assignment; manual choice remains available.
 14. **Test/evidence:** `qa:idts56:programmatic`, `qa:idts69:programmatic`, `qa:idts70:programmatic`, `qa:idts72:browser`, Smart Assign candidate-coverage/output-safety evidence and `docs/pm/evidence/idts-115/smart-assign-pending-group/rollout.md`.
 
-### TI-AI-05 — acceptAiSuggestion
+### 6.5 Accept an AI suggestion
+
+Technical trace ID: `TI-AI-05`; technical action: `acceptAiSuggestion`
 
 1. **Function name:** `acceptAiSuggestion`
 2. **Purpose:** Record the human ACCEPTED decision only.
@@ -259,7 +332,9 @@ Provider acceptance status:
 13. **Failure/rollback:** 409 on stale/racing decision; no Bug, classification or duplicate mutation.
 14. **Test/evidence:** `qa:idts91:programmatic`, `qa:idts92:programmatic`, IDTS-74/75 browser review evidence.
 
-### TI-AI-06 — rejectAiSuggestion
+### 6.6 Reject an AI suggestion
+
+Technical trace ID: `TI-AI-06`; technical action: `rejectAiSuggestion`
 
 1. **Function name:** `rejectAiSuggestion`
 2. **Purpose:** Record the human REJECTED decision only.
@@ -276,7 +351,9 @@ Provider acceptance status:
 13. **Failure/rollback:** No Bug mutation; stale/concurrent request returns safe 409.
 14. **Test/evidence:** `qa:idts91:programmatic`, `qa:idts92:programmatic`, browser review evidence.
 
-### TI-AI-07 — ignoreAiSuggestion
+### 6.7 Ignore an AI suggestion
+
+Technical trace ID: `TI-AI-07`; technical action: `ignoreAiSuggestion`
 
 1. **Function name:** `ignoreAiSuggestion`
 2. **Purpose:** Record the human IGNORED decision only.
@@ -293,7 +370,9 @@ Provider acceptance status:
 13. **Failure/rollback:** No Bug mutation; stale/concurrent request returns safe 409.
 14. **Test/evidence:** `qa:idts91:programmatic`, `qa:idts92:programmatic`, browser review evidence.
 
-### TI-AI-08 — applyClassificationSuggestion
+### 6.8 Apply an accepted classification suggestion
+
+Technical trace ID: `TI-AI-08`; technical action: `applyClassificationSuggestion`
 
 1. **Function name:** `applyClassificationSuggestion`
 2. **Purpose:** Explicitly apply allowlisted values from an accepted current classification suggestion.
@@ -310,7 +389,9 @@ Provider acceptance status:
 13. **Failure/rollback:** Any invalid/stale value rolls back all Bug/history changes. UI uses separate safe text for apply failure versus refresh-after-success failure.
 14. **Test/evidence:** `qa:idts93:programmatic`, `qa:idts115:programmatic`, `docs/pm/evidence/idts-115/classification-apply/`.
 
-### TI-AI-09 — confirmDuplicateSuggestion
+### 6.9 Confirm an accepted duplicate suggestion
+
+Technical trace ID: `TI-AI-09`; technical action: `confirmDuplicateSuggestion`
 
 1. **Function name:** `confirmDuplicateSuggestion`
 2. **Purpose:** Explicitly create a duplicate/similar relationship from an accepted current suggestion.
@@ -327,7 +408,9 @@ Provider acceptance status:
 13. **Failure/rollback:** Invalid or racing duplicate returns 400/409 and creates no duplicate row. UI distinguishes confirm failure from refresh-after-success failure.
 14. **Test/evidence:** `qa:idts95:programmatic`, `qa:idts115:programmatic`, `docs/pm/evidence/idts-115/duplicate-confirmation/`.
 
-### TI-AI-10 — readAiOperationalMetrics
+### 6.10 Read AI operational metrics
+
+Technical trace ID: `TI-AI-10`; technical function: `readAiOperationalMetrics`
 
 1. **Function name:** `readAiOperationalMetrics`
 2. **Purpose:** Return PM-only aggregates for provider outcome, review state and latency.

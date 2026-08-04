@@ -59,8 +59,9 @@ login/profile, dashboard/monitoring, notification UI and AI traces.
   - separate 14-part traces for login, profile, logout, dashboard, monitoring,
     in-app notifications, email outbox and all ten AI actions/functions;
   - review, missing-evidence and final-integration checklists.
-- The package explicitly records live OpenAI as
-  `BLOCKED / NOT ACCEPTED — provider disabled`.
+- Historical baseline note: the package at that earlier point recorded standalone
+  live OpenAI as `BLOCKED / NOT ACCEPTED — provider disabled`. This is not the
+  current SAP BTP/Vercel Gateway routing truth.
 - No Jira approval was added on DatDT's behalf, no official Drive file was changed
   and no final-artifact PASS was claimed.
 - Next handoff: DatDT reviews the package and records approval/corrections on
@@ -72,9 +73,9 @@ login/profile, dashboard/monitoring, notification UI and AI traces.
 - The approval covers the business requirements, standards, source-derived message
   definition, identity/dashboard/notification traces, all ten AI traces and the
   known-gap register.
-- Accepted limitations remain OfficeCLI unavailability, missing application UI
-  traces for `applyClassificationSuggestion`, `confirmDuplicateSuggestion` and
-  `readAiOperationalMetrics`, and disabled/not-accepted live OpenAI.
+- Historical approval note: at that earlier head, limitations included OfficeCLI
+  unavailability, missing application UI traces and disabled/not-accepted direct
+  OpenAI. Later refresh sections supersede those statements.
 - Approval permits commit, merge and DonHV final-workbook integration. It does not
   authorize overwriting the official Drive artifact from this branch.
 - Approved package commit: `9fec741`.
@@ -190,3 +191,29 @@ login/profile, dashboard/monitoring, notification UI and AI traces.
 - Remaining handoff: after the final evidence-only gate passes, DatDT personally
   reviews and approves or rejects that exact head. DonHV remains the final workbook
   integrator and Drive synchronizer.
+
+## 2026-08-04 DonHV leader integration against current dev
+
+- Merged current `origin/dev` after IDTS-108 integration using a normal merge commit;
+  no rebase or force-push was used. The shared acknowledgment conflict preserved the
+  current member rows and DatDT's existing READ acknowledgment.
+- Refreshed the candidate against SAP BTP/HANA current truth. The package now contains
+  21 complete 14-part implementation traces and 142 semantic message records. The two
+  added traces cover posting a Bug comment and managing attachment metadata/binary.
+- Corrected the email-processing trace: MTA binds Job Scheduling Service and enables
+  scheduler mode, while a separately configured scheduled job calls the protected CAP
+  action. The source registers that action directly; no nonexistent named handler is
+  claimed.
+- Documented exact feature-specific AI routing, eligible bounded fallbacks, deterministic
+  fallback, per-model request limiting, HTTP 429 cooldown, and advisory/no-mutation
+  boundaries without exposing credentials or raw provider payloads.
+- Current verification: OfficeCLI `1.0.143`; 96 referenced source paths all resolve;
+  21/21 traces contain fields 1-14; CAP compile passes with the pre-existing attachment
+  annotation warning; IDTS-116 and IDTS-114 suites pass; secret scan, agent rules,
+  QA-depth self-test, AI DevKit `5/0/0`, and `git diff --check` pass.
+- `npm ci --ignore-scripts` was required because the isolated worktree initially lacked
+  dependencies. The install reported the repository's existing npm audit posture; no
+  dependency or lockfile change is included in this documentation integration.
+- DonHV authorizes technical integration as project leader. This is not recorded as
+  DatDT's personal approval. No runtime, schema, official workbook, or Drive artifact
+  is changed by this package.

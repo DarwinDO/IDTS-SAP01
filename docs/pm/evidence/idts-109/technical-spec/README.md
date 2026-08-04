@@ -8,7 +8,7 @@ Final integrator: DonHV
 
 Required briefing baseline: `3e78b495cb8feb56188cc446b827d47e040e1b98`
 
-DatDT briefing acknowledgment: `PENDING` for the required briefing baseline; the older Jira comment `10762` does not satisfy this gate
+DatDT briefing acknowledgment: `READ` for briefing SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`; Jira IDTS-109 comment `10944`
 
 DatDT candidate approval: `PENDING`; Jira comment `10763` predates the refreshed candidate
 
@@ -17,7 +17,7 @@ Prepared: 2026-07-31; refreshed against current dev: 2026-08-04
 Submission language: English only
 
 Current source baseline: `origin/dev` commit
-`cbce7b6196da5cc8ce64dbd36a61709a8f4121c3`, merged normally into this branch.
+`6d65b56e5748706fcf92b9c59fd7595948019e21`, merged normally into this branch.
 The final exact candidate head will be recorded after the refreshed checks pass.
 
 ## Purpose
@@ -57,6 +57,7 @@ workbook and not evidence that the task has passed.
 - `scripts/qa/test-idts115-ai-fiori-entrypoints.js`
 - `docs/pm/evidence/idts-114/`
 - `docs/pm/evidence/idts-115/`
+- `docs/pm/evidence/idts-116/`
 
 ## Candidate boundaries
 
@@ -70,6 +71,12 @@ workbook and not evidence that the task has passed.
   classification model behind the Gateway. Tester/Developer interactive role
   coverage remains open; neither result is generalized into full acceptance.
 - Earlier DatDT approval in IDTS-109 comment `10763` predates the current source
-  baseline. A new personal approval naming the final candidate commit is required.
+  baseline and is not represented as approval of this head. DonHV may perform the
+  documented leader integration after all technical gates pass, without claiming
+  that DatDT personally approved the new head.
 - DonHV remains responsible for final workbook integration, generation, visual
   review and upload under the current shared-artifact workflow.
+- The 142-row Message Catalog is a curated semantic catalog. Repeated call sites that
+  produce the same user-visible contract are consolidated under one stable Message
+  ID; source-scan totals are retained separately and are not misreported as 142 raw
+  call sites.

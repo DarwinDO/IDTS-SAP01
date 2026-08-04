@@ -5638,3 +5638,11 @@ Live evidence: `docs/pm/evidence/idts-117/demo-readiness/live-verification-20260
 - **Symptom:** CAP compile in the cleaned local workspace initially failed because `@cap-js/attachments` was declared in `package.json`/`package-lock.json` but absent from `node_modules`. Running `npm ci --ignore-scripts` restored the locked dependency set; npm then reported 26 dependency advisories (1 low, 10 moderate, 14 high, 1 critical).
 - **Action/status:** dependency installation was limited to the ignored local `node_modules`; no lockfile, runtime source, BTP service, database, seed or schema was changed. No automatic `npm audit fix` or breaking upgrade was attempted in this documentation workstream.
 - **Verification/next owner:** rerun CAP compile and UI5 build after installation. Review the npm audit tree in a separate Security/DevOps work item before any dependency upgrade claim.
+
+### 2026-08-04 — IDTS-109 isolated-worktree native test binding
+
+- **Classification:** tooling issue.
+- **Symptom:** `npm run qa:email-outbox:programmatic` stopped before executing assertions because the isolated worktree could not load the native `better-sqlite3` binding.
+- **Root cause:** dependencies had been restored with `npm ci --ignore-scripts`, so the native addon build/install script was intentionally skipped. This result does not indicate an email-outbox product failure.
+- **Fix status:** fixed locally by rebuilding only the locked `better-sqlite3` dependency; no package, lockfile, runtime, HANA, seed or schema change was made.
+- **Verification/next action:** `npm rebuild better-sqlite3` succeeded, then `npm run qa:email-outbox:programmatic` passed. Keep the initial setup failure separate from the passing product test.
