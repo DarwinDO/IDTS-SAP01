@@ -6,7 +6,8 @@
 | --- | --- |
 | Owner | SangVN |
 | Support | DonHV for database and provider-side evidence |
-| Baseline | `eff7bea` (`origin/dev`, refreshed 2026-08-03) |
+| Source baseline | `cbce7b6196da5cc8ce64dbd36a61709a8f4121c3` (`origin/dev`, refreshed 2026-08-04) |
+| Candidate head | `717fd694797f678a4a1f9adca086e57b21497d76` before this evidence refresh; exact-head approval must name the final pushed commit |
 | Package state | Refresh in review with documented known limitations; not full PASS/Done and exact-head approval pending |
 | Human briefing acknowledgment | `READ` — Jira IDTS-108 comments `10876` and `10877` for briefing SHA `3e78b495`; SangVN personally updated the matching repository register row |
 | Final integration owner | DonHV through IDTS-112 |
@@ -30,7 +31,7 @@ explicit external blockers; that handoff is not a full PASS/Done claim.
   actions, AI actions, and collaboration entities after locked dependencies were
   installed in the isolated worktree.
 - CAP MCP re-confirmed `BugService` at `srv/service.cds:5`, its OData V4 path and
-  the current Bug/action/collaboration projections before the `eff7bea` refresh.
+  the current Bug/action/collaboration projections before the `cbce7b6` refresh.
   That baseline includes the merged IDTS-116 UI5/Fiori collaboration correction;
   it changes `app/` implementation source but no CAP service contract or CDS schema.
 - UI5 MCP returned the project identity and current async-module/data-binding
@@ -76,8 +77,8 @@ source symbols remain separate trace columns.
 | 17 | Send to Retest | Object Page action dialog | Optional Developer Note | Tester/PM | Status becomes Retest Required | Same sources; `sendToRetest` | KNOWN LIMITATION — no request/result/history evidence was executed for this action |
 | 18 | Close Bug | Object Page action dialog | Optional Developer Note | Tester/PM | Status becomes Closed; no next processor | Same sources; `closeBug` | PARTIAL / KNOWN LIMITATION — screenshot 25 proves the Tester dialog; request/result/history and reload evidence are open |
 | 19 | Reopen Bug | Object Page action dialog | Required Reason for Reopening | Tester/PM | Status becomes Reopened and processing ownership resumes | Same sources; `reopenBug` | PARTIAL / KNOWN LIMITATION — screenshot 26 proves the Tester dialog and required reason; validation failure, success, Network and persistence are open |
-| 20 | Comments | Object Page Comments section | Comment input, Post, comment list | Tester, Developer, PM; active Bug only | UI5 invokes bound Add Comment, then refreshes Bug/comments/history | `CommentsSection.fragment.xml`; `BugCollaboration.onAddComment`; `BugService.addComment` | PARTIAL / KNOWN LIMITATION — enabled/disabled states and two pre-fix safe failures are captured. IDTS-116 now uses the UI5 OData V4 model, but successful BTP post, sanitized Network response and reload persistence remain pending acceptance |
-| 21 | Evidence / Attachments | Generated Fiori Elements attachment facet | Standard attachment table controls for select/upload, Save/Discard, download and delete | Tester, Developer, PM subject to backend access | Attachment changes follow the parent Bug draft lifecycle; CAP persists metadata and the storage adapter handles binary content | `object-page.cds`; `manifest.json`; `@cap-js/attachments`; `content.js` | PARTIAL / KNOWN LIMITATION — the earlier custom-uploader failure remains valid pre-fix evidence. IDTS-116 restored the generated facet, while BTP upload/Save/reload/download/hash/delete proof remains DonHV/runtime follow-up |
+| 20 | Comments | Object Page Comments section | Comment input, Post, comment list | Tester, Developer, PM; active Bug only | UI5 invokes bound Add Comment, then independently refreshes the comments binding | `CommentsSection.fragment.xml`; `BugCollaboration.onAddComment`; `BugService.addComment` | CURRENT BTP PASS WITH SCOPE — IDTS-116 proves post, immediate list refresh, hard-reload persistence and no duplicate. It does not independently prove that every comment creates a separate history event. Older failure screenshots are historical pre-fix evidence only |
+| 21 | Evidence / Attachments | Generated Fiori Elements attachment facet | Standard attachment table controls for select/upload, Save/Discard, download and delete | Tester, Developer, PM subject to backend access | Attachment changes follow the parent Bug draft lifecycle; CAP persists metadata and the storage adapter handles binary content | `object-page.cds`; `manifest.json`; `@cap-js/attachments`; `content.js` | PARTIAL / KNOWN LIMITATION — IDTS-116 proves upload, Save, active reload and content readback. Real browser download plus SHA-256, delete and reload absence remain pending. The retired custom-uploader failure is historical only |
 | 22 | History Timeline | Object Page History section | Handoff action, growing event list, nested change table, reason/status | Authenticated Bug viewer | Show More pages events that are append-only by service behavior; no UI mutation | `HistoryTimeline.fragment.xml`; `history-read-models.js`; `history.js` | PARTIAL / KNOWN LIMITATION — existing append-only-by-service-behavior events and detail controls are captured; next-page request and expanded nested changes are not |
 | 23 | Handoff Summary review | Open from History section | Grounded summary, status/owner, missing info, comments/events, Accept/Reject/Ignore | Authenticated eligible reviewer | Review updates AiSuggestion audit only; Bug workflow is unchanged | `HandoffSummaryReview.js`; `bug-summary.js`; `review.js` | PARTIAL / KNOWN LIMITATION — screenshot 45 proves grounded advisory output and review controls; fallback, persisted review, audit readback, Network and explicit no-mutation proof remain open |
 | 24 | Notifications | Object Page Notifications facet | Event, recipient, channel, delivery status and timestamps | Authenticated Bug viewer under service authorization | Read-only display; email delivery remains separate outbox state | `history-notifications.cds`; `service.cds::Notifications` | PARTIAL / KNOWN LIMITATION — screenshot 7 proves in-app notification rows; refresh, outbox/provider-state comparison and Network evidence are DonHV/runtime follow-up |
@@ -155,6 +156,29 @@ source symbols remain separate trace columns.
 | 58 | Dashboard | AI Activity | `readAiOperationalMetrics` | Window days | PM only | Non-PM denied by CAP; provider/raw prompt/error detail not returned |
 | 59 | Shell | Sign Out | `AuthService.logout` plus local session clear | None | Authenticated | Network failure still clears local session safely |
 
+### 2.3 Authentication, shell, list, dashboard and notification controls
+
+| No. | Screen | Label / control | Binding or operation | Input | Role / visibility | Validation and failure behavior |
+| ---: | --- | --- | --- | --- | --- | --- |
+| 60 | Sign In | Email | `login-page.js` form state | Email address | Local/custom-auth profile only | Required; invalid credentials receive one sanitized authentication message |
+| 61 | Sign In | Password | `login-page.js` form state | Password | Local/custom-auth profile only | Required; value is never logged or persisted in browser evidence |
+| 62 | Sign In | Sign In | `AuthService.login` | Email and password | Local/custom-auth profile only | Busy state prevents duplicate submit; success establishes session and failure remains sanitized |
+| 63 | BTP access bridge | Sign in with SAP BTP | AppRouter/XSUAA protected route | None | BTP deployment | XSUAA owns authentication; invalid or mismatched IDTS role is rejected before business handling |
+| 64 | Profile shell | Signed-in identity | `AuthService.me` / platform identity | None | Authenticated | Shows allowlisted display identity and role only; token/session internals are excluded |
+| 65 | Profile shell | Sign Out | `AuthService.logout` or AppRouter logout flow | None | Authenticated | Clears the applicable session and returns to a signed-out/login bridge without replaying writes |
+| 66 | List Report | Search | Fiori Elements list binding | Free text | Authenticated | Read-only filtering; failed read does not mutate Bugs |
+| 67 | List Report | Editing Status | Draft/active filter | Status selection | Authenticated | Filters draft ownership state; no write occurs |
+| 68 | List Report | Business filters | Status, priority, severity, module, component, category, assignee, owner and dates | Filter values | Authenticated | Value-help/catalog validation applies; unsupported values return no matching rows rather than changing data |
+| 69 | List Report | Semantic tabs | All, Pending Assignment, Rejected Follow-up, Retest Required, Overdue and PM Action Queue | Selected tab | Role-scoped | Each tab applies a read-only predicate; counts are refreshed from the service |
+| 70 | List Report | Bug row navigation | Fiori Elements Object Page route | Selected Bug | Authorized viewer | Opens the selected entity context; authorization failure does not expose Bug detail |
+| 71 | Dashboard | Summary tiles | Role-scoped Bugs/DeveloperWorkloads reads | None | Authenticated; content varies by role | Read-only KPI aggregation; load failure shows a safe state |
+| 72 | Dashboard | Needs-attention rows | Role-scoped monitoring read model | Selected row | Authenticated | Navigation only; no automatic assignment or lifecycle transition |
+| 73 | Dashboard | Developer workload | `DeveloperWorkloads` | None | PM | Read-only workload/availability view; empty state is explicit |
+| 74 | Dashboard | AI Activity | `readAiOperationalMetrics` | Window days | PM only | Non-PM receives 403; only allowlisted counts and latency are shown |
+| 75 | Notifications | Event | `Bugs.notifications/eventType` | None | Authorized Bug viewer | Read-only and sanitized; no email body or provider credential is exposed |
+| 76 | Notifications | Recipient / channel | Notification recipient and channel projections | None | Authorized Bug viewer | Displays business-facing recipient/channel state only |
+| 77 | Notifications | Delivery status / timestamps | Notification and delivery read model | None | Authorized Bug viewer | Read-only status may differ from in-app notification state; refresh failure does not alter delivery |
+
 ## 3. Technical Implementation trace candidate
 
 The HTTP/OData column records the source contract. A browser Network capture is still
@@ -181,9 +205,9 @@ required before the row can be accepted as executed evidence.
 | 17 | Send to Retest | Fiori action dialog | Bound `sendToRetest` | `transitionBug`; coordinator role and transition check | Status Retest Required; audit/notification | KNOWN LIMITATION — request/result/history was not executed |
 | 18 | Close Bug | Fiori action dialog | Bound `closeBug` | `transitionBug`; coordinator role and transition check | Status Closed; next processor cleared | PARTIAL / KNOWN LIMITATION — Tester dialog is captured; request/result/history and reload are open |
 | 19 | Reopen Bug | Fiori action dialog | Bound `reopenBug` | `transitionBug`; coordinator role and reason required | Status Reopened; processing ownership resumes | PARTIAL / KNOWN LIMITATION — Tester dialog/required reason are captured; negative/positive request and persistence are open |
-| 20 | Add Comment | `BugCollaboration.onAddComment` | Bound `BugService.addComment` | `actions.js::addComment`; participant role and nonblank content | Inserts Comment and HistoryEvent; refreshes Object Page | PARTIAL / KNOWN LIMITATION — two safe UI failures prove no partial persistence; successful post, Network, history and reload remain open |
+| 20 | Add Comment | `BugCollaboration.onAddComment` | Bound `BugService.addComment` | `actions.js::addComment`; participant role and nonblank content | Inserts Comment and refreshes the independently requested comments list | CURRENT BTP PASS WITH SCOPE — post, immediate refresh, hard-reload persistence and no duplicate passed under IDTS-116. Separate history-event evidence remains outside this proof |
 | 21 | Add attachment on create/edit | Generated Fiori Elements attachment facet | Attachment composition draft operations through the OData V4 model | `@cap-js/attachments` plus CAP draft lifecycle and validation | Attachment row participates in parent Bug Save/Discard; no custom browser-memory queue remains | KNOWN LIMITATION — current generated-facet draft behavior is source-verified, but pre-Save/Discard Network evidence was not captured |
-| 22 | Upload attachment | Generated attachment table upload | Attachment metadata plus binary stream under the parent draft | `prepareAttachmentWrite`; attachment plugin validation | Save persists HANA metadata and storage-adapter binary; row appears after reload | PARTIAL / DEFERRED OWNER ACTION — pre-fix safe selection/failure evidence exists; successful BTP Network, HANA metadata and S3 binary evidence remain DonHV/runtime follow-up |
+| 22 | Upload attachment | Generated attachment table upload | Attachment metadata plus binary stream under the parent draft | `prepareAttachmentWrite`; attachment plugin validation | Save persists HANA metadata and storage-adapter binary; row appears after reload | PARTIAL / DEFERRED OWNER ACTION — current BTP evidence proves upload, Save, active reload and content readback. HANA/S3 operator evidence and the remaining browser download/delete sequence stay DonHV-owned |
 | 23 | Download attachment | Generated attachment content operation | Attachment content stream GET | Attachment authorization/plugin | Returns binary with safe filename; no write | KNOWN LIMITATION — download/hash evidence remains pending BTP acceptance after IDTS-116 |
 | 24 | Delete attachment | Generated attachment row delete followed by parent Save | Attachment draft DELETE/Save | Attachment authorization/plugin and draft lifecycle | Save deletes metadata/object without deleting Bug; Discard keeps the active row | KNOWN LIMITATION — before/request/Save/after/reload evidence remains pending BTP acceptance after IDTS-116 |
 | 25 | Read history | History fragment growing list | Read `HistoryEvents` and nested `HistoryLogs` | `history-read-models.js` enriches paged read model | Returns grouped events that are append-only by service behavior; Show More requests next page | PARTIAL / KNOWN LIMITATION — existing events/detail controls are captured; next-page request and expanded nested changes are open |
@@ -209,7 +233,7 @@ state recorded in the final column.
 | Classification | `app/bug-management-ui/webapp/ext/actions/ClassificationReview.js:142,247,583-634`; `srv/service.cds:125,151-154`; `srv/ai/classification-suggestion.js:63`; `srv/ai/classification-apply.js:57` | Suggest/review/apply trace confirmed |
 | Smart Assign | `app/bug-management-ui/webapp/ext/actions/SmartAssignDeveloper.js:287,381,662-838`; `srv/service.cds:143,197`; `srv/ai/assignment-explanation.js:21`; `srv/bug-service/actions.js:32` | Explain/review/manual assign trace confirmed |
 | Handoff summary | `app/bug-management-ui/webapp/ext/actions/HandoffSummaryReview.js:119,388-444`; `srv/service.cds:139,151-153`; `srv/ai/bug-summary.js:28`; `srv/ai/review.js:18-26` | Generate and shared review trace confirmed |
-| Comments and attachments | `app/bug-management-ui/webapp/ext/sections/BugCollaboration.js:125-132`; `app/bug-management-ui/annotations/object-page.cds:112-115`; `app/bug-management-ui/webapp/manifest.json:226-230`; `srv/service.js:104`; `srv/bug-service/content.js:60` | UI5 OData V4 comment invocation and generated Fiori attachment facet trace confirmed on the IDTS-116 baseline |
+| Comments and attachments | `app/bug-management-ui/webapp/ext/sections/BugCollaboration.js::onAddComment`; `app/bug-management-ui/webapp/ext/sections/CommentsSection.fragment.xml`; `app/bug-management-ui/annotations/object-page.cds`; `db/schema.cds::Bugs.attachments`; `srv/bug-service/content.js` | UI5 OData V4 bound comment action, independent comments refresh and generated Fiori attachment facet trace confirmed on the current baseline |
 | History and notifications | `srv/service.js:125`; `srv/bug-service/history-read-models.js:75`; `app/bug-management-ui/annotations/history-notifications.cds:30-47` | Read-only history enrichment and Fiori annotation trace confirmed |
 | Dashboard and AI metrics | `app/bug-management-ui/webapp/dashboard-page.js:213,221,314`; `srv/service.js:130-131,146`; `srv/ai/metrics.js:141` | Role dashboard reads and PM AI-metrics function trace confirmed |
 
@@ -221,7 +245,7 @@ state recorded in the final column.
 | EVID-108-UI-ROLES | List/Object Page/dashboard for Tester, Developer and PM | SangVN | Use demo users; avoid full private email | UI capture PASS — Developer, Tester and PM List Report/dashboard/Object Page variants are captured through the SAP BTP/approuter flow. Screenshots 48–51 add the PM monitoring tabs, workload dashboard, PM-only AI Activity dialog and BUG-0024 coordinator view; no profile-menu screenshot was retained because it exposed a private email |
 | EVID-108-UI-CREATE | New draft, required-field error, Assigned save, Pending Assignment save | SangVN | Sanitize Bug text | UI capture PASS — screenshots 29–33 prove empty draft, nine required-field messages, valid value-help selection, BUG-0023 Pending Assignment creation and reload persistence. Screenshots 35–38 prove BUG-0024 creation as Assigned with SangVN as technical/current owner and the same ID/status/ownership after full reload |
 | EVID-108-UI-LIFECYCLE | Each of 11 actions with dialog, request, result and history | SangVN | Sanitize notes/reasons | PARTIAL — Developer visibility/dialogs captured for Request More Information, Reject Bug and Resolve Bug; Tester visibility/dialogs captured for Close Bug and Reopen Bug for Further Work. All dialogs were dismissed without submission, so request/result/history evidence remains missing |
-| EVID-108-UI-COLLAB | Comment; generated attachment upload/Save/reload/download/delete; history paging | SangVN | No attachment secrets or raw private logs | PARTIAL / IDTS-116 ACCEPTANCE PENDING — Developer enabled/disabled states and pre-fix negative comment/upload attempts are captured. The SAP-standard implementation is merged at `eff7bea`; successful BTP comment and attachment persistence evidence remains pending under DonHV-owned IDTS-116 acceptance |
+| EVID-108-UI-COLLAB | Comment; generated attachment upload/Save/reload/download/delete; history paging | SangVN | No attachment secrets or raw private logs | PARTIAL — current IDTS-116 comment post/immediate-refresh/reload evidence is PASS. Attachment upload/Save/reload/content-readback is proven, while real browser download/SHA-256/delete/reload absence remains pending. Pre-fix failures are retained only as dated historical findings |
 | EVID-108-UI-AI | Similar, classification, handoff and Smart Assign review/apply/confirm/no-mutation | SangVN | No raw prompt/provider payload or private endpoint | PARTIAL — screenshot 34 proves Similar Bugs; screenshot 42 proves Classification Suggestions; screenshot 45 proves Handoff Summary; screenshot 47 proves the filtered Smart Assign candidate explanation with capability, availability, confidence and manual-choice controls. All remained read-only with no Accept/Reject/Ignore/Apply/Assign/Confirm Duplicate action. Fallback, review persistence/no-mutation and AI Network evidence remain missing |
 | EVID-108-NETWORK | Sanitized OData request/response for every traced function | SangVN | Remove bearer token, cookie, private host and full email | PARTIAL — screenshots 39–40 prove the authenticated BUG-0024 reload/read through `POST /odata/v4/bug/$batch` with outer and inner HTTP 200. The response contains BUG-0024, `ASSIGNED`, SangVN technical/current owner, Developer next role and `IsActiveEntity:true`. No Cookie, Authorization, token, password or email is visible. Remaining traced functions still require sanitized request/response evidence |
 | EVID-108-DATABASE | Bug, history, comment, notification, attachment metadata and duplicate/classification side effects | DonHV | No DB URL/credential; use selected rows only | DEFERRED OWNER ACTION — DonHV supplies sanitized selected-row evidence before final integration/acceptance |
@@ -293,7 +317,7 @@ were opened only for evidence and dismissed without submission. BUG-0003 remaine
 
 ## 5. Review and approval checklist
 
-- [x] Candidate package is based on refreshed `origin/dev` baseline `eff7bea`.
+- [x] Candidate package is merged with refreshed `origin/dev` baseline `cbce7b6196da5cc8ce64dbd36a61709a8f4121c3`.
 - [x] Runtime `app/`, `srv/`, and `db/` are unchanged by this task.
 - [x] Natural numbering is used for mentor-visible entries.
 - [x] Screen Layout inventory covers runtime pages, dialogs, sections and necessary
@@ -330,8 +354,9 @@ were opened only for evidence and dismissed without submission. BUG-0003 remaine
    flow; PM UI role captures are now supplied in screenshots 48–51. DonHV owns
    the deferred database/provider evidence. Until these gaps and IDTS-113/116/117 are
    supplied, retested, or explicitly accepted, the package remains ready with
-   blockers rather than full PASS/Done. IDTS-116 implementation is merged at
-   `eff7bea`; its BTP comment/attachment acceptance is still pending and must not be
-   inferred from local source/tests.
+   blockers rather than full PASS/Done. The current package is merged with
+   `cbce7b6`; comment post/immediate refresh/reload acceptance is current, while the
+   remaining attachment download/hash/delete/reload sequence must not be inferred
+   from source or partial runtime evidence.
 6. Canonical business documents are unchanged because this package records existing
    runtime behavior and does not change business meaning or scope.
