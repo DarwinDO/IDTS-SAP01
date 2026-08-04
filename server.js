@@ -7,6 +7,11 @@ const CANONICAL_APP_PREFIX = '/idts.bugmanagementui'
 const UI5_CDN_BASE = 'https://sapui5.hana.ondemand.com/1.148.0'
 const WEBAPP_ROOT = path.join(__dirname, 'app', 'bug-management-ui', 'webapp')
 const READINESS_TIMEOUT_MS = 12000
+const { sanitizeLoginContractError } = require('./srv/auth')
+
+// OData parameter validation happens before AuthService.login is dispatched.
+// Insert the narrowly scoped sanitizer before CAP's final error serializer.
+cds.middlewares.after.unshift(sanitizeLoginContractError)
 
 function timeoutAfter (milliseconds) {
   return new Promise((resolve, reject) => {

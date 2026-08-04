@@ -17,6 +17,7 @@ const {
 
 const DEFAULT_SESSION_TTL_MINUTES = 8 * 60
 const INVALID_CREDENTIALS_MESSAGE = 'Invalid email or password.'
+const INVALID_LOGIN_REQUEST_MESSAGE = 'The sign-in request is invalid.'
 const LOGIN_TEMPORARILY_UNAVAILABLE_MESSAGE = 'Sign-in is temporarily unavailable. Please try again later.'
 const BTP_LOGIN_MESSAGE = 'Use your SAP BTP account to sign in to this environment.'
 const BTP_USER_NOT_REGISTERED_MESSAGE = 'Your SAP BTP identity is not registered in IDTS.'
@@ -31,6 +32,22 @@ class AuthService extends cds.ApplicationService {
 
     return super.init()
   }
+}
+
+function sanitizeLoginContractError (error, req, _res, next) {
+  const loginPath = String(req?.originalUrl || '').split('?')[0]
+  if (req?.method !== 'POST' || loginPath !== '/odata/v4/auth/login' || error?.code !== 'ASSERT_DATA_TYPE' || !['email', 'password'].includes(error.target)) {
+    return next(error)
+  }
+
+  // The OData adapter has already attached a non-configurable serializer whose
+  // closure still contains the original validation template and arguments.
+  // Forward a new minimal error instead of mutating that adapter-owned object.
+  return next({
+    code: 'INVALID_LOGIN_REQUEST',
+    message: INVALID_LOGIN_REQUEST_MESSAGE,
+    statusCode: 400
+  })
 }
 
 async function login (req) {
@@ -226,13 +243,16 @@ function safeDiagnosticToken (value, fallback) {
 }
 
 module.exports = AuthService
+module.exports.sanitizeLoginContractError = sanitizeLoginContractError
 module.exports.__test = {
   INVALID_CREDENTIALS_MESSAGE,
+  INVALID_LOGIN_REQUEST_MESSAGE,
   LOGIN_TEMPORARILY_UNAVAILABLE_MESSAGE,
   BTP_LOGIN_MESSAGE,
   BTP_USER_NOT_REGISTERED_MESSAGE,
   isExpectedClientAuthReject,
   requestUserCandidates,
+  sanitizeLoginContractError,
   safeAuthErrorDiagnostic,
   safeDiagnosticToken
 }
