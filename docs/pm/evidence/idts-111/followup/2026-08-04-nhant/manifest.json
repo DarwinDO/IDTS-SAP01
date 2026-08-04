@@ -1,0 +1,90 @@
+{
+  "schemaVersion": "1.0",
+  "package": "IDTS-111-NHANT-FOLLOWUP-2026-08-04",
+  "jiraComment": "10978",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "repositoryBaselineSha": "9202adbf788fa52b309ebabc7560babfbc505dce",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "historicalEvidenceModified": false,
+  "workbookOrDriveModified": false,
+  "cases": [
+    {
+      "caseId": "UAT-ATT-001",
+      "executedAt": "2026-08-04T23:10:03+07:00",
+      "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
+      "actualResult": "The exact 183-byte fixture appeared as an active attachment after Save, then every attachment row disappeared after a fresh reload.",
+      "fixture": {
+        "file": "../../fixtures/uat-att-001-nhant-20260804.txt",
+        "mimeType": "text/plain",
+        "sizeBytes": 183,
+        "sha256": "1BB8C0F0CC1767605368B1E3CD139EBB33F9FCA02C4FEA33F619DA29C572ED26"
+      },
+      "evidence": [
+        {"file": "01-uat-att-001-active-before-reload.png", "sha256": "9061E85E122AAEF92074807145793CD4EA85A59C09E43D9B0DF604A35B612C52", "kind": "sanitized product screenshot"},
+        {"file": "UAT-ATT-001.png", "sha256": "8125EB31A20455E5F40FA61276E25E49C0B68D7C0267A76B3F894E8A0C679956", "kind": "sanitized visual trace"}
+      ]
+    },
+    {
+      "caseId": "UAT-ATT-002",
+      "executedAt": "2026-08-04T23:34:00+07:00",
+      "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
+      "actualResult": "The active exact attachment link was invoked once, but no download event occurred within 12 seconds; downloaded-byte and SHA-256 equality were not demonstrated.",
+      "evidence": [{"file": "UAT-ATT-002.png", "sha256": "51B4999F09EB4EE0B1B70974ED5461331076D6F14FD78C83AAA73D1C0E4BE3B5", "kind": "sanitized visual trace"}]
+    },
+    {
+      "caseId": "UAT-ATT-003",
+      "executedAt": "2026-08-04T23:35:00+07:00",
+      "candidateOutcome": "BLOCKED_INCONCLUSIVE",
+      "actualResult": "Only the newly created controlled duplicate was deleted in draft. The draft count fell from three to two, but after Save the filename was still observable and reload removed every attachment. The old controlled content route returned sanitized 404 Not Found, but deletion cannot be distinguished from ATT-001 persistence loss.",
+      "evidence": [{"file": "UAT-ATT-003.png", "sha256": "ACE775CB7AE8574CB46F2AD236C35EDD20D4EC437E8513A43F0E03153A496678", "kind": "sanitized visual trace"}]
+    },
+    {
+      "caseId": "UAT-AI-005",
+      "executedAt": "2026-08-04T23:24:15+07:00",
+      "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
+      "suggestionId": "650478d7-4d9f-4944-90c5-f017c0420150",
+      "sanitizedAudit": {"featureType": "CLASSIFICATION", "operationStatus": "SUCCESS", "reviewState": "ACCEPTED", "createdAt": "2026-08-04T16:24:15.382Z", "reviewedAt": "2026-08-04T16:24:24.533Z"},
+      "actualResult": "Accept persisted to the immutable audit record. Apply Classification returned a safe error and the Bug's classification, ownership, and lifecycle remained unchanged.",
+      "networkBoundary": "A same-session OData readback requested only non-payload audit fields and returned the immutable record. The browser surface did not expose response headers; no raw suggestion payload was read or stored.",
+      "evidence": [{"file": "UAT-AI-005.png", "sha256": "91A604D794578453A8871300742A5D56EAA8FAFD9B523EEEF4C91088BBB28748", "kind": "sanitized OData/UI visual trace"}]
+    },
+    {
+      "caseId": "UAT-AI-007",
+      "executedAt": "2026-08-04T23:18:51+07:00",
+      "candidateOutcome": "MEETS_EXPECTED_RESULT",
+      "suggestionId": "7fff4ebe-952f-4d32-bcc0-f4e0290123af",
+      "actualResult": "The Handoff Summary matched BUG-0025 state, three controlled comments, five visible history entries, known missing fields, and the expected manual next action. Close and reload caused no business mutation.",
+      "evidence": [{"file": "UAT-AI-007.png", "sha256": "18771A4B7412DE1A3BD51A8FEAEC95E072704FD3C2D2D90DC1DA80CC57908D03", "kind": "sanitized UI visual trace"}]
+    },
+    {
+      "caseId": "UAT-AI-009",
+      "executedAt": "2026-08-04T23:27:00+07:00",
+      "candidateOutcome": "MEETS_EXPECTED_RESULT",
+      "suggestionId": "9a000a39-eca1-4e5e-bb81-e1c6d69bbc54",
+      "sanitizedAudit": {"featureType": "ASSIGNMENT_EXPLANATION", "operationStatus": "SUCCESS", "reviewState": "PENDING", "createdAt": "2026-08-04T16:27:00.919Z"},
+      "actualResult": "Smart Assign loaded grounded candidate capability, availability, workload, confidence, and explanations. Cancel and reload preserved BUG-0026 Assigned to SangVN without workflow mutation.",
+      "networkBoundary": "A same-session OData readback requested only non-payload audit fields and returned the immutable record. The browser surface did not expose response headers; no candidate email or raw AI payload is retained.",
+      "evidence": [{"file": "UAT-AI-009.png", "sha256": "3798D49B8D091409BA56A696F943C4D45A2E99DAF855E6F6D17EA9DC260EA985", "kind": "sanitized OData/UI visual trace"}]
+    },
+    {
+      "caseId": "UAT-UX-002",
+      "executedAt": "2026-08-04T23:41:00+07:00",
+      "candidateOutcome": "MEETS_EXPECTED_RESULT",
+      "actualResult": "At 834x1112, a controlled BUG-0026 Smart Assign candidate with a long explanation wrapped without horizontal content overflow; the dialog and Assign/Cancel actions remained within the viewport.",
+      "measurements": {"candidateClientWidth": 702, "candidateScrollWidth": 702, "dialogRight": 793, "viewportWidth": 834, "assignRight": 705, "cancelRight": 777},
+      "evidence": [{"file": "UAT-UX-002.png", "sha256": "30B53FDEAD72BABDC68254E0940641E96E33D9C2C641689CD843676180F54063", "kind": "sanitized geometry/UI visual trace"}]
+    },
+    {
+      "caseId": "UAT-UX-003",
+      "candidateOutcome": "NOT_EXECUTED_HUMAN_REQUIRED",
+      "actualResult": "Physical Tab-key confirmation remains pending NhanT; no automated keyboard result was substituted.",
+      "template": "UAT-UX-003-physical-tab-template.md"
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "No credentials, tokens, cookies, private endpoint, full email, raw AI payload, or unrelated attachment content is stored."
+  },
+  "finalPassApproved": false
+}
