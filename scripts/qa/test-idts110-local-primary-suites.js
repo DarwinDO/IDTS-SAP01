@@ -105,10 +105,10 @@ const caseResults = hybridCases.map(testCase => {
   const passed = suiteKeys.every(key => executions[key]?.passed)
   return {
     caseId: testCase.caseId,
-    status: passed ? 'CANDIDATE_PASS' : 'FAIL',
+    status: passed ? 'MAPPING_ONLY_CANDIDATE' : 'MAPPING_FAILED',
     suiteKeys,
     actualResult: passed
-      ? 'The mapped local-primary domain suite(s) completed with exit code 0; DonHV retains case-level acceptance ownership.'
+      ? 'The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.'
       : 'At least one mapped local-primary domain suite failed or timed out.',
     baselineSha
   }
@@ -122,7 +122,7 @@ const output = {
   completedAt: new Date().toISOString(),
   baselineSha,
   policy: {
-    candidatePassIsFinalPass: false,
+    mappingOnlyIsAtomicExecution: false,
     humanReviewer: 'DonHV',
     btpConfirmationIsOptionalForPrimaryAssertion: true
   },
@@ -130,12 +130,12 @@ const output = {
   caseResults,
   totals: {
     total: caseResults.length,
-    candidatePassed: caseResults.filter(result => result.status === 'CANDIDATE_PASS').length,
-    failed: caseResults.filter(result => result.status === 'FAIL').length
+    mappingOnly: caseResults.filter(result => result.status === 'MAPPING_ONLY_CANDIDATE').length,
+    failedMappings: caseResults.filter(result => result.status === 'MAPPING_FAILED').length
   }
 }
 
 assert.equal(output.totals.total, 135)
 if (outputPath) fs.writeFileSync(outputPath, `${JSON.stringify(output, null, 2)}\n`, 'utf8')
 console.log(JSON.stringify(output.totals))
-if (output.totals.failed) process.exitCode = 1
+if (output.totals.failedMappings) process.exitCode = 1
