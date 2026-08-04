@@ -5,19 +5,19 @@
   "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
   "executor": "NhanT",
   "actorRole": "TESTER",
-  "executedAt": "2026-08-03T20:57:42+07:00",
+  "executedAt": "2026-08-04T16:39:36+07:00",
   "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
   "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
   "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
   "testRecord": {
     "bugNumber": "BUG-0025",
     "title": "IDTS-111 UAT-BUG-001 NhanT 20260803-1446",
-    "comment": "IDTS-111 UAT-COM-001 rerun NhanT 20260803-2054"
+    "comment": "IDTS-111 UAT-COM-001 current runtime NhanT 20260804-1645"
   },
   "expectedResult": "The sanitized comment, actor, role, and timestamp persist once.",
-  "actualResult": "The controlled comment was entered and Post Comment was invoked in a fresh targeted rerun. SAP again displayed the safe error 'The comment could not be posted. Please refresh and try again.' The input remained populated and the list remained 'No comments yet.', so no comment, actor, role, or timestamp persisted.",
-  "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
-  "reviewBoundary": "This is a candidate failure finding, not an approved FAIL. DonHV must classify the underlying comment-action failure and decide the Jira/catalog result.",
+  "actualResult": "On the current deployed runtime, SAP reported Comment posted. The controlled comment appeared once with actor NhanT, role Tester, timestamp Aug 4, 2026 4:39 PM, and remained present after reload.",
+  "candidateOutcome": "MEETS_EXPECTED_RESULT",
+  "reviewBoundary": "Current-runtime candidate PASS only; historical failure evidence is retained and DonHV still owns final acceptance/workbook integration.",
   "evidence": [
     {
       "id": "UAT-COM-001-E01",
@@ -36,24 +36,40 @@
       "file": "03-rerun-safe-post-failure.png",
       "description": "Fresh 2026-08-03 targeted rerun: safe post failure, retained input, and no persisted comment.",
       "sha256": "E0399525FE40E1092044C53BDE8E5D1534822423DA35769FA2FFD09EFCF9535A"
+    },
+    {
+      "id": "UAT-COM-001-E04",
+      "file": "04-current-runtime-before-post.png",
+      "description": "Current-runtime controlled comment before posting.",
+      "sha256": "CAD89BDDF2ACBB9F4E3E219F6705345B5B38F9EC9C9D8341C6A3541C0264F3C5"
+    },
+    {
+      "id": "UAT-COM-001-E05",
+      "file": "05-current-runtime-post-result.png",
+      "description": "Current-runtime success result with one NhanT/Tester comment.",
+      "sha256": "B42B29AD341C30ECCA646049F56ABE0CF9A9B244127175DC4B4995E0BF647CCB"
+    },
+    {
+      "id": "UAT-COM-001-E06",
+      "file": "06-current-runtime-reload.png",
+      "description": "Reload proof for the persisted comment.",
+      "sha256": "C5091233B8D3784EC15B47FBDE5DAA3805596325B7EEDA7A9F2CE452079C2082"
     }
   ],
   "privacyReview": {
     "status": "PASS",
     "notes": "The retained screenshots contain controlled UAT data only and no email, credential, cookie, token, or private endpoint text."
   },
-  "issueClassification": "product defect or deployed-environment integration blocker - addComment request failure",
+  "issueClassification": "historical deployed-runtime failure resolved in current runtime",
   "limitations": [
-    "The UI exposes only a sanitized error; the approved Browser surface does not expose the response status/body, and no session/network internals were inspected.",
-    "UAT-COM-003 and UAT-COM-004 depend on the same posting path and cannot receive a positive persistence result until this failure is resolved."
+    "The current Browser surface proves UI persistence but does not expose a sanitized HTTP response body or backend trace."
   ],
   "donhvLatestReview": {
     "jiraCommentId": "10942",
     "reviewDate": "2026-08-04",
-    "category": "HISTORICAL_OLD_RUNTIME_NEGATIVE",
-    "currentStatus": "RERUN_REQUIRED_CURRENT_RUNTIME",
+    "category": "CURRENT_RUNTIME_POSITIVE",
+    "currentStatus": "CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW",
     "preservesHistoricalCandidateTruth": true,
-    "finalPassApproved": false,
-    "historicalEvidenceOnly": true
+    "finalPassApproved": false
   }
 }

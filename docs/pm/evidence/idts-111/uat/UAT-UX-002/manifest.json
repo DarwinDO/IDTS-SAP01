@@ -14,9 +14,9 @@
     "height": 1112
   },
   "expectedResult": "Responsive pop-ins/wrapping preserve labels, values, and actions.",
-  "actualResult": "The tablet List Report preserved filters, tabs, Create Bug, table rows, and row actions. The Object Page preserved its header and primary actions, and the Similar Bugs footer actions remained reachable. However, the Review Classification Suggestions button label was visibly clipped and Similar Bugs reason text extended beyond the dialog content edge instead of wrapping, so labels/values were not fully preserved.",
+  "actualResult": "Current-runtime partial recheck at 834 x 1112 measured the Review Classification Suggestions button at 246 px client/scroll width fully inside the 834 px viewport, so the former action-label clipping was not reproduced. Similar Bugs opened with reachable footer actions but returned no candidates, so reason-text wrapping could not be revalidated; full-case PASS is not claimed.",
   "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
-  "reviewBoundary": "This is a candidate responsive-layout failure, not an approved FAIL. DonHV must review and decide Jira/catalog disposition.",
+  "reviewBoundary": "One former symptom is resolved; candidate-row wrapping remains unexecuted because the controlled bug returned no similar candidates. DonHV must decide whether IDTS-120 needs another fixture-specific recheck.",
   "evidence": [
     {
       "id": "UAT-UX-002-E01",
@@ -41,13 +41,13 @@
     "status": "PASS",
     "notes": "Controlled UAT data only; no email, credential, cookie, token, or private endpoint text."
   },
-  "issueClassification": "product defect candidate - responsive tablet clipping",
-  "limitations": [],
+  "issueClassification": "historical responsive defect partially resolved; candidate-reason wrapping recheck blocked by no-result fixture",
+  "limitations": ["Screenshot capture timed out on the current object page, so the current recheck retains measured DOM geometry and accessible action availability rather than a new PNG."],
   "donhvLatestReview": {
     "jiraCommentId": "10942",
     "reviewDate": "2026-08-04",
-    "category": "CONFIRMED_DEFECT_RECHECK",
-    "currentStatus": "RERUN_REQUIRED_CURRENT_RUNTIME",
+    "category": "CURRENT_RUNTIME_PARTIAL_RECHECK",
+    "currentStatus": "CURRENT_RUNTIME_PARTIAL_RECHECK_NEEDS_CANDIDATE_FIXTURE",
     "preservesHistoricalCandidateTruth": true,
     "finalPassApproved": false
   }

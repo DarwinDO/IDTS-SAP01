@@ -5,14 +5,14 @@
   "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
   "executor": "NhanT",
   "actorRole": "TESTER",
-  "executedAt": "2026-08-03T17:31:00+07:00",
+  "executedAt": "2026-08-04T16:48:00+07:00",
   "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
   "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
   "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
   "expectedResult": "The old session cannot access protected data and SAP sign-in is required again without a blank page or raw error.",
-  "actualResult": "Sign Out showed 'You have signed out of IDTS' and confirmed the application session ended. Reopening the protected application route exposed no Bug/profile data, but rendered a persistent blank white page rather than a SAP sign-in prompt.",
-  "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
-  "reviewBoundary": "Session invalidation passed; post-logout protected-route recovery failed. DonHV must review before approved FAIL/Jira disposition.",
+  "actualResult": "Sign Out navigated to the IDTS signed-out confirmation. Reopening the exact protected BUG-0025 route redirected to SAP Accounts Sign In and exposed no BUG-0025/profile data.",
+  "candidateOutcome": "MEETS_EXPECTED_RESULT",
+  "reviewBoundary": "Current-runtime candidate PASS only; DonHV owns final acceptance and disposition of historical IDTS-117 evidence.",
   "evidence": [
     {
       "id": "UAT-AUTH-005-E01",
@@ -31,15 +31,15 @@
     "status": "PASS",
     "notes": "Signed-out and blank-route screens contain no email, credential, token, cookie, protected Bug data, or private diagnostic."
   },
-  "issueClassification": "product/deployed-auth-flow defect candidate - blank protected route after logout",
+  "issueClassification": "historical deployed-auth-flow defect no longer reproduced in current runtime",
   "limitations": [
-    "The Browser history shortcut did not restore the signed-out page after the blank-route capture; the tab remains signed out and requires a fresh SAP sign-in."
+    "The tab intentionally remains at SAP Sign In after the recheck; NhanT must sign in again before additional SAP UAT."
   ],
   "donhvLatestReview": {
     "jiraCommentId": "10942",
     "reviewDate": "2026-08-04",
-    "category": "CONFIRMED_DEFECT_RECHECK",
-    "currentStatus": "RERUN_REQUIRED_CURRENT_RUNTIME",
+    "category": "CURRENT_RUNTIME_POSITIVE",
+    "currentStatus": "CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW",
     "preservesHistoricalCandidateTruth": true,
     "finalPassApproved": false
   }

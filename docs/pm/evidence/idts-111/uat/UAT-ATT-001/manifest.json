@@ -5,18 +5,18 @@
   "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
   "executor": "NhanT",
   "actorRole": "TESTER",
-  "executedAt": "2026-08-03T20:59:20+07:00",
+  "executedAt": "2026-08-04T16:41:51+07:00",
   "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
   "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
   "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
   "testRecord": {
     "bugNumber": "BUG-0025",
-    "file": "idts111-uat-att-001-rerun.txt",
-    "sizeBytes": 47,
+    "file": "idts-uat-supported.txt",
+    "sizeBytes": 44,
     "type": "text/plain"
   },
   "expectedResult": "Metadata persists, binary persists in storage, and the same attachment appears after reload.",
-  "actualResult": "A fresh targeted rerun selected a synthetic supported 47-byte text file. SAP again displayed the safe error 'The file could not be uploaded. Please refresh and try again.' The evidence grid remained empty, so no orphan attachment metadata was created.",
+  "actualResult": "The supported controlled file appeared in the generated attachment draft and Save produced an active-row/history signal, but the attachment disappeared after a fresh reload. Therefore metadata/binary persistence is not proven and the case still does not meet its expected result.",
   "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
   "reviewBoundary": "Safe failure/no orphan passed, but successful upload/persistence failed; DonHV must classify product versus deployed-storage environment.",
   "evidence": [
@@ -37,6 +37,18 @@
       "file": "03-rerun-supported-upload-failure.png",
       "description": "Fresh 2026-08-03 targeted rerun: safe upload failure and empty evidence grid for a synthetic 47-byte text file.",
       "sha256": "DA6D54AAB9310A12F17107C33ABBD4F4FF1D00D7FB6B7BEDA76CD366220B241D"
+    },
+    {
+      "id": "UAT-ATT-001-E04",
+      "file": "04-current-runtime-draft-upload.png",
+      "description": "Current runtime shows the supported file in the generated draft attachment row.",
+      "sha256": "119FCD187BF03BCA432B4AB58EC7420A6106A3E38494222745D7584BB87C599F"
+    },
+    {
+      "id": "UAT-ATT-001-E05",
+      "file": "05-current-runtime-reload-empty.png",
+      "description": "Fresh reload shows no attachment row, proving persistence failure.",
+      "sha256": "31E229856A0DA0538F0CC425F0AE0306852ADC1549EB7A3EC4B9D2635B4D7AE8"
     }
   ],
   "privacyReview": {
@@ -50,10 +62,9 @@
   "donhvLatestReview": {
     "jiraCommentId": "10942",
     "reviewDate": "2026-08-04",
-    "category": "HISTORICAL_OLD_RUNTIME_NEGATIVE",
-    "currentStatus": "RERUN_REQUIRED_CURRENT_RUNTIME",
+    "category": "CURRENT_RUNTIME_NEGATIVE",
+    "currentStatus": "CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW",
     "preservesHistoricalCandidateTruth": true,
-    "finalPassApproved": false,
-    "historicalEvidenceOnly": true
+    "finalPassApproved": false
   }
 }

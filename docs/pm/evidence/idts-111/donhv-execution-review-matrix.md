@@ -91,3 +91,7 @@ The PR #270 evidence package is internally consistent and may be retained as tru
 ## Current rerun state
 
 NhanT recorded the required acknowledgment in the repository and Jira comments `10908`/`10909`. The deployed SAP application is now usable. Fresh `UAT-COM-001` and `UAT-ATT-001` reruns reproduced their existing safe failures and added sanitized screenshots without promoting either result. The approved Browser surface still does not expose the sanitized response status/body, immutable suggestion ID, or Network trace required to close the root-cause questions for `UAT-COM-001`, `UAT-ATT-001`, `UAT-AI-005`, and `UAT-AI-009`; IDTS-113/114/115/116 remain the diagnostic owners. `UAT-UX-003` still requires physical-keyboard confirmation. The workbook and Drive artifact remain unchanged.
+
+### 2026-08-04 current-runtime addendum
+
+Current deployed reruns now supersede the old-runtime behavior for `UAT-COM-001` and `UAT-AUTH-005`, which are candidate PASS. `UAT-COM-003`, `UAT-ATT-001`, and `UAT-BUG-008` remain candidate failures with fresh evidence. `UAT-COM-004` passes sanitization/no-execution, `UAT-UX-002` is only partially rechecked, and `UAT-AI-005` still lacks the immutable suggestion ID and sanitized Network response required for diagnostic closure. `UAT-UX-003` remains a physical-keyboard handoff. DonHV still owns final disposition and workbook/Drive synchronization.

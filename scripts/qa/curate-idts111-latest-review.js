@@ -10,15 +10,23 @@ const reviewCommentId = '10942'
 const reviewDate = '2026-08-04'
 const checkOnly = process.argv.includes('--check')
 
-const stalePrerequisite = new Set(['UAT-AI-007', 'UAT-ATT-002', 'UAT-ATT-003', 'UAT-COM-003', 'UAT-COM-004'])
-const historicalOldRuntime = new Set(['UAT-ATT-001', 'UAT-COM-001'])
-const defectRecheck = new Set(['UAT-AUTH-005', 'UAT-BUG-008', 'UAT-UX-002'])
+const stalePrerequisite = new Set(['UAT-AI-007', 'UAT-ATT-002', 'UAT-ATT-003'])
+const historicalOldRuntime = new Set()
+const defectRecheck = new Set()
+const currentRuntimePositive = new Set(['UAT-AUTH-005', 'UAT-COM-001', 'UAT-COM-004'])
+const currentRuntimeNegative = new Set(['UAT-ATT-001', 'UAT-COM-003'])
+const currentRuntimeDefect = new Set(['UAT-BUG-008'])
+const currentRuntimePartial = new Set(['UAT-UX-002'])
 const semanticCorrection = new Set(['UAT-AI-008', 'UAT-AI-010', 'UAT-AI-014', 'UAT-AI-015', 'UAT-LIFE-014'])
 const aiDiagnostic = new Set(['UAT-AI-005', 'UAT-AI-009'])
 const physicalKeyboard = new Set(['UAT-UX-003'])
 
 function classify (manifest) {
   const id = manifest.caseId
+  if (currentRuntimePositive.has(id)) return ['CURRENT_RUNTIME_POSITIVE', 'CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW']
+  if (currentRuntimeNegative.has(id)) return ['CURRENT_RUNTIME_NEGATIVE', 'CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW']
+  if (currentRuntimeDefect.has(id)) return ['CONFIRMED_DEFECT_RECHECK', 'CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW']
+  if (currentRuntimePartial.has(id)) return ['CURRENT_RUNTIME_PARTIAL_RECHECK', 'CURRENT_RUNTIME_PARTIAL_RECHECK_NEEDS_CANDIDATE_FIXTURE']
   if (stalePrerequisite.has(id)) return ['STALE_PREREQUISITE_RERUN_REQUIRED', 'RERUN_REQUIRED_CURRENT_RUNTIME']
   if (historicalOldRuntime.has(id)) return ['HISTORICAL_OLD_RUNTIME_NEGATIVE', 'RERUN_REQUIRED_CURRENT_RUNTIME']
   if (defectRecheck.has(id)) return ['CONFIRMED_DEFECT_RECHECK', 'RERUN_REQUIRED_CURRENT_RUNTIME']
@@ -61,12 +69,14 @@ for (const manifestPath of manifests) {
 const expected = {
   RETAINED_TRUTHFUL_POSITIVE: 19,
   VALID_PRECONDITION_BLOCKER: 20,
-  STALE_PREREQUISITE_RERUN_REQUIRED: 5,
-  CONFIRMED_DEFECT_RECHECK: 3,
+  STALE_PREREQUISITE_RERUN_REQUIRED: 3,
+  CONFIRMED_DEFECT_RECHECK: 1,
   CATALOG_SEMANTIC_CORRECTION: 5,
   PHYSICAL_KEYBOARD_LIMITATION: 1,
   AI_DIAGNOSTIC_RERUN: 2,
-  HISTORICAL_OLD_RUNTIME_NEGATIVE: 2
+  CURRENT_RUNTIME_POSITIVE: 3,
+  CURRENT_RUNTIME_NEGATIVE: 2,
+  CURRENT_RUNTIME_PARTIAL_RECHECK: 1
 }
 
 for (const [category, expectedCount] of Object.entries(expected)) {
@@ -79,8 +89,8 @@ const summary = {
   curatedAtHead: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
   manifests: manifests.length,
   counts,
-  runtimeRerunPerformed: false,
-  runtimeRerunLimitation: 'The required Browser control tool is unavailable in this Codex session; historical evidence is preserved and no result is promoted.',
+  runtimeRerunPerformed: true,
+  runtimeRerunLimitation: 'AI immutable suggestion IDs and sanitized Network responses remain unavailable; UAT-UX-002 candidate-row wrapping still needs a matching fixture and UAT-UX-003 still needs NhanT physical-keyboard confirmation.',
   workbookAndDriveChanged: false
 }
 

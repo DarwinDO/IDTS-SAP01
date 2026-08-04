@@ -80,3 +80,11 @@ Ownership: NhanT executes and packages truthful evidence; DonHV owns result appr
 - Execution summary: `docs/pm/evidence/idts-111/execution-summary.md`
 - DonHV review matrix: `docs/pm/evidence/idts-111/donhv-execution-review-matrix.md`
 - Case evidence: `docs/pm/evidence/idts-111/uat/`
+
+### Current-runtime delta (2026-08-04)
+
+- Completed current reruns for comment, attachment, logout, duplicate audit, tablet action geometry, and AI classification apply.
+- Candidate positives: `UAT-COM-001`, `UAT-COM-004`, `UAT-AUTH-005`.
+- Candidate negatives: `UAT-COM-003`, `UAT-ATT-001`, `UAT-BUG-008`; `UAT-AI-005` reproduced but still lacks immutable-ID/Network diagnostics.
+- Partial: `UAT-UX-002` no longer clips the classification action, but no Similar Bugs candidate existed to recheck reason wrapping.
+- Still human-only: `UAT-UX-003` physical Tab-key observation. Workbook/Drive remain unchanged.

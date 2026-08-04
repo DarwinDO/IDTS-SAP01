@@ -93,3 +93,14 @@ This section is historical. IDTS-116 changed the current runtime after these obs
 - Machine-readable partition: `latest-review-summary.json` (19/20/5/3/5/1/2/2 as listed above).
 - A fresh SAP runtime rerun was not performed because this Codex session does not expose the Browser control tool required by the installed Browser skill. No historical result was promoted or fabricated.
 - Final workbook and Drive remain unchanged.
+
+## Current-runtime rerun closure (2026-08-04)
+
+- `UAT-COM-001`: candidate PASS; one NhanT/Tester comment persisted after reload.
+- `UAT-COM-003`: candidate FAIL; a 1006-character comment was accepted and persisted instead of being rejected.
+- `UAT-COM-004`: candidate PASS for sanitization/no execution; markup was stripped and no XSS console marker appeared.
+- `UAT-ATT-001`: current candidate FAIL; a supported file appeared in draft/active state but disappeared after reload.
+- `UAT-AUTH-005`: current candidate PASS; the protected route redirected to SAP Sign In after logout.
+- `UAT-BUG-008`: current candidate FAIL; one title Save again produced two identical audit events.
+- `UAT-UX-002`: partial; action label fits at 834 x 1112, but no Similar Bugs candidates existed to test reason wrapping.
+- `UAT-AI-005`: failure reproduced with no partial mutation; immutable suggestion ID and sanitized Network response remain unavailable. `UAT-UX-003` remains physical-keyboard-only.

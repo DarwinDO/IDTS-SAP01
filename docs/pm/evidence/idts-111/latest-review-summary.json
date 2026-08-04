@@ -1,19 +1,21 @@
 {
   "jiraCommentId": "10942",
   "reviewDate": "2026-08-04",
-  "curatedAtHead": "0f9c1762d2e3ec9c1d90d28befa9a63f8d856cd3",
+  "curatedAtHead": "f5532114e4659e4237aed809395c26403daf1dde",
   "manifests": 57,
   "counts": {
     "RETAINED_TRUTHFUL_POSITIVE": 19,
     "VALID_PRECONDITION_BLOCKER": 20,
     "AI_DIAGNOSTIC_RERUN": 2,
-    "STALE_PREREQUISITE_RERUN_REQUIRED": 5,
+    "STALE_PREREQUISITE_RERUN_REQUIRED": 3,
     "CATALOG_SEMANTIC_CORRECTION": 5,
-    "HISTORICAL_OLD_RUNTIME_NEGATIVE": 2,
-    "CONFIRMED_DEFECT_RECHECK": 3,
-    "PHYSICAL_KEYBOARD_LIMITATION": 1
+    "CONFIRMED_DEFECT_RECHECK": 1,
+    "PHYSICAL_KEYBOARD_LIMITATION": 1,
+    "CURRENT_RUNTIME_POSITIVE": 3,
+    "CURRENT_RUNTIME_NEGATIVE": 2,
+    "CURRENT_RUNTIME_PARTIAL_RECHECK": 1
   },
-  "runtimeRerunPerformed": false,
-  "runtimeRerunLimitation": "The required Browser control tool is unavailable in this Codex session; historical evidence is preserved and no result is promoted.",
+  "runtimeRerunPerformed": true,
+  "runtimeRerunLimitation": "AI immutable suggestion IDs and sanitized Network responses remain unavailable; UAT-UX-002 candidate-row wrapping still needs a matching fixture and UAT-UX-003 still needs NhanT physical-keyboard confirmation.",
   "workbookAndDriveChanged": false
 }

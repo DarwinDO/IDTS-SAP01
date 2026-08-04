@@ -36,4 +36,11 @@
 
 Assigned members may now execute after running the readiness check for their session. No UAT VI, fabricated sign-off, shared member session, or historical Render evidence is allowed. AI provider-primary success and safe fallback must be reported separately.
 
+## 2026-08-04 current-runtime update
+
+- Reruns completed for `UAT-COM-001/003/004`, `UAT-ATT-001`, `UAT-AUTH-005`, `UAT-BUG-008`, `UAT-UX-002`, and `UAT-AI-005`.
+- Comment persistence and logout redirect now meet expected behavior. Oversized comment, attachment persistence, and duplicate audit still do not meet expected behavior.
+- Remaining gaps: immutable AI suggestion ID plus sanitized Network response, a Similar Bugs candidate fixture for tablet wrapping, NhanT physical-keyboard confirmation, and existing role/service fixtures.
+- DonHV still owns final disposition and `UAT_EN_PREPARED` synchronization.
+
 NhanT's completed candidate package uses the authenticated SAP BTP UI and member-owned Tester identity. It contains 63 sanitized screenshots referenced by 57 manifests after the targeted comment/upload reruns, explicit candidate outcomes for 32 executed cases, and case-specific rerun conditions for 25 cases whose required identity, role, state, service, or fixture was unavailable. DonHV still owns review, catalog result decisions, Jira disposition, final workbook generation, and same-ID Drive synchronization.

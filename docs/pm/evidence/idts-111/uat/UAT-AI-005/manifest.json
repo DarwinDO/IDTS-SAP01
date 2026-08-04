@@ -5,17 +5,17 @@
   "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
   "executor": "NhanT",
   "actorRole": "TESTER",
-  "executedAt": "2026-08-03T16:38:00+07:00",
+  "executedAt": "2026-08-04T16:44:00+07:00",
   "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
   "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
   "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
   "testRecord": {
-    "bugNumber": "BUG-0026",
+    "bugNumber": "BUG-0025",
     "sourceClassification": "IDTS Bug Report / SAP CAP Backend",
-    "suggestedClassification": "IDTS Assignment / Workflow"
+    "suggestedClassification": "Sales and Distribution / IDTS Bug Report / Workflow"
   },
   "expectedResult": "Only allowlisted classification fields update after Accept and Apply; workflow ownership and lifecycle remain unchanged.",
-  "actualResult": "Accept changed the advisory state to Accepted and enabled Apply Classification. After confirmation, SAP displayed the safe error 'Classification could not be applied. Review the suggestion and try again.' After refresh, BUG-0026 remained Assigned to SangVN with IDTS Bug Report / SAP CAP Backend and no partial business mutation.",
+  "actualResult": "Current-runtime rerun on BUG-0025 loaded grounded suggestion values and NhanT accepted them. Apply Classification again returned the safe error 'Classification could not be applied. Review the suggestion and try again.' Reload preserved Pending Assignment, Project Manager ownership, title, and original classification with no partial mutation.",
   "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
   "reviewBoundary": "Safety/non-partial-mutation passed, but the accepted valid-looking suggestion could not be applied; DonHV must determine backend validation/root cause before approved FAIL/Jira disposition.",
   "evidence": [
@@ -36,7 +36,10 @@
       "file": "03-unchanged-after-reload.png",
       "description": "Reloaded BUG-0026 with original classification and workflow intact.",
       "sha256": "163EC50B801F234CC3C88949B56C87D745DD2FCEA7A0C9B149CF98F63AF08005"
-    }
+    },
+    {"id":"UAT-AI-005-E04","file":"04-current-runtime-suggestion.png","description":"Current grounded suggestion values before acceptance.","sha256":"0B0AB4E216CB11550BFC3E6922AD956F0A3CD944E16F432723827993FC624792"},
+    {"id":"UAT-AI-005-E05","file":"05-current-runtime-apply-error.png","description":"Current safe Apply Classification failure.","sha256":"EDD0CB74DBBF8F33CC2E5CB6F7A86769C10EED43ABF06EAEE92650B9FDBD440D"},
+    {"id":"UAT-AI-005-E06","file":"06-current-runtime-reload.png","description":"Current reload proof of no partial mutation.","sha256":"C5658BF54629752C0215FCCFFA451081D85CE7410DB4AD12015E0E96D2FF9EBD"}
   ],
   "privacyReview": {
     "status": "PASS",
@@ -44,7 +47,7 @@
   },
   "issueClassification": "product defect or deployed-environment integration candidate - accepted classification cannot be applied",
   "limitations": [
-    "The safe UI intentionally hides raw backend diagnostics; no direct service trace was available in this UAT execution."
+    "The Browser surface does not expose the immutable suggestion ID or sanitized HTTP Network response; DonHV's diagnostic closure requirement remains unmet."
   ],
   "donhvLatestReview": {
     "jiraCommentId": "10942",

@@ -5,17 +5,17 @@
   "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
   "executor": "NhanT",
   "actorRole": "TESTER",
-  "executedAt": "2026-08-03T15:50:00+07:00",
+  "executedAt": "2026-08-04T16:45:55+07:00",
   "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
   "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
   "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
   "testRecord": {
     "bugNumber": "BUG-0025",
     "oldTitle": "IDTS-111 UAT-BUG-001 NhanT 20260803-1446",
-    "newTitle": "IDTS-111 UAT-BUG-008 NhanT title edit 20260803-1550"
+    "newTitle": "IDTS-111 UAT-BUG-008 NhanT title recheck 20260804-1646"
   },
   "expectedResult": "Only the intended value changes; unrelated values remain unchanged and one grouped edit audit is visible.",
-  "actualResult": "The new title persisted after reload, while Description, IDTS Bug Report component, SAP CAP Backend category, priority, severity, and ownership fields remained unchanged. History displayed two identical Edit events ('Updated title.') by NhanT at the same timestamp instead of one grouped edit audit.",
+  "actualResult": "Current-runtime recheck persisted the new title and preserved unrelated status/ownership. After History finished loading, it again displayed two identical 'Updated title.' events by NhanT at Aug 4, 2026 4:45:55 PM for one Save.",
   "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
   "reviewBoundary": "Business state persistence passed, but duplicate audit events violate the expected single grouped audit. DonHV must review before approved FAIL/Jira disposition.",
   "evidence": [
@@ -48,7 +48,7 @@
     "jiraCommentId": "10942",
     "reviewDate": "2026-08-04",
     "category": "CONFIRMED_DEFECT_RECHECK",
-    "currentStatus": "RERUN_REQUIRED_CURRENT_RUNTIME",
+    "currentStatus": "CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW",
     "preservesHistoricalCandidateTruth": true,
     "finalPassApproved": false
   }
