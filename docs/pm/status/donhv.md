@@ -5662,3 +5662,11 @@ Live evidence: `docs/pm/evidence/idts-117/demo-readiness/live-verification-20260
 - **Root cause:** the AI DevKit CLI is exposed through `npx ai-devkit@latest lint --json`, not a repository npm script.
 - **Fix status:** command routing corrected; no product or document content was implicated.
 - **Verification/next action:** rerun OfficeCLI, the three repository QA scripts, and AI DevKit with the documented CLI command as separate checks.
+
+### 2026-08-04 — PR #240 Knowledge Gate evidence parsing
+
+- **Classification:** process/tooling issue.
+- **Symptom:** fresh GitHub run `30900508795` failed although the PR body visibly referenced the DatDT learning evidence.
+- **Root cause:** the QA Depth parser requires whitespace or string start immediately before `docs/...`; Markdown backticks around the evidence path prevented the regular expression from recognizing it.
+- **Fix status:** remove only the backticks from the structured `Evidence:` value; the evidence path and human gate result are unchanged.
+- **Verification/next action:** publish the corrected body, push this status-only follow-up to trigger a new exact-head run, and merge only after that run passes.
