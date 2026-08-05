@@ -1,6 +1,13 @@
 param(
     [Parameter(Mandatory = $false)]
-    [string]$GeneratedDirectory = "docs/sap490/generated"
+    [string]$GeneratedDirectory = "docs/sap490/generated",
+
+    [Parameter(Mandatory = $false)]
+    [string[]]$WorkbookNames = @(
+        "Functional_Specification_IDTS_SAP01_en_v0.7.xlsx",
+        "Technical_Specification_IDTS_SAP01_en_v0.8.xlsx",
+        "Configuration_Note_IDTS_SAP01_en_v0.5.xlsx"
+    )
 )
 
 $ErrorActionPreference = "Stop"
@@ -12,22 +19,13 @@ $outputDirectory = if ([System.IO.Path]::IsPathRooted($GeneratedDirectory)) {
     Join-Path $root $GeneratedDirectory
 }
 
-$workbookNames = @(
-    "Functional_Specification_IDTS_SAP01_en_v0.7.xlsx",
-    "Functional_Specification_IDTS_SAP01_vi_v0.7.xlsx",
-    "Technical_Specification_IDTS_SAP01_en_v0.7.xlsx",
-    "Technical_Specification_IDTS_SAP01_vi_v0.7.xlsx",
-    "Configuration_Note_IDTS_SAP01_en_v0.5.xlsx",
-    "Configuration_Note_IDTS_SAP01_vi_v0.5.xlsx"
-)
-
 $templateByPrefix = @{
     "Functional_Specification_" = "Functional_Specification.xlsx"
     "Technical_Specification_" = "Technical_Specification.xlsx"
     "Configuration_Note_" = "Configuration_Note.xlsx"
 }
 
-$missing = $workbookNames |
+$missing = $WorkbookNames |
     ForEach-Object { Join-Path $outputDirectory $_ } |
     Where-Object { -not (Test-Path -LiteralPath $_) }
 
@@ -45,7 +43,7 @@ try {
     $excel.Visible = $false
     $excel.DisplayAlerts = $false
 
-    foreach ($name in $workbookNames) {
+    foreach ($name in $WorkbookNames) {
         $path = (Resolve-Path -LiteralPath (Join-Path $outputDirectory $name)).Path
         $templateName = $templateByPrefix.GetEnumerator() |
             Where-Object { $name.StartsWith($_.Key) } |
@@ -81,11 +79,11 @@ try {
                 )
                 if ($name.StartsWith("Technical_Specification_")) {
                     # The generator deliberately narrows each technical tab to
-                    # the populated official-template region. Preserve those
-                    # per-tab print areas and repeated-title rows during the
+                    # the populated official-template region. Preserve its
+                    # print areas, fit settings and repeated-title rows during
                     # native Excel package normalization.
                     $pageSetupProperties = $pageSetupProperties |
-                        Where-Object { $_ -notin @("PrintArea", "FitToPagesTall") }
+                        Where-Object { $_ -notin @("PrintArea", "PrintTitleRows", "Zoom", "FitToPagesWide", "FitToPagesTall") }
                 }
                 foreach ($property in $pageSetupProperties) {
                     try {
@@ -102,6 +100,14 @@ try {
                     } catch {
                         throw "$name/$($templateSheet.Name): cannot copy PageSetup.$property - $($_.Exception.Message)"
                     }
+                }
+                if ($name.StartsWith("Technical_Specification_")) {
+                    # Approved print-only fidelity exception: generated tables
+                    # stay within the official landscape width while height
+                    # paginates naturally. Template tabs/styles remain intact.
+                    $targetSetup.Zoom = $false
+                    $targetSetup.FitToPagesWide = 1
+                    $targetSetup.FitToPagesTall = $false
                 }
                 # The official template contains an incomplete footer token
                 # (`&P / `). Keep the template position/style but complete the
