@@ -63,6 +63,14 @@ async function expectDraftRootRejection (label, action) {
   console.log(`  PASS  ${label}`)
 }
 
+async function expectStatus (label, expectedStatus, action) {
+  await assert.rejects(action, error => {
+    assert.equal(Number(error.code || error.statusCode || error.status), expectedStatus, `${label} must return HTTP ${expectedStatus}`)
+    return true
+  })
+  console.log(`  PASS  ${label}`)
+}
+
 async function main () {
   fs.mkdirSync(TMP_DIR, { recursive: true })
   if (fs.existsSync(DB_FILE)) fs.unlinkSync(DB_FILE)
@@ -120,6 +128,7 @@ async function main () {
   }))
 
   const tester = user('NhanT', 'TESTER')
+  const developer = user('SangVN', 'DEVELOPER')
   const pm = user('DonHV', 'PM')
   const blockedAttachmentID = cds.utils.uuid()
   const before = await snapshot(db, Bugs, Comments, HistoryEvents)
@@ -176,6 +185,63 @@ async function main () {
   assert.ok(await db.run(SELECT.one.from(PhysicalAttachments).where({ ID: ATTACHMENT_ID })), 'Rejected attachment delete must preserve metadata')
   assert.equal((await db.run(SELECT.from(Bugs.drafts).where({ ID: BUG_ID }))).length, 0, 'Rejected EDIT must not create a draft')
   console.log('  PASS  rejected operations leave aggregate state unchanged')
+
+  await expectStatus('Tester cannot reassign retest owner', 403, () => srv.dispatch(request({
+    event: 'reassignRetestOwner',
+    target: Bugs,
+    actor: tester,
+    data: { retestOwnerID: BACKUP_TESTER_ID, reason: 'Not authorized' }
+  })))
+  await expectStatus('Developer cannot reassign retest owner', 403, () => srv.dispatch(request({
+    event: 'reassignRetestOwner',
+    target: Bugs,
+    actor: developer,
+    data: { retestOwnerID: BACKUP_TESTER_ID, reason: 'Not authorized' }
+  })))
+  await expectStatus('blank reassignment reason is rejected', 400, () => srv.dispatch(request({
+    event: 'reassignRetestOwner',
+    target: Bugs,
+    actor: pm,
+    data: { retestOwnerID: BACKUP_TESTER_ID, reason: '   ' }
+  })))
+  await expectStatus('non-Tester reassignment target is rejected', 400, () => srv.dispatch(request({
+    event: 'reassignRetestOwner',
+    target: Bugs,
+    actor: pm,
+    data: { retestOwnerID: DON_USER_ID, reason: 'Invalid target role' }
+  })))
+  await expectStatus('same retest owner is rejected', 409, () => srv.dispatch(request({
+    event: 'reassignRetestOwner',
+    target: Bugs,
+    actor: pm,
+    data: { retestOwnerID: NHAN_USER_ID, reason: 'No-op is not allowed' }
+  })))
+
+  await db.run(UPDATE(Bugs).set({
+    status_code: 'RETEST_REQUIRED',
+    retestOwner_ID: NHAN_USER_ID,
+    nextProcessorUser_ID: NHAN_USER_ID,
+    nextProcessorRole_code: 'TESTER'
+  }).where({ ID: BUG_ID }))
+  await srv.dispatch(request({
+    event: 'reassignRetestOwner',
+    target: Bugs,
+    actor: pm,
+    data: { retestOwnerID: BACKUP_TESTER_ID, reason: 'Retest handover check' }
+  }))
+  const afterRetestReassign = await db.run(SELECT.one.from(Bugs).where({ ID: BUG_ID }))
+  assert.equal(afterRetestReassign.status_code, 'RETEST_REQUIRED')
+  assert.equal(afterRetestReassign.retestOwner_ID, BACKUP_TESTER_ID)
+  assert.equal(afterRetestReassign.nextProcessorUser_ID, BACKUP_TESTER_ID)
+  assert.equal(afterRetestReassign.nextProcessorRole_code, 'TESTER')
+  console.log('  PASS  PM reassignment at RETEST_REQUIRED persists owner and next processor')
+
+  await db.run(UPDATE(Bugs).set({
+    status_code: 'CLOSED',
+    retestOwner_ID: NHAN_USER_ID,
+    nextProcessorUser_ID: null,
+    nextProcessorRole_code: 'NONE'
+  }).where({ ID: BUG_ID }))
 
   await srv.dispatch(request({
     event: 'reassignRetestOwner',
