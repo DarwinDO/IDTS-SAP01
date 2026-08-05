@@ -107,7 +107,7 @@ async function main () {
   record('closed AI aggregate mutations are guarded', aiFiles.every(source => /assertBugOpenForMutation\(req,/.test(source)))
   record('closed assignment picker is disabled', /showValueHelp="\{=[^\"]*status_code[^\"]*CLOSED/.test(smartAssignment) && /enabled="\{=[^\"]*status_code[^\"]*CLOSED/.test(smartAssignment))
   record('comment controls use backend capability', (commentsFragment.match(/canAddComment/g) || []).length >= 2)
-  record('standard Edit is hidden and attachment mutations are restricted', /UI\.UpdateHidden[\s\S]*canEdit/.test(actionAnnotations) && /NavigationRestrictions[\s\S]*canEdit/.test(capabilityAnnotations))
+  record('standard Edit is hidden and attachment mutations are restricted', /UI\.UpdateHidden[\s\S]*canEdit/.test(actionAnnotations) && /NavigationRestrictions[\s\S]*canManageAttachments/.test(capabilityAnnotations))
   record('HANA migration is dry-run by default', /const execute = process\.argv\.includes\(['"]--execute['"]\)/.test(migration) && /if \(!execute\)/.test(migration))
   record('HANA migration is additive and preserves existing owners', /ALTER TABLE[\s\S]*ADD/.test(migration) && /retestOwner[\s\S]*IS NULL/.test(migration) && !/DROP\s+(?:TABLE|COLUMN)/i.test(migration))
   record('HANA migration backfills active and draft targets with unresolved counts', /for \(const target of resolvedTargets\)[\s\S]*backfilledRowCount[\s\S]*unresolvedOwnerCount/.test(migration))

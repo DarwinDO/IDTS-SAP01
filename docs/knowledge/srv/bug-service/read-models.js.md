@@ -92,3 +92,8 @@ Thêm action hoặc thay đổi transition → cập nhật cả capability ở 
 - Knowledge mirror: `docs/knowledge/srv/bug-service/read-models.js.md`
 - Source layer: `srv`
 - Last reviewed: 2026-06-22
+## IDTS-125 split capabilities (2026-08-05)
+
+**English.** `applyBugCapabilities` independently derives comment, edit-shell, attachment and dynamic field-control values. Non-assignee Developers get comment-only; assignees get the edit shell plus attachment mutations while required/optional Bug fields stay read-only; coordinators receive normal mandatory/optional controls.
+
+**Tiếng Việt.** `applyBugCapabilities` tính riêng capability comment, edit shell, attachment và dynamic field control. Developer không phải assignee chỉ có comment; assignee có edit shell và attachment mutation nhưng field Bug bắt buộc/tùy chọn vẫn read-only; coordinator nhận control mandatory/optional bình thường.

@@ -163,6 +163,7 @@ const CAPABILITY_FIELDS = new Set([
   // Virtual fields cần bảo vệ trong `$select` để after READ tính enable/visible cho action.
   'canAddComment',
   'canEdit',
+  'canManageAttachments',
   'canReassignRetestOwner',
   'canMarkInReview',
   'canStartProgress',
@@ -175,13 +176,16 @@ const CAPABILITY_FIELDS = new Set([
   'canAssign',
   'canMoveToPending',
   'canResubmit',
-  'assigneeFieldControl'
+  'assigneeFieldControl',
+  'bugRequiredFieldControl',
+  'bugOptionalFieldControl'
 ])
 
 const FIELD_CONTROL = {
-  // Giá trị SAP Common.FieldControl dùng cho assignee field read-only/optional.
+  // Giá trị SAP Common.FieldControl dùng cho field động theo role/ownership.
   READ_ONLY: 1,
-  OPTIONAL: 3
+  OPTIONAL: 3,
+  MANDATORY: 7
 }
 
 const READ_ONLY_ENTITY_NAMES = [

@@ -7,7 +7,7 @@ const {
   ATTACHMENT_ROLES,
   COMMENT_ROLES
 } = require('./constants')
-const { assertBugOpenForMutation } = require('./permissions')
+const { assertActiveActor, assertBugOpenForMutation, isAssignedDeveloper } = require('./permissions')
 
 const {
   resolveRequestUser,
@@ -26,19 +26,17 @@ async function prepareCommentCreate (req, entities) {
   if (!bug) return req.reject(404, 'Bug not found.')
   assertBugOpenForMutation(req, bug)
 
-  const actor = await resolveRequestUser(req, entities)
-  if (actor) {
-    if (!COMMENT_ROLES.has(actor.role_code)) {
-      return req.reject(403, 'Only Tester, Developer, or PM users can add comments.')
-    }
-
-    if (req.data.author_ID && req.data.author_ID !== actor.ID) {
-      return req.reject(403, 'Users cannot create comments on behalf of another user.', 'author')
-    }
-
-    req.data.author_ID = actor.ID
-    req.data.authorRole_code = actor.role_code
+  const actor = assertActiveActor(req, await resolveRequestUser(req, entities))
+  if (!COMMENT_ROLES.has(actor.role_code)) {
+    return req.reject(403, 'Only Tester, Developer, or PM users can add comments.')
   }
+
+  if (req.data.author_ID && req.data.author_ID !== actor.ID) {
+    return req.reject(403, 'Users cannot create comments on behalf of another user.', 'author')
+  }
+
+  req.data.author_ID = actor.ID
+  req.data.authorRole_code = actor.role_code
 
   if (!req.data.author_ID) {
     return req.reject(400, 'Comment author is required.', 'author')
@@ -65,19 +63,30 @@ async function prepareCommentCreate (req, entities) {
 async function prepareAttachmentWrite (req, entities) {
   // Chạy trước mọi thao tác ghi/xóa attachment. Hàm kiểm quyền trên Bug cha và chuẩn hóa metadata;
   // binary thật đi qua storage adapter/S3, còn DB chỉ giữ metadata và storage reference.
-  const actor = await resolveRequestUser(req, entities)
+  const actor = assertActiveActor(req, await resolveRequestUser(req, entities))
 
   const bug = await readParentBugForContent(req, entities, req.data?.up__ID)
   if (!bug) return req.reject(404, 'Bug not found.')
   assertBugOpenForMutation(req, bug)
 
-  if (actor && !ATTACHMENT_ROLES.has(actor.role_code)) {
-    return req.reject(403, 'Only Tester, Developer, or PM users can upload attachments.')
-  }
+  const isAssigned = actor?.role_code === 'DEVELOPER'
+    ? await isAssignedDeveloper(req, entities, actor.ID, bug)
+    : false
+  assertAttachmentPermission(req, actor, isAssigned)
 
   const contentLength = Number(req.http?.req?.headers?.['content-length'])
   if (Number.isFinite(contentLength) && contentLength > 0) {
     req.data.fileSize = contentLength
+  }
+}
+
+function assertAttachmentPermission (req, actor, isAssignedDeveloperActor) {
+  assertActiveActor(req, actor)
+  if (!ATTACHMENT_ROLES.has(actor.role_code)) {
+    return req.reject(403, 'Only Tester, Developer, or PM users can manage attachments.')
+  }
+  if (actor?.role_code === 'DEVELOPER' && !isAssignedDeveloperActor) {
+    return req.reject(403, 'Only the assigned developer, Tester, or PM can manage Bug attachments.')
   }
 }
 
@@ -139,5 +148,6 @@ module.exports = {
   readParentBugForContent,
   prepareCommentCreate,
   prepareCommentMutation,
-  prepareAttachmentWrite
+  prepareAttachmentWrite,
+  assertAttachmentPermission
 }

@@ -13,6 +13,25 @@ const {
   userIDForDeveloper
 } = require('./helpers')
 
+// Chỉ các field nghiệp vụ này được coi là sửa Bug. Field kỹ thuật/draft và
+// composition attachment không được đưa vào đây, nhờ vậy assignee có thể mở
+// edit shell để upload file mà không có quyền sửa nội dung Bug.
+const BUG_BUSINESS_FIELDS = [
+  'title', 'description', 'stepsToReproduce', 'actualResult', 'expectedResult',
+  'priority_code', 'severity_code', 'environment_code', 'environmentDetail',
+  'sapModule_ID', 'applicationComponent_ID', 'defectCategory_ID',
+  'componentCategory_ID', 'assignee_ID', 'status_code', 'rejectionReason',
+  'testCaseRef', 'testRunRef', 'plannedCompletionDate', 'dueDate',
+  'estimatedEffortHours', 'nextProcessorUser_ID', 'nextProcessorRole_code'
+]
+
+function assertActiveActor (req, actor) {
+  if (!actor) {
+    return req.reject(403, 'An active IDTS user is required for this operation.')
+  }
+  return actor
+}
+
 async function enforceBugWritePermission (req, entities, oldBug, nextBug, { isCreate }) {
   // `prepareBugWrite` gọi hàm này trước CREATE/UPDATE Bug active.
   // Với create, dùng rule riêng vì chưa có Bug cũ hay assignee để so sánh.
@@ -24,8 +43,15 @@ async function enforceBugWritePermission (req, entities, oldBug, nextBug, { isCr
 
   // `actor` là Users row được map từ token/session, không phải role do browser tự gửi.
   // Breakpoint tại đây để kiểm tra ID, role_code và active khi request bị từ chối sai.
-  const actor = await resolveRequestUser(req, entities)
-  if (!actor) return
+  const actor = assertActiveActor(req, await resolveRequestUser(req, entities))
+
+  if (actor.role_code === USER_ROLE.DEVELOPER && hasBugBusinessChanges(oldBug, nextBug)) {
+    return req.reject(
+      403,
+      'Developers cannot edit Bug fields. Use the permitted lifecycle actions, comments, or attachments.',
+      firstChangedBugField(oldBug, nextBug)
+    )
+  }
 
   // So sánh ảnh chụp trước/sau để tách quyền đổi assignee khỏi quyền đổi status.
   const statusChanged = oldBug.status_code !== nextBug.status_code
@@ -52,6 +78,39 @@ async function enforceBugWritePermission (req, entities, oldBug, nextBug, { isCr
     'Only the assigned developer, Tester, or PM can change the bug processing status.',
     'status'
   )
+}
+
+async function enforceBugEditPermission (req, entities, bug) {
+  assertBugOpenForMutation(req, bug)
+  const actor = assertActiveActor(req, await resolveRequestUser(req, entities))
+  if (COORDINATOR_ROLES.has(actor.role_code)) return
+  if (actor.role_code === USER_ROLE.DEVELOPER && await isAssignedDeveloper(req, entities, actor.ID, bug)) return
+  return req.reject(403, 'Only Tester, PM, or the assigned developer can open this Bug for editing.')
+}
+
+async function enforceDeveloperDraftFieldsUnchanged (req, entities, activeBug, draftOrPatch) {
+  const actor = assertActiveActor(req, await resolveRequestUser(req, entities))
+  if (actor.role_code !== USER_ROLE.DEVELOPER) return
+  const nextBug = { ...activeBug, ...draftOrPatch }
+  if (!hasBugBusinessChanges(activeBug, nextBug)) return
+  return req.reject(
+    403,
+    'Developers cannot edit Bug fields. Use the permitted lifecycle actions, comments, or attachments.',
+    firstChangedBugField(activeBug, nextBug)
+  )
+}
+
+function firstChangedBugField (oldBug = {}, nextBug = {}) {
+  return BUG_BUSINESS_FIELDS.find(field => normalizeComparable(oldBug[field]) !== normalizeComparable(nextBug[field]))
+}
+
+function hasBugBusinessChanges (oldBug, nextBug) {
+  return !!firstChangedBugField(oldBug, nextBug)
+}
+
+function normalizeComparable (value) {
+  if (value === undefined || value === '') return null
+  return value instanceof Date ? value.toISOString() : String(value)
 }
 
 function assertBugOpenForMutation (req, bug) {
@@ -84,8 +143,7 @@ function assertBugCreatePermission (req, actor) {
 async function enforceActionPermission (req, entities, bug, actionType) {
   // `transitionBug`, assign và các action lifecycle gọi hàm này trước khi update database.
   // PM/Tester được điều phối; Developer cần action nằm trong allow-list và là assignee hiện tại.
-  const actor = await resolveRequestUser(req, entities)
-  if (!actor) return
+  const actor = assertActiveActor(req, await resolveRequestUser(req, entities))
 
   if (COORDINATOR_ROLES.has(actor.role_code)) return
 
@@ -111,10 +169,15 @@ async function isAssignedDeveloper (req, entities, userID, bug) {
 }
 
 module.exports = {
+  BUG_BUSINESS_FIELDS,
+  assertActiveActor,
   assertBugOpenForMutation,
   assertBugCreatePermission,
   enforceBugCreatePermission,
   enforceBugWritePermission,
+  enforceBugEditPermission,
+  enforceDeveloperDraftFieldsUnchanged,
   enforceActionPermission,
+  hasBugBusinessChanges,
   isAssignedDeveloper
 }

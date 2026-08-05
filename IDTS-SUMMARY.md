@@ -568,3 +568,8 @@ Cập nhật đã chốt:
 - Note/reason chỉ bắt buộc ở các transition cụ thể: request more information, reject, resolve và reopen.
 - Bug Detail UI cần đưa assignee lên gần đầu, status phải edit bằng dropdown/value help, field quan trọng phải được nhóm để nhập nhanh, và severity/environment nên chuyển sang vùng phụ hoặc bên phải khi có thể.
 - DonHV chuyển từ vai trò thực thi BA/PM chính sang Backend CAP lead và backend bug fixing. NhanT hỗ trợ backend verification và QA. DatDT lead Fiori/UI5. SangVN hỗ trợ Fiori/UI5.
+## IDTS-125 authorization baseline / Baseline phân quyền IDTS-125
+
+**English.** Developers have team-visible read/comment access. Non-assignees cannot mutate Bug fields or attachments. The assigned Developer can use approved lifecycle actions and manage attachments, but Bug business fields remain read-only; Tester/PM retain documented edit and coordination rights. CAP is the security boundary across active and draft writes.
+
+**Tiếng Việt.** Developer có quyền đọc/comment Bug nhìn thấy trong team. Developer không phải assignee không được mutate field Bug hoặc attachment. Developer assignee được dùng lifecycle action đã duyệt và quản lý attachment nhưng field nghiệp vụ Bug vẫn read-only; Tester/PM giữ quyền edit và điều phối đã mô tả. CAP là security boundary cho cả active và draft write.

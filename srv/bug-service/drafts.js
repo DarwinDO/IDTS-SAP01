@@ -19,7 +19,7 @@ const {
   validateActiveCodeLists,
   validateRequiredBugFields
 } = require('./bug-write')
-const { assertBugOpenForMutation } = require('./permissions')
+const { assertBugOpenForMutation, enforceDeveloperDraftFieldsUnchanged } = require('./permissions')
 
 async function prepareDraftPatch (req, entities) {
   // Fiori gọi PATCH nhiều lần khi người dùng đổi field. `req.data` thường chỉ có field vừa đổi,
@@ -31,9 +31,10 @@ async function prepareDraftPatch (req, entities) {
   if (!currentDraft) return
 
   assertBugOpenForMutation(req, currentDraft)
-  if (currentDraft.HasActiveEntity) {
-    const activeBug = await readBug(req, entities, bugID)
+  const activeBug = await readBug(req, entities, bugID)
+  if (activeBug) {
     assertBugOpenForMutation(req, activeBug)
+    await enforceDeveloperDraftFieldsUnchanged(req, entities, activeBug, req.data)
   }
   delete req.data.reporter_ID
   delete req.data.retestOwner_ID
@@ -122,9 +123,10 @@ async function validateDraftForSave (req, entities) {
   if (!draft) return
 
   assertBugOpenForMutation(req, draft)
-  if (draft.HasActiveEntity) {
-    const activeBug = await readBug(req, entities, bugID)
+  const activeBug = await readBug(req, entities, bugID)
+  if (activeBug) {
     assertBugOpenForMutation(req, activeBug)
+    await enforceDeveloperDraftFieldsUnchanged(req, entities, activeBug, draft)
   }
 
   await ensureDraftReporterForSave(req, entities, draft)

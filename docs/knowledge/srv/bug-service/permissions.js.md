@@ -234,3 +234,10 @@ Quyền tạo Bug hiện được gom vào `enforceBugCreatePermission()` và `a
   **Phải kiểm tra cùng**: `before NEW` trong `srv/service.js`, visibility của Fiori Create, mapping role khi login và test authorization trực tiếp.
 
 Ẩn Create trên Fiori là UX cần thiết, nhưng trạng thái trình duyệt không phải ranh giới bảo mật; backend check này vẫn bắt buộc.
+## IDTS-125 mutation boundary (2026-08-05)
+
+**English.** `enforceBugEditPermission` allows the draft edit shell only to Tester/PM or the current assignee. `enforceBugWritePermission` and `enforceDeveloperDraftFieldsUnchanged` compare the explicit Bug business-field allow-list and reject Developer field changes with 403. Lifecycle actions keep their separate assignee-aware authorization. Safe breakpoints are immediately before these rejects and before persistence, where only IDs/role/changed field names are inspected.
+
+**Tiếng Việt.** `enforceBugEditPermission` chỉ cho Tester/PM hoặc assignee hiện tại mở draft edit shell. `enforceBugWritePermission` và `enforceDeveloperDraftFieldsUnchanged` so sánh allow-list field nghiệp vụ rõ ràng rồi reject Developer sửa field bằng 403. Lifecycle action vẫn dùng authorization theo assignee riêng. Breakpoint an toàn nằm ngay trước reject và trước persist, chỉ xem ID/role/tên field đổi.
+
+`assertActiveActor` makes every affected write path fail closed when the authenticated platform identity cannot resolve to one active IDTS user. / `assertActiveActor` làm mọi write path liên quan fail-closed khi platform identity đã xác thực không map được tới một IDTS user active.

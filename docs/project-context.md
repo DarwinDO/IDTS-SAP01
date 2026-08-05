@@ -287,3 +287,8 @@ Delta nghiệp vụ và UI:
   - `Resolved` -> `Reopened`.
 - Bug Detail UI cần đưa assignee lên gần đầu, status khi edit dùng dropdown/value help, field quan trọng được nhóm để nhập và review nhanh, và severity/environment nằm ở vùng thông tin phụ hoặc bên phải khi có thể.
 - Phân công Sprint 02: DonHV lead Backend CAP và backend bug fixing, NhanT hỗ trợ backend verification/QA, DatDT lead Fiori/UI5, SangVN hỗ trợ Fiori/UI5.
+## IDTS-125 mutation authorization boundary
+
+Team-visible Developer access means read and comment. A non-assignee Developer cannot edit Bug fields or mutate attachments. The assigned Developer can comment, manage attachments, and invoke status-appropriate lifecycle actions, while Bug business fields remain read-only. Tester and PM keep their documented edit/coordination permissions. Because SAP attachment upload uses the draft edit shell, Fiori exposes that shell only to the assignee/coordinators and uses separate field/attachment capabilities; CAP still rejects unauthorized active UPDATE, draft EDIT/PATCH/SAVE, and attachment writes.
+
+Vietnamese: Quyền Developer xem Bug trong team chỉ gồm đọc và comment. Developer không phải assignee không được sửa field Bug hoặc mutate attachment. Developer assignee được comment, quản lý attachment và gọi lifecycle action phù hợp status, còn field nghiệp vụ Bug vẫn read-only. Tester và PM giữ quyền edit/điều phối đã mô tả. Do SAP attachment upload dùng draft edit shell, Fiori chỉ mở shell cho assignee/coordinator và tách capability field/attachment; CAP vẫn reject active UPDATE, draft EDIT/PATCH/SAVE và attachment write trái quyền.

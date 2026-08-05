@@ -425,3 +425,8 @@ Sau buổi họp mentor gần nhất, team không nên dành sprint tiếp theo 
 - Note/reason chỉ bắt buộc ở các transition cần giải thích rõ: request more information, reject, resolve và reopen.
 - Fiori Bug Detail phải ưu tiên assignee và status, status edit bằng dropdown/value help, field quan trọng phải dễ nhập, và severity/environment nên nằm ở vùng thông tin phụ hoặc bên phải khi có thể.
 - DonHV hiện là Backend CAP lead và owner phần backend bug fixing. NhanT hỗ trợ backend verification và QA. DatDT lead Fiori/UI5. SangVN hỗ trợ Fiori/UI5.
+## IDTS-125 Role and assignee mutation boundary
+
+**English:** A Developer who is not the assignee may read and comment only. The assigned Developer may comment, upload/update/delete attachments, and use permitted lifecycle actions, but may not edit Bug business fields. Tester and PM retain the documented Bug-editing/coordination permissions. Fiori may open an edit shell for the assigned Developer to support the SAP attachment control, while dynamic field control keeps Bug fields read-only and CAP independently rejects unauthorized active/draft writes.
+
+**Tiếng Việt:** Developer không phải assignee chỉ được đọc và comment. Developer assignee được comment, upload/update/delete attachment và dùng lifecycle action được phép nhưng không được sửa field nghiệp vụ Bug. Tester và PM giữ quyền edit/điều phối đã mô tả. Fiori có thể mở edit shell cho Developer assignee để dùng SAP attachment control, đồng thời dynamic field control giữ field Bug read-only và CAP độc lập reject active/draft write trái quyền.

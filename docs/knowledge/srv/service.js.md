@@ -430,3 +430,8 @@ Neu bo registration nay, metadata co the van thay action, nhung runtime action s
 ### Vietnamese
 
 `BugService.init()` hiện đăng ký handler Accept, Reject, Ignore và Apply Classification từ `srv/ai`. Ba action đầu chỉ review. `applyClassificationSuggestion` là đường ghi riêng có guard cho classification suggestion đã Accept. Owner chính: DonHV; backup: DatDT. Khi debug, bắt đầu tại `this.on(...)` tương ứng rồi đi vào `review.js` hoặc `classification-apply.js`. Giữ file này chỉ làm wiring; quyền, catalog check, stale protection và history nằm trong module tập trung.
+## IDTS-125 handler entry guard (2026-08-05)
+
+**English.** The root `EDIT` handler now calls the assignee-aware permission guard before CAP creates an edit draft. PATCH/SAVE and attachment targets retain their own deeper guards, so hiding Fiori controls is never the only protection.
+
+**Tiếng Việt.** Handler root `EDIT` gọi permission guard theo assignee trước khi CAP tạo edit draft. PATCH/SAVE và attachment target vẫn có guard sâu riêng, nên ẩn control Fiori không bao giờ là lớp bảo vệ duy nhất.

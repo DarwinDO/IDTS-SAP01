@@ -201,3 +201,8 @@ Fiori draft là bản dữ liệu tạm trong database khi user đang sửa form
   **Phải kiểm tra cùng**: `bug-write.js`, đăng ký PATCH/SAVE trong `service.js`, `db/schema.cds` và draft test trên Object Page.
 
 Hai lần kiểm tra là có chủ ý: PATCH thường chỉ chứa một field vừa đổi, còn SAVE là cổng toàn vẹn cuối trên toàn bộ draft.
+## IDTS-125 draft guard (2026-08-05)
+
+**English.** PATCH reads both draft and active Bug; SAVE rereads the complete draft and active Bug. For a Developer, any Bug business-field difference is rejected before activation. Attachment-only draft work can continue for the assignee.
+
+**Tiếng Việt.** PATCH đọc cả draft và Bug active; SAVE đọc lại draft đầy đủ và Bug active. Với Developer, mọi khác biệt field nghiệp vụ Bug bị reject trước activation. Draft chỉ thay attachment vẫn được tiếp tục nếu actor là assignee.

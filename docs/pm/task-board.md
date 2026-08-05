@@ -118,6 +118,7 @@ Vietnamese:
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
+| IDTS-125 | Security: Enforce role- and assignee-scoped Bug mutations across CAP drafts and Fiori | SangVN | In Progress on `fix/idts-125-bug-mutation-authorization-sangvn`. Knowledge Gate retest PASS 6/6 on 2026-08-06; normal PR review, merge and final Jira evidence remain. |
 | IDTS-37 | Notification UI and email delivery status readability | SangVN | FE/QA review of notification section after SMTP/outbox changes, focusing on readable event/channel/status/recipient/message output. Unblocked by merged IDTS-36. |
 | IDTS-60 | Browser and manual UAT for completed Sprint 4 UI baseline | NhanT | Due 2026-07-12. Earlier QA checkpoint for merged Sprint 4 UI baseline before final `IDTS-57` regression. |
 | IDTS-40 | AWS ECS/ECR shared QA deployment direction | DonHV | Due 2026-07-18 if kept active. Treat as AWS-native follow-up/alternative, not a blocker for accepted Render QA. |

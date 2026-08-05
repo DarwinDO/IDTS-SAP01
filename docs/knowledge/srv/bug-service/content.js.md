@@ -83,3 +83,10 @@ Thay đổi quy tắc attachment/comment phải cập nhật ở đây + schema 
 ## IDTS-122 Closed aggregate boundary
 
 `prepareCommentCreate`, `prepareCommentMutation`, and `prepareAttachmentWrite` resolve the parent Bug and call the shared Closed-state guard. New comments, existing comment mutation, and attachment create/update/delete are denied while the parent Bug is `CLOSED`; reads and downloads remain allowed. CAP draft composition routing may reject an invalid direct child request before this custom guard, so deployed browser/API evidence is still required for the final route contract.
+## IDTS-125 attachment ownership (2026-08-05)
+
+**English.** Comment creation remains available to active Tester/Developer/PM users on open Bugs. Attachment create/update/delete additionally requires Tester/PM or the current Developer assignee. `filename`, MIME type and size are metadata; the binary stream is real file content handled by the storage adapter. Debug only parent Bug ID, actor/assignee mapping and metadata before storage; never inspect/log the binary body.
+
+**Tiếng Việt.** Comment vẫn dành cho Tester/Developer/PM active trên Bug mở. Create/update/delete attachment yêu cầu thêm actor là Tester/PM hoặc Developer assignee hiện tại. `filename`, MIME type và size là metadata; binary stream là nội dung file thật do storage adapter xử lý. Chỉ debug Bug ID cha, mapping actor/assignee và metadata trước storage; không xem/log binary body.
+
+Unmapped authenticated identities are rejected before comment authorship or attachment persistence. / Identity đã xác thực nhưng không map được IDTS user bị reject trước khi ghi author comment hoặc persist attachment.
