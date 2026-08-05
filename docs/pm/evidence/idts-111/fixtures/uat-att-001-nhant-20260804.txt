@@ -1,0 +1,5 @@
+IDTS-111 controlled attachment fixture
+Owner: NhanT
+Case chain: UAT-ATT-001, UAT-ATT-002, UAT-ATT-003
+Created: 2026-08-04 Asia/Bangkok
+Classification: non-sensitive synthetic QA data

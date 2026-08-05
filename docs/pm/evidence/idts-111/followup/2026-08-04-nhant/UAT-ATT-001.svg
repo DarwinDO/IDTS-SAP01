@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720">
+  <rect width="1200" height="720" fill="#f5f7fa"/><rect x="48" y="48" width="1104" height="624" rx="18" fill="#fff" stroke="#89919a"/>
+  <text x="86" y="108" font-family="Arial" font-size="34" font-weight="700" fill="#0a6ed1">UAT-ATT-001 — Current rerun</text>
+  <text x="86" y="150" font-family="Arial" font-size="20" fill="#354a5f">NhanT · Tester · 2026-08-04 23:10 +07 · runtime 67b1bf86169e</text>
+  <text x="86" y="210" font-family="Arial" font-size="24" font-weight="700">Exact fixture provenance</text>
+  <text x="110" y="252" font-family="Consolas" font-size="19">uat-att-001-nhant-20260804.txt · text/plain · 183 bytes</text>
+  <text x="110" y="286" font-family="Consolas" font-size="17">SHA-256 1BB8C0F0CC1767605368B1E3CD139EBB33F9FCA02C4FEA33F619DA29C572ED26</text>
+  <text x="86" y="350" font-family="Arial" font-size="24" font-weight="700">Observed</text>
+  <text x="110" y="392" font-family="Arial" font-size="21">1. Upload and Save showed the exact file as an active attachment row.</text>
+  <text x="110" y="430" font-family="Arial" font-size="21">2. A fresh reload showed zero attachment rows.</text>
+  <text x="110" y="468" font-family="Arial" font-size="21">3. Metadata and binary persistence are therefore not proven.</text>
+  <rect x="86" y="522" width="1028" height="92" rx="10" fill="#ffeaf4" stroke="#bb0000"/>
+  <text x="110" y="560" font-family="Arial" font-size="24" font-weight="700" fill="#bb0000">Candidate: DOES_NOT_MEET_EXPECTED_RESULT</text>
+  <text x="110" y="594" font-family="Arial" font-size="18">Historical 44/54/47-byte records were not modified.</text>
+</svg>
