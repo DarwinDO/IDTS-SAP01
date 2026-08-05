@@ -180,7 +180,9 @@ function safeErrorMessage (error) {
     .replace(/password\s*[=:]\s*[^\s,;]+/gi, 'password=[REDACTED]')
 }
 
-if (require.main === module) main().catch(error => {
+const invokedFromStdin = process.argv[1] === '-'
+
+if (require.main === module || invokedFromStdin) main().catch(error => {
   console.error(`IDTS-122 HANA migration failed: ${safeErrorMessage(error)}`)
   process.exit(1)
 })
@@ -189,6 +191,7 @@ module.exports = {
   columnName,
   ensureRetestOwnerAction,
   hasColumn,
+  main,
   physicalColumnName,
   quoteIdentifier,
   requireColumn,

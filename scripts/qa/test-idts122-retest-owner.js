@@ -2,6 +2,7 @@
 
 const fs = require('fs')
 const path = require('path')
+const { spawnSync } = require('child_process')
 
 const {
   assertBugOpenForMutation,
@@ -116,6 +117,10 @@ async function main () {
   record('HANA migration wraps code-list insert and backfill DML in one transaction', /db\.tx\(async tx =>[\s\S]*ensureRetestOwnerAction\(tx[\s\S]*UPDATE/.test(migration))
   record('HANA migration creates the unquoted-CDS-equivalent physical column', /ALTER TABLE[\s\S]*quoteIdentifier\(physicalColumnName\)[\s\S]*NVARCHAR\(36\)/.test(migration))
   record('HANA migration requires a single operator and documents sequential rerun', /Execute from one operator only/.test(migration) && /sequential rerun is safe/.test(migration))
+  record('HANA migration executes when transported through node stdin', /const invokedFromStdin = process\.argv\[1\] === ['"]-['"]/.test(migration) && /require\.main === module \|\| invokedFromStdin/.test(migration))
+  record('HANA migration exports main for explicit remote invocation', /module\.exports\s*=\s*\{[\s\S]*\bmain,/.test(migration))
+  const stdinDryRun = spawnSync(process.execPath, ['-'], { input: migration, encoding: 'utf8' })
+  record('stdin transport runs the helper instead of returning an empty success', stdinDryRun.status === 0 && /"mode": "dry-run"/.test(stdinDryRun.stdout))
 
   const resolvedPhysicalColumn = await resolveColumn({
     run: async () => [{ COLUMN_NAME: 'REPORTER_ID' }]
