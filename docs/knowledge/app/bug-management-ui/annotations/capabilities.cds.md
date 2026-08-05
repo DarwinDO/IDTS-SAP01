@@ -61,14 +61,16 @@ service.cds, read-models, permissions, actions.cds.
 
 IDTS-43 adds `UI.CreateHidden : true`.
 
-This is not a backend permission rule. It is a Fiori UI rule that hides the generated standard Create button. IDTS now uses a custom List Report action named `Create Bug`, because create visibility depends on the logged-in role from the custom login session. Tester and PM can see the custom action; Developer should not see it.
+This is not a backend permission rule. It is a Fiori UI rule that hides the generated standard Create button. IDTS now uses a custom List Report action named `Create Bug`, because create visibility depends on the logged-in role from the custom login session. Only Tester can see the custom action; PM and Developer must not see it.
+
+The custom action binds `visible` and `enabled` to the observable named model property `session>/canCreateBug`, initialized by `Component.js`. A plain JavaScript callback in the manifest is not used because it is not a reliable reactive Fiori Elements binding contract.
 
 The backend remains the security boundary. Even if a user manipulates browser storage or calls OData directly, `srv/bug-service/permissions.js` and `srv/service.js` must still reject unauthorized create/draft-create attempts.
 
 Important anchor:
 
 - Location: `UI.CreateHidden : true`
-  - IDTS concept: Create Bug is role-aware. It is allowed for Tester/PM and hidden from Developer.
+  - IDTS concept: Create Bug is role-aware. It is allowed only for Tester and hidden from PM/Developer.
   - Impact if broken: The standard Create button can appear to Developer users, causing a confusing UI/backend mismatch.
   - Must check together: `app/bug-management-ui/webapp/manifest.json` custom `CreateBug` action, `app/bug-management-ui/webapp/ext/actions/BugListActions.js`, `srv/service.js` `NEW` draft guard, and `srv/bug-service/permissions.js`.
 
@@ -76,14 +78,16 @@ Important anchor:
 
 IDTS-43 thêm `UI.CreateHidden : true`.
 
-Đây không phải rule phân quyền backend. Đây là rule UI của Fiori để ẩn nút Create chuẩn do framework tự sinh. IDTS hiện dùng một custom action ở List Report tên là `Create Bug`, vì việc nút tạo bug có hiện hay không phụ thuộc vào role của user trong custom login session. Tester và PM được thấy custom action; Developer không nên thấy.
+Đây không phải rule phân quyền backend. Đây là rule UI của Fiori để ẩn nút Create chuẩn do framework tự sinh. IDTS hiện dùng một custom action ở List Report tên là `Create Bug`, vì việc nút tạo bug có hiện hay không phụ thuộc vào role của user trong custom login session. Chỉ Tester được thấy custom action; PM và Developer không được thấy.
+
+Custom action bind `visible` và `enabled` vào property có thể quan sát `session>/canCreateBug`, được `Component.js` khởi tạo. Không dùng callback JavaScript trực tiếp trong manifest vì đó không phải binding phản ứng đáng tin cậy của Fiori Elements.
 
 Backend vẫn là lớp bảo vệ thật. Kể cả khi user sửa browser storage hoặc gọi OData trực tiếp, `srv/bug-service/permissions.js` và `srv/service.js` vẫn phải chặn create/draft-create không hợp lệ.
 
 Điểm neo quan trọng:
 
 - Vị trí: `UI.CreateHidden : true`
-  - Khái niệm IDTS: Create Bug phải theo role. Tester/PM được tạo, Developer bị ẩn.
+  - Khái niệm IDTS: Create Bug phải theo role. Chỉ Tester được tạo; PM/Developer bị ẩn.
   - Ảnh hưởng nếu sai: Nút Create chuẩn có thể hiện cho Developer, làm UI và backend lệch nhau.
   - Phải kiểm tra cùng: custom action `CreateBug` trong `app/bug-management-ui/webapp/manifest.json`, `app/bug-management-ui/webapp/ext/actions/BugListActions.js`, draft guard `NEW` trong `srv/service.js`, và `srv/bug-service/permissions.js`.
 

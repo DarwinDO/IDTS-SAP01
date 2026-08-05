@@ -14,14 +14,24 @@
 sap.ui.define(
     [
         "sap/fe/core/AppComponent",
+        "sap/ui/model/json/JSONModel",
+        "idts/bugmanagementui/ext/login/LoginController",
         "idts/bugmanagementui/ext/login/ProfileShell"
     ],
-    function (AppComponent, ProfileShell) {
+    function (AppComponent, JSONModel, LoginSession, ProfileShell) {
         "use strict";
         return AppComponent.extend("idts.bugmanagementui.Component", {
             metadata: { manifest: "json" },
 
             init: function () {
+                var user = LoginSession.getUser();
+                var sessionModel = new JSONModel({
+                    canCreateBug: Boolean(user && user.role_code === "TESTER")
+                });
+
+                // Bind toolbar authorization UX to observable session state.
+                // CAP remains the authoritative authorization boundary.
+                this.setModel(sessionModel, "session");
                 // UI5 gọi một lần sau khi auth guard/index bootstrap đã chạy. Base init tạo Fiori Elements app,
                 // rồi ProfileShell gắn avatar/menu theo user trong session; breakpoint ở đây khi shell thiếu.
                 AppComponent.prototype.init.apply(this, arguments);
