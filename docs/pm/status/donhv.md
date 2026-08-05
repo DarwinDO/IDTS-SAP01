@@ -5747,5 +5747,5 @@ Live evidence: `docs/pm/evidence/idts-117/demo-readiness/live-verification-20260
 - Classification: tooling/release defect.
 - Symptom: Cloud Foundry task `idts122-migrate-173056` exited `0` without migration output; the subsequent read-only probe reported that the active Bugs table still lacked the retest-owner column.
 - Root cause: the helper was transported through `node - --execute`; under Node stdin execution, `require.main === module` is false, so `main()` was never invoked.
-- Fix status: in progress on `fix/idts-122-migration-entrypoint-donhv`; the helper now detects the stdin entrypoint and exports `main`, with focused regression coverage.
+- Fix status: in progress on `fix/idts-122-migration-entrypoint-donhv`; the helper now detects only direct stdin execution, exports `main`, and emits a dedicated completion marker only after the execute result, with focused direct-stdin and nested-import regression coverage.
 - Safety: the no-op task made no HANA change. Service deployment remains blocked until a successful narrow rerun and read-only post-migration verification. No DB deploy, seed, or broad `cds deploy` was run.

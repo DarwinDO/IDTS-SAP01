@@ -117,10 +117,17 @@ async function main () {
   record('HANA migration wraps code-list insert and backfill DML in one transaction', /db\.tx\(async tx =>[\s\S]*ensureRetestOwnerAction\(tx[\s\S]*UPDATE/.test(migration))
   record('HANA migration creates the unquoted-CDS-equivalent physical column', /ALTER TABLE[\s\S]*quoteIdentifier\(physicalColumnName\)[\s\S]*NVARCHAR\(36\)/.test(migration))
   record('HANA migration requires a single operator and documents sequential rerun', /Execute from one operator only/.test(migration) && /sequential rerun is safe/.test(migration))
-  record('HANA migration executes when transported through node stdin', /const invokedFromStdin = process\.argv\[1\] === ['"]-['"]/.test(migration) && /require\.main === module \|\| invokedFromStdin/.test(migration))
+  record('HANA migration executes only as the direct node stdin module', /const invokedFromStdin = process\.argv\[1\] === ['"]-['"] && module\.id === ['"]\[stdin\]['"]/.test(migration) && /require\.main === module \|\| invokedFromStdin/.test(migration))
   record('HANA migration exports main for explicit remote invocation', /module\.exports\s*=\s*\{[\s\S]*\bmain,/.test(migration))
   const stdinDryRun = spawnSync(process.execPath, ['-'], { input: migration, encoding: 'utf8' })
-  record('stdin transport runs the helper instead of returning an empty success', stdinDryRun.status === 0 && /"mode": "dry-run"/.test(stdinDryRun.stdout))
+  record('stdin transport runs the helper instead of returning an empty success', stdinDryRun.status === 0 && /"mode": "dry-run"/.test(stdinDryRun.stdout) && !/IDTS-122-MIGRATION-COMPLETE/.test(stdinDryRun.stdout))
+  const nestedImport = spawnSync(process.execPath, ['-', '--dry-run'], {
+    cwd: ROOT,
+    input: "require('./scripts/db/migrate-idts122-retest-owner-hana.js')\nconsole.log('outer-stdin-finished')",
+    encoding: 'utf8'
+  })
+  record('importing the helper from another stdin script does not auto-run it', nestedImport.status === 0 && nestedImport.stdout.trim() === 'outer-stdin-finished')
+  record('execute completion marker is emitted only after the result payload', /const completionMarker = ['"]IDTS-122-MIGRATION-COMPLETE['"][\s\S]*console\.log\(JSON\.stringify\([\s\S]*console\.log\(completionMarker\)/.test(migration))
 
   const resolvedPhysicalColumn = await resolveColumn({
     run: async () => [{ COLUMN_NAME: 'REPORTER_ID' }]
