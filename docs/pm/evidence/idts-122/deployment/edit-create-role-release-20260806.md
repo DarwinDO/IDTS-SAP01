@@ -59,6 +59,7 @@
 ## Merged UI release and selective BTP deployment
 
 - PR: `#294`.
+- Post-deployment evidence follow-up: PR `#295`.
 - Merge SHA: `1a7964d8112594b7ea0e98b1d6112ad80b312659`.
 - Merge method: normal merge after the exact-head QA Depth Gate passed; no administrative bypass.
 - MTA archive was built from a detached fresh worktree at the merge SHA.
