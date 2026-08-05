@@ -77,9 +77,14 @@
     },
     {
       "caseId": "UAT-UX-003",
-      "candidateOutcome": "NOT_EXECUTED_HUMAN_REQUIRED",
-      "actualResult": "Physical Tab-key confirmation remains pending NhanT; no automated keyboard result was substituted.",
-      "template": "UAT-UX-003-physical-tab-template.md"
+      "executedAt": "2026-08-05T09:38:00+07:00",
+      "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
+      "actualResult": "NhanT's physical-keyboard check confirmed logical focus order through Create, comments, and actions; Enter opened Similar Bugs, Escape closed it, and focus returned to the trigger. Inside the dialog, Tab reached only the first similar-bug result and skipped the remaining results.",
+      "template": "UAT-UX-003-physical-tab-template.md",
+      "evidence": [
+        {"file": "UAT-UX-003-trigger-focus.png", "sha256": "46CB714141618BCECE4C7B1EB831D97AE59548C1CA9C75B8E065CF7EFED95401", "kind": "sanitized physical-keyboard trigger-focus screenshot"},
+        {"file": "UAT-UX-003-first-result-focus.png", "sha256": "E75188E1BDB04F5A06032064094ADC38296B82BEF2425E3B352CF1E919C3435C", "kind": "sanitized first-result focus screenshot"}
+      ]
     }
   ],
   "privacyReview": {
