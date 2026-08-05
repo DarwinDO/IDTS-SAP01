@@ -71,7 +71,7 @@ Vietnamese: `Notifications` la source event trong app; `NotificationDeliveries` 
 | --- | --- |
 | Tester | Detect bugs, create and update bug reports, check duplicates, classify bugs, assign/reassign developers, provide requested information, retest, close or reopen when needed, comment, and track status |
 | Developer | View assigned and team-visible bugs when permitted, discuss/comment, review bug details, request more information, reject wrong classification or unsuitable assignment with reason, add optional developer notes when useful, and update processing status only when assigned or authorized |
-| PM | Monitor all bugs, workload, overdue bugs, status progress, history, reports, and escalation notifications |
+| PM | Monitor all bugs, workload, overdue bugs, status progress, history, reports, escalation notifications, and reassign the retest owner when the current Tester is unavailable; PM cannot create new Bugs |
 
 MVP role baseline: IDTS currently uses three active roles only: Tester, Developer, and PM. `Reporter` is not a separate MVP role because the project is internal and Testers are the primary people who find and report bugs. `Admin` is not a separate MVP role because no dedicated admin workflow is planned yet; lightweight administrative responsibilities such as master-data upkeep, classification correction, and reassignment coordination are handled by Tester or PM where authorized.
 
@@ -165,9 +165,9 @@ Các quyết định chính:
 
 Current MVP note: `New` remains in the status catalog for legacy/import compatibility, but the normal create happy flow does not persist `New`. A newly submitted bug starts in `Assigned` when a developer is selected, or `Pending Assignment` when no suitable developer is selected.
 
-Current create-assignment clarification: IDTS must not automatically pick a Developer during create. If the Tester or PM does not explicitly select an assignee, the bug starts as `Pending Assignment`.
+Current create-assignment clarification: only a Tester can create a new Bug. IDTS must not automatically pick a Developer during create. If the Tester does not explicitly select an assignee, the bug starts as `Pending Assignment`.
 
-Vietnamese: IDTS không được tự chọn Developer khi tạo bug. Nếu Tester hoặc PM không chủ động chọn assignee, bug sẽ bắt đầu ở `Pending Assignment`.
+Vietnamese: Chỉ Tester được tạo Bug mới. IDTS không được tự chọn Developer khi tạo bug. Nếu Tester không chủ động chọn assignee, bug sẽ bắt đầu ở `Pending Assignment`.
 
 ### Assign Bug
 
@@ -218,9 +218,13 @@ Vietnamese:
 
 1. Developer marks bug as Resolved and adds a note.
 2. System or Tester moves the bug to Retest Required when verification is needed.
-3. Tester or PM verifies the result.
+3. The durable `retestOwner` identifies the Tester responsible for verification; PM may reassign that owner through a dedicated action when the current Tester is unavailable.
 4. Bug is Closed when accepted.
-5. Tester can Reopen if the issue still exists.
+5. Closed makes the business aggregate read-only: ordinary edit, Developer assignment, comments, attachment mutation, AI mutation, and other lifecycle actions are rejected.
+6. `Reopen Bug` is the controlled lifecycle exception. PM `Reassign Retest Owner` is the only other allowed business mutation while Closed.
+7. Existing comments, attachments, history, and AI audit remain readable; existing attachment binary remains downloadable.
+8. After Reopen, normal role/status permissions apply again.
+9. Bug records are never hard-deleted in any status; lifecycle actions preserve the required audit trail.
 
 ### Next Processor Ownership
 
@@ -233,7 +237,7 @@ Vietnamese:
    - Need More Information: Tester.
    - Pending Assignment: PM queue or Tester.
    - Rejected: Tester or PM must correct classification, reassign, or move to Pending Assignment.
-   - Resolved and Retest Required: Tester or PM.
+   - Resolved and Retest Required: durable `retestOwner`, with PM coordination when reassignment is required.
    - Closed: no next processor.
 6. Manual override should be limited to PM escalation or exceptional reassignment in the MVP.
 7. Every important `nextProcessor` change should be written to history logs.

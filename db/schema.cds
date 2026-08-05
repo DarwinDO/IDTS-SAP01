@@ -129,6 +129,7 @@ entity Bugs : cuid, managed {
   defectCategory         : Association to DefectCategories not null;
   componentCategory      : Association to ComponentCategories not null;
   reporter               : Association to Users not null;
+  retestOwner            : Association to Users;
   assignee               : Association to DeveloperProfiles;
   nextProcessorUser      : Association to Users;
   nextProcessorRole      : Association to ProcessorRoleValues;

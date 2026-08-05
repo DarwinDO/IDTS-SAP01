@@ -1,5 +1,9 @@
 # `srv/ai/bug-summary.js`
 
+## IDTS-122 guard
+
+Handoff-summary generation/review does not run on a Closed Bug. Stored summary/audit data stays readable, but a new AI operation requires Reopen.
+
 ## IDTS-114 handoff synthesis and verified source separation
 
 The provider now receives a bounded list of sanitized comments explicitly labelled as untrusted quoted business data. A feature-specific JSON Schema asks it for four advisory fields: what happened, missing information, comment insights, and confidence. `isGroundedCommentSummary()` accepts comment insights only when they overlap meaningful terms from stored comments; otherwise `fallbackCommentInsights()` is used. The response separately exposes `verifiedComments`, while `fallbackLatestEvents()` and `fallbackNextAction()` remain fully deterministic. This separation lets the UI show a useful synthesis without presenting model prose as authoritative history or allowing AI to decide workflow.

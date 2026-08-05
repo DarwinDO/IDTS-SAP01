@@ -9,7 +9,7 @@
 >
   <!-- Wrapper giữ cách đặt text bên trái/nút bên phải theo SAP Fiori section pattern. -->
   <section:SmartAssignmentSection
-    visible="{= ${IsActiveEntity} === true || ${HasActiveEntity} === true }"
+    visible="{= ${status_code} !== 'CLOSED' &amp;&amp; (${IsActiveEntity} === true || ${HasActiveEntity} === true) }"
   >
     <Button
       core:require="{ ClassificationReview: 'idts/bugmanagementui/ext/actions/ClassificationReview' }"

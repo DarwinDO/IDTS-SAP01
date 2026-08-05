@@ -28,15 +28,18 @@ const {
 const { readDeveloperWorkloads } = require('./bug-service/monitoring')
 const { registerReadOnlyEntityGuards } = require('./bug-service/guards')
 const { prepareBugWrite } = require('./bug-service/bug-write')
-const { enforceBugCreatePermission } = require('./bug-service/permissions')
+const { bugIDFrom, readBug } = require('./bug-service/helpers')
+const { assertBugOpenForMutation, enforceBugCreatePermission } = require('./bug-service/permissions')
 const {
   assignToDeveloper,
+  reassignRetestOwner,
   resubmitToDeveloper,
   addComment,
   transitionBug
 } = require('./bug-service/actions')
 const {
   prepareCommentCreate,
+  prepareCommentMutation,
   prepareAttachmentWrite
 } = require('./bug-service/content')
 const {
@@ -91,13 +94,25 @@ module.exports = class BugService extends cds.ApplicationService {
       const actor = await enforceBugCreatePermission(req, entities)
       await prepareDraftNew(req, actor)
     })
+    this.before('EDIT', Bugs, async req => {
+      const bug = await readBug(req, entities, bugIDFrom(req))
+      if (!bug) return req.reject(404, 'Bug not found.')
+      assertBugOpenForMutation(req, bug)
+    })
     this.before('UPDATE', Bugs, req => prepareBugWrite(req, entities, { isCreate: false }))
     this.before('PATCH', Bugs.drafts, req => prepareDraftPatch(req, entities))
+    this.before('DELETE', Bugs, async req => {
+      const bug = await readBug(req, entities, bugIDFrom(req))
+      if (!bug) return req.reject(404, 'Bug not found.')
+      assertBugOpenForMutation(req, bug)
+      return req.reject(405, 'Bug deletion is not supported. Use the lifecycle actions instead.')
+    })
 
     // Comment và attachment có cả entity active lẫn draft. Cùng một validator được gắn vào hai target
     // để rule không thay đổi theo việc người dùng đang sửa draft hay Bug đã lưu.
     for (const target of commentTargets) {
       this.before('CREATE', target, req => prepareCommentCreate(req, entities))
+      this.before(['PUT', 'UPDATE', 'PATCH', 'DELETE'], target, req => prepareCommentMutation(req, entities))
     }
 
     for (const target of attachmentTargets) {
@@ -152,6 +167,7 @@ module.exports = class BugService extends cds.ApplicationService {
     // Action nghiệp vụ từ Object Page đi vào các handler dưới đây. Các action chuyển status dùng chung
     // `transitionBug`: đó là nơi kiểm quyền, kiểm transition, update DB và ghi side effects.
     this.on('assignToDeveloper', req => assignToDeveloper(req, entities))
+    this.on('reassignRetestOwner', req => reassignRetestOwner(req, entities))
     this.on('addComment', req => addComment(req, entities))
     this.on('moveToPendingAssignment', req => transitionBug(req, entities, {
       status: STATUS.PENDING_ASSIGNMENT,

@@ -1,5 +1,9 @@
 # Knowledge: `srv/service.cds`
 
+## IDTS-122 contract delta
+
+`Bugs` exposes durable retest ownership and capability flags, and declares the bound `reassignRetestOwner` action. Active Testers are provided through a value help. These are additive service contracts; ordinary Closed-Bug mutation remains blocked in handlers, not trusted to metadata alone.
+
 ## IDTS-114 handoff comment-summary contract
 
 `BugHandoffSummaryResult.commentSummary` and `verifiedComments` are transient `LargeString` fields in the OData action result. They are not columns and do not create a HANA migration. `commentSummary` contains grounded advisory insights, while `verifiedComments` keeps the bounded sanitized source lines for human comparison.

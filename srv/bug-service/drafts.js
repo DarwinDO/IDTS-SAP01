@@ -19,6 +19,7 @@ const {
   validateActiveCodeLists,
   validateRequiredBugFields
 } = require('./bug-write')
+const { assertBugOpenForMutation } = require('./permissions')
 
 async function prepareDraftPatch (req, entities) {
   // Fiori gọi PATCH nhiều lần khi người dùng đổi field. `req.data` thường chỉ có field vừa đổi,
@@ -28,6 +29,14 @@ async function prepareDraftPatch (req, entities) {
 
   const currentDraft = await cds.tx(req).run(SELECT.one.from(entities.Bugs.drafts).where({ ID: bugID }))
   if (!currentDraft) return
+
+  assertBugOpenForMutation(req, currentDraft)
+  if (currentDraft.HasActiveEntity) {
+    const activeBug = await readBug(req, entities, bugID)
+    assertBugOpenForMutation(req, activeBug)
+  }
+  delete req.data.reporter_ID
+  delete req.data.retestOwner_ID
 
   const merged = { ...currentDraft, ...req.data }
   // Kiểm code-list ngay lúc PATCH để UI nhận lỗi đúng field sớm, không chờ đến Save.
@@ -64,12 +73,16 @@ async function prepareDraftNew (req, actor) {
   // Reporter is system-managed. Never trust a client-supplied reporter for a
   // new draft; bind it to the authenticated IDTS user instead.
   req.data.reporter_ID = actor.ID
+  req.data.retestOwner_ID = actor.ID
 }
 
 async function ensureDraftReporterForSave (req, entities, draft, actor) {
   // Draft mới đã có reporter từ `prepareDraftNew`. Nhánh fallback chỉ cứu draft cũ;
   // nếu không resolve được actor thì SAVE dừng để tránh Bug không rõ người báo.
-  if (draft.reporter_ID) return draft.reporter_ID
+  if (draft.reporter_ID) {
+    if (!draft.HasActiveEntity && !draft.retestOwner_ID) draft.retestOwner_ID = draft.reporter_ID
+    return draft.reporter_ID
+  }
 
   if (!actor && entities) actor = await resolveRequestUser(req, entities)
 
@@ -84,6 +97,7 @@ async function ensureDraftReporterForSave (req, entities, draft, actor) {
   // This fallback supports drafts created before IDTS-49. The active CREATE
   // handler still applies the authoritative system-managed fields afterward.
   draft.reporter_ID = actor.ID
+  if (!draft.HasActiveEntity && !draft.retestOwner_ID) draft.retestOwner_ID = actor.ID
   return actor.ID
 }
 
@@ -106,6 +120,12 @@ async function validateDraftForSave (req, entities) {
 
   const draft = await cds.tx(req).run(SELECT.one.from(entities.Bugs.drafts).where({ ID: bugID }))
   if (!draft) return
+
+  assertBugOpenForMutation(req, draft)
+  if (draft.HasActiveEntity) {
+    const activeBug = await readBug(req, entities, bugID)
+    assertBugOpenForMutation(req, activeBug)
+  }
 
   await ensureDraftReporterForSave(req, entities, draft)
   validateRequiredBugFields(req, draft, { rejectFirst: true })

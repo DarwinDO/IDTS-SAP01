@@ -1,5 +1,9 @@
 # `srv/ai/duplicate-confirmation.js`
 
+## IDTS-122 guard
+
+Duplicate confirmation cannot create a link from a Closed source Bug. Existing links remain readable; the source Bug must be Reopened before confirmation.
+
 ## English
 
 This module implements IDTS-95. `confirmDuplicateSuggestion(suggestionID, candidateBugID)` creates one `DuplicateLink` only after a Tester or PM has explicitly accepted a current `DUPLICATE_DETECTION` suggestion.

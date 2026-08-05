@@ -22,7 +22,7 @@ Hệ thống được xây dựng để hỗ trợ quy trình quản lý bug/def
 Mục tiêu chính gồm:
 
 * Số hóa quy trình ghi nhận bug/defect.  
-* Cho phép Tester tạo bug report đầy đủ thông tin.  
+* Chỉ cho phép Tester tạo bug report đầy đủ thông tin; PM và Developer không tạo Bug mới.
 * Hỗ trợ kiểm tra bug đã tồn tại hay chưa.  
 * Cho phép Tester assign bug cho Developer phù hợp.  
 * Cho phép Developer xem bug được giao, phản hồi và cập nhật trạng thái.  
@@ -144,9 +144,9 @@ Tester chọn module/category
 → Hệ thống kiểm tra workload/availability nếu có  
 → Assign bug cho Developer
 
-**English clarification:** IDTS must not automatically pick a Developer during create. If the Tester or PM does not explicitly select an assignee, the bug starts as `Pending Assignment`.
+**English clarification:** Only a Tester can create a new Bug. IDTS must not automatically pick a Developer during create. If the Tester does not explicitly select an assignee, the bug starts as `Pending Assignment`.
 
-**Tiếng Việt:** IDTS không được tự chọn Developer khi tạo bug. Nếu Tester hoặc PM không chủ động chọn assignee, bug sẽ bắt đầu ở `Pending Assignment`.
+**Tiếng Việt:** Chỉ Tester được tạo Bug mới. IDTS không được tự chọn Developer khi tạo bug. Nếu Tester không chủ động chọn assignee, bug sẽ bắt đầu ở `Pending Assignment`.
 
 Nếu Developer đang bận hoặc workload không phù hợp:
 
@@ -177,6 +177,10 @@ Business rule là:
 Tester can edit or add information to a submitted bug report  
 as long as the bug is not closed.
 
+Closed Bug là read-only aggregate: không edit Bug, đổi Developer, thêm comment, mutation attachment, mutation AI hoặc gọi lifecycle action khác. Existing comments/attachments/history vẫn đọc được và attachment cũ vẫn download được. Muốn tiếp tục xử lý phải dùng `Reopen Bug`; PM chỉ có thêm ngoại lệ điều phối `Reassign Retest Owner`.
+
+Bug record không hỗ trợ hard delete ở bất kỳ trạng thái nào; việc kết thúc hoặc tiếp tục xử lý phải đi qua lifecycle action để giữ audit trace.
+
 Nếu bug đã assign cho Developer rồi, sau khi Tester chỉnh sửa thông tin, hệ thống nên notify Developer.
 
 ---
@@ -197,6 +201,8 @@ Resolved
 Closed  
 Rejected  
 Reopened
+
+Hệ thống lưu `retestOwner` riêng để giữ Tester chịu trách nhiệm retest qua các lần close/reopen. `retestOwner` không phải Developer assignee và không phải current action owner. PM có thể reassign retest owner nếu Tester hiện tại không còn khả dụng mà không tự đổi status hoặc assignee.
 
 ---
 

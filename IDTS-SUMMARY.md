@@ -26,7 +26,7 @@ Hệ thống bao gồm các phạm vi sau:
 * Assign bug cho Developer phù hợp.  
 * Trường hợp chưa có Developer phù hợp thì bug có thể ở trạng thái **Pending Assignment**.  
 * Developer xem bug được giao, review thông tin, yêu cầu bổ sung thông tin, ghi chú và cập nhật trạng thái.  
-* Tester có thể chỉnh sửa/bổ sung bug report sau khi submit nếu bug chưa closed.  
+* Tester có thể chỉnh sửa/bổ sung bug report sau khi submit nếu bug chưa closed. Closed Bug là read-only aggregate; muốn xử lý tiếp phải Reopen trước.
 * PM theo dõi tiến độ, workload, overdue bugs và báo cáo.  
 * Comment giữa Tester, Developer và PM trong từng bug report.  
 * Notification cho các sự kiện quan trọng.  
@@ -233,9 +233,9 @@ Trạng thái ban đầu của bug sau khi submit có thể phụ thuộc vào t
 
 Nếu bug có Developer phù hợp, bug được ghi nhận trực tiếp ở trạng thái **Assigned**. Nếu chưa có Developer phù hợp, bug được ghi nhận ở trạng thái **Pending Assignment** để PM hoặc Tester theo dõi và phân công sau. Trong create happy flow hiện tại, backend không persist `New`; `New` chỉ còn để tương thích dữ liệu cũ/import.
 
-**English clarification:** IDTS must not automatically pick a Developer during create. If the Tester or PM does not explicitly select an assignee, the bug starts as `Pending Assignment`.
+**English clarification:** Only a Tester can create a new Bug. IDTS must not automatically pick a Developer during create. If the Tester does not explicitly select an assignee, the bug starts as `Pending Assignment`.
 
-**Tiếng Việt:** IDTS không được tự chọn Developer khi tạo bug. Nếu Tester hoặc PM không chủ động chọn assignee, bug sẽ bắt đầu ở `Pending Assignment`.
+**Tiếng Việt:** Chỉ Tester được tạo Bug mới. IDTS không được tự chọn Developer khi tạo bug. Nếu Tester không chủ động chọn assignee, bug sẽ bắt đầu ở `Pending Assignment`.
 
 Cách này giữ được logic chặt chẽ nhưng vẫn thực tế, vì trong một số trường hợp chưa có Developer phù hợp hoặc Developer đang quá tải.
 
@@ -306,7 +306,15 @@ Bộ status nên giữ:
 | **Resolved** | Developer đã cập nhật kết quả xử lý |
 | **Rejected** | Developer từ chối vì sai module/category hoặc assignee không phù hợp; đây là status cần follow-up, không phải final status |
 | **Reopened** | Bug được mở lại |
-| **Closed** | Bug đã đóng |
+| **Closed** | Bug đã đóng và aggregate chuyển thành read-only; chỉ Reopen hoặc PM reassign retest owner là ngoại lệ |
+
+### **Retest ownership and Closed behavior**
+
+`retestOwner` lưu Tester chịu trách nhiệm xác nhận kết quả. Giá trị ban đầu là Tester tạo Bug; giá trị có thể đổi khi Tester khác thực hiện retest/reopen hoặc khi PM dùng action điều phối riêng. Nó độc lập với Developer `assignee` và `nextProcessor`.
+
+Closed Bug không cho edit, assign/reassign Developer, comment, attachment mutation, AI mutation hoặc lifecycle action khác. Existing evidence vẫn đọc/download được. Người dùng phải Reopen trước khi tiếp tục xử lý nghiệp vụ.
+
+Bug record không được hard delete ở bất kỳ trạng thái nào; lifecycle và audit history là cơ chế kiểm soát vòng đời chính thức.
 
 ---
 

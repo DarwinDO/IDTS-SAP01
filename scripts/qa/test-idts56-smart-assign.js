@@ -222,12 +222,15 @@ async function verifyStaticContract() {
 
   const fragment = readApp(path.join('webapp', 'ext', 'fragment', 'SmartAssignmentSection.fragment.xml'))
   assertHasAll(fragment, [
-    'showValueHelp="true"',
+    'showValueHelp="{=',
+    "${status_code} !== 'CLOSED'",
+    'editable="{=',
+    'enabled="{=',
     'valueHelpRequest="SmartAssign.openAssigneePicker"',
     "mode: 'OneWay'",
     'change="SmartAssign.resetAssigneeInput"'
   ], 'SmartAssignmentSection.fragment.xml')
-  rec('Assignee field opens Smart Assign from value help and blocks free-text persistence', true)
+  rec('Assignee field opens status-aware Smart Assign value help and blocks Closed/free-text persistence', true)
 
   const requiredI18n = [
     'smartAssignDeveloper=',

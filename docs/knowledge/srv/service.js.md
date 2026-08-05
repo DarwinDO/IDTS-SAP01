@@ -1,5 +1,9 @@
 # Knowledge: `srv/service.js`
 
+## IDTS-122 closed-aggregate boundary
+
+The service wires backend guards for active UPDATE, draft EDIT/PATCH/SAVE, Bug DELETE, comment CREATE/PUT/UPDATE/PATCH/DELETE, attachments, lifecycle actions, and AI mutations. A `CLOSED` Bug rejects ordinary mutations with a safe 409 response. Bug hard-delete is rejected in every status. `reopenBug` and PM `reassignRetestOwner` are the only business exceptions while Closed. Debug from the incoming CAP event to `assertBugOpenForMutation`; UI visibility is not the security boundary.
+
 ## IDTS-113 Job Scheduler wiring
 
 `BugService.init()` registers `processEmailOutbox` and delegates one batch to

@@ -1,5 +1,9 @@
 # `srv/ai/duplicate-detection.js`
 
+## IDTS-122 guard
+
+Similar-Bug suggestion generation rejects a Closed source Bug before embeddings/provider work and suggestion persistence. Existing suggestions remain available for audit/read purposes.
+
 ## 2026-07-30 request-bounded Similar Bugs flow
 
 ### English

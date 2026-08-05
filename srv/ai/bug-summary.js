@@ -8,6 +8,7 @@ const { FEATURE_TYPES, createAiSuggestion } = require('./audit')
 const { createAiProvider } = require('./provider')
 const { redactSensitiveText } = require('./safety')
 const { resolveRequestUser } = require('../bug-service/helpers')
+const { assertBugOpenForMutation } = require('../bug-service/permissions')
 
 const MAX_COMMENT_COUNT = 8
 const MAX_HISTORY_COUNT = 10
@@ -40,6 +41,7 @@ async function summarizeBugHandoff (req, entities, dependencies = {}) {
   if (!context.bug) {
     return req.reject(404, 'Source bug was not found.')
   }
+  assertBugOpenForMutation(req, context.bug)
 
   const providerResult = await provider.structured({
     featureType: FEATURE_TYPES.BUG_SUMMARY,

@@ -7,6 +7,7 @@ const {
   ATTACHMENT_ROLES,
   COMMENT_ROLES
 } = require('./constants')
+const { assertBugOpenForMutation } = require('./permissions')
 
 const {
   resolveRequestUser,
@@ -20,6 +21,10 @@ async function prepareCommentCreate (req, entities) {
   if (!req.data.content) {
     return req.reject(400, 'Comment content is required.', 'content')
   }
+
+  const bug = await readParentBugForContent(req, entities, req.data.bug_ID)
+  if (!bug) return req.reject(404, 'Bug not found.')
+  assertBugOpenForMutation(req, bug)
 
   const actor = await resolveRequestUser(req, entities)
   if (actor) {
@@ -62,6 +67,10 @@ async function prepareAttachmentWrite (req, entities) {
   // binary thật đi qua storage adapter/S3, còn DB chỉ giữ metadata và storage reference.
   const actor = await resolveRequestUser(req, entities)
 
+  const bug = await readParentBugForContent(req, entities, req.data?.up__ID)
+  if (!bug) return req.reject(404, 'Bug not found.')
+  assertBugOpenForMutation(req, bug)
+
   if (actor && !ATTACHMENT_ROLES.has(actor.role_code)) {
     return req.reject(403, 'Only Tester, Developer, or PM users can upload attachments.')
   }
@@ -72,7 +81,63 @@ async function prepareAttachmentWrite (req, entities) {
   }
 }
 
+async function prepareCommentMutation (req, entities) {
+  const bug = await readParentBugForComment(req, entities)
+  if (!bug) return req.reject(404, 'Bug not found.')
+  assertBugOpenForMutation(req, bug)
+}
+
+async function readParentBugForContent (req, entities, suppliedParentID) {
+  const parameterIDs = (req.params || []).map(parameter => parameter?.ID).filter(Boolean)
+  const candidateBugIDs = [suppliedParentID, ...parameterIDs].filter(Boolean)
+
+  for (const candidateID of candidateBugIDs) {
+    const activeBug = await cds.tx(req).run(SELECT.one.from(entities.Bugs).where({ ID: candidateID }))
+    if (activeBug) return activeBug
+    const draftBug = await cds.tx(req).run(SELECT.one.from(entities.Bugs.drafts).where({ ID: candidateID }))
+    if (draftBug) return draftBug
+  }
+
+  const attachmentID = req.data?.ID || parameterIDs[parameterIDs.length - 1]
+  const attachmentTarget = entities['Bugs.attachments']
+  const attachmentDraftTarget = attachmentTarget?.drafts
+  if (!attachmentID || !attachmentTarget) return null
+
+  const activeAttachment = await cds.tx(req).run(
+    SELECT.one.from(attachmentTarget).columns('up__ID').where({ ID: attachmentID })
+  )
+  const draftAttachment = activeAttachment || !attachmentDraftTarget
+    ? null
+    : await cds.tx(req).run(
+      SELECT.one.from(attachmentDraftTarget).columns('up__ID').where({ ID: attachmentID })
+    )
+  const bugID = activeAttachment?.up__ID || draftAttachment?.up__ID
+  if (!bugID) return null
+
+  const activeBug = await cds.tx(req).run(SELECT.one.from(entities.Bugs).where({ ID: bugID }))
+  if (activeBug) return activeBug
+  return cds.tx(req).run(SELECT.one.from(entities.Bugs.drafts).where({ ID: bugID }))
+}
+
+async function readParentBugForComment (req, entities) {
+  const parameterIDs = (req.params || []).map(parameter => parameter?.ID).filter(Boolean)
+  const commentID = req.data?.ID || parameterIDs[parameterIDs.length - 1]
+  if (!commentID) return null
+
+  const commentTargets = [entities.Comments, entities.Comments?.drafts].filter(Boolean)
+  for (const target of commentTargets) {
+    const comment = await cds.tx(req).run(
+      SELECT.one.from(target).columns('bug_ID').where({ ID: commentID })
+    )
+    if (!comment?.bug_ID) continue
+    return readParentBugForContent(req, entities, comment.bug_ID)
+  }
+  return null
+}
+
 module.exports = {
+  readParentBugForContent,
   prepareCommentCreate,
+  prepareCommentMutation,
   prepareAttachmentWrite
 }

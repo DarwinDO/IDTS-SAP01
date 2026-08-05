@@ -1,5 +1,9 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/fragment/ClassificationReviewField.fragment.xml`
 
+## IDTS-122 update
+
+Classification AI review/apply affordances are unavailable on a Closed Bug. Existing values and prior audit remain readable.
+
 ## IDTS-115 create-draft guard
 
 The complete custom field is hidden for a root create draft and remains visible for an active Bug or an edit draft that has an active source. The action also repeats this check in JavaScript so an out-of-band trigger cannot call source-linked AI for a transient draft ID.

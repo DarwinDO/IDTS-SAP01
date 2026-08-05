@@ -1,5 +1,9 @@
 # Knowledge: `srv/bug-service/content.js`
 
+## IDTS-122 child-content boundary
+
+Comment and attachment mutations resolve their parent Bug first and reject the request when that Bug is Closed. Existing child rows remain readable and existing attachment content remains downloadable. After Reopen, the normal role and attachment/comment validations apply again.
+
 ## Beginner-first execution map (2026-07-18)
 
 ### English
@@ -75,3 +79,7 @@ Thay đổi quy tắc attachment/comment phải cập nhật ở đây + schema 
 - Knowledge mirror: `docs/knowledge/srv/bug-service/content.js.md`
 - Source layer: `srv`
 - Last reviewed: 2026-06-22
+
+## IDTS-122 Closed aggregate boundary
+
+`prepareCommentCreate`, `prepareCommentMutation`, and `prepareAttachmentWrite` resolve the parent Bug and call the shared Closed-state guard. New comments, existing comment mutation, and attachment create/update/delete are denied while the parent Bug is `CLOSED`; reads and downloads remain allowed. CAP draft composition routing may reject an invalid direct child request before this custom guard, so deployed browser/API evidence is still required for the final route contract.

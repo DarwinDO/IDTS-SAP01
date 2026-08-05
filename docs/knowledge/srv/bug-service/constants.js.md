@@ -1,5 +1,9 @@
 # Knowledge: `srv/bug-service/constants.js`
 
+## IDTS-122 lifecycle meaning
+
+`CLOSED` remains terminal for all ordinary transition/action paths. Reopen is the explicit lifecycle exception; PM retest-owner reassignment is an ownership action that keeps status Closed and does not alter Developer assignee.
+
 ## IDTS-89 action constants
 
 `ACTION` contains both legacy audit categories and 11 exact workflow-command codes. Do not remove `ASSIGN`, `REASSIGN`, `STATUS_CHANGE`, or the other legacy values because stored history and generic direct edits may still reference them. `DEVELOPER_ACTIONS` contains only the exact commands an assigned Developer may execute; assignment, pending-queue, resubmit, retest, close, and reopen remain coordinator-only.

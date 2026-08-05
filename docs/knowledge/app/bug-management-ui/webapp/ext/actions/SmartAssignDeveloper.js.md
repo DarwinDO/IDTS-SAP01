@@ -1,5 +1,9 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/actions/SmartAssignDeveloper.js`
 
+## IDTS-122 closed-state behavior
+
+Smart Assign does not open or assign when the Bug is Closed. The field/action binding is status-aware, and the backend independently rejects assignment or AI explanation generation on a Closed aggregate.
+
 ## IDTS-114 explanation provenance (2026-07-30)
 
 `applyAssignmentExplanations()` now renders **AI-generated explanation** only when backend returns `explanationSource = AI`. A deterministic row renders **Rules-based guidance** and does not display a model-confidence claim. This is display-only: selecting a candidate still requires the explicit Assign action and CAP validation.

@@ -1,5 +1,9 @@
 # `srv/ai/review.js`
 
+## IDTS-122 guard
+
+Accept, Reject, and Ignore are audit mutations and therefore reject suggestions whose source Bug is Closed. Reopen the source Bug before recording a new review decision.
+
 ## English
 
 This module implements the IDTS-91 human-review boundary for persisted `AiSuggestions`. `acceptAiSuggestion`, `rejectAiSuggestion`, and `ignoreAiSuggestion` all call one guarded function that resolves the authenticated IDTS user, verifies the linked Bug is readable, requires a current `PENDING` suggestion, and conditionally updates only the review state, reviewer, and review time.

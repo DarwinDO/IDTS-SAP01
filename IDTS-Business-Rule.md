@@ -115,7 +115,7 @@ PM được phép:
 * Receive escalation notification  
 * Request reassignment when needed
 
-PM không phải người trực tiếp tạo bug, fix bug hoặc cập nhật technical note thay Developer.
+PM không phải người trực tiếp tạo bug, fix bug hoặc cập nhật technical note thay Developer. Bug report mới chỉ được tạo bởi Tester; quyền PM không được dùng để bỏ qua rule này.
 
 ---
 
@@ -355,9 +355,27 @@ Khi Tester chọn **“Chưa có Developer phù hợp”** và submit bug, bug s
 | Tester chọn Developer cụ thể | Submit bug và assign cho Developer đó | Assigned |
 | Tester chọn “Chưa có Developer phù hợp” | Submit bug để ghi nhận, chưa assign Developer | Pending Assignment |
 
-**English clarification:** IDTS must not automatically pick a Developer during create. If the Tester or PM does not explicitly select an assignee, the bug starts as `Pending Assignment`.
+**English clarification:** IDTS must not automatically pick a Developer during create. Only a Tester can create a new Bug. If the Tester does not explicitly select an assignee, the bug starts as `Pending Assignment`.
 
-**Giải thích tiếng Việt:** IDTS không được tự chọn Developer khi tạo bug. Nếu Tester hoặc PM không chủ động chọn assignee, bug sẽ bắt đầu ở `Pending Assignment`.
+**Giải thích tiếng Việt:** IDTS không được tự chọn Developer khi tạo bug. Chỉ Tester được tạo Bug mới. Nếu Tester không chủ động chọn assignee, bug sẽ bắt đầu ở `Pending Assignment`.
+
+---
+
+## **BR-15A - Retest owner phải được lưu bền vững**
+
+Mỗi Bug phải có `retestOwner` để xác định Tester chịu trách nhiệm xác nhận kết quả. Khi Tester tạo Bug, hệ thống khởi tạo `retestOwner` bằng chính Tester đó. Khi một Tester khác thực hiện retest/reopen hoặc PM điều phối thay đổi người retest, hệ thống cập nhật `retestOwner` theo action được phép và ghi history. `retestOwner` không thay thế Developer `assignee` và không thay thế `nextProcessor`; ba khái niệm này có trách nhiệm khác nhau.
+
+PM được phép dùng action riêng `Reassign Retest Owner` khi Tester hiện tại không còn khả dụng. Việc đổi retest owner không tự đổi status, Developer assignee hoặc lifecycle.
+
+---
+
+## **BR-15B - Closed Bug là read-only aggregate**
+
+Khi Bug ở trạng thái `Closed`, toàn bộ aggregate nghiệp vụ được khóa đối với mutation thông thường. Người dùng không được edit Bug, assign/reassign Developer, thêm comment, upload/update/delete attachment, chạy hoặc review/apply AI suggestion, hay gọi lifecycle action khác. Dữ liệu comment, attachment, history và AI audit cũ vẫn được đọc; attachment cũ vẫn có thể download.
+
+Bug record không hỗ trợ hard delete ở bất kỳ trạng thái nào vì phải bảo toàn trace và audit; người dùng phải dùng lifecycle action phù hợp để kết thúc hoặc mở lại xử lý.
+
+Hai ngoại lệ có kiểm soát là `Reopen Bug` và PM `Reassign Retest Owner`. Sau khi reopen thành công, các mutation bình thường mới được phép trở lại theo role và status hiện hành. Email outbox đã commit trước đó vẫn có thể hoàn thành vì đây là xử lý hạ tầng, không phải mutation mới của Closed Bug.
 
 ---
 

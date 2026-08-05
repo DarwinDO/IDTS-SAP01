@@ -282,6 +282,8 @@ async function historyValueDisplay (req, entities, fieldName, value) {
       return displayComponentCategory(req, entities, value)
     case 'nextProcessorUser':
       return displayUserName(req, entities, value)
+    case 'retestOwner':
+      return displayUserName(req, entities, value)
     case 'nextProcessorRole':
       return displayProcessorRole(req, entities, value)
     default:
@@ -305,6 +307,8 @@ function buildHistorySummary (actionType, changes) {
         return 'Moved bug to Pending Assignment.'
       }
       return `${assigneeChange?.newValueDisplay ? `Reassigned bug to ${assigneeChange.newValueDisplay}.` : 'Reassigned bug.'}${statusChangeSuffix(statusChange)}`
+    case ACTION.REASSIGN_RETEST_OWNER:
+      return 'Reassigned the Tester responsible for retest.'
     case ACTION.MOVE_TO_PENDING_ASSIGNMENT:
       return 'Moved bug to Pending Assignment.'
     case ACTION.MARK_IN_REVIEW:

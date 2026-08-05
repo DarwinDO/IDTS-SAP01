@@ -1,5 +1,9 @@
 # `srv/ai/assignment-explanation.js`
 
+## IDTS-122 guard
+
+Smart-assignment explanation is advisory but still a mutation-producing AI audit operation. It rejects a Closed source Bug before any provider request or audit write; Reopen is required first.
+
 ## Candidate-reference JSON Schema (2026-07-30)
 
 `buildAssignmentOutputSchema()` constrains the structured result to short references created for the current request (`C1`, `C2`, ...). The array must contain exactly as many rows as the backend candidate list, and each item must contain `candidateRef`, `explanation` and `confidence`. The provider never receives a developer profile UUID and cannot create a candidate outside the backend list.

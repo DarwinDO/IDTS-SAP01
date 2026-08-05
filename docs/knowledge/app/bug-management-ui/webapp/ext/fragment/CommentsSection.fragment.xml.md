@@ -1,5 +1,9 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/fragment/CommentsSection.fragment.xml`
 
+## IDTS-122 update
+
+The comment composer and Post action are disabled/hidden for a Closed Bug; the historical comment list remains visible.
+
 ## IDTS-116 update — refreshable relative OData binding
 
 The comments feed is relative to the current Bug context. It declares `$$ownRequest: true` so UI5 OData V4 supports `requestRefresh("$direct")` after `addComment` succeeds. Without this parameter, the write can persist while the visible feed remains stale. This is a read-refresh setting only; CAP remains responsible for creating the comment and history event.

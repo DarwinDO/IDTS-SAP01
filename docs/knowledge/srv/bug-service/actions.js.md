@@ -1,5 +1,9 @@
 # Knowledge: `srv/bug-service/actions.js`
 
+## IDTS-122 retest continuity
+
+Lifecycle actions preserve a durable `retestOwner`. Closing clears `nextProcessor` but keeps the retest owner. Reopen routes verification back to that owner, while PM can use `reassignRetestOwner` without changing status or Developer assignee. All lifecycle actions except Reopen are rejected when the current status is `CLOSED`.
+
 ## IDTS-89 audit boundary
 
 `assignToDeveloper` writes `ASSIGN_TO_DEVELOPER`; `resubmitToDeveloper` writes `RESUBMIT_TO_DEVELOPER`; the shared `transitionBug` persists the exact ActionType supplied by `service.js`. Bug update, `HistoryEvents`, and `HistoryLogs` stay in the same request transaction, so a history insert failure rolls back the workflow change. See `docs/ai/implementation/knowledge-one-to-one-action-audit.md` for the full mapping and debug order.
@@ -202,6 +206,10 @@ Nút action trên Fiori chỉ là điểm bắt đầu trên UI. File này mới
 - Knowledge mirror: `docs/knowledge/srv/bug-service/actions.js.md`
 - Style baseline: `docs/knowledge/guidelines/knowledge-mirror-anchors.md`
 - Last reviewed: 2026-06-22
+
+## IDTS-122 Retest-owner reassignment
+
+`reassignRetestOwner` is a PM-only controlled exception for a Closed Bug. It validates an active Tester, rejects no-op reassignment, writes the dedicated `REASSIGN_RETEST_OWNER` history action with display-safe old/new Tester names, and creates the target Tester's notification/outbox record in the same CAP request transaction. It does not reopen the Bug or change the Developer assignee.
 
 ## IDTS-36 Resubmit Notification Update
 
