@@ -1,5 +1,9 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/fragment/SimilarBugReviewField.fragment.xml`
 
+## IDTS-122 update
+
+Similar-Bug generation/review/confirmation affordances are hidden on a Closed Bug; direct calls remain protected by CAP.
+
 ## IDTS-115 create-draft guard
 
 The wrapper is visible only when `IsActiveEntity` or `HasActiveEntity` is true. A brand-new root draft has neither an active source Bug nor a stable audit target, so the complete label/button row stays hidden. An edit draft of an existing active Bug keeps the action visible.

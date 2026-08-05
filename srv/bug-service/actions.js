@@ -27,7 +27,7 @@ const { getEmailConfig } = require('../email/config')
 const { writeNotificationRecord } = require('../email/outbox')
 
 const { determineNextProcessor, validateAssignee, validateTransition } = require('./bug-write')
-const { enforceActionPermission } = require('./permissions')
+const { assertBugOpenForMutation, enforceActionPermission } = require('./permissions')
 
 async function assignToDeveloper (req, entities) {
   // Action `assignToDeveloper` từ Object Page gọi vào đây. Hàm đọc Bug hiện tại, kiểm quyền điều phối,
@@ -52,6 +52,7 @@ async function resubmitToDeveloper (req, entities) {
   const bugID = bugIDFrom(req)
   const oldBug = await readBug(req, entities, bugID)
   if (!oldBug) return req.reject(404, 'Bug not found.')
+  assertBugOpenForMutation(req, oldBug)
 
   const actor = await resolveRequestUser(req, entities)
   if (actor && !COORDINATOR_ROLES.has(actor.role_code)) {
@@ -149,6 +150,7 @@ async function addComment (req, entities) {
   const bugID = bugIDFrom(req)
   const bug = await readBug(req, entities, bugID)
   if (!bug) return req.reject(404, 'Bug not found.')
+  assertBugOpenForMutation(req, bug)
 
   const actor = await resolveRequestUser(req, entities)
   if (!actor || !new Set(['TESTER', 'DEVELOPER', 'PM']).has(actor.role_code)) {
@@ -197,6 +199,8 @@ async function transitionBug (req, entities, options) {
   const bugID = bugIDFrom(req)
   const oldBug = await readBug(req, entities, bugID)
   if (!oldBug) return req.reject(404, 'Bug not found.')
+
+  if (options.actionType !== ACTION.REOPEN_BUG) assertBugOpenForMutation(req, oldBug)
 
   await enforceActionPermission(req, entities, oldBug, options.actionType)
 
@@ -277,8 +281,74 @@ async function transitionBug (req, entities, options) {
   return updatedBug
 }
 
+async function reassignRetestOwner (req, entities) {
+  const bugID = bugIDFrom(req)
+  const oldBug = await readBug(req, entities, bugID)
+  if (!oldBug) return req.reject(404, 'Bug not found.')
+
+  const actor = await resolveRequestUser(req, entities)
+  if (!actor || actor.role_code !== 'PM') {
+    return req.reject(403, 'Only PM users can reassign the retest owner.')
+  }
+
+  const retestOwnerID = trimToNull(req.data.retestOwnerID)
+  const reason = trimToNull(req.data.reason)
+  if (!retestOwnerID) return req.reject(400, 'Retest owner is required.', 'retestOwnerID')
+  if (!reason) return req.reject(400, 'Retest owner reassignment requires a reason.', 'reason')
+
+  const target = await cds.tx(req).run(
+    SELECT.one.from(entities.Users).columns('ID').where({
+      ID: retestOwnerID,
+      role_code: 'TESTER',
+      active: true
+    })
+  )
+  if (!target) return req.reject(400, 'Retest owner must be an active Tester.', 'retestOwnerID')
+  if (oldBug.retestOwner_ID === target.ID) {
+    return req.reject(409, 'Selected Tester is already responsible for retest.', 'retestOwnerID')
+  }
+
+  const patch = { retestOwner_ID: target.ID }
+  if (oldBug.status_code === STATUS.CLOSED) {
+    patch.nextProcessorUser_ID = null
+    patch.nextProcessorRole_code = 'NONE'
+  } else if (new Set([
+    STATUS.NEED_MORE_INFORMATION,
+    STATUS.REJECTED,
+    STATUS.RESOLVED,
+    STATUS.RETEST_REQUIRED
+  ]).has(oldBug.status_code)) {
+    patch.nextProcessorUser_ID = target.ID
+    patch.nextProcessorRole_code = 'TESTER'
+  }
+
+  const tx = cds.tx(req)
+  await tx.run(UPDATE(entities.Bugs).set(patch).where({ ID: bugID }))
+  const updatedBug = await tx.run(SELECT.one.from(entities.Bugs).where({ ID: bugID }))
+  await writeHistoryEvent(req, entities, {
+    bugID,
+    actorID: actor.ID,
+    actionType: ACTION.REASSIGN_RETEST_OWNER,
+    reason,
+    summary: 'Reassigned the Tester responsible for retest.',
+    changes: [{
+      fieldName: 'retestOwner',
+      oldValue: oldBug.retestOwner_ID,
+      newValue: target.ID
+    }]
+  })
+  await writeNotificationRecord(tx, {
+    bugID,
+    recipientID: target.ID,
+    eventType: 'UPDATED',
+    message: `${updatedBug.bugNumber || 'Bug'} was assigned to you for retest continuity.`
+  }, getEmailConfig())
+  return updatedBug
+}
+
 module.exports = {
   assignToDeveloper,
+  reassignRetestOwner,
   resubmitToDeveloper,
   addComment,
   transitionBug

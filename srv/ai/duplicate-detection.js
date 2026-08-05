@@ -7,6 +7,7 @@ const { SELECT } = cds.ql
 const { FEATURE_TYPES, createAiSuggestion } = require('./audit')
 const { createAiProvider } = require('./provider')
 const { resolveRequestUser } = require('../bug-service/helpers')
+const { assertBugOpenForMutation } = require('../bug-service/permissions')
 
 const DEFAULT_LIMIT = 5
 const MAX_LIMIT = 10
@@ -105,6 +106,7 @@ async function resolveSearchInput (tx, req, data) {
     if (!persisted) {
       return req.reject(404, 'The source bug does not exist.')
     }
+    assertBugOpenForMutation(req, persisted)
   }
 
   return {

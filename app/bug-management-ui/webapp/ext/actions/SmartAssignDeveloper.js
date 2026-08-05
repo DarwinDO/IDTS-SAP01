@@ -813,7 +813,7 @@ sap.ui.define([
             return bugContext.requestObject().then(function (bug) {
                 return synchronizeAssignmentContext(bugContext, bug || {});
             }).then(function (bug) {
-                if (!bug || (bug.IsActiveEntity === true && bug.canAssign === false)) {
+                if (!bug || bug.status_code === "CLOSED" || (bug.IsActiveEntity === true && bug.canAssign === false)) {
                     MessageToast.show(getText(view, "smartAssignUnavailableAction"));
                     return null;
                 }

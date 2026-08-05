@@ -9,7 +9,7 @@
 >
   <!-- Wrapper giữ cách đặt text bên trái/nút bên phải, không chứa logic tìm duplicate. -->
   <section:SmartAssignmentSection
-    visible="{= ${IsActiveEntity} === true || ${HasActiveEntity} === true }"
+    visible="{= ${status_code} !== 'CLOSED' &amp;&amp; (${IsActiveEntity} === true || ${HasActiveEntity} === true) }"
   >
     <Button
       core:require="{ DuplicateReview: 'idts/bugmanagementui/ext/actions/DuplicateReview' }"

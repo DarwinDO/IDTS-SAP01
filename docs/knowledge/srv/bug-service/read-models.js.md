@@ -1,5 +1,9 @@
 # Knowledge: `srv/bug-service/read-models.js`
 
+## IDTS-122 UI capability truth
+
+Read models expose state-aware capabilities: Closed Bugs are not editable, cannot accept comments or ordinary assignment, and expose PM retest-owner reassignment as a separate capability. These fields guide Fiori affordances; direct OData protection still lives in backend guards.
+
 ## Beginner-first execution map (2026-07-18)
 
 ### English

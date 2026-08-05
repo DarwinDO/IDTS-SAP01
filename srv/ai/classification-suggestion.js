@@ -7,6 +7,7 @@ const { SELECT } = cds.ql
 const { FEATURE_TYPES, createAiSuggestion } = require('./audit')
 const { createAiProvider } = require('./provider')
 const { tokenSimilarity } = require('./duplicate-detection')
+const { assertBugOpenForMutation } = require('../bug-service/permissions')
 const {
   containsUnsafeDiagnosticText,
   redactSensitiveText,
@@ -121,6 +122,7 @@ async function resolveClassificationInput (tx, req, entities, data) {
         .where({ ID: data.sourceBugID })
     )
     if (!source) return req.reject(404, 'Source bug was not found.')
+    assertBugOpenForMutation(req, source)
     return {
       sourceBugID: data.sourceBugID,
       title: source.title,

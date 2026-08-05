@@ -89,6 +89,10 @@ Thêm field audit → cập nhật importantChanges + labels. Thêm trigger noti
 - Source layer: `srv`
 - Last reviewed: 2026-06-22
 
+## IDTS-122 Retest-owner audit display
+
+History normalization maps `retestOwner` UUID values through `displayUserName`, and `REASSIGN_RETEST_OWNER` has its own human-readable summary. Raw IDs remain available in audit values, while the timeline uses Tester display names.
+
 ## IDTS-36 Notification Handoff Update
 
 ### English

@@ -1,5 +1,9 @@
 # `srv/ai/classification-suggestion.js`
 
+## IDTS-122 guard
+
+New classification-suggestion generation is blocked for a Closed Bug so provider calls and suggestion audit rows cannot be created after closure.
+
 ## Feature-specific structured output contract (2026-07-30)
 
 `suggestClassification()` builds the active catalog input once and derives a JSON Schema from the same short references. The provider must return each available classification field with an exact `catalogRef`, a confidence from 0 to 1 and a short reason. UUIDs never enter the schema or provider payload. `findCatalogRow()` still maps each reference to an active backend catalog row; unknown or inactive values remain rejected.

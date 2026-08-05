@@ -8,6 +8,7 @@ const { SELECT, UPDATE } = cds.ql
 const { REVIEW_STATES } = require('./audit')
 const { USER_ROLE } = require('../bug-service/constants')
 const { resolveRequestUser } = require('../bug-service/helpers')
+const { assertBugOpenForMutation } = require('../bug-service/permissions')
 
 const REVIEWER_ROLES = new Set([
   USER_ROLE.TESTER,
@@ -50,10 +51,11 @@ async function reviewAiSuggestion (req, entities, nextState) {
 
   const bug = await tx.run(
     SELECT.one.from(entities.Bugs)
-      .columns('ID')
+      .columns('ID', 'status_code')
       .where({ ID: suggestion.bug_ID })
   )
   if (!bug) return req.reject(404, 'AI suggestion was not found.')
+  assertBugOpenForMutation(req, bug)
 
   if (suggestion.reviewState_code !== REVIEW_STATES.PENDING || isExpired(suggestion.expiresAt)) {
     return req.reject(409, 'This AI suggestion is no longer pending review.')

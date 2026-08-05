@@ -9,6 +9,7 @@ const { INSERT, SELECT } = cds.ql
 const { FEATURE_TYPES, REVIEW_STATES } = require('./audit')
 const { COORDINATOR_ROLES } = require('../bug-service/constants')
 const { resolveRequestUser } = require('../bug-service/helpers')
+const { assertBugOpenForMutation } = require('../bug-service/permissions')
 
 async function confirmDuplicateSuggestion (req, entities) {
   const suggestionID = cleanUUID(req.data?.suggestionID)
@@ -53,14 +54,16 @@ async function confirmDuplicateSuggestion (req, entities) {
   }
 
   const sourceBug = await tx.run(
-    SELECT.one.from(entities.Bugs).columns('ID').where({ ID: sourceBugID })
+    SELECT.one.from(entities.Bugs).columns('ID', 'status_code').where({ ID: sourceBugID })
   )
   if (!sourceBug) return req.reject(404, 'AI suggestion was not found.')
+  assertBugOpenForMutation(req, sourceBug)
 
   const candidateBug = await tx.run(
-    SELECT.one.from(entities.Bugs).columns('ID').where({ ID: candidateBugID })
+    SELECT.one.from(entities.Bugs).columns('ID', 'status_code').where({ ID: candidateBugID })
   )
   if (!candidateBug) return req.reject(404, 'Candidate Bug was not found.')
+  assertBugOpenForMutation(req, candidateBug)
 
   const payload = parsePayload(req, suggestion.suggestionPayload)
   const storedCandidate = payload.candidates.find(candidate =>

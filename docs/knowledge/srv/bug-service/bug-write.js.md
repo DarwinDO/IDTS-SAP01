@@ -1,5 +1,9 @@
 # Knowledge: `srv/bug-service/bug-write.js`
 
+## IDTS-122 write semantics
+
+New Bugs are Tester-only and initialize `retestOwner` from the trusted Tester actor. Active writes preserve server-owned reporter/retest ownership. When routing a verification step, the handler prefers an active retest owner and falls back to PM coordination only when the stored Tester is missing or inactive.
+
 ## Beginner execution walkthrough (2026-07-18)
 
 ### English

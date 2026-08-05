@@ -9,6 +9,7 @@ const { FEATURE_TYPES, REVIEW_STATES } = require('./audit')
 const { ACTION, COORDINATOR_ROLES } = require('../bug-service/constants')
 const { importantChanges, writeHistoryEvent } = require('../bug-service/history')
 const { resolveRequestUser } = require('../bug-service/helpers')
+const { assertBugOpenForMutation } = require('../bug-service/permissions')
 const {
   resolveComponentCategory,
   validateActiveCodeLists,
@@ -90,6 +91,7 @@ async function applyClassificationSuggestion (req, entities) {
     SELECT.one.from(entities.Bugs).where({ ID: suggestion.bug_ID })
   )
   if (!bug) return req.reject(404, 'AI suggestion was not found.')
+  assertBugOpenForMutation(req, bug)
 
   const payload = parsePayload(req, suggestion.suggestionPayload)
   const patch = await buildGroundedPatch(req, entities, payload.suggestions)

@@ -29,6 +29,12 @@ annotate service.Bugs with @(
         InsertRestrictions : { Insertable : false },
         DeleteRestrictions : { Deletable : false },
         UpdateRestrictions : { Updatable : false }
+      },
+      {
+        NavigationProperty : attachments,
+        InsertRestrictions : { Insertable : canEdit },
+        DeleteRestrictions : { Deletable : canEdit },
+        UpdateRestrictions : { Updatable : canEdit }
       }
     ]
   }

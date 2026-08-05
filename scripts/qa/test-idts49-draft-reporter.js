@@ -89,14 +89,12 @@ async function main () {
     assertBugCreatePermission(request(), actor(NHANT_ID, 'TESTER'))?.ID === NHANT_ID
   )
 
-  record(
-    'PM can start bug creation and returns actor',
-    assertBugCreatePermission(request(), actor(DONHV_ID, 'PM'))?.ID === DONHV_ID
+  await expectReject(
+    'PM cannot start bug creation',
+    () => assertBugCreatePermission(request(), actor(DONHV_ID, 'PM')),
+    403,
+    undefined
   )
-
-  const pmNew = request({ ID: '49000000-0000-0000-0000-000000000001' })
-  await prepareDraftNew(pmNew, actor(DONHV_ID, 'PM'))
-  record('draft NEW derives reporter from authenticated actor', pmNew.data.reporter_ID === DONHV_ID)
 
   const testerNew = request({
     ID: '49000000-0000-0000-0000-000000000002',
@@ -104,6 +102,7 @@ async function main () {
   })
   await prepareDraftNew(testerNew, actor(NHANT_ID, 'TESTER'))
   record('draft NEW overwrites client-supplied reporter', testerNew.data.reporter_ID === NHANT_ID)
+  record('draft NEW initializes the durable retest owner', testerNew.data.retestOwner_ID === NHANT_ID)
 
   const missingReporterDraft = { ID: '49000000-0000-0000-0000-000000000003', reporter_ID: null }
   await ensureDraftReporterForSave(request(), null, missingReporterDraft, actor(DONHV_ID, 'PM'))

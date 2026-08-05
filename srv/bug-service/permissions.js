@@ -4,6 +4,7 @@ const {
   COORDINATOR_ROLES,
   DEVELOPER_ACTIONS,
   DEVELOPER_DIRECT_STATUSES,
+  STATUS,
   USER_ROLE
 } = require('./constants')
 
@@ -18,6 +19,8 @@ async function enforceBugWritePermission (req, entities, oldBug, nextBug, { isCr
   if (isCreate) {
     return enforceBugCreatePermission(req, entities)
   }
+
+  assertBugOpenForMutation(req, oldBug)
 
   // `actor` là Users row được map từ token/session, không phải role do browser tự gửi.
   // Breakpoint tại đây để kiểm tra ID, role_code và active khi request bị từ chối sai.
@@ -51,6 +54,12 @@ async function enforceBugWritePermission (req, entities, oldBug, nextBug, { isCr
   )
 }
 
+function assertBugOpenForMutation (req, bug) {
+  if (bug?.status_code === STATUS.CLOSED) {
+    return req.reject(409, 'Closed bugs are read-only. Reopen the bug before making changes.')
+  }
+}
+
 async function enforceBugCreatePermission (req, entities) {
   // Handler `NEW Bugs.drafts` và create active gọi hàm này để resolve user một lần,
   // sau đó trả actor cho `prepareDraftNew` gắn reporter hệ thống.
@@ -68,8 +77,8 @@ function assertBugCreatePermission (req, actor) {
       'reporter_ID'
     )
   }
-  if (COORDINATOR_ROLES.has(actor.role_code)) return actor
-  return req.reject(403, 'Only Tester or PM users can create bug reports.')
+  if (actor.role_code === USER_ROLE.TESTER) return actor
+  return req.reject(403, 'Only Tester users can create bug reports.')
 }
 
 async function enforceActionPermission (req, entities, bug, actionType) {
@@ -102,6 +111,7 @@ async function isAssignedDeveloper (req, entities, userID, bug) {
 }
 
 module.exports = {
+  assertBugOpenForMutation,
   assertBugCreatePermission,
   enforceBugCreatePermission,
   enforceBugWritePermission,

@@ -3,6 +3,7 @@ CREATE,Create,Bug was created,10,true,0
 EDIT,Edit,Bug data was changed,20,true,0
 ASSIGN,Assign,Bug was assigned,30,true,1
 REASSIGN,Reassign,Bug was reassigned,40,true,1
+REASSIGN_RETEST_OWNER,Reassign Retest Owner,Tester responsible for retest was reassigned,45,true,1
 STATUS_CHANGE,Status Change,Bug status was changed,50,true,1
 REQUEST_INFO,Request More Information,Developer requested more information,60,true,2
 REJECT,Reject,Developer rejected assignment or classification,70,true,2

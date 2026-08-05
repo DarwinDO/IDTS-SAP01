@@ -418,6 +418,8 @@ async function enrichBugCapabilities (bugs, req, entities) {
       row.canMoveToPending = false
       row.canResubmit = false
       row.canAddComment = false
+      row.canEdit = false
+      row.canReassignRetestOwner = false
       row.assigneeFieldControl = FIELD_CONTROL.READ_ONLY
     }
     return
@@ -445,6 +447,7 @@ async function enrichBugCapabilities (bugs, req, entities) {
     const assigneeID = row.assignee_ID ?? rowCapabilityInputs.assignee_ID
     const allowedTransitions = ALLOWED_TRANSITIONS[status] || []
     const isAssignedDev = !!(actorDeveloperProfileID && assigneeID === actorDeveloperProfileID)
+    const isClosed = status === STATUS.CLOSED
 
     row.canMarkInReview = allowedTransitions.includes(STATUS.IN_REVIEW) && isAssignedDev
     row.canStartProgress = allowedTransitions.includes(STATUS.IN_PROGRESS) && isAssignedDev
@@ -458,8 +461,10 @@ async function enrichBugCapabilities (bugs, req, entities) {
     row.canAssign = allowedTransitions.includes(STATUS.ASSIGNED) && isCoordinator
     row.canMoveToPending = allowedTransitions.includes(STATUS.PENDING_ASSIGNMENT) && isCoordinator
     row.canResubmit = status === STATUS.NEED_MORE_INFORMATION && allowedTransitions.includes(STATUS.ASSIGNED) && isCoordinator && !!assigneeID
-    row.canAddComment = COMMENT_ROLES.has(actorRole)
-    row.assigneeFieldControl = isCoordinator && (!status || allowedTransitions.includes(STATUS.ASSIGNED))
+    row.canAddComment = COMMENT_ROLES.has(actorRole) && !isClosed
+    row.canEdit = !isClosed
+    row.canReassignRetestOwner = actorRole === USER_ROLE.PM
+    row.assigneeFieldControl = !isClosed && isCoordinator && (!status || allowedTransitions.includes(STATUS.ASSIGNED))
       ? FIELD_CONTROL.OPTIONAL
       : FIELD_CONTROL.READ_ONLY
   }

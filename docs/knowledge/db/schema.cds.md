@@ -1,5 +1,9 @@
 # Knowledge: `db/schema.cds`
 
+## IDTS-122 retest ownership
+
+`Bugs.retestOwner` is a nullable association to `Users`. It stores the durable Tester responsible for retest across close/reopen and is deliberately separate from Developer `assignee` and current-action `nextProcessorUser`. HANA rollout is additive and requires a controlled migration for active and draft artifacts; never use broad deploy/seed to introduce this column.
+
 ## IDTS-97 operational fields
 
 `AiSuggestions.operationStatus` and `latencyMs` persist only a normalized provider outcome and non-negative duration. They support privacy-safe reliability aggregation; they must never be replaced with raw errors, prompts, responses, endpoints, or credentials. Missing latency remains null and is excluded from averages.

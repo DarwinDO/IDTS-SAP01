@@ -80,9 +80,11 @@ async function main() {
   roleCode = 'TESTER'
   assert.strictEqual(actionModule.isCreateVisible(), true)
   roleCode = 'PM'
-  assert.strictEqual(actionModule.isCreateVisible(), true)
-  pass('Tester and PM see Create Bug')
+  assert.strictEqual(actionModule.isCreateVisible(), false)
+  await assert.rejects(() => actionModule.createBug.call({}), /not allowed/)
+  pass('Only Tester sees or invokes Create Bug')
 
+  roleCode = 'TESTER'
   const listBinding = { path: '/Bugs' }
   let createArguments
   const extensionActionContext = {

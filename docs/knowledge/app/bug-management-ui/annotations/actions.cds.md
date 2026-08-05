@@ -1,5 +1,9 @@
 # Knowledge: `app/bug-management-ui/annotations/actions.cds`
 
+## IDTS-122 action visibility
+
+Lifecycle and collaboration actions use backend `can*` fields so Closed Bugs hide ordinary mutations while keeping Reopen and authorized PM retest-owner reassignment. Hidden actions improve UX but never replace CAP authorization.
+
 > **Ownership / debug anchor:** SangVN owns Fiori action placement (backup: DatDT). Trace a pressed action from this metadata to its UI5 extension, then to the CAP handler that still authorizes it.
 > **Ownership / điểm debug:** SangVN sở hữu vị trí action Fiori (backup: DatDT). Trace action được nhấn từ metadata này tới UI5 extension, rồi tới CAP handler vẫn kiểm quyền.
 

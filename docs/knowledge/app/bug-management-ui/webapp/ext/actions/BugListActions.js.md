@@ -1,5 +1,9 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/actions/BugListActions.js`
 
+## IDTS-122 create guard
+
+The custom Create Bug entry point is visible and executable only for Tester. The controller guard is a UX defense; the CAP draft NEW handler independently enforces the same rule for direct calls.
+
 > **Ownership / debug anchor:** SangVN owns custom List Report actions (backup: DatDT). For a failed create flow, trace the UI role check and then the backend draft-create authorization; UI hiding alone is not security.
 > **Ownership / điểm debug:** SangVN sở hữu custom action List Report (backup: DatDT). Khi create flow fail, trace UI role check rồi backend draft-create authorization; UI hide không phải security.
 

@@ -34,12 +34,12 @@ stateDiagram-v2
     In_Progress --> Resolved: developer marks resolution/response complete
     In_Progress --> Rejected: developer rejects after processing review
 
-    Resolved --> Retest_Required: verification is needed
-    Resolved --> Closed: no retest needed and Tester/PM accepts
-    Retest_Required --> Closed: retest passed
-    Retest_Required --> Reopened: retest failed
+    Resolved --> Retest_Required: durable retest owner verifies
+    Resolved --> Closed: accepted by authorized verifier
+    Retest_Required --> Closed: retest owner confirms passed
+    Retest_Required --> Reopened: retest owner confirms failed
     Resolved --> Reopened: issue still exists before retest
-    Closed --> Reopened: reopened after closure
+    Closed --> Reopened: controlled reopen exception
 
     Reopened --> Assigned: Tester or PM assigns again
     Reopened --> In_Review: assigned developer resumes review
@@ -61,10 +61,10 @@ stateDiagram-v2
 | Need More Information | Developer/Tester | Developer needs more details; Tester must update the report. |
 | In Progress | Developer | Developer is handling or tracking the resolution outside IDTS. |
 | Resolved | Developer | Developer has provided a resolution result or response. |
-| Retest Required | Tester/PM | Resolution needs verification before closure. |
+| Retest Required | Retest Owner / PM coordination | Resolution needs verification by the durable Tester owner before closure. |
 | Rejected | Developer/Tester/PM | Developer rejected because of wrong classification or unsuitable assignment; follow-up is required. |
 | Reopened | Tester | Bug is opened again after being resolved or closed. |
-| Closed | Tester/PM | Bug is accepted as complete and should not be freely edited. |
+| Closed | No ordinary action owner | Bug is accepted as complete and the aggregate is read-only. Only Reopen and PM Reassign Retest Owner remain available. |
 
 ## Notes
 
@@ -72,7 +72,8 @@ stateDiagram-v2
 - The current MVP create happy flow persists `Assigned` or `Pending Assignment` immediately on submit. `New` remains only for legacy/import compatibility and controlled transition handling.
 - `Rejected` is treated as a follow-up status, not a terminal status. It must have a reason, nextProcessor, and a later transition.
 - `Retest Required` keeps closure under Tester/PM control and mirrors common SAP ALM defect handling without adding a full test management module.
-- Closed bugs should not be edited freely. Reopen should be used when the issue still exists.
+- `retestOwner` is durable across close/reopen and is separate from Developer assignee and `nextProcessor`.
+- Closed bugs reject ordinary edit, Developer assignment, comment, attachment mutation, AI mutation, and other lifecycle actions. Existing evidence stays readable/downloadable. Reopen must be used before normal processing resumes.
 - Comments do not directly change status. A separate status update must be recorded and logged.
 
 Vietnamese:

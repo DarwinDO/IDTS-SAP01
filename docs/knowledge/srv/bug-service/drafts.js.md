@@ -1,5 +1,9 @@
 # Knowledge: `srv/bug-service/drafts.js`
 
+## IDTS-122 draft boundary
+
+Draft NEW initializes reporter and retest owner from the authenticated Tester. Draft EDIT/PATCH/SAVE checks the active Bug and rejects a Closed aggregate. This prevents a stale or manually constructed draft request from bypassing the active-state rule.
+
 ## Beginner execution walkthrough (2026-07-18)
 
 ### English

@@ -29,12 +29,12 @@ stateDiagram-v2
     In_Progress --> Resolved: developer marks resolution/response complete
     In_Progress --> Rejected: developer rejects after processing review
 
-    Resolved --> Retest_Required: verification is needed
-    Resolved --> Closed: no retest needed and Tester/PM accepts
-    Retest_Required --> Closed: retest passed
-    Retest_Required --> Reopened: retest failed
+    Resolved --> Retest_Required: durable retest owner verifies
+    Resolved --> Closed: accepted by authorized verifier
+    Retest_Required --> Closed: retest owner confirms passed
+    Retest_Required --> Reopened: retest owner confirms failed
     Resolved --> Reopened: issue still exists before retest
-    Closed --> Reopened: reopened after closure
+    Closed --> Reopened: controlled reopen exception
 
     Reopened --> Assigned: Tester or PM assigns again
     Reopened --> In_Review: assigned developer resumes review

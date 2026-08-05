@@ -99,6 +99,10 @@ sap.ui.define([
             showSafeError("Please save or discard the current draft before adding a comment.");
             return false;
         }
+        if (context.getProperty("status_code") === "CLOSED") {
+            showSafeError("Closed bugs are read-only. Reopen the bug before adding a comment.");
+            return false;
+        }
         return true;
     }
 

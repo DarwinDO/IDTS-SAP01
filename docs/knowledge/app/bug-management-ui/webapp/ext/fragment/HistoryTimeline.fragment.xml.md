@@ -1,5 +1,9 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/fragment/HistoryTimeline.fragment.xml`
 
+## IDTS-122 update
+
+History remains readable on a Closed Bug and shows the audit trail for close, reopen, and retest-owner reassignment. The timeline is evidence, not an editable collaboration surface.
+
 > **Ownership / debug anchor:** SangVN owns the history timeline UI (backup: NhanT). This fragment reads audit events; use its visible batch/Show More behavior before assuming history persistence is missing.
 > **Ownership / điểm debug:** SangVN sở hữu UI history timeline (backup: NhanT). Fragment này đọc audit event; kiểm batch/Show More trước khi kết luận persistence history bị mất.
 

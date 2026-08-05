@@ -1,5 +1,9 @@
 # Knowledge: `srv/bug-service/permissions.js`
 
+## IDTS-122 closed-aggregate and create rules
+
+Only Tester may create a new Bug. `assertBugOpenForMutation` is the shared backend lock for a `CLOSED` Bug and returns a safe 409 before ordinary edit, assignment, comment, attachment, AI, or lifecycle mutation. Reopen and PM retest-owner reassignment are explicit caller-level exceptions; never weaken this guard because a Fiori button is hidden.
+
 ## IDTS-89 permission mapping
 
 Authorization is checked on the direct CAP action, not only through Fiori button visibility. The assigned Developer allow-list is `MARK_IN_REVIEW`, `REQUEST_MORE_INFORMATION`, `REJECT_BUG`, `START_PROGRESS`, and `RESOLVE_BUG`. Tester/PM retain coordinator access. A wrong or missing assignee returns 403, and developers do not gain assignment or Move to Pending Assignment access from the new code names.

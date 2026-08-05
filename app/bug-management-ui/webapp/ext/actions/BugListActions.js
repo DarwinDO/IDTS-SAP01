@@ -14,7 +14,7 @@ sap.ui.define([
     function canCreateBug() {
         // Manifest action gọi để ẩn/hiện Create; safe profile chỉ phục vụ UX, không thay backend authorization.
         var user = LoginSession.getUser();
-        return Boolean(user && (user.role_code === "TESTER" || user.role_code === "PM"));
+        return Boolean(user && user.role_code === "TESTER");
     }
 
     function getModelFromActionContext(actionContext) {

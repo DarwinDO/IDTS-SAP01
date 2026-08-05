@@ -190,6 +190,8 @@ service BugService @(requires: 'authenticated-user') {
     virtual canMoveToPending      : Boolean,
     virtual canResubmit           : Boolean,
     virtual canAddComment         : Boolean,
+    virtual canEdit               : Boolean,
+    virtual canReassignRetestOwner: Boolean,
     virtual assigneeFieldControl  : Integer
   } actions {
     // Bound actions chạy trên một Bug cụ thể. Tên/signature phải khớp `srv/service.js` và Fiori action annotation.
@@ -241,6 +243,33 @@ service BugService @(requires: 'authenticated-user') {
     action sendToRetest(note: String) returns Bugs;
     action closeBug(note: String) returns Bugs;
     action reopenBug(reason: String) returns Bugs;
+    @(requires: 'PM')
+    action reassignRetestOwner(
+      @Common.ValueList : {
+        Label : 'Active Tester',
+        CollectionPath : 'ActiveTesters',
+        SearchSupported : true,
+        Parameters : [
+          {
+            $Type : 'Common.ValueListParameterInOut',
+            LocalDataProperty : retestOwnerID,
+            ValueListProperty : 'ID'
+          },
+          {
+            $Type : 'Common.ValueListParameterDisplayOnly',
+            ValueListProperty : 'displayName'
+          },
+          {
+            $Type : 'Common.ValueListParameterDisplayOnly',
+            ValueListProperty : 'email'
+          }
+        ]
+      }
+      @Common.Label : 'Retest Owner'
+      retestOwnerID: UUID,
+      @UI.MultiLineText @Common.Label : 'Reason'
+      reason: String
+    ) returns Bugs;
   };
   // Projection collaboration/audit bổ sung display fields nhưng không đổi schema gốc.
   entity Comments as projection on db.Comments {
@@ -331,6 +360,13 @@ service BugService @(requires: 'authenticated-user') {
     role,
     active
   };
+  @readonly
+  @cds.redirection.target: false
+  entity ActiveTesters as projection on db.Users {
+    key ID,
+    displayName,
+    email
+  } where active = true and role.code = 'TESTER';
   entity DeveloperProfiles as projection on db.DeveloperProfiles;
   entity SAPModules as projection on db.SAPModules;
   entity ApplicationComponents as projection on db.ApplicationComponents;

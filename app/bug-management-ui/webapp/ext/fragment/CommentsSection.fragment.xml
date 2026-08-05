@@ -26,7 +26,7 @@
             growingMaxLines="6"
             maxLength="1000"
             placeholder="{i18n>commentsInputPlaceholder}"
-            enabled="{= ${IsActiveEntity} === true &amp;&amp; ${HasDraftEntity} !== true }"
+            enabled="{= ${IsActiveEntity} === true &amp;&amp; ${HasDraftEntity} !== true &amp;&amp; ${canAddComment} === true }"
             class="sapUiTinyMarginTop"
           />
           <HBox justifyContent="End" class="sapUiTinyMarginTop">
@@ -36,7 +36,7 @@
               type="Emphasized"
               icon="sap-icon://post"
               press="Collaboration.onAddComment"
-              enabled="{= ${IsActiveEntity} === true &amp;&amp; ${HasDraftEntity} !== true }"
+              enabled="{= ${IsActiveEntity} === true &amp;&amp; ${HasDraftEntity} !== true &amp;&amp; ${canAddComment} === true }"
             />
           </HBox>
           <MessageStrip
