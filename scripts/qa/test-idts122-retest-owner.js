@@ -7,6 +7,10 @@ const {
   assertBugOpenForMutation,
   assertBugCreatePermission
 } = require('../../srv/bug-service/permissions')
+const {
+  ensureRetestOwnerAction,
+  resolveColumn
+} = require('../db/migrate-idts122-retest-owner-hana')
 
 const ROOT = path.resolve(__dirname, '..', '..')
 const RESULTS = []
@@ -104,6 +108,35 @@ async function main () {
   record('HANA migration is additive and preserves existing owners', /ALTER TABLE[\s\S]*ADD/.test(migration) && /retestOwner[\s\S]*IS NULL/.test(migration) && !/DROP\s+(?:TABLE|COLUMN)/i.test(migration))
   record('HANA migration backfills active and draft targets with unresolved counts', /for \(const target of resolvedTargets\)[\s\S]*backfilledRowCount[\s\S]*unresolvedOwnerCount/.test(migration))
   record('HANA migration inserts the audit action type narrowly and idempotently', /ensureRetestOwnerAction/.test(migration) && /SELECT[\s\S]*INSERT INTO/.test(migration) && /REASSIGN_RETEST_OWNER/.test(migration))
+  record('HANA migration resolves HDI physical column names before raw SQL', /async function resolveColumn/.test(migration) && /requireColumn\(db, table, ['"]reporter_ID['"]/.test(migration) && /physicalColumnName\s*=\s*columnName\.toUpperCase\(\)/.test(migration))
+  const alterIndex = migration.indexOf('ALTER TABLE')
+  const userColumnsIndex = migration.indexOf('const userColumns')
+  const actionColumnsIndex = migration.indexOf('const actionColumns')
+  record('HANA migration validates required columns before additive DDL', alterIndex >= 0 && userColumnsIndex >= 0 && actionColumnsIndex >= 0 && userColumnsIndex < alterIndex && actionColumnsIndex < alterIndex)
+  record('HANA migration wraps code-list insert and backfill DML in one transaction', /db\.tx\(async tx =>[\s\S]*ensureRetestOwnerAction\(tx[\s\S]*UPDATE/.test(migration))
+  record('HANA migration creates the unquoted-CDS-equivalent physical column', /ALTER TABLE[\s\S]*quoteIdentifier\(physicalColumnName\)[\s\S]*NVARCHAR\(36\)/.test(migration))
+  record('HANA migration requires a single operator and documents sequential rerun', /Execute from one operator only/.test(migration) && /sequential rerun is safe/.test(migration))
+
+  const resolvedPhysicalColumn = await resolveColumn({
+    run: async () => [{ COLUMN_NAME: 'REPORTER_ID' }]
+  }, 'IDTS_CAP_BUGS', 'reporter_ID')
+  record('HANA column resolver returns the physical catalog name', resolvedPhysicalColumn === 'REPORTER_ID')
+
+  const actionSql = []
+  const actionInserted = await ensureRetestOwnerAction({
+    async run (sql) {
+      actionSql.push(sql)
+      return actionSql.length === 1 ? [] : 1
+    }
+  }, 'IDTS_CAP_ACTIONTYPES', {
+    code: 'CODE',
+    name: 'NAME',
+    descr: 'DESCR',
+    sortOrder: 'SORTORDER',
+    active: 'ACTIVE',
+    criticality: 'CRITICALITY'
+  })
+  record('action migration SQL uses resolved HANA column names', actionInserted === true && actionSql.every(sql => !/"(?:code|name|descr|sortOrder|active|criticality)"/.test(sql)))
   record('retest reassignment has dedicated audit and notification', /REASSIGN_RETEST_OWNER/.test(constants) && /REASSIGN_RETEST_OWNER/.test(actionTypes) && /ACTION\.REASSIGN_RETEST_OWNER/.test(actions) && /writeNotificationRecord\(tx/.test(actions))
   record('retest-owner history displays user names', /case ['"]retestOwner['"]:[\s\S]*displayUserName/.test(history))
 

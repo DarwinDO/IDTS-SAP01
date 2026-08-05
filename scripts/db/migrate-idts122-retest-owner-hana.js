@@ -11,6 +11,7 @@ const targets = [
   { logicalName: 'draft Bugs', tableHint: 'BugService_Bugs_drafts' }
 ]
 const columnName = 'retestOwner_ID'
+const physicalColumnName = columnName.toUpperCase()
 const retestOwnerAction = Object.freeze({
   code: 'REASSIGN_RETEST_OWNER',
   name: 'Reassign Retest Owner',
@@ -30,7 +31,7 @@ async function main () {
       type: 'NVARCHAR(36) NULL',
       codeListInsert: `${retestOwnerAction.code} only when missing`,
       backfill: 'Active and draft rows whose reporter resolves to an active TESTER; existing non-null values are preserved.',
-      note: 'No database connection was opened. No DDL, DML, deploy, or seed operation ran. HANA additive DDL may commit per statement; this helper is intentionally idempotent and rerunnable.'
+      note: 'No database connection was opened. No DDL, DML, deploy, or seed operation ran. Execute from one operator only. HANA additive DDL may commit per statement; this helper is intentionally idempotent and rerunnable.'
     }, null, 2))
     return
   }
@@ -42,14 +43,9 @@ async function main () {
   for (const target of targets) {
     const table = await resolveTable(db, target.tableHint)
     if (!table) throw new Error(`Required ${target.logicalName} table was not found.`)
-    const columnExists = await hasColumn(db, table, columnName)
-    if (!columnExists) {
-      await db.run(`ALTER TABLE ${quoteIdentifier(table)} ADD (${quoteIdentifier(columnName)} NVARCHAR(36))`)
-    }
-    if (!await hasColumn(db, table, columnName)) {
-      throw new Error(`Column verification failed for ${target.logicalName}.`)
-    }
-    resolvedTargets.push({ ...target, table, added: !columnExists })
+    const reporterColumn = await requireColumn(db, table, 'reporter_ID', target.logicalName)
+    const retestOwnerColumn = await resolveColumn(db, table, columnName)
+    resolvedTargets.push({ ...target, table, reporterColumn, retestOwnerColumn })
   }
 
   const usersTable = await resolveTable(db, 'idts_cap_Users')
@@ -57,23 +53,51 @@ async function main () {
   const actionTypesTable = await resolveTable(db, 'idts_cap_ActionTypes')
   if (!actionTypesTable) throw new Error('ActionTypes table was not found; audit code-list update was not executed.')
 
-  const actionTypeInserted = await ensureRetestOwnerAction(db, actionTypesTable)
+  // Resolve every existing physical column before the first DDL statement. HDI
+  // artifacts use unquoted identifiers, which HANA stores in uppercase.
+  const userColumns = {
+    ID: await requireColumn(db, usersTable, 'ID', 'Users'),
+    roleCode: await requireColumn(db, usersTable, 'role_code', 'Users'),
+    active: await requireColumn(db, usersTable, 'active', 'Users')
+  }
+  const actionColumns = {
+    code: await requireColumn(db, actionTypesTable, 'code', 'ActionTypes'),
+    name: await requireColumn(db, actionTypesTable, 'name', 'ActionTypes'),
+    descr: await requireColumn(db, actionTypesTable, 'descr', 'ActionTypes'),
+    sortOrder: await requireColumn(db, actionTypesTable, 'sortOrder', 'ActionTypes'),
+    active: await requireColumn(db, actionTypesTable, 'active', 'ActionTypes'),
+    criticality: await requireColumn(db, actionTypesTable, 'criticality', 'ActionTypes')
+  }
 
   for (const target of resolvedTargets) {
-    target.backfilledRowCount = Number(await db.run(`
-      UPDATE ${quoteIdentifier(target.table)} AS B
-         SET ${quoteIdentifier(columnName)} = B.${quoteIdentifier('reporter_ID')}
-       WHERE B.${quoteIdentifier(columnName)} IS NULL
-         AND EXISTS (
-           SELECT 1
-             FROM ${quoteIdentifier(usersTable)} AS U
-            WHERE U.${quoteIdentifier('ID')} = B.${quoteIdentifier('reporter_ID')}
-              AND U.${quoteIdentifier('role_code')} = 'TESTER'
-              AND U.${quoteIdentifier('active')} = TRUE
-         )
-    `)) || 0
-    target.unresolvedOwnerCount = await unresolvedOwnerCount(db, target.table)
+    const columnExists = Boolean(target.retestOwnerColumn)
+    if (!columnExists) {
+      await db.run(`ALTER TABLE ${quoteIdentifier(target.table)} ADD (${quoteIdentifier(physicalColumnName)} NVARCHAR(36))`)
+      target.retestOwnerColumn = await resolveColumn(db, target.table, columnName)
+    }
+    if (!target.retestOwnerColumn) throw new Error(`Column verification failed for ${target.logicalName}.`)
+    target.added = !columnExists
   }
+
+  const migrationResult = await db.tx(async tx => {
+    const actionTypeInserted = await ensureRetestOwnerAction(tx, actionTypesTable, actionColumns)
+    for (const target of resolvedTargets) {
+      target.backfilledRowCount = Number(await tx.run(`
+        UPDATE ${quoteIdentifier(target.table)} AS B
+           SET ${quoteIdentifier(target.retestOwnerColumn)} = B.${quoteIdentifier(target.reporterColumn)}
+         WHERE B.${quoteIdentifier(target.retestOwnerColumn)} IS NULL
+           AND EXISTS (
+             SELECT 1
+               FROM ${quoteIdentifier(usersTable)} AS U
+              WHERE U.${quoteIdentifier(userColumns.ID)} = B.${quoteIdentifier(target.reporterColumn)}
+                AND U.${quoteIdentifier(userColumns.roleCode)} = 'TESTER'
+                AND U.${quoteIdentifier(userColumns.active)} = TRUE
+           )
+      `)) || 0
+      target.unresolvedOwnerCount = await unresolvedOwnerCount(tx, target.table, target.retestOwnerColumn)
+    }
+    return { actionTypeInserted }
+  })
 
   console.log(JSON.stringify({
     mode: 'execute',
@@ -83,22 +107,22 @@ async function main () {
       backfilledRowCount,
       unresolvedOwnerCount
     })),
-    actionTypeInserted,
-    note: 'Existing non-null retest owners were preserved. Additive DDL may commit per statement; rerun is safe. Credentials and private endpoints were not printed.'
+    actionTypeInserted: migrationResult.actionTypeInserted,
+    note: 'Existing non-null retest owners were preserved. Execute from one operator only. Additive DDL may commit per statement; sequential rerun is safe. Credentials and private endpoints were not printed.'
   }, null, 2))
 }
 
-async function ensureRetestOwnerAction (db, table) {
+async function ensureRetestOwnerAction (db, table, columns) {
   const existing = await db.run(
-    `SELECT ${quoteIdentifier('code')} FROM ${quoteIdentifier(table)} WHERE ${quoteIdentifier('code')} = ?`,
+    `SELECT ${quoteIdentifier(columns.code)} FROM ${quoteIdentifier(table)} WHERE ${quoteIdentifier(columns.code)} = ?`,
     [retestOwnerAction.code]
   )
   if (Array.isArray(existing) && existing.length > 0) return false
 
   await db.run(`
     INSERT INTO ${quoteIdentifier(table)} (
-      ${quoteIdentifier('code')}, ${quoteIdentifier('name')}, ${quoteIdentifier('descr')},
-      ${quoteIdentifier('sortOrder')}, ${quoteIdentifier('active')}, ${quoteIdentifier('criticality')}
+      ${quoteIdentifier(columns.code)}, ${quoteIdentifier(columns.name)}, ${quoteIdentifier(columns.descr)},
+      ${quoteIdentifier(columns.sortOrder)}, ${quoteIdentifier(columns.active)}, ${quoteIdentifier(columns.criticality)}
     ) VALUES (?, ?, ?, ?, ?, ?)
   `, [
     retestOwnerAction.code,
@@ -111,11 +135,11 @@ async function ensureRetestOwnerAction (db, table) {
   return true
 }
 
-async function unresolvedOwnerCount (db, table) {
+async function unresolvedOwnerCount (db, table, retestOwnerColumn) {
   const rows = await db.run(`
     SELECT COUNT(*) AS "count"
       FROM ${quoteIdentifier(table)}
-     WHERE ${quoteIdentifier(columnName)} IS NULL
+     WHERE ${quoteIdentifier(retestOwnerColumn)} IS NULL
   `)
   return Number(rows?.[0]?.count ?? rows?.[0]?.COUNT ?? 0)
 }
@@ -128,12 +152,22 @@ async function resolveTable (db, hint) {
   return rows?.[0]?.TABLE_NAME || rows?.[0]?.tableName || null
 }
 
-async function hasColumn (db, table, column) {
+async function resolveColumn (db, table, column) {
   const rows = await db.run(
     `SELECT COLUMN_NAME FROM SYS.TABLE_COLUMNS WHERE SCHEMA_NAME = CURRENT_SCHEMA AND TABLE_NAME = ? AND UPPER(COLUMN_NAME) = UPPER(?)`,
     [table, column]
   )
-  return Array.isArray(rows) && rows.length > 0
+  return rows?.[0]?.COLUMN_NAME || rows?.[0]?.columnName || null
+}
+
+async function requireColumn (db, table, column, logicalName) {
+  const resolved = await resolveColumn(db, table, column)
+  if (!resolved) throw new Error(`Required ${logicalName} column ${column} was not found.`)
+  return resolved
+}
+
+async function hasColumn (db, table, column) {
+  return Boolean(await resolveColumn(db, table, column))
 }
 
 function quoteIdentifier (value) {
@@ -155,7 +189,10 @@ module.exports = {
   columnName,
   ensureRetestOwnerAction,
   hasColumn,
+  physicalColumnName,
   quoteIdentifier,
+  requireColumn,
+  resolveColumn,
   resolveTable,
   retestOwnerAction,
   safeErrorMessage,
