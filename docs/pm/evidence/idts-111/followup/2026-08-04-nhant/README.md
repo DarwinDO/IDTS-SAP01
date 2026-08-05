@@ -1,6 +1,6 @@
 # IDTS-111 NhanT Follow-up Evidence — 2026-08-04
 
-This directory contains new member-owned evidence requested in Jira comment `10978`. Historical evidence is unchanged.
+This directory contains new member-owned evidence requested in Jira comment `10978`. Historical evidence is unchanged. Every outcome below remains a candidate pending DonHV disposition; this package does not grant final UAT approval.
 
 - Executor: NhanT
 - Role: Tester
@@ -23,4 +23,8 @@ This directory contains new member-owned evidence requested in Jira comment `109
 | UAT-UX-002 | MEETS | At 834×1112, the controlled long Smart Assign explanation used normal/pre-line wrapping with `scrollWidth == clientWidth`; Assign and Cancel remained inside the viewport. |
 | UAT-UX-003 | DOES NOT MEET | NhanT's physical Tab-key check confirmed logical Create/comment/action focus and correct Enter/Escape/focus return, but Similar Bugs exposed only the first result to sequential Tab navigation and skipped the remaining results. |
 
-The PNG cards are sanitized visual trace records generated from the observed SAP UI/OData state. `01-uat-att-001-active-before-reload.png` is a cropped product screenshot. No credential, token, cookie, private endpoint, full email, or raw AI payload is stored.
+## Evidence interpretation
+
+The case-named PNG/SVG cards are authored trace summaries assembled from the recorded SAP UI/OData observations. They are not independent browser screenshots and must not be used alone to prove runtime execution.
+
+`01-uat-att-001-active-before-reload.png`, `UAT-UX-003-trigger-focus.png`, and `UAT-UX-003-first-result-focus.png` are product/browser screenshots. No credential, token, cookie, private endpoint, full email, or raw AI payload is stored.

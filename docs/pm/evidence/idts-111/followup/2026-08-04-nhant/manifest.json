@@ -21,7 +21,7 @@
         "sha256": "1BB8C0F0CC1767605368B1E3CD139EBB33F9FCA02C4FEA33F619DA29C572ED26"
       },
       "evidence": [
-        {"file": "01-uat-att-001-active-before-reload.png", "sha256": "9061E85E122AAEF92074807145793CD4EA85A59C09E43D9B0DF604A35B612C52", "kind": "sanitized product screenshot"},
+        {"file": "01-uat-att-001-active-before-reload.png", "sha256": "C7D81C327EB36A200FA6E20F0EB6B6F2D89C35A42980353AD94561D0178007F3", "kind": "sanitized product screenshot"},
         {"file": "UAT-ATT-001.png", "sha256": "8125EB31A20455E5F40FA61276E25E49C0B68D7C0267A76B3F894E8A0C679956", "kind": "sanitized visual trace"}
       ]
     },
@@ -80,7 +80,7 @@
       "executedAt": "2026-08-05T09:38:00+07:00",
       "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
       "actualResult": "NhanT's physical-keyboard check confirmed logical focus order through Create, comments, and actions; Enter opened Similar Bugs, Escape closed it, and focus returned to the trigger. Inside the dialog, Tab reached only the first similar-bug result and skipped the remaining results.",
-      "template": "UAT-UX-003-physical-tab-template.md",
+      "memberRecord": "UAT-UX-003-physical-tab-record.md",
       "evidence": [
         {"file": "UAT-UX-003-trigger-focus.png", "sha256": "46CB714141618BCECE4C7B1EB831D97AE59548C1CA9C75B8E065CF7EFED95401", "kind": "sanitized physical-keyboard trigger-focus screenshot"},
         {"file": "UAT-UX-003-first-result-focus.png", "sha256": "E75188E1BDB04F5A06032064094ADC38296B82BEF2425E3B352CF1E919C3435C", "kind": "sanitized first-result focus screenshot"}
