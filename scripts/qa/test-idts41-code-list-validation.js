@@ -174,8 +174,11 @@ async function main () {
 
   assertBugCreatePermission(permissionRequest(), { role_code: 'TESTER' })
   record('Tester is allowed to start root draft creation', true)
-  assertBugCreatePermission(permissionRequest(), { role_code: 'PM' })
-  record('PM is allowed to start root draft creation', true)
+  await expectReject(
+    'PM is denied at root draft creation',
+    403,
+    () => assertBugCreatePermission(permissionRequest(), { role_code: 'PM' })
+  )
 
   const expectedChecks = 18
   if (RESULTS.length !== expectedChecks) {
