@@ -82,14 +82,14 @@
       "actualResult": "NhanT's physical-keyboard check confirmed logical focus order through Create, comments, and actions; Enter opened Similar Bugs, Escape closed it, and focus returned to the trigger. Inside the dialog, Tab reached only the first similar-bug result and skipped the remaining results.",
       "memberRecord": "UAT-UX-003-physical-tab-record.md",
       "evidence": [
-        {"file": "UAT-UX-003-trigger-focus.png", "sha256": "46CB714141618BCECE4C7B1EB831D97AE59548C1CA9C75B8E065CF7EFED95401", "kind": "sanitized physical-keyboard trigger-focus screenshot"},
-        {"file": "UAT-UX-003-first-result-focus.png", "sha256": "E75188E1BDB04F5A06032064094ADC38296B82BEF2425E3B352CF1E919C3435C", "kind": "sanitized first-result focus screenshot"}
+        {"file": "UAT-UX-003-trigger-focus.png", "sha256": "5C54724A42B25448E51E1EB540D35B52E6111E6B9B562020A42D93A9BCE5EFE8", "kind": "sanitized physical-keyboard trigger-focus screenshot with browser chrome removed"},
+        {"file": "UAT-UX-003-first-result-focus.png", "sha256": "AA59D506A49E86B35B68F0FEC73A52CE2DF6E5ABA946784F1D55ED613C02F1E4", "kind": "sanitized first-result focus screenshot with browser chrome removed"}
       ]
     }
   ],
   "privacyReview": {
     "status": "PASS",
-    "notes": "No credentials, tokens, cookies, private endpoint, full email, raw AI payload, or unrelated attachment content is stored."
+    "notes": "Browser chrome and the deployed host were removed from retained screenshots. No credentials, tokens, cookies, private endpoint, full email, raw AI payload, or unrelated attachment content is stored."
   },
   "finalPassApproved": false
 }

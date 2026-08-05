@@ -27,4 +27,4 @@ This directory contains new member-owned evidence requested in Jira comment `109
 
 The case-named PNG/SVG cards are authored trace summaries assembled from the recorded SAP UI/OData observations. They are not independent browser screenshots and must not be used alone to prove runtime execution.
 
-`01-uat-att-001-active-before-reload.png`, `UAT-UX-003-trigger-focus.png`, and `UAT-UX-003-first-result-focus.png` are product/browser screenshots. No credential, token, cookie, private endpoint, full email, or raw AI payload is stored.
+`01-uat-att-001-active-before-reload.png`, `UAT-UX-003-trigger-focus.png`, and `UAT-UX-003-first-result-focus.png` are product/browser screenshots. Browser chrome and the deployed host were removed from the UX-003 screenshots. No credential, token, cookie, private endpoint, full email, or raw AI payload is stored.
