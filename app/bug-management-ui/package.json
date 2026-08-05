@@ -1,6 +1,6 @@
 {
   "name": "bug-management-ui",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Fiori application for issue and defect tracking",
   "keywords": [
     "ui5",
