@@ -20,6 +20,7 @@ const {
 } = require('../../srv/ai')
 const { containsUnsafeDiagnosticText } = require('../../srv/ai/safety')
 const { OpenAiProvider } = require('../../srv/ai/openai-provider')
+const { safeFailureCode } = require('../../srv/ai/provider')
 
 const RESULTS = []
 let PASS = 0
@@ -161,6 +162,11 @@ async function main () {
   expectEqual('timeout status is AI_TIMEOUT', timeoutResult.status, 'AI_TIMEOUT')
   expectEqual('timeout is retryable', timeoutResult.error.retryable, true)
   expectNoUnsafeDiagnostic('timeout response excludes unsafe diagnostic text', timeoutResult)
+
+  expectEqual('Gateway HTTP 400 maps to semantic bad-request outcome', safeFailureCode({ code: 'VERCEL_GATEWAY_HTTP_400' }), 'AI_BAD_REQUEST')
+  expectEqual('Gateway HTTP 503 maps to semantic provider-5xx outcome', safeFailureCode({ code: 'VERCEL_GATEWAY_HTTP_503' }), 'AI_PROVIDER_5XX')
+  expectEqual('Gateway network failure maps to semantic unavailable outcome', safeFailureCode({ code: 'VERCEL_GATEWAY_NETWORK_ERROR' }), 'AI_UNAVAILABLE')
+  expectEqual('Gateway HTTP 403 remains a generic sanitized provider failure', safeFailureCode({ code: 'VERCEL_GATEWAY_HTTP_403' }), 'AI_PROVIDER_ERROR')
 
   const incompleteOpenAiConfig = normalizeAiConfig({
     enabled: true,

@@ -85,6 +85,15 @@
     "resources": {
       "css": []
     },
+    "extends": {
+      "extensions": {
+        "sap.ui.controllerExtensions": {
+          "sap.fe.templates.ListReport.ListReportController": {
+            "controllerName": "idts.bugmanagementui.ext.listreport.ListReportController"
+          }
+        }
+      }
+    },
     "routing": {
       "config": {},
       "routes": [

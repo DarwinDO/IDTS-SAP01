@@ -179,3 +179,11 @@ Debug order: Dashboard startup → button visibility → `openAiActivity()` → 
 Tiếng Việt: Dashboard PM có nút `AI Activity` trong header, không tạo route mới. Hàm gọi metrics 30 ngày, gộp theo capability và không hiển thị provider/model, prompt, response hay raw error. Dialog dùng `Device.system.phone` với thuộc tính `stretch` được hỗ trợ, không dùng `stretchOnPhone` đã deprecated. Backend vẫn kiểm quyền PM. Debug theo thứ tự startup → visibility → handler → Network → aggregate → model → table.
 
 Aggregation note: backend `failureCount` already includes timeout and unavailable outcomes. The UI sums `failureCount` once and must not add `unavailableCount` again, otherwise the business-facing failure total is overstated.
+
+## IDTS-122 — PM status drill-down and semantic AI outcomes
+
+The PM dashboard now reads `readBugStatusMetrics()` instead of counting a capped client-side Bug list. The service always returns the ten current workflow statuses, including zero-count rows, and deliberately excludes legacy `NEW`. Each tile carries the canonical `statusCode` and opens the List Report with a `status_code` hash parameter. The List Report controller extension then applies that value through the public Fiori Elements ExtensionAPI; it does not manipulate table controls or the DOM.
+
+The AI Activity dialog displays explicit semantic outcomes: success, bad request, rate limited, provider 5xx, timeout, unavailable, and other failure. Unknown historical failures remain `other failure`; the UI must never infer a provider HTTP class that was not captured by the adapter.
+
+Debug order: `loadDashboard()` → `readBugStatusMetrics()` Network response → `pmDashboard()` tile model → tile press hash → `ext/listreport/ListReportController.js` → List Report filter bar. For AI metrics, continue through `readAiOperationalMetrics()` and `srv/ai/metrics.js`.

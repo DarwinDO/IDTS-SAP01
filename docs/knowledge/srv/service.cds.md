@@ -1,5 +1,9 @@
 # Knowledge: `srv/service.cds`
 
+## IDTS-122 PM operational dashboard contracts
+
+`readBugStatusMetrics()` is a PM-only read function returning the ten canonical workflow statuses with label, criticality, sort order and Bug count. It is an aggregate read contract, not a HANA table and requires no schema deployment. `AiOperationalMetric` now exposes semantic outcome counters so the UI can distinguish known bad requests, rate limits, provider 5xx, timeouts, unavailable calls and unknown failures without exposing prompts, provider payloads or raw errors.
+
 ## IDTS-122 contract delta
 
 `Bugs` exposes durable retest ownership and capability flags, and declares the bound `reassignRetestOwner` action. Active Testers are provided through a value help. These are additive service contracts; ordinary Closed-Bug mutation remains blocked in handlers, not trusted to metadata alone.

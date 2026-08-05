@@ -28,3 +28,6 @@ This module is the privacy boundary for IDTS AI operational metrics. It creates 
 ## IDTS-114 model-ID preservation (2026-07-29)
 
 `safeModelAlias()` now preserves a validated `provider/model` identifier in operational metrics. This matters because `alibaba/qwen3.7-flash` and `openai/gpt-5.4-nano` must remain distinguishable during staged rollout. It still redacts unsafe text and rejects path traversal, URLs, tokens, prompts, and arbitrary diagnostic strings. The metric remains allowlisted metadata only; it cannot reveal a gateway key or a provider response.
+# IDTS-122 semantic outcome aggregation
+
+Operational metrics map persisted `operationStatus` values into explicit business-safe buckets. `SUCCESS` is counted separately; known `AI_BAD_REQUEST`, `AI_RATE_LIMITED`, `AI_PROVIDER_5XX`, `AI_TIMEOUT` and `AI_UNAVAILABLE` statuses keep their meaning; every unrecognized failure is counted as `otherFailureCount`. This avoids inventing HTTP classes for historical rows. Queries use a bounded reporting window and return aggregate counts only.
