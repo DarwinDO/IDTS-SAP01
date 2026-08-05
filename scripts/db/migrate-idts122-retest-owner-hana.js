@@ -4,8 +4,6 @@
 // Narrow additive HANA migration for IDTS-122. Dry-run is the default. The
 // helper never invokes cds deploy, imports seed data, drops columns, or prints
 // service-binding credentials.
-const cds = require('@sap/cds')
-
 const targets = [
   { logicalName: 'active Bugs', tableHint: 'idts_cap_Bugs' },
   { logicalName: 'draft Bugs', tableHint: 'BugService_Bugs_drafts' }
@@ -22,7 +20,7 @@ const retestOwnerAction = Object.freeze({
   criticality: 1
 })
 
-async function main () {
+async function main (options = {}) {
   const execute = process.argv.includes('--execute')
   if (!execute) {
     console.log(JSON.stringify({
@@ -37,8 +35,16 @@ async function main () {
     return
   }
 
-  const db = await cds.connect.to('db')
-  if (db.kind !== 'hana') throw new Error('IDTS-122 migration requires a bound SAP HANA database service.')
+  const db = await createHdiDatabase(options.env || process.env, options.hdb)
+
+  try {
+    await executeMigration(db)
+  } finally {
+    await db.disconnect()
+  }
+}
+
+async function executeMigration (db) {
 
   const resolvedTargets = []
   for (const target of targets) {
@@ -114,6 +120,120 @@ async function main () {
   console.log(completionMarker)
 }
 
+function readHdiCredentials (env = process.env) {
+  let services
+  try {
+    services = JSON.parse(env.VCAP_SERVICES || '{}')
+  } catch {
+    throw new Error('SAP HANA service bindings are unavailable or invalid.')
+  }
+
+  const candidates = Object.values(services)
+    .flatMap(entries => Array.isArray(entries) ? entries : [])
+    .filter(binding => binding?.credentials?.hdi_user && binding?.credentials?.hdi_password)
+
+  const requestedService = String(env.IDTS_HANA_MIGRATION_SERVICE || '').trim()
+  const matches = requestedService
+    ? candidates.filter(binding => [binding.name, binding.instance_name, binding.label].includes(requestedService))
+    : candidates
+
+  if (matches.length !== 1) {
+    throw new Error(requestedService
+      ? 'The requested SAP HANA migration binding was not found uniquely.'
+      : 'Exactly one SAP HANA HDI migration binding is required.')
+  }
+
+  const credentials = matches[0].credentials
+  for (const field of ['host', 'port', 'schema']) {
+    if (credentials[field] === undefined || credentials[field] === null || credentials[field] === '') {
+      throw new Error(`SAP HANA migration binding is missing ${field}.`)
+    }
+  }
+  if (!Number.isFinite(Number(credentials.port))) {
+    throw new Error('SAP HANA migration binding has an invalid port.')
+  }
+
+  return {
+    host: credentials.host,
+    port: Number(credentials.port),
+    user: credentials.hdi_user,
+    password: credentials.hdi_password,
+    schema: credentials.schema,
+    useTLS: credentials.encrypt !== false,
+    rejectUnauthorized: credentials.validate_certificate !== false,
+    ...(credentials.certificate ? { ca: credentials.certificate } : {})
+  }
+}
+
+async function createHdiDatabase (env = process.env, hdbModule = require('hdb')) {
+  const credentials = readHdiCredentials(env)
+  const client = hdbModule.createClient(credentials)
+  client.on('error', () => {})
+  try {
+    await callback(client.connect.bind(client))
+    client.setAutoCommit(true)
+    await runHdb(client, `SET SCHEMA ${quoteIdentifier(credentials.schema)}`)
+  } catch (error) {
+    if (client.readyState === 'connected') {
+      try { await callback(client.disconnect.bind(client)) } catch {}
+    } else {
+      client.end()
+    }
+    throw error
+  }
+
+  const adapter = {
+    kind: 'hana',
+    run: (sql, parameters) => runHdb(client, sql, parameters),
+    async tx (operation) {
+      client.setAutoCommit(false)
+      try {
+        const result = await operation(adapter)
+        await callback(client.commit.bind(client))
+        return result
+      } catch (error) {
+        try {
+          await callback(client.rollback.bind(client))
+        } catch {}
+        throw error
+      } finally {
+        client.setAutoCommit(true)
+      }
+    },
+    async disconnect () {
+      if (client.readyState === 'connected') await callback(client.disconnect.bind(client))
+      else client.end()
+    }
+  }
+  return adapter
+}
+
+function callback (register) {
+  return new Promise((resolve, reject) => register((error, result) => error ? reject(error) : resolve(result)))
+}
+
+async function runHdb (client, sql, parameters = []) {
+  if (!Array.isArray(parameters) || parameters.length === 0) {
+    return callback(done => client.exec(sql, done))
+  }
+
+  const statement = await callback(done => client.prepare(sql, done))
+  let result
+  let executionError
+  try {
+    result = await callback(done => statement.exec(parameters, done))
+  } catch (error) {
+    executionError = error
+  }
+  try {
+    await callback(done => statement.drop(done))
+  } catch (dropError) {
+    if (!executionError) throw dropError
+  }
+  if (executionError) throw executionError
+  return result
+}
+
 async function ensureRetestOwnerAction (db, table, columns) {
   const existing = await db.run(
     `SELECT ${quoteIdentifier(columns.code)} FROM ${quoteIdentifier(table)} WHERE ${quoteIdentifier(columns.code)} = ?`,
@@ -177,9 +297,17 @@ function quoteIdentifier (value) {
 }
 
 function safeErrorMessage (error) {
-  return String(error?.message || error || 'Unknown migration error.')
-    .replace(/(?:https?|hana):\/\/[^\s"']+/gi, '[REDACTED_ENDPOINT]')
-    .replace(/password\s*[=:]\s*[^\s,;]+/gi, 'password=[REDACTED]')
+  const message = String(error?.message || error || '')
+  if (/insufficient privilege/i.test(message)) {
+    return 'SAP HANA rejected the migration because the selected principal lacks the required privilege.'
+  }
+  if (/authentication|connect|network|socket|timeout/i.test(message)) {
+    return 'The dedicated SAP HANA migration connection could not be established.'
+  }
+  if (/^(?:SAP HANA|Exactly one|The requested|Required |Users table|ActionTypes table|Column verification)/.test(message)) {
+    return message
+  }
+  return 'SAP HANA migration execution failed.'
 }
 
 const invokedFromStdin = process.argv[1] === '-' && module.id === '[stdin]'
@@ -190,18 +318,22 @@ if (require.main === module || invokedFromStdin) main().catch(error => {
 })
 
 module.exports = {
+  createHdiDatabase,
   columnName,
   completionMarker,
   ensureRetestOwnerAction,
+  executeMigration,
   hasColumn,
   main,
   physicalColumnName,
   quoteIdentifier,
+  readHdiCredentials,
   requireColumn,
   resolveColumn,
   resolveTable,
   retestOwnerAction,
   safeErrorMessage,
   targets,
-  unresolvedOwnerCount
+  unresolvedOwnerCount,
+  runHdb
 }
