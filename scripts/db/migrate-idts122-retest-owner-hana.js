@@ -12,6 +12,7 @@ const targets = [
 ]
 const columnName = 'retestOwner_ID'
 const physicalColumnName = columnName.toUpperCase()
+const completionMarker = 'IDTS-122-MIGRATION-COMPLETE'
 const retestOwnerAction = Object.freeze({
   code: 'REASSIGN_RETEST_OWNER',
   name: 'Reassign Retest Owner',
@@ -110,6 +111,7 @@ async function main () {
     actionTypeInserted: migrationResult.actionTypeInserted,
     note: 'Existing non-null retest owners were preserved. Execute from one operator only. Additive DDL may commit per statement; sequential rerun is safe. Credentials and private endpoints were not printed.'
   }, null, 2))
+  console.log(completionMarker)
 }
 
 async function ensureRetestOwnerAction (db, table, columns) {
@@ -180,15 +182,19 @@ function safeErrorMessage (error) {
     .replace(/password\s*[=:]\s*[^\s,;]+/gi, 'password=[REDACTED]')
 }
 
-if (require.main === module) main().catch(error => {
+const invokedFromStdin = process.argv[1] === '-' && module.id === '[stdin]'
+
+if (require.main === module || invokedFromStdin) main().catch(error => {
   console.error(`IDTS-122 HANA migration failed: ${safeErrorMessage(error)}`)
   process.exit(1)
 })
 
 module.exports = {
   columnName,
+  completionMarker,
   ensureRetestOwnerAction,
   hasColumn,
+  main,
   physicalColumnName,
   quoteIdentifier,
   requireColumn,
