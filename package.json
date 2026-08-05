@@ -57,6 +57,8 @@
     "qa:draft-reporter:programmatic": "node scripts/qa/test-idts49-draft-reporter.js",
     "qa:idts122:programmatic": "node scripts/qa/test-idts122-retest-owner.js",
     "qa:idts122:closed": "node scripts/qa/test-idts122-closed-bug-immutability.js",
+    "qa:idts122:clean-baseline": "node scripts/qa/test-idts122-clean-baseline.js",
+    "qa:idts122:clean-baseline-hana": "node scripts/qa/test-idts122-clean-baseline-hana.js",
     "qa:depth:pr-body": "node scripts/qa/check-pr-depth.js",
     "qa:secret-scan": "node scripts/qa/secret-scan.js",
     "qa:agent-rules": "node scripts/qa/check-agent-rules.js",
