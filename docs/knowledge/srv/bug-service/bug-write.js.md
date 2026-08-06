@@ -308,3 +308,17 @@ Khi sửa rule này, phải test cả create lẫn update và chứng minh giá 
 ### Vietnamese
 
 `resolveComponentCategory()` hiện là validation helper được export. Ghi Bug bình thường vẫn gọi nó qua `deriveOrValidateComponentCategory()`, còn `classification-apply.js` dùng nó để derive lại cặp component/category active trước khi áp dụng suggestion đã Accept. Owner chính: DonHV; backup: DatDT. Khi debug, xem component/category ID được chọn, query cặp active và `ComponentCategories.ID` trả về. Giữ helper chỉ đọc/validate; caller vẫn chịu trách nhiệm quyết định patch nào được persist.
+
+## 2026-08-06 update: active classification parents
+
+### English
+
+An active `ComponentCategories` bridge is not sufficient by itself. `resolveComponentCategory()` now calls `validateActiveClassificationParents()` so both the selected Application Component and Defect Category must also be active. Active CREATE/UPDATE, classification apply, and draft activation therefore enforce the same business boundary. Errors target the scalar OData fields `applicationComponent_ID` and `defectCategory_ID` so Fiori can associate the message with the correct input.
+
+When changing this rule, prove that inactive parent rows are rejected before a Bug is persisted and that a valid active pair still derives the expected `componentCategory_ID`.
+
+### Vietnamese
+
+Chỉ có bridge `ComponentCategories` active là chưa đủ. `resolveComponentCategory()` hiện gọi `validateActiveClassificationParents()` để bắt buộc cả Application Component và Defect Category được chọn cũng phải active. Vì vậy active CREATE/UPDATE, áp dụng classification suggestion và draft activation dùng cùng một ranh giới nghiệp vụ. Lỗi trỏ đúng hai field OData dạng scalar là `applicationComponent_ID` và `defectCategory_ID` để Fiori gắn thông báo vào đúng ô nhập.
+
+Khi sửa rule này, phải chứng minh parent inactive bị từ chối trước khi Bug được lưu và một cặp active hợp lệ vẫn derive đúng `componentCategory_ID`.

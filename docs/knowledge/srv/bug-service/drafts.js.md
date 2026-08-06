@@ -201,3 +201,13 @@ Fiori draft là bản dữ liệu tạm trong database khi user đang sửa form
   **Phải kiểm tra cùng**: `bug-write.js`, đăng ký PATCH/SAVE trong `service.js`, `db/schema.cds` và draft test trên Object Page.
 
 Hai lần kiểm tra là có chủ ý: PATCH thường chỉ chứa một field vừa đổi, còn SAVE là cổng toàn vẹn cuối trên toàn bộ draft.
+
+## 2026-08-06 update: draft classification parent guard
+
+### English
+
+`prepareDraftPatch()` now validates that the draft's Application Component and Defect Category parents are active before looking up their bridge. The draft may temporarily hold an active but not-yet-valid pair while the user changes fields one at a time; however, `validateDraftForSave()` calls `resolveComponentCategory()` and rejects activation until the final pair is active and valid. A rejected PATCH leaves the stored draft unchanged.
+
+### Vietnamese
+
+`prepareDraftPatch()` hiện kiểm tra Application Component và Defect Category của draft còn active trước khi tìm bridge. Draft có thể tạm giữ một cặp parent active nhưng chưa match trong lúc người dùng đổi từng field; tuy nhiên `validateDraftForSave()` gọi `resolveComponentCategory()` và không cho activate cho đến khi cặp cuối cùng vừa active vừa hợp lệ. PATCH bị từ chối không làm thay đổi draft đã lưu.

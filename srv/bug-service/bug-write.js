@@ -192,6 +192,30 @@ async function resolveComponentCategory (req, entities, bug) {
   if (!bug.applicationComponent_ID || !bug.defectCategory_ID) return null
 
   const tx = cds.tx(req)
+  await validateActiveClassificationParents(req, entities, bug, tx)
+
+  const componentCategory = await tx.run(
+    SELECT.one.from(entities.ComponentCategories).where({
+      component_ID: bug.applicationComponent_ID,
+      defectCategory_ID: bug.defectCategory_ID,
+      active: true
+    })
+  )
+  if (!componentCategory) {
+    return req.reject(
+      400,
+      'The selected Application Component and Defect Category are not a valid Component Category.',
+      'defectCategory_ID'
+    )
+  }
+  return componentCategory
+}
+
+async function validateActiveClassificationParents (req, entities, bug, tx = cds.tx(req)) {
+  // Draft PATCH và active CREATE/UPDATE dùng chung hàng rào này. Bridge còn active không đủ:
+  // chính Application Component và Defect Category cũng phải đang active.
+  if (!bug.applicationComponent_ID || !bug.defectCategory_ID) return
+
   const applicationComponent = await tx.run(
     SELECT.one.from(entities.ApplicationComponents).columns('ID').where({
       ID: bug.applicationComponent_ID,
@@ -202,7 +226,7 @@ async function resolveComponentCategory (req, entities, bug) {
     return req.reject(
       400,
       'Application Component must reference an active catalog value.',
-      'applicationComponent'
+      'applicationComponent_ID'
     )
   }
 
@@ -216,25 +240,9 @@ async function resolveComponentCategory (req, entities, bug) {
     return req.reject(
       400,
       'Defect Category must reference an active catalog value.',
-      'defectCategory'
+      'defectCategory_ID'
     )
   }
-
-  const componentCategory = await tx.run(
-    SELECT.one.from(entities.ComponentCategories).where({
-      component_ID: bug.applicationComponent_ID,
-      defectCategory_ID: bug.defectCategory_ID,
-      active: true
-    })
-  )
-  if (!componentCategory) {
-    return req.reject(
-      400,
-      'The selected Application Component and Defect Category are not a valid Component Category.',
-      'defectCategory'
-    )
-  }
-  return componentCategory
 }
 
 async function validateAssignee (req, entities, bug) {
@@ -327,6 +335,7 @@ module.exports = {
   prepareBugWrite,
   determineNextProcessor,
   resolveComponentCategory,
+  validateActiveClassificationParents,
   validateActiveCodeLists,
   validateRequiredBugFields,
   validateAssignee,

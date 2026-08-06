@@ -16,6 +16,8 @@ const {
   recordDraftAttachmentSaveSideEffects
 } = require('./history')
 const {
+  resolveComponentCategory,
+  validateActiveClassificationParents,
   validateActiveCodeLists,
   validateRequiredBugFields
 } = require('./bug-write')
@@ -42,6 +44,7 @@ async function prepareDraftPatch (req, entities) {
   // Kiểm code-list ngay lúc PATCH để UI nhận lỗi đúng field sớm, không chờ đến Save.
   await validateActiveCodeLists(req, entities, merged)
   if (merged.applicationComponent_ID && merged.defectCategory_ID) {
+    await validateActiveClassificationParents(req, entities, merged)
     const componentCategory = await cds.tx(req).run(SELECT.one.from(entities.ComponentCategories).where({
       component_ID: merged.applicationComponent_ID,
       defectCategory_ID: merged.defectCategory_ID,
@@ -130,6 +133,7 @@ async function validateDraftForSave (req, entities) {
   await ensureDraftReporterForSave(req, entities, draft)
   validateRequiredBugFields(req, draft, { rejectFirst: true })
   await validateActiveCodeLists(req, entities, draft)
+  await resolveComponentCategory(req, entities, draft)
 }
 
 async function captureDraftSaveState (req, entities) {

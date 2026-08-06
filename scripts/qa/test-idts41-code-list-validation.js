@@ -23,6 +23,7 @@ const { INSERT, SELECT, UPDATE } = cds.ql
 
 const { assertBugCreatePermission } = require('../../srv/bug-service/permissions')
 const { validateActiveCodeLists } = require('../../srv/bug-service/bug-write')
+const { prepareDraftPatch } = require('../../srv/bug-service/drafts')
 
 const RESULTS = []
 const BASE_ID = '41000000-0000-0000-0000-000000000000'
@@ -153,7 +154,7 @@ async function main () {
     'inactive Application Component is rejected even when its bridge is active',
     400,
     () => dispatchCreate(service, bugData(inactiveComponentID)),
-    'applicationComponent'
+    'applicationComponent_ID'
   )
   const inactiveComponentBug = await db.run(
     SELECT.one.from('idts.cap.Bugs').columns('ID').where({ ID: inactiveComponentID })
@@ -167,13 +168,69 @@ async function main () {
     'inactive Defect Category is rejected even when its bridge is active',
     400,
     () => dispatchCreate(service, bugData(inactiveCategoryID)),
-    'defectCategory'
+    'defectCategory_ID'
   )
   const inactiveCategoryBug = await db.run(
     SELECT.one.from('idts.cap.Bugs').columns('ID').where({ ID: inactiveCategoryID })
   )
   record('inactive Defect Category does not persist a Bug', !inactiveCategoryBug)
   await db.run(UPDATE('idts.cap.DefectCategories').set({ active: true }).where({ ID: CATEGORY_ID }))
+
+  const expectedBridge = await db.run(SELECT.one.from('idts.cap.ComponentCategories').columns('ID').where({
+    component_ID: COMPONENT_ID,
+    defectCategory_ID: CATEGORY_ID,
+    active: true
+  }))
+  const draftID = `${BASE_ID.slice(0, -1)}b`
+  const draftUUID = `${BASE_ID.slice(0, -1)}c`
+  await db.run(INSERT.into('DRAFT.DraftAdministrativeData').entries({
+    DraftUUID: draftUUID,
+    DraftIsCreatedByMe: true,
+    DraftIsProcessedByMe: true
+  }))
+  await db.run(INSERT.into(entities.Bugs.drafts).entries({
+    ...bugData(draftID),
+    IsActiveEntity: false,
+    HasActiveEntity: false,
+    HasDraftEntity: false,
+    DraftAdministrativeData_DraftUUID: draftUUID
+  }))
+  async function prepareControlledDraftPatch (patch) {
+    return db.tx(async tx => {
+      const request = new cds.Request({
+        event: 'PATCH',
+        target: entities.Bugs.drafts,
+        data: { ID: draftID, ...patch },
+        params: [{ ID: draftID, IsActiveEntity: false }],
+        user: tester()
+      })
+      request.tx = tx
+      await prepareDraftPatch(request, entities)
+      return request.data
+    })
+  }
+  await db.run(UPDATE('idts.cap.ApplicationComponents').set({ active: false }).where({ ID: COMPONENT_ID }))
+  await expectReject(
+    'draft PATCH rejects an inactive Application Component before persistence',
+    400,
+    () => prepareControlledDraftPatch({ title: 'Rejected draft title change' }),
+    'applicationComponent_ID'
+  )
+  const unchangedDraft = await db.run(SELECT.one.from(entities.Bugs.drafts).columns('title').where({ ID: draftID }))
+  record('rejected draft PATCH leaves the stored draft unchanged', unchangedDraft?.title !== 'Rejected draft title change')
+  await db.run(UPDATE('idts.cap.ApplicationComponents').set({ active: true }).where({ ID: COMPONENT_ID }))
+
+  await db.run(UPDATE('idts.cap.DefectCategories').set({ active: false }).where({ ID: CATEGORY_ID }))
+  await expectReject(
+    'draft PATCH rejects an inactive Defect Category before persistence',
+    400,
+    () => prepareControlledDraftPatch({ title: 'Rejected category title change' }),
+    'defectCategory_ID'
+  )
+  await db.run(UPDATE('idts.cap.DefectCategories').set({ active: true }).where({ ID: CATEGORY_ID }))
+
+  const validDraftPatch = await prepareControlledDraftPatch({ title: 'Accepted draft title change' })
+  record('valid draft PATCH derives the active Component Category', validDraftPatch?.componentCategory_ID === expectedBridge?.ID)
 
   const updateID = `${BASE_ID.slice(0, -1)}8`
   await dispatchCreate(service, bugData(updateID))
@@ -208,7 +265,7 @@ async function main () {
     () => assertBugCreatePermission(permissionRequest(), { role_code: 'PM' })
   )
 
-  const expectedChecks = 22
+  const expectedChecks = 26
   if (RESULTS.length !== expectedChecks) {
     record('completion guard ran every planned check', false, `actual=${RESULTS.length} expected=${expectedChecks}`)
   }
