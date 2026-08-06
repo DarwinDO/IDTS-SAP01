@@ -1,6 +1,8 @@
 using BugService as service from '../../../srv/service';
 
 // Gợi ý học/debug: value help giúp người dùng chọn catalog hợp lệ; backend vẫn chặn mã sai, inactive hoặc không đủ quyền.
+annotate service.Bugs:status with @Common.Text : status.name @Common.TextArrangement : #TextOnly;
+
 annotate service.Bugs:status.code with @Common.FieldControl : #ReadOnly @Common.ValueListWithFixedValues : true @Common.ValueList : {
     // ValueList map field Bug với catalog OData; status read-only vì chỉ workflow action được đổi.
     Label : 'Status',
@@ -23,6 +25,8 @@ annotate service.Bugs:status.code with @Common.FieldControl : #ReadOnly @Common.
     ]
   };
 
+annotate service.Bugs:priority with @Common.Text : priority.name @Common.TextArrangement : #TextOnly;
+
 annotate service.Bugs:priority.code with @Common.ValueListWithFixedValues : true @Common.ValueList : {
     Label : 'Priority',
     CollectionPath : 'PriorityValues',
@@ -40,6 +44,8 @@ annotate service.Bugs:priority.code with @Common.ValueListWithFixedValues : true
     ]
   };
 
+annotate service.Bugs:severity with @Common.Text : severity.name @Common.TextArrangement : #TextOnly;
+
 annotate service.Bugs:severity.code with @Common.ValueListWithFixedValues : true @Common.ValueList : {
     Label : 'Severity',
     CollectionPath : 'SeverityValues',
@@ -56,6 +62,8 @@ annotate service.Bugs:severity.code with @Common.ValueListWithFixedValues : true
       }
     ]
   };
+
+annotate service.Bugs:environment with @Common.Text : environment.name @Common.TextArrangement : #TextOnly;
 
 annotate service.Bugs:environment.code with @Common.ValueListWithFixedValues : true @Common.ValueList : {
     Label : 'Environment',
@@ -212,6 +220,8 @@ annotate service.Bugs:assignee.ID with @Common.Label : 'Assignee'
     ]
   };
 
+annotate service.Bugs:reporter with @Common.Text : reporter.displayName @Common.TextArrangement : #TextOnly;
+
 annotate service.Bugs:reporter.ID with @Common.FieldControl : #ReadOnly @Common.ValueList : {
     Label : 'Reporter',
     CollectionPath : 'Users',
@@ -237,6 +247,8 @@ annotate service.Bugs:reporter.ID with @Common.FieldControl : #ReadOnly @Common.
     ]
   };
 
+annotate service.Bugs:nextProcessorUser with @Common.Text : nextProcessorUser.displayName @Common.TextArrangement : #TextOnly;
+
 annotate service.Bugs:nextProcessorUser.ID with @Common.FieldControl : #ReadOnly @Common.ValueList : {
     Label : 'Current Action Owner',
     CollectionPath : 'Users',
@@ -261,6 +273,8 @@ annotate service.Bugs:nextProcessorUser.ID with @Common.FieldControl : #ReadOnly
       }
     ]
   };
+
+annotate service.Bugs:nextProcessorRole with @Common.Text : nextProcessorRole.name @Common.TextArrangement : #TextOnly;
 
 annotate service.Bugs:nextProcessorRole.code with @Common.FieldControl : #ReadOnly @Common.ValueList : {
     Label : 'Action Owner Role',

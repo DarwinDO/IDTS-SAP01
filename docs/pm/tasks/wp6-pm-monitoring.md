@@ -75,3 +75,11 @@ Give PM users enough visibility to monitor workload, overdue bugs, pending assig
   - the misleading `My Action Items` tab is now `PM Action Queue`, filtering records routed to `nextProcessorRole_code = 'PM'`;
   - the knowledge mirror for `pm-monitoring.cds` explains the cross-folder contract and local SQLite refresh requirement.
 - Browser UAT on a persistent local SQLite database must run `npm run dev:sqlite:refresh-views` before opening the app, otherwise old local service views can still produce `no such column` errors even when source code is correct.
+
+## 2026-08-06 IDTS-126 Filter Token Text Remediation
+
+- Dashboard drill-down continues to set canonical scalar IDs/codes and execute the List Report filter automatically.
+- IDTS-126 adds SAP-supported `Common.Text` plus `TextOnly` metadata so key-backed filter tokens display business names instead of UUIDs/codes.
+- The metadata-only change does not alter dashboard navigation, OData filter semantics, HANA schema, seed data or master data.
+- Focused EDMX validation covers 11 key-backed SelectionFields; PM/Tester dashboard regression remains part of the release gate.
+- Current state: implementation and local gates complete; BTP deployment and signed-in browser acceptance are pending the normal PR/merge process.
