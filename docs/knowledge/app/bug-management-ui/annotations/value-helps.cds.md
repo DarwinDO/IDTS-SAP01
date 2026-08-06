@@ -1,5 +1,33 @@
 # Knowledge: `app/bug-management-ui/annotations/value-helps.cds`
 
+## IDTS-126 List Report filter-token text
+
+Fiori Elements keeps the technical foreign key as the actual filter value, but
+the user-facing token must show business text. Association-level
+`@Common.Text` together with `@Common.TextArrangement: #TextOnly` makes the
+generated scalar properties (for example `applicationComponent_ID`,
+`nextProcessorUser_ID`, and `status_code`) display names instead of UUIDs or
+codes without changing the OData filter semantics.
+
+The dashboard and List Report must continue filtering by canonical IDs/codes.
+Do not replace these filters with custom formatters, DOM manipulation, or text
+fields because that can make navigation filters ambiguous and can break exact
+matching. When diagnosing a raw token, compile the effective EDMX and inspect
+the scalar SelectionField property for both `Common.Text` and `TextOnly`.
+
+### Ghi chu IDTS-126
+
+Fiori Elements van dung khoa ngoai ky thuat lam gia tri loc that, nhung token ma
+nguoi dung nhin thay phai hien ten nghiep vu. `@Common.Text` o association ket
+hop voi `@Common.TextArrangement: #TextOnly` giup cac property sinh ra nhu
+`applicationComponent_ID`, `nextProcessorUser_ID`, va `status_code` hien ten
+thay vi UUID/code ma khong doi y nghia cua bo loc OData.
+
+Dashboard va List Report van phai loc bang ID/code chuan. Khong dung formatter
+tu tao, DOM hack, hay doi sang loc bang text. Khi debug, compile EDMX hieu luc
+va kiem tra property nam trong `UI.SelectionFields` co du `Common.Text` va
+`TextOnly` hay chua.
+
 ## IDTS-115 create-flow correction
 
 The Defect Category value help no longer writes `componentCategory_ID` back to
