@@ -147,6 +147,34 @@ async function main () {
   )
   await db.run(UPDATE('idts.cap.PriorityValues').set({ active: true }).where({ code: 'LOW' }))
 
+  const inactiveComponentID = `${BASE_ID.slice(0, -1)}9`
+  await db.run(UPDATE('idts.cap.ApplicationComponents').set({ active: false }).where({ ID: COMPONENT_ID }))
+  await expectReject(
+    'inactive Application Component is rejected even when its bridge is active',
+    400,
+    () => dispatchCreate(service, bugData(inactiveComponentID)),
+    'applicationComponent'
+  )
+  const inactiveComponentBug = await db.run(
+    SELECT.one.from('idts.cap.Bugs').columns('ID').where({ ID: inactiveComponentID })
+  )
+  record('inactive Application Component does not persist a Bug', !inactiveComponentBug)
+  await db.run(UPDATE('idts.cap.ApplicationComponents').set({ active: true }).where({ ID: COMPONENT_ID }))
+
+  const inactiveCategoryID = `${BASE_ID.slice(0, -1)}a`
+  await db.run(UPDATE('idts.cap.DefectCategories').set({ active: false }).where({ ID: CATEGORY_ID }))
+  await expectReject(
+    'inactive Defect Category is rejected even when its bridge is active',
+    400,
+    () => dispatchCreate(service, bugData(inactiveCategoryID)),
+    'defectCategory'
+  )
+  const inactiveCategoryBug = await db.run(
+    SELECT.one.from('idts.cap.Bugs').columns('ID').where({ ID: inactiveCategoryID })
+  )
+  record('inactive Defect Category does not persist a Bug', !inactiveCategoryBug)
+  await db.run(UPDATE('idts.cap.DefectCategories').set({ active: true }).where({ ID: CATEGORY_ID }))
+
   const updateID = `${BASE_ID.slice(0, -1)}8`
   await dispatchCreate(service, bugData(updateID))
   await expectReject(
@@ -180,7 +208,7 @@ async function main () {
     () => assertBugCreatePermission(permissionRequest(), { role_code: 'PM' })
   )
 
-  const expectedChecks = 18
+  const expectedChecks = 22
   if (RESULTS.length !== expectedChecks) {
     record('completion guard ran every planned check', false, `actual=${RESULTS.length} expected=${expectedChecks}`)
   }

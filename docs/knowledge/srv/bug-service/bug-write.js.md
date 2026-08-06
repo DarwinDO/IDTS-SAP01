@@ -4,6 +4,8 @@
 
 New Bugs are Tester-only and initialize `retestOwner` from the trusted Tester actor. Active writes preserve server-owned reporter/retest ownership. When routing a verification step, the handler prefers an active retest owner and falls back to PM coordination only when the stored Tester is missing or inactive.
 
+Classification writes validate three active boundaries in the same CAP transaction: the selected Application Component, the selected Defect Category, and their Component Category bridge. An active bridge does not make an inactive parent catalog row valid. Direct OData writes and draft SAVE therefore cannot bypass the active master-data rule exposed by Fiori value help.
+
 ## Beginner execution walkthrough (2026-07-18)
 
 ### English
