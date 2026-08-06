@@ -1,5 +1,12 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-08-06 — IDTS-122 dashboard tile filter execution defect
+
+| Classification | Symptom / work | Root cause / decision | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product/UI defect | PM status tiles populate the List Report Status filter but leave the old unfiltered table visible until the user presses Go. Tester tiles (`Created by me`, `Need my input`, `Retest required`) navigate to the List Report without applying their promised filters. | PM navigation carries only `status_code` and the List Report extension calls `setFilterValues()` without triggering the filter-bar search. Tester and Developer dashboard tiles reuse the same navigation handler but do not carry any filter intent. | Candidate fixed on `fix/idts-122-dashboard-tile-filter-donhv`: tiles now carry allowlisted role-specific filter objects; the List Report validates them, awaits public `setFilterValues(...)`, then calls public `ListReportExtensionAPI.refresh()` to execute search automatically. | Local verification PASS: focused static 7/7, CAP runtime 4/4, CAP compile, UI5 production build, syntax checks, secret scan, agent rules, depth self-test and `git diff --check`. Signed-in acceptance remains post-deploy. No HANA, seed or schema change is authorized. |
+| Local tooling issue | The first runtime dashboard test in the fresh worktree failed with `Cannot find module '@sap/cds'`; the first borrowed dependency tree then lacked `ui5-task-zipper`. | Fresh worktree intentionally had no `node_modules`; these are dependency-linkage issues, not product failures. | Repointed only the ignored local junction to an existing complete verified dependency tree. No package version or lockfile changed. | Exact runtime suite and UI5 production build then PASS. |
+
 ## 2026-08-06 — IDTS-122 List Report controller startup repair
 
 | Classification | Symptom / work | Root cause / decision | Fix status | Verification / next action |

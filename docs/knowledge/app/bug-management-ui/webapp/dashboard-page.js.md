@@ -182,6 +182,8 @@ Aggregation note: backend `failureCount` already includes timeout and unavailabl
 
 ## IDTS-122 — PM status drill-down and semantic AI outcomes
 
+Dashboard tiles carry an allowlisted filter object rather than only a status. PM tiles send `status_code`; Tester tiles send reporter/current-action-owner filters and combine `RETEST_REQUIRED` with the current action owner; Developer tiles send assignee and, where needed, status. The List Report extension validates these hash values, awaits all public `setFilterValues(...)` calls, then invokes the public `ListReportExtensionAPI.refresh()` method so the result table is searched immediately without requiring the user to press **Go**. `reporter_ID` is intentionally included in `UI.SelectionFields` to support the Tester "Created by me" drill-down.
+
 The PM dashboard now reads `readBugStatusMetrics()` instead of counting a capped client-side Bug list. The service always returns the ten current workflow statuses, including zero-count rows, and deliberately excludes legacy `NEW`. Each tile carries the canonical `statusCode` and opens the List Report with a `status_code` hash parameter. The List Report controller extension then applies that value through the public Fiori Elements ExtensionAPI; it does not manipulate table controls or the DOM.
 
 The AI Activity dialog displays explicit semantic outcomes: success, bad request, rate limited, provider 5xx, timeout, unavailable, and other failure. Unknown historical failures remain `other failure`; the UI must never infer a provider HTTP class that was not captured by the adapter.
