@@ -454,18 +454,27 @@
             var userID = user && user.ID;
             var createdByMe = bugs.filter(function (bug) { return bug.reporterID === userID; });
             var needMyInput = bugs.filter(function (bug) {
-                return bug.nextProcessorUserID === userID || (bug.reporterID === userID && bug.statusCode === "NEED_MORE_INFORMATION");
+                return bug.nextProcessorUserID === userID;
             });
             var retestRequired = bugs.filter(function (bug) {
-                return bug.reporterID === userID && bug.isRetestRequired;
+                return bug.nextProcessorUserID === userID && bug.isRetestRequired;
             });
 
             return {
                 roleMessage: "Track bugs you reported and items waiting for your next action.",
                 tiles: [
-                    tile("Created by me", createdByMe.length, "sap-icon://create-entry-time", "Neutral"),
-                    tile("Need my input", needMyInput.length, "sap-icon://inbox", needMyInput.length ? "Critical" : "Good"),
-                    tile("Retest required", retestRequired.length, "sap-icon://validate", retestRequired.length ? "Critical" : "Good")
+                    tile("Created by me", createdByMe.length, "sap-icon://create-entry-time", "Neutral", {
+                        reporter_ID: userID,
+                        exclude_closed: "true"
+                    }),
+                    tile("Need my input", needMyInput.length, "sap-icon://inbox", needMyInput.length ? "Critical" : "Good", {
+                        nextProcessorUser_ID: userID,
+                        exclude_closed: "true"
+                    }),
+                    tile("Retest required", retestRequired.length, "sap-icon://validate", retestRequired.length ? "Critical" : "Good", {
+                        status_code: "RETEST_REQUIRED",
+                        nextProcessorUser_ID: userID
+                    })
                 ],
                 focusBugs: focusList(needMyInput.concat(retestRequired, createdByMe)),
                 workloads: [],
@@ -489,9 +498,15 @@
             return {
                 roleMessage: "Track bugs assigned to you and work that needs your response.",
                 tiles: [
-                    tile("Assigned to me", assignedToMe.length, "sap-icon://employee", "Neutral"),
-                    tile("In progress", inProgress.length, "sap-icon://process", inProgress.length ? "Critical" : "Good"),
-                    tile("Information requested", infoRequested.length, "sap-icon://question-mark", infoRequested.length ? "Critical" : "Good")
+                    tile("Assigned to me", assignedToMe.length, "sap-icon://employee", "Neutral", { assignee_ID: profileID }),
+                    tile("In progress", inProgress.length, "sap-icon://process", inProgress.length ? "Critical" : "Good", {
+                        status_code: "IN_PROGRESS",
+                        assignee_ID: profileID
+                    }),
+                    tile("Information requested", infoRequested.length, "sap-icon://question-mark", infoRequested.length ? "Critical" : "Good", {
+                        status_code: "NEED_MORE_INFORMATION",
+                        assignee_ID: profileID
+                    })
                 ],
                 focusBugs: focusList(myActionItems),
                 workloads: [],
@@ -517,7 +532,7 @@
                         metric.bugCount || 0,
                         definition.icon,
                         Number(metric.bugCount || 0) === 0 ? "Neutral" : definition.valueColor,
-                        definition.statusCode
+                        { status_code: definition.statusCode }
                     );
                 }),
                 focusBugs: focusList(overdue.concat(pendingAssignment, bugs)),
@@ -629,7 +644,7 @@
         }
 
         // Factory object KPI cho JSONModel; không có side effect.
-        function tile(title, value, icon, valueColor, statusCode) {
+        function tile(title, value, icon, valueColor, filters) {
             return {
                 title: title,
                 subtitle: "Current count",
@@ -637,17 +652,23 @@
                 valueColor: valueColor,
                 icon: icon,
                 footer: "Open filtered bug list",
-                statusCode: statusCode || ""
+                filters: filters || {}
             };
         }
 
         // Điều hướng về Fiori List Report mà không xóa session.
         function openBugList(event) {
             var context = event && event.getSource && event.getSource().getBindingContext("dashboard");
-            var statusCode = context && context.getProperty("statusCode");
-            window.location.href = statusCode
-                ? "index.html#?status_code=" + encodeURIComponent(statusCode)
-                : "index.html";
+            var filters = (context && context.getProperty("filters")) || {};
+            var params = new URLSearchParams();
+
+            ["status_code", "reporter_ID", "nextProcessorUser_ID", "assignee_ID", "exclude_closed"].forEach(function (property) {
+                if (filters[property]) {
+                    params.set(property, filters[property]);
+                }
+            });
+
+            window.location.href = params.toString() ? "index.html#?" + params.toString() : "index.html";
         }
 
         // Lấy Bug ID từ binding context và mở deep link Object Page; ID thiếu thì bỏ qua an toàn.
