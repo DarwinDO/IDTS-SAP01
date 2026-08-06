@@ -14,6 +14,7 @@ For every task that creates, reads, edits, reviews, moves, synchronizes, or dele
 | CAP/CDS/OData/Fiori/UI5 | `sap-routing-and-ui.md` |
 | Code question, reading, design, writing, refactor, debug, review, or audit | `skills-quality-and-ponytail.md` |
 | Documents, knowledge mirrors, SAP490, Drive, DOCX/XLSX/PPTX/PDF | `documentation-knowledge-and-sap490.md` plus the OfficeCLI gate |
+| IDTS SAP490 XLSX workbook, generator, render, validation, or Drive synchronization | `idts-sap490-xlsx-fidelity` plus `documentation-knowledge-and-sap490.md` and OfficeCLI |
 | Tests, security, configuration, deployment, or release claims | `testing-security-and-release.md` |
 | Code ownership, beginner debugging, learning recap, task-start knowledge gate, or PR/Jira learning evidence | `ownership-learning-and-debug.md` |
 
@@ -521,6 +522,7 @@ This repo uses three kinds of agent guidance:
 - Repo-local simplicity skills under `.agents/skills/ponytail*`, adapted from `DietrichGebert/ponytail` for IDTS overengineering control.
 - Repo-local BA discovery skill under `.agents/skills/product-discovery`, adapted from `phucnt-bazone-vietnam/product-discovery` for IDTS requirement elicitation.
 - Repo-local BA/DOCX deliverable skill under `.agents/skills/idts-ba-docx-deliverables`, used as the primary coordinator for IDTS SAP490 hybrid BRD/SRS/FRS Markdown deliverables and template-filled DOCX/XLSX/PPTX artifacts.
+- Repo-local XLSX fidelity skill under `.agents/skills/idts-sap490-xlsx-fidelity`, mandatory for every IDTS SAP490 workbook and generator so the matching `OFFICIAL SUBMISSION` workbook remains the structural, typographic, border, layout, print, and visual authority.
 - Repo-local learning skill under `.agents/skills/learning-recap`, used as an optional mentor mode after nontrivial work so the user understands what changed, why it changed, and how it affects IDTS.
 - Repo-local database modeling skill under `.agents/skills/idts-database-modeling`, used before brainstorming, reviewing, or implementing IDTS CAP/CDS database model changes.
 - Installed SAP AI Skills Library skill under `.agents/skills/sap-fiori-guidelines`.
