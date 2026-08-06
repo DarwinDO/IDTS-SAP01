@@ -43,3 +43,5 @@ The temporary no-route Cloud Foundry worker used for the controlled transaction 
 - This evidence proves the additive HANA master-data rollout and post-state counts.
 - Runtime enforcement that both parent master-data rows are active is handled and verified in a separate CAP code branch.
 - The canonical six-Bug repository fixture remains a separate provenance task; this rollout did not rewrite Bug seed data.
+- The rollout runner is now bound to the exact reviewed catalog rows by SHA-256 fingerprints and fails closed if those source rows change.
+- The postverify evidence is aggregate and fingerprint based; it does not expose private row payloads. Runtime/business acceptance remains a separate step after the CAP fix is merged and deployed.

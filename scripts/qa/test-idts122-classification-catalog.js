@@ -95,6 +95,13 @@ function assertCatalog (components, defectCategories, componentCategories) {
   requireSameValues(defectCategories.map(row => row.ID), DEFECT_CATEGORY_IDS, 'CATALOG_DEFECT_CATEGORY_IDS_NONDETERMINISTIC', 'defect category IDs')
   requireSameValues(componentCategories.map(row => row.ID), COMPONENT_CATEGORY_IDS, 'CATALOG_COMPONENT_CATEGORY_IDS_NONDETERMINISTIC', 'component category IDs')
 
+  for (const row of components) {
+    if (row.active !== 'true') fail('CATALOG_COMPONENT_ACTIVE_INVALID', `application component ${row.ID} must be active`)
+  }
+  for (const row of defectCategories) {
+    if (row.active !== 'true') fail('CATALOG_DEFECT_CATEGORY_ACTIVE_INVALID', `defect category ${row.ID} must be active`)
+  }
+
   for (const expected of BASELINE_COMPONENTS) {
     assertRow(components.find(row => row.ID === expected[0]), expected, ['ID', 'code', 'name', 'componentType', 'active'], 'CATALOG_BASELINE_COMPONENT_CHANGED')
   }
@@ -148,6 +155,8 @@ function main () {
   expectFailure('non-deterministic component IDs are rejected', 'CATALOG_COMPONENT_IDS_NONDETERMINISTIC', components => { components[7].ID = '40000000-0000-0000-0000-000000000099' }, catalogs)
   expectFailure('non-deterministic ComponentCategory IDs are rejected', 'CATALOG_COMPONENT_CATEGORY_IDS_NONDETERMINISTIC', (_, __, pairs) => { pairs[30].ID = '60000000-0000-0000-0000-000000000099' }, catalogs)
   expectFailure('incorrect AI component fields are rejected', 'CATALOG_AI_COMPONENT_FIELDS_INVALID', components => { components[7].name = 'IDTS AI Assistant' }, catalogs)
+  expectFailure('inactive Application Component is rejected', 'CATALOG_COMPONENT_ACTIVE_INVALID', components => { components[7].active = 'false' }, catalogs)
+  expectFailure('inactive Defect Category is rejected', 'CATALOG_DEFECT_CATEGORY_ACTIVE_INVALID', (_, categories) => { categories[7].active = 'false' }, catalogs)
   expectFailure('wrong approved matrix is rejected', 'CATALOG_MATRIX_MISMATCH', (_, __, pairs) => { pairs[30].defectCategory_ID = '50000000-0000-0000-0000-000000000001' }, catalogs)
 }
 

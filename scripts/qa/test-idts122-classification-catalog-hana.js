@@ -1,7 +1,7 @@
 'use strict'
 
 const cds = require('@sap/cds')
-const { ENTITY, EXPECTED, TARGET_IDS, loadPlan, runCatalog, snapshot } = require('../db/apply-idts122-classification-catalog-hana')
+const { ENTITY, EXPECTED, TARGET_IDS, assertApprovedSource, loadPlan, runCatalog, snapshot } = require('../db/apply-idts122-classification-catalog-hana')
 const { DELETE, INSERT, SELECT, UPDATE } = cds.ql
 
 async function main () {
@@ -14,6 +14,13 @@ async function main () {
   assert(plan.components.length === 1, 'plan contains one AI component')
   assert(plan.bridges.length === 18, 'plan contains eighteen missing component/category pairs')
   assert(plan.responsibilities.length === 8, 'plan contains eight AI responsibility rows')
+  const malformedComponents = structuredClone(plan.components)
+  malformedComponents[0].active = false
+  await expectFailure(
+    () => Promise.resolve(assertApprovedSource('components', malformedComponents)),
+    'CATALOG_SOURCE_NOT_APPROVED',
+    'malformed source is rejected at the executable rollout boundary'
+  )
 
   await db.run(DELETE.from(ENTITY.responsibilities).where({ ID: { in: [...TARGET_IDS.responsibilities] } }))
   await db.run(DELETE.from(ENTITY.bridges).where({ ID: { in: [...TARGET_IDS.bridges] } }))

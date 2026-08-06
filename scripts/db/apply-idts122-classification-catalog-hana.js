@@ -33,6 +33,16 @@ const TARGET_IDS = Object.freeze({
   responsibilities: numericIds('70000000-0000-0000-0000-', 31, 38)
 })
 
+// These fingerprints bind the executable rollout to the exact reviewed source rows.
+// A changed CSV must be reviewed and deliberately re-baselined; --execute must never
+// accept a merely count-correct but semantically different catalog.
+const APPROVED_SOURCE_FINGERPRINTS = Object.freeze({
+  components: '6c2a7500b7d2c6c2b85fdf9555b2162693cd6bc7ed1a301d05808d89918471ba',
+  categories: '709880b1d21156693fa05128c866d52d37f9d087508e2cdc0e743e5d9620add6',
+  bridges: '372b8ce9410f0558d52050f8bafa6e08477340f765f3dd7cbd9fc1a038b4e283',
+  responsibilities: '19fe29bbe1a457f4e23a5e28d82b15fd1d1d2174577f3dedc569f1d53ccde1ab'
+})
+
 const DEFINITIONS = Object.freeze({
   components: {
     entity: ENTITY.components,
@@ -77,7 +87,17 @@ function loadPlan () {
     }
     plan[name] = rows
   }
+  const categories = readCsv('idts.cap-DefectCategories.csv')
+  assertApprovedSource('categories', categories)
+  for (const [name, rows] of Object.entries(plan)) assertApprovedSource(name, rows)
   return plan
+}
+
+function assertApprovedSource (name, rows) {
+  const actual = sha256(JSON.stringify(rows))
+  if (actual !== APPROVED_SOURCE_FINGERPRINTS[name]) {
+    throw coded('CATALOG_SOURCE_NOT_APPROVED', `${name} source rows differ from the reviewed catalog baseline.`)
+  }
 }
 
 async function snapshot (db) {
@@ -230,4 +250,4 @@ if (require.main === module || (process.argv[1] === '-' && module.id === '[stdin
   }).finally(() => cds.shutdown())
 }
 
-module.exports = { ENTITY, EXPECTED, TARGET_IDS, loadPlan, runCatalog, snapshot }
+module.exports = { APPROVED_SOURCE_FINGERPRINTS, ENTITY, EXPECTED, TARGET_IDS, assertApprovedSource, loadPlan, runCatalog, snapshot }
