@@ -10,6 +10,8 @@
 - Cloud Foundry operation: `247a06ef-913f-11f1-9066-eeee0a8e28f9`.
 - Selected deployment module: `idts-sap01-srv` only.
 
+The accepted MTAR was built from a detached worktree checked out at exact SHA `050ffeed07f9a901dcdee6da96db3dc9b37871fa`. Cloud Foundry operation `247a06ef-913f-11f1-9066-eeee0a8e28f9` processed only `idts-sap01-srv`; the readiness and read-only HANA checks below were executed after that operation completed.
+
 ## Database safety and readback
 
 The catalog transaction was additive and completed before this deployment:
@@ -55,6 +57,7 @@ The following suites passed from the detached exact-SHA worktree:
 - `qa:idts122:closed`: PASS.
 - `qa:idts122:dashboard`: 10/10 combined static/runtime checks.
 - `qa:idts41:programmatic`: 26/26, including inactive Application Component and Defect Category rejection without persistence.
+- `qa:idts93:programmatic`: 35/35 after PR `#301` corrected the stale negative fixture to use active but unbridged `IDTS_CAP_SERVICE + FIORI_UI5`; merge SHA `687dc3c02f2fc86a30b35abedeee05be1ece6a68`.
 - `qa:draft-reporter:programmatic`: 10/10.
 - Secret scan: PASS.
 - Agent rules: PASS.
@@ -71,6 +74,7 @@ The following suites passed from the detached exact-SHA worktree:
 | AI component has CAP Backend, Integration, Performance and Data Quality | PASS | Source fingerprint validator and responsibility catalog test |
 | Eight AI responsibility rows | PASS | Catalog test and HANA readback total 38 |
 | Inactive parent master data rejected safely | PASS | IDTS-41 26/26 |
+| Active but unapproved component/category pair rejected safely | PASS | IDTS-93 35/35; rejected with HTTP 400 and no classification persistence |
 | Existing Bugs/Users/Profiles preserved | PASS | Pre/post counts, ID fingerprints and post-deploy readback |
 | Signed-in value-help and Smart Assign visual acceptance | BLOCKED — browser-control tooling | Connected Edge timed out while the automation layer attempted to claim/list the already signed-in tab. No UI action was repeated blindly and no application mutation was made. |
 | Canonical six-Bug repo fixture synchronized from approved recovery package | BLOCKED — provenance unavailable | HANA contains the approved six-Bug runtime baseline, but the private approved package hash/source needed to replace the four legacy repo seed rows is not available in the current worktree. No fixture was fabricated. |
@@ -83,4 +87,3 @@ Priority 2B is therefore **runtime and database accepted, with browser visual ev
 - CAP compile continued to warn about the existing attachment `NonUpdateableProperties` annotation. Attachment authorization is outside this workstream.
 - A read-only script-discovery command initially used an invalid regular expression. It was replaced with `Select-String`; no source or runtime state changed.
 - Two independent final reviewers from the previous bounded review window did not return a usable report and were closed. Their unfinished conclusions are not counted as approval.
-
