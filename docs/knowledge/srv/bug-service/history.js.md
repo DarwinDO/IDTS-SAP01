@@ -114,3 +114,12 @@ File này vẫn quyết định ai nhận notification và lifecycle event nào 
   **Khái niệm IDTS**: Giữ history, notification và outbox trong cùng business transaction nhưng để việc kết nối SMTP cho worker chạy sau.
   **Ảnh hưởng nếu sai**: Status/history có thể commit mà thiếu notification tracking hoặc SMTP quay lại chặn critical workflow.
   **Phải kiểm tra cùng**: `srv/email/outbox.js:18`, các entity notification trong `db/schema.cds`, workflow notification tests.
+## IDTS-125 attachment deletion audit (2026-08-06)
+
+**English.** Attachment deletion history is derived at the authoritative draft `SAVE` boundary. The handler compares the pre-save active attachment snapshot with the post-save active metadata. A committed deletion produces one readable `HistoryEvent` and one field-level `HistoryLog`; a discarded draft produces no deletion history. Audit values contain only the attachment ID and a bounded filename. Storage URL, object key, hash, binary content, and provider diagnostics are excluded.
+
+The SAP attachment plugin uses a transactional outbox for external object-store work. Therefore the history event proves that the business deletion was committed in CAP/HANA; it is not evidence that the S3 object was already physically removed at the same instant.
+
+**Tiếng Việt.** Lịch sử xóa attachment được xác định tại boundary `SAVE` của draft. Handler so sánh snapshot attachment active trước Save với metadata active sau Save. Một thao tác xóa đã commit tạo đúng một `HistoryEvent` dễ đọc và một `HistoryLog` ở mức field; draft bị discard không tạo lịch sử xóa. Audit chỉ chứa attachment ID và filename đã giới hạn; không chứa storage URL, object key, hash, binary hoặc diagnostic của provider.
+
+SAP attachment plugin dùng transactional outbox cho external object store. Vì vậy history chứng minh business deletion đã commit trong CAP/HANA, không khẳng định object S3 đã bị xóa vật lý ngay cùng thời điểm.

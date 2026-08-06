@@ -14,12 +14,20 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 }
 
 const cds = require('@sap/cds')
-const { SELECT, UPDATE } = cds.ql
+const { DELETE, INSERT, SELECT, UPDATE } = cds.ql
 const { applyBugCapabilities } = require('../../srv/bug-service/read-models')
-const { assertAttachmentPermission } = require('../../srv/bug-service/content')
+const {
+  assertAttachmentDeletePermission,
+  assertAttachmentPermission
+} = require('../../srv/bug-service/content')
+const {
+  buildAttachmentDeleteAuditEntry,
+  recordDraftAttachmentSaveSideEffects
+} = require('../../srv/bug-service/history')
 
 const DAT_BUG_ID = '90000000-0000-0000-0000-000000000004'
 const SANG_BUG_ID = '90000000-0000-0000-0000-000000000003'
+const DELETE_ATTACHMENT_ID = '92000000-0000-0000-0000-000000000125'
 const RESULTS = []
 
 function user (name, role) {
@@ -37,6 +45,7 @@ function record (label, pass, detail = '') {
 
 function permissionRequest () {
   return {
+    user: { id: 'nhant@example.test', attr: {} },
     reject (code, message) {
       const error = new Error(message)
       error.code = code
@@ -63,6 +72,20 @@ async function dispatchUpdate (service, id, patch, requestUser) {
     query: UPDATE.entity(service.entities.Bugs).set(patch).where({ ID: id }),
     params: [{ ID: id, IsActiveEntity: true }],
     data: { ID: id, ...patch },
+    user: requestUser
+  })
+  return service.dispatch(req)
+}
+
+async function dispatchAttachmentDelete (service, bugID, attachmentID, requestUser, extraData = {}) {
+  const target = service.entities['Bugs.attachments']
+  const req = new cds.Request({
+    method: 'DELETE',
+    event: 'DELETE',
+    target,
+    query: DELETE.from(target).where({ ID: attachmentID }),
+    params: [{ ID: bugID, IsActiveEntity: true }, { ID: attachmentID }],
+    data: { ID: attachmentID, ...extraData },
     user: requestUser
   })
   return service.dispatch(req)
@@ -118,12 +141,129 @@ async function main () {
   assertAttachmentPermission(permissionRequest(), { role_code: 'TESTER' }, false)
   record('Tester attachment mutation remains allowed', true)
 
+  const ownAttachmentRequest = permissionRequest()
+  assertAttachmentDeletePermission(
+    ownAttachmentRequest,
+    { ID: 'tester-id', email: 'nhant@example.test', role_code: 'TESTER' },
+    { ID: 'attachment-id', createdBy: 'nhant@example.test' }
+  )
+  record('attachment uploader can delete their own attachment', true)
+
+  assertAttachmentDeletePermission(
+    permissionRequest(),
+    { ID: 'pm-id', email: 'pm@example.test', role_code: 'PM' },
+    { ID: 'attachment-id', createdBy: 'another.user@example.test' }
+  )
+  record('PM can delete another user attachment', true)
+
+  await expectReject(
+    'non-uploader Tester cannot delete another user attachment',
+    () => assertAttachmentDeletePermission(
+      permissionRequest(),
+      { ID: 'tester-id', email: 'nhant@example.test', role_code: 'TESTER' },
+      { ID: 'attachment-id', createdBy: 'another.user@example.test' }
+    ),
+    403
+  )
+
+  await expectReject(
+    'assigned Developer cannot delete another user attachment',
+    () => assertAttachmentDeletePermission(
+      { ...permissionRequest(), user: { id: 'developer@example.test', attr: {} } },
+      { ID: 'developer-id', email: 'developer@example.test', role_code: 'DEVELOPER' },
+      { ID: 'attachment-id', createdBy: 'another.user@example.test' }
+    ),
+    403
+  )
+
+  const deleteAudit = buildAttachmentDeleteAuditEntry({
+    attachmentID: 'attachment-id',
+    bugID: 'bug-id',
+    filename: '  evidence.png  ',
+    actorID: 'tester-id',
+    url: 's3://must-not-leak/private-object',
+    hash: 'must-not-leak'
+  })
+  record(
+    'attachment delete audit is one sanitized removal change',
+    deleteAudit?.bugID === 'bug-id' &&
+      deleteAudit?.actorID === 'tester-id' &&
+      deleteAudit?.changes?.length === 1 &&
+      deleteAudit.changes[0].fieldName === 'attachment' &&
+      deleteAudit.changes[0].oldValue === 'attachment-id' &&
+      deleteAudit.changes[0].oldValueDisplay === 'evidence.png' &&
+      deleteAudit.changes[0].newValue === null &&
+      !JSON.stringify(deleteAudit).includes('s3://') &&
+      !JSON.stringify(deleteAudit).includes('must-not-leak')
+  )
+
+  await db.run(DELETE.from('idts.cap.Bugs.attachments').where({ ID: DELETE_ATTACHMENT_ID }))
+  await db.run(INSERT.into('idts.cap.Bugs.attachments').entries({
+    ID: DELETE_ATTACHMENT_ID,
+    up__ID: DAT_BUG_ID,
+    filename: 'uploader-proof.txt',
+    mimeType: 'text/plain',
+    fileSize: 14,
+    createdBy: 'NhanT'
+  }))
+  const historyBeforeDelete = await db.run(SELECT.from('idts.cap.HistoryEvents').where({ bug_ID: DAT_BUG_ID }))
+  const logsBeforeDelete = await db.run(SELECT.from('idts.cap.HistoryLogs').where({ bug_ID: DAT_BUG_ID }))
+
+  await expectReject(
+    'actual attachment DELETE route rejects a non-uploader',
+    () => dispatchAttachmentDelete(service, DAT_BUG_ID, DELETE_ATTACHMENT_ID, sang()),
+    403
+  )
+  await expectReject(
+    'forged parent ID cannot bypass persisted attachment ownership',
+    () => dispatchAttachmentDelete(service, DAT_BUG_ID, DELETE_ATTACHMENT_ID, sang(), { up__ID: SANG_BUG_ID }),
+    403
+  )
+  record(
+    'denied actual attachment DELETE preserves metadata',
+    Boolean(await db.run(SELECT.one.from('idts.cap.Bugs.attachments').where({ ID: DELETE_ATTACHMENT_ID })))
+  )
+
+  await dispatchAttachmentDelete(service, DAT_BUG_ID, DELETE_ATTACHMENT_ID, tester())
+  record(
+    'actual uploader DELETE removes attachment metadata',
+    !await db.run(SELECT.one.from('idts.cap.Bugs.attachments').where({ ID: DELETE_ATTACHMENT_ID }))
+  )
+
+  const saveAuditRequest = new cds.Request({
+    method: 'POST',
+    event: 'SAVE',
+    target: service.entities.Bugs,
+    data: { ID: DAT_BUG_ID },
+    params: [{ ID: DAT_BUG_ID, IsActiveEntity: true }],
+    user: tester()
+  })
+  saveAuditRequest._preSaveActiveAttachments = [{
+    ID: DELETE_ATTACHMENT_ID,
+    up__ID: DAT_BUG_ID,
+    filename: 'uploader-proof.txt'
+  }]
+  await db.tx(saveAuditRequest, () =>
+    recordDraftAttachmentSaveSideEffects(saveAuditRequest, { ID: DAT_BUG_ID }, service.entities)
+  )
+  const historyAfterDelete = await db.run(SELECT.from('idts.cap.HistoryEvents').where({ bug_ID: DAT_BUG_ID }))
+  const logsAfterDelete = await db.run(SELECT.from('idts.cap.HistoryLogs').where({ bug_ID: DAT_BUG_ID }))
+  record(
+    'authoritative draft SAVE writes one sanitized deletion event and log',
+    historyAfterDelete.length === historyBeforeDelete.length + 1 &&
+      logsAfterDelete.length === logsBeforeDelete.length + 1 &&
+      historyAfterDelete.at(-1)?.summary === 'Deleted attachment uploader-proof.txt.' &&
+      logsAfterDelete.at(-1)?.fieldName === 'attachment' &&
+      logsAfterDelete.at(-1)?.oldValue === DELETE_ATTACHMENT_ID &&
+      logsAfterDelete.at(-1)?.newValue == null
+  )
+
   const labels = fs.readFileSync(path.join(process.cwd(), 'app', 'bug-management-ui', 'annotations', 'labels.cds'), 'utf8')
   const capabilities = fs.readFileSync(path.join(process.cwd(), 'app', 'bug-management-ui', 'annotations', 'capabilities.cds'), 'utf8')
   record('Fiori Bug fields use dynamic role field controls', /bugRequiredFieldControl/.test(labels) && /bugOptionalFieldControl/.test(labels))
   record('Fiori attachment mutations use dedicated capability', /attachments[\s\S]*canManageAttachments/.test(capabilities))
 
-  const expectedChecks = 12
+  const expectedChecks = 22
   if (RESULTS.length !== expectedChecks) record('completion guard reached every planned assertion', false, `expected=${expectedChecks} actual=${RESULTS.length}`)
   const failures = RESULTS.filter(result => !result.pass)
   console.log(`\nChecks: ${RESULTS.length} | Passed: ${RESULTS.length - failures.length} | Failed: ${failures.length}`)

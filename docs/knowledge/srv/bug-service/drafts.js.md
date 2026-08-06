@@ -216,3 +216,8 @@ Hai lần kiểm tra là có chủ ý: PATCH thường chỉ chứa một field 
 ### Vietnamese
 
 `prepareDraftPatch()` hiện kiểm tra Application Component và Defect Category của draft còn active trước khi tìm bridge. Draft có thể tạm giữ một cặp parent active nhưng chưa match trong lúc người dùng đổi từng field; tuy nhiên `validateDraftForSave()` gọi `resolveComponentCategory()` và không cho activate cho đến khi cặp cuối cùng vừa active vừa hợp lệ. PATCH bị từ chối không làm thay đổi draft đã lưu.
+## IDTS-125 attachment snapshot at SAVE (2026-08-06)
+
+**English.** Before draft activation, the SAVE flow keeps a sanitized snapshot of active attachment metadata. After activation it compares attachment IDs to identify committed additions and removals. This makes the Bug SAVE transaction the single audit boundary: a delete that is later discarded does not create history, while a committed delete creates its audit once.
+
+**Tiếng Việt.** Trước khi activate draft, luồng SAVE giữ snapshot đã làm sạch của metadata attachment active. Sau activation, hệ thống so sánh attachment ID để tìm phần đã thêm và đã xóa thật sự. Bug SAVE là audit boundary duy nhất: xóa rồi discard không tạo history, còn xóa đã commit chỉ tạo audit một lần.

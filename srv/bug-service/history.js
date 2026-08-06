@@ -120,25 +120,45 @@ async function recordDraftAttachmentSaveSideEffects (req, data, entities) {
       .where({ up__ID: bugID })
   )
 
+  const activeIds = new Set(activeAttachments.map(attachment => attachment.ID))
   const addedAttachments = activeAttachments.filter(attachment => !previousActiveIds.has(attachment.ID))
-  if (!addedAttachments.length) return
+  const removedAttachments = previousActiveAttachments.filter(attachment => !activeIds.has(attachment.ID))
+  if (!addedAttachments.length && !removedAttachments.length) return
 
   const actor = await resolveRequestUser(req, entities)
   const activeBug = await readBug(req, entities, bugID)
   const actorID = actor?.ID || activeBug?.reporter_ID || (await firstUserByRole(req, entities, 'TESTER'))?.ID
   if (!actorID) return
 
-  const changes = addedAttachments.map(attachment => ({
+  const addedChanges = addedAttachments.map(attachment => ({
     fieldName: 'attachment',
     oldValue: null,
     newValue: attachment.ID,
     oldValueDisplay: null,
     newValueDisplay: trimToNull(attachment.filename) || attachment.ID
   }))
+  const removedChanges = removedAttachments
+    .map(attachment => buildAttachmentDeleteAuditEntry({
+      attachmentID: attachment.ID,
+      bugID,
+      filename: attachment.filename,
+      actorID
+    })?.changes?.[0])
+    .filter(Boolean)
+  const changes = [...addedChanges, ...removedChanges]
 
-  const summary = addedAttachments.length === 1
-    ? `Added attachment ${changes[0].newValueDisplay}.`
-    : `Added ${addedAttachments.length} attachments.`
+  let summary
+  if (addedChanges.length && removedChanges.length) {
+    summary = `Updated attachments: added ${addedChanges.length}, removed ${removedChanges.length}.`
+  } else if (removedChanges.length === 1) {
+    summary = `Deleted attachment ${removedChanges[0].oldValueDisplay}.`
+  } else if (removedChanges.length > 1) {
+    summary = `Deleted ${removedChanges.length} attachments.`
+  } else if (addedChanges.length === 1) {
+    summary = `Added attachment ${addedChanges[0].newValueDisplay}.`
+  } else {
+    summary = `Added ${addedChanges.length} attachments.`
+  }
 
   await writeHistoryEvent(req, entities, {
     bugID,
@@ -147,6 +167,25 @@ async function recordDraftAttachmentSaveSideEffects (req, data, entities) {
     summary,
     changes
   })
+}
+
+function buildAttachmentDeleteAuditEntry (snapshot) {
+  const filename = trimToNull(snapshot?.filename)?.slice(0, 255) || snapshot?.attachmentID
+  if (!snapshot?.attachmentID || !snapshot?.bugID || !snapshot?.actorID) return null
+
+  return {
+    bugID: snapshot.bugID,
+    actorID: snapshot.actorID,
+    actionType: ACTION.EDIT,
+    summary: `Deleted attachment ${filename}.`,
+    changes: [{
+      fieldName: 'attachment',
+      oldValue: snapshot.attachmentID,
+      newValue: null,
+      oldValueDisplay: filename,
+      newValueDisplay: null
+    }]
+  }
 }
 
 function importantChanges (oldBug, finalBug) {
@@ -500,6 +539,7 @@ module.exports = {
   recordBugChangeSideEffects,
   recordCommentCreateSideEffects,
   recordDraftAttachmentSaveSideEffects,
+  buildAttachmentDeleteAuditEntry,
   importantChanges,
   writeHistoryEvent,
   writeNotificationForStatus,

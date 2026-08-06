@@ -435,3 +435,8 @@ Neu bo registration nay, metadata co the van thay action, nhung runtime action s
 **English.** The root `EDIT` handler now calls the assignee-aware permission guard before CAP creates an edit draft. PATCH/SAVE and attachment targets retain their own deeper guards, so hiding Fiori controls is never the only protection.
 
 **Tiếng Việt.** Handler root `EDIT` gọi permission guard theo assignee trước khi CAP tạo edit draft. PATCH/SAVE và attachment target vẫn có guard sâu riêng, nên ẩn control Fiori không bao giờ là lớp bảo vệ duy nhất.
+## IDTS-125 attachment deletion wiring (2026-08-06)
+
+**English.** `BugService.init()` registers the attachment authorization guard before attachment writes. It deliberately does not register an `after DELETE` history writer. Deletion audit is produced by the existing draft SAVE flow after comparing the before/after attachment metadata, preventing duplicate or false history when a draft is discarded.
+
+**Tiếng Việt.** `BugService.init()` đăng ký attachment authorization guard trước attachment write. File này cố ý không đăng ký history writer tại `after DELETE`. Audit xóa được tạo bởi luồng draft SAVE hiện có sau khi so sánh metadata trước/sau, tránh history trùng hoặc history giả khi draft bị discard.

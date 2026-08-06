@@ -65,6 +65,18 @@ async function prepareAttachmentWrite (req, entities) {
   // binary thật đi qua storage adapter/S3, còn DB chỉ giữ metadata và storage reference.
   const actor = assertActiveActor(req, await resolveRequestUser(req, entities))
 
+  if (req.event === 'DELETE') {
+    const attachment = await readAttachmentForMutation(req, entities)
+    if (!attachment) return req.reject(404, 'Attachment not found.')
+
+    const bug = await readParentBugForContent(req, entities, attachment.up__ID)
+    if (!bug) return req.reject(404, 'Bug not found.')
+    assertBugOpenForMutation(req, bug)
+    assertAttachmentDeletePermission(req, actor, attachment)
+
+    return
+  }
+
   const bug = await readParentBugForContent(req, entities, req.data?.up__ID)
   if (!bug) return req.reject(404, 'Bug not found.')
   assertBugOpenForMutation(req, bug)
@@ -80,6 +92,22 @@ async function prepareAttachmentWrite (req, entities) {
   }
 }
 
+async function readAttachmentForMutation (req, entities) {
+  const parameterIDs = (req.params || []).map(parameter => parameter?.ID).filter(Boolean)
+  const attachmentID = req.data?.ID || parameterIDs[parameterIDs.length - 1]
+  const attachmentTarget = entities['Bugs.attachments']
+  if (!attachmentID || !attachmentTarget) return null
+
+  const targets = [attachmentTarget, attachmentTarget.drafts].filter(Boolean)
+  for (const target of targets) {
+    const attachment = await cds.tx(req).run(
+      SELECT.one.from(target).columns('ID', 'up__ID', 'filename', 'createdBy').where({ ID: attachmentID })
+    )
+    if (attachment) return attachment
+  }
+  return null
+}
+
 function assertAttachmentPermission (req, actor, isAssignedDeveloperActor) {
   assertActiveActor(req, actor)
   if (!ATTACHMENT_ROLES.has(actor.role_code)) {
@@ -88,6 +116,33 @@ function assertAttachmentPermission (req, actor, isAssignedDeveloperActor) {
   if (actor?.role_code === 'DEVELOPER' && !isAssignedDeveloperActor) {
     return req.reject(403, 'Only the assigned developer, Tester, or PM can manage Bug attachments.')
   }
+}
+
+function assertAttachmentDeletePermission (req, actor, attachment) {
+  assertActiveActor(req, actor)
+  if (!ATTACHMENT_ROLES.has(actor.role_code)) {
+    return req.reject(403, 'Only Tester, Developer, or PM users can delete attachments.')
+  }
+  if (actor.role_code === 'PM') return
+
+  const attributes = req.user?.attr || {}
+  const actorIdentities = [
+    req.user?.id,
+    attributes.email,
+    attributes.user_name,
+    attributes.login_name,
+    actor.ID,
+    actor.email
+  ].map(normalizeIdentity).filter(Boolean)
+  const uploaderIdentity = normalizeIdentity(attachment?.createdBy)
+
+  if (!uploaderIdentity || !actorIdentities.includes(uploaderIdentity)) {
+    return req.reject(403, 'Only the attachment uploader or a PM user can delete this attachment.')
+  }
+}
+
+function normalizeIdentity (value) {
+  return typeof value === 'string' ? value.trim().toLowerCase() : null
 }
 
 async function prepareCommentMutation (req, entities) {
@@ -149,5 +204,7 @@ module.exports = {
   prepareCommentCreate,
   prepareCommentMutation,
   prepareAttachmentWrite,
-  assertAttachmentPermission
+  assertAttachmentPermission,
+  assertAttachmentDeletePermission,
+  readAttachmentForMutation
 }
