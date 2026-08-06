@@ -37,7 +37,7 @@ const workflowContract = [
     action: 'moveToPendingAssignment',
     actionType: 'MOVE_TO_PENDING_ASSIGNMENT',
     from: 'ASSIGNED',
-    data: { reason: 'IDTS-89 pending verification' },
+    data: {},
     user: ['NhanT', ['TESTER', 'authenticated-user']],
     expected: { status: 'PENDING_ASSIGNMENT', assignee: null, nextUser: DON_USER_ID, actor: NHAN_USER_ID, summary: 'Moved bug to Pending Assignment.' }
   },
@@ -45,7 +45,7 @@ const workflowContract = [
     action: 'markInReview',
     actionType: 'MARK_IN_REVIEW',
     from: 'ASSIGNED',
-    data: { note: 'IDTS-89 review verification' },
+    data: {},
     user: ['SangVN', ['DEVELOPER', 'authenticated-user']],
     expected: { status: 'IN_REVIEW', assignee: SANG_DEVELOPER_ID, nextUser: SANG_USER_ID, actor: SANG_USER_ID, summary: 'Marked bug as In Review.' }
   },
@@ -77,7 +77,7 @@ const workflowContract = [
     action: 'startProgress',
     actionType: 'START_PROGRESS',
     from: 'IN_REVIEW',
-    data: { note: 'IDTS-89 progress verification' },
+    data: {},
     user: ['SangVN', ['DEVELOPER', 'authenticated-user']],
     expected: { status: 'IN_PROGRESS', assignee: SANG_DEVELOPER_ID, nextUser: SANG_USER_ID, actor: SANG_USER_ID, summary: 'Started progress on the bug.' }
   },
@@ -93,7 +93,7 @@ const workflowContract = [
     action: 'sendToRetest',
     actionType: 'SEND_TO_RETEST',
     from: 'RESOLVED',
-    data: { note: 'Ready for regression retest.' },
+    data: {},
     user: ['NhanT', ['TESTER', 'authenticated-user']],
     expected: { status: 'RETEST_REQUIRED', assignee: SANG_DEVELOPER_ID, nextUser: NHAN_USER_ID, actor: NHAN_USER_ID, summary: 'Sent bug to retest.' }
   },
@@ -101,7 +101,7 @@ const workflowContract = [
     action: 'closeBug',
     actionType: 'CLOSE_BUG',
     from: 'RESOLVED',
-    data: { note: 'Acceptance verification completed.' },
+    data: {},
     user: ['NhanT', ['TESTER', 'authenticated-user']],
     expected: { status: 'CLOSED', assignee: SANG_DEVELOPER_ID, nextUser: null, actor: NHAN_USER_ID, summary: 'Closed bug.' }
   },
@@ -137,6 +137,7 @@ async function callAction (service, testCase, userOverride) {
 async function resetBug (db, entities, testCase) {
   await db.run(DELETE.from(entities.HistoryLogs).where({ bug_ID: BUG_ID }))
   await db.run(DELETE.from(entities.HistoryEvents).where({ bug_ID: BUG_ID }))
+  await db.run(DELETE.from(entities.Comments).where({ bug_ID: BUG_ID }))
 
   const hasAssignee = testCase.from !== 'PENDING_ASSIGNMENT'
   const developerOwned = ['ASSIGNED', 'IN_REVIEW', 'IN_PROGRESS', 'REOPENED'].includes(testCase.from)
@@ -202,6 +203,12 @@ async function verifyWorkflowActions (service, db, entities) {
     assert.equal(bug.status_code, testCase.expected.status, `${testCase.action} must preserve its status transition.`)
     assert.equal(bug.assignee_ID, testCase.expected.assignee, `${testCase.action} must preserve assignee behavior.`)
     assert.equal(bug.nextProcessorUser_ID, testCase.expected.nextUser, `${testCase.action} must preserve next-processor behavior.`)
+
+    if (testCase.action === 'resubmitToDeveloper') {
+      const comments = await db.run(SELECT.from(entities.Comments).where({ bug_ID: BUG_ID }))
+      assert.equal(comments.length, 0, 'resubmitToDeveloper must not create an automatic Comment.')
+      assert.equal(event.reason, testCase.data.note, 'resubmitToDeveloper must keep the update summary in History.')
+    }
   }
 }
 
@@ -304,6 +311,7 @@ async function main () {
   const service = await cds.serve('BugService').from(csn)
   const entities = {
     Bugs: service.entities.Bugs,
+    Comments: service.entities.Comments,
     HistoryEvents: service.entities.HistoryEvents,
     HistoryLogs: service.entities.HistoryLogs
   }

@@ -79,9 +79,9 @@ const USER_SANG  = '10000000-0000-0000-0000-000000000002'  // User SangVN
 
 /* ── Mock users ── */
 
-function tester ()   { return new cds.User({ id: 'alice', roles: ['TESTER',    'authenticated-user'] }) }
-function developer (name) { return new cds.User({ id: name || 'alice', roles: ['DEVELOPER', 'authenticated-user'] }) }
-function pm ()       { return new cds.User({ id: 'alice', roles: ['PM',        'authenticated-user'] }) }
+function tester ()   { return new cds.User({ id: 'NhanT', roles: ['TESTER',    'authenticated-user'] }) }
+function developer (name) { return new cds.User({ id: name || 'SangVN', roles: ['DEVELOPER', 'authenticated-user'] }) }
+function pm ()       { return new cds.User({ id: 'DonHV', roles: ['PM',        'authenticated-user'] }) }
 
 /* ── Helpers ── */
 
@@ -306,12 +306,12 @@ async function sectionOwnershipLifecycle (srv, entities, bugID) {
   expectEqual('OWN-09 Resolved owner = NhanT', bug?.currentActionOwnerDisplayName, 'NhanT')
 
   /* OWN-10 Send to Retest → owner = NhanT (reporter/tester) */
-  await mustCallAction(srv, bugID, 'sendToRetest', { note: 'Retest needed for regression verification' })
+  await mustCallAction(srv, bugID, 'sendToRetest', {})
   bug = await readBugOwnership(srv, bugID, entities)
   expectEqual('OWN-10 Retest Required owner = NhanT', bug?.currentActionOwnerDisplayName, 'NhanT')
 
   /* OWN-11 Close → owner = null */
-  await mustCallAction(srv, bugID, 'closeBug', { note: 'Verified and closing for regression test' })
+  await mustCallAction(srv, bugID, 'closeBug', {})
   bug = await readBugOwnership(srv, bugID, entities)
   expectEqual('OWN-11 Closed owner = null', bug?.currentActionOwnerDisplayName, null)
 
@@ -327,7 +327,7 @@ async function sectionOwnershipLifecycle (srv, entities, bugID) {
   expectEqual('OWN-13 Rejected owner = NhanT', bug?.currentActionOwnerDisplayName, 'NhanT')
 
   /* OWN-14 Move to Pending Assignment → owner = PM queue */
-  await mustCallAction(srv, bugID, 'moveToPendingAssignment', { reason: 'Move to queue for regression test' })
+  await mustCallAction(srv, bugID, 'moveToPendingAssignment', {})
   bug = await readBugOwnership(srv, bugID, entities)
   expectEqual('OWN-14 Pending Assignment owner = Project Manager', bug?.currentActionOwnerDisplayName, 'Project Manager')
 }
@@ -411,7 +411,7 @@ async function sectionMonitoringFlags (srv, entities, bugID) {
   expectEqual('MON-07 Rejected isPendingAssignment=false', mon?.isPendingAssignment, false)
 
   /* MON-08 Move to Pending → isPendingAssignment=true, isRejectedFollowUp=false */
-  await mustCallAction(srv, bugID, 'moveToPendingAssignment', { reason: 'Move to queue for monitoring regression' })
+  await mustCallAction(srv, bugID, 'moveToPendingAssignment', {})
   mon = await readBugMonitoring(srv, bugID)
   expectEqual('MON-08 Pending isPendingAssignment=true', mon?.isPendingAssignment, true)
   expectEqual('MON-09 Pending isRejectedFollowUp=false', mon?.isRejectedFollowUp, false)
@@ -426,12 +426,12 @@ async function sectionMonitoringFlags (srv, entities, bugID) {
   expectEqual('MON-10 Resolved isRetestRequired=false', mon?.isRetestRequired, false)
 
   /* MON-11 Send to Retest → isRetestRequired=true */
-  await mustCallAction(srv, bugID, 'sendToRetest', { note: 'Retest needed for monitoring regression' })
+  await mustCallAction(srv, bugID, 'sendToRetest', {})
   mon = await readBugMonitoring(srv, bugID)
   expectEqual('MON-11 Retest Required isRetestRequired=true', mon?.isRetestRequired, true)
 
   /* MON-12 Close → all flags false */
-  await callAction(srv, bugID, 'closeBug', { note: 'Closing for monitoring regression' })
+  await callAction(srv, bugID, 'closeBug', {})
   mon = await readBugMonitoring(srv, bugID)
   expectEqual('MON-12 Closed isPendingAssignment=false', mon?.isPendingAssignment, false)
   expectEqual('MON-13 Closed isRejectedFollowUp=false', mon?.isRejectedFollowUp, false)

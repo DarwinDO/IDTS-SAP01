@@ -1,5 +1,9 @@
 # Knowledge: `srv/service.js`
 
+## Optional Note handler wiring (2026-08-06)
+
+Move to Pending Assignment, Mark In Review, Start Progress, Send to Retest, and Close no longer read `req.data.note` or `req.data.reason`. The shared transition pipeline still enforces authorization and status rules, calculates the next processor, writes history, and creates notifications. The history reason is intentionally null; action type, actor, field changes, and timestamp remain the audit evidence.
+
 ## IDTS-122 closed-aggregate boundary
 
 The service wires backend guards for active UPDATE, draft EDIT/PATCH/SAVE, Bug DELETE, comment CREATE/PUT/UPDATE/PATCH/DELETE, attachments, lifecycle actions, and AI mutations. A `CLOSED` Bug rejects ordinary mutations with a safe 409 response. Bug hard-delete is rejected in every status. `reopenBug` and PM `reassignRetestOwner` are the only business exceptions while Closed. Debug from the incoming CAP event to `assertBugOpenForMutation`; UI visibility is not the security boundary.

@@ -70,8 +70,8 @@ The most important design choice is that most lifecycle buttons go through one s
 
 - **Location**: `srv/bug-service/actions.js:44`
   `async function resubmitToDeveloper(req, entities)`
-  **IDTS concept**: Recovery path from `NEED_MORE_INFORMATION` back to Developer processing. It validates transition to `ASSIGNED`, checks assignee suitability, and creates a follow-up comment from the update summary.
-  **Impact if broken**: A Tester can provide missing information but the bug may not return to the assigned Developer, or the update summary may disappear from the discussion trail.
+  **IDTS concept**: Recovery path from `NEED_MORE_INFORMATION` back to Developer processing. It validates transition to `ASSIGNED`, checks assignee suitability, and stores the required update summary in immutable History without creating a Comment automatically.
+  **Impact if broken**: A Tester can provide missing information but the bug may not return to the assigned Developer, or the update summary may disappear from History. Comments remain explicit user-authored discussion entries.
   **Must check together**: `srv/service.cds:71` `resubmitToDeveloper`, `app/bug-management-ui/annotations/actions.cds` side effects for comments/history/notifications, `srv/bug-service/history.js` comment and status side effects.
 
 - **Location**: `srv/bug-service/actions.js:139`
@@ -156,8 +156,8 @@ Nút action trên Fiori chỉ là điểm bắt đầu trên UI. File này mới
 
 - **Vị trí**: `srv/bug-service/actions.js:44`
   `async function resubmitToDeveloper(req, entities)`
-  **Khái niệm IDTS**: Đường phục hồi từ `NEED_MORE_INFORMATION` về lại Developer xử lý. Nó validate transition về `ASSIGNED`, kiểm tra assignee phù hợp và tạo follow-up comment từ update summary.
-  **Ảnh hưởng nếu sai**: Tester bổ sung thông tin nhưng bug có thể không quay về Developer được assign, hoặc phần update summary biến mất khỏi luồng trao đổi.
+  **Khái niệm IDTS**: Đường phục hồi từ `NEED_MORE_INFORMATION` về lại Developer xử lý. Nó validate transition về `ASSIGNED`, kiểm tra assignee phù hợp và lưu update summary bắt buộc trong History bất biến mà không tự tạo Comment.
+  **Ảnh hưởng nếu sai**: Tester bổ sung thông tin nhưng bug có thể không quay về Developer được assign, hoặc update summary biến mất khỏi History. Comment chỉ được tạo khi user chủ động đăng nội dung trao đổi.
   **Phải kiểm tra cùng**: `srv/service.cds:71` `resubmitToDeveloper`, side effects trong `app/bug-management-ui/annotations/actions.cds`, `srv/bug-service/history.js` cho comment và status side effects.
 
 - **Vị trí**: `srv/bug-service/actions.js:139`

@@ -87,18 +87,6 @@ async function resubmitToDeveloper (req, entities) {
     ? await tx.run(SELECT.one.from(entities.Users).where({ ID: oldBug.reporter_ID }))
     : null)
 
-  if (actorUser?.ID) {
-    await tx.run(
-      INSERT.into(entities.Comments).entries({
-        ID: cds.utils.uuid(),
-        bug_ID: bugID,
-        author_ID: actorUser.ID,
-        authorRole_code: actorUser.role_code,
-        content: `Resubmitted after information request: ${note}`
-      })
-    )
-  }
-
   const historyChanges = [
     {
       fieldName: 'status',

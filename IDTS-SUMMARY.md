@@ -384,7 +384,7 @@ Developer nhận bug được assign
 → Tester hoặc PM bổ sung thông tin qua edit/comment/attachment
 → Tester hoặc PM dùng `Resubmit to Developer` kèm update summary
 → Bug status quay về `Assigned`
-→ Hệ thống ghi history, follow-up comment, notification và trả `nextProcessor` về Developer được assign
+→ Hệ thống giữ update summary trong history, gửi notification và trả `nextProcessor` về Developer được assign; chỉ tạo comment khi user chủ động dùng Add Comment
 → Developer review lại
 
 Nếu bug sai module/category hoặc assignee không phù hợp:
