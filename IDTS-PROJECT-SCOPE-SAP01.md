@@ -427,3 +427,8 @@ Sau buổi họp mentor gần nhất, team không nên dành sprint tiếp theo 
 - Note/reason chỉ bắt buộc ở các transition cần giải thích rõ: request more information, reject, resolve và reopen.
 - Fiori Bug Detail phải ưu tiên assignee và status, status edit bằng dropdown/value help, field quan trọng phải dễ nhập, và severity/environment nên nằm ở vùng thông tin phụ hoặc bên phải khi có thể.
 - DonHV hiện là Backend CAP lead và owner phần backend bug fixing. NhanT hỗ trợ backend verification và QA. DatDT lead Fiori/UI5. SangVN hỗ trợ Fiori/UI5.
+## IDTS-125 Role and assignee mutation boundary
+
+**English:** A Developer who is not the assignee may read and comment only. The assigned Developer may comment, upload/update attachments, and use permitted lifecycle actions, but may not edit Bug business fields. On an open Bug, PM may delete any attachment; Tester or Developer may delete only an attachment that they uploaded. A committed deletion creates one sanitized business-history event and one field-level log at draft SAVE. Fiori may open an edit shell for supported attachment work, while CAP independently validates the persisted parent Bug and uploader metadata. CLOSED remains read-only.
+
+**Tiếng Việt:** Developer không phải assignee chỉ được đọc và comment. Developer assignee được comment, upload/update attachment và dùng lifecycle action được phép nhưng không được sửa field nghiệp vụ Bug. Trên Bug đang mở, PM được xóa mọi attachment; Tester hoặc Developer chỉ được xóa attachment do chính mình upload. Delete đã commit tạo một business-history event đã sanitize và một field-level log tại draft SAVE. Fiori có thể mở edit shell cho attachment work được hỗ trợ, còn CAP kiểm tra độc lập Bug cha và uploader metadata đã persist. CLOSED vẫn read-only.

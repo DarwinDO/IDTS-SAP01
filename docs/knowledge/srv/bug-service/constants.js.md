@@ -227,3 +227,8 @@ Các label history cho nhóm field người/vai trò đang xử lý hiện dùng
   **Khái niệm IDTS**: Delivery status là operational evidence do hệ thống quản lý.
   **Ảnh hưởng nếu sai**: Client có thể giả `SENT`, xóa bằng chứng lỗi hoặc enqueue email ngoài notification flow đã duyệt.
   **Phải kiểm tra cùng**: `srv/bug-service/guards.js`, `srv/service.cds:108`, API write-denial test.
+## IDTS-125 capability constants (2026-08-05)
+
+**English.** Capability dependencies now include `canManageAttachments` and two Bug field-control values. SAP Common.FieldControl numeric values are ReadOnly=1, Optional=3 and Mandatory=7.
+
+**Tiếng Việt.** Dependency capability thêm `canManageAttachments` và hai giá trị field-control của Bug. Giá trị số SAP Common.FieldControl là ReadOnly=1, Optional=3 và Mandatory=7.

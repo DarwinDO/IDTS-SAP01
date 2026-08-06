@@ -328,3 +328,8 @@ Vietnamese: Agent hoáº·c developer má»›i pháº£i xÃ¡c Ä‘á»‹nh 
 - Evidence: `docs/pm/evidence/sap490-test-filter-removal-20260723.md`.
 - Verdict remains `CONDITIONALLY READY — UAT execution and mentor sign-off pending` because UAT execution/sign-off is still pending.
 - Knowledge Gate remains `IN PROGRESS — handled in dedicated learning thread`.
+## 2026-08-05 IDTS-125 handover
+
+- SangVN implemented the role/assignee Bug-mutation boundary on `fix/idts-125-bug-mutation-authorization-sangvn`: non-assignee Developer is read/comment only; assigned Developer can comment, manage attachments and use permitted lifecycle actions while Bug fields stay read-only; Tester/PM retain documented edit/coordination permissions. Focused and impacted local verification passed. Ownership Knowledge Gate retest passed 6/6 on 2026-08-06; Jira remains In Progress pending normal PR review, merge and final evidence.
+
+- Vietnamese: SangVN đã implement boundary mutate Bug theo role/assignee trên branch IDTS-125. Focused và impacted local verification đã pass; Knowledge Gate retest PASS 6/6 ngày 2026-08-06. Jira vẫn In Progress để chờ PR review, merge và final evidence.

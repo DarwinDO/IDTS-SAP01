@@ -61,6 +61,7 @@
     "qa:idts122:clean-baseline": "node scripts/qa/test-idts122-clean-baseline.js",
     "qa:idts122:classification-catalog": "node scripts/qa/test-idts122-classification-catalog.js && node scripts/qa/test-idts122-developer-responsibility-catalog.js && node scripts/qa/test-idts122-classification-catalog-hana.js",
     "qa:idts122:clean-baseline-hana": "node scripts/qa/test-idts122-clean-baseline-hana.js",
+    "qa:idts125:programmatic": "node scripts/qa/test-idts125-bug-mutation-authorization.js",
     "qa:idts122:dashboard": "node scripts/qa/test-idts122-pm-dashboard.js && node scripts/qa/test-idts122-pm-dashboard-runtime.js",
     "qa:depth:pr-body": "node scripts/qa/check-pr-depth.js",
     "qa:secret-scan": "node scripts/qa/secret-scan.js",

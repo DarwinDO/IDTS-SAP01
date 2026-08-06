@@ -30,7 +30,7 @@ const { readBugStatusMetrics } = require('./bug-service/status-metrics')
 const { registerReadOnlyEntityGuards } = require('./bug-service/guards')
 const { prepareBugWrite } = require('./bug-service/bug-write')
 const { bugIDFrom, readBug } = require('./bug-service/helpers')
-const { assertBugOpenForMutation, enforceBugCreatePermission } = require('./bug-service/permissions')
+const { assertBugOpenForMutation, enforceBugCreatePermission, enforceBugEditPermission } = require('./bug-service/permissions')
 const {
   assignToDeveloper,
   reassignRetestOwner,
@@ -98,7 +98,7 @@ module.exports = class BugService extends cds.ApplicationService {
     this.before('EDIT', Bugs, async req => {
       const bug = await readBug(req, entities, bugIDFrom(req))
       if (!bug) return req.reject(404, 'Bug not found.')
-      assertBugOpenForMutation(req, bug)
+      await enforceBugEditPermission(req, entities, bug)
     })
     this.before('UPDATE', Bugs, req => prepareBugWrite(req, entities, { isCreate: false }))
     this.before('PATCH', Bugs.drafts, req => prepareDraftPatch(req, entities))

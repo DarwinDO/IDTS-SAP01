@@ -55,7 +55,7 @@ async function resubmitToDeveloper (req, entities) {
   assertBugOpenForMutation(req, oldBug)
 
   const actor = await resolveRequestUser(req, entities)
-  if (actor && !COORDINATOR_ROLES.has(actor.role_code)) {
+  if (!actor || !COORDINATOR_ROLES.has(actor.role_code)) {
     return req.reject(403, 'Only Tester or PM users can resubmit a bug to the developer.')
   }
 

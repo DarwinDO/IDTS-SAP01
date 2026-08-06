@@ -207,8 +207,11 @@ service BugService @(requires: 'authenticated-user') {
     virtual canResubmit           : Boolean,
     virtual canAddComment         : Boolean,
     virtual canEdit               : Boolean,
+    virtual canManageAttachments  : Boolean,
     virtual canReassignRetestOwner: Boolean,
-    virtual assigneeFieldControl  : Integer
+    virtual assigneeFieldControl  : Integer,
+    virtual bugRequiredFieldControl : Integer,
+    virtual bugOptionalFieldControl : Integer
   } actions {
     // Bound actions chạy trên một Bug cụ thể. Tên/signature phải khớp `srv/service.js` và Fiori action annotation.
     action addComment(content: LargeString) returns Bugs;

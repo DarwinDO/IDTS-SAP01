@@ -103,3 +103,8 @@ Backend vẫn là lớp bảo vệ thật. Kể cả khi user sửa browser stor
 **English.** Compilation publishes insert/update/delete restrictions to Fiori. Standard Create is hidden so the manifest action calls `BugListActions.createBug()` and Fiori EditFlow. These flags improve UX only; direct OData/draft requests still reach backend authorization. If Developer sees Create, inspect metadata and custom action visibility; if a direct request succeeds incorrectly, debug CAP permissions instead.
 
 **Tiếng Việt.** Khi compile, restriction insert/update/delete được đưa vào metadata Fiori. Standard Create bị ẩn để action trong manifest gọi `BugListActions.createBug()` và Fiori EditFlow. Các cờ chỉ cải thiện UX; request OData/draft trực tiếp vẫn phải qua authorization backend. Developer thấy Create thì kiểm metadata/visibility; direct request sai mà vẫn thành công thì debug CAP permission.
+## IDTS-125 attachment capability (2026-08-05)
+
+**English.** Attachment navigation restrictions use `canManageAttachments`, not generic `canEdit`. This keeps non-assignee upload/update/delete hidden while allowing the assignee's attachment edit shell.
+
+**Tiếng Việt.** Navigation restriction của attachment dùng `canManageAttachments`, không dùng `canEdit` chung. Nhờ đó upload/update/delete bị ẩn với non-assignee nhưng edit shell attachment vẫn mở cho assignee.

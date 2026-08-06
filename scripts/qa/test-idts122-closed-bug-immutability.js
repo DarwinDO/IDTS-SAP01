@@ -165,13 +165,13 @@ async function main () {
     'Rejected comment mutation must preserve existing content'
   )
   console.log('  PASS  existing comment content is preserved; mutation-route proof remains a browser/API acceptance item')
-  await expectDraftRootRejection('direct attachment metadata create cannot bypass the draft root', () => srv.dispatch(request({
-    event: 'CREATE',
+  await expect409('attachment delete is blocked for a Closed Bug', () => srv.dispatch(request({
+    event: 'DELETE',
     target: Attachments,
     actor: tester,
-    params: [],
-    data: { ID: blockedAttachmentID, up__ID: BUG_ID, filename: 'blocked.txt', mimeType: 'text/plain' },
-    query: INSERT.into(Attachments).entries({ ID: blockedAttachmentID, up__ID: BUG_ID, filename: 'blocked.txt', mimeType: 'text/plain' })
+    params: [{ ID: BUG_ID }, { ID: ATTACHMENT_ID }],
+    data: { ID: ATTACHMENT_ID },
+    query: DELETE.from(Attachments).where({ ID: ATTACHMENT_ID })
   })))
   await expect409('repeated close action is blocked', () => srv.dispatch(request({
     event: 'closeBug',
