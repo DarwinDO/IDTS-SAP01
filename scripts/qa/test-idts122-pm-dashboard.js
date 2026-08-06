@@ -53,7 +53,7 @@ check('status tile navigation carries a filter and a supported List Report exten
   assert.match(dashboard, /statusCode/)
   assert.match(dashboard, /encodeURIComponent\(statusCode\)/)
   assert.match(manifest, /sap\.fe\.templates\.ListReport\.ListReportController/)
-  const extension = read('app/bug-management-ui/webapp/ext/listreport/ListReportController.js')
+  const extension = read('app/bug-management-ui/webapp/ext/listreport/ListReportController.controller.js')
   assert.match(extension, /setFilterValues\(["']status_code["']/)
 })
 

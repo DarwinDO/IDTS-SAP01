@@ -186,4 +186,4 @@ The PM dashboard now reads `readBugStatusMetrics()` instead of counting a capped
 
 The AI Activity dialog displays explicit semantic outcomes: success, bad request, rate limited, provider 5xx, timeout, unavailable, and other failure. Unknown historical failures remain `other failure`; the UI must never infer a provider HTTP class that was not captured by the adapter.
 
-Debug order: `loadDashboard()` → `readBugStatusMetrics()` Network response → `pmDashboard()` tile model → tile press hash → `ext/listreport/ListReportController.js` → List Report filter bar. For AI metrics, continue through `readAiOperationalMetrics()` and `srv/ai/metrics.js`.
+Debug order: `loadDashboard()` → `readBugStatusMetrics()` Network response → `pmDashboard()` tile model → tile press hash → `ext/listreport/ListReportController.controller.js` → List Report filter bar. For AI metrics, continue through `readAiOperationalMetrics()` and `srv/ai/metrics.js`.
