@@ -1,5 +1,12 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-08-06 — IDTS-122 List Report controller startup repair
+
+| Classification | Symptom / work | Root cause / decision | Fix status | Verification / next action |
+| --- | --- | --- | --- | --- |
+| Product/UI defect | After a valid XSUAA sign-in, the Fiori List Report stopped at the technical error `Cannot read properties of undefined (reading 'getMetadata')`. Chrome console reported that `idts/bugmanagementui/ext/listreport/ListReportController.controller.js` could not be loaded. | The manifest registered controller name `idts.bugmanagementui.ext.listreport.ListReportController`, for which SAPUI5 resolves the conventional file `ListReportController.controller.js`; the repository used `ListReportController.js`. The undefined extension controller caused the later `getMetadata()` failure. | Candidate renames only the controller module file and updates the focused dashboard regression plus knowledge path. No controller behavior, CAP service, HANA, seed or schema changes. | Red test first failed with `ENOENT`; after rename the dashboard static checks pass 6/6 and runtime aggregate/authorization checks pass 4/4. UI5 production build, secret scan and agent rules pass. Selectively deploy UI/app-content only after normal PR merge, then rerun signed-in Chrome startup and Priority 2B visual acceptance. |
+| Local tooling issue | The first runtime dashboard test in the fresh worktree could not load the native `better-sqlite3` binding; the attempted `npx ui5 lint` command was also unsupported by the repository UI5 CLI version. | Dependencies were installed with scripts disabled, so the native binary was absent; this UI5 CLI exposes build but not a `lint` subcommand. | Rebuilt only the locked `better-sqlite3` package, then reran the dashboard suite successfully. No dependency version or lockfile changed. UI validation uses production build and focused module regression; the unsupported lint command is not reported as PASS. | Keep the npm audit result (26 dependency vulnerabilities) as existing dependency debt; do not run automatic or forced audit fixes in this narrow UI repair. |
+
 ## 2026-08-04 — IDTS-39 malformed-login contract follow-up
 
 | Classification | Symptom / result | Root cause / scope | Fix status | Verification / next action |
