@@ -325,6 +325,8 @@ Mô hình đúng:
 
 ## **7.3. Status scope**
 
+Current master-data scope is 8 Application Components, 8 Defect Categories, and 31 active valid Component Category pairs. It includes `IDTS AI Advisory` with CAP Backend, Integration, Performance, and Data Quality. This taxonomy supports classification and Smart Assign candidate filtering; it does not extend scope to autonomous AI assignment.
+
 Bộ status trong MVP:
 
 * New (legacy/import compatibility only)
