@@ -552,3 +552,6 @@ Superseded on 2026-08-04: the manifest must also avoid a `controlConfiguration` 
 Do not fix attachment reload by adding a raw request, custom `UploadSet`, hard-coded generated control ID, or custom CAP `READ` handler. First verify the active navigation response, then verify that the generated facet initiates its list request.
 
 Cập nhật ngày 2026-08-04: manifest không override table attachment. Facet `attachments_attachments` và vòng đời bảng do CAP attachment plugin quản lý; IDTS chỉ giữ custom Comments section.
+# IDTS-122 PM dashboard drill-down
+
+The List Report uses the supported `sap.fe.templates.ListReport.ListReportController` extension point to consume the dashboard `status_code` navigation parameter. The extension applies the filter with `ExtensionAPI.setFilterValues()` and accepts only the ten canonical workflow status codes. This keeps dashboard navigation inside supported Fiori Elements APIs and prevents arbitrary filter injection.

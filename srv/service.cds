@@ -91,8 +91,12 @@ service BugService @(requires: 'authenticated-user') {
     requestCount       : Integer;
     successCount       : Integer;
     failureCount       : Integer;
+    badRequestCount    : Integer;
+    rateLimitedCount   : Integer;
+    provider5xxCount   : Integer;
     timeoutCount       : Integer;
     unavailableCount   : Integer;
+    otherFailureCount  : Integer;
     acceptedCount      : Integer;
     rejectedCount      : Integer;
     ignoredCount       : Integer;
@@ -100,6 +104,14 @@ service BugService @(requires: 'authenticated-user') {
     latencySampleCount : Integer;
     averageLatencyMs   : Integer;
     maxLatencyMs       : Integer;
+  };
+
+  type BugStatusMetric {
+    statusCode        : String(40);
+    statusName        : String(120);
+    statusCriticality : Integer;
+    sortOrder         : Integer;
+    bugCount          : Integer;
   };
 
   type EmailOutboxRunResult {
@@ -161,6 +173,10 @@ service BugService @(requires: 'authenticated-user') {
   // PM-only operational aggregate; reads allowlisted audit metadata and never exposes prompt/response/error detail.
   @(requires: 'PM')
   function readAiOperationalMetrics(windowDays : Integer) returns array of AiOperationalMetric;
+
+  // PM-only lifecycle counts; the handler returns all ten current statuses, including zero-count rows.
+  @(requires: 'PM')
+  function readBugStatusMetrics() returns array of BugStatusMetric;
 
   @(requires: 'OutboxProcessor')
   action processEmailOutbox() returns EmailOutboxRunResult;

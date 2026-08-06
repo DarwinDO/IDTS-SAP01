@@ -872,6 +872,8 @@ Các rule dưới đây làm rõ baseline hiện hành để đồng bộ với 
 
 ## **BR-42 - Bug classification phải tách SAP Module, Application Component và Defect Category**
 
+The approved IDTS-122 baseline has 8 Application Components, 8 Defect Categories, and 31 active valid pairs. The `IDTS AI Advisory` component is paired only with CAP Backend, Integration, Performance, and Data Quality. A selected pair must be active together with both referenced master-data rows. Developer Responsibility narrows the candidate list; the authenticated user still makes the assignment decision.
+
 Khi tạo hoặc cập nhật bug, hệ thống không nên gộp mọi thứ vào một field `module/category` mơ hồ.
 
 Mô hình phân loại hiện hành:

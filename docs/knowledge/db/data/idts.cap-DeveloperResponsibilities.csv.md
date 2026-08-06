@@ -8,6 +8,8 @@ This file answers: “For which component/category and optional SAP module is a 
 
 IDTS-90 adds 22 rows across ten synthetic profiles. The data includes `PRIMARY`, `BACKUP` and `EXPERT` examples and covers Fiori, CAP, database, assignment and integration categories.
 
+IDTS-122 adds eight active, ANY-module rows for the four AI classification pairs. The stable matrix maps `CAP_BACKEND`, `INTEGRATION`, `PERFORMANCE`, and `DATA_QUALITY` to ComponentCategory UUIDs ending in `028`, `029`, `030`, and `031`, respectively. Each pair has a primary and a backup candidate; these rows deliberately do not create another user or developer profile.
+
 ### Assignment flow
 
 1. A bug receives an Application Component and Defect Category.
@@ -49,6 +51,8 @@ File này trả lời câu hỏi: “Developer phù hợp với component/catego
 
 IDTS-90 thêm 22 dòng cho mười profile giả lập. Dữ liệu có đủ ví dụ `PRIMARY`, `BACKUP`, `EXPERT` và bao phủ nhóm Fiori, CAP, database, assignment, integration.
 
+IDTS-122 thêm tám dòng active, ANY-module cho bốn cặp phân loại AI. Stable matrix ánh xạ `CAP_BACKEND`, `INTEGRATION`, `PERFORMANCE`, và `DATA_QUALITY` tới ComponentCategory UUID có bốn chữ số cuối lần lượt là `028`, `029`, `030`, và `031`. Mỗi cặp có một candidate primary và một candidate backup; các dòng này không tạo thêm user hoặc developer profile.
+
 ### Luồng assignment
 
 1. Bug được chọn Application Component và Defect Category.
@@ -85,5 +89,5 @@ IDTS-90 thêm 22 dòng cho mười profile giả lập. Dữ liệu có đủ v�
 ## Metadata
 
 - Source: `db/data/idts.cap-DeveloperResponsibilities.csv`
-- Rows after IDTS-90: 30
-- Last reviewed: 2026-07-23
+- Rows after IDTS-122 catalog integration: 38
+- Last reviewed: 2026-08-06

@@ -399,9 +399,9 @@ async function main () {
   )
   invalidPairRows[1] = {
     ...invalidPairRows[1],
-    valueID: '50000000-0000-0000-0000-000000000005',
-    valueCode: 'AUTH',
-    valueName: 'Authorization'
+    valueID: '50000000-0000-0000-0000-000000000001',
+    valueCode: 'FIORI_UI5',
+    valueName: 'SAP Fiori UI5'
   }
   const invalidPair = await acceptedSuggestion(service, db, ids.invalidPair, {
     suggestions: invalidPairRows

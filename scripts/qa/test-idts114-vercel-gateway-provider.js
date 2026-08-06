@@ -489,7 +489,7 @@ async function main () {
   check(
     'prompt-only compatibility failure remains sanitized',
     repeatedCompatibilityFailureResult.ok === false &&
-      repeatedCompatibilityFailureResult.status === 'AI_PROVIDER_ERROR' &&
+      repeatedCompatibilityFailureResult.status === 'AI_BAD_REQUEST' &&
       !containsUnsafeDiagnosticText(repeatedCompatibilityFailureResult)
   )
 
@@ -528,7 +528,7 @@ async function main () {
   check(
     'fallback response-format failure remains sanitized',
     fallbackCompatibilityResult.ok === false &&
-      fallbackCompatibilityResult.status === 'AI_PROVIDER_ERROR' &&
+      fallbackCompatibilityResult.status === 'AI_BAD_REQUEST' &&
       !containsUnsafeDiagnosticText(fallbackCompatibilityResult)
   )
 
@@ -756,7 +756,7 @@ async function main () {
     texts: ['Synthetic source', 'Synthetic candidate']
   })
   check('generic embedding batch HTTP 400 does not retry or use fallback', genericBatchBadRequestModels.length === 1)
-  check('generic embedding batch HTTP 400 remains a sanitized provider error', genericBatchBadRequestResult.status === 'AI_PROVIDER_ERROR' && !containsUnsafeDiagnosticText(genericBatchBadRequestResult))
+  check('generic embedding batch HTTP 400 is a sanitized bad-request outcome', genericBatchBadRequestResult.status === 'AI_BAD_REQUEST' && !containsUnsafeDiagnosticText(genericBatchBadRequestResult))
 
   resetGatewayCooldownForTest()
   const embeddingRateLimitModels = []

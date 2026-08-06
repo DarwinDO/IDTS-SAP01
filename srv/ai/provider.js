@@ -230,6 +230,9 @@ function safeFailureCode (error) {
   if (error?.code === 'AI_TIMEOUT') return 'AI_TIMEOUT'
   if (error?.code === 'AI_RATE_LIMITED' || error?.gatewayReason === 'rate_limited') return 'AI_RATE_LIMITED'
   if (error?.code === 'AI_EMBEDDING_BATCH_UNSUPPORTED') return 'AI_EMBEDDING_BATCH_UNSUPPORTED'
+  if (error?.code === 'VERCEL_GATEWAY_HTTP_400') return 'AI_BAD_REQUEST'
+  if (/^VERCEL_GATEWAY_HTTP_5\d\d$/.test(error?.code || '')) return 'AI_PROVIDER_5XX'
+  if (error?.code === 'VERCEL_GATEWAY_NETWORK_ERROR') return 'AI_UNAVAILABLE'
   return 'AI_PROVIDER_ERROR'
 }
 
@@ -385,5 +388,6 @@ module.exports = {
   sanitizeEmbeddingRequest,
   sanitizeJsonSchema,
   sanitizeStructuredRequest,
+  safeFailureCode,
   structuredModelRoute
 }

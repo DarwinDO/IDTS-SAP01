@@ -206,3 +206,13 @@ Hai lần kiểm tra là có chủ ý: PATCH thường chỉ chứa một field 
 **English.** PATCH reads both draft and active Bug; SAVE rereads the complete draft and active Bug. For a Developer, any Bug business-field difference is rejected before activation. Attachment-only draft work can continue for the assignee.
 
 **Tiếng Việt.** PATCH đọc cả draft và Bug active; SAVE đọc lại draft đầy đủ và Bug active. Với Developer, mọi khác biệt field nghiệp vụ Bug bị reject trước activation. Draft chỉ thay attachment vẫn được tiếp tục nếu actor là assignee.
+
+## 2026-08-06 update: draft classification parent guard
+
+### English
+
+`prepareDraftPatch()` now validates that the draft's Application Component and Defect Category parents are active before looking up their bridge. The draft may temporarily hold an active but not-yet-valid pair while the user changes fields one at a time; however, `validateDraftForSave()` calls `resolveComponentCategory()` and rejects activation until the final pair is active and valid. A rejected PATCH leaves the stored draft unchanged.
+
+### Vietnamese
+
+`prepareDraftPatch()` hiện kiểm tra Application Component và Defect Category của draft còn active trước khi tìm bridge. Draft có thể tạm giữ một cặp parent active nhưng chưa match trong lúc người dùng đổi từng field; tuy nhiên `validateDraftForSave()` gọi `resolveComponentCategory()` và không cho activate cho đến khi cặp cuối cùng vừa active vừa hợp lệ. PATCH bị từ chối không làm thay đổi draft đã lưu.

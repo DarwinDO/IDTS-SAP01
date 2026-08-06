@@ -7,7 +7,9 @@
 
 ### What this file is for
 
-`Component.js` is the SAPUI5 component entry point for the protected IDTS Fiori Elements app. It extends `sap/fe/core/AppComponent`, uses `manifest.json` as the app configuration source, and initializes the post-login profile shell after UI5 is available.
+`Component.js` is the SAPUI5 component entry point for the protected IDTS Fiori Elements app. It extends `sap/fe/core/AppComponent`, uses `manifest.json` as the app configuration source, initializes an observable named `session` JSON model, and initializes the post-login profile shell after UI5 is available.
+
+The `session>/canCreateBug` property is true only for the signed-in Tester role. The List Report custom `Create Bug` action binds both `visible` and `enabled` to that property. This keeps the toolbar aligned with the CAP rule while CAP remains the authoritative security boundary for direct OData calls.
 
 It does not validate tokens and it does not inject OData headers. Those pre-bootstrap responsibilities stay in `auth-guard.js`.
 
@@ -35,6 +37,7 @@ For `IDTS-53`, this component also calls `ProfileShell.init()`. That is the righ
 | `"idts/bugmanagementui/ext/login/ProfileShell"` | Signed-in profile shell module | The visible profile menu and Sign Out UX may disappear. | `ext/login/ProfileShell.js`, `index.html`, `css/idts-shell.css` |
 | `metadata: { manifest: "json" }` | Manifest-driven configuration | Routes, models, pages, and service binding may not load. | `manifest.json` |
 | `AppComponent.prototype.init.apply(this, arguments)` | Required base initialization | Fiori Elements startup can break if this call is skipped. | UI5 build/browser smoke |
+| `this.setModel(sessionModel, "session")` | Observable role-aware toolbar state | PM/Developer may see Create Bug or Tester may lose it if the model is absent/stale. | `manifest.json`, `LoginController.js`, backend create guard |
 | `ProfileShell.init()` | IDTS-53 profile startup | User cannot see signed-in account or Sign Out action. | `auth-guard.js`, `ProfileShell.js` |
 
 ### Cross-folder impact
@@ -49,6 +52,8 @@ For `IDTS-53`, this component also calls `ProfileShell.init()`. That is the righ
 - Always call the base `AppComponent` init before adding component-level startup behavior.
 - Do not move token validation or XHR header injection into this file; those must stay before UI5 bootstrap.
 - Keep component-level UI additions small and stable.
+- Keep `session>/canCreateBug` derived from the authenticated session role; do not use a non-reactive manifest callback for visibility.
+- Treat the UI binding as UX only. Never weaken the CAP Tester-only create authorization.
 - If profile shell behavior changes, update `ProfileShell.js`, `auth-guard.js`, and their knowledge mirrors together.
 - Run UI5 build/linter and browser smoke after changing this file.
 
