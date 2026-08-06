@@ -424,6 +424,8 @@ Mục này là baseline hiện hành để đồng bộ với `docs/project-cont
 
 ## **5.1. Classification Model**
 
+**Approved classification catalog baseline (IDTS-122):** the catalog contains 8 Application Components, 8 Defect Categories, and 31 active valid Component Category pairs. `IDTS AI Advisory` is a distinct Application Component for defects in AI advisory orchestration; it supports CAP Backend, Integration, Performance, and Data Quality categories. `DeveloperResponsibilities` supplies eligible human candidates for each pair and never authorizes AI to assign a developer automatically.
+
 Từ giờ không gộp tất cả vào một khái niệm `module/category` chung nữa. Khi triển khai, hệ thống dùng các khái niệm rõ hơn:
 
 | Khái niệm | Ý nghĩa | Ví dụ |

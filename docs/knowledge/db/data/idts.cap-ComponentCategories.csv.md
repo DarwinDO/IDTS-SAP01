@@ -98,10 +98,36 @@ Tester chọn Application Component + Defect Category khi tạo bug.
 - Thay đổi ảnh hưởng create flow, value help, assignment và view PM.
 - Sau khi sửa: kiểm tra value help phụ thuộc trên browser + hành vi phân công + test backend.
 
+## 2026-08-06 catalog update
+
+### English
+
+Rows `...014` through `...031` complete the approved eight-component/eight-category classification matrix without changing the original 13 rows. ComponentCategory remains the assignment key: it connects one ApplicationComponent to one DefectCategory for dependent value help and developer-responsibility matching.
+
+### Important source anchors
+
+- **Location**: `db/data/idts.cap-ComponentCategories.csv:15-32`
+  Deterministic IDs `...014`–`...031`.
+  **IDTS concept**: Missing classification choices are added only for Bug Report, Assignment, Notifications, PM Monitoring, Fiori UI, CAP Service, DB Model, and AI Advisory.
+  **Impact if broken**: Valid value-help and assignment choices can disappear, or existing demo and responsibility references can be redirected incorrectly.
+  **Must check together**: `db/data/idts.cap-ApplicationComponents.csv:9`, `db/data/idts.cap-DefectCategories.csv`, owned-separately `db/data/idts.cap-DeveloperResponsibilities.csv`, and `scripts/qa/test-idts122-classification-catalog.js`.
+
+### Tiếng Việt
+
+Các dòng `...014` đến `...031` hoàn thiện ma trận phân loại đã duyệt gồm tám component và tám category mà không thay đổi 13 dòng gốc. ComponentCategory vẫn là khóa phân công: nó nối một ApplicationComponent với một DefectCategory cho value help phụ thuộc và so khớp trách nhiệm developer.
+
+### Important source anchors
+
+- **Vị trí**: `db/data/idts.cap-ComponentCategories.csv:15-32`
+  ID xác định `...014`–`...031`.
+  **Khái niệm IDTS**: Chỉ bổ sung các lựa chọn phân loại còn thiếu cho Bug Report, Assignment, Notifications, PM Monitoring, Fiori UI, CAP Service, DB Model và AI Advisory.
+  **Ảnh hưởng nếu sai**: Các lựa chọn value help và phân công hợp lệ có thể mất, hoặc tham chiếu demo/trách nhiệm hiện có có thể bị chuyển sai.
+  **Cần kiểm tra cùng**: `db/data/idts.cap-ApplicationComponents.csv:9`, `db/data/idts.cap-DefectCategories.csv`, `db/data/idts.cap-DeveloperResponsibilities.csv` do người khác phụ trách và `scripts/qa/test-idts122-classification-catalog.js`.
+
 ## Metadata
 
 - Source file: `db/data/idts.cap-ComponentCategories.csv`
 - Knowledge mirror: `docs/knowledge/db/data/idts.cap-ComponentCategories.csv.md`
 - Source layer: `db/data`
 - Documentation style: learning-oriented + IDTS domain impact
-- Last reviewed: 2026-06-22
+- Last reviewed: 2026-08-06
