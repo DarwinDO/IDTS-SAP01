@@ -11,6 +11,8 @@ const jobs = [
   ['docs/sap490/generated/Unit_Test_IDTS_SAP01_en_candidate_v0.5.xlsx', 'Evidence', 'A1:N10', 'unit-evidence-first-block.png'],
   ['docs/sap490/generated/UAT_IDTS_SAP01_en_candidate_v0.3.xlsx', 'Test Cases', 'B1:AO12', 'uat-test-cases-content.png'],
   ['docs/sap490/generated/UAT_IDTS_SAP01_en_candidate_v0.3.xlsx', 'Test Cases', 'AP1:CI12', 'uat-test-cases-results.png'],
+  ['docs/sap490/generated/UAT_IDTS_SAP01_en_candidate_v0.3.xlsx', 'Test Cases', 'B11:AO16', 'uat-test-cases-5-8-content.png'],
+  ['docs/sap490/generated/UAT_IDTS_SAP01_en_candidate_v0.3.xlsx', 'Test Cases', 'AP11:CI16', 'uat-test-cases-5-8-results.png'],
   ['docs/sap490/generated/UAT_IDTS_SAP01_en_candidate_v0.3.xlsx', 'Test Result', 'A1:P10', 'uat-evidence-first-block.png']
 ];
 

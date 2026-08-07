@@ -5,7 +5,7 @@ Status: **CANDIDATE - NOT OFFICIAL / NOT APPROVED**
 ## Identity
 
 - Candidate: `docs/sap490/generated/UAT_IDTS_SAP01_en_candidate_v0.3.xlsx`
-- Candidate SHA-256: `358F0B5D342A7CD0E5C187E98B0C74243ED40BF860CE24B6AD2A281A51CF2A66`
+- Candidate SHA-256: `B88F7CDA09BB7F2D4DDB01F51F72C3452A669DCACCF1CC30B939A04FABAD68E3`
 - Candidate size: `5,044,999` bytes
 - Git baseline: `8d4e78b71d7cde2c54b2671577f1a90629864482`
 - Authority Drive ID: `1UYThySnyIu0KUu48K7PSpIFWjIbpixBY`
@@ -42,7 +42,7 @@ All other sheet names/order/visibility and page contracts are preserved by polic
 - OfficeCLI issues: 0 candidate-content issues; no formula-evaluation or schema error.
 - Drawing audit: 76 media parts; openpyxl reads 76 images on `Test Result`.
 - Visual review: artifact-tool focused ranges, Microsoft Excel 12 read-only export, and LibreOffice 26.2.3.2 PDF export inspected. Ordinary serial numbers, case text, status separation, links, missing-evidence labels, captions, hashes, and representative UAT images are visible. LibreOffice preserves the authority's multi-page horizontal print pagination; Excel review exports fit the selected review area to one page without saving that temporary print override into the candidate.
-- Review images: `rendered/excel-uat-test-cases-serial.png`, `rendered/excel-uat-evidence-serial.png`, `rendered/uat-test-cases-content.png`, `rendered/uat-evidence-first-block.png`, `rendered/libreoffice-uat-test-cases-page-017.png`, `rendered/libreoffice-uat-test-results-page-033.png`, `rendered/libreoffice-uat-evidence-page-053.png`.
+- Review images: `rendered/excel-uat-test-cases-serial.png`, `rendered/excel-uat-test-cases-5-8.png`, `rendered/excel-uat-evidence-serial.png`, `rendered/uat-test-cases-content.png`, `rendered/uat-test-cases-5-8-content.png`, `rendered/uat-test-cases-5-8-results.png`, `rendered/uat-evidence-first-block.png`, `rendered/libreoffice-uat-test-cases-page-017.png`, `rendered/libreoffice-uat-test-cases-page-018.png`, `rendered/libreoffice-uat-test-results-page-033.png`, `rendered/libreoffice-uat-evidence-page-053.png`.
 - Independent candidate-quality review: visual fidelity, XLSX structure, and content/evidence reviewers report no Critical or Major findings and `APPROVE CANDIDATE` for this exact SHA-256. This is not DonHV's release approval or a final UAT PASS.
 
 ## Release gate

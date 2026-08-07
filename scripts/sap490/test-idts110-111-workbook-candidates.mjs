@@ -33,11 +33,22 @@ const unitXml = await (await JSZip.loadAsync(await fs.readFile(unitFile))).file(
 const uatZip = await JSZip.loadAsync(await fs.readFile(uatFile));
 const uatScenarioXml = await uatZip.file('xl/worksheets/sheet3.xml').async('string');
 const uatXml = await uatZip.file('xl/worksheets/sheet4.xml').async('string');
+const xlsxCellStyle = (xml, reference) => {
+  const match = xml.match(new RegExp(`<x:c\\b[^>]*\\br="${reference}"[^>]*\\bs="(\\d+)"`));
+  assert.ok(match, `missing serialized style for ${reference}`);
+  return match[1];
+};
 assert.equal((unitXml.match(/<x:hyperlink\b/g) || []).length, 188);
 assert.equal((uatXml.match(/<x:hyperlink\b/g) || []).length, 90);
 assert.ok(unitXml.includes('location="Evidence!A1"'));
 assert.ok(uatXml.includes("location=\"'Test Result'!A1\""));
 assert.ok(/<x:pane\b[^>]*topLeftCell="C4"/.test(uatScenarioXml), 'UAT Test Scenario freeze pane C4 must be preserved');
+for (const column of ['B', 'E', 'Y', 'AP']) {
+  const expectedStyle = xlsxCellStyle(uatXml, `${column}12`);
+  for (const row of [13, 14, 50, 97]) {
+    assert.equal(xlsxCellStyle(uatXml, `${column}${row}`), expectedStyle, `UAT Test Cases ${column}${row} must match the generated case-row style from ${column}12`);
+  }
+}
 
 const forbiddenSampleTerms = /Credit Memo|WS92400001|ZCR4|ZG24|NamNH|HuyNB|Le Minh Thao|Hoàng Giao|Thế Hoàng/i;
 const forbiddenScenarioTerms = /Create substitution|Adopt substitution|Create Sales Order|Create Outbound Delivery|VL01N/i;

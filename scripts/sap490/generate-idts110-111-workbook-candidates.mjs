@@ -304,16 +304,24 @@ export async function generateUatCandidate() {
   testCases.getRange('B8:CI1429').clear();
   for (let index = 0; index < cases.length; index += 1) {
     const row = 8 + index;
-    testCases.getRange(`B${row}:CI${row}`).copyFrom(testCases.getRange('B8:CI8'), 'all');
-    testCases.getRange(`B${row}:CI${row}`).clear();
-    for (const range of [`B${row}:D${row}`, `E${row}:X${row}`, `Y${row}:AO${row}`, `AP${row}:BN${row}`, `BO${row}:BT${row}`, `BU${row}:BZ${row}`, `CA${row}:CB${row}`, `CC${row}:CI${row}`]) testCases.getRange(range).merge();
+    const contentRanges = [`B${row}:D${row}`, `E${row}:X${row}`, `Y${row}:AO${row}`, `AP${row}:BN${row}`];
+    const resultRanges = [`BO${row}:BT${row}`, `BU${row}:BZ${row}`, `CA${row}:CB${row}`, `CC${row}:CI${row}`];
+    for (const range of [...contentRanges, ...resultRanges]) testCases.getRange(range).merge();
     const item = cases[index];
     set(testCases, `B${row}`, index + 1);
-    testCases.getRange(`B${row}:D${row}`).format.font = { size: 6 };
     set(testCases, `E${row}`, safeFormulaText(`${item.title}\nSteps:\n${item.steps}`));
     set(testCases, `Y${row}`, safeFormulaText(item.preconditions));
     set(testCases, `AP${row}`, safeFormulaText(item.expected));
-    testCases.getRange(`E${row}:BN${row}`).format.wrapText = true;
+    for (const range of contentRanges) {
+      testCases.getRange(range).format.fill = '#FFFFFF';
+      testCases.getRange(range).format.wrapText = true;
+      testCases.getRange(range).format.verticalAlignment = 'top';
+      testCases.getRange(range).format.borders = { preset: 'outside', style: 'thin', color: '#000000' };
+    }
+    testCases.getRange(`B${row}:D${row}`).format.font = { name: 'Times New Roman', size: 6 };
+    testCases.getRange(`B${row}:D${row}`).format.horizontalAlignment = 'center';
+    testCases.getRange(`E${row}:BN${row}`).format.font = { name: 'Times New Roman', size: 10 };
+    testCases.getRange(`E${row}:BN${row}`).format.horizontalAlignment = 'left';
     set(testCases, `BO${row}`, item.reviewDisposition === 'PREPARED' ? 'Pending' : 'NhanT candidate');
     set(testCases, `BU${row}`, '');
     const displayedDisposition = item.id === 'UAT-AUTH-001' ? 'REVIEW' : uatDisplayDisposition(item.reviewDisposition);
@@ -322,7 +330,8 @@ export async function generateUatCandidate() {
     testCases.getRange(`CA${row}:CB${row}`).format.font = { name: 'Times New Roman', size: 8, bold: true };
     set(testCases, `CC${row}`, visibleEvidence(item).length ? 'Evidence' : 'Details');
     testCases.getRange(`CC${row}:CI${row}`).format.font = { name: 'Times New Roman', size: 9, color: '#0563C1', underline: true };
-    for (const range of [`BO${row}:BT${row}`, `BU${row}:BZ${row}`, `CA${row}:CB${row}`, `CC${row}:CI${row}`]) {
+    for (const range of resultRanges) {
+      testCases.getRange(range).format.fill = '#FFFFFF';
       testCases.getRange(range).format.borders = { preset: 'outside', style: 'thin', color: '#000000' };
       testCases.getRange(range).format.horizontalAlignment = 'center';
       testCases.getRange(range).format.verticalAlignment = 'center';
