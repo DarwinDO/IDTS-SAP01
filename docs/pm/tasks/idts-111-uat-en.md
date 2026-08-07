@@ -48,9 +48,10 @@ NhanT's current candidate package uses the authenticated SAP BTP UI and member-o
 ## 2026-08-08 workbook candidate handoff
 
 - English candidate generated from the hashed OFFICIAL SUBMISSIONS authority: `docs/sap490/generated/UAT_IDTS_SAP01_en_candidate_v0.3.xlsx`.
-- Candidate SHA-256: `F58D1343E7D982AB9E89D3033B0AC02BA58335BFC6950258B351FDA4851E9B17`.
-- Coverage: 90/90 catalog rows; 77 embedded manifest-hashed images across 36 cases; 54 cases explicitly state that valid case-specific image evidence is absent.
+- Candidate SHA-256: `358F0B5D342A7CD0E5C187E98B0C74243ED40BF860CE24B6AD2A281A51CF2A66`.
+- Coverage: 90/90 catalog rows; 76 embedded manifest-hashed images across 35 cases; 55 cases use `Details`. Serial 1 is conservatively displayed as `REVIEW` and its unrelated/insufficient source screenshot is omitted from the submission workbook without mutating the source evidence.
+- Visible workbook numbering uses ordinary serial numbers `1` through `90`; technical case IDs remain only in the audit mapping/evidence source.
 - Catalog truth remains 90 `PREPARED`; `MEETS` remains candidate review truth, not final UAT sign-off.
-- OfficeCLI schema and repo fidelity policy PASS. Excel, LibreOffice and artifact-tool focused renders were reviewed.
+- OfficeCLI schema and repo fidelity policy PASS. Final OfficeCLI issue inspection reports zero candidate-content issues. Excel, LibreOffice and artifact-tool focused renders were reviewed.
 - Manifest: `docs/pm/evidence/idts-110-111-workbook-candidates/uat-candidate-manifest.md`.
 - Status remains In Progress. No Drive update or Jira Done transition occurred because DonHV must personally acknowledge baseline `8d4e78b71d7cde2c54b2671577f1a90629864482`, add the matching Jira comment, and approve the exact candidate hash.

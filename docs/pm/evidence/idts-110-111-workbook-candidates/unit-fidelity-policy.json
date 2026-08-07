@@ -4,7 +4,16 @@
   "sheets": {
     "Cover": { "show_gridlines": false, "preserve_page_setup": true, "preserve_merges": true },
     "Histories": { "show_gridlines": false, "preserve_page_setup": true, "preserve_merges": true },
-    "UT": { "show_gridlines": false, "preserve_page_setup": true, "preserve_merges": false },
+    "UT": {
+      "show_gridlines": false,
+      "preserve_page_setup": true,
+      "preserve_merges": false,
+      "closed_frames": ["B8:D8", "E8:X8", "Y8:AW8", "AX8:BC8", "BD8:BI8", "BJ8:BK8", "BL8:BR8"],
+      "style_rules": [
+        { "range": "E8:X8", "font": { "name": "Times New Roman", "size": 10 } },
+        { "range": "BJ8:BK8", "font": { "name": "Times New Roman", "size": 8 } }
+      ]
+    },
     "Evidence": { "show_gridlines": false, "preserve_page_setup": true, "preserve_merges": false }
   }
 }

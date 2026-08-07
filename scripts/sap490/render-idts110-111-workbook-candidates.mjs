@@ -8,10 +8,10 @@ const output = path.join(root, 'docs/pm/evidence/idts-110-111-workbook-candidate
 const jobs = [
   ['docs/sap490/generated/Unit_Test_IDTS_SAP01_en_candidate_v0.5.xlsx', 'UT', 'B1:X12', 'unit-ut-case-content.png'],
   ['docs/sap490/generated/Unit_Test_IDTS_SAP01_en_candidate_v0.5.xlsx', 'UT', 'Y1:BR12', 'unit-ut-results.png'],
-  ['docs/sap490/generated/Unit_Test_IDTS_SAP01_en_candidate_v0.5.xlsx', 'Evidence', 'A1:N40', 'unit-evidence-first-block.png'],
+  ['docs/sap490/generated/Unit_Test_IDTS_SAP01_en_candidate_v0.5.xlsx', 'Evidence', 'A1:N10', 'unit-evidence-first-block.png'],
   ['docs/sap490/generated/UAT_IDTS_SAP01_en_candidate_v0.3.xlsx', 'Test Cases', 'B1:AO12', 'uat-test-cases-content.png'],
-  ['docs/sap490/generated/UAT_IDTS_SAP01_en_candidate_v0.3.xlsx', 'Test Cases', 'AP1:CB12', 'uat-test-cases-results.png'],
-  ['docs/sap490/generated/UAT_IDTS_SAP01_en_candidate_v0.3.xlsx', 'Test Result', 'A1:P40', 'uat-evidence-first-block.png']
+  ['docs/sap490/generated/UAT_IDTS_SAP01_en_candidate_v0.3.xlsx', 'Test Cases', 'AP1:CI12', 'uat-test-cases-results.png'],
+  ['docs/sap490/generated/UAT_IDTS_SAP01_en_candidate_v0.3.xlsx', 'Test Result', 'A1:P10', 'uat-evidence-first-block.png']
 ];
 
 await fs.mkdir(output, { recursive: true });

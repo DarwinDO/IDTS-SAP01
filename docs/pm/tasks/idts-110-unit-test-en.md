@@ -47,9 +47,10 @@ No Unit Test VI is created. No command-only, script-only, generated-card-only, s
 ## 2026-08-08 workbook candidate handoff
 
 - English candidate generated from the hashed OFFICIAL SUBMISSIONS authority: `docs/sap490/generated/Unit_Test_IDTS_SAP01_en_candidate_v0.5.xlsx`.
-- Candidate SHA-256: `62E1F35982C8B917944831AC615D4412518D4F0D1DF447E05D1079849747B59D`.
+- Candidate SHA-256: `FE82CD74657D0CF4C0CE10B11085561DD5E23DC813DD1C617EDC35DE9B9460FA`.
 - Coverage: 188/188 catalog rows; 280 embedded images; 188 internal evidence links.
+- Visible workbook numbering uses ordinary serial numbers `1` through `188`; technical case IDs remain only in the audit mapping/evidence source.
 - Catalog truth remains 188 `NOT_RUN`; compact workbook dispositions do not create PASS.
-- OfficeCLI schema and repo fidelity policy PASS. Excel, LibreOffice and artifact-tool focused renders were reviewed; OfficeCLI screenshot rendering itself was unavailable for the wide merged ranges.
+- OfficeCLI schema and repo fidelity policy PASS. Final OfficeCLI issue inspection reports only 13 authority-inherited broken defined names and no candidate-content issue. Excel, LibreOffice and artifact-tool focused renders were reviewed; OfficeCLI screenshot rendering itself was unavailable for the wide merged ranges.
 - Manifest: `docs/pm/evidence/idts-110-111-workbook-candidates/unit-test-candidate-manifest.md`.
 - Status remains In Progress. No Drive update or Jira Done transition occurred because DonHV must personally acknowledge baseline `8d4e78b71d7cde2c54b2671577f1a90629864482`, add the matching Jira comment, and approve the exact candidate hash.

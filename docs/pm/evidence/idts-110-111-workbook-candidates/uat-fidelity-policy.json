@@ -5,7 +5,18 @@
     "Cover": { "show_gridlines": false, "preserve_page_setup": true, "preserve_merges": true },
     "Histories": { "show_gridlines": false, "preserve_page_setup": true, "preserve_merges": true },
     "Test Scenario": { "show_gridlines": false, "preserve_page_setup": true, "preserve_merges": false },
-    "Test Cases": { "show_gridlines": false, "preserve_page_setup": true, "preserve_merges": false },
+    "Test Cases": {
+      "show_gridlines": false,
+      "preserve_page_setup": true,
+      "preserve_merges": false,
+      "closed_frames": ["BO6:CB6", "BO7:BT7", "BU7:BZ7", "CA7:CB7", "CC6:CI7", "BO8:BT8", "BU8:BZ8", "CA8:CB8", "CC8:CI8"],
+      "style_rules": [
+        { "range": "BO6:CI7", "font": { "name": "Times New Roman", "size": 12, "bold": true }, "fill_rgb": "FFBDD6EE" },
+        { "range": "BO8:BZ8", "font": { "name": "Times New Roman", "size": 8 } },
+        { "range": "CA8:CB8", "font": { "name": "Times New Roman", "size": 8, "bold": true } },
+        { "range": "CC8:CI8", "font": { "name": "Times New Roman", "size": 9 } }
+      ]
+    },
     "Test Result": { "show_gridlines": false, "preserve_page_setup": true, "preserve_merges": false }
   }
 }

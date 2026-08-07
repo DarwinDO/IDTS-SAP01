@@ -71,18 +71,18 @@ async function restoreWorksheetPrintContracts(authorityFile, candidateFile) {
       else if (normalized) target = target.replace(`</${q('worksheet')}>`, `${normalized}</${q('worksheet')}>`);
       else target = target.replace(targetPattern, '');
     }
-    const sourceView = source.match(/<(?:[A-Za-z0-9_]+:)?sheetView\b[^>]*>/)?.[0] || '';
-    const grid = sourceView.match(/\bshowGridLines="([^"]+)"/)?.[1] ?? '0';
-    const targetViewPattern = /<(?:[A-Za-z0-9_]+:)?sheetView\b[^>]*>/;
-    target = target.replace(targetViewPattern, (tag) => {
-      const clean = tag.replace(/\s+showGridLines="[^"]*"/g, '');
-      if (grid === undefined) return clean;
-      const closing = clean.trimEnd().endsWith('/>') ? '/>' : '>';
-      return `${clean.slice(0, clean.lastIndexOf(closing)).trimEnd()} showGridLines="${grid}" ${closing}`;
-    });
-    if (!targetViewPattern.test(target) && grid !== undefined) {
-      const views = `<${q('sheetViews')}><${q('sheetView')} showGridLines="${grid}" workbookViewId="0" /></${q('sheetViews')}>`;
-      target = target.replace(new RegExp(`(<${q('sheetFormatPr')}\\b)`), `${views}$1`);
+    const sourceViews = source.match(/<(?:[A-Za-z0-9_]+:)?sheetViews\b[^>]*>[\s\S]*?<\/(?:[A-Za-z0-9_]+:)?sheetViews>/)?.[0];
+    const targetViewsPattern = /<(?:[A-Za-z0-9_]+:)?sheetViews\b[^>]*>[\s\S]*?<\/(?:[A-Za-z0-9_]+:)?sheetViews>/;
+    if (sourceViews) {
+      let normalizedViews = sourceViews.replace(/<(\/?)(?:[A-Za-z0-9_]+:)?(sheetViews|sheetView|pane|selection)\b/g, (_match, closing, element) => `<${closing}${q(element)}`);
+      const viewOpen = new RegExp(`<${q('sheetView')}\\b[^>]*>`);
+      normalizedViews = normalizedViews.replace(viewOpen, (tag) => {
+        if (/\bshowGridLines=/.test(tag)) return tag;
+        return tag.endsWith('/>') ? tag.replace(/\/>$/, ' showGridLines="0"/>') : tag.replace(/>$/, ' showGridLines="0">');
+      });
+      target = targetViewsPattern.test(target)
+        ? target.replace(targetViewsPattern, normalizedViews)
+        : target.replace(new RegExp(`(<${q('sheetFormatPr')}\\b)`), `${normalizedViews}$1`);
     }
     candidate.file(name, target);
   }
@@ -103,43 +103,111 @@ async function applyInternalHyperlinks(candidateFile, sheetXmlName, links) {
 }
 const set = (sheet, address, value) => { sheet.getRange(address).values = [[value ?? '']]; };
 const safeFormulaText = (value) => String(value || '').startsWith('=') ? `'${value}` : String(value || '');
-const unitDisplayDisposition = (value) => ({
-  ACCEPTED_CANDIDATE: 'NR-ACCEPT',
-  MAPPING_ONLY_NOT_PASS: 'NR-MAP',
-  BLOCKED_PENDING_MEMBER_EVIDENCE: 'NR-BLOCK',
-  HELD_FOR_EXACT_HEAD_ACCEPTANCE: 'NR-HELD'
-}[value] || 'NR-REVIEW');
+const compactUnitAction = (steps) => {
+  const lines = String(steps || '').split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  const branch = lines.find((line) => /^Execute only this branch using:/i.test(line));
+  return (branch || lines[0] || 'Execute the case-specific branch.').replace(/^Execute only this branch using:\s*/i, '');
+};
+const unitTesterLabel = (value) => ({
+  ACCEPTED_CANDIDATE: 'NhanT candidate',
+  MAPPING_ONLY_NOT_PASS: 'Mapping only',
+  BLOCKED_PENDING_MEMBER_EVIDENCE: 'Pending member evidence',
+  HELD_FOR_EXACT_HEAD_ACCEPTANCE: 'Held for review'
+}[value] || 'Pending review');
 const uatDisplayDisposition = (value) => ({
   MEETS_EXPECTED_RESULT: 'MEETS',
-  DOES_NOT_MEET_EXPECTED_RESULT: 'DOES NOT MEET',
-  RERUN_REQUIRED_CURRENT_RUNTIME: 'RERUN REQUIRED',
-  BLOCKED: 'BLOCKED',
+  DOES_NOT_MEET_EXPECTED_RESULT: 'NOT MET',
+  RERUN_REQUIRED_CURRENT_RUNTIME: 'RERUN',
+  BLOCKED: 'BLOCK',
   PREPARED: 'PREPARED'
 }[value] || 'REVIEW');
+const visibleEvidence = (testCase) => testCase.id === 'UAT-AUTH-001' ? [] : testCase.evidence;
+const formatSerialList = (serials) => {
+  if (serials.length < 2) return `Case ${serials[0]}`;
+  if (serials.length === 2) return `Cases ${serials[0]} and ${serials[1]}`;
+  return `Cases ${serials.slice(0, -1).join(', ')}, and ${serials.at(-1)}`;
+};
+const normalizeUatReviewText = (value, serialById) => String(value || '')
+  .replace(/\b(UAT|UT)-([A-Z]+)-(\d+)((?:\/\d+)+)/g, (_match, prefix, domain, first, rest) => {
+    const ids = [first, ...rest.slice(1).split('/')].map((suffix) => `${prefix}-${domain}-${suffix}`);
+    const serials = ids.map((id) => serialById.get(id)).filter(Boolean);
+    return serials.length === ids.length ? formatSerialList(serials) : 'related test cases';
+  })
+  .replace(/\b(?:UAT|UT)-[A-Z]+-\d+\b/g, (id) => serialById.has(id) ? `Case ${serialById.get(id)}` : 'a related test case')
+  .replace(/\bcandidate PASS only\b/gi, 'candidate evidence that meets the expected result')
+  .replace(/\bcandidate PASS\b/gi, 'candidate evidence that meets the expected result')
+  .replace(/\bPASS\b/g, 'positive result')
+  .replace(/\bFAIL\b/g, 'negative result');
+const evidenceSummary = (testCase, serialById) => {
+  const unitSummary = {
+    ACCEPTED_CANDIDATE: 'Local candidate evidence only; no final PASS or workbook approval.',
+    MAPPING_ONLY_NOT_PASS: 'No individual case execution is proven.',
+    BLOCKED_PENDING_MEMBER_EVIDENCE: 'Blocked pending member-owned case evidence.',
+    HELD_FOR_EXACT_HEAD_ACCEPTANCE: 'Held pending exact-head evidence review.'
+  }[testCase.reviewDisposition];
+  if (unitSummary) return unitSummary;
+  if (testCase.id === 'UAT-AUTH-001') {
+    return 'The available screenshot shows the IDTS List Report only and contains unrelated runtime rows. It does not prove the profile identity/session assertions, so the image is omitted and the assertions remain pending case-specific evidence. Candidate review only; not final UAT sign-off.';
+  }
+  const note = normalizeUatReviewText(testCase.reviewNote, serialById).replace(/\s+/g, ' ').trim();
+  return `${note || 'No reviewer narrative recorded.'} Candidate review only; not final UAT sign-off.`;
+};
+const evidenceDispositionLabel = (value) => ({
+  ACCEPTED_CANDIDATE: 'CANDIDATE EVIDENCE',
+  MAPPING_ONLY_NOT_PASS: 'MAPPING',
+  BLOCKED_PENDING_MEMBER_EVIDENCE: 'BLOCKED',
+  HELD_FOR_EXACT_HEAD_ACCEPTANCE: 'HELD'
+}[value] || uatDisplayDisposition(value));
 
-async function addEvidenceBlocks(sheet, cases, startRow, endColumn) {
+async function addEvidenceBlocks(sheet, cases, startRow, endColumn, clearEndRow, clearEndColumn = endColumn) {
   sheet.deleteAllDrawings();
-  sheet.getRange(`A${startRow}:${endColumn}1048576`).clear();
+  sheet.getRange(`A${startRow}:${clearEndColumn}${clearEndRow}`).unmerge();
+  sheet.getRange(`A${startRow}:${clearEndColumn}${clearEndRow}`).clear();
+  sheet.getRange(`A${startRow}:${clearEndColumn}${clearEndRow}`).format.fill = '#FFFFFF';
+  sheet.getRange(`A${startRow}:${clearEndColumn}${clearEndRow}`).format.borders = { preset: 'all', style: 'thin', color: '#FFFFFF' };
   let row = startRow;
   const anchors = new Map();
-  for (const testCase of cases) {
+  const serialById = new Map(cases.map((testCase, index) => [testCase.id, index + 1]));
+  for (const [caseIndex, testCase] of cases.entries()) {
+    const summary = evidenceSummary(testCase, serialById);
+    const displayedEvidence = visibleEvidence(testCase);
     anchors.set(testCase.id, row);
-    set(sheet, `A${row}`, `Case: ${testCase.id}`);
-    set(sheet, `C${row}`, `${testCase.reviewDisposition} — ${testCase.reviewNote || ''}`);
-    sheet.getRange(`A${row}:${endColumn}${row}`).format.rowHeight = 24;
+    sheet.getRange(`A${row}:B${row}`).merge();
+    sheet.getRange(`C${row}:${endColumn}${row}`).merge();
+    set(sheet, `A${row}`, `Case: ${caseIndex + 1}`);
+    const displayedEvidenceDisposition = testCase.id === 'UAT-AUTH-001' ? 'REVIEW' : evidenceDispositionLabel(testCase.reviewDisposition);
+    set(sheet, `C${row}`, `${displayedEvidenceDisposition} — ${summary}`);
+    const summaryHeight = Math.min(360, Math.max(66, 18 + Math.ceil(summary.length / 65) * 18));
+    sheet.getRange(`A${row}:${endColumn}${row}`).format.rowHeight = testCase.reviewDisposition === 'HELD_FOR_EXACT_HEAD_ACCEPTANCE' ? Math.max(90, summaryHeight) : summaryHeight;
+    sheet.getRange(`A${row}:${endColumn}${row}`).format.wrapText = true;
+    sheet.getRange(`A${row}:${endColumn}${row}`).format.font = { name: 'Times New Roman', size: 10 };
+    sheet.getRange(`A${row}:${endColumn}${row}`).format.fill = '#BDD6EE';
+    sheet.getRange(`A${row}:B${row}`).format.borders = { preset: 'outside', style: 'thin', color: '#000000' };
+    sheet.getRange(`C${row}:${endColumn}${row}`).format.borders = { preset: 'outside', style: 'thin', color: '#000000' };
     row += 2;
-    if (!testCase.evidence.length) {
-      set(sheet, `C${row}`, 'No valid case-specific image evidence');
+    if (!displayedEvidence.length) {
+      sheet.getRange(`C${row}:${endColumn}${row}`).merge();
+      set(sheet, `C${row}`, testCase.id === 'UAT-AUTH-001'
+        ? 'Source screenshot omitted from the submission because it contains unrelated runtime rows and does not prove the profile assertion. Details only; no positive result is claimed.'
+        : 'No valid case-specific image evidence. Details only; no image or positive result is claimed.');
+      sheet.getRange(`C${row}:${endColumn}${row}`).format.wrapText = true;
+      sheet.getRange(`C${row}:${endColumn}${row}`).format.font = { name: 'Times New Roman', size: 10 };
+      sheet.getRange(`C${row}:${endColumn}${row}`).format.rowHeight = 60;
       row += 2;
       continue;
     }
-    for (const evidence of testCase.evidence) {
+    for (const evidence of displayedEvidence) {
       const absolute = path.join(repoRoot, evidence.path);
       const bytes = await fs.readFile(absolute);
       const dimensions = imageSize(bytes);
-      const widthPx = Math.min(720, dimensions.width || 720);
+      const widthPx = Math.min(300, dimensions.width || 300);
       const heightPx = Math.max(80, Math.round(widthPx * (dimensions.height || 400) / (dimensions.width || 720)));
-      set(sheet, `C${row}`, `${evidence.reviewBlocked ? 'REVIEW BLOCKED — ' : ''}${evidence.caption} — SHA-256 ${evidence.sha256}`);
+      sheet.getRange(`C${row}:${endColumn}${row}`).merge();
+      const visibleCaption = normalizeUatReviewText(evidence.caption, serialById);
+      set(sheet, `C${row}`, `${evidence.reviewBlocked ? 'REVIEW BLOCKED — ' : 'LOCAL CANDIDATE EVIDENCE — '}${visibleCaption} — SHA-256 ${evidence.sha256}`);
+      sheet.getRange(`C${row}:${endColumn}${row}`).format.rowHeight = 84;
+      sheet.getRange(`C${row}:${endColumn}${row}`).format.wrapText = true;
+      sheet.getRange(`C${row}:${endColumn}${row}`).format.font = { name: 'Times New Roman', size: 8 };
       const mime = path.extname(absolute).toLowerCase() === '.jpg' || path.extname(absolute).toLowerCase() === '.jpeg' ? 'image/jpeg' : 'image/png';
       sheet.images.add({
         dataUrl: `data:${mime};base64,${bytes.toString('base64')}`,
@@ -160,7 +228,7 @@ export async function generateUnitCandidate() {
   const workbook = await SpreadsheetFile.importXlsx(await FileBlob.load(await sanitizedImportCopy(UNIT_AUTHORITY)));
   const unit = workbook.worksheets.getItem('UT');
   const evidence = workbook.worksheets.getItem('Evidence');
-  const evidenceLayout = await addEvidenceBlocks(evidence, cases, 1, 'Z');
+  const evidenceLayout = await addEvidenceBlocks(evidence, cases, 1, 'F', 1055, 'Z');
   const unitLinks = [];
   unit.getRange('B8:BR1084').unmerge();
   unit.getRange('B8:BR1084').clear();
@@ -170,24 +238,37 @@ export async function generateUnitCandidate() {
     unit.getRange(`B${row}:BR${row}`).clear();
     for (const range of [`B${row}:D${row}`, `E${row}:X${row}`, `Y${row}:AW${row}`, `AX${row}:BC${row}`, `BD${row}:BI${row}`, `BJ${row}:BK${row}`, `BL${row}:BR${row}`]) unit.getRange(range).merge();
     const item = cases[index];
-    set(unit, `B${row}`, item.id);
+    set(unit, `B${row}`, index + 1);
     unit.getRange(`B${row}:D${row}`).format.font = { size: 8 };
-    set(unit, `E${row}`, safeFormulaText(`${item.title}\nPreconditions: ${item.preconditions}\nSteps:\n${item.steps}`));
+    set(unit, `E${row}`, safeFormulaText(`${item.title}\nPrecondition: ${item.preconditions}\nAction: ${compactUnitAction(item.steps)}`));
     unit.getRange(`E${row}:AW${row}`).format.wrapText = true;
-    unit.getRange(`E${row}:X${row}`).format.font = { size: 8 };
+    unit.getRange(`E${row}:X${row}`).format.font = { name: 'Times New Roman', size: 10 };
     set(unit, `Y${row}`, safeFormulaText(item.expected));
-    set(unit, `AX${row}`, 'NhanT execution / DonHV review');
-    set(unit, `BD${row}`, 'Candidate only');
-    set(unit, `BJ${row}`, unitDisplayDisposition(item.reviewDisposition));
-    unit.getRange(`BJ${row}:BK${row}`).format.font = { size: 6 };
+    set(unit, `AX${row}`, unitTesterLabel(item.reviewDisposition));
+    set(unit, `BD${row}`, '');
+    set(unit, `BJ${row}`, 'NOT RUN');
+    unit.getRange(`BJ${row}:BK${row}`).format.font = { name: 'Times New Roman', size: 8 };
     set(unit, `BL${row}`, 'Evidence');
     unit.getRange(`BL${row}:BR${row}`).format.font = { color: '#0563C1', underline: true };
+    for (const range of [`B${row}:D${row}`, `E${row}:X${row}`, `Y${row}:AW${row}`, `AX${row}:BC${row}`, `BD${row}:BI${row}`, `BJ${row}:BK${row}`, `BL${row}:BR${row}`]) {
+      unit.getRange(range).format.borders = { preset: 'outside', style: 'thin', color: '#000000' };
+    }
     unitLinks.push({ ref: `BL${row}`, location: `Evidence!A${evidenceLayout.anchors.get(item.id)}` });
-    unit.getRange(`B${row}:BR${row}`).format.rowHeight = 120;
+    unit.getRange(`B${row}:BR${row}`).format.rowHeight = 108;
   }
-  set(workbook.worksheets.getItem('Cover'), 'N3', 'IDTS-SAP01');
-  set(workbook.worksheets.getItem('Cover'), 'N4', 'Issue and Defect Tracking System');
-  set(workbook.worksheets.getItem('Histories'), 'D4', 'Candidate v0.5 — 188 catalog cases; evidence remains subject to exact-hash approval.');
+  const cover = workbook.worksheets.getItem('Cover');
+  const histories = workbook.worksheets.getItem('Histories');
+  set(cover, 'N11', 'SAP CAP / Fiori'); set(cover, 'Z11', 'Issue and Defect Tracking System');
+  set(cover, 'N12', 'IDTS-SAP01'); set(cover, 'N13', 'IDTS Unit Test');
+  set(cover, 'N14', '08.08.2026'); set(cover, 'Z14', '08.08.2026');
+  set(cover, 'U19', ''); set(cover, 'Z19', ''); set(cover, 'AE19', 'DonHV');
+  set(histories, 'D3', 'OFFICIAL SUBMISSIONS authority retained for template structure only.');
+  set(histories, 'F3', '08.08.2026'); set(histories, 'G3', 'Template authority');
+  set(histories, 'C4', 'Candidate v0.5'); set(histories, 'D4', '188 catalog cases; visible results remain NOT RUN; evidence is subject to exact-hash approval.');
+  set(histories, 'E4', 'UT / Evidence'); set(histories, 'F4', '08.08.2026'); set(histories, 'G4', 'DonHV — candidate compilation');
+  histories.getRange('B2:G2').format.rowHeight = 30; histories.getRange('B3:G4').format.rowHeight = 48;
+  set(unit, 'B3', 'IDTS-SAP01'); set(unit, 'L3', 'Issue and Defect Tracking System — Unit Test');
+  set(unit, 'AO3', 'DonHV'); set(unit, 'AX3', '08.08.2026'); set(unit, 'BE3', ''); set(unit, 'BL3', '');
   await fs.mkdir(outputRoot, { recursive: true });
   await (await SpreadsheetFile.exportXlsx(workbook)).save(UNIT_OUTPUT);
   await restoreWorksheetPrintContracts(UNIT_AUTHORITY, UNIT_OUTPUT);
@@ -202,13 +283,22 @@ export async function generateUatCandidate() {
   const scenarios = workbook.worksheets.getItem('Test Scenario');
   const testCases = workbook.worksheets.getItem('Test Cases');
   const results = workbook.worksheets.getItem('Test Result');
-  const evidenceLayout = await addEvidenceBlocks(results, cases, 6, 'P');
+  const evidenceLayout = await addEvidenceBlocks(results, cases, 1, 'F', 1429, 'Y');
   const uatLinks = [];
   const domains = [...new Set(cases.map((item) => item.area))];
-  scenarios.getRange('B8:CI1429').clear();
+  scenarios.getRange('E3:S3').unmerge();
+  scenarios.getRange('E3:S3').clear();
+  scenarios.getRange('A4:S1006').unmerge();
+  scenarios.getRange('A4:S1006').clear();
   domains.forEach((domain, index) => {
-    set(scenarios, `B${8 + index}`, index + 1);
-    set(scenarios, `E${8 + index}`, domain);
+    const row = 4 + index;
+    set(scenarios, `A${row}`, index + 1);
+    set(scenarios, `B${row}`, domain);
+    set(scenarios, `C${row}`, 'IDTS application');
+    set(scenarios, `D${row}`, 'N/A');
+    set(scenarios, `E${row}`, `${domain} UAT cases`);
+    scenarios.getRange(`A${row}:E${row}`).format.wrapText = true;
+    scenarios.getRange(`A${row}:E${row}`).format.rowHeight = 60;
   });
   testCases.getRange('B8:CI1429').unmerge();
   testCases.getRange('B8:CI1429').clear();
@@ -216,33 +306,57 @@ export async function generateUatCandidate() {
     const row = 8 + index;
     testCases.getRange(`B${row}:CI${row}`).copyFrom(testCases.getRange('B8:CI8'), 'all');
     testCases.getRange(`B${row}:CI${row}`).clear();
-    for (const range of [`B${row}:D${row}`, `E${row}:X${row}`, `Y${row}:AO${row}`, `AP${row}:BN${row}`, `BO${row}:BT${row}`, `BU${row}:BZ${row}`, `CA${row}:CB${row}`]) testCases.getRange(range).merge();
+    for (const range of [`B${row}:D${row}`, `E${row}:X${row}`, `Y${row}:AO${row}`, `AP${row}:BN${row}`, `BO${row}:BT${row}`, `BU${row}:BZ${row}`, `CA${row}:CB${row}`, `CC${row}:CI${row}`]) testCases.getRange(range).merge();
     const item = cases[index];
-    set(testCases, `B${row}`, item.id);
+    set(testCases, `B${row}`, index + 1);
     testCases.getRange(`B${row}:D${row}`).format.font = { size: 6 };
     set(testCases, `E${row}`, safeFormulaText(`${item.title}\nSteps:\n${item.steps}`));
     set(testCases, `Y${row}`, safeFormulaText(item.preconditions));
     set(testCases, `AP${row}`, safeFormulaText(item.expected));
     testCases.getRange(`E${row}:BN${row}`).format.wrapText = true;
-    set(testCases, `BO${row}`, item.catalogStatus);
-    set(testCases, `BU${row}`, uatDisplayDisposition(item.reviewDisposition));
-    testCases.getRange(`BO${row}:BZ${row}`).format.font = { size: 6 };
-    set(testCases, `CA${row}`, 'Evidence');
-    testCases.getRange(`CA${row}:CB${row}`).format.font = { size: 7, color: '#0563C1', underline: true };
-    uatLinks.push({ ref: `CA${row}`, location: `'Test Result'!A${evidenceLayout.anchors.get(item.id)}` });
+    set(testCases, `BO${row}`, item.reviewDisposition === 'PREPARED' ? 'Pending' : 'NhanT candidate');
+    set(testCases, `BU${row}`, '');
+    const displayedDisposition = item.id === 'UAT-AUTH-001' ? 'REVIEW' : uatDisplayDisposition(item.reviewDisposition);
+    set(testCases, `CA${row}`, displayedDisposition);
+    testCases.getRange(`BO${row}:BZ${row}`).format.font = { name: 'Times New Roman', size: 8 };
+    testCases.getRange(`CA${row}:CB${row}`).format.font = { name: 'Times New Roman', size: 8, bold: true };
+    set(testCases, `CC${row}`, visibleEvidence(item).length ? 'Evidence' : 'Details');
+    testCases.getRange(`CC${row}:CI${row}`).format.font = { name: 'Times New Roman', size: 9, color: '#0563C1', underline: true };
+    for (const range of [`BO${row}:BT${row}`, `BU${row}:BZ${row}`, `CA${row}:CB${row}`, `CC${row}:CI${row}`]) {
+      testCases.getRange(range).format.borders = { preset: 'outside', style: 'thin', color: '#000000' };
+      testCases.getRange(range).format.horizontalAlignment = 'center';
+      testCases.getRange(range).format.verticalAlignment = 'center';
+    }
+    uatLinks.push({ ref: `CC${row}`, location: `'Test Result'!A${evidenceLayout.anchors.get(item.id)}` });
     testCases.getRange(`B${row}:CI${row}`).format.rowHeight = 84;
   }
-  set(testCases, 'BO7', 'Catalog Status');
-  set(testCases, 'BU7', 'Review Disposition');
-  set(testCases, 'CA7', 'Evidence');
-  set(workbook.worksheets.getItem('Cover'), 'N3', 'IDTS-SAP01');
-  set(workbook.worksheets.getItem('Cover'), 'N4', 'Issue and Defect Tracking System');
-  set(workbook.worksheets.getItem('Histories'), 'D4', 'Candidate v0.3 — 90 catalog cases; MEETS is not final UAT sign-off.');
+  set(testCases, 'BO6', 'Test Results'); set(testCases, 'BO7', 'Tester');
+  set(testCases, 'BU7', 'Test Date'); set(testCases, 'CA7', 'Result'); set(testCases, 'CC6', 'Evidence');
+  for (const range of ['BO6:CB6', 'BO7:BT7', 'BU7:BZ7', 'CA7:CB7', 'CC6:CI7']) {
+    testCases.getRange(range).format.fill = '#BDD6EE';
+    testCases.getRange(range).format.font = { name: 'Times New Roman', size: 12, bold: true };
+    testCases.getRange(range).format.horizontalAlignment = 'center';
+    testCases.getRange(range).format.verticalAlignment = 'center';
+    testCases.getRange(range).format.borders = { preset: 'outside', style: 'thin', color: '#000000' };
+  }
+  const cover = workbook.worksheets.getItem('Cover');
+  const histories = workbook.worksheets.getItem('Histories');
+  set(cover, 'N11', 'SAP CAP / Fiori'); set(cover, 'Z11', 'Issue and Defect Tracking System');
+  set(cover, 'N12', 'IDTS-SAP01'); set(cover, 'N13', 'IDTS User Acceptance Test');
+  set(cover, 'N14', '08.08.2026'); set(cover, 'Z14', '08.08.2026');
+  set(cover, 'U19', ''); set(cover, 'Z19', ''); set(cover, 'AE19', 'DonHV');
+  set(histories, 'D3', 'OFFICIAL SUBMISSIONS authority retained for template structure only.');
+  set(histories, 'F3', '08.08.2026'); set(histories, 'G3', 'Template authority');
+  set(histories, 'C4', 'Candidate v0.3'); set(histories, 'D4', '90 catalog cases; review dispositions are candidate-only and not final UAT sign-off.');
+  set(histories, 'E4', 'Test Scenario / Test Cases / Test Result'); set(histories, 'F4', '08.08.2026'); set(histories, 'G4', 'DonHV — candidate compilation');
+  histories.getRange('B2:G2').format.rowHeight = 30; histories.getRange('B3:G4').format.rowHeight = 48;
+  set(testCases, 'B3', 'Issue and Defect Management'); set(testCases, 'L3', 'End-to-end IDTS UAT');
+  set(testCases, 'BF3', 'DonHV'); set(testCases, 'BO3', '08.08.2026'); set(testCases, 'BV3', ''); set(testCases, 'CC3', '');
   await fs.mkdir(outputRoot, { recursive: true });
   await (await SpreadsheetFile.exportXlsx(workbook)).save(UAT_OUTPUT);
   await restoreWorksheetPrintContracts(UAT_AUTHORITY, UAT_OUTPUT);
   await applyInternalHyperlinks(UAT_OUTPUT, 'xl/worksheets/sheet4.xml', uatLinks);
-  return { output: UAT_OUTPUT, cases: cases.length, evidence: cases.reduce((sum, item) => sum + item.evidence.length, 0), evidenceLastRow: evidenceLayout.lastRow };
+  return { output: UAT_OUTPUT, cases: cases.length, evidence: cases.reduce((sum, item) => sum + visibleEvidence(item).length, 0), evidenceLastRow: evidenceLayout.lastRow };
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
