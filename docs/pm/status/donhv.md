@@ -5920,3 +5920,12 @@ Live evidence: `docs/pm/evidence/idts-117/demo-readiness/live-verification-20260
 - **Security/data:** no HANA, seed, schema, credential, or business-data mutation.
 - **Tooling limitation:** the installed UI5 CLI does not expose a `ui5 lint` command (`Unknown argument: lint`). This is not a product failure; the XML change is covered by the focused static/runtime suite and the successful production build.
 - **Pre-existing test-harness issue:** `npm run qa:idts122:closed` remains red outside this patch because its repeated-close request sends a `note` property that is not declared by the parameterless `closeBug` action. CAP therefore returns HTTP 400 at request-contract validation before the test can assert the intended HTTP 409 Closed-Bug guard. The test file and service contract are unchanged by this branch; this gap is disclosed and no full-green/release claim is made from that suite.
+
+### 2026-08-08 — IDTS-122 incomplete current-runtime rollout (DonHV)
+
+- **Classification:** release/deployment issue.
+- **Symptom:** Tester draft `BUG-0009` still rendered the Assignee field without the value-help icon, while the sign-out route still showed the legacy plain HTML page after the related source changes had merged to `dev`.
+- **Root cause:** the previous rollout updated only HTML5 app content; the deployed CAP service and AppRouter predated DatDT's merged runtime changes. The unchanged UI application version `0.0.4` also made stale HTML5/browser content hard to distinguish.
+- **Fix status:** in progress on `fix/idts-122-current-runtime-rollout-donhv`. Build must come from a clean `origin/dev` checkout, bump package and manifest versions together to `0.0.5`, verify the MTAR contains the fixed Assignee binding, and selectively deploy only `idts-sap01-srv`, `idts-sap01-approuter`, and `idts-sap01-app-content`.
+- **Safety boundary:** do not deploy `idts-sap01-db-deployer`, seed data, schema migration, or any HANA mutation. Verify exact Git/MTAR hashes, module selection, readiness, and signed-in browser behavior before closing this entry.
+- **Tooling issues observed:** the fresh worktree initially pointed at an incomplete root `node_modules` junction, then an exploratory compile command referenced a non-existent `srv/auth-service.cds`. Both commands stopped before any mutation. The junction was repointed to the verified dependency cache, the actual `srv/service.cds` contract compiled successfully, and the UI production build passed.
