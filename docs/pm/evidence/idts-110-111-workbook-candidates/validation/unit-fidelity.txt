@@ -1,0 +1,1 @@
+﻿PASS: XLSX structure and critical-range fidelity policy satisfied

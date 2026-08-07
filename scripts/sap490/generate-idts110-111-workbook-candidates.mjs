@@ -47,8 +47,75 @@ async function sanitizedImportCopy(authorityFile) {
   await fs.writeFile(output, await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }));
   return output;
 }
+async function restoreWorksheetPrintContracts(authorityFile, candidateFile) {
+  const reference = await JSZip.loadAsync(await fs.readFile(authorityFile));
+  const candidate = await JSZip.loadAsync(await fs.readFile(candidateFile));
+  const sheetNames = Object.keys(reference.files).filter((name) => /^xl\/worksheets\/sheet\d+\.xml$/i.test(name));
+  for (const name of sheetNames) {
+    if (!candidate.file(name)) continue;
+    const source = await reference.file(name).async('string');
+    let target = await candidate.file(name).async('string');
+    const prefix = target.match(/<([A-Za-z0-9_]+):worksheet\b/)?.[1];
+    const q = (element) => prefix ? `${prefix}:${element}` : element;
+    for (const element of ['pageMargins', 'pageSetup']) {
+      const sourceTag = source.match(new RegExp(`<(?:[A-Za-z0-9_]+:)?${element}\\b[^>]*\\/?>`))?.[0];
+      const targetPattern = new RegExp(`<(?:[A-Za-z0-9_]+:)?${element}\\b[^>]*\\/?>`);
+      const normalized = sourceTag?.replace(new RegExp(`^<(?:[A-Za-z0-9_]+:)?${element}`), `<${q(element)}`);
+      if (normalized && targetPattern.test(target)) target = target.replace(targetPattern, normalized);
+      else if (normalized && element === 'pageSetup') {
+        const marginsPattern = new RegExp(`<(?:[A-Za-z0-9_]+:)?pageMargins\\b[^>]*\\/?>`);
+        target = marginsPattern.test(target)
+          ? target.replace(marginsPattern, (tag) => `${tag}${normalized}`)
+          : target.replace(`</${q('worksheet')}>`, `${normalized}</${q('worksheet')}>`);
+      }
+      else if (normalized) target = target.replace(`</${q('worksheet')}>`, `${normalized}</${q('worksheet')}>`);
+      else target = target.replace(targetPattern, '');
+    }
+    const sourceView = source.match(/<(?:[A-Za-z0-9_]+:)?sheetView\b[^>]*>/)?.[0] || '';
+    const grid = sourceView.match(/\bshowGridLines="([^"]+)"/)?.[1] ?? '0';
+    const targetViewPattern = /<(?:[A-Za-z0-9_]+:)?sheetView\b[^>]*>/;
+    target = target.replace(targetViewPattern, (tag) => {
+      const clean = tag.replace(/\s+showGridLines="[^"]*"/g, '');
+      if (grid === undefined) return clean;
+      const closing = clean.trimEnd().endsWith('/>') ? '/>' : '>';
+      return `${clean.slice(0, clean.lastIndexOf(closing)).trimEnd()} showGridLines="${grid}" ${closing}`;
+    });
+    if (!targetViewPattern.test(target) && grid !== undefined) {
+      const views = `<${q('sheetViews')}><${q('sheetView')} showGridLines="${grid}" workbookViewId="0" /></${q('sheetViews')}>`;
+      target = target.replace(new RegExp(`(<${q('sheetFormatPr')}\\b)`), `${views}$1`);
+    }
+    candidate.file(name, target);
+  }
+  await fs.writeFile(candidateFile, await candidate.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }));
+}
+async function applyInternalHyperlinks(candidateFile, sheetXmlName, links) {
+  const zip = await JSZip.loadAsync(await fs.readFile(candidateFile));
+  let xml = await zip.file(sheetXmlName).async('string');
+  const prefix = xml.match(/<([A-Za-z0-9_]+):worksheet\b/)?.[1];
+  const q = (element) => prefix ? `${prefix}:${element}` : element;
+  xml = xml.replace(new RegExp(`<${q('hyperlinks')}\\b[^>]*>[\\s\\S]*?<\\/${q('hyperlinks')}>`), '');
+  const nodes = links.map(({ ref, location }) => `<${q('hyperlink')} ref="${ref}" location="${location}" display="Evidence"/>`).join('');
+  const block = `<${q('hyperlinks')}>${nodes}</${q('hyperlinks')}>`;
+  const anchorPattern = new RegExp(`(<${q('pageMargins')}\\b)`);
+  xml = anchorPattern.test(xml) ? xml.replace(anchorPattern, `${block}$1`) : xml.replace(`</${q('worksheet')}>`, `${block}</${q('worksheet')}>`);
+  zip.file(sheetXmlName, xml);
+  await fs.writeFile(candidateFile, await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }));
+}
 const set = (sheet, address, value) => { sheet.getRange(address).values = [[value ?? '']]; };
 const safeFormulaText = (value) => String(value || '').startsWith('=') ? `'${value}` : String(value || '');
+const unitDisplayDisposition = (value) => ({
+  ACCEPTED_CANDIDATE: 'NR-ACCEPT',
+  MAPPING_ONLY_NOT_PASS: 'NR-MAP',
+  BLOCKED_PENDING_MEMBER_EVIDENCE: 'NR-BLOCK',
+  HELD_FOR_EXACT_HEAD_ACCEPTANCE: 'NR-HELD'
+}[value] || 'NR-REVIEW');
+const uatDisplayDisposition = (value) => ({
+  MEETS_EXPECTED_RESULT: 'MEETS',
+  DOES_NOT_MEET_EXPECTED_RESULT: 'DOES NOT MEET',
+  RERUN_REQUIRED_CURRENT_RUNTIME: 'RERUN REQUIRED',
+  BLOCKED: 'BLOCKED',
+  PREPARED: 'PREPARED'
+}[value] || 'REVIEW');
 
 async function addEvidenceBlocks(sheet, cases, startRow, endColumn) {
   sheet.deleteAllDrawings();
@@ -94,6 +161,7 @@ export async function generateUnitCandidate() {
   const unit = workbook.worksheets.getItem('UT');
   const evidence = workbook.worksheets.getItem('Evidence');
   const evidenceLayout = await addEvidenceBlocks(evidence, cases, 1, 'Z');
+  const unitLinks = [];
   unit.getRange('B8:BR1084').unmerge();
   unit.getRange('B8:BR1084').clear();
   for (let index = 0; index < cases.length; index += 1) {
@@ -103,19 +171,27 @@ export async function generateUnitCandidate() {
     for (const range of [`B${row}:D${row}`, `E${row}:X${row}`, `Y${row}:AW${row}`, `AX${row}:BC${row}`, `BD${row}:BI${row}`, `BJ${row}:BK${row}`, `BL${row}:BR${row}`]) unit.getRange(range).merge();
     const item = cases[index];
     set(unit, `B${row}`, item.id);
+    unit.getRange(`B${row}:D${row}`).format.font = { size: 8 };
     set(unit, `E${row}`, safeFormulaText(`${item.title}\nPreconditions: ${item.preconditions}\nSteps:\n${item.steps}`));
+    unit.getRange(`E${row}:AW${row}`).format.wrapText = true;
+    unit.getRange(`E${row}:X${row}`).format.font = { size: 8 };
     set(unit, `Y${row}`, safeFormulaText(item.expected));
     set(unit, `AX${row}`, 'NhanT execution / DonHV review');
     set(unit, `BD${row}`, 'Candidate only');
-    set(unit, `BJ${row}`, `${item.catalogStatus} | ${item.reviewDisposition}`);
-    unit.getRange(`BL${row}`).formulas = [[`=HYPERLINK("#Evidence!A${evidenceLayout.anchors.get(item.id)}","Evidence")`]];
-    unit.getRange(`B${row}:BR${row}`).format.rowHeight = 72;
+    set(unit, `BJ${row}`, unitDisplayDisposition(item.reviewDisposition));
+    unit.getRange(`BJ${row}:BK${row}`).format.font = { size: 6 };
+    set(unit, `BL${row}`, 'Evidence');
+    unit.getRange(`BL${row}:BR${row}`).format.font = { color: '#0563C1', underline: true };
+    unitLinks.push({ ref: `BL${row}`, location: `Evidence!A${evidenceLayout.anchors.get(item.id)}` });
+    unit.getRange(`B${row}:BR${row}`).format.rowHeight = 120;
   }
   set(workbook.worksheets.getItem('Cover'), 'N3', 'IDTS-SAP01');
   set(workbook.worksheets.getItem('Cover'), 'N4', 'Issue and Defect Tracking System');
   set(workbook.worksheets.getItem('Histories'), 'D4', 'Candidate v0.5 — 188 catalog cases; evidence remains subject to exact-hash approval.');
   await fs.mkdir(outputRoot, { recursive: true });
   await (await SpreadsheetFile.exportXlsx(workbook)).save(UNIT_OUTPUT);
+  await restoreWorksheetPrintContracts(UNIT_AUTHORITY, UNIT_OUTPUT);
+  await applyInternalHyperlinks(UNIT_OUTPUT, 'xl/worksheets/sheet3.xml', unitLinks);
   return { output: UNIT_OUTPUT, cases: cases.length, evidence: cases.reduce((sum, item) => sum + item.evidence.length, 0), evidenceLastRow: evidenceLayout.lastRow };
 }
 
@@ -127,6 +203,7 @@ export async function generateUatCandidate() {
   const testCases = workbook.worksheets.getItem('Test Cases');
   const results = workbook.worksheets.getItem('Test Result');
   const evidenceLayout = await addEvidenceBlocks(results, cases, 6, 'P');
+  const uatLinks = [];
   const domains = [...new Set(cases.map((item) => item.area))];
   scenarios.getRange('B8:CI1429').clear();
   domains.forEach((domain, index) => {
@@ -142,12 +219,17 @@ export async function generateUatCandidate() {
     for (const range of [`B${row}:D${row}`, `E${row}:X${row}`, `Y${row}:AO${row}`, `AP${row}:BN${row}`, `BO${row}:BT${row}`, `BU${row}:BZ${row}`, `CA${row}:CB${row}`]) testCases.getRange(range).merge();
     const item = cases[index];
     set(testCases, `B${row}`, item.id);
+    testCases.getRange(`B${row}:D${row}`).format.font = { size: 6 };
     set(testCases, `E${row}`, safeFormulaText(`${item.title}\nSteps:\n${item.steps}`));
     set(testCases, `Y${row}`, safeFormulaText(item.preconditions));
     set(testCases, `AP${row}`, safeFormulaText(item.expected));
+    testCases.getRange(`E${row}:BN${row}`).format.wrapText = true;
     set(testCases, `BO${row}`, item.catalogStatus);
-    set(testCases, `BU${row}`, item.reviewDisposition);
-    testCases.getRange(`CA${row}`).formulas = [[`=HYPERLINK("#'Test Result'!A${evidenceLayout.anchors.get(item.id)}","Evidence")`]];
+    set(testCases, `BU${row}`, uatDisplayDisposition(item.reviewDisposition));
+    testCases.getRange(`BO${row}:BZ${row}`).format.font = { size: 6 };
+    set(testCases, `CA${row}`, 'Evidence');
+    testCases.getRange(`CA${row}:CB${row}`).format.font = { size: 7, color: '#0563C1', underline: true };
+    uatLinks.push({ ref: `CA${row}`, location: `'Test Result'!A${evidenceLayout.anchors.get(item.id)}` });
     testCases.getRange(`B${row}:CI${row}`).format.rowHeight = 84;
   }
   set(testCases, 'BO7', 'Catalog Status');
@@ -158,6 +240,8 @@ export async function generateUatCandidate() {
   set(workbook.worksheets.getItem('Histories'), 'D4', 'Candidate v0.3 — 90 catalog cases; MEETS is not final UAT sign-off.');
   await fs.mkdir(outputRoot, { recursive: true });
   await (await SpreadsheetFile.exportXlsx(workbook)).save(UAT_OUTPUT);
+  await restoreWorksheetPrintContracts(UAT_AUTHORITY, UAT_OUTPUT);
+  await applyInternalHyperlinks(UAT_OUTPUT, 'xl/worksheets/sheet4.xml', uatLinks);
   return { output: UAT_OUTPUT, cases: cases.length, evidence: cases.reduce((sum, item) => sum + item.evidence.length, 0), evidenceLastRow: evidenceLayout.lastRow };
 }
 

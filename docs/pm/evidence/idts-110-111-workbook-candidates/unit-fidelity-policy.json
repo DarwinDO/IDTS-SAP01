@@ -1,0 +1,10 @@
+{
+  "preserve_sheet_order": true,
+  "preserve_sheet_visibility": true,
+  "sheets": {
+    "Cover": { "show_gridlines": false, "preserve_page_setup": true, "preserve_merges": true },
+    "Histories": { "show_gridlines": false, "preserve_page_setup": true, "preserve_merges": true },
+    "UT": { "show_gridlines": false, "preserve_page_setup": true, "preserve_merges": false },
+    "Evidence": { "show_gridlines": false, "preserve_page_setup": true, "preserve_merges": false }
+  }
+}
