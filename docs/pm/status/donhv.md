@@ -5632,3 +5632,58 @@ Live evidence: `docs/pm/evidence/idts-117/demo-readiness/live-verification-20260
 | Product/UI defect | The active Object Page did not request or render persisted attachment rows after hard reload, although three OData read shapes returned HTTP 200 with the same two rows. | Project-owned facet metadata prevented `@cap-js/attachments` from adding its standard plugin-owned facet; the manifest also overrode that table unnecessarily. | Local correction complete; BTP acceptance pending. | `qa:idts116`, `qa:idts73`, comment/attachment programmatic QA, CAP compile, UI5 build and manifest schema validation pass. Deploy without HDI/database/seed changes, then repeat the full browser flow. |
 | Tooling issue | The first focused test invocation in the fresh worktree failed with `MODULE_NOT_FOUND: @sap/cds`; a later combined PowerShell command continued after one failed test because commands were separated without exit checks. | The isolated worktree initially had no dependency installation, and the first orchestration did not stop on a nonzero child exit code. | Corrected by using the lockfile-matched dependency tree and rerunning every gate with explicit `$LASTEXITCODE` checks. | All focused suites now pass independently; retain the first failures as tooling evidence, not product defects. |
 | Pre-existing UI5 quality finding | UI5 MCP linter reports Manifest Version 1 and legacy QUnit bootstrap findings. | These findings already exist outside the attachment metadata change; manifest schema validation itself passes. | Not expanded into IDTS-116 to avoid unrelated migration risk. | Track a separate UI5 modernization task; do not suppress the linter or migrate the whole manifest during this narrow release fix. |
+### 2026-08-05 — Mermaid preview renderer interruption (tooling issue)
+
+- Symptom: Kroki rendered the first two Technical Design Mermaid previews, then returned HTTP 500 for a complex flow and the batch command timed out.
+- Affected scope: temporary files under `.tmp/technical-design-mermaid-preview/`; no workbook, runtime, Jira, Drive, database, or approved tab was changed.
+- Classification: tooling issue.
+- Cause/status: under investigation; likely a Mermaid syntax/complexity incompatibility in one or more diagrams rather than an IDTS product defect.
+- Next action: validate and render each `.mmd` independently, simplify only invalid Mermaid syntax, and visually inspect all eight before requesting DonHV approval.
+
+### 2026-08-05 — Lifecycle close ownership gap (product/business-rule finding)
+
+- Symptom: a PM can close an eligible Bug while another Tester is recorded as `nextProcessorUser_ID`; source review shows another active Tester can do the same.
+- Affected flow: `closeBug` from `RESOLVED` or `RETEST_REQUIRED`; UI capability `canClose` and direct OData authorization.
+- Root cause: `Tester` and `PM` are both in `COORDINATOR_ROLES`. Both `enforceActionPermission()` and `canClose` authorize by coordinator role and allowed status transition only; neither compares the actor with `nextProcessorUser_ID`.
+- Fix status: not changed. Current implementation is internally consistent, but the business policy is ambiguous because Current Action Owner is routing/audit data rather than exclusive action ownership.
+- Verification: source trace in `srv/bug-service/permissions.js`, `srv/bug-service/read-models.js`, `srv/bug-service/constants.js`, `srv/bug-service/actions.js`, and `srv/service.js`; existing test catalogs cover Tester/PM close but not a different-Tester denial case.
+- Decision needed: choose whether any coordinator may close, only the current Tester may close, or the current Tester plus an explicit PM override may close. If tightened, enforce it in the backend first and mirror it in `canClose` plus positive/negative/race tests.
+
+### 2026-08-05 — PM reporter becomes retest owner with mismatched role (product/data-model finding)
+
+- Symptom: when a PM creates a Bug, later Tester-owned statuses can set the PM user's ID as `nextProcessorUser_ID` while recording `nextProcessorRole_code = TESTER`.
+- Root cause: create writes the authenticated actor to `reporter_ID` regardless of whether the actor is Tester or PM. `determineNextProcessor()` then prioritizes `bug.reporter_ID` for every `TESTER_STATUSES` state without validating that the reporter actually has role Tester.
+- Impact: Current Action Owner can be a PM while the UI/business role says Tester; a separate designated retest owner does not currently exist.
+- Fix status: not changed. A business/data-model decision is required before runtime modification.
+- Recommended direction: introduce an explicit active Tester retest owner, default it from the reporter only when the reporter is a Tester, require PM selection before retest when the reporter is PM, and provide PM-controlled reassignment/override with mandatory reason and audit.
+
+### 2026-08-05 — HANA demo-data readback command quoting failure (test-harness issue)
+
+- Symptom: the first read-only Cloud Foundry task `idts-safe-bug-readback-20260805` exited before executing the Node.js query because the nested `node -e` expression lost its shell quoting.
+- Affected scope: sanitized read-only inventory of deployed Bugs for mentor-data curation; no database query or data mutation ran.
+- Root cause: Cloud Foundry task command parsing treated the unquoted JavaScript parentheses as shell syntax.
+- Fix status: under correction using an argument-safe command form; this is not an IDTS product or HANA defect.
+- Verification: CF task 39 log shows `bash: syntax error near unexpected token '('` before application code execution.
+- Follow-up: argument-safe task 42 reached HANA in read-only mode, then failed because the probe requested stale `Users.isActive`; the current CDS/HANA column is `Users.active`. No row was changed. The next rerun will use the current model field.
+- Resolution: argument-safe task 43 completed successfully and returned a sanitized read-only inventory of 26 deployed Bug rows. The inventory confirms 12 PM-created QA/demo rows, 10 NhanT-created rows, and 4 original seed rows; many titles are explicit UAT/IDTS smoke or draft-binding fixtures. No database row was changed.
+
+### 2026-08-06 — Attachment deletion history may be missing (product/audit finding)
+
+- Symptom: after deleting an attachment, the file appears to be removed but no corresponding deletion event is visible in the Bug History section.
+- Affected flow: attachment delete authorization, S3 object deletion, HANA attachment metadata deletion, `HistoryEvents`/`HistoryLogs`, and Object Page History refresh/reload.
+- Root cause: under investigation. Possible boundaries are missing backend audit append, incorrect event/Bug linkage, or a persisted event that the UI does not refresh/render.
+- Fix status: open and added as a merge blocker for IDTS-125/PR #293 after DatDT handed the attachment authorization and delete-audit scope to SangVN.
+- Verification required: controlled before/after count, read-only OData/HANA history readback, immediate History UI refresh, hard reload persistence, and negative proof that denied/failed deletion creates no history row.
+
+### 2026-08-06 — SAP HANA demo readiness temporarily unavailable (environment blocker, resolved)
+
+- Symptom: `npm run btp:demo:check` reported CAP `1/1`, AppRouter `1/1`, `/health` HTTP 200, anonymous protected API HTTP 401 and Web HTTP 200, but `/ready` returned HTTP 503.
+- Root cause/status: the SAP HANA Cloud demo instance was not ready; the supported preparation script requested the database start and waited for readiness.
+- Resolution: `npm run btp:demo:prepare` restored HANA readiness, restarted the CAP application once to clear stale pooled connections, and completed with `DEMO READY`.
+- Verification: a fresh `npm run btp:demo:check` returned HANA `/ready` HTTP 200, CAP `1/1`, AppRouter `1/1`, `/health` HTTP 200, anonymous Auth HTTP 401 and Web HTTP 200.
+- Safety: no HDI deployment, database seed, schema migration or business-data mutation was performed.
+## 2026-08-06 — IDTS-112 Technical Design mentor-facing redesign review
+
+| Classification | Symptom | Cause | Status / evidence | Next owner |
+| --- | --- | --- | --- | --- |
+| Tooling issue | CAP MCP `search_model` could not compile the documentation worktree and reported missing package module `@cap-js/attachments`. | The isolated documentation worktree does not currently resolve that CAP plugin dependency for MCP compilation. | Understood and contained. No runtime, database, workbook, or Drive mutation was performed. Technical Design review uses direct source inspection of `db/schema.cds` and `srv/service.cds`; OfficeCLI preflight remains PASS at `1.0.143`. | DonHV / IDTS-112; retry MCP only after dependency resolution is available. |
