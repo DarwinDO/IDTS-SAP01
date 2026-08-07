@@ -223,13 +223,18 @@ async function verifyStaticContract() {
   const fragment = readApp(path.join('webapp', 'ext', 'fragment', 'SmartAssignmentSection.fragment.xml'))
   assertHasAll(fragment, [
     'showValueHelp="{=',
-    "${status_code} !== 'CLOSED'",
+    "%{status_code} !== 'CLOSED'",
+    "%{canAssign} !== false",
     'editable="{=',
     'enabled="{=',
     'valueHelpRequest="SmartAssign.openAssigneePicker"',
     "mode: 'OneWay'",
     'change="SmartAssign.resetAssigneeInput"'
   ], 'SmartAssignmentSection.fragment.xml')
+  assert(!fragment.includes("${canAssign} === true"),
+    'Assignee value help must not disappear while the virtual canAssign field is still undefined')
+  assert(source.includes('bug.canAssign === false'),
+    'Smart Assign controller must still reject an authoritative canAssign=false result')
   rec('Assignee field opens status-aware Smart Assign value help and blocks Closed/free-text persistence', true)
 
   const requiredI18n = [
