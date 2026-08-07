@@ -11,11 +11,17 @@ starting the next SAP BTP login.
 | Block | Input/trigger | Output/side effect | Failure check |
 | --- | --- | --- | --- |
 | Document metadata | Browser loads `/logged-out.html`. | Accessible English title and responsive viewport. | Check the page is rendered rather than redirected. |
-| Signed-out message | AppRouter has ended the application session. | Tells the user the IDTS session ended. | Do not claim the whole SAP identity-provider session was destroyed. |
-| Sign-in link | User explicitly chooses to return. | Opens the protected `/login.html` bridge; after XSUAA establishes a session, that page forwards to the Fiori entry. | Network must complete top-level XSUAA navigation before `AuthService.me` runs. |
+| Self-contained Fiori-inspired layout | AppRouter serves the public page without the protected UI5 application. | Shows a responsive shell header, centered success card and visible keyboard focus without loading a CDN, font or script. | Keep the CSS and decorative SVG local so logout remains available independently of SAPUI5 and application authentication. |
+| Signed-out message | AppRouter has ended the application session. | Uses a positive status icon and tells the user the IDTS session ended successfully. | Do not claim the whole SAP identity-provider session was destroyed. |
+| Primary sign-in action | User explicitly chooses to return. | Opens the protected `/login.html` bridge; after XSUAA establishes a session, that page forwards to the Fiori entry. | Keep one emphasized action and let top-level XSUAA navigation complete before `AuthService.me` runs. |
 
 This file deliberately has no JavaScript, password field, token storage or
 custom login request.
+
+The visual treatment follows SAP Fiori principles (simple, responsive,
+coherent and accessible) but is intentionally application-owned; SAP BTP does
+not provide a reusable post-logout page equivalent to its identity-provider
+sign-in screen.
 
 ## Giải thích tiếng Việt
 

@@ -15,6 +15,8 @@
             script.id = "sap-ui-bootstrap";
             script.src = "resources/sap-ui-core.js";
             script.setAttribute("data-sap-ui-theme", "sap_horizon");
+            script.setAttribute("data-sap-ui-language", "en");
+            script.setAttribute("data-sap-ui-ignore-url-params", "true");
             script.setAttribute("data-sap-ui-resource-roots", '{"idts.bugmanagementui":"./"}');
             script.setAttribute("data-sap-ui-compat-version", "edge");
             script.setAttribute("data-sap-ui-async", "true");

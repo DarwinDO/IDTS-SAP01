@@ -252,15 +252,15 @@ service BugService @(requires: 'authenticated-user') {
       assigneeID: UUID,
       note: String
     ) returns Bugs;
-    action moveToPendingAssignment(reason: String) returns Bugs;
-    action markInReview(note: String) returns Bugs;
+    action moveToPendingAssignment() returns Bugs;
+    action markInReview() returns Bugs;
     action requestMoreInformation(reason: String) returns Bugs;
     action resubmitToDeveloper(note: String) returns Bugs;
     action rejectBug(reason: String) returns Bugs;
-    action startProgress(note: String) returns Bugs;
+    action startProgress() returns Bugs;
     action resolveBug(note: String) returns Bugs;
-    action sendToRetest(note: String) returns Bugs;
-    action closeBug(note: String) returns Bugs;
+    action sendToRetest() returns Bugs;
+    action closeBug() returns Bugs;
     action reopenBug(reason: String) returns Bugs;
     @(requires: 'PM')
     action reassignRetestOwner(

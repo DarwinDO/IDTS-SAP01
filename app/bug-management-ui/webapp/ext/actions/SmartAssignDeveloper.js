@@ -384,7 +384,6 @@ sap.ui.define([
         );
 
         operation.setParameter("assigneeID", candidate.developerProfileID);
-        operation.setParameter("note", getText(view, "smartAssignActionNote"));
 
         return operation.execute("$auto").then(function () {
             if (typeof bugContext.refresh === "function") {

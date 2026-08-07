@@ -44,6 +44,14 @@ async function main() {
   pass('Reopen action and reason wording are explicit')
 
   const manifest = JSON.parse(read(path.join('webapp', 'manifest.json')))
+  const bootstrap = read(path.join('webapp', 'bootstrap-ui5.js'))
+  const loginPage = read(path.join('webapp', 'login.html'))
+  assert(bootstrap.includes('script.setAttribute("data-sap-ui-language", "en")'), 'deferred UI5 bootstrap must force English')
+  assert(bootstrap.includes('script.setAttribute("data-sap-ui-ignore-url-params", "true")'), 'deferred UI5 bootstrap must ignore URL locale overrides')
+  assert(loginPage.includes('data-sap-ui-language="en"'), 'login UI5 bootstrap must force English')
+  assert(loginPage.includes('data-sap-ui-ignore-url-params="true"'), 'login UI5 bootstrap must ignore URL locale overrides')
+  pass('all runtime UI5 bootstraps force English framework text')
+
   const listSettings = manifest['sap.ui5'].routing.targets.BugsList.options.settings
   const createAction = listSettings.content.header.actions.CreateBug
   assert.strictEqual(createAction.press, 'idts.bugmanagementui.ext.actions.BugListActions.createBug')
@@ -121,7 +129,7 @@ async function main() {
   )
   pass('Create Bug fails safely when the Fiori model is unavailable')
 
-  console.log('\nIDTS-43 Fiori UX checks: 12 PASS / 0 FAIL')
+  console.log('\nIDTS-43 Fiori UX checks: 13 PASS / 0 FAIL')
 }
 
 main().catch(error => {
