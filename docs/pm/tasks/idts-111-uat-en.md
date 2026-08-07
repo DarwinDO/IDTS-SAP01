@@ -44,3 +44,13 @@ Assigned members may now execute after running the readiness check for their ses
 - DonHV still owns final disposition and `UAT_EN_PREPARED` synchronization.
 
 NhanT's current candidate package uses the authenticated SAP BTP UI and member-owned Tester identity. It contains 77 sanitized, hash-tracked screenshot references (64 unique hashes) across 57 manifests. DonHV's partition is 22 candidate MEETS, 12 candidate DOES_NOT_MEET and 23 BLOCKED; ATT-001 remains reviewer-blocked because its preserved fixture sizes are inconsistent. DonHV still owns review, catalog decisions, Jira disposition, final workbook generation and same-ID Drive synchronization.
+
+## 2026-08-08 workbook candidate handoff
+
+- English candidate generated from the hashed OFFICIAL SUBMISSIONS authority: `docs/sap490/generated/UAT_IDTS_SAP01_en_candidate_v0.3.xlsx`.
+- Candidate SHA-256: `F58D1343E7D982AB9E89D3033B0AC02BA58335BFC6950258B351FDA4851E9B17`.
+- Coverage: 90/90 catalog rows; 77 embedded manifest-hashed images across 36 cases; 54 cases explicitly state that valid case-specific image evidence is absent.
+- Catalog truth remains 90 `PREPARED`; `MEETS` remains candidate review truth, not final UAT sign-off.
+- OfficeCLI schema and repo fidelity policy PASS. Excel, LibreOffice and artifact-tool focused renders were reviewed.
+- Manifest: `docs/pm/evidence/idts-110-111-workbook-candidates/uat-candidate-manifest.md`.
+- Status remains In Progress. No Drive update or Jira Done transition occurred because DonHV must personally acknowledge baseline `8d4e78b71d7cde2c54b2671577f1a90629864482`, add the matching Jira comment, and approve the exact candidate hash.

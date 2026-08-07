@@ -328,6 +328,11 @@ Vietnamese: Agent hoáº·c developer má»›i pháº£i xÃ¡c Ä‘á»‹nh 
 - Evidence: `docs/pm/evidence/sap490-test-filter-removal-20260723.md`.
 - Verdict remains `CONDITIONALLY READY — UAT execution and mentor sign-off pending` because UAT execution/sign-off is still pending.
 - Knowledge Gate remains `IN PROGRESS — handled in dedicated learning thread`.
+## 2026-08-08 IDTS-110/111 workbook candidate handoff
+
+- DonHV's English Unit Test v0.5 and UAT v0.3 candidate workbooks now contain all 188/90 catalog cases and 280/77 embedded evidence images respectively. OfficeCLI schema, the SAP490 XLSX fidelity policy, and focused Excel/LibreOffice visual review pass.
+- These files remain candidate-only. Catalog truth is still Unit `NOT_RUN` and UAT `PREPARED`; no official Drive file or Jira status changed. DonHV must personally acknowledge baseline `8d4e78b71d7cde2c54b2671577f1a90629864482`, add the Jira comment, and approve the exact hashes recorded in `docs/pm/evidence/idts-110-111-workbook-candidates/` before same-ID synchronization.
+
 ## 2026-08-05 IDTS-125 handover
 
 - SangVN implemented the role/assignee Bug-mutation boundary on `fix/idts-125-bug-mutation-authorization-sangvn`: non-assignee Developer is read/comment only; assigned Developer can comment, manage attachments and use permitted lifecycle actions while Bug fields stay read-only; Tester/PM retain documented edit/coordination permissions. Focused and impacted local verification passed. Ownership Knowledge Gate retest passed 6/6 on 2026-08-06; Jira remains In Progress pending normal PR review, merge and final evidence.
