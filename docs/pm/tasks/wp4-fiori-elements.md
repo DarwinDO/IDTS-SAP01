@@ -340,3 +340,41 @@ Vietnamese:
 - Verification mới đã pass: CAP compile, UI5 build, backend regression `30 PASS / 0 FAIL`, programmatic QA comments/attachments, HTTP QA direct-assignee, HTTP QA comments/attachments, và Playwright UAT cho List Report cùng toàn bộ section Object Page mong đợi.
 - Jira `IDTS-29` was moved to Done after evidence comment `10153`.
 - GitHub PR #4 appeared after the direct branch review and was closed as superseded because the reviewed source changes were already in `dev` and the PR still contained generated `gen/srv` artifacts.
+
+## 2026-08-06 - Note-dialog simplification
+
+English:
+
+- Removed optional Note/Reason parameters from Mark In Review, Start Progress, Move to Pending Assignment, Send to Retest, and Close Bug.
+- Mark In Review and Start Progress now execute directly. Move to Pending Assignment, Send to Retest, and Close Bug use `Common.IsActionCritical` confirmation without text input.
+- Kept Developer Note on manual Assign Developer per DatDT's decision. Required explanation dialogs remain unchanged for Request More Information, Resubmit, Reject, Resolve, Reopen, Reassign Retest Owner, and Add Comment.
+- Smart Assign now sends only `assigneeID` and does not create a synthetic note. History still records the action type, actor, field changes, next processor, and timestamp.
+- Verification: Note contract PASS; CAP compile PASS; IDTS-23 `46/0`; IDTS-89 action audit PASS; History Events PASS; Smart Assign IDTS-56 `14/0`; assignment explanation IDTS-69 `13/0`; UI5 build PASS; IDTS-43 `13/0`; agent rules `8/8`; diff check PASS.
+
+### Resubmit auto-comment follow-up
+
+- Per DatDT's approval, `Resubmit to Developer` no longer creates a synthetic follow-up Comment from the required Update Summary.
+- The Update Summary remains immutable History evidence; status, assigned Developer, next processor and notification behavior are unchanged.
+- Fiori no longer refreshes the Comments child collection for Resubmit. Users still create discussion comments explicitly through Add Comment.
+
+Vietnamese:
+
+- Theo quyết định của DatDT, `Resubmit to Developer` không còn tự tạo follow-up Comment từ Update Summary bắt buộc.
+- Update Summary vẫn được giữ làm bằng chứng History bất biến; status, Developer được assign, next processor và notification không đổi.
+- Fiori không còn refresh collection Comments cho Resubmit. User vẫn chủ động tạo nội dung trao đổi qua Add Comment.
+
+## 2026-08-06 - English-only UI5 framework copy
+
+English:
+
+- Fixed mixed Vietnamese/English framework text by setting `language="en"` in both the deferred shared UI5 bootstrap and the standalone login bootstrap.
+- Enabled native UI5 `ignoreUrlParams` so an explicit `sap-language` URL parameter cannot override the English product language.
+- Kept approved Vietnamese source comments unchanged because they are developer learning material and are never rendered in the web UI.
+- Added the regression contract to the existing IDTS-43 Fiori UX suite. Fresh evidence: `13 PASS / 0 FAIL`, UI5 build passed, JavaScript syntax checks passed, and both application i18n files contain ASCII English values only.
+
+Vietnamese:
+
+- Đã sửa tình trạng text framework lẫn tiếng Việt/tiếng Anh bằng cách đặt `language="en"` trong cả shared UI5 bootstrap chạy sau auth và bootstrap riêng của trang login.
+- Bật native UI5 `ignoreUrlParams` để tham số URL `sap-language` không thể ghi đè ngôn ngữ English của sản phẩm.
+- Giữ nguyên source comment tiếng Việt đã được duyệt vì đây là learning material cho developer và không render lên web UI.
+- Thêm regression contract vào suite Fiori UX IDTS-43 hiện có. Evidence mới: `13 PASS / 0 FAIL`, UI5 build pass, JavaScript syntax pass và hai file i18n của app chỉ chứa value ASCII English.

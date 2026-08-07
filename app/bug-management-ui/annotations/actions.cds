@@ -110,15 +110,12 @@ annotate service.Bugs actions {
   @Common.SideEffects : {
     TargetEntities : [in, 'in/historyEvents', 'in/notifications']
   }
-  moveToPendingAssignment(
-    reason @UI.MultiLineText @Common.Label : 'Reason'
-  );
+  @Common.IsActionCritical
+  moveToPendingAssignment();
   @Common.SideEffects : {
     TargetEntities : [in, 'in/historyEvents', 'in/notifications']
   }
-  markInReview(
-    note @UI.MultiLineText @Common.Label : 'Developer Note'
-  );
+  markInReview();
   @Common.SideEffects : {
     TargetEntities : [in, 'in/historyEvents', 'in/notifications']
   }
@@ -132,7 +129,7 @@ annotate service.Bugs actions {
     note @UI.MultiLineText @Common.Label : 'Update Summary'
   );
   @Common.SideEffects : {
-    TargetEntities : [in, 'in/historyEvents', 'in/notifications', 'in/comments']
+    TargetEntities : [in, 'in/historyEvents', 'in/notifications']
   }
   rejectBug(
     reason @UI.MultiLineText @Common.Label : 'Rejection Reason'
@@ -140,9 +137,7 @@ annotate service.Bugs actions {
   @Common.SideEffects : {
     TargetEntities : [in, 'in/historyEvents', 'in/notifications']
   }
-  startProgress(
-    note @UI.MultiLineText @Common.Label : 'Developer Note'
-  );
+  startProgress();
   @Common.SideEffects : {
     TargetEntities : [in, 'in/historyEvents', 'in/notifications']
   }
@@ -152,15 +147,13 @@ annotate service.Bugs actions {
   @Common.SideEffects : {
     TargetEntities : [in, 'in/historyEvents', 'in/notifications']
   }
-  sendToRetest(
-    note @UI.MultiLineText @Common.Label : 'Developer Note'
-  );
+  @Common.IsActionCritical
+  sendToRetest();
   @Common.SideEffects : {
     TargetEntities : [in, 'in/historyEvents', 'in/notifications']
   }
-  closeBug(
-    note @UI.MultiLineText @Common.Label : 'Developer Note'
-  );
+  @Common.IsActionCritical
+  closeBug();
   @Common.SideEffects : {
     TargetEntities : [in, 'in/historyEvents', 'in/notifications']
   }

@@ -1,5 +1,9 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/actions/SmartAssignDeveloper.js`
 
+## Smart Assign Note policy (2026-08-06)
+
+For an active Bug, `executeAssignment()` now sends only the selected `assigneeID`; it no longer injects “Assigned from Smart Assign dialog.” Manual Assign Developer still exposes its optional Developer Note. Assignment audit remains available through the action type, actor, assignee/owner changes, and timestamp.
+
 ## IDTS-122 closed-state behavior
 
 Smart Assign does not open or assign when the Bug is Closed. The field/action binding is status-aware, and the backend independently rejects assignment or AI explanation generation on a Closed aggregate.

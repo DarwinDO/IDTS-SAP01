@@ -174,14 +174,11 @@ module.exports = class BugService extends cds.ApplicationService {
     this.on('moveToPendingAssignment', req => transitionBug(req, entities, {
       status: STATUS.PENDING_ASSIGNMENT,
       actionType: ACTION.MOVE_TO_PENDING_ASSIGNMENT,
-      reason: req.data.reason,
-      clearAssignee: true,
-      requireReason: false
+      clearAssignee: true
     }))
     this.on('markInReview', req => transitionBug(req, entities, {
       status: STATUS.IN_REVIEW,
       actionType: ACTION.MARK_IN_REVIEW,
-      reason: req.data.note,
       requireAssignee: true
     }))
     this.on('requestMoreInformation', req => transitionBug(req, entities, {
@@ -202,7 +199,6 @@ module.exports = class BugService extends cds.ApplicationService {
     this.on('startProgress', req => transitionBug(req, entities, {
       status: STATUS.IN_PROGRESS,
       actionType: ACTION.START_PROGRESS,
-      reason: req.data.note,
       requireAssignee: true
     }))
     this.on('resolveBug', req => transitionBug(req, entities, {
@@ -214,13 +210,11 @@ module.exports = class BugService extends cds.ApplicationService {
     }))
     this.on('sendToRetest', req => transitionBug(req, entities, {
       status: STATUS.RETEST_REQUIRED,
-      actionType: ACTION.SEND_TO_RETEST,
-      reason: req.data.note
+      actionType: ACTION.SEND_TO_RETEST
     }))
     this.on('closeBug', req => transitionBug(req, entities, {
       status: STATUS.CLOSED,
-      actionType: ACTION.CLOSE_BUG,
-      reason: req.data.note
+      actionType: ACTION.CLOSE_BUG
     }))
     this.on('reopenBug', req => transitionBug(req, entities, {
       status: STATUS.REOPENED,

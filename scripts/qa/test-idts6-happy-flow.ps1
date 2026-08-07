@@ -155,8 +155,8 @@ Write-Host "SC-03: Mark In Review"
 
 $r3a = Invoke-API -Method POST `
     -Url "$BASE/Bugs(ID=$BUG1,IsActiveEntity=true)/BugService.markInReview" `
-    -Body (@{ note="" } | ConvertTo-Json) `
-    -Label "SC-03a markInReview ASSIGNED bug - note optional" -ExpectStatus 200 -CsrfToken $csrf
+    -Body (@{} | ConvertTo-Json) `
+    -Label "SC-03a markInReview ASSIGNED bug - no input dialog" -ExpectStatus 200 -CsrfToken $csrf
 Print-Result $r3a
 
 Write-Host ""

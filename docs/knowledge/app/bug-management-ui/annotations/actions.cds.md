@@ -1,5 +1,13 @@
 # Knowledge: `app/bug-management-ui/annotations/actions.cds`
 
+## Note-dialog policy (2026-08-06)
+
+Mark In Review and Start Progress have no input parameter and run directly. Move to Pending Assignment, Send to Retest, and Close Bug also have no input parameter, but `@Common.IsActionCritical` makes Fiori request confirmation. Required explanation dialogs remain on Request More Information, Resubmit to Developer, Reject Bug, Resolve Bug, Reopen Bug, and Reassign Retest Owner. Assign Developer keeps its Developer Note field.
+
+`Resubmit to Developer` refreshes the Bug, History, and Notifications only. Its required Update Summary is audit evidence in History; it no longer creates or refreshes an automatic Comment. Comments remain explicit user-authored collaboration entries.
+
+Vietnamese: `Resubmit to Developer` chỉ refresh Bug, History và Notifications. Update Summary bắt buộc là bằng chứng audit trong History; action không còn tự tạo hoặc refresh Comment. Comment chỉ là nội dung trao đổi do user chủ động đăng.
+
 ## IDTS-122 action visibility
 
 Lifecycle and collaboration actions use backend `can*` fields so Closed Bugs hide ordinary mutations while keeping Reopen and authorized PM retest-owner reassignment. Hidden actions improve UX but never replace CAP authorization.
@@ -73,7 +81,7 @@ So this file is the bridge between backend workflow actions and the generated Fi
 
 - **Location**: `app/bug-management-ui/annotations/actions.cds:91-438`
   `@Common.SideEffects` blocks for bound actions
-  **IDTS concept**: Fiori refresh contract after backend action changes data. Lifecycle actions change status, assignee, next processor, capability booleans, history, notifications, and sometimes comments. Side effects tell Fiori what to reload. We use `TargetEntities: [in]` (and related paths like `'in/historyEvents'`) to force Fiori Elements V4 to fully refresh the bound entity instead of flat `TargetProperties`, which caused stale Object Page issues (IDTS-13).
+  **IDTS concept**: Fiori refresh contract after backend action changes data. Lifecycle actions change status, assignee, next processor, capability booleans, history, notifications, and sometimes comments. Resubmit does not target comments because it no longer writes one automatically. Side effects tell Fiori what to reload. We use `TargetEntities: [in]` (and related paths like `'in/historyEvents'`) to force Fiori Elements V4 to fully refresh the bound entity instead of flat `TargetProperties`, which caused stale Object Page issues (IDTS-13).
   **Impact if broken**: Backend changes may succeed, but the Object Page can still show stale status/buttons/history until manual reload. This was a real class of UI issue in IDTS.
   **Must check together**: `srv/bug-service/actions.js`, `srv/bug-service/read-models.js`, Object Page sections, browser lifecycle refresh tests.
 
@@ -165,7 +173,7 @@ Vì vậy file này là cầu nối giữa backend workflow actions và UI Fiori
 
 - **Vị trí**: `app/bug-management-ui/annotations/actions.cds:91-438`
   Các block `@Common.SideEffects` cho bound actions
-  **Khái niệm IDTS**: Hợp đồng refresh của Fiori sau khi backend action đổi dữ liệu. Lifecycle actions đổi status, assignee, next processor, capability booleans, history, notifications và đôi khi comments. Side effects nói cho Fiori biết cần reload gì. Chúng ta sử dụng `TargetEntities: [in]` (và các path con như `'in/historyEvents'`) để buộc Fiori Elements V4 tải lại toàn bộ bound entity; tránh dùng `TargetProperties` phẳng từng gây ra lỗi stale Object Page (IDTS-13).
+  **Khái niệm IDTS**: Hợp đồng refresh của Fiori sau khi backend action đổi dữ liệu. Lifecycle actions đổi status, assignee, next processor, capability booleans, history, notifications và đôi khi comments. Resubmit không target comments vì action này không còn tự ghi Comment. Side effects nói cho Fiori biết cần reload gì. Chúng ta sử dụng `TargetEntities: [in]` (và các path con như `'in/historyEvents'`) để buộc Fiori Elements V4 tải lại toàn bộ bound entity; tránh dùng `TargetProperties` phẳng từng gây ra lỗi stale Object Page (IDTS-13).
   **Ảnh hưởng nếu sai**: Backend đã đổi dữ liệu thành công nhưng Object Page vẫn hiển thị status/buttons/history cũ cho đến khi user reload thủ công. Đây từng là một nhóm lỗi UI thật trong IDTS.
   **Phải kiểm tra cùng**: `srv/bug-service/actions.js`, `srv/bug-service/read-models.js`, các Object Page sections, browser lifecycle refresh tests.
 

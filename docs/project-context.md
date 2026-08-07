@@ -194,7 +194,7 @@ Vietnamese: Chỉ Tester được tạo Bug mới. IDTS không được tự ch�
 2. Tester receives notification.
 3. Tester updates the bug report, comments, attachments, or reproduction details with the missing information.
 4. Tester or PM uses a dedicated `Resubmit to Developer` action and enters an update summary.
-5. System returns the bug to Assigned, sets `nextProcessor` back to the assigned Developer, writes history, creates a follow-up comment, and sends a notification to the Developer.
+5. System returns the bug to Assigned, sets `nextProcessor` back to the assigned Developer, keeps the required update summary in history, and sends a notification to the Developer. Resubmit does not create a comment automatically; users add discussion comments explicitly.
 
 ### Reject and Reassign
 

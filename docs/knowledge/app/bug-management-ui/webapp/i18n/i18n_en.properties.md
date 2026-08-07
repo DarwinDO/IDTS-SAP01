@@ -1,5 +1,9 @@
 # Knowledge: `app/bug-management-ui/webapp/i18n/i18n_en.properties`
 
+## Smart Assign Note cleanup (2026-08-06)
+
+The English bundle also removes `smartAssignActionNote`, preserving exact key parity with the default bundle after the synthetic assignment note was retired.
+
 ## IDTS-115 safe state messages
 
 This locale mirrors the base keys for create-draft AI guards, safe retry, incomplete classification, and invalid assignment mapping. Keep key coverage and wording aligned with `i18n.properties`.
