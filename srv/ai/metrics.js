@@ -15,8 +15,13 @@ const MAX_WINDOW_DAYS = 90
 const UNAVAILABLE_STATUSES = new Set([
   'AI_DISABLED',
   'AI_CONFIGURATION_INCOMPLETE',
-  'AI_PROVIDER_UNSUPPORTED'
+  'AI_PROVIDER_UNSUPPORTED',
+  'AI_UNAVAILABLE'
 ])
+
+const BAD_REQUEST_STATUSES = new Set(['AI_BAD_REQUEST'])
+const RATE_LIMITED_STATUSES = new Set(['AI_RATE_LIMITED'])
+const PROVIDER_5XX_STATUSES = new Set(['AI_PROVIDER_5XX'])
 
 function safeToken (value, fallback, maxLength) {
   const redacted = redactSensitiveText(value, maxLength)
@@ -40,9 +45,12 @@ function normalizeLatency (value) {
 function outcomeForStatus (value) {
   const status = safeToken(value, 'UNKNOWN', 40).toUpperCase()
   if (status === 'SUCCESS') return 'SUCCESS'
+  if (BAD_REQUEST_STATUSES.has(status)) return 'BAD_REQUEST'
+  if (RATE_LIMITED_STATUSES.has(status)) return 'RATE_LIMITED'
+  if (PROVIDER_5XX_STATUSES.has(status)) return 'PROVIDER_5XX'
   if (status === 'AI_TIMEOUT') return 'TIMEOUT'
   if (UNAVAILABLE_STATUSES.has(status)) return 'UNAVAILABLE'
-  return 'FAILURE'
+  return 'OTHER_FAILURE'
 }
 
 function safeOperationalMetric (result = {}) {
@@ -90,8 +98,12 @@ function aggregateAiOperationalMetrics (rows = [], { windowStart, windowEnd } = 
       requestCount: 0,
       successCount: 0,
       failureCount: 0,
+      badRequestCount: 0,
+      rateLimitedCount: 0,
+      provider5xxCount: 0,
       timeoutCount: 0,
       unavailableCount: 0,
+      otherFailureCount: 0,
       acceptedCount: 0,
       rejectedCount: 0,
       ignoredCount: 0,
@@ -106,8 +118,12 @@ function aggregateAiOperationalMetrics (rows = [], { windowStart, windowEnd } = 
     group.requestCount += 1
     if (outcome === 'SUCCESS') group.successCount += 1
     else group.failureCount += 1
+    if (outcome === 'BAD_REQUEST') group.badRequestCount += 1
+    if (outcome === 'RATE_LIMITED') group.rateLimitedCount += 1
+    if (outcome === 'PROVIDER_5XX') group.provider5xxCount += 1
     if (outcome === 'TIMEOUT') group.timeoutCount += 1
     if (outcome === 'UNAVAILABLE') group.unavailableCount += 1
+    if (outcome === 'OTHER_FAILURE') group.otherFailureCount += 1
 
     const reviewState = safeToken(row.reviewState_code, 'PENDING', 40).toUpperCase()
     if (reviewState === 'ACCEPTED') group.acceptedCount += 1
@@ -152,7 +168,7 @@ async function readAiOperationalMetrics (req) {
         'latencyMs',
         'reviewState_code'
       )
-      .where({ createdAt: { '>=': windowStart.toISOString() } })
+      .where({ createdAt: { between: windowStart.toISOString(), and: windowEnd.toISOString() } })
   )
   return aggregateAiOperationalMetrics(rows, {
     windowStart: windowStart.toISOString(),

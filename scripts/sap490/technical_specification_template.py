@@ -10,6 +10,8 @@ from __future__ import annotations
 from copy import copy
 from datetime import date
 from pathlib import Path
+import csv
+import re
 import shutil
 
 from openpyxl import load_workbook
@@ -17,14 +19,161 @@ from openpyxl.cell.cell import MergedCell
 from openpyxl.drawing.image import Image as XLImage
 from openpyxl.styles import Alignment
 
-from specification_catalog import AI_FUNCTIONS, LIFECYCLE_ACTIONS, MESSAGES
+from specification_catalog import AI_FUNCTIONS, LIFECYCLE_ACTIONS
 
 
 ROOT = Path(__file__).resolve().parents[2]
 TEMPLATE = ROOT / "docs" / "sap490" / "templates" / "Deliverable_template" / "Technical_Specification.xlsx"
 OUTPUT_DIR = ROOT / "docs" / "sap490" / "generated"
-VERSION = "0.7"
-DOCUMENT_DATE = date(2026, 7, 26)
+VERSION = "0.8"
+DOCUMENT_DATE = date(2026, 8, 4)
+
+IDTS107_DIR = ROOT / "docs" / "pm" / "evidence" / "idts-107" / "technical-spec"
+IDTS108_README = ROOT / "docs" / "pm" / "evidence" / "idts-108" / "README.md"
+IDTS109_DIR = ROOT / "docs" / "pm" / "evidence" / "idts-109" / "technical-spec"
+
+
+def _markdown_table(path, heading):
+    """Read one governed Markdown table by heading without adding a parser dependency."""
+    lines = Path(path).read_text(encoding="utf-8").splitlines()
+    start = next(i for i, line in enumerate(lines) if line.strip() == heading)
+    table = []
+    for line in lines[start + 1:]:
+        if line.startswith("##") and table:
+            break
+        if line.startswith("|"):
+            table.append([cell.strip() for cell in line.strip().strip("|").split("|")])
+        elif table and line.strip():
+            break
+    if len(table) < 2:
+        raise ValueError(f"No table found below {heading!r} in {path}")
+    return table[0], table[2:]
+
+
+def _database_dictionary_rows():
+    with (IDTS107_DIR / "database-dictionary.en.csv").open(encoding="utf-8-sig", newline="") as handle:
+        return list(csv.DictReader(handle))
+
+
+def _technical_implementation_sections():
+    """Parse IDTS-109's approved 14-part traces into formal vertical blocks."""
+    text = (IDTS109_DIR / "technical-implementation.md").read_text(encoding="utf-8")
+    sections = []
+    current = None
+    for line in text.splitlines():
+        match = re.match(r"^###\s+(.+)$", line)
+        if match:
+            if current:
+                sections.append(current)
+            current = {"title": match.group(1), "trace": "", "items": []}
+            continue
+        trace = re.match(r"^Technical trace ID:\s+(.+)$", line)
+        if current and trace:
+            current["trace"] = trace.group(1).replace("`", "")
+            continue
+        item = re.match(r"^(\d+)\.\s+\*\*(.+?):\*\*\s*(.*)$", line)
+        if current and item:
+            current["items"].append((item.group(1), item.group(2), item.group(3)))
+    if current:
+        sections.append(current)
+    return [section for section in sections if section["items"]]
+
+
+def _supplemental_implementation_sections():
+    """Add full 14-part traces for core Bug writes and exact lifecycle actions.
+
+    IDTS-109 owns the platform, collaboration, monitoring and AI traces.  The
+    lifecycle source package deliberately groups those actions, while the
+    mentor requires one independently reviewable block per action.  These
+    deterministic blocks preserve that distinction without inventing runtime
+    behavior.
+    """
+    sections = []
+
+    def add(title, trace, actor, trigger, request, contract, handler, validation,
+            transaction, side_effect, response, failure, evidence):
+        sections.append({
+            "title": title,
+            "trace": trace,
+            "items": [
+                ("1", "Function name", title.split(" ", 1)[-1]),
+                ("2", "Purpose", f"Execute {title.split(' ', 1)[-1]} through the governed Bug workflow."),
+                ("3", "Actor/precondition", actor),
+                ("4", "UI trigger", trigger),
+                ("5", "Frontend source", "Fiori Elements Object Page actions defined in app/bug-management-ui/annotations/actions.cds and the supported controller extensions."),
+                ("6", "HTTP/OData request", request),
+                ("7", "Service contract", contract),
+                ("8", "CAP handler/helper", handler),
+                ("9", "Validation/authorization", validation),
+                ("10", "Transaction", transaction),
+                ("11", "Database/provider side effect", side_effect),
+                ("12", "Response/UI refresh", response),
+                ("13", "Failure/rollback", failure),
+                ("14", "Test/evidence", evidence),
+            ],
+        })
+
+    add(
+        "7.1 Create and activate a Bug", "FLOW-DRAFT-CREATE",
+        "Tester or PM with an active IDTS identity; required catalogs and fields must be available.",
+        "Choose Create, complete the draft form and choose Create/Save.",
+        "OData V4 draft NEW/PATCH/SAVE followed by active CREATE.",
+        "srv/service.cds::Bugs draft projection and CAP draft events.",
+        "srv/service.js draft registration; srv/bug-service/drafts.js; srv/bug-service/bug-write.js::prepareBugWrite.",
+        "Server-owned reporter, required fields, active code lists, component/category mapping and role authorization.",
+        "CAP request transaction covers active Bug, history and in-app notification persistence.",
+        "Insert the active Bug and audit/notification rows in SAP HANA Cloud/HDI; no attachment binary is stored in HANA.",
+        "Return the active Bug context and refresh the Object Page.",
+        "Any validation or persistence failure rolls back the active write and returns a sanitized field/action message.",
+        "IDTS-110 Unit Test candidate evidence and IDTS-111 UAT review evidence; blocked/held cases retain their recorded disposition.",
+    )
+    add(
+        "7.2 Edit and save an active Bug", "FLOW-ACTIVE-EDIT",
+        "Authorized participant editing an existing active Bug through its draft.",
+        "Choose Edit, change permitted fields and choose Save.",
+        "OData V4 EDIT/PATCH/SAVE followed by active UPDATE.",
+        "srv/service.cds::Bugs draft projection and active UPDATE contract.",
+        "srv/bug-service/drafts.js::prepareDraftPatch; srv/bug-service/bug-write.js::prepareBugWrite.",
+        "Role, immutable/server-owned fields, catalogs, assignment responsibility and lifecycle rules.",
+        "CAP request transaction covers the active update and its audit/notification side effects.",
+        "Update the Bug in SAP HANA Cloud/HDI and append the applicable history/notification rows.",
+        "Refresh the active Object Page with committed values.",
+        "Failure rolls back the update; no partial Bug/history/notification state is accepted.",
+        "IDTS-110 Unit Test candidate evidence and IDTS-111 UAT review matrix at the frozen integration baseline.",
+    )
+
+    for index, (action, actors, before, after) in enumerate(LIFECYCLE_ACTIONS, start=1):
+        trace = f"FLOW-{action.upper()}"
+        add(
+            f"8.{index} {action}", trace,
+            f"{actors}; current status must be one of: {before}.",
+            f"Choose the {action} Object Page action and confirm any required parameters.",
+            f"POST the bound OData V4 action BugService.{action} for the selected Bug.",
+            f"srv/service.cds::Bugs.{action} bound action.",
+            f"srv/service.js action registration; srv/bug-service/actions.js::{action if action in ('assignToDeveloper', 'resubmitToDeveloper') else 'transitionBug'}.",
+            f"Validate actor role/ownership, current status {before}, required reason/note and assignee rules before deriving {after}.",
+            "One CAP request transaction covers Bug state, HistoryEvents/HistoryLogs and in-app notification changes.",
+            f"Update the Bug to {after} when permitted and append governed audit/notification rows in SAP HANA Cloud/HDI.",
+            "Return the committed Bug and let Fiori Elements refresh the affected context and side-effect sections.",
+            "Authorization, stale state, missing parameter or persistence failure rolls back the entire action; no partial lifecycle mutation remains.",
+            "IDTS-89 lifecycle programmatic evidence plus the reviewed IDTS-110/111 case disposition; commands alone are not the acceptance artifact.",
+        )
+
+    add(
+        "9.1 Read Bug history", "FLOW-HISTORY-READ",
+        "An authorized Bug participant opens an active Bug with stored history.",
+        "Open History or choose Show More.",
+        "GET the Bug HistoryEvents/HistoryLogs composition through BugService.",
+        "srv/service.cds history projections.",
+        "srv/bug-service/history.js read and formatting helpers.",
+        "Role-scoped Bug visibility and safe paging/order rules.",
+        "Read-only request; no business transaction mutation.",
+        "Read append-only history rows from SAP HANA Cloud/HDI; no provider side effect.",
+        "Return chronological audit rows and refresh the History section.",
+        "Read failure returns sanitized feedback and leaves Bug/history unchanged.",
+        "IDTS-108 History screen evidence and reviewed IDTS-110/111 history cases.",
+    )
+    return sections
 
 
 def _anchor(sheet, coordinate):
@@ -72,6 +221,12 @@ def _merge_once(sheet, cell_range):
         sheet.merge_cells(cell_range)
 
 
+def _unmerge_rows(sheet, start_row, end_row):
+    for merged in list(sheet.merged_cells.ranges):
+        if merged.min_row >= start_row and merged.max_row <= end_row:
+            sheet.unmerge_cells(str(merged))
+
+
 def _set_metadata(sheet, title, language):
     labels = {
         "en": ("Created by:", "Created date:", "Modified by:", "Modified date:", "Reviewed by:", "Reviewed date:", "Pending"),
@@ -115,6 +270,9 @@ def _set_print(sheet, area, title_rows=None, *, fit_height=0):
     sheet.sheet_properties.pageSetUpPr.fitToPage = True
     sheet.page_setup.fitToWidth = 1
     sheet.page_setup.fitToHeight = fit_height
+    # Preserve the official template page shell while repeating the populated
+    # table header on continuation pages.  This is a print-only aid; it does
+    # not change sheet rows, styles, merges, tab structure or visible content.
     if title_rows:
         sheet.print_title_rows = title_rows
 
@@ -167,7 +325,8 @@ def _fill_cover_and_history(workbook, language):
             ("0.4", "Official-template remediation", "All 12 sheets and exact action inventory", "2026-07-25"),
             ("0.5", "Runtime trace correction", "Exact source symbols, test truth and failure paths", "2026-07-25"),
             ("0.6", "Formal table remediation", "Structured catalogs and bilingual parity", "2026-07-25"),
-            ("0.7", "Template-fidelity remediation", "Restore official inner layouts and exact per-action trace", DOCUMENT_DATE.isoformat()),
+            ("0.7", "Template-fidelity remediation", "Restore official inner layouts and exact per-action trace", "2026-07-26"),
+            ("0.8", "BTP production-truth integration", "Integrate IDTS-107/108/109, HANA dictionary, current screens/messages and 14-part traces", DOCUMENT_DATE.isoformat()),
         ],
         "vi": [
             ("0.1", "Nền kỹ thuật ban đầu", "Kiến trúc, service và phạm vi lưu trữ", "2026-06-21"),
@@ -186,7 +345,8 @@ def _fill_cover_and_history(workbook, language):
             f"F{row_number}": changed, f"G{row_number}": "DonHV",
         }.items():
             _write(history, coordinate, value, wrap=False)
-        history.row_dimensions[row_number].height = 36
+        history.row_dimensions[row_number].height = 60
+    history.row_dimensions[2].height = 30
     _set_print(history, "B1:G10", "1:2")
 
 
@@ -212,6 +372,8 @@ def _fill_intro_scope_assumptions(workbook, language):
     _write(intro, "C15", intro_text)
     intro.row_dimensions[15].height = 88
     _write(intro, "B16", "No additional supplement." if language == "en" else "Không có phụ lục bổ sung.")
+    _merge_once(intro, "B16:BG16")
+    intro.row_dimensions[16].height = 24
     _set_print(intro, "B1:BG16", "1:4")
 
     scope = workbook["Scope"]
@@ -219,11 +381,12 @@ def _fill_intro_scope_assumptions(workbook, language):
     _clear_values(scope, 6, 30)
     scope_rows = {
         "en": [
-            "SCP-01 — IN SCOPE — AuthService, BugService, draft/active writes and eleven exact lifecycle actions.",
-            "SCP-02 — IN SCOPE — Comments, attachments, history, notifications, monitoring and role authorization.",
-            "SCP-03 — IN SCOPE — Human-reviewed AI suggestions, decisions, explicit apply/confirm and sanitized metrics.",
-            "SCP-04 — OUT OF SCOPE — ABAP/RAP, SAP Transport Requests and autonomous AI workflow decisions.",
-            "SCP-05 — LIMITATION — Shared QA is mentor/demo scope; live OpenAI remains DISABLED / NOT ACCEPTED.",
+            "1. IN SCOPE — AuthService, BugService, draft/active writes and eleven exact lifecycle actions.",
+            "1.1 IN SCOPE — Comments, standard CAP attachments, history, notifications, monitoring and role authorization.",
+            "1.2 IN SCOPE — Human-reviewed AI suggestions, decisions, explicit apply/confirm and sanitized metrics.",
+            "2. OUT OF SCOPE — ABAP/RAP, SAP Transport Requests and autonomous AI workflow decisions.",
+            "3. LIMITATION — BTP is the current mentor/demo deployment; external S3, Brevo and AI providers remain governed integrations rather than native BTP services.",
+            "3.1 EVIDENCE STATUS — Unit Test review: 38 accepted candidates, 2 held, 135 mapping-only and 13 blocked. UAT review: 22 MEETS, 12 DOES_NOT_MEET and 23 BLOCKED. These are review dispositions, not final acceptance claims.",
         ],
         "vi": [
             "SCP-01 — TRONG PHẠM VI — AuthService, BugService, ghi draft/active và mười một action vòng đời chính xác.",
@@ -238,6 +401,8 @@ def _fill_intro_scope_assumptions(workbook, language):
         _write(scope, f"B{row}", value)
         scope.row_dimensions[row].height = 34
     _write(scope, "B31", "No additional supplement." if language == "en" else "Không có phụ lục bổ sung.")
+    _merge_once(scope, "B31:BG31")
+    scope.row_dimensions[31].height = 24
     _set_print(scope, "B1:BG31", "1:5")
 
     assumptions = workbook["Assumptions"]
@@ -245,12 +410,12 @@ def _fill_intro_scope_assumptions(workbook, language):
     _clear_values(assumptions, 6, 41)
     assumption_rows = {
         "en": [
-            "ASM-01 — Local development uses SQLite; local records are not Shared QA evidence.",
-            "ASM-02 — Shared QA uses Render PostgreSQL and must retain data after restart/redeploy.",
-            "ASM-03 — Schema migrations are additive and idempotent; broad seed reload is forbidden.",
-            "ASM-04 — S3, Brevo and database credentials remain private and never appear in evidence.",
-            "ASM-05 — Live OpenAI is disabled; mock/fallback PASS is not provider-live acceptance.",
-            "ASM-06 — Shared QA evidence is valid only for the frozen Git and Render deploy SHA.",
+            "1. Local development uses SQLite; local records are not Shared QA evidence.",
+            "1.1 Shared QA uses SAP HANA Cloud through the idts-sap01-db HDI container and must retain data after application restart/redeploy.",
+            "1.2 Schema migrations are additive and idempotent; broad seed reload is forbidden.",
+            "2. S3, Brevo and database credentials remain private and never appear in evidence.",
+            "2.1 AI is advisory and feature-routed through the configured gateway; primary-provider, provider-fallback and deterministic-fallback evidence are reported separately.",
+            "2.2 Shared QA evidence is valid only for the frozen Git SHA and matching SAP BTP deployment baseline.",
         ],
         "vi": [
             "ASM-01 — Phát triển local dùng SQLite; dữ liệu local không phải evidence Shared QA.",
@@ -266,20 +431,37 @@ def _fill_intro_scope_assumptions(workbook, language):
         _write(assumptions, f"B{row}", value)
         assumptions.row_dimensions[row].height = 34
     _write(assumptions, "B42", "No additional supplement." if language == "en" else "Không có phụ lục bổ sung.")
+    _merge_once(assumptions, "B42:BG42")
+    assumptions.row_dimensions[42].height = 24
     _set_print(assumptions, "B1:BG42", "1:5")
 
 
 def _requirement_rows(language):
-    rows = [
-        ("SRS-FR-AUTH", "Authenticate users and protect bearer sessions", "Tester / Developer / PM", "AuthService /odata/v4/auth/", "srv/auth.js; srv/auth/custom-auth.js", "Users; AuthSessions; EVID-AUTH"),
-        ("SRS-FR-BUG", "Create and update valid Bugs through draft/active writes", "Tester / PM", "BugService /odata/v4/bug/", "srv/service.js; srv/bug-service/bug-write.js", "Bugs; code lists; EVID-BUG-WRITE"),
-        ("SRS-FR-ASG", "Assign an eligible Developer", "Tester / PM", "assignToDeveloper", "srv/bug-service/actions.js; permissions.js", "Bugs; DeveloperResponsibilities; EVID-ASSIGN"),
-        ("SRS-FR-LIFE", "Enforce eleven exact lifecycle actions", "Action-specific", "BugService bound actions", "srv/service.js; srv/bug-service/actions.js", "Bugs; HistoryEvents; Notifications; EVID-IDTS-89"),
-        ("SRS-FR-COLLAB", "Persist comments and attachment evidence", "Bug participants", "Comments / Attachments", "BugCollaboration.js; srv/bug-service/content.js", "Comments; PostgreSQL metadata; S3 binary; EVID-ATTACH"),
-        ("SRS-FR-MON", "Return role-aware workload and queues", "Tester / Developer / PM", "DeveloperWorkloads", "srv/bug-service/monitoring.js", "Read-only KPI rows; EVID-MONITOR"),
-        ("SRS-FR-NOTIFY", "Persist in-app notification and outbox delivery state", "System", "Notifications / NotificationDeliveries", "srv/email/outbox.js; srv/email/worker.js", "Notification and delivery state; EVID-EMAIL"),
-        ("SRS-FR-AI", "Provide human-reviewed AI assistance", "Action-specific", "BugService AI actions", "srv/ai/", "AiSuggestions; DuplicateLinks; EVID-AI-FALLBACK"),
-    ]
+    if language != "en":
+        raise ValueError("Technical Specification v0.8 is an English-only SAP490 submission")
+    _, source_rows = _markdown_table(
+        IDTS109_DIR / "functional-requirements.md",
+        "# Functional Requirements — Candidate",
+    )
+    requirement_ids = {
+        "Authentication and session management": "SRS-FR-AUTH",
+        "Profile and logout": "SRS-FR-AUTH",
+        "Dashboard": "SRS-FR-MON",
+        "PM monitoring": "SRS-FR-MON",
+        "In-app notifications": "SRS-FR-NOTIFY",
+        "Email outbox and delivery monitoring": "SRS-FR-NOTIFY",
+        "Bug collaboration comments": "SRS-FR-COLLAB",
+        "Bug evidence attachments": "SRS-FR-COLLAB",
+        "AI assistance": "SRS-FR-AI",
+        "AI review, apply and confirm": "SRS-FR-AI",
+        "AI operational monitoring": "SRS-FR-AI",
+    }
+    rows = [tuple(row[:5] + [f"{row[5]} ({requirement_ids[row[5]]})"]) for row in source_rows]
+    rows.extend([
+        ("5", "The system shall create and update valid Bugs through governed draft and active writes.", "Tester / PM", "The actor is authorized and required catalog values are available.", "The committed Bug, history and notification state remain consistent.", "Bug create/update (SRS-FR-BUG)"),
+        ("5.1", "The system shall assign an eligible active Developer whose responsibility matches the Bug classification.", "Tester / PM", "The Bug classification is valid and a matching active Developer is available.", "Assignee, status and next processor are updated only after backend validation.", "Developer assignment (SRS-FR-ASG)"),
+        ("5.2", "The system shall enforce the eleven supported Bug lifecycle actions according to role, ownership and current status.", "Action-specific", "The requested action is permitted from the current Bug state and required inputs are present.", "The Bug, history and notification changes commit atomically or roll back together.", "Bug lifecycle (SRS-FR-LIFE)"),
+    ])
     if language == "vi":
         translations = [
             "Xác thực người dùng và bảo vệ phiên bearer", "Tạo và cập nhật Bug hợp lệ qua ghi draft/active",
@@ -302,7 +484,7 @@ def _fill_requirements(workbook, language):
     sheet = workbook["Functional Requirements"]
     _set_metadata(sheet, "Functional Requirements" if language == "en" else "Yêu cầu chức năng", language)
     _clear_values(sheet, 5, 70)
-    headers = ["Requirement ID", "Technical objective", "Role", "Service / operation", "Source", "Data / evidence"]
+    headers = ["No.", "Business requirement", "Actor", "Precondition", "Outcome", "Related feature"]
     if language == "vi":
         headers = ["Mã yêu cầu", "Mục tiêu kỹ thuật", "Vai trò", "Service / thao tác", "Source", "Dữ liệu / evidence"]
     end = _write_template_table(
@@ -310,6 +492,8 @@ def _fill_requirements(workbook, language):
         [("B", "F"), ("G", "Q"), ("R", "V"), ("W", "AB"), ("AC", "AP"), ("AQ", "BG")],
         headers, _requirement_rows(language), workbook["Message Definition"],
     )
+    for row in range(6, end + 1):
+        sheet.row_dimensions[row].height = 95
     _set_print(sheet, f"B1:BG{end}", "1:5")
 
 
@@ -321,7 +505,7 @@ def _fill_design(workbook, language):
             5: "End-to-end CAP/Fiori workflow; architecture diagram is shown in the official graphic area. AuthSessions stores only the SHA-256 tokenHash; the raw bearer token is returned once.",
             7: "N/A — project planning is controlled in Jira; this specification documents the implemented technical baseline.",
             10: "Node.js package: idts-sap01; CAP modules are organized under app/, srv/ and db/.",
-            12: "CDS entities: Users, Bugs, Comments, Attachments, HistoryEvents, HistoryLogs, Notifications, NotificationDeliveries, AiSuggestions, DuplicateLinks and code lists.",
+            12: "Production build truth: 48 deployable SAP HANA tables and 578 column declarations, including active domain tables, code lists, draft artifacts, DRAFT.DraftAdministrativeData, attachment artifacts, calculated-service helper artifacts and cds.outbox.Messages. The complete dictionary follows this template section.",
             16: "CDS types and code-list values define stable business codes; classic ABAP domains are not used.",
             32: "CDS elements define UUIDs, associations, compositions, timestamps, status codes and validation targets.",
             48: "CAP projections/read models expose Bugs, DeveloperWorkloads and role-aware monitoring data.",
@@ -329,7 +513,7 @@ def _fill_design(workbook, language):
             52: "db/schema.cds defines persistence; srv/service.cds defines service projections/actions/functions.",
             57: "app/bug-management-ui/annotations.cds and annotations/actions.cds provide Fiori metadata extensions.",
             60: "AuthService and BugService are declared in CDS and implemented by adjacent Node.js service handlers.",
-            62: "OData V4 endpoints: /odata/v4/auth/ and /odata/v4/bug/. Render exposes the same contracts on Shared QA.",
+            62: "OData V4 endpoints are /odata/v4/auth/ and /odata/v4/bug/. SAP BTP AppRouter protects the browser route through XSUAA and forwards authenticated requests to the CAP service.",
             64: "@UI, @Common, @Capabilities and action annotations drive List Report/Object Page behavior.",
             66: "N/A — classic ABAP Function Groups are not used; behavior is organized as CAP/Node.js modules.",
             68: "N/A — CAP event handlers and JavaScript helpers replace classic ABAP Function Modules.",
@@ -343,7 +527,7 @@ def _fill_design(workbook, language):
             100: "Bug lifecycle states/actions are implemented as CAP bound actions with transaction-scoped history and notification side effects.",
             102: "Next processor, assignee, reason and action parameters form the workflow context; classic workflow container elements do not apply.",
             104: "Jira controls project tasks; runtime work queues are derived from Bug ownership/status and are not SAP Workflow tasks.",
-            106: "AWS S3 stores attachment binary; Brevo sends email; Render PostgreSQL stores Shared QA data; live OpenAI remains disabled.",
+            106: "SAP HANA Cloud/HDI stores business and attachment metadata. The configured S3 adapter stores attachment binary, Brevo sends email, Job Scheduler invokes the protected outbox processor, and Vercel AI Gateway routes advisory AI models.",
             108: "manifest.json routes Login/Dashboard/List Report/Object Page; actions return users to the affected Bug context.",
             115: "Official architecture diagram and sanitized Shared QA screenshots are embedded in the relevant template regions.",
             123: "Priority, Severity, Environment, SAP Module, Application Component and Defect Category are validated catalogs.",
@@ -395,7 +579,32 @@ def _fill_design(workbook, language):
     diagram = XLImage(ROOT / "docs" / "diagrams" / "rendered" / "png" / "02-cap-fiori-architecture.png")
     diagram.width, diagram.height = 480, 340
     sheet.add_image(diagram, "AQ5")
-    _set_print(sheet, "B1:BG129", "1:4")
+    dictionary = _database_dictionary_rows()
+    start = 132
+    _write(sheet, f"B{start}", "1. Production HANA Data Dictionary — 48 tables / 578 columns")
+    _merge_once(sheet, f"B{start}:BG{start}")
+    sheet.row_dimensions[start].height = 28
+    headers = ["Physical table", "Column", "Data type", "Key / null / default", "Relationship", "Business purpose", "CDS source", "Evidence"]
+    rows = [
+        (
+            item["Physical HANA Table"], item["Column"], item["Data Type"],
+            f"PK={item['Primary Key']}; nullable={item['Nullable']}; default={item['Default'] or '-'}",
+            item["Relationship / Target"] or "-", item["Business Purpose"],
+            item["CDS / Model Source"], item["Database Evidence"],
+        )
+        for item in dictionary
+    ]
+    end = _write_template_table(
+        sheet, start + 1,
+        [("B", "H"), ("I", "M"), ("N", "R"), ("S", "X"), ("Y", "AD"), ("AE", "AK"), ("AL", "AR"), ("AS", "BG")],
+        headers, rows, workbook["Message Definition"],
+    )
+    for row in range(start + 2, end + 1):
+        # Database dictionary cells are merged across template column groups, so
+        # Excel/LibreOffice cannot auto-fit them. 120 pt is the verified minimum
+        # that keeps the longest purpose/source/evidence text visible at 12 pt.
+        sheet.row_dimensions[row].height = 120
+    _set_print(sheet, f"B1:BG{end}", "1:4")
 
 
 def _fill_standards(workbook, language):
@@ -404,7 +613,7 @@ def _fill_standards(workbook, language):
     details = {
         "en": {
             5: "CAP entities/services use stable business names; JavaScript symbols use camelCase; constants use explicit codes.",
-            35: "CDS defines UUID keys, associations/compositions, constraints and audit fields; PostgreSQL follows CAP deployment output.",
+            35: "CDS defines UUID keys, associations/compositions, constraints and audit fields; the production CAP build emits HDI artifacts for SAP HANA Cloud.",
             38: "N/A — CAP/Node.js modules replace classic ABAP Function Groups.", 40: "N/A — CAP handlers/helpers replace classic ABAP Function Modules.",
             43: "Non-obvious entry points explain trigger, input, decision, side effect, next dependency and breakpoint.",
             47: "Follow repository lint/format conventions; do not reformat unrelated files.",
@@ -437,7 +646,19 @@ def _fill_standards(workbook, language):
         body_row = heading_row + 1
         _write(sheet, f"C{body_row}", text)
         sheet.row_dimensions[body_row].height = max(sheet.row_dimensions[body_row].height or 15, 42)
-    _set_print(sheet, "B1:BG83", "1:4")
+    _, standard_rows = _markdown_table(IDTS109_DIR / "development-standards.md", "# Development Standards — Candidate")
+    start = 84
+    _write(sheet, f"B{start}", "1. Detailed Development Standards")
+    end = _write_template_table(
+        sheet, start + 1,
+        [("B", "F"), ("G", "L"), ("M", "AA"), ("AB", "AJ"), ("AK", "AQ"), ("AR", "BG")],
+        ["Standard", "Area", "Rule", "Application", "Verification", "Evidence"],
+        [tuple(row[:6]) for row in standard_rows], workbook["Message Definition"],
+    )
+    sheet.row_dimensions[start].height = 20
+    for row in range(start + 2, end + 1):
+        sheet.row_dimensions[row].height = 195
+    _set_print(sheet, f"B1:BG{end}", "1:4")
 
 
 def _fill_screen_layout(workbook, language):
@@ -446,15 +667,30 @@ def _fill_screen_layout(workbook, language):
     _write(sheet, "B5", "Representative implemented screens" if language == "en" else "Các màn hình đã triển khai tiêu biểu", vertical="center")
     _write(sheet, "B6", "Layout 1 — Tester Bug Object Page" if language == "en" else "Bố cục 1 — Trang chi tiết Bug của Tester", vertical="center")
     _write(sheet, "B7", "Fiori Elements Object Page: summary, classification, assignment, collaboration, history and lifecycle actions." if language == "en" else "Fiori Elements Object Page: tóm tắt, phân loại, phân công, cộng tác, lịch sử và action vòng đời.")
+    _merge_once(sheet, "B16:BG16")
     _write(sheet, "B16", "Layout 2 — Developer actions are shown below the Tester layout." if language == "en" else "Bố cục 2 — Action của Developer được minh họa bên dưới bố cục Tester.")
+    sheet.row_dimensions[16].height = 24
     sheet._images = []
-    tester = XLImage(ROOT / "docs" / "pm" / "evidence" / "idts-100" / "shared-qa-attachments" / "idts73_saved_attachments_and_comments.png")
-    developer = XLImage(ROOT / "docs" / "pm" / "evidence" / "idts-100" / "shared-qa-ai-browser" / "all-review-actions" / "02_classification_dialog.png")
-    tester.width, tester.height = 1120, 450
-    developer.width, developer.height = 1120, 450
+    tester = XLImage(ROOT / "docs" / "pm" / "evidence" / "idts-108" / "screenshots" / "48-pm-list-report.png")
+    developer = XLImage(ROOT / "docs" / "pm" / "evidence" / "idts-108" / "screenshots" / "51-pm-bug-0024-object-page.png")
+    tester.width, tester.height = 550, 310
+    developer.width, developer.height = 550, 310
     sheet.add_image(tester, "B9")
-    sheet.add_image(developer, "B10")
-    _set_print(sheet, "B1:BG16", "1:4", fit_height=1)
+    sheet.add_image(developer, "AI9")
+    _, layout_rows = _markdown_table(IDTS108_README, "## 1. Screen Layout inventory")
+    start = 18
+    _merge_once(sheet, f"B{start}:BG{start}")
+    _write(sheet, f"B{start}", "1. Screen Layout Inventory")
+    sheet.row_dimensions[start].height = 24
+    end = _write_template_table(
+        sheet, start + 1,
+        [("B", "D"), ("E", "J"), ("K", "Q"), ("R", "AB"), ("AC", "AG"), ("AH", "AM"), ("AN", "AT"), ("AU", "BG")],
+        ["No.", "Screen / dialog", "Route / trigger", "Page type / areas", "Roles", "Navigation / result", "Source trace", "Evidence state"],
+        [tuple(row[:8]) for row in layout_rows], workbook["Message Definition"],
+    )
+    for row in range(start + 2, end + 1):
+        sheet.row_dimensions[row].height = 120
+    _set_print(sheet, f"B1:BG{end}", "1:4")
 
 
 def _screen_rows(language):
@@ -518,37 +754,41 @@ def _fill_screen_definition(workbook, language):
     sheet = workbook["Screen Definition"]
     _set_metadata(sheet, "Screen Definition" if language == "en" else "Định nghĩa màn hình", language)
     _write(sheet, "B5", "Bug List Report and Object Page" if language == "en" else "Danh sách Bug và trang chi tiết Bug", wrap=False)
+    _merge_once(sheet, "B9:BG9")
     _write(sheet, "B9", "1. Bug List Report / Object Page" if language == "en" else "1. Danh sách Bug / trang chi tiết Bug")
+    sheet.row_dimensions[9].height = 24
     if language == "vi":
         for coordinate, value in {"B10": "STT", "R10": "Thành phần màn hình", "AW10": "Ghi chú", "C11": "Tên", "I11": "Loại", "M11": "I/O", "O11": "Một/Nhiều", "R11": "Kiểu dữ liệu", "U11": "Độ dài", "X11": "Thập phân", "AA11": "Bắt buộc", "AE11": "Giá trị mặc định", "AI11": "Định dạng"}.items():
             _write(sheet, coordinate, value, vertical="center")
-    rows = _screen_rows(language)
-    target_rows = [13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
-    anchors = ("C", "I", "M", "O", "R", "U", "AA", "AE", "AW")
-    for index, (target_row, values) in enumerate(zip(target_rows, rows), 1):
-        _write(sheet, f"B{target_row}", index, vertical="center")
-        for column, value in zip(anchors, values):
-            _write(sheet, f"{column}{target_row}", value)
-        sheet.row_dimensions[target_row].height = 42
-    _write(sheet, "B32", "2. Footer / Supplement" if language == "en" else "2. Footer / phụ lục")
-    _write(sheet, "C43", "N/A — actions and navigation use the Fiori Elements Object Page toolbar and sections." if language == "en" else "N/A — action và điều hướng dùng toolbar/section của Fiori Elements Object Page.")
-    _set_print(sheet, "B1:BG43", "1:11", fit_height=1)
+    _, field_rows = _markdown_table(IDTS108_README, "### 2.1 Shared Bug fields")
+    _, action_rows = _markdown_table(IDTS108_README, "### 2.2 Actions and collaboration controls")
+    _unmerge_rows(sheet, 12, 140)
+    _clear_values(sheet, 12, 140)
+    groups = [("B", "D"), ("E", "J"), ("K", "Q"), ("R", "X"), ("Y", "AB"), ("AC", "AH"), ("AI", "AN"), ("AO", "AT"), ("AU", "BG")]
+    headers = ["No.", "Screen", "Field / action", "Binding / operation", "I/O", "Type / input", "Required / role", "Visibility", "Validation / failure behavior"]
+    normalized_fields = [tuple(row[:9]) for row in field_rows]
+    normalized_actions = [
+        (row[0], row[1], row[2], row[3], "Action", row[4], row[5], "Role-controlled", row[6])
+        for row in action_rows
+    ]
+    end = _write_template_table(sheet, 12, groups, headers, normalized_fields + normalized_actions, workbook["Message Definition"])
+    _set_print(sheet, f"B1:BG{end}", "1:11")
 
 
 def _fill_messages(workbook, language):
     sheet = workbook["Message Definition"]
     _set_metadata(sheet, "Message Definition" if language == "en" else "Định nghĩa thông báo", language)
-    if language == "vi":
-        for coordinate, value in {"B5": "Mã thông báo", "H5": "Ngôn ngữ", "M5": "Nội dung thông báo", "AQ5": "Thời điểm hiển thị"}.items():
-            _write(sheet, coordinate, value, vertical="center")
-    _clear_values(sheet, 6, 31)
-    for row, item in enumerate(MESSAGES, 6):
-        _write(sheet, f"B{row}", item["id"], vertical="center")
-        _write(sheet, f"H{row}", "EN" if language == "en" else "VI", vertical="center")
-        _write(sheet, f"M{row}", item["message"][language])
-        _write(sheet, f"AQ{row}", item["timing"][language])
-        sheet.row_dimensions[row].height = 54
-    _set_print(sheet, f"B1:BG{5 + len(MESSAGES)}", "1:5")
+    if language != "en":
+        raise ValueError("Technical Specification v0.8 is an English-only SAP490 submission")
+    _, message_rows = _markdown_table(IDTS109_DIR / "message-catalog.md", "## Catalog")
+    _unmerge_rows(sheet, 5, 300)
+    _clear_values(sheet, 5, 300)
+    groups = [("B", "F"), ("G", "P"), ("Q", "Y"), ("Z", "AC"), ("AD", "AG"), ("AH", "AK"), ("AL", "AO"), ("AP", "AT"), ("AU", "AZ"), ("BA", "BG")]
+    headers = ["Message ID", "User-facing text / safe summary", "Exact trigger / source", "HTTP / status", "Target", "Role / context", "Rollback behavior", "Sanitized logging", "Frontend handling", "Evidence"]
+    end = _write_template_table(sheet, 5, groups, headers, [tuple(row[:10]) for row in message_rows], sheet)
+    for row in range(7, end + 1):
+        sheet.row_dimensions[row].height = 135
+    _set_print(sheet, f"B1:BG{end}", "1:5")
 
 
 def _flow_rows(language):
@@ -565,8 +805,6 @@ def _flow_rows(language):
         rows.append((f"FLOW-{action.upper()}", f"{actors} invokes action", action, f"srv/bug-service/actions.js::{action}", f"Validate {before} → {after}; commit Bug/history/notification atomically", "EVID-IDTS-89"))
     rows.extend([
         ("FLOW-COMMENT-CREATE", "Add Comment", "CREATE Comments", "srv/bug-service/content.js::prepareCommentCreate", "Authorize participant; persist comment metadata", "EVID-COMMENT"),
-        ("FLOW-ATTACH-QUEUE", "Select file before Bug save", "Client pending memory", "BugCollaboration.js::queuePendingCreateAttachments", "Validate and retain File object in browser memory; no S3 write", "EVID-ATTACH"),
-        ("FLOW-ATTACH-UPLOAD", "Upload/flush after activation", "PUT Attachments/content", "BugCollaboration.js::uploadFilesToSavedBug; content.js::prepareAttachmentWrite", "Persist PostgreSQL metadata and S3 binary", "EVID-ATTACH"),
         ("FLOW-ATTACH-DOWNLOAD", "Choose Download", "GET Attachments/content", "BugCollaboration.js::onDownloadAttachment", "Read authorized S3 binary; return safe filename/content", "EVID-ATTACH"),
         ("FLOW-ATTACH-DELETE", "Confirm Delete", "DELETE Attachments", "BugCollaboration.js::onDeleteAttachment", "Delete authorized metadata/S3 object; preserve Bug", "EVID-ATTACH"),
         ("FLOW-HISTORY-READ", "Open History / Show More", "GET HistoryEvents/HistoryLogs", "srv/bug-service/history.js", "Read paged immutable audit records; no mutation", "EVID-HISTORY"),
@@ -586,8 +824,6 @@ def _flow_rows(language):
             "FLOW-ACTIVE-UPDATE": ("Lưu Bug đã sửa", "Cập nhật Bug sau khi kiểm tra permission/transition"),
             "FLOW-ASSIGN": ("Xác nhận Developer", "Cập nhật assignee/status/next processor/history/notification"),
             "FLOW-COMMENT-CREATE": ("Thêm bình luận", "Cấp quyền người tham gia; lưu metadata bình luận"),
-            "FLOW-ATTACH-QUEUE": ("Chọn tệp trước khi lưu Bug", "Validate và giữ File trong bộ nhớ trình duyệt; chưa ghi S3"),
-            "FLOW-ATTACH-UPLOAD": ("Tải lên sau khi activate", "Lưu metadata PostgreSQL và binary S3"),
             "FLOW-ATTACH-DOWNLOAD": ("Chọn tải xuống", "Đọc binary S3 đã cấp quyền; trả tên/nội dung an toàn"),
             "FLOW-ATTACH-DELETE": ("Xác nhận xóa", "Xóa metadata/S3 object đã cấp quyền; giữ nguyên Bug"),
             "FLOW-HISTORY-READ": ("Mở Lịch sử / Xem thêm", "Đọc audit record bất biến có phân trang; không mutation"),
@@ -622,16 +858,33 @@ def _fill_implementation(workbook, language):
     _write(sheet, "AC4", DOCUMENT_DATE.isoformat(), wrap=False)
     _write(sheet, "X5", "Reviewed by:" if language == "en" else "Người review:", wrap=False)
     _write(sheet, "AC5", "Pending" if language == "en" else "Chờ duyệt", wrap=False)
-    headers = ["Flow ID", "Trigger / request", "Exact source", "Transaction / data effect", "Evidence ID"]
-    if language == "vi":
-        headers = ["Mã luồng", "Trigger / request", "Source chính xác", "Transaction / ảnh hưởng dữ liệu", "Mã evidence"]
-    rows = [(flow, f"{trigger}; {request}", source, effect, evidence) for flow, trigger, request, source, effect, evidence in _flow_rows(language)]
+    if language != "en":
+        raise ValueError("Technical Specification v0.8 is an English-only SAP490 submission")
+    _unmerge_rows(sheet, 7, 500)
+    _clear_values(sheet, 7, 500, 2, 33)
+    rows = []
+    source_sections = _technical_implementation_sections()
+    # Preserve only current trace IDs; retired browser queue/upload helpers must not
+    # reappear in the mentor-facing Technical Specification.
+    for section in source_sections:
+        if section["trace"].startswith("TI-COLLAB-01"):
+            section["trace"] += "; FLOW-COMMENT-CREATE"
+    for section in source_sections + _supplemental_implementation_sections():
+        rows.append((section["title"], "Technical trace ID", section["trace"]))
+        for number, label, value in section["items"]:
+            rows.append(("", f"{number}. {label}", value))
     end = _write_template_table(
         sheet, 7,
-        [("B", "E"), ("F", "J"), ("K", "O"), ("P", "V"), ("W", "AG")],
-        headers, rows, workbook["Message Definition"],
+        [("B", "F"), ("G", "K"), ("L", "AG")],
+        ["Function / action", "Implementation item", "Current technical implementation and evidence"],
+        rows, workbook["Message Definition"],
     )
-    _set_print(sheet, f"B1:AG{end}", "1:7", fit_height=3)
+    for row in range(8, end + 1):
+        if sheet[f"B{row}"].value:
+            sheet.row_dimensions[row].height = 28
+        else:
+            sheet.row_dimensions[row].height = 42
+    _set_print(sheet, f"B1:AG{end}", "1:7")
 
 
 def _localize_template_headings(workbook):
@@ -671,8 +924,8 @@ def _localize_template_headings(workbook):
 
 
 def generate_technical_specification(language):
-    if language not in {"en", "vi"}:
-        raise ValueError(f"Unsupported language: {language}")
+    if language != "en":
+        raise ValueError("Technical Specification v0.8 is an English-only SAP490 submission")
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     output = OUTPUT_DIR / f"Technical_Specification_IDTS_SAP01_{language}_v{VERSION}.xlsx"
     shutil.copy2(TEMPLATE, output)
@@ -680,6 +933,10 @@ def generate_technical_specification(language):
     for name, item in list(workbook.defined_names.items()):
         if "#REF!" in str(item.attr_text):
             del workbook.defined_names[name]
+    for sheet in workbook.worksheets:
+        for name, item in list(sheet.defined_names.items()):
+            if "#REF!" in str(item.attr_text):
+                del sheet.defined_names[name]
 
     _fill_cover_and_history(workbook, language)
     _fill_intro_scope_assumptions(workbook, language)

@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTION_BLOCKED_PENDING_PRECONDITION",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T17:20:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "caseId": "UAT-AUTH-003",
+  "expectedResult": "Platform role and mapped IDTS role must intentionally differ.",
+  "actualResult": "No controlled role-mismatch identity or role-fixture mechanism is available in this session. Mutating production-like role mapping is outside NhanT UAT authority.",
+  "candidateOutcome": "NOT_EXECUTABLE_WITH_CURRENT_PRECONDITION",
+  "reviewBoundary": "DonHV provisions a disposable mismatched identity/mapping and restores it after execution.",
+  "evidence": [],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "No unauthorized identity, mutation, request, comment, attachment, or unrelated user data was used."
+  },
+  "issueClassification": "role-mismatch precondition unavailable",
+  "limitations": [
+    "No controlled role-mismatch identity or role-fixture mechanism is available in this session. Mutating production-like role mapping is outside NhanT UAT authority."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10962",
+    "reviewDate": "2026-08-04",
+    "category": "VALID_PRECONDITION_BLOCKER",
+    "currentStatus": "BLOCKED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
+}

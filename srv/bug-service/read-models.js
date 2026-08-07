@@ -418,13 +418,17 @@ async function enrichBugCapabilities (bugs, req, entities) {
       row.canMoveToPending = false
       row.canResubmit = false
       row.canAddComment = false
+      row.canEdit = false
+      row.canManageAttachments = false
+      row.canReassignRetestOwner = false
       row.assigneeFieldControl = FIELD_CONTROL.READ_ONLY
+      row.bugRequiredFieldControl = FIELD_CONTROL.READ_ONLY
+      row.bugOptionalFieldControl = FIELD_CONTROL.READ_ONLY
     }
     return
   }
 
   const actorRole = actor.role_code
-  const isCoordinator = COORDINATOR_ROLES.has(actorRole)
 
   let actorDeveloperProfileID = null
   if (actorRole === USER_ROLE.DEVELOPER) {
@@ -441,28 +445,40 @@ async function enrichBugCapabilities (bugs, req, entities) {
       capabilityInputs.byID.get(row.ID) ||
       capabilityInputs.byBugNumber.get(row.bugNumber) ||
       {}
-    const status = row.status_code ?? rowCapabilityInputs.status_code
-    const assigneeID = row.assignee_ID ?? rowCapabilityInputs.assignee_ID
-    const allowedTransitions = ALLOWED_TRANSITIONS[status] || []
-    const isAssignedDev = !!(actorDeveloperProfileID && assigneeID === actorDeveloperProfileID)
-
-    row.canMarkInReview = allowedTransitions.includes(STATUS.IN_REVIEW) && isAssignedDev
-    row.canStartProgress = allowedTransitions.includes(STATUS.IN_PROGRESS) && isAssignedDev
-    row.canResolve = allowedTransitions.includes(STATUS.RESOLVED) && isAssignedDev
-    row.canRequestMoreInfo = allowedTransitions.includes(STATUS.NEED_MORE_INFORMATION) && isAssignedDev
-    row.canReject = allowedTransitions.includes(STATUS.REJECTED) && isAssignedDev
-
-    row.canSendToRetest = allowedTransitions.includes(STATUS.RETEST_REQUIRED) && isCoordinator
-    row.canClose = allowedTransitions.includes(STATUS.CLOSED) && isCoordinator
-    row.canReopen = allowedTransitions.includes(STATUS.REOPENED) && isCoordinator
-    row.canAssign = allowedTransitions.includes(STATUS.ASSIGNED) && isCoordinator
-    row.canMoveToPending = allowedTransitions.includes(STATUS.PENDING_ASSIGNMENT) && isCoordinator
-    row.canResubmit = status === STATUS.NEED_MORE_INFORMATION && allowedTransitions.includes(STATUS.ASSIGNED) && isCoordinator && !!assigneeID
-    row.canAddComment = COMMENT_ROLES.has(actorRole)
-    row.assigneeFieldControl = isCoordinator && (!status || allowedTransitions.includes(STATUS.ASSIGNED))
-      ? FIELD_CONTROL.OPTIONAL
-      : FIELD_CONTROL.READ_ONLY
+    applyBugCapabilities(row, {
+      actorRole,
+      actorDeveloperProfileID,
+      status: row.status_code ?? rowCapabilityInputs.status_code,
+      assigneeID: row.assignee_ID ?? rowCapabilityInputs.assignee_ID
+    })
   }
+}
+
+function applyBugCapabilities (row, { actorRole, actorDeveloperProfileID, status, assigneeID }) {
+  const allowedTransitions = ALLOWED_TRANSITIONS[status] || []
+  const isCoordinator = COORDINATOR_ROLES.has(actorRole)
+  const isAssignedDev = !!(actorDeveloperProfileID && assigneeID === actorDeveloperProfileID)
+  const isClosed = status === STATUS.CLOSED
+
+  row.canMarkInReview = allowedTransitions.includes(STATUS.IN_REVIEW) && isAssignedDev
+  row.canStartProgress = allowedTransitions.includes(STATUS.IN_PROGRESS) && isAssignedDev
+  row.canResolve = allowedTransitions.includes(STATUS.RESOLVED) && isAssignedDev
+  row.canRequestMoreInfo = allowedTransitions.includes(STATUS.NEED_MORE_INFORMATION) && isAssignedDev
+  row.canReject = allowedTransitions.includes(STATUS.REJECTED) && isAssignedDev
+  row.canSendToRetest = allowedTransitions.includes(STATUS.RETEST_REQUIRED) && isCoordinator
+  row.canClose = allowedTransitions.includes(STATUS.CLOSED) && isCoordinator
+  row.canReopen = allowedTransitions.includes(STATUS.REOPENED) && isCoordinator
+  row.canAssign = allowedTransitions.includes(STATUS.ASSIGNED) && isCoordinator
+  row.canMoveToPending = allowedTransitions.includes(STATUS.PENDING_ASSIGNMENT) && isCoordinator
+  row.canResubmit = status === STATUS.NEED_MORE_INFORMATION && allowedTransitions.includes(STATUS.ASSIGNED) && isCoordinator && !!assigneeID
+  row.canAddComment = COMMENT_ROLES.has(actorRole) && !isClosed
+  row.canEdit = !isClosed && (isCoordinator || isAssignedDev)
+  row.canManageAttachments = !isClosed && (isCoordinator || isAssignedDev)
+  row.canReassignRetestOwner = actorRole === USER_ROLE.PM
+  row.assigneeFieldControl = !isClosed && isCoordinator && (!status || allowedTransitions.includes(STATUS.ASSIGNED)) ? FIELD_CONTROL.OPTIONAL : FIELD_CONTROL.READ_ONLY
+  row.bugRequiredFieldControl = !isClosed && isCoordinator ? FIELD_CONTROL.MANDATORY : FIELD_CONTROL.READ_ONLY
+  row.bugOptionalFieldControl = !isClosed && isCoordinator ? FIELD_CONTROL.OPTIONAL : FIELD_CONTROL.READ_ONLY
+  return row
 }
 
 function ensureCapabilitySelectDependencies (req) {
@@ -553,6 +569,7 @@ async function readCapabilityInputsFromEntity (rows, entity, req, capabilityInpu
 module.exports = {
   readAssignableDevelopers,
   buildAssignableDeveloperRows,
+  applyBugCapabilities,
   enrichBugDisplayFields,
   enrichBugCapabilities,
   ensureCapabilitySelectDependencies

@@ -115,3 +115,8 @@ Ví dụ, `description`, `stepsToReproduce`, `actualResult`, và `expectedResult
 **English.** Caller: `annotations.cds` during CAP compilation. Each `annotate BugService.<Entity> with { ... }` attaches human-readable labels to the existing OData fields; it does not create fields. Callee: Fiori Elements reads those labels from `$metadata` when rendering forms, tables, and value helps. Input is the service entity/property name; output is display metadata; database data is unchanged. When a label is wrong, verify the target symbol exists in `srv/service.cds` before changing UI code.
 
 **Tiếng Việt.** Caller là `annotations.cds` lúc CAP compile. Mỗi `annotate BugService.<Entity> with { ... }` gắn label dễ đọc vào field OData đã tồn tại; nó không tạo field mới. Callee là Fiori Elements, framework đọc label từ `$metadata` để dựng form, table và value help. Input là tên entity/property; output là display metadata; dữ liệu database không đổi. Khi label sai hoặc không hiện, kiểm target thật trong `srv/service.cds` trước khi sửa JavaScript UI.
+## IDTS-125 dynamic Bug fields (2026-08-05)
+
+**English.** Editable Bug properties now reference required or optional dynamic field control. Tester/PM see mandatory/optional inputs; Developers see those same Bug fields as read-only even when the assigned Developer opens edit mode for attachments.
+
+**Tiếng Việt.** Property Bug có thể edit giờ tham chiếu dynamic field control bắt buộc hoặc tùy chọn. Tester/PM thấy input mandatory/optional; Developer thấy chính các field Bug đó read-only dù assignee mở edit mode để thêm attachment.

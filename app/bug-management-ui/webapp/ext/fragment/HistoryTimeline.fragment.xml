@@ -8,7 +8,7 @@
     <!-- Handoff review nằm trong History nhưng không ghi audit/status; press mở dialog read-only. -->
     <section:SmartAssignmentSection
       class="sapUiTinyMarginBottom"
-      visible="{= ${IsActiveEntity} === true }"
+      visible="{= ${IsActiveEntity} === true &amp;&amp; ${status_code} !== 'CLOSED' }"
     >
       <Toolbar>
         <Text text="{i18n>handoffSummarySectionHint}" />

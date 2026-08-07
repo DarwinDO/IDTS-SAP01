@@ -22,7 +22,7 @@ Hệ thống được xây dựng để hỗ trợ quy trình quản lý bug/def
 Mục tiêu chính gồm:
 
 * Số hóa quy trình ghi nhận bug/defect.  
-* Cho phép Tester tạo bug report đầy đủ thông tin.  
+* Chỉ cho phép Tester tạo bug report đầy đủ thông tin; PM và Developer không tạo Bug mới.
 * Hỗ trợ kiểm tra bug đã tồn tại hay chưa.  
 * Cho phép Tester assign bug cho Developer phù hợp.  
 * Cho phép Developer xem bug được giao, phản hồi và cập nhật trạng thái.  
@@ -144,9 +144,9 @@ Tester chọn module/category
 → Hệ thống kiểm tra workload/availability nếu có  
 → Assign bug cho Developer
 
-**English clarification:** IDTS must not automatically pick a Developer during create. If the Tester or PM does not explicitly select an assignee, the bug starts as `Pending Assignment`.
+**English clarification:** Only a Tester can create a new Bug. IDTS must not automatically pick a Developer during create. If the Tester does not explicitly select an assignee, the bug starts as `Pending Assignment`.
 
-**Tiếng Việt:** IDTS không được tự chọn Developer khi tạo bug. Nếu Tester hoặc PM không chủ động chọn assignee, bug sẽ bắt đầu ở `Pending Assignment`.
+**Tiếng Việt:** Chỉ Tester được tạo Bug mới. IDTS không được tự chọn Developer khi tạo bug. Nếu Tester không chủ động chọn assignee, bug sẽ bắt đầu ở `Pending Assignment`.
 
 Nếu Developer đang bận hoặc workload không phù hợp:
 
@@ -177,6 +177,10 @@ Business rule là:
 Tester can edit or add information to a submitted bug report  
 as long as the bug is not closed.
 
+Closed Bug là read-only aggregate: không edit Bug, đổi Developer, thêm comment, mutation attachment, mutation AI hoặc gọi lifecycle action khác. Existing comments/attachments/history vẫn đọc được và attachment cũ vẫn download được. Muốn tiếp tục xử lý phải dùng `Reopen Bug`; PM chỉ có thêm ngoại lệ điều phối `Reassign Retest Owner`.
+
+Bug record không hỗ trợ hard delete ở bất kỳ trạng thái nào; việc kết thúc hoặc tiếp tục xử lý phải đi qua lifecycle action để giữ audit trace.
+
 Nếu bug đã assign cho Developer rồi, sau khi Tester chỉnh sửa thông tin, hệ thống nên notify Developer.
 
 ---
@@ -197,6 +201,8 @@ Resolved
 Closed  
 Rejected  
 Reopened
+
+Hệ thống lưu `retestOwner` riêng để giữ Tester chịu trách nhiệm retest qua các lần close/reopen. `retestOwner` không phải Developer assignee và không phải current action owner. PM có thể reassign retest owner nếu Tester hiện tại không còn khả dụng mà không tự đổi status hoặc assignee.
 
 ---
 
@@ -319,6 +325,8 @@ Mô hình đúng:
 
 ## **7.3. Status scope**
 
+Current master-data scope is 8 Application Components, 8 Defect Categories, and 31 active valid Component Category pairs. It includes `IDTS AI Advisory` with CAP Backend, Integration, Performance, and Data Quality. This taxonomy supports classification and Smart Assign candidate filtering; it does not extend scope to autonomous AI assignment.
+
 Bộ status trong MVP:
 
 * New (legacy/import compatibility only)
@@ -419,3 +427,8 @@ Sau buổi họp mentor gần nhất, team không nên dành sprint tiếp theo 
 - Note/reason chỉ bắt buộc ở các transition cần giải thích rõ: request more information, reject, resolve và reopen.
 - Fiori Bug Detail phải ưu tiên assignee và status, status edit bằng dropdown/value help, field quan trọng phải dễ nhập, và severity/environment nên nằm ở vùng thông tin phụ hoặc bên phải khi có thể.
 - DonHV hiện là Backend CAP lead và owner phần backend bug fixing. NhanT hỗ trợ backend verification và QA. DatDT lead Fiori/UI5. SangVN hỗ trợ Fiori/UI5.
+## IDTS-125 Role and assignee mutation boundary
+
+**English:** A Developer who is not the assignee may read and comment only. The assigned Developer may comment, upload/update attachments, and use permitted lifecycle actions, but may not edit Bug business fields. On an open Bug, PM may delete any attachment; Tester or Developer may delete only an attachment that they uploaded. A committed deletion creates one sanitized business-history event and one field-level log at draft SAVE. Fiori may open an edit shell for supported attachment work, while CAP independently validates the persisted parent Bug and uploader metadata. CLOSED remains read-only.
+
+**Tiếng Việt:** Developer không phải assignee chỉ được đọc và comment. Developer assignee được comment, upload/update attachment và dùng lifecycle action được phép nhưng không được sửa field nghiệp vụ Bug. Trên Bug đang mở, PM được xóa mọi attachment; Tester hoặc Developer chỉ được xóa attachment do chính mình upload. Delete đã commit tạo một business-history event đã sanitize và một field-level log tại draft SAVE. Fiori có thể mở edit shell cho attachment work được hỗ trợ, còn CAP kiểm tra độc lập Bug cha và uploader metadata đã persist. CLOSED vẫn read-only.

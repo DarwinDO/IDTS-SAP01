@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "UAT-UX-004",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T15:28:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "testRecord": {
+    "sourceCase": "UAT-COM-001",
+    "action": "BugService.addComment"
+  },
+  "expectedResult": "The UI shows a safe actionable message without SQL, stack trace, provider body, token, or private endpoint.",
+  "actualResult": "The failed valid-comment request displayed only the actionable safe message 'The comment could not be posted. Please refresh and try again.' No SQL, stack trace, provider body, token, endpoint, or session detail appeared in the UI or comment-filtered console inspection.",
+  "candidateOutcome": "MEETS_EXPECTED_RESULT",
+  "reviewBoundary": "This UX recovery case can meet its sanitization expectation while UAT-COM-001 separately records the underlying business-action failure. DonHV must review both together.",
+  "evidence": [
+    {
+      "id": "UAT-UX-004-E01",
+      "file": "01-sanitized-backend-error.png",
+      "description": "Sanitized actionable SAP error for a real controlled backend request failure.",
+      "sha256": "75BAC5242D660564AF0DC2991BCEDC987F3B0F2CB4160E5858374F37BDC0D526"
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "The screenshot contains no raw backend detail or sensitive session information."
+  },
+  "limitations": [
+    "The Browser surface did not expose sanitized response status/body; the catalog allows a safe error screenshot as evidence."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10962",
+    "reviewDate": "2026-08-04",
+    "category": "RETAINED_TRUTHFUL_POSITIVE",
+    "currentStatus": "CANDIDATE_EVIDENCE_RETAINED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
+}

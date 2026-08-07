@@ -10,6 +10,7 @@ annotate service.Bugs with @(
     sapModule_ID,
     applicationComponent_ID,
     defectCategory_ID,
+    reporter_ID,
     assignee_ID,
     nextProcessorUser_ID,
     nextProcessorRole_code,

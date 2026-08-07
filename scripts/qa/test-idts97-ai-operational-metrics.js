@@ -198,20 +198,27 @@ async function main () {
     { featureType_code: 'BUG_SUMMARY', providerAlias: 'mock', modelAlias: 'idts-97-model', operationStatus: 'SUCCESS', latencyMs: 10, reviewState_code: 'ACCEPTED' },
     { featureType_code: 'BUG_SUMMARY', providerAlias: 'mock', modelAlias: 'idts-97-model', operationStatus: 'AI_TIMEOUT', latencyMs: 30, reviewState_code: 'REJECTED' },
     { featureType_code: 'BUG_SUMMARY', providerAlias: 'mock', modelAlias: 'idts-97-model', operationStatus: 'AI_CONFIGURATION_INCOMPLETE', latencyMs: 5, reviewState_code: 'IGNORED' },
-    { featureType_code: 'BUG_SUMMARY', providerAlias: 'mock', modelAlias: 'idts-97-model', operationStatus: 'AI_PROVIDER_ERROR', latencyMs: null, reviewState_code: 'PENDING' }
+    { featureType_code: 'BUG_SUMMARY', providerAlias: 'mock', modelAlias: 'idts-97-model', operationStatus: 'AI_PROVIDER_ERROR', latencyMs: null, reviewState_code: 'PENDING' },
+    { featureType_code: 'BUG_SUMMARY', providerAlias: 'mock', modelAlias: 'idts-97-model', operationStatus: 'AI_BAD_REQUEST', latencyMs: null, reviewState_code: 'PENDING' },
+    { featureType_code: 'BUG_SUMMARY', providerAlias: 'mock', modelAlias: 'idts-97-model', operationStatus: 'AI_RATE_LIMITED', latencyMs: null, reviewState_code: 'PENDING' },
+    { featureType_code: 'BUG_SUMMARY', providerAlias: 'mock', modelAlias: 'idts-97-model', operationStatus: 'AI_PROVIDER_5XX', latencyMs: null, reviewState_code: 'PENDING' }
   ], {
     windowStart: '2026-07-01T00:00:00.000Z',
     windowEnd: '2026-07-31T00:00:00.000Z'
   })[0]
-  expectEqual('aggregate counts all audited feature requests', sampleAggregate.requestCount, 4)
+  expectEqual('aggregate counts all audited feature requests', sampleAggregate.requestCount, 7)
   expectEqual('aggregate counts successes', sampleAggregate.successCount, 1)
-  expectEqual('aggregate counts failures', sampleAggregate.failureCount, 3)
+  expectEqual('aggregate counts failures', sampleAggregate.failureCount, 6)
+  expectEqual('aggregate distinguishes bad request', sampleAggregate.badRequestCount, 1)
+  expectEqual('aggregate distinguishes rate limiting', sampleAggregate.rateLimitedCount, 1)
+  expectEqual('aggregate distinguishes provider/server failure', sampleAggregate.provider5xxCount, 1)
   expectEqual('aggregate distinguishes timeout', sampleAggregate.timeoutCount, 1)
   expectEqual('aggregate distinguishes provider unavailable', sampleAggregate.unavailableCount, 1)
+  expectEqual('aggregate retains unknown failures separately', sampleAggregate.otherFailureCount, 1)
   expectEqual('aggregate counts accepted review', sampleAggregate.acceptedCount, 1)
   expectEqual('aggregate counts rejected review', sampleAggregate.rejectedCount, 1)
   expectEqual('aggregate counts ignored review', sampleAggregate.ignoredCount, 1)
-  expectEqual('aggregate counts pending review', sampleAggregate.pendingCount, 1)
+  expectEqual('aggregate counts pending review', sampleAggregate.pendingCount, 4)
   expectEqual('aggregate counts latency samples only', sampleAggregate.latencySampleCount, 3)
   expectEqual('aggregate calculates average latency', sampleAggregate.averageLatencyMs, 15)
   expectEqual('aggregate calculates max latency', sampleAggregate.maxLatencyMs, 30)

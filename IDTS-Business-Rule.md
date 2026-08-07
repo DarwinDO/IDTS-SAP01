@@ -115,7 +115,7 @@ PM được phép:
 * Receive escalation notification  
 * Request reassignment when needed
 
-PM không phải người trực tiếp tạo bug, fix bug hoặc cập nhật technical note thay Developer.
+PM không phải người trực tiếp tạo bug, fix bug hoặc cập nhật technical note thay Developer. Bug report mới chỉ được tạo bởi Tester; quyền PM không được dùng để bỏ qua rule này.
 
 ---
 
@@ -355,9 +355,27 @@ Khi Tester chọn **“Chưa có Developer phù hợp”** và submit bug, bug s
 | Tester chọn Developer cụ thể | Submit bug và assign cho Developer đó | Assigned |
 | Tester chọn “Chưa có Developer phù hợp” | Submit bug để ghi nhận, chưa assign Developer | Pending Assignment |
 
-**English clarification:** IDTS must not automatically pick a Developer during create. If the Tester or PM does not explicitly select an assignee, the bug starts as `Pending Assignment`.
+**English clarification:** IDTS must not automatically pick a Developer during create. Only a Tester can create a new Bug. If the Tester does not explicitly select an assignee, the bug starts as `Pending Assignment`.
 
-**Giải thích tiếng Việt:** IDTS không được tự chọn Developer khi tạo bug. Nếu Tester hoặc PM không chủ động chọn assignee, bug sẽ bắt đầu ở `Pending Assignment`.
+**Giải thích tiếng Việt:** IDTS không được tự chọn Developer khi tạo bug. Chỉ Tester được tạo Bug mới. Nếu Tester không chủ động chọn assignee, bug sẽ bắt đầu ở `Pending Assignment`.
+
+---
+
+## **BR-15A - Retest owner phải được lưu bền vững**
+
+Mỗi Bug phải có `retestOwner` để xác định Tester chịu trách nhiệm xác nhận kết quả. Khi Tester tạo Bug, hệ thống khởi tạo `retestOwner` bằng chính Tester đó. Khi một Tester khác thực hiện retest/reopen hoặc PM điều phối thay đổi người retest, hệ thống cập nhật `retestOwner` theo action được phép và ghi history. `retestOwner` không thay thế Developer `assignee` và không thay thế `nextProcessor`; ba khái niệm này có trách nhiệm khác nhau.
+
+PM được phép dùng action riêng `Reassign Retest Owner` khi Tester hiện tại không còn khả dụng. Việc đổi retest owner không tự đổi status, Developer assignee hoặc lifecycle.
+
+---
+
+## **BR-15B - Closed Bug là read-only aggregate**
+
+Khi Bug ở trạng thái `Closed`, toàn bộ aggregate nghiệp vụ được khóa đối với mutation thông thường. Người dùng không được edit Bug, assign/reassign Developer, thêm comment, upload/update/delete attachment, chạy hoặc review/apply AI suggestion, hay gọi lifecycle action khác. Dữ liệu comment, attachment, history và AI audit cũ vẫn được đọc; attachment cũ vẫn có thể download.
+
+Bug record không hỗ trợ hard delete ở bất kỳ trạng thái nào vì phải bảo toàn trace và audit; người dùng phải dùng lifecycle action phù hợp để kết thúc hoặc mở lại xử lý.
+
+Hai ngoại lệ có kiểm soát là `Reopen Bug` và PM `Reassign Retest Owner`. Sau khi reopen thành công, các mutation bình thường mới được phép trở lại theo role và status hiện hành. Email outbox đã commit trước đó vẫn có thể hoàn thành vì đây là xử lý hạ tầng, không phải mutation mới của Closed Bug.
 
 ---
 
@@ -854,6 +872,8 @@ Các rule dưới đây làm rõ baseline hiện hành để đồng bộ với 
 
 ## **BR-42 - Bug classification phải tách SAP Module, Application Component và Defect Category**
 
+The approved IDTS-122 baseline has 8 Application Components, 8 Defect Categories, and 31 active valid pairs. The `IDTS AI Advisory` component is paired only with CAP Backend, Integration, Performance, and Data Quality. A selected pair must be active together with both referenced master-data rows. Developer Responsibility narrows the candidate list; the authenticated user still makes the assignment decision.
+
 Khi tạo hoặc cập nhật bug, hệ thống không nên gộp mọi thứ vào một field `module/category` mơ hồ.
 
 Mô hình phân loại hiện hành:
@@ -980,3 +1000,18 @@ Các rule bắt buộc:
 **Duplicate/similar implementation rule:** `suggestSimilarBugs` may return ranked candidates and a suggested relation label, but these values are review hints only. It must exclude the source bug, tolerate disabled/failed/malformed embedding output through deterministic fallback, and must not create `DuplicateLinks` or block create/edit/lifecycle actions. A persisted source-bug check may create a sanitized `AiSuggestions` audit row; a pre-create check must not invent a persisted bug reference.
 
 **Quy tắc triển khai duplicate/similar:** `suggestSimilarBugs` có thể trả danh sách ứng viên đã xếp hạng và nhãn relation gợi ý, nhưng đây chỉ là thông tin hỗ trợ review. Action phải loại bug nguồn, chịu được AI bị tắt/lỗi/embedding sai bằng deterministic fallback, và không được tạo `DuplicateLinks` hoặc chặn create/edit/lifecycle. Check trên bug đã lưu có thể tạo `AiSuggestions` audit row đã sanitize; check trước create không được tạo bug reference giả.
+## IDTS-125 Bug mutation authorization clarification / Làm rõ quyền sửa Bug
+
+**English.** Team-visible Developer access is read-and-discuss access, not generic Bug editing. A non-assignee Developer may read and comment but may not change Bug fields, enter the edit draft, or upload/update/delete attachments. The assigned Developer may comment, manage attachments, and invoke only the lifecycle actions explicitly allowed for the current status; opening the Fiori edit shell solely for attachment upload does not grant Bug-field mutation. Tester and PM retain their documented coordination/edit permissions. CAP enforces this matrix on active UPDATE, draft EDIT/PATCH/SAVE, and attachment mutations; Fiori capabilities are guidance only. Closed aggregate immutability remains unchanged.
+
+**Tiếng Việt.** Quyền Developer xem Bug trong team là quyền đọc và thảo luận, không phải quyền Edit Bug chung. Developer không phải assignee chỉ được đọc/comment; không được sửa field Bug, mở edit draft hoặc upload/update/delete attachment. Developer assignee được comment, quản lý attachment và chỉ gọi lifecycle action đã được cho phép theo status; việc mở edit shell của Fiori chỉ để upload attachment không cấp quyền sửa field Bug. Tester và PM giữ quyền edit/điều phối đã được mô tả. CAP chặn đồng nhất ở active UPDATE, draft EDIT/PATCH/SAVE và mutation attachment; capability Fiori chỉ là hướng dẫn UX. Closed aggregate vẫn immutable.
+
+## BR-51 - Attachment deletion follows uploader ownership and committed audit
+
+On an open Bug, PM may delete any attachment. A Tester or Developer may delete only an attachment that they uploaded. Authorization uses the persisted attachment parent and uploader metadata; a client-supplied parent ID cannot grant permission. A denied delete must not change attachment metadata or history.
+
+When deletion is committed through draft SAVE, the system writes exactly one readable `HistoryEvent` and one field-level `HistoryLog` using only sanitized attachment ID/filename metadata. Discarding the draft creates no deletion history. CLOSED Bugs continue to reject attachment mutation. Physical object deletion may complete asynchronously through the SAP attachment outbox; history represents the committed business deletion, not proof of immediate S3 removal.
+
+Trên Bug đang mở, PM được xóa mọi attachment. Tester hoặc Developer chỉ được xóa attachment do chính mình upload. Phân quyền phải dùng Bug cha và uploader metadata đã persist; parent ID do client gửi không được dùng để cấp quyền. Delete bị từ chối không được thay đổi metadata hoặc history.
+
+Khi delete được commit qua draft SAVE, hệ thống ghi đúng một `HistoryEvent` dễ đọc và một `HistoryLog` ở mức field, chỉ dùng attachment ID/filename đã sanitize. Discard draft không tạo lịch sử xóa. Bug CLOSED tiếp tục chặn attachment mutation. Việc xóa object vật lý có thể hoàn tất bất đồng bộ qua SAP attachment outbox; history phản ánh business deletion đã commit, không phải bằng chứng S3 đã xóa ngay lập tức.

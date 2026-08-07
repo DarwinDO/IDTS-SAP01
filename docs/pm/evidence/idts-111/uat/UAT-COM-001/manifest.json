@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "UAT-COM-001",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-04T16:39:36+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "testRecord": {
+    "bugNumber": "BUG-0025",
+    "title": "IDTS-111 UAT-BUG-001 NhanT 20260803-1446",
+    "comment": "IDTS-111 UAT-COM-001 current runtime NhanT 20260804-1645"
+  },
+  "expectedResult": "The sanitized comment, actor, role, and timestamp persist once.",
+  "actualResult": "On the current deployed runtime, SAP reported Comment posted. The controlled comment appeared once with actor NhanT, role Tester, timestamp Aug 4, 2026 4:39 PM, and remained present after reload.",
+  "candidateOutcome": "MEETS_EXPECTED_RESULT",
+  "reviewBoundary": "Current-runtime candidate PASS only; historical failure evidence is retained and DonHV still owns final acceptance/workbook integration.",
+  "evidence": [
+    {
+      "id": "UAT-COM-001-E01",
+      "file": "01-before-post.png",
+      "description": "Controlled comment entered before posting while the list still shows No comments yet.",
+      "sha256": "54B904B98EBD7159C605D8F0FBDCDB18D08054A6B40E654183A5D03B1FD1007D"
+    },
+    {
+      "id": "UAT-COM-001-E02",
+      "file": "02-post-failure.png",
+      "description": "Safe SAP error after Post Comment with the input retained and no stored comment.",
+      "sha256": "75BAC5242D660564AF0DC2991BCEDC987F3B0F2CB4160E5858374F37BDC0D526"
+    },
+    {
+      "id": "UAT-COM-001-E03",
+      "file": "03-rerun-safe-post-failure.png",
+      "description": "Fresh 2026-08-03 targeted rerun: safe post failure, retained input, and no persisted comment.",
+      "sha256": "E0399525FE40E1092044C53BDE8E5D1534822423DA35769FA2FFD09EFCF9535A"
+    },
+    {
+      "id": "UAT-COM-001-E04",
+      "file": "04-current-runtime-before-post.png",
+      "description": "Current-runtime controlled comment before posting.",
+      "sha256": "CAD89BDDF2ACBB9F4E3E219F6705345B5B38F9EC9C9D8341C6A3541C0264F3C5"
+    },
+    {
+      "id": "UAT-COM-001-E05",
+      "file": "05-current-runtime-post-result.png",
+      "description": "Current-runtime success result with one NhanT/Tester comment.",
+      "sha256": "B42B29AD341C30ECCA646049F56ABE0CF9A9B244127175DC4B4995E0BF647CCB"
+    },
+    {
+      "id": "UAT-COM-001-E06",
+      "file": "06-current-runtime-reload.png",
+      "description": "Reload proof for the persisted comment.",
+      "sha256": "C5091233B8D3784EC15B47FBDE5DAA3805596325B7EEDA7A9F2CE452079C2082"
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "The retained screenshots contain controlled UAT data only and no email, credential, cookie, token, or private endpoint text."
+  },
+  "issueClassification": "historical deployed-runtime failure resolved in current runtime",
+  "limitations": [
+    "The current Browser surface proves UI persistence but does not expose a sanitized HTTP response body or backend trace."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10962",
+    "reviewDate": "2026-08-04",
+    "category": "CURRENT_RUNTIME_POSITIVE",
+    "currentStatus": "CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
+}

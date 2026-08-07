@@ -1,5 +1,9 @@
 # Knowledge: `srv/bug-service/permissions.js`
 
+## IDTS-122 closed-aggregate and create rules
+
+Only Tester may create a new Bug. `assertBugOpenForMutation` is the shared backend lock for a `CLOSED` Bug and returns a safe 409 before ordinary edit, assignment, comment, attachment, AI, or lifecycle mutation. Reopen and PM retest-owner reassignment are explicit caller-level exceptions; never weaken this guard because a Fiori button is hidden.
+
 ## IDTS-89 permission mapping
 
 Authorization is checked on the direct CAP action, not only through Fiori button visibility. The assigned Developer allow-list is `MARK_IN_REVIEW`, `REQUEST_MORE_INFORMATION`, `REJECT_BUG`, `START_PROGRESS`, and `RESOLVE_BUG`. Tester/PM retain coordinator access. A wrong or missing assignee returns 403, and developers do not gain assignment or Move to Pending Assignment access from the new code names.
@@ -230,3 +234,10 @@ Quyền tạo Bug hiện được gom vào `enforceBugCreatePermission()` và `a
   **Phải kiểm tra cùng**: `before NEW` trong `srv/service.js`, visibility của Fiori Create, mapping role khi login và test authorization trực tiếp.
 
 Ẩn Create trên Fiori là UX cần thiết, nhưng trạng thái trình duyệt không phải ranh giới bảo mật; backend check này vẫn bắt buộc.
+## IDTS-125 mutation boundary (2026-08-05)
+
+**English.** `enforceBugEditPermission` allows the draft edit shell only to Tester/PM or the current assignee. `enforceBugWritePermission` and `enforceDeveloperDraftFieldsUnchanged` compare the explicit Bug business-field allow-list and reject Developer field changes with 403. Lifecycle actions keep their separate assignee-aware authorization. Safe breakpoints are immediately before these rejects and before persistence, where only IDs/role/changed field names are inspected.
+
+**Tiếng Việt.** `enforceBugEditPermission` chỉ cho Tester/PM hoặc assignee hiện tại mở draft edit shell. `enforceBugWritePermission` và `enforceDeveloperDraftFieldsUnchanged` so sánh allow-list field nghiệp vụ rõ ràng rồi reject Developer sửa field bằng 403. Lifecycle action vẫn dùng authorization theo assignee riêng. Breakpoint an toàn nằm ngay trước reject và trước persist, chỉ xem ID/role/tên field đổi.
+
+`assertActiveActor` makes every affected write path fail closed when the authenticated platform identity cannot resolve to one active IDTS user. / `assertActiveActor` làm mọi write path liên quan fail-closed khi platform identity đã xác thực không map được tới một IDTS user active.

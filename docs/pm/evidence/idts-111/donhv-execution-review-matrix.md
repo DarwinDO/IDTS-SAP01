@@ -3,11 +3,11 @@
 ## Review baseline
 
 - Candidate PR: `#270`.
-- Candidate head: `44721f53fe2f7588d38f6d6c79ffb0c33026d5d3`.
+- Historical reviewer baseline: `44721f53fe2f7588d38f6d6c79ffb0c33026d5d3`; current pre-commit curation baseline: `70fb5558ba11cf5c8aa977d797b5690fb42b07f4`.
 - Execution baseline: `fbea12cd996d8c1e13bd834fd6e054c8a37c32e6`.
 - Deployed runtime: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`.
 - Reviewer: DonHV, with independent read-only agent reviews used only as advisory input.
-- Evidence integrity: 57 manifests, 61 referenced images, 0 missing file, 0 SHA-256 mismatch.
+- Evidence integrity: 57 manifests, 77 image references, 64 unique image hashes, with zero missing files or hash mismatches in the fresh curation check. The final exact-head gate is still required after commit.
 
 `ACCEPTED_EVIDENCE` means that the submitted evidence truthfully supports the observed result. It does not mean that a blocked case passed, that a product defect is fixed, or that the final UAT workbook is approved.
 
@@ -28,7 +28,7 @@
 | UAT-AI-014 | DOES_NOT_MEET | CATALOG_MISMATCH | Same new-suggestion-ID issue as UAT-AI-010; rerun with audit readback. |
 | UAT-AI-015 | DOES_NOT_MEET | CATALOG_MISMATCH | Same new-suggestion-ID issue as UAT-AI-010; rerun with audit readback. |
 | UAT-AI-016 | BLOCKED | ACCEPTED_BLOCKER | Requires a stable accepted suggestion and controlled stale-source mutation. |
-| UAT-ATT-001 | DOES_NOT_MEET | NEEDS_TARGETED_RERUN | Upload failure is real, but current evidence does not identify metadata, binary, S3, session, or CSRF stage; investigate attachment chain and IDTS-113 environment. |
+| UAT-ATT-001 | DOES_NOT_MEET | BLOCKED — fixture provenance inconsistent | Preserve NhanT's observed failure and all evidence unchanged. The manifest records 44 bytes while retained evidence descriptions refer to 54-byte and 47-byte fixtures, so DonHV cannot accept this as one traceable exact fixture until NhanT reconciles identity and size. |
 | UAT-ATT-002 | BLOCKED | ACCEPTED_BLOCKER | Depends on successful controlled upload. |
 | UAT-ATT-003 | BLOCKED | ACCEPTED_BLOCKER | Depends on a DonHV-approved controlled attachment; do not delete unrelated evidence. |
 | UAT-ATT-004 | BLOCKED | TEST_HARNESS_LIMITATION | Browser chooser blocked the file before application validation; rerun using native/manual chooser. |
@@ -39,7 +39,7 @@
 | UAT-AUTH-002 | BLOCKED | MEMBER_IDENTITY_BLOCKER | Requires a member-owned unmapped SAP identity. |
 | UAT-AUTH-003 | BLOCKED | MEMBER_IDENTITY_BLOCKER | Requires a controlled mismatched-role identity. |
 | UAT-AUTH-004 | BLOCKED | ENVIRONMENT_BLOCKER | Requires controlled XSUAA/session expiry; Smart Assign 401 is not expiry proof. |
-| UAT-AUTH-005 | DOES_NOT_MEET | CONFIRMED_PRODUCT_DEFECT | Blank protected route after logout; tracked by IDTS-117. |
+| UAT-AUTH-005 | MEETS | ACCEPTED_EVIDENCE | Current rerun shows logout ended the session and reopening the protected route redirected to SAP Sign In. The earlier blank-route result remains historical evidence under IDTS-117. |
 | UAT-BUG-001 | MEETS | ACCEPTED_EVIDENCE | Create without assignee and Pending Assignment persistence demonstrated. |
 | UAT-BUG-002 | MEETS | ACCEPTED_EVIDENCE | Create with assignee and reload persistence demonstrated. |
 | UAT-BUG-003 | MEETS | ACCEPTED_EVIDENCE | Required Title validation demonstrated. |
@@ -53,10 +53,10 @@
 | UAT-CLS-002 | MEETS | ACCEPTED_EVIDENCE | Smart Assign selection and reload persistence demonstrated. |
 | UAT-CLS-003 | BLOCKED | ACCEPTED_BLOCKER | Requires an inactive-code/direct-request fixture. |
 | UAT-CLS-004 | MEETS | ACCEPTED_EVIDENCE | Description-only edit did not mutate classification/ownership. |
-| UAT-COM-001 | DOES_NOT_MEET | NEEDS_TARGETED_RERUN | Valid comment failed safely; tracked by IDTS-116, but sanitized HTTP/Network evidence is still required before root-cause confirmation. |
+| UAT-COM-001 | MEETS | ACCEPTED_EVIDENCE | Current rerun shows one controlled Tester comment persisted after reload. The earlier safe posting failure is retained as historical IDTS-116 evidence. |
 | UAT-COM-002 | MEETS | ACCEPTED_EVIDENCE | Empty-comment validation demonstrated. |
-| UAT-COM-003 | BLOCKED | ACCEPTED_BLOCKER | Depends on restoring valid comment posting. |
-| UAT-COM-004 | BLOCKED | ACCEPTED_BLOCKER | Depends on restoring valid comment posting. |
+| UAT-COM-003 | DOES_NOT_MEET | CURRENT_RUNTIME_NEGATIVE | Current rerun accepted and persisted a 1006-character comment instead of enforcing the catalog boundary. Keep as a current negative pending contract/catalog disposition. |
+| UAT-COM-004 | MEETS | ACCEPTED_EVIDENCE | Current rerun stripped markup, persisted safe content, and showed no XSS console marker. |
 | UAT-LIFE-001 | BLOCKED | MEMBER_IDENTITY_BLOCKER | Requires the authorized current processor. |
 | UAT-LIFE-002 | BLOCKED | MEMBER_IDENTITY_BLOCKER | Requires Developer identity. |
 | UAT-LIFE-003 | BLOCKED | FIXTURE_IDENTITY_BLOCKER | Requires an In Review record owned by the authenticated actor. |
@@ -68,22 +68,34 @@
 | UAT-LIFE-014 | DOES_NOT_MEET | CATALOG_MISMATCH | Current `closeBug` contract does not require a reason; revise catalog or make a separate approved business-rule change. Do not label current behavior a product defect. |
 | UAT-LIFE-015 | BLOCKED | FIXTURE_IDENTITY_BLOCKER | Requires a NhanT-owned Rejected record with correction flow. |
 | UAT-UX-001 | MEETS | ACCEPTED_EVIDENCE | Desktop readability/reachability demonstrated. |
-| UAT-UX-002 | DOES_NOT_MEET | CONFIRMED_PRODUCT_DEFECT | Tablet screenshot confirms clipped Classification action label and Similar Bugs reason overflow; tracked by IDTS-120. |
+| UAT-UX-002 | DOES_NOT_MEET | PARTIAL_RECHECK | Current geometry no longer confirms action clipping; candidate reason wrapping still needs a matching fixture before a product-defect conclusion. |
 | UAT-UX-003 | DOES_NOT_MEET | TEST_HARNESS_LIMITATION | Enter/Escape/focus return passed; automated Tab translation is insufficient. Confirm with a physical keyboard before filing an accessibility defect. |
 | UAT-UX-004 | MEETS | ACCEPTED_EVIDENCE | Safe error copy/no raw diagnostic demonstrated. |
 | UAT-UX-005 | MEETS | ACCEPTED_EVIDENCE | Reload/idempotent committed state demonstrated. |
 
 ## Review totals
 
-- 19 positive executions: evidence accepted.
-- 25 blocked executions: blocker evidence accepted, but no PASS claimed.
-- 13 candidate negative executions were dispositioned as:
-  - 3 confirmed product defects: `UAT-AUTH-005`, `UAT-BUG-008`, `UAT-UX-002`.
-  - 5 catalog/semantic mismatches: `UAT-AI-008`, `UAT-AI-010`, `UAT-AI-014`, `UAT-AI-015`, `UAT-LIFE-014`.
-  - 1 environment/session blocker: `UAT-AI-009`.
-  - 3 targeted reruns with insufficient root-cause evidence: `UAT-AI-005`, `UAT-ATT-001`, `UAT-COM-001`.
-  - 1 test-harness limitation: `UAT-UX-003`.
+- Current candidate partition is 22 MEETS / 12 DOES_NOT_MEET / 23 BLOCKED; none is final UAT approval.
+- Current reviewer disposition retains truthful evidence but separately blocks ATT-001 because the preserved fixture sizes are inconsistent.
+- Only `UAT-AI-007`, `UAT-ATT-002` and `UAT-ATT-003` retain stale prerequisites after the current-runtime reruns.
+- AI-005/009 still need immutable suggestion ID plus sanitized Network/audit evidence; UX-002 needs a matching wrapping fixture; UX-003 needs NhanT's physical Tab confirmation.
 
 ## Gate decision
 
 The PR #270 evidence package is internally consistent and may be retained as truthful candidate evidence. It must not be interpreted as final UAT approval. Merge remains gated by NhanT personally reading and acknowledging briefing SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`, by a fresh exact-head QA gate, and by the PR body preserving the candidate/blocker truth above. The UAT workbook and Google Drive artifact remain unchanged.
+
+## Current rerun state
+
+NhanT recorded the required acknowledgment in the repository and Jira comments `10908`/`10909`. Current-runtime evidence is retained, but ATT-001 is reviewer-blocked because its recorded 44/54/47-byte fixture provenance is inconsistent. AI-005/009 still need immutable suggestion ID and sanitized Network/audit evidence; UX-002 needs a matching fixture and UX-003 needs physical-keyboard confirmation. The workbook and Drive artifact remain unchanged.
+
+### 2026-08-04 current-runtime addendum
+
+Current deployed reruns now supersede the old-runtime behavior for `UAT-COM-001` and `UAT-AUTH-005`, which are candidate PASS. `UAT-COM-003`, `UAT-ATT-001`, and `UAT-BUG-008` remain candidate failures with fresh evidence. `UAT-COM-004` passes sanitization/no-execution, `UAT-UX-002` is only partially rechecked, and `UAT-AI-005` still lacks the immutable suggestion ID and sanitized Network response required for diagnostic closure. `UAT-UX-003` remains a physical-keyboard handoff. DonHV still owns final disposition and workbook/Drive synchronization.
+
+### Latest DoNHV comment 10962 remediation (2026-08-04)
+
+- Current reviewer partition remains **22 MEETS / 12 DOES_NOT_MEET / 23 BLOCKED** across 57 manifests; none is final UAT approval.
+- Fresh current-runtime PNGs now document `UAT-AUTH-005` signed-out confirmation plus protected-route SAP Sign In redirect, and `UAT-BUG-008` duplicate History rows.
+- `UAT-ATT-001` remains NhanT's candidate negative, but DonHV disposition is **BLOCKED — fixture provenance inconsistent**. The raw 44/54/47-byte records are intentionally unchanged pending member reconciliation.
+- Remaining human/diagnostic gaps are explicit: AI immutable suggestion ID/Network response, a matching UX-002 wrapping fixture, and NhanT physical-keyboard confirmation for UX-003.
+- Machine-readable curation uses Jira comment `10962`, pre-commit curation baseline `70fb5558ba11cf5c8aa977d797b5690fb42b07f4`, 57 manifests, 77 evidence references and 64 unique hashes. Final commit SHA is recorded in the PR/Jira handoff after commit to avoid self-referential metadata.

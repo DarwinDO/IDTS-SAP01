@@ -37,6 +37,7 @@ const ACTION = {
   EDIT: 'EDIT',
   ASSIGN: 'ASSIGN',
   REASSIGN: 'REASSIGN',
+  REASSIGN_RETEST_OWNER: 'REASSIGN_RETEST_OWNER',
   STATUS_CHANGE: 'STATUS_CHANGE',
   REQUEST_INFO: 'REQUEST_INFO',
   REJECT: 'REJECT',
@@ -71,6 +72,7 @@ const HISTORY_FIELD_LABELS = {
   applicationComponent: 'Application Component',
   defectCategory: 'Defect Category',
   componentCategory: 'Component Category',
+  retestOwner: 'Retest Owner',
   stepsToReproduce: 'Steps to Reproduce',
   actualResult: 'Actual Result',
   expectedResult: 'Expected Result',
@@ -160,6 +162,9 @@ const TESTER_STATUSES = new Set([
 const CAPABILITY_FIELDS = new Set([
   // Virtual fields cần bảo vệ trong `$select` để after READ tính enable/visible cho action.
   'canAddComment',
+  'canEdit',
+  'canManageAttachments',
+  'canReassignRetestOwner',
   'canMarkInReview',
   'canStartProgress',
   'canResolve',
@@ -171,18 +176,22 @@ const CAPABILITY_FIELDS = new Set([
   'canAssign',
   'canMoveToPending',
   'canResubmit',
-  'assigneeFieldControl'
+  'assigneeFieldControl',
+  'bugRequiredFieldControl',
+  'bugOptionalFieldControl'
 ])
 
 const FIELD_CONTROL = {
-  // Giá trị SAP Common.FieldControl dùng cho assignee field read-only/optional.
+  // Giá trị SAP Common.FieldControl dùng cho field động theo role/ownership.
   READ_ONLY: 1,
-  OPTIONAL: 3
+  OPTIONAL: 3,
+  MANDATORY: 7
 }
 
 const READ_ONLY_ENTITY_NAMES = [
   // Projection/catalog/audit chỉ đọc từ client; guards.js gắn reject handler cho thao tác ghi.
   'Users',
+  'ActiveTesters',
   'DeveloperProfiles',
   'SAPModules',
   'ApplicationComponents',

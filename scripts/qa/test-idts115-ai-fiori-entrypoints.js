@@ -51,7 +51,7 @@ includes('classification reports refresh failure without replaying Apply', class
 includes(
   'classification field hides AI on a root create draft',
   classificationField,
-  'visible="{= ${IsActiveEntity} === true || ${HasActiveEntity} === true }"'
+  '(${IsActiveEntity} === true || ${HasActiveEntity} === true)'
 )
 matches(
   'manifest hides the complete Classification custom field and its label on a root create draft',
@@ -100,7 +100,7 @@ includes('similar bugs distinguishes confirmation from refresh failure', duplica
 includes(
   'similar bugs field hides AI on a root create draft',
   similarBugField,
-  'visible="{= ${IsActiveEntity} === true || ${HasActiveEntity} === true }"'
+  '(${IsActiveEntity} === true || ${HasActiveEntity} === true)'
 )
 matches(
   'manifest hides the complete Similar Bugs custom field and its label on a root create draft',
@@ -183,8 +183,10 @@ includes('dashboard aggregates metrics by capability', dashboard, 'aggregateAiMe
 includes('dashboard uses the supported responsive Device flag', dashboard, '"sap/ui/Device"')
 includes('dashboard stretches the metrics dialog only on phones', dashboard, 'stretch: Device.system.phone')
 notIncludes('dashboard avoids deprecated stretchOnPhone', dashboard, 'stretchOnPhone')
-includes('dashboard uses the backend inclusive failure count once', dashboard, 'group.unavailableCount += Number(row.failureCount || 0)')
-notIncludes('dashboard does not double count unavailable failures', dashboard, 'Number(row.unavailableCount || 0) + Number(row.failureCount || 0)')
+includes('dashboard uses the backend unavailable count once', dashboard, 'group.unavailableCount += Number(row.unavailableCount || 0)')
+notIncludes('dashboard does not collapse every failure into unavailable', dashboard, 'group.unavailableCount += Number(row.failureCount || 0)')
+includes('dashboard displays rate-limited outcomes separately', dashboard, 'group.rateLimitedCount += Number(row.rateLimitedCount || 0)')
+includes('dashboard displays provider/server failures separately', dashboard, 'group.provider5xxCount += Number(row.provider5xxCount || 0)')
 notIncludes('manifest has no standalone AI metrics page or section', manifest, 'IdtsAiOperationalMetrics')
 
 const idts115I18nKeys = [

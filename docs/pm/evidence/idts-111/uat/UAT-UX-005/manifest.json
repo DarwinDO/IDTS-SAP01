@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "UAT-UX-005",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T15:33:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "testRecord": {
+    "bugNumber": "BUG-0025",
+    "committedAction": "Create active Bug without assignee"
+  },
+  "expectedResult": "Committed state and audit remain present and no action is duplicated.",
+  "actualResult": "After reload and reopening BUG-0025, the committed Bug remained Pending Assignment with Reporter NhanT, empty Assignee, Project Manager as current action owner, and one CREATE history event. No duplicate Bug or duplicate action was observed.",
+  "candidateOutcome": "MEETS_EXPECTED_RESULT",
+  "reviewBoundary": "DonHV must review this package before any PASS or catalog update.",
+  "evidence": [
+    {
+      "id": "UAT-UX-005-E01",
+      "file": "01-before-reload.png",
+      "description": "Committed BUG-0025 state immediately after creation.",
+      "sha256": "7190033D71F4C6619E166D5F5CFB1B1F38F5E6C0AD39989834D53B5233690345"
+    },
+    {
+      "id": "UAT-UX-005-E02",
+      "file": "02-after-reload-readback.png",
+      "description": "Fresh reload/readback of the same committed BUG-0025 state.",
+      "sha256": "BF42E7E3D46769E9259D85375AA774B6E6474DC90DF61BC6D734592AF414025F"
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "Controlled UAT data only; no email, credential, cookie, token, or private endpoint text."
+  },
+  "limitations": [],
+  "donhvLatestReview": {
+    "jiraCommentId": "10962",
+    "reviewDate": "2026-08-04",
+    "category": "RETAINED_TRUTHFUL_POSITIVE",
+    "currentStatus": "CANDIDATE_EVIDENCE_RETAINED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
+}

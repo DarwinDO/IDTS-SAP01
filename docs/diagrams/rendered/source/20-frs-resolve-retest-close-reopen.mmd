@@ -1,12 +1,13 @@
 flowchart TD
-    A["Developer marks Resolved"] --> B["System sets nextProcessor to Tester or PM"]
+    A["Developer marks Resolved"] --> B["System routes verification to durable retest owner"]
     B --> C{"Verification needed?"}
     C -->|"Yes"| D["Move to Retest Required"]
-    D --> E{"Retest result"}
+    D --> E{"Retest owner result"}
     E -->|"Passed"| F["Close bug"]
     E -->|"Failed"| G["Reopen bug"]
     C -->|"No and accepted"| F
     G --> H["Update information or assignment"]
     H --> I["Return to Assigned"]
-    F --> J["Clear nextProcessor"]
-    J --> K["Write history and notification records"]
+    F --> J["Clear nextProcessor; keep retest owner"]
+    J --> K["Closed aggregate becomes read-only"]
+    K --> L["Only Reopen or PM Reassign Retest Owner is allowed"]

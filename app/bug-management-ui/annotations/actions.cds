@@ -63,6 +63,12 @@ annotate service.Bugs with @(
       Label  : 'Reopen Bug for Further Work',
       Action : 'BugService.reopenBug',
       ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canReopen' } } }
+    },
+    {
+      $Type  : 'UI.DataFieldForAction',
+      Label  : 'Reassign Retest Owner',
+      Action : 'BugService.reassignRetestOwner',
+      ![@UI.Hidden] : { $edmJson : { $Not : { $Path : 'canReassignRetestOwner' } } }
     }
   ],
   UI.Identification #CommentAction : [
@@ -82,6 +88,10 @@ annotate service.Bugs with @(
       }
   ]
 );
+
+annotate service.Bugs with @UI.UpdateHidden : {
+  $edmJson : { $Not : { $Path : 'canEdit' } }
+};
 
 annotate service.Bugs actions {
   // Các block parameter dưới đây quyết định label/kiểu nhập của action dialog; giá trị được gửi vào CAP action tương ứng.
@@ -156,6 +166,12 @@ annotate service.Bugs actions {
   }
   reopenBug(
     reason @UI.MultiLineText @Common.Label : 'Reason for Reopening'
+  );
+  @Common.SideEffects : {
+    TargetEntities : [in, 'in/historyEvents', 'in/notifications']
+  }
+  reassignRetestOwner(
+    reason @UI.MultiLineText @Common.Label : 'Reason'
   );
 }
 

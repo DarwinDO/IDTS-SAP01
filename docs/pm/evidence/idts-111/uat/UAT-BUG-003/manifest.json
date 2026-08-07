@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "UAT-BUG-003",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T14:42:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "expectedResult": "Create remains blocked and Title is identified as required; no active Bug is created.",
+  "actualResult": "With every other required field populated through supported controls, Create left the Bug as an inactive draft. Title remained empty with aria-required=true and aria-invalid=true. The only validation message was 'Provide the missing value.' for Title.",
+  "candidateOutcome": "MEETS_EXPECTED_RESULT",
+  "reviewBoundary": "DonHV must review the execution and sanitized evidence before the catalog or final workbook can record PASS.",
+  "evidence": [
+    {
+      "id": "UAT-BUG-003-E01",
+      "file": "01-title-required.png",
+      "description": "Controlled new-Bug draft showing populated reproduction fields, one validation message for Title, Create still available, and Draft updated state.",
+      "sha256": "D914EA6F745204EF3B186F1603023575452F68EFE63C02983BB4D3E27AD63946",
+      "width": 1256,
+      "height": 912
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "The retained image contains controlled UAT text only and does not expose email, credentials, cookies, tokens, or private endpoint text."
+  },
+  "limitations": [
+    "Cloud Foundry CLI readiness could not run because the cf command is unavailable; authenticated UI readiness was verified instead.",
+    "This package records NhanT execution truth only and is not reviewer approval or user acceptance sign-off."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10962",
+    "reviewDate": "2026-08-04",
+    "category": "RETAINED_TRUTHFUL_POSITIVE",
+    "currentStatus": "CANDIDATE_EVIDENCE_RETAINED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
+}

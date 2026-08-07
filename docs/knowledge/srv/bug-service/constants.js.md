@@ -1,5 +1,9 @@
 # Knowledge: `srv/bug-service/constants.js`
 
+## IDTS-122 lifecycle meaning
+
+`CLOSED` remains terminal for all ordinary transition/action paths. Reopen is the explicit lifecycle exception; PM retest-owner reassignment is an ownership action that keeps status Closed and does not alter Developer assignee.
+
 ## IDTS-89 action constants
 
 `ACTION` contains both legacy audit categories and 11 exact workflow-command codes. Do not remove `ASSIGN`, `REASSIGN`, `STATUS_CHANGE`, or the other legacy values because stored history and generic direct edits may still reference them. `DEVELOPER_ACTIONS` contains only the exact commands an assigned Developer may execute; assignment, pending-queue, resubmit, retest, close, and reopen remain coordinator-only.
@@ -223,3 +227,8 @@ Các label history cho nhóm field người/vai trò đang xử lý hiện dùng
   **Khái niệm IDTS**: Delivery status là operational evidence do hệ thống quản lý.
   **Ảnh hưởng nếu sai**: Client có thể giả `SENT`, xóa bằng chứng lỗi hoặc enqueue email ngoài notification flow đã duyệt.
   **Phải kiểm tra cùng**: `srv/bug-service/guards.js`, `srv/service.cds:108`, API write-denial test.
+## IDTS-125 capability constants (2026-08-05)
+
+**English.** Capability dependencies now include `canManageAttachments` and two Bug field-control values. SAP Common.FieldControl numeric values are ReadOnly=1, Optional=3 and Mandatory=7.
+
+**Tiếng Việt.** Dependency capability thêm `canManageAttachments` và hai giá trị field-control của Bug. Giá trị số SAP Common.FieldControl là ReadOnly=1, Optional=3 và Mandatory=7.

@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "UAT-UX-001",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T15:34:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "expectedResult": "No clipping, horizontal overflow, vertical word breaking, or unreachable action is present.",
+  "actualResult": "At the normal desktop viewport, the List Report filters, tabs, Create Bug action, table row actions, Object Page header, sections, field labels, and primary actions were readable and reachable. The table uses its own horizontal scroll area for additional columns without causing page-level clipping.",
+  "candidateOutcome": "MEETS_EXPECTED_RESULT",
+  "reviewBoundary": "DonHV must review the screenshots before any PASS or catalog update.",
+  "evidence": [
+    {
+      "id": "UAT-UX-001-E01",
+      "file": "01-desktop-list-report.png",
+      "description": "Desktop List Report at 100 percent zoom.",
+      "sha256": "AEAE787F2605D0A16268B8761A9DACD4D013E77E5212EFFEF6C35D942AF4DDB4"
+    },
+    {
+      "id": "UAT-UX-001-E02",
+      "file": "02-desktop-object-page.png",
+      "description": "Desktop BUG-0025 Object Page at 100 percent zoom.",
+      "sha256": "BF42E7E3D46769E9259D85375AA774B6E6474DC90DF61BC6D734592AF414025F"
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "Controlled UAT data only; no email, credential, cookie, token, or private endpoint text."
+  },
+  "limitations": [
+    "The List Report table intentionally provides an internal horizontal scrollbar for off-screen columns; no page-level horizontal overflow was observed."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10962",
+    "reviewDate": "2026-08-04",
+    "category": "RETAINED_TRUTHFUL_POSITIVE",
+    "currentStatus": "CANDIDATE_EVIDENCE_RETAINED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
+}

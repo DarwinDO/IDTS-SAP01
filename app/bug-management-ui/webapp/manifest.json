@@ -5,7 +5,7 @@
     "type": "application",
     "i18n": "i18n/i18n.properties",
     "applicationVersion": {
-      "version": "0.0.3"
+      "version": "0.0.4"
     },
     "title": "{{appTitle}}",
     "description": "{{appDescription}}",
@@ -85,6 +85,15 @@
     "resources": {
       "css": []
     },
+    "extends": {
+      "extensions": {
+        "sap.ui.controllerExtensions": {
+          "sap.fe.templates.ListReport.ListReportController": {
+            "controllerName": "idts.bugmanagementui.ext.listreport.ListReportController"
+          }
+        }
+      }
+    },
     "routing": {
       "config": {},
       "routes": [
@@ -119,8 +128,8 @@
                     },
                     "CreateBug": {
                       "press": "idts.bugmanagementui.ext.actions.BugListActions.createBug",
-                      "visible": "idts.bugmanagementui.ext.actions.BugListActions.isCreateVisible",
-                      "enabled": "idts.bugmanagementui.ext.actions.BugListActions.isCreateVisible",
+                      "visible": "{session>/canCreateBug}",
+                      "enabled": "{session>/canCreateBug}",
                       "text": "{i18n>createBug}"
                     }
                   }

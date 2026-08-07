@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "1.0",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-04T16:43:58+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "caseId": "UAT-COM-004",
+  "expectedResult": "Controlled markup-like text is rendered safely and no script or HTML executes.",
+  "actualResult": "The controlled markup-like comment posted and persisted after reload. Executable markup was stripped/sanitized, no XSS marker appeared in console logs, and only the safe text prefix rendered.",
+  "candidateOutcome": "MEETS_EXPECTED_RESULT",
+  "reviewBoundary": "Current-runtime candidate PASS for sanitization/no execution; DonHV decides whether stripped markup text is acceptable product behavior.",
+  "evidence": [
+    {
+      "id": "UAT-COM-004-E01",
+      "file": "01-current-runtime-reload.png",
+      "description": "Reloaded comment shows safe text only; markup did not execute.",
+      "sha256": "F28A125CCE1FE650ABDEB06258ED2E4D0625F54C24AEF665372061E11C6C12C2"
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "No unauthorized identity, mutation, request, comment, attachment, or unrelated user data was used."
+  },
+  "issueClassification": "no current product defect; content is sanitized",
+  "limitations": [
+    "The sanitizer removes markup and its enclosed text rather than displaying literal tags; DonHV must confirm this UX policy is acceptable."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10962",
+    "reviewDate": "2026-08-04",
+    "category": "CURRENT_RUNTIME_POSITIVE",
+    "currentStatus": "CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
+}

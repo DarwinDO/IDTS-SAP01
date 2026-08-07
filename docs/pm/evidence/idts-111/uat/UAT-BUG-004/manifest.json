@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "UAT-BUG-004",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T14:45:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "expectedResult": "Create remains blocked and Description is identified as required; no active Bug is created.",
+  "actualResult": "With Title and every other required field populated, Create left the Bug as an inactive draft. Description remained empty with aria-required=true and aria-invalid=true. The only validation message was 'Provide the missing value.' for Description.",
+  "candidateOutcome": "MEETS_EXPECTED_RESULT",
+  "reviewBoundary": "DonHV must review the execution and sanitized evidence before the catalog or final workbook can record PASS.",
+  "evidence": [
+    {
+      "id": "UAT-BUG-004-E01",
+      "file": "01-description-required.png",
+      "description": "Controlled new-Bug draft showing a populated Title, the empty red Description field, and one Message Details entry for Description.",
+      "sha256": "804F5C5727A3CA7D5F0D6A8AFC2D8613E32441BF74E74EA107CA205D19C9628C",
+      "width": 1256,
+      "height": 912
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "The retained image contains controlled UAT text only and does not expose email, credentials, cookies, tokens, or private endpoint text."
+  },
+  "limitations": [
+    "Cloud Foundry CLI readiness could not run because the cf command is unavailable; authenticated UI readiness was verified instead.",
+    "This package records NhanT execution truth only and is not reviewer approval or user acceptance sign-off."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10962",
+    "reviewDate": "2026-08-04",
+    "category": "RETAINED_TRUTHFUL_POSITIVE",
+    "currentStatus": "CANDIDATE_EVIDENCE_RETAINED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
+}

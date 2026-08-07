@@ -1,5 +1,9 @@
 # Knowledge: `app/bug-management-ui/annotations/capabilities.cds`
 
+## IDTS-122 update
+
+The standard Edit/create affordances now follow current role and status rules: only Tester receives Create Bug, and a Closed Bug is not editable. Comment, attachment, assignment, and AI affordances also consume state-aware capabilities. Reopen and PM retest-owner reassignment remain the explicit exceptions.
+
 > **Ownership / debug anchor:** SangVN owns this Fiori affordance metadata (backup: DatDT). If an action is hidden or visible unexpectedly, check this file and then confirm the backend has the same authorization rule.
 > **Ownership / điểm debug:** SangVN sở hữu metadata affordance Fiori này (backup: DatDT). Nếu action ẩn/hiện sai, kiểm file này rồi xác nhận backend có cùng rule quyền.
 
@@ -57,14 +61,16 @@ service.cds, read-models, permissions, actions.cds.
 
 IDTS-43 adds `UI.CreateHidden : true`.
 
-This is not a backend permission rule. It is a Fiori UI rule that hides the generated standard Create button. IDTS now uses a custom List Report action named `Create Bug`, because create visibility depends on the logged-in role from the custom login session. Tester and PM can see the custom action; Developer should not see it.
+This is not a backend permission rule. It is a Fiori UI rule that hides the generated standard Create button. IDTS now uses a custom List Report action named `Create Bug`, because create visibility depends on the logged-in role from the custom login session. Only Tester can see the custom action; PM and Developer must not see it.
+
+The custom action binds `visible` and `enabled` to the observable named model property `session>/canCreateBug`, initialized by `Component.js`. A plain JavaScript callback in the manifest is not used because it is not a reliable reactive Fiori Elements binding contract.
 
 The backend remains the security boundary. Even if a user manipulates browser storage or calls OData directly, `srv/bug-service/permissions.js` and `srv/service.js` must still reject unauthorized create/draft-create attempts.
 
 Important anchor:
 
 - Location: `UI.CreateHidden : true`
-  - IDTS concept: Create Bug is role-aware. It is allowed for Tester/PM and hidden from Developer.
+  - IDTS concept: Create Bug is role-aware. It is allowed only for Tester and hidden from PM/Developer.
   - Impact if broken: The standard Create button can appear to Developer users, causing a confusing UI/backend mismatch.
   - Must check together: `app/bug-management-ui/webapp/manifest.json` custom `CreateBug` action, `app/bug-management-ui/webapp/ext/actions/BugListActions.js`, `srv/service.js` `NEW` draft guard, and `srv/bug-service/permissions.js`.
 
@@ -72,14 +78,16 @@ Important anchor:
 
 IDTS-43 thêm `UI.CreateHidden : true`.
 
-Đây không phải rule phân quyền backend. Đây là rule UI của Fiori để ẩn nút Create chuẩn do framework tự sinh. IDTS hiện dùng một custom action ở List Report tên là `Create Bug`, vì việc nút tạo bug có hiện hay không phụ thuộc vào role của user trong custom login session. Tester và PM được thấy custom action; Developer không nên thấy.
+Đây không phải rule phân quyền backend. Đây là rule UI của Fiori để ẩn nút Create chuẩn do framework tự sinh. IDTS hiện dùng một custom action ở List Report tên là `Create Bug`, vì việc nút tạo bug có hiện hay không phụ thuộc vào role của user trong custom login session. Chỉ Tester được thấy custom action; PM và Developer không được thấy.
+
+Custom action bind `visible` và `enabled` vào property có thể quan sát `session>/canCreateBug`, được `Component.js` khởi tạo. Không dùng callback JavaScript trực tiếp trong manifest vì đó không phải binding phản ứng đáng tin cậy của Fiori Elements.
 
 Backend vẫn là lớp bảo vệ thật. Kể cả khi user sửa browser storage hoặc gọi OData trực tiếp, `srv/bug-service/permissions.js` và `srv/service.js` vẫn phải chặn create/draft-create không hợp lệ.
 
 Điểm neo quan trọng:
 
 - Vị trí: `UI.CreateHidden : true`
-  - Khái niệm IDTS: Create Bug phải theo role. Tester/PM được tạo, Developer bị ẩn.
+  - Khái niệm IDTS: Create Bug phải theo role. Chỉ Tester được tạo; PM/Developer bị ẩn.
   - Ảnh hưởng nếu sai: Nút Create chuẩn có thể hiện cho Developer, làm UI và backend lệch nhau.
   - Phải kiểm tra cùng: custom action `CreateBug` trong `app/bug-management-ui/webapp/manifest.json`, `app/bug-management-ui/webapp/ext/actions/BugListActions.js`, draft guard `NEW` trong `srv/service.js`, và `srv/bug-service/permissions.js`.
 
@@ -95,3 +103,8 @@ Backend vẫn là lớp bảo vệ thật. Kể cả khi user sửa browser stor
 **English.** Compilation publishes insert/update/delete restrictions to Fiori. Standard Create is hidden so the manifest action calls `BugListActions.createBug()` and Fiori EditFlow. These flags improve UX only; direct OData/draft requests still reach backend authorization. If Developer sees Create, inspect metadata and custom action visibility; if a direct request succeeds incorrectly, debug CAP permissions instead.
 
 **Tiếng Việt.** Khi compile, restriction insert/update/delete được đưa vào metadata Fiori. Standard Create bị ẩn để action trong manifest gọi `BugListActions.createBug()` và Fiori EditFlow. Các cờ chỉ cải thiện UX; request OData/draft trực tiếp vẫn phải qua authorization backend. Developer thấy Create thì kiểm metadata/visibility; direct request sai mà vẫn thành công thì debug CAP permission.
+## IDTS-125 attachment capability (2026-08-05)
+
+**English.** Attachment navigation restrictions use `canManageAttachments`, not generic `canEdit`. This keeps non-assignee upload/update/delete hidden while allowing the assignee's attachment edit shell.
+
+**Tiếng Việt.** Navigation restriction của attachment dùng `canManageAttachments`, không dùng `canEdit` chung. Nhờ đó upload/update/delete bị ẩn với non-assignee nhưng edit shell attachment vẫn mở cho assignee.

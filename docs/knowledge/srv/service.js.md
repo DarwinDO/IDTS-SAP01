@@ -1,5 +1,9 @@
 # Knowledge: `srv/service.js`
 
+## IDTS-122 closed-aggregate boundary
+
+The service wires backend guards for active UPDATE, draft EDIT/PATCH/SAVE, Bug DELETE, comment CREATE/PUT/UPDATE/PATCH/DELETE, attachments, lifecycle actions, and AI mutations. A `CLOSED` Bug rejects ordinary mutations with a safe 409 response. Bug hard-delete is rejected in every status. `reopenBug` and PM `reassignRetestOwner` are the only business exceptions while Closed. Debug from the incoming CAP event to `assertBugOpenForMutation`; UI visibility is not the security boundary.
+
 ## IDTS-113 Job Scheduler wiring
 
 `BugService.init()` registers `processEmailOutbox` and delegates one batch to
@@ -426,3 +430,13 @@ Neu bo registration nay, metadata co the van thay action, nhung runtime action s
 ### Vietnamese
 
 `BugService.init()` hiện đăng ký handler Accept, Reject, Ignore và Apply Classification từ `srv/ai`. Ba action đầu chỉ review. `applyClassificationSuggestion` là đường ghi riêng có guard cho classification suggestion đã Accept. Owner chính: DonHV; backup: DatDT. Khi debug, bắt đầu tại `this.on(...)` tương ứng rồi đi vào `review.js` hoặc `classification-apply.js`. Giữ file này chỉ làm wiring; quyền, catalog check, stale protection và history nằm trong module tập trung.
+## IDTS-125 handler entry guard (2026-08-05)
+
+**English.** The root `EDIT` handler now calls the assignee-aware permission guard before CAP creates an edit draft. PATCH/SAVE and attachment targets retain their own deeper guards, so hiding Fiori controls is never the only protection.
+
+**Tiếng Việt.** Handler root `EDIT` gọi permission guard theo assignee trước khi CAP tạo edit draft. PATCH/SAVE và attachment target vẫn có guard sâu riêng, nên ẩn control Fiori không bao giờ là lớp bảo vệ duy nhất.
+## IDTS-125 attachment deletion wiring (2026-08-06)
+
+**English.** `BugService.init()` registers the attachment authorization guard before attachment writes. It deliberately does not register an `after DELETE` history writer. Deletion audit is produced by the existing draft SAVE flow after comparing the before/after attachment metadata, preventing duplicate or false history when a draft is discarded.
+
+**Tiếng Việt.** `BugService.init()` đăng ký attachment authorization guard trước attachment write. File này cố ý không đăng ký history writer tại `after DELETE`. Audit xóa được tạo bởi luồng draft SAVE hiện có sau khi so sánh metadata trước/sau, tránh history trùng hoặc history giả khi draft bị discard.

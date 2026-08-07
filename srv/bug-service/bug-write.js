@@ -16,13 +16,12 @@ const {
   firstUserByRole,
   nextBugNumber,
   readBug,
-  resolveRequestUser,
   trimToNull,
   userIDForDeveloper
 } = require('./helpers')
 
 const { importantChanges } = require('./history')
-const { enforceBugWritePermission } = require('./permissions')
+const { enforceBugWritePermission, enforceBugCreatePermission } = require('./permissions')
 
 const CODE_LIST_FIELDS = [
   { field: 'priority_code', label: 'Priority', entity: 'PriorityValues' },
@@ -45,15 +44,14 @@ async function prepareBugWrite (req, entities, { isCreate }) {
     // nếu không client có thể giả người báo hoặc tự chọn số Bug trùng.
     req.data.bugNumber = await nextBugNumber(req, entities)
 
-    const actor = await resolveRequestUser(req, entities)
-    let resolvedReporterId = null
-    if (actor) {
-      resolvedReporterId = actor.ID
-    } else {
-      const fallbackTester = await firstUserByRole(req, entities, 'TESTER')
-      if (fallbackTester) resolvedReporterId = fallbackTester.ID
-    }
-    req.data.reporter_ID = resolvedReporterId
+    const actor = await enforceBugCreatePermission(req, entities)
+    req.data.reporter_ID = actor.ID
+    req.data.retestOwner_ID = actor.ID
+  } else {
+    // Both identities are server-managed. Direct UPDATE must not move either
+    // ownership field; the dedicated PM action is the only reassignment path.
+    req.data.reporter_ID = oldBug.reporter_ID
+    req.data.retestOwner_ID = oldBug.retestOwner_ID
   }
 
   // Ba bước dưới kiểm từ chung đến riêng: field bắt buộc → catalog active → cặp component/category.
@@ -193,7 +191,10 @@ async function resolveComponentCategory (req, entities, bug) {
   // Helper dùng chung trả về cặp component/category active; caller quyết định cách ghi ID đã derive.
   if (!bug.applicationComponent_ID || !bug.defectCategory_ID) return null
 
-  const componentCategory = await cds.tx(req).run(
+  const tx = cds.tx(req)
+  await validateActiveClassificationParents(req, entities, bug, tx)
+
+  const componentCategory = await tx.run(
     SELECT.one.from(entities.ComponentCategories).where({
       component_ID: bug.applicationComponent_ID,
       defectCategory_ID: bug.defectCategory_ID,
@@ -204,10 +205,44 @@ async function resolveComponentCategory (req, entities, bug) {
     return req.reject(
       400,
       'The selected Application Component and Defect Category are not a valid Component Category.',
-      'defectCategory'
+      'defectCategory_ID'
     )
   }
   return componentCategory
+}
+
+async function validateActiveClassificationParents (req, entities, bug, tx = cds.tx(req)) {
+  // Draft PATCH và active CREATE/UPDATE dùng chung hàng rào này. Bridge còn active không đủ:
+  // chính Application Component và Defect Category cũng phải đang active.
+  if (!bug.applicationComponent_ID || !bug.defectCategory_ID) return
+
+  const applicationComponent = await tx.run(
+    SELECT.one.from(entities.ApplicationComponents).columns('ID').where({
+      ID: bug.applicationComponent_ID,
+      active: true
+    })
+  )
+  if (!applicationComponent) {
+    return req.reject(
+      400,
+      'Application Component must reference an active catalog value.',
+      'applicationComponent_ID'
+    )
+  }
+
+  const defectCategory = await tx.run(
+    SELECT.one.from(entities.DefectCategories).columns('ID').where({
+      ID: bug.defectCategory_ID,
+      active: true
+    })
+  )
+  if (!defectCategory) {
+    return req.reject(
+      400,
+      'Defect Category must reference an active catalog value.',
+      'defectCategory_ID'
+    )
+  }
 }
 
 async function validateAssignee (req, entities, bug) {
@@ -279,18 +314,28 @@ async function determineNextProcessor (req, entities, bug) {
 
   if (TESTER_STATUSES.has(bug.status_code)) {
     // Các bước cần Tester ưu tiên reporter ban đầu; chỉ fallback Tester đầu tiên khi dữ liệu cũ thiếu reporter.
-    const testerID = bug.reporter_ID || (await firstUserByRole(req, entities, 'TESTER'))?.ID
-    return { userID: testerID || null, roleCode: PROCESSOR_ROLE.TESTER }
+    const preferredTesterID = bug.retestOwner_ID || bug.reporter_ID
+    const retestOwner = preferredTesterID
+      ? await cds.tx(req).run(SELECT.one.from(entities.Users).columns('ID').where({
+          ID: preferredTesterID,
+          role_code: 'TESTER',
+          active: true
+        }))
+      : null
+    if (retestOwner?.ID) return { userID: retestOwner.ID, roleCode: PROCESSOR_ROLE.TESTER }
+    const pm = await firstUserByRole(req, entities, 'PM')
+    return { userID: pm?.ID || null, roleCode: PROCESSOR_ROLE.PM }
   }
 
-  const tester = await firstUserByRole(req, entities, 'TESTER')
-  return { userID: bug.reporter_ID || tester?.ID || null, roleCode: PROCESSOR_ROLE.UNASSIGNED_QUEUE }
+  const pm = await firstUserByRole(req, entities, 'PM')
+  return { userID: pm?.ID || null, roleCode: PROCESSOR_ROLE.UNASSIGNED_QUEUE }
 }
 
 module.exports = {
   prepareBugWrite,
   determineNextProcessor,
   resolveComponentCategory,
+  validateActiveClassificationParents,
   validateActiveCodeLists,
   validateRequiredBugFields,
   validateAssignee,

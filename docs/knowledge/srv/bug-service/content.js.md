@@ -1,5 +1,9 @@
 # Knowledge: `srv/bug-service/content.js`
 
+## IDTS-122 child-content boundary
+
+Comment and attachment mutations resolve their parent Bug first and reject the request when that Bug is Closed. Existing child rows remain readable and existing attachment content remains downloadable. After Reopen, the normal role and attachment/comment validations apply again.
+
 ## Beginner-first execution map (2026-07-18)
 
 ### English
@@ -75,3 +79,14 @@ Thay đổi quy tắc attachment/comment phải cập nhật ở đây + schema 
 - Knowledge mirror: `docs/knowledge/srv/bug-service/content.js.md`
 - Source layer: `srv`
 - Last reviewed: 2026-06-22
+
+## IDTS-122 Closed aggregate boundary
+
+`prepareCommentCreate`, `prepareCommentMutation`, and `prepareAttachmentWrite` resolve the parent Bug and call the shared Closed-state guard. New comments, existing comment mutation, and attachment create/update/delete are denied while the parent Bug is `CLOSED`; reads and downloads remain allowed. CAP draft composition routing may reject an invalid direct child request before this custom guard, so deployed browser/API evidence is still required for the final route contract.
+## IDTS-125 attachment ownership (2026-08-06)
+
+**English.** Comment creation remains available to active Tester/Developer/PM users on open Bugs. Attachment create/update keeps the existing coordination rule: Tester/PM or the current Developer assignee. Attachment deletion is narrower: PM may delete any attachment on an open Bug, while a Tester or Developer may delete only an attachment that they uploaded. The guard reads the persisted attachment row to obtain `up__ID` and `createdBy`; it never trusts a client-supplied parent ID for authorization. `filename`, MIME type and size are metadata; the binary stream is handled by the SAP attachment adapter and must never be logged.
+
+**Tiếng Việt.** Comment vẫn dành cho Tester/Developer/PM active trên Bug mở. Create/update attachment giữ rule điều phối hiện hành: Tester/PM hoặc Developer assignee hiện tại. Quyền delete chặt hơn: PM được xóa mọi attachment của Bug đang mở; Tester hoặc Developer chỉ được xóa attachment do chính mình upload. Guard đọc dòng attachment đã persist để lấy `up__ID` và `createdBy`, không tin parent ID do client gửi lên khi phân quyền. `filename`, MIME type và size là metadata; binary do SAP attachment adapter xử lý và không được ghi log.
+
+Unmapped authenticated identities are rejected before comment authorship or attachment persistence. / Identity đã xác thực nhưng không map được IDTS user bị reject trước khi ghi author comment hoặc persist attachment.

@@ -91,8 +91,12 @@ service BugService @(requires: 'authenticated-user') {
     requestCount       : Integer;
     successCount       : Integer;
     failureCount       : Integer;
+    badRequestCount    : Integer;
+    rateLimitedCount   : Integer;
+    provider5xxCount   : Integer;
     timeoutCount       : Integer;
     unavailableCount   : Integer;
+    otherFailureCount  : Integer;
     acceptedCount      : Integer;
     rejectedCount      : Integer;
     ignoredCount       : Integer;
@@ -100,6 +104,14 @@ service BugService @(requires: 'authenticated-user') {
     latencySampleCount : Integer;
     averageLatencyMs   : Integer;
     maxLatencyMs       : Integer;
+  };
+
+  type BugStatusMetric {
+    statusCode        : String(40);
+    statusName        : String(120);
+    statusCriticality : Integer;
+    sortOrder         : Integer;
+    bugCount          : Integer;
   };
 
   type EmailOutboxRunResult {
@@ -162,6 +174,10 @@ service BugService @(requires: 'authenticated-user') {
   @(requires: 'PM')
   function readAiOperationalMetrics(windowDays : Integer) returns array of AiOperationalMetric;
 
+  // PM-only lifecycle counts; the handler returns all ten current statuses, including zero-count rows.
+  @(requires: 'PM')
+  function readBugStatusMetrics() returns array of BugStatusMetric;
+
   @(requires: 'OutboxProcessor')
   action processEmailOutbox() returns EmailOutboxRunResult;
 
@@ -190,7 +206,12 @@ service BugService @(requires: 'authenticated-user') {
     virtual canMoveToPending      : Boolean,
     virtual canResubmit           : Boolean,
     virtual canAddComment         : Boolean,
-    virtual assigneeFieldControl  : Integer
+    virtual canEdit               : Boolean,
+    virtual canManageAttachments  : Boolean,
+    virtual canReassignRetestOwner: Boolean,
+    virtual assigneeFieldControl  : Integer,
+    virtual bugRequiredFieldControl : Integer,
+    virtual bugOptionalFieldControl : Integer
   } actions {
     // Bound actions chạy trên một Bug cụ thể. Tên/signature phải khớp `srv/service.js` và Fiori action annotation.
     action addComment(content: LargeString) returns Bugs;
@@ -241,6 +262,33 @@ service BugService @(requires: 'authenticated-user') {
     action sendToRetest(note: String) returns Bugs;
     action closeBug(note: String) returns Bugs;
     action reopenBug(reason: String) returns Bugs;
+    @(requires: 'PM')
+    action reassignRetestOwner(
+      @Common.ValueList : {
+        Label : 'Active Tester',
+        CollectionPath : 'ActiveTesters',
+        SearchSupported : true,
+        Parameters : [
+          {
+            $Type : 'Common.ValueListParameterInOut',
+            LocalDataProperty : retestOwnerID,
+            ValueListProperty : 'ID'
+          },
+          {
+            $Type : 'Common.ValueListParameterDisplayOnly',
+            ValueListProperty : 'displayName'
+          },
+          {
+            $Type : 'Common.ValueListParameterDisplayOnly',
+            ValueListProperty : 'email'
+          }
+        ]
+      }
+      @Common.Label : 'Retest Owner'
+      retestOwnerID: UUID,
+      @UI.MultiLineText @Common.Label : 'Reason'
+      reason: String
+    ) returns Bugs;
   };
   // Projection collaboration/audit bổ sung display fields nhưng không đổi schema gốc.
   entity Comments as projection on db.Comments {
@@ -331,6 +379,13 @@ service BugService @(requires: 'authenticated-user') {
     role,
     active
   };
+  @readonly
+  @cds.redirection.target: false
+  entity ActiveTesters as projection on db.Users {
+    key ID,
+    displayName,
+    email
+  } where active = true and role.code = 'TESTER';
   entity DeveloperProfiles as projection on db.DeveloperProfiles;
   entity SAPModules as projection on db.SAPModules;
   entity ApplicationComponents as projection on db.ApplicationComponents;

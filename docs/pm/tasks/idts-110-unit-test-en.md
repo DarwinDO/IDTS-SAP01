@@ -1,43 +1,45 @@
 # IDTS-110 — Unit Test EN v0.5 expansion
 
-- Catalog owner and approver: DonHV
-- Workbook generator and final integrator: DonHV
-- Test executor and case-evidence owner: NhanT
+- Catalog owner/approver: DonHV
+- Workbook generator/final integrator: DonHV
+- Test executor/case-evidence owner: NhanT
 - Due: 2026-08-05
-- Status: Execution candidate under DonHV remediation; PR #269 is not merge-ready
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-110
+- Status: In Progress; evidence package curated, member-owned reruns remain
 
 ## Workflow
 
-1. DonHV generates an English-only atomic condition-branch catalog from the frozen source baseline.
-2. DonHV reviews and approves the catalog before execution.
-3. NhanT executes the approved cases and captures sanitized, case-specific image evidence.
-4. DonHV reviews actual results and evidence.
-5. DonHV generates Unit Test EN v0.5 and synchronizes the approved workbook to the same Drive file ID.
+1. DonHV owns and approves the English-only 188-case catalog.
+2. NhanT executes cases and captures sanitized, case-specific evidence.
+3. DonHV reviews candidate truth without rewriting execution history.
+4. Only accepted results may later enter Unit Test EN v0.5.
+5. DonHV alone generates and synchronizes the workbook to the existing Drive ID.
 
-## Current candidate
+## Current catalog truth
 
 - Catalog: `docs/qa/idts-110-unit-test-catalog.json`
-- Generator: `scripts/qa/generate-idts110-unit-test-catalog.js`
-- Frozen baseline: `bc0c47e522ae208384d4b23dda21535dcc683683`
+- Frozen catalog baseline: `bc0c47e522ae208384d4b23dda21535dcc683683`
 - Cases: 188
-- Execution truth: 188 `NOT_RUN`; no historical PASS was inherited
-- Review evidence: `docs/pm/evidence/idts-110/unit-test-catalog-review.md`
-- Approval: DonHV, 2026-08-02; execution truth remains 188 `NOT_RUN`
+- Canonical execution state: 188 `NOT_RUN`
+- Workbook/Drive: unchanged
 
-No Unit Test VI is created. No command-only, script-only, shared-only, or unsanitized evidence is accepted.
+## PR #269 candidate and reviewer truth
 
-## DonHV review of PR #269
+| Layer | Accepted/PASS | Held | Mapping-only | Blocked |
+| --- | ---: | ---: | ---: | ---: |
+| NhanT candidate | 40 | 0 | 135 | 13 |
+| DonHV review | 38 | 2 | 135 | 13 |
 
-- Exact reviewed head: `8957cbaa20f9c629818901f9b988884337a7ff82`
-- Candidate result: `34 PASS / 2 FAIL / 152 BLOCKED`
-- Corrected primary taxonomy: 175 locally executable cases and 13 true BTP integration cases
-- `UT-AUTH-004`: catalog corrected so malformed CDS type is verified through the OData 400 boundary, while wrong string credentials retain generic 401
-- `UT-VAL-REPORTER`: catalog corrected to test unresolved authenticated actor; client omission remains valid because reporter is server-owned
-- Evidence cards are generated summaries, not browser/runtime proof by themselves
-- Required before merge: latest briefing acknowledgment, local rerun of false blockers, controlled BTP rerun of the 13 integration cases, evidence cleanup and fresh QA Depth Gate
+- Held: `UT-ATT-007/008`, pending exact-head acceptance.
+- Mapping-only: traceability, not execution PASS.
+- Blocked: 13 member-owned BTP/HANA/XSUAA/S3/Job Scheduler integrations.
+- Malformed-login sanitizer: merged separately under IDTS-39 / PR #283 at `e55a863d0cc4ada6c421ce940c1986162756c176`.
 
-Evidence:
+## Evidence
 
+- `docs/pm/evidence/idts-110/execution-summary.md`
 - `docs/pm/evidence/idts-110/donhv-execution-review-matrix.md`
 - `docs/pm/evidence/idts-110/donhv-case-taxonomy.json`
+- `docs/pm/evidence/idts-110/cases/`
+
+No Unit Test VI is created. No command-only, script-only, generated-card-only, shared-account, or unsanitized evidence is accepted as final execution proof.

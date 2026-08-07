@@ -1,5 +1,9 @@
 # Knowledge: `srv/bug-service/drafts.js`
 
+## IDTS-122 draft boundary
+
+Draft NEW initializes reporter and retest owner from the authenticated Tester. Draft EDIT/PATCH/SAVE checks the active Bug and rejects a Closed aggregate. This prevents a stale or manually constructed draft request from bypassing the active-state rule.
+
 ## Beginner execution walkthrough (2026-07-18)
 
 ### English
@@ -197,3 +201,23 @@ Fiori draft là bản dữ liệu tạm trong database khi user đang sửa form
   **Phải kiểm tra cùng**: `bug-write.js`, đăng ký PATCH/SAVE trong `service.js`, `db/schema.cds` và draft test trên Object Page.
 
 Hai lần kiểm tra là có chủ ý: PATCH thường chỉ chứa một field vừa đổi, còn SAVE là cổng toàn vẹn cuối trên toàn bộ draft.
+## IDTS-125 draft guard (2026-08-05)
+
+**English.** PATCH reads both draft and active Bug; SAVE rereads the complete draft and active Bug. For a Developer, any Bug business-field difference is rejected before activation. Attachment-only draft work can continue for the assignee.
+
+**Tiếng Việt.** PATCH đọc cả draft và Bug active; SAVE đọc lại draft đầy đủ và Bug active. Với Developer, mọi khác biệt field nghiệp vụ Bug bị reject trước activation. Draft chỉ thay attachment vẫn được tiếp tục nếu actor là assignee.
+
+## 2026-08-06 update: draft classification parent guard
+
+### English
+
+`prepareDraftPatch()` now validates that the draft's Application Component and Defect Category parents are active before looking up their bridge. The draft may temporarily hold an active but not-yet-valid pair while the user changes fields one at a time; however, `validateDraftForSave()` calls `resolveComponentCategory()` and rejects activation until the final pair is active and valid. A rejected PATCH leaves the stored draft unchanged.
+
+### Vietnamese
+
+`prepareDraftPatch()` hiện kiểm tra Application Component và Defect Category của draft còn active trước khi tìm bridge. Draft có thể tạm giữ một cặp parent active nhưng chưa match trong lúc người dùng đổi từng field; tuy nhiên `validateDraftForSave()` gọi `resolveComponentCategory()` và không cho activate cho đến khi cặp cuối cùng vừa active vừa hợp lệ. PATCH bị từ chối không làm thay đổi draft đã lưu.
+## IDTS-125 attachment snapshot at SAVE (2026-08-06)
+
+**English.** Before draft activation, the SAVE flow keeps a sanitized snapshot of active attachment metadata. After activation it compares attachment IDs to identify committed additions and removals. This makes the Bug SAVE transaction the single audit boundary: a delete that is later discarded does not create history, while a committed delete creates its audit once.
+
+**Tiếng Việt.** Trước khi activate draft, luồng SAVE giữ snapshot đã làm sạch của metadata attachment active. Sau activation, hệ thống so sánh attachment ID để tìm phần đã thêm và đã xóa thật sự. Bug SAVE là audit boundary duy nhất: xóa rồi discard không tạo history, còn xóa đã commit chỉ tạo audit một lần.

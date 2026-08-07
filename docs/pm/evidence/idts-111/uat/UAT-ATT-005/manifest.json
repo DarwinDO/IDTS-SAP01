@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "UAT-ATT-005",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTION_BLOCKED_PENDING_PRECONDITION",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T16:58:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "testRecord": {
+    "bugNumber": "BUG-0026",
+    "file": "controlled text fixture",
+    "sizeBytes": 10485761
+  },
+  "expectedResult": "Oversized file is blocked before unsafe persistence and the Bug remains usable.",
+  "actualResult": "The Browser chooser accepted the 10 MB + 1 byte text fixture but the page returned to an empty evidence table with no visible size-validation message. Because the input is cleared immediately and the later supported upload also fails, this run cannot distinguish client filtering from upload-path failure.",
+  "candidateOutcome": "NOT_EXECUTABLE_WITH_CURRENT_PRECONDITION",
+  "reviewBoundary": "Manual/native chooser confirmation is required after storage health is restored; do not approve PASS/FAIL from this ambiguous automation result.",
+  "evidence": [
+    {
+      "id": "UAT-ATT-005-E01",
+      "file": "01-oversized-selection-no-message.png",
+      "description": "Evidence section remained usable and empty, but no size-validation message was exposed.",
+      "sha256": "C97C56A689232A42586AFB8867AB4B0792853CAE9483F06D51D4CFDB87743402"
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "Synthetic repeated-byte text fixture only."
+  },
+  "issueClassification": "test-harness/environment ambiguity",
+  "limitations": [
+    "No visible size error and storage path is concurrently failing."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10962",
+    "reviewDate": "2026-08-04",
+    "category": "VALID_PRECONDITION_BLOCKER",
+    "currentStatus": "BLOCKED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
+}

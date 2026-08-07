@@ -1,5 +1,9 @@
 # `srv/ai/classification-apply.js`
 
+## IDTS-122 guard
+
+Applying a classification suggestion is rejected for a Closed Bug before field updates. The user must Reopen and still pass the existing role, freshness, review-state, and catalog validation.
+
 ## English
 
 This module implements IDTS-93. `applyClassificationSuggestion(suggestionID)` is the only AI-specific path that may change Bug classification, and only after an authorized Tester or PM has accepted a current classification suggestion.

@@ -47,11 +47,16 @@ async function main() {
   const listSettings = manifest['sap.ui5'].routing.targets.BugsList.options.settings
   const createAction = listSettings.content.header.actions.CreateBug
   assert.strictEqual(createAction.press, 'idts.bugmanagementui.ext.actions.BugListActions.createBug')
-  assert.strictEqual(createAction.visible, 'idts.bugmanagementui.ext.actions.BugListActions.isCreateVisible')
+  assert.strictEqual(createAction.visible, '{session>/canCreateBug}')
+  assert.strictEqual(createAction.enabled, '{session>/canCreateBug}')
+  const component = read(path.join('webapp', 'Component.js'))
+  assert(component.includes('new JSONModel({'), 'Component must initialize an observable session model')
+  assert(component.includes('canCreateBug: Boolean(user && user.role_code === "TESTER")'))
+  assert(component.includes('this.setModel(sessionModel, "session")'))
   const sections = manifest['sap.ui5'].routing.targets.BugsObjectPage.options.settings.content.body.sections
   assert(sections.History, 'custom History section is missing')
   assert(!sections.HistoryTimeline, 'old HistoryTimeline section key must be removed')
-  pass('manifest contains supported Create action and one custom History section')
+  pass('manifest binds Create visibility to an observable session model')
 
   let roleCode = null
   let actionModule
@@ -80,9 +85,11 @@ async function main() {
   roleCode = 'TESTER'
   assert.strictEqual(actionModule.isCreateVisible(), true)
   roleCode = 'PM'
-  assert.strictEqual(actionModule.isCreateVisible(), true)
-  pass('Tester and PM see Create Bug')
+  assert.strictEqual(actionModule.isCreateVisible(), false)
+  await assert.rejects(() => actionModule.createBug.call({}), /not allowed/)
+  pass('Only Tester sees or invokes Create Bug')
 
+  roleCode = 'TESTER'
   const listBinding = { path: '/Bugs' }
   let createArguments
   const extensionActionContext = {

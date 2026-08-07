@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "UAT-AI-004",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T15:17:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "testRecord": {
+    "bugNumber": "BUG-0025",
+    "title": "IDTS-111 UAT-BUG-001 NhanT 20260803-1446"
+  },
+  "expectedResult": "AI proposals use active catalog values; rules-based baselines are clearly labelled and no automatic apply occurs.",
+  "actualResult": "The Classification Suggestions dialog displayed field-by-field current and proposed values, plain-language reasons, AI suggestion source labels, and confidence indicators. Financial Accounting, IDTS Bug Report, and Workflow are active in the execution baseline catalogs. Apply Classification remained disabled because no suggestion was selected, and no classification was changed.",
+  "candidateOutcome": "MEETS_EXPECTED_RESULT",
+  "reviewBoundary": "DonHV must review this complete candidate package before any PASS decision or catalog update.",
+  "evidence": [
+    {
+      "id": "UAT-AI-004-E01",
+      "file": "01-classification-suggestions.png",
+      "description": "Classification Suggestions dialog showing active-catalog proposal labels, AI source labels, confidence/reasons, and disabled Apply Classification without selection.",
+      "sha256": "64DAC78F67125B521F5F6CA8EA97410BCE90842C6500F608104EA3E57697043C"
+    }
+  ],
+  "catalogReadback": {
+    "SAPModule": "FI / Financial Accounting / active=true",
+    "ApplicationComponent": "IDTS_BUG_REPORT / IDTS Bug Report / active=true",
+    "DefectCategory": "WORKFLOW / Workflow / active=true",
+    "source": "db/data execution-baseline CSV files"
+  },
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "The retained screenshot contains controlled UAT data only and no email, credential, cookie, token, or private endpoint text."
+  },
+  "limitations": [
+    "The proposed Workflow reason interprets the controlled no-assignee scenario as an incorrect outcome even though this Bug was intentionally created to verify Pending Assignment. Human review remains necessary; this quality concern did not violate the case's active-value/source-label/no-auto-apply acceptance focus.",
+    "No Accept, Reject, Ignore, row selection, or Apply Classification action was submitted."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10962",
+    "reviewDate": "2026-08-04",
+    "category": "RETAINED_TRUTHFUL_POSITIVE",
+    "currentStatus": "CANDIDATE_EVIDENCE_RETAINED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
+}

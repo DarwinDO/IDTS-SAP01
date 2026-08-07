@@ -1,5 +1,13 @@
 # Knowledge: `srv/service.cds`
 
+## IDTS-122 PM operational dashboard contracts
+
+`readBugStatusMetrics()` is a PM-only read function returning the ten canonical workflow statuses with label, criticality, sort order and Bug count. It is an aggregate read contract, not a HANA table and requires no schema deployment. `AiOperationalMetric` now exposes semantic outcome counters so the UI can distinguish known bad requests, rate limits, provider 5xx, timeouts, unavailable calls and unknown failures without exposing prompts, provider payloads or raw errors.
+
+## IDTS-122 contract delta
+
+`Bugs` exposes durable retest ownership and capability flags, and declares the bound `reassignRetestOwner` action. Active Testers are provided through a value help. These are additive service contracts; ordinary Closed-Bug mutation remains blocked in handlers, not trusted to metadata alone.
+
 ## IDTS-114 handoff comment-summary contract
 
 `BugHandoffSummaryResult.commentSummary` and `verifiedComments` are transient `LargeString` fields in the OData action result. They are not columns and do not create a HANA migration. `commentSummary` contains grounded advisory insights, while `verifiedComments` keeps the bounded sanitized source lines for human comparison.
@@ -437,3 +445,8 @@ The UI sends only this ID to `acceptAiSuggestion`, `rejectAiSuggestion`, or `ign
 `BugHandoffSummaryResult` và `SmartAssignmentExplanationCandidate` giờ expose `suggestionID`. Giá trị này là UUID của row `AiSuggestions` đã sanitize được tạo cho chính response đó. Handoff trả một ID trên result. Mỗi explanation row của cùng một request Smart Assign mang cùng ID vì request được persist thành một review unit.
 
 UI chỉ gửi ID này cho `acceptAiSuggestion`, `rejectAiSuggestion`, hoặc `ignoreAiSuggestion`. Việc thêm ID không làm Accept áp dụng summary, tạo history, chọn developer, hoặc assign bất kỳ ai.
+## IDTS-125 authorization metadata contract (2026-08-05)
+
+**English.** `Bugs` exposes virtual `canManageAttachments`, `bugRequiredFieldControl`, and `bugOptionalFieldControl` alongside `canEdit`. They carry per-row UX state only; CAP handlers remain authoritative.
+
+**Tiếng Việt.** `Bugs` expose virtual `canManageAttachments`, `bugRequiredFieldControl`, `bugOptionalFieldControl` bên cạnh `canEdit`. Chúng chỉ mang trạng thái UX theo row; CAP handler vẫn là nguồn quyền chính thức.

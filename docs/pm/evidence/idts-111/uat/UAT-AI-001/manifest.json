@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "UAT-AI-001",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-03T15:14:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "testRecord": {
+    "bugNumber": "BUG-0025",
+    "title": "IDTS-111 UAT-BUG-001 NhanT 20260803-1446"
+  },
+  "expectedResult": "The dialog shows grounded candidates with safe reasons, or a clear no-result state; it does not mutate the Bug.",
+  "actualResult": "The Similar Bugs dialog displayed five reviewable candidates with Bug number, title, match percentage, workflow status, RELATED classification, and plain-language matching reasons. Confirm Duplicate remained disabled because no candidate was selected, and no review or duplicate action was submitted.",
+  "candidateOutcome": "MEETS_EXPECTED_RESULT",
+  "reviewBoundary": "DonHV must review this complete candidate package before any PASS decision or catalog update.",
+  "evidence": [
+    {
+      "id": "UAT-AI-001-E01",
+      "file": "01-similar-bugs-review.png",
+      "description": "Review-only Similar Bugs dialog with five grounded candidates and safe reasons; Confirm Duplicate disabled without a selection.",
+      "sha256": "E42FF9818D9F4765F7FEBE73FED259C8C9D7E98079C9731093016B4B184781B1"
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "The retained screenshot contains controlled UAT data only and no email, credential, cookie, token, or private endpoint text."
+  },
+  "limitations": [
+    "No Accept, Reject, Ignore, candidate selection, or Confirm Duplicate action was submitted; mutation avoidance was verified by remaining in review-only state."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10962",
+    "reviewDate": "2026-08-04",
+    "category": "RETAINED_TRUTHFUL_POSITIVE",
+    "currentStatus": "CANDIDATE_EVIDENCE_RETAINED",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
+}

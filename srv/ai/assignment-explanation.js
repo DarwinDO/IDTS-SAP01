@@ -11,6 +11,7 @@ const {
   sanitizeErrorSummary
 } = require('./safety')
 const { STATUS } = require('../bug-service/constants')
+const { assertBugOpenForMutation } = require('../bug-service/permissions')
 const { resolveRequestUser } = require('../bug-service/helpers')
 const { buildAssignableDeveloperRows } = require('../bug-service/read-models')
 
@@ -91,6 +92,7 @@ async function resolveAssignmentInput (tx, req, entities, data) {
         .where({ ID: sourceBugID })
     )
     if (!source) return req.reject(404, 'Source bug was not found.')
+    assertBugOpenForMutation(req, source)
   }
 
   return {

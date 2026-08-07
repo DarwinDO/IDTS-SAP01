@@ -1,75 +1,81 @@
 ## Summary
 
-- Publish the approved IDTS-111 SAP BTP execution baseline and exact member assignments.
-- Confirm that the deployed runtime is compatible with the 90-case catalog without redeployment.
-- Preserve execution truth: 90 PREPARED, 0 executed, 0 PASS/FAIL/BLOCKED; workbook and Drive unchanged.
+- Preserve NhanT's complete 57-case Tester UAT package and add DonHV's case-by-case disposition.
+- Publish the current 57-case partition: 22 candidate MEETS, 12 candidate DOES_NOT_MEET and 23 BLOCKED, all pending DonHV's final disposition.
+- Keep the approved 90-case catalog at `PREPARED`; no candidate is promoted to final UAT PASS/FAIL before workbook integration.
 
 ## Positive Evidence
 
-- `npm run btp:demo:check`: PASS, `DEMO READY` at `2026-08-02T23:06:59+07:00`.
-- CAP and AppRouter started 1/1; liveness, database readiness and web entry HTTP 200.
-- Scoped Git comparison found no runtime-relevant changes between deployed SHA `67b1bf86169e9696c9365ef4846b99ffae30d4e2` and catalog source baseline `447da1dab80418847d806040e6b2060b0916cb63`.
-- `node scripts/qa/generate-idts111-uat-catalog.js --check`: PASS, 90 PREPARED cases.
-- OfficeCLI `1.0.143` preflight PASS.
+- 57 manifests and 77 PNG references form the current candidate evidence inventory; final gate verification is required before handoff.
+- Current review package records 22 candidate MEETS; these remain candidates rather than final workbook PASS results.
+- NhanT personally acknowledged briefing SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`; Jira comments are `10908` and `10909`.
 
 ## Negative Evidence
 
-- Anonymous protected OData returns HTTP 401 as expected.
-- No member execution, result approval, workbook generation, Drive update, schema deployment, seed load or database reset occurred.
-- The catalog checker initially produced a false `OUTDATED` result on CRLF checkout; a content-equivalent regeneration produced no diff, and comparison now normalizes only line endings.
+- Current rechecks: `UAT-AUTH-005` candidate positive; `UAT-BUG-008` candidate negative; `UAT-UX-002` partial pending a matching wrapping fixture.
+- Catalog mismatches: `UAT-AI-008`, `UAT-AI-010`, `UAT-AI-014`, `UAT-AI-015`, `UAT-LIFE-014`.
+- Member evidence still required: ATT-001 fixture reconciliation; AI-005/009 immutable suggestion ID plus sanitized Network/audit; UX-002 matching fixture; UX-003 physical Tab. AI-007/ATT-002/ATT-003 retain stale prerequisites.
+- No negative is relabeled to improve the result.
 
 ## Edge/Boundary Evidence
 
-- The baseline distinguishes point-in-time readiness from the BTP Trial/HANA Free Tier auto-stop limitation.
-- Every execution session must rerun readiness and report a later auto-stop as an environment blocker until diagnosed.
+- Twenty-three blocker packages remain truthful blockers without PASS.
+- `UAT-UX-003` is a test-harness limitation: Enter/Escape/focus return evidence is retained, but physical Tab-key confirmation is still required.
+- Targeted SAP reruns recovered on the current deployed surface: AUTH-005 is candidate positive, BUG-008 is candidate negative, and current comment/attachment checks retain their recorded candidate outcomes. The remaining blockers are evidence/fixture/identity prerequisites, not the earlier blank-page incident.
 
 ## Roles/Authorization
 
-- NhanT: 57 Tester/end-user cases.
-- DonHV: 21 PM/database/integration cases.
-- DatDT: 8 Developer cases.
-- SangVN: 4 Developer cases.
-- Members must use their own SAP identities; agents cannot approve or execute for them.
+- NhanT used only the NhanT Tester identity; PM/Developer/platform identity cases remain blocked when the required actor is unavailable.
+- `UAT-AI-009` must be rerun with sanitized Network evidence; the open page alone is not session-expiry proof.
+- No member identity, role, or protected master data was mutated to manufacture coverage.
 
 ## Persistence/Reload
 
-- Persistence and integration cases retain their before/after, reload and readback evidence requirements.
-- This PR changes no runtime, HANA data, S3 object, email delivery or authentication state.
+- Accepted evidence covers create/edit/discard, classification, lifecycle, AI decision observations, audit and reload/readback behavior.
+- Confirmed duplicate audit and tablet defects remain linked findings; catalog-semantic mismatches are not mislabeled product defects.
+- No workbook, Drive, HANA seed, or S3 object was changed by this remediation.
 
 ## UI/UX Review
 
-- No application UI is changed.
-- Case-specific screenshots and safe-error/Network evidence remain mandatory according to each catalog row.
+- The retained 77 PNG references remain the candidate visual set.
+- Current deployed SAP reruns produced sanitized PNG evidence for AUTH-005 and BUG-008; the package contains 77 hash-verified PNG references (64 unique hashes) with no missing/hash mismatch.
+- UX-002 remains fixture-limited and UX-003 still needs NhanT's physical Tab-key confirmation; no final PASS is inferred from those incomplete boundaries.
 
 ## Ponytail Simplicity
 
-- Two Markdown evidence files publish the baseline and assignments; no test framework, queue, scheduler or spreadsheet abstraction is added.
-- The existing generator receives only an EOL-tolerant deterministic check needed for Windows clones.
+- Reuse the existing manifests/screenshots and add only the reviewer matrix/status updates.
+- No new UAT framework, dependency, browser bypass, production code or spreadsheet abstraction is added.
 
 ## Ownership Knowledge Gate
 
-Member: DonHV
-Date: 2026-07-23
-Ownership flow: Bug create/lifecycle and exact workflow action audit
+Member: NhanT
+Date: 2026-08-03
+Ownership flow: QA authentication, authorization, persistence/reload, and notification outbox verification
 Base questions: 3
 Inactive-day questions: 0
 Additional-flow questions: 0
-Score: 90%
+Score: 100%
 Critical questions: PASS
 Debug exercise: PASS
 Teach-back: PASS
-Evidence: docs/learning/progress/donhv.md and docs/pm/evidence/idts-89/knowledge-gate-donhv-2026-07-23.md and docs/pm/evidence/idts-90/knowledge-gate-donhv-2026-07-23.md
+Evidence: docs/pm/evidence/idts-105/knowledge-gate-nhant-qa-2026-08-03.md and docs/learning/progress/nhant.md
 Result: PASS
+Briefing SHA: `3e78b495cb8feb56188cc446b827d47e040e1b98`
+Jira acknowledgments: IDTS-110 comment `10908`; IDTS-111 comment `10909`.
+Ownership: NhanT executes truthful Tester evidence; DonHV approves results and owns final workbook/Drive integration.
 
 ## Known Gaps
 
-- All 90 cases remain PREPARED until assigned humans execute them and DonHV reviews the evidence.
-- BTP Trial/HANA Free Tier do not provide an always-on SLA.
-- UAT EN v0.3 generation and same-ID Drive synchronization remain blocked until reviewed execution is complete.
+- AI-005/AI-009 still require immutable-ID, sanitized Network and matching audit diagnostics; the retained current UI observations are not sufficient final proof.
+- Candidate negatives remain disclosed. ATT-001 is specifically reviewer-blocked because its preserved 44/54/47-byte fixture provenance is inconsistent.
+- `UAT-UX-003` requires NhanT's physical-keyboard confirmation.
+- Twenty-three blockers still need their exact identities, fixtures, services or diagnostic proof before final approval.
+- OfficeCLI `1.0.143` preflight PASS. The final English `UAT_EN_PREPARED` workbook and Drive artifact remain unchanged.
 
 ## Jira/Evidence Links
 
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-111
-- Catalog PR: https://github.com/DarwinDO/IDTS-SAP01/pull/261
-- Baseline: `docs/pm/evidence/idts-111/execution-baseline.md`
-- Assignment: `docs/pm/evidence/idts-111/execution-assignment.md`
+- Previous execution comment: https://dutassociation.atlassian.net/browse/IDTS-111?focusedCommentId=10881
+- DonHV review: `docs/pm/evidence/idts-111/donhv-execution-review-matrix.md`
+- Execution summary: `docs/pm/evidence/idts-111/execution-summary.md`
+- Case evidence: `docs/pm/evidence/idts-111/uat/`

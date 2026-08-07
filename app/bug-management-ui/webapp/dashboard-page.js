@@ -32,6 +32,19 @@
         PENDING_ASSIGNMENT: "Information"
     };
 
+    var PM_STATUS_TILES = [
+        { statusCode: "PENDING_ASSIGNMENT", icon: "sap-icon://group", valueColor: "Critical" },
+        { statusCode: "ASSIGNED", icon: "sap-icon://employee", valueColor: "Neutral" },
+        { statusCode: "IN_REVIEW", icon: "sap-icon://inspect", valueColor: "Neutral" },
+        { statusCode: "NEED_MORE_INFORMATION", icon: "sap-icon://question-mark", valueColor: "Critical" },
+        { statusCode: "IN_PROGRESS", icon: "sap-icon://process", valueColor: "Neutral" },
+        { statusCode: "RESOLVED", icon: "sap-icon://complete", valueColor: "Good" },
+        { statusCode: "RETEST_REQUIRED", icon: "sap-icon://validate", valueColor: "Critical" },
+        { statusCode: "REJECTED", icon: "sap-icon://decline", valueColor: "Error" },
+        { statusCode: "REOPENED", icon: "sap-icon://undo", valueColor: "Critical" },
+        { statusCode: "CLOSED", icon: "sap-icon://locked", valueColor: "Good" }
+    ];
+
     sap.ui.require([
         "sap/m/App",
         "sap/m/Page",
@@ -218,11 +231,15 @@
 
             Promise.all([
                 fetchOData("/odata/v4/bug/Bugs?$top=200&$orderby=modifiedAt%20desc&$select=ID,IsActiveEntity,bugNumber,title,status_code,reporter_ID,assignee_ID,nextProcessorUser_ID,nextProcessorRole_code,isOverdue,isPendingAssignment,isRejectedFollowUp,isRetestRequired,reporterDisplayName,assigneeDisplayName,nextProcessorUserDisplayName,currentActionOwnerDisplayName"),
-                fetchOData("/odata/v4/bug/DeveloperWorkloads?$top=100&$orderby=developerName%20asc")
+                fetchOData("/odata/v4/bug/DeveloperWorkloads?$top=100&$orderby=developerName%20asc"),
+                roleCode === "PM"
+                    ? fetchOData("/odata/v4/bug/readBugStatusMetrics()")
+                    : Promise.resolve({ value: [] })
             ]).then(function (results) {
                 var bugs = normalizeBugs(results[0].value || []);
                 var workloads = normalizeWorkloads(results[1].value || []);
-                dashboardModel.setData(buildDashboardModel(roleCode, user, bugs, workloads));
+                var statusMetrics = normalizeStatusMetrics(results[2].value || []);
+                dashboardModel.setData(buildDashboardModel(roleCode, user, bugs, workloads, statusMetrics));
             }).catch(function () {
                 dashboardModel.setData({
                     roleMessage: "Dashboard data is not available right now. Please refresh the page or try again later.",
@@ -263,7 +280,7 @@
             });
             var dialog = new Dialog({
                 title: "{i18n>dashboardAiActivityTitle}",
-                contentWidth: "70rem",
+                contentWidth: "76rem",
                 resizable: true,
                 stretch: Device.system.phone,
                 busy: true,
@@ -275,9 +292,14 @@
                             new Column({ header: new Text({ text: "{i18n>dashboardAiActivityCapability}" }) }),
                             new Column({ header: new Text({ text: "{i18n>dashboardAiActivityRequests}" }) }),
                             new Column({ header: new Text({ text: "{i18n>dashboardAiActivitySuccessful}" }) }),
-                            new Column({ header: new Text({ text: "{i18n>dashboardAiActivityUnavailable}" }) }),
+                            new Column({ demandPopin: true, minScreenWidth: "Tablet", header: new Text({ text: "{i18n>dashboardAiActivityBadRequest}" }) }),
+                            new Column({ demandPopin: true, minScreenWidth: "Tablet", header: new Text({ text: "{i18n>dashboardAiActivityRateLimited}" }) }),
+                            new Column({ demandPopin: true, minScreenWidth: "Desktop", header: new Text({ text: "{i18n>dashboardAiActivityProvider5xx}" }) }),
+                            new Column({ demandPopin: true, minScreenWidth: "Desktop", header: new Text({ text: "{i18n>dashboardAiActivityTimeout}" }) }),
+                            new Column({ demandPopin: true, minScreenWidth: "Desktop", header: new Text({ text: "{i18n>dashboardAiActivityUnavailable}" }) }),
+                            new Column({ demandPopin: true, minScreenWidth: "Desktop", header: new Text({ text: "{i18n>dashboardAiActivityOtherFailure}" }) }),
                             new Column({ header: new Text({ text: "{i18n>dashboardAiActivityAverageLatency}" }) }),
-                            new Column({ header: new Text({ text: "{i18n>dashboardAiActivityReviewDecisions}" }) })
+                            new Column({ demandPopin: true, minScreenWidth: "Tablet", header: new Text({ text: "{i18n>dashboardAiActivityReviewDecisions}" }) })
                         ],
                         items: {
                             path: "aiMetrics>/rows",
@@ -286,7 +308,12 @@
                                     new Text({ text: "{aiMetrics>featureName}" }),
                                     new Text({ text: "{aiMetrics>requestCount}" }),
                                     new ObjectStatus({ text: "{aiMetrics>successCount}", state: "Success" }),
+                                    new ObjectStatus({ text: "{aiMetrics>badRequestCount}", state: "Warning" }),
+                                    new ObjectStatus({ text: "{aiMetrics>rateLimitedCount}", state: "Warning" }),
+                                    new ObjectStatus({ text: "{aiMetrics>provider5xxCount}", state: "Error" }),
+                                    new ObjectStatus({ text: "{aiMetrics>timeoutCount}", state: "Warning" }),
                                     new ObjectStatus({ text: "{aiMetrics>unavailableCount}", state: "Warning" }),
+                                    new ObjectStatus({ text: "{aiMetrics>otherFailureCount}", state: "Warning" }),
                                     new Text({ text: "{aiMetrics>averageLatencyText}" }),
                                     new Text({ text: "{aiMetrics>reviewDecisionsText}" })
                                 ]
@@ -335,7 +362,12 @@
                     featureCode: featureCode,
                     requestCount: 0,
                     successCount: 0,
+                    badRequestCount: 0,
+                    rateLimitedCount: 0,
+                    provider5xxCount: 0,
+                    timeoutCount: 0,
                     unavailableCount: 0,
+                    otherFailureCount: 0,
                     latencyTotal: 0,
                     latencySamples: 0,
                     acceptedCount: 0,
@@ -346,7 +378,12 @@
                 group.requestCount += Number(row.requestCount || 0);
                 group.successCount += Number(row.successCount || 0);
                 // Backend failureCount đã gồm timeout/unavailable; không cộng unavailableCount lần hai.
-                group.unavailableCount += Number(row.failureCount || 0);
+                group.badRequestCount += Number(row.badRequestCount || 0);
+                group.rateLimitedCount += Number(row.rateLimitedCount || 0);
+                group.provider5xxCount += Number(row.provider5xxCount || 0);
+                group.timeoutCount += Number(row.timeoutCount || 0);
+                group.unavailableCount += Number(row.unavailableCount || 0);
+                group.otherFailureCount += Number(row.otherFailureCount || 0);
                 if (row.averageLatencyMs !== null && row.averageLatencyMs !== undefined) {
                     var samples = Number(row.latencySampleCount || 0);
                     group.latencyTotal += Number(row.averageLatencyMs) * samples;
@@ -368,7 +405,12 @@
                     featureName: featureName(featureCode, bundle),
                     requestCount: group.requestCount,
                     successCount: group.successCount,
+                    badRequestCount: group.badRequestCount,
+                    rateLimitedCount: group.rateLimitedCount,
+                    provider5xxCount: group.provider5xxCount,
+                    timeoutCount: group.timeoutCount,
                     unavailableCount: group.unavailableCount,
+                    otherFailureCount: group.otherFailureCount,
                     averageLatencyText: latencyText,
                     reviewDecisionsText: bundle.getText("dashboardAiActivityReviewCounts", [
                         group.acceptedCount,
@@ -391,7 +433,7 @@
         }
 
         // Router thuần chọn model Tester/Developer/PM; không ghi DB hay gọi API tại đây.
-        function buildDashboardModel(roleCode, user, bugs, workloads) {
+        function buildDashboardModel(roleCode, user, bugs, workloads, statusMetrics) {
             var userID = user && user.ID;
             var developerWorkload = findCurrentDeveloperWorkload(workloads, userID);
             var openBugs = bugs.filter(function (bug) { return bug.statusCode !== "CLOSED"; });
@@ -401,7 +443,7 @@
             }
 
             if (roleCode === "PM") {
-                return pmDashboard(openBugs, workloads);
+                return pmDashboard(openBugs, workloads, statusMetrics);
             }
 
             return testerDashboard(user, openBugs);
@@ -412,18 +454,27 @@
             var userID = user && user.ID;
             var createdByMe = bugs.filter(function (bug) { return bug.reporterID === userID; });
             var needMyInput = bugs.filter(function (bug) {
-                return bug.nextProcessorUserID === userID || (bug.reporterID === userID && bug.statusCode === "NEED_MORE_INFORMATION");
+                return bug.nextProcessorUserID === userID;
             });
             var retestRequired = bugs.filter(function (bug) {
-                return bug.reporterID === userID && bug.isRetestRequired;
+                return bug.nextProcessorUserID === userID && bug.isRetestRequired;
             });
 
             return {
                 roleMessage: "Track bugs you reported and items waiting for your next action.",
                 tiles: [
-                    tile("Created by me", createdByMe.length, "sap-icon://create-entry-time", "Neutral"),
-                    tile("Need my input", needMyInput.length, "sap-icon://inbox", needMyInput.length ? "Critical" : "Good"),
-                    tile("Retest required", retestRequired.length, "sap-icon://validate", retestRequired.length ? "Critical" : "Good")
+                    tile("Created by me", createdByMe.length, "sap-icon://create-entry-time", "Neutral", {
+                        reporter_ID: userID,
+                        exclude_closed: "true"
+                    }),
+                    tile("Need my input", needMyInput.length, "sap-icon://inbox", needMyInput.length ? "Critical" : "Good", {
+                        nextProcessorUser_ID: userID,
+                        exclude_closed: "true"
+                    }),
+                    tile("Retest required", retestRequired.length, "sap-icon://validate", retestRequired.length ? "Critical" : "Good", {
+                        status_code: "RETEST_REQUIRED",
+                        nextProcessorUser_ID: userID
+                    })
                 ],
                 focusBugs: focusList(needMyInput.concat(retestRequired, createdByMe)),
                 workloads: [],
@@ -447,9 +498,15 @@
             return {
                 roleMessage: "Track bugs assigned to you and work that needs your response.",
                 tiles: [
-                    tile("Assigned to me", assignedToMe.length, "sap-icon://employee", "Neutral"),
-                    tile("In progress", inProgress.length, "sap-icon://process", inProgress.length ? "Critical" : "Good"),
-                    tile("Information requested", infoRequested.length, "sap-icon://question-mark", infoRequested.length ? "Critical" : "Good")
+                    tile("Assigned to me", assignedToMe.length, "sap-icon://employee", "Neutral", { assignee_ID: profileID }),
+                    tile("In progress", inProgress.length, "sap-icon://process", inProgress.length ? "Critical" : "Good", {
+                        status_code: "IN_PROGRESS",
+                        assignee_ID: profileID
+                    }),
+                    tile("Information requested", infoRequested.length, "sap-icon://question-mark", infoRequested.length ? "Critical" : "Good", {
+                        status_code: "NEED_MORE_INFORMATION",
+                        assignee_ID: profileID
+                    })
                 ],
                 focusBugs: focusList(myActionItems),
                 workloads: [],
@@ -458,17 +515,26 @@
         }
 
         // PM thấy toàn cảnh open/pending/overdue và workload, không giới hạn theo một user.
-        function pmDashboard(bugs, workloads) {
+        function pmDashboard(bugs, workloads, statusMetrics) {
             var pendingAssignment = bugs.filter(function (bug) { return bug.isPendingAssignment; });
             var overdue = bugs.filter(function (bug) { return bug.isOverdue; });
+            var metricsByCode = {};
+            statusMetrics.forEach(function (metric) {
+                metricsByCode[metric.statusCode] = metric;
+            });
 
             return {
-                roleMessage: "Monitor open bugs, pending assignment, overdue work, and developer workload.",
-                tiles: [
-                    tile("Open bugs", bugs.length, "sap-icon://request", "Neutral"),
-                    tile("Pending assignment", pendingAssignment.length, "sap-icon://group", pendingAssignment.length ? "Critical" : "Good"),
-                    tile("Overdue", overdue.length, "sap-icon://alert", overdue.length ? "Error" : "Good")
-                ],
+                roleMessage: "Monitor every Bug lifecycle status, overdue work, AI activity, and developer workload.",
+                tiles: PM_STATUS_TILES.map(function (definition) {
+                    var metric = metricsByCode[definition.statusCode] || {};
+                    return tile(
+                        metric.statusName || STATUS_LABELS[definition.statusCode],
+                        metric.bugCount || 0,
+                        definition.icon,
+                        Number(metric.bugCount || 0) === 0 ? "Neutral" : definition.valueColor,
+                        { status_code: definition.statusCode }
+                    );
+                }),
                 focusBugs: focusList(overdue.concat(pendingAssignment, bugs)),
                 workloads: workloadList(workloads),
                 showWorkload: true
@@ -517,6 +583,16 @@
                         isOverloaded: row.isOverloaded === true
                     };
                 });
+        }
+
+        function normalizeStatusMetrics(rows) {
+            return rows.map(function (row) {
+                return {
+                    statusCode: String(row.statusCode || ""),
+                    statusName: row.statusName || STATUS_LABELS[row.statusCode] || row.statusCode,
+                    bugCount: Number(row.bugCount || 0)
+                };
+            });
         }
 
         // Dựng row public/criticality cho list; không tính lại rule backend.
@@ -568,20 +644,31 @@
         }
 
         // Factory object KPI cho JSONModel; không có side effect.
-        function tile(title, value, icon, valueColor) {
+        function tile(title, value, icon, valueColor, filters) {
             return {
                 title: title,
                 subtitle: "Current count",
                 value: String(value),
                 valueColor: valueColor,
                 icon: icon,
-                footer: "Open bug list"
+                footer: "Open filtered bug list",
+                filters: filters || {}
             };
         }
 
         // Điều hướng về Fiori List Report mà không xóa session.
-        function openBugList() {
-            window.location.href = "index.html";
+        function openBugList(event) {
+            var context = event && event.getSource && event.getSource().getBindingContext("dashboard");
+            var filters = (context && context.getProperty("filters")) || {};
+            var params = new URLSearchParams();
+
+            ["status_code", "reporter_ID", "nextProcessorUser_ID", "assignee_ID", "exclude_closed"].forEach(function (property) {
+                if (filters[property]) {
+                    params.set(property, filters[property]);
+                }
+            });
+
+            window.location.href = params.toString() ? "index.html#?" + params.toString() : "index.html";
         }
 
         // Lấy Bug ID từ binding context và mở deep link Object Page; ID thiếu thì bỏ qua an toàn.

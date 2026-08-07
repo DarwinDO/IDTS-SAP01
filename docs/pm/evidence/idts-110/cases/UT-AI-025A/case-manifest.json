@@ -1,0 +1,63 @@
+{
+  "caseId": "UT-AI-025A",
+  "title": "repeated forward duplicate link is idempotently rejected",
+  "candidateExecutionStatus": "MAPPING_ONLY_CANDIDATE",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "executor": "NhanT (agent-assisted)",
+  "executedAt": "2026-08-04T09:15:45.802Z",
+  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
+  "deploySha": null,
+  "environment": "HYBRID_BTP",
+  "runtime": "Node.js v22.23.1, win32 x64",
+  "testCommand": "node scripts/qa/test-idts110-local-primary-suites.js --output=docs/pm/evidence/idts-110/local-primary-suite-results.json",
+  "sourceAssertions": [
+    "srv/ai/duplicate-detection.js#suggestSimilarBugs",
+    "srv/ai/duplicate-confirmation.js#confirmDuplicateSuggestion"
+  ],
+  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+  "assertions": [
+    "aiDuplicateConfirm: PASS  the same Bug pair always receives the same link ID | actual=\"193e856c-6bc9-554a-a8ee-70056df240eb\" expected=\"193e856c-6bc9-554a-a8ee-70056df240eb\"",
+    "aiDuplicateConfirm: PASS  pair identity is independent of source/target direction | actual=\"193e856c-6bc9-554a-a8ee-70056df240eb\" expected=\"193e856c-6bc9-554a-a8ee-70056df240eb\"",
+    "aiDuplicateConfirm: PASS  Tester confirmation returns a DuplicateLink ID | actual=\"193e856c-6bc9-554a-a8ee-70056df240eb\"",
+    "aiDuplicateConfirm: PASS  link uses the suggestion source Bug | actual=\"97000000-0000-0000-0000-000000000001\" expected=\"97000000-0000-0000-0000-000000000001\"",
+    "aiDuplicateConfirm: PASS  link uses the stored candidate Bug | actual=\"97000000-0000-0000-0000-000000000002\" expected=\"97000000-0000-0000-0000-000000000002\"",
+    "aiDuplicateConfirm: PASS  link uses the stored relation type | actual=\"SIMILAR\" expected=\"SIMILAR\"",
+    "aiDuplicateConfirm: PASS  positive confirmation persists exactly one link | actual=1 expected=1",
+    "aiDuplicateConfirm: PASS  confirmation preserves the accepted suggestion audit state | actual=\"ACCEPTED\" expected=\"ACCEPTED\"",
+    "aiDuplicateConfirm: PASS  confirmation does not change Bug status or assignee | actual=\"{\\\"status_code\\\":\\\"PENDING_ASSIGNMENT\\\",\\\"assignee_ID\\\":null}\" expected=\"{\\\"status_code\\\":\\\"PENDING_ASSIGNMENT\\\",\\\"assignee_ID\\\":null}\"",
+    "aiDuplicateConfirm: PASS  client cannot inject an arbitrary relation type | status=400 message=Property \"relationTypeCode\" does not exist in BugService.confirmDuplicateSuggestion",
+    "aiDuplicateConfirm: PASS  repeated confirmation is rejected safely | status=409 message=These Bugs are already linked.",
+    "aiDuplicateConfirm: PASS  repeated confirmation leaves one link | actual=1 expected=1",
+    "aiDuplicateConfirm: PASS  candidate outside the stored suggestion is rejected | status=400 message=Candidate Bug was not part of the accepted Similar Bugs suggestion.",
+    "aiDuplicateConfirm: PASS  outside-candidate rejection writes no link | actual=0 expected=0",
+    "aiDuplicateConfirm: PASS  self-link is rejected | status=400 message=A Bug cannot be linked to itself.",
+    "aiDuplicateConfirm: PASS  an existing reverse-direction link is treated as repeated | status=409 message=These Bugs are already linked.",
+    "aiDuplicateConfirm: PASS  pending suggestion cannot be confirmed | status=409 message=Only an accepted, current Similar Bugs suggestion can be confirmed.",
+    "aiDuplicateConfirm: PASS  rejected suggestion cannot be confirmed | status=409 message=Only an accepted, current Similar Bugs suggestion can be confirmed.",
+    "aiDuplicateConfirm: PASS  ignored suggestion cannot be confirmed | status=409 message=Only an accepted, current Similar Bugs suggestion can be confirmed.",
+    "aiDuplicateConfirm: PASS  non-Similar-Bugs suggestion cannot be confirmed | status=400 message=This AI suggestion is not a Similar Bugs suggestion.",
+    "aiDuplicateConfirm: PASS  Developer cannot confirm a duplicate suggestion | status=403 message=Only Tester or PM users can confirm duplicate suggestions.",
+    "aiDuplicateConfirm: PASS  unauthorized request writes no link | actual=0 expected=0",
+    "aiDuplicateConfirm: PASS  missing source Bug returns safe 404 | status=404 message=AI suggestion was not found.",
+    "aiDuplicateConfirm: PASS  missing candidate Bug returns safe 404 | status=404 message=Candidate Bug was not found.",
+    "aiDuplicateConfirm: PASS  malformed persisted payload is rejected | status=400 message=AI suggestion payload is not valid.",
+    "aiDuplicateConfirm: PASS  inactive stored relation type is rejected | status=400 message=AI suggestion duplicate relation type is inactive or unavailable.",
+    "aiDuplicateConfirm: PASS  expired accepted suggestion cannot be confirmed | status=409 message=Only an accepted, current Similar Bugs suggestion can be confirmed.",
+    "aiDuplicateConfirm: PASS  post-handler failure rejects confirmation | status=500 message=Forced post-handler failure for rollback verification.",
+    "aiDuplicateConfirm: PASS  failed request rolls DuplicateLink insert back | actual=0 expected=0",
+    "aiDuplicateConfirm: PASS  invalid suggestion ID returns 400 | status=400 message=A valid AI suggestion ID is required.",
+    "aiDuplicateConfirm: PASS  invalid candidate Bug ID returns 400 | status=400 message=A valid candidate Bug ID is required.",
+    "aiDuplicateConfirm: TOTAL: 31 PASS  |  0 FAIL  |  31 checks"
+  ],
+  "evidenceIds": [
+    "IDTS110-UT-AI-025A-LOCAL-PRIMARY-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png"
+  ],
+  "limitations": "This is broad suite-to-case traceability only. It is not an atomic case execution, browser proof, BTP acceptance evidence, or candidate PASS. DonHV owns final case-level review and workbook integration.",
+  "suiteKeys": [
+    "aiDuplicateConfirm"
+  ],
+  "structuredEvidenceFile": "../../local-primary-suite-results.json"
+}
