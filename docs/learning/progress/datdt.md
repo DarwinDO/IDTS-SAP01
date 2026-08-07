@@ -11,6 +11,26 @@ Effective date: 2026-07-13 (Asia/Bangkok). Initial historical debt: 0.
 | 2026-08-06 | Dashboard / UI bootstrap | 3 | 1 | 0 | 5/5 Y/N recognition (100%) | PASS | NOT ASSESSED | NOT ASSESSED | INCOMPLETE | DatDT affirmed the dashboard/read-model, History paging, derived overdue field, Network-first diagnosis, and UI mapping/formatter statements. The sixth Y/N answer approved the English-only UI5 bootstrap fix plan. This is supervised-task evidence only, not a Knowledge Gate PASS, because no controlled debug execution or own-words teach-back was completed. |
 | 2026-08-06 | Assignment / collaboration additional flow | 3 | 0 | 2 | 6/6 after one critical retest (100% final) | PASS | PASS | PASS | PASS | DatDT correctly traced CAP-owned assignment, explicit Comment/History behavior, required side-effect readback, no random AI assignment, and the Resubmit red/green evidence. After a hint and source/breakpoint anchor, DatDT passed the equivalent critical retest: attachment metadata remains in CAP persistence while binary goes through the storage adapter to S3/object storage, with `prepareAttachmentWrite` as a safety breakpoint. Controlled debug evidence: pre-fix IDTS-89 found one automatic Comment; post-fix found zero Comments while retaining the History reason. Teach-back correctly stated that Resubmit is an audit note and must not synthesize a Comment. |
 
+## 2026-08-07 Authentication Gate
+
+English: DatDT passed 5/5 (100%). Critical, controlled debug and teach-back
+results are PASS. DatDT distinguished the OData contract from its handler,
+rejected HTTP-only verification, identified safe login breakpoints and token
+forwarding, and required safe denial without secret or stack disclosure. The
+debug answer confirmed that XSUAA logout clears browser state and navigates to
+AppRouter `/do/logout` instead of calling custom logout. DatDT explained that a
+separate signed-out page keeps the flow understandable and avoids unreliable
+immediate re-entry to SAP login.
+
+Vietnamese: DatDT đạt 5/5 (100%). Critical, debug có kiểm soát và teach-back
+đều PASS. DatDT phân biệt đúng contract OData và handler, không chấp nhận chỉ
+kiểm tra HTTP 200, xác định breakpoint login an toàn và nơi gắn bearer token,
+đồng thời yêu cầu từ chối truy cập mà không lộ secret hoặc stack. Câu debug xác
+nhận logout XSUAA phải xóa browser state rồi điều hướng tới AppRouter
+`/do/logout`, không gọi custom logout. DatDT giải thích rằng trang signed-out
+riêng giúp luồng dễ hiểu và tránh việc chuyển ngay về SAP login gây hành vi
+không ổn định.
+
 ## Vietnamese
 
 Ngày hiệu lực: 13/07/2026 (Asia/Bangkok). Nợ lịch sử ban đầu: 0.

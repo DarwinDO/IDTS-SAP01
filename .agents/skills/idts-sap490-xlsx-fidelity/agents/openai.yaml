@@ -1,0 +1,6 @@
+interface:
+  display_name: "IDTS SAP490 XLSX Fidelity"
+  short_description: "Preserve OFFICIAL SUBMISSION XLSX fidelity"
+  default_prompt: "Use $idts-sap490-xlsx-fidelity to create or revise an IDTS SAP490 workbook from the OFFICIAL SUBMISSION template and verify layout fidelity."
+policy:
+  allow_implicit_invocation: true

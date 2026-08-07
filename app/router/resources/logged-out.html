@@ -4,12 +4,138 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Signed out | IDTS</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "72", "Segoe UI", Arial, sans-serif;
+      color: #1d2d3e;
+      background: #f5f6f7;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(145deg, #eef7fc 0%, #f5f6f7 52%, #eef1f3 100%);
+    }
+
+    .shell-bar {
+      display: flex;
+      align-items: center;
+      min-height: 3rem;
+      padding: 0 1.5rem;
+      background: #fff;
+      border-bottom: 1px solid #d9d9d9;
+      box-shadow: 0 0.125rem 0.5rem rgb(34 53 72 / 8%);
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .page {
+      display: grid;
+      min-height: calc(100vh - 3rem);
+      place-items: center;
+      padding: 2rem 1rem;
+    }
+
+    .card {
+      width: min(100%, 30rem);
+      padding: 3rem 2.5rem;
+      text-align: center;
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 0.75rem;
+      box-shadow: 0 0.5rem 2rem rgb(34 53 72 / 12%);
+    }
+
+    .status-icon {
+      display: grid;
+      width: 4rem;
+      height: 4rem;
+      margin: 0 auto 1.5rem;
+      place-items: center;
+      color: #107e3e;
+      background: #f1fdf6;
+      border: 1px solid #a1e6b9;
+      border-radius: 50%;
+    }
+
+    .status-icon svg {
+      width: 2rem;
+      height: 2rem;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.5rem, 5vw, 2rem);
+      line-height: 1.25;
+    }
+
+    .message {
+      margin: 0.75rem 0 2rem;
+      color: #556b82;
+      line-height: 1.5;
+    }
+
+    .primary-action {
+      display: inline-flex;
+      min-height: 2.75rem;
+      align-items: center;
+      justify-content: center;
+      padding: 0.625rem 1.5rem;
+      color: #fff;
+      background: #0070f2;
+      border: 1px solid #0070f2;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .primary-action:hover {
+      background: #0057d2;
+      border-color: #0057d2;
+    }
+
+    .primary-action:focus-visible {
+      outline: 0.1875rem solid #1d2d3e;
+      outline-offset: 0.1875rem;
+    }
+
+    .security-note {
+      margin: 1.5rem 0 0;
+      color: #758ca4;
+      font-size: 0.875rem;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 30rem) {
+      .shell-bar {
+        padding: 0 1rem;
+      }
+
+      .card {
+        padding: 2.25rem 1.5rem;
+      }
+    }
+  </style>
 </head>
 <body>
-  <main>
-    <h1>You have signed out of IDTS.</h1>
-    <p>Your application session has ended.</p>
-    <p><a href="/login.html">Sign in with SAP BTP</a></p>
+  <header class="shell-bar">Issue and Defect Tracking System</header>
+  <main class="page">
+    <section class="card" aria-labelledby="signed-out-title">
+      <div class="status-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12.5l4 4L19 7"></path>
+        </svg>
+      </div>
+      <h1 id="signed-out-title">You have signed out of IDTS.</h1>
+      <p class="message">Your application session has ended successfully.</p>
+      <a class="primary-action" href="/login.html">Sign in with SAP BTP</a>
+      <p class="security-note">Authentication is securely managed by SAP BTP.</p>
+    </section>
   </main>
 </body>
 </html>
