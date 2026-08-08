@@ -40,5 +40,5 @@ Never store real recipients, provider redirect URLs, BTP bindings/configuration,
 - SangVN reproduced the mismatch between email output `/idts.bugmanagementui/index.html` and AppRouter route `/idtsbugmanagementui/index.html`.
 - Branch `fix/idts-81-btp-email-deep-link-sangvn` applies the smallest shared normalizer change and covers root/current/dotted/older legacy inputs.
 - Focused outbox regression passes, fails on the URL assertion when the source fix is temporarily reverted, and passes again after restoration.
-- Local implementation remains unmerged: SangVN's Email Knowledge Gate is recorded as `0/4 FAIL` because yes/no-only confirmation does not satisfy critical reasoning, debug exercise, or teach-back. A valid retest or explicitly documented DonHV exception is required before merge/Jira Done.
+- Local implementation remains unmerged and is ready for normal PR review: SangVN's equivalent Y/N Email Knowledge Gate retest is `4/4 (100%) PASS`; Critical, controlled Debug, and Teach-back are all PASS. Jira Done still requires merge/deployment evidence and final acceptance.
 - Deployment and fresh mailbox click verification remain pending and are not claimed by local tests.
