@@ -4,7 +4,17 @@
   "sheets": {
     "Cover": { "show_gridlines": false, "preserve_page_setup": true, "preserve_merges": true },
     "Histories": { "show_gridlines": false, "preserve_page_setup": true, "preserve_merges": true },
-    "Test Scenario": { "show_gridlines": false, "preserve_page_setup": true, "preserve_merges": false },
+    "Test Scenario": {
+      "show_gridlines": false,
+      "preserve_page_setup": true,
+      "preserve_merges": false,
+      "closed_frames": ["E3:G3", "H3:J3", "K3:M3", "N3:P3", "Q3:S3", "A4:A4", "B4:B4", "C4:C4", "D4:D4", "E4:G4", "H4:J4", "K4:M4", "N4:P4", "Q4:S4", "A15:A15", "B15:B15", "C15:C15", "D15:D15", "E15:G15", "H15:J15", "K15:M15", "N15:P15", "Q15:S15"],
+      "style_rules": [
+        { "range": "E3:S3", "font": { "name": "Times New Roman", "size": 12, "bold": true }, "fill_rgb": "FFC9DAF8" },
+        { "range": "A4:D15", "font": { "name": "Times New Roman", "size": 12, "bold": false } },
+        { "range": "E4:S15", "font": { "name": "Times New Roman", "size": 12, "bold": true } }
+      ]
+    },
     "Test Cases": {
       "show_gridlines": false,
       "preserve_page_setup": true,

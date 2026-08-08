@@ -285,20 +285,71 @@ export async function generateUatCandidate() {
   const results = workbook.worksheets.getItem('Test Result');
   const evidenceLayout = await addEvidenceBlocks(results, cases, 1, 'F', 1429, 'Y');
   const uatLinks = [];
-  const domains = [...new Set(cases.map((item) => item.area))];
+  const scenarioDefinitions = [
+    'Sign in and access IDTS',
+    'Tester reports and classifies a Bug',
+    'PM triages, assigns and monitors work',
+    'Developer processes the Bug and collaborates',
+    'Retest, audit, notifications and AI-assisted review'
+  ];
+  const scenarioBands = ['E:G', 'H:J', 'K:M', 'N:P', 'Q:S'];
+  const coverageGroups = [
+    { name: 'Authentication and session', path: 'AppRouter / SAP sign-in', coverage: [1, 0, 0, 0, 1] },
+    { name: 'Bug creation and validation', path: 'Bug Management > Create Bug', coverage: [0, 1, 0, 0, 0] },
+    { name: 'Classification', path: 'Bug Management > Create/Edit Bug', coverage: [0, 1, 1, 0, 0] },
+    { name: 'Assignment and reassignment', path: 'Bug Management > Bug Details', coverage: [0, 0, 1, 1, 0] },
+    { name: 'Lifecycle processing', path: 'Bug Management > Bug Details', coverage: [0, 0, 1, 1, 0] },
+    { name: 'Comments', path: 'Bug Management > Bug Details > Comments', coverage: [0, 0, 1, 1, 0] },
+    { name: 'Attachments', path: 'Bug Management > Bug Details > Evidence / Attachments', coverage: [0, 1, 0, 1, 0] },
+    { name: 'History and audit', path: 'Bug Management > Bug Details > History', coverage: [0, 0, 0, 1, 1] },
+    { name: 'Notifications and email', path: 'IDTS notifications / email', coverage: [0, 0, 1, 1, 1] },
+    { name: 'Dashboard and monitoring', path: 'Bug Management > List Report / Dashboard', coverage: [0, 0, 1, 0, 1] },
+    { name: 'AI advisory and human review', path: 'Bug Management > Create/Edit Bug', coverage: [0, 1, 1, 0, 1] },
+    { name: 'Authorization, recovery and usability', path: 'IDTS application / protected routes', coverage: [1, 1, 1, 1, 1] }
+  ];
   scenarios.getRange('E3:S3').unmerge();
   scenarios.getRange('E3:S3').clear();
   scenarios.getRange('A4:S1006').unmerge();
   scenarios.getRange('A4:S1006').clear();
-  domains.forEach((domain, index) => {
+  scenarioDefinitions.forEach((title, index) => {
+    const range = `${scenarioBands[index].split(':')[0]}3:${scenarioBands[index].split(':')[1]}3`;
+    scenarios.getRange(range).merge();
+    set(scenarios, `${scenarioBands[index].split(':')[0]}3`, `${index + 1}\n${title}`);
+    scenarios.getRange(range).format.fill = '#C9DAF8';
+    scenarios.getRange(range).format.font = { name: 'Times New Roman', size: 12, bold: true };
+    scenarios.getRange(range).format.wrapText = true;
+    scenarios.getRange(range).format.horizontalAlignment = 'center';
+    scenarios.getRange(range).format.verticalAlignment = 'top';
+    scenarios.getRange(range).format.borders = { preset: 'outside', style: 'thin', color: '#000000' };
+  });
+  scenarios.getRange('A3:S3').format.rowHeight = 96;
+  coverageGroups.forEach((group, index) => {
     const row = 4 + index;
     set(scenarios, `A${row}`, index + 1);
-    set(scenarios, `B${row}`, domain);
-    set(scenarios, `C${row}`, 'IDTS application');
+    set(scenarios, `B${row}`, group.name);
+    set(scenarios, `C${row}`, group.path);
     set(scenarios, `D${row}`, 'N/A');
-    set(scenarios, `E${row}`, `${domain} UAT cases`);
-    scenarios.getRange(`A${row}:E${row}`).format.wrapText = true;
-    scenarios.getRange(`A${row}:E${row}`).format.rowHeight = 60;
+    for (const cell of [`A${row}`, `B${row}`, `C${row}`, `D${row}`]) {
+      scenarios.getRange(cell).format.font = { name: 'Times New Roman', size: 12 };
+      scenarios.getRange(cell).format.wrapText = true;
+      scenarios.getRange(cell).format.verticalAlignment = 'center';
+      scenarios.getRange(cell).format.borders = { preset: 'outside', style: 'thin', color: '#000000' };
+    }
+    scenarios.getRange(`A${row}`).format.horizontalAlignment = 'center';
+    scenarios.getRange(`B${row}`).format.horizontalAlignment = 'left';
+    scenarios.getRange(`C${row}`).format.horizontalAlignment = 'center';
+    scenarios.getRange(`D${row}`).format.horizontalAlignment = 'center';
+    scenarioBands.forEach((band, scenarioIndex) => {
+      const [start, end] = band.split(':');
+      const range = `${start}${row}:${end}${row}`;
+      scenarios.getRange(range).merge();
+      set(scenarios, `${start}${row}`, group.coverage[scenarioIndex] ? 'X' : '');
+      scenarios.getRange(range).format.font = { name: 'Times New Roman', size: 12, bold: true };
+      scenarios.getRange(range).format.horizontalAlignment = 'center';
+      scenarios.getRange(range).format.verticalAlignment = 'center';
+      scenarios.getRange(range).format.borders = { preset: 'outside', style: 'thin', color: '#000000' };
+    });
+    scenarios.getRange(`A${row}:S${row}`).format.rowHeight = 54;
   });
   testCases.getRange('B8:CI1429').unmerge();
   testCases.getRange('B8:CI1429').clear();

@@ -47,7 +47,7 @@ No Unit Test VI is created. No command-only, script-only, generated-card-only, s
 ## 2026-08-08 workbook candidate handoff
 
 - English candidate generated from the hashed OFFICIAL SUBMISSIONS authority: `docs/sap490/generated/Unit_Test_IDTS_SAP01_en_candidate_v0.5.xlsx`.
-- Candidate SHA-256: `C8A494837D5588C1501DD5D87351A137656A7A89CACCD57BE8F4C82E5904EAAC`.
+- Candidate SHA-256: `C74EBAC639E43114A571CC0DEDF3B7B8748EF766C8476AA02D1B3870830D7CE1`.
 - Coverage: 188/188 catalog rows; 280 embedded images; 188 internal evidence links.
 - Visible workbook numbering uses ordinary serial numbers `1` through `188`; technical case IDs remain only in the audit mapping/evidence source.
 - Catalog truth remains 188 `NOT_RUN`; compact workbook dispositions do not create PASS.

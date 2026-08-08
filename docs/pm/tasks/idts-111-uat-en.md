@@ -48,7 +48,8 @@ NhanT's current candidate package uses the authenticated SAP BTP UI and member-o
 ## 2026-08-08 workbook candidate handoff
 
 - English candidate generated from the hashed OFFICIAL SUBMISSIONS authority: `docs/sap490/generated/UAT_IDTS_SAP01_en_candidate_v0.3.xlsx`.
-- Candidate SHA-256: `B88F7CDA09BB7F2D4DDB01F51F72C3452A669DCACCF1CC30B939A04FABAD68E3`.
+- Candidate SHA-256: `493DE5D16B3563F1A47A375B21BFB62D76468C053332CF8E2DE5B3607CADAB96`.
+- `Test Scenario` now uses five end-to-end journeys across the official `E:S` matrix and maps 12 coverage groups with explicit `X` intersections; domains are no longer presented as scenarios.
 - Coverage: 90/90 catalog rows; 76 embedded manifest-hashed images across 35 cases; 55 cases use `Details`. Serial 1 is conservatively displayed as `REVIEW` and its unrelated/insufficient source screenshot is omitted from the submission workbook without mutating the source evidence.
 - Visible workbook numbering uses ordinary serial numbers `1` through `90`; technical case IDs remain only in the audit mapping/evidence source.
 - Catalog truth remains 90 `PREPARED`; `MEETS` remains candidate review truth, not final UAT sign-off.

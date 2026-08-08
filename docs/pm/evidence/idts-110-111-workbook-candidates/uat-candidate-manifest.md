@@ -5,8 +5,8 @@ Status: **CANDIDATE - NOT OFFICIAL / NOT APPROVED**
 ## Identity
 
 - Candidate: `docs/sap490/generated/UAT_IDTS_SAP01_en_candidate_v0.3.xlsx`
-- Candidate SHA-256: `B88F7CDA09BB7F2D4DDB01F51F72C3452A669DCACCF1CC30B939A04FABAD68E3`
-- Candidate size: `5,044,999` bytes
+- Candidate SHA-256: `493DE5D16B3563F1A47A375B21BFB62D76468C053332CF8E2DE5B3607CADAB96`
+- Candidate size: `5,046,177` bytes
 - Git baseline: `8d4e78b71d7cde2c54b2671577f1a90629864482`
 - Authority Drive ID: `1UYThySnyIu0KUu48K7PSpIFWjIbpixBY`
 - Authority filename: `GFA24SAP04_UAT.xlsx`
@@ -27,7 +27,8 @@ Status: **CANDIDATE - NOT OFFICIAL / NOT APPROVED**
 
 - `Cover!N3`, `Cover!N4`
 - `Histories!D4`
-- `Test Scenario!A4:E15` (12 clean IDTS domains with visible serials `1` through `12`)
+- `Test Scenario!E3:S3` (five end-to-end scenario headers in official three-column bands)
+- `Test Scenario!A4:S15` (12 coverage groups and the approved five-scenario `X` matrix)
 - `Test Cases!B8:CI97`
 - `Test Result!A1:Y1429` plus 76 drawing anchors; visible evidence bands/images are constrained to `A:F` for Excel/PDF readability
 
@@ -36,13 +37,13 @@ All other sheet names/order/visibility and page contracts are preserved by polic
 ## Verification
 
 - Catalog check: PASS, 90 `PREPARED` cases, EN-only and evidence policy valid.
-- Candidate contract: PASS, exact sheet order, visible serial numbers `1` through `90`, and 90 internal evidence hyperlinks.
+- Candidate contract: PASS, exact sheet order, visible serial numbers `1` through `90`, five scenario headers, 12 coverage rows, the approved `X` matrix, and 90 internal evidence hyperlinks.
 - OpenXML schema: OfficeCLI PASS.
 - Fidelity policy: PASS.
 - OfficeCLI issues: 0 candidate-content issues; no formula-evaluation or schema error.
 - Drawing audit: 76 media parts; openpyxl reads 76 images on `Test Result`.
 - Visual review: artifact-tool focused ranges, Microsoft Excel 12 read-only export, and LibreOffice 26.2.3.2 PDF export inspected. Ordinary serial numbers, case text, status separation, links, missing-evidence labels, captions, hashes, and representative UAT images are visible. LibreOffice preserves the authority's multi-page horizontal print pagination; Excel review exports fit the selected review area to one page without saving that temporary print override into the candidate.
-- Review images: `rendered/excel-uat-test-cases-serial.png`, `rendered/excel-uat-test-cases-5-8.png`, `rendered/excel-uat-evidence-serial.png`, `rendered/uat-test-cases-content.png`, `rendered/uat-test-cases-5-8-content.png`, `rendered/uat-test-cases-5-8-results.png`, `rendered/uat-evidence-first-block.png`, `rendered/libreoffice-uat-test-cases-page-017.png`, `rendered/libreoffice-uat-test-cases-page-018.png`, `rendered/libreoffice-uat-test-results-page-033.png`, `rendered/libreoffice-uat-evidence-page-053.png`.
+- Review images: `rendered/uat-test-scenario-matrix.png`, `rendered/excel-uat-test-scenario-matrix.png`, `rendered/libreoffice-uat-test-scenario-page-009.png`, `rendered/libreoffice-uat-test-scenario-page-011.png`, `rendered/libreoffice-uat-test-scenario-page-013.png`, `rendered/libreoffice-uat-test-scenario-page-015.png`, `rendered/excel-uat-test-cases-serial.png`, `rendered/excel-uat-test-cases-5-8.png`, `rendered/excel-uat-evidence-serial.png`, `rendered/uat-test-cases-content.png`, `rendered/uat-test-cases-5-8-content.png`, `rendered/uat-test-cases-5-8-results.png`, `rendered/uat-evidence-first-block.png`, `rendered/libreoffice-uat-test-cases-page-017.png`, `rendered/libreoffice-uat-test-cases-page-018.png`, `rendered/libreoffice-uat-test-results-page-033.png`, `rendered/libreoffice-uat-evidence-page-053.png`.
 - Independent candidate-quality review: visual fidelity, XLSX structure, and content/evidence reviewers report no Critical or Major findings and `APPROVE CANDIDATE` for this exact SHA-256. This is not DonHV's release approval or a final UAT PASS.
 
 ## Release gate
