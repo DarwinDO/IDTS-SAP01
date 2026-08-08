@@ -47,7 +47,26 @@ includes('classification gates the button to PM or Tester', classification, 'isP
 includes('classification prevents repeated Apply', classification, '/applyActionEnabled')
 includes('classification distinguishes an applied mutation from a refresh failure', classification, 'var applyCompleted = false')
 includes('classification restores retry only before the mutation succeeds', classification, 'if (!applyCompleted)')
-includes('classification reports refresh failure without replaying Apply', classification, 'applyCompleted ? "classificationRefreshFailed"')
+matches(
+  'classification reports refresh failure without replaying Apply',
+  classification,
+  /applyCompleted\s*\?\s*"classificationRefreshFailed"/
+)
+matches(
+  'classification allowlists only the exact responsibility mismatch contract',
+  classification,
+  /errorStatus\(error\) === 400[\s\S]{0,240}?Assigned developer is not responsible for the selected component\/category and SAP module scope\./
+)
+matches(
+  'classification maps the allowlisted pre-mutation error to actionable i18n copy',
+  classification,
+  /\.catch\(function \(error\)[\s\S]{0,900}?classificationResponsibilityMismatch[\s\S]{0,240}?classificationApplyFailed/
+)
+notIncludes(
+  'classification never renders the raw backend error',
+  classification,
+  'MessageBox.error(errorMessage(error))'
+)
 includes(
   'classification field hides AI on a root create draft',
   classificationField,
@@ -194,6 +213,7 @@ const idts115I18nKeys = [
   'classificationApplyConfirm',
   'classificationApplySuccess',
   'classificationApplyFailed',
+  'classificationResponsibilityMismatch',
   'classificationRefreshFailed',
   'classificationReviewMissingContext',
   'classificationReviewRetryButton',

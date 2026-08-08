@@ -181,3 +181,11 @@ Evidence: `docs/pm/evidence/idts-115/`.
   `docs/pm/evidence/idts-115/smart-assign-pending-group/rollout.md`.
 - IDTS-115 remains In Progress for the previously deferred Tester/Developer
   role matrix; the DonHV Smart Assign blocker is resolved.
+
+## 2026-08-08 Classification Apply responsibility feedback
+
+- Cloud Foundry evidence confirmed that the generic Apply failure can represent a valid CAP rejection when an accepted suggestion no longer matches the assigned Developer's component/category and SAP module responsibility.
+- The controller now allowlists only HTTP 400 containing the exact CAP responsibility-mismatch sentence. It shows actionable guidance to move the Bug to Pending Assignment or select a compatible Developer. Other Apply failures remain generic, and raw backend diagnostics are never rendered.
+- Backend validation, assignment, lifecycle, AI provider/model/key, schema and HANA data are unchanged. A successful mutation followed by refresh failure still keeps Apply disabled to prevent replay.
+- TDD evidence: the focused regression failed before implementation at the missing exact-contract predicate, then passed 250/250 after the minimal controller/i18n change. CAP compile, UI5 MCP lint, UI5 production build, secret scan, agent rules, QA Depth self-test, syntax and `git diff --check` pass.
+- The email-routing audit remains read-only. Shared QA has valid-shape email data for all active Tester/PM/Developer Users and linked DeveloperProfiles; BTP email config is ready but still has `testMode=true`. No routing change, delivery replay, provider call or database mutation occurred. Real-recipient routing still requires the exact approval phrase `GO EMAIL ROUTING`.
