@@ -37,9 +37,9 @@ The Assignee input is bound one-way to `assigneeDisplayName`. This means the use
   **Impact if broken**: Users could type misleading names into Assignee or the UI could try to patch a computed display field.
   **Must check together**: `SmartAssignDeveloper.resetAssigneeInput`, draft save behavior, and backend assignment validation.
 
-- **Location**: `showValueHelp="true"` and `valueHelpRequest="SmartAssign.openAssigneePicker"`
-  **IDTS concept**: Makes the Assignee field itself the Smart Assign entry point.
-  **Impact if broken**: Users may lose the picker or fall back to the old generic value help.
+- **Location**: expression-bound `showValueHelp`, `editable`, and `enabled`, plus `valueHelpRequest="SmartAssign.openAssigneePicker"`
+  **IDTS concept**: Makes the Assignee field itself the Smart Assign entry point while Closed Bugs and an authoritative `canAssign=false` remain blocked. A temporarily undefined virtual `canAssign` value must not hide the picker before the controller requests the current capability.
+  **Impact if broken**: Tester or PM users may lose the picker during initial Object Page binding even though the server allows assignment.
   **Must check together**: `SmartAssignDeveloper.js`, `manifest.json`, and browser smoke.
 
 - **Location**: `Current Action Owner` and `Action Owner Role` fields
@@ -107,9 +107,9 @@ Input Assignee bind one-way vao `assigneeDisplayName`. Nghia la user thay ten as
   **Anh huong neu sai**: User co the go ten gay hieu nham vao Assignee hoac UI co the patch nham computed display field.
   **Phai kiem tra cung**: `SmartAssignDeveloper.resetAssigneeInput`, draft save behavior, va backend assignment validation.
 
-- **Vi tri**: `showValueHelp="true"` va `valueHelpRequest="SmartAssign.openAssigneePicker"`
-  **Khai niem IDTS**: Bien chinh field Assignee thanh diem mo Smart Assign.
-  **Anh huong neu sai**: User mat picker hoac quay lai generic value help cu.
+- **Vi tri**: `showValueHelp`, `editable`, `enabled` dung expression binding va `valueHelpRequest="SmartAssign.openAssigneePicker"`
+  **Khai niem IDTS**: Field Assignee la diem mo Smart Assign; Bug Closed va ket qua `canAssign=false` chinh thuc van bi chan. Gia tri virtual `canAssign` tam thoi chua tai khong duoc lam mat picker truoc khi controller request capability hien tai.
+  **Anh huong neu sai**: Tester hoac PM co the mat picker luc Object Page moi bind du server van cho phep assignment.
   **Phai kiem tra cung**: `SmartAssignDeveloper.js`, `manifest.json`, va browser smoke.
 
 - **Vi tri**: field `Current Action Owner` va `Action Owner Role`
