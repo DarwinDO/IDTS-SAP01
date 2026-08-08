@@ -45,9 +45,9 @@ There are two bodies because email clients work differently:
 - `text` is the safe fallback. It is readable even if the email client blocks HTML.
 - `html` is the styled version. In IDTS-50 it uses a simple SAP/Fiori-like card layout with a blue header, metadata table, primary action button, fallback link, and footer.
 
-The link is also built here because it is part of the email experience. Fiori Elements uses hash-based routing, so the URL must keep `#` directly after `index.html`. In the current IDTS deployment, the Fiori entry page is `/idts.bugmanagementui/index.html`.
+The link is also built here because it is part of the email experience. Fiori Elements uses hash-based routing, so the URL must keep `#` directly after `index.html`. In the current SAP BTP deployment, the AppRouter entry page is `/idtsbugmanagementui/index.html`; the dotted manifest app ID `idts.bugmanagementui` is not the deployed URL path.
 
-`IDTS-81` also protects against an old private `baseUrl` value left from an earlier UI path. If configuration still mentions `/bug-management-ui/webapp`, this file treats that part as retired and rebuilds the link from the deployment root. That means a new email can recover safely without putting a real Render URL into source code or requiring every old delivery snapshot to be edited.
+`IDTS-81` also protects against old private `baseUrl` values left from earlier UI paths. If configuration still mentions `/idts.bugmanagementui` or `/bug-management-ui/webapp`, this file treats that part as retired and rebuilds the link from the deployment root. That means a new email can recover safely without putting a real deployment URL into source code or requiring every old delivery snapshot to be edited.
 
 ### Flow in IDTS
 
@@ -82,19 +82,19 @@ The link is also built here because it is part of the email experience. Fiori El
   CTA button and fallback link.
   **IDTS concept**: Lets the recipient jump from email into the IDTS Fiori Object Page.
   **Impact if broken**: Delivery can be marked `SENT`, but the user still cannot act because the link is unusable.
-  **Must check together**: `app/bug-management-ui/webapp/manifest.json` route pattern, Render `baseUrl` config, and browser smoke after deploy.
+  **Must check together**: `app/router/xs-app.json`, `app/bug-management-ui/webapp/manifest.json`, private `baseUrl` config, and browser smoke after deploy.
 
 - **Location**: `srv/email/template.js:85`
   `buildBugLink(baseUrl, bugID)`.
   **IDTS concept**: Builds the Fiori deep link for an active draft-enabled bug.
-  **Impact if broken**: The email may point to `index.html/` or omit `IsActiveEntity=true`, causing Render 404 or Fiori navigation failure.
+  **Impact if broken**: The email may use a dotted/retired app path, point to `index.html/`, or omit `IsActiveEntity=true`, causing an AppRouter 404 or Fiori navigation failure.
   **Must check together**: `app/bug-management-ui/webapp/manifest.json:92`, CAP draft key requirements, and the route used in `scripts/qa/test-idts24-uat-playwright.js`.
 
 - **Location**: `srv/email/template.js:92`
   `normalizeAppUrl(baseUrl)`.
   **IDTS concept**: Normalizes a private deployment root, current Fiori app path, or retired app path into the one current Fiori entry page.
   **Impact if broken**: A mail can be delivered successfully but send the recipient to a 404 page, making the notification unusable.
-  **Must check together**: `app/bug-management-ui/webapp/manifest.json`, `scripts/qa/test-email-outbox-programmatic.js`, Render `baseUrl`, and a newly delivered email on Shared QA.
+  **Must check together**: `app/router/xs-app.json`, `app/bug-management-ui/webapp/manifest.json`, `scripts/qa/test-email-outbox-programmatic.js`, private `baseUrl`, and a newly delivered email on BTP Shared QA.
 
 - **Location**: `srv/email/template.js:105`
   `escapeHtml(value)`.
@@ -109,7 +109,7 @@ The link is also built here because it is part of the email experience. Fiori El
 - `srv/service.cds` exposes safe delivery metadata but intentionally does not expose `htmlBody` or `textBody` to Fiori clients.
 - `app/bug-management-ui/webapp/manifest.json` defines the Fiori Object Page route `Bugs({key})`; this file must generate a link compatible with that route.
 - `scripts/qa/test-email-outbox-programmatic.js` protects the email template, link shape, escaping behavior, and outbox behavior.
-- Render private environment config supplies `baseUrl`; this file must not hardcode deployment URLs.
+- Private environment/binding config supplies `baseUrl`; this file must not hardcode deployment URLs.
 
 ### Safe editing checklist
 
@@ -118,9 +118,10 @@ The link is also built here because it is part of the email experience. Fiori El
 - Keep the Fiori link as `index.html#/Bugs(ID=<uuid>,IsActiveEntity=true)`, not `index.html/#/Bugs(...)`.
 - Do not include full descriptions, comments, attachments, credentials, tokens, SMTP config, API keys, private endpoints, or full private recipient lists.
 - If changing link logic, test at least these `baseUrl` forms:
-  - Render root, for example `https://host.example`;
-  - current Fiori app folder, for example `https://host.example/idts.bugmanagementui`;
-  - current exact app HTML, for example `https://host.example/idts.bugmanagementui/index.html`;
+  - deployment root, for example `https://host.example`;
+  - current AppRouter folder, for example `https://host.example/idtsbugmanagementui`;
+  - current exact app HTML, for example `https://host.example/idtsbugmanagementui/index.html`;
+  - retired dotted app-ID folder/HTML forms such as `/idts.bugmanagementui`;
   - retired legacy folder/HTML forms, which must be remapped to the current app rather than emitted again.
 - If changing email wording, keep “notification type”, “current status”, and “current action owner” distinct.
 
@@ -149,9 +150,9 @@ Email có hai phần nội dung vì email client hoạt động khác nhau:
 - `text` là bản fallback an toàn. Nếu email client chặn HTML thì người nhận vẫn đọc được.
 - `html` là bản có giao diện. Trong IDTS-50, phần này dùng layout dạng card gần với SAP/Fiori: header xanh, bảng metadata, nút hành động chính, fallback link và footer.
 
-Link mở bug cũng được tạo trong file này vì nó là một phần của trải nghiệm email. Fiori Elements dùng hash-based routing, nên dấu `#` phải đứng ngay sau `index.html`. Ở bản triển khai IDTS hiện tại, trang vào Fiori là `/idts.bugmanagementui/index.html`.
+Link mở bug cũng được tạo trong file này vì nó là một phần của trải nghiệm email. Fiori Elements dùng hash-based routing, nên dấu `#` phải đứng ngay sau `index.html`. Ở bản triển khai SAP BTP hiện tại, trang vào AppRouter là `/idtsbugmanagementui/index.html`; app ID có dấu chấm `idts.bugmanagementui` trong manifest không phải URL path đã deploy.
 
-`IDTS-81` cũng bảo vệ trường hợp private `baseUrl` cũ còn sót lại từ UI path trước đây. Nếu config vẫn chứa `/bug-management-ui/webapp`, file này xem phần đó là đã retired và dựng lại link từ deployment root. Nhờ vậy email mới có thể tự khôi phục link an toàn mà không cần ghi Render URL thật vào source hoặc sửa các email snapshot lịch sử.
+`IDTS-81` cũng bảo vệ trường hợp private `baseUrl` cũ còn sót lại từ UI path trước đây. Nếu config vẫn chứa `/idts.bugmanagementui` hoặc `/bug-management-ui/webapp`, file này xem phần đó là đã retired và dựng lại link từ deployment root. Nhờ vậy email mới có thể tự khôi phục link an toàn mà không cần ghi URL triển khai thật vào source hoặc sửa các email snapshot lịch sử.
 
 ### Flow hoạt động trong IDTS
 
@@ -186,19 +187,19 @@ Link mở bug cũng được tạo trong file này vì nó là một phần củ
   CTA button và fallback link.
   **Khái niệm IDTS**: Cho phép người nhận đi từ email vào đúng Object Page của bug trong Fiori.
   **Ảnh hưởng nếu sai**: Delivery có thể là `SENT`, nhưng người dùng vẫn không xử lý được vì link không mở được.
-  **Phải kiểm tra cùng**: Route pattern trong `app/bug-management-ui/webapp/manifest.json`, Render `baseUrl` config, và browser smoke sau deploy.
+  **Phải kiểm tra cùng**: `app/router/xs-app.json`, route pattern trong `app/bug-management-ui/webapp/manifest.json`, private `baseUrl` config, và browser smoke sau deploy.
 
 - **Vị trí**: `srv/email/template.js:85`
   `buildBugLink(baseUrl, bugID)`.
   **Khái niệm IDTS**: Tạo Fiori deep link cho active bug trong entity có draft.
-  **Ảnh hưởng nếu sai**: Email có thể trỏ tới `index.html/` hoặc thiếu `IsActiveEntity=true`, gây Render 404 hoặc Fiori không điều hướng đúng.
+  **Ảnh hưởng nếu sai**: Email có thể dùng app path có dấu chấm/đã retired, trỏ tới `index.html/`, hoặc thiếu `IsActiveEntity=true`, gây AppRouter 404 hoặc Fiori không điều hướng đúng.
   **Phải kiểm tra cùng**: `app/bug-management-ui/webapp/manifest.json:92`, yêu cầu key của CAP draft, và route trong `scripts/qa/test-idts24-uat-playwright.js`.
 
 - **Vị trí**: `srv/email/template.js:92`
   `normalizeAppUrl(baseUrl)`.
   **Khái niệm IDTS**: Chuẩn hóa deployment root private, current Fiori app path, hoặc path đã retired về đúng một trang vào Fiori hiện tại.
   **Ảnh hưởng nếu sai**: Mail có thể gửi thành công nhưng đưa người nhận tới trang 404, khiến notification không dùng được.
-  **Phải kiểm tra cùng**: `app/bug-management-ui/webapp/manifest.json`, `scripts/qa/test-email-outbox-programmatic.js`, Render `baseUrl`, và một mail Shared QA mới được gửi.
+  **Phải kiểm tra cùng**: `app/router/xs-app.json`, `app/bug-management-ui/webapp/manifest.json`, `scripts/qa/test-email-outbox-programmatic.js`, private `baseUrl`, và một mail BTP Shared QA mới được gửi.
 
 - **Vị trí**: `srv/email/template.js:105`
   `escapeHtml(value)`.
@@ -213,7 +214,7 @@ Link mở bug cũng được tạo trong file này vì nó là một phần củ
 - `srv/service.cds` expose metadata delivery an toàn nhưng cố ý không expose `htmlBody` hoặc `textBody` cho Fiori client.
 - `app/bug-management-ui/webapp/manifest.json` định nghĩa route Object Page `Bugs({key})`; file này phải tạo link tương thích route đó.
 - `scripts/qa/test-email-outbox-programmatic.js` bảo vệ template email, format link, behavior escape HTML và outbox behavior.
-- Render private environment config cung cấp `baseUrl`; file này không được hardcode deployment URL.
+- Private environment/binding config cung cấp `baseUrl`; file này không được hardcode deployment URL.
 
 ### Lưu ý khi sửa
 
@@ -222,9 +223,10 @@ Link mở bug cũng được tạo trong file này vì nó là một phần củ
 - Giữ link Fiori theo dạng `index.html#/Bugs(ID=<uuid>,IsActiveEntity=true)`, không dùng `index.html/#/Bugs(...)`.
 - Không đưa description đầy đủ, comment, attachment, credential, token, SMTP config, API key, private endpoint hoặc danh sách recipient thật vào email.
 - Nếu sửa logic link, phải test ít nhất các dạng `baseUrl`:
-  - Render root, ví dụ `https://host.example`;
-  - current Fiori app folder, ví dụ `https://host.example/idts.bugmanagementui`;
-  - current exact app HTML, ví dụ `https://host.example/idts.bugmanagementui/index.html`;
+  - deployment root, ví dụ `https://host.example`;
+  - current AppRouter folder, ví dụ `https://host.example/idtsbugmanagementui`;
+  - current exact app HTML, ví dụ `https://host.example/idtsbugmanagementui/index.html`;
+  - dotted app-ID folder/HTML cũ như `/idts.bugmanagementui`;
   - legacy folder/HTML đã retired, phải được remap sang app hiện tại thay vì phát lại path cũ.
 - Nếu sửa wording email, phải giữ rõ ba khái niệm “notification type”, “current status”, và “current action owner”.
 

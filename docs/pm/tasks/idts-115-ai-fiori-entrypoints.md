@@ -181,3 +181,13 @@ Evidence: `docs/pm/evidence/idts-115/`.
   `docs/pm/evidence/idts-115/smart-assign-pending-group/rollout.md`.
 - IDTS-115 remains In Progress for the previously deferred Tester/Developer
   role matrix; the DonHV Smart Assign blocker is resolved.
+
+## 2026-08-08 Classification Apply responsibility feedback
+
+- Cloud Foundry evidence confirmed that the generic Apply failure can represent a valid CAP rejection when an accepted suggestion no longer matches the assigned Developer's component/category and SAP module responsibility.
+- The controller now allowlists only HTTP 400 containing the exact CAP responsibility-mismatch sentence. It shows actionable guidance to move the Bug to Pending Assignment or select a compatible Developer. Other Apply failures remain generic, and raw backend diagnostics are never rendered.
+- Backend validation, assignment, lifecycle, AI provider/model/key, schema and HANA data are unchanged. A successful mutation followed by refresh failure still keeps Apply disabled to prevent replay.
+- TDD evidence: the focused regression failed before implementation at the missing exact-contract predicate, then passed 250/250 after the minimal controller/i18n change. CAP compile, UI5 MCP lint, UI5 production build, secret scan, agent rules, QA Depth self-test, syntax and `git diff --check` pass.
+- DonHV subsequently sent the exact approval phrase `GO EMAIL ROUTING`. The private UPS changed only `email.testMode` from `true` to `false`; provider fields and `defaultTestRecipient` were preserved. `idts-sap01-srv` restarted without artifact restage or database deployment. Effective app-environment readback, CAP `1/1`, `/health` 200 and `/ready` 200 pass. No historical delivery replay, send-smoke, SQL, seed or schema command ran.
+- UI commit `212bde0` is pushed on `fix/idts-115-classification-apply-feedback-donhv`; PR #311 targets `dev`. The operational evidence follow-up must receive its own fresh exact-head QA Depth PASS. No merge or Classification Apply artifact deployment is performed in this session.
+- Email-routing GO evidence: `docs/pm/evidence/idts-115/email-routing-go-20260808.md`. The config-only restart is not a source/runtime artifact deployment; Classification Apply UI deployment remains post-merge work.

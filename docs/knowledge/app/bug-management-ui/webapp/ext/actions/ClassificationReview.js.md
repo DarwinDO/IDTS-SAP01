@@ -201,6 +201,10 @@ Tiếng Việt: Nút Apply nằm trong dialog Classification hiện có. Nút ch
 
 Retry boundary: if the CAP action fails before mutation, Apply is re-enabled after busy clears. If CAP succeeds but context refresh fails, Apply stays disabled and the user is instructed to reload; this prevents replaying a successful mutation.
 
+Responsibility-mismatch boundary: the UI maps only HTTP 400 containing the exact CAP responsibility-mismatch sentence to actionable guidance. It never displays the raw backend error. All other pre-mutation failures keep the generic safe Apply message, while post-mutation refresh failure keeps the reload message and does not re-enable Apply. Check this predicate together with `validateAssignee()` in `srv/bug-service/bug-write.js`, both i18n bundles, and `scripts/qa/test-idts115-ai-fiori-entrypoints.js`.
+
+Ranh giới responsibility mismatch: UI chỉ map HTTP 400 có đúng toàn bộ câu lỗi CAP về responsibility mismatch sang hướng dẫn nghiệp vụ. UI không hiển thị raw backend error. Mọi lỗi trước mutation khác vẫn dùng thông báo Apply an toàn chung; lỗi refresh sau mutation vẫn yêu cầu reload và không bật lại Apply. Phải kiểm tra predicate này cùng `validateAssignee()` trong `srv/bug-service/bug-write.js`, hai bundle i18n và `scripts/qa/test-idts115-ai-fiori-entrypoints.js`.
+
 ## IDTS-114 responsive and retry-state boundary
 
 **English.** The Classification table enables `autoPopinMode` and uses only column `importance`; UI5 therefore owns the responsive breakpoints and the controller does not set ignored `minScreenWidth` or `demandPopin` values. Before every initial load or Retry, `loadSuggestions()` clears rows, suggestion ID, reviewer text, review buttons and Apply state. A failed retry can never leave an accepted stale suggestion available for Apply.
