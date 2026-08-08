@@ -42,7 +42,7 @@ This document is a BA blueprint for the target conceptual model. It is not the c
 | ID | UUID | Yes | Primary key. |
 | user | Association to Users | Yes | Developer user. |
 | availabilityStatus | String | Optional | Available, Busy, Unavailable. |
-| workloadLimit | Integer | Optional | Used for workload warning. |
+| workloadLimit | Integer | Optional | Legacy/profile planning metadata. The implemented MVP assignment authority uses the fixed effective-capacity rule: Busy at 2 non-Closed assigned Bugs and Unavailable/hard cap at 3. |
 | active | Boolean | Yes | Only active profiles are assignable. |
 
 ## SAPModules

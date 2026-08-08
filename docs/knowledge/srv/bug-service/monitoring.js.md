@@ -1,5 +1,9 @@
 # Knowledge: `srv/bug-service/monitoring.js`
 
+## 2026-08-08 effective availability
+
+English: Dashboard rows use 0-1 Available, 2 Busy, and 3+ Unavailable for every assigned non-Closed Bug, including Rejected. Vietnamese: Dashboard dùng 0-1 Available, 2 Busy, từ 3 Unavailable cho mọi Bug còn assignee và chưa Closed, kể cả Rejected.
+
 ## Beginner-first execution map (2026-07-18)
 
 ### English

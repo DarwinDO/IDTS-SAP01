@@ -20,6 +20,7 @@ const {
   resolveRequestUser,
   trimToNull
 } = require('./helpers')
+const { effectiveCapacity, readOpenOwnedBugCounts } = require('./capacity')
 
 const DISPLAY_FIELDS = new Set([
   'reporterDisplayName',
@@ -63,7 +64,7 @@ async function buildAssignableDeveloperRows (tx, entities, criteria = {}) {
           { ref: ['developerProfile', 'active'], as: 'developerActive' },
           { ref: ['developerProfile', 'user', 'displayName'], as: 'developerName' },
           { ref: ['developerProfile', 'user', 'email'], as: 'developerEmail' },
-          { ref: ['developerProfile', 'workloadLimit'], as: 'workloadLimit' },
+          { ref: ['developerProfile', 'availabilityStatus', 'code'], as: 'availabilityStatusCode' },
           { ref: ['developerProfile', 'availabilityStatus', 'name'], as: 'availabilityStatusName' },
           { ref: ['developerProfile', 'availabilityStatus', 'criticality'], as: 'availabilityCriticality' },
           { ref: ['componentCategory', 'component', 'name'], as: 'applicationComponentName' },
@@ -95,7 +96,7 @@ async function buildAssignableDeveloperRows (tx, entities, criteria = {}) {
       sapModuleID: row.sapModule_ID || null,
       developerName: row.developerName,
       developerEmail: row.developerEmail,
-      workloadLimit: row.workloadLimit ?? null,
+      availabilityStatusCode: row.availabilityStatusCode,
       availabilityStatusName: row.availabilityStatusName,
       availabilityCriticality: row.availabilityCriticality,
       applicationComponentName: row.applicationComponentName,
@@ -110,9 +111,9 @@ async function buildAssignableDeveloperRows (tx, entities, criteria = {}) {
         .columns(
           'ID',
           'active',
-          'workloadLimit',
           { ref: ['user', 'displayName'], as: 'developerName' },
           { ref: ['user', 'email'], as: 'developerEmail' },
+          { ref: ['availabilityStatus', 'code'], as: 'availabilityStatusCode' },
           { ref: ['availabilityStatus', 'name'], as: 'availabilityStatusName' },
           { ref: ['availabilityStatus', 'criticality'], as: 'availabilityCriticality' }
         )
@@ -126,7 +127,7 @@ async function buildAssignableDeveloperRows (tx, entities, criteria = {}) {
       sapModuleID: null,
       developerName: row.developerName,
       developerEmail: row.developerEmail,
-      workloadLimit: row.workloadLimit ?? null,
+      availabilityStatusCode: row.availabilityStatusCode,
       availabilityStatusName: row.availabilityStatusName,
       availabilityCriticality: row.availabilityCriticality,
       applicationComponentName: null,
@@ -137,7 +138,15 @@ async function buildAssignableDeveloperRows (tx, entities, criteria = {}) {
     }))
   }
 
-  return rows
+  const counts = await readOpenOwnedBugCounts(tx, entities, rows.map(row => row.developerProfileID))
+  return rows.map(row => {
+    const openOwnedBugCount = counts.get(row.developerProfileID) || 0
+    return {
+      ...row,
+      ...effectiveCapacity(row.availabilityStatusCode, openOwnedBugCount),
+      openOwnedBugCount
+    }
+  })
 }
 
 function assignableDeveloperCriteria (req) {
@@ -224,7 +233,7 @@ function filterAssignableDeveloperRow (row, criteria) {
 
 function toPublicAssignableDeveloperRow (row) {
   // Bỏ field nội bộ và chỉ expose dữ liệu cần cho dialog: tên, trạng thái, workload, suitability/warning.
-  const { workloadLimit, ...publicRow } = row
+  const { canReceiveNewBug, ...publicRow } = row
   return publicRow
 }
 

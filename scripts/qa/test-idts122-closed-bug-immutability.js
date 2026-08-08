@@ -176,8 +176,7 @@ async function main () {
   await expect409('repeated close action is blocked', () => srv.dispatch(request({
     event: 'closeBug',
     target: Bugs,
-    actor: tester,
-    data: { note: 'must not create duplicate audit' }
+    actor: tester
   })))
 
   const afterBlocked = await snapshot(db, Bugs, Comments, HistoryEvents)

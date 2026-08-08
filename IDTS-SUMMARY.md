@@ -28,6 +28,7 @@ Hệ thống bao gồm các phạm vi sau:
 * Developer xem bug được giao, review thông tin, yêu cầu bổ sung thông tin, ghi chú và cập nhật trạng thái.  
 * Tester có thể chỉnh sửa/bổ sung bug report sau khi submit nếu bug chưa closed. Closed Bug là read-only aggregate; muốn xử lý tiếp phải Reopen trước.
 * PM theo dõi tiến độ, workload, overdue bugs và báo cáo.  
+* Developer capacity dùng tất cả Bug còn assignee và chưa `Closed`: 0-1 là Available, 2 là Busy nhưng vẫn nhận Bug thứ ba, từ 3 là Unavailable và backend chặn assignment mới. `Rejected` vẫn được tính; nếu không còn Developer phù hợp thì dùng `Pending Assignment`, không có PM override.
 * Comment giữa Tester, Developer và PM trong từng bug report.  
 * Notification cho các sự kiện quan trọng.  
 * Lưu history/audit log cho các thay đổi quan trọng.

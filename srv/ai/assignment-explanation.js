@@ -14,6 +14,7 @@ const { STATUS } = require('../bug-service/constants')
 const { assertBugOpenForMutation } = require('../bug-service/permissions')
 const { resolveRequestUser } = require('../bug-service/helpers')
 const { buildAssignableDeveloperRows } = require('../bug-service/read-models')
+const { WORKLOAD_LIMIT } = require('../bug-service/capacity')
 
 const DEFAULT_LIMIT = 10
 const MAX_LIMIT = 10
@@ -154,10 +155,8 @@ async function readCandidateWorkloads (tx, entities, candidates) {
 
   for (const candidate of candidates) {
     const workload = workloads.get(candidate.developerProfileID) || emptyWorkload(candidate)
-    workload.workloadLimit = candidate.workloadLimit ?? null
-    workload.isOverloaded = workload.workloadLimit !== null && workload.workloadLimit !== undefined
-      ? workload.openOwnedBugCount > workload.workloadLimit
-      : false
+    workload.workloadLimit = WORKLOAD_LIMIT
+    workload.isOverloaded = workload.openOwnedBugCount >= WORKLOAD_LIMIT
     workloads.set(candidate.developerProfileID, workload)
   }
 
@@ -446,7 +445,7 @@ function emptyWorkload (candidate) {
   // Tạo workload 0 khi chưa có Bug, giữ candidate vẫn review được thay vì biến mất.
   return {
     developerProfileID: candidate.developerProfileID,
-    workloadLimit: candidate.workloadLimit ?? null,
+    workloadLimit: WORKLOAD_LIMIT,
     openOwnedBugCount: 0,
     overdueOwnedBugCount: 0,
     assignedCount: 0,

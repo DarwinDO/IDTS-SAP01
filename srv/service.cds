@@ -404,8 +404,12 @@ service BugService @(requires: 'authenticated-user') {
     sapModuleID               : UUID;
     developerName             : String(120);
     developerEmail            : String(255);
+    availabilityStatusCode    : String(40);
     availabilityStatusName    : String(120);
     availabilityCriticality   : Integer;
+    workloadLimit             : Integer;
+    openOwnedBugCount         : Integer;
+    isOverloaded              : Boolean;
     applicationComponentName  : String(120);
     defectCategoryName        : String(120);
     sapModuleName             : String(120);

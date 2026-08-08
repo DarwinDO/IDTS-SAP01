@@ -1,5 +1,9 @@
 # Knowledge: `srv/bug-service/bug-write.js`
 
+## 2026-08-08 capacity guard
+
+English: `validateAssignee` enforces the hard cap only for a new/changed assignee and locks that DeveloperProfile row before counting to serialize concurrent assignments. Existing lifecycle work remains possible after the Developer reaches three non-Closed Bugs. Vietnamese: `validateAssignee` chỉ enforce hard cap khi assignee mới/thay đổi và lock row DeveloperProfile trước khi đếm để serialize assignment đồng thời; lifecycle trên Bug hiện có không bị khóa khi Developer đã đạt ba Bug chưa Closed.
+
 ## IDTS-122 write semantics
 
 New Bugs are Tester-only and initialize `retestOwner` from the trusted Tester actor. Active writes preserve server-owned reporter/retest ownership. When routing a verification step, the handler prefers an active retest owner and falls back to PM coordination only when the stored Tester is missing or inactive.

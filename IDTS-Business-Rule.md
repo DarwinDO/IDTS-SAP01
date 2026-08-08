@@ -256,7 +256,17 @@ Trước khi bug được assign chính thức, cần kiểm tra Developer có p
 | Developer đang bận hoặc workload cao | Reassign sang Developer khác |
 | Không có Developer phù hợp | Giữ trạng thái Pending Assignment hoặc báo PM |
 
-Nếu nhóm chưa làm tự động workload, có thể để việc kiểm tra này ở mức thủ công.
+Capacity được tính theo tất cả Bug còn assignee và có status khác `Closed`; `Rejected`, `Resolved`, `Retest Required` và các status chưa đóng khác vẫn được tính.
+
+| Số Bug chưa `Closed` | Effective availability | Có thể nhận thêm Bug? |
+| ----- | ----- | ----- |
+| 0-1 | Available | Có |
+| 2 | Busy | Có, được nhận Bug thứ ba |
+| 3 trở lên | Unavailable | Không |
+
+Khi Developer đã có 3 Bug chưa `Closed`, backend phải từ chối assignment mới. Tester hoặc PM chọn Developer khác; nếu không còn Developer phù hợp, Bug giữ/chuyển sang `Pending Assignment`. PM không được override hard cap. Availability thủ công `Unavailable` (ví dụ nghỉ phép) luôn có hiệu lực dù workload thấp. Khi Bug được close, bỏ assignee hoặc reassign, effective availability được tính lại; hệ thống không ghi đè availability thủ công.
+
+**English clarification:** Capacity counts every assigned Bug whose status is not `Closed`, including `Rejected`. Zero or one is Available, two is Busy but can receive the third Bug, and three or more is Unavailable and blocks another assignment. There is no PM override; use another suitable Developer or `Pending Assignment`.
 
 ---
 

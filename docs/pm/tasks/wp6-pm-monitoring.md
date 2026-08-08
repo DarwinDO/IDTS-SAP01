@@ -1,5 +1,11 @@
 # WP6 - PM Monitoring
 
+## 2026-08-08 Effective developer capacity
+
+- `DeveloperWorkloads` and `AssignableDevelopers` now derive the same effective availability: 0-1 Available, 2 Busy, 3+ Unavailable.
+- Manual Unavailable remains authoritative; the fixed MVP limit is 3 and PM has no override. Rejected counts, Closed does not.
+- Smart Assign, AI explanation grounding, and Dashboard consume the same backend-derived status/count contract.
+
 Status: In Progress
 Owner workstream: Backend CAP / Fiori UI5
 Last updated: 2026-06-20
