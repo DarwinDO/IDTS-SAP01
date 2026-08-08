@@ -236,6 +236,7 @@ erDiagram
 - `USER` represents Tester, Developer, and PM users. Reporter and Admin are not separate MVP roles. Password hashes remain private and are intentionally omitted from the diagram.
 - `AUTH_SESSION` stores only a bearer-token hash plus expiry/revocation metadata. Raw bearer tokens are not persisted.
 - `DEVELOPER_PROFILE` exists only for users who can receive bug assignments.
+- `DEVELOPER_PROFILE.availabilityStatus` remains the manual availability signal. Effective capacity is derived from assigned Bugs whose status is not `Closed`: 0-1 Available, 2 Busy, and 3+ Unavailable; the derived value is not persisted over the manual status.
 - `SAP_MODULE` is a real SAP functional/business module such as FI, MM, SD, CO, PP, or HCM. It should not contain IDTS feature names.
 - `APPLICATION_COMPONENT` is the concrete application component or feature area where the bug appears. Examples: IDTS Bug Report, IDTS Assignment, IDTS Notification, Dashboard, a custom Fiori app, or a CAP service.
 - `SAP_MODULE_COMPONENT` controls which application components are relevant for each SAP module. This supports dependent value help in Fiori: choose SAP Module first, then show relevant application components.

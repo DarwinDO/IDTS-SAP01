@@ -9,6 +9,7 @@ const {
 } = require('./constants')
 
 const { trimToNull } = require('./helpers')
+const { effectiveCapacity } = require('./capacity')
 
 const STATUS_COUNT_FIELDS = new Map([
   [STATUS.ASSIGNED, 'assignedCount'],
@@ -130,9 +131,12 @@ function buildDeveloperWorkloadRows (profiles, bugs) {
   }
 
   for (const row of rowsByProfileID.values()) {
-    row.isOverloaded = row.workloadLimit !== null && row.workloadLimit !== undefined
-      ? row.openOwnedBugCount > row.workloadLimit
-      : false
+    const capacity = effectiveCapacity(row.availabilityStatusCode, row.openOwnedBugCount)
+    row.availabilityStatusCode = capacity.availabilityStatusCode
+    row.availabilityStatusName = capacity.availabilityStatusName
+    row.availabilityCriticality = capacity.availabilityCriticality
+    row.workloadLimit = capacity.workloadLimit
+    row.isOverloaded = capacity.isOverloaded
   }
 
   return [...rowsByProfileID.values()]
