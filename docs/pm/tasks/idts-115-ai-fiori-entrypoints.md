@@ -191,3 +191,11 @@ Evidence: `docs/pm/evidence/idts-115/`.
 - DonHV subsequently sent the exact approval phrase `GO EMAIL ROUTING`. The private UPS changed only `email.testMode` from `true` to `false`; provider fields and `defaultTestRecipient` were preserved. `idts-sap01-srv` restarted without artifact restage or database deployment. Effective app-environment readback, CAP `1/1`, `/health` 200 and `/ready` 200 pass. No historical delivery replay, send-smoke, SQL, seed or schema command ran.
 - UI commit `212bde0` is pushed on `fix/idts-115-classification-apply-feedback-donhv`; PR #311 targets `dev`. The operational evidence follow-up must receive its own fresh exact-head QA Depth PASS. No merge or Classification Apply artifact deployment is performed in this session.
 - Email-routing GO evidence: `docs/pm/evidence/idts-115/email-routing-go-20260808.md`. The config-only restart is not a source/runtime artifact deployment; Classification Apply UI deployment remains post-merge work.
+
+## 2026-08-08 Classification Apply rollout
+
+- PR #311 merged normally at `155a38d98091858ea19d915b0d492245d8dd1d15` and is included in the selectively deployed exact-source release `ccb2fd102b2daacaa3685bcfe671e0772ef1bbc4`.
+- Focused regression remains 250/250 PASS; CAP compile, UI5 build, security and repository gates pass. Post-deploy service/AppRouter/readiness/Web checks pass.
+- No DB deployer, schema, seed, SQL, AI provider configuration or business-data mutation was included.
+- Signed-in browser acceptance of the exact responsibility-mismatch popup remains pending because creating the controlled mismatch would mutate workflow data. IDTS-115 remains In Progress for this and its previously documented role/browser evidence gaps.
+- Combined release evidence: `docs/pm/evidence/idts-81-115-312/release-20260808.md`.

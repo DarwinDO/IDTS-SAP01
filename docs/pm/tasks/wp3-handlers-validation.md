@@ -5,6 +5,7 @@
 - Added backend-authoritative assignment capacity: all assigned non-Closed Bugs count, including Rejected; 0-1 is Available, 2 is Busy, and 3+ blocks another assignment.
 - Capacity is checked only for a new/changed assignee. Existing lifecycle actions remain available at the cap, and failed assignment writes no Bug, History, or Notification side effect.
 - The DeveloperProfile row is locked before count validation to serialize concurrent assignments where the database supports row locking.
+- PR #312 merged normally at `ccb2fd102b2daacaa3685bcfe671e0772ef1bbc4` and the exact SHA was selectively deployed to the CAP service. Capacity, workload and impacted assignment regressions pass; no DB deployer, schema, seed, SQL or business-data mutation ran.
 
 Status: Completed for Sprint 1 MVP; Sprint 02 backend refinements and SAP490 test evidence added
 Owner workstream: Backend CAP

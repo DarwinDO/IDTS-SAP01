@@ -5,6 +5,7 @@
 - `DeveloperWorkloads` and `AssignableDevelopers` now derive the same effective availability: 0-1 Available, 2 Busy, 3+ Unavailable.
 - Manual Unavailable remains authoritative; the fixed MVP limit is 3 and PM has no override. Rejected counts, Closed does not.
 - Smart Assign, AI explanation grounding, and Dashboard consume the same backend-derived status/count contract.
+- PR #312 merged and the exact release SHA `ccb2fd102b2daacaa3685bcfe671e0772ef1bbc4` is live in the CAP service. Developer workload verification passes 39/39 together with Smart Assign, assignment explanation and PM monitoring regressions; WP6 remains In Progress for its existing manual follow-ups.
 
 Status: In Progress
 Owner workstream: Backend CAP / Fiori UI5

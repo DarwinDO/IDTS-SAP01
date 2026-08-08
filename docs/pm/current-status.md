@@ -334,3 +334,9 @@ Vietnamese: Agent hoáº·c developer má»›i pháº£i xÃ¡c Ä‘á»‹nh 
 - SangVN implemented the role/assignee Bug-mutation boundary on `fix/idts-125-bug-mutation-authorization-sangvn`: non-assignee Developer is read/comment only; assigned Developer can comment, manage attachments and use permitted lifecycle actions while Bug fields stay read-only; Tester/PM retain documented edit/coordination permissions. Focused and impacted local verification passed. Ownership Knowledge Gate retest passed 6/6 on 2026-08-06; Jira remains In Progress pending normal PR review, merge and final evidence.
 
 - Vietnamese: SangVN đã implement boundary mutate Bug theo role/assignee trên branch IDTS-125. Focused và impacted local verification đã pass; Knowledge Gate retest PASS 6/6 ngày 2026-08-06. Jira vẫn In Progress để chờ PR review, merge và final evidence.
+
+## 2026-08-08 IDTS-81 / IDTS-115 / Developer capacity release
+
+- PR #310 (SangVN email BTP deep-link), PR #311 (DonHV Classification Apply feedback) and PR #312 (DatDT Developer capacity) merged normally and were selectively deployed from exact SHA `ccb2fd102b2daacaa3685bcfe671e0772ef1bbc4`.
+- CAP/AppRouter/readiness/Web checks pass and effective email routing remains `testMode=false`. No DB deployer, schema, seed, SQL, send-smoke or historical email replay ran.
+- IDTS-81 remains In Progress for a fresh authorized email click-test. IDTS-115 remains In Progress for the controlled signed-in mismatch case and previously documented role/browser gaps. Evidence: `docs/pm/evidence/idts-81-115-312/release-20260808.md`.
