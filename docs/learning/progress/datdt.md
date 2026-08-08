@@ -1,5 +1,14 @@
 # DatDT Knowledge Gate Progress
 
+## 2026-08-08 Assignment capacity + Dashboard monitoring
+
+- Questions: 7/7 Y/N recognition (100%).
+- Critical: PASS.
+- Debug: PASS — assigning another Bug to a Developer already owning 3 non-Closed Bugs must be rejected without changing the target Bug or creating assignment History/Notification.
+- Teach-back: PASS — DatDT explained that the backend is the final authority for business decisions and clear authorization enforcement.
+- Result: PASS.
+- Vietnamese evidence: DatDT xác nhận backend là nơi quyết định cuối cùng cho nghiệp vụ/phân quyền; hard cap phải được enforce ở CAP, không chỉ khóa nút UI.
+
 ## English
 
 Effective date: 2026-07-13 (Asia/Bangkok). Initial historical debt: 0.

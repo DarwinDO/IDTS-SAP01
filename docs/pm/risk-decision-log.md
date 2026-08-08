@@ -6,6 +6,7 @@ Last updated: 2026-07-23
 
 | ID | Date | Decision | Reason | Impact |
 | --- | --- | --- | --- | --- |
+| DEC-052 | 2026-08-08 | Derive effective Developer capacity from every assigned non-Closed Bug: 0-1 Available, 2 Busy, and 3+ Unavailable; manual Unavailable wins and PM cannot override. | The team needs one deterministic assignment rule that counts Rejected work, permits the third Bug, and prevents a fourth assignment without corrupting manual leave/availability. | CAP blocks a new/changed assignment at 3, falls back operationally to another candidate or Pending Assignment, locks the DeveloperProfile for concurrent validation, and exposes the same derived capacity to Smart Assign, AI explanation, and PM monitoring without a database schema migration. |
 | DEC-001 | 2026-05-28 | Use a split classification model: optional SAP Module, required Application Component, required Defect Category, inferred Component Category. | Avoid mixing SAP business modules with IDTS application features. | Data model and Fiori value helps must support dependent selection. |
 | DEC-002 | 2026-05-28 | Use Developer Responsibility as the assignment mapping. | Assignment should be based on capability, not only a free-text developer field. | Assignee value help must filter by Component Category and optional SAP Module. |
 | DEC-003 | 2026-05-28 | Keep `nextProcessor` as an automatically maintained action owner or queue. | PM and users need to know who must act next without changing the assignee concept. | CAP handlers must update nextProcessor and history logs on key actions. |

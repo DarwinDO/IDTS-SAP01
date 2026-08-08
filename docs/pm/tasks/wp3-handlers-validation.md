@@ -1,5 +1,11 @@
 # WP3 - Handler Rules and Validation
 
+## 2026-08-08 Developer capacity hard cap
+
+- Added backend-authoritative assignment capacity: all assigned non-Closed Bugs count, including Rejected; 0-1 is Available, 2 is Busy, and 3+ blocks another assignment.
+- Capacity is checked only for a new/changed assignee. Existing lifecycle actions remain available at the cap, and failed assignment writes no Bug, History, or Notification side effect.
+- The DeveloperProfile row is locked before count validation to serialize concurrent assignments where the database supports row locking.
+
 Status: Completed for Sprint 1 MVP; Sprint 02 backend refinements and SAP490 test evidence added
 Owner workstream: Backend CAP
 Last updated: 2026-06-21

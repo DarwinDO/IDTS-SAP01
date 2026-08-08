@@ -113,6 +113,7 @@
     "qa:idts73:browser": "node scripts/qa/test-idts73-create-attachments-browser.js",
     "qa:auth-email:playwright": "node scripts/qa/test-idts38-auth-email-playwright.js",
     "qa:developer-workload:programmatic": "node scripts/qa/test-developer-workload-programmatic.js",
+    "qa:developer-capacity:programmatic": "node scripts/qa/test-developer-capacity-programmatic.js",
     "qa:direct-assignee:http": "powershell -ExecutionPolicy Bypass -File scripts/qa/test-direct-assignee-draft-save.ps1",
     "qa:history-events:programmatic": "node scripts/qa/test-history-events-programmatic.js assign && node scripts/qa/test-history-events-programmatic.js resubmit && node scripts/qa/test-history-events-programmatic.js reject && node scripts/qa/test-history-events-programmatic.js pending && node scripts/qa/test-history-events-programmatic.js close && node scripts/qa/test-history-events-programmatic.js edit && node scripts/qa/test-history-events-programmatic.js legacy-labels",
     "qa:idts89:one-to-one-action-audit": "node scripts/qa/test-idts89-one-to-one-action-audit.js",

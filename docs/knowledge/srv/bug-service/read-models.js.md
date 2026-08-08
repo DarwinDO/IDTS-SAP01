@@ -1,5 +1,9 @@
 # Knowledge: `srv/bug-service/read-models.js`
 
+## 2026-08-08 effective availability
+
+English: `AssignableDevelopers` exposes the derived workload count and effective availability from the shared capacity helper. Vietnamese: `AssignableDevelopers` expose workload count và effective availability từ capacity helper dùng chung.
+
 ## IDTS-122 UI capability truth
 
 Read models expose state-aware capabilities: Closed Bugs are not editable, cannot accept comments or ordinary assignment, and expose PM retest-owner reassignment as a separate capability. These fields guide Fiori affordances; direct OData protection still lives in backend guards.

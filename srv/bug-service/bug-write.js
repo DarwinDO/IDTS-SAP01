@@ -22,6 +22,7 @@ const {
 
 const { importantChanges } = require('./history')
 const { enforceBugWritePermission, enforceBugCreatePermission } = require('./permissions')
+const { effectiveCapacity, readOpenOwnedBugCounts } = require('./capacity')
 
 const CODE_LIST_FIELDS = [
   { field: 'priority_code', label: 'Priority', entity: 'PriorityValues' },
@@ -84,7 +85,9 @@ async function prepareBugWrite (req, entities, { isCreate }) {
   }
 
   if (finalData.assignee_ID) {
-    await validateAssignee(req, entities, finalData)
+    await validateAssignee(req, entities, finalData, {
+      enforceCapacity: isCreate || oldBug.assignee_ID !== finalData.assignee_ID
+    })
   }
 
   if (finalStatus === STATUS.PENDING_ASSIGNMENT) {
@@ -245,13 +248,16 @@ async function validateActiveClassificationParents (req, entities, bug, tx = cds
   }
 }
 
-async function validateAssignee (req, entities, bug) {
+async function validateAssignee (req, entities, bug, { enforceCapacity = false } = {}) {
   // Assignee phải là DeveloperProfile active, đang nhận việc và có responsibility phù hợp
   // với component/category (và module nếu responsibility giới hạn module).
-  const developer = await SELECT.one.from(entities.DeveloperProfiles).where({
+  const tx = cds.tx(req)
+  const developerQuery = SELECT.one.from(entities.DeveloperProfiles).where({
     ID: bug.assignee_ID,
     active: true
   })
+  if (enforceCapacity) developerQuery.forUpdate()
+  const developer = await tx.run(developerQuery)
 
   if (!developer) {
     return req.reject(400, 'Assigned developer is not active or does not exist.', 'assignee')
@@ -259,6 +265,18 @@ async function validateAssignee (req, entities, bug) {
 
   if (developer.availabilityStatus_code === 'UNAVAILABLE') {
     return req.reject(400, 'Assigned developer is unavailable and cannot receive new bugs.', 'assignee')
+  }
+
+  if (enforceCapacity) {
+    const counts = await readOpenOwnedBugCounts(tx, entities, [bug.assignee_ID])
+    const capacity = effectiveCapacity(developer.availabilityStatus_code, counts.get(bug.assignee_ID))
+    if (!capacity.canReceiveNewBug) {
+      return req.reject(
+        400,
+        `Assigned developer already owns ${capacity.workloadLimit} or more non-Closed bugs and cannot receive another bug.`,
+        'assignee'
+      )
+    }
   }
 
   // Query có thể trả nhiều responsibility; `.some` bên dưới chỉ cần một record phù hợp là đủ.

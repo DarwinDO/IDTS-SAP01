@@ -101,6 +101,8 @@ async function main () {
   expectEqual('SangVN rejectedCount', sang?.rejectedCount, 0)
   expectEqual('SangVN estimatedEffortHoursTotal', Number(sang?.estimatedEffortHoursTotal), 19.5)
   expectEqual('SangVN isOverloaded', sang?.isOverloaded, true)
+  expectEqual('SangVN effective availability at 3+ open bugs', sang?.availabilityStatusCode, 'UNAVAILABLE')
+  expectEqual('SangVN fixed workload limit', sang?.workloadLimit, 3)
 
   const dat = byDeveloperName.get('DatDT')
   expectEqual('DatDT openOwnedBugCount', dat?.openOwnedBugCount, 1)
@@ -108,6 +110,7 @@ async function main () {
   expectEqual('DatDT currentActionItemCount', dat?.currentActionItemCount, 0)
   expectEqual('DatDT rejectedCount', dat?.rejectedCount, 1)
   expectEqual('DatDT estimatedEffortHoursTotal', Number(dat?.estimatedEffortHoursTotal), 3.5)
+  expectEqual('DatDT effective availability at 1 open bug', dat?.availabilityStatusCode, 'AVAILABLE')
 
   const legacy = byDeveloperName.get('LegacyDev')
   expectEqual('LegacyDev active=false still visible with backlog', legacy?.active, false)

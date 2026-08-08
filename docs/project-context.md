@@ -250,8 +250,10 @@ Vietnamese:
 3. User/queue filtering for the current action owner should continue to use `nextProcessorUser` and `nextProcessorRole`; `currentActionOwnerDisplayName` is a readable summary, not the filtering key.
 4. Backend workload summary is exposed separately as read-only `BugService.DeveloperWorkloads`, aggregated by `assignee` as the technical owner rather than by `nextProcessor`.
 5. `BugService.DeveloperWorkloads` includes active developers even when they currently own zero open bugs, and it retains inactive developers only while they still own open bugs that PM must clean up.
-6. PM receives escalation notifications for high-priority unassigned bugs, overdue bugs, repeated reassignments, rejected bugs, and stale updates.
-7. PM can comment or request reassignment without replacing Developer or Tester responsibilities.
+6. Effective Developer capacity counts every assigned Bug whose status is not `Closed`, including `Rejected`: 0-1 is Available, 2 is Busy but may receive the third Bug, and 3+ is Unavailable and blocks another assignment.
+7. Manual `Unavailable` remains authoritative. PM cannot override the workload cap; another suitable Developer must be selected or the Bug stays/moves to `Pending Assignment`.
+8. PM receives escalation notifications for high-priority unassigned bugs, overdue bugs, repeated reassignments, rejected bugs, and stale updates.
+9. PM can comment or request reassignment without replacing Developer or Tester responsibilities.
 
 ## Mentor-Confirmed Sprint 02 Delta
 

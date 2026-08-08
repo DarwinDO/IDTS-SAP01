@@ -150,6 +150,8 @@ Tester chọn module/category
 
 Nếu Developer đang bận hoặc workload không phù hợp:
 
+Capacity MVP được derive từ tất cả Bug còn assignee và chưa `Closed`, kể cả `Rejected`: 0-1 = Available, 2 = Busy nhưng vẫn nhận Bug thứ ba, và 3+ = Unavailable nên không nhận assignment mới. Manual `Unavailable` luôn được ưu tiên. PM không override hard cap; nếu không có candidate khác thì Bug chuyển/giữ `Pending Assignment`.
+
 Tester reassign bug cho Developer khác
 
 ---

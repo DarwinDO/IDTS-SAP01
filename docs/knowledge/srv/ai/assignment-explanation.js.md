@@ -1,5 +1,9 @@
 # `srv/ai/assignment-explanation.js`
 
+## 2026-08-08 capacity grounding
+
+English: AI explanations use the same fixed limit of three and remain advisory; CAP assignment validation is authoritative. Vietnamese: AI explanation dùng cùng hard cap ba Bug và chỉ tư vấn; CAP assignment validation mới là authority.
+
 ## IDTS-122 guard
 
 Smart-assignment explanation is advisory but still a mutation-producing AI audit operation. It rejects a Closed source Bug before any provider request or audit write; Reopen is required first.

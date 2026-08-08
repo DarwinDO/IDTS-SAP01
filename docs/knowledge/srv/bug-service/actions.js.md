@@ -1,5 +1,9 @@
 # Knowledge: `srv/bug-service/actions.js`
 
+## 2026-08-08 capacity guard
+
+English: assignment actions request capacity validation only when the Developer owner changes, before assignment side effects are written. Vietnamese: action assignment chỉ yêu cầu capacity validation khi đổi Developer owner và chạy trước khi ghi side effect assignment.
+
 ## IDTS-122 retest continuity
 
 Lifecycle actions preserve a durable `retestOwner`. Closing clears `nextProcessor` but keeps the retest owner. Reopen routes verification back to that owner, while PM can use `reassignRetestOwner` without changing status or Developer assignee. All lifecycle actions except Reopen are rejected when the current status is `CLOSED`.
