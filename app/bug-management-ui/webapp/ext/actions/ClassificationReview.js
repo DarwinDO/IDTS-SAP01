@@ -196,6 +196,13 @@ sap.ui.define([
             ) >= 0;
     }
 
+    function isResponsibilityMismatchError(error) {
+        return errorStatus(error) === 400 &&
+            errorMessage(error).indexOf(
+                "Assigned developer is not responsible for the selected component/category and SAP module scope."
+            ) >= 0;
+    }
+
     function isRetryableLoadError(error) {
         var status = errorStatus(error);
         return status === 0 || status === 408 || status === 429 || status >= 500;
@@ -413,13 +420,17 @@ sap.ui.define([
                         .then(function () {
                             MessageToast.show(getText(view, "classificationApplySuccess"));
                         })
-                        .catch(function () {
+                        .catch(function (error) {
                             if (!applyCompleted) {
                                 state.setProperty("/applyActionEnabled", true);
                             }
                             MessageBox.error(getText(
                                 view,
-                                applyCompleted ? "classificationRefreshFailed" : "classificationApplyFailed"
+                                applyCompleted
+                                    ? "classificationRefreshFailed"
+                                    : isResponsibilityMismatchError(error)
+                                        ? "classificationResponsibilityMismatch"
+                                        : "classificationApplyFailed"
                             ));
                         })
                         .finally(function () {
