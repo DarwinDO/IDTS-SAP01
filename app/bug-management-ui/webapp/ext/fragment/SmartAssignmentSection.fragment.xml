@@ -30,9 +30,9 @@
                       core:require="{ SmartAssign: 'idts/bugmanagementui/ext/actions/SmartAssignDeveloper' }"
                       value="{path: 'assigneeDisplayName', mode: 'OneWay'}"
                       placeholder="{i18n>smartAssigneePlaceholder}"
-                      showValueHelp="{= ${status_code} !== 'CLOSED' &amp;&amp; (${IsActiveEntity} !== true || ${canAssign} === true) }"
-                      editable="{= ${status_code} !== 'CLOSED' &amp;&amp; (${IsActiveEntity} !== true || ${canAssign} === true) }"
-                      enabled="{= ${status_code} !== 'CLOSED' &amp;&amp; (${IsActiveEntity} !== true || ${canAssign} === true) }"
+                      showValueHelp="{= %{status_code} !== 'CLOSED' &amp;&amp; (%{IsActiveEntity} !== true || %{canAssign} !== false) }"
+                      editable="{= %{status_code} !== 'CLOSED' &amp;&amp; (%{IsActiveEntity} !== true || %{canAssign} !== false) }"
+                      enabled="{= %{status_code} !== 'CLOSED' &amp;&amp; (%{IsActiveEntity} !== true || %{canAssign} !== false) }"
                       change="SmartAssign.resetAssigneeInput"
                       valueHelpRequest="SmartAssign.openAssigneePicker"
                     />

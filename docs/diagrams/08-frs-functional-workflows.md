@@ -171,7 +171,7 @@ sequenceDiagram
         CAP->>DB: Save Assigned + Developer action owner
         CAP->>DB: Write comment/history + notification/outbox
     else No suitable assignee
-        UI->>CAP: moveToPendingAssignment(reason)
+        UI->>CAP: Confirm moveToPendingAssignment()
         CAP->>DB: Clear assignee and save Pending Assignment
         CAP->>DB: Write history + notification/outbox
     end

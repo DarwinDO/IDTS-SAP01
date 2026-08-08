@@ -21,7 +21,7 @@ This file is intentionally small. It does not contain the form markup itself any
 
 1. A user opens `/bug-management-ui/webapp/login.html`, or `auth-guard.js` redirects them here from `index.html`.
 2. `login.html` loads `css/login.css` for page-specific SAP-token styling.
-3. `login.html` bootstraps SAPUI5 with theme `sap_horizon` and libraries `sap.m,sap.f`.
+3. `login.html` bootstraps SAPUI5 in English with theme `sap_horizon` and libraries `sap.m,sap.f`.
 4. `login-page.js` renders the actual login page inside `<div id="loginContent">`.
 5. On successful login, `login-page.js` stores the token/profile in `sessionStorage` and redirects to `index.html`.
 
@@ -32,6 +32,8 @@ This file is intentionally small. It does not contain the form markup itself any
 | `<link rel="stylesheet" href="css/login.css">` | Login visual style | Login may still work, but the page loses SAP/Fiori layout and responsive styling. | `css/login.css`, `login-page.js` |
 | `src="https://sapui5.hana.ondemand.com/1.148.0/resources/sap-ui-core.js"` | SAPUI5 runtime | The UI5 login controls cannot render if the runtime cannot load. | `index.html`, `ui5.yaml`, local `cds watch` behavior |
 | `data-sap-ui-theme="sap_horizon"` | SAP Horizon theme | Login may look inconsistent with the Fiori app if the theme changes. | `css/login.css`, `index.html` |
+| `data-sap-ui-language="en"` | English SAPUI5 framework text | Standard UI5 labels can follow the browser locale and mix languages if removed. | `bootstrap-ui5.js`, i18n bundles |
+| `data-sap-ui-ignore-url-params="true"` | Stable product language | A `sap-language` URL override can otherwise take precedence over the English bootstrap setting. | `bootstrap-ui5.js` |
 | `data-sap-ui-libs="sap.m,sap.f"` | UI5 control libraries | `login-page.js` cannot load the controls it uses. | `login-page.js` dependencies |
 | `<div id="loginContent"></div>` | Login render target | The login page becomes blank because `login-page.js` has nowhere to place the UI. | `login-page.js` |
 | `<script src="login-page.js"></script>` | Login behavior | Users cannot authenticate or redirect into the app. | `srv/auth.js`, `auth-guard.js` |
@@ -69,7 +71,7 @@ File này giờ được giữ rất gọn. Nó không tự viết form HTML n�
 
 1. User mở `/bug-management-ui/webapp/login.html`, hoặc bị `auth-guard.js` redirect từ `index.html` sang đây.
 2. `login.html` load `css/login.css` để lấy layout/styling riêng cho login.
-3. `login.html` bootstrap SAPUI5 với theme `sap_horizon` và thư viện `sap.m,sap.f`.
+3. `login.html` bootstrap SAPUI5 bằng tiếng Anh với theme `sap_horizon` và thư viện `sap.m,sap.f`.
 4. `login-page.js` render màn hình login thật vào `<div id="loginContent">`.
 5. Khi login thành công, `login-page.js` lưu token/profile vào `sessionStorage` và redirect sang `index.html`.
 
@@ -80,6 +82,8 @@ File này giờ được giữ rất gọn. Nó không tự viết form HTML n�
 | `<link rel="stylesheet" href="css/login.css">` | Giao diện login | Login có thể vẫn chạy, nhưng mất layout/responsive theo hướng SAP/Fiori. | `css/login.css`, `login-page.js` |
 | `src="https://sapui5.hana.ondemand.com/1.148.0/resources/sap-ui-core.js"` | SAPUI5 runtime | Các control UI5 của màn hình login không render được. | `index.html`, `ui5.yaml`, hành vi `cds watch` local |
 | `data-sap-ui-theme="sap_horizon"` | Theme SAP Horizon | Login nhìn lệch với app Fiori nếu theme đổi sai. | `css/login.css`, `index.html` |
+| `data-sap-ui-language="en"` | Text framework SAPUI5 bằng tiếng Anh | Nếu bỏ cấu hình này, label chuẩn của UI5 có thể theo locale browser và làm giao diện lẫn ngôn ngữ. | `bootstrap-ui5.js`, các i18n bundle |
+| `data-sap-ui-ignore-url-params="true"` | Ngôn ngữ sản phẩm ổn định | Nếu thiếu, `sap-language` trên URL có thể ưu tiên cao hơn cấu hình English trong bootstrap. | `bootstrap-ui5.js` |
 | `data-sap-ui-libs="sap.m,sap.f"` | Thư viện control UI5 | `login-page.js` không load được control cần dùng. | Dependency trong `login-page.js` |
 | `<div id="loginContent"></div>` | Vùng render login | Trang login bị trắng vì `login-page.js` không có chỗ đặt UI. | `login-page.js` |
 | `<script src="login-page.js"></script>` | Logic đăng nhập | User không đăng nhập hoặc redirect vào app được. | `srv/auth.js`, `auth-guard.js` |

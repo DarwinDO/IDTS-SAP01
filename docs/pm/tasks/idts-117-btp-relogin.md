@@ -152,3 +152,17 @@ The source merge was selectively deployed through MTA operation
 `/health` and `/ready` return HTTP 200, the protected API returns HTTP 401
 without a session, and the web entry returns HTTP 200. Evidence:
 `docs/pm/evidence/idts-117/demo-readiness/live-verification-20260802.md`.
+
+## 2026-08-07 signed-out page UX follow-up
+
+DatDT reported that the public post-logout page looked like raw HTML compared
+with the SAP identity-provider sign-in screen. The AppRouter/XSUAA logout flow
+was already correct; the cause was the intentionally minimal, unstyled
+`app/router/resources/logged-out.html`.
+
+The candidate keeps `/do/logout`, the public route and the protected
+`/login.html` bridge unchanged. It adds a self-contained, responsive,
+Fiori-inspired confirmation card with one primary sign-in action, visible
+keyboard focus and no JavaScript, external asset, credential or token logic.
+Focused local regression passes; final acceptance still requires visual and
+round-trip verification after the AppRouter candidate is deployed.

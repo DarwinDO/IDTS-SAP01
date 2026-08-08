@@ -169,9 +169,9 @@ async function main () {
   bug = await expectStatus(pm.token, bugID, 'ASSIGNED', 'PM assigns the bug to Developer')
   expect('Assigned bug stores the selected assignee', bug.assignee_ID === developerProfileID)
 
-  await callAction(developer.token, bugID, 'markInReview', { note: 'Reviewing the mentor acceptance bug.' })
+  await callAction(developer.token, bugID, 'markInReview', {})
   await expectStatus(pm.token, bugID, 'IN_REVIEW', 'Assigned Developer marks the bug In Review')
-  await callAction(developer.token, bugID, 'startProgress', { note: 'Starting controlled work.' })
+  await callAction(developer.token, bugID, 'startProgress', {})
   await expectStatus(pm.token, bugID, 'IN_PROGRESS', 'Assigned Developer starts progress')
 
   const missingReason = await callAction(developer.token, bugID, 'requestMoreInformation', { reason: '   ' }, [400])
@@ -181,13 +181,13 @@ async function main () {
 
   await callAction(tester.token, bugID, 'resubmitToDeveloper', { note: 'Fresh reproduction note was added for retest.' })
   await expectStatus(pm.token, bugID, 'ASSIGNED', 'Tester resubmits to the assigned Developer')
-  await callAction(developer.token, bugID, 'startProgress', { note: 'Continuing after additional information.' })
+  await callAction(developer.token, bugID, 'startProgress', {})
   await callAction(developer.token, bugID, 'resolveBug', { note: 'Controlled acceptance fix completed.' })
   await expectStatus(pm.token, bugID, 'RESOLVED', 'Developer resolves the bug')
 
-  await callAction(tester.token, bugID, 'sendToRetest', { note: 'Send the resolved item to retest.' })
+  await callAction(tester.token, bugID, 'sendToRetest', {})
   await expectStatus(pm.token, bugID, 'RETEST_REQUIRED', 'Tester sends the bug to Retest Required')
-  await callAction(tester.token, bugID, 'closeBug', { note: 'Acceptance retest passed.' })
+  await callAction(tester.token, bugID, 'closeBug', {})
   await expectStatus(pm.token, bugID, 'CLOSED', 'Tester closes the verified bug')
   await callAction(tester.token, bugID, 'reopenBug', { reason: 'Exercise the reopen branch before mentor demo.' })
   await expectStatus(pm.token, bugID, 'REOPENED', 'Tester reopens the bug for further work')
@@ -199,7 +199,7 @@ async function main () {
 
   await callAction(developer.token, bugID, 'rejectBug', { reason: 'Exercise correction and reassignment follow-up.' })
   await expectStatus(pm.token, bugID, 'REJECTED', 'Assigned Developer rejects the bug with a reason')
-  await callAction(pm.token, bugID, 'moveToPendingAssignment', { reason: 'Return the corrected item to the assignment queue.' })
+  await callAction(pm.token, bugID, 'moveToPendingAssignment', {})
   bug = await expectStatus(pm.token, bugID, 'PENDING_ASSIGNMENT', 'PM moves rejected bug to Pending Assignment')
   expect('Move to Pending Assignment clears the assignee', !bug.assignee_ID)
   await callAction(pm.token, bugID, 'assignToDeveloper', {

@@ -74,7 +74,7 @@ async function runSrv(srv) {
       query: UPDATE.entity(srv.entities.Bugs).set(patch).where({ ID: bugID }),
       params: [{ ID: bugID, IsActiveEntity: true }],
       data: { ID: bugID, ...patch },
-      user: new cds.User({ id: 'alice', roles: ['BugManager'] })
+      user: new cds.User({ id: 'NhanT', roles: ['TESTER', 'authenticated-user'] })
     })
     return srv.dispatch(req)
   }
@@ -184,12 +184,22 @@ async function runSrv(srv) {
   // Helper to call a bound action and get result
   async function callAction(bugID, actionName, data={}) {
     try {
+      const coordinatorActions = new Set(['resubmitToDeveloper', 'sendToRetest', 'closeBug', 'reopenBug'])
+      const pmActions = new Set(['assignToDeveloper', 'moveToPendingAssignment'])
+      const user = coordinatorActions.has(actionName)
+        ? new cds.User({ id: 'NhanT', roles: ['TESTER', 'authenticated-user'] })
+        : pmActions.has(actionName)
+          ? new cds.User({ id: 'DonHV', roles: ['PM', 'authenticated-user'] })
+          : new cds.User({
+              id: bugID === BUG1 ? 'DatDT' : 'SangVN',
+              roles: ['DEVELOPER', 'authenticated-user']
+            })
       const req = new cds.Request({
         method: 'POST',
         event: actionName,
         params: [{ ID: bugID, IsActiveEntity: true }],
         data,
-        user: new cds.User({ id: 'alice' })
+        user
       })
       const result = await srv.dispatch(req)
       return { ok: true, code: 200, data: result }
@@ -207,12 +217,12 @@ async function runSrv(srv) {
 
   console.log('')
   console.log('SC-03: Mark In Review')
-  const r3a = await callAction(BUG1, 'markInReview', { note: '' })
+  const r3a = await callAction(BUG1, 'markInReview', {})
   rec('SC-03a markInReview ASSIGNED -> IN_REVIEW', r3a.ok, r3a.code, 200, r3a.data?.status_code||r3a.msg)
 
   console.log('')
   console.log('SC-04: Start Progress')
-  const r4a = await callAction(BUG1, 'startProgress', { note: 'Starting work' })
+  const r4a = await callAction(BUG1, 'startProgress', {})
   rec('SC-04a startProgress IN_REVIEW -> IN_PROGRESS', r4a.ok, r4a.code, 200, r4a.data?.status_code||r4a.msg)
 
   console.log('')
@@ -223,19 +233,36 @@ async function runSrv(srv) {
   const r5b = await callAction(BUG1, 'requestMoreInformation', { reason: '' })
   rec('SC-05b requestMoreInfo empty reason -> 400', !r5b.ok && r5b.code===400, r5b.code, 400, r5b.msg)
 
-  const r5c = await callAction(BUG1, 'resubmitToDeveloper', { note: 'Updated steps and attached the missing evidence.' })
+  const resubmitNote = 'Updated steps and attached the missing evidence.'
+  const commentsBeforeResubmit = await cds.tx({}, tx => tx.run(
+    SELECT.from(srv.entities.Comments).where({ bug_ID: BUG1 })
+  ))
+  const r5c = await callAction(BUG1, 'resubmitToDeveloper', { note: resubmitNote })
   rec('SC-05c resubmitToDeveloper NEED_MORE_INFORMATION -> ASSIGNED', r5c.ok, r5c.code, 200, r5c.data?.status_code||r5c.msg)
 
-  const bug1Comments = await cds.tx({}, tx => tx.run(
-    SELECT.from(srv.entities.Comments).where({ bug_ID: BUG1 }).orderBy('createdAt desc').limit(1)
+  const commentsAfterResubmit = await cds.tx({}, tx => tx.run(
+    SELECT.from(srv.entities.Comments).where({ bug_ID: BUG1 })
   ))
-  const latestBug1Comment = bug1Comments?.[0]
   rec(
-    'SC-05d resubmitToDeveloper creates follow-up comment',
-    !!latestBug1Comment?.content && latestBug1Comment.content.includes('Resubmitted after information request:'),
+    'SC-05d resubmitToDeveloper does not create an automatic comment',
+    commentsAfterResubmit.length === commentsBeforeResubmit.length,
     200,
     200,
-    latestBug1Comment?.content || 'no comment found'
+    `comments before=${commentsBeforeResubmit.length}, after=${commentsAfterResubmit.length}`
+  )
+
+  const resubmitEvents = await cds.tx({}, tx => tx.run(
+    SELECT.from(srv.entities.HistoryEvents)
+      .where({ bug_ID: BUG1, actionType_code: 'RESUBMIT_TO_DEVELOPER' })
+      .orderBy('createdAt desc')
+      .limit(1)
+  ))
+  rec(
+    'SC-05e resubmitToDeveloper keeps update summary in History',
+    resubmitEvents[0]?.reason === resubmitNote,
+    200,
+    200,
+    resubmitEvents[0]?.reason || 'no resubmit history found'
   )
 
   const bug1Notifications = await cds.tx({}, tx => tx.run(
@@ -246,7 +273,7 @@ async function runSrv(srv) {
     notification.message?.includes('resubmitted with additional information')
   )
   rec(
-    'SC-05e resubmitToDeveloper creates developer notification',
+    'SC-05f resubmitToDeveloper creates developer notification',
     !!resubmitNotification,
     200,
     200,
@@ -266,7 +293,7 @@ async function runSrv(srv) {
 
   console.log('')
   console.log('SC-07: Move to Pending Assignment')
-  const r7a = await callAction(BUG3, 'moveToPendingAssignment', { reason: 'Awaiting reclassification' })
+  const r7a = await callAction(BUG3, 'moveToPendingAssignment', {})
   rec('SC-07a moveToPendingAssignment after REJECTED', r7a.ok, r7a.code, 200, r7a.data?.status_code||r7a.msg)
 
   console.log('')
@@ -289,7 +316,7 @@ async function runSrv(srv) {
 
   console.log('')
   console.log('SC-09: Send to Retest')
-  const r9a = await callAction(BUG3, 'sendToRetest', { note: 'Please retest in QAS' })
+  const r9a = await callAction(BUG3, 'sendToRetest', {})
   rec('SC-09a sendToRetest on RESOLVED', r9a.ok, r9a.code, 200, r9a.data?.status_code||r9a.msg)
 
   console.log('')
@@ -307,7 +334,7 @@ async function runSrv(srv) {
   await callAction(BUG3, 'markInReview', {})
   await callAction(BUG3, 'startProgress', {})
   await callAction(BUG3, 'resolveBug', { note: 'Fixed for close test' })
-  const r11a = await callAction(BUG3, 'closeBug', { note: 'QA verified and closed' })
+  const r11a = await callAction(BUG3, 'closeBug', {})
   rec('SC-11a closeBug on RESOLVED', r11a.ok, r11a.code, 200, r11a.data?.status_code||r11a.msg)
 
   console.log('')

@@ -208,7 +208,7 @@ async function verifyRejectScenario (srv) {
 
 async function verifyCloseScenario (srv) {
     await callAction(srv, BUG3, 'resolveBug', { note: 'Resolved before close event verification' }, user('SangVN', ['DEVELOPER', 'authenticated-user']))
-    await callAction(srv, BUG3, 'closeBug', { note: 'PM verified and closed for timeline contract test' })
+    await callAction(srv, BUG3, 'closeBug', {})
     const closeEvent = await latestHistoryEvent(srv, BUG3, 'CLOSE_BUG')
     rec('HE-10 close summary is readable', closeEvent?.summary?.includes('Closed bug.'), closeEvent?.summary || 'missing summary')
     rec(
@@ -220,7 +220,7 @@ async function verifyCloseScenario (srv) {
 
 async function verifyPendingScenario (srv) {
     await callAction(srv, BUG3, 'rejectBug', { reason: 'Prepare pending-assignment summary normalization test' }, user('SangVN', ['DEVELOPER', 'authenticated-user']))
-    await callAction(srv, BUG3, 'moveToPendingAssignment', { reason: 'Return to PM queue before reassignment' })
+    await callAction(srv, BUG3, 'moveToPendingAssignment', {})
     const movedPendingEvent = await latestHistoryEvent(srv, BUG3, 'MOVE_TO_PENDING_ASSIGNMENT')
     rec(
       'HE-09 pending-assignment summary is normalized',

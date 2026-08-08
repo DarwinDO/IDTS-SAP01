@@ -1,5 +1,9 @@
 # Knowledge: `srv/service.cds`
 
+## Optional Note action contract (2026-08-06)
+
+`moveToPendingAssignment`, `markInReview`, `startProgress`, `sendToRetest`, and `closeBug` now have zero non-binding parameters, so Fiori does not render a Note input for them. Request More Information, Resubmit, Reject, Resolve, and Reopen retain their explanation parameters. `assignToDeveloper` also retains its optional `note` because DatDT explicitly kept the manual assignment contract. Check together with `app/bug-management-ui/annotations/actions.cds`, `srv/service.js`, and `scripts/qa/test-note-action-contract.js`.
+
 ## IDTS-122 PM operational dashboard contracts
 
 `readBugStatusMetrics()` is a PM-only read function returning the ten canonical workflow statuses with label, criticality, sort order and Bug count. It is an aggregate read contract, not a HANA table and requires no schema deployment. `AiOperationalMetric` now exposes semantic outcome counters so the UI can distinguish known bad requests, rate limits, provider 5xx, timeouts, unavailable calls and unknown failures without exposing prompts, provider payloads or raw errors.
