@@ -93,17 +93,19 @@ function buildBugLink (baseUrl, bugID) {
 }
 
 function normalizeAppUrl (baseUrl) {
-  // Đưa baseUrl về đúng login/app path và bỏ slash dư để deep link chạy trên local lẫn Render.
+  // Đưa baseUrl về đúng AppRouter/app path và bỏ slash dư để deep link chạy trên local lẫn deployment.
   const normalized = String(baseUrl).trim().replace(/\/+$/, '')
-  const currentAppPath = '/idts.bugmanagementui/index.html'
+  const currentAppPath = '/idtsbugmanagementui/index.html'
 
   if (normalized.endsWith(currentAppPath)) return normalized
-  if (normalized.endsWith('/idts.bugmanagementui')) return `${normalized}/index.html`
+  if (normalized.endsWith('/idtsbugmanagementui')) return `${normalized}/index.html`
 
   // A prior Shared QA setup stored the retired UI5 application path in the
   // private base URL. Treat it as a deployment-root URL, never as a valid
   // destination, so newly generated emails recover without a secret change.
   const withoutLegacyAppPath = normalized
+    .replace(/\/idts\.bugmanagementui\/index\.html$/i, '')
+    .replace(/\/idts\.bugmanagementui$/i, '')
     .replace(/\/bug-management-ui\/webapp\/index\.html$/i, '')
     .replace(/\/bug-management-ui\/webapp$/i, '')
 
