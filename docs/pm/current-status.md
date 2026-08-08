@@ -1,11 +1,12 @@
 # Current Project Status
 
-Last updated: 2026-07-28
+Last updated: 2026-08-08
 
 ## Snapshot
 
 | Field | Current value |
 | --- | --- |
+| Shared QA email routing | DonHV approved `GO EMAIL ROUTING` on 2026-08-08. The existing BTP external-services binding changed only `email.testMode` from `true` to `false`; SMTP provider fields and `defaultTestRecipient` were preserved for rollback. CAP restarted at `1/1`; `/health` and `/ready` returned HTTP 200. No email replay/send-smoke, DB deployer, SQL, seed or schema operation ran. |
 | Repository hygiene | IDTS-104 is Done through PR #187 at merge commit `7d5ffa0`. Historical SAP490 binaries are preserved by tag `sap490-generated-archive-20260726` and a hash/blob manifest; current tree keeps only approved latest artifacts. Local temp/log/raw-UAT output was cleaned after useful screenshots were curated and labeled. Drive and runtime are unchanged. |
 | Project phase | Sprint 5 is active and currently At Risk. Jira Epic `IDTS-88` now consolidates all 11 current Sprint 5 issues for mentor readiness, Shared QA/infrastructure closure, security follow-up, and ownership governance. |
 | Product baseline | CAP/Fiori MVP, attachment/audit/notification/PM flows, and advisory-AI review baseline are implemented; BRD v1.5, SRS v1.4, and FRS v1.5 EN/VI are synchronized to the AuthService/AuthSessions, Render/PostgreSQL, attachment/S3, notification outbox, and human-reviewed AiSuggestions baseline. |

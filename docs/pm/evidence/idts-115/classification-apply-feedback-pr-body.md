@@ -55,7 +55,7 @@ Result: PASS
 ## Known Gaps
 
 - Signed-in BTP browser reproduction of the responsibility mismatch remains post-merge/selective-deploy acceptance.
-- Email real-recipient routing is intentionally unchanged and remains blocked pending the exact phrase `GO EMAIL ROUTING`.
+- DonHV supplied the exact phrase `GO EMAIL ROUTING`; the private BTP binding now has `email.testMode=false`, with provider fields and rollback recipient preserved. No delivery replay or send-smoke was run. Sanitized operational evidence is in `docs/pm/evidence/idts-115/email-routing-go-20260808.md`.
 - The IDTS-115 harness is a focused source/i18n contract check; it does not replace post-deploy browser evidence.
 
 ## Jira/Evidence Links
