@@ -8,6 +8,7 @@ const cds = require('@sap/cds')
 const root = path.resolve(__dirname, '../..')
 const roleModule = require('../../srv/auth/platform-role')
 const authTest = require('../../srv/auth').__test
+const { identityKeyFromRequestUser } = require('../../srv/auth/identity-map')
 
 let passed = 0
 let checks = 0
@@ -100,19 +101,23 @@ check('missing or multiple XSUAA business roles are rejected with 403', () => {
   )
 })
 
-check('JWT identity candidates include subject and standard email claims', () => {
-  assert.deepEqual(
-    authTest.requestUserCandidates({
-      user: {
-        id: 'subject-1',
-        attr: {
-          email: 'pm@example.test',
-          user_name: 'pm-user'
-        }
-      }
-    }),
-    ['subject-1', 'pm@example.test', 'pm-user']
-  )
+check('XSUAA identity key requires the pinned immutable user_uuid claim', () => {
+  assert.equal(identityKeyFromRequestUser({
+    id: 'mutable-login-name',
+    attr: {
+      origin: 'sap.default',
+      iss: 'https://issuer.example.invalid',
+      sub: 'different-subject'
+    }
+  }), null)
+  assert.equal(identityKeyFromRequestUser({
+    id: 'mutable-login-name',
+    attr: {
+      origin: 'sap.default',
+      iss: 'https://issuer.example.invalid',
+      user_uuid: 'stable-user-uuid'
+    }
+  })?.subject, 'stable-user-uuid')
 })
 
 check('production uses XSUAA while integration retains custom auth', () => {

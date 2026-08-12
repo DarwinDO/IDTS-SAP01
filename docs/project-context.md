@@ -46,7 +46,7 @@ Vietnamese: AI v1 chỉ hỗ trợ tìm bug trùng/tương tự, gợi ý phân 
 
 ## Authentication Direction
 
-- SAP BTP uses AppRouter/XSUAA platform authentication. CAP maps the authenticated SAP identity to the active IDTS `Users` row and requires the platform role to match the business role.
+- SAP BTP uses AppRouter/XSUAA platform authentication. CAP maps a linked identity to the active IDTS `Users` row by a unique hash of origin, issuer, and subject, then requires the platform role to match the business role. Email/display name remain mutable attributes and never authorize a request that contains a complete external identity tuple. Legacy rows remain nullable for a controlled link/backfill; ID/email compatibility applies only to local/custom-auth requests without the complete external tuple.
 - Local and Render/integration profiles retain the custom CAP Node.js auth foundation: `AuthService.login` verifies email/password against `Users.passwordHash`, creates an `AuthSessions` row, and returns a bearer token.
 - `Users` remains the internal business profile and role source for Tester, Developer, and PM.
 - On BTP, AppRouter forwards the XSUAA token. On custom-auth profiles, requests send the bearer token and middleware maps it back to `cds.User`; both paths enforce the IDTS business role.

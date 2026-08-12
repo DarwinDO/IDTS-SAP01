@@ -534,9 +534,9 @@ Không áp dụng các phần quá nặng như full ALM, ITSM, transport/release
 
 ## **5.8. Authentication Baseline**
 
-**English:** SAP BTP uses AppRouter/XSUAA platform authentication; CAP maps the SAP identity to the active `Users` row and enforces platform/business-role alignment. Local and Render/integration profiles retain custom CAP authentication with `Users.passwordHash`, `AuthSessions` and bearer-token mapping. Plaintext passwords, raw tokens, auth secrets, SMTP credentials, and private endpoints must not be committed.
+**English:** SAP BTP uses AppRouter/XSUAA platform authentication; CAP maps the SAP identity to the active `Users` row and enforces platform/business-role alignment. Linked users are resolved by a unique hash of identity-provider origin, issuer, and subject; email is mutable and never authorizes a complete external identity. Existing legacy rows remain nullable for controlled link/backfill. Local and Render/integration profiles retain custom CAP authentication with `Users.passwordHash`, `AuthSessions` and bearer-token mapping, including internal ID/email compatibility when no complete external tuple is present. Plaintext passwords, raw tokens, auth secrets, SMTP credentials, and private endpoints must not be committed.
 
-**Vietnamese:** Tren SAP BTP, IDTS dung AppRouter/XSUAA, map SAP identity toi `Users` dang active va kiem tra platform role khop business role. Local va Render/integration van dung custom CAP authentication voi `Users.passwordHash`, `AuthSessions` va bearer token. Khong commit plaintext password, raw token, auth secret, SMTP credential hoac private endpoint.
+**Vietnamese:** Tren SAP BTP, IDTS dung AppRouter/XSUAA, map SAP identity toi `Users` dang active va kiem tra platform role khop business role. User da link duoc map bang hash duy nhat cua origin, issuer va subject; email la attribute co the doi va khong authorize mot external identity day du. User legacy de nullable cho link/backfill co kiem soat. Local va Render/integration van dung custom CAP authentication voi `Users.passwordHash`, `AuthSessions` va bearer token, gom compatibility ID/email khi request khong co du external tuple. Khong commit plaintext password, raw token, auth secret, SMTP credential hoac private endpoint.
 
 ### **5.8.1. Controlled User Onboarding**
 

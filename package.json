@@ -83,6 +83,7 @@
     "qa:user-onboarding:programmatic": "node scripts/qa/test-user-onboarding-contract.js && node scripts/qa/test-user-onboarding-programmatic.js",
     "qa:user-onboarding-page:programmatic": "node scripts/qa/test-user-onboarding-page.mjs",
     "qa:user-admin-ui:programmatic": "node scripts/qa/test-user-admin-ui.js",
+    "qa:immutable-identity:programmatic": "node scripts/qa/test-immutable-identity-mapping.js",
     "qa:email-smtp:integration": "node scripts/qa/test-email-smtp-integration.js",
     "qa:email-brevo-api:integration": "node scripts/qa/test-email-brevo-api-integration.js",
     "qa:idts64:programmatic": "node scripts/qa/test-idts64-ai-provider.js",

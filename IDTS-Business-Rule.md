@@ -79,6 +79,7 @@ SAP BTP uses AppRouter/XSUAA platform authentication and maps the authenticated 
 Rules:
 
 * `Users` is the internal source for profile, email, active flag and MVP business role.
+* A linked SAP identity is authoritative by the unique hash of provider origin, issuer, and stable subject. Email/display name are mutable attributes and never authorize a complete external identity. Legacy rows keep nullable identity fields for a controlled link/backfill; local/custom-auth profiles may still resolve by internal ID/email when no complete external tuple is present.
 * Passwords must be stored only as hashes in `Users.passwordHash`; plaintext passwords must not be committed or logged.
 * Successful login creates a server-side `AuthSessions` record and returns a bearer token.
 * The database stores only the token hash, not the raw bearer token.
@@ -92,6 +93,7 @@ Tren SAP BTP, IDTS dung AppRouter/XSUAA va map SAP identity toi user/role IDTS d
 Rule:
 
 * `Users` la nguon noi bo cho profile, email, active flag va MVP business role.
+* SAP identity da link dung unique hash cua provider origin, issuer va stable subject lam authority. Email/display name co the thay doi va khong duoc dung de authorize external identity day du. Row legacy de nullable cho link/backfill co kiem soat; local/custom-auth chi fallback ID/email khi request khong co du external tuple.
 * Password chi duoc luu dang hash trong `Users.passwordHash`; khong commit hoac log plaintext password.
 * Login thanh cong tao `AuthSessions` phia server va tra bearer token.
 * Database chi luu token hash, khong luu raw bearer token.

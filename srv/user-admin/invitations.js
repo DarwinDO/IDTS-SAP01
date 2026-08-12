@@ -1,6 +1,7 @@
 'use strict'
 
 const crypto = require('node:crypto')
+const { identityKeyFromRequestUser } = require('../auth/identity-map')
 
 const BUSINESS_ROLES = Object.freeze(['PM', 'TESTER', 'DEVELOPER'])
 const MAX_INVITATION_TOKEN_LENGTH = 2048
@@ -126,19 +127,22 @@ function invitationTokenSegments (token) {
 
 function identitySnapshotFrom (user, invitation) {
   const attr = user?.attr || {}
-  const subject = bounded(user?.id, 255)
+  const identity = identityKeyFromRequestUser(user)
   const emailNormalized = normalizeEmail(attr.email)
-  const origin = bounded(attr.origin, 120)
-  const issuer = bounded(attr.iss || attr.issuer, 500)
 
-  if (!subject || !emailNormalized || !origin || !issuer) {
+  if (!identity || !emailNormalized) {
     throw contractError('IDENTITY_CLAIMS_INCOMPLETE', 'SAP identity claims are incomplete.')
   }
   if (emailNormalized !== normalizeEmail(invitation?.targetEmailNormalized)) {
     throw contractError('INVITATION_IDENTITY_MISMATCH', 'Signed-in SAP identity does not match the invitation.')
   }
 
-  return { subject, emailNormalized, origin, issuer }
+  return {
+    origin: identity.origin,
+    issuer: identity.issuer,
+    subject: identity.subject,
+    emailNormalized
+  }
 }
 
 function normalizeEmail (value) {

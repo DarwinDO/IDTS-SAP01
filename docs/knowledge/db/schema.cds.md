@@ -4,6 +4,10 @@
 
 `UserOnboardingRequests` stores the requested PM/Tester/Developer role, optional PM-only UserAdmin overlay, requester, state, expiry, token hash/nonce, correlation ID, and the verified external identity snapshot. A fixed 64-character `identityKeyHash` enforces external-identity uniqueness without creating a long cross-database index over issuer and subject strings. A nullable 64-character `openRequestKey` hashes the normalized target email and prevents concurrent live invitations; a later terminal-state transition must clear it. `UserOnboardingDeliveries` is a separate retry/lock record that does not store the raw signed URL or provider credential. These entities are additive; existing `Users` rows remain compatible and are not backfilled by this source change.
 
+`Users.externalIdentityOrigin`, `externalIdentityIssuer`, `externalIdentitySubject`, and the unique `externalIdentityKeyHash` are nullable for the existing legacy rows. Once a row is linked, the hash is the mapping authority. Email and display name can still change for communication/display, but cannot match over a different non-null identity hash. No automatic backfill or HANA migration is performed by the source change.
+
+Rollout order is mandatory: migrate the nullable columns/constraint, prove the live `user_uuid` claim, audit collisions, and link controlled rows before deploying the immutable runtime. Deploying the runtime first intentionally fails closed and would deny every existing BTP row whose hash is still null.
+
 ## IDTS-122 retest ownership
 
 `Bugs.retestOwner` is a nullable association to `Users`. It stores the durable Tester responsible for retest across close/reopen and is deliberately separate from Developer `assignee` and current-action `nextProcessorUser`. HANA rollout is additive and requires a controlled migration for active and draft artifacts; never use broad deploy/seed to introduce this column.

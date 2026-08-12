@@ -82,11 +82,12 @@ function main () {
   }), 'INVITATION_ALREADY_USED')
 
   const identity = identitySnapshotFrom({
-    id: 'stable-subject-123',
+    id: 'mutable-login-name',
     attr: {
       email: 'Controlled.Test@Example.invalid',
       origin: 'sap.default',
-      iss: 'https://issuer.example.invalid'
+      iss: 'https://issuer.example.invalid',
+      user_uuid: 'stable-subject-123'
     }
   }, invitation.persisted)
   assert.deepEqual(identity, {
@@ -96,11 +97,12 @@ function main () {
     issuer: 'https://issuer.example.invalid'
   })
   expectCode(() => identitySnapshotFrom({
-    id: 'stable-subject-123',
+    id: 'mutable-login-name',
     attr: {
       email: 'other@example.invalid',
       origin: 'sap.default',
-      iss: 'https://issuer.example.invalid'
+      iss: 'https://issuer.example.invalid',
+      user_uuid: 'stable-subject-123'
     }
   }, invitation.persisted), 'INVITATION_IDENTITY_MISMATCH')
 

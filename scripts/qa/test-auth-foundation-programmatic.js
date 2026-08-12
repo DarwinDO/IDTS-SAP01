@@ -59,6 +59,14 @@ function expectTruthy (label, actual) {
   rec(label, Boolean(actual), `actual=${JSON.stringify(actual)}`)
 }
 
+function expectSecretPresent (label, value) {
+  rec(label, typeof value === 'string' && value.length > 0, `present=${Boolean(value)}`)
+}
+
+function expectSecretEqual (label, actual, expected) {
+  rec(label, actual === expected, `equal=${actual === expected}`)
+}
+
 function expectNoLeak (label, value) {
   const text = JSON.stringify(value).toLowerCase()
   const leakPatterns = [
@@ -156,7 +164,7 @@ async function main () {
   })
 
   expectEqual('active login token type', loginResult.tokenType, 'Bearer')
-  expectTruthy('active login returns token', loginResult.token)
+  expectSecretPresent('active login returns token', loginResult.token)
   expectEqual('active login maps user ID', loginResult.user.ID, '10000000-0000-0000-0000-000000000001')
   expectEqual('active login maps role', loginResult.user.role_code, 'PM')
   expectTruthy('active login returns expiry', loginResult.expiresAt)
@@ -187,7 +195,7 @@ async function main () {
 
   expectTruthy('session row created', session?.ID)
   expectEqual('raw token is not stored', session?.tokenHash === loginResult.token, false)
-  expectEqual('stored hash matches token', session?.tokenHash, hashToken(loginResult.token))
+  expectSecretEqual('stored hash matches token', session?.tokenHash, hashToken(loginResult.token))
   expectEqual('session starts unrevoked', session?.revokedAt, null)
 
   const mapped = await runCustomAuth(loginResult.token)
