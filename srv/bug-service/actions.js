@@ -23,8 +23,7 @@ const {
   writeNotificationForStatus
 } = require('./history')
 
-const { getEmailConfig } = require('../email/config')
-const { writeNotificationRecord } = require('../email/outbox')
+const { writeNotificationAndSchedule } = require('../email/worker')
 
 const { determineNextProcessor, validateAssignee, validateTransition } = require('./bug-write')
 const { assertBugOpenForMutation, enforceActionPermission } = require('./permissions')
@@ -121,12 +120,12 @@ async function resubmitToDeveloper (req, entities) {
   })
 
   if (updatedBug.nextProcessorUser_ID) {
-    await writeNotificationRecord(cds.tx(req), {
+    await writeNotificationAndSchedule(req, {
       bugID,
       recipientID: updatedBug.nextProcessorUser_ID,
       eventType: 'UPDATED',
       message: `${updatedBug.bugNumber || 'Bug'} was resubmitted with additional information.`
-    }, getEmailConfig())
+    })
   }
 
   return updatedBug
@@ -327,12 +326,12 @@ async function reassignRetestOwner (req, entities) {
       newValue: target.ID
     }]
   })
-  await writeNotificationRecord(tx, {
+  await writeNotificationAndSchedule(req, {
     bugID,
     recipientID: target.ID,
     eventType: 'UPDATED',
     message: `${updatedBug.bugNumber || 'Bug'} was assigned to you for retest continuity.`
-  }, getEmailConfig())
+  })
   return updatedBug
 }
 

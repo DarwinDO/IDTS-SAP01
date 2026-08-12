@@ -75,7 +75,11 @@ async function writeNotificationRecord (tx, entry, config) {
     lastErrorSummary: skip?.summary || null
   }))
 
-  return { notificationID, deliveryID }
+  return {
+    notificationID,
+    deliveryID,
+    deliveryStatus: skip ? 'SKIPPED' : 'PENDING'
+  }
 }
 
 async function readBugEmailContext (tx, bugID) {
