@@ -75,6 +75,24 @@ async function main () {
   await new Promise(resolve => setImmediate(resolve))
   assert.equal(immediateSpawnCount, 1)
 
+  const searchResults = await service.send({
+    event: 'searchOnboarding',
+    data: { query: 'CONTROLLED.TEST' },
+    user: administrator
+  })
+  assert.equal(searchResults.length, 1)
+  assert.equal(searchResults[0].targetEmailNormalized, 'controlled.test@example.invalid')
+  assert.equal(searchResults[0].requestedRole_code, 'TESTER')
+  assert.equal(searchResults[0].status_code, 'INVITED')
+  assert.equal('identitySubject' in searchResults[0], false)
+  assert.equal('identityIssuer' in searchResults[0], false)
+
+  await expectRejected(service.send({
+    event: 'searchOnboarding',
+    data: { query: 'controlled.test' },
+    user: new cds.User({ id: 'pm@example.invalid', roles: ['authenticated-user', 'PM'] })
+  }), 403, 'USER_ADMIN_REQUIRED')
+
   await expectRejected(service.send({
     event: 'READ',
     query: SELECT.from(service.entities.OnboardingRequests),
@@ -92,6 +110,7 @@ async function main () {
   const serviceContract = require('node:fs').readFileSync(require('node:path').join(__dirname, '../../srv/user-admin.cds'), 'utf8')
   assert.doesNotMatch(serviceContract, /\btokenHash\b|\btokenNonce\b|\bidentityIssuer\b/)
   assert.match(serviceContract, /verifySapIdentity\(token\s*:\s*String\(2048\)\)/)
+  assert.match(serviceContract, /searchOnboarding\(query\s*:\s*String\(255\)\)/)
 
   const persisted = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: created.ID }))
   assert.equal(persisted.targetEmailNormalized, 'controlled.test@example.invalid')
