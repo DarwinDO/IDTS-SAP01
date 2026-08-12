@@ -32,6 +32,7 @@ entity ActionTypes : CodeList {}
 entity NotificationEventTypes : CodeList {}
 entity NotificationChannels : CodeList {}
 entity NotificationDeliveryStatuses : CodeList {}
+entity UserOnboardingStatuses : CodeList {}
 entity DuplicateRelationTypes : CodeList {}
 entity AiSuggestionFeatureTypes : CodeList {}
 entity AiSuggestionReviewStates : CodeList {}
@@ -236,6 +237,51 @@ entity NotificationDeliveries : cuid, managed {
 
 annotate NotificationDeliveries with @assert.unique.notificationChannel: [ notification, channel ];
 // Unique constraint ngăn cùng một notification tạo hai delivery EMAIL khi workflow/worker chạy lặp.
+
+entity UserOnboardingRequests : cuid, managed {
+  targetEmailNormalized : String(255) not null;
+  openRequestKey        : String(64);
+  requestedRole         : Association to UserRoles not null;
+  userAdminRequested    : Boolean default false not null;
+  status                : Association to UserOnboardingStatuses not null;
+  requestedBy           : Association to Users not null;
+  expiresAt             : Timestamp not null;
+  tokenNonce            : String(120) not null;
+  tokenHash             : String(64) not null;
+  consumedAt            : Timestamp;
+  verifiedAt            : Timestamp;
+  identityOrigin        : String(120);
+  identityIssuer        : String(500);
+  identitySubject       : String(255);
+  identityKeyHash       : String(64);
+  identityEmailNormalized : String(255);
+  correlationId         : UUID not null;
+  lastErrorCode         : String(80);
+  lastErrorSummary      : String(500);
+  deliveries            : Composition of many UserOnboardingDeliveries on deliveries.onboardingRequest = $self;
+}
+
+annotate UserOnboardingRequests with @assert.unique.onboardingTokenHash: [ tokenHash ];
+annotate UserOnboardingRequests with @assert.unique.externalIdentity: [ identityKeyHash ];
+annotate UserOnboardingRequests with @assert.unique.openOnboardingRequest: [ openRequestKey ];
+
+entity UserOnboardingDeliveries : cuid, managed {
+  onboardingRequest : Association to UserOnboardingRequests not null;
+  recipientEmail    : String(255) not null;
+  templateKey       : String(80) not null;
+  status            : Association to NotificationDeliveryStatuses not null;
+  attemptCount      : Integer default 0 not null;
+  nextAttemptAt     : Timestamp;
+  lastAttemptAt     : Timestamp;
+  sentAt            : Timestamp;
+  lastErrorCode     : String(80);
+  lastErrorSummary  : String(500);
+  providerMessageId : String(255);
+  lockedUntil       : Timestamp;
+  lockToken         : String(64);
+}
+
+annotate UserOnboardingDeliveries with @assert.unique.onboardingRequestDelivery: [ onboardingRequest ];
 
 entity DuplicateLinks : cuid, managed {
   // Liên kết duplicate chỉ được tạo khi user xác nhận; kết quả AI Similar Bugs tự nó không insert entity này.

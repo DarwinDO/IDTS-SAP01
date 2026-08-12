@@ -1,0 +1,7 @@
+code,name,descr,sortOrder,active,criticality
+INVITED,Invited,Invitation created and awaiting SAP identity verification,10,true,1
+IDENTITY_VERIFIED,Identity Verified,SAP identity was verified for the invitation,20,true,2
+PROVISIONING,Provisioning,External access provisioning is in progress,30,true,2
+ACTIVE,Active,User access is active and reconciled,40,true,3
+FAILED,Failed,Onboarding or provisioning requires safe remediation,50,true,1
+REVOKED,Revoked,Invitation or provisioned access was revoked,60,true,0

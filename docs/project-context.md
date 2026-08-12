@@ -51,6 +51,8 @@ Vietnamese: AI v1 chỉ hỗ trợ tìm bug trùng/tương tự, gợi ý phân 
 - `Users` remains the internal business profile and role source for Tester, Developer, and PM.
 - On BTP, AppRouter forwards the XSUAA token. On custom-auth profiles, requests send the bearer token and middleware maps it back to `cds.User`; both paths enforce the IDTS business role.
 - Passwords, tokens, auth secrets, SMTP credentials, and private endpoints must not be committed. Local passwords are set through private environment variables and stored only as hashes.
+- User administration requires the PM business role plus the separate `UserAdmin` capability. `UserAdmin` is not a fourth business role and does not weaken the exactly-one PM/Tester/Developer invariant.
+- Controlled onboarding uses an expiring, length-bounded signed invitation and SAP login callback. Its email link uses a URL fragment that the future callback page must exchange by POST. The database stores the token hash/nonce, concurrent-open-request key, and safe identity snapshot, not the raw invitation token or SAP credentials. Every administration endpoint also requires a matching active internal PM. Identity verification precedes active `Users` creation and external Role Collection provisioning.
 
 Vietnamese: Tren SAP BTP, AppRouter/XSUAA xac thuc SAP identity, CAP map identity nay toi `Users` dang active va kiem tra platform role khop business role. Local va Render/integration van dung custom CAP login voi `Users.passwordHash`, `AuthSessions` va bearer token. Khong commit password, token, auth secret, SMTP credential hoac private endpoint.
 
@@ -60,6 +62,7 @@ Vietnamese: Tren SAP BTP, AppRouter/XSUAA xac thuc SAP identity, CAP map identit
 - `NotificationDeliveries` is the separate email outbox and stores safe payload snapshots, delivery status, attempts, retry timing, sanitized failure detail, and worker locking.
 - SAP BTP selects the Brevo API through private provider configuration; local/integration profiles may use SMTP through Nodemailer.
 - SAP Job Scheduling Service invokes the protected CAP outbox-processing endpoint. Provider failure changes delivery status but does not roll back bug assignment or lifecycle work.
+- Eligible Bug and onboarding deliveries receive a one-shot post-commit processing kick for prompt UX; the scheduler remains the retry/recovery path.
 - Existing historical notifications are not automatically emailed after IDTS-36 deployment.
 - Email v1 uses the CAP database outbox; Redis, RabbitMQ, BullMQ, and provider-specific SDKs are not required.
 

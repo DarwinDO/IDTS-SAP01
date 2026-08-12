@@ -98,6 +98,25 @@ Rule:
 * Request OData da login phai map lai thanh `cds.User` voi `authenticated-user` cong role IDTS (`TESTER`, `DEVELOPER`, hoac `PM`).
 * User inactive khong duoc login du co password hash.
 
+## **BR-02B - Controlled user onboarding and UserAdmin overlay**
+
+* The only business roles remain `PM`, `TESTER`, and `DEVELOPER`; every active user has exactly one business role.
+* `UserAdmin` is an XSUAA capability overlay, not a fourth business role, and may be assigned only to selected PM users.
+* The backend requires both PM and UserAdmin plus a matching active internal PM for every user-administration read or action. PM without UserAdmin, inactive/unmapped PM, Tester, Developer, and direct API callers without the complete contract receive 403.
+* An invitation specifies exactly one allowlisted business role. UserAdmin may be requested only together with PM.
+* Invitation links are signed, one-time, expiring, and length-bounded. Email transports the token in a URL fragment for a callback page to exchange by POST, keeping it out of HTTP requests and referrers. IDTS stores the token hash and nonce but never stores or logs the signing key, SAP password, OTP, passkey, recovery code, cookie, bearer token, or raw provider error.
+* The signed-in SAP identity email must match the normalized invitation email. IDTS records origin, issuer, and subject for later immutable mapping; email remains a mutable attribute.
+* No active `Users` row, BTP Role Collection assignment, or provisioning success is created before identity verification completes.
+* Repeated invitation use, concurrent duplicate open invitations, external-identity collisions, multiple business roles, and non-PM UserAdmin requests must fail closed and be auditable.
+
+Vietnamese:
+
+* Business role van chi gom `PM`, `TESTER`, `DEVELOPER`; moi active user co dung mot business role.
+* `UserAdmin` la capability overlay cua XSUAA, khong phai business role thu tu, va chi gan cho mot so PM duoc chon.
+* Backend bat buoc dong thoi co PM va UserAdmin cho moi API quan tri user.
+* Link moi co chu ky, chi dung mot lan va co han; IDTS chi luu hash/nonce, khong luu secret hoac credential SAP.
+* Chi sau khi SAP identity duoc xac minh moi chuyen sang provisioning; email khong phai immutable authority duy nhat.
+
 ---
 
 ## **BR-03 \- PM có quyền giám sát, không trực tiếp xử lý bug**

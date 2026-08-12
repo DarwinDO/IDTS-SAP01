@@ -1,5 +1,9 @@
 # Knowledge: `db/schema.cds`
 
+## Controlled user onboarding (2026-08-12)
+
+`UserOnboardingRequests` stores the requested PM/Tester/Developer role, optional PM-only UserAdmin overlay, requester, state, expiry, token hash/nonce, correlation ID, and the verified external identity snapshot. A fixed 64-character `identityKeyHash` enforces external-identity uniqueness without creating a long cross-database index over issuer and subject strings. A nullable 64-character `openRequestKey` hashes the normalized target email and prevents concurrent live invitations; a later terminal-state transition must clear it. `UserOnboardingDeliveries` is a separate retry/lock record that does not store the raw signed URL or provider credential. These entities are additive; existing `Users` rows remain compatible and are not backfilled by this source change.
+
 ## IDTS-122 retest ownership
 
 `Bugs.retestOwner` is a nullable association to `Users`. It stores the durable Tester responsible for retest across close/reopen and is deliberately separate from Developer `assignee` and current-action `nextProcessorUser`. HANA rollout is additive and requires a controlled migration for active and draft artifacts; never use broad deploy/seed to introduce this column.
