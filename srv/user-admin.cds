@@ -12,6 +12,17 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     correlationId      : UUID;
   }
 
+  type OnboardingRequestSummary {
+    ID                    : UUID;
+    targetEmailNormalized : String(255);
+    requestedRole_code    : String(40);
+    userAdminRequested    : Boolean;
+    status_code           : String(40);
+    expiresAt             : Timestamp;
+    lastErrorCode         : String(80);
+    lastErrorSummary      : String(500);
+  }
+
   action requestOnboarding(
     email              : String(255),
     requestedRole      : String(40),
@@ -19,6 +30,8 @@ service UserAdministrationService @(requires: 'authenticated-user') {
   ) returns OnboardingResult;
 
   action verifySapIdentity(token : String(2048)) returns OnboardingResult;
+
+  action searchOnboarding(query : String(255)) returns many OnboardingRequestSummary;
 
   @readonly
   entity OnboardingRequests as projection on db.UserOnboardingRequests {

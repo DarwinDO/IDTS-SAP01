@@ -1,0 +1,57 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core">
+	<Dialog
+		id="inviteUserDialog"
+		title="{i18n>inviteUser}"
+		contentWidth="30rem"
+		stretch="{device>/system/phone}"
+		busy="{invite>/submitting}"
+		busyIndicatorDelay="0">
+		<content>
+			<VBox class="sapUiSmallMargin">
+				<Label text="{i18n>targetEmail}" labelFor="inviteEmail" required="true"/>
+				<Input
+					id="inviteEmail"
+					type="Email"
+					value="{invite>/email}"
+					valueLiveUpdate="true"
+					placeholder="{i18n>emailPlaceholder}"
+					enabled="{= !${invite>/submitting} }"
+					valueState="{= ${invite>/emailTouched} &amp;&amp; !${invite>/emailValid} ? 'Error' : 'None' }"
+					valueStateText="{i18n>invalidEmail}"
+					liveChange=".onInviteFieldChange"/>
+				<Label text="{i18n>businessRole}" labelFor="inviteRole" required="true" class="sapUiSmallMarginTop"/>
+				<Select id="inviteRole" width="100%" selectedKey="{invite>/role}" enabled="{= !${invite>/submitting} }" change=".onRoleChange">
+					<items>
+						<core:Item key="TESTER" text="{i18n>roleTester}"/>
+						<core:Item key="DEVELOPER" text="{i18n>roleDeveloper}"/>
+						<core:Item key="PM" text="{i18n>rolePm}"/>
+					</items>
+				</Select>
+				<CheckBox
+					text="{i18n>userAdminCapability}"
+					selected="{invite>/userAdminRequested}"
+					enabled="{= ${invite>/role} === 'PM' &amp;&amp; !${invite>/submitting} }"
+					select=".onInviteFieldChange"
+					class="sapUiSmallMarginTop"/>
+				<MessageStrip
+					text="{i18n>userAdminHint}"
+					type="Information"
+					showIcon="true"
+					visible="{= ${invite>/role} === 'PM' }"
+					class="sapUiSmallMarginTop"/>
+			</VBox>
+		</content>
+		<beginButton>
+			<Button
+				text="{i18n>sendInvitation}"
+				type="Emphasized"
+				enabled="{= ${invite>/canSubmit} &amp;&amp; !${invite>/submitting} }"
+				press=".onConfirmInvite"/>
+		</beginButton>
+		<endButton>
+			<Button text="{i18n>cancel}" enabled="{= !${invite>/submitting} }" press=".onCancelInvite"/>
+		</endButton>
+	</Dialog>
+</core:FragmentDefinition>

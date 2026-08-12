@@ -22,8 +22,31 @@ class UserAdministrationService extends cds.ApplicationService {
     this.before('READ', 'OnboardingRequests', req => requireActiveUserAdministrator(req))
     this.on('requestOnboarding', req => requestOnboarding(req))
     this.on('verifySapIdentity', req => verifySapIdentity(req))
+    this.on('searchOnboarding', req => searchOnboarding(req))
     return super.init()
   }
+}
+
+async function searchOnboarding (req) {
+  const query = normalizeSearchQuery(req.data.query)
+  const tx = cds.tx(req)
+  await requireActiveUserAdministrator(req, tx)
+
+  const selection = SELECT.from('idts.cap.UserOnboardingRequests')
+    .columns(
+      'ID',
+      'targetEmailNormalized',
+      'requestedRole_code',
+      'userAdminRequested',
+      'status_code',
+      'expiresAt',
+      'lastErrorCode',
+      'lastErrorSummary'
+    )
+    .orderBy('createdAt desc')
+    .limit(200)
+  if (query) selection.where`contains(targetEmailNormalized, ${query})`
+  return tx.run(selection)
 }
 
 async function requestOnboarding (req) {
@@ -231,6 +254,16 @@ function normalizeEmail (value) {
     : null
 }
 
+function normalizeSearchQuery (value) {
+  if (value === undefined || value === null) return ''
+  if (typeof value !== 'string') throw serviceError(400, 'INVALID_SEARCH_QUERY', 'Search query is invalid.')
+  const query = value.trim().toLowerCase()
+  if (query.length > 255 || /[<>\r\n]/.test(query)) {
+    throw serviceError(400, 'INVALID_SEARCH_QUERY', 'Search query is invalid.')
+  }
+  return query
+}
+
 function serviceError (status, code, message) {
   return Object.assign(new Error(message), { status, statusCode: status, code })
 }
@@ -238,3 +271,4 @@ function serviceError (status, code, message) {
 module.exports = UserAdministrationService
 module.exports.requestOnboarding = requestOnboarding
 module.exports.verifySapIdentity = verifySapIdentity
+module.exports.searchOnboarding = searchOnboarding
