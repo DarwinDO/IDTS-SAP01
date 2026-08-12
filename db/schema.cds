@@ -42,10 +42,18 @@ entity Users : cuid, managed {
   displayName : String(120) not null;
   email       : String(255) not null;
   role        : Association to UserRoles not null;
+  // Nullable for legacy rows. Once linked, the hash of origin + issuer + stable subject is the authority;
+  // email remains a mutable contact/login attribute and must not override a different linked identity.
+  externalIdentityOrigin  : String(120);
+  externalIdentityIssuer  : String(500);
+  externalIdentitySubject : String(255);
+  externalIdentityKeyHash : String(64);
   passwordHash: String(255);
   passwordChangedAt : Timestamp;
   active      : Boolean default true;
 }
+
+annotate Users with @assert.unique.userExternalIdentity: [ externalIdentityKeyHash ];
 
 entity AuthSessions : cuid, managed {
   // Mỗi lần login tạo session; DB chỉ giữ tokenHash. revokedAt/expiresAt quyết định token còn dùng được hay không.

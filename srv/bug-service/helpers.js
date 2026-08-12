@@ -2,7 +2,8 @@
 const cds = require('@sap/cds')
 
 const { SELECT } = cds.ql
-const { enforcePlatformRoleAlignment } = require('../auth/platform-role')
+const { enforcePlatformRoleAlignment, isXsuaaRuntime } = require('../auth/platform-role')
+const { selectActiveUserForRequest } = require('../auth/identity-map')
 
 async function readBug (req, entities, bugID) {
   // Helper chung đọc một Bug trong transaction của request; caller nhận row hoặc undefined, không tự reject.
@@ -13,41 +14,13 @@ async function readBug (req, entities, bugID) {
 async function resolveRequestUser (req, entities) {
   // Chuyển identity từ CAP request/session thành Users row active của IDTS. Đây là nguồn actor đáng tin
   // cho permission, reporter, author và history; không dùng role/email do payload nghiệp vụ gửi lên.
-  for (const candidate of requestUserCandidates(req)) {
-    const user = await activeUserFromCandidate(req, entities, candidate)
-    if (user) return enforcePlatformRoleAlignment(req, user)
-  }
-
-  return null
-}
-
-async function activeUserFromCandidate (req, entities, candidate) {
-  // Thử một candidate ID/email sau khi normalize và chỉ trả user active; hỗ trợ các kiểu identity khác nhau của local/cloud auth.
-  const tx = cds.tx(req)
-
-  const byID = await tx.run(SELECT.one.from(entities.Users).where({ ID: candidate, active: true }))
-  if (byID) return byID
-
-  const byEmail = await tx.run(SELECT.one.from(entities.Users).where({ email: candidate, active: true }))
-  if (byEmail) return byEmail
-
-  const byDisplayName = await tx.run(SELECT.one.from(entities.Users).where({ displayName: candidate, active: true }))
-  if (byDisplayName) return byDisplayName
-
-  const normalizedCandidate = typeof candidate === 'string' ? candidate.trim().toLowerCase() : null
-  if (!normalizedCandidate) return null
-
-  const activeUsers = await tx.run(
-    SELECT.from(entities.Users)
-      .columns('ID', 'displayName', 'email', 'role_code', 'active')
+  const users = await cds.tx(req).run(
+    SELECT.from('idts.cap.Users')
+      .columns('ID', 'displayName', 'email', 'role_code', 'active', 'externalIdentityKeyHash')
       .where({ active: true })
   )
-
-  return activeUsers.find(user =>
-    [user.ID, user.email, user.displayName]
-      .filter(Boolean)
-      .some(value => String(value).trim().toLowerCase() === normalizedCandidate)
-  ) || null
+  const user = selectActiveUserForRequest(users, req.user, { requireExternalIdentity: isXsuaaRuntime() })
+  return user ? enforcePlatformRoleAlignment(req, user) : null
 }
 
 function requestUserCandidates (req) {

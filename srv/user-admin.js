@@ -14,6 +14,8 @@ const {
 } = require('./user-admin/invitations')
 const { getUserAdminConfig } = require('./user-admin/config')
 const { scheduleImmediateEmailOutbox } = require('./email/worker')
+const { identityKeyHash, selectActiveUserForRequest } = require('./auth/identity-map')
+const { isXsuaaRuntime } = require('./auth/platform-role')
 
 const OPEN_STATUSES = ['INVITED', 'IDENTITY_VERIFIED', 'PROVISIONING']
 
@@ -161,19 +163,24 @@ async function verifySapIdentity (req) {
     throw serviceError(status, error.code, error.message)
   }
 
-  const identityKeyHash = crypto.createHash('sha256')
-    .update(`${identity.origin}\0${identity.issuer}\0${identity.subject}`)
-    .digest('hex')
+  const identityKeyHashValue = identityKeyHash(identity)
 
   const collision = await tx.run(
     SELECT.one.from('idts.cap.UserOnboardingRequests')
       .columns('ID')
       .where({
         ID: { '!=': invitation.ID },
-        identityKeyHash
+        identityKeyHash: identityKeyHashValue
       })
   )
   if (collision) throw serviceError(409, 'EXTERNAL_IDENTITY_ALREADY_LINKED', 'SAP identity is already linked to another onboarding request.')
+
+  const linkedUser = await tx.run(
+    SELECT.one.from('idts.cap.Users')
+      .columns('ID')
+      .where({ externalIdentityKeyHash: identityKeyHashValue })
+  )
+  if (linkedUser) throw serviceError(409, 'EXTERNAL_IDENTITY_ALREADY_LINKED', 'SAP identity is already linked to an IDTS user.')
 
   const verifiedAt = (req.timestamp || new Date()).toISOString()
   const updated = await tx.run(
@@ -184,7 +191,7 @@ async function verifySapIdentity (req) {
       identityOrigin: identity.origin,
       identityIssuer: identity.issuer,
       identitySubject: identity.subject,
-      identityKeyHash,
+      identityKeyHash: identityKeyHashValue,
       identityEmailNormalized: identity.emailNormalized,
       lastErrorCode: null,
       lastErrorSummary: null
@@ -202,13 +209,12 @@ async function verifySapIdentity (req) {
 }
 
 async function resolveActiveRequester (tx, req) {
-  const candidates = [req.user?.id, req.user?.attr?.email]
-    .filter(Boolean)
-    .map(value => String(value).trim().toLowerCase())
   const users = await tx.run(
-    SELECT.from('idts.cap.Users').columns('ID', 'email', 'role_code').where({ active: true })
+    SELECT.from('idts.cap.Users')
+      .columns('ID', 'displayName', 'email', 'role_code', 'active', 'externalIdentityKeyHash')
+      .where({ active: true })
   )
-  return users.find(user => candidates.includes(String(user.email || '').trim().toLowerCase())) || null
+  return selectActiveUserForRequest(users, req.user, { requireExternalIdentity: isXsuaaRuntime() })
 }
 
 async function requireActiveUserAdministrator (req, tx = cds.tx(req)) {

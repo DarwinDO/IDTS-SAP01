@@ -29,9 +29,15 @@ const DAT_BUG_ID = '90000000-0000-0000-0000-000000000004'
 const SANG_BUG_ID = '90000000-0000-0000-0000-000000000003'
 const DELETE_ATTACHMENT_ID = '92000000-0000-0000-0000-000000000125'
 const RESULTS = []
+const LOCAL_EMAILS = {
+  SangVN: 'sangvn@example.local',
+  DatDT: 'datdt@example.local',
+  NhanT: 'nhant@example.local'
+}
 
 function user (name, role) {
-  return new cds.User({ id: name, roles: [role, 'authenticated-user'] })
+  const email = LOCAL_EMAILS[name] || name
+  return new cds.User({ id: email, roles: [role, 'authenticated-user'], attr: { email } })
 }
 
 const sang = () => user('SangVN', 'DEVELOPER')
@@ -204,7 +210,7 @@ async function main () {
     filename: 'uploader-proof.txt',
     mimeType: 'text/plain',
     fileSize: 14,
-    createdBy: 'NhanT'
+    createdBy: 'nhant@example.local'
   }))
   const historyBeforeDelete = await db.run(SELECT.from('idts.cap.HistoryEvents').where({ bug_ID: DAT_BUG_ID }))
   const logsBeforeDelete = await db.run(SELECT.from('idts.cap.HistoryLogs').where({ bug_ID: DAT_BUG_ID }))

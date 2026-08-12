@@ -13,6 +13,7 @@ const {
   createInvitationToken,
   invitationIDFromToken
 } = require('../../srv/user-admin/invitations')
+const { identityKeyHash } = require('../../srv/auth/identity-map')
 const { processUserOnboardingDeliveries } = require('../../srv/user-admin/delivery')
 
 const SIGNING_KEY = 'local-programmatic-invitation-signing-key-123456789'
@@ -179,16 +180,39 @@ async function main () {
     signingKey: SIGNING_KEY,
     nonce: persisted.tokenNonce
   })
-  const verified = await service.send({
+  const verifiedIdentityKeyHash = identityKeyHash({
+    origin: 'sap.default',
+    issuer: 'https://issuer.example.invalid',
+    subject: 'stable-user-uuid-001'
+  })
+  await db.run(UPDATE('idts.cap.Users').set({ externalIdentityKeyHash: verifiedIdentityKeyHash }).where({ ID: PM_ID }))
+  await expectRejected(service.send({
     event: 'verifySapIdentity',
     data: { token: regenerated.token },
     user: new cds.User({
-      id: 'stable-sap-subject-001',
+      id: 'mutable-login-name',
       roles: ['authenticated-user'],
       attr: {
         email: 'controlled.test@example.invalid',
         origin: 'sap.default',
-        iss: 'https://issuer.example.invalid'
+        iss: 'https://issuer.example.invalid',
+        user_uuid: 'stable-user-uuid-001'
+      }
+    })
+  }), 409, 'EXTERNAL_IDENTITY_ALREADY_LINKED')
+  await db.run(UPDATE('idts.cap.Users').set({ externalIdentityKeyHash: null }).where({ ID: PM_ID }))
+
+  const verified = await service.send({
+    event: 'verifySapIdentity',
+    data: { token: regenerated.token },
+    user: new cds.User({
+      id: 'mutable-login-name',
+      roles: ['authenticated-user'],
+      attr: {
+        email: 'controlled.test@example.invalid',
+        origin: 'sap.default',
+        iss: 'https://issuer.example.invalid',
+        user_uuid: 'stable-user-uuid-001'
       }
     })
   })
@@ -201,7 +225,7 @@ async function main () {
   assert.ok(verifiedRow.consumedAt)
   assert.ok(verifiedRow.verifiedAt)
   assert.equal(verifiedRow.identityOrigin, 'sap.default')
-  assert.equal(verifiedRow.identitySubject, 'stable-sap-subject-001')
+  assert.equal(verifiedRow.identitySubject, 'stable-user-uuid-001')
   assert.equal(verifiedRow.identityIssuer, 'https://issuer.example.invalid')
   assert.equal(verifiedRow.identityKeyHash.length, 64)
 
@@ -209,12 +233,13 @@ async function main () {
     event: 'verifySapIdentity',
     data: { token: regenerated.token },
     user: new cds.User({
-      id: 'stable-sap-subject-001',
+      id: 'mutable-login-name',
       roles: ['authenticated-user'],
       attr: {
         email: 'controlled.test@example.invalid',
         origin: 'sap.default',
-        iss: 'https://issuer.example.invalid'
+        iss: 'https://issuer.example.invalid',
+        user_uuid: 'stable-user-uuid-001'
       }
     })
   }), 409, 'INVITATION_ALREADY_USED')

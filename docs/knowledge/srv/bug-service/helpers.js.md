@@ -1,5 +1,11 @@
 # Knowledge: `srv/bug-service/helpers.js`
 
+## Immutable-first actor resolution (2026-08-12)
+
+`resolveRequestUser` now loads only active physical `idts.cap.Users` rows and delegates identity selection to `srv/auth/identity-map.js`. A matching external identity hash wins even when email changes. When complete external claims are present but the hash does not match, resolution fails closed even for an unlinked row with the same email. Local/mock auth without a complete origin + issuer + subject tuple keeps only the legacy internal-ID/email behavior; display name is never an authority candidate.
+
+This helper still enforces the existing platform-role alignment after the row is resolved. Because it feeds permissions, history and notifications across BugService, any future change requires authorization regressions and controlled live JWT evidence.
+
 ## Beginner-first symbol map (2026-07-18)
 
 ### English
