@@ -10,8 +10,10 @@ const roleModule = require('../../srv/auth/platform-role')
 const authTest = require('../../srv/auth').__test
 
 let passed = 0
+let checks = 0
 
 function check (name, test) {
+  checks += 1
   try {
     test()
     passed += 1
@@ -45,7 +47,7 @@ check('XSUAA descriptor has all business and technical role templates', () => {
   const descriptor = JSON.parse(read('xs-security.json'))
   assert.deepEqual(
     descriptor['role-templates'].map(role => role.name).sort(),
-    ['Developer', 'OutboxProcessor', 'PM', 'Tester']
+    ['Developer', 'OutboxProcessor', 'PM', 'Tester', 'UserAdmin']
   )
   assert.deepEqual(
     descriptor.scopes.map(scope => scope.name).sort(),
@@ -53,7 +55,8 @@ check('XSUAA descriptor has all business and technical role templates', () => {
       '$XSAPPNAME.DEVELOPER',
       '$XSAPPNAME.OutboxProcessor',
       '$XSAPPNAME.PM',
-      '$XSAPPNAME.TESTER'
+      '$XSAPPNAME.TESTER',
+      '$XSAPPNAME.UserAdmin'
     ]
   )
 })
@@ -62,6 +65,13 @@ check('exactly one matching XSUAA role aligns with the IDTS database role', () =
   const req = rejectRequest()
   req.user = { is: role => role === 'TESTER' }
   const user = { ID: 'user-1', role_code: 'TESTER' }
+  assert.equal(roleModule.enforcePlatformRoleAlignment(req, user), user)
+})
+
+check('UserAdmin is a PM capability overlay, not a fourth business role', () => {
+  const req = rejectRequest()
+  req.user = { is: role => role === 'PM' || role === 'UserAdmin' }
+  const user = { ID: 'user-admin-1', role_code: 'PM' }
   assert.equal(roleModule.enforcePlatformRoleAlignment(req, user), user)
 })
 
@@ -179,5 +189,5 @@ else cds.env.requires.auth.impl = originalImpl
 if (process.exitCode) {
   console.error(`IDTS-113 BTP auth checks failed after ${passed} passes.`)
 } else {
-  console.log(`IDTS-113 BTP auth checks passed: ${passed}/12.`)
+  console.log(`IDTS-113 BTP auth checks passed: ${passed}/${checks}.`)
 }

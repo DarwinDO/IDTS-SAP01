@@ -288,6 +288,7 @@ Các trigger notification:
 | Workflow | SAP Build Process Automation, optional |
 | Notification | SAP BTP services / third-party webhook integration |
 | Authentication | SAP BTP AppRouter/XSUAA with SAP identity-to-IDTS-role alignment; custom `AuthService`/`AuthSessions` bearer authentication remains for local and Render/integration profiles. |
+| User Administration | Controlled SAP identity invitation and verification; exactly one PM/Tester/Developer business role; optional `UserAdmin` capability only for selected active PM users. Signed invitation tokens are bounded, one-time and not sent as HTTP query parameters; concurrent open invitations are rejected. External Role Collection provisioning remains a separate broker/control-plane boundary. |
 
 ---
 

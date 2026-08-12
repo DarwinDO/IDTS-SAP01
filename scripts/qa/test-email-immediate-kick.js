@@ -11,6 +11,7 @@ const path = require('node:path')
 const cds = require('@sap/cds')
 
 const {
+  processEmailOutboxBatch,
   scheduleImmediateEmailOutbox,
   writeNotificationAndSchedule
 } = require('../../srv/email/worker')
@@ -140,6 +141,24 @@ async function main () {
   assert.equal(skippedResult.deliveryStatus, 'SKIPPED')
   assert.equal(writeCount, 2)
   assert.equal(scheduleCount, 1, 'SKIPPED delivery never registers an immediate kick')
+
+  const combined = await processEmailOutboxBatch({
+    tx,
+    dependencies: {
+      emailConfig: { enabled: true, ready: true },
+      invitationConfig: { ready: true },
+      createSender () {
+        return { sendMail: async () => ({}), close () {} }
+      },
+      async processNotifications () {
+        return { sent: 2, failed: 1, skipped: 0 }
+      },
+      async processInvitations () {
+        return { sent: 1, failed: 0, skipped: 1 }
+      }
+    }
+  })
+  assert.deepEqual(combined, { sent: 3, failed: 1, skipped: 1 })
 
   const historySource = fs.readFileSync(path.join(__dirname, '../../srv/bug-service/history.js'), 'utf8')
   const actionsSource = fs.readFileSync(path.join(__dirname, '../../srv/bug-service/actions.js'), 'utf8')

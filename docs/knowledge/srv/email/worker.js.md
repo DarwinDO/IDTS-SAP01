@@ -6,6 +6,8 @@
 
 `writeNotificationAndSchedule()` keeps the durable outbox write inside the Bug request transaction. When that write returns `PENDING`, `scheduleImmediateEmailOutbox()` registers one `req.on('succeeded')` handler for the whole request. Only after commit does the handler start a privileged one-shot `cds.spawn()` transaction and process the due batch. A `WeakSet` prevents multiple notification writes in one request from registering duplicate kicks. `SKIPPED` deliveries and failed/rolled-back requests never start the kick. The periodic worker or SAP Job Scheduler remains the recovery path if the one-shot process is interrupted.
 
+The same batch now also processes eligible `UserOnboardingDeliveries` when private invitation configuration is complete. Missing invitation configuration does not block ordinary Bug notification delivery.
+
 ### Vietnamese
 
 `writeNotificationAndSchedule()` vẫn ghi durable outbox bên trong transaction của Bug request. Khi kết quả ghi là `PENDING`, `scheduleImmediateEmailOutbox()` đăng ký đúng một handler `req.on('succeeded')` cho toàn request. Chỉ sau khi commit, handler mới tạo một transaction `cds.spawn()` đặc quyền chạy một lần và xử lý batch đến hạn. `WeakSet` ngăn nhiều notification trong cùng request đăng ký kick trùng. Delivery `SKIPPED` và request fail/rollback không chạy kick. Periodic worker hoặc SAP Job Scheduler vẫn là đường recovery nếu one-shot process bị gián đoạn.
