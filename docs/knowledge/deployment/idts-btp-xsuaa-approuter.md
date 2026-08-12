@@ -8,6 +8,12 @@ Fiori application. Requests under `/odata` go from AppRouter to the CAP
 to `idts.cap.Users` and checks that the platform role matches the business
 role.
 
+## Controlled onboarding callback
+
+`app/router/xs-app.json` exposes `/onboarding/continue` as the only unauthenticated onboarding entry. It serves a no-store static handoff that accepts the signed token only from the URL fragment. `/onboarding/authenticate` requires XSUAA and then POSTs the token to the protected CAP service. JavaScript/CSS resources are public but contain no invitation, identity, credential, or tenant data. The default XSUAA identity-provider behavior is retained; no provider is hardcoded in the route.
+
+This source contract does not prove the live SAP ID registration-return behavior or the availability of origin/issuer/subject/email claims. Those require browser evidence after deployment approval.
+
 ## Configuration files
 
 | File | Responsibility |

@@ -81,6 +81,7 @@
     "qa:email-outbox:programmatic": "node scripts/qa/test-email-outbox-programmatic.js",
     "qa:email-immediate:programmatic": "node scripts/qa/test-email-immediate-kick.js",
     "qa:user-onboarding:programmatic": "node scripts/qa/test-user-onboarding-contract.js && node scripts/qa/test-user-onboarding-programmatic.js",
+    "qa:user-onboarding-page:programmatic": "node scripts/qa/test-user-onboarding-page.mjs",
     "qa:email-smtp:integration": "node scripts/qa/test-email-smtp-integration.js",
     "qa:email-brevo-api:integration": "node scripts/qa/test-email-brevo-api-integration.js",
     "qa:idts64:programmatic": "node scripts/qa/test-idts64-ai-provider.js",

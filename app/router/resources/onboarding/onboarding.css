@@ -1,0 +1,129 @@
+:root {
+  color-scheme: light;
+  font-family: "72", "72full", Arial, Helvetica, sans-serif;
+  color: #1d2d3e;
+  background: #f5f6f7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: linear-gradient(180deg, #eef7fc 0, #f5f6f7 45%);
+}
+
+.onboarding-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.onboarding-card {
+  width: min(100%, 32rem);
+  padding: 2rem;
+  border: 1px solid #d5dadd;
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 0.25rem 1.25rem rgb(34 53 72 / 12%);
+}
+
+.product-name {
+  margin: 0 0 0.75rem;
+  color: #0064d9;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  line-height: 1.25;
+}
+
+.supporting-text,
+.security-note {
+  line-height: 1.5;
+}
+
+.supporting-text {
+  margin: 1rem 0 1.5rem;
+}
+
+.security-note {
+  margin: 1.5rem 0 0;
+  color: #475e75;
+  font-size: 0.875rem;
+}
+
+.busy-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.5rem;
+}
+
+.busy-indicator {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 0.1875rem solid #d1e8ff;
+  border-top-color: #0064d9;
+  border-radius: 50%;
+  animation: onboarding-spin 0.8s linear infinite;
+}
+
+.message {
+  padding: 0.875rem 1rem;
+  border-left: 0.25rem solid #0070f2;
+  background: #eaf4ff;
+  line-height: 1.4;
+}
+
+.message-success {
+  border-left-color: #188918;
+  background: #f1fdf1;
+}
+
+.message-error {
+  border-left-color: #aa0808;
+  background: #fff1f0;
+}
+
+.primary-action {
+  min-height: 2.5rem;
+  margin-top: 1rem;
+  padding: 0 1rem;
+  border: 0.0625rem solid #0064d9;
+  border-radius: 0.25rem;
+  background: #0064d9;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primary-action:hover {
+  background: #004ea8;
+}
+
+.primary-action:focus-visible {
+  outline: 0.1875rem solid #1b90ff;
+  outline-offset: 0.1875rem;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+@keyframes onboarding-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .busy-indicator { animation: none; }
+}

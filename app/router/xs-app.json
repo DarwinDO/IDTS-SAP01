@@ -7,6 +7,27 @@
   },
   "routes": [
     {
+      "source": "^/onboarding/continue$",
+      "target": "onboarding/continue.html",
+      "localDir": "resources",
+      "authenticationType": "none",
+      "cacheControl": "no-cache, no-store, must-revalidate"
+    },
+    {
+      "source": "^/onboarding/authenticate$",
+      "target": "onboarding/authenticate.html",
+      "localDir": "resources",
+      "authenticationType": "xsuaa",
+      "cacheControl": "no-cache, no-store, must-revalidate"
+    },
+    {
+      "source": "^/onboarding/(onboarding-page\\.mjs|onboarding\\.css)$",
+      "target": "onboarding/$1",
+      "localDir": "resources",
+      "authenticationType": "none",
+      "cacheControl": "no-cache, no-store, must-revalidate"
+    },
+    {
       "source": "^/login\\.html$",
       "localDir": "resources",
       "authenticationType": "xsuaa",
