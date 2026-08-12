@@ -3,10 +3,11 @@
 const cds = require('@sap/cds')
 
 const { getEmailConfig } = require('./config')
-const { processEmailDeliveries } = require('./outbox')
+const { processEmailDeliveries, writeNotificationRecord } = require('./outbox')
 const { createEmailSender } = require('./sender')
 
 const LOG = cds.log('idts-email')
+const immediateKickRequests = new WeakSet()
 let job
 let sender
 
@@ -32,6 +33,49 @@ async function processEmailOutboxBatch ({ tx }) {
   } finally {
     batchSender.close()
   }
+}
+
+function scheduleImmediateEmailOutbox (req, dependencies = {}) {
+  if (!req || typeof req.on !== 'function' || immediateKickRequests.has(req)) return false
+
+  const spawn = dependencies.spawn || cds.spawn
+  const processBatch = dependencies.processBatch || processEmailOutboxBatch
+  immediateKickRequests.add(req)
+
+  // Chỉ kick sau khi transaction nghiệp vụ commit; scheduler vẫn là lớp recovery bền vững.
+  req.on('succeeded', () => {
+    try {
+      const immediateJob = spawn({ user: cds.User.privileged }, async tx => {
+        const result = await processBatch({ tx })
+        if (result.sent || result.failed) {
+          LOG.info(`Email outbox processed immediately: sent=${result.sent}, failed=${result.failed}.`)
+        }
+        return result
+      })
+      immediateJob?.on?.('failed', error => logWorkerFailure('Immediate email outbox run failed.', error))
+    } catch (error) {
+      logWorkerFailure('Immediate email outbox could not start.', error)
+    }
+  })
+
+  return true
+}
+
+async function writeNotificationAndSchedule (req, entry, dependencies = {}) {
+  const tx = dependencies.tx || cds.tx(req)
+  const config = dependencies.config || getEmailConfig()
+  const writeRecord = dependencies.writeRecord || writeNotificationRecord
+  const schedule = dependencies.schedule || scheduleImmediateEmailOutbox
+  const result = await writeRecord(tx, entry, config)
+
+  if (result.deliveryStatus === 'PENDING') schedule(req)
+  return result
+}
+
+function logWorkerFailure (message, error) {
+  const rawCode = String(error?.code || '')
+  const code = /^[A-Z0-9_-]{1,80}$/i.test(rawCode) ? ` code=${rawCode}` : ''
+  LOG.error(`${message}${code}`)
 }
 
 function startEmailWorker () {
@@ -79,6 +123,8 @@ function startEmailWorker () {
 
 module.exports = {
   processEmailOutboxBatch,
+  scheduleImmediateEmailOutbox,
   shouldStartEmailWorker,
-  startEmailWorker
+  startEmailWorker,
+  writeNotificationAndSchedule
 }

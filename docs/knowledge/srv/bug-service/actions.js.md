@@ -236,3 +236,9 @@ Nút action trên Fiori chỉ là điểm bắt đầu trên UI. File này mới
   **Khái niệm IDTS**: Khi Tester/PM resubmit, Developer được assign phải nhận notification và hệ thống phải có email delivery evidence tương ứng.
   **Ảnh hưởng nếu sai**: Bug quay lại `ASSIGNED` nhưng Developer không nhận follow-up notification và outbox không có email để xử lý.
   **Phải kiểm tra cùng**: `srv/email/outbox.js`, `srv/bug-service/history.js`, scenario SC-05e trong `scripts/qa/test-idts6-programmatic.js`.
+
+## Immediate delivery handoff (2026-08-12)
+
+**English.** The direct resubmit and retest-owner notification paths now use `writeNotificationAndSchedule(req, entry)`, matching status-driven notifications. The wrapper keeps persistence atomic and registers at most one post-commit kick per CAP request. It does not send from inside either action transaction.
+
+**Tiếng Việt.** Hai đường notification trực tiếp của resubmit và đổi retest owner nay dùng `writeNotificationAndSchedule(req, entry)`, giống notification theo status. Wrapper giữ persistence atomic và đăng ký tối đa một post-commit kick cho mỗi CAP request. Nó không gửi email bên trong transaction của action.

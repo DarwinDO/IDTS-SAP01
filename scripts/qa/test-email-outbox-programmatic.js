@@ -142,6 +142,7 @@ async function main () {
   assert.equal(pendingDelivery.channel_code, 'EMAIL')
   assert.equal(pendingDelivery.status_code, 'PENDING')
   assert.equal(pendingDelivery.attemptCount, 0)
+  assert.equal(pending.deliveryStatus, 'PENDING')
 
   const skippedDisabled = await db.tx(tx => writeNotificationRecord(tx, {
     bugID: bug.ID,
@@ -154,6 +155,7 @@ async function main () {
   )
   assert.equal(disabledDelivery.status_code, 'SKIPPED')
   assert.equal(disabledDelivery.lastErrorCode, 'EMAIL_DISABLED')
+  assert.equal(skippedDisabled.deliveryStatus, 'SKIPPED')
 
   const skippedInactive = await db.tx(tx => writeNotificationRecord(tx, {
     bugID: bug.ID,
@@ -211,6 +213,8 @@ async function main () {
   assert.equal(failedDelivery.lastErrorCode, 'ESOCKET')
   assert.doesNotMatch(failedDelivery.lastErrorSummary, /smtp\.private\.local|idts-test-password/)
   assert.ok(failedDelivery.nextAttemptAt)
+  assert.equal(failedDelivery.lockedUntil, null)
+  assert.equal(failedDelivery.lockToken, null)
 
   await db.run(UPDATE('idts.cap.NotificationDeliveries').set({
     nextAttemptAt: '2026-06-30T00:59:00.000Z'

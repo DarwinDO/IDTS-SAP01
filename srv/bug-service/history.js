@@ -27,8 +27,7 @@ const {
   userIDForDeveloper
 } = require('./helpers')
 
-const { writeNotificationRecord } = require('../email/outbox')
-const { getEmailConfig } = require('../email/config')
+const { writeNotificationAndSchedule } = require('../email/worker')
 
 async function recordCreateSideEffects (req, data, entities) {
   // after CREATE Bug gọi vào đây: tạo event “Create” và notification phù hợp sau khi Bug chính đã tồn tại.
@@ -424,12 +423,12 @@ async function writeNotificationForStatus (req, entities, bug, status) {
   const notification = notificationTargetForStatus(bug, status)
   if (!notification?.recipientID || !notification.eventType) return
 
-  await writeNotificationRecord(cds.tx(req), {
+  await writeNotificationAndSchedule(req, {
     bugID: bug.ID,
     recipientID: notification.recipientID,
     eventType: notification.eventType,
     message: notification.message
-  }, getEmailConfig())
+  })
 }
 
 function notificationTargetForStatus (bug, status) {

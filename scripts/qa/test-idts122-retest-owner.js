@@ -286,7 +286,7 @@ async function main () {
     criticality: 'CRITICALITY'
   })
   record('action migration SQL uses resolved HANA column names', actionInserted === true && actionSql.every(sql => !/"(?:code|name|descr|sortOrder|active|criticality)"/.test(sql)))
-  record('retest reassignment has dedicated audit and notification', /REASSIGN_RETEST_OWNER/.test(constants) && /REASSIGN_RETEST_OWNER/.test(actionTypes) && /ACTION\.REASSIGN_RETEST_OWNER/.test(actions) && /writeNotificationRecord\(tx/.test(actions))
+  record('retest reassignment has dedicated audit and notification', /REASSIGN_RETEST_OWNER/.test(constants) && /REASSIGN_RETEST_OWNER/.test(actionTypes) && /ACTION\.REASSIGN_RETEST_OWNER/.test(actions) && /writeNotificationAndSchedule\(req/.test(actions))
   record('retest-owner history displays user names', /case ['"]retestOwner['"]:[\s\S]*displayUserName/.test(history))
 
   const failures = RESULTS.filter(result => !result.pass)
