@@ -59,3 +59,9 @@ Không thay code review, QA Depth Gate, CAP/Fiori check hoặc Jira permission. 
 ### Evidence
 
 Lưu ghi chú đã sanitize ở `docs/learning/progress/` hoặc `docs/pm/evidence/`; comment Jira Done phải ghi `Ownership Knowledge Gate: PASS` và dẫn PR/evidence. Không lưu password, token, endpoint private, API key hoặc dữ liệu cá nhân đầy đủ.
+
+## 2026-08-12 DonHV email-flow gate
+
+DonHV completed the seven-question Notification and email outbox gate with 7/7 (100%). All security/data-integrity critical answers, the controlled `ESOCKET` debug exercise, and the final end-to-end teach-back passed. The deterministic gate date is 2026-08-12; the interactive session finished on 2026-08-13 Asia/Bangkok. Sanitized evidence: `docs/pm/evidence/idts-82/knowledge-gate-donhv-email-2026-08-12.md`. This records no runtime, deployment, Jira, PR, credential, or external-system mutation.
+
+Vietnamese: DonHV đã hoàn thành gate 7 câu cho flow Notification và email outbox với kết quả 7/7 (100%). Toàn bộ câu critical về security/data integrity, bài debug `ESOCKET` có kiểm soát và teach-back end-to-end cuối đều PASS. Ngày gate xác định bởi selector là 2026-08-12; phiên tương tác hoàn tất ngày 2026-08-13 Asia/Bangkok. Evidence đã sanitize nằm tại `docs/pm/evidence/idts-82/knowledge-gate-donhv-email-2026-08-12.md`. Không có runtime, deploy, Jira, PR, credential hoặc mutation hệ thống ngoài.
