@@ -21,6 +21,25 @@ function expectCode (fn, expectedCode) {
   assert.throws(fn, error => error?.code === expectedCode)
 }
 
+function xsuaaUser ({ email, userUuid, platformUserId = '11111111-1111-4111-8111-111111111111' }) {
+  return {
+    id: 'mutable-login-name',
+    attr: { email },
+    authInfo: {
+      token: {
+        origin: 'sap.default',
+        issuer: 'https://issuer.example.invalid',
+        userId: 'forbidden-sub-fallback',
+        payload: {
+          user_id: platformUserId,
+          user_uuid: userUuid,
+          sub: 'forbidden-sub-fallback'
+        }
+      }
+    }
+  }
+}
+
 function main () {
   assert.doesNotThrow(() => assertUserAdministrator(requestUser(['PM', 'UserAdmin'])))
   expectCode(() => assertUserAdministrator(requestUser(['PM'])), 'USER_ADMIN_REQUIRED')
@@ -81,30 +100,26 @@ function main () {
     now: new Date('2026-08-12T12:00:00.000Z')
   }), 'INVITATION_ALREADY_USED')
 
-  const identity = identitySnapshotFrom({
-    id: 'mutable-login-name',
-    attr: {
-      email: 'Controlled.Test@Example.invalid',
-      origin: 'sap.default',
-      iss: 'https://issuer.example.invalid',
-      user_uuid: 'stable-subject-123'
-    }
-  }, invitation.persisted)
+  const identity = identitySnapshotFrom(xsuaaUser({
+    email: 'Controlled.Test@Example.invalid',
+    userUuid: 'stable-subject-123'
+  }), invitation.persisted)
   assert.deepEqual(identity, {
     subject: 'stable-subject-123',
+    platformUserId: '11111111-1111-4111-8111-111111111111',
     emailNormalized: 'controlled.test@example.invalid',
     origin: 'sap.default',
     issuer: 'https://issuer.example.invalid'
   })
-  expectCode(() => identitySnapshotFrom({
-    id: 'mutable-login-name',
-    attr: {
-      email: 'other@example.invalid',
-      origin: 'sap.default',
-      iss: 'https://issuer.example.invalid',
-      user_uuid: 'stable-subject-123'
-    }
-  }, invitation.persisted), 'INVITATION_IDENTITY_MISMATCH')
+  expectCode(() => identitySnapshotFrom(xsuaaUser({
+    email: 'other@example.invalid',
+    userUuid: 'stable-subject-123'
+  }), invitation.persisted), 'INVITATION_IDENTITY_MISMATCH')
+  expectCode(() => identitySnapshotFrom(xsuaaUser({
+    email: 'Controlled.Test@Example.invalid',
+    userUuid: 'stable-subject-123',
+    platformUserId: ''
+  }), invitation.persisted), 'IDENTITY_CLAIMS_INCOMPLETE')
 
   const security = JSON.parse(fs.readFileSync(path.join(__dirname, '../../xs-security.json'), 'utf8'))
   const userAdminScope = security.scopes.find(scope => scope.name === '$XSAPPNAME.UserAdmin')

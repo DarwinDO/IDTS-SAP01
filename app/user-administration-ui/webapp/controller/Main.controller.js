@@ -11,6 +11,7 @@ sap.ui.define([
 		onInit: function () {
 			this.setModel(new JSONModel({ busy: false }), "view");
 			this.setModel(new JSONModel(this._emptyInvite()), "invite");
+			this.setModel(new JSONModel(this._emptyAccessChange()), "access");
 			this.setModel(new JSONModel({ items: [] }), "requests");
 			this._loadRequests("");
 		},
@@ -87,6 +88,102 @@ sap.ui.define([
 			this.getModel("invite").setData(this._emptyInvite());
 		},
 
+		onApproveProvisioning: async function (oEvent) {
+			const oRow = this._rowFromEvent(oEvent);
+			if (!oRow || !await this._confirm("approveConfirmation")) {
+				return;
+			}
+			await this._invokeAction("approveProvisioning", {
+				requestID: oRow.ID,
+				expectedVersion: oRow.provisioningVersion
+			}, "approvedQueued");
+		},
+
+		onOpenRoleChange: async function (oEvent) {
+			const oRow = this._rowFromEvent(oEvent);
+			if (!oRow) {
+				return;
+			}
+			await this._openAccessDialog({
+				mode: "CHANGE_ROLE",
+				title: await this._text("changeRole"),
+				confirmText: await this._text("changeRole"),
+				warning: await this._text("roleChangeWarning"),
+				row: oRow,
+				role: oRow.requestedRole_code,
+				userAdminRequested: oRow.userAdminRequested === true
+			});
+		},
+
+		onOpenRevoke: async function (oEvent) {
+			const oRow = this._rowFromEvent(oEvent);
+			if (!oRow) {
+				return;
+			}
+			await this._openAccessDialog({
+				mode: "REVOKE",
+				title: await this._text("revokeAccess"),
+				confirmText: await this._text("revokeAccess"),
+				warning: await this._text("revokeWarning"),
+				row: oRow,
+				role: oRow.requestedRole_code,
+				userAdminRequested: oRow.userAdminRequested === true
+			});
+		},
+
+		onAccessRoleChange: function (oEvent) {
+			const sRole = oEvent.getSource().getSelectedKey();
+			const oAccessModel = this.getModel("access");
+			oAccessModel.setProperty("/role", sRole);
+			if (sRole !== "PM") {
+				oAccessModel.setProperty("/userAdminRequested", false);
+			}
+		},
+
+		onConfirmAccessChange: async function () {
+			const oAccessModel = this.getModel("access");
+			const oAccess = oAccessModel.getData();
+			const sReason = (oAccess.reason || "").trim();
+			if (!sReason) {
+				MessageBox.warning(await this._text("reasonRequired"));
+				return;
+			}
+			oAccessModel.setProperty("/submitting", true);
+			const bRoleChange = oAccess.mode === "CHANGE_ROLE";
+			const bSuccess = await this._invokeAction(bRoleChange ? "requestRoleChange" : "requestRevoke", bRoleChange ? {
+				userID: oAccess.row.activeUser_ID,
+				requestedRole: oAccess.role,
+				userAdminRequested: oAccess.role === "PM" && oAccess.userAdminRequested === true,
+				reason: sReason,
+				expectedVersion: oAccess.row.provisioningVersion
+			} : {
+				userID: oAccess.row.activeUser_ID,
+				reason: sReason,
+				expectedVersion: oAccess.row.provisioningVersion
+			}, bRoleChange ? "changeRoleQueued" : "revokeQueued");
+			oAccessModel.setProperty("/submitting", false);
+			if (bSuccess) {
+				this._accessDialog.close();
+				oAccessModel.setData(this._emptyAccessChange());
+			}
+		},
+
+		onCancelAccessChange: function () {
+			this._accessDialog.close();
+			this.getModel("access").setData(this._emptyAccessChange());
+		},
+
+		onRetryAccessOperation: async function (oEvent) {
+			const oRow = this._rowFromEvent(oEvent);
+			if (!oRow || !oRow.latestOperation_ID || !await this._confirm("retryConfirmation")) {
+				return;
+			}
+			await this._invokeAction("retryAccessOperation", {
+				operationID: oRow.latestOperation_ID,
+				expectedVersion: oRow.provisioningVersion
+			}, "retryQueued");
+		},
+
 		_updateInviteState: function () {
 			const oInviteModel = this.getModel("invite");
 			const oInvite = oInviteModel.getData();
@@ -109,6 +206,61 @@ sap.ui.define([
 				canSubmit: false,
 				submitting: false
 			};
+		},
+
+		_emptyAccessChange: function () {
+			return {
+				mode: "",
+				title: "",
+				confirmText: "",
+				warning: "",
+				row: null,
+				role: "TESTER",
+				userAdminRequested: false,
+				reason: "",
+				submitting: false
+			};
+		},
+
+		_openAccessDialog: async function (oData) {
+			this.getModel("access").setData({ ...this._emptyAccessChange(), ...oData });
+			if (!this._accessDialog) {
+				this._accessDialog = await Fragment.load({
+					id: this.getView().getId(),
+					name: "idts.useradministrationui.fragment.ManageAccess",
+					controller: this
+				});
+				this.getView().addDependent(this._accessDialog);
+			}
+			this._accessDialog.open();
+		},
+
+		_invokeAction: async function (sAction, mParameters, sSuccessTextKey) {
+			this.getModel("view").setProperty("/busy", true);
+			try {
+				const oOperation = this.getView().getModel().bindContext(`/${sAction}(...)`);
+				Object.entries(mParameters).forEach(([sName, vValue]) => oOperation.setParameter(sName, vValue));
+				await oOperation.invoke("$direct");
+				await this._loadRequests("");
+				MessageToast.show(await this._text(sSuccessTextKey));
+				return true;
+			} catch {
+				MessageBox.error(await this._text("accessChangeFailed"));
+				return false;
+			} finally {
+				this.getModel("view").setProperty("/busy", false);
+			}
+		},
+
+		_confirm: async function (sTextKey) {
+			const sText = await this._text(sTextKey);
+			return new Promise(resolve => MessageBox.confirm(sText, {
+				onClose: sAction => resolve(sAction === MessageBox.Action.OK)
+			}));
+		},
+
+		_rowFromEvent: function (oEvent) {
+			return oEvent?.getSource?.().getBindingContext("requests")?.getObject?.() || null;
 		},
 
 		_loadRequests: async function (sQuery) {

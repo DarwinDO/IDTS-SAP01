@@ -1,0 +1,52 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core">
+	<Dialog
+		id="manageAccessDialog"
+		title="{access>/title}"
+		contentWidth="30rem"
+		stretchOnPhone="true">
+		<content>
+			<VBox class="sapUiSmallMargin">
+				<MessageStrip
+					text="{access>/warning}"
+					type="Warning"
+					showIcon="true"
+					class="sapUiSmallMarginBottom"/>
+				<Label text="{i18n>businessRole}" visible="{= ${access>/mode} === 'CHANGE_ROLE' }"/>
+				<Select
+					selectedKey="{access>/role}"
+					visible="{= ${access>/mode} === 'CHANGE_ROLE' }"
+					change=".onAccessRoleChange">
+					<core:Item key="PM" text="{i18n>rolePm}"/>
+					<core:Item key="TESTER" text="{i18n>roleTester}"/>
+					<core:Item key="DEVELOPER" text="{i18n>roleDeveloper}"/>
+				</Select>
+				<CheckBox
+					text="{i18n>userAdminCapability}"
+					selected="{access>/userAdminRequested}"
+					enabled="{= ${access>/role} === 'PM' }"
+					visible="{= ${access>/mode} === 'CHANGE_ROLE' }"
+					class="sapUiSmallMarginTop"/>
+				<Label text="{i18n>reason}" required="true" class="sapUiSmallMarginTop"/>
+				<TextArea
+					value="{access>/reason}"
+					valueLiveUpdate="true"
+					maxLength="500"
+					rows="4"
+					width="100%"
+					placeholder="{i18n>reasonPlaceholder}"/>
+			</VBox>
+		</content>
+		<beginButton>
+			<Button
+				text="{access>/confirmText}"
+				type="{= ${access>/mode} === 'REVOKE' ? 'Negative' : 'Emphasized' }"
+				enabled="{= !!${access>/reason} &amp;&amp; !${access>/submitting} }"
+				press=".onConfirmAccessChange"/>
+		</beginButton>
+		<endButton>
+			<Button text="{i18n>cancel}" press=".onCancelAccessChange"/>
+		</endButton>
+	</Dialog>
+</core:FragmentDefinition>

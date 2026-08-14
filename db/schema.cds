@@ -261,8 +261,17 @@ entity UserOnboardingRequests : cuid, managed {
   identityOrigin        : String(120);
   identityIssuer        : String(500);
   identitySubject       : String(255);
+  identityPlatformUserId: String(255);
   identityKeyHash       : String(64);
   identityEmailNormalized : String(255);
+  provisioningVersion   : Integer default 0 not null;
+  approvedAt            : Timestamp;
+  approvedBy            : Association to Users;
+  activeUser            : Association to Users;
+  latestOperation       : Association to UserAccessOperations;
+  provisionedAt         : Timestamp;
+  revokedAt             : Timestamp;
+  revokedBy             : Association to Users;
   correlationId         : UUID not null;
   lastErrorCode         : String(80);
   lastErrorSummary      : String(500);
@@ -290,6 +299,42 @@ entity UserOnboardingDeliveries : cuid, managed {
 }
 
 annotate UserOnboardingDeliveries with @assert.unique.onboardingRequestDelivery: [ onboardingRequest ];
+
+entity UserAccessOperations : cuid, managed {
+  onboardingRequest : Association to UserOnboardingRequests not null;
+  operationType     : String(30) not null;
+  state             : String(30) not null;
+  requestedBy       : Association to Users not null;
+  idempotencyKey    : String(64) not null;
+  expectedVersion   : Integer not null;
+  desiredRole       : Association to UserRoles not null;
+  desiredUserAdmin  : Boolean default false not null;
+  correlationId     : UUID not null;
+  attemptCount      : Integer default 0 not null;
+  nextAttemptAt     : Timestamp;
+  leasedAt          : Timestamp;
+  leaseExpiresAt    : Timestamp;
+  leaseTokenHash    : String(64);
+  completedAt       : Timestamp;
+  safeResultCode    : String(80);
+  safeResultSummary : String(500);
+  providerCorrelationHash : String(64);
+}
+
+annotate UserAccessOperations with @assert.unique.provisioningIdempotencyKey: [ idempotencyKey ];
+
+entity UserIdentityAuditEvents : cuid, managed {
+  operation          : Association to UserAccessOperations;
+  onboardingRequest : Association to UserOnboardingRequests not null;
+  actor              : Association to Users;
+  targetUser         : Association to Users;
+  action             : String(40) not null;
+  result             : String(40) not null;
+  fromState          : String(40);
+  toState            : String(40);
+  correlationId      : UUID not null;
+  detailsSummary     : String(500);
+}
 
 entity DuplicateLinks : cuid, managed {
   // Liên kết duplicate chỉ được tạo khi user xác nhận; kết quả AI Similar Bugs tự nó không insert entity này.

@@ -44,6 +44,10 @@ assert.match(view, /<SearchField/)
 assert.match(view, /<Table/)
 assert.match(view, /items="\{requests>\/items\}"/)
 assert.match(view, /press="\.onOpenInvite"/)
+assert.match(view, /press="\.onApproveProvisioning"/)
+assert.match(view, /press="\.onOpenRoleChange"/)
+assert.match(view, /press="\.onOpenRevoke"/)
+assert.match(view, /press="\.onRetryAccessOperation"/)
 assert.doesNotMatch(view, /type="Password"|tokenHash|tokenNonce|identityIssuer/)
 
 const fragment = fs.readFileSync(path.join(webapp, 'fragment/InviteUser.fragment.xml'), 'utf8')
@@ -64,9 +68,24 @@ assert.match(controller, /setParameter\("requestedRole"/)
 assert.match(controller, /setParameter\("userAdminRequested"/)
 assert.match(controller, /await oOperation\.invoke\("\$direct"\)/)
 assert.match(controller, /bindContext\("\/searchOnboarding\(\.\.\.\)"\)/)
+assert.match(controller, /"approveProvisioning"/)
+assert.match(controller, /"requestRoleChange"/)
+assert.match(controller, /"requestRevoke"/)
+assert.match(controller, /"retryAccessOperation"/)
+assert.match(controller, /_confirm\("retryConfirmation"\)/)
+assert.match(controller, /bindContext\(`\/\$\{sAction\}\(\.\.\.\)`\)/)
 assert.doesNotMatch(controller, /new Filter\("targetEmailNormalized"/)
 assert.match(controller, /if \(sRole !== "PM"\)[\s\S]+setProperty\("\/userAdminRequested", false\)/)
 assert.doesNotMatch(controller, /console\.|responseText|api[_-]?key|client[_-]?secret/i)
+
+const manageFragment = fs.readFileSync(path.join(webapp, 'fragment/ManageAccess.fragment.xml'), 'utf8')
+assert.match(manageFragment, /<Select/)
+assert.match(manageFragment, /<CheckBox/)
+assert.match(manageFragment, /<TextArea/)
+assert.match(manageFragment, /valueLiveUpdate="true"/)
+assert.match(manageFragment, /type="\{= \$\{access>\/mode\} === 'REVOKE' \? 'Negative' : 'Emphasized' \}"/)
+assert.match(manageFragment, /press="\.onConfirmAccessChange"/)
+assert.doesNotMatch(manageFragment, /Password|OTP|passkey|token/i)
 
 const controllerDefinition = loadController(controller)
 assert.equal(typeof controllerDefinition.onConfirmInvite, 'function')
@@ -163,7 +182,7 @@ function loadController (source) {
 
 for (const locale of ['i18n.properties', 'i18n_en.properties']) {
   const text = fs.readFileSync(path.join(webapp, 'i18n', locale), 'utf8')
-  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation']) {
+  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation']) {
     assert.match(text, new RegExp(`^${key}=`, 'm'))
   }
 }

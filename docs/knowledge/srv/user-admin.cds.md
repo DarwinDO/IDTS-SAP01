@@ -1,6 +1,6 @@
 # Knowledge: `srv/user-admin.cds`
 
-`UserAdministrationService` is a separate authenticated CAP boundary for controlled IDTS onboarding. It exposes `requestOnboarding`, `verifySapIdentity`, and the administration-only `searchOnboarding` action. Search uses POST, returns at most 200 safe summary rows, and avoids placing the entered email query in an OData `$filter` URL. Its read projection and summary type intentionally omit token hash, nonce, issuer, subject, and delivery locks.
+`UserAdministrationService` is a separate authenticated CAP boundary for controlled onboarding and access administration. It exposes invitation/verification/search plus `approveProvisioning`, `requestRoleChange`, `requestRevoke`, and `retryAccessOperation`. Every mutating administration action is PM+UserAdmin protected, version checked, and returns only a sanitized request summary. The service intentionally omits token hash, nonce, issuer, subject, leases and provider internals.
 
 Authorization is completed in `srv/user-admin.js`: administration requires both PM and `UserAdmin` plus a matching active internal PM. The verification action accepts a bounded invitation token and requires an authenticated SAP identity, but never asks IDTS to collect an SAP password, OTP, passkey, or recovery code.
 
