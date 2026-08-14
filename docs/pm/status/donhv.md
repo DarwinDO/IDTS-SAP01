@@ -6708,3 +6708,12 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Root cause: the selected JSON field was broader than the evidence allowlist.
 - Resolution: omit the returned identity metadata from reports and use only PR number/title/head/state/check fields for subsequent inventory; no credential, token or private endpoint was exposed.
 - Status/owner: no GitHub, repository or platform mutation resulted from the read; keep future evidence sanitized.
+
+### 2026-08-14 — Codex shell tool alias mismatch
+
+- Classification: transient tooling issue.
+- Symptom: the first read-only User Administration checkpoint command did not start because the orchestration script called an unavailable `exec_command` alias.
+- Root cause: the current tool registry exposes the Windows shell as `shell_command`; the previous local orchestration alias was not available in this turn.
+- Resolution: no shell command or mutation executed; switch to the registered `shell_command` tool and continue with the same read-only inspection.
+- Follow-up: the combined Git/artifact search returned exit code 1 after emitting the requested Git baseline because an optional `rg` evidence scan did not provide a stable success status in the mixed PowerShell pipeline. The baseline output was retained only as orientation, and subsequent checks must use focused commands with explicit per-command exit handling.
+- Status/owner: fixed in the orchestration call; no product, platform, credential, or business-data state changed. This status entry is the only repository change from the failed read-only attempts.
