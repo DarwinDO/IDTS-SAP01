@@ -6832,3 +6832,13 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Independent review: exact snapshot returned 0 Critical / 0 Major / 0 Minor and GO for source commit/review only. Deployment, HANA/XSUAA migration, API credential creation and live provisioning remain separate approval gates.
 - Runtime readiness: bounded recovery restored `DEMO READY` with CAP 1/1, AppRouter 1/1, `/health` 200, `/ready` 200, anonymous protected API 401 and Web 200.
 - Mutation ledger: approved state recovery started the two existing apps and requested `serviceStopped=false` on the existing HANA service. No application/DB/HDI deployment, seed, schema/data write, XSUAA change, credential, identity, role assignment, Jira or Drive mutation occurred.
+
+### 2026-08-14 - UA-R3A local broker candidate packaging
+
+- Classification: local release-artifact preparation; no external mutation.
+- Work completed: built exactly one broker candidate MTAR from commit `5331d6f` using `mta.user-access-broker-candidate.yaml`.
+- Verification: MTAR SHA-256 `353a62341333f8585c987f36edfd3cf2ffec1cfe0303c3e67037a94feaef4c51`; outer archive contains one broker module; inner payload contains 13 files with zero source-parity mismatch and zero credential-pattern hits; isolated broker install reports zero vulnerabilities. Runtime remains disabled and no route is defined.
+- Boundary: artifact references only the dedicated broker XSUAA and exact existing broker API-access service name. It contains no main CAP, AppRouter, UI, DB deployer, HDI or external integration module. It is `LOCAL_CANDIDATE / NOT_DEPLOYMENT_AUTHORIZED`.
+- Tooling issues: the first combined inspection/cleanup PowerShell expression was rejected before execution by local command policy because it mixed archive inspection, credential-pattern matching and recursive cleanup. Inspection was split into bounded read-only steps and passed. A later exact recursive cleanup command was likewise rejected before execution; the ignored inspection directory remains local and contains only extracted candidate artifact bytes, not credentials.
+- Next owner/gate: independent exact-artifact review, then a separate pre-mutation package for the broker-only user-provided service, additive HANA migration, XSUAA deployment and rollback. No deployment or provider/user/role mutation is implied by this evidence.
+- Independent review result: `0 Critical / 0 Major`; exact MTAR hash and all 13 source/payload Git blobs match. Local artifact accepted, while deployment remains `NO-GO`.
