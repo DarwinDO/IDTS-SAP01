@@ -1,5 +1,15 @@
 # Knowledge: `srv/email/outbox.js`
 
+## Immediate-kick handoff contract (2026-08-12)
+
+### English
+
+`writeNotificationRecord()` now returns the persisted delivery status together with its IDs. `PENDING` tells the worker orchestration to register a post-commit kick; `SKIPPED` explicitly prevents a kick. This return value is only orchestration metadata—the provider is still never contacted inside the business transaction.
+
+### Vietnamese
+
+`writeNotificationRecord()` nay trả trạng thái delivery đã ghi cùng các ID. `PENDING` báo cho worker orchestration đăng ký post-commit kick; `SKIPPED` ngăn kick một cách rõ ràng. Giá trị trả về này chỉ là metadata điều phối; provider vẫn tuyệt đối không được gọi bên trong business transaction.
+
 ## Beginner-first execution map (2026-07-18)
 
 ### English
@@ -172,4 +182,4 @@ Can kiem tra chung khi sua:
 
 - Source: `srv/email/outbox.js`
 - Related task: IDTS-36, IDTS-48
-- Last reviewed: 2026-07-02
+- Last reviewed: 2026-08-12

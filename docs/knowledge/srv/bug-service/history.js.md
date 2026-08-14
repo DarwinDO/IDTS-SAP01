@@ -114,6 +114,12 @@ File này vẫn quyết định ai nhận notification và lifecycle event nào 
   **Khái niệm IDTS**: Giữ history, notification và outbox trong cùng business transaction nhưng để việc kết nối SMTP cho worker chạy sau.
   **Ảnh hưởng nếu sai**: Status/history có thể commit mà thiếu notification tracking hoặc SMTP quay lại chặn critical workflow.
   **Phải kiểm tra cùng**: `srv/email/outbox.js:18`, các entity notification trong `db/schema.cds`, workflow notification tests.
+
+## Immediate delivery handoff (2026-08-12)
+
+**English.** `writeNotificationForStatus` now calls `writeNotificationAndSchedule(req, entry)`. The wrapper writes the notification/outbox in the current request transaction and registers one immediate worker kick only when the resulting email delivery is `PENDING`. The actual sender still runs only after `req.on('succeeded')`.
+
+**Tiếng Việt.** `writeNotificationForStatus` nay gọi `writeNotificationAndSchedule(req, entry)`. Wrapper ghi notification/outbox trong transaction request hiện tại và chỉ đăng ký một immediate worker kick khi email delivery là `PENDING`. Sender thật vẫn chỉ chạy sau `req.on('succeeded')`.
 ## IDTS-125 attachment deletion audit (2026-08-06)
 
 **English.** Attachment deletion history is derived at the authoritative draft `SAVE` boundary. The handler compares the pre-save active attachment snapshot with the post-save active metadata. A committed deletion produces one readable `HistoryEvent` and one field-level `HistoryLog`; a discarded draft produces no deletion history. Audit values contain only the attachment ID and a bounded filename. Storage URL, object key, hash, binary content, and provider diagnostics are excluded.
