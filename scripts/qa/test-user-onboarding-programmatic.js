@@ -7,7 +7,7 @@ process.env.IDTS_EMAIL_ENABLED = 'false'
 const assert = require('node:assert/strict')
 const { EventEmitter } = require('node:events')
 const cds = require('@sap/cds')
-const { INSERT, SELECT, UPDATE } = cds.ql
+const { DELETE, INSERT, SELECT, UPDATE } = cds.ql
 
 const {
   createInvitationToken,
@@ -18,6 +18,30 @@ const { processUserOnboardingDeliveries } = require('../../srv/user-admin/delive
 
 const SIGNING_KEY = 'local-programmatic-invitation-signing-key-123456789'
 const PM_ID = '71000000-0000-4000-8000-000000000001'
+
+function xsuaaUser ({
+  email = 'controlled.test@example.invalid',
+  userUuid = 'stable-user-uuid-001',
+  platformUserId = '71000000-0000-4000-8000-000000000020'
+} = {}) {
+  return new cds.User({
+    id: 'mutable-login-name',
+    roles: ['authenticated-user'],
+    attr: { email },
+    authInfo: {
+      token: {
+        origin: 'sap.default',
+        issuer: 'https://issuer.example.invalid',
+        userId: 'forbidden-sub-fallback',
+        payload: {
+          user_id: platformUserId,
+          user_uuid: userUuid,
+          sub: 'forbidden-sub-fallback'
+        }
+      }
+    }
+  })
+}
 
 async function expectRejected (operation, status, code) {
   await assert.rejects(operation, error => Number(error?.status || error?.statusCode) === status && error?.code === code)
@@ -94,6 +118,18 @@ async function main () {
     user: new cds.User({ id: 'pm@example.invalid', roles: ['authenticated-user', 'PM'] })
   }), 403, 'USER_ADMIN_REQUIRED')
 
+  for (const roles of [
+    ['authenticated-user', 'TESTER', 'UserAdmin'],
+    ['authenticated-user', 'DEVELOPER', 'UserAdmin'],
+    ['authenticated-user', 'PM', 'TESTER', 'UserAdmin']
+  ]) {
+    await expectRejected(service.send({
+      event: 'searchOnboarding',
+      data: { query: 'controlled.test' },
+      user: new cds.User({ id: 'pm@example.invalid', roles })
+    }), 403, 'USER_ADMIN_REQUIRED')
+  }
+
   await expectRejected(service.send({
     event: 'READ',
     query: SELECT.from(service.entities.OnboardingRequests),
@@ -109,7 +145,7 @@ async function main () {
   await db.run(UPDATE('idts.cap.Users').set({ active: true }).where({ ID: PM_ID }))
 
   const serviceContract = require('node:fs').readFileSync(require('node:path').join(__dirname, '../../srv/user-admin.cds'), 'utf8')
-  assert.doesNotMatch(serviceContract, /\btokenHash\b|\btokenNonce\b|\bidentityIssuer\b/)
+  assert.doesNotMatch(serviceContract, /\btokenHash\b|\btokenNonce\b|\bidentityOrigin\b|\bidentityIssuer\b|\bidentitySubject\b|\bidentityPlatformUserId\b/)
   assert.match(serviceContract, /verifySapIdentity\(token\s*:\s*String\(2048\)\)/)
   assert.match(serviceContract, /searchOnboarding\(query\s*:\s*String\(255\)\)/)
 
@@ -189,34 +225,31 @@ async function main () {
   await expectRejected(service.send({
     event: 'verifySapIdentity',
     data: { token: regenerated.token },
-    user: new cds.User({
-      id: 'mutable-login-name',
-      roles: ['authenticated-user'],
-      attr: {
-        email: 'controlled.test@example.invalid',
-        origin: 'sap.default',
-        iss: 'https://issuer.example.invalid',
-        user_uuid: 'stable-user-uuid-001'
-      }
-    })
+    user: xsuaaUser()
   }), 409, 'EXTERNAL_IDENTITY_ALREADY_LINKED')
   await db.run(UPDATE('idts.cap.Users').set({ externalIdentityKeyHash: null }).where({ ID: PM_ID }))
+
+  const duplicateEmailUserID = '71000000-0000-4000-8000-000000000009'
+  await db.run(INSERT.into('idts.cap.Users').entries({
+    ID: duplicateEmailUserID,
+    displayName: 'Legacy Duplicate Email',
+    email: 'Controlled.Test@Example.invalid',
+    role_code: 'TESTER',
+    active: false
+  }))
+  await expectRejected(service.send({
+    event: 'verifySapIdentity',
+    data: { token: regenerated.token },
+    user: xsuaaUser()
+  }), 409, 'EMAIL_RECONCILIATION_REQUIRED')
+  await db.run(DELETE.from('idts.cap.Users').where({ ID: duplicateEmailUserID }))
 
   const verified = await service.send({
     event: 'verifySapIdentity',
     data: { token: regenerated.token },
-    user: new cds.User({
-      id: 'mutable-login-name',
-      roles: ['authenticated-user'],
-      attr: {
-        email: 'controlled.test@example.invalid',
-        origin: 'sap.default',
-        iss: 'https://issuer.example.invalid',
-        user_uuid: 'stable-user-uuid-001'
-      }
-    })
+    user: xsuaaUser()
   })
-  assert.equal(verified.status, 'IDENTITY_VERIFIED')
+  assert.equal(verified.status, 'PENDING_APPROVAL')
   assert.equal('identityOrigin' in verified, false)
   assert.equal('identitySubject' in verified, false)
   assert.equal('tokenHash' in verified, false)
@@ -226,22 +259,211 @@ async function main () {
   assert.ok(verifiedRow.verifiedAt)
   assert.equal(verifiedRow.identityOrigin, 'sap.default')
   assert.equal(verifiedRow.identitySubject, 'stable-user-uuid-001')
+  assert.equal(verifiedRow.identityPlatformUserId, '71000000-0000-4000-8000-000000000020')
   assert.equal(verifiedRow.identityIssuer, 'https://issuer.example.invalid')
   assert.equal(verifiedRow.identityKeyHash.length, 64)
+  assert.equal(verifiedRow.status_code, 'PENDING_APPROVAL')
+  assert.equal(verifiedRow.provisioningVersion, 1)
+
+  const approved = await service.send({
+    event: 'approveProvisioning',
+    data: { requestID: created.ID, expectedVersion: 1 },
+    user: administrator
+  })
+  assert.equal(approved.status, 'PROVISION_QUEUED')
+  assert.equal(approved.provisioningVersion, 2)
+  const queuedOperation = await db.run(
+    SELECT.one.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: created.ID })
+  )
+  assert.equal(queuedOperation.operationType, 'PROVISION')
+  assert.equal(queuedOperation.state, 'PENDING')
+
+  await db.run(UPDATE('idts.cap.UserAccessOperations').set({
+    state: 'RETRYABLE_FAILURE',
+    safeResultCode: 'PROVIDER_TEMPORARY_FAILURE',
+    safeResultSummary: 'Temporary provider failure.'
+  }).where({ ID: queuedOperation.ID }))
+  await db.run(UPDATE('idts.cap.UserOnboardingRequests').set({
+    status_code: 'RETRYABLE_FAILURE'
+  }).where({ ID: created.ID }))
+  const retried = await service.send({
+    event: 'retryAccessOperation',
+    data: { operationID: queuedOperation.ID, expectedVersion: 2 },
+    user: administrator
+  })
+  assert.equal(retried.status, 'PROVISION_QUEUED')
+  assert.equal(retried.provisioningVersion, 3)
+  const retriedOperation = await db.run(
+    SELECT.one.from('idts.cap.UserAccessOperations').where({ ID: queuedOperation.ID })
+  )
+  assert.equal(retriedOperation.state, 'PENDING')
+  assert.equal(retriedOperation.expectedVersion, 3)
+  assert.notEqual(retriedOperation.idempotencyKey, queuedOperation.idempotencyKey)
+  assert.equal(retriedOperation.safeResultCode, null)
+  assert.equal(queuedOperation.expectedVersion, 2)
+  assert.equal(queuedOperation.desiredRole_code, 'TESTER')
+  assert.equal(queuedOperation.desiredUserAdmin, false)
+  assert.equal(queuedOperation.idempotencyKey.length, 64)
+
+  const provisionedUserID = '71000000-0000-4000-8000-000000000010'
+  const provisionedSessionID = '71000000-0000-4000-8000-000000000011'
+  await db.run(INSERT.into('idts.cap.Users').entries({
+    ID: provisionedUserID,
+    displayName: 'Controlled Test User',
+    email: 'controlled.test@example.invalid',
+    role_code: 'TESTER',
+    active: true,
+    externalIdentityOrigin: verifiedRow.identityOrigin,
+    externalIdentityIssuer: verifiedRow.identityIssuer,
+    externalIdentitySubject: verifiedRow.identitySubject,
+    externalIdentityKeyHash: verifiedRow.identityKeyHash
+  }))
+  await db.run(INSERT.into('idts.cap.AuthSessions').entries({
+    ID: provisionedSessionID,
+    user_ID: provisionedUserID,
+    tokenHash: 'b'.repeat(64),
+    issuedAt: '2026-08-13T00:00:00.000Z',
+    expiresAt: '2026-08-14T00:00:00.000Z'
+  }))
+  await db.run(UPDATE('idts.cap.UserOnboardingRequests').set({
+    status_code: 'ACTIVE',
+    activeUser_ID: provisionedUserID,
+    provisionedAt: '2026-08-13T00:00:00.000Z'
+  }).where({ ID: created.ID }))
+
+  const roleChange = await service.send({
+    event: 'requestRoleChange',
+    data: {
+      userID: provisionedUserID,
+      requestedRole: 'DEVELOPER',
+      userAdminRequested: false,
+      reason: 'Move controlled user to the development workflow.',
+      expectedVersion: 3
+    },
+    user: administrator
+  })
+  assert.equal(roleChange.status, 'ROLE_CHANGE_QUEUED')
+  assert.equal(roleChange.provisioningVersion, 4)
+  const suspendedUser = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: provisionedUserID }))
+  const revokedSession = await db.run(SELECT.one.from('idts.cap.AuthSessions').where({ ID: provisionedSessionID }))
+  assert.equal(suspendedUser.active, false)
+  assert.ok(revokedSession.revokedAt)
+  const roleChangeOperation = await db.run(
+    SELECT.one.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: created.ID, operationType: 'CHANGE_ROLE' })
+  )
+  assert.equal(roleChangeOperation.desiredRole_code, 'DEVELOPER')
+
+  await db.run(UPDATE('idts.cap.Users').set({ active: true, role_code: 'DEVELOPER' }).where({ ID: provisionedUserID }))
+  await db.run(UPDATE('idts.cap.UserOnboardingRequests').set({ status_code: 'ACTIVE' }).where({ ID: created.ID }))
+  const revoke = await service.send({
+    event: 'requestRevoke',
+    data: {
+      userID: provisionedUserID,
+      reason: 'Controlled access is no longer required.',
+      expectedVersion: 4
+    },
+    user: administrator
+  })
+  assert.equal(revoke.status, 'REVOKE_QUEUED')
+  assert.equal(revoke.provisioningVersion, 5)
+  const revokedUser = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: provisionedUserID }))
+  assert.equal(revokedUser.active, false)
+  const revokeOperation = await db.run(
+    SELECT.one.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: created.ID, operationType: 'REVOKE' })
+  )
+  assert.equal(revokeOperation.state, 'PENDING')
+
+  const bootstrapAdminRequestID = '71000000-0000-4000-8000-000000000012'
+  await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries({
+    ID: bootstrapAdminRequestID,
+    targetEmailNormalized: 'pm@example.invalid',
+    requestedRole_code: 'PM',
+    userAdminRequested: true,
+    status_code: 'ACTIVE',
+    requestedBy_ID: PM_ID,
+    expiresAt: '2026-08-14T00:00:00.000Z',
+    tokenNonce: 'bootstrap-admin-controlled-nonce',
+    tokenHash: '4'.repeat(64),
+    provisioningVersion: 1,
+    activeUser_ID: PM_ID,
+    correlationId: '71000000-0000-4000-8000-000000000013'
+  }))
+  await expectRejected(service.send({
+    event: 'requestRevoke',
+    data: {
+      userID: PM_ID,
+      reason: 'Attempt to remove the final administrator.',
+      expectedVersion: 1
+    },
+    user: administrator
+  }), 409, 'LAST_USER_ADMIN_REQUIRED')
+  const preservedAdmin = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: PM_ID }))
+  assert.equal(preservedAdmin.active, true)
+
+  const secondAdminID = '71000000-0000-4000-8000-000000000014'
+  const secondAdminRequestID = '71000000-0000-4000-8000-000000000015'
+  await db.run(INSERT.into('idts.cap.Users').entries({
+    ID: secondAdminID,
+    displayName: 'Second Controlled PM',
+    email: 'second.pm@example.invalid',
+    role_code: 'PM',
+    active: true
+  }))
+  await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries({
+    ID: secondAdminRequestID,
+    targetEmailNormalized: 'second.pm@example.invalid',
+    requestedRole_code: 'PM',
+    userAdminRequested: true,
+    status_code: 'ACTIVE',
+    requestedBy_ID: PM_ID,
+    expiresAt: '2026-08-14T00:00:00.000Z',
+    tokenNonce: 'second-admin-controlled-nonce',
+    tokenHash: '5'.repeat(64),
+    provisioningVersion: 1,
+    activeUser_ID: secondAdminID,
+    correlationId: '71000000-0000-4000-8000-000000000016'
+  }))
+  const secondAdministrator = new cds.User({
+    id: 'second.pm@example.invalid',
+    roles: ['authenticated-user', 'PM', 'UserAdmin']
+  })
+  const concurrentAdminRevokes = await Promise.allSettled([
+    service.send({
+      event: 'requestRevoke',
+      data: { userID: PM_ID, reason: 'Concurrent controlled revoke A.', expectedVersion: 1 },
+      user: administrator
+    }),
+    service.send({
+      event: 'requestRevoke',
+      data: { userID: secondAdminID, reason: 'Concurrent controlled revoke B.', expectedVersion: 1 },
+      user: secondAdministrator
+    })
+  ])
+  assert.equal(concurrentAdminRevokes.filter(result => result.status === 'fulfilled').length, 1)
+  const adminRevokeFailure = concurrentAdminRevokes.find(result => result.status === 'rejected')?.reason
+  assert.equal(adminRevokeFailure?.code, 'LAST_USER_ADMIN_REQUIRED')
+  const remainingActiveAdmins = await db.run(
+    SELECT.from('idts.cap.UserOnboardingRequests')
+      .columns('ID')
+      .where({ status_code: 'ACTIVE', requestedRole_code: 'PM', userAdminRequested: true })
+  )
+  assert.equal(remainingActiveAdmins.length, 1)
+  // Restore test-only administrator fixtures so the remaining unrelated checks keep a stable caller.
+  await db.run(UPDATE('idts.cap.Users').set({ active: true }).where({ ID: { in: [PM_ID, secondAdminID] } }))
+  await db.run(UPDATE('idts.cap.UserOnboardingRequests').set({ status_code: 'ACTIVE' }).where({
+    ID: { in: [bootstrapAdminRequestID, secondAdminRequestID] }
+  }))
+
+  await expectRejected(service.send({
+    event: 'approveProvisioning',
+    data: { requestID: created.ID, expectedVersion: 1 },
+    user: administrator
+  }), 409, 'ONBOARDING_VERSION_CONFLICT')
 
   await expectRejected(service.send({
     event: 'verifySapIdentity',
     data: { token: regenerated.token },
-    user: new cds.User({
-      id: 'mutable-login-name',
-      roles: ['authenticated-user'],
-      attr: {
-        email: 'controlled.test@example.invalid',
-        origin: 'sap.default',
-        iss: 'https://issuer.example.invalid',
-        user_uuid: 'stable-user-uuid-001'
-      }
-    })
+    user: xsuaaUser()
   }), 409, 'INVITATION_ALREADY_USED')
 
   await expectRejected(service.send({

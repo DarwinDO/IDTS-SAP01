@@ -45,6 +45,7 @@
 						<Column width="10rem"><Text text="{i18n>status}"/></Column>
 						<Column width="12rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>expiresAt}"/></Column>
 						<Column minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>deliveryIssue}"/></Column>
+						<Column width="13rem" hAlign="End"><Text text="{i18n>actions}"/></Column>
 					</columns>
 					<items>
 						<ColumnListItem type="Inactive">
@@ -59,6 +60,29 @@
 									state="{path: 'requests>status_code', formatter: 'formatter.statusState'}"/>
 								<Text text="{path: 'requests>expiresAt', formatter: 'formatter.dateTime'}"/>
 								<ObjectStatus text="{requests>lastErrorSummary}" state="Error"/>
+								<HBox justifyContent="End" renderType="Bare">
+									<Button
+										icon="sap-icon://accept"
+										tooltip="{i18n>approveProvisioning}"
+										visible="{= ${requests>status_code} === 'PENDING_APPROVAL' }"
+										press=".onApproveProvisioning"/>
+									<Button
+										icon="sap-icon://edit"
+										tooltip="{i18n>changeRole}"
+										visible="{= ${requests>status_code} === 'ACTIVE' }"
+										press=".onOpenRoleChange"/>
+									<Button
+										icon="sap-icon://decline"
+										type="Negative"
+										tooltip="{i18n>revokeAccess}"
+										visible="{= ${requests>status_code} === 'ACTIVE' }"
+										press=".onOpenRevoke"/>
+									<Button
+										icon="sap-icon://refresh"
+										tooltip="{i18n>retryProvisioning}"
+										visible="{= ${requests>status_code} === 'RETRYABLE_FAILURE' }"
+										press=".onRetryAccessOperation"/>
+								</HBox>
 							</cells>
 						</ColumnListItem>
 					</items>

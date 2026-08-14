@@ -1,8 +1,8 @@
 # IDTS User Administration UI
 
-Standalone SAPUI5 application for selected PM users who also hold the `UserAdmin` capability. It lists controlled onboarding requests and invokes `UserAdministrationService.requestOnboarding` to queue one invitation for exactly one PM, Tester, or Developer business role.
+Standalone SAPUI5 application for selected PM users who also hold the `UserAdmin` capability. It supports controlled invitation and identity verification, human approval, access-operation monitoring, role change, retry, and revoke for exactly one PM, Tester, or Developer business role.
 
-The UI is not an authorization boundary by itself. Its HTML5 routes require the XSUAA `UserAdmin` scope, and CAP additionally verifies PM + UserAdmin plus a matching active internal PM. The app does not collect SAP passwords, create SAP identities, assign BTP Role Collections, or expose raw provider errors.
+The UI is not an authorization boundary by itself. Its HTML5 routes require the XSUAA `UserAdmin` scope, and CAP additionally verifies PM + UserAdmin plus a matching active internal PM. The app never collects SAP passwords or calls SAP authorization APIs directly. CAP writes a versioned operation journal and a separate least-privilege broker is the only component allowed to reconcile BTP Role Collections. The real SAP provider adapter and credentials are disabled/not present in this source candidate; local tests use a fake provider, so this README is not a live provisioning claim.
 
 Local verification:
 

@@ -1,18 +1,19 @@
 'use strict'
 
 const crypto = require('node:crypto')
+const { validatedXsuaaIdentityFromRequestUser } = require('./validated-xsuaa-identity')
 
 function identityKeyFromRequestUser (user) {
-  const attr = user?.attr || {}
-  const origin = bounded(attr.origin, 120)
-  const issuer = bounded(attr.iss || attr.issuer, 500)
-  const subject = bounded(attr.user_uuid, 255)
-  if (!origin || !issuer || !subject) return null
+  const validated = validatedXsuaaIdentityFromRequestUser(user)
+  if (!validated.complete) return null
+
+  const { origin, issuer, subject, platformUserId } = validated
 
   return {
     origin,
     issuer,
     subject,
+    platformUserId,
     keyHash: identityKeyHash({ origin, issuer, subject })
   }
 }
@@ -51,6 +52,7 @@ function selectActiveUserForRequest (users, requestUser, options = {}) {
 }
 
 function hasPartialExternalIdentity (user) {
+  if (user?.authInfo !== undefined && user?.authInfo !== null) return true
   const attr = user?.attr || {}
   return [attr.origin, attr.iss, attr.issuer, attr.user_uuid, attr.sub]
     .some(value => typeof value === 'string' && value.trim())
@@ -65,15 +67,10 @@ function normalize (value) {
   return typeof value === 'string' ? value.trim().toLowerCase() : null
 }
 
-function bounded (value, maxLength) {
-  if (typeof value !== 'string') return null
-  const normalized = value.trim()
-  return normalized && normalized.length <= maxLength ? normalized : null
-}
-
 module.exports = {
   identityKeyHash,
   identityKeyFromRequestUser,
   hasPartialExternalIdentity,
-  selectActiveUserForRequest
+  selectActiveUserForRequest,
+  validatedXsuaaIdentityFromRequestUser
 }

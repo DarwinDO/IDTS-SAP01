@@ -130,7 +130,7 @@ function identitySnapshotFrom (user, invitation) {
   const identity = identityKeyFromRequestUser(user)
   const emailNormalized = normalizeEmail(attr.email)
 
-  if (!identity || !emailNormalized) {
+  if (!identity || !identity.platformUserId || !emailNormalized) {
     throw contractError('IDENTITY_CLAIMS_INCOMPLETE', 'SAP identity claims are incomplete.')
   }
   if (emailNormalized !== normalizeEmail(invitation?.targetEmailNormalized)) {
@@ -141,6 +141,7 @@ function identitySnapshotFrom (user, invitation) {
     origin: identity.origin,
     issuer: identity.issuer,
     subject: identity.subject,
+    platformUserId: identity.platformUserId,
     emailNormalized
   }
 }

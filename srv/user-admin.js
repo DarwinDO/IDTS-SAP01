@@ -17,7 +17,20 @@ const { scheduleImmediateEmailOutbox } = require('./email/worker')
 const { identityKeyHash, selectActiveUserForRequest } = require('./auth/identity-map')
 const { isXsuaaRuntime } = require('./auth/platform-role')
 
-const OPEN_STATUSES = ['INVITED', 'IDENTITY_VERIFIED', 'PROVISIONING']
+const OPEN_STATUSES = [
+  'INVITED',
+  'IDENTITY_VERIFIED',
+  'PENDING_APPROVAL',
+  'PROVISION_QUEUED',
+  'PROVISIONING',
+  'ROLE_CHANGE_QUEUED',
+  'ROLE_CHANGING',
+  'REVOKE_QUEUED',
+  'REVOKING',
+  'RETRYABLE_FAILURE',
+  'BLOCKED_MANUAL_REVIEW',
+  'ACTIVE'
+]
 
 class UserAdministrationService extends cds.ApplicationService {
   async init () {
@@ -25,6 +38,10 @@ class UserAdministrationService extends cds.ApplicationService {
     this.on('requestOnboarding', req => requestOnboarding(req))
     this.on('verifySapIdentity', req => verifySapIdentity(req))
     this.on('searchOnboarding', req => searchOnboarding(req))
+    this.on('approveProvisioning', req => approveProvisioning(req))
+    this.on('requestRoleChange', req => requestRoleChange(req))
+    this.on('requestRevoke', req => requestRevoke(req))
+    this.on('retryAccessOperation', req => retryAccessOperation(req))
     return super.init()
   }
 }
@@ -42,6 +59,12 @@ async function searchOnboarding (req) {
       'userAdminRequested',
       'status_code',
       'expiresAt',
+      'verifiedAt',
+      'provisionedAt',
+      'revokedAt',
+      'provisioningVersion',
+      'activeUser_ID',
+      'latestOperation_ID',
       'lastErrorCode',
       'lastErrorSummary'
     )
@@ -181,16 +204,23 @@ async function verifySapIdentity (req) {
       .where({ externalIdentityKeyHash: identityKeyHashValue })
   )
   if (linkedUser) throw serviceError(409, 'EXTERNAL_IDENTITY_ALREADY_LINKED', 'SAP identity is already linked to an IDTS user.')
+  const emailMatches = (await tx.run(SELECT.from('idts.cap.Users').columns('ID', 'email')))
+    .filter(user => normalizeEmail(user.email) === invitation.targetEmailNormalized)
+  if (emailMatches.length > 0) {
+    throw serviceError(409, 'EMAIL_RECONCILIATION_REQUIRED', 'An existing IDTS user requires identity reconciliation.')
+  }
 
   const verifiedAt = (req.timestamp || new Date()).toISOString()
   const updated = await tx.run(
     UPDATE('idts.cap.UserOnboardingRequests').set({
-      status_code: 'IDENTITY_VERIFIED',
+      status_code: 'PENDING_APPROVAL',
+      provisioningVersion: 1,
       consumedAt: verifiedAt,
       verifiedAt,
       identityOrigin: identity.origin,
       identityIssuer: identity.issuer,
       identitySubject: identity.subject,
+      identityPlatformUserId: identity.platformUserId,
       identityKeyHash: identityKeyHashValue,
       identityEmailNormalized: identity.emailNormalized,
       lastErrorCode: null,
@@ -201,11 +231,299 @@ async function verifySapIdentity (req) {
 
   return onboardingResult({
     ...invitation,
-    status_code: 'IDENTITY_VERIFIED',
+    status_code: 'PENDING_APPROVAL',
+    provisioningVersion: 1,
     verifiedAt,
     identityOrigin: identity.origin,
     identitySubject: identity.subject
   })
+}
+
+async function approveProvisioning (req) {
+  const tx = cds.tx(req)
+  const administrator = await requireActiveUserAdministrator(req, tx)
+  const request = await readOnboardingRequest(tx, req.data.requestID)
+  assertExpectedVersion(request, req.data.expectedVersion)
+  if (request.status_code !== 'PENDING_APPROVAL') {
+    throw serviceError(409, 'ONBOARDING_STATE_CONFLICT', 'The onboarding request is not awaiting approval.')
+  }
+
+  const nextVersion = request.provisioningVersion + 1
+  const correlationId = cds.utils.uuid()
+  const operationID = cds.utils.uuid()
+  const changed = await tx.run(
+    UPDATE('idts.cap.UserOnboardingRequests').set({
+      status_code: 'PROVISION_QUEUED',
+      provisioningVersion: nextVersion,
+      approvedAt: (req.timestamp || new Date()).toISOString(),
+      approvedBy_ID: administrator.ID,
+      latestOperation_ID: operationID,
+      lastErrorCode: null,
+      lastErrorSummary: null
+    }).where({
+      ID: request.ID,
+      status_code: 'PENDING_APPROVAL',
+      provisioningVersion: request.provisioningVersion
+    })
+  )
+  if (changed !== 1) throw serviceError(409, 'ONBOARDING_VERSION_CONFLICT', 'The onboarding request changed. Reload and try again.')
+
+  await insertAccessOperation(tx, {
+    ID: operationID,
+    request,
+    operationType: 'PROVISION',
+    requestedByID: administrator.ID,
+    expectedVersion: nextVersion,
+    correlationId
+  })
+  await insertIdentityAudit(tx, {
+    operationID,
+    requestID: request.ID,
+    actorID: administrator.ID,
+    action: 'APPROVE_PROVISIONING',
+    fromState: request.status_code,
+    toState: 'PROVISION_QUEUED',
+    correlationId,
+    summary: 'Provisioning approved and queued.'
+  })
+
+  return onboardingResult({
+    ...request,
+    status_code: 'PROVISION_QUEUED',
+    provisioningVersion: nextVersion,
+    correlationId
+  })
+}
+
+async function requestRoleChange (req) {
+  const access = assertRequestedAccess(req.data.requestedRole, req.data.userAdminRequested)
+  const reason = normalizeReason(req.data.reason)
+  const tx = cds.tx(req)
+  const administrator = await requireActiveUserAdministrator(req, tx)
+  const { user, request } = await readActiveProvisionedUser(tx, req.data.userID)
+  assertExpectedVersion(request, req.data.expectedVersion)
+  if (request.requestedRole_code === access.requestedRole && request.userAdminRequested === access.userAdminRequested) {
+    throw serviceError(409, 'ACCESS_ALREADY_DESIRED', 'The requested access is already active.')
+  }
+  await assertLastAdministratorSafety(tx, request, access)
+  return queueFailClosedAccessChange(req, tx, {
+    administrator,
+    request,
+    user,
+    operationType: 'CHANGE_ROLE',
+    queuedState: 'ROLE_CHANGE_QUEUED',
+    requestedRole: access.requestedRole,
+    userAdminRequested: access.userAdminRequested,
+    reason
+  })
+}
+
+async function requestRevoke (req) {
+  const reason = normalizeReason(req.data.reason)
+  const tx = cds.tx(req)
+  const administrator = await requireActiveUserAdministrator(req, tx)
+  const { user, request } = await readActiveProvisionedUser(tx, req.data.userID)
+  assertExpectedVersion(request, req.data.expectedVersion)
+  await assertLastAdministratorSafety(tx, request, { requestedRole: null, userAdminRequested: false })
+  return queueFailClosedAccessChange(req, tx, {
+    administrator,
+    request,
+    user,
+    operationType: 'REVOKE',
+    queuedState: 'REVOKE_QUEUED',
+    requestedRole: request.requestedRole_code,
+    userAdminRequested: request.userAdminRequested,
+    reason
+  })
+}
+
+async function retryAccessOperation (req) {
+  const tx = cds.tx(req)
+  const administrator = await requireActiveUserAdministrator(req, tx)
+  const operation = await tx.run(
+    SELECT.one.from('idts.cap.UserAccessOperations').where({ ID: req.data.operationID })
+  )
+  if (!operation) throw serviceError(404, 'ACCESS_OPERATION_NOT_FOUND', 'Access operation was not found.')
+  const request = await readOnboardingRequest(tx, operation.onboardingRequest_ID)
+  assertExpectedVersion(request, req.data.expectedVersion)
+  if (operation.state !== 'RETRYABLE_FAILURE' || request.status_code !== 'RETRYABLE_FAILURE') {
+    throw serviceError(409, 'ACCESS_OPERATION_NOT_RETRYABLE', 'The access operation cannot be retried.')
+  }
+  const nextVersion = request.provisioningVersion + 1
+  const changed = await tx.run(
+    UPDATE('idts.cap.UserAccessOperations').set({
+      state: 'PENDING',
+      expectedVersion: nextVersion,
+      idempotencyKey: provisioningIdempotencyKey(request.ID, operation.operationType, nextVersion),
+      nextAttemptAt: null,
+      leaseTokenHash: null,
+      leasedAt: null,
+      leaseExpiresAt: null,
+      safeResultCode: null,
+      safeResultSummary: null
+    }).where({ ID: operation.ID, state: 'RETRYABLE_FAILURE' })
+  )
+  if (changed !== 1) throw serviceError(409, 'ONBOARDING_VERSION_CONFLICT', 'The access operation changed. Reload and try again.')
+  const queuedState = queuedStateFor(operation.operationType)
+  const requestChanged = await tx.run(UPDATE('idts.cap.UserOnboardingRequests').set({
+    status_code: queuedState,
+    provisioningVersion: nextVersion,
+    latestOperation_ID: operation.ID,
+    lastErrorCode: null,
+    lastErrorSummary: null
+  }).where({ ID: request.ID, provisioningVersion: request.provisioningVersion }))
+  if (requestChanged !== 1) throw serviceError(409, 'ONBOARDING_VERSION_CONFLICT', 'The onboarding request changed. Reload and try again.')
+  await insertIdentityAudit(tx, {
+    operationID: operation.ID,
+    requestID: request.ID,
+    actorID: administrator.ID,
+    action: 'RETRY_ACCESS_OPERATION',
+    fromState: request.status_code,
+    toState: queuedState,
+    correlationId: operation.correlationId,
+    summary: 'Access operation queued for a bounded retry.'
+  })
+  return onboardingResult({ ...request, status_code: queuedState, provisioningVersion: nextVersion })
+}
+
+async function queueFailClosedAccessChange (req, tx, options) {
+  const nextVersion = options.request.provisioningVersion + 1
+  const correlationId = cds.utils.uuid()
+  const operationID = cds.utils.uuid()
+  const now = (req.timestamp || new Date()).toISOString()
+  const userChanged = await tx.run(UPDATE('idts.cap.Users').set({ active: false }).where({ ID: options.user.ID, active: true }))
+  if (userChanged !== 1) throw serviceError(409, 'ACCESS_USER_CHANGED', 'The user access record changed. Reload and try again.')
+  await tx.run(UPDATE('idts.cap.AuthSessions').set({ revokedAt: now }).where({
+    user_ID: options.user.ID,
+    revokedAt: null
+  }))
+  const requestPatch = {
+    requestedRole_code: options.requestedRole,
+    userAdminRequested: options.userAdminRequested,
+    status_code: options.queuedState,
+    provisioningVersion: nextVersion,
+    lastErrorCode: null,
+    lastErrorSummary: null
+  }
+  const changed = await tx.run(UPDATE('idts.cap.UserOnboardingRequests').set(requestPatch).where({
+    ID: options.request.ID,
+    status_code: 'ACTIVE',
+    provisioningVersion: options.request.provisioningVersion
+  }))
+  if (changed !== 1) throw serviceError(409, 'ONBOARDING_VERSION_CONFLICT', 'The access record changed. Reload and try again.')
+  await insertAccessOperation(tx, {
+    ID: operationID,
+    request: { ...options.request, requestedRole_code: options.requestedRole, userAdminRequested: options.userAdminRequested },
+    operationType: options.operationType,
+    requestedByID: options.administrator.ID,
+    expectedVersion: nextVersion,
+    correlationId
+  })
+  await insertIdentityAudit(tx, {
+    operationID,
+    requestID: options.request.ID,
+    actorID: options.administrator.ID,
+    targetUserID: options.user.ID,
+    action: options.operationType === 'REVOKE' ? 'REQUEST_REVOKE' : 'REQUEST_ROLE_CHANGE',
+    fromState: options.request.status_code,
+    toState: options.queuedState,
+    correlationId,
+    summary: options.reason
+  })
+  return onboardingResult({
+    ...options.request,
+    ...requestPatch,
+    correlationId
+  })
+}
+
+async function readOnboardingRequest (tx, ID) {
+  const request = await tx.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID }))
+  if (!request) throw serviceError(404, 'ONBOARDING_REQUEST_NOT_FOUND', 'Onboarding request was not found.')
+  return request
+}
+
+async function readActiveProvisionedUser (tx, userID) {
+  const user = await tx.run(SELECT.one.from('idts.cap.Users').where({ ID: userID, active: true }))
+  if (!user) throw serviceError(404, 'ACTIVE_USER_NOT_FOUND', 'Active user was not found.')
+  const request = await tx.run(
+    SELECT.one.from('idts.cap.UserOnboardingRequests').where({ activeUser_ID: user.ID, status_code: 'ACTIVE' })
+  )
+  if (!request) throw serviceError(409, 'ACTIVE_ACCESS_NOT_RECONCILED', 'Active access is not reconciled.')
+  return { user, request }
+}
+
+function assertExpectedVersion (request, expectedVersion) {
+  if (!Number.isInteger(expectedVersion) || expectedVersion < 0 || request.provisioningVersion !== expectedVersion) {
+    throw serviceError(409, 'ONBOARDING_VERSION_CONFLICT', 'The onboarding request changed. Reload and try again.')
+  }
+}
+
+async function assertLastAdministratorSafety (tx, request, desiredAccess) {
+  const removesUserAdmin = request.userAdminRequested === true && desiredAccess.userAdminRequested !== true
+  if (!removesUserAdmin) return
+  const activeAdmins = await tx.run(
+    SELECT.from('idts.cap.UserOnboardingRequests')
+      .columns('ID')
+      .where({ status_code: 'ACTIVE', requestedRole_code: 'PM', userAdminRequested: true })
+      .forUpdate()
+  )
+  if (activeAdmins.length <= 1) {
+    throw serviceError(409, 'LAST_USER_ADMIN_REQUIRED', 'The last active UserAdmin cannot be removed.')
+  }
+}
+
+async function insertAccessOperation (tx, options) {
+  await tx.run(INSERT.into('idts.cap.UserAccessOperations').entries({
+    ID: options.ID,
+    onboardingRequest_ID: options.request.ID,
+    operationType: options.operationType,
+    state: 'PENDING',
+    requestedBy_ID: options.requestedByID,
+    idempotencyKey: provisioningIdempotencyKey(options.request.ID, options.operationType, options.expectedVersion),
+    expectedVersion: options.expectedVersion,
+    desiredRole_code: options.request.requestedRole_code,
+    desiredUserAdmin: options.request.userAdminRequested === true,
+    correlationId: options.correlationId,
+    attemptCount: 0
+  }))
+}
+
+async function insertIdentityAudit (tx, options) {
+  await tx.run(INSERT.into('idts.cap.UserIdentityAuditEvents').entries({
+    ID: cds.utils.uuid(),
+    operation_ID: options.operationID || null,
+    onboardingRequest_ID: options.requestID,
+    actor_ID: options.actorID || null,
+    targetUser_ID: options.targetUserID || null,
+    action: options.action,
+    result: 'QUEUED',
+    fromState: options.fromState,
+    toState: options.toState,
+    correlationId: options.correlationId,
+    detailsSummary: options.summary
+  }))
+}
+
+function provisioningIdempotencyKey (requestID, operationType, expectedVersion) {
+  return crypto.createHash('sha256')
+    .update(JSON.stringify([requestID, operationType, expectedVersion]))
+    .digest('hex')
+}
+
+function queuedStateFor (operationType) {
+  if (operationType === 'REVOKE') return 'REVOKE_QUEUED'
+  if (operationType === 'CHANGE_ROLE') return 'ROLE_CHANGE_QUEUED'
+  return 'PROVISION_QUEUED'
+}
+
+function normalizeReason (value) {
+  if (typeof value !== 'string') throw serviceError(400, 'ACCESS_CHANGE_REASON_REQUIRED', 'A reason is required.')
+  const reason = value.trim()
+  if (!reason || reason.length > 500 || /[\r\n]/.test(reason)) {
+    throw serviceError(400, 'ACCESS_CHANGE_REASON_REQUIRED', 'A valid reason is required.')
+  }
+  return reason
 }
 
 async function resolveActiveRequester (tx, req) {
@@ -240,6 +558,9 @@ function onboardingResult (row) {
     status: row.status_code,
     expiresAt: row.expiresAt,
     verifiedAt: row.verifiedAt || null,
+    provisionedAt: row.provisionedAt || null,
+    revokedAt: row.revokedAt || null,
+    provisioningVersion: Number.isInteger(row.provisioningVersion) ? row.provisioningVersion : 0,
     correlationId: row.correlationId
   }
 }
@@ -278,3 +599,7 @@ module.exports = UserAdministrationService
 module.exports.requestOnboarding = requestOnboarding
 module.exports.verifySapIdentity = verifySapIdentity
 module.exports.searchOnboarding = searchOnboarding
+module.exports.approveProvisioning = approveProvisioning
+module.exports.requestRoleChange = requestRoleChange
+module.exports.requestRevoke = requestRevoke
+module.exports.retryAccessOperation = retryAccessOperation

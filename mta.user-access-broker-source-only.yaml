@@ -1,0 +1,23 @@
+_schema-version: 3.3.0
+ID: idts-user-access-broker-source-candidate
+version: 0.1.0
+description: "IDTS user access broker SOURCE-ONLY / NOT DEPLOYMENT-AUTHORIZED packaging candidate."
+
+modules:
+  - name: idts-user-access-broker-source-candidate
+    type: nodejs
+    path: broker
+    parameters:
+      instances: 1
+      no-route: true
+      buildpack: nodejs_buildpack
+      memory: 256M
+      disk-quota: 256M
+      health-check-type: http
+      health-check-http-endpoint: /health
+    properties:
+      IDTS_ACCESS_BROKER_ENABLED: false
+    build-parameters:
+      builder: npm-ci
+
+resources: []

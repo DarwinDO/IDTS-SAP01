@@ -13,6 +13,7 @@ const userAdminSource = fs.readFileSync(path.join(root, 'srv/user-admin.js'), 'u
 assert.match(schema, /externalIdentityOrigin\s*:\s*String\(120\)/)
 assert.match(schema, /externalIdentityIssuer\s*:\s*String\(500\)/)
 assert.match(schema, /externalIdentitySubject\s*:\s*String\(255\)/)
+assert.match(schema, /identityPlatformUserId\s*:\s*String\(255\)/)
 assert.match(schema, /externalIdentityKeyHash\s*:\s*String\(64\)/)
 assert.match(schema, /@assert\.unique\.userExternalIdentity:\s*\[\s*externalIdentityKeyHash\s*\]/)
 for (const source of [authSource, helperSource, userAdminSource]) {
@@ -25,45 +26,86 @@ const {
   selectActiveUserForRequest
 } = require('../../srv/auth/identity-map')
 
+function xsuaaUser ({
+  origin,
+  issuer,
+  userUuid,
+  platformUserId = '11111111-1111-4111-8111-111111111111',
+  sub = 'forbidden-sub-fallback',
+  email
+}) {
+  return {
+    id: 'mutable-login-name',
+    attr: { email },
+    authInfo: {
+      token: {
+        origin,
+        issuer,
+        userId: sub,
+        payload: {
+          user_id: platformUserId,
+          user_uuid: userUuid,
+          sub,
+          email
+        }
+      }
+    }
+  }
+}
+
 const requestUser = {
-  id: 'mutable-login-name',
-  attr: {
-    email: 'Renamed.User@Example.Invalid',
+  ...xsuaaUser({
     origin: 'sap.default',
     issuer: 'https://issuer.example.invalid',
-    user_uuid: 'Stable-Subject-01'
-  }
+    userUuid: 'Stable-Subject-01',
+    email: 'Renamed.User@Example.Invalid'
+  })
 }
 const identity = identityKeyFromRequestUser(requestUser)
 assert.equal(identity.origin, 'sap.default')
 assert.equal(identity.issuer, 'https://issuer.example.invalid')
 assert.equal(identity.subject, 'Stable-Subject-01')
+assert.equal(identity.platformUserId, '11111111-1111-4111-8111-111111111111')
 assert.match(identity.keyHash, /^[a-f0-9]{64}$/)
 assert.notEqual(
   identityKeyHash({ origin: 'a', issuer: 'b\0c', subject: 'd' }),
   identityKeyHash({ origin: 'a\0b', issuer: 'c', subject: 'd' })
 )
 
-const uuidIdentity = identityKeyFromRequestUser({
-  id: 'mutable-login-name',
-  attr: {
+const uuidIdentity = identityKeyFromRequestUser(xsuaaUser({
     origin: 'idts-ias-pilot',
     issuer: 'https://issuer.example.invalid',
-    user_uuid: 'stable-user-uuid',
+    userUuid: 'stable-user-uuid',
     sub: 'stable-subject'
-  }
-})
+}))
 assert.equal(uuidIdentity.subject, 'stable-user-uuid')
 
-const subjectIdentity = identityKeyFromRequestUser({
-  id: 'mutable-login-name',
-  attr: {
+const subjectIdentity = identityKeyFromRequestUser(xsuaaUser({
     origin: 'idts-ias-pilot',
     issuer: 'https://issuer.example.invalid',
+    userUuid: undefined,
     sub: 'stable-subject'
-  }
-})
+}))
 assert.equal(subjectIdentity, null)
+
+for (const missing of ['origin', 'issuer', 'userUuid']) {
+  const values = {
+    origin: 'sap.default',
+    issuer: 'https://issuer.example.invalid',
+    userUuid: 'stable-user-uuid'
+  }
+  values[missing] = undefined
+  assert.equal(identityKeyFromRequestUser(xsuaaUser(values)), null)
+}
+
+assert.equal(identityKeyFromRequestUser({
+  id: 'mutable-login-name',
+  attr: {
+    origin: 'sap.default',
+    issuer: 'https://issuer.example.invalid',
+    user_uuid: 'attr-only-must-not-be-authority'
+  }
+}), null)
 
 const renamedLinkedUser = {
   ID: '10000000-0000-0000-0000-000000000001',

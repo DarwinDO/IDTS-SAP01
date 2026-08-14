@@ -44,7 +44,7 @@ const originalImpl = cds.env.requires.auth.impl
 cds.env.requires.auth.kind = 'xsuaa'
 delete cds.env.requires.auth.impl
 
-check('XSUAA descriptor has all business and technical role templates', () => {
+check('XSUAA descriptor separates human role templates from the broker technical authority', () => {
   const descriptor = JSON.parse(read('xs-security.json'))
   assert.deepEqual(
     descriptor['role-templates'].map(role => role.name).sort(),
@@ -56,10 +56,16 @@ check('XSUAA descriptor has all business and technical role templates', () => {
       '$XSAPPNAME.DEVELOPER',
       '$XSAPPNAME.OutboxProcessor',
       '$XSAPPNAME.PM',
+      '$XSAPPNAME.ProvisioningBroker',
       '$XSAPPNAME.TESTER',
       '$XSAPPNAME.UserAdmin'
     ]
   )
+  assert.equal(descriptor['role-templates'].some(role => role.name === 'ProvisioningBroker'), false)
+  const brokerScope = descriptor.scopes.find(scope => scope.name === '$XSAPPNAME.ProvisioningBroker')
+  assert.deepEqual(brokerScope['grant-as-authority-to-apps'], [
+    '$XSAPPNAME(application,idts-user-access-broker)'
+  ])
 })
 
 check('exactly one matching XSUAA role aligns with the IDTS database role', () => {
@@ -112,10 +118,18 @@ check('XSUAA identity key requires the pinned immutable user_uuid claim', () => 
   }), null)
   assert.equal(identityKeyFromRequestUser({
     id: 'mutable-login-name',
-    attr: {
-      origin: 'sap.default',
-      iss: 'https://issuer.example.invalid',
-      user_uuid: 'stable-user-uuid'
+    attr: { email: 'mutable@example.invalid' },
+    authInfo: {
+      token: {
+        origin: 'sap.default',
+        issuer: 'https://issuer.example.invalid',
+        userId: 'forbidden-sub-fallback',
+        payload: {
+          user_id: '11111111-1111-4111-8111-111111111111',
+          user_uuid: 'stable-user-uuid',
+          sub: 'forbidden-sub-fallback'
+        }
+      }
     }
   })?.subject, 'stable-user-uuid')
 })
