@@ -6741,3 +6741,11 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Root cause: the command omitted `-s all` even though the current model exposes `AuthService`, `ProvisioningBrokerService`, `BugService`, and `UserAdministrationService`.
 - Resolution: keep the source unchanged and rerun the EDMX compile as `npx cds compile srv --to edmx -s all`; rerun the other parallel checks with individually captured results because the first orchestration stopped before reporting their outputs.
 - Status/owner: command-level issue only; no CAP, database, artifact, platform, or business-data mutation occurred.
+
+### 2026-08-14 — UA-R1 repository full-test wrapper is absent
+
+- Classification: test-harness/tooling issue.
+- Symptom: the finishing gate command `npm test` exited immediately with `Missing script: "test"`.
+- Root cause: the root `package.json` does not define a generic `test` script; IDTS exposes named `qa:*` verification scripts instead.
+- Resolution: no test or product mutation occurred from the failed wrapper. Use the focused User Administration, broker, onboarding, immutable-identity, email, agent-rule, secret-scan, QA-depth, CAP compile, HANA compile, and UI5 build commands recorded in this session as the exact verification set.
+- Status/owner: open test-harness improvement only; UA-R1 product checks are independently enumerated and green. No BTP, HANA, XSUAA, IAS, Git-history rewrite, credential, or business-data mutation occurred.
