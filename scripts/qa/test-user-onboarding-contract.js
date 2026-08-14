@@ -124,8 +124,12 @@ function main () {
   const security = JSON.parse(fs.readFileSync(path.join(__dirname, '../../xs-security.json'), 'utf8'))
   const userAdminScope = security.scopes.find(scope => scope.name === '$XSAPPNAME.UserAdmin')
   const userAdminTemplate = security['role-templates'].find(template => template.name === 'UserAdmin')
+  const userAdminCollections = (security['role-collections'] || [])
+    .filter(collection => collection.name === 'IDTS_USER_ADMIN')
   assert.ok(userAdminScope)
   assert.deepEqual(userAdminTemplate?.['scope-references'], ['$XSAPPNAME.UserAdmin'])
+  assert.equal(userAdminCollections.length, 1)
+  assert.deepEqual(userAdminCollections[0]['role-template-references'], ['$XSAPPNAME.UserAdmin'])
   assert.deepEqual(
     security['role-templates']
       .filter(template => ['Tester', 'Developer', 'PM'].includes(template.name))

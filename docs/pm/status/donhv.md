@@ -6749,3 +6749,27 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Root cause: the root `package.json` does not define a generic `test` script; IDTS exposes named `qa:*` verification scripts instead.
 - Resolution: no test or product mutation occurred from the failed wrapper. Use the focused User Administration, broker, onboarding, immutable-identity, email, agent-rule, secret-scan, QA-depth, CAP compile, HANA compile, and UI5 build commands recorded in this session as the exact verification set.
 - Status/owner: open test-harness improvement only; UA-R1 product checks are independently enumerated and green. No BTP, HANA, XSUAA, IAS, Git-history rewrite, credential, or business-data mutation occurred.
+
+### 2026-08-14 — UA-R2 BTP readiness session expired
+
+- Classification: environment blocker.
+- Symptom: `npm run btp:demo:check` stopped before inventory because CF CLI reported that its authentication token had expired or been revoked. A sanitized `btp list accounts/subaccount` wrapper also returned an authentication/command failure before emitting inventory.
+- Root cause: the previously authenticated local CF and SAP BTP CLI sessions are no longer valid.
+- Resolution: no recovery, deployment, start/stop, database, or platform mutation was attempted. Re-authentication must be completed through the previously designated human-login task, then the exact read-only readiness command can be rerun.
+- Status/owner: pending human CF and SAP BTP SSO re-authentication; local source/diff preparation may continue independently. No credential, token, endpoint, account identifier, or personal identifier was recorded.
+
+### 2026-08-14 — UA-R2 predefined UserAdmin Role Collection TDD red evidence
+
+- Classification: expected test-first security configuration finding.
+- Symptom: `node scripts/qa/test-user-onboarding-contract.js` failed with `0 !== 1` after requiring exactly one predefined `IDTS_USER_ADMIN` Role Collection.
+- Root cause: `xs-security.json` defined the `UserAdmin` scope and role template but did not yet define the corresponding predefined Role Collection.
+- Resolution: add the SAP-supported `role-collections` entry referencing only `$XSAPPNAME.UserAdmin`, then rerun the same test and XSUAA descriptor checks.
+- Status/owner: RED/GREEN complete. The exact contract and JSON parse checks pass with one predefined `IDTS_USER_ADMIN` Role Collection referencing only the `UserAdmin` role template. No XSUAA service update, role assignment, credential, or platform mutation occurred.
+
+### 2026-08-14 — UA-R2 auth QA script-name mismatch
+
+- Classification: transient test-harness invocation issue.
+- Symptom: the first parallel verification wrapper stopped at npm lookup because `qa:auth-foundation:programmatic` is not a defined package script.
+- Root cause: the wrapper used the test file's domain name instead of the repository script name `qa:auth:programmatic`.
+- Resolution: no test body or mutation ran from the invalid command; rerun the verification set with `npm run qa:auth:programmatic` and individually capture every result.
+- Status/owner: fixed in the verification command; no product, artifact, platform, credential, or data mutation occurred.

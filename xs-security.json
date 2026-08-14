@@ -73,5 +73,14 @@
       ],
       "attribute-references": []
     }
+  ],
+  "role-collections": [
+    {
+      "name": "IDTS_USER_ADMIN",
+      "description": "Selected IDTS Project Managers allowed to administer user access",
+      "role-template-references": [
+        "$XSAPPNAME.UserAdmin"
+      ]
+    }
   ]
 }
