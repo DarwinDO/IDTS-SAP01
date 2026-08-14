@@ -310,6 +310,30 @@ async function main () {
     authorizationClient.request({ method: 'TRACE', path: '/sap/rest/authorization/v2/roles' }),
     error => error?.code === 'PROVIDER_DENIED'
   )
+  let deniedMethodTokenReads = 0
+  let deniedMethodFetches = 0
+  const methodRestrictedClient = createSapAuthorizationApiClient({
+    apiUrl: api.apiUrl,
+    minIntervalMs: 0,
+    tokenProvider: {
+      getAccessToken: async () => {
+        deniedMethodTokenReads += 1
+        return 'must-not-be-requested'
+      }
+    },
+    fetchImpl: async () => {
+      deniedMethodFetches += 1
+      return { ok: true, status: 204 }
+    }
+  })
+  for (const method of ['POST', 'DELETE']) {
+    await assert.rejects(
+      methodRestrictedClient.request({ method, path: '/Groups/controlled-group', body: method === 'POST' ? {} : undefined }),
+      error => error?.code === 'PROVIDER_DENIED'
+    )
+  }
+  assert.equal(deniedMethodTokenReads, 0)
+  assert.equal(deniedMethodFetches, 0)
   const missingResourceClient = createSapAuthorizationApiClient({
     apiUrl: api.apiUrl,
     minIntervalMs: 0,

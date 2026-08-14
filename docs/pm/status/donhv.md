@@ -6717,3 +6717,27 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Resolution: no shell command or mutation executed; switch to the registered `shell_command` tool and continue with the same read-only inspection.
 - Follow-up: the combined Git/artifact search returned exit code 1 after emitting the requested Git baseline because an optional `rg` evidence scan did not provide a stable success status in the mixed PowerShell pipeline. The baseline output was retained only as orientation, and subsequent checks must use focused commands with explicit per-command exit handling.
 - Status/owner: fixed in the orchestration call; no product, platform, credential, or business-data state changed. This status entry is the only repository change from the failed read-only attempts.
+
+### 2026-08-14 — Broker dependency inventory quoting issue
+
+- Classification: transient tooling issue.
+- Symptom: the first read-only broker dependency inventory stopped at PowerShell parse time with an unterminated-string error.
+- Root cause: the ad-hoc `rg` regular expression mixed PowerShell and regex quote characters in one command string.
+- Resolution: no inventory command or mutation executed; rerun with fixed-string searches and separate package-lock checks.
+- Status/owner: contained in the verification wrapper; no product, artifact, platform, credential, or business-data state changed.
+
+### 2026-08-14 — UA-R1 transport allowlist TDD red evidence
+
+- Classification: expected test-first security finding.
+- Symptom: `node scripts/qa/test-user-access-broker-runtime.js` failed with `Missing expected rejection` after adding the UA-R1 negative test for `POST` and `DELETE`.
+- Root cause: `broker/lib/sap-authorization-api-client.js` still allowed `GET`, `POST`, `PATCH`, and `DELETE`, while the reviewed production user-management contract emits only `GET` and `PATCH`.
+- Resolution: restricted the generic SAP user-management transport to `GET` and `PATCH`; the same focused runtime test then passed and proved `POST`/`DELETE` are rejected before token acquisition or network dispatch.
+- Status/owner: RED and GREEN phases verified locally; no external API, credential, platform, HANA, user, or Role Collection mutation occurred.
+
+### 2026-08-14 — UA-R1 CAP multi-service compile invocation issue
+
+- Classification: transient tooling issue.
+- Symptom: the first UA-R1 parallel compile gate stopped because `npx cds compile srv --to edmx` reported multiple service definitions and required an explicit service selection.
+- Root cause: the command omitted `-s all` even though the current model exposes `AuthService`, `ProvisioningBrokerService`, `BugService`, and `UserAdministrationService`.
+- Resolution: keep the source unchanged and rerun the EDMX compile as `npx cds compile srv --to edmx -s all`; rerun the other parallel checks with individually captured results because the first orchestration stopped before reporting their outputs.
+- Status/owner: command-level issue only; no CAP, database, artifact, platform, or business-data mutation occurred.

@@ -1,6 +1,6 @@
 'use strict'
 
-const ALLOWED_METHODS = new Set(['GET', 'POST', 'PATCH', 'DELETE'])
+const ALLOWED_METHODS = new Set(['GET', 'PATCH'])
 
 function createSapAuthorizationApiClient ({
   apiUrl,
