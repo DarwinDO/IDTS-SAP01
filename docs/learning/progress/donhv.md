@@ -8,6 +8,7 @@ Effective date: 2026-07-13 (Asia/Bangkok). Initial historical debt: 0. Record th
 | --- | --- | ---: | ---: | ---: | --- | --- | --- | --- | --- | --- |
 | 2026-07-23 | Create/lifecycle and exact workflow action audit | 3 | 0 | 0 | 90% | PASS | PASS | PASS | PASS | `docs/pm/evidence/idts-89/knowledge-gate-donhv-2026-07-23.md` |
 | 2026-07-23 | Assignment and developer capability data | 3 | 0 | 2 | 90% | PASS | PASS | PASS | PASS | `docs/pm/evidence/idts-90/knowledge-gate-donhv-2026-07-23.md` |
+| 2026-08-12 | Notification and email outbox | 3 | 4 | 0 | 100% | PASS | PASS | PASS | PASS | `docs/pm/evidence/idts-82/knowledge-gate-donhv-email-2026-08-12.md` |
 
 ## Vietnamese
 
@@ -18,3 +19,4 @@ Ngày hiệu lực: 13/07/2026 (Asia/Bangkok). Nợ lịch sử ban đầu: 0. G
 | Ngày | Flow | Cơ bản | Ngày không code | Flow thêm | Điểm | Critical | Debug | Teach-back | Kết quả | Evidence |
 | --- | --- | ---: | ---: | ---: | --- | --- | --- | --- | --- | --- |
 | 2026-07-23 | Create/lifecycle và audit action workflow 1-1 | 3 | 0 | 0 | 90% | PASS | PASS | PASS | PASS | `docs/pm/evidence/idts-89/knowledge-gate-donhv-2026-07-23.md` |
+| 2026-08-12 | Notification và email outbox | 3 | 4 | 0 | 100% | PASS | PASS | PASS | PASS | `docs/pm/evidence/idts-82/knowledge-gate-donhv-email-2026-08-12.md` |
