@@ -42,6 +42,7 @@ class UserAdministrationService extends cds.ApplicationService {
     this.on('requestRoleChange', req => requestRoleChange(req))
     this.on('requestRevoke', req => requestRevoke(req))
     this.on('retryAccessOperation', req => retryAccessOperation(req))
+    this.on('reconcileAccessOperation', req => reconcileAccessOperation(req))
     return super.init()
   }
 }
@@ -338,6 +339,27 @@ async function requestRevoke (req) {
 }
 
 async function retryAccessOperation (req) {
+  return requeueAccessOperation(req, {
+    requiredState: 'RETRYABLE_FAILURE',
+    errorCode: 'ACCESS_OPERATION_NOT_RETRYABLE',
+    errorMessage: 'The access operation cannot be retried.',
+    auditAction: 'RETRY_ACCESS_OPERATION',
+    auditSummary: 'Access operation queued for a bounded retry.'
+  })
+}
+
+async function reconcileAccessOperation (req) {
+  return requeueAccessOperation(req, {
+    requiredState: 'BLOCKED_MANUAL_REVIEW',
+    requiredSafeResultCode: 'AMBIGUOUS_PROVIDER_OUTCOME',
+    errorCode: 'ACCESS_OPERATION_NOT_RECONCILABLE',
+    errorMessage: 'The access operation cannot be reconciled.',
+    auditAction: 'RECONCILE_ACCESS_OPERATION',
+    auditSummary: 'Access operation queued for provider-state reconciliation.'
+  })
+}
+
+async function requeueAccessOperation (req, options) {
   const tx = cds.tx(req)
   const administrator = await requireActiveUserAdministrator(req, tx)
   const operation = await tx.run(
@@ -346,22 +368,30 @@ async function retryAccessOperation (req) {
   if (!operation) throw serviceError(404, 'ACCESS_OPERATION_NOT_FOUND', 'Access operation was not found.')
   const request = await readOnboardingRequest(tx, operation.onboardingRequest_ID)
   assertExpectedVersion(request, req.data.expectedVersion)
-  if (operation.state !== 'RETRYABLE_FAILURE' || request.status_code !== 'RETRYABLE_FAILURE') {
-    throw serviceError(409, 'ACCESS_OPERATION_NOT_RETRYABLE', 'The access operation cannot be retried.')
+  if (
+    operation.state !== options.requiredState ||
+    request.status_code !== options.requiredState ||
+    (options.requiredSafeResultCode && operation.safeResultCode !== options.requiredSafeResultCode)
+  ) {
+    throw serviceError(409, options.errorCode, options.errorMessage)
   }
   const nextVersion = request.provisioningVersion + 1
+  const operationWhere = { ID: operation.ID, state: options.requiredState }
+  if (options.requiredSafeResultCode) operationWhere.safeResultCode = options.requiredSafeResultCode
   const changed = await tx.run(
     UPDATE('idts.cap.UserAccessOperations').set({
       state: 'PENDING',
       expectedVersion: nextVersion,
       idempotencyKey: provisioningIdempotencyKey(request.ID, operation.operationType, nextVersion),
       nextAttemptAt: null,
+      completedAt: null,
       leaseTokenHash: null,
       leasedAt: null,
       leaseExpiresAt: null,
       safeResultCode: null,
-      safeResultSummary: null
-    }).where({ ID: operation.ID, state: 'RETRYABLE_FAILURE' })
+      safeResultSummary: null,
+      providerCorrelationHash: null
+    }).where(operationWhere)
   )
   if (changed !== 1) throw serviceError(409, 'ONBOARDING_VERSION_CONFLICT', 'The access operation changed. Reload and try again.')
   const queuedState = queuedStateFor(operation.operationType)
@@ -377,11 +407,11 @@ async function retryAccessOperation (req) {
     operationID: operation.ID,
     requestID: request.ID,
     actorID: administrator.ID,
-    action: 'RETRY_ACCESS_OPERATION',
+    action: options.auditAction,
     fromState: request.status_code,
     toState: queuedState,
     correlationId: operation.correlationId,
-    summary: 'Access operation queued for a bounded retry.'
+    summary: options.auditSummary
   })
   return onboardingResult({ ...request, status_code: queuedState, provisioningVersion: nextVersion })
 }
@@ -603,3 +633,4 @@ module.exports.approveProvisioning = approveProvisioning
 module.exports.requestRoleChange = requestRoleChange
 module.exports.requestRevoke = requestRevoke
 module.exports.retryAccessOperation = retryAccessOperation
+module.exports.reconcileAccessOperation = reconcileAccessOperation

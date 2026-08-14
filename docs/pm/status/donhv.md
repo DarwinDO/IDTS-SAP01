@@ -6773,3 +6773,62 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Root cause: the wrapper used the test file's domain name instead of the repository script name `qa:auth:programmatic`.
 - Resolution: no test body or mutation ran from the invalid command; rerun the verification set with `npm run qa:auth:programmatic` and individually capture every result.
 - Status/owner: fixed in the verification command; no product, artifact, platform, credential, or data mutation occurred.
+
+### 2026-08-14 - UA-R2 privileged broker release coupling and missing reconciliation TDD evidence
+
+- Classification: product/release-design defects confirmed by expected test-first failures.
+- Symptom: the focused broker runtime test proved that the ordinary `mta.yaml` still contains the privileged broker and its API-access/XSUAA resources; the CAP/UI contract tests proved that no `reconcileAccessOperation` action or UI control exists for `BLOCKED_MANUAL_REVIEW`; the programmatic test received no reconciliation result because the handler is absent.
+- Root cause: the broker lifecycle was embedded in the main application MTA even though its privileged credential has a separate approval lifecycle, while only bounded retry for `RETRYABLE_FAILURE` was implemented and ambiguous provider outcomes had no explicit read-before-write reconciliation path.
+- Resolution plan: remove broker resources/modules from the ordinary release descriptor, place them in a dedicated pre-mutation/non-deploy-authorized descriptor, and add a PM+UserAdmin reconciliation action/UI path that requeues only an exact `BLOCKED_MANUAL_REVIEW` operation for broker read-before-write convergence. Blind provider retry remains prohibited.
+- Status/owner: RED and GREEN verified locally. The ordinary release no longer contains the privileged broker dependency; a separate disabled pre-mutation descriptor owns that future lifecycle. Retry and manual reconciliation now have distinct server-side state guards, confirmations, audit actions, and UI visibility. Focused onboarding/access/broker/UI tests, CAP/HANA compile, auth regression, secret scan, and `git diff --check` pass. No BTP, XSUAA, HANA, role, user, credential, deployment, or business-data mutation occurred.
+
+### 2026-08-14 - CF SSO terminal input and inline-helper tooling issue
+
+- Classification: environment/tooling usability issue.
+- Symptom: the visible `cf login --sso` prompt does not accept typing or paste in DonHV's terminal. An attempted inline encoded PowerShell helper was rejected by the local command policy before execution.
+- Root cause: the interactive terminal path is not usable in this desktop setup, and opaque inline credential-handling logic is intentionally blocked from execution.
+- Resolution: use the reviewable `scripts/btp/cf-login-sso-from-clipboard.ps1` helper. DonHV only clicks Copy in the SAP browser; the helper reads the temporary code in process memory, pipes it to CF CLI stdin, clears the clipboard/value in `finally`, emits only PASS/FAIL, and never sends the code through chat, command arguments, files, or logs.
+- Status/owner: helper and static no-secret contract added; focused verification and live human-copy check are in progress. No platform mutation occurred.
+
+### 2026-08-14 - CF SSO helper clipboard-clear compatibility defect
+
+- Classification: tooling/security defect found in the first live helper run.
+- Symptom: CF authentication and authenticated API verification passed, but `Set-Clipboard -Value ''` raised `ArgumentNullException`, leaving the copied temporary passcode potentially present in the clipboard.
+- Root cause: Windows PowerShell binds the empty-string literal as a null clipboard value for this cmdlet.
+- Resolution: immediately overwrite the live clipboard with one whitespace character, then change the helper to use the same non-secret overwrite in `finally`; update the contract test first so the old empty-string behavior fails.
+- Status/owner: live clipboard overwrite PASS; the corrected helper contract now requires a one-whitespace overwrite that Windows PowerShell accepts. RED/GREEN focused verification complete. CF login itself succeeded and no platform configuration/data mutation occurred.
+
+### 2026-08-14 - UA-R2 readiness target mismatch and independent security findings
+
+- Classification: environment blocker plus source security review findings.
+- Symptom: after authenticated CF API access passed, `npm run btp:demo:check` returned CAP/AppRouter FAIL and HTTP 404 for health, ready, protected API and Web. Independent review also found that reconciliation accepted every blocked permanent failure, retained the prior provider correlation hash, and the clipboard helper accepted an overly broad derived host/output contract.
+- Root cause: the SSO login did not yet prove the intended org/space remained targeted. In source, `BLOCKED_MANUAL_REVIEW` combines ambiguous and deterministic failures, while the requeue helper checked only the generic state; cleanup omitted `providerCorrelationHash`; the helper host regex was not anchored to SAP's official HANA domain.
+- Resolution plan: verify/restore only the exact intended CF target before any recovery decision; constrain reconcile to `AMBIGUOUS_PROVIDER_OUTCOME`, clear prior correlation state, anchor the passcode host derivation, and ensure sensitive variables are nulled before clipboard cleanup. Apply each change through focused RED/GREEN tests.
+- Status/owner: readiness recovery not attempted; TDD remediation in progress. No platform, HANA, XSUAA, credential, user, role, route, app-state, or data mutation occurred.
+
+### 2026-08-14 - UA-R2 bounded readiness recovery timed out
+
+- Classification: environment/tooling issue.
+- Symptom: the previously approved `npm run btp:demo:prepare` workflow exceeded the 60-second command timeout without returning a completion result.
+- Root cause: not yet established; the workflow may still have completed one or more approved app/service state-recovery steps before the local timeout.
+- Resolution: do not rerun preparation blindly. Perform sanitized read-only app/service/readiness readback first, then classify the exact state.
+- Resolution evidence: the first readback showed both existing apps at 1/1 with `/health` 200 and `/ready` 503 while HANA was waking. A later transient read returned CAP 404, so no mutation was retried; the next exact read showed CAP 1/1. Final independent `npm run btp:demo:check` returned CAP 1/1, AppRouter 1/1, `/health` 200, `/ready` 200, anonymous protected API 401, Web 200, and `DEMO READY`.
+- Actual approved recovery mutations: start the existing CAP app, start the existing AppRouter, and request `serviceStopped=false` on the existing HANA Cloud service. The script timed out locally while waiting; no blind retry occurred, and no additional restart was needed after final readback.
+- Status/owner: resolved. No DB deployer, HDI deploy, seed, schema migration, SQL/DML, application deployment, XSUAA update, identity, role, credential, Jira, or Drive mutation occurred.
+
+### 2026-08-14 - Codex task readback timeout
+
+- Classification: transient tooling issue.
+- Symptom: a read-only attempt to read the coordinating Codex task produced no response within the bounded wait and was terminated.
+- Root cause: task-readback tooling did not return in the allotted interval; no project or platform command was involved.
+- Resolution: stop the readback cell rather than repeatedly poll it; rely on the already delivered sanitized handoff and continue local verification.
+- Status/owner: contained. No repository, Git, Jira, Drive, BTP, credential, user, role, or business-data mutation resulted.
+
+### 2026-08-14 - UA-R2 source remediation and exact re-review
+
+- Classification: security and release-boundary verification.
+- Work completed: restricted reconciliation to exact ambiguous provider outcomes, cleared stale provider correlation state on every requeue, hardened the CF SSO clipboard helper to the anchored SAP HANA Cloud API domain and status-only output, and kept the privileged broker outside the ordinary application MTA in a disabled candidate descriptor.
+- Verification: onboarding, access provisioning, broker runtime, auth 28/28, User Administration UI contract, immutable identity, CAP EDMX, HANA compile, UI5 lint/test/build, secret scan, agent rules, QA-depth, clipboard helper contract, and `git diff --check` all pass. CAP compile retains only the known unrelated attachment vocabulary warning.
+- Independent review: exact snapshot returned 0 Critical / 0 Major / 0 Minor and GO for source commit/review only. Deployment, HANA/XSUAA migration, API credential creation and live provisioning remain separate approval gates.
+- Runtime readiness: bounded recovery restored `DEMO READY` with CAP 1/1, AppRouter 1/1, `/health` 200, `/ready` 200, anonymous protected API 401 and Web 200.
+- Mutation ledger: approved state recovery started the two existing apps and requested `serviceStopped=false` on the existing HANA service. No application/DB/HDI deployment, seed, schema/data write, XSUAA change, credential, identity, role assignment, Jira or Drive mutation occurred.

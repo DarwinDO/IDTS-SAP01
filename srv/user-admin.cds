@@ -66,6 +66,11 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     expectedVersion: Integer
   ) returns OnboardingResult;
 
+  action reconcileAccessOperation(
+    operationID    : UUID,
+    expectedVersion: Integer
+  ) returns OnboardingResult;
+
   @readonly
   entity OnboardingRequests as projection on db.UserOnboardingRequests {
     ID,

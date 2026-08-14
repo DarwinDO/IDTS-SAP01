@@ -300,10 +300,56 @@ async function main () {
   assert.equal(retriedOperation.expectedVersion, 3)
   assert.notEqual(retriedOperation.idempotencyKey, queuedOperation.idempotencyKey)
   assert.equal(retriedOperation.safeResultCode, null)
+  assert.equal(retriedOperation.completedAt, null)
   assert.equal(queuedOperation.expectedVersion, 2)
   assert.equal(queuedOperation.desiredRole_code, 'TESTER')
   assert.equal(queuedOperation.desiredUserAdmin, false)
   assert.equal(queuedOperation.idempotencyKey.length, 64)
+  await expectRejected(service.send({
+    event: 'reconcileAccessOperation',
+    data: { operationID: queuedOperation.ID, expectedVersion: 3 },
+    user: administrator
+  }), 409, 'ACCESS_OPERATION_NOT_RECONCILABLE')
+
+  await db.run(UPDATE('idts.cap.UserAccessOperations').set({
+    state: 'BLOCKED_MANUAL_REVIEW',
+    completedAt: '2026-08-13T00:05:00.000Z',
+    safeResultCode: 'PROVIDER_DENIED',
+    safeResultSummary: 'Provider rejected the operation.',
+    providerCorrelationHash: '9'.repeat(64)
+  }).where({ ID: queuedOperation.ID }))
+  await db.run(UPDATE('idts.cap.UserOnboardingRequests').set({
+    status_code: 'BLOCKED_MANUAL_REVIEW'
+  }).where({ ID: created.ID }))
+  await expectRejected(service.send({
+    event: 'retryAccessOperation',
+    data: { operationID: queuedOperation.ID, expectedVersion: 3 },
+    user: administrator
+  }), 409, 'ACCESS_OPERATION_NOT_RETRYABLE')
+  await expectRejected(service.send({
+    event: 'reconcileAccessOperation',
+    data: { operationID: queuedOperation.ID, expectedVersion: 3 },
+    user: administrator
+  }), 409, 'ACCESS_OPERATION_NOT_RECONCILABLE')
+  await db.run(UPDATE('idts.cap.UserAccessOperations').set({
+    safeResultCode: 'AMBIGUOUS_PROVIDER_OUTCOME',
+    safeResultSummary: 'Provider result requires reconciliation.'
+  }).where({ ID: queuedOperation.ID }))
+  const reconciled = await service.send({
+    event: 'reconcileAccessOperation',
+    data: { operationID: queuedOperation.ID, expectedVersion: 3 },
+    user: administrator
+  })
+  assert.equal(reconciled.status, 'PROVISION_QUEUED')
+  assert.equal(reconciled.provisioningVersion, 4)
+  const reconciledOperation = await db.run(
+    SELECT.one.from('idts.cap.UserAccessOperations').where({ ID: queuedOperation.ID })
+  )
+  assert.equal(reconciledOperation.state, 'PENDING')
+  assert.equal(reconciledOperation.expectedVersion, 4)
+  assert.equal(reconciledOperation.completedAt, null)
+  assert.equal(reconciledOperation.safeResultCode, null)
+  assert.equal(reconciledOperation.providerCorrelationHash, null)
 
   const provisionedUserID = '71000000-0000-4000-8000-000000000010'
   const provisionedSessionID = '71000000-0000-4000-8000-000000000011'
@@ -338,12 +384,12 @@ async function main () {
       requestedRole: 'DEVELOPER',
       userAdminRequested: false,
       reason: 'Move controlled user to the development workflow.',
-      expectedVersion: 3
+      expectedVersion: 4
     },
     user: administrator
   })
   assert.equal(roleChange.status, 'ROLE_CHANGE_QUEUED')
-  assert.equal(roleChange.provisioningVersion, 4)
+  assert.equal(roleChange.provisioningVersion, 5)
   const suspendedUser = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: provisionedUserID }))
   const revokedSession = await db.run(SELECT.one.from('idts.cap.AuthSessions').where({ ID: provisionedSessionID }))
   assert.equal(suspendedUser.active, false)
@@ -360,12 +406,12 @@ async function main () {
     data: {
       userID: provisionedUserID,
       reason: 'Controlled access is no longer required.',
-      expectedVersion: 4
+      expectedVersion: 5
     },
     user: administrator
   })
   assert.equal(revoke.status, 'REVOKE_QUEUED')
-  assert.equal(revoke.provisioningVersion, 5)
+  assert.equal(revoke.provisioningVersion, 6)
   const revokedUser = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: provisionedUserID }))
   assert.equal(revokedUser.active, false)
   const revokeOperation = await db.run(

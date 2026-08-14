@@ -61,29 +61,6 @@ modules:
     requires:
       - name: idts-sap01-db
 
-  - name: idts-user-access-broker
-    type: nodejs
-    path: broker
-    parameters:
-      instances: 1
-      no-route: true
-      buildpack: nodejs_buildpack
-      memory: 256M
-      disk-quota: 256M
-      health-check-type: http
-      health-check-http-endpoint: /health
-    properties:
-      IDTS_ACCESS_BROKER_ENABLED: false
-      IDTS_ACCESS_BROKER_POLL_INTERVAL_MS: 5000
-    build-parameters:
-      builder: npm-ci
-    requires:
-      - name: idts-user-access-broker-auth
-      - name: idts-user-access-broker-api-access
-      - name: srv-api
-        properties:
-          IDTS_BROKER_CAP_URL: ~{srv-url}
-
   - name: idts-sap01-app-content
     type: com.sap.application.content
     path: gen
@@ -220,24 +197,3 @@ resources:
     type: org.cloudfoundry.existing-service
     parameters:
       service-name: idts-sap01-ai-gateway
-
-  - name: idts-user-access-broker-auth
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: xsuaa
-      service-plan: application
-      config:
-        xsappname: idts-user-access-broker
-        tenant-mode: dedicated
-        authorities:
-          - idts-sap01-${org}-${space}.ProvisioningBroker
-        oauth2-configuration:
-          credential-types:
-            - binding-secret
-
-  # Future exact gate creates this broker-only UPS from the securely staged
-  # API credential. CAP, AppRouter, UI, HANA and Job Scheduler never bind it.
-  - name: idts-user-access-broker-api-access
-    type: org.cloudfoundry.existing-service
-    parameters:
-      service-name: idts-user-access-broker-api-access

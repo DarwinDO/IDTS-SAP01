@@ -15,3 +15,5 @@ Identity has two deliberately separate identifiers. `payload.user_uuid` is the G
 This remains a source boundary, not live provisioning evidence. A later credential/read-only reconciliation gate must prove the current landscape returns the expected SCIM record before the disabled adapter can be enabled.
 
 `mta.user-access-broker-source-only.yaml` is intentionally a one-module, no-route, zero-resource packaging descriptor with `IDTS_ACCESS_BROKER_ENABLED=false`. It proves that broker source can be packaged independently; it is explicitly not deployment-authorized and cannot provision without separately reviewed bindings and a verified mutation contract.
+
+The ordinary `mta.yaml` deliberately excludes the privileged broker and both broker-only service dependencies. `mta.user-access-broker-candidate.yaml` is the separate pre-mutation topology candidate; it stays disabled and is not deployment-authorized. This separation prevents an ordinary IDTS release from requiring or receiving the BTP administration credential.

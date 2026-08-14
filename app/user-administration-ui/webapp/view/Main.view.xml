@@ -82,6 +82,11 @@
 										tooltip="{i18n>retryProvisioning}"
 										visible="{= ${requests>status_code} === 'RETRYABLE_FAILURE' }"
 										press=".onRetryAccessOperation"/>
+									<Button
+										icon="sap-icon://synchronize"
+										tooltip="{i18n>reconcileProvisioning}"
+										visible="{= ${requests>status_code} === 'BLOCKED_MANUAL_REVIEW' }"
+										press=".onReconcileAccessOperation"/>
 								</HBox>
 							</cells>
 						</ColumnListItem>

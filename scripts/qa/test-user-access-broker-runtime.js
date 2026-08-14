@@ -198,16 +198,28 @@ async function main () {
 
   const repositoryRoot = path.join(__dirname, '../..')
   const mta = YAML.parse(fs.readFileSync(path.join(repositoryRoot, 'mta.yaml'), 'utf8'))
-  const brokerModule = mta.modules.find(module => module.name === 'idts-user-access-broker')
-  assert.ok(brokerModule, 'the separate broker module must be declared')
+  assert.equal(mta.modules.some(module => module.name === 'idts-user-access-broker'), false,
+    'the ordinary IDTS release must not depend on the privileged broker')
+  assert.equal(mta.resources.some(resource => resource.name === 'idts-user-access-broker-api-access'), false)
+  assert.equal(mta.resources.some(resource => resource.name === 'idts-user-access-broker-auth'), false)
+
+  const brokerMta = YAML.parse(fs.readFileSync(
+    path.join(repositoryRoot, 'mta.user-access-broker-candidate.yaml'),
+    'utf8'
+  ))
+  assert.match(brokerMta.description, /PRE-MUTATION CANDIDATE \/ NOT DEPLOYMENT-AUTHORIZED/)
+  assert.equal(brokerMta.modules.length, 1)
+  const brokerModule = brokerMta.modules.find(module => module.name === 'idts-user-access-broker')
+  assert.ok(brokerModule, 'the dedicated broker candidate must declare the broker module')
   assert.equal(brokerModule.path, 'broker')
   assert.equal(brokerModule.parameters['no-route'], true)
   assert.equal(brokerModule.properties.IDTS_ACCESS_BROKER_ENABLED, false)
   assert.deepEqual(brokerModule.requires.map(requirement => requirement.name).sort(), [
     'idts-user-access-broker-api-access',
-    'idts-user-access-broker-auth',
-    'srv-api'
+    'idts-user-access-broker-auth'
   ])
+  assert.equal('IDTS_BROKER_CAP_URL' in brokerModule.properties, false,
+    'the private CAP route must be materialized only in a later exact mutation gate')
   const mainSrv = mta.modules.find(module => module.name === 'idts-sap01-srv')
   const mainAppRouter = mta.modules.find(module => module.name === 'idts-sap01-approuter')
   for (const module of [mainSrv, mainAppRouter]) {
@@ -215,10 +227,10 @@ async function main () {
     assert.equal(names.includes('idts-user-access-broker-api-access'), false)
     assert.equal(names.includes('idts-user-access-broker-auth'), false)
   }
-  const apiAccessResource = mta.resources.find(resource => resource.name === 'idts-user-access-broker-api-access')
+  const apiAccessResource = brokerMta.resources.find(resource => resource.name === 'idts-user-access-broker-api-access')
   assert.equal(apiAccessResource.type, 'org.cloudfoundry.existing-service')
   assert.equal(apiAccessResource.parameters['service-name'], 'idts-user-access-broker-api-access')
-  const brokerAuthResource = mta.resources.find(resource => resource.name === 'idts-user-access-broker-auth')
+  const brokerAuthResource = brokerMta.resources.find(resource => resource.name === 'idts-user-access-broker-auth')
   assert.equal(brokerAuthResource.parameters.service, 'xsuaa')
   assert.equal(brokerAuthResource.parameters.config.xsappname, 'idts-user-access-broker')
   assert.deepEqual(brokerAuthResource.parameters.config.authorities, [

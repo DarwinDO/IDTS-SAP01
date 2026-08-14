@@ -111,6 +111,7 @@ Rule:
 * No active `Users` row, BTP Role Collection assignment, or provisioning success is created before identity verification completes.
 * Identity verification moves the request to human approval. Only an approved, version-matched operation may enter the provisioning queue; `ACTIVE` is set only after the separate broker reads back the exact desired Role Collection state.
 * Role change and revoke fail closed: IDTS disables the local user and revokes active `AuthSessions` before external reconciliation. UserAdmin remains valid only with PM, multiple business roles are rejected, and the last active UserAdmin cannot be removed.
+* A retry is available only for a provider result classified as retryable. An ambiguous provider result moves to `BLOCKED_MANUAL_REVIEW` and may continue only after a PM+UserAdmin explicitly requests reconciliation; the broker must read current provider state before applying a bounded allowlisted delta.
 * CAP stores the operation journal and append-only safe audit events, but never the SAP administration credential or raw provider response. A separate least-privilege broker owns the external authorization API call and accepts only server-side allowlisted roles.
 * Repeated invitation use, concurrent duplicate open invitations, external-identity collisions, multiple business roles, and non-PM UserAdmin requests must fail closed and be auditable.
 

@@ -292,6 +292,7 @@ async function main () {
   assert.match(service, /action requestRoleChange\(/)
   assert.match(service, /action requestRevoke\(/)
   assert.match(service, /action retryAccessOperation\(/)
+  assert.match(service, /action reconcileAccessOperation\(/)
   assert.match(schema, /entity UserAccessOperations/)
   assert.match(schema, /entity UserIdentityAuditEvents/)
   assert.deepEqual(

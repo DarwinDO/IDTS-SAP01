@@ -184,6 +184,17 @@ sap.ui.define([
 			}, "retryQueued");
 		},
 
+		onReconcileAccessOperation: async function (oEvent) {
+			const oRow = this._rowFromEvent(oEvent);
+			if (!oRow || !oRow.latestOperation_ID || !await this._confirm("reconcileConfirmation")) {
+				return;
+			}
+			await this._invokeAction("reconcileAccessOperation", {
+				operationID: oRow.latestOperation_ID,
+				expectedVersion: oRow.provisioningVersion
+			}, "reconcileQueued");
+		},
+
 		_updateInviteState: function () {
 			const oInviteModel = this.getModel("invite");
 			const oInvite = oInviteModel.getData();
