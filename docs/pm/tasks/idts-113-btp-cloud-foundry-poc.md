@@ -87,6 +87,22 @@ auth/history/comment regression, and MTA packaging. Authenticated BTP browser
 smoke is deferred until the combined HANA/integration deployment is ready, so
 this increment does not claim deployed XSUAA acceptance.
 
+## 2026-08-07 demo-readiness recovery
+
+- Initial `npm run btp:demo:check` found CAP and AppRouter started `1/1`,
+  `/health` 200, anonymous `/odata/v4/auth/me` 401 and Web 200, but DB-backed
+  `/ready` 503.
+- `npm run btp:demo:prepare` used the supported HANA service-start operation,
+  waited until `/ready` returned 200, and restarted CAP once to clear stale
+  pooled connections. It did not run the HDI deployer, a database deployment,
+  data import or seed.
+- Fresh independent check-only verification exited 0 with `DEMO READY`:
+  CAP/AppRouter `1/1`, `/health` 200, `/ready` 200, anonymous Auth 401 and Web
+  200. HANA reported `HanaService is ready. All pods are running`; the service
+  broker operation flag remained `update in progress` during the final bounded
+  poll, so the data plane was demo-ready while the control-plane operation was
+  still settling.
+
 ## Migration increment — HANA data and retained integrations
 
 - The exporter uses the authenticated Render CLI instead of copying a
