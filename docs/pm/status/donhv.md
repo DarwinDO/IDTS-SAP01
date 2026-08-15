@@ -7419,3 +7419,25 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Root cause: missing first-match selection and scalar integer cast.
 - Fix status: fixed by selecting the exact option row or the first match before calculating the display range.
 - Platform impact: none; only local CLI help text was read.
+### 2026-08-15 — Dependency security finding: M3C build reports inherited npm vulnerabilities
+
+- Classification: security/dependency issue.
+- Symptom: the full local MTA build reported 26 root-workspace vulnerabilities (including one critical). The production `srv` module reported 7 vulnerabilities (one high and six moderate); UI/AppRouter build workspaces also reported high-severity findings.
+- Scope boundary: root/UI build-time findings are not automatically present in the static HTML5 runtime payload; the `srv` production package is deployable runtime code and requires exact `npm audit --omit=dev --json` classification before deployment.
+- Root cause: dependency tree inherited from the current project/package locks; no new package dependency was added by the User Administration feature or M3B scripts.
+- Fix status: classified. Exact `gen/srv` production audit contains 1 high and 6 moderate findings in the existing `@cap-js/attachments` / Google storage transitive chain. Root production dependency declarations are unchanged versus `origin/dev`; the feature adds test scripts, workspace registration and a static UI build workspace only. This is an inherited baseline risk, not a feature regression. No `npm audit fix`, override, forced upgrade, or lock mutation is authorized implicitly; dependency remediation remains a separate task.
+- Platform impact: none; the build was local and no artifact has been deployed.
+### 2026-08-15 — Test-harness issue: M3C topology denylist matched descriptor prose
+
+- Classification: test-harness issue.
+- Symptom: the first dedicated UI-content topology test failed because the descriptor description explicitly said it contained no AppRouter/XSUAA; the denylist correctly found those words even though no such module/resource existed.
+- Root cause: security-token scanning covered free-text description as well as topology fields.
+- Fix status: fixed by reducing the descriptor description to the positive allowlisted purpose only. The strict whole-file denylist remains unchanged and therefore now guards both topology and prose.
+- Platform impact: none; the test stopped before artifact build or deployment.
+### 2026-08-15 — Build-harness issue: dedicated UI content staging directory was absent
+
+- Classification: build/test-harness issue.
+- Symptom: the first `mbt build -f mta.user-admin-ui-r3c.yaml` stopped at descriptor validation because the generated content-module path `gen/user-admin-ui-r3c` did not yet exist.
+- Root cause: MBT validates every module path before executing the HTML5 module build/copy steps; an empty generated path must be materialized first.
+- Fix status: fixed by creating only that ignored empty staging directory before rerunning the same descriptor. No source content or artifact is synthesized there manually.
+- Platform impact: none; no MTAR was produced and no deployment occurred.
