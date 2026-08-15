@@ -7155,3 +7155,44 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Additional tooling issue: the first narrowly validated recursive removal command for the incomplete dependency folder was blocked by the execution safety policy before it ran. The remediation switched to a recoverable same-shell rename followed by reinstall; no broad delete was attempted.
 - Cleanup note: the later exact-path removal of that quarantined incomplete folder was also blocked by the execution policy before execution. It remains only under ignored `node_modules`; repository status/source are unaffected, and no alternative broad deletion was attempted.
 - Status/owner: under in-session remediation; no HDI, database, BTP or Git mutation occurred.
+
+### 2026-08-15 — M3B HDI simulation preflight wildcard error
+
+- Classification: transient tooling issue.
+- Symptom: the first read-only `rg` inventory returned a Windows invalid-filename error for the literal `mta*.yaml` path while the separate readiness check still completed `DEMO READY`.
+- Root cause: PowerShell/Windows did not expand the wildcard as a file path for `rg`.
+- Resolution: rerun the inventory with `rg --glob 'mta*.yaml'` and exact directory roots. The failed search performed no source, HDI, database or platform mutation.
+- Status/owner: contained in-session.
+
+### 2026-08-15 — M3B HDI staging copy-delete command blocked
+
+- Classification: tooling/safety-policy issue.
+- Symptom: the first local staging command was rejected before launch because it copied the generated payload and then attempted to delete the two forbidden data artifacts.
+- Root cause: the execution safety policy correctly rejected the delete-bearing composition even though the paths were generated staging paths.
+- Resolution: construct the fresh staging tree by positive allowlist copy so the CSV and `.hdbtabledata` files never enter it. No retry of the rejected copy-delete pattern is allowed.
+- Status/owner: contained before execution; local staging, HDI and platform mutation counts remained zero for this failed attempt.
+
+### 2026-08-15 — M3B HDI staging v1 rejected by positive inspector
+
+- Classification: test-harness/packaging issue.
+- Symptom: the first allowlist-copy staging excluded the two new onboarding data artifacts but still contained 122 pre-existing CSV/`.hdbtabledata` files outside the planned working set; the lockfile parser also failed on npm's valid empty-string root key without `ConvertFrom-Json -AsHashTable`.
+- Root cause: the copy boundary was an exclusion filter over the complete generated `src` tree rather than a positive package allowlist, and the inspector used the wrong PowerShell JSON mode for package-lock v3.
+- Resolution: mark staging v1 and its manifest `REJECTED/NEVER_RUN`; create a fresh v2 containing only `.hdiconfig`, `.hdinamespace` and the exact 13 reviewed schema artifacts, and parse the lockfile as a hash table. No CF push, binding, task or HDI simulation had begun.
+- Status/owner: contained locally; external mutation count remained zero.
+
+### 2026-08-15 — M3B HDI simulate-make process did not exit
+
+- Classification: platform/test-harness blocker under investigation.
+- Symptom: the one approved `simulate-make` task reached the HDI container, scheduled exactly 13 deploy files and zero undeploy files, and logged the make step as `ok`, but the Cloud Foundry task remained `RUNNING` beyond the bounded 20-minute wait and emitted no process exit status.
+- Safety result: no simulation retry is allowed. The evidence is classified `AMBIGUOUS` rather than PASS even though the server-side make log reached `ok`.
+- Containment: terminate only the exact temporary task after the bounded timeout, then delete only its exact no-route helper app/binding. Preserve the HDI service and all main apps. Recheck `DEMO READY` and require a separate remediation decision before any future simulation or real migration.
+- Status/owner: open blocker for DonHV; real HDI make/deploy and status initialization remain NO-GO.
+
+### 2026-08-15 — M3B HDI helper-app first cleanup delete returned nonzero
+
+- Classification: platform cleanup issue under readback.
+- Symptom: after the exact hung task was terminated successfully, the first exact `cf delete idts-ua-hdi-sim-20260815 -f` returned nonzero.
+- Safety response: no blind delete retry. Perform sanitized app/task/binding readback first to distinguish termination propagation from a completed or failed deletion.
+- Boundary: never delete the HDI service, routes, main apps or similarly named objects. Any retry requires proof that the same exact no-route helper app remains, has no running task and still owns only the one reviewed HDI binding.
+- Resolution/readback: the exact app remained no-route, the terminated task was no longer running, and the HDI binding count had already become zero. A second exact-name delete was then allowed and succeeded; final helper-app presence is zero.
+- Status/owner: cleanup completed. The simulation result remains `AMBIGUOUS`, and real migration remains blocked.
