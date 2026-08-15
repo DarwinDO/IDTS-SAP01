@@ -7016,3 +7016,11 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Main readiness: final `npm run btp:demo:check` PASS with CAP/AppRouter `1/1`, health/ready `200`, anonymous API `401`, Web `200`, `DEMO READY`.
 - Prohibited mutations remained zero: HANA/HDI/schema/data, main-app deployment, shared XSUAA, Authorization API credential update/create/delete, user/role, IAS/IPS/trust, Jira and Drive.
 - Next owner/gate: M3 must separately review the additive HANA migration, CAP/UI/XSUAA UserAdmin deployment and exact enablement contract. Broker polling remains disabled until CAP endpoint, authority grant, operation state and rollback are all proven.
+
+### 2026-08-15 - UA-R3B M3 broad Git delta output truncation
+
+- Classification: transient tooling/evidence issue.
+- Symptom: a broad `origin/dev...HEAD` Git diff/log inventory exceeded the tool output budget and was truncated before it could serve as complete M3 evidence.
+- Root cause: the feature branch contains a large historical delta, and the initial command requested an unbounded combined summary/name listing.
+- Resolution: discard the truncated output and rerun bounded, allowlisted inventories grouped by commit and target path (`db`, `srv`, `app/user-administration-ui`, XSUAA/MTA and broker). Do not infer completeness from the truncated output.
+- Status/owner: contained; the command was read-only apart from refreshing remote refs. No source, platform, database, identity, role, Jira or Drive mutation occurred.
