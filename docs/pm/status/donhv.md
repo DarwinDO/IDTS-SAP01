@@ -7121,3 +7121,12 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Root cause: the wrapper did not set fail-stop semantics or gate the commit on the prior command's exit code.
 - Resolution: remove the two trailing blank lines, rerun `git diff --check`, and amend the same local commit before push. Future commit wrappers must use explicit exit-code checks instead of assuming semicolon chaining stops.
 - Status/owner: contained locally; no remote push or platform mutation occurred before remediation.
+### 2026-08-15 — UA-R3C M3B XSUAA overlay execution
+
+- Classification: security/configuration delivery plus one tooling/packaging defect.
+- Outcome: XSUAA now contains the reviewed `UserAdmin` and `ProvisioningBroker` scopes, the `UserAdmin` role template, and exactly one read-only `IDTS_USER_ADMIN` Role Collection. The unique selected existing PM retained `IDTS_PM` and received only the overlay; all other users remain without it, and user count stayed 4.
+- Defect observed: the first `cf update-service` attempt used standalone `xs-security.json`; SAP rejected it before apply because `xsappname` is normally merged from `mta.yaml`. The incomplete hash is permanently rejected. Root cause was an execution-package mismatch, not live XSUAA drift.
+- Resolution: supported readback proved live tenant-mode and full OAuth configuration. A corrective full descriptor preserved those values, added only the approved authorization delta, and succeeded once. An ACL-restricted random temporary file was overwritten/deleted; final prefix inventory count was zero. No blind retry occurred.
+- Verification: XSUAA last operation succeeded; both scopes count 1; template count 1; Role Collection count/role count 1/1; selected PM role count 8 -> 9 with exact before/after fingerprints; other-user overlay count 0; broker remains no-route; `npm run btp:demo:check` reports `DEMO READY`.
+- Mutation ledger: XSUAA attempts 2 (first rejected/no apply, second applied), role assignment attempts/successes 1/1; CAP/UI/HANA/HDI, broker enablement, provisioning, shadow-user, IAS/IPS/trust, Jira and Drive mutations 0.
+- Next gate: fresh private-browser login/JWT proof for PM + UserAdmin and negative authorization; do not infer runtime acceptance from configuration readback. CAP/UI deployment, HDI migration and broker enablement remain unapproved.
