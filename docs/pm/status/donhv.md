@@ -7229,3 +7229,179 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Cleanup: first exact app delete returned nonzero; readback proved app present, no running task, no route and binding already absent. One second exact-name delete succeeded. Final helper app/binding counts are zero.
 - Runtime verification: fresh `npm run btp:demo:check` returned CAP/AppRouter `1/1`, health/ready/Web `200`, anonymous protected API `401`, `DEMO READY`.
 - Hard blocker: the live database service is exact plan `hana-free`. Current official SAP HANA Cloud documentation states free tier has no backup/recovery and no storage snapshots. Therefore real HDI make, 14-row status initialization, CAP/UI deployment and broker enablement remain `NO-GO` until DonHV approves and verifies a separate logical recovery mechanism or supplies an environment with SAP-supported backup/recovery.
+
+### 2026-08-15 — User Administration logical-backup runner syntax failure
+
+- Classification: local test-harness/tooling issue.
+- Symptom: the first focused backup-runner test stopped during module parsing with `SyntaxError: Invalid or unexpected token` in the temporary-table SQL builder.
+- Root cause: the final SQL fragment opened with a single quote but was closed with a backtick.
+- Fix status: corrected the delimiter before any CF task, HANA connection, backup export or platform mutation could run.
+- Verification/owner: rerun the focused logical-backup suite and Node syntax check; DonHV workstream remains the owner until both pass.
+
+### 2026-08-15 — Logical-backup preflight emitted unsanitized CF identity/route details
+
+- Classification: tooling/evidence-collection privacy issue.
+- Symptom: the initial combined read-only preflight used raw `cf target`, `cf apps` and `cf services`; the captured terminal output included the authenticated username and full public application routes.
+- Root cause: the preflight command did not pass CF output through the established allowlist sanitizer before returning tool evidence.
+- Fix status: no credential, token, cookie, binding value or private endpoint was read, but the output boundary was broader than approved. All remaining CF checks must capture raw output only in process memory and emit booleans/counts/allowlisted service or app names; no raw target/app/service command output may be returned.
+- Verification/owner: DonHV workstream; sanitized preflight and final evidence must contain no full email or route/domain value. No platform mutation occurred in the affected preflight.
+
+### 2026-08-15 — Logical-backup task could not be created before explicit staging
+
+- Classification: platform execution/test-harness issue.
+- Symptom: the first `cf run-task` returned nonzero and readback proved zero tasks were created.
+- Root cause: `cf push --no-start` uploaded one READY package but produced zero builds and no current droplet on this CF CLI/runtime; a task cannot start without a staged/current droplet.
+- Safety response: no task retry occurred. Sanitized V3 readback proved package count `1`, build count `0`, current droplet absent, metadata/envelope count `0` and no HANA backup code execution.
+- Fix status/owner: perform the already planned explicit stage, verify a unique STAGED build/droplet belongs to the exact app/package, set that exact droplet when required by installed CF v8 semantics, then permit only one actual task creation. Main apps and HDI service remain untouched.
+
+### 2026-08-15 — First logical-backup task failed with over-coarse safe error
+
+- Classification: test-harness/diagnostic issue.
+- Symptom: after explicit staging/current-droplet assignment, the first actual backup task reached `FAILED` and emitted only `IDTS_UA_BACKUP_RESULT=FAIL`; no metadata or encrypted envelope was produced.
+- Root cause status: under investigation. The fixed failure marker protected binding/data privacy but was too coarse to distinguish connect, layout, source read, temporary-table, restore or encryption stages.
+- Safety response: no blind task retry and no raw provider/HANA error output. Add only a fixed allowlisted stage code, rebuild the same bounded helper app, then allow a single diagnostic remediation attempt after exact source/package ownership readback.
+- Mutation state: one failed task, zero encrypted exports, zero migration/HDI make, zero business-table DML and zero permanent HANA object.
+
+#### Safe-stage diagnostic readback
+
+- The corrected second task attempt returned fixed stage `LAYOUT`, with metadata/envelope counts still `0`.
+- This narrows the failure to live Users table/column discovery before any source-row read, temporary-table DDL or DML.
+- The next correction splits only this safe stage into table-query, table-count, column-query and column-contract codes. It continues to suppress the raw HANA error and does not expand database authority or output.
+
+#### Catalog-discovery root cause and least-privilege correction
+
+- The third safe diagnostic returned `TABLE_LOOKUP_COUNT` with metadata/envelope count `0`.
+- Root cause: the bound HDI principal did not expose the target through the `SYS.TABLES` catalog query used only for discovery. No source-row read or temporary-table operation began.
+- Correction: remove catalog dependency and query the exact reviewed physical table name plus the exact 11 legacy columns directly. The SQL read and canonical row-key validation now fail closed if the live artifact differs; no new privilege or service binding is requested.
+
+#### Physical identifier correction
+
+- The fourth task returned safe stage `SOURCE_READ`, still before any row export or temporary-table operation.
+- Root cause: generated `.hdbtable` identifiers are unquoted, so HANA stores the physical table/column identifiers in uppercase. The direct fallback incorrectly quoted mixed-case CDS names.
+- Correction: keep canonical JSON aliases in reviewed CDS casing, but query exact uppercase physical identifiers (`IDTS_CAP_USERS` and the 11 uppercase columns). This matches the existing repository HANA migration contract and does not broaden the selected data.
+
+#### Runtime-principal correction
+
+- The fifth task still returned `SOURCE_READ`, proving connection setup completed but the selected principal could not read the application table.
+- Root cause: the helper selected HDI deployment-owner fields (`hdi_user`/`hdi_password`). For a logical data export, the least-privilege and application-compatible contract is the bound runtime `user`/`password`, which is the principal already used by CAP for business-table reads.
+- Correction: require exactly one binding with runtime credentials and ignore deployment-owner fields. This reduces privilege and preserves the same schema/table/column allowlist.
+
+#### HANA local temporary column-table constraint correction
+
+- The sixth task reached `TEMP_CREATE`, proving the runtime principal successfully read the exact 11-column Users source.
+- Root cause: the candidate defined a primary key on a `LOCAL TEMPORARY COLUMN TABLE`. SAP HANA Cloud SQL Reference states local temporary column tables support creation **without** a primary key; primary keys are supported for local temporary row tables instead.
+- Correction: remove only the primary-key clause. The table remains session-local, column-based and automatically removed when the connection ends; insert/readback digest equality still detects duplicates or missing rows.
+- Official reference: SAP HANA Cloud `CREATE TABLE Statement (Data Definition)`.
+
+### 2026-08-15 — User Administration logical backup and restore rehearsal PASS
+
+- Classification: release-safety recovery gate completed.
+- Result: the final bounded task encrypted exactly `14` live legacy Users rows; HANA session-local restore and local DPAPI decrypt reproduced digest prefix `e7ccf9cd16a2` and the same row count.
+- Data/security: exact eleven-column allowlist; no plaintext row, email, password hash, credential, token, private key or raw provider error entered repo/evidence/log output. The private key exists only as DPAPI CurrentUser ciphertext and the envelope only as AES-GCM/RSA ciphertext in an ACL-restricted directory outside the repo.
+- Cleanup: first exact app delete returned nonzero; sanitized readback proved no running task and the HDI binding already absent. One second exact-name delete succeeded. Final temporary app/binding counts are zero.
+- Runtime verification: fresh `npm run btp:demo:check` returned CAP/AppRouter `1/1`, health/ready/Web `200`, anonymous protected API `401`, `DEMO READY`.
+- Next gate: the encrypted logical recovery prerequisite is PASS for the exact additive Users migration. Proceed only with the reviewed schema-only HDI allowlist; keep all CSV/`.hdbtabledata` and status initialization excluded.
+
+### 2026-08-15 — Generated staging inventory output was too broad
+
+- Classification: tooling/evidence-output issue.
+- Symptom: a recursive file listing of the prior generated HDI staging included ignored `node_modules` and was truncated by the tool output limit.
+- Root cause: the inventory command did not limit itself to the package root and `src/gen` positive allowlist.
+- Resolution: all subsequent staging inspections report only aggregate counts and exact allowlisted artifact names/hashes; dependency trees are verified through lock/audit checks instead of recursive terminal listings.
+- Impact: local output noise only; no source, HANA, CF or Git mutation resulted from the listing.
+### 2026-08-15 — Tooling issue: raw `cf tasks` header exposed authenticated username
+
+- Classification: tooling / evidence-sanitization issue.
+- Symptom: a direct read-only `cf tasks idts-ua-hdi-make-20260815-g1` invocation printed the authenticated CF username in its standard target header before the sanitized task table.
+- Security impact: no password, token, cookie, JWT, service credential, binding value, or private endpoint was exposed; the username is PII and must not be repeated in evidence.
+- Root cause: the command was invoked directly instead of capturing its full output in memory and emitting only allowlisted fields.
+- Fix status: fixed for all subsequent CF readbacks in this session; commands must capture raw CLI output in-process and print only sanitized counts/status booleans.
+- Verification: pending the next wrapped task-log/readback command; no platform mutation resulted from this issue.
+### 2026-08-15 — Test-harness issue: schema postcheck wrapper read the wrong JSON shape
+
+- Classification: test-harness issue.
+- Symptom: the first sanitized post-migration wrapper reported `SCHEMA_POSTCHECK=MISMATCH` while its allowlisted counters showed 14 Users, 14 null external-identity rows, and zero rows in all five new tables.
+- Root cause: the PowerShell wrapper attempted to read new-table counts from a nonexistent nested `tables` property; the inspector intentionally emits those five counts at the JSON top level. Casting missing values to integer also displayed misleading zeros.
+- Fix status: fixed by validating the exact top-level allowlist and rejecting missing/non-numeric values before comparison.
+- Security/data impact: none; this was read-only evidence parsing and performed no HANA mutation.
+- Verification: rerun the corrected wrapper and require `SCHEMA_POSTCHECK=PASS` before any status initialization.
+### 2026-08-15 — Environment cleanup blocker: first exact helper-app deletion did not complete
+
+- Classification: environment/tooling blocker.
+- Symptom: after schema migration and aggregate postcheck passed, the first exact `cf delete` attempt for the temporary no-route HDI helper app returned exit code 1; sanitized readback still found exactly one app.
+- Safety response: no blind retry was performed. Readback before deletion proved zero active tasks and exactly one expected HDI binding. The schema make was not rerun.
+- Root cause: under investigation using only allowlisted CF V3 state/count readback; raw CLI output, account identifiers, routes, GUIDs, environment and credentials remain suppressed.
+- Fix status: open until exact ownership/state is reconfirmed and a bounded cleanup action succeeds.
+- Remaining owner: DonHV workstream agent; main CAP/AppRouter and HANA business data remain untouched.
+
+#### Recurrence during status-initializer cleanup
+
+- The same bounded behavior recurred for `idts-ua-status-init-20260815-g1`: first exact deletion returned exit 1 and left the app present after the expected single HDI binding had been removed.
+- No blind retry is allowed. Cleanup proceeds only after a fresh readback proves the exact app is stopped, unbound, route-free, and has no active task; then one exact retry may remove the residual app shell.
+- The onboarding-status transaction had already committed and a separate inspect-only task proved the exact 14-row catalog before cleanup began.
+### 2026-08-15 — Tooling issue: status-initializer staging copy used the wrong working-directory-relative path
+
+- Classification: tooling issue.
+- Symptom: the first two `Copy-Item` calls could not find the initializer/helper source because the command was executed inside the generated staging directory while using repository-root-relative paths.
+- Root cause: incorrect path anchoring; npm lock/install still completed only for the minimal `hdb` package contract.
+- Fix status: fixed by using exact absolute source and destination paths, followed by an exact generated-staging file allowlist check.
+- Security/platform impact: none; no CF/HANA/Git/Jira/Drive mutation occurred and no source file was overwritten.
+### 2026-08-15 — Environment blocker: status-initializer staging command exceeded the command window
+
+- Classification: environment/tooling blocker.
+- Symptom: exact temporary initializer app push and its single HDI binding succeeded, but the subsequent `cf stage` did not return within the 30-second command window, so no stage exit code was obtained.
+- Safety response: no blind restage/retry is allowed. The workflow switched to sanitized CF V3 build/droplet readback and will wait read-only when state is still `STAGING`.
+- Root cause: Cloud Foundry staging duration exceeded the local command wait window; platform completion state remains to be read back.
+- Fix status: under investigation; proceed only if exactly one build owned by the exact temporary app reaches `STAGED` and its droplet can be matched in memory.
+- Platform impact: bounded to the approved temporary no-route app and one HDI binding; main applications and business data were not changed.
+### 2026-08-15 — Data-initialization blocker: first exact onboarding-status task failed closed
+
+- Classification: data/test-harness blocker.
+- Symptom: the first and only `ua-status-init-g1` task for the exact temporary app reached terminal state `FAILED`.
+- Safety response: no retry was issued. The initializer catches raw database errors, emits only a fixed safe failure marker, and performs transaction rollback after `begin`; post-state must be inspected before any correction.
+- Root cause: confirmed as CF task command selection, not HANA DML. Sanitized V3 readback showed the task command was empty, so Cloud Foundry used the deliberately failing application start command (`process.exit(64)`) and never launched the initializer.
+- Fix status: in progress. Replace request-supplied task commands with two exact, source-controlled Procfile process types (`status-inspect` and `status-init`); validate the fixed allowlist before staging and invoke tasks only by process type.
+- Data impact: no initializer code reached HANA in either failed task. An inspect-only process must still prove the table row count before the first real DML task.
+
+#### Follow-up root cause correction
+
+- Procfile process types were packaged and selected correctly, but the task still stopped before the initializer's safe marker.
+- Sanitized log classification found `MODULE_NOT_FOUND`; allowlisted filename hit counts proved the missing dependency was the checked-in `user-admin-logical-backup-contract.js`, required at module load by the reused HDI database helper.
+- Fix: add exactly that reviewed source dependency to the generated staging allowlist, rebuild the droplet, then require an inspect-only task to succeed before DML.
+- No HANA statement from the initializer executed during this failure.
+### 2026-08-15 — Tooling issue: ad-hoc ESLint 10 invocation has no repository flat config
+
+- Classification: tooling issue.
+- Symptom: after the onboarding-status initializer unit test passed, an ad-hoc `npx eslint` invocation stopped because ESLint 10 could not find `eslint.config.js|mjs|cjs`.
+- Root cause: the repository does not define the ESLint 9/10 flat-config entrypoint for arbitrary root scripts; this is outside the project-supported verification commands.
+- Fix status: closed for this gate by using the repository's focused Node tests, syntax checks, CAP/HANA compile, agent-rules, QA-depth and `git diff --check` gates. No dependency/config change is introduced merely to satisfy the ad-hoc command.
+- Product/platform impact: none; the initializer focused test and Node syntax check passed before the tooling error.
+### 2026-08-15 — Tooling issue: PowerShell task-key introspection used invalid `Sort-Object -join` syntax
+
+- Classification: tooling issue.
+- Symptom: a read-only helper intended to emit only CF task JSON property names failed because `-join` was parsed as a nonexistent `Sort-Object` parameter.
+- Root cause: PowerShell pipeline precedence; the sorted array must be parenthesized before applying the `-join` operator.
+- Fix status: fixed in the next command by using `((... | Sort-Object -Unique) -join ',')`.
+- Platform/security impact: none; the malformed local expression performed no mutation and emitted no raw CF object or credential.
+### 2026-08-15 — UA-R3C M3B additive schema and exact catalog initialization COMPLETE
+
+- Work completed: encrypted legacy-Users backup and session-local restore rehearsal; additive schema-only HDI make; aggregate postcheck; exact 14-row `UserOnboardingStatuses` initialization; inspect-only postcheck; temporary-app cleanup.
+- Result: schema make `SUCCEEDED`; legacy Users 14/14 preserved with all new external identity fields null; five new operational tables created empty; exact status catalog 14/14; runtime returned to `DEMO READY`.
+- Data boundary: no broad `cds deploy`, DB deployer, CSV/`.hdbtabledata`, unrelated seed, drop, truncate, delete, or business-data update was executed. Catalog initialization used one parameterized transaction and exact readback.
+- Cleanup: both temporary no-route helper apps and their HDI bindings are absent. Main CAP/AppRouter remain 1/1 with health/ready/Web 200 and anonymous protected API 401 expected.
+- Evidence: `docs/pm/evidence/user-administration/ua-r3c-m3b-schema-and-status-init.md`.
+- Next handoff: build and review a selective CAP/UI runtime artifact that excludes DB deployer/seed and keeps the provisioning broker disabled until its live provider contract gate.
+### 2026-08-15 — Tooling issue: CAP EDMX compile omitted the required multi-service selector
+
+- Classification: tooling issue.
+- Symptom: `npx cds compile srv --to edmx` stopped because the model contains AuthService, ProvisioningBrokerService, BugService, and UserAdministrationService.
+- Root cause: the command omitted `-s all`, which CAP requires when compiling multiple service definitions to EDMX.
+- Fix status: fixed by rerunning `npx cds compile srv --to edmx -s all`; this does not require source changes.
+- Product/platform impact: none; the failure occurred before compilation output and performed no deployment or data mutation.
+### 2026-08-15 — Documentation issue: M3B evidence used trailing spaces for Markdown line breaks
+
+- Classification: documentation/tooling issue.
+- Symptom: cached `git diff --check` reported four trailing-whitespace lines in the two M3B evidence headers.
+- Root cause: Markdown hard-break spacing was used after Date and Owner fields, conflicting with the repository clean-diff gate.
+- Fix status: fixed by removing the trailing spaces and rerunning cached `git diff --check` before commit.
+- Runtime/platform impact: none.
