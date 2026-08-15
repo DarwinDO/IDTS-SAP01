@@ -1,6 +1,6 @@
 # UA-R3B M2 Broker-Only Deployment Plan
 
-Status: `PRE-MUTATION / EXACT PACKAGE / NOT YET EXECUTED`
+Status: `M2 DEPLOYED / DISABLED / VERIFIED`
 
 ## Frozen inputs
 
@@ -96,3 +96,18 @@ Final rollback proof requires:
 - broker app, broker MTA and dedicated XSUAA absent;
 - UPS exact count `1`, binding count `0`;
 - main srv/AppRouter bindings `6/3` and readiness unchanged.
+
+## Execution result
+
+- Independent pre-mutation review: `0 Critical / 0 Major / 0 Minor` on commit `57492193409735f8f79ecfa796ea66d5550e59d5` and MTAR SHA-256 `44a3d3ce6e94ccc77072287cc1b12ea0604735c8dedd019e28d730ff67f6b668`.
+- Forward deploy attempts: `1`.
+- Broker start attempts: `1`.
+- Rollback attempts: `0`.
+- Broker app: exact count `1`, requested state `STARTED`, running/desired `1/1`, routes `0`.
+- Broker binding set: exactly `idts-user-access-broker-auth` and `idts-user-access-broker-api-access`.
+- Existing UPS: exact count `1`, binding count `1`, bound only to the broker app.
+- Dedicated XSUAA: exact count `1`, binding count `1`, bound only to the broker app.
+- Main srv/AppRouter binding counts: unchanged `6/3`.
+- Main runtime: CAP/AppRouter `1/1`, liveness/readiness `200`, anonymous protected API `401`, Web `200`, `DEMO READY`.
+- Broker remains no-route and `IDTS_ACCESS_BROKER_ENABLED=false` in the checksum-reviewed deployment artifact. M2 did not activate polling or provisioning.
+- No HANA/HDI/schema/data, main-app deployment, shared-XSUAA, user, role, IAS/IPS, trust, API credential, Jira or Drive mutation occurred.

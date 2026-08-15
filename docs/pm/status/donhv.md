@@ -6981,3 +6981,38 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Fresh evidence: broker focused test PASS; isolated `npm ci --omit=dev --ignore-scripts` PASS; npm audit reports 0 vulnerabilities; one new uniquely named replacement MTAR `idts-user-access-broker-r3b1-7023ab2.mtar` was built with SHA-256 `44a3d3ce6e94ccc77072287cc1b12ea0604735c8dedd019e28d730ff67f6b668`; 13 payload files, source-parity mismatches `0`, package and lock engines exact `22.x`, old-engine occurrences `0`, sensitive-pattern hits `0`.
 - Boundary: `90d61cb...d3109` is `REJECTED / NEVER DEPLOY`; no CF/BTP deployment, service, binding, XSUAA, HANA, identity or role mutation occurred during remediation.
 - Next owner/gate: independent exact review must bind its verdict to the new `44a3d3...b668` artifact before M2 mutation.
+
+### 2026-08-15 - UA-R3B M2 CF deploy banner PII exposure
+
+- Classification: tooling/evidence privacy issue.
+- Symptom: the supported `cf deploy` command printed the currently authenticated CF username in its standard deployment banner even though the execution plan did not request identity output.
+- Root cause: the MultiApps CLI includes target actor information in normal stdout by default.
+- Resolution: do not copy the raw deploy banner into repo evidence, Jira, final reports or cross-task messages; retain only sanitized operation outcome/topology counts. Future wrappers should locally filter the actor-bearing banner while preserving exit status and safe progress states.
+- Status/owner: contained after observation. No password, token, cookie, client secret, API credential value or raw binding payload was printed; the disclosed username must be treated as PII and omitted from all further evidence.
+
+### 2026-08-15 - UA-R3B M2 start-wrapper fail-stop defect
+
+- Classification: test-harness/process issue during an approved mutation.
+- Symptom: the target condition evaluated without entering its failure branch, but the success evidence statement omitted whitespace after `Write-Output`; PowerShell raised a command-not-found error and then continued because the wrapper did not set fail-stop behavior. The exact broker `cf start` still executed once and returned exit `0`.
+- Root cause: compressed PowerShell syntax plus missing `$ErrorActionPreference='Stop'` allowed an evidence-formatting error to be non-terminating.
+- Resolution: do not retry start. Perform a fresh independent target/app/topology readback; only the readback may establish success. Future mutation wrappers must set fail-stop and emit target status before entering the mutation statement.
+- Status/owner: start attempt count remains exactly `1`; state verification pending. No main-app, XSUAA configuration, HANA, user or role mutation was introduced by the wrapper error.
+
+### 2026-08-15 - UA-R3B M2 post-start readback parser issue
+
+- Classification: transient test-harness/tooling issue.
+- Symptom: the first read-only post-start V3 wrapper failed at PowerShell parse time because compact `foreach` statements omitted whitespace around `in`.
+- Root cause: over-compressed command formatting; no CF API request from the malformed portion could establish state.
+- Resolution: rerun the same read-only allowlisted fields with explicit script-block formatting; do not rerun `cf start`.
+- Status/owner: contained; no mutation occurred from the parser failure.
+
+### 2026-08-15 - UA-R3B M2 isolated broker deployment complete
+
+- Classification: controlled security/runtime bootstrap deployment.
+- Exact inputs: commit `57492193409735f8f79ecfa796ea66d5550e59d5`; replacement MTAR SHA-256 `44a3d3ce6e94ccc77072287cc1b12ea0604735c8dedd019e28d730ff67f6b668`; independent pre-mutation review `0 Critical / 0 Major / 0 Minor`.
+- Forward mutations: one MTA deploy with `--no-start`, creating the exact broker app and dedicated XSUAA and binding the existing UPS only to the broker; one exact broker start. Rollback attempts `0`.
+- Fresh post-state: broker app exact count `1`, STARTED `1/1`, route count `0`; exact two-binding set PASS; UPS exact count `1`, binding count `1`, bound only to broker; dedicated XSUAA exact count `1`, binding count `1`, bound only to broker; main srv/AppRouter binding counts unchanged `6/3`.
+- Runtime boundary: checksum-reviewed artifact sets `IDTS_ACCESS_BROKER_ENABLED=false`; no CAP URL is configured; disabled runtime returns before parsing bindings, requesting tokens, polling CAP, or calling SAP. M2 proves isolated staging/start/health/topology only, not live provisioning.
+- Main readiness: final `npm run btp:demo:check` PASS with CAP/AppRouter `1/1`, health/ready `200`, anonymous API `401`, Web `200`, `DEMO READY`.
+- Prohibited mutations remained zero: HANA/HDI/schema/data, main-app deployment, shared XSUAA, Authorization API credential update/create/delete, user/role, IAS/IPS/trust, Jira and Drive.
+- Next owner/gate: M3 must separately review the additive HANA migration, CAP/UI/XSUAA UserAdmin deployment and exact enablement contract. Broker polling remains disabled until CAP endpoint, authority grant, operation state and rollback are all proven.
