@@ -7462,3 +7462,63 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Root cause: (1) an unsafe variable name for HTML5 host-service readback; (2) the revision parser assumed a paginated V3 response shape not returned by the installed endpoint/CLI path.
 - Fix status: in progress. Rename the variable and inspect only safe property names/count/version fields; deployment remains blocked until revision baseline is nonempty and unambiguous.
 - Platform impact: none; all completed calls were read-only and the wrapper stopped before deployment.
+### 2026-08-15 - M3C deployment blocker: blue-green returned success but canonical CAP app name was absent
+
+- Classification: deployment/environment blocker.
+- Symptom: the exact selective `cf deploy ... -m idts-sap01-srv --strategy blue-green` command returned exit 0, but immediate sanitized V3 readback found zero apps named exactly `idts-sap01-srv`.
+- Safety response: UI content deployment is stopped. No retry, rollback, rename, route change, or app deletion is allowed until an allowlisted inventory resolves whether a blue-green temporary/suffixed app owns the canonical route and is healthy.
+- Root cause: under investigation; likely incomplete/variant blue-green name finalization despite successful operation status.
+- Fix status: open. Required readback: all app names with the exact approved prefix, instances, route counts, binding counts, MTA operation state and main health/ready behavior.
+- Scope impact: CAP deployment only. DB deployer, AppRouter, XSUAA/resources, broker, HANA data and UI content were not selected in this command.
+- Resolution: CLOSED. After both variants proved health/readiness/auth and six-binding parity, the productive route was moved to the new variant, the isolated old variant was deleted, the new variant was renamed to canonical `idts-sap01-srv`, and the exact idle route was removed. Final readback: canonical CAP STARTED with one route/six bindings; `-live` and `-idle` absent; AppRouter unchanged; `npm run btp:demo:check` returned `DEMO READY`.
+
+**Resolution:** CLOSED. SAP's current blue-green flow had left a healthy old live app and healthy new idle app without canonical-name finalization. After proving both variants' health/readiness/auth/binding shape, the productive route was moved to the new variant, the isolated old variant was deleted, the new variant was renamed to canonical `idts-sap01-srv`, and the exact idle route was removed. Final readback: canonical app STARTED with one route/six bindings; `-live` and `-idle` absent; AppRouter baseline unchanged; `npm run btp:demo:check` returned `DEMO READY`.
+### 2026-08-15 - M3C sanitized MTA inspection leaked route text (tooling issue)
+
+- **Classification:** tooling issue / evidence-sanitization defect.
+- **Symptom:** a read-only PowerShell MTA-name check used array `-match` semantics and emitted matching `cf mta` rows, including private route host text, instead of a Boolean-only result.
+- **Scope:** terminal evidence only; no password, token, cookie, JWT, service credential, or binding value was emitted. No platform state changed.
+- **Root cause:** the captured multi-line CLI output was an array; PowerShell `-match` returned matching strings rather than a scalar Boolean.
+- **Status:** fixed in the investigation workflow by prohibiting raw `cf mta` row emission and using scalar/allowlisted parsing only. The leaked route text must not be copied into repo evidence, Jira, or final reporting.
+- **Verification/next owner:** DonHV workstream must keep all subsequent CF/MTA readback to allowlisted app names, counts, state, route classification, binding counts, and revision numbers only.
+
+### 2026-08-15 - M3C blue-green recovery stopped after live-app delete returned nonzero
+
+- **Classification:** deployment/environment blocker under investigation.
+- **Symptom:** the bounded promotion successfully mapped the productive route to the checksum-reviewed idle app and removed that route from the old live app, but `cf delete` for the exact old live app returned nonzero.
+- **Safety state:** the productive route readback had exactly one destination, the healthy new app, before the delete attempt. No retry, rename, idle-route deletion, or UI deployment was performed after the nonzero result.
+- **Root cause:** pending sanitized app/MTA readback; the old app may already be absent asynchronously or deletion may be blocked by controller metadata.
+- **Next action:** read exact app counts/state first. Retry is prohibited unless absence/ownership and the original failure class are unambiguous.
+
+### 2026-08-15 - M3C promotion wrapper parser failure before rename
+
+- **Classification:** tooling issue.
+- **Symptom:** the first exact rename/idle-route cleanup wrapper failed PowerShell parsing because one binding-count expression missed a closing parenthesis.
+- **Impact:** parser failure occurred before execution; no CF command or platform mutation from that wrapper ran.
+- **Status:** fixed by simplifying the expression and rerunning the same fail-closed preconditions before any mutation.
+- **Follow-up:** the first simplification still contained unmatched parentheses in later readback assignments and was again rejected before execution. The recovery switched to short, one-mutation wrappers with independent readbacks to remove compound-parser risk.
+
+### 2026-08-15 - M3C UI-content postcheck used unresolved MTA ID and unavailable html5-list path
+
+- **Classification:** test-harness/tooling issue.
+- **Symptom:** the dedicated UI-content deploy returned success and active MTA operations were zero, but the first postcheck found zero rows for the assumed MTA ID and the installed `cf html5-list -di ...` invocation returned nonzero.
+- **Safety response:** no redeploy/retry. Main CAP/AppRouter remained STARTED with route/binding counts 1/6 and 1/3; fresh demo readiness remained `DEMO READY`.
+- **Root cause:** under verification by reading the exact packaged MTAD ID and installed HTML5 plugin/help capability; deployment success alone is not accepted as content readback.
+- **Owner/next evidence:** DonHV workstream must prove exact MTA/content presence through supported sanitized readback before browser acceptance.
+- **Follow-up tooling symptom:** the first exact `cf mta` + manifest wrapper returned no allowlisted output despite process completion. It is not accepted as PASS; verification was split into short exit-code/field-specific commands.
+- **Follow-up parser symptom:** PowerShell 7 `ConvertFrom-Json` rejected the UI manifest because it contains an empty-string annotation key. The failed read did not mutate files or platform state; the readback switched to `-AsHashtable`/Node JSON parsing.
+
+### 2026-08-15 - Browser DOM snapshot exposed OAuth authorization URL parameters
+
+- **Classification:** tooling/evidence-sanitization issue.
+- **Symptom:** the first read-only login-page DOM snapshot included full authorization link query parameters (client identifier, state, challenge and nonce) rather than only provider labels.
+- **Impact:** values appeared only in transient tool output; they were not written to repo evidence/Jira/final reporting and no credential/password/token/cookie/JWT was read.
+- **Fix status:** fixed operationally by prohibiting full login DOM snapshots and using only allowlisted title/provider-label/status checks. DonHV continues authentication personally in the visible browser.
+
+### 2026-08-15 - Browser acceptance sandbox did not expose fetch
+
+- **Classification:** test-harness/tooling issue.
+- **Symptom:** a read-only same-origin metadata probe inside browser evaluation failed locally with `fetch is not a function` before any HTTP request was issued.
+- **Impact:** no platform/data mutation and no auth material was inspected. The UI tab itself had already loaded with title `User Administration`.
+- **Fix status:** switched to a separate authenticated metadata tab and allowlisted page-text assertions; no retry of the unsupported evaluation method.
+- **Follow-up:** Edge blocked direct navigation to the `$metadata` URL with a client-side blocker before a page response. Acceptance therefore uses the already-loaded UI's resource timing and visible controls instead of treating the blocked navigation as a CAP failure.
