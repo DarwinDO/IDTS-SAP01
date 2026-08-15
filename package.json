@@ -130,6 +130,8 @@
     "db:idts122-action-repair:dry-run": "node scripts/db/repair-idts122-reassign-action-type.js",
     "db:idts122-action-repair:rehearse": "node scripts/db/repair-idts122-reassign-action-type.js --rehearse",
     "db:idts122-action-repair:execute": "node scripts/db/repair-idts122-reassign-action-type.js --execute",
+    "btp:login:cf": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/btp/cf-login-sso-from-clipboard.ps1",
+    "btp:login:cli": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/btp/btp-login-browser-sso.ps1",
     "btp:external-services:bind": "powershell -ExecutionPolicy Bypass -File scripts/btp/upsert-external-services.ps1",
     "btp:demo:check": "powershell -ExecutionPolicy Bypass -File scripts/btp/prepare-demo.ps1 -CheckOnly",
     "btp:demo:prepare": "powershell -ExecutionPolicy Bypass -File scripts/btp/prepare-demo.ps1",
