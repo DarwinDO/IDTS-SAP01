@@ -59,4 +59,4 @@
 - [x] Document the two commands and the human-only browser/Copy actions.
 - [x] Record the prior terminal-input and clipboard-clear defects plus the fix evidence in DonHV status.
 - [x] Run focused test, syntax parsing, secret scan, agent rules and `git diff --check`.
-- [ ] Commit and push the isolated branch after confirming no unrelated files are staged.
+- [x] Commit and push the isolated branch after confirming no unrelated files are staged.
