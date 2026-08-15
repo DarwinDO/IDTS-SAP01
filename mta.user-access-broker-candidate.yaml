@@ -34,7 +34,7 @@ resources:
         xsappname: idts-user-access-broker
         tenant-mode: dedicated
         authorities:
-          - idts-sap01-${org}-${space}.ProvisioningBroker
+          - $XSSERVICENAME(idts-sap01-auth).ProvisioningBroker
         oauth2-configuration:
           credential-types:
             - binding-secret

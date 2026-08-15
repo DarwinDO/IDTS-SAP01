@@ -322,6 +322,12 @@ Vietnamese clean note: Nút `Assign Developer` riêng đã được bỏ khỏi 
 Any new agent or developer should identify their member name first, then read this file, `task-board.md`, the relevant member file under `status/*.md`, and the relevant `tasks/*.md` before making changes.
 
 Vietnamese: Agent hoáº·c developer má»›i pháº£i xÃ¡c Ä‘á»‹nh tÃªn thÃ nh viÃªn trÆ°á»›c, sau Ä‘Ã³ Ä‘á»c file nÃ y, `task-board.md`, file status thÃ nh viÃªn tÆ°Æ¡ng á»©ng trong `status/*.md`, vÃ  file `tasks/*.md` liÃªn quan trÆ°á»›c khi chá»‰nh sá»­a.
+
+## 2026-08-15 User Administration M3D broker enablement
+
+- The isolated `idts-user-access-broker` is STARTED `1/1`, no-route, bound only to its dedicated XSUAA and broker-only API-access UPS, and its fresh empty-queue poll is `IDLE`.
+- The cross-XSUAA authority defect was corrected by replacing the constructed main app ID with `$XSSERVICENAME(idts-sap01-auth).ProvisioningBroker`; focused tests and live scope/audience/CAP-claim checks pass without exposing auth material.
+- No SAP provider, user or Role Collection mutation ran. End-to-end acceptance remains blocked on one controlled non-member SAP ID test identity and an exact assign/readback/revoke/cleanup gate.
 ## 2026-07-23 SAP490 test-sheet filter correction
 
 - The 12 current test workbooks were regenerated from the official-template generator with all unintended AutoFilters removed: 36 before, 0 after across 48 sheets.

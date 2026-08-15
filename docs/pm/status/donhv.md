@@ -7522,3 +7522,150 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - **Impact:** no platform/data mutation and no auth material was inspected. The UI tab itself had already loaded with title `User Administration`.
 - **Fix status:** switched to a separate authenticated metadata tab and allowlisted page-text assertions; no retry of the unsupported evaluation method.
 - **Follow-up:** Edge blocked direct navigation to the `$metadata` URL with a client-side blocker before a page response. Acceptance therefore uses the already-loaded UI's resource timing and visible controls instead of treating the blocked navigation as a CAP failure.
+### 2026-08-15 - M3D preflight rg wildcard path failed on Windows
+
+- Classification: tooling issue.
+- Symptom: the first read-only M3D source inventory passed `mta*.yaml` as a path argument to `rg`; Windows rejected it as an invalid filename.
+- Impact: Git freeze and all non-wildcard searches completed; no file or platform mutation occurred.
+- Fix status: closed by using `rg --files`/explicit descriptor paths instead of a filesystem wildcard argument.
+
+### 2026-08-15 - M3D source inspection output exceeded the review budget
+
+- Classification: tooling/test-harness issue.
+- Symptom: the first read-only M3D inspection concatenated several broker source files and the tool truncated the combined output before all contracts could be reviewed.
+- Impact: no source or platform mutation occurred; truncated output is not accepted as evidence for broker enablement.
+- Fix status: closed operationally by switching to one-file and focused-symbol reads with bounded output.
+
+### 2026-08-15 - M3D Git upstream comparison was parsed by PowerShell
+
+- Classification: tooling issue.
+- Symptom: PowerShell interpreted Git's `@{upstream}` revision syntax inside a composed command, so `git rev-list` received an invalid encoded argument and returned nonzero.
+- Impact: the preceding `git status` and `git rev-parse HEAD` reads succeeded; no Git or platform mutation occurred.
+- Fix status: closed by using the explicit remote branch name for subsequent upstream comparisons.
+
+### 2026-08-15 - M3D focused broker search reused an unsupported Windows wildcard
+
+- Classification: tooling issue.
+- Symptom: the read-only symbol search passed `srv/provisioning-broker.*` as a path argument, and Windows rejected that wildcard path while returning matches from other explicit files.
+- Impact: no source or platform mutation occurred; the partial search is not used as complete broker-contract evidence.
+- Fix status: closed by using explicit `srv/provisioning-broker.js` and `srv/provisioning-broker.cds` paths.
+
+### 2026-08-15 - M3D aggregate readback cannot use CF SSH
+
+- Classification: environment blocker.
+- Symptom: `cf ssh-enabled idts-sap01-srv` reports that SSH is disabled, so the aggregate-only HANA inspector cannot be invoked through a read-only container shell.
+- Impact: no SSH setting was changed and no data/platform mutation occurred. The stale post-migration operation count is not accepted as current evidence.
+- Fix status: open for this gate; use one bounded CF task on the existing CAP droplet/bindings that emits only aggregate counts, without enabling SSH, deploying code, or changing HANA data.
+
+### 2026-08-15 - M3D readiness preflight found HANA not ready
+
+- Classification: environment blocker.
+- Symptom: fresh `npm run btp:demo:check` reported CAP/AppRouter `1/1`, liveness `200`, protected API `401`, Web `200`, but DB readiness `/ready` returned `503`.
+- Root cause: HANA readiness is temporarily unavailable; no source/schema/data defect is established.
+- Fix status: recovery in progress through the existing approved `npm run btp:demo:prepare` workflow only. DB deploy, HDI deploy, seed, migration and SQL/DML remain prohibited.
+
+### 2026-08-15 - M3D aggregate-only CF task returned nonzero
+
+- Classification: test-harness/environment issue under investigation.
+- Symptom: the uniquely named one-off task on `idts-sap01-srv` returned exit code `1` before an aggregate count was accepted.
+- Safety response: no retry; broker remains disabled. Perform sanitized task-state and allowlisted marker readback first.
+- Impact: the task command contains only a read-only `count(*)` query and no secret/PII, schema, seed, DML or deploy operation. No data mutation is authorized or claimed.
+- Fix status: closed. Sanitized readback proved the task state `FAILED` with the allowlisted marker `IDTS_M3D_OPERATION_COUNT=FAIL`. A distinct stage-aware physical-table inspector task was then used instead of retrying the same command.
+
+### 2026-08-15 - M3D aggregate wrapper returned nonzero after successful task
+
+- Classification: test-harness/tooling issue.
+- Symptom: the physical-table inspector task completed `SUCCEEDED` and emitted exactly `IDTS_M3D_OPERATION_COUNT=0`, but the outer PowerShell wrapper exited `4` because a single regex result became a scalar string and `$matches[0]` evaluated its first character.
+- Root cause: PowerShell scalar-versus-array behavior in the wrapper's final assertion; not a task, HANA, or broker failure.
+- Fix status: closed without rerun. The independent task-state and unique allowlisted marker prove the current operation count is zero; future wrappers must force `@($matches)` before indexing.
+- Platform/data impact: one read-only aggregate CF task; no DB/schema/seed/DML mutation.
+
+### 2026-08-15 - M3D broker-binding set comparator stopped activation
+
+- Classification: test-harness/tooling issue under investigation.
+- Symptom: the final read-only activation preflight found the broker STARTED `1/1`, zero routes and the expected main-app baselines, but its exact binding-set comparator returned `FAIL`.
+- Safety response: activation stopped before any `set-env` or restage mutation.
+- Impact: no broker/environment/provider/user/role mutation occurred.
+- Root cause: the wrapper compared the V3 service-credential-binding object's own optional `name` field with service-instance names. Those are different resource layers.
+- Fix status: closed by resolving each binding's `service_instance` relationship in memory. Readback proved exactly two instances, exact auth/API-access presence and zero extra service instances.
+
+### 2026-08-15 - M3D first broker activation failed post-restage runtime assertion
+
+- Classification: test-harness/environment issue under investigation.
+- Symptom: target/topology precheck passed; CAP URL and `IDTS_ACCESS_BROKER_ENABLED=true` were set; broker restage returned success; the immediate app/process assertion then failed before a sanitized poll result was accepted.
+- Safety response: no activation retry. The wrapper restored `IDTS_ACCESS_BROKER_ENABLED=false`, removed `IDTS_BROKER_CAP_URL`, restaged the exact broker app and reported `ROLLBACK=PASS`.
+- External effect boundary: no Role Collection/user/IAS/HANA data operation was requested; pre-enable aggregate count was zero. Main CAP/AppRouter/shared XSUAA were not mutated.
+- Root cause: the wrapper used the ambiguous shorthand `Where-Object type-eq'web'`; it did not select the web process reliably. Fresh explicit script-block readback proved broker STARTED `1/1`, zero routes, two bindings and main runtime `DEMO READY`.
+- Fix status: closed after a second unique task proved `LIVE_DISABLED_PROOF=PASS` following rollback. Any later activation uses explicit `Where-Object { $_.type -eq 'web' }` and must refresh the zero-operation aggregate first.
+
+### 2026-08-15 - M3D broker technical poll returned ERROR
+
+- Classification: integration/environment blocker under investigation.
+- Symptom: after a fresh zero-operation proof, the corrected activation reached broker STARTED `1/1` with zero routes, but the first new sanitized poll result was `ERROR` instead of `IDLE`.
+- Safety response: no third activation attempt. The wrapper restored `IDTS_ACCESS_BROKER_ENABLED=false`, removed `IDTS_BROKER_CAP_URL`, restaged the broker and reported `ROLLBACK=PASS`.
+- Scope evidence: queue count was exactly zero immediately before activation, so the worker could not reach the SAP provider mutation path. No user, Role Collection, HANA data, trust or main-app mutation was performed.
+- Fix status: open. Diagnose dedicated-XSUAA token acquisition and CAP technical-action reachability separately with allowlisted PASS/FAIL only while the main broker remains disabled.
+- Diagnostic update: a disabled-main-broker task with a temporary CAP URL proved `IDTS_M3D_TOKEN=PASS` and `IDTS_M3D_DIAG=CAP_CAP_CLIENT_UNAVAILABLE`; the URL was then removed successfully. The blocker is narrowed to CAP route/action/authorization response, not broker binding or client-credential token acquisition.
+- HTTP diagnostic update: a second status-only task returned `IDTS_M3D_CAP_HTTP_STATUS=401`; it did not read the response body and removed the temporary CAP URL afterward. The live blocker is the broker technical token's acceptance/audience contract at main CAP, not a missing route (`404`) or provider invocation.
+- Token-claim diagnostic update: the technical token shape and expiry passed, while allowlisted checks for the single `.ProvisioningBroker` scope and matching main-app audience both failed. No raw JWT or claim value was emitted. The dedicated broker XSUAA authority configuration must be re-applied after the main XSUAA grant before broker enablement can be retried.
+- Authority refresh update: the isolated dedicated XSUAA `update-service` completed successfully, but the existing binding's new token still lacked scope/audience. SAP documentation requires rebinding the requesting application after authority changes so its OAuth client is updated. The next bounded fix is isolated unbind/rebind/restage of only the broker-to-dedicated-XSUAA binding while broker remains disabled.
+
+### 2026-08-15 - M3D local XSUAA source check expanded `$XSAPPNAME`
+
+- Classification: tooling issue.
+- Symptom: a PowerShell double-quoted Node command expanded `$XSAPPNAME` before Node evaluated the JSON checks and emitted false negative source results.
+- Impact: no source/platform mutation occurred; the output is rejected as evidence.
+- Fix status: closed by using a PowerShell single-quoted Node program or a file-based JSON read that preserves the literal `$XSAPPNAME` token.
+
+### 2026-08-15 - M3D broker authority referenced the wrong main XSUAA app ID
+
+- Classification: product configuration defect.
+- Symptom: dedicated-XSUAA token acquisition passed, but the technical token lacked the `ProvisioningBroker` scope/audience and main CAP returned HTTP `401`.
+- Root cause: `mta.user-access-broker-r3b.yaml` and its candidate used `idts-sap01-${org}-${space}.ProvisioningBroker`; a sanitized CAP task proved the live main XSUAA `xsappname` does not equal that constructed pattern.
+- Fix status: fixed. The service-reference contract is present in both broker descriptors and focused tests. Dedicated XSUAA update/rebind/restage produced a token with scope/audience PASS; CAP technical claim returned `PASS_EMPTY`; final enabled broker poll returned `IDLE`.
+- Security impact: broker remained disabled; zero queued operations; no provider/user/role/data mutation occurred.
+
+### 2026-08-15 - M3D broker enablement completed at empty queue
+
+- Classification: controlled deployment/security milestone.
+- Outcome: broker STARTED `1/1`, zero routes, exactly dedicated XSUAA + broker API-access UPS bindings, fresh poll `IDLE`; main runtime `DEMO READY`.
+- Authorization evidence: dedicated token scope/audience PASS and technical CAP claim `PASS_EMPTY`; no raw token, JWT, claim, credential, endpoint or PII was logged.
+- Mutation boundary: no SAP provider call, user mutation, Role Collection mutation, HANA schema/data mutation, IAS/IPS/trust mutation, or main-XSUAA/main-app config mutation.
+- Evidence: `docs/pm/evidence/user-administration/ua-r3d-m3d-broker-enablement.md`.
+- Remaining blocker/owner: DonHV must supply one controlled non-member SAP ID test identity (email only, no password/OTP/token) for the separate assign/readback/revoke/cleanup acceptance gate.
+
+### 2026-08-15 - M3D exact authority search reused a Windows wildcard
+
+- Classification: tooling issue.
+- Symptom: a secondary `rg` command used `mta.user-access-broker*.yaml` as a Windows path and returned an invalid-filename error after the primary fixed-string search had already found all exact occurrences.
+- Impact: no source/platform mutation occurred.
+- Fix status: closed by using the explicit broker descriptor paths returned by the primary search.
+
+### 2026-08-15 - M3D ACL temp-config wrapper was blocked before XSUAA update
+
+- Classification: tooling/safety-policy issue.
+- Symptom: the execution policy rejected the composed ACL temp-directory/config cleanup command before PowerShell started.
+- Impact: `cf update-service` was never invoked; no file, XSUAA, app, user, role or data mutation occurred.
+- Fix status: closed by using the installed CLI's supported inline JSON parameter, constructed only in process memory. The config contains no secret, token, credential or endpoint and its raw value is not emitted.
+
+### 2026-08-15 - M3D first V3 binding-name wrapper returned a false zero
+
+- Classification: test-harness/tooling issue.
+- Symptom: the first sanitized V3 wrapper filtered the global service-credential-binding collection by an app relationship field that is not present in that response shape and incorrectly emitted binding count `0`, contradicting the verified CAP baseline.
+- Impact: the value is rejected and was not used for an enablement decision; no platform mutation or credential read occurred.
+- Fix status: closed. The supported filtered collection `/v3/service_credential_bindings?app_guids=<in-memory-guid>` returned the verified CAP binding count `6`; no GUID or credential was emitted.
+### 2026-08-15 - M3D final verification tooling note
+
+- Classification: tooling issue.
+- Symptom: a combined `rg` regular expression failed with `unclosed group` because PowerShell expanded the `$XSSERVICENAME` fragment before `rg` parsed it.
+- Scope: read-only verification command only; no source, runtime, platform, or data impact.
+- Resolution: use separate fixed-string searches/single-quoted patterns for the remaining verification.
+- Status: fixed in session.
+
+### 2026-08-15 - M3D staged diff check did not stop the first local commit
+
+- Classification: tooling/process issue.
+- Symptom: `git diff --cached --check` reported one blank line at EOF, but the composed command used `;`, so `git commit` still ran locally.
+- Scope: local unpublished commit only; no remote or platform impact.
+- Resolution: remove the whitespace defect, rerun the check independently, and amend before push. Future commit wrappers must use fail-fast sequencing.
+- Status: fixed in session.

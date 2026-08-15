@@ -234,7 +234,7 @@ async function main () {
   assert.equal(brokerAuthResource.parameters.service, 'xsuaa')
   assert.equal(brokerAuthResource.parameters.config.xsappname, 'idts-user-access-broker')
   assert.deepEqual(brokerAuthResource.parameters.config.authorities, [
-    'idts-sap01-${org}-${space}.ProvisioningBroker'
+    '$XSSERVICENAME(idts-sap01-auth).ProvisioningBroker'
   ])
 
   const deploymentMta = YAML.parse(fs.readFileSync(
@@ -266,7 +266,7 @@ async function main () {
   assert.equal(deploymentAuth.parameters.config.xsappname, 'idts-user-access-broker')
   assert.equal(deploymentAuth.parameters.config['tenant-mode'], 'dedicated')
   assert.deepEqual(deploymentAuth.parameters.config.authorities, [
-    'idts-sap01-${org}-${space}.ProvisioningBroker'
+    '$XSSERVICENAME(idts-sap01-auth).ProvisioningBroker'
   ])
 
   const security = JSON.parse(fs.readFileSync(path.join(repositoryRoot, 'xs-security.json'), 'utf8'))
