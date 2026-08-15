@@ -7130,3 +7130,10 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Verification: XSUAA last operation succeeded; both scopes count 1; template count 1; Role Collection count/role count 1/1; selected PM role count 8 -> 9 with exact before/after fingerprints; other-user overlay count 0; broker remains no-route; `npm run btp:demo:check` reports `DEMO READY`.
 - Mutation ledger: XSUAA attempts 2 (first rejected/no apply, second applied), role assignment attempts/successes 1/1; CAP/UI/HANA/HDI, broker enablement, provisioning, shadow-user, IAS/IPS/trust, Jira and Drive mutations 0.
 - Next gate: fresh private-browser login/JWT proof for PM + UserAdmin and negative authorization; do not infer runtime acceptance from configuration readback. CAP/UI deployment, HDI migration and broker enablement remain unapproved.
+
+### 2026-08-15 — M3B evidence commit gate did not stop on whitespace failure
+
+- Classification: tooling/process issue.
+- Symptom: `git diff --cached --check` reported two trailing-space lines, but the semicolon-separated command continued to commit and push the evidence.
+- Root cause: the shell command did not explicitly stop when the verification command returned nonzero.
+- Resolution: removed the two trailing-space markers, logged the issue immediately, and reran `git diff --check` as an independent fail-stop gate before the corrective commit. No evidence content or platform state was lost.

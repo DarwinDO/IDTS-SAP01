@@ -1,7 +1,9 @@
 # UA-R3C M3B XSUAA Execution Evidence
 
-Date: 2026-08-15  
-Source HEAD: `1702f650d94f119a3f6893cfddd743b6b0ca7e68`  
+Date: 2026-08-15
+
+Source HEAD: `1702f650d94f119a3f6893cfddd743b6b0ca7e68`
+
 Scope: XSUAA `UserAdmin`/`ProvisioningBroker` overlay and one selected existing PM assignment only.
 
 ## Outcome
