@@ -237,6 +237,38 @@ async function main () {
     'idts-sap01-${org}-${space}.ProvisioningBroker'
   ])
 
+  const deploymentMta = YAML.parse(fs.readFileSync(
+    path.join(repositoryRoot, 'mta.user-access-broker-r3b.yaml'),
+    'utf8'
+  ))
+  assert.equal(deploymentMta.description, 'IDTS User Access Broker UA-R3B CONTROLLED BROKER-ONLY DEPLOYMENT')
+  assert.equal(deploymentMta.modules.length, 1)
+  assert.equal(deploymentMta.resources.length, 2)
+  const deploymentBroker = deploymentMta.modules[0]
+  assert.equal(deploymentBroker.name, 'idts-user-access-broker')
+  assert.equal(deploymentBroker.path, 'broker')
+  assert.equal(deploymentBroker.parameters['no-route'], true)
+  assert.equal(deploymentBroker.properties.IDTS_ACCESS_BROKER_ENABLED, false)
+  assert.equal('IDTS_BROKER_CAP_URL' in deploymentBroker.properties, false)
+  assert.deepEqual(deploymentBroker.requires.map(requirement => requirement.name).sort(), [
+    'idts-user-access-broker-api-access',
+    'idts-user-access-broker-auth'
+  ])
+  const deploymentApiAccess = deploymentMta.resources.find(
+    resource => resource.name === 'idts-user-access-broker-api-access'
+  )
+  assert.equal(deploymentApiAccess.type, 'org.cloudfoundry.existing-service')
+  assert.equal(deploymentApiAccess.parameters['service-name'], 'idts-user-access-broker-api-access')
+  const deploymentAuth = deploymentMta.resources.find(resource => resource.name === 'idts-user-access-broker-auth')
+  assert.equal(deploymentAuth.type, 'org.cloudfoundry.managed-service')
+  assert.equal(deploymentAuth.parameters.service, 'xsuaa')
+  assert.equal(deploymentAuth.parameters['service-plan'], 'application')
+  assert.equal(deploymentAuth.parameters.config.xsappname, 'idts-user-access-broker')
+  assert.equal(deploymentAuth.parameters.config['tenant-mode'], 'dedicated')
+  assert.deepEqual(deploymentAuth.parameters.config.authorities, [
+    'idts-sap01-${org}-${space}.ProvisioningBroker'
+  ])
+
   const security = JSON.parse(fs.readFileSync(path.join(repositoryRoot, 'xs-security.json'), 'utf8'))
   const technicalScope = security.scopes.find(scope => scope.name === '$XSAPPNAME.ProvisioningBroker')
   assert.deepEqual(technicalScope['grant-as-authority-to-apps'], [
@@ -245,8 +277,12 @@ async function main () {
   assert.equal(security['role-templates'].some(template => template.name === 'ProvisioningBroker'), false)
 
   const brokerPackage = JSON.parse(fs.readFileSync(path.join(repositoryRoot, 'broker/package.json'), 'utf8'))
+  assert.deepEqual(brokerPackage.engines, { node: '22.x' })
   assert.deepEqual(brokerPackage.scripts, { start: 'node server.js' })
   assert.deepEqual(brokerPackage.dependencies || {}, {})
+
+  const brokerPackageLock = JSON.parse(fs.readFileSync(path.join(repositoryRoot, 'broker/package-lock.json'), 'utf8'))
+  assert.equal(brokerPackageLock.packages[''].engines.node, '22.x')
 
   const sourceOnlyMta = YAML.parse(fs.readFileSync(
     path.join(repositoryRoot, 'mta.user-access-broker-source-only.yaml'),

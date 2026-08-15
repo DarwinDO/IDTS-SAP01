@@ -6842,3 +6842,142 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Tooling issues: the first combined inspection/cleanup PowerShell expression was rejected before execution by local command policy because it mixed archive inspection, credential-pattern matching and recursive cleanup. Inspection was split into bounded read-only steps and passed. A later exact recursive cleanup command was likewise rejected before execution; the ignored inspection directory remains local and contains only extracted candidate artifact bytes, not credentials.
 - Next owner/gate: independent exact-artifact review, then a separate pre-mutation package for the broker-only user-provided service, additive HANA migration, XSUAA deployment and rollback. No deployment or provider/user/role mutation is implied by this evidence.
 - Independent review result: `0 Critical / 0 Major`; exact MTAR hash and all 13 source/payload Git blobs match. Local artifact accepted, while deployment remains `NO-GO`.
+
+### 2026-08-14 - UA-R3B local evidence search output truncation
+
+- Classification: transient tooling/security-boundary issue.
+- Symptom: a read-only filename search across broad Codex rollout-summary and PowerShell-history roots produced more output than the tool response budget and was truncated, so the result could not be used as reliable credential-location evidence.
+- Root cause: the search scope was broader than the bounded allowlist required for the single DPAPI-backed UPS mutation.
+- Resolution: discard the truncated output as evidence and delegate execution to the already authorized proxy task that retains the private DPAPI session context; require only sanitized precondition/postcondition counts and a mutation ledger. Do not repeat the broad search or print credential paths, entropy, ciphertext, or decrypted fields.
+- Status/owner: contained; no repository, Git, Jira, Drive, CF, BTP, credential, UPS, binding, deployment, identity, role, HANA, or business-data mutation resulted from the search.
+
+### 2026-08-14 - UA-R3B proxy task follow-up readback failure
+
+- Classification: transient Codex coordination tooling issue.
+- Symptom: the follow-up prompt to the designated proxy task was accepted, but the subsequent wait call reported no readable task match on the local host; a direct read attempt then remained pending and was terminated within the bounded wait.
+- Root cause: the delegated source task is not readable through the current host's thread-read/wait surface even though follow-up delivery returned success.
+- Resolution: do not infer execution success from message delivery and do not repeat unbounded polling. Keep the mutation ledger at zero until independently verified CF state exists; use a bounded local in-process executor only if the private DPAPI material can be rediscovered without exposing values.
+- Status/owner: open tooling limitation, contained for this gate. No repository, Git, Jira, Drive, CF, BTP, credential, UPS, binding, deployment, identity, role, HANA, or business-data mutation was caused by the coordination calls.
+
+### 2026-08-14 - UA-R3B DPAPI candidate inventory timeout
+
+- Classification: transient tooling issue.
+- Symptom: a read-only recursive `.dpapi` candidate count across three broad local roots exceeded the 20-second bound and returned no usable count.
+- Root cause: the recursive root scope was too broad for the bounded gate and duplicated paths under the workspace/worktree hierarchy.
+- Resolution: do not rerun the broad inventory or treat its missing output as evidence. Restrict discovery to exact allowlisted evidence roots and emit counts only; mutation remains blocked until the single candidate is proven.
+- Status/owner: contained. The timed-out command performed only filesystem enumeration and caused no repository, Git, Jira, Drive, CF, BTP, credential, UPS, binding, deployment, identity, role, HANA, or business-data mutation.
+
+### 2026-08-14 - UA-R3B delegated-session evidence scan timeout
+
+- Classification: transient tooling/security-boundary issue.
+- Symptom: a read-only scan for the delegated task identifier across the full Codex session store found 282 referenced session files and timed out before narrowing to DPAPI evidence.
+- Root cause: the delegated task identifier is repeated in many cross-task handoffs, so it is not a selective key for scanning the full session store.
+- Resolution: discard the partial count as credential evidence and do not scan session contents broadly. Continue only through the designated task's private executor or a bounded exact session artifact; never print or extract secret-bearing transcript content.
+- Status/owner: contained. No external or repository mutation occurred.
+
+### 2026-08-14 - UA-R3B locked delegated-session read issue
+
+- Classification: transient tooling issue.
+- Symptom: the exact delegated-session filename was uniquely identified, but a standard `ReadAllText` call failed because the active Codex process holds the JSONL file open. The wrapper continued and emitted zero occurrence counts, so those counts are invalid and discarded.
+- Root cause: the reader did not request shared read/write access and did not fail closed after the I/O exception.
+- Resolution: treat only the unique filename match as valid; if exact-session inspection remains necessary, use a read-only `FileStream` with `FileShare.ReadWrite` and fail closed before emitting any derived count. Never print matched secret-bearing content.
+- Status/owner: contained. No external or repository mutation occurred.
+
+### 2026-08-14 - UA-R3B shared-session read denied
+
+- Classification: transient Codex storage tooling limitation.
+- Symptom: even an exact read-only `FileStream` request with `FileShare.ReadWrite` could not open the active delegated task JSONL and failed closed.
+- Root cause: the active session file is held with a lock mode that rejects additional readers in this host context.
+- Resolution: do not copy, unlock, terminate, or bypass the active task. The delegated task remains the only safe holder of its private DPAPI context; wait for its sanitized completion instead of reconstructing secrets from storage.
+- Status/owner: open coordination limitation; no external or repository mutation occurred.
+
+### 2026-08-14 - UA-R3B M1 existing Authorization API credential materialized as an unbound UPS
+
+- Classification: approved security/configuration bootstrap mutation.
+- Outcome: `CREATED` for exactly one user-provided service named `idts-user-access-broker-api-access`, using the existing `idts-user-access-broker-pilot` credential only. No second API credential was created.
+- Secret handling: the designated proxy executor decrypted the single 1,142-byte DPAPI blob in process memory, passed the four allowlisted values through CF interactive stdin, suppressed raw output, and cleared in-memory values. No secret, ciphertext, entropy, credential path, token, or raw provider response was written to the repo, terminal evidence, chat, clipboard, or temporary file.
+- Fresh post-readback: UPS exact/case-insensitive count `1/1`; type user-provided PASS; UPS binding count `0`; broker app count `0`; existing API credential exact/case-insensitive count remains `1/1`; main srv/AppRouter binding counts remain `6/3`.
+- Mutation ledger: forward create attempts `1`, confirmed creates `1`, rollback attempts `0`, rollback confirmations `0`, prohibited mutations `0`.
+- Boundary: no bind, broker deployment/start, XSUAA creation/update, environment change, HANA/HDI/schema/data mutation, user/role assignment, main-app mutation, IAS/IPS/trust change, Jira, Drive, commit, or push occurred in M1.
+- Next owner/gate: M2 requires a separate exact approval for the broker-only deployment/readback before this UPS may be bound. The UPS must never be bound to the main CAP srv, AppRouter, UI, scheduler, DB deployer, or any other app.
+
+### 2026-08-15 - UA-R3B M2 proxy follow-up dispatch timeout
+
+- Classification: transient Codex coordination tooling issue.
+- Symptom: the read-only M2 independent-review follow-up to the designated proxy task remained pending beyond the bounded dispatch wait and the cell was terminated without a delivery result.
+- Root cause: the Codex task messaging surface did not return a completion/acknowledgement in the bounded interval; no CF/BTP command was involved.
+- Resolution: do not resend blindly or infer that an independent review exists. Continue primary read-only freeze/local preparation, inspect task status separately, and require an explicit proxy verdict before any platform mutation.
+- Status/owner: contained; no repository, Git, Jira, Drive, CF, BTP, XSUAA, UPS binding, deployment, HANA, identity, or role mutation resulted from the coordination call.
+
+### 2026-08-15 - UA-R3B M2 unavailable shell tool alias
+
+- Classification: transient tooling issue.
+- Symptom: a read-only skill-file request called the previously available `shell_command` alias, but the current tool surface no longer exposed that method and raised a local TypeError before launching a process.
+- Root cause: deferred tool availability changed after context rollover.
+- Resolution: use the stable `exec_command` tool for subsequent local reads and commands; no retry through the missing alias.
+- Status/owner: fixed in command routing; no external or repository mutation resulted.
+
+### 2026-08-15 - UA-R3B M2 Windows ripgrep glob invocation issue
+
+- Classification: transient tooling issue.
+- Symptom: a read-only `rg` inventory passed `mta*.yaml` as a Windows path argument, causing OS error 123; the other explicit roots were still searched successfully.
+- Root cause: the wildcard was supplied as a positional path instead of an `rg -g` glob filter.
+- Resolution: rerun only the missing descriptor inventory with `-g 'mta*.yaml'` or explicit filenames; do not treat the partial command as complete evidence.
+- Status/owner: fixed in command routing; no external or repository mutation resulted.
+
+### 2026-08-15 - UA-R3B M2 deployment descriptor TDD RED
+
+- Classification: expected test-harness RED for the controlled broker deployment package.
+- Symptom: `npm run qa:user-access-broker:programmatic` failed with `ENOENT` for `mta.user-access-broker-r3b.yaml` after the exact broker-only topology assertions were added first.
+- Root cause: the deployment-authorized descriptor had not yet been created; only the earlier explicitly non-deploy-authorized candidate existed.
+- Resolution plan: add one exact R3B descriptor with the reviewed one-module/no-route/disabled broker, dedicated XSUAA, and exact existing UPS topology, then rerun the same test for GREEN.
+- Status/owner: expected RED captured; no platform mutation occurred.
+
+### 2026-08-15 - UA-R3B M2 preflight runtime sleep
+
+- Classification: SAP BTP Trial environment blocker.
+- Symptom: fresh `npm run btp:demo:check` returned CAP/AppRouter FAIL, HTTP 404 for liveness/readiness/protected API/Web, and `DEMO NOT READY`; sanitized CF readback showed both existing main apps requested `STOPPED`.
+- Root cause: the trial runtime stopped the existing applications between sessions; no source/deployment drift was inferred from the sleep state.
+- Resolution plan: use only the previously approved unchanged `npm run btp:demo:prepare` recovery workflow to start the existing CAP/AppRouter and wake the existing HANA service if stopped. No DB deployer, HDI deploy, seed, migration, SQL/DML, source deployment, XSUAA update, or broad recovery command is allowed.
+- Status/owner: recovery pending; M2 broker mutation remains blocked until a fresh read-only check returns `DEMO READY`.
+
+### 2026-08-15 - UA-R3B M2 PowerShell package-lock parser limitation
+
+- Classification: transient tooling issue.
+- Symptom: Windows PowerShell 5.1 `ConvertFrom-Json` rejected `broker/package-lock.json` while attempting to address the lockfile root package entry with the empty-string key.
+- Root cause: the legacy PowerShell JSON converter does not reliably support the package-lock v3 `packages[""]` property shape.
+- Resolution: use Node.js JSON parsing for package-lock inspection and focused assertions; do not rewrite or normalize the lockfile through PowerShell.
+- Status/owner: contained; no file or platform mutation occurred from the failed read.
+
+### 2026-08-15 - UA-R3B M2 Node engine TDD RED
+
+- Classification: expected release-contract RED test.
+- Symptom: the focused broker test rejected `broker/package.json` because the packaged engine was `>=20 <23` instead of the SAP buildpack-compatible exact contract `22.x`.
+- Root cause: the source-only broker package retained a broad local Node range that the regional Cloud Foundry Node.js buildpack has previously rejected as an improper constraint.
+- Resolution plan: change only the broker package engine and package-lock root engine to `22.x`, rerun focused tests/audit, and build a new uniquely named MTAR. The rejected `90d61c...3109` MTAR must never be deployed or overwritten.
+- Status/owner: expected RED captured; no platform mutation occurred.
+
+### 2026-08-15 - UA-R3B M2 nested lock inspection argument-quoting issue
+
+- Classification: transient test-harness/tooling issue.
+- Symptom: the first replacement-MTAR inspector passed the extracted package-lock JSON through a PowerShell process argument to `node -e`; quote normalization corrupted the JSON and Node returned a parse error, producing an invalid `LOCK_ENGINE_22X=False` result.
+- Root cause: structured JSON was transported through a command-line argument instead of parsed directly from the already in-memory bytes.
+- Resolution: discard only the lock-engine result from that run; retain independently valid artifact hash/file-count/source-parity/package-engine/secret-scan results. Recheck the lock engine directly from in-memory text with an exact structural regex and fail closed on count other than one.
+- Status/owner: contained; no file or platform mutation occurred from inspection.
+
+### 2026-08-15 - UA-R3B M2 PowerShell filter syntax issue
+
+- Classification: transient test-harness/tooling issue.
+- Symptom: the bounded lock-only archive recheck failed before reading the entry because the compact `Where-Object` expression omitted whitespace around the `-eq` operator.
+- Root cause: overly compressed PowerShell syntax.
+- Resolution: rerun with explicit script-block predicates and keep the same exact lock-engine assertions; no archive rebuild or platform action is needed.
+- Status/owner: contained; no file or platform mutation occurred.
+
+### 2026-08-15 - UA-R3B M2 SAP buildpack engine remediation
+
+- Classification: release compatibility defect found by independent exact-artifact review.
+- Symptom/root cause: replacement candidate `90d61cb...d3109` packaged `engines.node=>=20 <23`, an expression already rejected by the regional SAP BTP Node.js buildpack as an improper constraint.
+- Resolution: focused TDD now requires exact `22.x` in both `broker/package.json` and the package-lock root. Only those broker deployment package fields changed; the root application and main AppRouter were not modified.
+- Fresh evidence: broker focused test PASS; isolated `npm ci --omit=dev --ignore-scripts` PASS; npm audit reports 0 vulnerabilities; one new uniquely named replacement MTAR `idts-user-access-broker-r3b1-7023ab2.mtar` was built with SHA-256 `44a3d3ce6e94ccc77072287cc1b12ea0604735c8dedd019e28d730ff67f6b668`; 13 payload files, source-parity mismatches `0`, package and lock engines exact `22.x`, old-engine occurrences `0`, sensitive-pattern hits `0`.
+- Boundary: `90d61cb...d3109` is `REJECTED / NEVER DEPLOY`; no CF/BTP deployment, service, binding, XSUAA, HANA, identity or role mutation occurred during remediation.
+- Next owner/gate: independent exact review must bind its verdict to the new `44a3d3...b668` artifact before M2 mutation.
