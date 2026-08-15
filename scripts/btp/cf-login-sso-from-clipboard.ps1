@@ -2,7 +2,6 @@
 param()
 
 $ErrorActionPreference = 'Stop'
-$Host.UI.RawUI.WindowTitle = 'IDTS CF SSO - Copy Only'
 
 function Clear-SensitiveClipboard {
   $clipboardCheck = $null

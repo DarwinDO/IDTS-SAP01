@@ -6055,3 +6055,11 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Root cause: cleanup used `Get-Clipboard -ErrorAction SilentlyContinue`, PASS was written inside the main `try`, and the script had no top-level fixed-output failure mapper.
 - Status: fixed in source and verified live. Clipboard reads/writes now use terminating errors, null cleanup readback is rejected, five overwrite/readback cycles complete before the single status output, and every caught failure maps to a fixed allowlisted status with nonzero exit. Documentation now distinguishes the static non-secret official passcode page from temporary secrets and the CLIs' documented managed session stores.
 - Verification: focused contract PASS; PowerShell parser PASS; live `npm run btp:login:cf` returned only `CF_LOGIN=PASS`; immediate independent clipboard readback PASS; secret scan PASS; agent rules 8/8; QA-depth self-test 15/15; `git diff --check` PASS with line-ending warnings only. A fresh exact-head review remains required before making PR #319 ready.
+
+### 2026-08-15 — CLI login helper host-compatibility review blocker
+
+- Classification: tooling/security issue.
+- Symptom: the second exact-head review found both login helpers set `RawUI.WindowTitle` before their protected error boundary. A terminal host without `RawUI` could therefore emit an unrestricted PowerShell error instead of one allowlisted status.
+- Root cause: cosmetic title setup was placed before the protected flow and had no product value.
+- Resolution: removed both title assignments. The BTP helper was also aligned with the CF helper so PASS/FAIL is emitted once, after protected cleanup, with cleanup failure mapped to a fixed nonzero status.
+- Verification: expected focused RED observed before correction; focused contract PASS after correction; both PowerShell parsers PASS; secret scan PASS; agent rules 8/8; QA-depth self-test 15/15; `git diff --check` PASS with line-ending warnings only. BTP live rerun was intentionally cancelled while waiting for browser confirmation; the earlier live BTP PASS remains historical evidence, and a fresh exact-head review is still required before merge.

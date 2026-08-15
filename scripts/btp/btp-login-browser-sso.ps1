@@ -2,18 +2,14 @@
 param()
 
 $ErrorActionPreference = 'Stop'
-$Host.UI.RawUI.WindowTitle = 'IDTS BTP CLI Browser SSO'
-
-function Write-SafeStatus {
-  param([Parameter(Mandatory = $true)][string]$Status)
-  Write-Host $Status
-}
 
 $process = $null
 $outputTask = $null
 $errorTask = $null
 $standardOutput = $null
 $standardError = $null
+$finalStatus = 'BTP_LOGIN=FAIL'
+$exitCode = 1
 
 try {
   $btpCommand = Get-Command btp.exe -ErrorAction Stop
@@ -29,8 +25,8 @@ try {
   $process = New-Object System.Diagnostics.Process
   $process.StartInfo = $startInfo
   if (-not $process.Start()) {
-    Write-SafeStatus 'BTP_LOGIN=FAIL_START'
-    exit 1
+    $finalStatus = 'BTP_LOGIN=FAIL_START'
+    throw 'BTP login process did not start'
   }
 
   $outputTask = $process.StandardOutput.ReadToEndAsync()
@@ -40,36 +36,46 @@ try {
 
   if (-not $process.WaitForExit(600000)) {
     $process.Kill()
-    Write-SafeStatus 'BTP_LOGIN=TIMEOUT'
-    exit 1
+    $finalStatus = 'BTP_LOGIN=TIMEOUT'
+    throw 'BTP login timed out'
   }
 
   $standardOutput = $outputTask.GetAwaiter().GetResult()
   $standardError = $errorTask.GetAwaiter().GetResult()
   if ($process.ExitCode -ne 0) {
-    Write-SafeStatus 'BTP_LOGIN=FAIL'
-    exit 1
+    throw 'BTP login failed'
   }
 
   & btp --format json list accounts/subaccount *> $null
   if ($LASTEXITCODE -ne 0) {
-    Write-SafeStatus 'BTP_LOGIN=FAIL_READBACK'
-    exit 1
+    $finalStatus = 'BTP_LOGIN=FAIL_READBACK'
+    throw 'BTP authenticated readback failed'
   }
 
-  Write-SafeStatus 'BTP_LOGIN=PASS'
+  $finalStatus = 'BTP_LOGIN=PASS'
+  $exitCode = 0
 } catch {
-  Write-SafeStatus 'BTP_LOGIN=FAIL'
-  exit 1
+  if ($finalStatus -eq 'BTP_LOGIN=PASS') {
+    $finalStatus = 'BTP_LOGIN=FAIL'
+    $exitCode = 1
+  }
 } finally {
   $standardOutput = $null
   $standardError = $null
   $outputTask = $null
   $errorTask = $null
   if ($process) {
-    $process.Dispose()
+    try {
+      $process.Dispose()
+    } catch {
+      $finalStatus = 'BTP_LOGIN=FAIL_CLEANUP'
+      $exitCode = 1
+    }
   }
   $process = $null
   $startInfo = $null
   $btpCommand = $null
 }
+
+Write-Host $finalStatus
+exit $exitCode

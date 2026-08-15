@@ -25,6 +25,9 @@ const btpScript = fs.readFileSync(
   'utf8'
 )
 
+assert.doesNotMatch(cfScript, /RawUI|WindowTitle/)
+assert.doesNotMatch(btpScript, /RawUI|WindowTitle/)
+
 assert.match(cfScript, /Get-Clipboard -Raw/)
 assert.match(cfScript, /Start-Process \$passcodeUrl/)
 assert.ok(cfScript.includes("(?m)^API endpoint:\\s+(https://api\\.cf\\.[a-z0-9-]+\\.hana\\.ondemand\\.com)\\s*$"))
@@ -59,6 +62,11 @@ assert.match(btpScript, /Arguments\s*=\s*'login --sso'/)
 assert.match(btpScript, /StandardInput\.WriteLine\(\)/)
 assert.match(btpScript, /& btp --format json list accounts\/subaccount \*> \$null/)
 assert.match(btpScript, /BTP_LOGIN=PASS/)
+assert.ok(
+  btpScript.lastIndexOf("Write-Host $finalStatus") > btpScript.lastIndexOf('} finally {'),
+  'BTP PASS/FAIL status must be emitted only after protected cleanup'
+)
+assert.equal((btpScript.match(/Write-Host/g) || []).length, 1)
 
 for (const script of [cfScript, btpScript]) {
   assert.doesNotMatch(script, /--sso-passcode|--password|-p\s+\$(?:passcode|password)/i)
