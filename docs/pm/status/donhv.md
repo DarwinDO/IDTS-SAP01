@@ -7405,3 +7405,17 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Root cause: Markdown hard-break spacing was used after Date and Owner fields, conflicting with the repository clean-diff gate.
 - Fix status: fixed by removing the trailing spaces and rerunning cached `git diff --check` before commit.
 - Runtime/platform impact: none.
+### 2026-08-15 — Tooling issue: ripgrep received an invalid Windows wildcard path
+
+- Classification: tooling issue.
+- Symptom: a read-only search passed `mta*.yaml` as a direct path and Windows returned an invalid filename syntax error.
+- Root cause: ripgrep path arguments do not expand that wildcard in this PowerShell invocation.
+- Fix status: fixed by discovering matching files with `rg --files -g 'mta*.yaml'` and passing exact paths.
+- Product/platform impact: none.
+### 2026-08-15 — Tooling issue: MultiApps help slicer treated multiple `-m` matches as one line number
+
+- Classification: tooling issue.
+- Symptom: a read-only PowerShell helper failed while extracting context around `cf deploy -m` because `Select-String` returned multiple matches and arithmetic was attempted on an array.
+- Root cause: missing first-match selection and scalar integer cast.
+- Fix status: fixed by selecting the exact option row or the first match before calculating the display range.
+- Platform impact: none; only local CLI help text was read.
