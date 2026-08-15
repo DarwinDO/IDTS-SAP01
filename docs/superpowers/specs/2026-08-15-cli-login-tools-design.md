@@ -11,10 +11,11 @@ Provide two safe npm commands that let DonHV refresh Cloud Foundry and SAP BTP C
 
 ## Security Boundary
 
-- Never put a passcode, password, token, cookie, login URL, account identifier or credential in process arguments, files, terminal output, logs, evidence or chat.
+- Never put a passcode, password, token, cookie, secret-bearing completion URL, account identifier or credential in process arguments, helper-created files, terminal output, logs, evidence or chat. Passing the static, non-secret official CF passcode-page URL to the browser launcher is allowed.
 - The CF helper accepts only a new clipboard value matching the bounded temporary-code shape.
 - Both helpers suppress raw CLI output and return allowlisted status lines only.
-- The CF helper nulls sensitive variables before overwriting the clipboard with one neutral whitespace character in `finally`.
+- The CF helper nulls sensitive variables and completes five fail-closed neutral clipboard overwrite/readback cycles before emitting PASS.
+- The official CF and BTP CLIs may retain their documented managed login/session configuration. The helpers do not create a separate credential store.
 - Login refresh is the only external effect. The commands do not deploy, start, stop, bind, configure, assign roles or mutate application data.
 
 ## Implementation

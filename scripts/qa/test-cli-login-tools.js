@@ -33,8 +33,18 @@ assert.match(cfScript, /& cf apps \*> \$null/)
 assert.match(cfScript, /Set-Clipboard -Value ' '/)
 assert.match(cfScript, /function Clear-SensitiveClipboard/)
 assert.match(cfScript, /for \(\$attempt = 0; \$attempt -lt 5; \$attempt\+\+\)/)
-assert.match(cfScript, /Get-Clipboard -Raw -ErrorAction SilentlyContinue/)
+assert.doesNotMatch(cfScript, /Get-Clipboard[^\r\n]*SilentlyContinue/)
+assert.match(cfScript, /Get-Clipboard -Raw -ErrorAction Stop/)
 assert.match(cfScript, /throw 'CF clipboard cleanup failed'/)
+assert.match(cfScript, /\$finalStatus = 'CF_LOGIN=FAIL'\s*\$exitCode = 1/s)
+assert.match(cfScript, /catch\s*\{\s*if \(\$finalStatus -eq 'CF_LOGIN=PASS'\)/s)
+assert.match(cfScript, /catch\s*\{\s*\$finalStatus = 'CF_LOGIN=FAIL_CLEANUP'/s)
+assert.ok(
+  cfScript.lastIndexOf("Write-Host $finalStatus") > cfScript.lastIndexOf('Clear-SensitiveClipboard'),
+  'CF PASS/FAIL status must be emitted only after verified clipboard cleanup'
+)
+assert.equal((cfScript.match(/Write-Host/g) || []).length, 1)
+assert.doesNotMatch(cfScript, /Write-(?:Host|Output)[^\r\n]*\$_/)
 assert.ok(
   cfScript.indexOf('$passcode = $null', cfScript.indexOf('} finally {')) <
     cfScript.indexOf('Clear-SensitiveClipboard', cfScript.indexOf('} finally {'))

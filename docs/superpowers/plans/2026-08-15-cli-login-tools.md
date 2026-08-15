@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- No password, OTP, passcode, token, cookie, login URL, account identifier or credential may be printed, persisted or passed as a process argument.
+- No password, OTP, passcode, token, cookie, secret-bearing completion URL, account identifier or credential may be printed, persisted by the helper or passed as a process argument. The static, non-secret official CF passcode-page URL may be passed to the browser launcher; the official CLIs retain their documented managed session configuration.
 - No new npm dependency.
 - Login refresh is the only external effect.
 - Runtime output is limited to fixed PASS/FAIL status strings.
@@ -42,6 +42,7 @@
 - Produces: `CF_LOGIN=PASS|FAIL_*` and `BTP_LOGIN=PASS|FAIL_*` only.
 
 - [x] Add the reviewed CF helper with an anchored SAP API host, official passcode-page derivation, five-minute new-clipboard deadline, stdin pipe, authenticated `cf apps` readback and fail-safe cleanup.
+- [x] Harden cleanup after independent review: every clipboard read/write is fail-closed, cleanup completes before PASS, and every failure maps to one fixed status line.
 - [x] Add the BTP helper using `System.Diagnostics.Process`, redirected stdin/stdout/stderr, one automatic newline and a read-only authenticated subaccount-list verification.
 - [x] Add npm aliases that invoke only the two fixed scripts through `powershell -NoProfile -ExecutionPolicy Bypass -File`.
 - [x] Run the focused test and require PASS.
