@@ -7441,3 +7441,24 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Root cause: MBT validates every module path before executing the HTML5 module build/copy steps; an empty generated path must be materialized first.
 - Fix status: fixed by creating only that ignored empty staging directory before rerunning the same descriptor. No source content or artifact is synthesized there manually.
 - Platform impact: none; no MTAR was produced and no deployment occurred.
+### 2026-08-15 — Tooling/safety issue: dynamic recursive temp cleanup was blocked
+
+- Classification: tooling/safety issue.
+- Symptom: an artifact-inspection command was rejected before execution because it combined a dynamically generated temporary path with recursive deletion.
+- Root cause: the command violated the workspace destructive-operation safety boundary even though it attempted an explicit temp-root containment check.
+- Fix status: fixed by extracting read-only artifact copies into a fixed, ignored generated inspection directory and performing no automatic deletion in the inspection command.
+- Platform/security impact: none; the rejected process never started.
+### 2026-08-15 — Test-harness issue: first nested srv parity inspection emitted no result
+
+- Classification: test-harness issue.
+- Symptom: after extracting the checksum-reviewed srv module into a fixed generated directory, the first hash/CSN parity wrapper completed without allowlisted output.
+- Root cause: under investigation; the wrapper assumed nested payload paths before first enumerating the extracted archive layout.
+- Fix status: open until exact relative paths are discovered and the parity wrapper emits explicit PASS/MISMATCH for each required file and compiled service.
+- Platform impact: none; this is local artifact-copy inspection only and the artifact remains undeployed.
+### 2026-08-15 — Pre-deploy wrapper issues: reserved `$Host` variable and empty revision fields
+
+- Classification: test-harness/tooling issue.
+- Symptom: the first M3C sanitized baseline emitted empty revision count/max fields, then stopped when assigning to PowerShell's read-only automatic `$Host` variable.
+- Root cause: (1) an unsafe variable name for HTML5 host-service readback; (2) the revision parser assumed a paginated V3 response shape not returned by the installed endpoint/CLI path.
+- Fix status: in progress. Rename the variable and inspect only safe property names/count/version fields; deployment remains blocked until revision baseline is nonempty and unambiguous.
+- Platform impact: none; all completed calls were read-only and the wrapper stopped before deployment.
