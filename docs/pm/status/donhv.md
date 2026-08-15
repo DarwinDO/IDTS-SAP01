@@ -7137,3 +7137,21 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Symptom: `git diff --cached --check` reported two trailing-space lines, but the semicolon-separated command continued to commit and push the evidence.
 - Root cause: the shell command did not explicitly stop when the verification command returned nonzero.
 - Resolution: removed the two trailing-space markers, logged the issue immediately, and reran `git diff --check` as an independent fail-stop gate before the corrective commit. No evidence content or platform state was lost.
+
+### 2026-08-15 — M3B JWT browser launcher variable collision
+
+- Classification: transient tooling issue.
+- Symptom: the read-only browser-launch command stopped before opening Edge because PowerShell treated `$host` as the read-only built-in `$Host` variable.
+- Root cause: a case-insensitive variable-name collision in the one-off route parser.
+- Resolution: renamed the local variable to a task-specific route-host name and reran only the browser-launch step. No browser, authentication, source, data or platform mutation occurred in the failed attempt.
+- Status/owner: contained in-session; DonHV task continues with the corrected launcher.
+
+### 2026-08-15 — M3B HDI baseline build missing local attachment dependency
+
+- Classification: local environment/tooling issue.
+- Symptom: fresh `origin/dev` HANA build stopped because the clean root checkout could not resolve `@cap-js/attachments`; no baseline artifacts were produced by that attempt.
+- Root cause: the root checkout's local dependency installation was stale/incomplete relative to its committed lockfile.
+- Resolution: preserve source and lockfile bytes, restore only the local ignored dependency tree using the committed lockfile, then rerun the exact baseline build. The feature candidate build itself had already completed successfully.
+- Additional tooling issue: the first narrowly validated recursive removal command for the incomplete dependency folder was blocked by the execution safety policy before it ran. The remediation switched to a recoverable same-shell rename followed by reinstall; no broad delete was attempted.
+- Cleanup note: the later exact-path removal of that quarantined incomplete folder was also blocked by the execution policy before execution. It remains only under ignored `node_modules`; repository status/source are unaffected, and no alternative broad deletion was attempted.
+- Status/owner: under in-session remediation; no HDI, database, BTP or Git mutation occurred.
