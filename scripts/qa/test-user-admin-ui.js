@@ -88,6 +88,7 @@ assert.match(manageFragment, /<TextArea/)
 assert.match(manageFragment, /valueLiveUpdate="true"/)
 assert.match(manageFragment, /type="\{= \$\{access>\/mode\} === 'REVOKE' \? 'Negative' : 'Emphasized' \}"/)
 assert.match(manageFragment, /press="\.onConfirmAccessChange"/)
+assert.doesNotMatch(manageFragment, /stretchOnPhone=/)
 assert.doesNotMatch(manageFragment, /Password|OTP|passkey|token/i)
 
 const controllerDefinition = loadController(controller)

@@ -7024,3 +7024,100 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Root cause: the feature branch contains a large historical delta, and the initial command requested an unbounded combined summary/name listing.
 - Resolution: discard the truncated output and rerun bounded, allowlisted inventories grouped by commit and target path (`db`, `srv`, `app/user-administration-ui`, XSUAA/MTA and broker). Do not infer completeness from the truncated output.
 - Status/owner: contained; the command was read-only apart from refreshing remote refs. No source, platform, database, identity, role, Jira or Drive mutation occurred.
+
+### 2026-08-15 - UA-R3C M3A PM context output truncation
+
+- Classification: transient tooling/evidence issue.
+- Symptom: one combined read of the project context, PM board/status, risk log and task search exceeded the tool output budget and was truncated.
+- Root cause: unrelated long-lived PM and risk history was requested in a single command.
+- Resolution: discard the truncated body as completeness evidence and use bounded exact-file reads/searches for the User Administration design, plan and verification package.
+- Status/owner: contained; the command was read-only. No platform, database, identity, role, Jira or Drive mutation occurred.
+
+### 2026-08-15 - UA-R3C M3A deprecated UI5 dialog property TDD RED
+
+- Classification: product-code compatibility defect / expected regression RED.
+- Symptom: UI5 MCP linter reported `stretchOnPhone` on `ManageAccess.fragment.xml` as a deprecated `sap.m.Dialog` property; the new focused assertion failed against the current source with exit `1`.
+- Root cause: the administration dialog used the legacy phone-only stretch flag instead of the current responsive sizing contract.
+- Resolution plan: remove only the deprecated property, retain the existing content width and controls, then rerun the focused test, UI5 linter, manifest validation and UI build.
+- Status/owner: expected RED captured; fix and fresh verification pending. No platform mutation occurred.
+
+### 2026-08-15 - UA-R3C M3A focused UI test working-directory error
+
+- Classification: transient tooling issue.
+- Symptom: the first post-fix command invoked `node scripts/qa/test-user-admin-ui.js` from the UI application subdirectory, so Node looked for a non-existent nested `app/user-administration-ui/scripts/qa` path and exited with `MODULE_NOT_FOUND`.
+- Root cause: the root-relative test path was combined with the UI subdirectory working directory.
+- Resolution: use the app-local `npm test` script from the UI directory and run the root-relative focused script only from the repository root. Treat the app-local `npm test` PASS separately from the failed redundant invocation.
+- Status/owner: contained; `npm test` subsequently passed in the same output. A fresh standalone build/linter verification remains required. No platform mutation occurred.
+
+### 2026-08-15 - UA-R3C M3A combined focused-test timeout
+
+- Classification: transient test-harness/tooling issue.
+- Symptom: the combined focused-test-and-compile command reached the tool's 30-second boundary after all listed programmatic suites printed PASS; no CAP/HANA compile marker or reliable final exit code was returned.
+- Root cause: multiple in-memory CAP deployments produced verbose seed initialization output and consumed the full command window.
+- Resolution: retain each explicitly printed focused-suite PASS as narrow evidence, but rerun CAP EDMX and HANA compilation as separate bounded commands with explicit exit markers. Do not infer compile success from the timed-out wrapper.
+- Status/owner: contained; tests used only local in-memory databases. No HANA/BTP mutation occurred.
+
+### 2026-08-15 - UA-R3C M3A silent compile-wrapper failure
+
+- Classification: test-harness/tooling issue under investigation.
+- Symptom: the first isolated compile wrapper exited `1` before emitting either success marker because all compiler output had been redirected.
+- Root cause: the project now contains four service definitions, so `cds compile srv --to edmx` requires explicit service selection; the actual error requested `-s all` or one named service. The added log-level option was not the cause.
+- Resolution: correct the M3A plan and command to `npx cds compile srv --to edmx -s all`, then run HANA compilation separately.
+- Status/owner: diagnosed; fresh corrected compilation pending. No platform or database mutation occurred.
+
+### 2026-08-15 - UA-R3C M3A offline CAP build warning and destination normalization
+
+- Classification: pre-existing model warning plus local build-tool path issue.
+- Symptom: both the exact `origin/dev` baseline and M3A candidate builds emitted the same warning that `@Capabilities.UpdateRestrictions.NonUpdateableProperties` is not known for `BugService.Bugs_attachments`. The candidate `--dest` value was also normalized beneath the generated build root (`gen/.tmp/...`) instead of the requested repository `.tmp` path.
+- Root cause: the annotation warning predates User Administration and is unchanged in both builds. CAP build resolves the supplied relative destination within its generated output context.
+- Resolution: classify the identical warning as a non-M3A blocker but retain it in evidence; use the actual resolved baseline/candidate generated roots for an allowlisted offline comparison. Do not deploy either build and do not treat the warning as newly introduced.
+- Status/owner: builds completed successfully; offline delta inspection pending. No HDI simulation/make or platform mutation occurred.
+
+### 2026-08-15 - UA-R3C M3A generated HDB table parser mismatch
+
+- Classification: transient test-harness/tooling issue.
+- Symptom: PowerShell `ConvertFrom-Json` rejected generated `idts.cap.Users.hdbtable` content with `Invalid JSON primitive: COLUMN`, so the attempted column comparison returned invalid empty counts.
+- Root cause: generated `.hdbtable` uses HANA artifact syntax rather than JSON.
+- Resolution: discard the failed counts and inspect the generated artifact with syntax-aware text/allowlist comparison; require exactly the four external identity columns and no removed legacy column.
+- Status/owner: contained; no generated artifact or platform state was changed.
+
+### 2026-08-15 - UA-R3C M3A empty XSUAA collection diff parser error
+
+- Classification: transient test-harness/tooling issue.
+- Symptom: the first semantic XSUAA comparison passed a null baseline `role-collections` property into `Compare-Object`, which rejected the missing reference array. Scope/template and broker-authority reads completed, but collection diff output was incomplete.
+- Root cause: `origin/dev` has no `role-collections` property and the helper did not normalize missing arrays to empty arrays.
+- Resolution: normalize absent JSON arrays to `@()` and rerun the complete semantic comparison; do not infer the collection addition from the partial run.
+- Status/owner: contained; JSON files and platform XSUAA were read-only.
+
+### 2026-08-15 - UA-R3C M3A PowerShell nested-array XSUAA comparison defect
+
+- Classification: transient test-harness/tooling issue.
+- Symptom: the normalized comparison incorrectly reported unchanged scopes/templates as both added and removed while correctly reporting the new collection. The generic tuple wrapper treated each nested array as a single comparison object.
+- Root cause: PowerShell array unrolling/nesting semantics in the generic comparison loop.
+- Resolution: discard the addition/removal counts from that run and compare scopes, templates and collections as three explicit flat string arrays. Keep the independently read broker-authority target count only after the complete rerun also passes.
+- Status/owner: contained; no XSUAA or source mutation occurred.
+
+### 2026-08-15 - UA-R3C M3A Windows ripgrep wildcard path error
+
+- Classification: transient tooling issue.
+- Symptom: `rg` rejected the literal Windows path argument `xs-security*.json` with OS error 123 while the exact broker descriptor/file reads succeeded.
+- Root cause: a shell-style wildcard was supplied as a Windows path operand instead of using ripgrep's `--glob` option.
+- Resolution: use `rg --glob 'xs-security*.json'` or exact file paths for subsequent searches; discard only the failed wildcard portion.
+- Status/owner: contained; no source or platform mutation occurred.
+
+### 2026-08-15 - UA-R3C M3A local exact-diff gate completed
+
+- Classification: source-only verification and predeployment design gate.
+- Completed: removed the deprecated `stretchOnPhone` dialog property after a focused TDD RED; updated the matching UI knowledge mirror; produced the M3A design, execution plan and exact-diff evidence package.
+- Fresh verification: User Administration UI tests, onboarding/access programmatic tests, secret scan, agent-rule check and CAP EDMX compile all exited `0`; HANA CDS compile, QA Depth self-test, UI build, UI5 lint/manifest validation and read-only BTP readiness also passed in their recorded runs. The existing `BugService.Bugs_attachments` annotation warning is unchanged from the exact `origin/dev` baseline.
+- Offline persistence finding: the additive build adds four nullable immutable-identity columns and the approved User Administration tables/indexes, but also generates one `.hdbtabledata` artifact containing exactly 14 lifecycle status rows. No HDI simulation/make, seed, schema or data mutation was executed; this status initialization is an explicit M3B approval blocker.
+- XSUAA finding: the candidate adds only `UserAdmin`, `ProvisioningBroker`, the `UserAdmin` role template and `IDTS_USER_ADMIN`; the full baseline/candidate descriptor hashes are frozen in the M3A evidence. No XSUAA, Role Collection or role-assignment mutation was executed.
+- Status/owner: M3A local package complete with `CONDITIONAL GO` to request M3B exact-diff review only. Broker enablement, CAP/UI deployment, HANA migration, status initialization and live provisioning remain unapproved.
+
+### 2026-08-15 - UA-R3C M3A commit wrapper did not fail-stop
+
+- Classification: transient tooling/process issue.
+- Symptom: `git diff --cached --check` reported trailing blank lines in two new Markdown files, but the semicolon-separated PowerShell wrapper continued into `git commit`.
+- Root cause: the wrapper did not set fail-stop semantics or gate the commit on the prior command's exit code.
+- Resolution: remove the two trailing blank lines, rerun `git diff --check`, and amend the same local commit before push. Future commit wrappers must use explicit exit-code checks instead of assuming semicolon chaining stops.
+- Status/owner: contained locally; no remote push or platform mutation occurred before remediation.

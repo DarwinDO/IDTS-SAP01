@@ -4,8 +4,7 @@
 	<Dialog
 		id="manageAccessDialog"
 		title="{access>/title}"
-		contentWidth="30rem"
-		stretchOnPhone="true">
+		contentWidth="30rem">
 		<content>
 			<VBox class="sapUiSmallMargin">
 				<MessageStrip
