@@ -7192,7 +7192,40 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 
 - Classification: platform cleanup issue under readback.
 - Symptom: after the exact hung task was terminated successfully, the first exact `cf delete idts-ua-hdi-sim-20260815 -f` returned nonzero.
+
+#### Root-cause correction — missing deployer exit flag
+
+- Classification: test-harness/tooling issue.
+- Root cause: `@sap/hdi-deploy` 5.7.0 intentionally enters an idle loop after a successful deployment unless `--exit` is supplied. The first schema-only simulation command omitted that flag, so the HDI make completed but the CF task never reached a terminal state.
+- Fix status: source-only fix implemented in `scripts/btp/ua-hdi-simulate-command.js`; it adds exactly one `--exit` while preserving the 13-file schema allowlist, simulate-only mode, warning-as-error, zero auto-undeploy, zero CSV and zero `.hdbtabledata` boundary.
+- Verification: `scripts/qa/test-ua-hdi-simulate-command.js` passed; reverting `--exit` to `--no-exit` made the test fail at the exact assertion, and restoring the fix made the test pass again.
+- Remaining owner/action: DonHV gate owner; run one fresh R2 simulation with a new exact temporary app/task identity. Real HDI make and status initialization remain blocked until that task exits successfully and its sanitized plan is still `13 deploy / 0 undeploy`.
+
+#### R2 server-parameter rejection
+
+- Classification: test-harness/configuration issue.
+- Symptom: R2 exited promptly, proving the `--exit` correction, but the task ended `FAILED` before a new simulated make completed.
+- Root cause: the exact HANA HDI server rejected `try_fast_table_migration` as an unknown make parameter. This value was not in the server-returned allowlist and must not be sent.
+- Safety result: no retry was issued. Readback showed the unique R2 task as `FAILED`; the logs also confirmed the prior simulated request had completed with `13` effective deploys, `0` undeploys and `8` dependent redeploys.
+- Fix status: TDD regression changed to reject any `try_fast_table_migration` argument; it failed against the old command and passed after the single unsupported parameter pair was removed. The server warning-as-error and zero auto-undeploy boundaries remain unchanged.
+- Remaining owner/action: inventory the dependent redeploy boundary during one new exact R3 simulation. Real HDI make remains blocked until R3 exits successfully with no server warnings and no unrelated dependency.
+
+#### R3 helper-app first cleanup delete returned nonzero
+
+- Classification: platform cleanup issue under readback.
+- Symptom: after the unique R3 task reached terminal `SUCCEEDED`, the first exact-name `cf delete` returned nonzero.
+- Safety response: no blind retry. Immediate readback showed the exact temporary app still present, its HDI binding already absent, and no route was ever created.
+- Remaining action: verify zero running tasks and exact ownership, then permit one second exact-name delete only; never use wildcard/orphan cleanup and never target the HDI service or main applications.
 - Safety response: no blind delete retry. Perform sanitized app/task/binding readback first to distinguish termination propagation from a completed or failed deletion.
 - Boundary: never delete the HDI service, routes, main apps or similarly named objects. Any retry requires proof that the same exact no-route helper app remains, has no running task and still owns only the one reviewed HDI binding.
 - Resolution/readback: the exact app remained no-route, the terminated task was no longer running, and the HDI binding count had already become zero. A second exact-name delete was then allowed and succeeded; final helper-app presence is zero.
 - Status/owner: cleanup completed. The simulation result remains `AMBIGUOUS`, and real migration remains blocked.
+
+### 2026-08-15 — M3B HDI schema-only simulation R3 PASS; real migration blocked by free-tier recoverability
+
+- Classification: release safety gate / environment blocker.
+- Result: the corrected R3 task terminated `SUCCEEDED` with `13` effective schema deploys, `0` effective undeploys, `8` dependent redeploys, and `0` server warnings. `--exit` fixed the prior idle process, and the unsupported `try_fast_table_migration` pair was absent. No CSV or `.hdbtabledata` was packaged.
+- Dependency evidence: the task log named seven direct `Users` views (`ActiveTesters`, `AiSuggestions`, `Comments`, `HistoryEvents`, `HistoryLogs`, `Notifications`, `Users`); the local generated-source scan found the same exact direct dependency set. No unrelated dependent name was observed.
+- Cleanup: first exact app delete returned nonzero; readback proved app present, no running task, no route and binding already absent. One second exact-name delete succeeded. Final helper app/binding counts are zero.
+- Runtime verification: fresh `npm run btp:demo:check` returned CAP/AppRouter `1/1`, health/ready/Web `200`, anonymous protected API `401`, `DEMO READY`.
+- Hard blocker: the live database service is exact plan `hana-free`. Current official SAP HANA Cloud documentation states free tier has no backup/recovery and no storage snapshots. Therefore real HDI make, 14-row status initialization, CAP/UI deployment and broker enablement remain `NO-GO` until DonHV approves and verifies a separate logical recovery mechanism or supplies an environment with SAP-supported backup/recovery.
