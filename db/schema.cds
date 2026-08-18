@@ -325,7 +325,7 @@ annotate UserAccessOperations with @assert.unique.provisioningIdempotencyKey: [ 
 
 entity UserIdentityAuditEvents : cuid, managed {
   operation          : Association to UserAccessOperations;
-  onboardingRequest : Association to UserOnboardingRequests not null;
+  onboardingRequest : Association to UserOnboardingRequests;
   actor              : Association to Users;
   targetUser         : Association to Users;
   action             : String(40) not null;
@@ -333,8 +333,12 @@ entity UserIdentityAuditEvents : cuid, managed {
   fromState          : String(40);
   toState            : String(40);
   correlationId      : UUID not null;
+  beforeIdentityHash : String(64);
+  afterIdentityHash  : String(64);
   detailsSummary     : String(500);
 }
+
+annotate UserIdentityAuditEvents with @assert.unique.identityAuditCorrelationAction: [ correlationId, action ];
 
 entity DuplicateLinks : cuid, managed {
   // Liên kết duplicate chỉ được tạo khi user xác nhận; kết quả AI Similar Bugs tự nó không insert entity này.

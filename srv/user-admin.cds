@@ -1,6 +1,12 @@
 using idts.cap as db from '../db/schema';
 
 service UserAdministrationService @(requires: 'authenticated-user') {
+  type BootstrapIdentityResult {
+    status                     : String(20);
+    correlationId              : UUID;
+    authorityFingerprintPrefix : String(12);
+  }
+
   type OnboardingResult {
     ID                 : UUID;
     targetEmail        : String(255);
@@ -65,6 +71,9 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     operationID    : UUID,
     expectedVersion: Integer
   ) returns OnboardingResult;
+
+  @requires: 'PM'
+  action bootstrapCurrentIdentityLink() returns BootstrapIdentityResult;
 
   action reconcileAccessOperation(
     operationID    : UUID,

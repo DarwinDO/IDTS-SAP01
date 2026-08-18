@@ -14,7 +14,7 @@ const {
 } = require('./user-admin/invitations')
 const { getUserAdminConfig } = require('./user-admin/config')
 const { scheduleImmediateEmailOutbox } = require('./email/worker')
-const { identityKeyHash, selectActiveUserForRequest } = require('./auth/identity-map')
+const { identityKeyFromRequestUser, identityKeyHash, selectActiveUserForRequest } = require('./auth/identity-map')
 const { isXsuaaRuntime } = require('./auth/platform-role')
 
 const OPEN_STATUSES = [
@@ -35,6 +35,7 @@ const OPEN_STATUSES = [
 class UserAdministrationService extends cds.ApplicationService {
   async init () {
     this.before('READ', 'OnboardingRequests', req => requireActiveUserAdministrator(req))
+    this.on('bootstrapCurrentIdentityLink', req => bootstrapCurrentIdentityLink(req))
     this.on('requestOnboarding', req => requestOnboarding(req))
     this.on('verifySapIdentity', req => verifySapIdentity(req))
     this.on('searchOnboarding', req => searchOnboarding(req))
@@ -346,6 +347,120 @@ async function retryAccessOperation (req) {
     auditAction: 'RETRY_ACCESS_OPERATION',
     auditSummary: 'Access operation queued for a bounded retry.'
   })
+}
+
+async function bootstrapCurrentIdentityLink (req) {
+  assertUserAdministrator(req)
+  if (!isXsuaaRuntime()) throw serviceError(403, 'BOOTSTRAP_RUNTIME_REQUIRED', 'SAP identity bootstrap requires XSUAA.')
+
+  const identity = identityKeyFromRequestUser(req.user)
+  if (!identity) throw serviceError(403, 'BOOTSTRAP_IDENTITY_INCOMPLETE', 'SAP identity claims are incomplete.')
+
+  const approvedHash = String(process.env.IDTS_USER_ADMIN_BOOTSTRAP_TARGET_SHA256 || '').trim().toLowerCase()
+  if (!/^[0-9a-f]{64}$/.test(approvedHash)) {
+    throw serviceError(403, 'BOOTSTRAP_TARGET_NOT_APPROVED', 'The bootstrap target is not approved.')
+  }
+
+  const tx = cds.tx(req)
+  const candidates = await tx.run(
+    SELECT.from('idts.cap.Users')
+      .columns(
+        'ID',
+        'role_code',
+        'active',
+        'externalIdentityOrigin',
+        'externalIdentityIssuer',
+        'externalIdentitySubject',
+        'externalIdentityKeyHash'
+      )
+      .where({ role_code: 'PM', active: true })
+      .forUpdate()
+  )
+  if (candidates.length !== 1) {
+    throw serviceError(409, 'BOOTSTRAP_TARGET_NOT_UNIQUE', 'The bootstrap target is not unique.')
+  }
+
+  const target = candidates[0]
+  const targetHash = crypto.createHash('sha256').update(String(target.ID)).digest('hex')
+  if (!constantTimeHexEqual(targetHash, approvedHash)) {
+    throw serviceError(403, 'BOOTSTRAP_TARGET_NOT_APPROVED', 'The bootstrap target is not approved.')
+  }
+
+  const tuple = [
+    target.externalIdentityOrigin,
+    target.externalIdentityIssuer,
+    target.externalIdentitySubject,
+    target.externalIdentityKeyHash
+  ]
+  const expectedTuple = [identity.origin, identity.issuer, identity.subject, identity.keyHash]
+  const populated = tuple.filter(value => value !== null && value !== undefined).length
+  const afterIdentityHash = identityStateHash(expectedTuple)
+
+  if (populated === 4 && tuple.every((value, index) => value === expectedTuple[index])) {
+    const audit = await tx.run(
+      SELECT.one.from('idts.cap.UserIdentityAuditEvents')
+        .columns('correlationId')
+        .where({ targetUser_ID: target.ID, action: 'BOOTSTRAP_LINK', afterIdentityHash })
+    )
+    if (!audit) throw serviceError(409, 'BOOTSTRAP_AUDIT_MISSING', 'The bootstrap audit is missing.')
+    return bootstrapResult('NO_OP', audit.correlationId, identity.keyHash)
+  }
+  if (populated !== 0) throw serviceError(409, 'BOOTSTRAP_STATE_CONFLICT', 'The bootstrap target state changed.')
+
+  const collision = await tx.run(
+    SELECT.one.from('idts.cap.Users')
+      .columns('ID')
+      .where({ externalIdentityKeyHash: identity.keyHash, ID: { '!=': target.ID } })
+  )
+  if (collision) throw serviceError(409, 'BOOTSTRAP_IDENTITY_COLLISION', 'The SAP identity is already linked.')
+
+  const correlationId = cds.utils.uuid()
+  const changed = await tx.run(
+    UPDATE('idts.cap.Users').set({
+      externalIdentityOrigin: identity.origin,
+      externalIdentityIssuer: identity.issuer,
+      externalIdentitySubject: identity.subject,
+      externalIdentityKeyHash: identity.keyHash
+    }).where({
+      ID: target.ID,
+      externalIdentityOrigin: null,
+      externalIdentityIssuer: null,
+      externalIdentitySubject: null,
+      externalIdentityKeyHash: null
+    })
+  )
+  if (changed !== 1) throw serviceError(409, 'BOOTSTRAP_STATE_CONFLICT', 'The bootstrap target state changed.')
+
+  await tx.run(INSERT.into('idts.cap.UserIdentityAuditEvents').entries({
+    ID: cds.utils.uuid(),
+    onboardingRequest_ID: null,
+    actor_ID: target.ID,
+    targetUser_ID: target.ID,
+    action: 'BOOTSTRAP_LINK',
+    result: 'LINKED',
+    fromState: 'UNLINKED',
+    toState: 'LINKED',
+    correlationId,
+    beforeIdentityHash: identityStateHash([null, null, null, null]),
+    afterIdentityHash,
+    detailsSummary: 'Current PM SAP identity linked through the controlled bootstrap gate.'
+  }))
+
+  return bootstrapResult('LINKED', correlationId, identity.keyHash)
+}
+
+function constantTimeHexEqual (left, right) {
+  const leftBuffer = Buffer.from(left, 'hex')
+  const rightBuffer = Buffer.from(right, 'hex')
+  return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer)
+}
+
+function identityStateHash (tuple) {
+  return crypto.createHash('sha256').update(JSON.stringify(tuple)).digest('hex')
+}
+
+function bootstrapResult (status, correlationId, identityHash) {
+  return { status, correlationId, authorityFingerprintPrefix: identityHash.slice(0, 12) }
 }
 
 async function reconcileAccessOperation (req) {

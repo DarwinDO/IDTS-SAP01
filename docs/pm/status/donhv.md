@@ -7725,3 +7725,65 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Security: secret values were delivered through redirected stdin, raw CF output was suppressed, byte buffers were cleared, and no secret/endpoint was written to repo, chat, evidence, command arguments or HANA.
 - Verification: invitation-config TDD red/green, UPS runner contract, PowerShell parser, onboarding/backend/UI callbacks, access broker, immutable identity, CAP compile, secret scan, agent rules, M3C topology and diff checks pass. The CAP compile retains only the known unrelated attachment annotation warning.
 - Next: commit exact source, build a checksum-bound MTAR, deploy only `idts-sap01-srv`, bind only the dedicated UPS, verify runtime config booleans, then retry the controlled invitation once.
+
+### 2026-08-18 - M3E full MBT packaging stalled at zero-byte CAP data ZIP
+
+- Classification: local build/tooling issue, bypassed with exact artifact patching.
+- Symptom: the full `mbt build` completed CAP generation and production install but remained on CAP module packaging while its generated `data.zip` stayed zero bytes and the packager showed negligible progress.
+- Safety response: interrupted only the local build process; no MTAR was produced and no platform mutation occurred.
+- Resolution: copy the checksum-verified M3C MTAR to a new filename and replace only nested `srv/user-admin/config.js` from exact generated HEAD `3ac0241`; preserve the old MTAR. New artifact config parity passed and SHA-256 is `E2C7856ACF2F99EC13411824213FF65336A932EE9550F1FF4CB6F17320877A5D`.
+- Limitation: inherited install audit remained 26 findings at repository level and 7 in generated CAP; no dependency was added and no audit fix was run.
+
+### 2026-08-18 - M3E stale M3C blue-green operation blocked selective deploy
+
+- Classification: deployment/process issue, closed.
+- Symptom: the first exact selective deploy did not start because operation `15dd6714-989b-11f1-8302-eeee0a9ef113` from 2026-08-15 remained `ACTION_REQUIRED` in the testing phase.
+- Evidence: downloaded operation logs showed the old idle variant had reached testing; live readback showed exactly one STARTED canonical CAP app and zero idle app. SAP documents that abort at testing phase does not rollback app/service state.
+- Resolution: abort the exact stale operation once, then verify active operation count zero and canonical CAP still STARTED before a new deploy. No blind force deploy was used.
+
+### 2026-08-18 - M3E module-select deploy still processed dependent managed resources
+
+- Classification: deployment behavior/risk finding.
+- Symptom: `cf deploy ... -m idts-sap01-srv --no-start` still processed XSUAA, destination and Job Scheduler and unbound/rebound the CAP app's declared dependent services before staging the selected module.
+- Impact: DB deployer, UI and AppRouter modules did not run, but the operation was broader than the expected binary-only CAP update. App binding count returned to the exact six-service baseline before adding the invitation UPS.
+- Resolution: let the in-flight operation finish rather than interrupting it, then bind only `idts-user-admin-invitation-config`, start CAP once, verify seven CAP bindings, UPS binding count one, `DEMO READY`, and production invitation-config booleans all true.
+- Follow-up: future narrow CAP patches should avoid the full MTA descriptor when managed-resource reprocessing is not explicitly approved.
+
+### 2026-08-18 - M3E first post-fix invitation attempt used a pre-deploy browser session
+
+- Classification: browser/runtime acceptance issue, no data mutation.
+- Symptom: the retained User Administration tab returned generic invitation failure after CAP/XSUAA rebind. Browser diagnostics showed HTTP `503`; aggregate HANA readback remained zero requests and zero deliveries.
+- Root cause boundary: the page and OData/CSRF session predated the selective deploy and XSUAA rebind. Reload redirected through login and the authenticated User Administration UI loaded again through `sap.default`.
+- Safety response: no further submission until a fresh authenticated page is visible and DonHV reconfirms transmitting the controlled test email. Broker remains IDLE and no invitation/email/provider operation exists.
+
+### 2026-08-18 - M3E fresh invitation blocked by missing PM immutable identity link
+
+- Classification: expected security gate / incomplete bootstrap implementation.
+- Symptom: after fresh `sap.default` authentication, `requestOnboarding` returned safe `403 USER_ADMIN_REQUIRED`; aggregate readback remained zero requests and zero deliveries.
+- Root cause: XSUAA carries PM + UserAdmin sufficiently to enter the static UI, but production `requireActiveUserAdministrator` requires immutable identity matching. The single active legacy PM row still has all four external identity fields null, so the intentional no-email-fallback rule denies the action.
+- Corrected aggregate evidence: HANA returns physical uppercase keys to direct task queries. The first task incorrectly inspected lowercase properties and reported zero PMs; a shape-aware readback proved 14 rows with `PM=1`, `TESTER=1`, `DEVELOPER=12`, exactly one active PM, one active PM with a fully null tuple, and zero bootstrap audit rows.
+- Sanitized target evidence: SHA-256 fingerprint prefix of the unique active PM internal ID is `b9addbaef9b5`; no ID, email, JWT or raw identity tuple was emitted.
+- Safety response: no email fallback, JWT decode, manual HANA update or additional invitation retry. The next gate must deploy a temporary no-parameter bootstrap action, perform one transactional four-field link plus audit, then remove the endpoint/config immediately.
+
+### 2026-08-18 - M3E bootstrap TDD fixture initially contained two PM rows
+
+- Classification: test-harness/data-fixture issue, fixed locally.
+- Symptom: the first green bootstrap test returned `BOOTSTRAP_TARGET_NOT_UNIQUE` because `cds.deploy` loaded the 14 seed Users before the test inserted another controlled PM.
+- Impact: the guard behaved correctly; no platform or persistent data mutation occurred.
+- Resolution: delete only the SQLite in-memory test Users before inserting the controlled PM fixture. The bootstrap test then passed LINKED, one audit, idempotent NO_OP, multi-role denial and wrong-target-hash denial.
+
+### 2026-08-18 - M3E bootstrap audit schema migration completed
+
+- Classification: controlled additive HANA mutation.
+- Outcome: schema-only HDI simulation and real make both completed `SUCCEEDED` with `Make succeeded`, zero warning signal and zero undeploy signal. The positive staging package contained 14 allowlisted schema artifacts, two HDI metadata files, two runners, package metadata and zero CSV/tabledata.
+- Exact change: `UserIdentityAuditEvents.onboardingRequest_ID` became nullable; two nullable 64-character before/after identity hash columns and one unique `(correlationId, action)` index were added. No Users table, status tabledata, seed or unrelated artifact was deployed.
+- Postcheck: Users remained exactly 14, audit rows remained zero, and the three changed/new audit columns were readable.
+- Cleanup: first exact temporary-app delete returned nonzero because the HDI binding operation was still settling; readback then showed binding count zero and running task count zero. The second exact delete succeeded; temporary app count is zero and the HDI service remains present.
+
+### 2026-08-18 - M3E temporary PM identity bootstrap source ready
+
+- Classification: controlled temporary security endpoint.
+- Contract: no request parameters; native XSUAA only; exact PM + UserAdmin; complete validated identity tuple; exactly one active PM; constant-time full approved target hash; conditional four-null-field update; collision/partial-state rejection; one transactional `BOOTSTRAP_LINK` audit; safe status/correlation/12-character fingerprint response.
+- TDD: expected red before the action existed, then PASS for LINKED, unchanged email/role/active, one audit, idempotent local NO_OP, multi-role denial and wrong-hash denial.
+- Target evidence: unique active PM fingerprint prefix remains `b9addbaef9b5`. No raw internal ID, email, JWT, issuer, subject or full approval hash is exposed in runtime evidence.
+- Next: commit/deploy temporary CAP revision with private full hash, invoke once in the fresh DonHV `sap.default` session, read back link/audit, then remove the action and private setting immediately.

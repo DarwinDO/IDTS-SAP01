@@ -4,6 +4,8 @@ Every administration read and request action uses one shared guard: the JWT must
 
 In production, the signing key and onboarding base URL come only from the exact `idts-user-admin-invitation-config` user-provided service binding. The binding must occur exactly once and contain exactly `invitationSigningKey` and `invitationBaseUrl`; missing, duplicate, malformed, or broader credentials fail closed. Development and tests retain the existing `cds.env.idts.userAdmin` configuration path. The signing key is never stored in source, HANA, responses, logs, evidence, command arguments, or the browser.
 
+The temporary `bootstrapCurrentIdentityLink` action has no target, email, role or capability input. It requires native XSUAA, exactly PM + UserAdmin, a complete validated SAP identity tuple, exactly one active legacy PM and a full approved internal-ID hash supplied at deployment time. It conditionally writes only the four external identity fields and one `BOOTSTRAP_LINK` audit row in the same transaction, returns only status/correlation/fingerprint prefix, and is removed immediately after the one-PM bootstrap gate.
+
 Administration requester resolution now uses the shared immutable mapper. A matching external-identity hash wins even after email rename. If complete identity claims are present but the hash differs or is absent from all rows, authorization fails closed; email cannot bootstrap or cross into any account.
 
 `searchOnboarding` uses the same active PM + UserAdmin guard, normalizes its bounded query, and performs a parameterized `contains` search. It returns only the UI summary allowlist and caps results at 200. Using an action keeps a searched email out of the OData request URL.

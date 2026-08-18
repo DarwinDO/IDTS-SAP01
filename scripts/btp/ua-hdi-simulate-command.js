@@ -6,6 +6,7 @@ const SCHEMA_FILES = Object.freeze([
   'src/gen/idts.cap.UserAccessOperations.hdbtable',
   'src/gen/idts.cap.UserAccessOperations.provisioningIdempotencyKey.hdbindex',
   'src/gen/idts.cap.UserIdentityAuditEvents.hdbtable',
+  'src/gen/idts.cap.UserIdentityAuditEvents.identityAuditCorrelationAction.hdbindex',
   'src/gen/idts.cap.UserOnboardingDeliveries.hdbtable',
   'src/gen/idts.cap.UserOnboardingDeliveries.onboardingRequestDelivery.hdbindex',
   'src/gen/idts.cap.UserOnboardingRequests.externalIdentity.hdbindex',
