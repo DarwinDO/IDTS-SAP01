@@ -212,10 +212,15 @@ async function verifySapIdentity (req) {
   }
 
   const verifiedAt = (req.timestamp || new Date()).toISOString()
+  const approvalRequired = requiresProvisioningApproval(invitation)
+  const operationID = approvalRequired ? null : cds.utils.uuid()
+  const operationCorrelationId = approvalRequired ? invitation.correlationId : cds.utils.uuid()
+  const nextStatus = approvalRequired ? 'PENDING_APPROVAL' : 'PROVISION_QUEUED'
+  const nextVersion = approvalRequired ? 1 : 2
   const updated = await tx.run(
     UPDATE('idts.cap.UserOnboardingRequests').set({
-      status_code: 'PENDING_APPROVAL',
-      provisioningVersion: 1,
+      status_code: nextStatus,
+      provisioningVersion: nextVersion,
       consumedAt: verifiedAt,
       verifiedAt,
       identityOrigin: identity.origin,
@@ -224,20 +229,63 @@ async function verifySapIdentity (req) {
       identityPlatformUserId: identity.platformUserId,
       identityKeyHash: identityKeyHashValue,
       identityEmailNormalized: identity.emailNormalized,
+      ...(approvalRequired ? {} : {
+        approvedAt: verifiedAt,
+        approvedBy_ID: invitation.requestedBy_ID,
+        latestOperation_ID: operationID
+      }),
       lastErrorCode: null,
       lastErrorSummary: null
     }).where({ ID: invitation.ID, status_code: 'INVITED', consumedAt: null })
   )
   if (updated !== 1) throw serviceError(409, 'INVITATION_ALREADY_USED', 'Invitation has already been used.')
 
+  if (!approvalRequired) {
+    const verifiedRequest = {
+      ...invitation,
+      status_code: nextStatus,
+      provisioningVersion: nextVersion,
+      verifiedAt,
+      identityOrigin: identity.origin,
+      identityIssuer: identity.issuer,
+      identitySubject: identity.subject,
+      identityPlatformUserId: identity.platformUserId,
+      identityKeyHash: identityKeyHashValue,
+      identityEmailNormalized: identity.emailNormalized
+    }
+    await insertAccessOperation(tx, {
+      ID: operationID,
+      request: verifiedRequest,
+      operationType: 'PROVISION',
+      requestedByID: invitation.requestedBy_ID,
+      expectedVersion: nextVersion,
+      correlationId: operationCorrelationId
+    })
+    await insertIdentityAudit(tx, {
+      operationID,
+      requestID: invitation.ID,
+      actorID: invitation.requestedBy_ID,
+      action: 'AUTO_APPROVE_PROVISIONING',
+      fromState: 'INVITED',
+      toState: nextStatus,
+      correlationId: operationCorrelationId,
+      summary: 'Standard-role provisioning queued after SAP identity verification.'
+    })
+  }
+
   return onboardingResult({
     ...invitation,
-    status_code: 'PENDING_APPROVAL',
-    provisioningVersion: 1,
+    status_code: nextStatus,
+    provisioningVersion: nextVersion,
     verifiedAt,
     identityOrigin: identity.origin,
-    identitySubject: identity.subject
+    identitySubject: identity.subject,
+    correlationId: operationCorrelationId
   })
+}
+
+function requiresProvisioningApproval (request) {
+  return request?.requestedRole_code === 'PM' || request?.userAdminRequested === true
 }
 
 async function approveProvisioning (req) {
@@ -634,3 +682,4 @@ module.exports.requestRoleChange = requestRoleChange
 module.exports.requestRevoke = requestRevoke
 module.exports.retryAccessOperation = retryAccessOperation
 module.exports.reconcileAccessOperation = reconcileAccessOperation
+module.exports.requiresProvisioningApproval = requiresProvisioningApproval

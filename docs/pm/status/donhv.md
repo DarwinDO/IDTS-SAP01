@@ -7795,3 +7795,33 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Postcheck: Users remained 14; exactly one active PM has a complete tuple; target fingerprint remains `b9addbaef9b5`; exactly one matching `BOOTSTRAP_LINK` audit exists with result `LINKED` and both private state hashes present.
 - Invariants: no email, role, active, password, Role Collection, XSUAA, trust, invitation, delivery or provider mutation was made by the action. The action was not called a second time live.
 - Cleanup in progress: source action/type/handler/test removed and action-free CAP payload rebuilt. Next deploy removes the endpoint, then the private target-hash environment variable is unset and endpoint absence/readiness are verified.
+
+### 2026-08-18 - M3E direct CAP push with `--no-route` unmapped the existing route
+
+- Classification: deployment/tooling issue, fixed before bootstrap invocation.
+- Symptom: the temporary bootstrap `cf push --no-start --no-route` preserved seven bindings but reduced the CAP app route count from one to zero.
+- Safety response: did not start the app. Read back the exact existing route object/domain, mapped only that route back to `idts-sap01-srv`, and verified route count one before staging/starting.
+- Resolution: action-free cleanup push omitted `--no-route`; it preserved the exact route. Future existing-app pushes must not use `--no-route` when the current route must survive.
+
+### 2026-08-18 - M3E temporary bootstrap endpoint removed and private setting cleared
+
+- Classification: controlled security cleanup milestone.
+- Outcome: action-free HEAD `7f485f9` was compiled and deployed directly to the existing CAP app with seven bindings and one preserved route. The private `IDTS_USER_ADMIN_BOOTSTRAP_TARGET_SHA256` variable was removed through CAPI before start.
+- Verification: old action POST returns `404`; `DEMO READY`; Users 14; linked active PM one; `BOOTSTRAP_LINK` audit one. The temporary action was never invoked a second time live.
+
+### 2026-08-18 - M3E immediate invitation email kick did not run after commit
+
+- Classification: product/runtime integration defect under follow-up.
+- Symptom: the final invitation action succeeded and persisted exactly one INVITED TESTER request plus one PENDING delivery, but the delivery remained attempt zero after more than 20 seconds.
+- Safety response: no duplicate invitation. The first bounded recovery task failed before provider access because it opened `cds.tx` without first connecting the default DB; delivery remained PENDING/0.
+- Root cause correction: load deployed CSN, `await cds.connect.to('db')`, open `db.tx()`, require exactly one PENDING/attempt-zero onboarding delivery, process only `UserOnboardingDeliveries`, then commit or rollback.
+- Outcome: corrected recovery task returned `SENT=1`, `FAILED=0`, `SKIPPED=0`. Final readback: request INVITED/TESTER/UserAdmin false; delivery SENT, attempt one, no error, sent timestamp present.
+- Follow-up owner: User Administration source must add a regression/live-safe fix for why `req.on('succeeded')` did not trigger the immediate worker in production; hourly scheduler remains recovery only and no second email may be sent for this invitation.
+
+### 2026-08-18 - Standard-role onboarding now uses one PM confirmation
+
+- Classification: approved business-flow/UX change.
+- Outcome: TESTER and DEVELOPER verification atomically records the immutable identity, records the original inviter as approver, creates one provisioning operation/audit and returns `PROVISION_QUEUED` at version 2. PM or any UserAdmin request remains `PENDING_APPROVAL` at version 1 and still requires `approveProvisioning`.
+- Safety: collision, replay, email mismatch, incomplete claims and legacy reconciliation still fail before queuing. `ACTIVE` remains impossible until broker provider readback succeeds.
+- Email UX: future invitation messages link to the official SAP account portal and SAP Universal ID registration page and state that IDTS cannot check whether an email is registered with SAP. No account-existence API, password, OTP or provider lookup was added.
+- Verification: standard-role auto-queue, privileged manual approval, operation version/idempotency, email text/HTML links, onboarding callback, broker contract, UI contract, CAP compile, secret scan, agent rules and diff checks pass.

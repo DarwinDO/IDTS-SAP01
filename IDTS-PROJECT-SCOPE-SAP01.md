@@ -288,7 +288,7 @@ Các trigger notification:
 | Workflow | SAP Build Process Automation, optional |
 | Notification | SAP BTP services / third-party webhook integration |
 | Authentication | SAP BTP AppRouter/XSUAA with immutable SAP identity-to-IDTS-role alignment (origin + issuer + subject hash; no mutable-email fallback for a complete external identity); custom `AuthService`/`AuthSessions` bearer authentication remains for local and Render/integration profiles. |
-| User Administration | Controlled SAP identity invitation and verification, human approval, versioned provisioning/role-change/revoke operations, exactly one PM/Tester/Developer business role, and optional `UserAdmin` only for selected PM users. Signed invitation tokens are bounded and one-time. CAP owns operation/audit truth; a separate least-privilege broker owns external Role Collection reconciliation. The real SAP API adapter, credential, HANA migration and live rollout require a separate approved gate. |
+| User Administration | Controlled SAP identity invitation and verification, single-confirmation auto-queue for TESTER/DEVELOPER, second approval for PM/UserAdmin, versioned provisioning/role-change/revoke operations, exactly one PM/Tester/Developer business role, and optional `UserAdmin` only for selected PM users. Signed invitation tokens are bounded and one-time; email links to official SAP account login/registration but IDTS does not query whether an email is registered. CAP owns operation/audit truth; a separate least-privilege broker owns external Role Collection reconciliation. |
 
 ---
 

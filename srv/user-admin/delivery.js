@@ -8,6 +8,8 @@ const { createInvitationToken } = require('./invitations')
 
 const DELIVERIES = 'idts.cap.UserOnboardingDeliveries'
 const REQUESTS = 'idts.cap.UserOnboardingRequests'
+const SAP_ACCOUNT_URL = 'https://account.sap.com/'
+const SAP_REGISTRATION_URL = 'https://account.sap.com/registration/'
 
 async function processUserOnboardingDeliveries ({
   tx,
@@ -135,9 +137,13 @@ function buildInvitationMessage (request, token, invitationConfig, emailConfig) 
     '',
     `Continue with SAP: ${link}`,
     '',
+    `Already have an SAP account? Sign in or manage it: ${SAP_ACCOUNT_URL}`,
+    `Need an SAP Universal ID? Register here: ${SAP_REGISTRATION_URL}`,
+    'For privacy, IDTS cannot check whether an email is registered with SAP.',
+    '',
     'IDTS will never ask for your SAP password, OTP, passkey, or recovery code.'
   ].join('\n')
-  const html = `<!doctype html><html><body><p>An IDTS Project Manager requested access for this SAP identity.</p><p><strong>Requested access:</strong> ${escapeHtml(role + overlay)}</p><p><strong>Invitation expires:</strong> ${escapeHtml(request.expiresAt)}</p><p><a href="${escapeHtml(link)}">Continue with SAP</a></p><p>IDTS will never ask for your SAP password, OTP, passkey, or recovery code.</p></body></html>`
+  const html = `<!doctype html><html><body><p>An IDTS Project Manager requested access for this SAP identity.</p><p><strong>Requested access:</strong> ${escapeHtml(role + overlay)}</p><p><strong>Invitation expires:</strong> ${escapeHtml(request.expiresAt)}</p><p><a href="${escapeHtml(link)}">Continue with SAP</a></p><p><a href="${SAP_ACCOUNT_URL}">Sign in or manage your SAP account</a></p><p><a href="${SAP_REGISTRATION_URL}">Register an SAP Universal ID</a></p><p>For privacy, IDTS cannot check whether an email is registered with SAP.</p><p>IDTS will never ask for your SAP password, OTP, passkey, or recovery code.</p></body></html>`
 
   return {
     to: request.targetEmailNormalized,

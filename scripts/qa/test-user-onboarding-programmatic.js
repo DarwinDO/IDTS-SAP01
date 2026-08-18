@@ -15,6 +15,7 @@ const {
 } = require('../../srv/user-admin/invitations')
 const { identityKeyHash } = require('../../srv/auth/identity-map')
 const { processUserOnboardingDeliveries } = require('../../srv/user-admin/delivery')
+const { requiresProvisioningApproval } = require('../../srv/user-admin')
 
 const SIGNING_KEY = 'local-programmatic-invitation-signing-key-123456789'
 const PM_ID = '71000000-0000-4000-8000-000000000001'
@@ -48,6 +49,10 @@ async function expectRejected (operation, status, code) {
 }
 
 async function main () {
+  assert.equal(requiresProvisioningApproval({ requestedRole_code: 'TESTER', userAdminRequested: false }), false)
+  assert.equal(requiresProvisioningApproval({ requestedRole_code: 'DEVELOPER', userAdminRequested: false }), false)
+  assert.equal(requiresProvisioningApproval({ requestedRole_code: 'PM', userAdminRequested: false }), true)
+  assert.equal(requiresProvisioningApproval({ requestedRole_code: 'PM', userAdminRequested: true }), true)
   cds.env.idts = cds.env.idts || {}
   cds.env.idts.userAdmin = {
     invitationSigningKey: SIGNING_KEY,
@@ -189,6 +194,11 @@ async function main () {
   assert.match(sentMessages[0].text, /Continue with SAP/)
   assert.match(sentMessages[0].text, /https:\/\/idts\.example\.invalid\/onboarding\/continue#token=/)
   assert.doesNotMatch(sentMessages[0].text, /\?token=/)
+  assert.match(sentMessages[0].text, /https:\/\/account\.sap\.com\//)
+  assert.match(sentMessages[0].text, /https:\/\/account\.sap\.com\/registration\//)
+  assert.match(sentMessages[0].text, /IDTS cannot check whether an email is registered with SAP/)
+  assert.match(sentMessages[0].html, /https:\/\/account\.sap\.com\//)
+  assert.match(sentMessages[0].html, /https:\/\/account\.sap\.com\/registration\//)
   assert.doesNotMatch(JSON.stringify(persisted), /local-programmatic-invitation-signing-key/)
   assert.doesNotMatch(JSON.stringify(delivery), /onboarding\/continue\?token=/)
 
@@ -249,7 +259,7 @@ async function main () {
     data: { token: regenerated.token },
     user: xsuaaUser()
   })
-  assert.equal(verified.status, 'PENDING_APPROVAL')
+  assert.equal(verified.status, 'PROVISION_QUEUED')
   assert.equal('identityOrigin' in verified, false)
   assert.equal('identitySubject' in verified, false)
   assert.equal('tokenHash' in verified, false)
@@ -262,21 +272,74 @@ async function main () {
   assert.equal(verifiedRow.identityPlatformUserId, '71000000-0000-4000-8000-000000000020')
   assert.equal(verifiedRow.identityIssuer, 'https://issuer.example.invalid')
   assert.equal(verifiedRow.identityKeyHash.length, 64)
-  assert.equal(verifiedRow.status_code, 'PENDING_APPROVAL')
-  assert.equal(verifiedRow.provisioningVersion, 1)
-
-  const approved = await service.send({
-    event: 'approveProvisioning',
-    data: { requestID: created.ID, expectedVersion: 1 },
-    user: administrator
-  })
-  assert.equal(approved.status, 'PROVISION_QUEUED')
-  assert.equal(approved.provisioningVersion, 2)
+  assert.equal(verifiedRow.status_code, 'PROVISION_QUEUED')
+  assert.equal(verifiedRow.provisioningVersion, 2)
+  assert.ok(verifiedRow.approvedAt)
+  assert.equal(verifiedRow.approvedBy_ID, PM_ID)
   const queuedOperation = await db.run(
     SELECT.one.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: created.ID })
   )
   assert.equal(queuedOperation.operationType, 'PROVISION')
   assert.equal(queuedOperation.state, 'PENDING')
+  assert.equal(queuedOperation.expectedVersion, 2)
+
+  const privilegedCreated = await service.send({
+    event: 'requestOnboarding',
+    data: {
+      email: 'controlled.pm@example.invalid',
+      requestedRole: 'PM',
+      userAdminRequested: true
+    },
+    user: administrator
+  })
+  const privilegedSend = await processUserOnboardingDeliveries({
+    tx: db,
+    emailConfig: {
+      ready: true,
+      batchSize: 10,
+      maxRetryCount: 2,
+      pollIntervalMs: 15000,
+      fromAddress: 'no-reply@example.invalid',
+      fromName: 'IDTS'
+    },
+    invitationConfig: {
+      invitationSigningKey: SIGNING_KEY,
+      invitationBaseUrl: 'https://idts.example.invalid/onboarding/continue'
+    },
+    sendMail: async () => ({ messageId: 'controlled-privileged-message-id' }),
+    now: new Date('2026-08-12T10:06:00.000Z'),
+    workerID: 'onboarding-privileged-worker'
+  })
+  assert.deepEqual(privilegedSend, { sent: 1, failed: 0, skipped: 0 })
+  const privilegedRow = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: privilegedCreated.ID }))
+  const privilegedToken = createInvitationToken({
+    invitationID: privilegedRow.ID,
+    targetEmail: privilegedRow.targetEmailNormalized,
+    expiresAt: privilegedRow.expiresAt,
+    signingKey: SIGNING_KEY,
+    nonce: privilegedRow.tokenNonce
+  })
+  const privilegedVerified = await service.send({
+    event: 'verifySapIdentity',
+    data: { token: privilegedToken.token },
+    user: xsuaaUser({
+      email: 'controlled.pm@example.invalid',
+      userUuid: 'stable-pm-user-uuid-002',
+      platformUserId: '71000000-0000-4000-8000-000000000021'
+    })
+  })
+  assert.equal(privilegedVerified.status, 'PENDING_APPROVAL')
+  assert.equal(privilegedVerified.provisioningVersion, 1)
+  assert.equal(await db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: privilegedRow.ID })), undefined)
+
+  const privilegedApproved = await service.send({
+    event: 'approveProvisioning',
+    data: { requestID: privilegedRow.ID, expectedVersion: 1 },
+    user: administrator
+  })
+  assert.equal(privilegedApproved.status, 'PROVISION_QUEUED')
+  assert.equal(privilegedApproved.provisioningVersion, 2)
+  assert.ok(await db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: privilegedRow.ID })))
 
   await db.run(UPDATE('idts.cap.UserAccessOperations').set({
     state: 'RETRYABLE_FAILURE',
