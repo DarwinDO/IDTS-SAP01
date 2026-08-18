@@ -7787,3 +7787,11 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - TDD: expected red before the action existed, then PASS for LINKED, unchanged email/role/active, one audit, idempotent local NO_OP, multi-role denial and wrong-hash denial.
 - Target evidence: unique active PM fingerprint prefix remains `b9addbaef9b5`. No raw internal ID, email, JWT, issuer, subject or full approval hash is exposed in runtime evidence.
 - Next: commit/deploy temporary CAP revision with private full hash, invoke once in the fresh DonHV `sap.default` session, read back link/audit, then remove the action and private setting immediately.
+
+### 2026-08-18 - M3E PM immutable identity bootstrap linked successfully
+
+- Classification: controlled one-row identity/audit mutation.
+- Outcome: fresh DonHV `sap.default` session invoked `bootstrapCurrentIdentityLink()` exactly once and received HTTP `200`, status `LINKED`, authority fingerprint prefix `7cbe66784f58`, correlation `cab48d47-70d6-466d-89f8-de7f99f2e786`.
+- Postcheck: Users remained 14; exactly one active PM has a complete tuple; target fingerprint remains `b9addbaef9b5`; exactly one matching `BOOTSTRAP_LINK` audit exists with result `LINKED` and both private state hashes present.
+- Invariants: no email, role, active, password, Role Collection, XSUAA, trust, invitation, delivery or provider mutation was made by the action. The action was not called a second time live.
+- Cleanup in progress: source action/type/handler/test removed and action-free CAP payload rebuilt. Next deploy removes the endpoint, then the private target-hash environment variable is unset and endpoint absence/readiness are verified.

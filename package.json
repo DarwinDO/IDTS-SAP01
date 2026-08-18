@@ -80,7 +80,7 @@
     "qa:idts60:browser": "node scripts/qa/test-idts60-attachments-browser.js",
     "qa:email-outbox:programmatic": "node scripts/qa/test-email-outbox-programmatic.js",
     "qa:email-immediate:programmatic": "node scripts/qa/test-email-immediate-kick.js",
-    "qa:user-onboarding:programmatic": "node scripts/qa/test-user-admin-invitation-config.js && node scripts/qa/test-user-admin-identity-bootstrap.js && node scripts/qa/test-user-onboarding-contract.js && node scripts/qa/test-user-onboarding-programmatic.js",
+    "qa:user-onboarding:programmatic": "node scripts/qa/test-user-admin-invitation-config.js && node scripts/qa/test-user-onboarding-contract.js && node scripts/qa/test-user-onboarding-programmatic.js",
     "qa:user-onboarding-page:programmatic": "node scripts/qa/test-user-onboarding-page.mjs",
     "qa:user-admin-ui:programmatic": "node scripts/qa/test-user-admin-ui.js",
     "qa:user-access:programmatic": "node scripts/qa/test-user-access-provisioning-contract.js && node scripts/qa/test-provisioning-broker-programmatic.js",
