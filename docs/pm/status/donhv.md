@@ -7856,3 +7856,14 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Classification: test-harness/tool invocation issue, fixed immediately.
 - Symptom: `npx cds compile srv --to edmx` exited nonzero because the model contains four services and the compiler requires an explicit service selection.
 - Resolution: rerun `npx cds compile srv --to edmx -s all`; all services compiled successfully. The existing unrelated `BugService.Bugs_attachments` capability warning remains unchanged.
+
+### 2026-08-18 - Immediate email kick fix deployed and replacement invitation sent
+
+- Classification: product/runtime defect resolved in source and shared trial runtime; two recovery-task harness issues resolved without duplicate sending.
+- Source: commit `0c4df3c` binds the default `cds.spawn` receiver and adds a real default-path regression plus the bilingual knowledge update. The fixed CAP payload was built by patching only `srv/email/worker.js` into the checksum-reviewed `1cb719c` CAP payload.
+- Deployment: create package, stage, set the exact owned droplet and restart only `idts-sap01-srv`. CAP retained one route and seven bindings; AppRouter retained one route and three bindings. No DB deploy, schema, seed, XSUAA, role, user or provider-credential mutation occurred.
+- Recovery harness issue 1: the first guarded task read HANA result properties only in lowercase, while direct task queries returned uppercase physical names; it stopped with `SAFE_PENDING_COUNT_MISMATCH` before provider access.
+- Recovery harness issue 2: the second task normalized its guard but loaded CSN without assigning `cds.model`, so the delivery processor saw physical uppercase rows and returned `sent=0, failed=0, skipped=0`; again no provider call occurred.
+- Corrected bounded recovery: assign `cds.model = await cds.load('*')`, connect the DB, require exactly one `PENDING` attempt-zero onboarding delivery, process only onboarding deliveries and commit. Result: `sent=1`, `failed=0`, `skipped=0`.
+- Final readback: newest delivery `SENT`, attempt one, sent timestamp present, no error; newest request `INVITED`, unexpired, no error. Previous delivery remains `SENT`; previous request is `FAILED/INVITATION_EXPIRED`. `npm run btp:demo:check` reports `DEMO READY`.
+- User action: refresh User Administration and open only the newest email link in the controlled test-user private session.
