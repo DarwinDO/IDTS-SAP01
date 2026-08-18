@@ -92,6 +92,20 @@ async function main () {
   assert.equal(scheduleImmediateEmailOutbox(null, dependencies), false)
   assert.equal(scheduleImmediateEmailOutbox({}, dependencies), false)
 
+  const defaultSpawnRequest = fakeRequest()
+  let defaultSpawnBatchCount = 0
+  assert.equal(scheduleImmediateEmailOutbox(defaultSpawnRequest, {
+    async processBatch ({ tx: detachedTx }) {
+      assert.ok(detachedTx, 'CAP supplies the detached transaction')
+      defaultSpawnBatchCount += 1
+      return { sent: 0, failed: 0, skipped: 0 }
+    }
+  }), true)
+  await defaultSpawnRequest.emit('succeeded')
+  await waitForDetachedWork()
+  await waitForDetachedWork()
+  assert.equal(defaultSpawnBatchCount, 1, 'the default cds.spawn keeps its CAP receiver')
+
   assert.equal(typeof writeNotificationAndSchedule, 'function', 'notification orchestration API is exported')
   let writeCount = 0
   let scheduleCount = 0

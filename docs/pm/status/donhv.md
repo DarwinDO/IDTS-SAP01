@@ -7825,3 +7825,34 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Safety: collision, replay, email mismatch, incomplete claims and legacy reconciliation still fail before queuing. `ACTIVE` remains impossible until broker provider readback succeeds.
 - Email UX: future invitation messages link to the official SAP account portal and SAP Universal ID registration page and state that IDTS cannot check whether an email is registered with SAP. No account-existence API, password, OTP or provider lookup was added.
 - Verification: standard-role auto-queue, privileged manual approval, operation version/idempotency, email text/HTML links, onboarding callback, broker contract, UI contract, CAP compile, secret scan, agent rules and diff checks pass.
+
+### 2026-08-18 - Live invitation callback returned AppRouter 503
+
+- Classification: product deployment/runtime defect, fixed in the shared trial runtime.
+- Symptom: after the controlled TESTER shadow user authenticated successfully through `sap.default`, the invitation callback returned OpenResty HTTP `503`. CAP and AppRouter were both `1/1`, `/health` and `/ready` were `200`, so this was not a stopped-runtime failure.
+- Root cause: the deployed AppRouter droplet predated commit `8dfdc88` and did not contain the dedicated public `/onboarding/continue` route or onboarding resources. The request fell through to the generic authenticated HTML5 repository route; sanitized router evidence recorded two backend-generated `503` responses.
+- Resolution: from exact source HEAD `1cb719c`, create and stage a nine-file AppRouter-only package, set only the new owned droplet, and restart only `idts-sap01-approuter`. CAP, HANA, XSUAA, routes, bindings and business data were not changed.
+- Verification: AppRouter returned to `1/1`; route/binding counts stayed `1/3`; CAP stayed `1/7`; unauthenticated `/onboarding/continue` now contains the expected onboarding-page marker instead of an OAuth redirect; onboarding CSS is HTTP `200`; `npm run btp:demo:check` reports `DEMO READY`.
+- Remaining action: repeat the same invitation link in the retained private browser session before expiry, then verify TESTER identity reconciliation and broker provisioning readback.
+
+### 2026-08-18 - AppRouter deployment wrapper and evidence-output issues
+
+- Classification: tooling/process issue, fixed for the live deployment; local staging cleanup remains open.
+- Symptom: the first long PowerShell orchestration command was rejected before execution by the terminal policy. A later stage command exceeded the wrapper yield window while Cloud Foundry continued staging, and the initial package-create output included the authenticated CLI principal despite the intended sanitized-evidence boundary.
+- Response: split the deployment into bounded commands, determine stage success by read-only build/droplet readback rather than retrying, suppress subsequent raw mutation output, and keep GUIDs only in process memory. No blind retry occurred.
+- Remaining issue: deletion of the exact nine-file local `.tmp/approuter-deploy-1cb719c` staging directory was blocked by the terminal safety layer. It contains source payload only, no credential, and must be removed later through an approved exact-path cleanup command; it does not affect runtime behavior.
+
+### 2026-08-18 - Immediate invitation email kick crashed CAP after commit
+
+- Classification: product/runtime defect, fixed in source and pending selective CAP deployment.
+- Symptom: replacement TESTER invitation returned HTTP `200`, but the post-commit email kick logged `Immediate email outbox could not start`, then CAP shut down. The following `searchOnboarding` request received router `502 endpoint_failure`, so the UI displayed “Onboarding requests could not be loaded”; the new email delivery remained pending.
+- Root cause: `scheduleImmediateEmailOutbox()` copied `cds.spawn` into an unbound local function and then invoked it. CAP's implementation defaults its facade argument from the method receiver; the unbound call therefore reached `spawn.js` with an object that had no callable `tx`.
+- TDD evidence: a new default-path regression using the real `cds.spawn` reproduced the exact `TypeError` and process exit before the fix. Binding the default method with `cds.spawn.bind(cds)` made the same test pass while preserving the injected-spawn tests.
+- Safety: the business transaction had already committed before the detached kick, so the invitation row was created once and was not rolled back. No duplicate request or second provider call was attempted during diagnosis.
+- Next: run focused/full CAP checks, deploy only the corrected CAP payload, recover exactly the one pending onboarding delivery, and verify email `SENT` plus restored UI readback.
+
+### 2026-08-18 - CAP compile verification initially omitted service selection
+
+- Classification: test-harness/tool invocation issue, fixed immediately.
+- Symptom: `npx cds compile srv --to edmx` exited nonzero because the model contains four services and the compiler requires an explicit service selection.
+- Resolution: rerun `npx cds compile srv --to edmx -s all`; all services compiled successfully. The existing unrelated `BugService.Bugs_attachments` capability warning remains unchanged.

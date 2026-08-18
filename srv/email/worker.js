@@ -57,7 +57,7 @@ async function processEmailOutboxBatch ({ tx, dependencies = {} }) {
 function scheduleImmediateEmailOutbox (req, dependencies = {}) {
   if (!req || typeof req.on !== 'function' || immediateKickRequests.has(req)) return false
 
-  const spawn = dependencies.spawn || cds.spawn
+  const spawn = dependencies.spawn || cds.spawn.bind(cds)
   const processBatch = dependencies.processBatch || processEmailOutboxBatch
   immediateKickRequests.add(req)
 
