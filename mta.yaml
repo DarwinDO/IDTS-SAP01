@@ -52,6 +52,7 @@ modules:
       - name: idts-sap01-jobscheduler
       - name: idts-sap01-external-services
       - name: idts-sap01-ai-gateway
+      - name: idts-user-admin-invitation-config
 
   - name: idts-sap01-db-deployer
     type: hdb
@@ -197,3 +198,10 @@ resources:
     type: org.cloudfoundry.existing-service
     parameters:
       service-name: idts-sap01-ai-gateway
+
+  # Dedicated UPS containing only the private invitation signing key and the
+  # public onboarding callback base URL. It is bound only to the CAP module.
+  - name: idts-user-admin-invitation-config
+    type: org.cloudfoundry.existing-service
+    parameters:
+      service-name: idts-user-admin-invitation-config

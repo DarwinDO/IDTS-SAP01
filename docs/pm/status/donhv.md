@@ -7669,3 +7669,59 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Scope: local unpublished commit only; no remote or platform impact.
 - Resolution: remove the whitespace defect, rerun the check independently, and amend before push. Future commit wrappers must use fail-fast sequencing.
 - Status: fixed in session.
+
+### 2026-08-18 - M3E aggregate preflight task command quoting failure
+
+- Classification: test-harness/tooling issue, fixed in session.
+- Symptom: the first uniquely named aggregate-only CF task on `idts-sap01-srv` completed `FAILED` and emitted only the allowlisted marker `M3E_OPERATION_COUNT=FAIL`; no count was accepted.
+- Safety response: no retry, no broker start and no onboarding/provider operation. Sanitized task readback confirmed `FAILED` before any follow-up diagnostic.
+- Impact: the task contained one read-only `COUNT(*)` query. No HANA DML/schema/seed, user, Role Collection, trust, identity, main-app configuration or credential mutation occurred.
+- Root cause: the first nested PowerShell/Node command escaped the SQL identifier quotes incorrectly before Cloud Foundry executed it; the task reached the safe catch marker without producing a count.
+- Fix and verification: a distinct Base64-carried stage-only diagnostic completed `SUCCEEDED` with `CONNECT=PASS`, `QUERY=PASS` and `M3E_OPERATION_COUNT=0`. No blind retry of the failed command occurred.
+- Owner/next step: DonHV User Administration M3E may start the exact broker app after rechecking its isolated topology; the operation journal is currently empty.
+
+### 2026-08-18 - M3E focused root ESLint command unavailable
+
+- Classification: test-harness/tooling issue, closed operationally.
+- Symptom: `npx eslint srv/user-admin/config.js scripts/qa/test-user-admin-invitation-config.js` exited `2` because the repository has no root `eslint.config.js|mjs|cjs` for ESLint 10 discovery.
+- Impact: the focused invitation-config test had already passed; no source/platform/data mutation resulted from the lint command.
+- Resolution: use `node --check` for the two CommonJS files plus the repository-owned onboarding, CAP compile, secret, agent-rule and diff checks. Do not create an unrelated root ESLint migration in this gate.
+
+### 2026-08-18 - M3E CAP compile command omitted service selection
+
+- Classification: test-harness/tooling issue, fixed in session.
+- Symptom: `npx cds compile srv --to edmx` exited `1` because the model contains four service definitions and the CLI requires an explicit service selection.
+- Impact: the three focused User Administration/onboarding suites had passed; no model, platform or data mutation resulted from the failed command.
+- Resolution: rerun the complete model compile with `-s all`; use that result as the M3E CAP compile evidence.
+
+### 2026-08-18 - M3E inline UPS creation wrapper blocked before execution
+
+- Classification: tooling/safety-policy issue, under remediation.
+- Symptom: the composed PowerShell command for target/collision checks, in-memory signing-key generation and interactive UPS creation was rejected before PowerShell started.
+- Impact: no UPS, binding, app, source deployment, secret or data mutation occurred. The invitation-config service collision count remains to be refreshed by the replacement runner.
+- Resolution: replace the opaque composite command with a small reviewed PowerShell script plus static contract test. The script contains no secret; it generates the key in memory, uses stdin, suppresses raw CLI output and emits only allowlisted status.
+
+### 2026-08-18 - M3E UPS runner used a PowerShell 7-only RNG API
+
+- Classification: tooling/runtime compatibility issue, fixed before platform mutation.
+- Symptom: the first reviewed UPS runner exited `M3E_INVITATION_UPS=FAIL;CODE=UNEXPECTED`; sanitized readback proved the UPS count remained `0`.
+- Root cause: Windows PowerShell 5.1 does not expose the static `RandomNumberGenerator.Fill` API used by the initial runner. A bounded compatibility probe returned `RNG_FILL=FAIL`.
+- Fix: use `RandomNumberGenerator.Create().GetBytes(...)` and dispose the generator, then clear the byte array in `finally`. The contract test and PowerShell parser must pass before one new create attempt.
+- Platform/data impact: zero UPS, binding, app, user, role, HANA or email mutation from the failed attempt.
+
+### 2026-08-18 - M3E UPS runner used unsupported ProcessStartInfo.ArgumentList mutation
+
+- Classification: tooling/runtime compatibility issue, fixed before platform mutation.
+- Symptom: after the RNG fix, the runner again exited `CODE=UNEXPECTED`; sanitized readback again proved UPS count `0`.
+- Root cause: Windows PowerShell 5.1 exposes an `ArgumentList` property surface but does not support `ArgumentList.Add`; a bounded compatibility probe returned `ARGUMENT_LIST_ADD=FAIL`.
+- Fix: use one fixed non-secret `ProcessStartInfo.Arguments` string containing only the CF action, exact UPS name and two parameter names. Secret values remain redirected stdin only.
+- Platform/data impact: zero UPS, binding, app, user, role, HANA or email mutation from the second failed attempt.
+
+### 2026-08-18 - M3E dedicated invitation configuration ready for selective CAP deployment
+
+- Classification: controlled security/configuration milestone.
+- Outcome: created exactly one unbound `idts-user-admin-invitation-config` UPS containing only an in-memory-generated signing key and the current HTTPS `/onboarding/continue` base URL. Sanitized readback returned `COUNT=1;BINDINGS=0`.
+- Source boundary: production `srv/user-admin/config.js` now accepts exactly one binding with exactly `invitationSigningKey` and `invitationBaseUrl`; missing, duplicate, malformed or broader credentials fail closed. Local/test configuration remains unchanged.
+- Security: secret values were delivered through redirected stdin, raw CF output was suppressed, byte buffers were cleared, and no secret/endpoint was written to repo, chat, evidence, command arguments or HANA.
+- Verification: invitation-config TDD red/green, UPS runner contract, PowerShell parser, onboarding/backend/UI callbacks, access broker, immutable identity, CAP compile, secret scan, agent rules, M3C topology and diff checks pass. The CAP compile retains only the known unrelated attachment annotation warning.
+- Next: commit exact source, build a checksum-bound MTAR, deploy only `idts-sap01-srv`, bind only the dedicated UPS, verify runtime config booleans, then retry the controlled invitation once.
