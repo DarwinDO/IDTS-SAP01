@@ -1,7 +1,7 @@
 _schema-version: 3.3.0
 ID: idts-user-admin-ui-r3c
 version: 1.0.0
-description: "IDTS User Administration HTML5 content only."
+description: "IDTS shared Bug Management and User Administration HTML5 content."
 
 modules:
   - name: idts-user-admin-ui-r3c-content
@@ -10,6 +10,10 @@ modules:
     build-parameters:
       build-result: app/
       requires:
+        - name: idts-bug-ui-r3c-html5
+          artifacts:
+            - bug-management-ui.zip
+          target-path: app/
         - name: idts-user-admin-ui-r3c-html5
           artifacts:
             - user-administration-ui.zip
@@ -18,6 +22,17 @@ modules:
       - name: idts-user-admin-ui-r3c-host
         parameters:
           content-target: true
+
+  - name: idts-bug-ui-r3c-html5
+    type: html5
+    path: app/bug-management-ui
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm ci --workspaces=false
+        - npm run build
+      supported-platforms: []
 
   - name: idts-user-admin-ui-r3c-html5
     type: html5
