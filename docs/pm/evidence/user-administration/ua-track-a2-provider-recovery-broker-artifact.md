@@ -57,3 +57,17 @@ No platform mutation was performed while building or reviewing this artifact.
 - For HTTP `403`, the client reads only the schema-defined `scope` field and recognizes it only when it exactly matches one of the seven reviewed SAP API scopes. That case becomes `PROVIDER_SCOPE_MISSING`; arbitrary scope text and every other provider-body field are discarded.
 - All three results are non-retryable. No token refresh, provider PATCH, credential rotation, deployment or BTP mutation is part of this source gate.
 - TDD evidence: the new runtime assertion failed against the old combined `PROVIDER_DENIED` mapping, passed after the bounded change, failed again when that mapping was temporarily restored, and passed again after the fix was restored.
+
+## Provider-denial diagnostic broker rollout
+
+- Source commit: `0781f3db536faa6c36941ed961c6c7131b28ea78`.
+- Broker-only ZIP: `mta_archives/idts-user-access-broker-provider-diagnostics-0781f3d.zip`.
+- Exact ZIP SHA-256: `B21AFF2816E37BBA1FDA48C38C3970494B7DBDEA177F58B01C84DAB363CA9215`; size `16,090` bytes.
+- Payload: exactly 13 regular broker files, normalized Git-blob mismatch `0`, Node engine `22.x`, no dependencies, `npm ci --omit=dev --ignore-scripts` PASS and production audit `0` vulnerabilities.
+- ZIP reproducibility limitation: `git archive HEAD:broker` archives a tree object and embeds run-time ZIP timestamps, so a second archive had different container bytes. The first exact hash above is the sole rollout authority; file-list and normalized Git-blob parity are the source-content proof.
+- Initial readiness was blocked only by sleeping HANA (`/ready` HTTP `503`). The approved recovery workflow issued one supported HANA start request and one main-CAP restart after readiness; independent `npm run btp:demo:check` returned `DEMO READY`. No DB/HDI deploy, schema, seed or business-data mutation ran.
+- Pre-state broker droplet fingerprint: `bef1e1e442f0`. Post-state fingerprint: `aecc592fcbd8`.
+- Mutations: create package `1`, stage package `1`, set droplet `1`, broker restart `1`; rollback `0`.
+- The first deployment wrapper stopped before `set-droplet`: it read build ownership from the absent `relationships.package` field while this CF V3 build exposes the package at top-level `package.guid`, and the build was initially still `STAGING`. Readback proved exactly one owned build later reached `STAGED`; no second package or stage was run. The corrective continuation used that same build for the single set/restart.
+- Final topology: broker `STARTED 1/1`, routes `0`, bindings exactly `idts-user-access-broker-api-access` and `idts-user-access-broker-auth`; main CAP/AppRouter binding counts remain `7/3`; final demo check is `DEMO READY`.
+- Controlled provider attempt count after this rollout: `0`. Windows Computer Use stopped because it could not determine the selected browser URL with enough confidence; no cookie, JWT or alternate direct CAP mutation was used. DonHV must open the existing User Administration tab and press the latest controlled TESTER row's Reconcile/Retry action exactly once before the result can be classified.
