@@ -68,3 +68,20 @@ Attempt 2 result: `FAILED_BEFORE_HDI_MAKE`. The current artifact is rejected for
 - Two abandoned partial local staging directories contain no archive and are never execution inputs.
 
 The old `b0ae552...` archive and both prior temporary app/task names remain `REJECTED / NEVER RUN AGAIN`.
+
+## Attempt 3 — missing HANA driver peer dependency
+
+R3 passed the fresh target/readiness/hash/collision checks, no-start/no-route push, exact HDI binding, one persistent stage, exact package/build/droplet ownership and one `set-droplet`. The one authorized task then failed once before simulation because the minimal package contained `@sap/hdi-deploy` but neither supported HANA driver peer dependency. No simulation/make, DDL, DML, seed, CSV or `.hdbtabledata` action began.
+
+Result: `FAILED_BEFORE_HDI_SIMULATION`. The R3 archive is rejected and must not be retried. The smallest remediation is to add one exact supported HANA driver to a fresh package, run isolated install/audit and build one new checksum-bound artifact before another unique-app attempt.
+
+## Corrective artifact R4
+
+R4 follows the repository's existing HANA deployer contract: exact `hdb@2.29.6` plus the explicit `--use-hdb` flag. The reproducible package template is source-controlled; the runtime package lock is freshly generated with scripts disabled.
+
+- Archive SHA-256: `9e56a32153be90592ec8aaad6b34e821ce7abe7b47ba1d0e0aaee7623cbe1360`; size `8,847` bytes; exactly 14 files.
+- Package/lock/runner SHA-256: `536780c...c840` / `14a82d...bed1` / `595c9c...7ba0`.
+- Lock v3 has 30 entries with exact direct dependencies `@sap/hdi-deploy@5.7.0` and `hdb@2.29.6`; missing integrity, local/git resolution and lifecycle-script flags are zero.
+- Isolated install, audit zero, packaged resolver, schema parity, unsafe-path, forbidden-artifact and sensitive-content checks pass.
+
+R4 is the only eligible simulation input. R3 and all older archives remain rejected.

@@ -2,6 +2,7 @@
 
 const assert = require('node:assert/strict')
 const { buildSimulationArgs, resolveDeployer, SCHEMA_FILES } = require('../btp/ua-developer-hdi-simulate-command')
+const packageTemplate = require('../btp/ua-developer-hdi-sim-package.json')
 
 const args = buildSimulationArgs()
 
@@ -17,7 +18,7 @@ assert.deepEqual(SCHEMA_FILES, [
   'src/gen/UserAdministrationService.ResponsibilityLevels.hdbview',
   'src/gen/UserAdministrationService.SAPModules.hdbview'
 ])
-for (const flag of ['--exit', '--simulate-make', '--treat-warnings-as-errors', '--treat-deployer-warnings-as-errors', '--no-auto-undeploy', '--no-trace-vcap-services']) {
+for (const flag of ['--exit', '--simulate-make', '--use-hdb', '--treat-warnings-as-errors', '--treat-deployer-warnings-as-errors', '--no-auto-undeploy', '--no-trace-vcap-services']) {
   assert.equal(args.filter(value => value === flag).length, 1, `${flag} must occur exactly once`)
 }
 for (const option of ['--working-set', '--include-filter', '--deploy']) {
@@ -27,6 +28,12 @@ for (const option of ['--working-set', '--include-filter', '--deploy']) {
 }
 assert.equal(args.includes('--undeploy'), false)
 assert.equal(args.some(value => /\.csv$|\.hdbtabledata$/i.test(value)), false)
+assert.equal(packageTemplate.engines.node, '22.x')
+assert.deepEqual(packageTemplate.dependencies, {
+  '@sap/hdi-deploy': '5.7.0',
+  hdb: '2.29.6'
+})
+assert.equal(packageTemplate.scripts.start, 'node -e "process.exit(1)"')
 assert.match(resolveDeployer().replaceAll('\\', '/'), /@sap\/hdi-deploy\/deploy\.js$/)
 
 const directCalls = []

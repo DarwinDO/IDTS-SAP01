@@ -19,6 +19,7 @@ function buildSimulationArgs () {
   return [
     '--exit',
     '--simulate-make',
+    '--use-hdb',
     '--treat-warnings-as-errors',
     '--treat-deployer-warnings-as-errors',
     '--no-auto-undeploy',
