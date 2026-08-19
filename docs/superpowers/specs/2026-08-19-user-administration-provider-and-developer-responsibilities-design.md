@@ -34,7 +34,9 @@ The API client must retain only an allowlisted semantic classification:
 | Condition | Safe code | Retryable |
 | --- | --- | --- |
 | HTTP 400 | `PROVIDER_REQUEST_INVALID` | No |
-| HTTP 401/403 | `PROVIDER_DENIED` | No |
+| HTTP 401 | `PROVIDER_AUTHENTICATION_FAILED` | No; refresh only in a later bounded gate |
+| HTTP 403 with an allowlisted SAP scope | `PROVIDER_SCOPE_MISSING` | No |
+| Other HTTP 403 | `PROVIDER_FORBIDDEN` | No |
 | HTTP 404 | `PROVIDER_RESOURCE_NOT_FOUND` | No |
 | HTTP 409/412 | `PROVIDER_CONFLICT` | No; reconcile first |
 | HTTP 429 | `PROVIDER_RATE_LIMITED` | Yes |
@@ -43,7 +45,7 @@ The API client must retain only an allowlisted semantic classification:
 | Network failure | `PROVIDER_NETWORK_FAILURE` | Yes |
 | Invalid/missing JSON on a JSON response | `PROVIDER_RESPONSE_INVALID` | No |
 
-No code may persist or return the provider body, URL, token, user ID, group ID or response headers. A PATCH must never be retried inside the HTTP client. Ambiguous outcomes move to reconciliation; the operation journal remains authoritative.
+No code may persist or return the provider body, URL, token, user ID, group ID or response headers. For HTTP 403, the client may inspect only the schema-defined `scope` field and may recognize it only when it exactly matches one of the seven reviewed SAP API scopes; the scope value itself is never returned or persisted. A PATCH must never be retried inside the HTTP client. Ambiguous outcomes move to reconciliation; the operation journal remains authoritative.
 
 After a broker-only deployment, one controlled operation may be reconciled. If the PATCH succeeds, the broker reads the user again, proves exactly one `IDTS_TESTER`, and CAP sets `ACTIVE`. If it fails, the new safe code determines the next gate; no blind retry is permitted.
 
