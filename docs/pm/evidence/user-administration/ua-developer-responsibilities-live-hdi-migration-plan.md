@@ -44,3 +44,11 @@ The command uses `@sap/hdi-deploy@5.7.0`, `hdb@2.29.6`, warning-as-error, no aut
 Before any CAP/UI deployment can write the new tables, a failed postcheck may rollback only the exact eleven new artifacts through an exact separately reviewed undeploy task. Rollback is allowed only when all three new tables have zero rows and ownership is unambiguous. Never delete the HDI service or run a full DB deployer. If row state, ownership or task outcome is ambiguous, preserve state and stop.
 
 The successful R6 simulation is the forward preflight and proves the eleven artifacts were not part of the deployed HDI state. Any source/artifact/hash/topology drift invalidates this plan.
+
+## Execution result
+
+The exact R7 task completed once with state `SUCCEEDED` and process exit zero. Make reported 11 deployed, 0 undeployed and 0 warnings; no simulation marker, CSV, `.hdbtabledata` or effective undeploy appeared.
+
+Post-migration metadata found exactly the three new tables. A schema-qualified aggregate query returned row counts `0,0,0`; no business row was selected or printed. The first three direct-name inspectors failed read-only due logical/physical identifier assumptions, and the bounded metadata-based inspector resolved the exact names without exposing them.
+
+The helper binding/app were removed. Rollback was not invoked because forward and postcheck passed. This closes the additive HDI migration as `PASS`; CAP/UI deployment remains a separate gate.
