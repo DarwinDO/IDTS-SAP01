@@ -312,6 +312,8 @@ async function main () {
   assert.match(service, /responsibilities\s*:\s*array of DeveloperResponsibilityInput/)
   assert.match(service, /action readDeveloperProfile\(/)
   assert.match(service, /action updateDeveloperProfile\(/)
+  assert.match(service, /entity ApplicationComponents as projection on db\.ApplicationComponents/)
+  assert.match(service, /entity DefectCategories as projection on db\.DefectCategories/)
   assert.match(schema, /entity UserAccessOperations/)
   assert.match(schema, /entity UserIdentityAuditEvents/)
   assert.match(schema, /entity UserOnboardingDeveloperProfiles/)

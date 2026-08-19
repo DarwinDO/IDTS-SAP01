@@ -139,6 +139,8 @@ service UserAdministrationService @(requires: 'authenticated-user') {
   @readonly entity AvailabilityStatuses as projection on db.AvailabilityStatuses;
   @readonly entity ResponsibilityLevels as projection on db.ResponsibilityLevels;
   @readonly entity SAPModules as projection on db.SAPModules;
+  @readonly entity ApplicationComponents as projection on db.ApplicationComponents;
+  @readonly entity DefectCategories as projection on db.DefectCategories;
   @readonly entity ComponentCategories as projection on db.ComponentCategories {
     ID,
     component,

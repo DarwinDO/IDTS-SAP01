@@ -1,5 +1,11 @@
 # Knowledge: `srv/user-admin.cds`
 
+## Developer catalog navigation / Navigation catalog Developer
+
+`ComponentCategories` exposes its `component` and `defectCategory` associations for the PM invitation form. The service must also expose read-only `ApplicationComponents` and `DefectCategories` projections; otherwise CAP cannot redirect those associations into OData navigation properties and UI5 `$expand` requests fail with HTTP 400 before the dialog opens.
+
+`ComponentCategories` expose association `component` và `defectCategory` cho form invite của PM. Service cũng phải expose projection read-only `ApplicationComponents` và `DefectCategories`; nếu thiếu, CAP không redirect được association thành OData navigation property và request `$expand` của UI5 sẽ lỗi HTTP 400 trước khi dialog mở.
+
 ## Developer administration source candidate / Candidate quản trị Developer
 
 The service accepts a structured `DeveloperProfileInput` only for DEVELOPER onboarding or role change. It exposes PM+UserAdmin actions to read and update an active Developer profile, plus read-only catalogs for availability, responsibility level, SAP Module, and Component Category.
