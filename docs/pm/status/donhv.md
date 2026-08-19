@@ -7867,3 +7867,13 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Corrected bounded recovery: assign `cds.model = await cds.load('*')`, connect the DB, require exactly one `PENDING` attempt-zero onboarding delivery, process only onboarding deliveries and commit. Result: `sent=1`, `failed=0`, `skipped=0`.
 - Final readback: newest delivery `SENT`, attempt one, sent timestamp present, no error; newest request `INVITED`, unexpired, no error. Previous delivery remains `SENT`; previous request is `FAILED/INVITATION_EXPIRED`. `npm run btp:demo:check` reports `DEMO READY`.
 - User action: refresh User Administration and open only the newest email link in the controlled test-user private session.
+
+### 2026-08-19 - User Administration initial list race and transient provisioning failure
+
+- Classification: product UI defect plus transient provider failure; UI fix implemented locally, selective UI deployment pending.
+- Observed: the controlled TESTER identity verification returned success, but the Admin table displayed rows only immediately after invitation submission and returned to “No onboarding requests found” after a full reload.
+- Data evidence: CAP `searchOnboarding` returned HTTP `200` with a 1392-byte payload; HANA retained three request rows. The newest request is identity-verified at version 2 with one `PROVISION` operation in `RETRYABLE_FAILURE`, safe code `PROVIDER_UNAVAILABLE`; it is not deleted and is not `ACTIVE`.
+- UI root cause: `onInit` invoked the deferred OData action before metadata discovery completed. After invitation submission, metadata was already available, explaining why the same action temporarily populated the table. The fix waits for `getMetaModel().requestObject("/")` before the initial `_loadRequests("")`.
+- TDD: the new regression first failed because `_loadInitialRequests` was absent, then passed after the bounded controller change; UI lint and production UI build pass.
+- Provider recovery evidence: a broker-only read-only task obtained its OAuth token and received HTTP `200` from the SAP Groups API; response shape matched the reviewed lower-case contract. The 20 latest CAP claim polls are HTTP `204`, so a user-confirmed retry can proceed after the row is visible.
+- Safety: no new invitation, role assignment, retry action, schema/data write or credential read occurred during diagnosis. The verified request remains retryable; `ACTIVE` still requires provider assignment and readback.

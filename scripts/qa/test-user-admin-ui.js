@@ -94,8 +94,31 @@ assert.doesNotMatch(manageFragment, /Password|OTP|passkey|token/i)
 const controllerDefinition = loadController(controller)
 assert.equal(typeof controllerDefinition.onConfirmInvite, 'function')
 assert.equal(typeof controllerDefinition._loadRequests, 'function')
+assert.equal(typeof controllerDefinition._loadInitialRequests, 'function')
 
 async function verifyRuntimeBehavior () {
+  let metadataRequested = false
+  let initialLoadCount = 0
+  const initialLoadInstance = Object.assign(Object.create(controllerDefinition), {
+    getView: () => ({
+      getModel: () => ({
+        getMetaModel: () => ({
+          requestObject: async path => {
+            assert.equal(path, '/')
+            metadataRequested = true
+          }
+        })
+      })
+    }),
+    _loadRequests: async query => {
+      assert.equal(metadataRequested, true, 'initial search waits for OData metadata')
+      assert.equal(query, '')
+      initialLoadCount += 1
+    }
+  })
+  await initialLoadInstance._loadInitialRequests()
+  assert.equal(initialLoadCount, 1)
+
   let inviteData = {
     email: 'controlled.test@example.invalid',
     role: 'PM',

@@ -13,7 +13,17 @@ sap.ui.define([
 			this.setModel(new JSONModel(this._emptyInvite()), "invite");
 			this.setModel(new JSONModel(this._emptyAccessChange()), "access");
 			this.setModel(new JSONModel({ items: [] }), "requests");
-			this._loadRequests("");
+			this._loadInitialRequests();
+		},
+
+		_loadInitialRequests: async function () {
+			try {
+				await this.getView().getModel().getMetaModel().requestObject("/");
+			} catch {
+				MessageBox.error(await this._text("requestListFailed"));
+				return;
+			}
+			await this._loadRequests("");
 		},
 
 		onSearch: async function (oEvent) {

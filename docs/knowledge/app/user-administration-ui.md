@@ -8,7 +8,11 @@ The HTML5 application's `xs-app.json` requires the `$XSAPPNAME.UserAdmin` scope 
 
 The access-change dialog keeps a bounded content width and relies on current UI5 responsive dialog behavior. It does not use the deprecated `stretchOnPhone` property; the focused UI contract and UI5 linter enforce that boundary.
 
+Initial request loading waits for `ODataMetaModel.requestObject("/")` before invoking the deferred `searchOnboarding` action. This prevents the first page load from racing OData metadata discovery: the same backend search used after invitation submission is now also used reliably after a full browser refresh.
+
 Vietnamese: Day la app SAPUI5 rieng cho PM duoc gan capability UserAdmin. Man hinh moi, approve, doi role va revoke qua CAP. Retry chi hien cho loi tam thoi; Reconcile chi hien cho ket qua provider mo ho va co confirmation rieng. UI khong goi BTP API truc tiep va khong giu credential. `ACTIVE` chi hien sau khi broker readback thanh cong. Real SAP adapter van chua live trong source-candidate.
+
+Lan load dau phai doi OData metadata san sang roi moi goi `searchOnboarding`. Neu goi action ngay trong `onInit`, metadata co the chua biet action va table giu model rong; sau khi metadata da load thi cung action lai hien du lieu. Regression test khoa dung thu tu metadata -> search.
 
 ## Verification
 
