@@ -91,6 +91,9 @@ async function main () {
   const request = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: REQUEST_ID }))
   const user = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: request.activeUser_ID }))
   const profile = await db.run(SELECT.one.from('idts.cap.DeveloperProfiles').where({ user_ID: user.ID }))
+  const profileState = await db.run(
+    SELECT.one.from('idts.cap.DeveloperProfileAdministrationStates').where({ developerProfile_ID: profile.ID })
+  )
   const responsibilities = await db.run(
     SELECT.from('idts.cap.DeveloperResponsibilities').where({ developerProfile_ID: profile.ID, active: true })
   )
@@ -100,6 +103,7 @@ async function main () {
   assert.equal(profile.availabilityStatus_code, 'AVAILABLE')
   assert.equal(profile.workloadLimit, 3)
   assert.equal(profile.active, true)
+  assert.equal(profileState.administrationVersion, 0)
   assert.equal(responsibilities.length, 1)
   assert.equal(responsibilities[0].componentCategory_ID, componentCategory.ID)
 

@@ -415,7 +415,8 @@ async function readDeveloperProfile (req) {
   const tx = cds.tx(req)
   await requireActiveUserAdministrator(req, tx)
   const { user, profile } = await readDeveloperTarget(tx, req.data.userID)
-  return developerProfileResult(tx, user, profile)
+  const administrationVersion = await readDeveloperProfileAdministrationVersion(tx, profile.ID)
+  return developerProfileResult(tx, user, profile, administrationVersion)
 }
 
 async function updateDeveloperProfile (req) {
@@ -426,18 +427,33 @@ async function updateDeveloperProfile (req) {
   const administrator = await requireActiveUserAdministrator(req, tx)
   await validateDeveloperProfileCatalog(tx, desiredProfile)
   const { user, profile } = await readDeveloperTarget(tx, req.data.userID, true)
-  if (!Number.isInteger(req.data.expectedVersion) || profile.administrationVersion !== req.data.expectedVersion) {
+  const administrationState = await tx.run(
+    SELECT.one.from('idts.cap.DeveloperProfileAdministrationStates').where({ developerProfile_ID: profile.ID })
+  )
+  const administrationVersion = administrationState?.administrationVersion || 0
+  if (!Number.isInteger(req.data.expectedVersion) || administrationVersion !== req.data.expectedVersion) {
     throw serviceError(409, 'DEVELOPER_PROFILE_VERSION_CONFLICT', 'The Developer profile changed. Reload and try again.')
   }
 
-  const nextVersion = profile.administrationVersion + 1
+  const nextVersion = administrationVersion + 1
   const changed = await tx.run(UPDATE('idts.cap.DeveloperProfiles').set({
     availabilityStatus_code: desiredProfile.availabilityStatusCode,
     workloadLimit: desiredProfile.workloadLimit,
-    administrationVersion: nextVersion,
     active: true
-  }).where({ ID: profile.ID, administrationVersion: profile.administrationVersion }))
+  }).where({ ID: profile.ID }))
   if (changed !== 1) throw serviceError(409, 'DEVELOPER_PROFILE_VERSION_CONFLICT', 'The Developer profile changed. Reload and try again.')
+  if (administrationState) {
+    const stateChanged = await tx.run(UPDATE('idts.cap.DeveloperProfileAdministrationStates').set({
+      administrationVersion: nextVersion
+    }).where({ ID: administrationState.ID, administrationVersion }))
+    if (stateChanged !== 1) throw serviceError(409, 'DEVELOPER_PROFILE_VERSION_CONFLICT', 'The Developer profile changed. Reload and try again.')
+  } else {
+    await tx.run(INSERT.into('idts.cap.DeveloperProfileAdministrationStates').entries({
+      ID: cds.utils.uuid(),
+      developerProfile_ID: profile.ID,
+      administrationVersion: nextVersion
+    }))
+  }
 
   const existing = await tx.run(
     SELECT.from('idts.cap.DeveloperResponsibilities').where({ developerProfile_ID: profile.ID })
@@ -474,9 +490,8 @@ async function updateDeveloperProfile (req) {
     ...profile,
     availabilityStatus_code: desiredProfile.availabilityStatusCode,
     workloadLimit: desiredProfile.workloadLimit,
-    administrationVersion: nextVersion,
     active: true
-  })
+  }, nextVersion)
 }
 
 async function readDeveloperTarget (tx, userID, lock = false) {
@@ -489,7 +504,16 @@ async function readDeveloperTarget (tx, userID, lock = false) {
   return { user, profile }
 }
 
-async function developerProfileResult (tx, user, profile) {
+async function readDeveloperProfileAdministrationVersion (tx, profileID) {
+  const state = await tx.run(
+    SELECT.one.from('idts.cap.DeveloperProfileAdministrationStates')
+      .columns('administrationVersion')
+      .where({ developerProfile_ID: profileID })
+  )
+  return state?.administrationVersion || 0
+}
+
+async function developerProfileResult (tx, user, profile, administrationVersion) {
   const responsibilities = await tx.run(
     SELECT.from('idts.cap.DeveloperResponsibilities').where({ developerProfile_ID: profile.ID }).orderBy('createdAt asc')
   )
@@ -505,7 +529,7 @@ async function developerProfileResult (tx, user, profile) {
     developerProfileID: profile.ID,
     availabilityStatusCode: profile.availabilityStatus_code,
     workloadLimit: profile.workloadLimit,
-    administrationVersion: profile.administrationVersion,
+    administrationVersion,
     ready: user.active === true && profile.active === true && activeResponsibilityCount > 0,
     activeResponsibilityCount,
     openBugImpactCount: Number(impact?.count || 0),

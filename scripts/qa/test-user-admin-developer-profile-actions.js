@@ -43,8 +43,12 @@ async function main () {
     user_ID: DEV_ID,
     availabilityStatus_code: 'AVAILABLE',
     workloadLimit: 3,
-    administrationVersion: 0,
     active: true
+  }))
+  await db.run(INSERT.into('idts.cap.DeveloperProfileAdministrationStates').entries({
+    ID: '72000000-0000-4000-8000-000000000005',
+    developerProfile_ID: PROFILE_ID,
+    administrationVersion: 0
   }))
   await db.run(INSERT.into('idts.cap.DeveloperResponsibilities').entries({
     ID: RESPONSIBILITY_ID,
@@ -109,6 +113,10 @@ async function main () {
   const persisted = await db.run(SELECT.from('idts.cap.DeveloperResponsibilities').where({ developerProfile_ID: PROFILE_ID }))
   assert.equal(persisted.length, 2, 'responsibilities must be deactivated, never hard-deleted')
   assert.equal(persisted.filter(row => row.active).length, 1)
+  const persistedState = await db.run(
+    SELECT.one.from('idts.cap.DeveloperProfileAdministrationStates').where({ developerProfile_ID: PROFILE_ID })
+  )
+  assert.equal(persistedState.administrationVersion, 1)
 
   const auditActions = (await db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').columns('action')))
     .map(row => row.action)

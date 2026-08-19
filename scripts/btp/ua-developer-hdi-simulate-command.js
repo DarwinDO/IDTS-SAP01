@@ -4,12 +4,13 @@ const { spawnSync } = require('node:child_process')
 const path = require('node:path')
 
 const SCHEMA_FILES = Object.freeze([
-  'src/gen/idts.cap.DeveloperProfiles.hdbtable',
+  'src/gen/idts.cap.DeveloperProfileAdministrationStates.hdbtable',
+  'src/gen/idts.cap.DeveloperProfileAdministrationStates.developerProfileAdministrationState.hdbindex',
   'src/gen/idts.cap.UserOnboardingDeveloperProfiles.hdbtable',
   'src/gen/idts.cap.UserOnboardingDeveloperProfiles.onboardingDeveloperProfile.hdbindex',
   'src/gen/idts.cap.UserOnboardingDeveloperResponsibilities.hdbtable',
   'src/gen/idts.cap.UserOnboardingDeveloperResponsibilities.onboardingDeveloperScope.hdbindex',
-  'src/gen/BugService.DeveloperProfiles.hdbview',
+  'src/gen/BugService.DeveloperProfileAdministrationStates.hdbview',
   'src/gen/UserAdministrationService.AvailabilityStatuses.hdbview',
   'src/gen/UserAdministrationService.ComponentCategories.hdbview',
   'src/gen/UserAdministrationService.ResponsibilityLevels.hdbview',

@@ -71,9 +71,16 @@ entity DeveloperProfiles : cuid, managed {
   user               : Association to Users not null;
   availabilityStatus : Association to AvailabilityStatuses;
   workloadLimit      : Integer;
-  administrationVersion : Integer default 0 not null;
+  administrationState : Composition of one DeveloperProfileAdministrationStates on administrationState.developerProfile = $self;
   active             : Boolean default true;
 }
+
+entity DeveloperProfileAdministrationStates : cuid, managed {
+  developerProfile      : Association to DeveloperProfiles not null;
+  administrationVersion : Integer default 0 not null;
+}
+
+annotate DeveloperProfileAdministrationStates with @assert.unique.developerProfileAdministrationState: [ developerProfile ];
 
 entity SAPModules : cuid, managed {
   code   : String(20) not null;

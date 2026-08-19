@@ -112,3 +112,22 @@ Exact build comparison against deployed-source baseline `71c8a836...`:
 - added artifacts are two request-owned Developer tables, two unique indexes and four read-only catalog views.
 
 R5 archive SHA-256 is `1b6ad9dee97cc91512f604a6e3fd1636ad3067ebec79e9c0ed4c6938b16f12e8`; it contains exactly the ten changed/added artifacts plus two HDI metadata files, runner, package and lock. R4 and older inputs remain rejected.
+
+## Attempt 5 — second seeded-table dependency found
+
+The exact R5 task completed `SUCCEEDED`, scheduled ten deploy and zero undeploy files, reported zero make warnings and an explicit successful-simulation marker. The onboarding status seed dependency was eliminated, but HDI still simulated one dependent table-data/CSV expansion for the changed seeded `DeveloperProfiles` table.
+
+No real row or schema mutation occurred. Real migration remains `NO-GO`. R5 is rejected for real make; the remaining safe refactor is to move `administrationVersion` to a new one-to-one administration-state table so every migration artifact is additive and no existing seeded table is altered.
+
+## R6 fully additive isolation
+
+`administrationVersion` now lives in the new one-to-one `DeveloperProfileAdministrationStates` entity. Legacy profiles without a state row read as version zero; their first successful PM update creates the row. The public UI/CAP version contract is unchanged.
+
+Exact generated comparison against baseline `71c8a836...` is now:
+
+- 227 baseline / 238 candidate artifacts;
+- 11 added / 0 changed / 0 removed;
+- existing table changes: 0;
+- CSV/`.hdbtabledata` diff: 0.
+
+R6 archive SHA-256 `4014eec047f1e971fb6c52fb2d02c60ab7992fd696b93c9c8bbbb2dedc9ca6aa` contains exactly those eleven additive artifacts, two HDI metadata files, runner, package and lock. Exact forbidden existing-table entries are zero; secret/table-data scan, isolated install and audit pass. All older simulation archives are rejected.

@@ -2,9 +2,9 @@
 
 ## User-admin Developer profile additions / Bổ sung Developer profile cho User Admin
 
-`DeveloperProfiles.administrationVersion` supports optimistic PM updates. `UserOnboardingRequests` owns one `UserOnboardingDeveloperProfiles` header and many `UserOnboardingDeveloperResponsibilities`. Together they form the desired availability/workload and Component Category, optional SAP Module, and responsibility-level snapshot used only after provider readback. Keeping the desired profile in new request-owned tables avoids changing the existing onboarding table and its seed-data dependency during the additive HANA migration.
+`DeveloperProfileAdministrationStates` stores the one-to-one optimistic version used for PM updates without adding a column to the existing seeded `DeveloperProfiles` table. `UserOnboardingRequests` owns one `UserOnboardingDeveloperProfiles` header and many `UserOnboardingDeveloperResponsibilities`. Together they form the desired availability/workload and Component Category, optional SAP Module, and responsibility-level snapshot used only after provider readback. Keeping both concurrency state and desired invitation data in new owned tables makes the HANA migration additive and avoids seed-data redeployment.
 
-`DeveloperProfiles.administrationVersion` hỗ trợ optimistic update của PM. `UserOnboardingRequests` sở hữu một header `UserOnboardingDeveloperProfiles` và nhiều `UserOnboardingDeveloperResponsibilities`. Hai phần tạo snapshot availability/workload, Component Category, SAP Module tùy chọn và responsibility level chỉ materialize sau provider readback. Tách profile mong muốn sang các bảng request-owned mới giúp migration HANA additive không sửa bảng onboarding cũ và không kéo theo seed-data dependency.
+`DeveloperProfileAdministrationStates` lưu optimistic version one-to-one cho cập nhật của PM mà không thêm cột vào bảng seeded `DeveloperProfiles` hiện hữu. `UserOnboardingRequests` sở hữu một header `UserOnboardingDeveloperProfiles` và nhiều `UserOnboardingDeveloperResponsibilities`. Hai phần tạo snapshot availability/workload, Component Category, SAP Module tùy chọn và responsibility level chỉ materialize sau provider readback. Tách concurrency state và desired invitation data sang bảng owned mới giúp migration HANA additive và không redeploy seed data.
 
 ## Controlled user onboarding (2026-08-12)
 

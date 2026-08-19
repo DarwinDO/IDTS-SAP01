@@ -269,12 +269,26 @@ async function alignDeveloperProfile (tx, userID, desiredRole, request, operatio
     let profileID
     if (profile) {
       profileID = profile.ID
+      const administrationState = await tx.run(
+        SELECT.one.from('idts.cap.DeveloperProfileAdministrationStates').where({ developerProfile_ID: profile.ID })
+      )
+      const nextAdministrationVersion = (administrationState?.administrationVersion || 0) + 1
       await tx.run(UPDATE('idts.cap.DeveloperProfiles').set({
         availabilityStatus_code: desiredProfile.availabilityStatus_code,
         workloadLimit: desiredProfile.workloadLimit,
-        administrationVersion: (profile.administrationVersion || 0) + 1,
         active: true
       }).where({ ID: profile.ID }))
+      if (administrationState) {
+        await tx.run(UPDATE('idts.cap.DeveloperProfileAdministrationStates').set({
+          administrationVersion: nextAdministrationVersion
+        }).where({ ID: administrationState.ID }))
+      } else {
+        await tx.run(INSERT.into('idts.cap.DeveloperProfileAdministrationStates').entries({
+          ID: cds.utils.uuid(),
+          developerProfile_ID: profile.ID,
+          administrationVersion: nextAdministrationVersion
+        }))
+      }
       await appendDeveloperAudit(tx, operation, request, userID, 'DEVELOPER_PROFILE_UPDATED')
     } else {
       profileID = cds.utils.uuid()
@@ -283,8 +297,12 @@ async function alignDeveloperProfile (tx, userID, desiredRole, request, operatio
         user_ID: userID,
         availabilityStatus_code: desiredProfile.availabilityStatus_code,
         workloadLimit: desiredProfile.workloadLimit,
-        administrationVersion: 0,
         active: true
+      }))
+      await tx.run(INSERT.into('idts.cap.DeveloperProfileAdministrationStates').entries({
+        ID: cds.utils.uuid(),
+        developerProfile_ID: profileID,
+        administrationVersion: 0
       }))
       await appendDeveloperAudit(tx, operation, request, userID, 'DEVELOPER_PROFILE_CREATED')
     }

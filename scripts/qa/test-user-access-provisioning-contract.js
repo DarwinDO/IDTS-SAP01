@@ -316,9 +316,11 @@ async function main () {
   assert.match(schema, /entity UserIdentityAuditEvents/)
   assert.match(schema, /entity UserOnboardingDeveloperProfiles/)
   assert.match(schema, /entity UserOnboardingDeveloperResponsibilities/)
+  assert.match(schema, /entity DeveloperProfileAdministrationStates/)
   assert.doesNotMatch(schema, /developerAvailabilityStatus\s*:/)
   assert.doesNotMatch(schema, /developerWorkloadLimit\s*:/)
-  assert.match(schema, /administrationVersion\s*:\s*Integer default 0 not null/)
+  const developerProfiles = schema.match(/entity DeveloperProfiles[\s\S]*?\n}/)?.[0] || ''
+  assert.doesNotMatch(developerProfiles, /administrationVersion/)
   assert.deepEqual(
     security.scopes.find(scope => scope.name === '$XSAPPNAME.ProvisioningBroker')?.['grant-as-authority-to-apps'],
     ['$XSAPPNAME(application,idts-user-access-broker)']
