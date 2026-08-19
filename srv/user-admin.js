@@ -404,6 +404,8 @@ async function requestRevoke (req) {
 async function retryAccessOperation (req) {
   return requeueAccessOperation(req, {
     requiredState: 'RETRYABLE_FAILURE',
+    legacyState: 'BLOCKED_MANUAL_REVIEW',
+    legacySafeResultCode: 'PROVIDER_DENIED',
     errorCode: 'ACCESS_OPERATION_NOT_RETRYABLE',
     errorMessage: 'The access operation cannot be retried.',
     auditAction: 'RETRY_ACCESS_OPERATION',
@@ -645,17 +647,29 @@ async function requeueAccessOperation (req, options) {
   if (!operation) throw serviceError(404, 'ACCESS_OPERATION_NOT_FOUND', 'Access operation was not found.')
   const request = await readOnboardingRequest(tx, operation.onboardingRequest_ID)
   assertExpectedVersion(request, req.data.expectedVersion)
-  if (
-    operation.state !== options.requiredState ||
-    request.status_code !== options.requiredState ||
-    (options.requiredSafeResultCode && operation.safeResultCode !== options.requiredSafeResultCode)
-  ) {
+  const regularMatch =
+    operation.state === options.requiredState &&
+    request.status_code === options.requiredState &&
+    (!options.requiredSafeResultCode || operation.safeResultCode === options.requiredSafeResultCode)
+  const legacyMatch = Boolean(
+    options.legacyState &&
+    options.legacySafeResultCode &&
+    operation.state === options.legacyState &&
+    request.status_code === options.legacyState &&
+    operation.safeResultCode === options.legacySafeResultCode &&
+    request.lastErrorCode === options.legacySafeResultCode
+  )
+  if (!regularMatch && !legacyMatch) {
     throw serviceError(409, options.errorCode, options.errorMessage)
   }
   const nextVersion = request.provisioningVersion + 1
   const nextCorrelationId = cds.utils.uuid()
-  const operationWhere = { ID: operation.ID, state: options.requiredState }
-  if (options.requiredSafeResultCode) operationWhere.safeResultCode = options.requiredSafeResultCode
+  const operationWhere = {
+    ID: operation.ID,
+    state: legacyMatch ? options.legacyState : options.requiredState
+  }
+  const expectedSafeResultCode = legacyMatch ? options.legacySafeResultCode : options.requiredSafeResultCode
+  if (expectedSafeResultCode) operationWhere.safeResultCode = expectedSafeResultCode
   const changed = await tx.run(
     UPDATE('idts.cap.UserAccessOperations').set({
       state: 'PENDING',

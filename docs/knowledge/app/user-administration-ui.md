@@ -24,6 +24,10 @@ Lan load dau bat dau dung mot lan trong `onAfterRendering`, sau khi model cua co
 
 Moi ban deploy HTML5 phai dong bo va tang version trong `manifest.json` va `package.json`. Production build tao `sap-ui-cachebuster-info.json`, con `index.html` bat UI5 application cache buster de trinh duyet lay dung `Component-preload.js` moi thay vi giu JavaScript cu.
 
+Action visibility mirrors the backend state-code boundary. Retry appears for `RETRYABLE_FAILURE` and for the exact one-time legacy tuple `BLOCKED_MANUAL_REVIEW + PROVIDER_DENIED`. Reconcile appears only for `BLOCKED_MANUAL_REVIEW + AMBIGUOUS_PROVIDER_OUTCOME`. New non-retryable authentication, missing-scope and forbidden results expose neither action; CAP repeats the same checks for direct requests.
+
+Vietnamese: UI bam sat boundary state-code cua backend. Retry hien cho `RETRYABLE_FAILURE` va tuple legacy mot lan `BLOCKED_MANUAL_REVIEW + PROVIDER_DENIED`. Reconcile chi hien cho `BLOCKED_MANUAL_REVIEW + AMBIGUOUS_PROVIDER_OUTCOME`. Cac ket qua authentication, missing-scope va forbidden moi khong hien hai action nay; CAP van kiem tra lai neu goi API truc tiep.
+
 ## Verification
 
 - `npm run qa:user-admin-ui:programmatic`

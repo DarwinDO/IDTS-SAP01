@@ -49,6 +49,8 @@ No code may persist or return the provider body, URL, token, user ID, group ID o
 
 After a broker-only deployment, one controlled operation may be reconciled. If the PATCH succeeds, the broker reads the user again, proves exactly one `IDTS_TESTER`, and CAP sets `ACTIVE`. If it fails, the new safe code determines the next gate; no blind retry is permitted.
 
+The historical controlled operation predates the split denial codes and is already `BLOCKED_MANUAL_REVIEW + PROVIDER_DENIED`. `retryAccessOperation` may requeue exactly this legacy tuple once when the operation and request safe-code state agree. The new broker cannot produce `PROVIDER_DENIED` for an HTTP denial, so the compatibility path closes itself after the diagnostic attempt. Reconcile remains limited to `AMBIGUOUS_PROVIDER_OUTCOME`; the UI mirrors both backend conditions.
+
 ## Track B: Developer onboarding and maintenance
 
 ### Business rule

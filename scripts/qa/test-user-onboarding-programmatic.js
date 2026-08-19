@@ -451,34 +451,55 @@ async function main () {
     providerCorrelationHash: '9'.repeat(64)
   }).where({ ID: queuedOperation.ID }))
   await db.run(UPDATE('idts.cap.UserOnboardingRequests').set({
-    status_code: 'BLOCKED_MANUAL_REVIEW'
+    status_code: 'BLOCKED_MANUAL_REVIEW',
+    lastErrorCode: 'PROVIDER_DENIED'
+  }).where({ ID: created.ID }))
+  const legacyDiagnosticRetry = await service.send({
+    event: 'retryAccessOperation',
+    data: { operationID: queuedOperation.ID, expectedVersion: 3 },
+    user: administrator
+  })
+  assert.equal(legacyDiagnosticRetry.status, 'PROVISION_QUEUED')
+  assert.equal(legacyDiagnosticRetry.provisioningVersion, 4)
+  await db.run(UPDATE('idts.cap.UserAccessOperations').set({
+    state: 'BLOCKED_MANUAL_REVIEW',
+    completedAt: '2026-08-13T00:06:00.000Z',
+    safeResultCode: 'PROVIDER_FORBIDDEN',
+    safeResultSummary: 'Provider denied the operation.'
+  }).where({ ID: queuedOperation.ID }))
+  await db.run(UPDATE('idts.cap.UserOnboardingRequests').set({
+    status_code: 'BLOCKED_MANUAL_REVIEW',
+    lastErrorCode: 'PROVIDER_FORBIDDEN'
   }).where({ ID: created.ID }))
   await expectRejected(service.send({
     event: 'retryAccessOperation',
-    data: { operationID: queuedOperation.ID, expectedVersion: 3 },
+    data: { operationID: queuedOperation.ID, expectedVersion: 4 },
     user: administrator
   }), 409, 'ACCESS_OPERATION_NOT_RETRYABLE')
   await expectRejected(service.send({
     event: 'reconcileAccessOperation',
-    data: { operationID: queuedOperation.ID, expectedVersion: 3 },
+    data: { operationID: queuedOperation.ID, expectedVersion: 4 },
     user: administrator
   }), 409, 'ACCESS_OPERATION_NOT_RECONCILABLE')
   await db.run(UPDATE('idts.cap.UserAccessOperations').set({
     safeResultCode: 'AMBIGUOUS_PROVIDER_OUTCOME',
     safeResultSummary: 'Provider result requires reconciliation.'
   }).where({ ID: queuedOperation.ID }))
+  await db.run(UPDATE('idts.cap.UserOnboardingRequests').set({
+    lastErrorCode: 'AMBIGUOUS_PROVIDER_OUTCOME'
+  }).where({ ID: created.ID }))
   const reconciled = await service.send({
     event: 'reconcileAccessOperation',
-    data: { operationID: queuedOperation.ID, expectedVersion: 3 },
+    data: { operationID: queuedOperation.ID, expectedVersion: 4 },
     user: administrator
   })
   assert.equal(reconciled.status, 'PROVISION_QUEUED')
-  assert.equal(reconciled.provisioningVersion, 4)
+  assert.equal(reconciled.provisioningVersion, 5)
   const reconciledOperation = await db.run(
     SELECT.one.from('idts.cap.UserAccessOperations').where({ ID: queuedOperation.ID })
   )
   assert.equal(reconciledOperation.state, 'PENDING')
-  assert.equal(reconciledOperation.expectedVersion, 4)
+  assert.equal(reconciledOperation.expectedVersion, 5)
   assert.notEqual(reconciledOperation.correlationId, retriedOperation.correlationId)
   assert.equal(reconciled.correlationId, reconciledOperation.correlationId)
   assert.equal(reconciledOperation.completedAt, null)
@@ -519,12 +540,12 @@ async function main () {
       userAdminRequested: false,
       developerProfile: desiredDeveloperProfile,
       reason: 'Move controlled user to the development workflow.',
-      expectedVersion: 4
+      expectedVersion: 5
     },
     user: administrator
   })
   assert.equal(roleChange.status, 'ROLE_CHANGE_QUEUED')
-  assert.equal(roleChange.provisioningVersion, 5)
+  assert.equal(roleChange.provisioningVersion, 6)
   const suspendedUser = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: provisionedUserID }))
   const revokedSession = await db.run(SELECT.one.from('idts.cap.AuthSessions').where({ ID: provisionedSessionID }))
   assert.equal(suspendedUser.active, false)
@@ -541,12 +562,12 @@ async function main () {
     data: {
       userID: provisionedUserID,
       reason: 'Controlled access is no longer required.',
-      expectedVersion: 5
+      expectedVersion: 6
     },
     user: administrator
   })
   assert.equal(revoke.status, 'REVOKE_QUEUED')
-  assert.equal(revoke.provisioningVersion, 6)
+  assert.equal(revoke.provisioningVersion, 7)
   const revokedUser = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: provisionedUserID }))
   assert.equal(revokedUser.active, false)
   const revokeOperation = await db.run(
