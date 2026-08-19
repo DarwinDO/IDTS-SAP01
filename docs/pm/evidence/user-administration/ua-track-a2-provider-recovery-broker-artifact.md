@@ -108,3 +108,14 @@ No platform mutation was performed while building or reviewing this artifact.
 - One read-only main-CAP task queried only matching operation count and `attemptCount`; it performed zero provider calls and encoded the sanitized result in its exit status. Readback proved exactly one matching row at attempt `4`.
 - The first task-result wrapper used JavaScript-style `String(...)` in PowerShell and then assumed the words `exit status`; both readback parsers failed after the single task had already completed. The task was not rerun. Sanitized numeric readback isolated the task-name date from the final exit code and established attempt `4`.
 - Source candidate exposes only `latestOperationAttemptCount` in the PM summary and allows the compatibility Retry only for exact attempt `4`. It does not change the HANA schema. If the next broker claim returns another HTTP 400, attempt `5` cannot be retried through this path.
+
+## Attempt-4 CAP/UI rollout
+
+- Source commit: `fc122c2119adadf3719a9c6becc69713c48c3d09`.
+- CAP ZIP: `mta_archives/idts-ua-request-invalid-attempt4-cap-fc122c2.zip`, SHA-256 `340E34AA2D8FF971BDB301CC7BF7A922735E318C60736B2AAEC418FFAFFACE5B`, size `317,168` bytes. Compared with the accepted R9c payload, only `srv/user-admin.js`, `srv/csn.json` and `srv/odata/v4/UserAdministrationService.xml` differ; all three match the exact build output, file count remains 94 and HDI artifact count is zero.
+- CAP rollout: package `1`, stage `1`, set droplet `1`, restart `1`, rollback `0`. CAP remains `1/1`, seven bindings and one route; droplet fingerprint changed from `34c35f88896c` to `f175fc326f34`.
+- The first CAP rollout wrapper had a PowerShell `foreach` spacing parse error and stopped before every CF command. The corrected wrapper re-froze target/artifact/package state before the sole real rollout.
+- UI content-only MTAR: `mta_archives/idts-user-admin-ui-attempt4-fc122c2.mtar`, SHA-256 `417BE253F4FC0C7648351B15033E3341074882809B74089816D80720530E7AC0`, version `1.0.5`, 31 static application files, no CAP/DB/AppRouter path and no unsafe archive entry.
+- UI deployment: exact content-only deploy `1`, exit zero and active MTA operations zero.
+- Live PM browser readback: UI version `1.0.5`; latest controlled row is exactly `BLOCKED_MANUAL_REVIEW + PROVIDER_REQUEST_INVALID + attempt 4`; Retry is visible and Reconcile is hidden. Both actions are hidden for the two failed expired rows.
+- Provider mutation count after this rollout remains zero. The live Retry click is deliberately held for action-time human confirmation because it can change the controlled user's Role Collection.
