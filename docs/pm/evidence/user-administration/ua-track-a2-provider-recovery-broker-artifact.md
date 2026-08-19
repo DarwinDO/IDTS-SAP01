@@ -1,0 +1,28 @@
+# UA Track A2 Provider Recovery Broker Artifact
+
+Date: 2026-08-19
+
+## Exact source and artifact
+
+- Source commit: `e2fe21693c398c46e4a62dc1bd5542b59010827b`.
+- Artifact: `mta_archives/idts-user-access-broker-track-a2-e2fe216.zip` (ignored generated output, not committed).
+- SHA-256: `3161D8F9CCE1BA9847C899A353A1C08F38E782700E874C140712E1FF2F358CC0`.
+- Size: `15,507` bytes.
+- Payload: exactly 13 regular broker files, source-export parity mismatch count `0`, no `node_modules`, unsafe path or unexpected file.
+- Node engine: exact `22.x`; lock contains zero non-root packages.
+- Isolated `npm ci --omit=dev --ignore-scripts`: PASS.
+- `npm audit --omit=dev`: zero vulnerabilities.
+- Credential/private-key/bearer/email/live-CF-domain scan: zero hits.
+
+## Live read-only baseline
+
+- Main runtime: `DEMO READY`; CAP/AppRouter `1/1`, health/readiness `200`, anonymous protected API `401`, Web `200`.
+- Broker: `STARTED`, one process/one desired instance, zero routes.
+- Broker bindings: exactly `idts-user-access-broker-api-access` and `idts-user-access-broker-auth`.
+- Current droplet fingerprint: `176c63dc7816`.
+
+## Rollout correction
+
+The historical broker MTA descriptor intentionally sets `IDTS_ACCESS_BROKER_ENABLED=false`. Redeploying it could disable the currently enabled broker or disturb its private CAP URL. The safe Track A rollout therefore uses the checksum-reviewed source ZIP through Cloud Foundry V3 package/stage/set-droplet against the existing exact broker app. This preserves current env, routes and bindings. Rollback resets the exact previous droplet after ownership/readback checks; it does not redeploy the historical disabled descriptor.
+
+No platform mutation was performed while building or reviewing this artifact.
