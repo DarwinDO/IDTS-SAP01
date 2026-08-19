@@ -82,8 +82,14 @@ async function executeAccessChange ({ action, requestedRole, userAdminRequested,
 
 function safeProvisioningFailure (error) {
   const known = {
+    PROVIDER_REQUEST_INVALID: ['The access provider rejected the request format.', false],
     PROVIDER_DENIED: ['The access provider rejected the requested change.', false],
+    PROVIDER_CONFLICT: ['The access provider reported a state conflict; reconciliation is required.', false],
     PROVIDER_RATE_LIMITED: ['The access provider temporarily rate-limited the request.', true],
+    PROVIDER_UPSTREAM_5XX: ['The access provider is temporarily unavailable.', true],
+    PROVIDER_TIMEOUT: ['The access provider did not respond before the timeout.', true],
+    PROVIDER_NETWORK_FAILURE: ['The access provider network request failed.', true],
+    PROVIDER_RESPONSE_INVALID: ['The access provider returned an invalid response.', false],
     PROVIDER_UNAVAILABLE: ['The access provider is temporarily unavailable.', true],
     PROVIDER_RESOURCE_NOT_FOUND: ['The required SAP access resource is unavailable.', false],
     PROVIDER_IDENTITY_UNVERIFIED: ['The target SAP identity could not be verified.', false],

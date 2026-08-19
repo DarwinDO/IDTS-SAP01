@@ -42,13 +42,25 @@ function createSapAuthorizationApiClient ({
           options.headers['Content-Type'] = 'application/json'
           options.body = JSON.stringify(body)
         }
-        const response = await fetchImpl(new URL(path, `${baseUrl}/`).toString(), options)
+        let response
+        try {
+          response = await fetchImpl(new URL(path, `${baseUrl}/`).toString(), options)
+        } catch (error) {
+          if (controller.signal.aborted || error?.name === 'AbortError') throw providerError('PROVIDER_TIMEOUT')
+          if (typeof error?.code === 'string') throw error
+          throw providerError('PROVIDER_NETWORK_FAILURE')
+        }
         if (!response?.ok) throw statusError(response?.status)
         if (response.status === 204) return null
-        return await response.json()
+        try {
+          return await response.json()
+        } catch (error) {
+          if (controller.signal.aborted || error?.name === 'AbortError') throw providerError('PROVIDER_TIMEOUT')
+          throw providerError('PROVIDER_RESPONSE_INVALID')
+        }
       } catch (error) {
         if (typeof error?.code === 'string') throw error
-        throw providerError('PROVIDER_UNAVAILABLE')
+        throw providerError('PROVIDER_NETWORK_FAILURE')
       } finally {
         clearTimeout(timer)
       }
@@ -72,10 +84,13 @@ function httpsBaseUrl (value) {
 }
 
 function statusError (status) {
+  if (status === 400) return providerError('PROVIDER_REQUEST_INVALID')
   if (status === 429) return providerError('PROVIDER_RATE_LIMITED')
   if (status === 404) return providerError('PROVIDER_RESOURCE_NOT_FOUND')
-  if (status === 401 || status === 403 || status === 409 || status === 412) return providerError('PROVIDER_DENIED')
-  return providerError('PROVIDER_UNAVAILABLE')
+  if (status === 401 || status === 403) return providerError('PROVIDER_DENIED')
+  if (status === 409 || status === 412) return providerError('PROVIDER_CONFLICT')
+  if (Number.isInteger(status) && status >= 500 && status <= 599) return providerError('PROVIDER_UPSTREAM_5XX')
+  return providerError('PROVIDER_RESPONSE_INVALID')
 }
 
 function providerError (code) {

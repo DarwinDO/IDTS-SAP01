@@ -1,5 +1,11 @@
 # Knowledge: IDTS user access broker source candidate
 
+## Provider failure classification
+
+The broker preserves only safe semantic provider codes. HTTP 400, authorization denial, missing resources, conflicts, and invalid responses require correction or reconciliation and are not retryable. HTTP 429, provider 5xx, timeout, and network failure are retryable only through the CAP operation journal. The HTTP client never retries a PATCH by itself and never exposes a raw provider response.
+
+Vietnamese: Broker chỉ giữ safe code có ý nghĩa nghiệp vụ. HTTP 400, bị từ chối quyền, thiếu resource, conflict và response sai cần sửa hoặc reconcile và không được retry. HTTP 429, provider 5xx, timeout và network failure chỉ được retry thông qua operation journal của CAP. HTTP client không tự retry PATCH và không expose raw provider response.
+
 The user access broker is a separate trust boundary from the CAP business runtime. CAP owns approval, optimistic versioning, fail-closed local suspension, the durable operation journal, and safe audit events. The broker alone may later receive a least-privilege SAP Authorization and Trust Management API credential. It accepts no client-selected subaccount, identity provider, endpoint, or Role Collection name.
 
 The fixed mapping is PM to `IDTS_PM`, TESTER to `IDTS_TESTER`, DEVELOPER to `IDTS_DEVELOPER`, plus `IDTS_USER_ADMIN` only for selected PM access. Processing is read-before-write, bounded write, then read-after-write. Timeout or ambiguous provider outcomes are reconciled before retry; raw provider errors are never returned or logged.

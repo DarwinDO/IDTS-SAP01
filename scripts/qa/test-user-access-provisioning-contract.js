@@ -143,6 +143,21 @@ async function main () {
     summary: 'The access provider rejected the requested change.',
     retryable: false
   })
+  const safeProviderFailures = [
+    ['PROVIDER_REQUEST_INVALID', false],
+    ['PROVIDER_CONFLICT', false],
+    ['PROVIDER_RATE_LIMITED', true],
+    ['PROVIDER_UPSTREAM_5XX', true],
+    ['PROVIDER_TIMEOUT', true],
+    ['PROVIDER_NETWORK_FAILURE', true],
+    ['PROVIDER_RESPONSE_INVALID', false]
+  ]
+  for (const [code, retryable] of safeProviderFailures) {
+    const safe = safeProvisioningFailure(Object.assign(new Error('private provider detail'), { code }))
+    assert.equal(safe.code, code)
+    assert.equal(safe.retryable, retryable)
+    assert.equal(safe.summary.includes('private provider detail'), false)
+  }
   assert.deepEqual(safeProvisioningFailure(new Error('token=must-not-leak')), {
     code: 'PROVISIONING_FAILED',
     summary: 'The access change could not be completed.',

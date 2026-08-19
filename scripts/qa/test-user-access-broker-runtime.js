@@ -397,6 +397,77 @@ async function main () {
     error => error?.code === 'PROVIDER_RESOURCE_NOT_FOUND' && !error.message.includes('private provider response')
   )
 
+  const providerStatusCases = [
+    [400, 'PROVIDER_REQUEST_INVALID'],
+    [401, 'PROVIDER_DENIED'],
+    [403, 'PROVIDER_DENIED'],
+    [409, 'PROVIDER_CONFLICT'],
+    [412, 'PROVIDER_CONFLICT'],
+    [429, 'PROVIDER_RATE_LIMITED'],
+    [500, 'PROVIDER_UPSTREAM_5XX'],
+    [503, 'PROVIDER_UPSTREAM_5XX']
+  ]
+  for (const [status, expectedCode] of providerStatusCases) {
+    const statusClient = createSapAuthorizationApiClient({
+      apiUrl: api.apiUrl,
+      minIntervalMs: 0,
+      tokenProvider: { getAccessToken: async () => 'controlled-api-token' },
+      fetchImpl: async () => ({
+        ok: false,
+        status,
+        text: async () => 'private provider response token=must-not-leak'
+      })
+    })
+    await assert.rejects(
+      statusClient.request({ method: 'PATCH', path: '/Groups/controlled', body: { members: [] } }),
+      error => error?.code === expectedCode &&
+        !error.message.includes('private provider response') &&
+        !error.message.includes('controlled-api-token')
+    )
+  }
+
+  const invalidJsonClient = createSapAuthorizationApiClient({
+    apiUrl: api.apiUrl,
+    minIntervalMs: 0,
+    tokenProvider: { getAccessToken: async () => 'controlled-api-token' },
+    fetchImpl: async () => ({
+      ok: true,
+      status: 200,
+      json: async () => { throw new SyntaxError('private malformed response') }
+    })
+  })
+  await assert.rejects(
+    invalidJsonClient.request({ method: 'GET', path: '/Users/controlled' }),
+    error => error?.code === 'PROVIDER_RESPONSE_INVALID' && !error.message.includes('private malformed response')
+  )
+
+  const networkFailureClient = createSapAuthorizationApiClient({
+    apiUrl: api.apiUrl,
+    minIntervalMs: 0,
+    tokenProvider: { getAccessToken: async () => 'controlled-api-token' },
+    fetchImpl: async () => { throw new TypeError('private network endpoint') }
+  })
+  await assert.rejects(
+    networkFailureClient.request({ method: 'GET', path: '/Users/controlled' }),
+    error => error?.code === 'PROVIDER_NETWORK_FAILURE' && !error.message.includes('private network endpoint')
+  )
+
+  const timeoutClient = createSapAuthorizationApiClient({
+    apiUrl: api.apiUrl,
+    minIntervalMs: 0,
+    timeoutMs: 100,
+    tokenProvider: { getAccessToken: async () => 'controlled-api-token' },
+    fetchImpl: async (url, options) => new Promise((resolve, reject) => {
+      options.signal.addEventListener('abort', () => reject(Object.assign(new Error('private timeout detail'), {
+        name: 'AbortError'
+      })), { once: true })
+    })
+  })
+  await assert.rejects(
+    timeoutClient.request({ method: 'GET', path: '/Users/controlled' }),
+    error => error?.code === 'PROVIDER_TIMEOUT' && !error.message.includes('private timeout detail')
+  )
+
   const scimRequests = []
   let directGroups = [{ display: 'NON_IDTS_EXISTING', value: 'non-idts', type: 'DIRECT' }]
   const scimApiClient = {
