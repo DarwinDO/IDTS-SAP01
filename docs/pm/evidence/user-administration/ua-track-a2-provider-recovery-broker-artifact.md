@@ -119,3 +119,12 @@ No platform mutation was performed while building or reviewing this artifact.
 - UI deployment: exact content-only deploy `1`, exit zero and active MTA operations zero.
 - Live PM browser readback: UI version `1.0.5`; latest controlled row is exactly `BLOCKED_MANUAL_REVIEW + PROVIDER_REQUEST_INVALID + attempt 4`; Retry is visible and Reconcile is hidden. Both actions are hidden for the two failed expired rows.
 - Provider mutation count after this rollout remains zero. The live Retry click is deliberately held for action-time human confirmation because it can change the controlled user's Role Collection.
+
+## Controlled attempt-5 acceptance
+
+- DonHV clicked the exact visible Retry once. The request moved to `PROVISION_QUEUED`, then completed at attempt `5` as `ACTIVE` with no safe error.
+- BTP CLI SSO was refreshed through the reviewed browser-login helper. Sanitized Role Collection readback for controlled identity fingerprint `ff6dde030d31` proves: `IDTS_TESTER=1`, `IDTS_PM=0`, `IDTS_DEVELOPER=0`, `IDTS_USER_ADMIN=0`; exact business-role count is one.
+- The `IDTS_TESTER` Role Collection now has two direct assignments in total because the pre-existing project Tester remains assigned and the controlled identity is the second. This is expected and is not a duplicate assignment to the controlled identity.
+- Corrected internal read-only proof confirms exactly one matching ACTIVE TESTER request, linked internal User active with role TESTER, matching immutable identity key hash, and latest operation `SUCCEEDED` at attempt `5` with a completion timestamp.
+- The first internal proof task referenced nonexistent `Users.identity*`/`identityPlatformUserId` columns and exited through its query-failure code. The model stores `externalIdentity*` on `Users` and `identityPlatformUserId` on the onboarding request. A corrected read-only task used those exact fields and passed; neither task called the provider or wrote business data.
+- Final acceptance result: PASS for the controlled TESTER onboarding/provisioning flow. No manual Role Collection assignment, no second Retry, no direct PATCH outside the journal and no conflicting IDTS role occurred.
