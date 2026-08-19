@@ -26,3 +26,17 @@ Date: 2026-08-19
 The historical broker MTA descriptor intentionally sets `IDTS_ACCESS_BROKER_ENABLED=false`. Redeploying it could disable the currently enabled broker or disturb its private CAP URL. The safe Track A rollout therefore uses the checksum-reviewed source ZIP through Cloud Foundry V3 package/stage/set-droplet against the existing exact broker app. This preserves current env, routes and bindings. Rollback resets the exact previous droplet after ownership/readback checks; it does not redeploy the historical disabled descriptor.
 
 No platform mutation was performed while building or reviewing this artifact.
+
+## Track A3 deployment
+
+- Exact package upload count: `1`.
+- Exact stage attempt count: `1`.
+- Exact set-droplet count: `1`.
+- Exact broker restart count: `1`.
+- Rollback count: `0`.
+- Previous droplet fingerprint: `176c63dc7816`.
+- Current droplet fingerprint: `bef1e1e442f0`.
+- Post-state: broker `STARTED` and `1/1`, zero routes, exactly two bindings, latest sanitized poll `IDLE`.
+- Main state: CAP bindings `7`, AppRouter bindings `3`; `npm run btp:demo:check` returned `DEMO READY`.
+- No broker env, route, binding, XSUAA, HANA, user or Role Collection mutation occurred in the code rollout.
+- Next checkpoint: DonHV must press Reconcile exactly once on the controlled TESTER row. No automated/direct PATCH is permitted.
