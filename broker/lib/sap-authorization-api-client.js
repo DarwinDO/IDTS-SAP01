@@ -1,6 +1,15 @@
 'use strict'
 
 const ALLOWED_METHODS = new Set(['GET', 'PATCH'])
+const EXPECTED_API_SCOPES = new Set([
+  'uaa.resource',
+  'xs_authorization.read',
+  'xs_authorization.write',
+  'xs_idp.read',
+  'xs_idp.write',
+  'xs_user.read',
+  'xs_user.write'
+])
 
 function createSapAuthorizationApiClient ({
   apiUrl,
@@ -50,7 +59,7 @@ function createSapAuthorizationApiClient ({
           if (typeof error?.code === 'string') throw error
           throw providerError('PROVIDER_NETWORK_FAILURE')
         }
-        if (!response?.ok) throw statusError(response?.status)
+        if (!response?.ok) throw await responseError(response)
         if (response.status === 204) return null
         try {
           return await response.json()
@@ -83,14 +92,31 @@ function httpsBaseUrl (value) {
   }
 }
 
-function statusError (status) {
+async function responseError (response) {
+  const status = response?.status
   if (status === 400) return providerError('PROVIDER_REQUEST_INVALID')
   if (status === 429) return providerError('PROVIDER_RATE_LIMITED')
   if (status === 404) return providerError('PROVIDER_RESOURCE_NOT_FOUND')
-  if (status === 401 || status === 403) return providerError('PROVIDER_DENIED')
+  if (status === 401) return providerError('PROVIDER_AUTHENTICATION_FAILED')
+  if (status === 403) {
+    return providerError(await reportsExpectedScope(response)
+      ? 'PROVIDER_SCOPE_MISSING'
+      : 'PROVIDER_FORBIDDEN')
+  }
   if (status === 409 || status === 412) return providerError('PROVIDER_CONFLICT')
   if (Number.isInteger(status) && status >= 500 && status <= 599) return providerError('PROVIDER_UPSTREAM_5XX')
   return providerError('PROVIDER_RESPONSE_INVALID')
+}
+
+async function reportsExpectedScope (response) {
+  if (typeof response?.json !== 'function') return false
+  try {
+    const body = await response.json()
+    return body && typeof body === 'object' && !Array.isArray(body) &&
+      typeof body.scope === 'string' && EXPECTED_API_SCOPES.has(body.scope)
+  } catch {
+    return false
+  }
 }
 
 function providerError (code) {

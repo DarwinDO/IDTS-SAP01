@@ -145,6 +145,9 @@ async function main () {
   })
   const safeProviderFailures = [
     ['PROVIDER_REQUEST_INVALID', false],
+    ['PROVIDER_AUTHENTICATION_FAILED', false],
+    ['PROVIDER_FORBIDDEN', false],
+    ['PROVIDER_SCOPE_MISSING', false],
     ['PROVIDER_CONFLICT', false],
     ['PROVIDER_RATE_LIMITED', true],
     ['PROVIDER_UPSTREAM_5XX', true],

@@ -399,8 +399,8 @@ async function main () {
 
   const providerStatusCases = [
     [400, 'PROVIDER_REQUEST_INVALID'],
-    [401, 'PROVIDER_DENIED'],
-    [403, 'PROVIDER_DENIED'],
+    [401, 'PROVIDER_AUTHENTICATION_FAILED'],
+    [403, 'PROVIDER_FORBIDDEN'],
     [409, 'PROVIDER_CONFLICT'],
     [412, 'PROVIDER_CONFLICT'],
     [429, 'PROVIDER_RATE_LIMITED'],
@@ -425,6 +425,41 @@ async function main () {
         !error.message.includes('controlled-api-token')
     )
   }
+
+  const missingScopeClient = createSapAuthorizationApiClient({
+    apiUrl: api.apiUrl,
+    minIntervalMs: 0,
+    tokenProvider: { getAccessToken: async () => 'controlled-api-token' },
+    fetchImpl: async () => ({
+      ok: false,
+      status: 403,
+      json: async () => ({
+        scope: 'xs_user.write',
+        error_description: 'private provider response must-not-leak'
+      })
+    })
+  })
+  await assert.rejects(
+    missingScopeClient.request({ method: 'PATCH', path: '/Groups/controlled', body: { members: [] } }),
+    error => error?.code === 'PROVIDER_SCOPE_MISSING' &&
+      !error.message.includes('xs_user.write') &&
+      !error.message.includes('private provider response')
+  )
+
+  const untrustedScopeClient = createSapAuthorizationApiClient({
+    apiUrl: api.apiUrl,
+    minIntervalMs: 0,
+    tokenProvider: { getAccessToken: async () => 'controlled-api-token' },
+    fetchImpl: async () => ({
+      ok: false,
+      status: 403,
+      json: async () => ({ scope: 'private.provider.scope' })
+    })
+  })
+  await assert.rejects(
+    untrustedScopeClient.request({ method: 'PATCH', path: '/Groups/controlled', body: { members: [] } }),
+    error => error?.code === 'PROVIDER_FORBIDDEN' && !error.message.includes('private.provider.scope')
+  )
 
   const invalidJsonClient = createSapAuthorizationApiClient({
     apiUrl: api.apiUrl,

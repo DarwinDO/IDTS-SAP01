@@ -84,6 +84,9 @@ function safeProvisioningFailure (error) {
   const known = {
     PROVIDER_REQUEST_INVALID: ['The access provider rejected the request format.', false],
     PROVIDER_DENIED: ['The access provider rejected the requested change.', false],
+    PROVIDER_AUTHENTICATION_FAILED: ['The access provider could not authenticate the broker credential.', false],
+    PROVIDER_FORBIDDEN: ['The access provider denied the requested change.', false],
+    PROVIDER_SCOPE_MISSING: ['The broker credential is missing a required provider scope.', false],
     PROVIDER_CONFLICT: ['The access provider reported a state conflict; reconciliation is required.', false],
     PROVIDER_RATE_LIMITED: ['The access provider temporarily rate-limited the request.', true],
     PROVIDER_UPSTREAM_5XX: ['The access provider is temporarily unavailable.', true],

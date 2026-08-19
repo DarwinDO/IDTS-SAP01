@@ -50,3 +50,10 @@ No platform mutation was performed while building or reviewing this artifact.
 - Credential metadata: read-write (`read-only=false`), full-access client class, client-credentials token, all seven OpenAPI scopes including `xs_user.write` and `xs_authorization.write`.
 - Token, target user and `IDTS_TESTER` group all belong to the same zone. API user readback reports active and verified. API base URL is root and is not altered by the client's relative path construction.
 - Conclusion: OAuth/token/zone/identity/group/read-contract hypotheses are closed. SAP rejected the membership PATCH at the resource-authorization/policy layer. No further PATCH is permitted without a new architecture/credential decision or SAP-supported explanation.
+
+## Provider-denial diagnostic source gate
+
+- The broker now distinguishes an HTTP `401` as `PROVIDER_AUTHENTICATION_FAILED` and an HTTP `403` as `PROVIDER_FORBIDDEN`.
+- For HTTP `403`, the client reads only the schema-defined `scope` field and recognizes it only when it exactly matches one of the seven reviewed SAP API scopes. That case becomes `PROVIDER_SCOPE_MISSING`; arbitrary scope text and every other provider-body field are discarded.
+- All three results are non-retryable. No token refresh, provider PATCH, credential rotation, deployment or BTP mutation is part of this source gate.
+- TDD evidence: the new runtime assertion failed against the old combined `PROVIDER_DENIED` mapping, passed after the bounded change, failed again when that mapping was temporarily restored, and passed again after the fix was restored.
