@@ -34,3 +34,9 @@ No push, DB deployer, AppRouter, UI, route, binding, env, XSUAA, HANA, user, rol
 Require CAP STARTED 1/1, same one route and seven binding names, `/health` and `/ready` HTTP 200, protected anonymous API 401, AppRouter/Web 200, and focused User Administration metadata/action reachability.
 
 If restart/readiness fails, read state once; do not re-stage. Rollback sets the exact prior droplet held in process memory and restarts CAP once. Main database schema remains additive and is not rolled back during CAP rollback.
+
+## R9 catalog-navigation correction
+
+Browser acceptance found that `ComponentCategories` lacked OData navigation because its target entities were not exposed in the service. Source commit `e29ee0a2de5c840d4734bf18159266baa132aba4` adds read-only `ApplicationComponents` and `DefectCategories` projections; EDMX now contains both target entity types and both navigation properties.
+
+Corrective CAP ZIP `mta_archives/idts-ua-developer-cap-r9c.zip` has SHA-256 `271cbed9964bb7ebcf52fcbf8ff61352020b0a3f2e36e6737aaf13561b38da1a`, size 316,915 bytes, 94 source files, Node 22.x, no HDI artifacts and production audit High/Critical zero. Deploy through the same create-package/stage/owned-droplet/restart sequence; do not redeploy UI or HANA.
