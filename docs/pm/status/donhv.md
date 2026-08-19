@@ -7877,3 +7877,11 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - TDD: the new regression first failed because `_loadInitialRequests` was absent, then passed after the bounded controller change; UI lint and production UI build pass.
 - Provider recovery evidence: a broker-only read-only task obtained its OAuth token and received HTTP `200` from the SAP Groups API; response shape matched the reviewed lower-case contract. The 20 latest CAP claim polls are HTTP `204`, so a user-confirmed retry can proceed after the row is visible.
 - Safety: no new invitation, role assignment, retry action, schema/data write or credential read occurred during diagnosis. The verified request remains retryable; `ACTIVE` still requires provider assignment and readback.
+
+### 2026-08-19 - User Administration initial-load fix deployed
+
+- Classification: controlled HTML5 content-only deployment.
+- Source: commit `f290583`; focused UI contract, ESLint, production UI build, secret scan and `git diff --check` pass. UI5 MCP manifest validation returns valid with zero errors; UI5 MCP linter returns no findings.
+- Artifact: first local MTAR `1DDD2C...FCA9` was rejected before deploy because it included the temporary `input/` staging folder. Replacement MTAR SHA-256 `FB6D28265A35A2F9D8E722C587E6FBDD45921FF300CDA81393CC359B549BEC6F` contains one content module, one existing HTML5 repo service reference and exactly one inner `user-administration-ui.zip`; packaged ZIP hash matches the source build and its preload contains `_loadInitialRequests`.
+- Deployment: exact `cf deploy` exited zero; no active MTA operation remained. CAP, AppRouter and broker stayed started `1/1`; no DB, XSUAA, route, binding, user, role or invitation mutation was part of deployment.
+- Browser acceptance pending: PM must hard-refresh the User Administration page, verify persisted rows appear, then explicitly trigger the state-bound Retry action for the latest `RETRYABLE_FAILURE` row.
