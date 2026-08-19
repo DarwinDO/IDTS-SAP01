@@ -17,3 +17,5 @@ The clean build's npm audit reported four High findings only in build-time UI de
 Deploy only MTA `idts-user-admin-ui-r3c`, whose descriptor contains one HTML5 build module, one application-content module and one existing HTML5 repo host reference. It contains no CAP, DB deployer, AppRouter, XSUAA, HANA or managed-service mutation.
 
 After deploy require zero active MTA operations, unchanged CAP/AppRouter topology, `DEMO READY`, cachebuster-backed UI resources, and visible Developer profile controls in the PM + UserAdmin session. On deploy failure, read operation state before any retry; do not delete the HTML5 repo service.
+
+Execution completed once with exact post-deploy MTAR hash match and zero active MTA operations. The content-only MTA was not retained in `cf mta` inventory, so acceptance used the live cache-busted browser payload. PM + UserAdmin loaded persisted onboarding rows and the Developer invitation controls; no invitation was sent.
