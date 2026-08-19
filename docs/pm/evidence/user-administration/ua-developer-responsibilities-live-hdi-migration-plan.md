@@ -52,3 +52,9 @@ The exact R7 task completed once with state `SUCCEEDED` and process exit zero. M
 Post-migration metadata found exactly the three new tables. A schema-qualified aggregate query returned row counts `0,0,0`; no business row was selected or printed. The first three direct-name inspectors failed read-only due logical/physical identifier assumptions, and the bounded metadata-based inspector resolved the exact names without exposing them.
 
 The helper binding/app were removed. Rollback was not invoked because forward and postcheck passed. This closes the additive HDI migration as `PASS`; CAP/UI deployment remains a separate gate.
+
+## R10 catalog-view follow-up
+
+Browser acceptance of the later CAP navigation correction showed two new read-only service views were also required. R10b archive SHA-256 `1dc52d1041c2845c991b1deed318bdfe4343b16cbef75936fb717c3e99ed4bae`, size 6,904 bytes, contains only two HANA views, two HDI metadata files, exact simulation/migration runner, package and lock. It contains no table, index, CSV or `.hdbtabledata`; install/audit High/Critical zero.
+
+Run the default `ua-developer-catalog-hdi-command.js` once for simulation. Only after 2 deploy / 0 undeploy / 0 warning / no table-data PASS, run the same command once with exact argument `migrate`. Cleanup the unique helper app afterward. No other schema or application mutation is included.
