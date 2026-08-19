@@ -40,3 +40,13 @@ No platform mutation was performed while building or reviewing this artifact.
 - Main state: CAP bindings `7`, AppRouter bindings `3`; `npm run btp:demo:check` returned `DEMO READY`.
 - No broker env, route, binding, XSUAA, HANA, user or Role Collection mutation occurred in the code rollout.
 - Next checkpoint: DonHV must press Reconcile exactly once on the controlled TESTER row. No automated/direct PATCH is permitted.
+
+## Controlled retry result
+
+- DonHV pressed Retry exactly once from `RETRYABLE_FAILURE`.
+- Broker result: `BLOCKED_MANUAL_REVIEW`; subsequent polls returned `IDLE`.
+- Persisted safe summary: provider rejected the access change (`PROVIDER_DENIED`, HTTP 401/403 class).
+- BTP readback: zero Role Collections; `IDTS_TESTER=false`; no conflicting IDTS role.
+- Credential metadata: read-write (`read-only=false`), full-access client class, client-credentials token, all seven OpenAPI scopes including `xs_user.write` and `xs_authorization.write`.
+- Token, target user and `IDTS_TESTER` group all belong to the same zone. API user readback reports active and verified. API base URL is root and is not altered by the client's relative path construction.
+- Conclusion: OAuth/token/zone/identity/group/read-contract hypotheses are closed. SAP rejected the membership PATCH at the resource-authorization/policy layer. No further PATCH is permitted without a new architecture/credential decision or SAP-supported explanation.
