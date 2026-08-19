@@ -7885,3 +7885,12 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Artifact: first local MTAR `1DDD2C...FCA9` was rejected before deploy because it included the temporary `input/` staging folder. Replacement MTAR SHA-256 `FB6D28265A35A2F9D8E722C587E6FBDD45921FF300CDA81393CC359B549BEC6F` contains one content module, one existing HTML5 repo service reference and exactly one inner `user-administration-ui.zip`; packaged ZIP hash matches the source build and its preload contains `_loadInitialRequests`.
 - Deployment: exact `cf deploy` exited zero; no active MTA operation remained. CAP, AppRouter and broker stayed started `1/1`; no DB, XSUAA, route, binding, user, role or invitation mutation was part of deployment.
 - Browser acceptance pending: PM must hard-refresh the User Administration page, verify persisted rows appear, then explicitly trigger the state-bound Retry action for the latest `RETRYABLE_FAILURE` row.
+
+### 2026-08-19 - User Administration browser reused stale UI bundle after content deployment
+
+- Classification: product UI deployment/cache defect, root cause confirmed; fix pending approval.
+- Symptom: after the initial-load content deployment and an ordinary F5 reload, the table still displayed `No onboarding requests found` even though HANA retained the requests and CAP had previously returned the search payload.
+- Runtime evidence: the 11:10 browser reload requested `index.html` and OData metadata but did not request `manifest.json` or `Component-preload.js`; CAP received no `searchOnboarding` call. The browser therefore executed its previously cached UI bundle.
+- Source finding: `sap.app.applicationVersion.version` remains `0.1.0`, the UI package version is `1.0.0`, and the build emits no `sap-ui-cachebuster-info.json`; the content deployment reused the old application version without an application cache-buster contract.
+- Safety: no request, role, provider, HANA, XSUAA or invitation mutation occurred during diagnosis. The latest verified request remains available for the separately approved retry after the table is restored.
+- Proposed resolution: align and increment the UI application/package version, enable the standard UI5 application cache buster, add a focused packaging regression, and redeploy only the User Administration HTML5 content.

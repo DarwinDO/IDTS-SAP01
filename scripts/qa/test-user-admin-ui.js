@@ -35,9 +35,19 @@ assert.deepEqual(contentRequirement.artifacts, ['user-administration-ui.zip'])
 assert.equal(contentRequirement['target-path'], 'app/')
 
 const appPackage = JSON.parse(fs.readFileSync(path.join(app, 'package.json'), 'utf8'))
+assert.equal(manifest['sap.app'].applicationVersion.version, appPackage.version, 'HTML5 manifest and package versions stay aligned')
+assert.notEqual(appPackage.version, '1.0.0', 'changed HTML5 content must use a new application version')
 assert.match(appPackage.scripts.build, /ui5 build preload/)
+assert.match(appPackage.scripts.build, /--include-task generateCachebusterInfo/)
 assert.equal(appPackage.devDependencies['ui5-task-zipper'], '^3.4.2')
 assert.ok(fs.existsSync(path.join(app, 'package-lock.json')))
+
+const ui5Config = YAML.parse(fs.readFileSync(path.join(app, 'ui5.yaml'), 'utf8'))
+const zipperTask = ui5Config.builder.customTasks.find(task => task.name === 'ui5-task-zipper')
+assert.equal(zipperTask.afterTask, 'generateCachebusterInfo', 'the deployable ZIP must be created after cache-buster metadata')
+
+const indexHtml = fs.readFileSync(path.join(webapp, 'index.html'), 'utf8')
+assert.match(indexHtml, /data-sap-ui-app-cache-buster="\.\/"/)
 
 const view = fs.readFileSync(path.join(webapp, 'view/Main.view.xml'), 'utf8')
 assert.match(view, /<SearchField/)

@@ -16,7 +16,7 @@ builder:
       - "/test/**"
   customTasks:
     - name: ui5-task-zipper
-      afterTask: generateVersionInfo
+      afterTask: generateCachebusterInfo
       configuration:
         archiveName: user-administration-ui
         relativePaths: true
