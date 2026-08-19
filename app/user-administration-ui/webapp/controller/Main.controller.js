@@ -13,16 +13,17 @@ sap.ui.define([
 			this.setModel(new JSONModel(this._emptyInvite()), "invite");
 			this.setModel(new JSONModel(this._emptyAccessChange()), "access");
 			this.setModel(new JSONModel({ items: [] }), "requests");
+		},
+
+		onAfterRendering: function () {
+			if (this._initialRequestsStarted) {
+				return;
+			}
+			this._initialRequestsStarted = true;
 			this._loadInitialRequests();
 		},
 
 		_loadInitialRequests: async function () {
-			try {
-				await this.getView().getModel().getMetaModel().requestObject("/");
-			} catch {
-				MessageBox.error(await this._text("requestListFailed"));
-				return;
-			}
 			await this._loadRequests("");
 		},
 
@@ -310,7 +311,7 @@ sap.ui.define([
 		},
 
 		_text: async function (sKey) {
-			const oBundle = await this.getModel("i18n").getResourceBundle();
+			const oBundle = await this.getResourceBundle();
 			return oBundle.getText(sKey);
 		}
 	});

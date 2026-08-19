@@ -7894,3 +7894,27 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Source finding: `sap.app.applicationVersion.version` remains `0.1.0`, the UI package version is `1.0.0`, and the build emits no `sap-ui-cachebuster-info.json`; the content deployment reused the old application version without an application cache-buster contract.
 - Safety: no request, role, provider, HANA, XSUAA or invitation mutation occurred during diagnosis. The latest verified request remains available for the separately approved retry after the table is restored.
 - Proposed resolution: align and increment the UI application/package version, enable the standard UI5 application cache buster, add a focused packaging regression, and redeploy only the User Administration HTML5 content.
+- Follow-up runtime finding: after the cache-buster deployment, Edge fetched the timestamped `manifest.json` and `Component-preload.js`, proving stale-cache remediation. The table remained empty because the new controller hit a second lifecycle error before search.
+
+### 2026-08-19 - Initial-load error handler used view i18n before model propagation
+
+- Classification: product UI lifecycle defect, fixed in source; replacement content deployment pending.
+- Symptom: the cache-busted bundle still did not call `searchOnboarding`. Edge DevTools showed `TypeError: Cannot read properties of undefined (reading 'getResourceBundle')` in `_text`, called from `_loadInitialRequests`.
+- Root cause: metadata loading rejected during `onInit`; the catch path then tried to resolve i18n through the view before the component's i18n model had propagated, masking the original failure and leaving the request JSON model empty.
+- Resolution: start the initial search once from `onAfterRendering`, remove the redundant explicit metadata gate, and resolve text through the existing owner-component `getResourceBundle()` helper. A focused runtime test proves two rendering callbacks start exactly one initial load.
+- Verification so far: RED on missing `onAfterRendering`; GREEN after the bounded controller change; UI contract, ESLint, production build, cache-buster generation and deploy ZIP cache-buster presence pass. Live content replacement remains pending.
+
+### 2026-08-19 - First cache-buster MTAR build lacked generated content staging
+
+- Classification: build-tooling issue, fixed-path investigation in progress.
+- Symptom: `mbt build` stopped at descriptor validation because the content-only descriptor expects `gen/user-admin-ui-r3c`, which is generated packaging input and was absent from the clean checkout.
+- Impact: no MTAR was created and no Cloud Foundry/BTP mutation started. The source UI ZIP remained valid and contained the cache-buster metadata.
+- Safety response: reject the failed output name, do not reuse historical staging, and reconstruct only the descriptor's exact generated content directory from the newly built, checksum-reviewed UI ZIP before one fresh MTAR build.
+
+### 2026-08-19 - First generated cache-buster MTAR inherited stale build output
+
+- Classification: build-tooling/artifact-boundary issue, contained before deployment.
+- Symptom: deep inspection of `idts-user-admin-ui-cache-fd57300b.mtar` found an unexpected `idts-sap01-srv/data.zip` entry even though the dedicated descriptor contains only the User Administration HTML5/content modules.
+- Root cause: MBT reused the existing untracked worktree build directory, which still contained output from an earlier broader build.
+- Fix status: the MTAR is `REJECTED / NEVER DEPLOY`. Rebuild is moving to a clean export of exact commit `fd57300`, leaving the user-owned historical worktree directory untouched.
+- Platform impact: none. The artifact was never submitted to Cloud Foundry; CAP, HANA, XSUAA, broker and business data remain unchanged.

@@ -8,13 +8,13 @@ The HTML5 application's `xs-app.json` requires the `$XSAPPNAME.UserAdmin` scope 
 
 The access-change dialog keeps a bounded content width and relies on current UI5 responsive dialog behavior. It does not use the deprecated `stretchOnPhone` property; the focused UI contract and UI5 linter enforce that boundary.
 
-Initial request loading waits for `ODataMetaModel.requestObject("/")` before invoking the deferred `searchOnboarding` action. This prevents the first page load from racing OData metadata discovery: the same backend search used after invitation submission is now also used reliably after a full browser refresh.
+Initial request loading starts once from `onAfterRendering`, after the component models have propagated to the view. The initial-load guard prevents a later rendering cycle from issuing a duplicate search. User-visible text is resolved through the owner component's resource bundle, so an early service failure cannot be masked by an unavailable view-level i18n model.
 
 The HTML5 manifest version and package version stay aligned and advance whenever deployed UI content changes. The production build explicitly generates `sap-ui-cachebuster-info.json`, while `index.html` enables the standard UI5 application cache buster. UI5 then rewrites application resource URLs with their build signatures, so a content-only deployment cannot silently keep an older `Component-preload.js` in the browser cache.
 
 Vietnamese: Day la app SAPUI5 rieng cho PM duoc gan capability UserAdmin. Man hinh moi, approve, doi role va revoke qua CAP. Retry chi hien cho loi tam thoi; Reconcile chi hien cho ket qua provider mo ho va co confirmation rieng. UI khong goi BTP API truc tiep va khong giu credential. `ACTIVE` chi hien sau khi broker readback thanh cong. Real SAP adapter van chua live trong source-candidate.
 
-Lan load dau phai doi OData metadata san sang roi moi goi `searchOnboarding`. Neu goi action ngay trong `onInit`, metadata co the chua biet action va table giu model rong; sau khi metadata da load thi cung action lai hien du lieu. Regression test khoa dung thu tu metadata -> search.
+Lan load dau bat dau dung mot lan trong `onAfterRendering`, sau khi model cua component da duoc gan xuong view. Guard chan render lai goi trung search. Message loi lay i18n truc tiep tu owner component, nen loi service som khong bi che boi view chua co i18n model.
 
 Moi ban deploy HTML5 phai dong bo va tang version trong `manifest.json` va `package.json`. Production build tao `sap-ui-cachebuster-info.json`, con `index.html` bat UI5 application cache buster de trinh duyet lay dung `Component-preload.js` moi thay vi giu JavaScript cu.
 

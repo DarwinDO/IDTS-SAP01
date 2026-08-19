@@ -105,29 +105,28 @@ const controllerDefinition = loadController(controller)
 assert.equal(typeof controllerDefinition.onConfirmInvite, 'function')
 assert.equal(typeof controllerDefinition._loadRequests, 'function')
 assert.equal(typeof controllerDefinition._loadInitialRequests, 'function')
+assert.equal(typeof controllerDefinition.onAfterRendering, 'function')
+assert.match(controller, /this\.getResourceBundle\(\)/)
 
 async function verifyRuntimeBehavior () {
-  let metadataRequested = false
   let initialLoadCount = 0
   const initialLoadInstance = Object.assign(Object.create(controllerDefinition), {
-    getView: () => ({
-      getModel: () => ({
-        getMetaModel: () => ({
-          requestObject: async path => {
-            assert.equal(path, '/')
-            metadataRequested = true
-          }
-        })
-      })
-    }),
+    _loadInitialRequests: async () => { initialLoadCount += 1 },
+    _initialRequestsStarted: false
+  })
+  initialLoadInstance.onAfterRendering()
+  initialLoadInstance.onAfterRendering()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(initialLoadCount, 1, 'initial search starts once after the view is rendered')
+
+  let loadQuery
+  const directInitialLoadInstance = Object.assign(Object.create(controllerDefinition), {
     _loadRequests: async query => {
-      assert.equal(metadataRequested, true, 'initial search waits for OData metadata')
-      assert.equal(query, '')
-      initialLoadCount += 1
+      loadQuery = query
     }
   })
-  await initialLoadInstance._loadInitialRequests()
-  assert.equal(initialLoadCount, 1)
+  await directInitialLoadInstance._loadInitialRequests()
+  assert.equal(loadQuery, '')
 
   let inviteData = {
     email: 'controlled.test@example.invalid',
@@ -161,6 +160,7 @@ async function verifyRuntimeBehavior () {
       if (name === 'i18n') return { getResourceBundle: async () => ({ getText: key => key }) }
       throw new Error(`Unexpected model ${name}`)
     },
+    getResourceBundle: async () => ({ getText: key => key }),
     getView: () => ({
       getModel: () => ({ bindContext: () => operation })
     }),
