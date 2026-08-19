@@ -88,4 +88,18 @@ Two local harness issues and one policy-blocked Temp cleanup attempt are recorde
 - Live HDI `simulate-make`: **NO-GO under the current read-only approval**.
 - Real schema migration: **NO-GO** until a successful separately approved live simulation, exact pre/post aggregate checks, and rollback/recovery evidence are reviewed.
 
+## Local live-simulation package
+
+The follow-up local packaging gate created `mta_archives/idts-ua-developer-hdi-sim-c39bdbe.zip` without executing it:
+
+- SHA-256 `b0ae552d9f4a11ee266d1c7d2f38e7bf7cd8936c63a19ffda2a3f5aaa4986dda`;
+- `8,243` bytes;
+- exactly `14` files: the 9 schema/view artifacts, 2 HDI metadata files, one safe simulation command, `package.json`, and `package-lock.json`;
+- zero `node_modules`, CSV, `.hdbtabledata`, unsafe path, sensitive-content hit, or staging/archive mismatch;
+- exact Node `22.x` and `@sap/hdi-deploy@5.7.0` lock; npm audit `0` vulnerabilities.
+
+The future forward/cleanup plan is frozen in `ua-developer-responsibilities-live-hdi-sim-plan.md`. No CF/HANA command was executed while creating this package.
+
+Exact future-plan SHA-256: `92bc5a5314225907ae3371cb7a59ffeec56795929dc0dad41e2235ef87997c9e`.
+
 OfficeCLI preflight: `1.0.144`; it cannot validate Markdown semantics, so exact hashes, CAP builds, and programmatic checks remain authoritative.
