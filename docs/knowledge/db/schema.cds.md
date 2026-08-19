@@ -2,9 +2,9 @@
 
 ## User-admin Developer profile additions / Bổ sung Developer profile cho User Admin
 
-`DeveloperProfiles.administrationVersion` supports optimistic PM updates. `UserOnboardingRequests` stores desired availability/workload and owns `UserOnboardingDeveloperResponsibilities`, a snapshot of Component Category, optional SAP Module, and responsibility level used only after provider readback.
+`DeveloperProfiles.administrationVersion` supports optimistic PM updates. `UserOnboardingRequests` owns one `UserOnboardingDeveloperProfiles` header and many `UserOnboardingDeveloperResponsibilities`. Together they form the desired availability/workload and Component Category, optional SAP Module, and responsibility-level snapshot used only after provider readback. Keeping the desired profile in new request-owned tables avoids changing the existing onboarding table and its seed-data dependency during the additive HANA migration.
 
-`DeveloperProfiles.administrationVersion` hỗ trợ optimistic update của PM. `UserOnboardingRequests` lưu availability/workload mong muốn và sở hữu `UserOnboardingDeveloperResponsibilities`, là snapshot Component Category, SAP Module tùy chọn và responsibility level chỉ materialize sau provider readback.
+`DeveloperProfiles.administrationVersion` hỗ trợ optimistic update của PM. `UserOnboardingRequests` sở hữu một header `UserOnboardingDeveloperProfiles` và nhiều `UserOnboardingDeveloperResponsibilities`. Hai phần tạo snapshot availability/workload, Component Category, SAP Module tùy chọn và responsibility level chỉ materialize sau provider readback. Tách profile mong muốn sang các bảng request-owned mới giúp migration HANA additive không sửa bảng onboarding cũ và không kéo theo seed-data dependency.
 
 ## Controlled user onboarding (2026-08-12)
 

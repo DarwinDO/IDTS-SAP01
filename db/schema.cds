@@ -252,8 +252,6 @@ entity UserOnboardingRequests : cuid, managed {
   openRequestKey        : String(64);
   requestedRole         : Association to UserRoles not null;
   userAdminRequested    : Boolean default false not null;
-  developerAvailabilityStatus : Association to AvailabilityStatuses;
-  developerWorkloadLimit : Integer;
   status                : Association to UserOnboardingStatuses not null;
   requestedBy           : Association to Users not null;
   expiresAt             : Timestamp not null;
@@ -279,12 +277,21 @@ entity UserOnboardingRequests : cuid, managed {
   lastErrorCode         : String(80);
   lastErrorSummary      : String(500);
   deliveries            : Composition of many UserOnboardingDeliveries on deliveries.onboardingRequest = $self;
+  developerProfile      : Composition of one UserOnboardingDeveloperProfiles on developerProfile.onboardingRequest = $self;
   developerResponsibilities : Composition of many UserOnboardingDeveloperResponsibilities on developerResponsibilities.onboardingRequest = $self;
 }
 
 annotate UserOnboardingRequests with @assert.unique.onboardingTokenHash: [ tokenHash ];
 annotate UserOnboardingRequests with @assert.unique.externalIdentity: [ identityKeyHash ];
 annotate UserOnboardingRequests with @assert.unique.openOnboardingRequest: [ openRequestKey ];
+
+entity UserOnboardingDeveloperProfiles : cuid, managed {
+  onboardingRequest   : Association to UserOnboardingRequests not null;
+  availabilityStatus : Association to AvailabilityStatuses not null;
+  workloadLimit      : Integer not null;
+}
+
+annotate UserOnboardingDeveloperProfiles with @assert.unique.onboardingDeveloperProfile: [ onboardingRequest ];
 
 entity UserOnboardingDeveloperResponsibilities : cuid, managed {
   onboardingRequest   : Association to UserOnboardingRequests not null;

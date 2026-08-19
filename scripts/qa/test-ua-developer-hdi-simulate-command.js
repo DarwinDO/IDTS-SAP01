@@ -6,12 +6,13 @@ const packageTemplate = require('../btp/ua-developer-hdi-sim-package.json')
 
 const args = buildSimulationArgs()
 
-assert.equal(SCHEMA_FILES.length, 9)
+assert.equal(SCHEMA_FILES.length, 10)
 assert.deepEqual(SCHEMA_FILES, [
   'src/gen/idts.cap.DeveloperProfiles.hdbtable',
+  'src/gen/idts.cap.UserOnboardingDeveloperProfiles.hdbtable',
+  'src/gen/idts.cap.UserOnboardingDeveloperProfiles.onboardingDeveloperProfile.hdbindex',
   'src/gen/idts.cap.UserOnboardingDeveloperResponsibilities.hdbtable',
   'src/gen/idts.cap.UserOnboardingDeveloperResponsibilities.onboardingDeveloperScope.hdbindex',
-  'src/gen/idts.cap.UserOnboardingRequests.hdbtable',
   'src/gen/BugService.DeveloperProfiles.hdbview',
   'src/gen/UserAdministrationService.AvailabilityStatuses.hdbview',
   'src/gen/UserAdministrationService.ComponentCategories.hdbview',

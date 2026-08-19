@@ -256,19 +256,22 @@ async function completeProviderConflict (tx, options, safeCode) {
 async function alignDeveloperProfile (tx, userID, desiredRole, request, operation) {
   const profile = await tx.run(SELECT.one.from('idts.cap.DeveloperProfiles').where({ user_ID: userID }))
   if (desiredRole === 'DEVELOPER') {
+    const desiredProfile = await tx.run(
+      SELECT.one.from('idts.cap.UserOnboardingDeveloperProfiles').where({ onboardingRequest_ID: request.ID })
+    )
     const desiredResponsibilities = await tx.run(
       SELECT.from('idts.cap.UserOnboardingDeveloperResponsibilities').where({ onboardingRequest_ID: request.ID })
     )
-    if (!request.developerAvailabilityStatus_code || !Number.isInteger(request.developerWorkloadLimit) ||
-        request.developerWorkloadLimit < 1 || desiredResponsibilities.length === 0) {
+    if (!desiredProfile?.availabilityStatus_code || !Number.isInteger(desiredProfile.workloadLimit) ||
+        desiredProfile.workloadLimit < 1 || desiredResponsibilities.length === 0) {
       throw brokerError(409, 'DEVELOPER_PROFILE_INCOMPLETE', 'Developer profile is incomplete.')
     }
     let profileID
     if (profile) {
       profileID = profile.ID
       await tx.run(UPDATE('idts.cap.DeveloperProfiles').set({
-        availabilityStatus_code: request.developerAvailabilityStatus_code,
-        workloadLimit: request.developerWorkloadLimit,
+        availabilityStatus_code: desiredProfile.availabilityStatus_code,
+        workloadLimit: desiredProfile.workloadLimit,
         administrationVersion: (profile.administrationVersion || 0) + 1,
         active: true
       }).where({ ID: profile.ID }))
@@ -278,8 +281,8 @@ async function alignDeveloperProfile (tx, userID, desiredRole, request, operatio
       await tx.run(INSERT.into('idts.cap.DeveloperProfiles').entries({
         ID: profileID,
         user_ID: userID,
-        availabilityStatus_code: request.developerAvailabilityStatus_code,
-        workloadLimit: request.developerWorkloadLimit,
+        availabilityStatus_code: desiredProfile.availabilityStatus_code,
+        workloadLimit: desiredProfile.workloadLimit,
         administrationVersion: 0,
         active: true
       }))

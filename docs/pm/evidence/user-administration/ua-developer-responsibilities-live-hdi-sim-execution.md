@@ -85,3 +85,30 @@ R4 follows the repository's existing HANA deployer contract: exact `hdb@2.29.6` 
 - Isolated install, audit zero, packaged resolver, schema parity, unsafe-path, forbidden-artifact and sensitive-content checks pass.
 
 R4 is the only eligible simulation input. R3 and all older archives remain rejected.
+
+## Attempt 4 — simulation succeeded, migration boundary failed
+
+The exact one-shot R4 task completed `SUCCEEDED` with process exit zero. It scheduled all nine approved deploy files, started the make with nine deploy and zero undeploy inputs, reported zero make warnings, and ended with an explicit successful-simulation marker.
+
+The dependent-artifact trace is not acceptable for real migration: HDI simulated dependent indexes plus an expanded `.hdbtabledata` source and its CSV insert path for the changed onboarding table. These were simulation messages only; no real DDL, DML, seed or table-data operation was applied. Nevertheless, the result violates the approved `no .hdbtabledata / no CSV / no unrelated dependent artifact` acceptance contract.
+
+Verdict:
+
+- live `simulate-make` execution: `PASS`;
+- additive real-migration safety: `NO-GO`;
+- real HDI make: prohibited until the table-data dependency is removed or a separately reviewed exact data-safe migration strategy proves no business/catalog row mutation.
+
+## R5 additive-schema isolation
+
+The desired invitation profile header now lives in the new request-owned `UserOnboardingDeveloperProfiles` entity instead of two new columns on the existing `UserOnboardingRequests` table. Responsibilities remain request-owned. This preserves the public business contract while removing the old onboarding table and its status-table-data dependency from the migration.
+
+Exact build comparison against deployed-source baseline `71c8a836...`:
+
+- generated HANA artifacts: 227 baseline / 235 candidate;
+- added 8, changed 2, removed 0;
+- `UserOnboardingRequests.hdbtable` changed: false;
+- CSV/`.hdbtabledata` diff: 0;
+- changed artifacts are only `DeveloperProfiles.hdbtable` and its BugService view;
+- added artifacts are two request-owned Developer tables, two unique indexes and four read-only catalog views.
+
+R5 archive SHA-256 is `1b6ad9dee97cc91512f604a6e3fd1636ad3067ebec79e9c0ed4c6938b16f12e8`; it contains exactly the ten changed/added artifacts plus two HDI metadata files, runner, package and lock. R4 and older inputs remain rejected.

@@ -134,8 +134,6 @@ async function requestOnboarding (req) {
       openRequestKey,
       requestedRole_code: access.requestedRole,
       userAdminRequested: access.userAdminRequested,
-      developerAvailabilityStatus_code: developerProfile?.availabilityStatusCode || null,
-      developerWorkloadLimit: developerProfile?.workloadLimit || null,
       status_code: 'INVITED',
       requestedBy_ID: requestedBy.ID,
       expiresAt,
@@ -149,7 +147,7 @@ async function requestOnboarding (req) {
     }
     throw error
   }
-  await persistDesiredDeveloperResponsibilities(tx, invitationID, developerProfile)
+  await persistDesiredDeveloperProfile(tx, invitationID, developerProfile)
   await tx.run(INSERT.into('idts.cap.UserOnboardingDeliveries').entries({
     ID: cds.utils.uuid(),
     onboardingRequest_ID: invitationID,
@@ -578,11 +576,15 @@ async function validateDeveloperProfileCatalog (tx, profile) {
 }
 
 async function persistDesiredDeveloperProfile (tx, requestID, profile) {
-  await tx.run(UPDATE('idts.cap.UserOnboardingRequests').set({
-    developerAvailabilityStatus_code: profile?.availabilityStatusCode || null,
-    developerWorkloadLimit: profile?.workloadLimit || null
-  }).where({ ID: requestID }))
+  await tx.run(DELETE.from('idts.cap.UserOnboardingDeveloperProfiles').where({ onboardingRequest_ID: requestID }))
   await tx.run(DELETE.from('idts.cap.UserOnboardingDeveloperResponsibilities').where({ onboardingRequest_ID: requestID }))
+  if (!profile) return
+  await tx.run(INSERT.into('idts.cap.UserOnboardingDeveloperProfiles').entries({
+    ID: cds.utils.uuid(),
+    onboardingRequest_ID: requestID,
+    availabilityStatus_code: profile.availabilityStatusCode,
+    workloadLimit: profile.workloadLimit
+  }))
   await persistDesiredDeveloperResponsibilities(tx, requestID, profile)
 }
 

@@ -347,11 +347,16 @@ async function main () {
   const persistedDeveloperInvitation = await db.run(
     SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: developerInvitation.ID })
   )
+  const persistedDesiredProfile = await db.run(
+    SELECT.one.from('idts.cap.UserOnboardingDeveloperProfiles').where({ onboardingRequest_ID: developerInvitation.ID })
+  )
   const persistedDesiredResponsibilities = await db.run(
     SELECT.from('idts.cap.UserOnboardingDeveloperResponsibilities').where({ onboardingRequest_ID: developerInvitation.ID })
   )
-  assert.equal(persistedDeveloperInvitation.developerAvailabilityStatus_code, 'AVAILABLE')
-  assert.equal(persistedDeveloperInvitation.developerWorkloadLimit, 3)
+  assert.equal(Object.hasOwn(persistedDeveloperInvitation, 'developerAvailabilityStatus_code'), false)
+  assert.equal(Object.hasOwn(persistedDeveloperInvitation, 'developerWorkloadLimit'), false)
+  assert.equal(persistedDesiredProfile.availabilityStatus_code, 'AVAILABLE')
+  assert.equal(persistedDesiredProfile.workloadLimit, 3)
   assert.equal(persistedDesiredResponsibilities.length, 1)
   assert.equal(persistedDesiredResponsibilities[0].componentCategory_ID, componentCategory.ID)
   const privilegedSend = await processUserOnboardingDeliveries({

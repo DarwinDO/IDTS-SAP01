@@ -314,7 +314,10 @@ async function main () {
   assert.match(service, /action updateDeveloperProfile\(/)
   assert.match(schema, /entity UserAccessOperations/)
   assert.match(schema, /entity UserIdentityAuditEvents/)
+  assert.match(schema, /entity UserOnboardingDeveloperProfiles/)
   assert.match(schema, /entity UserOnboardingDeveloperResponsibilities/)
+  assert.doesNotMatch(schema, /developerAvailabilityStatus\s*:/)
+  assert.doesNotMatch(schema, /developerWorkloadLimit\s*:/)
   assert.match(schema, /administrationVersion\s*:\s*Integer default 0 not null/)
   assert.deepEqual(
     security.scopes.find(scope => scope.name === '$XSAPPNAME.ProvisioningBroker')?.['grant-as-authority-to-apps'],

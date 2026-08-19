@@ -31,8 +31,6 @@ async function main () {
     openRequestKey: '8'.repeat(64),
     requestedRole_code: 'DEVELOPER',
     userAdminRequested: false,
-    developerAvailabilityStatus_code: 'AVAILABLE',
-    developerWorkloadLimit: 3,
     status_code: 'PROVISION_QUEUED',
     requestedBy_ID: ADMIN_ID,
     expiresAt: '2026-08-20T00:00:00.000Z',
@@ -48,6 +46,12 @@ async function main () {
     identityEmailNormalized: 'new.developer@example.invalid',
     provisioningVersion: 1,
     correlationId: '82000000-0000-4000-8000-000000000004'
+  }))
+  await db.run(INSERT.into('idts.cap.UserOnboardingDeveloperProfiles').entries({
+    ID: '82000000-0000-4000-8000-000000000007',
+    onboardingRequest_ID: REQUEST_ID,
+    availabilityStatus_code: 'AVAILABLE',
+    workloadLimit: 3
   }))
   await db.run(INSERT.into('idts.cap.UserOnboardingDeveloperResponsibilities').entries({
     ID: '82000000-0000-4000-8000-000000000005',

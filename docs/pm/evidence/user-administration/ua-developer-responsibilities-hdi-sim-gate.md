@@ -103,3 +103,9 @@ The future forward/cleanup plan is frozen in `ua-developer-responsibilities-live
 Exact future-plan SHA-256: `92bc5a5314225907ae3371cb7a59ffeec56795929dc0dad41e2235ef87997c9e`.
 
 OfficeCLI preflight: `1.0.144`; it cannot validate Markdown semantics, so exact hashes, CAP builds, and programmatic checks remain authoritative.
+
+## R5 safety supersession
+
+The earlier nine-file delta is historical and must not be used for real migration because live simulation proved that changing `UserOnboardingRequests.hdbtable` pulled an existing table-data/CSV dependency into the make graph.
+
+R5 supersedes that package by storing the desired invitation profile in a new request-owned table. Exact generated comparison against baseline `71c8a836...` is now 227 baseline files / 235 candidate files, with 8 added, 2 changed and 0 removed. `UserOnboardingRequests.hdbtable` is unchanged and the generated diff contains zero CSV or `.hdbtabledata` files. The eligible simulation allowlist is the exact ten added/changed HANA artifacts recorded in the R5 plan; all older archives are rejected.

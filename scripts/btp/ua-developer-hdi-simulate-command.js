@@ -5,9 +5,10 @@ const path = require('node:path')
 
 const SCHEMA_FILES = Object.freeze([
   'src/gen/idts.cap.DeveloperProfiles.hdbtable',
+  'src/gen/idts.cap.UserOnboardingDeveloperProfiles.hdbtable',
+  'src/gen/idts.cap.UserOnboardingDeveloperProfiles.onboardingDeveloperProfile.hdbindex',
   'src/gen/idts.cap.UserOnboardingDeveloperResponsibilities.hdbtable',
   'src/gen/idts.cap.UserOnboardingDeveloperResponsibilities.onboardingDeveloperScope.hdbindex',
-  'src/gen/idts.cap.UserOnboardingRequests.hdbtable',
   'src/gen/BugService.DeveloperProfiles.hdbview',
   'src/gen/UserAdministrationService.AvailabilityStatuses.hdbview',
   'src/gen/UserAdministrationService.ComponentCategories.hdbview',
