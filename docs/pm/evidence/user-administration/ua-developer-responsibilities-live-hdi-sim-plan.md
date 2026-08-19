@@ -2,16 +2,17 @@
 
 Date: 2026-08-19
 Owner: DonHV
-Status: `EXACT PLAN ONLY / NEVER EXECUTE WITHOUT NEW APPROVAL`
+Status: `EXACT R3 PLAN / STANDING DONHV GO / STOP ON DRIFT`
 
 ## Frozen local artifact
 
-- Archive: `mta_archives/idts-ua-developer-hdi-sim-c39bdbe.zip`.
-- SHA-256: `b0ae552d9f4a11ee266d1c7d2f38e7bf7cd8936c63a19ffda2a3f5aaa4986dda`.
-- Size: `8,243` bytes.
+- Archive: `mta_archives/idts-ua-developer-hdi-sim-r3c.zip`.
+- SHA-256: `c6dd8612d9be1f35832825db8ac11355ca7bca5defed09c734d9e505d4917a2f`.
+- Size: `8,333` bytes.
 - File entries: exactly `14`.
 - Package SHA-256: `1e9dccdf06bc2fb8688153bda3041dcb8633b944d40990e4dd837d4c940dec1e`.
 - Lock SHA-256: `dd60fde58879c82a5170d3058549cbcfc97731b070bfe4df4be4c501890aca66`.
+- Simulation runner SHA-256: `0874a8ca0ba85af9da6d604b3c467360bc0513941b5d1e987f90a2fa9c4896b8`.
 - Node engine: exact `22.x`.
 - Direct dependency: exact `@sap/hdi-deploy@5.7.0`.
 - Lockfile v3: 26 package entries; zero missing integrity, local/git resolution, lifecycle-script flag, or audit vulnerability.
@@ -22,8 +23,8 @@ The package `start` script exits with code 1 and performs no HDI work. Accidenta
 
 ## Exact temporary topology
 
-- Temporary app: `idts-ua-developer-hdi-sim-20260819`.
-- Temporary task: `idts-ua-developer-hdi-sim-20260819-run`.
+- Temporary app: `idts-ua-developer-hdi-sim-20260819-r3`.
+- Temporary task: `idts-ua-developer-hdi-sim-20260819-run-r3`.
 - Routes: `0`.
 - Instances started: `0`.
 - Memory: `256M`.
@@ -53,11 +54,11 @@ The commands below are documentation only. Values inside angle brackets must be 
 ### D01 — create/upload only, no stage/start/route
 
 ```powershell
-cf push idts-ua-developer-hdi-sim-20260819 `
+cf push idts-ua-developer-hdi-sim-20260819-r3 `
   --no-manifest `
   --no-start `
   --no-route `
-  -p mta_archives/idts-ua-developer-hdi-sim-c39bdbe.zip `
+  -p mta_archives/idts-ua-developer-hdi-sim-r3c.zip `
   -m 256M `
   -k 512M `
   -b nodejs_buildpack
@@ -68,7 +69,7 @@ Readback: exact app count 1, requested state STOPPED, routes 0, bindings 0, pack
 ### D02 — bind only the existing HDI container
 
 ```powershell
-cf bind-service idts-ua-developer-hdi-sim-20260819 idts-sap01-db
+cf bind-service idts-ua-developer-hdi-sim-20260819-r3 idts-sap01-db
 ```
 
 Readback: app binding-name set is exactly `{ idts-sap01-db }`; main app bindings unchanged.
@@ -76,7 +77,7 @@ Readback: app binding-name set is exactly `{ idts-sap01-db }`; main app bindings
 ### D03 — stage the bound package
 
 ```powershell
-cf stage-package idts-ua-developer-hdi-sim-20260819
+cf stage-package idts-ua-developer-hdi-sim-20260819-r3
 ```
 
 Privately resolve the exact app-owned latest build and its STAGED droplet. Require the build package to equal D01's READY package. Keep all GUIDs in process memory.
@@ -84,7 +85,7 @@ Privately resolve the exact app-owned latest build and its STAGED droplet. Requi
 ### D04 — assign only the owned staged droplet
 
 ```powershell
-cf set-droplet idts-ua-developer-hdi-sim-20260819 <IN_MEMORY_OWN_STAGED_DROPLET_GUID>
+cf set-droplet idts-ua-developer-hdi-sim-20260819-r3 <IN_MEMORY_OWN_STAGED_DROPLET_GUID>
 ```
 
 Readback must prove current droplet matches. The app remains STOPPED and must never be started.
@@ -92,11 +93,11 @@ Readback must prove current droplet matches. The app remains STOPPED and must ne
 ### D05 — run exactly one bounded simulation task
 
 ```powershell
-cf run-task idts-ua-developer-hdi-sim-20260819 `
+cf run-task idts-ua-developer-hdi-sim-20260819-r3 `
   --command "node scripts/btp/ua-developer-hdi-simulate-command.js" `
   -m 256M `
   -k 512M `
-  --name idts-ua-developer-hdi-sim-20260819-run `
+  --name idts-ua-developer-hdi-sim-20260819-run-r3 `
   --wait
 ```
 
@@ -117,8 +118,8 @@ Timeout or ambiguous state requires one sanitized task readback. Do not run a se
 Cleanup runs after PASS or FAIL only when no task is still running and ownership is exact. Assert target before every command.
 
 ```powershell
-cf unbind-service idts-ua-developer-hdi-sim-20260819 idts-sap01-db
-cf delete idts-ua-developer-hdi-sim-20260819 -f
+cf unbind-service idts-ua-developer-hdi-sim-20260819-r3 idts-sap01-db
+cf delete idts-ua-developer-hdi-sim-20260819-r3 -f
 ```
 
 Final readback:

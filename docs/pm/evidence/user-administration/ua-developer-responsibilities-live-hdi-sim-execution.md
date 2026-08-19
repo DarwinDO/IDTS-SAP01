@@ -44,3 +44,27 @@ Corrections only:
 5. Any nonzero, timeout beyond the documented staging bound, multiple/absent owned builds, or package/droplet mismatch triggers exact cleanup with no task.
 
 This delta does not authorize new services, routes, app start, DB deployer, real make, data mutation, or a second simulation task.
+
+## Attempt 2 — simulation command failed before HDI make
+
+Temporary app: `idts-ua-developer-hdi-sim-20260819-r2`.
+
+The fresh preflight, unique-name collision check, no-start/no-route push, exact HDI binding, persistent `stage-package` polling, owned-build readback, staged-droplet ownership check and exact `set-droplet` all passed. The build readback correction used the V3 build's top-level package GUID plus its app relationship; no second staging command was issued.
+
+The one authorized task then failed once with sanitized class `MODULE_NOT_FOUND`. It did not reach HDI make: make completion was false, deployer completion was false, and no CSV or table-data artifact was referenced. Root cause is local command resolution: the resolver eagerly evaluated the optional `@sap/cds-dk` fallback even though the packaged payload already contained direct `@sap/hdi-deploy@5.7.0`.
+
+Cleanup followed read-before-action discipline. The interrupted unbind output was not retried blindly; readback first proved binding count zero and no running task. The exact temporary app was then deleted once. The HDI service and main applications were not deleted, restarted or changed.
+
+Attempt 2 result: `FAILED_BEFORE_HDI_MAKE`. The current artifact is rejected for further execution. The next step is TDD for direct-dependency-first resolution, followed by a new staging root, new artifact name/checksum and fresh preflight.
+
+## Corrective artifact R3
+
+- TDD reproduced the failure when a direct HDI deployer existed but the optional `@sap/cds-dk` fallback was absent.
+- The resolver now checks the direct `@sap/hdi-deploy` dependency first and evaluates the `@sap/cds-dk` fallback only after direct lookup fails.
+- New archive: `mta_archives/idts-ua-developer-hdi-sim-r3c.zip`.
+- SHA-256: `c6dd8612d9be1f35832825db8ac11355ca7bca5defed09c734d9e505d4917a2f`; size `8,333` bytes; exactly 14 files.
+- Simulation runner SHA-256: `0874a8ca0ba85af9da6d604b3c467360bc0513941b5d1e987f90a2fa9c4896b8`.
+- Isolated `npm ci`, npm audit zero, packaged default resolver, schema parity, forbidden-artifact scan and archive entry checks pass.
+- Two abandoned partial local staging directories contain no archive and are never execution inputs.
+
+The old `b0ae552...` archive and both prior temporary app/task names remain `REJECTED / NEVER RUN AGAIN`.

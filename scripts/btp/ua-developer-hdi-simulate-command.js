@@ -1,6 +1,7 @@
 'use strict'
 
 const { spawnSync } = require('node:child_process')
+const path = require('node:path')
 
 const SCHEMA_FILES = Object.freeze([
   'src/gen/idts.cap.DeveloperProfiles.hdbtable',
@@ -28,10 +29,24 @@ function buildSimulationArgs () {
   ]
 }
 
-function resolveDeployer () {
-  return require.resolve('@sap/hdi-deploy/deploy.js', {
-    paths: [process.cwd(), __dirname, require.resolve('@sap/cds-dk/package.json')]
-  })
+function resolveDeployer (resolve = require.resolve) {
+  try {
+    return resolve('@sap/hdi-deploy/deploy.js', {
+      paths: [process.cwd(), __dirname]
+    })
+  } catch (directError) {
+    let cdsDkPackage
+    try {
+      cdsDkPackage = resolve('@sap/cds-dk/package.json', {
+        paths: [process.cwd(), __dirname]
+      })
+    } catch {
+      throw directError
+    }
+    return resolve('@sap/hdi-deploy/deploy.js', {
+      paths: [path.dirname(cdsDkPackage)]
+    })
+  }
 }
 
 function run () {

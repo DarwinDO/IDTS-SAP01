@@ -29,4 +29,28 @@ assert.equal(args.includes('--undeploy'), false)
 assert.equal(args.some(value => /\.csv$|\.hdbtabledata$/i.test(value)), false)
 assert.match(resolveDeployer().replaceAll('\\', '/'), /@sap\/hdi-deploy\/deploy\.js$/)
 
+const directCalls = []
+const directPath = resolveDeployer((request, options) => {
+  directCalls.push({ request, paths: options?.paths })
+  if (request === '@sap/hdi-deploy/deploy.js') return 'C:/payload/node_modules/@sap/hdi-deploy/deploy.js'
+  throw new Error(`Unexpected fallback lookup: ${request}`)
+})
+assert.equal(directPath, 'C:/payload/node_modules/@sap/hdi-deploy/deploy.js')
+assert.deepEqual(directCalls.map(call => call.request), ['@sap/hdi-deploy/deploy.js'])
+
+const fallbackCalls = []
+const fallbackPath = resolveDeployer((request, options) => {
+  fallbackCalls.push({ request, paths: options?.paths })
+  if (request === '@sap/hdi-deploy/deploy.js' && fallbackCalls.length === 1) throw new Error('direct dependency absent')
+  if (request === '@sap/cds-dk/package.json') return 'C:/tools/node_modules/@sap/cds-dk/package.json'
+  if (request === '@sap/hdi-deploy/deploy.js') return 'C:/tools/node_modules/@sap/cds-dk/node_modules/@sap/hdi-deploy/deploy.js'
+  throw new Error(`Unexpected lookup: ${request}`)
+})
+assert.equal(fallbackPath, 'C:/tools/node_modules/@sap/cds-dk/node_modules/@sap/hdi-deploy/deploy.js')
+assert.deepEqual(fallbackCalls.map(call => call.request), [
+  '@sap/hdi-deploy/deploy.js',
+  '@sap/cds-dk/package.json',
+  '@sap/hdi-deploy/deploy.js'
+])
+
 console.log('UA Developer HDI simulation command contract: PASS')
