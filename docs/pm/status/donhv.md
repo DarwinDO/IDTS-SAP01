@@ -7914,6 +7914,19 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Source remediation: `retryAccessOperation`, `reconcileAccessOperation`, and expired-lease recovery now rotate the operation attempt correlation before writing a new audit. The same operation journal row and every prior audit are preserved.
 - TDD evidence: before the fix, retry retained the old correlation and the expired-lease fixture reproduced the exact unique-constraint failure. After the fix, retry/reconcile return the new correlation, expired recovery records a second `PROVISION` audit under a distinct correlation, and both focused suites pass.
 
+### 2026-08-19 - Correlation-fix CAP package staging failed before droplet switch
+
+- Classification: Cloud Foundry staging/environment blocker, under investigation.
+- Symptom: exact source package upload succeeded, but `cf stage-package` exited nonzero and produced no staged droplet.
+- Safety state: the current main CAP droplet was re-read immediately before staging and was never changed; `cf set-droplet` and restart were not executed. Existing CAP therefore remains online with one route and seven bindings.
+- Next: inspect only the failed build state/error for the uniquely fingerprinted new package. Do not upload or stage another package until the cause is proven.
+- Root cause: SAP BTP Node.js buildpack `1.9.2` rejected the generated package engine `>=20 <23` as an improper constraint. The clean manual build omitted the repository's existing generated-payload step `scripts/btp/pin-cf-node-engine.js`, which pins only `gen/srv/package.json` to `22.x` for this runtime.
+- Remediation boundary: keep the failed package unused, run the existing pin script against the same checksum-reviewed clean `gen/srv`, create a new payload/hash, and allow at most one new package/stage attempt after exact engine/topology parity checks.
+- Follow-up harness issue: after the Node 22 package upload, the orchestration wrapper reached its failure branch but PowerShell parsed `throw"..."` as an unknown command because the required space after `throw` was missing. The wrapper stopped without calling `set-droplet` or restart. Exact package/build state must be read back before any decision; no blind stage retry is allowed.
+- Recovery: readback proved the Node 22 build had actually reached `STAGED`; no stage retry was issued. Its exact droplet was assigned once and CAP restarted once. Final CAP topology is one route/seven bindings on droplet fingerprint `4955ca92d23c`; AppRouter and broker remain unchanged.
+- Runtime verification: `npm run btp:demo:check` reports `DEMO READY`. Before rollout the expired-operation poll returned repeated HTTP `500`; after rollout the poll returns stable HTTP `204`, proving the stale lease no longer loops on the old audit constraint.
+- Next controlled action: BTP readback still shows no `IDTS_TESTER`, so refresh the Admin row and invoke only `Reconcile` from `BLOCKED_MANUAL_REVIEW`. The broker must read provider state before any write and then complete/read back exactly one TESTER assignment.
+
 ### 2026-08-19 - First cache-buster MTAR build lacked generated content staging
 
 - Classification: build-tooling issue, fixed-path investigation in progress.
