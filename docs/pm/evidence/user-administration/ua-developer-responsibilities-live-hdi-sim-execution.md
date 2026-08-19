@@ -131,3 +131,15 @@ Exact generated comparison against baseline `71c8a836...` is now:
 - CSV/`.hdbtabledata` diff: 0.
 
 R6 archive SHA-256 `4014eec047f1e971fb6c52fb2d02c60ab7992fd696b93c9c8bbbb2dedc9ca6aa` contains exactly those eleven additive artifacts, two HDI metadata files, runner, package and lock. Exact forbidden existing-table entries are zero; secret/table-data scan, isolated install and audit pass. All older simulation archives are rejected.
+
+## Attempt 6 — final additive simulation PASS
+
+The exact R6 task completed once with state `SUCCEEDED` and process exit zero. Sanitized readback proved:
+
+- all eleven allowlisted additive artifacts were scheduled;
+- make result: 11 deployed, 0 undeployed, 0 warnings;
+- explicit successful-simulation marker present;
+- CSV/`.hdbtabledata` mention absent;
+- effective undeploy greater than zero absent.
+
+The exact HDI binding and temporary app were removed after terminal task readback. No temporary app remains. This closes the live simulation gate as `PASS`; no real make was performed.
