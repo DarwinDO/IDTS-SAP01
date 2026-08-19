@@ -205,13 +205,30 @@ async function main () {
     leaseExpiresAt: '2026-08-12T00:05:00.000Z',
     leaseTokenHash: '9'.repeat(64)
   }))
+  await db.run(INSERT.into('idts.cap.UserIdentityAuditEvents').entries({
+    ID: '81000000-0000-4000-8000-000000000014',
+    operation_ID: EXPIRED_OPERATION_ID,
+    onboardingRequest_ID: EXPIRED_REQUEST_ID,
+    actor_ID: ADMIN_ID,
+    action: 'PROVISION',
+    result: 'RETRYABLE_FAILURE',
+    fromState: 'PROVISIONING',
+    toState: 'RETRYABLE_FAILURE',
+    correlationId: '81000000-0000-4000-8000-000000000013',
+    detailsSummary: 'A prior attempt already recorded its outcome.'
+  }))
   await service.send({ event: 'claimNextAccessOperation', data: {}, user: broker })
   const expiredOperation = await db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ ID: EXPIRED_OPERATION_ID }))
   const expiredRequest = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: EXPIRED_REQUEST_ID }))
   assert.equal(expiredOperation.state, 'BLOCKED_MANUAL_REVIEW')
   assert.equal(expiredOperation.leaseTokenHash, null)
   assert.equal(expiredOperation.safeResultCode, 'AMBIGUOUS_PROVIDER_OUTCOME')
+  assert.notEqual(expiredOperation.correlationId, '81000000-0000-4000-8000-000000000013')
   assert.equal(expiredRequest.status_code, 'BLOCKED_MANUAL_REVIEW')
+  const expiredAudits = await db.run(
+    SELECT.from('idts.cap.UserIdentityAuditEvents').where({ operation_ID: EXPIRED_OPERATION_ID, action: 'PROVISION' })
+  )
+  assert.equal(expiredAudits.length, 2)
 
   await assert.rejects(service.send({
     event: 'claimNextAccessOperation',

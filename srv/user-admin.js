@@ -424,6 +424,7 @@ async function requeueAccessOperation (req, options) {
     throw serviceError(409, options.errorCode, options.errorMessage)
   }
   const nextVersion = request.provisioningVersion + 1
+  const nextCorrelationId = cds.utils.uuid()
   const operationWhere = { ID: operation.ID, state: options.requiredState }
   if (options.requiredSafeResultCode) operationWhere.safeResultCode = options.requiredSafeResultCode
   const changed = await tx.run(
@@ -431,6 +432,7 @@ async function requeueAccessOperation (req, options) {
       state: 'PENDING',
       expectedVersion: nextVersion,
       idempotencyKey: provisioningIdempotencyKey(request.ID, operation.operationType, nextVersion),
+      correlationId: nextCorrelationId,
       nextAttemptAt: null,
       completedAt: null,
       leaseTokenHash: null,
@@ -458,10 +460,10 @@ async function requeueAccessOperation (req, options) {
     action: options.auditAction,
     fromState: request.status_code,
     toState: queuedState,
-    correlationId: operation.correlationId,
+    correlationId: nextCorrelationId,
     summary: options.auditSummary
   })
-  return onboardingResult({ ...request, status_code: queuedState, provisioningVersion: nextVersion })
+  return onboardingResult({ ...request, status_code: queuedState, provisioningVersion: nextVersion, correlationId: nextCorrelationId })
 }
 
 async function queueFailClosedAccessChange (req, tx, options) {

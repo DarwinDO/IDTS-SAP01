@@ -78,6 +78,7 @@ async function blockExpiredLeases (tx, now) {
       .limit(20)
   )
   for (const operation of expired) {
+    const reconciliationCorrelationId = cds.utils.uuid()
     const request = await tx.run(
       SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: operation.onboardingRequest_ID })
     )
@@ -91,6 +92,7 @@ async function blockExpiredLeases (tx, now) {
       nextAttemptAt: null,
       leaseTokenHash: null,
       leaseExpiresAt: null,
+      correlationId: reconciliationCorrelationId,
       safeResultCode: 'AMBIGUOUS_PROVIDER_OUTCOME',
       safeResultSummary: safeSummaryFor('AMBIGUOUS_PROVIDER_OUTCOME')
     }).where({
@@ -109,7 +111,7 @@ async function blockExpiredLeases (tx, now) {
       provisioningVersion: operation.expectedVersion
     }))
     if (requestUpdated !== 1) throw brokerError(409, 'ACCESS_OPERATION_CONFLICT', 'Expired access request changed during reconciliation.')
-    await appendAudit(tx, operation, request, 'BLOCKED_MANUAL_REVIEW', request.activeUser_ID, 'AMBIGUOUS_PROVIDER_OUTCOME')
+    await appendAudit(tx, { ...operation, correlationId: reconciliationCorrelationId }, request, 'BLOCKED_MANUAL_REVIEW', request.activeUser_ID, 'AMBIGUOUS_PROVIDER_OUTCOME')
   }
 }
 

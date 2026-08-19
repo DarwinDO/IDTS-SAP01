@@ -7904,6 +7904,16 @@ Evidence package: `docs/pm/evidence/idts-112/browser-evidence-20260807/manifest.
 - Resolution: start the initial search once from `onAfterRendering`, remove the redundant explicit metadata gate, and resolve text through the existing owner-component `getResourceBundle()` helper. A focused runtime test proves two rendering callbacks start exactly one initial load.
 - Verification so far: RED on missing `onAfterRendering`; GREEN after the bounded controller change; UI contract, ESLint, production build, cache-buster generation and deploy ZIP cache-buster presence pass. Live content replacement remains pending.
 
+### 2026-08-19 - Retried provisioning completion collided with the prior attempt audit
+
+- Classification: product backend idempotency/audit defect, under investigation; no blind retry allowed.
+- Symptom: PM Retry moved the verified TESTER request to `PROVISION_QUEUED`; broker claimed it once, but `completeAccessOperation` returned HTTP `500`. Subsequent polls were idle and the UI remained queued/processing rather than reaching a terminal safe state.
+- Root cause evidence: HANA rejected the completion audit insert on the unique `(correlationId, action)` index for the same `PROVISION` operation. The retry path reuses the operation correlation ID, so the new attempt cannot append its own outcome after the first failed attempt already wrote an audit event.
+- Provider readback: the controlled shadow user still has zero Role Collections and `IDTS_TESTER` is absent. Therefore this attempt did not grant business access; no revoke or duplicate provider call is needed before remediation.
+- Safety response: do not click Retry again. Keep the existing operation for exact recovery, fix retry/reconcile to use a fresh attempt correlation ID while preserving prior audits, then deploy the bounded CAP correction before any further provider call.
+- Source remediation: `retryAccessOperation`, `reconcileAccessOperation`, and expired-lease recovery now rotate the operation attempt correlation before writing a new audit. The same operation journal row and every prior audit are preserved.
+- TDD evidence: before the fix, retry retained the old correlation and the expired-lease fixture reproduced the exact unique-constraint failure. After the fix, retry/reconcile return the new correlation, expired recovery records a second `PROVISION` audit under a distinct correlation, and both focused suites pass.
+
 ### 2026-08-19 - First cache-buster MTAR build lacked generated content staging
 
 - Classification: build-tooling issue, fixed-path investigation in progress.
