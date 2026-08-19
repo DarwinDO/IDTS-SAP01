@@ -3,7 +3,7 @@
 // Reviewed source: SAP Business Accelerator Hub PlatformAPI.json
 // SHA-256: 69dc872e32ce2c4bcec77466c736f81e0a99961b333eea9f10aa23b9705c2cc8
 const OPENAPI_SHA256 = '69dc872e32ce2c4bcec77466c736f81e0a99961b333eea9f10aa23b9705c2cc8'
-const CONTRACT_ID = 'SAP_USER_MANAGEMENT_OPENAPI_69DC872E_V1'
+const CONTRACT_ID = 'SAP_USER_MANAGEMENT_OPENAPI_69DC872E_V2'
 const DEFAULT_ORIGIN = 'sap.default'
 const PAGE_SIZE = 500
 const MAX_GROUP_PAGES = 20
@@ -36,7 +36,10 @@ async function patchMembership (identity, roleCollection, operation, apiClient) 
   return apiClient.request({
     method: 'PATCH',
     path: `/Groups/${encodeURIComponent(group.id)}`,
+    headers: { 'If-Match': String(group.version) },
     body: {
+      id: group.id,
+      displayName: group.displayName,
       members: [{
         origin: identity.origin,
         type: 'USER',
@@ -85,7 +88,18 @@ async function exactRoleCollection (roleCollection, apiClient) {
   if (matches.length !== 1) throw providerError('PROVIDER_GROUP_AMBIGUOUS')
   const id = bounded(matches[0].id, 255)
   if (!id) throw providerError('PROVIDER_GROUP_AMBIGUOUS')
-  return { id }
+  const group = await apiClient.request({
+    method: 'GET',
+    path: `/Groups/${encodeURIComponent(id)}`
+  })
+  const displayName = bounded(group?.displayName, 255)
+  const version = group?.meta?.version
+  if (!group || typeof group !== 'object' || Array.isArray(group) ||
+      group.id !== id || displayName !== roleCollection ||
+      !Number.isInteger(version) || version < 0) {
+    throw providerError('PROVIDER_GROUP_AMBIGUOUS')
+  }
+  return { id, displayName, version }
 }
 
 async function allRoleCollections (apiClient) {

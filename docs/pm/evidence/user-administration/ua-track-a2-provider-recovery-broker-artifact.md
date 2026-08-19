@@ -79,3 +79,23 @@ No platform mutation was performed while building or reviewing this artifact.
 - After the compatibility requeue, the old safe fields are cleared and the optimistic version advances. New diagnostic results `PROVIDER_AUTHENTICATION_FAILED`, `PROVIDER_SCOPE_MISSING` and `PROVIDER_FORBIDDEN` remain non-retryable and cannot use the legacy path.
 - UI Retry mirrors the normal-or-legacy boundary; UI Reconcile now requires `AMBIGUOUS_PROVIDER_OUTCOME`. CAP repeats the checks for direct requests.
 - Source verification: onboarding, User Administration UI and provisioning suites PASS; CAP EDMX compile PASS with only the unchanged attachment vocabulary warning; UI test/lint/build PASS at version `1.0.4`; manifest validation and focused UI5 MCP lint PASS; secret, agent-rule, QA-depth and diff checks PASS.
+
+## Legacy diagnostic action rollout and runtime result
+
+- Source commit: `f273c57255af96d07c8c362e4532300feb4e1c34`.
+- Selective CAP ZIP: `mta_archives/idts-ua-legacy-diagnostic-cap-f273c57.zip`, SHA-256 `16120471E6D019391310854C8298D1CCF10D0B728FDA14932667144F3B218567`, size `316,935` bytes. It preserves all 93 other files from the accepted R9c payload and changes only `srv/user-admin.js`; Node is `22.x`, HDI artifact count is zero, and production audit High/Critical is zero.
+- CAP mutations: create package `1`, stage `1`, set droplet `1`, restart `1`, rollback `0`. CAP remained `1/1` with seven bindings and one route; droplet fingerprint changed from `40a14158660f` to `34c35f88896c`.
+- The first orchestration wrapper used PowerShell's reserved automatic `$args` variable as a function parameter. It therefore invoked bare `cf`, printed help and exited zero; package readback proved no package was created. The corrected wrapper renamed the parameter to `CommandArgs`, re-froze package state and performed the sole real package upload. This was a tooling issue, not a Cloud Foundry mutation ambiguity.
+- UI content-only MTAR: `mta_archives/idts-user-admin-ui-legacy-diagnostic-f273c57.mtar`, SHA-256 `79D930D4F1444513DFD2683B778E909C36A96A6D282CF18AFA19D2CF09A341E0`. Its static payload version is `1.0.4`; it contains the exact `PROVIDER_DENIED` Retry and `AMBIGUOUS_PROVIDER_OUTCOME` Reconcile guards, no CAP/DB/AppRouter artifact, and no unsafe archive path.
+- Exact UI rollback MTAR was rebuilt from parent commit `5a3073f2f10eaec9ea002f2dcbe2acd033b6860d`: SHA-256 `E53E179650D14000B2A10B21E4074C374A8745F466745A5E11D4EA1E703AA950`, version `1.0.3`. The historical `0.1.0` MTAR was not accepted as rollback authority.
+- UI deployment: one exact content-only `cf deploy`, exit zero, active MTA operations zero. Final `npm run btp:demo:check` returned `DEMO READY`.
+- Browser runtime readback proved version `1.0.4`. The current TESTER row is now `BLOCKED_MANUAL_REVIEW + PROVIDER_REQUEST_INVALID`; Retry and Reconcile are both hidden. This is the expected fail-closed behavior. No provider PATCH was triggered during this CAP/UI rollout or browser readback.
+- The SAP Platform OpenAPI still documents `PATCH /Groups/{Id}` with a `ScimGroupPatch.members[]` entry containing `origin`, `type=USER`, `value`, and `operation=create|delete`, which matches the broker payload shape. HTTP 400 therefore remains an unresolved provider-contract/tenant-behavior blocker. Do not retry, change the role manually, or guess another payload without a separately reviewed diagnostic.
+
+## HTTP 400 request-contract remediation source gate
+
+- The same OpenAPI describes HTTP 400 as a malformed body or bad `If-Match` and exposes `ScimGroup.meta.version` as an integer. The earlier broker sent no `If-Match` and only the `members` fragment.
+- The bounded candidate now reads the exact group resource after exact-name list resolution, verifies exact ID/display name and non-negative integer version, then PATCHes `{ id, displayName, members }` with that version in `If-Match`.
+- The API client accepts no general header map: only an exact integer `If-Match` on PATCH is allowed. Invalid/extra headers fail before token acquisition and network access.
+- Contract identifier advances from `SAP_USER_MANAGEMENT_OPENAPI_69DC872E_V1` to `..._V2`; the underlying reviewed OpenAPI hash remains unchanged.
+- This section records source-only remediation. It does not authorize broker deployment, operation requeue or a new provider PATCH.

@@ -382,6 +382,37 @@ async function main () {
   }
   assert.equal(deniedMethodTokenReads, 0)
   assert.equal(deniedMethodFetches, 0)
+
+  const ifMatchRequests = []
+  const ifMatchClient = createSapAuthorizationApiClient({
+    apiUrl: api.apiUrl,
+    minIntervalMs: 0,
+    tokenProvider: { getAccessToken: async () => 'controlled-api-token' },
+    fetchImpl: async (url, options) => {
+      ifMatchRequests.push({ url, options })
+      return { ok: true, status: 204 }
+    }
+  })
+  await ifMatchClient.request({
+    method: 'PATCH',
+    path: '/Groups/controlled-group',
+    headers: { 'If-Match': '7' },
+    body: { id: 'controlled-group', displayName: 'IDTS_TESTER', members: [] }
+  })
+  assert.equal(ifMatchRequests[0].options.headers['If-Match'], '7')
+  for (const headers of [
+    { 'If-Match': '-1' },
+    { 'If-Match': 7 },
+    { 'If-Match': 'not-an-integer' },
+    { 'X-Private-Header': 'must-not-pass' }
+  ]) {
+    await assert.rejects(
+      ifMatchClient.request({ method: 'PATCH', path: '/Groups/controlled-group', headers, body: { members: [] } }),
+      error => error?.code === 'PROVIDER_DENIED'
+    )
+  }
+  assert.equal(ifMatchRequests.length, 1)
+
   const missingResourceClient = createSapAuthorizationApiClient({
     apiUrl: api.apiUrl,
     minIntervalMs: 0,
@@ -506,8 +537,8 @@ async function main () {
   const scimRequests = []
   let directGroups = [{ display: 'NON_IDTS_EXISTING', value: 'non-idts', type: 'DIRECT' }]
   const scimApiClient = {
-    async request ({ method, path, body }) {
-      scimRequests.push({ method, path, body })
+    async request ({ method, path, headers, body }) {
+      scimRequests.push({ method, path, headers, body })
       if (method === 'GET' && path === '/Users/11111111-1111-4111-8111-111111111111') {
         return {
           id: '11111111-1111-4111-8111-111111111111',
@@ -529,7 +560,17 @@ async function main () {
           totalResults: 4
         }
       }
+      if (method === 'GET' && path === '/Groups/idts-tester-group') {
+        return {
+          id: 'idts-tester-group',
+          displayName: 'IDTS_TESTER',
+          meta: { version: 7 }
+        }
+      }
       if (method === 'PATCH' && path === '/Groups/idts-tester-group') {
+        assert.deepEqual(headers, { 'If-Match': '7' })
+        assert.equal(body.id, 'idts-tester-group')
+        assert.equal(body.displayName, 'IDTS_TESTER')
         assert.equal(body.members.length, 1)
         assert.deepEqual({ ...body.members[0], operation: undefined }, {
           origin: 'sap.default',
@@ -547,7 +588,7 @@ async function main () {
     }
   }
   const scimContract = createSapUserManagementContract()
-  assert.equal(scimContract.contractId, 'SAP_USER_MANAGEMENT_OPENAPI_69DC872E_V1')
+  assert.equal(scimContract.contractId, 'SAP_USER_MANAGEMENT_OPENAPI_69DC872E_V2')
   assert.equal(OPENAPI_SHA256, '69dc872e32ce2c4bcec77466c736f81e0a99961b333eea9f10aa23b9705c2cc8')
   assert.deepEqual(await scimContract.listRoleCollections(controlledIdentity, scimApiClient), ['NON_IDTS_EXISTING'])
   await scimContract.assignRoleCollection(controlledIdentity, 'IDTS_TESTER', scimApiClient)
@@ -615,9 +656,37 @@ async function main () {
     error => error?.code === 'PROVIDER_GROUP_AMBIGUOUS' && !error.message.includes('IDTS_TESTER')
   )
 
+  for (const invalidDetail of [
+    { id: 'one', displayName: 'IDTS_TESTER', meta: {} },
+    { id: 'other', displayName: 'IDTS_TESTER', meta: { version: 1 } },
+    { id: 'one', displayName: 'OTHER', meta: { version: 1 } }
+  ]) {
+    const invalidDetailClient = {
+      request: async ({ method, path }) => {
+        if (method === 'GET' && path.startsWith('/Users/')) {
+          return { id: controlledIdentity.platformUserId, origin: 'sap.default', active: true, groups: [] }
+        }
+        if (method === 'GET' && path.startsWith('/Groups?')) {
+          return {
+            resources: [{ id: 'one', displayName: 'IDTS_TESTER' }],
+            startIndex: 1,
+            itemsPerPage: 1,
+            totalResults: 1
+          }
+        }
+        if (method === 'GET' && path === '/Groups/one') return invalidDetail
+        throw new Error('unexpected invalid-detail request')
+      }
+    }
+    await assert.rejects(
+      scimContract.assignRoleCollection(controlledIdentity, 'IDTS_TESTER', invalidDetailClient),
+      error => error?.code === 'PROVIDER_GROUP_AMBIGUOUS'
+    )
+  }
+
   const paginatedPaths = []
   const paginatedGroupClient = {
-    request: async ({ method, path, body }) => {
+    request: async ({ method, path, headers, body }) => {
       paginatedPaths.push(path)
       if (method === 'GET' && path.startsWith('/Users/')) {
         return { id: controlledIdentity.platformUserId, origin: 'sap.default', active: true, groups: [] }
@@ -638,7 +707,13 @@ async function main () {
           totalResults: 2
         }
       }
+      if (method === 'GET' && path === '/Groups/second') {
+        return { id: 'second', displayName: 'IDTS_PM', meta: { version: 11 } }
+      }
       if (method === 'PATCH' && path === '/Groups/second') {
+        assert.deepEqual(headers, { 'If-Match': '11' })
+        assert.equal(body.id, 'second')
+        assert.equal(body.displayName, 'IDTS_PM')
         assert.equal(body.members[0].operation, 'create')
         return { id: 'second' }
       }

@@ -25,11 +25,12 @@ function createSapAuthorizationApiClient ({
   let nextRequestAt = 0
 
   return Object.freeze({
-    async request ({ method, path, body }) {
+    async request ({ method, path, headers, body }) {
       const normalizedMethod = String(method || '').toUpperCase()
       if (!ALLOWED_METHODS.has(normalizedMethod) || !safeRelativePath(path)) throw providerError('PROVIDER_DENIED')
       if (normalizedMethod === 'GET' && body !== undefined) throw providerError('PROVIDER_DENIED')
       if (body !== undefined && (!body || typeof body !== 'object' || Array.isArray(body))) throw providerError('PROVIDER_DENIED')
+      const normalizedHeaders = requestHeaders(normalizedMethod, headers)
 
       const token = await tokenProvider.getAccessToken()
       if (typeof token !== 'string' || token.length === 0) throw providerError('PROVIDER_UNAVAILABLE')
@@ -43,7 +44,8 @@ function createSapAuthorizationApiClient ({
           method: normalizedMethod,
           headers: {
             Accept: 'application/json',
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
+            ...normalizedHeaders
           },
           signal: controller.signal
         }
@@ -106,6 +108,20 @@ async function responseError (response) {
   if (status === 409 || status === 412) return providerError('PROVIDER_CONFLICT')
   if (Number.isInteger(status) && status >= 500 && status <= 599) return providerError('PROVIDER_UPSTREAM_5XX')
   return providerError('PROVIDER_RESPONSE_INVALID')
+}
+
+function requestHeaders (method, headers) {
+  if (headers === undefined) return {}
+  if (method !== 'PATCH' || !headers || typeof headers !== 'object' || Array.isArray(headers)) {
+    throw providerError('PROVIDER_DENIED')
+  }
+  const keys = Object.keys(headers)
+  if (keys.length !== 1 || keys[0] !== 'If-Match' ||
+      typeof headers['If-Match'] !== 'string' ||
+      !/^(0|[1-9][0-9]*)$/.test(headers['If-Match'])) {
+    throw providerError('PROVIDER_DENIED')
+  }
+  return { 'If-Match': headers['If-Match'] }
 }
 
 async function reportsExpectedScope (response) {
