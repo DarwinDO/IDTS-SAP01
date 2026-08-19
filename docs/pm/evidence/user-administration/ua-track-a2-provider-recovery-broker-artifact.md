@@ -99,3 +99,12 @@ No platform mutation was performed while building or reviewing this artifact.
 - The API client accepts no general header map: only an exact integer `If-Match` on PATCH is allowed. Invalid/extra headers fail before token acquisition and network access.
 - Contract identifier advances from `SAP_USER_MANAGEMENT_OPENAPI_69DC872E_V1` to `..._V2`; the underlying reviewed OpenAPI hash remains unchanged.
 - This section records source-only remediation. It does not authorize broker deployment, operation requeue or a new provider PATCH.
+
+## Versioned-patch broker rollout and one-shot retry preparation
+
+- Broker source commit: `4b86ea3efcac25c54c47f4d977ffbb00c9fd44c9`.
+- Broker ZIP: `mta_archives/idts-user-access-broker-ifmatch-4b86ea3.zip`, SHA-256 `66B7A379543393BF3CF0EB161696D4CBBB846980361D69F3E8E09840E86C4EEC`, size `16,385` bytes. It contains 13 tracked regular files plus the ZIP directory entry, source mismatch zero, Node `22.x`, unsafe-path zero and production audit zero.
+- Broker rollout: package `1`, stage `1`, set droplet `1`, restart `1`, rollback `0`. Broker remains `1/1`, zero routes and two bindings; droplet fingerprint changed from `aecc592fcbd8` to `9c7c22baf4c4`. Main binding counts remained `7/3` and demo readiness was `DEMO READY` before rollout.
+- One read-only main-CAP task queried only matching operation count and `attemptCount`; it performed zero provider calls and encoded the sanitized result in its exit status. Readback proved exactly one matching row at attempt `4`.
+- The first task-result wrapper used JavaScript-style `String(...)` in PowerShell and then assumed the words `exit status`; both readback parsers failed after the single task had already completed. The task was not rerun. Sanitized numeric readback isolated the task-name date from the final exit code and established attempt `4`.
+- Source candidate exposes only `latestOperationAttemptCount` in the PM summary and allows the compatibility Retry only for exact attempt `4`. It does not change the HANA schema. If the next broker claim returns another HTTP 400, attempt `5` cannot be retried through this path.

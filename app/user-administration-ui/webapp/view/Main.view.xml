@@ -85,7 +85,7 @@
 									<Button
 										icon="sap-icon://refresh"
 										tooltip="{i18n>retryProvisioning}"
-										visible="{= ${requests>status_code} === 'RETRYABLE_FAILURE' || (${requests>status_code} === 'BLOCKED_MANUAL_REVIEW' &amp;&amp; ${requests>lastErrorCode} === 'PROVIDER_DENIED') }"
+										visible="{= ${requests>status_code} === 'RETRYABLE_FAILURE' || (${requests>status_code} === 'BLOCKED_MANUAL_REVIEW' &amp;&amp; ${requests>lastErrorCode} === 'PROVIDER_REQUEST_INVALID' &amp;&amp; ${requests>latestOperationAttemptCount} === 4) }"
 										press=".onRetryAccessOperation"/>
 									<Button
 										icon="sap-icon://synchronize"

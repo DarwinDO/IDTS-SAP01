@@ -446,14 +446,21 @@ async function main () {
   await db.run(UPDATE('idts.cap.UserAccessOperations').set({
     state: 'BLOCKED_MANUAL_REVIEW',
     completedAt: '2026-08-13T00:05:00.000Z',
-    safeResultCode: 'PROVIDER_DENIED',
-    safeResultSummary: 'Provider rejected the operation.',
+    attemptCount: 4,
+    safeResultCode: 'PROVIDER_REQUEST_INVALID',
+    safeResultSummary: 'Provider rejected the request contract.',
     providerCorrelationHash: '9'.repeat(64)
   }).where({ ID: queuedOperation.ID }))
   await db.run(UPDATE('idts.cap.UserOnboardingRequests').set({
     status_code: 'BLOCKED_MANUAL_REVIEW',
-    lastErrorCode: 'PROVIDER_DENIED'
+    lastErrorCode: 'PROVIDER_REQUEST_INVALID'
   }).where({ ID: created.ID }))
+  const requestInvalidSearch = await service.send({
+    event: 'searchOnboarding',
+    data: { query: 'controlled.test' },
+    user: administrator
+  })
+  assert.equal(requestInvalidSearch[0].latestOperationAttemptCount, 4)
   const legacyDiagnosticRetry = await service.send({
     event: 'retryAccessOperation',
     data: { operationID: queuedOperation.ID, expectedVersion: 3 },
@@ -464,12 +471,13 @@ async function main () {
   await db.run(UPDATE('idts.cap.UserAccessOperations').set({
     state: 'BLOCKED_MANUAL_REVIEW',
     completedAt: '2026-08-13T00:06:00.000Z',
-    safeResultCode: 'PROVIDER_FORBIDDEN',
-    safeResultSummary: 'Provider denied the operation.'
+    attemptCount: 5,
+    safeResultCode: 'PROVIDER_REQUEST_INVALID',
+    safeResultSummary: 'Provider still rejected the request contract.'
   }).where({ ID: queuedOperation.ID }))
   await db.run(UPDATE('idts.cap.UserOnboardingRequests').set({
     status_code: 'BLOCKED_MANUAL_REVIEW',
-    lastErrorCode: 'PROVIDER_FORBIDDEN'
+    lastErrorCode: 'PROVIDER_REQUEST_INVALID'
   }).where({ ID: created.ID }))
   await expectRejected(service.send({
     event: 'retryAccessOperation',
@@ -481,6 +489,18 @@ async function main () {
     data: { operationID: queuedOperation.ID, expectedVersion: 4 },
     user: administrator
   }), 409, 'ACCESS_OPERATION_NOT_RECONCILABLE')
+  await db.run(UPDATE('idts.cap.UserAccessOperations').set({
+    safeResultCode: 'PROVIDER_FORBIDDEN',
+    safeResultSummary: 'Provider denied the operation.'
+  }).where({ ID: queuedOperation.ID }))
+  await db.run(UPDATE('idts.cap.UserOnboardingRequests').set({
+    lastErrorCode: 'PROVIDER_FORBIDDEN'
+  }).where({ ID: created.ID }))
+  await expectRejected(service.send({
+    event: 'retryAccessOperation',
+    data: { operationID: queuedOperation.ID, expectedVersion: 4 },
+    user: administrator
+  }), 409, 'ACCESS_OPERATION_NOT_RETRYABLE')
   await db.run(UPDATE('idts.cap.UserAccessOperations').set({
     safeResultCode: 'AMBIGUOUS_PROVIDER_OUTCOME',
     safeResultSummary: 'Provider result requires reconciliation.'

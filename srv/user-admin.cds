@@ -60,6 +60,7 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     provisioningVersion   : Integer;
     activeUser_ID          : UUID;
     latestOperation_ID     : UUID;
+    latestOperationAttemptCount : Integer;
     lastErrorCode         : String(80);
     lastErrorSummary      : String(500);
   }

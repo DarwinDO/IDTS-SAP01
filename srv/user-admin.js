@@ -80,7 +80,21 @@ async function searchOnboarding (req) {
     .orderBy('createdAt desc')
     .limit(200)
   if (query) selection.where`contains(targetEmailNormalized, ${query})`
-  return tx.run(selection)
+  const requests = await tx.run(selection)
+  const operationIDs = [...new Set(requests.map(request => request.latestOperation_ID).filter(Boolean))]
+  if (operationIDs.length === 0) {
+    return requests.map(request => ({ ...request, latestOperationAttemptCount: null }))
+  }
+  const operations = await tx.run(
+    SELECT.from('idts.cap.UserAccessOperations')
+      .columns('ID', 'attemptCount')
+      .where({ ID: { in: operationIDs } })
+  )
+  const attemptByOperation = new Map(operations.map(operation => [operation.ID, operation.attemptCount]))
+  return requests.map(request => ({
+    ...request,
+    latestOperationAttemptCount: attemptByOperation.get(request.latestOperation_ID) ?? null
+  }))
 }
 
 async function requestOnboarding (req) {
@@ -405,7 +419,8 @@ async function retryAccessOperation (req) {
   return requeueAccessOperation(req, {
     requiredState: 'RETRYABLE_FAILURE',
     legacyState: 'BLOCKED_MANUAL_REVIEW',
-    legacySafeResultCode: 'PROVIDER_DENIED',
+    legacySafeResultCode: 'PROVIDER_REQUEST_INVALID',
+    legacyAttemptCount: 4,
     errorCode: 'ACCESS_OPERATION_NOT_RETRYABLE',
     errorMessage: 'The access operation cannot be retried.',
     auditAction: 'RETRY_ACCESS_OPERATION',
@@ -657,7 +672,8 @@ async function requeueAccessOperation (req, options) {
     operation.state === options.legacyState &&
     request.status_code === options.legacyState &&
     operation.safeResultCode === options.legacySafeResultCode &&
-    request.lastErrorCode === options.legacySafeResultCode
+    request.lastErrorCode === options.legacySafeResultCode &&
+    operation.attemptCount === options.legacyAttemptCount
   )
   if (!regularMatch && !legacyMatch) {
     throw serviceError(409, options.errorCode, options.errorMessage)
@@ -670,6 +686,7 @@ async function requeueAccessOperation (req, options) {
   }
   const expectedSafeResultCode = legacyMatch ? options.legacySafeResultCode : options.requiredSafeResultCode
   if (expectedSafeResultCode) operationWhere.safeResultCode = expectedSafeResultCode
+  if (legacyMatch) operationWhere.attemptCount = options.legacyAttemptCount
   const changed = await tx.run(
     UPDATE('idts.cap.UserAccessOperations').set({
       state: 'PENDING',
