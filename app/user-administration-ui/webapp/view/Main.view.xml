@@ -72,6 +72,11 @@
 										visible="{= ${requests>status_code} === 'ACTIVE' }"
 										press=".onOpenRoleChange"/>
 									<Button
+										icon="sap-icon://skills"
+										tooltip="{i18n>manageResponsibilities}"
+										visible="{= ${requests>status_code} === 'ACTIVE' &amp;&amp; ${requests>requestedRole_code} === 'DEVELOPER' }"
+										press=".onOpenDeveloperProfile"/>
+									<Button
 										icon="sap-icon://decline"
 										type="Negative"
 										tooltip="{i18n>revokeAccess}"

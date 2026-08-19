@@ -71,6 +71,7 @@ entity DeveloperProfiles : cuid, managed {
   user               : Association to Users not null;
   availabilityStatus : Association to AvailabilityStatuses;
   workloadLimit      : Integer;
+  administrationVersion : Integer default 0 not null;
   active             : Boolean default true;
 }
 
@@ -251,6 +252,8 @@ entity UserOnboardingRequests : cuid, managed {
   openRequestKey        : String(64);
   requestedRole         : Association to UserRoles not null;
   userAdminRequested    : Boolean default false not null;
+  developerAvailabilityStatus : Association to AvailabilityStatuses;
+  developerWorkloadLimit : Integer;
   status                : Association to UserOnboardingStatuses not null;
   requestedBy           : Association to Users not null;
   expiresAt             : Timestamp not null;
@@ -276,11 +279,21 @@ entity UserOnboardingRequests : cuid, managed {
   lastErrorCode         : String(80);
   lastErrorSummary      : String(500);
   deliveries            : Composition of many UserOnboardingDeliveries on deliveries.onboardingRequest = $self;
+  developerResponsibilities : Composition of many UserOnboardingDeveloperResponsibilities on developerResponsibilities.onboardingRequest = $self;
 }
 
 annotate UserOnboardingRequests with @assert.unique.onboardingTokenHash: [ tokenHash ];
 annotate UserOnboardingRequests with @assert.unique.externalIdentity: [ identityKeyHash ];
 annotate UserOnboardingRequests with @assert.unique.openOnboardingRequest: [ openRequestKey ];
+
+entity UserOnboardingDeveloperResponsibilities : cuid, managed {
+  onboardingRequest   : Association to UserOnboardingRequests not null;
+  componentCategory  : Association to ComponentCategories not null;
+  sapModule           : Association to SAPModules;
+  responsibilityLevel: Association to ResponsibilityLevels not null;
+}
+
+annotate UserOnboardingDeveloperResponsibilities with @assert.unique.onboardingDeveloperScope: [ onboardingRequest, componentCategory, sapModule ];
 
 entity UserOnboardingDeliveries : cuid, managed {
   onboardingRequest : Association to UserOnboardingRequests not null;

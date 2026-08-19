@@ -1,5 +1,15 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-08-19 — Developer Responsibilities source implementation
+
+- Implemented source-only Developer Profile input for invitation and role change, request-owned desired responsibilities, optimistic PM administration actions, atomic post-provider materialization, and the UI5 Manage Responsibilities flow. No HDI/CAP/UI deployment or provider mutation was performed.
+- Product blocker remains open: the controlled TESTER provider PATCH is denied by SAP Authorization API policy; no manual Role Collection assignment and no additional PATCH/retry were attempted. Owner: DonHV/SAP-supported provider authority gate.
+- Test-harness issue fixed: UUID validation initially rejected the project's deterministic seed UUIDs because it required RFC version/variant bits. The validator now accepts the CDS UUID shape used by existing project fixtures.
+- Test-harness issue fixed: the onboarding delivery assertion expected one sent invitation after the new Developer fixture added a second intentional pending delivery. The assertion now reflects both test invitations.
+- Test-harness issue fixed: `cds compile srv --to edmx` was ambiguous because the model contains four services. The source gate now compiles all services explicitly with `-s all`; no product code change was required.
+- Security defect fixed before deployment: the newly exposed Developer catalog projections initially inherited only service-level `authenticated-user`, so a direct authenticated API caller could reach them without the shared PM+UserAdmin/internal-PM guard. A RED regression proved the gap; all five read entities now use the same fail-closed guard.
+- Verification gate: focused Developer profile, onboarding, provisioning completion, provisioning broker, UI contract, UI lint/build, CAP EDMX/HANA compile, UI5 MCP linter, secret scan, agent rules, QA-depth, and `git diff --check`.
+
 ## 2026-08-08 — IDTS-115 classification feedback and email-routing diagnosis
 
 | Classification | Symptom / work | Root cause / decision | Fix status | Verification / next action |

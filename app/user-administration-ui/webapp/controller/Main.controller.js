@@ -12,6 +12,8 @@ sap.ui.define([
 			this.setModel(new JSONModel({ busy: false }), "view");
 			this.setModel(new JSONModel(this._emptyInvite()), "invite");
 			this.setModel(new JSONModel(this._emptyAccessChange()), "access");
+			this.setModel(new JSONModel(this._emptyDeveloperAdministration()), "developer");
+			this.setModel(new JSONModel({ loaded: false }), "catalogs");
 			this.setModel(new JSONModel({ items: [] }), "requests");
 		},
 
@@ -32,6 +34,7 @@ sap.ui.define([
 		},
 
 		onOpenInvite: async function () {
+			await this._ensureDeveloperCatalogs();
 			this.getModel("invite").setData(this._emptyInvite());
 			if (!this._inviteDialog) {
 				this._inviteDialog = await Fragment.load({
@@ -61,6 +64,9 @@ sap.ui.define([
 			if (sRole !== "PM") {
 				oInviteModel.setProperty("/userAdminRequested", false);
 			}
+			if (sRole === "DEVELOPER" && !oInviteModel.getProperty("/developerProfile")) {
+				oInviteModel.setProperty("/developerProfile", this._emptyDeveloperProfile());
+			}
 			this._updateInviteState();
 		},
 
@@ -81,6 +87,7 @@ sap.ui.define([
 				oOperation.setParameter("email", oInvite.email.trim());
 				oOperation.setParameter("requestedRole", oInvite.role);
 				oOperation.setParameter("userAdminRequested", oInvite.role === "PM" && oInvite.userAdminRequested === true);
+				oOperation.setParameter("developerProfile", this._developerProfileForRole(oInvite.role, oInvite.developerProfile));
 				await oOperation.invoke("$direct");
 				this._inviteDialog.close();
 				this.getModel("invite").setData(this._emptyInvite());
@@ -115,6 +122,10 @@ sap.ui.define([
 			if (!oRow) {
 				return;
 			}
+			await this._ensureDeveloperCatalogs();
+			const oDeveloperProfile = oRow.requestedRole_code === "DEVELOPER"
+				? await this._readDeveloperProfile(oRow.activeUser_ID)
+				: this._emptyDeveloperProfile();
 			await this._openAccessDialog({
 				mode: "CHANGE_ROLE",
 				title: await this._text("changeRole"),
@@ -122,7 +133,8 @@ sap.ui.define([
 				warning: await this._text("roleChangeWarning"),
 				row: oRow,
 				role: oRow.requestedRole_code,
-				userAdminRequested: oRow.userAdminRequested === true
+				userAdminRequested: oRow.userAdminRequested === true,
+				developerProfile: oDeveloperProfile
 			});
 		},
 
@@ -149,6 +161,9 @@ sap.ui.define([
 			if (sRole !== "PM") {
 				oAccessModel.setProperty("/userAdminRequested", false);
 			}
+			if (sRole === "DEVELOPER" && !oAccessModel.getProperty("/developerProfile")) {
+				oAccessModel.setProperty("/developerProfile", this._emptyDeveloperProfile());
+			}
 		},
 
 		onConfirmAccessChange: async function () {
@@ -165,6 +180,7 @@ sap.ui.define([
 				userID: oAccess.row.activeUser_ID,
 				requestedRole: oAccess.role,
 				userAdminRequested: oAccess.role === "PM" && oAccess.userAdminRequested === true,
+				developerProfile: this._developerProfileForRole(oAccess.role, oAccess.developerProfile),
 				reason: sReason,
 				expectedVersion: oAccess.row.provisioningVersion
 			} : {
@@ -206,12 +222,63 @@ sap.ui.define([
 			}, "reconcileQueued");
 		},
 
+		onOpenDeveloperProfile: async function (oEvent) {
+			const oRow = this._rowFromEvent(oEvent);
+			if (!oRow?.activeUser_ID) return;
+			await this._ensureDeveloperCatalogs();
+			try {
+				const oProfile = await this._readDeveloperProfile(oRow.activeUser_ID);
+				this.getModel("developer").setData({
+					...this._emptyDeveloperAdministration(),
+					userID: oRow.activeUser_ID,
+					expectedVersion: oProfile.administrationVersion,
+					openBugImpactCount: oProfile.openBugImpactCount,
+					developerProfile: oProfile
+				});
+				if (!this._developerDialog) {
+					this._developerDialog = await Fragment.load({
+						id: this.getView().getId(),
+						name: "idts.useradministrationui.fragment.ManageDeveloperProfile",
+						controller: this
+					});
+					this.getView().addDependent(this._developerDialog);
+				}
+				this._developerDialog.open();
+			} catch {
+				MessageBox.error(await this._text("developerProfileLoadFailed"));
+			}
+		},
+
+		onConfirmDeveloperProfile: async function () {
+			const oData = this.getModel("developer").getData();
+			if (!(oData.reason || "").trim()) {
+				MessageBox.warning(await this._text("reasonRequired"));
+				return;
+			}
+			const bSuccess = await this._invokeAction("updateDeveloperProfile", {
+				userID: oData.userID,
+				desiredProfile: this._developerProfileForRole("DEVELOPER", oData.developerProfile),
+				reason: oData.reason.trim(),
+				expectedVersion: oData.expectedVersion
+			}, "developerProfileUpdated");
+			if (bSuccess) this._developerDialog.close();
+		},
+
+		onCancelDeveloperProfile: function () { this._developerDialog.close(); },
+		onAddInviteResponsibility: function () { this._addResponsibility("invite"); },
+		onRemoveInviteResponsibility: function (oEvent) { this._removeResponsibility("invite", oEvent); },
+		onAddAccessResponsibility: function () { this._addResponsibility("access"); },
+		onRemoveAccessResponsibility: function (oEvent) { this._removeResponsibility("access", oEvent); },
+		onAddDeveloperResponsibility: function () { this._addResponsibility("developer"); },
+		onRemoveDeveloperResponsibility: function (oEvent) { this._removeResponsibility("developer", oEvent); },
+
 		_updateInviteState: function () {
 			const oInviteModel = this.getModel("invite");
 			const oInvite = oInviteModel.getData();
 			const bEmailValid = this._isValidEmail(oInvite.email);
 			oInviteModel.setProperty("/emailValid", bEmailValid);
-			oInviteModel.setProperty("/canSubmit", bEmailValid && ["PM", "TESTER", "DEVELOPER"].includes(oInvite.role));
+			const bDeveloperReady = oInvite.role !== "DEVELOPER" || this._hasDeveloperResponsibility(oInvite.developerProfile);
+			oInviteModel.setProperty("/canSubmit", bEmailValid && bDeveloperReady && ["PM", "TESTER", "DEVELOPER"].includes(oInvite.role));
 		},
 
 		_isValidEmail: function (sEmail) {
@@ -226,7 +293,8 @@ sap.ui.define([
 				emailTouched: false,
 				emailValid: false,
 				canSubmit: false,
-				submitting: false
+				submitting: false,
+				developerProfile: this._emptyDeveloperProfile()
 			};
 		},
 
@@ -240,8 +308,83 @@ sap.ui.define([
 				role: "TESTER",
 				userAdminRequested: false,
 				reason: "",
-				submitting: false
+				submitting: false,
+				developerProfile: this._emptyDeveloperProfile()
 			};
+		},
+
+		_emptyDeveloperProfile: function () {
+			return {
+				availabilityStatusCode: "AVAILABLE",
+				workloadLimit: 3,
+				responsibilities: [{ componentCategoryID: "", sapModuleID: null, responsibilityLevelCode: "PRIMARY", active: true }]
+			};
+		},
+
+		_emptyDeveloperAdministration: function () {
+			return { userID: null, expectedVersion: 0, openBugImpactCount: 0, reason: "", developerProfile: this._emptyDeveloperProfile() };
+		},
+
+		_developerProfileForRole: function (sRole, oProfile) {
+			if (sRole !== "DEVELOPER") return null;
+			return {
+				availabilityStatusCode: oProfile.availabilityStatusCode,
+				workloadLimit: Number(oProfile.workloadLimit),
+				responsibilities: (oProfile.responsibilities || []).filter(oRow => oRow.active !== false).map(oRow => ({
+					componentCategoryID: oRow.componentCategoryID,
+					sapModuleID: oRow.sapModuleID || null,
+					responsibilityLevelCode: oRow.responsibilityLevelCode || "PRIMARY"
+				}))
+			};
+		},
+
+		_hasDeveloperResponsibility: function (oProfile) {
+			return !!oProfile && Number(oProfile.workloadLimit) > 0 && (oProfile.responsibilities || []).some(oRow => oRow.active !== false && oRow.componentCategoryID);
+		},
+
+		_addResponsibility: function (sModel) {
+			const oModel = this.getModel(sModel);
+			const sPath = "/developerProfile/responsibilities";
+			const aRows = oModel.getProperty(sPath) || [];
+			oModel.setProperty(sPath, aRows.concat({ componentCategoryID: "", sapModuleID: null, responsibilityLevelCode: "PRIMARY", active: true }));
+			if (sModel === "invite") this._updateInviteState();
+		},
+
+		_removeResponsibility: function (sModel, oEvent) {
+			const oModel = this.getModel(sModel);
+			const sPath = "/developerProfile/responsibilities";
+			const iIndex = Number(oEvent.getSource().getBindingContext(sModel).getPath().split("/").pop());
+			const aRows = (oModel.getProperty(sPath) || []).slice();
+			aRows.splice(iIndex, 1);
+			oModel.setProperty(sPath, aRows);
+			if (sModel === "invite") this._updateInviteState();
+		},
+
+		_readDeveloperProfile: async function (sUserID) {
+			const oOperation = this.getView().getModel().bindContext("/readDeveloperProfile(...)");
+			oOperation.setParameter("userID", sUserID);
+			const oContext = await oOperation.invoke("$direct");
+			return (oContext || oOperation.getBoundContext()).requestObject();
+		},
+
+		_ensureDeveloperCatalogs: async function () {
+			if (this.getModel("catalogs").getProperty("/loaded")) return;
+			const oODataModel = this.getView().getModel();
+			const load = async (sPath, mParameters) => (await oODataModel.bindList(sPath, null, null, null, mParameters).requestContexts(0, 200)).map(oContext => oContext.getObject());
+			const [aAvailability, aLevels, aModules, aCategories] = await Promise.all([
+				load("/AvailabilityStatuses", { $filter: "active eq true" }),
+				load("/ResponsibilityLevels", { $filter: "active eq true" }),
+				load("/SAPModules", { $filter: "active eq true" }),
+				load("/ComponentCategories", { $filter: "active eq true", $expand: "component,defectCategory" })
+			]);
+			const sAnySapModule = await this._text("anySapModule");
+			this.getModel("catalogs").setData({
+				loaded: true,
+				availabilityStatuses: aAvailability,
+				responsibilityLevels: aLevels,
+				sapModules: [{ ID: "", name: sAnySapModule }, ...aModules],
+				componentCategories: aCategories.map(oRow => ({ ...oRow, label: `${oRow.component?.name || ""} — ${oRow.defectCategory?.name || ""}` }))
+			});
 		},
 
 		_openAccessDialog: async function (oData) {

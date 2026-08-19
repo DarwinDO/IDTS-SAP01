@@ -114,6 +114,8 @@ Rule:
 * A retry is available only for a provider result classified as retryable. An ambiguous provider result moves to `BLOCKED_MANUAL_REVIEW` and may continue only after a PM+UserAdmin explicitly requests reconciliation; the broker must read current provider state before applying a bounded allowlisted delta.
 * CAP stores the operation journal and append-only safe audit events, but never the SAP administration credential or raw provider response. A separate least-privilege broker owns the external authorization API call and accepts only server-side allowlisted roles.
 * Repeated invitation use, concurrent duplicate open invitations, external-identity collisions, multiple business roles, and non-PM UserAdmin requests must fail closed and be auditable.
+* DEVELOPER invitations and role changes require a desired Developer Profile with a positive workload limit and at least one active Component Category responsibility. SAP Module is optional. Provider readback, internal User activation, active Developer Profile, and at least one active responsibility must all succeed before `ACTIVE`.
+* PM+UserAdmin may update Developer availability, workload, and responsibilities with optimistic versioning. Responsibility removal is a soft deactivation: it affects future matching but preserves existing Bug assignees and reports the affected open-Bug count for separate PM handling.
 
 Vietnamese:
 

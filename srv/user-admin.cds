@@ -1,6 +1,38 @@
 using idts.cap as db from '../db/schema';
 
 service UserAdministrationService @(requires: 'authenticated-user') {
+  type DeveloperResponsibilityInput {
+    componentCategoryID      : UUID;
+    sapModuleID              : UUID;
+    responsibilityLevelCode  : String(40);
+  }
+
+  type DeveloperProfileInput {
+    availabilityStatusCode : String(40);
+    workloadLimit          : Integer;
+    responsibilities      : array of DeveloperResponsibilityInput;
+  }
+
+  type DeveloperResponsibilityResult {
+    ID                       : UUID;
+    componentCategoryID      : UUID;
+    sapModuleID              : UUID;
+    responsibilityLevelCode  : String(40);
+    active                   : Boolean;
+  }
+
+  type DeveloperProfileResult {
+    userID                    : UUID;
+    developerProfileID        : UUID;
+    availabilityStatusCode    : String(40);
+    workloadLimit             : Integer;
+    administrationVersion     : Integer;
+    ready                     : Boolean;
+    activeResponsibilityCount : Integer;
+    openBugImpactCount        : Integer;
+    responsibilities          : array of DeveloperResponsibilityResult;
+  }
+
   type OnboardingResult {
     ID                 : UUID;
     targetEmail        : String(255);
@@ -35,7 +67,8 @@ service UserAdministrationService @(requires: 'authenticated-user') {
   action requestOnboarding(
     email              : String(255),
     requestedRole      : String(40),
-    userAdminRequested : Boolean
+    userAdminRequested : Boolean,
+    developerProfile   : DeveloperProfileInput
   ) returns OnboardingResult;
 
   action verifySapIdentity(token : String(2048)) returns OnboardingResult;
@@ -51,6 +84,7 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     userID              : UUID,
     requestedRole       : String(40),
     userAdminRequested  : Boolean,
+    developerProfile    : DeveloperProfileInput,
     reason              : String(500),
     expectedVersion     : Integer
   ) returns OnboardingResult;
@@ -65,6 +99,15 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     operationID    : UUID,
     expectedVersion: Integer
   ) returns OnboardingResult;
+
+  action readDeveloperProfile(userID : UUID) returns DeveloperProfileResult;
+
+  action updateDeveloperProfile(
+    userID          : UUID,
+    desiredProfile  : DeveloperProfileInput,
+    reason          : String(500),
+    expectedVersion : Integer
+  ) returns DeveloperProfileResult;
 
   action reconcileAccessOperation(
     operationID    : UUID,
@@ -91,5 +134,15 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     correlationId,
     lastErrorCode,
     lastErrorSummary
+  };
+
+  @readonly entity AvailabilityStatuses as projection on db.AvailabilityStatuses;
+  @readonly entity ResponsibilityLevels as projection on db.ResponsibilityLevels;
+  @readonly entity SAPModules as projection on db.SAPModules;
+  @readonly entity ComponentCategories as projection on db.ComponentCategories {
+    ID,
+    component,
+    defectCategory,
+    active
   };
 }

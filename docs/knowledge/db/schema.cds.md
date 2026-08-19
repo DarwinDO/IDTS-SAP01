@@ -1,5 +1,11 @@
 # Knowledge: `db/schema.cds`
 
+## User-admin Developer profile additions / Bổ sung Developer profile cho User Admin
+
+`DeveloperProfiles.administrationVersion` supports optimistic PM updates. `UserOnboardingRequests` stores desired availability/workload and owns `UserOnboardingDeveloperResponsibilities`, a snapshot of Component Category, optional SAP Module, and responsibility level used only after provider readback.
+
+`DeveloperProfiles.administrationVersion` hỗ trợ optimistic update của PM. `UserOnboardingRequests` lưu availability/workload mong muốn và sở hữu `UserOnboardingDeveloperResponsibilities`, là snapshot Component Category, SAP Module tùy chọn và responsibility level chỉ materialize sau provider readback.
+
 ## Controlled user onboarding (2026-08-12)
 
 `UserOnboardingRequests` stores the requested PM/Tester/Developer role, optional PM-only UserAdmin overlay, requester, state, expiry, token hash/nonce, correlation ID, and the verified external identity snapshot. A fixed 64-character `identityKeyHash` enforces external-identity uniqueness without creating a long cross-database index over issuer and subject strings. `identityPlatformUserId` separately stores the CAP/XSUAA-validated `payload.user_id` needed to address the exact SCIM shadow user; it is not part of the immutable Global User ID hash and is not exposed by the public service projection. A nullable 64-character `openRequestKey` hashes the normalized target email and prevents concurrent live invitations; a later terminal-state transition must clear it. `UserOnboardingDeliveries` is a separate retry/lock record that does not store the raw signed URL or provider credential. These entities are additive; existing `Users` rows remain compatible and are not backfilled by this source change.

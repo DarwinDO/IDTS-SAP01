@@ -1,5 +1,11 @@
 # Knowledge: `app/user-administration-ui`
 
+## Developer responsibilities / Phạm vi phụ trách Developer
+
+The Invite and Change Role dialogs show Developer Profile fields only when DEVELOPER is selected. Active Developers have a Manage Responsibilities action for availability, workload, Component Category, optional SAP Module, level, reason, and open-Bug impact. UI sends structured inputs; CAP remains authoritative for authorization and validation.
+
+Dialog Invite/Change Role chỉ hiện Developer Profile khi chọn DEVELOPER. Developer active có action Manage Responsibilities để chỉnh availability, workload, Component Category, SAP Module tùy chọn, level, reason và xem open-Bug impact. UI gửi structured input; CAP vẫn là lớp phân quyền và validation cuối.
+
 `idts.useradministrationui` is the standalone SAPUI5 administration surface for controlled IDTS onboarding. The responsive table uses the protected `searchOnboarding` POST action, normalizes the query to lowercase, and shows at most 200 request summaries containing the requested business role, optional PM-only UserAdmin overlay, lifecycle status, expiry, and sanitized delivery failure summary. The search value is carried in a POST body instead of an OData `$filter` URL, reducing email exposure in browser/proxy access logs.
 
 The invite dialog submits the unbound OData V4 `requestOnboarding` action with `email`, exactly one allowlisted `requestedRole`, and `userAdminRequested`. TESTER/DEVELOPER use this confirmation as their approval and auto-queue only after identity verification; PM/UserAdmin still expose confirmation-gated Approve & Provision. Change Role, Revoke, Retry and Reconcile remain state-bound. The UI never calls the broker/BTP API directly and never announces `ACTIVE` merely because an operation was queued.

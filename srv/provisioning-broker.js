@@ -173,14 +173,15 @@ async function completeSuccess (tx, options) {
       externalIdentityKeyHash: request.identityKeyHash,
       active: true
     }))
-    await alignDeveloperProfile(tx, userID, operation.desiredRole_code)
+    await alignDeveloperProfile(tx, userID, operation.desiredRole_code, request, operation)
   } else if (operation.operationType === 'CHANGE_ROLE') {
     if (!userID) throw brokerError(409, 'ACTIVE_ACCESS_NOT_RECONCILED', 'Active access is not reconciled.')
     await tx.run(UPDATE('idts.cap.Users').set({ role_code: operation.desiredRole_code, active: true }).where({ ID: userID }))
-    await alignDeveloperProfile(tx, userID, operation.desiredRole_code)
+    await alignDeveloperProfile(tx, userID, operation.desiredRole_code, request, operation)
   } else if (operation.operationType === 'REVOKE') {
     if (!userID) throw brokerError(409, 'ACTIVE_ACCESS_NOT_RECONCILED', 'Active access is not reconciled.')
     await tx.run(UPDATE('idts.cap.Users').set({ active: false }).where({ ID: userID }))
+    await alignDeveloperProfile(tx, userID, null, request, operation)
   }
 
   const finalState = operation.operationType === 'REVOKE' ? 'REVOKED' : 'ACTIVE'
@@ -252,22 +253,98 @@ async function completeProviderConflict (tx, options, safeCode) {
   return completed
 }
 
-async function alignDeveloperProfile (tx, userID, desiredRole) {
+async function alignDeveloperProfile (tx, userID, desiredRole, request, operation) {
   const profile = await tx.run(SELECT.one.from('idts.cap.DeveloperProfiles').where({ user_ID: userID }))
   if (desiredRole === 'DEVELOPER') {
+    const desiredResponsibilities = await tx.run(
+      SELECT.from('idts.cap.UserOnboardingDeveloperResponsibilities').where({ onboardingRequest_ID: request.ID })
+    )
+    if (!request.developerAvailabilityStatus_code || !Number.isInteger(request.developerWorkloadLimit) ||
+        request.developerWorkloadLimit < 1 || desiredResponsibilities.length === 0) {
+      throw brokerError(409, 'DEVELOPER_PROFILE_INCOMPLETE', 'Developer profile is incomplete.')
+    }
+    let profileID
     if (profile) {
-      await tx.run(UPDATE('idts.cap.DeveloperProfiles').set({ active: true }).where({ ID: profile.ID }))
+      profileID = profile.ID
+      await tx.run(UPDATE('idts.cap.DeveloperProfiles').set({
+        availabilityStatus_code: request.developerAvailabilityStatus_code,
+        workloadLimit: request.developerWorkloadLimit,
+        administrationVersion: (profile.administrationVersion || 0) + 1,
+        active: true
+      }).where({ ID: profile.ID }))
+      await appendDeveloperAudit(tx, operation, request, userID, 'DEVELOPER_PROFILE_UPDATED')
     } else {
+      profileID = cds.utils.uuid()
       await tx.run(INSERT.into('idts.cap.DeveloperProfiles').entries({
-        ID: cds.utils.uuid(),
+        ID: profileID,
         user_ID: userID,
-        availabilityStatus_code: 'AVAILABLE',
+        availabilityStatus_code: request.developerAvailabilityStatus_code,
+        workloadLimit: request.developerWorkloadLimit,
+        administrationVersion: 0,
         active: true
       }))
+      await appendDeveloperAudit(tx, operation, request, userID, 'DEVELOPER_PROFILE_CREATED')
     }
+    await materializeDeveloperResponsibilities(tx, profileID, desiredResponsibilities, operation, request, userID)
   } else if (profile?.active) {
     await tx.run(UPDATE('idts.cap.DeveloperProfiles').set({ active: false }).where({ ID: profile.ID }))
+    await tx.run(UPDATE('idts.cap.DeveloperResponsibilities').set({ active: false }).where({
+      developerProfile_ID: profile.ID,
+      active: true
+    }))
+    await appendDeveloperAudit(tx, operation, request, userID, 'DEVELOPER_PROFILE_DEACTIVATED')
   }
+}
+
+async function materializeDeveloperResponsibilities (tx, profileID, desired, operation, request, userID) {
+  const existing = await tx.run(SELECT.from('idts.cap.DeveloperResponsibilities').where({ developerProfile_ID: profileID }))
+  const desiredTuples = new Set()
+  for (const row of desired) {
+    const tuple = responsibilityTuple(row.componentCategory_ID, row.sapModule_ID)
+    desiredTuples.add(tuple)
+    const current = existing.find(item => responsibilityTuple(item.componentCategory_ID, item.sapModule_ID) === tuple)
+    if (current) {
+      await tx.run(UPDATE('idts.cap.DeveloperResponsibilities').set({
+        responsibilityLevel_code: row.responsibilityLevel_code,
+        active: true
+      }).where({ ID: current.ID }))
+      await appendDeveloperAudit(tx, operation, request, userID, 'DEVELOPER_RESPONSIBILITY_UPDATED')
+    } else {
+      await tx.run(INSERT.into('idts.cap.DeveloperResponsibilities').entries({
+        ID: cds.utils.uuid(),
+        developerProfile_ID: profileID,
+        componentCategory_ID: row.componentCategory_ID,
+        sapModule_ID: row.sapModule_ID,
+        responsibilityLevel_code: row.responsibilityLevel_code,
+        active: true
+      }))
+      await appendDeveloperAudit(tx, operation, request, userID, 'DEVELOPER_RESPONSIBILITY_ADDED')
+    }
+  }
+  for (const row of existing.filter(item => item.active && !desiredTuples.has(responsibilityTuple(item.componentCategory_ID, item.sapModule_ID)))) {
+    await tx.run(UPDATE('idts.cap.DeveloperResponsibilities').set({ active: false }).where({ ID: row.ID, active: true }))
+    await appendDeveloperAudit(tx, operation, request, userID, 'DEVELOPER_RESPONSIBILITY_DEACTIVATED')
+  }
+}
+
+async function appendDeveloperAudit (tx, operation, request, userID, action) {
+  await tx.run(INSERT.into('idts.cap.UserIdentityAuditEvents').entries({
+    ID: cds.utils.uuid(),
+    operation_ID: operation.ID,
+    onboardingRequest_ID: request.ID,
+    actor_ID: operation.requestedBy_ID,
+    targetUser_ID: userID,
+    action,
+    result: 'APPLIED',
+    fromState: request.status_code,
+    toState: request.status_code,
+    correlationId: cds.utils.uuid(),
+    detailsSummary: 'Developer profile materialized after provider verification.'
+  }))
+}
+
+function responsibilityTuple (componentCategoryID, sapModuleID) {
+  return `${componentCategoryID}|${sapModuleID || 'ANY'}`
 }
 
 async function appendAudit (tx, operation, request, toState, userID, result) {

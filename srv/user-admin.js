@@ -2,7 +2,7 @@
 
 const crypto = require('node:crypto')
 const cds = require('@sap/cds')
-const { INSERT, SELECT, UPDATE } = cds.ql
+const { DELETE, INSERT, SELECT, UPDATE } = cds.ql
 
 const {
   assertRequestedAccess,
@@ -16,6 +16,10 @@ const { getUserAdminConfig } = require('./user-admin/config')
 const { scheduleImmediateEmailOutbox } = require('./email/worker')
 const { identityKeyHash, selectActiveUserForRequest } = require('./auth/identity-map')
 const { isXsuaaRuntime } = require('./auth/platform-role')
+const {
+  normalizeDeveloperProfileInput,
+  assertDeveloperProfileForRole
+} = require('./user-admin/developer-profile')
 
 const OPEN_STATUSES = [
   'INVITED',
@@ -34,12 +38,16 @@ const OPEN_STATUSES = [
 
 class UserAdministrationService extends cds.ApplicationService {
   async init () {
-    this.before('READ', 'OnboardingRequests', req => requireActiveUserAdministrator(req))
+    for (const entity of ['OnboardingRequests', 'AvailabilityStatuses', 'ResponsibilityLevels', 'SAPModules', 'ComponentCategories']) {
+      this.before('READ', entity, req => requireActiveUserAdministrator(req))
+    }
     this.on('requestOnboarding', req => requestOnboarding(req))
     this.on('verifySapIdentity', req => verifySapIdentity(req))
     this.on('searchOnboarding', req => searchOnboarding(req))
     this.on('approveProvisioning', req => approveProvisioning(req))
     this.on('requestRoleChange', req => requestRoleChange(req))
+    this.on('readDeveloperProfile', req => readDeveloperProfile(req))
+    this.on('updateDeveloperProfile', req => updateDeveloperProfile(req))
     this.on('requestRevoke', req => requestRevoke(req))
     this.on('retryAccessOperation', req => retryAccessOperation(req))
     this.on('reconcileAccessOperation', req => reconcileAccessOperation(req))
@@ -77,12 +85,15 @@ async function searchOnboarding (req) {
 
 async function requestOnboarding (req) {
   const access = assertRequestedAccess(req.data.requestedRole, req.data.userAdminRequested)
+  const developerProfile = normalizeDeveloperProfileInput(req.data.developerProfile)
+  assertDeveloperProfileForRole(access.requestedRole, developerProfile)
   const targetEmail = normalizeEmail(req.data.email)
   if (!targetEmail) throw serviceError(400, 'INVALID_INVITATION_EMAIL', 'A valid invitation email is required.')
 
   const config = invitationConfig()
   const tx = cds.tx(req)
   const requestedBy = await requireActiveUserAdministrator(req, tx)
+  await validateDeveloperProfileCatalog(tx, developerProfile)
   const now = req.timestamp || new Date()
 
   await tx.run(
@@ -123,6 +134,8 @@ async function requestOnboarding (req) {
       openRequestKey,
       requestedRole_code: access.requestedRole,
       userAdminRequested: access.userAdminRequested,
+      developerAvailabilityStatus_code: developerProfile?.availabilityStatusCode || null,
+      developerWorkloadLimit: developerProfile?.workloadLimit || null,
       status_code: 'INVITED',
       requestedBy_ID: requestedBy.ID,
       expiresAt,
@@ -136,6 +149,7 @@ async function requestOnboarding (req) {
     }
     throw error
   }
+  await persistDesiredDeveloperResponsibilities(tx, invitationID, developerProfile)
   await tx.run(INSERT.into('idts.cap.UserOnboardingDeliveries').entries({
     ID: cds.utils.uuid(),
     onboardingRequest_ID: invitationID,
@@ -272,7 +286,6 @@ async function verifySapIdentity (req) {
       summary: 'Standard-role provisioning queued after SAP identity verification.'
     })
   }
-
   return onboardingResult({
     ...invitation,
     status_code: nextStatus,
@@ -346,15 +359,19 @@ async function approveProvisioning (req) {
 
 async function requestRoleChange (req) {
   const access = assertRequestedAccess(req.data.requestedRole, req.data.userAdminRequested)
+  const developerProfile = normalizeDeveloperProfileInput(req.data.developerProfile)
+  assertDeveloperProfileForRole(access.requestedRole, developerProfile)
   const reason = normalizeReason(req.data.reason)
   const tx = cds.tx(req)
   const administrator = await requireActiveUserAdministrator(req, tx)
   const { user, request } = await readActiveProvisionedUser(tx, req.data.userID)
+  await validateDeveloperProfileCatalog(tx, developerProfile)
   assertExpectedVersion(request, req.data.expectedVersion)
   if (request.requestedRole_code === access.requestedRole && request.userAdminRequested === access.userAdminRequested) {
     throw serviceError(409, 'ACCESS_ALREADY_DESIRED', 'The requested access is already active.')
   }
   await assertLastAdministratorSafety(tx, request, access)
+  await persistDesiredDeveloperProfile(tx, request.ID, developerProfile)
   return queueFailClosedAccessChange(req, tx, {
     administrator,
     request,
@@ -394,6 +411,192 @@ async function retryAccessOperation (req) {
     auditAction: 'RETRY_ACCESS_OPERATION',
     auditSummary: 'Access operation queued for a bounded retry.'
   })
+}
+
+async function readDeveloperProfile (req) {
+  const tx = cds.tx(req)
+  await requireActiveUserAdministrator(req, tx)
+  const { user, profile } = await readDeveloperTarget(tx, req.data.userID)
+  return developerProfileResult(tx, user, profile)
+}
+
+async function updateDeveloperProfile (req) {
+  const desiredProfile = normalizeDeveloperProfileInput(req.data.desiredProfile)
+  assertDeveloperProfileForRole('DEVELOPER', desiredProfile)
+  normalizeReason(req.data.reason)
+  const tx = cds.tx(req)
+  const administrator = await requireActiveUserAdministrator(req, tx)
+  await validateDeveloperProfileCatalog(tx, desiredProfile)
+  const { user, profile } = await readDeveloperTarget(tx, req.data.userID, true)
+  if (!Number.isInteger(req.data.expectedVersion) || profile.administrationVersion !== req.data.expectedVersion) {
+    throw serviceError(409, 'DEVELOPER_PROFILE_VERSION_CONFLICT', 'The Developer profile changed. Reload and try again.')
+  }
+
+  const nextVersion = profile.administrationVersion + 1
+  const changed = await tx.run(UPDATE('idts.cap.DeveloperProfiles').set({
+    availabilityStatus_code: desiredProfile.availabilityStatusCode,
+    workloadLimit: desiredProfile.workloadLimit,
+    administrationVersion: nextVersion,
+    active: true
+  }).where({ ID: profile.ID, administrationVersion: profile.administrationVersion }))
+  if (changed !== 1) throw serviceError(409, 'DEVELOPER_PROFILE_VERSION_CONFLICT', 'The Developer profile changed. Reload and try again.')
+
+  const existing = await tx.run(
+    SELECT.from('idts.cap.DeveloperResponsibilities').where({ developerProfile_ID: profile.ID })
+  )
+  const desiredTuples = new Set()
+  for (const responsibility of desiredProfile.responsibilities) {
+    const tuple = responsibilityTuple(responsibility.componentCategoryID, responsibility.sapModuleID)
+    desiredTuples.add(tuple)
+    const current = existing.find(row => responsibilityTuple(row.componentCategory_ID, row.sapModule_ID) === tuple)
+    if (current) {
+      await tx.run(UPDATE('idts.cap.DeveloperResponsibilities').set({
+        responsibilityLevel_code: responsibility.responsibilityLevelCode,
+        active: true
+      }).where({ ID: current.ID }))
+      await appendDeveloperAdministrationAudit(tx, administrator.ID, user.ID, 'DEVELOPER_RESPONSIBILITY_UPDATED')
+    } else {
+      await tx.run(INSERT.into('idts.cap.DeveloperResponsibilities').entries({
+        ID: cds.utils.uuid(),
+        developerProfile_ID: profile.ID,
+        componentCategory_ID: responsibility.componentCategoryID,
+        sapModule_ID: responsibility.sapModuleID,
+        responsibilityLevel_code: responsibility.responsibilityLevelCode,
+        active: true
+      }))
+      await appendDeveloperAdministrationAudit(tx, administrator.ID, user.ID, 'DEVELOPER_RESPONSIBILITY_ADDED')
+    }
+  }
+  for (const current of existing.filter(row => row.active && !desiredTuples.has(responsibilityTuple(row.componentCategory_ID, row.sapModule_ID)))) {
+    await tx.run(UPDATE('idts.cap.DeveloperResponsibilities').set({ active: false }).where({ ID: current.ID, active: true }))
+    await appendDeveloperAdministrationAudit(tx, administrator.ID, user.ID, 'DEVELOPER_RESPONSIBILITY_DEACTIVATED')
+  }
+  await appendDeveloperAdministrationAudit(tx, administrator.ID, user.ID, 'DEVELOPER_PROFILE_UPDATED')
+  return developerProfileResult(tx, user, {
+    ...profile,
+    availabilityStatus_code: desiredProfile.availabilityStatusCode,
+    workloadLimit: desiredProfile.workloadLimit,
+    administrationVersion: nextVersion,
+    active: true
+  })
+}
+
+async function readDeveloperTarget (tx, userID, lock = false) {
+  const user = await tx.run(SELECT.one.from('idts.cap.Users').where({ ID: userID, active: true, role_code: 'DEVELOPER' }))
+  if (!user) throw serviceError(404, 'ACTIVE_DEVELOPER_NOT_FOUND', 'Active Developer was not found.')
+  let query = SELECT.one.from('idts.cap.DeveloperProfiles').where({ user_ID: user.ID, active: true })
+  if (lock) query = query.forUpdate()
+  const profile = await tx.run(query)
+  if (!profile) throw serviceError(409, 'DEVELOPER_PROFILE_INCOMPLETE', 'Developer profile is incomplete.')
+  return { user, profile }
+}
+
+async function developerProfileResult (tx, user, profile) {
+  const responsibilities = await tx.run(
+    SELECT.from('idts.cap.DeveloperResponsibilities').where({ developerProfile_ID: profile.ID }).orderBy('createdAt asc')
+  )
+  const activeResponsibilityCount = responsibilities.filter(row => row.active).length
+  const impact = await tx.run(
+    SELECT.one.from('idts.cap.Bugs').columns('count(*) as count').where({
+      assignee_ID: profile.ID,
+      status_code: { '!=': 'CLOSED' }
+    })
+  )
+  return {
+    userID: user.ID,
+    developerProfileID: profile.ID,
+    availabilityStatusCode: profile.availabilityStatus_code,
+    workloadLimit: profile.workloadLimit,
+    administrationVersion: profile.administrationVersion,
+    ready: user.active === true && profile.active === true && activeResponsibilityCount > 0,
+    activeResponsibilityCount,
+    openBugImpactCount: Number(impact?.count || 0),
+    responsibilities: responsibilities.map(row => ({
+      ID: row.ID,
+      componentCategoryID: row.componentCategory_ID,
+      sapModuleID: row.sapModule_ID || null,
+      responsibilityLevelCode: row.responsibilityLevel_code,
+      active: row.active === true
+    }))
+  }
+}
+
+async function appendDeveloperAdministrationAudit (tx, actorID, targetUserID, action) {
+  await tx.run(INSERT.into('idts.cap.UserIdentityAuditEvents').entries({
+    ID: cds.utils.uuid(),
+    actor_ID: actorID,
+    targetUser_ID: targetUserID,
+    action,
+    result: 'APPLIED',
+    correlationId: cds.utils.uuid(),
+    detailsSummary: 'Developer administration change applied.'
+  }))
+}
+
+function responsibilityTuple (componentCategoryID, sapModuleID) {
+  return `${componentCategoryID}|${sapModuleID || 'ANY'}`
+}
+
+async function validateDeveloperProfileCatalog (tx, profile) {
+  if (!profile) return
+  const availability = await tx.run(
+    SELECT.one.from('idts.cap.AvailabilityStatuses').columns('code').where({
+      code: profile.availabilityStatusCode,
+      active: true
+    })
+  )
+  if (!availability) throw serviceError(400, 'INVALID_DEVELOPER_AVAILABILITY', 'Developer availability is invalid or inactive.')
+
+  for (const responsibility of profile.responsibilities) {
+    const componentCategory = await tx.run(
+      SELECT.one.from('idts.cap.ComponentCategories').columns(
+        'ID',
+        { ref: ['component', 'active'], as: 'componentActive' },
+        { ref: ['defectCategory', 'active'], as: 'defectCategoryActive' }
+      ).where({
+        ID: responsibility.componentCategoryID,
+        active: true
+      })
+    )
+    if (!componentCategory || componentCategory.componentActive !== true || componentCategory.defectCategoryActive !== true) {
+      throw serviceError(400, 'INVALID_COMPONENT_CATEGORY', 'Component Category is invalid or inactive.')
+    }
+    if (responsibility.sapModuleID) {
+      const sapModule = await tx.run(
+        SELECT.one.from('idts.cap.SAPModules').columns('ID').where({ ID: responsibility.sapModuleID, active: true })
+      )
+      if (!sapModule) throw serviceError(400, 'INVALID_SAP_MODULE', 'SAP Module is invalid or inactive.')
+    }
+    const level = await tx.run(
+      SELECT.one.from('idts.cap.ResponsibilityLevels').columns('code').where({
+        code: responsibility.responsibilityLevelCode,
+        active: true
+      })
+    )
+    if (!level) throw serviceError(400, 'INVALID_RESPONSIBILITY_LEVEL', 'Responsibility level is invalid or inactive.')
+  }
+}
+
+async function persistDesiredDeveloperProfile (tx, requestID, profile) {
+  await tx.run(UPDATE('idts.cap.UserOnboardingRequests').set({
+    developerAvailabilityStatus_code: profile?.availabilityStatusCode || null,
+    developerWorkloadLimit: profile?.workloadLimit || null
+  }).where({ ID: requestID }))
+  await tx.run(DELETE.from('idts.cap.UserOnboardingDeveloperResponsibilities').where({ onboardingRequest_ID: requestID }))
+  await persistDesiredDeveloperResponsibilities(tx, requestID, profile)
+}
+
+async function persistDesiredDeveloperResponsibilities (tx, requestID, profile) {
+  if (!profile) return
+  await tx.run(INSERT.into('idts.cap.UserOnboardingDeveloperResponsibilities').entries(
+    profile.responsibilities.map(responsibility => ({
+      ID: cds.utils.uuid(),
+      onboardingRequest_ID: requestID,
+      componentCategory_ID: responsibility.componentCategoryID,
+      sapModule_ID: responsibility.sapModuleID,
+      responsibilityLevel_code: responsibility.responsibilityLevelCode
+    }))
+  ))
 }
 
 async function reconcileAccessOperation (req) {

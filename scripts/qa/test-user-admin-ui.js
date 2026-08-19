@@ -59,6 +59,7 @@ assert.match(view, /press="\.onOpenRoleChange"/)
 assert.match(view, /press="\.onOpenRevoke"/)
 assert.match(view, /press="\.onRetryAccessOperation"/)
 assert.match(view, /press="\.onReconcileAccessOperation"/)
+assert.match(view, /press="\.onOpenDeveloperProfile"/)
 assert.doesNotMatch(view, /type="Password"|tokenHash|tokenNonce|identityIssuer/)
 
 const fragment = fs.readFileSync(path.join(webapp, 'fragment/InviteUser.fragment.xml'), 'utf8')
@@ -66,6 +67,8 @@ assert.match(fragment, /<Input[^>]+type="Email"/)
 assert.match(fragment, /<Select/)
 assert.match(fragment, /<CheckBox/)
 assert.match(fragment, /press="\.onConfirmInvite"/)
+assert.match(fragment, /invite>\/developerProfile\/responsibilities/)
+assert.match(fragment, /press="\.onAddInviteResponsibility"/)
 assert.match(fragment, /valueState="\{=/)
 assert.match(fragment, /valueLiveUpdate="true"/)
 assert.match(fragment, /!\$\{invite>\/submitting\}/)
@@ -77,6 +80,7 @@ assert.match(controller, /bindContext\("\/requestOnboarding\(\.\.\.\)"\)/)
 assert.match(controller, /setParameter\("email"/)
 assert.match(controller, /setParameter\("requestedRole"/)
 assert.match(controller, /setParameter\("userAdminRequested"/)
+assert.match(controller, /setParameter\("developerProfile"/)
 assert.match(controller, /await oOperation\.invoke\("\$direct"\)/)
 assert.match(controller, /bindContext\("\/searchOnboarding\(\.\.\.\)"\)/)
 assert.match(controller, /"approveProvisioning"/)
@@ -84,6 +88,9 @@ assert.match(controller, /"requestRoleChange"/)
 assert.match(controller, /"requestRevoke"/)
 assert.match(controller, /"retryAccessOperation"/)
 assert.match(controller, /"reconcileAccessOperation"/)
+assert.match(controller, /readDeveloperProfile/)
+assert.match(controller, /"updateDeveloperProfile"/)
+assert.match(controller, /sapModules:\s*\[\{ ID: "", name: sAnySapModule \}, \.\.\.aModules\]/)
 assert.match(controller, /_confirm\("retryConfirmation"\)/)
 assert.match(controller, /_confirm\("reconcileConfirmation"\)/)
 assert.match(controller, /bindContext\(`\/\$\{sAction\}\(\.\.\.\)`\)/)
@@ -100,6 +107,12 @@ assert.match(manageFragment, /type="\{= \$\{access>\/mode\} === 'REVOKE' \? 'Neg
 assert.match(manageFragment, /press="\.onConfirmAccessChange"/)
 assert.doesNotMatch(manageFragment, /stretchOnPhone=/)
 assert.doesNotMatch(manageFragment, /Password|OTP|passkey|token/i)
+
+const developerFragment = fs.readFileSync(path.join(webapp, 'fragment/ManageDeveloperProfile.fragment.xml'), 'utf8')
+assert.match(developerFragment, /developer>\/developerProfile\/responsibilities/)
+assert.match(developerFragment, /press="\.onConfirmDeveloperProfile"/)
+assert.match(developerFragment, /press="\.onAddDeveloperResponsibility"/)
+assert.doesNotMatch(developerFragment, /Password|OTP|passkey|token/i)
 
 const controllerDefinition = loadController(controller)
 assert.equal(typeof controllerDefinition.onConfirmInvite, 'function')
@@ -219,7 +232,7 @@ function loadController (source) {
 
 for (const locale of ['i18n.properties', 'i18n_en.properties']) {
   const text = fs.readFileSync(path.join(webapp, 'i18n', locale), 'utf8')
-  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation']) {
+  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'manageResponsibilities']) {
     assert.match(text, new RegExp(`^${key}=`, 'm'))
   }
 }

@@ -1,5 +1,11 @@
 # Knowledge: `srv/user-admin.js`
 
+## Developer profile validation / Validation profile Developer
+
+Developer access requires a positive workload limit and at least one unique active catalog responsibility. The handler persists the desired snapshot, validates active catalogs, and uses `administrationVersion` plus a locked profile read to reject stale PM updates. Responsibility removal sets `active=false`; it never deletes the row or reassigns Bugs.
+
+Quyền Developer bắt buộc workload dương và ít nhất một responsibility catalog active, không trùng scope. Handler lưu desired snapshot, validate catalog active và dùng `administrationVersion` cùng row lock để chặn cập nhật cũ. Bỏ responsibility chỉ đặt `active=false`, không xóa dòng và không tự reassign Bug.
+
 Every administration read and request action uses one shared guard: the JWT must contain exactly one PM business role plus `UserAdmin`, and it must still resolve to an active internal PM. The request action also validates the role allowlist, PM-only UserAdmin requests, duplicate open invitations, and private signing configuration. It persists the request and delivery atomically, then registers the shared post-commit email kick. A unique hash of the normalized target email closes the concurrent check-then-insert race; a constraint conflict becomes the safe `ONBOARDING_ALREADY_OPEN` response. Before that check, an expired `INVITED` request for the target is retained as `FAILED` with a safe expiry reason and releases its open-request key, allowing a clean re-invitation without deleting audit data.
 
 In production, the signing key and onboarding base URL come only from the exact `idts-user-admin-invitation-config` user-provided service binding. The binding must occur exactly once and contain exactly `invitationSigningKey` and `invitationBaseUrl`; missing, duplicate, malformed, or broader credentials fail closed. Development and tests retain the existing `cds.env.idts.userAdmin` configuration path. The signing key is never stored in source, HANA, responses, logs, evidence, command arguments, or the browser.

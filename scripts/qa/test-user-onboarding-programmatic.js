@@ -141,6 +141,12 @@ async function main () {
     user: new cds.User({ id: 'pm@example.invalid', roles: ['authenticated-user', 'PM'] })
   }), 403, 'USER_ADMIN_REQUIRED')
 
+  await expectRejected(service.send({
+    event: 'READ',
+    query: SELECT.from(service.entities.ComponentCategories),
+    user: new cds.User({ id: 'developer@example.invalid', roles: ['authenticated-user', 'DEVELOPER'] })
+  }), 403, 'USER_ADMIN_REQUIRED')
+
   await db.run(UPDATE('idts.cap.Users').set({ active: false }).where({ ID: PM_ID }))
   await expectRejected(service.send({
     event: 'READ',
@@ -292,6 +298,62 @@ async function main () {
     },
     user: administrator
   })
+
+  const componentCategory = await db.run(
+    SELECT.one.from('idts.cap.ComponentCategories').columns('ID').where({ active: true })
+  )
+  assert.ok(componentCategory?.ID)
+  const desiredDeveloperProfile = {
+    availabilityStatusCode: 'AVAILABLE',
+    workloadLimit: 3,
+    responsibilities: [{
+      componentCategoryID: componentCategory.ID,
+      sapModuleID: null,
+      responsibilityLevelCode: 'PRIMARY'
+    }]
+  }
+
+  await expectRejected(service.send({
+    event: 'requestOnboarding',
+    data: {
+      email: 'missing.developer.profile@example.invalid',
+      requestedRole: 'DEVELOPER',
+      userAdminRequested: false
+    },
+    user: administrator
+  }), 400, 'DEVELOPER_PROFILE_REQUIRED')
+
+  await expectRejected(service.send({
+    event: 'requestOnboarding',
+    data: {
+      email: 'tester.with.profile@example.invalid',
+      requestedRole: 'TESTER',
+      userAdminRequested: false,
+      developerProfile: desiredDeveloperProfile
+    },
+    user: administrator
+  }), 400, 'DEVELOPER_PROFILE_NOT_ALLOWED')
+
+  const developerInvitation = await service.send({
+    event: 'requestOnboarding',
+    data: {
+      email: 'desired.developer@example.invalid',
+      requestedRole: 'DEVELOPER',
+      userAdminRequested: false,
+      developerProfile: desiredDeveloperProfile
+    },
+    user: administrator
+  })
+  const persistedDeveloperInvitation = await db.run(
+    SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: developerInvitation.ID })
+  )
+  const persistedDesiredResponsibilities = await db.run(
+    SELECT.from('idts.cap.UserOnboardingDeveloperResponsibilities').where({ onboardingRequest_ID: developerInvitation.ID })
+  )
+  assert.equal(persistedDeveloperInvitation.developerAvailabilityStatus_code, 'AVAILABLE')
+  assert.equal(persistedDeveloperInvitation.developerWorkloadLimit, 3)
+  assert.equal(persistedDesiredResponsibilities.length, 1)
+  assert.equal(persistedDesiredResponsibilities[0].componentCategory_ID, componentCategory.ID)
   const privilegedSend = await processUserOnboardingDeliveries({
     tx: db,
     emailConfig: {
@@ -310,7 +372,7 @@ async function main () {
     now: new Date('2026-08-12T10:06:00.000Z'),
     workerID: 'onboarding-privileged-worker'
   })
-  assert.deepEqual(privilegedSend, { sent: 1, failed: 0, skipped: 0 })
+  assert.deepEqual(privilegedSend, { sent: 2, failed: 0, skipped: 0 })
   const privilegedRow = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: privilegedCreated.ID }))
   const privilegedToken = createInvitationToken({
     invitationID: privilegedRow.ID,
@@ -450,6 +512,7 @@ async function main () {
       userID: provisionedUserID,
       requestedRole: 'DEVELOPER',
       userAdminRequested: false,
+      developerProfile: desiredDeveloperProfile,
       reason: 'Move controlled user to the development workflow.',
       expectedVersion: 4
     },
@@ -594,7 +657,8 @@ async function main () {
     data: {
       email: 'controlled.developer@example.invalid',
       requestedRole: 'DEVELOPER',
-      userAdminRequested: false
+      userAdminRequested: false,
+      developerProfile: desiredDeveloperProfile
     },
     user: administrator
   })

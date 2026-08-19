@@ -308,8 +308,14 @@ async function main () {
   assert.match(service, /action requestRevoke\(/)
   assert.match(service, /action retryAccessOperation\(/)
   assert.match(service, /action reconcileAccessOperation\(/)
+  assert.match(service, /type DeveloperProfileInput/)
+  assert.match(service, /responsibilities\s*:\s*array of DeveloperResponsibilityInput/)
+  assert.match(service, /action readDeveloperProfile\(/)
+  assert.match(service, /action updateDeveloperProfile\(/)
   assert.match(schema, /entity UserAccessOperations/)
   assert.match(schema, /entity UserIdentityAuditEvents/)
+  assert.match(schema, /entity UserOnboardingDeveloperResponsibilities/)
+  assert.match(schema, /administrationVersion\s*:\s*Integer default 0 not null/)
   assert.deepEqual(
     security.scopes.find(scope => scope.name === '$XSAPPNAME.ProvisioningBroker')?.['grant-as-authority-to-apps'],
     ['$XSAPPNAME(application,idts-user-access-broker)']
