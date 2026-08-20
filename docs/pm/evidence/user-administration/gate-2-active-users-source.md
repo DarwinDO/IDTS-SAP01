@@ -9,13 +9,13 @@ Evidence source cho Gate 2 Active Users được chuẩn bị trên branch cô l
 ## Frozen source / Source đã freeze
 
 - Required base: `96746fef148d6d6b9627ed1e8b9be5b28eb94e81`
-- Implementation commits: `f04c90f` (read-model contract), `4563585` (backend aggregation), `c9a5e34` (Active Users UI), `c789b4f` (paging/default-state remediation), `ea4621e` (restored-tab/UI paging remediation)
+- Implementation commits: `f04c90f` (read-model contract), `4563585` (backend aggregation), `c9a5e34` (Active Users UI), `c789b4f` (paging/default-state remediation), `ea4621e` (restored-tab/UI paging remediation), `c68586a` (identity fail-closed/capability-column remediation)
 - Source path: `C:\Users\LapHub\.codex\worktrees\e429\IDTS-SAP01`
 - Human owner: DonHV
 - Coordinator: independent exact-diff review; executor does not self-approve
 
 - Base bắt buộc: `96746fef148d6d6b9627ed1e8b9be5b28eb94e81`
-- Commit implementation: `f04c90f` (contract read model), `4563585` (backend aggregation), `c9a5e34` (UI Active Users), `c789b4f` (paging/default-state remediation), `ea4621e` (restored-tab/UI paging remediation)
+- Commit implementation: `f04c90f` (contract read model), `4563585` (backend aggregation), `c9a5e34` (UI Active Users), `c789b4f` (paging/default-state remediation), `ea4621e` (restored-tab/UI paging remediation), `c68586a` (remediation identity fail-closed/cột capability)
 - Source path: `C:\Users\LapHub\.codex\worktrees\e429\IDTS-SAP01`
 - Human owner: DonHV
 - Coordinator: review exact diff độc lập; executor không tự approve
