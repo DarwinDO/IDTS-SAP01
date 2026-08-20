@@ -182,6 +182,14 @@ async function completeSuccess (tx, options) {
     if (!userID) throw brokerError(409, 'ACTIVE_ACCESS_NOT_RECONCILED', 'Active access is not reconciled.')
     await tx.run(UPDATE('idts.cap.Users').set({ active: false }).where({ ID: userID }))
     await alignDeveloperProfile(tx, userID, null, request, operation)
+  } else if (operation.operationType === 'REACTIVATE') {
+    if (!userID) throw brokerError(409, 'ACTIVE_ACCESS_NOT_RECONCILED', 'Active access is not reconciled.')
+    const activated = await tx.run(UPDATE('idts.cap.Users').set({ active: true }).where({
+      ID: userID,
+      active: false,
+      role_code: operation.desiredRole_code
+    }))
+    if (activated !== 1) throw brokerError(409, 'ACCESS_OPERATION_CONFLICT', 'The local access record does not match the reconciled role.')
   }
 
   const finalState = operation.operationType === 'REVOKE' ? 'REVOKED' : 'ACTIVE'
@@ -429,6 +437,7 @@ function processingStateFor (operationType) {
   if (operationType === 'CHANGE_ROLE') return 'ROLE_CHANGING'
   if (operationType === 'REVOKE') return 'REVOKING'
   if (operationType === 'PROVISION') return 'PROVISIONING'
+  if (operationType === 'REACTIVATE') return 'SUSPENDED'
   throw brokerError(400, 'INVALID_PROVISIONING_ACTION', 'Provisioning action is invalid.')
 }
 
@@ -436,6 +445,7 @@ function queuedStateFor (operationType) {
   if (operationType === 'CHANGE_ROLE') return 'ROLE_CHANGE_QUEUED'
   if (operationType === 'REVOKE') return 'REVOKE_QUEUED'
   if (operationType === 'PROVISION') return 'PROVISION_QUEUED'
+  if (operationType === 'REACTIVATE') return 'SUSPENDED'
   throw brokerError(400, 'INVALID_PROVISIONING_ACTION', 'Provisioning action is invalid.')
 }
 

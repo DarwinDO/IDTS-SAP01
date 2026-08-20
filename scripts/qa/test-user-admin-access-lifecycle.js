@@ -8,6 +8,7 @@ const fs = require('node:fs')
 const path = require('node:path')
 const cds = require('@sap/cds')
 const { INSERT, SELECT } = cds.ql
+const { executeAccessChange } = require('../../broker/lib/access-provisioning')
 
 const root = path.resolve(__dirname, '../..')
 const serviceSource = fs.readFileSync(path.join(root, 'srv/user-admin.cds'), 'utf8')
@@ -214,6 +215,12 @@ async function runProgrammaticLifecycleChecks () {
   assert.equal(suspensionAudit.result, 'QUEUED')
   assert.equal(suspendedRequest.latestOperation_ID, null)
   assert.equal((await db.run(SELECT.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: TARGET_REQUEST_ID }))).length, beforeOperations.length)
+  const suspendedActiveUserRows = await service.send({
+    event: 'searchActiveUsers',
+    data: { query: 'Lifecycle Target', includeNonActive: true, skip: 0, top: 100 },
+    user: adminOne
+  })
+  assert.equal(suspendedActiveUserRows[0].accessState, 'SUSPENDED')
 
   await expectRejected(service.send({
     event: 'requestSuspend',
@@ -250,6 +257,57 @@ async function runProgrammaticLifecycleChecks () {
   assert.equal(reactivationAudit.result, 'QUEUED')
   assert.equal((await db.run(SELECT.one.from('idts.cap.Users').where({ ID: TARGET_ID }))).active, false)
 
+  const matchingProviderCalls = []
+  const matchingProvider = {
+    listRoleCollections: async () => {
+      matchingProviderCalls.push('LIST')
+      return ['IDTS_TESTER']
+    },
+    assignRoleCollection: async () => { throw new Error('REACTIVATE must not assign a provider Role Collection.') },
+    unassignRoleCollection: async () => { throw new Error('REACTIVATE must not revoke a provider Role Collection.') }
+  }
+  const readback = await executeAccessChange({
+    action: 'REACTIVATE',
+    requestedRole: 'TESTER',
+    userAdminRequested: false,
+    provider: matchingProvider
+  })
+  assert.deepEqual(readback, { action: 'REACTIVATE', changed: [], finalRoleCollections: ['IDTS_TESTER'] })
+  assert.deepEqual(matchingProviderCalls, ['LIST'])
+  await assert.rejects(
+    executeAccessChange({
+      action: 'REACTIVATE',
+      requestedRole: 'TESTER',
+      userAdminRequested: false,
+      provider: { ...matchingProvider, listRoleCollections: async () => ['IDTS_PM'] }
+    }),
+    error => error?.code === 'PROVISIONING_READBACK_MISMATCH'
+  )
+
+  const originalAuth = cds.env.requires.auth
+  cds.env.requires.auth = { kind: 'xsuaa' }
+  const brokerService = await cds.serve('ProvisioningBrokerService').from('srv/provisioning-broker.cds')
+  const broker = new cds.User({ id: 'lifecycle-broker', roles: ['authenticated-user', 'ProvisioningBroker'] })
+  const claimed = await brokerService.send({ event: 'claimNextAccessOperation', data: {}, user: broker })
+  assert.equal(claimed.operationType, 'REACTIVATE')
+  const completed = await brokerService.send({
+    event: 'completeAccessOperation',
+    data: {
+      operationID: claimed.operationID,
+      leaseToken: claimed.leaseToken,
+      resultCode: 'APPLIED',
+      safeCode: 'ROLE_COLLECTIONS_VERIFIED',
+      providerCorrelationHash: 'e'.repeat(64)
+    },
+    user: broker
+  })
+  cds.env.requires.auth = originalAuth
+  assert.equal(completed.status, 'ACTIVE')
+  assert.equal((await db.run(SELECT.one.from('idts.cap.Users').where({ ID: TARGET_ID }))).active, true)
+  assert.equal((await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: TARGET_REQUEST_ID }))).status_code, 'ACTIVE')
+  assert.equal((await db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ ID: claimed.operationID }))).state, 'SUCCEEDED')
+  assert.equal((await db.run(SELECT.from('idts.cap.AuthSessions').where({ user_ID: TARGET_ID }))).filter(session => session.revokedAt).length, 3)
+
   const concurrent = await Promise.allSettled([
     service.send({
       event: 'requestSuspend',
@@ -271,10 +329,32 @@ async function runProgrammaticLifecycleChecks () {
     active: true
   }))
   const activeAdminRequest = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ activeUser_ID: activeAdmin.ID, status_code: 'ACTIVE' }))
+  const activeAdminUser = activeAdmin.ID === ADMIN_ONE_ID ? adminOne : adminTwo
+  await expectRejected(service.send({
+    event: 'requestRoleChange',
+    data: {
+      userID: activeAdmin.ID,
+      requestedRole: 'TESTER',
+      userAdminRequested: false,
+      developerProfile: null,
+      reason: 'Final administrator role must remain protected.',
+      expectedVersion: activeAdminRequest.provisioningVersion
+    },
+    user: activeAdminUser
+  }), 409, 'LAST_USER_ADMIN_REQUIRED')
+  await expectRejected(service.send({
+    event: 'requestRevoke',
+    data: {
+      userID: activeAdmin.ID,
+      reason: 'Final administrator access must remain protected.',
+      expectedVersion: activeAdminRequest.provisioningVersion
+    },
+    user: activeAdminUser
+  }), 409, 'LAST_USER_ADMIN_REQUIRED')
   await expectRejected(service.send({
     event: 'requestSuspend',
     data: { userID: activeAdmin.ID, reason: 'Final administrator must remain.', expectedVersion: activeAdminRequest.provisioningVersion },
-    user: activeAdmin.ID === ADMIN_ONE_ID ? adminOne : adminTwo
+    user: activeAdminUser
   }), 409, 'LAST_USER_ADMIN_REQUIRED')
   assert.equal((await db.run(SELECT.one.from('idts.cap.Users').where({ ID: activeAdmin.ID }))).active, true)
 

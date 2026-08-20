@@ -5,7 +5,7 @@ process.env.CDS_ENV = 'test'
 
 const assert = require('node:assert/strict')
 const cds = require('@sap/cds')
-const { INSERT, SELECT } = cds.ql
+const { INSERT, SELECT, UPDATE } = cds.ql
 
 const ADMIN_ID = '81000000-0000-4000-8000-000000000001'
 const REQUEST_ID = '81000000-0000-4000-8000-000000000002'
@@ -14,6 +14,9 @@ const FAILURE_REQUEST_ID = '81000000-0000-4000-8000-000000000006'
 const FAILURE_OPERATION_ID = '81000000-0000-4000-8000-000000000007'
 const EXPIRED_REQUEST_ID = '81000000-0000-4000-8000-000000000010'
 const EXPIRED_OPERATION_ID = '81000000-0000-4000-8000-000000000011'
+const REACTIVATION_OPERATION_ID = '81000000-0000-4000-8000-000000000015'
+const REACTIVATION_SESSION_ID = '81000000-0000-4000-8000-000000000016'
+const REVOKE_OPERATION_ID = '81000000-0000-4000-8000-000000000017'
 
 async function main () {
   cds.env.requires.auth = { kind: 'xsuaa' }
@@ -103,6 +106,106 @@ async function main () {
   assert.equal(operation.attemptCount, 1)
   assert.equal(operation.leaseTokenHash, null)
   assert.equal(operation.providerCorrelationHash, 'e'.repeat(64))
+
+  await db.run(INSERT.into('idts.cap.AuthSessions').entries({
+    ID: REACTIVATION_SESSION_ID,
+    user_ID: request.activeUser_ID,
+    tokenHash: 'a'.repeat(64),
+    issuedAt: '2026-08-13T00:00:00.000Z',
+    expiresAt: '2026-08-14T00:00:00.000Z',
+    revokedAt: '2026-08-13T01:00:00.000Z'
+  }))
+  await db.run(UPDATE('idts.cap.Users').set({ active: false }).where({ ID: request.activeUser_ID }))
+  await db.run(UPDATE('idts.cap.UserOnboardingRequests').set({
+    status_code: 'SUSPENDED',
+    provisioningVersion: 4,
+    latestOperation_ID: REACTIVATION_OPERATION_ID
+  }).where({ ID: REQUEST_ID }))
+  await db.run(INSERT.into('idts.cap.UserAccessOperations').entries({
+    ID: REACTIVATION_OPERATION_ID,
+    onboardingRequest_ID: REQUEST_ID,
+    operationType: 'REACTIVATE',
+    state: 'PENDING',
+    requestedBy_ID: ADMIN_ID,
+    idempotencyKey: 'b'.repeat(64),
+    expectedVersion: 4,
+    desiredRole_code: 'TESTER',
+    desiredUserAdmin: false,
+    correlationId: '81000000-0000-4000-8000-000000000017',
+    attemptCount: 0
+  }))
+  const reactivationClaim = await service.send({ event: 'claimNextAccessOperation', data: {}, user: broker })
+  assert.equal(reactivationClaim.operationID, REACTIVATION_OPERATION_ID)
+  assert.equal(reactivationClaim.operationType, 'REACTIVATE')
+  assert.equal(reactivationClaim.desiredBusinessRole, 'TESTER')
+  const reactivationCompletion = await service.send({
+    event: 'completeAccessOperation',
+    data: {
+      operationID: REACTIVATION_OPERATION_ID,
+      leaseToken: reactivationClaim.leaseToken,
+      resultCode: 'APPLIED',
+      safeCode: 'ROLE_COLLECTIONS_VERIFIED',
+      providerCorrelationHash: 'c'.repeat(64)
+    },
+    user: broker
+  })
+  assert.equal(reactivationCompletion.status, 'ACTIVE')
+  assert.equal((await db.run(SELECT.one.from('idts.cap.Users').where({ ID: request.activeUser_ID }))).active, true)
+  assert.equal((await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: REQUEST_ID }))).status_code, 'ACTIVE')
+  assert.equal((await db.run(SELECT.one.from('idts.cap.AuthSessions').where({ ID: REACTIVATION_SESSION_ID }))).revokedAt, '2026-08-13T01:00:00.000Z')
+  await assert.rejects(service.send({
+    event: 'completeAccessOperation',
+    data: {
+      operationID: REACTIVATION_OPERATION_ID,
+      leaseToken: reactivationClaim.leaseToken,
+      resultCode: 'APPLIED',
+      safeCode: 'ROLE_COLLECTIONS_VERIFIED',
+      providerCorrelationHash: 'c'.repeat(64)
+    },
+    user: broker
+  }), error => error?.code === 'ACCESS_OPERATION_LEASE_INVALID')
+
+  await db.run(UPDATE('idts.cap.Users').set({ active: false }).where({ ID: request.activeUser_ID }))
+  await db.run(UPDATE('idts.cap.UserOnboardingRequests').set({
+    status_code: 'REVOKE_QUEUED',
+    provisioningVersion: 6,
+    latestOperation_ID: REVOKE_OPERATION_ID
+  }).where({ ID: REQUEST_ID }))
+  await db.run(INSERT.into('idts.cap.UserAccessOperations').entries({
+    ID: REVOKE_OPERATION_ID,
+    onboardingRequest_ID: REQUEST_ID,
+    operationType: 'REVOKE',
+    state: 'PENDING',
+    requestedBy_ID: ADMIN_ID,
+    idempotencyKey: 'f'.repeat(64),
+    expectedVersion: 6,
+    desiredRole_code: 'TESTER',
+    desiredUserAdmin: false,
+    correlationId: '81000000-0000-4000-8000-000000000018',
+    attemptCount: 0
+  }))
+  const revokeClaim = await service.send({ event: 'claimNextAccessOperation', data: {}, user: broker })
+  assert.equal(revokeClaim.operationID, REVOKE_OPERATION_ID)
+  const revokeFailure = await service.send({
+    event: 'completeAccessOperation',
+    data: {
+      operationID: REVOKE_OPERATION_ID,
+      leaseToken: revokeClaim.leaseToken,
+      resultCode: 'PERMANENT_FAILURE',
+      safeCode: 'PROVIDER_FORBIDDEN',
+      providerCorrelationHash: null
+    },
+    user: broker
+  })
+  assert.equal(revokeFailure.status, 'BLOCKED_MANUAL_REVIEW')
+  assert.equal((await db.run(SELECT.one.from('idts.cap.Users').where({ ID: request.activeUser_ID }))).active, false)
+  const revokeRequest = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: REQUEST_ID }))
+  assert.equal(revokeRequest.activeUser_ID, request.activeUser_ID)
+  assert.equal(revokeRequest.status_code, 'BLOCKED_MANUAL_REVIEW')
+  assert.ok(await db.run(SELECT.one.from('idts.cap.UserIdentityAuditEvents').where({
+    operation_ID: REVOKE_OPERATION_ID,
+    action: 'REVOKE'
+  })))
 
   await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries({
     ID: FAILURE_REQUEST_ID,

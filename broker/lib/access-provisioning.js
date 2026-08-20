@@ -22,14 +22,22 @@ function requestedRoleCollections ({ requestedRole, userAdminRequested }) {
 }
 
 async function executeAccessChange ({ action, requestedRole, userAdminRequested, provider }) {
-  assertProvider(provider)
   const normalizedAction = String(action || '').trim().toUpperCase()
-  if (!['ASSIGN', 'CHANGE_ROLE', 'REVOKE'].includes(normalizedAction)) {
+  if (!['ASSIGN', 'CHANGE_ROLE', 'REVOKE', 'REACTIVATE'].includes(normalizedAction)) {
     throw brokerError('INVALID_PROVISIONING_ACTION', 'Provisioning action is invalid.')
   }
+  assertProvider(provider, normalizedAction === 'REACTIVATE')
 
   const desired = requestedRoleCollections({ requestedRole, userAdminRequested })
   const before = unique(await provider.listRoleCollections())
+  if (normalizedAction === 'REACTIVATE') {
+    assertValidUserAdminOverlay(before)
+    const currentIDTS = before.filter(collection => IDTS_ACCESS_COLLECTIONS.has(collection))
+    if (currentIDTS.length !== desired.length || desired.some(collection => !currentIDTS.includes(collection))) {
+      throw brokerError('PROVISIONING_READBACK_MISMATCH', 'The current access state does not match the requested IDTS access.')
+    }
+    return { action: normalizedAction, changed: [], finalRoleCollections: desired }
+  }
   if (normalizedAction !== 'REVOKE') {
     assertValidUserAdminOverlay(before)
     if (normalizedAction !== 'CHANGE_ROLE') assertNoConflictingBusinessRole(before, desired[0])
@@ -140,8 +148,11 @@ function assertValidUserAdminOverlay (collections) {
   }
 }
 
-function assertProvider (provider) {
-  for (const method of ['listRoleCollections', 'assignRoleCollection', 'unassignRoleCollection']) {
+function assertProvider (provider, readOnly = false) {
+  const methods = readOnly
+    ? ['listRoleCollections']
+    : ['listRoleCollections', 'assignRoleCollection', 'unassignRoleCollection']
+  for (const method of methods) {
     if (typeof provider?.[method] !== 'function') {
       throw brokerError('PROVIDER_UNAVAILABLE', 'The access provider is unavailable.')
     }
