@@ -30,7 +30,7 @@ Although only the CAP module was selected, MultiApps processed its required mana
 
 ## Current state
 
-Status: `SOURCE_REMEDIATED_PENDING_SELECTIVE_REDEPLOYMENT`.
+Status: `REMEDIATION_DEPLOYED_PENDING_BOUNDED_MANUAL_REACCEPTANCE`.
 
 The first post-cutover readiness probe timed out. After CF control-plane connectivity briefly recovered, an initial sanitized V3 readback observed the CAP app requested `STARTED` with one desired web instance but zero running instances. The frozen rollback command was invoked once, but failed during its initial CF API GET and did not mutate the app. A later fresh readback proved CAP running `1/1`, followed by a complete `DEMO READY` result, zero active MTA operations, successful XSUAA/destination/Job Scheduler last operations, and unchanged CAP/AppRouter binding counts `7/3`; therefore no rollback was required.
 
@@ -90,4 +90,16 @@ The main MTAR is a full archive. Any approved redeployment must select only modu
 
 The full-repo/module installs emitted existing npm audit/deprecation findings during packaging. No `npm audit fix`, dependency update or lockfile change was made. The first dedicated UI build was rejected before artifact creation because the preceding full build removed its empty generated staging directory; recreating only that directory allowed one successful build. No platform mutation occurred during packaging.
 
-Gate 2 now requires a selective CAP/UI remediation deployment, fresh readiness, and a bounded manual recheck of identity-incomplete state plus the capability column before merge. Gate 3 remains unopened.
+## Remediation deployment
+
+DonHV approved the exact selective remediation deployment. Preconditions passed: exact artifact hashes, target assertion, `DEMO READY`, CAP/AppRouter `1/1`, binding counts `7/3`, zero active MTA operations and exact-head CI PASS.
+
+- CAP operation `34328020-9c99-11f1-a69e-eeee0a86188c` selected only `idts-sap01-srv` with blue-green strategy, version rule `ALL`, zero retries and abort-on-error.
+- The idle CAP candidate passed `/health=200`, `/ready=200` and anonymous protected API `401` before resume.
+- MultiApps again processed same-descriptor metadata for Destination, XSUAA and Job Scheduler; all three final last operations are `succeeded`. DB deployer, AppRouter and app-content modules were not selected.
+- The CAP cutover completed once; no rollback or redeploy retry ran.
+- UI operation `d2648b53-9c99-11f1-b965-eeee0a8dceb0` deployed only the dedicated content module to the existing HTML5 host and completed once.
+- Final independent readiness: CAP/AppRouter `1/1`, liveness/readiness `200`, anonymous protected API `401`, Web `200`, `DEMO READY`, binding counts `7/3`, active MTA operations `0`.
+- Schema/HDI/seed/data/user/role/provider mutations: `0`.
+
+Gate 2 now needs a bounded human recheck on the remediated runtime: confirm the User Administration capability column is visible, the controlled linked TESTER remains `ACTIVE`, the incomplete/unlinked fixture is not reported `ACTIVE`, Tester remains forbidden from User Administration, and Tester still renders Bug Management. Merge and Gate 3 remain blocked until this recheck is recorded.
