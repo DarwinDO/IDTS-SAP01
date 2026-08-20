@@ -75,7 +75,7 @@ Evidence source cho Gate 2 Active Users được chuẩn bị trên branch cô l
 - Search is case-insensitive and the CDS `String(255)` boundary rejects a 256-character query with HTTP 400 before product handler execution.
 - Explicit `skip/top` page bounds reject negative skip and `top > 100` with HTTP 400.
 - A 205-row synthetic fixture returns pages of 100, 100, 5, and 0 with stable boundaries and no duplicate user IDs; users are not lost because of an early source-row limit.
-- Empty, missing, or mismatched identity state stays safe; a single `ACTIVE` request without a matching immutable link and duplicate active requests both become `INCOMPLETE`.
+- Empty, missing, or mismatched identity state stays safe; a single PM `ACTIVE` request asking for UserAdmin without a matching immutable link and duplicate active requests both become `INCOMPLETE`. The fixture also proves the unlinked PM cannot be reported with UserAdmin capability.
 - A stale operation fixture cannot replace the selected request's current safe result.
 - Result ordering is stable and each page is bounded to at most 100 rows; callers advance with `skip`.
 

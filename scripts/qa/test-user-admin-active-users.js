@@ -175,7 +175,7 @@ async function main () {
       ID: UNLINKED_ACTIVE_USER_ID,
       displayName: 'Unlinked Active User',
       email: 'unlinked-active@example.invalid',
-      role_code: 'TESTER',
+      role_code: 'PM',
       active: true
     }
   ]))
@@ -247,6 +247,8 @@ async function main () {
     }),
     requestEntry(UNLINKED_ACTIVE_REQUEST_ID, {
       targetEmailNormalized: 'unlinked-active@example.invalid',
+      requestedRole_code: 'PM',
+      userAdminRequested: true,
       activeUser_ID: UNLINKED_ACTIVE_USER_ID,
       identityKeyHash: 'f'.repeat(64),
       status_code: 'ACTIVE',
@@ -388,6 +390,7 @@ async function main () {
   }))[0]
   assert.equal(unlinkedActive.identityLinked, false)
   assert.equal(unlinkedActive.accessState, 'INCOMPLETE')
+  assert.equal(unlinkedActive.userAdminCapability, false)
 
   const roleSearch = await service.send({
     event: 'searchActiveUsers',
