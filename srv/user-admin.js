@@ -20,6 +20,7 @@ const {
   normalizeDeveloperProfileInput,
   assertDeveloperProfileForRole
 } = require('./user-admin/developer-profile')
+const { registerActiveUserHandlers } = require('./user-admin/active-users')
 
 const OPEN_STATUSES = [
   'INVITED',
@@ -51,6 +52,7 @@ class UserAdministrationService extends cds.ApplicationService {
     this.on('requestRevoke', req => requestRevoke(req))
     this.on('retryAccessOperation', req => retryAccessOperation(req))
     this.on('reconcileAccessOperation', req => reconcileAccessOperation(req))
+    registerActiveUserHandlers(this, { authorize: requireActiveUserAdministrator })
     return super.init()
   }
 }
