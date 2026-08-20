@@ -13,6 +13,7 @@ sap.ui.define([
 			this.setModel(new JSONModel({ busy: false, selectedTab: oSessionState.selectedTab }), "view");
 			this.setModel(new JSONModel(this._emptyInvite()), "invite");
 			this.setModel(new JSONModel(this._emptyAccessChange()), "access");
+			this.setModel(new JSONModel(this._emptyAccessLifecycle()), "lifecycle");
 			this.setModel(new JSONModel(this._emptyDeveloperAdministration()), "developer");
 			this.setModel(new JSONModel({ loaded: false }), "catalogs");
 			this.setModel(new JSONModel({ items: [] }), "requests");
@@ -101,7 +102,10 @@ sap.ui.define([
 				} else if (Array.isArray(oResult?.value)) {
 					oDetails = oResult.value[0];
 				}
-				oActiveUsersModel.setProperty("/details", oDetails || null);
+				oActiveUsersModel.setProperty("/details", oDetails ? {
+					...oDetails,
+					_request: this._requestForActiveUser(oRow.userID)
+				} : null);
 				if (!this._activeUserDetailsDialog) {
 					this._activeUserDetailsDialog = await Fragment.load({
 						id: this.getView().getId(),
@@ -121,6 +125,24 @@ sap.ui.define([
 		onCloseActiveUserDetails: function () {
 			if (this._activeUserDetailsDialog) this._activeUserDetailsDialog.close();
 			this.getModel("activeUsers").setProperty("/details", null);
+		},
+
+		onOpenActiveUserRoleChange: async function () {
+			const oDetails = this.getModel("activeUsers").getProperty("/details");
+			if (oDetails?.accessState !== "ACTIVE") return;
+			await this._openRoleChangeForRow(oDetails._request);
+		},
+
+		onOpenActiveUserSuspend: async function () {
+			await this._openActiveUserLifecycle("SUSPEND", "ACTIVE", "suspendAccess", "suspendWarning", "suspendAccess");
+		},
+
+		onOpenActiveUserReactivate: async function () {
+			await this._openActiveUserLifecycle("REACTIVATE", "SUSPENDED", "reactivateAccess", "reactivateWarning", "reactivateAccess");
+		},
+
+		onOpenActiveUserRevoke: async function () {
+			await this._openActiveUserLifecycle("REVOKE", "ACTIVE", "revokeAccess", "revokeWarning", "revokeAccess");
 		},
 
 		onOpenInvite: async function () {
@@ -209,9 +231,11 @@ sap.ui.define([
 
 		onOpenRoleChange: async function (oEvent) {
 			const oRow = this._rowFromEvent(oEvent);
-			if (!oRow) {
-				return;
-			}
+			await this._openRoleChangeForRow(oRow);
+		},
+
+		_openRoleChangeForRow: async function (oRow) {
+			if (!oRow) return;
 			await this._ensureDeveloperCatalogs();
 			const oDeveloperProfile = oRow.requestedRole_code === "DEVELOPER"
 				? await this._readDeveloperProfile(oRow.activeUser_ID)
@@ -260,12 +284,13 @@ sap.ui.define([
 			const oAccessModel = this.getModel("access");
 			const oAccess = oAccessModel.getData();
 			const sReason = (oAccess.reason || "").trim();
+			const bRoleChange = oAccess.mode === "CHANGE_ROLE";
 			if (!sReason) {
 				MessageBox.warning(await this._text("reasonRequired"));
 				return;
 			}
+			if (!await this._confirm(bRoleChange ? "changeRoleConfirmation" : "revokeConfirmation")) return;
 			oAccessModel.setProperty("/submitting", true);
-			const bRoleChange = oAccess.mode === "CHANGE_ROLE";
 			const bSuccess = await this._invokeAction(bRoleChange ? "requestRoleChange" : "requestRevoke", bRoleChange ? {
 				userID: oAccess.row.activeUser_ID,
 				requestedRole: oAccess.role,
@@ -277,7 +302,7 @@ sap.ui.define([
 				userID: oAccess.row.activeUser_ID,
 				reason: sReason,
 				expectedVersion: oAccess.row.provisioningVersion
-			}, bRoleChange ? "changeRoleQueued" : "revokeQueued");
+			}, bRoleChange ? "changeRoleQueued" : "revokeQueued", true);
 			oAccessModel.setProperty("/submitting", false);
 			if (bSuccess) {
 				this._accessDialog.close();
@@ -285,9 +310,44 @@ sap.ui.define([
 			}
 		},
 
+		onConfirmAccessLifecycle: async function () {
+			const oLifecycleModel = this.getModel("lifecycle");
+			const oLifecycle = oLifecycleModel.getData();
+			if (oLifecycle.submitting) return;
+			const sReason = (oLifecycle.reason || "").trim();
+			if (!sReason) {
+				MessageBox.warning(await this._text("reasonRequired"));
+				return;
+			}
+			const mActions = {
+				SUSPEND: ["requestSuspend", "suspendQueued"],
+				REACTIVATE: ["requestReactivate", "reactivateQueued"],
+				REVOKE: ["requestRevoke", "revokeQueued"]
+			};
+			const aAction = mActions[oLifecycle.mode];
+			if (!aAction || !oLifecycle.row?.activeUser_ID) return;
+			if (!await this._confirm(`${oLifecycle.mode.toLowerCase()}Confirmation`)) return;
+			oLifecycleModel.setProperty("/submitting", true);
+			const bSuccess = await this._invokeAction(aAction[0], {
+				userID: oLifecycle.row.activeUser_ID,
+				reason: sReason,
+				expectedVersion: oLifecycle.row.provisioningVersion
+			}, aAction[1], true);
+			oLifecycleModel.setProperty("/submitting", false);
+			if (bSuccess) {
+				this._accessLifecycleDialog.close();
+				oLifecycleModel.setData(this._emptyAccessLifecycle());
+			}
+		},
+
 		onCancelAccessChange: function () {
 			this._accessDialog.close();
 			this.getModel("access").setData(this._emptyAccessChange());
+		},
+
+		onCancelAccessLifecycle: function () {
+			this._accessLifecycleDialog.close();
+			this.getModel("lifecycle").setData(this._emptyAccessLifecycle());
 		},
 
 		onRetryAccessOperation: async function (oEvent) {
@@ -298,7 +358,7 @@ sap.ui.define([
 			await this._invokeAction("retryAccessOperation", {
 				operationID: oRow.latestOperation_ID,
 				expectedVersion: oRow.provisioningVersion
-			}, "retryQueued");
+			}, "retryQueued", true);
 		},
 
 		onReconcileAccessOperation: async function (oEvent) {
@@ -309,7 +369,7 @@ sap.ui.define([
 			await this._invokeAction("reconcileAccessOperation", {
 				operationID: oRow.latestOperation_ID,
 				expectedVersion: oRow.provisioningVersion
-			}, "reconcileQueued");
+			}, "reconcileQueued", true);
 		},
 
 		onOpenDeveloperProfile: async function (oEvent) {
@@ -403,6 +463,18 @@ sap.ui.define([
 			};
 		},
 
+		_emptyAccessLifecycle: function () {
+			return {
+				mode: "",
+				title: "",
+				confirmText: "",
+				warning: "",
+				row: null,
+				reason: "",
+				submitting: false
+			};
+		},
+
 		_emptyDeveloperProfile: function () {
 			return {
 				availabilityStatusCode: "AVAILABLE",
@@ -490,13 +562,40 @@ sap.ui.define([
 			this._accessDialog.open();
 		},
 
-		_invokeAction: async function (sAction, mParameters, sSuccessTextKey) {
+		_openActiveUserLifecycle: async function (sMode, sState, sTitleKey, sWarningKey, sConfirmKey) {
+			const oDetails = this.getModel("activeUsers").getProperty("/details");
+			if (oDetails?.accessState !== sState || !oDetails._request) return;
+			await this._openAccessLifecycleDialog({
+				mode: sMode,
+				title: await this._text(sTitleKey),
+				confirmText: await this._text(sConfirmKey),
+				warning: await this._text(sWarningKey),
+				row: oDetails._request,
+				buttonType: sMode === "REACTIVATE" ? "Accept" : "Negative"
+			});
+		},
+
+		_openAccessLifecycleDialog: async function (oData) {
+			this.getModel("lifecycle").setData({ ...this._emptyAccessLifecycle(), ...oData });
+			if (!this._accessLifecycleDialog) {
+				this._accessLifecycleDialog = await Fragment.load({
+					id: this.getView().getId(),
+					name: "idts.useradministrationui.fragment.ConfirmAccessLifecycle",
+					controller: this
+				});
+				this.getView().addDependent(this._accessLifecycleDialog);
+			}
+			this._accessLifecycleDialog.open();
+		},
+
+		_invokeAction: async function (sAction, mParameters, sSuccessTextKey, bReloadActiveUsers) {
 			this.getModel("view").setProperty("/busy", true);
 			try {
 				const oOperation = this.getView().getModel().bindContext(`/${sAction}(...)`);
 				Object.entries(mParameters).forEach(([sName, vValue]) => oOperation.setParameter(sName, vValue));
 				await oOperation.invoke("$direct");
 				await this._loadRequests("");
+				if (bReloadActiveUsers === true && this.getModel("activeUsers")) await this._loadActiveUsers();
 				MessageToast.show(await this._text(sSuccessTextKey));
 				return true;
 			} catch {
@@ -520,6 +619,10 @@ sap.ui.define([
 
 		_activeUserRowFromEvent: function (oEvent) {
 			return oEvent?.getSource?.().getBindingContext("activeUsers")?.getObject?.() || null;
+		},
+
+		_requestForActiveUser: function (sUserID) {
+			return (this.getModel("requests")?.getProperty("/items") || []).find(oRow => oRow.activeUser_ID === sUserID) || null;
 		},
 
 		_ensureActiveUsersLoaded: function () {

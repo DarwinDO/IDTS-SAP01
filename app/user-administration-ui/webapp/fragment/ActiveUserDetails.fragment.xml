@@ -90,6 +90,27 @@
 					<Label text="{i18n>openBugImpact}" class="sapUiSmallMarginTop"/>
 					<ObjectNumber number="{activeUsers>/details/developerOpenBugImpactCount}"/>
 				</VBox>
+				<Toolbar class="sapUiSmallMarginTop">
+					<Button
+						text="{i18n>changeRole}"
+						visible="{= !!${activeUsers>/details/_request} &amp;&amp; ${activeUsers>/details/accessState} === 'ACTIVE' }"
+						press=".onOpenActiveUserRoleChange"/>
+					<Button
+						text="{i18n>suspendAccess}"
+						type="Negative"
+						visible="{= !!${activeUsers>/details/_request} &amp;&amp; ${activeUsers>/details/accessState} === 'ACTIVE' }"
+						press=".onOpenActiveUserSuspend"/>
+					<Button
+						text="{i18n>reactivateAccess}"
+						type="Accept"
+						visible="{= !!${activeUsers>/details/_request} &amp;&amp; ${activeUsers>/details/accessState} === 'SUSPENDED' }"
+						press=".onOpenActiveUserReactivate"/>
+					<Button
+						text="{i18n>revokeAccess}"
+						type="Negative"
+						visible="{= !!${activeUsers>/details/_request} &amp;&amp; ${activeUsers>/details/accessState} === 'ACTIVE' }"
+						press=".onOpenActiveUserRevoke"/>
+				</Toolbar>
 			</VBox>
 		</content>
 		<endButton>
