@@ -15,7 +15,7 @@ const cdsSource = fs.readFileSync(path.join(root, 'srv/user-admin.cds'), 'utf8')
 const required = [
   'type ActiveUserSummary',
   'type ActiveUserDetails',
-  'action searchActiveUsers(',
+  'action searchActiveUsers(query : String(255), includeNonActive : Boolean, skip : Integer, top : Integer) returns many ActiveUserSummary;',
   'action readActiveUserDetails('
 ]
 for (const marker of required) assert.ok(cdsSource.includes(marker), marker)
@@ -50,6 +50,7 @@ const REVOKED_OPERATION_ID = '82200000-0000-4000-8000-000000000003'
 const SUSPENDED_OPERATION_ID = '82200000-0000-4000-8000-000000000004'
 const ACTIVE_PROFILE_ID = '82300000-0000-4000-8000-000000000001'
 const ACTIVE_AUDIT_ID = '82400000-0000-4000-8000-000000000001'
+const PAGED_USER_COUNT = 205
 
 const ACTIVE_HASH = 'a'.repeat(64)
 const REVOKED_HASH = 'b'.repeat(64)
@@ -101,6 +102,10 @@ function administrator () {
     id: 'gate2.admin@example.invalid',
     roles: ['authenticated-user', 'PM', 'UserAdmin']
   })
+}
+
+function pagedUserID (index) {
+  return `82000000-0000-4000-8000-${String(100 + index).padStart(12, '0')}`
 }
 
 async function expectRejected (operation, status, code) {
@@ -165,6 +170,13 @@ async function main () {
       active: false
     }
   ]))
+  await db.run(INSERT.into('idts.cap.Users').entries(Array.from({ length: PAGED_USER_COUNT }, (_, index) => ({
+    ID: pagedUserID(index),
+    displayName: `Paged User ${String(index).padStart(3, '0')}`,
+    email: `paged-${String(index).padStart(3, '0')}@example.invalid`,
+    role_code: 'TESTER',
+    active: true
+  }))))
 
   await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries([
     requestEntry(ACTIVE_REQUEST_ID, {
@@ -293,10 +305,24 @@ async function main () {
   const admin = administrator()
   const defaultRows = await service.send({
     event: 'searchActiveUsers',
-    data: { query: '', includeNonActive: false },
+    data: { query: '', includeNonActive: false, skip: 0, top: 100 },
     user: admin
   })
-  assert.deepEqual(defaultRows.map(row => row.userID), [ACTIVE_USER_ID])
+  const fixtureDefaultRows = defaultRows.filter(row => [
+    ACTIVE_USER_ID,
+    AMBIGUOUS_USER_ID,
+    PM_ID,
+    INCOMPLETE_USER_ID,
+    SUSPENDED_USER_ID,
+    REVOKED_USER_ID
+  ].includes(row.userID))
+  assert.deepEqual(fixtureDefaultRows.map(row => row.userID), [ACTIVE_USER_ID, AMBIGUOUS_USER_ID, PM_ID, INCOMPLETE_USER_ID])
+  const defaultSuspendedRows = await service.send({
+    event: 'searchActiveUsers',
+    data: { query: 'Suspended User', includeNonActive: false, skip: 0, top: 100 },
+    user: admin
+  })
+  assert.deepEqual(defaultSuspendedRows.map(row => row.userID), [SUSPENDED_USER_ID])
 
   const activeAlice = defaultRows[0]
   assert.equal(activeAlice.displayName, 'Active Alice')
@@ -310,40 +336,95 @@ async function main () {
   assert.equal(activeAlice.pendingOperationType, null)
   assert.equal(activeAlice.pendingOperationState, null)
 
-  const allRows = await service.send({
+  const revoked = (await service.send({
     event: 'searchActiveUsers',
-    data: { query: '', includeNonActive: true },
+    data: { query: 'Revoked User', includeNonActive: true, skip: 0, top: 100 },
     user: admin
-  })
-  const revoked = allRows.find(row => row.userID === REVOKED_USER_ID)
-  const suspended = allRows.find(row => row.userID === SUSPENDED_USER_ID)
-  const ambiguous = allRows.find(row => row.userID === AMBIGUOUS_USER_ID)
-  const incomplete = allRows.find(row => row.userID === INCOMPLETE_USER_ID)
+  }))[0]
+  const suspended = (await service.send({
+    event: 'searchActiveUsers',
+    data: { query: 'Suspended User', includeNonActive: true, skip: 0, top: 100 },
+    user: admin
+  }))[0]
+  const ambiguous = (await service.send({
+    event: 'searchActiveUsers',
+    data: { query: 'Ambiguous User', includeNonActive: true, skip: 0, top: 100 },
+    user: admin
+  }))[0]
+  const incomplete = (await service.send({
+    event: 'searchActiveUsers',
+    data: { query: 'Incomplete User', includeNonActive: true, skip: 0, top: 100 },
+    user: admin
+  }))[0]
   assert.equal(revoked.accessState, 'REVOKED')
   assert.equal(suspended.accessState, 'SUSPENDED')
   assert.equal(suspended.pendingOperationType, 'CHANGE_ROLE')
   assert.equal(suspended.pendingOperationState, 'PENDING')
   assert.equal(ambiguous.accessState, 'INCOMPLETE')
   assert.equal(incomplete.accessState, 'INCOMPLETE')
-  assert.equal(allRows.some(row => row.userID === REVOKED_USER_ID), true)
+  assert.equal(revoked.userID, REVOKED_USER_ID)
 
   const roleSearch = await service.send({
     event: 'searchActiveUsers',
-    data: { query: 'DeVeLoPeR', includeNonActive: false },
+    data: { query: 'DeVeLoPeR', includeNonActive: false, skip: 0, top: 100 },
     user: admin
   })
-  assert.deepEqual(roleSearch.map(row => row.userID), [ACTIVE_USER_ID])
+  assert.equal(roleSearch.some(row => row.userID === ACTIVE_USER_ID), true)
+  assert.equal(roleSearch.every(row => row.businessRole === 'DEVELOPER'), true)
   const stateSearch = await service.send({
     event: 'searchActiveUsers',
-    data: { query: 'sUsPeNdEd', includeNonActive: true },
+    data: { query: 'sUsPeNdEd', includeNonActive: true, skip: 0, top: 100 },
     user: admin
   })
   assert.deepEqual(stateSearch.map(row => row.userID), [SUSPENDED_USER_ID])
   await expectRejected(service.send({
     event: 'searchActiveUsers',
-    data: { query: 'x'.repeat(256), includeNonActive: true },
+    data: { query: 'x'.repeat(256), includeNonActive: true, skip: 0, top: 100 },
     user: admin
   }), 400)
+
+  const pageOne = await service.send({
+    event: 'searchActiveUsers',
+    data: { query: 'Paged User', includeNonActive: false, skip: 0, top: 100 },
+    user: admin
+  })
+  const pageTwo = await service.send({
+    event: 'searchActiveUsers',
+    data: { query: 'Paged User', includeNonActive: false, skip: 100, top: 100 },
+    user: admin
+  })
+  const pageThree = await service.send({
+    event: 'searchActiveUsers',
+    data: { query: 'Paged User', includeNonActive: false, skip: 200, top: 100 },
+    user: admin
+  })
+  const pageFour = await service.send({
+    event: 'searchActiveUsers',
+    data: { query: 'Paged User', includeNonActive: false, skip: 300, top: 100 },
+    user: admin
+  })
+  assert.equal(pageOne.length, 100)
+  assert.equal(pageTwo.length, 100)
+  assert.equal(pageThree.length, 5)
+  assert.equal(pageFour.length, 0)
+  assert.equal(new Set([...pageOne, ...pageTwo, ...pageThree].map(row => row.userID)).size, PAGED_USER_COUNT)
+  assert.equal(pageOne.some(left => pageTwo.some(right => left.userID === right.userID)), false)
+  assert.equal(pageOne[pageOne.length - 1].displayName < pageTwo[0].displayName, true)
+  assert.equal(pageTwo[pageTwo.length - 1].displayName < pageThree[0].displayName, true)
+  assert.deepEqual(
+    [...pageOne, ...pageTwo, ...pageThree].map(row => row.userID),
+    Array.from({ length: PAGED_USER_COUNT }, (_, index) => pagedUserID(index))
+  )
+  await expectRejected(service.send({
+    event: 'searchActiveUsers',
+    data: { query: '', includeNonActive: false, skip: -1, top: 100 },
+    user: admin
+  }), 400, 'INVALID_PAGE')
+  await expectRejected(service.send({
+    event: 'searchActiveUsers',
+    data: { query: '', includeNonActive: false, skip: 0, top: 101 },
+    user: admin
+  }), 400, 'INVALID_PAGE')
 
   const details = await service.send({
     event: 'readActiveUserDetails',
@@ -376,14 +457,14 @@ async function main () {
   ]) {
     await expectRejected(service.send({
       event: 'searchActiveUsers',
-      data: { query: '', includeNonActive: false },
+      data: { query: '', includeNonActive: false, skip: 0, top: 100 },
       user
     }), 403, 'USER_ADMIN_REQUIRED')
   }
   await db.run(UPDATE('idts.cap.Users').set({ active: false }).where({ ID: PM_ID }))
   await expectRejected(service.send({
     event: 'searchActiveUsers',
-    data: { query: '', includeNonActive: false },
+    data: { query: '', includeNonActive: false, skip: 0, top: 100 },
     user: admin
   }), 403, 'USER_ADMIN_REQUIRED')
 

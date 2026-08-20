@@ -114,7 +114,7 @@ service UserAdministrationService @(requires: 'authenticated-user') {
 
   action searchOnboarding(query : String(255)) returns many OnboardingRequestSummary;
 
-  action searchActiveUsers(query : String(255), includeNonActive : Boolean) returns many ActiveUserSummary;
+  action searchActiveUsers(query : String(255), includeNonActive : Boolean, skip : Integer, top : Integer) returns many ActiveUserSummary;
 
   action readActiveUserDetails(userID : UUID) returns ActiveUserDetails;
 

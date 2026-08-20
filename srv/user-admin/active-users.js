@@ -45,6 +45,10 @@ const PENDING_OPERATION_STATES = new Set([
   'BLOCKED_MANUAL_REVIEW'
 ])
 
+const DEFAULT_PAGE_SIZE = 100
+const MAX_PAGE_SIZE = 100
+const MAX_PAGE_SKIP = 1000000
+
 // Gate 2 chỉ đọc các cột allow-list rồi ghép trong request; không cache dữ liệu giữa hai request.
 function registerActiveUserHandlers (service, { authorize }) {
   if (typeof authorize !== 'function') throw new TypeError('Active user authorization is required.')
@@ -55,14 +59,15 @@ function registerActiveUserHandlers (service, { authorize }) {
 async function searchActiveUsers (req, { authorize }) {
   const query = normalizeSearchQuery(req.data?.query)
   const includeNonActive = req.data?.includeNonActive === true
+  const { skip, top } = normalizePaging(req.data)
   const tx = cds.tx(req)
   await authorize(req, tx)
   const rows = await buildReadModel(tx)
   return rows
-    .filter(row => includeNonActive || row.accessState === 'ACTIVE')
+    .filter(row => includeNonActive || row.accessState !== 'REVOKED')
     .filter(row => matchesQuery(row, query))
     .sort(compareRows)
-    .slice(0, 200)
+    .slice(skip, skip + top)
     .map(toSummary)
 }
 
@@ -87,7 +92,7 @@ async function buildReadModel (tx, { includeDeveloperDetails = false } = {}) {
       'role_code',
       'active',
       'externalIdentityKeyHash'
-    ).orderBy('displayName asc', 'email asc', 'ID asc').limit(200)
+    ).orderBy('displayName asc', 'email asc', 'ID asc')
   )
   if (users.length === 0) return []
 
@@ -358,6 +363,16 @@ function normalizeSearchQuery (value) {
     throw serviceError(400, 'INVALID_SEARCH_QUERY', 'Search query is invalid.')
   }
   return query
+}
+
+function normalizePaging (data = {}) {
+  const skip = data.skip === undefined || data.skip === null ? 0 : Number(data.skip)
+  const top = data.top === undefined || data.top === null ? DEFAULT_PAGE_SIZE : Number(data.top)
+  if (!Number.isInteger(skip) || skip < 0 || skip > MAX_PAGE_SKIP ||
+    !Number.isInteger(top) || top < 1 || top > MAX_PAGE_SIZE) {
+    throw serviceError(400, 'INVALID_PAGE', 'Page bounds are invalid.')
+  }
+  return { skip, top }
 }
 
 function normalizeContactEmail (value) {
