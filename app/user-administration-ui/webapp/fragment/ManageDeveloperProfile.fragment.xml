@@ -1,0 +1,29 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+	<Dialog id="manageDeveloperProfileDialog" title="{i18n>manageResponsibilities}" contentWidth="42rem" stretch="{device>/system/phone}">
+		<content>
+			<VBox class="sapUiSmallMargin">
+				<MessageStrip text="{= ${i18n>openBugImpact} + ': ' + ${developer>/openBugImpactCount} }" type="Information" showIcon="true"/>
+				<Label text="{i18n>availability}" required="true" class="sapUiSmallMarginTop"/>
+				<Select selectedKey="{developer>/developerProfile/availabilityStatusCode}" items="{catalogs>/availabilityStatuses}"><core:Item key="{catalogs>code}" text="{catalogs>name}"/></Select>
+				<Label text="{i18n>workloadLimit}" required="true" class="sapUiSmallMarginTop"/>
+				<Input type="Number" min="1" value="{developer>/developerProfile/workloadLimit}"/>
+				<Title text="{i18n>developerResponsibilities}" level="H5" class="sapUiSmallMarginTop"/>
+				<List items="{developer>/developerProfile/responsibilities}" noDataText="{i18n>responsibilityRequired}">
+					<CustomListItem>
+						<VBox class="sapUiTinyMarginBottom">
+							<Select selectedKey="{developer>componentCategoryID}" items="{catalogs>/componentCategories}"><core:Item key="{catalogs>ID}" text="{catalogs>label}"/></Select>
+							<Select forceSelection="false" selectedKey="{developer>sapModuleID}" items="{catalogs>/sapModules}"><core:Item key="{catalogs>ID}" text="{catalogs>name}"/></Select>
+							<Select selectedKey="{developer>responsibilityLevelCode}" items="{catalogs>/responsibilityLevels}"><core:Item key="{catalogs>code}" text="{catalogs>name}"/></Select>
+							<Button text="{i18n>removeResponsibility}" type="Transparent" press=".onRemoveDeveloperResponsibility"/>
+						</VBox>
+					</CustomListItem>
+				</List>
+				<Button text="{i18n>addResponsibility}" icon="sap-icon://add" type="Transparent" press=".onAddDeveloperResponsibility"/>
+				<Label text="{i18n>reason}" required="true" class="sapUiSmallMarginTop"/>
+				<TextArea value="{developer>/reason}" valueLiveUpdate="true" maxLength="500" rows="3" width="100%"/>
+			</VBox>
+		</content>
+		<beginButton><Button text="{i18n>saveResponsibilities}" type="Emphasized" press=".onConfirmDeveloperProfile"/></beginButton>
+		<endButton><Button text="{i18n>cancel}" press=".onCancelDeveloperProfile"/></endButton>
+	</Dialog>
+</core:FragmentDefinition>

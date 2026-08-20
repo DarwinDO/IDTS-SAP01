@@ -1,0 +1,15 @@
+code,name,descr,sortOrder,active,criticality
+INVITED,Invited,Invitation created and awaiting SAP identity verification,10,true,1
+IDENTITY_VERIFIED,Identity Verified,SAP identity was verified for the invitation,20,true,2
+PENDING_APPROVAL,Pending Approval,SAP identity is verified and awaits PM approval,30,true,2
+PROVISION_QUEUED,Provision Queued,Approved access is queued for provisioning,40,true,2
+PROVISIONING,Provisioning,External access provisioning is in progress,50,true,2
+ROLE_CHANGE_QUEUED,Role Change Queued,Approved role change is queued,60,true,2
+ROLE_CHANGING,Role Changing,External role change is in progress,70,true,2
+REVOKE_QUEUED,Revoke Queued,Access revocation is queued and local access is suspended,80,true,2
+REVOKING,Revoking,External access revocation is in progress,90,true,2
+ACTIVE,Active,User access is active and reconciled,100,true,3
+RETRYABLE_FAILURE,Retryable Failure,Provisioning failed temporarily and may be retried,110,true,1
+BLOCKED_MANUAL_REVIEW,Manual Review Required,Provisioning requires human review,120,true,1
+FAILED,Failed,Invitation or onboarding failed before provisioning,130,true,1
+REVOKED,Revoked,Provisioned access was revoked,140,true,0

@@ -8,10 +8,13 @@ const cds = require('@sap/cds')
 const root = path.resolve(__dirname, '../..')
 const roleModule = require('../../srv/auth/platform-role')
 const authTest = require('../../srv/auth').__test
+const { identityKeyFromRequestUser } = require('../../srv/auth/identity-map')
 
 let passed = 0
+let checks = 0
 
 function check (name, test) {
+  checks += 1
   try {
     test()
     passed += 1
@@ -41,11 +44,11 @@ const originalImpl = cds.env.requires.auth.impl
 cds.env.requires.auth.kind = 'xsuaa'
 delete cds.env.requires.auth.impl
 
-check('XSUAA descriptor has all business and technical role templates', () => {
+check('XSUAA descriptor separates human role templates from the broker technical authority', () => {
   const descriptor = JSON.parse(read('xs-security.json'))
   assert.deepEqual(
     descriptor['role-templates'].map(role => role.name).sort(),
-    ['Developer', 'OutboxProcessor', 'PM', 'Tester']
+    ['Developer', 'OutboxProcessor', 'PM', 'Tester', 'UserAdmin']
   )
   assert.deepEqual(
     descriptor.scopes.map(scope => scope.name).sort(),
@@ -53,15 +56,29 @@ check('XSUAA descriptor has all business and technical role templates', () => {
       '$XSAPPNAME.DEVELOPER',
       '$XSAPPNAME.OutboxProcessor',
       '$XSAPPNAME.PM',
-      '$XSAPPNAME.TESTER'
+      '$XSAPPNAME.ProvisioningBroker',
+      '$XSAPPNAME.TESTER',
+      '$XSAPPNAME.UserAdmin'
     ]
   )
+  assert.equal(descriptor['role-templates'].some(role => role.name === 'ProvisioningBroker'), false)
+  const brokerScope = descriptor.scopes.find(scope => scope.name === '$XSAPPNAME.ProvisioningBroker')
+  assert.deepEqual(brokerScope['grant-as-authority-to-apps'], [
+    '$XSAPPNAME(application,idts-user-access-broker)'
+  ])
 })
 
 check('exactly one matching XSUAA role aligns with the IDTS database role', () => {
   const req = rejectRequest()
   req.user = { is: role => role === 'TESTER' }
   const user = { ID: 'user-1', role_code: 'TESTER' }
+  assert.equal(roleModule.enforcePlatformRoleAlignment(req, user), user)
+})
+
+check('UserAdmin is a PM capability overlay, not a fourth business role', () => {
+  const req = rejectRequest()
+  req.user = { is: role => role === 'PM' || role === 'UserAdmin' }
+  const user = { ID: 'user-admin-1', role_code: 'PM' }
   assert.equal(roleModule.enforcePlatformRoleAlignment(req, user), user)
 })
 
@@ -90,19 +107,31 @@ check('missing or multiple XSUAA business roles are rejected with 403', () => {
   )
 })
 
-check('JWT identity candidates include subject and standard email claims', () => {
-  assert.deepEqual(
-    authTest.requestUserCandidates({
-      user: {
-        id: 'subject-1',
-        attr: {
-          email: 'pm@example.test',
-          user_name: 'pm-user'
+check('XSUAA identity key requires the pinned immutable user_uuid claim', () => {
+  assert.equal(identityKeyFromRequestUser({
+    id: 'mutable-login-name',
+    attr: {
+      origin: 'sap.default',
+      iss: 'https://issuer.example.invalid',
+      sub: 'different-subject'
+    }
+  }), null)
+  assert.equal(identityKeyFromRequestUser({
+    id: 'mutable-login-name',
+    attr: { email: 'mutable@example.invalid' },
+    authInfo: {
+      token: {
+        origin: 'sap.default',
+        issuer: 'https://issuer.example.invalid',
+        userId: 'forbidden-sub-fallback',
+        payload: {
+          user_id: '11111111-1111-4111-8111-111111111111',
+          user_uuid: 'stable-user-uuid',
+          sub: 'forbidden-sub-fallback'
         }
       }
-    }),
-    ['subject-1', 'pm@example.test', 'pm-user']
-  )
+    }
+  })?.subject, 'stable-user-uuid')
 })
 
 check('production uses XSUAA while integration retains custom auth', () => {
@@ -179,5 +208,5 @@ else cds.env.requires.auth.impl = originalImpl
 if (process.exitCode) {
   console.error(`IDTS-113 BTP auth checks failed after ${passed} passes.`)
 } else {
-  console.log(`IDTS-113 BTP auth checks passed: ${passed}/12.`)
+  console.log(`IDTS-113 BTP auth checks passed: ${passed}/${checks}.`)
 }

@@ -1,0 +1,11 @@
+{
+  "name": "idts-user-access-broker",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}

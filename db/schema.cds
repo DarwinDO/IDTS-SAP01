@@ -32,6 +32,7 @@ entity ActionTypes : CodeList {}
 entity NotificationEventTypes : CodeList {}
 entity NotificationChannels : CodeList {}
 entity NotificationDeliveryStatuses : CodeList {}
+entity UserOnboardingStatuses : CodeList {}
 entity DuplicateRelationTypes : CodeList {}
 entity AiSuggestionFeatureTypes : CodeList {}
 entity AiSuggestionReviewStates : CodeList {}
@@ -41,10 +42,18 @@ entity Users : cuid, managed {
   displayName : String(120) not null;
   email       : String(255) not null;
   role        : Association to UserRoles not null;
+  // Nullable for legacy rows. Once linked, the hash of origin + issuer + stable subject is the authority;
+  // email remains a mutable contact/login attribute and must not override a different linked identity.
+  externalIdentityOrigin  : String(120);
+  externalIdentityIssuer  : String(500);
+  externalIdentitySubject : String(255);
+  externalIdentityKeyHash : String(64);
   passwordHash: String(255);
   passwordChangedAt : Timestamp;
   active      : Boolean default true;
 }
+
+annotate Users with @assert.unique.userExternalIdentity: [ externalIdentityKeyHash ];
 
 entity AuthSessions : cuid, managed {
   // Mỗi lần login tạo session; DB chỉ giữ tokenHash. revokedAt/expiresAt quyết định token còn dùng được hay không.
@@ -62,8 +71,16 @@ entity DeveloperProfiles : cuid, managed {
   user               : Association to Users not null;
   availabilityStatus : Association to AvailabilityStatuses;
   workloadLimit      : Integer;
+  administrationState : Composition of one DeveloperProfileAdministrationStates on administrationState.developerProfile = $self;
   active             : Boolean default true;
 }
+
+entity DeveloperProfileAdministrationStates : cuid, managed {
+  developerProfile      : Association to DeveloperProfiles not null;
+  administrationVersion : Integer default 0 not null;
+}
+
+annotate DeveloperProfileAdministrationStates with @assert.unique.developerProfileAdministrationState: [ developerProfile ];
 
 entity SAPModules : cuid, managed {
   code   : String(20) not null;
@@ -236,6 +253,119 @@ entity NotificationDeliveries : cuid, managed {
 
 annotate NotificationDeliveries with @assert.unique.notificationChannel: [ notification, channel ];
 // Unique constraint ngăn cùng một notification tạo hai delivery EMAIL khi workflow/worker chạy lặp.
+
+entity UserOnboardingRequests : cuid, managed {
+  targetEmailNormalized : String(255) not null;
+  openRequestKey        : String(64);
+  requestedRole         : Association to UserRoles not null;
+  userAdminRequested    : Boolean default false not null;
+  status                : Association to UserOnboardingStatuses not null;
+  requestedBy           : Association to Users not null;
+  expiresAt             : Timestamp not null;
+  tokenNonce            : String(120) not null;
+  tokenHash             : String(64) not null;
+  consumedAt            : Timestamp;
+  verifiedAt            : Timestamp;
+  identityOrigin        : String(120);
+  identityIssuer        : String(500);
+  identitySubject       : String(255);
+  identityPlatformUserId: String(255);
+  identityKeyHash       : String(64);
+  identityEmailNormalized : String(255);
+  provisioningVersion   : Integer default 0 not null;
+  approvedAt            : Timestamp;
+  approvedBy            : Association to Users;
+  activeUser            : Association to Users;
+  latestOperation       : Association to UserAccessOperations;
+  provisionedAt         : Timestamp;
+  revokedAt             : Timestamp;
+  revokedBy             : Association to Users;
+  correlationId         : UUID not null;
+  lastErrorCode         : String(80);
+  lastErrorSummary      : String(500);
+  deliveries            : Composition of many UserOnboardingDeliveries on deliveries.onboardingRequest = $self;
+  developerProfile      : Composition of one UserOnboardingDeveloperProfiles on developerProfile.onboardingRequest = $self;
+  developerResponsibilities : Composition of many UserOnboardingDeveloperResponsibilities on developerResponsibilities.onboardingRequest = $self;
+}
+
+annotate UserOnboardingRequests with @assert.unique.onboardingTokenHash: [ tokenHash ];
+annotate UserOnboardingRequests with @assert.unique.externalIdentity: [ identityKeyHash ];
+annotate UserOnboardingRequests with @assert.unique.openOnboardingRequest: [ openRequestKey ];
+
+entity UserOnboardingDeveloperProfiles : cuid, managed {
+  onboardingRequest   : Association to UserOnboardingRequests not null;
+  availabilityStatus : Association to AvailabilityStatuses not null;
+  workloadLimit      : Integer not null;
+}
+
+annotate UserOnboardingDeveloperProfiles with @assert.unique.onboardingDeveloperProfile: [ onboardingRequest ];
+
+entity UserOnboardingDeveloperResponsibilities : cuid, managed {
+  onboardingRequest   : Association to UserOnboardingRequests not null;
+  componentCategory  : Association to ComponentCategories not null;
+  sapModule           : Association to SAPModules;
+  responsibilityLevel: Association to ResponsibilityLevels not null;
+}
+
+annotate UserOnboardingDeveloperResponsibilities with @assert.unique.onboardingDeveloperScope: [ onboardingRequest, componentCategory, sapModule ];
+
+entity UserOnboardingDeliveries : cuid, managed {
+  onboardingRequest : Association to UserOnboardingRequests not null;
+  recipientEmail    : String(255) not null;
+  templateKey       : String(80) not null;
+  status            : Association to NotificationDeliveryStatuses not null;
+  attemptCount      : Integer default 0 not null;
+  nextAttemptAt     : Timestamp;
+  lastAttemptAt     : Timestamp;
+  sentAt            : Timestamp;
+  lastErrorCode     : String(80);
+  lastErrorSummary  : String(500);
+  providerMessageId : String(255);
+  lockedUntil       : Timestamp;
+  lockToken         : String(64);
+}
+
+annotate UserOnboardingDeliveries with @assert.unique.onboardingRequestDelivery: [ onboardingRequest ];
+
+entity UserAccessOperations : cuid, managed {
+  onboardingRequest : Association to UserOnboardingRequests not null;
+  operationType     : String(30) not null;
+  state             : String(30) not null;
+  requestedBy       : Association to Users not null;
+  idempotencyKey    : String(64) not null;
+  expectedVersion   : Integer not null;
+  desiredRole       : Association to UserRoles not null;
+  desiredUserAdmin  : Boolean default false not null;
+  correlationId     : UUID not null;
+  attemptCount      : Integer default 0 not null;
+  nextAttemptAt     : Timestamp;
+  leasedAt          : Timestamp;
+  leaseExpiresAt    : Timestamp;
+  leaseTokenHash    : String(64);
+  completedAt       : Timestamp;
+  safeResultCode    : String(80);
+  safeResultSummary : String(500);
+  providerCorrelationHash : String(64);
+}
+
+annotate UserAccessOperations with @assert.unique.provisioningIdempotencyKey: [ idempotencyKey ];
+
+entity UserIdentityAuditEvents : cuid, managed {
+  operation          : Association to UserAccessOperations;
+  onboardingRequest : Association to UserOnboardingRequests;
+  actor              : Association to Users;
+  targetUser         : Association to Users;
+  action             : String(40) not null;
+  result             : String(40) not null;
+  fromState          : String(40);
+  toState            : String(40);
+  correlationId      : UUID not null;
+  beforeIdentityHash : String(64);
+  afterIdentityHash  : String(64);
+  detailsSummary     : String(500);
+}
+
+annotate UserIdentityAuditEvents with @assert.unique.identityAuditCorrelationAction: [ correlationId, action ];
 
 entity DuplicateLinks : cuid, managed {
   // Liên kết duplicate chỉ được tạo khi user xác nhận; kết quả AI Similar Bugs tự nó không insert entity này.

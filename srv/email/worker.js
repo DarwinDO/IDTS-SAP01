@@ -5,6 +5,8 @@ const cds = require('@sap/cds')
 const { getEmailConfig } = require('./config')
 const { processEmailDeliveries, writeNotificationRecord } = require('./outbox')
 const { createEmailSender } = require('./sender')
+const { getUserAdminConfig } = require('../user-admin/config')
+const { processUserOnboardingDeliveries } = require('../user-admin/delivery')
 
 const LOG = cds.log('idts-email')
 const immediateKickRequests = new WeakSet()
@@ -17,19 +19,36 @@ function shouldStartEmailWorker () {
   return String(process.env.IDTS_EMAIL_WORKER_MODE || 'poll').toLowerCase() !== 'scheduler'
 }
 
-async function processEmailOutboxBatch ({ tx }) {
-  const config = getEmailConfig()
+async function processEmailOutboxBatch ({ tx, dependencies = {} }) {
+  const config = dependencies.emailConfig || getEmailConfig()
   if (!config.enabled || !config.ready) {
     return { sent: 0, failed: 0, skipped: 0 }
   }
 
-  const batchSender = createEmailSender(config)
+  const invitationConfig = dependencies.invitationConfig || getUserAdminConfig()
+  const batchSender = (dependencies.createSender || createEmailSender)(config)
+  const processNotifications = dependencies.processNotifications || processEmailDeliveries
+  const processInvitations = dependencies.processInvitations || processUserOnboardingDeliveries
+  const sendMail = message => batchSender.sendMail(message)
   try {
-    return await processEmailDeliveries({
+    const notifications = await processNotifications({
       tx,
       config,
-      sendMail: message => batchSender.sendMail(message)
+      sendMail
     })
+    const invitations = invitationConfig.ready
+      ? await processInvitations({
+          tx,
+          emailConfig: config,
+          invitationConfig,
+          sendMail
+        })
+      : { sent: 0, failed: 0, skipped: 0 }
+    return {
+      sent: notifications.sent + invitations.sent,
+      failed: notifications.failed + invitations.failed,
+      skipped: notifications.skipped + invitations.skipped
+    }
   } finally {
     batchSender.close()
   }
@@ -38,7 +57,7 @@ async function processEmailOutboxBatch ({ tx }) {
 function scheduleImmediateEmailOutbox (req, dependencies = {}) {
   if (!req || typeof req.on !== 'function' || immediateKickRequests.has(req)) return false
 
-  const spawn = dependencies.spawn || cds.spawn
+  const spawn = dependencies.spawn || cds.spawn.bind(cds)
   const processBatch = dependencies.processBatch || processEmailOutboxBatch
   immediateKickRequests.add(req)
 
@@ -92,14 +111,21 @@ function startEmailWorker () {
   }
 
   sender = createEmailSender(config)
+  const invitationConfig = getUserAdminConfig()
   job = cds.spawn({
     user: cds.User.privileged,
     every: config.pollIntervalMs
   }, async tx => {
-    const result = await processEmailDeliveries({
+    const result = await processEmailOutboxBatch({
       tx,
-      config,
-      sendMail: message => sender.sendMail(message)
+      dependencies: {
+        emailConfig: config,
+        invitationConfig,
+        createSender: () => ({
+          sendMail: message => sender.sendMail(message),
+          close () {}
+        })
+      }
     })
     if (result.sent || result.failed) {
       LOG.info(`Email outbox processed via ${config.provider}: sent=${result.sent}, failed=${result.failed}.`)

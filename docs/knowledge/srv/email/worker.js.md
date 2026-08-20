@@ -6,9 +6,15 @@
 
 `writeNotificationAndSchedule()` keeps the durable outbox write inside the Bug request transaction. When that write returns `PENDING`, `scheduleImmediateEmailOutbox()` registers one `req.on('succeeded')` handler for the whole request. Only after commit does the handler start a privileged one-shot `cds.spawn()` transaction and process the due batch. A `WeakSet` prevents multiple notification writes in one request from registering duplicate kicks. `SKIPPED` deliveries and failed/rolled-back requests never start the kick. The periodic worker or SAP Job Scheduler remains the recovery path if the one-shot process is interrupted.
 
+`cds.spawn` is a receiver-dependent CAP method. If it is saved in a local variable, it must be bound to `cds`; calling an unbound reference makes the runtime treat the wrong object as the CAP facade and the detached transaction cannot start. The focused test exercises the real default `cds.spawn`, not only an injected fake.
+
+The same batch now also processes eligible `UserOnboardingDeliveries` when private invitation configuration is complete. Missing invitation configuration does not block ordinary Bug notification delivery.
+
 ### Vietnamese
 
 `writeNotificationAndSchedule()` vẫn ghi durable outbox bên trong transaction của Bug request. Khi kết quả ghi là `PENDING`, `scheduleImmediateEmailOutbox()` đăng ký đúng một handler `req.on('succeeded')` cho toàn request. Chỉ sau khi commit, handler mới tạo một transaction `cds.spawn()` đặc quyền chạy một lần và xử lý batch đến hạn. `WeakSet` ngăn nhiều notification trong cùng request đăng ký kick trùng. Delivery `SKIPPED` và request fail/rollback không chạy kick. Periodic worker hoặc SAP Job Scheduler vẫn là đường recovery nếu one-shot process bị gián đoạn.
+
+`cds.spawn` là method phụ thuộc receiver của CAP. Nếu lưu method này vào biến local thì phải bind lại với `cds`; gọi một reference bị tách khỏi receiver làm runtime dùng nhầm object thay cho CAP facade và không thể mở detached transaction. Focused test phải chạy đường `cds.spawn` mặc định thật, không chỉ fake được inject.
 
 ## IDTS-113 SAP BTP scheduling mode
 

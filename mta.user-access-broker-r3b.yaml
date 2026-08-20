@@ -1,0 +1,45 @@
+_schema-version: '3.3'
+ID: idts-user-access-broker-r3b
+version: 0.2.0
+description: IDTS User Access Broker UA-R3B CONTROLLED BROKER-ONLY DEPLOYMENT
+
+modules:
+  - name: idts-user-access-broker
+    type: nodejs
+    path: broker
+    parameters:
+      instances: 1
+      no-route: true
+      buildpack: nodejs_buildpack
+      memory: 256M
+      disk-quota: 256M
+      health-check-type: http
+      health-check-http-endpoint: /health
+    properties:
+      IDTS_ACCESS_BROKER_ENABLED: false
+      IDTS_ACCESS_BROKER_POLL_INTERVAL_MS: 5000
+    build-parameters:
+      builder: npm-ci
+    requires:
+      - name: idts-user-access-broker-auth
+      - name: idts-user-access-broker-api-access
+
+resources:
+  - name: idts-user-access-broker-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      config:
+        xsappname: idts-user-access-broker
+        tenant-mode: dedicated
+        authorities:
+          - $XSSERVICENAME(idts-sap01-auth).ProvisioningBroker
+        oauth2-configuration:
+          credential-types:
+            - binding-secret
+
+  - name: idts-user-access-broker-api-access
+    type: org.cloudfoundry.existing-service
+    parameters:
+      service-name: idts-user-access-broker-api-access

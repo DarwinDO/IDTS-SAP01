@@ -46,11 +46,15 @@ Vietnamese: AI v1 chỉ hỗ trợ tìm bug trùng/tương tự, gợi ý phân 
 
 ## Authentication Direction
 
-- SAP BTP uses AppRouter/XSUAA platform authentication. CAP maps the authenticated SAP identity to the active IDTS `Users` row and requires the platform role to match the business role.
+- SAP BTP uses AppRouter/XSUAA platform authentication. CAP maps a linked identity to the active IDTS `Users` row by a unique hash of origin, issuer, and subject, then requires the platform role to match the business role. Email/display name remain mutable attributes and never authorize a request that contains a complete external identity tuple. Legacy rows remain nullable for a controlled link/backfill; ID/email compatibility applies only to local/custom-auth requests without the complete external tuple.
 - Local and Render/integration profiles retain the custom CAP Node.js auth foundation: `AuthService.login` verifies email/password against `Users.passwordHash`, creates an `AuthSessions` row, and returns a bearer token.
 - `Users` remains the internal business profile and role source for Tester, Developer, and PM.
 - On BTP, AppRouter forwards the XSUAA token. On custom-auth profiles, requests send the bearer token and middleware maps it back to `cds.User`; both paths enforce the IDTS business role.
 - Passwords, tokens, auth secrets, SMTP credentials, and private endpoints must not be committed. Local passwords are set through private environment variables and stored only as hashes.
+- User administration requires the PM business role plus the separate `UserAdmin` capability. `UserAdmin` is not a fourth business role and does not weaken the exactly-one PM/Tester/Developer invariant.
+- Controlled onboarding uses an expiring, length-bounded signed invitation and SAP login callback. Its email link uses a URL fragment exchanged by POST and also provides official SAP account sign-in/registration links; IDTS does not expose an email-account existence check. The PM's invitation confirmation auto-queues TESTER/DEVELOPER after successful identity verification, while PM/UserAdmin still require a second approval. Every administration endpoint requires a matching active internal PM, and `ACTIVE` remains impossible before broker Role Collection readback.
+- The source-candidate administration flow continues through explicit approval and a versioned operation journal. UI never calls SAP authorization APIs. CAP queues only allowlisted operations; a separate broker performs read-before/write/read-after Role Collection reconciliation and returns sanitized semantic results. `ACTIVE` requires provider proof. Role change/revoke suspend local access and revoke `AuthSessions` before reconciliation. The real SAP adapter/credential and HANA/XSUAA deployment remain gated and are not live merely because local fake-broker tests pass.
+- Developer onboarding and role change also carry a desired Developer Profile. A Developer is assignment-ready only after provider role readback and atomic local materialization of an active profile with at least one active Component Category responsibility. PM+UserAdmin may update availability, workload, optional SAP Module scope, and PRIMARY/BACKUP/EXPERT level with optimistic versioning. Removing a responsibility does not reassign existing Bugs.
 
 Vietnamese: Tren SAP BTP, AppRouter/XSUAA xac thuc SAP identity, CAP map identity nay toi `Users` dang active va kiem tra platform role khop business role. Local va Render/integration van dung custom CAP login voi `Users.passwordHash`, `AuthSessions` va bearer token. Khong commit password, token, auth secret, SMTP credential hoac private endpoint.
 
@@ -60,6 +64,7 @@ Vietnamese: Tren SAP BTP, AppRouter/XSUAA xac thuc SAP identity, CAP map identit
 - `NotificationDeliveries` is the separate email outbox and stores safe payload snapshots, delivery status, attempts, retry timing, sanitized failure detail, and worker locking.
 - SAP BTP selects the Brevo API through private provider configuration; local/integration profiles may use SMTP through Nodemailer.
 - SAP Job Scheduling Service invokes the protected CAP outbox-processing endpoint. Provider failure changes delivery status but does not roll back bug assignment or lifecycle work.
+- Eligible Bug and onboarding deliveries receive a one-shot post-commit processing kick for prompt UX; the scheduler remains the retry/recovery path.
 - Existing historical notifications are not automatically emailed after IDTS-36 deployment.
 - Email v1 uses the CAP database outbox; Redis, RabbitMQ, BullMQ, and provider-specific SDKs are not required.
 

@@ -14,6 +14,7 @@ const {
   enforcePlatformRoleAlignment,
   isXsuaaRuntime
 } = require('./auth/platform-role')
+const { selectActiveUserForRequest } = require('./auth/identity-map')
 
 const DEFAULT_SESSION_TTL_MINUTES = 8 * 60
 const INVALID_CREDENTIALS_MESSAGE = 'Invalid email or password.'
@@ -145,33 +146,15 @@ async function me (req) {
 
 async function btpUserProfile (req) {
   const tx = cds.tx(req)
-  const candidates = new Set(requestUserCandidates(req).map(value => value.trim().toLowerCase()))
   const users = await tx.run(
     SELECT.from('idts.cap.Users')
-      .columns('ID', 'displayName', 'email', 'role_code', 'active')
+      .columns('ID', 'displayName', 'email', 'role_code', 'active', 'externalIdentityKeyHash')
       .where({ active: true })
   )
-  const user = users.find(row =>
-    [row.ID, row.email, row.displayName]
-      .filter(Boolean)
-      .some(value => candidates.has(String(value).trim().toLowerCase()))
-  )
+  const user = selectActiveUserForRequest(users, req.user, { requireExternalIdentity: true })
 
   if (!user) return req.reject(403, BTP_USER_NOT_REGISTERED_MESSAGE)
   return publicUser(tx, enforcePlatformRoleAlignment(req, user))
-}
-
-function requestUserCandidates (req) {
-  const attributes = req.user?.attr || {}
-  return [
-    req.user?.id,
-    attributes.email,
-    attributes.user_name,
-    attributes.login_name,
-    attributes.name
-  ]
-    .flatMap(value => Array.isArray(value) ? value : [value])
-    .filter(Boolean)
 }
 
 async function publicUser (tx, user) {
@@ -251,7 +234,6 @@ module.exports.__test = {
   BTP_LOGIN_MESSAGE,
   BTP_USER_NOT_REGISTERED_MESSAGE,
   isExpectedClientAuthReject,
-  requestUserCandidates,
   sanitizeLoginContractError,
   safeAuthErrorDiagnostic,
   safeDiagnosticToken

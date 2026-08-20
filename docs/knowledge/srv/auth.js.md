@@ -1,5 +1,11 @@
 # Knowledge: `srv/auth.js`
 
+## Immutable external identity resolution (2026-08-12)
+
+For BTP-authenticated profiles, this service now resolves an active internal `Users` row through the shared `srv/auth/identity-map.js` contract. A linked row is authoritative by the SHA-256 hash of provider origin, issuer and stable subject. Email, login name and display name remain mutable attributes and never authorize a complete external identity. Existing unlinked rows require a controlled link/backfill; linking is intentionally not automatic.
+
+This is a source contract only. It deliberately pins the subject candidate to `user_uuid`; it never switches dynamically to `sub` or mutable `req.user.id`. The live pilot must still prove that the designated XSUAA/trust exposes a stable `user_uuid` before any production-like link or HANA migration. The service projection continues to expose no raw external identity fields or hash.
+
 ## Beginner-first execution map (2026-07-18)
 
 ### English

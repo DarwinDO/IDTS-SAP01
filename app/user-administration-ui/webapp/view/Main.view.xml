@@ -1,0 +1,103 @@
+<mvc:View
+	controllerName="idts.useradministrationui.controller.Main"
+	displayBlock="true"
+	xmlns="sap.m"
+	xmlns:f="sap.f"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:core="sap.ui.core"
+	core:require="{
+		formatter: 'idts/useradministrationui/model/formatter'
+	}">
+	<f:DynamicPage id="page" busy="{view>/busy}" busyIndicatorDelay="0">
+		<f:title>
+			<f:DynamicPageTitle>
+				<f:heading>
+					<Title text="{i18n>appTitle}" level="H1"/>
+				</f:heading>
+				<f:actions>
+					<Button
+						text="{i18n>inviteUser}"
+						type="Emphasized"
+						icon="sap-icon://add-employee"
+						press=".onOpenInvite"/>
+				</f:actions>
+			</f:DynamicPageTitle>
+		</f:title>
+		<f:content>
+			<VBox class="sapUiResponsiveContentPadding">
+				<Toolbar>
+					<SearchField
+						width="100%"
+						placeholder="{i18n>searchPlaceholder}"
+						search=".onSearch"/>
+				</Toolbar>
+				<Table
+					id="onboardingTable"
+					items="{requests>/items}"
+					growing="true"
+					growingScrollToLoad="true"
+					noDataText="{i18n>noRequests}"
+					sticky="ColumnHeaders">
+					<columns>
+						<Column><Text text="{i18n>targetEmail}"/></Column>
+						<Column width="8rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>businessRole}"/></Column>
+						<Column width="9rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>userAdminCapability}"/></Column>
+						<Column width="10rem"><Text text="{i18n>status}"/></Column>
+						<Column width="12rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>expiresAt}"/></Column>
+						<Column minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>deliveryIssue}"/></Column>
+						<Column width="13rem" hAlign="End"><Text text="{i18n>actions}"/></Column>
+					</columns>
+					<items>
+						<ColumnListItem type="Inactive">
+							<cells>
+								<Text text="{requests>targetEmailNormalized}"/>
+								<ObjectStatus text="{requests>requestedRole_code}"/>
+								<ObjectStatus
+									text="{= ${requests>userAdminRequested} ? ${i18n>enabled} : ${i18n>notEnabled} }"
+									state="{= ${requests>userAdminRequested} ? 'Information' : 'None' }"/>
+								<ObjectStatus
+									text="{requests>status_code}"
+									state="{path: 'requests>status_code', formatter: 'formatter.statusState'}"/>
+								<Text text="{path: 'requests>expiresAt', formatter: 'formatter.dateTime'}"/>
+								<ObjectStatus text="{requests>lastErrorSummary}" state="Error"/>
+								<HBox justifyContent="End" renderType="Bare">
+									<Button
+										icon="sap-icon://accept"
+										tooltip="{i18n>approveProvisioning}"
+										visible="{= ${requests>status_code} === 'PENDING_APPROVAL' }"
+										press=".onApproveProvisioning"/>
+									<Button
+										icon="sap-icon://edit"
+										tooltip="{i18n>changeRole}"
+										visible="{= ${requests>status_code} === 'ACTIVE' }"
+										press=".onOpenRoleChange"/>
+									<Button
+										icon="sap-icon://skills"
+										tooltip="{i18n>manageResponsibilities}"
+										visible="{= ${requests>status_code} === 'ACTIVE' &amp;&amp; ${requests>requestedRole_code} === 'DEVELOPER' }"
+										press=".onOpenDeveloperProfile"/>
+									<Button
+										icon="sap-icon://decline"
+										type="Negative"
+										tooltip="{i18n>revokeAccess}"
+										visible="{= ${requests>status_code} === 'ACTIVE' }"
+										press=".onOpenRevoke"/>
+									<Button
+										icon="sap-icon://refresh"
+										tooltip="{i18n>retryProvisioning}"
+										visible="{= ${requests>status_code} === 'RETRYABLE_FAILURE' || (${requests>status_code} === 'BLOCKED_MANUAL_REVIEW' &amp;&amp; ${requests>lastErrorCode} === 'PROVIDER_REQUEST_INVALID' &amp;&amp; ${requests>latestOperationAttemptCount} === 4) }"
+										press=".onRetryAccessOperation"/>
+									<Button
+										icon="sap-icon://synchronize"
+										tooltip="{i18n>reconcileProvisioning}"
+										visible="{= ${requests>status_code} === 'BLOCKED_MANUAL_REVIEW' &amp;&amp; ${requests>lastErrorCode} === 'AMBIGUOUS_PROVIDER_OUTCOME' }"
+										press=".onReconcileAccessOperation"/>
+								</HBox>
+							</cells>
+						</ColumnListItem>
+					</items>
+				</Table>
+			</VBox>
+		</f:content>
+	</f:DynamicPage>
+</mvc:View>

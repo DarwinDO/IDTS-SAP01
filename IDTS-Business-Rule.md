@@ -79,6 +79,7 @@ SAP BTP uses AppRouter/XSUAA platform authentication and maps the authenticated 
 Rules:
 
 * `Users` is the internal source for profile, email, active flag and MVP business role.
+* A linked SAP identity is authoritative by the unique hash of provider origin, issuer, and stable subject. Email/display name are mutable attributes and never authorize a complete external identity. Legacy rows keep nullable identity fields for a controlled link/backfill; local/custom-auth profiles may still resolve by internal ID/email when no complete external tuple is present.
 * Passwords must be stored only as hashes in `Users.passwordHash`; plaintext passwords must not be committed or logged.
 * Successful login creates a server-side `AuthSessions` record and returns a bearer token.
 * The database stores only the token hash, not the raw bearer token.
@@ -92,11 +93,38 @@ Tren SAP BTP, IDTS dung AppRouter/XSUAA va map SAP identity toi user/role IDTS d
 Rule:
 
 * `Users` la nguon noi bo cho profile, email, active flag va MVP business role.
+* SAP identity da link dung unique hash cua provider origin, issuer va stable subject lam authority. Email/display name co the thay doi va khong duoc dung de authorize external identity day du. Row legacy de nullable cho link/backfill co kiem soat; local/custom-auth chi fallback ID/email khi request khong co du external tuple.
 * Password chi duoc luu dang hash trong `Users.passwordHash`; khong commit hoac log plaintext password.
 * Login thanh cong tao `AuthSessions` phia server va tra bearer token.
 * Database chi luu token hash, khong luu raw bearer token.
 * Request OData da login phai map lai thanh `cds.User` voi `authenticated-user` cong role IDTS (`TESTER`, `DEVELOPER`, hoac `PM`).
 * User inactive khong duoc login du co password hash.
+
+## **BR-02B - Controlled user onboarding and UserAdmin overlay**
+
+* The only business roles remain `PM`, `TESTER`, and `DEVELOPER`; every active user has exactly one business role.
+* `UserAdmin` is an XSUAA capability overlay, not a fourth business role, and may be assigned only to selected PM users.
+* The backend requires both PM and UserAdmin plus a matching active internal PM for every user-administration read or action. PM without UserAdmin, inactive/unmapped PM, Tester, Developer, and direct API callers without the complete contract receive 403.
+* An invitation specifies exactly one allowlisted business role. UserAdmin may be requested only together with PM.
+* Invitation links are signed, one-time, expiring, and length-bounded. Email transports the token in a URL fragment for a callback page to exchange by POST, keeping it out of HTTP requests and referrers. IDTS stores the token hash and nonce but never stores or logs the signing key, SAP password, OTP, passkey, recovery code, cookie, bearer token, or raw provider error.
+* The signed-in SAP identity email must match the normalized invitation email. IDTS records origin, issuer, and subject for later immutable mapping; email remains a mutable attribute.
+* No active `Users` row, BTP Role Collection assignment, or provisioning success is created before identity verification completes.
+* The PM confirmation that sends an invitation is sufficient approval for TESTER and DEVELOPER. After successful identity verification, these standard roles enter the provisioning queue automatically. PM access and any UserAdmin overlay require a second version-matched human approval. `ACTIVE` is set only after the separate broker reads back the exact desired Role Collection state.
+* Role change and revoke fail closed: IDTS disables the local user and revokes active `AuthSessions` before external reconciliation. UserAdmin remains valid only with PM, multiple business roles are rejected, and the last active UserAdmin cannot be removed.
+* A retry is available only for a provider result classified as retryable. An ambiguous provider result moves to `BLOCKED_MANUAL_REVIEW` and may continue only after a PM+UserAdmin explicitly requests reconciliation; the broker must read current provider state before applying a bounded allowlisted delta.
+* CAP stores the operation journal and append-only safe audit events, but never the SAP administration credential or raw provider response. A separate least-privilege broker owns the external authorization API call and accepts only server-side allowlisted roles.
+* Repeated invitation use, concurrent duplicate open invitations, external-identity collisions, multiple business roles, and non-PM UserAdmin requests must fail closed and be auditable.
+* DEVELOPER invitations and role changes require a desired Developer Profile with a positive workload limit and at least one active Component Category responsibility. SAP Module is optional. Provider readback, internal User activation, active Developer Profile, and at least one active responsibility must all succeed before `ACTIVE`.
+* PM+UserAdmin may update Developer availability, workload, and responsibilities with optimistic versioning. Responsibility removal is a soft deactivation: it affects future matching but preserves existing Bug assignees and reports the affected open-Bug count for separate PM handling.
+
+Vietnamese:
+
+* Business role van chi gom `PM`, `TESTER`, `DEVELOPER`; moi active user co dung mot business role.
+* `UserAdmin` la capability overlay cua XSUAA, khong phai business role thu tu, va chi gan cho mot so PM duoc chon.
+* Backend bat buoc dong thoi co PM va UserAdmin cho moi API quan tri user.
+* Link moi co chu ky, chi dung mot lan va co han; IDTS chi luu hash/nonce, khong luu secret hoac credential SAP.
+* Chi sau khi SAP identity duoc xac minh moi chuyen sang provisioning; email khong phai immutable authority duy nhat.
+* TESTER/DEVELOPER dung confirmation luc PM gui invitation lam approval; sau identity verification se tu queue provisioning. PM hoac UserAdmin van can approval thu hai. `ACTIVE` chi duoc set sau broker readback dung exact Role Collection; role change/revoke khoa local access va revoke session truoc de fail closed.
 
 ---
 

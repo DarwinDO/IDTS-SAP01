@@ -1,5 +1,23 @@
 # Knowledge: `db/schema.cds`
 
+## User-admin Developer profile additions / Bổ sung Developer profile cho User Admin
+
+`DeveloperProfileAdministrationStates` stores the one-to-one optimistic version used for PM updates without adding a column to the existing seeded `DeveloperProfiles` table. `UserOnboardingRequests` owns one `UserOnboardingDeveloperProfiles` header and many `UserOnboardingDeveloperResponsibilities`. Together they form the desired availability/workload and Component Category, optional SAP Module, and responsibility-level snapshot used only after provider readback. Keeping both concurrency state and desired invitation data in new owned tables makes the HANA migration additive and avoids seed-data redeployment.
+
+`DeveloperProfileAdministrationStates` lưu optimistic version one-to-one cho cập nhật của PM mà không thêm cột vào bảng seeded `DeveloperProfiles` hiện hữu. `UserOnboardingRequests` sở hữu một header `UserOnboardingDeveloperProfiles` và nhiều `UserOnboardingDeveloperResponsibilities`. Hai phần tạo snapshot availability/workload, Component Category, SAP Module tùy chọn và responsibility level chỉ materialize sau provider readback. Tách concurrency state và desired invitation data sang bảng owned mới giúp migration HANA additive và không redeploy seed data.
+
+## Controlled user onboarding (2026-08-12)
+
+`UserOnboardingRequests` stores the requested PM/Tester/Developer role, optional PM-only UserAdmin overlay, requester, state, expiry, token hash/nonce, correlation ID, and the verified external identity snapshot. A fixed 64-character `identityKeyHash` enforces external-identity uniqueness without creating a long cross-database index over issuer and subject strings. `identityPlatformUserId` separately stores the CAP/XSUAA-validated `payload.user_id` needed to address the exact SCIM shadow user; it is not part of the immutable Global User ID hash and is not exposed by the public service projection. A nullable 64-character `openRequestKey` hashes the normalized target email and prevents concurrent live invitations; a later terminal-state transition must clear it. `UserOnboardingDeliveries` is a separate retry/lock record that does not store the raw signed URL or provider credential. These entities are additive; existing `Users` rows remain compatible and are not backfilled by this source change.
+
+`UserIdentityAuditEvents.onboardingRequest` is nullable only for the controlled legacy-PM bootstrap, where no invitation exists. Bootstrap rows require `action=BOOTSTRAP_LINK`, one actor/target user, before/after identity-state hashes and a unique `(correlationId, action)` pair. Normal provisioning audit rows continue to reference their onboarding request. This relaxation does not expose the audit entity through a public service.
+
+`UserAccessOperations` is the versioned, idempotent operation journal for provision, role change and revoke. It stores only desired allowlisted access, lease hash/timestamps, bounded retry state, safe result codes and a provider-correlation hash. `UserIdentityAuditEvents` is append-only administration evidence separate from Bug history. Neither entity stores an OAuth token, API credential, raw provider response, endpoint, or full provider payload. These are source candidates only until the additive HANA migration is reviewed and approved.
+
+`Users.externalIdentityOrigin`, `externalIdentityIssuer`, `externalIdentitySubject`, and the unique `externalIdentityKeyHash` are nullable for the existing legacy rows. Once a row is linked, the hash is the mapping authority. Email and display name can still change for communication/display, but cannot match over a different non-null identity hash. No automatic backfill or HANA migration is performed by the source change.
+
+Rollout order is mandatory: migrate the nullable columns/constraint, prove the live `user_uuid` claim, audit collisions, and link controlled rows before deploying the immutable runtime. Deploying the runtime first intentionally fails closed and would deny every existing BTP row whose hash is still null.
+
 ## IDTS-122 retest ownership
 
 `Bugs.retestOwner` is a nullable association to `Users`. It stores the durable Tester responsible for retest across close/reopen and is deliberately separate from Developer `assignee` and current-action `nextProcessorUser`. HANA rollout is additive and requires a controlled migration for active and draft artifacts; never use broad deploy/seed to introduce this column.

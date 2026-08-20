@@ -13,6 +13,17 @@
       "description": "Coordinate assignment, monitoring, and governance"
     },
     {
+      "name": "$XSAPPNAME.UserAdmin",
+      "description": "Manage controlled IDTS user onboarding and access requests"
+    },
+    {
+      "name": "$XSAPPNAME.ProvisioningBroker",
+      "description": "Process allowlisted IDTS access provisioning operations",
+      "grant-as-authority-to-apps": [
+        "$XSAPPNAME(application,idts-user-access-broker)"
+      ]
+    },
+    {
       "name": "$XSAPPNAME.OutboxProcessor",
       "description": "Invoke the protected email outbox processing endpoint",
       "grant-as-authority-to-apps": [
@@ -47,12 +58,29 @@
       "attribute-references": []
     },
     {
+      "name": "UserAdmin",
+      "description": "IDTS user administration capability for selected Project Managers",
+      "scope-references": [
+        "$XSAPPNAME.UserAdmin"
+      ],
+      "attribute-references": []
+    },
+    {
       "name": "OutboxProcessor",
       "description": "IDTS technical email outbox processor",
       "scope-references": [
         "$XSAPPNAME.OutboxProcessor"
       ],
       "attribute-references": []
+    }
+  ],
+  "role-collections": [
+    {
+      "name": "IDTS_USER_ADMIN",
+      "description": "Selected IDTS Project Managers allowed to administer user access",
+      "role-template-references": [
+        "$XSAPPNAME.UserAdmin"
+      ]
     }
   ]
 }

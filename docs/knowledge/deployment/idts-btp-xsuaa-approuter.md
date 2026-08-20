@@ -8,6 +8,18 @@ Fiori application. Requests under `/odata` go from AppRouter to the CAP
 to `idts.cap.Users` and checks that the platform role matches the business
 role.
 
+## Controlled onboarding callback
+
+`app/router/xs-app.json` exposes `/onboarding/continue` as the only unauthenticated onboarding entry. It serves a no-store static handoff that accepts the signed token only from the URL fragment. `/onboarding/authenticate` requires XSUAA and then POSTs the token to the protected CAP service. JavaScript/CSS resources are public but contain no invitation, identity, credential, or tenant data. The default XSUAA identity-provider behavior is retained; no provider is hardcoded in the route.
+
+## User Administration HTML5 module
+
+`app/user-administration-ui` builds a separate `user-administration-ui.zip` consumed by `idts-sap01-app-content`. Its HTML5 repository route requires `$XSAPPNAME.UserAdmin`, while the forwarded OData route keeps XSUAA authentication, CSRF protection, and the same scope requirement. This is an additional UI gate only: CAP still enforces PM + UserAdmin plus an active internal PM for every administration read/action.
+
+The source descriptor does not deploy or update XSUAA by itself. Until the `UserAdmin` source scope/template is reviewed and applied, the HTML5 app cannot be considered live-ready. No database deployer, schema migration, Role Collection assignment, or external trust change is part of the UI build.
+
+This source contract does not prove the live SAP ID registration-return behavior or the availability of origin/issuer/subject/email claims. Those require browser evidence after deployment approval.
+
 ## Configuration files
 
 | File | Responsibility |
