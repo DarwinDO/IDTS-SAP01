@@ -21,6 +21,11 @@ const {
   assertDeveloperProfileForRole
 } = require('./user-admin/developer-profile')
 const { registerActiveUserHandlers } = require('./user-admin/active-users')
+const {
+  requestSuspend,
+  requestReactivate,
+  assertNotFinalAdministrator
+} = require('./user-admin/access-lifecycle')
 
 const OPEN_STATUSES = [
   'INVITED',
@@ -50,6 +55,18 @@ class UserAdministrationService extends cds.ApplicationService {
     this.on('readDeveloperProfile', req => readDeveloperProfile(req))
     this.on('updateDeveloperProfile', req => updateDeveloperProfile(req))
     this.on('requestRevoke', req => requestRevoke(req))
+    const accessLifecycleDependencies = {
+      authorize: requireActiveUserAdministrator,
+      readActiveProvisionedUser,
+      readSuspendedProvisionedUser,
+      assertExpectedVersion,
+      insertAccessOperation,
+      insertIdentityAudit,
+      normalizeReason,
+      onboardingResult
+    }
+    this.on('requestSuspend', req => requestSuspend(req, accessLifecycleDependencies))
+    this.on('requestReactivate', req => requestReactivate(req, accessLifecycleDependencies))
     this.on('retryAccessOperation', req => retryAccessOperation(req))
     this.on('reconcileAccessOperation', req => reconcileAccessOperation(req))
     registerActiveUserHandlers(this, { authorize: requireActiveUserAdministrator })
@@ -384,7 +401,7 @@ async function requestRoleChange (req) {
   if (request.requestedRole_code === access.requestedRole && request.userAdminRequested === access.userAdminRequested) {
     throw serviceError(409, 'ACCESS_ALREADY_DESIRED', 'The requested access is already active.')
   }
-  await assertLastAdministratorSafety(tx, request, access)
+  await assertLastAdministratorSafety(tx, request, access, user.ID)
   await persistDesiredDeveloperProfile(tx, request.ID, developerProfile)
   return queueFailClosedAccessChange(req, tx, {
     administrator,
@@ -404,7 +421,7 @@ async function requestRevoke (req) {
   const administrator = await requireActiveUserAdministrator(req, tx)
   const { user, request } = await readActiveProvisionedUser(tx, req.data.userID)
   assertExpectedVersion(request, req.data.expectedVersion)
-  await assertLastAdministratorSafety(tx, request, { requestedRole: null, userAdminRequested: false })
+  await assertLastAdministratorSafety(tx, request, { requestedRole: null, userAdminRequested: false }, user.ID)
   return queueFailClosedAccessChange(req, tx, {
     administrator,
     request,
@@ -795,24 +812,26 @@ async function readActiveProvisionedUser (tx, userID) {
   return { user, request }
 }
 
+async function readSuspendedProvisionedUser (tx, userID) {
+  const user = await tx.run(SELECT.one.from('idts.cap.Users').where({ ID: userID, active: false }))
+  if (!user) throw serviceError(404, 'SUSPENDED_USER_NOT_FOUND', 'Suspended user was not found.')
+  const request = await tx.run(
+    SELECT.one.from('idts.cap.UserOnboardingRequests').where({ activeUser_ID: user.ID, status_code: 'SUSPENDED' })
+  )
+  if (!request) throw serviceError(409, 'ACCESS_NOT_SUSPENDED', 'Only suspended access can be reactivated.')
+  return { user, request }
+}
+
 function assertExpectedVersion (request, expectedVersion) {
   if (!Number.isInteger(expectedVersion) || expectedVersion < 0 || request.provisioningVersion !== expectedVersion) {
     throw serviceError(409, 'ONBOARDING_VERSION_CONFLICT', 'The onboarding request changed. Reload and try again.')
   }
 }
 
-async function assertLastAdministratorSafety (tx, request, desiredAccess) {
+async function assertLastAdministratorSafety (tx, request, desiredAccess, targetUserID) {
   const removesUserAdmin = request.userAdminRequested === true && desiredAccess.userAdminRequested !== true
   if (!removesUserAdmin) return
-  const activeAdmins = await tx.run(
-    SELECT.from('idts.cap.UserOnboardingRequests')
-      .columns('ID')
-      .where({ status_code: 'ACTIVE', requestedRole_code: 'PM', userAdminRequested: true })
-      .forUpdate()
-  )
-  if (activeAdmins.length <= 1) {
-    throw serviceError(409, 'LAST_USER_ADMIN_REQUIRED', 'The last active UserAdmin cannot be removed.')
-  }
+  await assertNotFinalAdministrator(tx, targetUserID)
 }
 
 async function insertAccessOperation (tx, options) {
@@ -944,6 +963,8 @@ module.exports.searchOnboarding = searchOnboarding
 module.exports.approveProvisioning = approveProvisioning
 module.exports.requestRoleChange = requestRoleChange
 module.exports.requestRevoke = requestRevoke
+module.exports.requestSuspend = requestSuspend
+module.exports.requestReactivate = requestReactivate
 module.exports.retryAccessOperation = retryAccessOperation
 module.exports.reconcileAccessOperation = reconcileAccessOperation
 module.exports.requiresProvisioningApproval = requiresProvisioningApproval
