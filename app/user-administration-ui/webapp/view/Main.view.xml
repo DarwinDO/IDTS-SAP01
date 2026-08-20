@@ -121,7 +121,7 @@
 										<ToolbarSpacer/>
 										<CheckBox
 											selected="{activeUsers>/includeNonActive}"
-											text="{i18n>includeNonActive}"
+											text="{i18n>includeRevoked}"
 											select=".onActiveUsersFilterChange"/>
 										<Button
 											icon="sap-icon://refresh"
@@ -138,8 +138,6 @@
 										id="activeUsersTable"
 										items="{activeUsers>/items}"
 										busy="{activeUsers>/busy}"
-										growing="true"
-										growingScrollToLoad="true"
 										noDataText="{i18n>noActiveUsers}"
 										sticky="ColumnHeaders">
 										<columns>
@@ -208,6 +206,13 @@
 											</ColumnListItem>
 										</items>
 									</Table>
+									<Button
+										text="{i18n>loadMoreActiveUsers}"
+										type="Transparent"
+										visible="{activeUsers>/hasMore}"
+										enabled="{= !${activeUsers>/busy} }"
+										press=".onLoadMoreActiveUsers"
+										class="sapUiTinyMarginTop"/>
 								</VBox>
 							</content>
 						</IconTabFilter>
@@ -250,6 +255,13 @@
 											</ColumnListItem>
 										</items>
 									</Table>
+									<Button
+										text="{i18n>loadMoreActiveUsers}"
+										type="Transparent"
+										visible="{activeUsers>/hasMore}"
+										enabled="{= !${activeUsers>/busy} }"
+										press=".onLoadMoreActiveUsers"
+										class="sapUiTinyMarginTop"/>
 								</VBox>
 							</content>
 						</IconTabFilter>

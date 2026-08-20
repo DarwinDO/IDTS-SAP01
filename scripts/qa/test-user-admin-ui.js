@@ -72,6 +72,8 @@ assert.match(view, /items="\{activeUsers>\/developerItems\}"/)
 assert.match(view, /search="\.onActiveUsersSearch"/)
 assert.match(view, /press="\.onOpenActiveUserDetails"/)
 assert.match(view, /press="\.onRetryActiveUsers"/)
+assert.match(view, /text="\{i18n>includeRevoked\}"/)
+assert.match(view, /press="\.onLoadMoreActiveUsers"/)
 assert.doesNotMatch(view, /identityOrigin|identityIssuer|identitySubject|identityKeyHash|identityPlatformUserId/)
 
 const activeUserDetailsFragment = fs.readFileSync(path.join(webapp, 'fragment/ActiveUserDetails.fragment.xml'), 'utf8')
@@ -119,8 +121,12 @@ assert.match(controller, /activeUsers/)
 assert.match(controller, /bindContext\("\/searchActiveUsers\(\.\.\.\)"\)/)
 assert.match(controller, /setParameter\("query"/)
 assert.match(controller, /setParameter\("includeNonActive"/)
+assert.match(controller, /setParameter\("skip"/)
+assert.match(controller, /setParameter\("top"/)
 assert.match(controller, /bindContext\("\/readActiveUserDetails\(\.\.\.\)"\)/)
 assert.match(controller, /onTabSelect/)
+assert.match(controller, /_ensureActiveUsersLoaded/)
+assert.match(controller, /onLoadMoreActiveUsers/)
 assert.match(controller, /sessionStorage/)
 assert.doesNotMatch(controller, /identityOrigin|identityIssuer|identitySubject|identityKeyHash|identityPlatformUserId/)
 
@@ -151,6 +157,8 @@ assert.equal(typeof controllerDefinition._loadInitialRequests, 'function')
 assert.equal(typeof controllerDefinition.onAfterRendering, 'function')
 assert.equal(typeof controllerDefinition.onTabSelect, 'function')
 assert.equal(typeof controllerDefinition._loadActiveUsers, 'function')
+assert.equal(typeof controllerDefinition._ensureActiveUsersLoaded, 'function')
+assert.equal(typeof controllerDefinition.onLoadMoreActiveUsers, 'function')
 assert.equal(typeof controllerDefinition.onOpenActiveUserDetails, 'function')
 assert.match(controller, /this\.getResourceBundle\(\)/)
 
@@ -167,6 +175,7 @@ async function verifyRuntimeBehavior () {
 
   let loadQuery
   const directInitialLoadInstance = Object.assign(Object.create(controllerDefinition), {
+    getModel: name => name === 'view' ? { getProperty: () => 'requests' } : { getProperty: () => false },
     _loadRequests: async query => {
       loadQuery = query
     }
@@ -242,7 +251,7 @@ async function verifyRuntimeBehavior () {
   assert.equal(searchParameter, 'mixed.case@example.invalid')
   assert.equal(searchInvocations, 1)
 
-  const activeUsersData = { items: [], developerItems: [], query: '', includeNonActive: false, loaded: false, busy: false, error: false }
+  const activeUsersData = { items: [], developerItems: [], query: '', includeNonActive: false, pageSize: 100, nextSkip: 0, hasMore: false, loaded: false, busy: false, error: false }
   const activeUsersModel = {
     getProperty: key => activeUsersData[key.slice(1)],
     setProperty: (key, value) => { activeUsersData[key.slice(1)] = value }
@@ -267,9 +276,42 @@ async function verifyRuntimeBehavior () {
   await activeInstance._loadActiveUsers(' Mixed Query ')
   assert.equal(activeParameters.query, 'mixed query')
   assert.equal(activeParameters.includeNonActive, false)
+  assert.equal(activeParameters.skip, 0)
+  assert.equal(activeParameters.top, 100)
   assert.equal(activeUsersData.items.length, 2)
   assert.equal(activeUsersData.developerItems.length, 1)
   assert.equal(activeUsersData.loaded, true)
+  activeUsersData.hasMore = true
+  activeUsersData.nextSkip = 2
+  await activeInstance.onLoadMoreActiveUsers()
+  assert.equal(activeParameters.skip, 2)
+  assert.equal(activeUsersData.items.length, 2)
+
+  const restoredData = { selectedTab: 'activeUsers' }
+  const restoredActiveUsersData = { loaded: false, busy: false }
+  let restoredRequestLoads = 0
+  let restoredActiveLoads = 0
+  const restoredModel = {
+    getProperty: key => restoredData[key.slice(1)],
+    setProperty: (key, value) => { restoredData[key.slice(1)] = value }
+  }
+  const restoredActiveModel = {
+    getProperty: key => restoredActiveUsersData[key.slice(1)],
+    setProperty: (key, value) => { restoredActiveUsersData[key.slice(1)] = value }
+  }
+  const restoredInstance = Object.assign(Object.create(controllerDefinition), {
+    getModel: name => name === 'view' ? restoredModel : restoredActiveModel,
+    _loadRequests: async () => { restoredRequestLoads += 1 },
+    _loadActiveUsers: async () => {
+      restoredActiveLoads += 1
+      restoredActiveUsersData.loaded = true
+    }
+  })
+  await restoredInstance._loadInitialRequests()
+  assert.equal(restoredRequestLoads, 1)
+  assert.equal(restoredActiveLoads, 1)
+  await restoredInstance.onTabSelect({ getParameter: name => name === 'key' ? 'activeUsers' : undefined, getSource: () => ({ getSelectedKey: () => 'activeUsers' }) })
+  assert.equal(restoredActiveLoads, 1)
 }
 
 function loadController (source) {
@@ -294,7 +336,7 @@ function loadController (source) {
 
 for (const locale of ['i18n.properties', 'i18n_en.properties']) {
   const text = fs.readFileSync(path.join(webapp, 'i18n', locale), 'utf8')
-  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'manageResponsibilities', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'activeUserSearchPlaceholder', 'includeNonActive', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'viewDetails', 'activeUserDetails', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'requestCount', 'auditEventCount', 'developerProfile', 'close', 'activeUsersNoDeveloper']) {
+  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'manageResponsibilities', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'activeUserSearchPlaceholder', 'includeNonActive', 'includeRevoked', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'loadMoreActiveUsers', 'viewDetails', 'activeUserDetails', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'requestCount', 'auditEventCount', 'developerProfile', 'close', 'activeUsersNoDeveloper']) {
     assert.match(text, new RegExp(`^${key}=`, 'm'))
   }
 }

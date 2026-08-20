@@ -21,6 +21,9 @@ sap.ui.define([
 				developerItems: [],
 				query: oSessionState.query,
 				includeNonActive: oSessionState.includeNonActive,
+				pageSize: 100,
+				nextSkip: 0,
+				hasMore: false,
 				loaded: false,
 				busy: false,
 				error: false,
@@ -39,18 +42,22 @@ sap.ui.define([
 
 		_loadInitialRequests: async function () {
 			await this._loadRequests("");
+			const sSelectedTab = this.getModel("view").getProperty("/selectedTab");
+			if (["activeUsers", "developerResponsibilities"].includes(sSelectedTab)) {
+				await this._ensureActiveUsersLoaded();
+			}
 		},
 
 		onSearch: async function (oEvent) {
 			await this._loadRequests(oEvent.getParameter("query") || "");
 		},
 
-		onTabSelect: function (oEvent) {
+		onTabSelect: async function (oEvent) {
 			const sKey = oEvent.getParameter("key") || oEvent.getSource().getSelectedKey();
 			this.getModel("view").setProperty("/selectedTab", sKey);
 			this._saveActiveUsersSessionState();
 			if ((sKey === "activeUsers" || sKey === "developerResponsibilities") && !this.getModel("activeUsers").getProperty("/loaded")) {
-				this._loadActiveUsers();
+				await this._ensureActiveUsersLoaded();
 			}
 		},
 
@@ -69,6 +76,12 @@ sap.ui.define([
 
 		onRetryActiveUsers: async function () {
 			await this._loadActiveUsers();
+		},
+
+		onLoadMoreActiveUsers: async function () {
+			const oActiveUsersModel = this.getModel("activeUsers");
+			if (!oActiveUsersModel.getProperty("/hasMore") || oActiveUsersModel.getProperty("/busy")) return;
+			await this._loadActiveUsers(undefined, true);
 		},
 
 		onOpenActiveUserDetails: async function (oEvent) {
@@ -509,25 +522,53 @@ sap.ui.define([
 			return oEvent?.getSource?.().getBindingContext("activeUsers")?.getObject?.() || null;
 		},
 
-		_loadActiveUsers: async function (sQuery) {
+		_ensureActiveUsersLoaded: function () {
 			const oActiveUsersModel = this.getModel("activeUsers");
+			if (oActiveUsersModel.getProperty("/loaded")) return Promise.resolve();
+			if (!this._activeUsersLoadPromise) {
+				this._activeUsersLoadPromise = this._loadActiveUsers().finally(() => {
+					this._activeUsersLoadPromise = null;
+				});
+			}
+			return this._activeUsersLoadPromise;
+		},
+
+		_loadActiveUsers: async function (sQuery, bAppend) {
+			const oActiveUsersModel = this.getModel("activeUsers");
+			const bAppending = bAppend === true;
 			const sNormalizedQuery = (sQuery === undefined ? oActiveUsersModel.getProperty("/query") : sQuery || "").trim().toLowerCase();
+			const iPageSize = Number(oActiveUsersModel.getProperty("/pageSize")) || 100;
+			const iSkip = bAppending ? Number(oActiveUsersModel.getProperty("/nextSkip")) || 0 : 0;
 			const iRequest = (this._activeUsersRequest || 0) + 1;
 			this._activeUsersRequest = iRequest;
 			oActiveUsersModel.setProperty("/query", sNormalizedQuery);
+			if (!bAppending) {
+				oActiveUsersModel.setProperty("/items", []);
+				oActiveUsersModel.setProperty("/developerItems", []);
+				oActiveUsersModel.setProperty("/nextSkip", 0);
+				oActiveUsersModel.setProperty("/hasMore", false);
+				oActiveUsersModel.setProperty("/loaded", false);
+			}
 			oActiveUsersModel.setProperty("/busy", true);
 			oActiveUsersModel.setProperty("/error", false);
 			try {
 				const oOperation = this.getView().getModel().bindContext("/searchActiveUsers(...)");
 				oOperation.setParameter("query", sNormalizedQuery);
 				oOperation.setParameter("includeNonActive", oActiveUsersModel.getProperty("/includeNonActive") === true);
+				oOperation.setParameter("skip", iSkip);
+				oOperation.setParameter("top", iPageSize);
 				await oOperation.invoke("$direct");
 				const oContext = oOperation.getBoundContext();
 				const oResult = await (oContext ? oContext.requestObject() : {});
 				const aItems = Array.isArray(oResult) ? oResult : (oResult?.value || []);
 				if (iRequest === this._activeUsersRequest) {
-					oActiveUsersModel.setProperty("/items", aItems);
-					oActiveUsersModel.setProperty("/developerItems", aItems.filter(oRow => oRow.businessRole === "DEVELOPER"));
+					const aExistingItems = bAppending ? oActiveUsersModel.getProperty("/items") || [] : [];
+					const oExistingIDs = new Set(aExistingItems.map(oRow => oRow.userID));
+					const aCombinedItems = aExistingItems.concat(aItems.filter(oRow => !oExistingIDs.has(oRow.userID)));
+					oActiveUsersModel.setProperty("/items", aCombinedItems);
+					oActiveUsersModel.setProperty("/developerItems", aCombinedItems.filter(oRow => oRow.businessRole === "DEVELOPER"));
+					oActiveUsersModel.setProperty("/nextSkip", iSkip + aItems.length);
+					oActiveUsersModel.setProperty("/hasMore", aItems.length === iPageSize);
 					oActiveUsersModel.setProperty("/loaded", true);
 				}
 			} catch {
