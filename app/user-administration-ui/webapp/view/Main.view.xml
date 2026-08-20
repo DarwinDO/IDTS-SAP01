@@ -143,6 +143,7 @@
 										<columns>
 											<Column><Text text="{i18n>user}"/></Column>
 											<Column width="9rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>businessRole}"/></Column>
+											<Column width="11rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>userAdminCapability}"/></Column>
 											<Column width="9rem"><Text text="{i18n>accessState}"/></Column>
 											<Column width="9rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>identityLinked}"/></Column>
 											<Column width="10rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>developerReady}"/></Column>
@@ -154,7 +155,8 @@
 											<ColumnListItem type="Inactive">
 												<cells>
 													<ObjectIdentifier title="{activeUsers>displayName}" text="{activeUsers>email}"/>
-													<ObjectStatus text="{activeUsers>businessRole}"/>
+												<ObjectStatus text="{activeUsers>businessRole}"/>
+												<ObjectStatus text="{= ${activeUsers>userAdminCapability} ? ${i18n>enabled} : ${i18n>notEnabled} }"/>
 													<ObjectStatus
 														text="{
 															parts: [

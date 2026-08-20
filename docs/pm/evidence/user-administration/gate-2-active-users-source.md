@@ -43,7 +43,7 @@ Evidence source cho Gate 2 Active Users được chuẩn bị trên branch cô l
 - Current request selection is deterministic (`modifiedAt`, `createdAt`, `ID` descending); duplicate active requests fail closed as `INCOMPLETE`.
 - Only the chosen request's `latestOperation_ID` is read, so a stale operation cannot replace the current safe result.
 - List reads do not load audit rows or bug rows. Details load only bounded counts/profile impact when requested.
-- Identity linkage is a boolean only. Forbidden identity/provider/credential/lease/body output fields are absent from the CDS contract and returned objects.
+- Identity linkage is a boolean only. Missing or mismatched immutable linkage forces the derived access state to `INCOMPLETE` and prevents the UserAdmin capability from being reported as enabled. Forbidden identity/provider/credential/lease/body output fields are absent from the CDS contract and returned objects.
 - `requireActiveUserAdministrator` remains the exact PM + `UserAdmin` plus active-internal-PM guard, and authorization runs before each action's first query.
 - No module-level cache or external provider call exists.
 
@@ -52,7 +52,7 @@ Evidence source cho Gate 2 Active Users được chuẩn bị trên branch cô l
 - Chọn request hiện tại deterministic theo `modifiedAt`, `createdAt`, `ID` giảm dần; duplicate active fail closed thành `INCOMPLETE`.
 - Chỉ đọc `latestOperation_ID` của request được chọn nên stale operation không thay safe result hiện tại.
 - List không load audit row hoặc bug row. Details chỉ load count bounded/profile impact khi được yêu cầu.
-- Link identity chỉ là boolean. Forbidden identity/provider/credential/lease/body field không có trong CDS contract và object trả về.
+- Link identity chỉ là boolean. Immutable link thiếu hoặc không khớp buộc access state thành `INCOMPLETE` và không cho báo capability UserAdmin là enabled. Forbidden identity/provider/credential/lease/body field không có trong CDS contract và object trả về.
 - `requireActiveUserAdministrator` giữ đúng guard PM + `UserAdmin` và internal PM active; authorization chạy trước query đầu tiên của mỗi action.
 - Không có cache cấp module hoặc provider call.
 
@@ -75,7 +75,7 @@ Evidence source cho Gate 2 Active Users được chuẩn bị trên branch cô l
 - Search is case-insensitive and the CDS `String(255)` boundary rejects a 256-character query with HTTP 400 before product handler execution.
 - Explicit `skip/top` page bounds reject negative skip and `top > 100` with HTTP 400.
 - A 205-row synthetic fixture returns pages of 100, 100, 5, and 0 with stable boundaries and no duplicate user IDs; users are not lost because of an early source-row limit.
-- Empty/incomplete identity state stays safe; duplicate active requests become `INCOMPLETE`.
+- Empty, missing, or mismatched identity state stays safe; a single `ACTIVE` request without a matching immutable link and duplicate active requests both become `INCOMPLETE`.
 - A stale operation fixture cannot replace the selected request's current safe result.
 - Result ordering is stable and each page is bounded to at most 100 rows; callers advance with `skip`.
 
@@ -91,7 +91,7 @@ Source checks prove request-local CAP reads, explicit page progression, and UI s
 
 ### UI/UX review
 
-The source uses an `IconTabBar`, responsive tables with pop-in columns, friendly localized labels, semantic `ObjectStatus`, busy/no-data/error/retry states, explicit Load More paging, and a display-only details dialog. Restored `activeUsers`/`developerResponsibilities` session tabs load Active Users during initial request loading and share one guarded promise. UI5 MCP linter returned zero findings on the changed files; local lint and build are separate gates. No screenshot is included because this source gate contains no approved manual PII-safe visual evidence.
+The source uses an `IconTabBar`, responsive tables with pop-in columns, an explicit User Administration capability column, friendly localized labels, semantic `ObjectStatus`, busy/no-data/error/retry states, explicit Load More paging, and a display-only details dialog. Restored `activeUsers`/`developerResponsibilities` session tabs load Active Users during initial request loading and share one guarded promise. UI5 MCP linter returned zero findings on the changed files; local lint and build are separate gates. Raw screenshots are excluded because they contain PII/private hostnames; sanitized manual evidence is recorded in the rollout evidence.
 
 ## Exact source commands / Command source chính xác
 

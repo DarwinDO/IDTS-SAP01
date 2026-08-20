@@ -37,6 +37,7 @@ const AMBIGUOUS_USER_ID = '82000000-0000-4000-8000-000000000003'
 const REVOKED_USER_ID = '82000000-0000-4000-8000-000000000004'
 const SUSPENDED_USER_ID = '82000000-0000-4000-8000-000000000005'
 const INCOMPLETE_USER_ID = '82000000-0000-4000-8000-000000000006'
+const UNLINKED_ACTIVE_USER_ID = '82000000-0000-4000-8000-000000000007'
 const ACTIVE_REQUEST_ID = '82100000-0000-4000-8000-000000000001'
 const EXPIRED_REQUEST_A_ID = '82100000-0000-4000-8000-000000000002'
 const EXPIRED_REQUEST_B_ID = '82100000-0000-4000-8000-000000000003'
@@ -44,6 +45,7 @@ const AMBIGUOUS_REQUEST_A_ID = '82100000-0000-4000-8000-000000000004'
 const AMBIGUOUS_REQUEST_B_ID = '82100000-0000-4000-8000-000000000005'
 const REVOKED_REQUEST_ID = '82100000-0000-4000-8000-000000000006'
 const SUSPENDED_REQUEST_ID = '82100000-0000-4000-8000-000000000007'
+const UNLINKED_ACTIVE_REQUEST_ID = '82100000-0000-4000-8000-000000000008'
 const ACTIVE_OPERATION_ID = '82200000-0000-4000-8000-000000000001'
 const STALE_OPERATION_ID = '82200000-0000-4000-8000-000000000002'
 const REVOKED_OPERATION_ID = '82200000-0000-4000-8000-000000000003'
@@ -168,6 +170,13 @@ async function main () {
       email: 'incomplete@example.invalid',
       role_code: 'TESTER',
       active: false
+    },
+    {
+      ID: UNLINKED_ACTIVE_USER_ID,
+      displayName: 'Unlinked Active User',
+      email: 'unlinked-active@example.invalid',
+      role_code: 'TESTER',
+      active: true
     }
   ]))
   await db.run(INSERT.into('idts.cap.Users').entries(Array.from({ length: PAGED_USER_COUNT }, (_, index) => ({
@@ -235,6 +244,14 @@ async function main () {
       status_code: 'ROLE_CHANGE_QUEUED',
       createdAt: '2026-08-20T08:00:00.000Z',
       modifiedAt: '2026-08-20T09:00:00.000Z'
+    }),
+    requestEntry(UNLINKED_ACTIVE_REQUEST_ID, {
+      targetEmailNormalized: 'unlinked-active@example.invalid',
+      activeUser_ID: UNLINKED_ACTIVE_USER_ID,
+      identityKeyHash: 'f'.repeat(64),
+      status_code: 'ACTIVE',
+      createdAt: '2026-08-20T08:30:00.000Z',
+      modifiedAt: '2026-08-20T09:30:00.000Z'
     })
   ]))
 
@@ -363,6 +380,14 @@ async function main () {
   assert.equal(ambiguous.accessState, 'INCOMPLETE')
   assert.equal(incomplete.accessState, 'INCOMPLETE')
   assert.equal(revoked.userID, REVOKED_USER_ID)
+
+  const unlinkedActive = (await service.send({
+    event: 'searchActiveUsers',
+    data: { query: 'Unlinked Active User', includeNonActive: true, skip: 0, top: 100 },
+    user: admin
+  }))[0]
+  assert.equal(unlinkedActive.identityLinked, false)
+  assert.equal(unlinkedActive.accessState, 'INCOMPLETE')
 
   const roleSearch = await service.send({
     event: 'searchActiveUsers',

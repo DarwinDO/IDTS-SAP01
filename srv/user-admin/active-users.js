@@ -182,14 +182,14 @@ async function buildReadModel (tx, { includeDeveloperDetails = false } = {}) {
     const operation = request?.latestOperation_ID ? operationsByID.get(request.latestOperation_ID) : null
     const profile = profilesByUser.get(user.ID) || null
     const activeResponsibilityCount = profile ? responsibilityCounts.get(profile.ID) || 0 : 0
-    const accessState = selected.ambiguous
-      ? 'INCOMPLETE'
-      : deriveAccessState({ userActive: user.active === true, requestStatus: request?.status_code })
     const identityLinked = !selected.ambiguous && Boolean(
       user.externalIdentityKeyHash &&
       request?.identityKeyHash &&
       user.externalIdentityKeyHash === request.identityKeyHash
     )
+    const accessState = identityLinked
+      ? deriveAccessState({ userActive: user.active === true, requestStatus: request?.status_code })
+      : 'INCOMPLETE'
     const developerReady = user.role_code === 'DEVELOPER' &&
       user.active === true &&
       profile?.active === true &&
@@ -201,7 +201,7 @@ async function buildReadModel (tx, { includeDeveloperDetails = false } = {}) {
       displayName: String(user.displayName || ''),
       email: normalizeContactEmail(user.email),
       businessRole: user.role_code || null,
-      userAdminCapability: !selected.ambiguous &&
+      userAdminCapability: identityLinked &&
         request?.status_code === 'ACTIVE' &&
         request.userAdminRequested === true &&
         user.role_code === 'PM',
