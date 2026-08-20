@@ -339,7 +339,7 @@ Vietnamese: Agent hoáº·c developer má»›i pháº£i xÃ¡c Ä‘á»‹nh 
 ## 2026-08-20 WP8 Gate 3 Access Lifecycle executor handoff
 
 - Gate 2 is merged at `f89eacc1ef2eed6767395b1b5bc6c97ff0d6c7f5`; this isolated Gate 3 branch `feature/wp8-admin-access-lifecycle-donhv` is based exactly on that commit.
-- Source implementation is present through `a352003` (local suspend, queued reactivation, broker readback proof, state-bound Active Users actions, focused TDD, and UI build/lint). Canonical business rules and Gate 3 knowledge mirrors are being synchronized before the final source gate.
+- Source implementation and documentation are present through `ad7e3d4` (local suspend, queued reactivation, broker readback proof, state-bound Active Users actions, focused TDD, canonical rules, PM evidence, and knowledge mirrors). The final source gate is PASS; Draft PR push/readback remains next.
 - Suspension is IDTS-local and fail-closed: it protects the final PM + UserAdmin, revokes active sessions atomically, records `SUSPENDED`, and performs no provider write. Reactivation keeps local access disabled until exact immutable-principal and Role Collection readback proof.
 - No BTP, HANA/HDI, schema, seed, provider, SAP user, Role Collection, session outside the local transaction, Jira, Drive, deployment, merge, or Ready transition mutation occurred in Gate 3. The executor stops at Draft PR; coordinator exact-diff review and any later deployment/acceptance remain separate approvals.
 

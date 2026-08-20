@@ -5,6 +5,7 @@ Executor: DonHV / Luna Max `gpt-5.6-luna`, reasoning `max`
 Branch: `feature/wp8-admin-access-lifecycle-donhv`
 Required base: `f89eacc1ef2eed6767395b1b5bc6c97ff0d6c7f5`
 Source implementation head at evidence preparation: `a352003`
+Documentation/PM sync commit: `ad7e3d4`
 
 ## Scope delivered
 
@@ -40,7 +41,7 @@ PASS:
 - `npm --prefix app/user-administration-ui run build`
 - UI5 MCP linter for the changed controller/fragments, framework `1.148.0`.
 
-The complete plan-mandated final source gate, secret scan, agent-rules check, QA depth self-test, full service compile, diff gate, branch push, and Draft PR readback remain the next executor boundary at the time of this evidence preparation.
+The final source gate is now PASS: all seven focused User Administration/identity suites, secret scan, agent-rules check, QA Depth self-test, supported all-service EDMX compile, HANA compile, UI lint, UI build, and the final diff check all pass. The literal `npx cds compile srv --to edmx` invocation fails before compilation because CAP requires a service selector for this four-service model; the supported equivalent `npx cds compile srv -s all --to edmx` passes. Branch push and Draft PR readback remain the next executor boundary.
 
 ## Security and mutation boundary
 
