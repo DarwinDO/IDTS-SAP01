@@ -12,13 +12,14 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 ## Current status
 
-`IN PROGRESS — GATE 2 SOURCE IMPLEMENTATION / DRAFT PR PENDING`
+`IN PROGRESS — GATE 3 SOURCE IMPLEMENTATION / DRAFT PR PENDING`
 
 - Gate 1 foundation is merged through PR #318 at `5e99aa0beed6ed877b8b9d53b42b878e1c16fbf5`.
 - Master design and Gate 2–6 designs are prepared on `docs/wp8-admin-roadmap-planning-donhv`.
 - DonHV approved the written designs and five detailed implementation plans.
-- Gate 2 executor branch `feature/wp8-admin-active-users-donhv` is frozen from required base `96746fef148d6d6b9627ed1e8b9be5b28eb94e81`. Contract, backend aggregation, UI tab/details, focused tests, and source mirrors/evidence are implemented in isolated commits; final source gates and Draft PR creation remain next.
-- Gate 2 remains read-only and source-only. Manual browser acceptance, coordinator exact-diff review, merge, deployment, and Gate 3 remain outside this executor handoff.
+- Gate 2 is merged at `f89eacc1ef2eed6767395b1b5bc6c97ff0d6c7f5`. Gate 3 executor branch `feature/wp8-admin-access-lifecycle-donhv` is frozen from that exact base and currently contains source through `a352003`.
+- Gate 3 source covers local `SUSPENDED` suspension, final-administrator protection, atomic session revocation, queued `REACTIVATE`, readback-only broker proof, CAP completion, state-bound UI actions, focused TDD, and source knowledge mirrors. The final source gate and Draft PR creation remain next.
+- Gate 3 remains source-only. Manual browser acceptance, coordinator exact-diff review, merge, deployment, and any SAP user/Role Collection/provider mutation remain outside this executor handoff.
 
 ## Gate sequence
 
@@ -44,4 +45,4 @@ Each gate records source tests, CAP/Fiori/UI5 MCP guidance, security review, art
 
 ## Next handoff
 
-DonHV/coordinator runs the final source gate, reviews the exact Draft PR diff, and separately owns manual browser acceptance. Keep Gates 3–6 unopened until Gate 2 review and approval are complete.
+DonHV/coordinator runs the final source gate, reviews the exact Gate 3 Draft PR diff, and separately owns manual browser acceptance. Keep Gates 4–6 unopened until Gate 3 review and approval are complete.
