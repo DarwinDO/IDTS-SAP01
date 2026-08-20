@@ -30,13 +30,15 @@ Although only the CAP module was selected, MultiApps processed its required mana
 
 ## Current state
 
-Status: `BLOCKED_CAP_ROLLBACK_NETWORK`.
+Status: `BLOCKED_UI_POSTDEPLOY_NETWORK`.
 
-The first post-cutover readiness probe timed out. After CF control-plane connectivity briefly recovered, sanitized V3 readback proved the CAP app was requested `STARTED` with one desired web instance but zero running instances. Direct health/ready/auth checks still returned no HTTP status. The frozen rollback to the pre-rollout CAP revision was invoked once, but the command failed during its initial CF API GET because the regional control-plane request timed out; the rollback mutation did not start. Repeated bounded readback attempts continued to time out, so no blind retry was performed.
+The first post-cutover readiness probe timed out. After CF control-plane connectivity briefly recovered, an initial sanitized V3 readback observed the CAP app requested `STARTED` with one desired web instance but zero running instances. The frozen rollback command was invoked once, but failed during its initial CF API GET and did not mutate the app. A later fresh readback proved CAP running `1/1`, followed by a complete `DEMO READY` result, zero active MTA operations, successful XSUAA/destination/Job Scheduler last operations, and unchanged CAP/AppRouter binding counts `7/3`; therefore no rollback was required.
+
+The checksum-reviewed dedicated UI content MTAR was then deployed exactly once. MultiApps reported initial deployment of MTA `idts-user-admin-ui-r3c`, uploaded the single content module to the existing HTML5 host, skipped service deletion and finished successfully. The regional CF control plane and both AppRouter entry paths became unreachable again immediately afterward, so live content/readiness acceptance remains unproven. No second UI deploy or blind rollback was attempted.
 
 - CAP deploy attempts/succeeded according to MultiApps: `1/1`.
-- UI deploy attempts: `0`.
+- UI deploy attempts/succeeded according to MultiApps: `1/1`.
 - Rollback command attempts: `1`; confirmed rollback mutations: `0`.
 - Database/schema/data mutations: `0`.
 
-Do not deploy the UI, merge the PR or begin manual acceptance. When CF regional control-plane connectivity is restored, first re-read the exact app/revision state. If the CAP app is not healthy on the reviewed forward revision, execute the frozen rollback to pre-rollout revision `11` exactly once, then require CAP/AppRouter `1/1`, health/ready `200`, anonymous protected API `401`, Web `200`, service operations succeeded and no active MTA operation. Do not retry the CAP forward deployment blindly.
+Do not merge the PR or begin manual acceptance. When CF regional connectivity is restored, read back the dedicated UI MTA count, zero active operations, CAP/AppRouter `1/1`, health/ready `200`, anonymous protected API `401`, Web `200`, service operation health, binding parity, and both Bug/Admin entry paths. Do not retry either forward deployment blindly. Use the frozen UI rollback artifact only if content-specific acceptance fails after connectivity is healthy.
