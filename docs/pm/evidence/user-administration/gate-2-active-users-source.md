@@ -9,34 +9,37 @@ Evidence source cho Gate 2 Active Users được chuẩn bị trên branch cô l
 ## Frozen source / Source đã freeze
 
 - Required base: `96746fef148d6d6b9627ed1e8b9be5b28eb94e81`
-- Implementation commits: `f04c90f` (read-model contract), `4563585` (backend aggregation), `c9a5e34` (Active Users UI)
+- Implementation commits: `f04c90f` (read-model contract), `4563585` (backend aggregation), `c9a5e34` (Active Users UI), `c789b4f` (paging/default-state remediation), `ea4621e` (restored-tab/UI paging remediation)
 - Source path: `C:\Users\LapHub\.codex\worktrees\e429\IDTS-SAP01`
 - Human owner: DonHV
 - Coordinator: independent exact-diff review; executor does not self-approve
 
 - Base bắt buộc: `96746fef148d6d6b9627ed1e8b9be5b28eb94e81`
-- Commit implementation: `f04c90f` (contract read model), `4563585` (backend aggregation), `c9a5e34` (UI Active Users)
+- Commit implementation: `f04c90f` (contract read model), `4563585` (backend aggregation), `c9a5e34` (UI Active Users), `c789b4f` (paging/default-state remediation), `ea4621e` (restored-tab/UI paging remediation)
 - Source path: `C:\Users\LapHub\.codex\worktrees\e429\IDTS-SAP01`
 - Human owner: DonHV
 - Coordinator: review exact diff độc lập; executor không tự approve
 
 ## Scope and contract / Phạm vi và contract
 
-- `srv/user-admin.cds` adds `ActiveUserSummary` and `ActiveUserDetails` plus `searchActiveUsers(query, includeNonActive)` and `readActiveUserDetails(userID)`.
+- `srv/user-admin.cds` adds `ActiveUserSummary` and `ActiveUserDetails` plus `searchActiveUsers(query, includeNonActive, skip, top)` and `readActiveUserDetails(userID)`.
 - The public result is one row per persisted IDTS user, not one row per invitation.
-- Default search returns derived `ACTIVE` rows; `includeNonActive=true` also returns `SUSPENDED`, `REVOKED`, and `INCOMPLETE` rows.
+- Default search excludes only derived `REVOKED` rows; `SUSPENDED` and `INCOMPLETE` rows remain visible, and `includeNonActive=true` adds revoked rows.
+- Explicit `skip/top` paging is applied after complete filtering and stable ordering; `top` is bounded to 100 and no OData entity nextLink is claimed.
 - Details return counts and an allow-listed Developer profile summary, not request/audit rows.
 - No entity, aspect, field, CSV, database, provider, or platform artifact was added or changed.
 
-- `srv/user-admin.cds` thêm `ActiveUserSummary`, `ActiveUserDetails` và hai action `searchActiveUsers(query, includeNonActive)`, `readActiveUserDetails(userID)`.
+- `srv/user-admin.cds` thêm `ActiveUserSummary`, `ActiveUserDetails` và hai action `searchActiveUsers(query, includeNonActive, skip, top)`, `readActiveUserDetails(userID)`.
 - Result public là một row cho mỗi user IDTS persisted, không phải một row cho mỗi invitation.
-- Search mặc định trả row state suy ra `ACTIVE`; `includeNonActive=true` thêm `SUSPENDED`, `REVOKED`, `INCOMPLETE`.
+- Search mặc định chỉ loại row `REVOKED`; row `SUSPENDED` và `INCOMPLETE` vẫn hiển thị, còn `includeNonActive=true` thêm revoked.
+- Paging explicit `skip/top` chạy sau filter và sort ổn định; `top` tối đa 100 và không claim OData entity nextLink.
 - Details chỉ trả count và summary profile Developer được allow-list, không trả request/audit row.
 - Không thêm hoặc đổi entity, aspect, field, CSV, database, provider hay platform artifact.
 
 ## Deterministic aggregation and security / Aggregation deterministic và security
 
 - Explicit-column CQL reads the existing user, onboarding-request, latest-operation, Developer profile/responsibility, and detail-only count sources.
+- User source rows are not truncated at 200 before aggregation; filtering and stable sorting happen before the bounded page slice.
 - Current request selection is deterministic (`modifiedAt`, `createdAt`, `ID` descending); duplicate active requests fail closed as `INCOMPLETE`.
 - Only the chosen request's `latestOperation_ID` is read, so a stale operation cannot replace the current safe result.
 - List reads do not load audit rows or bug rows. Details load only bounded counts/profile impact when requested.
@@ -45,6 +48,7 @@ Evidence source cho Gate 2 Active Users được chuẩn bị trên branch cô l
 - No module-level cache or external provider call exists.
 
 - CQL explicit-column đọc nguồn hiện có: user, onboarding request, latest operation, profile/responsibility Developer và count chỉ có ở details.
+- User source row không bị cắt ở 200 trước aggregation; filter và sort ổn định chạy trước page slice bounded.
 - Chọn request hiện tại deterministic theo `modifiedAt`, `createdAt`, `ID` giảm dần; duplicate active fail closed thành `INCOMPLETE`.
 - Chỉ đọc `latestOperation_ID` của request được chọn nên stale operation không thay safe result hiện tại.
 - List không load audit row hoặc bug row. Details chỉ load count bounded/profile impact khi được yêu cầu.
@@ -69,9 +73,11 @@ Evidence source cho Gate 2 Active Users được chuẩn bị trên branch cô l
 ### Edge and boundary
 
 - Search is case-insensitive and the CDS `String(255)` boundary rejects a 256-character query with HTTP 400 before product handler execution.
+- Explicit `skip/top` page bounds reject negative skip and `top > 100` with HTTP 400.
+- A 205-row synthetic fixture returns pages of 100, 100, 5, and 0 with stable boundaries and no duplicate user IDs; users are not lost because of an early source-row limit.
 - Empty/incomplete identity state stays safe; duplicate active requests become `INCOMPLETE`.
 - A stale operation fixture cannot replace the selected request's current safe result.
-- Result ordering is stable and capped at 200 rows.
+- Result ordering is stable and each page is bounded to at most 100 rows; callers advance with `skip`.
 
 ### Roles and authorization
 
@@ -81,20 +87,20 @@ Action service và UI route hiện đều được bảo vệ. Việc hiển th�
 
 ### Persistence and reload
 
-Source checks prove request-local CAP reads and UI session-state preservation for the selected tab, search query, and non-active filter. A browser hard-reload and live persistence check is intentionally pending DonHV-owned manual acceptance; source tests are not presented as browser proof.
+Source checks prove request-local CAP reads, explicit page progression, and UI session-state preservation for the selected tab, search query, and revoked-user filter. The restored-tab behavior test proves initial Active Users loading is awaited and does not double-load after the tab event. A browser hard-reload and live persistence check is intentionally pending DonHV-owned manual acceptance; source tests are not presented as browser proof.
 
 ### UI/UX review
 
-The source uses an `IconTabBar`, responsive tables with pop-in columns, friendly localized labels, semantic `ObjectStatus`, busy/no-data/error/retry states, and a display-only details dialog. UI5 MCP linter returned zero findings on the changed files; local lint and build are separate gates. No screenshot is included because this source gate contains no approved manual PII-safe visual evidence.
+The source uses an `IconTabBar`, responsive tables with pop-in columns, friendly localized labels, semantic `ObjectStatus`, busy/no-data/error/retry states, explicit Load More paging, and a display-only details dialog. Restored `activeUsers`/`developerResponsibilities` session tabs load Active Users during initial request loading and share one guarded promise. UI5 MCP linter returned zero findings on the changed files; local lint and build are separate gates. No screenshot is included because this source gate contains no approved manual PII-safe visual evidence.
 
 ## Exact source commands / Command source chính xác
 
 Observed before this evidence commit:
 
 ```text
-npm run qa:user-admin-active-users:programmatic       PASS
+npm run qa:user-admin-active-users:programmatic       PASS (205-row paging/default-state fixtures)
 npm run qa:user-onboarding:programmatic               PASS
-npm run qa:user-admin-ui:programmatic                 PASS
+npm run qa:user-admin-ui:programmatic                 PASS (paging + restored-tab fixtures)
 npm run qa:user-access:programmatic                   PASS
 npx cds compile srv/user-admin.cds --to edmx          exit 0
 npx cds compile db/schema.cds --to hana                exit 0

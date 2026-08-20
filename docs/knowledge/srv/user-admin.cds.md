@@ -2,9 +2,9 @@
 
 ## Gate 2 Active Users contract / Contract Active Users Gate 2
 
-Gate 2 adds the read-only `ActiveUserSummary` and `ActiveUserDetails` structured types plus `searchActiveUsers(query, includeNonActive)` and `readActiveUserDetails(userID)` actions. The summary is one row per persisted IDTS user, not one row per invitation. Default search returns only the derived `ACTIVE` state; the explicit non-active option includes `SUSPENDED`, `REVOKED`, and `INCOMPLETE` rows.
+Gate 2 adds the read-only `ActiveUserSummary` and `ActiveUserDetails` structured types plus `searchActiveUsers(query, includeNonActive, skip, top)` and `readActiveUserDetails(userID)` actions. The summary is one row per persisted IDTS user, not one row per invitation. Default search excludes only derived `REVOKED` rows; `SUSPENDED` and `INCOMPLETE` rows remain visible for admin attention, while `includeNonActive=true` adds revoked rows. `skip`/`top` provide explicit stable paging; `top` is bounded to 100.
 
-Gate 2 thêm structured type `ActiveUserSummary`, `ActiveUserDetails` chỉ đọc cùng hai action `searchActiveUsers(query, includeNonActive)` và `readActiveUserDetails(userID)`. Summary có một row cho mỗi user IDTS đã lưu, không phải một row cho mỗi invitation. Search mặc định chỉ trả state suy ra là `ACTIVE`; tùy chọn non-active rõ ràng thêm row `SUSPENDED`, `REVOKED` và `INCOMPLETE`.
+Gate 2 thêm structured type `ActiveUserSummary`, `ActiveUserDetails` chỉ đọc cùng hai action `searchActiveUsers(query, includeNonActive, skip, top)` và `readActiveUserDetails(userID)`. Summary có một row cho mỗi user IDTS đã lưu, không phải một row cho mỗi invitation. Search mặc định chỉ loại row `REVOKED`; row `SUSPENDED` và `INCOMPLETE` vẫn hiển thị để admin xử lý, còn `includeNonActive=true` thêm row revoked. `skip`/`top` tạo paging explicit ổn định; `top` bị giới hạn 100.
 
 The public contract contains display/contact fields, business role, the PM/UserAdmin capability boolean, derived access state, immutable-link completeness boolean, Developer readiness/responsibility count, pending operation type/state, safe result code, reconciliation timestamp, and details-only counts/profile summary. It does not expose provider identifiers, identity claims or immutable-link values, credentials, invitation payloads, operation leases, or raw audit/provider data.
 

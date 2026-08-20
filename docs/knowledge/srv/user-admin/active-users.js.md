@@ -9,12 +9,12 @@
 ## Entry points / Điểm vào
 
 - `registerActiveUserHandlers(service, { authorize })` attaches the two service actions and requires an authorization function.
-- `searchActiveUsers(req, { authorize })` normalizes the bounded search input, authorizes, builds the read model, applies the default active-only filter or the explicit non-active option, then returns stable sorted summaries capped at 200 rows.
+- `searchActiveUsers(req, { authorize })` normalizes the bounded search and `skip/top` inputs, authorizes, builds the read model, excludes only `REVOKED` by default, and returns one stable sorted page with `top` bounded to 100. Callers request the next page by increasing `skip`; the action does not claim an OData entity nextLink.
 - `readActiveUserDetails(req, { authorize })` validates the UUID, authorizes, builds the detail-capable read model, and returns one display-only details object.
 - `deriveAccessState({ userActive, requestStatus })` is a pure helper used by the programmatic fixture test.
 
 - `registerActiveUserHandlers(service, { authorize })` gắn hai service action và bắt buộc có hàm authorization.
-- `searchActiveUsers(req, { authorize })` chuẩn hóa query có giới hạn, authorize, dựng read model, lọc mặc định chỉ active hoặc nhận tùy chọn non-active rõ ràng, sau đó trả summary sort ổn định, tối đa 200 row.
+- `searchActiveUsers(req, { authorize })` chuẩn hóa query và `skip/top` có giới hạn, authorize, dựng read model, mặc định chỉ loại `REVOKED`, sau đó trả một page summary sort ổn định với `top` tối đa 100. Caller lấy page tiếp theo bằng cách tăng `skip`; action không claim OData entity nextLink.
 - `readActiveUserDetails(req, { authorize })` validate UUID, authorize, dựng read model đủ cho details và trả một object details chỉ hiển thị.
 - `deriveAccessState({ userActive, requestStatus })` là helper thuần được test bằng fixture programmatic.
 
@@ -35,18 +35,20 @@ flowchart TD
 ```
 
 1. The module selects explicit user columns only, including the internal immutable-link comparison value. That value is never mapped to the public result.
-2. It loads onboarding requests linked to the bounded user set and selects only relevant lifecycle states. The selection order is `modifiedAt desc`, then `createdAt desc`, then `ID desc`; duplicate `ACTIVE` requests are marked ambiguous and fail closed as `INCOMPLETE` rather than choosing an arbitrary row.
+2. It loads explicit user columns without an early 200-row truncation, then loads onboarding requests for that user set and selects only relevant lifecycle states. The selection order is `modifiedAt desc`, then `createdAt desc`, then `ID desc`; duplicate `ACTIVE` requests are marked ambiguous and fail closed as `INCOMPLETE` rather than choosing an arbitrary row.
 3. It follows only the selected request's `latestOperation_ID`. A newer operation attached to an older request cannot replace the selected request's safe result.
 4. It aggregates active Developer profile responsibilities for readiness. Bug rows are loaded only for the details path to calculate the open-impact count; audit rows are never loaded for the list path.
 5. It derives `ACTIVE`, `SUSPENDED`, `REVOKED`, or `INCOMPLETE`. Identity linkage is exposed only as the boolean `identityLinked`.
-6. Details count request IDs associated with the user ID or normalized contact email and count audit IDs for the target user. The details response contains counts, not request or audit rows.
+6. Search filters and sorts the complete derived set before applying explicit `skip/top` paging. The default page excludes only `REVOKED`; the explicit option includes it.
+7. Details count request IDs associated with the user ID or normalized contact email and count audit IDs for the target user. The details response contains counts, not request or audit rows.
 
 1. Module chỉ select các column user được allow-list, trong đó có giá trị internal phục vụ so sánh immutable link. Giá trị đó không bao giờ được map ra public result.
-2. Module load các onboarding request đã link với tập user bị giới hạn và chỉ chọn lifecycle state liên quan. Thứ tự chọn là `modifiedAt desc`, sau đó `createdAt desc`, rồi `ID desc`; duplicate `ACTIVE` bị đánh dấu ambiguous và fail closed thành `INCOMPLETE`, không chọn bừa một row.
+2. Module load column user explicit không cắt sớm ở 200 row, sau đó load onboarding request của tập user đó và chỉ chọn lifecycle state liên quan. Thứ tự chọn là `modifiedAt desc`, sau đó `createdAt desc`, rồi `ID desc`; duplicate `ACTIVE` bị đánh dấu ambiguous và fail closed thành `INCOMPLETE`, không chọn bừa một row.
 3. Module chỉ đi theo `latestOperation_ID` của request đã chọn. Operation mới hơn nhưng thuộc request cũ không thể thay thế safe result của request đã chọn.
 4. Module aggregate responsibility active của Developer để tính readiness. Bug row chỉ load ở details để tính open-impact count; list không load audit row.
 5. Module suy ra `ACTIVE`, `SUSPENDED`, `REVOKED` hoặc `INCOMPLETE`. Link identity chỉ lộ ra dưới dạng boolean `identityLinked`.
-6. Details đếm request ID gắn với user ID hoặc normalized contact email và đếm audit ID theo target user. Response details chỉ có count, không có request/audit row.
+6. Search filter và sort toàn bộ derived set rồi mới paging bằng `skip/top` explicit. Page mặc định chỉ loại `REVOKED`; tùy chọn rõ ràng sẽ thêm row này.
+7. Details đếm request ID gắn với user ID hoặc normalized contact email và đếm audit ID theo target user. Response details chỉ có count, không có request/audit row.
 
 ## Public safe fields / Field an toàn công khai
 
@@ -80,9 +82,9 @@ Response cố ý không chứa provider identifier, identity claim, giá trị i
 
 ## Verification / Xác minh
 
-The focused test at `scripts/qa/test-user-admin-active-users.js` covers deduplication, deterministic request ordering, stale-operation exclusion, default/non-active filtering, case-insensitive search, bounded input denial, ambiguous active requests, safe identity booleans, details counts, and the PM/UserAdmin authorization matrix. The exact source evidence record is `docs/pm/evidence/user-administration/gate-2-active-users-source.md`.
+The focused test at `scripts/qa/test-user-admin-active-users.js` covers deduplication, deterministic request ordering, stale-operation exclusion, default/non-active filtering, case-insensitive search, bounded input denial, explicit page bounds, 205-row page boundaries without duplicates/data loss, ambiguous active requests, safe identity booleans, details counts, and the PM/UserAdmin authorization matrix. The exact source evidence record is `docs/pm/evidence/user-administration/gate-2-active-users-source.md`.
 
-Test focused tại `scripts/qa/test-user-admin-active-users.js` bao phủ deduplicate, thứ tự request deterministic, loại stale operation, filter mặc định/non-active, search không phân biệt hoa thường, từ chối input quá dài, duplicate active ambiguous, boolean identity an toàn, details count và ma trận authorization PM/UserAdmin. Record source evidence chính xác là `docs/pm/evidence/user-administration/gate-2-active-users-source.md`.
+Test focused tại `scripts/qa/test-user-admin-active-users.js` bao phủ deduplicate, thứ tự request deterministic, loại stale operation, filter mặc định/non-active, search không phân biệt hoa thường, từ chối input quá dài, page bound explicit, boundary 205 row qua nhiều page không duplicate/mất data, duplicate active ambiguous, boolean identity an toàn, details count và ma trận authorization PM/UserAdmin. Record source evidence chính xác là `docs/pm/evidence/user-administration/gate-2-active-users-source.md`.
 
 ## Metadata / Metadata
 
