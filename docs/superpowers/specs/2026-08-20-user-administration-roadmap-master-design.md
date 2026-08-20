@@ -114,6 +114,8 @@ Recommended branch names:
 
 Every gate has one design, one implementation plan, focused knowledge mirrors, test evidence, a Draft PR, and a separate mutation approval when platform or HANA state is affected.
 
+After a gate PR is merged, the coordinator must prove the exact gate HEAD is reachable from refreshed `origin/dev`, the gate worktree is clean, and no user-owned/untracked file remains. From outside the target worktree, run `git worktree remove <exact-path>` followed by `git worktree prune`. Never use `--force` or manually delete a gate worktree.
+
 ## Release policy
 
 Source completion, schema completion, deployment completion, and manual acceptance are distinct claims. A gate is complete only when its defined source tests, exact artifact checks, rollout readbacks, role matrix, persistence/reload evidence, rollback verification, and DonHV-owned manual evidence all pass. A narrow PASS never closes a broader gate.

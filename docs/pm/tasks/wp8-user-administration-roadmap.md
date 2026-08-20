@@ -12,11 +12,11 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 ## Current status
 
-`IN PROGRESS — WRITTEN DESIGN REVIEW`
+`IN PROGRESS — IMPLEMENTATION PLAN REVIEW`
 
 - Gate 1 foundation is merged through PR #318 at `5e99aa0beed6ed877b8b9d53b42b878e1c16fbf5`.
 - Master design and Gate 2–6 designs are prepared on `docs/wp8-admin-roadmap-planning-donhv`.
-- Implementation plans and executor tasks remain blocked until DonHV reviews and approves the written designs.
+- DonHV approved the written designs. Five detailed implementation plans are prepared for review; executor tasks remain blocked until DonHV approves the plan package.
 
 ## Gate sequence
 
@@ -34,6 +34,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 - The coordinating task independently reviews exact diffs and verification evidence.
 - Platform mutation requires a separate DonHV approval with exact before-state, checksum, rollback, and stop conditions.
 - Gate 5 is deferrable when funding is constrained.
+- After each gate merges and exact reachability/cleanliness checks pass, remove that gate's worktree from outside its path with `git worktree remove`, then run `git worktree prune`; never force-remove a dirty or unmerged worktree.
 
 ## Evidence expectation
 
@@ -41,4 +42,4 @@ Each gate records source tests, CAP/Fiori/UI5 MCP guidance, security review, art
 
 ## Next handoff
 
-DonHV reviews the six design files under `docs/superpowers/specs/`. After approval, create one exact implementation plan per remaining gate, commit the plan package, and only then open the Gate 2 Luna Max executor task.
+DonHV reviews the five implementation plans under `docs/superpowers/plans/`. After approval, open only the Gate 2 Luna Max executor task with the exact merged planning SHA; Gates 3–6 remain unopened.

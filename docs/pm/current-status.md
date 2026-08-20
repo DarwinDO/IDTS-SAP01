@@ -327,7 +327,7 @@ Vietnamese: Agent hoáº·c developer má»›i pháº£i xÃ¡c Ä‘á»‹nh 
 
 - PR #318 is merged into `dev` at `5e99aa0beed6ed877b8b9d53b42b878e1c16fbf5`; local `dev` and `origin/dev` were synchronized.
 - DonHV approved a sequential post-merge roadmap: Active Users, access lifecycle, Developer Responsibilities controlled pilot, Business Catalog Administration, and Operations/Audit.
-- The master design and five gate designs are under written review. Implementation plans, Luna Max executor tasks, source changes, and platform mutations have not started.
+- DonHV approved the master and five gate designs. Five detailed implementation plans are prepared for review; Luna Max executor tasks, source changes, and platform mutations have not started.
 - Cost control uses one Luna Max task per gate, no full-chat context fork, and coordinating-task review before the next gate.
 
 ## 2026-08-15 User Administration M3D broker enablement
