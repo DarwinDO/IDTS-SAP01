@@ -84,4 +84,3 @@ Source review precedes any catalog/status initialization, CAP/UI deployment, bro
 ## Out of scope
 
 No SAP password/MFA management, shadow-user deletion, arbitrary role assignment, mass operation, or automatic Bug reassignment.
-

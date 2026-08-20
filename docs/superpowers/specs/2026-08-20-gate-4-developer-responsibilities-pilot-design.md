@@ -73,4 +73,3 @@ Rollback removes only the pilot's IDTS Role Collection assignment through the op
 ## Out of scope
 
 No automatic Bug reassignment, capacity optimizer, mass responsibility import, or mandatory AI assignment.
-

@@ -121,4 +121,3 @@ Source completion, schema completion, deployment completion, and manual acceptan
 ## Deferred and prohibited scope
 
 The roadmap does not add password reset, OTP/MFA/passkey management, IAS/IPS administration, trust configuration, arbitrary Role Collection assignment, API credential management, CF/HANA operations, raw security-token inspection, mass elevation, or SAP ID creation. Those remain platform responsibilities.
-

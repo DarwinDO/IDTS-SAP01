@@ -67,4 +67,3 @@ Ship read-only explorer first. Mutation actions follow in the same gate only aft
 ## Out of scope
 
 No code-list hard delete, generic entity editor, schema browser, direct HANA access, SAP configuration administration, mass import, or automatic migration of affected Bugs.
-

@@ -102,4 +102,3 @@ Gate 2 uses a selective CAP and shared UI-content deployment after exact artifac
 ## Out of scope
 
 No access mutations, bulk export, provider queries per row, arbitrary sorting on hidden identifiers, or audit explorer.
-

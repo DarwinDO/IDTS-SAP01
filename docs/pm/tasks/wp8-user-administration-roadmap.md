@@ -42,4 +42,3 @@ Each gate records source tests, CAP/Fiori/UI5 MCP guidance, security review, art
 ## Next handoff
 
 DonHV reviews the six design files under `docs/superpowers/specs/`. After approval, create one exact implementation plan per remaining gate, commit the plan package, and only then open the Gate 2 Luna Max executor task.
-
