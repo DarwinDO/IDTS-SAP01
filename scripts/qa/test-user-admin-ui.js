@@ -63,6 +63,22 @@ assert.match(view, /status_code\} === 'RETRYABLE_FAILURE'[\s\S]+lastErrorCode\} 
 assert.match(view, /status_code\} === 'BLOCKED_MANUAL_REVIEW'[\s\S]+lastErrorCode\} === 'AMBIGUOUS_PROVIDER_OUTCOME'/)
 assert.match(view, /press="\.onOpenDeveloperProfile"/)
 assert.doesNotMatch(view, /type="Password"|tokenHash|tokenNonce|identityIssuer/)
+assert.match(view, /<IconTabBar/)
+assert.match(view, /key="requests"/)
+assert.match(view, /key="activeUsers"/)
+assert.match(view, /key="developerResponsibilities"/)
+assert.match(view, /items="\{activeUsers>\/items\}"/)
+assert.match(view, /items="\{activeUsers>\/developerItems\}"/)
+assert.match(view, /search="\.onActiveUsersSearch"/)
+assert.match(view, /press="\.onOpenActiveUserDetails"/)
+assert.match(view, /press="\.onRetryActiveUsers"/)
+assert.doesNotMatch(view, /identityOrigin|identityIssuer|identitySubject|identityKeyHash|identityPlatformUserId/)
+
+const activeUserDetailsFragment = fs.readFileSync(path.join(webapp, 'fragment/ActiveUserDetails.fragment.xml'), 'utf8')
+assert.match(activeUserDetailsFragment, /<Dialog/)
+assert.match(activeUserDetailsFragment, /activeUsers>\/details/)
+assert.match(activeUserDetailsFragment, /press="\.onCloseActiveUserDetails"/)
+assert.doesNotMatch(activeUserDetailsFragment, /requestRoleChange|requestRevoke|updateDeveloperProfile|onConfirmAccessChange|onConfirmDeveloperProfile|onOpenRevoke|onRevoke/i)
 
 const fragment = fs.readFileSync(path.join(webapp, 'fragment/InviteUser.fragment.xml'), 'utf8')
 assert.match(fragment, /<Input[^>]+type="Email"/)
@@ -99,6 +115,18 @@ assert.match(controller, /bindContext\(`\/\$\{sAction\}\(\.\.\.\)`\)/)
 assert.doesNotMatch(controller, /new Filter\("targetEmailNormalized"/)
 assert.match(controller, /if \(sRole !== "PM"\)[\s\S]+setProperty\("\/userAdminRequested", false\)/)
 assert.doesNotMatch(controller, /console\.|responseText|api[_-]?key|client[_-]?secret/i)
+assert.match(controller, /activeUsers/)
+assert.match(controller, /bindContext\("\/searchActiveUsers\(\.\.\.\)"\)/)
+assert.match(controller, /setParameter\("query"/)
+assert.match(controller, /setParameter\("includeNonActive"/)
+assert.match(controller, /bindContext\("\/readActiveUserDetails\(\.\.\.\)"\)/)
+assert.match(controller, /onTabSelect/)
+assert.match(controller, /sessionStorage/)
+assert.doesNotMatch(controller, /identityOrigin|identityIssuer|identitySubject|identityKeyHash|identityPlatformUserId/)
+
+const formatter = fs.readFileSync(path.join(webapp, 'model/formatter.js'), 'utf8')
+assert.match(formatter, /accessStateText/)
+assert.match(formatter, /accessStateState/)
 
 const manageFragment = fs.readFileSync(path.join(webapp, 'fragment/ManageAccess.fragment.xml'), 'utf8')
 assert.match(manageFragment, /<Select/)
@@ -121,6 +149,9 @@ assert.equal(typeof controllerDefinition.onConfirmInvite, 'function')
 assert.equal(typeof controllerDefinition._loadRequests, 'function')
 assert.equal(typeof controllerDefinition._loadInitialRequests, 'function')
 assert.equal(typeof controllerDefinition.onAfterRendering, 'function')
+assert.equal(typeof controllerDefinition.onTabSelect, 'function')
+assert.equal(typeof controllerDefinition._loadActiveUsers, 'function')
+assert.equal(typeof controllerDefinition.onOpenActiveUserDetails, 'function')
 assert.match(controller, /this\.getResourceBundle\(\)/)
 
 async function verifyRuntimeBehavior () {
@@ -210,6 +241,35 @@ async function verifyRuntimeBehavior () {
   await instance._loadRequests('Mixed.Case@Example.Invalid')
   assert.equal(searchParameter, 'mixed.case@example.invalid')
   assert.equal(searchInvocations, 1)
+
+  const activeUsersData = { items: [], developerItems: [], query: '', includeNonActive: false, loaded: false, busy: false, error: false }
+  const activeUsersModel = {
+    getProperty: key => activeUsersData[key.slice(1)],
+    setProperty: (key, value) => { activeUsersData[key.slice(1)] = value }
+  }
+  const activeParameters = {}
+  const activeOperation = {
+    setParameter: (name, value) => { activeParameters[name] = value },
+    invoke: async () => {},
+    getBoundContext: () => ({ requestObject: async () => ({ value: [
+      { userID: 'active-1', businessRole: 'DEVELOPER' },
+      { userID: 'active-2', businessRole: 'TESTER' }
+    ] }) })
+  }
+  const activeInstance = Object.assign(Object.create(controllerDefinition), {
+    getModel: name => {
+      if (name === 'activeUsers') return activeUsersModel
+      if (name === 'view') return { getProperty: key => key === '/selectedTab' ? 'activeUsers' : undefined, setProperty: () => {} }
+      throw new Error(`Unexpected active model ${name}`)
+    },
+    getView: () => ({ getModel: () => ({ bindContext: () => activeOperation }) })
+  })
+  await activeInstance._loadActiveUsers(' Mixed Query ')
+  assert.equal(activeParameters.query, 'mixed query')
+  assert.equal(activeParameters.includeNonActive, false)
+  assert.equal(activeUsersData.items.length, 2)
+  assert.equal(activeUsersData.developerItems.length, 1)
+  assert.equal(activeUsersData.loaded, true)
 }
 
 function loadController (source) {
@@ -234,7 +294,7 @@ function loadController (source) {
 
 for (const locale of ['i18n.properties', 'i18n_en.properties']) {
   const text = fs.readFileSync(path.join(webapp, 'i18n', locale), 'utf8')
-  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'manageResponsibilities']) {
+  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'manageResponsibilities', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'activeUserSearchPlaceholder', 'includeNonActive', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'viewDetails', 'activeUserDetails', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'requestCount', 'auditEventCount', 'developerProfile', 'close', 'activeUsersNoDeveloper']) {
     assert.match(text, new RegExp(`^${key}=`, 'm'))
   }
 }
