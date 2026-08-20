@@ -9,12 +9,27 @@ sap.ui.define([
 
 	return BaseController.extend("idts.useradministrationui.controller.Main", {
 		onInit: function () {
-			this.setModel(new JSONModel({ busy: false }), "view");
+			const oSessionState = this._readActiveUsersSessionState();
+			this.setModel(new JSONModel({ busy: false, selectedTab: oSessionState.selectedTab }), "view");
 			this.setModel(new JSONModel(this._emptyInvite()), "invite");
 			this.setModel(new JSONModel(this._emptyAccessChange()), "access");
 			this.setModel(new JSONModel(this._emptyDeveloperAdministration()), "developer");
 			this.setModel(new JSONModel({ loaded: false }), "catalogs");
 			this.setModel(new JSONModel({ items: [] }), "requests");
+			this.setModel(new JSONModel({
+				items: [],
+				developerItems: [],
+				query: oSessionState.query,
+				includeNonActive: oSessionState.includeNonActive,
+				pageSize: 100,
+				nextSkip: 0,
+				hasMore: false,
+				loaded: false,
+				busy: false,
+				error: false,
+				details: null,
+				detailsBusy: false
+			}), "activeUsers");
 		},
 
 		onAfterRendering: function () {
@@ -27,10 +42,85 @@ sap.ui.define([
 
 		_loadInitialRequests: async function () {
 			await this._loadRequests("");
+			const sSelectedTab = this.getModel("view").getProperty("/selectedTab");
+			if (["activeUsers", "developerResponsibilities"].includes(sSelectedTab)) {
+				await this._ensureActiveUsersLoaded();
+			}
 		},
 
 		onSearch: async function (oEvent) {
 			await this._loadRequests(oEvent.getParameter("query") || "");
+		},
+
+		onTabSelect: async function (oEvent) {
+			const sKey = oEvent.getParameter("key") || oEvent.getSource().getSelectedKey();
+			this.getModel("view").setProperty("/selectedTab", sKey);
+			this._saveActiveUsersSessionState();
+			if ((sKey === "activeUsers" || sKey === "developerResponsibilities") && !this.getModel("activeUsers").getProperty("/loaded")) {
+				await this._ensureActiveUsersLoaded();
+			}
+		},
+
+		onActiveUsersSearch: async function (oEvent) {
+			const sQuery = oEvent.getParameter("query") || oEvent.getParameter("value") || "";
+			this.getModel("activeUsers").setProperty("/query", sQuery);
+			this._saveActiveUsersSessionState();
+			await this._loadActiveUsers(sQuery);
+		},
+
+		onActiveUsersFilterChange: async function (oEvent) {
+			this.getModel("activeUsers").setProperty("/includeNonActive", oEvent.getParameter("selected") === true);
+			this._saveActiveUsersSessionState();
+			await this._loadActiveUsers();
+		},
+
+		onRetryActiveUsers: async function () {
+			await this._loadActiveUsers();
+		},
+
+		onLoadMoreActiveUsers: async function () {
+			const oActiveUsersModel = this.getModel("activeUsers");
+			if (!oActiveUsersModel.getProperty("/hasMore") || oActiveUsersModel.getProperty("/busy")) return;
+			await this._loadActiveUsers(undefined, true);
+		},
+
+		onOpenActiveUserDetails: async function (oEvent) {
+			const oRow = this._activeUserRowFromEvent(oEvent);
+			if (!oRow?.userID) return;
+			const oActiveUsersModel = this.getModel("activeUsers");
+			oActiveUsersModel.setProperty("/detailsBusy", true);
+			try {
+				const oOperation = this.getView().getModel().bindContext("/readActiveUserDetails(...)");
+				oOperation.setParameter("userID", oRow.userID);
+				await oOperation.invoke("$direct");
+				const oContext = oOperation.getBoundContext();
+				const oResult = await (oContext ? oContext.requestObject() : {});
+				let oDetails = oResult;
+				if (Array.isArray(oResult)) {
+					oDetails = oResult[0];
+				} else if (Array.isArray(oResult?.value)) {
+					oDetails = oResult.value[0];
+				}
+				oActiveUsersModel.setProperty("/details", oDetails || null);
+				if (!this._activeUserDetailsDialog) {
+					this._activeUserDetailsDialog = await Fragment.load({
+						id: this.getView().getId(),
+						name: "idts.useradministrationui.fragment.ActiveUserDetails",
+						controller: this
+					});
+					this.getView().addDependent(this._activeUserDetailsDialog);
+				}
+				this._activeUserDetailsDialog.open();
+			} catch {
+				MessageBox.error(await this._text("activeUserDetailsFailed"));
+			} finally {
+				oActiveUsersModel.setProperty("/detailsBusy", false);
+			}
+		},
+
+		onCloseActiveUserDetails: function () {
+			if (this._activeUserDetailsDialog) this._activeUserDetailsDialog.close();
+			this.getModel("activeUsers").setProperty("/details", null);
 		},
 
 		onOpenInvite: async function () {
@@ -426,6 +516,100 @@ sap.ui.define([
 
 		_rowFromEvent: function (oEvent) {
 			return oEvent?.getSource?.().getBindingContext("requests")?.getObject?.() || null;
+		},
+
+		_activeUserRowFromEvent: function (oEvent) {
+			return oEvent?.getSource?.().getBindingContext("activeUsers")?.getObject?.() || null;
+		},
+
+		_ensureActiveUsersLoaded: function () {
+			const oActiveUsersModel = this.getModel("activeUsers");
+			if (oActiveUsersModel.getProperty("/loaded")) return Promise.resolve();
+			if (!this._activeUsersLoadPromise) {
+				this._activeUsersLoadPromise = this._loadActiveUsers().finally(() => {
+					this._activeUsersLoadPromise = null;
+				});
+			}
+			return this._activeUsersLoadPromise;
+		},
+
+		_loadActiveUsers: async function (sQuery, bAppend) {
+			const oActiveUsersModel = this.getModel("activeUsers");
+			const bAppending = bAppend === true;
+			const sNormalizedQuery = (sQuery === undefined ? oActiveUsersModel.getProperty("/query") : sQuery || "").trim().toLowerCase();
+			const iPageSize = Number(oActiveUsersModel.getProperty("/pageSize")) || 100;
+			const iSkip = bAppending ? Number(oActiveUsersModel.getProperty("/nextSkip")) || 0 : 0;
+			const iRequest = (this._activeUsersRequest || 0) + 1;
+			this._activeUsersRequest = iRequest;
+			oActiveUsersModel.setProperty("/query", sNormalizedQuery);
+			if (!bAppending) {
+				oActiveUsersModel.setProperty("/items", []);
+				oActiveUsersModel.setProperty("/developerItems", []);
+				oActiveUsersModel.setProperty("/nextSkip", 0);
+				oActiveUsersModel.setProperty("/hasMore", false);
+				oActiveUsersModel.setProperty("/loaded", false);
+			}
+			oActiveUsersModel.setProperty("/busy", true);
+			oActiveUsersModel.setProperty("/error", false);
+			try {
+				const oOperation = this.getView().getModel().bindContext("/searchActiveUsers(...)");
+				oOperation.setParameter("query", sNormalizedQuery);
+				oOperation.setParameter("includeNonActive", oActiveUsersModel.getProperty("/includeNonActive") === true);
+				oOperation.setParameter("skip", iSkip);
+				oOperation.setParameter("top", iPageSize);
+				await oOperation.invoke("$direct");
+				const oContext = oOperation.getBoundContext();
+				const oResult = await (oContext ? oContext.requestObject() : {});
+				const aItems = Array.isArray(oResult) ? oResult : (oResult?.value || []);
+				if (iRequest === this._activeUsersRequest) {
+					const aExistingItems = bAppending ? oActiveUsersModel.getProperty("/items") || [] : [];
+					const oExistingIDs = new Set(aExistingItems.map(oRow => oRow.userID));
+					const aCombinedItems = aExistingItems.concat(aItems.filter(oRow => !oExistingIDs.has(oRow.userID)));
+					oActiveUsersModel.setProperty("/items", aCombinedItems);
+					oActiveUsersModel.setProperty("/developerItems", aCombinedItems.filter(oRow => oRow.businessRole === "DEVELOPER"));
+					oActiveUsersModel.setProperty("/nextSkip", iSkip + aItems.length);
+					oActiveUsersModel.setProperty("/hasMore", aItems.length === iPageSize);
+					oActiveUsersModel.setProperty("/loaded", true);
+				}
+			} catch {
+				if (iRequest === this._activeUsersRequest) {
+					oActiveUsersModel.setProperty("/error", true);
+				}
+			} finally {
+				if (iRequest === this._activeUsersRequest) {
+					oActiveUsersModel.setProperty("/busy", false);
+				}
+			}
+		},
+
+		_readActiveUsersSessionState: function () {
+			const oDefault = { selectedTab: "requests", query: "", includeNonActive: false };
+			if (typeof window === "undefined" || !window.sessionStorage) return oDefault;
+			try {
+				const oSaved = JSON.parse(window.sessionStorage.getItem("idts.userAdministration.activeUsers") || "{}");
+				return {
+					selectedTab: ["requests", "activeUsers", "developerResponsibilities"].includes(oSaved.selectedTab) ? oSaved.selectedTab : oDefault.selectedTab,
+					query: typeof oSaved.query === "string" ? oSaved.query : oDefault.query,
+					includeNonActive: oSaved.includeNonActive === true
+				};
+			} catch {
+				return oDefault;
+			}
+		},
+
+		_saveActiveUsersSessionState: function () {
+			if (typeof window === "undefined" || !window.sessionStorage) return;
+			try {
+				const oViewModel = this.getModel("view");
+				const oActiveUsersModel = this.getModel("activeUsers");
+				window.sessionStorage.setItem("idts.userAdministration.activeUsers", JSON.stringify({
+					selectedTab: oViewModel.getProperty("/selectedTab"),
+					query: oActiveUsersModel.getProperty("/query") || "",
+					includeNonActive: oActiveUsersModel.getProperty("/includeNonActive") === true
+				}));
+			} catch {
+				// Lưu bộ lọc chỉ là tiện ích; không được chặn việc tải dữ liệu chỉ đọc.
+			}
 		},
 
 		_loadRequests: async function (sQuery) {

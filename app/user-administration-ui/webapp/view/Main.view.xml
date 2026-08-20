@@ -25,78 +25,250 @@
 		</f:title>
 		<f:content>
 			<VBox class="sapUiResponsiveContentPadding">
-				<Toolbar>
-					<SearchField
-						width="100%"
-						placeholder="{i18n>searchPlaceholder}"
-						search=".onSearch"/>
-				</Toolbar>
-				<Table
-					id="onboardingTable"
-					items="{requests>/items}"
-					growing="true"
-					growingScrollToLoad="true"
-					noDataText="{i18n>noRequests}"
-					sticky="ColumnHeaders">
-					<columns>
-						<Column><Text text="{i18n>targetEmail}"/></Column>
-						<Column width="8rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>businessRole}"/></Column>
-						<Column width="9rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>userAdminCapability}"/></Column>
-						<Column width="10rem"><Text text="{i18n>status}"/></Column>
-						<Column width="12rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>expiresAt}"/></Column>
-						<Column minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>deliveryIssue}"/></Column>
-						<Column width="13rem" hAlign="End"><Text text="{i18n>actions}"/></Column>
-					</columns>
+				<IconTabBar
+					id="administrationTabs"
+					selectedKey="{view>/selectedTab}"
+					select=".onTabSelect"
+					expandable="false">
 					<items>
-						<ColumnListItem type="Inactive">
-							<cells>
-								<Text text="{requests>targetEmailNormalized}"/>
-								<ObjectStatus text="{requests>requestedRole_code}"/>
-								<ObjectStatus
-									text="{= ${requests>userAdminRequested} ? ${i18n>enabled} : ${i18n>notEnabled} }"
-									state="{= ${requests>userAdminRequested} ? 'Information' : 'None' }"/>
-								<ObjectStatus
-									text="{requests>status_code}"
-									state="{path: 'requests>status_code', formatter: 'formatter.statusState'}"/>
-								<Text text="{path: 'requests>expiresAt', formatter: 'formatter.dateTime'}"/>
-								<ObjectStatus text="{requests>lastErrorSummary}" state="Error"/>
-								<HBox justifyContent="End" renderType="Bare">
+						<IconTabFilter key="requests" text="{i18n>accessRequestsTab}" icon="sap-icon://request">
+							<content>
+								<VBox>
+									<Toolbar>
+										<SearchField
+											width="100%"
+											placeholder="{i18n>searchPlaceholder}"
+											search=".onSearch"/>
+									</Toolbar>
+									<Table
+										id="onboardingTable"
+										items="{requests>/items}"
+										growing="true"
+										growingScrollToLoad="true"
+										noDataText="{i18n>noRequests}"
+										sticky="ColumnHeaders">
+										<columns>
+											<Column><Text text="{i18n>targetEmail}"/></Column>
+											<Column width="8rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>businessRole}"/></Column>
+											<Column width="9rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>userAdminCapability}"/></Column>
+											<Column width="10rem"><Text text="{i18n>status}"/></Column>
+											<Column width="12rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>expiresAt}"/></Column>
+											<Column minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>deliveryIssue}"/></Column>
+											<Column width="13rem" hAlign="End"><Text text="{i18n>actions}"/></Column>
+										</columns>
+										<items>
+											<ColumnListItem type="Inactive">
+												<cells>
+													<Text text="{requests>targetEmailNormalized}"/>
+													<ObjectStatus text="{requests>requestedRole_code}"/>
+													<ObjectStatus
+														text="{= ${requests>userAdminRequested} ? ${i18n>enabled} : ${i18n>notEnabled} }"
+														state="{= ${requests>userAdminRequested} ? 'Information' : 'None' }"/>
+													<ObjectStatus
+														text="{requests>status_code}"
+														state="{path: 'requests>status_code', formatter: 'formatter.statusState'}"/>
+													<Text text="{path: 'requests>expiresAt', formatter: 'formatter.dateTime'}"/>
+													<ObjectStatus text="{requests>lastErrorSummary}" state="Error"/>
+													<HBox justifyContent="End" renderType="Bare">
+														<Button
+															icon="sap-icon://accept"
+															tooltip="{i18n>approveProvisioning}"
+															visible="{= ${requests>status_code} === 'PENDING_APPROVAL' }"
+															press=".onApproveProvisioning"/>
+														<Button
+															icon="sap-icon://edit"
+															tooltip="{i18n>changeRole}"
+															visible="{= ${requests>status_code} === 'ACTIVE' }"
+															press=".onOpenRoleChange"/>
+														<Button
+															icon="sap-icon://skills"
+															tooltip="{i18n>manageResponsibilities}"
+															visible="{= ${requests>status_code} === 'ACTIVE' &amp;&amp; ${requests>requestedRole_code} === 'DEVELOPER' }"
+															press=".onOpenDeveloperProfile"/>
+														<Button
+															icon="sap-icon://decline"
+															type="Negative"
+															tooltip="{i18n>revokeAccess}"
+															visible="{= ${requests>status_code} === 'ACTIVE' }"
+															press=".onOpenRevoke"/>
+														<Button
+															icon="sap-icon://refresh"
+															tooltip="{i18n>retryProvisioning}"
+															visible="{= ${requests>status_code} === 'RETRYABLE_FAILURE' || (${requests>status_code} === 'BLOCKED_MANUAL_REVIEW' &amp;&amp; ${requests>lastErrorCode} === 'PROVIDER_REQUEST_INVALID' &amp;&amp; ${requests>latestOperationAttemptCount} === 4) }"
+															press=".onRetryAccessOperation"/>
+														<Button
+															icon="sap-icon://synchronize"
+															tooltip="{i18n>reconcileProvisioning}"
+															visible="{= ${requests>status_code} === 'BLOCKED_MANUAL_REVIEW' &amp;&amp; ${requests>lastErrorCode} === 'AMBIGUOUS_PROVIDER_OUTCOME' }"
+															press=".onReconcileAccessOperation"/>
+													</HBox>
+												</cells>
+											</ColumnListItem>
+										</items>
+									</Table>
+								</VBox>
+							</content>
+						</IconTabFilter>
+						<IconTabFilter key="activeUsers" text="{i18n>activeUsersTab}" icon="sap-icon://employee">
+							<content>
+								<VBox>
+									<Toolbar>
+										<SearchField
+											width="100%"
+											value="{activeUsers>/query}"
+											placeholder="{i18n>activeUserSearchPlaceholder}"
+											search=".onActiveUsersSearch"/>
+										<ToolbarSpacer/>
+										<CheckBox
+											selected="{activeUsers>/includeNonActive}"
+											text="{i18n>includeRevoked}"
+											select=".onActiveUsersFilterChange"/>
+										<Button
+											icon="sap-icon://refresh"
+											tooltip="{i18n>retryActiveUsers}"
+											press=".onRetryActiveUsers"/>
+									</Toolbar>
+									<MessageStrip
+										visible="{activeUsers>/error}"
+										text="{i18n>activeUsersLoadFailed}"
+										type="Error"
+										showIcon="true"
+										class="sapUiTinyMarginTop"/>
+									<Table
+										id="activeUsersTable"
+										items="{activeUsers>/items}"
+										busy="{activeUsers>/busy}"
+										noDataText="{i18n>noActiveUsers}"
+										sticky="ColumnHeaders">
+										<columns>
+											<Column><Text text="{i18n>user}"/></Column>
+											<Column width="9rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>businessRole}"/></Column>
+											<Column width="11rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>userAdminCapability}"/></Column>
+											<Column width="9rem"><Text text="{i18n>accessState}"/></Column>
+											<Column width="9rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>identityLinked}"/></Column>
+											<Column width="10rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>developerReady}"/></Column>
+											<Column width="12rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>pendingOperation}"/></Column>
+											<Column width="12rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>lastReconciled}"/></Column>
+											<Column width="8rem" hAlign="End"><Text text="{i18n>actions}"/></Column>
+										</columns>
+										<items>
+											<ColumnListItem type="Inactive">
+												<cells>
+													<ObjectIdentifier title="{activeUsers>displayName}" text="{activeUsers>email}"/>
+												<ObjectStatus text="{activeUsers>businessRole}"/>
+												<ObjectStatus text="{= ${activeUsers>userAdminCapability} ? ${i18n>enabled} : ${i18n>notEnabled} }"/>
+													<ObjectStatus
+														text="{
+															parts: [
+																{ path: 'activeUsers>accessState' },
+																{ path: 'i18n>activeStateText' },
+																{ path: 'i18n>suspendedStateText' },
+																{ path: 'i18n>revokedStateText' },
+																{ path: 'i18n>incompleteStateText' }
+															],
+															formatter: 'formatter.accessStateText'
+														}"
+														state="{path: 'activeUsers>accessState', formatter: 'formatter.accessStateState'}"/>
+													<ObjectStatus
+														text="{
+															parts: [
+																{ path: 'activeUsers>identityLinked' },
+																{ path: 'i18n>yes' },
+																{ path: 'i18n>no' }
+															],
+															formatter: 'formatter.booleanText'
+														}"
+														state="{path: 'activeUsers>identityLinked', formatter: 'formatter.booleanState'}"/>
+													<ObjectStatus
+														text="{
+															parts: [
+																{ path: 'activeUsers>developerReady' },
+																{ path: 'i18n>readyText' },
+																{ path: 'i18n>needsAttentionText' }
+															],
+															formatter: 'formatter.developerReadyText'
+														}"
+														state="{path: 'activeUsers>developerReady', formatter: 'formatter.booleanState'}"/>
+													<ObjectStatus
+														text="{
+															parts: [
+																{ path: 'activeUsers>pendingOperationState' },
+																{ path: 'i18n>noneText' },
+																{ path: 'i18n>pendingText' },
+																{ path: 'i18n>inProgressText' },
+																{ path: 'i18n>retryNeededText' },
+																{ path: 'i18n>manualReviewText' }
+															],
+															formatter: 'formatter.pendingOperationText'
+														}"
+														state="{path: 'activeUsers>pendingOperationState', formatter: 'formatter.operationState'}"/>
+													<Text text="{path: 'activeUsers>lastReconciledAt', formatter: 'formatter.dateTime'}"/>
+													<Button text="{i18n>viewDetails}" type="Transparent" press=".onOpenActiveUserDetails"/>
+												</cells>
+											</ColumnListItem>
+										</items>
+									</Table>
 									<Button
-										icon="sap-icon://accept"
-										tooltip="{i18n>approveProvisioning}"
-										visible="{= ${requests>status_code} === 'PENDING_APPROVAL' }"
-										press=".onApproveProvisioning"/>
+										text="{i18n>loadMoreActiveUsers}"
+										type="Transparent"
+										visible="{activeUsers>/hasMore}"
+										enabled="{= !${activeUsers>/busy} }"
+										press=".onLoadMoreActiveUsers"
+										class="sapUiTinyMarginTop"/>
+								</VBox>
+							</content>
+						</IconTabFilter>
+						<IconTabFilter key="developerResponsibilities" text="{i18n>developerResponsibilitiesTab}" icon="sap-icon://skills">
+							<content>
+								<VBox>
+									<MessageStrip
+										text="{i18n>developerResponsibilitiesEntry}"
+										type="Information"
+										showIcon="true"/>
+									<Table
+										id="developerResponsibilitiesTable"
+										items="{activeUsers>/developerItems}"
+										busy="{activeUsers>/busy}"
+										noDataText="{i18n>activeUsersNoDeveloper}"
+										sticky="ColumnHeaders">
+										<columns>
+											<Column><Text text="{i18n>user}"/></Column>
+											<Column width="11rem"><Text text="{i18n>developerReady}"/></Column>
+											<Column width="11rem"><Text text="{i18n>activeResponsibilityCount}"/></Column>
+											<Column width="8rem" hAlign="End"><Text text="{i18n>actions}"/></Column>
+										</columns>
+										<items>
+											<ColumnListItem type="Inactive">
+												<cells>
+													<ObjectIdentifier title="{activeUsers>displayName}" text="{activeUsers>email}"/>
+													<ObjectStatus
+														text="{
+															parts: [
+																{ path: 'activeUsers>developerReady' },
+																{ path: 'i18n>readyText' },
+																{ path: 'i18n>needsAttentionText' }
+															],
+															formatter: 'formatter.developerReadyText'
+														}"
+														state="{path: 'activeUsers>developerReady', formatter: 'formatter.booleanState'}"/>
+													<ObjectNumber number="{activeUsers>activeResponsibilityCount}"/>
+													<Button text="{i18n>viewDetails}" type="Transparent" press=".onOpenActiveUserDetails"/>
+												</cells>
+											</ColumnListItem>
+										</items>
+									</Table>
 									<Button
-										icon="sap-icon://edit"
-										tooltip="{i18n>changeRole}"
-										visible="{= ${requests>status_code} === 'ACTIVE' }"
-										press=".onOpenRoleChange"/>
-									<Button
-										icon="sap-icon://skills"
-										tooltip="{i18n>manageResponsibilities}"
-										visible="{= ${requests>status_code} === 'ACTIVE' &amp;&amp; ${requests>requestedRole_code} === 'DEVELOPER' }"
-										press=".onOpenDeveloperProfile"/>
-									<Button
-										icon="sap-icon://decline"
-										type="Negative"
-										tooltip="{i18n>revokeAccess}"
-										visible="{= ${requests>status_code} === 'ACTIVE' }"
-										press=".onOpenRevoke"/>
-									<Button
-										icon="sap-icon://refresh"
-										tooltip="{i18n>retryProvisioning}"
-										visible="{= ${requests>status_code} === 'RETRYABLE_FAILURE' || (${requests>status_code} === 'BLOCKED_MANUAL_REVIEW' &amp;&amp; ${requests>lastErrorCode} === 'PROVIDER_REQUEST_INVALID' &amp;&amp; ${requests>latestOperationAttemptCount} === 4) }"
-										press=".onRetryAccessOperation"/>
-									<Button
-										icon="sap-icon://synchronize"
-										tooltip="{i18n>reconcileProvisioning}"
-										visible="{= ${requests>status_code} === 'BLOCKED_MANUAL_REVIEW' &amp;&amp; ${requests>lastErrorCode} === 'AMBIGUOUS_PROVIDER_OUTCOME' }"
-										press=".onReconcileAccessOperation"/>
-								</HBox>
-							</cells>
-						</ColumnListItem>
+										text="{i18n>loadMoreActiveUsers}"
+										type="Transparent"
+										visible="{activeUsers>/hasMore}"
+										enabled="{= !${activeUsers>/busy} }"
+										press=".onLoadMoreActiveUsers"
+										class="sapUiTinyMarginTop"/>
+								</VBox>
+							</content>
+						</IconTabFilter>
 					</items>
-				</Table>
+				</IconTabBar>
 			</VBox>
 		</f:content>
 	</f:DynamicPage>

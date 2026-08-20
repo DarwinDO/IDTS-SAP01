@@ -330,6 +330,12 @@ Vietnamese: Agent hoáº·c developer má»›i pháº£i xÃ¡c Ä‘á»‹nh 
 - DonHV approved the master and five gate designs. Five detailed implementation plans are prepared for review; Luna Max executor tasks, source changes, and platform mutations have not started.
 - Cost control uses one Luna Max task per gate, no full-chat context fork, and coordinating-task review before the next gate.
 
+## 2026-08-20 WP8 Gate 2 Active Users executor handoff
+
+- The isolated branch `feature/wp8-admin-active-users-donhv` started at the required base `96746fef148d6d6b9627ed1e8b9be5b28eb94e81` and contains the Gate 2 contract, deterministic read model, Active Users UI tab/details, focused TDD, and source evidence package.
+- No schema, CSV, database, provider, BTP, role, user, session, Jira, Drive, deployment, merge, Ready transition, or Gate 3 mutation occurred.
+- The executor stops after final source gates and a Draft PR to `dev`; DonHV/coordinator owns exact-diff review and manual browser acceptance.
+
 ## 2026-08-15 User Administration M3D broker enablement
 
 - The isolated `idts-user-access-broker` is STARTED `1/1`, no-route, bound only to its dedicated XSUAA and broker-only API-access UPS, and its fresh empty-queue poll is `IDLE`.

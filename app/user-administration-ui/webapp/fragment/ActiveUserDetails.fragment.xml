@@ -1,0 +1,99 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+	<Dialog
+		id="activeUserDetailsDialog"
+		core:require="{
+			formatter: 'idts/useradministrationui/model/formatter'
+		}"
+		title="{i18n>activeUserDetails}"
+		contentWidth="38rem"
+		stretch="{device>/system/phone}"
+		busy="{activeUsers>/detailsBusy}">
+		<content>
+			<VBox class="sapUiSmallMargin">
+				<ObjectIdentifier title="{activeUsers>/details/displayName}" text="{activeUsers>/details/email}"/>
+				<Label text="{i18n>accessState}" class="sapUiSmallMarginTop"/>
+				<ObjectStatus
+					text="{
+						parts: [
+							{ path: 'activeUsers>/details/accessState' },
+							{ path: 'i18n>activeStateText' },
+							{ path: 'i18n>suspendedStateText' },
+							{ path: 'i18n>revokedStateText' },
+							{ path: 'i18n>incompleteStateText' }
+						],
+						formatter: 'formatter.accessStateText'
+					}"
+					state="{path: 'activeUsers>/details/accessState', formatter: 'formatter.accessStateState'}"/>
+				<Label text="{i18n>businessRole}" class="sapUiSmallMarginTop"/>
+				<Text text="{activeUsers>/details/businessRole}"/>
+				<Label text="{i18n>userAdminCapability}" class="sapUiSmallMarginTop"/>
+				<ObjectStatus
+					text="{
+						parts: [
+							{ path: 'activeUsers>/details/userAdminCapability' },
+							{ path: 'i18n>yes' },
+							{ path: 'i18n>no' }
+						],
+						formatter: 'formatter.booleanText'
+					}"
+					state="{path: 'activeUsers>/details/userAdminCapability', formatter: 'formatter.booleanState'}"/>
+				<Label text="{i18n>identityLinked}" class="sapUiSmallMarginTop"/>
+				<ObjectStatus
+					text="{
+						parts: [
+							{ path: 'activeUsers>/details/identityLinked' },
+							{ path: 'i18n>yes' },
+							{ path: 'i18n>no' }
+						],
+						formatter: 'formatter.booleanText'
+					}"
+					state="{path: 'activeUsers>/details/identityLinked', formatter: 'formatter.booleanState'}"/>
+				<Label text="{i18n>developerReady}" class="sapUiSmallMarginTop"/>
+				<ObjectStatus
+					text="{
+						parts: [
+							{ path: 'activeUsers>/details/developerReady' },
+							{ path: 'i18n>readyText' },
+							{ path: 'i18n>needsAttentionText' }
+						],
+						formatter: 'formatter.developerReadyText'
+					}"
+					state="{path: 'activeUsers>/details/developerReady', formatter: 'formatter.booleanState'}"/>
+				<Label text="{i18n>activeResponsibilityCount}" class="sapUiSmallMarginTop"/>
+				<ObjectNumber number="{activeUsers>/details/activeResponsibilityCount}"/>
+				<Label text="{i18n>pendingOperation}" class="sapUiSmallMarginTop"/>
+				<ObjectIdentifier
+					title="{activeUsers>/details/pendingOperationType}"
+					text="{
+						parts: [
+							{ path: 'activeUsers>/details/pendingOperationState' },
+							{ path: 'i18n>noneText' },
+							{ path: 'i18n>pendingText' },
+							{ path: 'i18n>inProgressText' },
+							{ path: 'i18n>retryNeededText' },
+							{ path: 'i18n>manualReviewText' }
+						],
+						formatter: 'formatter.pendingOperationText'
+					}"/>
+				<Label text="{i18n>lastReconciled}" class="sapUiSmallMarginTop"/>
+				<Text text="{path: 'activeUsers>/details/lastReconciledAt', formatter: 'formatter.dateTime'}"/>
+				<Label text="{i18n>requestCount}" class="sapUiSmallMarginTop"/>
+				<ObjectNumber number="{activeUsers>/details/requestCount}"/>
+				<Label text="{i18n>auditEventCount}" class="sapUiSmallMarginTop"/>
+				<ObjectNumber number="{activeUsers>/details/auditEventCount}"/>
+				<VBox visible="{= !!${activeUsers>/details/developerProfileID} }">
+					<Title text="{i18n>developerProfile}" level="H5" class="sapUiSmallMarginTop"/>
+					<Label text="{i18n>availability}" class="sapUiSmallMarginTop"/>
+					<Text text="{activeUsers>/details/developerAvailabilityStatus}"/>
+					<Label text="{i18n>workloadLimit}" class="sapUiSmallMarginTop"/>
+					<ObjectNumber number="{activeUsers>/details/developerWorkloadLimit}"/>
+					<Label text="{i18n>openBugImpact}" class="sapUiSmallMarginTop"/>
+					<ObjectNumber number="{activeUsers>/details/developerOpenBugImpactCount}"/>
+				</VBox>
+			</VBox>
+		</content>
+		<endButton>
+			<Button text="{i18n>close}" press=".onCloseActiveUserDetails"/>
+		</endButton>
+	</Dialog>
+</core:FragmentDefinition>

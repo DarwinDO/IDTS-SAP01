@@ -33,6 +33,44 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     responsibilities          : array of DeveloperResponsibilityResult;
   }
 
+  type ActiveUserSummary {
+    userID                   : UUID;
+    displayName              : String(120);
+    email                    : String(255);
+    businessRole             : String(40);
+    userAdminCapability      : Boolean;
+    accessState              : String(20);
+    identityLinked           : Boolean;
+    developerReady           : Boolean;
+    activeResponsibilityCount: Integer;
+    pendingOperationType     : String(30);
+    pendingOperationState    : String(30);
+    lastSafeResultCode       : String(80);
+    lastReconciledAt         : Timestamp;
+  }
+
+  type ActiveUserDetails {
+    userID                        : UUID;
+    displayName                   : String(120);
+    email                         : String(255);
+    businessRole                  : String(40);
+    userAdminCapability           : Boolean;
+    accessState                   : String(20);
+    identityLinked                : Boolean;
+    developerReady                : Boolean;
+    activeResponsibilityCount     : Integer;
+    pendingOperationType          : String(30);
+    pendingOperationState         : String(30);
+    lastSafeResultCode            : String(80);
+    lastReconciledAt              : Timestamp;
+    requestCount                 : Integer;
+    auditEventCount              : Integer;
+    developerProfileID           : UUID;
+    developerAvailabilityStatus  : String(40);
+    developerWorkloadLimit       : Integer;
+    developerOpenBugImpactCount  : Integer;
+  }
+
   type OnboardingResult {
     ID                 : UUID;
     targetEmail        : String(255);
@@ -75,6 +113,10 @@ service UserAdministrationService @(requires: 'authenticated-user') {
   action verifySapIdentity(token : String(2048)) returns OnboardingResult;
 
   action searchOnboarding(query : String(255)) returns many OnboardingRequestSummary;
+
+  action searchActiveUsers(query : String(255), includeNonActive : Boolean, skip : Integer, top : Integer) returns many ActiveUserSummary;
+
+  action readActiveUserDetails(userID : UUID) returns ActiveUserDetails;
 
   action approveProvisioning(
     requestID       : UUID,
