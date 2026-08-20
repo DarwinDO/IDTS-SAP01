@@ -323,6 +323,13 @@ Any new agent or developer should identify their member name first, then read th
 
 Vietnamese: Agent hoáº·c developer má»›i pháº£i xÃ¡c Ä‘á»‹nh tÃªn thÃ nh viÃªn trÆ°á»›c, sau Ä‘Ã³ Ä‘á»c file nÃ y, `task-board.md`, file status thÃ nh viÃªn tÆ°Æ¡ng á»©ng trong `status/*.md`, vÃ  file `tasks/*.md` liÃªn quan trÆ°á»›c khi chá»‰nh sá»­a.
 
+## 2026-08-20 WP8 User Administration roadmap
+
+- PR #318 is merged into `dev` at `5e99aa0beed6ed877b8b9d53b42b878e1c16fbf5`; local `dev` and `origin/dev` were synchronized.
+- DonHV approved a sequential post-merge roadmap: Active Users, access lifecycle, Developer Responsibilities controlled pilot, Business Catalog Administration, and Operations/Audit.
+- DonHV approved the master and five gate designs. Five detailed implementation plans are prepared for review; Luna Max executor tasks, source changes, and platform mutations have not started.
+- Cost control uses one Luna Max task per gate, no full-chat context fork, and coordinating-task review before the next gate.
+
 ## 2026-08-15 User Administration M3D broker enablement
 
 - The isolated `idts-user-access-broker` is STARTED `1/1`, no-route, bound only to its dedicated XSUAA and broker-only API-access UPS, and its fresh empty-queue poll is `IDLE`.
