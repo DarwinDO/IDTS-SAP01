@@ -30,7 +30,7 @@ Although only the CAP module was selected, MultiApps processed its required mana
 
 ## Current state
 
-Status: `PASS_PENDING_PR_REVIEW_AND_MERGE`.
+Status: `SOURCE_REMEDIATED_PENDING_SELECTIVE_REDEPLOYMENT`.
 
 The first post-cutover readiness probe timed out. After CF control-plane connectivity briefly recovered, an initial sanitized V3 readback observed the CAP app requested `STARTED` with one desired web instance but zero running instances. The frozen rollback command was invoked once, but failed during its initial CF API GET and did not mutate the app. A later fresh readback proved CAP running `1/1`, followed by a complete `DEMO READY` result, zero active MTA operations, successful XSUAA/destination/Job Scheduler last operations, and unchanged CAP/AppRouter binding counts `7/3`; therefore no rollback was required.
 
@@ -70,4 +70,24 @@ The supplied screenshots are intentionally not committed because they include a 
 | G2-M6-blocked | 40,551 | `46953c62cd4fe9bbe664f978f769397a9807b75078e4408dddb11fa6ca09a4c5` | Initial Tester Bug Management check shows the safe platform-starting fallback while HANA readiness is `503`. |
 | G2-M6-pass | 197,240 | `f3d0a078fbfc925bc99de4fda3be8124593d15eab305243f3f7b978152f18afe` | After bounded recovery, controlled TESTER renders Bug Management and the session role is `Tester`. |
 
-Final manual result: `PASS`. Gate 2 now awaits exact PR review and merge; Gate 3 must remain unopened until that integration decision completes.
+The manual result above is valid for deployed source `f0818cdf179e0594d7719336973105442b278983`, but a final pre-merge review then found two source/design gaps: incomplete immutable identity could still be labeled `ACTIVE`, and the list omitted the required User Administration capability column. Those gaps are fixed at source head `4d28763dce61392186fa567c8da34633062eac9b`; therefore the earlier runtime/manual PASS must not be treated as acceptance of the remediated head.
+
+## Remediation artifact candidate
+
+Independent source re-review closed both product Majors. A strengthened PM/UserAdmin fixture mutation-check also proves that removing the identity guard makes the capability test fail.
+
+- Remediated source head: `4d28763dce61392186fa567c8da34633062eac9b`.
+- Main MTAR: `mta_archives/gate2-4d28763-remediation-main/idts-sap01-gate2-remediation-4d28763.mtar`.
+- Main MTAR SHA-256: `51827D0B6C1F807D2A4A763150220D35122D5A40EE231EE93A5832EE8F201110`.
+- Dedicated UI MTAR: `mta_archives/gate2-4d28763-remediation-ui/idts-user-admin-ui-gate2-remediation-4d28763.mtar`.
+- Dedicated UI MTAR SHA-256: `B28BA137A8C9DDD65A74F65247865833B1B1702A659DB52C83F756C9EAD44228`.
+- Packaged CAP `srv/user-admin/active-users.js` SHA-256 equals source: `8864A13C09A5A00BF4F7DF2EA378F14E989F81A36386AC52E1CF48DD913E8250`.
+- Dedicated content contains exactly `bug-management-ui.zip` and `user-administration-ui.zip`; the nested Admin view contains both the localized capability header and `activeUsers>userAdminCapability` binding.
+- Nested User Administration ZIP SHA-256: `A7051B7DDFEC6423090747AF3F4E7C24DFE3678327FEF8D39E4483425E94480B`.
+- Independent artifact review: `0 Critical / 0 Major`; GO only for requesting a separate selective deployment approval.
+
+The main MTAR is a full archive. Any approved redeployment must select only module `idts-sap01-srv`; DB deployer, AppRouter and app-content modules remain excluded. The dedicated UI operation may select only `idts-user-admin-ui-r3c-content` and the existing HTML5 host. Rollback authority remains the previously frozen current-runtime artifacts: main `D9DD3B8D...`, deployed UI `180E7FCC...`, and UI rollback `A7FB892F...`.
+
+The full-repo/module installs emitted existing npm audit/deprecation findings during packaging. No `npm audit fix`, dependency update or lockfile change was made. The first dedicated UI build was rejected before artifact creation because the preceding full build removed its empty generated staging directory; recreating only that directory allowed one successful build. No platform mutation occurred during packaging.
+
+Gate 2 now requires a selective CAP/UI remediation deployment, fresh readiness, and a bounded manual recheck of identity-incomplete state plus the capability column before merge. Gate 3 remains unopened.
