@@ -30,7 +30,7 @@ Although only the CAP module was selected, MultiApps processed its required mana
 
 ## Current state
 
-Status: `READY_PENDING_DONHV_MANUAL`.
+Status: `PASS_PENDING_PR_REVIEW_AND_MERGE`.
 
 The first post-cutover readiness probe timed out. After CF control-plane connectivity briefly recovered, an initial sanitized V3 readback observed the CAP app requested `STARTED` with one desired web instance but zero running instances. The frozen rollback command was invoked once, but failed during its initial CF API GET and did not mutate the app. A later fresh readback proved CAP running `1/1`, followed by a complete `DEMO READY` result, zero active MTA operations, successful XSUAA/destination/Job Scheduler last operations, and unchanged CAP/AppRouter binding counts `7/3`; therefore no rollback was required.
 
@@ -43,4 +43,31 @@ Connectivity later recovered. A fresh readiness check returned CAP/AppRouter `1/
 - Rollback command attempts: `1`; confirmed rollback mutations: `0`.
 - Database/schema/data mutations: `0`.
 
-Do not merge the PR until DonHV completes the manual Gate 2 acceptance. No forward deployment retry is required. Use the frozen UI rollback artifact only if a content-specific manual acceptance failure is reproduced while connectivity is healthy.
+DonHV completed the manual Gate 2 acceptance. No forward deployment retry is required. Use the frozen UI rollback artifact only if a content-specific regression is reproduced while connectivity is healthy.
+
+## DonHV manual acceptance checkpoint
+
+DonHV supplied screenshots that establish the following current results:
+
+- Authorized PM + UserAdmin can open Access Requests, Active Users and Developer Responsibilities.
+- Active Users search returns the controlled TESTER as active and identity-linked.
+- The controlled TESTER receives `Forbidden` when opening User Administration, which is the expected negative authorization result.
+- The controlled TESTER Bug Management check was temporarily blocked by the safe platform-starting fallback.
+
+The blocked Bug Management check was diagnosed as an environment/runtime readiness issue: CAP and AppRouter remained `1/1`, but HANA readiness returned `503`. The approved conditional recovery requested one supported HANA start and restarted CAP once. An independent final check then proved CAP/AppRouter `1/1`, liveness/readiness `200`, protected anonymous API `401`, Web `200`, and `DEMO READY`. No schema, migration, import, seed, user, role or provider mutation ran.
+
+After recovery, DonHV pressed `Retry` once in the existing controlled TESTER Bug Management session. Bug Management rendered its list, filters and navigation, and the session menu identified the controlled account as `Tester`. This closes the unchanged-Bug-UI and controlled-Tester-access checks.
+
+The supplied screenshots are intentionally not committed because they include a full email address and a private application hostname. The sanitized evidence below records only byte size, SHA-256 digest and allowlisted visible claims.
+
+| Evidence | Bytes | SHA-256 | Sanitized result |
+| --- | ---: | --- | --- |
+| G2-M1 | 66,929 | `3d6e725dee77d5f87f15aa9d2b6a4aba68c182b63dec64bd1446622b06ebc7e4` | PM + UserAdmin Access Requests view loads. |
+| G2-M2 | 73,400 | `679d09dfa63f3b65982f0c71f78784c8aa9666df12e88f98ecf3c0adde7ddffb` | Active Users search shows the controlled TESTER active and identity-linked. |
+| G2-M3 | 55,527 | `0fa4c5e1917a163603976d0654776340c69e5f43b22bfd6711e4e36a5bf3c580` | Developer Responsibilities read-only tab loads. |
+| G2-M4 | 175,481 | `681bf78bd948a707c8885b406daa855da7bc7f88b8da939d7d9c1a04e496146d` | Active Users list is deduplicated and readable. |
+| G2-M5 | 44,772 | `56fea400f6ba9d427733acf3b2ea4cb3743f4f74a3d7edc1c0ab76b7c161f2f2` | Controlled TESTER is denied from User Administration with `Forbidden`. |
+| G2-M6-blocked | 40,551 | `46953c62cd4fe9bbe664f978f769397a9807b75078e4408dddb11fa6ca09a4c5` | Initial Tester Bug Management check shows the safe platform-starting fallback while HANA readiness is `503`. |
+| G2-M6-pass | 197,240 | `f3d0a078fbfc925bc99de4fda3be8124593d15eab305243f3f7b978152f18afe` | After bounded recovery, controlled TESTER renders Bug Management and the session role is `Tester`. |
+
+Final manual result: `PASS`. Gate 2 now awaits exact PR review and merge; Gate 3 must remain unopened until that integration decision completes.
