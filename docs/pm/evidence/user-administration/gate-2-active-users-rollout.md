@@ -30,13 +30,13 @@ Although only the CAP module was selected, MultiApps processed its required mana
 
 ## Current state
 
-Status: `BLOCKED_NETWORK_READBACK`.
+Status: `BLOCKED_CAP_ROLLBACK_NETWORK`.
 
-The first post-cutover readiness probe timed out. Subsequent sanitized CF API readback and direct application-route readback also timed out from the same client. Because both control-plane and data-plane connectivity are unavailable, the result is ambiguous and must not be classified as an application defect without a fresh readback.
+The first post-cutover readiness probe timed out. After CF control-plane connectivity briefly recovered, sanitized V3 readback proved the CAP app was requested `STARTED` with one desired web instance but zero running instances. Direct health/ready/auth checks still returned no HTTP status. The frozen rollback to the pre-rollout CAP revision was invoked once, but the command failed during its initial CF API GET because the regional control-plane request timed out; the rollback mutation did not start. Repeated bounded readback attempts continued to time out, so no blind retry was performed.
 
 - CAP deploy attempts/succeeded according to MultiApps: `1/1`.
 - UI deploy attempts: `0`.
-- Rollback attempts: `0`.
+- Rollback command attempts: `1`; confirmed rollback mutations: `0`.
 - Database/schema/data mutations: `0`.
 
-Do not deploy the UI, merge the PR or begin manual acceptance until a fresh read-only check proves CAP/AppRouter `1/1`, health/ready `200`, anonymous protected API `401`, Web `200`, service operations succeeded and no active MTA operation remains. Do not retry the CAP deployment blindly.
+Do not deploy the UI, merge the PR or begin manual acceptance. When CF regional control-plane connectivity is restored, first re-read the exact app/revision state. If the CAP app is not healthy on the reviewed forward revision, execute the frozen rollback to pre-rollout revision `11` exactly once, then require CAP/AppRouter `1/1`, health/ready `200`, anonymous protected API `401`, Web `200`, service operations succeeded and no active MTA operation. Do not retry the CAP forward deployment blindly.
