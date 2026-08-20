@@ -179,3 +179,12 @@ Record a new decision here when it changes scope, ownership, entity meaning, sta
 - Likelihood: Medium
 - Impact: High
 - Mitigation: keep the seven-day fallback window, stop new writes before rollback, inventory affected HANA records, reconcile the delta transactionally into PostgreSQL, and require DonHV to accept any rollback that intentionally omits reconciliation.
+
+### DEC-057 — Deliver the post-PR-318 User Administration roadmap through sequential Luna Max gates
+
+- Date: 2026-08-20
+- Decision: split Active Users, access lifecycle, Developer Responsibilities controlled pilot, Business Catalogs, and Operations/Audit into independently testable gates. Open only one gate task/branch at a time from the latest merged `origin/dev`.
+- Cost control: use `gpt-5.6-luna` with reasoning `max`, the highest available Luna setting; pass only exact specs/plans/files rather than the full historical chat. Gate 5 may be deferred when funding is constrained.
+- Review authority: executor tasks prepare source, tests, evidence and Draft PRs but cannot merge or authorize later gates. The coordinating DonHV task performs exact-diff review, verification and diagnosis before requesting a decision.
+- Mutation safety: HDI, BTP deployment, XSUAA, user/role, catalog or provider mutations require separate exact approval with before-state, checksum, readback, rollback and stop conditions.
+- Evidence: `docs/superpowers/specs/2026-08-20-user-administration-roadmap-master-design.md` and `docs/pm/tasks/wp8-user-administration-roadmap.md`.
