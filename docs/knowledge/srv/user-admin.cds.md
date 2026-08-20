@@ -1,5 +1,19 @@
 # Knowledge: `srv/user-admin.cds`
 
+## Gate 2 Active Users contract / Contract Active Users Gate 2
+
+Gate 2 adds the read-only `ActiveUserSummary` and `ActiveUserDetails` structured types plus `searchActiveUsers(query, includeNonActive)` and `readActiveUserDetails(userID)` actions. The summary is one row per persisted IDTS user, not one row per invitation. Default search returns only the derived `ACTIVE` state; the explicit non-active option includes `SUSPENDED`, `REVOKED`, and `INCOMPLETE` rows.
+
+Gate 2 thêm structured type `ActiveUserSummary`, `ActiveUserDetails` chỉ đọc cùng hai action `searchActiveUsers(query, includeNonActive)` và `readActiveUserDetails(userID)`. Summary có một row cho mỗi user IDTS đã lưu, không phải một row cho mỗi invitation. Search mặc định chỉ trả state suy ra là `ACTIVE`; tùy chọn non-active rõ ràng thêm row `SUSPENDED`, `REVOKED` và `INCOMPLETE`.
+
+The public contract contains display/contact fields, business role, the PM/UserAdmin capability boolean, derived access state, immutable-link completeness boolean, Developer readiness/responsibility count, pending operation type/state, safe result code, reconciliation timestamp, and details-only counts/profile summary. It does not expose provider identifiers, identity claims or immutable-link values, credentials, invitation payloads, operation leases, or raw audit/provider data.
+
+Contract public chứa field display/contact, business role, boolean capability PM/UserAdmin, access state suy ra, boolean đầy đủ immutable-link, readiness/count responsibility Developer, type/state operation pending, safe result code, timestamp reconciliation và count/profile summary chỉ có ở details. Contract không expose provider identifier, identity claim hoặc giá trị immutable-link, credential, payload invitation, operation lease hay raw audit/provider data.
+
+The service remains under the existing authenticated `UserAdministrationService` boundary. Handler authorization is still exact PM + `UserAdmin` plus an active internal PM; UI visibility is not an authorization mechanism. No entity, aspect, column, CSV, or database artifact changes for Gate 2.
+
+Service vẫn nằm dưới boundary authenticated `UserAdministrationService` hiện có. Authorization handler vẫn là đúng PM + `UserAdmin` và internal PM active; UI visibility không phải cơ chế phân quyền. Gate 2 không đổi entity, aspect, column, CSV hoặc database artifact.
+
 ## Developer catalog navigation / Navigation catalog Developer
 
 `ComponentCategories` exposes its `component` and `defectCategory` associations for the PM invitation form. The service must also expose read-only `ApplicationComponents` and `DefectCategories` projections; otherwise CAP cannot redirect those associations into OData navigation properties and UI5 `$expand` requests fail with HTTP 400 before the dialog opens.

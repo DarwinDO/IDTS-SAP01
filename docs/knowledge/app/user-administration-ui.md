@@ -1,5 +1,19 @@
 # Knowledge: `app/user-administration-ui`
 
+## Gate 2 Active Users / Active Users Gate 2
+
+The main view now separates three user-administration surfaces in an `IconTabBar`: existing Access Requests, read-only Active Users, and a read-only Developer Responsibilities summary. The request table keeps its existing actions and `requests` model. Active Users uses a separate `activeUsers` JSON model, loads only when either new tab is first selected, and calls the CAP `searchActiveUsers` action rather than the provider or BTP API.
+
+Main view tách ba surface user administration trong `IconTabBar`: Access Requests hiện có, Active Users chỉ đọc và summary Developer Responsibilities chỉ đọc. Bảng request giữ action và model `requests` hiện có. Active Users dùng JSON model riêng `activeUsers`, chỉ load khi một trong hai tab mới được chọn lần đầu và gọi CAP action `searchActiveUsers`, không gọi provider hoặc BTP API.
+
+Active Users keeps the search query and non-active filter in the current browser session, normalizes the query before sending it, and ignores stale responses when searches overlap. The table uses friendly localized labels, semantic `ObjectStatus` states, responsive pop-in columns, busy/no-data/error states, and a retry action. The Developer Responsibilities tab derives its display list from the same safe summary response and provides one View Details entry point.
+
+Active Users giữ query và filter non-active trong session browser hiện tại, chuẩn hóa query trước khi gửi và bỏ qua response cũ khi search chồng nhau. Table dùng label thân thiện qua i18n, `ObjectStatus` semantic, column responsive pop-in, busy/no-data/error state và retry. Tab Developer Responsibilities lọc danh sách hiển thị từ cùng safe summary response và cung cấp một entry point View Details.
+
+The details dialog calls `readActiveUserDetails` only after the user selects View Details. It shows display/contact, role, derived access state, safe booleans, readiness/responsibility counts, safe operation summary, reconciliation timestamp, request/audit counts, and the allow-listed Developer profile summary. It has only a Close action: no role change, suspend, reactivate, revoke, provider inventory, credential, or identity-claim control is present.
+
+Dialog details chỉ gọi `readActiveUserDetails` sau khi user chọn View Details. Dialog hiển thị display/contact, role, access state suy ra, boolean an toàn, readiness/count responsibility, operation summary an toàn, timestamp reconciliation, count request/audit và summary profile Developer được allow-list. Dialog chỉ có Close: không có control đổi role, suspend, reactivate, revoke, provider inventory, credential hoặc identity claim.
+
 ## Developer responsibilities / Phạm vi phụ trách Developer
 
 The Invite and Change Role dialogs show Developer Profile fields only when DEVELOPER is selected. Active Developers have a Manage Responsibilities action for availability, workload, Component Category, optional SAP Module, level, reason, and open-Bug impact. UI sends structured inputs; CAP remains authoritative for authorization and validation.
