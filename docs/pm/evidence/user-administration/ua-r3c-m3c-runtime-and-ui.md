@@ -1,7 +1,7 @@
 # UA-R3C M3C Runtime and UI Evidence
 
-Date: 2026-08-15  
-Owner: DonHV  
+Date: 2026-08-15
+Owner: DonHV
 Classification: controlled SAP BTP trial rollout evidence
 
 ## Outcome
