@@ -30,7 +30,7 @@ Although only the CAP module was selected, MultiApps processed its required mana
 
 ## Current state
 
-Status: `REMEDIATION_DEPLOYED_PENDING_BOUNDED_MANUAL_REACCEPTANCE`.
+Status: `PASS_PENDING_FINAL_MERGE`.
 
 The first post-cutover readiness probe timed out. After CF control-plane connectivity briefly recovered, an initial sanitized V3 readback observed the CAP app requested `STARTED` with one desired web instance but zero running instances. The frozen rollback command was invoked once, but failed during its initial CF API GET and did not mutate the app. A later fresh readback proved CAP running `1/1`, followed by a complete `DEMO READY` result, zero active MTA operations, successful XSUAA/destination/Job Scheduler last operations, and unchanged CAP/AppRouter binding counts `7/3`; therefore no rollback was required.
 
@@ -102,4 +102,14 @@ DonHV approved the exact selective remediation deployment. Preconditions passed:
 - Final independent readiness: CAP/AppRouter `1/1`, liveness/readiness `200`, anonymous protected API `401`, Web `200`, `DEMO READY`, binding counts `7/3`, active MTA operations `0`.
 - Schema/HDI/seed/data/user/role/provider mutations: `0`.
 
-Gate 2 now needs a bounded human recheck on the remediated runtime: confirm the User Administration capability column is visible, the controlled linked TESTER remains `ACTIVE`, the incomplete/unlinked fixture is not reported `ACTIVE`, Tester remains forbidden from User Administration, and Tester still renders Bug Management. Merge and Gate 3 remain blocked until this recheck is recorded.
+## Remediated runtime manual reacceptance
+
+DonHV supplied the bounded reacceptance evidence after the remediation deployment:
+
+| Evidence | Bytes | SHA-256 | Sanitized result |
+| --- | ---: | --- | --- |
+| G2-R1 | 179,630 | `3a7d8de92bb73cbd3cfd7aba713eb2d7baae7e2690690ac0da6143218a8095b0` | Active Users shows the new capability column; unlinked rows are `Needs review` with Identity Link `No`; the controlled linked TESTER remains `Active` with Identity Link `Yes`. |
+| G2-R2 | 39,778 | `abc54045cff31a0f7e8f32fd767f7c62c6905b63f1644a1e3b481bb36b919c1e` | Controlled TESTER remains denied from User Administration with `Forbidden`. |
+| G2-R3 | 193,365 | `39a19e921901d5991344fbc0bdff8dcebcb5a9e09db7c40375f3c12f565d0332` | Controlled TESTER renders Bug Management and the session role is `Tester`. |
+
+Raw screenshots are not committed because they contain a full email address and private application hostname. The remediated runtime manual result is `PASS`. Gate 2 may proceed to final exact-head review/CI and merge; Gate 3 remains unopened until merge, local `dev` synchronization and exact worktree cleanup complete.
