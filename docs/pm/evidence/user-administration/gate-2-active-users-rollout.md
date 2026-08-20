@@ -30,15 +30,17 @@ Although only the CAP module was selected, MultiApps processed its required mana
 
 ## Current state
 
-Status: `BLOCKED_UI_POSTDEPLOY_NETWORK`.
+Status: `READY_PENDING_DONHV_MANUAL`.
 
 The first post-cutover readiness probe timed out. After CF control-plane connectivity briefly recovered, an initial sanitized V3 readback observed the CAP app requested `STARTED` with one desired web instance but zero running instances. The frozen rollback command was invoked once, but failed during its initial CF API GET and did not mutate the app. A later fresh readback proved CAP running `1/1`, followed by a complete `DEMO READY` result, zero active MTA operations, successful XSUAA/destination/Job Scheduler last operations, and unchanged CAP/AppRouter binding counts `7/3`; therefore no rollback was required.
 
 The checksum-reviewed dedicated UI content MTAR was then deployed exactly once. MultiApps reported initial deployment of MTA `idts-user-admin-ui-r3c`, uploaded the single content module to the existing HTML5 host, skipped service deletion and finished successfully. The regional CF control plane and both AppRouter entry paths became unreachable again immediately afterward, so live content/readiness acceptance remains unproven. No second UI deploy or blind rollback was attempted.
+
+Connectivity later recovered. A fresh readiness check returned CAP/AppRouter `1/1`, health/ready `200`, anonymous protected API `401`, Web `200` and `DEMO READY`; active MTA operations were zero. Read-only Edge verification through the existing PM session proved the new User Administration title, the three approved tabs, automatic Active Users loading, one controlled active TESTER row with a complete identity link, a read-only details dialog, restored Active Users tab/query after reload without duplicate loading, and an unaffected Bug Management list/filter surface. No browser write action or business-data mutation was performed. DonHV-owned Tester-negative and visual evidence remain pending.
 
 - CAP deploy attempts/succeeded according to MultiApps: `1/1`.
 - UI deploy attempts/succeeded according to MultiApps: `1/1`.
 - Rollback command attempts: `1`; confirmed rollback mutations: `0`.
 - Database/schema/data mutations: `0`.
 
-Do not merge the PR or begin manual acceptance. When CF regional connectivity is restored, read back the dedicated UI MTA count, zero active operations, CAP/AppRouter `1/1`, health/ready `200`, anonymous protected API `401`, Web `200`, service operation health, binding parity, and both Bug/Admin entry paths. Do not retry either forward deployment blindly. Use the frozen UI rollback artifact only if content-specific acceptance fails after connectivity is healthy.
+Do not merge the PR until DonHV completes the manual Gate 2 acceptance. No forward deployment retry is required. Use the frozen UI rollback artifact only if a content-specific manual acceptance failure is reproduced while connectivity is healthy.
