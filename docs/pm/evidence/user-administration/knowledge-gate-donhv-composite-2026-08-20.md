@@ -94,4 +94,3 @@ PM + UserAdmin gửi invitation
 ```
 
 UI không thay thế backend authorization. Không set `ACTIVE` trước provider readback. Kết quả provider mơ hồ phải readback trước action tiếp theo. Evidence không chứa credential, raw token, provider body, PII đầy đủ hoặc endpoint private.
-
