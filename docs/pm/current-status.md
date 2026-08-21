@@ -343,6 +343,13 @@ Vietnamese: Agent hoáº·c developer má»›i pháº£i xÃ¡c Ä‘á»‹nh 
 - Suspension is IDTS-local and fail-closed: it protects the final PM + UserAdmin, revokes active sessions atomically, records `SUSPENDED`, and performs no provider write. Reactivation keeps local access disabled until exact immutable-principal and Role Collection readback proof.
 - No BTP, HANA/HDI, schema, seed, provider, SAP user, Role Collection, session outside the local transaction, Jira, Drive, deployment, merge, or Ready transition mutation occurred in Gate 3. The executor stops at Draft PR; coordinator exact-diff review and any later deployment/acceptance remain separate approvals.
 
+## 2026-08-21 WP8 Gate 3 rollout and controlled lifecycle acceptance
+
+- Gate 3 source and bounded status initializer/rollback follow-ups are merged; rollout baseline is `9367abda9bdacfe989bd91cec7ae644ae1059a4c`.
+- Selective status initialization and CAP/broker/User Administration UI rollout completed without HDI/schema/seed/AppRouter deployment. Controlled TESTER suspension proved local `active=false`, one `SUSPENDED` request, zero unrevoked custom sessions and one suspend audit.
+- Reactivation remained blocked until broker readback, then completed `SUCCEEDED / ROLE_COLLECTIONS_VERIFIED`; final user/request state is `ACTIVE / TESTER`, PM console persists `Active / Yes / None`, and independent readiness is `DEMO READY`.
+- One fresh separate TESTER browser denial/post-reactivation Bug Management check remains pending; Gate 4 and final Gate 3 closure remain blocked on that bounded human evidence or an explicit coordinator limitation decision. Full sanitized evidence: `docs/pm/evidence/user-administration/gate-3-access-lifecycle-rollout.md`.
+
 ## 2026-08-15 User Administration M3D broker enablement
 
 - The isolated `idts-user-access-broker` is STARTED `1/1`, no-route, bound only to its dedicated XSUAA and broker-only API-access UPS, and its fresh empty-queue poll is `IDLE`.
