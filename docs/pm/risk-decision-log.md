@@ -196,3 +196,11 @@ Record a new decision here when it changes scope, ownership, entity meaning, sta
 - Rationale: suspending local access must be immediately safe without risking an external Role Collection mutation, while reactivation must not grant local access from a queued request or stale/mismatched provider state.
 - Enforcement: use optimistic request versions, target/final-admin row locks, exact fixed role/capability snapshots, one `listRoleCollections` read with no assign/unassign for reactivation, sanitized semantic results, and no automatic session restoration. UI buttons are state-bound and confirmation-gated but never replace CAP authorization.
 - Scope boundary: this source gate does not deploy, migrate, seed, change XSUAA, mutate SAP users/roles, run a live provider operation, merge, or claim browser/manual acceptance. Evidence: `docs/pm/evidence/user-administration/gate-3-access-lifecycle-source.md`.
+
+### DEC-059 — Preserve legacy user IDs when linking verified FPT SAP identities
+
+- Date: 2026-08-21
+- Decision: link one explicitly selected active legacy TESTER/DEVELOPER to a verified SAP identity by updating the same `Users.ID` with the new contact email and immutable identity tuple after read-only exact Role Collection proof. Do not create a replacement user, infer a match, or move Developer Profiles, responsibilities, existing Bug assignees, comments, notifications, or history.
+- Assignment safety: a Developer without exactly one matching `ACTIVE` immutable identity link is excluded from new direct assignment and Smart Assign. Existing Bug assignees remain unchanged for a separate PM decision.
+- Scope boundary: the initial action excludes PM/UserAdmin, provider role writes, bulk matching/import, mutable-email auth fallback, and direct SQL migration. Implementation, HDI, deployment, invitations, identity/email updates, and per-member acceptance remain separately gated.
+- Evidence: `docs/superpowers/specs/2026-08-21-gate-3b-existing-user-identity-link-design.md` and `docs/superpowers/plans/2026-08-21-gate-3b-existing-user-identity-link-implementation.md`.

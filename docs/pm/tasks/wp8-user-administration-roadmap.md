@@ -12,7 +12,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 ## Current status
 
-`IN PROGRESS — GATE 3 SOURCE IMPLEMENTATION / DRAFT PR PENDING`
+`IN PROGRESS — GATE 3B EXISTING USER IDENTITY LINK PLANNING`
 
 - Gate 1 foundation is merged through PR #318 at `5e99aa0beed6ed877b8b9d53b42b878e1c16fbf5`.
 - Master design and Gate 2–6 designs are prepared on `docs/wp8-admin-roadmap-planning-donhv`.
@@ -20,14 +20,16 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 - Gate 2 is merged at `f89eacc1ef2eed6767395b1b5bc6c97ff0d6c7f5`. Gate 3 executor branch `feature/wp8-admin-access-lifecycle-donhv` is frozen from that exact base and contains source/documentation through `ad7e3d4`; the final source gate passes.
 - Gate 3 source covers local `SUSPENDED` suspension, final-administrator protection, atomic session revocation, queued `REACTIVATE`, readback-only broker proof, CAP completion, state-bound UI actions, focused TDD, and source knowledge mirrors. The final source gate and Draft PR creation remain next.
 - Gate 3 remains source-only. Manual browser acceptance, coordinator exact-diff review, merge, deployment, and any SAP user/Role Collection/provider mutation remain outside this executor handoff.
+- Gate 3B is an approved transition insert before the next controlled Developer pilot. It links one selected legacy TESTER/DEVELOPER to a verified SAP identity by preserving the same internal user/profile/Bug relationships and adds the fail-closed assignment-readiness guard. Design and implementation plan are frozen under `docs/superpowers/specs/2026-08-21-gate-3b-existing-user-identity-link-design.md` and `docs/superpowers/plans/2026-08-21-gate-3b-existing-user-identity-link-implementation.md`; source execution has not started.
 
 ## Gate sequence
 
 1. Gate 2 — Active Users read-only list and details.
 2. Gate 3 — Role/capability change, suspend, reactivate, revoke.
-3. Gate 4 — Developer Responsibilities controlled pilot.
-4. Gate 5 — Business Catalog Administration.
-5. Gate 6 — Operations and Audit usability.
+3. Gate 3B — Existing legacy TESTER/DEVELOPER identity link and assignment-readiness correction.
+4. Gate 4 — Developer Responsibilities controlled pilot.
+5. Gate 5 — Business Catalog Administration.
+6. Gate 6 — Operations and Audit usability.
 
 ## Delivery rules
 
