@@ -3,9 +3,17 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { STATUSES, initializeStatuses, inspectStatusCatalog, verifyExistingRows } = require('../btp/initialize-user-onboarding-statuses');
+const {
+  LEGACY_STATUSES,
+  STATUSES,
+  initializeStatuses,
+  inspectStatusCatalog,
+  inspectSuspendedRollback,
+  rollbackSuspendedStatus,
+  verifyExistingRows
+} = require('../btp/initialize-user-onboarding-statuses');
 
-function fakeDb (initial = []) {
+function fakeDb (initial = [], options = {}) {
   const rows = initial.map((row) => ({ ...row }));
   const calls = [];
   return {
@@ -13,9 +21,16 @@ function fakeDb (initial = []) {
     rows,
     async run (sql, parameters = []) {
       calls.push({ sql, parameters });
+      if (/^SELECT COUNT\(\*\)/.test(sql.trim())) return [{ COUNT: options.suspendedReferences || 0 }];
       if (/^SELECT/.test(sql.trim())) return rows.map((row) => ({ ...row }));
       if (/^INSERT/.test(sql.trim())) {
         rows.push(Object.fromEntries(['code', 'name', 'descr', 'sortOrder', 'active', 'criticality'].map((key, index) => [key, parameters[index]])));
+        return 1;
+      }
+      if (/^DELETE/.test(sql.trim())) {
+        const index = rows.findIndex((row) => row.code === parameters[0]);
+        if (index === -1) return 0;
+        rows.splice(index, 1);
         return 1;
       }
       throw new Error('Unexpected SQL');
@@ -33,7 +48,9 @@ function fakeDb (initial = []) {
   const procfile = fs.readFileSync(path.join(__dirname, '../btp/user-onboarding-status-init.Procfile'), 'utf8').trim().split(/\r?\n/);
   assert.deepEqual(procfile, [
     'status-inspect: node initialize-user-onboarding-statuses.js --inspect-only',
-    'status-init: node initialize-user-onboarding-statuses.js'
+    'status-init: node initialize-user-onboarding-statuses.js',
+    'status-rollback-inspect: node initialize-user-onboarding-statuses.js --rollback-suspended',
+    'status-rollback: node initialize-user-onboarding-statuses.js --rollback-suspended --execute'
   ]);
 
   const empty = fakeDb();
@@ -78,6 +95,51 @@ function fakeDb (initial = []) {
   };
   await assert.rejects(() => initializeStatuses(mismatch), /readback did not match/);
   assert.equal(mismatch.calls.some((call) => call.sql === 'ROLLBACK'), true);
+
+  assert.equal(LEGACY_STATUSES.length, 14);
+  assert.deepEqual(await inspectSuspendedRollback(fakeDb(STATUSES)), {
+    rowCount: 15,
+    exact: true,
+    suspendedReferences: 0,
+    eligible: true
+  });
+  assert.deepEqual(await inspectSuspendedRollback(fakeDb(STATUSES, { suspendedReferences: 2 })), {
+    rowCount: 15,
+    exact: true,
+    suspendedReferences: 2,
+    eligible: false
+  });
+
+  const rollbackDb = fakeDb(STATUSES);
+  const rolledBack = await rollbackSuspendedStatus(rollbackDb);
+  assert.equal(rolledBack.result, 'ROLLED_BACK');
+  assert.equal(rolledBack.rowCount, 14);
+  assert.equal(rollbackDb.calls.filter((call) => /^DELETE/.test(call.sql)).length, 1);
+  assert.equal(rollbackDb.calls.some((call) => call.sql === 'COMMIT'), true);
+  assert.equal(rollbackDb.calls.some((call) => call.sql === 'ROLLBACK'), false);
+  assert.deepEqual(rollbackDb.rows, LEGACY_STATUSES);
+  const restored = await initializeStatuses(rollbackDb);
+  assert.equal(restored.result, 'INITIALIZED');
+  assert.equal(rollbackDb.calls.filter((call) => /^INSERT/.test(call.sql)).length, 1);
+
+  const alreadyRolledBack = fakeDb(LEGACY_STATUSES);
+  assert.equal((await rollbackSuspendedStatus(alreadyRolledBack)).result, 'NOOP');
+  assert.equal(alreadyRolledBack.calls.some((call) => call.sql === 'BEGIN'), false);
+
+  const referenced = fakeDb(STATUSES, { suspendedReferences: 1 });
+  await assert.rejects(() => rollbackSuspendedStatus(referenced), /referenced/);
+  assert.equal(referenced.calls.some((call) => call.sql === 'BEGIN'), false);
+  assert.equal(referenced.calls.some((call) => /^DELETE/.test(call.sql)), false);
+
+  const rollbackMismatch = fakeDb(STATUSES);
+  const rollbackRun = rollbackMismatch.run;
+  rollbackMismatch.run = async function (sql, params) {
+    const value = await rollbackRun.call(this, sql, params);
+    if (/^SELECT/.test(sql.trim()) && !/^SELECT COUNT/.test(sql.trim()) && this.rows.length === 14) return this.rows.slice(0, 13);
+    return value;
+  };
+  await assert.rejects(() => rollbackSuspendedStatus(rollbackMismatch), /readback did not match/);
+  assert.equal(rollbackMismatch.calls.some((call) => call.sql === 'ROLLBACK'), true);
 
   console.log('User onboarding status initializer: PASS');
 })().catch((error) => {
