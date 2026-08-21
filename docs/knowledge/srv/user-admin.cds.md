@@ -35,3 +35,9 @@ Each bounded Retry or Reconcile creates a fresh operation-attempt correlation ID
 Vietnamese: Service nay tach user administration khoi BugService. API quan tri bat buoc PM + UserAdmin; callback chi nhan SAP identity da duoc AppRouter/XSUAA xac thuc. Contract public khong expose token hash, nonce, signing key hoac lock cua worker.
 
 Moi lan Retry/Reconcile va moi expired-lease recovery dung correlation ID moi cho attempt moi, nhung van giu cung operation journal da version. Audit attempt cu duoc giu nguyen; khong xoa history va khong tao operation thu hai.
+
+## Gate 3 access lifecycle / Vòng đời access Gate 3
+
+The additive service contract exposes `requestSuspend(userID, reason, expectedVersion)` and `requestReactivate(userID, reason, expectedVersion)`, both returning the existing sanitized `OnboardingResult` shape. Gate 3 adds the `SUSPENDED` onboarding status without removing or renaming existing statuses. The client sends only the bounded reason and optimistic version; provider identifiers, credentials, leases, and raw provider data remain outside the public contract.
+
+Vietnamese: Contract additive them `requestSuspend(userID, reason, expectedVersion)` va `requestReactivate(userID, reason, expectedVersion)`, cung tra ve shape `OnboardingResult` da sanitize. Gate 3 them status onboarding `SUSPENDED` ma khong xoa hoac doi ten status cu. Client chi gui reason co gioi han va version optimistic; provider identifier, credential, lease va raw provider data khong nam trong public contract.

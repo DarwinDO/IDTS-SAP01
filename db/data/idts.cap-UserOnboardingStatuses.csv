@@ -9,6 +9,7 @@ ROLE_CHANGING,Role Changing,External role change is in progress,70,true,2
 REVOKE_QUEUED,Revoke Queued,Access revocation is queued and local access is suspended,80,true,2
 REVOKING,Revoking,External access revocation is in progress,90,true,2
 ACTIVE,Active,User access is active and reconciled,100,true,3
+SUSPENDED,Suspended,IDTS-local access is suspended pending an explicit reactivation.,105,true,1
 RETRYABLE_FAILURE,Retryable Failure,Provisioning failed temporarily and may be retried,110,true,1
 BLOCKED_MANUAL_REVIEW,Manual Review Required,Provisioning requires human review,120,true,1
 FAILED,Failed,Invitation or onboarding failed before provisioning,130,true,1

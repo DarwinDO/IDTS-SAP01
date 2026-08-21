@@ -11,6 +11,7 @@ const {
 } = require('../../broker/lib/service-bindings')
 const { createClientCredentialsTokenProvider } = require('../../broker/lib/oauth-client')
 const { createProvisioningCapClient } = require('../../broker/lib/cap-client')
+const { processOneAccessOperation } = require('../../broker/worker')
 const { createSapAuthorizationProviderFactory } = require('../../broker/lib/sap-authorization-provider')
 const { createSapAuthorizationApiClient } = require('../../broker/lib/sap-authorization-api-client')
 const {
@@ -175,6 +176,46 @@ async function main () {
   })
   assert.deepEqual(completed, { operationID: claimed.operationID, status: 'ACTIVE' })
   assert.equal(capRequests.length, 2)
+
+  const reactivationCalls = []
+  const reactivationCompletions = []
+  const reactivationResult = await processOneAccessOperation({
+    capClient: {
+      claimNextAccessOperation: async () => ({
+        operationID: '77777777-7777-4777-8777-777777777777',
+        operationType: 'REACTIVATE',
+        targetEmail: 'controlled@example.invalid',
+        identityOrigin: 'sap.default',
+        identityIssuer: 'https://issuer.example.invalid',
+        identitySubject: 'stable-user-uuid',
+        identityPlatformUserId: '77777777-7777-4777-8777-777777777778',
+        desiredBusinessRole: 'TESTER',
+        desiredUserAdmin: false,
+        leaseToken: '7'.repeat(64)
+      }),
+      completeAccessOperation: async payload => {
+        reactivationCompletions.push(payload)
+        return { status: 'ACTIVE' }
+      }
+    },
+    providerFactory: {
+      forIdentity: identity => {
+        assert.equal(identity.platformUserId, '77777777-7777-4777-8777-777777777778')
+        return {
+          listRoleCollections: async () => {
+            reactivationCalls.push('LIST')
+            return ['IDTS_TESTER', 'NON_IDTS_EXISTING']
+          },
+          assignRoleCollection: async name => { reactivationCalls.push(['ASSIGN', name]) },
+          unassignRoleCollection: async name => { reactivationCalls.push(['REVOKE', name]) }
+        }
+      }
+    }
+  })
+  assert.deepEqual(reactivationResult, { processed: true, status: 'ACTIVE' })
+  assert.deepEqual(reactivationCalls, ['LIST'])
+  assert.equal(reactivationCompletions[0].resultCode, 'NOOP_ALREADY_DESIRED')
+  assert.equal(reactivationCompletions[0].safeCode, 'ROLE_COLLECTIONS_VERIFIED')
 
   const unavailableCap = createProvisioningCapClient({
     baseUrl: 'https://cap.example.invalid',

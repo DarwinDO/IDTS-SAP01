@@ -85,6 +85,10 @@ assert.match(activeUserDetailsFragment, /<Dialog/)
 assert.match(activeUserDetailsFragment, /activeUsers>\/details/)
 assert.match(activeUserDetailsFragment, /press="\.onCloseActiveUserDetails"/)
 assert.doesNotMatch(activeUserDetailsFragment, /requestRoleChange|requestRevoke|updateDeveloperProfile|onConfirmAccessChange|onConfirmDeveloperProfile|onOpenRevoke|onRevoke/i)
+assert.match(activeUserDetailsFragment, /press="\.onOpenActiveUserRoleChange"/)
+assert.match(activeUserDetailsFragment, /press="\.onOpenActiveUserSuspend"/)
+assert.match(activeUserDetailsFragment, /press="\.onOpenActiveUserReactivate"/)
+assert.match(activeUserDetailsFragment, /press="\.onOpenActiveUserRevoke"/)
 
 const fragment = fs.readFileSync(path.join(webapp, 'fragment/InviteUser.fragment.xml'), 'utf8')
 assert.match(fragment, /<Input[^>]+type="Email"/)
@@ -110,8 +114,12 @@ assert.match(controller, /bindContext\("\/searchOnboarding\(\.\.\.\)"\)/)
 assert.match(controller, /"approveProvisioning"/)
 assert.match(controller, /"requestRoleChange"/)
 assert.match(controller, /"requestRevoke"/)
+assert.match(controller, /"requestSuspend"/)
+assert.match(controller, /"requestReactivate"/)
 assert.match(controller, /"retryAccessOperation"/)
 assert.match(controller, /"reconcileAccessOperation"/)
+assert.match(controller, /onConfirmAccessLifecycle/)
+assert.match(controller, /ConfirmAccessLifecycle/)
 assert.match(controller, /readDeveloperProfile/)
 assert.match(controller, /"updateDeveloperProfile"/)
 assert.match(controller, /sapModules:\s*\[\{ ID: "", name: sAnySapModule \}, \.\.\.aModules\]/)
@@ -147,6 +155,13 @@ assert.match(manageFragment, /type="\{= \$\{access>\/mode\} === 'REVOKE' \? 'Neg
 assert.match(manageFragment, /press="\.onConfirmAccessChange"/)
 assert.doesNotMatch(manageFragment, /stretchOnPhone=/)
 assert.doesNotMatch(manageFragment, /Password|OTP|passkey|token/i)
+
+const lifecycleFragment = fs.readFileSync(path.join(webapp, 'fragment/ConfirmAccessLifecycle.fragment.xml'), 'utf8')
+assert.match(lifecycleFragment, /<Dialog/)
+assert.match(lifecycleFragment, /lifecycle>\/reason/)
+assert.match(lifecycleFragment, /press="\.onConfirmAccessLifecycle"/)
+assert.match(lifecycleFragment, /enabled="\{= !!\$\{lifecycle>\/reason\}/)
+assert.doesNotMatch(lifecycleFragment, /Role Collection|IdP|subaccount|endpoint|externalUser|provider/i)
 
 const developerFragment = fs.readFileSync(path.join(webapp, 'fragment/ManageDeveloperProfile.fragment.xml'), 'utf8')
 assert.match(developerFragment, /developer>\/developerProfile\/responsibilities/)
@@ -316,6 +331,39 @@ async function verifyRuntimeBehavior () {
   assert.equal(restoredActiveLoads, 1)
   await restoredInstance.onTabSelect({ getParameter: name => name === 'key' ? 'activeUsers' : undefined, getSource: () => ({ getSelectedKey: () => 'activeUsers' }) })
   assert.equal(restoredActiveLoads, 1)
+
+  let lifecycleInvocation
+  let lifecycleData = {
+    mode: 'SUSPEND',
+    row: { activeUser_ID: 'active-1', provisioningVersion: 7 },
+    reason: 'Controlled lifecycle review.',
+    submitting: false
+  }
+  const lifecycleModel = {
+    getData: () => lifecycleData,
+    setProperty: (key, value) => { lifecycleData[key.slice(1)] = value },
+    setData: data => { lifecycleData = data }
+  }
+  const lifecycleInstance = Object.assign(Object.create(controllerDefinition), {
+    getModel: name => name === 'lifecycle' ? lifecycleModel : { setProperty: () => {} },
+    _confirm: async key => {
+      assert.equal(key, 'suspendConfirmation')
+      return true
+    },
+    _invokeAction: async (action, parameters, successKey, reloadActiveUsers) => {
+      lifecycleInvocation = { action, parameters, successKey, reloadActiveUsers }
+      return true
+    },
+    _emptyAccessLifecycle: controllerDefinition._emptyAccessLifecycle,
+    _accessLifecycleDialog: { close: () => {} }
+  })
+  await lifecycleInstance.onConfirmAccessLifecycle()
+  assert.deepEqual(JSON.parse(JSON.stringify(lifecycleInvocation)), {
+    action: 'requestSuspend',
+    parameters: { userID: 'active-1', reason: 'Controlled lifecycle review.', expectedVersion: 7 },
+    successKey: 'suspendQueued',
+    reloadActiveUsers: true
+  })
 }
 
 function loadController (source) {
@@ -340,7 +388,7 @@ function loadController (source) {
 
 for (const locale of ['i18n.properties', 'i18n_en.properties']) {
   const text = fs.readFileSync(path.join(webapp, 'i18n', locale), 'utf8')
-  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'manageResponsibilities', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'activeUserSearchPlaceholder', 'includeNonActive', 'includeRevoked', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'loadMoreActiveUsers', 'viewDetails', 'activeUserDetails', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'requestCount', 'auditEventCount', 'developerProfile', 'close', 'activeUsersNoDeveloper']) {
+  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'changeRoleConfirmation', 'revokeConfirmation', 'manageResponsibilities', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'activeUserSearchPlaceholder', 'includeNonActive', 'includeRevoked', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'loadMoreActiveUsers', 'viewDetails', 'activeUserDetails', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'developerProfile', 'close', 'activeUsersNoDeveloper', 'suspendAccess', 'reactivateAccess', 'suspendWarning', 'reactivateWarning', 'suspendQueued', 'reactivateQueued']) {
     assert.match(text, new RegExp(`^${key}=`, 'm'))
   }
 }

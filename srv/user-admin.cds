@@ -138,6 +138,18 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     expectedVersion : Integer
   ) returns OnboardingResult;
 
+  action requestSuspend(
+    userID          : UUID,
+    reason          : String(500),
+    expectedVersion : Integer
+  ) returns OnboardingResult;
+
+  action requestReactivate(
+    userID          : UUID,
+    reason          : String(500),
+    expectedVersion : Integer
+  ) returns OnboardingResult;
+
   action retryAccessOperation(
     operationID    : UUID,
     expectedVersion: Integer

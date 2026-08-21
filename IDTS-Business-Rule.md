@@ -111,6 +111,8 @@ Rule:
 * No active `Users` row, BTP Role Collection assignment, or provisioning success is created before identity verification completes.
 * The PM confirmation that sends an invitation is sufficient approval for TESTER and DEVELOPER. After successful identity verification, these standard roles enter the provisioning queue automatically. PM access and any UserAdmin overlay require a second version-matched human approval. `ACTIVE` is set only after the separate broker reads back the exact desired Role Collection state.
 * Role change and revoke fail closed: IDTS disables the local user and revokes active `AuthSessions` before external reconciliation. UserAdmin remains valid only with PM, multiple business roles are rejected, and the last active UserAdmin cannot be removed.
+* `requestSuspend` is an IDTS-local temporary lock: it protects the final active PM + UserAdmin, sets `Users.active=false`, revokes all active `AuthSessions` in the same transaction, moves the request to `SUSPENDED`, and appends audit without creating a provider-write operation or removing SAP access.
+* `requestReactivate` keeps local access disabled while it queues a read-only `REACTIVATE` operation. The broker returns success only when the immutable principal and exact current IDTS business role/UserAdmin Role Collection set match the desired state; CAP then activates the internal user and request. Missing, extra, conflicting, timed-out, or ambiguous provider state remains fail closed.
 * A retry is available only for a provider result classified as retryable. An ambiguous provider result moves to `BLOCKED_MANUAL_REVIEW` and may continue only after a PM+UserAdmin explicitly requests reconciliation; the broker must read current provider state before applying a bounded allowlisted delta.
 * CAP stores the operation journal and append-only safe audit events, but never the SAP administration credential or raw provider response. A separate least-privilege broker owns the external authorization API call and accepts only server-side allowlisted roles.
 * Repeated invitation use, concurrent duplicate open invitations, external-identity collisions, multiple business roles, and non-PM UserAdmin requests must fail closed and be auditable.
@@ -125,6 +127,8 @@ Vietnamese:
 * Link moi co chu ky, chi dung mot lan va co han; IDTS chi luu hash/nonce, khong luu secret hoac credential SAP.
 * Chi sau khi SAP identity duoc xac minh moi chuyen sang provisioning; email khong phai immutable authority duy nhat.
 * TESTER/DEVELOPER dung confirmation luc PM gui invitation lam approval; sau identity verification se tu queue provisioning. PM hoac UserAdmin van can approval thu hai. `ACTIVE` chi duoc set sau broker readback dung exact Role Collection; role change/revoke khoa local access va revoke session truoc de fail closed.
+* `requestSuspend` la khoa tam thoi local: bao ve PM + UserAdmin cuoi cung, set `Users.active=false`, revoke moi `AuthSessions` active trong cung transaction, chuyen request sang `SUSPENDED` va ghi audit; khong tao provider-write operation va khong xoa SAP access.
+* `requestReactivate` giu local access bi khoa trong khi queue operation `REACTIVATE` chi-doc. Chi sau khi broker xac nhan immutable principal va exact Role Collection business/UserAdmin moi active lai user/request; mismatch, timeout, conflict hoac ket qua mo ho van fail closed.
 
 ---
 

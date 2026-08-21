@@ -84,6 +84,7 @@
     "qa:user-onboarding-page:programmatic": "node scripts/qa/test-user-onboarding-page.mjs",
     "qa:user-admin-ui:programmatic": "node scripts/qa/test-user-admin-ui.js",
     "qa:user-admin-active-users:programmatic": "node scripts/qa/test-user-admin-active-users.js",
+    "qa:user-admin-access-lifecycle:programmatic": "node scripts/qa/test-user-admin-access-lifecycle.js",
     "qa:user-access:programmatic": "node scripts/qa/test-user-access-provisioning-contract.js && node scripts/qa/test-provisioning-broker-programmatic.js",
     "qa:user-access-broker:programmatic": "node scripts/qa/test-user-access-broker-runtime.js",
     "qa:immutable-identity:programmatic": "node scripts/qa/test-immutable-identity-mapping.js",

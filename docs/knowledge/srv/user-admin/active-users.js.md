@@ -92,3 +92,9 @@ Test focused tại `scripts/qa/test-user-admin-active-users.js` bao phủ dedupl
 - Depth: source entry point plus dependencies through the persisted read model
 - Source: `srv/user-admin/active-users.js`
 - Related: `srv/user-admin.cds`, `srv/user-admin.js`, `scripts/qa/test-user-admin-active-users.js`
+
+## Gate 3 lifecycle visibility / Hiển thị vòng đời Gate 3
+
+`SUSPENDED` belongs to both the relevant request statuses and the suspended-request status set. Therefore an actively suspended user remains visible in Active Users with `accessState=SUSPENDED` while a `REACTIVATE` operation is queued or processing; the pending operation summary does not incorrectly collapse the row to `INCOMPLETE`. The read model still returns only the safe identity booleans and never returns immutable-link hashes or provider identifiers.
+
+Vietnamese: `SUSPENDED` nam trong ca tap relevant request status va tap suspended-request status. Vi vay user dang suspend van hien trong Active Users voi `accessState=SUSPENDED` khi operation `REACTIVATE` dang queued hoac processing; pending operation khong lam row bi ha sai ve `INCOMPLETE`. Read model van chi tra boolean identity an toan va khong tra immutable-link hash hay provider identifier.

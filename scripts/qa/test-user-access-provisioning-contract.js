@@ -72,6 +72,60 @@ async function main () {
     }
   }), error => error?.code === 'USER_ADMIN_REQUIRES_PM')
 
+  const reactivationCalls = []
+  const reactivationProvider = {
+    listRoleCollections: async () => {
+      reactivationCalls.push('LIST')
+      return ['IDTS_PM', 'IDTS_USER_ADMIN', 'NON_IDTS_EXISTING']
+    },
+    assignRoleCollection: async name => { reactivationCalls.push(['ASSIGN', name]) },
+    unassignRoleCollection: async name => { reactivationCalls.push(['REVOKE', name]) }
+  }
+  const reactivation = await executeAccessChange({
+    action: 'REACTIVATE',
+    requestedRole: 'PM',
+    userAdminRequested: true,
+    provider: reactivationProvider
+  })
+  assert.deepEqual(reactivation, {
+    action: 'REACTIVATE',
+    changed: [],
+    finalRoleCollections: ['IDTS_PM', 'IDTS_USER_ADMIN']
+  })
+  assert.deepEqual(reactivationCalls, ['LIST'])
+  for (const current of [
+    [],
+    ['IDTS_TESTER'],
+    ['IDTS_PM', 'IDTS_USER_ADMIN', 'IDTS_TESTER']
+  ]) {
+    await assert.rejects(executeAccessChange({
+      action: 'REACTIVATE',
+      requestedRole: 'PM',
+      userAdminRequested: true,
+      provider: {
+        listRoleCollections: async () => current,
+        assignRoleCollection: async () => { throw new Error('read-only reactivation must not assign') },
+        unassignRoleCollection: async () => { throw new Error('read-only reactivation must not revoke') }
+      }
+    }), error => error?.code === 'PROVISIONING_READBACK_MISMATCH' || error?.code === 'MULTIPLE_BUSINESS_ROLES')
+  }
+  await assert.rejects(executeAccessChange({
+    action: 'REACTIVATE',
+    requestedRole: 'TESTER',
+    userAdminRequested: true,
+    provider: reactivationProvider
+  }), error => error?.code === 'USER_ADMIN_REQUIRES_PM')
+  await assert.rejects(executeAccessChange({
+    action: 'REACTIVATE',
+    requestedRole: 'PM',
+    userAdminRequested: true,
+    provider: {
+      listRoleCollections: async () => { throw Object.assign(new Error('private provider timeout'), { code: 'PROVIDER_TIMEOUT' }) },
+      assignRoleCollection: async () => { throw new Error('read-only reactivation must not assign') },
+      unassignRoleCollection: async () => { throw new Error('read-only reactivation must not revoke') }
+    }
+  }), error => error?.code === 'PROVIDER_TIMEOUT')
+
   calls.length = 0
   const idempotent = await executeAccessChange({
     action: 'ASSIGN',
@@ -208,6 +262,71 @@ async function main () {
   assert.equal(completedPayloads[0].safeCode, 'ROLE_COLLECTIONS_VERIFIED')
   assert.equal('targetEmail' in completedPayloads[0], false)
   assert.equal('identitySubject' in completedPayloads[0], false)
+
+  const reactivationWorkerCalls = []
+  const reactivationWorkerCompletions = []
+  const reactivationWorker = await processOneAccessOperation({
+    capClient: {
+      claimNextAccessOperation: async () => ({
+        operationID: '66666666-6666-4666-8666-666666666666',
+        operationType: 'REACTIVATE',
+        targetEmail: 'controlled@example.invalid',
+        identityOrigin: 'sap.default',
+        identityIssuer: 'https://issuer.example.invalid',
+        identitySubject: 'stable-subject',
+        identityPlatformUserId: '66666666-6666-4666-8666-666666666667',
+        desiredBusinessRole: 'TESTER',
+        desiredUserAdmin: false,
+        leaseToken: '6'.repeat(64)
+      }),
+      completeAccessOperation: async payload => {
+        reactivationWorkerCompletions.push(payload)
+        return { status: 'ACTIVE' }
+      }
+    },
+    providerFactory: {
+      forIdentity: () => ({
+        listRoleCollections: async () => {
+          reactivationWorkerCalls.push('LIST')
+          return ['IDTS_TESTER']
+        },
+        assignRoleCollection: async name => { reactivationWorkerCalls.push(['ASSIGN', name]) },
+        unassignRoleCollection: async name => { reactivationWorkerCalls.push(['REVOKE', name]) }
+      })
+    }
+  })
+  assert.deepEqual(reactivationWorker, { processed: true, status: 'ACTIVE' })
+  assert.deepEqual(reactivationWorkerCalls, ['LIST'])
+  assert.equal(reactivationWorkerCompletions[0].resultCode, 'NOOP_ALREADY_DESIRED')
+  assert.equal(reactivationWorkerCompletions[0].safeCode, 'ROLE_COLLECTIONS_VERIFIED')
+
+  const identityFailureCompletions = []
+  const identityFailure = await processOneAccessOperation({
+    capClient: {
+      claimNextAccessOperation: async () => ({
+        operationID: '88888888-8888-4888-8888-888888888888',
+        operationType: 'REACTIVATE',
+        targetEmail: 'controlled@example.invalid',
+        identityOrigin: 'sap.default',
+        identityIssuer: 'https://issuer.example.invalid',
+        identitySubject: 'stable-subject',
+        identityPlatformUserId: '88888888-8888-4888-8888-888888888889',
+        desiredBusinessRole: 'TESTER',
+        desiredUserAdmin: false,
+        leaseToken: '8'.repeat(64)
+      }),
+      completeAccessOperation: async payload => {
+        identityFailureCompletions.push(payload)
+        return { status: 'BLOCKED_MANUAL_REVIEW' }
+      }
+    },
+    providerFactory: {
+      forIdentity: () => { throw Object.assign(new Error('identity tuple did not reconcile'), { code: 'PROVIDER_IDENTITY_UNVERIFIED' }) }
+    }
+  })
+  assert.deepEqual(identityFailure, { processed: true, status: 'BLOCKED_MANUAL_REVIEW' })
+  assert.equal(identityFailureCompletions[0].resultCode, 'PERMANENT_FAILURE')
+  assert.equal(identityFailureCompletions[0].safeCode, 'PROVIDER_IDENTITY_UNVERIFIED')
 
   const sameSubjectDifferentIssuer = new Set()
   const identityTuples = []

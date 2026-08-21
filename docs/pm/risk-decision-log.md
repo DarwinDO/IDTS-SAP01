@@ -188,3 +188,11 @@ Record a new decision here when it changes scope, ownership, entity meaning, sta
 - Review authority: executor tasks prepare source, tests, evidence and Draft PRs but cannot merge or authorize later gates. The coordinating DonHV task performs exact-diff review, verification and diagnosis before requesting a decision.
 - Mutation safety: HDI, BTP deployment, XSUAA, user/role, catalog or provider mutations require separate exact approval with before-state, checksum, readback, rollback and stop conditions.
 - Evidence: `docs/superpowers/specs/2026-08-20-user-administration-roadmap-master-design.md` and `docs/pm/tasks/wp8-user-administration-roadmap.md`.
+
+### DEC-058 — Keep Gate 3 suspension local and make reactivation provider-proof-driven
+
+- Date: 2026-08-20
+- Decision: `requestSuspend` is an IDTS-local fail-closed lock. It protects the final active PM + `UserAdmin`, revokes active local sessions in the same transaction, records `SUSPENDED` and audit, and creates no provider-write operation. `requestReactivate` queues a read-only operation and leaves the local user inactive until immutable-principal and exact desired IDTS Role Collection readback succeeds.
+- Rationale: suspending local access must be immediately safe without risking an external Role Collection mutation, while reactivation must not grant local access from a queued request or stale/mismatched provider state.
+- Enforcement: use optimistic request versions, target/final-admin row locks, exact fixed role/capability snapshots, one `listRoleCollections` read with no assign/unassign for reactivation, sanitized semantic results, and no automatic session restoration. UI buttons are state-bound and confirmation-gated but never replace CAP authorization.
+- Scope boundary: this source gate does not deploy, migrate, seed, change XSUAA, mutate SAP users/roles, run a live provider operation, merge, or claim browser/manual acceptance. Evidence: `docs/pm/evidence/user-administration/gate-3-access-lifecycle-source.md`.
