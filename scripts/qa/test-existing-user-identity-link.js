@@ -88,7 +88,7 @@ async function main () {
     assert.ok(declaration, `missing public declaration: ${name}`)
     assert.doesNotMatch(
       declaration,
-      /linkSourceEmailNormalized|identityOrigin|identityIssuer|identitySubject|identityKeyHash/,
+      /linkTargetUser|linkSourceEmailNormalized|identityOrigin|identityIssuer|identitySubject|identityPlatformUserId|identityKeyHash/,
       `${name} exposes identity-link internals`
     )
   }

@@ -110,6 +110,11 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     developerProfile   : DeveloperProfileInput
   ) returns OnboardingResult;
 
+  action requestExistingUserIdentityLink(
+    userID : UUID,
+    email  : String(255)
+  ) returns OnboardingResult;
+
   action verifySapIdentity(token : String(2048)) returns OnboardingResult;
 
   action searchOnboarding(query : String(255)) returns many OnboardingRequestSummary;
