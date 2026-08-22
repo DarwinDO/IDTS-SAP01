@@ -417,7 +417,7 @@ async function verifyRuntimeBehavior () {
   existingLinkInstance.onExistingIdentityLinkFieldChange({ getParameter: name => name === 'value' ? 'New.Identity@Example.INVALID' : undefined })
   assert.equal(existingLinkData.emailValid, true)
   await existingLinkInstance.onConfirmExistingIdentityLink()
-  assert.deepEqual(existingLinkInvocation, {
+  assert.deepEqual(JSON.parse(JSON.stringify(existingLinkInvocation)), {
     action: 'requestExistingUserIdentityLink',
     parameters: { userID: 'legacy-1', email: 'new.identity@example.invalid' },
     successKey: 'identityLinkQueued',

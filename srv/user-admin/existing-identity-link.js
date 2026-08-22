@@ -61,7 +61,7 @@ function assertEligibleLegacyTarget (target) {
   if (identity.some(value => value != null)) {
     throw serviceError(409, 'IDENTITY_LINK_TARGET_IDENTITY_CONFLICT', 'The selected user is not eligible for identity linking.')
   }
-  if (!normalizeEmail(target.email)?.endsWith('.example.local')) {
+  if (!normalizeEmail(target.email)?.endsWith('@example.local')) {
     throw serviceError(409, 'IDENTITY_LINK_TARGET_NOT_LEGACY', 'The selected user is not eligible for identity linking.')
   }
 }

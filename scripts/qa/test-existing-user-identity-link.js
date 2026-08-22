@@ -20,6 +20,7 @@ const IDS = Object.freeze({
   nonLegacyTarget: '82000000-0000-4000-8000-000000000009',
   staleTarget: '82000000-0000-4000-8000-000000000012',
   emailCollisionUser: '82000000-0000-4000-8000-000000000013',
+  verificationStaleTarget: '82000000-0000-4000-8000-000000000040',
   verificationInactiveTarget: '82000000-0000-4000-8000-000000000041',
   verificationPartialTarget: '82000000-0000-4000-8000-000000000042',
   verificationRoleTarget: '82000000-0000-4000-8000-000000000043',
@@ -73,19 +74,21 @@ function extractNamedBlock (source, kind, name) {
   return ''
 }
 
-function fixtureXsuaaUser (cds, email) {
+function fixtureXsuaaUser (cds, email, options = {}) {
+  const subject = options.subject || 'fixture-subject'
+  const platformUserId = options.platformUserId || 'fixture-platform-user'
   return new cds.User({
     id: 'fixture-sap-login',
-    roles: ['authenticated-user'],
+    roles: options.roles || ['authenticated-user'],
     attr: { email },
     authInfo: {
       token: {
         origin: 'fixture-origin',
         issuer: 'https://issuer.example.invalid',
         payload: {
-          user_id: 'fixture-platform-user',
-          user_uuid: 'fixture-subject',
-          sub: 'fixture-subject'
+          user_id: platformUserId,
+          user_uuid: subject,
+          sub: subject
         }
       }
     }
@@ -98,6 +101,8 @@ async function main () {
   const userAdmin = readSource('srv/user-admin.js')
   const provisioning = readSource('srv/provisioning-broker.js')
   const accessProvisioning = readSource('broker/lib/access-provisioning.js')
+  const existingLink = readSource('srv/user-admin/existing-identity-link.js')
+  const activeUsers = readSource('srv/user-admin/active-users.js')
 
   assert.match(schema, /linkTargetUser\s*:\s*Association to Users/, 'missing existing-user link target association')
   assert.match(schema, /linkSourceEmailNormalized\s*:\s*String\(255\)/, 'missing existing-user source email snapshot')
@@ -108,6 +113,8 @@ async function main () {
   assert.match(userAdmin, /if \(operation\.operationType === 'LINK_EXISTING'\) requestPatch\.correlationId = nextCorrelationId/, 'retry/reconcile LINK_EXISTING recovery must persist requeue correlation')
   assert.match(provisioning, /const lockedUsers = await tx\.run\([\s\S]*SELECT\.from\('idts\.cap\.Users'\)[\s\S]*\.forUpdate\(\)/, 'existing link completion must lock Users before collision checks')
   assert.match(accessProvisioning, /'LINK_EXISTING'/, 'missing read-only LINK_EXISTING broker contract')
+  assert.match(existingLink, /endsWith\('@example\.local'\)/, 'existing-link action must accept legacy @example.local addresses')
+  assert.match(activeUsers, /endsWith\('@example\.local'\)/, 'Active Users must expose linking for legacy @example.local addresses')
 
   const publicDeclarations = [
     ['OnboardingResult', extractNamedBlock(service, 'type', 'OnboardingResult')],
@@ -175,32 +182,7 @@ async function runEphemeralBehavioralContract () {
 
 async function seedFixture (cds, db) {
   const { INSERT } = cds.ql
-  await db.run(INSERT.into('idts.cap.UserRoles').entries([
-    { code: 'PM', name: 'Project Manager', active: true },
-    { code: 'DEVELOPER', name: 'Developer', active: true },
-    { code: 'TESTER', name: 'Tester', active: true }
-  ]))
-  await db.run(INSERT.into('idts.cap.UserOnboardingStatuses').entries([
-    'INVITED', 'PROVISION_QUEUED', 'PROVISIONING', 'ACTIVE'
-  ].map(code => ({ code, name: code, active: true }))))
-  await db.run(INSERT.into('idts.cap.NotificationDeliveryStatuses').entries([
-    { code: 'PENDING', name: 'Pending', active: true }
-  ]))
-  await db.run(INSERT.into('idts.cap.AvailabilityStatuses').entries([
-    { code: 'AVAILABLE', name: 'Available', active: true, criticality: 1 }
-  ]))
-  await db.run(INSERT.into('idts.cap.ResponsibilityLevels').entries([
-    { code: 'PRIMARY', name: 'Primary', active: true }
-  ]))
-  await db.run(INSERT.into('idts.cap.StatusValues').entries([
-    { code: 'ASSIGNED', name: 'Assigned', active: true }
-  ]))
-  await db.run(INSERT.into('idts.cap.PriorityValues').entries([
-    { code: 'MEDIUM', name: 'Medium', active: true }
-  ]))
-  await db.run(INSERT.into('idts.cap.SeverityValues').entries([
-    { code: 'MEDIUM', name: 'Medium', active: true }
-  ]))
+  const { identityKeyHash } = require('../../srv/auth/identity-map')
   await db.run(INSERT.into('idts.cap.ApplicationComponents').entries({
     ID: IDS.component,
     code: 'FIXTURE_COMPONENT',
@@ -225,6 +207,14 @@ async function seedFixture (cds, db) {
       displayName: 'Fixture Administrator',
       email: 'fixture.pm@example.invalid',
       role_code: 'PM',
+      externalIdentityOrigin: 'fixture-origin',
+      externalIdentityIssuer: 'https://issuer.example.invalid',
+      externalIdentitySubject: 'fixture-admin-subject',
+      externalIdentityKeyHash: identityKeyHash({
+        origin: 'fixture-origin',
+        issuer: 'https://issuer.example.invalid',
+        subject: 'fixture-admin-subject'
+      }),
       active: true
     },
     {
@@ -273,7 +263,7 @@ async function seedFixture (cds, db) {
     {
       ID: IDS.linkedTarget,
       displayName: 'Fixture Linked Developer',
-      email: 'linked.developer@example.invalid',
+      email: 'already.linked.developer@example.invalid',
       role_code: 'DEVELOPER',
       externalIdentityOrigin: 'fixture-origin',
       externalIdentityIssuer: 'fixture-issuer',
@@ -300,6 +290,13 @@ async function seedFixture (cds, db) {
       displayName: 'Fixture Email Collision',
       email: 'reserved.identity@example.invalid',
       role_code: 'TESTER',
+      active: true
+    },
+    {
+      ID: IDS.verificationStaleTarget,
+      displayName: 'Fixture Verification Stale Target',
+      email: 'verification.stale@example.local',
+      role_code: 'DEVELOPER',
       active: true
     },
     {
@@ -415,7 +412,6 @@ async function assertExistingLinkRequest (cds, db) {
       event: 'requestExistingUserIdentityLink',
       data: { userID: IDS.targetDeveloper, email: TARGET_EMAIL },
       user: administrator,
-      timestamp: FIXTURE_NOW
     })
     assert.equal(created.status, 'INVITED', 'existing-user link request must start as INVITED')
     assert.equal(created.requestedRole, 'DEVELOPER', 'link request must derive the target role')
@@ -440,7 +436,6 @@ async function assertExistingLinkRequest (cds, db) {
           event: 'requestExistingUserIdentityLink',
           data: { userID, email },
           user,
-          timestamp: FIXTURE_NOW
         }),
         error => error?.code === code &&
           !String(error?.message || '').includes(email) &&
@@ -489,7 +484,6 @@ async function assertExistingLinkRequest (cds, db) {
       event: 'requestExistingUserIdentityLink',
       data: { userID: IDS.testerTarget, email: 'linked.tester@example.invalid' },
       user: administrator,
-      timestamp: FIXTURE_NOW
     })
     assert.equal(testerCreated.requestedRole, 'TESTER', 'link request must derive the legacy Tester role')
     assert.equal(testerCreated.userAdminRequested, false, 'existing-user link must never request UserAdmin')
@@ -498,7 +492,6 @@ async function assertExistingLinkRequest (cds, db) {
       event: 'requestExistingUserIdentityLink',
       data: { userID: IDS.staleTarget, email: 'stale.replacement@example.invalid' },
       user: administrator,
-      timestamp: FIXTURE_NOW
     })
     const staleRequest = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: '82000000-0000-4000-8000-000000000014' }))
     assert.equal(staleRequest.status_code, 'FAILED', 'expired link invitation must be closed before reinviting')
@@ -510,13 +503,11 @@ async function assertExistingLinkRequest (cds, db) {
         event: 'requestExistingUserIdentityLink',
         data: { userID: IDS.concurrentTarget, email: 'concurrent.one@example.invalid' },
         user: administrator,
-        timestamp: FIXTURE_NOW
       }),
       service.send({
         event: 'requestExistingUserIdentityLink',
         data: { userID: IDS.concurrentTarget, email: 'concurrent.two@example.invalid' },
         user: administrator,
-        timestamp: FIXTURE_NOW
       })
     ])
     assert.equal(concurrent.filter(result => result.status === 'fulfilled').length, 1, 'concurrent link requests must create one winner')
@@ -547,7 +538,6 @@ async function assertExistingLinkVerification (cds, db, { service, request }) {
       event: 'requestExistingUserIdentityLink',
       data: { userID, email },
       user: administrator,
-      timestamp: FIXTURE_NOW
     })
     const staged = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: created.ID }))
     return {
@@ -569,7 +559,6 @@ async function assertExistingLinkVerification (cds, db, { service, request }) {
         event: 'verifySapIdentity',
         data: { token },
         user: fixtureXsuaaUser(cds, email),
-        timestamp: FIXTURE_NOW
       }),
       error => {
         rejection = error
@@ -603,8 +592,8 @@ async function assertExistingLinkVerification (cds, db, { service, request }) {
     assert.equal(audits.length, 0, `${code} must not append a queue audit`)
   }
 
-  const staleSource = await prepareVerification(IDS.staleTarget, 'verification.stale@example.invalid')
-  await db.run(UPDATE('idts.cap.Users').set({ email: 'changed.source@example.local' }).where({ ID: IDS.staleTarget }))
+  const staleSource = await prepareVerification(IDS.verificationStaleTarget, 'verification.stale@example.invalid')
+  await db.run(UPDATE('idts.cap.Users').set({ email: 'changed.source@example.local' }).where({ ID: IDS.verificationStaleTarget }))
   await assertRejectedWithoutWrites(staleSource, 'IDENTITY_LINK_TARGET_CHANGED')
 
   const changedRole = await prepareVerification(IDS.verificationRoleTarget, 'verification.role@example.invalid')
@@ -667,7 +656,6 @@ async function assertExistingLinkVerification (cds, db, { service, request }) {
     event: 'verifySapIdentity',
     data: { token },
     user: fixtureXsuaaUser(cds, TARGET_EMAIL),
-    timestamp: FIXTURE_NOW
   })
   assert.equal(verified.status, 'PROVISION_QUEUED', 'verified link request must queue provisioning')
   assert.equal(verified.provisioningVersion, 2, 'verified link request must use version 2')
@@ -692,7 +680,6 @@ async function assertExistingLinkVerification (cds, db, { service, request }) {
       event: 'verifySapIdentity',
       data: { token },
       user: fixtureXsuaaUser(cds, TARGET_EMAIL),
-      timestamp: FIXTURE_NOW
     }),
     error => error?.code === 'INVITATION_ALREADY_USED',
     'a repeated verification token must fail closed'
@@ -764,7 +751,6 @@ async function assertAtomicCompletion (cds, db, { service, request, operation, c
       event: 'claimNextAccessOperation',
       data: {},
       user: brokerUser,
-      timestamp: FIXTURE_NOW
     })
     assert.equal(claim.operationID, operation.ID, 'broker must claim the link operation')
     assert.equal(claim.operationType, 'LINK_EXISTING', 'broker must preserve LINK_EXISTING')
@@ -780,7 +766,6 @@ async function assertAtomicCompletion (cds, db, { service, request, operation, c
           providerCorrelationHash: null
         },
         user: brokerUser,
-        timestamp: FIXTURE_NOW
       }),
       brokerService.send({
         event: 'completeAccessOperation',
@@ -792,7 +777,6 @@ async function assertAtomicCompletion (cds, db, { service, request, operation, c
           providerCorrelationHash: null
         },
         user: brokerUser,
-        timestamp: FIXTURE_NOW
       })
     ])
     assert.equal(completionResults.filter(result => result.status === 'fulfilled').length, 1, 'one concurrent link completion must win')
@@ -855,7 +839,6 @@ async function assertAtomicCompletion (cds, db, { service, request, operation, c
       event: 'claimNextAccessOperation',
       data: {},
       user: brokerUser,
-      timestamp: FIXTURE_NOW
     })
     assert.equal(mismatchClaim.operationID, CORRELATION_MISMATCH_OPERATION_ID, 'mismatch fixture must claim its link operation')
     const mismatchResult = await brokerService.send({
@@ -868,7 +851,6 @@ async function assertAtomicCompletion (cds, db, { service, request, operation, c
         providerCorrelationHash: null
       },
       user: brokerUser,
-      timestamp: FIXTURE_NOW
     })
     assert.equal(mismatchResult.status, 'BLOCKED_MANUAL_REVIEW', 'correlation mismatch must fail closed')
     const mismatchAfter = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: IDS.verificationEmailTarget }))
@@ -882,9 +864,26 @@ async function assertAtomicCompletion (cds, db, { service, request, operation, c
     assert.equal(mismatchOperation.state, 'BLOCKED_MANUAL_REVIEW', 'correlation mismatch must block the operation')
     assert.equal(mismatchAudits.some(row => row.toState === 'ACTIVE' || row.result === 'APPLIED'), false, 'correlation mismatch must not append a completion audit')
 
-    const recoveryAdmin = new cds.User({
-      id: 'fixture.recovery.pm@example.invalid',
+    const recoveryAdmin = fixtureXsuaaUser(cds, 'fixture.pm@example.invalid', {
+      subject: 'fixture-admin-subject',
+      platformUserId: 'fixture-admin-platform-user',
       roles: ['authenticated-user', 'PM', 'UserAdmin']
+    })
+    const { identityKeyFromRequestUser, selectActiveUserForRequest } = require('../../srv/auth/identity-map')
+    const recoveryAdminIdentity = identityKeyFromRequestUser(recoveryAdmin)
+    const recoveryAdminRow = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: IDS.administrator }))
+    assert.equal(recoveryAdmin.is('PM'), true, 'recovery administrator must carry the PM business role')
+    assert.equal(recoveryAdmin.is('UserAdmin'), true, 'recovery administrator must carry the UserAdmin capability')
+    assert.equal(recoveryAdminRow.externalIdentityKeyHash, recoveryAdminIdentity.keyHash, 'recovery administrator must resolve by immutable XSUAA identity')
+    service.before(['retryAccessOperation', 'reconcileAccessOperation'], async req => {
+      const requestIdentity = identityKeyFromRequestUser(req.user)
+      const activeUsers = await cds.tx(req).run(SELECT.from('idts.cap.Users').columns(
+        'ID', 'displayName', 'email', 'role_code', 'active', 'externalIdentityKeyHash'
+      ).where({ active: true }))
+      assert.equal(req.user.is('PM'), true, 'recovery request must retain the PM business role')
+      assert.equal(req.user.is('UserAdmin'), true, 'recovery request must retain the UserAdmin capability')
+      assert.equal(requestIdentity?.keyHash, recoveryAdminRow.externalIdentityKeyHash, 'recovery request must retain the immutable XSUAA identity')
+      assert.equal(selectActiveUserForRequest(activeUsers, req.user, { requireExternalIdentity: true })?.ID, IDS.administrator, 'recovery request must resolve the active PM by immutable identity')
     })
     const recoveryCases = [
       {
@@ -973,7 +972,6 @@ async function assertAtomicCompletion (cds, db, { service, request, operation, c
         event: 'claimNextAccessOperation',
         data: {},
         user: brokerUser,
-        timestamp: FIXTURE_NOW
       })
       assert.equal(recoveryClaim.operationID, recovery.operationID, `${recovery.name} recovery must requeue its link operation`)
       const recovered = await brokerService.send({
@@ -986,7 +984,6 @@ async function assertAtomicCompletion (cds, db, { service, request, operation, c
           providerCorrelationHash: null
         },
         user: brokerUser,
-        timestamp: FIXTURE_NOW
       })
       assert.equal(recovered.status, 'ACTIVE', `${recovery.name} recovery must permit exact LINK_EXISTING completion`)
       const linkedRequest = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: recovery.requestID }))
@@ -997,7 +994,7 @@ async function assertAtomicCompletion (cds, db, { service, request, operation, c
 
     const retryRecovery = recoveryCases[0]
     await seedRecoveryLink(retryRecovery)
-    const retryClaim = await brokerService.send({ event: 'claimNextAccessOperation', data: {}, user: brokerUser, timestamp: FIXTURE_NOW })
+    const retryClaim = await brokerService.send({ event: 'claimNextAccessOperation', data: {}, user: brokerUser })
     assert.equal(retryClaim.operationID, retryRecovery.operationID)
     const retryFailure = await brokerService.send({
       event: 'completeAccessOperation',
@@ -1009,14 +1006,12 @@ async function assertAtomicCompletion (cds, db, { service, request, operation, c
         providerCorrelationHash: null
       },
       user: brokerUser,
-      timestamp: FIXTURE_NOW
     })
     assert.equal(retryFailure.status, 'RETRYABLE_FAILURE')
     const retried = await service.send({
       event: 'retryAccessOperation',
       data: { operationID: retryRecovery.operationID, expectedVersion: 2 },
       user: recoveryAdmin,
-      timestamp: FIXTURE_NOW
     })
     assert.equal(retried.status, 'PROVISION_QUEUED')
     await assertRecoveryCorrelation(retryRecovery)
@@ -1024,7 +1019,7 @@ async function assertAtomicCompletion (cds, db, { service, request, operation, c
 
     const reconcileRecovery = recoveryCases[1]
     await seedRecoveryLink(reconcileRecovery)
-    const reconcileClaim = await brokerService.send({ event: 'claimNextAccessOperation', data: {}, user: brokerUser, timestamp: FIXTURE_NOW })
+    const reconcileClaim = await brokerService.send({ event: 'claimNextAccessOperation', data: {}, user: brokerUser })
     assert.equal(reconcileClaim.operationID, reconcileRecovery.operationID)
     const reconcileFailure = await brokerService.send({
       event: 'completeAccessOperation',
@@ -1036,14 +1031,12 @@ async function assertAtomicCompletion (cds, db, { service, request, operation, c
         providerCorrelationHash: null
       },
       user: brokerUser,
-      timestamp: FIXTURE_NOW
     })
     assert.equal(reconcileFailure.status, 'BLOCKED_MANUAL_REVIEW')
     const reconciled = await service.send({
       event: 'reconcileAccessOperation',
       data: { operationID: reconcileRecovery.operationID, expectedVersion: 2 },
       user: recoveryAdmin,
-      timestamp: FIXTURE_NOW
     })
     assert.equal(reconciled.status, 'PROVISION_QUEUED')
     await assertRecoveryCorrelation(reconcileRecovery)
@@ -1051,7 +1044,7 @@ async function assertAtomicCompletion (cds, db, { service, request, operation, c
 
     const expiredRecovery = recoveryCases[2]
     await seedRecoveryLink(expiredRecovery)
-    const expiredClaim = await brokerService.send({ event: 'claimNextAccessOperation', data: {}, user: brokerUser, timestamp: FIXTURE_NOW })
+    const expiredClaim = await brokerService.send({ event: 'claimNextAccessOperation', data: {}, user: brokerUser })
     assert.equal(expiredClaim, null, 'expired link lease must be reconciled before a new claim')
     const expiredState = await assertRecoveryCorrelation(expiredRecovery)
     assert.equal(expiredState.recoveryRequest.status_code, 'BLOCKED_MANUAL_REVIEW')
@@ -1060,7 +1053,6 @@ async function assertAtomicCompletion (cds, db, { service, request, operation, c
       event: 'reconcileAccessOperation',
       data: { operationID: expiredRecovery.operationID, expectedVersion: 2 },
       user: recoveryAdmin,
-      timestamp: FIXTURE_NOW
     })
     assert.equal(expiredReconciled.status, 'PROVISION_QUEUED')
     await assertRecoveryCorrelation(expiredRecovery)

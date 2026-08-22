@@ -385,7 +385,7 @@ async function main () {
     identityIssuer: 'https://issuer.example.invalid',
     identitySubject: 'stable-link-user-uuid',
     identityPlatformUserId: '81000000-0000-4000-8000-000000000028',
-    identityKeyHash: 'j'.repeat(64),
+    identityKeyHash: 'a'.repeat(64),
     identityEmailNormalized: 'linked.user@example.invalid',
     provisioningVersion: 2,
     latestOperation_ID: LINK_OPERATION_ID,
@@ -437,7 +437,7 @@ async function main () {
   assert.equal(linkedUser.externalIdentityOrigin, 'sap.default')
   assert.equal(linkedUser.externalIdentityIssuer, 'https://issuer.example.invalid')
   assert.equal(linkedUser.externalIdentitySubject, 'stable-link-user-uuid')
-  assert.equal(linkedUser.externalIdentityKeyHash, 'j'.repeat(64))
+  assert.equal(linkedUser.externalIdentityKeyHash, 'a'.repeat(64))
   assert.equal(linkedRequest.status_code, 'ACTIVE')
   assert.equal(linkedRequest.activeUser_ID, LINK_USER_ID)
   assert.equal(linkedRequest.provisioningVersion, 3)
@@ -505,7 +505,7 @@ async function main () {
       identityIssuer: 'https://issuer.example.invalid',
       identitySubject: 'cross-target-a',
       identityPlatformUserId: '81000000-0000-4000-8000-000000000029',
-      identityKeyHash: 'n'.repeat(64),
+      identityKeyHash: 'b'.repeat(64),
       identityEmailNormalized: 'cross.target@example.invalid',
       provisioningVersion: 2,
       latestOperation_ID: LINK_RACE_OPERATION_A_ID,
@@ -530,7 +530,7 @@ async function main () {
       identityIssuer: 'https://issuer.example.invalid',
       identitySubject: 'cross-target-b',
       identityPlatformUserId: '81000000-0000-4000-8000-000000000030',
-      identityKeyHash: 'q'.repeat(64),
+      identityKeyHash: 'd'.repeat(64),
       identityEmailNormalized: 'cross.target@example.invalid',
       provisioningVersion: 2,
       latestOperation_ID: LINK_RACE_OPERATION_B_ID,
