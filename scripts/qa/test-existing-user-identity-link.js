@@ -750,18 +750,35 @@ async function assertAtomicCompletion (cds, db, { request, operation }) {
     assert.equal(claim.operationID, operation.ID, 'broker must claim the link operation')
     assert.equal(claim.operationType, 'LINK_EXISTING', 'broker must preserve LINK_EXISTING')
 
-    const completed = await brokerService.send({
-      event: 'completeAccessOperation',
-      data: {
-        operationID: operation.ID,
-        leaseToken: claim.leaseToken,
-        resultCode: 'NOOP_ALREADY_DESIRED',
-        safeCode: 'ROLE_COLLECTIONS_VERIFIED',
-        providerCorrelationHash: null
-      },
-      user: brokerUser,
-      timestamp: FIXTURE_NOW
-    })
+    const completionResults = await Promise.allSettled([
+      brokerService.send({
+        event: 'completeAccessOperation',
+        data: {
+          operationID: operation.ID,
+          leaseToken: claim.leaseToken,
+          resultCode: 'NOOP_ALREADY_DESIRED',
+          safeCode: 'ROLE_COLLECTIONS_VERIFIED',
+          providerCorrelationHash: null
+        },
+        user: brokerUser,
+        timestamp: FIXTURE_NOW
+      }),
+      brokerService.send({
+        event: 'completeAccessOperation',
+        data: {
+          operationID: operation.ID,
+          leaseToken: claim.leaseToken,
+          resultCode: 'NOOP_ALREADY_DESIRED',
+          safeCode: 'ROLE_COLLECTIONS_VERIFIED',
+          providerCorrelationHash: null
+        },
+        user: brokerUser,
+        timestamp: FIXTURE_NOW
+      })
+    ])
+    assert.equal(completionResults.filter(result => result.status === 'fulfilled').length, 1, 'one concurrent link completion must win')
+    assert.equal(completionResults.filter(result => result.status === 'rejected').length, 1, 'one concurrent link completion must reject')
+    const completed = completionResults.find(result => result.status === 'fulfilled').value
     assert.equal(completed.status, 'ACTIVE', 'read-only provider proof must activate the link request')
 
     const after = await preservationSnapshot(db)
@@ -784,22 +801,6 @@ async function assertAtomicCompletion (cds, db, { request, operation }) {
     const audit = await db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ operation_ID: operation.ID }))
     assert.equal(audit.some(row => row.action === 'LINK_EXISTING'), true, 'link completion must append LINK_EXISTING audit')
 
-    await assert.rejects(
-      () => brokerService.send({
-        event: 'completeAccessOperation',
-        data: {
-          operationID: operation.ID,
-          leaseToken: claim.leaseToken,
-          resultCode: 'NOOP_ALREADY_DESIRED',
-          safeCode: 'ROLE_COLLECTIONS_VERIFIED',
-          providerCorrelationHash: null
-        },
-        user: brokerUser,
-        timestamp: FIXTURE_NOW
-      }),
-      error => Number(error?.status || error?.statusCode) === 409,
-      'repeated completion must fail closed without a second mutation'
-    )
   } finally {
     cds.env.requires.auth = previousAuth
   }

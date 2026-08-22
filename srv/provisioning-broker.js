@@ -190,6 +190,10 @@ async function completeSuccess (tx, options) {
       role_code: operation.desiredRole_code
     }))
     if (activated !== 1) throw brokerError(409, 'ACCESS_OPERATION_CONFLICT', 'The local access record does not match the reconciled role.')
+  } else if (operation.operationType === 'LINK_EXISTING') {
+    const linked = await completeExistingLink(tx, options)
+    if (linked?.status) return linked
+    userID = linked
   }
 
   const finalState = operation.operationType === 'REVOKE' ? 'REVOKED' : 'ACTIVE'
@@ -201,7 +205,7 @@ async function completeSuccess (tx, options) {
     lastErrorCode: null,
     lastErrorSummary: null
   }
-  if (operation.operationType === 'PROVISION') requestPatch.provisionedAt = nowIso
+  if (['PROVISION', 'LINK_EXISTING'].includes(operation.operationType)) requestPatch.provisionedAt = nowIso
   if (operation.operationType === 'REVOKE') requestPatch.revokedAt = nowIso
   const requestUpdated = await tx.run(UPDATE('idts.cap.UserOnboardingRequests').set(requestPatch).where({
     ID: request.ID,
@@ -220,6 +224,73 @@ async function completeSuccess (tx, options) {
   if (operationUpdated !== 1) throw brokerError(409, 'ACCESS_OPERATION_CONFLICT', 'The access operation changed.')
   await appendAudit(tx, operation, request, finalState, userID, options.resultCode)
   return { operationID: operation.ID, status: finalState }
+}
+
+async function completeExistingLink (tx, options) {
+  const { operation, request } = options
+  const targetID = request.linkTargetUser_ID
+  if (!targetID || request.latestOperation_ID !== operation.ID ||
+      typeof request.correlationId !== 'string' || request.correlationId.length === 0 ||
+      typeof operation.correlationId !== 'string' || operation.correlationId.length === 0) {
+    return completeProviderConflict(tx, options, 'IDENTITY_RECONCILIATION_REQUIRED')
+  }
+
+  const target = await tx.run(
+    SELECT.one.from('idts.cap.Users').where({ ID: targetID })
+  )
+  if (!target) return completeProviderConflict(tx, options, 'IDENTITY_RECONCILIATION_REQUIRED')
+
+  const otherUsers = await tx.run(
+    SELECT.from('idts.cap.Users').columns('ID', 'email', 'externalIdentityKeyHash')
+  )
+  const duplicate = otherUsers.find(user => user.ID !== targetID && (
+    normalizedEmail(user.email) === request.targetEmailNormalized ||
+    user.externalIdentityKeyHash === request.identityKeyHash
+  ))
+  if (duplicate) return completeProviderConflict(tx, options, 'IDENTITY_RECONCILIATION_REQUIRED')
+
+  const identityFields = [
+    target.externalIdentityOrigin,
+    target.externalIdentityIssuer,
+    target.externalIdentitySubject,
+    target.externalIdentityKeyHash
+  ]
+  const unlinked = target.active === true &&
+    target.role_code === operation.desiredRole_code &&
+    normalizedEmail(target.email) === request.linkSourceEmailNormalized &&
+    identityFields.every(value => value == null)
+  const alreadyLinked = request.activeUser_ID === targetID &&
+    target.active === true &&
+    target.role_code === operation.desiredRole_code &&
+    normalizedEmail(target.email) === request.targetEmailNormalized &&
+    target.externalIdentityOrigin === request.identityOrigin &&
+    target.externalIdentityIssuer === request.identityIssuer &&
+    target.externalIdentitySubject === request.identitySubject &&
+    target.externalIdentityKeyHash === request.identityKeyHash
+
+  if (alreadyLinked) return targetID
+  if (!unlinked) return completeProviderConflict(tx, options, 'IDENTITY_RECONCILIATION_REQUIRED')
+
+  const changed = await tx.run(
+    UPDATE('idts.cap.Users').set({
+      email: request.identityEmailNormalized,
+      externalIdentityOrigin: request.identityOrigin,
+      externalIdentityIssuer: request.identityIssuer,
+      externalIdentitySubject: request.identitySubject,
+      externalIdentityKeyHash: request.identityKeyHash
+    }).where({
+      ID: targetID,
+      email: target.email,
+      active: true,
+      role_code: operation.desiredRole_code,
+      externalIdentityOrigin: null,
+      externalIdentityIssuer: null,
+      externalIdentitySubject: null,
+      externalIdentityKeyHash: null
+    })
+  )
+  if (changed !== 1) return completeProviderConflict(tx, options, 'IDENTITY_RECONCILIATION_REQUIRED')
+  return targetID
 }
 
 async function completeFailure (tx, options) {
@@ -437,6 +508,7 @@ function processingStateFor (operationType) {
   if (operationType === 'CHANGE_ROLE') return 'ROLE_CHANGING'
   if (operationType === 'REVOKE') return 'REVOKING'
   if (operationType === 'PROVISION') return 'PROVISIONING'
+  if (operationType === 'LINK_EXISTING') return 'PROVISIONING'
   if (operationType === 'REACTIVATE') return 'SUSPENDED'
   throw brokerError(400, 'INVALID_PROVISIONING_ACTION', 'Provisioning action is invalid.')
 }
@@ -445,6 +517,7 @@ function queuedStateFor (operationType) {
   if (operationType === 'CHANGE_ROLE') return 'ROLE_CHANGE_QUEUED'
   if (operationType === 'REVOKE') return 'REVOKE_QUEUED'
   if (operationType === 'PROVISION') return 'PROVISION_QUEUED'
+  if (operationType === 'LINK_EXISTING') return 'PROVISION_QUEUED'
   if (operationType === 'REACTIVATE') return 'SUSPENDED'
   throw brokerError(400, 'INVALID_PROVISIONING_ACTION', 'Provisioning action is invalid.')
 }

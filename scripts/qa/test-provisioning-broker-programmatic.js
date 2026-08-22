@@ -17,6 +17,11 @@ const EXPIRED_OPERATION_ID = '81000000-0000-4000-8000-000000000011'
 const REACTIVATION_OPERATION_ID = '81000000-0000-4000-8000-000000000015'
 const REACTIVATION_SESSION_ID = '81000000-0000-4000-8000-000000000016'
 const REVOKE_OPERATION_ID = '81000000-0000-4000-8000-000000000017'
+const LINK_USER_ID = '81000000-0000-4000-8000-000000000018'
+const LINK_REQUEST_ID = '81000000-0000-4000-8000-000000000019'
+const LINK_OPERATION_ID = '81000000-0000-4000-8000-000000000020'
+const LINK_PROFILE_ID = '81000000-0000-4000-8000-000000000021'
+const LINK_RESPONSIBILITY_ID = '81000000-0000-4000-8000-000000000022'
 
 async function main () {
   cds.env.requires.auth = { kind: 'xsuaa' }
@@ -332,6 +337,131 @@ async function main () {
     SELECT.from('idts.cap.UserIdentityAuditEvents').where({ operation_ID: EXPIRED_OPERATION_ID, action: 'PROVISION' })
   )
   assert.equal(expiredAudits.length, 2)
+
+  await db.run(INSERT.into('idts.cap.Users').entries({
+    ID: LINK_USER_ID,
+    displayName: 'Legacy Link Developer',
+    email: 'legacy.link@example.local',
+    role_code: 'DEVELOPER',
+    passwordHash: 'legacy-password-hash',
+    active: true
+  }))
+  await db.run(INSERT.into('idts.cap.DeveloperProfiles').entries({
+    ID: LINK_PROFILE_ID,
+    user_ID: LINK_USER_ID,
+    availabilityStatus_code: 'AVAILABLE',
+    workloadLimit: 3,
+    active: true
+  }))
+  await db.run(INSERT.into('idts.cap.DeveloperResponsibilities').entries({
+    ID: LINK_RESPONSIBILITY_ID,
+    developerProfile_ID: LINK_PROFILE_ID,
+    componentCategory_ID: '60000000-0000-0000-0000-000000000001',
+    responsibilityLevel_code: 'PRIMARY',
+    active: true
+  }))
+  await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries({
+    ID: LINK_REQUEST_ID,
+    targetEmailNormalized: 'linked.user@example.invalid',
+    linkTargetUser_ID: LINK_USER_ID,
+    linkSourceEmailNormalized: 'legacy.link@example.local',
+    openRequestKey: 'h'.repeat(64),
+    requestedRole_code: 'DEVELOPER',
+    userAdminRequested: false,
+    status_code: 'PROVISION_QUEUED',
+    requestedBy_ID: ADMIN_ID,
+    expiresAt: '2026-08-14T00:00:00.000Z',
+    tokenNonce: 'controlled-link-nonce',
+    tokenHash: 'i'.repeat(64),
+    consumedAt: '2026-08-13T00:00:00.000Z',
+    verifiedAt: '2026-08-13T00:00:00.000Z',
+    identityOrigin: 'sap.default',
+    identityIssuer: 'https://issuer.example.invalid',
+    identitySubject: 'stable-link-user-uuid',
+    identityPlatformUserId: '81000000-0000-4000-8000-000000000028',
+    identityKeyHash: 'j'.repeat(64),
+    identityEmailNormalized: 'linked.user@example.invalid',
+    provisioningVersion: 2,
+    latestOperation_ID: LINK_OPERATION_ID,
+    correlationId: '81000000-0000-4000-8000-000000000029'
+  }))
+  await db.run(INSERT.into('idts.cap.UserAccessOperations').entries({
+    ID: LINK_OPERATION_ID,
+    onboardingRequest_ID: LINK_REQUEST_ID,
+    operationType: 'LINK_EXISTING',
+    state: 'PENDING',
+    requestedBy_ID: ADMIN_ID,
+    idempotencyKey: 'k'.repeat(64),
+    expectedVersion: 2,
+    desiredRole_code: 'DEVELOPER',
+    desiredUserAdmin: false,
+    correlationId: '81000000-0000-4000-8000-000000000030',
+    attemptCount: 0
+  }))
+
+  const beforeLinkUser = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: LINK_USER_ID }))
+  const beforeLinkProfile = await db.run(SELECT.one.from('idts.cap.DeveloperProfiles').where({ ID: LINK_PROFILE_ID }))
+  const beforeLinkResponsibilities = await db.run(SELECT.from('idts.cap.DeveloperResponsibilities').where({ developerProfile_ID: LINK_PROFILE_ID }))
+  const linkClaim = await service.send({ event: 'claimNextAccessOperation', data: {}, user: broker })
+  assert.equal(linkClaim.operationID, LINK_OPERATION_ID)
+  assert.equal(linkClaim.operationType, 'LINK_EXISTING')
+  assert.equal(linkClaim.targetEmail, 'linked.user@example.invalid')
+  assert.equal(linkClaim.desiredBusinessRole, 'DEVELOPER')
+  const linkCompletion = await service.send({
+    event: 'completeAccessOperation',
+    data: {
+      operationID: LINK_OPERATION_ID,
+      leaseToken: linkClaim.leaseToken,
+      resultCode: 'NOOP_ALREADY_DESIRED',
+      safeCode: 'ROLE_COLLECTIONS_VERIFIED',
+      providerCorrelationHash: null
+    },
+    user: broker
+  })
+  assert.equal(linkCompletion.status, 'ACTIVE')
+  const linkedUser = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: LINK_USER_ID }))
+  const linkedRequest = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: LINK_REQUEST_ID }))
+  const linkedOperation = await db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ ID: LINK_OPERATION_ID }))
+  assert.equal(linkedUser.ID, LINK_USER_ID)
+  assert.equal(linkedUser.displayName, beforeLinkUser.displayName)
+  assert.equal(linkedUser.role_code, beforeLinkUser.role_code)
+  assert.equal(linkedUser.active, beforeLinkUser.active)
+  assert.equal(linkedUser.passwordHash, beforeLinkUser.passwordHash)
+  assert.equal(linkedUser.email, 'linked.user@example.invalid')
+  assert.equal(linkedUser.externalIdentityOrigin, 'sap.default')
+  assert.equal(linkedUser.externalIdentityIssuer, 'https://issuer.example.invalid')
+  assert.equal(linkedUser.externalIdentitySubject, 'stable-link-user-uuid')
+  assert.equal(linkedUser.externalIdentityKeyHash, 'j'.repeat(64))
+  assert.equal(linkedRequest.status_code, 'ACTIVE')
+  assert.equal(linkedRequest.activeUser_ID, LINK_USER_ID)
+  assert.equal(linkedRequest.provisioningVersion, 3)
+  assert.ok(linkedRequest.provisionedAt)
+  assert.equal(linkedRequest.lastErrorCode, null)
+  assert.equal(linkedRequest.lastErrorSummary, null)
+  assert.equal(linkedOperation.state, 'SUCCEEDED')
+  assert.deepEqual(
+    (await db.run(SELECT.one.from('idts.cap.DeveloperProfiles').where({ ID: LINK_PROFILE_ID }))),
+    beforeLinkProfile
+  )
+  assert.deepEqual(
+    (await db.run(SELECT.from('idts.cap.DeveloperResponsibilities').where({ developerProfile_ID: LINK_PROFILE_ID }))),
+    beforeLinkResponsibilities
+  )
+  assert.ok(await db.run(SELECT.one.from('idts.cap.UserIdentityAuditEvents').where({
+    operation_ID: LINK_OPERATION_ID,
+    action: 'LINK_EXISTING'
+  })))
+  await assert.rejects(service.send({
+    event: 'completeAccessOperation',
+    data: {
+      operationID: LINK_OPERATION_ID,
+      leaseToken: linkClaim.leaseToken,
+      resultCode: 'NOOP_ALREADY_DESIRED',
+      safeCode: 'ROLE_COLLECTIONS_VERIFIED',
+      providerCorrelationHash: null
+    },
+    user: broker
+  }), error => error?.code === 'ACCESS_OPERATION_LEASE_INVALID')
 
   await assert.rejects(service.send({
     event: 'claimNextAccessOperation',
