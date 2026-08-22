@@ -1,6 +1,11 @@
 using idts.cap as db from '../db/schema';
 
 service UserAdministrationService @(requires: 'authenticated-user') {
+  type BootstrapPmNormalizationResult {
+    status        : String(20);
+    correlationId : UUID;
+  }
+
   type DeveloperResponsibilityInput {
     componentCategoryID      : UUID;
     sapModuleID              : UUID;
@@ -122,6 +127,9 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     requestID      : UUID,
     expectedVersion: Integer
   ) returns OnboardingResult;
+
+  @requires: 'PM'
+  action normalizeCurrentBootstrapPm() returns BootstrapPmNormalizationResult;
 
   action verifySapIdentity(token : String(2048)) returns OnboardingResult;
 
