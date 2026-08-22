@@ -242,3 +242,8 @@ Nút action trên Fiori chỉ là điểm bắt đầu trên UI. File này mới
 **English.** The direct resubmit and retest-owner notification paths now use `writeNotificationAndSchedule(req, entry)`, matching status-driven notifications. The wrapper keeps persistence atomic and registers at most one post-commit kick per CAP request. It does not send from inside either action transaction.
 
 **Tiếng Việt.** Hai đường notification trực tiếp của resubmit và đổi retest owner nay dùng `writeNotificationAndSchedule(req, entry)`, giống notification theo status. Wrapper giữ persistence atomic và đăng ký tối đa một post-commit kick cho mỗi CAP request. Nó không gửi email bên trong transaction của action.
+## Gate 3B assignment action boundary / Ranh gioi action assignment Gate 3B
+
+`transitionBug` passes `enforceIdentityAccess` only when the action supplies a different assignee. Lifecycle transitions that keep an existing assignee do not turn the new-link readiness rule into an ownership migration. The backend remains authoritative even if the UI value help is bypassed.
+
+`transitionBug` chi truyen `enforceIdentityAccess` khi action cung cap assignee khac. Lifecycle transition giu assignee hien tai khong bien rule readiness thanh migration ownership. Backend van la authority ke ca khi bypass value help tren UI.

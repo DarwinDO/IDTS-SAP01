@@ -1,0 +1,49 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+	<Dialog
+		id="linkExistingIdentityDialog"
+		title="{i18n>linkExistingIdentity}"
+		contentWidth="34rem"
+		stretch="{device>/system/phone}"
+		busy="{existingLink>/submitting}">
+		<content>
+			<VBox class="sapUiSmallMargin">
+				<ObjectIdentifier
+					title="{existingLink>/row/displayName}"
+					text="{existingLink>/row/email}"/>
+				<Label
+					text="{i18n>existingIdentityLinkRole}"
+					class="sapUiSmallMarginTop"/>
+				<ObjectStatus
+					text="{existingLink>/row/businessRole}"
+					state="None"/>
+				<ObjectStatus
+					text="{i18n>existingIdentityLinkNotice}"
+					state="Information"
+					class="sapUiSmallMarginTop"/>
+				<Label
+					text="{i18n>existingIdentityLinkEmail}"
+					labelFor="existingIdentityLinkEmailInput"
+					class="sapUiSmallMarginTop"/>
+				<Input
+					id="existingIdentityLinkEmailInput"
+					type="Email"
+					value="{existingLink>/email}"
+					placeholder="{i18n>emailPlaceholder}"
+					valueLiveUpdate="true"
+					liveChange=".onExistingIdentityLinkFieldChange"
+					valueState="{= ${existingLink>/emailTouched} &amp;&amp; !${existingLink>/emailValid} ? 'Error' : 'None' }"
+					valueStateText="{i18n>invalidEmail}"/>
+			</VBox>
+		</content>
+		<beginButton>
+			<Button
+				text="{i18n>sendIdentityLink}"
+				type="Emphasized"
+				enabled="{= ${existingLink>/emailValid} === true &amp;&amp; ${existingLink>/submitting} !== true }"
+				press=".onConfirmExistingIdentityLink"/>
+		</beginButton>
+		<endButton>
+			<Button text="{i18n>cancel}" press=".onCancelExistingIdentityLink"/>
+		</endButton>
+	</Dialog>
+</core:FragmentDefinition>

@@ -92,6 +92,11 @@
 				</VBox>
 				<Toolbar class="sapUiSmallMarginTop">
 					<Button
+						text="{i18n>linkExistingIdentity}"
+						type="Emphasized"
+						visible="{= ${activeUsers>/details/linkEligible} === true }"
+						press=".onOpenExistingIdentityLink"/>
+					<Button
 						text="{i18n>changeRole}"
 						visible="{= !!${activeUsers>/details/_request} &amp;&amp; ${activeUsers>/details/accessState} === 'ACTIVE' }"
 						press=".onOpenActiveUserRoleChange"/>

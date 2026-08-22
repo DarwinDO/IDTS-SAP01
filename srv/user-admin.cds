@@ -41,6 +41,7 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     userAdminCapability      : Boolean;
     accessState              : String(20);
     identityLinked           : Boolean;
+    linkEligible             : Boolean;
     developerReady           : Boolean;
     activeResponsibilityCount: Integer;
     pendingOperationType     : String(30);
@@ -57,6 +58,7 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     userAdminCapability           : Boolean;
     accessState                   : String(20);
     identityLinked                : Boolean;
+    linkEligible                  : Boolean;
     developerReady                : Boolean;
     activeResponsibilityCount     : Integer;
     pendingOperationType          : String(30);
@@ -108,6 +110,11 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     requestedRole      : String(40),
     userAdminRequested : Boolean,
     developerProfile   : DeveloperProfileInput
+  ) returns OnboardingResult;
+
+  action requestExistingUserIdentityLink(
+    userID : UUID,
+    email  : String(255)
   ) returns OnboardingResult;
 
   action verifySapIdentity(token : String(2048)) returns OnboardingResult;

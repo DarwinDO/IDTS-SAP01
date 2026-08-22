@@ -204,3 +204,20 @@ Record a new decision here when it changes scope, ownership, entity meaning, sta
 - Assignment safety: a Developer without exactly one matching `ACTIVE` immutable identity link is excluded from new direct assignment and Smart Assign. Existing Bug assignees remain unchanged for a separate PM decision.
 - Scope boundary: the initial action excludes PM/UserAdmin, provider role writes, bulk matching/import, mutable-email auth fallback, and direct SQL migration. Implementation, HDI, deployment, invitations, identity/email updates, and per-member acceptance remain separately gated.
 - Evidence: `docs/superpowers/specs/2026-08-21-gate-3b-existing-user-identity-link-design.md` and `docs/superpowers/plans/2026-08-21-gate-3b-existing-user-identity-link-implementation.md`.
+## DEC-053 — Gate 3B source-only completion boundary (2026-08-22)
+
+The executor may complete the source implementation, focused tests, knowledge/evidence, commits, push, and one Draft PR for Gate 3B. Missing locked dependencies, CAP attachment resolution, UI toolchain availability, runtime acceptance, provider readback, data mutation, deployment, merge, and Ready transition remain explicit separate gates. `LINK_EXISTING` must remain provider read-only and the exact local user/profile/responsibility/Bug preservation invariant remains mandatory.
+
+Executor duoc hoan tat source implementation, focused test, knowledge/evidence, commit, push va mot Draft PR cho Gate 3B. Thieu dependency locked, CAP attachments, UI toolchain, runtime acceptance, provider readback, data mutation, deploy, merge va Ready van la gate rieng. `LINK_EXISTING` phai chi read-only provider va invariant giu nguyen user/profile/responsibility/Bug exact van bat buoc.
+
+### DEC-060 — Gate 3B remediation closes review findings without schema expansion (2026-08-22)
+
+Use the existing CAP transaction as the final normalized-email reservation boundary: lock the explicit Users collision read with `forUpdate()` before `LINK_EXISTING` completion, require exact request/operation correlation equality, and persist the generated existing-link operation correlation on the private request. Reject duplicate Role Collection entries as malformed readback. Keep the approved two-field schema delta unchanged. The UI may show only safe business role and preservation copy; no provider, user, email, identity, role, data, HANA/HDI, or platform mutation is authorized. One bounded independent re-review must confirm 0 Critical/Major/Important before a Draft PR.
+
+Dung transaction CAP hien co lam boundary reservation email normalized cuoi cung: lock Users collision read bang `forUpdate()` truoc completion `LINK_EXISTING`, bat buoc correlation request/operation exact va ghi correlation operation vao request private cho existing link. Reject Role Collection trung lap la readback malformed. Giu nguyen schema delta hai field da duyet. UI chi duoc hien business role an toan va copy preservation; khong duoc mutation provider, user, email, identity, role, data, HANA/HDI hoac platform. Mot bounded independent re-review phai xac nhan 0 Critical/Major/Important truoc Draft PR.
+
+### DEC-061 — Bind recovery correlations for existing-user links (2026-08-22)
+
+When retry, reconcile, or expired-lease reconciliation rotates a `UserAccessOperations.correlationId`, the same transaction and optimistic request version/state guard must write the identical value to `UserOnboardingRequests.correlationId` for `LINK_EXISTING`. This preserves exact completion binding while leaving ordinary PROVISION and other lifecycle recovery behavior unchanged. The executor will stop without another reviewer or Draft PR; the coordinator owns final exact-delta review.
+
+Khi retry, reconcile hoac reconcile lease het han rotate `UserAccessOperations.correlationId`, cung transaction va optimistic request version/state guard phai ghi dung value vao `UserOnboardingRequests.correlationId` cho `LINK_EXISTING`. Cach nay giu exact completion binding ma khong doi recovery behavior cua PROVISION va lifecycle khac. Executor dung lai, khong spawn reviewer hoac Draft PR; coordinator so huu final exact-delta review.

@@ -14,6 +14,7 @@ sap.ui.define([
 			this.setModel(new JSONModel(this._emptyInvite()), "invite");
 			this.setModel(new JSONModel(this._emptyAccessChange()), "access");
 			this.setModel(new JSONModel(this._emptyAccessLifecycle()), "lifecycle");
+			this.setModel(new JSONModel(this._emptyExistingIdentityLink()), "existingLink");
 			this.setModel(new JSONModel(this._emptyDeveloperAdministration()), "developer");
 			this.setModel(new JSONModel({ loaded: false }), "catalogs");
 			this.setModel(new JSONModel({ items: [] }), "requests");
@@ -125,6 +126,68 @@ sap.ui.define([
 		onCloseActiveUserDetails: function () {
 			if (this._activeUserDetailsDialog) this._activeUserDetailsDialog.close();
 			this.getModel("activeUsers").setProperty("/details", null);
+		},
+
+		onOpenExistingIdentityLink: async function () {
+			const oDetails = this.getModel("activeUsers").getProperty("/details");
+			if (!oDetails?.linkEligible || !oDetails.userID) return;
+			this.getModel("existingLink").setData({
+				...this._emptyExistingIdentityLink(),
+				row: {
+					userID: oDetails.userID,
+					displayName: oDetails.displayName,
+					email: oDetails.email,
+					businessRole: oDetails.businessRole,
+					linkEligible: oDetails.linkEligible
+				}
+			});
+			if (!this._existingIdentityLinkDialog) {
+				this._existingIdentityLinkDialog = await Fragment.load({
+					id: this.getView().getId(),
+					name: "idts.useradministrationui.fragment.LinkExistingIdentity",
+					controller: this
+				});
+				this.getView().addDependent(this._existingIdentityLinkDialog);
+			}
+			this._existingIdentityLinkDialog.open();
+		},
+
+		onExistingIdentityLinkFieldChange: function (oEvent) {
+			const oModel = this.getModel("existingLink");
+			const sValue = oEvent?.getParameter?.("value");
+			if (typeof sValue === "string") {
+				oModel.setProperty("/email", sValue);
+				oModel.setProperty("/emailTouched", true);
+				oModel.setProperty("/emailValid", this._isValidEmail(sValue));
+			}
+		},
+
+		onConfirmExistingIdentityLink: async function () {
+			const oModel = this.getModel("existingLink");
+			const oLink = oModel.getData();
+			if (oLink.submitting || !oLink.row?.linkEligible || !oLink.row?.userID) return;
+			const sEmail = (oLink.email || "").trim();
+			if (!this._isValidEmail(sEmail)) {
+				oModel.setProperty("/emailTouched", true);
+				oModel.setProperty("/emailValid", false);
+				MessageBox.warning(await this._text("invalidEmail"));
+				return;
+			}
+			oModel.setProperty("/submitting", true);
+			const bSuccess = await this._invokeAction("requestExistingUserIdentityLink", {
+				userID: oLink.row.userID,
+				email: sEmail.toLowerCase()
+			}, "identityLinkQueued", true);
+			oModel.setProperty("/submitting", false);
+			if (bSuccess) {
+				this._existingIdentityLinkDialog.close();
+				oModel.setData(this._emptyExistingIdentityLink());
+			}
+		},
+
+		onCancelExistingIdentityLink: function () {
+			if (this._existingIdentityLinkDialog) this._existingIdentityLinkDialog.close();
+			this.getModel("existingLink").setData(this._emptyExistingIdentityLink());
 		},
 
 		onOpenActiveUserRoleChange: async function () {
@@ -471,6 +534,16 @@ sap.ui.define([
 				warning: "",
 				row: null,
 				reason: "",
+				submitting: false
+			};
+		},
+
+		_emptyExistingIdentityLink: function () {
+			return {
+				row: null,
+				email: "",
+				emailTouched: false,
+				emailValid: false,
 				submitting: false
 			};
 		},

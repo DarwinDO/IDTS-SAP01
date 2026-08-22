@@ -24,7 +24,7 @@ async function processOneAccessOperation ({ capClient, providerFactory }) {
       platformUserId: operation.identityPlatformUserId
     })
     result = await executeAccessChange({
-      action: operation.operationType === 'PROVISION' ? 'ASSIGN' : operation.operationType,
+      action: brokerActionFor(operation.operationType),
       requestedRole: operation.desiredBusinessRole,
       userAdminRequested: operation.desiredUserAdmin,
       provider
@@ -52,6 +52,12 @@ async function processOneAccessOperation ({ capClient, providerFactory }) {
     providerCorrelationHash: safeProviderCorrelationHash(provider)
   })
   return { processed: true, status: completed.status }
+}
+
+function brokerActionFor (operationType) {
+  if (operationType === 'PROVISION') return 'ASSIGN'
+  if (operationType === 'LINK_EXISTING') return 'LINK_EXISTING'
+  return operationType
 }
 
 function assertClient (client) {

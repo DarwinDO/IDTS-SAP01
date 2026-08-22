@@ -423,6 +423,10 @@ async function main () {
   })
   assert.equal(retried.status, 'PROVISION_QUEUED')
   assert.equal(retried.provisioningVersion, 3)
+  const originalRequestCorrelation = created.correlationId
+  const retriedRequest = await db.run(
+    SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: created.ID })
+  )
   const retriedOperation = await db.run(
     SELECT.one.from('idts.cap.UserAccessOperations').where({ ID: queuedOperation.ID })
   )
@@ -430,6 +434,8 @@ async function main () {
   assert.equal(retriedOperation.expectedVersion, 3)
   assert.notEqual(retriedOperation.idempotencyKey, queuedOperation.idempotencyKey)
   assert.notEqual(retriedOperation.correlationId, queuedOperation.correlationId)
+  assert.equal(retriedRequest.correlationId, originalRequestCorrelation, 'ordinary PROVISION retry must preserve request correlation behavior')
+  assert.notEqual(retriedOperation.correlationId, retriedRequest.correlationId, 'ordinary PROVISION retry must not adopt LINK_EXISTING correlation binding')
   assert.equal(retried.correlationId, retriedOperation.correlationId)
   assert.equal(retriedOperation.safeResultCode, null)
   assert.equal(retriedOperation.completedAt, null)

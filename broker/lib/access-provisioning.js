@@ -23,19 +23,15 @@ function requestedRoleCollections ({ requestedRole, userAdminRequested }) {
 
 async function executeAccessChange ({ action, requestedRole, userAdminRequested, provider }) {
   const normalizedAction = String(action || '').trim().toUpperCase()
-  if (!['ASSIGN', 'CHANGE_ROLE', 'REVOKE', 'REACTIVATE'].includes(normalizedAction)) {
+  if (!['ASSIGN', 'CHANGE_ROLE', 'REVOKE', 'REACTIVATE', 'LINK_EXISTING'].includes(normalizedAction)) {
     throw brokerError('INVALID_PROVISIONING_ACTION', 'Provisioning action is invalid.')
   }
-  assertProvider(provider, normalizedAction === 'REACTIVATE')
+  assertProvider(provider, ['REACTIVATE', 'LINK_EXISTING'].includes(normalizedAction))
 
   const desired = requestedRoleCollections({ requestedRole, userAdminRequested })
   const before = unique(await provider.listRoleCollections())
-  if (normalizedAction === 'REACTIVATE') {
-    assertValidUserAdminOverlay(before)
-    const currentIDTS = before.filter(collection => IDTS_ACCESS_COLLECTIONS.has(collection))
-    if (currentIDTS.length !== desired.length || desired.some(collection => !currentIDTS.includes(collection))) {
-      throw brokerError('PROVISIONING_READBACK_MISMATCH', 'The current access state does not match the requested IDTS access.')
-    }
+  if (['REACTIVATE', 'LINK_EXISTING'].includes(normalizedAction)) {
+    assertExactDesiredAccess(before, desired)
     return { action: normalizedAction, changed: [], finalRoleCollections: desired }
   }
   if (normalizedAction !== 'REVOKE') {
@@ -148,6 +144,14 @@ function assertValidUserAdminOverlay (collections) {
   }
 }
 
+function assertExactDesiredAccess (current, desired) {
+  assertValidUserAdminOverlay(current)
+  const currentIDTS = current.filter(collection => IDTS_ACCESS_COLLECTIONS.has(collection))
+  if (currentIDTS.length !== desired.length || desired.some(collection => !currentIDTS.includes(collection))) {
+    throw brokerError('PROVISIONING_READBACK_MISMATCH', 'The current access state does not match the requested IDTS access.')
+  }
+}
+
 function assertProvider (provider, readOnly = false) {
   const methods = readOnly
     ? ['listRoleCollections']
@@ -160,10 +164,10 @@ function assertProvider (provider, readOnly = false) {
 }
 
 function unique (values) {
-  if (!Array.isArray(values) || values.some(value => typeof value !== 'string')) {
+  if (!Array.isArray(values) || values.some(value => typeof value !== 'string') || new Set(values).size !== values.length) {
     throw brokerError('PROVISIONING_READBACK_MISMATCH', 'The access provider result could not be verified.')
   }
-  return [...new Set(values)]
+  return values
 }
 
 function brokerError (code, message) {

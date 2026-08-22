@@ -38,6 +38,7 @@ const REVOKED_USER_ID = '82000000-0000-4000-8000-000000000004'
 const SUSPENDED_USER_ID = '82000000-0000-4000-8000-000000000005'
 const INCOMPLETE_USER_ID = '82000000-0000-4000-8000-000000000006'
 const UNLINKED_ACTIVE_USER_ID = '82000000-0000-4000-8000-000000000007'
+const LEGACY_UNLINKED_USER_ID = '82000000-0000-4000-8000-000000000008'
 const ACTIVE_REQUEST_ID = '82100000-0000-4000-8000-000000000001'
 const EXPIRED_REQUEST_A_ID = '82100000-0000-4000-8000-000000000002'
 const EXPIRED_REQUEST_B_ID = '82100000-0000-4000-8000-000000000003'
@@ -46,6 +47,7 @@ const AMBIGUOUS_REQUEST_B_ID = '82100000-0000-4000-8000-000000000005'
 const REVOKED_REQUEST_ID = '82100000-0000-4000-8000-000000000006'
 const SUSPENDED_REQUEST_ID = '82100000-0000-4000-8000-000000000007'
 const UNLINKED_ACTIVE_REQUEST_ID = '82100000-0000-4000-8000-000000000008'
+const PENDING_LINK_REQUEST_ID = '82100000-0000-4000-8000-000000000009'
 const ACTIVE_OPERATION_ID = '82200000-0000-4000-8000-000000000001'
 const STALE_OPERATION_ID = '82200000-0000-4000-8000-000000000002'
 const REVOKED_OPERATION_ID = '82200000-0000-4000-8000-000000000003'
@@ -72,6 +74,7 @@ function requestEntry (ID, values) {
     correlationId: ID,
     provisioningVersion: 1,
     activeUser_ID: values.activeUser_ID || null,
+    linkTargetUser_ID: values.linkTargetUser_ID || null,
     identityKeyHash: values.identityKeyHash || null,
     latestOperation_ID: values.latestOperation_ID || null,
     createdAt: values.createdAt,
@@ -176,6 +179,13 @@ async function main () {
       displayName: 'Unlinked Active User',
       email: 'unlinked-active@example.invalid',
       role_code: 'PM',
+      active: true
+    },
+    {
+      ID: LEGACY_UNLINKED_USER_ID,
+      displayName: 'Legacy Unlinked Developer',
+      email: 'legacy.unlinked@example.local',
+      role_code: 'DEVELOPER',
       active: true
     }
   ]))
@@ -332,10 +342,11 @@ async function main () {
     AMBIGUOUS_USER_ID,
     PM_ID,
     INCOMPLETE_USER_ID,
+    LEGACY_UNLINKED_USER_ID,
     SUSPENDED_USER_ID,
     REVOKED_USER_ID
   ].includes(row.userID))
-  assert.deepEqual(fixtureDefaultRows.map(row => row.userID), [ACTIVE_USER_ID, AMBIGUOUS_USER_ID, PM_ID, INCOMPLETE_USER_ID])
+  assert.deepEqual(fixtureDefaultRows.map(row => row.userID), [ACTIVE_USER_ID, AMBIGUOUS_USER_ID, PM_ID, INCOMPLETE_USER_ID, LEGACY_UNLINKED_USER_ID])
   const defaultSuspendedRows = await service.send({
     event: 'searchActiveUsers',
     data: { query: 'Suspended User', includeNonActive: false, skip: 0, top: 100 },
@@ -348,6 +359,7 @@ async function main () {
   assert.equal(activeAlice.businessRole, 'DEVELOPER')
   assert.equal(activeAlice.accessState, 'ACTIVE')
   assert.equal(activeAlice.identityLinked, true)
+  assert.equal(activeAlice.linkEligible, false)
   assert.equal(activeAlice.developerReady, true)
   assert.equal(activeAlice.activeResponsibilityCount, 1)
   assert.equal(activeAlice.lastSafeResultCode, 'ROLE_COLLECTIONS_VERIFIED')
@@ -376,7 +388,9 @@ async function main () {
     user: admin
   }))[0]
   assert.equal(revoked.accessState, 'REVOKED')
+  assert.equal(revoked.linkEligible, false)
   assert.equal(suspended.accessState, 'SUSPENDED')
+  assert.equal(suspended.linkEligible, false)
   assert.equal(suspended.pendingOperationType, 'CHANGE_ROLE')
   assert.equal(suspended.pendingOperationState, 'PENDING')
   assert.equal(ambiguous.accessState, 'INCOMPLETE')
@@ -391,6 +405,32 @@ async function main () {
   assert.equal(unlinkedActive.identityLinked, false)
   assert.equal(unlinkedActive.accessState, 'INCOMPLETE')
   assert.equal(unlinkedActive.userAdminCapability, false)
+  assert.equal(unlinkedActive.linkEligible, false)
+
+  const legacyUnlinked = (await service.send({
+    event: 'searchActiveUsers',
+    data: { query: 'Legacy Unlinked Developer', includeNonActive: true, skip: 0, top: 100 },
+    user: admin
+  }))[0]
+  assert.equal(legacyUnlinked.identityLinked, false)
+  assert.equal(legacyUnlinked.accessState, 'INCOMPLETE')
+  assert.equal(legacyUnlinked.developerReady, false)
+  assert.equal(legacyUnlinked.linkEligible, true)
+
+  await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries(requestEntry(PENDING_LINK_REQUEST_ID, {
+    targetEmailNormalized: 'pending.link@example.invalid',
+    requestedRole_code: 'DEVELOPER',
+    linkTargetUser_ID: LEGACY_UNLINKED_USER_ID,
+    status_code: 'INVITED',
+    createdAt: '2026-08-20T12:00:00.000Z',
+    modifiedAt: '2026-08-20T12:00:00.000Z'
+  })))
+  const pendingLegacyUnlinked = (await service.send({
+    event: 'searchActiveUsers',
+    data: { query: 'Legacy Unlinked Developer', includeNonActive: true, skip: 0, top: 100 },
+    user: admin
+  }))[0]
+  assert.equal(pendingLegacyUnlinked.linkEligible, false, 'pending target-linked invitation must hide the link action')
 
   const roleSearch = await service.send({
     event: 'searchActiveUsers',

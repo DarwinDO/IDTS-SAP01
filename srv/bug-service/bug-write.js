@@ -23,6 +23,7 @@ const {
 const { importantChanges } = require('./history')
 const { enforceBugWritePermission, enforceBugCreatePermission } = require('./permissions')
 const { effectiveCapacity, readOpenOwnedBugCounts } = require('./capacity')
+const { hasActiveIdentityAccess, readActiveIdentityAccessByUser } = require('../access/identity-readiness')
 
 const CODE_LIST_FIELDS = [
   { field: 'priority_code', label: 'Priority', entity: 'PriorityValues' },
@@ -86,7 +87,8 @@ async function prepareBugWrite (req, entities, { isCreate }) {
 
   if (finalData.assignee_ID) {
     await validateAssignee(req, entities, finalData, {
-      enforceCapacity: isCreate || oldBug.assignee_ID !== finalData.assignee_ID
+      enforceCapacity: isCreate || oldBug.assignee_ID !== finalData.assignee_ID,
+      enforceIdentityAccess: isCreate || oldBug.assignee_ID !== finalData.assignee_ID
     })
   }
 
@@ -248,7 +250,7 @@ async function validateActiveClassificationParents (req, entities, bug, tx = cds
   }
 }
 
-async function validateAssignee (req, entities, bug, { enforceCapacity = false } = {}) {
+async function validateAssignee (req, entities, bug, { enforceCapacity = false, enforceIdentityAccess = false } = {}) {
   // Assignee phải là DeveloperProfile active, đang nhận việc và có responsibility phù hợp
   // với component/category (và module nếu responsibility giới hạn module).
   const tx = cds.tx(req)
@@ -261,6 +263,14 @@ async function validateAssignee (req, entities, bug, { enforceCapacity = false }
 
   if (!developer) {
     return req.reject(400, 'Assigned developer is not active or does not exist.', 'assignee')
+  }
+
+  if (enforceIdentityAccess) {
+    const identityAccessByUser = await readActiveIdentityAccessByUser(tx, [developer.user_ID])
+    const identityAccess = identityAccessByUser.get(developer.user_ID)
+    if (!identityAccess || !hasActiveIdentityAccess(identityAccess.user, identityAccess.requests)) {
+      return req.reject(400, 'Assigned developer is not linked to active SAP identity access.', 'assignee')
+    }
   }
 
   if (developer.availabilityStatus_code === 'UNAVAILABLE') {

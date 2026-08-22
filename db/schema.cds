@@ -256,6 +256,8 @@ annotate NotificationDeliveries with @assert.unique.notificationChannel: [ notif
 
 entity UserOnboardingRequests : cuid, managed {
   targetEmailNormalized : String(255) not null;
+  linkTargetUser            : Association to Users;
+  linkSourceEmailNormalized : String(255);
   openRequestKey        : String(64);
   requestedRole         : Association to UserRoles not null;
   userAdminRequested    : Boolean default false not null;

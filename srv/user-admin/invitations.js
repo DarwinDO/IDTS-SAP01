@@ -213,5 +213,6 @@ module.exports = {
   createInvitationToken,
   identitySnapshotFrom,
   invitationIDFromToken,
+  normalizeEmail,
   verifyInvitationToken
 }

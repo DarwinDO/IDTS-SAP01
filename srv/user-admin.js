@@ -10,8 +10,10 @@ const {
   createInvitationToken,
   identitySnapshotFrom,
   invitationIDFromToken,
+  normalizeEmail,
   verifyInvitationToken
 } = require('./user-admin/invitations')
+const { requestExistingUserIdentityLink } = require('./user-admin/existing-identity-link')
 const { getUserAdminConfig } = require('./user-admin/config')
 const { scheduleImmediateEmailOutbox } = require('./email/worker')
 const { identityKeyHash, selectActiveUserForRequest } = require('./auth/identity-map')
@@ -67,6 +69,11 @@ class UserAdministrationService extends cds.ApplicationService {
     }
     this.on('requestSuspend', req => requestSuspend(req, accessLifecycleDependencies))
     this.on('requestReactivate', req => requestReactivate(req, accessLifecycleDependencies))
+    this.on('requestExistingUserIdentityLink', req => requestExistingUserIdentityLink(req, {
+      requireActiveUserAdministrator,
+      isOpenRequestConstraintError,
+      onboardingResult
+    }))
     this.on('retryAccessOperation', req => retryAccessOperation(req))
     this.on('reconcileAccessOperation', req => reconcileAccessOperation(req))
     registerActiveUserHandlers(this, { authorize: requireActiveUserAdministrator })
@@ -233,6 +240,7 @@ async function verifySapIdentity (req) {
   }
 
   const identityKeyHashValue = identityKeyHash(identity)
+  const isExistingLink = Boolean(invitation.linkTargetUser_ID)
 
   const collision = await tx.run(
     SELECT.one.from('idts.cap.UserOnboardingRequests')
@@ -244,20 +252,23 @@ async function verifySapIdentity (req) {
   )
   if (collision) throw serviceError(409, 'EXTERNAL_IDENTITY_ALREADY_LINKED', 'SAP identity is already linked to another onboarding request.')
 
-  const linkedUser = await tx.run(
-    SELECT.one.from('idts.cap.Users')
-      .columns('ID')
-      .where({ externalIdentityKeyHash: identityKeyHashValue })
+  const users = await tx.run(
+    SELECT.from('idts.cap.Users').columns('ID', 'email', 'externalIdentityKeyHash')
   )
-  if (linkedUser) throw serviceError(409, 'EXTERNAL_IDENTITY_ALREADY_LINKED', 'SAP identity is already linked to an IDTS user.')
-  const emailMatches = (await tx.run(SELECT.from('idts.cap.Users').columns('ID', 'email')))
+  const otherUsers = users.filter(user => !isExistingLink || user.ID !== invitation.linkTargetUser_ID)
+  if (otherUsers.some(user => user.externalIdentityKeyHash === identityKeyHashValue)) {
+    throw serviceError(409, 'EXTERNAL_IDENTITY_ALREADY_LINKED', 'SAP identity is already linked to an IDTS user.')
+  }
+  const emailMatches = otherUsers
     .filter(user => normalizeEmail(user.email) === invitation.targetEmailNormalized)
   if (emailMatches.length > 0) {
     throw serviceError(409, 'EMAIL_RECONCILIATION_REQUIRED', 'An existing IDTS user requires identity reconciliation.')
   }
 
+  const linkTarget = isExistingLink ? await readUnlinkedLinkTarget(tx, invitation) : null
+
   const verifiedAt = (req.timestamp || new Date()).toISOString()
-  const approvalRequired = requiresProvisioningApproval(invitation)
+  const approvalRequired = !isExistingLink && requiresProvisioningApproval(invitation)
   const operationID = approvalRequired ? null : cds.utils.uuid()
   const operationCorrelationId = approvalRequired ? invitation.correlationId : cds.utils.uuid()
   const nextStatus = approvalRequired ? 'PENDING_APPROVAL' : 'PROVISION_QUEUED'
@@ -277,7 +288,8 @@ async function verifySapIdentity (req) {
       ...(approvalRequired ? {} : {
         approvedAt: verifiedAt,
         approvedBy_ID: invitation.requestedBy_ID,
-        latestOperation_ID: operationID
+        latestOperation_ID: operationID,
+        ...(isExistingLink ? { correlationId: operationCorrelationId } : {})
       }),
       lastErrorCode: null,
       lastErrorSummary: null
@@ -288,6 +300,8 @@ async function verifySapIdentity (req) {
   if (!approvalRequired) {
     const verifiedRequest = {
       ...invitation,
+      requestedRole_code: linkTarget?.role_code || invitation.requestedRole_code,
+      userAdminRequested: isExistingLink ? false : invitation.userAdminRequested,
       status_code: nextStatus,
       provisioningVersion: nextVersion,
       verifiedAt,
@@ -296,12 +310,13 @@ async function verifySapIdentity (req) {
       identitySubject: identity.subject,
       identityPlatformUserId: identity.platformUserId,
       identityKeyHash: identityKeyHashValue,
-      identityEmailNormalized: identity.emailNormalized
+      identityEmailNormalized: identity.emailNormalized,
+      ...(isExistingLink ? { correlationId: operationCorrelationId } : {})
     }
     await insertAccessOperation(tx, {
       ID: operationID,
       request: verifiedRequest,
-      operationType: 'PROVISION',
+      operationType: isExistingLink ? 'LINK_EXISTING' : 'PROVISION',
       requestedByID: invitation.requestedBy_ID,
       expectedVersion: nextVersion,
       correlationId: operationCorrelationId
@@ -310,11 +325,14 @@ async function verifySapIdentity (req) {
       operationID,
       requestID: invitation.ID,
       actorID: invitation.requestedBy_ID,
-      action: 'AUTO_APPROVE_PROVISIONING',
+      targetUserID: linkTarget?.ID,
+      action: isExistingLink ? 'QUEUE_LINK_EXISTING' : 'AUTO_APPROVE_PROVISIONING',
       fromState: 'INVITED',
       toState: nextStatus,
       correlationId: operationCorrelationId,
-      summary: 'Standard-role provisioning queued after SAP identity verification.'
+      summary: isExistingLink
+        ? 'Existing-user identity link queued after SAP identity verification.'
+        : 'Standard-role provisioning queued after SAP identity verification.'
     })
   }
   return onboardingResult({
@@ -326,6 +344,34 @@ async function verifySapIdentity (req) {
     identitySubject: identity.subject,
     correlationId: operationCorrelationId
   })
+}
+
+async function readUnlinkedLinkTarget (tx, invitation) {
+  const target = await tx.run(
+    SELECT.one.from('idts.cap.Users').columns(
+      'ID', 'email', 'role_code', 'active',
+      'externalIdentityOrigin', 'externalIdentityIssuer',
+      'externalIdentitySubject', 'externalIdentityKeyHash'
+    ).where({ ID: invitation.linkTargetUser_ID })
+  )
+  const hasIdentityValue = [
+    target?.externalIdentityOrigin,
+    target?.externalIdentityIssuer,
+    target?.externalIdentitySubject,
+    target?.externalIdentityKeyHash
+  ].some(value => value != null)
+  if (
+    !target ||
+    target.ID !== invitation.linkTargetUser_ID ||
+    target.active !== true ||
+    !['TESTER', 'DEVELOPER'].includes(target.role_code) ||
+    target.role_code !== invitation.requestedRole_code ||
+    normalizeEmail(target.email) !== normalizeEmail(invitation.linkSourceEmailNormalized) ||
+    hasIdentityValue
+  ) {
+    throw serviceError(409, 'IDENTITY_LINK_TARGET_CHANGED', 'The selected identity-link target changed. Start a new invitation.')
+  }
+  return target
 }
 
 function requiresProvisioningApproval (request) {
@@ -724,13 +770,18 @@ async function requeueAccessOperation (req, options) {
   )
   if (changed !== 1) throw serviceError(409, 'ONBOARDING_VERSION_CONFLICT', 'The access operation changed. Reload and try again.')
   const queuedState = queuedStateFor(operation.operationType)
-  const requestChanged = await tx.run(UPDATE('idts.cap.UserOnboardingRequests').set({
+  const requestPatch = {
     status_code: queuedState,
     provisioningVersion: nextVersion,
     latestOperation_ID: operation.ID,
     lastErrorCode: null,
     lastErrorSummary: null
-  }).where({ ID: request.ID, provisioningVersion: request.provisioningVersion }))
+  }
+  if (operation.operationType === 'LINK_EXISTING') requestPatch.correlationId = nextCorrelationId
+  const requestChanged = await tx.run(UPDATE('idts.cap.UserOnboardingRequests').set(requestPatch).where({
+    ID: request.ID,
+    provisioningVersion: request.provisioningVersion
+  }))
   if (requestChanged !== 1) throw serviceError(409, 'ONBOARDING_VERSION_CONFLICT', 'The onboarding request changed. Reload and try again.')
   await insertIdentityAudit(tx, {
     operationID: operation.ID,
@@ -932,14 +983,6 @@ function invitationConfig () {
     throw serviceError(503, 'INVITATION_CONFIG_UNAVAILABLE', 'User onboarding is temporarily unavailable.')
   }
   return config
-}
-
-function normalizeEmail (value) {
-  if (typeof value !== 'string') return null
-  const email = value.trim().toLowerCase()
-  return email.length <= 255 && !/[<>\r\n]/.test(email) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-    ? email
-    : null
 }
 
 function normalizeSearchQuery (value) {

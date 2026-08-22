@@ -50,3 +50,8 @@ Vietnamese: UI bam sat boundary state-code-attempt cua backend. Retry hien cho `
 - UI5 MCP manifest validation and linter
 
 Live browser, XSUAA scope deployment, real Role Collection assignment, HANA migration, provider reconciliation, revoke, and stale-session acceptance remain later controlled gates.
+## Gate 3B existing identity link UI / UI link identity hien huu Gate 3B
+
+Active User details shows one `Link existing identity` button only when the server-owned `linkEligible` Boolean is true. The dialog displays only the safe existing user name/email, a read-only preservation/readback notice, and a type-Email input. Submit sends exactly `userID` and the normalized email to `requestExistingUserIdentityLink`; success says queued, reloads Requests and Active Users, and never claims that access is already active. All copy is localized in both current property files.
+
+Details Active User chi hien nut `Link existing identity` khi Boolean `linkEligible` do server tinh la true. Dialog chi hien ten/email an toan cua user hien tai, notice read-only ve preservation/readback va input type Email. Submit chi gui `userID` va email normalized toi `requestExistingUserIdentityLink`; thanh cong chi bao queued, reload Requests va Active Users, khong claim access da active. Moi copy deu duoc i18n hoa trong hai file properties hien hanh.
