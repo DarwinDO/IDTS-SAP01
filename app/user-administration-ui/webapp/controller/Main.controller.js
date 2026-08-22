@@ -292,6 +292,15 @@ sap.ui.define([
 			}, "approvedQueued");
 		},
 
+		onCancelExistingLinkInvitation: async function (oEvent) {
+			const oRow = this._rowFromEvent(oEvent);
+			if (!oRow?.cancelEligible || !await this._confirm("cancelExistingLinkConfirmation")) return;
+			await this._invokeAction("cancelExistingUserIdentityLink", {
+				requestID: oRow.ID,
+				expectedVersion: oRow.provisioningVersion
+			}, "existingLinkCancelled", true);
+		},
+
 		onOpenRoleChange: async function (oEvent) {
 			const oRow = this._rowFromEvent(oEvent);
 			await this._openRoleChangeForRow(oRow);

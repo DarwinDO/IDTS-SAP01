@@ -13,7 +13,10 @@ const {
   normalizeEmail,
   verifyInvitationToken
 } = require('./user-admin/invitations')
-const { requestExistingUserIdentityLink } = require('./user-admin/existing-identity-link')
+const {
+  requestExistingUserIdentityLink,
+  cancelExistingUserIdentityLink
+} = require('./user-admin/existing-identity-link')
 const { getUserAdminConfig } = require('./user-admin/config')
 const { scheduleImmediateEmailOutbox } = require('./email/worker')
 const { identityKeyHash, selectActiveUserForRequest } = require('./auth/identity-map')
@@ -74,6 +77,10 @@ class UserAdministrationService extends cds.ApplicationService {
       isOpenRequestConstraintError,
       onboardingResult
     }))
+    this.on('cancelExistingUserIdentityLink', req => cancelExistingUserIdentityLink(req, {
+      requireActiveUserAdministrator,
+      onboardingResult
+    }))
     this.on('retryAccessOperation', req => retryAccessOperation(req))
     this.on('reconcileAccessOperation', req => reconcileAccessOperation(req))
     registerActiveUserHandlers(this, { authorize: requireActiveUserAdministrator })
@@ -100,6 +107,7 @@ async function searchOnboarding (req) {
       'provisioningVersion',
       'activeUser_ID',
       'latestOperation_ID',
+      'linkTargetUser_ID',
       'lastErrorCode',
       'lastErrorSummary'
     )
@@ -109,7 +117,7 @@ async function searchOnboarding (req) {
   const requests = await tx.run(selection)
   const operationIDs = [...new Set(requests.map(request => request.latestOperation_ID).filter(Boolean))]
   if (operationIDs.length === 0) {
-    return requests.map(request => ({ ...request, latestOperationAttemptCount: null }))
+    return requests.map(request => onboardingSummary(request, null))
   }
   const operations = await tx.run(
     SELECT.from('idts.cap.UserAccessOperations')
@@ -117,10 +125,19 @@ async function searchOnboarding (req) {
       .where({ ID: { in: operationIDs } })
   )
   const attemptByOperation = new Map(operations.map(operation => [operation.ID, operation.attemptCount]))
-  return requests.map(request => ({
-    ...request,
-    latestOperationAttemptCount: attemptByOperation.get(request.latestOperation_ID) ?? null
-  }))
+  return requests.map(request => onboardingSummary(
+    request,
+    attemptByOperation.get(request.latestOperation_ID) ?? null
+  ))
+}
+
+function onboardingSummary (request, latestOperationAttemptCount) {
+  const { linkTargetUser_ID: linkTargetUserID, ...publicRequest } = request
+  return {
+    ...publicRequest,
+    latestOperationAttemptCount,
+    cancelEligible: Boolean(linkTargetUserID) && request.status_code === 'INVITED'
+  }
 }
 
 async function requestOnboarding (req) {

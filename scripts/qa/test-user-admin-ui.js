@@ -59,6 +59,8 @@ assert.match(view, /press="\.onOpenRoleChange"/)
 assert.match(view, /press="\.onOpenRevoke"/)
 assert.match(view, /press="\.onRetryAccessOperation"/)
 assert.match(view, /press="\.onReconcileAccessOperation"/)
+assert.match(view, /press="\.onCancelExistingLinkInvitation"/)
+assert.match(view, /requests>cancelEligible/)
 assert.match(view, /status_code\} === 'RETRYABLE_FAILURE'[\s\S]+lastErrorCode\} === 'PROVIDER_REQUEST_INVALID'[\s\S]+latestOperationAttemptCount\} === 4/)
 assert.match(view, /status_code\} === 'BLOCKED_MANUAL_REVIEW'[\s\S]+lastErrorCode\} === 'AMBIGUOUS_PROVIDER_OUTCOME'/)
 assert.match(view, /press="\.onOpenDeveloperProfile"/)
@@ -128,6 +130,8 @@ assert.match(controller, /await oOperation\.invoke\("\$direct"\)/)
 assert.match(controller, /bindContext\("\/searchOnboarding\(\.\.\.\)"\)/)
 assert.match(controller, /"approveProvisioning"/)
 assert.match(controller, /"requestRoleChange"/)
+assert.match(controller, /"cancelExistingUserIdentityLink"/)
+assert.match(controller, /cancelExistingLinkConfirmation/)
 assert.match(controller, /"requestRevoke"/)
 assert.match(controller, /"requestSuspend"/)
 assert.match(controller, /"requestReactivate"/)
@@ -434,6 +438,35 @@ async function verifyRuntimeBehavior () {
   }
   await existingLinkInstance.onConfirmExistingIdentityLink()
   assert.equal(existingLinkClosed, 1, 'double submit must be ignored while submitting')
+
+  let cancelInvocation
+  let confirmCount = 0
+  const cancelRow = { ID: 'request-1', provisioningVersion: 3, cancelEligible: true }
+  const cancelInstance = Object.assign(Object.create(controllerDefinition), {
+    _rowFromEvent: () => cancelRow,
+    _confirm: async key => {
+      confirmCount += 1
+      assert.equal(key, 'cancelExistingLinkConfirmation')
+      return true
+    },
+    _invokeAction: async (action, parameters, successKey, reloadActiveUsers) => {
+      cancelInvocation = { action, parameters, successKey, reloadActiveUsers }
+      return true
+    }
+  })
+  await cancelInstance.onCancelExistingLinkInvitation({})
+  assert.equal(confirmCount, 1)
+  assert.deepEqual(JSON.parse(JSON.stringify(cancelInvocation)), {
+    action: 'cancelExistingUserIdentityLink',
+    parameters: { requestID: 'request-1', expectedVersion: 3 },
+    successKey: 'existingLinkCancelled',
+    reloadActiveUsers: true
+  })
+
+  cancelInvocation = null
+  cancelInstance._confirm = async () => false
+  await cancelInstance.onCancelExistingLinkInvitation({})
+  assert.equal(cancelInvocation, null, 'dismissed confirmation must not invoke cancellation')
 }
 
 function loadController (source) {
@@ -458,7 +491,7 @@ function loadController (source) {
 
 for (const locale of ['i18n.properties', 'i18n_en.properties']) {
   const text = fs.readFileSync(path.join(webapp, 'i18n', locale), 'utf8')
-  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'changeRoleConfirmation', 'revokeConfirmation', 'manageResponsibilities', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'activeUserSearchPlaceholder', 'includeNonActive', 'includeRevoked', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'loadMoreActiveUsers', 'viewDetails', 'activeUserDetails', 'linkExistingIdentity', 'existingIdentityLinkRole', 'existingIdentityLinkNotice', 'existingIdentityLinkEmail', 'sendIdentityLink', 'identityLinkQueued', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'developerProfile', 'close', 'activeUsersNoDeveloper', 'suspendAccess', 'reactivateAccess', 'suspendWarning', 'reactivateWarning', 'suspendQueued', 'reactivateQueued']) {
+  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'changeRoleConfirmation', 'revokeConfirmation', 'manageResponsibilities', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'activeUserSearchPlaceholder', 'includeNonActive', 'includeRevoked', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'loadMoreActiveUsers', 'viewDetails', 'activeUserDetails', 'linkExistingIdentity', 'existingIdentityLinkRole', 'existingIdentityLinkNotice', 'existingIdentityLinkEmail', 'sendIdentityLink', 'identityLinkQueued', 'cancelExistingLinkInvitation', 'cancelExistingLinkConfirmation', 'existingLinkCancelled', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'developerProfile', 'close', 'activeUsersNoDeveloper', 'suspendAccess', 'reactivateAccess', 'suspendWarning', 'reactivateWarning', 'suspendQueued', 'reactivateQueued']) {
     assert.match(text, new RegExp(`^${key}=`, 'm'))
   }
   assert.match(text, /^existingIdentityLinkNotice=.*same Users\.ID.*Developer Profile.*Bug assignments.*comments.*history/m)

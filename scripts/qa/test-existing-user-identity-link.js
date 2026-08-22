@@ -107,6 +107,8 @@ async function main () {
   assert.match(schema, /linkTargetUser\s*:\s*Association to Users/, 'missing existing-user link target association')
   assert.match(schema, /linkSourceEmailNormalized\s*:\s*String\(255\)/, 'missing existing-user source email snapshot')
   assert.match(service, /action requestExistingUserIdentityLink\([\s\S]*userID\s*:\s*UUID[\s\S]*email\s*:\s*String\(255\)/, 'missing existing-user identity-link action')
+  assert.match(service, /cancelExistingUserIdentityLink\([\s\S]*requestID\s*:\s*UUID[\s\S]*expectedVersion\s*:\s*Integer/, 'missing existing-user invitation cancellation action')
+  assert.match(service, /cancelEligible\s*:\s*Boolean/, 'request summary must expose only a server-owned cancellation eligibility flag')
   assert.match(provisioning, /operation\.operationType === 'LINK_EXISTING'/, 'missing LINK_EXISTING provisioning branch')
   assert.match(provisioning, /request\.correlationId\s*!==\s*operation\.correlationId/, 'existing link completion must bind request and operation correlation')
   assert.match(provisioning, /if \(operation\.operationType === 'LINK_EXISTING'\) requestPatch\.correlationId = reconciliationCorrelationId/, 'expired LINK_EXISTING recovery must persist reconciliation correlation')
@@ -114,6 +116,11 @@ async function main () {
   assert.match(provisioning, /const lockedUsers = await tx\.run\([\s\S]*SELECT\.from\('idts\.cap\.Users'\)[\s\S]*\.forUpdate\(\)/, 'existing link completion must lock Users before collision checks')
   assert.match(accessProvisioning, /'LINK_EXISTING'/, 'missing read-only LINK_EXISTING broker contract')
   assert.match(existingLink, /endsWith\('@example\.local'\)/, 'existing-link action must accept legacy @example.local addresses')
+  assert.match(existingLink, /async function cancelExistingUserIdentityLink/, 'missing bounded invitation cancellation handler')
+  assert.match(existingLink, /status_code:\s*'INVITED'[\s\S]*consumedAt:\s*null[\s\S]*provisioningVersion/, 'cancellation must use an optimistic unconsumed INVITED guard')
+  assert.match(existingLink, /status_code:\s*'FAILED'[\s\S]*openRequestKey:\s*null[\s\S]*INVITATION_CANCELLED/, 'cancellation must invalidate the request and release its open-request key')
+  assert.match(existingLink, /CANCEL_LINK_INVITATION/, 'cancellation must append a safe allowlisted audit event')
+  assert.doesNotMatch(existingLink, /DELETE\s*\(/, 'cancellation must preserve request and delivery history')
   assert.match(activeUsers, /endsWith\('@example\.local'\)/, 'Active Users must expose linking for legacy @example.local addresses')
 
   const publicDeclarations = [
@@ -487,6 +494,83 @@ async function assertExistingLinkRequest (cds, db) {
     })
     assert.equal(testerCreated.requestedRole, 'TESTER', 'link request must derive the legacy Tester role')
     assert.equal(testerCreated.userAdminRequested, false, 'existing-user link must never request UserAdmin')
+
+    const testerRequest = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: testerCreated.ID }))
+    const { createInvitationToken } = require('../../srv/user-admin/invitations')
+    const cancelledToken = createInvitationToken({
+      invitationID: testerRequest.ID,
+      targetEmail: 'linked.tester@example.invalid',
+      expiresAt: testerRequest.expiresAt,
+      signingKey: fixtureSigningKey(),
+      nonce: testerRequest.tokenNonce
+    }).token
+    const summaries = await service.send({ event: 'searchOnboarding', data: { query: 'linked.tester' }, user: administrator })
+    const testerSummary = summaries.find(row => row.ID === testerRequest.ID)
+    assert.equal(testerSummary.cancelEligible, true, 'open target-linked invitation must be cancellable')
+    assert.equal(Object.hasOwn(testerSummary, 'linkTargetUser_ID'), false, 'public request summary must not expose the target user ID')
+
+    await assert.rejects(
+      () => service.send({
+        event: 'cancelExistingUserIdentityLink',
+        data: { requestID: testerRequest.ID, expectedVersion: 0 },
+        user: new cds.User({ id: 'fixture.pm', roles: ['authenticated-user', 'PM'] })
+      }),
+      error => error?.code === 'USER_ADMIN_REQUIRED',
+      'cancellation must require the existing PM plus UserAdmin boundary'
+    )
+
+    await assert.rejects(
+      () => service.send({
+        event: 'cancelExistingUserIdentityLink',
+        data: { requestID: testerRequest.ID, expectedVersion: 99 },
+        user: administrator
+      }),
+      error => error?.code === 'ONBOARDING_VERSION_CONFLICT',
+      'stale cancellation must fail without changing the request'
+    )
+    const cancelled = await service.send({
+      event: 'cancelExistingUserIdentityLink',
+      data: { requestID: testerRequest.ID, expectedVersion: 0 },
+      user: administrator
+    })
+    assert.equal(cancelled.status, 'FAILED', 'cancelled invitation must become terminal')
+    assert.equal(cancelled.provisioningVersion, 1, 'cancellation must advance the optimistic version')
+    const cancelledRequest = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: testerRequest.ID }))
+    assert.equal(cancelledRequest.openRequestKey, null, 'cancellation must release the target invitation lock')
+    assert.equal(cancelledRequest.lastErrorCode, 'INVITATION_CANCELLED', 'cancellation must persist only a safe result code')
+    const cancelledDelivery = await db.run(SELECT.one.from('idts.cap.UserOnboardingDeliveries').where({ onboardingRequest_ID: testerRequest.ID }))
+    assert.equal(cancelledDelivery.status_code, 'SKIPPED', 'pending delivery must not send after cancellation')
+    const cancelAudits = await db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({
+      onboardingRequest_ID: testerRequest.ID,
+      action: 'CANCEL_LINK_INVITATION'
+    }))
+    assert.equal(cancelAudits.length, 1, 'cancellation must append one audit event')
+    assert.equal(cancelAudits[0].targetUser_ID, IDS.testerTarget, 'audit must bind the existing user without putting identity data in its summary')
+    assert.equal(cancelAudits[0].detailsSummary.includes('linked.tester'), false, 'audit summary must not contain the invitation email')
+    await assert.rejects(
+      () => service.send({
+        event: 'verifySapIdentity',
+        data: { token: cancelledToken },
+        user: fixtureXsuaaUser(cds, 'linked.tester@example.invalid')
+      }),
+      error => ['INVITATION_ALREADY_USED', 'INVITATION_STATE_INVALID'].includes(error?.code),
+      'cancelled token must not materialize identity data'
+    )
+    await assert.rejects(
+      () => service.send({
+        event: 'cancelExistingUserIdentityLink',
+        data: { requestID: testerRequest.ID, expectedVersion: 1 },
+        user: administrator
+      }),
+      error => error?.code === 'IDENTITY_LINK_INVITATION_NOT_OPEN',
+      'repeated cancellation must fail closed'
+    )
+    const replacement = await service.send({
+      event: 'requestExistingUserIdentityLink',
+      data: { userID: IDS.testerTarget, email: 'linked.tester.corrected@example.invalid' },
+      user: administrator
+    })
+    assert.equal(replacement.status, 'INVITED', 'cancelled target must accept one corrected replacement invitation')
 
     const staleCreated = await service.send({
       event: 'requestExistingUserIdentityLink',
