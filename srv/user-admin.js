@@ -10,8 +10,10 @@ const {
   createInvitationToken,
   identitySnapshotFrom,
   invitationIDFromToken,
+  normalizeEmail,
   verifyInvitationToken
 } = require('./user-admin/invitations')
+const { requestExistingUserIdentityLink } = require('./user-admin/existing-identity-link')
 const { getUserAdminConfig } = require('./user-admin/config')
 const { scheduleImmediateEmailOutbox } = require('./email/worker')
 const { identityKeyHash, selectActiveUserForRequest } = require('./auth/identity-map')
@@ -67,6 +69,11 @@ class UserAdministrationService extends cds.ApplicationService {
     }
     this.on('requestSuspend', req => requestSuspend(req, accessLifecycleDependencies))
     this.on('requestReactivate', req => requestReactivate(req, accessLifecycleDependencies))
+    this.on('requestExistingUserIdentityLink', req => requestExistingUserIdentityLink(req, {
+      requireActiveUserAdministrator,
+      isOpenRequestConstraintError,
+      onboardingResult
+    }))
     this.on('retryAccessOperation', req => retryAccessOperation(req))
     this.on('reconcileAccessOperation', req => reconcileAccessOperation(req))
     registerActiveUserHandlers(this, { authorize: requireActiveUserAdministrator })
@@ -932,14 +939,6 @@ function invitationConfig () {
     throw serviceError(503, 'INVITATION_CONFIG_UNAVAILABLE', 'User onboarding is temporarily unavailable.')
   }
   return config
-}
-
-function normalizeEmail (value) {
-  if (typeof value !== 'string') return null
-  const email = value.trim().toLowerCase()
-  return email.length <= 255 && !/[<>\r\n]/.test(email) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-    ? email
-    : null
 }
 
 function normalizeSearchQuery (value) {

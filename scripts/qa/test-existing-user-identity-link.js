@@ -13,6 +13,13 @@ const IDS = Object.freeze({
   targetDeveloper: '82000000-0000-4000-8000-000000000002',
   concurrentTarget: '82000000-0000-4000-8000-000000000003',
   partialTarget: '82000000-0000-4000-8000-000000000004',
+  testerTarget: '82000000-0000-4000-8000-000000000005',
+  pmTarget: '82000000-0000-4000-8000-000000000006',
+  inactiveTarget: '82000000-0000-4000-8000-000000000007',
+  linkedTarget: '82000000-0000-4000-8000-000000000008',
+  nonLegacyTarget: '82000000-0000-4000-8000-000000000009',
+  staleTarget: '82000000-0000-4000-8000-000000000012',
+  emailCollisionUser: '82000000-0000-4000-8000-000000000013',
   profile: '82000000-0000-4000-8000-000000000010',
   responsibility: '82000000-0000-4000-8000-000000000011',
   component: '82000000-0000-4000-8000-000000000020',
@@ -218,8 +225,76 @@ async function seedFixture (cds, db) {
       role_code: 'DEVELOPER',
       externalIdentityOrigin: 'fixture-origin',
       active: true
+    },
+    {
+      ID: IDS.testerTarget,
+      displayName: 'Fixture Legacy Tester',
+      email: 'legacy.tester@example.local',
+      role_code: 'TESTER',
+      active: true
+    },
+    {
+      ID: IDS.pmTarget,
+      displayName: 'Fixture PM Target',
+      email: 'legacy.pm@example.local',
+      role_code: 'PM',
+      active: true
+    },
+    {
+      ID: IDS.inactiveTarget,
+      displayName: 'Fixture Inactive Developer',
+      email: 'inactive.developer@example.local',
+      role_code: 'DEVELOPER',
+      active: false
+    },
+    {
+      ID: IDS.linkedTarget,
+      displayName: 'Fixture Linked Developer',
+      email: 'linked.developer@example.invalid',
+      role_code: 'DEVELOPER',
+      externalIdentityOrigin: 'fixture-origin',
+      externalIdentityIssuer: 'fixture-issuer',
+      externalIdentitySubject: 'fixture-subject',
+      externalIdentityKeyHash: fixtureHash('fixture-linked'),
+      active: true
+    },
+    {
+      ID: IDS.nonLegacyTarget,
+      displayName: 'Fixture Nonlegacy Developer',
+      email: 'nonlegacy.developer@example.invalid',
+      role_code: 'DEVELOPER',
+      active: true
+    },
+    {
+      ID: IDS.staleTarget,
+      displayName: 'Fixture Stale Legacy Developer',
+      email: 'stale.developer@example.local',
+      role_code: 'DEVELOPER',
+      active: true
+    },
+    {
+      ID: IDS.emailCollisionUser,
+      displayName: 'Fixture Email Collision',
+      email: 'reserved.identity@example.invalid',
+      role_code: 'TESTER',
+      active: true
     }
   ]))
+  await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries({
+    ID: '82000000-0000-4000-8000-000000000014',
+    targetEmailNormalized: 'stale.invitation@example.invalid',
+    linkTargetUser_ID: IDS.staleTarget,
+    linkSourceEmailNormalized: 'stale.developer@example.local',
+    openRequestKey: fixtureHash(JSON.stringify(['LINK_EXISTING', IDS.staleTarget])),
+    requestedRole_code: 'DEVELOPER',
+    userAdminRequested: false,
+    status_code: 'INVITED',
+    requestedBy_ID: IDS.administrator,
+    expiresAt: '2026-08-22T07:00:00.000Z',
+    tokenNonce: 'fixture-stale-nonce',
+    tokenHash: fixtureHash('fixture-stale-token'),
+    correlationId: '82000000-0000-4000-8000-000000000015'
+  }))
   await db.run(INSERT.into('idts.cap.DeveloperProfiles').entries({
     ID: IDS.profile,
     user_ID: IDS.targetDeveloper,
@@ -280,6 +355,10 @@ async function assertExistingLinkRequest (cds, db) {
     assert.equal(created.status, 'INVITED', 'existing-user link request must start as INVITED')
     assert.equal(created.requestedRole, 'DEVELOPER', 'link request must derive the target role')
     assert.equal(Object.hasOwn(created, 'identitySubject'), false, 'public result exposes identity subject')
+    assert.deepEqual(Object.keys(created).sort(), [
+      'ID', 'correlationId', 'expiresAt', 'provisionedAt', 'provisioningVersion',
+      'requestedRole', 'revokedAt', 'status', 'targetEmail', 'userAdminRequested', 'verifiedAt'
+    ].sort(), 'link result must remain the standard safe onboarding result')
 
     const request = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: created.ID }))
     assert.equal(request.linkTargetUser_ID, IDS.targetDeveloper, 'request must target the selected existing user')
@@ -290,27 +369,63 @@ async function assertExistingLinkRequest (cds, db) {
     assert.equal(delivery.length, 1, 'link request must create one delivery')
     assert.equal(delivery[0].templateKey, 'IDTS_EXISTING_USER_IDENTITY_LINK_V1', 'link request must use the link template')
 
-    await assert.rejects(
-      () => service.send({
-        event: 'requestExistingUserIdentityLink',
-        data: { userID: IDS.targetDeveloper, email: 'another.developer@example.invalid' },
-        user: new cds.User({ id: 'fixture.tester', roles: ['authenticated-user', 'TESTER'] }),
-        timestamp: FIXTURE_NOW
-      }),
-      error => Number(error?.status || error?.statusCode) === 403,
-      'non-administrator link request must be rejected'
-    )
+    const expectLinkRejected = async ({ user, userID, email, code }) => {
+      await assert.rejects(
+        () => service.send({
+          event: 'requestExistingUserIdentityLink',
+          data: { userID, email },
+          user,
+          timestamp: FIXTURE_NOW
+        }),
+        error => error?.code === code &&
+          !String(error?.message || '').includes(email) &&
+          !/fixture-origin|fixture-subject|fixture-platform-user/.test(String(error?.message || '')),
+        `link request must reject safely with ${code}`
+      )
+    }
 
-    await assert.rejects(
-      () => service.send({
-        event: 'requestExistingUserIdentityLink',
-        data: { userID: IDS.partialTarget, email: 'partial.target@example.invalid' },
-        user: administrator,
-        timestamp: FIXTURE_NOW
-      }),
-      error => [400, 409].includes(Number(error?.status || error?.statusCode)),
-      'partially linked target must fail closed'
-    )
+    for (const user of [
+      new cds.User({ id: 'fixture.anonymous', roles: ['authenticated-user'] }),
+      new cds.User({ id: 'fixture.tester', roles: ['authenticated-user', 'TESTER'] }),
+      new cds.User({ id: 'fixture.developer', roles: ['authenticated-user', 'DEVELOPER'] }),
+      new cds.User({ id: 'fixture.pm', roles: ['authenticated-user', 'PM'] }),
+      new cds.User({ id: 'fixture.multi-role', roles: ['authenticated-user', 'PM', 'TESTER', 'UserAdmin'] })
+    ]) {
+      await expectLinkRejected({
+        user,
+        userID: IDS.testerTarget,
+        email: 'unauthorized.link@example.invalid',
+        code: 'USER_ADMIN_REQUIRED'
+      })
+    }
+
+    await expectLinkRejected({ user: administrator, userID: '82000000-0000-4000-8000-000000000099', email: 'missing.target@example.invalid', code: 'IDENTITY_LINK_TARGET_NOT_FOUND' })
+    await expectLinkRejected({ user: administrator, userID: IDS.pmTarget, email: 'pm.target@example.invalid', code: 'IDENTITY_LINK_TARGET_ROLE_INVALID' })
+    await expectLinkRejected({ user: administrator, userID: IDS.inactiveTarget, email: 'inactive.target@example.invalid', code: 'IDENTITY_LINK_TARGET_INACTIVE' })
+    await expectLinkRejected({ user: administrator, userID: IDS.partialTarget, email: 'partial.target@example.invalid', code: 'IDENTITY_LINK_TARGET_IDENTITY_CONFLICT' })
+    await expectLinkRejected({ user: administrator, userID: IDS.linkedTarget, email: 'linked.target@example.invalid', code: 'IDENTITY_LINK_TARGET_ALREADY_LINKED' })
+    await expectLinkRejected({ user: administrator, userID: IDS.nonLegacyTarget, email: 'nonlegacy.target@example.invalid', code: 'IDENTITY_LINK_TARGET_NOT_LEGACY' })
+    await expectLinkRejected({ user: administrator, userID: IDS.testerTarget, email: 'RESERVED.IDENTITY@EXAMPLE.INVALID', code: 'EMAIL_RECONCILIATION_REQUIRED' })
+
+    const testerCreated = await service.send({
+      event: 'requestExistingUserIdentityLink',
+      data: { userID: IDS.testerTarget, email: 'linked.tester@example.invalid' },
+      user: administrator,
+      timestamp: FIXTURE_NOW
+    })
+    assert.equal(testerCreated.requestedRole, 'TESTER', 'link request must derive the legacy Tester role')
+    assert.equal(testerCreated.userAdminRequested, false, 'existing-user link must never request UserAdmin')
+
+    const staleCreated = await service.send({
+      event: 'requestExistingUserIdentityLink',
+      data: { userID: IDS.staleTarget, email: 'stale.replacement@example.invalid' },
+      user: administrator,
+      timestamp: FIXTURE_NOW
+    })
+    const staleRequest = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: '82000000-0000-4000-8000-000000000014' }))
+    assert.equal(staleRequest.status_code, 'FAILED', 'expired link invitation must be closed before reinviting')
+    assert.equal(staleRequest.openRequestKey, null, 'expired link invitation must release its target lock')
+    assert.equal(staleCreated.requestedRole, 'DEVELOPER', 'reinvitation must still derive the target role')
 
     const concurrent = await Promise.allSettled([
       service.send({
