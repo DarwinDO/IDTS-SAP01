@@ -19,7 +19,7 @@ const {
 } = require('./user-admin/existing-identity-link')
 const { getUserAdminConfig } = require('./user-admin/config')
 const { scheduleImmediateEmailOutbox } = require('./email/worker')
-const { identityKeyFromRequestUser, identityKeyHash, selectActiveUserForRequest } = require('./auth/identity-map')
+const { identityKeyHash, selectActiveUserForRequest } = require('./auth/identity-map')
 const { isXsuaaRuntime } = require('./auth/platform-role')
 const {
   normalizeDeveloperProfileInput,
@@ -81,147 +81,11 @@ class UserAdministrationService extends cds.ApplicationService {
       requireActiveUserAdministrator,
       onboardingResult
     }))
-    this.on('normalizeCurrentBootstrapPm', req => normalizeCurrentBootstrapPm(req))
     this.on('retryAccessOperation', req => retryAccessOperation(req))
     this.on('reconcileAccessOperation', req => reconcileAccessOperation(req))
     registerActiveUserHandlers(this, { authorize: requireActiveUserAdministrator })
     return super.init()
   }
-}
-
-async function normalizeCurrentBootstrapPm (req) {
-  assertUserAdministrator(req)
-  if (!isXsuaaRuntime()) {
-    throw serviceError(403, 'BOOTSTRAP_PM_RUNTIME_REQUIRED', 'Bootstrap PM normalization requires XSUAA.')
-  }
-  const identity = identityKeyFromRequestUser(req.user)
-  if (!identity) {
-    throw serviceError(403, 'BOOTSTRAP_PM_IDENTITY_INCOMPLETE', 'SAP identity claims are incomplete.')
-  }
-  const contactEmail = normalizeEmail(req.user?.attr?.email || req.user?.attr?.user_name || req.user?.id)
-  if (!contactEmail || contactEmail.endsWith('@example.local')) {
-    throw serviceError(409, 'BOOTSTRAP_PM_CONTACT_INVALID', 'The authenticated PM contact email is not eligible for normalization.')
-  }
-
-  const tx = cds.tx(req)
-  const candidates = await tx.run(
-    SELECT.from('idts.cap.Users').columns(
-      'ID', 'email', 'role_code', 'active',
-      'externalIdentityOrigin', 'externalIdentityIssuer',
-      'externalIdentitySubject', 'externalIdentityKeyHash'
-    ).where({
-      active: true,
-      role_code: 'PM',
-      externalIdentityKeyHash: identity.keyHash
-    }).forUpdate()
-  )
-  if (candidates.length !== 1) {
-    throw serviceError(409, 'BOOTSTRAP_PM_TARGET_NOT_UNIQUE', 'The bootstrap PM target is not unique.')
-  }
-  const target = candidates[0]
-  const expectedIdentityHash = identityStateHash([
-    identity.origin,
-    identity.issuer,
-    identity.subject,
-    identity.keyHash
-  ])
-  const bootstrapAudits = await tx.run(
-    SELECT.from('idts.cap.UserIdentityAuditEvents').columns('ID').where({
-      targetUser_ID: target.ID,
-      action: 'BOOTSTRAP_LINK',
-      result: 'LINKED',
-      afterIdentityHash: expectedIdentityHash
-    })
-  )
-  if (bootstrapAudits.length !== 1) {
-    throw serviceError(409, 'BOOTSTRAP_PM_AUDIT_INVALID', 'The bootstrap PM audit is not valid.')
-  }
-
-  const users = await tx.run(SELECT.from('idts.cap.Users').columns('ID', 'email'))
-  if (users.some(user => user.ID !== target.ID && normalizeEmail(user.email) === contactEmail)) {
-    throw serviceError(409, 'BOOTSTRAP_PM_EMAIL_CONFLICT', 'The authenticated PM contact email is already in use.')
-  }
-
-  const activeRequests = await tx.run(
-    SELECT.from('idts.cap.UserOnboardingRequests').where({ activeUser_ID: target.ID, status_code: 'ACTIVE' })
-  )
-  if (activeRequests.length === 1 &&
-      normalizeEmail(target.email) === contactEmail &&
-      activeRequests[0].requestedRole_code === 'PM' &&
-      activeRequests[0].userAdminRequested === true &&
-      activeRequests[0].identityKeyHash === identity.keyHash &&
-      normalizeEmail(activeRequests[0].targetEmailNormalized) === contactEmail) {
-    return { status: 'NO_OP', correlationId: activeRequests[0].correlationId }
-  }
-  if (activeRequests.length !== 0 || !normalizeEmail(target.email)?.endsWith('@example.local')) {
-    throw serviceError(409, 'BOOTSTRAP_PM_STATE_CONFLICT', 'The bootstrap PM state is not eligible for normalization.')
-  }
-
-  const now = (req.timestamp || new Date()).toISOString()
-  const requestID = cds.utils.uuid()
-  const correlationId = cds.utils.uuid()
-  const tokenNonce = crypto.randomBytes(24).toString('base64url')
-  const tokenHash = crypto.createHash('sha256')
-    .update(JSON.stringify(['BOOTSTRAP_PM_NORMALIZED', requestID, tokenNonce]))
-    .digest('hex')
-  const changed = await tx.run(
-    UPDATE('idts.cap.Users').set({ email: contactEmail }).where({
-      ID: target.ID,
-      email: target.email,
-      active: true,
-      role_code: 'PM',
-      externalIdentityKeyHash: identity.keyHash
-    })
-  )
-  if (changed !== 1) {
-    throw serviceError(409, 'BOOTSTRAP_PM_STATE_CONFLICT', 'The bootstrap PM state changed. Reload and try again.')
-  }
-
-  await tx.run(INSERT.into('idts.cap.UserOnboardingRequests').entries({
-    ID: requestID,
-    targetEmailNormalized: contactEmail,
-    requestedRole_code: 'PM',
-    userAdminRequested: true,
-    status_code: 'ACTIVE',
-    requestedBy_ID: target.ID,
-    expiresAt: now,
-    tokenNonce,
-    tokenHash,
-    consumedAt: now,
-    verifiedAt: now,
-    identityOrigin: identity.origin,
-    identityIssuer: identity.issuer,
-    identitySubject: identity.subject,
-    identityPlatformUserId: identity.platformUserId,
-    identityKeyHash: identity.keyHash,
-    identityEmailNormalized: contactEmail,
-    provisioningVersion: 1,
-    approvedAt: now,
-    approvedBy_ID: target.ID,
-    activeUser_ID: target.ID,
-    provisionedAt: now,
-    correlationId
-  }))
-  await tx.run(INSERT.into('idts.cap.UserIdentityAuditEvents').entries({
-    ID: cds.utils.uuid(),
-    onboardingRequest_ID: requestID,
-    actor_ID: target.ID,
-    targetUser_ID: target.ID,
-    action: 'BOOTSTRAP_PM_NORMALIZED',
-    result: 'APPLIED',
-    fromState: 'BOOTSTRAP_LINKED',
-    toState: 'ACTIVE',
-    correlationId,
-    beforeIdentityHash: expectedIdentityHash,
-    afterIdentityHash: expectedIdentityHash,
-    detailsSummary: 'Bootstrap PM contact and access journal normalized.'
-  }))
-
-  return { status: 'NORMALIZED', correlationId }
-}
-
-function identityStateHash (tuple) {
-  return crypto.createHash('sha256').update(JSON.stringify(tuple)).digest('hex')
 }
 
 async function searchOnboarding (req) {

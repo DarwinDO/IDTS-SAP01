@@ -41,6 +41,11 @@ function xsuaaUser ({ email, userUuid, platformUserId = '11111111-1111-4111-8111
 }
 
 function main () {
+  const serviceSource = fs.readFileSync(path.join(__dirname, '../../srv/user-admin.cds'), 'utf8')
+  const handlerSource = fs.readFileSync(path.join(__dirname, '../../srv/user-admin.js'), 'utf8')
+  assert.doesNotMatch(serviceSource, /normalizeCurrentBootstrapPm/, 'temporary bootstrap PM action must be removed')
+  assert.doesNotMatch(handlerSource, /normalizeCurrentBootstrapPm|BOOTSTRAP_PM_NORMALIZED/, 'temporary bootstrap PM handler must be removed')
+
   assert.doesNotThrow(() => assertUserAdministrator(requestUser(['PM', 'UserAdmin'])))
   expectCode(() => assertUserAdministrator(requestUser(['PM'])), 'USER_ADMIN_REQUIRED')
   expectCode(() => assertUserAdministrator(requestUser(['TESTER', 'UserAdmin'])), 'USER_ADMIN_REQUIRED')
