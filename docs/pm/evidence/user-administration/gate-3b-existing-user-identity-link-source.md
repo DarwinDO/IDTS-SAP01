@@ -6,8 +6,8 @@
 
 - Human/coordinator: DonHV; source branch: `feature/wp8-existing-user-identity-link-donhv`.
 - Frozen base: `44b89db5db22e2ea65d4a85d746f57ad3a8f840e` (`origin/dev` and `dev` at task start).
-- Source implementation commits: `b14064b`, `c4a751c`, `9067497`, `be803f6`, `e0719fb`, `d3ca17f`, `2dde055`, `3a9c179`, `d5d60c9`.
-- Final exact head is recorded in the final verification update after the documentation/evidence commit; no merge or Ready transition is implied by this artifact.
+- Source implementation commits: `b14064b`, `c4a751c`, `9067497`, `be803f6`, `e0719fb`, `d3ca17f`, `2dde055`, `3a9c179`, `d5d60c9`; documentation/evidence/status checkpoints: `566dcda`, `8bba402`.
+- Documentation/status verification baseline before this evidence-closure edit: `8bba402`; the final PR head must be read back fresh after all commits and is reported in the coordinator handoff. No merge or Ready transition is implied by this artifact.
 - Approved authority: `docs/superpowers/specs/2026-08-21-gate-3b-existing-user-identity-link-design.md` and `docs/superpowers/plans/2026-08-21-gate-3b-existing-user-identity-link-implementation.md`.
 
 ### Delivered source behavior
