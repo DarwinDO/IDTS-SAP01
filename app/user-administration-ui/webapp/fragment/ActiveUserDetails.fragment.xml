@@ -97,11 +97,6 @@
 						visible="{= ${activeUsers>/details/linkEligible} === true }"
 						press=".onOpenExistingIdentityLink"/>
 					<Button
-						text="{i18n>bootstrapPmNormalize}"
-						type="Emphasized"
-						visible="{= ${activeUsers>/details/businessRole} === 'PM' &amp;&amp; ${activeUsers>/details/accessState} === 'INCOMPLETE' &amp;&amp; ${activeUsers>/details/requestCount} === 0 &amp;&amp; ${activeUsers>/details/auditEventCount} === 1 }"
-						press=".onNormalizeCurrentBootstrapPm"/>
-					<Button
 						text="{i18n>changeRole}"
 						visible="{= !!${activeUsers>/details/_request} &amp;&amp; ${activeUsers>/details/accessState} === 'ACTIVE' }"
 						press=".onOpenActiveUserRoleChange"/>
