@@ -204,3 +204,8 @@ Record a new decision here when it changes scope, ownership, entity meaning, sta
 - Assignment safety: a Developer without exactly one matching `ACTIVE` immutable identity link is excluded from new direct assignment and Smart Assign. Existing Bug assignees remain unchanged for a separate PM decision.
 - Scope boundary: the initial action excludes PM/UserAdmin, provider role writes, bulk matching/import, mutable-email auth fallback, and direct SQL migration. Implementation, HDI, deployment, invitations, identity/email updates, and per-member acceptance remain separately gated.
 - Evidence: `docs/superpowers/specs/2026-08-21-gate-3b-existing-user-identity-link-design.md` and `docs/superpowers/plans/2026-08-21-gate-3b-existing-user-identity-link-implementation.md`.
+## DEC-053 — Gate 3B source-only completion boundary (2026-08-22)
+
+The executor may complete the source implementation, focused tests, knowledge/evidence, commits, push, and one Draft PR for Gate 3B. Missing locked dependencies, CAP attachment resolution, UI toolchain availability, runtime acceptance, provider readback, data mutation, deployment, merge, and Ready transition remain explicit separate gates. `LINK_EXISTING` must remain provider read-only and the exact local user/profile/responsibility/Bug preservation invariant remains mandatory.
+
+Executor duoc hoan tat source implementation, focused test, knowledge/evidence, commit, push va mot Draft PR cho Gate 3B. Thieu dependency locked, CAP attachments, UI toolchain, runtime acceptance, provider readback, data mutation, deploy, merge va Ready van la gate rieng. `LINK_EXISTING` phai chi read-only provider va invariant giu nguyen user/profile/responsibility/Bug exact van bat buoc.

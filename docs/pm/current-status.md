@@ -366,3 +366,14 @@ Vietnamese: Agent hoáº·c developer má»›i pháº£i xÃ¡c Ä‘á»‹nh 
 - PR #310 (SangVN email BTP deep-link), PR #311 (DonHV Classification Apply feedback) and PR #312 (DatDT Developer capacity) merged normally and were selectively deployed from exact SHA `ccb2fd102b2daacaa3685bcfe671e0772ef1bbc4`.
 - CAP/AppRouter/readiness/Web checks pass and effective email routing remains `testMode=false`. No DB deployer, schema, seed, SQL, send-smoke or historical email replay ran.
 - IDTS-81 remains In Progress for a fresh authorized email click-test. IDTS-115 remains In Progress for the controlled signed-in mismatch case and previously documented role/browser gaps. Evidence: `docs/pm/evidence/idts-81-115-312/release-20260808.md`.
+## 2026-08-22 WP8 Gate 3B source handoff
+
+- The source-only Gate 3B branch `feature/wp8-existing-user-identity-link-donhv` is based exactly on `44b89db5db22e2ea65d4a85d746f57ad3a8f840e` and completes Tasks 1-9 through the final exact-head review checkpoint. It preserves the selected `Users.ID`, profile/responsibility/Bug relationships, and adds provider-read-only `LINK_EXISTING` proof plus fail-closed assignment readiness.
+- Runtime CAP/SQLite, full broker/UI dependencies, CAP EDMX/HANA compile, UI lint/build and live provider acceptance remain unverified or environment-blocked. No platform, HANA/HDI, data, provider, email, invitation, user, identity, Role Collection, deployment, merge or Ready mutation occurred.
+- Coordinator next approval: review the one Draft PR at exact head, then separately authorize any runtime/live Gate 3B acceptance. Gate 4/5 remain unopened.
+
+## Bàn giao source WP8 Gate 3B 2026-08-22
+
+- Branch source-only `feature/wp8-existing-user-identity-link-donhv` dựa chính xác trên `44b89db5db22e2ea65d4a85d746f57ad3a8f840e` và hoàn tất Tasks 1-9 đến checkpoint review exact-head cuối. Branch giữ nguyên `Users.ID` được chọn, quan hệ profile/responsibility/Bug và thêm proof `LINK_EXISTING` chỉ đọc provider cùng assignment readiness fail-closed.
+- CAP/SQLite runtime, dependency broker/UI đầy đủ, compile CAP EDMX/HANA, UI lint/build và acceptance provider live vẫn chưa verify hoặc đang bị block môi trường. Không có mutation platform, HANA/HDI, data, provider, email, invitation, user, identity, Role Collection, deploy, merge hoặc Ready.
+- Approval tiếp theo của coordinator: review một Draft PR tại exact head, sau đó mới quyết định riêng runtime/live Gate 3B acceptance. Gate 4/5 vẫn chưa mở.

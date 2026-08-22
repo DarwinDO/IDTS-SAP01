@@ -47,3 +47,12 @@ Vietnamese: Recovery cho request contract chi cho dung mot lan. `retryAccessOper
 Vietnamese: `requestSuspend` la action khoa access local cua IDTS. Sau guard PM + `UserAdmin` va version check, handler lock user muc tieu va kiem tra lai invariant administrator cuoi cung trong cung transaction. Handler dat `Users.active=false`, revoke `AuthSessions` dang active, doi request thanh `SUSPENDED`, tang version va ghi `REQUEST_SUSPEND`. Action khong tao provider operation va khong goi SAP API.
 
 `requestReactivate` chi nhan user da provisioned, dang inactive va request `SUSPENDED`. Handler lock/version-check request, tao mot operation `REACTIVATE` voi snapshot role/capability hien tai, tang version va ghi `REQUEST_REACTIVATE`. User local van inactive cho den khi broker chung minh readback provider. Session da revoke khong bao gio tu dong khoi phuc.
+## Gate 3B existing identity request and verification / Request va verify identity hien huu Gate 3B
+
+`requestExistingUserIdentityLink` is a PM + UserAdmin action for one selected active legacy TESTER/DEVELOPER. The server derives the role, snapshots the normalized legacy email, creates the signed invitation/delivery, and locks the target with `sha256(JSON.stringify(['LINK_EXISTING', targetID]))`. `verifySapIdentity` retains common token and immutable identity checks, re-reads the exact target, excludes only that exact target from duplicate scans, and queues version-2 `LINK_EXISTING` with `desiredUserAdmin=false`. Normal PROVISION continues through its existing branch.
+
+`requestExistingUserIdentityLink` la action PM + UserAdmin cho mot legacy TESTER/DEVELOPER active duoc chon. Server tu suy ra role, snapshot email legacy normalized, tao invitation/delivery da ky va khoa target bang `sha256(JSON.stringify(['LINK_EXISTING', targetID]))`. `verifySapIdentity` giu cac check token va immutable identity chung, doc lai dung target, chi loai target do khoi duplicate scan, va queue version-2 `LINK_EXISTING` voi `desiredUserAdmin=false`. Nhanh PROVISION binh thuong van giu nguyen.
+
+The handler returns the existing safe `OnboardingResult` allowlist. Internal target association, source email snapshot, identity claims, hashes, operation leases, and provider data never enter the public service result or audit summary.
+
+Handler chi tra allowlist `OnboardingResult` an toan hien co. Association target noi bo, snapshot email nguon, identity claims, hash, lease operation va data provider khong bao gio vao public result hoac audit summary.

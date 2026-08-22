@@ -472,3 +472,8 @@ Lưu ý khi sửa:
 - Giữ `AiSuggestions` gắn với `Bugs`; AI suggestion v1 của IDTS là suggestion theo context bug, không phải record AI global.
 - Không thêm field raw prompt, raw provider response, credential, attachment content hoặc storage reference.
 - Giữ review state là association tới code list để UI và report hiển thị label dễ đọc.
+## Gate 3B additive link fields / Field link additive Gate 3B
+
+`UserOnboardingRequests` adds only the nullable `linkTargetUser` association and `linkSourceEmailNormalized` snapshot. They bind one approved legacy target and its original contact email to the signed verification flow; no new code-list state, HDI data artifact, drop, seed, or replacement User entity is introduced. The same `Users.ID` remains the durable identity/profile/assignment owner.
+
+`UserOnboardingRequests` chi them association nullable `linkTargetUser` va snapshot `linkSourceEmailNormalized`. Hai field gan mot legacy target da duyet va email lien he ban dau vao flow verify da ky; khong them state code-list, artifact HDI, drop, seed hoac entity User thay the. `Users.ID` cu van la owner ben vung cua identity/profile/assignment.

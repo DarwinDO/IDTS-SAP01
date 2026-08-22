@@ -101,3 +101,8 @@ Thêm action hoặc thay đổi transition → cập nhật cả capability ở 
 **English.** `applyBugCapabilities` independently derives comment, edit-shell, attachment and dynamic field-control values. Non-assignee Developers get comment-only; assignees get the edit shell plus attachment mutations while required/optional Bug fields stay read-only; coordinators receive normal mandatory/optional controls.
 
 **Tiếng Việt.** `applyBugCapabilities` tính riêng capability comment, edit shell, attachment và dynamic field control. Developer không phải assignee chỉ có comment; assignee có edit shell và attachment mutation nhưng field Bug bắt buộc/tùy chọn vẫn read-only; coordinator nhận control mandatory/optional bình thường.
+## Gate 3B Smart Assign identity filtering / Loc identity Smart Assign Gate 3B
+
+`buildAssignableDeveloperRows` resolves each Developer Profile to its internal User, applies the shared exact active-identity predicate, and filters unlinked Developers before public candidate rows are returned. The internal User ID is removed from the public row; only safe candidate/profile/capacity fields remain. Existing Bug assignee rows are not rewritten by this read model.
+
+`buildAssignableDeveloperRows` map moi Developer Profile toi User noi bo, ap dung predicate active-identity exact va loc Developer chua link truoc khi tra candidate public. User ID noi bo bi loai khoi public row; chi giu field candidate/profile/capacity an toan. Read model khong viet lai assignee cua Bug hien co.
