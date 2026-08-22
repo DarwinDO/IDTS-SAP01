@@ -164,10 +164,10 @@ function assertProvider (provider, readOnly = false) {
 }
 
 function unique (values) {
-  if (!Array.isArray(values) || values.some(value => typeof value !== 'string')) {
+  if (!Array.isArray(values) || values.some(value => typeof value !== 'string') || new Set(values).size !== values.length) {
     throw brokerError('PROVISIONING_READBACK_MISMATCH', 'The access provider result could not be verified.')
   }
-  return [...new Set(values)]
+  return values
 }
 
 function brokerError (code, message) {

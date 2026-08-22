@@ -95,6 +95,9 @@ assert.match(activeUserDetailsFragment, /press="\.onOpenExistingIdentityLink"/)
 const linkExistingIdentityFragment = fs.readFileSync(path.join(webapp, 'fragment/LinkExistingIdentity.fragment.xml'), 'utf8')
 assert.match(linkExistingIdentityFragment, /<Dialog/)
 assert.match(linkExistingIdentityFragment, /existingLink>\/row\/displayName/)
+assert.match(linkExistingIdentityFragment, /existingLink>\/row\/businessRole/)
+assert.match(linkExistingIdentityFragment, /existingIdentityLinkRole/)
+assert.match(linkExistingIdentityFragment, /state="None"/)
 assert.match(linkExistingIdentityFragment, /type="Email"/)
 assert.match(linkExistingIdentityFragment, /existingLink>\/email/)
 assert.match(linkExistingIdentityFragment, /press="\.onConfirmExistingIdentityLink"/)
@@ -154,6 +157,8 @@ assert.match(controller, /onLoadMoreActiveUsers/)
 assert.match(controller, /requestExistingUserIdentityLink/)
 assert.match(controller, /setParameter\("userID"/)
 assert.match(controller, /setParameter\("email"/)
+assert.match(controller, /businessRole: oDetails\.businessRole/)
+assert.match(controller, /sEmail\.toLowerCase\(\)/)
 assert.match(controller, /onConfirmExistingIdentityLink/)
 assert.match(controller, /onExistingIdentityLinkFieldChange/)
 assert.match(controller, /onCancelExistingIdentityLink/)
@@ -409,7 +414,7 @@ async function verifyRuntimeBehavior () {
     _emptyExistingIdentityLink: controllerDefinition._emptyExistingIdentityLink,
     _existingIdentityLinkDialog: { close: () => { existingLinkClosed += 1 } }
   })
-  existingLinkInstance.onExistingIdentityLinkFieldChange({ getParameter: name => name === 'value' ? 'new.identity@example.invalid' : undefined })
+  existingLinkInstance.onExistingIdentityLinkFieldChange({ getParameter: name => name === 'value' ? 'New.Identity@Example.INVALID' : undefined })
   assert.equal(existingLinkData.emailValid, true)
   await existingLinkInstance.onConfirmExistingIdentityLink()
   assert.deepEqual(existingLinkInvocation, {
@@ -453,9 +458,10 @@ function loadController (source) {
 
 for (const locale of ['i18n.properties', 'i18n_en.properties']) {
   const text = fs.readFileSync(path.join(webapp, 'i18n', locale), 'utf8')
-  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'changeRoleConfirmation', 'revokeConfirmation', 'manageResponsibilities', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'activeUserSearchPlaceholder', 'includeNonActive', 'includeRevoked', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'loadMoreActiveUsers', 'viewDetails', 'activeUserDetails', 'linkExistingIdentity', 'existingIdentityLinkNotice', 'existingIdentityLinkEmail', 'sendIdentityLink', 'identityLinkQueued', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'developerProfile', 'close', 'activeUsersNoDeveloper', 'suspendAccess', 'reactivateAccess', 'suspendWarning', 'reactivateWarning', 'suspendQueued', 'reactivateQueued']) {
+  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'changeRoleConfirmation', 'revokeConfirmation', 'manageResponsibilities', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'activeUserSearchPlaceholder', 'includeNonActive', 'includeRevoked', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'loadMoreActiveUsers', 'viewDetails', 'activeUserDetails', 'linkExistingIdentity', 'existingIdentityLinkRole', 'existingIdentityLinkNotice', 'existingIdentityLinkEmail', 'sendIdentityLink', 'identityLinkQueued', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'developerProfile', 'close', 'activeUsersNoDeveloper', 'suspendAccess', 'reactivateAccess', 'suspendWarning', 'reactivateWarning', 'suspendQueued', 'reactivateQueued']) {
     assert.match(text, new RegExp(`^${key}=`, 'm'))
   }
+  assert.match(text, /^existingIdentityLinkNotice=.*same Users\.ID.*Developer Profile.*Bug assignments.*comments.*history/m)
 }
 
 verifyRuntimeBehavior().then(() => {

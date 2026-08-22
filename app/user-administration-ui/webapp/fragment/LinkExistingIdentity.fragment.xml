@@ -10,6 +10,12 @@
 				<ObjectIdentifier
 					title="{existingLink>/row/displayName}"
 					text="{existingLink>/row/email}"/>
+				<Label
+					text="{i18n>existingIdentityLinkRole}"
+					class="sapUiSmallMarginTop"/>
+				<ObjectStatus
+					text="{existingLink>/row/businessRole}"
+					state="None"/>
 				<ObjectStatus
 					text="{i18n>existingIdentityLinkNotice}"
 					state="Information"

@@ -12,6 +12,10 @@ Module này sở hữu boundary PM + UserAdmin để link một legacy TESTER/DE
 
 Onboarding result và audit summary trả về đều an toàn. Identity field của target, source snapshot, token material, chi tiết provider và raw email không xuất hiện trong public output hoặc safe summary.
 
+The request boundary remains only a target-level concurrency guard; final normalized-email ownership is enforced again during broker completion under the locked Users read. This closes the cross-target race without adding a reservation column or provider write.
+
+Boundary request van chi la guard concurrency theo target; ownership email normalized cuoi cung duoc enforce lai o broker completion voi Users read bi lock. Cach nay dong race cross-target ma khong them reservation column hoac provider write.
+
 ### Important source anchors
 
 - **Location**: `srv/user-admin/existing-identity-link.js:15` `requestExistingUserIdentityLink(...)`

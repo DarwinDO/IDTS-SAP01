@@ -37,6 +37,7 @@ const IDS = Object.freeze({
 
 const TARGET_EMAIL = 'linked.developer@example.invalid'
 const FIXTURE_NOW = new Date('2026-08-22T08:00:00.000Z')
+const CORRELATION_MISMATCH_OPERATION_ID = '82000000-0000-4000-8000-000000000047'
 
 function fixtureSigningKey () {
   return `fixture-signing-key-${'x'.repeat(40)}`
@@ -90,6 +91,8 @@ async function main () {
   assert.match(schema, /linkSourceEmailNormalized\s*:\s*String\(255\)/, 'missing existing-user source email snapshot')
   assert.match(service, /action requestExistingUserIdentityLink\([\s\S]*userID\s*:\s*UUID[\s\S]*email\s*:\s*String\(255\)/, 'missing existing-user identity-link action')
   assert.match(provisioning, /operation\.operationType === 'LINK_EXISTING'/, 'missing LINK_EXISTING provisioning branch')
+  assert.match(provisioning, /request\.correlationId\s*!==\s*operation\.correlationId/, 'existing link completion must bind request and operation correlation')
+  assert.match(provisioning, /const lockedUsers = await tx\.run\([\s\S]*SELECT\.from\('idts\.cap\.Users'\)[\s\S]*\.forUpdate\(\)/, 'existing link completion must lock Users before collision checks')
   assert.match(accessProvisioning, /'LINK_EXISTING'/, 'missing read-only LINK_EXISTING broker contract')
 
   const publicDeclarations = [
@@ -664,6 +667,7 @@ async function assertExistingLinkVerification (cds, db, { service, request }) {
   assert.equal(operation.expectedVersion, 2, 'verified link operation must use request version 2')
   assert.equal(operation.desiredRole_code, 'DEVELOPER', 'operation role must be server-derived')
   assert.equal(operation.desiredUserAdmin, false, 'existing-user link must not request UserAdmin')
+  assert.equal(persisted.correlationId, operation.correlationId, 'verified link request and operation must share exact correlation')
 
   const audit = await db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ onboardingRequest_ID: request.ID }))
   assert.equal(audit.some(row => row.action === 'QUEUE_LINK_EXISTING'), true, 'link queue must append the safe queue audit')
@@ -679,7 +683,7 @@ async function assertExistingLinkVerification (cds, db, { service, request }) {
     error => error?.code === 'INVITATION_ALREADY_USED',
     'a repeated verification token must fail closed'
   )
-  return { request: persisted, operation }
+  return { request: persisted, operation, correlationMismatchRequest: emailCollision.request }
 }
 
 async function assertReadOnlyProviderContract () {
@@ -709,7 +713,8 @@ async function assertReadOnlyProviderContract () {
     [],
     ['IDTS_TESTER'],
     ['IDTS_DEVELOPER', 'IDTS_TESTER'],
-    ['IDTS_DEVELOPER', 'IDTS_USER_ADMIN']
+    ['IDTS_DEVELOPER', 'IDTS_USER_ADMIN'],
+    ['IDTS_DEVELOPER', 'IDTS_DEVELOPER']
   ]) {
     const negativeCalls = []
     await assert.rejects(
@@ -733,8 +738,8 @@ async function assertReadOnlyProviderContract () {
 
 }
 
-async function assertAtomicCompletion (cds, db, { request, operation }) {
-  const { SELECT } = cds.ql
+async function assertAtomicCompletion (cds, db, { request, operation, correlationMismatchRequest }) {
+  const { INSERT, SELECT, UPDATE } = cds.ql
   const before = await preservationSnapshot(db)
   const previousAuth = cds.env.requires.auth
   cds.env.requires.auth = { kind: 'xsuaa' }
@@ -783,10 +788,13 @@ async function assertAtomicCompletion (cds, db, { request, operation }) {
 
     const after = await preservationSnapshot(db)
     assert.deepEqual(after.userIDs, before.userIDs, 'link completion must not create or replace a user')
+    assert.deepEqual(after.user, before.user, 'link completion must preserve display name, role, active state, and password fields')
     assert.equal(after.profileID, before.profileID, 'link completion must preserve Developer Profile ID')
     assert.deepEqual(after.responsibilityIDs, before.responsibilityIDs, 'link completion must preserve responsibility IDs')
     assert.deepEqual(after.bugAssignments, before.bugAssignments, 'link completion must preserve Bug assignees')
     assert.equal(after.commentCount, before.commentCount, 'link completion must preserve comments')
+    assert.deepEqual(after.historyEventIDs, before.historyEventIDs, 'link completion must preserve history events')
+    assert.deepEqual(after.notificationIDs, before.notificationIDs, 'link completion must preserve notifications')
 
     const linkedUser = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: IDS.targetDeveloper }))
     const linkedRequest = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: request.ID }))
@@ -801,6 +809,65 @@ async function assertAtomicCompletion (cds, db, { request, operation }) {
     const audit = await db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ operation_ID: operation.ID }))
     assert.equal(audit.some(row => row.action === 'LINK_EXISTING'), true, 'link completion must append LINK_EXISTING audit')
 
+    const mismatchBefore = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: IDS.verificationEmailTarget }))
+    await db.run(UPDATE('idts.cap.UserOnboardingRequests').set({
+      status_code: 'PROVISION_QUEUED',
+      consumedAt: FIXTURE_NOW.toISOString(),
+      verifiedAt: FIXTURE_NOW.toISOString(),
+      identityOrigin: 'fixture-origin',
+      identityIssuer: 'https://issuer.example.invalid',
+      identitySubject: 'correlation-mismatch-subject',
+      identityPlatformUserId: 'fixture-platform-user',
+      identityKeyHash: fixtureHash('correlation-mismatch'),
+      identityEmailNormalized: 'verification.email@example.invalid',
+      provisioningVersion: 2,
+      latestOperation_ID: CORRELATION_MISMATCH_OPERATION_ID,
+      correlationId: '82000000-0000-4000-8000-000000000048'
+    }).where({ ID: correlationMismatchRequest.ID }))
+    await db.run(INSERT.into('idts.cap.UserAccessOperations').entries({
+      ID: CORRELATION_MISMATCH_OPERATION_ID,
+      onboardingRequest_ID: correlationMismatchRequest.ID,
+      operationType: 'LINK_EXISTING',
+      state: 'PENDING',
+      requestedBy_ID: correlationMismatchRequest.requestedBy_ID,
+      idempotencyKey: fixtureHash('correlation-mismatch-operation'),
+      expectedVersion: 2,
+      desiredRole_code: 'DEVELOPER',
+      desiredUserAdmin: false,
+      correlationId: '82000000-0000-4000-8000-000000000049',
+      attemptCount: 0
+    }))
+    const mismatchClaim = await brokerService.send({
+      event: 'claimNextAccessOperation',
+      data: {},
+      user: brokerUser,
+      timestamp: FIXTURE_NOW
+    })
+    assert.equal(mismatchClaim.operationID, CORRELATION_MISMATCH_OPERATION_ID, 'mismatch fixture must claim its link operation')
+    const mismatchResult = await brokerService.send({
+      event: 'completeAccessOperation',
+      data: {
+        operationID: CORRELATION_MISMATCH_OPERATION_ID,
+        leaseToken: mismatchClaim.leaseToken,
+        resultCode: 'NOOP_ALREADY_DESIRED',
+        safeCode: 'ROLE_COLLECTIONS_VERIFIED',
+        providerCorrelationHash: null
+      },
+      user: brokerUser,
+      timestamp: FIXTURE_NOW
+    })
+    assert.equal(mismatchResult.status, 'BLOCKED_MANUAL_REVIEW', 'correlation mismatch must fail closed')
+    const mismatchAfter = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: IDS.verificationEmailTarget }))
+    const mismatchRequest = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: correlationMismatchRequest.ID }))
+    const mismatchOperation = await db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ ID: CORRELATION_MISMATCH_OPERATION_ID }))
+    const mismatchAudits = await db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ operation_ID: CORRELATION_MISMATCH_OPERATION_ID }))
+    assert.equal(mismatchAfter.email, mismatchBefore.email, 'correlation mismatch must not update the target email')
+    assert.equal(mismatchAfter.externalIdentityKeyHash, mismatchBefore.externalIdentityKeyHash, 'correlation mismatch must not materialize identity')
+    assert.equal(mismatchRequest.status_code, 'BLOCKED_MANUAL_REVIEW', 'correlation mismatch must block the request')
+    assert.equal(mismatchRequest.activeUser_ID, null, 'correlation mismatch must not assign an active user')
+    assert.equal(mismatchOperation.state, 'BLOCKED_MANUAL_REVIEW', 'correlation mismatch must block the operation')
+    assert.equal(mismatchAudits.some(row => row.toState === 'ACTIVE' || row.result === 'APPLIED'), false, 'correlation mismatch must not append a completion audit')
+
   } finally {
     cds.env.requires.auth = previousAuth
   }
@@ -809,16 +876,24 @@ async function assertAtomicCompletion (cds, db, { request, operation }) {
 async function preservationSnapshot (db) {
   const { SELECT } = require('@sap/cds').ql
   const users = await db.run(SELECT.from('idts.cap.Users').columns('ID').orderBy('ID asc'))
+  const user = await db.run(SELECT.one.from('idts.cap.Users').columns(
+    'ID', 'displayName', 'role_code', 'active', 'passwordHash', 'passwordChangedAt'
+  ).where({ ID: IDS.targetDeveloper }))
   const profiles = await db.run(SELECT.from('idts.cap.DeveloperProfiles').columns('ID').where({ user_ID: IDS.targetDeveloper }))
   const responsibilities = await db.run(SELECT.from('idts.cap.DeveloperResponsibilities').columns('ID').where({ developerProfile_ID: IDS.profile }).orderBy('ID asc'))
   const bugs = await db.run(SELECT.from('idts.cap.Bugs').columns('ID', 'assignee_ID').orderBy('ID asc'))
   const comments = await db.run(SELECT.from('idts.cap.Comments').columns('ID').where({ bug_ID: IDS.bug }))
+  const historyEvents = await db.run(SELECT.from('idts.cap.HistoryEvents').columns('ID').where({ bug_ID: IDS.bug }))
+  const notifications = await db.run(SELECT.from('idts.cap.Notifications').columns('ID').where({ recipient_ID: IDS.targetDeveloper }))
   return {
     userIDs: users.map(row => row.ID),
+    user,
     profileID: profiles[0]?.ID || null,
     responsibilityIDs: responsibilities.map(row => row.ID),
     bugAssignments: bugs.map(row => ({ ID: row.ID, assignee_ID: row.assignee_ID })),
-    commentCount: comments.length
+    commentCount: comments.length,
+    historyEventIDs: historyEvents.map(row => row.ID),
+    notificationIDs: notifications.map(row => row.ID)
   }
 }
 

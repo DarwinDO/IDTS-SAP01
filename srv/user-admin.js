@@ -288,7 +288,8 @@ async function verifySapIdentity (req) {
       ...(approvalRequired ? {} : {
         approvedAt: verifiedAt,
         approvedBy_ID: invitation.requestedBy_ID,
-        latestOperation_ID: operationID
+        latestOperation_ID: operationID,
+        ...(isExistingLink ? { correlationId: operationCorrelationId } : {})
       }),
       lastErrorCode: null,
       lastErrorSummary: null
@@ -309,7 +310,8 @@ async function verifySapIdentity (req) {
       identitySubject: identity.subject,
       identityPlatformUserId: identity.platformUserId,
       identityKeyHash: identityKeyHashValue,
-      identityEmailNormalized: identity.emailNormalized
+      identityEmailNormalized: identity.emailNormalized,
+      ...(isExistingLink ? { correlationId: operationCorrelationId } : {})
     }
     await insertAccessOperation(tx, {
       ID: operationID,

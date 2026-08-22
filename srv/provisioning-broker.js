@@ -231,19 +231,29 @@ async function completeExistingLink (tx, options) {
   const targetID = request.linkTargetUser_ID
   if (!targetID || request.latestOperation_ID !== operation.ID ||
       typeof request.correlationId !== 'string' || request.correlationId.length === 0 ||
-      typeof operation.correlationId !== 'string' || operation.correlationId.length === 0) {
+      typeof operation.correlationId !== 'string' || operation.correlationId.length === 0 ||
+      request.correlationId !== operation.correlationId) {
     return completeProviderConflict(tx, options, 'IDENTITY_RECONCILIATION_REQUIRED')
   }
 
-  const target = await tx.run(
-    SELECT.one.from('idts.cap.Users').where({ ID: targetID })
+  // Lock every Users row before the duplicate check so concurrent links for
+  // different targets cannot both reserve the same mutable email.
+  const lockedUsers = await tx.run(
+    SELECT.from('idts.cap.Users').columns(
+      'ID',
+      'email',
+      'role_code',
+      'active',
+      'externalIdentityOrigin',
+      'externalIdentityIssuer',
+      'externalIdentitySubject',
+      'externalIdentityKeyHash'
+    ).forUpdate()
   )
+  const target = lockedUsers.find(user => user.ID === targetID)
   if (!target) return completeProviderConflict(tx, options, 'IDENTITY_RECONCILIATION_REQUIRED')
 
-  const otherUsers = await tx.run(
-    SELECT.from('idts.cap.Users').columns('ID', 'email', 'externalIdentityKeyHash')
-  )
-  const duplicate = otherUsers.find(user => user.ID !== targetID && (
+  const duplicate = lockedUsers.find(user => user.ID !== targetID && (
     normalizedEmail(user.email) === request.targetEmailNormalized ||
     user.externalIdentityKeyHash === request.identityKeyHash
   ))

@@ -137,6 +137,7 @@ sap.ui.define([
 					userID: oDetails.userID,
 					displayName: oDetails.displayName,
 					email: oDetails.email,
+					businessRole: oDetails.businessRole,
 					linkEligible: oDetails.linkEligible
 				}
 			});
@@ -175,7 +176,7 @@ sap.ui.define([
 			oModel.setProperty("/submitting", true);
 			const bSuccess = await this._invokeAction("requestExistingUserIdentityLink", {
 				userID: oLink.row.userID,
-				email: sEmail
+				email: sEmail.toLowerCase()
 			}, "identityLinkQueued", true);
 			oModel.setProperty("/submitting", false);
 			if (bSuccess) {
