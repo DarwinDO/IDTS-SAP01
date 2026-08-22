@@ -101,24 +101,30 @@ async function buildReadModel (tx, { includeDeveloperDetails = false } = {}) {
 
   const userIDs = users.map(user => user.ID)
   const identityAccessByUser = await readActiveIdentityAccessByUser(tx, userIDs)
-  const requests = await tx.run(
-    SELECT.from(REQUESTS).columns(
-      'ID',
-      'activeUser_ID',
-      'targetEmailNormalized',
-      'requestedRole_code',
-      'userAdminRequested',
-      'status_code',
-      'identityKeyHash',
-      'latestOperation_ID',
-      'provisionedAt',
-      'revokedAt',
-      'lastErrorCode',
-      'lastErrorSummary',
-      'createdAt',
-      'modifiedAt'
-    ).where({ activeUser_ID: { in: userIDs } })
-  )
+  const requestColumns = [
+    'ID',
+    'activeUser_ID',
+    'linkTargetUser_ID',
+    'targetEmailNormalized',
+    'requestedRole_code',
+    'userAdminRequested',
+    'status_code',
+    'identityKeyHash',
+    'latestOperation_ID',
+    'provisionedAt',
+    'revokedAt',
+    'lastErrorCode',
+    'lastErrorSummary',
+    'createdAt',
+    'modifiedAt'
+  ]
+  const [activeUserRequests, targetLinkRequests] = await Promise.all([
+    tx.run(SELECT.from(REQUESTS).columns(...requestColumns).where({ activeUser_ID: { in: userIDs } })),
+    tx.run(SELECT.from(REQUESTS).columns(...requestColumns).where({ linkTargetUser_ID: { in: userIDs } }))
+  ])
+  const requests = [...new Map(
+    [...activeUserRequests, ...targetLinkRequests].map(request => [request.ID, request])
+  ).values()]
 
   const operationIDs = [...new Set(requests.map(request => request.latestOperation_ID).filter(Boolean))]
   const operations = operationIDs.length === 0
@@ -167,7 +173,7 @@ async function buildReadModel (tx, { includeDeveloperDetails = false } = {}) {
         ).where({ assignee_ID: { in: profileIDs } })
       )
 
-  const requestsByUser = groupBy(requests, row => row.activeUser_ID)
+  const requestsByUser = groupBy(requests, row => row.activeUser_ID || row.linkTargetUser_ID)
   const operationsByID = new Map(operations.map(operation => [operation.ID, operation]))
   const profilesByUser = new Map(profiles.map(profile => [profile.user_ID, profile]))
   const responsibilityCounts = countBy(
@@ -178,7 +184,7 @@ async function buildReadModel (tx, { includeDeveloperDetails = false } = {}) {
     bugs.filter(row => row.status_code !== 'CLOSED'),
     row => row.assignee_ID
   )
-  const requestCounts = countBy(requests, row => row.activeUser_ID)
+  const requestCounts = countBy(requests, row => row.activeUser_ID || row.linkTargetUser_ID)
 
   return users.map(user => {
     const selected = selectUserRequest(requestsByUser.get(user.ID) || [])
@@ -251,6 +257,9 @@ async function readActiveUserCounts (tx, row) {
       SELECT.from(REQUESTS).columns('ID').where({ targetEmailNormalized: row.email })
     ))
   }
+  requestRows.push(...await tx.run(
+    SELECT.from(REQUESTS).columns('ID').where({ linkTargetUser_ID: row.userID })
+  ))
   const auditRows = await tx.run(
     SELECT.from(AUDIT_EVENTS).columns('ID').where({ targetUser_ID: row.userID })
   )

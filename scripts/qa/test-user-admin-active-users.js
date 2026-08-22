@@ -47,6 +47,7 @@ const AMBIGUOUS_REQUEST_B_ID = '82100000-0000-4000-8000-000000000005'
 const REVOKED_REQUEST_ID = '82100000-0000-4000-8000-000000000006'
 const SUSPENDED_REQUEST_ID = '82100000-0000-4000-8000-000000000007'
 const UNLINKED_ACTIVE_REQUEST_ID = '82100000-0000-4000-8000-000000000008'
+const PENDING_LINK_REQUEST_ID = '82100000-0000-4000-8000-000000000009'
 const ACTIVE_OPERATION_ID = '82200000-0000-4000-8000-000000000001'
 const STALE_OPERATION_ID = '82200000-0000-4000-8000-000000000002'
 const REVOKED_OPERATION_ID = '82200000-0000-4000-8000-000000000003'
@@ -73,6 +74,7 @@ function requestEntry (ID, values) {
     correlationId: ID,
     provisioningVersion: 1,
     activeUser_ID: values.activeUser_ID || null,
+    linkTargetUser_ID: values.linkTargetUser_ID || null,
     identityKeyHash: values.identityKeyHash || null,
     latestOperation_ID: values.latestOperation_ID || null,
     createdAt: values.createdAt,
@@ -414,6 +416,21 @@ async function main () {
   assert.equal(legacyUnlinked.accessState, 'INCOMPLETE')
   assert.equal(legacyUnlinked.developerReady, false)
   assert.equal(legacyUnlinked.linkEligible, true)
+
+  await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries(requestEntry(PENDING_LINK_REQUEST_ID, {
+    targetEmailNormalized: 'pending.link@example.invalid',
+    requestedRole_code: 'DEVELOPER',
+    linkTargetUser_ID: LEGACY_UNLINKED_USER_ID,
+    status_code: 'INVITED',
+    createdAt: '2026-08-20T12:00:00.000Z',
+    modifiedAt: '2026-08-20T12:00:00.000Z'
+  })))
+  const pendingLegacyUnlinked = (await service.send({
+    event: 'searchActiveUsers',
+    data: { query: 'Legacy Unlinked Developer', includeNonActive: true, skip: 0, top: 100 },
+    user: admin
+  }))[0]
+  assert.equal(pendingLegacyUnlinked.linkEligible, false, 'pending target-linked invitation must hide the link action')
 
   const roleSearch = await service.send({
     event: 'searchActiveUsers',
