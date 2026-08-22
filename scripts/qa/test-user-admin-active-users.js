@@ -121,7 +121,8 @@ async function expectRejected (operation, status, code) {
 async function main () {
   const { deriveAccessState } = require('../../srv/user-admin/active-users')
 
-  assert.equal(deriveAccessState({ userActive: true, requestStatus: 'ACTIVE' }), 'ACTIVE')
+  assert.equal(deriveAccessState({ userActive: true, identityLinked: true, requestStatus: 'ACTIVE' }), 'ACTIVE')
+  assert.equal(deriveAccessState({ userActive: true, identityLinked: false, requestStatus: 'ACTIVE' }), 'INCOMPLETE')
   assert.equal(deriveAccessState({ userActive: false, requestStatus: 'REVOKED' }), 'REVOKED')
   assert.equal(deriveAccessState({ userActive: false, requestStatus: 'ROLE_CHANGE_QUEUED' }), 'SUSPENDED')
   assert.equal(deriveAccessState({ userActive: false, requestStatus: null }), 'INCOMPLETE')

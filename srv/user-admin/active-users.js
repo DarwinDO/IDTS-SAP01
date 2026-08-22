@@ -194,9 +194,11 @@ async function buildReadModel (tx, { includeDeveloperDetails = false } = {}) {
     const activeResponsibilityCount = profile ? responsibilityCounts.get(profile.ID) || 0 : 0
     const identityAccess = identityAccessByUser.get(user.ID)
     const identityLinked = !selected.ambiguous && hasActiveIdentityAccess(user, identityAccess?.requests)
-    const accessState = identityLinked
-      ? deriveAccessState({ userActive: user.active === true, requestStatus: request?.status_code })
-      : 'INCOMPLETE'
+    const accessState = deriveAccessState({
+      userActive: user.active === true,
+      identityLinked,
+      requestStatus: request?.status_code
+    })
     const developerReady = user.role_code === 'DEVELOPER' &&
       user.active === true &&
       identityLinked &&
@@ -206,7 +208,7 @@ async function buildReadModel (tx, { includeDeveloperDetails = false } = {}) {
       ['TESTER', 'DEVELOPER'].includes(user.role_code) &&
       !identityLinked &&
       accessState === 'INCOMPLETE' &&
-      normalizeContactEmail(user.email).endsWith('.example.local') &&
+      normalizeContactEmail(user.email).endsWith('@example.local') &&
       (!request || request.status_code === 'REVOKED')
     const pending = operation && PENDING_OPERATION_STATES.has(operation.state) ? operation : null
 
@@ -280,8 +282,8 @@ function selectUserRequest (rows) {
   }
 }
 
-function deriveAccessState ({ userActive, requestStatus }) {
-  if (userActive === true && requestStatus === 'ACTIVE') return 'ACTIVE'
+function deriveAccessState ({ userActive, identityLinked, requestStatus }) {
+  if (identityLinked === true && userActive === true && requestStatus === 'ACTIVE') return 'ACTIVE'
   if (requestStatus === 'REVOKED') return 'REVOKED'
   if (userActive !== true && SUSPENDED_REQUEST_STATUSES.has(requestStatus)) return 'SUSPENDED'
   return 'INCOMPLETE'
