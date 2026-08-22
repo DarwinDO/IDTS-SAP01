@@ -38,6 +38,10 @@ Provider request-contract recovery is deliberately one-shot. `retryAccessOperati
 
 Vietnamese: Recovery cho request contract chi cho dung mot lan. `retryAccessOperation` binh thuong chi nhan `RETRYABLE_FAILURE`; trong migration co kiem soat no chi nhan them dung tuple `BLOCKED_MANUAL_REVIEW + PROVIDER_REQUEST_INVALID + attemptCount 4` khi operation va request khop nhau. Attempt count chi duoc dua vao summary cua PM de UI bam sat boundary. Neu provider fail them lan nua, attempt tang va khong the quay lai cua compatibility. Reconcile van chi danh cho `AMBIGUOUS_PROVIDER_OUTCOME`.
 
+When a `retryAccessOperation` or `reconcileAccessOperation` rotates a `LINK_EXISTING` operation correlation, the same transaction/version guard writes that new UUID to `UserOnboardingRequests.correlationId`. Other operation types retain their existing request-correlation behavior. The recovery contract therefore reaches the same exact-correlation `LINK_EXISTING` completion path after retry or reconciliation.
+
+Khi `retryAccessOperation` hoac `reconcileAccessOperation` rotate correlation cua operation `LINK_EXISTING`, cung transaction/version guard ghi UUID moi do vao `UserOnboardingRequests.correlationId`. Operation type khac giu behavior correlation request cu. Vi vay recovery co the di vao cung completion `LINK_EXISTING` yeu cau exact correlation sau retry hoac reconcile.
+
 ## Gate 3 access lifecycle / Vòng đời access Gate 3
 
 `requestSuspend` is a local IDTS access action. After the existing PM + `UserAdmin` guard and version check, it locks the target user and rechecks the final-administrator invariant in the same transaction. It sets `Users.active=false`, revokes active `AuthSessions`, changes the request to `SUSPENDED`, increments the request version, and appends `REQUEST_SUSPEND`. It does not create a provider operation or call SAP APIs.

@@ -6,8 +6,8 @@
 
 - Human/coordinator: DonHV; source branch: `feature/wp8-existing-user-identity-link-donhv`.
 - Frozen base: `44b89db5db22e2ea65d4a85d746f57ad3a8f840e` (`origin/dev` and `dev` at task start).
-- Source implementation commits: `b14064b`, `c4a751c`, `9067497`, `be803f6`, `e0719fb`, `d3ca17f`, `2dde055`, `3a9c179`, `d5d60c9`, `ba94757`, `7b7e062`; documentation/evidence/status checkpoints: `566dcda`, `8bba402`, `5043f10`.
-- The frozen review of `44b89db..7b64909` found four Important and three Minor findings; `ba94757` and `7b7e062` address the findings in source/tests, with the post-update rollback proof explicitly triaged as test-quality debt. The final exact head and one bounded independent re-review must be read back fresh after this evidence update. No merge or Ready transition is implied by this artifact.
+- Source implementation commits: `b14064b`, `c4a751c`, `9067497`, `be803f6`, `e0719fb`, `d3ca17f`, `2dde055`, `3a9c179`, `d5d60c9`, `ba94757`, `7b7e062`, `734d625`; documentation/evidence/status checkpoints: `566dcda`, `8bba402`, `5043f10`.
+- The frozen review of `44b89db..7b64909` found four Important and three Minor findings; the bounded re-review of `44b89db..95772d7` closed those findings but found one recovery-correlation Important plus two evidence Minors. `734d625` addresses the recovery Important; rollback/history-notification gaps remain explicit test-quality/environment limitations. No additional independent reviewer is authorized; the coordinator must perform final exact-delta review before any Draft PR decision. No merge or Ready transition is implied by this artifact.
 - Approved authority: `docs/superpowers/specs/2026-08-21-gate-3b-existing-user-identity-link-design.md` and `docs/superpowers/plans/2026-08-21-gate-3b-existing-user-identity-link-implementation.md`.
 
 ### Delivered source behavior
@@ -15,7 +15,7 @@
 - Additive request model: nullable `linkTargetUser` association and `linkSourceEmailNormalized` snapshot; public action accepts only `userID` and `email`.
 - Existing-user request/verification: server-owned active legacy TESTER/DEVELOPER target, signed invitation, exact target lock, immutable identity verification, version-2 `LINK_EXISTING` queue, and no PM re-approval.
 - Broker: `LINK_EXISTING` performs one exact Role Collection readback and returns a safe no-op result. No assign, unassign, PATCH, or compensation path is available.
-- CAP completion: exact same `Users.ID`; request/operation correlation IDs must match exactly; completion locks the explicit Users collision read before checking normalized email/hash ownership, then conditionally updates only email and the four immutable identity fields and finalizes request/operation/audit atomically. Profiles, responsibilities, Bugs, comments, notifications, history, display name, role, active flag, and password data are preserved.
+- CAP completion: exact same `Users.ID`; request/operation correlation IDs must match exactly; initial verification, retry/reconcile requeue, and expired-lease reconciliation persist the same correlation on both private rows for `LINK_EXISTING`; completion locks the explicit Users collision read before checking normalized email/hash ownership, then conditionally updates only email and the four immutable identity fields and finalizes request/operation/audit atomically. Profiles, responsibilities, Bugs, comments, notifications, history, display name, role, active flag, and password data are preserved.
 - Assignment readiness: one exact matching `ACTIVE` identity request is required for new direct assignment and Smart Assign. Existing Bug assignees are not rewritten.
 - Active Users: request rows are read/deduplicated through both `activeUser_ID` and private `linkTargetUser_ID`, so pending target-linked requests hide duplicate link eligibility.
 - UI: safe server-owned `linkEligible` controls a localized dialog with a read-only current business role and explicit same-`Users.ID`/Profile/responsibilities/Bug/comment/history preservation copy; submit lowercases and sends only `userID` and email, reports queued status, and reloads Requests/Active Users.
@@ -38,6 +38,7 @@ Passed source checks:
 - Direct provider probes passed for exact readback, zero writes, and duplicate Role Collection rejection. Source assertions and focused fixtures cover exact correlation equality, cross-target same-email one-winner/one-blocked behavior, pending target-linked Active Users visibility, and the expanded preservation snapshot.
 - `git diff --check` passed with only the known LF-to-CRLF working-copy warnings.
 - `npm run qa:immutable-identity:programmatic`, `npm run qa:secret-scan`, `npm run qa:agent-rules`, `npm run qa:depth:self-test` (15/15), and `node scripts/qa/test-user-access-provisioning-contract.js` passed.
+- Recovery source assertions and `node --check` passed for the broker, UserAdmin, existing-link fixture, and standard onboarding fixture. The focused runtime fixture now covers retry, reconcile, and expired-lease→reconcile correlation equality followed by exact `LINK_EXISTING` completion; it is dependency-blocked before execution.
 - Task 1 review fix/re-review: no Critical/Important findings; Task 2 replacement review: no findings; Task 3 review: no Critical/Important with deferred test-quality items triaged inline; Task 4 review: no Critical/Important with deferred test-quality items triaged inline.
 
 Environment-blocked or not claimable as runtime PASS:
@@ -54,7 +55,7 @@ Environment-blocked or not claimable as runtime PASS:
 - Public/API/UI surfaces omit provider identifiers, identity claims, platform IDs, raw token/JWT/cookie/OTP material, endpoint/body details, credentials, operation leases, and full identity hashes; the dialog exposes only safe business role and preservation copy.
 - Audit summaries are fixed safe text; target associations and operation/request links remain internal persistence relationships.
 - `LINK_EXISTING` is explicitly zero-write at the provider boundary and the final local update is exact-target, role/source-email/null-tuple constrained.
-- Duplicate email/hash, partial identity, wrong role, inactive target, stale source, PM target, replay, concurrent request/completion, cross-target same-email race, exact correlation drift, invalid email, duplicate provider readback, and ambiguous active-link cases are represented in focused source contracts; runtime execution remains dependency-blocked.
+- Duplicate email/hash, partial identity, wrong role, inactive target, stale source, PM target, replay, concurrent request/completion, cross-target same-email race, initial/recovery correlation drift, retry/reconcile/expired-lease recovery, invalid email, duplicate provider readback, and ambiguous active-link cases are represented in focused source contracts; runtime execution remains dependency-blocked.
 - The post-user-update fault-injection rollback proof remains a documented test-quality deferral because the locked CAP fixture has no supported fault-injection hook; the transaction boundary and preservation snapshot are source-visible.
 
 ### Mutation ledger
@@ -71,7 +72,7 @@ Environment-blocked or not claimable as runtime PASS:
 
 ### Next approval
 
-Coordinator must review the new exact-head diff and bounded re-review result before any Draft PR is created. Runtime/live identity acceptance, any provider readback, deployment, merge, Ready transition, and Gate 4/5 require separate DonHV approval.
+Coordinator must review the final exact-delta source fix from `95772d7` through the new clean head. No additional reviewer or Draft PR is authorized in this executor turn; runtime/live identity acceptance, any provider readback, deployment, merge, Ready transition, and Gate 4/5 require separate DonHV approval.
 
 ## Tiếng Việt
 
@@ -79,13 +80,13 @@ Coordinator must review the new exact-head diff and bounded re-review result bef
 
 - Owner/coordinator: DonHV; branch source: `feature/wp8-existing-user-identity-link-donhv`.
 - Base đóng băng: `44b89db5db22e2ea65d4a85d746f57ad3a8f840e` (`origin/dev` và `dev` tại thời điểm bắt đầu).
-- Các commit source: `b14064b`, `c4a751c`, `9067497`, `be803f6`, `e0719fb`, `d3ca17f`, `2dde055`, `3a9c179`, `d5d60c9`.
-- Review frozen trước đó trên `44b89db..7b64909` phát hiện 4 Important và 3 Minor; `ba94757` và `7b7e062` đã xử lý ở source/test, còn proof rollback sau user update được triage rõ là test-quality debt. Exact head cuối và một bounded re-review sẽ được đọc lại sau evidence update này; artifact này không hàm ý merge hoặc Ready.
+- Các commit source: `b14064b`, `c4a751c`, `9067497`, `be803f6`, `e0719fb`, `d3ca17f`, `2dde055`, `3a9c179`, `d5d60c9`, `ba94757`, `7b7e062`, `734d625`.
+- Review frozen trên `44b89db..7b64909` phát hiện 4 Important và 3 Minor; bounded re-review trên `44b89db..95772d7` đóng các finding cũ nhưng phát hiện 1 Important recovery-correlation và 2 Minor evidence. `734d625` đã xử lý Important recovery; rollback/history-notification vẫn là limitation test-quality/môi trường được ghi rõ. Không spawn reviewer thêm; coordinator cần final exact-delta review trước quyết định Draft PR. Artifact không hàm ý merge hoặc Ready.
 - Spec/plan được duyệt là nguồn chuẩn theo hai file trong `docs/superpowers/` nêu trên.
 
 ### Behavior source đã giao
 
-Giữ nguyên `Users.ID` được chọn; link identity chỉ readback provider; CAP update cùng row, lock collision Users và bind exact correlation request/operation, giữ profile/responsibility/Bug/comment/notification/history; assignment mới và Smart Assign yêu cầu đúng một identity link `ACTIVE`; Active Users ẩn pending target-linked request; UI hiển thị role read-only, copy preservation đầy đủ, chỉ gửi `userID` và email lowercase, báo queued và reload an toàn.
+Giữ nguyên `Users.ID` được chọn; link identity chỉ readback provider; CAP update cùng row, bind exact correlation request/operation cả initial/retry/reconcile/expired lease cho `LINK_EXISTING`, lock collision Users và giữ profile/responsibility/Bug/comment/notification/history; assignment mới và Smart Assign yêu cầu đúng một identity link `ACTIVE`; Active Users ẩn pending target-linked request; UI hiển thị role read-only, copy preservation đầy đủ, chỉ gửi `userID` và email lowercase, báo queued và reload an toàn.
 
 ### Kết quả verification và giới hạn
 
@@ -93,4 +94,4 @@ Syntax JS, XML parse, probe broker read-only/duplicate/zero-write, source assert
 
 ### Approval tiếp theo
 
-Coordinator review exact-head diff và bounded re-review trước khi quyết định Draft PR. Runtime/live identity acceptance, provider readback, deploy, merge, Ready và Gate 4/5 cần DonHV approval riêng.
+Coordinator review exact-delta diff từ `95772d7` đến exact head mới trước khi quyết định Draft PR; executor không spawn reviewer thêm. Runtime/live identity acceptance, provider readback, deploy, merge, Ready và Gate 4/5 cần DonHV approval riêng.
