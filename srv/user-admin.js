@@ -770,13 +770,18 @@ async function requeueAccessOperation (req, options) {
   )
   if (changed !== 1) throw serviceError(409, 'ONBOARDING_VERSION_CONFLICT', 'The access operation changed. Reload and try again.')
   const queuedState = queuedStateFor(operation.operationType)
-  const requestChanged = await tx.run(UPDATE('idts.cap.UserOnboardingRequests').set({
+  const requestPatch = {
     status_code: queuedState,
     provisioningVersion: nextVersion,
     latestOperation_ID: operation.ID,
     lastErrorCode: null,
     lastErrorSummary: null
-  }).where({ ID: request.ID, provisioningVersion: request.provisioningVersion }))
+  }
+  if (operation.operationType === 'LINK_EXISTING') requestPatch.correlationId = nextCorrelationId
+  const requestChanged = await tx.run(UPDATE('idts.cap.UserOnboardingRequests').set(requestPatch).where({
+    ID: request.ID,
+    provisioningVersion: request.provisioningVersion
+  }))
   if (requestChanged !== 1) throw serviceError(409, 'ONBOARDING_VERSION_CONFLICT', 'The onboarding request changed. Reload and try again.')
   await insertIdentityAudit(tx, {
     operationID: operation.ID,

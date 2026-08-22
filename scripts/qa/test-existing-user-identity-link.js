@@ -38,6 +38,17 @@ const IDS = Object.freeze({
 const TARGET_EMAIL = 'linked.developer@example.invalid'
 const FIXTURE_NOW = new Date('2026-08-22T08:00:00.000Z')
 const CORRELATION_MISMATCH_OPERATION_ID = '82000000-0000-4000-8000-000000000047'
+const RECOVERY = Object.freeze({
+  retryTarget: '82000000-0000-4000-8000-000000000050',
+  retryRequest: '82000000-0000-4000-8000-000000000051',
+  retryOperation: '82000000-0000-4000-8000-000000000052',
+  reconcileTarget: '82000000-0000-4000-8000-000000000053',
+  reconcileRequest: '82000000-0000-4000-8000-000000000054',
+  reconcileOperation: '82000000-0000-4000-8000-000000000055',
+  expiredTarget: '82000000-0000-4000-8000-000000000056',
+  expiredRequest: '82000000-0000-4000-8000-000000000057',
+  expiredOperation: '82000000-0000-4000-8000-000000000058'
+})
 
 function fixtureSigningKey () {
   return `fixture-signing-key-${'x'.repeat(40)}`
@@ -84,6 +95,7 @@ function fixtureXsuaaUser (cds, email) {
 async function main () {
   const schema = readSource('db/schema.cds')
   const service = readSource('srv/user-admin.cds')
+  const userAdmin = readSource('srv/user-admin.js')
   const provisioning = readSource('srv/provisioning-broker.js')
   const accessProvisioning = readSource('broker/lib/access-provisioning.js')
 
@@ -92,6 +104,8 @@ async function main () {
   assert.match(service, /action requestExistingUserIdentityLink\([\s\S]*userID\s*:\s*UUID[\s\S]*email\s*:\s*String\(255\)/, 'missing existing-user identity-link action')
   assert.match(provisioning, /operation\.operationType === 'LINK_EXISTING'/, 'missing LINK_EXISTING provisioning branch')
   assert.match(provisioning, /request\.correlationId\s*!==\s*operation\.correlationId/, 'existing link completion must bind request and operation correlation')
+  assert.match(provisioning, /if \(operation\.operationType === 'LINK_EXISTING'\) requestPatch\.correlationId = reconciliationCorrelationId/, 'expired LINK_EXISTING recovery must persist reconciliation correlation')
+  assert.match(userAdmin, /if \(operation\.operationType === 'LINK_EXISTING'\) requestPatch\.correlationId = nextCorrelationId/, 'retry/reconcile LINK_EXISTING recovery must persist requeue correlation')
   assert.match(provisioning, /const lockedUsers = await tx\.run\([\s\S]*SELECT\.from\('idts\.cap\.Users'\)[\s\S]*\.forUpdate\(\)/, 'existing link completion must lock Users before collision checks')
   assert.match(accessProvisioning, /'LINK_EXISTING'/, 'missing read-only LINK_EXISTING broker contract')
 
@@ -683,7 +697,7 @@ async function assertExistingLinkVerification (cds, db, { service, request }) {
     error => error?.code === 'INVITATION_ALREADY_USED',
     'a repeated verification token must fail closed'
   )
-  return { request: persisted, operation, correlationMismatchRequest: emailCollision.request }
+  return { service, request: persisted, operation, correlationMismatchRequest: emailCollision.request }
 }
 
 async function assertReadOnlyProviderContract () {
@@ -738,7 +752,7 @@ async function assertReadOnlyProviderContract () {
 
 }
 
-async function assertAtomicCompletion (cds, db, { request, operation, correlationMismatchRequest }) {
+async function assertAtomicCompletion (cds, db, { service, request, operation, correlationMismatchRequest }) {
   const { INSERT, SELECT, UPDATE } = cds.ql
   const before = await preservationSnapshot(db)
   const previousAuth = cds.env.requires.auth
@@ -867,6 +881,190 @@ async function assertAtomicCompletion (cds, db, { request, operation, correlatio
     assert.equal(mismatchRequest.activeUser_ID, null, 'correlation mismatch must not assign an active user')
     assert.equal(mismatchOperation.state, 'BLOCKED_MANUAL_REVIEW', 'correlation mismatch must block the operation')
     assert.equal(mismatchAudits.some(row => row.toState === 'ACTIVE' || row.result === 'APPLIED'), false, 'correlation mismatch must not append a completion audit')
+
+    const recoveryAdmin = new cds.User({
+      id: 'fixture.recovery.pm@example.invalid',
+      roles: ['authenticated-user', 'PM', 'UserAdmin']
+    })
+    const recoveryCases = [
+      {
+        name: 'retry',
+        targetID: RECOVERY.retryTarget,
+        requestID: RECOVERY.retryRequest,
+        operationID: RECOVERY.retryOperation,
+        correlationId: '82000000-0000-4000-8000-000000000059'
+      },
+      {
+        name: 'reconcile',
+        targetID: RECOVERY.reconcileTarget,
+        requestID: RECOVERY.reconcileRequest,
+        operationID: RECOVERY.reconcileOperation,
+        correlationId: '82000000-0000-4000-8000-000000000060'
+      },
+      {
+        name: 'expired',
+        targetID: RECOVERY.expiredTarget,
+        requestID: RECOVERY.expiredRequest,
+        operationID: RECOVERY.expiredOperation,
+        correlationId: '82000000-0000-4000-8000-000000000061'
+      }
+    ]
+    const seedRecoveryLink = async recovery => {
+      const sourceEmail = `recovery.${recovery.name}@example.local`
+      const targetEmail = `recovery.${recovery.name}@example.invalid`
+      const expired = recovery.name === 'expired'
+      await db.run(INSERT.into('idts.cap.Users').entries({
+        ID: recovery.targetID,
+        displayName: `Recovery ${recovery.name}`,
+        email: sourceEmail,
+        role_code: 'DEVELOPER',
+        active: true
+      }))
+      await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries({
+        ID: recovery.requestID,
+        targetEmailNormalized: targetEmail,
+        linkTargetUser_ID: recovery.targetID,
+        linkSourceEmailNormalized: sourceEmail,
+        openRequestKey: fixtureHash(`recovery-open-${recovery.name}`),
+        requestedRole_code: 'DEVELOPER',
+        userAdminRequested: false,
+        status_code: expired ? 'PROVISIONING' : 'PROVISION_QUEUED',
+        requestedBy_ID: IDS.administrator,
+        expiresAt: '2026-08-23T00:00:00.000Z',
+        tokenNonce: `recovery-${recovery.name}-nonce`,
+        tokenHash: fixtureHash(`recovery-${recovery.name}-token`),
+        consumedAt: FIXTURE_NOW.toISOString(),
+        verifiedAt: FIXTURE_NOW.toISOString(),
+        identityOrigin: 'sap.default',
+        identityIssuer: 'https://issuer.example.invalid',
+        identitySubject: `recovery-${recovery.name}-subject`,
+        identityPlatformUserId: `recovery-${recovery.name}-platform`,
+        identityKeyHash: fixtureHash(`recovery-${recovery.name}-identity`),
+        identityEmailNormalized: targetEmail,
+        provisioningVersion: 2,
+        latestOperation_ID: recovery.operationID,
+        correlationId: recovery.correlationId
+      }))
+      await db.run(INSERT.into('idts.cap.UserAccessOperations').entries({
+        ID: recovery.operationID,
+        onboardingRequest_ID: recovery.requestID,
+        operationType: 'LINK_EXISTING',
+        state: expired ? 'PROCESSING' : 'PENDING',
+        requestedBy_ID: IDS.administrator,
+        idempotencyKey: fixtureHash(`recovery-${recovery.name}-operation`),
+        expectedVersion: 2,
+        desiredRole_code: 'DEVELOPER',
+        desiredUserAdmin: false,
+        correlationId: recovery.correlationId,
+        attemptCount: expired ? 1 : 0,
+        leasedAt: expired ? '2026-08-22T07:00:00.000Z' : null,
+        leaseExpiresAt: expired ? '2026-08-22T07:30:00.000Z' : null,
+        leaseTokenHash: expired ? fixtureHash(`recovery-${recovery.name}-lease`) : null
+      }))
+    }
+    const assertRecoveryCorrelation = async recovery => {
+      const recoveryRequest = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: recovery.requestID }))
+      const recoveryOperation = await db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ ID: recovery.operationID }))
+      assert.equal(recoveryRequest.correlationId, recoveryOperation.correlationId, `${recovery.name} recovery must persist equal request/operation correlation`)
+      return { recoveryRequest, recoveryOperation }
+    }
+    const completeRecoveredLink = async recovery => {
+      const recoveryClaim = await brokerService.send({
+        event: 'claimNextAccessOperation',
+        data: {},
+        user: brokerUser,
+        timestamp: FIXTURE_NOW
+      })
+      assert.equal(recoveryClaim.operationID, recovery.operationID, `${recovery.name} recovery must requeue its link operation`)
+      const recovered = await brokerService.send({
+        event: 'completeAccessOperation',
+        data: {
+          operationID: recovery.operationID,
+          leaseToken: recoveryClaim.leaseToken,
+          resultCode: 'NOOP_ALREADY_DESIRED',
+          safeCode: 'ROLE_COLLECTIONS_VERIFIED',
+          providerCorrelationHash: null
+        },
+        user: brokerUser,
+        timestamp: FIXTURE_NOW
+      })
+      assert.equal(recovered.status, 'ACTIVE', `${recovery.name} recovery must permit exact LINK_EXISTING completion`)
+      const linkedRequest = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: recovery.requestID }))
+      const linkedUser = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: recovery.targetID }))
+      assert.equal(linkedRequest.status_code, 'ACTIVE', `${recovery.name} recovery must activate its request`)
+      assert.equal(linkedUser.email, `recovery.${recovery.name}@example.invalid`, `${recovery.name} recovery must update only its selected target`)
+    }
+
+    const retryRecovery = recoveryCases[0]
+    await seedRecoveryLink(retryRecovery)
+    const retryClaim = await brokerService.send({ event: 'claimNextAccessOperation', data: {}, user: brokerUser, timestamp: FIXTURE_NOW })
+    assert.equal(retryClaim.operationID, retryRecovery.operationID)
+    const retryFailure = await brokerService.send({
+      event: 'completeAccessOperation',
+      data: {
+        operationID: retryRecovery.operationID,
+        leaseToken: retryClaim.leaseToken,
+        resultCode: 'RETRYABLE_FAILURE',
+        safeCode: 'PROVIDER_TEMPORARY_FAILURE',
+        providerCorrelationHash: null
+      },
+      user: brokerUser,
+      timestamp: FIXTURE_NOW
+    })
+    assert.equal(retryFailure.status, 'RETRYABLE_FAILURE')
+    const retried = await service.send({
+      event: 'retryAccessOperation',
+      data: { operationID: retryRecovery.operationID, expectedVersion: 2 },
+      user: recoveryAdmin,
+      timestamp: FIXTURE_NOW
+    })
+    assert.equal(retried.status, 'PROVISION_QUEUED')
+    await assertRecoveryCorrelation(retryRecovery)
+    await completeRecoveredLink(retryRecovery)
+
+    const reconcileRecovery = recoveryCases[1]
+    await seedRecoveryLink(reconcileRecovery)
+    const reconcileClaim = await brokerService.send({ event: 'claimNextAccessOperation', data: {}, user: brokerUser, timestamp: FIXTURE_NOW })
+    assert.equal(reconcileClaim.operationID, reconcileRecovery.operationID)
+    const reconcileFailure = await brokerService.send({
+      event: 'completeAccessOperation',
+      data: {
+        operationID: reconcileRecovery.operationID,
+        leaseToken: reconcileClaim.leaseToken,
+        resultCode: 'CONFLICT',
+        safeCode: 'AMBIGUOUS_PROVIDER_OUTCOME',
+        providerCorrelationHash: null
+      },
+      user: brokerUser,
+      timestamp: FIXTURE_NOW
+    })
+    assert.equal(reconcileFailure.status, 'BLOCKED_MANUAL_REVIEW')
+    const reconciled = await service.send({
+      event: 'reconcileAccessOperation',
+      data: { operationID: reconcileRecovery.operationID, expectedVersion: 2 },
+      user: recoveryAdmin,
+      timestamp: FIXTURE_NOW
+    })
+    assert.equal(reconciled.status, 'PROVISION_QUEUED')
+    await assertRecoveryCorrelation(reconcileRecovery)
+    await completeRecoveredLink(reconcileRecovery)
+
+    const expiredRecovery = recoveryCases[2]
+    await seedRecoveryLink(expiredRecovery)
+    const expiredClaim = await brokerService.send({ event: 'claimNextAccessOperation', data: {}, user: brokerUser, timestamp: FIXTURE_NOW })
+    assert.equal(expiredClaim, null, 'expired link lease must be reconciled before a new claim')
+    const expiredState = await assertRecoveryCorrelation(expiredRecovery)
+    assert.equal(expiredState.recoveryRequest.status_code, 'BLOCKED_MANUAL_REVIEW')
+    assert.equal(expiredState.recoveryOperation.state, 'BLOCKED_MANUAL_REVIEW')
+    const expiredReconciled = await service.send({
+      event: 'reconcileAccessOperation',
+      data: { operationID: expiredRecovery.operationID, expectedVersion: 2 },
+      user: recoveryAdmin,
+      timestamp: FIXTURE_NOW
+    })
+    assert.equal(expiredReconciled.status, 'PROVISION_QUEUED')
+    await assertRecoveryCorrelation(expiredRecovery)
+    await completeRecoveredLink(expiredRecovery)
 
   } finally {
     cds.env.requires.auth = previousAuth

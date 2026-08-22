@@ -101,11 +101,13 @@ async function blockExpiredLeases (tx, now) {
       leaseTokenHash: operation.leaseTokenHash
     }))
     if (operationUpdated !== 1) throw brokerError(409, 'ACCESS_OPERATION_CONFLICT', 'Expired operation changed during reconciliation.')
-    const requestUpdated = await tx.run(UPDATE('idts.cap.UserOnboardingRequests').set({
+    const requestPatch = {
       status_code: 'BLOCKED_MANUAL_REVIEW',
       lastErrorCode: 'AMBIGUOUS_PROVIDER_OUTCOME',
       lastErrorSummary: safeSummaryFor('AMBIGUOUS_PROVIDER_OUTCOME')
-    }).where({
+    }
+    if (operation.operationType === 'LINK_EXISTING') requestPatch.correlationId = reconciliationCorrelationId
+    const requestUpdated = await tx.run(UPDATE('idts.cap.UserOnboardingRequests').set(requestPatch).where({
       ID: request.ID,
       status_code: request.status_code,
       provisioningVersion: operation.expectedVersion
