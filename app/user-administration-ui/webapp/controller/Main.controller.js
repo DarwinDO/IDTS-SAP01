@@ -190,6 +190,14 @@ sap.ui.define([
 			this.getModel("existingLink").setData(this._emptyExistingIdentityLink());
 		},
 
+		onNormalizeCurrentBootstrapPm: async function () {
+			const oDetails = this.getModel("activeUsers").getProperty("/details");
+			if (oDetails?.businessRole !== "PM" || oDetails?.accessState !== "INCOMPLETE" || oDetails?.requestCount !== 0 || oDetails?.auditEventCount !== 1) return;
+			if (!await this._confirm("bootstrapPmNormalizeConfirmation")) return;
+			const bSuccess = await this._invokeAction("normalizeCurrentBootstrapPm", {}, "bootstrapPmNormalized", true);
+			if (bSuccess) this.onCloseActiveUserDetails();
+		},
+
 		onOpenActiveUserRoleChange: async function () {
 			const oDetails = this.getModel("activeUsers").getProperty("/details");
 			if (oDetails?.accessState !== "ACTIVE") return;
