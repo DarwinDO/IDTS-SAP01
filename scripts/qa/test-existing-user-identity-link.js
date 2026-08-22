@@ -20,6 +20,12 @@ const IDS = Object.freeze({
   nonLegacyTarget: '82000000-0000-4000-8000-000000000009',
   staleTarget: '82000000-0000-4000-8000-000000000012',
   emailCollisionUser: '82000000-0000-4000-8000-000000000013',
+  verificationInactiveTarget: '82000000-0000-4000-8000-000000000041',
+  verificationPartialTarget: '82000000-0000-4000-8000-000000000042',
+  verificationRoleTarget: '82000000-0000-4000-8000-000000000043',
+  verificationPmTarget: '82000000-0000-4000-8000-000000000044',
+  verificationEmailTarget: '82000000-0000-4000-8000-000000000045',
+  verificationIdentityTarget: '82000000-0000-4000-8000-000000000046',
   profile: '82000000-0000-4000-8000-000000000010',
   responsibility: '82000000-0000-4000-8000-000000000011',
   component: '82000000-0000-4000-8000-000000000020',
@@ -278,6 +284,48 @@ async function seedFixture (cds, db) {
       email: 'reserved.identity@example.invalid',
       role_code: 'TESTER',
       active: true
+    },
+    {
+      ID: IDS.verificationInactiveTarget,
+      displayName: 'Fixture Verification Inactive Target',
+      email: 'verification.inactive@example.local',
+      role_code: 'DEVELOPER',
+      active: true
+    },
+    {
+      ID: IDS.verificationPartialTarget,
+      displayName: 'Fixture Verification Partial Target',
+      email: 'verification.partial@example.local',
+      role_code: 'DEVELOPER',
+      active: true
+    },
+    {
+      ID: IDS.verificationRoleTarget,
+      displayName: 'Fixture Verification Role Target',
+      email: 'verification.role@example.local',
+      role_code: 'TESTER',
+      active: true
+    },
+    {
+      ID: IDS.verificationPmTarget,
+      displayName: 'Fixture Verification PM Target',
+      email: 'verification.pm@example.local',
+      role_code: 'DEVELOPER',
+      active: true
+    },
+    {
+      ID: IDS.verificationEmailTarget,
+      displayName: 'Fixture Verification Email Target',
+      email: 'verification.email@example.local',
+      role_code: 'DEVELOPER',
+      active: true
+    },
+    {
+      ID: IDS.verificationIdentityTarget,
+      displayName: 'Fixture Verification Identity Target',
+      email: 'verification.identity@example.local',
+      role_code: 'DEVELOPER',
+      active: true
     }
   ]))
   await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries({
@@ -455,8 +503,98 @@ async function assertExistingLinkRequest (cds, db) {
 }
 
 async function assertExistingLinkVerification (cds, db, { service, request }) {
-  const { SELECT } = cds.ql
+  const { SELECT, UPDATE } = cds.ql
   const { createInvitationToken } = require('../../srv/user-admin/invitations')
+  const { identityKeyHash } = require('../../srv/auth/identity-map')
+  const administrator = new cds.User({
+    id: 'fixture.pm@example.invalid',
+    roles: ['authenticated-user', 'PM', 'UserAdmin']
+  })
+  const prepareVerification = async (userID, email) => {
+    const created = await service.send({
+      event: 'requestExistingUserIdentityLink',
+      data: { userID, email },
+      user: administrator,
+      timestamp: FIXTURE_NOW
+    })
+    const staged = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: created.ID }))
+    return {
+      request: staged,
+      token: createInvitationToken({
+        invitationID: staged.ID,
+        targetEmail: email,
+        expiresAt: staged.expiresAt,
+        signingKey: fixtureSigningKey(),
+        nonce: staged.tokenNonce
+      }).token,
+      email
+    }
+  }
+  const assertRejectedWithoutWrites = async ({ request: staged, token, email }, code) => {
+    await assert.rejects(
+      () => service.send({
+        event: 'verifySapIdentity',
+        data: { token },
+        user: fixtureXsuaaUser(cds, email),
+        timestamp: FIXTURE_NOW
+      }),
+      error => error?.code === code &&
+        !String(error?.message || '').includes(email) &&
+        !/fixture-origin|fixture-subject|fixture-platform-user/.test(String(error?.message || '')),
+      `verification must fail closed with ${code}`
+    )
+    const after = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: staged.ID }))
+    const operation = await db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: staged.ID }))
+    assert.equal(after.status_code, 'INVITED', `${code} must leave the invitation state unchanged`)
+    assert.equal(after.consumedAt, null, `${code} must not consume the invitation`)
+    assert.equal(operation, undefined, `${code} must not queue an operation`)
+  }
+
+  const staleSource = await prepareVerification(IDS.staleTarget, 'verification.stale@example.invalid')
+  await db.run(UPDATE('idts.cap.Users').set({ email: 'changed.source@example.local' }).where({ ID: IDS.staleTarget }))
+  await assertRejectedWithoutWrites(staleSource, 'IDENTITY_LINK_TARGET_CHANGED')
+
+  const changedRole = await prepareVerification(IDS.verificationRoleTarget, 'verification.role@example.invalid')
+  await db.run(UPDATE('idts.cap.Users').set({ role_code: 'DEVELOPER' }).where({ ID: IDS.verificationRoleTarget }))
+  await assertRejectedWithoutWrites(changedRole, 'IDENTITY_LINK_TARGET_CHANGED')
+
+  const inactive = await prepareVerification(IDS.verificationInactiveTarget, 'verification.inactive@example.invalid')
+  await db.run(UPDATE('idts.cap.Users').set({ active: false }).where({ ID: IDS.verificationInactiveTarget }))
+  await assertRejectedWithoutWrites(inactive, 'IDENTITY_LINK_TARGET_CHANGED')
+
+  const partialIdentity = await prepareVerification(IDS.verificationPartialTarget, 'verification.partial@example.invalid')
+  await db.run(UPDATE('idts.cap.Users').set({ externalIdentityOrigin: 'another-origin' }).where({ ID: IDS.verificationPartialTarget }))
+  await assertRejectedWithoutWrites(partialIdentity, 'IDENTITY_LINK_TARGET_CHANGED')
+
+  const pmTarget = await prepareVerification(IDS.verificationPmTarget, 'verification.pm@example.invalid')
+  await db.run(UPDATE('idts.cap.Users').set({ role_code: 'PM' }).where({ ID: IDS.verificationPmTarget }))
+  await assertRejectedWithoutWrites(pmTarget, 'IDENTITY_LINK_TARGET_CHANGED')
+
+  const emailCollision = await prepareVerification(IDS.verificationEmailTarget, 'verification.email@example.invalid')
+  await db.run(UPDATE('idts.cap.Users').set({ email: emailCollision.email }).where({ ID: IDS.emailCollisionUser }))
+  await assertRejectedWithoutWrites(emailCollision, 'EMAIL_RECONCILIATION_REQUIRED')
+  await db.run(UPDATE('idts.cap.Users').set({ email: 'reserved.identity@example.invalid' }).where({ ID: IDS.emailCollisionUser }))
+
+  const identityCollision = await prepareVerification(IDS.verificationIdentityTarget, 'verification.identity@example.invalid')
+  await db.run(UPDATE('idts.cap.Users').set({
+    externalIdentityOrigin: 'fixture-origin',
+    externalIdentityIssuer: 'https://issuer.example.invalid',
+    externalIdentitySubject: 'fixture-subject',
+    externalIdentityKeyHash: identityKeyHash({
+      origin: 'fixture-origin',
+      issuer: 'https://issuer.example.invalid',
+      subject: 'fixture-subject',
+      platformUserId: 'fixture-platform-user'
+    })
+  }).where({ ID: IDS.emailCollisionUser }))
+  await assertRejectedWithoutWrites(identityCollision, 'EXTERNAL_IDENTITY_ALREADY_LINKED')
+  await db.run(UPDATE('idts.cap.Users').set({
+    externalIdentityOrigin: null,
+    externalIdentityIssuer: null,
+    externalIdentitySubject: null,
+    externalIdentityKeyHash: null
+  }).where({ ID: IDS.emailCollisionUser }))
+
   const token = createInvitationToken({
     invitationID: request.ID,
     targetEmail: TARGET_EMAIL,
@@ -478,12 +616,25 @@ async function assertExistingLinkVerification (cds, db, { service, request }) {
   const operation = await db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: request.ID }))
   assert.equal(persisted.status_code, 'PROVISION_QUEUED', 'verified request state must be queued')
   assert.equal(operation.operationType, 'LINK_EXISTING', 'verification must queue LINK_EXISTING')
+  assert.equal(operation.state, 'PENDING', 'verified link operation must start pending')
+  assert.equal(operation.expectedVersion, 2, 'verified link operation must use request version 2')
   assert.equal(operation.desiredRole_code, 'DEVELOPER', 'operation role must be server-derived')
   assert.equal(operation.desiredUserAdmin, false, 'existing-user link must not request UserAdmin')
 
   const audit = await db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ onboardingRequest_ID: request.ID }))
   assert.equal(audit.some(row => row.action === 'QUEUE_LINK_EXISTING'), true, 'link queue must append the safe queue audit')
   assert.equal(audit.some(row => /@|fixture-origin|fixture-subject/.test(String(row.detailsSummary || ''))), false, 'link queue audit must not contain identity values')
+
+  await assert.rejects(
+    () => service.send({
+      event: 'verifySapIdentity',
+      data: { token },
+      user: fixtureXsuaaUser(cds, TARGET_EMAIL),
+      timestamp: FIXTURE_NOW
+    }),
+    error => error?.code === 'INVITATION_ALREADY_USED',
+    'a repeated verification token must fail closed'
+  )
   return { request: persisted, operation }
 }
 
