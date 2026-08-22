@@ -11,6 +11,7 @@ const { scheduleImmediateEmailOutbox } = require('../email/worker')
 const USERS = 'idts.cap.Users'
 const REQUESTS = 'idts.cap.UserOnboardingRequests'
 const DELIVERIES = 'idts.cap.UserOnboardingDeliveries'
+const AUDIT_EVENTS = 'idts.cap.UserIdentityAuditEvents'
 
 async function requestExistingUserIdentityLink (req, dependencies) {
   const tx = cds.tx(req)
@@ -39,6 +40,83 @@ async function requestExistingUserIdentityLink (req, dependencies) {
     now,
     req,
     dependencies
+  })
+}
+
+async function cancelExistingUserIdentityLink (req, dependencies) {
+  const tx = cds.tx(req)
+  const administrator = await dependencies.requireActiveUserAdministrator(req, tx)
+  const requestID = req.data.requestID
+  const expectedVersion = req.data.expectedVersion
+  if (typeof requestID !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestID)) {
+    throw serviceError(400, 'INVALID_ONBOARDING_REQUEST', 'The onboarding request is invalid.')
+  }
+
+  const request = await tx.run(
+    SELECT.one.from(REQUESTS).columns(
+      'ID', 'targetEmailNormalized', 'requestedRole_code', 'userAdminRequested',
+      'status_code', 'expiresAt', 'verifiedAt', 'provisionedAt', 'revokedAt',
+      'provisioningVersion', 'correlationId', 'consumedAt', 'linkTargetUser_ID'
+    ).where({ ID: requestID })
+  )
+  if (!request || !request.linkTargetUser_ID) {
+    throw serviceError(404, 'IDENTITY_LINK_INVITATION_NOT_FOUND', 'The identity-link invitation was not found.')
+  }
+  if (!Number.isInteger(expectedVersion) || expectedVersion < 0 || request.provisioningVersion !== expectedVersion) {
+    throw serviceError(409, 'ONBOARDING_VERSION_CONFLICT', 'The onboarding request changed. Reload and try again.')
+  }
+  if (request.status_code !== 'INVITED' || request.consumedAt != null) {
+    throw serviceError(409, 'IDENTITY_LINK_INVITATION_NOT_OPEN', 'Only an open identity-link invitation can be cancelled.')
+  }
+
+  const nextVersion = expectedVersion + 1
+  const lastErrorSummary = 'Invitation was cancelled before identity verification.'
+  const affectedRows = await tx.run(
+    UPDATE(REQUESTS).set({
+      status_code: 'FAILED',
+      openRequestKey: null,
+      provisioningVersion: nextVersion,
+      lastErrorCode: 'INVITATION_CANCELLED',
+      lastErrorSummary
+    }).where({
+      ID: request.ID,
+      status_code: 'INVITED',
+      consumedAt: null,
+      provisioningVersion: expectedVersion
+    })
+  )
+  if (affectedRows !== 1) {
+    throw serviceError(409, 'ONBOARDING_VERSION_CONFLICT', 'The onboarding request changed. Reload and try again.')
+  }
+
+  await tx.run(UPDATE(DELIVERIES).set({
+    status_code: 'SKIPPED',
+    nextAttemptAt: null,
+    lastErrorCode: 'INVITATION_CANCELLED',
+    lastErrorSummary,
+    lockedUntil: null,
+    lockToken: null
+  }).where({
+    onboardingRequest_ID: request.ID,
+    status_code: { in: ['PENDING', 'FAILED'] }
+  }))
+  await tx.run(INSERT.into(AUDIT_EVENTS).entries({
+    ID: cds.utils.uuid(),
+    onboardingRequest_ID: request.ID,
+    actor_ID: administrator.ID,
+    targetUser_ID: request.linkTargetUser_ID,
+    action: 'CANCEL_LINK_INVITATION',
+    result: 'APPLIED',
+    fromState: 'INVITED',
+    toState: 'FAILED',
+    correlationId: request.correlationId,
+    detailsSummary: 'An open identity-link invitation was cancelled.'
+  }))
+
+  return dependencies.onboardingResult({
+    ...request,
+    status_code: 'FAILED',
+    provisioningVersion: nextVersion
   })
 }
 
@@ -169,4 +247,4 @@ function serviceError (status, code, message) {
   return Object.assign(new Error(message), { status, statusCode: status, code })
 }
 
-module.exports = { requestExistingUserIdentityLink }
+module.exports = { requestExistingUserIdentityLink, cancelExistingUserIdentityLink }

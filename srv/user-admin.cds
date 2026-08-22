@@ -103,6 +103,7 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     latestOperationAttemptCount : Integer;
     lastErrorCode         : String(80);
     lastErrorSummary      : String(500);
+    cancelEligible        : Boolean;
   }
 
   action requestOnboarding(
@@ -115,6 +116,11 @@ service UserAdministrationService @(requires: 'authenticated-user') {
   action requestExistingUserIdentityLink(
     userID : UUID,
     email  : String(255)
+  ) returns OnboardingResult;
+
+  action cancelExistingUserIdentityLink(
+    requestID      : UUID,
+    expectedVersion: Integer
   ) returns OnboardingResult;
 
   action verifySapIdentity(token : String(2048)) returns OnboardingResult;

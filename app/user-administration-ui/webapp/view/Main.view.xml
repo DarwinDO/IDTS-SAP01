@@ -96,12 +96,18 @@
 															tooltip="{i18n>retryProvisioning}"
 															visible="{= ${requests>status_code} === 'RETRYABLE_FAILURE' || (${requests>status_code} === 'BLOCKED_MANUAL_REVIEW' &amp;&amp; ${requests>lastErrorCode} === 'PROVIDER_REQUEST_INVALID' &amp;&amp; ${requests>latestOperationAttemptCount} === 4) }"
 															press=".onRetryAccessOperation"/>
-														<Button
-															icon="sap-icon://synchronize"
-															tooltip="{i18n>reconcileProvisioning}"
-															visible="{= ${requests>status_code} === 'BLOCKED_MANUAL_REVIEW' &amp;&amp; ${requests>lastErrorCode} === 'AMBIGUOUS_PROVIDER_OUTCOME' }"
-															press=".onReconcileAccessOperation"/>
-													</HBox>
+												<Button
+													icon="sap-icon://synchronize"
+													tooltip="{i18n>reconcileProvisioning}"
+													visible="{= ${requests>status_code} === 'BLOCKED_MANUAL_REVIEW' &amp;&amp; ${requests>lastErrorCode} === 'AMBIGUOUS_PROVIDER_OUTCOME' }"
+													press=".onReconcileAccessOperation"/>
+												<Button
+													icon="sap-icon://sys-cancel"
+													type="Negative"
+													tooltip="{i18n>cancelExistingLinkInvitation}"
+													visible="{requests>cancelEligible}"
+													press=".onCancelExistingLinkInvitation"/>
+											</HBox>
 												</cells>
 											</ColumnListItem>
 										</items>
