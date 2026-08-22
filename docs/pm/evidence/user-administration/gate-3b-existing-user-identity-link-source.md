@@ -6,8 +6,8 @@
 
 - Human/coordinator: DonHV; source branch: `feature/wp8-existing-user-identity-link-donhv`.
 - Frozen base: `44b89db5db22e2ea65d4a85d746f57ad3a8f840e` (`origin/dev` and `dev` at task start).
-- Source implementation commits: `b14064b`, `c4a751c`, `9067497`, `be803f6`, `e0719fb`, `d3ca17f`, `2dde055`, `3a9c179`, `d5d60c9`, `ba94757`, `7b7e062`; documentation/evidence/status checkpoints: `566dcda`, `8bba402`.
-- The frozen review of `44b89db..7b64909` found four Important and three Minor findings; `ba94757` and `7b7e062` remediate them in source/tests. The final exact head and one bounded independent re-review must be read back fresh after the remaining PM/evidence commit. No merge or Ready transition is implied by this artifact.
+- Source implementation commits: `b14064b`, `c4a751c`, `9067497`, `be803f6`, `e0719fb`, `d3ca17f`, `2dde055`, `3a9c179`, `d5d60c9`, `ba94757`, `7b7e062`; documentation/evidence/status checkpoints: `566dcda`, `8bba402`, `5043f10`.
+- The frozen review of `44b89db..7b64909` found four Important and three Minor findings; `ba94757` and `7b7e062` address the findings in source/tests, with the post-update rollback proof explicitly triaged as test-quality debt. The final exact head and one bounded independent re-review must be read back fresh after this evidence update. No merge or Ready transition is implied by this artifact.
 - Approved authority: `docs/superpowers/specs/2026-08-21-gate-3b-existing-user-identity-link-design.md` and `docs/superpowers/plans/2026-08-21-gate-3b-existing-user-identity-link-implementation.md`.
 
 ### Delivered source behavior
@@ -80,7 +80,7 @@ Coordinator must review the new exact-head diff and bounded re-review result bef
 - Owner/coordinator: DonHV; branch source: `feature/wp8-existing-user-identity-link-donhv`.
 - Base đóng băng: `44b89db5db22e2ea65d4a85d746f57ad3a8f840e` (`origin/dev` và `dev` tại thời điểm bắt đầu).
 - Các commit source: `b14064b`, `c4a751c`, `9067497`, `be803f6`, `e0719fb`, `d3ca17f`, `2dde055`, `3a9c179`, `d5d60c9`.
-- Review frozen trước đó trên `44b89db..7b64909` phát hiện 4 Important và 3 Minor; `ba94757` và `7b7e062` đã remediation ở source/test. Exact head cuối và một bounded re-review sẽ được đọc lại sau commit PM/evidence; artifact này không hàm ý merge hoặc Ready.
+- Review frozen trước đó trên `44b89db..7b64909` phát hiện 4 Important và 3 Minor; `ba94757` và `7b7e062` đã xử lý ở source/test, còn proof rollback sau user update được triage rõ là test-quality debt. Exact head cuối và một bounded re-review sẽ được đọc lại sau evidence update này; artifact này không hàm ý merge hoặc Ready.
 - Spec/plan được duyệt là nguồn chuẩn theo hai file trong `docs/superpowers/` nêu trên.
 
 ### Behavior source đã giao
