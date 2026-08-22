@@ -447,6 +447,19 @@ async function assertExistingLinkRequest (cds, db) {
       })
     }
 
+    const requestCountBeforeInvalidEmail = (await db.run(SELECT.from('idts.cap.UserOnboardingRequests'))).length
+    await expectLinkRejected({
+      user: administrator,
+      userID: IDS.testerTarget,
+      email: 'not-an-email',
+      code: 'INVALID_INVITATION_EMAIL'
+    })
+    assert.equal(
+      (await db.run(SELECT.from('idts.cap.UserOnboardingRequests'))).length,
+      requestCountBeforeInvalidEmail,
+      'invalid link email must not insert a request'
+    )
+
     await expectLinkRejected({ user: administrator, userID: '82000000-0000-4000-8000-000000000099', email: 'missing.target@example.invalid', code: 'IDENTITY_LINK_TARGET_NOT_FOUND' })
     await expectLinkRejected({ user: administrator, userID: IDS.pmTarget, email: 'pm.target@example.invalid', code: 'IDENTITY_LINK_TARGET_ROLE_INVALID' })
     await expectLinkRejected({ user: administrator, userID: IDS.inactiveTarget, email: 'inactive.target@example.invalid', code: 'IDENTITY_LINK_TARGET_INACTIVE' })
@@ -491,6 +504,8 @@ async function assertExistingLinkRequest (cds, db) {
     ])
     assert.equal(concurrent.filter(result => result.status === 'fulfilled').length, 1, 'concurrent link requests must create one winner')
     assert.equal(concurrent.filter(result => result.status === 'rejected').length, 1, 'concurrent link requests must reject one loser')
+    assert.equal(concurrent.find(result => result.status === 'rejected').reason?.code, 'EXISTING_IDENTITY_LINK_ALREADY_OPEN',
+      'concurrent link loser must use the safe existing-link-open code')
     const concurrentRequests = await db.run(SELECT.from('idts.cap.UserOnboardingRequests').where({ linkTargetUser_ID: IDS.concurrentTarget }))
     assert.equal(concurrentRequests.length, 1, 'concurrent link requests must persist one request')
     const concurrentDeliveries = await db.run(SELECT.from('idts.cap.UserOnboardingDeliveries').where({ onboardingRequest_ID: concurrentRequests[0].ID }))
@@ -531,6 +546,7 @@ async function assertExistingLinkVerification (cds, db, { service, request }) {
     }
   }
   const assertRejectedWithoutWrites = async ({ request: staged, token, email }, code) => {
+    let rejection
     await assert.rejects(
       () => service.send({
         event: 'verifySapIdentity',
@@ -538,16 +554,36 @@ async function assertExistingLinkVerification (cds, db, { service, request }) {
         user: fixtureXsuaaUser(cds, email),
         timestamp: FIXTURE_NOW
       }),
-      error => error?.code === code &&
-        !String(error?.message || '').includes(email) &&
-        !/fixture-origin|fixture-subject|fixture-platform-user/.test(String(error?.message || '')),
+      error => {
+        rejection = error
+        return error?.code === code
+      },
       `verification must fail closed with ${code}`
     )
+    const safeMessage = String(rejection?.message || '')
+    for (const privateValue of [
+      email,
+      'changed.source@example.local',
+      'legacy.developer@example.local',
+      'https://issuer.example.invalid',
+      'fixture-origin',
+      'fixture-subject',
+      'fixture-platform-user',
+      token,
+      fixtureHash('fixture-linked')
+    ]) {
+      assert.equal(safeMessage.includes(privateValue), false, `${code} must not expose private identity material`)
+    }
     const after = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: staged.ID }))
     const operation = await db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: staged.ID }))
+    const audits = await db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({
+      onboardingRequest_ID: staged.ID,
+      action: 'QUEUE_LINK_EXISTING'
+    }))
     assert.equal(after.status_code, 'INVITED', `${code} must leave the invitation state unchanged`)
     assert.equal(after.consumedAt, null, `${code} must not consume the invitation`)
     assert.equal(operation, undefined, `${code} must not queue an operation`)
+    assert.equal(audits.length, 0, `${code} must not append a queue audit`)
   }
 
   const staleSource = await prepareVerification(IDS.staleTarget, 'verification.stale@example.invalid')
@@ -563,8 +599,16 @@ async function assertExistingLinkVerification (cds, db, { service, request }) {
   await assertRejectedWithoutWrites(inactive, 'IDENTITY_LINK_TARGET_CHANGED')
 
   const partialIdentity = await prepareVerification(IDS.verificationPartialTarget, 'verification.partial@example.invalid')
-  await db.run(UPDATE('idts.cap.Users').set({ externalIdentityOrigin: 'another-origin' }).where({ ID: IDS.verificationPartialTarget }))
-  await assertRejectedWithoutWrites(partialIdentity, 'IDENTITY_LINK_TARGET_CHANGED')
+  for (const [field, value] of [
+    ['externalIdentityOrigin', 'another-origin'],
+    ['externalIdentityIssuer', 'https://another-issuer.example.invalid'],
+    ['externalIdentitySubject', 'another-subject'],
+    ['externalIdentityKeyHash', fixtureHash('another-identity')]
+  ]) {
+    await db.run(UPDATE('idts.cap.Users').set({ [field]: value }).where({ ID: IDS.verificationPartialTarget }))
+    await assertRejectedWithoutWrites(partialIdentity, 'IDENTITY_LINK_TARGET_CHANGED')
+    await db.run(UPDATE('idts.cap.Users').set({ [field]: null }).where({ ID: IDS.verificationPartialTarget }))
+  }
 
   const pmTarget = await prepareVerification(IDS.verificationPmTarget, 'verification.pm@example.invalid')
   await db.run(UPDATE('idts.cap.Users').set({ role_code: 'PM' }).where({ ID: IDS.verificationPmTarget }))
@@ -660,6 +704,32 @@ async function assertReadOnlyProviderContract () {
   }, 'exact existing-user role readback must be a NOOP')
   assert.deepEqual(calls, ['listRoleCollections'], 'LINK_EXISTING must call only listRoleCollections')
   assert.deepEqual(Object.keys(provider), ['listRoleCollections'], 'LINK_EXISTING provider contract must expose no write method')
+
+  for (const roleCollections of [
+    [],
+    ['IDTS_TESTER'],
+    ['IDTS_DEVELOPER', 'IDTS_TESTER'],
+    ['IDTS_DEVELOPER', 'IDTS_USER_ADMIN']
+  ]) {
+    const negativeCalls = []
+    await assert.rejects(
+      () => executeAccessChange({
+        action: 'LINK_EXISTING',
+        requestedRole: 'DEVELOPER',
+        userAdminRequested: false,
+        provider: {
+          listRoleCollections: async () => {
+            negativeCalls.push('listRoleCollections')
+            return roleCollections
+          }
+        }
+      }),
+      error => error?.code === (roleCollections.includes('IDTS_USER_ADMIN')
+        ? 'USER_ADMIN_REQUIRES_PM'
+        : 'PROVISIONING_READBACK_MISMATCH')
+    )
+    assert.deepEqual(negativeCalls, ['listRoleCollections'], 'LINK_EXISTING mismatch must remain read-only')
+  }
 
 }
 
