@@ -89,6 +89,18 @@ assert.match(activeUserDetailsFragment, /press="\.onOpenActiveUserRoleChange"/)
 assert.match(activeUserDetailsFragment, /press="\.onOpenActiveUserSuspend"/)
 assert.match(activeUserDetailsFragment, /press="\.onOpenActiveUserReactivate"/)
 assert.match(activeUserDetailsFragment, /press="\.onOpenActiveUserRevoke"/)
+assert.match(activeUserDetailsFragment, /linkEligible/)
+assert.match(activeUserDetailsFragment, /press="\.onOpenExistingIdentityLink"/)
+
+const linkExistingIdentityFragment = fs.readFileSync(path.join(webapp, 'fragment/LinkExistingIdentity.fragment.xml'), 'utf8')
+assert.match(linkExistingIdentityFragment, /<Dialog/)
+assert.match(linkExistingIdentityFragment, /existingLink>\/row\/displayName/)
+assert.match(linkExistingIdentityFragment, /type="Email"/)
+assert.match(linkExistingIdentityFragment, /existingLink>\/email/)
+assert.match(linkExistingIdentityFragment, /press="\.onConfirmExistingIdentityLink"/)
+assert.match(linkExistingIdentityFragment, /press="\.onCancelExistingIdentityLink"/)
+assert.match(linkExistingIdentityFragment, /existingIdentityLinkNotice/)
+assert.doesNotMatch(linkExistingIdentityFragment, /Role Collection|IdP|subaccount|endpoint|externalIdentity|platformUser|provider/i)
 
 const fragment = fs.readFileSync(path.join(webapp, 'fragment/InviteUser.fragment.xml'), 'utf8')
 assert.match(fragment, /<Input[^>]+type="Email"/)
@@ -139,6 +151,13 @@ assert.match(controller, /bindContext\("\/readActiveUserDetails\(\.\.\.\)"\)/)
 assert.match(controller, /onTabSelect/)
 assert.match(controller, /_ensureActiveUsersLoaded/)
 assert.match(controller, /onLoadMoreActiveUsers/)
+assert.match(controller, /requestExistingUserIdentityLink/)
+assert.match(controller, /setParameter\("userID"/)
+assert.match(controller, /setParameter\("email"/)
+assert.match(controller, /onConfirmExistingIdentityLink/)
+assert.match(controller, /onExistingIdentityLinkFieldChange/)
+assert.match(controller, /onCancelExistingIdentityLink/)
+assert.match(controller, /linkEligible/)
 assert.match(controller, /sessionStorage/)
 assert.doesNotMatch(controller, /identityOrigin|identityIssuer|identitySubject|identityKeyHash|identityPlatformUserId/)
 
@@ -179,6 +198,8 @@ assert.equal(typeof controllerDefinition._loadActiveUsers, 'function')
 assert.equal(typeof controllerDefinition._ensureActiveUsersLoaded, 'function')
 assert.equal(typeof controllerDefinition.onLoadMoreActiveUsers, 'function')
 assert.equal(typeof controllerDefinition.onOpenActiveUserDetails, 'function')
+assert.equal(typeof controllerDefinition.onConfirmExistingIdentityLink, 'function')
+assert.equal(typeof controllerDefinition.onExistingIdentityLinkFieldChange, 'function')
 assert.match(controller, /this\.getResourceBundle\(\)/)
 
 async function verifyRuntimeBehavior () {
@@ -364,6 +385,50 @@ async function verifyRuntimeBehavior () {
     successKey: 'suspendQueued',
     reloadActiveUsers: true
   })
+
+  let existingLinkData = {
+    row: { userID: 'legacy-1', linkEligible: true },
+    email: 'new.identity@example.invalid',
+    emailTouched: false,
+    emailValid: true,
+    submitting: false
+  }
+  let existingLinkInvocation
+  let existingLinkClosed = 0
+  const existingLinkModel = {
+    getData: () => existingLinkData,
+    setProperty: (key, value) => { existingLinkData[key.slice(1)] = value },
+    setData: data => { existingLinkData = data }
+  }
+  const existingLinkInstance = Object.assign(Object.create(controllerDefinition), {
+    getModel: name => name === 'existingLink' ? existingLinkModel : { setProperty: () => {} },
+    _invokeAction: async (action, parameters, successKey, reloadActiveUsers) => {
+      existingLinkInvocation = { action, parameters, successKey, reloadActiveUsers }
+      return true
+    },
+    _emptyExistingIdentityLink: controllerDefinition._emptyExistingIdentityLink,
+    _existingIdentityLinkDialog: { close: () => { existingLinkClosed += 1 } }
+  })
+  existingLinkInstance.onExistingIdentityLinkFieldChange({ getParameter: name => name === 'value' ? 'new.identity@example.invalid' : undefined })
+  assert.equal(existingLinkData.emailValid, true)
+  await existingLinkInstance.onConfirmExistingIdentityLink()
+  assert.deepEqual(existingLinkInvocation, {
+    action: 'requestExistingUserIdentityLink',
+    parameters: { userID: 'legacy-1', email: 'new.identity@example.invalid' },
+    successKey: 'identityLinkQueued',
+    reloadActiveUsers: true
+  })
+  assert.equal(existingLinkClosed, 1)
+  assert.equal(existingLinkData.row, null)
+
+  existingLinkData = {
+    row: { userID: 'legacy-1', linkEligible: true },
+    email: 'new.identity@example.invalid',
+    emailValid: true,
+    submitting: true
+  }
+  await existingLinkInstance.onConfirmExistingIdentityLink()
+  assert.equal(existingLinkClosed, 1, 'double submit must be ignored while submitting')
 }
 
 function loadController (source) {
@@ -388,7 +453,7 @@ function loadController (source) {
 
 for (const locale of ['i18n.properties', 'i18n_en.properties']) {
   const text = fs.readFileSync(path.join(webapp, 'i18n', locale), 'utf8')
-  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'changeRoleConfirmation', 'revokeConfirmation', 'manageResponsibilities', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'activeUserSearchPlaceholder', 'includeNonActive', 'includeRevoked', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'loadMoreActiveUsers', 'viewDetails', 'activeUserDetails', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'developerProfile', 'close', 'activeUsersNoDeveloper', 'suspendAccess', 'reactivateAccess', 'suspendWarning', 'reactivateWarning', 'suspendQueued', 'reactivateQueued']) {
+  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'changeRoleConfirmation', 'revokeConfirmation', 'manageResponsibilities', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'activeUserSearchPlaceholder', 'includeNonActive', 'includeRevoked', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'loadMoreActiveUsers', 'viewDetails', 'activeUserDetails', 'linkExistingIdentity', 'existingIdentityLinkNotice', 'existingIdentityLinkEmail', 'sendIdentityLink', 'identityLinkQueued', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'developerProfile', 'close', 'activeUsersNoDeveloper', 'suspendAccess', 'reactivateAccess', 'suspendWarning', 'reactivateWarning', 'suspendQueued', 'reactivateQueued']) {
     assert.match(text, new RegExp(`^${key}=`, 'm'))
   }
 }

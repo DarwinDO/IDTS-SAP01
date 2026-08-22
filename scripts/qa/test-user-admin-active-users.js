@@ -357,6 +357,7 @@ async function main () {
   assert.equal(activeAlice.businessRole, 'DEVELOPER')
   assert.equal(activeAlice.accessState, 'ACTIVE')
   assert.equal(activeAlice.identityLinked, true)
+  assert.equal(activeAlice.linkEligible, false)
   assert.equal(activeAlice.developerReady, true)
   assert.equal(activeAlice.activeResponsibilityCount, 1)
   assert.equal(activeAlice.lastSafeResultCode, 'ROLE_COLLECTIONS_VERIFIED')
@@ -385,7 +386,9 @@ async function main () {
     user: admin
   }))[0]
   assert.equal(revoked.accessState, 'REVOKED')
+  assert.equal(revoked.linkEligible, false)
   assert.equal(suspended.accessState, 'SUSPENDED')
+  assert.equal(suspended.linkEligible, false)
   assert.equal(suspended.pendingOperationType, 'CHANGE_ROLE')
   assert.equal(suspended.pendingOperationState, 'PENDING')
   assert.equal(ambiguous.accessState, 'INCOMPLETE')
@@ -400,6 +403,7 @@ async function main () {
   assert.equal(unlinkedActive.identityLinked, false)
   assert.equal(unlinkedActive.accessState, 'INCOMPLETE')
   assert.equal(unlinkedActive.userAdminCapability, false)
+  assert.equal(unlinkedActive.linkEligible, false)
 
   const legacyUnlinked = (await service.send({
     event: 'searchActiveUsers',
