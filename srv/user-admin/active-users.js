@@ -2,6 +2,7 @@
 
 const cds = require('@sap/cds')
 const { SELECT } = cds.ql
+const { hasActiveIdentityAccess, readActiveIdentityAccessByUser } = require('../access/identity-readiness')
 
 const USERS = 'idts.cap.Users'
 const REQUESTS = 'idts.cap.UserOnboardingRequests'
@@ -99,6 +100,7 @@ async function buildReadModel (tx, { includeDeveloperDetails = false } = {}) {
   if (users.length === 0) return []
 
   const userIDs = users.map(user => user.ID)
+  const identityAccessByUser = await readActiveIdentityAccessByUser(tx, userIDs)
   const requests = await tx.run(
     SELECT.from(REQUESTS).columns(
       'ID',
@@ -184,18 +186,22 @@ async function buildReadModel (tx, { includeDeveloperDetails = false } = {}) {
     const operation = request?.latestOperation_ID ? operationsByID.get(request.latestOperation_ID) : null
     const profile = profilesByUser.get(user.ID) || null
     const activeResponsibilityCount = profile ? responsibilityCounts.get(profile.ID) || 0 : 0
-    const identityLinked = !selected.ambiguous && Boolean(
-      user.externalIdentityKeyHash &&
-      request?.identityKeyHash &&
-      user.externalIdentityKeyHash === request.identityKeyHash
-    )
+    const identityAccess = identityAccessByUser.get(user.ID)
+    const identityLinked = !selected.ambiguous && hasActiveIdentityAccess(user, identityAccess?.requests)
     const accessState = identityLinked
       ? deriveAccessState({ userActive: user.active === true, requestStatus: request?.status_code })
       : 'INCOMPLETE'
     const developerReady = user.role_code === 'DEVELOPER' &&
       user.active === true &&
+      identityLinked &&
       profile?.active === true &&
       activeResponsibilityCount > 0
+    const linkEligible = user.active === true &&
+      ['TESTER', 'DEVELOPER'].includes(user.role_code) &&
+      !identityLinked &&
+      accessState === 'INCOMPLETE' &&
+      normalizeContactEmail(user.email).endsWith('.example.local') &&
+      (!request || request.status_code === 'REVOKED')
     const pending = operation && PENDING_OPERATION_STATES.has(operation.state) ? operation : null
 
     return {
@@ -209,6 +215,7 @@ async function buildReadModel (tx, { includeDeveloperDetails = false } = {}) {
         user.role_code === 'PM',
       accessState,
       identityLinked,
+      linkEligible,
       developerReady,
       activeResponsibilityCount,
       pendingOperationType: pending?.operationType || null,
@@ -280,6 +287,7 @@ function toSummary (row) {
     userAdminCapability: row.userAdminCapability,
     accessState: row.accessState,
     identityLinked: row.identityLinked,
+    linkEligible: row.linkEligible,
     developerReady: row.developerReady,
     activeResponsibilityCount: row.activeResponsibilityCount,
     pendingOperationType: row.pendingOperationType,

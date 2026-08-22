@@ -21,6 +21,7 @@ const {
   trimToNull
 } = require('./helpers')
 const { effectiveCapacity, readOpenOwnedBugCounts } = require('./capacity')
+const { hasActiveIdentityAccess, readActiveIdentityAccessByUser } = require('../access/identity-readiness')
 
 const DISPLAY_FIELDS = new Set([
   'reporterDisplayName',
@@ -62,6 +63,7 @@ async function buildAssignableDeveloperRows (tx, entities, criteria = {}) {
           'responsibilityLevel_code',
           'active',
           { ref: ['developerProfile', 'active'], as: 'developerActive' },
+          { ref: ['developerProfile', 'user', 'ID'], as: 'developerUserID' },
           { ref: ['developerProfile', 'user', 'displayName'], as: 'developerName' },
           { ref: ['developerProfile', 'user', 'email'], as: 'developerEmail' },
           { ref: ['developerProfile', 'availabilityStatus', 'code'], as: 'availabilityStatusCode' },
@@ -92,6 +94,7 @@ async function buildAssignableDeveloperRows (tx, entities, criteria = {}) {
     rows = [...byDeveloper.values()].map(row => ({
       ID: row.developerProfile_ID,
       developerProfileID: row.developerProfile_ID,
+      developerUserID: row.developerUserID,
       componentCategoryID: row.componentCategory_ID,
       sapModuleID: row.sapModule_ID || null,
       developerName: row.developerName,
@@ -111,6 +114,7 @@ async function buildAssignableDeveloperRows (tx, entities, criteria = {}) {
         .columns(
           'ID',
           'active',
+          { ref: ['user', 'ID'], as: 'developerUserID' },
           { ref: ['user', 'displayName'], as: 'developerName' },
           { ref: ['user', 'email'], as: 'developerEmail' },
           { ref: ['availabilityStatus', 'code'], as: 'availabilityStatusCode' },
@@ -123,6 +127,7 @@ async function buildAssignableDeveloperRows (tx, entities, criteria = {}) {
     rows = profiles.map(row => ({
       ID: row.ID,
       developerProfileID: row.ID,
+      developerUserID: row.developerUserID,
       componentCategoryID: null,
       sapModuleID: null,
       developerName: row.developerName,
@@ -138,8 +143,16 @@ async function buildAssignableDeveloperRows (tx, entities, criteria = {}) {
     }))
   }
 
-  const counts = await readOpenOwnedBugCounts(tx, entities, rows.map(row => row.developerProfileID))
-  return rows.map(row => {
+  const identityAccessByUser = await readActiveIdentityAccessByUser(
+    tx,
+    rows.map(row => row.developerUserID)
+  )
+  const identityReadyRows = rows.filter(row => {
+    const identityAccess = identityAccessByUser.get(row.developerUserID)
+    return identityAccess && hasActiveIdentityAccess(identityAccess.user, identityAccess.requests)
+  })
+  const counts = await readOpenOwnedBugCounts(tx, entities, identityReadyRows.map(row => row.developerProfileID))
+  return identityReadyRows.map(row => {
     const openOwnedBugCount = counts.get(row.developerProfileID) || 0
     return {
       ...row,
@@ -233,7 +246,7 @@ function filterAssignableDeveloperRow (row, criteria) {
 
 function toPublicAssignableDeveloperRow (row) {
   // Bỏ field nội bộ và chỉ expose dữ liệu cần cho dialog: tên, trạng thái, workload, suitability/warning.
-  const { canReceiveNewBug, ...publicRow } = row
+  const { canReceiveNewBug, developerUserID, ...publicRow } = row
   return publicRow
 }
 

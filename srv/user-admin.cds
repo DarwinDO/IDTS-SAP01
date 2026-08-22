@@ -41,6 +41,7 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     userAdminCapability      : Boolean;
     accessState              : String(20);
     identityLinked           : Boolean;
+    linkEligible             : Boolean;
     developerReady           : Boolean;
     activeResponsibilityCount: Integer;
     pendingOperationType     : String(30);
@@ -57,6 +58,7 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     userAdminCapability           : Boolean;
     accessState                   : String(20);
     identityLinked                : Boolean;
+    linkEligible                  : Boolean;
     developerReady                : Boolean;
     activeResponsibilityCount     : Integer;
     pendingOperationType          : String(30);
