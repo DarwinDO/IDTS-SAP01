@@ -35,7 +35,15 @@ assert.deepEqual(contentRequirement.artifacts, ['user-administration-ui.zip'])
 assert.equal(contentRequirement['target-path'], 'app/')
 
 const appPackage = JSON.parse(fs.readFileSync(path.join(app, 'package.json'), 'utf8'))
+const appPackageLock = JSON.parse(fs.readFileSync(path.join(app, 'package-lock.json'), 'utf8'))
 assert.equal(manifest['sap.app'].applicationVersion.version, appPackage.version, 'HTML5 manifest and package versions stay aligned')
+assert.equal(appPackageLock.version, appPackage.version, 'HTML5 package and lockfile versions stay aligned')
+assert.equal(appPackageLock.packages[''].version, appPackage.version, 'HTML5 lockfile root version stays aligned')
+const [majorVersion, minorVersion, patchVersion] = appPackage.version.split('.').map(Number)
+assert.ok(
+  majorVersion > 1 || minorVersion > 0 || patchVersion >= 9,
+  'general invitation cancellation content must advance beyond deployed UI 1.0.8'
+)
 assert.notEqual(appPackage.version, '1.0.0', 'changed HTML5 content must use a new application version')
 assert.match(appPackage.scripts.build, /ui5 build preload/)
 assert.match(appPackage.scripts.build, /--include-task generateCachebusterInfo/)
