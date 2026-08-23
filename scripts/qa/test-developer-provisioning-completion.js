@@ -107,6 +107,83 @@ async function main () {
   assert.equal(responsibilities.length, 1)
   assert.equal(responsibilities[0].componentCategory_ID, componentCategory.ID)
 
+  await assert.rejects(service.send({
+    event: 'completeAccessOperation',
+    data: {
+      operationID: OPERATION_ID,
+      leaseToken: claimed.leaseToken,
+      resultCode: 'APPLIED',
+      safeCode: 'ROLE_COLLECTIONS_VERIFIED'
+    },
+    user: broker
+  }), error => error?.code === 'ACCESS_OPERATION_LEASE_INVALID')
+  assert.equal((await db.run(SELECT.from('idts.cap.Users').where({ externalIdentityKeyHash: 'a'.repeat(64) }))).length, 1)
+  assert.equal((await db.run(SELECT.from('idts.cap.DeveloperProfiles').where({ user_ID: user.ID }))).length, 1)
+  assert.equal((await db.run(SELECT.from('idts.cap.DeveloperResponsibilities').where({ developerProfile_ID: profile.ID }))).length, 1)
+
+  const incompleteRequestID = '82000000-0000-4000-8000-000000000010'
+  const incompleteOperationID = '82000000-0000-4000-8000-000000000011'
+  const incompleteIdentityHash = 'c'.repeat(64)
+  await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries({
+    ID: incompleteRequestID,
+    targetEmailNormalized: 'incomplete.developer@example.invalid',
+    openRequestKey: 'd'.repeat(64),
+    requestedRole_code: 'DEVELOPER',
+    userAdminRequested: false,
+    status_code: 'PROVISION_QUEUED',
+    requestedBy_ID: ADMIN_ID,
+    expiresAt: '2026-08-20T00:00:00.000Z',
+    tokenNonce: 'incomplete-developer-nonce',
+    tokenHash: 'e'.repeat(64),
+    consumedAt: '2026-08-19T00:00:00.000Z',
+    verifiedAt: '2026-08-19T00:00:00.000Z',
+    identityOrigin: 'sap.default',
+    identityIssuer: 'https://issuer.example.invalid',
+    identitySubject: 'incomplete-developer-uuid',
+    identityPlatformUserId: '82000000-0000-4000-8000-000000000012',
+    identityKeyHash: incompleteIdentityHash,
+    identityEmailNormalized: 'incomplete.developer@example.invalid',
+    provisioningVersion: 1,
+    correlationId: '82000000-0000-4000-8000-000000000013'
+  }))
+  await db.run(INSERT.into('idts.cap.UserOnboardingDeveloperProfiles').entries({
+    ID: '82000000-0000-4000-8000-000000000014',
+    onboardingRequest_ID: incompleteRequestID,
+    availabilityStatus_code: 'AVAILABLE',
+    workloadLimit: 3
+  }))
+  await db.run(INSERT.into('idts.cap.UserAccessOperations').entries({
+    ID: incompleteOperationID,
+    onboardingRequest_ID: incompleteRequestID,
+    operationType: 'PROVISION',
+    state: 'PENDING',
+    requestedBy_ID: ADMIN_ID,
+    idempotencyKey: 'f'.repeat(64),
+    expectedVersion: 1,
+    desiredRole_code: 'DEVELOPER',
+    desiredUserAdmin: false,
+    correlationId: '82000000-0000-4000-8000-000000000015',
+    attemptCount: 0
+  }))
+
+  const incompleteClaim = await service.send({ event: 'claimNextAccessOperation', data: {}, user: broker })
+  assert.equal(incompleteClaim.operationID, incompleteOperationID)
+  await assert.rejects(service.send({
+    event: 'completeAccessOperation',
+    data: {
+      operationID: incompleteOperationID,
+      leaseToken: incompleteClaim.leaseToken,
+      resultCode: 'APPLIED',
+      safeCode: 'ROLE_COLLECTIONS_VERIFIED'
+    },
+    user: broker
+  }), error => error?.code === 'DEVELOPER_PROFILE_INCOMPLETE')
+  const incompleteRequest = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: incompleteRequestID }))
+  const incompleteOperation = await db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ ID: incompleteOperationID }))
+  assert.equal(incompleteRequest.status_code, 'PROVISIONING')
+  assert.equal(incompleteOperation.state, 'PROCESSING')
+  assert.equal(await db.run(SELECT.one.from('idts.cap.Users').where({ externalIdentityKeyHash: incompleteIdentityHash })), undefined)
+
   console.log('IDTS Developer provisioning completion: PASS')
 }
 

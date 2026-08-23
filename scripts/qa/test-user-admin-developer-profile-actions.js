@@ -5,7 +5,7 @@ process.env.CDS_ENV = 'test'
 
 const assert = require('node:assert/strict')
 const cds = require('@sap/cds')
-const { INSERT, SELECT } = cds.ql
+const { INSERT, SELECT, UPDATE } = cds.ql
 
 const PM_ID = '72000000-0000-4000-8000-000000000001'
 const DEV_ID = '72000000-0000-4000-8000-000000000002'
@@ -17,7 +17,8 @@ async function expectRejected (operation, status, code) {
 }
 
 async function main () {
-  const db = await cds.deploy('db').to('sqlite::memory:')
+  const csn = await cds.load('srv/service.cds')
+  const db = await cds.deploy(csn).to('sqlite::memory:')
   cds.db = db
   const componentCategories = await db.run(
     SELECT.from('idts.cap.ComponentCategories').columns('ID').where({ active: true }).limit(2)
@@ -60,10 +61,44 @@ async function main () {
   }))
 
   const service = await cds.serve('UserAdministrationService').from('srv/user-admin.cds')
+  const bugService = await cds.serve('BugService').from(csn)
   const administrator = new cds.User({
     id: 'pm.profile@example.invalid',
     roles: ['authenticated-user', 'PM', 'UserAdmin']
   })
+  const identityHash = '7'.repeat(64)
+  await db.run(UPDATE('idts.cap.Users').set({ externalIdentityKeyHash: identityHash }).where({ ID: DEV_ID }))
+  await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries({
+    ID: '72000000-0000-4000-8000-000000000020',
+    targetEmailNormalized: 'dev.profile@example.invalid',
+    requestedRole_code: 'DEVELOPER',
+    userAdminRequested: false,
+    status_code: 'ACTIVE',
+    requestedBy_ID: PM_ID,
+    expiresAt: '2026-09-01T00:00:00.000Z',
+    tokenNonce: 'developer-profile-action-nonce',
+    tokenHash: '8'.repeat(64),
+    identityKeyHash: identityHash,
+    identityEmailNormalized: 'dev.profile@example.invalid',
+    activeUser_ID: DEV_ID,
+    provisioningVersion: 1,
+    correlationId: '72000000-0000-4000-8000-000000000021'
+  }))
+  const controlledBug = await db.run(SELECT.one.from('idts.cap.Bugs').columns('ID'))
+  await db.run(UPDATE('idts.cap.Bugs').set({
+    assignee_ID: PROFILE_ID,
+    componentCategory_ID: componentCategories[0].ID,
+    status_code: 'ASSIGNED'
+  }).where({ ID: controlledBug.ID }))
+
+  async function readAssignable (componentCategoryID) {
+    return bugService.dispatch(new cds.Request({
+      method: 'READ',
+      target: bugService.entities.AssignableDevelopers,
+      query: SELECT.from(bugService.entities.AssignableDevelopers).where({ componentCategoryID, active: true }),
+      user: administrator
+    }))
+  }
 
   await expectRejected(service.send({
     event: 'updateDeveloperProfile',
@@ -85,6 +120,7 @@ async function main () {
   assert.equal(initial.administrationVersion, 0)
   assert.equal(initial.activeResponsibilityCount, 1)
   assert.equal(initial.responsibilities.length, 1)
+  assert.equal((await readAssignable(componentCategories[0].ID)).some(row => row.developerProfileID === PROFILE_ID), true)
 
   const updated = await service.send({
     event: 'updateDeveloperProfile',
@@ -117,6 +153,39 @@ async function main () {
     SELECT.one.from('idts.cap.DeveloperProfileAdministrationStates').where({ developerProfile_ID: PROFILE_ID })
   )
   assert.equal(persistedState.administrationVersion, 1)
+  assert.equal((await readAssignable(componentCategories[0].ID)).some(row => row.developerProfileID === PROFILE_ID), false)
+  assert.equal((await readAssignable(componentCategories[1].ID)).some(row => row.developerProfileID === PROFILE_ID), true)
+  assert.equal((await db.run(SELECT.one.from('idts.cap.Bugs').columns('assignee_ID').where({ ID: controlledBug.ID }))).assignee_ID, PROFILE_ID)
+
+  const reactivated = await service.send({
+    event: 'updateDeveloperProfile',
+    data: {
+      userID: DEV_ID,
+      desiredProfile: {
+        availabilityStatusCode: 'AVAILABLE',
+        workloadLimit: 3,
+        responsibilities: [{
+          componentCategoryID: componentCategories[0].ID,
+          sapModuleID: null,
+          responsibilityLevelCode: 'PRIMARY'
+        }, {
+          componentCategoryID: componentCategories[1].ID,
+          sapModuleID: null,
+          responsibilityLevelCode: 'BACKUP'
+        }]
+      },
+      reason: 'Reactivate the original scope without reassigning existing Bugs.',
+      expectedVersion: 1
+    },
+    user: administrator
+  })
+  assert.equal(reactivated.administrationVersion, 2)
+  assert.equal(reactivated.activeResponsibilityCount, 2)
+  const reactivatedRows = await db.run(SELECT.from('idts.cap.DeveloperResponsibilities').where({ developerProfile_ID: PROFILE_ID }))
+  assert.equal(reactivatedRows.length, 2, 'reactivation must reuse the inactive responsibility instead of duplicating it')
+  assert.equal(reactivatedRows.filter(row => row.active).length, 2)
+  assert.equal((await readAssignable(componentCategories[0].ID)).some(row => row.developerProfileID === PROFILE_ID), true)
+  assert.equal((await db.run(SELECT.one.from('idts.cap.Bugs').columns('assignee_ID').where({ ID: controlledBug.ID }))).assignee_ID, PROFILE_ID)
 
   const auditActions = (await db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').columns('action')))
     .map(row => row.action)

@@ -27,6 +27,8 @@ const APP = path.join(ROOT, 'app', 'bug-management-ui')
 const BUG1 = '90000000-0000-0000-0000-000000000001'
 const COMPONENT_CATEGORY_1 = '60000000-0000-0000-0000-000000000001'
 const DEV_DAT = '20000000-0000-0000-0000-000000000002'
+const DEV_DAT_USER = '10000000-0000-0000-0000-000000000003'
+const PM_USER = '10000000-0000-0000-0000-000000000001'
 const DEV_MISSING = '20000000-0000-0000-0000-000000009999'
 const UNLINKED_DEV_USER = '91000000-0000-0000-0000-000000000010'
 const UNLINKED_DEV_PROFILE = '91000000-0000-0000-0000-000000000011'
@@ -457,7 +459,7 @@ async function callAssignAction(srv, assigneeID) {
     target: srv.entities.Bugs,
     params: [{ ID: BUG1, IsActiveEntity: true }],
     data: { assigneeID, note: 'IDTS-56 QA smart assign validation' },
-    user: new cds.User({ id: 'DonHV', roles: ['authenticated-user'] })
+    user: new cds.User({ id: PM_USER, roles: ['authenticated-user'] })
   })
   return srv.dispatch(req)
 }
@@ -469,7 +471,7 @@ async function verifyBackendValidation() {
   const { INSERT, SELECT, UPDATE } = cds.ql
   const pm = await db.run(SELECT.one.from('idts.cap.Users').where({ role_code: 'PM', active: true }))
   const identityHash = 'd'.repeat(64)
-  await db.run(UPDATE('idts.cap.Users').set({ externalIdentityKeyHash: identityHash }).where({ ID: DEV_DAT }))
+  await db.run(UPDATE('idts.cap.Users').set({ externalIdentityKeyHash: identityHash }).where({ ID: DEV_DAT_USER }))
   await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries({
     ID: '91000000-0000-0000-0000-000000000001',
     targetEmailNormalized: 'datdt@example.local',
@@ -482,7 +484,7 @@ async function verifyBackendValidation() {
     tokenHash: 'e'.repeat(64),
     identityKeyHash: identityHash,
     identityEmailNormalized: 'datdt@example.local',
-    activeUser_ID: DEV_DAT,
+    activeUser_ID: DEV_DAT_USER,
     provisioningVersion: 3,
     correlationId: '91000000-0000-0000-0000-000000000002'
   }))
@@ -516,7 +518,7 @@ async function verifyBackendValidation() {
       componentCategoryID: COMPONENT_CATEGORY_1,
       active: true
     }),
-    user: new cds.User({ id: 'DonHV', roles: ['authenticated-user'] })
+    user: new cds.User({ id: PM_USER, roles: ['authenticated-user'] })
   })
   const candidates = await srv.dispatch(readReq)
   assert(candidates.some(candidate => candidate.developerProfileID === DEV_DAT))
