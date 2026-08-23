@@ -221,3 +221,12 @@ Dung transaction CAP hien co lam boundary reservation email normalized cuoi cung
 When retry, reconcile, or expired-lease reconciliation rotates a `UserAccessOperations.correlationId`, the same transaction and optimistic request version/state guard must write the identical value to `UserOnboardingRequests.correlationId` for `LINK_EXISTING`. This preserves exact completion binding while leaving ordinary PROVISION and other lifecycle recovery behavior unchanged. The executor will stop without another reviewer or Draft PR; the coordinator owns final exact-delta review.
 
 Khi retry, reconcile hoac reconcile lease het han rotate `UserAccessOperations.correlationId`, cung transaction va optimistic request version/state guard phai ghi dung value vao `UserOnboardingRequests.correlationId` cho `LINK_EXISTING`. Cach nay giu exact completion binding ma khong doi recovery behavior cua PROVISION va lifecycle khac. Executor dung lai, khong spawn reviewer hoac Draft PR; coordinator so huu final exact-delta review.
+
+### DEC-062 — Administer IDTS business catalogs without hard delete (2026-08-23)
+
+- Decision: expose only SAP Modules, Application Components, Defect Categories, and Component Category pairs to exact PM + UserAdmin through bounded CAP projections/actions. Use normalized uniqueness, active-parent validation, ETags, impact counts, dependency-aware deactivation, and append-only sanitized audit.
+- Historical safety: deactivation never rewrites historical Bugs; active responsibilities/catalog children block unsafe deactivation. DELETE, generic master-data editing, CSV import, and SAP/BTP administration remain out of scope.
+- Mutation boundary: this source gate may commit/push/open one Draft PR only. HDI simulation/migration, deployment, live catalog mutation, merge, and Gate 6 require later exact approval.
+
+- Quyết định: chỉ expose SAP Module, Application Component, Defect Category và cặp Component Category cho đúng PM + UserAdmin qua CAP contract giới hạn. Dùng uniqueness normalize, parent active, ETag, impact count, deactivate theo dependency và audit append-only sanitize.
+- An toàn lịch sử: deactivate không rewrite Bug lịch sử; responsibility/child catalog active chặn deactivate không an toàn. DELETE, generic master-data edit, import CSV và quản trị SAP/BTP ngoài scope.

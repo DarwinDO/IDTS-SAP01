@@ -477,3 +477,9 @@ Lưu ý khi sửa:
 `UserOnboardingRequests` adds only the nullable `linkTargetUser` association and `linkSourceEmailNormalized` snapshot. They bind one approved legacy target and its original contact email to the signed verification flow; no new code-list state, HDI data artifact, drop, seed, or replacement User entity is introduced. The same `Users.ID` remains the durable identity/profile/assignment owner.
 
 `UserOnboardingRequests` chi them association nullable `linkTargetUser` va snapshot `linkSourceEmailNormalized`. Hai field gan mot legacy target da duyet va email lien he ban dau vao flow verify da ky; khong them state code-list, artifact HDI, drop, seed hoac entity User thay the. `Users.ID` cu van la owner ben vung cua identity/profile/assignment.
+
+## Gate 5 Business Catalog constraints and audit / Constraint va audit Business Catalog Gate 5
+
+The four managed IDTS business catalogs now have database-backed uniqueness for module/component/category codes and the Application Component + Defect Category pair. `CatalogAdministrationAuditEvents` is append-only and stores only actor, catalog type, target ID, allowlisted action/result, safe display summaries, reason, correlation ID, and timestamps. No seed row, hard delete, provider identity, credential, or raw request body is added.
+
+Bon business catalog do IDTS quan ly co unique constraint o database cho code module/component/category va cap Application Component + Defect Category. `CatalogAdministrationAuditEvents` la append-only, chi luu actor, loai catalog, target ID, action/result allowlist, display summary an toan, reason, correlation ID va timestamp. Gate nay khong them seed, hard delete, provider identity, credential hay raw request body.

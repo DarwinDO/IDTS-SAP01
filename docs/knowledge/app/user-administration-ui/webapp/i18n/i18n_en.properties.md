@@ -13,3 +13,7 @@ Ba key Cancel hien huu gio dung wording tong quat cho moi invitation chua verify
 Gate 4 adds confirmation and impact copy for responsibility changes. It states that existing Bugs keep their current assignee and that the PM must review the open-Bug impact count; it never promises automatic reassignment.
 
 Gate 4 thêm copy confirmation và impact cho thay đổi responsibility. Nội dung nói rõ Bug hiện hữu giữ nguyên assignee và PM phải review số Bug đang mở bị ảnh hưởng; UI không hứa tự động reassign.
+
+Gate 5 keeps exact English parity for Business Catalog labels, impact counts, reasons, success messages, and safe failures. No technical or secret-bearing value is interpolated.
+
+Gate 5 giu parity English cho label Business Catalog, impact count, reason, success va safe failure. Khong interpolate gia tri ky thuat hoac secret.

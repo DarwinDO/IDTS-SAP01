@@ -391,3 +391,9 @@ Vietnamese: Agent hoáº·c developer má»›i pháº£i xÃ¡c Ä‘á»‹nh 
 - `sap.default` automatic shadow-user creation is enabled with the trust still active and available for user logon. This removes per-user manual shadow creation while Role Collection assignment and CAP activation remain fail-closed.
 - The controlled non-member Developer reached ACTIVE with identity link, Ready profile, one responsibility and successful Bug Management access in a fresh session. Repository evidence omits the raw account identifier.
 - Gate 4 is complete. Gate 5 Business Catalog Administration remains unopened pending a separate DonHV decision.
+
+## 2026-08-23 WP8 Gate 5 source candidate
+
+- Gate 5 is open source-only from exact `origin/dev` `fd6870585d72ca63e55b744708960b417a2795b9` on `feature/wp8-admin-business-catalogs-donhv`.
+- The candidate adds bounded PM + UserAdmin administration for four IDTS business catalogs, optimistic ETags, normalized uniqueness, impact/deactivation guards, no DELETE, sanitized append-only audit, and User Administration UI `1.0.11`.
+- No HDI simulation/migration, HANA data/catalog mutation, deployment, merge, or Gate 6 work has run. The source executor stops at one Draft PR for coordinator review.

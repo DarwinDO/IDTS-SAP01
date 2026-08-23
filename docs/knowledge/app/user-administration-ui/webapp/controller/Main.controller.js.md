@@ -13,3 +13,9 @@ Controller giữ flow details Active Users hiện có và thêm dialog link iden
 `onConfirmDeveloperProfile` requires a reason and one explicit confirmation before calling the existing optimistic `updateDeveloperProfile` action. A synchronous controller guard and the `developer>/submitting` state prevent double submit across the asynchronous confirmation/action boundary. Success reloads Access Requests and Active Users so readiness and impact counts do not stay stale; CAP remains authoritative for validation, version conflicts, persistence and assignment eligibility.
 
 `onConfirmDeveloperProfile` yêu cầu reason và một confirmation rõ ràng trước khi gọi action optimistic `updateDeveloperProfile` hiện có. Guard đồng bộ ở controller cùng state `developer>/submitting` chặn double submit xuyên qua boundary confirm/action bất đồng bộ. Khi thành công, UI reload Access Requests và Active Users để readiness/impact count không bị cũ; CAP vẫn là nguồn chính cho validation, version conflict, persistence và assignment eligibility.
+
+## Gate 5 Business Catalogs
+
+The controller loads at most 100 rows from one selected catalog, applies local search/inactive display filtering, preserves OData contexts for native ETag-aware updates, prevents double submit, and requests count-only impact before deactivation. CAP remains authoritative for authorization, normalization, conflicts, dependencies, and audit.
+
+Controller load toi da 100 row cua catalog dang chon, filter search/inactive o UI, giu OData context cho update native co ETag, chan double submit va doc impact count-only truoc deactivate. CAP van la authority cho authorization, normalization, conflict, dependency va audit.

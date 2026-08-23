@@ -67,6 +67,12 @@ The handler returns the existing safe `OnboardingResult` allowlist. Internal tar
 
 Handler chi tra allowlist `OnboardingResult` an toan hien co. Association target noi bo, snapshot email nguon, identity claims, hash, lease operation va data provider khong bao gio vao public result hoac audit summary.
 
+## Gate 5 catalog handler registration / Dang ky handler catalog Gate 5
+
+The User Administration service registers the catalog module inside the existing PM + UserAdmin authorization boundary. UI visibility is not authorization; every catalog read, impact request, create, update, activate, deactivate, and delete rejection is server-authorized.
+
+User Administration service dang ky module catalog trong boundary PM + UserAdmin hien co. UI visibility khong phai authorization; moi read, impact request, create, update, activate, deactivate va delete rejection deu duoc server authorize.
+
 For an existing-user link, verification writes the generated operation correlation ID back to the private request row before creating the `LINK_EXISTING` operation. This makes the broker's exact request/operation correlation check fail closed on drift without changing the ordinary provisioning approval path.
 
 Với link user hiện hữu, verify ghi correlation ID của operation được tạo vào request private trước khi tạo operation `LINK_EXISTING`. Nhờ vậy broker sẽ fail closed nếu correlation request/operation lệch nhau mà không đổi path approval provisioning thông thường.

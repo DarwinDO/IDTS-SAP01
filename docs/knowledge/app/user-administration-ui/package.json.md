@@ -16,6 +16,10 @@ Version `1.0.9` đánh dấu content live đầu tiên có copy Cancel tổng qu
 
 Version `1.0.10` thêm confirmation responsibility, notice không tự reassign và double-submit guard của Gate 4 mà không đổi dependency hoặc build command.
 
+Version `1.0.11` adds the Gate 5 Business Catalogs tab and dialogs. Dependencies and build commands remain unchanged.
+
+Version `1.0.11` them tab/dialog Business Catalogs Gate 5. Dependency va build command giu nguyen.
+
 ### Important source anchors
 
 - **Location**: top-level `version`.

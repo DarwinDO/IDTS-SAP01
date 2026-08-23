@@ -46,3 +46,9 @@ Vietnamese: Contract additive them `requestSuspend(userID, reason, expectedVersi
 `requestExistingUserIdentityLink(userID: UUID, email: String(255))` is the only new public action input. `linkTargetUser` and `linkSourceEmailNormalized` are private persistence fields on the onboarding request; the Active Users summary/details add only the safe Boolean `linkEligible`. Provider identifiers and immutable identity internals remain absent from public projections.
 
 `requestExistingUserIdentityLink(userID: UUID, email: String(255))` la input duy nhat cua action public moi. `linkTargetUser` va `linkSourceEmailNormalized` la field persistence private cua onboarding request; Active Users summary/details chi them Boolean an toan `linkEligible`. Provider identifier va immutable identity noi bo van khong co trong public projection.
+
+## Gate 5 Business Catalog public contract / Contract Business Catalog Gate 5
+
+`UserAdministrationService` exposes four bounded catalog projections with a 100-row query cap, `modifiedAt` ETag, and one virtual administration reason accepted only for mutation handling. `readCatalogImpact` returns only counts for referenced Bugs, active Developer responsibilities, and active child catalogs. The service does not expose the audit table, raw SQL, provider data, or hard delete.
+
+`UserAdministrationService` expose bon projection catalog gioi han 100 row, dung `modifiedAt` lam ETag va mot virtual administration reason chi cho mutation handler. `readCatalogImpact` chi tra count Bug tham chieu, Developer responsibility active va child catalog active. Service khong expose audit table, raw SQL, provider data hay hard delete.

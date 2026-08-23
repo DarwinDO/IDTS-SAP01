@@ -14,6 +14,10 @@ UI5 manifest định danh ứng dụng User Administration, OData V4 service, mo
 
 Version `1.0.10` phát hành content confirmation responsibility Gate 4 thành một HTML5 release riêng và giữ nguyên route/data source.
 
+Version `1.0.11` publishes the source-candidate Business Catalogs UI while keeping the same OData V4 data source, libraries, routes, and authorization boundary.
+
+Version `1.0.11` phat hanh UI Business Catalogs source-candidate, van giu nguyen OData V4 data source, library, route va authorization boundary.
+
 Toàn bộ routing và OData setting giữ nguyên. Release chỉ tăng version không được thêm destination, credential, endpoint private hoặc quyết định authorization; CAP vẫn là nguồn chính xác cho `cancelEligible` và mutation Cancel.
 
 ### Important source anchors
