@@ -1,8 +1,9 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-	<Dialog id="manageDeveloperProfileDialog" title="{i18n>manageResponsibilities}" contentWidth="42rem" stretch="{device>/system/phone}">
+	<Dialog id="manageDeveloperProfileDialog" title="{i18n>manageResponsibilities}" contentWidth="42rem" stretch="{device>/system/phone}" busy="{developer>/submitting}" busyIndicatorDelay="0">
 		<content>
 			<VBox class="sapUiSmallMargin">
 				<MessageStrip text="{= ${i18n>openBugImpact} + ': ' + ${developer>/openBugImpactCount} }" type="Information" showIcon="true"/>
+				<MessageStrip text="{i18n>existingBugsKeepAssignee}" type="Information" showIcon="true" class="sapUiTinyMarginTop"/>
 				<Label text="{i18n>availability}" required="true" class="sapUiSmallMarginTop"/>
 				<Select selectedKey="{developer>/developerProfile/availabilityStatusCode}" items="{catalogs>/availabilityStatuses}"><core:Item key="{catalogs>code}" text="{catalogs>name}"/></Select>
 				<Label text="{i18n>workloadLimit}" required="true" class="sapUiSmallMarginTop"/>
@@ -23,7 +24,7 @@
 				<TextArea value="{developer>/reason}" valueLiveUpdate="true" maxLength="500" rows="3" width="100%"/>
 			</VBox>
 		</content>
-		<beginButton><Button text="{i18n>saveResponsibilities}" type="Emphasized" press=".onConfirmDeveloperProfile"/></beginButton>
+		<beginButton><Button text="{i18n>saveResponsibilities}" type="Emphasized" press=".onConfirmDeveloperProfile" enabled="{= !!${developer>/reason} &amp;&amp; !${developer>/submitting} }"/></beginButton>
 		<endButton><Button text="{i18n>cancel}" press=".onCancelDeveloperProfile"/></endButton>
 	</Dialog>
 </core:FragmentDefinition>
