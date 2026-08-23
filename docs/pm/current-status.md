@@ -402,4 +402,11 @@ Vietnamese: Agent hoáº·c developer má»›i pháº£i xÃ¡c Ä‘á»‹nh 
 
 - Gate 5 is open source-only from exact `origin/dev` `fd6870585d72ca63e55b744708960b417a2795b9` on `feature/wp8-admin-business-catalogs-donhv`.
 - The candidate adds bounded PM + UserAdmin administration for four IDTS business catalogs, optimistic ETags, normalized uniqueness, impact/deactivation guards, no DELETE, sanitized append-only audit, and User Administration UI `1.0.11`.
+
+## 2026-08-23 WP8 Gate 5 HDI simulation
+
+- Gate 5 source merged through PR #337 at `eb0c5d1bc6c92557a7d41e45008240e1e929bc44`.
+- Exact archive `19CB2D25210B6200067B61B9F9F5495FEFDC2BC6DD70841BEC583304C79BE9E3` ran one warning-as-error HDI simulation after aggregate duplicate groups returned zero. The terminal make simulated exactly five effective deploy files, zero undeploy, zero warnings, zero dependent redeploy and no CSV/`.hdbtabledata`.
+- The exact temporary app/binding/task were cleaned up; main CAP/AppRouter/HDI topology remained unchanged and final readiness was `DEMO READY`.
+- Real HDI make, selective CAP/UI deployment and live Business Catalog acceptance remain `NO-GO` because the `hana-free` target has no approved native backup/recovery path. Next owner: DonHV recovery/rollback decision.
 - No HDI simulation/migration, HANA data/catalog mutation, deployment, merge, or Gate 6 work has run. The source executor stops at one Draft PR for coordinator review.

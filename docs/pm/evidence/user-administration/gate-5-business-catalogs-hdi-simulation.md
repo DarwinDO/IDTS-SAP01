@@ -2,7 +2,7 @@
 
 Date: 2026-08-23
 Owner: DonHV
-Status: `PRE-SIMULATION / EXACT R2 ARTIFACT / REAL MIGRATION NO-GO`
+Status: `LIVE SIMULATION PASS / REAL MIGRATION NO-GO`
 
 ## Frozen source and artifact
 
@@ -76,3 +76,59 @@ Timeout or ambiguity requires one sanitized readback and no blind retry. Cleanup
 | Main app/XSUAA/provider/user/role/email/Jira/Drive mutation | 0 |
 
 OfficeCLI preflight: `1.0.144`. OfficeCLI does not validate Markdown semantics; exact hashes, programmatic contracts, sanitized platform readback and terminal task evidence remain authoritative.
+
+## Live execution result
+
+The one authorized R2 simulation chain completed without a retry:
+
+| Step | Result |
+| --- | --- |
+| D01 exact no-start/no-route push | PASS; app STOPPED, routes 0, bindings 0, one READY package |
+| D02 HDI bind | PASS; exact binding set `{ idts-sap01-db }` |
+| D03 package stage | PASS; one build owned the exact READY package |
+| D04 set droplet | PASS; one owned STAGED droplet selected; app remained STOPPED |
+| D05 aggregate precheck | PASS; row counts `4 / 8 / 8 / 31`, duplicate groups `0` |
+| D05 HDI simulation | PASS; task SUCCEEDED, exit 0 |
+| Cleanup | PASS; zero running tasks, unbound once, deleted exact app once |
+
+Sanitized HDI result:
+
+- exact deploy set: all five allowlisted artifacts;
+- make result: `5` deployed effective `5`, `0` undeployed effective `0`;
+- warnings: `0`;
+- dependent redeploy: `0`;
+- CSV, `.hdbtabledata`, seed or unrelated artifact: `0`;
+- explicit successful-simulation marker: present;
+- real HDI make, DDL, DML and catalog/business-row mutation: `0`.
+
+One `npm` peer-dependency warning appeared only in staging logs, not in the HDI task/make. A diagnostic sanitizer briefly emitted a technical container identifier; that line is rejected as evidence and is not persisted here. The first post-unbind readback still showed one relationship, but one read-only poll reached zero; unbind was never retried.
+
+Final readback:
+
+- temporary app/task/binding/route: absent;
+- main CAP: `1/1`, revisions `7/7`, routes `1`, bindings `7`;
+- main AppRouter: `1/1`, revisions `11/11`, routes `1`, bindings `3`;
+- existing HDI service: count `1`, last operation succeeded;
+- final `npm run btp:demo:check`: `DEMO READY`.
+
+## Final mutation ledger
+
+| Mutation | Attempted / confirmed |
+| --- | --- |
+| Temporary app push | `1 / 1` |
+| Exact HDI bind | `1 / 1` |
+| Package stage | `1 / 1` |
+| Set owned droplet | `1 / 1` |
+| HDI simulation task | `1 / 1` |
+| Exact unbind | `1 / 1` |
+| Exact temporary app delete | `1 / 1` |
+| Real HDI make / DDL / DML / seed | `0 / 0` |
+| Catalog/business-row mutation | `0 / 0` |
+| Main app/XSUAA/provider/user/role/email/Jira/Drive mutation | `0 / 0` |
+
+## Verdict
+
+- Gate 5 live HDI simulation: **PASS**.
+- Additive five-artifact plan: **PASS**.
+- Real schema migration: **NO-GO** until DonHV separately approves a recovery/rollback strategy appropriate for the `hana-free` target.
+- CAP/UI deployment and live catalog acceptance: **NO-GO** until the schema migration gate passes.

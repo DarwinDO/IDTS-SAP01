@@ -12,7 +12,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 ## Current status
 
-`IN PROGRESS — GATE 5 HDI SIMULATION`
+`BLOCKED — GATE 5 MIGRATION RECOVERY DECISION`
 
 - Gates 1–3B are merged, deployed and accepted. Gate 3 browser closure is recorded by PR #325 at `04643e12727290f2f35fd56e9c3d2a8df4cbcdbc`.
 - Gate 4 branch `feature/wp8-admin-developer-pilot-donhv` is frozen from that exact base.
@@ -23,6 +23,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 - The controlled non-member Developer pilot reached `ACTIVE`, immutable identity link `Yes`, readiness `Ready`, one active responsibility and successful Bug Management access in a fresh session.
 - Automatic `sap.default` shadow-user creation is enabled for this POC; authorization still requires the allowlisted broker-assigned IDTS Role Collection and CAP readback.
 - Gate 5 source was independently reviewed with zero findings, merged through PR #337, and is now `origin/dev` commit `eb0c5d1bc6c92557a7d41e45008240e1e929bc44`. The coordinator rollout branch has frozen a five-artifact additive allowlist and a checksum-bound one-shot HDI simulation package. Real migration, deployment and live catalog mutation remain blocked behind separate recovery and execution evidence.
+- The exact R2 HDI simulation task passed once with five effective deploy files, zero undeploy, zero warnings, zero dependent redeploy and no CSV/`.hdbtabledata`; aggregate duplicate groups were zero and exact temporary cleanup restored the unchanged main topology. Real make remains blocked because the `hana-free` target has no approved native backup/recovery path.
 
 ## Gate sequence
 
@@ -49,4 +50,4 @@ Each gate records source tests, CAP/Fiori/UI5 MCP guidance, security review, art
 
 ## Next handoff
 
-Gate 5 source is merged at `eb0c5d1bc6c92557a7d41e45008240e1e929bc44`. Execute exactly one warning-as-error HDI simulation from the checksum-reviewed five-artifact package, clean up the exact temporary app, and return a simulation verdict. Real migration remains `NO-GO` while the `hana-free` target has no approved native recovery path.
+Gate 5 source is merged and the one-shot live simulation is PASS. DonHV must now choose and approve an exact recovery/rollback strategy for the additive five-artifact migration; without that decision, real HDI make, selective CAP/UI deployment and live Business Catalog acceptance remain NO-GO.
