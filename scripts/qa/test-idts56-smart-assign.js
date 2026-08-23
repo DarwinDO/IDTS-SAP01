@@ -28,6 +28,9 @@ const BUG1 = '90000000-0000-0000-0000-000000000001'
 const COMPONENT_CATEGORY_1 = '60000000-0000-0000-0000-000000000001'
 const DEV_DAT = '20000000-0000-0000-0000-000000000002'
 const DEV_MISSING = '20000000-0000-0000-0000-000000009999'
+const UNLINKED_DEV_USER = '91000000-0000-0000-0000-000000000010'
+const UNLINKED_DEV_PROFILE = '91000000-0000-0000-0000-000000000011'
+const UNLINKED_DEV_RESPONSIBILITY = '91000000-0000-0000-0000-000000000012'
 
 let pass = 0
 let fail = 0
@@ -463,6 +466,47 @@ async function verifyBackendValidation() {
   const csn = await cds.load('srv/service.cds')
   const db = await cds.connect.to('db', { kind: 'sqlite', credentials: { url: ':memory:' } })
   await cds.deploy(csn).to(db)
+  const { INSERT, SELECT, UPDATE } = cds.ql
+  const pm = await db.run(SELECT.one.from('idts.cap.Users').where({ role_code: 'PM', active: true }))
+  const identityHash = 'd'.repeat(64)
+  await db.run(UPDATE('idts.cap.Users').set({ externalIdentityKeyHash: identityHash }).where({ ID: DEV_DAT }))
+  await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries({
+    ID: '91000000-0000-0000-0000-000000000001',
+    targetEmailNormalized: 'datdt@example.local',
+    requestedRole_code: 'DEVELOPER',
+    userAdminRequested: false,
+    status_code: 'ACTIVE',
+    requestedBy_ID: pm.ID,
+    expiresAt: '2026-09-01T00:00:00.000Z',
+    tokenNonce: 'smart-assign-identity-nonce',
+    tokenHash: 'e'.repeat(64),
+    identityKeyHash: identityHash,
+    identityEmailNormalized: 'datdt@example.local',
+    activeUser_ID: DEV_DAT,
+    provisioningVersion: 3,
+    correlationId: '91000000-0000-0000-0000-000000000002'
+  }))
+  await db.run(INSERT.into('idts.cap.Users').entries({
+    ID: UNLINKED_DEV_USER,
+    displayName: 'Legacy Unlinked Smart Assign Developer',
+    email: 'legacy.smart-assign@example.local',
+    role_code: 'DEVELOPER',
+    active: true
+  }))
+  await db.run(INSERT.into('idts.cap.DeveloperProfiles').entries({
+    ID: UNLINKED_DEV_PROFILE,
+    user_ID: UNLINKED_DEV_USER,
+    availabilityStatus_code: 'AVAILABLE',
+    workloadLimit: 3,
+    active: true
+  }))
+  await db.run(INSERT.into('idts.cap.DeveloperResponsibilities').entries({
+    ID: UNLINKED_DEV_RESPONSIBILITY,
+    developerProfile_ID: UNLINKED_DEV_PROFILE,
+    componentCategory_ID: COMPONENT_CATEGORY_1,
+    responsibilityLevel_code: 'PRIMARY',
+    active: true
+  }))
   const srv = await cds.serve('BugService').from(csn)
 
   const readReq = new cds.Request({
@@ -476,6 +520,8 @@ async function verifyBackendValidation() {
   })
   const candidates = await srv.dispatch(readReq)
   assert(candidates.some(candidate => candidate.developerProfileID === DEV_DAT))
+  assert.equal(candidates.some(candidate => candidate.developerProfileID === UNLINKED_DEV_PROFILE), false,
+    'Smart Assign must exclude an unlinked Developer')
   rec('AssignableDevelopers returns a valid candidate for BUG-0001', true)
 
   const assigned = await callAssignAction(srv, DEV_DAT)
@@ -485,6 +531,9 @@ async function verifyBackendValidation() {
 
   await assert.rejects(() => callAssignAction(srv, DEV_MISSING), /does not exist|not active|not responsible/)
   rec('negative assignment is blocked by backend validation', true)
+
+  await assert.rejects(() => callAssignAction(srv, UNLINKED_DEV_PROFILE), /not linked to active SAP identity access/)
+  rec('unlinked Developer is blocked from new assignment', true)
 }
 
 async function main() {

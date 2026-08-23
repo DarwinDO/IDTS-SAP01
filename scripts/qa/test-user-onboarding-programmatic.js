@@ -423,6 +423,10 @@ async function main () {
   })
   assert.equal(retried.status, 'PROVISION_QUEUED')
   assert.equal(retried.provisioningVersion, 3)
+  const originalRequestCorrelation = created.correlationId
+  const retriedRequest = await db.run(
+    SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: created.ID })
+  )
   const retriedOperation = await db.run(
     SELECT.one.from('idts.cap.UserAccessOperations').where({ ID: queuedOperation.ID })
   )
@@ -430,6 +434,8 @@ async function main () {
   assert.equal(retriedOperation.expectedVersion, 3)
   assert.notEqual(retriedOperation.idempotencyKey, queuedOperation.idempotencyKey)
   assert.notEqual(retriedOperation.correlationId, queuedOperation.correlationId)
+  assert.equal(retriedRequest.correlationId, originalRequestCorrelation, 'ordinary PROVISION retry must preserve request correlation behavior')
+  assert.notEqual(retriedOperation.correlationId, retriedRequest.correlationId, 'ordinary PROVISION retry must not adopt LINK_EXISTING correlation binding')
   assert.equal(retried.correlationId, retriedOperation.correlationId)
   assert.equal(retriedOperation.safeResultCode, null)
   assert.equal(retriedOperation.completedAt, null)
@@ -794,6 +800,80 @@ async function main () {
   assert.equal(expiredRow.openRequestKey, null)
   assert.equal(expiredRow.lastErrorCode, 'INVITATION_EXPIRED')
   assert.equal(expiredRow.lastErrorSummary, 'Invitation expired before identity verification.')
+
+  const cancellableInvite = await service.send({
+    event: 'requestOnboarding',
+    data: { email: 'cancel.standard@example.invalid', requestedRole: 'TESTER', userAdminRequested: false },
+    user: administrator
+  })
+  const cancellableRow = await db.run(
+    SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: cancellableInvite.ID })
+  )
+  const cancellableToken = createInvitationToken({
+    invitationID: cancellableRow.ID,
+    targetEmail: cancellableRow.targetEmailNormalized,
+    expiresAt: cancellableRow.expiresAt,
+    signingKey: SIGNING_KEY,
+    nonce: cancellableRow.tokenNonce
+  }).token
+  const cancellableSummary = (await service.send({
+    event: 'searchOnboarding',
+    data: { query: 'cancel.standard' },
+    user: administrator
+  })).find(row => row.ID === cancellableInvite.ID)
+  assert.equal(cancellableSummary.cancelEligible, true, 'every unverified INVITED request must be cancellable')
+
+  await expectRejected(service.send({
+    event: 'cancelExistingUserIdentityLink',
+    data: { requestID: cancellableInvite.ID, expectedVersion: 0 },
+    user: new cds.User({ id: 'pm@example.invalid', roles: ['authenticated-user', 'PM'] })
+  }), 403, 'USER_ADMIN_REQUIRED')
+  await expectRejected(service.send({
+    event: 'cancelExistingUserIdentityLink',
+    data: { requestID: cancellableInvite.ID, expectedVersion: 99 },
+    user: administrator
+  }), 409, 'ONBOARDING_VERSION_CONFLICT')
+
+  const cancelledStandard = await service.send({
+    event: 'cancelExistingUserIdentityLink',
+    data: { requestID: cancellableInvite.ID, expectedVersion: 0 },
+    user: administrator
+  })
+  assert.equal(cancelledStandard.status, 'FAILED')
+  assert.equal(cancelledStandard.provisioningVersion, 1)
+  const cancelledStandardRow = await db.run(
+    SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: cancellableInvite.ID })
+  )
+  assert.equal(cancelledStandardRow.openRequestKey, null)
+  assert.equal(cancelledStandardRow.lastErrorCode, 'INVITATION_CANCELLED')
+  assert.equal(cancelledStandardRow.consumedAt, null)
+  const cancelledStandardDelivery = await db.run(
+    SELECT.one.from('idts.cap.UserOnboardingDeliveries').where({ onboardingRequest_ID: cancellableInvite.ID })
+  )
+  assert.equal(cancelledStandardDelivery.status_code, 'SKIPPED')
+  const standardCancelAudits = await db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({
+    onboardingRequest_ID: cancellableInvite.ID,
+    action: 'CANCEL_INVITATION'
+  }))
+  assert.equal(standardCancelAudits.length, 1)
+  assert.equal(standardCancelAudits[0].targetUser_ID, null)
+  assert.equal(standardCancelAudits[0].detailsSummary.includes('cancel.standard'), false)
+  await expectRejected(service.send({
+    event: 'verifySapIdentity',
+    data: { token: cancellableToken },
+    user: xsuaaUser({ email: 'cancel.standard@example.invalid', userUuid: 'cancelled-standard-user' })
+  }), 409, 'INVITATION_ALREADY_USED')
+  await expectRejected(service.send({
+    event: 'cancelExistingUserIdentityLink',
+    data: { requestID: cancellableInvite.ID, expectedVersion: 1 },
+    user: administrator
+  }), 409, 'ONBOARDING_INVITATION_NOT_OPEN')
+  const replacementStandard = await service.send({
+    event: 'requestOnboarding',
+    data: { email: 'cancel.standard@example.invalid', requestedRole: 'TESTER', userAdminRequested: false },
+    user: administrator
+  })
+  assert.equal(replacementStandard.status, 'INVITED')
 
   cds.spawn = originalSpawn
 

@@ -217,6 +217,44 @@ async function main () {
   assert.equal(reactivationCompletions[0].resultCode, 'NOOP_ALREADY_DESIRED')
   assert.equal(reactivationCompletions[0].safeCode, 'ROLE_COLLECTIONS_VERIFIED')
 
+  const existingLinkCalls = []
+  const existingLinkCompletions = []
+  const existingLinkResult = await processOneAccessOperation({
+    capClient: {
+      claimNextAccessOperation: async () => ({
+        operationID: '88888888-8888-4888-8888-888888888888',
+        operationType: 'LINK_EXISTING',
+        targetEmail: 'controlled@example.invalid',
+        identityOrigin: 'sap.default',
+        identityIssuer: 'https://issuer.example.invalid',
+        identitySubject: 'stable-user-uuid',
+        identityPlatformUserId: '88888888-8888-4888-8888-888888888889',
+        desiredBusinessRole: 'DEVELOPER',
+        desiredUserAdmin: false,
+        leaseToken: '8'.repeat(64)
+      }),
+      completeAccessOperation: async payload => {
+        existingLinkCompletions.push(payload)
+        return { status: 'ACTIVE' }
+      }
+    },
+    providerFactory: {
+      forIdentity: identity => {
+        assert.equal(identity.email, 'controlled@example.invalid')
+        return {
+          listRoleCollections: async () => {
+            existingLinkCalls.push('LIST')
+            return ['IDTS_DEVELOPER']
+          }
+        }
+      }
+    }
+  })
+  assert.deepEqual(existingLinkResult, { processed: true, status: 'ACTIVE' })
+  assert.deepEqual(existingLinkCalls, ['LIST'])
+  assert.equal(existingLinkCompletions[0].resultCode, 'NOOP_ALREADY_DESIRED')
+  assert.equal(existingLinkCompletions[0].safeCode, 'ROLE_COLLECTIONS_VERIFIED')
+
   const unavailableCap = createProvisioningCapClient({
     baseUrl: 'https://cap.example.invalid',
     tokenProvider: { getAccessToken: async () => 'controlled-broker-token' },

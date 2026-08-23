@@ -213,7 +213,8 @@ async function transitionBug (req, entities, options) {
   const nextState = { ...oldBug, ...patch }
   if (nextState.assignee_ID) {
     await validateAssignee(req, entities, nextState, {
-      enforceCapacity: !!options.assigneeID && options.assigneeID !== oldBug.assignee_ID
+      enforceCapacity: !!options.assigneeID && options.assigneeID !== oldBug.assignee_ID,
+      enforceIdentityAccess: !!options.assigneeID && options.assigneeID !== oldBug.assignee_ID
     })
   }
 

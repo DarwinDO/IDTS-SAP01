@@ -7,9 +7,17 @@ Rollout branch: `chore/wp8-gate3-access-lifecycle-rollout-donhv`
 
 ## Outcome
 
-`AUTOMATED RUNTIME PASS / INDEPENDENT TESTER BROWSER NEGATIVE PENDING`
+`PASS — AUTOMATED LIFECYCLE + INDEPENDENT TESTER BROWSER ACCEPTANCE`
 
-The controlled linked TESTER completed the fail-closed suspension and provider-proof reactivation lifecycle. The final backend and PM-console readbacks show `ACTIVE`, exact business role `TESTER`, identity link `Yes`, pending operation `None`, and broker result `ROLE_COLLECTIONS_VERIFIED`. A separate authenticated TESTER browser session was not available after the lifecycle run, so this evidence does not claim a new post-suspension browser denial or post-reactivation Bug Management render.
+The controlled linked TESTER completed the fail-closed suspension and provider-proof reactivation lifecycle. The final backend and PM-console readbacks show `ACTIVE`, exact business role `TESTER`, identity link `Yes`, pending operation `None`, and broker result `ROLE_COLLECTIONS_VERIFIED`. DonHV later completed the independent TESTER browser checks: User Administration returned `Forbidden`, while Bug Management rendered successfully and displayed the `Tester` role after reactivation.
+
+## Independent TESTER browser closure
+
+- The authenticated TESTER opened the User Administration URL and received `Forbidden`; the privileged PM + UserAdmin surface remained inaccessible.
+- The same authenticated TESTER opened Bug Management successfully after provider-proof reactivation, and the user menu displayed role `Tester`.
+- The PM console continued to show the controlled request `ACTIVE`, exact business role `TESTER`, identity link present, and no pending access operation.
+- User-supplied screenshots were reviewed interactively but are not committed because they contain a full email and private application hostname. No password, OTP, cookie, JWT, callback code, or raw immutable identity tuple was captured.
+- A separate screenshot taken during the short suspended interval was not retained. Fail-closed suspension remains proven by local `Users.active=false`, zero unrevoked custom sessions, the `SUSPENDED` request and audit, followed by the provider-readback-only reactivation path.
 
 ## Deployment and initialization boundary
 
@@ -65,7 +73,7 @@ DEMO READY
 - **Environment blocker, closed:** the CF token expired before readback. The reviewed clipboard-to-stdin SSO helper restored the default CF session without logging or persisting the temporary passcode.
 - **Environment recovery, closed:** HANA readiness was `503`; the approved prepare workflow restored `200` and final `DEMO READY` without schema/data deployment.
 - **Computer Use tooling issue, bounded:** Edge twice returned `coordinate input geometry is unavailable` at the final Reactivate confirmation. No operation was queued by those attempts; backend precheck proved zero `REACTIVATE` operations. DonHV clicked the already prepared confirmation manually, after which the operation succeeded.
-- **Manual-evidence limitation, open:** no separate authenticated TESTER browser session remained available for a fresh suspended-user denial and post-reactivation Bug Management render. Prior Gate 2 evidence proves this controlled TESTER's normal Bug Management access and User Administration denial, but it is not relabeled as fresh Gate 3 browser evidence.
+- **Manual-evidence limitation, bounded:** post-reactivation Bug Management access and continued User Administration denial were freshly proven. No screenshot from the short suspended interval was retained; backend/session-revocation readback is the authoritative evidence for that interval.
 
 ## Mutation ledger
 
@@ -78,4 +86,4 @@ DEMO READY
 
 ## Remaining acceptance
 
-Gate 3 can claim source, rollout, backend lifecycle, provider-readback, persistence, and PM-console acceptance. Final human browser closure requires one fresh controlled TESTER session proving suspended TESTER denial, post-reactivation Bug Management rendering with role `Tester`, and continued denial from User Administration.
+No Gate 3 lifecycle acceptance action remains. Gate 3 is closed with source, rollout, backend lifecycle, provider readback, persistence/reload, PM-console, independent TESTER Bug Management, and User Administration denial evidence. The missing suspended-interval screenshot remains a documented evidence limitation and does not authorize replaying the lifecycle or mutating user access again.

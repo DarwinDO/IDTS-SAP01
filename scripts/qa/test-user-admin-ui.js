@@ -35,7 +35,15 @@ assert.deepEqual(contentRequirement.artifacts, ['user-administration-ui.zip'])
 assert.equal(contentRequirement['target-path'], 'app/')
 
 const appPackage = JSON.parse(fs.readFileSync(path.join(app, 'package.json'), 'utf8'))
+const appPackageLock = JSON.parse(fs.readFileSync(path.join(app, 'package-lock.json'), 'utf8'))
 assert.equal(manifest['sap.app'].applicationVersion.version, appPackage.version, 'HTML5 manifest and package versions stay aligned')
+assert.equal(appPackageLock.version, appPackage.version, 'HTML5 package and lockfile versions stay aligned')
+assert.equal(appPackageLock.packages[''].version, appPackage.version, 'HTML5 lockfile root version stays aligned')
+const [majorVersion, minorVersion, patchVersion] = appPackage.version.split('.').map(Number)
+assert.ok(
+  majorVersion > 1 || minorVersion > 0 || patchVersion >= 9,
+  'general invitation cancellation content must advance beyond deployed UI 1.0.8'
+)
 assert.notEqual(appPackage.version, '1.0.0', 'changed HTML5 content must use a new application version')
 assert.match(appPackage.scripts.build, /ui5 build preload/)
 assert.match(appPackage.scripts.build, /--include-task generateCachebusterInfo/)
@@ -59,6 +67,8 @@ assert.match(view, /press="\.onOpenRoleChange"/)
 assert.match(view, /press="\.onOpenRevoke"/)
 assert.match(view, /press="\.onRetryAccessOperation"/)
 assert.match(view, /press="\.onReconcileAccessOperation"/)
+assert.match(view, /press="\.onCancelExistingLinkInvitation"/)
+assert.match(view, /requests>cancelEligible/)
 assert.match(view, /status_code\} === 'RETRYABLE_FAILURE'[\s\S]+lastErrorCode\} === 'PROVIDER_REQUEST_INVALID'[\s\S]+latestOperationAttemptCount\} === 4/)
 assert.match(view, /status_code\} === 'BLOCKED_MANUAL_REVIEW'[\s\S]+lastErrorCode\} === 'AMBIGUOUS_PROVIDER_OUTCOME'/)
 assert.match(view, /press="\.onOpenDeveloperProfile"/)
@@ -89,6 +99,21 @@ assert.match(activeUserDetailsFragment, /press="\.onOpenActiveUserRoleChange"/)
 assert.match(activeUserDetailsFragment, /press="\.onOpenActiveUserSuspend"/)
 assert.match(activeUserDetailsFragment, /press="\.onOpenActiveUserReactivate"/)
 assert.match(activeUserDetailsFragment, /press="\.onOpenActiveUserRevoke"/)
+assert.match(activeUserDetailsFragment, /linkEligible/)
+assert.match(activeUserDetailsFragment, /press="\.onOpenExistingIdentityLink"/)
+
+const linkExistingIdentityFragment = fs.readFileSync(path.join(webapp, 'fragment/LinkExistingIdentity.fragment.xml'), 'utf8')
+assert.match(linkExistingIdentityFragment, /<Dialog/)
+assert.match(linkExistingIdentityFragment, /existingLink>\/row\/displayName/)
+assert.match(linkExistingIdentityFragment, /existingLink>\/row\/businessRole/)
+assert.match(linkExistingIdentityFragment, /existingIdentityLinkRole/)
+assert.match(linkExistingIdentityFragment, /state="None"/)
+assert.match(linkExistingIdentityFragment, /type="Email"/)
+assert.match(linkExistingIdentityFragment, /existingLink>\/email/)
+assert.match(linkExistingIdentityFragment, /press="\.onConfirmExistingIdentityLink"/)
+assert.match(linkExistingIdentityFragment, /press="\.onCancelExistingIdentityLink"/)
+assert.match(linkExistingIdentityFragment, /existingIdentityLinkNotice/)
+assert.doesNotMatch(linkExistingIdentityFragment, /Role Collection|IdP|subaccount|endpoint|externalIdentity|platformUser|provider/i)
 
 const fragment = fs.readFileSync(path.join(webapp, 'fragment/InviteUser.fragment.xml'), 'utf8')
 assert.match(fragment, /<Input[^>]+type="Email"/)
@@ -104,6 +129,8 @@ assert.doesNotMatch(fragment, /Password|OTP|passkey|token/i)
 
 const controller = fs.readFileSync(path.join(webapp, 'controller/Main.controller.js'), 'utf8')
 assert.match(controller, /^sap\.ui\.define\(/)
+assert.doesNotMatch(controller, /normalizeCurrentBootstrapPm|bootstrapPmNormalize/, 'temporary PM normalization UI must be removed')
+assert.doesNotMatch(activeUserDetailsFragment, /bootstrapPmNormalize|onNormalizeCurrentBootstrapPm/, 'temporary PM normalization button must be removed')
 assert.match(controller, /bindContext\("\/requestOnboarding\(\.\.\.\)"\)/)
 assert.match(controller, /setParameter\("email"/)
 assert.match(controller, /setParameter\("requestedRole"/)
@@ -113,6 +140,8 @@ assert.match(controller, /await oOperation\.invoke\("\$direct"\)/)
 assert.match(controller, /bindContext\("\/searchOnboarding\(\.\.\.\)"\)/)
 assert.match(controller, /"approveProvisioning"/)
 assert.match(controller, /"requestRoleChange"/)
+assert.match(controller, /"cancelExistingUserIdentityLink"/)
+assert.match(controller, /cancelExistingLinkConfirmation/)
 assert.match(controller, /"requestRevoke"/)
 assert.match(controller, /"requestSuspend"/)
 assert.match(controller, /"requestReactivate"/)
@@ -139,6 +168,15 @@ assert.match(controller, /bindContext\("\/readActiveUserDetails\(\.\.\.\)"\)/)
 assert.match(controller, /onTabSelect/)
 assert.match(controller, /_ensureActiveUsersLoaded/)
 assert.match(controller, /onLoadMoreActiveUsers/)
+assert.match(controller, /requestExistingUserIdentityLink/)
+assert.match(controller, /setParameter\("userID"/)
+assert.match(controller, /setParameter\("email"/)
+assert.match(controller, /businessRole: oDetails\.businessRole/)
+assert.match(controller, /sEmail\.toLowerCase\(\)/)
+assert.match(controller, /onConfirmExistingIdentityLink/)
+assert.match(controller, /onExistingIdentityLinkFieldChange/)
+assert.match(controller, /onCancelExistingIdentityLink/)
+assert.match(controller, /linkEligible/)
 assert.match(controller, /sessionStorage/)
 assert.doesNotMatch(controller, /identityOrigin|identityIssuer|identitySubject|identityKeyHash|identityPlatformUserId/)
 
@@ -179,6 +217,8 @@ assert.equal(typeof controllerDefinition._loadActiveUsers, 'function')
 assert.equal(typeof controllerDefinition._ensureActiveUsersLoaded, 'function')
 assert.equal(typeof controllerDefinition.onLoadMoreActiveUsers, 'function')
 assert.equal(typeof controllerDefinition.onOpenActiveUserDetails, 'function')
+assert.equal(typeof controllerDefinition.onConfirmExistingIdentityLink, 'function')
+assert.equal(typeof controllerDefinition.onExistingIdentityLinkFieldChange, 'function')
 assert.match(controller, /this\.getResourceBundle\(\)/)
 
 async function verifyRuntimeBehavior () {
@@ -364,6 +404,79 @@ async function verifyRuntimeBehavior () {
     successKey: 'suspendQueued',
     reloadActiveUsers: true
   })
+
+  let existingLinkData = {
+    row: { userID: 'legacy-1', linkEligible: true },
+    email: 'new.identity@example.invalid',
+    emailTouched: false,
+    emailValid: true,
+    submitting: false
+  }
+  let existingLinkInvocation
+  let existingLinkClosed = 0
+  const existingLinkModel = {
+    getData: () => existingLinkData,
+    setProperty: (key, value) => { existingLinkData[key.slice(1)] = value },
+    setData: data => { existingLinkData = data }
+  }
+  const existingLinkInstance = Object.assign(Object.create(controllerDefinition), {
+    getModel: name => name === 'existingLink' ? existingLinkModel : { setProperty: () => {} },
+    _invokeAction: async (action, parameters, successKey, reloadActiveUsers) => {
+      existingLinkInvocation = { action, parameters, successKey, reloadActiveUsers }
+      return true
+    },
+    _emptyExistingIdentityLink: controllerDefinition._emptyExistingIdentityLink,
+    _existingIdentityLinkDialog: { close: () => { existingLinkClosed += 1 } }
+  })
+  existingLinkInstance.onExistingIdentityLinkFieldChange({ getParameter: name => name === 'value' ? 'New.Identity@Example.INVALID' : undefined })
+  assert.equal(existingLinkData.emailValid, true)
+  await existingLinkInstance.onConfirmExistingIdentityLink()
+  assert.deepEqual(JSON.parse(JSON.stringify(existingLinkInvocation)), {
+    action: 'requestExistingUserIdentityLink',
+    parameters: { userID: 'legacy-1', email: 'new.identity@example.invalid' },
+    successKey: 'identityLinkQueued',
+    reloadActiveUsers: true
+  })
+  assert.equal(existingLinkClosed, 1)
+  assert.equal(existingLinkData.row, null)
+
+  existingLinkData = {
+    row: { userID: 'legacy-1', linkEligible: true },
+    email: 'new.identity@example.invalid',
+    emailValid: true,
+    submitting: true
+  }
+  await existingLinkInstance.onConfirmExistingIdentityLink()
+  assert.equal(existingLinkClosed, 1, 'double submit must be ignored while submitting')
+
+  let cancelInvocation
+  let confirmCount = 0
+  const cancelRow = { ID: 'request-1', provisioningVersion: 3, cancelEligible: true }
+  const cancelInstance = Object.assign(Object.create(controllerDefinition), {
+    _rowFromEvent: () => cancelRow,
+    _confirm: async key => {
+      confirmCount += 1
+      assert.equal(key, 'cancelExistingLinkConfirmation')
+      return true
+    },
+    _invokeAction: async (action, parameters, successKey, reloadActiveUsers) => {
+      cancelInvocation = { action, parameters, successKey, reloadActiveUsers }
+      return true
+    }
+  })
+  await cancelInstance.onCancelExistingLinkInvitation({})
+  assert.equal(confirmCount, 1)
+  assert.deepEqual(JSON.parse(JSON.stringify(cancelInvocation)), {
+    action: 'cancelExistingUserIdentityLink',
+    parameters: { requestID: 'request-1', expectedVersion: 3 },
+    successKey: 'existingLinkCancelled',
+    reloadActiveUsers: true
+  })
+
+  cancelInvocation = null
+  cancelInstance._confirm = async () => false
+  await cancelInstance.onCancelExistingLinkInvitation({})
+  assert.equal(cancelInvocation, null, 'dismissed confirmation must not invoke cancellation')
 }
 
 function loadController (source) {
@@ -388,9 +501,13 @@ function loadController (source) {
 
 for (const locale of ['i18n.properties', 'i18n_en.properties']) {
   const text = fs.readFileSync(path.join(webapp, 'i18n', locale), 'utf8')
-  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'changeRoleConfirmation', 'revokeConfirmation', 'manageResponsibilities', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'activeUserSearchPlaceholder', 'includeNonActive', 'includeRevoked', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'loadMoreActiveUsers', 'viewDetails', 'activeUserDetails', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'developerProfile', 'close', 'activeUsersNoDeveloper', 'suspendAccess', 'reactivateAccess', 'suspendWarning', 'reactivateWarning', 'suspendQueued', 'reactivateQueued']) {
+  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'changeRoleConfirmation', 'revokeConfirmation', 'manageResponsibilities', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'activeUserSearchPlaceholder', 'includeNonActive', 'includeRevoked', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'loadMoreActiveUsers', 'viewDetails', 'activeUserDetails', 'linkExistingIdentity', 'existingIdentityLinkRole', 'existingIdentityLinkNotice', 'existingIdentityLinkEmail', 'sendIdentityLink', 'identityLinkQueued', 'cancelExistingLinkInvitation', 'cancelExistingLinkConfirmation', 'existingLinkCancelled', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'developerProfile', 'close', 'activeUsersNoDeveloper', 'suspendAccess', 'reactivateAccess', 'suspendWarning', 'reactivateWarning', 'suspendQueued', 'reactivateQueued']) {
     assert.match(text, new RegExp(`^${key}=`, 'm'))
   }
+  assert.match(text, /^cancelExistingLinkInvitation=Cancel invitation$/m)
+  assert.match(text, /^cancelExistingLinkConfirmation=Cancel this invitation\? Its link will stop working and a new invitation can be sent\.$/m)
+  assert.match(text, /^existingLinkCancelled=Invitation cancelled\.$/m)
+  assert.match(text, /^existingIdentityLinkNotice=.*same Users\.ID.*Developer Profile.*Bug assignments.*comments.*history/m)
 }
 
 verifyRuntimeBehavior().then(() => {

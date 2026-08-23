@@ -326,3 +326,8 @@ When changing this rule, prove that inactive parent rows are rejected before a B
 Chỉ có bridge `ComponentCategories` active là chưa đủ. `resolveComponentCategory()` hiện gọi `validateActiveClassificationParents()` để bắt buộc cả Application Component và Defect Category được chọn cũng phải active. Vì vậy active CREATE/UPDATE, áp dụng classification suggestion và draft activation dùng cùng một ranh giới nghiệp vụ. Lỗi trỏ đúng hai field OData dạng scalar là `applicationComponent_ID` và `defectCategory_ID` để Fiori gắn thông báo vào đúng ô nhập.
 
 Khi sửa rule này, phải chứng minh parent inactive bị từ chối trước khi Bug được lưu và một cặp active hợp lệ vẫn derive đúng `componentCategory_ID`.
+## Gate 3B assignment identity guard / Guard identity cho assignment Gate 3B
+
+`validateAssignee` checks the shared active-identity predicate only when a new assignee is selected or a new Bug is created. Updating an existing Bug with the same assignee does not revalidate identity readiness, so legacy Bug ownership is preserved. A new assignment to an unlinked/non-active-access Developer is rejected with a safe assignee error before the Bug write.
+
+`validateAssignee` chi check predicate active-identity dung khi chon assignee moi hoac tao Bug moi. Update Bug hien co voi cung assignee khong validate lai readiness, nen ownership Bug legacy duoc giu. Assignment moi vao Developer chua link/khong co active access bi reject voi loi assignee an toan truoc khi ghi Bug.

@@ -343,13 +343,6 @@ Vietnamese: Agent hoáº·c developer má»›i pháº£i xÃ¡c Ä‘á»‹nh 
 - Suspension is IDTS-local and fail-closed: it protects the final PM + UserAdmin, revokes active sessions atomically, records `SUSPENDED`, and performs no provider write. Reactivation keeps local access disabled until exact immutable-principal and Role Collection readback proof.
 - No BTP, HANA/HDI, schema, seed, provider, SAP user, Role Collection, session outside the local transaction, Jira, Drive, deployment, merge, or Ready transition mutation occurred in Gate 3. The executor stops at Draft PR; coordinator exact-diff review and any later deployment/acceptance remain separate approvals.
 
-## 2026-08-21 WP8 Gate 3 rollout and controlled lifecycle acceptance
-
-- Gate 3 source and bounded status initializer/rollback follow-ups are merged; rollout baseline is `9367abda9bdacfe989bd91cec7ae644ae1059a4c`.
-- Selective status initialization and CAP/broker/User Administration UI rollout completed without HDI/schema/seed/AppRouter deployment. Controlled TESTER suspension proved local `active=false`, one `SUSPENDED` request, zero unrevoked custom sessions and one suspend audit.
-- Reactivation remained blocked until broker readback, then completed `SUCCEEDED / ROLE_COLLECTIONS_VERIFIED`; final user/request state is `ACTIVE / TESTER`, PM console persists `Active / Yes / None`, and independent readiness is `DEMO READY`.
-- One fresh separate TESTER browser denial/post-reactivation Bug Management check remains pending; Gate 4 and final Gate 3 closure remain blocked on that bounded human evidence or an explicit coordinator limitation decision. Full sanitized evidence: `docs/pm/evidence/user-administration/gate-3-access-lifecycle-rollout.md`.
-
 ## 2026-08-15 User Administration M3D broker enablement
 
 - The isolated `idts-user-access-broker` is STARTED `1/1`, no-route, bound only to its dedicated XSUAA and broker-only API-access UPS, and its fresh empty-queue poll is `IDLE`.
@@ -373,3 +366,14 @@ Vietnamese: Agent hoáº·c developer má»›i pháº£i xÃ¡c Ä‘á»‹nh 
 - PR #310 (SangVN email BTP deep-link), PR #311 (DonHV Classification Apply feedback) and PR #312 (DatDT Developer capacity) merged normally and were selectively deployed from exact SHA `ccb2fd102b2daacaa3685bcfe671e0772ef1bbc4`.
 - CAP/AppRouter/readiness/Web checks pass and effective email routing remains `testMode=false`. No DB deployer, schema, seed, SQL, send-smoke or historical email replay ran.
 - IDTS-81 remains In Progress for a fresh authorized email click-test. IDTS-115 remains In Progress for the controlled signed-in mismatch case and previously documented role/browser gaps. Evidence: `docs/pm/evidence/idts-81-115-312/release-20260808.md`.
+## 2026-08-22 WP8 Gate 3B source handoff
+
+- The source-only Gate 3B branch `feature/wp8-existing-user-identity-link-donhv` is based exactly on `44b89db5db22e2ea65d4a85d746f57ad3a8f840e`. The bounded re-review at `95772d7` found one recovery-correlation Important and two evidence Minors; source fix `734d625` binds retry/reconcile/expired-lease correlations for `LINK_EXISTING` while preserving ordinary operation behavior. The branch preserves the selected `Users.ID`, profile/responsibility/Bug relationships, and adds provider-read-only `LINK_EXISTING` proof plus fail-closed assignment readiness.
+- Runtime CAP/SQLite, full broker/UI dependencies, CAP EDMX/HANA compile, UI lint/build and live provider acceptance remain unverified or environment-blocked. No platform, HANA/HDI, data, provider, email, invitation, user, identity, Role Collection, deployment, merge or Ready mutation occurred.
+- Coordinator next approval: read back the exact clean head and review only the `95772d7..new-head` recovery delta. No additional reviewer or Draft PR is authorized in this executor turn; runtime/live Gate 3B acceptance, merge, deployment and Ready remain separate. Gate 4/5 remain unopened.
+
+## Bàn giao source WP8 Gate 3B 2026-08-22
+
+- Branch source-only `feature/wp8-existing-user-identity-link-donhv` dựa chính xác trên `44b89db5db22e2ea65d4a85d746f57ad3a8f840e`. Bounded re-review tại `95772d7` phát hiện 1 Important recovery-correlation và 2 Minor evidence; source fix `734d625` bind correlation retry/reconcile/expired lease cho `LINK_EXISTING` và giữ behavior operation khác. Branch giữ nguyên `Users.ID` được chọn, quan hệ profile/responsibility/Bug và thêm proof `LINK_EXISTING` chỉ đọc provider cùng assignment readiness fail-closed.
+- CAP/SQLite runtime, dependency broker/UI đầy đủ, compile CAP EDMX/HANA, UI lint/build và acceptance provider live vẫn chưa verify hoặc đang bị block môi trường. Không có mutation platform, HANA/HDI, data, provider, email, invitation, user, identity, Role Collection, deploy, merge hoặc Ready.
+- Approval tiếp theo của coordinator: đọc exact clean head và chỉ review delta `95772d7..new-head`; executor không spawn reviewer thêm và chưa được tạo Draft PR. Runtime/live Gate 3B, merge, deploy và Ready vẫn là bước riêng. Gate 4/5 vẫn chưa mở.
