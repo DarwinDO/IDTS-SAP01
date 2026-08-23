@@ -42,6 +42,23 @@ const db = {
     /Catalog duplicate state blocks Gate 5 rollout/
   )
 
+  const postValues = [4, 0, 8, 0, 8, 0, 31, 0, 0]
+  let postRead = 0
+  const post = await inspectCatalogState({ run: async () => [{ VALUE: postValues[postRead++] }] }, { requireAuditEmpty: true })
+  assert.equal(post.auditEvents.rowCount, 0)
+  assert.equal(postRead, 9)
+
+  let nonEmptyRead = 0
+  await assert.rejects(
+    inspectCatalogState({
+      async run () {
+        nonEmptyRead += 1
+        return [{ VALUE: nonEmptyRead === 9 ? 1 : 0 }]
+      }
+    }, { requireAuditEmpty: true }),
+    /Catalog audit table must be empty/
+  )
+
   console.log('Gate 5 Business Catalog aggregate inspector: PASS')
 })().catch(error => {
   console.error(error)

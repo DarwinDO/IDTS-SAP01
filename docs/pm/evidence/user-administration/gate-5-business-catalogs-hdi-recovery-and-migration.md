@@ -1,7 +1,7 @@
 # Gate 5 Business Catalogs — Logical Recovery and Migration
 
-Date: 2026-08-23  
-Owner: DonHV  
+Date: 2026-08-23
+Owner: DonHV
 Status: `IN PROGRESS — RECOVERY PREFLIGHT`
 
 ## Approval and boundary
@@ -57,4 +57,6 @@ The rollback command can undeploy only the same five schema artifacts. It may be
 
 ## Execution result
 
-Pending fresh key custody, R3 artifact inspection, live readiness/topology freeze, encrypted backup/rehearsal, real make and post-readback.
+- R3 SHA-256 `BE6E767D8409EC4A050EE39FC3B9E41877B6338F9C4DFC1303B7A3102A4B8C24` passed its original 18-file inspection but is `REJECTED / NEVER RUN`: it did not yet make the audit-table-empty postcondition executable.
+- The post-migration inspector now requires `CatalogAdministrationAuditEvents` row count zero and fails closed otherwise.
+- Pending R4 build/inspection, live topology freeze, encrypted backup/rehearsal, real make and post-readback.
