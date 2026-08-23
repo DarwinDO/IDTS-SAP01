@@ -395,6 +395,7 @@ async function verifyRuntimeBehavior () {
     ]
   }
   let createCount = 0
+  const submittedCatalogGroups = []
   let releaseCatalogCreate
   const catalogCreateDone = new Promise(resolve => { releaseCatalogCreate = resolve })
   const catalogODataModel = {
@@ -405,7 +406,7 @@ async function verifyRuntimeBehavior () {
         create: () => ({ created: async () => { createCount += 1; await catalogCreateDone } })
       }
     },
-    submitBatch: async () => {}
+    submitBatch: async group => { submittedCatalogGroups.push(group) }
   }
   const catalogInstance = Object.assign(Object.create(controllerDefinition), {
     getModel: name => name === 'catalogs' ? catalogModel : { setProperty: () => {} },
@@ -423,6 +424,7 @@ async function verifyRuntimeBehavior () {
   const secondCatalogCreate = catalogInstance.onConfirmCatalogEdit()
   await new Promise(resolve => setImmediate(resolve))
   assert.equal(createCount, 1, 'catalog double submit must be ignored')
+  assert.deepEqual(submittedCatalogGroups, ['catalogChanges'], 'catalog create uses one explicit update batch')
   releaseCatalogCreate()
   await Promise.all([firstCatalogCreate, secondCatalogCreate])
 

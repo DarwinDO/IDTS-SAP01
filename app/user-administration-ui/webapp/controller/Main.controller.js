@@ -777,10 +777,14 @@ sap.ui.define([
 			oCatalogModel.setProperty("/edit/submitting", true);
 			try {
 				if (oEdit.mode === "CREATE") {
-					const oList = this.getView().getModel().bindList(`/${oConfig.entity}`);
-					await oList.create({ ...oPayload, active: true }).created();
+					const oODataModel = this.getView().getModel();
+					const oList = oODataModel.bindList(`/${oConfig.entity}`, null, null, null, { $$updateGroupId: "catalogChanges" });
+					const oCreatedContext = oList.create({ ...oPayload, active: true });
+					await oODataModel.submitBatch("catalogChanges");
+					await oCreatedContext.created();
 				} else {
-					await Promise.all(Object.entries(oPayload).map(([sField, vValue]) => oEdit.row._context.setProperty(sField, vValue)));
+					Object.entries(oPayload).forEach(([sField, vValue]) => oEdit.row._context.setProperty(sField, vValue, "catalogChanges"));
+					await this.getView().getModel().submitBatch("catalogChanges");
 				}
 				this._catalogEditDialog.close();
 				MessageToast.show(await this._text("catalogSaved"));
@@ -845,7 +849,8 @@ sap.ui.define([
 
 		_updateCatalogRow: async function (oRow, mChanges) {
 			try {
-				await Promise.all(Object.entries(mChanges).map(([sField, vValue]) => oRow._context.setProperty(sField, vValue)));
+				Object.entries(mChanges).forEach(([sField, vValue]) => oRow._context.setProperty(sField, vValue, "catalogChanges"));
+				await this.getView().getModel().submitBatch("catalogChanges");
 				MessageToast.show(await this._text("catalogSaved"));
 				await this._loadCatalogs();
 				return true;
@@ -862,7 +867,7 @@ sap.ui.define([
 			oCatalogModel.setProperty("/error", false);
 			try {
 				await this._ensureCatalogLookups(true);
-				const oBinding = this.getView().getModel().bindList(`/${oConfig.entity}`, null, null, null, { $top: 100 });
+				const oBinding = this.getView().getModel().bindList(`/${oConfig.entity}`, null, null, null, { $top: 100, $$updateGroupId: "catalogChanges" });
 				const aContexts = await oBinding.requestContexts(0, 100);
 				const aItems = await Promise.all(aContexts.map(async oContext => ({ ...(await oContext.requestObject()), _context: oContext })));
 				const aComponents = oCatalogModel.getProperty("/componentOptions") || [];
