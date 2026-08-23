@@ -90,11 +90,18 @@ function assertEnvelope (envelope) {
 
 function encryptBackup (rows, publicKey) {
   const canonical = canonicalizeRows(rows);
+  return encryptCanonicalDocument(canonical.json, publicKey);
+}
+
+function encryptCanonicalDocument (canonicalJson, publicKey) {
+  if (typeof canonicalJson !== 'string' || canonicalJson.length === 0) {
+    throw new Error('Canonical backup document is required.');
+  }
   const aesKey = randomBytes(32);
   try {
     const iv = randomBytes(12);
     const cipher = createCipheriv('aes-256-gcm', aesKey, iv);
-    const ciphertext = Buffer.concat([cipher.update(canonical.json, 'utf8'), cipher.final()]);
+    const ciphertext = Buffer.concat([cipher.update(canonicalJson, 'utf8'), cipher.final()]);
     const tag = cipher.getAuthTag();
     const encryptedKey = publicEncrypt({ key: publicKey, oaepHash: 'sha256', padding: constants.RSA_PKCS1_OAEP_PADDING }, aesKey);
     return {
@@ -111,6 +118,10 @@ function encryptBackup (rows, publicKey) {
 }
 
 function decryptBackup (envelope, privateKey) {
+  return canonicalizeRows(decryptCanonicalDocument(envelope, privateKey));
+}
+
+function decryptCanonicalDocument (envelope, privateKey) {
   assertEnvelope(envelope);
   const aesKey = privateDecrypt({
     key: privateKey,
@@ -125,7 +136,7 @@ function decryptBackup (envelope, privateKey) {
       decipher.update(Buffer.from(envelope.ciphertext, 'base64')),
       decipher.final()
     ]).toString('utf8');
-    return canonicalizeRows(JSON.parse(plaintext));
+    return JSON.parse(plaintext);
   } finally {
     aesKey.fill(0);
   }
@@ -134,6 +145,8 @@ function decryptBackup (envelope, privateKey) {
 module.exports = {
   LEGACY_COLUMNS,
   canonicalizeRows,
+  decryptCanonicalDocument,
   decryptBackup,
+  encryptCanonicalDocument,
   encryptBackup
 };

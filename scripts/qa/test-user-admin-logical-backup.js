@@ -6,7 +6,9 @@ const { generateKeyPairSync } = require('node:crypto');
 const {
   LEGACY_COLUMNS,
   canonicalizeRows,
+  decryptCanonicalDocument,
   encryptBackup,
+  encryptCanonicalDocument,
   decryptBackup
 } = require('../btp/user-admin-logical-backup-contract');
 const {
@@ -60,6 +62,11 @@ assert.deepEqual(decrypted.rows.map((row) => row.ID), [baseRow.ID, rowTwo.ID]);
 const tampered = { ...encrypted, tag: Buffer.from('tampered-auth-tag').toString('base64') };
 assert.throws(() => decryptBackup(tampered, privateKey));
 assert.throws(() => encryptBackup([baseRow], 'not-a-public-key'));
+
+const document = { version: 1, datasets: [{ key: 'sample', rows: [{ ID: baseRow.ID }] }] };
+const encryptedDocument = encryptCanonicalDocument(JSON.stringify(document), publicKey);
+assert.deepEqual(decryptCanonicalDocument(encryptedDocument, privateKey), document);
+assert.equal(JSON.stringify(encryptedDocument).includes(baseRow.ID), false);
 
 assert.throws(
   () => readHdiCredentials({ VCAP_SERVICES: JSON.stringify({ hana: [] }) }),
