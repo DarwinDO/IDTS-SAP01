@@ -106,6 +106,14 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     cancelEligible        : Boolean;
   }
 
+  type CatalogImpactResult {
+    catalogType                 : String(30);
+    catalogID                   : UUID;
+    bugReferenceCount           : Integer;
+    activeResponsibilityCount   : Integer;
+    activeChildReferenceCount   : Integer;
+  }
+
   action requestOnboarding(
     email              : String(255),
     requestedRole      : String(40),
@@ -182,6 +190,11 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     expectedVersion: Integer
   ) returns OnboardingResult;
 
+  action readCatalogImpact(
+    catalogType : String(30),
+    catalogID   : UUID
+  ) returns CatalogImpactResult;
+
   @readonly
   entity OnboardingRequests as projection on db.UserOnboardingRequests {
     ID,
@@ -214,5 +227,51 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     component,
     defectCategory,
     active
+  };
+
+  @cds.query.limit.max: 100
+  @cds.redirection.target: false
+  entity CatalogSAPModules as projection on db.SAPModules {
+    key ID,
+    code,
+    name,
+    active,
+    createdAt,
+    modifiedAt @odata.etag
+  };
+
+  @cds.query.limit.max: 100
+  @cds.redirection.target: false
+  entity CatalogApplicationComponents as projection on db.ApplicationComponents {
+    key ID,
+    code,
+    name,
+    componentType,
+    active,
+    createdAt,
+    modifiedAt @odata.etag
+  };
+
+  @cds.query.limit.max: 100
+  @cds.redirection.target: false
+  entity CatalogDefectCategories as projection on db.DefectCategories {
+    key ID,
+    code,
+    name,
+    categoryType,
+    active,
+    createdAt,
+    modifiedAt @odata.etag
+  };
+
+  @cds.query.limit.max: 100
+  @cds.redirection.target: false
+  entity CatalogComponentCategories as projection on db.ComponentCategories {
+    key ID,
+    component.ID as component_ID,
+    defectCategory.ID as defectCategory_ID,
+    active,
+    createdAt,
+    modifiedAt @odata.etag
   };
 }
