@@ -26,6 +26,7 @@ const {
   assertDeveloperProfileForRole
 } = require('./user-admin/developer-profile')
 const { registerActiveUserHandlers } = require('./user-admin/active-users')
+const { registerCatalogHandlers } = require('./user-admin/catalogs')
 const {
   requestSuspend,
   requestReactivate,
@@ -84,6 +85,7 @@ class UserAdministrationService extends cds.ApplicationService {
     this.on('retryAccessOperation', req => retryAccessOperation(req))
     this.on('reconcileAccessOperation', req => reconcileAccessOperation(req))
     registerActiveUserHandlers(this, { authorize: requireActiveUserAdministrator })
+    registerCatalogHandlers(this, { authorize: requireActiveUserAdministrator })
     return super.init()
   }
 }

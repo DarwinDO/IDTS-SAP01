@@ -1059,3 +1059,9 @@ When deletion is committed through draft SAVE, the system writes exactly one rea
 Trên Bug đang mở, PM được xóa mọi attachment. Tester hoặc Developer chỉ được xóa attachment do chính mình upload. Phân quyền phải dùng Bug cha và uploader metadata đã persist; parent ID do client gửi không được dùng để cấp quyền. Delete bị từ chối không được thay đổi metadata hoặc history.
 
 Khi delete được commit qua draft SAVE, hệ thống ghi đúng một `HistoryEvent` dễ đọc và một `HistoryLog` ở mức field, chỉ dùng attachment ID/filename đã sanitize. Discard draft không tạo lịch sử xóa. Bug CLOSED tiếp tục chặn attachment mutation. Việc xóa object vật lý có thể hoàn tất bất đồng bộ qua SAP attachment outbox; history phản ánh business deletion đã commit, không phải bằng chứng S3 đã xóa ngay lập tức.
+
+## BR-52 - Business catalog changes preserve valid active references
+
+Only an active PM with User Administration capability may administer IDTS business catalogs. Create/update uses normalized unique codes or one unique Application Component + Defect Category pair and optimistic ETag concurrency. Deactivation requires impact review and a reason, and is rejected while active Developer Responsibilities or active catalog children depend on the item. Historical Bug references remain valid and readable. DELETE is prohibited; every successful or rejected authorized change writes a sanitized append-only audit event.
+
+Chỉ PM active có User Administration capability được quản trị business catalog IDTS. Create/update dùng code đã normalize và unique hoặc một cặp Application Component + Defect Category unique, cùng optimistic ETag concurrency. Deactivate yêu cầu review impact và reason, đồng thời bị reject khi còn Developer Responsibility active hoặc child catalog active phụ thuộc. Tham chiếu Bug lịch sử vẫn hợp lệ và đọc được. Cấm DELETE; mỗi thay đổi được phép thành công hoặc bị reject đều ghi audit append-only đã sanitize.

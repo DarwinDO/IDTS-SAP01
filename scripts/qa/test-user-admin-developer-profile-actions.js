@@ -26,8 +26,20 @@ async function main () {
   assert.equal(componentCategories.length, 2)
 
   const inactiveCategoryID = '72000000-0000-4000-8000-000000000010'
-  const activeComponent = await db.run(SELECT.one.from('idts.cap.ApplicationComponents').columns('ID').where({ active: true }))
-  const activeDefectCategory = await db.run(SELECT.one.from('idts.cap.DefectCategories').columns('ID').where({ active: true }))
+  const activeComponent = { ID: '72000000-0000-4000-8000-000000000011' }
+  const activeDefectCategory = { ID: '72000000-0000-4000-8000-000000000012' }
+  await db.run(INSERT.into('idts.cap.ApplicationComponents').entries({
+    ...activeComponent,
+    code: 'PROFILE-FIXTURE',
+    name: 'Profile fixture component',
+    active: true
+  }))
+  await db.run(INSERT.into('idts.cap.DefectCategories').entries({
+    ...activeDefectCategory,
+    code: 'PROFILE-FIXTURE',
+    name: 'Profile fixture category',
+    active: true
+  }))
   await db.run(INSERT.into('idts.cap.ComponentCategories').entries({
     ID: inactiveCategoryID,
     component_ID: activeComponent.ID,

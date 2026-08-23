@@ -88,12 +88,16 @@ entity SAPModules : cuid, managed {
   active : Boolean default true;
 }
 
+annotate SAPModules with @assert.unique.catalogCode: [ code ];
+
 entity ApplicationComponents : cuid, managed {
   code          : String(40) not null;
   name          : String(120) not null;
   componentType : String(60);
   active        : Boolean default true;
 }
+
+annotate ApplicationComponents with @assert.unique.catalogCode: [ code ];
 
 entity SAPModuleComponents : cuid, managed {
   // Bridge này nói component thuộc SAP module nào; không phải assignment responsibility của developer.
@@ -109,11 +113,28 @@ entity DefectCategories : cuid, managed {
   active       : Boolean default true;
 }
 
+annotate DefectCategories with @assert.unique.catalogCode: [ code ];
+
 entity ComponentCategories : cuid, managed {
   // Bridge component + defect category tạo khóa phân loại thật dùng để đối chiếu DeveloperResponsibilities.
   component      : Association to ApplicationComponents not null;
   defectCategory : Association to DefectCategories not null;
   active         : Boolean default true;
+}
+
+annotate ComponentCategories with @assert.unique.catalogPair: [ component, defectCategory ];
+
+entity CatalogAdministrationAuditEvents : cuid, managed {
+  // Audit append-only cho quản trị catalog; chỉ lưu summary an toàn, không lưu raw request hoặc identity/provider data.
+  actor         : Association to Users not null;
+  catalogType   : String(30) not null;
+  targetID      : UUID not null;
+  action        : String(30) not null;
+  result        : String(30) not null;
+  beforeSummary : String(500);
+  afterSummary  : String(500);
+  reason        : String(500);
+  correlationId : UUID not null;
 }
 
 entity DeveloperResponsibilities : cuid, managed {

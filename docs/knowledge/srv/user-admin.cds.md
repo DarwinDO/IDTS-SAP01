@@ -46,3 +46,55 @@ Vietnamese: Contract additive them `requestSuspend(userID, reason, expectedVersi
 `requestExistingUserIdentityLink(userID: UUID, email: String(255))` is the only new public action input. `linkTargetUser` and `linkSourceEmailNormalized` are private persistence fields on the onboarding request; the Active Users summary/details add only the safe Boolean `linkEligible`. Provider identifiers and immutable identity internals remain absent from public projections.
 
 `requestExistingUserIdentityLink(userID: UUID, email: String(255))` la input duy nhat cua action public moi. `linkTargetUser` va `linkSourceEmailNormalized` la field persistence private cua onboarding request; Active Users summary/details chi them Boolean an toan `linkEligible`. Provider identifier va immutable identity noi bo van khong co trong public projection.
+
+## Gate 5 Business Catalog public contract / Contract Business Catalog Gate 5
+
+`UserAdministrationService` exposes four bounded catalog projections with a 100-row query cap, `modifiedAt` ETag, and one virtual administration reason accepted only for mutation handling. `readCatalogImpact` returns only counts for referenced Bugs, active Developer responsibilities, and active child catalogs. The service does not expose the audit table, raw SQL, provider data, or hard delete.
+
+`UserAdministrationService` expose bon projection catalog gioi han 100 row, dung `modifiedAt` lam ETag va mot virtual administration reason chi cho mutation handler. `readCatalogImpact` chi tra count Bug tham chieu, Developer responsibility active va child catalog active. Service khong expose audit table, raw SQL, provider data hay hard delete.
+
+## Gate 5 contract anchors / Anchor contract Gate 5
+
+### English
+
+The four catalog projections are the public OData V4 shapes for the Business Catalogs tab. They intentionally expose IDs, classification fields, active state, managed timestamps, and one virtual `administrationReason` input used by the handler for bounded deactivation audit. `CatalogComponentCategories` exposes only `component_ID` and `defectCategory_ID`, not unrestricted Bug/User navigation.
+
+- **Location**: `srv/user-admin.cds:109-115`, `CatalogImpactResult`.
+  **IDTS concept**: Deactivation preview is count-only: Bug references, active DeveloperResponsibilities, and active child catalog references.
+  **Impact if broken**: The UI could promise safe deactivation without showing the dependency boundary or could expose raw business records.
+  **Must check together**: `srv/user-admin/catalogs.js:291-342`, `CatalogImpact.fragment.xml`, and `scripts/qa/test-user-admin-catalogs.js:133-150`.
+
+- **Location**: `srv/user-admin.cds:193-196`, `readCatalogImpact`.
+  **IDTS concept**: The only custom catalog action accepts an allowlisted catalog type and UUID; it is still behind the service authorization boundary.
+  **Impact if broken**: A caller could probe arbitrary entities or bypass PM/UserAdmin authorization through an unbounded impact endpoint.
+  **Must check together**: `srv/user-admin.js:87-89`, `srv/user-admin/catalogs.js:291-309`, and the role-negative tests.
+
+- **Location**: `srv/user-admin.cds:236-293`, four `Catalog*` projections.
+  **IDTS concept**: Each projection has a maximum query limit of 100, `modifiedAt @odata.etag`, explicit insert/update capability, explicit `DeleteRestrictions.Deletable: false`, and an immutable UUID key. The read cap protects each request; UI5 uses `requestContexts(0, Infinity)` to follow pages for complete local filtering.
+  **Impact if broken**: Metadata could advertise unsafe DELETE, lose optimistic concurrency, let clients treat IDs as mutable, or make the UI silently search only the first page.
+  **Must check together**: `Main.controller.js:870-900`, `srv/user-admin/catalogs.js:111-187`, CAP EDMX output, and `scripts/qa/test-user-admin-catalogs.js:61-67`.
+
+### Tiếng Việt
+
+Bốn projection catalog là shape OData V4 public cho tab Business Catalogs. Projection chỉ expose ID, field phân loại, active, managed timestamp và một input virtual `administrationReason` để handler ghi audit deactivate có giới hạn. `CatalogComponentCategories` chỉ expose `component_ID` và `defectCategory_ID`, không mở navigation tự do tới Bug/User.
+
+- **Vị trí**: `srv/user-admin.cds:109-115`, `CatalogImpactResult`.
+  **Khái niệm IDTS**: Deactivation preview chỉ trả count: Bug reference, `DeveloperResponsibilities` active và child catalog active.
+  **Ảnh hưởng nếu sai**: UI có thể hứa deactivate an toàn mà không cho thấy boundary dependency hoặc làm lộ raw business record.
+  **Phải kiểm tra cùng**: `srv/user-admin/catalogs.js:291-342`, `CatalogImpact.fragment.xml` và `scripts/qa/test-user-admin-catalogs.js:133-150`.
+
+- **Vị trí**: `srv/user-admin.cds:193-196`, `readCatalogImpact`.
+  **Khái niệm IDTS**: Custom action duy nhất của catalog chỉ nhận catalog type allowlist và UUID, đồng thời vẫn nằm trong boundary authorization của service.
+  **Ảnh hưởng nếu sai**: Caller có thể probe entity tùy ý hoặc bypass authorization PM/UserAdmin qua endpoint impact không giới hạn.
+  **Phải kiểm tra cùng**: `srv/user-admin.js:87-89`, `srv/user-admin/catalogs.js:291-309` và negative role tests.
+
+- **Vị trí**: `srv/user-admin.cds:236-293`, bốn projection `Catalog*`.
+  **Khái niệm IDTS**: Mỗi projection có query limit tối đa 100, `modifiedAt @odata.etag`, capability insert/update rõ ràng, `DeleteRestrictions.Deletable: false` rõ ràng và UUID key immutable. Read cap bảo vệ từng request; UI5 dùng `requestContexts(0, Infinity)` để đi qua các page và filter local đầy đủ.
+  **Ảnh hưởng nếu sai**: Metadata có thể quảng bá DELETE không an toàn, mất optimistic concurrency, cho client coi ID là mutable hoặc làm UI chỉ search âm thầm page đầu.
+  **Phải kiểm tra cùng**: `Main.controller.js:870-900`, `srv/user-admin/catalogs.js:111-187`, output CAP EDMX và `scripts/qa/test-user-admin-catalogs.js:61-67`.
+
+### Safe editing / Sửa an toàn
+
+Do not expose `CatalogAdministrationAuditEvents` as a writable public entity. When adding a catalog field, update the CDS projection, handler allowlist, UI payload/display, both locale files, knowledge mirrors, CAP/UI contracts, and the exact OData metadata test. Re-run `npx cds compile srv -s all --to edmx`; this is source verification only, not HDI migration.
+
+Không expose `CatalogAdministrationAuditEvents` thành entity public writable. Khi thêm field catalog, phải cập nhật CDS projection, handler allowlist, UI payload/display, hai locale, knowledge mirror, CAP/UI contract và test metadata OData. Chạy lại `npx cds compile srv -s all --to edmx`; đây chỉ là source verification, không phải HDI migration.

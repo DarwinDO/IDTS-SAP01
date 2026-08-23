@@ -273,6 +273,50 @@
 								</VBox>
 							</content>
 						</IconTabFilter>
+						<IconTabFilter key="businessCatalogs" text="{i18n>businessCatalogsTab}" icon="sap-icon://tags">
+							<content>
+								<VBox>
+									<IconTabBar id="catalogTypeTabs" selectedKey="{catalogs>/selectedType}" select=".onCatalogTypeChange" expandable="false" applyContentPadding="false">
+										<items>
+											<IconTabFilter key="SAP_MODULE" text="{i18n>sapModulesCatalog}"/>
+											<IconTabFilter key="APPLICATION_COMPONENT" text="{i18n>applicationComponentsCatalog}"/>
+											<IconTabFilter key="DEFECT_CATEGORY" text="{i18n>defectCategoriesCatalog}"/>
+											<IconTabFilter key="COMPONENT_CATEGORY" text="{i18n>componentCategoriesCatalog}"/>
+										</items>
+									</IconTabBar>
+									<Toolbar>
+										<SearchField width="100%" placeholder="{i18n>catalogSearchPlaceholder}" search=".onCatalogSearch"/>
+										<CheckBox text="{i18n>includeInactiveCatalogs}" selected="{catalogs>/includeInactive}" select=".onCatalogInactiveFilterChange"/>
+										<Button icon="sap-icon://refresh" tooltip="{i18n>refreshCatalogs}" press=".onRetryCatalogs"/>
+										<Button text="{i18n>addCatalogItem}" type="Emphasized" icon="sap-icon://add" press=".onOpenCatalogCreate"/>
+									</Toolbar>
+									<MessageStrip visible="{catalogs>/error}" text="{i18n>catalogLoadFailed}" type="Error" showIcon="true"/>
+									<Table id="businessCatalogsTable" items="{catalogs>/items}" busy="{catalogs>/busy}" noDataText="{i18n>noCatalogItems}" sticky="ColumnHeaders">
+										<columns>
+											<Column width="12rem"><Text text="{i18n>catalogCode}"/></Column>
+											<Column><Text text="{i18n>catalogName}"/></Column>
+											<Column width="10rem"><Text text="{i18n>catalogClassificationType}"/></Column>
+											<Column width="8rem"><Text text="{i18n>catalogStatus}"/></Column>
+											<Column width="15rem" hAlign="End"><Text text="{i18n>actions}"/></Column>
+										</columns>
+										<items>
+											<ColumnListItem type="Inactive">
+												<cells>
+													<Text text="{catalogs>displayCode}" wrapping="false"/>
+													<Text text="{catalogs>displayName}" wrapping="false"/>
+													<Text text="{catalogs>displayType}" wrapping="false"/>
+													<ObjectStatus text="{= ${catalogs>active} ? ${i18n>activeStateText} : ${i18n>inactiveCatalogState} }" state="{= ${catalogs>active} ? 'Success' : 'None' }"/>
+													<HBox justifyContent="End">
+														<Button text="{i18n>editCatalogItem}" type="Transparent" press=".onOpenCatalogEdit"/>
+														<Button text="{= ${catalogs>active} ? ${i18n>deactivateCatalogItem} : ${i18n>activateCatalogItem} }" type="Transparent" press=".onToggleCatalogActive"/>
+													</HBox>
+												</cells>
+											</ColumnListItem>
+										</items>
+									</Table>
+								</VBox>
+							</content>
+						</IconTabFilter>
 					</items>
 				</IconTabBar>
 			</VBox>

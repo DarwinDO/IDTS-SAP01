@@ -477,3 +477,51 @@ Lưu ý khi sửa:
 `UserOnboardingRequests` adds only the nullable `linkTargetUser` association and `linkSourceEmailNormalized` snapshot. They bind one approved legacy target and its original contact email to the signed verification flow; no new code-list state, HDI data artifact, drop, seed, or replacement User entity is introduced. The same `Users.ID` remains the durable identity/profile/assignment owner.
 
 `UserOnboardingRequests` chi them association nullable `linkTargetUser` va snapshot `linkSourceEmailNormalized`. Hai field gan mot legacy target da duyet va email lien he ban dau vao flow verify da ky; khong them state code-list, artifact HDI, drop, seed hoac entity User thay the. `Users.ID` cu van la owner ben vung cua identity/profile/assignment.
+
+## Gate 5 Business Catalog constraints and audit / Constraint va audit Business Catalog Gate 5
+
+The four managed IDTS business catalogs now have database-backed uniqueness for module/component/category codes and the Application Component + Defect Category pair. `CatalogAdministrationAuditEvents` is append-only and stores only actor, catalog type, target ID, allowlisted action/result, safe display summaries, reason, correlation ID, and timestamps. No seed row, hard delete, provider identity, credential, or raw request body is added.
+
+Bon business catalog do IDTS quan ly co unique constraint o database cho code module/component/category va cap Application Component + Defect Category. `CatalogAdministrationAuditEvents` la append-only, chi luu actor, loai catalog, target ID, action/result allowlist, display summary an toan, reason, correlation ID va timestamp. Gate nay khong them seed, hard delete, provider identity, credential hay raw request body.
+
+### Important source anchors / Các điểm neo quan trọng
+
+#### English
+
+- **Location**: `db/schema.cds:91-100,109-116` — `@assert.unique.catalogCode` on `SAPModules`, `ApplicationComponents`, and `DefectCategories`.
+  **IDTS concept**: Catalog codes are durable normalized value-help identifiers and must be unique within each catalog.
+  **Impact if broken**: Bug classification, filters, and UI value helps can show ambiguous codes or reject a valid-looking update only after persistence.
+  **Must check together**: `srv/user-admin/catalogs.js:88-95,136-147`, the three catalog projections in `srv/user-admin.cds`, and `scripts/qa/test-user-admin-catalogs.js:152-185`.
+
+- **Location**: `db/schema.cds:118-125` — `ComponentCategories` plus `@assert.unique.catalogPair`.
+  **IDTS concept**: Application Component + Defect Category is the concrete Component Category assignment key used by DeveloperResponsibilities and Bug classification.
+  **Impact if broken**: Duplicate assignment keys can produce two responsibility targets for one classification and make impact/deactivation counts unreliable.
+  **Must check together**: `srv/user-admin/catalogs.js:96-104,148-163`, `srv/user-admin.cds:272-280`, Developer profile validation, and `db/data/idts.cap-ComponentCategories.csv`.
+
+- **Location**: `db/schema.cds:127-137` — `CatalogAdministrationAuditEvents`.
+  **IDTS concept**: Append-only, bounded audit for catalog CREATE/UPDATE/DEACTIVATE/REACTIVATE and safe rejected attempts. The record stores summaries, not raw request or provider identity data.
+  **Impact if broken**: PM loses a durable explanation of who changed a catalog and why, or audit becomes a privacy leak/child-owned record that disappears with a deactivated catalog.
+  **Must check together**: `srv/user-admin/catalogs.js:189-225`, `docs/pm/evidence/user-administration/gate-5-business-catalogs-hdi-plan.md`, and the audit rollback test.
+
+#### Tiếng Việt
+
+- **Vị trí**: `db/schema.cds:91-100,109-116` — `@assert.unique.catalogCode` trên `SAPModules`, `ApplicationComponents`, `DefectCategories`.
+  **Khái niệm IDTS**: Catalog code là identifier value-help bền vững đã normalize và phải unique trong từng catalog.
+  **Ảnh hưởng nếu sai**: Classification Bug, filter và UI value help có thể hiện code mơ hồ hoặc chỉ reject update trông hợp lệ sau khi persistence.
+  **Phải kiểm tra cùng**: `srv/user-admin/catalogs.js:88-95,136-147`, ba catalog projection trong `srv/user-admin.cds` và `scripts/qa/test-user-admin-catalogs.js:152-185`.
+
+- **Vị trí**: `db/schema.cds:118-125` — `ComponentCategories` và `@assert.unique.catalogPair`.
+  **Khái niệm IDTS**: Application Component + Defect Category là assignment key Component Category thật, được `DeveloperResponsibilities` và Bug classification dùng.
+  **Ảnh hưởng nếu sai**: Assignment key trùng có thể tạo hai responsibility target cho cùng classification và làm count impact/deactivate không đáng tin.
+  **Phải kiểm tra cùng**: `srv/user-admin/catalogs.js:96-104,148-163`, `srv/user-admin.cds:272-280`, validation profile Developer và `db/data/idts.cap-ComponentCategories.csv`.
+
+- **Vị trí**: `db/schema.cds:127-137` — `CatalogAdministrationAuditEvents`.
+  **Khái niệm IDTS**: Audit append-only có giới hạn cho CREATE/UPDATE/DEACTIVATE/REACTIVATE và rejection an toàn. Record lưu summary, không lưu raw request hoặc provider identity.
+  **Ảnh hưởng nếu sai**: PM mất giải thích bền vững ai đổi catalog và vì sao, hoặc audit trở thành privacy leak/child-owned record bị mất theo catalog deactivate.
+  **Phải kiểm tra cùng**: `srv/user-admin/catalogs.js:189-225`, `docs/pm/evidence/user-administration/gate-5-business-catalogs-hdi-plan.md` và audit rollback test.
+
+### Safe editing / Sửa an toàn
+
+The Gate 5 model delta is additive: unique constraints/indexes and one audit table only. Do not change existing catalog IDs/columns or seed CSVs in this gate. If a catalog relationship changes, review Bug fields, DeveloperResponsibilities, service impact counts, generated HANA output, and historical-readability tests together; never run HDI make/migration or live catalog mutation from this source gate.
+
+Delta model Gate 5 là additive: chỉ unique constraint/index và một audit table. Không đổi ID/column catalog hiện có hoặc seed CSV trong gate này. Nếu đổi quan hệ catalog, phải review cùng field Bug, `DeveloperResponsibilities`, count impact service, output HANA generated và test đọc lịch sử; không chạy HDI make/migration hoặc live catalog mutation từ source gate này.

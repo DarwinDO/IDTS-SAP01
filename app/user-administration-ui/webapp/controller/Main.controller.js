@@ -7,6 +7,13 @@ sap.ui.define([
 ], function (BaseController, Fragment, JSONModel, MessageBox, MessageToast) {
 	"use strict";
 
+	const CATALOG_CONFIG = Object.freeze({
+		SAP_MODULE: { entity: "CatalogSAPModules", fields: ["code", "name"] },
+		APPLICATION_COMPONENT: { entity: "CatalogApplicationComponents", fields: ["code", "name", "componentType"] },
+		DEFECT_CATEGORY: { entity: "CatalogDefectCategories", fields: ["code", "name", "categoryType"] },
+		COMPONENT_CATEGORY: { entity: "CatalogComponentCategories", fields: ["component_ID", "defectCategory_ID"] }
+	});
+
 	return BaseController.extend("idts.useradministrationui.controller.Main", {
 		onInit: function () {
 			const oSessionState = this._readActiveUsersSessionState();
@@ -16,7 +23,20 @@ sap.ui.define([
 			this.setModel(new JSONModel(this._emptyAccessLifecycle()), "lifecycle");
 			this.setModel(new JSONModel(this._emptyExistingIdentityLink()), "existingLink");
 			this.setModel(new JSONModel(this._emptyDeveloperAdministration()), "developer");
-			this.setModel(new JSONModel({ loaded: false }), "catalogs");
+			this.setModel(new JSONModel({
+				selectedType: "SAP_MODULE",
+				allItems: [],
+				items: [],
+				query: "",
+				includeInactive: false,
+				loaded: false,
+				busy: false,
+				error: false,
+				componentOptions: [],
+				defectOptions: [],
+				edit: null,
+				impact: null
+			}), "catalogs");
 			this.setModel(new JSONModel({ items: [] }), "requests");
 			this.setModel(new JSONModel({
 				items: [],
@@ -48,6 +68,7 @@ sap.ui.define([
 			if (["activeUsers", "developerResponsibilities"].includes(sSelectedTab)) {
 				await this._ensureActiveUsersLoaded();
 			}
+			if (sSelectedTab === "businessCatalogs") await this._loadCatalogs();
 		},
 
 		onSearch: async function (oEvent) {
@@ -60,6 +81,9 @@ sap.ui.define([
 			this._saveActiveUsersSessionState();
 			if ((sKey === "activeUsers" || sKey === "developerResponsibilities") && !this.getModel("activeUsers").getProperty("/loaded")) {
 				await this._ensureActiveUsersLoaded();
+			}
+			if (sKey === "businessCatalogs" && !this.getModel("catalogs").getProperty("/loaded")) {
+				await this._loadCatalogs();
 			}
 		},
 
@@ -680,6 +704,240 @@ sap.ui.define([
 			this._accessLifecycleDialog.open();
 		},
 
+		onCatalogTypeChange: async function (oEvent) {
+			this.getModel("catalogs").setProperty("/selectedType", oEvent.getParameter("key") || oEvent.getSource().getSelectedKey() || "SAP_MODULE");
+			await this._loadCatalogs();
+		},
+
+		onCatalogSearch: function (oEvent) {
+			this.getModel("catalogs").setProperty("/query", oEvent.getParameter("query") || oEvent.getParameter("value") || "");
+			this._applyCatalogFilters();
+		},
+
+		onCatalogInactiveFilterChange: function (oEvent) {
+			this.getModel("catalogs").setProperty("/includeInactive", oEvent.getParameter("selected") === true);
+			this._applyCatalogFilters();
+		},
+
+		onRetryCatalogs: async function () {
+			await this._loadCatalogs();
+		},
+
+		onOpenCatalogCreate: async function () {
+			await this._ensureCatalogLookups();
+			this.getModel("catalogs").setProperty("/edit", {
+				mode: "CREATE",
+				code: "",
+				name: "",
+				componentType: "",
+				categoryType: "",
+				["component_ID"]: "",
+				["defectCategory_ID"]: "",
+				submitting: false,
+				validation: {}
+			});
+			await this._openCatalogEditDialog();
+		},
+
+		onOpenCatalogEdit: async function (oEvent) {
+			const oRow = this._catalogRowFromEvent(oEvent);
+			if (!oRow) return;
+			await this._ensureCatalogLookups();
+			this.getModel("catalogs").setProperty("/edit", {
+				mode: "UPDATE",
+				row: oRow,
+				code: oRow.code || "",
+				name: oRow.name || "",
+				["component_ID"]: oRow["component_ID"] || "",
+				["defectCategory_ID"]: oRow["defectCategory_ID"] || "",
+				componentType: oRow.componentType || "",
+				categoryType: oRow.categoryType || "",
+				submitting: false,
+				validation: {}
+			});
+			await this._openCatalogEditDialog();
+		},
+
+		_openCatalogEditDialog: async function () {
+			if (!this._catalogEditDialog) {
+				this._catalogEditDialog = await Fragment.load({
+					id: this.getView().getId(),
+					name: "idts.useradministrationui.fragment.EditCatalogItem",
+					controller: this
+				});
+				this.getView().addDependent(this._catalogEditDialog);
+			}
+			this._catalogEditDialog.open();
+		},
+
+		onConfirmCatalogEdit: async function () {
+			const oCatalogModel = this.getModel("catalogs");
+			const oEdit = oCatalogModel.getProperty("/edit");
+			if (!oEdit || oEdit.submitting) return;
+			const sType = oCatalogModel.getProperty("/selectedType");
+			const oConfig = CATALOG_CONFIG[sType];
+			const oPayload = Object.fromEntries(oConfig.fields.map(sField => [sField, String(oEdit[sField] || "").trim()]));
+			const mValidation = {};
+			if (sType !== "COMPONENT_CATEGORY" && (!oPayload.code || !oPayload.name)) {
+				if (!oPayload.code) mValidation.code = await this._text("catalogCodeRequired");
+				if (!oPayload.name) mValidation.name = await this._text("catalogNameRequired");
+			}
+			if (sType === "COMPONENT_CATEGORY" && (!oPayload.component_ID || !oPayload.defectCategory_ID)) {
+				if (!oPayload.component_ID) mValidation["component_ID"] = await this._text("catalogComponentRequired");
+				if (!oPayload.defectCategory_ID) mValidation["defectCategory_ID"] = await this._text("catalogDefectCategoryRequired");
+			}
+			if (Object.keys(mValidation).length > 0) {
+				oCatalogModel.setProperty("/edit/validation", mValidation);
+				MessageBox.warning(await this._text("catalogRequiredFields"));
+				return;
+			}
+			oCatalogModel.setProperty("/edit/validation", {});
+			oCatalogModel.setProperty("/edit/submitting", true);
+			try {
+				if (oEdit.mode === "CREATE") {
+					const oODataModel = this.getView().getModel();
+					const oList = oODataModel.bindList(`/${oConfig.entity}`, null, null, null, { $$updateGroupId: "catalogChanges" });
+					const oCreatedContext = oList.create({ ...oPayload, active: true });
+					await this._submitCatalogChanges([oCreatedContext.created()]);
+				} else {
+					const aChanges = Object.entries(oPayload).map(([sField, vValue]) => oEdit.row._context.setProperty(sField, vValue, "catalogChanges"));
+					await this._submitCatalogChanges(aChanges);
+				}
+				this._catalogEditDialog.close();
+				MessageToast.show(await this._text("catalogSaved"));
+				await this._loadCatalogs();
+			} catch {
+				MessageBox.error(await this._text("catalogChangeFailed"));
+			} finally {
+				oCatalogModel.setProperty("/edit/submitting", false);
+			}
+		},
+
+		_submitCatalogChanges: async function (aChangePromises) {
+			await this.getView().getModel().submitBatch("catalogChanges");
+			await Promise.all((aChangePromises || []).filter(oPromise => oPromise && typeof oPromise.then === "function"));
+		},
+
+		onCancelCatalogEdit: function () {
+			this._catalogEditDialog?.close();
+		},
+
+		onToggleCatalogActive: async function (oEvent) {
+			const oRow = this._catalogRowFromEvent(oEvent);
+			if (!oRow) return;
+			if (!oRow.active) {
+				await this._updateCatalogRow(oRow, { active: true });
+				return;
+			}
+			const oCatalogModel = this.getModel("catalogs");
+			oCatalogModel.setProperty("/busy", true);
+			try {
+				const oOperation = this.getView().getModel().bindContext("/readCatalogImpact(...)");
+				oOperation.setParameter("catalogType", oCatalogModel.getProperty("/selectedType"));
+				oOperation.setParameter("catalogID", oRow.ID);
+				await oOperation.invoke("$direct");
+				const oResult = await oOperation.getBoundContext().requestObject();
+				oCatalogModel.setProperty("/impact", { ...oResult, row: oRow, reason: "", submitting: false });
+				if (!this._catalogImpactDialog) {
+					this._catalogImpactDialog = await Fragment.load({
+						id: this.getView().getId(),
+						name: "idts.useradministrationui.fragment.CatalogImpact",
+						controller: this
+					});
+					this.getView().addDependent(this._catalogImpactDialog);
+				}
+				this._catalogImpactDialog.open();
+			} catch {
+				MessageBox.error(await this._text("catalogImpactFailed"));
+			} finally {
+				oCatalogModel.setProperty("/busy", false);
+			}
+		},
+
+		onConfirmCatalogDeactivation: async function () {
+			const oCatalogModel = this.getModel("catalogs");
+			const oImpact = oCatalogModel.getProperty("/impact");
+			const sReason = String(oImpact?.reason || "").trim();
+			if (!oImpact?.row || !sReason || oImpact.submitting) return;
+			oCatalogModel.setProperty("/impact/submitting", true);
+			const bSuccess = await this._updateCatalogRow(oImpact.row, { active: false, administrationReason: sReason });
+			oCatalogModel.setProperty("/impact/submitting", false);
+			if (bSuccess) this._catalogImpactDialog.close();
+		},
+
+		onCancelCatalogImpact: function () {
+			this._catalogImpactDialog?.close();
+		},
+
+		_updateCatalogRow: async function (oRow, mChanges) {
+			try {
+				const aChanges = Object.entries(mChanges).map(([sField, vValue]) => oRow._context.setProperty(sField, vValue, "catalogChanges"));
+				await this._submitCatalogChanges(aChanges);
+				MessageToast.show(await this._text("catalogSaved"));
+				await this._loadCatalogs();
+				return true;
+			} catch {
+				MessageBox.error(await this._text("catalogChangeFailed"));
+				return false;
+			}
+		},
+
+		_loadCatalogs: async function () {
+			const oCatalogModel = this.getModel("catalogs");
+			const oConfig = CATALOG_CONFIG[oCatalogModel.getProperty("/selectedType")];
+			oCatalogModel.setProperty("/busy", true);
+			oCatalogModel.setProperty("/error", false);
+			try {
+				await this._ensureCatalogLookups(true);
+				const oBinding = this.getView().getModel().bindList(`/${oConfig.entity}`, null, null, null, { $$updateGroupId: "catalogChanges" });
+				const aContexts = await oBinding.requestContexts(0, Infinity);
+				const aItems = await Promise.all(aContexts.map(async oContext => ({ ...(await oContext.requestObject()), _context: oContext })));
+				const aComponents = oCatalogModel.getProperty("/componentOptions") || [];
+				const aDefects = oCatalogModel.getProperty("/defectOptions") || [];
+				const mComponents = Object.fromEntries(aComponents.map(oItem => [oItem.ID, oItem.name]));
+				const mDefects = Object.fromEntries(aDefects.map(oItem => [oItem.ID, oItem.name]));
+				oCatalogModel.setProperty("/allItems", aItems.map(oItem => ({
+					...oItem,
+					displayCode: oItem.code || "—",
+					displayName: oItem.name || `${mComponents[oItem.component_ID] || "Unknown component"} / ${mDefects[oItem.defectCategory_ID] || "Unknown category"}`,
+					displayType: oItem.componentType || oItem.categoryType || "—"
+				})));
+				oCatalogModel.setProperty("/loaded", true);
+				this._applyCatalogFilters();
+			} catch {
+				oCatalogModel.setProperty("/error", true);
+			} finally {
+				oCatalogModel.setProperty("/busy", false);
+			}
+		},
+
+		_ensureCatalogLookups: async function (bRefresh) {
+			const oCatalogModel = this.getModel("catalogs");
+			if (!bRefresh && oCatalogModel.getProperty("/componentOptions")?.length && oCatalogModel.getProperty("/defectOptions")?.length) return;
+			const fnRead = async sEntity => {
+				const oBinding = this.getView().getModel().bindList(`/${sEntity}`);
+				const aContexts = await oBinding.requestContexts(0, Infinity);
+				return Promise.all(aContexts.map(oContext => oContext.requestObject()));
+			};
+			const [aComponents, aDefects] = await Promise.all([fnRead("CatalogApplicationComponents"), fnRead("CatalogDefectCategories")]);
+			oCatalogModel.setProperty("/componentOptions", aComponents.filter(oItem => oItem.active));
+			oCatalogModel.setProperty("/defectOptions", aDefects.filter(oItem => oItem.active));
+		},
+
+		_applyCatalogFilters: function () {
+			const oCatalogModel = this.getModel("catalogs");
+			const sQuery = String(oCatalogModel.getProperty("/query") || "").trim().toLowerCase();
+			const bIncludeInactive = oCatalogModel.getProperty("/includeInactive") === true;
+			const aItems = oCatalogModel.getProperty("/allItems") || [];
+			oCatalogModel.setProperty("/items", aItems.filter(oItem =>
+				(bIncludeInactive || oItem.active) && (!sQuery || `${oItem.displayCode} ${oItem.displayName} ${oItem.displayType}`.toLowerCase().includes(sQuery))
+			));
+		},
+
+		_catalogRowFromEvent: function (oEvent) {
+			return oEvent?.getSource?.().getBindingContext("catalogs")?.getObject?.() || null;
+		},
+
 		_invokeAction: async function (sAction, mParameters, sSuccessTextKey, bReloadActiveUsers) {
 			this.getModel("view").setProperty("/busy", true);
 			try {
@@ -783,7 +1041,7 @@ sap.ui.define([
 			try {
 				const oSaved = JSON.parse(window.sessionStorage.getItem("idts.userAdministration.activeUsers") || "{}");
 				return {
-					selectedTab: ["requests", "activeUsers", "developerResponsibilities"].includes(oSaved.selectedTab) ? oSaved.selectedTab : oDefault.selectedTab,
+					selectedTab: ["requests", "activeUsers", "developerResponsibilities", "businessCatalogs"].includes(oSaved.selectedTab) ? oSaved.selectedTab : oDefault.selectedTab,
 					query: typeof oSaved.query === "string" ? oSaved.query : oDefault.query,
 					includeNonActive: oSaved.includeNonActive === true
 				};
