@@ -77,6 +77,11 @@ assert.match(view, /<IconTabBar/)
 assert.match(view, /key="requests"/)
 assert.match(view, /key="activeUsers"/)
 assert.match(view, /key="developerResponsibilities"/)
+assert.match(view, /key="businessCatalogs"/)
+assert.match(view, /items="\{catalogs>\/items\}"/)
+assert.match(view, /press="\.onOpenCatalogCreate"/)
+assert.match(view, /press="\.onOpenCatalogEdit"/)
+assert.match(view, /press="\.onToggleCatalogActive"/)
 assert.match(view, /items="\{activeUsers>\/items\}"/)
 assert.match(view, /items="\{activeUsers>\/developerItems\}"/)
 assert.match(view, /search="\.onActiveUsersSearch"/)
@@ -211,6 +216,18 @@ assert.match(developerFragment, /enabled="\{= !!\$\{developer>\/reason\} &amp;&a
 assert.doesNotMatch(developerFragment, /Password|OTP|passkey|token/i)
 assert.match(controller, /_confirm\("developerProfileConfirmation"\)/)
 
+const editCatalogFragment = fs.readFileSync(path.join(webapp, 'fragment/EditCatalogItem.fragment.xml'), 'utf8')
+assert.match(editCatalogFragment, /<Dialog/)
+assert.match(editCatalogFragment, /catalogs>\/edit/)
+assert.match(editCatalogFragment, /press="\.onConfirmCatalogEdit"/)
+assert.doesNotMatch(editCatalogFragment, /Delete|Hard delete|HANA|Role Collection|token|credential/i)
+
+const catalogImpactFragment = fs.readFileSync(path.join(webapp, 'fragment/CatalogImpact.fragment.xml'), 'utf8')
+assert.match(catalogImpactFragment, /<Dialog/)
+assert.match(catalogImpactFragment, /catalogs>\/impact/)
+assert.match(catalogImpactFragment, /press="\.onConfirmCatalogDeactivation"/)
+assert.doesNotMatch(catalogImpactFragment, /Delete|HANA|Role Collection|token|credential/i)
+
 const controllerDefinition = loadController(controller)
 assert.equal(typeof controllerDefinition.onConfirmInvite, 'function')
 assert.equal(typeof controllerDefinition._loadRequests, 'function')
@@ -223,6 +240,12 @@ assert.equal(typeof controllerDefinition.onLoadMoreActiveUsers, 'function')
 assert.equal(typeof controllerDefinition.onOpenActiveUserDetails, 'function')
 assert.equal(typeof controllerDefinition.onConfirmExistingIdentityLink, 'function')
 assert.equal(typeof controllerDefinition.onExistingIdentityLinkFieldChange, 'function')
+assert.equal(typeof controllerDefinition._loadCatalogs, 'function')
+assert.equal(typeof controllerDefinition.onOpenCatalogCreate, 'function')
+assert.equal(typeof controllerDefinition.onOpenCatalogEdit, 'function')
+assert.equal(typeof controllerDefinition.onConfirmCatalogEdit, 'function')
+assert.equal(typeof controllerDefinition.onToggleCatalogActive, 'function')
+assert.equal(typeof controllerDefinition.onConfirmCatalogDeactivation, 'function')
 assert.match(controller, /this\.getResourceBundle\(\)/)
 
 async function verifyRuntimeBehavior () {
@@ -349,6 +372,59 @@ async function verifyRuntimeBehavior () {
   await activeInstance.onLoadMoreActiveUsers()
   assert.equal(activeParameters.skip, 2)
   assert.equal(activeUsersData.items.length, 2)
+
+  const catalogData = {
+    selectedType: 'SAP_MODULE', allItems: [], items: [], query: '', includeInactive: false,
+    loaded: false, busy: false, error: false, componentOptions: [], defectOptions: [],
+    edit: { mode: 'CREATE', code: 'NEW', name: 'New module', submitting: false }
+  }
+  const catalogModel = {
+    getProperty: key => catalogData[key.slice(1)],
+    setProperty: (key, value) => {
+      const parts = key.slice(1).split('/')
+      if (parts.length === 1) catalogData[parts[0]] = value
+      else catalogData[parts[0]][parts[1]] = value
+    }
+  }
+  const catalogRows = {
+    CatalogApplicationComponents: [{ ID: 'component-1', name: 'Component', active: true }],
+    CatalogDefectCategories: [{ ID: 'defect-1', name: 'Defect', active: true }],
+    CatalogSAPModules: [
+      { ID: 'module-1', code: 'ACTIVE', name: 'Active module', active: true },
+      { ID: 'module-2', code: 'INACTIVE', name: 'Inactive module', active: false }
+    ]
+  }
+  let createCount = 0
+  let releaseCatalogCreate
+  const catalogCreateDone = new Promise(resolve => { releaseCatalogCreate = resolve })
+  const catalogODataModel = {
+    bindList: path => {
+      const entity = path.slice(1)
+      return {
+        requestContexts: async () => (catalogRows[entity] || []).map(item => ({ requestObject: async () => item })),
+        create: () => ({ created: async () => { createCount += 1; await catalogCreateDone } })
+      }
+    },
+    submitBatch: async () => {}
+  }
+  const catalogInstance = Object.assign(Object.create(controllerDefinition), {
+    getModel: name => name === 'catalogs' ? catalogModel : { setProperty: () => {} },
+    getView: () => ({ getModel: () => catalogODataModel }),
+    _catalogEditDialog: { close: () => {} },
+    _text: async key => key
+  })
+  await catalogInstance._loadCatalogs()
+  assert.equal(catalogData.loaded, true)
+  assert.equal(catalogData.items.length, 1, 'inactive catalog items are hidden by default')
+  catalogData.includeInactive = true
+  catalogInstance._applyCatalogFilters()
+  assert.equal(catalogData.items.length, 2)
+  const firstCatalogCreate = catalogInstance.onConfirmCatalogEdit()
+  const secondCatalogCreate = catalogInstance.onConfirmCatalogEdit()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(createCount, 1, 'catalog double submit must be ignored')
+  releaseCatalogCreate()
+  await Promise.all([firstCatalogCreate, secondCatalogCreate])
 
   const restoredData = { selectedTab: 'activeUsers' }
   const restoredActiveUsersData = { loaded: false, busy: false }
@@ -550,7 +626,7 @@ function loadController (source) {
 
 for (const locale of ['i18n.properties', 'i18n_en.properties']) {
   const text = fs.readFileSync(path.join(webapp, 'i18n', locale), 'utf8')
-  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'changeRoleConfirmation', 'revokeConfirmation', 'manageResponsibilities', 'developerProfileConfirmation', 'existingBugsKeepAssignee', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'activeUserSearchPlaceholder', 'includeNonActive', 'includeRevoked', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'loadMoreActiveUsers', 'viewDetails', 'activeUserDetails', 'linkExistingIdentity', 'existingIdentityLinkRole', 'existingIdentityLinkNotice', 'existingIdentityLinkEmail', 'sendIdentityLink', 'identityLinkQueued', 'cancelExistingLinkInvitation', 'cancelExistingLinkConfirmation', 'existingLinkCancelled', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'developerProfile', 'close', 'activeUsersNoDeveloper', 'suspendAccess', 'reactivateAccess', 'suspendWarning', 'reactivateWarning', 'suspendQueued', 'reactivateQueued']) {
+  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'changeRoleConfirmation', 'revokeConfirmation', 'manageResponsibilities', 'developerProfileConfirmation', 'existingBugsKeepAssignee', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'businessCatalogsTab', 'catalogType', 'catalogSearchPlaceholder', 'includeInactiveCatalogs', 'addCatalogItem', 'editCatalogItem', 'deactivateCatalogItem', 'activateCatalogItem', 'catalogImpactTitle', 'catalogReason', 'saveCatalogItem', 'confirmCatalogDeactivation', 'activeUserSearchPlaceholder', 'includeNonActive', 'includeRevoked', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'loadMoreActiveUsers', 'viewDetails', 'activeUserDetails', 'linkExistingIdentity', 'existingIdentityLinkRole', 'existingIdentityLinkNotice', 'existingIdentityLinkEmail', 'sendIdentityLink', 'identityLinkQueued', 'cancelExistingLinkInvitation', 'cancelExistingLinkConfirmation', 'existingLinkCancelled', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'developerProfile', 'close', 'activeUsersNoDeveloper', 'suspendAccess', 'reactivateAccess', 'suspendWarning', 'reactivateWarning', 'suspendQueued', 'reactivateQueued']) {
     assert.match(text, new RegExp(`^${key}=`, 'm'))
   }
   assert.match(text, /^cancelExistingLinkInvitation=Cancel invitation$/m)

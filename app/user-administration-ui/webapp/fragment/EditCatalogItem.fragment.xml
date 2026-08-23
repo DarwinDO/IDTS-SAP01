@@ -1,0 +1,22 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+	<Dialog title="{i18n>editCatalogItem}" busy="{catalogs>/edit/submitting}" contentWidth="34rem">
+		<content>
+			<VBox class="sapUiSmallMargin">
+				<Label text="{i18n>catalogCode}" required="true" visible="{= ${catalogs>/selectedType} !== 'COMPONENT_CATEGORY' }"/>
+				<Input value="{catalogs>/edit/code}" maxLength="40" visible="{= ${catalogs>/selectedType} !== 'COMPONENT_CATEGORY' }"/>
+				<Label text="{i18n>catalogName}" required="true" visible="{= ${catalogs>/selectedType} !== 'COMPONENT_CATEGORY' }"/>
+				<Input value="{catalogs>/edit/name}" maxLength="120" visible="{= ${catalogs>/selectedType} !== 'COMPONENT_CATEGORY' }"/>
+				<Label text="{i18n>applicationComponent}" required="true" visible="{= ${catalogs>/selectedType} === 'COMPONENT_CATEGORY' }"/>
+				<Select selectedKey="{catalogs>/edit/component_ID}" items="{catalogs>/componentOptions}" visible="{= ${catalogs>/selectedType} === 'COMPONENT_CATEGORY' }">
+					<core:Item key="{catalogs>ID}" text="{catalogs>name}"/>
+				</Select>
+				<Label text="{i18n>defectCategory}" required="true" visible="{= ${catalogs>/selectedType} === 'COMPONENT_CATEGORY' }"/>
+				<Select selectedKey="{catalogs>/edit/defectCategory_ID}" items="{catalogs>/defectOptions}" visible="{= ${catalogs>/selectedType} === 'COMPONENT_CATEGORY' }">
+					<core:Item key="{catalogs>ID}" text="{catalogs>name}"/>
+				</Select>
+			</VBox>
+		</content>
+		<beginButton><Button text="{i18n>saveCatalogItem}" type="Emphasized" enabled="{= !${catalogs>/edit/submitting} }" press=".onConfirmCatalogEdit"/></beginButton>
+		<endButton><Button text="{i18n>cancel}" press=".onCancelCatalogEdit"/></endButton>
+	</Dialog>
+</core:FragmentDefinition>
