@@ -496,6 +496,9 @@ for (const locale of ['i18n.properties', 'i18n_en.properties']) {
   for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'changeRoleConfirmation', 'revokeConfirmation', 'manageResponsibilities', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'activeUserSearchPlaceholder', 'includeNonActive', 'includeRevoked', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'loadMoreActiveUsers', 'viewDetails', 'activeUserDetails', 'linkExistingIdentity', 'existingIdentityLinkRole', 'existingIdentityLinkNotice', 'existingIdentityLinkEmail', 'sendIdentityLink', 'identityLinkQueued', 'cancelExistingLinkInvitation', 'cancelExistingLinkConfirmation', 'existingLinkCancelled', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'developerProfile', 'close', 'activeUsersNoDeveloper', 'suspendAccess', 'reactivateAccess', 'suspendWarning', 'reactivateWarning', 'suspendQueued', 'reactivateQueued']) {
     assert.match(text, new RegExp(`^${key}=`, 'm'))
   }
+  assert.match(text, /^cancelExistingLinkInvitation=Cancel invitation$/m)
+  assert.match(text, /^cancelExistingLinkConfirmation=Cancel this invitation\? Its link will stop working and a new invitation can be sent\.$/m)
+  assert.match(text, /^existingLinkCancelled=Invitation cancelled\.$/m)
   assert.match(text, /^existingIdentityLinkNotice=.*same Users\.ID.*Developer Profile.*Bug assignments.*comments.*history/m)
 }
 

@@ -59,14 +59,16 @@ async function cancelExistingUserIdentityLink (req, dependencies) {
       'provisioningVersion', 'correlationId', 'consumedAt', 'linkTargetUser_ID'
     ).where({ ID: requestID })
   )
-  if (!request || !request.linkTargetUser_ID) {
-    throw serviceError(404, 'IDENTITY_LINK_INVITATION_NOT_FOUND', 'The identity-link invitation was not found.')
+  if (!request) {
+    throw serviceError(404, 'IDENTITY_LINK_INVITATION_NOT_FOUND', 'The invitation was not found.')
   }
+  const isExistingLink = Boolean(request.linkTargetUser_ID)
   if (!Number.isInteger(expectedVersion) || expectedVersion < 0 || request.provisioningVersion !== expectedVersion) {
     throw serviceError(409, 'ONBOARDING_VERSION_CONFLICT', 'The onboarding request changed. Reload and try again.')
   }
   if (request.status_code !== 'INVITED' || request.consumedAt != null) {
-    throw serviceError(409, 'IDENTITY_LINK_INVITATION_NOT_OPEN', 'Only an open identity-link invitation can be cancelled.')
+    const code = isExistingLink ? 'IDENTITY_LINK_INVITATION_NOT_OPEN' : 'ONBOARDING_INVITATION_NOT_OPEN'
+    throw serviceError(409, code, 'Only an open invitation can be cancelled.')
   }
 
   const nextVersion = expectedVersion + 1
@@ -104,13 +106,13 @@ async function cancelExistingUserIdentityLink (req, dependencies) {
     ID: cds.utils.uuid(),
     onboardingRequest_ID: request.ID,
     actor_ID: administrator.ID,
-    targetUser_ID: request.linkTargetUser_ID,
-    action: 'CANCEL_LINK_INVITATION',
+    targetUser_ID: request.linkTargetUser_ID || null,
+    action: isExistingLink ? 'CANCEL_LINK_INVITATION' : 'CANCEL_INVITATION',
     result: 'APPLIED',
     fromState: 'INVITED',
     toState: 'FAILED',
     correlationId: request.correlationId,
-    detailsSummary: 'An open identity-link invitation was cancelled.'
+    detailsSummary: 'An open onboarding invitation was cancelled.'
   }))
 
   return dependencies.onboardingResult({

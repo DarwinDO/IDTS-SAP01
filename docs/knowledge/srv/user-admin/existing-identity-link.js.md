@@ -16,9 +16,17 @@ The request boundary remains only a target-level concurrency guard; final normal
 
 Boundary request van chi la guard concurrency theo target; ownership email normalized cuoi cung duoc enforce lai o broker completion voi Users read bi lock. Cach nay dong race cross-target ma khong them reservation column hoac provider write.
 
+The existing public action name is retained for compatibility with the deployed UI, but its cancellation transaction now accepts every unconsumed `INVITED` request. It uses the same optimistic version guard, clears `openRequestKey`, marks pending/failed delivery as `SKIPPED`, preserves all request/delivery history, and appends either `CANCEL_LINK_INVITATION` for a targeted legacy link or `CANCEL_INVITATION` for standard onboarding. Verified, provisioning, active, failed, expired, and already-cancelled requests remain non-cancellable.
+
+Ten public action hien huu duoc giu de tuong thich voi UI da deploy, nhung transaction Cancel nay gio chap nhan moi request `INVITED` chua consumed. Handler dung cung optimistic version guard, clear `openRequestKey`, dat delivery PENDING/FAILED thanh `SKIPPED`, giu toan bo lich su request/delivery, va ghi `CANCEL_LINK_INVITATION` cho link legacy co target hoac `CANCEL_INVITATION` cho onboarding thuong. Request da verify, dang provisioning, active, failed, expired hoac da Cancel van khong the Cancel lai.
+
 ### Important source anchors
 
 - **Location**: `srv/user-admin/existing-identity-link.js:15` `requestExistingUserIdentityLink(...)`
   **IDTS concept**: Server-owned authorization and target snapshot before the one-time identity invitation.
   **Impact if broken**: A PM could link the wrong row, create concurrent invitations, or expose a path to PM/UserAdmin identity takeover.
   **Must check together**: `srv/user-admin.js`, `db/schema.cds`, invitation templates, and the Gate 3B request/verification contract.
+- **Location**: `srv/user-admin/existing-identity-link.js` `cancelExistingUserIdentityLink(...)`
+  **IDTS concept**: One fail-closed cancellation transaction shared by standard and existing-link invitations.
+  **Impact if broken**: A stale email link could remain usable, a concurrent PM action could overwrite newer state, or delivery history could be lost.
+  **Must check together**: `srv/user-admin.js` summary eligibility, `UserOnboardingDeliveries`, UI i18n copy, and both onboarding cancellation fixtures.
