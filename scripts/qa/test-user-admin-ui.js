@@ -224,6 +224,10 @@ const editCatalogFragment = fs.readFileSync(path.join(webapp, 'fragment/EditCata
 assert.match(editCatalogFragment, /<Dialog/)
 assert.match(editCatalogFragment, /catalogs>\/edit/)
 assert.match(editCatalogFragment, /press="\.onConfirmCatalogEdit"/)
+assert.match(editCatalogFragment, /edit\/componentType/)
+assert.match(editCatalogFragment, /edit\/categoryType/)
+assert.match(editCatalogFragment, /valueState="/)
+assert.match(editCatalogFragment, /valueStateText="/)
 assert.doesNotMatch(editCatalogFragment, /Delete|Hard delete|HANA|Role Collection|token|credential/i)
 
 const catalogImpactFragment = fs.readFileSync(path.join(webapp, 'fragment/CatalogImpact.fragment.xml'), 'utf8')
@@ -380,7 +384,7 @@ async function verifyRuntimeBehavior () {
   const catalogData = {
     selectedType: 'SAP_MODULE', allItems: [], items: [], query: '', includeInactive: false,
     loaded: false, busy: false, error: false, componentOptions: [], defectOptions: [],
-    edit: { mode: 'CREATE', code: 'NEW', name: 'New module', submitting: false }
+    edit: { mode: 'CREATE', code: 'NEW', name: 'New module', submitting: false, validation: {} }
   }
   const catalogModel = {
     getProperty: key => catalogData[key.slice(1)],
@@ -391,22 +395,42 @@ async function verifyRuntimeBehavior () {
     }
   }
   const catalogRows = {
-    CatalogApplicationComponents: [{ ID: 'component-1', name: 'Component', active: true }],
-    CatalogDefectCategories: [{ ID: 'defect-1', name: 'Defect', active: true }],
-    CatalogSAPModules: [
-      { ID: 'module-1', code: 'ACTIVE', name: 'Active module', active: true },
-      { ID: 'module-2', code: 'INACTIVE', name: 'Inactive module', active: false }
-    ]
+    CatalogApplicationComponents: Array.from({ length: 205 }, (_, index) => ({
+      ID: `component-${index + 1}`,
+      name: `Component ${index + 1}`,
+      componentType: 'CAP',
+      active: true
+    })),
+    CatalogDefectCategories: Array.from({ length: 205 }, (_, index) => ({
+      ID: `defect-${index + 1}`,
+      name: `Defect ${index + 1}`,
+      categoryType: 'FUNCTIONAL',
+      active: true
+    })),
+    CatalogSAPModules: Array.from({ length: 205 }, (_, index) => ({
+      ID: `module-${index + 1}`,
+      code: `MOD-${index + 1}`,
+      name: `Module ${index + 1}`,
+      active: index !== 199
+    }))
   }
   let createCount = 0
   const submittedCatalogGroups = []
+  const catalogBindingParameters = []
+  const catalogRequestRanges = []
   let releaseCatalogCreate
   const catalogCreateDone = new Promise(resolve => { releaseCatalogCreate = resolve })
   const catalogODataModel = {
-    bindList: path => {
+    bindList: (path, _sorters, _filters, _parameters, bindingParameters) => {
       const entity = path.slice(1)
+      catalogBindingParameters.push(bindingParameters)
       return {
-        requestContexts: async () => (catalogRows[entity] || []).map(item => ({ requestObject: async () => item })),
+        requestContexts: async (start = 0, length) => {
+          catalogRequestRanges.push({ entity, start, length })
+          const rows = catalogRows[entity] || []
+          const requestedLength = length === Infinity ? rows.length : Math.min(rows.length, Number(length || 0))
+          return rows.slice(start, start + requestedLength).map(item => ({ requestObject: async () => item }))
+        },
         create: () => ({ created: async () => { createCount += 1; await catalogCreateDone } })
       }
     },
@@ -420,10 +444,24 @@ async function verifyRuntimeBehavior () {
   })
   await catalogInstance._loadCatalogs()
   assert.equal(catalogData.loaded, true)
-  assert.equal(catalogData.items.length, 1, 'inactive catalog items are hidden by default')
+  assert.equal(catalogData.allItems.length, 205, 'catalog loading retrieves every page before local search')
+  assert.equal(catalogData.items.length, 204, 'inactive catalog items are hidden by default')
+  assert.equal(catalogRequestRanges.every(range => range.length === Infinity), true, 'catalog reads request a complete result set')
+  assert.equal(catalogBindingParameters.every(parameters => !parameters || !Object.hasOwn(parameters, '$top')), true, 'catalog bindings do not pass disallowed OData V4 $top parameters')
   catalogData.includeInactive = true
   catalogInstance._applyCatalogFilters()
-  assert.equal(catalogData.items.length, 2)
+  assert.equal(catalogData.items.length, 205)
+  catalogData.query = 'MOD-201'
+  catalogInstance._applyCatalogFilters()
+  assert.equal(catalogData.items.length, 1, 'local search narrows a complete result set')
+  assert.equal(catalogData.items[0].code, 'MOD-201', 'local search can find rows beyond the first 100')
+  catalogData.query = ''
+  catalogData.includeInactive = false
+  catalogData.edit = { mode: 'CREATE', code: '', name: '', componentType: '', categoryType: '', submitting: false, validation: {} }
+  await catalogInstance.onConfirmCatalogEdit()
+  assert.equal(catalogData.edit.validation.code, 'catalogCodeRequired', 'missing code is exposed through a value-state message')
+  assert.equal(catalogData.edit.validation.name, 'catalogNameRequired', 'missing name is exposed through a value-state message')
+  catalogData.edit = { mode: 'CREATE', code: 'NEW', name: 'New module', submitting: false, validation: {} }
   const firstCatalogCreate = catalogInstance.onConfirmCatalogEdit()
   const secondCatalogCreate = catalogInstance.onConfirmCatalogEdit()
   await new Promise(resolve => setImmediate(resolve))
@@ -431,6 +469,24 @@ async function verifyRuntimeBehavior () {
   assert.deepEqual(submittedCatalogGroups, ['catalogChanges'], 'catalog create uses one explicit update batch')
   releaseCatalogCreate()
   await Promise.all([firstCatalogCreate, secondCatalogCreate])
+
+  let rejectPatch
+  const patchPromise = new Promise((_resolve, reject) => { rejectPatch = reject })
+  patchPromise.catch(() => {})
+  let catalogReloads = 0
+  const updateInstance = Object.assign(Object.create(controllerDefinition), {
+    getView: () => ({ getModel: () => ({
+      submitBatch: async group => {
+        assert.equal(group, 'catalogChanges')
+        rejectPatch(Object.assign(new Error('precondition failed'), { status: 412 }))
+      }
+    }) }),
+    _loadCatalogs: async () => { catalogReloads += 1 },
+    _text: async key => key
+  })
+  const updateResult = await updateInstance._updateCatalogRow({ _context: { setProperty: () => patchPromise } }, { active: false })
+  assert.equal(updateResult, false, 'an inner PATCH rejection prevents false catalog success')
+  assert.equal(catalogReloads, 0, 'a failed PATCH does not reload the catalog as if it succeeded')
 
   const restoredData = { selectedTab: 'activeUsers' }
   const restoredActiveUsersData = { loaded: false, busy: false }

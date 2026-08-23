@@ -231,8 +231,11 @@ service UserAdministrationService @(requires: 'authenticated-user') {
 
   @cds.query.limit.max: 100
   @cds.redirection.target: false
+  @Capabilities.InsertRestrictions.Insertable: true
+  @Capabilities.UpdateRestrictions.Updatable: true
+  @Capabilities.DeleteRestrictions.Deletable: false
   entity CatalogSAPModules as projection on db.SAPModules {
-    key ID,
+    key ID @Core.Immutable,
     code,
     name,
     active,
@@ -243,8 +246,11 @@ service UserAdministrationService @(requires: 'authenticated-user') {
 
   @cds.query.limit.max: 100
   @cds.redirection.target: false
+  @Capabilities.InsertRestrictions.Insertable: true
+  @Capabilities.UpdateRestrictions.Updatable: true
+  @Capabilities.DeleteRestrictions.Deletable: false
   entity CatalogApplicationComponents as projection on db.ApplicationComponents {
-    key ID,
+    key ID @Core.Immutable,
     code,
     name,
     componentType,
@@ -256,8 +262,11 @@ service UserAdministrationService @(requires: 'authenticated-user') {
 
   @cds.query.limit.max: 100
   @cds.redirection.target: false
+  @Capabilities.InsertRestrictions.Insertable: true
+  @Capabilities.UpdateRestrictions.Updatable: true
+  @Capabilities.DeleteRestrictions.Deletable: false
   entity CatalogDefectCategories as projection on db.DefectCategories {
-    key ID,
+    key ID @Core.Immutable,
     code,
     name,
     categoryType,
@@ -269,8 +278,11 @@ service UserAdministrationService @(requires: 'authenticated-user') {
 
   @cds.query.limit.max: 100
   @cds.redirection.target: false
+  @Capabilities.InsertRestrictions.Insertable: true
+  @Capabilities.UpdateRestrictions.Updatable: true
+  @Capabilities.DeleteRestrictions.Deletable: false
   entity CatalogComponentCategories as projection on db.ComponentCategories {
-    key ID,
+    key ID @Core.Immutable,
     component.ID as component_ID,
     defectCategory.ID as defectCategory_ID,
     active,

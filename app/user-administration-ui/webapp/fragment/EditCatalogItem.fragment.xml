@@ -3,15 +3,19 @@
 		<content>
 			<VBox class="sapUiSmallMargin">
 				<Label text="{i18n>catalogCode}" required="true" visible="{= ${catalogs>/selectedType} !== 'COMPONENT_CATEGORY' }"/>
-				<Input value="{catalogs>/edit/code}" maxLength="40" visible="{= ${catalogs>/selectedType} !== 'COMPONENT_CATEGORY' }"/>
+				<Input value="{catalogs>/edit/code}" maxLength="40" valueState="{= ${catalogs>/edit/validation/code} ? 'Error' : 'None' }" valueStateText="{catalogs>/edit/validation/code}" visible="{= ${catalogs>/selectedType} !== 'COMPONENT_CATEGORY' }"/>
 				<Label text="{i18n>catalogName}" required="true" visible="{= ${catalogs>/selectedType} !== 'COMPONENT_CATEGORY' }"/>
-				<Input value="{catalogs>/edit/name}" maxLength="120" visible="{= ${catalogs>/selectedType} !== 'COMPONENT_CATEGORY' }"/>
+				<Input value="{catalogs>/edit/name}" maxLength="120" valueState="{= ${catalogs>/edit/validation/name} ? 'Error' : 'None' }" valueStateText="{catalogs>/edit/validation/name}" visible="{= ${catalogs>/selectedType} !== 'COMPONENT_CATEGORY' }"/>
+				<Label text="{i18n>componentType}" visible="{= ${catalogs>/selectedType} === 'APPLICATION_COMPONENT' }"/>
+				<Input value="{catalogs>/edit/componentType}" maxLength="60" valueState="{= ${catalogs>/edit/validation/componentType} ? 'Error' : 'None' }" valueStateText="{catalogs>/edit/validation/componentType}" visible="{= ${catalogs>/selectedType} === 'APPLICATION_COMPONENT' }"/>
+				<Label text="{i18n>categoryType}" visible="{= ${catalogs>/selectedType} === 'DEFECT_CATEGORY' }"/>
+				<Input value="{catalogs>/edit/categoryType}" maxLength="60" valueState="{= ${catalogs>/edit/validation/categoryType} ? 'Error' : 'None' }" valueStateText="{catalogs>/edit/validation/categoryType}" visible="{= ${catalogs>/selectedType} === 'DEFECT_CATEGORY' }"/>
 				<Label text="{i18n>applicationComponent}" required="true" visible="{= ${catalogs>/selectedType} === 'COMPONENT_CATEGORY' }"/>
-				<Select selectedKey="{catalogs>/edit/component_ID}" items="{catalogs>/componentOptions}" visible="{= ${catalogs>/selectedType} === 'COMPONENT_CATEGORY' }">
+				<Select selectedKey="{catalogs>/edit/component_ID}" valueState="{= ${catalogs>/edit/validation/component_ID} ? 'Error' : 'None' }" valueStateText="{catalogs>/edit/validation/component_ID}" items="{catalogs>/componentOptions}" visible="{= ${catalogs>/selectedType} === 'COMPONENT_CATEGORY' }">
 					<core:Item key="{catalogs>ID}" text="{catalogs>name}"/>
 				</Select>
 				<Label text="{i18n>defectCategory}" required="true" visible="{= ${catalogs>/selectedType} === 'COMPONENT_CATEGORY' }"/>
-				<Select selectedKey="{catalogs>/edit/defectCategory_ID}" items="{catalogs>/defectOptions}" visible="{= ${catalogs>/selectedType} === 'COMPONENT_CATEGORY' }">
+				<Select selectedKey="{catalogs>/edit/defectCategory_ID}" valueState="{= ${catalogs>/edit/validation/defectCategory_ID} ? 'Error' : 'None' }" valueStateText="{catalogs>/edit/validation/defectCategory_ID}" items="{catalogs>/defectOptions}" visible="{= ${catalogs>/selectedType} === 'COMPONENT_CATEGORY' }">
 					<core:Item key="{catalogs>ID}" text="{catalogs>name}"/>
 				</Select>
 			</VBox>

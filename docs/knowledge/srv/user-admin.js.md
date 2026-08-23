@@ -76,3 +76,53 @@ User Administration service dang ky module catalog trong boundary PM + UserAdmin
 For an existing-user link, verification writes the generated operation correlation ID back to the private request row before creating the `LINK_EXISTING` operation. This makes the broker's exact request/operation correlation check fail closed on drift without changing the ordinary provisioning approval path.
 
 Với link user hiện hữu, verify ghi correlation ID của operation được tạo vào request private trước khi tạo operation `LINK_EXISTING`. Nhờ vậy broker sẽ fail closed nếu correlation request/operation lệch nhau mà không đổi path approval provisioning thông thường.
+
+## Gate 5 catalog registration / Đăng ký catalog Gate 5
+
+### English
+
+`UserAdministrationService.init` delegates all Business Catalog behavior to `registerCatalogHandlers` at `srv/user-admin.js:87-89`. The service passes the same `requireActiveUserAdministrator` function used by the other User Administration flows, so a visible tab or a direct OData call cannot grant catalog access by itself.
+
+### Important source anchors
+
+- **Location**: `srv/user-admin.js:51-55` — `UserAdministrationService.init` read guard registration.
+  **IDTS concept**: Existing read-only administration entities stay behind the active PM + `UserAdmin` guard; the catalog module does not create a second authorization policy.
+  **Impact if broken**: A new catalog projection could become readable by a Tester, Developer, inactive PM, or mixed-role principal even when the UI hides the tab.
+  **Must check together**: `srv/user-admin/catalogs.js:59-70`, `requireActiveUserAdministrator`, and negative-role tests in `scripts/qa/test-user-admin-catalogs.js:125-131`.
+
+- **Location**: `srv/user-admin.js:87-89` — `registerCatalogHandlers(this, { authorize: requireActiveUserAdministrator })`.
+  **IDTS concept**: One shared server authorization boundary covers catalog reads, impact, CREATE, UPDATE, activation/deactivation, and DELETE denial.
+  **Impact if broken**: A future handler could accidentally accept a weaker authorization callback or bypass the guard on one operation.
+  **Must check together**: `srv/user-admin.cds:3`, `srv/user-admin/catalogs.js:59-70`, and `docs/pm/evidence/user-administration/gate-5-business-catalogs-source.md`.
+
+- **Location**: `srv/user-admin.js:51-89`.
+  **IDTS concept**: Catalog registration is additive; existing onboarding, access lifecycle, identity-link, and Developer profile flows remain separate handlers and transaction boundaries.
+  **Impact if broken**: A catalog change could alter provisioning/provider behavior or make a Business Catalog endpoint depend on user/role mutation state.
+  **Must check together**: `srv/user-admin.cds` action declarations, `srv/user-admin/catalogs.js`, and the Gate 5 source-only mutation ledger.
+
+### Tiếng Việt
+
+`UserAdministrationService.init` ủy quyền toàn bộ Business Catalog cho `registerCatalogHandlers` tại `srv/user-admin.js:87-89`. Service truyền đúng `requireActiveUserAdministrator` đang dùng cho các flow User Administration khác, vì vậy tab hiển thị hay gọi OData trực tiếp không tự cấp quyền catalog.
+
+### Các điểm neo source quan trọng
+
+- **Vị trí**: `srv/user-admin.js:51-55` — đăng ký read guard trong `UserAdministrationService.init`.
+  **Khái niệm IDTS**: Entity administration chỉ đọc hiện tại vẫn nằm sau guard PM + `UserAdmin` active; module catalog không tạo policy authorization thứ hai.
+  **Ảnh hưởng nếu sai**: Tester, Developer, PM inactive hoặc principal mixed-role có thể đọc projection catalog dù UI đã ẩn tab.
+  **Phải kiểm tra cùng**: `srv/user-admin/catalogs.js:59-70`, `requireActiveUserAdministrator` và negative-role tests `scripts/qa/test-user-admin-catalogs.js:125-131`.
+
+- **Vị trí**: `srv/user-admin.js:87-89` — `registerCatalogHandlers(this, { authorize: requireActiveUserAdministrator })`.
+  **Khái niệm IDTS**: Một authorization boundary server dùng chung cho read catalog, impact, CREATE, UPDATE, activate/deactivate và DELETE denial.
+  **Ảnh hưởng nếu sai**: Handler mới có thể nhận callback yếu hơn hoặc bypass guard ở một operation.
+  **Phải kiểm tra cùng**: `srv/user-admin.cds:3`, `srv/user-admin/catalogs.js:59-70` và `docs/pm/evidence/user-administration/gate-5-business-catalogs-source.md`.
+
+- **Vị trí**: `srv/user-admin.js:51-89`.
+  **Khái niệm IDTS**: Registration catalog là additive; onboarding, access lifecycle, identity-link và Developer profile hiện hữu vẫn là các handler/transaction riêng.
+  **Ảnh hưởng nếu sai**: Catalog change có thể vô tình đổi behavior provisioning/provider hoặc làm endpoint catalog phụ thuộc mutation user/role.
+  **Phải kiểm tra cùng**: action declaration trong `srv/user-admin.cds`, `srv/user-admin/catalogs.js` và mutation ledger source-only Gate 5.
+
+### Safe editing / Sửa an toàn
+
+Keep this file as wiring only. Put catalog validation, impact counting, audit, and no-DELETE logic in `srv/user-admin/catalogs.js`; put public field/capability/ETag contracts in `srv/user-admin.cds`. Verify the full User Administration and Developer regression suites after changing registration.
+
+Giữ file này chỉ làm wiring. Validation catalog, đếm impact, audit và no-DELETE phải ở `srv/user-admin/catalogs.js`; public field/capability/ETag contract phải ở `srv/user-admin.cds`. Khi sửa registration, phải verify toàn bộ User Administration và Developer regression.

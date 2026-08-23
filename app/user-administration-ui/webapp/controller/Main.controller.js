@@ -725,7 +725,17 @@ sap.ui.define([
 
 		onOpenCatalogCreate: async function () {
 			await this._ensureCatalogLookups();
-			this.getModel("catalogs").setProperty("/edit", { mode: "CREATE", code: "", name: "", ["component_ID"]: "", ["defectCategory_ID"]: "", submitting: false });
+			this.getModel("catalogs").setProperty("/edit", {
+				mode: "CREATE",
+				code: "",
+				name: "",
+				componentType: "",
+				categoryType: "",
+				["component_ID"]: "",
+				["defectCategory_ID"]: "",
+				submitting: false,
+				validation: {}
+			});
 			await this._openCatalogEditDialog();
 		},
 
@@ -742,7 +752,8 @@ sap.ui.define([
 				["defectCategory_ID"]: oRow["defectCategory_ID"] || "",
 				componentType: oRow.componentType || "",
 				categoryType: oRow.categoryType || "",
-				submitting: false
+				submitting: false,
+				validation: {}
 			});
 			await this._openCatalogEditDialog();
 		},
@@ -766,25 +777,31 @@ sap.ui.define([
 			const sType = oCatalogModel.getProperty("/selectedType");
 			const oConfig = CATALOG_CONFIG[sType];
 			const oPayload = Object.fromEntries(oConfig.fields.map(sField => [sField, String(oEdit[sField] || "").trim()]));
+			const mValidation = {};
 			if (sType !== "COMPONENT_CATEGORY" && (!oPayload.code || !oPayload.name)) {
-				MessageBox.warning(await this._text("catalogRequiredFields"));
-				return;
+				if (!oPayload.code) mValidation.code = await this._text("catalogCodeRequired");
+				if (!oPayload.name) mValidation.name = await this._text("catalogNameRequired");
 			}
 			if (sType === "COMPONENT_CATEGORY" && (!oPayload.component_ID || !oPayload.defectCategory_ID)) {
+				if (!oPayload.component_ID) mValidation["component_ID"] = await this._text("catalogComponentRequired");
+				if (!oPayload.defectCategory_ID) mValidation["defectCategory_ID"] = await this._text("catalogDefectCategoryRequired");
+			}
+			if (Object.keys(mValidation).length > 0) {
+				oCatalogModel.setProperty("/edit/validation", mValidation);
 				MessageBox.warning(await this._text("catalogRequiredFields"));
 				return;
 			}
+			oCatalogModel.setProperty("/edit/validation", {});
 			oCatalogModel.setProperty("/edit/submitting", true);
 			try {
 				if (oEdit.mode === "CREATE") {
 					const oODataModel = this.getView().getModel();
 					const oList = oODataModel.bindList(`/${oConfig.entity}`, null, null, null, { $$updateGroupId: "catalogChanges" });
 					const oCreatedContext = oList.create({ ...oPayload, active: true });
-					await oODataModel.submitBatch("catalogChanges");
-					await oCreatedContext.created();
+					await this._submitCatalogChanges([oCreatedContext.created()]);
 				} else {
-					Object.entries(oPayload).forEach(([sField, vValue]) => oEdit.row._context.setProperty(sField, vValue, "catalogChanges"));
-					await this.getView().getModel().submitBatch("catalogChanges");
+					const aChanges = Object.entries(oPayload).map(([sField, vValue]) => oEdit.row._context.setProperty(sField, vValue, "catalogChanges"));
+					await this._submitCatalogChanges(aChanges);
 				}
 				this._catalogEditDialog.close();
 				MessageToast.show(await this._text("catalogSaved"));
@@ -794,6 +811,11 @@ sap.ui.define([
 			} finally {
 				oCatalogModel.setProperty("/edit/submitting", false);
 			}
+		},
+
+		_submitCatalogChanges: async function (aChangePromises) {
+			await this.getView().getModel().submitBatch("catalogChanges");
+			await Promise.all((aChangePromises || []).filter(oPromise => oPromise && typeof oPromise.then === "function"));
 		},
 
 		onCancelCatalogEdit: function () {
@@ -849,8 +871,8 @@ sap.ui.define([
 
 		_updateCatalogRow: async function (oRow, mChanges) {
 			try {
-				Object.entries(mChanges).forEach(([sField, vValue]) => oRow._context.setProperty(sField, vValue, "catalogChanges"));
-				await this.getView().getModel().submitBatch("catalogChanges");
+				const aChanges = Object.entries(mChanges).map(([sField, vValue]) => oRow._context.setProperty(sField, vValue, "catalogChanges"));
+				await this._submitCatalogChanges(aChanges);
 				MessageToast.show(await this._text("catalogSaved"));
 				await this._loadCatalogs();
 				return true;
@@ -867,8 +889,8 @@ sap.ui.define([
 			oCatalogModel.setProperty("/error", false);
 			try {
 				await this._ensureCatalogLookups(true);
-				const oBinding = this.getView().getModel().bindList(`/${oConfig.entity}`, null, null, null, { $top: 100, $$updateGroupId: "catalogChanges" });
-				const aContexts = await oBinding.requestContexts(0, 100);
+				const oBinding = this.getView().getModel().bindList(`/${oConfig.entity}`, null, null, null, { $$updateGroupId: "catalogChanges" });
+				const aContexts = await oBinding.requestContexts(0, Infinity);
 				const aItems = await Promise.all(aContexts.map(async oContext => ({ ...(await oContext.requestObject()), _context: oContext })));
 				const aComponents = oCatalogModel.getProperty("/componentOptions") || [];
 				const aDefects = oCatalogModel.getProperty("/defectOptions") || [];
@@ -877,7 +899,8 @@ sap.ui.define([
 				oCatalogModel.setProperty("/allItems", aItems.map(oItem => ({
 					...oItem,
 					displayCode: oItem.code || "—",
-					displayName: oItem.name || `${mComponents[oItem.component_ID] || "Unknown component"} / ${mDefects[oItem.defectCategory_ID] || "Unknown category"}`
+					displayName: oItem.name || `${mComponents[oItem.component_ID] || "Unknown component"} / ${mDefects[oItem.defectCategory_ID] || "Unknown category"}`,
+					displayType: oItem.componentType || oItem.categoryType || "—"
 				})));
 				oCatalogModel.setProperty("/loaded", true);
 				this._applyCatalogFilters();
@@ -892,8 +915,8 @@ sap.ui.define([
 			const oCatalogModel = this.getModel("catalogs");
 			if (!bRefresh && oCatalogModel.getProperty("/componentOptions")?.length && oCatalogModel.getProperty("/defectOptions")?.length) return;
 			const fnRead = async sEntity => {
-				const oBinding = this.getView().getModel().bindList(`/${sEntity}`, null, null, null, { $top: 100 });
-				const aContexts = await oBinding.requestContexts(0, 100);
+				const oBinding = this.getView().getModel().bindList(`/${sEntity}`);
+				const aContexts = await oBinding.requestContexts(0, Infinity);
 				return Promise.all(aContexts.map(oContext => oContext.requestObject()));
 			};
 			const [aComponents, aDefects] = await Promise.all([fnRead("CatalogApplicationComponents"), fnRead("CatalogDefectCategories")]);
@@ -907,7 +930,7 @@ sap.ui.define([
 			const bIncludeInactive = oCatalogModel.getProperty("/includeInactive") === true;
 			const aItems = oCatalogModel.getProperty("/allItems") || [];
 			oCatalogModel.setProperty("/items", aItems.filter(oItem =>
-				(bIncludeInactive || oItem.active) && (!sQuery || `${oItem.displayCode} ${oItem.displayName}`.toLowerCase().includes(sQuery))
+				(bIncludeInactive || oItem.active) && (!sQuery || `${oItem.displayCode} ${oItem.displayName} ${oItem.displayType}`.toLowerCase().includes(sQuery))
 			));
 		},
 

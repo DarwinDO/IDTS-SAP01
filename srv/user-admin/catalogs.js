@@ -16,7 +16,7 @@ const CATALOGS = Object.freeze({
     serviceEntity: 'CatalogSAPModules',
     entity: 'idts.cap.SAPModules',
     codeLength: 20,
-    fields: ['ID', 'code', 'name', 'active', 'administrationReason'],
+    fields: ['code', 'name', 'active', 'administrationReason'],
     bugField: 'sapModule_ID',
     responsibilityMode: 'sapModule',
     children: [['idts.cap.SAPModuleComponents', 'sapModule_ID']]
@@ -25,7 +25,7 @@ const CATALOGS = Object.freeze({
     serviceEntity: 'CatalogApplicationComponents',
     entity: 'idts.cap.ApplicationComponents',
     codeLength: 40,
-    fields: ['ID', 'code', 'name', 'componentType', 'active', 'administrationReason'],
+    fields: ['code', 'name', 'componentType', 'active', 'administrationReason'],
     bugField: 'applicationComponent_ID',
     responsibilityMode: 'component',
     children: [
@@ -37,7 +37,7 @@ const CATALOGS = Object.freeze({
     serviceEntity: 'CatalogDefectCategories',
     entity: 'idts.cap.DefectCategories',
     codeLength: 40,
-    fields: ['ID', 'code', 'name', 'categoryType', 'active', 'administrationReason'],
+    fields: ['code', 'name', 'categoryType', 'active', 'administrationReason'],
     bugField: 'defectCategory_ID',
     responsibilityMode: 'defectCategory',
     children: [['idts.cap.ComponentCategories', 'defectCategory_ID']]
@@ -45,7 +45,7 @@ const CATALOGS = Object.freeze({
   COMPONENT_CATEGORY: {
     serviceEntity: 'CatalogComponentCategories',
     entity: 'idts.cap.ComponentCategories',
-    fields: ['ID', 'component_ID', 'defectCategory_ID', 'active', 'administrationReason'],
+    fields: ['component_ID', 'defectCategory_ID', 'active', 'administrationReason'],
     bugField: 'componentCategory_ID',
     responsibilityMode: 'componentCategory',
     children: []
@@ -73,11 +73,15 @@ async function prepareCatalogCreate (req, { authorize }) {
   const tx = cds.tx(req)
   const actor = await authorize(req, tx)
   const catalog = catalogFromRequest(req)
+  const targetID = crypto.randomUUID()
+  req._catalogRejection = { actorID: actor.ID, catalog, targetID }
+  registerCatalogRejectionAudit(req, 'CREATE')
+  if (Object.hasOwn(req.query?.INSERT?.entries?.[0] || {}, 'ID')) {
+    throw catalogError(400, 'CATALOG_ID_IMMUTABLE', 'Catalog ID is server-generated and cannot be supplied.')
+  }
   assertAllowedFields(req.data, catalog.fields)
 
-  req.data.ID = crypto.randomUUID()
-  req._catalogRejection = { actorID: actor.ID, catalog, targetID: req.data.ID }
-  registerCatalogRejectionAudit(req, 'CREATE')
+  req.data.ID = targetID
   const administrationReason = normalizeOptionalText(
     req.data.administrationReason ?? req.query?.INSERT?.entries?.[0]?.administrationReason,
     500
@@ -112,10 +116,18 @@ async function prepareCatalogUpdate (req, { authorize }) {
   const tx = cds.tx(req)
   const actor = await authorize(req, tx)
   const catalog = catalogFromRequest(req)
-  assertAllowedFields(req.data, catalog.fields)
+  if (Object.hasOwn(req.query?.UPDATE?.data || {}, 'ID')) {
+    throw catalogError(400, 'CATALOG_ID_IMMUTABLE', 'Catalog ID cannot be changed.')
+  }
+  assertAllowedFields(req.data, [...catalog.fields, 'ID'])
 
-  const targetID = String(req.params?.[0]?.ID || req.data.ID || '').trim().toLowerCase()
+  const routeID = String(req.params?.[0]?.ID || '').trim().toLowerCase()
+  const payloadID = String(req.data?.ID || '').trim().toLowerCase()
+  const targetID = routeID || payloadID
   assertUuid(targetID, 'INVALID_CATALOG_ID')
+  if (routeID && payloadID && routeID !== payloadID) {
+    throw catalogError(400, 'CATALOG_ID_IMMUTABLE', 'Catalog ID cannot be changed.')
+  }
   req._catalogRejection = { actorID: actor.ID, catalog, targetID }
   registerCatalogRejectionAudit(req, 'UPDATE')
   const current = await tx.run(SELECT.one.from(catalog.entity).where({ ID: targetID }).forUpdate())
@@ -233,7 +245,7 @@ function catalogFromRequest (req) {
 }
 
 function assertAllowedFields (data, fields) {
-  const unexpected = Object.keys(data || {}).filter(field => !fields.includes(field))
+  const unexpected = Object.keys(data || {}).filter(field => field !== 'ID' && !fields.includes(field))
   if (unexpected.length) throw catalogError(400, 'CATALOG_FIELDS_INVALID', 'Catalog payload contains unsupported fields.')
 }
 

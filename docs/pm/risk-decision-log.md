@@ -230,3 +230,11 @@ Khi retry, reconcile hoac reconcile lease het han rotate `UserAccessOperations.c
 
 - Quyết định: chỉ expose SAP Module, Application Component, Defect Category và cặp Component Category cho đúng PM + UserAdmin qua CAP contract giới hạn. Dùng uniqueness normalize, parent active, ETag, impact count, deactivate theo dependency và audit append-only sanitize.
 - An toàn lịch sử: deactivate không rewrite Bug lịch sử; responsibility/child catalog active chặn deactivate không an toàn. DELETE, generic master-data edit, import CSV và quản trị SAP/BTP ngoài scope.
+
+### DEC-063 — Gate 5 executor remediation boundary (2026-08-23)
+
+- Decision: close the exact `346a1cf` review findings with native UI5 OData V4 contracts (`requestContexts(0, Infinity)`, `Context.created()`, and awaited `Context.setProperty` promises), explicit CAP immutable-ID/delete metadata, and anchored bilingual knowledge mirrors before opening one Draft PR.
+- Scope boundary: source, tests, evidence, PM status, push, and Draft PR only. No dependency install/upgrade, HDI/HANA/data/catalog/provider/user/role/email/Jira/Drive mutation, deployment, merge, Ready transition, or Gate 6.
+- Risk: a service query cap remains 100 per request; UI5 complete-result reads may become expensive if catalogs grow materially. A later operations gate must add a reviewed server-side search/paging UX only with performance evidence.
+- Quyết định: đóng finding review exact `346a1cf` bằng native UI5 OData V4 contract (`requestContexts(0, Infinity)`, `Context.created()` và await promise `Context.setProperty`), metadata immutable-ID/delete rõ ràng và knowledge mirror song ngữ có anchor trước khi mở một Draft PR.
+- Ranh giới: chỉ source, test, evidence, PM status, push và Draft PR. Không install/upgrade dependency, mutation HDI/HANA/data/catalog/provider/user/role/email/Jira/Drive, deploy, merge, Ready hay Gate 6.

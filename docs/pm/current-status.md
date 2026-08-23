@@ -343,6 +343,12 @@ Vietnamese: Agent hoáº·c developer má»›i pháº£i xÃ¡c Ä‘á»‹nh 
 - Suspension is IDTS-local and fail-closed: it protects the final PM + UserAdmin, revokes active sessions atomically, records `SUSPENDED`, and performs no provider write. Reactivation keeps local access disabled until exact immutable-principal and Role Collection readback proof.
 - No BTP, HANA/HDI, schema, seed, provider, SAP user, Role Collection, session outside the local transaction, Jira, Drive, deployment, merge, or Ready transition mutation occurred in Gate 3. The executor stops at Draft PR; coordinator exact-diff review and any later deployment/acceptance remain separate approvals.
 
+## 2026-08-23 WP8 Gate 5 Business Catalog remediation
+
+- Gate 5 is source-only on `feature/wp8-admin-business-catalogs-gate5-luna-donhv`, frozen from `origin/dev` `fd6870585d72ca63e55b744708960b417a2795b9`; execution started at candidate `346a1cfaca800f566b2a1ed102608a65537f7bdd` after the coordinator returned 0 Critical / 1 Major / 5 Important findings.
+- Remediation closes the OData V4 `$top`/complete-result gap, awaits inner PATCH/POST promises after `submitBatch`, exposes `componentType`/`categoryType` with value states, rejects raw client catalog IDs, makes DELETE restrictions/immutable IDs explicit in service metadata, and expands anchored bilingual knowledge mirrors.
+- Focused catalog/UI contracts, CAP EDMX/HANA compile, UI5 MCP supported-resource lint, UI lint and UI build are fresh source evidence. No HDI/HANA/data/catalog/provider/user/role/email/Jira/Drive/deployment/merge/Ready/Gate 6 mutation has occurred. Final exact head, security scan, Draft PR and `qa-depth-gate` readback remain handoff steps.
+
 ## 2026-08-15 User Administration M3D broker enablement
 
 - The isolated `idts-user-access-broker` is STARTED `1/1`, no-route, bound only to its dedicated XSUAA and broker-only API-access UPS, and its fresh empty-queue poll is `IDLE`.

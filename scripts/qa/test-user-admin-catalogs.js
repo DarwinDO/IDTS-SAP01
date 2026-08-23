@@ -64,6 +64,8 @@ async function main () {
     assert.equal(definition['@cds.query.limit.max'], 100, `${entityName} caps reads at 100 rows`)
     assert.deepEqual(Object.keys(definition.elements).sort(), safeFields.sort(), `${entityName} exposes only safe fields`)
     assert.equal(definition.elements.modifiedAt['@odata.etag'], true, `${entityName} uses modifiedAt as ETag`)
+    assert.equal(definition['@Capabilities.DeleteRestrictions.Deletable'], false, `${entityName} metadata forbids DELETE`)
+    assert.equal(definition.elements.ID['@Core.Immutable'], true, `${entityName} metadata marks ID immutable`)
   }
 
   assert.ok(model.definitions['UserAdministrationService.readCatalogImpact'], 'readCatalogImpact is exposed')
@@ -152,6 +154,19 @@ async function main () {
   const created = await createCatalog(service, 'CatalogSAPModules', { code: '  g5-new  ', name: '  Gate 5 New Module  ', active: true }, administrator)
   assert.equal(created.code, 'G5-NEW', 'CREATE normalizes catalog codes')
   assert.equal(created.name, 'Gate 5 New Module', 'CREATE trims catalog names')
+
+  const clientSuppliedID = '85200000-0000-4000-8000-000000000099'
+  await expectRejected(createCatalog(service, 'CatalogSAPModules', {
+    ID: clientSuppliedID,
+    code: 'G5-CLIENT-ID',
+    name: 'Client ID must be rejected'
+  }, administrator), 400, 'CATALOG_ID_IMMUTABLE')
+  assert.equal(
+    await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: clientSuppliedID })),
+    undefined,
+    'client-supplied catalog IDs never become persisted rows'
+  )
+
   const createAudit = await db.run(SELECT.one.from('idts.cap.CatalogAdministrationAuditEvents').where({
     targetID: created.ID,
     catalogType: 'SAP_MODULE',
@@ -165,6 +180,20 @@ async function main () {
   assert.equal(updated.name, 'Updated Gate 5 Module', 'UPDATE trims catalog names')
   const persistedUpdate = await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: created.ID }))
   assert.equal(persistedUpdate.code, 'G5-NEW', 'UPDATE preserves an omitted catalog code')
+
+  await expectRejected(service.send({
+    event: 'UPDATE',
+    data: { ID: created.ID, name: 'Client ID update must be rejected' },
+    query: UPDATE('UserAdministrationService.CatalogSAPModules')
+      .set({ ID: created.ID, name: 'Client ID update must be rejected' })
+      .where({ ID: created.ID }),
+    user: administrator
+  }), 400, 'CATALOG_ID_IMMUTABLE')
+  assert.equal(
+    (await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: created.ID }))).name,
+    'Updated Gate 5 Module',
+    'client-supplied UPDATE IDs never retarget or mutate the row'
+  )
 
   await expectRejected(createCatalog(service, 'CatalogSAPModules', { code: 'bad code!', name: 'Bad' }, administrator), 400, 'INVALID_CATALOG_CODE')
   const rejectedAudit = await db.run(SELECT.one.from('idts.cap.CatalogAdministrationAuditEvents').where({
@@ -234,12 +263,12 @@ async function main () {
   assert.equal(afterAuditFailure.name, beforeAuditFailure.name, 'audit failure rolls back the catalog update')
   await db.run('DROP TRIGGER fail_gate5_catalog_audit')
 
-  await expectRejected(service.send({
+  await assert.rejects(service.send({
     event: 'DELETE',
     data: { ID: IDS.module },
     query: DELETE.from('UserAdministrationService.CatalogSAPModules').where({ ID: IDS.module }),
     user: administrator
-  }), 405, 'CATALOG_DELETE_FORBIDDEN')
+  }), error => Number(error?.status || error?.statusCode) === 405 || error?.code === 'CATALOG_DELETE_FORBIDDEN' || error?.code === 'ENTITY_IS_NOT_CRUD' || error?.message === 'ENTITY_IS_NOT_CRUD' || error?.cause?.code === 'ENTITY_IS_NOT_CRUD' || error?.cause?.message === 'ENTITY_IS_NOT_CRUD')
 
   console.log('IDTS User Administration catalog administration contract: PASS')
 }

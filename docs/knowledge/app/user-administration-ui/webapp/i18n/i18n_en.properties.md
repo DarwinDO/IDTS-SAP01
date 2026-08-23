@@ -1,5 +1,29 @@
 # Knowledge: `i18n_en.properties`
 
+## Gate 5 key anchors / Anchor key Gate 5
+
+### English
+
+The Gate 5 keys at `app/user-administration-ui/webapp/i18n/i18n_en.properties:118-154` are the English counterpart for the Business Catalogs tab, type column, `componentType`/`categoryType` inputs, safe errors, count-only impact review, deactivation reason, and field-specific value-state text. Their meaning must remain synchronized with `i18n.properties`.
+
+- **IDTS concept**: Localized copy keeps the admin flow understandable while CAP remains the authority for authorization and mutation.
+- **Impact if broken**: A locale switch can hide a required-field message, mislabel activation state, or reveal technical implementation wording.
+- **Must check together**: `i18n.properties`, `Main.view.xml:276-318`, `EditCatalogItem.fragment.xml:5-20`, and `CatalogImpact.fragment.xml:5-14`.
+
+### Tiếng Việt
+
+Các key Gate 5 tại `app/user-administration-ui/webapp/i18n/i18n_en.properties:118-154` là counterpart English cho tab Business Catalogs, column type, input `componentType`/`categoryType`, lỗi an toàn, impact review count-only, reason deactivate và value-state text theo field. Ý nghĩa phải đồng bộ với `i18n.properties`.
+
+- **Khái niệm IDTS**: Copy đã localize giúp admin hiểu flow, còn CAP vẫn là authority cho authorization và mutation.
+- **Ảnh hưởng nếu sai**: Đổi locale có thể làm mất message field bắt buộc, label sai activate state hoặc lộ wording implementation kỹ thuật.
+- **Phải kiểm tra cùng**: `i18n.properties`, `Main.view.xml:276-318`, `EditCatalogItem.fragment.xml:5-20` và `CatalogImpact.fragment.xml:5-14`.
+
+### Safe editing / Sửa an toàn
+
+Keep the English and default locale key sets in parity. Never add raw server error, provider, identity, endpoint, or credential values to a properties file. Re-run the UI contract after wording changes.
+
+Giữ bộ key English và locale mặc định parity. Không thêm raw server error, provider, identity, endpoint hoặc credential vào properties. Chạy lại UI contract sau khi đổi wording.
+
 ## English / Tiếng Việt
 
 This locale mirrors the Gate 3B existing-identity link keys from `i18n.properties`, including the read-only current-role label and full preservation notice. Keep both locale files synchronized whenever the dialog wording changes.

@@ -295,6 +295,7 @@
 										<columns>
 											<Column width="12rem"><Text text="{i18n>catalogCode}"/></Column>
 											<Column><Text text="{i18n>catalogName}"/></Column>
+											<Column width="10rem"><Text text="{i18n>catalogClassificationType}"/></Column>
 											<Column width="8rem"><Text text="{i18n>catalogStatus}"/></Column>
 											<Column width="15rem" hAlign="End"><Text text="{i18n>actions}"/></Column>
 										</columns>
@@ -303,6 +304,7 @@
 												<cells>
 													<Text text="{catalogs>displayCode}" wrapping="false"/>
 													<Text text="{catalogs>displayName}" wrapping="false"/>
+													<Text text="{catalogs>displayType}" wrapping="false"/>
 													<ObjectStatus text="{= ${catalogs>active} ? ${i18n>activeStateText} : ${i18n>inactiveCatalogState} }" state="{= ${catalogs>active} ? 'Success' : 'None' }"/>
 													<HBox justifyContent="End">
 														<Button text="{i18n>editCatalogItem}" type="Transparent" press=".onOpenCatalogEdit"/>

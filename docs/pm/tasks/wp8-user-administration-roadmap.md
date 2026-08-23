@@ -22,7 +22,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 - PR #335 passed CI and merged at `7bf7609ca070fae0d467c4964051eee0956828ad`; User Administration UI `1.0.10` was selectively deployed.
 - The controlled non-member Developer pilot reached `ACTIVE`, immutable identity link `Yes`, readiness `Ready`, one active responsibility and successful Bug Management access in a fresh session.
 - Automatic `sap.default` shadow-user creation is enabled for this POC; authorization still requires the allowlisted broker-assigned IDTS Role Collection and CAP readback.
-- Gate 5 source candidate adds bounded Business Catalog read/create/update/activate/deactivate, impact review, optimistic concurrency, uniqueness, and sanitized append-only audit. It has not run HDI simulation/migration, deployment, or live catalog mutation.
+- Gate 5 source candidate adds bounded Business Catalog read/create/update/activate/deactivate, impact review, optimistic concurrency, uniqueness, and sanitized append-only audit. Coordinator review at `346a1cf` found 0 Critical, 1 Major, and 5 Important findings; the execution branch is closing those findings with focused RED/GREEN contracts before Draft PR. It has not run HDI simulation/migration, deployment, or live catalog mutation.
 
 ## Gate sequence
 
@@ -49,4 +49,4 @@ Each gate records source tests, CAP/Fiori/UI5 MCP guidance, security review, art
 
 ## Next handoff
 
-Gate 5 is open source-only on `feature/wp8-admin-business-catalogs-donhv` from frozen `origin/dev` `fd6870585d72ca63e55b744708960b417a2795b9`. Stop at Draft PR; schema simulation/migration, rollout, live acceptance, merge, and Gate 6 remain separate approvals.
+Gate 5 is open source-only on `feature/wp8-admin-business-catalogs-gate5-luna-donhv` from frozen `origin/dev` `fd6870585d72ca63e55b744708960b417a2795b9` (created at candidate `346a1cfaca800f566b2a1ed102608a65537f7bdd`). Stop at Draft PR; schema simulation/migration, rollout, live acceptance, merge, and Gate 6 remain separate approvals.
