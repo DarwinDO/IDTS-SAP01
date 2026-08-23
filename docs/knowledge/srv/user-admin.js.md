@@ -51,6 +51,12 @@ Khi `retryAccessOperation` hoac `reconcileAccessOperation` rotate correlation cu
 Vietnamese: `requestSuspend` la action khoa access local cua IDTS. Sau guard PM + `UserAdmin` va version check, handler lock user muc tieu va kiem tra lai invariant administrator cuoi cung trong cung transaction. Handler dat `Users.active=false`, revoke `AuthSessions` dang active, doi request thanh `SUSPENDED`, tang version va ghi `REQUEST_SUSPEND`. Action khong tao provider operation va khong goi SAP API.
 
 `requestReactivate` chi nhan user da provisioned, dang inactive va request `SUSPENDED`. Handler lock/version-check request, tao mot operation `REACTIVATE` voi snapshot role/capability hien tai, tang version va ghi `REQUEST_REACTIVATE`. User local van inactive cho den khi broker chung minh readback provider. Session da revoke khong bao gio tu dong khoi phuc.
+
+## General invitation cancellation / Huy invitation tong quat
+
+`searchOnboarding` privately reads `consumedAt` and removes it from the public result. The server-owned `cancelEligible` flag is true only while a request is exactly `INVITED` and unconsumed, regardless of whether it is a standard onboarding invitation or an existing-user identity link. The UI therefore never decides cancellation eligibility from email, role, or target identifiers.
+
+`searchOnboarding` doc private `consumedAt` va loai field nay khoi ket qua public. Flag server-owned `cancelEligible` chi true khi request dung `INVITED` va chua consumed, bat ke day la invitation onboarding thuong hay link identity user hien huu. Vi vay UI khong tu quyet dinh kha nang Cancel tu email, role hoac target identifier.
 ## Gate 3B existing identity request and verification / Request va verify identity hien huu Gate 3B
 
 `requestExistingUserIdentityLink` is a PM + UserAdmin action for one selected active legacy TESTER/DEVELOPER. The server derives the role, snapshots the normalized legacy email, creates the signed invitation/delivery, and locks the target with `sha256(JSON.stringify(['LINK_EXISTING', targetID]))`. `verifySapIdentity` retains common token and immutable identity checks, re-reads the exact target, excludes only that exact target from duplicate scans, and queues version-2 `LINK_EXISTING` with `desiredUserAdmin=false`. Normal PROVISION continues through its existing branch.

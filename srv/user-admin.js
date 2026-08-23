@@ -101,6 +101,7 @@ async function searchOnboarding (req) {
       'userAdminRequested',
       'status_code',
       'expiresAt',
+      'consumedAt',
       'verifiedAt',
       'provisionedAt',
       'revokedAt',
@@ -132,11 +133,11 @@ async function searchOnboarding (req) {
 }
 
 function onboardingSummary (request, latestOperationAttemptCount) {
-  const { linkTargetUser_ID: linkTargetUserID, ...publicRequest } = request
+  const { consumedAt, linkTargetUser_ID: _linkTargetUserID, ...publicRequest } = request
   return {
     ...publicRequest,
     latestOperationAttemptCount,
-    cancelEligible: Boolean(linkTargetUserID) && request.status_code === 'INVITED'
+    cancelEligible: request.status_code === 'INVITED' && consumedAt == null
   }
 }
 
