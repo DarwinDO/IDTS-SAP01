@@ -21,10 +21,10 @@ const IDS = {
 }
 
 const CATALOGS = [
-  ['CatalogSAPModules', ['ID', 'code', 'name', 'active', 'createdAt', 'modifiedAt']],
-  ['CatalogApplicationComponents', ['ID', 'code', 'name', 'componentType', 'active', 'createdAt', 'modifiedAt']],
-  ['CatalogDefectCategories', ['ID', 'code', 'name', 'categoryType', 'active', 'createdAt', 'modifiedAt']],
-  ['CatalogComponentCategories', ['ID', 'component_ID', 'defectCategory_ID', 'active', 'createdAt', 'modifiedAt']]
+  ['CatalogSAPModules', ['ID', 'code', 'name', 'active', 'administrationReason', 'createdAt', 'modifiedAt']],
+  ['CatalogApplicationComponents', ['ID', 'code', 'name', 'componentType', 'active', 'administrationReason', 'createdAt', 'modifiedAt']],
+  ['CatalogDefectCategories', ['ID', 'code', 'name', 'categoryType', 'active', 'administrationReason', 'createdAt', 'modifiedAt']],
+  ['CatalogComponentCategories', ['ID', 'component_ID', 'defectCategory_ID', 'active', 'administrationReason', 'createdAt', 'modifiedAt']]
 ]
 
 function user (roles) {
@@ -33,6 +33,25 @@ function user (roles) {
 
 async function expectRejected (operation, status, code) {
   await assert.rejects(operation, error => Number(error?.status || error?.statusCode) === status && (!code || error?.code === code))
+}
+
+function createCatalog (service, entity, data, administrator) {
+  return service.send({
+    event: 'CREATE',
+    data: { ...data },
+    query: INSERT.into(`UserAdministrationService.${entity}`).entries({ ...data }),
+    user: administrator
+  })
+}
+
+function updateCatalog (service, entity, ID, data, administrator, headers) {
+  return service.send({
+    event: 'UPDATE',
+    data: { ID, ...data },
+    query: UPDATE(`UserAdministrationService.${entity}`).set({ ...data }).where({ ID }),
+    headers,
+    user: administrator
+  })
 }
 
 async function main () {
@@ -130,15 +149,99 @@ async function main () {
   await expectRejected(service.send({ event: 'readCatalogImpact', data: { catalogType: 'SAP_MODULE', catalogID: 'not-a-uuid' }, user: administrator }), 400, 'INVALID_CATALOG_ID')
   await expectRejected(service.send({ event: 'readCatalogImpact', data: { catalogType: 'SAP_MODULE', catalogID: '85900000-0000-4000-8000-000000000099' }, user: administrator }), 404, 'CATALOG_NOT_FOUND')
 
-  for (const [event, query] of [
-    ['CREATE', INSERT.into('UserAdministrationService.CatalogSAPModules').entries({ code: 'NOPE', name: 'Nope', active: true })],
-    ['UPDATE', UPDATE('UserAdministrationService.CatalogSAPModules').set({ name: 'Nope' }).where({ ID: IDS.module })],
-    ['DELETE', DELETE.from('UserAdministrationService.CatalogSAPModules').where({ ID: IDS.module })]
-  ]) {
-    await expectRejected(service.send({ event, query, user: administrator }), 405, 'CATALOG_READ_ONLY')
-  }
+  const created = await createCatalog(service, 'CatalogSAPModules', { code: '  g5-new  ', name: '  Gate 5 New Module  ', active: true }, administrator)
+  assert.equal(created.code, 'G5-NEW', 'CREATE normalizes catalog codes')
+  assert.equal(created.name, 'Gate 5 New Module', 'CREATE trims catalog names')
+  const createAudit = await db.run(SELECT.one.from('idts.cap.CatalogAdministrationAuditEvents').where({
+    targetID: created.ID,
+    catalogType: 'SAP_MODULE',
+    action: 'CREATE',
+    result: 'SUCCEEDED'
+  }))
+  assert.equal(createAudit.actor_ID, IDS.admin, 'CREATE records the authorized actor')
+  assert.equal(createAudit.afterSummary, 'G5-NEW: Gate 5 New Module', 'CREATE audit stores only the safe display summary')
 
-  console.log('IDTS User Administration catalog read contract: PASS')
+  const updated = await updateCatalog(service, 'CatalogSAPModules', created.ID, { name: '  Updated Gate 5 Module  ' }, administrator)
+  assert.equal(updated.name, 'Updated Gate 5 Module', 'UPDATE trims catalog names')
+  const persistedUpdate = await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: created.ID }))
+  assert.equal(persistedUpdate.code, 'G5-NEW', 'UPDATE preserves an omitted catalog code')
+
+  await expectRejected(createCatalog(service, 'CatalogSAPModules', { code: 'bad code!', name: 'Bad' }, administrator), 400, 'INVALID_CATALOG_CODE')
+  const rejectedAudit = await db.run(SELECT.one.from('idts.cap.CatalogAdministrationAuditEvents').where({
+    catalogType: 'SAP_MODULE',
+    action: 'CREATE',
+    result: 'REJECTED',
+    reason: 'INVALID_CATALOG_CODE'
+  }))
+  assert.equal(rejectedAudit.actor_ID, IDS.admin, 'authorized validation rejection records a safe audit event')
+  assert.equal(rejectedAudit.beforeSummary, null, 'rejection audit does not persist request payloads')
+  assert.equal(rejectedAudit.afterSummary, null, 'rejection audit does not persist request payloads')
+  await expectRejected(createCatalog(service, 'CatalogSAPModules', { code: 'G5-NAME', name: '   ' }, administrator), 400, 'INVALID_CATALOG_NAME')
+  await expectRejected(createCatalog(service, 'CatalogSAPModules', { code: 'g5-new', name: 'Duplicate' }, administrator), 409, 'CATALOG_CODE_EXISTS')
+  await expectRejected(createCatalog(service, 'CatalogSAPModules', { code: 'G5-EXTRA', name: 'Extra', createdBy: 'client' }, administrator), 400)
+  await expectRejected(createCatalog(service, 'CatalogSAPModules', { code: 'G5-DENIED', name: 'Denied' }, user(['TESTER'])), 403)
+
+  const alternate = await createCatalog(service, 'CatalogSAPModules', { code: 'G5-ALT', name: 'Alternate Module' }, administrator)
+  await expectRejected(updateCatalog(service, 'CatalogSAPModules', alternate.ID, { code: ' g5-new ' }, administrator), 409, 'CATALOG_CODE_EXISTS')
+  await expectRejected(updateCatalog(service, 'CatalogSAPModules', alternate.ID, {
+    name: 'Stale write must fail'
+  }, administrator, { 'if-match': 'W/"1900-01-01T00:00:00.0000000Z"' }), 412)
+
+  await expectRejected(createCatalog(service, 'CatalogComponentCategories', {
+    component_ID: IDS.component,
+    defectCategory_ID: IDS.defect,
+    active: true
+  }, administrator), 409, 'CATALOG_PAIR_EXISTS')
+
+  const inactiveComponentID = '85300000-0000-4000-8000-000000000099'
+  await db.run(INSERT.into('idts.cap.ApplicationComponents').entries({
+    ID: inactiveComponentID,
+    code: 'G5-INACTIVE',
+    name: 'Inactive component',
+    active: false
+  }))
+  await expectRejected(createCatalog(service, 'CatalogComponentCategories', {
+    component_ID: inactiveComponentID,
+    defectCategory_ID: IDS.defect,
+    active: true
+  }, administrator), 409, 'INACTIVE_CATALOG_PARENT')
+
+  await expectRejected(updateCatalog(service, 'CatalogSAPModules', IDS.module, {
+    active: false,
+    administrationReason: 'This referenced module must remain active.'
+  }, administrator), 409, 'CATALOG_HAS_ACTIVE_DEPENDENCIES')
+  await expectRejected(updateCatalog(service, 'CatalogSAPModules', created.ID, { active: false }, administrator), 400, 'CATALOG_REASON_REQUIRED')
+
+  await updateCatalog(service, 'CatalogSAPModules', created.ID, {
+    active: false,
+    administrationReason: 'Retired after impact review.'
+  }, administrator)
+  assert.equal((await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: created.ID }))).active, false, 'safe deactivation persists')
+  const deactivateAudit = await db.run(SELECT.one.from('idts.cap.CatalogAdministrationAuditEvents').where({
+    targetID: created.ID,
+    action: 'DEACTIVATE'
+  }))
+  assert.equal(deactivateAudit.reason, 'Retired after impact review.', 'deactivation audit records the bounded reason')
+
+  await updateCatalog(service, 'CatalogSAPModules', created.ID, { active: true }, administrator)
+  assert.equal((await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: created.ID }))).active, true, 'reactivation persists')
+  assert.ok(await db.run(SELECT.one.from('idts.cap.CatalogAdministrationAuditEvents').where({ targetID: created.ID, action: 'REACTIVATE' })), 'reactivation is audited')
+
+  const beforeAuditFailure = await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: alternate.ID }))
+  await db.run(`CREATE TRIGGER fail_gate5_catalog_audit BEFORE INSERT ON idts_cap_CatalogAdministrationAuditEvents BEGIN SELECT RAISE(ABORT, 'forced audit failure'); END`)
+  await assert.rejects(updateCatalog(service, 'CatalogSAPModules', alternate.ID, { name: 'Must roll back' }, administrator))
+  const afterAuditFailure = await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: alternate.ID }))
+  assert.equal(afterAuditFailure.name, beforeAuditFailure.name, 'audit failure rolls back the catalog update')
+  await db.run('DROP TRIGGER fail_gate5_catalog_audit')
+
+  await expectRejected(service.send({
+    event: 'DELETE',
+    data: { ID: IDS.module },
+    query: DELETE.from('UserAdministrationService.CatalogSAPModules').where({ ID: IDS.module }),
+    user: administrator
+  }), 405, 'CATALOG_DELETE_FORBIDDEN')
+
+  console.log('IDTS User Administration catalog administration contract: PASS')
 }
 
 main().catch(error => {

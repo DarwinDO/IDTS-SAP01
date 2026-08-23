@@ -236,6 +236,7 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     code,
     name,
     active,
+    virtual null as administrationReason : String(500),
     createdAt,
     modifiedAt @odata.etag
   };
@@ -248,6 +249,7 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     name,
     componentType,
     active,
+    virtual null as administrationReason : String(500),
     createdAt,
     modifiedAt @odata.etag
   };
@@ -260,6 +262,7 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     name,
     categoryType,
     active,
+    virtual null as administrationReason : String(500),
     createdAt,
     modifiedAt @odata.etag
   };
@@ -271,6 +274,7 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     component.ID as component_ID,
     defectCategory.ID as defectCategory_ID,
     active,
+    virtual null as administrationReason : String(500),
     createdAt,
     modifiedAt @odata.etag
   };
