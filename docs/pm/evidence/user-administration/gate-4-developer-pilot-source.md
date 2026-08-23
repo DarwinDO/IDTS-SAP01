@@ -5,7 +5,8 @@
 - Base: `04643e12727290f2f35fd56e9c3d2a8df4cbcdbc`
 - Branch: `feature/wp8-admin-developer-pilot-donhv`
 - Gate: source review and selective User Administration UI hardening only
-- Live controlled non-member Developer pilot: pending after merge and rollout
+- Merge commit: `7bf7609ca070fae0d467c4964051eee0956828ad`
+- Live controlled non-member Developer pilot: PASS on 2026-08-23
 
 ## Positive contract
 
@@ -40,3 +41,17 @@
 - CAP/UI5/Fiori MCP tools were unavailable in this executor environment; the source gate uses the repository's CAP compile, UI lint/build and focused programmatic suites instead.
 - Ponytail boundary: reuse the existing service/actions/entities and add no dependency or speculative abstraction.
 - External mutation count during this source evidence phase: zero.
+
+## Live rollout and acceptance
+
+- GitHub PR #335 passed `qa-depth-gate` and merged into `dev` at `7bf7609ca070fae0d467c4964051eee0956828ad`.
+- Selective UI artifact `idts-user-admin-ui-gate4-7bf7609.mtar` had SHA-256 `02E79B348DB92E9E03D43E2C01D014DECB4CFA276FF6A2802143DDC783F32AD4` and contained only the two reviewed HTML5 application ZIPs. User Administration content read back at version `1.0.10`.
+- `sap.default` remained active and available for user logon. `Create Shadow Users on User Logon` changed from `false` to `true`, with exact post-update readback `true`, so future invited SAP ID users do not require manual shadow-user creation. No Role Collection or trust origin was added or removed.
+- The controlled identity is recorded only as a non-member Developer; its raw email is intentionally excluded from repository evidence.
+- After invitation and SAP identity verification, the request reached `ACTIVE`. Active Users readback proved business role `DEVELOPER`, identity link `Yes`, Developer readiness `Ready`, one active responsibility, no pending operation, availability `AVAILABLE`, workload limit `3`, and zero open Bugs assigned at activation.
+- A fresh session after provider completion successfully opened IDTS Bug Management and displayed role `Developer`. This also proves the user needed a fresh token after the asynchronous role assignment; the verification page itself remained a static pending acknowledgement and did not auto-refresh.
+- HANA Cloud was asleep during the acceptance window. The repository-supported `btp:demo:prepare` started it once, waited for readiness and restarted CAP once to clear stale pooled connections. Final readiness was CAP `1/1`, AppRouter `1/1`, liveness `200`, DB readiness `200`, anonymous protected API `401`, Web `200`, `DEMO READY`.
+
+## Remaining limitation
+
+- The identity-verification success page is a point-in-time acknowledgement. It does not poll provisioning or redirect automatically when the request becomes `ACTIVE`; users must start a fresh application session to receive the newly assigned role token.

@@ -12,14 +12,16 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 ## Current status
 
-`IN PROGRESS — GATE 4 SOURCE COMPLETE / CONTROLLED DEVELOPER PILOT PENDING`
+`COMPLETE — GATE 4 MERGED / SELECTIVE UI ROLLOUT / CONTROLLED DEVELOPER PILOT PASS`
 
 - Gates 1–3B are merged, deployed and accepted. Gate 3 browser closure is recorded by PR #325 at `04643e12727290f2f35fd56e9c3d2a8df4cbcdbc`.
 - Gate 4 branch `feature/wp8-admin-developer-pilot-donhv` is frozen from that exact base.
 - The cross-layer contract reuses the real onboarding, profile administration, provider-proof completion, Smart Assign and User Administration UI suites. It proves incomplete local completion remains non-active, repeated completion creates no duplicate profile/responsibility rows, deactivate/reactivate changes new assignment eligibility, and existing Bug assignees remain unchanged.
 - The audit found test fixtures that used a Developer Profile ID as a User ID and a display name as the actor. Fixtures now use exact seeded `Users.ID` values; production fail-closed identity/authorization behavior remains unchanged.
 - The reproducible product gap was in Manage Responsibilities UI: no explicit no-auto-reassignment confirmation and no state-bound duplicate-submit guard. UI version `1.0.10` adds confirmation, impact copy, busy/disabled state and reload through existing actions; CAP contracts and schema remain unchanged.
-- Source review/PR/merge and selective UI rollout remain before the controlled non-member Developer pilot. The pilot requires one SAP ID that is not DonHV or an existing team member.
+- PR #335 passed CI and merged at `7bf7609ca070fae0d467c4964051eee0956828ad`; User Administration UI `1.0.10` was selectively deployed.
+- The controlled non-member Developer pilot reached `ACTIVE`, immutable identity link `Yes`, readiness `Ready`, one active responsibility and successful Bug Management access in a fresh session.
+- Automatic `sap.default` shadow-user creation is enabled for this POC; authorization still requires the allowlisted broker-assigned IDTS Role Collection and CAP readback.
 
 ## Gate sequence
 
@@ -46,4 +48,4 @@ Each gate records source tests, CAP/Fiori/UI5 MCP guidance, security review, art
 
 ## Next handoff
 
-DonHV/coordinator runs the Gate 4 final source gate, reviews/merges the exact PR, deploys only the changed User Administration content, then performs the controlled non-member Developer pilot. Gate 5 remains unopened.
+Gate 4 is closed. Before opening Gate 5, separately review its frozen Business Catalog Administration plan and create a fresh worktree from current `origin/dev` only after DonHV approval.
