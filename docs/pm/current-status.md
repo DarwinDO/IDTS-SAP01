@@ -384,3 +384,10 @@ Vietnamese: Agent hoáº·c developer má»›i pháº£i xÃ¡c Ä‘á»‹nh 
 - The source gate reuses the real onboarding, profile-administration, provider-proof completion, Smart Assign and User Administration UI paths. It proves Developer activation stays fail-closed without a complete profile, repeated completion is idempotent, inactive responsibilities disappear from new assignment candidates, and existing Bug assignees are preserved.
 - The only product change is User Administration UI hardening: an explicit preservation confirmation, impact copy and a state-bound duplicate-submit guard. The UI content version advances from `1.0.9` to `1.0.10`; no CAP/schema/provider contract changes are added by this Gate 4 delta.
 - Next boundary: exact source review, PR/CI/merge, selective User Administration content rollout, then one controlled non-member Developer pilot. Gate 5 remains unopened and no live Developer identity is selected in source evidence.
+
+## 2026-08-23 WP8 Gate 4 live closure
+
+- PR #335 passed CI and merged to `dev` at `7bf7609ca070fae0d467c4964051eee0956828ad`; reviewed User Administration HTML5 content version `1.0.10` was deployed selectively.
+- `sap.default` automatic shadow-user creation is enabled with the trust still active and available for user logon. This removes per-user manual shadow creation while Role Collection assignment and CAP activation remain fail-closed.
+- The controlled non-member Developer reached ACTIVE with identity link, Ready profile, one responsibility and successful Bug Management access in a fresh session. Repository evidence omits the raw account identifier.
+- Gate 4 is complete. Gate 5 Business Catalog Administration remains unopened pending a separate DonHV decision.
