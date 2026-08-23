@@ -705,7 +705,7 @@ sap.ui.define([
 		},
 
 		onCatalogTypeChange: async function (oEvent) {
-			this.getModel("catalogs").setProperty("/selectedType", oEvent.getParameter("selectedItem")?.getKey?.() || "SAP_MODULE");
+			this.getModel("catalogs").setProperty("/selectedType", oEvent.getParameter("key") || oEvent.getSource().getSelectedKey() || "SAP_MODULE");
 			await this._loadCatalogs();
 		},
 

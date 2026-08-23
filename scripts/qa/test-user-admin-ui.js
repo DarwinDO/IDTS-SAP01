@@ -78,6 +78,10 @@ assert.match(view, /key="requests"/)
 assert.match(view, /key="activeUsers"/)
 assert.match(view, /key="developerResponsibilities"/)
 assert.match(view, /key="businessCatalogs"/)
+assert.match(view, /id="catalogTypeTabs"/)
+for (const catalogType of ['SAP_MODULE', 'APPLICATION_COMPONENT', 'DEFECT_CATEGORY', 'COMPONENT_CATEGORY']) {
+  assert.match(view, new RegExp(`key="${catalogType}"`))
+}
 assert.match(view, /items="\{catalogs>\/items\}"/)
 assert.match(view, /press="\.onOpenCatalogCreate"/)
 assert.match(view, /press="\.onOpenCatalogEdit"/)

@@ -276,14 +276,15 @@
 						<IconTabFilter key="businessCatalogs" text="{i18n>businessCatalogsTab}" icon="sap-icon://tags">
 							<content>
 								<VBox>
+									<IconTabBar id="catalogTypeTabs" selectedKey="{catalogs>/selectedType}" select=".onCatalogTypeChange" expandable="false" applyContentPadding="false">
+										<items>
+											<IconTabFilter key="SAP_MODULE" text="{i18n>sapModulesCatalog}"/>
+											<IconTabFilter key="APPLICATION_COMPONENT" text="{i18n>applicationComponentsCatalog}"/>
+											<IconTabFilter key="DEFECT_CATEGORY" text="{i18n>defectCategoriesCatalog}"/>
+											<IconTabFilter key="COMPONENT_CATEGORY" text="{i18n>componentCategoriesCatalog}"/>
+										</items>
+									</IconTabBar>
 									<Toolbar>
-										<Label text="{i18n>catalogType}" labelFor="catalogTypeSelect"/>
-										<Select id="catalogTypeSelect" selectedKey="{catalogs>/selectedType}" change=".onCatalogTypeChange">
-											<core:Item key="SAP_MODULE" text="{i18n>sapModulesCatalog}"/>
-											<core:Item key="APPLICATION_COMPONENT" text="{i18n>applicationComponentsCatalog}"/>
-											<core:Item key="DEFECT_CATEGORY" text="{i18n>defectCategoriesCatalog}"/>
-											<core:Item key="COMPONENT_CATEGORY" text="{i18n>componentCategoriesCatalog}"/>
-										</Select>
 										<SearchField width="100%" placeholder="{i18n>catalogSearchPlaceholder}" search=".onCatalogSearch"/>
 										<CheckBox text="{i18n>includeInactiveCatalogs}" selected="{catalogs>/includeInactive}" select=".onCatalogInactiveFilterChange"/>
 										<Button icon="sap-icon://refresh" tooltip="{i18n>refreshCatalogs}" press=".onRetryCatalogs"/>
