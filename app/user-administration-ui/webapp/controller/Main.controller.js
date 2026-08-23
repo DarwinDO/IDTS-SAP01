@@ -473,17 +473,27 @@ sap.ui.define([
 
 		onConfirmDeveloperProfile: async function () {
 			const oData = this.getModel("developer").getData();
+			// Khóa đồng bộ trước confirm để hai click nhanh không tạo hai optimistic-version request.
+			if (this._developerProfileSubmitting || oData.submitting) return;
 			if (!(oData.reason || "").trim()) {
 				MessageBox.warning(await this._text("reasonRequired"));
 				return;
 			}
-			const bSuccess = await this._invokeAction("updateDeveloperProfile", {
-				userID: oData.userID,
-				desiredProfile: this._developerProfileForRole("DEVELOPER", oData.developerProfile),
-				reason: oData.reason.trim(),
-				expectedVersion: oData.expectedVersion
-			}, "developerProfileUpdated");
-			if (bSuccess) this._developerDialog.close();
+			this._developerProfileSubmitting = true;
+			this.getModel("developer").setProperty("/submitting", true);
+			try {
+				if (!await this._confirm("developerProfileConfirmation")) return;
+				const bSuccess = await this._invokeAction("updateDeveloperProfile", {
+					userID: oData.userID,
+					desiredProfile: this._developerProfileForRole("DEVELOPER", oData.developerProfile),
+					reason: oData.reason.trim(),
+					expectedVersion: oData.expectedVersion
+				}, "developerProfileUpdated", true);
+				if (bSuccess) this._developerDialog.close();
+			} finally {
+				this._developerProfileSubmitting = false;
+				this.getModel("developer").setProperty("/submitting", false);
+			}
 		},
 
 		onCancelDeveloperProfile: function () { this._developerDialog.close(); },
@@ -566,7 +576,7 @@ sap.ui.define([
 		},
 
 		_emptyDeveloperAdministration: function () {
-			return { userID: null, expectedVersion: 0, openBugImpactCount: 0, reason: "", developerProfile: this._emptyDeveloperProfile() };
+			return { userID: null, expectedVersion: 0, openBugImpactCount: 0, reason: "", submitting: false, developerProfile: this._emptyDeveloperProfile() };
 		},
 
 		_developerProfileForRole: function (sRole, oProfile) {

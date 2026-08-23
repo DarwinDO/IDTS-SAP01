@@ -86,6 +86,7 @@
     "qa:existing-user-identity-link:programmatic": "node scripts/qa/test-existing-user-identity-link.js",
     "qa:user-admin-active-users:programmatic": "node scripts/qa/test-user-admin-active-users.js",
     "qa:user-admin-access-lifecycle:programmatic": "node scripts/qa/test-user-admin-access-lifecycle.js",
+    "qa:developer-pilot:programmatic": "node scripts/qa/test-developer-responsibility-pilot-contract.js",
     "qa:user-access:programmatic": "node scripts/qa/test-user-access-provisioning-contract.js && node scripts/qa/test-provisioning-broker-programmatic.js",
     "qa:user-access-broker:programmatic": "node scripts/qa/test-user-access-broker-runtime.js",
     "qa:immutable-identity:programmatic": "node scripts/qa/test-immutable-identity-mapping.js",

@@ -6,11 +6,15 @@ This file is the npm and build contract for the standalone User Administration U
 
 Version `1.0.9` marks the first live content containing generic Cancel copy for both standard and existing-user invitations. If it stays at `1.0.8`, the backend button can become available while browsers continue to receive the older identity-link-only label.
 
+Version `1.0.10` adds the Gate 4 responsibility confirmation, no-auto-reassignment notice and double-submit guard without changing dependencies or build commands.
+
 ## Tiếng Việt
 
 File này là contract npm và build của User Administration UI độc lập. `version` phải tăng cùng `sap.app/applicationVersion` trong `webapp/manifest.json` và root version trong `package-lock.json`; HTML5 Repository và AppRouter dùng release identity này để phân biệt content mới deploy với content cũ đang cache. Các script dùng lại UI5 toolchain đã cài và tạo cache-buster index cùng ZIP deploy. Không thêm runtime dependency hoặc đổi build task cho release chỉ thay wording.
 
 Version `1.0.9` đánh dấu content live đầu tiên có copy Cancel tổng quát cho cả invitation thường và existing-user. Nếu vẫn là `1.0.8`, button backend có thể xuất hiện nhưng browser vẫn nhận label cũ chỉ nói identity-link.
+
+Version `1.0.10` thêm confirmation responsibility, notice không tự reassign và double-submit guard của Gate 4 mà không đổi dependency hoặc build command.
 
 ### Important source anchors
 

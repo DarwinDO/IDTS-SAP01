@@ -41,8 +41,8 @@ assert.equal(appPackageLock.version, appPackage.version, 'HTML5 package and lock
 assert.equal(appPackageLock.packages[''].version, appPackage.version, 'HTML5 lockfile root version stays aligned')
 const [majorVersion, minorVersion, patchVersion] = appPackage.version.split('.').map(Number)
 assert.ok(
-  majorVersion > 1 || minorVersion > 0 || patchVersion >= 9,
-  'general invitation cancellation content must advance beyond deployed UI 1.0.8'
+  majorVersion > 1 || minorVersion > 0 || patchVersion >= 10,
+  'Developer responsibility administration content must advance beyond deployed UI 1.0.9'
 )
 assert.notEqual(appPackage.version, '1.0.0', 'changed HTML5 content must use a new application version')
 assert.match(appPackage.scripts.build, /ui5 build preload/)
@@ -205,7 +205,11 @@ const developerFragment = fs.readFileSync(path.join(webapp, 'fragment/ManageDeve
 assert.match(developerFragment, /developer>\/developerProfile\/responsibilities/)
 assert.match(developerFragment, /press="\.onConfirmDeveloperProfile"/)
 assert.match(developerFragment, /press="\.onAddDeveloperResponsibility"/)
+assert.match(developerFragment, /busy="\{developer>\/submitting\}"/)
+assert.match(developerFragment, /existingBugsKeepAssignee/)
+assert.match(developerFragment, /enabled="\{= !!\$\{developer>\/reason\} &amp;&amp; !\$\{developer>\/submitting\} \}"/)
 assert.doesNotMatch(developerFragment, /Password|OTP|passkey|token/i)
+assert.match(controller, /_confirm\("developerProfileConfirmation"\)/)
 
 const controllerDefinition = loadController(controller)
 assert.equal(typeof controllerDefinition.onConfirmInvite, 'function')
@@ -477,6 +481,51 @@ async function verifyRuntimeBehavior () {
   cancelInstance._confirm = async () => false
   await cancelInstance.onCancelExistingLinkInvitation({})
   assert.equal(cancelInvocation, null, 'dismissed confirmation must not invoke cancellation')
+
+  let developerData = {
+    userID: 'developer-user-1',
+    expectedVersion: 4,
+    reason: 'Adjust responsibility coverage without reassigning existing Bugs.',
+    submitting: false,
+    developerProfile: {
+      availabilityStatusCode: 'AVAILABLE',
+      workloadLimit: 3,
+      responsibilities: [{ componentCategoryID: 'component-category-1', sapModuleID: null, responsibilityLevelCode: 'PRIMARY', active: true }]
+    }
+  }
+  let developerInvocationCount = 0
+  let developerConfirmCount = 0
+  let developerClosedCount = 0
+  let releaseDeveloperInvocation
+  const developerInvocationDone = new Promise(resolve => { releaseDeveloperInvocation = resolve })
+  const developerModel = {
+    getData: () => developerData,
+    setProperty: (key, value) => { developerData[key.slice(1)] = value }
+  }
+  const developerInstance = Object.assign(Object.create(controllerDefinition), {
+    getModel: name => name === 'developer' ? developerModel : { setProperty: () => {} },
+    _confirm: async key => {
+      developerConfirmCount += 1
+      assert.equal(key, 'developerProfileConfirmation')
+      return true
+    },
+    _invokeAction: async () => {
+      developerInvocationCount += 1
+      await developerInvocationDone
+      return true
+    },
+    _developerDialog: { close: () => { developerClosedCount += 1 } }
+  })
+  const developerFirst = developerInstance.onConfirmDeveloperProfile()
+  const developerSecond = developerInstance.onConfirmDeveloperProfile()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(developerConfirmCount, 1, 'Developer profile confirmation must be state-bound')
+  assert.equal(developerInvocationCount, 1, 'Developer profile double submit must be ignored')
+  assert.equal(developerData.submitting, true)
+  releaseDeveloperInvocation()
+  await Promise.all([developerFirst, developerSecond])
+  assert.equal(developerData.submitting, false)
+  assert.equal(developerClosedCount, 1)
 }
 
 function loadController (source) {
@@ -501,7 +550,7 @@ function loadController (source) {
 
 for (const locale of ['i18n.properties', 'i18n_en.properties']) {
   const text = fs.readFileSync(path.join(webapp, 'i18n', locale), 'utf8')
-  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'changeRoleConfirmation', 'revokeConfirmation', 'manageResponsibilities', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'activeUserSearchPlaceholder', 'includeNonActive', 'includeRevoked', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'loadMoreActiveUsers', 'viewDetails', 'activeUserDetails', 'linkExistingIdentity', 'existingIdentityLinkRole', 'existingIdentityLinkNotice', 'existingIdentityLinkEmail', 'sendIdentityLink', 'identityLinkQueued', 'cancelExistingLinkInvitation', 'cancelExistingLinkConfirmation', 'existingLinkCancelled', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'developerProfile', 'close', 'activeUsersNoDeveloper', 'suspendAccess', 'reactivateAccess', 'suspendWarning', 'reactivateWarning', 'suspendQueued', 'reactivateQueued']) {
+  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'changeRoleConfirmation', 'revokeConfirmation', 'manageResponsibilities', 'developerProfileConfirmation', 'existingBugsKeepAssignee', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'activeUserSearchPlaceholder', 'includeNonActive', 'includeRevoked', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'loadMoreActiveUsers', 'viewDetails', 'activeUserDetails', 'linkExistingIdentity', 'existingIdentityLinkRole', 'existingIdentityLinkNotice', 'existingIdentityLinkEmail', 'sendIdentityLink', 'identityLinkQueued', 'cancelExistingLinkInvitation', 'cancelExistingLinkConfirmation', 'existingLinkCancelled', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'developerProfile', 'close', 'activeUsersNoDeveloper', 'suspendAccess', 'reactivateAccess', 'suspendWarning', 'reactivateWarning', 'suspendQueued', 'reactivateQueued']) {
     assert.match(text, new RegExp(`^${key}=`, 'm'))
   }
   assert.match(text, /^cancelExistingLinkInvitation=Cancel invitation$/m)
