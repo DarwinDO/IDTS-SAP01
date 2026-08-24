@@ -39,6 +39,7 @@ const DELIVERY_ERROR_SUMMARIES = Object.freeze({
 const OPERATION_RESULT_SUMMARIES = Object.freeze({
   APPLIED: 'The requested access change was applied and verified.',
   NOOP_ALREADY_DESIRED: 'The requested access was already present and verified.',
+  ROLE_COLLECTIONS_VERIFIED: 'The assigned role collections were verified.',
   CONFLICT: 'Provider state conflicts with the requested IDTS access.',
   RETRYABLE_FAILURE: 'The provider is temporarily unavailable; a bounded retry may be requested.',
   PERMANENT_FAILURE: 'The provider rejected the access change; manual review is required.',

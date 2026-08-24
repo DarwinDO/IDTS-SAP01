@@ -19,6 +19,7 @@
 - Ambiguous access operations expose Reconcile only; permanent failures expose neither action. Operations UI has Delivery/Provisioning subtabs; Audit is separate. UI models load lazily, details are safe/read-only, and loading/empty/error/action states are explicit and bilingual.
 - Delivery details expose the safe persisted `sentAt` and `lastAttemptAt` timestamps so an operator can distinguish a fresh outcome from legacy rows without inspecting raw logs, provider responses, or database data.
 - Readiness accepts both CAP logical column names and SAP HANA uppercase result keys. The same fail-closed outcome rules therefore apply on SQLite source tests and the live HANA adapter without changing persisted data.
+- Successful broker operations using the persisted safe code `ROLE_COLLECTIONS_VERIFIED` render an allowlisted success explanation instead of the generic unavailable fallback.
 - No `db/schema.cds` change and no generated schema artifact change are part of this candidate.
 
 ### Source verification
@@ -78,6 +79,8 @@ Gate 6 thêm safe DTO/action cho delivery, access operation, audit và readiness
 Hộp chi tiết Delivery hiển thị thêm hai timestamp an toàn đã persist là `sentAt` và `lastAttemptAt`. PM có thể phân biệt outcome mới với dữ liệu legacy mà không cần xem log thô, provider response hoặc dữ liệu database.
 
 Readiness đọc được cả tên cột logic của CAP và key uppercase do SAP HANA trả về. Quy tắc outcome fail-closed vì vậy hoạt động giống nhau trên SQLite source test và HANA live mà không đổi dữ liệu persist.
+
+Operation broker thành công có safe code persist `ROLE_COLLECTIONS_VERIFIED` được hiển thị bằng mô tả thành công allowlist thay vì fallback unavailable chung.
 
 ### Ledger workaround dependency
 

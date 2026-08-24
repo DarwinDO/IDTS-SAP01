@@ -8527,3 +8527,16 @@ Vietnamese:
 - Symptom: Delivery details proved a recent `SENT` outcome and Provisioning listed recent completed operations, but both readiness indicators remained `UNKNOWN`.
 - Root cause: the live HANA query returned uppercase result keys (`STATUS_CODE`, `SENTAT`, `STATE`, `COMPLETEDAT`) while readiness read only CAP logical key spellings. A sanitized read-only task proved 10/10 recent sent deliveries and 6/6 recent succeeded operations; exact runtime source checksum matched the reviewed source.
 - Fix: TDD added one bounded persisted-column accessor used only by readiness derivation and a regression with HANA-shaped uppercase rows. No schema, HANA row, provider, email, user, role, or retry/reconcile mutation occurred. Diagnostic task 16 was terminated after it emitted its safe result but did not exit; tasks 17–19 completed successfully.
+
+### 2026-08-24 Gate 6 successful operation summary / Summary operation thành công Gate 6
+
+- Classification: safe-copy gap exposed by PM Operation details acceptance.
+- Symptom: a completed operation displayed the generic `Provisioning result is unavailable.` message.
+- Root cause: all six successful live operations persisted the legitimate allowlisted safe code `ROLE_COLLECTIONS_VERIFIED`, but the Gate 6 presentation map covered result codes and failure codes without this worker success code.
+- Fix: TDD adds one exact safe summary mapping. No provider response, raw role inventory, identity value, schema, data row, or operation state changes.
+
+### 2026-08-24 Gate 6 bounded CAP replacement / Thay thế CAP giới hạn Gate 6
+
+- The first replacement package accidentally copied the source package engine `>=20 <23`; the regional Node.js buildpack rejected it during staging before any droplet assignment or restart. The running app remained unchanged and `npm run btp:demo:check` still reported `DEMO READY`.
+- The corrected R2 package preserved the approved deployment payload engine `22.x` and replaced only `srv/user-admin/operations-audit.js`. One owned staged droplet was assigned and the exact CAP app restarted once; post-readback returned `AVAILABLE`, `RECENT_SUCCESS`, and `DEMO READY`.
+- Two PowerShell wrappers had parser-only failures before mutation and were replaced with shorter quote-safe checks. No blind retry, schema, HANA row, provider, email, user, role, or main AppRouter mutation occurred.

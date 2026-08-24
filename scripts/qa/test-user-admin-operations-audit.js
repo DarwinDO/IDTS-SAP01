@@ -231,8 +231,8 @@ async function main () {
     }),
     operationEntry(SUCCESS_OPERATION_ID, SUCCESS_REQUEST_ID, {
       state: 'SUCCEEDED',
-      safeResultCode: 'APPLIED',
-      safeResultSummary: 'The requested access change was applied and verified.',
+      safeResultCode: 'ROLE_COLLECTIONS_VERIFIED',
+      safeResultSummary: 'The assigned role collections were verified.',
       attemptCount: 1,
       completedAt: RECENT_TIMESTAMP,
       modifiedAt: RECENT_TIMESTAMP
@@ -350,6 +350,7 @@ async function main () {
   const ambiguousOperation = operations.find(row => row.operationID === AMBIGUOUS_OPERATION_ID)
   const permanentOperation = operations.find(row => row.operationID === PERMANENT_OPERATION_ID)
   const inconsistentOperation = operations.find(row => row.operationID === INCONSISTENT_OPERATION_ID)
+  const successfulOperation = operations.find(row => row.operationID === SUCCESS_OPERATION_ID)
   assert.equal(retryOperation.canRetry, true)
   assert.equal(retryOperation.canReconcile, false)
   assert.equal(ambiguousOperation.canRetry, false)
@@ -358,6 +359,7 @@ async function main () {
   assert.equal(permanentOperation.canReconcile, false)
   assert.equal(inconsistentOperation.canRetry, false)
   assert.equal(inconsistentOperation.canReconcile, false)
+  assert.equal(successfulOperation.safeResultSummary, 'The assigned role collections were verified.')
   assert.equal(retryOperation.requestedByDisplay, 'Operations PM')
   assert.equal(retryOperation.targetDisplay, 'r***@example.invalid')
   assert.equal('idempotencyKey' in retryOperation, false)
