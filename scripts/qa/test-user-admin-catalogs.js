@@ -6,6 +6,7 @@ process.env.CDS_ENV = 'test'
 const assert = require('node:assert/strict')
 const cds = require('@sap/cds')
 const { DELETE, INSERT, SELECT, UPDATE } = cds.ql
+const { assertActivePairParents, assertCatalogTargetIdentity } = require('../../srv/user-admin/catalogs')
 
 const IDS = {
   admin: '85000000-0000-4000-8000-000000000001',
@@ -24,7 +25,7 @@ const CATALOGS = [
   ['CatalogSAPModules', ['ID', 'code', 'name', 'active', 'administrationReason', 'createdAt', 'modifiedAt']],
   ['CatalogApplicationComponents', ['ID', 'code', 'name', 'componentType', 'active', 'administrationReason', 'createdAt', 'modifiedAt']],
   ['CatalogDefectCategories', ['ID', 'code', 'name', 'categoryType', 'active', 'administrationReason', 'createdAt', 'modifiedAt']],
-  ['CatalogComponentCategories', ['ID', 'component_ID', 'defectCategory_ID', 'active', 'administrationReason', 'createdAt', 'modifiedAt']]
+  ['CatalogComponentCategories', ['ID', 'component', 'defectCategory', 'active', 'administrationReason', 'createdAt', 'modifiedAt']]
 ]
 
 function user (roles) {
@@ -55,6 +56,24 @@ function updateCatalog (service, entity, ID, data, administrator, headers) {
 }
 
 async function main () {
+  let queryActive = false
+  const singleConnectionTx = {
+    async run () {
+      assert.equal(queryActive, false, 'pair-parent reads do not overlap on one database connection')
+      queryActive = true
+      await new Promise(resolve => setImmediate(resolve))
+      queryActive = false
+      return { ID: IDS.component }
+    }
+  }
+  await assertActivePairParents(singleConnectionTx, IDS.component, IDS.defect)
+  assert.doesNotThrow(() => assertCatalogTargetIdentity(IDS.module, IDS.module), 'the same normalized target key is harmless')
+  assert.throws(
+    () => assertCatalogTargetIdentity(IDS.module, IDS.component),
+    error => error.code === 'CATALOG_ID_IMMUTABLE',
+    'a mismatched route and payload key is rejected'
+  )
+
   const model = await cds.load('srv/user-admin.cds')
   assert.ok(model.definitions.UserAdministrationService, 'UserAdministrationService exists')
 
@@ -156,11 +175,12 @@ async function main () {
   assert.equal(created.name, 'Gate 5 New Module', 'CREATE trims catalog names')
 
   const clientSuppliedID = '85200000-0000-4000-8000-000000000099'
-  await expectRejected(createCatalog(service, 'CatalogSAPModules', {
+  const serverOwnedID = await createCatalog(service, 'CatalogSAPModules', {
     ID: clientSuppliedID,
     code: 'G5-CLIENT-ID',
-    name: 'Client ID must be rejected'
-  }, administrator), 400, 'CATALOG_ID_IMMUTABLE')
+    name: 'Client ID must be replaced'
+  }, administrator)
+  assert.notEqual(serverOwnedID.ID, clientSuppliedID, 'CREATE always replaces a client or framework supplied ID')
   assert.equal(
     await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: clientSuppliedID })),
     undefined,
@@ -181,18 +201,18 @@ async function main () {
   const persistedUpdate = await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: created.ID }))
   assert.equal(persistedUpdate.code, 'G5-NEW', 'UPDATE preserves an omitted catalog code')
 
-  await expectRejected(service.send({
+  const sameIDUpdate = await service.send({
     event: 'UPDATE',
-    data: { ID: created.ID, name: 'Client ID update must be rejected' },
+    data: { ID: created.ID, name: 'Framework-normalized ID update' },
     query: UPDATE('UserAdministrationService.CatalogSAPModules')
-      .set({ ID: created.ID, name: 'Client ID update must be rejected' })
+      .set({ ID: created.ID, name: 'Framework-normalized ID update' })
       .where({ ID: created.ID }),
     user: administrator
-  }), 400, 'CATALOG_ID_IMMUTABLE')
+  })
   assert.equal(
     (await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: created.ID }))).name,
-    'Updated Gate 5 Module',
-    'client-supplied UPDATE IDs never retarget or mutate the row'
+    sameIDUpdate.name,
+    'a framework-normalized key equal to the route key does not retarget the row'
   )
 
   await expectRejected(createCatalog(service, 'CatalogSAPModules', { code: 'bad code!', name: 'Bad' }, administrator), 400, 'INVALID_CATALOG_CODE')

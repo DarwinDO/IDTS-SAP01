@@ -57,7 +57,7 @@ Vietnamese: Contract additive them `requestSuspend(userID, reason, expectedVersi
 
 ### English
 
-The four catalog projections are the public OData V4 shapes for the Business Catalogs tab. They intentionally expose IDs, classification fields, active state, managed timestamps, and one virtual `administrationReason` input used by the handler for bounded deactivation audit. `CatalogComponentCategories` exposes only `component_ID` and `defectCategory_ID`, not unrestricted Bug/User navigation.
+The four catalog projections are the public OData V4 shapes for the Business Catalogs tab. Their keys are immutable and server-computed. They intentionally expose classification fields, active state, managed timestamps, and one virtual writable `administrationReason` input used only by the handler for bounded deactivation audit. `CatalogComponentCategories` exposes the writable `component` and `defectCategory` associations required by UI5; OData also emits their foreign-key properties, but the service does not expose unrestricted Bug/User navigation.
 
 - **Location**: `srv/user-admin.cds:109-115`, `CatalogImpactResult`.
   **IDTS concept**: Deactivation preview is count-only: Bug references, active DeveloperResponsibilities, and active child catalog references.
@@ -76,7 +76,7 @@ The four catalog projections are the public OData V4 shapes for the Business Cat
 
 ### Tiếng Việt
 
-Bốn projection catalog là shape OData V4 public cho tab Business Catalogs. Projection chỉ expose ID, field phân loại, active, managed timestamp và một input virtual `administrationReason` để handler ghi audit deactivate có giới hạn. `CatalogComponentCategories` chỉ expose `component_ID` và `defectCategory_ID`, không mở navigation tự do tới Bug/User.
+Bốn projection catalog là shape OData V4 public cho tab Business Catalogs. Key là immutable và do server tạo. Projection expose field phân loại, active, managed timestamp và input virtual writable `administrationReason` chỉ để handler ghi audit deactivate có giới hạn. `CatalogComponentCategories` expose association writable `component` và `defectCategory` mà UI5 cần; OData cũng sinh foreign-key property tương ứng, nhưng service không mở navigation tự do tới Bug/User.
 
 - **Vị trí**: `srv/user-admin.cds:109-115`, `CatalogImpactResult`.
   **Khái niệm IDTS**: Deactivation preview chỉ trả count: Bug reference, `DeveloperResponsibilities` active và child catalog active.

@@ -14,7 +14,10 @@ const EXPECTED_UNIQUES = {
 }
 
 async function main () {
-  const model = await cds.load('db/schema.cds')
+  const [model, serviceModel] = await Promise.all([
+    cds.load('db/schema.cds'),
+    cds.load('srv/user-admin.cds')
+  ])
 
   for (const [entityName, expectedElements] of Object.entries(EXPECTED_UNIQUES)) {
     const definition = model.definitions[entityName]
@@ -54,6 +57,38 @@ async function main () {
     assert.equal(element.notNull === true, notNull, `catalog audit field ${name} nullability`)
     if (length !== undefined) assert.equal(element.length, length, `catalog audit field ${name} length`)
   }
+
+  for (const entityName of [
+    'UserAdministrationService.CatalogSAPModules',
+    'UserAdministrationService.CatalogApplicationComponents',
+    'UserAdministrationService.CatalogDefectCategories',
+    'UserAdministrationService.CatalogComponentCategories'
+  ]) {
+    const id = serviceModel.definitions[entityName]?.elements?.ID
+    assert.equal(id?.['@Core.Immutable'], true, `${entityName}.ID remains immutable`)
+    assert.equal(id?.['@Core.Computed'], true, `${entityName}.ID is server-generated for OData clients`)
+    assert.equal(
+      serviceModel.definitions[entityName]?.elements?.administrationReason?.['@Core.Computed'],
+      false,
+      `${entityName}.administrationReason remains a writable transient command field`
+    )
+  }
+
+  const componentCategoryProjection = serviceModel.definitions['UserAdministrationService.CatalogComponentCategories']
+  const projectedReferences = componentCategoryProjection.projection.columns.map(column => column.ref).filter(Boolean)
+  assert.ok(
+    projectedReferences.some(reference => reference.length === 1 && reference[0] === 'component'),
+    'Component Category exposes the writable component association'
+  )
+  assert.ok(
+    projectedReferences.some(reference => reference.length === 1 && reference[0] === 'defectCategory'),
+    'Component Category exposes the writable defect-category association'
+  )
+  assert.equal(
+    projectedReferences.some(reference => reference.length > 1 && reference.at(-1) === 'ID'),
+    false,
+    'Component Category avoids read-only association-path aliases for foreign-key writes'
+  )
 
   console.log('IDTS User Administration catalog model contract: PASS')
 }

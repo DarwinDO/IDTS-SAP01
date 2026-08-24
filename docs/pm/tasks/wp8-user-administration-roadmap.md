@@ -12,7 +12,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 ## Current status
 
-`IN PROGRESS — GATE 5 SOURCE CANDIDATE`
+`READY FOR INTEGRATION — GATE 5 PR #338`
 
 - Gates 1–3B are merged, deployed and accepted. Gate 3 browser closure is recorded by PR #325 at `04643e12727290f2f35fd56e9c3d2a8df4cbcdbc`.
 - Gate 4 branch `feature/wp8-admin-developer-pilot-donhv` is frozen from that exact base.
@@ -22,7 +22,10 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 - PR #335 passed CI and merged at `7bf7609ca070fae0d467c4964051eee0956828ad`; User Administration UI `1.0.10` was selectively deployed.
 - The controlled non-member Developer pilot reached `ACTIVE`, immutable identity link `Yes`, readiness `Ready`, one active responsibility and successful Bug Management access in a fresh session.
 - Automatic `sap.default` shadow-user creation is enabled for this POC; authorization still requires the allowlisted broker-assigned IDTS Role Collection and CAP readback.
-- Gate 5 source candidate adds bounded Business Catalog read/create/update/activate/deactivate, impact review, optimistic concurrency, uniqueness, and sanitized append-only audit. Coordinator review at `346a1cf` found 0 Critical, 1 Major, and 5 Important findings; the execution branch is closing those findings with focused RED/GREEN contracts before Draft PR. It has not run HDI simulation/migration, deployment, or live catalog mutation.
+- Gate 5 source was independently reviewed with zero findings and merged through PR #337 at `eb0c5d1bc6c92557a7d41e45008240e1e929bc44`.
+- The rollout then completed the checksum-bound encrypted backup/restore rehearsal, exact five-artifact real migration and additive four-view recovery. Counts and digests remained identical, duplicate groups and new audit rows were zero, and no seed, `.hdbtabledata` or catalog-row DML ran.
+- Selective CAP rollout and controlled PM catalog lifecycle acceptance passed for create, edit, deactivate, reactivate, impact/audit handling and zero hard delete. All four controlled rows ended inactive and final readiness was `DEMO READY`.
+- PR #338 records the rollout evidence. Exact-head review/CI passed, and a controlled TESTER session proved Bug Management access while direct User Administration navigation returned `Forbidden`. Gate 5 is ready for PR integration. Gate 6 remains unopened.
 
 ## Gate sequence
 
@@ -49,4 +52,4 @@ Each gate records source tests, CAP/Fiori/UI5 MCP guidance, security review, art
 
 ## Next handoff
 
-Gate 5 is open source-only on `feature/wp8-admin-business-catalogs-gate5-luna-donhv` from frozen `origin/dev` `fd6870585d72ca63e55b744708960b417a2795b9` (created at candidate `346a1cfaca800f566b2a1ed102608a65537f7bdd`). Stop at Draft PR; schema simulation/migration, rollout, live acceptance, merge, and Gate 6 remain separate approvals.
+Move PR #338 from Draft to Ready, merge it after exact GitHub checks remain green, synchronize `dev`, and remove the clean merged Gate 5 worktree from outside its path. Gate 6 requires a separate start decision.

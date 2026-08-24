@@ -402,4 +402,12 @@ Vietnamese: Agent hoáº·c developer má»›i pháº£i xÃ¡c Ä‘á»‹nh 
 
 - Gate 5 is open source-only from exact `origin/dev` `fd6870585d72ca63e55b744708960b417a2795b9` on `feature/wp8-admin-business-catalogs-donhv`.
 - The candidate adds bounded PM + UserAdmin administration for four IDTS business catalogs, optimistic ETags, normalized uniqueness, impact/deactivation guards, no DELETE, sanitized append-only audit, and User Administration UI `1.0.11`.
-- No HDI simulation/migration, HANA data/catalog mutation, deployment, merge, or Gate 6 work has run. The source executor stops at one Draft PR for coordinator review.
+
+## 2026-08-23 WP8 Gate 5 HDI simulation
+
+- Gate 5 source merged through PR #337 at `eb0c5d1bc6c92557a7d41e45008240e1e929bc44`.
+- Exact archive `19CB2D25210B6200067B61B9F9F5495FEFDC2BC6DD70841BEC583304C79BE9E3` ran one warning-as-error HDI simulation after aggregate duplicate groups returned zero. The terminal make simulated exactly five effective deploy files, zero undeploy, zero warnings, zero dependent redeploy and no CSV/`.hdbtabledata`.
+- The exact temporary app/binding/task were cleaned up; main CAP/AppRouter/HDI topology remained unchanged and final readiness was `DEMO READY`.
+- The later checksum-bound recovery gate completed the encrypted four-catalog backup/restore rehearsal, exact five-artifact real make and additive four-view recovery. Counts remained `4 / 8 / 8 / 31`, every pre/post digest matched, duplicate groups and new audit rows were zero, and no seed, `.hdbtabledata` or catalog-row DML ran.
+- Selective CAP rollout and controlled PM Business Catalog acceptance passed. Four unique rows were created; the Component Category was updated, deactivated, reactivated and finally deactivated; the three parent rows were finally deactivated; zero hard deletes occurred. Final readiness was `DEMO READY`.
+- PR #338 records the exact migration and live-acceptance evidence. Exact-head review returned zero Critical/Major/Important/Minor, GitHub QA passed, and a controlled TESTER session proved Bug Management access while direct User Administration navigation returned `Forbidden`. Gate 5 is ready for PR integration; Gate 6 has not opened.
