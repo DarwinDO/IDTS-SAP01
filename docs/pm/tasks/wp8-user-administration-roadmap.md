@@ -12,7 +12,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 ## Current status
 
-`IN REVIEW — GATE 5 PR #338 AND TESTER AUTHORIZATION-NEGATIVE EVIDENCE`
+`READY FOR INTEGRATION — GATE 5 PR #338`
 
 - Gates 1–3B are merged, deployed and accepted. Gate 3 browser closure is recorded by PR #325 at `04643e12727290f2f35fd56e9c3d2a8df4cbcdbc`.
 - Gate 4 branch `feature/wp8-admin-developer-pilot-donhv` is frozen from that exact base.
@@ -25,7 +25,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 - Gate 5 source was independently reviewed with zero findings and merged through PR #337 at `eb0c5d1bc6c92557a7d41e45008240e1e929bc44`.
 - The rollout then completed the checksum-bound encrypted backup/restore rehearsal, exact five-artifact real migration and additive four-view recovery. Counts and digests remained identical, duplicate groups and new audit rows were zero, and no seed, `.hdbtabledata` or catalog-row DML ran.
 - Selective CAP rollout and controlled PM catalog lifecycle acceptance passed for create, edit, deactivate, reactivate, impact/audit handling and zero hard delete. All four controlled rows ended inactive and final readiness was `DEMO READY`.
-- Draft PR #338 records the rollout evidence. The remaining Gate 5 boundary is exact-head review followed by the controlled TESTER browser check proving User Administration remains forbidden. Gate 6 remains unopened.
+- PR #338 records the rollout evidence. Exact-head review/CI passed, and a controlled TESTER session proved Bug Management access while direct User Administration navigation returned `Forbidden`. Gate 5 is ready for PR integration. Gate 6 remains unopened.
 
 ## Gate sequence
 
@@ -52,4 +52,4 @@ Each gate records source tests, CAP/Fiori/UI5 MCP guidance, security review, art
 
 ## Next handoff
 
-Capture the controlled TESTER authorization-negative browser result against the reviewed Gate 5 runtime. After that evidence passes, PR #338 may move from Draft to Ready/merge and its clean merged worktree may be removed. Gate 6 requires a separate start decision.
+Move PR #338 from Draft to Ready, merge it after exact GitHub checks remain green, synchronize `dev`, and remove the clean merged Gate 5 worktree from outside its path. Gate 6 requires a separate start decision.

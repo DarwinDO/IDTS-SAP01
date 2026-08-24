@@ -2,7 +2,7 @@
 
 ## Scope and authority
 
-This record covers the approved additive catalog-view recovery, selective CAP-only rollout, controlled PM catalog lifecycle, cleanup and final readiness. It does not authorize seed data, hard delete, arbitrary catalog mutation, XSUAA/IAS/IPS/provider/user/role/email changes, or Gate 6.
+This record covers the approved additive catalog-view recovery, selective CAP-only rollout, controlled PM catalog lifecycle, controlled TESTER authorization-negative browser check, cleanup and final readiness. It does not authorize seed data, hard delete, arbitrary catalog mutation, XSUAA/IAS/IPS/provider/user/role/email changes, or Gate 6.
 
 ## Additive HANA view recovery
 
@@ -50,7 +50,12 @@ Controlled rows used unique Gate 5 codes/names. No baseline row was edited.
 - Hard delete attempts: `0`.
 - Final controlled-row state: all four rows retained as inactive for history/audit.
 
-The available Browser contained only the authenticated PM session. A live TESTER negative browser result is therefore not claimed. Source authorization tests cover anonymous, TESTER, DEVELOPER, PM without UserAdmin, and multi-business-role rejection.
+## Controlled TESTER authorization boundary
+
+- A fresh controlled TESTER session opened Bug Management successfully and rendered the Bug list; the profile showed the `Tester` business role.
+- In the same authenticated session, direct navigation to User Administration returned `Forbidden`.
+- The two screenshots were reviewed as human acceptance evidence but are not committed because they contain the controlled account identifier.
+- No role, user, provider, catalog or business-data mutation was performed by this browser check.
 
 ## Fresh verification
 
@@ -81,4 +86,4 @@ The available Browser contained only the authenticated PM session. A live TESTER
 
 ## Verdict
 
-Gate 5 Business Catalogs additive schema/view rollout and controlled PM lifecycle acceptance are **PASS** for the reviewed dev POC boundary. Gate 6 is not opened by this result. Live TESTER-negative browser evidence remains an explicitly unclaimed optional follow-up, not a fabricated PASS.
+Gate 5 Business Catalogs additive schema/view rollout, controlled PM lifecycle acceptance and controlled TESTER authorization-negative browser check are **PASS** for the reviewed dev POC boundary. Gate 6 is not opened by this result.
