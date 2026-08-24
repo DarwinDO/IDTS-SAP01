@@ -1195,10 +1195,16 @@ sap.ui.define([
 			oModel.setProperty("/error", false);
 			try {
 				const oOperation = this.getView().getModel().bindContext("/readAdministrationReadiness(...)");
-				await oOperation.invoke("$direct");
-				const oContext = oOperation.getBoundContext();
-				const oResult = await (oContext ? oContext.requestObject() : {});
-				oModel.setData({ ...(oResult || {}), loaded: true, busy: false, error: false });
+				const vInvocationResult = await oOperation.invoke("$direct");
+				const oContext = oOperation.getBoundContext?.();
+				const vContextResult = vInvocationResult === undefined && oContext
+					? await oContext.requestObject()
+					: undefined;
+				const oResult = vInvocationResult === undefined ? vContextResult : vInvocationResult;
+				const oStructuredResult = oResult && typeof oResult === "object" && oResult.value && typeof oResult.value === "object"
+					? oResult.value
+					: oResult;
+				oModel.setData({ ...(oStructuredResult || {}), loaded: true, busy: false, error: false });
 			} catch {
 				oModel.setProperty("/error", true);
 			} finally {

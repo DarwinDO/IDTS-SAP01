@@ -103,6 +103,11 @@ Delivery retry passes only `deliveryID` plus the optimistic `modifiedAt` and rel
   **Impact if broken**: browser-dependent coercion could reject audit requests or silently shift the selected date range.
   **Must check together**: `srv/user-admin.cds` Timestamp parameters and `scripts/qa/test-user-admin-ui.js` runtime parameter assertions.
 
+- **Location**: `Main.controller.js:_loadReadiness`.
+  **IDTS concept**: UI5 may expose the readiness action as a direct structured result or as `{ value: structuredResult }`; the controller normalizes either shape before setting top-level `adminReadiness` fields and always clears busy on success or failure.
+  **Impact if broken**: readiness indicators can remain `UNKNOWN` even after a successful action, or a stale busy state can block Operations UI recovery.
+  **Must check together**: `srv/user-admin.cds:readAdministrationReadiness`, `scripts/qa/test-user-admin-ui.js` readiness runtime cases, and the `adminReadiness` bindings in `Main.view.xml`.
+
 ### Tiếng Việt
 
 Controller tạo riêng các JSON model `deliveries`, `operations`, `audit` và `adminReadiness` trong `onInit`. `onTabSelect` và `onOperationsTabSelect` lazy load: chỉ request subtab Operations đang chọn, còn Audit chỉ load khi được chọn. `_loadDeliveries`, `_loadOperations` và `_loadAudit` gửi filter server explicit với page skip/top 25 và giữ state loading/error/empty trong model. `onOpenDeliveryDetails`, `onOpenOperationDetails` và `onOpenAuditDetails` chỉ mở fragment detail an toàn.
@@ -123,6 +128,11 @@ Retry delivery chỉ gửi `deliveryID` và optimistic `modifiedAt`, sau success
   **Khái niệm IDTS**: value `yyyy-MM-dd` của DatePicker được đổi explicit thành boundary UTC hợp lệ cho `Edm.DateTimeOffset` (`T00:00:00.000Z` / `T23:59:59.999Z`); value rỗng/invalid thành `null`.
   **Ảnh hưởng nếu sai**: coercion tùy browser có thể reject audit request hoặc lệch ngày filter.
   **Phải kiểm tra cùng**: parameter Timestamp trong `srv/user-admin.cds` và assertion runtime trong `scripts/qa/test-user-admin-ui.js`.
+
+- **Vị trí**: `Main.controller.js:_loadReadiness`.
+  **Khái niệm IDTS**: UI5 có thể trả readiness action là structured result trực tiếp hoặc `{ value: structuredResult }`; controller normalize cả hai shape trước khi set field top-level của `adminReadiness` và luôn clear busy khi success hoặc failure.
+  **Ảnh hưởng nếu sai**: indicator readiness có thể vẫn `UNKNOWN` dù action thành công, hoặc busy cũ chặn UI Operations recovery.
+  **Phải kiểm tra cùng**: `readAdministrationReadiness` trong `srv/user-admin.cds`, readiness runtime cases trong `scripts/qa/test-user-admin-ui.js` và binding `adminReadiness` trong `Main.view.xml`.
 
 ### Safe editing / Sửa an toàn
 

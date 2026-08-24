@@ -131,6 +131,22 @@ assert.match(activeUserDetailsFragment, /press="\.onOpenActiveUserRevoke"/)
 assert.match(activeUserDetailsFragment, /linkEligible/)
 assert.match(activeUserDetailsFragment, /press="\.onOpenExistingIdentityLink"/)
 
+for (const [fragmentName, firstLabel] of [
+  ['DeliveryDetails.fragment.xml', 'recipient'],
+  ['OperationDetails.fragment.xml', 'operation'],
+  ['AuditDetails.fragment.xml', 'auditAction']
+]) {
+  const detailsFragment = fs.readFileSync(path.join(webapp, 'fragment', fragmentName), 'utf8')
+  const labels = [...detailsFragment.matchAll(/<Label\b[\s\S]*?\/>/g)].map(match => match[0])
+  assert.ok(labels.length > 1, `${fragmentName} must contain multiple detail labels`)
+  assert.match(labels[0], new RegExp(`text="\\{i18n>${firstLabel}\\}"`))
+  assert.doesNotMatch(labels[0], /class="sapUiSmallMarginTop"/)
+  assert.ok(
+    labels.slice(1).every(label => label.includes('class="sapUiSmallMarginTop"')),
+    `${fragmentName} must space every label after the first with sapUiSmallMarginTop`
+  )
+}
+
 const linkExistingIdentityFragment = fs.readFileSync(path.join(webapp, 'fragment/LinkExistingIdentity.fragment.xml'), 'utf8')
 assert.match(linkExistingIdentityFragment, /<Dialog/)
 assert.match(linkExistingIdentityFragment, /existingLink>\/row\/displayName/)
@@ -319,6 +335,63 @@ async function verifyRuntimeBehavior () {
   assert.equal(dateNormalizer._normalizeAuditDate('', false), null)
   assert.equal(dateNormalizer._normalizeAuditDate(null, true), null)
   assert.equal(dateNormalizer._normalizeAuditDate('not-a-date', false), null)
+
+  const readinessCases = [
+    {
+      name: 'direct structured action result',
+      invokeResult: { emailDeliveryState: 'AVAILABLE', provisioningBrokerState: 'RECENT_SUCCESS', lastSuccessfulReconciliationAt: '2026-08-24T10:00:00.000Z' },
+      contextResult: null
+    },
+    {
+      name: 'direct structured UI5 context result',
+      invokeResult: undefined,
+      contextResult: { emailDeliveryState: 'AVAILABLE', provisioningBrokerState: 'RECENT_SUCCESS', lastSuccessfulReconciliationAt: '2026-08-24T10:00:00.000Z' }
+    },
+    {
+      name: 'UI5 value-wrapped action result',
+      invokeResult: undefined,
+      contextResult: { value: { emailDeliveryState: 'UNAVAILABLE', provisioningBrokerState: 'UNKNOWN', lastSuccessfulReconciliationAt: null } }
+    }
+  ]
+  for (const readinessCase of readinessCases) {
+    const readinessData = { emailDeliveryState: 'UNKNOWN', provisioningBrokerState: 'UNKNOWN', lastSuccessfulReconciliationAt: null, loaded: false, busy: false, error: true }
+    const readinessModel = {
+      setData: data => Object.assign(readinessData, data),
+      setProperty: (key, value) => { readinessData[key.slice(1)] = value }
+    }
+    const readinessOperation = {
+      invoke: async () => readinessCase.invokeResult,
+      getBoundContext: () => readinessCase.contextResult ? { requestObject: async () => readinessCase.contextResult } : null
+    }
+    const readinessInstance = Object.assign(Object.create(controllerDefinition), {
+      getModel: name => name === 'adminReadiness' ? readinessModel : undefined,
+      getView: () => ({ getModel: () => ({ bindContext: () => readinessOperation }) })
+    })
+    await readinessInstance._loadReadiness()
+    const expected = readinessCase.invokeResult ?? readinessCase.contextResult?.value ?? readinessCase.contextResult
+    assert.deepEqual({
+      emailDeliveryState: readinessData.emailDeliveryState,
+      provisioningBrokerState: readinessData.provisioningBrokerState,
+      lastSuccessfulReconciliationAt: readinessData.lastSuccessfulReconciliationAt
+    }, expected, `${readinessCase.name} must expose readiness fields at model top level`)
+    assert.equal(readinessData.loaded, true, `${readinessCase.name} must mark readiness loaded`)
+    assert.equal(readinessData.busy, false, `${readinessCase.name} must clear busy`)
+    assert.equal(readinessData.error, false, `${readinessCase.name} must clear error`)
+    assert.equal(Object.hasOwn(readinessData, 'value'), false, `${readinessCase.name} must not retain a value wrapper`)
+  }
+
+  const failedReadinessData = { emailDeliveryState: 'UNKNOWN', provisioningBrokerState: 'UNKNOWN', lastSuccessfulReconciliationAt: null, loaded: false, busy: false, error: false }
+  const failedReadinessModel = {
+    setData: data => Object.assign(failedReadinessData, data),
+    setProperty: (key, value) => { failedReadinessData[key.slice(1)] = value }
+  }
+  const failedReadinessInstance = Object.assign(Object.create(controllerDefinition), {
+    getModel: name => name === 'adminReadiness' ? failedReadinessModel : undefined,
+    getView: () => ({ getModel: () => ({ bindContext: () => ({ invoke: async () => { throw new Error('readiness unavailable') } }) }) })
+  })
+  await failedReadinessInstance._loadReadiness()
+  assert.equal(failedReadinessData.busy, false, 'failed readiness must clear busy')
+  assert.equal(failedReadinessData.error, true, 'failed readiness must retain error state')
 
   const auditData = { items: [], action: '', result: '', from: '2026-08-24', to: '2026-08-25', nextSkip: 0, pageSize: 25, hasMore: false, loaded: false, busy: false, error: false }
   const auditParameters = {}

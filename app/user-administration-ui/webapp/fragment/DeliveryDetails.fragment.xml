@@ -4,17 +4,17 @@
 			<VBox class="sapUiResponsiveContentPadding">
 				<Label text="{i18n>recipient}"/>
 				<Text text="{deliveries>/selected/recipientDisplay}"/>
-				<Label text="{i18n>deliveryStatus}"/>
+				<Label text="{i18n>deliveryStatus}" class="sapUiSmallMarginTop"/>
 				<ObjectStatus text="{parts: [{path: 'deliveries>/selected/status'}, {path: 'i18n>pendingText'}, {path: 'i18n>failedText'}, {path: 'i18n>sentText'}, {path: 'i18n>skippedText'}, {path: 'i18n>unknownText'}], formatter: 'formatter.statusText'}" state="{path: 'deliveries>/selected/status', formatter: 'formatter.statusState'}"/>
-				<Label text="{i18n>attempts}"/>
+				<Label text="{i18n>attempts}" class="sapUiSmallMarginTop"/>
 				<Text text="{deliveries>/selected/attemptCount}"/>
-				<Label text="{i18n>sentAt}"/>
+				<Label text="{i18n>sentAt}" class="sapUiSmallMarginTop"/>
 				<Text text="{path: 'deliveries>/selected/sentAt', formatter: 'formatter.dateTime'}"/>
-				<Label text="{i18n>lastAttempt}"/>
+				<Label text="{i18n>lastAttempt}" class="sapUiSmallMarginTop"/>
 				<Text text="{path: 'deliveries>/selected/lastAttemptAt', formatter: 'formatter.dateTime'}"/>
-				<Label text="{i18n>nextAttempt}"/>
+				<Label text="{i18n>nextAttempt}" class="sapUiSmallMarginTop"/>
 				<Text text="{path: 'deliveries>/selected/nextAttemptAt', formatter: 'formatter.dateTime'}"/>
-				<Label text="{i18n>deliveryError}"/>
+				<Label text="{i18n>deliveryError}" class="sapUiSmallMarginTop"/>
 				<Text text="{deliveries>/selected/safeErrorSummary}"/>
 			</VBox>
 		</content>

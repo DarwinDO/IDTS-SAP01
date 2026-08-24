@@ -4,15 +4,15 @@
 			<VBox class="sapUiResponsiveContentPadding">
 				<Label text="{i18n>operation}"/>
 				<Text text="{operations>/selected/operationType}"/>
-				<Label text="{i18n>operationState}"/>
+				<Label text="{i18n>operationState}" class="sapUiSmallMarginTop"/>
 				<ObjectStatus text="{path: 'operations>/selected/state', formatter: 'formatter.operationStateText'}" state="{path: 'operations>/selected/state', formatter: 'formatter.operationState'}"/>
-				<Label text="{i18n>requestedBy}"/>
+				<Label text="{i18n>requestedBy}" class="sapUiSmallMarginTop"/>
 				<Text text="{operations>/selected/requestedByDisplay}"/>
-				<Label text="{i18n>target}"/>
+				<Label text="{i18n>target}" class="sapUiSmallMarginTop"/>
 				<Text text="{operations>/selected/targetDisplay}"/>
-				<Label text="{i18n>safeResult}"/>
+				<Label text="{i18n>safeResult}" class="sapUiSmallMarginTop"/>
 				<Text text="{operations>/selected/safeResultSummary}"/>
-				<Label text="{i18n>attempts}"/>
+				<Label text="{i18n>attempts}" class="sapUiSmallMarginTop"/>
 				<Text text="{operations>/selected/attemptCount}"/>
 			</VBox>
 		</content>

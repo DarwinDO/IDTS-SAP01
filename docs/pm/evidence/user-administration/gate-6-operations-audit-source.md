@@ -38,6 +38,8 @@ The maintained explicit suites are authoritative; root `npm test` is not used be
 - `npm --prefix app/user-administration-ui run build` — PASS.
 - UI5 MCP linter — PASS with zero findings after explicit fragment `core:require` formatter imports.
 - UI audit DatePicker parameters are normalized before OData invocation: date-only `from` => `T00:00:00.000Z`, `to` => `T23:59:59.999Z`, empty/invalid => `null`.
+- UI readiness normalizes either a direct structured action result or a UI5 `{ value: structuredResult }` result into top-level `adminReadiness` fields; focused runtime assertions prove success clears `busy/error` and failure clears `busy` while retaining `error`.
+- Delivery, Operation, and Audit detail dialogs now reuse native `sapUiSmallMarginTop` on every label after the first; the UI contract asserts all three fragments and adds no custom CSS/dependency.
 - `git diff --check origin/dev` — PASS, exit 0; exact schema diff, generated-artifact diff, and untracked generated-artifact counts are all zero.
 
 ### Dependency visibility mutation ledger
@@ -61,6 +63,11 @@ The safe contract tests assert absence of recipient/provider IDs, body/raw error
 ### Remaining handoff
 
 The single bounded independent source/security review found 0 Critical/Major and 2 Important findings; both were remediated in source and covered by fresh focused regressions. A subsequent coordinator exact-head review found 3 additional Important findings (list parent eligibility, fail-closed PENDING readiness semantics, and UI DateTimeOffset normalization); all three are now remediated and the full exact matrix is green on the working tree. The reviewer made no edits. The next exact head and CI readback will be reported after the remediation commit/push. The worktree is intentionally preserved for coordinator feedback.
+
+### Coordinator UI readiness and detail spacing remediation
+
+- The live symptom was a successful readiness action not populating indicator fields when UI5 exposed the response under `value`; the bounded fix unwraps only the structured result and keeps CAP/backend behavior unchanged.
+- TDD RED was captured before the production change at the new spacing/readiness assertions. GREEN then passed `npm run qa:user-admin-ui:programmatic`; no deployment, provider, email, user, role, data, schema, dependency, or lockfile mutation occurred.
 
 ## Tiếng Việt
 

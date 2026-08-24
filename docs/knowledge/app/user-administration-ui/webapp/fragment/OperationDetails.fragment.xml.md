@@ -2,9 +2,9 @@
 
 ## English / Tiếng Việt
 
-The Gate 6 provisioning dialog shows safe operation type/state, safe actor and target display, bounded result summary, and attempt count. Retry and reconcile buttons are not invented here; the list controller reuses the existing server-authorized access-operation actions and eligibility flags.
+The Gate 6 provisioning dialog shows safe operation type/state, safe actor and target display, bounded result summary, and attempt count. Labels after the first field use the native `sapUiSmallMarginTop` spacing pattern from `ActiveUserDetails`; no custom CSS is needed. Retry and reconcile buttons are not invented here; the list controller reuses the existing server-authorized access-operation actions and eligibility flags.
 
-Dialog provisioning Gate 6 hiện operation type/state an toàn, actor và target display an toàn, result summary bounded và số lần thử. Dialog không tự tạo retry/reconcile; controller list dùng lại action access operation hiện có và flag eligibility do server trả.
+Dialog provisioning Gate 6 hiện operation type/state an toàn, actor và target display an toàn, result summary bounded và số lần thử. Các label sau field đầu dùng spacing native `sapUiSmallMarginTop` theo pattern `ActiveUserDetails`, không cần CSS custom. Dialog không tự tạo retry/reconcile; controller list dùng lại action access operation hiện có và flag eligibility do server trả.
 
 **Source anchor:** `OperationDetails.fragment.xml:1-23`; verify with `srv/user-admin/operations-audit.js` and the existing Retry/Reconcile guards.
 
