@@ -12,7 +12,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 ## Current status
 
-`IN PROGRESS — GATE 6 SOURCE CANDIDATE`
+`IN PROGRESS — GATE 6 DRAFT PR #339`
 
 - Gates 1–3B are merged, deployed and accepted. Gate 3 browser closure is recorded by PR #325 at `04643e12727290f2f35fd56e9c3d2a8df4cbcdbc`.
 - Gate 4 branch `feature/wp8-admin-developer-pilot-donhv` is frozen from that exact base.
@@ -28,6 +28,11 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 - PR #338 records the Gate 5 rollout evidence. Exact-head review/CI passed, and a controlled TESTER session proved Bug Management access while direct User Administration navigation returned `Forbidden`.
 - Gate 6 source candidate is isolated on `feature/wp8-admin-operations-audit-donhv` from exact `aae01e375a15d7664281b8cee35ac16727e696cf`. It adds safe bounded Operations/Audit DTO actions, persisted-state readiness, state-valid onboarding-delivery retry, Operations/Audit UI tabs, focused tests and bilingual knowledge mirrors. No schema/index or dependency/lockfile change is proposed.
 - The only local dependency-visibility workaround is two NTFS junctions to the exact clean root `E:\IDTS-SAP01` locked dependency trees, verified by package-lock SHA parity and target absence before creation. They are excluded from Git and must not be reproduced as repository artifacts.
+
+## Gate 6 source handoff
+
+- Source head `a9f0896edf8694b2a9a485ad96f52205bfee2df6` is pushed on `feature/wp8-admin-operations-audit-donhv`; Draft PR #339 targets `dev` and GitHub `qa-depth-gate` passed.
+- The one independent review returned 0 Critical/Major and 2 Important findings. The executor remediated both (seven-day persisted readiness freshness and unexpired `INVITED` parent delivery retry) and reran the focused/full source matrix. The coordinator owns exact-head review of the remediation delta and all later rollout/acceptance/merge decisions.
 
 ## Gate sequence
 

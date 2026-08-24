@@ -8402,3 +8402,33 @@ Vietnamese:
 - Finding 2: retry delivery chưa kiểm tra parent invitation còn `INVITED` và chưa hết hạn, nên worker có thể skip sau khi action đã ghi `PENDING`/audit. Đã fix bằng check parent status/expiry trước attempt/lock/update; thêm regression expired-parent không write/audit.
 - Verify: operations suite focused PASS sau hai fix; final exact matrix và schema/generated-artifact/diff cần chạy lại trên source cuối.
 - Reviewer cũng xác nhận parity guard access hiện có, authorization, forbidden DTO/UI field, retry atomicity/modifiedAt/lock/ceiling, post-commit kick và drift material sạch. Reviewer không sửa file.
+### 2026-08-24 Gate 6 GitHub checks watch flag issue / Lỗi flag watch GitHub checks Gate 6
+
+- Classification: tooling/operator issue.
+- Symptom: `gh pr checks 339 --watch --interval 10 --json name,state,bucket,link` exited with `cannot use --watch with --json flag` before polling any check.
+- Root cause: GitHub CLI does not allow JSON output in watch mode.
+- Fix/status: no GitHub/PR/source state changed; use the supported non-JSON watch command and separate JSON readbacks. No remaining blocker.
+
+### 2026-08-24 Gate 6 GitHub checks watch flag issue / Lỗi flag watch GitHub checks Gate 6
+
+- Phân loại: tooling/operator issue.
+- Triệu chứng: `gh pr checks 339 --watch --interval 10 --json name,state,bucket,link` exit với `cannot use --watch with --json flag` trước khi poll check.
+- Nguyên nhân: GitHub CLI không cho JSON output trong watch mode.
+- Fix/trạng thái: không đổi GitHub/PR/source; dùng watch không JSON và JSON readback riêng. Không còn blocker.
+### 2026-08-24 Gate 6 Draft PR handoff / Bàn giao Draft PR Gate 6
+
+- Classification: source-gate handoff; no product blocker remains after remediation.
+- Exact source base/head at Draft PR creation: base `aae01e375a15d7664281b8cee35ac16727e696cf`, source head `a9f0896edf8694b2a9a485ad96f52205bfee2df6`, branch `feature/wp8-admin-operations-audit-donhv`, Draft PR `#339` targeting `dev`.
+- GitHub QA readback: `qa-depth-gate` PASS. Local exact matrix, CAP EDMX/HANA compile, UI5 MCP linter, UI lint/build, secret scan, agent rules, QA-depth self-test and diff/schema/generated-artifact checks PASS/zero; EDMX retains only the pre-existing attachment vocabulary warning.
+- Independent review: exactly one bounded source/security reviewer, 0 Critical/Major and 2 Important initially; both fixed (freshness cutoff and parent invitation eligibility) and covered by fresh focused/full verification. Reviewer made no edits; no second reviewer was spawned.
+- Mutation ledger: only the two coordinator-approved local NTFS junctions expose the exact locked root dependency trees; no install/upgrade/audit-fix, package/version/lockfile/source schema, provider/email/data/user/role/platform/Jira/Drive/deploy/merge/Ready mutation.
+- Next owner/boundary: coordinator DonHV exact-head review and later selective rollout/manual acceptance. Executor preserves the worktree and does not mark Ready, merge, deploy, mutate data/provider/identity/roles, or remove the worktree.
+
+### 2026-08-24 Gate 6 Draft PR handoff / Bàn giao Draft PR Gate 6
+
+- Phân loại: handoff source-gate; sau remediation không còn product blocker.
+- Base/head source exact khi tạo Draft PR: base `aae01e375a15d7664281b8cee35ac16727e696cf`, source head `a9f0896edf8694b2a9a485ad96f52205bfee2df6`, branch `feature/wp8-admin-operations-audit-donhv`, Draft PR `#339` target `dev`.
+- GitHub QA readback: `qa-depth-gate` PASS. Exact matrix local, compile CAP EDMX/HANA, UI5 MCP linter, UI lint/build, secret scan, agent rules, QA-depth self-test và diff/schema/generated-artifact đều PASS/zero; EDMX chỉ còn warning vocabulary attachment đã có từ trước.
+- Review độc lập: đúng một reviewer bounded source/security, ban đầu 0 Critical/Major và 2 Important; cả hai đã fix (freshness cutoff và parent invitation eligibility) và có fresh focused/full verification. Reviewer không sửa file; không spawn reviewer thứ hai.
+- Mutation ledger: chỉ hai NTFS junction local được coordinator cho phép để expose exact locked root dependency tree; không install/upgrade/audit-fix, package/version/lockfile/schema source, provider/email/data/user/role/platform/Jira/Drive/deploy/merge/Ready mutation.
+- Owner/boundary tiếp theo: coordinator DonHV review exact-head và later selective rollout/manual acceptance. Executor giữ worktree và không Ready, merge, deploy, mutation data/provider/identity/role hoặc remove worktree.

@@ -55,7 +55,7 @@ The safe contract tests assert absence of recipient/provider IDs, body/raw error
 
 ### Remaining handoff
 
-The single bounded independent source/security review found 0 Critical/Major and 2 Important findings; both were remediated in source and covered by fresh focused regressions. The reviewer made no edits. The final exact head, PR number and GitHub QA readback are added at Draft-PR handoff. The worktree is intentionally preserved for coordinator feedback.
+The single bounded independent source/security review found 0 Critical/Major and 2 Important findings; both were remediated in source and covered by fresh focused regressions. The reviewer made no edits. Draft PR #339 is open from source head `a9f0896edf8694b2a9a485ad96f52205bfee2df6`; GitHub `qa-depth-gate` passed. The worktree is intentionally preserved for coordinator feedback.
 
 ## Tiếng Việt
 
@@ -77,4 +77,4 @@ Chỉ dùng hai NTFS junction đã được coordinator cho phép sau khi kiểm
 
 ### Handoff
 
-Đây là evidence source-only. Một bounded independent source/security review duy nhất phát hiện 0 Critical/Major và 2 Important; cả hai đã được fix trong source và có focused regression mới. Reviewer không sửa file. Exact head cuối, PR và GitHub QA readback sẽ được bổ sung khi tạo Draft PR. Giữ nguyên worktree để coordinator review.
+Đây là evidence source-only. Một bounded independent source/security review duy nhất phát hiện 0 Critical/Major và 2 Important; cả hai đã được fix trong source và có focused regression mới. Reviewer không sửa file. Draft PR #339 đã mở từ source head `a9f0896edf8694b2a9a485ad96f52205bfee2df6`; GitHub `qa-depth-gate` đã PASS. Giữ nguyên worktree để coordinator review.
