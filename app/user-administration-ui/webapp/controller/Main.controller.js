@@ -1300,8 +1300,8 @@ sap.ui.define([
 				const oOperation = this.getView().getModel().bindContext("/searchAccessAuditEvents(...)");
 				oOperation.setParameter("action", oModel.getProperty("/action") || null);
 				oOperation.setParameter("result", oModel.getProperty("/result") || null);
-				oOperation.setParameter("from", oModel.getProperty("/from") || null);
-				oOperation.setParameter("to", oModel.getProperty("/to") || null);
+				oOperation.setParameter("from", this._normalizeAuditDate(oModel.getProperty("/from"), false));
+				oOperation.setParameter("to", this._normalizeAuditDate(oModel.getProperty("/to"), true));
 				oOperation.setParameter("skip", iSkip);
 				oOperation.setParameter("top", iPageSize);
 				await oOperation.invoke("$direct");
@@ -1320,6 +1320,21 @@ sap.ui.define([
 			} finally {
 				if (iRequest === this._auditRequest) oModel.setProperty("/busy", false);
 			}
+		},
+
+		_normalizeAuditDate: function (sValue, bEndOfDay) {
+			if (sValue instanceof Date) {
+				return Number.isNaN(sValue.getTime()) ? null : sValue.toISOString();
+			}
+			const sDate = typeof sValue === "string" ? sValue.trim() : "";
+			if (!sDate) return null;
+			if (/^\d{4}-\d{2}-\d{2}$/.test(sDate)) {
+				const oDate = new Date(`${sDate}T00:00:00.000Z`);
+				if (Number.isNaN(oDate.getTime()) || oDate.toISOString().slice(0, 10) !== sDate) return null;
+				return `${sDate}T${bEndOfDay ? "23:59:59.999" : "00:00:00.000"}Z`;
+			}
+			const oDate = new Date(sDate);
+			return Number.isNaN(oDate.getTime()) ? null : oDate.toISOString();
 		},
 
 		_invokeOperationsAction: async function (sAction, mParameters, sSuccessTextKey, sReloadModel) {

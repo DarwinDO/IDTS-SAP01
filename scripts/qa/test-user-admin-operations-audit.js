@@ -70,6 +70,7 @@ const EXHAUSTED_DELIVERY_ID = '91300000-0000-4000-8000-000000000003'
 const LOCKED_DELIVERY_ID = '91300000-0000-4000-8000-000000000004'
 const SENT_DELIVERY_ID = '91300000-0000-4000-8000-000000000005'
 const EXPIRED_DELIVERY_ID = '91300000-0000-4000-8000-000000000006'
+const NON_INVITED_DELIVERY_ID = '91300000-0000-4000-8000-000000000007'
 const RETRY_MODIFIED_AT = '2026-08-24T06:00:00.000Z'
 const RECENT_TIMESTAMP = new Date(Date.now() - (60 * 60 * 1000)).toISOString()
 
@@ -265,7 +266,8 @@ async function main () {
     requestEntry('91700000-0000-4000-8000-000000000003', { email: 'exhausted-action@example.invalid', status: 'INVITED' }),
     requestEntry('91700000-0000-4000-8000-000000000004', { email: 'locked-action@example.invalid', status: 'INVITED' }),
     requestEntry('91700000-0000-4000-8000-000000000005', { email: 'sent-action@example.invalid', status: 'INVITED' }),
-    requestEntry('91700000-0000-4000-8000-000000000006', { email: 'expired-action@example.invalid', status: 'INVITED', expiresAt: '2026-08-01T00:00:00.000Z' })
+    requestEntry('91700000-0000-4000-8000-000000000006', { email: 'expired-action@example.invalid', status: 'INVITED', expiresAt: '2026-08-01T00:00:00.000Z' }),
+    requestEntry('91700000-0000-4000-8000-000000000007', { email: 'non-invited-action@example.invalid', status: 'ACTIVE' })
   )
   deliveryRows.push(
     deliveryEntry(RETRY_DELIVERY_ID, '91700000-0000-4000-8000-000000000001', { email: 'retry-action@example.invalid', modifiedAt: RETRY_MODIFIED_AT }),
@@ -285,6 +287,9 @@ async function main () {
     }),
     deliveryEntry(EXPIRED_DELIVERY_ID, '91700000-0000-4000-8000-000000000006', {
       email: 'expired-action@example.invalid'
+    }),
+    deliveryEntry(NON_INVITED_DELIVERY_ID, '91700000-0000-4000-8000-000000000007', {
+      email: 'non-invited-action@example.invalid'
     })
   )
   await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries(deliveryRequests))
@@ -296,7 +301,7 @@ async function main () {
     data: { status: 'FAILED', query: '', skip: 0, top: 100 },
     user: ADMIN
   })
-  assert.equal(deliveries.length, 31)
+  assert.equal(deliveries.length, 32)
   assert.equal(deliveries[0].recipientDisplay.startsWith('d***@'), true)
   assert.equal(deliveries[0].recipientDisplay.includes('@example.invalid'), true)
   assert.equal(deliveries[0].recipientDisplay.includes('delivery-26'), false)
@@ -322,6 +327,9 @@ async function main () {
     user: ADMIN
   })
   assert.deepEqual(filteredByRequest.map(row => row.deliveryID), [RETRY_DELIVERY_ID])
+  assert.equal(deliveries.find(row => row.deliveryID === RETRY_DELIVERY_ID).canRetry, true)
+  assert.equal(deliveries.find(row => row.deliveryID === EXPIRED_DELIVERY_ID).canRetry, false)
+  assert.equal(deliveries.find(row => row.deliveryID === NON_INVITED_DELIVERY_ID).canRetry, false)
 
   const operations = await service.send({
     event: 'searchAccessOperations',
@@ -425,7 +433,8 @@ async function main () {
     [PERMANENT_DELIVERY_ID, 'DELIVERY_NOT_RETRYABLE'],
     [EXHAUSTED_DELIVERY_ID, 'DELIVERY_RETRY_LIMIT_REACHED'],
     [LOCKED_DELIVERY_ID, 'DELIVERY_LOCKED'],
-    [EXPIRED_DELIVERY_ID, 'DELIVERY_NOT_RETRYABLE']
+    [EXPIRED_DELIVERY_ID, 'DELIVERY_NOT_RETRYABLE'],
+    [NON_INVITED_DELIVERY_ID, 'DELIVERY_NOT_RETRYABLE']
   ]) {
     const row = await db.run(SELECT.one.from('idts.cap.UserOnboardingDeliveries').where({ ID: deliveryID }))
     await expectRejected(operationsAudit.retryOnboardingDelivery({
@@ -441,8 +450,23 @@ async function main () {
   }
   const expiredDelivery = await db.run(SELECT.one.from('idts.cap.UserOnboardingDeliveries').where({ ID: EXPIRED_DELIVERY_ID }))
   assert.equal(expiredDelivery.status_code, 'FAILED')
+  const nonInvitedDelivery = await db.run(SELECT.one.from('idts.cap.UserOnboardingDeliveries').where({ ID: NON_INVITED_DELIVERY_ID }))
+  assert.equal(nonInvitedDelivery.status_code, 'FAILED')
   assert.equal((await db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ action: 'RETRY_ONBOARDING_DELIVERY' }))).length, 1)
 
+  await db.run(UPDATE('idts.cap.UserOnboardingDeliveries').set({ status_code: 'PENDING', modifiedAt: RECENT_TIMESTAMP }))
+  const pendingReadiness = await service.send({ event: 'readAdministrationReadiness', data: {}, user: ADMIN })
+  assert.equal(pendingReadiness.emailDeliveryState, 'UNKNOWN')
+  await db.run(UPDATE('idts.cap.UserOnboardingDeliveries').set({ status_code: 'FAILED', modifiedAt: RECENT_TIMESTAMP }))
+  const failedReadiness = await service.send({ event: 'readAdministrationReadiness', data: {}, user: ADMIN })
+  assert.equal(failedReadiness.emailDeliveryState, 'UNAVAILABLE')
+  await db.run(UPDATE('idts.cap.UserOnboardingDeliveries').set({ status_code: 'SENT', modifiedAt: RECENT_TIMESTAMP }))
+  const sentReadiness = await service.send({ event: 'readAdministrationReadiness', data: {}, user: ADMIN })
+  assert.equal(sentReadiness.emailDeliveryState, 'AVAILABLE')
+  await db.run(UPDATE('idts.cap.UserOnboardingDeliveries').set({ status_code: 'FAILED', modifiedAt: RECENT_TIMESTAMP }))
+  await db.run(UPDATE('idts.cap.UserOnboardingDeliveries').set({ status_code: 'SENT', modifiedAt: RECENT_TIMESTAMP }).where({ ID: SENT_DELIVERY_ID }))
+  const sentPrecedenceReadiness = await service.send({ event: 'readAdministrationReadiness', data: {}, user: ADMIN })
+  assert.equal(sentPrecedenceReadiness.emailDeliveryState, 'AVAILABLE')
   await db.run(UPDATE('idts.cap.UserOnboardingDeliveries').set({ modifiedAt: '2020-01-01T00:00:00.000Z' }))
   await db.run(UPDATE('idts.cap.UserAccessOperations').set({ modifiedAt: '2020-01-01T00:00:00.000Z' }))
   const staleReadiness = await service.send({ event: 'readAdministrationReadiness', data: {}, user: ADMIN })

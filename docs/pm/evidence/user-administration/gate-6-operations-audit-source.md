@@ -13,8 +13,9 @@
 ### Product changes
 
 - `srv/user-admin.cds` defines explicit safe delivery, access-operation, audit-event, readiness DTOs and the bounded `retryOnboardingDelivery` action. Persistence entities remain unexposed.
-- `srv/user-admin/operations-audit.js` applies PM + UserAdmin authorization, default 25/max 100 paging, stable ordering, safe masked display, allowlisted summaries, 12-character SHA-256 correlation fingerprints, a fixed seven-day persisted-outcome freshness window, and optimistic retry guards.
-- Delivery retry accepts only exact `FAILED` transient rows whose parent invitation is still `INVITED` and unexpired, below the configured attempt ceiling and outside an active lock; it resets only retry-safe fields, preserves recipient/template/provider history and attempt count, appends audit in the same transaction, then reuses the existing post-commit immediate outbox kick.
+- `srv/user-admin/operations-audit.js` applies PM + UserAdmin authorization, default 25/max 100 paging, stable ordering, safe masked display, allowlisted summaries, 12-character SHA-256 correlation fingerprints, a fixed seven-day persisted-outcome freshness window, and optimistic retry guards. Delivery list eligibility performs one bounded bulk parent-request read per page; it does not use N+1 lookups.
+- Delivery retry/list eligibility accepts only exact `FAILED` transient rows whose parent invitation is still `INVITED` and unexpired, below the configured attempt ceiling and outside an active lock; it resets only retry-safe fields, preserves recipient/template/provider history and attempt count, appends audit in the same transaction, then reuses the existing post-commit immediate outbox kick.
+- Readiness is fail-closed: recent `SENT` => `AVAILABLE`; otherwise recent `FAILED` => `UNAVAILABLE`; recent `PENDING`, other/no conclusive state => `UNKNOWN`; stale rows are ignored.
 - Ambiguous access operations expose Reconcile only; permanent failures expose neither action. Operations UI has Delivery/Provisioning subtabs; Audit is separate. UI models load lazily, details are safe/read-only, and loading/empty/error/action states are explicit and bilingual.
 - No `db/schema.cds` change and no generated schema artifact change are part of this candidate.
 
@@ -33,6 +34,7 @@ The maintained explicit suites are authoritative; root `npm test` is not used be
 - `npm --prefix app/user-administration-ui run lint` — PASS.
 - `npm --prefix app/user-administration-ui run build` — PASS.
 - UI5 MCP linter — PASS with zero findings after explicit fragment `core:require` formatter imports.
+- UI audit DatePicker parameters are normalized before OData invocation: date-only `from` => `T00:00:00.000Z`, `to` => `T23:59:59.999Z`, empty/invalid => `null`.
 - `git diff --check origin/dev` — PASS, exit 0; exact schema diff, generated-artifact diff, and untracked generated-artifact counts are all zero.
 
 ### Dependency visibility mutation ledger
@@ -51,11 +53,11 @@ Coordinator-approved workaround only; no package installation or dependency muta
 
 ### Privacy/security checks
 
-The safe contract tests assert absence of recipient/provider IDs, body/raw error fields, lock/lease/idempotency fields, provider/identity hashes, tokens and credentials from safe DTOs. They also cover stale readiness, parent invitation expiry, mismatched access request/operation state, and inclusive date filtering. UI source and detail fragments bind only safe fields. Raw fixture values exist only in memory to test that they do not cross the DTO boundary; no provider outage is manufactured and no provider is called.
+The safe contract tests assert absence of recipient/provider IDs, body/raw error fields, lock/lease/idempotency fields, provider/identity hashes, tokens and credentials from safe DTOs. They also cover stale/PENDING/FAILED/SENT readiness semantics, parent invitation expiry/non-INVITED list eligibility, mismatched access request/operation state, inclusive date filtering, and exact UI DateTimeOffset parameter normalization. UI source and detail fragments bind only safe fields. Raw fixture values exist only in memory to test that they do not cross the DTO boundary; no provider outage is manufactured and no provider is called.
 
 ### Remaining handoff
 
-The single bounded independent source/security review found 0 Critical/Major and 2 Important findings; both were remediated in source and covered by fresh focused regressions. The reviewer made no edits. Draft PR #339 is open from source head `a9f0896edf8694b2a9a485ad96f52205bfee2df6`; GitHub `qa-depth-gate` passed. The worktree is intentionally preserved for coordinator feedback.
+The single bounded independent source/security review found 0 Critical/Major and 2 Important findings; both were remediated in source and covered by fresh focused regressions. A subsequent coordinator exact-head review found 3 additional Important findings (list parent eligibility, fail-closed PENDING readiness semantics, and UI DateTimeOffset normalization); all three are now remediated and the full exact matrix is green on the working tree. The reviewer made no edits. The next exact head and CI readback will be reported after the remediation commit/push. The worktree is intentionally preserved for coordinator feedback.
 
 ## Tiếng Việt
 
@@ -69,7 +71,7 @@ The single bounded independent source/security review found 0 Critical/Major and
 
 ### Tóm tắt thay đổi
 
-Gate 6 thêm safe DTO/action cho delivery, access operation, audit và readiness; paging 25/100; order ổn định; mask display; correlation fingerprint 12 ký tự; readiness freshness bảy ngày; retry onboarding delivery optimistic chỉ khi parent invitation còn hợp lệ, có ceiling, audit cùng transaction và existing outbox kick sau commit. UI tách Delivery/Provisioning và Audit, lazy model, detail an toàn, state loading/empty/error và copy song ngữ. Không thay đổi schema/generated artifact.
+Gate 6 thêm safe DTO/action cho delivery, access operation, audit và readiness; paging 25/100; order ổn định; mask display; correlation fingerprint 12 ký tự; readiness freshness bảy ngày và semantics fail-closed; retry onboarding delivery optimistic chỉ khi parent invitation còn hợp lệ, có ceiling, audit cùng transaction và existing outbox kick sau commit. UI tách Delivery/Provisioning và Audit, lazy model, detail an toàn, state loading/empty/error, normalize DateTimeOffset audit và copy song ngữ. Không thay đổi schema/generated artifact.
 
 ### Ledger workaround dependency
 
@@ -77,4 +79,4 @@ Chỉ dùng hai NTFS junction đã được coordinator cho phép sau khi kiểm
 
 ### Handoff
 
-Đây là evidence source-only. Một bounded independent source/security review duy nhất phát hiện 0 Critical/Major và 2 Important; cả hai đã được fix trong source và có focused regression mới. Reviewer không sửa file. Draft PR #339 đã mở từ source head `a9f0896edf8694b2a9a485ad96f52205bfee2df6`; GitHub `qa-depth-gate` đã PASS. Giữ nguyên worktree để coordinator review.
+Đây là evidence source-only. Một bounded independent source/security review duy nhất phát hiện 0 Critical/Major và 2 Important; cả hai đã được fix trong source và có focused regression mới. Sau đó coordinator exact-head review phát hiện thêm 3 Important (eligibility parent trên list, semantics PENDING readiness fail-closed và normalize DateTimeOffset UI); cả ba đã được fix và full exact matrix trên working tree đã PASS. Reviewer không sửa file. Head/CI readback mới sẽ báo sau khi commit/push remediation. Giữ nguyên worktree để coordinator review.

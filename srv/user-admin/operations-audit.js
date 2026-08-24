@@ -70,6 +70,7 @@ async function searchOnboardingDeliveries (req, dependencies) {
   const status = optionalCode(req.data?.status, 'INVALID_DELIVERY_STATUS')
   const query = normalizeQuery(req.data?.query)
   const maxAttempts = maxAttemptsFrom(dependencies.getEmailConfig)
+  const readAt = requestTime(req)
   const selection = SELECT.from(DELIVERIES)
     .columns(
       'ID',
@@ -89,7 +90,12 @@ async function searchOnboardingDeliveries (req, dependencies) {
   if (status) selection.where({ status_code: status })
   if (query) selection.where`contains(recipientEmail, ${query}) or contains(ID, ${query}) or contains(onboardingRequest_ID, ${query})`
   const rows = await tx.run(selection)
-  return rows.map(row => toDeliverySummary(row, maxAttempts))
+  const requestIDs = [...new Set(rows.map(row => row.onboardingRequest_ID).filter(Boolean))]
+  const requests = requestIDs.length === 0
+    ? []
+    : await tx.run(SELECT.from(REQUESTS).columns('ID', 'status_code', 'expiresAt').where({ ID: { in: requestIDs } }))
+  const requestByID = new Map(requests.map(row => [row.ID, row]))
+  return rows.map(row => toDeliverySummary(row, maxAttempts, requestByID.get(row.onboardingRequest_ID), readAt))
 }
 
 async function searchAccessOperations (req, dependencies) {
@@ -177,7 +183,7 @@ async function readAdministrationReadiness (req, dependencies) {
       ? 'UNKNOWN'
       : recentDeliveries.some(row => row.status_code === 'SENT')
         ? 'AVAILABLE'
-        : recentDeliveries.some(row => ['PENDING', 'FAILED'].includes(row.status_code))
+        : recentDeliveries.some(row => row.status_code === 'FAILED')
           ? 'UNAVAILABLE'
           : 'UNKNOWN',
     provisioningBrokerState: successful.length > 0
@@ -292,7 +298,7 @@ async function retryOnboardingDelivery (req, dependencies = {}) {
       'modifiedAt'
     ).where({ ID: delivery.ID })
   )
-  return toDeliverySummary(refreshed, maxAttempts)
+  return toDeliverySummary(refreshed, maxAttempts, request, now)
 }
 
 async function mapOperationSummaries (tx, rows) {
@@ -361,7 +367,7 @@ async function mapAuditSummaries (tx, rows) {
   }))
 }
 
-function toDeliverySummary (row, maxAttempts = 3) {
+function toDeliverySummary (row, maxAttempts = 3, request, readAt = new Date()) {
   return {
     deliveryID: row.ID,
     requestID: row.onboardingRequest_ID,
@@ -374,15 +380,24 @@ function toDeliverySummary (row, maxAttempts = 3) {
     safeErrorCode: row.lastErrorCode ? safeCode(row.lastErrorCode) : null,
     safeErrorSummary: row.lastErrorCode ? deliverySummary(row.lastErrorCode) : null,
     modifiedAt: row.modifiedAt || null,
-    canRetry: canRetryDelivery(row, maxAttempts)
+    canRetry: canRetryDelivery(row, maxAttempts, request, readAt)
   }
 }
 
-function canRetryDelivery (row, maxAttempts) {
+function canRetryDelivery (row, maxAttempts, request, readAt) {
+  const expiresAt = request?.expiresAt ? Date.parse(request.expiresAt) : NaN
   return row.status_code === 'FAILED' &&
     RETRYABLE_DELIVERY_CODES.has(row.lastErrorCode) &&
     Number(row.attemptCount || 0) < maxAttempts &&
-    (!row.lockedUntil || Date.parse(row.lockedUntil) <= Date.now())
+    (!row.lockedUntil || Date.parse(row.lockedUntil) <= readAt.getTime()) &&
+    request?.status_code === 'INVITED' &&
+    Number.isFinite(expiresAt) &&
+    expiresAt > readAt.getTime()
+}
+
+function requestTime (req) {
+  const readAt = req.timestamp instanceof Date ? req.timestamp : new Date(req.timestamp || Date.now())
+  return Number.isNaN(readAt.getTime()) ? new Date() : readAt
 }
 
 function maxAttemptsFrom (getConfig) {

@@ -98,6 +98,11 @@ Delivery retry passes only `deliveryID` plus the optimistic `modifiedAt` and rel
   **Impact if broken**: the UI may enumerate oversized results, show stale retry eligibility, or load provider data eagerly.
   **Must check together**: `srv/user-admin/operations-audit.js:65-286`, `adminReadiness`, and UI5 linter/build.
 
+- **Location**: `Main.controller.js:_normalizeAuditDate` and `_loadAudit`.
+  **IDTS concept**: DatePicker `yyyy-MM-dd` values are converted explicitly to valid UTC `Edm.DateTimeOffset` boundaries (`T00:00:00.000Z` / `T23:59:59.999Z`); empty or invalid values become `null`.
+  **Impact if broken**: browser-dependent coercion could reject audit requests or silently shift the selected date range.
+  **Must check together**: `srv/user-admin.cds` Timestamp parameters and `scripts/qa/test-user-admin-ui.js` runtime parameter assertions.
+
 ### Tiếng Việt
 
 Controller tạo riêng các JSON model `deliveries`, `operations`, `audit` và `adminReadiness` trong `onInit`. `onTabSelect` và `onOperationsTabSelect` lazy load: chỉ request subtab Operations đang chọn, còn Audit chỉ load khi được chọn. `_loadDeliveries`, `_loadOperations` và `_loadAudit` gửi filter server explicit với page skip/top 25 và giữ state loading/error/empty trong model. `onOpenDeliveryDetails`, `onOpenOperationDetails` và `onOpenAuditDetails` chỉ mở fragment detail an toàn.
@@ -113,6 +118,11 @@ Retry delivery chỉ gửi `deliveryID` và optimistic `modifiedAt`, sau success
   **Khái niệm IDTS**: server pagination có giới hạn và reload sau action giúp operational data mới mà không trộn vào Requests/Active Users.
   **Ảnh hưởng nếu sai**: UI có thể enumerate result quá lớn, hiện retry eligibility cũ hoặc eager-load provider data.
   **Phải kiểm tra cùng**: `srv/user-admin/operations-audit.js:65-286`, `adminReadiness` và UI5 linter/build.
+
+- **Vị trí**: `Main.controller.js:_normalizeAuditDate` và `_loadAudit`.
+  **Khái niệm IDTS**: value `yyyy-MM-dd` của DatePicker được đổi explicit thành boundary UTC hợp lệ cho `Edm.DateTimeOffset` (`T00:00:00.000Z` / `T23:59:59.999Z`); value rỗng/invalid thành `null`.
+  **Ảnh hưởng nếu sai**: coercion tùy browser có thể reject audit request hoặc lệch ngày filter.
+  **Phải kiểm tra cùng**: parameter Timestamp trong `srv/user-admin.cds` và assertion runtime trong `scripts/qa/test-user-admin-ui.js`.
 
 ### Safe editing / Sửa an toàn
 

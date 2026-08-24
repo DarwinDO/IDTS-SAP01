@@ -206,6 +206,9 @@ assert.match(controller, /onLoadMoreActiveUsers/)
 assert.match(controller, /_deliveriesRequest/)
 assert.match(controller, /_operationsRequest/)
 assert.match(controller, /_auditRequest/)
+assert.match(controller, /_normalizeAuditDate/)
+assert.match(controller, /setParameter\("from", this\._normalizeAuditDate/)
+assert.match(controller, /setParameter\("to", this\._normalizeAuditDate/)
 assert.match(controller, /requestExistingUserIdentityLink/)
 assert.match(controller, /setParameter\("userID"/)
 assert.match(controller, /setParameter\("email"/)
@@ -300,9 +303,42 @@ assert.equal(typeof controllerDefinition._loadDeliveries, 'function')
 assert.equal(typeof controllerDefinition._loadOperations, 'function')
 assert.equal(typeof controllerDefinition._loadAudit, 'function')
 assert.equal(typeof controllerDefinition._loadReadiness, 'function')
+assert.equal(typeof controllerDefinition._normalizeAuditDate, 'function')
 assert.match(controller, /this\.getResourceBundle\(\)/)
 
 async function verifyRuntimeBehavior () {
+  const dateNormalizer = Object.create(controllerDefinition)
+  assert.equal(dateNormalizer._normalizeAuditDate('2026-08-24', false), '2026-08-24T00:00:00.000Z')
+  assert.equal(dateNormalizer._normalizeAuditDate('2026-08-24', true), '2026-08-24T23:59:59.999Z')
+  assert.equal(dateNormalizer._normalizeAuditDate('', false), null)
+  assert.equal(dateNormalizer._normalizeAuditDate(null, true), null)
+  assert.equal(dateNormalizer._normalizeAuditDate('not-a-date', false), null)
+
+  const auditData = { items: [], action: '', result: '', from: '2026-08-24', to: '2026-08-25', nextSkip: 0, pageSize: 25, hasMore: false, loaded: false, busy: false, error: false }
+  const auditParameters = {}
+  const auditOperation = {
+    setParameter: (name, value) => { auditParameters[name] = value },
+    invoke: async () => {},
+    getBoundContext: () => ({ requestObject: async () => ({ value: [] }) })
+  }
+  const auditModel = {
+    getProperty: key => auditData[key.slice(1)],
+    setProperty: (key, value) => { auditData[key.slice(1)] = value }
+  }
+  const auditInstance = Object.assign(Object.create(controllerDefinition), {
+    _auditRequest: 0,
+    getModel: name => name === 'audit' ? auditModel : undefined,
+    getView: () => ({ getModel: () => ({ bindContext: () => auditOperation }) })
+  })
+  await auditInstance._loadAudit()
+  assert.equal(auditParameters.from, '2026-08-24T00:00:00.000Z')
+  assert.equal(auditParameters.to, '2026-08-25T23:59:59.999Z')
+  auditData.from = 'not-a-date'
+  auditData.to = ''
+  await auditInstance._loadAudit()
+  assert.equal(auditParameters.from, null)
+  assert.equal(auditParameters.to, null)
+
   let initialLoadCount = 0
   const initialLoadInstance = Object.assign(Object.create(controllerDefinition), {
     _loadInitialRequests: async () => { initialLoadCount += 1 },

@@ -8454,3 +8454,55 @@ Vietnamese:
 - Phân loại: tooling/operator issue.
 - Triệu chứng: orchestration readback PR/Git/status cuối lại quote property `max_output_tokens`, sinh `SyntaxError: Unexpected identifier 'max_output_tokens'` trước khi command chạy.
 - Fix/trạng thái: không đổi GitHub/repository; wrapper đã sửa và các lệnh readback riêng sẽ chạy lại. Không ảnh hưởng product và không còn source blocker.
+### 2026-08-24 Gate 6 regression patch context issue / Lỗi context patch regression Gate 6
+
+- Classification: tooling/operator issue.
+- Symptom: the first combined `apply_patch` for the list-level delivery eligibility regression failed context verification at the existing filtered-delivery assertion; no test or source file was changed by that patch.
+- Fix/status: stop-and-inspect before proceeding. The corrected patch will target the exact current fixture context and add both coordinator-requested RED regressions. No product, dependency, lockfile, platform, data, provider, or GitHub state changed.
+
+### 2026-08-24 Gate 6 regression patch context issue / Lỗi context patch regression Gate 6
+
+- Phân loại: tooling/operator issue.
+- Triệu chứng: `apply_patch` đầu tiên cho regression list-level delivery eligibility fail context verification tại assertion filtered-delivery hiện có; patch không đổi test hoặc source.
+- Fix/trạng thái: đã dừng và inspect trước khi làm tiếp. Patch sửa sẽ bám đúng context fixture hiện tại và thêm cả hai regression theo coordinator. Không đổi product, dependency, lockfile, platform, data, provider hoặc GitHub.
+### 2026-08-24 Gate 6 list/readiness RED regression / RED regression list/readiness Gate 6
+
+- Classification: expected TDD RED / product correctness finding.
+- Symptom: `npm run qa:user-admin-operations:programmatic` failed at the new list assertion because an expired parent delivery still returned `canRetry=true`.
+- Root cause: `searchOnboardingDeliveries` had not yet bulk-read parent request state/expiry; existing action-level validation did not protect list/UI eligibility.
+- Status: expected RED captured; no source implementation changed yet. The second readiness regression will be added before GREEN (PENDING-only must be UNKNOWN, FAILED-only UNAVAILABLE, SENT precedence AVAILABLE, stale ignored).
+
+### 2026-08-24 Gate 6 list/readiness RED regression / RED regression list/readiness Gate 6
+
+- Phân loại: expected TDD RED / finding correctness sản phẩm.
+- Triệu chứng: `npm run qa:user-admin-operations:programmatic` fail tại assertion list mới vì delivery có parent hết hạn vẫn trả `canRetry=true`.
+- Nguyên nhân: `searchOnboardingDeliveries` chưa bulk-read state/expiry parent request; validation action-level hiện có không bảo vệ eligibility trên list/UI.
+- Trạng thái: đã capture RED đúng kỳ vọng; chưa đổi implementation source. Sẽ thêm readiness regression trước GREEN (PENDING-only UNKNOWN, FAILED-only UNAVAILABLE, SENT precedence AVAILABLE, stale ignored).
+### 2026-08-24 Gate 6 UI date normalization RED / RED normalize date UI Gate 6
+
+- Classification: expected TDD RED / UI contract gap.
+- Symptom: `npm run qa:user-admin-ui:programmatic` failed because `_normalizeAuditDate` and exact normalized `from`/`to` parameter assertions were not yet implemented.
+- Root cause: `_loadAudit` still passed persisted `yyyy-MM-dd` DatePicker strings directly to CDS `Timestamp` action parameters.
+- Status: expected RED captured; no UI implementation changed yet. GREEN will require exact UTC start/end strings and null for empty/invalid values.
+
+### 2026-08-24 Gate 6 UI date normalization RED / RED normalize date UI Gate 6
+
+- Phân loại: expected TDD RED / gap contract UI.
+- Triệu chứng: `npm run qa:user-admin-ui:programmatic` fail vì chưa có `_normalizeAuditDate` và assertion exact cho parameter `from`/`to` đã normalize.
+- Nguyên nhân: `_loadAudit` vẫn truyền trực tiếp string DatePicker `yyyy-MM-dd` vào action CDS `Timestamp`.
+- Trạng thái: đã capture RED đúng kỳ vọng; chưa đổi UI implementation. GREEN cần chuỗi UTC start/end exact và null cho value rỗng/invalid.
+### 2026-08-24 Gate 6 coordinator remediation findings / Findings remediation coordinator Gate 6
+
+- Classification: IMPORTANT source-review findings; all three are fixed in-session.
+- Finding 1: delivery list `canRetry` lacked parent request eligibility. Fix: one bounded bulk `UserOnboardingRequests` read per delivery page; `canRetry` now requires parent exists, `status_code=INVITED`, and `expiresAt > readAt`. Added valid/expired/non-INVITED list regressions; action-level expired/non-INVITED no-write guards remain.
+- Finding 2: readiness treated recent `PENDING` as `UNAVAILABLE`. Fix: recent `SENT` takes precedence as `AVAILABLE`; otherwise recent `FAILED` gives `UNAVAILABLE`; PENDING/other/no conclusive state gives `UNKNOWN`; stale rows remain ignored. Added focused matrix.
+- Finding 3: UI DatePicker `yyyy-MM-dd` was passed raw to CDS Timestamp audit parameters. Fix: `_normalizeAuditDate` sends exact UTC start/end DateTimeOffset strings and null for empty/invalid values; added helper and `_loadAudit` parameter runtime assertions.
+- Verification: focused operations and UI suites PASS after fixes; full exact matrix, compile/lint/build, UI5 MCP lint, security/depth, diff/schema/generated checks remain to run on final delta.
+
+### 2026-08-24 Gate 6 coordinator remediation findings / Findings remediation coordinator Gate 6
+
+- Phân loại: findings IMPORTANT từ source review; cả ba đã fix trong session.
+- Finding 1: `canRetry` list delivery thiếu eligibility parent request. Fix: một bulk read bounded `UserOnboardingRequests` cho mỗi delivery page; `canRetry` yêu cầu parent tồn tại, `status_code=INVITED` và `expiresAt > readAt`. Đã thêm regression valid/expired/non-INVITED; guard action-level expired/non-INVITED no-write vẫn giữ.
+- Finding 2: readiness coi PENDING gần đây là `UNAVAILABLE`. Fix: recent `SENT` ưu tiên `AVAILABLE`; nếu không, recent `FAILED` là `UNAVAILABLE`; PENDING/other/no conclusive là `UNKNOWN`; row stale vẫn bị bỏ qua. Đã thêm matrix focused.
+- Finding 3: DatePicker UI `yyyy-MM-dd` truyền raw vào parameter CDS Timestamp audit. Fix: `_normalizeAuditDate` gửi DateTimeOffset UTC start/end exact và null cho empty/invalid; thêm assertion runtime helper và parameter `_loadAudit`.
+- Verify: operations và UI focused PASS sau fix; full exact matrix, compile/lint/build, UI5 MCP lint, security/depth, diff/schema/generated cần chạy trên delta cuối.
