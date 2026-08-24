@@ -78,6 +78,26 @@ assert.match(view, /key="requests"/)
 assert.match(view, /key="activeUsers"/)
 assert.match(view, /key="developerResponsibilities"/)
 assert.match(view, /key="businessCatalogs"/)
+assert.match(view, /key="operations"/)
+assert.match(view, /key="deliveries"/)
+assert.match(view, /key="provisioning"/)
+assert.match(view, /key="audit"/)
+assert.match(view, /items="\{deliveries>\/items\}"/)
+assert.match(view, /items="\{operations>\/items\}"/)
+assert.match(view, /items="\{audit>\/items\}"/)
+assert.match(view, /adminReadiness>emailDeliveryState/)
+assert.match(view, /press="\.onRetryOnboardingDelivery"/)
+assert.match(view, /press="\.onOpenOperationDetails"/)
+assert.match(view, /press="\.onOpenAuditDetails"/)
+assert.match(view, /visible="\{deliveries>canRetry\}" enabled="\{= !\$\{view>\/busy\} \}" press="\.onRetryOnboardingDelivery"/)
+assert.match(view, /visible="\{operations>canRetry\}" enabled="\{= !\$\{view>\/busy\} \}" press="\.onRetryAccessOperation"/)
+assert.match(view, /visible="\{operations>canReconcile\}" enabled="\{= !\$\{view>\/busy\} \}" press="\.onReconcileAccessOperation"/)
+assert.match(view, /selectedKey="\{audit>\/action\}"/)
+assert.match(view, /formatter: 'formatter\.operationTypeText'/)
+assert.match(view, /formatter: 'formatter\.auditActionText'/)
+assert.match(view, /formatter: 'formatter\.resultText'/)
+assert.ok(fs.existsSync(path.join(webapp, 'fragment/OperationDetails.fragment.xml')), 'operations detail fragment is missing')
+assert.ok(fs.existsSync(path.join(webapp, 'fragment/AuditDetails.fragment.xml')), 'audit detail fragment is missing')
 assert.match(view, /id="catalogTypeTabs"/)
 for (const catalogType of ['SAP_MODULE', 'APPLICATION_COMPONENT', 'DEFECT_CATEGORY', 'COMPONENT_CATEGORY']) {
   assert.match(view, new RegExp(`key="${catalogType}"`))
@@ -137,6 +157,12 @@ assert.match(fragment, /!\$\{invite>\/submitting\}/)
 assert.doesNotMatch(fragment, /Password|OTP|passkey|token/i)
 
 const controller = fs.readFileSync(path.join(webapp, 'controller/Main.controller.js'), 'utf8')
+assert.match(controller, /searchOnboardingDeliveries/)
+assert.match(controller, /searchAccessOperations/)
+assert.match(controller, /searchAccessAuditEvents/)
+assert.match(controller, /readAdministrationReadiness/)
+assert.match(controller, /retryOnboardingDelivery/)
+assert.match(controller, /_ensureOperationsLoaded/)
 assert.match(controller, /^sap\.ui\.define\(/)
 assert.doesNotMatch(controller, /normalizeCurrentBootstrapPm|bootstrapPmNormalize/, 'temporary PM normalization UI must be removed')
 assert.doesNotMatch(activeUserDetailsFragment, /bootstrapPmNormalize|onNormalizeCurrentBootstrapPm/, 'temporary PM normalization button must be removed')
@@ -177,6 +203,9 @@ assert.match(controller, /bindContext\("\/readActiveUserDetails\(\.\.\.\)"\)/)
 assert.match(controller, /onTabSelect/)
 assert.match(controller, /_ensureActiveUsersLoaded/)
 assert.match(controller, /onLoadMoreActiveUsers/)
+assert.match(controller, /_deliveriesRequest/)
+assert.match(controller, /_operationsRequest/)
+assert.match(controller, /_auditRequest/)
 assert.match(controller, /requestExistingUserIdentityLink/)
 assert.match(controller, /setParameter\("userID"/)
 assert.match(controller, /setParameter\("email"/)
@@ -192,6 +221,14 @@ assert.doesNotMatch(controller, /identityOrigin|identityIssuer|identitySubject|i
 const formatter = fs.readFileSync(path.join(webapp, 'model/formatter.js'), 'utf8')
 assert.match(formatter, /accessStateText/)
 assert.match(formatter, /accessStateState/)
+assert.match(formatter, /operationStateText/)
+assert.match(formatter, /operationTypeText/)
+assert.match(formatter, /auditActionText/)
+assert.match(formatter, /resultText/)
+assert.match(formatter, /sAvailable, sUnavailable, sRecentSuccess, sStale, sUnknown/)
+assert.match(formatter, /sPending, sFailed, sSent, sSkipped, sUnknown/)
+assert.match(formatter, /readinessText/)
+assert.match(formatter, /readinessState/)
 
 const manageFragment = fs.readFileSync(path.join(webapp, 'fragment/ManageAccess.fragment.xml'), 'utf8')
 assert.match(manageFragment, /<Select/)
@@ -254,6 +291,15 @@ assert.equal(typeof controllerDefinition.onOpenCatalogEdit, 'function')
 assert.equal(typeof controllerDefinition.onConfirmCatalogEdit, 'function')
 assert.equal(typeof controllerDefinition.onToggleCatalogActive, 'function')
 assert.equal(typeof controllerDefinition.onConfirmCatalogDeactivation, 'function')
+assert.equal(typeof controllerDefinition.onOperationsTabSelect, 'function')
+assert.equal(typeof controllerDefinition.onRetryOnboardingDelivery, 'function')
+assert.equal(typeof controllerDefinition.onOpenDeliveryDetails, 'function')
+assert.equal(typeof controllerDefinition.onOpenOperationDetails, 'function')
+assert.equal(typeof controllerDefinition.onOpenAuditDetails, 'function')
+assert.equal(typeof controllerDefinition._loadDeliveries, 'function')
+assert.equal(typeof controllerDefinition._loadOperations, 'function')
+assert.equal(typeof controllerDefinition._loadAudit, 'function')
+assert.equal(typeof controllerDefinition._loadReadiness, 'function')
 assert.match(controller, /this\.getResourceBundle\(\)/)
 
 async function verifyRuntimeBehavior () {
@@ -695,6 +741,19 @@ for (const locale of ['i18n.properties', 'i18n_en.properties']) {
   assert.match(text, /^cancelExistingLinkConfirmation=Cancel this invitation\? Its link will stop working and a new invitation can be sent\.$/m)
   assert.match(text, /^existingLinkCancelled=Invitation cancelled\.$/m)
   assert.match(text, /^existingIdentityLinkNotice=.*same Users\.ID.*Developer Profile.*Bug assignments.*comments.*history/m)
+}
+
+const operationsI18nKeys = [
+  'operationsTab', 'deliveryOperationsTab', 'provisioningOperationsTab', 'auditTab', 'deliverySearchPlaceholder',
+  'deliveryStatusFilter', 'availableText', 'unavailableText', 'recentSuccessText', 'staleText', 'unknownText', 'skippedText',
+  'noDeliveries', 'retryDelivery', 'retryDeliveryConfirmation', 'deliveryRetryQueued',
+  'operationStateFilter', 'operationTypeFilter', 'linkExistingOperation', 'noOperations', 'operationsLoadFailed', 'auditActionFilter',
+  'allActions', 'auditResultFilter', 'appliedText', 'retryNeededText', 'rejectedText', 'suspendAccess', 'reactivateAccess',
+  'noAuditEvents', 'auditLoadFailed', 'operationDetails', 'auditDetails', 'deliveryDetails', 'safeDetails'
+]
+for (const locale of ['i18n.properties', 'i18n_en.properties', 'i18n_vi.properties']) {
+  const text = fs.readFileSync(path.join(webapp, 'i18n', locale), 'utf8')
+  for (const key of operationsI18nKeys) assert.match(text, new RegExp(`^${key}=`, 'm'))
 }
 
 verifyRuntimeBehavior().then(() => {

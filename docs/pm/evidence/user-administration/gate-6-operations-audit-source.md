@@ -1,0 +1,80 @@
+# WP8 Gate 6 — Operations and Audit source evidence
+
+## English
+
+### Boundary and frozen source
+
+- Owner/executor: DonHV / Gate 6 executor.
+- Branch: `feature/wp8-admin-operations-audit-donhv`.
+- Required base, `origin/dev`, local `dev`, and merge-base: `aae01e375a15d7664281b8cee35ac16727e696cf`.
+- Scope: source, tests, knowledge mirrors, PM evidence, exact branch push, one Draft PR, GitHub QA readback, and one bounded independent source/security review.
+- Stop boundary: no deploy, HANA/HDI make, provider/email retry, data mutation, user/role/XSUAA/IAS/IPS/trust mutation, Jira/Drive mutation, Ready, merge, Gate 7, or worktree removal.
+
+### Product changes
+
+- `srv/user-admin.cds` defines explicit safe delivery, access-operation, audit-event, readiness DTOs and the bounded `retryOnboardingDelivery` action. Persistence entities remain unexposed.
+- `srv/user-admin/operations-audit.js` applies PM + UserAdmin authorization, default 25/max 100 paging, stable ordering, safe masked display, allowlisted summaries, 12-character SHA-256 correlation fingerprints, a fixed seven-day persisted-outcome freshness window, and optimistic retry guards.
+- Delivery retry accepts only exact `FAILED` transient rows whose parent invitation is still `INVITED` and unexpired, below the configured attempt ceiling and outside an active lock; it resets only retry-safe fields, preserves recipient/template/provider history and attempt count, appends audit in the same transaction, then reuses the existing post-commit immediate outbox kick.
+- Ambiguous access operations expose Reconcile only; permanent failures expose neither action. Operations UI has Delivery/Provisioning subtabs; Audit is separate. UI models load lazily, details are safe/read-only, and loading/empty/error/action states are explicit and bilingual.
+- No `db/schema.cds` change and no generated schema artifact change are part of this candidate.
+
+### Source verification
+
+The maintained explicit suites are authoritative; root `npm test` is not used because the repository has no authoritative root test script.
+
+- `npm run qa:user-admin-operations:programmatic` — PASS.
+- `npm run qa:user-onboarding:programmatic` — PASS.
+- `npm run qa:user-access:programmatic` — PASS.
+- `npm run qa:user-admin-ui:programmatic` — PASS.
+- `node scripts/qa/test-email-immediate-kick.js` — PASS.
+- Active-users, access-lifecycle, user-access, broker, immutable-identity, secret scan, agent rules, and QA-depth self-test — PASS.
+- `npx cds compile srv -s all --to edmx` — PASS; known pre-existing attachment annotation warning only.
+- `npx cds compile db/schema.cds --to hana` — PASS.
+- `npm --prefix app/user-administration-ui run lint` — PASS.
+- `npm --prefix app/user-administration-ui run build` — PASS.
+- UI5 MCP linter — PASS with zero findings after explicit fragment `core:require` formatter imports.
+- `git diff --check origin/dev` — PASS, exit 0; exact schema diff, generated-artifact diff, and untracked generated-artifact counts are all zero.
+
+### Dependency visibility mutation ledger
+
+Coordinator-approved workaround only; no package installation or dependency mutation occurred.
+
+| Check / mutation | Evidence |
+| --- | --- |
+| Root source state | `E:\IDTS-SAP01` was clean on branch `dev`; root `dev`, `origin/dev`, and merge-base matched the frozen SHA above. |
+| Lockfile parity | Root and target `package-lock.json` SHA-256: `688A9CDCDB41E32E3C012AF9033EC8BFF079E0DF5FB2B3B29CD074D588F6E455`. |
+| Required source trees | Root trees contained `@sap/cds`, `@cap-js/attachments`, `yaml`, `@ui5/cli`; the exact UI app tree contained the required ESLint packages. |
+| Target preflight | Target root `node_modules` and target `app/user-administration-ui/node_modules` were absent before creation. |
+| Junction 1 | `C:\Users\LapHub\.codex\worktrees\adf5\IDTS-SAP01\node_modules` → `E:\IDTS-SAP01\node_modules`; readback type `Junction`. |
+| Junction 2 | `C:\Users\LapHub\.codex\worktrees\adf5\IDTS-SAP01\app\user-administration-ui\node_modules` → `E:\IDTS-SAP01\app\user-administration-ui\node_modules`; readback type `Junction`. |
+| Repository effect | Junctions are ignored/untracked filesystem visibility only; no manifest, version, lockfile, install, upgrade, audit-fix, source, platform, or data mutation. |
+
+### Privacy/security checks
+
+The safe contract tests assert absence of recipient/provider IDs, body/raw error fields, lock/lease/idempotency fields, provider/identity hashes, tokens and credentials from safe DTOs. They also cover stale readiness, parent invitation expiry, mismatched access request/operation state, and inclusive date filtering. UI source and detail fragments bind only safe fields. Raw fixture values exist only in memory to test that they do not cross the DTO boundary; no provider outage is manufactured and no provider is called.
+
+### Remaining handoff
+
+The single bounded independent source/security review found 0 Critical/Major and 2 Important findings; both were remediated in source and covered by fresh focused regressions. The reviewer made no edits. The final exact head, PR number and GitHub QA readback are added at Draft-PR handoff. The worktree is intentionally preserved for coordinator feedback.
+
+## Tiếng Việt
+
+### Phạm vi và source frozen
+
+- Owner/executor: DonHV / Gate 6 executor.
+- Branch: `feature/wp8-admin-operations-audit-donhv`.
+- Base bắt buộc, `origin/dev`, `dev` local và merge-base: `aae01e375a15d7664281b8cee35ac16727e696cf`.
+- Chỉ làm source, test, knowledge mirror, PM evidence, push branch exact, một Draft PR, GitHub QA readback và một bounded independent source/security review.
+- Không deploy, HANA/HDI make, retry provider/email, data mutation, user/role/XSUAA/IAS/IPS/trust mutation, Jira/Drive, Ready, merge, Gate 7 hoặc remove worktree.
+
+### Tóm tắt thay đổi
+
+Gate 6 thêm safe DTO/action cho delivery, access operation, audit và readiness; paging 25/100; order ổn định; mask display; correlation fingerprint 12 ký tự; readiness freshness bảy ngày; retry onboarding delivery optimistic chỉ khi parent invitation còn hợp lệ, có ceiling, audit cùng transaction và existing outbox kick sau commit. UI tách Delivery/Provisioning và Audit, lazy model, detail an toàn, state loading/empty/error và copy song ngữ. Không thay đổi schema/generated artifact.
+
+### Ledger workaround dependency
+
+Chỉ dùng hai NTFS junction đã được coordinator cho phép sau khi kiểm tra root `E:\IDTS-SAP01` clean/exact, package-lock SHA parity `688A9CDCDB41E32E3C012AF9033EC8BFF079E0DF5FB2B3B29CD074D588F6E455`, tree dependency tồn tại và target path vắng. Junction chỉ để visibility trong local worktree, bị ignore/untracked, không install/upgrade/audit-fix và không đổi manifest/version/lockfile/source/platform/data.
+
+### Handoff
+
+Đây là evidence source-only. Một bounded independent source/security review duy nhất phát hiện 0 Critical/Major và 2 Important; cả hai đã được fix trong source và có focused regression mới. Reviewer không sửa file. Exact head cuối, PR và GitHub QA readback sẽ được bổ sung khi tạo Draft PR. Giữ nguyên worktree để coordinator review.

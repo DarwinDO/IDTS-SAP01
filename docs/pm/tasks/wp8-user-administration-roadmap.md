@@ -12,7 +12,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 ## Current status
 
-`READY FOR INTEGRATION — GATE 5 PR #338`
+`IN PROGRESS — GATE 6 SOURCE CANDIDATE`
 
 - Gates 1–3B are merged, deployed and accepted. Gate 3 browser closure is recorded by PR #325 at `04643e12727290f2f35fd56e9c3d2a8df4cbcdbc`.
 - Gate 4 branch `feature/wp8-admin-developer-pilot-donhv` is frozen from that exact base.
@@ -25,7 +25,9 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 - Gate 5 source was independently reviewed with zero findings and merged through PR #337 at `eb0c5d1bc6c92557a7d41e45008240e1e929bc44`.
 - The rollout then completed the checksum-bound encrypted backup/restore rehearsal, exact five-artifact real migration and additive four-view recovery. Counts and digests remained identical, duplicate groups and new audit rows were zero, and no seed, `.hdbtabledata` or catalog-row DML ran.
 - Selective CAP rollout and controlled PM catalog lifecycle acceptance passed for create, edit, deactivate, reactivate, impact/audit handling and zero hard delete. All four controlled rows ended inactive and final readiness was `DEMO READY`.
-- PR #338 records the rollout evidence. Exact-head review/CI passed, and a controlled TESTER session proved Bug Management access while direct User Administration navigation returned `Forbidden`. Gate 5 is ready for PR integration. Gate 6 remains unopened.
+- PR #338 records the Gate 5 rollout evidence. Exact-head review/CI passed, and a controlled TESTER session proved Bug Management access while direct User Administration navigation returned `Forbidden`.
+- Gate 6 source candidate is isolated on `feature/wp8-admin-operations-audit-donhv` from exact `aae01e375a15d7664281b8cee35ac16727e696cf`. It adds safe bounded Operations/Audit DTO actions, persisted-state readiness, state-valid onboarding-delivery retry, Operations/Audit UI tabs, focused tests and bilingual knowledge mirrors. No schema/index or dependency/lockfile change is proposed.
+- The only local dependency-visibility workaround is two NTFS junctions to the exact clean root `E:\IDTS-SAP01` locked dependency trees, verified by package-lock SHA parity and target absence before creation. They are excluded from Git and must not be reproduced as repository artifacts.
 
 ## Gate sequence
 
@@ -50,6 +52,6 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 Each gate records source tests, CAP/Fiori/UI5 MCP guidance, security review, artifact checksums where applicable, role matrix, persistence/reload, UI/UX evidence, mutation ledger, rollback verification, and remaining limitations.
 
-## Next handoff
+## Gate 6 handoff boundary
 
-Move PR #338 from Draft to Ready, merge it after exact GitHub checks remain green, synchronize `dev`, and remove the clean merged Gate 5 worktree from outside its path. Gate 6 requires a separate start decision.
+The executor may complete source/tests/docs/evidence commits, push the exact branch, open exactly one Draft PR, read back GitHub QA, and report the mutation ledger. The coordinator owns the independent exact-head review, selective rollout/manual acceptance, Ready/merge, and any provider/data/user/role/HANA/HDI/deployment action. Do not manufacture an outage or remove this worktree before coordinator feedback.

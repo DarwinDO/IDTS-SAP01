@@ -17,7 +17,7 @@ sap.ui.define([
 	return BaseController.extend("idts.useradministrationui.controller.Main", {
 		onInit: function () {
 			const oSessionState = this._readActiveUsersSessionState();
-			this.setModel(new JSONModel({ busy: false, selectedTab: oSessionState.selectedTab }), "view");
+			this.setModel(new JSONModel({ busy: false, selectedTab: oSessionState.selectedTab, selectedOperationsTab: oSessionState.selectedOperationsTab }), "view");
 			this.setModel(new JSONModel(this._emptyInvite()), "invite");
 			this.setModel(new JSONModel(this._emptyAccessChange()), "access");
 			this.setModel(new JSONModel(this._emptyAccessLifecycle()), "lifecycle");
@@ -38,6 +38,10 @@ sap.ui.define([
 				impact: null
 			}), "catalogs");
 			this.setModel(new JSONModel({ items: [] }), "requests");
+			this.setModel(new JSONModel({ items: [], query: oSessionState.deliveryQuery, status: oSessionState.deliveryStatus, nextSkip: 0, pageSize: 25, hasMore: false, loaded: false, busy: false, error: false, selected: null, detailsBusy: false }), "deliveries");
+			this.setModel(new JSONModel({ items: [], state: oSessionState.operationState, operationType: oSessionState.operationType, nextSkip: 0, pageSize: 25, hasMore: false, loaded: false, busy: false, error: false, selected: null, detailsBusy: false }), "operations");
+			this.setModel(new JSONModel({ items: [], action: oSessionState.auditAction, result: oSessionState.auditResult, from: oSessionState.auditFrom, to: oSessionState.auditTo, nextSkip: 0, pageSize: 25, hasMore: false, loaded: false, busy: false, error: false, selected: null, detailsBusy: false }), "audit");
+			this.setModel(new JSONModel({ emailDeliveryState: "UNKNOWN", provisioningBrokerState: "UNKNOWN", lastSuccessfulReconciliationAt: null, loaded: false, busy: false, error: false }), "adminReadiness");
 			this.setModel(new JSONModel({
 				items: [],
 				developerItems: [],
@@ -69,6 +73,8 @@ sap.ui.define([
 				await this._ensureActiveUsersLoaded();
 			}
 			if (sSelectedTab === "businessCatalogs") await this._loadCatalogs();
+			if (sSelectedTab === "operations") await this._ensureOperationsLoaded();
+			if (sSelectedTab === "audit") await this._ensureAuditLoaded();
 		},
 
 		onSearch: async function (oEvent) {
@@ -85,6 +91,121 @@ sap.ui.define([
 			if (sKey === "businessCatalogs" && !this.getModel("catalogs").getProperty("/loaded")) {
 				await this._loadCatalogs();
 			}
+			if (sKey === "operations") await this._ensureOperationsLoaded();
+			if (sKey === "audit") await this._ensureAuditLoaded();
+		},
+
+		onOperationsTabSelect: async function (oEvent) {
+			const sKey = oEvent.getParameter("key") || oEvent.getSource().getSelectedKey();
+			this.getModel("view").setProperty("/selectedOperationsTab", sKey);
+			this._saveActiveUsersSessionState();
+			if (sKey === "deliveries") await this._loadDeliveries();
+			if (sKey === "provisioning") await this._loadOperations();
+		},
+
+		onDeliverySearch: async function (oEvent) {
+			this.getModel("deliveries").setProperty("/query", oEvent.getParameter("query") || oEvent.getParameter("value") || "");
+			this._saveActiveUsersSessionState();
+			await this._loadDeliveries();
+		},
+
+		onDeliveryStatusChange: async function (oEvent) {
+			this.getModel("deliveries").setProperty("/status", oEvent.getParameter("selectedItem")?.getKey?.() || "");
+			this._saveActiveUsersSessionState();
+			await this._loadDeliveries();
+		},
+
+		onProvisioningFilterChange: async function () {
+			this._saveActiveUsersSessionState();
+			await this._loadOperations();
+		},
+
+		onAuditFilterChange: async function () {
+			this._saveActiveUsersSessionState();
+			await this._loadAudit();
+		},
+
+		onLoadMoreDeliveries: async function () {
+			const oModel = this.getModel("deliveries");
+			if (oModel.getProperty("/hasMore") && !oModel.getProperty("/busy")) await this._loadDeliveries(undefined, true);
+		},
+
+		onLoadMoreOperations: async function () {
+			const oModel = this.getModel("operations");
+			if (oModel.getProperty("/hasMore") && !oModel.getProperty("/busy")) await this._loadOperations(undefined, true);
+		},
+
+		onLoadMoreAudit: async function () {
+			const oModel = this.getModel("audit");
+			if (oModel.getProperty("/hasMore") && !oModel.getProperty("/busy")) await this._loadAudit(undefined, true);
+		},
+
+		onRetryOnboardingDelivery: async function (oEvent) {
+			const oRow = this._operationsRowFromEvent(oEvent, "deliveries");
+			if (!oRow || !await this._confirm("retryDeliveryConfirmation")) return;
+			await this._invokeOperationsAction("retryOnboardingDelivery", {
+				deliveryID: oRow.deliveryID,
+				expectedModifiedAt: oRow.modifiedAt
+			}, "deliveryRetryQueued", "deliveries");
+		},
+
+		onRefreshOperations: async function () {
+			const sSubtab = this.getModel("view").getProperty("/selectedOperationsTab") || "deliveries";
+			if (sSubtab === "deliveries") await this._loadDeliveries();
+			if (sSubtab === "provisioning") await this._loadOperations();
+			await this._loadReadiness();
+		},
+
+		onRefreshAudit: async function () {
+			await this._loadAudit();
+		},
+
+		onOpenDeliveryDetails: async function (oEvent) {
+			const oRow = this._operationsRowFromEvent(oEvent, "deliveries");
+			if (!oRow) return;
+			this.getModel("deliveries").setProperty("/selected", oRow);
+			if (!this._deliveryDetailsDialog) {
+				this._deliveryDetailsDialog = await Fragment.load({ id: this.getView().getId(), name: "idts.useradministrationui.fragment.DeliveryDetails", controller: this });
+				this.getView().addDependent(this._deliveryDetailsDialog);
+			}
+			this._deliveryDetailsDialog.open();
+		},
+
+		onCloseDeliveryDetails: function () {
+			this._deliveryDetailsDialog?.close();
+			this.getModel("deliveries").setProperty("/selected", null);
+		},
+
+		onOpenOperationDetails: async function (oEvent) {
+			const oRow = this._operationsRowFromEvent(oEvent, "operations");
+			if (!oRow) return;
+			this.getModel("operations").setProperty("/selected", oRow);
+			if (!this._operationDetailsDialog) {
+				this._operationDetailsDialog = await Fragment.load({ id: this.getView().getId(), name: "idts.useradministrationui.fragment.OperationDetails", controller: this });
+				this.getView().addDependent(this._operationDetailsDialog);
+			}
+			this._operationDetailsDialog.open();
+		},
+
+		onCloseOperationDetails: function () {
+			this._operationDetailsDialog?.close();
+			this.getModel("operations").setProperty("/selected", null);
+		},
+
+		onOpenAuditDetails: async function (oEvent) {
+			const oRow = this._operationsRowFromEvent(oEvent, "audit");
+			if (!oRow) return;
+			this.getModel("audit").setProperty("/selected", oRow);
+			if (!this._auditDetailsDialog) {
+				this._auditDetailsDialog = await Fragment.load({ id: this.getView().getId(), name: "idts.useradministrationui.fragment.AuditDetails", controller: this });
+				this.getView().addDependent(this._auditDetailsDialog);
+			}
+			this._auditDetailsDialog.open();
+		},
+
+		onCloseAuditDetails: function () {
+			this._auditDetailsDialog?.close();
+			this.getModel("audit").setProperty("/selected", null);
 		},
 
 		onActiveUsersSearch: async function (oEvent) {
@@ -447,8 +568,16 @@ sap.ui.define([
 		},
 
 		onRetryAccessOperation: async function (oEvent) {
-			const oRow = this._rowFromEvent(oEvent);
-			if (!oRow || !oRow.latestOperation_ID || !await this._confirm("retryConfirmation")) {
+			const oRow = this._rowFromEvent(oEvent) || this._operationsRowFromEvent(oEvent, "operations");
+			if (!oRow || (!oRow.latestOperation_ID && !oRow.operationID) || !await this._confirm("retryConfirmation")) {
+				return;
+			}
+			if (oRow.operationID) {
+				if (oRow.canRetry === false) return;
+				await this._invokeOperationsAction("retryAccessOperation", {
+					operationID: oRow.operationID,
+					expectedVersion: oRow.expectedVersion
+				}, "retryQueued", "operations");
 				return;
 			}
 			await this._invokeAction("retryAccessOperation", {
@@ -458,8 +587,16 @@ sap.ui.define([
 		},
 
 		onReconcileAccessOperation: async function (oEvent) {
-			const oRow = this._rowFromEvent(oEvent);
-			if (!oRow || !oRow.latestOperation_ID || !await this._confirm("reconcileConfirmation")) {
+			const oRow = this._rowFromEvent(oEvent) || this._operationsRowFromEvent(oEvent, "operations");
+			if (!oRow || (!oRow.latestOperation_ID && !oRow.operationID) || !await this._confirm("reconcileConfirmation")) {
+				return;
+			}
+			if (oRow.operationID) {
+				if (oRow.canReconcile === false) return;
+				await this._invokeOperationsAction("reconcileAccessOperation", {
+					operationID: oRow.operationID,
+					expectedVersion: oRow.expectedVersion
+				}, "reconcileQueued", "operations");
 				return;
 			}
 			await this._invokeAction("reconcileAccessOperation", {
@@ -971,6 +1108,10 @@ sap.ui.define([
 			return oEvent?.getSource?.().getBindingContext("activeUsers")?.getObject?.() || null;
 		},
 
+		_operationsRowFromEvent: function (oEvent, sModelName) {
+			return oEvent?.getSource?.().getBindingContext(sModelName)?.getObject?.() || null;
+		},
+
 		_requestForActiveUser: function (sUserID) {
 			return (this.getModel("requests")?.getProperty("/items") || []).find(oRow => oRow.activeUser_ID === sUserID) || null;
 		},
@@ -1035,15 +1176,190 @@ sap.ui.define([
 			}
 		},
 
+		_ensureOperationsLoaded: function () {
+			const sSubtab = this.getModel("view").getProperty("/selectedOperationsTab") || "deliveries";
+			const oModel = sSubtab === "deliveries" ? this.getModel("deliveries") : this.getModel("operations");
+			if (!oModel.getProperty("/loaded")) {
+				return Promise.all([sSubtab === "deliveries" ? this._loadDeliveries() : this._loadOperations(), this._loadReadiness()]);
+			}
+			return this._loadReadiness();
+		},
+
+		_ensureAuditLoaded: function () {
+			return this.getModel("audit").getProperty("/loaded") ? Promise.resolve() : this._loadAudit();
+		},
+
+		_loadReadiness: async function () {
+			const oModel = this.getModel("adminReadiness");
+			oModel.setProperty("/busy", true);
+			oModel.setProperty("/error", false);
+			try {
+				const oOperation = this.getView().getModel().bindContext("/readAdministrationReadiness(...)");
+				await oOperation.invoke("$direct");
+				const oContext = oOperation.getBoundContext();
+				const oResult = await (oContext ? oContext.requestObject() : {});
+				oModel.setData({ ...(oResult || {}), loaded: true, busy: false, error: false });
+			} catch {
+				oModel.setProperty("/error", true);
+			} finally {
+				oModel.setProperty("/busy", false);
+			}
+		},
+
+		_loadDeliveries: async function (_sQuery, bAppend) {
+			const oModel = this.getModel("deliveries");
+			const bAppending = bAppend === true;
+			const iRequest = (this._deliveriesRequest || 0) + 1;
+			this._deliveriesRequest = iRequest;
+			const iSkip = bAppending ? Number(oModel.getProperty("/nextSkip")) || 0 : 0;
+			const iPageSize = Number(oModel.getProperty("/pageSize")) || 25;
+			if (!bAppending) {
+				oModel.setProperty("/items", []);
+				oModel.setProperty("/nextSkip", 0);
+				oModel.setProperty("/hasMore", false);
+			}
+			oModel.setProperty("/busy", true);
+			oModel.setProperty("/error", false);
+			try {
+				const oOperation = this.getView().getModel().bindContext("/searchOnboardingDeliveries(...)");
+				oOperation.setParameter("status", oModel.getProperty("/status") || null);
+				oOperation.setParameter("query", oModel.getProperty("/query") || "");
+				oOperation.setParameter("skip", iSkip);
+				oOperation.setParameter("top", iPageSize);
+				await oOperation.invoke("$direct");
+				const oContext = oOperation.getBoundContext();
+				const oResult = await (oContext ? oContext.requestObject() : {});
+				const aItems = Array.isArray(oResult) ? oResult : (oResult?.value || []);
+				const aExisting = bAppending ? oModel.getProperty("/items") || [] : [];
+				if (iRequest === this._deliveriesRequest) {
+					oModel.setProperty("/items", aExisting.concat(aItems));
+					oModel.setProperty("/nextSkip", iSkip + aItems.length);
+					oModel.setProperty("/hasMore", aItems.length === iPageSize);
+					oModel.setProperty("/loaded", true);
+				}
+			} catch {
+				if (iRequest === this._deliveriesRequest) oModel.setProperty("/error", true);
+			} finally {
+				if (iRequest === this._deliveriesRequest) oModel.setProperty("/busy", false);
+			}
+		},
+
+		_loadOperations: async function (_unused, bAppend) {
+			const oModel = this.getModel("operations");
+			const bAppending = bAppend === true;
+			const iRequest = (this._operationsRequest || 0) + 1;
+			this._operationsRequest = iRequest;
+			const iSkip = bAppending ? Number(oModel.getProperty("/nextSkip")) || 0 : 0;
+			const iPageSize = Number(oModel.getProperty("/pageSize")) || 25;
+			if (!bAppending) {
+				oModel.setProperty("/items", []);
+				oModel.setProperty("/nextSkip", 0);
+				oModel.setProperty("/hasMore", false);
+			}
+			oModel.setProperty("/busy", true);
+			oModel.setProperty("/error", false);
+			try {
+				const oOperation = this.getView().getModel().bindContext("/searchAccessOperations(...)");
+				oOperation.setParameter("state", oModel.getProperty("/state") || null);
+				oOperation.setParameter("operationType", oModel.getProperty("/operationType") || null);
+				oOperation.setParameter("skip", iSkip);
+				oOperation.setParameter("top", iPageSize);
+				await oOperation.invoke("$direct");
+				const oContext = oOperation.getBoundContext();
+				const oResult = await (oContext ? oContext.requestObject() : {});
+				const aItems = Array.isArray(oResult) ? oResult : (oResult?.value || []);
+				const aExisting = bAppending ? oModel.getProperty("/items") || [] : [];
+				if (iRequest === this._operationsRequest) {
+					oModel.setProperty("/items", aExisting.concat(aItems));
+					oModel.setProperty("/nextSkip", iSkip + aItems.length);
+					oModel.setProperty("/hasMore", aItems.length === iPageSize);
+					oModel.setProperty("/loaded", true);
+				}
+			} catch {
+				if (iRequest === this._operationsRequest) oModel.setProperty("/error", true);
+			} finally {
+				if (iRequest === this._operationsRequest) oModel.setProperty("/busy", false);
+			}
+		},
+
+		_loadAudit: async function (_unused, bAppend) {
+			const oModel = this.getModel("audit");
+			const bAppending = bAppend === true;
+			const iRequest = (this._auditRequest || 0) + 1;
+			this._auditRequest = iRequest;
+			const iSkip = bAppending ? Number(oModel.getProperty("/nextSkip")) || 0 : 0;
+			const iPageSize = Number(oModel.getProperty("/pageSize")) || 25;
+			if (!bAppending) {
+				oModel.setProperty("/items", []);
+				oModel.setProperty("/nextSkip", 0);
+				oModel.setProperty("/hasMore", false);
+			}
+			oModel.setProperty("/busy", true);
+			oModel.setProperty("/error", false);
+			try {
+				const oOperation = this.getView().getModel().bindContext("/searchAccessAuditEvents(...)");
+				oOperation.setParameter("action", oModel.getProperty("/action") || null);
+				oOperation.setParameter("result", oModel.getProperty("/result") || null);
+				oOperation.setParameter("from", oModel.getProperty("/from") || null);
+				oOperation.setParameter("to", oModel.getProperty("/to") || null);
+				oOperation.setParameter("skip", iSkip);
+				oOperation.setParameter("top", iPageSize);
+				await oOperation.invoke("$direct");
+				const oContext = oOperation.getBoundContext();
+				const oResult = await (oContext ? oContext.requestObject() : {});
+				const aItems = Array.isArray(oResult) ? oResult : (oResult?.value || []);
+				const aExisting = bAppending ? oModel.getProperty("/items") || [] : [];
+				if (iRequest === this._auditRequest) {
+					oModel.setProperty("/items", aExisting.concat(aItems));
+					oModel.setProperty("/nextSkip", iSkip + aItems.length);
+					oModel.setProperty("/hasMore", aItems.length === iPageSize);
+					oModel.setProperty("/loaded", true);
+				}
+			} catch {
+				if (iRequest === this._auditRequest) oModel.setProperty("/error", true);
+			} finally {
+				if (iRequest === this._auditRequest) oModel.setProperty("/busy", false);
+			}
+		},
+
+		_invokeOperationsAction: async function (sAction, mParameters, sSuccessTextKey, sReloadModel) {
+			this.getModel("view").setProperty("/busy", true);
+			try {
+				const oOperation = this.getView().getModel().bindContext(`/${sAction}(...)`);
+				Object.entries(mParameters).forEach(([sName, vValue]) => oOperation.setParameter(sName, vValue));
+				await oOperation.invoke("$direct");
+				if (sReloadModel === "deliveries") await this._loadDeliveries();
+				if (sReloadModel === "operations") await this._loadOperations();
+				if (sReloadModel === "audit") await this._loadAudit();
+				await this._loadReadiness();
+				MessageToast.show(await this._text(sSuccessTextKey));
+				return true;
+			} catch {
+				MessageBox.error(await this._text("operationsActionFailed"));
+				return false;
+			} finally {
+				this.getModel("view").setProperty("/busy", false);
+			}
+		},
+
 		_readActiveUsersSessionState: function () {
-			const oDefault = { selectedTab: "requests", query: "", includeNonActive: false };
+			const oDefault = { selectedTab: "requests", selectedOperationsTab: "deliveries", query: "", includeNonActive: false, deliveryQuery: "", deliveryStatus: "", operationState: "", operationType: "", auditAction: "", auditResult: "", auditFrom: "", auditTo: "" };
 			if (typeof window === "undefined" || !window.sessionStorage) return oDefault;
 			try {
 				const oSaved = JSON.parse(window.sessionStorage.getItem("idts.userAdministration.activeUsers") || "{}");
 				return {
-					selectedTab: ["requests", "activeUsers", "developerResponsibilities", "businessCatalogs"].includes(oSaved.selectedTab) ? oSaved.selectedTab : oDefault.selectedTab,
+					selectedTab: ["requests", "activeUsers", "developerResponsibilities", "businessCatalogs", "operations", "audit"].includes(oSaved.selectedTab) ? oSaved.selectedTab : oDefault.selectedTab,
+					selectedOperationsTab: ["deliveries", "provisioning"].includes(oSaved.selectedOperationsTab) ? oSaved.selectedOperationsTab : oDefault.selectedOperationsTab,
 					query: typeof oSaved.query === "string" ? oSaved.query : oDefault.query,
-					includeNonActive: oSaved.includeNonActive === true
+					includeNonActive: oSaved.includeNonActive === true,
+					deliveryQuery: typeof oSaved.deliveryQuery === "string" ? oSaved.deliveryQuery : oDefault.deliveryQuery,
+					deliveryStatus: typeof oSaved.deliveryStatus === "string" ? oSaved.deliveryStatus : oDefault.deliveryStatus,
+					operationState: typeof oSaved.operationState === "string" ? oSaved.operationState : oDefault.operationState,
+					operationType: typeof oSaved.operationType === "string" ? oSaved.operationType : oDefault.operationType,
+					auditAction: typeof oSaved.auditAction === "string" ? oSaved.auditAction : oDefault.auditAction,
+					auditResult: typeof oSaved.auditResult === "string" ? oSaved.auditResult : oDefault.auditResult,
+					auditFrom: typeof oSaved.auditFrom === "string" ? oSaved.auditFrom : oDefault.auditFrom,
+					auditTo: typeof oSaved.auditTo === "string" ? oSaved.auditTo : oDefault.auditTo
 				};
 			} catch {
 				return oDefault;
@@ -1057,8 +1373,17 @@ sap.ui.define([
 				const oActiveUsersModel = this.getModel("activeUsers");
 				window.sessionStorage.setItem("idts.userAdministration.activeUsers", JSON.stringify({
 					selectedTab: oViewModel.getProperty("/selectedTab"),
+					selectedOperationsTab: oViewModel.getProperty("/selectedOperationsTab"),
 					query: oActiveUsersModel.getProperty("/query") || "",
-					includeNonActive: oActiveUsersModel.getProperty("/includeNonActive") === true
+					includeNonActive: oActiveUsersModel.getProperty("/includeNonActive") === true,
+					deliveryQuery: this.getModel("deliveries")?.getProperty("/query") || "",
+					deliveryStatus: this.getModel("deliveries")?.getProperty("/status") || "",
+					operationState: this.getModel("operations")?.getProperty("/state") || "",
+					operationType: this.getModel("operations")?.getProperty("/operationType") || "",
+					auditAction: this.getModel("audit")?.getProperty("/action") || "",
+					auditResult: this.getModel("audit")?.getProperty("/result") || "",
+					auditFrom: this.getModel("audit")?.getProperty("/from") || "",
+					auditTo: this.getModel("audit")?.getProperty("/to") || ""
 				}));
 			} catch {
 				// Lưu bộ lọc chỉ là tiện ích; không được chặn việc tải dữ liệu chỉ đọc.

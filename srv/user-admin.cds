@@ -106,6 +106,60 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     cancelEligible        : Boolean;
   }
 
+  type OnboardingDeliverySummary {
+    deliveryID       : UUID;
+    requestID        : UUID;
+    recipientDisplay : String(255);
+    status           : String(40);
+    attemptCount     : Integer;
+    nextAttemptAt    : Timestamp;
+    lastAttemptAt    : Timestamp;
+    sentAt           : Timestamp;
+    safeErrorCode    : String(80);
+    safeErrorSummary : String(500);
+    modifiedAt       : Timestamp;
+    canRetry         : Boolean;
+  }
+
+  type AccessOperationSummary {
+    operationID          : UUID;
+    requestID            : UUID;
+    operationType        : String(30);
+    state                : String(30);
+    attemptCount         : Integer;
+    createdAt            : Timestamp;
+    startedAt            : Timestamp;
+    completedAt          : Timestamp;
+    safeResultCode       : String(80);
+    safeResultSummary    : String(500);
+    requestedByDisplay   : String(120);
+    targetDisplay        : String(255);
+    expectedVersion      : Integer;
+    canRetry             : Boolean;
+    canReconcile         : Boolean;
+  }
+
+  type AdministrationAuditEventSummary {
+    eventID                : UUID;
+    requestID              : UUID;
+    operationID            : UUID;
+    action                 : String(40);
+    result                 : String(40);
+    fromState              : String(40);
+    toState                : String(40);
+    actorDisplay            : String(120);
+    targetDisplay           : String(255);
+    occurredAt              : Timestamp;
+    detailsSummary          : String(500);
+    correlationFingerprint  : String(12);
+  }
+
+  type AdministrationReadiness {
+    emailDeliveryState              : String(20);
+    provisioningBrokerState         : String(30);
+    lastSuccessfulReconciliationAt  : Timestamp;
+  }
+
   type CatalogImpactResult {
     catalogType                 : String(30);
     catalogID                   : UUID;
@@ -134,6 +188,36 @@ service UserAdministrationService @(requires: 'authenticated-user') {
   action verifySapIdentity(token : String(2048)) returns OnboardingResult;
 
   action searchOnboarding(query : String(255)) returns many OnboardingRequestSummary;
+
+  action searchOnboardingDeliveries(
+    status : String(40),
+    query  : String(255),
+    skip   : Integer,
+    top    : Integer
+  ) returns many OnboardingDeliverySummary;
+
+  action searchAccessOperations(
+    state         : String(30),
+    operationType : String(30),
+    skip          : Integer,
+    top           : Integer
+  ) returns many AccessOperationSummary;
+
+  action searchAccessAuditEvents(
+    action : String(40),
+    result : String(40),
+    from   : Timestamp,
+    to     : Timestamp,
+    skip   : Integer,
+    top    : Integer
+  ) returns many AdministrationAuditEventSummary;
+
+  action readAdministrationReadiness() returns AdministrationReadiness;
+
+  action retryOnboardingDelivery(
+    deliveryID        : UUID,
+    expectedModifiedAt: Timestamp
+  ) returns OnboardingDeliverySummary;
 
   action searchActiveUsers(query : String(255), includeNonActive : Boolean, skip : Integer, top : Integer) returns many ActiveUserSummary;
 

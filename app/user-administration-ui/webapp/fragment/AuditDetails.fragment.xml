@@ -1,0 +1,27 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" core:require="{ formatter: 'idts/useradministrationui/model/formatter' }">
+	<Dialog title="{i18n>auditDetails}" contentWidth="32rem" draggable="true" resizable="true">
+		<content>
+			<VBox class="sapUiResponsiveContentPadding">
+				<Label text="{i18n>auditAction}"/>
+				<Text text="{audit>/selected/action}"/>
+				<Label text="{i18n>auditResult}"/>
+				<ObjectStatus text="{audit>/selected/result}" state="{path: 'audit>/selected/result', formatter: 'formatter.statusState'}"/>
+				<Label text="{i18n>fromState}"/>
+				<Text text="{audit>/selected/fromState}"/>
+				<Label text="{i18n>toState}"/>
+				<Text text="{audit>/selected/toState}"/>
+				<Label text="{i18n>actor}"/>
+				<Text text="{audit>/selected/actorDisplay}"/>
+				<Label text="{i18n>target}"/>
+				<Text text="{audit>/selected/targetDisplay}"/>
+				<Label text="{i18n>correlationFingerprint}"/>
+				<Text text="{audit>/selected/correlationFingerprint}"/>
+				<Label text="{i18n>safeDetails}"/>
+				<Text text="{audit>/selected/detailsSummary}" wrapping="true"/>
+			</VBox>
+		</content>
+		<beginButton>
+			<Button text="{i18n>close}" press=".onCloseAuditDetails"/>
+		</beginButton>
+	</Dialog>
+</core:FragmentDefinition>

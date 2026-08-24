@@ -98,3 +98,31 @@ Bốn projection catalog là shape OData V4 public cho tab Business Catalogs. Ke
 Do not expose `CatalogAdministrationAuditEvents` as a writable public entity. When adding a catalog field, update the CDS projection, handler allowlist, UI payload/display, both locale files, knowledge mirrors, CAP/UI contracts, and the exact OData metadata test. Re-run `npx cds compile srv -s all --to edmx`; this is source verification only, not HDI migration.
 
 Không expose `CatalogAdministrationAuditEvents` thành entity public writable. Khi thêm field catalog, phải cập nhật CDS projection, handler allowlist, UI payload/display, hai locale, knowledge mirror, CAP/UI contract và test metadata OData. Chạy lại `npx cds compile srv -s all --to edmx`; đây chỉ là source verification, không phải HDI migration.
+
+## Gate 6 Operations and Audit contract / Contract Operations và Audit Gate 6
+
+### English
+
+Gate 6 adds five action-only safe DTO contracts at `srv/user-admin.cds:109-224`: onboarding delivery summaries, access-operation summaries, administration audit summaries, persisted-state readiness, and the bounded `retryOnboardingDelivery` action. The service deliberately does not expose `UserOnboardingDeliveries`, `UserAccessOperations`, or `UserIdentityAuditEvents` as public entities.
+
+- **IDTS concept**: PM + UserAdmin can inspect delivery, provisioning, and append-only administration history without receiving recipient email, provider IDs, lock/lease material, idempotency keys, identity hashes, or raw provider data.
+- **Impact if broken**: A new field can turn a support screen into a credential/provider/debug viewer or allow a caller to enumerate private identity data.
+- **Must check together**: `srv/user-admin/operations-audit.js`, `scripts/qa/test-user-admin-operations-audit.js`, CAP EDMX, and `Main.view.xml` operations/audit tabs.
+
+Each action accepts bounded filters and `skip`/`top`; the server default is 25 and the maximum is 100. `modifiedAt` is present only as the optimistic token needed by the delivery retry action. Correlations are represented only by a server-generated 12-character SHA-256 fingerprint in audit summaries.
+
+### Tiếng Việt
+
+Gate 6 thêm năm contract DTO an toàn chỉ qua action tại `srv/user-admin.cds:109-224`: summary delivery onboarding, summary access operation, summary audit administration, readiness suy ra từ persisted state và action `retryOnboardingDelivery` có giới hạn. Service cố ý không expose `UserOnboardingDeliveries`, `UserAccessOperations` hoặc `UserIdentityAuditEvents` thành public entity.
+
+- **Khái niệm IDTS**: PM + UserAdmin có thể xem delivery, provisioning và lịch sử administration append-only mà không nhận email người nhận, provider ID, lock/lease, idempotency key, identity hash hoặc raw provider data.
+- **Ảnh hưởng nếu sai**: Thêm field không an toàn có thể biến màn hình support thành log/credential/provider viewer hoặc cho phép dò identity private.
+- **Phải kiểm tra cùng**: `srv/user-admin/operations-audit.js`, `scripts/qa/test-user-admin-operations-audit.js`, CAP EDMX và tab operations/audit trong `Main.view.xml`.
+
+Mỗi action nhận filter có giới hạn cùng `skip`/`top`; mặc định server là 25 và tối đa 100. `modifiedAt` chỉ xuất hiện như optimistic token cần cho retry delivery. Correlation chỉ hiển thị dưới dạng fingerprint SHA-256 12 ký tự do server tạo.
+
+### Safe editing / Sửa an toàn
+
+Keep the DTO allow-list explicit. If persistence adds a column, do not add it to the action result by copying the entity; decide whether it is a safe business display field, add a red/green forbidden-field test, and update the bilingual UI mirror. Do not add schema indexes or public entity projections without measured evidence and a separate decision.
+
+Giữ allow-list DTO rõ ràng. Nếu persistence thêm column, không copy nguyên entity vào action result; phải quyết định đó có phải field business an toàn không, thêm test forbidden-field red/green và cập nhật mirror UI song ngữ. Không thêm index schema hoặc public entity projection khi chưa có evidence đo lường và decision riêng.

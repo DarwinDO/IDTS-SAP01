@@ -18,6 +18,7 @@ const {
   cancelExistingUserIdentityLink
 } = require('./user-admin/existing-identity-link')
 const { getUserAdminConfig } = require('./user-admin/config')
+const { getEmailConfig } = require('./email/config')
 const { scheduleImmediateEmailOutbox } = require('./email/worker')
 const { identityKeyHash, selectActiveUserForRequest } = require('./auth/identity-map')
 const { isXsuaaRuntime } = require('./auth/platform-role')
@@ -27,6 +28,7 @@ const {
 } = require('./user-admin/developer-profile')
 const { registerActiveUserHandlers } = require('./user-admin/active-users')
 const { registerCatalogHandlers } = require('./user-admin/catalogs')
+const { registerOperationsAuditHandlers } = require('./user-admin/operations-audit')
 const {
   requestSuspend,
   requestReactivate,
@@ -86,6 +88,11 @@ class UserAdministrationService extends cds.ApplicationService {
     this.on('reconcileAccessOperation', req => reconcileAccessOperation(req))
     registerActiveUserHandlers(this, { authorize: requireActiveUserAdministrator })
     registerCatalogHandlers(this, { authorize: requireActiveUserAdministrator })
+    registerOperationsAuditHandlers(this, {
+      authorize: requireActiveUserAdministrator,
+      schedule: scheduleImmediateEmailOutbox,
+      getEmailConfig
+    })
     return super.init()
   }
 }

@@ -83,6 +83,7 @@
     "qa:user-onboarding:programmatic": "node scripts/qa/test-user-admin-invitation-config.js && node scripts/qa/test-user-onboarding-contract.js && node scripts/qa/test-user-onboarding-programmatic.js",
     "qa:user-onboarding-page:programmatic": "node scripts/qa/test-user-onboarding-page.mjs",
     "qa:user-admin-ui:programmatic": "node scripts/qa/test-user-admin-ui.js",
+    "qa:user-admin-operations:programmatic": "node scripts/qa/test-user-admin-operations-audit.js",
     "qa:existing-user-identity-link:programmatic": "node scripts/qa/test-existing-user-identity-link.js",
     "qa:user-admin-active-users:programmatic": "node scripts/qa/test-user-admin-active-users.js",
     "qa:user-admin-access-lifecycle:programmatic": "node scripts/qa/test-user-admin-access-lifecycle.js",

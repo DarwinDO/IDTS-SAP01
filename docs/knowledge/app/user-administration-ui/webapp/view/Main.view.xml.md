@@ -43,3 +43,27 @@ Tab Business Catalogs là một `IconTabBar` lồng trong User Administration. U
 Keep visible text in i18n and keep CAP authorization/validation out of XML expressions. When adding a column or action, verify responsive behavior, no-delete semantics, value-state/fragment contracts, and CAP metadata together.
 
 Giữ text hiển thị trong i18n và không đưa authorization/validation CAP vào XML expression. Khi thêm column/action, phải verify responsive behavior, no-delete semantics, contract value-state/fragment và metadata CAP cùng nhau.
+
+## Gate 6 Operations and Audit tabs / Tab Operations và Audit Gate 6
+
+### English
+
+The view adds a separate `operations` tab with `deliveries` and `provisioning` subtabs at `Main.view.xml:276-383`, plus a separate `audit` tab at `Main.view.xml:385-425`. Each table has a dedicated JSON model, server-page load state, empty text, error `MessageStrip`, responsive `autoPopinMode`, safe detail dialog, and state-bound action buttons. Delivery shows only masked recipient and safe error summary; provisioning actions use the existing guarded Retry/Reconcile actions; audit shows a short fingerprint rather than a raw correlation or identity hash.
+
+- **IDTS concept**: operations support is a business-facing administration screen, not a BTP cockpit or log viewer.
+- **Impact if broken**: UI could expose raw email/provider data, show blind Retry for ambiguous/permanent outcomes, or load all history at once.
+- **Must check together**: `Main.controller.js:98-157,1176-1330`, the three safe detail fragments, `srv/user-admin.cds:109-224`, and UI5 linter/build output.
+
+### Tiếng Việt
+
+View thêm tab riêng `operations` với subtab `deliveries` và `provisioning` tại `Main.view.xml:276-383`, cùng tab `audit` riêng tại `Main.view.xml:385-425`. Mỗi table dùng JSON model riêng, có state load theo page server, empty text, `MessageStrip` lỗi, responsive `autoPopinMode`, dialog detail an toàn và button theo state. Delivery chỉ hiện recipient đã mask và safe error summary; action provisioning tái sử dụng Retry/Reconcile đã có guard; audit hiện fingerprint ngắn thay vì correlation raw hoặc identity hash.
+
+- **Khái niệm IDTS**: Operations là màn hình administration hướng business, không phải BTP cockpit hoặc log viewer.
+- **Ảnh hưởng nếu sai**: UI có thể lộ email/provider raw, hiện Retry mù cho ambiguous/permanent hoặc load toàn bộ history một lần.
+- **Phải kiểm tra cùng**: `Main.controller.js:98-157,1176-1330`, ba fragment detail an toàn, `srv/user-admin.cds:109-224` và output UI5 linter/build.
+
+### Safe editing / Sửa an toàn
+
+Keep each tab bound to its own model and load only the selected operations subtab. Do not add raw persistence properties to XML bindings; add a safe DTO field and a contract test first. Keep technical support codes in controlled details, while table labels remain friendly and localized.
+
+Giữ mỗi tab bind vào model riêng và chỉ load subtab operations đang chọn. Không bind raw persistence property vào XML; phải thêm safe DTO field và contract test trước. Code support kỹ thuật chỉ được hiện ở details có kiểm soát, còn label table phải thân thiện và được localize.

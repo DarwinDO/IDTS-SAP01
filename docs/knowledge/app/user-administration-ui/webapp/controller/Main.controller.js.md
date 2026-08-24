@@ -79,3 +79,43 @@ Không chuyển authorization hoặc conflict rule vào controller. Giữ text u
 The controller loads at most 100 rows from one selected catalog, applies local search/inactive display filtering, preserves OData contexts for native ETag-aware updates, prevents double submit, and requests count-only impact before deactivation. CAP remains authoritative for authorization, normalization, conflicts, dependencies, and audit.
 
 Controller load toi da 100 row cua catalog dang chon, filter search/inactive o UI, giu OData context cho update native co ETag, chan double submit va doc impact count-only truoc deactivate. CAP van la authority cho authorization, normalization, conflict, dependency va audit.
+
+## Gate 6 Operations and Audit controller flow / Luồng controller Operations và Audit Gate 6
+
+### English
+
+The controller creates separate `deliveries`, `operations`, `audit`, and `adminReadiness` JSON models in `onInit`. `onTabSelect` and `onOperationsTabSelect` provide lazy loading: only the selected Operations subtab is requested, while Audit is loaded only when selected. `_loadDeliveries`, `_loadOperations`, and `_loadAudit` pass explicit server filters with skip/top 25-page state and preserve loading/error/empty behavior through the models. `onOpenDeliveryDetails`, `onOpenOperationDetails`, and `onOpenAuditDetails` open only safe detail fragments.
+
+Delivery retry passes only `deliveryID` plus the optimistic `modifiedAt` and reloads the delivery list/readiness after success. Provisioning Retry/Reconcile uses the existing action names and sends only operation ID/version. Session storage now retains Operations/Audit tab and filter state without storing credentials or raw response data.
+
+- **Location**: `Main.controller.js:98-157` — tab/filter/action entry points.
+  **IDTS concept**: UI state is bound to server-owned safe DTOs and state-valid actions.
+  **Impact if broken**: stale filters or duplicate submits can make the UI claim an operation that CAP rejected.
+  **Must check together**: `Main.view.xml:276-425`, `scripts/qa/test-user-admin-ui.js`, and CAP action contracts.
+
+- **Location**: `Main.controller.js:1176-1330` — lazy loaders and operation action helper.
+  **IDTS concept**: bounded server pagination and post-action reload keep operational data current without merging it into Requests/Active Users.
+  **Impact if broken**: the UI may enumerate oversized results, show stale retry eligibility, or load provider data eagerly.
+  **Must check together**: `srv/user-admin/operations-audit.js:65-286`, `adminReadiness`, and UI5 linter/build.
+
+### Tiếng Việt
+
+Controller tạo riêng các JSON model `deliveries`, `operations`, `audit` và `adminReadiness` trong `onInit`. `onTabSelect` và `onOperationsTabSelect` lazy load: chỉ request subtab Operations đang chọn, còn Audit chỉ load khi được chọn. `_loadDeliveries`, `_loadOperations` và `_loadAudit` gửi filter server explicit với page skip/top 25 và giữ state loading/error/empty trong model. `onOpenDeliveryDetails`, `onOpenOperationDetails` và `onOpenAuditDetails` chỉ mở fragment detail an toàn.
+
+Retry delivery chỉ gửi `deliveryID` và optimistic `modifiedAt`, sau success reload list/readiness. Retry/Reconcile provisioning dùng đúng action hiện có và chỉ gửi operation ID/version. Session storage giữ tab/filter Operations/Audit mà không lưu credential hoặc raw response.
+
+- **Vị trí**: `Main.controller.js:98-157` — entry point tab/filter/action.
+  **Khái niệm IDTS**: UI state bind vào safe DTO và action do server kiểm soát.
+  **Ảnh hưởng nếu sai**: filter cũ hoặc submit trùng có thể làm UI báo operation mà CAP đã reject.
+  **Phải kiểm tra cùng**: `Main.view.xml:276-425`, `scripts/qa/test-user-admin-ui.js` và CAP action contract.
+
+- **Vị trí**: `Main.controller.js:1176-1330` — lazy loader và operation action helper.
+  **Khái niệm IDTS**: server pagination có giới hạn và reload sau action giúp operational data mới mà không trộn vào Requests/Active Users.
+  **Ảnh hưởng nếu sai**: UI có thể enumerate result quá lớn, hiện retry eligibility cũ hoặc eager-load provider data.
+  **Phải kiểm tra cùng**: `srv/user-admin/operations-audit.js:65-286`, `adminReadiness` và UI5 linter/build.
+
+### Safe editing / Sửa an toàn
+
+Keep CAP authorization, optimistic checks, and safe mapping out of the controller. Any new operation action needs a model, lazy-load path, disabled/busy state, safe error copy, reload behavior, and a UI contract test before it is exposed in XML.
+
+Giữ authorization CAP, optimistic check và safe mapping ở backend, không chuyển vào controller. Action operation mới phải có model, lazy-load path, busy/disabled state, error copy an toàn, reload behavior và UI contract test trước khi expose trong XML.
