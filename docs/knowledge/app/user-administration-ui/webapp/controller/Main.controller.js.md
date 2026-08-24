@@ -104,7 +104,7 @@ Delivery retry passes only `deliveryID` plus the optimistic `modifiedAt` and rel
   **Must check together**: `srv/user-admin.cds` Timestamp parameters and `scripts/qa/test-user-admin-ui.js` runtime parameter assertions.
 
 - **Location**: `Main.controller.js:_loadReadiness`.
-  **IDTS concept**: UI5 may expose the readiness action as a direct structured result or as `{ value: structuredResult }`; the controller normalizes either shape before setting top-level `adminReadiness` fields and always clears busy on success or failure.
+  **IDTS concept**: SAPUI5 `ODataContextBinding.invoke()` resolves to a `Context`; the controller calls that returned context's `requestObject()` (or the bound context fallback), then normalizes a direct structured result or `{ value: structuredResult }` before setting top-level `adminReadiness` fields and clearing busy/error.
   **Impact if broken**: readiness indicators can remain `UNKNOWN` even after a successful action, or a stale busy state can block Operations UI recovery.
   **Must check together**: `srv/user-admin.cds:readAdministrationReadiness`, `scripts/qa/test-user-admin-ui.js` readiness runtime cases, and the `adminReadiness` bindings in `Main.view.xml`.
 
@@ -130,7 +130,7 @@ Retry delivery chỉ gửi `deliveryID` và optimistic `modifiedAt`, sau success
   **Phải kiểm tra cùng**: parameter Timestamp trong `srv/user-admin.cds` và assertion runtime trong `scripts/qa/test-user-admin-ui.js`.
 
 - **Vị trí**: `Main.controller.js:_loadReadiness`.
-  **Khái niệm IDTS**: UI5 có thể trả readiness action là structured result trực tiếp hoặc `{ value: structuredResult }`; controller normalize cả hai shape trước khi set field top-level của `adminReadiness` và luôn clear busy khi success hoặc failure.
+  **Khái niệm IDTS**: `ODataContextBinding.invoke()` của SAPUI5 resolve thành `Context`; controller gọi `requestObject()` của context đó (hoặc bound context fallback), rồi normalize result structured trực tiếp hoặc `{ value: structuredResult }` trước khi set field top-level `adminReadiness` và clear busy/error.
   **Ảnh hưởng nếu sai**: indicator readiness có thể vẫn `UNKNOWN` dù action thành công, hoặc busy cũ chặn UI Operations recovery.
   **Phải kiểm tra cùng**: `readAdministrationReadiness` trong `srv/user-admin.cds`, readiness runtime cases trong `scripts/qa/test-user-admin-ui.js` và binding `adminReadiness` trong `Main.view.xml`.
 

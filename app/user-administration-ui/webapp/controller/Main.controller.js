@@ -1196,11 +1196,13 @@ sap.ui.define([
 			try {
 				const oOperation = this.getView().getModel().bindContext("/readAdministrationReadiness(...)");
 				const vInvocationResult = await oOperation.invoke("$direct");
-				const oContext = oOperation.getBoundContext?.();
-				const vContextResult = vInvocationResult === undefined && oContext
+				const oContext = typeof vInvocationResult?.requestObject === "function"
+					? vInvocationResult
+					: oOperation.getBoundContext?.();
+				const vContextResult = oContext && typeof oContext.requestObject === "function"
 					? await oContext.requestObject()
 					: undefined;
-				const oResult = vInvocationResult === undefined ? vContextResult : vInvocationResult;
+				const oResult = vContextResult === undefined ? vInvocationResult : vContextResult;
 				const oStructuredResult = oResult && typeof oResult === "object" && oResult.value && typeof oResult.value === "object"
 					? oResult.value
 					: oResult;

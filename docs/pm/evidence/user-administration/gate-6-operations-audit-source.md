@@ -69,6 +69,11 @@ The single bounded independent source/security review found 0 Critical/Major and
 - The live symptom was a successful readiness action not populating indicator fields when UI5 exposed the response under `value`; the bounded fix unwraps only the structured result and keeps CAP/backend behavior unchanged.
 - TDD RED was captured before the production change at the new spacing/readiness assertions. GREEN then passed `npm run qa:user-admin-ui:programmatic`; no deployment, provider, email, user, role, data, schema, dependency, or lockfile mutation occurred.
 
+### Post-rollout UI5 Context correction
+
+- Runtime readback showed the prior assumption was incomplete: SAPUI5 `ODataContextBinding.invoke()` resolves to a `Context`, not the structured JSON. `_loadReadiness` now calls `requestObject()` on that returned Context, falls back to the bound Context, and unwraps direct or `{ value: structuredResult }` payloads.
+- TDD RED reproduced the rollout symptom with both Context response shapes; GREEN passed the focused UI contract and preserved busy/error handling. No spacing, backend, schema, dependency, platform, provider, email, user, role, or data change was made.
+
 ## Tiếng Việt
 
 ### Phạm vi và source frozen
@@ -96,3 +101,8 @@ Chỉ dùng hai NTFS junction đã được coordinator cho phép sau khi kiểm
 ### Handoff
 
 Đây là evidence source-only. Một bounded independent source/security review duy nhất phát hiện 0 Critical/Major và 2 Important; cả hai đã được fix trong source và có focused regression mới. Sau đó coordinator exact-head review phát hiện thêm 3 Important (eligibility parent trên list, semantics PENDING readiness fail-closed và normalize DateTimeOffset UI); cả ba đã được fix và full exact matrix trên working tree đã PASS. Reviewer không sửa file. Head/CI readback mới sẽ báo sau khi commit/push remediation. Giữ nguyên worktree để coordinator review.
+
+### Sửa Context UI5 sau rollout
+
+- Readback runtime cho thấy giả định trước đây chưa đủ: `ODataContextBinding.invoke()` của SAPUI5 resolve thành `Context`, không phải structured JSON. `_loadReadiness` giờ gọi `requestObject()` trên Context trả về, fallback sang bound Context và unwrap payload direct hoặc `{ value: structuredResult }`.
+- TDD RED tái hiện symptom rollout với cả hai shape Context; GREEN giữ focused UI contract PASS và bảo toàn xử lý busy/error. Không đổi spacing, backend, schema, dependency, platform, provider, email, user, role hoặc data.

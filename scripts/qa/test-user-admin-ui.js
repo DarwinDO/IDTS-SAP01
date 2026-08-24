@@ -340,17 +340,32 @@ async function verifyRuntimeBehavior () {
     {
       name: 'direct structured action result',
       invokeResult: { emailDeliveryState: 'AVAILABLE', provisioningBrokerState: 'RECENT_SUCCESS', lastSuccessfulReconciliationAt: '2026-08-24T10:00:00.000Z' },
-      contextResult: null
+      contextResult: null,
+      expected: { emailDeliveryState: 'AVAILABLE', provisioningBrokerState: 'RECENT_SUCCESS', lastSuccessfulReconciliationAt: '2026-08-24T10:00:00.000Z' }
     },
     {
       name: 'direct structured UI5 context result',
       invokeResult: undefined,
-      contextResult: { emailDeliveryState: 'AVAILABLE', provisioningBrokerState: 'RECENT_SUCCESS', lastSuccessfulReconciliationAt: '2026-08-24T10:00:00.000Z' }
+      contextResult: { emailDeliveryState: 'AVAILABLE', provisioningBrokerState: 'RECENT_SUCCESS', lastSuccessfulReconciliationAt: '2026-08-24T10:00:00.000Z' },
+      expected: { emailDeliveryState: 'AVAILABLE', provisioningBrokerState: 'RECENT_SUCCESS', lastSuccessfulReconciliationAt: '2026-08-24T10:00:00.000Z' }
     },
     {
       name: 'UI5 value-wrapped action result',
       invokeResult: undefined,
-      contextResult: { value: { emailDeliveryState: 'UNAVAILABLE', provisioningBrokerState: 'UNKNOWN', lastSuccessfulReconciliationAt: null } }
+      contextResult: { value: { emailDeliveryState: 'UNAVAILABLE', provisioningBrokerState: 'UNKNOWN', lastSuccessfulReconciliationAt: null } },
+      expected: { emailDeliveryState: 'UNAVAILABLE', provisioningBrokerState: 'UNKNOWN', lastSuccessfulReconciliationAt: null }
+    },
+    {
+      name: 'UI5 invoke Context with direct result',
+      invokeResult: { requestObject: async () => ({ emailDeliveryState: 'AVAILABLE', provisioningBrokerState: 'RECENT_SUCCESS', lastSuccessfulReconciliationAt: '2026-08-24T10:00:00.000Z' }) },
+      contextResult: null,
+      expected: { emailDeliveryState: 'AVAILABLE', provisioningBrokerState: 'RECENT_SUCCESS', lastSuccessfulReconciliationAt: '2026-08-24T10:00:00.000Z' }
+    },
+    {
+      name: 'UI5 invoke Context with value-wrapped result',
+      invokeResult: { requestObject: async () => ({ value: { emailDeliveryState: 'UNAVAILABLE', provisioningBrokerState: 'UNKNOWN', lastSuccessfulReconciliationAt: null } }) },
+      contextResult: null,
+      expected: { emailDeliveryState: 'UNAVAILABLE', provisioningBrokerState: 'UNKNOWN', lastSuccessfulReconciliationAt: null }
     }
   ]
   for (const readinessCase of readinessCases) {
@@ -368,12 +383,11 @@ async function verifyRuntimeBehavior () {
       getView: () => ({ getModel: () => ({ bindContext: () => readinessOperation }) })
     })
     await readinessInstance._loadReadiness()
-    const expected = readinessCase.invokeResult ?? readinessCase.contextResult?.value ?? readinessCase.contextResult
     assert.deepEqual({
       emailDeliveryState: readinessData.emailDeliveryState,
       provisioningBrokerState: readinessData.provisioningBrokerState,
       lastSuccessfulReconciliationAt: readinessData.lastSuccessfulReconciliationAt
-    }, expected, `${readinessCase.name} must expose readiness fields at model top level`)
+    }, readinessCase.expected, `${readinessCase.name} must expose readiness fields at model top level`)
     assert.equal(readinessData.loaded, true, `${readinessCase.name} must mark readiness loaded`)
     assert.equal(readinessData.busy, false, `${readinessCase.name} must clear busy`)
     assert.equal(readinessData.error, false, `${readinessCase.name} must clear error`)
