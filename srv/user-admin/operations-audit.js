@@ -171,12 +171,15 @@ async function readAdministrationReadiness (req, dependencies) {
     tx.run(SELECT.from(DELIVERIES).columns('status_code', 'lastAttemptAt', 'sentAt').orderBy('createdAt desc', 'ID desc').limit(25)),
     tx.run(SELECT.from(OPERATIONS).columns('state', 'completedAt').orderBy('createdAt desc', 'ID desc').limit(25))
   ])
-  const now = Date.now()
-  const hasRecentSent = deliveries.some(row => row.status_code === 'SENT' && isRecentPersistedOutcome(row.sentAt, now))
-  const hasRecentFailure = deliveries.some(row => row.status_code === 'FAILED' && isRecentPersistedOutcome(row.lastAttemptAt, now))
-  const successful = operations.filter(row => row.state === 'SUCCEEDED' && isRecentPersistedOutcome(row.completedAt, now))
+  return deriveAdministrationReadiness(deliveries, operations, Date.now())
+}
+
+function deriveAdministrationReadiness (deliveries, operations, now) {
+  const hasRecentSent = deliveries.some(row => persistedValue(row, 'status_code') === 'SENT' && isRecentPersistedOutcome(persistedValue(row, 'sentAt'), now))
+  const hasRecentFailure = deliveries.some(row => persistedValue(row, 'status_code') === 'FAILED' && isRecentPersistedOutcome(persistedValue(row, 'lastAttemptAt'), now))
+  const successful = operations.filter(row => persistedValue(row, 'state') === 'SUCCEEDED' && isRecentPersistedOutcome(persistedValue(row, 'completedAt'), now))
   const lastSuccessful = successful
-    .map(row => row.completedAt)
+    .map(row => persistedValue(row, 'completedAt'))
     .sort((left, right) => Date.parse(right) - Date.parse(left))[0] || null
   return {
     emailDeliveryState: hasRecentSent
@@ -191,6 +194,10 @@ async function readAdministrationReadiness (req, dependencies) {
         : 'UNKNOWN',
     lastSuccessfulReconciliationAt: lastSuccessful
   }
+}
+
+function persistedValue (row, name) {
+  return row?.[name] ?? row?.[name.toUpperCase()]
 }
 
 function isRecentPersistedOutcome (value, now) {
@@ -501,6 +508,7 @@ module.exports = {
   searchAccessOperations,
   searchAccessAuditEvents,
   readAdministrationReadiness,
+  deriveAdministrationReadiness,
   retryOnboardingDelivery,
   clampPage,
   maskRecipient,

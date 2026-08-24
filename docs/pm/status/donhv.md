@@ -8520,3 +8520,10 @@ Vietnamese:
 - Symptom: the safe Delivery details dialog showed status and attempt count but omitted the already-allowlisted `sentAt` and `lastAttemptAt` fields, so the PM could not distinguish fresh outcomes from legacy rows while readiness correctly remained fail-closed `UNKNOWN`.
 - Fix: TDD added only two read-only formatted fields and bilingual labels to the existing details dialog. No readiness semantics, retry eligibility, schema, provider, email, user, role, or HANA data changed.
 - Verification: the UI contract failed before the fragment change, then passed with UI lint/build and `git diff --check` after the minimal implementation.
+
+### 2026-08-24 Gate 6 HANA readiness key casing / Casing key readiness HANA Gate 6
+
+- Classification: live product defect found after timestamp visibility made the contradiction falsifiable.
+- Symptom: Delivery details proved a recent `SENT` outcome and Provisioning listed recent completed operations, but both readiness indicators remained `UNKNOWN`.
+- Root cause: the live HANA query returned uppercase result keys (`STATUS_CODE`, `SENTAT`, `STATE`, `COMPLETEDAT`) while readiness read only CAP logical key spellings. A sanitized read-only task proved 10/10 recent sent deliveries and 6/6 recent succeeded operations; exact runtime source checksum matched the reviewed source.
+- Fix: TDD added one bounded persisted-column accessor used only by readiness derivation and a regression with HANA-shaped uppercase rows. No schema, HANA row, provider, email, user, role, or retry/reconcile mutation occurred. Diagnostic task 16 was terminated after it emitted its safe result but did not exit; tasks 17–19 completed successfully.

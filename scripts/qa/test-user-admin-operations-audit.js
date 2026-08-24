@@ -173,6 +173,15 @@ async function main () {
   assert.equal(operationsAudit.maskRecipient('alice@example.invalid'), 'a***@example.invalid')
   assert.equal(operationsAudit.maskRecipient(''), 'Hidden recipient')
   assert.match(operationsAudit.correlationFingerprint('91000000-0000-4000-8000-000000000001'), /^[a-f0-9]{12}$/)
+  assert.deepEqual(operationsAudit.deriveAdministrationReadiness([
+    { STATUS_CODE: 'SENT', SENTAT: RECENT_TIMESTAMP, LASTATTEMPTAT: RECENT_TIMESTAMP }
+  ], [
+    { STATE: 'SUCCEEDED', COMPLETEDAT: RECENT_TIMESTAMP }
+  ], Date.now()), {
+    emailDeliveryState: 'AVAILABLE',
+    provisioningBrokerState: 'RECENT_SUCCESS',
+    lastSuccessfulReconciliationAt: RECENT_TIMESTAMP
+  }, 'HANA uppercase column names must retain fresh readiness outcomes')
 
   const db = await cds.deploy('db').to('sqlite::memory:')
   cds.db = db
