@@ -12,7 +12,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 ## Current status
 
-`BLOCKED — GATE 5 MIGRATION RECOVERY DECISION`
+`IN REVIEW — GATE 5 PR #338 AND TESTER AUTHORIZATION-NEGATIVE EVIDENCE`
 
 - Gates 1–3B are merged, deployed and accepted. Gate 3 browser closure is recorded by PR #325 at `04643e12727290f2f35fd56e9c3d2a8df4cbcdbc`.
 - Gate 4 branch `feature/wp8-admin-developer-pilot-donhv` is frozen from that exact base.
@@ -22,8 +22,10 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 - PR #335 passed CI and merged at `7bf7609ca070fae0d467c4964051eee0956828ad`; User Administration UI `1.0.10` was selectively deployed.
 - The controlled non-member Developer pilot reached `ACTIVE`, immutable identity link `Yes`, readiness `Ready`, one active responsibility and successful Bug Management access in a fresh session.
 - Automatic `sap.default` shadow-user creation is enabled for this POC; authorization still requires the allowlisted broker-assigned IDTS Role Collection and CAP readback.
-- Gate 5 source was independently reviewed with zero findings, merged through PR #337, and is now `origin/dev` commit `eb0c5d1bc6c92557a7d41e45008240e1e929bc44`. The coordinator rollout branch has frozen a five-artifact additive allowlist and a checksum-bound one-shot HDI simulation package. Real migration, deployment and live catalog mutation remain blocked behind separate recovery and execution evidence.
-- The exact R2 HDI simulation task passed once with five effective deploy files, zero undeploy, zero warnings, zero dependent redeploy and no CSV/`.hdbtabledata`; aggregate duplicate groups were zero and exact temporary cleanup restored the unchanged main topology. Real make remains blocked because the `hana-free` target has no approved native backup/recovery path.
+- Gate 5 source was independently reviewed with zero findings and merged through PR #337 at `eb0c5d1bc6c92557a7d41e45008240e1e929bc44`.
+- The rollout then completed the checksum-bound encrypted backup/restore rehearsal, exact five-artifact real migration and additive four-view recovery. Counts and digests remained identical, duplicate groups and new audit rows were zero, and no seed, `.hdbtabledata` or catalog-row DML ran.
+- Selective CAP rollout and controlled PM catalog lifecycle acceptance passed for create, edit, deactivate, reactivate, impact/audit handling and zero hard delete. All four controlled rows ended inactive and final readiness was `DEMO READY`.
+- Draft PR #338 records the rollout evidence. The remaining Gate 5 boundary is exact-head review followed by the controlled TESTER browser check proving User Administration remains forbidden. Gate 6 remains unopened.
 
 ## Gate sequence
 
@@ -50,4 +52,4 @@ Each gate records source tests, CAP/Fiori/UI5 MCP guidance, security review, art
 
 ## Next handoff
 
-Gate 5 source is merged and the one-shot live simulation is PASS. DonHV must now choose and approve an exact recovery/rollback strategy for the additive five-artifact migration; without that decision, real HDI make, selective CAP/UI deployment and live Business Catalog acceptance remain NO-GO.
+Synchronize the Gate 5 canonical records and PR #338 with the completed migration/acceptance evidence, obtain a zero-finding exact-head review, then capture the controlled TESTER authorization-negative browser result. Only after those checks may PR #338 move from Draft to Ready/merge and its clean merged worktree be removed. Gate 6 requires a separate start decision.

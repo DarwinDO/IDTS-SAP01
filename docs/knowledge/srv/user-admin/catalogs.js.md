@@ -10,8 +10,8 @@ This CAP handler module owns the server-side administration boundary for four re
 
 1. `srv/user-admin.js` registers this module inside the authenticated `UserAdministrationService` and supplies `requireActiveUserAdministrator`.
 2. A catalog `READ`, `CREATE`, `UPDATE`, or `DELETE` request enters the handler. Every path authorizes the exact active PM + `UserAdmin` principal before reading or changing persistence.
-3. CREATE normalizes code/name/type fields, rejects raw client IDs, validates duplicate codes or active parent pairs, and lets CAP persist the server-generated UUID.
-4. UPDATE rejects any raw client ID field, then uses the route/body ID only as an immutable target key, locks the target row, checks the request `If-Match` value against `modifiedAt`, validates only allowlisted changes, and blocks deactivation when active responsibility or child references remain.
+3. CREATE discards any client/framework ID, assigns a fresh server UUID, normalizes code/name/type fields, and validates duplicate codes or active parent pairs. A caller-supplied ID is never persisted.
+4. UPDATE accepts the same normalized ID in route and payload only as the immutable target key, rejects route/payload mismatch, locks the target row, checks the request `If-Match` value against `modifiedAt`, removes the key from the persistence change set, validates only allowlisted changes, and blocks deactivation when active responsibility or child references remain.
 5. CAP commits the catalog change and its append-only sanitized audit row together. A failure rolls both back. Rejected requests record only a safe result code, never a raw request body or provider identity.
 6. `readCatalogImpact` returns counts for Bugs, DeveloperResponsibilities, and active child catalog rows. It does not expose the audit table or unrestricted navigation into Bugs/Users.
 
@@ -28,12 +28,12 @@ This CAP handler module owns the server-side administration boundary for four re
   **Must check together**: `srv/user-admin.js:51-89` (authorization injection), `srv/user-admin.cds:193-196` (impact action), and `scripts/qa/test-user-admin-catalogs.js:111-150,237-242` (role/impact/DELETE contract).
 
 - **Location**: `srv/user-admin/catalogs.js:72-109` — `prepareCatalogCreate`.
-  **IDTS concept**: CREATE rejects a client-supplied `ID` from the raw `INSERT.entries[0]` payload, normalizes codes to uppercase/trimmed allowlisted syntax, validates names and active Component Category parents, and records a rejection context before validation.
-  **Impact if broken**: A caller could choose or silently replace a durable catalog identity, create duplicate or malformed value-help entries, or create a Component Category whose parents are inactive.
+  **IDTS concept**: CREATE replaces any client/framework `ID` with a fresh server UUID, normalizes codes to uppercase/trimmed allowlisted syntax, validates names and active Component Category parents, strips the transient administration reason before persistence, and records a rejection context before validation.
+  **Impact if broken**: A caller could choose a durable catalog identity, a transient reason could leak into persistence, duplicate or malformed value-help entries could be created, or a Component Category could reference inactive parents.
   **Must check together**: `srv/user-admin.cds:234-280` (`@Core.Immutable` keys and insert capability), `db/schema.cds:91-125` (unique code/pair constraints), and `scripts/qa/test-user-admin-catalogs.js:152-182,196-207` (normalization, immutable-ID, duplicate, and parent tests).
 
 - **Location**: `srv/user-admin/catalogs.js:111-187` — `prepareCatalogUpdate`.
-  **IDTS concept**: UPDATE rejects a raw client ID field before using the route/body ID only as an immutable target key, locks the current row, checks the ETag, validates normalized fields, requires a bounded reason for deactivation, and blocks active dependency loss.
+  **IDTS concept**: UPDATE accepts equal normalized route/payload IDs only as the immutable target key, rejects a mismatch, removes the ID from the persistence change set, locks the current row, checks the ETag, validates normalized fields, requires a bounded reason for deactivation, and blocks active dependency loss.
   **Impact if broken**: Stale PM edits could overwrite another change, an ID could be retargeted, or a catalog used by active responsibility/child rows could disappear from new selections without a controlled follow-up.
   **Must check together**: `srv/user-admin.cds:236-293` (`modifiedAt @odata.etag`, capabilities), `scripts/qa/test-user-admin-catalogs.js:164-228` (ETag/deactivation/reactivation/audit), and the UI5 update-group flow in `Main.controller.js:803-861`.
 
@@ -44,7 +44,7 @@ This CAP handler module owns the server-side administration boundary for four re
 
 ### Safe editing checklist
 
-- Keep raw client `ID` rejection separate from CAP-generated `req.data.ID`; CAP may populate the latter before custom `before CREATE` code runs, while UPDATE must reject a raw `ID` in `UPDATE.data` even when it matches the route.
+- On CREATE, always replace any client/framework ID with a fresh server UUID and never persist the supplied value. On UPDATE, allow the same normalized route/payload ID only to identify the target, reject mismatches, and remove the key before persistence.
 - Keep `If-Match`/`modifiedAt` checks and `forUpdate()` in the same request transaction.
 - Never add DELETE, bulk import, raw SQL, provider data, identity claims, credentials, or raw request payload fields.
 - When changing a catalog field or impact relationship, update the CDS projection, `CATALOGS` map, UI payload/display logic, focused CAP/UI contracts, and this mirror together.
@@ -60,8 +60,8 @@ Module handler CAP này sở hữu boundary quản trị phía server cho bốn 
 
 1. `srv/user-admin.js` đăng ký module trong `UserAdministrationService` đã authenticated và truyền guard `requireActiveUserAdministrator`.
 2. Request `READ`, `CREATE`, `UPDATE` hoặc `DELETE` của catalog đi vào handler. Mọi path đều authorize đúng principal PM + `UserAdmin` đang active trước khi đọc hoặc đổi persistence.
-3. CREATE normalize code/name/type, reject ID raw do client gửi, kiểm tra duplicate code hoặc cặp parent đang active, rồi để CAP lưu UUID do server tạo.
-4. UPDATE reject raw client ID, rồi lock row đích, so sánh `If-Match` với `modifiedAt`, chỉ validate field allowlist và chặn deactivate khi còn responsibility hoặc child reference active.
+3. CREATE bỏ ID do client/framework đưa vào, gán UUID mới do server tạo, normalize code/name/type và kiểm tra duplicate code hoặc cặp parent đang active. ID caller gửi không bao giờ được persist.
+4. UPDATE chỉ chấp nhận route/payload ID đã normalize giống nhau để xác định target immutable, reject mismatch, lock row đích, so sánh `If-Match` với `modifiedAt`, bỏ key khỏi change set, chỉ validate field allowlist và chặn deactivate khi còn responsibility hoặc child reference active.
 5. CAP commit thay đổi catalog và audit append-only sanitize trong cùng transaction. Nếu lỗi, cả hai cùng rollback. Request bị reject chỉ ghi result code an toàn, không ghi raw body hay provider identity.
 6. `readCatalogImpact` chỉ trả count của Bug, `DeveloperResponsibilities` và child catalog active. Action không expose audit table hoặc navigation không giới hạn vào Bugs/Users.
 
@@ -78,12 +78,12 @@ Module handler CAP này sở hữu boundary quản trị phía server cho bốn 
   **Phải kiểm tra cùng**: `srv/user-admin.js:51-89` (inject authorization), `srv/user-admin.cds:193-196` (impact action) và `scripts/qa/test-user-admin-catalogs.js:111-150,237-242` (role/impact/DELETE contract).
 
 - **Vị trí**: `srv/user-admin/catalogs.js:72-109` — `prepareCatalogCreate`.
-  **Khái niệm IDTS**: CREATE reject `ID` do client gửi từ raw `INSERT.entries[0]`, normalize code thành uppercase/trim theo syntax allowlist, validate name và parent active của Component Category, rồi lưu context rejection trước validation.
-  **Ảnh hưởng nếu sai**: Caller có thể tự chọn hoặc bị overwrite silent durable catalog identity, tạo value-help entry trùng/malformed hoặc tạo Component Category có parent inactive.
+  **Khái niệm IDTS**: CREATE thay mọi `ID` do client/framework cung cấp bằng UUID mới của server, normalize code thành uppercase/trim theo syntax allowlist, validate name và parent active của Component Category, bỏ administration reason transient trước persistence và lưu context rejection trước validation.
+  **Ảnh hưởng nếu sai**: Caller có thể tự chọn durable catalog identity, reason transient có thể lọt vào persistence, value-help entry trùng/malformed có thể được tạo hoặc Component Category có parent inactive.
   **Phải kiểm tra cùng**: `srv/user-admin.cds:234-280` (key `@Core.Immutable` và insert capability), `db/schema.cds:91-125` (unique code/pair) và `scripts/qa/test-user-admin-catalogs.js:152-182,196-207` (normalize, immutable-ID, duplicate, parent).
 
 - **Vị trí**: `srv/user-admin/catalogs.js:111-187` — `prepareCatalogUpdate`.
-  **Khái niệm IDTS**: UPDATE reject raw client ID trước, sau đó dùng ID từ route/body chỉ như target key immutable, lock row hiện tại, enforce ETag, validate field normalize, bắt buộc reason khi deactivate và chặn mất dependency active.
+  **Khái niệm IDTS**: UPDATE chỉ chấp nhận route/payload ID đã normalize giống nhau như target key immutable, reject mismatch, bỏ ID khỏi persistence change set, lock row hiện tại, enforce ETag, validate field normalize, bắt buộc reason khi deactivate và chặn mất dependency active.
   **Ảnh hưởng nếu sai**: PM edit cũ có thể overwrite thay đổi mới, ID có thể bị đổi target hoặc catalog đang được responsibility/child active dùng bị mất khỏi selection mà không có follow-up có kiểm soát.
   **Phải kiểm tra cùng**: `srv/user-admin.cds:236-293` (`modifiedAt @odata.etag`, capability), `scripts/qa/test-user-admin-catalogs.js:164-228` (ETag/deactivate/reactivate/audit) và UI5 update-group tại `Main.controller.js:803-861`.
 
@@ -94,7 +94,7 @@ Module handler CAP này sở hữu boundary quản trị phía server cho bốn 
 
 ### Checklist sửa an toàn
 
-- Tách raw client `ID` rejection khỏi `req.data.ID` do CAP tạo; CAP có thể populate field sau trước khi custom `before CREATE` chạy. Với UPDATE, reject `ID` trong `UPDATE.data` kể cả khi ID đó trùng route.
+- Với CREATE, luôn thay ID từ client/framework bằng UUID mới của server và không persist giá trị caller gửi. Với UPDATE, chỉ dùng route/payload ID giống nhau sau normalize để xác định target, reject mismatch và bỏ key trước persistence.
 - Giữ ETag/`modifiedAt` và `forUpdate()` trong cùng request transaction.
 - Không thêm DELETE, bulk import, raw SQL, provider data, identity claim, credential hoặc raw request payload.
 - Khi đổi field catalog hoặc quan hệ impact, cập nhật đồng thời CDS projection, map `CATALOGS`, UI payload/display, CAP/UI contract và mirror này.
