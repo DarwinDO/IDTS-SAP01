@@ -235,11 +235,11 @@ service UserAdministrationService @(requires: 'authenticated-user') {
   @Capabilities.UpdateRestrictions.Updatable: true
   @Capabilities.DeleteRestrictions.Deletable: false
   entity CatalogSAPModules as projection on db.SAPModules {
-    key ID @Core.Immutable,
+    key ID @Core.Immutable @Core.Computed,
     code,
     name,
     active,
-    virtual null as administrationReason : String(500),
+    virtual null as administrationReason : String(500) @Core.Computed: false,
     createdAt,
     modifiedAt @odata.etag
   };
@@ -250,12 +250,12 @@ service UserAdministrationService @(requires: 'authenticated-user') {
   @Capabilities.UpdateRestrictions.Updatable: true
   @Capabilities.DeleteRestrictions.Deletable: false
   entity CatalogApplicationComponents as projection on db.ApplicationComponents {
-    key ID @Core.Immutable,
+    key ID @Core.Immutable @Core.Computed,
     code,
     name,
     componentType,
     active,
-    virtual null as administrationReason : String(500),
+    virtual null as administrationReason : String(500) @Core.Computed: false,
     createdAt,
     modifiedAt @odata.etag
   };
@@ -266,12 +266,12 @@ service UserAdministrationService @(requires: 'authenticated-user') {
   @Capabilities.UpdateRestrictions.Updatable: true
   @Capabilities.DeleteRestrictions.Deletable: false
   entity CatalogDefectCategories as projection on db.DefectCategories {
-    key ID @Core.Immutable,
+    key ID @Core.Immutable @Core.Computed,
     code,
     name,
     categoryType,
     active,
-    virtual null as administrationReason : String(500),
+    virtual null as administrationReason : String(500) @Core.Computed: false,
     createdAt,
     modifiedAt @odata.etag
   };
@@ -282,11 +282,11 @@ service UserAdministrationService @(requires: 'authenticated-user') {
   @Capabilities.UpdateRestrictions.Updatable: true
   @Capabilities.DeleteRestrictions.Deletable: false
   entity CatalogComponentCategories as projection on db.ComponentCategories {
-    key ID @Core.Immutable,
-    component.ID as component_ID,
-    defectCategory.ID as defectCategory_ID,
+    key ID @Core.Immutable @Core.Computed,
+    component,
+    defectCategory,
     active,
-    virtual null as administrationReason : String(500),
+    virtual null as administrationReason : String(500) @Core.Computed: false,
     createdAt,
     modifiedAt @odata.etag
   };

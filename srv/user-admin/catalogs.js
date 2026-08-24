@@ -76,9 +76,7 @@ async function prepareCatalogCreate (req, { authorize }) {
   const targetID = crypto.randomUUID()
   req._catalogRejection = { actorID: actor.ID, catalog, targetID }
   registerCatalogRejectionAudit(req, 'CREATE')
-  if (Object.hasOwn(req.query?.INSERT?.entries?.[0] || {}, 'ID')) {
-    throw catalogError(400, 'CATALOG_ID_IMMUTABLE', 'Catalog ID is server-generated and cannot be supplied.')
-  }
+  delete req.data.ID
   assertAllowedFields(req.data, catalog.fields)
 
   req.data.ID = targetID
@@ -116,18 +114,13 @@ async function prepareCatalogUpdate (req, { authorize }) {
   const tx = cds.tx(req)
   const actor = await authorize(req, tx)
   const catalog = catalogFromRequest(req)
-  if (Object.hasOwn(req.query?.UPDATE?.data || {}, 'ID')) {
-    throw catalogError(400, 'CATALOG_ID_IMMUTABLE', 'Catalog ID cannot be changed.')
-  }
   assertAllowedFields(req.data, [...catalog.fields, 'ID'])
 
   const routeID = String(req.params?.[0]?.ID || '').trim().toLowerCase()
   const payloadID = String(req.data?.ID || '').trim().toLowerCase()
+  assertCatalogTargetIdentity(routeID, payloadID)
   const targetID = routeID || payloadID
   assertUuid(targetID, 'INVALID_CATALOG_ID')
-  if (routeID && payloadID && routeID !== payloadID) {
-    throw catalogError(400, 'CATALOG_ID_IMMUTABLE', 'Catalog ID cannot be changed.')
-  }
   req._catalogRejection = { actorID: actor.ID, catalog, targetID }
   registerCatalogRejectionAudit(req, 'UPDATE')
   const current = await tx.run(SELECT.one.from(catalog.entity).where({ ID: targetID }).forUpdate())
@@ -275,11 +268,15 @@ function assertUuid (value, code) {
   }
 }
 
+function assertCatalogTargetIdentity (routeID, payloadID) {
+  if (routeID && payloadID && routeID !== payloadID) {
+    throw catalogError(400, 'CATALOG_ID_IMMUTABLE', 'Catalog ID cannot be changed.')
+  }
+}
+
 async function assertActivePairParents (tx, componentID, defectCategoryID) {
-  const [component, defectCategory] = await Promise.all([
-    tx.run(SELECT.one.from('idts.cap.ApplicationComponents').columns('ID').where({ ID: componentID, active: true })),
-    tx.run(SELECT.one.from('idts.cap.DefectCategories').columns('ID').where({ ID: defectCategoryID, active: true }))
-  ])
+  const component = await tx.run(SELECT.one.from('idts.cap.ApplicationComponents').columns('ID').where({ ID: componentID, active: true }))
+  const defectCategory = await tx.run(SELECT.one.from('idts.cap.DefectCategories').columns('ID').where({ ID: defectCategoryID, active: true }))
   if (!component || !defectCategory) {
     throw catalogError(409, 'INACTIVE_CATALOG_PARENT', 'Component Category parents must be active.')
   }
@@ -358,6 +355,8 @@ function catalogError (status, code, message) {
 }
 
 module.exports = {
+  assertActivePairParents,
+  assertCatalogTargetIdentity,
   CATALOG_ENTITIES,
   registerCatalogHandlers,
   readCatalogImpact
