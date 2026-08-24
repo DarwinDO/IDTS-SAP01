@@ -1,7 +1,7 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" core:require="{ formatter: 'idts/useradministrationui/model/formatter' }">
 	<Dialog title="{i18n>auditDetails}" contentWidth="32rem" draggable="true" resizable="true">
 		<content>
-			<VBox class="sapUiResponsiveContentPadding">
+			<VBox class="sapUiSmallMargin">
 				<Label text="{i18n>auditAction}"/>
 				<Text text="{audit>/selected/action}"/>
 				<Label text="{i18n>auditResult}" class="sapUiSmallMarginTop"/>

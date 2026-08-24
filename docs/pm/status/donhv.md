@@ -8560,3 +8560,14 @@ Vietnamese:
 - TDD RED: đã thêm case readiness direct và `{ value: ... }` khi `invoke()` trả Context; `npm run qa:user-admin-ui:programmatic` fail vì field top-level vẫn `UNKNOWN`. Trước RED chưa đổi production source.
 - Fix: `_loadReadiness` giờ gọi `requestObject()` trên Context trả về từ `invoke()`, fallback sang bound Context và unwrap result direct/value-wrapped, đồng thời giữ xử lý busy/error. Không đổi spacing hoặc backend.
 - Verify: fresh UI contract, Operations/Audit contract, UI lint/build, secret scan và `git diff --check` đều PASS. Chỉ các file fix bounded được stage để commit local; không push/deploy/platform mutation.
+
+### 2026-08-24 Gate 6 readiness binding/detail inset correction — source-only complete
+
+- Classification: product UI binding/layout defect found in static/runtime review. Three readiness fields used relative named-model paths (`adminReadiness>...`) while `/error` was absolute; detail dialog containers used `sapUiResponsiveContentPadding`, which did not provide the required visible inset.
+- TDD RED: added exact absolute-path assertions and native `sapUiSmallMargin` container assertions; `npm run qa:user-admin-ui:programmatic` failed before source changes. No controller/backend/schema/platform mutation.
+- Fix: changed only the three readiness formatter bindings to `adminReadiness>/...` and the three detail `VBox` containers to `sapUiSmallMargin`; existing label `sapUiSmallMarginTop` spacing remains unchanged.
+- Verification: fresh UI contract, Operations/Audit contract, UI lint/build, secret scan and `git diff --check` all PASS. No controller/backend/schema/dependency/platform mutation.
+- Phân loại: lỗi binding/layout UI product phát hiện trong review static/runtime. Ba field readiness dùng path named-model tương đối (`adminReadiness>...`) trong khi `/error` là absolute; container dialog detail dùng `sapUiResponsiveContentPadding` nhưng không tạo inset nhìn thấy.
+- TDD RED: đã thêm assertion exact cho path absolute và container `sapUiSmallMargin`; `npm run qa:user-admin-ui:programmatic` fail trước khi sửa source. Không mutation controller/backend/schema/platform.
+- Fix: chỉ đổi ba binding formatter readiness thành `adminReadiness>/...` và ba container `VBox` detail thành `sapUiSmallMargin`; spacing label `sapUiSmallMarginTop` hiện có được giữ nguyên.
+- Verify: fresh UI contract, Operations/Audit contract, UI lint/build, secret scan và `git diff --check` đều PASS. Không mutation controller/backend/schema/dependency/platform.

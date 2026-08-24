@@ -1,7 +1,7 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" core:require="{ formatter: 'idts/useradministrationui/model/formatter' }">
 	<Dialog title="{i18n>operationDetails}" contentWidth="32rem" draggable="true" resizable="true">
 		<content>
-			<VBox class="sapUiResponsiveContentPadding">
+			<VBox class="sapUiSmallMargin">
 				<Label text="{i18n>operation}"/>
 				<Text text="{operations>/selected/operationType}"/>
 				<Label text="{i18n>operationState}" class="sapUiSmallMarginTop"/>

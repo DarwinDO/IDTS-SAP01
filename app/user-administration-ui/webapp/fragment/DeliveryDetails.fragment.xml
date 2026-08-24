@@ -1,7 +1,7 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" core:require="{ formatter: 'idts/useradministrationui/model/formatter' }">
 	<Dialog title="{i18n>deliveryDetails}" contentWidth="28rem" draggable="true" resizable="true">
 		<content>
-			<VBox class="sapUiResponsiveContentPadding">
+			<VBox class="sapUiSmallMargin">
 				<Label text="{i18n>recipient}"/>
 				<Text text="{deliveries>/selected/recipientDisplay}"/>
 				<Label text="{i18n>deliveryStatus}" class="sapUiSmallMarginTop"/>

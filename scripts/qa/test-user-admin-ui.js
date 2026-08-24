@@ -85,7 +85,10 @@ assert.match(view, /key="audit"/)
 assert.match(view, /items="\{deliveries>\/items\}"/)
 assert.match(view, /items="\{operations>\/items\}"/)
 assert.match(view, /items="\{audit>\/items\}"/)
-assert.match(view, /adminReadiness>emailDeliveryState/)
+for (const readinessPath of ['emailDeliveryState', 'provisioningBrokerState', 'lastSuccessfulReconciliationAt']) {
+  assert.match(view, new RegExp(`adminReadiness>/${readinessPath}`), `readiness binding must use an absolute named-model path: ${readinessPath}`)
+  assert.doesNotMatch(view, new RegExp(`adminReadiness>${readinessPath}`), `readiness binding must not use a relative named-model path: ${readinessPath}`)
+}
 assert.match(view, /press="\.onRetryOnboardingDelivery"/)
 assert.match(view, /press="\.onOpenOperationDetails"/)
 assert.match(view, /press="\.onOpenAuditDetails"/)
@@ -137,6 +140,8 @@ for (const [fragmentName, firstLabel] of [
   ['AuditDetails.fragment.xml', 'auditAction']
 ]) {
   const detailsFragment = fs.readFileSync(path.join(webapp, 'fragment', fragmentName), 'utf8')
+  assert.match(detailsFragment, /<VBox class="sapUiSmallMargin">/)
+  assert.doesNotMatch(detailsFragment, /<VBox class="sapUiResponsiveContentPadding">/)
   const labels = [...detailsFragment.matchAll(/<Label\b[\s\S]*?\/>/g)].map(match => match[0])
   assert.ok(labels.length > 1, `${fragmentName} must contain multiple detail labels`)
   assert.match(labels[0], new RegExp(`text="\\{i18n>${firstLabel}\\}"`))

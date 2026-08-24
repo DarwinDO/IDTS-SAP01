@@ -277,9 +277,9 @@
 							<content>
 								<VBox>
 									<HBox justifyContent="SpaceBetween" wrap="Wrap" class="sapUiTinyMarginBottom">
-										<ObjectStatus text="{parts: [{path: 'adminReadiness>emailDeliveryState'}, {path: 'i18n>emailDeliveryState'}, {path: 'i18n>availableText'}, {path: 'i18n>unavailableText'}, {path: 'i18n>recentSuccessText'}, {path: 'i18n>staleText'}, {path: 'i18n>unknownText'}], formatter: 'formatter.readinessText'}" state="{path: 'adminReadiness>emailDeliveryState', formatter: 'formatter.readinessState'}"/>
-										<ObjectStatus text="{parts: [{path: 'adminReadiness>provisioningBrokerState'}, {path: 'i18n>provisioningState'}, {path: 'i18n>availableText'}, {path: 'i18n>unavailableText'}, {path: 'i18n>recentSuccessText'}, {path: 'i18n>staleText'}, {path: 'i18n>unknownText'}], formatter: 'formatter.readinessText'}" state="{path: 'adminReadiness>provisioningBrokerState', formatter: 'formatter.readinessState'}"/>
-										<Text text="{parts: [{path: 'adminReadiness>lastSuccessfulReconciliationAt'}, {path: 'i18n>lastSuccessfulReconciliation'}], formatter: 'formatter.readinessLastSuccess'}"/>
+										<ObjectStatus text="{parts: [{path: 'adminReadiness>/emailDeliveryState'}, {path: 'i18n>emailDeliveryState'}, {path: 'i18n>availableText'}, {path: 'i18n>unavailableText'}, {path: 'i18n>recentSuccessText'}, {path: 'i18n>staleText'}, {path: 'i18n>unknownText'}], formatter: 'formatter.readinessText'}" state="{path: 'adminReadiness>/emailDeliveryState', formatter: 'formatter.readinessState'}"/>
+										<ObjectStatus text="{parts: [{path: 'adminReadiness>/provisioningBrokerState'}, {path: 'i18n>provisioningState'}, {path: 'i18n>availableText'}, {path: 'i18n>unavailableText'}, {path: 'i18n>recentSuccessText'}, {path: 'i18n>staleText'}, {path: 'i18n>unknownText'}], formatter: 'formatter.readinessText'}" state="{path: 'adminReadiness>/provisioningBrokerState', formatter: 'formatter.readinessState'}"/>
+										<Text text="{parts: [{path: 'adminReadiness>/lastSuccessfulReconciliationAt'}, {path: 'i18n>lastSuccessfulReconciliation'}], formatter: 'formatter.readinessLastSuccess'}"/>
 									</HBox>
 									<MessageStrip visible="{adminReadiness>/error}" text="{i18n>readinessLoadFailed}" type="Error" showIcon="true"/>
 									<IconTabBar id="operationsSubtabs" selectedKey="{view>/selectedOperationsTab}" select=".onOperationsTabSelect" expandable="false" applyContentPadding="false">

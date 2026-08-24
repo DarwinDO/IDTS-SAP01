@@ -2,9 +2,9 @@
 
 ## English / Tiếng Việt
 
-The Gate 6 delivery dialog is a safe read-only detail surface. It shows only the masked recipient, bounded delivery status, attempt count, outcome timestamps, next-attempt time, and allowlisted error summary. Labels after the first field reuse the native `sapUiSmallMarginTop` spacing pattern from `ActiveUserDetails`; no custom CSS is introduced. It has no raw email body, provider identifier, lock/lease value, idempotency key, credential, or raw error binding.
+The Gate 6 delivery dialog is a safe read-only detail surface. Its content `VBox` uses native `sapUiSmallMargin` for a visible inset, and labels after the first field reuse the native `sapUiSmallMarginTop` spacing pattern from `ActiveUserDetails`. It shows only the masked recipient, bounded delivery status, attempt count, outcome timestamps, next-attempt time, and allowlisted error summary. No custom CSS is introduced, and there is no raw email body, provider identifier, lock/lease value, idempotency key, credential, or raw error binding.
 
-Dialog delivery Gate 6 là surface detail read-only an toàn. Dialog chỉ hiện recipient đã mask, delivery status bounded, số lần thử, timestamp outcome, thời điểm thử tiếp theo và error summary allowlist. Các label sau field đầu dùng lại spacing native `sapUiSmallMarginTop` theo pattern `ActiveUserDetails`; không thêm CSS custom. Không có binding email body raw, provider identifier, lock/lease, idempotency key, credential hoặc raw error.
+Dialog delivery Gate 6 là surface detail read-only an toàn. `VBox` content dùng `sapUiSmallMargin` native để tạo inset nhìn thấy, còn các label sau field đầu dùng spacing native `sapUiSmallMarginTop` theo pattern `ActiveUserDetails`. Dialog chỉ hiện recipient đã mask, delivery status bounded, số lần thử, timestamp outcome, thời điểm thử tiếp theo và error summary allowlist. Không thêm CSS custom và không có binding email body raw, provider identifier, lock/lease, idempotency key, credential hoặc raw error.
 
 **Source anchor:** `DeliveryDetails.fragment.xml:1-21`; controller source is `Main.controller.js:onOpenDeliveryDetails`, while CAP owns retry eligibility and optimistic checks.
 

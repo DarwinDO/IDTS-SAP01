@@ -40,6 +40,7 @@ The maintained explicit suites are authoritative; root `npm test` is not used be
 - UI audit DatePicker parameters are normalized before OData invocation: date-only `from` => `T00:00:00.000Z`, `to` => `T23:59:59.999Z`, empty/invalid => `null`.
 - UI readiness normalizes either a direct structured action result or a UI5 `{ value: structuredResult }` result into top-level `adminReadiness` fields; focused runtime assertions prove success clears `busy/error` and failure clears `busy` while retaining `error`.
 - Delivery, Operation, and Audit detail dialogs now reuse native `sapUiSmallMarginTop` on every label after the first; the UI contract asserts all three fragments and adds no custom CSS/dependency.
+- Readiness bindings in `Main.view.xml` use absolute named-model paths for all three formatter fields (`adminReadiness>/...`), and all three detail dialog containers use native `sapUiSmallMargin`; exact static assertions cover both corrections.
 - `git diff --check origin/dev` — PASS, exit 0; exact schema diff, generated-artifact diff, and untracked generated-artifact counts are all zero.
 
 ### Dependency visibility mutation ledger
@@ -74,6 +75,10 @@ The single bounded independent source/security review found 0 Critical/Major and
 - Runtime readback showed the prior assumption was incomplete: SAPUI5 `ODataContextBinding.invoke()` resolves to a `Context`, not the structured JSON. `_loadReadiness` now calls `requestObject()` on that returned Context, falls back to the bound Context, and unwraps direct or `{ value: structuredResult }` payloads.
 - TDD RED reproduced the rollout symptom with both Context response shapes; GREEN passed the focused UI contract and preserved busy/error handling. No spacing, backend, schema, dependency, platform, provider, email, user, role, or data change was made.
 
+### Readiness binding and detail inset correction
+
+- The three readiness formatter bindings now use absolute named-model paths (`adminReadiness>/...`), and each detail dialog content `VBox` uses native `sapUiSmallMargin`; exact UI assertions cover both corrections while preserving existing label margins.
+
 ## Tiếng Việt
 
 ### Phạm vi và source frozen
@@ -106,3 +111,7 @@ Chỉ dùng hai NTFS junction đã được coordinator cho phép sau khi kiểm
 
 - Readback runtime cho thấy giả định trước đây chưa đủ: `ODataContextBinding.invoke()` của SAPUI5 resolve thành `Context`, không phải structured JSON. `_loadReadiness` giờ gọi `requestObject()` trên Context trả về, fallback sang bound Context và unwrap payload direct hoặc `{ value: structuredResult }`.
 - TDD RED tái hiện symptom rollout với cả hai shape Context; GREEN giữ focused UI contract PASS và bảo toàn xử lý busy/error. Không đổi spacing, backend, schema, dependency, platform, provider, email, user, role hoặc data.
+
+### Sửa binding readiness và inset detail
+
+- Ba binding formatter readiness dùng path absolute `adminReadiness>/...`, đồng nhất với binding `adminReadiness>/error`; ba `VBox` detail dùng `sapUiSmallMargin` native để có inset hiển thị rõ. UI contract có assertion exact cho cả path và class.
