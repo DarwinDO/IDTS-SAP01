@@ -52,4 +52,4 @@ Each gate records source tests, CAP/Fiori/UI5 MCP guidance, security review, art
 
 ## Next handoff
 
-Synchronize the Gate 5 canonical records and PR #338 with the completed migration/acceptance evidence, obtain a zero-finding exact-head review, then capture the controlled TESTER authorization-negative browser result. Only after those checks may PR #338 move from Draft to Ready/merge and its clean merged worktree be removed. Gate 6 requires a separate start decision.
+Capture the controlled TESTER authorization-negative browser result against the reviewed Gate 5 runtime. After that evidence passes, PR #338 may move from Draft to Ready/merge and its clean merged worktree may be removed. Gate 6 requires a separate start decision.
