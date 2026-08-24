@@ -8432,3 +8432,14 @@ Vietnamese:
 - Review độc lập: đúng một reviewer bounded source/security, ban đầu 0 Critical/Major và 2 Important; cả hai đã fix (freshness cutoff và parent invitation eligibility) và có fresh focused/full verification. Reviewer không sửa file; không spawn reviewer thứ hai.
 - Mutation ledger: chỉ hai NTFS junction local được coordinator cho phép để expose exact locked root dependency tree; không install/upgrade/audit-fix, package/version/lockfile/schema source, provider/email/data/user/role/platform/Jira/Drive/deploy/merge/Ready mutation.
 - Owner/boundary tiếp theo: coordinator DonHV review exact-head và later selective rollout/manual acceptance. Executor giữ worktree và không Ready, merge, deploy, mutation data/provider/identity/role hoặc remove worktree.
+### 2026-08-24 Gate 6 post-push watch wrapper recurrence / Lặp lỗi wrapper watch sau push Gate 6
+
+- Classification: tooling/operator issue.
+- Symptom: the second orchestration call for `gh pr checks 339 --watch --interval 10` again quoted the `max_output_tokens` property and raised `SyntaxError: Unexpected identifier 'max_output_tokens'` before `gh` ran.
+- Fix/status: corrected immediately; no repository or GitHub state changed in the failed wrapper. This is the same command-wrapper shape already logged; no product impact or remaining blocker.
+
+### 2026-08-24 Gate 6 post-push watch wrapper recurrence / Lặp lỗi wrapper watch sau push Gate 6
+
+- Phân loại: tooling/operator issue.
+- Triệu chứng: lần gọi orchestration thứ hai cho `gh pr checks 339 --watch --interval 10` lại quote property `max_output_tokens`, sinh `SyntaxError: Unexpected identifier 'max_output_tokens'` trước khi `gh` chạy.
+- Fix/trạng thái: đã sửa ngay; failed wrapper không đổi repository hoặc GitHub. Đây là cùng command-wrapper shape đã log; không ảnh hưởng product và không còn blocker.
