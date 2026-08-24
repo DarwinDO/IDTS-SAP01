@@ -8443,3 +8443,14 @@ Vietnamese:
 - Phân loại: tooling/operator issue.
 - Triệu chứng: lần gọi orchestration thứ hai cho `gh pr checks 339 --watch --interval 10` lại quote property `max_output_tokens`, sinh `SyntaxError: Unexpected identifier 'max_output_tokens'` trước khi `gh` chạy.
 - Fix/trạng thái: đã sửa ngay; failed wrapper không đổi repository hoặc GitHub. Đây là cùng command-wrapper shape đã log; không ảnh hưởng product và không còn blocker.
+### 2026-08-24 Gate 6 final readback wrapper recurrence / Lặp lỗi wrapper readback cuối Gate 6
+
+- Classification: tooling/operator issue.
+- Symptom: the final combined PR/Git/status readback orchestration call again quoted the `max_output_tokens` property and raised `SyntaxError: Unexpected identifier 'max_output_tokens'` before any command ran.
+- Fix/status: no GitHub/repository state changed; the wrapper is corrected and the individual readback commands are rerun separately. No product impact or remaining source blocker.
+
+### 2026-08-24 Gate 6 final readback wrapper recurrence / Lặp lỗi wrapper readback cuối Gate 6
+
+- Phân loại: tooling/operator issue.
+- Triệu chứng: orchestration readback PR/Git/status cuối lại quote property `max_output_tokens`, sinh `SyntaxError: Unexpected identifier 'max_output_tokens'` trước khi command chạy.
+- Fix/trạng thái: không đổi GitHub/repository; wrapper đã sửa và các lệnh readback riêng sẽ chạy lại. Không ảnh hưởng product và không còn source blocker.
