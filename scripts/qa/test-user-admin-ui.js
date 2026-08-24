@@ -276,6 +276,12 @@ assert.match(catalogImpactFragment, /catalogs>\/impact/)
 assert.match(catalogImpactFragment, /press="\.onConfirmCatalogDeactivation"/)
 assert.doesNotMatch(catalogImpactFragment, /Delete|HANA|Role Collection|token|credential/i)
 
+const deliveryDetailsFragment = fs.readFileSync(path.join(webapp, 'fragment/DeliveryDetails.fragment.xml'), 'utf8')
+assert.match(deliveryDetailsFragment, /i18n>sentAt/)
+assert.match(deliveryDetailsFragment, /deliveries>\/selected\/sentAt/)
+assert.match(deliveryDetailsFragment, /i18n>lastAttempt/)
+assert.match(deliveryDetailsFragment, /deliveries>\/selected\/lastAttemptAt/)
+
 const controllerDefinition = loadController(controller)
 assert.equal(typeof controllerDefinition.onConfirmInvite, 'function')
 assert.equal(typeof controllerDefinition._loadRequests, 'function')
@@ -785,7 +791,7 @@ const operationsI18nKeys = [
   'noDeliveries', 'retryDelivery', 'retryDeliveryConfirmation', 'deliveryRetryQueued',
   'operationStateFilter', 'operationTypeFilter', 'linkExistingOperation', 'noOperations', 'operationsLoadFailed', 'auditActionFilter',
   'allActions', 'auditResultFilter', 'appliedText', 'retryNeededText', 'rejectedText', 'suspendAccess', 'reactivateAccess',
-  'noAuditEvents', 'auditLoadFailed', 'operationDetails', 'auditDetails', 'deliveryDetails', 'safeDetails'
+  'noAuditEvents', 'auditLoadFailed', 'operationDetails', 'auditDetails', 'deliveryDetails', 'safeDetails', 'sentAt', 'lastAttempt'
 ]
 for (const locale of ['i18n.properties', 'i18n_en.properties', 'i18n_vi.properties']) {
   const text = fs.readFileSync(path.join(webapp, 'i18n', locale), 'utf8')

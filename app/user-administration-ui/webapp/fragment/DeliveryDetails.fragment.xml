@@ -8,6 +8,10 @@
 				<ObjectStatus text="{parts: [{path: 'deliveries>/selected/status'}, {path: 'i18n>pendingText'}, {path: 'i18n>failedText'}, {path: 'i18n>sentText'}, {path: 'i18n>skippedText'}, {path: 'i18n>unknownText'}], formatter: 'formatter.statusText'}" state="{path: 'deliveries>/selected/status', formatter: 'formatter.statusState'}"/>
 				<Label text="{i18n>attempts}"/>
 				<Text text="{deliveries>/selected/attemptCount}"/>
+				<Label text="{i18n>sentAt}"/>
+				<Text text="{path: 'deliveries>/selected/sentAt', formatter: 'formatter.dateTime'}"/>
+				<Label text="{i18n>lastAttempt}"/>
+				<Text text="{path: 'deliveries>/selected/lastAttemptAt', formatter: 'formatter.dateTime'}"/>
 				<Label text="{i18n>nextAttempt}"/>
 				<Text text="{path: 'deliveries>/selected/nextAttemptAt', formatter: 'formatter.dateTime'}"/>
 				<Label text="{i18n>deliveryError}"/>

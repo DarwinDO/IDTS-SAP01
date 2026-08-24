@@ -8513,3 +8513,10 @@ Vietnamese:
 - Root cause: readiness freshness depended on managed `modifiedAt`, but direct DB CQL delivery/operation writers persist the explicit business outcome timestamps and do not guarantee a fresh managed timestamp for legacy/live rows.
 - Fix: TDD changed readiness to use delivery `sentAt` for success, delivery `lastAttemptAt` for failure, and operation `completedAt` for success. RED reproduced `UNKNOWN` with stale `modifiedAt` and recent outcome timestamps; focused GREEN passed. No schema/data/backfill/provider/user/role mutation was used.
 - Tooling/process notes: one combined staging build command was blocked before execution by the shell guard; the first isolated UI build stopped before module build because its generated content directory was absent; both were corrected with fresh non-destructive staging. CAP SSH remained disabled and was not enabled. Owner: DonHV coordinator; final full matrix, exact artifact rebuild, selective CAP correction and browser reread remain pending.
+
+### 2026-08-24 Gate 6 delivery timestamp visibility / Hiển thị timestamp delivery Gate 6
+
+- Classification: UI observability gap found during controlled PM browser acceptance.
+- Symptom: the safe Delivery details dialog showed status and attempt count but omitted the already-allowlisted `sentAt` and `lastAttemptAt` fields, so the PM could not distinguish fresh outcomes from legacy rows while readiness correctly remained fail-closed `UNKNOWN`.
+- Fix: TDD added only two read-only formatted fields and bilingual labels to the existing details dialog. No readiness semantics, retry eligibility, schema, provider, email, user, role, or HANA data changed.
+- Verification: the UI contract failed before the fragment change, then passed with UI lint/build and `git diff --check` after the minimal implementation.

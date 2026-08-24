@@ -17,6 +17,7 @@
 - Delivery retry/list eligibility accepts only exact `FAILED` transient rows whose parent invitation is still `INVITED` and unexpired, below the configured attempt ceiling and outside an active lock; it resets only retry-safe fields, preserves recipient/template/provider history and attempt count, appends audit in the same transaction, then reuses the existing post-commit immediate outbox kick.
 - Readiness is fail-closed: recent `SENT` => `AVAILABLE`; otherwise recent `FAILED` => `UNAVAILABLE`; recent `PENDING`, other/no conclusive state => `UNKNOWN`; stale rows are ignored.
 - Ambiguous access operations expose Reconcile only; permanent failures expose neither action. Operations UI has Delivery/Provisioning subtabs; Audit is separate. UI models load lazily, details are safe/read-only, and loading/empty/error/action states are explicit and bilingual.
+- Delivery details expose the safe persisted `sentAt` and `lastAttemptAt` timestamps so an operator can distinguish a fresh outcome from legacy rows without inspecting raw logs, provider responses, or database data.
 - No `db/schema.cds` change and no generated schema artifact change are part of this candidate.
 
 ### Source verification
@@ -72,6 +73,8 @@ The single bounded independent source/security review found 0 Critical/Major and
 ### Tóm tắt thay đổi
 
 Gate 6 thêm safe DTO/action cho delivery, access operation, audit và readiness; paging 25/100; order ổn định; mask display; correlation fingerprint 12 ký tự; readiness freshness bảy ngày và semantics fail-closed; retry onboarding delivery optimistic chỉ khi parent invitation còn hợp lệ, có ceiling, audit cùng transaction và existing outbox kick sau commit. UI tách Delivery/Provisioning và Audit, lazy model, detail an toàn, state loading/empty/error, normalize DateTimeOffset audit và copy song ngữ. Không thay đổi schema/generated artifact.
+
+Hộp chi tiết Delivery hiển thị thêm hai timestamp an toàn đã persist là `sentAt` và `lastAttemptAt`. PM có thể phân biệt outcome mới với dữ liệu legacy mà không cần xem log thô, provider response hoặc dữ liệu database.
 
 ### Ledger workaround dependency
 
