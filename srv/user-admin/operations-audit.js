@@ -168,24 +168,22 @@ async function readAdministrationReadiness (req, dependencies) {
   const tx = cds.tx(req)
   await dependencies.authorize(req, tx)
   const [deliveries, operations] = await Promise.all([
-    tx.run(SELECT.from(DELIVERIES).columns('status_code', 'modifiedAt').orderBy('createdAt desc', 'ID desc').limit(25)),
-    tx.run(SELECT.from(OPERATIONS).columns('state', 'completedAt', 'modifiedAt').orderBy('createdAt desc', 'ID desc').limit(25))
+    tx.run(SELECT.from(DELIVERIES).columns('status_code', 'lastAttemptAt', 'sentAt').orderBy('createdAt desc', 'ID desc').limit(25)),
+    tx.run(SELECT.from(OPERATIONS).columns('state', 'completedAt').orderBy('createdAt desc', 'ID desc').limit(25))
   ])
   const now = Date.now()
-  const recentDeliveries = deliveries.filter(row => isRecentPersistedOutcome(row.modifiedAt, now))
-  const recentOperations = operations.filter(row => isRecentPersistedOutcome(row.modifiedAt, now))
-  const successful = recentOperations.filter(row => row.state === 'SUCCEEDED' && row.completedAt)
+  const hasRecentSent = deliveries.some(row => row.status_code === 'SENT' && isRecentPersistedOutcome(row.sentAt, now))
+  const hasRecentFailure = deliveries.some(row => row.status_code === 'FAILED' && isRecentPersistedOutcome(row.lastAttemptAt, now))
+  const successful = operations.filter(row => row.state === 'SUCCEEDED' && isRecentPersistedOutcome(row.completedAt, now))
   const lastSuccessful = successful
     .map(row => row.completedAt)
     .sort((left, right) => Date.parse(right) - Date.parse(left))[0] || null
   return {
-    emailDeliveryState: recentDeliveries.length === 0
-      ? 'UNKNOWN'
-      : recentDeliveries.some(row => row.status_code === 'SENT')
-        ? 'AVAILABLE'
-        : recentDeliveries.some(row => row.status_code === 'FAILED')
-          ? 'UNAVAILABLE'
-          : 'UNKNOWN',
+    emailDeliveryState: hasRecentSent
+      ? 'AVAILABLE'
+      : hasRecentFailure
+        ? 'UNAVAILABLE'
+        : 'UNKNOWN',
     provisioningBrokerState: successful.length > 0
       ? 'RECENT_SUCCESS'
       : operations.length > 0

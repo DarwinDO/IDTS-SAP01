@@ -383,6 +383,19 @@ async function main () {
   assert.equal(readiness.provisioningBrokerState, 'RECENT_SUCCESS')
   assert.equal(readiness.lastSuccessfulReconciliationAt, RECENT_TIMESTAMP)
 
+  // Direct DB CQL writers persist explicit outcome timestamps but legacy/live rows may
+  // not have a fresh managed modifiedAt. Readiness must use the outcome timestamp.
+  await db.run(UPDATE('idts.cap.UserOnboardingDeliveries').set({
+    modifiedAt: '2020-01-01T00:00:00.000Z'
+  }).where({ ID: SENT_DELIVERY_ID }))
+  await db.run(UPDATE('idts.cap.UserAccessOperations').set({
+    modifiedAt: '2020-01-01T00:00:00.000Z'
+  }).where({ ID: SUCCESS_OPERATION_ID }))
+  const outcomeTimestampReadiness = await service.send({ event: 'readAdministrationReadiness', data: {}, user: ADMIN })
+  assert.equal(outcomeTimestampReadiness.emailDeliveryState, 'AVAILABLE')
+  assert.equal(outcomeTimestampReadiness.provisioningBrokerState, 'RECENT_SUCCESS')
+  assert.equal(outcomeTimestampReadiness.lastSuccessfulReconciliationAt, RECENT_TIMESTAMP)
+
   await expectRejected(service.send({
     event: 'searchAccessOperations',
     data: { skip: 0, top: 25 },
@@ -467,8 +480,15 @@ async function main () {
   await db.run(UPDATE('idts.cap.UserOnboardingDeliveries').set({ status_code: 'SENT', modifiedAt: RECENT_TIMESTAMP }).where({ ID: SENT_DELIVERY_ID }))
   const sentPrecedenceReadiness = await service.send({ event: 'readAdministrationReadiness', data: {}, user: ADMIN })
   assert.equal(sentPrecedenceReadiness.emailDeliveryState, 'AVAILABLE')
-  await db.run(UPDATE('idts.cap.UserOnboardingDeliveries').set({ modifiedAt: '2020-01-01T00:00:00.000Z' }))
-  await db.run(UPDATE('idts.cap.UserAccessOperations').set({ modifiedAt: '2020-01-01T00:00:00.000Z' }))
+  await db.run(UPDATE('idts.cap.UserOnboardingDeliveries').set({
+    modifiedAt: '2020-01-01T00:00:00.000Z',
+    lastAttemptAt: '2020-01-01T00:00:00.000Z',
+    sentAt: '2020-01-01T00:00:00.000Z'
+  }))
+  await db.run(UPDATE('idts.cap.UserAccessOperations').set({
+    modifiedAt: '2020-01-01T00:00:00.000Z',
+    completedAt: '2020-01-01T00:00:00.000Z'
+  }))
   const staleReadiness = await service.send({ event: 'readAdministrationReadiness', data: {}, user: ADMIN })
   assert.equal(staleReadiness.emailDeliveryState, 'UNKNOWN')
   assert.equal(staleReadiness.provisioningBrokerState, 'STALE')

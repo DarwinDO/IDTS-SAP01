@@ -10,7 +10,7 @@ This module owns the Gate 6 safe operational read models and one bounded onboard
 2. Each query selects explicit persistence columns, orders by `createdAt desc, ID desc`, and clamps paging to default 25 / maximum 100.
 3. Delivery recipients are masked; actor/target names are safe display strings; error/result/detail text is replaced by allowlisted summaries. Delivery retry eligibility is enriched with one bounded bulk parent-request read per page, never an N+1 lookup.
 4. Audit correlation IDs are hashed server-side and truncated to 12 lowercase hexadecimal characters. Identity before/after hashes, provider hashes, leases, locks, idempotency keys, and raw errors never enter the DTOs.
-5. Readiness uses only persisted delivery/operation outcomes modified within the fixed seven-day freshness window. Recent `SENT` is `AVAILABLE`; otherwise recent `FAILED` is `UNAVAILABLE`; recent `PENDING`, other states, or no conclusive state is `UNKNOWN`. It does not read environment bindings, credentials, health endpoints, or provider state.
+5. Readiness uses explicit persisted outcome timestamps within the fixed seven-day freshness window: delivery `sentAt` for success, delivery `lastAttemptAt` for failure, and access-operation `completedAt` for success. Recent `SENT` is `AVAILABLE`; otherwise recent `FAILED` is `UNAVAILABLE`; recent `PENDING`, other states, or no conclusive state is `UNKNOWN`. It does not depend on managed `modifiedAt`, and it does not read environment bindings, credentials, health endpoints, or provider state.
 
 ### Delivery retry boundary
 
@@ -40,7 +40,7 @@ Module này sở hữu read model vận hành an toàn Gate 6 và một retry on
 2. Mỗi query chỉ chọn column explicit, order ổn định `createdAt desc, ID desc`, và clamp page mặc định 25 / tối đa 100.
 3. Recipient được mask; actor/target là display string an toàn; error/result/detail dùng summary allowlist. Eligibility retry delivery được enrich bằng một bulk read parent request bounded cho mỗi page, không có N+1 lookup.
 4. Correlation ID được hash ở server và rút còn 12 ký tự hex lowercase. Identity hash before/after, provider hash, lease, lock, idempotency key và raw error không đi vào DTO.
-5. Readiness chỉ dùng outcome delivery/operation đã persist và `modifiedAt` nằm trong cửa sổ freshness cố định bảy ngày. `SENT` gần đây là `AVAILABLE`; nếu không có thì `FAILED` gần đây là `UNAVAILABLE`; PENDING/state khác/không kết luận là `UNKNOWN`. Không đọc binding, credential, health endpoint hay provider state.
+5. Readiness dùng timestamp outcome explicit đã persist trong cửa sổ freshness cố định bảy ngày: delivery `sentAt` cho success, delivery `lastAttemptAt` cho failure, và access-operation `completedAt` cho success. `SENT` gần đây là `AVAILABLE`; nếu không có thì `FAILED` gần đây là `UNAVAILABLE`; PENDING/state khác/không kết luận là `UNKNOWN`. Logic không phụ thuộc managed `modifiedAt` và không đọc binding, credential, health endpoint hay provider state.
 
 ### Boundary retry delivery
 
