@@ -8571,3 +8571,12 @@ Vietnamese:
 - TDD RED: đã thêm assertion exact cho path absolute và container `sapUiSmallMargin`; `npm run qa:user-admin-ui:programmatic` fail trước khi sửa source. Không mutation controller/backend/schema/platform.
 - Fix: chỉ đổi ba binding formatter readiness thành `adminReadiness>/...` và ba container `VBox` detail thành `sapUiSmallMargin`; spacing label `sapUiSmallMarginTop` hiện có được giữ nguyên.
 - Verify: fresh UI contract, Operations/Audit contract, UI lint/build, secret scan và `git diff --check` đều PASS. Không mutation controller/backend/schema/dependency/platform.
+
+### 2026-08-25 Gate 6 selective UI rollout and manual acceptance — PASS
+
+- Exact source head `b0affdd2663254e81252582ba88b5a510f96e6bb`; bounded delta review 0 Critical/Important/Minor; GitHub QA PASS.
+- Deployed once from UI content-only MTAR SHA-256 `61ACFD2ECC30E962349036D60C2FAC07D95A0798F560AE1B7ED7B3AC29E1D0D6`. Archive inspection proved one application-content module, one existing HTML5 host and exactly two UI ZIPs; no CAP/HDI/HANA/route/managed-service/provider/user/role content.
+- Post-readback: zero active MTA operations and `DEMO READY` with CAP/AppRouter `1/1`, liveness/readiness `200`, protected anonymous API `401` and Web `200`.
+- DonHV manual evidence confirms Email Delivery `Available`, Provisioning Broker `Recent success`, reconciliation timestamp, safe masked Delivery/Provisioning/Audit lists, safe details, support fingerprint truncation and native dialog insets. Six screenshot byte sizes/digests and allowlisted claims are frozen in `docs/pm/evidence/user-administration/gate-6-operations-audit-source.md`; raw screenshots are not committed because they contain private host/user display data.
+- No artificial outage or ineligible retry was manufactured; no provider/email/user/role/data/schema/HANA/HDI mutation was used for acceptance. Gate 6 manual acceptance: PASS.
+- Bản rollout UI selective dùng đúng artifact checksum; không deploy CAP/HANA. Readiness, Delivery, Provisioning, Audit và layout detail đều được DonHV xác nhận runtime. Evidence raw không commit vì chứa host/user private; chỉ lưu size/hash/claim allowlist. Manual acceptance Gate 6: PASS.

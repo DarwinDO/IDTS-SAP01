@@ -115,3 +115,32 @@ Chỉ dùng hai NTFS junction đã được coordinator cho phép sau khi kiểm
 ### Sửa binding readiness và inset detail
 
 - Ba binding formatter readiness dùng path absolute `adminReadiness>/...`, đồng nhất với binding `adminReadiness>/error`; ba `VBox` detail dùng `sapUiSmallMargin` native để có inset hiển thị rõ. UI contract có assertion exact cho cả path và class.
+
+## Coordinator rollout and manual acceptance — 2026-08-25
+
+### Exact rollout evidence
+
+- Source head: `b0affdd2663254e81252582ba88b5a510f96e6bb`.
+- UI content-only MTAR SHA-256: `61ACFD2ECC30E962349036D60C2FAC07D95A0798F560AE1B7ED7B3AC29E1D0D6`.
+- The archive contained one `com.sap.application.content` module, one existing HTML5 repository host, and exactly the unchanged Bug Management UI ZIP plus the rebuilt User Administration UI ZIP. It contained no CAP, HDI/HANA, route, managed-service, provider, user, or role mutation.
+- Deployment completed once; post-readback reported zero active MTA operations. `npm run btp:demo:check` returned CAP/AppRouter `1/1`, liveness/readiness `200`, protected anonymous API `401`, Web `200`, and `DEMO READY`.
+- GitHub `qa-depth-gate` passed on the exact source head. The bounded exact-delta review returned 0 Critical / 0 Important / 0 Minor.
+
+### DonHV manual acceptance
+
+DonHV refreshed the deployed UI and supplied six screenshots. Raw screenshots are not committed because they contain private host/user display information. This record stores only byte sizes, SHA-256 digests, and allowlisted visible claims.
+
+| Evidence | Bytes | SHA-256 | Allowlisted visible claim |
+| --- | ---: | --- | --- |
+| Operations readiness + Delivery details | 143971 | `92A4E509DD32829015B8B840125D1F19D38E61B5B5BB9E7914994B23989644F8` | Email delivery `Available`; broker `Recent success`; reconciliation timestamp present; masked recipient; sent status/timestamps; native dialog inset. |
+| Delivery list | 91538 | `432FC7AFBA4DE1B9AFFFD6568E7B6C1E9D4780F9E19F949519939CA69E23F022` | Masked recipients, safe status and attempt counts render after reload. |
+| Provisioning list | 87047 | `1524F5522D7B596CC4733D4D541AD1CEA6EAB5AA9F57DF2099DA3DD95AE3E6DF` | Completed provision/link/reactivate operations render with masked/safe targets. |
+| Provisioning details | 129124 | `9B10680A41B55B11525892D883B06083F988325E777E1986A2527A555136C4DC` | Safe operation/state/actor/target/attempt/result summary; native dialog inset. |
+| Audit list | 161202 | `5CD47CD890574190CBCDDCAB458F244496EDB71C05782B0ADC07229E59FBF56B` | Audit rows render action, result, actor, masked target, occurrence time, filters and safe detail action. |
+| Audit details | 203798 | `693FE273AA7AB356785DB8C1B7D06C539446BC779933824497B4F33D178FAAE` | Safe state transition, actor, masked target, 12-character support fingerprint and allowlisted summary; native dialog inset. |
+
+Manual acceptance result: **PASS** for the available read-only Operations and Audit data. No artificial outage, permanent failure, ambiguous provider result, or otherwise ineligible retry was manufactured. Action eligibility and no-write rejection paths remain covered by the maintained programmatic contracts. The previously accepted controlled Tester denial from User Administration remains the negative-role boundary; this UI-only rollout did not change authorization.
+
+### Kết quả acceptance thủ công
+
+DonHV xác nhận runtime hiển thị đúng readiness, Delivery, Provisioning, Audit và ba hộp chi tiết có inset chuẩn. Dữ liệu email/target được mask; UI chỉ hiện state, timestamp, fingerprint rút gọn và summary allowlist. Không tạo outage giả, không retry mù và không mutation provider/user/role/data để lấy evidence. Kết quả manual acceptance Gate 6: **PASS**.
