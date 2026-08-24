@@ -1,0 +1,23 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" core:require="{ formatter: 'idts/useradministrationui/model/formatter' }">
+	<Dialog title="{i18n>operationDetails}" contentWidth="32rem" draggable="true" resizable="true">
+		<content>
+			<VBox class="sapUiSmallMargin">
+				<Label text="{i18n>operation}"/>
+				<Text text="{operations>/selected/operationType}"/>
+				<Label text="{i18n>operationState}" class="sapUiSmallMarginTop"/>
+				<ObjectStatus text="{path: 'operations>/selected/state', formatter: 'formatter.operationStateText'}" state="{path: 'operations>/selected/state', formatter: 'formatter.operationState'}"/>
+				<Label text="{i18n>requestedBy}" class="sapUiSmallMarginTop"/>
+				<Text text="{operations>/selected/requestedByDisplay}"/>
+				<Label text="{i18n>target}" class="sapUiSmallMarginTop"/>
+				<Text text="{operations>/selected/targetDisplay}"/>
+				<Label text="{i18n>safeResult}" class="sapUiSmallMarginTop"/>
+				<Text text="{operations>/selected/safeResultSummary}"/>
+				<Label text="{i18n>attempts}" class="sapUiSmallMarginTop"/>
+				<Text text="{operations>/selected/attemptCount}"/>
+			</VBox>
+		</content>
+		<beginButton>
+			<Button text="{i18n>close}" press=".onCloseOperationDetails"/>
+		</beginButton>
+	</Dialog>
+</core:FragmentDefinition>

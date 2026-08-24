@@ -52,6 +52,8 @@ Show only cached/derived operational facts from persisted safe state:
 - Provisioning broker recent-success/stale/unknown.
 - Last successful reconciliation time.
 
+Freshness uses explicit persisted outcome timestamps rather than managed-row metadata: delivery `sentAt` for success, delivery `lastAttemptAt` for failure, and access-operation `completedAt` for success.
+
 The page does not call private health endpoints, read bindings, or inspect credentials on each load.
 
 ## Bounded actions

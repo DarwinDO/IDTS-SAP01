@@ -273,6 +273,167 @@
 								</VBox>
 							</content>
 						</IconTabFilter>
+						<IconTabFilter key="operations" text="{i18n>operationsTab}" icon="sap-icon://activity-items">
+							<content>
+								<VBox>
+									<HBox justifyContent="SpaceBetween" wrap="Wrap" class="sapUiTinyMarginBottom">
+										<ObjectStatus text="{parts: [{path: 'adminReadiness>/emailDeliveryState'}, {path: 'i18n>emailDeliveryState'}, {path: 'i18n>availableText'}, {path: 'i18n>unavailableText'}, {path: 'i18n>recentSuccessText'}, {path: 'i18n>staleText'}, {path: 'i18n>unknownText'}], formatter: 'formatter.readinessText'}" state="{path: 'adminReadiness>/emailDeliveryState', formatter: 'formatter.readinessState'}"/>
+										<ObjectStatus text="{parts: [{path: 'adminReadiness>/provisioningBrokerState'}, {path: 'i18n>provisioningState'}, {path: 'i18n>availableText'}, {path: 'i18n>unavailableText'}, {path: 'i18n>recentSuccessText'}, {path: 'i18n>staleText'}, {path: 'i18n>unknownText'}], formatter: 'formatter.readinessText'}" state="{path: 'adminReadiness>/provisioningBrokerState', formatter: 'formatter.readinessState'}"/>
+										<Text text="{parts: [{path: 'adminReadiness>/lastSuccessfulReconciliationAt'}, {path: 'i18n>lastSuccessfulReconciliation'}], formatter: 'formatter.readinessLastSuccess'}"/>
+									</HBox>
+									<MessageStrip visible="{adminReadiness>/error}" text="{i18n>readinessLoadFailed}" type="Error" showIcon="true"/>
+									<IconTabBar id="operationsSubtabs" selectedKey="{view>/selectedOperationsTab}" select=".onOperationsTabSelect" expandable="false" applyContentPadding="false">
+										<items>
+											<IconTabFilter key="deliveries" text="{i18n>deliveryOperationsTab}" icon="sap-icon://email">
+												<content>
+													<VBox>
+														<Toolbar>
+															<SearchField width="100%" placeholder="{i18n>deliverySearchPlaceholder}" search=".onDeliverySearch"/>
+															<Select selectedKey="{deliveries>/status}" change=".onDeliveryStatusChange" tooltip="{i18n>deliveryStatusFilter}">
+																<core:Item key="" text="{i18n>allStatuses}"/>
+																<core:Item key="PENDING" text="{i18n>pendingText}"/>
+																<core:Item key="FAILED" text="{i18n>failedText}"/>
+																<core:Item key="SENT" text="{i18n>sentText}"/>
+															</Select>
+															<Button icon="sap-icon://refresh" tooltip="{i18n>refreshOperations}" press=".onRefreshOperations"/>
+														</Toolbar>
+														<MessageStrip visible="{deliveries>/error}" text="{i18n>deliveryLoadFailed}" type="Error" showIcon="true"/>
+														<Table id="deliveryOperationsTable" items="{deliveries>/items}" busy="{deliveries>/busy}" noDataText="{i18n>noDeliveries}" sticky="ColumnHeaders" autoPopinMode="true">
+															<columns>
+																<Column importance="High"><Text text="{i18n>recipient}"/></Column>
+																<Column width="9rem"><Text text="{i18n>deliveryStatus}"/></Column>
+																<Column width="7rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>attempts}"/></Column>
+																<Column width="12rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>nextAttempt}"/></Column>
+																<Column minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>deliveryError}"/></Column>
+																<Column width="11rem" hAlign="End"><Text text="{i18n>actions}"/></Column>
+															</columns>
+															<items>
+																<ColumnListItem type="Inactive">
+																	<cells>
+																		<Text text="{deliveries>recipientDisplay}"/>
+																	<ObjectStatus text="{parts: [{path: 'deliveries>status'}, {path: 'i18n>pendingText'}, {path: 'i18n>failedText'}, {path: 'i18n>sentText'}, {path: 'i18n>skippedText'}, {path: 'i18n>unknownText'}], formatter: 'formatter.statusText'}" state="{path: 'deliveries>status', formatter: 'formatter.statusState'}"/>
+																		<ObjectNumber number="{deliveries>attemptCount}"/>
+																		<Text text="{path: 'deliveries>nextAttemptAt', formatter: 'formatter.dateTime'}"/>
+																		<Text text="{deliveries>safeErrorSummary}"/>
+																		<HBox justifyContent="End" renderType="Bare">
+																			<Button icon="sap-icon://detail-view" tooltip="{i18n>viewDetails}" press=".onOpenDeliveryDetails"/>
+															<Button icon="sap-icon://refresh" tooltip="{i18n>retryDelivery}" visible="{deliveries>canRetry}" enabled="{= !${view>/busy} }" press=".onRetryOnboardingDelivery"/>
+																		</HBox>
+																	</cells>
+																</ColumnListItem>
+															</items>
+														</Table>
+														<Button text="{i18n>loadMoreOperations}" type="Transparent" visible="{deliveries>/hasMore}" enabled="{= !${deliveries>/busy} }" press=".onLoadMoreDeliveries"/>
+													</VBox>
+												</content>
+											</IconTabFilter>
+											<IconTabFilter key="provisioning" text="{i18n>provisioningOperationsTab}" icon="sap-icon://synchronize">
+												<content>
+													<VBox>
+														<Toolbar>
+															<Select selectedKey="{operations>/state}" change=".onProvisioningFilterChange" tooltip="{i18n>operationStateFilter}">
+																<core:Item key="" text="{i18n>allStatuses}"/>
+																<core:Item key="RETRYABLE_FAILURE" text="{i18n>retryNeededText}"/>
+																<core:Item key="BLOCKED_MANUAL_REVIEW" text="{i18n>manualReviewText}"/>
+																<core:Item key="SUCCEEDED" text="{i18n>completedText}"/>
+															</Select>
+															<Select selectedKey="{operations>/operationType}" change=".onProvisioningFilterChange" tooltip="{i18n>operationTypeFilter}">
+																<core:Item key="" text="{i18n>allOperations}"/>
+																<core:Item key="PROVISION" text="{i18n>provisionOperation}"/>
+																<core:Item key="CHANGE_ROLE" text="{i18n>changeRoleOperation}"/>
+																<core:Item key="REVOKE" text="{i18n>revokeOperation}"/>
+																<core:Item key="REACTIVATE" text="{i18n>reactivateOperation}"/>
+															</Select>
+															<Button icon="sap-icon://refresh" tooltip="{i18n>refreshOperations}" press=".onRefreshOperations"/>
+														</Toolbar>
+														<MessageStrip visible="{operations>/error}" text="{i18n>operationsLoadFailed}" type="Error" showIcon="true"/>
+														<Table id="provisioningOperationsTable" items="{operations>/items}" busy="{operations>/busy}" noDataText="{i18n>noOperations}" sticky="ColumnHeaders" autoPopinMode="true">
+															<columns>
+																<Column importance="High"><Text text="{i18n>operation}"/></Column>
+																<Column width="10rem"><Text text="{i18n>operationState}"/></Column>
+																<Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>requestedBy}"/></Column>
+																<Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>target}"/></Column>
+																<Column width="7rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>attempts}"/></Column>
+																<Column width="14rem" hAlign="End"><Text text="{i18n>actions}"/></Column>
+															</columns>
+															<items>
+															<ColumnListItem type="Inactive">
+																<cells>
+																	<Text text="{parts: [{path: 'operations>operationType'}, {path: 'i18n>provisionOperation'}, {path: 'i18n>changeRoleOperation'}, {path: 'i18n>revokeOperation'}, {path: 'i18n>reactivateOperation'}, {path: 'i18n>linkExistingOperation'}], formatter: 'formatter.operationTypeText'}"/>
+																		<ObjectStatus text="{path: 'operations>state', formatter: 'formatter.operationStateText'}" state="{path: 'operations>state', formatter: 'formatter.operationState'}"/>
+																		<Text text="{operations>requestedByDisplay}"/>
+																		<Text text="{operations>targetDisplay}"/>
+																		<ObjectNumber number="{operations>attemptCount}"/>
+																		<HBox justifyContent="End" renderType="Bare">
+																			<Button icon="sap-icon://detail-view" tooltip="{i18n>viewDetails}" press=".onOpenOperationDetails"/>
+																	<Button icon="sap-icon://refresh" tooltip="{i18n>retryProvisioning}" visible="{operations>canRetry}" enabled="{= !${view>/busy} }" press=".onRetryAccessOperation"/>
+																	<Button icon="sap-icon://synchronize" tooltip="{i18n>reconcileProvisioning}" visible="{operations>canReconcile}" enabled="{= !${view>/busy} }" press=".onReconcileAccessOperation"/>
+																		</HBox>
+																	</cells>
+																</ColumnListItem>
+															</items>
+														</Table>
+														<Button text="{i18n>loadMoreOperations}" type="Transparent" visible="{operations>/hasMore}" enabled="{= !${operations>/busy} }" press=".onLoadMoreOperations"/>
+													</VBox>
+												</content>
+											</IconTabFilter>
+										</items>
+									</IconTabBar>
+								</VBox>
+							</content>
+						</IconTabFilter>
+						<IconTabFilter key="audit" text="{i18n>auditTab}" icon="sap-icon://activity-2">
+							<content>
+								<VBox>
+															<Toolbar>
+																<Select selectedKey="{audit>/action}" change=".onAuditFilterChange" tooltip="{i18n>auditActionFilter}">
+																	<core:Item key="" text="{i18n>allActions}"/>
+																	<core:Item key="PROVISION" text="{i18n>provisionOperation}"/>
+																	<core:Item key="CHANGE_ROLE" text="{i18n>changeRoleOperation}"/>
+																	<core:Item key="REVOKE" text="{i18n>revokeOperation}"/>
+																	<core:Item key="REACTIVATE" text="{i18n>reactivateOperation}"/>
+																	<core:Item key="LINK_EXISTING" text="{i18n>linkExistingOperation}"/>
+																	<core:Item key="RETRY_ONBOARDING_DELIVERY" text="{i18n>retryDelivery}"/>
+																	<core:Item key="RETRY_ACCESS_OPERATION" text="{i18n>retryProvisioning}"/>
+																	<core:Item key="RECONCILE_ACCESS_OPERATION" text="{i18n>reconcileProvisioning}"/>
+																</Select>
+																<Select selectedKey="{audit>/result}" change=".onAuditFilterChange" tooltip="{i18n>auditResultFilter}">
+											<core:Item key="" text="{i18n>allResults}"/>
+											<core:Item key="QUEUED" text="{i18n>queuedText}"/>
+											<core:Item key="APPLIED" text="{i18n>completedText}"/>
+											<core:Item key="RETRYABLE_FAILURE" text="{i18n>retryNeededText}"/>
+										</Select>
+										<DatePicker value="{audit>/from}" valueFormat="yyyy-MM-dd" displayFormat="medium" change=".onAuditFilterChange" placeholder="{i18n>fromDate}" tooltip="{i18n>fromDate}"/>
+										<DatePicker value="{audit>/to}" valueFormat="yyyy-MM-dd" displayFormat="medium" change=".onAuditFilterChange" placeholder="{i18n>toDate}" tooltip="{i18n>toDate}"/>
+										<Button icon="sap-icon://refresh" tooltip="{i18n>refreshAudit}" press=".onRefreshAudit"/>
+									</Toolbar>
+									<MessageStrip visible="{audit>/error}" text="{i18n>auditLoadFailed}" type="Error" showIcon="true"/>
+									<Table id="administrationAuditTable" items="{audit>/items}" busy="{audit>/busy}" noDataText="{i18n>noAuditEvents}" sticky="ColumnHeaders" autoPopinMode="true">
+										<columns>
+											<Column importance="High"><Text text="{i18n>auditAction}"/></Column>
+											<Column width="9rem"><Text text="{i18n>auditResult}"/></Column>
+											<Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>actor}"/></Column>
+											<Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>target}"/></Column>
+											<Column width="12rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>occurredAt}"/></Column>
+											<Column width="9rem" hAlign="End"><Text text="{i18n>actions}"/></Column>
+										</columns>
+										<items>
+																<ColumnListItem type="Inactive">
+																	<cells>
+																		<Text text="{parts: [{path: 'audit>action'}, {path: 'i18n>provisionOperation'}, {path: 'i18n>changeRoleOperation'}, {path: 'i18n>revokeOperation'}, {path: 'i18n>reactivateOperation'}, {path: 'i18n>linkExistingOperation'}, {path: 'i18n>suspendAccess'}, {path: 'i18n>reactivateAccess'}, {path: 'i18n>retryDelivery'}, {path: 'i18n>retryProvisioning'}, {path: 'i18n>reconcileProvisioning'}], formatter: 'formatter.auditActionText'}"/>
+																		<ObjectStatus text="{parts: [{path: 'audit>result'}, {path: 'i18n>queuedText'}, {path: 'i18n>appliedText'}, {path: 'i18n>retryNeededText'}, {path: 'i18n>rejectedText'}], formatter: 'formatter.resultText'}" state="{path: 'audit>result', formatter: 'formatter.statusState'}"/>
+													<Text text="{audit>actorDisplay}"/>
+													<Text text="{audit>targetDisplay}"/>
+													<Text text="{path: 'audit>occurredAt', formatter: 'formatter.dateTime'}"/>
+													<Button icon="sap-icon://detail-view" tooltip="{i18n>viewDetails}" press=".onOpenAuditDetails"/>
+												</cells>
+											</ColumnListItem>
+										</items>
+									</Table>
+									<Button text="{i18n>loadMoreOperations}" type="Transparent" visible="{audit>/hasMore}" enabled="{= !${audit>/busy} }" press=".onLoadMoreAudit"/>
+								</VBox>
+							</content>
+						</IconTabFilter>
 						<IconTabFilter key="businessCatalogs" text="{i18n>businessCatalogsTab}" icon="sap-icon://tags">
 							<content>
 								<VBox>

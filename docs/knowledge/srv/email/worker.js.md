@@ -190,3 +190,21 @@ Tach nhu vay giup Render shared QA doi tu SMTP sang Brevo API chi bang private e
 - Source: `srv/email/worker.js`
 - Related task: IDTS-36, IDTS-48
 - Last reviewed: 2026-08-12
+
+## Gate 6 immediate-kick reuse / Tái sử dụng immediate-kick Gate 6
+
+### English
+
+Gate 6 reuses `scheduleImmediateEmailOutbox(req)` at `srv/email/worker.js:48-82`. The new delivery retry only registers this existing request `succeeded` listener; it does not call a provider inside the administration request, create another queue, or change the scheduler recovery loop. The worker remains the single place that claims and sends pending deliveries.
+
+- **IDTS concept**: post-commit responsiveness and durable polling recovery are one shared email boundary.
+- **Impact if broken**: a new retry-specific sender could double-send invitations or expose provider failure in the user-administration transaction.
+- **Must check together**: `srv/user-admin/operations-audit.js:188-286`, `srv/user-admin/delivery.js`, and `scripts/qa/test-email-immediate-kick.js`.
+
+### Tiếng Việt
+
+Gate 6 tái sử dụng `scheduleImmediateEmailOutbox(req)` tại `srv/email/worker.js:48-82`. Retry delivery mới chỉ đăng ký listener `succeeded` hiện có của request; nó không gọi provider trong request administration, không tạo queue thứ hai và không đổi scheduler recovery loop. Worker vẫn là nơi duy nhất claim và send delivery pending.
+
+- **Khái niệm IDTS**: responsiveness sau commit và polling recovery bền vững dùng chung một boundary email.
+- **Ảnh hưởng nếu sai**: sender riêng cho retry có thể gửi invitation hai lần hoặc đưa provider failure vào transaction user-administration.
+- **Phải kiểm tra cùng**: `srv/user-admin/operations-audit.js:188-286`, `srv/user-admin/delivery.js` và `scripts/qa/test-email-immediate-kick.js`.

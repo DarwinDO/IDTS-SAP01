@@ -78,6 +78,29 @@ assert.match(view, /key="requests"/)
 assert.match(view, /key="activeUsers"/)
 assert.match(view, /key="developerResponsibilities"/)
 assert.match(view, /key="businessCatalogs"/)
+assert.match(view, /key="operations"/)
+assert.match(view, /key="deliveries"/)
+assert.match(view, /key="provisioning"/)
+assert.match(view, /key="audit"/)
+assert.match(view, /items="\{deliveries>\/items\}"/)
+assert.match(view, /items="\{operations>\/items\}"/)
+assert.match(view, /items="\{audit>\/items\}"/)
+for (const readinessPath of ['emailDeliveryState', 'provisioningBrokerState', 'lastSuccessfulReconciliationAt']) {
+  assert.match(view, new RegExp(`adminReadiness>/${readinessPath}`), `readiness binding must use an absolute named-model path: ${readinessPath}`)
+  assert.doesNotMatch(view, new RegExp(`adminReadiness>${readinessPath}`), `readiness binding must not use a relative named-model path: ${readinessPath}`)
+}
+assert.match(view, /press="\.onRetryOnboardingDelivery"/)
+assert.match(view, /press="\.onOpenOperationDetails"/)
+assert.match(view, /press="\.onOpenAuditDetails"/)
+assert.match(view, /visible="\{deliveries>canRetry\}" enabled="\{= !\$\{view>\/busy\} \}" press="\.onRetryOnboardingDelivery"/)
+assert.match(view, /visible="\{operations>canRetry\}" enabled="\{= !\$\{view>\/busy\} \}" press="\.onRetryAccessOperation"/)
+assert.match(view, /visible="\{operations>canReconcile\}" enabled="\{= !\$\{view>\/busy\} \}" press="\.onReconcileAccessOperation"/)
+assert.match(view, /selectedKey="\{audit>\/action\}"/)
+assert.match(view, /formatter: 'formatter\.operationTypeText'/)
+assert.match(view, /formatter: 'formatter\.auditActionText'/)
+assert.match(view, /formatter: 'formatter\.resultText'/)
+assert.ok(fs.existsSync(path.join(webapp, 'fragment/OperationDetails.fragment.xml')), 'operations detail fragment is missing')
+assert.ok(fs.existsSync(path.join(webapp, 'fragment/AuditDetails.fragment.xml')), 'audit detail fragment is missing')
 assert.match(view, /id="catalogTypeTabs"/)
 for (const catalogType of ['SAP_MODULE', 'APPLICATION_COMPONENT', 'DEFECT_CATEGORY', 'COMPONENT_CATEGORY']) {
   assert.match(view, new RegExp(`key="${catalogType}"`))
@@ -111,6 +134,24 @@ assert.match(activeUserDetailsFragment, /press="\.onOpenActiveUserRevoke"/)
 assert.match(activeUserDetailsFragment, /linkEligible/)
 assert.match(activeUserDetailsFragment, /press="\.onOpenExistingIdentityLink"/)
 
+for (const [fragmentName, firstLabel] of [
+  ['DeliveryDetails.fragment.xml', 'recipient'],
+  ['OperationDetails.fragment.xml', 'operation'],
+  ['AuditDetails.fragment.xml', 'auditAction']
+]) {
+  const detailsFragment = fs.readFileSync(path.join(webapp, 'fragment', fragmentName), 'utf8')
+  assert.match(detailsFragment, /<VBox class="sapUiSmallMargin">/)
+  assert.doesNotMatch(detailsFragment, /<VBox class="sapUiResponsiveContentPadding">/)
+  const labels = [...detailsFragment.matchAll(/<Label\b[\s\S]*?\/>/g)].map(match => match[0])
+  assert.ok(labels.length > 1, `${fragmentName} must contain multiple detail labels`)
+  assert.match(labels[0], new RegExp(`text="\\{i18n>${firstLabel}\\}"`))
+  assert.doesNotMatch(labels[0], /class="sapUiSmallMarginTop"/)
+  assert.ok(
+    labels.slice(1).every(label => label.includes('class="sapUiSmallMarginTop"')),
+    `${fragmentName} must space every label after the first with sapUiSmallMarginTop`
+  )
+}
+
 const linkExistingIdentityFragment = fs.readFileSync(path.join(webapp, 'fragment/LinkExistingIdentity.fragment.xml'), 'utf8')
 assert.match(linkExistingIdentityFragment, /<Dialog/)
 assert.match(linkExistingIdentityFragment, /existingLink>\/row\/displayName/)
@@ -137,6 +178,12 @@ assert.match(fragment, /!\$\{invite>\/submitting\}/)
 assert.doesNotMatch(fragment, /Password|OTP|passkey|token/i)
 
 const controller = fs.readFileSync(path.join(webapp, 'controller/Main.controller.js'), 'utf8')
+assert.match(controller, /searchOnboardingDeliveries/)
+assert.match(controller, /searchAccessOperations/)
+assert.match(controller, /searchAccessAuditEvents/)
+assert.match(controller, /readAdministrationReadiness/)
+assert.match(controller, /retryOnboardingDelivery/)
+assert.match(controller, /_ensureOperationsLoaded/)
 assert.match(controller, /^sap\.ui\.define\(/)
 assert.doesNotMatch(controller, /normalizeCurrentBootstrapPm|bootstrapPmNormalize/, 'temporary PM normalization UI must be removed')
 assert.doesNotMatch(activeUserDetailsFragment, /bootstrapPmNormalize|onNormalizeCurrentBootstrapPm/, 'temporary PM normalization button must be removed')
@@ -177,6 +224,12 @@ assert.match(controller, /bindContext\("\/readActiveUserDetails\(\.\.\.\)"\)/)
 assert.match(controller, /onTabSelect/)
 assert.match(controller, /_ensureActiveUsersLoaded/)
 assert.match(controller, /onLoadMoreActiveUsers/)
+assert.match(controller, /_deliveriesRequest/)
+assert.match(controller, /_operationsRequest/)
+assert.match(controller, /_auditRequest/)
+assert.match(controller, /_normalizeAuditDate/)
+assert.match(controller, /setParameter\("from", this\._normalizeAuditDate/)
+assert.match(controller, /setParameter\("to", this\._normalizeAuditDate/)
 assert.match(controller, /requestExistingUserIdentityLink/)
 assert.match(controller, /setParameter\("userID"/)
 assert.match(controller, /setParameter\("email"/)
@@ -192,6 +245,14 @@ assert.doesNotMatch(controller, /identityOrigin|identityIssuer|identitySubject|i
 const formatter = fs.readFileSync(path.join(webapp, 'model/formatter.js'), 'utf8')
 assert.match(formatter, /accessStateText/)
 assert.match(formatter, /accessStateState/)
+assert.match(formatter, /operationStateText/)
+assert.match(formatter, /operationTypeText/)
+assert.match(formatter, /auditActionText/)
+assert.match(formatter, /resultText/)
+assert.match(formatter, /sAvailable, sUnavailable, sRecentSuccess, sStale, sUnknown/)
+assert.match(formatter, /sPending, sFailed, sSent, sSkipped, sUnknown/)
+assert.match(formatter, /readinessText/)
+assert.match(formatter, /readinessState/)
 
 const manageFragment = fs.readFileSync(path.join(webapp, 'fragment/ManageAccess.fragment.xml'), 'utf8')
 assert.match(manageFragment, /<Select/)
@@ -236,6 +297,12 @@ assert.match(catalogImpactFragment, /catalogs>\/impact/)
 assert.match(catalogImpactFragment, /press="\.onConfirmCatalogDeactivation"/)
 assert.doesNotMatch(catalogImpactFragment, /Delete|HANA|Role Collection|token|credential/i)
 
+const deliveryDetailsFragment = fs.readFileSync(path.join(webapp, 'fragment/DeliveryDetails.fragment.xml'), 'utf8')
+assert.match(deliveryDetailsFragment, /i18n>sentAt/)
+assert.match(deliveryDetailsFragment, /deliveries>\/selected\/sentAt/)
+assert.match(deliveryDetailsFragment, /i18n>lastAttempt/)
+assert.match(deliveryDetailsFragment, /deliveries>\/selected\/lastAttemptAt/)
+
 const controllerDefinition = loadController(controller)
 assert.equal(typeof controllerDefinition.onConfirmInvite, 'function')
 assert.equal(typeof controllerDefinition._loadRequests, 'function')
@@ -254,9 +321,122 @@ assert.equal(typeof controllerDefinition.onOpenCatalogEdit, 'function')
 assert.equal(typeof controllerDefinition.onConfirmCatalogEdit, 'function')
 assert.equal(typeof controllerDefinition.onToggleCatalogActive, 'function')
 assert.equal(typeof controllerDefinition.onConfirmCatalogDeactivation, 'function')
+assert.equal(typeof controllerDefinition.onOperationsTabSelect, 'function')
+assert.equal(typeof controllerDefinition.onRetryOnboardingDelivery, 'function')
+assert.equal(typeof controllerDefinition.onOpenDeliveryDetails, 'function')
+assert.equal(typeof controllerDefinition.onOpenOperationDetails, 'function')
+assert.equal(typeof controllerDefinition.onOpenAuditDetails, 'function')
+assert.equal(typeof controllerDefinition._loadDeliveries, 'function')
+assert.equal(typeof controllerDefinition._loadOperations, 'function')
+assert.equal(typeof controllerDefinition._loadAudit, 'function')
+assert.equal(typeof controllerDefinition._loadReadiness, 'function')
+assert.equal(typeof controllerDefinition._normalizeAuditDate, 'function')
 assert.match(controller, /this\.getResourceBundle\(\)/)
 
 async function verifyRuntimeBehavior () {
+  const dateNormalizer = Object.create(controllerDefinition)
+  assert.equal(dateNormalizer._normalizeAuditDate('2026-08-24', false), '2026-08-24T00:00:00.000Z')
+  assert.equal(dateNormalizer._normalizeAuditDate('2026-08-24', true), '2026-08-24T23:59:59.999Z')
+  assert.equal(dateNormalizer._normalizeAuditDate('', false), null)
+  assert.equal(dateNormalizer._normalizeAuditDate(null, true), null)
+  assert.equal(dateNormalizer._normalizeAuditDate('not-a-date', false), null)
+
+  const readinessCases = [
+    {
+      name: 'direct structured action result',
+      invokeResult: { emailDeliveryState: 'AVAILABLE', provisioningBrokerState: 'RECENT_SUCCESS', lastSuccessfulReconciliationAt: '2026-08-24T10:00:00.000Z' },
+      contextResult: null,
+      expected: { emailDeliveryState: 'AVAILABLE', provisioningBrokerState: 'RECENT_SUCCESS', lastSuccessfulReconciliationAt: '2026-08-24T10:00:00.000Z' }
+    },
+    {
+      name: 'direct structured UI5 context result',
+      invokeResult: undefined,
+      contextResult: { emailDeliveryState: 'AVAILABLE', provisioningBrokerState: 'RECENT_SUCCESS', lastSuccessfulReconciliationAt: '2026-08-24T10:00:00.000Z' },
+      expected: { emailDeliveryState: 'AVAILABLE', provisioningBrokerState: 'RECENT_SUCCESS', lastSuccessfulReconciliationAt: '2026-08-24T10:00:00.000Z' }
+    },
+    {
+      name: 'UI5 value-wrapped action result',
+      invokeResult: undefined,
+      contextResult: { value: { emailDeliveryState: 'UNAVAILABLE', provisioningBrokerState: 'UNKNOWN', lastSuccessfulReconciliationAt: null } },
+      expected: { emailDeliveryState: 'UNAVAILABLE', provisioningBrokerState: 'UNKNOWN', lastSuccessfulReconciliationAt: null }
+    },
+    {
+      name: 'UI5 invoke Context with direct result',
+      invokeResult: { requestObject: async () => ({ emailDeliveryState: 'AVAILABLE', provisioningBrokerState: 'RECENT_SUCCESS', lastSuccessfulReconciliationAt: '2026-08-24T10:00:00.000Z' }) },
+      contextResult: null,
+      expected: { emailDeliveryState: 'AVAILABLE', provisioningBrokerState: 'RECENT_SUCCESS', lastSuccessfulReconciliationAt: '2026-08-24T10:00:00.000Z' }
+    },
+    {
+      name: 'UI5 invoke Context with value-wrapped result',
+      invokeResult: { requestObject: async () => ({ value: { emailDeliveryState: 'UNAVAILABLE', provisioningBrokerState: 'UNKNOWN', lastSuccessfulReconciliationAt: null } }) },
+      contextResult: null,
+      expected: { emailDeliveryState: 'UNAVAILABLE', provisioningBrokerState: 'UNKNOWN', lastSuccessfulReconciliationAt: null }
+    }
+  ]
+  for (const readinessCase of readinessCases) {
+    const readinessData = { emailDeliveryState: 'UNKNOWN', provisioningBrokerState: 'UNKNOWN', lastSuccessfulReconciliationAt: null, loaded: false, busy: false, error: true }
+    const readinessModel = {
+      setData: data => Object.assign(readinessData, data),
+      setProperty: (key, value) => { readinessData[key.slice(1)] = value }
+    }
+    const readinessOperation = {
+      invoke: async () => readinessCase.invokeResult,
+      getBoundContext: () => readinessCase.contextResult ? { requestObject: async () => readinessCase.contextResult } : null
+    }
+    const readinessInstance = Object.assign(Object.create(controllerDefinition), {
+      getModel: name => name === 'adminReadiness' ? readinessModel : undefined,
+      getView: () => ({ getModel: () => ({ bindContext: () => readinessOperation }) })
+    })
+    await readinessInstance._loadReadiness()
+    assert.deepEqual({
+      emailDeliveryState: readinessData.emailDeliveryState,
+      provisioningBrokerState: readinessData.provisioningBrokerState,
+      lastSuccessfulReconciliationAt: readinessData.lastSuccessfulReconciliationAt
+    }, readinessCase.expected, `${readinessCase.name} must expose readiness fields at model top level`)
+    assert.equal(readinessData.loaded, true, `${readinessCase.name} must mark readiness loaded`)
+    assert.equal(readinessData.busy, false, `${readinessCase.name} must clear busy`)
+    assert.equal(readinessData.error, false, `${readinessCase.name} must clear error`)
+    assert.equal(Object.hasOwn(readinessData, 'value'), false, `${readinessCase.name} must not retain a value wrapper`)
+  }
+
+  const failedReadinessData = { emailDeliveryState: 'UNKNOWN', provisioningBrokerState: 'UNKNOWN', lastSuccessfulReconciliationAt: null, loaded: false, busy: false, error: false }
+  const failedReadinessModel = {
+    setData: data => Object.assign(failedReadinessData, data),
+    setProperty: (key, value) => { failedReadinessData[key.slice(1)] = value }
+  }
+  const failedReadinessInstance = Object.assign(Object.create(controllerDefinition), {
+    getModel: name => name === 'adminReadiness' ? failedReadinessModel : undefined,
+    getView: () => ({ getModel: () => ({ bindContext: () => ({ invoke: async () => { throw new Error('readiness unavailable') } }) }) })
+  })
+  await failedReadinessInstance._loadReadiness()
+  assert.equal(failedReadinessData.busy, false, 'failed readiness must clear busy')
+  assert.equal(failedReadinessData.error, true, 'failed readiness must retain error state')
+
+  const auditData = { items: [], action: '', result: '', from: '2026-08-24', to: '2026-08-25', nextSkip: 0, pageSize: 25, hasMore: false, loaded: false, busy: false, error: false }
+  const auditParameters = {}
+  const auditOperation = {
+    setParameter: (name, value) => { auditParameters[name] = value },
+    invoke: async () => {},
+    getBoundContext: () => ({ requestObject: async () => ({ value: [] }) })
+  }
+  const auditModel = {
+    getProperty: key => auditData[key.slice(1)],
+    setProperty: (key, value) => { auditData[key.slice(1)] = value }
+  }
+  const auditInstance = Object.assign(Object.create(controllerDefinition), {
+    _auditRequest: 0,
+    getModel: name => name === 'audit' ? auditModel : undefined,
+    getView: () => ({ getModel: () => ({ bindContext: () => auditOperation }) })
+  })
+  await auditInstance._loadAudit()
+  assert.equal(auditParameters.from, '2026-08-24T00:00:00.000Z')
+  assert.equal(auditParameters.to, '2026-08-25T23:59:59.999Z')
+  auditData.from = 'not-a-date'
+  auditData.to = ''
+  await auditInstance._loadAudit()
+  assert.equal(auditParameters.from, null)
+  assert.equal(auditParameters.to, null)
+
   let initialLoadCount = 0
   const initialLoadInstance = Object.assign(Object.create(controllerDefinition), {
     _loadInitialRequests: async () => { initialLoadCount += 1 },
@@ -695,6 +875,19 @@ for (const locale of ['i18n.properties', 'i18n_en.properties']) {
   assert.match(text, /^cancelExistingLinkConfirmation=Cancel this invitation\? Its link will stop working and a new invitation can be sent\.$/m)
   assert.match(text, /^existingLinkCancelled=Invitation cancelled\.$/m)
   assert.match(text, /^existingIdentityLinkNotice=.*same Users\.ID.*Developer Profile.*Bug assignments.*comments.*history/m)
+}
+
+const operationsI18nKeys = [
+  'operationsTab', 'deliveryOperationsTab', 'provisioningOperationsTab', 'auditTab', 'deliverySearchPlaceholder',
+  'deliveryStatusFilter', 'availableText', 'unavailableText', 'recentSuccessText', 'staleText', 'unknownText', 'skippedText',
+  'noDeliveries', 'retryDelivery', 'retryDeliveryConfirmation', 'deliveryRetryQueued',
+  'operationStateFilter', 'operationTypeFilter', 'linkExistingOperation', 'noOperations', 'operationsLoadFailed', 'auditActionFilter',
+  'allActions', 'auditResultFilter', 'appliedText', 'retryNeededText', 'rejectedText', 'suspendAccess', 'reactivateAccess',
+  'noAuditEvents', 'auditLoadFailed', 'operationDetails', 'auditDetails', 'deliveryDetails', 'safeDetails', 'sentAt', 'lastAttempt'
+]
+for (const locale of ['i18n.properties', 'i18n_en.properties', 'i18n_vi.properties']) {
+  const text = fs.readFileSync(path.join(webapp, 'i18n', locale), 'utf8')
+  for (const key of operationsI18nKeys) assert.match(text, new RegExp(`^${key}=`, 'm'))
 }
 
 verifyRuntimeBehavior().then(() => {

@@ -238,3 +238,15 @@ Khi retry, reconcile hoac reconcile lease het han rotate `UserAccessOperations.c
 - Risk: a service query cap remains 100 per request; UI5 complete-result reads may become expensive if catalogs grow materially. A later operations gate must add a reviewed server-side search/paging UX only with performance evidence.
 - Quyết định: đóng finding review exact `346a1cf` bằng native UI5 OData V4 contract (`requestContexts(0, Infinity)`, `Context.created()` và await promise `Context.setProperty`), metadata immutable-ID/delete rõ ràng và knowledge mirror song ngữ có anchor trước khi mở một Draft PR.
 - Ranh giới: chỉ source, test, evidence, PM status, push và Draft PR. Không install/upgrade dependency, mutation HDI/HANA/data/catalog/provider/user/role/email/Jira/Drive, deploy, merge, Ready hay Gate 6.
+
+### DEC-064 — Gate 6 safe Operations/Audit boundary (2026-08-24)
+
+- Decision: expose only explicit PM + UserAdmin safe DTO actions for onboarding deliveries, access operations, audit events and persisted-state readiness. Keep paging at 25 default/100 maximum with stable ordering, server-side masking, allowlisted summaries and a 12-character non-reversible correlation fingerprint.
+- Retry boundary: onboarding delivery retry requires exact FAILED + allowlisted transient state, optimistic `modifiedAt`, available attempt budget and no active lock. Reset and audit append are one transaction; the existing immediate outbox kick is registered after commit. Existing access Retry/Reconcile guards remain authoritative, with ambiguous outcome reconcile-only and permanent failure actionless.
+- Security/scope: no raw email/provider body or ID, lock/lease/idempotency value, identity hash, token/JWT, credential, endpoint, binding/env/log control, arbitrary audit export, outage simulation, schema/index change, or live provider/data mutation.
+- Handoff: source/tests/docs/evidence and one Draft PR only. Coordinator separately owns review, selective rollout, manual acceptance, Ready/merge, and cleanup.
+
+### DEC-065 — Reuse exact locked root dependency tree only for local visibility (2026-08-24)
+
+- Decision: after exact clean/parity/target checks, the executor may use only the minimum NTFS junctions needed to expose `E:\IDTS-SAP01` root and User Administration UI `node_modules` to the isolated worktree. The junctions are local environment state, excluded from Git, and do not authorize install, upgrade, audit-fix, package/version/lockfile mutation.
+- Evidence: root and UI package-lock hashes match `688A9CDCDB41E32E3C012AF9033EC8BFF079E0DF5FB2B3B29CD074D588F6E455`; required dependency trees exist at the clean root; targets were absent before creation; no parity/target check failed.

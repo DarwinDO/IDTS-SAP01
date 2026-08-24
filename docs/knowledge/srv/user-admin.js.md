@@ -126,3 +126,27 @@ Với link user hiện hữu, verify ghi correlation ID của operation được
 Keep this file as wiring only. Put catalog validation, impact counting, audit, and no-DELETE logic in `srv/user-admin/catalogs.js`; put public field/capability/ETag contracts in `srv/user-admin.cds`. Verify the full User Administration and Developer regression suites after changing registration.
 
 Giữ file này chỉ làm wiring. Validation catalog, đếm impact, audit và no-DELETE phải ở `srv/user-admin/catalogs.js`; public field/capability/ETag contract phải ở `srv/user-admin.cds`. Khi sửa registration, phải verify toàn bộ User Administration và Developer regression.
+
+## Gate 6 Operations and Audit registration / Đăng ký Operations và Audit Gate 6
+
+### English
+
+`UserAdministrationService.init` registers `operations-audit.js` at `srv/user-admin.js:91-95` with the same `requireActiveUserAdministrator` guard used by the rest of User Administration. The module receives the existing `scheduleImmediateEmailOutbox` and email-config readers only as dependencies; it does not create a second worker or provider client.
+
+- **IDTS concept**: the new read models and delivery retry share one server authorization boundary, while access Retry/Reconcile remains implemented by the existing guarded handlers.
+- **Impact if broken**: a new action could be callable by a PM without UserAdmin, create an unbounded provider operation, or schedule a second email worker.
+- **Must check together**: `srv/user-admin.cds:109-224`, `srv/user-admin/operations-audit.js:56-224`, `srv/email/worker.js`, and the focused negative-role/retry tests.
+
+### Tiếng Việt
+
+`UserAdministrationService.init` đăng ký `operations-audit.js` tại `srv/user-admin.js:91-95` với cùng guard `requireActiveUserAdministrator` như các flow User Administration khác. Module chỉ nhận `scheduleImmediateEmailOutbox` và email-config reader hiện có qua dependency; không tạo worker hoặc provider client thứ hai.
+
+- **Khái niệm IDTS**: read model mới và retry delivery dùng chung một boundary authorization server; Retry/Reconcile access vẫn dùng handler đã có guard.
+- **Ảnh hưởng nếu sai**: action mới có thể bị PM thiếu UserAdmin gọi được, tạo provider operation không giới hạn hoặc tạo email worker thứ hai.
+- **Phải kiểm tra cùng**: `srv/user-admin.cds:109-224`, `srv/user-admin/operations-audit.js:56-224`, `srv/email/worker.js` và test negative-role/retry tập trung.
+
+### Safe editing / Sửa an toàn
+
+Keep `srv/user-admin.js` as composition/wiring. Put masking, page clamping, safe output mapping, readiness derivation, and delivery retry guards in `operations-audit.js`; keep provider execution outside this service action. Re-run CAP EDMX and the User Administration, onboarding, access, and immediate-kick regressions after changing registration.
+
+Giữ `srv/user-admin.js` là file composition/wiring. Đưa masking, clamp page, mapping output an toàn, readiness derivation và guard retry delivery vào `operations-audit.js`; không thực thi provider trong action service này. Khi đổi registration, chạy lại CAP EDMX cùng regression User Administration, onboarding, access và immediate-kick.

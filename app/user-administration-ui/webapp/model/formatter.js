@@ -48,14 +48,86 @@ sap.ui.define(["sap/ui/core/format/DateFormat"], function (DateFormat) {
 				PENDING: "Warning",
 				PROCESSING: "Information",
 				RETRYABLE_FAILURE: "Warning",
-				BLOCKED_MANUAL_REVIEW: "Error"
+				BLOCKED_MANUAL_REVIEW: "Error",
+				SUCCEEDED: "Success"
 			})[sState] || "None";
+		},
+
+		operationStateText: function (sState) {
+			return ({
+				PENDING: "Pending",
+				PROCESSING: "In progress",
+				RETRYABLE_FAILURE: "Retry needed",
+				BLOCKED_MANUAL_REVIEW: "Manual review",
+				SUCCEEDED: "Completed"
+			})[sState] || "Unknown";
+		},
+
+		operationTypeText: function (sType, sProvision, sChangeRole, sRevoke, sReactivate, sLinkExisting) {
+			return ({
+				PROVISION: sProvision,
+				CHANGE_ROLE: sChangeRole,
+				REVOKE: sRevoke,
+				REACTIVATE: sReactivate,
+				LINK_EXISTING: sLinkExisting
+			})[sType] || sType || "Unknown";
+		},
+
+		auditActionText: function (sAction, sProvision, sChangeRole, sRevoke, sReactivate, sLinkExisting, sSuspend, sReactivateRequest, sRetryDelivery, sRetryAccess, sReconcileAccess) {
+			return ({
+				PROVISION: sProvision,
+				CHANGE_ROLE: sChangeRole,
+				REVOKE: sRevoke,
+				REACTIVATE: sReactivate,
+				LINK_EXISTING: sLinkExisting,
+				REQUEST_SUSPEND: sSuspend,
+				REQUEST_REACTIVATE: sReactivateRequest,
+				RETRY_ONBOARDING_DELIVERY: sRetryDelivery,
+				RETRY_ACCESS_OPERATION: sRetryAccess,
+				RECONCILE_ACCESS_OPERATION: sReconcileAccess
+			})[sAction] || sAction || "Unknown";
+		},
+
+		resultText: function (sResult, sQueued, sApplied, sRetryable, sRejected) {
+			return ({
+				QUEUED: sQueued,
+				APPLIED: sApplied,
+				NOOP_ALREADY_DESIRED: sApplied,
+				RETRYABLE_FAILURE: sRetryable,
+				PERMANENT_FAILURE: sRejected,
+				CONFLICT: sRejected
+			})[sResult] || sResult || "Unknown";
+		},
+
+		statusText: function (sStatus, sPending, sFailed, sSent, sSkipped, sUnknown) {
+			return ({
+				PENDING: sPending,
+				FAILED: sFailed,
+				SENT: sSent,
+				SKIPPED: sSkipped
+			})[sStatus] || sUnknown || "Unknown";
+		},
+
+		readinessText: function (sState, sLabel, sAvailable, sUnavailable, sRecentSuccess, sStale, sUnknown) {
+			const sText = ({ AVAILABLE: sAvailable, UNAVAILABLE: sUnavailable, RECENT_SUCCESS: sRecentSuccess, STALE: sStale, UNKNOWN: sUnknown })[sState] || sUnknown || "Unknown";
+			return `${sLabel || "Readiness"}: ${sText}`;
+		},
+
+		readinessState: function (sState) {
+			return ({ AVAILABLE: "Success", RECENT_SUCCESS: "Success", UNAVAILABLE: "Error", STALE: "Warning" })[sState] || "None";
+		},
+
+		readinessLastSuccess: function (sValue, sLabel) {
+			return sValue ? `${sLabel || "Last successful reconciliation"}: ${oDateTimeFormat.format(new Date(sValue))}` : `${sLabel || "Last successful reconciliation"}: —`;
 		},
 
 		statusState: function (sStatus) {
 			return ({
 				ACTIVE: "Success",
 				FAILED: "Error",
+				SENT: "Success",
+				SUCCEEDED: "Success",
+				PENDING: "Warning",
 				RETRYABLE_FAILURE: "Warning",
 				BLOCKED_MANUAL_REVIEW: "Error",
 				PENDING_APPROVAL: "Information",

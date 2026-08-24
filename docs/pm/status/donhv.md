@@ -529,9 +529,6 @@ Last updated: 2026-07-23
 | SAP490 specification remediation closure | Functional Specification v0.4 and Technical Specification v0.2 EN/VI are complete as the four official review workbooks. | All discovered problems were template-generation or presentation defects: stale named ranges, incorrect cover mapping, unmerged/narrow narrative or field areas, and inherited metadata. | Complete. OfficeCLI now reports zero format and content issues and `validate` passes for all four local workbooks. The two Functional and two Technical raw Drive files were replaced in place only after fresh metadata preflight, preserving their original IDs, names, parent review folder, and links. | Live Google Sheets review confirms the final Technical cover and horizontal Screen Layout; Functional/Technical Drive metadata readback is complete. Test & Fix Bug remains unchanged because no product defect was found. |
 | Documentation verification finding | A final package-XML forbidden-template scan still found two EN and four VI technical string hits after the visible header correction. | The broad scan may include hidden template metadata or visible cell content not covered by the previously inspected header ranges. | Under investigation. Do not claim the Technical files fully clean until each match is located and assessed. No Drive state is changed by this read-only scan. | Print bounded XML contexts, repair only any user-visible stale values with OfficeCLI, rerun the scan and then replace the same two Drive files only if their bytes change. |
 | Documentation verification resolution | The remaining package-XML hits are unreferenced entries retained in `xl/sharedStrings.xml`, not values used by any worksheet cell. | OfficeCLI clearing/replacing a shared-string cell leaves the old string in the workbook's internal string table; it does not affect a cell reference. | Resolved as non-visible package residue. A workbook-level reference check found `0` active cell references in Technical EN and VI; OfficeCLI content/format scans and validation are clean, and live Drive review shows no stale metadata. | No binary rewrite is justified because it risks the validated template layout without improving reviewer-visible content. Do not re-upload; retain the existing final Drive revision. |
-
-Vietnamese:
-
 | Phan loai | Trieu chung / cong viec | Nguyen nhan | Trang thai xu ly | Verify / buoc tiep theo |
 | --- | --- | --- | --- | --- |
 | Loi UI san pham | DonHV thay `Find Similar Bugs` dang nam trong section Assignment, `Review Classification Suggestions` bi tach khoi ngu canh classification, va `Review Handoff Summary` hien qua som thay vi gan History. | Cac AI review section ban dau duoc them de chung minh UI entry point; manifest anchor dat handoff truoc assignment, va nut duplicate/similar bi nhung trong `SmartAssignmentSection.fragment.xml`. | Hoan tat. PR #136 da squash-merge vao `dev` tai `31840d1`; Render deploy `dep-d97sim5aeets739021bg` dang live. Duplicate/similar review da nam trong `SimilarBugCheckSection.fragment.xml` sau Bug Summary, classification review van gan classification, Handoff Summary nam truoc History, va Assignment khong con chua duplicate/similar review. | Verify pass: static placement `19/19`; focused IDTS-74/75/76 regression checks; UI5 build; CAP compile voi warning attachment co san; secret scan; AI DevKit lint; `git diff --check`; va Render browser smoke `8/8`. Evidence: `docs/pm/evidence/idts-77/`. |
@@ -8292,3 +8289,294 @@ Vietnamese:
 - Final controlled lifecycle PASS: four unique rows created; Component Category updated, deactivated, reactivated and finally deactivated; three parent rows finally deactivated; zero hard deletes. Final readiness is `DEMO READY`.
 - Tooling/process issues: Windows PowerShell 5.1 could not run the PowerShell 7 backup verifier; a simulation parser initially counted baseline inventory as scheduled work; several quote/spacing mistakes stopped local PowerShell commands before mutation; one root-level `npm run lint` used the wrong project and was rerun successfully in the UI package; a generated `$null` redirect file was removed from the worktree. No product or platform state was inferred from those tooling failures.
 - Evidence: `docs/pm/evidence/user-administration/gate-5-business-catalogs-live-acceptance-20260824.md`.
+English:
+
+- 2026-08-24 — Gate 6 baseline wrapper issue (tooling/operator issue, closed): the initial read-only baseline wrapper called `.Trim()` on the empty output of `git branch --show-current` because this executor worktree was detached at the verified base SHA. `origin/dev`, local `dev`, merge-base and worktree cleanliness were otherwise verified; no source, Git ref, platform, data or external state changed. The follow-up treats detached HEAD as a valid pre-branch state and creates only the requested feature branch from the exact frozen SHA.
+- 2026-08-24 — Gate 6 CAP MCP model probe (tooling/environment issue, open): read-only `mcp__cap__search_model` calls for `UserAdministrationService`, `UserOnboardingDeliveries`, `UserAccessOperations`, and `UserIdentityAuditEvents` all stopped because the isolated worktree could not resolve the already-declared `@cap-js/attachments` package from `db/schema.cds`. CAP documentation search still returned safe authorization/read-only guidance; Fiori search, UI5 guidelines and UI project info returned guidance, with the existing UI5 `1.148.0` patch marked outdated. No source, dependency, lockfile, platform, data or external state changed. Owner: Gate 6 executor; use local source and locked dependency visibility only, with no install or upgrade.
+- 2026-08-24 — Gate 6 baseline dependency visibility blocker (environment/tooling issue, open): the required `qa:user-onboarding:programmatic` suite stopped before assertions because `@sap/cds` was not resolvable; `qa:user-access:programmatic` passed its contract sub-suite and then stopped because `@sap/cds` was not resolvable; `qa:user-admin-ui:programmatic` stopped because `yaml` was not resolvable. No source, dependency, lockfile, platform, data or external state changed. Owner: Gate 6 executor; prove exact locked dependency-tree parity and use only an existing visibility workaround, or report the blocker without installing/upgrading.
+- 2026-08-24 — Gate 6 dependency-visibility mutation ledger (authorized bounded workaround): root `E:\IDTS-SAP01` is clean on `dev`, `dev` and `origin/dev` both equal `aae01e375a15d7664281b8cee35ac16727e696cf`, and root/target `package-lock.json` SHA-256 both equal `688A9CDCDB41E32E3C012AF9033EC8BFF079E0DF5FB2B3B29CD074D588F6E455`. Required root trees `@sap/cds`, `@cap-js/attachments`, `yaml`, and `@ui5/cli` exist; target `node_modules` paths are absent. Coordinator authorized only the minimum root junction `C:\Users\LapHub\.codex\worktrees\adf5\IDTS-SAP01\node_modules -> E:\IDTS-SAP01\node_modules`; the UI-app junction is not created because the root tree supplies `@ui5/cli` and the app-scoped source tree lacks it. No install, upgrade, audit-fix, dependency/version, lockfile, source, platform or data mutation is authorized.
+- 2026-08-24 — Gate 6 root dependency junction created (authorized tooling workaround): exact target readback is `Junction` at `C:\Users\LapHub\.codex\worktrees\adf5\IDTS-SAP01\node_modules` with target `E:\IDTS-SAP01\node_modules`; no UI-app junction was created. This is the only dependency-visibility mutation; no install, upgrade, audit-fix, dependency/version, lockfile, source, platform or data mutation occurred.
+- 2026-08-24 — Gate 6 dependency-visible baseline and CAP probe: `qa:user-onboarding:programmatic`, `qa:user-access:programmatic`, and `qa:user-admin-ui:programmatic` passed after the authorized root junction. CAP MCP `search_model` now resolves the User Administration service and persisted onboarding/operation/audit model; corrected `npx cds compile srv -s all --to edmx` exits `0` with the known pre-existing attachment annotation warning only. The MCP output was used for source mapping, not copied into API/UI/log/evidence, and no source/schema/dependency/lockfile/platform/data mutation occurred.
+- 2026-08-24 — Gate 6 operations contract test-harness issue (fixed): the first GREEN rerun found that the test boundary assumed a literal LF/indentation before `@readonly`, while `srv/user-admin.cds` is CRLF-formatted. The CDS contract itself was present; the test now uses a CRLF-safe regex anchor. No product, dependency, lockfile, platform or data state changed; rerun the focused contract test after the exact-anchor fix.
+- 2026-08-24 — Gate 6 operations readiness fixture issue (fixed): the first handler GREEN run placed the controlled `SENT` delivery outside the bounded recent-readiness window, so the expected persisted-state `AVAILABLE` result was not sampled. The fixture now places that `SENT` row in the recent window; no product, dependency, lockfile, platform or data state changed.
+- 2026-08-24 — Gate 6 UI contract test-harness issue (under correction): the first UI GREEN rerun evaluated new controller assertions before the existing `controller` source variable was initialized. The failure occurred before UI assertions; move the assertions below the source read and rerun. No product, dependency, lockfile, platform or data state changed.
+- 2026-08-24 — Gate 6 UI lint dependency visibility blocker (environment/tooling issue, open): `npm --prefix app/user-administration-ui run lint` reached ESLint but could not resolve `eslint-plugin-jsdoc` from the target app scope. The exact root UI dependency tree contains the plugin; no source, dependency, lockfile, platform or data state changed. Owner: Gate 6 executor; use only the approved target app junction, then rerun lint/build.
+- 2026-08-24 — Gate 6 UI-app junction preflight wrapper issue (tooling/operator issue, open): the first short read-only PowerShell wrapper exited `1` without emitting source/target checks before any filesystem mutation. No junction was created and no source, dependency, lockfile, platform or data state changed. Rerun with shorter quote-safe checks before the authorized UI-app junction.
+- 2026-08-24 — Gate 6 UI-app dependency junction created (authorized tooling workaround): separate quote-safe checks proved the exact root UI tree and `eslint-plugin-jsdoc` exist while the target app path was absent. Created only `C:\Users\LapHub\.codex\worktrees\adf5\IDTS-SAP01\app\user-administration-ui\node_modules -> E:\IDTS-SAP01\app\user-administration-ui\node_modules`; readback is `Junction`. No install, upgrade, audit-fix, dependency/version, lockfile, source, platform or data mutation occurred.
+- 2026-08-24 — Gate 6 UI5 MCP linter finding (UI tooling issue, fixed): the first linter run reported `no-globals` for `formatter` in `DeliveryDetails.fragment.xml`, `OperationDetails.fragment.xml`, and `AuditDetails.fragment.xml`. Each fragment now imports the formatter through `core:require`; no auto-fix or dependency/source outside the three fragments was used. Rerun the same linter and UI build.
+
+Vietnamese:
+
+- 2026-08-24 — Lỗi wrapper baseline Gate 6 (lỗi tooling/operator, đã đóng): wrapper baseline chỉ đọc ban đầu gọi `.Trim()` trên output rỗng của `git branch --show-current` vì worktree executor đang detached tại base SHA đã verify. `origin/dev`, `dev` local, merge-base và trạng thái sạch của worktree vẫn đã được kiểm tra; không có thay đổi source, Git ref, platform, data hoặc external state. Bước tiếp theo coi detached HEAD là trạng thái trước khi tạo branch hợp lệ và chỉ tạo đúng feature branch được yêu cầu từ SHA frozen.
+- 2026-08-24 — Probe model CAP MCP Gate 6 (lỗi tooling/environment, đang mở): các lệnh `mcp__cap__search_model` chỉ đọc cho `UserAdministrationService`, `UserOnboardingDeliveries`, `UserAccessOperations` và `UserIdentityAuditEvents` đều dừng vì worktree isolated không resolve được package `@cap-js/attachments` đã khai báo từ `db/schema.cds`. CAP documentation search vẫn trả guidance an toàn về authorization/read-only; Fiori search, UI5 guidelines và thông tin project UI5 đã trả kết quả, trong đó UI5 `1.148.0` được đánh dấu đã cũ ở patch level. Không có thay đổi source, dependency, lockfile, platform, data hoặc external state. Owner: Gate 6 executor; chỉ dùng source local và dependency tree locked có thể nhìn thấy, không install hoặc upgrade.
+- 2026-08-24 — Blocker visibility dependency Gate 6 (lỗi environment/tooling, đang mở): suite bắt buộc `qa:user-onboarding:programmatic` dừng trước assertion vì không resolve được `@sap/cds`; `qa:user-access:programmatic` pass sub-suite contract rồi dừng vì không resolve được `@sap/cds`; `qa:user-admin-ui:programmatic` dừng vì không resolve được `yaml`. Không có thay đổi source, dependency, lockfile, platform, data hoặc external state. Owner: Gate 6 executor; phải chứng minh dependency tree locked exact parity và chỉ dùng workaround visibility đang tồn tại, hoặc báo blocker mà không install/upgrade.
+- 2026-08-24 — Ledger mutation visibility dependency Gate 6 (workaround giới hạn đã được coordinator cho phép): root `E:\IDTS-SAP01` sạch trên `dev`, `dev` và `origin/dev` cùng bằng `aae01e375a15d7664281b8cee35ac16727e696cf`, SHA-256 `package-lock.json` của root/target cùng bằng `688A9CDCDB41E32E3C012AF9033EC8BFF079E0DF5FB2B3B29CD074D588F6E455`. Các tree root bắt buộc `@sap/cds`, `@cap-js/attachments`, `yaml` và `@ui5/cli` tồn tại; path `node_modules` ở target đang vắng. Coordinator chỉ cho phép junction root tối thiểu `C:\Users\LapHub\.codex\worktrees\adf5\IDTS-SAP01\node_modules -> E:\IDTS-SAP01\node_modules`; không tạo junction cho UI app vì root tree đã có `@ui5/cli` còn source tree scoped của app không có package này. Không được install, upgrade, audit-fix, đổi dependency/version, lockfile, source, platform hoặc data.
+- 2026-08-24 — Đã tạo junction dependency root Gate 6 (workaround tooling được cho phép): readback exact cho thấy target `C:\Users\LapHub\.codex\worktrees\adf5\IDTS-SAP01\node_modules` là `Junction` trỏ tới `E:\IDTS-SAP01\node_modules`; không tạo junction cho UI app. Đây là mutation duy nhất về visibility dependency; không install, upgrade, audit-fix, đổi dependency/version, lockfile, source, platform hoặc data.
+- 2026-08-24 — Baseline và CAP probe Gate 6 sau khi có dependency visibility: `qa:user-onboarding:programmatic`, `qa:user-access:programmatic` và `qa:user-admin-ui:programmatic` đều PASS sau junction root được cho phép. CAP MCP `search_model` đã resolve service User Administration và model persisted onboarding/operation/audit; lệnh sửa đúng `npx cds compile srv -s all --to edmx` exit `0`, chỉ còn warning annotation attachment đã có từ trước. Output MCP chỉ dùng để map source, không copy vào API/UI/log/evidence; không có mutation source/schema/dependency/lockfile/platform/data.
+- 2026-08-24 — Lỗi test-harness contract operations Gate 6 (đã fix): lần chạy GREEN đầu tiên phát hiện test boundary kỳ vọng hai khoảng trắng trước `@readonly`, trong khi `srv/user-admin.cds` dùng một khoảng trắng. CDS contract đã có; chỉ sửa anchor của test. Không có thay đổi product, dependency, lockfile, platform hoặc data; chạy lại test contract tập trung sau khi sửa anchor exact.
+- 2026-08-24 — Lỗi fixture readiness operations Gate 6 (đã fix): lần GREEN đầu tiên đặt delivery `SENT` được kiểm soát nằm ngoài cửa sổ readiness gần đây bị giới hạn, nên kết quả `AVAILABLE` dựa trên persisted-safe-state không được sample. Fixture đã đưa row `SENT` vào cửa sổ gần đây; không có thay đổi product, dependency, lockfile, platform hoặc data.
+- 2026-08-24 — Lỗi test-harness contract UI Gate 6 (đang sửa): lần GREEN đầu tiên đánh giá assertion controller mới trước khi biến source `controller` hiện có được khởi tạo. Lỗi xảy ra trước các UI assertion; đã chuyển assertion xuống sau bước đọc source và chạy lại. Không có thay đổi product, dependency, lockfile, platform hoặc data.
+- 2026-08-24 — Blocker visibility dependency UI lint Gate 6 (lỗi environment/tooling, đang mở): `npm --prefix app/user-administration-ui run lint` đã chạy tới ESLint nhưng không resolve được `eslint-plugin-jsdoc` từ app scope target. Exact root UI dependency tree có package này; không có thay đổi source, dependency, lockfile, platform hoặc data. Owner: Gate 6 executor; chỉ dùng junction app target đã được cho phép rồi chạy lại lint/build.
+- 2026-08-24 — Lỗi wrapper preflight junction app Gate 6 (lỗi tooling/operator, đang mở): wrapper PowerShell ngắn chỉ đọc đầu tiên exit `1` mà không in check source/target trước khi có mutation filesystem. Không tạo junction và không có thay đổi source, dependency, lockfile, platform hoặc data. Chạy lại bằng lệnh quote-safe ngắn trước junction UI app đã được phép.
+- 2026-08-24 — Đã tạo junction dependency UI app Gate 6 (workaround tooling được cho phép): các check quote-safe riêng chứng minh exact root UI tree và `eslint-plugin-jsdoc` tồn tại trong khi target app path vắng. Chỉ tạo `C:\Users\LapHub\.codex\worktrees\adf5\IDTS-SAP01\app\user-administration-ui\node_modules -> E:\IDTS-SAP01\app\user-administration-ui\node_modules`; readback là `Junction`. Không install, upgrade, audit-fix, đổi dependency/version, lockfile, source, platform hoặc data.
+- 2026-08-24 — Finding UI5 MCP linter Gate 6 (lỗi tooling UI, đã fix): lần linter đầu tiên báo `no-globals` cho `formatter` trong ba fragment `DeliveryDetails.fragment.xml`, `OperationDetails.fragment.xml` và `AuditDetails.fragment.xml`. Mỗi fragment đã import formatter qua `core:require`; không dùng auto-fix và không đổi dependency/source ngoài ba fragment. Chạy lại linter và UI build.
+### 2026-08-24 Gate 6 verification skill path lookup issue / Vấn đề tra đường dẫn skill verify Gate 6
+
+- Classification: tooling/process issue.
+- Symptom: the first read attempt used stale absolute paths under `C:\Users\LapHub\.codex\skills\superpowers` and `C:\Users\LapHub\.agents\skills`; PowerShell returned `Cannot find path` for the verification, finishing, verify, karpathy, and ponytail-review skill files.
+- Root cause: this desktop session stores the plugin skills under the bundled plugin cache and the repo-local AI DevKit skills under `.agents/skills` in the current worktree.
+- Fix/status: fixed in-session by reading the exact bundled/repo-local paths; all required instructions were read before final verification. No repository source, dependency, lockfile, platform, or runtime state was changed by the failed lookup.
+- Evidence: corrected reads completed for `verification-before-completion`, `finishing-a-development-branch`, `.agents/skills/verify`, `.agents/skills/karpathy-guidelines`, and `.agents/skills/ponytail-review`.
+- Remaining owner: executor; no follow-up blocker. Root `npm test` is intentionally not run because the Gate 6 instruction defines explicit maintained QA suites as authoritative.
+
+### 2026-08-24 Gate 6 verification skill path lookup issue / Vấn đề tra đường dẫn skill verify Gate 6
+
+- Phân loại: tooling/process issue.
+- Triệu chứng: lần đọc đầu dùng absolute path cũ dưới `C:\Users\LapHub\.codex\skills\superpowers` và `C:\Users\LapHub\.agents\skills`; PowerShell trả `Cannot find path` cho các skill verification, finishing, verify, karpathy-guidelines và ponytail-review.
+- Nguyên nhân: session desktop lưu plugin skill trong bundled plugin cache và AI DevKit skill repo-local trong `.agents/skills` của worktree hiện tại.
+- Fix/trạng thái: đã sửa trong session bằng cách đọc đúng path bundled/repo-local; đã đọc đầy đủ instruction trước final verification. Failed lookup không thay đổi source, dependency, lockfile, platform hoặc runtime.
+- Bằng chứng: đã đọc đúng `verification-before-completion`, `finishing-a-development-branch`, `.agents/skills/verify`, `.agents/skills/karpathy-guidelines` và `.agents/skills/ponytail-review`.
+- Owner còn lại: executor; không còn blocker follow-up. Cố ý không chạy root `npm test` vì Gate 6 quy định explicit maintained QA suites là authoritative.
+
+### 2026-08-24 Gate 6 focused test wrapper typo / Lỗi wrapper test focused Gate 6
+
+- Classification: tooling/operator issue.
+- Symptom: a corrected focused-test command was not launched because the orchestration JavaScript accidentally quoted the `max_output_tokens` property name, producing `SyntaxError: Unexpected identifier 'max_output_tokens'` before `exec_command`.
+- Root cause: malformed tool-call object syntax, not a Node/CAP/test failure.
+- Fix/status: corrected the wrapper and reran the unchanged `npm run qa:user-admin-operations:programmatic` command; no source, dependency, lockfile, platform, data, or external state changed in the failed attempt.
+- Owner: executor; no remaining blocker.
+
+### 2026-08-24 Gate 6 focused test wrapper typo / Lỗi wrapper test focused Gate 6
+
+- Phân loại: tooling/operator issue.
+- Triệu chứng: command test focused không chạy vì orchestration JavaScript vô tình quote property `max_output_tokens`, sinh `SyntaxError: Unexpected identifier 'max_output_tokens'` trước khi gọi `exec_command`.
+- Nguyên nhân: object syntax của tool-call bị sai, không phải lỗi Node/CAP/test.
+- Fix/trạng thái: đã sửa wrapper và chạy lại đúng `npm run qa:user-admin-operations:programmatic`; failed attempt không đổi source, dependency, lockfile, platform, data hoặc external state.
+- Owner: executor; không còn blocker.
+
+### 2026-08-24 Gate 6 eligibility/read-model correction / Sửa eligibility/read-model Gate 6
+
+- Classification: product correctness defect found in source review and fixed in-session.
+- Symptom: the initial Operations read model derived access Retry/Reconcile visibility from operation state/result without also requiring the linked onboarding request state/error predicates used by the existing CAP actions. A date-only Audit `to` filter also represented midnight, excluding later events on the selected date.
+- Root cause: the new mapper had not copied the existing `requeueAccessOperation` request-state guard, and timestamp normalization had no inclusive end-of-day handling for UI DatePicker values.
+- Fix/status: the mapper now requires exact linked request state and legacy request error for Retry/Reconcile eligibility; date-only `to` values normalize to UTC end-of-day. Added inconsistent-state and inclusive-date regressions.
+- Verification: `npm run qa:user-admin-operations:programmatic` PASS; no schema, dependency, lockfile, platform, data, provider or external mutation.
+- Remaining owner: executor; no blocker.
+
+### 2026-08-24 Gate 6 eligibility/read-model correction / Sửa eligibility/read-model Gate 6
+
+- Phân loại: product correctness defect phát hiện trong source review và đã fix trong session.
+- Triệu chứng: read model Operations ban đầu suy ra Retry/Reconcile từ operation state/result mà chưa kiểm tra đủ state/error của onboarding request theo guard CAP hiện có. Filter Audit `to` dạng date-only cũng thành midnight nên loại event muộn trong ngày được chọn.
+- Nguyên nhân: mapper mới chưa copy request-state guard của `requeueAccessOperation`, còn normalize timestamp chưa xử lý inclusive end-of-day cho DatePicker.
+- Fix/trạng thái: mapper yêu cầu linked request state exact và request error legacy cho eligibility Retry/Reconcile; `to` date-only normalize tới cuối ngày UTC. Đã thêm regression inconsistent-state và inclusive-date.
+- Verify: `npm run qa:user-admin-operations:programmatic` PASS; không mutation schema, dependency, lockfile, platform, data, provider hoặc external.
+- Owner còn lại: executor; không còn blocker.
+
+### 2026-08-24 Gate 6 invalid-lock fixture limitation / Giới hạn fixture invalid-lock Gate 6
+
+- Classification: test-harness/data-shape issue.
+- Symptom: the added regression fixture with `lockedUntil: 'not-a-timestamp'` failed during SQLite INSERT with `RangeError: Invalid time value`, before the retry handler executed.
+- Root cause: the CDS `Timestamp` column rejects malformed persisted timestamps; the fixture cannot represent an invalid lock value through the normal deploy/INSERT path.
+- Fix/status: removed only the invalid persisted fixture and retained the handler’s fail-closed invalid-date guard plus the supported future-lock rejection. No product, schema, dependency, lockfile, platform, data, provider or external state changed; the in-memory database was process-local.
+- Verification/next action: rerun the focused operations suite; if malformed-row coverage is needed later, use a bounded mocked transaction rather than violating the CDS type.
+
+### 2026-08-24 Gate 6 invalid-lock fixture limitation / Giới hạn fixture invalid-lock Gate 6
+
+- Phân loại: test-harness/data-shape issue.
+- Triệu chứng: fixture regression mới với `lockedUntil: 'not-a-timestamp'` fail khi SQLite INSERT với `RangeError: Invalid time value`, trước khi handler retry chạy.
+- Nguyên nhân: cột CDS `Timestamp` reject timestamp sai format; fixture không thể biểu diễn lock invalid qua deploy/INSERT bình thường.
+- Fix/trạng thái: chỉ bỏ fixture persisted invalid và giữ fail-closed guard trong handler cùng regression future-lock hợp lệ. Không đổi product, schema, dependency, lockfile, platform, data, provider hoặc external; database chỉ in-memory theo process.
+- Verify/bước tiếp: chạy lại operations suite; nếu cần cover malformed row, dùng mocked transaction bounded thay vì phá kiểu CDS.
+### 2026-08-24 Gate 6 independent source/security review findings / Findings review source-security độc lập Gate 6
+
+- Classification: independent source/security review finding; no Critical/Major, two Important findings.
+- Finding 1: readiness checked only the latest 25 rows without a freshness cutoff, so old `SENT`/`SUCCEEDED` rows could report healthy. Fixed by filtering persisted `modifiedAt` to a fixed seven-day window and adding a stale-readiness regression.
+- Finding 2: delivery retry did not verify the parent invitation remained `INVITED` and unexpired, so the worker could later skip it after the action wrote `PENDING`/audit. Fixed by checking parent status and expiry before attempt/lock/update; added expired-parent no-write/audit regression.
+- Verification: focused operations suite PASS after both fixes; final exact matrix and schema/generated-artifact/diff checks remain to be rerun after the final source state.
+- Review agent also found existing access guard parity, authorization, forbidden DTO/UI fields, retry atomicity/modifiedAt/lock/ceiling, post-commit kick, and material drift clean. No files were changed by the reviewer.
+
+### 2026-08-24 Gate 6 independent source/security review findings / Findings review source-security độc lập Gate 6
+
+- Phân loại: finding từ review source/security độc lập; không có Critical/Major, có hai finding Important.
+- Finding 1: readiness chỉ kiểm tra 25 row mới nhất mà chưa có freshness cutoff, nên row `SENT`/`SUCCEEDED` cũ có thể báo healthy. Đã fix bằng filter `modifiedAt` persisted trong window cố định bảy ngày và thêm regression stale-readiness.
+- Finding 2: retry delivery chưa kiểm tra parent invitation còn `INVITED` và chưa hết hạn, nên worker có thể skip sau khi action đã ghi `PENDING`/audit. Đã fix bằng check parent status/expiry trước attempt/lock/update; thêm regression expired-parent không write/audit.
+- Verify: operations suite focused PASS sau hai fix; final exact matrix và schema/generated-artifact/diff cần chạy lại trên source cuối.
+- Reviewer cũng xác nhận parity guard access hiện có, authorization, forbidden DTO/UI field, retry atomicity/modifiedAt/lock/ceiling, post-commit kick và drift material sạch. Reviewer không sửa file.
+### 2026-08-24 Gate 6 GitHub checks watch flag issue / Lỗi flag watch GitHub checks Gate 6
+
+- Classification: tooling/operator issue.
+- Symptom: `gh pr checks 339 --watch --interval 10 --json name,state,bucket,link` exited with `cannot use --watch with --json flag` before polling any check.
+- Root cause: GitHub CLI does not allow JSON output in watch mode.
+- Fix/status: no GitHub/PR/source state changed; use the supported non-JSON watch command and separate JSON readbacks. No remaining blocker.
+
+### 2026-08-24 Gate 6 GitHub checks watch flag issue / Lỗi flag watch GitHub checks Gate 6
+
+- Phân loại: tooling/operator issue.
+- Triệu chứng: `gh pr checks 339 --watch --interval 10 --json name,state,bucket,link` exit với `cannot use --watch with --json flag` trước khi poll check.
+- Nguyên nhân: GitHub CLI không cho JSON output trong watch mode.
+- Fix/trạng thái: không đổi GitHub/PR/source; dùng watch không JSON và JSON readback riêng. Không còn blocker.
+### 2026-08-24 Gate 6 Draft PR handoff / Bàn giao Draft PR Gate 6
+
+- Classification: source-gate handoff; no product blocker remains after remediation.
+- Exact source base/head at Draft PR creation: base `aae01e375a15d7664281b8cee35ac16727e696cf`, source head `a9f0896edf8694b2a9a485ad96f52205bfee2df6`, branch `feature/wp8-admin-operations-audit-donhv`, Draft PR `#339` targeting `dev`.
+- GitHub QA readback: `qa-depth-gate` PASS. Local exact matrix, CAP EDMX/HANA compile, UI5 MCP linter, UI lint/build, secret scan, agent rules, QA-depth self-test and diff/schema/generated-artifact checks PASS/zero; EDMX retains only the pre-existing attachment vocabulary warning.
+- Independent review: exactly one bounded source/security reviewer, 0 Critical/Major and 2 Important initially; both fixed (freshness cutoff and parent invitation eligibility) and covered by fresh focused/full verification. Reviewer made no edits; no second reviewer was spawned.
+- Mutation ledger: only the two coordinator-approved local NTFS junctions expose the exact locked root dependency trees; no install/upgrade/audit-fix, package/version/lockfile/source schema, provider/email/data/user/role/platform/Jira/Drive/deploy/merge/Ready mutation.
+- Next owner/boundary: coordinator DonHV exact-head review and later selective rollout/manual acceptance. Executor preserves the worktree and does not mark Ready, merge, deploy, mutate data/provider/identity/roles, or remove the worktree.
+
+### 2026-08-24 Gate 6 Draft PR handoff / Bàn giao Draft PR Gate 6
+
+- Phân loại: handoff source-gate; sau remediation không còn product blocker.
+- Base/head source exact khi tạo Draft PR: base `aae01e375a15d7664281b8cee35ac16727e696cf`, source head `a9f0896edf8694b2a9a485ad96f52205bfee2df6`, branch `feature/wp8-admin-operations-audit-donhv`, Draft PR `#339` target `dev`.
+- GitHub QA readback: `qa-depth-gate` PASS. Exact matrix local, compile CAP EDMX/HANA, UI5 MCP linter, UI lint/build, secret scan, agent rules, QA-depth self-test và diff/schema/generated-artifact đều PASS/zero; EDMX chỉ còn warning vocabulary attachment đã có từ trước.
+- Review độc lập: đúng một reviewer bounded source/security, ban đầu 0 Critical/Major và 2 Important; cả hai đã fix (freshness cutoff và parent invitation eligibility) và có fresh focused/full verification. Reviewer không sửa file; không spawn reviewer thứ hai.
+- Mutation ledger: chỉ hai NTFS junction local được coordinator cho phép để expose exact locked root dependency tree; không install/upgrade/audit-fix, package/version/lockfile/schema source, provider/email/data/user/role/platform/Jira/Drive/deploy/merge/Ready mutation.
+- Owner/boundary tiếp theo: coordinator DonHV review exact-head và later selective rollout/manual acceptance. Executor giữ worktree và không Ready, merge, deploy, mutation data/provider/identity/role hoặc remove worktree.
+### 2026-08-24 Gate 6 post-push watch wrapper recurrence / Lặp lỗi wrapper watch sau push Gate 6
+
+- Classification: tooling/operator issue.
+- Symptom: the second orchestration call for `gh pr checks 339 --watch --interval 10` again quoted the `max_output_tokens` property and raised `SyntaxError: Unexpected identifier 'max_output_tokens'` before `gh` ran.
+- Fix/status: corrected immediately; no repository or GitHub state changed in the failed wrapper. This is the same command-wrapper shape already logged; no product impact or remaining blocker.
+
+### 2026-08-24 Gate 6 post-push watch wrapper recurrence / Lặp lỗi wrapper watch sau push Gate 6
+
+- Phân loại: tooling/operator issue.
+- Triệu chứng: lần gọi orchestration thứ hai cho `gh pr checks 339 --watch --interval 10` lại quote property `max_output_tokens`, sinh `SyntaxError: Unexpected identifier 'max_output_tokens'` trước khi `gh` chạy.
+- Fix/trạng thái: đã sửa ngay; failed wrapper không đổi repository hoặc GitHub. Đây là cùng command-wrapper shape đã log; không ảnh hưởng product và không còn blocker.
+### 2026-08-24 Gate 6 final readback wrapper recurrence / Lặp lỗi wrapper readback cuối Gate 6
+
+- Classification: tooling/operator issue.
+- Symptom: the final combined PR/Git/status readback orchestration call again quoted the `max_output_tokens` property and raised `SyntaxError: Unexpected identifier 'max_output_tokens'` before any command ran.
+- Fix/status: no GitHub/repository state changed; the wrapper is corrected and the individual readback commands are rerun separately. No product impact or remaining source blocker.
+
+### 2026-08-24 Gate 6 final readback wrapper recurrence / Lặp lỗi wrapper readback cuối Gate 6
+
+- Phân loại: tooling/operator issue.
+- Triệu chứng: orchestration readback PR/Git/status cuối lại quote property `max_output_tokens`, sinh `SyntaxError: Unexpected identifier 'max_output_tokens'` trước khi command chạy.
+- Fix/trạng thái: không đổi GitHub/repository; wrapper đã sửa và các lệnh readback riêng sẽ chạy lại. Không ảnh hưởng product và không còn source blocker.
+### 2026-08-24 Gate 6 regression patch context issue / Lỗi context patch regression Gate 6
+
+- Classification: tooling/operator issue.
+- Symptom: the first combined `apply_patch` for the list-level delivery eligibility regression failed context verification at the existing filtered-delivery assertion; no test or source file was changed by that patch.
+- Fix/status: stop-and-inspect before proceeding. The corrected patch will target the exact current fixture context and add both coordinator-requested RED regressions. No product, dependency, lockfile, platform, data, provider, or GitHub state changed.
+
+### 2026-08-24 Gate 6 regression patch context issue / Lỗi context patch regression Gate 6
+
+- Phân loại: tooling/operator issue.
+- Triệu chứng: `apply_patch` đầu tiên cho regression list-level delivery eligibility fail context verification tại assertion filtered-delivery hiện có; patch không đổi test hoặc source.
+- Fix/trạng thái: đã dừng và inspect trước khi làm tiếp. Patch sửa sẽ bám đúng context fixture hiện tại và thêm cả hai regression theo coordinator. Không đổi product, dependency, lockfile, platform, data, provider hoặc GitHub.
+### 2026-08-24 Gate 6 list/readiness RED regression / RED regression list/readiness Gate 6
+
+- Classification: expected TDD RED / product correctness finding.
+- Symptom: `npm run qa:user-admin-operations:programmatic` failed at the new list assertion because an expired parent delivery still returned `canRetry=true`.
+- Root cause: `searchOnboardingDeliveries` had not yet bulk-read parent request state/expiry; existing action-level validation did not protect list/UI eligibility.
+- Status: expected RED captured; no source implementation changed yet. The second readiness regression will be added before GREEN (PENDING-only must be UNKNOWN, FAILED-only UNAVAILABLE, SENT precedence AVAILABLE, stale ignored).
+
+### 2026-08-24 Gate 6 list/readiness RED regression / RED regression list/readiness Gate 6
+
+- Phân loại: expected TDD RED / finding correctness sản phẩm.
+- Triệu chứng: `npm run qa:user-admin-operations:programmatic` fail tại assertion list mới vì delivery có parent hết hạn vẫn trả `canRetry=true`.
+- Nguyên nhân: `searchOnboardingDeliveries` chưa bulk-read state/expiry parent request; validation action-level hiện có không bảo vệ eligibility trên list/UI.
+- Trạng thái: đã capture RED đúng kỳ vọng; chưa đổi implementation source. Sẽ thêm readiness regression trước GREEN (PENDING-only UNKNOWN, FAILED-only UNAVAILABLE, SENT precedence AVAILABLE, stale ignored).
+### 2026-08-24 Gate 6 UI date normalization RED / RED normalize date UI Gate 6
+
+- Classification: expected TDD RED / UI contract gap.
+- Symptom: `npm run qa:user-admin-ui:programmatic` failed because `_normalizeAuditDate` and exact normalized `from`/`to` parameter assertions were not yet implemented.
+- Root cause: `_loadAudit` still passed persisted `yyyy-MM-dd` DatePicker strings directly to CDS `Timestamp` action parameters.
+- Status: expected RED captured; no UI implementation changed yet. GREEN will require exact UTC start/end strings and null for empty/invalid values.
+
+### 2026-08-24 Gate 6 UI date normalization RED / RED normalize date UI Gate 6
+
+- Phân loại: expected TDD RED / gap contract UI.
+- Triệu chứng: `npm run qa:user-admin-ui:programmatic` fail vì chưa có `_normalizeAuditDate` và assertion exact cho parameter `from`/`to` đã normalize.
+- Nguyên nhân: `_loadAudit` vẫn truyền trực tiếp string DatePicker `yyyy-MM-dd` vào action CDS `Timestamp`.
+- Trạng thái: đã capture RED đúng kỳ vọng; chưa đổi UI implementation. GREEN cần chuỗi UTC start/end exact và null cho value rỗng/invalid.
+### 2026-08-24 Gate 6 coordinator remediation findings / Findings remediation coordinator Gate 6
+
+- Classification: IMPORTANT source-review findings; all three are fixed in-session.
+- Finding 1: delivery list `canRetry` lacked parent request eligibility. Fix: one bounded bulk `UserOnboardingRequests` read per delivery page; `canRetry` now requires parent exists, `status_code=INVITED`, and `expiresAt > readAt`. Added valid/expired/non-INVITED list regressions; action-level expired/non-INVITED no-write guards remain.
+- Finding 2: readiness treated recent `PENDING` as `UNAVAILABLE`. Fix: recent `SENT` takes precedence as `AVAILABLE`; otherwise recent `FAILED` gives `UNAVAILABLE`; PENDING/other/no conclusive state gives `UNKNOWN`; stale rows remain ignored. Added focused matrix.
+- Finding 3: UI DatePicker `yyyy-MM-dd` was passed raw to CDS Timestamp audit parameters. Fix: `_normalizeAuditDate` sends exact UTC start/end DateTimeOffset strings and null for empty/invalid values; added helper and `_loadAudit` parameter runtime assertions.
+- Verification: focused operations and UI suites PASS after fixes; full exact matrix, compile/lint/build, UI5 MCP lint, security/depth, diff/schema/generated checks remain to run on final delta.
+
+### 2026-08-24 Gate 6 coordinator remediation findings / Findings remediation coordinator Gate 6
+
+- Phân loại: findings IMPORTANT từ source review; cả ba đã fix trong session.
+- Finding 1: `canRetry` list delivery thiếu eligibility parent request. Fix: một bulk read bounded `UserOnboardingRequests` cho mỗi delivery page; `canRetry` yêu cầu parent tồn tại, `status_code=INVITED` và `expiresAt > readAt`. Đã thêm regression valid/expired/non-INVITED; guard action-level expired/non-INVITED no-write vẫn giữ.
+- Finding 2: readiness coi PENDING gần đây là `UNAVAILABLE`. Fix: recent `SENT` ưu tiên `AVAILABLE`; nếu không, recent `FAILED` là `UNAVAILABLE`; PENDING/other/no conclusive là `UNKNOWN`; row stale vẫn bị bỏ qua. Đã thêm matrix focused.
+- Finding 3: DatePicker UI `yyyy-MM-dd` truyền raw vào parameter CDS Timestamp audit. Fix: `_normalizeAuditDate` gửi DateTimeOffset UTC start/end exact và null cho empty/invalid; thêm assertion runtime helper và parameter `_loadAudit`.
+- Verify: operations và UI focused PASS sau fix; full exact matrix, compile/lint/build, UI5 MCP lint, security/depth, diff/schema/generated cần chạy trên delta cuối.
+### 2026-08-24 Gate 6 live readiness timestamp defect / Lỗi timestamp readiness live Gate 6
+
+- Classification: product defect found during controlled PM browser acceptance.
+- Symptom: Operations Delivery displayed multiple `Sent` rows while the readiness strip showed `Email delivery: Unknown` and `Provisioning broker: Unknown`.
+- Root cause: readiness freshness depended on managed `modifiedAt`, but direct DB CQL delivery/operation writers persist the explicit business outcome timestamps and do not guarantee a fresh managed timestamp for legacy/live rows.
+- Fix: TDD changed readiness to use delivery `sentAt` for success, delivery `lastAttemptAt` for failure, and operation `completedAt` for success. RED reproduced `UNKNOWN` with stale `modifiedAt` and recent outcome timestamps; focused GREEN passed. No schema/data/backfill/provider/user/role mutation was used.
+- Tooling/process notes: one combined staging build command was blocked before execution by the shell guard; the first isolated UI build stopped before module build because its generated content directory was absent; both were corrected with fresh non-destructive staging. CAP SSH remained disabled and was not enabled. Owner: DonHV coordinator; final full matrix, exact artifact rebuild, selective CAP correction and browser reread remain pending.
+
+### 2026-08-24 Gate 6 delivery timestamp visibility / Hiển thị timestamp delivery Gate 6
+
+- Classification: UI observability gap found during controlled PM browser acceptance.
+- Symptom: the safe Delivery details dialog showed status and attempt count but omitted the already-allowlisted `sentAt` and `lastAttemptAt` fields, so the PM could not distinguish fresh outcomes from legacy rows while readiness correctly remained fail-closed `UNKNOWN`.
+- Fix: TDD added only two read-only formatted fields and bilingual labels to the existing details dialog. No readiness semantics, retry eligibility, schema, provider, email, user, role, or HANA data changed.
+- Verification: the UI contract failed before the fragment change, then passed with UI lint/build and `git diff --check` after the minimal implementation.
+
+### 2026-08-24 Gate 6 HANA readiness key casing / Casing key readiness HANA Gate 6
+
+- Classification: live product defect found after timestamp visibility made the contradiction falsifiable.
+- Symptom: Delivery details proved a recent `SENT` outcome and Provisioning listed recent completed operations, but both readiness indicators remained `UNKNOWN`.
+- Root cause: the live HANA query returned uppercase result keys (`STATUS_CODE`, `SENTAT`, `STATE`, `COMPLETEDAT`) while readiness read only CAP logical key spellings. A sanitized read-only task proved 10/10 recent sent deliveries and 6/6 recent succeeded operations; exact runtime source checksum matched the reviewed source.
+- Fix: TDD added one bounded persisted-column accessor used only by readiness derivation and a regression with HANA-shaped uppercase rows. No schema, HANA row, provider, email, user, role, or retry/reconcile mutation occurred. Diagnostic task 16 was terminated after it emitted its safe result but did not exit; tasks 17–19 completed successfully.
+
+### 2026-08-24 Gate 6 successful operation summary / Summary operation thành công Gate 6
+
+- Classification: safe-copy gap exposed by PM Operation details acceptance.
+- Symptom: a completed operation displayed the generic `Provisioning result is unavailable.` message.
+- Root cause: all six successful live operations persisted the legitimate allowlisted safe code `ROLE_COLLECTIONS_VERIFIED`, but the Gate 6 presentation map covered result codes and failure codes without this worker success code.
+- Fix: TDD adds one exact safe summary mapping. No provider response, raw role inventory, identity value, schema, data row, or operation state changes.
+
+### 2026-08-24 Gate 6 bounded CAP replacement / Thay thế CAP giới hạn Gate 6
+
+- The first replacement package accidentally copied the source package engine `>=20 <23`; the regional Node.js buildpack rejected it during staging before any droplet assignment or restart. The running app remained unchanged and `npm run btp:demo:check` still reported `DEMO READY`.
+- The corrected R2 package preserved the approved deployment payload engine `22.x` and replaced only `srv/user-admin/operations-audit.js`. One owned staged droplet was assigned and the exact CAP app restarted once; post-readback returned `AVAILABLE`, `RECENT_SUCCESS`, and `DEMO READY`.
+- Two PowerShell wrappers had parser-only failures before mutation and were replaced with shorter quote-safe checks. No blind retry, schema, HANA row, provider, email, user, role, or main AppRouter mutation occurred.
+- R3 packaged the reviewed success-summary delta on top of R2: SHA-256 `C61DDE2D0E4949576F3A7D71C55578598CB5DE6A8C6F029E94DD445EEB6FC771`, 142 files, Node `22.x`, zero forbidden files, and exactly one changed payload file. The first post-upload ownership filter mishandled PowerShell's already-parsed UTC `DateTime`; sanitized readback found the single fresh READY package, so execution continued without another upload. One stage, owned droplet assignment, and restart completed at `1/1`; post-rollout `npm run btp:demo:check` returned `DEMO READY`.
+
+### 2026-08-24 Gate 6 UI readiness/spacing remediation — source-only complete
+
+- Classification: product UI correctness fix. `_loadReadiness` now accepts direct and UI5 `{ value: structuredResult }` results, writes readiness fields at model top level, and clears busy/error correctly. Delivery/Operation/Audit details reuse native `sapUiSmallMarginTop` after the first label; no backend/schema/dependency/platform mutation.
+- Verification: TDD RED was captured at the spacing contract, then fresh UI contract, Operations/Audit contract, UI lint, UI build, secret scan and `git diff --check` all passed with direct/wrapped/error runtime cases and all three fragment spacing assertions.
+- Phân loại: fix correctness UI product. `_loadReadiness` nhận result direct và UI5 `{ value: structuredResult }`, set field readiness ở top-level model và clear busy/error đúng; detail Delivery/Operation/Audit dùng `sapUiSmallMarginTop` native sau label đầu; không mutation backend/schema/dependency/platform.
+- Verify: đã capture TDD RED tại spacing contract; fresh UI contract, Operations/Audit contract, UI lint, UI build, secret scan và `git diff --check` đều PASS với runtime direct/wrapped/error và assertion spacing cả ba fragment.
+- Independent exact-diff review on `f3bd57c..0e57483` returned 0 Critical / 0 Important / 0 Minor. The content-only MTAR SHA-256 `05C6D526A560E6CAD909E0610F6152D5C155AFE6DB919ECCCAFC430784605283` contained exactly one application-content module, the existing HTML5 host, unchanged Bug UI ZIP, and the reviewed User Administration ZIP. One module-selective deployment completed; active MTA operations returned zero and post-deploy `npm run btp:demo:check` returned `DEMO READY`. Edge control timed out while the UI5 page retained browser work, so visual confirmation remains a manual refresh/readback rather than a claimed automated browser PASS.
+
+### 2026-08-24 Gate 6 UI5 invoke Context correction — source-only complete
+
+- Classification: product UI runtime defect found after rollout. Runtime screenshot still showed readiness `Unknown` because SAPUI5 `ODataContextBinding.invoke()` resolves to a `Context`; `_loadReadiness` treated that Context as structured JSON and never called `requestObject()`.
+- TDD RED: added direct and `{ value: ... }` readiness cases where `invoke()` returns a Context; `npm run qa:user-admin-ui:programmatic` failed with top-level fields remaining `UNKNOWN`. No production source changed before this RED.
+- Fix: `_loadReadiness` now uses `requestObject()` on the Context returned by `invoke()`, falls back to the bound Context, and unwraps direct/value-wrapped results while preserving busy/error handling. No spacing or backend change.
+- Verification: fresh UI contract, Operations/Audit contract, UI lint/build, secret scan and `git diff --check` all PASS. Only the bounded fix files are staged for local commit; no push/deploy/platform mutation.
+- Phân loại: lỗi runtime UI product phát hiện sau rollout. Screenshot vẫn hiện readiness `Unknown` vì `ODataContextBinding.invoke()` của SAPUI5 resolve thành `Context`; `_loadReadiness` coi Context là JSON structured và không gọi `requestObject()`.
+- TDD RED: đã thêm case readiness direct và `{ value: ... }` khi `invoke()` trả Context; `npm run qa:user-admin-ui:programmatic` fail vì field top-level vẫn `UNKNOWN`. Trước RED chưa đổi production source.
+- Fix: `_loadReadiness` giờ gọi `requestObject()` trên Context trả về từ `invoke()`, fallback sang bound Context và unwrap result direct/value-wrapped, đồng thời giữ xử lý busy/error. Không đổi spacing hoặc backend.
+- Verify: fresh UI contract, Operations/Audit contract, UI lint/build, secret scan và `git diff --check` đều PASS. Chỉ các file fix bounded được stage để commit local; không push/deploy/platform mutation.
+
+### 2026-08-24 Gate 6 readiness binding/detail inset correction — source-only complete
+
+- Classification: product UI binding/layout defect found in static/runtime review. Three readiness fields used relative named-model paths (`adminReadiness>...`) while `/error` was absolute; detail dialog containers used `sapUiResponsiveContentPadding`, which did not provide the required visible inset.
+- TDD RED: added exact absolute-path assertions and native `sapUiSmallMargin` container assertions; `npm run qa:user-admin-ui:programmatic` failed before source changes. No controller/backend/schema/platform mutation.
+- Fix: changed only the three readiness formatter bindings to `adminReadiness>/...` and the three detail `VBox` containers to `sapUiSmallMargin`; existing label `sapUiSmallMarginTop` spacing remains unchanged.
+- Verification: fresh UI contract, Operations/Audit contract, UI lint/build, secret scan and `git diff --check` all PASS. No controller/backend/schema/dependency/platform mutation.
+- Phân loại: lỗi binding/layout UI product phát hiện trong review static/runtime. Ba field readiness dùng path named-model tương đối (`adminReadiness>...`) trong khi `/error` là absolute; container dialog detail dùng `sapUiResponsiveContentPadding` nhưng không tạo inset nhìn thấy.
+- TDD RED: đã thêm assertion exact cho path absolute và container `sapUiSmallMargin`; `npm run qa:user-admin-ui:programmatic` fail trước khi sửa source. Không mutation controller/backend/schema/platform.
+- Fix: chỉ đổi ba binding formatter readiness thành `adminReadiness>/...` và ba container `VBox` detail thành `sapUiSmallMargin`; spacing label `sapUiSmallMarginTop` hiện có được giữ nguyên.
+- Verify: fresh UI contract, Operations/Audit contract, UI lint/build, secret scan và `git diff --check` đều PASS. Không mutation controller/backend/schema/dependency/platform.
+
+### 2026-08-25 Gate 6 selective UI rollout and manual acceptance — PASS
+
+- Exact source head `b0affdd2663254e81252582ba88b5a510f96e6bb`; bounded delta review 0 Critical/Important/Minor; GitHub QA PASS.
+- Deployed once from UI content-only MTAR SHA-256 `61ACFD2ECC30E962349036D60C2FAC07D95A0798F560AE1B7ED7B3AC29E1D0D6`. Archive inspection proved one application-content module, one existing HTML5 host and exactly two UI ZIPs; no CAP/HDI/HANA/route/managed-service/provider/user/role content.
+- Post-readback: zero active MTA operations and `DEMO READY` with CAP/AppRouter `1/1`, liveness/readiness `200`, protected anonymous API `401` and Web `200`.
+- DonHV manual evidence confirms Email Delivery `Available`, Provisioning Broker `Recent success`, reconciliation timestamp, safe masked Delivery/Provisioning/Audit lists, safe details, support fingerprint truncation and native dialog insets. Six screenshot byte sizes/digests and allowlisted claims are frozen in `docs/pm/evidence/user-administration/gate-6-operations-audit-source.md`; raw screenshots are not committed because they contain private host/user display data.
+- No artificial outage or ineligible retry was manufactured; no provider/email/user/role/data/schema/HANA/HDI mutation was used for acceptance. Gate 6 manual acceptance: PASS.
+- Bản rollout UI selective dùng đúng artifact checksum; không deploy CAP/HANA. Readiness, Delivery, Provisioning, Audit và layout detail đều được DonHV xác nhận runtime. Evidence raw không commit vì chứa host/user private; chỉ lưu size/hash/claim allowlist. Manual acceptance Gate 6: PASS.
