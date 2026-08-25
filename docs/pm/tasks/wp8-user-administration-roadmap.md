@@ -78,6 +78,12 @@ The executor may complete source/tests/docs/evidence commits, push the exact bra
 - Change Role collects a Developer profile only for a real non-Developer to Developer transition and rejects a same-role submit before any action request.
 - Scope remains source-only. The independent review required one minimal safe CAP DTO addition, `ActiveUserDetails.accessRequestVersion`, so lifecycle actions use the server-selected request instead of the filtered Requests table. There is no database schema, dependency, lockfile, platform, provider, user/role, data or deployment mutation.
 
+### Gate 6.2 dialog action-layout follow-up
+
+- Active User details uses a native wrapping action row so Change Role, Suspend/Reactivate and Revoke remain fully reachable at narrow dialog widths.
+- Manage Responsibilities is owned only by the Developer Responsibilities table and is not duplicated inside Active User details.
+- The source fix is UI-only and advances the HTML5 cache identity to `1.0.13`; selective content rollout and read-only visual acceptance remain separate release evidence.
+
 ## Bàn giao source Gate 6.1 — làm rõ navigation và action
 
 - Base frozen: `3f3efc113a4ebd708d3f88a314941e51817eb843`.
