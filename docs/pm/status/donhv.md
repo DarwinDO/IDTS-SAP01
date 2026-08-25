@@ -8849,3 +8849,9 @@ Vietnamese:
 - Classification: process/tooling issue during PR evidence refresh.
 - Symptom/root cause: capturing `gh pr view --jq .body` in a PowerShell variable converted the multiline body into an array; passing it back through `--raw-field` joined lines with spaces, so the published QA-depth parser temporarily reported all headings missing.
 - Fix/status: rebuilt the exact Markdown body in a task-owned file using the repository patch workflow, validated all 11 sections locally, updated PR #343 with `gh pr edit --body-file`, validated the published body through direct stdin, then removed the temporary file. Source, platform, provider, user/role, data, HANA/HDI, Jira and Drive state were unchanged.
+
+### 2026-08-25 Gate 6.2 PR-head refresh wrapper note
+
+- Classification: transient tooling issue.
+- Symptom/root cause: a Node one-liner embedded in a PowerShell double-quoted command used a JavaScript template literal; PowerShell interpreted the backtick sequence before Node parsed it, so Node received an invalid backspace character and the upstream `gh pr view` pipe closed. The API update never ran.
+- Fix/status: use a PowerShell single-quoted, template-literal-free Node program and concatenate the `body=` argument explicitly. No PR body, source, platform, provider, user/role or data mutation resulted from the failed wrapper.
