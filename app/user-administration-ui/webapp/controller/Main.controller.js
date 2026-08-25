@@ -13,6 +13,10 @@ sap.ui.define([
 		DEFECT_CATEGORY: { entity: "CatalogDefectCategories", fields: ["code", "name", "categoryType"] },
 		COMPONENT_CATEGORY: { entity: "CatalogComponentCategories", fields: ["component_ID", "defectCategory_ID"] }
 	});
+	const WORKLOAD_ORDER = "isOverloaded desc,overdueOwnedBugCount desc,developerName asc,developerProfileID asc";
+	const WORKLOAD_SELECT = "developerProfileID,developerUserID,developerName,developerEmail,availabilityStatusCode,availabilityStatusName,availabilityCriticality,workloadLimit,openOwnedBugCount,overdueOwnedBugCount,currentActionItemCount,estimatedEffortHoursTotal,isOverloaded,active";
+	const WORKLOAD_BUG_SELECT = "ID,bugNumber,title,status_code,priority_code,severity_code,dueDate,estimatedEffortHours,assigneeDisplayName,currentActionOwnerDisplayName";
+	const UUID_PATTERN = /^[0-9a-f-]{36}$/i;
 
 	return BaseController.extend("idts.useradministrationui.controller.Main", {
 		onInit: function () {
@@ -71,6 +75,20 @@ sap.ui.define([
 				details: null,
 				detailsBusy: false
 			}), "activeUsers");
+			this.setModel(new JSONModel({
+				items: [],
+				query: oSessionState.workloadQuery,
+				nextSkip: 0,
+				pageSize: 100,
+				hasMore: false,
+				loaded: false,
+				busy: false,
+				error: false,
+				selectedDeveloper: null,
+				bugs: [],
+				bugsBusy: false,
+				bugsError: false
+			}), "workload");
 		},
 
 		onAfterRendering: function () {
@@ -86,7 +104,11 @@ sap.ui.define([
 			const sSelectedTab = this.getModel("view").getProperty("/selectedTab");
 			const sSelectedAccessTab = this.getModel("view").getProperty("/selectedAccessTab");
 			if (sSelectedTab === "developers" || (sSelectedTab === "access" && sSelectedAccessTab === "activeUsers")) {
-				await this._ensureActiveUsersLoaded();
+				if (sSelectedTab === "developers" && this.getModel("view").getProperty("/selectedDeveloperTab") === "developerWorkload") {
+					await this._ensureDeveloperWorkloadLoaded();
+				} else {
+					await this._ensureActiveUsersLoaded();
+				}
 			}
 			if (sSelectedTab === "businessCatalogs") await this._loadCatalogs();
 			if (sSelectedTab === "operations") await this._ensureOperationsLoaded();
@@ -101,7 +123,13 @@ sap.ui.define([
 			const sKey = oEvent.getParameter("key") || oEvent.getSource().getSelectedKey();
 			this.getModel("view").setProperty("/selectedTab", sKey);
 			this._saveActiveUsersSessionState();
-			if ((sKey === "developers" || (sKey === "access" && this.getModel("view").getProperty("/selectedAccessTab") === "activeUsers")) && !this.getModel("activeUsers").getProperty("/loaded")) {
+			if (sKey === "developers") {
+				if (this.getModel("view").getProperty("/selectedDeveloperTab") === "developerWorkload") {
+					await this._ensureDeveloperWorkloadLoaded();
+				} else if (!this.getModel("activeUsers").getProperty("/loaded")) {
+					await this._ensureActiveUsersLoaded();
+				}
+			} else if (sKey === "access" && this.getModel("view").getProperty("/selectedAccessTab") === "activeUsers" && !this.getModel("activeUsers").getProperty("/loaded")) {
 				await this._ensureActiveUsersLoaded();
 			}
 			if (sKey === "businessCatalogs" && !this.getModel("businessCatalogs").getProperty("/loaded")) {
@@ -122,7 +150,60 @@ sap.ui.define([
 			const sKey = oEvent.getParameter("key") || oEvent.getSource().getSelectedKey();
 			this.getModel("view").setProperty("/selectedDeveloperTab", sKey);
 			this._saveActiveUsersSessionState();
-			await this._ensureActiveUsersLoaded();
+			if (sKey === "developerWorkload") {
+				await this._ensureDeveloperWorkloadLoaded();
+			} else {
+				await this._ensureActiveUsersLoaded();
+			}
+		},
+
+		onDeveloperWorkloadSearch: async function (oEvent) {
+			const sQuery = oEvent.getParameter("query") || oEvent.getParameter("value") || "";
+			this.getModel("workload").setProperty("/query", sQuery);
+			this._saveActiveUsersSessionState();
+			await this._loadDeveloperWorkloads(sQuery);
+		},
+
+		onRefreshDeveloperWorkload: async function () {
+			await this._loadDeveloperWorkloads();
+		},
+
+		onLoadMoreDeveloperWorkload: async function () {
+			const oWorkloadModel = this.getModel("workload");
+			if (oWorkloadModel.getProperty("/hasMore") && !oWorkloadModel.getProperty("/busy")) {
+				await this._loadDeveloperWorkloads(undefined, true);
+			}
+		},
+
+		onOpenDeveloperWorkload: async function (oEvent) {
+			const oRow = this._workloadRowFromEvent(oEvent);
+			if (!oRow?.developerProfileID) return;
+			const oWorkloadModel = this.getModel("workload");
+			oWorkloadModel.setProperty("/selectedDeveloper", oRow);
+			if (!this._developerWorkloadDialog) {
+				this._developerWorkloadDialog = await Fragment.load({
+					id: this.getView().getId(),
+					name: "idts.useradministrationui.fragment.DeveloperWorkloadDetails",
+					controller: this
+				});
+				this.getView().addDependent(this._developerWorkloadDialog);
+			}
+			this._developerWorkloadDialog.open();
+			await this._loadDeveloperWorkloadBugs(oRow);
+		},
+
+		onCloseDeveloperWorkload: function () {
+			this._developerWorkloadDialog?.close();
+			this.getModel("workload").setProperty("/selectedDeveloper", null);
+			this.getModel("workload").setProperty("/bugs", []);
+		},
+
+		openBugInManagement: function (oEvent) {
+			const oRow = oEvent?.getSource?.().getBindingContext("workload")?.getObject?.() || null;
+			const sUrl = this._bugObjectPageUrl(oRow?.bugID || oRow?.ID);
+			if (sUrl && typeof window !== "undefined" && typeof window.location?.assign === "function") {
+				window.location.assign(sUrl);
+			}
 		},
 
 		onOperationsTabSelect: async function (oEvent) {
@@ -1140,6 +1221,10 @@ sap.ui.define([
 			return oEvent?.getSource?.().getBindingContext("activeUsers")?.getObject?.() || null;
 		},
 
+		_workloadRowFromEvent: function (oEvent) {
+			return oEvent?.getSource?.().getBindingContext("workload")?.getObject?.() || null;
+		},
+
 		_operationsRowFromEvent: function (oEvent, sModelName) {
 			return oEvent?.getSource?.().getBindingContext(sModelName)?.getObject?.() || null;
 		},
@@ -1153,6 +1238,154 @@ sap.ui.define([
 				});
 			}
 			return this._activeUsersLoadPromise;
+		},
+
+		_ensureDeveloperWorkloadLoaded: function () {
+			const oWorkloadModel = this.getModel("workload");
+			if (oWorkloadModel.getProperty("/loaded")) return Promise.resolve();
+			if (!this._developerWorkloadLoadPromise) {
+				this._developerWorkloadLoadPromise = this._loadDeveloperWorkloads().finally(() => {
+					this._developerWorkloadLoadPromise = null;
+				});
+			}
+			return this._developerWorkloadLoadPromise;
+		},
+
+		_loadDeveloperWorkloads: async function (sQuery, bAppend) {
+			const oWorkloadModel = this.getModel("workload");
+			const bAppending = bAppend === true;
+			const sNormalizedQuery = (sQuery === undefined ? oWorkloadModel.getProperty("/query") : sQuery || "").trim();
+			const iPageSize = Math.min(Math.max(Number(oWorkloadModel.getProperty("/pageSize")) || 100, 1), 100);
+			const iSkip = bAppending ? Number(oWorkloadModel.getProperty("/nextSkip")) || 0 : 0;
+			const iRequest = (this._developerWorkloadRequest || 0) + 1;
+			this._developerWorkloadRequest = iRequest;
+			oWorkloadModel.setProperty("/query", sNormalizedQuery);
+			if (!bAppending) {
+				oWorkloadModel.setProperty("/items", []);
+				oWorkloadModel.setProperty("/nextSkip", 0);
+				oWorkloadModel.setProperty("/hasMore", false);
+				oWorkloadModel.setProperty("/loaded", false);
+				oWorkloadModel.setProperty("/selectedDeveloper", null);
+				oWorkloadModel.setProperty("/bugs", []);
+				oWorkloadModel.setProperty("/bugsError", false);
+			}
+			oWorkloadModel.setProperty("/busy", true);
+			oWorkloadModel.setProperty("/error", false);
+			try {
+				const mParameters = {
+					$select: WORKLOAD_SELECT,
+					$orderby: WORKLOAD_ORDER,
+					$$groupId: "$direct"
+				};
+				if (sNormalizedQuery) mParameters.$search = sNormalizedQuery;
+				const oBinding = this.getView().getModel("bugApi").bindList("/DeveloperWorkloads", null, null, null, mParameters);
+				const aContexts = await oBinding.requestContexts(iSkip, iPageSize);
+				const aRows = (await Promise.all(aContexts.map(oContext => this._requestContextObject(oContext))))
+					.filter(Boolean)
+					.map(oRow => this._normalizeDeveloperWorkloadRow(oRow));
+				if (iRequest !== this._developerWorkloadRequest) return;
+				const aExistingRows = bAppending ? oWorkloadModel.getProperty("/items") || [] : [];
+				const oExistingIDs = new Set(aExistingRows.map(oRow => oRow.developerProfileID));
+				const aNewRows = aRows.filter(oRow => oRow.developerProfileID && !oExistingIDs.has(oRow.developerProfileID));
+				oWorkloadModel.setProperty("/items", aExistingRows.concat(aNewRows));
+				oWorkloadModel.setProperty("/nextSkip", iSkip + aRows.length);
+				oWorkloadModel.setProperty("/hasMore", aRows.length === iPageSize);
+				oWorkloadModel.setProperty("/loaded", true);
+			} catch {
+				if (iRequest === this._developerWorkloadRequest) oWorkloadModel.setProperty("/error", true);
+			} finally {
+				if (iRequest === this._developerWorkloadRequest) oWorkloadModel.setProperty("/busy", false);
+			}
+		},
+
+		_loadDeveloperWorkloadBugs: async function (oDeveloper) {
+			const oWorkloadModel = this.getModel("workload");
+			const sProfileID = oDeveloper?.developerProfileID;
+			const iRequest = (this._developerWorkloadBugRequest || 0) + 1;
+			this._developerWorkloadBugRequest = iRequest;
+			oWorkloadModel.setProperty("/bugs", []);
+			oWorkloadModel.setProperty("/bugsBusy", true);
+			oWorkloadModel.setProperty("/bugsError", false);
+			try {
+				if (!UUID_PATTERN.test(String(sProfileID || ""))) return;
+				const oBinding = this.getView().getModel("bugApi").bindList("/Bugs", null, null, null, {
+					$select: WORKLOAD_BUG_SELECT,
+					$filter: `assignee_ID eq ${sProfileID} and status_code ne 'CLOSED'`,
+					$orderby: "dueDate asc,bugNumber asc",
+					$$groupId: "$direct"
+				});
+				const aContexts = await oBinding.requestContexts(0, 100);
+				const aRows = (await Promise.all(aContexts.map(oContext => this._requestContextObject(oContext))))
+					.filter(oRow => oRow && oRow.status_code !== "CLOSED")
+					.map(oRow => this._normalizeDeveloperWorkloadBug(oRow));
+				if (iRequest === this._developerWorkloadBugRequest) oWorkloadModel.setProperty("/bugs", aRows);
+			} catch {
+				if (iRequest === this._developerWorkloadBugRequest) oWorkloadModel.setProperty("/bugsError", true);
+			} finally {
+				if (iRequest === this._developerWorkloadBugRequest) oWorkloadModel.setProperty("/bugsBusy", false);
+			}
+		},
+
+		_requestContextObject: async function (oContext) {
+			if (typeof oContext?.requestObject === "function") return oContext.requestObject();
+			if (typeof oContext?.getObject === "function") return oContext.getObject();
+			return oContext;
+		},
+
+		_normalizeDeveloperWorkloadRow: function (oRow) {
+			const oSource = oRow || {};
+			const toCount = value => Number.isFinite(Number(value)) ? Number(value) : 0;
+			const workloadLimit = oSource.workloadLimit === null || oSource.workloadLimit === undefined || oSource.workloadLimit === ""
+				? null
+				: (Number.isFinite(Number(oSource.workloadLimit)) ? Number(oSource.workloadLimit) : null);
+			return {
+				developerProfileID: oSource.developerProfileID || null,
+				developerUserID: oSource.developerUserID || null,
+				developerName: oSource.developerName || "",
+				developerEmail: oSource.developerEmail || "",
+				availabilityStatusCode: oSource.availabilityStatusCode || null,
+				availabilityStatusName: oSource.availabilityStatusName || "",
+				availabilityCriticality: toCount(oSource.availabilityCriticality),
+				workloadLimit,
+				openOwnedBugCount: toCount(oSource.openOwnedBugCount),
+				overdueOwnedBugCount: toCount(oSource.overdueOwnedBugCount),
+				currentActionItemCount: toCount(oSource.currentActionItemCount),
+				estimatedEffortHoursTotal: toCount(oSource.estimatedEffortHoursTotal),
+				isOverloaded: oSource.isOverloaded === true || oSource.isOverloaded === "true",
+				active: oSource.active === true,
+				accessReady: oSource.active === true && !!oSource.developerUserID
+			};
+		},
+
+		_normalizeDeveloperWorkloadBug: function (oRow) {
+			const oSource = oRow || {};
+			const sBugID = oSource.ID || null;
+			return {
+				ID: sBugID,
+				bugID: sBugID,
+				bugNumber: oSource.bugNumber || "",
+				title: oSource.title || "",
+				status_code: oSource.status_code || "",
+				priority_code: oSource.priority_code || "",
+				severity_code: oSource.severity_code || "",
+				dueDate: oSource.dueDate || null,
+				estimatedEffortHours: Number.isFinite(Number(oSource.estimatedEffortHours)) ? Number(oSource.estimatedEffortHours) : 0,
+				assigneeDisplayName: oSource.assigneeDisplayName || "",
+				currentActionOwnerDisplayName: oSource.currentActionOwnerDisplayName || "",
+				overdue: this._isWorkloadBugOverdue(oSource.dueDate, oSource.status_code),
+				objectPageUrl: this._bugObjectPageUrl(sBugID)
+			};
+		},
+
+		_isWorkloadBugOverdue: function (sDueDate, sStatus) {
+			const sDate = typeof sDueDate === "string" ? sDueDate.slice(0, 10) : "";
+			return sStatus !== "CLOSED" && /^\d{4}-\d{2}-\d{2}$/.test(sDate) && sDate < new Date().toISOString().slice(0, 10);
+		},
+
+		_bugObjectPageUrl: function (bugID) {
+			return /^[0-9a-f-]{36}$/i.test(String(bugID || ""))
+				? "/idtsbugmanagementui/index.html#/Bugs(ID=" + encodeURIComponent(bugID) + ",IsActiveEntity=true)"
+				: null;
 		},
 
 		_loadActiveUsers: async function (sQuery, bAppend) {
@@ -1394,7 +1627,7 @@ sap.ui.define([
 		},
 
 		_readActiveUsersSessionState: function () {
-			const oDefault = { selectedTab: "access", selectedAccessTab: "requests", selectedDeveloperTab: "developerResponsibilities", selectedOperationsTab: "deliveries", query: "", includeNonActive: false, deliveryQuery: "", deliveryStatus: "", operationState: "", operationType: "", auditAction: "", auditResult: "", auditFrom: "", auditTo: "" };
+			const oDefault = { selectedTab: "access", selectedAccessTab: "requests", selectedDeveloperTab: "developerWorkload", selectedOperationsTab: "deliveries", query: "", includeNonActive: false, workloadQuery: "", deliveryQuery: "", deliveryStatus: "", operationState: "", operationType: "", auditAction: "", auditResult: "", auditFrom: "", auditTo: "" };
 			if (typeof window === "undefined" || !window.sessionStorage) return oDefault;
 			try {
 				const oSaved = JSON.parse(window.sessionStorage.getItem("idts.userAdministration.activeUsers") || "{}");
@@ -1409,10 +1642,11 @@ sap.ui.define([
 				return {
 					selectedTab: sSelectedTab,
 					selectedAccessTab: sSelectedAccessTab,
-					selectedDeveloperTab: oSaved.selectedDeveloperTab === "developerResponsibilities" ? oSaved.selectedDeveloperTab : oDefault.selectedDeveloperTab,
+					selectedDeveloperTab: ["developerWorkload", "developerResponsibilities"].includes(oSaved.selectedDeveloperTab) ? oSaved.selectedDeveloperTab : oDefault.selectedDeveloperTab,
 					selectedOperationsTab: ["deliveries", "provisioning"].includes(oSaved.selectedOperationsTab) ? oSaved.selectedOperationsTab : oDefault.selectedOperationsTab,
 					query: typeof oSaved.query === "string" ? oSaved.query : oDefault.query,
 					includeNonActive: oSaved.includeNonActive === true,
+					workloadQuery: typeof oSaved.workloadQuery === "string" ? oSaved.workloadQuery : oDefault.workloadQuery,
 					deliveryQuery: typeof oSaved.deliveryQuery === "string" ? oSaved.deliveryQuery : oDefault.deliveryQuery,
 					deliveryStatus: typeof oSaved.deliveryStatus === "string" ? oSaved.deliveryStatus : oDefault.deliveryStatus,
 					operationState: typeof oSaved.operationState === "string" ? oSaved.operationState : oDefault.operationState,
@@ -1439,6 +1673,7 @@ sap.ui.define([
 					selectedOperationsTab: oViewModel.getProperty("/selectedOperationsTab"),
 					query: oActiveUsersModel.getProperty("/query") || "",
 					includeNonActive: oActiveUsersModel.getProperty("/includeNonActive") === true,
+					workloadQuery: this.getModel("workload")?.getProperty("/query") || "",
 					deliveryQuery: this.getModel("deliveries")?.getProperty("/query") || "",
 					deliveryStatus: this.getModel("deliveries")?.getProperty("/status") || "",
 					operationState: this.getModel("operations")?.getProperty("/state") || "",
