@@ -476,11 +476,6 @@ sap.ui.define([
 			}, "existingLinkCancelled", true);
 		},
 
-		onOpenRoleChange: async function (oEvent) {
-			const oRow = this._rowFromEvent(oEvent);
-			await this._openRoleChangeForRow(oRow);
-		},
-
 		_openRoleChangeForRow: async function (oRow) {
 			if (!oRow) return;
 			await this._openAccessDialog({
@@ -493,22 +488,6 @@ sap.ui.define([
 				role: oRow.requestedRole_code,
 				userAdminRequested: oRow.userAdminRequested === true,
 				developerProfile: null
-			});
-		},
-
-		onOpenRevoke: async function (oEvent) {
-			const oRow = this._rowFromEvent(oEvent);
-			if (!oRow) {
-				return;
-			}
-			await this._openAccessDialog({
-				mode: "REVOKE",
-				title: await this._text("revokeAccess"),
-				confirmText: await this._text("revokeAccess"),
-				warning: await this._text("revokeWarning"),
-				row: oRow,
-				role: oRow.requestedRole_code,
-				userAdminRequested: oRow.userAdminRequested === true
 			});
 		},
 
