@@ -8808,3 +8808,16 @@ Vietnamese:
 - One exact deployment completed with zero retries and no service deletion. Active MTA operations returned zero. The content-only operation did not retain a queryable MTA configuration record; direct authenticated browser readback and exact artifact hash are the runtime authority.
 - Browser readback proved all six full tabs/tooltips, the Developer and Manage Responsibilities icons, three distinct Developer actions, and the Change Role informational hint. The dialog was closed without submit.
 - Final readiness returned CAP/AppRouter `1/1`, health/ready `200`, protected anonymous API `401`, Web `200`, and `DEMO READY`. No CAP, AppRouter, HANA/HDI, schema, provider, email, user, role, catalog, business-data, Jira, Drive, merge or Ready mutation occurred.
+
+### 2026-08-25 worktree junction removal safety guard
+
+- Classification: process/tooling hardening after the confirmed primary-checkout `app/` deletion incident.
+- TDD RED: `qa:agent-rules` failed because the canonical change-control rule did not require reparse-point inventory, non-recursive junction detachment, target survival proof, or a no-force boundary before `git worktree remove`.
+- Minimal fix: added one mandatory change-control bullet and four exact machine-enforced phrases in `scripts/qa/check-agent-rules.js`. No cleanup framework, dependency, application source, runtime, provider, user, role, HANA/HDI, Jira, or Drive mutation was added.
+- GREEN: `node scripts/qa/check-agent-rules.js` returned PASS (8 required rules); `git diff --check` exited zero. OfficeCLI preflight returned `1.0.144`; Markdown is outside OfficeCLI semantic editing, so the repository-native patch workflow was used.
+
+### 2026-08-25 Gate 6.1 post-guard refresh tooling note
+
+- Classification: transient command-wrapper issue during append-only conflict inspection.
+- Symptom: the first read-only PowerShell context printer used `$i:` inside an interpolated string and failed parsing before reading or writing repository content.
+- Fix: reran the same read-only inspection with the format operator, confirmed the only merge conflict was the append-only status tail, and retained both Gate 6.1 and junction-safety histories. No product, platform, provider, user, role, data, HANA/HDI, Jira, or Drive mutation resulted from the failed wrapper.

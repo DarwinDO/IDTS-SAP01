@@ -13,3 +13,4 @@ priority: required
 - Make surgical changes only; do not reformat unrelated files or rewrite business documents wholesale.
 - For business/domain changes, synchronize canonical business docs, relevant diagrams, BA/PM records, and knowledge notes in the same work item.
 - Before completion, verify the exact requested behavior, run `git diff --check`, and report remaining risks honestly.
+- Before `git worktree remove`, enumerate reparse points inside the exact worktree. If any dependency junction exists, detach junction objects non-recursively, prove every junction target still exists, and only then remove/prune the worktree. Never use force or recursive deletion to bypass an attached junction.
