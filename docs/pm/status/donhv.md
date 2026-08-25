@@ -8742,3 +8742,10 @@ Vietnamese:
 - Matrix local: UI contract, onboarding, UI lint/build, secret scan, agent-rules, QA-depth self-test và exact diff/scope đều PASS. `qa:user-admin-operations:programmatic` vẫn là blocker baseline date-fixture tại line 385 (`0 !== 2`); không sửa ngoài scope.
 - Mutation ledger: không mutation backend/schema/package/dependency/lockfile/controller/manifest/provider/user/role/data/HANA/HDI/Jira/Drive/deploy/merge/Ready. Hai dependency junction exact locked chỉ local và untracked. Không spawn child agent; UI5 MCP tool không callable.
 - Boundary dừng: coordinator DonHV sở hữu exact-head review, disposition blocker operations baseline, browser/manual acceptance, Ready/merge, deploy và cleanup worktree. Executor không advance Draft PR.
+### 2026-08-25 Operations/Audit deterministic date fixture
+
+- Classification: test-harness issue discovered while independently reviewing Gate 6.1 PR #340.
+- Symptom: `npm run qa:user-admin-operations:programmatic` returned `0 !== 2` at `scripts/qa/test-user-admin-operations-audit.js:385` on both unchanged `dev` and the Gate 6.1 head.
+- Root cause: `auditEntry()` omitted `createdAt`, so CAP supplied the execution date while the test intentionally filtered the fixed date `2026-08-24`.
+- Fix: the fixture now supplies an explicit deterministic `createdAt` inside the asserted day. Production CAP/UI behavior, schema, dependencies and lockfiles are unchanged.
+- Verification owner: DonHV coordinator. Focused RED was reproduced on `dev`; GREEN and Draft-PR evidence are recorded in the dedicated test-only branch.
