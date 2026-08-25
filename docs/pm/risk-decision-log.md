@@ -250,3 +250,12 @@ Khi retry, reconcile hoac reconcile lease het han rotate `UserAccessOperations.c
 
 - Decision: after exact clean/parity/target checks, the executor may use only the minimum NTFS junctions needed to expose `E:\IDTS-SAP01` root and User Administration UI `node_modules` to the isolated worktree. The junctions are local environment state, excluded from Git, and do not authorize install, upgrade, audit-fix, package/version/lockfile mutation.
 - Evidence: root and UI package-lock hashes match `688A9CDCDB41E32E3C012AF9033EC8BFF079E0DF5FB2B3B29CD074D588F6E455`; required dependency trees exist at the clean root; targets were absent before creation; no parity/target check failed.
+
+### DEC-066 — Reuse BugService workload and regroup User Administration by business ownership (2026-08-25)
+
+- Decision: complete the post-Gate-6 User Administration experience through Gates 6.2–6.5. Split Developer value-help state from Business Catalog administration state; group navigation into Access, Developers, Operations, Business Catalogs and Audit; place lifecycle actions on Active Users and responsibility actions under Developers.
+- Workload boundary: reuse the existing read-only `BugService.DeveloperWorkloads` and bounded Bug reads. Do not persist workload snapshots, duplicate aggregation inside UserAdministrationService, or permit assignment mutations from User Administration. Keep technical assignee and current action owner visibly distinct.
+- Navigation boundary: use same-origin relative paths between the two HTML5 apps and expose only a server-derived `canAdministerUsers` Boolean as a UX hint. AppRouter and CAP authorization remain authoritative.
+- Notification boundary: send role-change, suspend, reactivate and revoke emails only after verified local/provider completion through the existing outbox. Responsibility-only edits remain audit-only to avoid notification spam.
+- Scope boundary: this decision authorizes specification and planning only. Source implementation, deployment, email delivery, provider/user/role/data mutation, merge and release require later exact gates.
+- Evidence: `docs/superpowers/specs/2026-08-25-user-administration-ux-workload-navigation-design.md`.

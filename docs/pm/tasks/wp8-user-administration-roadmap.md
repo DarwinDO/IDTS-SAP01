@@ -12,7 +12,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 ## Current status
 
-`IN PROGRESS — GATE 6 DRAFT PR #339`
+`IN PROGRESS — POST-GATE-6 UX/WORKLOAD/NAVIGATION PLANNING`
 
 - Gates 1–3B are merged, deployed and accepted. Gate 3 browser closure is recorded by PR #325 at `04643e12727290f2f35fd56e9c3d2a8df4cbcdbc`.
 - Gate 4 branch `feature/wp8-admin-developer-pilot-donhv` is frozen from that exact base.
@@ -26,8 +26,10 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 - The rollout then completed the checksum-bound encrypted backup/restore rehearsal, exact five-artifact real migration and additive four-view recovery. Counts and digests remained identical, duplicate groups and new audit rows were zero, and no seed, `.hdbtabledata` or catalog-row DML ran.
 - Selective CAP rollout and controlled PM catalog lifecycle acceptance passed for create, edit, deactivate, reactivate, impact/audit handling and zero hard delete. All four controlled rows ended inactive and final readiness was `DEMO READY`.
 - PR #338 records the Gate 5 rollout evidence. Exact-head review/CI passed, and a controlled TESTER session proved Bug Management access while direct User Administration navigation returned `Forbidden`.
-- Gate 6 source candidate is isolated on `feature/wp8-admin-operations-audit-donhv` from exact `aae01e375a15d7664281b8cee35ac16727e696cf`. It adds safe bounded Operations/Audit DTO actions, persisted-state readiness, state-valid onboarding-delivery retry, Operations/Audit UI tabs, focused tests and bilingual knowledge mirrors. No schema/index or dependency/lockfile change is proposed.
-- The only local dependency-visibility workaround is two NTFS junctions to the exact clean root `E:\IDTS-SAP01` locked dependency trees, verified by package-lock SHA parity and target absence before creation. They are excluded from Git and must not be reproduced as repository artifacts.
+- Gate 6 Operations/Audit and the Gate 6.1 navigation/action-clarity follow-up are historical merged increments. Their executor dependency junctions were local-only implementation aids and are not part of the current planning worktree or product design.
+- Gates 1–6 and the Gate 6.1 navigation/action-clarity follow-up are now present in refreshed `origin/dev` at planning baseline `b2d56f95c65106b8e59583e4b8b0775d2c3588bf`.
+- DonHV approved the post-Gate-6 design direction on 2026-08-25: isolate Developer and Business Catalog UI state, regroup the six top-level areas into five business-owned areas, reuse the existing read-only BugService workload model, add exact Bug drill-down and same-origin cross-app navigation, and add email only after material access changes complete.
+- The approved design is recorded in `docs/superpowers/specs/2026-08-25-user-administration-ux-workload-navigation-design.md`. It authorizes planning only; implementation, deployment, email delivery, provider/user/role/data mutation, merge and release remain separate decisions.
 
 ## Gate 6 source handoff
 
@@ -42,6 +44,10 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 4. Gate 4 — Developer Responsibilities controlled pilot.
 5. Gate 5 — Business Catalog Administration.
 6. Gate 6 — Operations and Audit usability.
+7. Gate 6.2 — UI state isolation, navigation regrouping and action ownership.
+8. Gate 6.3 — Developer workload and assigned-Bug drill-down.
+9. Gate 6.4 — Safe cross-app navigation.
+10. Gate 6.5 — Post-completion access-change email notifications.
 
 ## Delivery rules
 
