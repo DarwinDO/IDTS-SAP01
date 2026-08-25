@@ -8978,3 +8978,10 @@ Vietnamese:
 - Result: `0 Critical / 0 Major / 0 Important / 0 Minor`; no concrete authorization bypass or regression found. Reviewer verified actor resolution, active identity/platform-role fail-closed behavior, PM all rows, Developer own-row scope before CQN search/filter/count/order/page, and the direct `service.js:147` caller.
 - Fresh reviewer checks: workload `49 PASS / 0 FAIL`, XSUAA auth `13/13`, UI workload/UI/Active Users/User Access PASS, CAP compile and `git diff --check` PASS. Limitation: no live XSUAA HTTP/browser runtime acceptance; focused programmatic platform-alignment evidence is present.
 - Handoff: GO for push and exactly one Draft PR after committing this status-only review closure. Stop before Ready, merge, rollout, deployment, cleanup or Gate 6.4.
+
+### 2026-08-26 Gate 6.3 Draft PR handoff
+
+- Final source/status branch: `feature/wp8-user-admin-developer-workload-donhv`; base/merge-base `d53f402ab92215e44d29da2e1d3da73a576fffd3`.
+- Exactly one Draft PR: `#349` — `https://github.com/DarwinDO/IDTS-SAP01/pull/349`, target `dev`, initial remote head `0ac4e23a3ff2c2ba427eac8f7d23000a5e79115f`, `isDraft=true`, `state=OPEN`.
+- Remote PR body readback passed `QA Depth Gate PR body check: PASS (11 required sections)`. GitHub `qa-depth-gate` returned `SUCCESS`.
+- Mutation ledger: source/status/docs were committed and pushed; no second PR, Ready, merge, rollout, deployment, HANA/HDI, provider, user/role, data, email, Jira/Drive or Gate 6.4 mutation occurred. Final current head after this status/evidence handoff will be read back before stopping.

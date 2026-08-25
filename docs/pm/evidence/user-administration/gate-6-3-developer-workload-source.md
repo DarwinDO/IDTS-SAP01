@@ -8,6 +8,7 @@
 - Required base: `d53f402ab92215e44d29da2e1d3da73a576fffd3`.
 - `origin/dev`, local `dev`, merge-base and initial detached checkout all matched the required SHA before the branch was created.
 - Pre-remediation source/evidence head: `912aa5792b25beeab794d7c1fa3680baf78319cd`.
+- Authorization remediation source commit: `f981816800e10b9600601844a308917aa394b7c9`; final status-only closure commit before PR creation: `0ac4e23a3ff2c2ba427eac8f7d23000a5e79115f`.
 - Scope: named BugService model, read-only Developers → Workload overview, bounded assigned non-Closed Bug details, exact same-origin Bug Object Page links, the authorized narrow `srv/bug-service/monitoring.js` authorization remediation, focused contracts, bilingual mirrors, PM evidence and one Draft PR handoff.
 - Explicitly out of scope: `db/`, schema/HANA/HDI, any `srv/` file other than the authorized `srv/bug-service/monitoring.js` guard/scoping fix, ordinary `BugService.Bugs` read-policy changes, dependency/lockfile, assignment/status mutation, platform/provider/user/role/data/email mutation, deployment, merge, Ready transition, runtime rollout, Gate 6.4 and worktree cleanup.
 
@@ -97,6 +98,12 @@ Gate 6.3 bổ sung model OData V4 có tên `bugApi` để đọc `DeveloperWorkl
 
 Các contract TDD, suite User Administration/Active Users/User Access, workload backend `49/0`, secret scan, agent rules, QA-depth, CAP EDMX/HANA compile, UI5 MCP lint/manifest validation, UI lint/build và diff guard đều đã có evidence mới. Server đã scope PM all/Developer own-row trước filter/page/count và fail-closed role/identity; ordinary `BugService.Bugs` read policy không đổi. Đây chỉ là source gate; chưa có runtime/manual acceptance, deploy, mutation dữ liệu/provider/user/role/email, merge, Ready hoặc Gate 6.4.
 
+## Draft PR handoff
+
+- Exactly one Draft PR was created: `#349`, target `dev`, initial reviewed head `0ac4e23a3ff2c2ba427eac8f7d23000a5e79115f`.
+- Remote PR body readback passed `QA Depth Gate PR body check: PASS (11 required sections)`.
+- GitHub `qa-depth-gate` readback is `SUCCESS`; final branch/status-only readback is reported by the coordinator handoff.
+
 ## Approval boundary
 
-This evidence supports source review and exactly one Draft PR only. It does not claim runtime/manual acceptance, deployment, merge, Ready, release, or Gate 6.4. Any unresolved Critical/Major/Important finding is a NO-GO and must stop PR handoff.
+This evidence supports the one Draft PR handoff only. It does not claim runtime/manual acceptance, deployment, merge, Ready, release, or Gate 6.4. The exact-head source review returned zero Critical/Major/Important/Minor; live XSUAA/browser acceptance and all later release decisions remain separate.
