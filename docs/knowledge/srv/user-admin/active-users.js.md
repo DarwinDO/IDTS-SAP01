@@ -107,3 +107,21 @@ Read model dung `srv/access/identity-readiness.js`. `identityLinked` chi true kh
 The Gate 3B read model loads and deduplicates onboarding rows by both `activeUser_ID` and private `linkTargetUser_ID`. A pending target-linked request is therefore grouped, counted, and selected for the legacy target even before completion, so `linkEligible` becomes false and the UI cannot offer a misleading duplicate link action.
 
 Read model Gate 3B doc va deduplicate request qua ca `activeUser_ID` va `linkTargetUser_ID` private. Request target-linked dang pending duoc group, count va select cho legacy target truoc khi completion, vi vay `linkEligible` thanh false va UI khong hien action link lap.
+
+## Gate 6.2 details-only lifecycle token / Optimistic token lifecycle chi o details Gate 6.2
+
+### English
+
+The read model selects the current request server-side from the complete relevant request set (`selectUserRequest`), independently of whichever Access Requests rows the UI happens to filter. For `readActiveUserDetails`, `accessRequestVersion` is the safe integer `provisioningVersion` of that selected request; `toDetails` allow-lists the token beside counts and Developer profile summary, while `toSummary` omits it.
+
+The details response contains no request row, invitation body, provider identifier, identity claim, hash, lease, or raw provider result. The UI can construct only a minimal lifecycle snapshot from `userID`, `businessRole`, `userAdminCapability`, and `accessRequestVersion`; a missing integer produces no action token. CAP still owns authorization, current-state checks, optimistic conflict handling, and mutation. This keeps Change Role, Suspend, Reactivate and Revoke independent from a filtered Requests model.
+
+**Source anchors**: `active-users.js:104-126` (request allow-list), `active-users.js:191-243` (authoritative selection and token), `active-users.js:313-325` (safe summary/details mapping), and `srv/user-admin.cds:53-72`.
+
+### Tiếng Việt
+
+Read model chọn request hiện tại ở server từ toàn bộ tập request liên quan (`selectUserRequest`), độc lập với việc UI đang filter những row nào trong Access Requests. Với `readActiveUserDetails`, `accessRequestVersion` là `provisioningVersion` integer an toàn của request được chọn; `toDetails` allow-list token này cạnh count và summary profile Developer, còn `toSummary` không trả token.
+
+Response details không chứa request row, invitation body, provider identifier, identity claim, hash, lease hoặc raw provider result. UI chỉ được dựng snapshot lifecycle tối thiểu từ `userID`, `businessRole`, `userAdminCapability` và `accessRequestVersion`; thiếu integer thì không có action token. CAP vẫn sở hữu authorization, check state hiện tại, optimistic conflict và mutation. Nhờ vậy Change Role, Suspend, Reactivate và Revoke không phụ thuộc Requests model đang filter.
+
+**Anchor nguồn**: `active-users.js:104-126` (request allow-list), `active-users.js:191-243` (selection có authority và token), `active-users.js:313-325` (mapping summary/details an toàn) và `srv/user-admin.cds:53-72`.

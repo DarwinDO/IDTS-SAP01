@@ -72,38 +72,52 @@ Keep each tab bound to its own model and load only the selected operations subta
 
 Giữ mỗi tab bind vào model riêng và chỉ load subtab operations đang chọn. Không bind raw persistence property vào XML; phải thêm safe DTO field và contract test trước. Code support kỹ thuật chỉ được hiện ở details có kiểm soát, còn label table phải thân thiện và được localize.
 
-## Gate 6.1 navigation and action clarity / Làm rõ navigation và action Gate 6.1
+## Gate 6.2 state and action ownership / State và ownership action Gate 6.2
 
 ### English
 
-The main `administrationTabs` `IconTabBar` at `Main.view.xml:28-35` uses only native SAPUI5 responsiveness: `headerMode="Inline"`, `tabDensityMode="Compact"`, and `tabsOverflowMode="End"`. The six top-level tabs each have a localized tooltip at `Main.view.xml:37`, `121`, `230`, `279`, `390`, and `440`, so the full task meaning remains discoverable when labels are constrained. No custom CSS or new controller behavior is involved.
+The main `administrationTabs` `IconTabBar` at `Main.view.xml:28-35` has five parent business areas: Access, Developers, Operations, Business Catalogs and Audit. Access owns the `accessSubtabs` child boundary for Requests and Active Users; Developers owns `developerSubtabs` for Responsibilities and reserves the same native child boundary for the later Workload increment. The parent bar keeps native SAPUI5 `headerMode="Inline"`, compact density and end overflow, with one localized tooltip per parent area.
 
-- **Location**: `Main.view.xml:28-35`, `administrationTabs` properties.
-  **IDTS concept**: The User Administration task areas remain six explicit business workspaces while native IconTabBar overflow and compact density protect readability on narrower screens.
-  **Impact if broken**: Tab labels can become ambiguous or hard to scan, and the navigation can lose its native responsive behavior.
-  **Must check together**: `scripts/qa/test-user-admin-ui.js`, all six tab tooltip keys in the three locale bundles, and SAPUI5 lint/build.
+- **Location**: `Main.view.xml:37-221`, Access and its child tabs.
+  **IDTS concept**: Requests and Active Users are sibling views under one Access area, so a filtered request list cannot define the availability of Active User actions.
+  **Impact if broken**: Navigation and action ownership can drift, or a details action can disappear merely because Requests is filtered.
+  **Must check together**: `Main.controller.js:onOpenActiveUserDetails`, `ActiveUserDetails.fragment.xml`, the Active Users contract, and the focused UI test.
 
-- **Location**: `Main.view.xml:82-96`, Access Requests row action buttons.
-  **IDTS concept**: `edit` remains Change Role, `action-settings` identifies Manage Developer availability and responsibilities, and `decline` remains Revoke; all existing visibility expressions and handlers stay unchanged.
-  **Impact if broken**: PM + UserAdmin may misread a row action or lose a safe route to the existing CAP-authorized action.
-  **Must check together**: `Main.controller.js` action handlers, the focused UI contract, and `ManageAccess.fragment.xml:15-20` informational guidance.
+- **Location**: `Main.view.xml:41-108`, the Access Requests table.
+  **IDTS concept**: Request rows expose only request-owned Approve, Retry, Reconcile and Cancel controls, with visibility derived from request state or the server-owned `cancelEligible` flag.
+  **Impact if broken**: A request row could suggest a lifecycle or Developer-profile mutation that belongs to an Active User or Developer workspace.
+  **Must check together**: `Main.controller.js` request action handlers, `srv/user-admin.cds` action inputs, and the filtered-request regression.
+
+Active User details owns the lifecycle actions Change Role, Suspend, Reactivate and Revoke. The detail fragment gates those actions by the server-derived access state and Developer role; the request table does not duplicate them.
+
+- **Location**: `Main.view.xml:222-281`, Developers and the Responsibilities table.
+  **IDTS concept**: Manage Responsibilities is a Developer-owned action. The table is fed by Developer rows, and the Manage button is visible only when `activeUsers>accessState` is `ACTIVE`; Active User details does not duplicate this action.
+  **Impact if broken**: A non-active Developer could be offered a profile mutation, or a non-Developer could receive a misleading responsibility action.
+  **Must check together**: `ActiveUserDetails.fragment.xml`, `Main.controller.js:onOpenDeveloperProfile`, `ManageDeveloperProfile.fragment.xml`, and the focused UI contract.
 
 ### Tiếng Việt
 
-`IconTabBar` chính `administrationTabs` tại `Main.view.xml:28-35` chỉ dùng responsive native của SAPUI5: `headerMode="Inline"`, `tabDensityMode="Compact"` và `tabsOverflowMode="End"`. Sáu tab cấp cao đều có tooltip đã localize tại `Main.view.xml:37`, `121`, `230`, `279`, `390` và `440`, nên ý nghĩa task vẫn dễ khám phá khi label bị giới hạn không gian. Không có CSS custom hoặc behavior controller mới.
+`IconTabBar` chính `administrationTabs` tại `Main.view.xml:28-35` có năm khu vực nghiệp vụ cấp cao: Access, Developers, Operations, Business Catalogs và Audit. Access sở hữu boundary child `accessSubtabs` cho Requests và Active Users; Developers sở hữu `developerSubtabs` cho Responsibilities và giữ cùng boundary native cho increment Workload sau này. Parent bar vẫn dùng `headerMode="Inline"`, compact density và end overflow native của SAPUI5, cùng một tooltip đã localize cho mỗi khu vực.
 
-- **Vị trí**: `Main.view.xml:28-35`, các property của `administrationTabs`.
-  **Khái niệm IDTS**: Sáu khu vực User Administration vẫn là sáu workspace nghiệp vụ rõ ràng; overflow và density native của IconTabBar giúp đọc được trên màn hình hẹp.
-  **Ảnh hưởng nếu sai**: Label tab có thể khó hiểu hoặc khó quét nhanh, và navigation có thể mất responsive native.
-  **Phải kiểm tra cùng**: `scripts/qa/test-user-admin-ui.js`, sáu key tooltip trong ba locale bundle và UI5 lint/build.
+- **Vị trí**: `Main.view.xml:37-221`, Access và các child tab.
+  **Khái niệm IDTS**: Requests và Active Users là hai view cùng cấp dưới Access, vì vậy filtered request list không được quyết định việc Active User action có tồn tại hay không.
+  **Ảnh hưởng nếu sai**: Navigation và ownership action có thể lệch nhau, hoặc action ở details biến mất chỉ vì Requests đang bị filter.
+  **Phải kiểm tra cùng**: `Main.controller.js:onOpenActiveUserDetails`, `ActiveUserDetails.fragment.xml`, contract Active Users và UI test tập trung.
 
-- **Vị trí**: `Main.view.xml:82-96`, các button action trong dòng Access Requests.
-  **Khái niệm IDTS**: `edit` vẫn là Change Role, `action-settings` biểu thị Manage availability và responsibility của Developer, còn `decline` vẫn là Revoke; expression visibility và handler hiện có không đổi.
-  **Ảnh hưởng nếu sai**: PM + UserAdmin có thể hiểu nhầm action hoặc mất đường an toàn tới action do CAP kiểm soát quyền.
-  **Phải kiểm tra cùng**: handler trong `Main.controller.js`, UI contract tập trung và hướng dẫn tại `ManageAccess.fragment.xml:15-20`.
+- **Vị trí**: `Main.view.xml:41-108`, table Access Requests.
+  **Khái niệm IDTS**: Dòng request chỉ expose Approve, Retry, Reconcile và Cancel thuộc request; visibility lấy từ request state hoặc flag `cancelEligible` do server quản lý.
+  **Ảnh hưởng nếu sai**: Dòng request có thể gợi ý mutation lifecycle hoặc Developer profile vốn thuộc Active User hoặc workspace Developer.
+  **Phải kiểm tra cùng**: handler request action trong `Main.controller.js`, input action của `srv/user-admin.cds` và regression filtered-request.
+
+Active User details sở hữu các lifecycle action Change Role, Suspend, Reactivate và Revoke. Fragment details gate các action này theo access state và role Developer do server suy ra; table request không lặp lại chúng.
+
+- **Vị trí**: `Main.view.xml:222-281`, Developers và table Responsibilities.
+  **Khái niệm IDTS**: Manage Responsibilities là action thuộc Developer. Table nhận các row Developer, còn button Manage chỉ visible khi `activeUsers>accessState` là `ACTIVE`; Active User details không lặp lại action này.
+  **Ảnh hưởng nếu sai**: Developer không active có thể bị gợi ý mutation profile, hoặc user không phải Developer nhận action responsibility gây hiểu nhầm.
+  **Phải kiểm tra cùng**: `ActiveUserDetails.fragment.xml`, `Main.controller.js:onOpenDeveloperProfile`, `ManageDeveloperProfile.fragment.xml` và UI contract tập trung.
 
 ### Safe editing / Sửa an toàn
 
-Keep these navigation properties, tooltip bindings, icon semantics, visibility expressions, and press handlers aligned. If a new top-level task is added, add a localized tooltip and a focused contract assertion; do not add CSS or move authorization into XML.
+Keep the five parent areas, the Access/Developers child boundaries, and the ownership-specific visibility expressions aligned. Keep request actions on request rows, lifecycle actions in Active User details, and Developer profile maintenance on active Developer paths. Do not move CAP authorization or server-owned state decisions into XML.
 
-Giữ đồng bộ các property navigation, binding tooltip, semantic icon, expression visibility và press handler. Nếu thêm task cấp cao mới, phải thêm tooltip đã localize và assertion contract tập trung; không thêm CSS hoặc chuyển authorization vào XML.
+Giữ đồng bộ năm khu vực cấp cao, boundary child Access/Developers và expression visibility theo ownership. Giữ request action trên dòng request, lifecycle action trong Active User details và profile maintenance trên path Developer active. Không chuyển authorization CAP hoặc quyết định state do server quản lý vào XML.

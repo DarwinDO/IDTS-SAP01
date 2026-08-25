@@ -11,3 +11,8 @@ The UI only submits the desired profile and optimistic version. Catalog validity
 Dialog PM + UserAdmin này chỉnh availability, workload và tập Component Category responsibility đang active qua CAP action hiện có. Dialog hiển thị số Bug đang mở bị ảnh hưởng và nói rõ Bug hiện hữu giữ nguyên assignee. Reason và confirmation là bắt buộc; dialog chuyển busy và disable Save khi một request đang chạy.
 
 UI chỉ gửi desired profile và optimistic version. Catalog hợp lệ, duplicate scope, authorization, persistence, audit và Smart Assign eligibility vẫn do server quyết định.
+## Gate 6.2 catalog ownership / Ownership catalog Gate 6.2
+
+Manage Responsibilities reads availability, Component Category, optional SAP Module and responsibility level exclusively from `developerCatalogs`. Business Catalog edit/load state is isolated from this dialog.
+
+Manage Responsibilities chỉ đọc availability, Component Category, SAP Module tùy chọn và responsibility level từ `developerCatalogs`. State edit/load của Business Catalog được tách khỏi dialog này.

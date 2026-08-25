@@ -69,8 +69,8 @@
 
 - [ ] Add manifest dataSource bugService and named model bugApi with OData V4 operationMode Server, autoExpandSelect true and earlyRequests false.
 - [ ] Add the workload JSONModel above in onInit and selectedDeveloperTab session state.
-- [ ] Implement _loadDeveloperWorkloads(query, append) using bugApi.bindList("/DeveloperWorkloads") with top <= 100 and stable order requested from the service. Normalize numeric counts and retain developerProfileID/userID only in model state, never render internal IDs.
-- [ ] Sort presentation rows overloaded first, overdue descending, then developer name only after each bounded service page is read. De-duplicate by developerProfileID on append.
+- [ ] Implement _loadDeveloperWorkloads(query, append) using bugApi.bindList("/DeveloperWorkloads") with top <= 100 and the server order `isOverloaded desc,overdueOwnedBugCount desc,developerName asc,developerProfileID asc`. Normalize numeric counts and retain developerProfileID/userID only in model state, never render internal IDs.
+- [ ] Preserve that server order when appending pages; do not re-sort individual pages in the browser. De-duplicate by developerProfileID on append and prove page-boundary stability.
 - [ ] Implement search, refresh and Load More guards; one failed workload read sets only workload.error.
 - [ ] Run npm run qa:user-admin-workload:programmatic and npm run qa:user-admin-ui:programmatic. Expected: exit 0.
 - [ ] Commit:
@@ -140,7 +140,7 @@ _bugObjectPageUrl: function (bugID) {
 ~~~
 
 - [ ] Open with window.location.assign only when the helper returns a URL. Do not hardcode domain or open a new authentication flow.
-- [ ] Test zero Bugs, 100 Bugs, closed exclusion, current owner different from assignee, overdue boundary, malformed ID, and exact URL.
+- [ ] Test zero Bugs, 100 Bugs, closed exclusion, current owner different from assignee, overdue boundary, malformed ID, exact URL, and stable no-duplicate workload rows across a page boundary.
 - [ ] Run:
 
 ~~~powershell

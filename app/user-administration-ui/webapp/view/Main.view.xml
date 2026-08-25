@@ -34,6 +34,10 @@
 					tabDensityMode="Compact"
 					tabsOverflowMode="End">
 					<items>
+						<IconTabFilter key="access" text="{i18n>accessTab}" icon="sap-icon://locked" tooltip="{i18n>accessTabTooltip}">
+							<content>
+								<IconTabBar id="accessSubtabs" selectedKey="{view>/selectedAccessTab}" select=".onAccessTabSelect" expandable="false" headerMode="Inline" tabDensityMode="Compact">
+									<items>
 						<IconTabFilter key="requests" text="{i18n>accessRequestsTab}" icon="sap-icon://request" tooltip="{i18n>accessRequestsTabTooltip}">
 							<content>
 								<VBox>
@@ -78,22 +82,6 @@
 															tooltip="{i18n>approveProvisioning}"
 															visible="{= ${requests>status_code} === 'PENDING_APPROVAL' }"
 															press=".onApproveProvisioning"/>
-														<Button
-															icon="sap-icon://edit"
-															tooltip="{i18n>changeRoleActionTooltip}"
-															visible="{= ${requests>status_code} === 'ACTIVE' }"
-															press=".onOpenRoleChange"/>
-														<Button
-															icon="sap-icon://action-settings"
-															tooltip="{i18n>manageResponsibilitiesActionTooltip}"
-															visible="{= ${requests>status_code} === 'ACTIVE' &amp;&amp; ${requests>requestedRole_code} === 'DEVELOPER' }"
-															press=".onOpenDeveloperProfile"/>
-														<Button
-															icon="sap-icon://decline"
-															type="Negative"
-															tooltip="{i18n>revokeAccessActionTooltip}"
-															visible="{= ${requests>status_code} === 'ACTIVE' }"
-															press=".onOpenRevoke"/>
 														<Button
 															icon="sap-icon://refresh"
 															tooltip="{i18n>retryProvisioning}"
@@ -227,7 +215,15 @@
 								</VBox>
 							</content>
 						</IconTabFilter>
-						<IconTabFilter key="developerResponsibilities" text="{i18n>developerResponsibilitiesTab}" icon="sap-icon://activity-individual" tooltip="{i18n>developerResponsibilitiesTabTooltip}">
+									</items>
+								</IconTabBar>
+							</content>
+						</IconTabFilter>
+						<IconTabFilter key="developers" text="{i18n>developersTab}" icon="sap-icon://activity-individual" tooltip="{i18n>developersTabTooltip}">
+							<content>
+								<IconTabBar id="developerSubtabs" selectedKey="{view>/selectedDeveloperTab}" select=".onDeveloperTabSelect" expandable="false" headerMode="Inline" tabDensityMode="Compact">
+									<items>
+						<IconTabFilter key="developerResponsibilities" text="{i18n>developerResponsibilitiesTab}" icon="sap-icon://action-settings" tooltip="{i18n>developerResponsibilitiesTabTooltip}">
 							<content>
 								<VBox>
 									<MessageStrip
@@ -261,7 +257,10 @@
 														}"
 														state="{path: 'activeUsers>developerReady', formatter: 'formatter.booleanState'}"/>
 													<ObjectNumber number="{activeUsers>activeResponsibilityCount}"/>
-													<Button text="{i18n>viewDetails}" type="Transparent" press=".onOpenActiveUserDetails"/>
+													<HBox justifyContent="End" renderType="Bare">
+														<Button text="{i18n>viewDetails}" type="Transparent" press=".onOpenActiveUserDetails"/>
+												<Button icon="sap-icon://action-settings" tooltip="{i18n>manageResponsibilitiesActionTooltip}" type="Transparent" visible="{= ${activeUsers>accessState} === 'ACTIVE' }" press=".onOpenDeveloperProfile"/>
+													</HBox>
 												</cells>
 											</ColumnListItem>
 										</items>
@@ -274,6 +273,10 @@
 										press=".onLoadMoreActiveUsers"
 										class="sapUiTinyMarginTop"/>
 								</VBox>
+							</content>
+						</IconTabFilter>
+									</items>
+								</IconTabBar>
 							</content>
 						</IconTabFilter>
 						<IconTabFilter key="operations" text="{i18n>operationsTab}" icon="sap-icon://activity-items" tooltip="{i18n>operationsTabTooltip}">
@@ -440,7 +443,7 @@
 						<IconTabFilter key="businessCatalogs" text="{i18n>businessCatalogsTab}" icon="sap-icon://tags" tooltip="{i18n>businessCatalogsTabTooltip}">
 							<content>
 								<VBox>
-									<IconTabBar id="catalogTypeTabs" selectedKey="{catalogs>/selectedType}" select=".onCatalogTypeChange" expandable="false" applyContentPadding="false">
+									<IconTabBar id="catalogTypeTabs" selectedKey="{businessCatalogs>/selectedType}" select=".onCatalogTypeChange" expandable="false" applyContentPadding="false">
 										<items>
 											<IconTabFilter key="SAP_MODULE" text="{i18n>sapModulesCatalog}"/>
 											<IconTabFilter key="APPLICATION_COMPONENT" text="{i18n>applicationComponentsCatalog}"/>
@@ -450,12 +453,12 @@
 									</IconTabBar>
 									<Toolbar>
 										<SearchField width="100%" placeholder="{i18n>catalogSearchPlaceholder}" search=".onCatalogSearch"/>
-										<CheckBox text="{i18n>includeInactiveCatalogs}" selected="{catalogs>/includeInactive}" select=".onCatalogInactiveFilterChange"/>
+										<CheckBox text="{i18n>includeInactiveCatalogs}" selected="{businessCatalogs>/includeInactive}" select=".onCatalogInactiveFilterChange"/>
 										<Button icon="sap-icon://refresh" tooltip="{i18n>refreshCatalogs}" press=".onRetryCatalogs"/>
 										<Button text="{i18n>addCatalogItem}" type="Emphasized" icon="sap-icon://add" press=".onOpenCatalogCreate"/>
 									</Toolbar>
-									<MessageStrip visible="{catalogs>/error}" text="{i18n>catalogLoadFailed}" type="Error" showIcon="true"/>
-									<Table id="businessCatalogsTable" items="{catalogs>/items}" busy="{catalogs>/busy}" noDataText="{i18n>noCatalogItems}" sticky="ColumnHeaders">
+									<MessageStrip visible="{businessCatalogs>/error}" text="{i18n>catalogLoadFailed}" type="Error" showIcon="true"/>
+									<Table id="businessCatalogsTable" items="{businessCatalogs>/items}" busy="{businessCatalogs>/busy}" noDataText="{i18n>noCatalogItems}" sticky="ColumnHeaders">
 										<columns>
 											<Column width="12rem"><Text text="{i18n>catalogCode}"/></Column>
 											<Column><Text text="{i18n>catalogName}"/></Column>
@@ -466,13 +469,13 @@
 										<items>
 											<ColumnListItem type="Inactive">
 												<cells>
-													<Text text="{catalogs>displayCode}" wrapping="false"/>
-													<Text text="{catalogs>displayName}" wrapping="false"/>
-													<Text text="{catalogs>displayType}" wrapping="false"/>
-													<ObjectStatus text="{= ${catalogs>active} ? ${i18n>activeStateText} : ${i18n>inactiveCatalogState} }" state="{= ${catalogs>active} ? 'Success' : 'None' }"/>
+													<Text text="{businessCatalogs>displayCode}" wrapping="false"/>
+													<Text text="{businessCatalogs>displayName}" wrapping="false"/>
+													<Text text="{businessCatalogs>displayType}" wrapping="false"/>
+													<ObjectStatus text="{= ${businessCatalogs>active} ? ${i18n>activeStateText} : ${i18n>inactiveCatalogState} }" state="{= ${businessCatalogs>active} ? 'Success' : 'None' }"/>
 													<HBox justifyContent="End">
 														<Button text="{i18n>editCatalogItem}" type="Transparent" press=".onOpenCatalogEdit"/>
-														<Button text="{= ${catalogs>active} ? ${i18n>deactivateCatalogItem} : ${i18n>activateCatalogItem} }" type="Transparent" press=".onToggleCatalogActive"/>
+														<Button text="{= ${businessCatalogs>active} ? ${i18n>deactivateCatalogItem} : ${i18n>activateCatalogItem} }" type="Transparent" press=".onToggleCatalogActive"/>
 													</HBox>
 												</cells>
 											</ColumnListItem>

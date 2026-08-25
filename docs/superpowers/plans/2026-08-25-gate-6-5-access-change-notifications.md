@@ -60,7 +60,11 @@ entity UserAccessNotificationDeliveries : cuid, managed {
 
 - [ ] Require @assert.unique.accessAuditDelivery: [ sourceAuditEvent ].
 - [ ] Require eventType allowlist ACCESS_ROLE_CHANGED, ACCESS_SUSPENDED, ACCESS_REACTIVATED and ACCESS_REVOKED in the writer, not a client field.
-- [ ] Add package script qa:user-access-notifications:programmatic.
+- [ ] Add package script:
+
+~~~json
+"qa:user-access-notifications:programmatic": "node scripts/qa/test-user-access-notifications.js"
+~~~
 - [ ] Run it. Expected: FAIL because the entity/writer does not exist.
 - [ ] Add the entity/unique annotation exactly as above; do not change Notifications, NotificationDeliveries or UserOnboardingDeliveries.
 - [ ] Compile:

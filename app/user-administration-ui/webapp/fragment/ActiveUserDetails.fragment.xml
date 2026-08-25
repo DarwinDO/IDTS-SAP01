@@ -90,32 +90,37 @@
 					<Label text="{i18n>openBugImpact}" class="sapUiSmallMarginTop"/>
 					<ObjectNumber number="{activeUsers>/details/developerOpenBugImpactCount}"/>
 				</VBox>
-				<Toolbar class="sapUiSmallMarginTop">
+				<HBox width="100%" wrap="Wrap" class="sapUiSmallMarginTop">
 					<Button
 						text="{i18n>linkExistingIdentity}"
 						type="Emphasized"
 						visible="{= ${activeUsers>/details/linkEligible} === true }"
+						class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
 						press=".onOpenExistingIdentityLink"/>
 					<Button
 						text="{i18n>changeRole}"
 						visible="{= !!${activeUsers>/details/_request} &amp;&amp; ${activeUsers>/details/accessState} === 'ACTIVE' }"
+						class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
 						press=".onOpenActiveUserRoleChange"/>
 					<Button
 						text="{i18n>suspendAccess}"
 						type="Negative"
 						visible="{= !!${activeUsers>/details/_request} &amp;&amp; ${activeUsers>/details/accessState} === 'ACTIVE' }"
+						class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
 						press=".onOpenActiveUserSuspend"/>
 					<Button
 						text="{i18n>reactivateAccess}"
 						type="Accept"
 						visible="{= !!${activeUsers>/details/_request} &amp;&amp; ${activeUsers>/details/accessState} === 'SUSPENDED' }"
+						class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
 						press=".onOpenActiveUserReactivate"/>
 					<Button
 						text="{i18n>revokeAccess}"
 						type="Negative"
 						visible="{= !!${activeUsers>/details/_request} &amp;&amp; ${activeUsers>/details/accessState} === 'ACTIVE' }"
+						class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
 						press=".onOpenActiveUserRevoke"/>
-				</Toolbar>
+				</HBox>
 			</VBox>
 		</content>
 		<endButton>

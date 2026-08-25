@@ -17,12 +17,27 @@ sap.ui.define([
 	return BaseController.extend("idts.useradministrationui.controller.Main", {
 		onInit: function () {
 			const oSessionState = this._readActiveUsersSessionState();
-			this.setModel(new JSONModel({ busy: false, selectedTab: oSessionState.selectedTab, selectedOperationsTab: oSessionState.selectedOperationsTab }), "view");
+			this.setModel(new JSONModel({
+				busy: false,
+				selectedTab: oSessionState.selectedTab,
+				selectedAccessTab: oSessionState.selectedAccessTab,
+				selectedDeveloperTab: oSessionState.selectedDeveloperTab,
+				selectedOperationsTab: oSessionState.selectedOperationsTab
+			}), "view");
 			this.setModel(new JSONModel(this._emptyInvite()), "invite");
 			this.setModel(new JSONModel(this._emptyAccessChange()), "access");
 			this.setModel(new JSONModel(this._emptyAccessLifecycle()), "lifecycle");
 			this.setModel(new JSONModel(this._emptyExistingIdentityLink()), "existingLink");
 			this.setModel(new JSONModel(this._emptyDeveloperAdministration()), "developer");
+			this.setModel(new JSONModel({
+				availabilityStatuses: [],
+				responsibilityLevels: [],
+				sapModules: [],
+				componentCategories: [],
+				loaded: false,
+				busy: false,
+				error: false
+			}), "developerCatalogs");
 			this.setModel(new JSONModel({
 				selectedType: "SAP_MODULE",
 				allItems: [],
@@ -36,7 +51,7 @@ sap.ui.define([
 				defectOptions: [],
 				edit: null,
 				impact: null
-			}), "catalogs");
+			}), "businessCatalogs");
 			this.setModel(new JSONModel({ items: [] }), "requests");
 			this.setModel(new JSONModel({ items: [], query: oSessionState.deliveryQuery, status: oSessionState.deliveryStatus, nextSkip: 0, pageSize: 25, hasMore: false, loaded: false, busy: false, error: false, selected: null, detailsBusy: false }), "deliveries");
 			this.setModel(new JSONModel({ items: [], state: oSessionState.operationState, operationType: oSessionState.operationType, nextSkip: 0, pageSize: 25, hasMore: false, loaded: false, busy: false, error: false, selected: null, detailsBusy: false }), "operations");
@@ -69,7 +84,8 @@ sap.ui.define([
 		_loadInitialRequests: async function () {
 			await this._loadRequests("");
 			const sSelectedTab = this.getModel("view").getProperty("/selectedTab");
-			if (["activeUsers", "developerResponsibilities"].includes(sSelectedTab)) {
+			const sSelectedAccessTab = this.getModel("view").getProperty("/selectedAccessTab");
+			if (sSelectedTab === "developers" || (sSelectedTab === "access" && sSelectedAccessTab === "activeUsers")) {
 				await this._ensureActiveUsersLoaded();
 			}
 			if (sSelectedTab === "businessCatalogs") await this._loadCatalogs();
@@ -85,14 +101,28 @@ sap.ui.define([
 			const sKey = oEvent.getParameter("key") || oEvent.getSource().getSelectedKey();
 			this.getModel("view").setProperty("/selectedTab", sKey);
 			this._saveActiveUsersSessionState();
-			if ((sKey === "activeUsers" || sKey === "developerResponsibilities") && !this.getModel("activeUsers").getProperty("/loaded")) {
+			if ((sKey === "developers" || (sKey === "access" && this.getModel("view").getProperty("/selectedAccessTab") === "activeUsers")) && !this.getModel("activeUsers").getProperty("/loaded")) {
 				await this._ensureActiveUsersLoaded();
 			}
-			if (sKey === "businessCatalogs" && !this.getModel("catalogs").getProperty("/loaded")) {
+			if (sKey === "businessCatalogs" && !this.getModel("businessCatalogs").getProperty("/loaded")) {
 				await this._loadCatalogs();
 			}
 			if (sKey === "operations") await this._ensureOperationsLoaded();
 			if (sKey === "audit") await this._ensureAuditLoaded();
+		},
+
+		onAccessTabSelect: async function (oEvent) {
+			const sKey = oEvent.getParameter("key") || oEvent.getSource().getSelectedKey();
+			this.getModel("view").setProperty("/selectedAccessTab", sKey);
+			this._saveActiveUsersSessionState();
+			if (sKey === "activeUsers") await this._ensureActiveUsersLoaded();
+		},
+
+		onDeveloperTabSelect: async function (oEvent) {
+			const sKey = oEvent.getParameter("key") || oEvent.getSource().getSelectedKey();
+			this.getModel("view").setProperty("/selectedDeveloperTab", sKey);
+			this._saveActiveUsersSessionState();
+			await this._ensureActiveUsersLoaded();
 		},
 
 		onOperationsTabSelect: async function (oEvent) {
@@ -250,7 +280,12 @@ sap.ui.define([
 				}
 				oActiveUsersModel.setProperty("/details", oDetails ? {
 					...oDetails,
-					_request: this._requestForActiveUser(oRow.userID)
+					_request: Number.isInteger(oDetails.accessRequestVersion) ? {
+						["activeUser_ID"]: oDetails.userID,
+						["requestedRole_code"]: oDetails.businessRole,
+						userAdminRequested: oDetails.userAdminCapability === true,
+						provisioningVersion: oDetails.accessRequestVersion
+					} : null
 				} : null);
 				if (!this._activeUserDetailsDialog) {
 					this._activeUserDetailsDialog = await Fragment.load({
@@ -446,54 +481,33 @@ sap.ui.define([
 			}, "existingLinkCancelled", true);
 		},
 
-		onOpenRoleChange: async function (oEvent) {
-			const oRow = this._rowFromEvent(oEvent);
-			await this._openRoleChangeForRow(oRow);
-		},
-
 		_openRoleChangeForRow: async function (oRow) {
 			if (!oRow) return;
-			await this._ensureDeveloperCatalogs();
-			const oDeveloperProfile = oRow.requestedRole_code === "DEVELOPER"
-				? await this._readDeveloperProfile(oRow.activeUser_ID)
-				: this._emptyDeveloperProfile();
 			await this._openAccessDialog({
 				mode: "CHANGE_ROLE",
 				title: await this._text("changeRole"),
 				confirmText: await this._text("changeRole"),
 				warning: await this._text("roleChangeWarning"),
 				row: oRow,
+				currentRole: oRow.requestedRole_code,
 				role: oRow.requestedRole_code,
 				userAdminRequested: oRow.userAdminRequested === true,
-				developerProfile: oDeveloperProfile
+				developerProfile: null
 			});
 		},
 
-		onOpenRevoke: async function (oEvent) {
-			const oRow = this._rowFromEvent(oEvent);
-			if (!oRow) {
-				return;
-			}
-			await this._openAccessDialog({
-				mode: "REVOKE",
-				title: await this._text("revokeAccess"),
-				confirmText: await this._text("revokeAccess"),
-				warning: await this._text("revokeWarning"),
-				row: oRow,
-				role: oRow.requestedRole_code,
-				userAdminRequested: oRow.userAdminRequested === true
-			});
-		},
-
-		onAccessRoleChange: function (oEvent) {
+		onAccessRoleChange: async function (oEvent) {
 			const sRole = oEvent.getSource().getSelectedKey();
 			const oAccessModel = this.getModel("access");
 			oAccessModel.setProperty("/role", sRole);
 			if (sRole !== "PM") {
 				oAccessModel.setProperty("/userAdminRequested", false);
 			}
-			if (sRole === "DEVELOPER" && !oAccessModel.getProperty("/developerProfile")) {
+			if (sRole === "DEVELOPER" && oAccessModel.getProperty("/currentRole") !== "DEVELOPER") {
+				await this._ensureDeveloperCatalogs();
 				oAccessModel.setProperty("/developerProfile", this._emptyDeveloperProfile());
+			} else {
+				oAccessModel.setProperty("/developerProfile", null);
 			}
 		},
 
@@ -502,6 +516,10 @@ sap.ui.define([
 			const oAccess = oAccessModel.getData();
 			const sReason = (oAccess.reason || "").trim();
 			const bRoleChange = oAccess.mode === "CHANGE_ROLE";
+			if (bRoleChange && oAccess.currentRole === oAccess.role) {
+				MessageBox.warning(await this._text("roleChangeRequiresDifferentRole"));
+				return;
+			}
 			if (!sReason) {
 				MessageBox.warning(await this._text("reasonRequired"));
 				return;
@@ -606,14 +624,15 @@ sap.ui.define([
 		},
 
 		onOpenDeveloperProfile: async function (oEvent) {
-			const oRow = this._rowFromEvent(oEvent);
-			if (!oRow?.activeUser_ID) return;
+			const oRow = this._rowFromEvent(oEvent) || this._activeUserRowFromEvent(oEvent) || this.getModel("activeUsers").getProperty("/details");
+			const sUserID = oRow?.activeUser_ID || oRow?.userID;
+			if (!sUserID) return;
 			await this._ensureDeveloperCatalogs();
 			try {
-				const oProfile = await this._readDeveloperProfile(oRow.activeUser_ID);
+				const oProfile = await this._readDeveloperProfile(sUserID);
 				this.getModel("developer").setData({
 					...this._emptyDeveloperAdministration(),
-					userID: oRow.activeUser_ID,
+					userID: sUserID,
 					expectedVersion: oProfile.administrationVersion,
 					openBugImpactCount: oProfile.openBugImpactCount,
 					developerProfile: oProfile
@@ -698,11 +717,12 @@ sap.ui.define([
 				confirmText: "",
 				warning: "",
 				row: null,
+				currentRole: "",
 				role: "TESTER",
 				userAdminRequested: false,
 				reason: "",
 				submitting: false,
-				developerProfile: this._emptyDeveloperProfile()
+				developerProfile: null
 			};
 		},
 
@@ -783,23 +803,35 @@ sap.ui.define([
 		},
 
 		_ensureDeveloperCatalogs: async function () {
-			if (this.getModel("catalogs").getProperty("/loaded")) return;
+			const oCatalogModel = this.getModel("developerCatalogs");
+			if (oCatalogModel.getProperty("/loaded")) return;
+			oCatalogModel.setProperty("/busy", true);
+			oCatalogModel.setProperty("/error", false);
 			const oODataModel = this.getView().getModel();
 			const load = async (sPath, mParameters) => (await oODataModel.bindList(sPath, null, null, null, mParameters).requestContexts(0, 200)).map(oContext => oContext.getObject());
-			const [aAvailability, aLevels, aModules, aCategories] = await Promise.all([
-				load("/AvailabilityStatuses", { $filter: "active eq true" }),
-				load("/ResponsibilityLevels", { $filter: "active eq true" }),
-				load("/SAPModules", { $filter: "active eq true" }),
-				load("/ComponentCategories", { $filter: "active eq true", $expand: "component,defectCategory" })
-			]);
-			const sAnySapModule = await this._text("anySapModule");
-			this.getModel("catalogs").setData({
-				loaded: true,
-				availabilityStatuses: aAvailability,
-				responsibilityLevels: aLevels,
-				sapModules: [{ ID: "", name: sAnySapModule }, ...aModules],
-				componentCategories: aCategories.map(oRow => ({ ...oRow, label: `${oRow.component?.name || ""} — ${oRow.defectCategory?.name || ""}` }))
-			});
+			try {
+				const [aAvailability, aLevels, aModules, aCategories] = await Promise.all([
+					load("/AvailabilityStatuses", { $filter: "active eq true" }),
+					load("/ResponsibilityLevels", { $filter: "active eq true" }),
+					load("/SAPModules", { $filter: "active eq true" }),
+					load("/ComponentCategories", { $filter: "active eq true", $expand: "component,defectCategory" })
+				]);
+				const sAnySapModule = await this._text("anySapModule");
+				oCatalogModel.setData({
+					loaded: true,
+					busy: false,
+					error: false,
+					availabilityStatuses: aAvailability,
+					responsibilityLevels: aLevels,
+					sapModules: [{ ID: "", name: sAnySapModule }, ...aModules],
+					componentCategories: aCategories.map(oRow => ({ ...oRow, label: `${oRow.component?.name || ""} — ${oRow.defectCategory?.name || ""}` }))
+				});
+			} catch (oError) {
+				oCatalogModel.setProperty("/error", true);
+				throw oError;
+			} finally {
+				oCatalogModel.setProperty("/busy", false);
+			}
 		},
 
 		_openAccessDialog: async function (oData) {
@@ -842,17 +874,17 @@ sap.ui.define([
 		},
 
 		onCatalogTypeChange: async function (oEvent) {
-			this.getModel("catalogs").setProperty("/selectedType", oEvent.getParameter("key") || oEvent.getSource().getSelectedKey() || "SAP_MODULE");
+			this.getModel("businessCatalogs").setProperty("/selectedType", oEvent.getParameter("key") || oEvent.getSource().getSelectedKey() || "SAP_MODULE");
 			await this._loadCatalogs();
 		},
 
 		onCatalogSearch: function (oEvent) {
-			this.getModel("catalogs").setProperty("/query", oEvent.getParameter("query") || oEvent.getParameter("value") || "");
+			this.getModel("businessCatalogs").setProperty("/query", oEvent.getParameter("query") || oEvent.getParameter("value") || "");
 			this._applyCatalogFilters();
 		},
 
 		onCatalogInactiveFilterChange: function (oEvent) {
-			this.getModel("catalogs").setProperty("/includeInactive", oEvent.getParameter("selected") === true);
+			this.getModel("businessCatalogs").setProperty("/includeInactive", oEvent.getParameter("selected") === true);
 			this._applyCatalogFilters();
 		},
 
@@ -862,7 +894,7 @@ sap.ui.define([
 
 		onOpenCatalogCreate: async function () {
 			await this._ensureCatalogLookups();
-			this.getModel("catalogs").setProperty("/edit", {
+			this.getModel("businessCatalogs").setProperty("/edit", {
 				mode: "CREATE",
 				code: "",
 				name: "",
@@ -880,7 +912,7 @@ sap.ui.define([
 			const oRow = this._catalogRowFromEvent(oEvent);
 			if (!oRow) return;
 			await this._ensureCatalogLookups();
-			this.getModel("catalogs").setProperty("/edit", {
+			this.getModel("businessCatalogs").setProperty("/edit", {
 				mode: "UPDATE",
 				row: oRow,
 				code: oRow.code || "",
@@ -908,7 +940,7 @@ sap.ui.define([
 		},
 
 		onConfirmCatalogEdit: async function () {
-			const oCatalogModel = this.getModel("catalogs");
+			const oCatalogModel = this.getModel("businessCatalogs");
 			const oEdit = oCatalogModel.getProperty("/edit");
 			if (!oEdit || oEdit.submitting) return;
 			const sType = oCatalogModel.getProperty("/selectedType");
@@ -966,7 +998,7 @@ sap.ui.define([
 				await this._updateCatalogRow(oRow, { active: true });
 				return;
 			}
-			const oCatalogModel = this.getModel("catalogs");
+			const oCatalogModel = this.getModel("businessCatalogs");
 			oCatalogModel.setProperty("/busy", true);
 			try {
 				const oOperation = this.getView().getModel().bindContext("/readCatalogImpact(...)");
@@ -992,7 +1024,7 @@ sap.ui.define([
 		},
 
 		onConfirmCatalogDeactivation: async function () {
-			const oCatalogModel = this.getModel("catalogs");
+			const oCatalogModel = this.getModel("businessCatalogs");
 			const oImpact = oCatalogModel.getProperty("/impact");
 			const sReason = String(oImpact?.reason || "").trim();
 			if (!oImpact?.row || !sReason || oImpact.submitting) return;
@@ -1020,7 +1052,7 @@ sap.ui.define([
 		},
 
 		_loadCatalogs: async function () {
-			const oCatalogModel = this.getModel("catalogs");
+			const oCatalogModel = this.getModel("businessCatalogs");
 			const oConfig = CATALOG_CONFIG[oCatalogModel.getProperty("/selectedType")];
 			oCatalogModel.setProperty("/busy", true);
 			oCatalogModel.setProperty("/error", false);
@@ -1049,7 +1081,7 @@ sap.ui.define([
 		},
 
 		_ensureCatalogLookups: async function (bRefresh) {
-			const oCatalogModel = this.getModel("catalogs");
+			const oCatalogModel = this.getModel("businessCatalogs");
 			if (!bRefresh && oCatalogModel.getProperty("/componentOptions")?.length && oCatalogModel.getProperty("/defectOptions")?.length) return;
 			const fnRead = async sEntity => {
 				const oBinding = this.getView().getModel().bindList(`/${sEntity}`);
@@ -1062,7 +1094,7 @@ sap.ui.define([
 		},
 
 		_applyCatalogFilters: function () {
-			const oCatalogModel = this.getModel("catalogs");
+			const oCatalogModel = this.getModel("businessCatalogs");
 			const sQuery = String(oCatalogModel.getProperty("/query") || "").trim().toLowerCase();
 			const bIncludeInactive = oCatalogModel.getProperty("/includeInactive") === true;
 			const aItems = oCatalogModel.getProperty("/allItems") || [];
@@ -1072,7 +1104,7 @@ sap.ui.define([
 		},
 
 		_catalogRowFromEvent: function (oEvent) {
-			return oEvent?.getSource?.().getBindingContext("catalogs")?.getObject?.() || null;
+			return oEvent?.getSource?.().getBindingContext("businessCatalogs")?.getObject?.() || null;
 		},
 
 		_invokeAction: async function (sAction, mParameters, sSuccessTextKey, bReloadActiveUsers) {
@@ -1110,10 +1142,6 @@ sap.ui.define([
 
 		_operationsRowFromEvent: function (oEvent, sModelName) {
 			return oEvent?.getSource?.().getBindingContext(sModelName)?.getObject?.() || null;
-		},
-
-		_requestForActiveUser: function (sUserID) {
-			return (this.getModel("requests")?.getProperty("/items") || []).find(oRow => oRow.activeUser_ID === sUserID) || null;
 		},
 
 		_ensureActiveUsersLoaded: function () {
@@ -1366,12 +1394,22 @@ sap.ui.define([
 		},
 
 		_readActiveUsersSessionState: function () {
-			const oDefault = { selectedTab: "requests", selectedOperationsTab: "deliveries", query: "", includeNonActive: false, deliveryQuery: "", deliveryStatus: "", operationState: "", operationType: "", auditAction: "", auditResult: "", auditFrom: "", auditTo: "" };
+			const oDefault = { selectedTab: "access", selectedAccessTab: "requests", selectedDeveloperTab: "developerResponsibilities", selectedOperationsTab: "deliveries", query: "", includeNonActive: false, deliveryQuery: "", deliveryStatus: "", operationState: "", operationType: "", auditAction: "", auditResult: "", auditFrom: "", auditTo: "" };
 			if (typeof window === "undefined" || !window.sessionStorage) return oDefault;
 			try {
 				const oSaved = JSON.parse(window.sessionStorage.getItem("idts.userAdministration.activeUsers") || "{}");
+				const sLegacyTab = oSaved.selectedTab;
+				let sSelectedTab = oDefault.selectedTab;
+				if (["access", "developers", "businessCatalogs", "operations", "audit"].includes(sLegacyTab)) sSelectedTab = sLegacyTab;
+				if (["requests", "activeUsers"].includes(sLegacyTab)) sSelectedTab = "access";
+				if (sLegacyTab === "developerResponsibilities") sSelectedTab = "developers";
+				let sSelectedAccessTab = oDefault.selectedAccessTab;
+				if (["requests", "activeUsers"].includes(oSaved.selectedAccessTab)) sSelectedAccessTab = oSaved.selectedAccessTab;
+				else if (["requests", "activeUsers"].includes(sLegacyTab)) sSelectedAccessTab = sLegacyTab;
 				return {
-					selectedTab: ["requests", "activeUsers", "developerResponsibilities", "businessCatalogs", "operations", "audit"].includes(oSaved.selectedTab) ? oSaved.selectedTab : oDefault.selectedTab,
+					selectedTab: sSelectedTab,
+					selectedAccessTab: sSelectedAccessTab,
+					selectedDeveloperTab: oSaved.selectedDeveloperTab === "developerResponsibilities" ? oSaved.selectedDeveloperTab : oDefault.selectedDeveloperTab,
 					selectedOperationsTab: ["deliveries", "provisioning"].includes(oSaved.selectedOperationsTab) ? oSaved.selectedOperationsTab : oDefault.selectedOperationsTab,
 					query: typeof oSaved.query === "string" ? oSaved.query : oDefault.query,
 					includeNonActive: oSaved.includeNonActive === true,
@@ -1396,6 +1434,8 @@ sap.ui.define([
 				const oActiveUsersModel = this.getModel("activeUsers");
 				window.sessionStorage.setItem("idts.userAdministration.activeUsers", JSON.stringify({
 					selectedTab: oViewModel.getProperty("/selectedTab"),
+					selectedAccessTab: oViewModel.getProperty("/selectedAccessTab"),
+					selectedDeveloperTab: oViewModel.getProperty("/selectedDeveloperTab"),
 					selectedOperationsTab: oViewModel.getProperty("/selectedOperationsTab"),
 					query: oActiveUsersModel.getProperty("/query") || "",
 					includeNonActive: oActiveUsersModel.getProperty("/includeNonActive") === true,

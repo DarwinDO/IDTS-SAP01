@@ -41,8 +41,8 @@ assert.equal(appPackageLock.version, appPackage.version, 'HTML5 package and lock
 assert.equal(appPackageLock.packages[''].version, appPackage.version, 'HTML5 lockfile root version stays aligned')
 const [majorVersion, minorVersion, patchVersion] = appPackage.version.split('.').map(Number)
 assert.ok(
-  majorVersion > 1 || minorVersion > 0 || patchVersion >= 10,
-  'Developer responsibility administration content must advance beyond deployed UI 1.0.9'
+  majorVersion > 1 || minorVersion > 0 || patchVersion >= 13,
+  'Gate 6.2 dialog follow-up must advance beyond deployed UI 1.0.12'
 )
 assert.notEqual(appPackage.version, '1.0.0', 'changed HTML5 content must use a new application version')
 assert.match(appPackage.scripts.build, /ui5 build preload/)
@@ -57,26 +57,28 @@ assert.equal(zipperTask.afterTask, 'generateCachebusterInfo', 'the deployable ZI
 const indexHtml = fs.readFileSync(path.join(webapp, 'index.html'), 'utf8')
 assert.match(indexHtml, /data-sap-ui-app-cache-buster="\.\/"/)
 
+const controller = fs.readFileSync(path.join(webapp, 'controller/Main.controller.js'), 'utf8')
 const view = fs.readFileSync(path.join(webapp, 'view/Main.view.xml'), 'utf8')
+assert.match(controller, /setModel\(new JSONModel\([\s\S]*?\), "developerCatalogs"\)/)
+assert.match(controller, /setModel\(new JSONModel\([\s\S]*?\), "businessCatalogs"\)/)
+assert.match(controller, /_ensureDeveloperCatalogs[\s\S]*?getModel\("developerCatalogs"\)/)
+assert.match(controller, /_loadCatalogs[\s\S]*?getModel\("businessCatalogs"\)/)
+assert.doesNotMatch(controller, /getModel\("catalogs"\)/)
 assert.match(view, /<SearchField/)
 assert.match(view, /<Table/)
 assert.match(view, /items="\{requests>\/items\}"/)
 assert.match(view, /press="\.onOpenInvite"/)
 assert.match(view, /press="\.onApproveProvisioning"/)
-assert.match(view, /press="\.onOpenRoleChange"/)
-assert.match(view, /press="\.onOpenRevoke"/)
 assert.match(view, /press="\.onRetryAccessOperation"/)
 assert.match(view, /press="\.onReconcileAccessOperation"/)
 assert.match(view, /press="\.onCancelExistingLinkInvitation"/)
 assert.match(view, /requests>cancelEligible/)
 assert.match(view, /status_code\} === 'RETRYABLE_FAILURE'[\s\S]+lastErrorCode\} === 'PROVIDER_REQUEST_INVALID'[\s\S]+latestOperationAttemptCount\} === 4/)
 assert.match(view, /status_code\} === 'BLOCKED_MANUAL_REVIEW'[\s\S]+lastErrorCode\} === 'AMBIGUOUS_PROVIDER_OUTCOME'/)
-assert.match(view, /press="\.onOpenDeveloperProfile"/)
 assert.doesNotMatch(view, /type="Password"|tokenHash|tokenNonce|identityIssuer/)
 assert.match(view, /<IconTabBar/)
-assert.match(view, /key="requests"/)
-assert.match(view, /key="activeUsers"/)
-assert.match(view, /key="developerResponsibilities"/)
+assert.match(view, /key="access"/)
+assert.match(view, /key="developers"/)
 assert.match(view, /key="businessCatalogs"/)
 assert.match(view, /key="operations"/)
 assert.match(view, /key="deliveries"/)
@@ -84,7 +86,7 @@ assert.match(view, /key="provisioning"/)
 assert.match(view, /key="audit"/)
 assert.doesNotMatch(view, /sap-icon:\/\/skills/, 'skills is not a valid SAPUI5 icon for this UI')
 assert.equal((view.match(/icon="sap-icon:\/\/activity-individual"/g) || []).length, 1)
-assert.equal((view.match(/icon="sap-icon:\/\/action-settings"/g) || []).length, 1)
+assert.equal((view.match(/icon="sap-icon:\/\/action-settings"/g) || []).length, 2)
 const mainIconTabBarOpenMatch = view.match(/<IconTabBar[\s\S]*?id="administrationTabs"[\s\S]*?tabsOverflowMode="End">/)
 assert.ok(mainIconTabBarOpenMatch, 'main administration IconTabBar opening tag is complete')
 const mainIconTabBarOpen = mainIconTabBarOpenMatch[0]
@@ -93,9 +95,8 @@ assert.match(mainIconTabBarOpen, /headerMode="Inline"/)
 assert.match(mainIconTabBarOpen, /tabDensityMode="Compact"/)
 assert.match(mainIconTabBarOpen, /tabsOverflowMode="End"/)
 const mainTabTooltips = {
-  requests: 'accessRequestsTabTooltip',
-  activeUsers: 'activeUsersTabTooltip',
-  developerResponsibilities: 'developerResponsibilitiesTabTooltip',
+  access: 'accessTabTooltip',
+  developers: 'developersTabTooltip',
   operations: 'operationsTabTooltip',
   audit: 'auditTabTooltip',
   businessCatalogs: 'businessCatalogsTabTooltip'
@@ -104,19 +105,19 @@ for (const [tabKey, tooltipKey] of Object.entries(mainTabTooltips)) {
   const tab = view.match(new RegExp(`<IconTabFilter\\b[\\s\\S]*?\\bkey="${tabKey}"[\\s\\S]*?tooltip="\\{i18n>${tooltipKey}\\}">`))
   assert.ok(tab, `main tab is present: ${tabKey}`)
 }
+assert.match(view, /id="accessSubtabs"[\s\S]*?selectedKey="\{view>\/selectedAccessTab\}"[\s\S]*?select="\.onAccessTabSelect"/)
+assert.match(view, /id="developerSubtabs"[\s\S]*?selectedKey="\{view>\/selectedDeveloperTab\}"[\s\S]*?select="\.onDeveloperTabSelect"/)
+assert.match(view, /key="requests"/)
+assert.match(view, /key="activeUsers"/)
+assert.match(view, /key="developerResponsibilities"/)
 const requestTableStart = view.indexOf('id="onboardingTable"')
 const requestTable = view.slice(requestTableStart, view.indexOf('</Table>', requestTableStart))
 const requestButtons = [...requestTable.matchAll(/<Button[\s\S]*?\/>/g)].map(match => match[0])
-for (const [icon, tooltipKey] of [
-  ['edit', 'changeRoleActionTooltip'],
-  ['action-settings', 'manageResponsibilitiesActionTooltip'],
-  ['decline', 'revokeAccessActionTooltip']
-]) {
-  const button = requestButtons.find(candidate => candidate.includes(`icon="sap-icon://${icon}"`))
-  assert.ok(button, `row action icon is present: ${icon}`)
-  assert.match(button, new RegExp(`tooltip="\\{i18n>${tooltipKey}\\}"`), `row action tooltip is present: ${icon}`)
-}
-assert.equal(new Set(['changeRoleActionTooltip', 'manageResponsibilitiesActionTooltip', 'revokeAccessActionTooltip']).size, 3)
+assert.doesNotMatch(requestTable, /onOpenRoleChange|onOpenDeveloperProfile|onOpenRevoke/)
+assert.equal(requestButtons.some(button => button.includes('onApproveProvisioning')), true)
+assert.equal(requestButtons.some(button => button.includes('onRetryAccessOperation')), true)
+assert.equal(requestButtons.some(button => button.includes('onReconcileAccessOperation')), true)
+assert.equal(requestButtons.some(button => button.includes('onCancelExistingLinkInvitation')), true)
 assert.match(view, /items="\{deliveries>\/items\}"/)
 assert.match(view, /items="\{operations>\/items\}"/)
 assert.match(view, /items="\{audit>\/items\}"/)
@@ -140,7 +141,7 @@ assert.match(view, /id="catalogTypeTabs"/)
 for (const catalogType of ['SAP_MODULE', 'APPLICATION_COMPONENT', 'DEFECT_CATEGORY', 'COMPONENT_CATEGORY']) {
   assert.match(view, new RegExp(`key="${catalogType}"`))
 }
-assert.match(view, /items="\{catalogs>\/items\}"/)
+assert.match(view, /items="\{businessCatalogs>\/items\}"/)
 assert.match(view, /press="\.onOpenCatalogCreate"/)
 assert.match(view, /press="\.onOpenCatalogEdit"/)
 assert.match(view, /press="\.onToggleCatalogActive"/)
@@ -168,6 +169,16 @@ assert.match(activeUserDetailsFragment, /press="\.onOpenActiveUserReactivate"/)
 assert.match(activeUserDetailsFragment, /press="\.onOpenActiveUserRevoke"/)
 assert.match(activeUserDetailsFragment, /linkEligible/)
 assert.match(activeUserDetailsFragment, /press="\.onOpenExistingIdentityLink"/)
+assert.match(activeUserDetailsFragment, /<HBox width="100%" wrap="Wrap" class="sapUiSmallMarginTop">/)
+assert.doesNotMatch(activeUserDetailsFragment, /<Toolbar/)
+assert.doesNotMatch(activeUserDetailsFragment, /press="\.onOpenDeveloperProfile"/)
+assert.match(controller, /accessRequestVersion/, 'Active User details must build actions from the authoritative details DTO')
+assert.doesNotMatch(controller, /_requestForActiveUser/, 'Active User actions must not depend on the filtered Access Requests model')
+
+const developerResponsibilitiesTableStart = view.indexOf('id="developerResponsibilitiesTable"')
+const developerResponsibilitiesTable = view.slice(developerResponsibilitiesTableStart, view.indexOf('</Table>', developerResponsibilitiesTableStart))
+assert.match(developerResponsibilitiesTable, /press="\.onOpenDeveloperProfile"/)
+assert.match(developerResponsibilitiesTable, /visible="\{= \$\{activeUsers>accessState\} === 'ACTIVE' \}"/)
 
 for (const [fragmentName, firstLabel] of [
   ['DeliveryDetails.fragment.xml', 'recipient'],
@@ -212,7 +223,6 @@ assert.match(fragment, /valueLiveUpdate="true"/)
 assert.match(fragment, /!\$\{invite>\/submitting\}/)
 assert.doesNotMatch(fragment, /Password|OTP|passkey|token/i)
 
-const controller = fs.readFileSync(path.join(webapp, 'controller/Main.controller.js'), 'utf8')
 assert.match(controller, /searchOnboardingDeliveries/)
 assert.match(controller, /searchAccessOperations/)
 assert.match(controller, /searchAccessAuditEvents/)
@@ -298,6 +308,8 @@ assert.match(manageFragment, /type="\{= \$\{access>\/mode\} === 'REVOKE' \? 'Neg
 assert.match(manageFragment, /press="\.onConfirmAccessChange"/)
 assert.match(manageFragment, /text="\{i18n>changeRoleResponsibilitiesHint\}"/)
 assert.match(manageFragment, /visible="\{= \$\{access>\/mode\} === 'CHANGE_ROLE' \}"/)
+assert.match(manageFragment, /\$\{access>\/currentRole\} !== 'DEVELOPER'/)
+assert.match(manageFragment, /\$\{access>\/role\} === 'DEVELOPER'/)
 assert.doesNotMatch(manageFragment, /stretchOnPhone=/)
 assert.doesNotMatch(manageFragment, /Password|OTP|passkey|token/i)
 
@@ -320,7 +332,7 @@ assert.match(controller, /_confirm\("developerProfileConfirmation"\)/)
 
 const editCatalogFragment = fs.readFileSync(path.join(webapp, 'fragment/EditCatalogItem.fragment.xml'), 'utf8')
 assert.match(editCatalogFragment, /<Dialog/)
-assert.match(editCatalogFragment, /catalogs>\/edit/)
+assert.match(editCatalogFragment, /businessCatalogs>\/edit/)
 assert.match(editCatalogFragment, /press="\.onConfirmCatalogEdit"/)
 assert.match(editCatalogFragment, /edit\/componentType/)
 assert.match(editCatalogFragment, /edit\/categoryType/)
@@ -330,7 +342,7 @@ assert.doesNotMatch(editCatalogFragment, /Delete|Hard delete|HANA|Role Collectio
 
 const catalogImpactFragment = fs.readFileSync(path.join(webapp, 'fragment/CatalogImpact.fragment.xml'), 'utf8')
 assert.match(catalogImpactFragment, /<Dialog/)
-assert.match(catalogImpactFragment, /catalogs>\/impact/)
+assert.match(catalogImpactFragment, /businessCatalogs>\/impact/)
 assert.match(catalogImpactFragment, /press="\.onConfirmCatalogDeactivation"/)
 assert.doesNotMatch(catalogImpactFragment, /Delete|HANA|Role Collection|token|credential/i)
 
@@ -592,6 +604,42 @@ async function verifyRuntimeBehavior () {
   assert.equal(activeUsersData.items.length, 2)
   assert.equal(activeUsersData.developerItems.length, 1)
   assert.equal(activeUsersData.loaded, true)
+
+  const detailsData = { details: null, detailsBusy: false }
+  const detailsModel = {
+    getProperty: key => detailsData[key.slice(1)],
+    setProperty: (key, value) => { detailsData[key.slice(1)] = value }
+  }
+  const detailsOperation = {
+    setParameter: () => {},
+    invoke: async () => {},
+    getBoundContext: () => ({ requestObject: async () => ({
+      userID: 'active-2',
+      businessRole: 'TESTER',
+      userAdminCapability: false,
+      accessState: 'ACTIVE',
+      accessRequestVersion: 9
+    }) })
+  }
+  const detailsInstance = Object.assign(Object.create(controllerDefinition), {
+    getModel: name => {
+      if (name === 'activeUsers') return detailsModel
+      if (name === 'requests') return { getProperty: () => [{ activeUser_ID: 'filtered-out-user' }] }
+      throw new Error(`Unexpected details model ${name}`)
+    },
+    getView: () => ({ getModel: () => ({ bindContext: () => detailsOperation }) }),
+    _activeUserDetailsDialog: { open: () => {} }
+  })
+  await detailsInstance.onOpenActiveUserDetails({
+    getSource: () => ({ getBindingContext: name => name === 'activeUsers' ? { getObject: () => ({ userID: 'active-2' }) } : null })
+  })
+  assert.equal(JSON.stringify(detailsData.details._request), JSON.stringify({
+    activeUser_ID: 'active-2',
+    requestedRole_code: 'TESTER',
+    userAdminRequested: false,
+    provisioningVersion: 9
+  }), 'details lifecycle actions must not depend on the filtered Requests model')
+
   activeUsersData.hasMore = true
   activeUsersData.nextSkip = 2
   await activeInstance.onLoadMoreActiveUsers()
@@ -654,12 +702,59 @@ async function verifyRuntimeBehavior () {
     submitBatch: async group => { submittedCatalogGroups.push(group) }
   }
   const catalogInstance = Object.assign(Object.create(controllerDefinition), {
-    getModel: name => name === 'catalogs' ? catalogModel : { setProperty: () => {} },
+    getModel: name => name === 'businessCatalogs' ? catalogModel : { setProperty: () => {} },
     getView: () => ({ getModel: () => catalogODataModel }),
     _catalogEditDialog: { close: () => {} },
     _text: async key => key
   })
+  const developerCatalogData = { loaded: false, busy: false, error: false, availabilityStatuses: [], responsibilityLevels: [], sapModules: [], componentCategories: [] }
+  const developerCatalogModel = {
+    getProperty: key => developerCatalogData[key.slice(1)],
+    setProperty: (key, value) => { developerCatalogData[key.slice(1)] = value },
+    setData: data => Object.assign(developerCatalogData, data)
+  }
+  const developerRows = {
+    '/AvailabilityStatuses': [{ code: 'AVAILABLE', name: 'Available' }],
+    '/ResponsibilityLevels': [{ code: 'PRIMARY', name: 'Primary' }],
+    '/SAPModules': [{ ID: 'module-1', name: 'Module 1' }],
+    '/ComponentCategories': [{ ID: 'category-1', component: { name: 'Component' }, defectCategory: { name: 'Defect' } }]
+  }
+  const developerCatalogInstance = Object.assign(Object.create(controllerDefinition), {
+    getModel: name => name === 'developerCatalogs' ? developerCatalogModel : catalogModel,
+    getView: () => ({ getModel: () => ({
+      bindList: path => ({ requestContexts: async () => (developerRows[path] || []).map(row => ({ getObject: () => row })) })
+    }) }),
+    _text: async key => key
+  })
+  catalogData.query = 'business sentinel'
+  await developerCatalogInstance._ensureDeveloperCatalogs()
+  assert.equal(developerCatalogData.loaded, true)
+  assert.equal(developerCatalogData.componentCategories[0].label, 'Component — Defect')
+  assert.equal(catalogData.query, 'business sentinel', 'Developer catalog loading must not alter Business Catalog state')
+  const failedDeveloperData = { loaded: false, busy: false, error: false }
+  const failedDeveloperModel = {
+    getProperty: key => failedDeveloperData[key.slice(1)],
+    setProperty: (key, value) => { failedDeveloperData[key.slice(1)] = value },
+    setData: data => Object.assign(failedDeveloperData, data)
+  }
+  const failedDeveloperInstance = Object.assign(Object.create(controllerDefinition), {
+    getModel: name => name === 'developerCatalogs' ? failedDeveloperModel : catalogModel,
+    getView: () => ({ getModel: () => ({ bindList: () => ({ requestContexts: async () => { throw new Error('developer catalog unavailable') } }) }) })
+  })
+  await assert.rejects(failedDeveloperInstance._ensureDeveloperCatalogs(), /developer catalog unavailable/)
+  assert.equal(failedDeveloperData.error, true)
+  assert.equal(catalogData.query, 'business sentinel', 'Developer catalog failure must not alter Business Catalog state')
+  catalogData.query = ''
   await catalogInstance._loadCatalogs()
+  assert.equal(developerCatalogData.componentCategories[0].label, 'Component — Defect', 'Business Catalog loading must not alter Developer catalog state')
+  const businessFailureInstance = Object.assign(Object.create(controllerDefinition), {
+    getModel: name => name === 'businessCatalogs' ? catalogModel : developerCatalogModel,
+    _ensureCatalogLookups: async () => { throw new Error('business catalog unavailable') }
+  })
+  catalogData.error = false
+  await businessFailureInstance._loadCatalogs()
+  assert.equal(catalogData.error, true)
+  assert.equal(developerCatalogData.componentCategories[0].label, 'Component — Defect', 'Business Catalog failure must not alter Developer catalog state')
   assert.equal(catalogData.loaded, true)
   assert.equal(catalogData.allItems.length, 205, 'catalog loading retrieves every page before local search')
   assert.equal(catalogData.items.length, 204, 'inactive catalog items are hidden by default')
@@ -705,7 +800,7 @@ async function verifyRuntimeBehavior () {
   assert.equal(updateResult, false, 'an inner PATCH rejection prevents false catalog success')
   assert.equal(catalogReloads, 0, 'a failed PATCH does not reload the catalog as if it succeeded')
 
-  const restoredData = { selectedTab: 'activeUsers' }
+  const restoredData = { selectedTab: 'access', selectedAccessTab: 'activeUsers' }
   const restoredActiveUsersData = { loaded: false, busy: false }
   let restoredRequestLoads = 0
   let restoredActiveLoads = 0
@@ -728,8 +823,49 @@ async function verifyRuntimeBehavior () {
   await restoredInstance._loadInitialRequests()
   assert.equal(restoredRequestLoads, 1)
   assert.equal(restoredActiveLoads, 1)
-  await restoredInstance.onTabSelect({ getParameter: name => name === 'key' ? 'activeUsers' : undefined, getSource: () => ({ getSelectedKey: () => 'activeUsers' }) })
+  await restoredInstance.onAccessTabSelect({ getParameter: name => name === 'key' ? 'activeUsers' : undefined, getSource: () => ({ getSelectedKey: () => 'activeUsers' }) })
   assert.equal(restoredActiveLoads, 1)
+
+  let openedAccess
+  let developerProfileReads = 0
+  const roleOpenInstance = Object.assign(Object.create(controllerDefinition), {
+    _text: async key => key,
+    _readDeveloperProfile: async () => { developerProfileReads += 1 },
+    _openAccessDialog: async data => { openedAccess = data }
+  })
+  await roleOpenInstance._openRoleChangeForRow({ activeUser_ID: 'developer-1', requestedRole_code: 'DEVELOPER', userAdminRequested: false })
+  assert.equal(developerProfileReads, 0, 'opening Change Role for an existing Developer must not read the Developer profile')
+  assert.equal(openedAccess.currentRole, 'DEVELOPER')
+  assert.equal(openedAccess.role, 'DEVELOPER')
+  assert.equal(openedAccess.developerProfile, null)
+
+  const roleData = { currentRole: 'PM', role: 'PM', userAdminRequested: true, developerProfile: null }
+  let developerCatalogLoads = 0
+  const roleModel = {
+    getData: () => roleData,
+    getProperty: key => roleData[key.slice(1)],
+    setProperty: (key, value) => { roleData[key.slice(1)] = value }
+  }
+  const roleChangeInstance = Object.assign(Object.create(controllerDefinition), {
+    getModel: name => name === 'access' ? roleModel : undefined,
+    _ensureDeveloperCatalogs: async () => { developerCatalogLoads += 1 }
+  })
+  await roleChangeInstance.onAccessRoleChange({ getSource: () => ({ getSelectedKey: () => 'DEVELOPER' }) })
+  assert.equal(developerCatalogLoads, 1)
+  assert.equal(roleData.developerProfile.responsibilities.length, 1, 'transition into Developer creates one editable responsibility')
+  roleData.currentRole = 'DEVELOPER'
+  await roleChangeInstance.onAccessRoleChange({ getSource: () => ({ getSelectedKey: () => 'TESTER' }) })
+  assert.equal(roleData.developerProfile, null, 'transition out of Developer does not carry a Developer profile payload')
+
+  let sameRoleInvocations = 0
+  Object.assign(roleData, { mode: 'CHANGE_ROLE', currentRole: 'TESTER', role: 'TESTER', reason: 'No actual transition.', row: { activeUser_ID: 'tester-1', provisioningVersion: 1 } })
+  const sameRoleInstance = Object.assign(Object.create(controllerDefinition), {
+    getModel: name => name === 'access' ? roleModel : undefined,
+    _text: async key => key,
+    _invokeAction: async () => { sameRoleInvocations += 1 }
+  })
+  await sameRoleInstance.onConfirmAccessChange()
+  assert.equal(sameRoleInvocations, 0, 'same-role confirmation must not invoke requestRoleChange')
 
   let lifecycleInvocation
   let lifecycleData = {

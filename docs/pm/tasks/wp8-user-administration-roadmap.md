@@ -12,7 +12,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 ## Current status
 
-`IN PROGRESS — POST-GATE-6 UX/WORKLOAD/NAVIGATION PLANNING`
+`IN PROGRESS — GATE 6.3 READY FOR SOURCE EXECUTION`
 
 - Gates 1–3B are merged, deployed and accepted. Gate 3 browser closure is recorded by PR #325 at `04643e12727290f2f35fd56e9c3d2a8df4cbcdbc`.
 - Gate 4 branch `feature/wp8-admin-developer-pilot-donhv` is frozen from that exact base.
@@ -27,9 +27,9 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 - Selective CAP rollout and controlled PM catalog lifecycle acceptance passed for create, edit, deactivate, reactivate, impact/audit handling and zero hard delete. All four controlled rows ended inactive and final readiness was `DEMO READY`.
 - PR #338 records the Gate 5 rollout evidence. Exact-head review/CI passed, and a controlled TESTER session proved Bug Management access while direct User Administration navigation returned `Forbidden`.
 - Gate 6 Operations/Audit and the Gate 6.1 navigation/action-clarity follow-up are historical merged increments. Their executor dependency junctions were local-only implementation aids and are not part of the current planning worktree or product design.
-- Gates 1–6 and the Gate 6.1 navigation/action-clarity follow-up are now present in refreshed `origin/dev` at planning baseline `b2d56f95c65106b8e59583e4b8b0775d2c3588bf`.
+- Gates 1–6.2 are now present in refreshed `origin/dev` at planning baseline `170f0646e73db82451126891b4665e69a90b0aa0`.
 - DonHV approved the post-Gate-6 design direction on 2026-08-25: isolate Developer and Business Catalog UI state, regroup the six top-level areas into five business-owned areas, reuse the existing read-only BugService workload model, add exact Bug drill-down and same-origin cross-app navigation, and add email only after material access changes complete.
-- The approved design is recorded in `docs/superpowers/specs/2026-08-25-user-administration-ux-workload-navigation-design.md`. It authorizes planning only; implementation, deployment, email delivery, provider/user/role/data mutation, merge and release remain separate decisions.
+- The approved design is recorded in `docs/superpowers/specs/2026-08-25-user-administration-ux-workload-navigation-design.md`. Gate 6.2 is complete; its obsolete pre-implementation plan is removed. The retained Gate 6.3–6.5 plans authorize only their bounded source gates, while deployment, email delivery, provider/user/role/data mutation, merge and release remain separate decisions.
 - DonHV approved the Gate 6.5 outbox amendment: keep Bug, invitation and access-change delivery storage domain-specific while sharing one worker/transport/provider/retry pipeline and one User Administration Delivery view. Gate 6.5 therefore includes an additive access-delivery table and a separate HANA migration gate.
 
 ## Gate 6 source handoff
@@ -45,8 +45,8 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 4. Gate 4 — Developer Responsibilities controlled pilot.
 5. Gate 5 — Business Catalog Administration.
 6. Gate 6 — Operations and Audit usability.
-7. Gate 6.2 — UI state isolation, navigation regrouping and action ownership.
-8. Gate 6.3 — Developer workload and assigned-Bug drill-down.
+7. Gate 6.2 — UI state isolation, navigation regrouping and action ownership — COMPLETE.
+8. Gate 6.3 — Developer workload and assigned-Bug drill-down — NEXT.
 9. Gate 6.4 — Safe cross-app navigation.
 10. Gate 6.5 — Post-completion access-change email notifications.
 
@@ -76,6 +76,28 @@ The executor may complete source/tests/docs/evidence commits, push the exact bra
 - Scope: UI-only replacement of invalid icons, native six-tab responsiveness, localized tab/action tooltips, and Change Role guidance. No backend, schema, dependency, lockfile, provider, user/role, data, deployment, merge, Ready, or cleanup mutation.
 - Focused UI contract, onboarding suite, app lint/build, secret scan, agent rules, QA-depth self-test, Operations/Audit suite, and diff checks pass. The pre-existing hard-coded date-fixture issue was fixed test-only and merged separately through PR #341 before the Gate 6.1 branch refresh.
 - Coordinator exact-diff review found zero Critical/Major/Important/Minor. Draft PR #340 remains open for refreshed CI and later visual acceptance/release decisions.
+
+## Gate 6.2 completed — state and action ownership
+
+- Frozen base: `b2d56f95c65106b8e59583e4b8b0775d2c3588bf`.
+- Branch: `fix/wp8-user-admin-state-action-ownership-donhv`.
+- The implementation separates Developer value-help state from Business Catalog administration state, groups the UI into five business-owned areas, removes lifecycle/profile actions from Access Request rows and keeps them on Active Users/Developers.
+- Change Role collects a Developer profile only for a real non-Developer to Developer transition and rejects a same-role submit before any action request.
+- Scope remains source-only. The independent review required one minimal safe CAP DTO addition, `ActiveUserDetails.accessRequestVersion`, so lifecycle actions use the server-selected request instead of the filtered Requests table. There is no database schema, dependency, lockfile, platform, provider, user/role, data or deployment mutation.
+
+### Gate 6.2 dialog action-layout follow-up
+
+- Active User details uses a native wrapping action row so Change Role, Suspend/Reactivate and Revoke remain fully reachable at narrow dialog widths.
+- Manage Responsibilities is owned only by the Developer Responsibilities table and is not duplicated inside Active User details.
+- The source fix is UI-only and advances the HTML5 cache identity to `1.0.13`; selective content rollout and read-only visual acceptance remain separate release evidence.
+- PR `#346` merged and the checksum-reviewed `1.0.13` content-only MTAR was deployed once. Normal-viewport PM acceptance proved complete lifecycle actions without horizontal overflow, no duplicate details Manage action, and the retained outer Developer Manage action; no lifecycle mutation was submitted.
+
+## Gate 6.3 next source gate — Developer workload and Bug drill-down
+
+- Authoritative plan: `docs/superpowers/plans/2026-08-25-gate-6-3-developer-workload-bug-drilldown.md`.
+- Start only from fresh `origin/dev` after this planning package merges; planned branch is `feature/wp8-user-admin-developer-workload-donhv`.
+- Reuse the existing read-only `BugService.DeveloperWorkloads` aggregate and bounded `Bugs` fields. Add no workload table, duplicated aggregation, assignment/status mutation, or backend authorization shortcut.
+- Add Developers → Workload overview, assigned non-Closed Bug details, and exact same-origin Bug Object Page deep links. Stop at one Draft PR before runtime rollout or Gate 6.4.
 
 ## Bàn giao source Gate 6.1 — làm rõ navigation và action
 

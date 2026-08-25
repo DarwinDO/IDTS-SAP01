@@ -4,19 +4,17 @@
 
 - Design owner: DonHV.
 - Approved in chat: 2026-08-25; Gate 6.5 outbox amendment approved later the same day.
-- Planning baseline: `origin/dev` at `b2d56f95c65106b8e59583e4b8b0775d2c3588bf`.
+- Refreshed planning baseline: `origin/dev` at `170f0646e73db82451126891b4665e69a90b0aa0`.
 - Planning branch: `docs/wp8-user-admin-ux-architecture-donhv`.
-- This document authorizes implementation planning only. It does not authorize source changes, HANA/HDI changes, deployment, provider/user/role mutation, email delivery, merge, or release.
+- Gate 6.2 is complete. This document now governs source planning for Gates 6.3–6.5 only; each gate still requires its own branch, Draft PR, review, rollout approval, and release boundary.
 
 ## Purpose
 
-Finish the User Administration information architecture after Gates 1–6 by:
+With Gate 6.2 complete, finish the remaining User Administration roadmap by:
 
-1. fixing the intermittent Developer/Business Catalog loading conflict;
-2. placing access and Developer actions in the screens that own those concepts;
-3. adding a read-only Developer workload view that shows which Bugs are assigned to each Developer;
-4. adding safe navigation between Bug Management and User Administration; and
-5. notifying affected users after material access changes complete.
+1. adding a read-only Developer workload view that shows which Bugs are assigned to each Developer;
+2. adding safe navigation between Bug Management and User Administration; and
+3. notifying affected users after material access changes complete.
 
 The design reuses existing CAP, BugService workload, AppRouter, email transport, worker orchestration, and SAPUI5 patterns. It does not add a new database, workload snapshot table, router framework, Launchpad, message queue, provider integration, or separate email worker. Gate 6.5 adds one additive delivery table because the existing Bug and invitation delivery tables have incompatible lifecycle and uniqueness contracts.
 
@@ -32,12 +30,15 @@ The merged source already contains:
 - Exact Bug Object Page deep links in the form `/idtsbugmanagementui/index.html#/Bugs(ID=<uuid>,IsActiveEntity=true)`.
 - PM + UserAdmin server-side authorization for User Administration.
 - The existing notification/email outbox and immediate post-commit kick.
+- Independent `developerCatalogs` and `businessCatalogs` UI state/load guards.
+- Five business-owned top-level areas with Access and Developers child tabs.
+- Lifecycle actions owned by Active Users, responsibility management owned by Developers, and Developer Profile input limited to a real transition into Developer.
 
 The design must reuse these foundations rather than recalculate or persist equivalent state.
 
 ## Problems to close
 
-### P0 — shared catalog state is order-dependent
+### Closed in Gate 6.2 — shared catalog state was order-dependent
 
 Developer value helps and Business Catalog administration currently share one `catalogs` JSON model and one `loaded` flag. Opening either area first can mark the other area loaded or replace its state. Observable outcomes include empty Developer dropdowns and intermittent Business Catalog load errors.
 
@@ -46,9 +47,9 @@ The implementation must use two independent models and load guards:
 - `developerCatalogs` for availability, responsibility levels, SAP Modules, and Component Categories used by Developer forms.
 - `businessCatalogs` for selected catalog type, complete item collection, search, inactive visibility, and catalog mutations.
 
-No flag or collection may be shared between the two models.
+No flag or collection may be shared between the two models. The refreshed source satisfies this rule; Gates 6.3–6.5 must preserve it.
 
-### P0 — actions are attached to the wrong business object
+### Closed in Gate 6.2 — actions were attached to the wrong business object
 
 The Access Requests table currently doubles as invitation history and active-access administration. This makes active-user actions appear beside historical requests and encourages users to treat a request row as the user account.
 
@@ -63,7 +64,7 @@ Ownership after this design:
 | Business Catalogs | Create, edit, deactivate, reactivate catalog rows |
 | Audit | Read-only search and details |
 
-### P0 — Change Role duplicates profile administration
+### Closed in Gate 6.2 — Change Role duplicated profile administration
 
 Change Role currently displays Developer Profile and Responsibility controls for an already-Developer user even before a different target role is selected.
 
@@ -278,7 +279,7 @@ Bug notification delivery remains in the Bug Management domain and is not added 
 
 ## Delivery gates
 
-### Gate 6.2 — state isolation and action ownership
+### Gate 6.2 — state isolation and action ownership — COMPLETE
 
 - Split `developerCatalogs` and `businessCatalogs` models/load guards.
 - Group the top navigation into Access, Developers, Operations, Business Catalogs, and Audit.
@@ -287,6 +288,7 @@ Bug notification delivery remains in the Bug Management domain and is not added 
 - Restrict Change Role Developer Profile input to a real transition into Developer.
 - Preserve all existing CAP authorization/state/version guards.
 - No schema, HANA, provider, user, role, or email mutation.
+- Integrated through the Gate 6.2 source/review/release sequence; the obsolete pre-implementation plan is intentionally removed from this refreshed package.
 
 ### Gate 6.3 — Developer workload and Bug drill-down
 
@@ -311,7 +313,7 @@ Bug notification delivery remains in the Bug Management domain and is not added 
 - Present Invitation and Access-change delivery rows in one normalized Operations table with a type filter.
 - Verify success/failure/duplicate/idempotency cases and ensure no responsibility-edit spam.
 
-Each gate requires a fresh `origin/dev` baseline after the previous gate merge, one isolated branch/worktree, focused TDD, exact source review, one Draft PR, separate rollout approval, manual role/browser acceptance, and safe worktree cleanup after merge.
+Each remaining gate requires a fresh `origin/dev` baseline after the previous gate merge, one isolated branch/worktree, focused TDD, exact source review, one Draft PR, separate rollout approval, manual role/browser acceptance, and safe worktree cleanup after merge.
 
 ## Verification strategy
 

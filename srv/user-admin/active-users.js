@@ -115,6 +115,7 @@ async function buildReadModel (tx, { includeDeveloperDetails = false } = {}) {
     'revokedAt',
     'lastErrorCode',
     'lastErrorSummary',
+    'provisioningVersion',
     'createdAt',
     'modifiedAt'
   ]
@@ -238,6 +239,7 @@ async function buildReadModel (tx, { includeDeveloperDetails = false } = {}) {
             : null,
       requestCount: requestCounts.get(user.ID) || 0,
       auditEventCount: 0,
+      accessRequestVersion: Number.isInteger(request?.provisioningVersion) ? request.provisioningVersion : null,
       developerProfile: profile
         ? {
             ID: profile.ID,
@@ -313,6 +315,7 @@ function toDetails (row) {
     ...toSummary(row),
     requestCount: row.requestCount,
     auditEventCount: row.auditEventCount,
+    accessRequestVersion: row.accessRequestVersion,
     developerProfileID: row.developerProfile?.ID || null,
     developerAvailabilityStatus: row.developerProfile?.availabilityStatus || null,
     developerWorkloadLimit: row.developerProfile?.workloadLimit ?? null,

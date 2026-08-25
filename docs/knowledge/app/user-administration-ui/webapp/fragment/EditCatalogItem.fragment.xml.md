@@ -39,3 +39,8 @@ Fragment này là editor có giới hạn cho một catalog type đang chọn. C
 Do not add a Delete button or technical fields here. Keep both locales in parity and use the controller’s JSON-model validation messages rather than hardcoded technical error text. Any new field must be added to the CAP projection, handler allowlist, UI payload, test, and mirror.
 
 Không thêm Delete button hoặc technical field vào fragment. Giữ parity hai locale và dùng validation message từ JSON model của controller thay vì hardcode technical error text. Field mới phải được thêm đồng thời vào CAP projection, handler allowlist, UI payload, test và mirror.
+## Gate 6.2 isolated model / Model tách biệt Gate 6.2
+
+All Business Catalog edit, validation and lookup bindings use `businessCatalogs`; they do not share the Developer form model.
+
+Mọi binding edit, validation và lookup Business Catalog dùng `businessCatalogs`; chúng không dùng chung model với form Developer.
