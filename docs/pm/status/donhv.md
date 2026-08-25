@@ -8580,3 +8580,11 @@ Vietnamese:
 - DonHV manual evidence confirms Email Delivery `Available`, Provisioning Broker `Recent success`, reconciliation timestamp, safe masked Delivery/Provisioning/Audit lists, safe details, support fingerprint truncation and native dialog insets. Six screenshot byte sizes/digests and allowlisted claims are frozen in `docs/pm/evidence/user-administration/gate-6-operations-audit-source.md`; raw screenshots are not committed because they contain private host/user display data.
 - No artificial outage or ineligible retry was manufactured; no provider/email/user/role/data/schema/HANA/HDI mutation was used for acceptance. Gate 6 manual acceptance: PASS.
 - Bản rollout UI selective dùng đúng artifact checksum; không deploy CAP/HANA. Readiness, Delivery, Provisioning, Audit và layout detail đều được DonHV xác nhận runtime. Evidence raw không commit vì chứa host/user private; chỉ lưu size/hash/claim allowlist. Manual acceptance Gate 6: PASS.
+
+### 2026-08-25 Operations/Audit deterministic date fixture
+
+- Classification: test-harness issue discovered while independently reviewing Gate 6.1 PR #340.
+- Symptom: `npm run qa:user-admin-operations:programmatic` returned `0 !== 2` at `scripts/qa/test-user-admin-operations-audit.js:385` on both unchanged `dev` and the Gate 6.1 head.
+- Root cause: `auditEntry()` omitted `createdAt`, so CAP supplied the execution date while the test intentionally filtered the fixed date `2026-08-24`.
+- Fix: the fixture now supplies an explicit deterministic `createdAt` inside the asserted day. Production CAP/UI behavior, schema, dependencies and lockfiles are unchanged.
+- Verification owner: DonHV coordinator. Focused RED was reproduced on `dev`; GREEN and Draft-PR evidence are recorded in the dedicated test-only branch.

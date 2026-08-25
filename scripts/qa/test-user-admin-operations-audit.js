@@ -158,7 +158,8 @@ function auditEntry (ID, operationID, requestID, values = {}) {
     correlationId: values.correlationId || operationID,
     beforeIdentityHash: 'b'.repeat(64),
     afterIdentityHash: 'a'.repeat(64),
-    detailsSummary: values.detailsSummary || 'Safe controlled audit details.'
+    detailsSummary: values.detailsSummary || 'Safe controlled audit details.',
+    createdAt: values.createdAt || '2026-08-24T04:00:00.000Z'
   }
 }
 
