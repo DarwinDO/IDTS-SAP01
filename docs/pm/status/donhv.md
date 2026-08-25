@@ -8588,3 +8588,10 @@ Vietnamese:
 - Root cause: `auditEntry()` omitted `createdAt`, so CAP supplied the execution date while the test intentionally filtered the fixed date `2026-08-24`.
 - Fix: the fixture now supplies an explicit deterministic `createdAt` inside the asserted day. Production CAP/UI behavior, schema, dependencies and lockfiles are unchanged.
 - Verification owner: DonHV coordinator. Focused RED was reproduced on `dev`; GREEN and Draft-PR evidence are recorded in the dedicated test-only branch.
+
+### 2026-08-25 worktree junction removal safety guard
+
+- Classification: process/tooling hardening after the confirmed primary-checkout `app/` deletion incident.
+- TDD RED: `qa:agent-rules` failed because the canonical change-control rule did not require reparse-point inventory, non-recursive junction detachment, target survival proof, or a no-force boundary before `git worktree remove`.
+- Minimal fix: added one mandatory change-control bullet and four exact machine-enforced phrases in `scripts/qa/check-agent-rules.js`. No cleanup framework, dependency, application source, runtime, provider, user, role, HANA/HDI, Jira, or Drive mutation was added.
+- GREEN: `node scripts/qa/check-agent-rules.js` returned PASS (8 required rules); `git diff --check` exited zero. OfficeCLI preflight returned `1.0.144`; Markdown is outside OfficeCLI semantic editing, so the repository-native patch workflow was used.

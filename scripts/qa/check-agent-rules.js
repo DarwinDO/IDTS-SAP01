@@ -44,6 +44,17 @@ function main () {
     if (!agents.includes(name.replace('.md', ''))) errors.push(`AGENTS.md does not route rule: ${name}`)
   }
 
+  const changeControl = read(path.join(RULES_DIR, 'change-control-and-git.md'))
+  const worktreeSafetyPhrases = [
+    'git worktree remove',
+    'reparse points',
+    'detach junction objects non-recursively',
+    'prove every junction target still exists'
+  ]
+  for (const phrase of worktreeSafetyPhrases) {
+    if (!changeControl.includes(phrase)) errors.push(`Change-control rule misses worktree safety phrase: ${phrase}`)
+  }
+
   if (errors.length) {
     console.error('Agent rule check: FAIL')
     errors.forEach(error => console.error(`- ${error}`))
