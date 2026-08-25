@@ -8581,6 +8581,18 @@ Vietnamese:
 - No artificial outage or ineligible retry was manufactured; no provider/email/user/role/data/schema/HANA/HDI mutation was used for acceptance. Gate 6 manual acceptance: PASS.
 - Bản rollout UI selective dùng đúng artifact checksum; không deploy CAP/HANA. Readiness, Delivery, Provisioning, Audit và layout detail đều được DonHV xác nhận runtime. Evidence raw không commit vì chứa host/user private; chỉ lưu size/hash/claim allowlist. Manual acceptance Gate 6: PASS.
 
+### 2026-08-25 Gate 6.1 PR-body evidence-format check / Lỗi format evidence PR body Gate 6.1
+
+- Classification: process/tooling issue.
+- Symptom: `node scripts/qa/check-pr-depth.js --body-file <absolute-path>` rejected the temporary Draft PR body because the Ownership Knowledge Gate evidence path was wrapped in Markdown backticks; the validator requires a plain `docs/learning/progress/` or `docs/pm/evidence/` token.
+- Fix/status: no repository/GitHub state changed. Correct only the temporary body format and rerun the validator; the referenced ownership evidence is valid.
+
+### 2026-08-25 Gate 6.1 PR-body evidence-format check / Lỗi format evidence PR body Gate 6.1
+
+- Phân loại: process/tooling issue.
+- Triệu chứng: `node scripts/qa/check-pr-depth.js --body-file <absolute-path>` reject Draft PR body tạm vì path evidence Ownership Knowledge Gate được bọc backtick Markdown; validator yêu cầu token plain `docs/learning/progress/` hoặc `docs/pm/evidence/`.
+- Fix/trạng thái: không đổi repository/GitHub. Chỉ sửa format body tạm và chạy lại validator; evidence ownership được dẫn là hợp lệ.
+
 ### 2026-08-25 Gate 6.1 operations date-filter baseline blocker / Blocker baseline date-filter operations Gate 6.1
 
 - Classification: pre-existing test-harness issue.
