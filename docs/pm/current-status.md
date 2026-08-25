@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-08-08
+Last updated: 2026-08-26
 
 ## Snapshot
 
@@ -425,3 +425,10 @@ Vietnamese: Agent hoáº·c developer má»›i pháº£i xÃ¡c Ä‘á»‹nh 
 - The candidate adds the named read-only BugService `bugApi` model, server-ordered workload paging with global duplicate protection, Developers → Workload overview, bounded assigned non-Closed Bug detail rows, UTC overdue semantics, separate technical/current-action ownership labels, and exact same-origin Bug Object Page links. No `db/`, `srv/`, schema, dependency/lockfile, provider, user/role, data, email or deployment change is included.
 - Fresh workload/UI/Active Users/User Access contracts, reused DeveloperWorkloads backend `39/0`, secret scan, agent rules, QA-depth self-test, CAP EDMX/HANA compile, UI5 MCP lint/manifest validation, UI lint/build and prohibited-file diff guards pass. The existing attachment capability warning remains documented and unrelated.
 - Source evidence and bilingual mirrors are present. Independent exact-head source/security review, exactly one Draft PR/CI readback, manual/browser acceptance, rollout, Ready, merge and Gate 6.4 remain separate decisions.
+
+## 2026-08-26 WP8 Gate 6.3 authorization remediation handoff
+
+- DonHV authorized a narrow scope expansion after the bounded review found a Major authorization/privacy gap specifically on `DeveloperWorkloads`; ordinary `BugService.Bugs` reads remain outside the finding and remediation.
+- `srv/bug-service/monitoring.js` now resolves the active internal actor through existing `resolveRequestUser` and platform-role alignment, gives active PM all rows without `UserAdmin`, scopes active Developers to their resolved `developerUserID` before client search/filter/order/page/count, and fails closed for Tester, UserAdmin without PM, inactive, unmapped and misaligned callers.
+- Focused GREEN: `49 PASS / 0 FAIL`. The branch remains source-only from exact `d53f402ab92215e44d29da2e1d3da73a576fffd3`; no db/schema/ordinary Bugs-policy/dependency/lockfile/platform/provider/user/role/data/email/deployment mutation occurred.
+- Remaining handoff: run the full post-remediation matrix, perform one exact-head independent re-review, commit intentional changes including the preserved status log, push, create exactly one Draft PR to `dev`, read back CI/body/base/head, then stop before Ready, merge, rollout or Gate 6.4.

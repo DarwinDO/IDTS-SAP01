@@ -12,7 +12,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 ## Current status
 
-`IN PROGRESS — GATE 6.3 SOURCE COMPLETE; DRAFT PR HANDOFF PENDING`
+`IN PROGRESS — GATE 6.3 AUTHORIZATION REMEDIATION COMPLETE; EXACT-HEAD REVIEW/MATRIX/DRAFT PR PENDING`
 
 - Gates 1–3B are merged, deployed and accepted. Gate 3 browser closure is recorded by PR #325 at `04643e12727290f2f35fd56e9c3d2a8df4cbcdbc`.
 - Gate 4 branch `feature/wp8-admin-developer-pilot-donhv` is frozen from that exact base.
@@ -46,7 +46,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 5. Gate 5 — Business Catalog Administration.
 6. Gate 6 — Operations and Audit usability.
 7. Gate 6.2 — UI state isolation, navigation regrouping and action ownership — COMPLETE.
-8. Gate 6.3 — Developer workload and assigned-Bug drill-down — NEXT.
+8. Gate 6.3 — Developer workload and assigned-Bug drill-down — IN PROGRESS; authorization remediation is complete under DonHV's narrow scope expansion.
 9. Gate 6.4 — Safe cross-app navigation.
 10. Gate 6.5 — Post-completion access-change email notifications.
 
@@ -102,9 +102,15 @@ The executor may complete source/tests/docs/evidence commits, push the exact bra
 ## Gate 6.3 source implementation handoff
 
 - Branch `feature/wp8-user-admin-developer-workload-donhv` started from exact `d53f402ab92215e44d29da2e1d3da73a576fffd3` (`origin/dev`, local `dev`, and merge-base).
-- Source commits add the named read-only `bugApi` model, server-ordered/paged workload state, Developers → Workload overview, bounded assigned non-Closed Bug details, exact same-origin Bug Object Page links, focused TDD and bilingual UI copy/mirrors. No `db/`/`srv/`/schema/backend or dependency/lockfile change is present.
-- Fresh source matrix is green: workload/UI/Active Users/User Access contracts, reused DeveloperWorkloads backend (`39/0`), secret scan, agent rules, QA-depth self-test, CAP EDMX/HANA compile, UI5 MCP lint/manifest validation, UI lint/build and prohibited-file diff guards. Existing attachment `NonUpdateableProperties` compile warning remains unrelated and documented.
+- Source commits add the named read-only `bugApi` model, server-ordered/paged workload state, Developers → Workload overview, bounded assigned non-Closed Bug details, exact same-origin Bug Object Page links, focused TDD and bilingual UI copy/mirrors. DonHV then authorized the smallest server fix in `srv/bug-service/monitoring.js`: resolve active internal identity/platform-role alignment, PM all rows, Developer own `developerUserID` row(s), and fail-closed other roles before client filter/order/page/count. No `db/`, schema, ordinary `BugService.Bugs` read-policy, dependency or lockfile change is present.
+- Focused source GREEN is fresh: workload authorization/aggregate backend (`49/0`), with the original UI/Active Users/User Access contracts preserved. Secret scan, agent rules, QA-depth self-test, CAP EDMX/HANA compile, UI5 MCP lint/manifest validation, UI lint/build and prohibited-file diff gates remain required post-remediation checks. Existing attachment `NonUpdateableProperties` compile warning remains unrelated and documented.
 - Evidence: `docs/pm/evidence/user-administration/gate-6-3-developer-workload-source.md`. Manual/browser acceptance, independent exact-head source/security review, Draft PR/CI readback, rollout, merge, Ready and Gate 6.4 remain separate boundaries.
+
+### Gate 6.3 authorization remediation handoff — 2026-08-26
+
+- The prior exact-head review found one Major authorization/privacy gap specifically on `DeveloperWorkloads`; ordinary `BugService.Bugs` reads were not newly attributed to Gate 6.3.
+- DonHV authorized the narrow server scope. `readDeveloperWorkloads` now calls `resolveRequestUser`, permits active PM all rows without `UserAdmin`, scopes active Developers to resolved `developerUserID` before all client query semantics, and rejects Tester, UserAdmin without PM, inactive, unmapped and misaligned callers with 403.
+- TDD RED was observed as `39 PASS / 10 FAIL / 49 checks`; GREEN is `49 PASS / 0 FAIL / 49 checks`. One exact-head independent re-review and the full post-remediation matrix remain before push and exactly one Draft PR to `dev`.
 
 ## Bàn giao source Gate 6.1 — làm rõ navigation và action
 
