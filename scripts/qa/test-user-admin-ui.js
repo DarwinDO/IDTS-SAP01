@@ -690,9 +690,30 @@ async function verifyRuntimeBehavior () {
   assert.equal(developerCatalogData.loaded, true)
   assert.equal(developerCatalogData.componentCategories[0].label, 'Component — Defect')
   assert.equal(catalogData.query, 'business sentinel', 'Developer catalog loading must not alter Business Catalog state')
+  const failedDeveloperData = { loaded: false, busy: false, error: false }
+  const failedDeveloperModel = {
+    getProperty: key => failedDeveloperData[key.slice(1)],
+    setProperty: (key, value) => { failedDeveloperData[key.slice(1)] = value },
+    setData: data => Object.assign(failedDeveloperData, data)
+  }
+  const failedDeveloperInstance = Object.assign(Object.create(controllerDefinition), {
+    getModel: name => name === 'developerCatalogs' ? failedDeveloperModel : catalogModel,
+    getView: () => ({ getModel: () => ({ bindList: () => ({ requestContexts: async () => { throw new Error('developer catalog unavailable') } }) }) })
+  })
+  await assert.rejects(failedDeveloperInstance._ensureDeveloperCatalogs(), /developer catalog unavailable/)
+  assert.equal(failedDeveloperData.error, true)
+  assert.equal(catalogData.query, 'business sentinel', 'Developer catalog failure must not alter Business Catalog state')
   catalogData.query = ''
   await catalogInstance._loadCatalogs()
   assert.equal(developerCatalogData.componentCategories[0].label, 'Component — Defect', 'Business Catalog loading must not alter Developer catalog state')
+  const businessFailureInstance = Object.assign(Object.create(controllerDefinition), {
+    getModel: name => name === 'businessCatalogs' ? catalogModel : developerCatalogModel,
+    _ensureCatalogLookups: async () => { throw new Error('business catalog unavailable') }
+  })
+  catalogData.error = false
+  await businessFailureInstance._loadCatalogs()
+  assert.equal(catalogData.error, true)
+  assert.equal(developerCatalogData.componentCategories[0].label, 'Component — Defect', 'Business Catalog failure must not alter Developer catalog state')
   assert.equal(catalogData.loaded, true)
   assert.equal(catalogData.allItems.length, 205, 'catalog loading retrieves every page before local search')
   assert.equal(catalogData.items.length, 204, 'inactive catalog items are hidden by default')
