@@ -57,7 +57,13 @@ assert.equal(zipperTask.afterTask, 'generateCachebusterInfo', 'the deployable ZI
 const indexHtml = fs.readFileSync(path.join(webapp, 'index.html'), 'utf8')
 assert.match(indexHtml, /data-sap-ui-app-cache-buster="\.\/"/)
 
+const controller = fs.readFileSync(path.join(webapp, 'controller/Main.controller.js'), 'utf8')
 const view = fs.readFileSync(path.join(webapp, 'view/Main.view.xml'), 'utf8')
+assert.match(controller, /setModel\(new JSONModel\([\s\S]*?\), "developerCatalogs"\)/)
+assert.match(controller, /setModel\(new JSONModel\([\s\S]*?\), "businessCatalogs"\)/)
+assert.match(controller, /_ensureDeveloperCatalogs[\s\S]*?getModel\("developerCatalogs"\)/)
+assert.match(controller, /_loadCatalogs[\s\S]*?getModel\("businessCatalogs"\)/)
+assert.doesNotMatch(controller, /getModel\("catalogs"\)/)
 assert.match(view, /<SearchField/)
 assert.match(view, /<Table/)
 assert.match(view, /items="\{requests>\/items\}"/)
@@ -74,9 +80,8 @@ assert.match(view, /status_code\} === 'BLOCKED_MANUAL_REVIEW'[\s\S]+lastErrorCod
 assert.match(view, /press="\.onOpenDeveloperProfile"/)
 assert.doesNotMatch(view, /type="Password"|tokenHash|tokenNonce|identityIssuer/)
 assert.match(view, /<IconTabBar/)
-assert.match(view, /key="requests"/)
-assert.match(view, /key="activeUsers"/)
-assert.match(view, /key="developerResponsibilities"/)
+assert.match(view, /key="access"/)
+assert.match(view, /key="developers"/)
 assert.match(view, /key="businessCatalogs"/)
 assert.match(view, /key="operations"/)
 assert.match(view, /key="deliveries"/)
@@ -107,16 +112,11 @@ for (const [tabKey, tooltipKey] of Object.entries(mainTabTooltips)) {
 const requestTableStart = view.indexOf('id="onboardingTable"')
 const requestTable = view.slice(requestTableStart, view.indexOf('</Table>', requestTableStart))
 const requestButtons = [...requestTable.matchAll(/<Button[\s\S]*?\/>/g)].map(match => match[0])
-for (const [icon, tooltipKey] of [
-  ['edit', 'changeRoleActionTooltip'],
-  ['action-settings', 'manageResponsibilitiesActionTooltip'],
-  ['decline', 'revokeAccessActionTooltip']
-]) {
-  const button = requestButtons.find(candidate => candidate.includes(`icon="sap-icon://${icon}"`))
-  assert.ok(button, `row action icon is present: ${icon}`)
-  assert.match(button, new RegExp(`tooltip="\\{i18n>${tooltipKey}\\}"`), `row action tooltip is present: ${icon}`)
-}
-assert.equal(new Set(['changeRoleActionTooltip', 'manageResponsibilitiesActionTooltip', 'revokeAccessActionTooltip']).size, 3)
+assert.doesNotMatch(requestTable, /onOpenRoleChange|onOpenDeveloperProfile|onOpenRevoke/)
+assert.equal(requestButtons.some(button => button.includes('onApproveProvisioning')), true)
+assert.equal(requestButtons.some(button => button.includes('onRetryAccessOperation')), true)
+assert.equal(requestButtons.some(button => button.includes('onReconcileAccessOperation')), true)
+assert.equal(requestButtons.some(button => button.includes('onCancelExistingLinkInvitation')), true)
 assert.match(view, /items="\{deliveries>\/items\}"/)
 assert.match(view, /items="\{operations>\/items\}"/)
 assert.match(view, /items="\{audit>\/items\}"/)
@@ -168,6 +168,11 @@ assert.match(activeUserDetailsFragment, /press="\.onOpenActiveUserReactivate"/)
 assert.match(activeUserDetailsFragment, /press="\.onOpenActiveUserRevoke"/)
 assert.match(activeUserDetailsFragment, /linkEligible/)
 assert.match(activeUserDetailsFragment, /press="\.onOpenExistingIdentityLink"/)
+assert.match(activeUserDetailsFragment, /press="\.onOpenDeveloperProfile"/)
+
+const developerResponsibilitiesTableStart = view.indexOf('id="developerResponsibilitiesTable"')
+const developerResponsibilitiesTable = view.slice(developerResponsibilitiesTableStart, view.indexOf('</Table>', developerResponsibilitiesTableStart))
+assert.match(developerResponsibilitiesTable, /press="\.onOpenDeveloperProfile"/)
 
 for (const [fragmentName, firstLabel] of [
   ['DeliveryDetails.fragment.xml', 'recipient'],
@@ -212,7 +217,6 @@ assert.match(fragment, /valueLiveUpdate="true"/)
 assert.match(fragment, /!\$\{invite>\/submitting\}/)
 assert.doesNotMatch(fragment, /Password|OTP|passkey|token/i)
 
-const controller = fs.readFileSync(path.join(webapp, 'controller/Main.controller.js'), 'utf8')
 assert.match(controller, /searchOnboardingDeliveries/)
 assert.match(controller, /searchAccessOperations/)
 assert.match(controller, /searchAccessAuditEvents/)
@@ -298,6 +302,8 @@ assert.match(manageFragment, /type="\{= \$\{access>\/mode\} === 'REVOKE' \? 'Neg
 assert.match(manageFragment, /press="\.onConfirmAccessChange"/)
 assert.match(manageFragment, /text="\{i18n>changeRoleResponsibilitiesHint\}"/)
 assert.match(manageFragment, /visible="\{= \$\{access>\/mode\} === 'CHANGE_ROLE' \}"/)
+assert.match(manageFragment, /\$\{access>\/currentRole\} !== 'DEVELOPER'/)
+assert.match(manageFragment, /\$\{access>\/role\} === 'DEVELOPER'/)
 assert.doesNotMatch(manageFragment, /stretchOnPhone=/)
 assert.doesNotMatch(manageFragment, /Password|OTP|passkey|token/i)
 
