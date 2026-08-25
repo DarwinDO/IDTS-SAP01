@@ -48,7 +48,17 @@
 
 ### Handoff boundary
 
-This is a source candidate only. The coordinator independently reviewed the product diff with zero findings. The pre-existing Operations/Audit date-fixture blocker was isolated, fixed test-only, verified, and merged separately through PR #341 before this branch was refreshed. PR #340 remains the one Gate 6.1 Draft PR. No runtime/browser acceptance, deployment, provider/data mutation, merge, Ready transition, or cleanup is claimed here.
+The coordinator independently reviewed the product diff with zero findings. The pre-existing Operations/Audit date-fixture blocker was isolated, fixed test-only, verified, and merged separately through PR #341 before this branch was refreshed. PR #340 remains the one Gate 6.1 Draft PR.
+
+### Selective rollout and browser acceptance
+
+- Exact source head: `aa50cb28f6ae8beac99bde18b618dea70e91917c`.
+- Exact content-only MTAR: `idts-user-admin-ui-g6-1-aa50cb2.mtar`, SHA-256 `78559942507E1D4EFC5E6DD991FAAAB33ABF56759D564117C3B045F72D7E393B`, 302,398 bytes.
+- Deep inspection proved one `com.sap.application.content` module, one existing HTML5 repository service, and exactly the Bug Management and User Administration UI ZIPs. No CAP, AppRouter, route, XSUAA, HANA/HDI, backend, schema, `node_modules`, credential, or environment payload was present.
+- One `cf deploy` completed with zero retries and no service deletion. The content-only operation did not retain a queryable MTA configuration record, so acceptance is bound to the exact archive hash, completed operation output, direct live browser readback, zero active MTA operations, and final readiness rather than an inferred `cf mta` record.
+- Fresh post-deploy `npm run btp:demo:check` returned CAP `1/1`, AppRouter `1/1`, liveness `200`, readiness `200`, protected anonymous API `401`, Web `200`, and `DEMO READY`.
+- Authenticated live browser readback proved all six full tab labels and localized tooltips, the new Developer Responsibilities and Manage Responsibilities icons, distinct Change Role / Manage Responsibilities / Revoke action names, and the Change Role-only informational hint. The dialog was closed without submitting a mutation.
+- No provider, email, user, role, catalog, business-data, HANA/HDI, backend, schema, service-binding, Jira, Drive, merge, or Ready mutation occurred.
 
 ## Tiếng Việt
 
@@ -98,4 +108,14 @@ This is a source candidate only. The coordinator independently reviewed the prod
 
 ### Boundary bàn giao
 
-Đây chỉ là source candidate. Coordinator đã review độc lập product diff với zero findings. Blocker fixture date Operations/Audit có sẵn đã được tách riêng, fix test-only, verify và merge qua PR #341 trước khi refresh branch này. PR #340 vẫn là Draft PR duy nhất của Gate 6.1. Không claim runtime/browser acceptance, deployment, mutation provider/data, merge, Ready hoặc cleanup.
+Coordinator đã review độc lập product diff với zero findings. Blocker fixture date Operations/Audit có sẵn đã được tách riêng, fix test-only, verify và merge qua PR #341 trước khi refresh branch này. PR #340 vẫn là Draft PR duy nhất của Gate 6.1.
+
+### Rollout selective và browser acceptance
+
+- Head source exact: `aa50cb28f6ae8beac99bde18b618dea70e91917c`.
+- MTAR content-only exact: `idts-user-admin-ui-g6-1-aa50cb2.mtar`, SHA-256 `78559942507E1D4EFC5E6DD991FAAAB33ABF56759D564117C3B045F72D7E393B`, 302.398 byte.
+- Deep inspection chứng minh đúng một module `com.sap.application.content`, một existing HTML5 repository service và đúng hai ZIP Bug Management/User Administration UI. Không có payload CAP, AppRouter, route, XSUAA, HANA/HDI, backend, schema, `node_modules`, credential hoặc environment.
+- Một `cf deploy` hoàn tất với retry bằng 0 và không xóa service. Operation content-only không giữ lại MTA configuration có thể query, vì vậy acceptance khóa theo hash archive exact, output operation hoàn tất, browser readback live, active MTA operation bằng 0 và readiness cuối; không suy diễn từ `cf mta` record.
+- `npm run btp:demo:check` sau deploy trả CAP `1/1`, AppRouter `1/1`, liveness `200`, readiness `200`, protected anonymous API `401`, Web `200` và `DEMO READY`.
+- Browser đăng nhập live chứng minh đủ sáu tên tab và tooltip, icon mới cho Developer Responsibilities/Manage Responsibilities, tên riêng cho Change Role / Manage Responsibilities / Revoke, cùng informational hint chỉ có trong Change Role. Dialog được đóng mà không submit mutation.
+- Không mutation provider, email, user, role, catalog, business data, HANA/HDI, backend, schema, service binding, Jira, Drive, merge hoặc Ready.

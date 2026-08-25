@@ -8781,3 +8781,30 @@ Vietnamese:
 - A read-only scan found an exact root lock match at `E:\IDTS-SAP01-worktrees\wp7-user-onboarding-donhv\node_modules`. The User Administration UI tree has identical normalized lock content; only its package version field predates the current UI source version. The two broken local junctions were replaced explicitly and read back; no install, upgrade, package declaration, or lockfile write ran.
 - Fresh PASS: User Administration UI contract, Operations/Audit, onboarding, secret scan, agent rules 8/8, QA-depth self-test 15/15, UI lint, UI build, PR-body parser 11 sections, and `git diff --check`.
 - The Operations/Audit blocker is CLOSED. Remaining boundary: push exact refreshed Gate 6.1 head, obtain GitHub CI, then perform separate runtime visual acceptance before merge/deployment decisions.
+
+### 2026-08-25 Gate 6.1 content-only build staging prerequisite
+
+- Classification: local build-staging issue; no artifact or platform mutation.
+- Symptom: the first strict `mbt build` stopped during descriptor validation because the ignored staging path `gen/user-admin-ui-r3c` did not exist.
+- Root cause/fix: `mta.user-admin-ui-r3c.yaml` declares that generated content-module path; create only the empty contained staging directory and rerun the exact build. The failed attempt did not reach module builds or create an MTAR.
+
+### 2026-08-25 Gate 6.1 artifact inspection regex
+
+- Classification: tooling issue after successful local build.
+- Symptom: the first `rg` command against the extracted User Administration ZIP failed to parse because PowerShell quoting truncated a grouped regex containing quoted XML attributes.
+- Fix/status: rerun with separate fixed-string patterns. Archive extraction, hashes, and file counts completed; the failed text search did not change the artifact, Git, or platform state.
+
+### 2026-08-25 root app deletion through dependency junctions — restored
+
+- Classification: destructive local tooling/process defect discovered outside the Gate 6.1 product diff.
+- Root cause: a disposable worktree still contained a root `node_modules` junction into `E:\IDTS-SAP01`; npm workspace junctions below that target pointed back to `E:\IDTS-SAP01\app\...`. `git worktree remove` followed the reparse-point chain and removed 100 tracked `app/` files from the primary checkout.
+- Recovery: restored only tracked `app/` content from the clean primary checkout HEAD, ran exact-lock `npm ci --ignore-scripts` without a lockfile change, and independently verified `TRACKED_APP_MISSING=0` plus a clean `E:\IDTS-SAP01` worktree.
+- Prevention boundary: never remove a worktree while any dependency junction exists. Detach junction objects non-recursively, prove their targets remain, then remove/prune. A separate process-rule PR will encode and test this guard; it is intentionally not mixed into the UI-only PR #340.
+
+### 2026-08-25 Gate 6.1 selective UI rollout and live acceptance — PASS
+
+- Exact source head `aa50cb28f6ae8beac99bde18b618dea70e91917c` produced content-only MTAR SHA-256 `78559942507E1D4EFC5E6DD991FAAAB33ABF56759D564117C3B045F72D7E393B` (302,398 bytes).
+- Deep inspection proved one application-content module, one existing HTML5 repository service, exactly two UI ZIPs, the approved icons/inline compact overflow contract, zero `sap-icon://skills`, and no backend/schema/HANA/XSUAA/credential payload.
+- One exact deployment completed with zero retries and no service deletion. Active MTA operations returned zero. The content-only operation did not retain a queryable MTA configuration record; direct authenticated browser readback and exact artifact hash are the runtime authority.
+- Browser readback proved all six full tabs/tooltips, the Developer and Manage Responsibilities icons, three distinct Developer actions, and the Change Role informational hint. The dialog was closed without submit.
+- Final readiness returned CAP/AppRouter `1/1`, health/ready `200`, protected anonymous API `401`, Web `200`, and `DEMO READY`. No CAP, AppRouter, HANA/HDI, schema, provider, email, user, role, catalog, business-data, Jira, Drive, merge or Ready mutation occurred.
