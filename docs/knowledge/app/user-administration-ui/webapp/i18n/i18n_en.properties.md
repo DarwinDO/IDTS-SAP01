@@ -69,4 +69,28 @@ Giữ parity giữa bộ key English và default, đồng thời giữ các key 
 
 English labels keep the five top-level areas and same-role validation explicit.
 
+## Gate 6.3 workload copy / Copy workload Gate 6.3
+
+### English
+
+This bundle mirrors the new workload keys from `i18n.properties`: Developer Workload navigation, safe ownership explanation, bounded table/detail labels, state text, search/refresh/load-more actions, and `Open Bug`. The keys are deliberately business-facing and remain semantically equivalent to the default bundle and the Vietnamese bundle.
+
+- **IDTS concept**: English users can distinguish technical assignee from Current Action Owner and understand that workload colors are attention hints, not authorization.
+- **Impact if broken**: A locale switch can remove the only explanation for the workload boundary or make a read-only action sound like assignment/status mutation.
+- **Must check together**: `i18n.properties`, `i18n_vi.properties`, Workload XML, formatter functions, and the focused workload contract.
+
+### Tiếng Việt
+
+Bundle này mirror các key workload mới từ `i18n.properties`: navigation Developer Workload, explanation ownership an toàn, label table/detail bounded, state text, action search/refresh/load-more và `Open Bug`. Các key tập trung vào nghiệp vụ và giữ ý nghĩa tương đương với bundle default và bundle tiếng Việt.
+
+- **Khái niệm IDTS**: User English phân biệt được technical assignee với Current Action Owner và hiểu màu workload chỉ là hint cần chú ý, không phải authorization.
+- **Ảnh hưởng nếu sai**: Đổi locale có thể làm mất explanation duy nhất về boundary workload hoặc làm action read-only nghe như mutation assignment/status.
+- **Phải kiểm tra cùng**: `i18n.properties`, `i18n_vi.properties`, XML Workload, formatter và workload contract tập trung.
+
+### Safe editing / Sửa an toàn
+
+Keep default/English/Vietnamese key parity. Do not add raw server failures, internal identifiers, endpoints, provider terms, or credentials to this bundle.
+
+Giữ parity key default/English/Vietnamese. Không thêm raw server failure, internal identifier, endpoint, term provider hoặc credential vào bundle này.
+
 Label tiếng Anh giữ rõ năm khu vực cấp cao và validation khi role không thay đổi.

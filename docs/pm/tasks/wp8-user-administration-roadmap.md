@@ -12,7 +12,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 ## Current status
 
-`IN PROGRESS — GATE 6.3 READY FOR SOURCE EXECUTION`
+`IN PROGRESS — GATE 6.3 SOURCE COMPLETE; DRAFT PR HANDOFF PENDING`
 
 - Gates 1–3B are merged, deployed and accepted. Gate 3 browser closure is recorded by PR #325 at `04643e12727290f2f35fd56e9c3d2a8df4cbcdbc`.
 - Gate 4 branch `feature/wp8-admin-developer-pilot-donhv` is frozen from that exact base.
@@ -98,6 +98,13 @@ The executor may complete source/tests/docs/evidence commits, push the exact bra
 - Start only from fresh `origin/dev` after this planning package merges; planned branch is `feature/wp8-user-admin-developer-workload-donhv`.
 - Reuse the existing read-only `BugService.DeveloperWorkloads` aggregate and bounded `Bugs` fields. Add no workload table, duplicated aggregation, assignment/status mutation, or backend authorization shortcut.
 - Add Developers → Workload overview, assigned non-Closed Bug details, and exact same-origin Bug Object Page deep links. Stop at one Draft PR before runtime rollout or Gate 6.4.
+
+## Gate 6.3 source implementation handoff
+
+- Branch `feature/wp8-user-admin-developer-workload-donhv` started from exact `d53f402ab92215e44d29da2e1d3da73a576fffd3` (`origin/dev`, local `dev`, and merge-base).
+- Source commits add the named read-only `bugApi` model, server-ordered/paged workload state, Developers → Workload overview, bounded assigned non-Closed Bug details, exact same-origin Bug Object Page links, focused TDD and bilingual UI copy/mirrors. No `db/`/`srv/`/schema/backend or dependency/lockfile change is present.
+- Fresh source matrix is green: workload/UI/Active Users/User Access contracts, reused DeveloperWorkloads backend (`39/0`), secret scan, agent rules, QA-depth self-test, CAP EDMX/HANA compile, UI5 MCP lint/manifest validation, UI lint/build and prohibited-file diff guards. Existing attachment `NonUpdateableProperties` compile warning remains unrelated and documented.
+- Evidence: `docs/pm/evidence/user-administration/gate-6-3-developer-workload-source.md`. Manual/browser acceptance, independent exact-head source/security review, Draft PR/CI readback, rollout, merge, Ready and Gate 6.4 remain separate boundaries.
 
 ## Bàn giao source Gate 6.1 — làm rõ navigation và action
 

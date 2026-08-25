@@ -8877,3 +8877,47 @@ Vietnamese:
 - Gate 6.2 is now recorded as complete, and its obsolete pre-implementation plan was removed. The approved Gate 6.3–6.5 plans remain, with Gate 6.3 strengthened to require stable server-side workload ordering across page boundaries.
 - This refresh changes documentation/planning only. It performs no product runtime, HANA/HDI, deployment, provider, user/role, data, email, Jira, or Drive mutation.
 - Validation note: the first refreshed script-alias check correctly found two aliases absent from the current package because their gates create them, but only Gate 6.3 showed the exact future JSON entry. Gate 6.5 now also records its exact package-script entry so the checker can distinguish planned creation from an unexplained typo.
+
+### 2026-08-25 Gate 6.3 dependency visibility preflight
+
+- Classification: environment/tooling issue, resolved locally without source mutation.
+- Symptom: CAP and Fiori MCP read-only preflight could not compile the project because the isolated worktree did not resolve `@cap-js/attachments`; local `node_modules` and the User Administration UI dependency tree were absent.
+- Root cause/fix: the exact clean primary checkout `E:\IDTS-SAP01` is on `dev` at `d53f402ab92215e44d29da2e1d3da73a576fffd3`, has matching `origin/dev`, clean status, and the required locked dependency trees. Added only two untracked NTFS junctions from this worktree to those exact dependency trees; no install, upgrade, package declaration or lockfile write ran.
+- Verification/status: both junction targets and `@cap-js/attachments`/UI5 CLI visibility read back successfully. CAP/Fiori MCP metadata discovery and local `npx cds compile srv -s all --to edmx` then completed with exit 0; `npx cds --version` still reports the shared-tree `npm ls` warning `ELSPROBLEMS`, so no install/upgrade was attempted. DonHV owns any later dependency-tree recovery or cleanup decision.
+
+### 2026-08-25 Gate 6.3 UI lint finding during workload implementation
+
+- Classification: product-code verification finding; source fix in progress.
+- Symptom: `npm run lint --prefix app/user-administration-ui` returned one error at `Main.controller.js:1338` for a nested ternary and three warnings for CAP/OData snake-case fields `status_code`, `priority_code`, and `severity_code`.
+- Root cause/fix/status: the nested ternary was local normalization logic and was replaced with a named bounded value; the three warnings were removed by bracket access while preserving the exact BugService field names required by the approved `$select` contract. Fresh `npm run lint --prefix app/user-administration-ui` exited 0 with no errors or warnings. No runtime, schema, dependency, lockfile, platform, provider, user/role, data, email, Jira, Drive or deployment mutation occurred.
+
+### 2026-08-25 Gate 6.3 UI5 MCP fragment lint finding
+
+- Classification: product-code verification finding; source fix in progress.
+- Symptom: UI5 MCP lint reported five errors in `DeveloperWorkloadDetails.fragment.xml`: five formatter bindings were treated as global because the fragment had no local `core:require`, and `stretchOnPhone` was deprecated.
+- Root cause/fix/status: the fragment reused the existing view formatter pattern without declaring the module at fragment scope, and copied an obsolete Dialog property. Added the local formatter import and supported `stretch` property; fresh UI5 MCP lint returned an empty result set and manifest validation returned `isValid:true` with zero errors. No runtime, schema, dependency, lockfile, platform, provider, user/role, data, email, Jira, Drive or deployment mutation occurred.
+
+### 2026-08-25 Gate 6.3 workload page-merge review finding
+
+- Classification: product-code verification finding; TDD remediation in progress.
+- Symptom: exact-diff review showed the append merge de-duplicated incoming rows against prior pages but did not update the key set while iterating the incoming page, so two duplicate `developerProfileID` rows in one page could both render.
+- Root cause/fix/status: the merge used one `filter` against a static prior-page set. The implementation now updates the key set while iterating incoming rows; fresh workload/UI contracts and ESLint pass. No runtime, schema, dependency, lockfile, platform, provider, user/role, data, email, Jira, Drive or deployment mutation occurred.
+
+### 2026-08-25 Gate 6.3 page-merge regression cursor expectation
+
+- Classification: test-harness issue, fixed in the same TDD cycle.
+- Symptom: after adding a duplicate row to the incoming page, the no-duplicate regression still expected `nextSkip=102`; the actual raw page length was three, so the correct cursor was `103` even though only two rows were retained.
+- Fix/status: updated the assertion to distinguish raw server cursor advancement from unique rendered row count. No product, runtime, schema, dependency, lockfile, platform, provider, user/role, data, email, Jira, Drive or deployment mutation occurred.
+
+### 2026-08-25 Gate 6.3 CAP compile known warning
+
+- Classification: pre-existing CAP/tooling warning, non-blocking and outside this diff.
+- Symptom: `npx cds compile srv -s all --to edmx` exited 0 but reported the existing `db/schema.cds:183` warning that `Capabilities.UpdateRestrictions.NonUpdateableProperties` is not known for `BugService.Bugs_attachments`; the HANA compile also exited 0 and generated only the existing model artifacts.
+- Status/evidence: no `db/` or `srv/` file was changed by Gate 6.3, and no warning remediation or dependency upgrade was attempted. The warning remains documented as pre-existing; it is not a Gate 6.3 product finding.
+
+### 2026-08-25 Gate 6.3 source implementation and matrix
+
+- Branch `feature/wp8-user-admin-developer-workload-donhv` is based exactly on `d53f402ab92215e44d29da2e1d3da73a576fffd3`; source implementation head before final documentation/review handoff is `363b6a04f103dd0c60c7882b40a9c912ac74d5df`.
+- Completed source scope: named read-only `bugApi`, server-ordered/paged DeveloperWorkloads with global duplicate protection, Developers → Workload overview, bounded assigned non-Closed Bug dialog, UTC overdue handling, separate technical/current-action owner fields and exact same-origin Bug Object Page links. Matching bilingual source mirrors and evidence are prepared.
+- Fresh PASS: workload/UI/Active Users/User Access contracts, reused DeveloperWorkloads backend `39/0`, secret scan, agent rules `8/8`, QA-depth self-test `15/15`, CAP EDMX/HANA compile, UI5 MCP lint/manifest validation, UI lint/build, and prohibited-file diff guards. Existing attachment capability warning is non-blocking and documented above.
+- No `db/`, `srv/`, schema, dependency/lockfile, provider, user/role, data, email, deployment, Jira, Drive, merge, Ready or Gate 6.4 mutation occurred. Next boundary: one bounded independent exact-head source/security review, push, exactly one Draft PR, CI/body/head/base readback, then stop.
