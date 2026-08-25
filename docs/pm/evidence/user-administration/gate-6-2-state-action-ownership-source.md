@@ -75,3 +75,17 @@ Gate 6.2 selective CAP/UI rollout and bounded read-only PM browser acceptance ar
 - User Administration cache identity advanced from deployed `1.0.12` to `1.0.13`; package, lockfile root and UI5 manifest versions remain equal.
 - Fresh source verification passed the User Administration UI, onboarding, Active Users, access lifecycle, Operations/Audit, user-access, broker and immutable-identity suites; secret scan, agent rules, QA Depth self-test, CAP EDMX/HANA compile, UI lint/build, XML parse and diff check also passed. CAP EDMX retains only the pre-existing attachment vocabulary warning.
 - Runtime/browser acceptance remains separate until the exact merged `1.0.13` HTML5 artifact is checksum-reviewed and selectively deployed. No lifecycle or responsibility mutation is required for that visual acceptance.
+
+### Dialog follow-up selective rollout and acceptance
+
+- Product PR `#346` merged to exact `dev` SHA `3c1e7176927e3b800a8d734d44b9fa5303f9a298`; local `dev` and `origin/dev` matched before the build.
+- Content-only MTAR `mta_archives/idts-user-admin-ui-g62-dialog-3c1e717.mtar` is 301,188 bytes with SHA-256 `E1BE4BE2CE34E07D2EB5DF5319F0021DCD32DE9FB5295B327DCADDAD54BCEFF0`.
+- Deep inspection proved one application-content module, one existing HTML5 repository host, exactly Bug Management and User Administration ZIPs, zero `node_modules`, packaged User Administration version `1.0.13`, and byte-identical source/package `ActiveUserDetails.fragment.xml` SHA-256 `1C428F964A857DBB7D779C53C193E33406E4F4436381899CCB09345355CD90AF`.
+- The packaged fragment contains the native wrapping `HBox`, all four lifecycle handlers and no `onOpenDeveloperProfile` details binding. Build-time npm audit reported the pre-existing locked dependency warnings; no audit-fix, dependency update or lockfile mutation was performed.
+- Pre/post readiness returned `DEMO READY`: CAP/AppRouter `1/1`, health/readiness/Web `200`, anonymous protected API `401`. One content-only deployment completed with retry count `0`, service deletion disabled and zero active MTA operations afterward. CAP, AppRouter, HDI/schema, binding, environment, provider, user/role, email and business data were unchanged.
+- Authenticated PM browser readback at the normal Edge viewport proved the active Developer details dialog has no horizontal overflow (`scrollWidth = clientWidth = 608`), displays complete Change Role, Suspend access and Revoke Access buttons, omits Manage Responsibilities, and leaves the outer active-Developer Manage action available in the Developer Responsibilities table. No action was submitted.
+- A secondary automated narrow-viewport attempt was not accepted as evidence because the browser debugger disconnected during viewport control. The viewport was not intentionally retained, and no product action or data mutation occurred. Native `wrap="Wrap"` remains covered by source/TDD; no unsupported narrow-browser PASS is claimed.
+
+### Dialog follow-up final verdict
+
+The merged `1.0.13` content-only rollout and normal-viewport read-only PM acceptance are **PASS** for the requested clipping and duplicate-action defects. Breakpoint-specific automated evidence remains limited to source/TDD because of the browser-control tooling interruption; this does not change the verified no-overflow normal viewport result.
