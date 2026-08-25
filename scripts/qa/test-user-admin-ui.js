@@ -82,6 +82,41 @@ assert.match(view, /key="operations"/)
 assert.match(view, /key="deliveries"/)
 assert.match(view, /key="provisioning"/)
 assert.match(view, /key="audit"/)
+assert.doesNotMatch(view, /sap-icon:\/\/skills/, 'skills is not a valid SAPUI5 icon for this UI')
+assert.equal((view.match(/icon="sap-icon:\/\/activity-individual"/g) || []).length, 1)
+assert.equal((view.match(/icon="sap-icon:\/\/action-settings"/g) || []).length, 1)
+const mainIconTabBarOpenMatch = view.match(/<IconTabBar[\s\S]*?id="administrationTabs"[\s\S]*?tabsOverflowMode="End">/)
+assert.ok(mainIconTabBarOpenMatch, 'main administration IconTabBar opening tag is complete')
+const mainIconTabBarOpen = mainIconTabBarOpenMatch[0]
+assert.match(mainIconTabBarOpen, /id="administrationTabs"/)
+assert.match(mainIconTabBarOpen, /headerMode="Inline"/)
+assert.match(mainIconTabBarOpen, /tabDensityMode="Compact"/)
+assert.match(mainIconTabBarOpen, /tabsOverflowMode="End"/)
+const mainTabTooltips = {
+  requests: 'accessRequestsTabTooltip',
+  activeUsers: 'activeUsersTabTooltip',
+  developerResponsibilities: 'developerResponsibilitiesTabTooltip',
+  operations: 'operationsTabTooltip',
+  audit: 'auditTabTooltip',
+  businessCatalogs: 'businessCatalogsTabTooltip'
+}
+for (const [tabKey, tooltipKey] of Object.entries(mainTabTooltips)) {
+  const tab = view.match(new RegExp(`<IconTabFilter\\b[\\s\\S]*?\\bkey="${tabKey}"[\\s\\S]*?tooltip="\\{i18n>${tooltipKey}\\}">`))
+  assert.ok(tab, `main tab is present: ${tabKey}`)
+}
+const requestTableStart = view.indexOf('id="onboardingTable"')
+const requestTable = view.slice(requestTableStart, view.indexOf('</Table>', requestTableStart))
+const requestButtons = [...requestTable.matchAll(/<Button[\s\S]*?\/>/g)].map(match => match[0])
+for (const [icon, tooltipKey] of [
+  ['edit', 'changeRoleActionTooltip'],
+  ['action-settings', 'manageResponsibilitiesActionTooltip'],
+  ['decline', 'revokeAccessActionTooltip']
+]) {
+  const button = requestButtons.find(candidate => candidate.includes(`icon="sap-icon://${icon}"`))
+  assert.ok(button, `row action icon is present: ${icon}`)
+  assert.match(button, new RegExp(`tooltip="\\{i18n>${tooltipKey}\\}"`), `row action tooltip is present: ${icon}`)
+}
+assert.equal(new Set(['changeRoleActionTooltip', 'manageResponsibilitiesActionTooltip', 'revokeAccessActionTooltip']).size, 3)
 assert.match(view, /items="\{deliveries>\/items\}"/)
 assert.match(view, /items="\{operations>\/items\}"/)
 assert.match(view, /items="\{audit>\/items\}"/)
@@ -261,6 +296,8 @@ assert.match(manageFragment, /<TextArea/)
 assert.match(manageFragment, /valueLiveUpdate="true"/)
 assert.match(manageFragment, /type="\{= \$\{access>\/mode\} === 'REVOKE' \? 'Negative' : 'Emphasized' \}"/)
 assert.match(manageFragment, /press="\.onConfirmAccessChange"/)
+assert.match(manageFragment, /text="\{i18n>changeRoleResponsibilitiesHint\}"/)
+assert.match(manageFragment, /visible="\{= \$\{access>\/mode\} === 'CHANGE_ROLE' \}"/)
 assert.doesNotMatch(manageFragment, /stretchOnPhone=/)
 assert.doesNotMatch(manageFragment, /Password|OTP|passkey|token/i)
 
@@ -888,6 +925,13 @@ const operationsI18nKeys = [
 for (const locale of ['i18n.properties', 'i18n_en.properties', 'i18n_vi.properties']) {
   const text = fs.readFileSync(path.join(webapp, 'i18n', locale), 'utf8')
   for (const key of operationsI18nKeys) assert.match(text, new RegExp(`^${key}=`, 'm'))
+  for (const key of [
+    ...Object.values(mainTabTooltips),
+    'changeRoleActionTooltip',
+    'manageResponsibilitiesActionTooltip',
+    'revokeAccessActionTooltip',
+    'changeRoleResponsibilitiesHint'
+  ]) assert.match(text, new RegExp(`^${key}=`, 'm'), `${key} must exist in ${locale}`)
 }
 
 verifyRuntimeBehavior().then(() => {

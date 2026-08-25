@@ -12,6 +12,12 @@
 					type="Warning"
 					showIcon="true"
 					class="sapUiSmallMarginBottom"/>
+				<MessageStrip
+					text="{i18n>changeRoleResponsibilitiesHint}"
+					type="Information"
+					showIcon="true"
+					visible="{= ${access>/mode} === 'CHANGE_ROLE' }"
+					class="sapUiSmallMarginBottom"/>
 				<Label text="{i18n>businessRole}" visible="{= ${access>/mode} === 'CHANGE_ROLE' }"/>
 				<Select
 					selectedKey="{access>/role}"
