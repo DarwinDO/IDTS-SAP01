@@ -1251,6 +1251,7 @@ sap.ui.define([
 			return this._developerWorkloadLoadPromise;
 		},
 
+		// Chỉ đọc aggregate do BugService tính; User Administration không được tự tính hoặc đổi assignment/status.
 		_loadDeveloperWorkloads: async function (sQuery, bAppend) {
 			const oWorkloadModel = this.getModel("workload");
 			const bAppending = bAppend === true;
@@ -1298,6 +1299,7 @@ sap.ui.define([
 			}
 		},
 
+		// Drill-down chỉ lấy field Bug allowlist và lọc CLOSED ở server trước khi render dialog.
 		_loadDeveloperWorkloadBugs: async function (oDeveloper) {
 			const oWorkloadModel = this.getModel("workload");
 			const sProfileID = oDeveloper?.developerProfileID;
@@ -1335,9 +1337,10 @@ sap.ui.define([
 		_normalizeDeveloperWorkloadRow: function (oRow) {
 			const oSource = oRow || {};
 			const toCount = value => Number.isFinite(Number(value)) ? Number(value) : 0;
-			const workloadLimit = oSource.workloadLimit === null || oSource.workloadLimit === undefined || oSource.workloadLimit === ""
-				? null
-				: (Number.isFinite(Number(oSource.workloadLimit)) ? Number(oSource.workloadLimit) : null);
+			let workloadLimit = null;
+			if (oSource.workloadLimit !== null && oSource.workloadLimit !== undefined && oSource.workloadLimit !== "" && Number.isFinite(Number(oSource.workloadLimit))) {
+				workloadLimit = Number(oSource.workloadLimit);
+			}
 			return {
 				developerProfileID: oSource.developerProfileID || null,
 				developerUserID: oSource.developerUserID || null,
@@ -1365,14 +1368,14 @@ sap.ui.define([
 				bugID: sBugID,
 				bugNumber: oSource.bugNumber || "",
 				title: oSource.title || "",
-				status_code: oSource.status_code || "",
-				priority_code: oSource.priority_code || "",
-				severity_code: oSource.severity_code || "",
+				["status_code"]: oSource["status_code"] || "",
+				["priority_code"]: oSource["priority_code"] || "",
+				["severity_code"]: oSource["severity_code"] || "",
 				dueDate: oSource.dueDate || null,
 				estimatedEffortHours: Number.isFinite(Number(oSource.estimatedEffortHours)) ? Number(oSource.estimatedEffortHours) : 0,
 				assigneeDisplayName: oSource.assigneeDisplayName || "",
 				currentActionOwnerDisplayName: oSource.currentActionOwnerDisplayName || "",
-				overdue: this._isWorkloadBugOverdue(oSource.dueDate, oSource.status_code),
+				overdue: this._isWorkloadBugOverdue(oSource.dueDate, oSource["status_code"]),
 				objectPageUrl: this._bugObjectPageUrl(sBugID)
 			};
 		},
@@ -1382,6 +1385,7 @@ sap.ui.define([
 			return sStatus !== "CLOSED" && /^\d{4}-\d{2}-\d{2}$/.test(sDate) && sDate < new Date().toISOString().slice(0, 10);
 		},
 
+		// Chỉ tạo relative same-origin link hợp lệ; domain và auth flow do AppRouter/Bug Management xử lý.
 		_bugObjectPageUrl: function (bugID) {
 			return /^[0-9a-f-]{36}$/i.test(String(bugID || ""))
 				? "/idtsbugmanagementui/index.html#/Bugs(ID=" + encodeURIComponent(bugID) + ",IsActiveEntity=true)"

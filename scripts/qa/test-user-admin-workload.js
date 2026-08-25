@@ -11,6 +11,7 @@ const manifest = JSON.parse(fs.readFileSync(path.join(webapp, 'manifest.json'), 
 const controllerSource = fs.readFileSync(path.join(webapp, 'controller/Main.controller.js'), 'utf8')
 const viewSource = fs.readFileSync(path.join(webapp, 'view/Main.view.xml'), 'utf8')
 const detailFragmentSource = fs.readFileSync(path.join(webapp, 'fragment/DeveloperWorkloadDetails.fragment.xml'), 'utf8')
+const formatterSource = fs.readFileSync(path.join(webapp, 'model/formatter.js'), 'utf8')
 
 const VALID_UUID = '20000000-0000-0000-0000-000000000001'
 const SECOND_UUID = '20000000-0000-0000-0000-000000000002'
@@ -37,6 +38,19 @@ assert.match(detailFragmentSource, /press="\.openBugInManagement"/)
 assert.match(detailFragmentSource, /workload>assigneeDisplayName/)
 assert.match(detailFragmentSource, /workload>currentActionOwnerDisplayName/)
 assert.match(detailFragmentSource, /class="sapUiSmallMargin"/)
+assert.doesNotMatch(detailFragmentSource, /description|comments|attachments|identityIssuer|identitySubject|providerCorrelation|audit/i)
+for (const locale of ['i18n.properties', 'i18n_en.properties', 'i18n_vi.properties']) {
+  const localeText = fs.readFileSync(path.join(webapp, 'i18n', locale), 'utf8')
+  for (const key of [
+    'developerWorkloadTab', 'developerWorkloadTabTooltip', 'developerWorkloadOwnershipNote',
+    'developerWorkloadSearchPlaceholder', 'refreshDeveloperWorkload', 'developerWorkloadLoadFailed',
+    'noDeveloperWorkloads', 'openLimit', 'needsDeveloperAction', 'overdue', 'estimatedEffort',
+    'developerActionUnit', 'hoursShort', 'overloadedText', 'overdueText', 'withinLimitText',
+    'viewWorkload', 'loadMoreDeveloperWorkloads', 'developerWorkloadDetailsTitle', 'openAssignedBugs',
+    'developerWorkloadDetailsNote', 'developerWorkloadBugsLoadFailed', 'noDeveloperWorkloadBugs',
+    'bugNumber', 'title', 'priority', 'severity', 'dueDate', 'technicalAssignee', 'currentActionOwner', 'openBug'
+  ]) assert.match(localeText, new RegExp(`^${key}=`, 'm'), `${key} must exist in ${locale}`)
+}
 
 assert.match(controllerSource, /getView\(\)\.getModel\("bugApi"\)/)
 assert.match(controllerSource, /bindList\("\/DeveloperWorkloads"/)
@@ -49,10 +63,11 @@ assert.match(controllerSource, /window\.location\.assign\(sUrl\)/)
 assert.doesNotMatch(controllerSource, /bugApi[\s\S]{0,800}\.(create|update|delete)\s*\(/i)
 assert.doesNotMatch(controllerSource, /description|comments|attachments|identityIssuer|identitySubject|providerCorrelation/i)
 
-function loadController (source) {
+function loadController (source, oWindow) {
   let definition
   const BaseController = { extend: (_name, value) => { definition = value; return { prototype: value } } }
   const sandbox = {
+    window: oWindow,
     sap: {
       ui: {
         define: (_dependencies, factory) => factory(
@@ -130,6 +145,41 @@ assert.equal(Object.hasOwn(normalizedBug, 'attachments'), false)
 assert.equal(controller._normalizeDeveloperWorkloadBug({ ...normalizedBug, dueDate: today }).overdue, false)
 assert.equal(controller._normalizeDeveloperWorkloadBug({ ...normalizedBug, status_code: 'CLOSED' }).overdue, false)
 assert.equal(controller._normalizeDeveloperWorkloadBug({ ...normalizedBug, ID: 'broken' }).objectPageUrl, null)
+
+function loadFormatter (source) {
+  let formatter
+  const vm = require('node:vm')
+  vm.runInNewContext(source, {
+    sap: {
+      ui: {
+        define: (_dependencies, factory) => {
+          formatter = factory({ getDateTimeInstance: () => ({ format: value => new Date(value).toISOString() }) })
+        }
+      }
+    }
+  }, { filename: 'formatter.js' })
+  return formatter
+}
+
+const formatter = loadFormatter(formatterSource)
+assert.equal(formatter.workloadOpenLimit(4, 3), '4 / 3')
+assert.equal(formatter.workloadOpenLimit('4', null), '4 / —')
+assert.equal(formatter.workloadState(true, 0, true), 'Error')
+assert.equal(formatter.workloadState(false, 1, true), 'Warning')
+assert.equal(formatter.workloadState(false, 0, true), 'Success')
+assert.equal(formatter.workloadState(false, 0, false), 'None')
+
+let navigatedUrl = null
+const navigationController = loadController(controllerSource, { location: { assign: url => { navigatedUrl = url } } })
+navigationController.openBugInManagement({
+  getSource: () => ({ getBindingContext: () => ({ getObject: () => ({ bugID: VALID_UUID }) }) })
+})
+assert.equal(navigatedUrl, `/idtsbugmanagementui/index.html#/Bugs(ID=${VALID_UUID},IsActiveEntity=true)`)
+navigatedUrl = null
+navigationController.openBugInManagement({
+  getSource: () => ({ getBindingContext: () => ({ getObject: () => ({ bugID: 'broken' }) }) })
+})
+assert.equal(navigatedUrl, null)
 
 function modelFor (data) {
   return {
