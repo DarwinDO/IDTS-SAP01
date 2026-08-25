@@ -8855,3 +8855,10 @@ Vietnamese:
 - Classification: transient tooling issue.
 - Symptom/root cause: a Node one-liner embedded in a PowerShell double-quoted command used a JavaScript template literal; PowerShell interpreted the backtick sequence before Node parsed it, so Node received an invalid backspace character and the upstream `gh pr view` pipe closed. The API update never ran.
 - Fix/status: use a PowerShell single-quoted, template-literal-free Node program and concatenate the `body=` argument explicitly. No PR body, source, platform, provider, user/role or data mutation resulted from the failed wrapper.
+
+### 2026-08-25 Gate 6.2 selective rollout and acceptance
+
+- Product PR `#343` and UI release-version PR `#344` merged to exact `dev` SHA `4469191ef939e4509e6f261b450257341fcc18d5`. User Administration advanced to `1.0.12` after focused RED/GREEN cache-identity verification.
+- Checksum-reviewed CAP ZIP `F77C3CBE...0510C` was rolled out through one upload, one stage, one owned set-droplet and one restart. A UTC timestamp parser issue stopped the first wrapper before staging; the unique READY package was read back and reused without a second upload. Final CAP is `1/1`.
+- Checksum-reviewed shared HTML5 MTAR `BCE31E1B...37EFF` deployed once and contains exactly Bug UI `0.0.5` plus User Admin UI `1.0.12`. No HDI/schema/migration/seed/AppRouter/binding/env/provider/user/role/email mutation occurred.
+- Edge initially retained the old cache-buster mapping while direct repository assets were already `1.0.12`. A tab-local cache-disabled reload loaded the new mapping; cache was restored immediately. PM acceptance then proved filtered-request-independent Active User actions, active-only Manage Responsibilities, disabled same-role Change Role, independent child-tab persistence and independently loading Developer/Business Catalog areas. No action mutation was submitted. Final `npm run btp:demo:check` is `DEMO READY`.
