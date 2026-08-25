@@ -41,8 +41,8 @@ assert.equal(appPackageLock.version, appPackage.version, 'HTML5 package and lock
 assert.equal(appPackageLock.packages[''].version, appPackage.version, 'HTML5 lockfile root version stays aligned')
 const [majorVersion, minorVersion, patchVersion] = appPackage.version.split('.').map(Number)
 assert.ok(
-  majorVersion > 1 || minorVersion > 0 || patchVersion >= 10,
-  'Developer responsibility administration content must advance beyond deployed UI 1.0.9'
+  majorVersion > 1 || minorVersion > 0 || patchVersion >= 12,
+  'Gate 6.2 content must advance beyond deployed UI 1.0.11'
 )
 assert.notEqual(appPackage.version, '1.0.0', 'changed HTML5 content must use a new application version')
 assert.match(appPackage.scripts.build, /ui5 build preload/)
