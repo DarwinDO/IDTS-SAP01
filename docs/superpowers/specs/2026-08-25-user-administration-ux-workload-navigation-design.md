@@ -3,7 +3,7 @@
 ## Status and authority
 
 - Design owner: DonHV.
-- Approved in chat: 2026-08-25.
+- Approved in chat: 2026-08-25; Gate 6.5 outbox amendment approved later the same day.
 - Planning baseline: `origin/dev` at `b2d56f95c65106b8e59583e4b8b0775d2c3588bf`.
 - Planning branch: `docs/wp8-user-admin-ux-architecture-donhv`.
 - This document authorizes implementation planning only. It does not authorize source changes, HANA/HDI changes, deployment, provider/user/role mutation, email delivery, merge, or release.
@@ -18,7 +18,7 @@ Finish the User Administration information architecture after Gates 1–6 by:
 4. adding safe navigation between Bug Management and User Administration; and
 5. notifying affected users after material access changes complete.
 
-The design reuses existing CAP, BugService workload, AppRouter, email outbox, and SAPUI5 patterns. It does not add a new database, workload snapshot table, router framework, Launchpad, message queue, or provider integration.
+The design reuses existing CAP, BugService workload, AppRouter, email transport, worker orchestration, and SAPUI5 patterns. It does not add a new database, workload snapshot table, router framework, Launchpad, message queue, provider integration, or separate email worker. Gate 6.5 adds one additive delivery table because the existing Bug and invitation delivery tables have incompatible lifecycle and uniqueness contracts.
 
 ## Current verified foundations
 
@@ -206,7 +206,38 @@ Workload Bug links use the exact Object Page deep-link shape above. No `returnTo
 
 ## Material access-change notifications
 
-Use the existing email outbox after a material access operation is verified and locally completed.
+### Domain storage with one delivery pipeline
+
+Keep three domain-owned delivery stores because their source contracts differ:
+
+```text
+Bug event          -> NotificationDeliveries
+Invitation event   -> UserOnboardingDeliveries
+Access audit event -> UserAccessNotificationDeliveries
+                           |
+                           v
+            one worker / transport / provider / retry policy
+```
+
+`NotificationDeliveries` requires a Bug notification. `UserOnboardingDeliveries` has one unique invitation delivery per onboarding request. Reusing either for repeatable access-change events would overwrite history, weaken foreign-key meaning, or require broad changes to the stable Bug email flow.
+
+Add `UserAccessNotificationDeliveries` with:
+
+- a required association to the append-only access audit event that caused the email;
+- recipient email snapshot;
+- allowlisted access event type;
+- template key and sanitized subject/text/HTML snapshots;
+- delivery status, attempt count, retry timestamps and provider message ID;
+- lock token/expiry and sanitized failure code/summary; and
+- a unique constraint on the source audit event so one business event cannot create duplicate email deliveries.
+
+Do not add a separate `UserAccessNotifications` intent entity. The existing append-only access audit event is the business intent and idempotency source.
+
+The existing scheduler entrypoint calls the Bug, invitation, and access delivery processors. They reuse one provider configuration, transport adapter, retry/backoff convention, error sanitizer and readiness calculation. Do not add another scheduler, service binding, credential, queue or provider.
+
+### Completion timing
+
+Create the access delivery in the same final local transaction that appends the successful access audit event, then schedule the existing post-commit worker kick.
 
 Send a safe notification for:
 
@@ -218,6 +249,12 @@ Send a safe notification for:
 Do not send success mail when an operation is only queued, when provider readback is pending, or when completion fails. The email contains the action, effective IDTS role/access state, safe timestamp, and relative application link. It contains no Role Collection inventory, identity tuple, provider response, token, endpoint, or credential.
 
 Responsibility-only availability/workload/scope edits write Audit and update UI but do not send email in this increment. This avoids notification spam. A later user-notification preference feature may revisit that decision.
+
+### Unified Operations presentation
+
+Operations -> Delivery remains one table. Add an allowlisted `deliveryType` with `INVITATION` and `ACCESS_CHANGE`, and one filter for All, Invitation and Access change. Normalize both tables into the same masked safe DTO. Do not create separate Invitation Delivery and Access Delivery tabs.
+
+Bug notification delivery remains in the Bug Management domain and is not added to User Administration in this increment. A future system-wide operations console would require a separate design.
 
 ## Related UX corrections and guardrails
 
@@ -268,8 +305,10 @@ Responsibility-only availability/workload/scope edits write Audit and update UI 
 
 ### Gate 6.5 — access-change email notifications
 
+- Add the additive `UserAccessNotificationDeliveries` table and exact generated HANA artifact review.
 - Queue emails only after verified completion of role change, suspend, reactivate, and revoke.
-- Reuse outbox, masking, retry, readiness, and Operations UI.
+- Reuse the existing worker entrypoint, transport, provider configuration, masking, retry policy and readiness approach.
+- Present Invitation and Access-change delivery rows in one normalized Operations table with a type filter.
 - Verify success/failure/duplicate/idempotency cases and ensure no responsibility-edit spam.
 
 Each gate requires a fresh `origin/dev` baseline after the previous gate merge, one isolated branch/worktree, focused TDD, exact source review, one Draft PR, separate rollout approval, manual role/browser acceptance, and safe worktree cleanup after merge.
@@ -287,7 +326,8 @@ Each gate requires a fresh `origin/dev` baseline after the previous gate merge, 
 - Open/Closed, assignee/current-action-owner, overdue, limit, overload, and effort edge cases.
 - Safe Bug deep-link generation.
 - `canAdministerUsers` positive/negative authorization matrix.
-- Email post-completion timing, idempotency, safe payload, failure/retry, and no responsibility-edit delivery.
+- Access-delivery audit-event uniqueness, post-completion timing, idempotency, safe payload, failure/retry, unified Operations projection, and no responsibility-edit delivery.
+- Additive HANA generation: exactly the new access-delivery table/index artifacts, zero destructive changes and no `.hdbtabledata`.
 - Secret/privacy scan, agent rules, QA-depth self-test, CAP EDMX/HANA compile, UI lint/build, and `git diff --check`.
 
 ### Manual acceptance
@@ -309,6 +349,7 @@ Each gate requires a fresh `origin/dev` baseline after the previous gate merge, 
 - Generic Launchpad/unified-shell replacement.
 - User-configurable email preferences.
 - Historical workload charts or exported reports.
+- A system-wide email operations console that combines Bug notifications with User Administration delivery rows.
 
 ## Success criteria
 

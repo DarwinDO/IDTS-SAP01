@@ -30,6 +30,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 - Gates 1–6 and the Gate 6.1 navigation/action-clarity follow-up are now present in refreshed `origin/dev` at planning baseline `b2d56f95c65106b8e59583e4b8b0775d2c3588bf`.
 - DonHV approved the post-Gate-6 design direction on 2026-08-25: isolate Developer and Business Catalog UI state, regroup the six top-level areas into five business-owned areas, reuse the existing read-only BugService workload model, add exact Bug drill-down and same-origin cross-app navigation, and add email only after material access changes complete.
 - The approved design is recorded in `docs/superpowers/specs/2026-08-25-user-administration-ux-workload-navigation-design.md`. It authorizes planning only; implementation, deployment, email delivery, provider/user/role/data mutation, merge and release remain separate decisions.
+- DonHV approved the Gate 6.5 outbox amendment: keep Bug, invitation and access-change delivery storage domain-specific while sharing one worker/transport/provider/retry pipeline and one User Administration Delivery view. Gate 6.5 therefore includes an additive access-delivery table and a separate HANA migration gate.
 
 ## Gate 6 source handoff
 
