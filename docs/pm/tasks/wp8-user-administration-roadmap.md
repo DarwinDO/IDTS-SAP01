@@ -67,8 +67,8 @@ The executor may complete source/tests/docs/evidence commits, push the exact bra
 - Executor branch: `fix/wp8-user-admin-navigation-action-ux-donhv`.
 - Source commit: `66bb31fa4824511204893c52d4e39377df2e8fff`; the final documentation/evidence commit and Draft PR readback remain coordinator handoff items.
 - Scope: UI-only replacement of invalid icons, native six-tab responsiveness, localized tab/action tooltips, and Change Role guidance. No backend, schema, dependency, lockfile, provider, user/role, data, deployment, merge, Ready, or cleanup mutation.
-- Focused UI contract, onboarding suite, app lint/build, secret scan, agent rules, QA-depth self-test, and diff checks pass. The unchanged operations/audit suite is blocked by its hard-coded baseline date fixture and is recorded in `docs/pm/evidence/user-administration/gate-6-1-navigation-action-clarity-source.md`.
-- Coordinator owns exact-head review, one Draft PR targeting `dev`, CI readback, and all later acceptance/release decisions.
+- Focused UI contract, onboarding suite, app lint/build, secret scan, agent rules, QA-depth self-test, Operations/Audit suite, and diff checks pass. The pre-existing hard-coded date-fixture issue was fixed test-only and merged separately through PR #341 before the Gate 6.1 branch refresh.
+- Coordinator exact-diff review found zero Critical/Major/Important/Minor. Draft PR #340 remains open for refreshed CI and later visual acceptance/release decisions.
 
 ## Bàn giao source Gate 6.1 — làm rõ navigation và action
 
@@ -76,5 +76,5 @@ The executor may complete source/tests/docs/evidence commits, push the exact bra
 - Branch executor: `fix/wp8-user-admin-navigation-action-ux-donhv`.
 - Source commit: `66bb31fa4824511204893c52d4e39377df2e8fff`; commit documentation/evidence cuối và readback Draft PR vẫn do coordinator handoff.
 - Scope: chỉ UI, gồm thay icon invalid, responsive native cho sáu tab, tooltip tab/action đã localize và hướng dẫn trong Change Role. Không mutation backend, schema, dependency, lockfile, provider, user/role, data, deploy, merge, Ready hoặc cleanup.
-- UI contract tập trung, onboarding suite, app lint/build, secret scan, agent rules, QA-depth self-test và diff check đều pass. Operations/audit suite không đổi đang bị block bởi fixture date hard-code baseline; đã ghi trong `docs/pm/evidence/user-administration/gate-6-1-navigation-action-clarity-source.md`.
-- Coordinator sở hữu exact-head review, một Draft PR target `dev`, CI readback và mọi quyết định acceptance/release sau đó.
+- UI contract tập trung, onboarding suite, app lint/build, secret scan, agent rules, QA-depth self-test, Operations/Audit suite và diff check đều pass. Lỗi fixture date hard-code có sẵn đã được fix test-only và merge riêng qua PR #341 trước khi refresh branch Gate 6.1.
+- Exact-diff review của coordinator có zero Critical/Major/Important/Minor. Draft PR #340 vẫn mở để chạy CI mới và thực hiện visual acceptance/release sau đó.

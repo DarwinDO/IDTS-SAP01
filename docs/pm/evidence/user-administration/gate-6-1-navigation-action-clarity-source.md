@@ -36,7 +36,7 @@
 | `npm run qa:agent-rules` | PASS; 8 required rules |
 | `npm run qa:depth:self-test` | PASS; 15/15 |
 | `git diff --check origin/dev` | Exit 0; only non-blocking Windows LF-to-CRLF checkout warnings |
-| `npm run qa:user-admin-operations:programmatic` | BLOCKED by unchanged baseline fixture date: line 385 expects hard-coded 2026-08-24 while CAP managed `auditEntry.createdAt` uses current 2026-08-25; same failure reproduced in isolation |
+| `npm run qa:user-admin-operations:programmatic` | PASS after the dedicated test-only fixture correction merged through PR #341; production UI/CAP behavior remains unchanged |
 
 ### Scope and mutation proof
 
@@ -48,7 +48,7 @@
 
 ### Handoff boundary
 
-This is a source candidate only. The coordinator must independently review the exact final head, decide how to disposition the pre-existing operations-suite blocker, create/read back exactly one Draft PR targeting `dev`, and keep the worktree. No runtime/browser acceptance, deployment, provider/data mutation, merge, Ready transition, or cleanup is claimed here.
+This is a source candidate only. The coordinator independently reviewed the product diff with zero findings. The pre-existing Operations/Audit date-fixture blocker was isolated, fixed test-only, verified, and merged separately through PR #341 before this branch was refreshed. PR #340 remains the one Gate 6.1 Draft PR. No runtime/browser acceptance, deployment, provider/data mutation, merge, Ready transition, or cleanup is claimed here.
 
 ## Tiếng Việt
 
@@ -86,7 +86,7 @@ This is a source candidate only. The coordinator must independently review the e
 | `npm run qa:agent-rules` | PASS; đủ 8 rule bắt buộc |
 | `npm run qa:depth:self-test` | PASS; 15/15 |
 | `git diff --check origin/dev` | Exit 0; chỉ có warning LF-to-CRLF của Windows, không block |
-| `npm run qa:user-admin-operations:programmatic` | BLOCKED bởi fixture date baseline không đổi: line 385 expect ngày cố định 2026-08-24 trong khi CAP managed `auditEntry.createdAt` dùng ngày hiện tại 2026-08-25; đã reproduce khi chạy riêng |
+| `npm run qa:user-admin-operations:programmatic` | PASS sau khi correction fixture test-only riêng được merge qua PR #341; không đổi behavior UI/CAP production |
 
 ### Proof scope và mutation
 
@@ -98,4 +98,4 @@ This is a source candidate only. The coordinator must independently review the e
 
 ### Boundary bàn giao
 
-Đây chỉ là source candidate. Coordinator phải tự review exact final head, quyết định disposition cho blocker operations-suite có sẵn, tạo/readback đúng một Draft PR target `dev` và giữ worktree. Không claim runtime/browser acceptance, deployment, mutation provider/data, merge, Ready hoặc cleanup.
+Đây chỉ là source candidate. Coordinator đã review độc lập product diff với zero findings. Blocker fixture date Operations/Audit có sẵn đã được tách riêng, fix test-only, verify và merge qua PR #341 trước khi refresh branch này. PR #340 vẫn là Draft PR duy nhất của Gate 6.1. Không claim runtime/browser acceptance, deployment, mutation provider/data, merge, Ready hoặc cleanup.

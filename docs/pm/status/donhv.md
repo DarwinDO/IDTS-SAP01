@@ -8749,3 +8749,35 @@ Vietnamese:
 - Root cause: `auditEntry()` omitted `createdAt`, so CAP supplied the execution date while the test intentionally filtered the fixed date `2026-08-24`.
 - Fix: the fixture now supplies an explicit deterministic `createdAt` inside the asserted day. Production CAP/UI behavior, schema, dependencies and lockfiles are unchanged.
 - Verification owner: DonHV coordinator. Focused RED was reproduced on `dev`; GREEN and Draft-PR evidence are recorded in the dedicated test-only branch.
+
+### 2026-08-25 Gate 6.1 refresh after deterministic fixture merge
+
+- Classification: source-gate integration/verification update.
+- PR #341 merged the test-only deterministic `createdAt` fixture as merge commit `63641a8505365427fad7bb1a640a8e2b350a9dd1`; its clean/reachable worktree and local/remote feature branch were removed without force.
+- Gate 6.1 branch merged refreshed `origin/dev`; the only conflict was append-only `docs/pm/status/donhv.md`, resolved by retaining both Gate 6.1 and fixture histories. Product UI files had no merge conflict.
+- The coordinator product review remains zero Critical/Major/Important/Minor. Full refreshed source matrix and PR #340 CI are the next evidence boundary; no deployment/runtime/provider/user/role/data/HANA/HDI mutation occurred.
+
+### 2026-08-25 Gate 6.1 dependency-target loss during refreshed verification
+
+- Classification: environment blocker outside the Gate 6.1 tracked diff.
+- Symptom: after refreshing PR #340, local UI/Operations/Onboarding/lint/build commands failed before assertions because the two existing worktree junctions no longer exposed `yaml`, `@sap/cds`, ESLint, or UI5. Readback found the junctions still registered but their `E:\IDTS-SAP01` dependency targets missing/empty.
+- Additional safety finding: `E:\IDTS-SAP01` currently reports many tracked `app/` files deleted. This task did not reset, restore, stage, commit, or otherwise alter those deletions because their ownership is outside Gate 6.1.
+- Status/owner: preserve the root checkout and search read-only for another exact locked dependency tree. If none exists, rely on refreshed GitHub CI and report local verification as environment-blocked. DonHV owns any separate recovery decision for `E:\IDTS-SAP01`.
+
+### 2026-08-25 Gate 6.1 dependency-tree scan wrapper
+
+- Classification: tooling issue, fixed before filesystem mutation.
+- Symptom: the first read-only PowerShell search for alternative `node_modules` trees failed at parse time with `An empty pipe element is not allowed`.
+- Root cause/fix: the pipeline followed a closed `foreach` block directly. Rerun with results collected in an explicit array; no file, Git, dependency, or platform state changed.
+
+### 2026-08-25 Gate 6.1 junction replacement command guard
+
+- Classification: tooling/safety-guard issue.
+- Symptom: one combined PowerShell command that validated, removed, recreated, and read back two broken junctions was rejected before execution by the command safety policy.
+- Fix/status: perform each already-validated junction removal and creation as separate explicit PowerShell commands, then read back both targets. The rejected command changed no filesystem, Git, dependency, or platform state.
+
+### 2026-08-25 Gate 6.1 refreshed source matrix — PASS
+
+- A read-only scan found an exact root lock match at `E:\IDTS-SAP01-worktrees\wp7-user-onboarding-donhv\node_modules`. The User Administration UI tree has identical normalized lock content; only its package version field predates the current UI source version. The two broken local junctions were replaced explicitly and read back; no install, upgrade, package declaration, or lockfile write ran.
+- Fresh PASS: User Administration UI contract, Operations/Audit, onboarding, secret scan, agent rules 8/8, QA-depth self-test 15/15, UI lint, UI build, PR-body parser 11 sections, and `git diff --check`.
+- The Operations/Audit blocker is CLOSED. Remaining boundary: push exact refreshed Gate 6.1 head, obtain GitHub CI, then perform separate runtime visual acceptance before merge/deployment decisions.
