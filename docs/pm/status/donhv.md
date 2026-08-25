@@ -8843,3 +8843,9 @@ Vietnamese:
 - Classification: transient tooling issue.
 - Symptom/root cause: the first read-only PowerShell ancestry wrapper embedded a command and `$LASTEXITCODE` inside one parenthesized expression, causing a parser error before any command executed.
 - Fix/status: split the ancestry checks into separate quote-safe commands; exact base/head and current `origin/dev` were then verified. No repository, PR, platform, provider, user/role or data mutation occurred.
+
+### 2026-08-25 Gate 6.2 PR-body newline repair
+
+- Classification: process/tooling issue during PR evidence refresh.
+- Symptom/root cause: capturing `gh pr view --jq .body` in a PowerShell variable converted the multiline body into an array; passing it back through `--raw-field` joined lines with spaces, so the published QA-depth parser temporarily reported all headings missing.
+- Fix/status: rebuilt the exact Markdown body in a task-owned file using the repository patch workflow, validated all 11 sections locally, updated PR #343 with `gh pr edit --body-file`, validated the published body through direct stdin, then removed the temporary file. Source, platform, provider, user/role, data, HANA/HDI, Jira and Drive state were unchanged.
