@@ -29,9 +29,12 @@
 					id="administrationTabs"
 					selectedKey="{view>/selectedTab}"
 					select=".onTabSelect"
-					expandable="false">
+					expandable="false"
+					headerMode="Inline"
+					tabDensityMode="Compact"
+					tabsOverflowMode="End">
 					<items>
-						<IconTabFilter key="requests" text="{i18n>accessRequestsTab}" icon="sap-icon://request">
+						<IconTabFilter key="requests" text="{i18n>accessRequestsTab}" icon="sap-icon://request" tooltip="{i18n>accessRequestsTabTooltip}">
 							<content>
 								<VBox>
 									<Toolbar>
@@ -77,18 +80,18 @@
 															press=".onApproveProvisioning"/>
 														<Button
 															icon="sap-icon://edit"
-															tooltip="{i18n>changeRole}"
+															tooltip="{i18n>changeRoleActionTooltip}"
 															visible="{= ${requests>status_code} === 'ACTIVE' }"
 															press=".onOpenRoleChange"/>
 														<Button
-															icon="sap-icon://skills"
-															tooltip="{i18n>manageResponsibilities}"
+															icon="sap-icon://action-settings"
+															tooltip="{i18n>manageResponsibilitiesActionTooltip}"
 															visible="{= ${requests>status_code} === 'ACTIVE' &amp;&amp; ${requests>requestedRole_code} === 'DEVELOPER' }"
 															press=".onOpenDeveloperProfile"/>
 														<Button
 															icon="sap-icon://decline"
 															type="Negative"
-															tooltip="{i18n>revokeAccess}"
+															tooltip="{i18n>revokeAccessActionTooltip}"
 															visible="{= ${requests>status_code} === 'ACTIVE' }"
 															press=".onOpenRevoke"/>
 														<Button
@@ -115,7 +118,7 @@
 								</VBox>
 							</content>
 						</IconTabFilter>
-						<IconTabFilter key="activeUsers" text="{i18n>activeUsersTab}" icon="sap-icon://employee">
+						<IconTabFilter key="activeUsers" text="{i18n>activeUsersTab}" icon="sap-icon://employee" tooltip="{i18n>activeUsersTabTooltip}">
 							<content>
 								<VBox>
 									<Toolbar>
@@ -224,7 +227,7 @@
 								</VBox>
 							</content>
 						</IconTabFilter>
-						<IconTabFilter key="developerResponsibilities" text="{i18n>developerResponsibilitiesTab}" icon="sap-icon://skills">
+						<IconTabFilter key="developerResponsibilities" text="{i18n>developerResponsibilitiesTab}" icon="sap-icon://activity-individual" tooltip="{i18n>developerResponsibilitiesTabTooltip}">
 							<content>
 								<VBox>
 									<MessageStrip
@@ -273,7 +276,7 @@
 								</VBox>
 							</content>
 						</IconTabFilter>
-						<IconTabFilter key="operations" text="{i18n>operationsTab}" icon="sap-icon://activity-items">
+						<IconTabFilter key="operations" text="{i18n>operationsTab}" icon="sap-icon://activity-items" tooltip="{i18n>operationsTabTooltip}">
 							<content>
 								<VBox>
 									<HBox justifyContent="SpaceBetween" wrap="Wrap" class="sapUiTinyMarginBottom">
@@ -382,7 +385,7 @@
 								</VBox>
 							</content>
 						</IconTabFilter>
-						<IconTabFilter key="audit" text="{i18n>auditTab}" icon="sap-icon://activity-2">
+						<IconTabFilter key="audit" text="{i18n>auditTab}" icon="sap-icon://activity-2" tooltip="{i18n>auditTabTooltip}">
 							<content>
 								<VBox>
 															<Toolbar>
@@ -434,7 +437,7 @@
 								</VBox>
 							</content>
 						</IconTabFilter>
-						<IconTabFilter key="businessCatalogs" text="{i18n>businessCatalogsTab}" icon="sap-icon://tags">
+						<IconTabFilter key="businessCatalogs" text="{i18n>businessCatalogsTab}" icon="sap-icon://tags" tooltip="{i18n>businessCatalogsTabTooltip}">
 							<content>
 								<VBox>
 									<IconTabBar id="catalogTypeTabs" selectedKey="{catalogs>/selectedType}" select=".onCatalogTypeChange" expandable="false" applyContentPadding="false">

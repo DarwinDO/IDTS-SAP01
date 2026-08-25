@@ -8581,6 +8581,167 @@ Vietnamese:
 - No artificial outage or ineligible retry was manufactured; no provider/email/user/role/data/schema/HANA/HDI mutation was used for acceptance. Gate 6 manual acceptance: PASS.
 - Bản rollout UI selective dùng đúng artifact checksum; không deploy CAP/HANA. Readiness, Delivery, Provisioning, Audit và layout detail đều được DonHV xác nhận runtime. Evidence raw không commit vì chứa host/user private; chỉ lưu size/hash/claim allowlist. Manual acceptance Gate 6: PASS.
 
+### 2026-08-25 Gate 6.1 PR-body evidence-format check / Lỗi format evidence PR body Gate 6.1
+
+- Classification: process/tooling issue.
+- Symptom: `node scripts/qa/check-pr-depth.js --body-file <absolute-path>` rejected the temporary Draft PR body because the Ownership Knowledge Gate evidence path was wrapped in Markdown backticks; the validator requires a plain `docs/learning/progress/` or `docs/pm/evidence/` token.
+- Fix/status: no repository/GitHub state changed. Correct only the temporary body format and rerun the validator; the referenced ownership evidence is valid.
+
+### 2026-08-25 Gate 6.1 PR-body evidence-format check / Lỗi format evidence PR body Gate 6.1
+
+- Phân loại: process/tooling issue.
+- Triệu chứng: `node scripts/qa/check-pr-depth.js --body-file <absolute-path>` reject Draft PR body tạm vì path evidence Ownership Knowledge Gate được bọc backtick Markdown; validator yêu cầu token plain `docs/learning/progress/` hoặc `docs/pm/evidence/`.
+- Fix/trạng thái: không đổi repository/GitHub. Chỉ sửa format body tạm và chạy lại validator; evidence ownership được dẫn là hợp lệ.
+
+### 2026-08-25 Gate 6.1 operations date-filter baseline blocker / Blocker baseline date-filter operations Gate 6.1
+
+- Classification: pre-existing test-harness issue.
+- Symptom: `npm run qa:user-admin-operations:programmatic` fails both in parallel and alone at `scripts/qa/test-user-admin-operations-audit.js:385` with `auditEventsByDate.length` equal to `0` instead of `2`.
+- Root cause: the unchanged `auditEntry` fixture does not provide `createdAt`; CAP managed timestamps use the current date (`2026-08-25`), while the unchanged assertion filters hard-coded `2026-08-24`. The handler normalizes date-only input correctly; `git diff --quiet origin/dev -- srv db package.json package-lock.json app/user-administration-ui/package.json app/user-administration-ui/package-lock.json` returned exit `0`.
+- Status/owner: known baseline test-harness blocker, not caused by Gate 6.1 UI files. Do not change backend or unrelated operations tests in this UI-only gate; coordinator should disposition or rerun with the appropriate baseline date before final acceptance.
+
+### 2026-08-25 Gate 6.1 operations date-filter baseline blocker / Blocker baseline date-filter operations Gate 6.1
+
+- Phân loại: test-harness issue có sẵn từ baseline.
+- Triệu chứng: `npm run qa:user-admin-operations:programmatic` fail cả khi chạy song song và chạy riêng tại `scripts/qa/test-user-admin-operations-audit.js:385`, `auditEventsByDate.length` là `0` thay vì `2`.
+- Nguyên nhân: fixture `auditEntry` không đổi không cung cấp `createdAt`; CAP managed timestamp dùng ngày hiện tại (`2026-08-25`), trong khi assertion không đổi filter ngày cố định `2026-08-24`. Handler normalize date-only đúng; `git diff --quiet origin/dev -- srv db package.json package-lock.json app/user-administration-ui/package.json app/user-administration-ui/package-lock.json` trả exit `0`.
+- Trạng thái/owner: blocker test-harness baseline đã biết, không do file UI Gate 6.1. Không sửa backend hoặc operations test ngoài scope trong gate UI-only; coordinator cần disposition hoặc chạy lại với baseline date phù hợp trước acceptance cuối.
+
+### 2026-08-25 Gate 6.1 parallel operations-suite failure / Lỗi suite operations khi chạy song song Gate 6.1
+
+- Classification: test-harness/environment issue under investigation.
+- Symptom: in the first parallel mandatory matrix, `npm run qa:user-admin-operations:programmatic` exited `1` at `test-user-admin-operations-audit.js:385` with `0 !== 2` after in-memory CAP bootstrap; the UI, onboarding, lint, and build commands passed.
+- Root cause: not established; the operation suite was run concurrently with the onboarding suite and the failure occurred in test data/result count, not in the changed UI files.
+- Status/owner: log immediately before rerun; run the operations suite alone against the same exact source. No product, schema, dependency, lockfile, platform, provider, user, role, Jira, or Drive state changed.
+
+### 2026-08-25 Gate 6.1 parallel operations-suite failure / Lỗi suite operations khi chạy song song Gate 6.1
+
+- Phân loại: test-harness/environment issue đang điều tra.
+- Triệu chứng: trong matrix bắt buộc chạy song song đầu tiên, `npm run qa:user-admin-operations:programmatic` exit `1` tại `test-user-admin-operations-audit.js:385` với `0 !== 2` sau CAP in-memory bootstrap; UI, onboarding, lint và build đều pass.
+- Nguyên nhân: chưa xác định; operations suite chạy đồng thời với onboarding suite và fail ở count test data/result, không nằm trong file UI đã sửa.
+- Trạng thái/owner: đã log ngay trước khi rerun; chạy riêng operations suite trên cùng source exact. Không đổi product, schema, dependency, lockfile, platform, provider, user, role, Jira hoặc Drive.
+
+### 2026-08-25 Gate 6.1 knowledge mirror patch context / Lỗi context patch knowledge mirror Gate 6.1
+
+- Classification: tooling/editing issue.
+- Symptom: the first combined `apply_patch` for Gate 6.1 knowledge mirrors was rejected because the existing default-locale mirror did not contain the assumed Vietnamese safe-editing paragraph. No file was changed by the rejected patch.
+- Root cause: the patch context was broader than the exact current file content.
+- Fix/status: stop and inspect tails, then apply smaller exact-context append patches. No product, dependency, lockfile, platform, provider, user, role, Jira, or Drive state changed.
+
+### 2026-08-25 Gate 6.1 knowledge mirror patch context / Lỗi context patch knowledge mirror Gate 6.1
+
+- Phân loại: tooling/editing issue.
+- Triệu chứng: `apply_patch` đầu tiên cho knowledge mirror Gate 6.1 bị reject vì mirror default-locale hiện tại không có đoạn Vietnamese safe-editing như context giả định. Patch bị reject không đổi file nào.
+- Nguyên nhân: context patch rộng hơn nội dung thực tế của file hiện tại.
+- Fix/trạng thái: dừng và inspect tail, sau đó append bằng các patch nhỏ bám context exact. Không đổi product, dependency, lockfile, platform, provider, user, role, Jira hoặc Drive.
+
+### 2026-08-25 Gate 6.1 action-attribute test matcher issue / Lỗi matcher attribute action Gate 6.1
+
+- Classification: test-harness issue.
+- Symptom: the focused contract reached the three row-action checks but the Revoke assertion expected `icon` immediately followed by `tooltip`; the approved existing `type="Negative"` attribute sits between them.
+- Root cause: the new test matcher assumed one attribute order and did not preserve the existing negative-button semantics.
+- Fix/status: update the test to inspect complete self-closing Button tags and assert icon/tooltip membership independently; no production or external state changed.
+
+### 2026-08-25 Gate 6.1 action-attribute test matcher issue / Lỗi matcher attribute action Gate 6.1
+
+- Phân loại: test-harness issue.
+- Triệu chứng: focused contract đã đến ba assertion action nhưng assertion Revoke giả định `icon` đứng ngay trước `tooltip`; attribute `type="Negative"` hiện có nằm giữa hai attribute đó.
+- Nguyên nhân: matcher mới giả định thứ tự attribute và chưa giữ rõ semantic negative button hiện tại.
+- Fix/trạng thái: sửa test để inspect toàn bộ Button self-closing và assert icon/tooltip độc lập; không đổi production hay external state.
+
+### 2026-08-25 Gate 6.1 test-harness attribute parse recurrence / Lặp lỗi parse attribute test Gate 6.1
+
+- Classification: test-harness issue.
+- Symptom: the corrected focused run stopped at the `requests` tab tooltip assertion because the helper again treated the `>` inside the i18n binding as the end of the XML opening tag.
+- Root cause: XML attributes contain binding expressions with literal angle brackets; a `[^>]*` tag matcher is insufficient for this view.
+- Fix/status: update only the test matcher to bind each expected tab key to its expected tooltip key across the full opening tag; no product or external state changed.
+
+### 2026-08-25 Gate 6.1 test-harness attribute parse recurrence / Lặp lỗi parse attribute test Gate 6.1
+
+- Phân loại: test-harness issue.
+- Triệu chứng: lần focused tiếp theo dừng ở assertion tooltip tab `requests` vì helper lại coi `>` trong binding i18n là kết thúc opening tag XML.
+- Nguyên nhân: XML attribute chứa binding có ký tự góc literal; matcher `[^>]*` không đủ cho view này.
+- Fix/trạng thái: chỉ cập nhật matcher test để bind từng tab key với tooltip key tương ứng xuyên qua opening tag đầy đủ; không đổi product hay external state.
+
+### 2026-08-25 Gate 6.1 test-harness binding parse issue / Lỗi parse binding trong test Gate 6.1
+
+- Classification: test-harness issue.
+- Symptom: the first post-GREEN-source run of `npm run qa:user-admin-ui:programmatic` stopped at the new `headerMode` assertion because the test sliced the XML opening tag at the `>` inside `{view>/selectedTab}`.
+- Root cause: the assertion helper used the first literal `>` rather than the complete `administrationTabs` opening tag.
+- Fix/status: test-only correction will match through the expected `tabsOverflowMode="End"` property; no product, dependency, lockfile, platform, provider, user, role, Jira, or Drive state changed. Rerun the focused suite afterward.
+
+### 2026-08-25 Gate 6.1 test-harness binding parse issue / Lỗi parse binding trong test Gate 6.1
+
+- Phân loại: test-harness issue.
+- Triệu chứng: lần chạy đầu sau khi source GREEN dừng tại assertion `headerMode` vì test cắt opening tag XML tại ký tự `>` bên trong `{view>/selectedTab}`.
+- Nguyên nhân: helper assertion dùng `>` literal đầu tiên thay vì toàn bộ opening tag `administrationTabs`.
+- Fix/trạng thái: chỉ sửa test để match qua property `tabsOverflowMode="End"`; không đổi product, dependency, lockfile, platform, provider, user, role, Jira hoặc Drive. Chạy lại focused suite sau đó.
+
+### 2026-08-25 Gate 6.1 UI clarity TDD RED / RED TDD làm rõ UI Gate 6.1
+
+- Classification: expected TDD RED / product UX contract gap.
+- Symptom: after locked dependency visibility was restored, `npm run qa:user-admin-ui:programmatic` exited `1` at the new assertion `skills is not a valid SAPUI5 icon for this UI`; the current view still contains two `sap-icon://skills` usages and lacks the new native tab properties/tooltips, action tooltip keys, hint copy, and locale parity.
+- Root cause: Gate 6.1 source changes have not been applied yet.
+- Status: expected RED captured before production UI changes. Next step is the minimal approved view/fragment/i18n implementation; no backend, schema, dependency, lockfile, platform, provider, user, role, Jira, or Drive state changed.
+
+### 2026-08-25 Gate 6.1 UI clarity TDD RED / RED TDD làm rõ UI Gate 6.1
+
+- Phân loại: RED TDD dự kiến / gap contract UX sản phẩm.
+- Triệu chứng: sau khi khôi phục locked dependency visibility, `npm run qa:user-admin-ui:programmatic` exit `1` tại assertion mới `skills is not a valid SAPUI5 icon for this UI`; view hiện tại vẫn có hai `sap-icon://skills` và thiếu property/tab tooltip native, action tooltip key, hint copy và parity locale mới.
+- Nguyên nhân: chưa áp dụng source change Gate 6.1.
+- Trạng thái: đã capture RED đúng trước khi sửa production UI. Bước tiếp theo là implementation tối thiểu đã duyệt; không đổi backend, schema, dependency, lockfile, platform, provider, user, role, Jira hoặc Drive.
+
+### 2026-08-25 Gate 6.1 focused RED dependency visibility / Thiếu dependency khi chạy RED Gate 6.1
+
+- Classification: environment/tooling blocker.
+- Symptom: the first `npm run qa:user-admin-ui:programmatic` exited `1` before the new assertions with `Error: Cannot find module 'yaml'` from `scripts/qa/test-user-admin-ui.js`.
+- Root cause: the isolated worktree has no visible root dependency tree; this is not a UI or test-contract failure.
+- Fix/status: no source, package version, dependency declaration, lockfile, platform, provider, user, role, Jira, or Drive state changed. Reuse only the exact locked dependency visibility already approved for this WP8 source gate, then rerun the same command to capture the intended RED.
+- Owner/evidence: current Gate 6.1 executor; dependency visibility remains local-only and untracked.
+
+### 2026-08-25 Gate 6.1 focused RED dependency visibility / Thiếu dependency khi chạy RED Gate 6.1
+
+- Phân loại: environment/tooling blocker.
+- Triệu chứng: lần chạy đầu `npm run qa:user-admin-ui:programmatic` exit `1` trước assertion mới với `Error: Cannot find module 'yaml'` từ `scripts/qa/test-user-admin-ui.js`.
+- Nguyên nhân: isolated worktree chưa có root dependency tree nhìn thấy; đây không phải lỗi UI hay test contract.
+- Fix/trạng thái: không đổi source, package version, dependency declaration, lockfile, platform, provider, user, role, Jira hoặc Drive. Chỉ dùng dependency visibility exact locked đã được duyệt cho source gate WP8 này, rồi chạy lại cùng command để capture RED đúng kỳ vọng.
+- Owner/evidence: Gate 6.1 executor hiện tại; dependency visibility chỉ local, không track Git.
+
+### 2026-08-25 Gate 6.1 OfficeCLI skill-path lookup / Lỗi tra cứu đường dẫn skill OfficeCLI Gate 6.1
+
+- Classification: tooling/process issue.
+- Symptom: a read-only check for `.agents/skills/officecli/SKILL.md` returned `Cannot find path`; the `officecli` executable remained available.
+- Root cause: this checkout does not contain that optional repo-local skill path; the required project preflight was already completed separately with `officecli --version` returning `1.0.144`.
+- Fix/status: no product, source, dependency, lockfile, platform, provider, user, role, Jira, or Drive state changed. Continue with the repository documentation rule and the installed local UI5/Fiori skills.
+- Evidence/owner: current Gate 6.1 executor; no remaining OfficeCLI blocker.
+
+### 2026-08-25 Gate 6.1 OfficeCLI skill-path lookup / Lỗi tra cứu đường dẫn skill OfficeCLI Gate 6.1
+
+- Phân loại: tooling/process issue.
+- Triệu chứng: kiểm tra read-only `.agents/skills/officecli/SKILL.md` trả `Cannot find path`; executable `officecli` vẫn có sẵn.
+- Nguyên nhân: checkout này không có optional repo-local skill path đó; preflight bắt buộc của project đã chạy riêng với `officecli --version` trả `1.0.144`.
+- Fix/trạng thái: không đổi product, source, dependency, lockfile, platform, provider, user, role, Jira hoặc Drive. Tiếp tục theo documentation rule của repo và skill UI5/Fiori local đã cài.
+- Evidence/owner: Gate 6.1 executor hiện tại; không còn blocker OfficeCLI.
+
+### 2026-08-25 Gate 6.1 Draft PR handoff / Bàn giao Draft PR Gate 6.1
+
+- Classification: source-gate handoff.
+- Exact source base: `3f3efc113a4ebd708d3f88a314941e51817eb843`; exact head: `3365277da785ca1f38694ebf402307cf19c9342a`; branch: `fix/wp8-user-admin-navigation-action-ux-donhv`.
+- Draft PR: `#340` — `https://github.com/DarwinDO/IDTS-SAP01/pull/340`, target `dev`, head readback exact, `isDraft=true`, state `OPEN`.
+- GitHub CI readback: `qa-depth-gate` PASS, run `32815525905`, job `97702872423`.
+- Local matrix: UI contract, onboarding, UI lint/build, secret scan, agent-rules, QA-depth self-test and exact diff/scope checks PASS. `qa:user-admin-operations:programmatic` remains the documented baseline date-fixture blocker at line 385 (`0 !== 2`); no unrelated fix was made.
+- Mutation ledger: no backend/schema/package/dependency/lockfile/controller/manifest/provider/user/role/data/HANA/HDI/Jira/Drive/deployment/merge/Ready mutation. Two exact locked dependency junctions remain local and untracked. No child agent was spawned; no UI5 MCP tool was callable.
+- Stop boundary: coordinator DonHV owns exact-head review, disposition of the baseline operations blocker, any browser/manual acceptance, Ready/merge, deployment, and worktree cleanup. Executor does not advance the Draft PR.
+
+### 2026-08-25 Gate 6.1 Draft PR handoff / Bàn giao Draft PR Gate 6.1
+
+- Phân loại: handoff source gate.
+- Base source exact: `3f3efc113a4ebd708d3f88a314941e51817eb843`; head exact: `3365277da785ca1f38694ebf402307cf19c9342a`; branch: `fix/wp8-user-admin-navigation-action-ux-donhv`.
+- Draft PR: `#340` — `https://github.com/DarwinDO/IDTS-SAP01/pull/340`, target `dev`, readback head khớp exact, `isDraft=true`, state `OPEN`.
+- CI GitHub readback: `qa-depth-gate` PASS, run `32815525905`, job `97702872423`.
+- Matrix local: UI contract, onboarding, UI lint/build, secret scan, agent-rules, QA-depth self-test và exact diff/scope đều PASS. `qa:user-admin-operations:programmatic` vẫn là blocker baseline date-fixture tại line 385 (`0 !== 2`); không sửa ngoài scope.
+- Mutation ledger: không mutation backend/schema/package/dependency/lockfile/controller/manifest/provider/user/role/data/HANA/HDI/Jira/Drive/deploy/merge/Ready. Hai dependency junction exact locked chỉ local và untracked. Không spawn child agent; UI5 MCP tool không callable.
+- Boundary dừng: coordinator DonHV sở hữu exact-head review, disposition blocker operations baseline, browser/manual acceptance, Ready/merge, deploy và cleanup worktree. Executor không advance Draft PR.
 ### 2026-08-25 Operations/Audit deterministic date fixture
 
 - Classification: test-harness issue discovered while independently reviewing Gate 6.1 PR #340.
@@ -8589,9 +8750,74 @@ Vietnamese:
 - Fix: the fixture now supplies an explicit deterministic `createdAt` inside the asserted day. Production CAP/UI behavior, schema, dependencies and lockfiles are unchanged.
 - Verification owner: DonHV coordinator. Focused RED was reproduced on `dev`; GREEN and Draft-PR evidence are recorded in the dedicated test-only branch.
 
+### 2026-08-25 Gate 6.1 refresh after deterministic fixture merge
+
+- Classification: source-gate integration/verification update.
+- PR #341 merged the test-only deterministic `createdAt` fixture as merge commit `63641a8505365427fad7bb1a640a8e2b350a9dd1`; its clean/reachable worktree and local/remote feature branch were removed without force.
+- Gate 6.1 branch merged refreshed `origin/dev`; the only conflict was append-only `docs/pm/status/donhv.md`, resolved by retaining both Gate 6.1 and fixture histories. Product UI files had no merge conflict.
+- The coordinator product review remains zero Critical/Major/Important/Minor. Full refreshed source matrix and PR #340 CI are the next evidence boundary; no deployment/runtime/provider/user/role/data/HANA/HDI mutation occurred.
+
+### 2026-08-25 Gate 6.1 dependency-target loss during refreshed verification
+
+- Classification: environment blocker outside the Gate 6.1 tracked diff.
+- Symptom: after refreshing PR #340, local UI/Operations/Onboarding/lint/build commands failed before assertions because the two existing worktree junctions no longer exposed `yaml`, `@sap/cds`, ESLint, or UI5. Readback found the junctions still registered but their `E:\IDTS-SAP01` dependency targets missing/empty.
+- Additional safety finding: `E:\IDTS-SAP01` currently reports many tracked `app/` files deleted. This task did not reset, restore, stage, commit, or otherwise alter those deletions because their ownership is outside Gate 6.1.
+- Status/owner: preserve the root checkout and search read-only for another exact locked dependency tree. If none exists, rely on refreshed GitHub CI and report local verification as environment-blocked. DonHV owns any separate recovery decision for `E:\IDTS-SAP01`.
+
+### 2026-08-25 Gate 6.1 dependency-tree scan wrapper
+
+- Classification: tooling issue, fixed before filesystem mutation.
+- Symptom: the first read-only PowerShell search for alternative `node_modules` trees failed at parse time with `An empty pipe element is not allowed`.
+- Root cause/fix: the pipeline followed a closed `foreach` block directly. Rerun with results collected in an explicit array; no file, Git, dependency, or platform state changed.
+
+### 2026-08-25 Gate 6.1 junction replacement command guard
+
+- Classification: tooling/safety-guard issue.
+- Symptom: one combined PowerShell command that validated, removed, recreated, and read back two broken junctions was rejected before execution by the command safety policy.
+- Fix/status: perform each already-validated junction removal and creation as separate explicit PowerShell commands, then read back both targets. The rejected command changed no filesystem, Git, dependency, or platform state.
+
+### 2026-08-25 Gate 6.1 refreshed source matrix — PASS
+
+- A read-only scan found an exact root lock match at `E:\IDTS-SAP01-worktrees\wp7-user-onboarding-donhv\node_modules`. The User Administration UI tree has identical normalized lock content; only its package version field predates the current UI source version. The two broken local junctions were replaced explicitly and read back; no install, upgrade, package declaration, or lockfile write ran.
+- Fresh PASS: User Administration UI contract, Operations/Audit, onboarding, secret scan, agent rules 8/8, QA-depth self-test 15/15, UI lint, UI build, PR-body parser 11 sections, and `git diff --check`.
+- The Operations/Audit blocker is CLOSED. Remaining boundary: push exact refreshed Gate 6.1 head, obtain GitHub CI, then perform separate runtime visual acceptance before merge/deployment decisions.
+
+### 2026-08-25 Gate 6.1 content-only build staging prerequisite
+
+- Classification: local build-staging issue; no artifact or platform mutation.
+- Symptom: the first strict `mbt build` stopped during descriptor validation because the ignored staging path `gen/user-admin-ui-r3c` did not exist.
+- Root cause/fix: `mta.user-admin-ui-r3c.yaml` declares that generated content-module path; create only the empty contained staging directory and rerun the exact build. The failed attempt did not reach module builds or create an MTAR.
+
+### 2026-08-25 Gate 6.1 artifact inspection regex
+
+- Classification: tooling issue after successful local build.
+- Symptom: the first `rg` command against the extracted User Administration ZIP failed to parse because PowerShell quoting truncated a grouped regex containing quoted XML attributes.
+- Fix/status: rerun with separate fixed-string patterns. Archive extraction, hashes, and file counts completed; the failed text search did not change the artifact, Git, or platform state.
+
+### 2026-08-25 root app deletion through dependency junctions — restored
+
+- Classification: destructive local tooling/process defect discovered outside the Gate 6.1 product diff.
+- Root cause: a disposable worktree still contained a root `node_modules` junction into `E:\IDTS-SAP01`; npm workspace junctions below that target pointed back to `E:\IDTS-SAP01\app\...`. `git worktree remove` followed the reparse-point chain and removed 100 tracked `app/` files from the primary checkout.
+- Recovery: restored only tracked `app/` content from the clean primary checkout HEAD, ran exact-lock `npm ci --ignore-scripts` without a lockfile change, and independently verified `TRACKED_APP_MISSING=0` plus a clean `E:\IDTS-SAP01` worktree.
+- Prevention boundary: never remove a worktree while any dependency junction exists. Detach junction objects non-recursively, prove their targets remain, then remove/prune. A separate process-rule PR will encode and test this guard; it is intentionally not mixed into the UI-only PR #340.
+
+### 2026-08-25 Gate 6.1 selective UI rollout and live acceptance — PASS
+
+- Exact source head `aa50cb28f6ae8beac99bde18b618dea70e91917c` produced content-only MTAR SHA-256 `78559942507E1D4EFC5E6DD991FAAAB33ABF56759D564117C3B045F72D7E393B` (302,398 bytes).
+- Deep inspection proved one application-content module, one existing HTML5 repository service, exactly two UI ZIPs, the approved icons/inline compact overflow contract, zero `sap-icon://skills`, and no backend/schema/HANA/XSUAA/credential payload.
+- One exact deployment completed with zero retries and no service deletion. Active MTA operations returned zero. The content-only operation did not retain a queryable MTA configuration record; direct authenticated browser readback and exact artifact hash are the runtime authority.
+- Browser readback proved all six full tabs/tooltips, the Developer and Manage Responsibilities icons, three distinct Developer actions, and the Change Role informational hint. The dialog was closed without submit.
+- Final readiness returned CAP/AppRouter `1/1`, health/ready `200`, protected anonymous API `401`, Web `200`, and `DEMO READY`. No CAP, AppRouter, HANA/HDI, schema, provider, email, user, role, catalog, business-data, Jira, Drive, merge or Ready mutation occurred.
+
 ### 2026-08-25 worktree junction removal safety guard
 
 - Classification: process/tooling hardening after the confirmed primary-checkout `app/` deletion incident.
 - TDD RED: `qa:agent-rules` failed because the canonical change-control rule did not require reparse-point inventory, non-recursive junction detachment, target survival proof, or a no-force boundary before `git worktree remove`.
 - Minimal fix: added one mandatory change-control bullet and four exact machine-enforced phrases in `scripts/qa/check-agent-rules.js`. No cleanup framework, dependency, application source, runtime, provider, user, role, HANA/HDI, Jira, or Drive mutation was added.
 - GREEN: `node scripts/qa/check-agent-rules.js` returned PASS (8 required rules); `git diff --check` exited zero. OfficeCLI preflight returned `1.0.144`; Markdown is outside OfficeCLI semantic editing, so the repository-native patch workflow was used.
+
+### 2026-08-25 Gate 6.1 post-guard refresh tooling note
+
+- Classification: transient command-wrapper issue during append-only conflict inspection.
+- Symptom: the first read-only PowerShell context printer used `$i:` inside an interpolated string and failed parsing before reading or writing repository content.
+- Fix: reran the same read-only inspection with the format operator, confirmed the only merge conflict was the append-only status tail, and retained both Gate 6.1 and junction-safety histories. No product, platform, provider, user, role, data, HANA/HDI, Jira, or Drive mutation resulted from the failed wrapper.
