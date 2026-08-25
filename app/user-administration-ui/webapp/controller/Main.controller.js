@@ -1287,7 +1287,12 @@ sap.ui.define([
 				if (iRequest !== this._developerWorkloadRequest) return;
 				const aExistingRows = bAppending ? oWorkloadModel.getProperty("/items") || [] : [];
 				const oExistingIDs = new Set(aExistingRows.map(oRow => oRow.developerProfileID));
-				const aNewRows = aRows.filter(oRow => oRow.developerProfileID && !oExistingIDs.has(oRow.developerProfileID));
+				const aNewRows = [];
+				for (const oRow of aRows) {
+					if (!oRow.developerProfileID || oExistingIDs.has(oRow.developerProfileID)) continue;
+					oExistingIDs.add(oRow.developerProfileID);
+					aNewRows.push(oRow);
+				}
 				oWorkloadModel.setProperty("/items", aExistingRows.concat(aNewRows));
 				oWorkloadModel.setProperty("/nextSkip", iSkip + aRows.length);
 				oWorkloadModel.setProperty("/hasMore", aRows.length === iPageSize);

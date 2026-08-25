@@ -215,6 +215,7 @@ async function verifyPagingAndReadContracts () {
           assert.equal(length, 100)
           return [
             { requestObject: async () => ({ ...normalized, developerProfileID: SECOND_UUID, developerName: 'Second', isOverloaded: false }) },
+            { requestObject: async () => ({ ...normalized, developerProfileID: SECOND_UUID, developerName: 'Duplicate second', isOverloaded: false }) },
             { requestObject: async () => ({ ...normalized, developerProfileID: VALID_UUID, developerName: 'Duplicate', isOverloaded: true }) }
           ]
         }
@@ -227,7 +228,7 @@ async function verifyPagingAndReadContracts () {
   })
   await workloadInstance._loadDeveloperWorkloads(undefined, true)
   assert.deepEqual(workloadData.items.map(row => row.developerName), ['First', 'Second'])
-  assert.equal(workloadData.nextSkip, 102)
+  assert.equal(workloadData.nextSkip, 103)
   assert.equal(workloadData.error, false)
   assert.equal(workloadBindingCalls[0].entitySet, '/DeveloperWorkloads')
   assert.equal(workloadBindingCalls[0].parameters.$orderby, 'isOverloaded desc,overdueOwnedBugCount desc,developerName asc,developerProfileID asc')
