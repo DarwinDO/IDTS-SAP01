@@ -121,6 +121,44 @@ sap.ui.define(["sap/ui/core/format/DateFormat"], function (DateFormat) {
 			return sValue ? `${sLabel || "Last successful reconciliation"}: ${oDateTimeFormat.format(new Date(sValue))}` : `${sLabel || "Last successful reconciliation"}: —`;
 		},
 
+		availabilityState: function (iCriticality) {
+			return ({ 1: "Error", 2: "Warning", 3: "Success" })[Number(iCriticality)] || "None";
+		},
+
+		workloadOpenLimit: function (iOpen, iLimit) {
+			const sOpen = Number.isFinite(Number(iOpen)) ? Number(iOpen) : 0;
+			const sLimit = iLimit === null || iLimit === undefined || iLimit === "" ? "—" : Number(iLimit);
+			return `${sOpen} / ${Number.isFinite(Number(sLimit)) ? Number(sLimit) : "—"}`;
+		},
+
+		workloadReadinessText: function (bReady, sReady, sNeedsAttention) {
+			return bReady === true ? sReady || "Ready" : sNeedsAttention || "Needs attention";
+		},
+
+		workloadReadinessState: function (bReady) {
+			return bReady === true ? "Success" : "Warning";
+		},
+
+		workloadCountState: function (iCount) {
+			return Number(iCount) > 0 ? "Warning" : "None";
+		},
+
+		workloadStateText: function (bOverloaded, iOverdue, sOverloaded, sOverdue, sWithinLimit) {
+			if (bOverloaded === true) return sOverloaded || "Overloaded";
+			if (Number(iOverdue) > 0) return sOverdue || "Overdue";
+			return sWithinLimit || "Within limit";
+		},
+
+		workloadState: function (bOverloaded, iOverdue, bActive) {
+			if (bOverloaded === true) return "Error";
+			if (Number(iOverdue) > 0) return "Warning";
+			return bActive === false ? "None" : "Success";
+		},
+
+		workloadDetailsTitle: function (sDeveloperName, sLabel) {
+			return sDeveloperName ? `${sLabel || "Developer workload"}: ${sDeveloperName}` : (sLabel || "Developer workload");
+		},
+
 		statusState: function (sStatus) {
 			return ({
 				ACTIVE: "Success",
