@@ -83,6 +83,7 @@ The executor may complete source/tests/docs/evidence commits, push the exact bra
 - Active User details uses a native wrapping action row so Change Role, Suspend/Reactivate and Revoke remain fully reachable at narrow dialog widths.
 - Manage Responsibilities is owned only by the Developer Responsibilities table and is not duplicated inside Active User details.
 - The source fix is UI-only and advances the HTML5 cache identity to `1.0.13`; selective content rollout and read-only visual acceptance remain separate release evidence.
+- PR `#346` merged and the checksum-reviewed `1.0.13` content-only MTAR was deployed once. Normal-viewport PM acceptance proved complete lifecycle actions without horizontal overflow, no duplicate details Manage action, and the retained outer Developer Manage action; no lifecycle mutation was submitted.
 
 ## Bàn giao source Gate 6.1 — làm rõ navigation và action
 
