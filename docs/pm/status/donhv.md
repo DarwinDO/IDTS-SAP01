@@ -8951,7 +8951,7 @@ Vietnamese:
 
 - Scope/owner: DonHV-authorized narrow server remediation on `srv/bug-service/monitoring.js`; no `srv/service.cds` change was required. Existing status-only log entries were preserved deliberately.
 - Root cause/fix: the handler previously aggregated every DeveloperWorkloads row before any actor check. It now resolves the active internal actor through `resolveRequestUser` (including existing XSUAA platform-role alignment), permits active PM all rows without `UserAdmin`, scopes active Developer profiles/Bugs and final rows to the actor `Users.ID`, then applies client search/filter/order/page/count only inside that scope. Non-PM/non-Developer and unresolved/inactive/misaligned callers fail closed with 403. Ordinary `BugService.Bugs` read behavior was not changed.
-- Verification: genuine TDD RED returned `39 PASS / 10 FAIL / 49 checks`; GREEN returned `49 PASS / 0 FAIL / 49 checks`. Focused bilingual knowledge mirror and Gate 6.3 evidence are updated. Exact-head independent re-review and the full post-remediation matrix remain open before push/Draft PR.
+- Verification: genuine TDD RED returned `39 PASS / 10 FAIL / 49 checks`; GREEN returned `49 PASS / 0 FAIL / 49 checks`. Focused bilingual knowledge mirror and Gate 6.3 evidence are updated. The full post-remediation matrix and final bounded exact-head re-review are now green; push/Draft PR remains the next boundary.
 - Mutation ledger: no db/schema/HANA/HDI, ordinary Bugs policy, dependency/lockfile, platform/provider/user/role/data/email/deployment/Jira/Drive, Gate 6.4, Ready, merge or cleanup mutation occurred.
 
 ### 2026-08-26 Gate 6.3 authorized diff-guard wrapper issue
@@ -8964,4 +8964,17 @@ Vietnamese:
 
 - Classification: delegation/tooling issue; the first post-remediation reviewer did not reach source review.
 - Symptom: the read-only reviewer returned the repository member-identity question instead of reviewing exact head `f9818168`; two queued identity responses did not produce findings within the bounded wait.
-- Fix/status: the unstarted reviewer will be closed and replaced once with the same exact-head read-only assignment, including `donhv` in the initial prompt. No source, dependency, runtime, external-state or second review-cycle mutation occurred.
+- Fix/status: the first unstarted reviewer was closed; one replacement exact-head read-only assignment was run with `donhv` in the initial prompt. No source, dependency, runtime, external-state or second product-review-cycle mutation occurred.
+
+### 2026-08-26 Gate 6.3 exact-head reviewer broad-scan limitation
+
+- Classification: delegation/tooling issue; closed by a narrow completion pass.
+- Symptom: the replacement reviewer verified the exact base/head and reported no concrete Critical/Major/Important bypass in the inspected workload files, but its broad Codex Security discovery was canceled before the final independent verdict could be sealed.
+- Status/owner: a narrow completion pass on the same exact head returned the final review below. Native broad Codex Security scan remains unavailable because TAC was not connected; no source, dependency, runtime or external-state mutation occurred.
+
+### 2026-08-26 Gate 6.3 final bounded exact-head re-review
+
+- Review head: `79150496f1af72441f1b0220f6dcbc7b66c39d5a`; base/merge-base: `d53f402ab92215e44d29da2e1d3da73a576fffd3`.
+- Result: `0 Critical / 0 Major / 0 Important / 0 Minor`; no concrete authorization bypass or regression found. Reviewer verified actor resolution, active identity/platform-role fail-closed behavior, PM all rows, Developer own-row scope before CQN search/filter/count/order/page, and the direct `service.js:147` caller.
+- Fresh reviewer checks: workload `49 PASS / 0 FAIL`, XSUAA auth `13/13`, UI workload/UI/Active Users/User Access PASS, CAP compile and `git diff --check` PASS. Limitation: no live XSUAA HTTP/browser runtime acceptance; focused programmatic platform-alignment evidence is present.
+- Handoff: GO for push and exactly one Draft PR after committing this status-only review closure. Stop before Ready, merge, rollout, deployment, cleanup or Gate 6.4.
