@@ -8722,3 +8722,23 @@ Vietnamese:
 - Nguyên nhân: checkout này không có optional repo-local skill path đó; preflight bắt buộc của project đã chạy riêng với `officecli --version` trả `1.0.144`.
 - Fix/trạng thái: không đổi product, source, dependency, lockfile, platform, provider, user, role, Jira hoặc Drive. Tiếp tục theo documentation rule của repo và skill UI5/Fiori local đã cài.
 - Evidence/owner: Gate 6.1 executor hiện tại; không còn blocker OfficeCLI.
+
+### 2026-08-25 Gate 6.1 Draft PR handoff / Bàn giao Draft PR Gate 6.1
+
+- Classification: source-gate handoff.
+- Exact source base: `3f3efc113a4ebd708d3f88a314941e51817eb843`; exact head: `3365277da785ca1f38694ebf402307cf19c9342a`; branch: `fix/wp8-user-admin-navigation-action-ux-donhv`.
+- Draft PR: `#340` — `https://github.com/DarwinDO/IDTS-SAP01/pull/340`, target `dev`, head readback exact, `isDraft=true`, state `OPEN`.
+- GitHub CI readback: `qa-depth-gate` PASS, run `32815525905`, job `97702872423`.
+- Local matrix: UI contract, onboarding, UI lint/build, secret scan, agent-rules, QA-depth self-test and exact diff/scope checks PASS. `qa:user-admin-operations:programmatic` remains the documented baseline date-fixture blocker at line 385 (`0 !== 2`); no unrelated fix was made.
+- Mutation ledger: no backend/schema/package/dependency/lockfile/controller/manifest/provider/user/role/data/HANA/HDI/Jira/Drive/deployment/merge/Ready mutation. Two exact locked dependency junctions remain local and untracked. No child agent was spawned; no UI5 MCP tool was callable.
+- Stop boundary: coordinator DonHV owns exact-head review, disposition of the baseline operations blocker, any browser/manual acceptance, Ready/merge, deployment, and worktree cleanup. Executor does not advance the Draft PR.
+
+### 2026-08-25 Gate 6.1 Draft PR handoff / Bàn giao Draft PR Gate 6.1
+
+- Phân loại: handoff source gate.
+- Base source exact: `3f3efc113a4ebd708d3f88a314941e51817eb843`; head exact: `3365277da785ca1f38694ebf402307cf19c9342a`; branch: `fix/wp8-user-admin-navigation-action-ux-donhv`.
+- Draft PR: `#340` — `https://github.com/DarwinDO/IDTS-SAP01/pull/340`, target `dev`, readback head khớp exact, `isDraft=true`, state `OPEN`.
+- CI GitHub readback: `qa-depth-gate` PASS, run `32815525905`, job `97702872423`.
+- Matrix local: UI contract, onboarding, UI lint/build, secret scan, agent-rules, QA-depth self-test và exact diff/scope đều PASS. `qa:user-admin-operations:programmatic` vẫn là blocker baseline date-fixture tại line 385 (`0 !== 2`); không sửa ngoài scope.
+- Mutation ledger: không mutation backend/schema/package/dependency/lockfile/controller/manifest/provider/user/role/data/HANA/HDI/Jira/Drive/deploy/merge/Ready. Hai dependency junction exact locked chỉ local và untracked. Không spawn child agent; UI5 MCP tool không callable.
+- Boundary dừng: coordinator DonHV sở hữu exact-head review, disposition blocker operations baseline, browser/manual acceptance, Ready/merge, deploy và cleanup worktree. Executor không advance Draft PR.
