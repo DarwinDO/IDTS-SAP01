@@ -33,3 +33,8 @@ Bundle tiếng Việt hiện có copy Gate 6.1 đã dịch cho cả sáu tooltip
 Keep the new keys in all three bundles with equivalent meaning. Do not replace business wording with raw technical terms or provider details.
 
 Giữ key mới trong cả ba bundle với ý nghĩa tương đương. Không thay wording nghiệp vụ bằng term kỹ thuật raw hoặc chi tiết provider.
+## Gate 6.2
+
+Vietnamese labels mirror Access, Developers and same-role validation without changing technical keys.
+
+Label tiếng Việt mirror Access, Developers và validation cùng role mà không đổi technical key.

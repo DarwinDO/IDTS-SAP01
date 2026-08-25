@@ -107,3 +107,12 @@ The main `administrationTabs` `IconTabBar` at `Main.view.xml:28-35` uses only na
 Keep these navigation properties, tooltip bindings, icon semantics, visibility expressions, and press handlers aligned. If a new top-level task is added, add a localized tooltip and a focused contract assertion; do not add CSS or move authorization into XML.
 
 Giữ đồng bộ các property navigation, binding tooltip, semantic icon, expression visibility và press handler. Nếu thêm task cấp cao mới, phải thêm tooltip đã localize và assertion contract tập trung; không thêm CSS hoặc chuyển authorization vào XML.
+## Gate 6.2 business-owned navigation / Navigation theo ownership Gate 6.2
+
+### English
+
+The top navigation is reduced to five business areas: Access, Developers, Operations, Business Catalogs and Audit. Access contains Requests and Active Users; Developers contains Responsibilities and reserves the same native child-tab boundary for the later Workload increment. Request rows expose only request-owned Approve, Retry, Reconcile and Cancel actions. Active User details owns Change Role, Suspend, Reactivate, Revoke and Developer responsibility maintenance.
+
+### Tiếng Việt
+
+Navigation cấp cao được gom thành năm khu vực nghiệp vụ: Access, Developers, Operations, Business Catalogs và Audit. Access chứa Requests và Active Users; Developers chứa Responsibilities và giữ boundary child tab native cho Workload ở increment sau. Dòng request chỉ hiện Approve, Retry, Reconcile và Cancel thuộc request. Active User details sở hữu Change Role, Suspend, Reactivate, Revoke và quản lý responsibility Developer.

@@ -39,3 +39,8 @@ Dialog impact là boundary xác nhận, không phải authorization engine hay d
 Keep impact responses count-only and keep dependency enforcement in CAP. Do not add raw Bug lists, user identities, provider details, or direct database controls to this fragment.
 
 Giữ impact response chỉ có count và giữ dependency enforcement ở CAP. Không thêm danh sách Bug raw, identity user, provider detail hoặc control database trực tiếp vào fragment.
+## Gate 6.2 isolated model / Model tách biệt Gate 6.2
+
+All impact bindings use `businessCatalogs`; Developer value-help loading cannot alter the selected impact row, reason or counts.
+
+Mọi binding impact dùng `businessCatalogs`; load value help Developer không thể đổi impact row, reason hoặc count đang chọn.

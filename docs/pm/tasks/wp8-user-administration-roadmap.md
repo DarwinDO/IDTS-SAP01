@@ -70,6 +70,14 @@ The executor may complete source/tests/docs/evidence commits, push the exact bra
 - Focused UI contract, onboarding suite, app lint/build, secret scan, agent rules, QA-depth self-test, Operations/Audit suite, and diff checks pass. The pre-existing hard-coded date-fixture issue was fixed test-only and merged separately through PR #341 before the Gate 6.1 branch refresh.
 - Coordinator exact-diff review found zero Critical/Major/Important/Minor. Draft PR #340 remains open for refreshed CI and later visual acceptance/release decisions.
 
+## Gate 6.2 source candidate — state and action ownership
+
+- Frozen base: `b2d56f95c65106b8e59583e4b8b0775d2c3588bf`.
+- Branch: `fix/wp8-user-admin-state-action-ownership-donhv`.
+- The implementation separates Developer value-help state from Business Catalog administration state, groups the UI into five business-owned areas, removes lifecycle/profile actions from Access Request rows and keeps them on Active Users/Developers.
+- Change Role collects a Developer profile only for a real non-Developer to Developer transition and rejects a same-role submit before any action request.
+- Scope remains UI/source-only. No CAP/schema/dependency/lockfile/platform/provider/user/role/data/deployment mutation is authorized by this candidate.
+
 ## Bàn giao source Gate 6.1 — làm rõ navigation và action
 
 - Base frozen: `3f3efc113a4ebd708d3f88a314941e51817eb843`.

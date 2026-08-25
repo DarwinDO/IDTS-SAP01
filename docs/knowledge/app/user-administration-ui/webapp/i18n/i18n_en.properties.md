@@ -65,3 +65,8 @@ Bundle English này mirror các key tooltip và hint đổi role của Gate 6.1 
 Keep the English and default key sets in parity, and keep the Vietnamese bundle present for the same new keys. Re-run the UI contract after any wording or key change.
 
 Giữ parity giữa bộ key English và default, đồng thời giữ các key mới tương ứng trong bundle tiếng Việt. Chạy lại UI contract tập trung sau mọi thay đổi wording hoặc key.
+## Gate 6.2
+
+English labels keep the five top-level areas and same-role validation explicit.
+
+Label tiếng Anh giữ rõ năm khu vực cấp cao và validation khi role không thay đổi.

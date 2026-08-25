@@ -139,3 +139,20 @@ Retry delivery chỉ gửi `deliveryID` và optimistic `modifiedAt`, sau success
 Keep CAP authorization, optimistic checks, and safe mapping out of the controller. Any new operation action needs a model, lazy-load path, disabled/busy state, safe error copy, reload behavior, and a UI contract test before it is exposed in XML.
 
 Giữ authorization CAP, optimistic check và safe mapping ở backend, không chuyển vào controller. Action operation mới phải có model, lazy-load path, busy/disabled state, error copy an toàn, reload behavior và UI contract test trước khi expose trong XML.
+## Gate 6.2 state and action ownership / State và ownership action Gate 6.2
+
+### English
+
+The controller owns two independent catalog models. `developerCatalogs` contains only availability, responsibility-level, SAP-module and Component Category value helps used by invitation, role-transition and responsibility forms. `businessCatalogs` contains only the selected administration catalog, complete rows, filters, edit state, impact and lookup rows. Loading or failing one model cannot overwrite the other.
+
+Top-level session state is now `access`, `developers`, `operations`, `businessCatalogs` or `audit`. Access and Developers retain their selected child tab separately. Lifecycle actions continue to use the existing CAP actions but are opened from Active User details; responsibility administration accepts either an Active User summary/detail row and always resolves the same server-owned user ID.
+
+Change Role starts with `currentRole === role` and no Developer profile read. A Developer profile is created only when the target changes from a non-Developer role to `DEVELOPER`; same-role confirmation is rejected before any OData action.
+
+### Tiếng Việt
+
+Controller sở hữu hai catalog model độc lập. `developerCatalogs` chỉ chứa value help availability, responsibility level, SAP module và Component Category cho invitation, chuyển role và form responsibility. `businessCatalogs` chỉ chứa catalog quản trị đang chọn, toàn bộ row, filter, edit state, impact và lookup. Load hoặc lỗi của model này không được ghi đè model kia.
+
+Session state cấp cao giờ chỉ là `access`, `developers`, `operations`, `businessCatalogs` hoặc `audit`; Access và Developers giữ child tab riêng. Action lifecycle vẫn gọi CAP action hiện có nhưng được mở từ Active User details. Manage Responsibilities nhận row summary/details và luôn dùng cùng user ID do server quản lý.
+
+Change Role khởi tạo `currentRole === role` và không đọc Developer profile. Profile chỉ được tạo khi chuyển thật từ role không phải Developer sang `DEVELOPER`; chọn lại cùng role bị chặn trước mọi OData action.
