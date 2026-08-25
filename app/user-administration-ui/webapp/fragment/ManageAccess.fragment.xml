@@ -27,19 +27,19 @@
 					<core:Item key="TESTER" text="{i18n>roleTester}"/>
 					<core:Item key="DEVELOPER" text="{i18n>roleDeveloper}"/>
 				</Select>
-				<VBox visible="{= ${access>/mode} === 'CHANGE_ROLE' &amp;&amp; ${access>/role} === 'DEVELOPER' }" class="sapUiSmallMarginTop">
+				<VBox visible="{= ${access>/mode} === 'CHANGE_ROLE' &amp;&amp; ${access>/currentRole} !== 'DEVELOPER' &amp;&amp; ${access>/role} === 'DEVELOPER' }" class="sapUiSmallMarginTop">
 					<Label text="{i18n>availability}" required="true"/>
-					<Select selectedKey="{access>/developerProfile/availabilityStatusCode}" items="{catalogs>/availabilityStatuses}">
-						<core:Item key="{catalogs>code}" text="{catalogs>name}"/>
+					<Select selectedKey="{access>/developerProfile/availabilityStatusCode}" items="{developerCatalogs>/availabilityStatuses}">
+						<core:Item key="{developerCatalogs>code}" text="{developerCatalogs>name}"/>
 					</Select>
 					<Label text="{i18n>workloadLimit}" required="true" class="sapUiSmallMarginTop"/>
 					<Input type="Number" min="1" value="{access>/developerProfile/workloadLimit}"/>
 					<List items="{access>/developerProfile/responsibilities}">
 						<CustomListItem>
 							<VBox>
-								<Select selectedKey="{access>componentCategoryID}" items="{catalogs>/componentCategories}"><core:Item key="{catalogs>ID}" text="{catalogs>label}"/></Select>
-								<Select forceSelection="false" selectedKey="{access>sapModuleID}" items="{catalogs>/sapModules}"><core:Item key="{catalogs>ID}" text="{catalogs>name}"/></Select>
-								<Select selectedKey="{access>responsibilityLevelCode}" items="{catalogs>/responsibilityLevels}"><core:Item key="{catalogs>code}" text="{catalogs>name}"/></Select>
+								<Select selectedKey="{access>componentCategoryID}" items="{developerCatalogs>/componentCategories}"><core:Item key="{developerCatalogs>ID}" text="{developerCatalogs>label}"/></Select>
+								<Select forceSelection="false" selectedKey="{access>sapModuleID}" items="{developerCatalogs>/sapModules}"><core:Item key="{developerCatalogs>ID}" text="{developerCatalogs>name}"/></Select>
+								<Select selectedKey="{access>responsibilityLevelCode}" items="{developerCatalogs>/responsibilityLevels}"><core:Item key="{developerCatalogs>code}" text="{developerCatalogs>name}"/></Select>
 								<Button text="{i18n>removeResponsibility}" type="Transparent" press=".onRemoveAccessResponsibility"/>
 							</VBox>
 						</CustomListItem>
@@ -66,7 +66,7 @@
 			<Button
 				text="{access>/confirmText}"
 				type="{= ${access>/mode} === 'REVOKE' ? 'Negative' : 'Emphasized' }"
-				enabled="{= !!${access>/reason} &amp;&amp; !${access>/submitting} }"
+				enabled="{= !!${access>/reason} &amp;&amp; !${access>/submitting} &amp;&amp; (${access>/mode} !== 'CHANGE_ROLE' || (${access>/currentRole} !== ${access>/role} &amp;&amp; (${access>/role} !== 'DEVELOPER' || (!!${access>/developerProfile} &amp;&amp; ${access>/developerProfile/responsibilities}.length > 0)))) }"
 				press=".onConfirmAccessChange"/>
 		</beginButton>
 		<endButton>

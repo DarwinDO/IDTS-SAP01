@@ -5,16 +5,16 @@
 				<MessageStrip text="{= ${i18n>openBugImpact} + ': ' + ${developer>/openBugImpactCount} }" type="Information" showIcon="true"/>
 				<MessageStrip text="{i18n>existingBugsKeepAssignee}" type="Information" showIcon="true" class="sapUiTinyMarginTop"/>
 				<Label text="{i18n>availability}" required="true" class="sapUiSmallMarginTop"/>
-				<Select selectedKey="{developer>/developerProfile/availabilityStatusCode}" items="{catalogs>/availabilityStatuses}"><core:Item key="{catalogs>code}" text="{catalogs>name}"/></Select>
+			<Select selectedKey="{developer>/developerProfile/availabilityStatusCode}" items="{developerCatalogs>/availabilityStatuses}"><core:Item key="{developerCatalogs>code}" text="{developerCatalogs>name}"/></Select>
 				<Label text="{i18n>workloadLimit}" required="true" class="sapUiSmallMarginTop"/>
 				<Input type="Number" min="1" value="{developer>/developerProfile/workloadLimit}"/>
 				<Title text="{i18n>developerResponsibilities}" level="H5" class="sapUiSmallMarginTop"/>
 				<List items="{developer>/developerProfile/responsibilities}" noDataText="{i18n>responsibilityRequired}">
 					<CustomListItem>
 						<VBox class="sapUiTinyMarginBottom">
-							<Select selectedKey="{developer>componentCategoryID}" items="{catalogs>/componentCategories}"><core:Item key="{catalogs>ID}" text="{catalogs>label}"/></Select>
-							<Select forceSelection="false" selectedKey="{developer>sapModuleID}" items="{catalogs>/sapModules}"><core:Item key="{catalogs>ID}" text="{catalogs>name}"/></Select>
-							<Select selectedKey="{developer>responsibilityLevelCode}" items="{catalogs>/responsibilityLevels}"><core:Item key="{catalogs>code}" text="{catalogs>name}"/></Select>
+						<Select selectedKey="{developer>componentCategoryID}" items="{developerCatalogs>/componentCategories}"><core:Item key="{developerCatalogs>ID}" text="{developerCatalogs>label}"/></Select>
+						<Select forceSelection="false" selectedKey="{developer>sapModuleID}" items="{developerCatalogs>/sapModules}"><core:Item key="{developerCatalogs>ID}" text="{developerCatalogs>name}"/></Select>
+						<Select selectedKey="{developer>responsibilityLevelCode}" items="{developerCatalogs>/responsibilityLevels}"><core:Item key="{developerCatalogs>code}" text="{developerCatalogs>name}"/></Select>
 							<Button text="{i18n>removeResponsibility}" type="Transparent" press=".onRemoveDeveloperResponsibility"/>
 						</VBox>
 					</CustomListItem>

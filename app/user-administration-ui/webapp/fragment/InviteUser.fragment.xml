@@ -31,8 +31,8 @@
 				</Select>
 				<VBox visible="{= ${invite>/role} === 'DEVELOPER' }" class="sapUiSmallMarginTop">
 					<Label text="{i18n>availability}" required="true"/>
-					<Select selectedKey="{invite>/developerProfile/availabilityStatusCode}" items="{catalogs>/availabilityStatuses}">
-						<core:Item key="{catalogs>code}" text="{catalogs>name}"/>
+			<Select selectedKey="{invite>/developerProfile/availabilityStatusCode}" items="{developerCatalogs>/availabilityStatuses}">
+				<core:Item key="{developerCatalogs>code}" text="{developerCatalogs>name}"/>
 					</Select>
 					<Label text="{i18n>workloadLimit}" required="true" class="sapUiSmallMarginTop"/>
 					<Input type="Number" min="1" value="{invite>/developerProfile/workloadLimit}" liveChange=".onInviteFieldChange"/>
@@ -40,14 +40,14 @@
 					<List items="{invite>/developerProfile/responsibilities}" noDataText="{i18n>responsibilityRequired}">
 						<CustomListItem>
 							<VBox class="sapUiTinyMarginBottom">
-								<Select width="100%" selectedKey="{invite>componentCategoryID}" items="{catalogs>/componentCategories}" change=".onInviteFieldChange">
-									<core:Item key="{catalogs>ID}" text="{catalogs>label}"/>
+					<Select width="100%" selectedKey="{invite>componentCategoryID}" items="{developerCatalogs>/componentCategories}" change=".onInviteFieldChange">
+						<core:Item key="{developerCatalogs>ID}" text="{developerCatalogs>label}"/>
 								</Select>
-								<Select width="100%" forceSelection="false" selectedKey="{invite>sapModuleID}" items="{catalogs>/sapModules}">
-									<core:Item key="{catalogs>ID}" text="{catalogs>name}"/>
+					<Select width="100%" forceSelection="false" selectedKey="{invite>sapModuleID}" items="{developerCatalogs>/sapModules}">
+						<core:Item key="{developerCatalogs>ID}" text="{developerCatalogs>name}"/>
 								</Select>
-								<Select width="100%" selectedKey="{invite>responsibilityLevelCode}" items="{catalogs>/responsibilityLevels}">
-									<core:Item key="{catalogs>code}" text="{catalogs>name}"/>
+					<Select width="100%" selectedKey="{invite>responsibilityLevelCode}" items="{developerCatalogs>/responsibilityLevels}">
+						<core:Item key="{developerCatalogs>code}" text="{developerCatalogs>name}"/>
 								</Select>
 								<Button text="{i18n>removeResponsibility}" type="Transparent" press=".onRemoveInviteResponsibility"/>
 							</VBox>

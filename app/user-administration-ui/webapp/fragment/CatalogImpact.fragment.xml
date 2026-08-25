@@ -1,16 +1,16 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-	<Dialog title="{i18n>catalogImpactTitle}" busy="{catalogs>/impact/submitting}" contentWidth="34rem">
+	<Dialog title="{i18n>catalogImpactTitle}" busy="{businessCatalogs>/impact/submitting}" contentWidth="34rem">
 		<content>
 			<VBox class="sapUiSmallMargin">
 				<MessageStrip text="{i18n>catalogDeactivationNotice}" type="Warning" showIcon="true"/>
-				<ObjectStatus title="{i18n>referencedBugs}" text="{catalogs>/impact/bugReferenceCount}"/>
-				<ObjectStatus title="{i18n>activeResponsibilities}" text="{catalogs>/impact/activeResponsibilityCount}"/>
-				<ObjectStatus title="{i18n>activeCatalogChildren}" text="{catalogs>/impact/activeChildReferenceCount}"/>
+			<ObjectStatus title="{i18n>referencedBugs}" text="{businessCatalogs>/impact/bugReferenceCount}"/>
+			<ObjectStatus title="{i18n>activeResponsibilities}" text="{businessCatalogs>/impact/activeResponsibilityCount}"/>
+			<ObjectStatus title="{i18n>activeCatalogChildren}" text="{businessCatalogs>/impact/activeChildReferenceCount}"/>
 				<Label text="{i18n>catalogReason}" required="true"/>
-				<TextArea value="{catalogs>/impact/reason}" rows="3" maxLength="500" valueLiveUpdate="true"/>
+			<TextArea value="{businessCatalogs>/impact/reason}" rows="3" maxLength="500" valueLiveUpdate="true"/>
 			</VBox>
 		</content>
-		<beginButton><Button text="{i18n>confirmCatalogDeactivation}" type="Negative" enabled="{= !!${catalogs>/impact/reason} &amp;&amp; !${catalogs>/impact/submitting} }" press=".onConfirmCatalogDeactivation"/></beginButton>
+		<beginButton><Button text="{i18n>confirmCatalogDeactivation}" type="Negative" enabled="{= !!${businessCatalogs>/impact/reason} &amp;&amp; !${businessCatalogs>/impact/submitting} }" press=".onConfirmCatalogDeactivation"/></beginButton>
 		<endButton><Button text="{i18n>cancel}" press=".onCancelCatalogImpact"/></endButton>
 	</Dialog>
 </core:FragmentDefinition>
