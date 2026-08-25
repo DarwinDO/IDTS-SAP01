@@ -1,0 +1,223 @@
+'use strict'
+
+const assert = require('node:assert/strict')
+const fs = require('node:fs')
+const path = require('node:path')
+
+const root = path.resolve(__dirname, '../..')
+const app = path.join(root, 'app/user-administration-ui')
+const webapp = path.join(app, 'webapp')
+const manifest = JSON.parse(fs.readFileSync(path.join(webapp, 'manifest.json'), 'utf8'))
+const controllerSource = fs.readFileSync(path.join(webapp, 'controller/Main.controller.js'), 'utf8')
+const viewSource = fs.readFileSync(path.join(webapp, 'view/Main.view.xml'), 'utf8')
+
+const VALID_UUID = '20000000-0000-0000-0000-000000000001'
+const SECOND_UUID = '20000000-0000-0000-0000-000000000002'
+
+assert.equal(manifest['sap.app'].dataSources.bugService?.uri, '/odata/v4/bug/')
+assert.equal(manifest['sap.app'].dataSources.bugService?.settings?.odataVersion, '4.0')
+assert.equal(manifest['sap.ui5'].models.bugApi?.dataSource, 'bugService')
+assert.equal(manifest['sap.ui5'].models.bugApi?.type, 'sap.ui.model.odata.v4.ODataModel')
+assert.equal(manifest['sap.ui5'].models.bugApi?.settings?.operationMode, 'Server')
+assert.equal(manifest['sap.ui5'].models.bugApi?.settings?.autoExpandSelect, true)
+assert.equal(manifest['sap.ui5'].models.bugApi?.settings?.earlyRequests, false)
+assert.equal(manifest['sap.ui5'].models.bugApi?.preload, false)
+
+const workloadIndex = viewSource.indexOf('key="developerWorkload"')
+const responsibilitiesIndex = viewSource.indexOf('key="developerResponsibilities"')
+assert.ok(workloadIndex >= 0 && responsibilitiesIndex > workloadIndex, 'Workload must precede Responsibilities')
+assert.match(viewSource, /items="\{workload>\/items\}"/)
+assert.match(viewSource, /press="\.onOpenDeveloperWorkload"/)
+assert.match(viewSource, /press="\.onDeveloperWorkloadSearch"/)
+assert.match(viewSource, /press="\.onRefreshDeveloperWorkload"/)
+assert.match(viewSource, /press="\.onLoadMoreDeveloperWorkload"/)
+assert.match(viewSource, /press="\.openBugInManagement"/)
+assert.match(viewSource, /workload>assigneeDisplayName/)
+assert.match(viewSource, /workload>currentActionOwnerDisplayName/)
+assert.doesNotMatch(viewSource, /workload>developerProfileID/)
+
+assert.match(controllerSource, /getView\(\)\.getModel\("bugApi"\)/)
+assert.match(controllerSource, /bindList\("\/DeveloperWorkloads"/)
+assert.match(controllerSource, /isOverloaded desc,overdueOwnedBugCount desc,developerName asc,developerProfileID asc/)
+assert.match(controllerSource, /bindList\("\/Bugs"/)
+assert.match(controllerSource, /status_code ne 'CLOSED'/)
+assert.match(controllerSource, /dueDate asc,bugNumber asc/)
+assert.match(controllerSource, /estimatedEffortHours,currentActionOwnerDisplayName/)
+assert.match(controllerSource, /window\.location\.assign\(sUrl\)/)
+assert.doesNotMatch(controllerSource, /bugApi[\s\S]{0,800}\.(create|update|delete)\s*\(/i)
+assert.doesNotMatch(controllerSource, /description|comments|attachments|identityIssuer|identitySubject|providerCorrelation/i)
+
+function loadController (source) {
+  let definition
+  const BaseController = { extend: (_name, value) => { definition = value; return { prototype: value } } }
+  const sandbox = {
+    sap: {
+      ui: {
+        define: (_dependencies, factory) => factory(
+          BaseController,
+          { load: async () => ({ open: () => {}, close: () => {} }) },
+          function JSONModel () {},
+          { error: () => {}, warning: () => {} },
+          { show: () => {} }
+        )
+      }
+    }
+  }
+  const vm = require('node:vm')
+  vm.runInNewContext(source, sandbox, { filename: 'Main.controller.js' })
+  return definition
+}
+
+const controller = loadController(controllerSource)
+assert.equal(typeof controller._loadDeveloperWorkloads, 'function')
+assert.equal(typeof controller._loadDeveloperWorkloadBugs, 'function')
+assert.equal(typeof controller._normalizeDeveloperWorkloadRow, 'function')
+assert.equal(typeof controller._normalizeDeveloperWorkloadBug, 'function')
+assert.equal(typeof controller._bugObjectPageUrl, 'function')
+assert.equal(typeof controller.openBugInManagement, 'function')
+
+assert.equal(controller._bugObjectPageUrl(VALID_UUID), `/idtsbugmanagementui/index.html#/Bugs(ID=${VALID_UUID},IsActiveEntity=true)`)
+assert.equal(controller._bugObjectPageUrl('not-a-uuid'), null)
+assert.equal(controller._bugObjectPageUrl(''), null)
+assert.equal(controller._bugObjectPageUrl(null), null)
+
+const normalized = controller._normalizeDeveloperWorkloadRow({
+  developerProfileID: VALID_UUID,
+  developerUserID: '10000000-0000-0000-0000-000000000001',
+  developerName: 'SangVN',
+  developerEmail: 'sang@example.invalid',
+  openOwnedBugCount: '4',
+  overdueOwnedBugCount: '2',
+  currentActionItemCount: '3',
+  workloadLimit: null,
+  estimatedEffortHoursTotal: '19.50',
+  isOverloaded: true,
+  active: true
+})
+assert.equal(normalized.openOwnedBugCount, 4)
+assert.equal(normalized.overdueOwnedBugCount, 2)
+assert.equal(normalized.currentActionItemCount, 3)
+assert.equal(normalized.estimatedEffortHoursTotal, 19.5)
+assert.equal(normalized.workloadLimit, null)
+assert.equal(normalized.accessReady, true)
+assert.equal(normalized.developerProfileID, VALID_UUID)
+assert.equal(normalized.developerUserID, '10000000-0000-0000-0000-000000000001')
+
+const today = new Date().toISOString().slice(0, 10)
+const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
+const normalizedBug = controller._normalizeDeveloperWorkloadBug({
+  ID: VALID_UUID,
+  bugNumber: 'BUG-0001',
+  title: 'Assigned workload check',
+  status_code: 'IN_PROGRESS',
+  priority_code: 'HIGH',
+  severity_code: 'MEDIUM',
+  dueDate: yesterday,
+  estimatedEffortHours: '2.50',
+  assigneeDisplayName: 'Technical Developer',
+  currentActionOwnerDisplayName: 'Current Action Owner'
+})
+assert.equal(normalizedBug.overdue, true)
+assert.equal(normalizedBug.estimatedEffortHours, 2.5)
+assert.equal(normalizedBug.assigneeDisplayName, 'Technical Developer')
+assert.equal(normalizedBug.currentActionOwnerDisplayName, 'Current Action Owner')
+assert.equal(normalizedBug.objectPageUrl, `/idtsbugmanagementui/index.html#/Bugs(ID=${VALID_UUID},IsActiveEntity=true)`)
+assert.equal(Object.hasOwn(normalizedBug, 'description'), false)
+assert.equal(Object.hasOwn(normalizedBug, 'comments'), false)
+assert.equal(Object.hasOwn(normalizedBug, 'attachments'), false)
+assert.equal(controller._normalizeDeveloperWorkloadBug({ ...normalizedBug, dueDate: today }).overdue, false)
+assert.equal(controller._normalizeDeveloperWorkloadBug({ ...normalizedBug, status_code: 'CLOSED' }).overdue, false)
+assert.equal(controller._normalizeDeveloperWorkloadBug({ ...normalizedBug, ID: 'broken' }).objectPageUrl, null)
+
+function modelFor (data) {
+  return {
+    getProperty: key => data[key.slice(1)],
+    setProperty: (key, value) => { data[key.slice(1)] = value },
+    setData: value => Object.assign(data, value)
+  }
+}
+
+async function verifyPagingAndReadContracts () {
+  const workloadData = {
+    items: [{ ...normalized, developerProfileID: VALID_UUID, developerName: 'First' }],
+    query: '',
+    nextSkip: 100,
+    pageSize: 100,
+    hasMore: true,
+    loaded: true,
+    busy: false,
+    error: false,
+    selectedDeveloper: null,
+    bugs: [],
+    bugsBusy: false,
+    bugsError: false
+  }
+  const workloadModel = modelFor(workloadData)
+  const workloadBindingCalls = []
+  const workloadApi = {
+    bindList: (entitySet, _context, _sorters, _filters, parameters) => {
+      workloadBindingCalls.push({ entitySet, parameters })
+      return {
+        requestContexts: async (skip, length) => {
+          assert.equal(skip, 100)
+          assert.equal(length, 100)
+          return [
+            { requestObject: async () => ({ ...normalized, developerProfileID: SECOND_UUID, developerName: 'Second', isOverloaded: false }) },
+            { requestObject: async () => ({ ...normalized, developerProfileID: VALID_UUID, developerName: 'Duplicate', isOverloaded: true }) }
+          ]
+        }
+      }
+    }
+  }
+  const workloadInstance = Object.assign(Object.create(controller), {
+    getModel: name => name === 'workload' ? workloadModel : undefined,
+    getView: () => ({ getModel: name => name === 'bugApi' ? workloadApi : undefined })
+  })
+  await workloadInstance._loadDeveloperWorkloads(undefined, true)
+  assert.deepEqual(workloadData.items.map(row => row.developerName), ['First', 'Second'])
+  assert.equal(workloadData.nextSkip, 102)
+  assert.equal(workloadData.error, false)
+  assert.equal(workloadBindingCalls[0].entitySet, '/DeveloperWorkloads')
+  assert.equal(workloadBindingCalls[0].parameters.$orderby, 'isOverloaded desc,overdueOwnedBugCount desc,developerName asc,developerProfileID asc')
+  assert.equal(workloadBindingCalls[0].parameters.$top, undefined)
+
+  const bugData = { ...workloadData, selectedDeveloper: { developerProfileID: VALID_UUID }, bugs: [], bugsBusy: false, bugsError: false }
+  const bugModel = modelFor(bugData)
+  const bugBindingCalls = []
+  const bugApi = {
+    bindList: (entitySet, _context, _sorters, _filters, parameters) => {
+      bugBindingCalls.push({ entitySet, parameters })
+      return {
+        requestContexts: async (skip, length) => {
+          assert.equal(skip, 0)
+          assert.equal(length, 100)
+          return [
+            { requestObject: async () => ({ ...normalizedBug, ID: VALID_UUID }) },
+            { requestObject: async () => ({ ...normalizedBug, ID: SECOND_UUID, status_code: 'CLOSED' }) }
+          ]
+        }
+      }
+    }
+  }
+  const bugInstance = Object.assign(Object.create(controller), {
+    getModel: name => name === 'workload' ? bugModel : undefined,
+    getView: () => ({ getModel: name => name === 'bugApi' ? bugApi : undefined })
+  })
+  await bugInstance._loadDeveloperWorkloadBugs(bugData.selectedDeveloper)
+  assert.equal(bugData.bugs.length, 1)
+  assert.equal(bugData.bugs[0].ID, VALID_UUID)
+  assert.equal(bugData.bugsBusy, false)
+  assert.equal(bugData.bugsError, false)
+  assert.equal(bugBindingCalls[0].entitySet, '/Bugs')
+  assert.equal(bugBindingCalls[0].parameters.$filter, `assignee_ID eq ${VALID_UUID} and status_code ne 'CLOSED'`)
+  assert.equal(bugBindingCalls[0].parameters.$orderby, 'dueDate asc,bugNumber asc')
+  assert.equal(bugBindingCalls[0].parameters.$select, 'ID,bugNumber,title,status_code,priority_code,severity_code,dueDate,estimatedEffortHours,assigneeDisplayName,currentActionOwnerDisplayName')
+  assert.equal(bugBindingCalls[0].parameters.$top, undefined)
+}
+
+verifyPagingAndReadContracts().then(() => {
+  console.log('IDTS User Administration Developer Workload contract: PASS')
+}).catch(error => {
+  console.error(error.stack || error)
+  process.exitCode = 1
+})
