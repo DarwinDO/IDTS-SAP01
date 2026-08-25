@@ -37,8 +37,15 @@
 - `qa:user-admin-active-users:programmatic`: PASS.
 - `qa:user-access:programmatic`: PASS.
 - User Administration UI lint/build: PASS.
-- No backend/schema/public CAP contract, dependency, package version, lockfile, MTA or XSUAA change.
+- No database schema, dependency, package version, lockfile, MTA or XSUAA change. The only CAP contract delta is the details-only safe `ActiveUserDetails.accessRequestVersion` optimistic token; summary rows and provider/identity internals remain unchanged.
 
 ## Claim boundary
 
 This is source-only evidence. It does not claim deployment, browser acceptance, runtime release, provider/user/role mutation, HANA/HDI mutation or email delivery.
+
+## Independent review and remediation status
+
+- **Finding — filtered-request action coupling**: the Active User lifecycle route previously depended on the filtered `requests>/items` model, so a user absent from the current request filter could lose its action token. The safe contract is a details-only `accessRequestVersion` from the server-selected request; the UI must build only a minimal optimistic snapshot from that DTO.
+- **Finding — Developer action visibility**: the Manage Responsibilities button could be rendered for a non-active Developer. Its view visibility must require `accessState === 'ACTIVE'`, while the Developer workspace and Active User details remain the ownership boundary.
+- **Finding — missing/stale mirrors**: `InviteUser.fragment.xml` had no knowledge mirror, and the Main view/controller/CDS/Active Users mirrors did not fully describe the independent catalog model, details-only version token, or ownership split; the old navigation block also described superseded request-row actions.
+- **Remediation state**: focused RED/GREEN remediation is implemented: Active User details obtains the selected request version from the server DTO, the Developer Manage action is active-only, and the stale/missing mirrors are corrected. Focused and full local source checks are green; the independent review remains **OPEN** until the exact remediated head is re-read.

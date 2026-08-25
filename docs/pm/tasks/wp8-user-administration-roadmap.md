@@ -76,7 +76,7 @@ The executor may complete source/tests/docs/evidence commits, push the exact bra
 - Branch: `fix/wp8-user-admin-state-action-ownership-donhv`.
 - The implementation separates Developer value-help state from Business Catalog administration state, groups the UI into five business-owned areas, removes lifecycle/profile actions from Access Request rows and keeps them on Active Users/Developers.
 - Change Role collects a Developer profile only for a real non-Developer to Developer transition and rejects a same-role submit before any action request.
-- Scope remains UI/source-only. No CAP/schema/dependency/lockfile/platform/provider/user/role/data/deployment mutation is authorized by this candidate.
+- Scope remains source-only. The independent review required one minimal safe CAP DTO addition, `ActiveUserDetails.accessRequestVersion`, so lifecycle actions use the server-selected request instead of the filtered Requests table. There is no database schema, dependency, lockfile, platform, provider, user/role, data or deployment mutation.
 
 ## Bàn giao source Gate 6.1 — làm rõ navigation và action
 

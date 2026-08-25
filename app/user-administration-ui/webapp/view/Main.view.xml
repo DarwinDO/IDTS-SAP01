@@ -259,7 +259,7 @@
 													<ObjectNumber number="{activeUsers>activeResponsibilityCount}"/>
 													<HBox justifyContent="End" renderType="Bare">
 														<Button text="{i18n>viewDetails}" type="Transparent" press=".onOpenActiveUserDetails"/>
-														<Button icon="sap-icon://action-settings" tooltip="{i18n>manageResponsibilitiesActionTooltip}" type="Transparent" press=".onOpenDeveloperProfile"/>
+												<Button icon="sap-icon://action-settings" tooltip="{i18n>manageResponsibilitiesActionTooltip}" type="Transparent" visible="{= ${activeUsers>accessState} === 'ACTIVE' }" press=".onOpenDeveloperProfile"/>
 													</HBox>
 												</cells>
 											</ColumnListItem>

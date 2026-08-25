@@ -170,10 +170,13 @@ assert.match(activeUserDetailsFragment, /press="\.onOpenActiveUserRevoke"/)
 assert.match(activeUserDetailsFragment, /linkEligible/)
 assert.match(activeUserDetailsFragment, /press="\.onOpenExistingIdentityLink"/)
 assert.match(activeUserDetailsFragment, /press="\.onOpenDeveloperProfile"/)
+assert.match(controller, /accessRequestVersion/, 'Active User details must build actions from the authoritative details DTO')
+assert.doesNotMatch(controller, /_requestForActiveUser/, 'Active User actions must not depend on the filtered Access Requests model')
 
 const developerResponsibilitiesTableStart = view.indexOf('id="developerResponsibilitiesTable"')
 const developerResponsibilitiesTable = view.slice(developerResponsibilitiesTableStart, view.indexOf('</Table>', developerResponsibilitiesTableStart))
 assert.match(developerResponsibilitiesTable, /press="\.onOpenDeveloperProfile"/)
+assert.match(developerResponsibilitiesTable, /visible="\{= \$\{activeUsers>accessState\} === 'ACTIVE' \}"/)
 
 for (const [fragmentName, firstLabel] of [
   ['DeliveryDetails.fragment.xml', 'recipient'],
@@ -599,6 +602,42 @@ async function verifyRuntimeBehavior () {
   assert.equal(activeUsersData.items.length, 2)
   assert.equal(activeUsersData.developerItems.length, 1)
   assert.equal(activeUsersData.loaded, true)
+
+  const detailsData = { details: null, detailsBusy: false }
+  const detailsModel = {
+    getProperty: key => detailsData[key.slice(1)],
+    setProperty: (key, value) => { detailsData[key.slice(1)] = value }
+  }
+  const detailsOperation = {
+    setParameter: () => {},
+    invoke: async () => {},
+    getBoundContext: () => ({ requestObject: async () => ({
+      userID: 'active-2',
+      businessRole: 'TESTER',
+      userAdminCapability: false,
+      accessState: 'ACTIVE',
+      accessRequestVersion: 9
+    }) })
+  }
+  const detailsInstance = Object.assign(Object.create(controllerDefinition), {
+    getModel: name => {
+      if (name === 'activeUsers') return detailsModel
+      if (name === 'requests') return { getProperty: () => [{ activeUser_ID: 'filtered-out-user' }] }
+      throw new Error(`Unexpected details model ${name}`)
+    },
+    getView: () => ({ getModel: () => ({ bindContext: () => detailsOperation }) }),
+    _activeUserDetailsDialog: { open: () => {} }
+  })
+  await detailsInstance.onOpenActiveUserDetails({
+    getSource: () => ({ getBindingContext: name => name === 'activeUsers' ? { getObject: () => ({ userID: 'active-2' }) } : null })
+  })
+  assert.equal(JSON.stringify(detailsData.details._request), JSON.stringify({
+    activeUser_ID: 'active-2',
+    requestedRole_code: 'TESTER',
+    userAdminRequested: false,
+    provisioningVersion: 9
+  }), 'details lifecycle actions must not depend on the filtered Requests model')
+
   activeUsersData.hasMore = true
   activeUsersData.nextSkip = 2
   await activeInstance.onLoadMoreActiveUsers()

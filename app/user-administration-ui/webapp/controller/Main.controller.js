@@ -280,7 +280,12 @@ sap.ui.define([
 				}
 				oActiveUsersModel.setProperty("/details", oDetails ? {
 					...oDetails,
-					_request: this._requestForActiveUser(oRow.userID)
+					_request: Number.isInteger(oDetails.accessRequestVersion) ? {
+						["activeUser_ID"]: oDetails.userID,
+						["requestedRole_code"]: oDetails.businessRole,
+						userAdminRequested: oDetails.userAdminCapability === true,
+						provisioningVersion: oDetails.accessRequestVersion
+					} : null
 				} : null);
 				if (!this._activeUserDetailsDialog) {
 					this._activeUserDetailsDialog = await Fragment.load({
@@ -1137,10 +1142,6 @@ sap.ui.define([
 
 		_operationsRowFromEvent: function (oEvent, sModelName) {
 			return oEvent?.getSource?.().getBindingContext(sModelName)?.getObject?.() || null;
-		},
-
-		_requestForActiveUser: function (sUserID) {
-			return (this.getModel("requests")?.getProperty("/items") || []).find(oRow => oRow.activeUser_ID === sUserID) || null;
 		},
 
 		_ensureActiveUsersLoaded: function () {

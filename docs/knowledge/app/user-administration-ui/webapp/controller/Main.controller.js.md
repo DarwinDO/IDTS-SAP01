@@ -147,6 +147,10 @@ The controller owns two independent catalog models. `developerCatalogs` contains
 
 Top-level session state is now `access`, `developers`, `operations`, `businessCatalogs` or `audit`. Access and Developers retain their selected child tab separately. Lifecycle actions continue to use the existing CAP actions but are opened from Active User details; responsibility administration accepts either an Active User summary/detail row and always resolves the same server-owned user ID.
 
+`onOpenActiveUserDetails` invokes `readActiveUserDetails` and builds the lifecycle action snapshot only from the details DTO: an integer `accessRequestVersion`, `businessRole`, `userAdminCapability`, and the server-owned `userID`. It does not search `requests>/items` or depend on the current Access Requests filter. When the details DTO has no safe integer version, `_request` is null and the lifecycle handlers do not open an action. The resulting minimal snapshot carries only the optimistic token needed by CAP; it is not a copy of a request row and contains no provider or identity internals.
+
+`onOpenActiveUserRoleChange`, Suspend, Reactivate and Revoke are therefore opened from the Active User details state and pass that details-derived version to the existing CAP action. Manage Responsibilities is a separate Developer-owned path: the Developers table contains only Developer rows, the view requires `accessState === 'ACTIVE'`, and Active User details applies the same active-Developer visibility before `onOpenDeveloperProfile` reads the profile. The controller loads the independent `developerCatalogs` model before the profile dialog and never uses Business Catalog edit state as a value-help source.
+
 Change Role starts with `currentRole === role` and no Developer profile read. A Developer profile is created only when the target changes from a non-Developer role to `DEVELOPER`; same-role confirmation is rejected before any OData action.
 
 ### Tiếng Việt
@@ -154,5 +158,9 @@ Change Role starts with `currentRole === role` and no Developer profile read. A 
 Controller sở hữu hai catalog model độc lập. `developerCatalogs` chỉ chứa value help availability, responsibility level, SAP module và Component Category cho invitation, chuyển role và form responsibility. `businessCatalogs` chỉ chứa catalog quản trị đang chọn, toàn bộ row, filter, edit state, impact và lookup. Load hoặc lỗi của model này không được ghi đè model kia.
 
 Session state cấp cao giờ chỉ là `access`, `developers`, `operations`, `businessCatalogs` hoặc `audit`; Access và Developers giữ child tab riêng. Action lifecycle vẫn gọi CAP action hiện có nhưng được mở từ Active User details. Manage Responsibilities nhận row summary/details và luôn dùng cùng user ID do server quản lý.
+
+`onOpenActiveUserDetails` gọi `readActiveUserDetails` và chỉ dựng snapshot action lifecycle từ DTO details: `accessRequestVersion` là integer, `businessRole`, `userAdminCapability` và `userID` do server quản lý. Controller không tìm trong `requests>/items` và không phụ thuộc Access Requests đang filter thế nào. Nếu DTO details không có version integer an toàn, `_request` là null và lifecycle handler không mở action. Snapshot tối thiểu này chỉ giữ optimistic token cần cho CAP; nó không copy nguyên request row và không chứa identity/provider internals.
+
+Vì vậy `onOpenActiveUserRoleChange`, Suspend, Reactivate và Revoke đều mở từ state của Active User details và gửi version lấy từ details tới CAP action hiện có. Manage Responsibilities là path riêng thuộc Developer: table Developers chỉ chứa row Developer, view yêu cầu `accessState === 'ACTIVE'`, và Active User details cũng áp dụng visibility active-Developer tương tự trước khi gọi `onOpenDeveloperProfile`. Controller load model `developerCatalogs` độc lập trước dialog profile và không dùng edit state của Business Catalog làm value-help source.
 
 Change Role khởi tạo `currentRole === role` và không đọc Developer profile. Profile chỉ được tạo khi chuyển thật từ role không phải Developer sang `DEVELOPER`; chọn lại cùng role bị chặn trước mọi OData action.
