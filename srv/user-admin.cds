@@ -67,6 +67,7 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     lastReconciledAt              : Timestamp;
     requestCount                 : Integer;
     auditEventCount              : Integer;
+    accessRequestVersion         : Integer;
     developerProfileID           : UUID;
     developerAvailabilityStatus  : String(40);
     developerWorkloadLimit       : Integer;

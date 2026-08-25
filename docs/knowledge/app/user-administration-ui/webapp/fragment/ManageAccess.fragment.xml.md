@@ -43,3 +43,8 @@ Gate 6.1 thêm `MessageStrip` thông tin tại `ManageAccess.fragment.xml:15-20`
 ### Sửa an toàn
 
 Chỉ hiện strip thông tin khi Change Role, giữ nguyên handler và expression visibility hiện có, đồng thời không đưa chi tiết kỹ thuật/provider lên UI. Action access mới phải có contract test tập trung và text i18n an toàn trước khi expose trong XML.
+## Gate 6.2 real role-transition boundary / Boundary chuyển role thật Gate 6.2
+
+The Developer profile section is visible only when `currentRole` is not `DEVELOPER` and the selected target role is `DEVELOPER`. Existing Developers do not edit availability, workload or responsibilities through Change Role; they use Manage Responsibilities. Confirm remains disabled for the same role and for an incomplete transition-to-Developer profile.
+
+Phần Developer profile chỉ hiện khi `currentRole` không phải `DEVELOPER` và role đích là `DEVELOPER`. Developer hiện có không sửa availability, workload hoặc responsibilities qua Change Role mà dùng Manage Responsibilities. Confirm bị disable nếu role không đổi hoặc profile chuyển sang Developer chưa đầy đủ.

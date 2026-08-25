@@ -101,6 +101,11 @@
 						visible="{= !!${activeUsers>/details/_request} &amp;&amp; ${activeUsers>/details/accessState} === 'ACTIVE' }"
 						press=".onOpenActiveUserRoleChange"/>
 					<Button
+						text="{i18n>manageResponsibilities}"
+						icon="sap-icon://action-settings"
+						visible="{= !!${activeUsers>/details/_request} &amp;&amp; ${activeUsers>/details/accessState} === 'ACTIVE' &amp;&amp; ${activeUsers>/details/businessRole} === 'DEVELOPER' }"
+						press=".onOpenDeveloperProfile"/>
+					<Button
 						text="{i18n>suspendAccess}"
 						type="Negative"
 						visible="{= !!${activeUsers>/details/_request} &amp;&amp; ${activeUsers>/details/accessState} === 'ACTIVE' }"

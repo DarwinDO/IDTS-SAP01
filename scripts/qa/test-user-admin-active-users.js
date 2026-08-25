@@ -72,7 +72,7 @@ function requestEntry (ID, values) {
     tokenNonce: `${ID}-nonce`,
     tokenHash: `${ID}-hash`,
     correlationId: ID,
-    provisioningVersion: 1,
+    provisioningVersion: values.provisioningVersion ?? 1,
     activeUser_ID: values.activeUser_ID || null,
     linkTargetUser_ID: values.linkTargetUser_ID || null,
     identityKeyHash: values.identityKeyHash || null,
@@ -206,6 +206,7 @@ async function main () {
       identityKeyHash: ACTIVE_HASH,
       latestOperation_ID: ACTIVE_OPERATION_ID,
       status_code: 'ACTIVE',
+      provisioningVersion: 7,
       createdAt: '2026-08-19T08:00:00.000Z',
       modifiedAt: '2026-08-20T10:00:00.000Z'
     }),
@@ -507,6 +508,7 @@ async function main () {
   assert.equal(details.developerAvailabilityStatus, 'AVAILABLE')
   assert.equal(details.developerWorkloadLimit, 3)
   assert.equal(details.developerOpenBugImpactCount, 0)
+  assert.equal(details.accessRequestVersion, 7, 'details must carry the selected authoritative request version for lifecycle actions')
 
   for (const forbidden of [
     'identityOrigin',

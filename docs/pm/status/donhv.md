@@ -8821,3 +8821,37 @@ Vietnamese:
 - Classification: transient command-wrapper issue during append-only conflict inspection.
 - Symptom: the first read-only PowerShell context printer used `$i:` inside an interpolated string and failed parsing before reading or writing repository content.
 - Fix: reran the same read-only inspection with the format operator, confirmed the only merge conflict was the append-only status tail, and retained both Gate 6.1 and junction-safety histories. No product, platform, provider, user, role, data, HANA/HDI, Jira, or Drive mutation resulted from the failed wrapper.
+| 2026-08-25 | Gate 6.2 isolated baseline dependency blocker | The fresh source-only worktree and exact lockfile parity passed; the focused User Administration UI contract passed, while onboarding, Active Users and user-access runtime suites stopped before assertions because the locked shared `better-sqlite3` package has no Node 22 native binding materialized. | Created only two local NTFS dependency junctions after exact clean/lock/target checks. Read-only probes found compatible binaries only in older worktrees whose lockfiles differ, so they were rejected rather than reused. | Environment/tooling blocker only; no source, lockfile, install, rebuild, runtime, platform, provider, user/role, data, HANA/HDI, Jira or Drive mutation occurred. | Open pending setup decision. | UI contract PASS; runtime fixture errors consistently identify missing `better_sqlite3.node`; candidate binary ABI probe PASS but lock parity FAIL. | Either explicitly approve rebuilding the exact locked shared `better-sqlite3` binary, or continue Gate 6.2 with those CAP runtime suites truthfully blocked. |
+| 2026-08-25 | Gate 6.2 source implementation | DonHV approved rebuilding the exact locked `better-sqlite3` binary. Lock SHA stayed unchanged and all blocked SQLite fixtures became runnable. TDD then separated Developer/Business Catalog state, regrouped navigation by ownership, removed lifecycle actions from request rows and restricted Developer profile input to a true role transition. | Product source commit `d5e90b6`; RED contract commit `6d08833`; two local dependency junctions only. | No backend/schema/public CAP contract, dependency version, lockfile, platform, provider, user/role, data, email, HANA/HDI, Jira or Drive mutation. | Source implementation complete; final full verification/Draft PR pending. | Focused UI, onboarding, Active Users and user-access suites PASS; UI lint/build PASS. | Complete mirrors/evidence and exact source-gate verification, then open one Draft PR. |
+| 2026-08-25 | Gate 6.2 compile-log cleanup tooling note | The first exact-path PowerShell cleanup wrapper for two task-owned compile logs was rejected by the shell policy before execution. | Removed only `.gate62-edmx.log` and `.gate62-hana.log` through the repository patch tool and verified they were absent from Git status. | Tooling-only issue; no tracked source, dependency, platform, provider, user/role, data, HANA/HDI, Jira or Drive mutation. | Closed. | Exact file deletion and clean untracked-file readback. | Continue documentation commit and Draft PR handoff. |
+
+### 2026-08-25 Gate 6.2 independent review and mirror remediation / Review độc lập và remediation mirror Gate 6.2
+
+- Classification: open source-gate remediation; no final PASS claimed.
+- Findings: Active User lifecycle actions were coupled to the filtered Requests model; Manage Responsibilities could appear for a non-active Developer; `InviteUser` and the details/action ownership mirrors were missing or stale.
+- Remediation/status: details-only `accessRequestVersion`, active-only Manage visibility, and corrected bilingual mirrors/evidence were implemented with focused RED/GREEN checks. Final closure remains pending exact remediated-head review and CI readback.
+- Mutation ledger: this documentation pass changed only the listed knowledge/evidence/status files; no deployment, runtime, provider, user/role, data, HANA/HDI, Jira or Drive mutation occurred.
+
+### 2026-08-25 Gate 6.2 filtered-request test-harness note / Ghi chú harness filtered-request Gate 6.2
+
+- Classification: transient test-harness issue.
+- Symptom/root cause: a new regression used `deepStrictEqual` on an object returned by `vm.runInNewContext`; identical fields failed because the object had a different cross-realm prototype.
+- Fix/status: compare JSON/plain fields instead. This is a test adjustment only; no product behavior, platform, provider, user/role or data mutation occurred beyond that test change.
+
+### 2026-08-25 Gate 6.2 coordinator review wrapper note
+
+- Classification: transient tooling issue.
+- Symptom/root cause: the first read-only PowerShell ancestry wrapper embedded a command and `$LASTEXITCODE` inside one parenthesized expression, causing a parser error before any command executed.
+- Fix/status: split the ancestry checks into separate quote-safe commands; exact base/head and current `origin/dev` were then verified. No repository, PR, platform, provider, user/role or data mutation occurred.
+
+### 2026-08-25 Gate 6.2 PR-body newline repair
+
+- Classification: process/tooling issue during PR evidence refresh.
+- Symptom/root cause: capturing `gh pr view --jq .body` in a PowerShell variable converted the multiline body into an array; passing it back through `--raw-field` joined lines with spaces, so the published QA-depth parser temporarily reported all headings missing.
+- Fix/status: rebuilt the exact Markdown body in a task-owned file using the repository patch workflow, validated all 11 sections locally, updated PR #343 with `gh pr edit --body-file`, validated the published body through direct stdin, then removed the temporary file. Source, platform, provider, user/role, data, HANA/HDI, Jira and Drive state were unchanged.
+
+### 2026-08-25 Gate 6.2 PR-head refresh wrapper note
+
+- Classification: transient tooling issue.
+- Symptom/root cause: a Node one-liner embedded in a PowerShell double-quoted command used a JavaScript template literal; PowerShell interpreted the backtick sequence before Node parsed it, so Node received an invalid backspace character and the upstream `gh pr view` pipe closed. The API update never ran.
+- Fix/status: use a PowerShell single-quoted, template-literal-free Node program and concatenate the `body=` argument explicitly. No PR body, source, platform, provider, user/role or data mutation resulted from the failed wrapper.

@@ -126,3 +126,21 @@ Mỗi action nhận filter có giới hạn cùng `skip`/`top`; mặc định se
 Keep the DTO allow-list explicit. If persistence adds a column, do not add it to the action result by copying the entity; decide whether it is a safe business display field, add a red/green forbidden-field test, and update the bilingual UI mirror. Do not add schema indexes or public entity projections without measured evidence and a separate decision.
 
 Giữ allow-list DTO rõ ràng. Nếu persistence thêm column, không copy nguyên entity vào action result; phải quyết định đó có phải field business an toàn không, thêm test forbidden-field red/green và cập nhật mirror UI song ngữ. Không thêm index schema hoặc public entity projection khi chưa có evidence đo lường và decision riêng.
+
+## Gate 6.2 details-only lifecycle token / Optimistic token lifecycle chỉ ở details Gate 6.2
+
+### English
+
+`ActiveUserDetails.accessRequestVersion` is a details-only safe optimistic token. The server selects the authoritative current request while building the Active User read model, then maps only its integer `provisioningVersion` into this field. `ActiveUserSummary` does not expose the token, and the details result does not expose the selected request row, invitation payload, provider identifiers, identity claims, hashes, leases, or raw provider data.
+
+The UI may use the token as `expectedVersion` for `requestRoleChange`, `requestSuspend`, `requestReactivate`, or `requestRevoke`, but CAP remains authoritative for user ownership, state, authorization and conflict checks. If no selected request has a safe integer version, the details field is null and the UI must not invent a request token. This contract is additive and does not create a public request entity or a schema column.
+
+**Source anchors**: `srv/user-admin.cds:53-72` (`ActiveUserDetails`), `srv/user-admin.cds:223-257` (read/details and lifecycle actions), and `srv/user-admin/active-users.js:104-126,191-243,313-325` (allow-listed selection and details mapping).
+
+### Tiếng Việt
+
+`ActiveUserDetails.accessRequestVersion` là optimistic token an toàn chỉ có ở details. Server chọn request hiện tại có authority khi dựng read model Active User, rồi chỉ map `provisioningVersion` integer của request đó vào field này. `ActiveUserSummary` không expose token; response details cũng không expose nguyên request row, invitation payload, provider identifier, identity claim, hash, lease hoặc raw provider data.
+
+UI có thể dùng token làm `expectedVersion` cho `requestRoleChange`, `requestSuspend`, `requestReactivate` hoặc `requestRevoke`, nhưng CAP vẫn là authority cho user ownership, state, authorization và conflict check. Nếu không có request được chọn với version integer an toàn, field details là null và UI không được tự tạo request token. Contract này là additive, không tạo public request entity hay schema column.
+
+**Anchor nguồn**: `srv/user-admin.cds:53-72` (`ActiveUserDetails`), `srv/user-admin.cds:223-257` (action read/details và lifecycle) và `srv/user-admin/active-users.js:104-126,191-243,313-325` (selection allow-list và mapping details).
