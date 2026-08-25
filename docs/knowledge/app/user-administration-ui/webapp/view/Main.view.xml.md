@@ -71,3 +71,39 @@ Readiness strip bind `emailDeliveryState`, `provisioningBrokerState` và `lastSu
 Keep each tab bound to its own model and load only the selected operations subtab. Do not add raw persistence properties to XML bindings; add a safe DTO field and a contract test first. Keep technical support codes in controlled details, while table labels remain friendly and localized.
 
 Giữ mỗi tab bind vào model riêng và chỉ load subtab operations đang chọn. Không bind raw persistence property vào XML; phải thêm safe DTO field và contract test trước. Code support kỹ thuật chỉ được hiện ở details có kiểm soát, còn label table phải thân thiện và được localize.
+
+## Gate 6.1 navigation and action clarity / Làm rõ navigation và action Gate 6.1
+
+### English
+
+The main `administrationTabs` `IconTabBar` at `Main.view.xml:28-35` uses only native SAPUI5 responsiveness: `headerMode="Inline"`, `tabDensityMode="Compact"`, and `tabsOverflowMode="End"`. The six top-level tabs each have a localized tooltip at `Main.view.xml:37`, `121`, `230`, `279`, `390`, and `440`, so the full task meaning remains discoverable when labels are constrained. No custom CSS or new controller behavior is involved.
+
+- **Location**: `Main.view.xml:28-35`, `administrationTabs` properties.
+  **IDTS concept**: The User Administration task areas remain six explicit business workspaces while native IconTabBar overflow and compact density protect readability on narrower screens.
+  **Impact if broken**: Tab labels can become ambiguous or hard to scan, and the navigation can lose its native responsive behavior.
+  **Must check together**: `scripts/qa/test-user-admin-ui.js`, all six tab tooltip keys in the three locale bundles, and SAPUI5 lint/build.
+
+- **Location**: `Main.view.xml:82-96`, Access Requests row action buttons.
+  **IDTS concept**: `edit` remains Change Role, `action-settings` identifies Manage Developer availability and responsibilities, and `decline` remains Revoke; all existing visibility expressions and handlers stay unchanged.
+  **Impact if broken**: PM + UserAdmin may misread a row action or lose a safe route to the existing CAP-authorized action.
+  **Must check together**: `Main.controller.js` action handlers, the focused UI contract, and `ManageAccess.fragment.xml:15-20` informational guidance.
+
+### Tiếng Việt
+
+`IconTabBar` chính `administrationTabs` tại `Main.view.xml:28-35` chỉ dùng responsive native của SAPUI5: `headerMode="Inline"`, `tabDensityMode="Compact"` và `tabsOverflowMode="End"`. Sáu tab cấp cao đều có tooltip đã localize tại `Main.view.xml:37`, `121`, `230`, `279`, `390` và `440`, nên ý nghĩa task vẫn dễ khám phá khi label bị giới hạn không gian. Không có CSS custom hoặc behavior controller mới.
+
+- **Vị trí**: `Main.view.xml:28-35`, các property của `administrationTabs`.
+  **Khái niệm IDTS**: Sáu khu vực User Administration vẫn là sáu workspace nghiệp vụ rõ ràng; overflow và density native của IconTabBar giúp đọc được trên màn hình hẹp.
+  **Ảnh hưởng nếu sai**: Label tab có thể khó hiểu hoặc khó quét nhanh, và navigation có thể mất responsive native.
+  **Phải kiểm tra cùng**: `scripts/qa/test-user-admin-ui.js`, sáu key tooltip trong ba locale bundle và UI5 lint/build.
+
+- **Vị trí**: `Main.view.xml:82-96`, các button action trong dòng Access Requests.
+  **Khái niệm IDTS**: `edit` vẫn là Change Role, `action-settings` biểu thị Manage availability và responsibility của Developer, còn `decline` vẫn là Revoke; expression visibility và handler hiện có không đổi.
+  **Ảnh hưởng nếu sai**: PM + UserAdmin có thể hiểu nhầm action hoặc mất đường an toàn tới action do CAP kiểm soát quyền.
+  **Phải kiểm tra cùng**: handler trong `Main.controller.js`, UI contract tập trung và hướng dẫn tại `ManageAccess.fragment.xml:15-20`.
+
+### Safe editing / Sửa an toàn
+
+Keep these navigation properties, tooltip bindings, icon semantics, visibility expressions, and press handlers aligned. If a new top-level task is added, add a localized tooltip and a focused contract assertion; do not add CSS or move authorization into XML.
+
+Giữ đồng bộ các property navigation, binding tooltip, semantic icon, expression visibility và press handler. Nếu thêm task cấp cao mới, phải thêm tooltip đã localize và assertion contract tập trung; không thêm CSS hoặc chuyển authorization vào XML.

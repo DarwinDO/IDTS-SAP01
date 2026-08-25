@@ -60,3 +60,21 @@ Each gate records source tests, CAP/Fiori/UI5 MCP guidance, security review, art
 ## Gate 6 handoff boundary
 
 The executor may complete source/tests/docs/evidence commits, push the exact branch, open exactly one Draft PR, read back GitHub QA, and report the mutation ledger. The coordinator owns the independent exact-head review, selective rollout/manual acceptance, Ready/merge, and any provider/data/user/role/HANA/HDI/deployment action. Do not manufacture an outage or remove this worktree before coordinator feedback.
+
+## Gate 6.1 source handoff — navigation and action clarity
+
+- Frozen base: `3f3efc113a4ebd708d3f88a314941e51817eb843`.
+- Executor branch: `fix/wp8-user-admin-navigation-action-ux-donhv`.
+- Source commit: `66bb31fa4824511204893c52d4e39377df2e8fff`; the final documentation/evidence commit and Draft PR readback remain coordinator handoff items.
+- Scope: UI-only replacement of invalid icons, native six-tab responsiveness, localized tab/action tooltips, and Change Role guidance. No backend, schema, dependency, lockfile, provider, user/role, data, deployment, merge, Ready, or cleanup mutation.
+- Focused UI contract, onboarding suite, app lint/build, secret scan, agent rules, QA-depth self-test, and diff checks pass. The unchanged operations/audit suite is blocked by its hard-coded baseline date fixture and is recorded in `docs/pm/evidence/user-administration/gate-6-1-navigation-action-clarity-source.md`.
+- Coordinator owns exact-head review, one Draft PR targeting `dev`, CI readback, and all later acceptance/release decisions.
+
+## Bàn giao source Gate 6.1 — làm rõ navigation và action
+
+- Base frozen: `3f3efc113a4ebd708d3f88a314941e51817eb843`.
+- Branch executor: `fix/wp8-user-admin-navigation-action-ux-donhv`.
+- Source commit: `66bb31fa4824511204893c52d4e39377df2e8fff`; commit documentation/evidence cuối và readback Draft PR vẫn do coordinator handoff.
+- Scope: chỉ UI, gồm thay icon invalid, responsive native cho sáu tab, tooltip tab/action đã localize và hướng dẫn trong Change Role. Không mutation backend, schema, dependency, lockfile, provider, user/role, data, deploy, merge, Ready hoặc cleanup.
+- UI contract tập trung, onboarding suite, app lint/build, secret scan, agent rules, QA-depth self-test và diff check đều pass. Operations/audit suite không đổi đang bị block bởi fixture date hard-code baseline; đã ghi trong `docs/pm/evidence/user-administration/gate-6-1-navigation-action-clarity-source.md`.
+- Coordinator sở hữu exact-head review, một Draft PR target `dev`, CI readback và mọi quyết định acceptance/release sau đó.

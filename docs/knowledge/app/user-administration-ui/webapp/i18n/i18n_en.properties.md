@@ -41,3 +41,27 @@ Gate 4 thêm copy confirmation và impact cho thay đổi responsibility. Nội 
 Gate 5 keeps exact English parity for Business Catalog labels, impact counts, reasons, success messages, and safe failures. No technical or secret-bearing value is interpolated.
 
 Gate 5 giu parity English cho label Business Catalog, impact count, reason, success va safe failure. Khong interpolate gia tri ky thuat hoac secret.
+
+## Gate 6.1 navigation and action copy / Copy navigation và action Gate 6.1
+
+### English
+
+This English bundle mirrors the Gate 6.1 tooltip and change-role hint keys from `i18n.properties`: six top-level navigation tooltips, `changeRoleActionTooltip`, `manageResponsibilitiesActionTooltip`, `revokeAccessActionTooltip`, and `changeRoleResponsibilitiesHint`. The wording stays business-facing and avoids provider, endpoint, identity, and implementation details.
+
+- **IDTS concept**: English fallback and English selection must preserve the distinction between a business-role change and Developer availability/responsibility maintenance.
+  **Impact if broken**: A locale switch can make an icon-only row action unclear or remove the safe choice guidance from the role dialog.
+  **Must check together**: `i18n.properties`, `i18n_vi.properties`, `Main.view.xml:37,121,230,279,390,440`, and `ManageAccess.fragment.xml:15-20`.
+
+### Tiếng Việt
+
+Bundle English này mirror các key tooltip và hint đổi role của Gate 6.1 từ `i18n.properties`: sáu tooltip navigation cấp cao, `changeRoleActionTooltip`, `manageResponsibilitiesActionTooltip`, `revokeAccessActionTooltip` và `changeRoleResponsibilitiesHint`. Wording tập trung vào nghiệp vụ, không chứa provider, endpoint, identity hay chi tiết implementation.
+
+- **Khái niệm IDTS**: Fallback và lựa chọn locale English phải giữ rõ khác biệt giữa đổi business role với đổi availability/responsibility của Developer.
+  **Ảnh hưởng nếu sai**: Đổi locale có thể làm row action icon-only khó hiểu hoặc làm mất hướng dẫn lựa chọn an toàn trong dialog đổi role.
+  **Phải kiểm tra cùng**: `i18n.properties`, `i18n_vi.properties`, `Main.view.xml:37,121,230,279,390,440` và `ManageAccess.fragment.xml:15-20`.
+
+### Safe editing / Sửa an toàn
+
+Keep the English and default key sets in parity, and keep the Vietnamese bundle present for the same new keys. Re-run the UI contract after any wording or key change.
+
+Giữ parity giữa bộ key English và default, đồng thời giữ các key mới tương ứng trong bundle tiếng Việt. Chạy lại UI contract tập trung sau mọi thay đổi wording hoặc key.
