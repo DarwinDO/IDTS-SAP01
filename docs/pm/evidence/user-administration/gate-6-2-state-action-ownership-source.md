@@ -65,3 +65,13 @@ This is source-only evidence. It does not claim deployment, browser acceptance, 
 ## Final runtime verdict
 
 Gate 6.2 selective CAP/UI rollout and bounded read-only PM browser acceptance are **PASS** for the reviewed dev POC boundary. No lifecycle, role, responsibility, provider or business-data action was submitted during acceptance.
+
+## Dialog action-layout follow-up — 2026-08-25
+
+- Frozen base: `b885335099d68a579bd1904e0e6825205b4a3cb2` (`origin/dev` at task start).
+- Branch: `fix/wp8-gate62-dialog-actions-donhv`.
+- TDD reproduced two exact regressions: the non-wrapping Active User details toolbar clipped the final lifecycle action in a narrow dialog, and the details dialog duplicated Manage Responsibilities already owned by the Developer Responsibilities table.
+- The minimal UI fix uses one native wrapping `HBox`, native UI5 spacing classes, preserves Link Existing Identity plus Change Role/Suspend/Reactivate/Revoke handlers and visibility guards, and removes only the duplicate details Manage action. No controller, backend, authorization, schema or custom CSS changed.
+- User Administration cache identity advanced from deployed `1.0.12` to `1.0.13`; package, lockfile root and UI5 manifest versions remain equal.
+- Fresh source verification passed the User Administration UI, onboarding, Active Users, access lifecycle, Operations/Audit, user-access, broker and immutable-identity suites; secret scan, agent rules, QA Depth self-test, CAP EDMX/HANA compile, UI lint/build, XML parse and diff check also passed. CAP EDMX retains only the pre-existing attachment vocabulary warning.
+- Runtime/browser acceptance remains separate until the exact merged `1.0.13` HTML5 artifact is checksum-reviewed and selectively deployed. No lifecycle or responsibility mutation is required for that visual acceptance.

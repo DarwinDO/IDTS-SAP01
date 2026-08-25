@@ -91,7 +91,7 @@ The main `administrationTabs` `IconTabBar` at `Main.view.xml:28-35` has five par
 Active User details owns the lifecycle actions Change Role, Suspend, Reactivate and Revoke. The detail fragment gates those actions by the server-derived access state and Developer role; the request table does not duplicate them.
 
 - **Location**: `Main.view.xml:222-281`, Developers and the Responsibilities table.
-  **IDTS concept**: Manage Responsibilities is a Developer-owned action. The table is fed by Developer rows, and the Manage button is visible only when `activeUsers>accessState` is `ACTIVE`; Active User details supplies the same route for an active Developer.
+  **IDTS concept**: Manage Responsibilities is a Developer-owned action. The table is fed by Developer rows, and the Manage button is visible only when `activeUsers>accessState` is `ACTIVE`; Active User details does not duplicate this action.
   **Impact if broken**: A non-active Developer could be offered a profile mutation, or a non-Developer could receive a misleading responsibility action.
   **Must check together**: `ActiveUserDetails.fragment.xml`, `Main.controller.js:onOpenDeveloperProfile`, `ManageDeveloperProfile.fragment.xml`, and the focused UI contract.
 
@@ -112,7 +112,7 @@ Active User details owns the lifecycle actions Change Role, Suspend, Reactivate 
 Active User details sở hữu các lifecycle action Change Role, Suspend, Reactivate và Revoke. Fragment details gate các action này theo access state và role Developer do server suy ra; table request không lặp lại chúng.
 
 - **Vị trí**: `Main.view.xml:222-281`, Developers và table Responsibilities.
-  **Khái niệm IDTS**: Manage Responsibilities là action thuộc Developer. Table nhận các row Developer, còn button Manage chỉ visible khi `activeUsers>accessState` là `ACTIVE`; Active User details cũng đi vào cùng route cho Developer active.
+  **Khái niệm IDTS**: Manage Responsibilities là action thuộc Developer. Table nhận các row Developer, còn button Manage chỉ visible khi `activeUsers>accessState` là `ACTIVE`; Active User details không lặp lại action này.
   **Ảnh hưởng nếu sai**: Developer không active có thể bị gợi ý mutation profile, hoặc user không phải Developer nhận action responsibility gây hiểu nhầm.
   **Phải kiểm tra cùng**: `ActiveUserDetails.fragment.xml`, `Main.controller.js:onOpenDeveloperProfile`, `ManageDeveloperProfile.fragment.xml` và UI contract tập trung.
 
