@@ -8959,3 +8959,9 @@ Vietnamese:
 - Classification: tooling issue; fixed in the same verification cycle.
 - Symptom: a PowerShell allowlist wrapper returned failure even though the only `srv/` path was `srv/bug-service/monitoring.js`; a single path was treated as a scalar, so `$srvPaths[0]` addressed its first character.
 - Fix/status: reran the check with array coercion, preserving the authorized one-file `srv` scope. No product, dependency, schema, runtime or external-state mutation occurred.
+
+### 2026-08-26 Gate 6.3 bounded reviewer identity handoff issue
+
+- Classification: delegation/tooling issue; the first post-remediation reviewer did not reach source review.
+- Symptom: the read-only reviewer returned the repository member-identity question instead of reviewing exact head `f9818168`; two queued identity responses did not produce findings within the bounded wait.
+- Fix/status: the unstarted reviewer will be closed and replaced once with the same exact-head read-only assignment, including `donhv` in the initial prompt. No source, dependency, runtime, external-state or second review-cycle mutation occurred.
