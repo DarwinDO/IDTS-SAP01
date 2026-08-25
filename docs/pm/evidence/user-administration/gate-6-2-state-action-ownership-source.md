@@ -5,8 +5,8 @@
 - Base: `b2d56f95c65106b8e59583e4b8b0775d2c3588bf` (`origin/dev`).
 - Branch: `fix/wp8-user-admin-state-action-ownership-donhv`.
 - RED contract commit: `6d08833`.
-- Product source commit: `d5e90b6`.
-- Scope: User Administration SAPUI5 controller, XML fragments/view, locale bundles, focused UI contract and bilingual knowledge mirrors only.
+- Product source commits: `d5e90b6` (initial UI ownership change) and `25bfe63` (independent-review remediation).
+- Scope: User Administration SAPUI5 controller and XML, the details-only `ActiveUserDetails.accessRequestVersion` CAP DTO plus Active Users read-model mapping, focused backend/UI contracts, and bilingual knowledge mirrors. Database schema, mutating CAP actions, dependency/lockfile, MTA and XSUAA remain unchanged.
 
 ## Implemented contract
 
