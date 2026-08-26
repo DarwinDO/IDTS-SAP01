@@ -184,3 +184,9 @@ Thu tu breakpoint tren BTP: `me(req)` -> cac identity candidate trong JWT ->
 `activeUserFromCandidate()` -> `enforcePlatformRoleAlignment()` ->
 `publicUser()`. Chi quan sat viec claim co ton tai va user ID/role da resolve;
 khong in JWT, password hash hoac credential.
+
+## Gate 6.4 capability derivation / Suy ra capability Gate 6.4
+
+**English.** The BTP `me` path resolves an active immutable identity, applies `enforcePlatformRoleAlignment()`, and only then passes `canAdministerUsers` into `publicUser()`. `publicUser()` normalizes the option with `Boolean(...)`, so login/custom-auth callers remain false by default. If this ordering is weakened, a mismatched or multi-role platform identity could receive a misleading navigation hint; the auth matrix must fail with 403 for both cases.
+
+**Tiếng Việt.** Path `me` trên BTP resolve immutable identity đang active, chạy `enforcePlatformRoleAlignment()`, rồi mới truyền `canAdministerUsers` vào `publicUser()`. `publicUser()` chuẩn hóa option bằng `Boolean(...)`, nên login/custom-auth mặc định vẫn là false. Nếu thứ tự này bị làm yếu, identity platform lệch role hoặc có nhiều business role có thể nhận hint điều hướng sai; auth matrix phải trả 403 cho cả hai trường hợp.

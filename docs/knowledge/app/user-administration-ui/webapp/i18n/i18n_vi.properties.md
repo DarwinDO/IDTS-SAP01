@@ -68,3 +68,9 @@ Keep all workload keys present in the three bundles with equivalent meaning. Kee
 Giữ toàn bộ key workload trong cả ba bundle với ý nghĩa tương đương. Giữ wording tiếng Việt rõ cho user và không chèn raw backend/provider/identity value.
 
 The `workloadStatus=Trạng thái workload` key keeps the informational status column separate from Actions. Vietnamese: key `workloadStatus=Trạng thái workload` tách cột trạng thái thông tin khỏi cột Actions.
+
+## Gate 6.4 navigation keys / Key điều hướng Gate 6.4
+
+**English.** The Vietnamese bundle uses `Quay lại Bug Management` for both the visible action and tooltip, preserving the same navigation meaning as the default/English bundles.
+
+**Tiếng Việt.** Bundle tiếng Việt dùng `Quay lại Bug Management` cho cả action hiển thị và tooltip, giữ đúng cùng ý nghĩa điều hướng với bundle mặc định/tiếng Anh. Không thêm domain, token hoặc thuật ngữ provider vào copy.

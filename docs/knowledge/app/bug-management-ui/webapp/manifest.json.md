@@ -555,3 +555,9 @@ Cập nhật ngày 2026-08-04: manifest không override table attachment. Facet 
 # IDTS-122 PM dashboard drill-down
 
 The List Report uses the supported `sap.fe.templates.ListReport.ListReportController` extension point to consume the dashboard `status_code` navigation parameter. The extension applies the filter with `ExtensionAPI.setFilterValues()` and accepts only the ten canonical workflow status codes. This keeps dashboard navigation inside supported Fiori Elements APIs and prevents arbitrary filter injection.
+
+## Gate 6.4 header navigation / Điều hướng header Gate 6.4
+
+**English.** The `UserAdministration` List Report header action sits beside `OpenDashboard`. Its `visible` and `enabled` properties bind to `session>/canAdministerUsers`, its press handler is `BugListActions.openUserAdministration`, and its text comes from i18n. Do not add a domain, AppRouter route, token, or unsupported tooltip metadata here.
+
+**Tiếng Việt.** Action header `UserAdministration` nằm cạnh `OpenDashboard`. `visible` và `enabled` bind vào `session>/canAdministerUsers`, press handler là `BugListActions.openUserAdministration`, còn text lấy từ i18n. Không thêm domain, AppRouter route, token hoặc tooltip metadata chưa được hỗ trợ vào đây.

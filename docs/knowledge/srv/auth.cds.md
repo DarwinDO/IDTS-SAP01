@@ -115,3 +115,9 @@ File nay chi khai bao hinh dang API. Viec check password va tao token nam trong 
 - Source file: `srv/auth.cds`
 - Knowledge mirror: `docs/knowledge/srv/auth.cds.md`
 - Last reviewed: 2026-06-29
+
+## Gate 6.4 safe navigation capability / Capability điều hướng an toàn Gate 6.4
+
+**English.** `AuthUser.canAdministerUsers` is a Boolean UX hint consumed by Bug Management. It does not grant access: AppRouter and CAP still enforce User Administration authorization. Custom authentication returns `false`; only an XSUAA request resolved to an active internal PM with aligned platform role and `UserAdmin` may receive `true`. Check `srv/auth.js`, the Bug Management session model, and `scripts/qa/test-auth-foundation-programmatic.js` together.
+
+**Tiếng Việt.** `AuthUser.canAdministerUsers` là Boolean gợi ý UX cho Bug Management. Field này không cấp quyền: AppRouter và CAP vẫn kiểm soát User Administration. Custom auth luôn trả `false`; chỉ request XSUAA map đúng PM nội bộ đang active, platform role khớp và có `UserAdmin` mới nhận `true`. Khi sửa phải kiểm tra cùng `srv/auth.js`, session model của Bug Management và `scripts/qa/test-auth-foundation-programmatic.js`.

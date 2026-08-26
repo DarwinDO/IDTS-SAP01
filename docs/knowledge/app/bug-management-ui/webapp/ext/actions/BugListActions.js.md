@@ -186,3 +186,9 @@ Khi sua file nay, phai chay browser smoke theo role Developer, Tester va PM. Sta
 **English.** Manifest calls `isCreateVisible()` to show Create for Tester/PM. Press calls `createBug()` → rechecks safe role for UX → obtains OData model and supported Fiori EditFlow → binds `/Bugs` → `createDocument(NewPage)` sends the CAP NEW draft request. Backend draft authorization is still final. `openDashboard()` only navigates. Break at `createBug()`, then Network NEW, then backend draft guards when creation fails.
 
 **Tiếng Việt.** Manifest gọi `isCreateVisible()` để hiện Create cho Tester/PM. Nhấn nút gọi `createBug()` → kiểm lại safe role cho UX → lấy OData model và Fiori EditFlow chuẩn → bind `/Bugs` → `createDocument(NewPage)` gửi CAP NEW draft. Authorization draft backend vẫn là quyết định cuối. `openDashboard()` chỉ điều hướng. Breakpoint ở `createBug()`, rồi Network NEW, rồi backend draft guard nếu tạo lỗi.
+
+## Gate 6.4 User Administration action / Action User Administration Gate 6.4
+
+**English.** `openUserAdministration()` re-reads the safe login profile and rejects unless `canAdministerUsers` is exactly `true`. It then calls `window.location.assign("/idtsuseradministrationui/index.html")`, preserving the current tab and AppRouter session. The relative path carries no domain, query, token, or `returnTo`; direct access is still protected by AppRouter and CAP.
+
+**Tiếng Việt.** `openUserAdministration()` đọc lại safe login profile và reject nếu `canAdministerUsers` không đúng bằng `true`. Sau đó hàm gọi `window.location.assign("/idtsuseradministrationui/index.html")`, giữ nguyên tab và AppRouter session. Relative path không mang domain, query, token hoặc `returnTo`; truy cập trực tiếp vẫn do AppRouter và CAP bảo vệ.
