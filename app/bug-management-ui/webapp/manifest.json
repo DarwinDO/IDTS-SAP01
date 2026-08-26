@@ -126,6 +126,12 @@
                       "press": "idts.bugmanagementui.ext.actions.BugListActions.openDashboard",
                       "text": "{i18n>dashboardOpenAction}"
                     },
+                    "UserAdministration": {
+                      "press": "idts.bugmanagementui.ext.actions.BugListActions.openUserAdministration",
+                      "visible": "{session>/canAdministerUsers}",
+                      "enabled": "{session>/canAdministerUsers}",
+                      "text": "{i18n>userAdministrationOpenAction}"
+                    },
                     "CreateBug": {
                       "press": "idts.bugmanagementui.ext.actions.BugListActions.createBug",
                       "visible": "{session>/canCreateBug}",

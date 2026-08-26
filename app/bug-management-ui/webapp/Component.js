@@ -26,7 +26,8 @@ sap.ui.define(
             init: function () {
                 var user = LoginSession.getUser();
                 var sessionModel = new JSONModel({
-                    canCreateBug: Boolean(user && user.role_code === "TESTER")
+                    canCreateBug: Boolean(user && user.role_code === "TESTER"),
+                    canAdministerUsers: Boolean(user && user.canAdministerUsers === true)
                 });
 
                 // Bind toolbar authorization UX to observable session state.

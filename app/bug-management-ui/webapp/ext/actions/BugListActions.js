@@ -17,6 +17,12 @@ sap.ui.define([
         return Boolean(user && user.role_code === "TESTER");
     }
 
+    function canAdministerUsers() {
+        // Capability được CAP cấp an toàn; UI chỉ dùng để UX và vẫn fail closed.
+        var user = LoginSession.getUser();
+        return Boolean(user && user.canAdministerUsers === true);
+    }
+
     function getModelFromActionContext(actionContext) {
         // Chuẩn hóa các shape ExtensionAPI giữa Fiori runtime để lấy đúng OData V4 model.
         if (actionContext && typeof actionContext.getModel === "function") {
@@ -60,6 +66,16 @@ sap.ui.define([
         openDashboard: function () {
             // Điều hướng sang custom dashboard nhưng giữ cùng session tab.
             window.location.href = window.location.pathname.replace(/\/index\.html.*$/, "/dashboard.html");
+        },
+
+        openUserAdministration: function () {
+            // Đọc lại capability ngay lúc bấm; không mang theo domain, query hay token.
+            if (!canAdministerUsers()) {
+                return Promise.reject(new Error("Current user is not allowed to administer users."));
+            }
+
+            window.location.assign("/idtsuseradministrationui/index.html");
+            return Promise.resolve();
         },
 
         createBug: function () {

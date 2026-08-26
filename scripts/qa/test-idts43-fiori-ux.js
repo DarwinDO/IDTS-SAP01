@@ -15,6 +15,7 @@ function read(relativePath) {
 }
 
 function pass(label) {
+  pass.count = (pass.count || 0) + 1
   console.log(`  PASS  ${label}`)
 }
 
@@ -60,23 +61,45 @@ async function main() {
   const component = read(path.join('webapp', 'Component.js'))
   assert(component.includes('new JSONModel({'), 'Component must initialize an observable session model')
   assert(component.includes('canCreateBug: Boolean(user && user.role_code === "TESTER")'))
+  assert(component.includes('canAdministerUsers: Boolean(user && user.canAdministerUsers === true)'), 'Component must expose the safe UserAdmin capability in session state')
   assert(component.includes('this.setModel(sessionModel, "session")'))
   const sections = manifest['sap.ui5'].routing.targets.BugsObjectPage.options.settings.content.body.sections
   assert(sections.History, 'custom History section is missing')
   assert(!sections.HistoryTimeline, 'old HistoryTimeline section key must be removed')
   pass('manifest binds Create visibility to an observable session model')
 
-  let roleCode = null
+  const userAdministrationAction = listSettings.content.header.actions.UserAdministration
+  assert(userAdministrationAction, 'User Administration header action is missing')
+  assert.strictEqual(userAdministrationAction.press, 'idts.bugmanagementui.ext.actions.BugListActions.openUserAdministration')
+  assert.strictEqual(userAdministrationAction.visible, '{session>/canAdministerUsers}')
+  assert.strictEqual(userAdministrationAction.enabled, '{session>/canAdministerUsers}')
+  assert.strictEqual(userAdministrationAction.text, '{i18n>userAdministrationOpenAction}')
+  assert(!Object.prototype.hasOwnProperty.call(userAdministrationAction, 'tooltip'), 'User Administration action must not invent unsupported tooltip metadata')
+  pass('manifest binds User Administration visibility and enablement to the safe capability')
+
+  let controlledUser = null
+  let navigationCalls = []
   let actionModule
   const sandbox = {
     Error,
     Promise,
+    window: {
+      location: {
+        href: '/idtsbugmanagementui/index.html',
+        assign(relativePath) {
+          navigationCalls.push(relativePath)
+        }
+      },
+      open() {
+        throw new Error('new-window navigation is not supported')
+      }
+    },
     sap: {
       ui: {
         define(dependencies, factory) {
           actionModule = factory({
             getUser() {
-              return roleCode ? { role_code: roleCode } : null
+              return controlledUser
             }
           })
         }
@@ -85,19 +108,19 @@ async function main() {
   }
   vm.runInNewContext(read(path.join('webapp', 'ext', 'actions', 'BugListActions.js')), sandbox)
 
-  roleCode = 'DEVELOPER'
+  controlledUser = { role_code: 'DEVELOPER' }
   assert.strictEqual(actionModule.isCreateVisible(), false)
   await assert.rejects(() => actionModule.createBug.call({}), /not allowed/)
   pass('Developer does not see or invoke Create Bug')
 
-  roleCode = 'TESTER'
+  controlledUser = { role_code: 'TESTER' }
   assert.strictEqual(actionModule.isCreateVisible(), true)
-  roleCode = 'PM'
+  controlledUser = { role_code: 'PM' }
   assert.strictEqual(actionModule.isCreateVisible(), false)
   await assert.rejects(() => actionModule.createBug.call({}), /not allowed/)
   pass('Only Tester sees or invokes Create Bug')
 
-  roleCode = 'TESTER'
+  controlledUser = { role_code: 'TESTER' }
   const listBinding = { path: '/Bugs' }
   let createArguments
   const extensionActionContext = {
@@ -129,7 +152,30 @@ async function main() {
   )
   pass('Create Bug fails safely when the Fiori model is unavailable')
 
-  console.log('\nIDTS-43 Fiori UX checks: 13 PASS / 0 FAIL')
+  controlledUser = { role_code: 'PM', canAdministerUsers: true }
+  navigationCalls = []
+  await actionModule.openUserAdministration.call({})
+  assert.deepStrictEqual(navigationCalls, ['/idtsuseradministrationui/index.html'])
+  assert(!/[?#]|returnTo|:\/\//.test(navigationCalls[0]))
+  assert.strictEqual(sandbox.window.location.href, '/idtsbugmanagementui/index.html')
+  pass('PM with UserAdmin navigates in the same tab to the exact relative User Administration path')
+
+  for (const user of [
+    null,
+    {},
+    { role_code: 'PM' },
+    { role_code: 'PM', canAdministerUsers: false },
+    { role_code: 'PM', canAdministerUsers: 1 },
+    { role_code: 'PM', canAdministerUsers: 'true' }
+  ]) {
+    controlledUser = user
+    navigationCalls = []
+    await assert.rejects(() => actionModule.openUserAdministration.call({}), /not allowed/)
+    assert.deepStrictEqual(navigationCalls, [])
+  }
+  pass('Missing, false, and non-Boolean UserAdmin capability values fail closed without navigation')
+
+  console.log(`\nIDTS-43 Fiori UX checks: ${pass.count} PASS / 0 FAIL`)
 }
 
 main().catch(error => {
