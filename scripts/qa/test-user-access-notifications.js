@@ -466,27 +466,24 @@ async function insertAppliedAudit (db, ID, targetUserID, action) {
 }
 
 async function verifyAtomicDuplicateRace () {
-  const state = { deliveryReads: 0, inserts: 0, delivery: null }
+  const state = { deliveryReads: 0, inserts: 0, aborted: false }
   const tx = {
     run: async query => {
+      if (state.aborted) throw Object.assign(new Error('query after PostgreSQL transaction abort'), { code: 'POST_ERROR_QUERY' })
       if (query.SELECT) {
         const source = String(query.SELECT.from?.ref?.[0] || '')
         if (source === ENTITY) {
           state.deliveryReads += 1
-          return state.deliveryReads <= 2 ? undefined : state.delivery
+          return undefined
         }
         if (source === 'idts.cap.Users') return { ID: '65000000-0000-4000-8000-000000000001', email: 'race.user@example.test' }
       }
       if (query.INSERT) {
         state.inserts += 1
-        if (state.inserts === 1) {
-          const entry = Array.isArray(query.INSERT.entries) ? query.INSERT.entries[0] : query.INSERT.entries
-          state.delivery = { ID: entry.ID, status_code: 'PENDING' }
-          return 1
-        }
-        throw Object.assign(new Error('unique constraint failed: UserAccessNotificationDeliveries.sourceAuditEvent_ID'), { code: 'SQLITE_CONSTRAINT' })
+        state.aborted = true
+        throw Object.assign(new Error('duplicate key value violates unique constraint'), { code: '23505' })
       }
-      throw new Error('Unexpected CQN in duplicate-race test.')
+      throw new Error('Unexpected CQN in PostgreSQL duplicate test.')
     }
   }
   const input = {
@@ -499,10 +496,32 @@ async function verifyAtomicDuplicateRace () {
     completedAt: '2026-08-26T10:00:00.000Z',
     emailConfig: { enabled: true, ready: true, baseUrl: 'https://idts.example.test', fromAddress: 'no-reply@example.test' }
   }
-  const results = await Promise.all([writeUserAccessDelivery(input), writeUserAccessDelivery(input)])
-  assert.equal(state.inserts, 2, 'both racing writers reached the atomic insert')
-  assert.deepEqual(results.map(result => result.created).sort(), [false, true])
-  assert.equal(results[0].deliveryID, results[1].deliveryID, 'the collision returns the inserted delivery')
+  const duplicate = await writeUserAccessDelivery(input)
+  assert.equal(state.inserts, 1, 'the PostgreSQL duplicate reaches one insert')
+  assert.equal(state.deliveryReads, 1, 'no query follows the aborted PostgreSQL insert')
+  assert.equal(duplicate.created, false)
+  assert.equal(duplicate.deliveryStatus, 'PENDING')
+  assert.match(duplicate.deliveryID, /^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/)
+
+  for (const code of ['SQLITE_CONSTRAINT_FOREIGNKEY', 'SQLITE_CONSTRAINT_NOTNULL']) {
+    let deliveryReads = 0
+    const constraintTx = {
+      run: async query => {
+        if (query.SELECT) {
+          const source = String(query.SELECT.from?.ref?.[0] || '')
+          if (source === ENTITY) {
+            deliveryReads += 1
+            return deliveryReads === 1 ? undefined : { ID: 'visible-but-unrelated-delivery', status_code: 'PENDING' }
+          }
+          return { ID: input.targetUserID, email: 'race.user@example.test' }
+        }
+        if (query.INSERT) throw Object.assign(new Error('constraint failed'), { code })
+        throw new Error('Unexpected CQN in SQLite constraint test.')
+      }
+    }
+    await assert.rejects(writeUserAccessDelivery({ ...input, tx: constraintTx }), error => error?.code === code)
+    assert.equal(deliveryReads, 1, `${code} is rethrown even when a row could be read`)
+  }
 
   const nonUniqueTx = {
     run: async query => {
