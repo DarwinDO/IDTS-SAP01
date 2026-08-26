@@ -1,6 +1,6 @@
 {
 	"name": "idts.useradministrationui",
-	"version": "1.0.13",
+	"version": "1.0.14",
 	"description": "Controlled IDTS user onboarding administration UI",
 	"author": "IDTS Team",
 	"license": "Apache-2.0",

@@ -9053,3 +9053,9 @@ Vietnamese:
 - Classification: delegation/tooling issue; the single bounded reviewer returned the repository member-identity question instead of reviewing exact head `7c50476f`, despite the parent task already being authorized as `donhv`.
 - Fix/status: no source, dependency, runtime or external-state mutation occurred. The same reviewer was resumed once with explicit `donhv` context; no parallel second review was spawned while it was active.
 - Follow-up: the resumed reviewer remained running without producing a source verdict after two bounded waits and an explicit finish interrupt, so it was closed before any finding could be issued. This non-started attempt does not count as the required review; one replacement will be run with inherited context and explicit `donhv` identity.
+
+### 2026-08-26 Gate 6.3 rollout cache-identity HOLD
+
+- Pre-deployment readiness initially returned CAP/AppRouter stopped with HTTP 404 probes. The approved conditional prepare ran exactly once, started only CAP and AppRouter, did not request a HANA start, and the independent final check returned `DEMO READY`: CAP/AppRouter `1/1`, health/readiness/Web `200`, anonymous protected API `401`.
+- Rollout packaging then stopped before upload/stage/deploy because User Administration still used deployed version `1.0.13`. Reusing that HTML5 cache identity could leave browsers on the prior controller/preload after a successful content deployment.
+- TDD RED: the focused UI contract failed exactly on the required Gate 6.3 version `1.0.14`. The minimal release fix aligns package, lock root and manifest at `1.0.14`; dependencies, build commands, CAP/AppRouter/HANA/XSUAA/provider/user/role/data state remain unchanged.
