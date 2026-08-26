@@ -18,9 +18,9 @@ Version `1.0.11` publishes the source-candidate Business Catalogs UI while keepi
 
 Version `1.0.11` phat hanh UI Business Catalogs source-candidate, van giu nguyen OData V4 data source, library, route va authorization boundary.
 
-Version `1.0.14` publishes Gate 6.3 workload content as a distinct browser-visible release while preserving the reviewed OData models, routes and authorization boundary.
+Version `1.0.15` publishes the Gate 6.3 Workload Actions-column remediation as a distinct browser-visible release while preserving the reviewed OData models, routes and authorization boundary.
 
-Version `1.0.14` phát hành nội dung workload Gate 6.3 thành một release riêng cho browser, đồng thời giữ nguyên các OData model, route và authorization boundary đã review.
+Version `1.0.15` phát hành remediation cột Actions của Workload Gate 6.3 thành một release riêng cho browser, đồng thời giữ nguyên các OData model, route và authorization boundary đã review.
 
 Toàn bộ routing và OData setting giữ nguyên. Release chỉ tăng version không được thêm destination, credential, endpoint private hoặc quyết định authorization; CAP vẫn là nguồn chính xác cho `cancelEligible` và mutation Cancel.
 

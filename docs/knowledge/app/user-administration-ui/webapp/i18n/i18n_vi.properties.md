@@ -66,3 +66,5 @@ Bundle tiếng Việt có label Gate 6.3 đã dịch cho navigation Developer Wo
 Keep all workload keys present in the three bundles with equivalent meaning. Keep Vietnamese user-facing wording clear and do not insert raw backend/provider/identity values.
 
 Giữ toàn bộ key workload trong cả ba bundle với ý nghĩa tương đương. Giữ wording tiếng Việt rõ cho user và không chèn raw backend/provider/identity value.
+
+The `workloadStatus=Trạng thái workload` key keeps the informational status column separate from Actions. Vietnamese: key `workloadStatus=Trạng thái workload` tách cột trạng thái thông tin khỏi cột Actions.

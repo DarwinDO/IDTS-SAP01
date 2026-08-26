@@ -12,7 +12,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 ## Current status
 
-`IN PROGRESS — GATE 6.3 DRAFT PR #349 OPEN; QA DEPTH PASS; RUNTIME ACCEPTANCE PENDING`
+`IN PROGRESS — GATE 6.3 LIVE ACTIONS-COLUMN REMEDIATION; SOURCE VERIFICATION GREEN; PR/ROLLOUT REACCEPTANCE PENDING`
 
 - Gates 1–3B are merged, deployed and accepted. Gate 3 browser closure is recorded by PR #325 at `04643e12727290f2f35fd56e9c3d2a8df4cbcdbc`.
 - Gate 4 branch `feature/wp8-admin-developer-pilot-donhv` is frozen from that exact base.
@@ -46,7 +46,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 5. Gate 5 — Business Catalog Administration.
 6. Gate 6 — Operations and Audit usability.
 7. Gate 6.2 — UI state isolation, navigation regrouping and action ownership — COMPLETE.
-8. Gate 6.3 — Developer workload and assigned-Bug drill-down — DRAFT PR #349 OPEN; authorization remediation is complete, while the coordinator-identified identity-access readiness remediation remains source-review pending under DonHV's narrow scope expansion.
+8. Gate 6.3 — Developer workload and assigned-Bug drill-down — PR #349 and the `1.0.14` rollout completed; live acceptance found an 8-column/9-cell mismatch that hides `View workload`. The approved UI-only `1.0.15` remediation is in progress before final runtime reacceptance.
 9. Gate 6.4 — Safe cross-app navigation.
 10. Gate 6.5 — Post-completion access-change email notifications.
 
@@ -118,6 +118,13 @@ The executor may complete source/tests/docs/evidence commits, push the exact bra
 - Root cause was browser inference of readiness from active profile plus `developerUserID`. The approved fix adds read-only `DeveloperWorkloads.identityAccessReady`, populated server-side with one bounded `readActiveIdentityAccessByUser` call plus `hasActiveIdentityAccess`; it is false for unlinked, inactive/suspended, missing/mismatched hash, duplicate matching ACTIVE requests and unknown legacy backlog rows. Assignment readiness/counts remain separate.
 - Intentional RED was `56 PASS / 5 FAIL / 61 checks`; focused GREEN is `61 PASS / 0 FAIL / 61 checks`, and the UI workload contract passes with active-profile-plus-user-ID-only normalization false. Ordinary `BugService.Bugs` read policy remains unchanged and is not described as newly exposed by Gate 6.3.
 - The first exact-head review found one Important `WORKLOAD_SELECT` omission; RED failed, the smallest fix added `identityAccessReady` to the select list, and the full matrix was rerun green. Fresh review of `44f3a34902f1f3e1b521f7a6f2c0c280b60f0d6d` returned `GO — 0 Critical / 0 Major / 0 Important / 0 Minor`. Push/remote Draft PR readback is the next boundary; do not advance Ready, merge, deploy, mutate data/provider/user/role/email, start Gate 6.4 or clean the worktree.
+
+### Gate 6.3 live Actions-column remediation — 2026-08-26
+
+- English: post-rollout PM acceptance proved workload rows and server-derived Access readiness render, but the table declared eight columns for nine row cells. The workload-state cell consumed `Actions`, UI5 omitted the extra `View workload` button cell, and details/deep-link acceptance was blocked.
+- English: the approved minimal source fix adds one localized `Workload status` column before `Actions`, retains the existing button/handler, adds an exact 9-column/9-cell regression, and advances only the User Administration HTML5 cache identity to `1.0.15`. Backend, schema, dependency graph and business data remain unchanged.
+- Vietnamese: acceptance PM sau rollout xác nhận row workload và Access readiness do server tính đã render, nhưng table khai báo tám cột cho chín cell. Cell trạng thái workload chiếm `Actions`, UI5 bỏ cell nút `View workload` bị dư, nên acceptance details/deep-link bị chặn.
+- Vietnamese: fix source tối thiểu đã duyệt chỉ thêm cột i18n `Trạng thái workload` trước `Actions`, giữ button/handler hiện có, thêm regression exact 9 cột/9 cell và chỉ tăng cache identity HTML5 User Administration lên `1.0.15`. Backend, schema, dependency graph và dữ liệu nghiệp vụ không đổi.
 
 ## Bàn giao source Gate 6.1 — làm rõ navigation và action
 

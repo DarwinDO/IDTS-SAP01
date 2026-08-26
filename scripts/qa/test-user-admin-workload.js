@@ -31,6 +31,24 @@ const workloadIndex = viewSource.indexOf('key="developerWorkload"')
 const responsibilitiesIndex = viewSource.indexOf('key="developerResponsibilities"')
 assert.ok(workloadIndex >= 0 && responsibilitiesIndex > workloadIndex, 'Workload must precede Responsibilities')
 const workloadSectionSource = viewSource.slice(workloadIndex, responsibilitiesIndex)
+const workloadTableStart = workloadSectionSource.indexOf('id="developerWorkloadTable"')
+const workloadTableEnd = workloadSectionSource.indexOf('</Table>', workloadTableStart)
+const workloadTableSource = workloadSectionSource.slice(workloadTableStart, workloadTableEnd)
+
+function countDirectXmlControls (source, containerName) {
+  const containerStart = source.indexOf(`<${containerName}>`)
+  const containerEnd = source.indexOf(`</${containerName}>`, containerStart)
+  assert.ok(containerStart >= 0 && containerEnd > containerStart, `${containerName} container must exist`)
+  const controlLines = source.slice(containerStart, containerEnd).split(/\r?\n/)
+    .filter(line => /^\s*<[A-Z]/.test(line))
+  const minimumIndent = Math.min(...controlLines.map(line => line.match(/^\s*/)[0].length))
+  return controlLines.filter(line => line.match(/^\s*/)[0].length === minimumIndent).length
+}
+
+assert.equal(countDirectXmlControls(workloadTableSource, 'columns'), 9, 'Workload table must declare one column for every cell')
+assert.equal(countDirectXmlControls(workloadTableSource, 'cells'), 9, 'Workload row must provide one cell for every column')
+assert.match(workloadTableSource, /i18n>workloadStatus/)
+assert.match(workloadTableSource, /<HBox[^>]*>[\s\S]*?<Button[^>]*i18n>viewWorkload[^>]*press="\.onOpenDeveloperWorkload"/)
 assert.match(viewSource, /items="\{workload>\/items\}"/)
 assert.match(viewSource, /press="\.onOpenDeveloperWorkload"/)
 assert.match(viewSource, /search="\.onDeveloperWorkloadSearch"/)
@@ -47,7 +65,7 @@ for (const locale of ['i18n.properties', 'i18n_en.properties', 'i18n_vi.properti
   for (const key of [
     'developerWorkloadTab', 'developerWorkloadTabTooltip', 'developerWorkloadOwnershipNote',
     'developerWorkloadSearchPlaceholder', 'refreshDeveloperWorkload', 'developerWorkloadLoadFailed',
-    'noDeveloperWorkloads', 'openLimit', 'needsDeveloperAction', 'overdue', 'estimatedEffort',
+    'noDeveloperWorkloads', 'openLimit', 'needsDeveloperAction', 'overdue', 'estimatedEffort', 'workloadStatus',
     'developerActionUnit', 'hoursShort', 'overloadedText', 'overdueText', 'withinLimitText',
     'viewWorkload', 'loadMoreDeveloperWorkloads', 'developerWorkloadDetailsTitle', 'openAssignedBugs',
     'developerWorkloadDetailsNote', 'developerWorkloadBugsLoadFailed', 'noDeveloperWorkloadBugs',

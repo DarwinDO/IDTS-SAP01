@@ -157,3 +157,19 @@ The Developers child `IconTabBar` places `developerWorkload` before `developerRe
 Keep native IconTabBar/table responsiveness and keep the Workload table read-only. Do not bind internal IDs, raw errors, provider fields, or write actions into the view. Update all locale keys and the focused UI tests when labels, states, columns, or action ownership changes.
 
 Giữ responsive native của IconTabBar/table và giữ table Workload chỉ đọc. Không bind internal ID, raw error, provider field hoặc write action vào view. Khi đổi label, state, column hoặc ownership action, phải cập nhật cả locale keys và UI test tập trung.
+
+## Gate 6.3 Actions-column alignment remediation / Remediation alignment cột Actions Gate 6.3
+
+### English
+
+The Workload table declares a dedicated localized `Workload status` column between Estimated effort and Actions. This keeps the nine declared columns aligned with the nine row cells, so the existing workload-state `ObjectStatus` remains informational and the existing transparent `View workload` button renders in the final Actions cell. No controller, handler, write action, or backend contract changes.
+
+- **Impact if broken**: the status cell can consume the Actions column and UI5 can omit the extra button cell, making workload details and the Bug Management deep-link unreachable.
+- **Must check together**: all three i18n bundles, `scripts/qa/test-user-admin-workload.js`, `DeveloperWorkloadDetails.fragment.xml`, and browser acceptance.
+
+### Tiếng Việt
+
+Table Workload khai báo cột i18n `Trạng thái workload` riêng giữa Effort ước tính và Actions. Nhờ đó chín cột khai báo khớp với chín cell của row, `ObjectStatus` trạng thái workload hiện có vẫn chỉ cung cấp thông tin và nút transparent `View workload` hiện có được render ở cell Actions cuối. Không đổi controller, handler, write action hoặc contract backend.
+
+- **Ảnh hưởng nếu sai**: cell trạng thái có thể chiếm cột Actions và UI5 có thể bỏ cell nút bị dư, khiến details workload và deep-link Bug Management không thể truy cập.
+- **Phải kiểm tra cùng**: cả ba bundle i18n, `scripts/qa/test-user-admin-workload.js`, `DeveloperWorkloadDetails.fragment.xml` và browser acceptance.
