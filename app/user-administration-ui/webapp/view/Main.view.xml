@@ -258,7 +258,7 @@
 														<columns>
 															<Column importance="High"><Text text="{i18n>user}"/></Column>
 															<Column width="10rem"><Text text="{i18n>availability}"/></Column>
-															<Column width="10rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>developerReady}"/></Column>
+															<Column width="10rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>accessReadinessLabel}"/></Column>
 															<Column width="9rem"><Text text="{i18n>openLimit}"/></Column>
 															<Column width="9rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>needsDeveloperAction}"/></Column>
 															<Column width="7rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>overdue}"/></Column>
@@ -273,8 +273,8 @@
 																		text="{workload>availabilityStatusName}"
 																		state="{parts: [{path: 'workload>availabilityCriticality'}], formatter: 'formatter.availabilityState'}"/>
 																	<ObjectStatus
-																		text="{parts: [{path: 'workload>accessReady'}, {path: 'i18n>readyText'}, {path: 'i18n>needsAttentionText'}], formatter: 'formatter.workloadReadinessText'}"
-																		state="{path: 'workload>accessReady', formatter: 'formatter.workloadReadinessState'}"/>
+																		text="{parts: [{path: 'workload>identityAccessReady'}, {path: 'i18n>accessReadinessReadyText'}, {path: 'i18n>accessReadinessAttentionText'}, {path: 'i18n>accessReadinessLabel'}], formatter: 'formatter.workloadReadinessText'}"
+																		state="{path: 'workload>identityAccessReady', formatter: 'formatter.workloadReadinessState'}"/>
 																	<Text text="{parts: [{path: 'workload>openOwnedBugCount'}, {path: 'workload>workloadLimit'}], formatter: 'formatter.workloadOpenLimit'}"/>
 																	<ObjectNumber number="{workload>currentActionItemCount}" unit="{i18n>developerActionUnit}"/>
 																	<ObjectNumber number="{workload>overdueOwnedBugCount}" state="{path: 'workload>overdueOwnedBugCount', formatter: 'formatter.workloadCountState'}"/>

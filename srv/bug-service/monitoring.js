@@ -11,6 +11,7 @@ const {
 
 const { resolveRequestUser, trimToNull } = require('./helpers')
 const { effectiveCapacity } = require('./capacity')
+const { hasActiveIdentityAccess, readActiveIdentityAccessByUser } = require('../access/identity-readiness')
 
 const STATUS_COUNT_FIELDS = new Map([
   [STATUS.ASSIGNED, 'assignedCount'],
@@ -65,6 +66,10 @@ async function readDeveloperWorkloads (req, entities) {
   }
 
   const profiles = await tx.run(profileQuery)
+  const identityAccessByUser = await readActiveIdentityAccessByUser(
+    tx,
+    profiles.map(profile => profile.user_ID)
+  )
   const profileIDs = profiles.map(profile => profile.ID).filter(Boolean)
   let bugs = []
 
@@ -84,7 +89,7 @@ async function readDeveloperWorkloads (req, entities) {
     bugs = await tx.run(bugQuery)
   }
 
-  let rows = buildDeveloperWorkloadRows(profiles, bugs)
+  let rows = buildDeveloperWorkloadRows(profiles, bugs, identityAccessByUser)
     .filter(row => row.active || row.openOwnedBugCount > 0)
 
   if (workloadAccess.developerUserID) {
@@ -115,11 +120,12 @@ async function readDeveloperWorkloads (req, entities) {
   return rows
 }
 
-function buildDeveloperWorkloadRows (profiles, bugs) {
+function buildDeveloperWorkloadRows (profiles, bugs, identityAccessByUser) {
   // Gom Bug theo developer và tính count/effort/overdue; không ghi aggregate xuống database.
   const rowsByProfileID = new Map()
 
   for (const profile of profiles) {
+    const identityAccess = identityAccessByUser?.get(profile.user_ID)
     rowsByProfileID.set(profile.ID, emptyDeveloperWorkloadRow({
       developerProfileID: profile.ID,
       developerUserID: profile.user_ID || null,
@@ -129,6 +135,9 @@ function buildDeveloperWorkloadRows (profiles, bugs) {
       availabilityStatusName: profile.availabilityStatusName || null,
       availabilityCriticality: profile.availabilityCriticality ?? null,
       workloadLimit: profile.workloadLimit ?? null,
+      identityAccessReady: identityAccess
+        ? hasActiveIdentityAccess(identityAccess.user, identityAccess.requests)
+        : false,
       active: !!profile.active
     }))
   }
@@ -147,6 +156,7 @@ function buildDeveloperWorkloadRows (profiles, bugs) {
         availabilityStatusName: null,
         availabilityCriticality: null,
         workloadLimit: null,
+        identityAccessReady: false,
         active: false
       })
       rowsByProfileID.set(bug.assignee_ID, row)
@@ -187,6 +197,7 @@ function emptyDeveloperWorkloadRow (base) {
     availabilityStatusName: base.availabilityStatusName,
     availabilityCriticality: base.availabilityCriticality,
     workloadLimit: base.workloadLimit,
+    identityAccessReady: base.identityAccessReady === true,
     openOwnedBugCount: 0,
     overdueOwnedBugCount: 0,
     currentActionItemCount: 0,

@@ -12,6 +12,8 @@ const controllerSource = fs.readFileSync(path.join(webapp, 'controller/Main.cont
 const viewSource = fs.readFileSync(path.join(webapp, 'view/Main.view.xml'), 'utf8')
 const detailFragmentSource = fs.readFileSync(path.join(webapp, 'fragment/DeveloperWorkloadDetails.fragment.xml'), 'utf8')
 const formatterSource = fs.readFileSync(path.join(webapp, 'model/formatter.js'), 'utf8')
+const monitoringSource = fs.readFileSync(path.join(root, 'srv/bug-service/monitoring.js'), 'utf8')
+const serviceSource = fs.readFileSync(path.join(root, 'srv/service.cds'), 'utf8')
 
 const VALID_UUID = '20000000-0000-0000-0000-000000000001'
 const SECOND_UUID = '20000000-0000-0000-0000-000000000002'
@@ -28,6 +30,7 @@ assert.equal(manifest['sap.ui5'].models.bugApi?.preload, false)
 const workloadIndex = viewSource.indexOf('key="developerWorkload"')
 const responsibilitiesIndex = viewSource.indexOf('key="developerResponsibilities"')
 assert.ok(workloadIndex >= 0 && responsibilitiesIndex > workloadIndex, 'Workload must precede Responsibilities')
+const workloadSectionSource = viewSource.slice(workloadIndex, responsibilitiesIndex)
 assert.match(viewSource, /items="\{workload>\/items\}"/)
 assert.match(viewSource, /press="\.onOpenDeveloperWorkload"/)
 assert.match(viewSource, /search="\.onDeveloperWorkloadSearch"/)
@@ -48,7 +51,8 @@ for (const locale of ['i18n.properties', 'i18n_en.properties', 'i18n_vi.properti
     'developerActionUnit', 'hoursShort', 'overloadedText', 'overdueText', 'withinLimitText',
     'viewWorkload', 'loadMoreDeveloperWorkloads', 'developerWorkloadDetailsTitle', 'openAssignedBugs',
     'developerWorkloadDetailsNote', 'developerWorkloadBugsLoadFailed', 'noDeveloperWorkloadBugs',
-    'bugNumber', 'title', 'priority', 'severity', 'dueDate', 'technicalAssignee', 'currentActionOwner', 'openBug'
+    'bugNumber', 'title', 'priority', 'severity', 'dueDate', 'technicalAssignee', 'currentActionOwner', 'openBug',
+    'accessReadinessLabel', 'accessReadinessReadyText', 'accessReadinessAttentionText'
   ]) assert.match(localeText, new RegExp(`^${key}=`, 'm'), `${key} must exist in ${locale}`)
 }
 
@@ -60,6 +64,17 @@ assert.match(controllerSource, /status_code ne 'CLOSED'/)
 assert.match(controllerSource, /dueDate asc,bugNumber asc/)
 assert.match(controllerSource, /estimatedEffortHours,assigneeDisplayName,currentActionOwnerDisplayName/)
 assert.match(controllerSource, /window\.location\.assign\(sUrl\)/)
+assert.match(serviceSource, /identityAccessReady\s*:\s*Boolean/)
+assert.match(serviceSource, /@readonly[\s\S]{0,500}entity DeveloperWorkloads[\s\S]{0,900}identityAccessReady\s*:\s*Boolean/)
+assert.match(monitoringSource, /const identityAccessByUser = await readActiveIdentityAccessByUser\([\s\S]{0,160}profiles\.map\(profile => profile\.user_ID\)/)
+assert.match(monitoringSource, /hasActiveIdentityAccess/)
+assert.match(monitoringSource, /identityAccessReady/)
+assert.doesNotMatch(monitoringSource, /for\s*\([^)]*profiles[\s\S]{0,200}readActiveIdentityAccessByUser/)
+assert.match(controllerSource, /identityAccessReady: oSource\.identityAccessReady === true/)
+assert.doesNotMatch(controllerSource, /accessReady|oSource\.active === true && !!oSource\.developerUserID/)
+assert.match(workloadSectionSource, /workload>identityAccessReady/)
+assert.match(workloadSectionSource, /i18n>accessReadinessLabel/)
+assert.doesNotMatch(workloadSectionSource, /workload>accessReady|i18n>developerReady/)
 assert.doesNotMatch(controllerSource, /bugApi[\s\S]{0,800}\.(create|update|delete)\s*\(/i)
 assert.doesNotMatch(controllerSource, /description|comments|attachments|identityIssuer|identitySubject|providerCorrelation/i)
 
@@ -116,7 +131,13 @@ assert.equal(normalized.overdueOwnedBugCount, 2)
 assert.equal(normalized.currentActionItemCount, 3)
 assert.equal(normalized.estimatedEffortHoursTotal, 19.5)
 assert.equal(normalized.workloadLimit, null)
-assert.equal(normalized.accessReady, true)
+assert.equal(normalized.identityAccessReady, false)
+assert.equal(controller._normalizeDeveloperWorkloadRow({
+  developerProfileID: VALID_UUID,
+  developerUserID: '10000000-0000-0000-0000-000000000001',
+  active: true,
+  identityAccessReady: true
+}).identityAccessReady, true)
 assert.equal(normalized.developerProfileID, VALID_UUID)
 assert.equal(normalized.developerUserID, '10000000-0000-0000-0000-000000000001')
 
@@ -164,6 +185,7 @@ function loadFormatter (source) {
 const formatter = loadFormatter(formatterSource)
 assert.equal(formatter.workloadOpenLimit(4, 3), '4 / 3')
 assert.equal(formatter.workloadOpenLimit('4', null), '4 / —')
+assert.equal(formatter.workloadReadinessText(true, 'Ready', 'Needs attention', 'Access readiness'), 'Access readiness: Ready')
 assert.equal(formatter.workloadState(true, 0, true), 'Error')
 assert.equal(formatter.workloadState(false, 1, true), 'Warning')
 assert.equal(formatter.workloadState(false, 0, true), 'Success')

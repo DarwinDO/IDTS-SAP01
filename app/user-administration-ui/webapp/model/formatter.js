@@ -131,8 +131,9 @@ sap.ui.define(["sap/ui/core/format/DateFormat"], function (DateFormat) {
 			return `${sOpen} / ${Number.isFinite(Number(sLimit)) ? Number(sLimit) : "—"}`;
 		},
 
-		workloadReadinessText: function (bReady, sReady, sNeedsAttention) {
-			return bReady === true ? sReady || "Ready" : sNeedsAttention || "Needs attention";
+		workloadReadinessText: function (bReady, sReady, sNeedsAttention, sLabel) {
+			const sState = bReady === true ? sReady || "Ready" : sNeedsAttention || "Needs attention";
+			return sLabel ? `${sLabel}: ${sState}` : sState;
 		},
 
 		workloadReadinessState: function (bReady) {

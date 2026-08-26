@@ -18,6 +18,7 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 
 const cds = require('@sap/cds')
 const { DELETE, INSERT, SELECT, UPDATE } = cds.ql
+const { hasActiveIdentityAccess, readActiveIdentityAccessByUser } = require('../../srv/access/identity-readiness')
 
 const RESULTS = []
 let PASS = 0
@@ -30,6 +31,7 @@ const USERS = {
   IDLE_INACTIVE: '10000000-0000-0000-0000-000000000007',
   INACTIVE_REQUESTER: '10000000-0000-0000-0000-000000000008',
   SANG: '10000000-0000-0000-0000-000000000002',
+  DAT: '10000000-0000-0000-0000-000000000003',
   NHANT: '10000000-0000-0000-0000-000000000004'
 }
 
@@ -39,6 +41,25 @@ const PROFILES = {
   ZERO: '20000000-0000-0000-0000-000000000003',
   LEGACY: '20000000-0000-0000-0000-000000000004',
   IDLE_INACTIVE: '20000000-0000-0000-0000-000000000005'
+}
+
+const IDENTITY_HASHES = {
+  SANG: 'a'.repeat(64),
+  DAT: 'b'.repeat(64),
+  LEGACY: 'c'.repeat(64),
+  DAT_MISMATCH: 'd'.repeat(64)
+}
+
+const IDENTITY_REQUESTS = {
+  SANG: '91000000-0000-0000-0000-000000000001',
+  DAT: '91000000-0000-0000-0000-000000000002',
+  LEGACY: '91000000-0000-0000-0000-000000000003'
+}
+
+const ORPHAN = {
+  USER: '92000000-0000-0000-0000-000000000001',
+  PROFILE: '92000000-0000-0000-0000-000000000002',
+  BUG: '92000000-0000-0000-0000-000000000003'
 }
 
 function rec (label, pass, detail = '') {
@@ -95,14 +116,39 @@ async function main () {
   )
   const byDeveloperName = new Map(allRows.map(row => [row.developerName, row]))
 
-  expectEqual('DeveloperWorkloads row count', allRows.length, 4)
+  expectEqual('DeveloperWorkloads row count', allRows.length, 5)
   expectArrayEqual(
     'DeveloperWorkloads names',
     allRows.map(row => row.developerName),
-    ['DatDT', 'LegacyDev', 'SangVN', 'ZeroDev']
+    ['DatDT', 'LegacyDev', 'SangVN', 'Unknown Developer', 'ZeroDev']
+  )
+
+  let identityReadCalls = 0
+  const identityAccessByUser = await readActiveIdentityAccessByUser({
+    run: (...args) => {
+      identityReadCalls += 1
+      return db.run(...args)
+    }
+  }, [USERS.SANG, USERS.DAT, USERS.ZERO, USERS.LEGACY])
+  expectEqual('Identity readiness uses one bounded bulk helper (two reads)', identityReadCalls, 2)
+  expectEqual('Bulk identity readiness exact linked user', identityAccessByUser.get(USERS.SANG)?.ready, true)
+  expectEqual('Bulk identity readiness unlinked user', identityAccessByUser.get(USERS.ZERO)?.ready, false)
+  expectEqual('Bulk identity readiness inactive user', identityAccessByUser.get(USERS.LEGACY)?.ready, false)
+  expectEqual('Bulk identity readiness hash mismatch', identityAccessByUser.get(USERS.DAT)?.ready, false)
+  expectEqual(
+    'Duplicate matching ACTIVE requests are not ready',
+    hasActiveIdentityAccess(
+      { ID: 'duplicate-user', active: true, externalIdentityKeyHash: 'e'.repeat(64) },
+      [
+        { activeUser_ID: 'duplicate-user', status_code: 'ACTIVE', identityKeyHash: 'e'.repeat(64) },
+        { activeUser_ID: 'duplicate-user', status_code: 'ACTIVE', identityKeyHash: 'e'.repeat(64) }
+      ]
+    ),
+    false
   )
 
   const sang = byDeveloperName.get('SangVN')
+  expectEqual('SangVN identityAccessReady requires exact identity link', sang?.identityAccessReady, true)
   expectEqual('SangVN openOwnedBugCount', sang?.openOwnedBugCount, 6)
   expectEqual('SangVN overdueOwnedBugCount', sang?.overdueOwnedBugCount, 4)
   expectEqual('SangVN currentActionItemCount', sang?.currentActionItemCount, 4)
@@ -120,6 +166,7 @@ async function main () {
   expectEqual('SangVN fixed workload limit', sang?.workloadLimit, 3)
 
   const dat = byDeveloperName.get('DatDT')
+  expectEqual('DatDT identityAccessReady rejects hash mismatch', dat?.identityAccessReady, false)
   expectEqual('DatDT openOwnedBugCount', dat?.openOwnedBugCount, 1)
   expectEqual('DatDT overdueOwnedBugCount', dat?.overdueOwnedBugCount, 1)
   expectEqual('DatDT currentActionItemCount', dat?.currentActionItemCount, 0)
@@ -128,15 +175,21 @@ async function main () {
   expectEqual('DatDT effective availability at 1 open bug', dat?.availabilityStatusCode, 'AVAILABLE')
 
   const legacy = byDeveloperName.get('LegacyDev')
+  expectEqual('LegacyDev identityAccessReady rejects inactive user', legacy?.identityAccessReady, false)
   expectEqual('LegacyDev active=false still visible with backlog', legacy?.active, false)
   expectEqual('LegacyDev openOwnedBugCount', legacy?.openOwnedBugCount, 1)
   expectEqual('LegacyDev currentActionItemCount', legacy?.currentActionItemCount, 1)
   expectEqual('LegacyDev isOverloaded', legacy?.isOverloaded, false)
 
   const zero = byDeveloperName.get('ZeroDev')
+  expectEqual('ZeroDev identityAccessReady rejects unlinked user', zero?.identityAccessReady, false)
   expectEqual('ZeroDev active=true visible with zero load', zero?.active, true)
   expectEqual('ZeroDev openOwnedBugCount', zero?.openOwnedBugCount, 0)
   expectEqual('ZeroDev isOverloaded', zero?.isOverloaded, false)
+
+  const unknown = byDeveloperName.get('Unknown Developer')
+  expectEqual('Unknown legacy backlog identityAccessReady is false', unknown?.identityAccessReady, false)
+  expectEqual('Unknown legacy backlog keeps its open bug', unknown?.openOwnedBugCount, 1)
 
   rec(
     'IdleInactiveDev omitted when inactive and zero backlog',
@@ -169,7 +222,7 @@ async function main () {
       .where({ active: false })
       .orderBy('developerName')
   )
-  expectArrayEqual('Filter active=false', inactiveRows.map(row => row.developerName), ['LegacyDev'])
+  expectArrayEqual('Filter active=false', inactiveRows.map(row => row.developerName), ['LegacyDev', 'Unknown Developer'])
 
   const searchQuery = SELECT.from('BugService.DeveloperWorkloads')
     .columns('developerName')
@@ -202,7 +255,7 @@ async function main () {
   const countQuery = SELECT.from('BugService.DeveloperWorkloads').columns('developerName')
   countQuery.SELECT.count = true
   const countRows = await runAs(pmUser, countQuery)
-  expectEqual('DeveloperWorkloads $count=true', countRows.$count, 4)
+  expectEqual('DeveloperWorkloads $count=true', countRows.$count, 5)
 
   const developerUser = new cds.User({ id: USERS.SANG, roles: ['DEVELOPER', 'authenticated-user'] })
   const developerRows = await runAs(
@@ -333,6 +386,9 @@ async function seedWorkloadScenario (db) {
       .where({ assignee_ID: PROFILES.SANG })
   )
 
+  await db.run(UPDATE('idts.cap.Users').set({ externalIdentityKeyHash: IDENTITY_HASHES.SANG }).where({ ID: USERS.SANG }))
+  await db.run(UPDATE('idts.cap.Users').set({ externalIdentityKeyHash: IDENTITY_HASHES.DAT }).where({ ID: USERS.DAT }))
+
   await db.run(INSERT.into('idts.cap.Users').entries([
     {
       ID: USERS.ZERO,
@@ -346,6 +402,7 @@ async function seedWorkloadScenario (db) {
       displayName: 'LegacyDev',
       email: 'legacydev@example.local',
       role_code: 'DEVELOPER',
+      externalIdentityKeyHash: IDENTITY_HASHES.LEGACY,
       active: false
     },
     {
@@ -361,7 +418,20 @@ async function seedWorkloadScenario (db) {
       email: 'inactive.requester@example.local',
       role_code: 'DEVELOPER',
       active: false
+    },
+    {
+      ID: ORPHAN.USER,
+      displayName: 'Orphan Legacy User',
+      email: 'orphan.legacy@example.local',
+      role_code: 'DEVELOPER',
+      active: true
     }
+  ]))
+
+  await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries([
+    identityRequestEntry(IDENTITY_REQUESTS.SANG, USERS.SANG, IDENTITY_HASHES.SANG),
+    identityRequestEntry(IDENTITY_REQUESTS.DAT, USERS.DAT, IDENTITY_HASHES.DAT_MISMATCH),
+    identityRequestEntry(IDENTITY_REQUESTS.LEGACY, USERS.LEGACY, IDENTITY_HASHES.LEGACY)
   ]))
 
   await db.run(INSERT.into('idts.cap.DeveloperProfiles').entries([
@@ -385,6 +455,13 @@ async function seedWorkloadScenario (db) {
       availabilityStatus_code: 'AVAILABLE',
       workloadLimit: 2,
       active: false
+    },
+    {
+      ID: ORPHAN.PROFILE,
+      user_ID: ORPHAN.USER,
+      availabilityStatus_code: 'AVAILABLE',
+      workloadLimit: 2,
+      active: true
     }
   ]))
 
@@ -448,8 +525,19 @@ async function seedWorkloadScenario (db) {
       nextProcessorRole_code: 'DEVELOPER',
       dueDate: dates.futurePlus4,
       estimatedEffortHours: '2.25'
+    }),
+    bugEntry({
+      ID: ORPHAN.BUG,
+      bugNumber: 'BUG-WL-UNKNOWN',
+      status_code: 'ASSIGNED',
+      assignee_ID: ORPHAN.PROFILE,
+      dueDate: dates.futurePlus4,
+      estimatedEffortHours: '1.00'
     })
   ]))
+
+  // Preserve a legacy Bug whose former Developer Profile no longer exists; the read model must fail closed on identity readiness.
+  await db.run(DELETE.from('idts.cap.DeveloperProfiles').where({ ID: ORPHAN.PROFILE }))
 }
 
 function dateOffset (days) {
@@ -478,6 +566,26 @@ function bugEntry (overrides) {
     testRunRef: null,
     rejectionReason: null,
     ...overrides
+  }
+}
+
+function identityRequestEntry (ID, activeUserID, identityKeyHash) {
+  return {
+    ID,
+    targetEmailNormalized: `${activeUserID}@example.invalid`,
+    openRequestKey: null,
+    requestedRole_code: 'DEVELOPER',
+    userAdminRequested: false,
+    status_code: 'ACTIVE',
+    requestedBy_ID: USERS.DON,
+    expiresAt: '2026-09-30T00:00:00.000Z',
+    tokenNonce: `${ID}-nonce`,
+    tokenHash: `${ID}-token`,
+    identityKeyHash,
+    identityEmailNormalized: `${activeUserID}@example.invalid`,
+    provisioningVersion: 1,
+    activeUser_ID: activeUserID,
+    correlationId: ID
   }
 }
 

@@ -1361,7 +1361,7 @@ sap.ui.define([
 				estimatedEffortHoursTotal: toCount(oSource.estimatedEffortHoursTotal),
 				isOverloaded: oSource.isOverloaded === true || oSource.isOverloaded === "true",
 				active: oSource.active === true,
-				accessReady: oSource.active === true && !!oSource.developerUserID
+				identityAccessReady: oSource.identityAccessReady === true
 			};
 		},
 

@@ -1,5 +1,9 @@
 # Knowledge: `i18n_en.properties`
 
+## 2026-08-26 Gate 6.3 access-readiness copy
+
+`accessReadinessLabel=Access readiness`, `accessReadinessReadyText=Ready`, and `accessReadinessAttentionText=Needs attention` are the English counterpart for the server-derived `identityAccessReady` workload field. Keep these keys aligned with `i18n.properties` and `i18n_vi.properties`; the UI must not infer access readiness from profile activity or a user ID.
+
 ## Gate 5 key anchors / Anchor key Gate 5
 
 ### English

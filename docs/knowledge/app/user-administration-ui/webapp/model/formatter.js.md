@@ -20,7 +20,7 @@ Do not put provider responses, raw errors, credentials, identity hashes, tokens,
 
 ### English
 
-The formatter remains presentation-only for the workload view. `availabilityState` maps the server criticality to SAP semantic states; `workloadOpenLimit` renders `open / limit` and uses an em dash when no limit exists; `workloadReadinessText` and `workloadReadinessState` show a profile readiness hint without authorizing access; `workloadCountState` marks only positive overdue counts; and `workloadStateText`/`workloadState` distinguish overloaded, overdue, within-limit, and inactive states. `workloadDetailsTitle` labels the selected Developer detail dialog. None of these functions calculates workload or exposes an internal ID.
+The formatter remains presentation-only for the workload view. `availabilityState` maps the server criticality to SAP semantic states; `workloadOpenLimit` renders `open / limit` and uses an em dash when no limit exists; `workloadReadinessText` and `workloadReadinessState` render the server-derived `identityAccessReady` Boolean with the localized `Access readiness` label and never authorize access; `workloadCountState` marks only positive overdue counts; and `workloadStateText`/`workloadState` distinguish overloaded, overdue, within-limit, and inactive states. `workloadDetailsTitle` labels the selected Developer detail dialog. None of these functions calculates workload or exposes an internal ID.
 
 - **IDTS concept**: Semantic color and localized labels help a PM scan current capacity without replacing CAP authorization or BugService aggregation.
 - **Impact if broken**: A missing limit could appear as zero, an overdue count could be shown as healthy, or a color could be mistaken for permission.
@@ -28,7 +28,7 @@ The formatter remains presentation-only for the workload view. `availabilityStat
 
 ### Tiếng Việt
 
-Formatter vẫn chỉ làm presentation cho view workload. `availabilityState` map criticality từ server sang semantic state của SAP; `workloadOpenLimit` render `open / limit` và dùng dấu gạch ngang dài khi không có limit; `workloadReadinessText` và `workloadReadinessState` hiển thị hint readiness profile nhưng không authorize access; `workloadCountState` chỉ đánh dấu khi overdue count lớn hơn 0; `workloadStateText`/`workloadState` phân biệt overloaded, overdue, within-limit và inactive. `workloadDetailsTitle` tạo title cho dialog Developer được chọn. Không function nào tự tính workload hoặc expose internal ID.
+Formatter vẫn chỉ làm presentation cho view workload. `availabilityState` map criticality từ server sang semantic state của SAP; `workloadOpenLimit` render `open / limit` và dùng dấu gạch ngang dài khi không có limit; `workloadReadinessText` và `workloadReadinessState` render Boolean `identityAccessReady` do server tính cùng label localize `Access readiness` và không authorize access; `workloadCountState` chỉ đánh dấu khi overdue count lớn hơn 0; `workloadStateText`/`workloadState` phân biệt overloaded, overdue, within-limit và inactive. `workloadDetailsTitle` tạo title cho dialog Developer được chọn. Không function nào tự tính workload hoặc expose internal ID.
 
 - **Khái niệm IDTS**: Semantic color và label localize giúp PM quét capacity hiện tại mà không thay thế authorization CAP hoặc aggregation của BugService.
 - **Ảnh hưởng nếu sai**: Limit thiếu có thể bị hiện như zero, overdue count có thể bị hiện như healthy hoặc màu bị hiểu nhầm là permission.

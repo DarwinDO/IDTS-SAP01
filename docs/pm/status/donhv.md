@@ -8985,3 +8985,47 @@ Vietnamese:
 - Exactly one Draft PR: `#349` — `https://github.com/DarwinDO/IDTS-SAP01/pull/349`, target `dev`, initial remote head `0ac4e23a3ff2c2ba427eac8f7d23000a5e79115f`, `isDraft=true`, `state=OPEN`.
 - Remote PR body readback passed `QA Depth Gate PR body check: PASS (11 required sections)`. GitHub `qa-depth-gate` returned `SUCCESS`.
 - Mutation ledger: source/status/docs were committed and pushed; no second PR, Ready, merge, rollout, deployment, HANA/HDI, provider, user/role, data, email, Jira/Drive or Gate 6.4 mutation occurred. Final current head after this status/evidence handoff will be read back before stopping.
+
+### 2026-08-26 Gate 6.3 readiness security finding — remediation in progress
+
+- Classification: Important-equivalent security-state-misrepresentation finding; coordinator Codex Security diff scan on exact head `50b68701da8a650917a0a0d218f50632820950fc` reported `csf_80d41b36a850713c6bbc2a4c`, occurrence `occ_52dec5bce30b309ab47d3757`, rule `ui-readiness.misrepresentation`.
+- Evidence: report `C:\Users\LapHub\AppData\Local\Temp\codex-security-scans-FgOWdt\IDTS-SAP01\50b68701da8a650917a0a0d218f50632820950fc_20260825T173136Z_qrim87f8\report.md` was supplied/read from the coordinator scan package; the finding affects `app/user-administration-ui/webapp/controller/Main.controller.js:1364`, the authoritative predicate in `srv/access/identity-readiness.js:9-18`, and the readiness assertions in `scripts/qa/test-user-admin-workload.js:88-104`. TAC was unavailable because the connector was not connected.
+- Symptom/root cause: the browser labels readiness from `DeveloperProfile.active && developerUserID`, which is weaker than the authoritative active User + nonempty immutable identity hash + exactly-one matching `ACTIVE` onboarding request invariant. Coordinator’s prior `49/49` workload-auth, `13/13` XSUAA and UI workload checks did not cover target Developer identity-access readiness.
+- Fix/status: fixed in the subsequent RED/GREEN cycle with one bounded `readActiveIdentityAccessByUser` bulk helper call plus `hasActiveIdentityAccess` in the read contract; the UI consumes only the server Boolean. Ordinary `BugService.Bugs` reads are out of scope and are not newly attributed to Gate 6.3.
+- Owner/next: DonHV source gate; focused GREEN is complete, full matrix and exact-head independent review remain the next boundary. No Ready, merge, deploy, data/provider/user/role/email/Jira/Drive mutation, Gate 6.4 or cleanup.
+
+### 2026-08-26 Gate 6.3 unknown-row probe fixture issue
+
+- Classification: test-harness/tooling issue; a bounded in-memory orphan-workload probe stopped before the intended foreign-key/deletion check because its synthetic Bug omitted the schema-required non-null `description` field.
+- Fix/status: no repository, database, product or external-state mutation occurred; the probe was rerun with the repository’s complete `bugEntry` shape and the unknown-row regression was retained in the workload suite.
+- Verification/owner: the complete probe preserved the dangling Bug after profile deletion; focused backend GREEN asserts `Unknown Developer.identityAccessReady === false` and its open Bug remains visible.
+
+### 2026-08-26 Gate 6.3 readiness RED evidence
+
+- Classification: intentional TDD RED; the expanded in-memory workload suite reached `56 PASS / 5 FAIL / 61 checks`.
+- Failing assertions: `SangVN`, `DatDT`, `LegacyDev`, `ZeroDev` and the dangling `Unknown Developer` workload rows had no `identityAccessReady` field because the service contract/handler had not yet been changed. The shared helper assertions already passed: exact linked, unlinked, inactive, hash mismatch, duplicate matching ACTIVE requests, and the bounded two-read helper shape.
+- Fix/status: expected RED, source implementation not yet applied. Existing PM-all/Developer-own authorization and all query-bypass assertions remained green in the same run. No ordinary `BugService.Bugs` policy was changed.
+
+### 2026-08-26 Gate 6.3 UI readiness RED evidence
+
+- Classification: intentional TDD RED; `node scripts/qa/test-user-admin-workload.js` stopped at the first missing `accessReadinessLabel` locale key, before the source-contract assertions. This is expected because the UI still uses `developerReady`/`accessReady` and no server `identityAccessReady` contract exists yet.
+- Fix/status: no source implementation applied when observed. The RED contract now requires server-only `identityAccessReady`, shared bulk/helper usage, localized Access readiness text, and false normalization when only active profile plus `developerUserID` is present.
+
+### 2026-08-26 Gate 6.3 readiness GREEN remediation
+
+- Implemented the smallest authorized fix: `srv/bug-service/monitoring.js` performs one `readActiveIdentityAccessByUser` bulk read for scoped workload profiles and applies `hasActiveIdentityAccess` per returned safe DTO; profile rows and unknown legacy rows expose only `identityAccessReady`, defaulting false. `srv/service.cds` adds the read-only Boolean contract field; no database/schema/HANA artifact changed.
+- UI now consumes only the server boolean and renders localized `Access readiness`; active profile plus `developerUserID` alone normalizes false. Technical assignee/current action owner and assignment/workload counts remain separate.
+- Fresh focused GREEN: workload backend `61 PASS / 0 FAIL / 61 checks`, UI workload contract PASS, Node syntax checks PASS, CAP EDMX compile exit 0. Prior auth/query scope remains green in the same backend suite. No ordinary `BugService.Bugs` read-policy change.
+
+### 2026-08-26 Gate 6.3 readiness full matrix
+
+- Programmatic: `qa:user-admin-workload` PASS; `qa:user-admin-ui` PASS; `qa:user-admin-active-users` PASS; `qa:user-access` provisioning PASS; `qa:idts113:btp-auth` PASS `13/13`; `qa:developer-workload` PASS `61/0`.
+- Governance/security: secret scan PASS; agent rules PASS `8`; QA-depth self-test PASS `15/0`; both Node syntax checks and `git diff --check` PASS. The only diff warnings are repository line-ending normalization notices; no whitespace failure occurred.
+- CAP/UI: `npx cds compile srv -s all --to edmx` exit 0 with the known unrelated attachment `NonUpdateableProperties` warning; `npx cds compile db/schema.cds --to hana` exit 0; UI5 MCP linter empty and manifest valid with zero errors; UI ESLint and SAPUI5 build exit 0.
+- Scope guards: no `db/`, `package-lock.json`, `mta.yaml` or `xs-security.json` path changed; authorized `srv` path set is exactly `srv/bug-service/monitoring.js, srv/service.cds`. No generated HANA artifact was created or changed.
+
+### 2026-08-26 Gate 6.3 authorized-srv allowlist wrapper issue
+
+- Classification: tooling issue; the first PowerShell allowlist wrapper nested two `git diff --name-only` arrays and compared a `System.Object[]` value, falsely reporting an unexpected `srv` path.
+- Fix/status: no source or external state changed. The wrapper was rerun with flattened scalar path collection; the intended allowlist remained exactly `srv/bug-service/monitoring.js` and `srv/service.cds`.
+- Verification: flattened wrapper passed with exactly `srv/bug-service/monitoring.js, srv/service.cds`; `db/`, dependency/lockfile and deployment-path guards also passed.

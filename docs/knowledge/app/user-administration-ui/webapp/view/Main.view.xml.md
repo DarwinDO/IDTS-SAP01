@@ -126,7 +126,7 @@ Giữ đồng bộ năm khu vực cấp cao, boundary child Access/Developers v�
 
 ### English
 
-The Developers child `IconTabBar` places `developerWorkload` before `developerResponsibilities`. The Workload view is a responsive read-only table bound to `workload>/items`; it has search, Refresh, independent error/busy state, server-page `Load more`, and a `View workload` action. It displays safe business fields: Developer name/email, availability, profile readiness, open/limit, current Developer action count, overdue count, effort, and workload state. Internal profile/user IDs are not bound into the visible XML.
+The Developers child `IconTabBar` places `developerWorkload` before `developerResponsibilities`. The Workload view is a responsive read-only table bound to `workload>/items`; it has search, Refresh, independent error/busy state, server-page `Load more`, and a `View workload` action. It displays safe business fields: Developer name/email, availability, server-derived identity access readiness, open/limit, current Developer action count, overdue count, effort, and workload state. The localized column is `Access readiness`; internal profile/user IDs are not bound into the visible XML.
 
 - **Location**: `Main.view.xml` Workload `IconTabFilter`, `developerWorkloadTable`, and the `View workload` button.
   **IDTS concept**: Developer workload is a business-owned read-only workspace; responsibility mutation stays in the separate Responsibilities area and Bug mutation stays in Bug Management.
@@ -140,7 +140,7 @@ The Developers child `IconTabBar` places `developerWorkload` before `developerRe
 
 ### Tiếng Việt
 
-`IconTabBar` con của Developers đặt `developerWorkload` trước `developerResponsibilities`. View Workload là table responsive chỉ đọc bind vào `workload>/items`; có search, Refresh, error/busy state độc lập, `Load more` theo page server và action `View workload`. View chỉ hiện field nghiệp vụ an toàn: tên/email Developer, availability, readiness profile, open/limit, số action hiện tại của Developer, overdue, effort và workload state. Internal profile/user ID không được bind vào XML hiển thị.
+`IconTabBar` con của Developers đặt `developerWorkload` trước `developerResponsibilities`. View Workload là table responsive chỉ đọc bind vào `workload>/items`; có search, Refresh, error/busy state độc lập, `Load more` theo page server và action `View workload`. View chỉ hiện field nghiệp vụ an toàn: tên/email Developer, availability, access readiness do server tính, open/limit, số action hiện tại của Developer, overdue, effort và workload state. Column được localize là `Access readiness`; internal profile/user ID không được bind vào XML hiển thị.
 
 - **Vị trí**: `IconTabFilter` Workload, `developerWorkloadTable` và button `View workload` trong `Main.view.xml`.
   **Khái niệm IDTS**: Workload Developer là workspace chỉ đọc thuộc Developers; mutation responsibility nằm ở khu vực Responsibilities riêng, mutation Bug nằm ở Bug Management.

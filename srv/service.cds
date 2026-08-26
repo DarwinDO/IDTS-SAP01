@@ -420,6 +420,7 @@ service BugService @(requires: 'authenticated-user') {
   entity DeveloperWorkloads {
     key developerProfileID      : UUID;
     developerUserID             : UUID;
+    identityAccessReady         : Boolean;
     developerName               : String(120);
     developerEmail              : String(255);
     availabilityStatusCode      : String(40);

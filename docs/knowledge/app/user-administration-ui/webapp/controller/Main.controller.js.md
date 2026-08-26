@@ -146,13 +146,17 @@ Giữ authorization CAP, optimistic check và safe mapping ở backend, không c
 
 `onInit` creates the independent `workload` JSONModel with `items`, `query`, `nextSkip`, `pageSize: 100`, `hasMore`, `loaded`, `busy`, `error`, `selectedDeveloper`, `bugs`, `bugsBusy`, and `bugsError`. The selected Developer child tab is stored in session state so returning to User Administration does not silently switch the user to another Developer workspace. The `bugApi` model is deliberately separate from the User Administration default model.
 
+The Workload normalization consumes only the server-provided `identityAccessReady` Boolean. It never infers access readiness from `active`, `developerUserID`, profile state, or assignment counts; the label is localized as `Access readiness`. The backend remains authoritative for identity-link readiness and DeveloperWorkloads authorization.
+
+Normalize Workload chỉ consume Boolean `identityAccessReady` do server trả. Controller không tự suy luận readiness từ `active`, `developerUserID`, profile state hoặc assignment count; label được localize là `Access readiness`. Backend vẫn là authority cho identity-link readiness và authorization của DeveloperWorkloads.
+
 - **Location**: `Main.controller.js:const WORKLOAD_ORDER`, `const WORKLOAD_SELECT`, and `const WORKLOAD_BUG_SELECT`.
   **IDTS concept**: The UI declares the exact server ordering and bounded field contracts for aggregate rows and Bug details.
   **Impact if broken**: Page-boundary order can drift, a detail read can expose descriptions/comments/audit/provider data, or later code can accidentally depend on a broad Bug payload.
   **Must check together**: named `bugApi` in `manifest.json`, `srv/service.cds` BugService projections, the approved Gate 6.3 design, and `test-user-admin-workload.js`.
 
 - **Location**: `Main.controller.js:_loadDeveloperWorkloads`.
-  **IDTS concept**: Read-only DeveloperWorkloads consumption. The binding requests the server order `isOverloaded desc, overdueOwnedBugCount desc, developerName asc, developerProfileID asc`, caps each page at 100, normalizes numeric values, preserves page order when appending, and de-duplicates only by the Developer Profile key.
+  **IDTS concept**: Read-only DeveloperWorkloads consumption. The binding requests the server order `isOverloaded desc, overdueOwnedBugCount desc, developerName asc, developerProfileID asc`, caps each page at 100, normalizes numeric values and the server `identityAccessReady` Boolean, preserves page order when appending, and de-duplicates only by the Developer Profile key.
   **Impact if broken**: PM could see a different priority order on the second page, duplicate Developers, misleading effort/count values, or a workload error could overwrite unrelated User Administration state.
   **Must check together**: `srv/bug-service/monitoring.js:readDeveloperWorkloads`, `Main.view.xml` Workload table, and page-boundary/error assertions in `scripts/qa/test-user-admin-workload.js`.
 
@@ -176,7 +180,7 @@ Giữ authorization CAP, optimistic check và safe mapping ở backend, không c
   **Phải kiểm tra cùng**: model `bugApi` trong `manifest.json`, projection BugService trong `srv/service.cds`, design Gate 6.3 đã duyệt và `test-user-admin-workload.js`.
 
 - **Vị trí**: `Main.controller.js:_loadDeveloperWorkloads`.
-  **Khái niệm IDTS**: Đọc DeveloperWorkloads chỉ đọc. Binding yêu cầu order `isOverloaded desc, overdueOwnedBugCount desc, developerName asc, developerProfileID asc`, giới hạn mỗi page tối đa 100, normalize numeric value, giữ thứ tự khi append và chỉ deduplicate theo key Developer Profile.
+  **Khái niệm IDTS**: Đọc DeveloperWorkloads chỉ đọc. Binding yêu cầu order `isOverloaded desc, overdueOwnedBugCount desc, developerName asc, developerProfileID asc`, giới hạn mỗi page tối đa 100, normalize numeric value và Boolean `identityAccessReady` do server trả, giữ thứ tự khi append và chỉ deduplicate theo key Developer Profile.
   **Ảnh hưởng nếu sai**: PM có thể thấy page sau khác thứ tự ưu tiên, Developer bị lặp, count/effort sai hoặc lỗi workload ghi đè state khác của User Administration.
   **Phải kiểm tra cùng**: `srv/bug-service/monitoring.js:readDeveloperWorkloads`, table Workload trong `Main.view.xml` và assertion page-boundary/error trong `scripts/qa/test-user-admin-workload.js`.
 

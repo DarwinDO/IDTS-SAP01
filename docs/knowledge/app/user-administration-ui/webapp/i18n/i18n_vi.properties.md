@@ -1,5 +1,9 @@
 # Knowledge: `i18n_vi.properties`
 
+## 2026-08-26 Gate 6.3 access-readiness copy
+
+Bundle tiếng Việt có `accessReadinessLabel=Mức sẵn sàng truy cập`, `accessReadinessReadyText=Sẵn sàng` và `accessReadinessAttentionText=Cần chú ý` cho Boolean `identityAccessReady` do server tính. Giữ parity với `i18n.properties` và `i18n_en.properties`; không suy luận access readiness từ profile active hoặc user ID trong browser.
+
 ## English / Tiếng Việt
 
 This Vietnamese mirror provides Gate 6 Operations and Audit labels for the same safe UI concepts as the English-first property files: delivery/provisioning tabs, readiness, bounded statuses, action/result filters, safe detail labels, and retry/reconcile feedback. Existing untranslated application keys continue to fall back to the English-first bundle.

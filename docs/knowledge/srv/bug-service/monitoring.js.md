@@ -18,6 +18,20 @@ Trước khi tải profile hoặc Bug, `readDeveloperWorkloads` resolve caller q
 
 Scope Developer được áp dụng trước khi aggregate xử lý filter, order, paging và count. Gate 6.3 remediation này không thay đổi read policy của `BugService.Bugs` thông thường; boundary được sửa cụ thể là read model `DeveloperWorkloads`.
 
+## 2026-08-26 identity-access readiness contract
+
+### English
+
+After authorization scoping, `readDeveloperWorkloads` makes one bounded `readActiveIdentityAccessByUser` helper call for the scoped profile user IDs. Each profile row exposes the safe service Boolean `identityAccessReady`, calculated with `hasActiveIdentityAccess`. It is true only when the target internal User is active, has a non-empty immutable `externalIdentityKeyHash`, and has exactly one matching `ACTIVE` onboarding request with the same `identityKeyHash`. Missing/inactive users, missing or mismatched hashes, duplicate matching requests, and dangling legacy Bugs without a current profile are false. This access readiness is separate from assignment readiness, current action counts, availability, and workload overload.
+
+### Vietnamese
+
+Sau khi scope authorization, `readDeveloperWorkloads` gọi một bounded helper `readActiveIdentityAccessByUser` cho các user ID của profile đã được scope. Mỗi workload row expose Boolean an toàn `identityAccessReady` của service, tính bằng `hasActiveIdentityAccess`. Chỉ trả true khi User nội bộ đang active, có `externalIdentityKeyHash` immutable không rỗng và có đúng một onboarding request `ACTIVE` khớp cùng `identityKeyHash`. User thiếu/inactive, hash thiếu hoặc lệch, request khớp bị duplicate và Bug legacy không còn profile hiện tại đều trả false. Access readiness tách biệt với assignment readiness, count current action, availability và overload workload.
+
+The bulk helper is read-only and set-based; it does not call a provider, persist a snapshot, duplicate workload aggregation, or authorize ordinary `BugService.Bugs` reads.
+
+Helper bulk là read-only và set-based; không gọi provider, không persist snapshot, không duplicate aggregation workload và không authorize read `BugService.Bugs` thông thường.
+
 ## Beginner-first execution map (2026-07-18)
 
 ### English
