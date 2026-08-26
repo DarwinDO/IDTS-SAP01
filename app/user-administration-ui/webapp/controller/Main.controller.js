@@ -281,9 +281,14 @@ sap.ui.define([
 
 		onRetryDelivery: async function (oEvent) {
 			const oRow = this._operationsRowFromEvent(oEvent, "deliveries");
-			if (!oRow || !await this._confirm("retryDeliveryConfirmation")) return;
+			if (!oRow) return false;
+			if (!["ACCESS_CHANGE", "INVITATION"].includes(oRow.deliveryType)) {
+				MessageBox.error(await this._text("operationsActionFailed"));
+				return false;
+			}
+			if (!await this._confirm("retryDeliveryConfirmation")) return false;
 			const sAction = oRow.deliveryType === "ACCESS_CHANGE" ? "retryUserAccessDelivery" : "retryOnboardingDelivery";
-			await this._invokeOperationsAction(sAction, {
+			return this._invokeOperationsAction(sAction, {
 				deliveryID: oRow.deliveryID,
 				expectedModifiedAt: oRow.modifiedAt
 			}, "deliveryRetryQueued", "deliveries");
@@ -1277,8 +1282,11 @@ sap.ui.define([
 				status: safeText(oRow?.status, ""),
 				attemptCount: Number.isFinite(Number(oRow?.attemptCount)) ? Number(oRow.attemptCount) : 0,
 				nextAttemptAt: oRow?.nextAttemptAt || null,
+				nextAttemptAtDisplay: oRow?.nextAttemptAt || sEmpty,
 				lastAttemptAt: oRow?.lastAttemptAt || null,
+				lastAttemptAtDisplay: oRow?.lastAttemptAt || sEmpty,
 				sentAt: oRow?.sentAt || null,
+				sentAtDisplay: oRow?.sentAt || sEmpty,
 				errorCode: safeText(oRow?.errorCode, ""),
 				errorSummary: safeText(oRow?.errorSummary, ""),
 				safeErrorSummary: safeText(oRow?.errorSummary || oRow?.safeErrorSummary),

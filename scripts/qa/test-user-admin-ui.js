@@ -390,6 +390,9 @@ assert.match(deliveryDetailsFragment, /i18n>sentAt/)
 assert.match(deliveryDetailsFragment, /deliveries>\/selected\/sentAt/)
 assert.match(deliveryDetailsFragment, /i18n>lastAttempt/)
 assert.match(deliveryDetailsFragment, /deliveries>\/selected\/lastAttemptAt/)
+for (const detailTimestamp of ['sentAt', 'lastAttemptAt', 'nextAttemptAt']) {
+  assert.match(deliveryDetailsFragment, new RegExp(`deliveries>\\/selected\\/${detailTimestamp}Display`), `${detailTimestamp} must have a safe empty-detail display`)
+}
 
 const controllerDefinition = loadController(controller)
 assert.equal(typeof controllerDefinition.onConfirmInvite, 'function')
@@ -543,6 +546,9 @@ async function verifyRuntimeBehavior () {
   assert.equal(normalizedEmptyDelivery.recipientDisplay, 'label:emptyDetail')
   assert.equal(normalizedEmptyDelivery.eventTypeLabel, 'label:emptyDetail')
   assert.equal(normalizedEmptyDelivery.safeErrorSummary, 'label:emptyDetail')
+  for (const detailTimestamp of ['sentAt', 'lastAttemptAt', 'nextAttemptAt']) {
+    assert.equal(normalizedEmptyDelivery[`${detailTimestamp}Display`], 'label:emptyDetail', `${detailTimestamp} empty value uses the em-dash display fallback`)
+  }
 
   const deliveryData = {
     items: [], query: 'masked', status: 'FAILED', deliveryType: 'ACCESS_CHANGE', nextSkip: 0,
@@ -591,13 +597,20 @@ async function verifyRuntimeBehavior () {
   const typedRetryInstance = Object.assign(Object.create(controllerDefinition), {
     _operationsRowFromEvent: () => ({ deliveryID: 'access-delivery-3', deliveryType: 'ACCESS_CHANGE', modifiedAt: 'access-version' }),
     _confirm: async key => { assert.equal(key, 'retryDeliveryConfirmation'); return true },
-    _invokeOperationsAction: async (...args) => { typedRetryCalls.push(args) }
+    _invokeOperationsAction: async (...args) => { typedRetryCalls.push(args) },
+    _text: async key => key
   })
   await typedRetryInstance.onRetryDelivery({})
   assert.deepEqual(JSON.parse(JSON.stringify(typedRetryCalls[0])), ['retryUserAccessDelivery', { deliveryID: 'access-delivery-3', expectedModifiedAt: 'access-version' }, 'deliveryRetryQueued', 'deliveries'])
   typedRetryInstance._operationsRowFromEvent = () => ({ deliveryID: 'invitation-delivery-1', deliveryType: 'INVITATION', modifiedAt: 'invitation-version' })
   await typedRetryInstance.onRetryDelivery({})
   assert.deepEqual(JSON.parse(JSON.stringify(typedRetryCalls[1])), ['retryOnboardingDelivery', { deliveryID: 'invitation-delivery-1', expectedModifiedAt: 'invitation-version' }, 'deliveryRetryQueued', 'deliveries'])
+  for (const invalidDeliveryType of ['UNKNOWN', undefined]) {
+    typedRetryInstance._operationsRowFromEvent = () => ({ deliveryID: 'invalid-delivery', deliveryType: invalidDeliveryType, modifiedAt: 'invalid-version' })
+    const invalidRetryResult = await typedRetryInstance.onRetryDelivery({})
+    assert.equal(invalidRetryResult, false, 'unknown delivery types fail closed with a safe result')
+  }
+  assert.equal(typedRetryCalls.length, 2, 'unknown or missing delivery types must not invoke an OData retry action')
 
   const auditData = { items: [], action: '', result: '', from: '2026-08-24', to: '2026-08-25', nextSkip: 0, pageSize: 25, hasMore: false, loaded: false, busy: false, error: false }
   const auditParameters = {}
@@ -1201,6 +1214,16 @@ const operationsI18nKeys = [
 for (const locale of ['i18n.properties', 'i18n_en.properties', 'i18n_vi.properties']) {
   const text = fs.readFileSync(path.join(webapp, 'i18n', locale), 'utf8')
   for (const key of operationsI18nKeys) assert.match(text, new RegExp(`^${key}=`, 'm'))
+  assert.match(text, /^deliverySearchPlaceholder=(?!.*(?:request|onboarding)).+$/im, `${locale} delivery search copy must be neutral`)
+  assert.match(text, /^noDeliveries=(?!.*(?:request|onboarding)).+$/im, `${locale} empty delivery copy must be neutral`)
+  if (locale === 'i18n_vi.properties') {
+    assert.match(text, /^deliverySearchPlaceholder=Tìm delivery theo người nhận đã che hoặc mã delivery$/m)
+    assert.match(text, /^noDeliveries=Không có delivery phù hợp với bộ lọc này$/m)
+  } else {
+    assert.match(text, /^deliverySearchPlaceholder=Search deliveries by masked recipient or delivery ID$/m)
+    assert.match(text, /^noDeliveries=No deliveries match this filter$/m)
+  }
+  assert.match(text, /^emptyDetail=—$/m, `${locale} empty detail must use an em dash`)
   for (const key of [
     ...Object.values(mainTabTooltips),
     'bugManagementOpenAction',

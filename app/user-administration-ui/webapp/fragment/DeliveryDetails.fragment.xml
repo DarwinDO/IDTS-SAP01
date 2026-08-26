@@ -9,11 +9,14 @@
 				<Label text="{i18n>attempts}" class="sapUiSmallMarginTop"/>
 				<Text text="{deliveries>/selected/attemptCount}"/>
 				<Label text="{i18n>sentAt}" class="sapUiSmallMarginTop"/>
-				<Text text="{path: 'deliveries>/selected/sentAt', formatter: 'formatter.dateTime'}"/>
+				<Text text="{path: 'deliveries>/selected/sentAt', formatter: 'formatter.dateTime'}" visible="{= !!${deliveries>/selected/sentAt} }"/>
+				<Text text="{deliveries>/selected/sentAtDisplay}" visible="{= !${deliveries>/selected/sentAt} }"/>
 				<Label text="{i18n>lastAttempt}" class="sapUiSmallMarginTop"/>
-				<Text text="{path: 'deliveries>/selected/lastAttemptAt', formatter: 'formatter.dateTime'}"/>
+				<Text text="{path: 'deliveries>/selected/lastAttemptAt', formatter: 'formatter.dateTime'}" visible="{= !!${deliveries>/selected/lastAttemptAt} }"/>
+				<Text text="{deliveries>/selected/lastAttemptAtDisplay}" visible="{= !${deliveries>/selected/lastAttemptAt} }"/>
 				<Label text="{i18n>nextAttempt}" class="sapUiSmallMarginTop"/>
-				<Text text="{path: 'deliveries>/selected/nextAttemptAt', formatter: 'formatter.dateTime'}"/>
+				<Text text="{path: 'deliveries>/selected/nextAttemptAt', formatter: 'formatter.dateTime'}" visible="{= !!${deliveries>/selected/nextAttemptAt} }"/>
+				<Text text="{deliveries>/selected/nextAttemptAtDisplay}" visible="{= !${deliveries>/selected/nextAttemptAt} }"/>
 				<Label text="{i18n>deliveryError}" class="sapUiSmallMarginTop"/>
 				<Text text="{deliveries>/selected/safeErrorSummary}"/>
 			</VBox>
