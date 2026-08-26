@@ -76,6 +76,18 @@ assert.match(view, /<SearchField/)
 assert.match(view, /<Table/)
 assert.match(view, /items="\{requests>\/items\}"/)
 assert.match(view, /press="\.onOpenInvite"/)
+const headerActionsMatch = view.match(/<f:actions>[\s\S]*?<\/f:actions>/)
+assert.ok(headerActionsMatch, 'dynamic page header actions must be present')
+const headerButtons = [...headerActionsMatch[0].matchAll(/<Button\b[\s\S]*?\/>/g)].map(match => match[0])
+assert.equal(headerButtons.length, 2, 'header must keep the navigation and Invite User actions')
+const bugManagementAction = headerButtons[0]
+assert.match(bugManagementAction, /text="\{i18n>bugManagementOpenAction\}"/)
+assert.match(bugManagementAction, /tooltip="\{i18n>bugManagementOpenActionTooltip\}"/)
+assert.match(bugManagementAction, /type="Transparent"/)
+assert.match(bugManagementAction, /icon="sap-icon:\/\/nav-back"/)
+assert.match(bugManagementAction, /press="\.onOpenBugManagement"/)
+assert.match(headerButtons[1], /text="\{i18n>inviteUser\}"/)
+assert.match(headerButtons[1], /type="Emphasized"/)
 assert.match(view, /press="\.onApproveProvisioning"/)
 assert.match(view, /press="\.onRetryAccessOperation"/)
 assert.match(view, /press="\.onReconcileAccessOperation"/)
@@ -364,6 +376,7 @@ assert.match(deliveryDetailsFragment, /deliveries>\/selected\/lastAttemptAt/)
 
 const controllerDefinition = loadController(controller)
 assert.equal(typeof controllerDefinition.onConfirmInvite, 'function')
+assert.equal(typeof controllerDefinition.onOpenBugManagement, 'function')
 assert.equal(typeof controllerDefinition._loadRequests, 'function')
 assert.equal(typeof controllerDefinition._loadInitialRequests, 'function')
 assert.equal(typeof controllerDefinition.onAfterRendering, 'function')
@@ -393,6 +406,17 @@ assert.equal(typeof controllerDefinition._normalizeAuditDate, 'function')
 assert.match(controller, /this\.getResourceBundle\(\)/)
 
 async function verifyRuntimeBehavior () {
+  const navigationCalls = []
+  const navigationDefinition = loadController(controller, {
+    location: { assign: url => navigationCalls.push(url) }
+  })
+  Object.create(navigationDefinition).onOpenBugManagement()
+  assert.deepEqual(navigationCalls, ['/idtsbugmanagementui/index.html'])
+  assert(!/[?#]|returnTo|:\/\//.test(navigationCalls[0]))
+  const unavailableNavigation = Object.create(loadController(controller, { location: {} }))
+  assert.doesNotThrow(() => unavailableNavigation.onOpenBugManagement())
+  assert.deepEqual(navigationCalls, ['/idtsbugmanagementui/index.html'])
+
   const dateNormalizer = Object.create(controllerDefinition)
   assert.equal(dateNormalizer._normalizeAuditDate('2026-08-24', false), '2026-08-24T00:00:00.000Z')
   assert.equal(dateNormalizer._normalizeAuditDate('2026-08-24', true), '2026-08-24T23:59:59.999Z')
@@ -1029,10 +1053,11 @@ async function verifyRuntimeBehavior () {
   assert.equal(developerClosedCount, 1)
 }
 
-function loadController (source) {
+function loadController (source, oWindow = { location: { assign: () => {} } }) {
   let definition
   const BaseController = { extend: (_name, value) => { definition = value; return { prototype: value } } }
   const sandbox = {
+    window: oWindow,
     sap: {
       ui: {
         define: (_dependencies, factory) => factory(
@@ -1051,7 +1076,7 @@ function loadController (source) {
 
 for (const locale of ['i18n.properties', 'i18n_en.properties']) {
   const text = fs.readFileSync(path.join(webapp, 'i18n', locale), 'utf8')
-  for (const key of ['appTitle', 'inviteUser', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'changeRoleConfirmation', 'revokeConfirmation', 'manageResponsibilities', 'developerProfileConfirmation', 'existingBugsKeepAssignee', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'businessCatalogsTab', 'catalogType', 'catalogSearchPlaceholder', 'includeInactiveCatalogs', 'addCatalogItem', 'editCatalogItem', 'deactivateCatalogItem', 'activateCatalogItem', 'catalogImpactTitle', 'catalogReason', 'saveCatalogItem', 'confirmCatalogDeactivation', 'activeUserSearchPlaceholder', 'includeNonActive', 'includeRevoked', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'loadMoreActiveUsers', 'viewDetails', 'activeUserDetails', 'linkExistingIdentity', 'existingIdentityLinkRole', 'existingIdentityLinkNotice', 'existingIdentityLinkEmail', 'sendIdentityLink', 'identityLinkQueued', 'cancelExistingLinkInvitation', 'cancelExistingLinkConfirmation', 'existingLinkCancelled', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'developerProfile', 'close', 'activeUsersNoDeveloper', 'suspendAccess', 'reactivateAccess', 'suspendWarning', 'reactivateWarning', 'suspendQueued', 'reactivateQueued']) {
+  for (const key of ['appTitle', 'inviteUser', 'bugManagementOpenAction', 'bugManagementOpenActionTooltip', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'changeRoleConfirmation', 'revokeConfirmation', 'manageResponsibilities', 'developerProfileConfirmation', 'existingBugsKeepAssignee', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'businessCatalogsTab', 'catalogType', 'catalogSearchPlaceholder', 'includeInactiveCatalogs', 'addCatalogItem', 'editCatalogItem', 'deactivateCatalogItem', 'activateCatalogItem', 'catalogImpactTitle', 'catalogReason', 'saveCatalogItem', 'confirmCatalogDeactivation', 'activeUserSearchPlaceholder', 'includeNonActive', 'includeRevoked', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'loadMoreActiveUsers', 'viewDetails', 'activeUserDetails', 'linkExistingIdentity', 'existingIdentityLinkRole', 'existingIdentityLinkNotice', 'existingIdentityLinkEmail', 'sendIdentityLink', 'identityLinkQueued', 'cancelExistingLinkInvitation', 'cancelExistingLinkConfirmation', 'existingLinkCancelled', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'developerProfile', 'close', 'activeUsersNoDeveloper', 'suspendAccess', 'reactivateAccess', 'suspendWarning', 'reactivateWarning', 'suspendQueued', 'reactivateQueued']) {
     assert.match(text, new RegExp(`^${key}=`, 'm'))
   }
   assert.match(text, /^cancelExistingLinkInvitation=Cancel invitation$/m)
@@ -1073,6 +1098,8 @@ for (const locale of ['i18n.properties', 'i18n_en.properties', 'i18n_vi.properti
   for (const key of operationsI18nKeys) assert.match(text, new RegExp(`^${key}=`, 'm'))
   for (const key of [
     ...Object.values(mainTabTooltips),
+    'bugManagementOpenAction',
+    'bugManagementOpenActionTooltip',
     'changeRoleActionTooltip',
     'manageResponsibilitiesActionTooltip',
     'revokeAccessActionTooltip',

@@ -198,6 +198,13 @@ sap.ui.define([
 			this.getModel("workload").setProperty("/bugs", []);
 		},
 
+		onOpenBugManagement: function () {
+			const sUrl = "/idtsbugmanagementui/index.html";
+			if (typeof window !== "undefined" && typeof window.location?.assign === "function") {
+				window.location.assign(sUrl);
+			}
+		},
+
 		openBugInManagement: function (oEvent) {
 			const oRow = oEvent?.getSource?.().getBindingContext("workload")?.getObject?.() || null;
 			const sUrl = this._bugObjectPageUrl(oRow?.bugID || oRow?.ID);
