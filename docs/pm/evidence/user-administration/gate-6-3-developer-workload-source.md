@@ -68,6 +68,7 @@
 
 | Coordinator Security diff scan on prior exact head `50b68701...` | One reportable medium/high-confidence finding `csf_80d41b36a850713c6bbc2a4c` / `occ_52dec5bce30b309ab47d3757` (`ui-readiness.misrepresentation`); not a zero-finding scan. TAC unavailable. The current remediation requires a fresh exact-head re-review before handoff. |
 | Fresh readiness matrix and scope guard | `qa:user-admin-workload`, `qa:user-admin-ui`, `qa:user-admin-active-users`, `qa:user-access`, `qa:idts113:btp-auth` `13/13`, `qa:developer-workload` `61/0`, secret scan, agent rules, QA-depth `15/0`, CAP EDMX/HANA, UI5 MCP linter/manifest, UI lint/build and whitespace checks pass. Authorized `srv` paths are exactly `srv/bug-service/monitoring.js` and `srv/service.cds`; `db/`, dependency/lockfile and deployment paths are unchanged. |
+| Readiness Important remediation and final re-review | Initial review of `7c50476f2fbed15de722de55fddca6d73789b53a` found one Important omission: `WORKLOAD_SELECT` did not request `identityAccessReady`. RED failed at that assertion; fix commit `44f3a349` adds the field. Fresh exact-head review of `44f3a34902f1f3e1b521f7a6f2c0c280b60f0d6d` returned `GO — 0 Critical / 0 Major / 0 Important / 0 Minor`. |
 
 ## Privacy, authorization and mutation boundary
 

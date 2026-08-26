@@ -146,9 +146,9 @@ Giữ authorization CAP, optimistic check và safe mapping ở backend, không c
 
 `onInit` creates the independent `workload` JSONModel with `items`, `query`, `nextSkip`, `pageSize: 100`, `hasMore`, `loaded`, `busy`, `error`, `selectedDeveloper`, `bugs`, `bugsBusy`, and `bugsError`. The selected Developer child tab is stored in session state so returning to User Administration does not silently switch the user to another Developer workspace. The `bugApi` model is deliberately separate from the User Administration default model.
 
-The Workload normalization consumes only the server-provided `identityAccessReady` Boolean. It never infers access readiness from `active`, `developerUserID`, profile state, or assignment counts; the label is localized as `Access readiness`. The backend remains authoritative for identity-link readiness and DeveloperWorkloads authorization.
+The Workload `WORKLOAD_SELECT` allowlist requests `identityAccessReady`, and normalization consumes only that server-provided Boolean. It never infers access readiness from `active`, `developerUserID`, profile state, or assignment counts; the label is localized as `Access readiness`. The backend remains authoritative for identity-link readiness and DeveloperWorkloads authorization.
 
-Normalize Workload chỉ consume Boolean `identityAccessReady` do server trả. Controller không tự suy luận readiness từ `active`, `developerUserID`, profile state hoặc assignment count; label được localize là `Access readiness`. Backend vẫn là authority cho identity-link readiness và authorization của DeveloperWorkloads.
+Allowlist `WORKLOAD_SELECT` của Workload có request field `identityAccessReady`, và normalize chỉ consume Boolean do server trả. Controller không tự suy luận readiness từ `active`, `developerUserID`, profile state hoặc assignment count; label được localize là `Access readiness`. Backend vẫn là authority cho identity-link readiness và authorization của DeveloperWorkloads.
 
 - **Location**: `Main.controller.js:const WORKLOAD_ORDER`, `const WORKLOAD_SELECT`, and `const WORKLOAD_BUG_SELECT`.
   **IDTS concept**: The UI declares the exact server ordering and bounded field contracts for aggregate rows and Bug details.

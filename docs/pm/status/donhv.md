@@ -9005,12 +9005,18 @@ Vietnamese:
 - Review head: `7c50476f2fbed15de722de55fddca6d73789b53a`; base: `d53f402ab92215e44d29da2e1d3da73a576fffd3`.
 - Result: `0 Critical / 0 Major / 1 Important / 0 Minor`; valid finding in `app/user-administration-ui/webapp/controller/Main.controller.js:17`: `WORKLOAD_SELECT` omitted `identityAccessReady`. Because the OData `$select` did not request the field, the server Boolean reached neither normalization nor the Workload UI, so exact-ready rows would display as not ready.
 - Review also confirmed the prior browser inference is removed; server authorization ordering, bounded bulk helper usage/no N+1, exact fail-closed invariant, unknown-row handling, Access readiness label, ordinary Bugs policy boundary and authorized diff scope passed.
-- Fix/status: open; add a RED assertion that `WORKLOAD_SELECT` includes `identityAccessReady`, then make the smallest select-list fix. Do not push, update PR #349, or advance until a fresh exact-head re-review returns zero Critical/Major/Important.
+- Fix/status: fixed with a RED assertion and the smallest select-list change; `WORKLOAD_SELECT` now requests `identityAccessReady`. Do not push/update PR #349 until the closure evidence is committed and the final exact-head readback is complete.
 
 ### 2026-08-26 Gate 6.3 review-finding RED
 
 - Classification: intentional TDD RED for the Important review finding; `node scripts/qa/test-user-admin-workload.js` failed at the new `WORKLOAD_SELECT` assertion because the committed select string omitted `identityAccessReady`.
 - Fix/status: expected and isolated to the UI read contract; the server field, normalization, authorization, helper invariant, and all prior focused backend checks remain unchanged. No push/PR/Ready mutation occurred.
+
+### 2026-08-26 Gate 6.3 Important remediation closure
+
+- Fix: `Main.controller.js:17` now includes `identityAccessReady` in `WORKLOAD_SELECT`; focused UI contract and syntax passed, and the full Gate 6.3 matrix was rerun green.
+- Fresh exact-head review: `44f3a34902f1f3e1b521f7a6f2c0c280b60f0d6d` against base `d53f402ab92215e44d29da2e1d3da73a576fffd3` returned `GO — 0 Critical / 0 Major / 0 Important / 0 Minor`. Reviewer confirmed the prior omission is fixed and all server authorization/invariant/no-N+1/ordinary-Bugs/diff-scope checks remain sound.
+- Status: source gate is review-green and ready for the authorized push/PR #349 readback boundary only. No Ready, merge, deploy, Gate 6.4 or cleanup.
 
 ### 2026-08-26 Gate 6.3 readiness RED evidence
 
