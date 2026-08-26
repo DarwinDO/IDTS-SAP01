@@ -54,3 +54,9 @@ Khai báo `sap.app.dataSources.bugService` trỏ User Administration tới endpo
 Keep `bugService` same-origin and keep `bugApi` named and server-paged. Do not add credentials, hard-coded domains, destinations, or mutation settings. If the BugService contract changes, update the controller `$select` allowlist, the workload mirror, and the focused contract test together.
 
 Giữ `bugService` cùng origin và giữ `bugApi` là model có tên, paging phía server. Không thêm credential, domain hard-code, destination hoặc setting mutation. Nếu contract BugService đổi, phải cập nhật cùng nhau allowlist `$select` của controller, mirror workload và contract test tập trung.
+
+## Gate 6.4 release identity / Release identity Gate 6.4
+
+**English.** `sap.app.applicationVersion.version` is `1.0.16`, aligned with `package.json` and both lockfile root versions. This gives the Back action a fresh HTML5 cache identity without changing models, routes, dependencies, or runtime behavior.
+
+**Tiếng Việt.** `sap.app.applicationVersion.version` là `1.0.16`, đồng bộ `package.json` và cả hai version root trong lockfile. Nhờ vậy action Back có cache identity HTML5 mới mà không đổi model, route, dependency hoặc behavior runtime.

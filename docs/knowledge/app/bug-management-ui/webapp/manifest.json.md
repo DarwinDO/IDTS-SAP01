@@ -561,3 +561,5 @@ The List Report uses the supported `sap.fe.templates.ListReport.ListReportContro
 **English.** The `UserAdministration` List Report header action sits beside `OpenDashboard`. Its `visible` and `enabled` properties bind to `session>/canAdministerUsers`, its press handler is `BugListActions.openUserAdministration`, and its text comes from i18n. Do not add a domain, AppRouter route, token, or unsupported tooltip metadata here.
 
 **Tiếng Việt.** Action header `UserAdministration` nằm cạnh `OpenDashboard`. `visible` và `enabled` bind vào `session>/canAdministerUsers`, press handler là `BugListActions.openUserAdministration`, còn text lấy từ i18n. Không thêm domain, AppRouter route, token hoặc tooltip metadata chưa được hỗ trợ vào đây.
+
+**Gate 6.4 release identity.** `sap.app.applicationVersion.version` is `0.0.6`, aligned with the app package and lockfile so AppRouter/HTML5 Repository can distinguish the new navigation bundle. Vietnamese: `sap.app.applicationVersion.version` là `0.0.6`, đồng bộ package và lockfile để AppRouter/HTML5 Repository phân biệt bundle navigation mới.

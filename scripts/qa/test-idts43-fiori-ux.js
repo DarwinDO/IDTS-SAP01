@@ -45,6 +45,13 @@ async function main() {
   pass('Reopen action and reason wording are explicit')
 
   const manifest = JSON.parse(read(path.join('webapp', 'manifest.json')))
+  const appPackage = JSON.parse(read('package.json'))
+  const appPackageLock = JSON.parse(read('package-lock.json'))
+  assert.strictEqual(appPackage.version, '0.0.6', 'Gate 6.4 navigation must advance the Bug Management HTML5 cache identity')
+  assert.strictEqual(manifest['sap.app'].applicationVersion.version, appPackage.version)
+  assert.strictEqual(appPackageLock.version, appPackage.version)
+  assert.strictEqual(appPackageLock.packages[''].version, appPackage.version)
+  pass('Bug Management package, lockfile, and manifest use Gate 6.4 cache identity')
   const bootstrap = read(path.join('webapp', 'bootstrap-ui5.js'))
   const loginPage = read(path.join('webapp', 'login.html'))
   assert(bootstrap.includes('script.setAttribute("data-sap-ui-language", "en")'), 'deferred UI5 bootstrap must force English')
