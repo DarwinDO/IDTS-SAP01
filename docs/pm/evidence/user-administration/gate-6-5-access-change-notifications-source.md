@@ -5,7 +5,7 @@
 ### Exact scope and source state
 
 - Owner: DonHV. Branch: `feature/wp8-user-access-notification-delivery-donhv`.
-- Frozen planning base: `5a12a7d3b1b32a4def1514daa809352bd22c1013`; documented source head: `128f5ba0cbf9edfec6c7c1368d04316cf72f6efe`.
+- Frozen planning snapshot: `5a12a7d3b1b32a4def1514daa809352bd22c1013`; exact implementation base/merge-base: `e355f95d7d0eb61e2bd675a35709270454e62276`; documented source head: `128f5ba0cbf9edfec6c7c1368d04316cf72f6efe`.
 - Scope: one private access-change delivery outbox, final-audit completion wiring, reuse of the existing sender/worker/retry path, safe unified Operations DTO/actions, one User Administration Delivery table/filter/details flow, version `1.0.17`, focused tests, and bilingual mirrors.
 - Out of scope: HDI/HANA migration or simulation, deployment, real email/provider send, user/role/data mutation, historical backfill, push, PR, Ready, merge, and cleanup.
 
@@ -26,7 +26,7 @@ Every changed tracked `app/`, `srv/`, and `db/` source in `origin/dev...128f5ba0
 
 | Item | Result |
 | --- | --- |
-| Baseline source | `origin/dev` at `5a12a7d3b1b32a4def1514daa809352bd22c1013` |
+| Baseline source | Exact implementation base/merge-base `e355f95d7d0eb61e2bd675a35709270454e62276` (`origin/dev` at implementation start). The earlier `5a12...` commit is the planning snapshot only; the intervening merge changes documentation, not `db/`. |
 | Candidate source | `128f5ba0cbf9edfec6c7c1368d04316cf72f6efe` |
 | Compile method | `cds compile db/schema.cds --to hana --dest` to a unique temporary directory for both sources; the archived baseline used a read-only junction to the candidate's already locked dependency tree so CAP attachments resolve. |
 | Baseline / candidate artifacts | `60` / `62` |
@@ -53,7 +53,7 @@ The next approval boundary is one bounded independent review of the complete exa
 ### Phạm vi và trạng thái source chính xác
 
 - Owner: DonHV. Branch: `feature/wp8-user-access-notification-delivery-donhv`.
-- Planning base đã khóa: `5a12a7d3b1b32a4def1514daa809352bd22c1013`; source head được ghi nhận: `128f5ba0cbf9edfec6c7c1368d04316cf72f6efe`.
+- Planning snapshot đã khóa: `5a12a7d3b1b32a4def1514daa809352bd22c1013`; implementation base/merge-base chính xác: `e355f95d7d0eb61e2bd675a35709270454e62276`; source head được ghi nhận: `128f5ba0cbf9edfec6c7c1368d04316cf72f6efe`.
 - Phạm vi: đúng một outbox private cho delivery thay đổi access, wiring completion từ audit cuối, tái sử dụng sender/worker/retry hiện có, DTO/action Operations hợp nhất an toàn, một luồng bảng/filter/details Delivery User Administration, version `1.0.17`, test tập trung và mirror song ngữ.
 - Ngoài phạm vi: HANA/HDI migration hoặc simulation, deploy, gửi email/provider thật, mutation user/role/data, backfill lịch sử, push, PR, Ready, merge và cleanup.
 
@@ -74,7 +74,7 @@ Mọi source tracked thay đổi dưới `app/`, `srv/`, `db/` trong `origin/dev
 
 | Hạng mục | Kết quả |
 | --- | --- |
-| Source baseline | `origin/dev` tại `5a12a7d3b1b32a4def1514daa809352bd22c1013` |
+| Source baseline | Implementation base/merge-base chính xác `e355f95d7d0eb61e2bd675a35709270454e62276` (`origin/dev` khi bắt đầu implementation). Commit `5a12...` trước đó chỉ là planning snapshot; merge ở giữa chỉ đổi documentation, không đổi `db/`. |
 | Source candidate | `128f5ba0cbf9edfec6c7c1368d04316cf72f6efe` |
 | Cách compile | `cds compile db/schema.cds --to hana --dest` tới thư mục tạm unique cho cả hai source; baseline Git archive dùng junction read-only tới dependency tree đã khóa của candidate để CAP attachments resolve. |
 | Artifact baseline / candidate | `60` / `62` |

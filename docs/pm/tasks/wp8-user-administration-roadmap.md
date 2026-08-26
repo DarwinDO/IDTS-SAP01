@@ -52,7 +52,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 ### Gate 6.5 source-evidence boundary — 2026-08-26
 
-- Exact clean planning base: `5a12a7d3b1b32a4def1514daa809352bd22c1013`; documented implementation head: `128f5ba0cbf9edfec6c7c1368d04316cf72f6efe`.
+- Exact clean planning snapshot: `5a12a7d3b1b32a4def1514daa809352bd22c1013`; exact implementation base/merge-base: `e355f95d7d0eb61e2bd675a35709270454e62276`; documented implementation head: `128f5ba0cbf9edfec6c7c1368d04316cf72f6efe`.
 - Authoritative implementation plan: `docs/superpowers/plans/2026-08-25-gate-6-5-access-change-notifications.md`.
 - The plan keeps Bug, invitation and access delivery storage domain-specific; adds exactly one access-delivery table; reuses one sender/worker/provider/scheduler/retry path; and keeps one normalized User Administration Delivery table.
 - Only final allowlisted `APPLIED` role-change/suspend/reactivate/revoke audits create deliveries. `NOOP_ALREADY_DESIRED`, failure/ambiguous/queued events and responsibility-only changes create none.
