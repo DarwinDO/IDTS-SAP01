@@ -74,3 +74,25 @@ The `workloadStatus=Trạng thái workload` key keeps the informational status c
 **English.** The Vietnamese bundle uses `Quay lại Bug Management` for both the visible action and tooltip, preserving the same navigation meaning as the default/English bundles.
 
 **Tiếng Việt.** Bundle tiếng Việt dùng `Quay lại Bug Management` cho cả action hiển thị và tooltip, giữ đúng cùng ý nghĩa điều hướng với bundle mặc định/tiếng Anh. Không thêm domain, token hoặc thuật ngữ provider vào copy.
+
+## Gate 6.5 Vietnamese delivery copy / Copy delivery tiếng Việt Gate 6.5
+
+### English
+
+The Vietnamese bundle provides equivalent user meaning for all new delivery keys: `Tất cả loại`, `Thư mời`, `Thay đổi quyền truy cập`, and friendly labels for role changed, suspended, reactivated, and revoked. Search/empty copy is neutral, and the empty timestamp marker is the same em dash as the English bundles.
+
+- **Location**: `i18n_vi.properties:48-60,78` — Gate 6.5 Operations copy.
+  **IDTS concept**: Vietnamese PMs see the same safe business meaning and retry context as English users.
+  **Impact if broken**: the Vietnamese UI can expose codes, misstate an access event, or imply only onboarding rows exist.
+  **Must check together**: default/English bundles, controller label maps, view/detail bindings, and encoding/parity tests.
+
+### Tiếng Việt
+
+Bundle tiếng Việt cung cấp ý nghĩa tương đương cho toàn bộ key delivery mới: `Tất cả loại`, `Thư mời`, `Thay đổi quyền truy cập` và label thân thiện cho đã đổi role, tạm dừng, kích hoạt lại, thu hồi. Copy search/empty trung lập và marker timestamp rỗng dùng cùng em dash như bundle tiếng Anh.
+
+- **Vị trí**: `i18n_vi.properties:48-60,78` — copy Operations Gate 6.5.
+  **Khái niệm IDTS**: PM dùng tiếng Việt thấy cùng business meaning an toàn và context retry như user tiếng Anh.
+  **Ảnh hưởng nếu sai**: UI tiếng Việt có thể lộ code, diễn đạt sai event access hoặc ngụ ý chỉ có row onboarding.
+  **Phải kiểm tra cùng**: bundle mặc định/English, map label controller, binding view/detail và test encoding/parity.
+
+**Safe editing / Sửa an toàn:** Preserve UTF-8 Vietnamese and semantic parity; do not translate technical identifiers used as keys. / Giữ UTF-8 Vietnamese và parity semantics; không dịch technical identifier dùng làm key.

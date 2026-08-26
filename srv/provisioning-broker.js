@@ -3,6 +3,9 @@
 const crypto = require('node:crypto')
 const cds = require('@sap/cds')
 const { INSERT, SELECT, UPDATE } = cds.ql
+const { getEmailConfig } = require('./email/config')
+const { scheduleImmediateEmailOutbox } = require('./email/worker')
+const { ACCESS_EVENT_BY_ACTION, writeUserAccessDelivery } = require('./user-admin/access-delivery')
 
 const BUSINESS_ROLES = ['PM', 'TESTER', 'DEVELOPER']
 const SUCCESS_RESULTS = ['APPLIED', 'NOOP_ALREADY_DESIRED']
@@ -113,7 +116,7 @@ async function blockExpiredLeases (tx, now) {
       provisioningVersion: operation.expectedVersion
     }))
     if (requestUpdated !== 1) throw brokerError(409, 'ACCESS_OPERATION_CONFLICT', 'Expired access request changed during reconciliation.')
-    await appendAudit(tx, { ...operation, correlationId: reconciliationCorrelationId }, request, 'BLOCKED_MANUAL_REVIEW', request.activeUser_ID, 'AMBIGUOUS_PROVIDER_OUTCOME')
+    await appendAudit(tx, { ...operation, correlationId: reconciliationCorrelationId }, request, 'BLOCKED_MANUAL_REVIEW', request.activeUser_ID, 'AMBIGUOUS_PROVIDER_OUTCOME', nowIso)
   }
 }
 
@@ -148,7 +151,7 @@ async function completeAccessOperation (req) {
       now: req.timestamp || new Date()
     })
   }
-  return completeSuccess(tx, { operation, request, resultCode, safeCode, providerCorrelationHash, now: req.timestamp || new Date() })
+  return completeSuccess(tx, { req, operation, request, resultCode, safeCode, providerCorrelationHash, now: req.timestamp || new Date() })
 }
 
 async function completeSuccess (tx, options) {
@@ -224,7 +227,23 @@ async function completeSuccess (tx, options) {
     providerCorrelationHash: options.providerCorrelationHash
   }).where({ ID: operation.ID, state: 'PROCESSING' }))
   if (operationUpdated !== 1) throw brokerError(409, 'ACCESS_OPERATION_CONFLICT', 'The access operation changed.')
-  await appendAudit(tx, operation, request, finalState, userID, options.resultCode)
+  const auditEvent = await appendAudit(tx, operation, request, finalState, userID, options.resultCode, nowIso)
+  const eventType = options.resultCode === 'APPLIED' && ACCESS_EVENT_BY_ACTION[operation.operationType]
+  if (eventType) {
+    const finalUser = await tx.run(SELECT.one.from('idts.cap.Users').columns('ID', 'role_code', 'active').where({ ID: userID }))
+    const finalRequest = await tx.run(SELECT.one.from('idts.cap.UserOnboardingRequests').columns('ID', 'status_code').where({ ID: request.ID }))
+    const delivery = await writeUserAccessDelivery({
+      tx,
+      auditEvent,
+      targetUserID: finalUser.ID,
+      eventType,
+      effectiveRole: finalUser.role_code,
+      effectiveAccessState: finalRequest.status_code,
+      completedAt: auditEvent.completedAt,
+      emailConfig: getEmailConfig()
+    })
+    if (delivery.deliveryStatus === 'PENDING') scheduleImmediateEmailOutbox(options.req)
+  }
   return { operationID: operation.ID, status: finalState }
 }
 
@@ -330,7 +349,7 @@ async function completeFailure (tx, options) {
     lastErrorSummary: safeSummaryFor(options.resultCode)
   }).where({ ID: options.request.ID, provisioningVersion: options.operation.expectedVersion }))
   if (requestUpdated !== 1) throw brokerError(409, 'ACCESS_OPERATION_CONFLICT', 'The access request changed.')
-  await appendAudit(tx, options.operation, options.request, finalState, options.request.activeUser_ID, options.resultCode)
+  await appendAudit(tx, options.operation, options.request, finalState, options.request.activeUser_ID, options.resultCode, now.toISOString())
   return { operationID: options.operation.ID, status: finalState }
 }
 
@@ -459,20 +478,35 @@ function responsibilityTuple (componentCategoryID, sapModuleID) {
   return `${componentCategoryID}|${sapModuleID || 'ANY'}`
 }
 
-async function appendAudit (tx, operation, request, toState, userID, result) {
-  await tx.run(INSERT.into('idts.cap.UserIdentityAuditEvents').entries({
+async function appendAudit (tx, operation, request, toState, userID, result, completedAt = new Date().toISOString()) {
+  const auditEvent = {
     ID: cds.utils.uuid(),
-    operation_ID: operation.ID,
-    onboardingRequest_ID: request.ID,
-    actor_ID: operation.requestedBy_ID,
-    targetUser_ID: userID || null,
+    operationID: operation.ID,
+    requestID: request.ID,
+    actorID: operation.requestedBy_ID,
+    targetUserID: userID || null,
     action: operation.operationType,
     result,
     fromState: request.status_code,
     toState,
     correlationId: operation.correlationId,
+    completedAt: new Date(completedAt).toISOString()
+  }
+  await tx.run(INSERT.into('idts.cap.UserIdentityAuditEvents').entries({
+    ID: auditEvent.ID,
+    operation_ID: auditEvent.operationID,
+    onboardingRequest_ID: auditEvent.requestID,
+    actor_ID: auditEvent.actorID,
+    targetUser_ID: auditEvent.targetUserID,
+    action: auditEvent.action,
+    result: auditEvent.result,
+    fromState: auditEvent.fromState,
+    toState: auditEvent.toState,
+    correlationId: auditEvent.correlationId,
+    createdAt: auditEvent.completedAt,
     detailsSummary: safeSummaryFor(result)
   }))
+  return auditEvent
 }
 
 function assertProvisioningBroker (req) {

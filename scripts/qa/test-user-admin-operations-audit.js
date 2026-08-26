@@ -9,14 +9,17 @@ const serviceSource = fs.readFileSync(path.join(root, 'srv/user-admin.cds'), 'ut
 
 const required = [
   'type OnboardingDeliverySummary',
+  'type AdministrationDeliverySummary',
   'type AccessOperationSummary',
   'type AdministrationAuditEventSummary',
   'type AdministrationReadiness',
   'action searchOnboardingDeliveries(',
+  'action searchAdministrationDeliveries(',
   'action searchAccessOperations(',
   'action searchAccessAuditEvents(',
   'action readAdministrationReadiness()',
-  'action retryOnboardingDelivery('
+  'action retryOnboardingDelivery(',
+  'action retryUserAccessDelivery('
 ]
 for (const marker of required) assert.ok(serviceSource.includes(marker), `missing ${marker}`)
 
@@ -27,8 +30,14 @@ assert.ok(contractStart >= 0 && contractEnd > contractStart, 'safe operations co
 const safeContract = serviceSource.slice(contractStart, contractEnd)
 for (const forbidden of [
   'recipientEmail',
+  'subject',
+  'textBody',
+  'htmlBody',
   'providerMessageId',
+  'sourceAuditEvent',
+  'targetUser',
   'lockToken',
+  'lockedUntil',
   'leaseToken',
   'leaseTokenHash',
   'idempotencyKey',
@@ -71,6 +80,11 @@ const LOCKED_DELIVERY_ID = '91300000-0000-4000-8000-000000000004'
 const SENT_DELIVERY_ID = '91300000-0000-4000-8000-000000000005'
 const EXPIRED_DELIVERY_ID = '91300000-0000-4000-8000-000000000006'
 const NON_INVITED_DELIVERY_ID = '91300000-0000-4000-8000-000000000007'
+const ACCESS_RETRY_DELIVERY_ID = '91800000-0000-4000-8000-000000000001'
+const ACCESS_PERMANENT_DELIVERY_ID = '91800000-0000-4000-8000-000000000002'
+const ACCESS_EXHAUSTED_DELIVERY_ID = '91800000-0000-4000-8000-000000000003'
+const ACCESS_LOCKED_DELIVERY_ID = '91800000-0000-4000-8000-000000000004'
+const ACCESS_SENT_DELIVERY_ID = '91800000-0000-4000-8000-000000000005'
 const RETRY_MODIFIED_AT = '2026-08-24T06:00:00.000Z'
 const RECENT_TIMESTAMP = new Date(Date.now() - (60 * 60 * 1000)).toISOString()
 
@@ -122,6 +136,32 @@ function deliveryEntry (ID, requestID, values = {}) {
   }
 }
 
+function accessDeliveryEntry (ID, sourceAuditEventID, values = {}) {
+  return {
+    ID,
+    sourceAuditEvent_ID: sourceAuditEventID,
+    targetUser_ID: TARGET_ID,
+    recipientEmail: values.email || `access-${ID.slice(-4)}@example.invalid`,
+    eventType: values.eventType || 'ACCESS_SUSPENDED',
+    templateKey: values.templateKey || 'USER_ACCESS_ACCESS_SUSPENDED',
+    subject: values.subject || '[IDTS] Your access suspended',
+    textBody: values.textBody || 'Safe access delivery text snapshot.',
+    htmlBody: values.htmlBody || '<p>Safe access delivery HTML snapshot.</p>',
+    status_code: values.status || 'FAILED',
+    attemptCount: values.attemptCount ?? 1,
+    nextAttemptAt: values.nextAttemptAt || '2026-08-24T06:05:00.000Z',
+    lastAttemptAt: values.lastAttemptAt || '2026-08-24T05:55:00.000Z',
+    sentAt: values.sentAt || null,
+    lastErrorCode: values.errorCode === undefined ? 'BREVO_API_FAILED' : values.errorCode,
+    lastErrorSummary: values.errorSummary === undefined ? 'Persisted provider summary must not leave the service.' : values.errorSummary,
+    providerMessageId: values.providerMessageId || 'access-provider-private',
+    lockedUntil: values.lockedUntil || null,
+    lockToken: values.lockToken || null,
+    createdAt: values.createdAt || '2026-08-24T05:30:00.000Z',
+    modifiedAt: values.modifiedAt || RETRY_MODIFIED_AT
+  }
+}
+
 function operationEntry (ID, requestID, values = {}) {
   return {
     ID,
@@ -168,7 +208,89 @@ async function expectRejected (operation, status, code) {
     (code === undefined || error?.code === code))
 }
 
+async function verifyAdministrationDeliveryAuthorizationAndBounds () {
+  let authorized = false
+  const sources = []
+  const limits = []
+  const tx = {
+    run: async query => {
+      assert.equal(authorized, true, 'authorization precedes every Administration delivery table read')
+      sources.push(String(query.SELECT?.from?.ref?.[0] || ''))
+      limits.push({
+        rows: query.SELECT?.limit?.rows?.val,
+        offset: query.SELECT?.limit?.offset?.val
+      })
+      return []
+    }
+  }
+  const dependencies = {
+    tx,
+    authorize: async () => { authorized = true },
+    getEmailConfig: () => ({ maxRetryCount: 2 })
+  }
+  const all = await operationsAudit.searchAdministrationDeliveries({
+    data: { deliveryType: 'ALL', status: '', query: '', skip: 50000, top: 500 },
+    timestamp: new Date('2026-08-26T10:00:00.000Z')
+  }, dependencies)
+  assert.deepEqual(all, [])
+  assert.deepEqual(sources.sort(), [
+    'idts.cap.UserAccessNotificationDeliveries',
+    'idts.cap.UserOnboardingDeliveries'
+  ])
+  assert.deepEqual(limits, [
+    { rows: 10100, offset: undefined },
+    { rows: 10100, offset: undefined }
+  ], 'ALL reads at most clamped skip plus top from each table')
+
+  authorized = false
+  sources.length = 0
+  limits.length = 0
+  await operationsAudit.searchAdministrationDeliveries({
+    data: { deliveryType: 'ACCESS_CHANGE', status: '', query: '', skip: 5, top: 10 }
+  }, dependencies)
+  assert.deepEqual(sources, ['idts.cap.UserAccessNotificationDeliveries'], 'a concrete type reads only its own table')
+  assert.deepEqual(limits, [{ rows: 10, offset: 5 }])
+
+  let reads = 0
+  await expectRejected(operationsAudit.searchAdministrationDeliveries({
+    data: { deliveryType: 'ALL', skip: 0, top: 25 }
+  }, {
+    tx: { run: async () => { reads += 1 } },
+    authorize: async () => { throw Object.assign(new Error('forbidden'), { status: 403, code: 'USER_ADMIN_REQUIRED' }) }
+  }), 403, 'USER_ADMIN_REQUIRED')
+  assert.equal(reads, 0, 'failed authorization performs no Administration delivery table read')
+
+  reads = 0
+  await expectRejected(operationsAudit.retryUserAccessDelivery({
+    data: { deliveryID: ACCESS_RETRY_DELIVERY_ID, expectedModifiedAt: RETRY_MODIFIED_AT }
+  }, {
+    tx: { run: async () => { reads += 1 } },
+    authorize: async () => { throw Object.assign(new Error('forbidden'), { status: 403, code: 'USER_ADMIN_REQUIRED' }) }
+  }), 403, 'USER_ADMIN_REQUIRED')
+  assert.equal(reads, 0, 'failed authorization performs no access delivery read or mutation')
+}
+
 async function main () {
+  const serviceModel = await cds.load('srv/user-admin.cds')
+  assert.deepEqual(
+    Object.keys(serviceModel.definitions['UserAdministrationService.AdministrationDeliverySummary'].elements),
+    [
+      'deliveryID',
+      'deliveryType',
+      'eventType',
+      'recipientDisplay',
+      'status',
+      'attemptCount',
+      'nextAttemptAt',
+      'lastAttemptAt',
+      'sentAt',
+      'errorCode',
+      'errorSummary',
+      'canRetry',
+      'modifiedAt'
+    ],
+    'the normalized Administration delivery DTO is an exact allowlist'
+  )
   assert.deepEqual(operationsAudit.clampPage(), { skip: 0, top: 25 })
   assert.deepEqual(operationsAudit.clampPage(-2, 500), { skip: 0, top: 100 })
   assert.equal(operationsAudit.maskRecipient('alice@example.invalid'), 'a***@example.invalid')
@@ -183,6 +305,7 @@ async function main () {
     provisioningBrokerState: 'RECENT_SUCCESS',
     lastSuccessfulReconciliationAt: RECENT_TIMESTAMP
   }, 'HANA uppercase column names must retain fresh readiness outcomes')
+  await verifyAdministrationDeliveryAuthorizationAndBounds()
 
   const db = await cds.deploy('db').to('sqlite::memory:')
   cds.db = db
@@ -250,6 +373,41 @@ async function main () {
       toState: 'ACTIVE',
       targetUserID: TARGET_ID,
       detailsSummary: 'Successful provider reconciliation.'
+    }),
+    auditEntry('91900000-0000-4000-8000-000000000001', null, null, {
+      action: 'SUSPEND',
+      result: 'APPLIED',
+      toState: 'SUSPENDED',
+      targetUserID: TARGET_ID,
+      correlationId: '91900000-0000-4000-8000-000000000001'
+    }),
+    auditEntry('91900000-0000-4000-8000-000000000002', null, null, {
+      action: 'CHANGE_ROLE',
+      result: 'APPLIED',
+      toState: 'ACTIVE',
+      targetUserID: TARGET_ID,
+      correlationId: '91900000-0000-4000-8000-000000000002'
+    }),
+    auditEntry('91900000-0000-4000-8000-000000000003', null, null, {
+      action: 'REACTIVATE',
+      result: 'APPLIED',
+      toState: 'ACTIVE',
+      targetUserID: TARGET_ID,
+      correlationId: '91900000-0000-4000-8000-000000000003'
+    }),
+    auditEntry('91900000-0000-4000-8000-000000000004', null, null, {
+      action: 'REVOKE',
+      result: 'APPLIED',
+      toState: 'REVOKED',
+      targetUserID: TARGET_ID,
+      correlationId: '91900000-0000-4000-8000-000000000004'
+    }),
+    auditEntry('91900000-0000-4000-8000-000000000005', null, null, {
+      action: 'CHANGE_ROLE',
+      result: 'APPLIED',
+      toState: 'ACTIVE',
+      targetUserID: TARGET_ID,
+      correlationId: '91900000-0000-4000-8000-000000000005'
     })
   ]))
 
@@ -304,8 +462,114 @@ async function main () {
   )
   await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries(deliveryRequests))
   await db.run(INSERT.into('idts.cap.UserOnboardingDeliveries').entries(deliveryRows))
+  await db.run(INSERT.into('idts.cap.UserAccessNotificationDeliveries').entries([
+    accessDeliveryEntry(ACCESS_RETRY_DELIVERY_ID, '91900000-0000-4000-8000-000000000001', {
+      email: 'delivery-26-access@example.invalid',
+      createdAt: '2026-08-24T05:26:00.000Z',
+      modifiedAt: RETRY_MODIFIED_AT
+    }),
+    accessDeliveryEntry(ACCESS_PERMANENT_DELIVERY_ID, '91900000-0000-4000-8000-000000000002', {
+      email: 'permanent-access@example.invalid',
+      eventType: 'ACCESS_ROLE_CHANGED',
+      errorCode: 'BREVO_API_REJECTED'
+    }),
+    accessDeliveryEntry(ACCESS_EXHAUSTED_DELIVERY_ID, '91900000-0000-4000-8000-000000000003', {
+      email: 'exhausted-access@example.invalid',
+      eventType: 'ACCESS_REACTIVATED',
+      attemptCount: 3
+    }),
+    accessDeliveryEntry(ACCESS_LOCKED_DELIVERY_ID, '91900000-0000-4000-8000-000000000004', {
+      email: 'locked-access@example.invalid',
+      eventType: 'ACCESS_REVOKED',
+      lockedUntil: '2099-01-01T00:00:00.000Z',
+      lockToken: 'private-access-lock'
+    }),
+    accessDeliveryEntry(ACCESS_SENT_DELIVERY_ID, '91900000-0000-4000-8000-000000000005', {
+      email: 'sent-access@example.invalid',
+      eventType: 'ACCESS_ROLE_CHANGED',
+      status: 'SENT',
+      sentAt: RECENT_TIMESTAMP,
+      lastAttemptAt: RECENT_TIMESTAMP,
+      errorCode: null,
+      errorSummary: null,
+      createdAt: RECENT_TIMESTAMP,
+      modifiedAt: RECENT_TIMESTAMP
+    })
+  ]))
 
   const service = await cds.serve('UserAdministrationService').from('srv/user-admin.cds')
+  const normalizedDeliveries = await service.send({
+    event: 'searchAdministrationDeliveries',
+    data: { deliveryType: 'ALL', status: 'FAILED', query: 'delivery-26', skip: 0, top: 10 },
+    user: ADMIN
+  })
+  assert.deepEqual(
+    normalizedDeliveries.map(row => [row.deliveryID, row.deliveryType]),
+    [
+      [ACCESS_RETRY_DELIVERY_ID, 'ACCESS_CHANGE'],
+      ['91600000-0000-4000-8000-000000000026', 'INVITATION']
+    ],
+    'mixed delivery rows sort by createdAt descending then ID descending'
+  )
+  const normalizedKeys = [
+    'attemptCount',
+    'canRetry',
+    'deliveryID',
+    'deliveryType',
+    'errorCode',
+    'errorSummary',
+    'eventType',
+    'lastAttemptAt',
+    'modifiedAt',
+    'nextAttemptAt',
+    'recipientDisplay',
+    'sentAt',
+    'status'
+  ]
+  assert.deepEqual(Object.keys(normalizedDeliveries[0]).sort(), normalizedKeys)
+  assert.equal(normalizedDeliveries[0].recipientDisplay, 'd***@example.invalid')
+  assert.equal(normalizedDeliveries[0].recipientDisplay.includes('delivery-26-access'), false)
+  assert.equal(normalizedDeliveries[0].errorCode, 'BREVO_API_FAILED')
+  assert.equal(normalizedDeliveries[0].errorSummary, 'Email provider request failed.')
+  assert.equal(normalizedDeliveries[0].canRetry, true)
+  for (const forbidden of ['recipientEmail', 'subject', 'textBody', 'htmlBody', 'providerMessageId', 'sourceAuditEvent_ID', 'targetUser_ID', 'lockToken', 'lockedUntil']) {
+    assert.equal(forbidden in normalizedDeliveries[0], false, `normalized delivery forbids ${forbidden}`)
+  }
+
+  const accessOnly = await service.send({
+    event: 'searchAdministrationDeliveries',
+    data: { deliveryType: 'ACCESS_CHANGE', status: 'FAILED', query: '', skip: 0, top: 100 },
+    user: ADMIN
+  })
+  assert.equal(accessOnly.length, 4)
+  assert.ok(accessOnly.every(row => row.deliveryType === 'ACCESS_CHANGE'))
+  assert.equal(accessOnly.find(row => row.deliveryID === ACCESS_PERMANENT_DELIVERY_ID).canRetry, false)
+  assert.equal(accessOnly.find(row => row.deliveryID === ACCESS_EXHAUSTED_DELIVERY_ID).canRetry, false)
+  assert.equal(accessOnly.find(row => row.deliveryID === ACCESS_LOCKED_DELIVERY_ID).canRetry, false)
+  const invitationsOnly = await service.send({
+    event: 'searchAdministrationDeliveries',
+    data: { deliveryType: 'INVITATION', status: 'FAILED', query: 'retry-action', skip: 0, top: 25 },
+    user: ADMIN
+  })
+  assert.deepEqual(invitationsOnly.map(row => row.deliveryID), [RETRY_DELIVERY_ID])
+  assert.equal(invitationsOnly[0].eventType, 'INVITATION')
+  assert.equal(invitationsOnly[0].deliveryType, 'INVITATION')
+  await expectRejected(service.send({
+    event: 'searchAdministrationDeliveries',
+    data: { deliveryType: 'BUG', status: '', query: '', skip: 0, top: 25 },
+    user: ADMIN
+  }), 400, 'INVALID_DELIVERY_TYPE')
+  await expectRejected(service.send({
+    event: 'searchAdministrationDeliveries',
+    data: { deliveryType: 'ALL', status: '', query: '', skip: 0, top: 25 },
+    user: new cds.User({ id: ADMIN.id, roles: ['authenticated-user', 'PM'] })
+  }), 403, 'USER_ADMIN_REQUIRED')
+  await expectRejected(service.send({
+    event: 'retryUserAccessDelivery',
+    data: { deliveryID: ACCESS_RETRY_DELIVERY_ID, expectedModifiedAt: RETRY_MODIFIED_AT },
+    user: new cds.User({ id: ADMIN.id, roles: ['authenticated-user', 'PM'] })
+  }), 403, 'USER_ADMIN_REQUIRED')
+
   const deliveries = await service.send({
     event: 'searchOnboardingDeliveries',
     data: { status: 'FAILED', query: '', skip: 0, top: 100 },
@@ -372,7 +636,7 @@ async function main () {
     data: { action: '', result: '', from: null, to: null, skip: 0, top: 100 },
     user: ADMIN
   })
-  assert.equal(auditEvents.length, 2)
+  assert.equal(auditEvents.length, 7)
   assert.match(auditEvents[0].correlationFingerprint, /^[a-f0-9]{12}$/)
   assert.equal(auditEvents[0].actorDisplay, 'Operations PM')
   assert.equal('beforeIdentityHash' in auditEvents[0], false)
@@ -383,7 +647,7 @@ async function main () {
     data: { action: '', result: '', from: '2026-08-24', to: '2026-08-24', skip: 0, top: 100 },
     user: ADMIN
   })
-  assert.equal(auditEventsByDate.length, 2)
+  assert.equal(auditEventsByDate.length, 7)
   await expectRejected(service.send({
     event: 'searchAccessAuditEvents',
     data: { from: '2026-08-25T00:00:00.000Z', to: '2026-08-24T00:00:00.000Z', skip: 0, top: 25 },
@@ -473,6 +737,87 @@ async function main () {
       schedule: () => {}
     }), 409, expectedCode)
   }
+
+  const accessRetryBefore = await db.run(SELECT.one.from('idts.cap.UserAccessNotificationDeliveries').where({ ID: ACCESS_RETRY_DELIVERY_ID }))
+  const completionAuditBefore = await db.run(SELECT.one.from('idts.cap.UserIdentityAuditEvents').where({ ID: accessRetryBefore.sourceAuditEvent_ID }))
+  let accessScheduleCount = 0
+  const accessRetryResult = await operationsAudit.retryUserAccessDelivery({
+    data: { deliveryID: ACCESS_RETRY_DELIVERY_ID, expectedModifiedAt: RETRY_MODIFIED_AT },
+    timestamp: new Date('2026-08-24T07:10:00.000Z'),
+    user: ADMIN
+  }, {
+    tx: db,
+    authorize: async () => ({ ID: PM_ID }),
+    getEmailConfig: () => ({ maxRetryCount: 2 }),
+    schedule: () => { accessScheduleCount += 1 }
+  })
+  assert.equal(accessRetryResult.deliveryType, 'ACCESS_CHANGE')
+  assert.equal(accessRetryResult.eventType, 'ACCESS_SUSPENDED')
+  assert.equal(accessRetryResult.status, 'PENDING')
+  assert.equal(accessRetryResult.recipientDisplay, 'd***@example.invalid')
+  assert.equal(accessRetryResult.errorCode, null)
+  assert.equal(accessRetryResult.errorSummary, null)
+  assert.equal(accessScheduleCount, 1, 'the existing post-commit scheduler is registered once')
+  const accessRetryAfter = await db.run(SELECT.one.from('idts.cap.UserAccessNotificationDeliveries').where({ ID: ACCESS_RETRY_DELIVERY_ID }))
+  assert.equal(accessRetryAfter.status_code, 'PENDING')
+  assert.equal(accessRetryAfter.nextAttemptAt, '2026-08-24T07:10:00.000Z')
+  assert.equal(accessRetryAfter.lastErrorCode, null)
+  assert.equal(accessRetryAfter.lastErrorSummary, null)
+  assert.equal(accessRetryAfter.lockedUntil, null)
+  assert.equal(accessRetryAfter.lockToken, null)
+  for (const field of ['sourceAuditEvent_ID', 'targetUser_ID', 'recipientEmail', 'eventType', 'templateKey', 'subject', 'textBody', 'htmlBody', 'providerMessageId', 'attemptCount', 'lastAttemptAt', 'sentAt']) {
+    assert.equal(accessRetryAfter[field], accessRetryBefore[field], `access retry preserves ${field}`)
+  }
+  const completionAuditAfter = await db.run(SELECT.one.from('idts.cap.UserIdentityAuditEvents').where({ ID: accessRetryBefore.sourceAuditEvent_ID }))
+  assert.deepEqual(completionAuditAfter, completionAuditBefore, 'access retry preserves the final completion audit snapshot')
+  const accessRetryAudits = await db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ action: 'RETRY_ACCESS_DELIVERY' }))
+  assert.equal(accessRetryAudits.length, 1)
+  assert.equal(accessRetryAudits[0].targetUser_ID, TARGET_ID)
+  assert.equal(accessRetryAudits[0].result, 'QUEUED')
+  assert.equal(accessRetryAudits[0].fromState, 'FAILED')
+  assert.equal(accessRetryAudits[0].toState, 'PENDING')
+
+  await expectRejected(operationsAudit.retryUserAccessDelivery({
+    data: { deliveryID: ACCESS_RETRY_DELIVERY_ID, expectedModifiedAt: RETRY_MODIFIED_AT },
+    timestamp: new Date('2026-08-24T07:11:00.000Z'),
+    user: ADMIN
+  }, {
+    tx: db,
+    authorize: async () => ({ ID: PM_ID }),
+    getEmailConfig: () => ({ maxRetryCount: 2 }),
+    schedule: () => { accessScheduleCount += 1 }
+  }), 409, 'DELIVERY_RETRY_CONFLICT')
+  for (const [deliveryID, expectedCode] of [
+    [ACCESS_PERMANENT_DELIVERY_ID, 'DELIVERY_NOT_RETRYABLE'],
+    [ACCESS_EXHAUSTED_DELIVERY_ID, 'DELIVERY_RETRY_LIMIT_REACHED'],
+    [ACCESS_LOCKED_DELIVERY_ID, 'DELIVERY_LOCKED'],
+    [ACCESS_SENT_DELIVERY_ID, 'DELIVERY_NOT_RETRYABLE']
+  ]) {
+    const row = await db.run(SELECT.one.from('idts.cap.UserAccessNotificationDeliveries').where({ ID: deliveryID }))
+    await expectRejected(operationsAudit.retryUserAccessDelivery({
+      data: { deliveryID, expectedModifiedAt: row.modifiedAt },
+      timestamp: new Date('2026-08-24T07:12:00.000Z'),
+      user: ADMIN
+    }, {
+      tx: db,
+      authorize: async () => ({ ID: PM_ID }),
+      getEmailConfig: () => ({ maxRetryCount: 2 }),
+      schedule: () => { accessScheduleCount += 1 }
+    }), 409, expectedCode)
+  }
+  await expectRejected(operationsAudit.retryUserAccessDelivery({
+    data: { deliveryID: PERMANENT_DELIVERY_ID, expectedModifiedAt: RETRY_MODIFIED_AT },
+    timestamp: new Date('2026-08-24T07:13:00.000Z'),
+    user: ADMIN
+  }, {
+    tx: db,
+    authorize: async () => ({ ID: PM_ID }),
+    getEmailConfig: () => ({ maxRetryCount: 2 }),
+    schedule: () => { accessScheduleCount += 1 }
+  }), 404, 'DELIVERY_NOT_FOUND')
+  assert.equal(accessScheduleCount, 1, 'rejected access retries never schedule provider work')
+  assert.equal((await db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ action: 'RETRY_ACCESS_DELIVERY' }))).length, 1)
+
   const expiredDelivery = await db.run(SELECT.one.from('idts.cap.UserOnboardingDeliveries').where({ ID: EXPIRED_DELIVERY_ID }))
   assert.equal(expiredDelivery.status_code, 'FAILED')
   const nonInvitedDelivery = await db.run(SELECT.one.from('idts.cap.UserOnboardingDeliveries').where({ ID: NON_INVITED_DELIVERY_ID }))
@@ -480,18 +825,36 @@ async function main () {
   assert.equal((await db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ action: 'RETRY_ONBOARDING_DELIVERY' }))).length, 1)
 
   await db.run(UPDATE('idts.cap.UserOnboardingDeliveries').set({ status_code: 'PENDING', modifiedAt: RECENT_TIMESTAMP }))
+  await db.run(UPDATE('idts.cap.UserAccessNotificationDeliveries').set({ status_code: 'PENDING', modifiedAt: RECENT_TIMESTAMP }))
   const pendingReadiness = await service.send({ event: 'readAdministrationReadiness', data: {}, user: ADMIN })
   assert.equal(pendingReadiness.emailDeliveryState, 'UNKNOWN')
-  await db.run(UPDATE('idts.cap.UserOnboardingDeliveries').set({ status_code: 'FAILED', modifiedAt: RECENT_TIMESTAMP }))
+  await db.run(UPDATE('idts.cap.UserAccessNotificationDeliveries').set({
+    status_code: 'FAILED',
+    lastAttemptAt: RECENT_TIMESTAMP,
+    modifiedAt: RECENT_TIMESTAMP
+  }))
   const failedReadiness = await service.send({ event: 'readAdministrationReadiness', data: {}, user: ADMIN })
   assert.equal(failedReadiness.emailDeliveryState, 'UNAVAILABLE')
-  await db.run(UPDATE('idts.cap.UserOnboardingDeliveries').set({ status_code: 'SENT', modifiedAt: RECENT_TIMESTAMP }))
+  await db.run(UPDATE('idts.cap.UserAccessNotificationDeliveries').set({
+    status_code: 'SENT',
+    sentAt: RECENT_TIMESTAMP,
+    modifiedAt: RECENT_TIMESTAMP
+  }).where({ ID: ACCESS_SENT_DELIVERY_ID }))
   const sentReadiness = await service.send({ event: 'readAdministrationReadiness', data: {}, user: ADMIN })
   assert.equal(sentReadiness.emailDeliveryState, 'AVAILABLE')
-  await db.run(UPDATE('idts.cap.UserOnboardingDeliveries').set({ status_code: 'FAILED', modifiedAt: RECENT_TIMESTAMP }))
-  await db.run(UPDATE('idts.cap.UserOnboardingDeliveries').set({ status_code: 'SENT', modifiedAt: RECENT_TIMESTAMP }).where({ ID: SENT_DELIVERY_ID }))
+  await db.run(UPDATE('idts.cap.UserOnboardingDeliveries').set({
+    status_code: 'SENT',
+    sentAt: RECENT_TIMESTAMP,
+    modifiedAt: RECENT_TIMESTAMP
+  }).where({ ID: SENT_DELIVERY_ID }))
+  await db.run(UPDATE('idts.cap.UserAccessNotificationDeliveries').set({
+    status_code: 'FAILED',
+    lastAttemptAt: RECENT_TIMESTAMP,
+    sentAt: null,
+    modifiedAt: RECENT_TIMESTAMP
+  }))
   const sentPrecedenceReadiness = await service.send({ event: 'readAdministrationReadiness', data: {}, user: ADMIN })
-  assert.equal(sentPrecedenceReadiness.emailDeliveryState, 'AVAILABLE')
+  assert.equal(sentPrecedenceReadiness.emailDeliveryState, 'AVAILABLE', 'recent SENT in either UA table precedes recent FAILED in the other')
   await db.run(UPDATE('idts.cap.UserOnboardingDeliveries').set({
     modifiedAt: '2020-01-01T00:00:00.000Z',
     lastAttemptAt: '2020-01-01T00:00:00.000Z',
@@ -500,6 +863,11 @@ async function main () {
   await db.run(UPDATE('idts.cap.UserAccessOperations').set({
     modifiedAt: '2020-01-01T00:00:00.000Z',
     completedAt: '2020-01-01T00:00:00.000Z'
+  }))
+  await db.run(UPDATE('idts.cap.UserAccessNotificationDeliveries').set({
+    modifiedAt: '2020-01-01T00:00:00.000Z',
+    lastAttemptAt: '2020-01-01T00:00:00.000Z',
+    sentAt: '2020-01-01T00:00:00.000Z'
   }))
   const staleReadiness = await service.send({ event: 'readAdministrationReadiness', data: {}, user: ADMIN })
   assert.equal(staleReadiness.emailDeliveryState, 'UNKNOWN')

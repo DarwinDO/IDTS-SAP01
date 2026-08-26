@@ -3,7 +3,7 @@
 const cds = require('@sap/cds')
 const { SELECT, UPDATE } = cds.ql
 
-const { retryDelayMs, sanitizeTransportError } = require('../email/outbox')
+const { formatFrom, retryDelayMs, sanitizeTransportError } = require('../email/outbox')
 const { createInvitationToken } = require('./invitations')
 
 const DELIVERIES = 'idts.cap.UserOnboardingDeliveries'
@@ -165,12 +165,6 @@ function invitationConfigReady (config) {
 
 function safeDeliveryError (code) {
   return Object.assign(new Error('Invitation delivery failed.'), { code })
-}
-
-function formatFrom (config) {
-  if (!config?.fromAddress) return undefined
-  const name = String(config.fromName || 'IDTS').replace(/["\r\n]/g, '')
-  return `"${name}" <${config.fromAddress}>`
 }
 
 function escapeHtml (value) {

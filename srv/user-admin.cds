@@ -122,6 +122,22 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     canRetry         : Boolean;
   }
 
+  type AdministrationDeliverySummary {
+    deliveryID       : UUID;
+    deliveryType     : String(30);
+    eventType        : String(40);
+    recipientDisplay : String(255);
+    status           : String(40);
+    attemptCount     : Integer;
+    nextAttemptAt    : Timestamp;
+    lastAttemptAt    : Timestamp;
+    sentAt           : Timestamp;
+    errorCode        : String(80);
+    errorSummary     : String(500);
+    canRetry         : Boolean;
+    modifiedAt       : Timestamp;
+  }
+
   type AccessOperationSummary {
     operationID          : UUID;
     requestID            : UUID;
@@ -197,6 +213,14 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     top    : Integer
   ) returns many OnboardingDeliverySummary;
 
+  action searchAdministrationDeliveries(
+    deliveryType : String(30),
+    status       : String(40),
+    query        : String(255),
+    skip         : Integer,
+    top          : Integer
+  ) returns many AdministrationDeliverySummary;
+
   action searchAccessOperations(
     state         : String(30),
     operationType : String(30),
@@ -219,6 +243,11 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     deliveryID        : UUID,
     expectedModifiedAt: Timestamp
   ) returns OnboardingDeliverySummary;
+
+  action retryUserAccessDelivery(
+    deliveryID        : UUID,
+    expectedModifiedAt: Timestamp
+  ) returns AdministrationDeliverySummary;
 
   action searchActiveUsers(query : String(255), includeNonActive : Boolean, skip : Integer, top : Integer) returns many ActiveUserSummary;
 

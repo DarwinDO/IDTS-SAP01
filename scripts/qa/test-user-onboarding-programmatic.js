@@ -196,6 +196,7 @@ async function main () {
   })
   assert.deepEqual(sendResult, { sent: 1, failed: 0, skipped: 0 })
   assert.equal(sentMessages.length, 1)
+  assert.equal(sentMessages[0].from, '"IDTS" <no-reply@example.invalid>')
   assert.match(sentMessages[0].subject, /IDTS access invitation/)
   assert.match(sentMessages[0].text, /Continue with SAP/)
   assert.match(sentMessages[0].text, /https:\/\/idts\.example\.invalid\/onboarding\/continue#token=/)

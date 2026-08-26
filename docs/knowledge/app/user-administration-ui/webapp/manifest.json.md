@@ -60,3 +60,25 @@ Giữ `bugService` cùng origin và giữ `bugApi` là model có tên, paging ph
 **English.** `sap.app.applicationVersion.version` is `1.0.16`, aligned with `package.json` and both lockfile root versions. This gives the Back action a fresh HTML5 cache identity without changing models, routes, dependencies, or runtime behavior.
 
 **Tiếng Việt.** `sap.app.applicationVersion.version` là `1.0.16`, đồng bộ `package.json` và cả hai version root trong lockfile. Nhờ vậy action Back có cache identity HTML5 mới mà không đổi model, route, dependency hoặc behavior runtime.
+
+## Gate 6.5 release identity / Release identity Gate 6.5
+
+### English
+
+`sap.app.applicationVersion.version` is now `1.0.17`, aligned with package and lock metadata. Gate 6.5 changes no data source, route, model, component dependency, or AppRouter path; the existing `mainService` continues to serve the new bounded actions.
+
+- **Location**: `app/user-administration-ui/webapp/manifest.json:10` — application version.
+  **IDTS concept**: cache-safe delivery of the reviewed unified Operations UI.
+  **Impact if broken**: deployed content may serve stale controls/copy or claim a version different from the package.
+  **Must check together**: `package.json:3`, `package-lock.json:3,9`, UI build, and later live content readback.
+
+### Tiếng Việt
+
+`sap.app.applicationVersion.version` giờ là `1.0.17`, đồng bộ package và lock metadata. Gate 6.5 không đổi data source, route, model, component dependency hoặc AppRouter path; `mainService` hiện có tiếp tục phục vụ action bounded mới.
+
+- **Vị trí**: `app/user-administration-ui/webapp/manifest.json:10` — version ứng dụng.
+  **Khái niệm IDTS**: phân phối UI Operations hợp nhất đã review với cache an toàn.
+  **Ảnh hưởng nếu sai**: content deploy có thể phục vụ control/copy cũ hoặc khai báo version khác package.
+  **Phải kiểm tra cùng**: `package.json:3`, `package-lock.json:3,9`, UI build và readback content live ở gate sau.
+
+**Safe editing / Sửa an toàn:** Keep the main OData model and routing unchanged in this version-only manifest delta. / Giữ nguyên main OData model và routing trong delta manifest chỉ đổi version này.

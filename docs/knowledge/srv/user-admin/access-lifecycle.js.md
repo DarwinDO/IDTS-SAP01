@@ -21,3 +21,25 @@ Module này quản lý local access lifecycle của Gate 3 và được đăng k
 ## Debug / Verification
 
 Inspect the request version, request state, latest operation, active session count, and audit events together. A successful local suspend must have no new provider operation; a successful reactivation request must have exactly one `REACTIVATE` operation and must not make the user active. Focused coverage is in `scripts/qa/test-user-admin-access-lifecycle.js`.
+
+## Gate 6.5 local suspend completion / Completion suspend local Gate 6.5
+
+### English
+
+`requestSuspend` normalizes one request timestamp, applies local deactivation/session revocation, persists the original `REQUEST_SUSPEND/QUEUED` audit and a final `SUSPEND/APPLIED` audit in chronological order, then creates the access delivery from that final audit in the same transaction. Only a `PENDING` row registers the existing post-commit kick. Reactivation remains queued and sends nothing until broker readback finishes with `APPLIED`.
+
+- **Location**: `srv/user-admin/access-lifecycle.js:19-80` — local suspend timestamp, audits, delivery, and kick.
+  **IDTS concept**: local suspend is already final locally, while reactivation is not final until provider proof.
+  **Impact if broken**: users can receive premature reactivation mail, miss a completed suspend notice, or see inverted audit timestamps.
+  **Must check together**: `srv/user-admin.js:935-969`, `srv/user-admin/access-delivery.js:63-107`, and lifecycle chronology tests.
+
+### Tiếng Việt
+
+`requestSuspend` normalize một request timestamp, apply deactivation local/revoke session, persist audit gốc `REQUEST_SUSPEND/QUEUED` và audit cuối `SUSPEND/APPLIED` theo đúng thứ tự thời gian, rồi tạo access delivery từ audit cuối trong cùng transaction. Chỉ row `PENDING` mới đăng ký post-commit kick hiện có. Reactivation vẫn queued và không gửi gì cho tới khi broker readback hoàn tất với `APPLIED`.
+
+- **Vị trí**: `srv/user-admin/access-lifecycle.js:19-80` — timestamp, audit, delivery và kick của suspend local.
+  **Khái niệm IDTS**: suspend local đã final tại local, còn reactivate chỉ final sau provider proof.
+  **Ảnh hưởng nếu sai**: user có thể nhận email reactivate sớm, mất thông báo suspend đã hoàn tất hoặc thấy timestamp audit đảo thứ tự.
+  **Phải kiểm tra cùng**: `srv/user-admin.js:935-969`, `srv/user-admin/access-delivery.js:63-107` và test chronology lifecycle.
+
+**Safe editing / Sửa an toàn:** Preserve lock/version/final-admin/session-revocation guards and the one transaction. Do not send directly here. / Giữ guard lock/version/final-admin/revoke-session và một transaction. Không gửi trực tiếp tại đây.

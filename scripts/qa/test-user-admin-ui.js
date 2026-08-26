@@ -45,8 +45,13 @@ const appPackage = JSON.parse(fs.readFileSync(path.join(app, 'package.json'), 'u
 const appPackageLock = JSON.parse(fs.readFileSync(path.join(app, 'package-lock.json'), 'utf8'))
 assert.equal(manifest['sap.app'].applicationVersion.version, appPackage.version, 'HTML5 manifest and package versions stay aligned')
 assert.equal(appPackageLock.version, appPackage.version, 'HTML5 package and lockfile versions stay aligned')
-assert.equal(appPackage.version, '1.0.16', 'Gate 6.4 cross-app navigation must advance the User Administration HTML5 cache identity')
+assert.equal(appPackage.version, '1.0.17', 'Gate 6.5 access-change delivery UI must advance the User Administration HTML5 cache identity')
 assert.equal(appPackageLock.packages[''].version, appPackage.version, 'HTML5 lockfile root version stays aligned')
+assert.equal(appPackageLock.packages[''].name, appPackage.name, 'HTML5 lockfile root keeps package identity')
+assert.equal(appPackageLock.packages[''].license, appPackage.license, 'HTML5 lockfile root keeps package license')
+assert.deepEqual(appPackageLock.packages[''].devDependencies, appPackage.devDependencies, 'HTML5 lockfile root keeps dependency semantics')
+const bugPackage = JSON.parse(fs.readFileSync(path.join(root, 'app/bug-management-ui/package.json'), 'utf8'))
+assert.equal(bugPackage.version, '0.0.6', 'Bug Management UI version remains unchanged')
 const [majorVersion, minorVersion, patchVersion] = appPackage.version.split('.').map(Number)
 assert.ok(
   majorVersion > 1 || minorVersion > 0 || patchVersion >= 13,
@@ -141,6 +146,14 @@ assert.equal(requestButtons.some(button => button.includes('onRetryAccessOperati
 assert.equal(requestButtons.some(button => button.includes('onReconcileAccessOperation')), true)
 assert.equal(requestButtons.some(button => button.includes('onCancelExistingLinkInvitation')), true)
 assert.match(view, /items="\{deliveries>\/items\}"/)
+assert.match(view, /selectedKey="\{deliveries>\/deliveryType\}"/)
+assert.match(view, /deliveryTypeFilter/)
+assert.match(view, /allDeliveryTypes/)
+assert.match(view, /invitationDeliveryType/)
+assert.match(view, /accessChangeDeliveryType/)
+assert.match(view, /deliveries>deliveryTypeLabel/)
+assert.match(view, /deliveries>eventTypeLabel/)
+assert.equal((view.match(/id="deliveryOperationsTable"/g) || []).length, 1, 'Delivery remains one unified table')
 assert.match(view, /items="\{operations>\/items\}"/)
 assert.match(view, /items="\{audit>\/items\}"/)
 for (const readinessPath of ['emailDeliveryState', 'provisioningBrokerState', 'lastSuccessfulReconciliationAt']) {
@@ -245,11 +258,15 @@ assert.match(fragment, /valueLiveUpdate="true"/)
 assert.match(fragment, /!\$\{invite>\/submitting\}/)
 assert.doesNotMatch(fragment, /Password|OTP|passkey|token/i)
 
-assert.match(controller, /searchOnboardingDeliveries/)
+assert.match(controller, /searchAdministrationDeliveries/)
 assert.match(controller, /searchAccessOperations/)
 assert.match(controller, /searchAccessAuditEvents/)
 assert.match(controller, /readAdministrationReadiness/)
 assert.match(controller, /retryOnboardingDelivery/)
+assert.match(controller, /retryUserAccessDelivery/)
+assert.match(controller, /onDeliveryTypeChange/)
+assert.match(controller, /deliveryTypeLabel/)
+assert.match(controller, /eventTypeLabel/)
 assert.match(controller, /_ensureOperationsLoaded/)
 assert.match(controller, /^sap\.ui\.define\(/)
 assert.doesNotMatch(controller, /normalizeCurrentBootstrapPm|bootstrapPmNormalize/, 'temporary PM normalization UI must be removed')
@@ -373,6 +390,9 @@ assert.match(deliveryDetailsFragment, /i18n>sentAt/)
 assert.match(deliveryDetailsFragment, /deliveries>\/selected\/sentAt/)
 assert.match(deliveryDetailsFragment, /i18n>lastAttempt/)
 assert.match(deliveryDetailsFragment, /deliveries>\/selected\/lastAttemptAt/)
+for (const detailTimestamp of ['sentAt', 'lastAttemptAt', 'nextAttemptAt']) {
+  assert.match(deliveryDetailsFragment, new RegExp(`deliveries>\\/selected\\/${detailTimestamp}Display`), `${detailTimestamp} must have a safe empty-detail display`)
+}
 
 const controllerDefinition = loadController(controller)
 assert.equal(typeof controllerDefinition.onConfirmInvite, 'function')
@@ -393,12 +413,15 @@ assert.equal(typeof controllerDefinition.onOpenCatalogEdit, 'function')
 assert.equal(typeof controllerDefinition.onConfirmCatalogEdit, 'function')
 assert.equal(typeof controllerDefinition.onToggleCatalogActive, 'function')
 assert.equal(typeof controllerDefinition.onConfirmCatalogDeactivation, 'function')
-assert.equal(typeof controllerDefinition.onOperationsTabSelect, 'function')
-assert.equal(typeof controllerDefinition.onRetryOnboardingDelivery, 'function')
+  assert.equal(typeof controllerDefinition.onOperationsTabSelect, 'function')
+  assert.equal(typeof controllerDefinition.onDeliveryTypeChange, 'function')
+  assert.equal(typeof controllerDefinition.onRetryDelivery, 'function')
+  assert.equal(typeof controllerDefinition.onRetryOnboardingDelivery, 'function')
 assert.equal(typeof controllerDefinition.onOpenDeliveryDetails, 'function')
 assert.equal(typeof controllerDefinition.onOpenOperationDetails, 'function')
 assert.equal(typeof controllerDefinition.onOpenAuditDetails, 'function')
-assert.equal(typeof controllerDefinition._loadDeliveries, 'function')
+  assert.equal(typeof controllerDefinition._loadDeliveries, 'function')
+  assert.equal(typeof controllerDefinition._normalizeDeliveryRow, 'function')
 assert.equal(typeof controllerDefinition._loadOperations, 'function')
 assert.equal(typeof controllerDefinition._loadAudit, 'function')
 assert.equal(typeof controllerDefinition._loadReadiness, 'function')
@@ -494,6 +517,100 @@ async function verifyRuntimeBehavior () {
   await failedReadinessInstance._loadReadiness()
   assert.equal(failedReadinessData.busy, false, 'failed readiness must clear busy')
   assert.equal(failedReadinessData.error, true, 'failed readiness must retain error state')
+
+  const deliveryNormalizer = Object.assign(Object.create(controllerDefinition), {
+    _text: async key => `label:${key}`
+  })
+  const normalizedAccessDelivery = await deliveryNormalizer._normalizeDeliveryRow({
+    deliveryID: 'access-delivery-1',
+    deliveryType: 'ACCESS_CHANGE',
+    eventType: 'ACCESS_SUSPENDED',
+    recipientDisplay: 'd***@example.invalid',
+    status: 'FAILED',
+    attemptCount: 1,
+    errorCode: 'SMTP_TIMEOUT',
+    errorSummary: 'A safe delivery failure.',
+    canRetry: true,
+    modifiedAt: '2026-08-26T08:00:00.000Z'
+  })
+  assert.equal(normalizedAccessDelivery.deliveryTypeLabel, 'label:accessChangeDeliveryType')
+  assert.equal(normalizedAccessDelivery.eventTypeLabel, 'label:suspendedEvent')
+  assert.equal(normalizedAccessDelivery.recipientDisplay, 'd***@example.invalid')
+  assert.equal(normalizedAccessDelivery.safeErrorSummary, 'A safe delivery failure.')
+  for (const forbidden of ['recipientEmail', 'subject', 'textBody', 'htmlBody', 'providerMessageId', 'sourceAuditEvent_ID', 'targetUser_ID', 'lockToken', 'lockedUntil']) {
+    assert.equal(forbidden in normalizedAccessDelivery, false, `UI delivery row forbids ${forbidden}`)
+  }
+  const normalizedEmptyDelivery = await deliveryNormalizer._normalizeDeliveryRow({
+    deliveryID: 'empty-delivery', deliveryType: 'ACCESS_CHANGE', eventType: 'UNKNOWN_EVENT'
+  })
+  assert.equal(normalizedEmptyDelivery.recipientDisplay, 'label:emptyDetail')
+  assert.equal(normalizedEmptyDelivery.eventTypeLabel, 'label:emptyDetail')
+  assert.equal(normalizedEmptyDelivery.safeErrorSummary, 'label:emptyDetail')
+  for (const detailTimestamp of ['sentAt', 'lastAttemptAt', 'nextAttemptAt']) {
+    assert.equal(normalizedEmptyDelivery[`${detailTimestamp}Display`], 'label:emptyDetail', `${detailTimestamp} empty value uses the em-dash display fallback`)
+  }
+
+  const deliveryData = {
+    items: [], query: 'masked', status: 'FAILED', deliveryType: 'ACCESS_CHANGE', nextSkip: 0,
+    pageSize: 25, hasMore: false, loaded: false, busy: false, error: false, selected: null, detailsBusy: false
+  }
+  const deliveryParameters = {}
+  const deliveryOperation = {
+    setParameter: (name, value) => { deliveryParameters[name] = value },
+    invoke: async () => {},
+    getBoundContext: () => ({ requestObject: async () => ({ value: [{
+      deliveryID: 'access-delivery-2', deliveryType: 'ACCESS_CHANGE', eventType: 'ACCESS_REVOKED',
+      recipientDisplay: 'r***@example.invalid', status: 'FAILED', attemptCount: 2, canRetry: false
+    }] }) })
+  }
+  const deliveryModel = {
+    getProperty: key => deliveryData[key.slice(1)],
+    setProperty: (key, value) => { deliveryData[key.slice(1)] = value }
+  }
+  const deliveryInstance = Object.assign(Object.create(controllerDefinition), {
+    getModel: name => name === 'deliveries' ? deliveryModel : undefined,
+    getView: () => ({ getModel: () => ({ bindContext: () => deliveryOperation }) }),
+    _text: async key => `label:${key}`
+  })
+  await deliveryInstance._loadDeliveries()
+  assert.deepEqual(deliveryParameters, { deliveryType: 'ACCESS_CHANGE', status: 'FAILED', query: 'masked', skip: 0, top: 25 })
+  assert.equal(deliveryData.items[0].eventTypeLabel, 'label:revokedEvent')
+  assert.equal(deliveryData.loaded, true)
+  assert.equal(deliveryData.busy, false)
+  assert.equal(deliveryData.error, false)
+
+  let typeChangeLoadCount = 0
+  const typeChangeData = { deliveryType: 'ALL' }
+  const typeChangeInstance = Object.assign(Object.create(controllerDefinition), {
+    getModel: name => name === 'deliveries' ? {
+      setProperty: (key, value) => { typeChangeData[key.slice(1)] = value },
+      getProperty: key => typeChangeData[key.slice(1)]
+    } : undefined,
+    _saveActiveUsersSessionState: () => {},
+    _loadDeliveries: async () => { typeChangeLoadCount += 1 }
+  })
+  await typeChangeInstance.onDeliveryTypeChange({ getParameter: name => name === 'selectedItem' ? { getKey: () => 'INVITATION' } : undefined })
+  assert.equal(typeChangeData.deliveryType, 'INVITATION')
+  assert.equal(typeChangeLoadCount, 1)
+
+  const typedRetryCalls = []
+  const typedRetryInstance = Object.assign(Object.create(controllerDefinition), {
+    _operationsRowFromEvent: () => ({ deliveryID: 'access-delivery-3', deliveryType: 'ACCESS_CHANGE', modifiedAt: 'access-version' }),
+    _confirm: async key => { assert.equal(key, 'retryDeliveryConfirmation'); return true },
+    _invokeOperationsAction: async (...args) => { typedRetryCalls.push(args) },
+    _text: async key => key
+  })
+  await typedRetryInstance.onRetryDelivery({})
+  assert.deepEqual(JSON.parse(JSON.stringify(typedRetryCalls[0])), ['retryUserAccessDelivery', { deliveryID: 'access-delivery-3', expectedModifiedAt: 'access-version' }, 'deliveryRetryQueued', 'deliveries'])
+  typedRetryInstance._operationsRowFromEvent = () => ({ deliveryID: 'invitation-delivery-1', deliveryType: 'INVITATION', modifiedAt: 'invitation-version' })
+  await typedRetryInstance.onRetryDelivery({})
+  assert.deepEqual(JSON.parse(JSON.stringify(typedRetryCalls[1])), ['retryOnboardingDelivery', { deliveryID: 'invitation-delivery-1', expectedModifiedAt: 'invitation-version' }, 'deliveryRetryQueued', 'deliveries'])
+  for (const invalidDeliveryType of ['UNKNOWN', undefined]) {
+    typedRetryInstance._operationsRowFromEvent = () => ({ deliveryID: 'invalid-delivery', deliveryType: invalidDeliveryType, modifiedAt: 'invalid-version' })
+    const invalidRetryResult = await typedRetryInstance.onRetryDelivery({})
+    assert.equal(invalidRetryResult, false, 'unknown delivery types fail closed with a safe result')
+  }
+  assert.equal(typedRetryCalls.length, 2, 'unknown or missing delivery types must not invoke an OData retry action')
 
   const auditData = { items: [], action: '', result: '', from: '2026-08-24', to: '2026-08-25', nextSkip: 0, pageSize: 25, hasMore: false, loaded: false, busy: false, error: false }
   const auditParameters = {}
@@ -1091,11 +1208,22 @@ const operationsI18nKeys = [
   'noDeliveries', 'retryDelivery', 'retryDeliveryConfirmation', 'deliveryRetryQueued',
   'operationStateFilter', 'operationTypeFilter', 'linkExistingOperation', 'noOperations', 'operationsLoadFailed', 'auditActionFilter',
   'allActions', 'auditResultFilter', 'appliedText', 'retryNeededText', 'rejectedText', 'suspendAccess', 'reactivateAccess',
-  'noAuditEvents', 'auditLoadFailed', 'operationDetails', 'auditDetails', 'deliveryDetails', 'safeDetails', 'sentAt', 'lastAttempt'
+  'noAuditEvents', 'auditLoadFailed', 'operationDetails', 'auditDetails', 'deliveryDetails', 'safeDetails', 'sentAt', 'lastAttempt',
+  'deliveryTypeFilter', 'allDeliveryTypes', 'invitationDeliveryType', 'accessChangeDeliveryType', 'roleChangedEvent', 'suspendedEvent', 'reactivatedEvent', 'revokedEvent', 'emptyDetail'
 ]
 for (const locale of ['i18n.properties', 'i18n_en.properties', 'i18n_vi.properties']) {
   const text = fs.readFileSync(path.join(webapp, 'i18n', locale), 'utf8')
   for (const key of operationsI18nKeys) assert.match(text, new RegExp(`^${key}=`, 'm'))
+  assert.match(text, /^deliverySearchPlaceholder=(?!.*(?:request|onboarding)).+$/im, `${locale} delivery search copy must be neutral`)
+  assert.match(text, /^noDeliveries=(?!.*(?:request|onboarding)).+$/im, `${locale} empty delivery copy must be neutral`)
+  if (locale === 'i18n_vi.properties') {
+    assert.match(text, /^deliverySearchPlaceholder=Tìm delivery theo người nhận đã che hoặc mã delivery$/m)
+    assert.match(text, /^noDeliveries=Không có delivery phù hợp với bộ lọc này$/m)
+  } else {
+    assert.match(text, /^deliverySearchPlaceholder=Search deliveries by masked recipient or delivery ID$/m)
+    assert.match(text, /^noDeliveries=No deliveries match this filter$/m)
+  }
+  assert.match(text, /^emptyDetail=—$/m, `${locale} empty detail must use an em dash`)
   for (const key of [
     ...Object.values(mainTabTooltips),
     'bugManagementOpenAction',

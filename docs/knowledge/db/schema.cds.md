@@ -525,3 +525,37 @@ Bon business catalog do IDTS quan ly co unique constraint o database cho code mo
 The Gate 5 model delta is additive: unique constraints/indexes and one audit table only. Do not change existing catalog IDs/columns or seed CSVs in this gate. If a catalog relationship changes, review Bug fields, DeveloperResponsibilities, service impact counts, generated HANA output, and historical-readability tests together; never run HDI make/migration or live catalog mutation from this source gate.
 
 Delta model Gate 5 là additive: chỉ unique constraint/index và một audit table. Không đổi ID/column catalog hiện có hoặc seed CSV trong gate này. Nếu đổi quan hệ catalog, phải review cùng field Bug, `DeveloperResponsibilities`, count impact service, output HANA generated và test đọc lịch sử; không chạy HDI make/migration hoặc live catalog mutation từ source gate này.
+
+## Gate 6.5 access-change delivery outbox / Outbox delivery thay đổi access Gate 6.5
+
+### English
+
+`UserAccessNotificationDeliveries` is a separate, additive outbox for material User Administration access changes. Its required `sourceAuditEvent` association is the business idempotency source; one unique delivery may exist for each final audit event. The row stores only the target user reference, recipient and sanitized message snapshots, allowlisted event type, delivery outcome, retry timing, provider message identifier, and worker lock fields. It does not reuse Bug or invitation delivery ownership.
+
+- **Location**: `db/schema.cds:393-414` — `entity UserAccessNotificationDeliveries`.
+  **IDTS concept**: durable delivery history for final role change, suspend, reactivate, or revoke outcomes.
+  **Impact if broken**: access emails can lose retry/audit state, become coupled to the wrong domain, or expose unsafe provider data.
+  **Must check together**: `srv/user-admin/access-delivery.js:63-107`, `srv/email/worker.js:25-61`, `srv/user-admin/operations-audit.js:107-202`.
+- **Location**: `db/schema.cds:416` — `@assert.unique.accessAuditDelivery`.
+  **IDTS concept**: one delivery per append-only final access audit event.
+  **Impact if broken**: concurrent completion or replay can queue duplicate email for one business change.
+  **Must check together**: `srv/user-admin/access-delivery.js:73-82` and the concurrent/idempotency checks in `scripts/qa/test-user-access-notifications.js`.
+
+### Tiếng Việt
+
+`UserAccessNotificationDeliveries` là outbox riêng, additive cho thay đổi access có ý nghĩa trong User Administration. Association bắt buộc `sourceAuditEvent` là nguồn idempotency nghiệp vụ; mỗi audit event cuối chỉ có tối đa một delivery. Row chỉ lưu tham chiếu user đích, snapshot người nhận/nội dung đã sanitize, event type allowlist, kết quả gửi, lịch retry, provider message identifier và lock worker. Entity không dùng ownership của delivery Bug hoặc invitation.
+
+- **Vị trí**: `db/schema.cds:393-414` — `entity UserAccessNotificationDeliveries`.
+  **Khái niệm IDTS**: lịch sử delivery bền vững cho kết quả cuối đổi role, suspend, reactivate hoặc revoke.
+  **Ảnh hưởng nếu sai**: email access có thể mất trạng thái retry/audit, bị gắn nhầm domain hoặc lộ dữ liệu provider không an toàn.
+  **Phải kiểm tra cùng**: `srv/user-admin/access-delivery.js:63-107`, `srv/email/worker.js:25-61`, `srv/user-admin/operations-audit.js:107-202`.
+- **Vị trí**: `db/schema.cds:416` — `@assert.unique.accessAuditDelivery`.
+  **Khái niệm IDTS**: một delivery cho mỗi access audit event cuối append-only.
+  **Ảnh hưởng nếu sai**: completion đồng thời hoặc replay có thể queue email trùng cho cùng một thay đổi nghiệp vụ.
+  **Phải kiểm tra cùng**: `srv/user-admin/access-delivery.js:73-82` và test concurrent/idempotency trong `scripts/qa/test-user-access-notifications.js`.
+
+### Safe editing / Sửa an toàn
+
+Keep this schema change additive. Never add seed CSV or `.hdbtabledata` for delivery rows, and never run HDI from a source-documentation gate. Compare generated HANA artifacts against the frozen baseline before approving migration.
+
+Giữ thay đổi schema này additive. Không thêm seed CSV hoặc `.hdbtabledata` cho delivery row và không chạy HDI từ gate tài liệu source. Phải so sánh artifact HANA generated với baseline đã freeze trước khi duyệt migration.
