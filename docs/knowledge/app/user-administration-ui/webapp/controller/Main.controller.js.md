@@ -224,3 +224,9 @@ Session state cấp cao giờ chỉ là `access`, `developers`, `operations`, `b
 Vì vậy `onOpenActiveUserRoleChange`, Suspend, Reactivate và Revoke đều mở từ state của Active User details và gửi version lấy từ details tới CAP action hiện có. Manage Responsibilities là path riêng thuộc Developer và chỉ được expose ở table Developers; table chỉ chứa row Developer và yêu cầu `accessState === 'ACTIVE'`. Controller load model `developerCatalogs` độc lập trước dialog profile và không dùng edit state của Business Catalog làm value-help source.
 
 Change Role khởi tạo `currentRole === role` và không đọc Developer profile. Profile chỉ được tạo khi chuyển thật từ role không phải Developer sang `DEVELOPER`; chọn lại cùng role bị chặn trước mọi OData action.
+
+## Gate 6.4 same-session navigation / Điều hướng cùng session Gate 6.4
+
+**English.** `onOpenBugManagement()` calls guarded `window.location.assign("/idtsbugmanagementui/index.html")`. The fixed same-origin path keeps the current tab and AppRouter session, and it carries no token, domain, query, fragment, or `returnTo`. The guard makes the method a no-op when the browser navigation API is unavailable. This handler performs no OData call or data mutation.
+
+**Tiếng Việt.** `onOpenBugManagement()` gọi có guard `window.location.assign("/idtsbugmanagementui/index.html")`. Path cùng origin cố định giữ tab hiện tại và AppRouter session, không mang token, domain, query, fragment hoặc `returnTo`. Guard làm handler không thao tác khi API navigation của browser không có. Handler không gọi OData và không thay đổi dữ liệu.

@@ -111,3 +111,9 @@ Với `IDTS-53`, component này cũng gọi `ProfileShell.init()`. Đây là ch�
 **English.** UI5 `ComponentSupport` creates this component after auth guard passes. `init()` first calls the Fiori Elements base component so manifest routing/models exist, then calls `ProfileShell.init()` to render the signed-in menu. Side effects: app startup and profile control creation; no direct database write. Break at `init()` when the whole app fails, then step into the base init for routing/model issues or ProfileShell for avatar/menu issues.
 
 **Tiếng Việt.** UI5 `ComponentSupport` tạo component này sau khi auth guard cho qua. `init()` gọi base component của Fiori Elements trước để routing/model trong manifest tồn tại, rồi gọi `ProfileShell.init()` để render menu user. Side effect là khởi động app và tạo profile control; không ghi database trực tiếp. Đặt breakpoint ở `init()` khi toàn app lỗi, sau đó step vào base init nếu routing/model lỗi hoặc ProfileShell nếu avatar/menu lỗi.
+
+## Gate 6.4 session capability / Capability trong session Gate 6.4
+
+**English.** `init()` copies only the strict server Boolean `user.canAdministerUsers === true` into `session>/canAdministerUsers`. The manifest uses it to hide and disable the User Administration action; the action handler checks the safe profile again at click time. This model is UX state, never backend authorization.
+
+**Tiếng Việt.** `init()` chỉ copy Boolean nghiêm ngặt `user.canAdministerUsers === true` vào `session>/canAdministerUsers`. Manifest dùng giá trị này để ẩn và disable action User Administration; handler kiểm tra lại safe profile lúc bấm. Model này chỉ là state UX, không thay authorization backend.

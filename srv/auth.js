@@ -154,10 +154,13 @@ async function btpUserProfile (req) {
   const user = selectActiveUserForRequest(users, req.user, { requireExternalIdentity: true })
 
   if (!user) return req.reject(403, BTP_USER_NOT_REGISTERED_MESSAGE)
-  return publicUser(tx, enforcePlatformRoleAlignment(req, user))
+  const alignedUser = enforcePlatformRoleAlignment(req, user)
+  return publicUser(tx, alignedUser, {
+    canAdministerUsers: alignedUser.role_code === 'PM' && req.user.is('UserAdmin')
+  })
 }
 
-async function publicUser (tx, user) {
+async function publicUser (tx, user, options = {}) {
   // Dựng object user an toàn cho response login/me bằng cách join role/profile cần hiển thị.
   const role = user.role_code
     ? await tx.run(SELECT.one.from('idts.cap.UserRoles').columns('name').where({ code: user.role_code }))
@@ -168,7 +171,8 @@ async function publicUser (tx, user) {
     displayName: user.displayName,
     email: user.email,
     role_code: user.role_code,
-    roleName: role?.name || null
+    roleName: role?.name || null,
+    canAdministerUsers: Boolean(options.canAdministerUsers)
   }
 }
 

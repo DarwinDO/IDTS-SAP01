@@ -16,6 +16,12 @@
 				</f:heading>
 				<f:actions>
 					<Button
+						text="{i18n>bugManagementOpenAction}"
+						type="Transparent"
+						icon="sap-icon://nav-back"
+						tooltip="{i18n>bugManagementOpenActionTooltip}"
+						press=".onOpenBugManagement"/>
+					<Button
 						text="{i18n>inviteUser}"
 						type="Emphasized"
 						icon="sap-icon://add-employee"

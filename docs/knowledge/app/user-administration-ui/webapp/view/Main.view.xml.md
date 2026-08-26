@@ -173,3 +173,9 @@ Table Workload khai báo cột i18n `Trạng thái workload` riêng giữa Effor
 
 - **Ảnh hưởng nếu sai**: cell trạng thái có thể chiếm cột Actions và UI5 có thể bỏ cell nút bị dư, khiến details workload và deep-link Bug Management không thể truy cập.
 - **Phải kiểm tra cùng**: cả ba bundle i18n, `scripts/qa/test-user-admin-workload.js`, `DeveloperWorkloadDetails.fragment.xml` và browser acceptance.
+
+## Gate 6.4 Back to Bug Management action / Action quay lại Bug Management Gate 6.4
+
+**English.** `DynamicPageTitle.actions` places one transparent, localized `nav-back` button before the existing emphasized Invite User button. It calls `.onOpenBugManagement`; no custom CSS or second navigation shell is introduced. If the order or handler breaks, PMs lose the clear return path while Invite remains the page's primary action. Check `Main.controller.js`, all three i18n bundles, and `scripts/qa/test-user-admin-ui.js` together.
+
+**Tiếng Việt.** `DynamicPageTitle.actions` đặt một nút transparent `nav-back` đã localize trước nút Invite User emphasized hiện có. Nút gọi `.onOpenBugManagement`; không thêm custom CSS hoặc navigation shell thứ hai. Nếu thứ tự hoặc handler sai, PM mất đường quay lại rõ ràng trong khi Invite vẫn phải là primary action của trang. Kiểm tra cùng `Main.controller.js`, cả ba bundle i18n và `scripts/qa/test-user-admin-ui.js`.

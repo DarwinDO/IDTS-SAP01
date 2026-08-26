@@ -306,3 +306,9 @@ This locale mirrors `aiSuggestionReviewUnavailable`, `handoffSummaryReviewNotice
 ## IDTS-115 additions
 
 The new Classification Apply, Duplicate Confirmation, and PM AI Activity labels are defined in this bundle. They are user-facing text only; no provider, prompt, token, SQL, endpoint, or raw diagnostic is exposed. The default bundle keeps the same keys for parity.
+
+## Gate 6.4 navigation copy / Copy điều hướng Gate 6.4
+
+**English.** `userAdministrationOpenAction` mirrors the default bundle and supplies the visible Fiori header action text. Keep it short, user-facing, and free of domain or authorization implementation details.
+
+**Tiếng Việt.** `userAdministrationOpenAction` mirror bundle mặc định và cung cấp text hiển thị cho action header Fiori. Giữ wording ngắn, hướng tới user và không chứa domain hoặc chi tiết triển khai authorization.

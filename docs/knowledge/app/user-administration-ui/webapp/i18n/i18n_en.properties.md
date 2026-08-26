@@ -100,3 +100,9 @@ Keep default/English/Vietnamese key parity. Do not add raw server failures, inte
 Giữ parity key default/English/Vietnamese. Không thêm raw server failure, internal identifier, endpoint, term provider hoặc credential vào bundle này.
 
 Label tiếng Anh giữ rõ năm khu vực cấp cao và validation khi role không thay đổi.
+
+## Gate 6.4 navigation keys / Key điều hướng Gate 6.4
+
+**English.** `bugManagementOpenAction` and its tooltip mirror the default bundle with the concise label `Back to Bug Management`. Keep this wording aligned with the header button and free of implementation details.
+
+**Tiếng Việt.** `bugManagementOpenAction` và tooltip mirror bundle mặc định bằng label ngắn `Back to Bug Management`. Giữ wording đồng bộ với nút header và không đưa chi tiết triển khai vào copy.
