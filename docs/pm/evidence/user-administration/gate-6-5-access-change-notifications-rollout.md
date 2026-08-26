@@ -58,5 +58,13 @@ This is a later-approval plan, not execution evidence. Gate 6.5 source documenta
 ### Acceptance boundary
 
 - Automated source, artifact, migration and runtime-readiness evidence is complete.
-- Browser acceptance is pending because the controllable in-app browser reached SAP Sign In and no connected Chrome session was available. No login identifier, password, OTP, cookie or token was entered by the executor.
-- No controlled access change, real access-change email, Operations retry, historical replay, provider/user/role mutation, or raw-recipient evidence was produced. These remain a user-assisted acceptance boundary after authenticated PM + UserAdmin login and a separately chosen safe tester account.
+- Browser acceptance initially stopped at SAP Sign In without entering a login identifier, password, OTP, cookie, or token. DonHV later authenticated directly and explicitly approved the bounded Tester scenario recorded below.
+- No Operations retry, historical replay, role change, permanent provider configuration change, or raw-recipient evidence was produced.
+
+### Controlled live acceptance closure — 2026-08-27
+
+- DonHV explicitly approved one bounded Suspend -> Reactivate cycle for the existing Tester account `donhvse`; committed evidence retains only the masked recipient `d***@fpt.edu.vn`.
+- Suspend completed and produced exactly one Access change delivery. Operations showed state `Sent`, attempts `1`, and the Gmail mailbox readback confirmed one `[IDTS] Your access suspended` message in Inbox. No message body, raw audit identifier, provider response, token, credential, or endpoint is committed here.
+- The access broker was found stopped while Reactivate was pending. It was started once and reached `1/1`; the same Reactivate operation then completed with attempts `1`. Its details reported that the assigned role collections were verified, so the external provider was already at the desired state. Consistent with the approved `NOOP_ALREADY_DESIRED` exclusion, no Reactivate delivery was added and Gmail search found no `[IDTS] Your access reactivated` message.
+- Final User Administration readback showed the Tester restored to `Active`, identity link `Yes`, and pending operation `None`. Operations reported email delivery `Available`, provisioning broker `Recent success`, and the latest successful reconciliation timestamp. No role change, retry/replay, historical backfill, permanent provider configuration change, or extra email was submitted.
+- The runtime acceptance therefore passes the Gate 6.5 contract: one eligible applied transition produced one persisted delivery and one email; the provider-verification no-op produced neither. A separate real provider-side state transition would be required to test the Reactivated email template and is not authorized by this acceptance.
