@@ -122,6 +122,7 @@ Vietnamese:
 | IDTS-37 | Notification UI and email delivery status readability | SangVN | FE/QA review of notification section after SMTP/outbox changes, focusing on readable event/channel/status/recipient/message output. Unblocked by merged IDTS-36. |
 | IDTS-60 | Browser and manual UAT for completed Sprint 4 UI baseline | NhanT | Due 2026-07-12. Earlier QA checkpoint for merged Sprint 4 UI baseline before final `IDTS-57` regression. |
 | IDTS-40 | AWS ECS/ECR shared QA deployment direction | DonHV | Due 2026-07-18 if kept active. Treat as AWS-native follow-up/alternative, not a blocker for accepted Render QA. |
+| WP7-NOTIFY | Design personal My Notifications and prompt email delivery | DonHV | Design approved and written from `origin/dev` `e355f95d`; implementation plan/source work not started. N1-N6 remain separately gated. |
 
 Vietnamese:
 
@@ -130,6 +131,7 @@ Vietnamese:
 | IDTS-37 | Notification UI va kha nang doc email delivery status | SangVN | FE/QA review notification section sau khi co SMTP/outbox, tap trung event/channel/status/recipient/message. Da duoc unblock boi IDTS-36 da merge. |
 | IDTS-60 | Browser/manual UAT cho baseline UI Sprint 4 da merge | NhanT | Han 2026-07-12. Checkpoint QA som cho baseline UI da merge truoc khi regression tong cuoi `IDTS-57`. |
 | IDTS-40 | Huong deploy shared QA bang AWS ECS/ECR | DonHV | Due 2026-07-18 neu giu active. Xem la AWS-native follow-up/alternative, khong block Render QA da accepted. |
+| WP7-NOTIFY | Thiet ke My Notifications ca nhan va email nhanh | DonHV | Da duyet va viet design tu `origin/dev` `e355f95d`; chua bat dau implementation plan/source. N1-N6 van tach gate. |
 
 ## In Progress
 

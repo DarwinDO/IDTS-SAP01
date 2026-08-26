@@ -243,6 +243,11 @@ Các trigger notification:
 * Mỗi email có outbox/delivery status riêng: `PENDING`, `SENT`, `FAILED`, `SKIPPED`.
 * SAP Job Scheduling Service gọi protected CAP outbox-processing endpoint; provider fail chỉ đổi delivery status và không được rollback action xử lý Bug đã commit.
 * Core scope không bao gồm message broker riêng như Redis, RabbitMQ hoặc BullMQ; CAP database outbox là đủ cho v1.
+* Event Bug cần hành động và access change đủ điều kiện dùng immediate worker kick sau commit làm đường gửi email chính; lịch một giờ chỉ recovery/retry và không phải latency bình thường.
+* `My Notifications` là inbox cá nhân liên kết Bug và material User Access event, có unread/read state, paging, filter và deep link an toàn. PM/UserAdmin không được đọc inbox user khác.
+* `@mention` gửi in-app cộng email nhanh. Pending Assignment/Overdue/SLA dùng inbox và digest theo chính sách đã duyệt; SLA mặc định là 4 giờ cho Critical/Blocker và 24 giờ cho mức khác.
+* Daily digest chạy 08:00 từ thứ Hai đến thứ Sáu theo `Asia/Bangkok`, dùng chung worker/provider/retry, không thay thế email status cần gửi nhanh.
+* Transition chỉ backfill tối đa 30 ngày Bug notification vào inbox index và giữ inbox index/read state 90 ngày; không resend email hoặc rewrite source history.
 
 **Approved AI assistance baseline / Baseline AI assistance đã duyệt:**
 
