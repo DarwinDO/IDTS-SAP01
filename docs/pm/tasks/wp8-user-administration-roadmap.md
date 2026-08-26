@@ -138,6 +138,8 @@ The executor may complete source/tests/docs/evidence commits, push the exact bra
 - **Tiếng Việt:** Branch `feature/wp8-cross-app-user-admin-navigation-donhv` bắt đầu từ baseline Gate 6.3 đã merge `99b100bdb07d599df17dbb2295c70384d04d1883`. Source head `4a15dc31042c3a1ed410c9ed790f0f229748255e` thêm hint server-derived `canAdministerUsers` và navigation cùng origin theo hai chiều. Visibility UI chỉ là hint; authorization AppRouter/CAP không đổi và vẫn là lớp quyết định.
 - **Tiếng Việt:** Auth TDD kết thúc `39/0` sau khi finding Important về test alignment được fix và re-review. Bug UI `16/0`; User Admin UI, secret scan, agent rules, QA-depth, compile EDMX/HANA, lint User Admin và cả hai UI build đều pass. Codex Security launcher không tạo được scan ID nên không báo PASS; còn cần final independent exact-diff review trước handoff Draft PR.
 - Evidence: `docs/pm/evidence/user-administration/gate-6-4-cross-app-navigation-source.md`. Runtime rollout, browser role/session acceptance, Ready, merge, Gate 6.5 và cleanup là các approval boundary riêng.
+- Final independent review of exact source/evidence head `3a2edd85729d70fd75b32c70b057e3c4a400009f` returned GO with `0 Critical / 0 Major / 0 Important / 3 Minor`; the retained Minors are test-hardening only. Push and one Draft PR are authorized; rollout, browser acceptance, Ready, merge, Gate 6.5 and cleanup remain separate.
+- Final review độc lập trên source/evidence head chính xác `3a2edd85729d70fd75b32c70b057e3c4a400009f` trả GO với `0 Critical / 0 Major / 0 Important / 3 Minor`; các Minor giữ lại chỉ là hardening test. Được push và mở một Draft PR; rollout, browser acceptance, Ready, merge, Gate 6.5 và cleanup vẫn tách riêng.
 
 ## Bàn giao source Gate 6.1 — làm rõ navigation và action
 
