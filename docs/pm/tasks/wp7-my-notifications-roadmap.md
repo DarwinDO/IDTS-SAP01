@@ -4,13 +4,14 @@
 
 ### Status
 
-`DESIGN APPROVED — IMPLEMENTATION PLAN NOT STARTED`
+`DESIGN APPROVED — IMPLEMENTATION PLAN WRITTEN; SOURCE NOT STARTED`
 
 ### Authority
 
 - Owner: DonHV.
 - Design baseline: `origin/dev` `e355f95d7d0eb61e2bd675a35709270454e62276`.
 - Authoritative design: `docs/superpowers/specs/2026-08-26-my-notifications-and-delivery-design.md`.
+- Authoritative implementation plan: `docs/superpowers/plans/2026-08-26-my-notifications-and-prompt-email-implementation.md`.
 - This roadmap does not authorize source/schema/runtime/external mutations.
 
 ### Sequence
@@ -26,19 +27,20 @@ Each gate freezes a fresh base, uses a dedicated worktree/branch, TDD, exact sco
 
 ### Next boundary
 
-DonHV reviews the written design spec. After approval, create a detailed implementation plan; do not start N1 source work in the planning branch.
+DonHV reviews the detailed implementation plan and chooses an execution mode. N1 source work must not start until Gate 6.5 is merged and a fresh exact `origin/dev` contains its access-delivery contract.
 
 ## Tiếng Việt
 
 ### Trạng thái
 
-`ĐÃ DUYỆT THIẾT KẾ — CHƯA BẮT ĐẦU IMPLEMENTATION PLAN`
+`ĐÃ DUYỆT THIẾT KẾ — ĐÃ VIẾT IMPLEMENTATION PLAN; CHƯA LÀM SOURCE`
 
 ### Thẩm quyền
 
 - Owner: DonHV.
 - Baseline thiết kế: `origin/dev` `e355f95d7d0eb61e2bd675a35709270454e62276`.
 - Thiết kế authority: `docs/superpowers/specs/2026-08-26-my-notifications-and-delivery-design.md`.
+- Implementation plan authority: `docs/superpowers/plans/2026-08-26-my-notifications-and-prompt-email-implementation.md`.
 - Roadmap này không cho phép mutation source/schema/runtime/hệ thống ngoài.
 
 ### Thứ tự
@@ -54,4 +56,4 @@ Mỗi gate freeze base mới, dùng worktree/branch riêng, TDD, exact scope gua
 
 ### Boundary tiếp theo
 
-DonHV review design spec đã viết. Sau khi duyệt mới tạo implementation plan chi tiết; không bắt đầu source N1 trong planning branch.
+DonHV review implementation plan chi tiết và chọn cách execute. Chưa được làm source N1 cho tới khi Gate 6.5 merge và `origin/dev` mới có đúng access-delivery contract.
