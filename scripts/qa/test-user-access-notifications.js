@@ -8,6 +8,52 @@ const cds = require('@sap/cds')
 
 const ENTITY = 'idts.cap.UserAccessNotificationDeliveries'
 
+const BUG_DELIVERY_SHAPE = [
+  ['ID', 'cds.UUID', null, false, null, null, true],
+  ['createdAt', 'cds.Timestamp', null, false, null, null, false],
+  ['createdBy', 'User', null, false, 255, null, false],
+  ['modifiedAt', 'cds.Timestamp', null, false, null, null, false],
+  ['modifiedBy', 'User', null, false, 255, null, false],
+  ['notification', 'cds.Association', 'idts.cap.Notifications', true, null, null, false],
+  ['channel', 'cds.Association', 'idts.cap.NotificationChannels', true, null, null, false],
+  ['recipientEmail', 'cds.String', null, false, 255, null, false],
+  ['templateKey', 'cds.String', null, true, 80, null, false],
+  ['subject', 'cds.String', null, true, 255, null, false],
+  ['textBody', 'cds.LargeString', null, true, null, null, false],
+  ['htmlBody', 'cds.LargeString', null, true, null, null, false],
+  ['status', 'cds.Association', 'idts.cap.NotificationDeliveryStatuses', true, null, null, false],
+  ['attemptCount', 'cds.Integer', null, true, null, 0, false],
+  ['nextAttemptAt', 'cds.Timestamp', null, false, null, null, false],
+  ['lastAttemptAt', 'cds.Timestamp', null, false, null, null, false],
+  ['sentAt', 'cds.Timestamp', null, false, null, null, false],
+  ['lastErrorCode', 'cds.String', null, false, 80, null, false],
+  ['lastErrorSummary', 'cds.String', null, false, 500, null, false],
+  ['providerMessageId', 'cds.String', null, false, 255, null, false],
+  ['lockedUntil', 'cds.Timestamp', null, false, null, null, false],
+  ['lockToken', 'cds.String', null, false, 64, null, false]
+]
+
+const ONBOARDING_DELIVERY_SHAPE = [
+  ['ID', 'cds.UUID', null, false, null, null, true],
+  ['createdAt', 'cds.Timestamp', null, false, null, null, false],
+  ['createdBy', 'User', null, false, 255, null, false],
+  ['modifiedAt', 'cds.Timestamp', null, false, null, null, false],
+  ['modifiedBy', 'User', null, false, 255, null, false],
+  ['onboardingRequest', 'cds.Association', 'idts.cap.UserOnboardingRequests', true, null, null, false],
+  ['recipientEmail', 'cds.String', null, true, 255, null, false],
+  ['templateKey', 'cds.String', null, true, 80, null, false],
+  ['status', 'cds.Association', 'idts.cap.NotificationDeliveryStatuses', true, null, null, false],
+  ['attemptCount', 'cds.Integer', null, true, null, 0, false],
+  ['nextAttemptAt', 'cds.Timestamp', null, false, null, null, false],
+  ['lastAttemptAt', 'cds.Timestamp', null, false, null, null, false],
+  ['sentAt', 'cds.Timestamp', null, false, null, null, false],
+  ['lastErrorCode', 'cds.String', null, false, 80, null, false],
+  ['lastErrorSummary', 'cds.String', null, false, 500, null, false],
+  ['providerMessageId', 'cds.String', null, false, 255, null, false],
+  ['lockedUntil', 'cds.Timestamp', null, false, null, null, false],
+  ['lockToken', 'cds.String', null, false, 64, null, false]
+]
+
 async function main () {
   const model = await cds.load('db/schema.cds')
   const delivery = model.definitions[ENTITY]
@@ -52,6 +98,7 @@ async function main () {
   assert.deepEqual(unique?.map(item => item['=']), ['sourceAuditEvent'], 'source audit event is unique')
 
   const bugDelivery = model.definitions['idts.cap.NotificationDeliveries']
+  assert.deepEqual(entityShape(bugDelivery), BUG_DELIVERY_SHAPE, 'Bug delivery model shape remains unchanged')
   assert.deepEqual(
     bugDelivery['@assert.unique.notificationChannel']?.map(item => item['=']),
     ['notification', 'channel'],
@@ -59,12 +106,37 @@ async function main () {
   )
   const onboardingDelivery = model.definitions['idts.cap.UserOnboardingDeliveries']
   assert.deepEqual(
+    entityShape(onboardingDelivery),
+    ONBOARDING_DELIVERY_SHAPE,
+    'onboarding delivery model shape remains unchanged'
+  )
+  assert.deepEqual(
     onboardingDelivery['@assert.unique.onboardingRequestDelivery']?.map(item => item['=']),
     ['onboardingRequest'],
     'onboarding delivery uniqueness remains unchanged'
   )
 
+  const mutatedBugShape = structuredClone(BUG_DELIVERY_SHAPE)
+  mutatedBugShape.find(([name]) => name === 'subject')[4] = 254
+  assert.notDeepEqual(
+    entityShape(bugDelivery),
+    mutatedBugShape,
+    'controlled subject-length mutation is detected by the normalized shape contract'
+  )
+
   console.log('IDTS user access notification contract: PASS')
+}
+
+function entityShape (definition) {
+  return Object.entries(definition.elements).map(([name, element]) => [
+    name,
+    element.type,
+    element.target || null,
+    element.notNull === true,
+    element.length ?? null,
+    element.default?.val ?? null,
+    element.key === true
+  ])
 }
 
 main().catch(error => {
