@@ -100,3 +100,33 @@ After separate rollout approval: verify PM + UserAdmin sees the Bug Management a
 - MCP CAP/Fiori/UI5 không callable. Codex Security diff launcher thất bại hai lần trước khi tạo scan ID, nên không tuyên bố Security PASS. Coverage thay thế gồm secret scan, auth matrix deterministic, review từng task và final independent exact-diff review.
 - Final review độc lập có giới hạn trên exact range `99b100bdb07d599df17dbb2295c70384d04d1883..3a2edd85729d70fd75b32c70b057e3c4a400009f` trả GO với `0 Critical / 0 Major / 0 Important / 3 Minor`. Ba Minor chỉ là hardening test tĩnh, source/bundle hiện tại đúng; không còn product/security defect đã biết. Ponytail kết luận `Lean already. Ship.`
 - Manual browser/role/session acceptance chưa chạy và cần approval rollout riêng. Không có deploy hoặc mutation dữ liệu thật trong source gate này.
+
+## Selective rollout closure / Closure rollout chọn lọc
+
+### Release identity and artifacts
+
+- Version-only PR #354 advanced Bug Management to `0.0.6` and User Administration to `1.0.16`. Its exact reviewed head was `465f8e8738126402271480152b2f5611cbd10f0a`; independent review returned `0 Critical / 0 Major / 0 Important / 0 Minor`, GitHub `qa-depth-gate` passed, and the PR merged at `2993c707f7369e46c45ec2b105c30f9786f0d859`.
+- CAP ZIP `idts-gate64-cap-2993c707.zip`: SHA-256 `45D3186D851990390941BBEC2521F5BFFB39AEE699507FDC622DECBD8C4FDFC9`, 348,468 bytes, Node `22.x`, 110 archive entries including directories, zero `node_modules`, DB/HDI, environment or credential payload; packaged `srv/auth.js` matches the exact generated source.
+- UI MTAR `idts-user-admin-ui-gate64-2993c707.mtar`: SHA-256 `C09E9EDB14A9E36B0C4E09635E1012E3B67AD8A524CB65F4AAE3CB52400DDEC2`, 323,001 bytes. Deep inspection found exactly one application-content module, one existing HTML5 repository host, and nested `bug-management-ui.zip` / `user-administration-ui.zip` at `0.0.6` / `1.0.16`; no CAP, DB/HDI, AppRouter, managed-service, route or `node_modules` payload.
+- Full Windows `mbt build` was rejected after its CAP `data.zip` remained zero bytes for several minutes. No full MTAR was accepted or deployed. CAP therefore used the previously validated direct package/stage/owned-droplet path; UI used the dedicated content-only descriptor.
+
+### Platform execution and final readiness
+
+- Preflight and both post-deployment gates returned `DEMO READY`: CAP/AppRouter `1/1`, liveness/readiness `200`, protected anonymous API `401`, Web `200`. The approved check-only workflow never ran prepare/recovery.
+- CAP rollout counts: create package `1`, stage `1`, set owned droplet `1`, restart `1`, rollback `0`. The new droplet fingerprint is `239c70d4-3de`; CAP retained one route and seven bindings. AppRouter retained one route, three bindings, and its original droplet fingerprint `ed1f1d34-32f`.
+- UI content operation `c752eeef-a107-11f1-8c0e-eeee0a892136` selected only `idts-user-admin-ui-r3c-content`, finished successfully, retained exactly one healthy existing HTML5 repository host, and left zero active MTA operations.
+- No DB deployer, HDI make, schema, migration, seed, DDL/DML, AppRouter deployment, route/binding, XSUAA, provider/email, user/role, Jira or Drive mutation ran.
+
+### Browser acceptance
+
+- The existing authenticated PM + `UserAdmin` session loaded the newly deployed User Administration header with visible/enabled `Back to Bug Management`, then opened the exact `/idtsbugmanagementui/index.html` path. Bug Management rendered visible/enabled `Open User Administration`, which returned to exact `/idtsuseradministrationui/index.html` in the same tab. Tab count stayed unchanged and no second login or business write occurred.
+- A preexisting tab initially rendered cached Gate 6.3 content; one exact cache-busted reload exposed the new Gate 6.4 action. This is why both HTML5 cache identities were advanced before rollout.
+- There was no independent Tester/Developer browser session available at exact runtime. No account, role or session was mutated to manufacture that evidence. Negative authorization remains covered by the source/runtime auth matrix `39/0`; the prior controlled Tester `Forbidden` screenshot is historical and is not misrepresented as exact-head reacceptance.
+- Five framework-level console debt entries remained (Lrep fallback, S/CUBE, deprecated SAPUI5 pseudo-module and future-fatal listener warning). Both applications rendered and the exact navigation actions succeeded; no Gate 6.4 source stack or failed navigation was observed.
+
+### Bản tóm tắt tiếng Việt
+
+- PR version-only #354 merge tại `2993c707f7369e46c45ec2b105c30f9786f0d859`; review độc lập zero finding và CI xanh. Artifact CAP/UI được khóa hash và deep-inspect đúng scope; UI chứa đúng version `0.0.6` / `1.0.16`.
+- CAP deploy qua đúng một package/stage/set-droplet/restart; UI deploy đúng một content operation `c752eeef-a107-11f1-8c0e-eeee0a892136`. Không DB/HDI/schema/migration/seed/data/user/role/provider/email mutation.
+- Readiness cuối là `DEMO READY`. Session PM + UserAdmin đi hai chiều Bug Management ↔ User Administration đúng exact path, cùng tab, không login lại và không submit write action.
+- Không có session Tester/Developer độc lập ở runtime exact; không đổi role/user để tạo evidence. Negative vẫn được khóa bằng auth matrix `39/0` và limitation được báo trung thực.
