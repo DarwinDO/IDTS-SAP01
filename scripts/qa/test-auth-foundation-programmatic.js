@@ -276,6 +276,16 @@ async function main () {
     })
     expectEqual('XSUAA Developer with accidental UserAdmin hides capability', btpDeveloperProfile.canAdministerUsers, false)
 
+    await expectRejectsStatus('XSUAA mismatched platform and business roles fail closed', 403, () => auth.send({
+      event: 'me',
+      user: xsuaaUser('pm-user-uuid', ['TESTER', 'UserAdmin'])
+    }))
+
+    await expectRejectsStatus('XSUAA multiple business roles fail closed', 403, () => auth.send({
+      event: 'me',
+      user: xsuaaUser('pm-user-uuid', ['PM', 'TESTER', 'UserAdmin'])
+    }))
+
     await expectRejectsStatus('XSUAA missing identity fails closed', 403, () => auth.send({
       event: 'me',
       user: new cds.User({ id: 'missing-identity', roles: ['authenticated-user', 'PM', 'UserAdmin'] })
