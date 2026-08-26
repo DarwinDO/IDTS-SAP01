@@ -7,6 +7,7 @@ const { processEmailDeliveries, writeNotificationRecord } = require('./outbox')
 const { createEmailSender } = require('./sender')
 const { getUserAdminConfig } = require('../user-admin/config')
 const { processUserOnboardingDeliveries } = require('../user-admin/delivery')
+const { processUserAccessDeliveries } = require('../user-admin/access-delivery')
 
 const LOG = cds.log('idts-email')
 const immediateKickRequests = new WeakSet()
@@ -29,6 +30,7 @@ async function processEmailOutboxBatch ({ tx, dependencies = {} }) {
   const batchSender = (dependencies.createSender || createEmailSender)(config)
   const processNotifications = dependencies.processNotifications || processEmailDeliveries
   const processInvitations = dependencies.processInvitations || processUserOnboardingDeliveries
+  const processAccess = dependencies.processAccess || processUserAccessDeliveries
   const sendMail = message => batchSender.sendMail(message)
   try {
     const notifications = await processNotifications({
@@ -44,10 +46,15 @@ async function processEmailOutboxBatch ({ tx, dependencies = {} }) {
           sendMail
         })
       : { sent: 0, failed: 0, skipped: 0 }
+    const access = await processAccess({
+      tx,
+      config,
+      sendMail
+    })
     return {
-      sent: notifications.sent + invitations.sent,
-      failed: notifications.failed + invitations.failed,
-      skipped: notifications.skipped + invitations.skipped
+      sent: notifications.sent + invitations.sent + access.sent,
+      failed: notifications.failed + invitations.failed + access.failed,
+      skipped: notifications.skipped + invitations.skipped + access.skipped
     }
   } finally {
     batchSender.close()
