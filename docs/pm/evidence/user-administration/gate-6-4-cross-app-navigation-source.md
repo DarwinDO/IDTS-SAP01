@@ -64,6 +64,18 @@ After separate rollout approval: verify PM + UserAdmin sees the Bug Management a
 - Three local-only NTFS junctions expose exact locked root and two UI dependency trees from `E:\IDTS-SAP01`; lockfile SHA parity was proven before creation. No install, upgrade, audit-fix, package declaration, or lockfile write ran.
 - No deployment, platform/provider/user/role/data/email/Jira/Drive/schema/HANA/HDI mutation occurred.
 
+### Release-version follow-up
+
+- After merge, readiness was `DEMO READY`, but both changed HTML5 apps still used the identities already deployed by Gate 6.3 (`0.0.5` and `1.0.15`). The rollout stopped before artifact creation or deployment.
+- The version-only follow-up starts from merged Gate 6.4 commit `3cee05aef400845cda520a8aa79d2c73227adcea` on `fix/wp8-gate64-ui-release-version-donhv`. RED reproduced `0.0.5 !== 0.0.6` and `1.0.15 !== 1.0.16`; GREEN aligns each package, lockfile root, and manifest at Bug `0.0.6` and User Administration `1.0.16`.
+- Dependencies, build commands, application behavior, CAP, schema, XSUAA, AppRouter routes, data and platform state are unchanged by this source follow-up. A separate PR/merge is required before packaging.
+
+### Follow-up version release / Phiên bản follow-up
+
+- Sau merge, readiness là `DEMO READY` nhưng hai HTML5 app đã đổi vẫn dùng identity đang deploy từ Gate 6.3 (`0.0.5` và `1.0.15`). Rollout dừng trước khi tạo artifact hoặc deploy.
+- Follow-up chỉ-version bắt đầu từ merge commit Gate 6.4 `3cee05aef400845cda520a8aa79d2c73227adcea` trên `fix/wp8-gate64-ui-release-version-donhv`. RED reproduce `0.0.5 !== 0.0.6` và `1.0.15 !== 1.0.16`; GREEN đồng bộ package, lockfile root và manifest ở Bug `0.0.6`, User Administration `1.0.16`.
+- Follow-up source này không đổi dependency, build command, behavior app, CAP, schema, XSUAA, AppRouter route, dữ liệu hoặc platform. Phải có PR/merge riêng trước packaging.
+
 ## Tiếng Việt
 
 ### Scope và baseline chính xác

@@ -89,3 +89,9 @@ Phần này nói rõ file này liên kết với file nào, liên kết nằm �
 - Source line count at documentation time: 21
 - Documentation style: learning-oriented explanation, not line listing only
 - Last reviewed: 2026-06-22
+
+## Gate 6.4 release identity / Release identity Gate 6.4
+
+**English.** Version `0.0.6` publishes the Gate 6.4 User Administration header action under a fresh HTML5 cache identity. It changes release metadata only; dependencies and build commands are unchanged. Keep it equal to `webapp/manifest.json`, the top/root versions in `package-lock.json`, the built ZIP, and live HTML5 Repository readback.
+
+**Tiếng Việt.** Version `0.0.6` phát hành action User Administration của Gate 6.4 bằng cache identity HTML5 mới. Chỉ metadata release thay đổi; dependency và build command giữ nguyên. Phải giữ bằng `webapp/manifest.json`, version top/root trong `package-lock.json`, ZIP build và readback HTML5 Repository live.

@@ -20,6 +20,8 @@ Version `1.0.10` thêm confirmation responsibility, notice không tự reassign 
 
 Version `1.0.15` phát hành remediation cột Actions của Workload Gate 6.3 với cache identity HTML5 mới. Chỉ metadata release thay đổi; dependency và build command giữ nguyên.
 
+Version `1.0.16` publishes the Gate 6.4 Back to Bug Management action with a fresh HTML5 cache identity. Version `1.0.16` phát hành action Quay lại Bug Management của Gate 6.4 bằng cache identity HTML5 mới. Dependency và build command không đổi.
+
 Version `1.0.11` adds the Gate 5 Business Catalogs tab and dialogs. Dependencies and build commands remain unchanged.
 
 Version `1.0.11` them tab/dialog Business Catalogs Gate 5. Dependency va build command giu nguyen.
