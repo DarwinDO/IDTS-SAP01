@@ -28,9 +28,24 @@ const LINK_RACE_REQUEST_A_ID = '81000000-0000-4000-8000-000000000025'
 const LINK_RACE_REQUEST_B_ID = '81000000-0000-4000-8000-000000000026'
 const LINK_RACE_OPERATION_A_ID = '81000000-0000-4000-8000-000000000027'
 const LINK_RACE_OPERATION_B_ID = '81000000-0000-4000-8000-000000000028'
+const CHANGE_ROLE_OPERATION_ID = '81000000-0000-4000-8000-000000000031'
+const NOOP_CHANGE_ROLE_OPERATION_ID = '81000000-0000-4000-8000-000000000032'
+const APPLIED_REVOKE_OPERATION_ID = '81000000-0000-4000-8000-000000000033'
+const DESIRED_PROFILE_ID = '81000000-0000-4000-8000-000000000034'
+const DESIRED_RESPONSIBILITY_ID = '81000000-0000-4000-8000-000000000035'
 
 async function main () {
   cds.env.requires.auth = { kind: 'xsuaa' }
+  cds.env.idts.email = {
+    enabled: true,
+    provider: 'smtp',
+    host: 'smtp.example.invalid',
+    port: 587,
+    username: 'controlled-user',
+    password: 'controlled-password',
+    fromAddress: 'no-reply@example.invalid',
+    baseUrl: 'https://idts.example.invalid'
+  }
   const db = await cds.deploy('db').to('sqlite::memory:')
   cds.db = db
   await db.run(INSERT.into('idts.cap.Users').entries({
@@ -117,6 +132,7 @@ async function main () {
   assert.equal(operation.attemptCount, 1)
   assert.equal(operation.leaseTokenHash, null)
   assert.equal(operation.providerCorrelationHash, 'e'.repeat(64))
+  assert.equal((await db.run(SELECT.from('idts.cap.UserAccessNotificationDeliveries'))).length, 0, 'PROVISION creates no access delivery')
 
   await db.run(INSERT.into('idts.cap.AuthSessions').entries({
     ID: REACTIVATION_SESSION_ID,
@@ -164,6 +180,16 @@ async function main () {
   assert.equal((await db.run(SELECT.one.from('idts.cap.Users').where({ ID: request.activeUser_ID }))).active, true)
   assert.equal((await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: REQUEST_ID }))).status_code, 'ACTIVE')
   assert.equal((await db.run(SELECT.one.from('idts.cap.AuthSessions').where({ ID: REACTIVATION_SESSION_ID }))).revokedAt, '2026-08-13T01:00:00.000Z')
+  const reactivationDelivery = await db.run(SELECT.one.from('idts.cap.UserAccessNotificationDeliveries'))
+  const reactivationAudit = await db.run(SELECT.one.from('idts.cap.UserIdentityAuditEvents').where({
+    operation_ID: REACTIVATION_OPERATION_ID,
+    action: 'REACTIVATE',
+    result: 'APPLIED'
+  }))
+  assert.equal(reactivationDelivery.sourceAuditEvent_ID, reactivationAudit.ID)
+  assert.equal(reactivationDelivery.eventType, 'ACCESS_REACTIVATED')
+  assert.match(reactivationDelivery.textBody, /Effective role: Tester/)
+  assert.match(reactivationDelivery.textBody, /Access state: Active/)
   await assert.rejects(service.send({
     event: 'completeAccessOperation',
     data: {
@@ -175,9 +201,139 @@ async function main () {
     },
     user: broker
   }), error => error?.code === 'ACCESS_OPERATION_LEASE_INVALID')
+  assert.equal((await db.run(SELECT.from('idts.cap.UserAccessNotificationDeliveries'))).length, 1, 'duplicate callback creates no delivery')
+
+  const componentCategory = await db.run(SELECT.one.from('idts.cap.ComponentCategories').columns('ID'))
+  await db.run(INSERT.into('idts.cap.UserOnboardingDeveloperProfiles').entries({
+    ID: DESIRED_PROFILE_ID,
+    onboardingRequest_ID: REQUEST_ID,
+    availabilityStatus_code: 'AVAILABLE',
+    workloadLimit: 3
+  }))
+  await db.run(INSERT.into('idts.cap.UserOnboardingDeveloperResponsibilities').entries({
+    ID: DESIRED_RESPONSIBILITY_ID,
+    onboardingRequest_ID: REQUEST_ID,
+    componentCategory_ID: componentCategory.ID,
+    responsibilityLevel_code: 'PRIMARY'
+  }))
+  await db.run(UPDATE('idts.cap.Users').set({ active: false }).where({ ID: request.activeUser_ID }))
+  await db.run(UPDATE('idts.cap.UserOnboardingRequests').set({
+    requestedRole_code: 'DEVELOPER',
+    status_code: 'ROLE_CHANGE_QUEUED',
+    provisioningVersion: 6,
+    latestOperation_ID: CHANGE_ROLE_OPERATION_ID
+  }).where({ ID: REQUEST_ID }))
+  await db.run(INSERT.into('idts.cap.UserAccessOperations').entries({
+    ID: CHANGE_ROLE_OPERATION_ID,
+    onboardingRequest_ID: REQUEST_ID,
+    operationType: 'CHANGE_ROLE',
+    state: 'PENDING',
+    requestedBy_ID: ADMIN_ID,
+    idempotencyKey: '4'.repeat(64),
+    expectedVersion: 6,
+    desiredRole_code: 'DEVELOPER',
+    desiredUserAdmin: false,
+    correlationId: '81000000-0000-4000-8000-000000000036',
+    attemptCount: 0
+  }))
+  const changeRoleClaim = await service.send({ event: 'claimNextAccessOperation', data: {}, user: broker })
+  const changeRoleCompletion = await service.send({
+    event: 'completeAccessOperation',
+    data: {
+      operationID: CHANGE_ROLE_OPERATION_ID,
+      leaseToken: changeRoleClaim.leaseToken,
+      resultCode: 'APPLIED',
+      safeCode: 'ROLE_COLLECTIONS_VERIFIED',
+      providerCorrelationHash: '4'.repeat(64)
+    },
+    user: broker
+  })
+  assert.equal(changeRoleCompletion.status, 'ACTIVE')
+  const changeRoleAudits = await db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ operation_ID: CHANGE_ROLE_OPERATION_ID }))
+  const changeRoleFinalAudit = changeRoleAudits.find(row => row.action === 'CHANGE_ROLE')
+  const changeRoleDelivery = await db.run(SELECT.one.from('idts.cap.UserAccessNotificationDeliveries').where({ sourceAuditEvent_ID: changeRoleFinalAudit.ID }))
+  assert.equal(changeRoleDelivery.eventType, 'ACCESS_ROLE_CHANGED')
+  assert.match(changeRoleDelivery.textBody, /Effective role: Developer/)
+  assert.match(changeRoleDelivery.textBody, /Access state: Active/)
+  assert.equal(changeRoleAudits.some(row => row.action.startsWith('DEVELOPER_PROFILE_')), true)
+  assert.equal(changeRoleAudits.some(row => row.action.startsWith('DEVELOPER_RESPONSIBILITY_')), true)
+  assert.equal((await db.run(SELECT.from('idts.cap.UserAccessNotificationDeliveries').where({ sourceAuditEvent_ID: { in: changeRoleAudits.filter(row => row.action !== 'CHANGE_ROLE').map(row => row.ID) } }))).length, 0)
+  assert.equal((await db.run(SELECT.from('idts.cap.UserAccessNotificationDeliveries'))).length, 2, 'one final role-change delivery only')
 
   await db.run(UPDATE('idts.cap.Users').set({ active: false }).where({ ID: request.activeUser_ID }))
   await db.run(UPDATE('idts.cap.UserOnboardingRequests').set({
+    status_code: 'ROLE_CHANGE_QUEUED',
+    provisioningVersion: 8,
+    latestOperation_ID: NOOP_CHANGE_ROLE_OPERATION_ID
+  }).where({ ID: REQUEST_ID }))
+  await db.run(INSERT.into('idts.cap.UserAccessOperations').entries({
+    ID: NOOP_CHANGE_ROLE_OPERATION_ID,
+    onboardingRequest_ID: REQUEST_ID,
+    operationType: 'CHANGE_ROLE',
+    state: 'PENDING',
+    requestedBy_ID: ADMIN_ID,
+    idempotencyKey: '5'.repeat(64),
+    expectedVersion: 8,
+    desiredRole_code: 'DEVELOPER',
+    desiredUserAdmin: false,
+    correlationId: '81000000-0000-4000-8000-000000000037',
+    attemptCount: 0
+  }))
+  const noopClaim = await service.send({ event: 'claimNextAccessOperation', data: {}, user: broker })
+  await service.send({
+    event: 'completeAccessOperation',
+    data: {
+      operationID: NOOP_CHANGE_ROLE_OPERATION_ID,
+      leaseToken: noopClaim.leaseToken,
+      resultCode: 'NOOP_ALREADY_DESIRED',
+      safeCode: 'ROLE_COLLECTIONS_VERIFIED',
+      providerCorrelationHash: null
+    },
+    user: broker
+  })
+  assert.equal((await db.run(SELECT.from('idts.cap.UserAccessNotificationDeliveries'))).length, 2, 'NOOP creates no access delivery')
+
+  await db.run(UPDATE('idts.cap.Users').set({ active: false }).where({ ID: request.activeUser_ID }))
+  await db.run(UPDATE('idts.cap.UserOnboardingRequests').set({
+    status_code: 'REVOKE_QUEUED',
+    provisioningVersion: 10,
+    latestOperation_ID: APPLIED_REVOKE_OPERATION_ID
+  }).where({ ID: REQUEST_ID }))
+  await db.run(INSERT.into('idts.cap.UserAccessOperations').entries({
+    ID: APPLIED_REVOKE_OPERATION_ID,
+    onboardingRequest_ID: REQUEST_ID,
+    operationType: 'REVOKE',
+    state: 'PENDING',
+    requestedBy_ID: ADMIN_ID,
+    idempotencyKey: '6'.repeat(64),
+    expectedVersion: 10,
+    desiredRole_code: 'DEVELOPER',
+    desiredUserAdmin: false,
+    correlationId: '81000000-0000-4000-8000-000000000038',
+    attemptCount: 0
+  }))
+  const appliedRevokeClaim = await service.send({ event: 'claimNextAccessOperation', data: {}, user: broker })
+  await service.send({
+    event: 'completeAccessOperation',
+    data: {
+      operationID: APPLIED_REVOKE_OPERATION_ID,
+      leaseToken: appliedRevokeClaim.leaseToken,
+      resultCode: 'APPLIED',
+      safeCode: 'ROLE_COLLECTIONS_REVOKED',
+      providerCorrelationHash: '6'.repeat(64)
+    },
+    user: broker
+  })
+  const appliedRevokeAudit = await db.run(SELECT.one.from('idts.cap.UserIdentityAuditEvents').where({ operation_ID: APPLIED_REVOKE_OPERATION_ID, action: 'REVOKE', result: 'APPLIED' }))
+  const appliedRevokeDelivery = await db.run(SELECT.one.from('idts.cap.UserAccessNotificationDeliveries').where({ sourceAuditEvent_ID: appliedRevokeAudit.ID }))
+  assert.equal(appliedRevokeDelivery.eventType, 'ACCESS_REVOKED')
+  assert.match(appliedRevokeDelivery.textBody, /Effective role: Developer/)
+  assert.match(appliedRevokeDelivery.textBody, /Access state: Revoked/)
+  assert.equal((await db.run(SELECT.from('idts.cap.UserAccessNotificationDeliveries'))).length, 3)
+
+  await db.run(UPDATE('idts.cap.Users').set({ active: false }).where({ ID: request.activeUser_ID }))
+  await db.run(UPDATE('idts.cap.UserOnboardingRequests').set({
+    requestedRole_code: 'TESTER',
     status_code: 'REVOKE_QUEUED',
     provisioningVersion: 6,
     latestOperation_ID: REVOKE_OPERATION_ID
@@ -217,6 +373,7 @@ async function main () {
     operation_ID: REVOKE_OPERATION_ID,
     action: 'REVOKE'
   })))
+  assert.equal((await db.run(SELECT.from('idts.cap.UserAccessNotificationDeliveries'))).length, 3, 'provider failure creates no access delivery')
 
   await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries({
     ID: FAILURE_REQUEST_ID,
@@ -343,6 +500,7 @@ async function main () {
     SELECT.from('idts.cap.UserIdentityAuditEvents').where({ operation_ID: EXPIRED_OPERATION_ID, action: 'PROVISION' })
   )
   assert.equal(expiredAudits.length, 2)
+  assert.equal((await db.run(SELECT.from('idts.cap.UserAccessNotificationDeliveries'))).length, 3, 'expired lease creates no access delivery')
 
   await db.run(INSERT.into('idts.cap.Users').entries({
     ID: LINK_USER_ID,
@@ -457,6 +615,7 @@ async function main () {
     operation_ID: LINK_OPERATION_ID,
     action: 'LINK_EXISTING'
   })))
+  assert.equal((await db.run(SELECT.from('idts.cap.UserAccessNotificationDeliveries'))).length, 3, 'LINK_EXISTING creates no access delivery')
   await assert.rejects(service.send({
     event: 'completeAccessOperation',
     data: {
@@ -602,6 +761,7 @@ async function main () {
   const blockedRaceUser = raceUsers.find(user => user.ID === blockedRaceRequest.linkTargetUser_ID)
   assert.match(blockedRaceUser.email, /@example\.local$/, 'cross-target email race loser must preserve its legacy email')
   assert.equal(blockedRaceUser.externalIdentityKeyHash, null, 'cross-target email race loser must preserve unlinked identity state')
+  assert.equal((await db.run(SELECT.from('idts.cap.UserAccessNotificationDeliveries'))).length, 3, 'provider conflict creates no access delivery')
 
   await assert.rejects(service.send({
     event: 'claimNextAccessOperation',
