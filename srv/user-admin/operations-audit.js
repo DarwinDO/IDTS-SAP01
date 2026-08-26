@@ -8,6 +8,7 @@ const { getEmailConfig: defaultEmailConfig } = require('../email/config')
 const { scheduleImmediateEmailOutbox: defaultSchedule } = require('../email/worker')
 
 const DELIVERIES = 'idts.cap.UserOnboardingDeliveries'
+const ACCESS_DELIVERIES = 'idts.cap.UserAccessNotificationDeliveries'
 const REQUESTS = 'idts.cap.UserOnboardingRequests'
 const OPERATIONS = 'idts.cap.UserAccessOperations'
 const AUDIT_EVENTS = 'idts.cap.UserIdentityAuditEvents'
@@ -16,6 +17,7 @@ const USERS = 'idts.cap.Users'
 const DEFAULT_PAGE_SIZE = 25
 const MAX_PAGE_SIZE = 100
 const MAX_PAGE_SKIP = 1000000
+const MAX_ADMINISTRATION_PAGE_SKIP = 10000
 const READINESS_WINDOW_MS = 7 * 24 * 60 * 60 * 1000
 
 const RETRYABLE_DELIVERY_CODES = new Set([
@@ -48,6 +50,7 @@ const OPERATION_RESULT_SUMMARIES = Object.freeze({
 
 const AUDIT_SUMMARIES = Object.freeze({
   RETRY_ONBOARDING_DELIVERY: 'Onboarding delivery retry queued.',
+  RETRY_ACCESS_DELIVERY: 'Access delivery retry queued.',
   REQUEST_SUSPEND: 'Local access suspension requested.',
   REQUEST_REACTIVATE: 'Access reactivation requested.',
   RECONCILE_ACCESS_OPERATION: 'Access operation reconciliation queued.',
@@ -58,10 +61,12 @@ const AUDIT_SUMMARIES = Object.freeze({
 function registerOperationsAuditHandlers (service, dependencies = {}) {
   if (typeof dependencies.authorize !== 'function') throw new TypeError('Operations authorization is required.')
   service.on('searchOnboardingDeliveries', req => searchOnboardingDeliveries(req, dependencies))
+  service.on('searchAdministrationDeliveries', req => searchAdministrationDeliveries(req, dependencies))
   service.on('searchAccessOperations', req => searchAccessOperations(req, dependencies))
   service.on('searchAccessAuditEvents', req => searchAccessAuditEvents(req, dependencies))
   service.on('readAdministrationReadiness', req => readAdministrationReadiness(req, dependencies))
   service.on('retryOnboardingDelivery', req => retryOnboardingDelivery(req, dependencies))
+  service.on('retryUserAccessDelivery', req => retryUserAccessDelivery(req, dependencies))
 }
 
 async function searchOnboardingDeliveries (req, dependencies) {
@@ -97,6 +102,107 @@ async function searchOnboardingDeliveries (req, dependencies) {
     : await tx.run(SELECT.from(REQUESTS).columns('ID', 'status_code', 'expiresAt').where({ ID: { in: requestIDs } }))
   const requestByID = new Map(requests.map(row => [row.ID, row]))
   return rows.map(row => toDeliverySummary(row, maxAttempts, requestByID.get(row.onboardingRequest_ID), readAt))
+}
+
+async function searchAdministrationDeliveries (req, dependencies = {}) {
+  const tx = dependencies.tx || cds.tx(req)
+  await dependencies.authorize(req, tx)
+  const deliveryType = administrationDeliveryType(req.data?.deliveryType)
+  const { skip, top } = clampAdministrationPage(req.data?.skip, req.data?.top)
+  const status = optionalCode(req.data?.status, 'INVALID_DELIVERY_STATUS')
+  const query = normalizeQuery(req.data?.query)
+  const maxAttempts = maxAttemptsFrom(dependencies.getEmailConfig)
+  const readAt = requestTime(req)
+
+  if (deliveryType !== 'ALL') {
+    const rows = await tx.run(administrationDeliverySelection(deliveryType, status, query, top, skip))
+    const normalized = await normalizeAdministrationDeliveries(tx, deliveryType, rows, maxAttempts, readAt)
+    return normalized.map(entry => entry.value)
+  }
+
+  const readLimit = skip + top
+  const [invitations, accessChanges] = await Promise.all([
+    tx.run(administrationDeliverySelection('INVITATION', status, query, readLimit)),
+    tx.run(administrationDeliverySelection('ACCESS_CHANGE', status, query, readLimit))
+  ])
+  const normalized = [
+    ...await normalizeAdministrationDeliveries(tx, 'INVITATION', invitations, maxAttempts, readAt),
+    ...await normalizeAdministrationDeliveries(tx, 'ACCESS_CHANGE', accessChanges, maxAttempts, readAt)
+  ]
+  normalized.sort(compareAdministrationDeliveries)
+  return normalized.slice(skip, skip + top).map(entry => entry.value)
+}
+
+function administrationDeliverySelection (deliveryType, status, query, top, skip) {
+  const invitation = deliveryType === 'INVITATION'
+  const selection = SELECT.from(invitation ? DELIVERIES : ACCESS_DELIVERIES)
+    .columns(...(invitation
+      ? [
+          'ID',
+          'onboardingRequest_ID',
+          'recipientEmail',
+          'status_code',
+          'attemptCount',
+          'nextAttemptAt',
+          'lastAttemptAt',
+          'sentAt',
+          'lastErrorCode',
+          'modifiedAt',
+          'lockedUntil',
+          'createdAt'
+        ]
+      : [
+          'ID',
+          'recipientEmail',
+          'eventType',
+          'status_code',
+          'attemptCount',
+          'nextAttemptAt',
+          'lastAttemptAt',
+          'sentAt',
+          'lastErrorCode',
+          'modifiedAt',
+          'lockedUntil',
+          'createdAt'
+        ]))
+    .orderBy('createdAt desc', 'ID desc')
+    .limit(top, skip)
+  if (status) selection.where({ status_code: status })
+  if (query && invitation) {
+    selection.where`contains(recipientEmail, ${query}) or contains(ID, ${query}) or contains(onboardingRequest_ID, ${query})`
+  } else if (query) {
+    selection.where`contains(recipientEmail, ${query}) or contains(ID, ${query}) or contains(eventType, ${query})`
+  }
+  return selection
+}
+
+async function normalizeAdministrationDeliveries (tx, deliveryType, rows, maxAttempts, readAt) {
+  let requestByID = new Map()
+  if (deliveryType === 'INVITATION') {
+    const requestIDs = [...new Set(rows.map(row => row.onboardingRequest_ID).filter(Boolean))]
+    const requests = requestIDs.length === 0
+      ? []
+      : await tx.run(SELECT.from(REQUESTS).columns('ID', 'status_code', 'expiresAt').where({ ID: { in: requestIDs } }))
+    requestByID = new Map(requests.map(row => [row.ID, row]))
+  }
+  return rows.map(row => ({
+    createdAt: row.createdAt,
+    ID: row.ID,
+    value: toAdministrationDeliverySummary(
+      row,
+      deliveryType,
+      maxAttempts,
+      requestByID.get(row.onboardingRequest_ID),
+      readAt
+    )
+  }))
+}
+
+function compareAdministrationDeliveries (left, right) {
+  const leftTime = Date.parse(left.createdAt || '')
+  const rightTime = Date.parse(right.createdAt || '')
+  const timestampOrder = (Number.isFinite(rightTime) ? rightTime : 0) - (Number.isFinite(leftTime) ? leftTime : 0)
+  return timestampOrder || String(right.ID || '').localeCompare(String(left.ID || ''))
 }
 
 async function searchAccessOperations (req, dependencies) {
@@ -168,11 +274,12 @@ async function searchAccessAuditEvents (req, dependencies) {
 async function readAdministrationReadiness (req, dependencies) {
   const tx = cds.tx(req)
   await dependencies.authorize(req, tx)
-  const [deliveries, operations] = await Promise.all([
+  const [invitations, accessChanges, operations] = await Promise.all([
     tx.run(SELECT.from(DELIVERIES).columns('status_code', 'lastAttemptAt', 'sentAt').orderBy('createdAt desc', 'ID desc').limit(25)),
+    tx.run(SELECT.from(ACCESS_DELIVERIES).columns('status_code', 'lastAttemptAt', 'sentAt').orderBy('createdAt desc', 'ID desc').limit(25)),
     tx.run(SELECT.from(OPERATIONS).columns('state', 'completedAt').orderBy('createdAt desc', 'ID desc').limit(25))
   ])
-  return deriveAdministrationReadiness(deliveries, operations, Date.now())
+  return deriveAdministrationReadiness([...invitations, ...accessChanges], operations, Date.now())
 }
 
 function deriveAdministrationReadiness (deliveries, operations, now) {
@@ -307,6 +414,96 @@ async function retryOnboardingDelivery (req, dependencies = {}) {
   return toDeliverySummary(refreshed, maxAttempts, request, now)
 }
 
+async function retryUserAccessDelivery (req, dependencies = {}) {
+  const tx = dependencies.tx || cds.tx(req)
+  const administrator = await dependencies.authorize(req, tx)
+  const deliveryID = normalizeUuid(req.data?.deliveryID)
+  if (!deliveryID) throw serviceError(400, 'INVALID_DELIVERY_ID', 'Delivery ID is invalid.')
+  const expectedModifiedAt = requiredTimestamp(req.data?.expectedModifiedAt)
+  const delivery = await tx.run(
+    SELECT.one.from(ACCESS_DELIVERIES).columns(
+      'ID',
+      'targetUser_ID',
+      'recipientEmail',
+      'eventType',
+      'status_code',
+      'attemptCount',
+      'nextAttemptAt',
+      'lastAttemptAt',
+      'sentAt',
+      'lastErrorCode',
+      'lockedUntil',
+      'modifiedAt'
+    ).where({ ID: deliveryID })
+  )
+  if (!delivery) throw serviceError(404, 'DELIVERY_NOT_FOUND', 'Delivery was not found.')
+  if (normalizeTimestamp(delivery.modifiedAt) !== expectedModifiedAt) {
+    throw serviceError(409, 'DELIVERY_RETRY_CONFLICT', 'The delivery changed. Reload and try again.')
+  }
+  if (delivery.status_code !== 'FAILED' || !RETRYABLE_DELIVERY_CODES.has(delivery.lastErrorCode)) {
+    throw serviceError(409, 'DELIVERY_NOT_RETRYABLE', 'The delivery cannot be retried.')
+  }
+
+  const maxAttempts = maxAttemptsFrom(dependencies.getEmailConfig)
+  if (Number(delivery.attemptCount || 0) >= maxAttempts) {
+    throw serviceError(409, 'DELIVERY_RETRY_LIMIT_REACHED', 'The delivery retry limit has been reached.')
+  }
+  const now = requestTime(req)
+  const lockedUntil = delivery.lockedUntil ? Date.parse(delivery.lockedUntil) : null
+  if (delivery.lockedUntil && (!Number.isFinite(lockedUntil) || lockedUntil > now.getTime())) {
+    throw serviceError(409, 'DELIVERY_LOCKED', 'The delivery is currently being processed.')
+  }
+
+  const changed = await tx.run(
+    UPDATE(ACCESS_DELIVERIES).set({
+      status_code: 'PENDING',
+      nextAttemptAt: now.toISOString(),
+      lastErrorCode: null,
+      lastErrorSummary: null,
+      lockedUntil: null,
+      lockToken: null
+    }).where({
+      ID: delivery.ID,
+      status_code: 'FAILED',
+      attemptCount: delivery.attemptCount,
+      lastErrorCode: delivery.lastErrorCode,
+      modifiedAt: delivery.modifiedAt
+    })
+  )
+  if (changed !== 1) throw serviceError(409, 'DELIVERY_RETRY_CONFLICT', 'The delivery changed. Reload and try again.')
+
+  await tx.run(INSERT.into(AUDIT_EVENTS).entries({
+    ID: cds.utils.uuid(),
+    actor_ID: administrator?.ID || null,
+    targetUser_ID: delivery.targetUser_ID,
+    action: 'RETRY_ACCESS_DELIVERY',
+    result: 'QUEUED',
+    fromState: 'FAILED',
+    toState: 'PENDING',
+    correlationId: cds.utils.uuid(),
+    detailsSummary: AUDIT_SUMMARIES.RETRY_ACCESS_DELIVERY
+  }))
+
+  const schedule = dependencies.schedule || defaultSchedule
+  if (typeof schedule === 'function') schedule(req)
+  const refreshed = await tx.run(
+    SELECT.one.from(ACCESS_DELIVERIES).columns(
+      'ID',
+      'recipientEmail',
+      'eventType',
+      'status_code',
+      'attemptCount',
+      'nextAttemptAt',
+      'lastAttemptAt',
+      'sentAt',
+      'lastErrorCode',
+      'lockedUntil',
+      'modifiedAt'
+    ).where({ ID: delivery.ID })
+  )
+  return toAdministrationDeliverySummary(refreshed, 'ACCESS_CHANGE', maxAttempts, null, now)
+}
+
 async function mapOperationSummaries (tx, rows) {
   if (rows.length === 0) return []
   const requestIDs = [...new Set(rows.map(row => row.onboardingRequest_ID).filter(Boolean))]
@@ -390,6 +587,27 @@ function toDeliverySummary (row, maxAttempts = 3, request, readAt = new Date()) 
   }
 }
 
+function toAdministrationDeliverySummary (row, deliveryType, maxAttempts = 3, request, readAt = new Date()) {
+  const invitation = deliveryType === 'INVITATION'
+  return {
+    deliveryID: row.ID,
+    deliveryType,
+    eventType: invitation ? 'INVITATION' : safeCode(row.eventType),
+    recipientDisplay: maskRecipient(row.recipientEmail),
+    status: safeCode(row.status_code),
+    attemptCount: Number(row.attemptCount || 0),
+    nextAttemptAt: row.nextAttemptAt || null,
+    lastAttemptAt: row.lastAttemptAt || null,
+    sentAt: row.sentAt || null,
+    errorCode: row.lastErrorCode ? safeCode(row.lastErrorCode) : null,
+    errorSummary: row.lastErrorCode ? deliverySummary(row.lastErrorCode) : null,
+    canRetry: invitation
+      ? canRetryDelivery(row, maxAttempts, request, readAt)
+      : canRetryAccessDelivery(row, maxAttempts, readAt),
+    modifiedAt: row.modifiedAt || null
+  }
+}
+
 function canRetryDelivery (row, maxAttempts, request, readAt) {
   const expiresAt = request?.expiresAt ? Date.parse(request.expiresAt) : NaN
   return row.status_code === 'FAILED' &&
@@ -399,6 +617,14 @@ function canRetryDelivery (row, maxAttempts, request, readAt) {
     request?.status_code === 'INVITED' &&
     Number.isFinite(expiresAt) &&
     expiresAt > readAt.getTime()
+}
+
+function canRetryAccessDelivery (row, maxAttempts, readAt) {
+  const lockedUntil = row.lockedUntil ? Date.parse(row.lockedUntil) : null
+  return row.status_code === 'FAILED' &&
+    RETRYABLE_DELIVERY_CODES.has(row.lastErrorCode) &&
+    Number(row.attemptCount || 0) < maxAttempts &&
+    (!row.lockedUntil || (Number.isFinite(lockedUntil) && lockedUntil <= readAt.getTime()))
 }
 
 function requestTime (req) {
@@ -418,6 +644,23 @@ function clampPage (skip, top) {
     skip: Number.isInteger(parsedSkip) && parsedSkip >= 0 ? Math.min(parsedSkip, MAX_PAGE_SKIP) : 0,
     top: Number.isInteger(parsedTop) && parsedTop > 0 ? Math.min(parsedTop, MAX_PAGE_SIZE) : DEFAULT_PAGE_SIZE
   }
+}
+
+function clampAdministrationPage (skip, top) {
+  const parsedSkip = Number(skip)
+  const parsedTop = Number(top)
+  return {
+    skip: Number.isInteger(parsedSkip) ? Math.min(Math.max(parsedSkip, 0), MAX_ADMINISTRATION_PAGE_SKIP) : 0,
+    top: Number.isInteger(parsedTop) ? Math.min(Math.max(parsedTop, 1), MAX_PAGE_SIZE) : DEFAULT_PAGE_SIZE
+  }
+}
+
+function administrationDeliveryType (value) {
+  const deliveryType = optionalCode(value, 'INVALID_DELIVERY_TYPE') || 'ALL'
+  if (!['ALL', 'INVITATION', 'ACCESS_CHANGE'].includes(deliveryType)) {
+    throw serviceError(400, 'INVALID_DELIVERY_TYPE', 'Delivery type is invalid.')
+  }
+  return deliveryType
 }
 
 function maskRecipient (value) {
@@ -506,13 +749,17 @@ function serviceError (status, code, message) {
 module.exports = {
   registerOperationsAuditHandlers,
   searchOnboardingDeliveries,
+  searchAdministrationDeliveries,
   searchAccessOperations,
   searchAccessAuditEvents,
   readAdministrationReadiness,
   deriveAdministrationReadiness,
   retryOnboardingDelivery,
+  retryUserAccessDelivery,
   clampPage,
+  clampAdministrationPage,
   maskRecipient,
   correlationFingerprint,
-  toDeliverySummary
+  toDeliverySummary,
+  toAdministrationDeliverySummary
 }
