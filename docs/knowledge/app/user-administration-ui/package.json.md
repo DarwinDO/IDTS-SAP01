@@ -8,6 +8,8 @@ Version `1.0.9` marks the first live content containing generic Cancel copy for 
 
 Version `1.0.10` adds the Gate 4 responsibility confirmation, no-auto-reassignment notice and double-submit guard without changing dependencies or build commands.
 
+Version `1.0.14` publishes the Gate 6.3 Developer Workload and Bug drill-down content under a fresh HTML5 cache identity. It changes release metadata only; dependencies and build commands remain unchanged.
+
 ## Tiếng Việt
 
 File này là contract npm và build của User Administration UI độc lập. `version` phải tăng cùng `sap.app/applicationVersion` trong `webapp/manifest.json` và root version trong `package-lock.json`; HTML5 Repository và AppRouter dùng release identity này để phân biệt content mới deploy với content cũ đang cache. Các script dùng lại UI5 toolchain đã cài và tạo cache-buster index cùng ZIP deploy. Không thêm runtime dependency hoặc đổi build task cho release chỉ thay wording.
@@ -15,6 +17,8 @@ File này là contract npm và build của User Administration UI độc lập. 
 Version `1.0.9` đánh dấu content live đầu tiên có copy Cancel tổng quát cho cả invitation thường và existing-user. Nếu vẫn là `1.0.8`, button backend có thể xuất hiện nhưng browser vẫn nhận label cũ chỉ nói identity-link.
 
 Version `1.0.10` thêm confirmation responsibility, notice không tự reassign và double-submit guard của Gate 4 mà không đổi dependency hoặc build command.
+
+Version `1.0.14` phát hành nội dung Developer Workload và Bug drill-down Gate 6.3 với cache identity HTML5 mới. Chỉ metadata release thay đổi; dependency và build command giữ nguyên.
 
 Version `1.0.11` adds the Gate 5 Business Catalogs tab and dialogs. Dependencies and build commands remain unchanged.
 

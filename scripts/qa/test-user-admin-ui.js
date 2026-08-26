@@ -45,6 +45,7 @@ const appPackage = JSON.parse(fs.readFileSync(path.join(app, 'package.json'), 'u
 const appPackageLock = JSON.parse(fs.readFileSync(path.join(app, 'package-lock.json'), 'utf8'))
 assert.equal(manifest['sap.app'].applicationVersion.version, appPackage.version, 'HTML5 manifest and package versions stay aligned')
 assert.equal(appPackageLock.version, appPackage.version, 'HTML5 package and lockfile versions stay aligned')
+assert.equal(appPackage.version, '1.0.14', 'Gate 6.3 workload rollout must advance the deployed HTML5 cache identity')
 assert.equal(appPackageLock.packages[''].version, appPackage.version, 'HTML5 lockfile root version stays aligned')
 const [majorVersion, minorVersion, patchVersion] = appPackage.version.split('.').map(Number)
 assert.ok(
