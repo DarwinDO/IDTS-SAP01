@@ -12,7 +12,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 ## Current status
 
-`GATE 6.3 COMPLETE — ACTIONS-COLUMN REMEDIATION MERGED, CONTENT 1.0.15 DEPLOYED, LIVE REACCEPTANCE PASS; GATE 6.4 REQUIRES A NEW APPROVAL`
+`GATE 6.4 COMPLETE — SOURCE/VERSION PRS MERGED, SELECTIVE CAP + CONTENT ROLLOUT COMPLETE, PM SAME-SESSION ROUND-TRIP PASS; GATE 6.5 NOT STARTED`
 
 - Gates 1–3B are merged, deployed and accepted. Gate 3 browser closure is recorded by PR #325 at `04643e12727290f2f35fd56e9c3d2a8df4cbcdbc`.
 - Gate 4 branch `feature/wp8-admin-developer-pilot-donhv` is frozen from that exact base.
@@ -47,7 +47,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 6. Gate 6 — Operations and Audit usability.
 7. Gate 6.2 — UI state isolation, navigation regrouping and action ownership — COMPLETE.
 8. Gate 6.3 — Developer workload and assigned-Bug drill-down — COMPLETE. PR #351 fixed the live 8-column/9-cell mismatch, HTML5 content `1.0.15` was deployed content-only, and PM reacceptance passed for Workload status, View workload, details ownership fields and exact Bug Object Page navigation.
-9. Gate 6.4 — Safe cross-app navigation.
+9. Gate 6.4 — Safe cross-app navigation — COMPLETE. Source PR #353 and cache-identity PR #354 are merged; selective CAP/content rollout and PM + UserAdmin same-tab round-trip acceptance passed at final merge `2993c707f7369e46c45ec2b105c30f9786f0d859`.
 10. Gate 6.5 — Post-completion access-change email notifications.
 
 ## Delivery rules
@@ -140,6 +140,7 @@ The executor may complete source/tests/docs/evidence commits, push the exact bra
 - Evidence: `docs/pm/evidence/user-administration/gate-6-4-cross-app-navigation-source.md`. Runtime rollout, browser role/session acceptance, Ready, merge, Gate 6.5 và cleanup là các approval boundary riêng.
 - Final independent review of exact source/evidence head `3a2edd85729d70fd75b32c70b057e3c4a400009f` returned GO with `0 Critical / 0 Major / 0 Important / 3 Minor`; the retained Minors are test-hardening only. Push and one Draft PR are authorized; rollout, browser acceptance, Ready, merge, Gate 6.5 and cleanup remain separate.
 - Final review độc lập trên source/evidence head chính xác `3a2edd85729d70fd75b32c70b057e3c4a400009f` trả GO với `0 Critical / 0 Major / 0 Important / 3 Minor`; các Minor giữ lại chỉ là hardening test. Được push và mở một Draft PR; rollout, browser acceptance, Ready, merge, Gate 6.5 và cleanup vẫn tách riêng.
+- **Closure:** Source PR #353 merged, version-only PR #354 merged at `2993c707f7369e46c45ec2b105c30f9786f0d859`, CAP direct package rollout and content-only operation `c752eeef-a107-11f1-8c0e-eeee0a892136` completed, final readiness is `DEMO READY`, and PM + UserAdmin round-trip navigation passed in one tab without a write. Exact-runtime Tester/Developer browser recheck remains unavailable because no independent session was present; no role/user mutation was used to manufacture it. Gate 6.5 remains unopened.
 
 ## Bàn giao source Gate 6.1 — làm rõ navigation và action
 
