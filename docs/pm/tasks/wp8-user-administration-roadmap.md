@@ -12,7 +12,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 ## Current status
 
-`IN PROGRESS — GATE 6.3 LIVE ACTIONS-COLUMN REMEDIATION; SOURCE VERIFICATION GREEN; PR/ROLLOUT REACCEPTANCE PENDING`
+`GATE 6.3 COMPLETE — ACTIONS-COLUMN REMEDIATION MERGED, CONTENT 1.0.15 DEPLOYED, LIVE REACCEPTANCE PASS; GATE 6.4 REQUIRES A NEW APPROVAL`
 
 - Gates 1–3B are merged, deployed and accepted. Gate 3 browser closure is recorded by PR #325 at `04643e12727290f2f35fd56e9c3d2a8df4cbcdbc`.
 - Gate 4 branch `feature/wp8-admin-developer-pilot-donhv` is frozen from that exact base.
@@ -46,7 +46,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 5. Gate 5 — Business Catalog Administration.
 6. Gate 6 — Operations and Audit usability.
 7. Gate 6.2 — UI state isolation, navigation regrouping and action ownership — COMPLETE.
-8. Gate 6.3 — Developer workload and assigned-Bug drill-down — PR #349 and the `1.0.14` rollout completed; live acceptance found an 8-column/9-cell mismatch that hides `View workload`. The approved UI-only `1.0.15` remediation is in progress before final runtime reacceptance.
+8. Gate 6.3 — Developer workload and assigned-Bug drill-down — COMPLETE. PR #351 fixed the live 8-column/9-cell mismatch, HTML5 content `1.0.15` was deployed content-only, and PM reacceptance passed for Workload status, View workload, details ownership fields and exact Bug Object Page navigation.
 9. Gate 6.4 — Safe cross-app navigation.
 10. Gate 6.5 — Post-completion access-change email notifications.
 
@@ -125,6 +125,11 @@ The executor may complete source/tests/docs/evidence commits, push the exact bra
 - English: the approved minimal source fix adds one localized `Workload status` column before `Actions`, retains the existing button/handler, adds an exact 9-column/9-cell regression, and advances only the User Administration HTML5 cache identity to `1.0.15`. Backend, schema, dependency graph and business data remain unchanged.
 - Vietnamese: acceptance PM sau rollout xác nhận row workload và Access readiness do server tính đã render, nhưng table khai báo tám cột cho chín cell. Cell trạng thái workload chiếm `Actions`, UI5 bỏ cell nút `View workload` bị dư, nên acceptance details/deep-link bị chặn.
 - Vietnamese: fix source tối thiểu đã duyệt chỉ thêm cột i18n `Trạng thái workload` trước `Actions`, giữ button/handler hiện có, thêm regression exact 9 cột/9 cell và chỉ tăng cache identity HTML5 User Administration lên `1.0.15`. Backend, schema, dependency graph và dữ liệu nghiệp vụ không đổi.
+
+- English closure: PR #351 passed `qa-depth-gate` and merged at `5812b29f49a8a00ff79a877a347b911b0a851858`. Shared content artifact SHA-256 `86BBEE7EF590707D7A8DC30BCBD145855AD43570E13F8E7A06F3132368A1BD34` contained exactly Bug Management `0.0.5` plus User Administration `1.0.15`, no `node_modules`, and was deployed once through content operation `a738f1e0-a0f3-11f1-8b5a-eeee0a9eb3ea`. Final readiness was `DEMO READY`.
+- English live reacceptance: the PM session rendered one Workload status header and 13 View workload buttons. DatDT details showed two assigned non-Closed Bugs, separate Technical Assignee and Current Action Owner columns, and two Open Bug actions; selecting the first opened the exact Bug Object Page for `BUG-0008`. No write action was submitted.
+- Vietnamese closure: PR #351 PASS `qa-depth-gate` và merge tại `5812b29f49a8a00ff79a877a347b911b0a851858`. Artifact shared content SHA-256 `86BBEE7EF590707D7A8DC30BCBD145855AD43570E13F8E7A06F3132368A1BD34` chứa đúng Bug Management `0.0.5` cùng User Administration `1.0.15`, không có `node_modules`, và được deploy đúng một lần qua operation content `a738f1e0-a0f3-11f1-8b5a-eeee0a9eb3ea`. Readiness cuối là `DEMO READY`.
+- Vietnamese live reacceptance: session PM render một header Workload status và 13 nút View workload. Details DatDT hiện hai Bug non-Closed được assign, tách cột Technical Assignee và Current Action Owner, cùng hai action Open Bug; chọn action đầu đã mở đúng Bug Object Page của `BUG-0008`. Không submit write action.
 
 ## Bàn giao source Gate 6.1 — làm rõ navigation và action
 
