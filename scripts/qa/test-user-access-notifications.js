@@ -134,7 +134,7 @@ async function main () {
   )
 
   await verifyAccessDeliveryBehavior()
-  await verifyAtomicDuplicateRace()
+  await verifyConstraintFailuresPropagate()
 
   console.log('IDTS user access notification contract: PASS')
 }
@@ -211,6 +211,17 @@ async function verifyAccessDeliveryBehavior () {
     action: 'SUSPEND',
     result: 'APPLIED'
   }
+  const missingPersistedAudit = await writeUserAccessDelivery({
+    tx: db,
+    auditEvent: { ...audit, ID: '62000000-0000-4000-8000-000000000099' },
+    targetUserID: userID,
+    eventType: 'ACCESS_SUSPENDED',
+    effectiveRole: 'TESTER',
+    effectiveAccessState: 'SUSPENDED',
+    completedAt: '2026-08-26T10:00:00.000Z',
+    emailConfig: safeConfig
+  })
+  assert.deepEqual(missingPersistedAudit, { created: false }, 'a non-persisted audit cannot create a delivery')
   await db.run(INSERT.into('idts.cap.UserIdentityAuditEvents').entries({
     ...audit,
     targetUser_ID: userID,
@@ -452,6 +463,8 @@ async function verifyAccessDeliveryBehavior () {
   assert.equal(expiredLockStored.status_code, 'SENT', 'expired lock is recovered')
   assert.equal(competingStored.status_code, 'SENT', 'competing claim is delivered once')
 
+  await verifySerializedTransactions(db, safeConfig, userID)
+
   await db.disconnect()
 }
 
@@ -465,14 +478,20 @@ async function insertAppliedAudit (db, ID, targetUserID, action) {
   return audit
 }
 
-async function verifyAtomicDuplicateRace () {
-  const state = { deliveryReads: 0, inserts: 0, aborted: false }
+async function verifyConstraintFailuresPropagate () {
+  const state = { auditLocks: 0, deliveryReads: 0, inserts: 0, aborted: false }
   const tx = {
     run: async query => {
       if (state.aborted) throw Object.assign(new Error('query after PostgreSQL transaction abort'), { code: 'POST_ERROR_QUERY' })
       if (query.SELECT) {
         const source = String(query.SELECT.from?.ref?.[0] || '')
+        if (source === 'idts.cap.UserIdentityAuditEvents') {
+          assert.ok(query.SELECT.forUpdate, 'the persisted audit source is locked before delivery lookup')
+          state.auditLocks += 1
+          return { ID: '66000000-0000-4000-8000-000000000001' }
+        }
         if (source === ENTITY) {
+          assert.equal(state.auditLocks, 1, 'the audit lock precedes the delivery lookup')
           state.deliveryReads += 1
           return undefined
         }
@@ -496,20 +515,25 @@ async function verifyAtomicDuplicateRace () {
     completedAt: '2026-08-26T10:00:00.000Z',
     emailConfig: { enabled: true, ready: true, baseUrl: 'https://idts.example.test', fromAddress: 'no-reply@example.test' }
   }
-  const duplicate = await writeUserAccessDelivery(input)
+  await assert.rejects(writeUserAccessDelivery(input), error => error?.code === '23505')
+  assert.equal(state.auditLocks, 1)
   assert.equal(state.inserts, 1, 'the PostgreSQL duplicate reaches one insert')
   assert.equal(state.deliveryReads, 1, 'no query follows the aborted PostgreSQL insert')
-  assert.equal(duplicate.created, false)
-  assert.equal(duplicate.deliveryStatus, 'PENDING')
-  assert.match(duplicate.deliveryID, /^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/)
 
   for (const code of ['SQLITE_CONSTRAINT_FOREIGNKEY', 'SQLITE_CONSTRAINT_NOTNULL']) {
+    let auditLocks = 0
     let deliveryReads = 0
     const constraintTx = {
       run: async query => {
         if (query.SELECT) {
           const source = String(query.SELECT.from?.ref?.[0] || '')
+          if (source === 'idts.cap.UserIdentityAuditEvents') {
+            assert.ok(query.SELECT.forUpdate)
+            auditLocks += 1
+            return { ID: input.auditEvent.ID }
+          }
           if (source === ENTITY) {
+            assert.equal(auditLocks, 1, `${code} mock honors the audit lock before delivery lookup`)
             deliveryReads += 1
             return deliveryReads === 1 ? undefined : { ID: 'visible-but-unrelated-delivery', status_code: 'PENDING' }
           }
@@ -520,13 +544,21 @@ async function verifyAtomicDuplicateRace () {
       }
     }
     await assert.rejects(writeUserAccessDelivery({ ...input, tx: constraintTx }), error => error?.code === code)
+    assert.equal(auditLocks, 1)
     assert.equal(deliveryReads, 1, `${code} is rethrown even when a row could be read`)
   }
 
+  let nonUniqueAuditLocks = 0
   const nonUniqueTx = {
     run: async query => {
       if (query.SELECT) {
         const source = String(query.SELECT.from?.ref?.[0] || '')
+        if (source === 'idts.cap.UserIdentityAuditEvents') {
+          assert.ok(query.SELECT.forUpdate)
+          nonUniqueAuditLocks += 1
+          return { ID: input.auditEvent.ID }
+        }
+        if (source === ENTITY) assert.equal(nonUniqueAuditLocks, 1, 'non-unique mock honors the audit lock before delivery lookup')
         return source === ENTITY ? undefined : { ID: input.targetUserID, email: 'race.user@example.test' }
       }
       if (query.INSERT) throw Object.assign(new Error('database connection failed'), { code: 'ECONNREFUSED' })
@@ -534,6 +566,28 @@ async function verifyAtomicDuplicateRace () {
     }
   }
   await assert.rejects(writeUserAccessDelivery({ ...input, tx: nonUniqueTx }), error => error?.code === 'ECONNREFUSED')
+  assert.equal(nonUniqueAuditLocks, 1)
+}
+
+async function verifySerializedTransactions (db, emailConfig, targetUserID) {
+  const audit = await insertAppliedAudit(db, '62000000-0000-4000-8000-000000000013', targetUserID, 'SUSPEND')
+  const input = {
+    auditEvent: audit,
+    targetUserID,
+    eventType: 'ACCESS_SUSPENDED',
+    effectiveRole: 'TESTER',
+    effectiveAccessState: 'SUSPENDED',
+    completedAt: '2026-08-26T10:05:00.000Z',
+    emailConfig
+  }
+  const results = await Promise.all([
+    db.tx(tx => writeUserAccessDelivery({ ...input, tx })),
+    db.tx(tx => writeUserAccessDelivery({ ...input, tx }))
+  ])
+  assert.deepEqual(results.map(result => result.created).sort(), [false, true], 'both enclosing transactions commit with one creation')
+  const rows = await db.run(SELECT.from(ENTITY).where({ sourceAuditEvent_ID: audit.ID }))
+  assert.equal(rows.length, 1, 'serialized transactions leave exactly one delivery row')
+  assert.ok(results.every(result => result.deliveryID === rows[0].ID))
 }
 
 function entityShape (definition) {

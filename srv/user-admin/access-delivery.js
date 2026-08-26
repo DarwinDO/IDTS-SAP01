@@ -1,6 +1,5 @@
 'use strict'
 
-const crypto = require('node:crypto')
 const cds = require('@sap/cds')
 const { INSERT, SELECT, UPDATE } = cds.ql
 
@@ -8,6 +7,7 @@ const { formatFrom, retryDelayMs, sanitizeTransportError } = require('../email/o
 const { isSafeEmailAddress } = require('../email/config')
 
 const DELIVERIES = 'idts.cap.UserAccessNotificationDeliveries'
+const AUDITS = 'idts.cap.UserIdentityAuditEvents'
 const USERS = 'idts.cap.Users'
 
 const ACCESS_EVENT_BY_ACTION = Object.freeze({
@@ -73,6 +73,11 @@ async function writeUserAccessDelivery ({
   const expectedEventType = ACCESS_EVENT_BY_ACTION[auditEvent?.action]
   if (!tx || !auditEvent?.ID || auditEvent.result !== 'APPLIED' || expectedEventType !== eventType) return { created: false }
 
+  const sourceAudit = await tx.run(
+    SELECT.one.from(AUDITS).columns('ID').where({ ID: auditEvent.ID }).forUpdate()
+  )
+  if (!sourceAudit) return { created: false }
+
   const existing = await tx.run(SELECT.one.from(DELIVERIES).where({ sourceAuditEvent_ID: auditEvent.ID }))
   if (existing) return { deliveryID: existing.ID, deliveryStatus: existing.status_code, created: false }
 
@@ -82,27 +87,22 @@ async function writeUserAccessDelivery ({
   const message = buildAccessDeliveryMessage({ eventType, effectiveRole, effectiveAccessState, completedAt }, emailConfig)
   const skipped = skippedAccessDeliveryReason(emailConfig, recipient.email, buildAccessApplicationLink(emailConfig?.baseUrl))
   const deliveryStatus = skipped ? 'SKIPPED' : 'PENDING'
-  const deliveryID = deliveryIdFromSourceAudit(auditEvent.ID)
-  try {
-    await tx.run(INSERT.into(DELIVERIES).entries({
-      ID: deliveryID,
-      sourceAuditEvent_ID: auditEvent.ID,
-      targetUser_ID: recipient.ID,
-      recipientEmail: recipient.email || '',
-      eventType,
-      templateKey: message.templateKey,
-      subject: message.subject,
-      textBody: message.text,
-      htmlBody: message.html,
-      status_code: deliveryStatus,
-      attemptCount: 0,
-      lastErrorCode: skipped?.code || null,
-      lastErrorSummary: skipped?.summary || null
-    }))
-  } catch (error) {
-    if (!isExpectedDeliveryDuplicate(error, deliveryID, auditEvent.ID)) throw error
-    return { deliveryID, deliveryStatus, created: false }
-  }
+  const deliveryID = cds.utils.uuid()
+  await tx.run(INSERT.into(DELIVERIES).entries({
+    ID: deliveryID,
+    sourceAuditEvent_ID: auditEvent.ID,
+    targetUser_ID: recipient.ID,
+    recipientEmail: recipient.email || '',
+    eventType,
+    templateKey: message.templateKey,
+    subject: message.subject,
+    textBody: message.text,
+    htmlBody: message.html,
+    status_code: deliveryStatus,
+    attemptCount: 0,
+    lastErrorCode: skipped?.code || null,
+    lastErrorSummary: skipped?.summary || null
+  }))
 
   return { deliveryID, deliveryStatus, created: true }
 }
@@ -201,30 +201,6 @@ function normalizeCompletedAt (value) {
   if (typeof value !== 'string' || /[\r\n]/.test(value) || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value)) return 'Unknown'
   const date = new Date(value)
   return Number.isFinite(date.getTime()) ? date.toISOString() : 'Unknown'
-}
-
-function deliveryIdFromSourceAudit (sourceAuditID) {
-  const hash = crypto.createHash('sha1')
-    .update('idts-user-access-delivery-v1\0')
-    .update(String(sourceAuditID).toLowerCase())
-    .digest()
-  const bytes = Buffer.from(hash.subarray(0, 16))
-  bytes[6] = (bytes[6] & 0x0f) | 0x50
-  bytes[8] = (bytes[8] & 0x3f) | 0x80
-  const hex = bytes.toString('hex')
-  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
-}
-
-function isExpectedDeliveryDuplicate (error, deliveryID, sourceAuditID) {
-  const code = String(error?.code || '').toUpperCase()
-  const message = String(error?.message || '')
-  if (code === '23505') return true
-  if (code === 'SQLITE_CONSTRAINT_UNIQUE' || code === 'SQLITE_CONSTRAINT_PRIMARYKEY') return true
-  const mentionsTarget = message.includes(deliveryID) || message.includes(sourceAuditID) ||
-    /UserAccessNotificationDeliveries.*(?:sourceAuditEvent|\.ID)|(?:sourceAuditEvent|\.ID).*UserAccessNotificationDeliveries/i.test(message)
-  if (code === 'SQLITE_CONSTRAINT' && /^UNIQUE constraint failed:/i.test(message) && mentionsTarget) return true
-  if (code === '301' && /unique constraint.*violat/i.test(message) && mentionsTarget) return true
-  return (code === 'ER_DUP_ENTRY' || /duplicate key/i.test(message)) && mentionsTarget
 }
 
 function escapeHtml (value) {
