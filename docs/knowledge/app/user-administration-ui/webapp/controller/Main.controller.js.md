@@ -139,6 +139,66 @@ Retry delivery chỉ gửi `deliveryID` và optimistic `modifiedAt`, sau success
 Keep CAP authorization, optimistic checks, and safe mapping out of the controller. Any new operation action needs a model, lazy-load path, disabled/busy state, safe error copy, reload behavior, and a UI contract test before it is exposed in XML.
 
 Giữ authorization CAP, optimistic check và safe mapping ở backend, không chuyển vào controller. Action operation mới phải có model, lazy-load path, busy/disabled state, error copy an toàn, reload behavior và UI contract test trước khi expose trong XML.
+
+## Gate 6.3 Developer workload and Bug drill-down / Workload Developer và drill-down Bug Gate 6.3
+
+### English
+
+`onInit` creates the independent `workload` JSONModel with `items`, `query`, `nextSkip`, `pageSize: 100`, `hasMore`, `loaded`, `busy`, `error`, `selectedDeveloper`, `bugs`, `bugsBusy`, and `bugsError`. The selected Developer child tab is stored in session state so returning to User Administration does not silently switch the user to another Developer workspace. The `bugApi` model is deliberately separate from the User Administration default model.
+
+The Workload `WORKLOAD_SELECT` allowlist requests `identityAccessReady`, and normalization consumes only that server-provided Boolean. It never infers access readiness from `active`, `developerUserID`, profile state, or assignment counts; the label is localized as `Access readiness`. The backend remains authoritative for identity-link readiness and DeveloperWorkloads authorization.
+
+Allowlist `WORKLOAD_SELECT` của Workload có request field `identityAccessReady`, và normalize chỉ consume Boolean do server trả. Controller không tự suy luận readiness từ `active`, `developerUserID`, profile state hoặc assignment count; label được localize là `Access readiness`. Backend vẫn là authority cho identity-link readiness và authorization của DeveloperWorkloads.
+
+- **Location**: `Main.controller.js:const WORKLOAD_ORDER`, `const WORKLOAD_SELECT`, and `const WORKLOAD_BUG_SELECT`.
+  **IDTS concept**: The UI declares the exact server ordering and bounded field contracts for aggregate rows and Bug details.
+  **Impact if broken**: Page-boundary order can drift, a detail read can expose descriptions/comments/audit/provider data, or later code can accidentally depend on a broad Bug payload.
+  **Must check together**: named `bugApi` in `manifest.json`, `srv/service.cds` BugService projections, the approved Gate 6.3 design, and `test-user-admin-workload.js`.
+
+- **Location**: `Main.controller.js:_loadDeveloperWorkloads`.
+  **IDTS concept**: Read-only DeveloperWorkloads consumption. The binding requests the server order `isOverloaded desc, overdueOwnedBugCount desc, developerName asc, developerProfileID asc`, caps each page at 100, normalizes numeric values and the server `identityAccessReady` Boolean, preserves page order when appending, and de-duplicates only by the Developer Profile key.
+  **Impact if broken**: PM could see a different priority order on the second page, duplicate Developers, misleading effort/count values, or a workload error could overwrite unrelated User Administration state.
+  **Must check together**: `srv/bug-service/monitoring.js:readDeveloperWorkloads`, `Main.view.xml` Workload table, and page-boundary/error assertions in `scripts/qa/test-user-admin-workload.js`.
+
+- **Location**: `Main.controller.js:_loadDeveloperWorkloadBugs` and `_normalizeDeveloperWorkloadBug`.
+  **IDTS concept**: A selected Developer receives only non-Closed Bugs assigned to the technical `assignee_ID`, with the allowlisted fields `ID`, `bugNumber`, `title`, status/priority/severity codes, due date, effort, technical assignee display name, and current action owner display name.
+  **Impact if broken**: The Workload area could change assignment/status, confuse technical ownership with next action ownership, or leak collaboration, identity, provider, or audit content.
+  **Must check together**: `srv/service.cds:Bugs`, `srv/bug-service/monitoring.js` ownership semantics, `DeveloperWorkloadDetails.fragment.xml`, and the closed-exclusion/current-owner/field-allowlist assertions.
+
+- **Location**: `Main.controller.js:_isWorkloadBugOverdue`, `_bugObjectPageUrl`, and `openBugInManagement`.
+  **IDTS concept**: Overdue is a UTC date-only comparison; the current date is not overdue. A valid UUID becomes the exact relative Bug Object Page route `/idtsbugmanagementui/index.html#/Bugs(ID=<uuid>,IsActiveEntity=true)`. Invalid IDs produce no navigation.
+  **Impact if broken**: Bugs due today could be incorrectly escalated, a malformed link could navigate to an unintended route, or the code could hard-code a tenant domain/new authentication flow.
+  **Must check together**: Bug Management routing, `DeveloperWorkloadDetails.fragment.xml`, and malformed-ID/deep-link/UTC-boundary tests.
+
+### Tiếng Việt
+
+`onInit` tạo JSONModel độc lập `workload` với `items`, `query`, `nextSkip`, `pageSize: 100`, `hasMore`, `loaded`, `busy`, `error`, `selectedDeveloper`, `bugs`, `bugsBusy` và `bugsError`. Tab con Developer được lưu trong session state để khi quay lại User Administration, màn hình không tự chuyển sang Developer workspace khác. Model `bugApi` được tách khỏi default model của User Administration.
+
+- **Vị trí**: `Main.controller.js:const WORKLOAD_ORDER`, `const WORKLOAD_SELECT` và `const WORKLOAD_BUG_SELECT`.
+  **Khái niệm IDTS**: UI khai báo order phía server và contract field bounded cho aggregate row và detail Bug.
+  **Ảnh hưởng nếu sai**: Thứ tự giữa các page có thể lệch, detail read có thể lộ description/comment/audit/provider data hoặc code sau này phụ thuộc vào payload Bug quá rộng.
+  **Phải kiểm tra cùng**: model `bugApi` trong `manifest.json`, projection BugService trong `srv/service.cds`, design Gate 6.3 đã duyệt và `test-user-admin-workload.js`.
+
+- **Vị trí**: `Main.controller.js:_loadDeveloperWorkloads`.
+  **Khái niệm IDTS**: Đọc DeveloperWorkloads chỉ đọc. Binding yêu cầu order `isOverloaded desc, overdueOwnedBugCount desc, developerName asc, developerProfileID asc`, giới hạn mỗi page tối đa 100, normalize numeric value và Boolean `identityAccessReady` do server trả, giữ thứ tự khi append và chỉ deduplicate theo key Developer Profile.
+  **Ảnh hưởng nếu sai**: PM có thể thấy page sau khác thứ tự ưu tiên, Developer bị lặp, count/effort sai hoặc lỗi workload ghi đè state khác của User Administration.
+  **Phải kiểm tra cùng**: `srv/bug-service/monitoring.js:readDeveloperWorkloads`, table Workload trong `Main.view.xml` và assertion page-boundary/error trong `scripts/qa/test-user-admin-workload.js`.
+
+- **Vị trí**: `Main.controller.js:_loadDeveloperWorkloadBugs` và `_normalizeDeveloperWorkloadBug`.
+  **Khái niệm IDTS**: Developer được chọn chỉ nhận Bug chưa Closed có `assignee_ID` là technical owner, cùng allowlist `ID`, `bugNumber`, `title`, status/priority/severity code, due date, effort, tên technical assignee và current action owner.
+  **Ảnh hưởng nếu sai**: Khu vực Workload có thể đổi assignment/status, đánh đồng ownership kỹ thuật với người xử lý bước tiếp theo hoặc lộ collaboration, identity, provider hay audit content.
+  **Phải kiểm tra cùng**: `srv/service.cds:Bugs`, ownership semantics trong `srv/bug-service/monitoring.js`, `DeveloperWorkloadDetails.fragment.xml` và assertion closed-exclusion/current-owner/field-allowlist.
+
+- **Vị trí**: `Main.controller.js:_isWorkloadBugOverdue`, `_bugObjectPageUrl` và `openBugInManagement`.
+  **Khái niệm IDTS**: Overdue dùng so sánh date-only theo UTC; Bug đến hạn hôm nay chưa quá hạn. UUID hợp lệ tạo exact relative Bug Object Page route `/idtsbugmanagementui/index.html#/Bugs(ID=<uuid>,IsActiveEntity=true)`. ID sai không tạo navigation.
+  **Ảnh hưởng nếu sai**: Bug đến hạn hôm nay có thể bị đánh dấu sai, link hỏng có thể đi tới route ngoài ý muốn hoặc code hard-code domain tenant/new auth flow.
+  **Phải kiểm tra cùng**: routing Bug Management, `DeveloperWorkloadDetails.fragment.xml` và test malformed-ID/deep-link/UTC-boundary.
+
+### Safe editing / Sửa an toàn
+
+Keep workload reads read-only and keep the two ownership concepts visible as separate fields. Do not add write actions, persistence, client-side aggregation, raw IDs to rendered text, or broad Bug `$select` fields. Changes to ordering, page size, or allowlist require a focused RED/GREEN contract update first.
+
+Giữ workload read-only và giữ hai khái niệm ownership hiển thị thành hai field riêng. Không thêm write action, persistence, client-side aggregation, raw ID vào text render hoặc field Bug ngoài allowlist. Mọi thay đổi order, page size hoặc allowlist phải cập nhật contract RED/GREEN tập trung trước.
 ## Gate 6.2 state and action ownership / State và ownership action Gate 6.2
 
 ### English

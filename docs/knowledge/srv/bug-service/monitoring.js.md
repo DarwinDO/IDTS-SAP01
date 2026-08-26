@@ -4,11 +4,39 @@
 
 English: Dashboard rows use 0-1 Available, 2 Busy, and 3+ Unavailable for every assigned non-Closed Bug, including Rejected. Vietnamese: Dashboard dùng 0-1 Available, 2 Busy, từ 3 Unavailable cho mọi Bug còn assignee và chưa Closed, kể cả Rejected.
 
+## 2026-08-26 DeveloperWorkloads authorization boundary
+
+### English
+
+Before loading profiles or Bugs, `readDeveloperWorkloads` resolves the caller through the existing `resolveRequestUser` helper. That helper requires one active internal IDTS user and preserves the existing XSUAA platform-role alignment check. An active PM may read all workload rows without requiring the `UserAdmin` capability. An active Developer is scoped server-side to rows whose `developerUserID` equals the resolved actor `Users.ID`; the client cannot widen this scope with `$filter`, `$search`, `$count`, `$skip`, `$top`, `$orderby`, or `$select`. Tester, UserAdmin without PM business role, inactive, unmapped, and misaligned callers fail closed with the repository's 403 path.
+
+The Developer scope is applied before aggregate filtering, ordering, paging and count calculation. Ordinary `BugService.Bugs` read policy is not changed by this Gate 6.3 remediation; the authorization boundary is specifically the `DeveloperWorkloads` read model.
+
+### Vietnamese
+
+Trước khi tải profile hoặc Bug, `readDeveloperWorkloads` resolve caller qua helper dùng chung `resolveRequestUser`. Helper này yêu cầu đúng một internal IDTS user đang active và giữ nguyên kiểm tra platform-role alignment của XSUAA. PM active được đọc toàn bộ workload mà không cần capability `UserAdmin`. Developer active bị scope ở server vào những row có `developerUserID` bằng `Users.ID` của actor đã resolve; client không thể mở rộng scope bằng `$filter`, `$search`, `$count`, `$skip`, `$top`, `$orderby` hoặc `$select`. Tester, UserAdmin không có business role PM, caller inactive, không map được hoặc misaligned đều fail-closed theo path 403 của repository.
+
+Scope Developer được áp dụng trước khi aggregate xử lý filter, order, paging và count. Gate 6.3 remediation này không thay đổi read policy của `BugService.Bugs` thông thường; boundary được sửa cụ thể là read model `DeveloperWorkloads`.
+
+## 2026-08-26 identity-access readiness contract
+
+### English
+
+After authorization scoping, `readDeveloperWorkloads` makes one bounded `readActiveIdentityAccessByUser` helper call for the scoped profile user IDs. Each profile row exposes the safe service Boolean `identityAccessReady`, calculated with `hasActiveIdentityAccess`. It is true only when the target internal User is active, has a non-empty immutable `externalIdentityKeyHash`, and has exactly one matching `ACTIVE` onboarding request with the same `identityKeyHash`. Missing/inactive users, missing or mismatched hashes, duplicate matching requests, and dangling legacy Bugs without a current profile are false. This access readiness is separate from assignment readiness, current action counts, availability, and workload overload.
+
+### Vietnamese
+
+Sau khi scope authorization, `readDeveloperWorkloads` gọi một bounded helper `readActiveIdentityAccessByUser` cho các user ID của profile đã được scope. Mỗi workload row expose Boolean an toàn `identityAccessReady` của service, tính bằng `hasActiveIdentityAccess`. Chỉ trả true khi User nội bộ đang active, có `externalIdentityKeyHash` immutable không rỗng và có đúng một onboarding request `ACTIVE` khớp cùng `identityKeyHash`. User thiếu/inactive, hash thiếu hoặc lệch, request khớp bị duplicate và Bug legacy không còn profile hiện tại đều trả false. Access readiness tách biệt với assignment readiness, count current action, availability và overload workload.
+
+The bulk helper is read-only and set-based; it does not call a provider, persist a snapshot, duplicate workload aggregation, or authorize ordinary `BugService.Bugs` reads.
+
+Helper bulk là read-only và set-based; không gọi provider, không persist snapshot, không duplicate aggregation workload và không authorize read `BugService.Bugs` thông thường.
+
 ## Beginner-first execution map (2026-07-18)
 
 ### English
 
-`service.js` handles READ DeveloperWorkloads with `readDeveloperWorkloads`. It queries active profiles and relevant Bugs, calls `buildDeveloperWorkloadRows`, then applies CQN search/filter/order/paging/select in memory because these are calculated rows rather than a database table. Workload distinguishes technical ownership from current action ownership and computes overdue/effort/overload without persisting aggregates. Debug raw profiles/Bugs → one developer's empty row → each Bug contribution → filter evaluator → final page. The small expression evaluator uses an operator allow-list; never replace it with JavaScript `eval`.
+`service.js` handles READ DeveloperWorkloads with `readDeveloperWorkloads`. It resolves the active internal actor first, scopes PM or Developer access server-side, queries only the permitted profile/Bug set, calls `buildDeveloperWorkloadRows`, then applies CQN search/filter/order/paging/select in memory because these are calculated rows rather than a database table. Workload distinguishes technical ownership from current action ownership and computes overdue/effort/overload without persisting aggregates. Debug actor resolution → scoped profiles/Bugs → one developer's empty row → each Bug contribution → filter evaluator → final page. The small expression evaluator uses an operator allow-list; never replace it with JavaScript `eval`.
 
 ### Vietnamese
 
@@ -32,7 +60,7 @@ Implements the `DeveloperWorkloads` read model — the aggregate view used by PM
 
 ### IDTS flow
 
-`readDeveloperWorkloads` is registered as an `on('READ', DeveloperWorkloads)` handler. It loads all active developer profiles + their assigned bugs, calculates counts per status, overdue flag, total effort, and whether the developer is overloaded.
+`readDeveloperWorkloads` is registered as an `on('READ', DeveloperWorkloads)` handler. It resolves an active internal actor with platform-role alignment, permits PM all-rows monitoring, scopes an active Developer to the actor's own `developerUserID`, then calculates counts per status, overdue flag, total effort, and whether the developer is overloaded.
 
 It keeps inactive developers only while they still own open bugs (important for PM cleanup).
 
@@ -59,7 +87,7 @@ Thực hiện read model `DeveloperWorkloads` — view tổng hợp để PM xem
 
 ### Flow hoạt động trong IDTS
 
-Handler on READ DeveloperWorkloads. Tải developer profiles + bug được assign, tính số lượng theo trạng thái, overdue, effort, overloaded.
+Handler on READ DeveloperWorkloads. Resolve actor active + platform-role alignment, cho PM xem toàn cảnh, scope Developer vào `developerUserID` của chính actor, rồi tải profile/bug được assign để tính số lượng theo trạng thái, overdue, effort, overloaded.
 
 Giữ developer không active chỉ khi họ vẫn còn bug đang mở (để PM dọn dẹp).
 
@@ -80,4 +108,4 @@ service.cds + schema (DeveloperProfiles, Bugs) + Fiori monitoring.
 - Source file: `srv/bug-service/monitoring.js`
 - Knowledge mirror: `docs/knowledge/srv/bug-service/monitoring.js.md`
 - Source layer: `srv`
-- Last reviewed: 2026-06-22
+- Last reviewed: 2026-08-26

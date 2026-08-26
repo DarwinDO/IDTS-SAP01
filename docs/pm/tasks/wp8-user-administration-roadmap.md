@@ -12,7 +12,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 ## Current status
 
-`IN PROGRESS — GATE 6.3 READY FOR SOURCE EXECUTION`
+`IN PROGRESS — GATE 6.3 DRAFT PR #349 OPEN; QA DEPTH PASS; RUNTIME ACCEPTANCE PENDING`
 
 - Gates 1–3B are merged, deployed and accepted. Gate 3 browser closure is recorded by PR #325 at `04643e12727290f2f35fd56e9c3d2a8df4cbcdbc`.
 - Gate 4 branch `feature/wp8-admin-developer-pilot-donhv` is frozen from that exact base.
@@ -46,7 +46,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 5. Gate 5 — Business Catalog Administration.
 6. Gate 6 — Operations and Audit usability.
 7. Gate 6.2 — UI state isolation, navigation regrouping and action ownership — COMPLETE.
-8. Gate 6.3 — Developer workload and assigned-Bug drill-down — NEXT.
+8. Gate 6.3 — Developer workload and assigned-Bug drill-down — DRAFT PR #349 OPEN; authorization remediation is complete, while the coordinator-identified identity-access readiness remediation remains source-review pending under DonHV's narrow scope expansion.
 9. Gate 6.4 — Safe cross-app navigation.
 10. Gate 6.5 — Post-completion access-change email notifications.
 
@@ -98,6 +98,26 @@ The executor may complete source/tests/docs/evidence commits, push the exact bra
 - Start only from fresh `origin/dev` after this planning package merges; planned branch is `feature/wp8-user-admin-developer-workload-donhv`.
 - Reuse the existing read-only `BugService.DeveloperWorkloads` aggregate and bounded `Bugs` fields. Add no workload table, duplicated aggregation, assignment/status mutation, or backend authorization shortcut.
 - Add Developers → Workload overview, assigned non-Closed Bug details, and exact same-origin Bug Object Page deep links. Stop at one Draft PR before runtime rollout or Gate 6.4.
+
+## Gate 6.3 source implementation handoff
+
+- Branch `feature/wp8-user-admin-developer-workload-donhv` started from exact `d53f402ab92215e44d29da2e1d3da73a576fffd3` (`origin/dev`, local `dev`, and merge-base).
+- Source commits add the named read-only `bugApi` model, server-ordered/paged workload state, Developers → Workload overview, bounded assigned non-Closed Bug details, exact same-origin Bug Object Page links, focused TDD and bilingual UI copy/mirrors. DonHV then authorized the smallest server fix in `srv/bug-service/monitoring.js`: resolve active internal identity/platform-role alignment, PM all rows, Developer own `developerUserID` row(s), and fail-closed other roles before client filter/order/page/count. No `db/`, schema, ordinary `BugService.Bugs` read-policy, dependency or lockfile change is present.
+- Focused source GREEN for the authorization delta was `49/0`, with the original UI/Active Users/User Access contracts preserved. The readiness remediation adds a server-derived `identityAccessReady` Boolean using the existing identity-readiness invariant and focused GREEN is now `61/0`. Secret scan, agent rules, QA-depth self-test, CAP EDMX/HANA compile, UI5 MCP lint/manifest validation, UI lint/build and prohibited-file diff gates remain required post-remediation checks. Existing attachment `NonUpdateableProperties` compile warning remains unrelated and documented.
+- Evidence: `docs/pm/evidence/user-administration/gate-6-3-developer-workload-source.md`. Draft PR #349 targets `dev`, remote body validation passed and GitHub `qa-depth-gate` passed. Manual/browser acceptance, rollout, merge, Ready and Gate 6.4 remain separate boundaries.
+
+### Gate 6.3 authorization remediation handoff — 2026-08-26
+
+- The prior exact-head review found one Major authorization/privacy gap specifically on `DeveloperWorkloads`; ordinary `BugService.Bugs` reads were not newly attributed to Gate 6.3. The auth-only remediation re-review returned zero findings at every severity; a later coordinator diff scan identified a separate readiness state-misrepresentation finding described below.
+- DonHV authorized the narrow server scope. `readDeveloperWorkloads` now calls `resolveRequestUser`, permits active PM all rows without `UserAdmin`, scopes active Developers to resolved `developerUserID` before all client query semantics, and rejects Tester, UserAdmin without PM, inactive, unmapped and misaligned callers with 403.
+- TDD RED was observed as `39 PASS / 10 FAIL / 49 checks`; GREEN is `49 PASS / 0 FAIL / 49 checks`. Exactly one Draft PR `#349` is open at initial head `0ac4e23a3ff2c2ba427eac8f7d23000a5e79115f`; remote body validation and `qa-depth-gate` passed.
+
+### Gate 6.3 identity-access readiness remediation — 2026-08-26
+
+- Coordinator Codex Security diff scan on exact head `50b68701da8a650917a0a0d218f50632820950fc` reported one medium/high-confidence finding, not zero: `csf_80d41b36a850713c6bbc2a4c`, occurrence `occ_52dec5bce30b309ab47d3757`, rule `ui-readiness.misrepresentation`. The scan report is recorded in the Gate 6.3 evidence and DonHV status; TAC was unavailable.
+- Root cause was browser inference of readiness from active profile plus `developerUserID`. The approved fix adds read-only `DeveloperWorkloads.identityAccessReady`, populated server-side with one bounded `readActiveIdentityAccessByUser` call plus `hasActiveIdentityAccess`; it is false for unlinked, inactive/suspended, missing/mismatched hash, duplicate matching ACTIVE requests and unknown legacy backlog rows. Assignment readiness/counts remain separate.
+- Intentional RED was `56 PASS / 5 FAIL / 61 checks`; focused GREEN is `61 PASS / 0 FAIL / 61 checks`, and the UI workload contract passes with active-profile-plus-user-ID-only normalization false. Ordinary `BugService.Bugs` read policy remains unchanged and is not described as newly exposed by Gate 6.3.
+- The first exact-head review found one Important `WORKLOAD_SELECT` omission; RED failed, the smallest fix added `identityAccessReady` to the select list, and the full matrix was rerun green. Fresh review of `44f3a34902f1f3e1b521f7a6f2c0c280b60f0d6d` returned `GO — 0 Critical / 0 Major / 0 Important / 0 Minor`. Push/remote Draft PR readback is the next boundary; do not advance Ready, merge, deploy, mutate data/provider/user/role/email, start Gate 6.4 or clean the worktree.
 
 ## Bàn giao source Gate 6.1 — làm rõ navigation và action
 

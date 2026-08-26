@@ -121,3 +121,39 @@ Active User details sở hữu các lifecycle action Change Role, Suspend, React
 Keep the five parent areas, the Access/Developers child boundaries, and the ownership-specific visibility expressions aligned. Keep request actions on request rows, lifecycle actions in Active User details, and Developer profile maintenance on active Developer paths. Do not move CAP authorization or server-owned state decisions into XML.
 
 Giữ đồng bộ năm khu vực cấp cao, boundary child Access/Developers và expression visibility theo ownership. Giữ request action trên dòng request, lifecycle action trong Active User details và profile maintenance trên path Developer active. Không chuyển authorization CAP hoặc quyết định state do server quản lý vào XML.
+
+## Gate 6.3 Workload overview / Tổng quan workload Gate 6.3
+
+### English
+
+The Developers child `IconTabBar` places `developerWorkload` before `developerResponsibilities`. The Workload view is a responsive read-only table bound to `workload>/items`; it has search, Refresh, independent error/busy state, server-page `Load more`, and a `View workload` action. It displays safe business fields: Developer name/email, availability, server-derived identity access readiness, open/limit, current Developer action count, overdue count, effort, and workload state. The localized column is `Access readiness`; internal profile/user IDs are not bound into the visible XML.
+
+- **Location**: `Main.view.xml` Workload `IconTabFilter`, `developerWorkloadTable`, and the `View workload` button.
+  **IDTS concept**: Developer workload is a business-owned read-only workspace; responsibility mutation stays in the separate Responsibilities area and Bug mutation stays in Bug Management.
+  **Impact if broken**: Users may confuse capacity monitoring with profile editing or believe a Workload button changes assignment/status.
+  **Must check together**: `Main.controller.js:onDeveloperTabSelect`, `onOpenDeveloperWorkload`, the `workload` JSONModel, `DeveloperWorkloadDetails.fragment.xml`, and `test-user-admin-ui.js`/`test-user-admin-workload.js`.
+
+- **Location**: Workload table bindings for `openLimit`, `needsDeveloperAction`, `overdue`, `estimatedEffort`, and workload state.
+  **IDTS concept**: Semantic states communicate overload and overdue attention only; color is not an authorization decision. The explanatory strip separates technical assignee from the current action owner.
+  **Impact if broken**: An overloaded color could be read as access denial, or a Developer could mistake the next workflow processor for the technical assignee.
+  **Must check together**: `formatter.js` workload functions, localized keys in all three bundles, and Bug detail ownership columns.
+
+### Tiếng Việt
+
+`IconTabBar` con của Developers đặt `developerWorkload` trước `developerResponsibilities`. View Workload là table responsive chỉ đọc bind vào `workload>/items`; có search, Refresh, error/busy state độc lập, `Load more` theo page server và action `View workload`. View chỉ hiện field nghiệp vụ an toàn: tên/email Developer, availability, access readiness do server tính, open/limit, số action hiện tại của Developer, overdue, effort và workload state. Column được localize là `Access readiness`; internal profile/user ID không được bind vào XML hiển thị.
+
+- **Vị trí**: `IconTabFilter` Workload, `developerWorkloadTable` và button `View workload` trong `Main.view.xml`.
+  **Khái niệm IDTS**: Workload Developer là workspace chỉ đọc thuộc Developers; mutation responsibility nằm ở khu vực Responsibilities riêng, mutation Bug nằm ở Bug Management.
+  **Ảnh hưởng nếu sai**: User có thể nhầm monitoring capacity với chỉnh profile hoặc nghĩ button Workload sẽ đổi assignment/status.
+  **Phải kiểm tra cùng**: `Main.controller.js:onDeveloperTabSelect`, `onOpenDeveloperWorkload`, JSONModel `workload`, `DeveloperWorkloadDetails.fragment.xml` và `test-user-admin-ui.js`/`test-user-admin-workload.js`.
+
+- **Vị trí**: binding table Workload cho `openLimit`, `needsDeveloperAction`, `overdue`, `estimatedEffort` và workload state.
+  **Khái niệm IDTS**: Semantic state chỉ truyền đạt overload và overdue cần chú ý; màu không phải quyết định authorization. Info strip tách technical assignee với current action owner.
+  **Ảnh hưởng nếu sai**: Màu overloaded có thể bị hiểu là access bị từ chối hoặc Developer nhầm processor bước tiếp theo với technical assignee.
+  **Phải kiểm tra cùng**: function workload trong `formatter.js`, key localize ở cả ba bundle và các column ownership trong detail Bug.
+
+### Safe editing / Sửa an toàn
+
+Keep native IconTabBar/table responsiveness and keep the Workload table read-only. Do not bind internal IDs, raw errors, provider fields, or write actions into the view. Update all locale keys and the focused UI tests when labels, states, columns, or action ownership changes.
+
+Giữ responsive native của IconTabBar/table và giữ table Workload chỉ đọc. Không bind internal ID, raw error, provider field hoặc write action vào view. Khi đổi label, state, column hoặc ownership action, phải cập nhật cả locale keys và UI test tập trung.

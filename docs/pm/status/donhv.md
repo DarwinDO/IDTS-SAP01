@@ -8877,3 +8877,179 @@ Vietnamese:
 - Gate 6.2 is now recorded as complete, and its obsolete pre-implementation plan was removed. The approved Gate 6.3–6.5 plans remain, with Gate 6.3 strengthened to require stable server-side workload ordering across page boundaries.
 - This refresh changes documentation/planning only. It performs no product runtime, HANA/HDI, deployment, provider, user/role, data, email, Jira, or Drive mutation.
 - Validation note: the first refreshed script-alias check correctly found two aliases absent from the current package because their gates create them, but only Gate 6.3 showed the exact future JSON entry. Gate 6.5 now also records its exact package-script entry so the checker can distinguish planned creation from an unexplained typo.
+
+### 2026-08-25 Gate 6.3 dependency visibility preflight
+
+- Classification: environment/tooling issue, resolved locally without source mutation.
+- Symptom: CAP and Fiori MCP read-only preflight could not compile the project because the isolated worktree did not resolve `@cap-js/attachments`; local `node_modules` and the User Administration UI dependency tree were absent.
+- Root cause/fix: the exact clean primary checkout `E:\IDTS-SAP01` is on `dev` at `d53f402ab92215e44d29da2e1d3da73a576fffd3`, has matching `origin/dev`, clean status, and the required locked dependency trees. Added only two untracked NTFS junctions from this worktree to those exact dependency trees; no install, upgrade, package declaration or lockfile write ran.
+- Verification/status: both junction targets and `@cap-js/attachments`/UI5 CLI visibility read back successfully. CAP/Fiori MCP metadata discovery and local `npx cds compile srv -s all --to edmx` then completed with exit 0; `npx cds --version` still reports the shared-tree `npm ls` warning `ELSPROBLEMS`, so no install/upgrade was attempted. DonHV owns any later dependency-tree recovery or cleanup decision.
+
+### 2026-08-25 Gate 6.3 UI lint finding during workload implementation
+
+- Classification: product-code verification finding; source fix in progress.
+- Symptom: `npm run lint --prefix app/user-administration-ui` returned one error at `Main.controller.js:1338` for a nested ternary and three warnings for CAP/OData snake-case fields `status_code`, `priority_code`, and `severity_code`.
+- Root cause/fix/status: the nested ternary was local normalization logic and was replaced with a named bounded value; the three warnings were removed by bracket access while preserving the exact BugService field names required by the approved `$select` contract. Fresh `npm run lint --prefix app/user-administration-ui` exited 0 with no errors or warnings. No runtime, schema, dependency, lockfile, platform, provider, user/role, data, email, Jira, Drive or deployment mutation occurred.
+
+### 2026-08-25 Gate 6.3 UI5 MCP fragment lint finding
+
+- Classification: product-code verification finding; source fix in progress.
+- Symptom: UI5 MCP lint reported five errors in `DeveloperWorkloadDetails.fragment.xml`: five formatter bindings were treated as global because the fragment had no local `core:require`, and `stretchOnPhone` was deprecated.
+- Root cause/fix/status: the fragment reused the existing view formatter pattern without declaring the module at fragment scope, and copied an obsolete Dialog property. Added the local formatter import and supported `stretch` property; fresh UI5 MCP lint returned an empty result set and manifest validation returned `isValid:true` with zero errors. No runtime, schema, dependency, lockfile, platform, provider, user/role, data, email, Jira, Drive or deployment mutation occurred.
+
+### 2026-08-25 Gate 6.3 workload page-merge review finding
+
+- Classification: product-code verification finding; TDD remediation in progress.
+- Symptom: exact-diff review showed the append merge de-duplicated incoming rows against prior pages but did not update the key set while iterating the incoming page, so two duplicate `developerProfileID` rows in one page could both render.
+- Root cause/fix/status: the merge used one `filter` against a static prior-page set. The implementation now updates the key set while iterating incoming rows; fresh workload/UI contracts and ESLint pass. No runtime, schema, dependency, lockfile, platform, provider, user/role, data, email, Jira, Drive or deployment mutation occurred.
+
+### 2026-08-25 Gate 6.3 page-merge regression cursor expectation
+
+- Classification: test-harness issue, fixed in the same TDD cycle.
+- Symptom: after adding a duplicate row to the incoming page, the no-duplicate regression still expected `nextSkip=102`; the actual raw page length was three, so the correct cursor was `103` even though only two rows were retained.
+- Fix/status: updated the assertion to distinguish raw server cursor advancement from unique rendered row count. No product, runtime, schema, dependency, lockfile, platform, provider, user/role, data, email, Jira, Drive or deployment mutation occurred.
+
+### 2026-08-25 Gate 6.3 CAP compile known warning
+
+- Classification: pre-existing CAP/tooling warning, non-blocking and outside this diff.
+- Symptom: `npx cds compile srv -s all --to edmx` exited 0 but reported the existing `db/schema.cds:183` warning that `Capabilities.UpdateRestrictions.NonUpdateableProperties` is not known for `BugService.Bugs_attachments`; the HANA compile also exited 0 and generated only the existing model artifacts.
+- Status/evidence: no `db/` or `srv/` file was changed by Gate 6.3, and no warning remediation or dependency upgrade was attempted. The warning remains documented as pre-existing; it is not a Gate 6.3 product finding.
+
+### 2026-08-25 Gate 6.3 source implementation and matrix
+
+- Branch `feature/wp8-user-admin-developer-workload-donhv` is based exactly on `d53f402ab92215e44d29da2e1d3da73a576fffd3`; source implementation head before final documentation/review handoff is `363b6a04f103dd0c60c7882b40a9c912ac74d5df`.
+- Completed source scope: named read-only `bugApi`, server-ordered/paged DeveloperWorkloads with global duplicate protection, Developers → Workload overview, bounded assigned non-Closed Bug dialog, UTC overdue handling, separate technical/current-action owner fields and exact same-origin Bug Object Page links. Matching bilingual source mirrors and evidence are prepared.
+- Fresh PASS: workload/UI/Active Users/User Access contracts, reused DeveloperWorkloads backend `39/0`, secret scan, agent rules `8/8`, QA-depth self-test `15/15`, CAP EDMX/HANA compile, UI5 MCP lint/manifest validation, UI lint/build, and prohibited-file diff guards. Existing attachment capability warning is non-blocking and documented above.
+- No `db/`, `srv/`, schema, dependency/lockfile, provider, user/role, data, email, deployment, Jira, Drive, merge, Ready or Gate 6.4 mutation occurred. Next boundary: one bounded independent exact-head source/security review, push, exactly one Draft PR, CI/body/head/base readback, then stop.
+
+### 2026-08-25 Gate 6.3 security-diff preflight path issue
+
+- Classification: tooling issue; closed after path correction.
+- Symptom: the first bounded security-diff preflight command failed with exit 1 because the expected `security-diff-scan/scripts/config_preflight.py` path was not present under the installed skill directory.
+- Root cause/status: the preflight script is stored at a different plugin path than the skill document assumed; no scanner, source, runtime, dependency, lockfile, platform, provider, user/role, data, email, Jira, Drive or deployment mutation occurred. The exact installed path will be located read-only before retrying.
+
+### 2026-08-25 Gate 6.3 Codex Security TAC connector limitation
+
+- Classification: tooling/environment blocker; remains open for the optional Codex Security MCP scan.
+- Symptom: the required one-time TAC status read returned `connector_openai_codex_security_access is not connected` / `USER_NOT_LOGGED_IN`; no Codex Security scan was launched.
+- Status/owner: the bounded independent exact-head reviewer and repository secret scan remain the requested source/security evidence path. DonHV may connect the security connector later if a native Codex Security scan is required; no source, runtime, dependency, lockfile, platform, provider, user/role, data, email, Jira, Drive or deployment mutation occurred.
+
+### 2026-08-25 Gate 6.3 independent review Major authorization blocker
+
+- Classification: product security defect / authorization boundary; remediated in the authorized narrow scope, pending exact-head re-review.
+- Symptom/evidence: the exact-head reviewer found that `app/user-administration-ui/webapp/controller/Main.controller.js` directly reads `BugService` workload data, while the User Administration route checks `UserAdmin`; `srv/service.cds` exposes the BugService with only `authenticated-user`, and `srv/bug-service/monitoring.js` had no PM + active-user guard for the workload read model. A TESTER/DEVELOPER/other authenticated caller could therefore read all `DeveloperWorkloads` rows directly. Ordinary `BugService.Bugs` reads were not treated as a new Gate 6.3 exposure.
+- Remediation/owner: DonHV authorized the narrow `srv/bug-service/monitoring.js` fix. It now calls existing `resolveRequestUser`, permits active PM all-rows access without `UserAdmin`, scopes active Developer rows to the resolved `developerUserID` before client search/filter/order/page/count, and returns 403 for Tester, UserAdmin without PM, inactive, unmapped or misaligned callers. No `srv/service.cds`, db/schema, ordinary Bugs read policy or CAP contract change was needed.
+- Fresh GREEN: `npm run qa:developer-workload:programmatic` returned `49 PASS / 0 FAIL`; exact-head re-review and full Gate 6.3 matrix remain before push/PR. No push, PR, Ready, merge, rollout, deployment, provider, user/role, data, email, Jira, Drive or Gate 6.4 mutation occurred.
+
+### 2026-08-25 Gate 6.3 authorization TDD runner anomaly
+
+- Classification: test-harness issue; fixed in the same TDD cycle.
+- Symptom: after adding the authorization RED assertions to `scripts/qa/test-developer-workload-programmatic.js`, the runner exited 0 after the PM `$count` assertion without printing or executing the new Developer/Tester/inactive/unmapped checks; no production authorization code was changed.
+- Root cause/fix/status: the test kept a long-lived `srv.tx` transaction outside the callback form while starting later actor transactions; the later read promise did not settle before Node's event loop became idle. The test now uses the repository's callback transaction form for every actor query. Fresh RED then executed all new assertions and returned `39 PASS / 10 FAIL / 49 checks`, with failures matching the missing server authorization/scoping behavior. The prior status-only entries remain preserved; no reset, overwrite, source/runtime/dependency/schema/data/provider/user/role/email/Jira/Drive/deployment mutation occurred.
+
+### 2026-08-26 Gate 6.3 DeveloperWorkloads authorization remediation
+
+- Scope/owner: DonHV-authorized narrow server remediation on `srv/bug-service/monitoring.js`; no `srv/service.cds` change was required. Existing status-only log entries were preserved deliberately.
+- Root cause/fix: the handler previously aggregated every DeveloperWorkloads row before any actor check. It now resolves the active internal actor through `resolveRequestUser` (including existing XSUAA platform-role alignment), permits active PM all rows without `UserAdmin`, scopes active Developer profiles/Bugs and final rows to the actor `Users.ID`, then applies client search/filter/order/page/count only inside that scope. Non-PM/non-Developer and unresolved/inactive/misaligned callers fail closed with 403. Ordinary `BugService.Bugs` read behavior was not changed.
+- Verification: genuine TDD RED returned `39 PASS / 10 FAIL / 49 checks`; GREEN returned `49 PASS / 0 FAIL / 49 checks`. Focused bilingual knowledge mirror and Gate 6.3 evidence are updated. The full post-remediation matrix and final bounded exact-head re-review are now green; push/Draft PR remains the next boundary.
+- Mutation ledger: no db/schema/HANA/HDI, ordinary Bugs policy, dependency/lockfile, platform/provider/user/role/data/email/deployment/Jira/Drive, Gate 6.4, Ready, merge or cleanup mutation occurred.
+
+### 2026-08-26 Gate 6.3 authorized diff-guard wrapper issue
+
+- Classification: tooling issue; fixed in the same verification cycle.
+- Symptom: a PowerShell allowlist wrapper returned failure even though the only `srv/` path was `srv/bug-service/monitoring.js`; a single path was treated as a scalar, so `$srvPaths[0]` addressed its first character.
+- Fix/status: reran the check with array coercion, preserving the authorized one-file `srv` scope. No product, dependency, schema, runtime or external-state mutation occurred.
+
+### 2026-08-26 Gate 6.3 bounded reviewer identity handoff issue
+
+- Classification: delegation/tooling issue; the first post-remediation reviewer did not reach source review.
+- Symptom: the read-only reviewer returned the repository member-identity question instead of reviewing exact head `f9818168`; two queued identity responses did not produce findings within the bounded wait.
+- Fix/status: the first unstarted reviewer was closed; one replacement exact-head read-only assignment was run with `donhv` in the initial prompt. No source, dependency, runtime, external-state or second product-review-cycle mutation occurred.
+
+### 2026-08-26 Gate 6.3 exact-head reviewer broad-scan limitation
+
+- Classification: delegation/tooling issue; closed by a narrow completion pass.
+- Symptom: the replacement reviewer verified the exact base/head and reported no concrete Critical/Major/Important bypass in the inspected workload files, but its broad Codex Security discovery was canceled before the final independent verdict could be sealed.
+- Status/owner: a narrow completion pass on the same exact head returned the final review below. Native broad Codex Security scan remains unavailable because TAC was not connected; no source, dependency, runtime or external-state mutation occurred.
+
+### 2026-08-26 Gate 6.3 final bounded exact-head re-review
+
+- Review head: `79150496f1af72441f1b0220f6dcbc7b66c39d5a`; base/merge-base: `d53f402ab92215e44d29da2e1d3da73a576fffd3`.
+- Result: `0 Critical / 0 Major / 0 Important / 0 Minor`; no concrete authorization bypass or regression found. Reviewer verified actor resolution, active identity/platform-role fail-closed behavior, PM all rows, Developer own-row scope before CQN search/filter/count/order/page, and the direct `service.js:147` caller.
+- Fresh reviewer checks: workload `49 PASS / 0 FAIL`, XSUAA auth `13/13`, UI workload/UI/Active Users/User Access PASS, CAP compile and `git diff --check` PASS. Limitation: no live XSUAA HTTP/browser runtime acceptance; focused programmatic platform-alignment evidence is present.
+- Handoff: GO for push and exactly one Draft PR after committing this status-only review closure. Stop before Ready, merge, rollout, deployment, cleanup or Gate 6.4.
+
+### 2026-08-26 Gate 6.3 Draft PR handoff
+
+- Final source/status branch: `feature/wp8-user-admin-developer-workload-donhv`; base/merge-base `d53f402ab92215e44d29da2e1d3da73a576fffd3`.
+- Exactly one Draft PR: `#349` — `https://github.com/DarwinDO/IDTS-SAP01/pull/349`, target `dev`, initial remote head `0ac4e23a3ff2c2ba427eac8f7d23000a5e79115f`, `isDraft=true`, `state=OPEN`.
+- Remote PR body readback passed `QA Depth Gate PR body check: PASS (11 required sections)`. GitHub `qa-depth-gate` returned `SUCCESS`.
+- Mutation ledger: source/status/docs were committed and pushed; no second PR, Ready, merge, rollout, deployment, HANA/HDI, provider, user/role, data, email, Jira/Drive or Gate 6.4 mutation occurred. Final current head after this status/evidence handoff will be read back before stopping.
+
+### 2026-08-26 Gate 6.3 readiness security finding — remediation in progress
+
+- Classification: Important-equivalent security-state-misrepresentation finding; coordinator Codex Security diff scan on exact head `50b68701da8a650917a0a0d218f50632820950fc` reported `csf_80d41b36a850713c6bbc2a4c`, occurrence `occ_52dec5bce30b309ab47d3757`, rule `ui-readiness.misrepresentation`.
+- Evidence: report `C:\Users\LapHub\AppData\Local\Temp\codex-security-scans-FgOWdt\IDTS-SAP01\50b68701da8a650917a0a0d218f50632820950fc_20260825T173136Z_qrim87f8\report.md` was supplied/read from the coordinator scan package; the finding affects `app/user-administration-ui/webapp/controller/Main.controller.js:1364`, the authoritative predicate in `srv/access/identity-readiness.js:9-18`, and the readiness assertions in `scripts/qa/test-user-admin-workload.js:88-104`. TAC was unavailable because the connector was not connected.
+- Symptom/root cause: the browser labels readiness from `DeveloperProfile.active && developerUserID`, which is weaker than the authoritative active User + nonempty immutable identity hash + exactly-one matching `ACTIVE` onboarding request invariant. Coordinator’s prior `49/49` workload-auth, `13/13` XSUAA and UI workload checks did not cover target Developer identity-access readiness.
+- Fix/status: fixed in the subsequent RED/GREEN cycle with one bounded `readActiveIdentityAccessByUser` bulk helper call plus `hasActiveIdentityAccess` in the read contract; the UI consumes only the server Boolean. Ordinary `BugService.Bugs` reads are out of scope and are not newly attributed to Gate 6.3.
+- Owner/next: DonHV source gate; focused GREEN is complete, full matrix and exact-head independent review remain the next boundary. No Ready, merge, deploy, data/provider/user/role/email/Jira/Drive mutation, Gate 6.4 or cleanup.
+
+### 2026-08-26 Gate 6.3 unknown-row probe fixture issue
+
+- Classification: test-harness/tooling issue; a bounded in-memory orphan-workload probe stopped before the intended foreign-key/deletion check because its synthetic Bug omitted the schema-required non-null `description` field.
+- Fix/status: no repository, database, product or external-state mutation occurred; the probe was rerun with the repository’s complete `bugEntry` shape and the unknown-row regression was retained in the workload suite.
+- Verification/owner: the complete probe preserved the dangling Bug after profile deletion; focused backend GREEN asserts `Unknown Developer.identityAccessReady === false` and its open Bug remains visible.
+
+### 2026-08-26 Gate 6.3 independent exact-head review — Important blocker
+
+- Review head: `7c50476f2fbed15de722de55fddca6d73789b53a`; base: `d53f402ab92215e44d29da2e1d3da73a576fffd3`.
+- Result: `0 Critical / 0 Major / 1 Important / 0 Minor`; valid finding in `app/user-administration-ui/webapp/controller/Main.controller.js:17`: `WORKLOAD_SELECT` omitted `identityAccessReady`. Because the OData `$select` did not request the field, the server Boolean reached neither normalization nor the Workload UI, so exact-ready rows would display as not ready.
+- Review also confirmed the prior browser inference is removed; server authorization ordering, bounded bulk helper usage/no N+1, exact fail-closed invariant, unknown-row handling, Access readiness label, ordinary Bugs policy boundary and authorized diff scope passed.
+- Fix/status: fixed with a RED assertion and the smallest select-list change; `WORKLOAD_SELECT` now requests `identityAccessReady`. Do not push/update PR #349 until the closure evidence is committed and the final exact-head readback is complete.
+
+### 2026-08-26 Gate 6.3 review-finding RED
+
+- Classification: intentional TDD RED for the Important review finding; `node scripts/qa/test-user-admin-workload.js` failed at the new `WORKLOAD_SELECT` assertion because the committed select string omitted `identityAccessReady`.
+- Fix/status: expected and isolated to the UI read contract; the server field, normalization, authorization, helper invariant, and all prior focused backend checks remain unchanged. No push/PR/Ready mutation occurred.
+
+### 2026-08-26 Gate 6.3 Important remediation closure
+
+- Fix: `Main.controller.js:17` now includes `identityAccessReady` in `WORKLOAD_SELECT`; focused UI contract and syntax passed, and the full Gate 6.3 matrix was rerun green.
+- Fresh exact-head review: `44f3a34902f1f3e1b521f7a6f2c0c280b60f0d6d` against base `d53f402ab92215e44d29da2e1d3da73a576fffd3` returned `GO — 0 Critical / 0 Major / 0 Important / 0 Minor`. Reviewer confirmed the prior omission is fixed and all server authorization/invariant/no-N+1/ordinary-Bugs/diff-scope checks remain sound.
+- Status: source gate is review-green and ready for the authorized push/PR #349 readback boundary only. No Ready, merge, deploy, Gate 6.4 or cleanup.
+
+### 2026-08-26 Gate 6.3 readiness RED evidence
+
+- Classification: intentional TDD RED; the expanded in-memory workload suite reached `56 PASS / 5 FAIL / 61 checks`.
+- Failing assertions: `SangVN`, `DatDT`, `LegacyDev`, `ZeroDev` and the dangling `Unknown Developer` workload rows had no `identityAccessReady` field because the service contract/handler had not yet been changed. The shared helper assertions already passed: exact linked, unlinked, inactive, hash mismatch, duplicate matching ACTIVE requests, and the bounded two-read helper shape.
+- Fix/status: expected RED, source implementation not yet applied. Existing PM-all/Developer-own authorization and all query-bypass assertions remained green in the same run. No ordinary `BugService.Bugs` policy was changed.
+
+### 2026-08-26 Gate 6.3 UI readiness RED evidence
+
+- Classification: intentional TDD RED; `node scripts/qa/test-user-admin-workload.js` stopped at the first missing `accessReadinessLabel` locale key, before the source-contract assertions. This is expected because the UI still uses `developerReady`/`accessReady` and no server `identityAccessReady` contract exists yet.
+- Fix/status: no source implementation applied when observed. The RED contract now requires server-only `identityAccessReady`, shared bulk/helper usage, localized Access readiness text, and false normalization when only active profile plus `developerUserID` is present.
+
+### 2026-08-26 Gate 6.3 readiness GREEN remediation
+
+- Implemented the smallest authorized fix: `srv/bug-service/monitoring.js` performs one `readActiveIdentityAccessByUser` bulk read for scoped workload profiles and applies `hasActiveIdentityAccess` per returned safe DTO; profile rows and unknown legacy rows expose only `identityAccessReady`, defaulting false. `srv/service.cds` adds the read-only Boolean contract field; no database/schema/HANA artifact changed.
+- UI now consumes only the server boolean and renders localized `Access readiness`; active profile plus `developerUserID` alone normalizes false. Technical assignee/current action owner and assignment/workload counts remain separate.
+- Fresh focused GREEN: workload backend `61 PASS / 0 FAIL / 61 checks`, UI workload contract PASS, Node syntax checks PASS, CAP EDMX compile exit 0. Prior auth/query scope remains green in the same backend suite. No ordinary `BugService.Bugs` read-policy change.
+
+### 2026-08-26 Gate 6.3 readiness full matrix
+
+- Programmatic: `qa:user-admin-workload` PASS; `qa:user-admin-ui` PASS; `qa:user-admin-active-users` PASS; `qa:user-access` provisioning PASS; `qa:idts113:btp-auth` PASS `13/13`; `qa:developer-workload` PASS `61/0`.
+- Governance/security: secret scan PASS; agent rules PASS `8`; QA-depth self-test PASS `15/0`; both Node syntax checks and `git diff --check` PASS. The only diff warnings are repository line-ending normalization notices; no whitespace failure occurred.
+- CAP/UI: `npx cds compile srv -s all --to edmx` exit 0 with the known unrelated attachment `NonUpdateableProperties` warning; `npx cds compile db/schema.cds --to hana` exit 0; UI5 MCP linter empty and manifest valid with zero errors; UI ESLint and SAPUI5 build exit 0.
+- Scope guards: no `db/`, `package-lock.json`, `mta.yaml` or `xs-security.json` path changed; authorized `srv` path set is exactly `srv/bug-service/monitoring.js, srv/service.cds`. No generated HANA artifact was created or changed.
+
+### 2026-08-26 Gate 6.3 authorized-srv allowlist wrapper issue
+
+- Classification: tooling issue; the first PowerShell allowlist wrapper nested two `git diff --name-only` arrays and compared a `System.Object[]` value, falsely reporting an unexpected `srv` path.
+- Fix/status: no source or external state changed. The wrapper was rerun with flattened scalar path collection; the intended allowlist remained exactly `srv/bug-service/monitoring.js` and `srv/service.cds`.
+- Verification: flattened wrapper passed with exactly `srv/bug-service/monitoring.js, srv/service.cds`; `db/`, dependency/lockfile and deployment-path guards also passed.
+
+### 2026-08-26 Gate 6.3 independent reviewer identity-gate interruption
+
+- Classification: delegation/tooling issue; the single bounded reviewer returned the repository member-identity question instead of reviewing exact head `7c50476f`, despite the parent task already being authorized as `donhv`.
+- Fix/status: no source, dependency, runtime or external-state mutation occurred. The same reviewer was resumed once with explicit `donhv` context; no parallel second review was spawned while it was active.
+- Follow-up: the resumed reviewer remained running without producing a source verdict after two bounded waits and an explicit finish interrupt, so it was closed before any finding could be issued. This non-started attempt does not count as the required review; one replacement will be run with inherited context and explicit `donhv` identity.

@@ -6,11 +6,15 @@
 
 `readActiveIdentityAccessByUser(tx, userIDs)` reads only the safe internal readiness inputs and groups active requests by User ID for read models and assignment validation. It does not call a provider or mutate data.
 
+Gate 6.3 also consumes this helper in `srv/bug-service/monitoring.js` with one bounded profile-user read and exposes only the safe `DeveloperWorkloads.identityAccessReady` Boolean. The Workload UI must not replace this invariant with profile activity or a user ID.
+
 ## Tiếng Việt
 
 `hasActiveIdentityAccess(user, requests)` là predicate readiness dùng chung và fail-closed. Nó yêu cầu User nội bộ đang active, có immutable identity hash không rỗng và đúng một onboarding request `ACTIVE` có `activeUser_ID` cùng `identityKeyHash` khớp User. Không có hoặc có nhiều match đều chưa ready.
 
 `readActiveIdentityAccessByUser(tx, userIDs)` chỉ đọc input nội bộ an toàn và group request active theo User ID cho read model và validation assignment. Hàm không gọi provider và không mutate dữ liệu.
+
+Gate 6.3 cũng dùng helper này trong `srv/bug-service/monitoring.js` bằng một lần đọc bounded theo user của profile và chỉ expose Boolean an toàn `DeveloperWorkloads.identityAccessReady`. UI Workload không được thay invariant này bằng profile active hoặc user ID.
 
 ### Important source anchors
 

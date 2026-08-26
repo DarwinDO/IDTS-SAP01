@@ -1,5 +1,19 @@
 # Knowledge: `srv/service.cds`
 
+## 2026-08-26 DeveloperWorkloads access-readiness contract
+
+### English
+
+The read-only `BugService.DeveloperWorkloads` contract now includes `identityAccessReady : Boolean`. This is a safe server-derived access-link state, not a persisted column and not Developer assignment readiness. `srv/bug-service/monitoring.js` fills it from the existing active internal User plus immutable identity-hash and exactly-one matching `ACTIVE` onboarding-request invariant; no database/schema/HANA artifact is added.
+
+### Tiếng Việt
+
+Contract read-only `BugService.DeveloperWorkloads` có thêm `identityAccessReady : Boolean`. Đây là trạng thái link access an toàn do server tính, không phải column persist và không phải assignment readiness của Developer. `srv/bug-service/monitoring.js` điền field này từ invariant User nội bộ active + immutable identity hash + đúng một onboarding request `ACTIVE` khớp; không thêm database/schema/HANA artifact.
+
+Keep this field read-only and documented with `srv/access/identity-readiness.js`, `srv/bug-service/monitoring.js`, the User Administration Workload view, and the focused backend/UI contracts.
+
+Giữ field này read-only và đồng bộ tài liệu với `srv/access/identity-readiness.js`, `srv/bug-service/monitoring.js`, view Workload User Administration và focused backend/UI contract.
+
 ## Optional Note action contract (2026-08-06)
 
 `moveToPendingAssignment`, `markInReview`, `startProgress`, `sendToRetest`, and `closeBug` now have zero non-binding parameters, so Fiori does not render a Note input for them. Request More Information, Resubmit, Reject, Resolve, and Reopen retain their explanation parameters. `assignToDeveloper` also retains its optional `note` because DatDT explicitly kept the manual assignment contract. Check together with `app/bug-management-ui/annotations/actions.cds`, `srv/service.js`, and `scripts/qa/test-note-action-contract.js`.

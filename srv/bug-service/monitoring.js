@@ -5,11 +5,13 @@ const { SELECT } = cds.ql
 
 const {
   PROCESSOR_ROLE,
-  STATUS
+  STATUS,
+  USER_ROLE
 } = require('./constants')
 
-const { trimToNull } = require('./helpers')
+const { resolveRequestUser, trimToNull } = require('./helpers')
 const { effectiveCapacity } = require('./capacity')
+const { hasActiveIdentityAccess, readActiveIdentityAccessByUser } = require('../access/identity-readiness')
 
 const STATUS_COUNT_FIELDS = new Map([
   [STATUS.ASSIGNED, 'assignedCount'],
@@ -22,41 +24,78 @@ const STATUS_COUNT_FIELDS = new Map([
   [STATUS.REJECTED, 'rejectedCount']
 ])
 
+async function authorizeDeveloperWorkloadRead (req, entities) {
+  // Workload là read model nhạy cảm: actor được resolve từ user active nội bộ và platform-role alignment,
+  // không từ filter/role do client gửi. PM xem toàn cảnh; Developer chỉ xem row gắn với Users.ID của mình.
+  const actor = await resolveRequestUser(req, entities)
+  if (!actor || actor.active !== true) {
+    return req.reject(403, 'An active IDTS user is required to read DeveloperWorkloads.')
+  }
+
+  if (actor.role_code === USER_ROLE.PM) {
+    return { actor, developerUserID: null }
+  }
+
+  if (actor.role_code === USER_ROLE.DEVELOPER && actor.ID) {
+    return { actor, developerUserID: actor.ID }
+  }
+
+  return req.reject(403, 'Only active PM or Developer users can read DeveloperWorkloads.')
+}
+
 async function readDeveloperWorkloads (req, entities) {
   // Custom READ cho Dashboard/PM: đọc profile + Bug cần thiết, tính row workload trong memory,
-  // rồi áp `$search/$filter/$orderby/$top/$skip/$select` từ CQN trước khi trả response.
+  // scope theo actor trước, rồi mới áp `$search/$filter/$orderby/$top/$skip/$select` từ CQN.
+  const workloadAccess = await authorizeDeveloperWorkloadRead(req, entities)
   const tx = cds.tx(req)
-  const [profiles, bugs] = await Promise.all([
-    tx.run(
-      SELECT.from(entities.DeveloperProfiles)
-        .columns(
-          'ID',
-          'user_ID',
-          'availabilityStatus_code',
-          'workloadLimit',
-          'active',
-          { ref: ['user', 'displayName'], as: 'developerName' },
-          { ref: ['user', 'email'], as: 'developerEmail' },
-          { ref: ['availabilityStatus', 'name'], as: 'availabilityStatusName' },
-          { ref: ['availabilityStatus', 'criticality'], as: 'availabilityCriticality' }
-        )
-    ),
-    tx.run(
-      SELECT.from(entities.Bugs)
-        .columns(
-          'assignee_ID',
-          'status_code',
-          'dueDate',
-          'estimatedEffortHours',
-          'nextProcessorUser_ID',
-          'nextProcessorRole_code'
-        )
-        .where({ assignee_ID: { '!=': null } })
+  const profileQuery = SELECT.from(entities.DeveloperProfiles)
+    .columns(
+      'ID',
+      'user_ID',
+      'availabilityStatus_code',
+      'workloadLimit',
+      'active',
+      { ref: ['user', 'displayName'], as: 'developerName' },
+      { ref: ['user', 'email'], as: 'developerEmail' },
+      { ref: ['availabilityStatus', 'name'], as: 'availabilityStatusName' },
+      { ref: ['availabilityStatus', 'criticality'], as: 'availabilityCriticality' }
     )
-  ])
 
-  let rows = buildDeveloperWorkloadRows(profiles, bugs)
+  if (workloadAccess.developerUserID) {
+    profileQuery.where({ user_ID: workloadAccess.developerUserID })
+  }
+
+  const profiles = await tx.run(profileQuery)
+  const identityAccessByUser = await readActiveIdentityAccessByUser(
+    tx,
+    profiles.map(profile => profile.user_ID)
+  )
+  const profileIDs = profiles.map(profile => profile.ID).filter(Boolean)
+  let bugs = []
+
+  if (!workloadAccess.developerUserID || profileIDs.length) {
+    const bugQuery = SELECT.from(entities.Bugs)
+      .columns(
+        'assignee_ID',
+        'status_code',
+        'dueDate',
+        'estimatedEffortHours',
+        'nextProcessorUser_ID',
+        'nextProcessorRole_code'
+      )
+      .where(workloadAccess.developerUserID
+        ? { assignee_ID: { in: profileIDs } }
+        : { assignee_ID: { '!=': null } })
+    bugs = await tx.run(bugQuery)
+  }
+
+  let rows = buildDeveloperWorkloadRows(profiles, bugs, identityAccessByUser)
     .filter(row => row.active || row.openOwnedBugCount > 0)
+
+  if (workloadAccess.developerUserID) {
+    // Defensive second boundary: future profile/bug aggregation changes cannot widen a Developer read.
+    rows = rows.filter(row => row.developerUserID === workloadAccess.developerUserID)
+  }
 
   rows = applySearch(rows, req.query?.SELECT?.search)
   rows = applyWhere(rows, req.query?.SELECT?.where)
@@ -81,11 +120,12 @@ async function readDeveloperWorkloads (req, entities) {
   return rows
 }
 
-function buildDeveloperWorkloadRows (profiles, bugs) {
+function buildDeveloperWorkloadRows (profiles, bugs, identityAccessByUser) {
   // Gom Bug theo developer và tính count/effort/overdue; không ghi aggregate xuống database.
   const rowsByProfileID = new Map()
 
   for (const profile of profiles) {
+    const identityAccess = identityAccessByUser?.get(profile.user_ID)
     rowsByProfileID.set(profile.ID, emptyDeveloperWorkloadRow({
       developerProfileID: profile.ID,
       developerUserID: profile.user_ID || null,
@@ -95,6 +135,9 @@ function buildDeveloperWorkloadRows (profiles, bugs) {
       availabilityStatusName: profile.availabilityStatusName || null,
       availabilityCriticality: profile.availabilityCriticality ?? null,
       workloadLimit: profile.workloadLimit ?? null,
+      identityAccessReady: identityAccess
+        ? hasActiveIdentityAccess(identityAccess.user, identityAccess.requests)
+        : false,
       active: !!profile.active
     }))
   }
@@ -113,6 +156,7 @@ function buildDeveloperWorkloadRows (profiles, bugs) {
         availabilityStatusName: null,
         availabilityCriticality: null,
         workloadLimit: null,
+        identityAccessReady: false,
         active: false
       })
       rowsByProfileID.set(bug.assignee_ID, row)
@@ -153,6 +197,7 @@ function emptyDeveloperWorkloadRow (base) {
     availabilityStatusName: base.availabilityStatusName,
     availabilityCriticality: base.availabilityCriticality,
     workloadLimit: base.workloadLimit,
+    identityAccessReady: base.identityAccessReady === true,
     openOwnedBugCount: 0,
     overdueOwnedBugCount: 0,
     currentActionItemCount: 0,

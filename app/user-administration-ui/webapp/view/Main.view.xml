@@ -223,7 +223,83 @@
 							<content>
 								<IconTabBar id="developerSubtabs" selectedKey="{view>/selectedDeveloperTab}" select=".onDeveloperTabSelect" expandable="false" headerMode="Inline" tabDensityMode="Compact">
 									<items>
-						<IconTabFilter key="developerResponsibilities" text="{i18n>developerResponsibilitiesTab}" icon="sap-icon://action-settings" tooltip="{i18n>developerResponsibilitiesTabTooltip}">
+										<IconTabFilter key="developerWorkload" text="{i18n>developerWorkloadTab}" icon="sap-icon://bar-chart" tooltip="{i18n>developerWorkloadTabTooltip}">
+											<content>
+												<VBox>
+													<MessageStrip
+														text="{i18n>developerWorkloadOwnershipNote}"
+														type="Information"
+														showIcon="true"/>
+													<Toolbar>
+														<SearchField
+															width="100%"
+															value="{workload>/query}"
+															placeholder="{i18n>developerWorkloadSearchPlaceholder}"
+															search=".onDeveloperWorkloadSearch"/>
+														<ToolbarSpacer/>
+														<Button
+															icon="sap-icon://refresh"
+															tooltip="{i18n>refreshDeveloperWorkload}"
+															press=".onRefreshDeveloperWorkload"/>
+													</Toolbar>
+													<MessageStrip
+														visible="{workload>/error}"
+														text="{i18n>developerWorkloadLoadFailed}"
+														type="Error"
+														showIcon="true"
+														class="sapUiTinyMarginTop"/>
+													<Table
+														id="developerWorkloadTable"
+														items="{workload>/items}"
+														busy="{workload>/busy}"
+														noDataText="{i18n>noDeveloperWorkloads}"
+														sticky="ColumnHeaders"
+														autoPopinMode="true">
+														<columns>
+															<Column importance="High"><Text text="{i18n>user}"/></Column>
+															<Column width="10rem"><Text text="{i18n>availability}"/></Column>
+															<Column width="10rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>accessReadinessLabel}"/></Column>
+															<Column width="9rem"><Text text="{i18n>openLimit}"/></Column>
+															<Column width="9rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>needsDeveloperAction}"/></Column>
+															<Column width="7rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>overdue}"/></Column>
+															<Column width="10rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>estimatedEffort}"/></Column>
+															<Column width="11rem" hAlign="End"><Text text="{i18n>actions}"/></Column>
+														</columns>
+														<items>
+															<ColumnListItem type="Inactive">
+																<cells>
+																	<ObjectIdentifier title="{workload>developerName}" text="{workload>developerEmail}"/>
+																	<ObjectStatus
+																		text="{workload>availabilityStatusName}"
+																		state="{parts: [{path: 'workload>availabilityCriticality'}], formatter: 'formatter.availabilityState'}"/>
+																	<ObjectStatus
+																		text="{parts: [{path: 'workload>identityAccessReady'}, {path: 'i18n>accessReadinessReadyText'}, {path: 'i18n>accessReadinessAttentionText'}, {path: 'i18n>accessReadinessLabel'}], formatter: 'formatter.workloadReadinessText'}"
+																		state="{path: 'workload>identityAccessReady', formatter: 'formatter.workloadReadinessState'}"/>
+																	<Text text="{parts: [{path: 'workload>openOwnedBugCount'}, {path: 'workload>workloadLimit'}], formatter: 'formatter.workloadOpenLimit'}"/>
+																	<ObjectNumber number="{workload>currentActionItemCount}" unit="{i18n>developerActionUnit}"/>
+																	<ObjectNumber number="{workload>overdueOwnedBugCount}" state="{path: 'workload>overdueOwnedBugCount', formatter: 'formatter.workloadCountState'}"/>
+																	<ObjectNumber number="{workload>estimatedEffortHoursTotal}" unit="{i18n>hoursShort}"/>
+																	<ObjectStatus
+																		text="{parts: [{path: 'workload>isOverloaded'}, {path: 'workload>overdueOwnedBugCount'}, {path: 'i18n>overloadedText'}, {path: 'i18n>overdueText'}, {path: 'i18n>withinLimitText'}], formatter: 'formatter.workloadStateText'}"
+																		state="{parts: [{path: 'workload>isOverloaded'}, {path: 'workload>overdueOwnedBugCount'}, {path: 'workload>active'}], formatter: 'formatter.workloadState'}"/>
+																	<HBox justifyContent="End" renderType="Bare">
+																		<Button text="{i18n>viewWorkload}" type="Transparent" press=".onOpenDeveloperWorkload"/>
+																	</HBox>
+																</cells>
+															</ColumnListItem>
+														</items>
+													</Table>
+													<Button
+														text="{i18n>loadMoreDeveloperWorkloads}"
+														type="Transparent"
+														visible="{workload>/hasMore}"
+														enabled="{= !${workload>/busy} }"
+														press=".onLoadMoreDeveloperWorkload"
+														class="sapUiTinyMarginTop"/>
+												</VBox>
+											</content>
+										</IconTabFilter>
+										<IconTabFilter key="developerResponsibilities" text="{i18n>developerResponsibilitiesTab}" icon="sap-icon://action-settings" tooltip="{i18n>developerResponsibilitiesTabTooltip}">
 							<content>
 								<VBox>
 									<MessageStrip

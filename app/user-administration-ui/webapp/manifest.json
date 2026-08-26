@@ -17,6 +17,13 @@
 				"settings": {
 					"odataVersion": "4.0"
 				}
+			},
+			"bugService": {
+				"uri": "/odata/v4/bug/",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "4.0"
+				}
 			}
 		},
 		"sourceTemplate": {
@@ -72,6 +79,16 @@
 				"settings": {
 					"autoExpandSelect": true,
 					"earlyRequests": true,
+					"operationMode": "Server"
+				}
+			},
+			"bugApi": {
+				"dataSource": "bugService",
+				"type": "sap.ui.model.odata.v4.ODataModel",
+				"preload": false,
+				"settings": {
+					"autoExpandSelect": true,
+					"earlyRequests": false,
 					"operationMode": "Server"
 				}
 			}

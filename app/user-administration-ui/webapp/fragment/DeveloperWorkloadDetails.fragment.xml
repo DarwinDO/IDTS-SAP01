@@ -1,0 +1,90 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+	core:require="{
+		formatter: 'idts/useradministrationui/model/formatter'
+	}">
+	<Dialog
+		id="developerWorkloadDetailsDialog"
+		title="{parts: [{path: 'workload>/selectedDeveloper/developerName'}, {path: 'i18n>developerWorkloadDetailsTitle'}], formatter: 'formatter.workloadDetailsTitle'}"
+		contentWidth="100%"
+		stretch="true"
+		resizable="true">
+		<content>
+			<VBox class="sapUiSmallMargin">
+				<HBox wrap="Wrap" justifyContent="SpaceBetween" class="sapUiTinyMarginBottom">
+					<VBox class="sapUiTinyMarginEnd">
+						<Label text="{i18n>openAssignedBugs}"/>
+						<ObjectNumber number="{workload>/selectedDeveloper/openOwnedBugCount}"/>
+					</VBox>
+					<VBox class="sapUiTinyMarginEnd">
+						<Label text="{i18n>needsDeveloperAction}"/>
+						<ObjectNumber number="{workload>/selectedDeveloper/currentActionItemCount}"/>
+					</VBox>
+					<VBox>
+						<Label text="{i18n>overdue}"/>
+						<ObjectNumber number="{workload>/selectedDeveloper/overdueOwnedBugCount}" state="{path: 'workload>/selectedDeveloper/overdueOwnedBugCount', formatter: 'formatter.workloadCountState'}"/>
+					</VBox>
+				</HBox>
+				<MessageStrip
+					text="{i18n>developerWorkloadDetailsNote}"
+					type="Information"
+					showIcon="true"
+					class="sapUiTinyMarginBottom"/>
+				<MessageStrip
+					visible="{workload>/bugsError}"
+					text="{i18n>developerWorkloadBugsLoadFailed}"
+					type="Error"
+					showIcon="true"
+					class="sapUiTinyMarginBottom"/>
+				<Table
+					id="developerWorkloadBugsTable"
+					items="{workload>/bugs}"
+					busy="{workload>/bugsBusy}"
+					noDataText="{i18n>noDeveloperWorkloadBugs}"
+					sticky="ColumnHeaders"
+					autoPopinMode="true">
+					<columns>
+						<Column importance="High"><Text text="{i18n>bugNumber}"/></Column>
+						<Column importance="High"><Text text="{i18n>title}"/></Column>
+						<Column width="9rem"><Text text="{i18n>status}"/></Column>
+						<Column width="7rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>priority}"/></Column>
+						<Column width="8rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>severity}"/></Column>
+						<Column width="10rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>dueDate}"/></Column>
+						<Column width="12rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>technicalAssignee}"/></Column>
+						<Column width="12rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>currentActionOwner}"/></Column>
+						<Column width="9rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>estimatedEffort}"/></Column>
+						<Column width="8rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>overdue}"/></Column>
+						<Column width="8rem" hAlign="End"><Text text="{i18n>actions}"/></Column>
+					</columns>
+					<items>
+						<ColumnListItem type="Inactive">
+							<cells>
+								<ObjectIdentifier title="{workload>bugNumber}" text="{workload>title}"/>
+								<Text text="{workload>title}"/>
+								<ObjectStatus text="{workload>status_code}" state="{path: 'workload>status_code', formatter: 'formatter.statusState'}"/>
+								<Text text="{workload>priority_code}"/>
+								<Text text="{workload>severity_code}"/>
+								<Text text="{path: 'workload>dueDate', formatter: 'formatter.dateTime'}"/>
+								<Text text="{workload>assigneeDisplayName}"/>
+								<Text text="{workload>currentActionOwnerDisplayName}"/>
+								<ObjectNumber number="{workload>estimatedEffortHours}" unit="{i18n>hoursShort}"/>
+								<ObjectStatus
+									text="{= ${workload>overdue} ? ${i18n>overdueText} : ${i18n>withinLimitText} }"
+									state="{= ${workload>overdue} ? 'Warning' : 'None' }"/>
+								<Button
+									text="{i18n>openBug}"
+									type="Transparent"
+									enabled="{= !!${workload>objectPageUrl} }"
+									press=".openBugInManagement"/>
+							</cells>
+						</ColumnListItem>
+					</items>
+				</Table>
+			</VBox>
+		</content>
+		<beginButton>
+			<Button text="{i18n>close}" press=".onCloseDeveloperWorkload"/>
+		</beginButton>
+	</Dialog>
+</core:FragmentDefinition>

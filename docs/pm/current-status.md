@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last updated: 2026-08-08
+Last updated: 2026-08-26
 
 ## Snapshot
 
@@ -418,3 +418,25 @@ Vietnamese: Agent hoáº·c developer má»›i pháº£i xÃ¡c Ä‘á»‹nh 
 - The candidate adds explicit safe delivery, access-operation, audit, and persisted-readiness DTO actions; bounded server paging; safe display masking; 12-character correlation fingerprints; a state-valid optimistic onboarding-delivery retry; and Operations/Audit UI tabs with lazy models and bilingual copy. Existing access Retry/Reconcile guards remain in use.
 - No `db/schema.cds` change, generated schema artifact, dependency/version/lockfile change, provider/email outage, provider/data/user/role/credential/Jira/Drive/BTP/HANA/HDI/deployment/merge/Ready mutation occurred. The only local environment workaround is two untracked/excluded NTFS junctions to the exact clean locked root dependency trees; their checksums and targets are recorded in the Gate 6 evidence.
 - Root onboarding/access/UI contracts, Gate 6 operations contract, CAP EDMX/HANA compile, UI5 MCP lint, UI lint/build, immediate-kick/source regressions, secret scan, agent rules and QA-depth self-test all pass. The single bounded independent source/security review found 0 Critical/Major and 2 Important findings; both were remediated and covered by fresh focused regressions. Draft PR #339 is open from source head `a9f0896edf8694b2a9a485ad96f52205bfee2df6`; GitHub `qa-depth-gate` passed. Final coordinator exact-head review, later acceptance/rollout, Ready, merge and cleanup remain separate.
+
+## 2026-08-25 WP8 Gate 6.3 Developer workload source handoff
+
+- Gate 6.3 is source-only on `feature/wp8-user-admin-developer-workload-donhv`, frozen from exact `d53f402ab92215e44d29da2e1d3da73a576fffd3` shared by `origin/dev`, local `dev`, merge-base and the initial clean checkout.
+- The candidate adds the named read-only BugService `bugApi` model, server-ordered workload paging with global duplicate protection, Developers → Workload overview, bounded assigned non-Closed Bug detail rows, UTC overdue semantics, separate technical/current-action ownership labels, and exact same-origin Bug Object Page links. No `db/`, `srv/`, schema, dependency/lockfile, provider, user/role, data, email or deployment change is included.
+- Fresh workload/UI/Active Users/User Access contracts, reused DeveloperWorkloads backend `39/0`, secret scan, agent rules, QA-depth self-test, CAP EDMX/HANA compile, UI5 MCP lint/manifest validation, UI lint/build and prohibited-file diff guards pass. The existing attachment capability warning remains documented and unrelated.
+- Source evidence and bilingual mirrors are present. Independent exact-head source/security review, exactly one Draft PR/CI readback, manual/browser acceptance, rollout, Ready, merge and Gate 6.4 remain separate decisions.
+
+## 2026-08-26 WP8 Gate 6.3 authorization remediation handoff
+
+- DonHV authorized a narrow scope expansion after the bounded review found a Major authorization/privacy gap specifically on `DeveloperWorkloads`; ordinary `BugService.Bugs` reads remain outside the finding and remediation.
+- `srv/bug-service/monitoring.js` now resolves the active internal actor through existing `resolveRequestUser` and platform-role alignment, gives active PM all rows without `UserAdmin`, scopes active Developers to their resolved `developerUserID` before client search/filter/order/page/count, and fails closed for Tester, UserAdmin without PM, inactive, unmapped and misaligned callers.
+- Focused GREEN: `49 PASS / 0 FAIL`. The branch remains source-only from exact `d53f402ab92215e44d29da2e1d3da73a576fffd3`; no db/schema/ordinary Bugs-policy/dependency/lockfile/platform/provider/user/role/data/email/deployment mutation occurred.
+- Handoff complete at source/PR boundary: final bounded exact-head review returned `0 Critical / 0 Major / 0 Important / 0 Minor`; branch was pushed, exactly one Draft PR `#349` targets `dev`, remote body validation passed, and GitHub `qa-depth-gate` passed. Runtime/browser acceptance, Ready, merge, rollout, cleanup and Gate 6.4 remain blocked by the explicit stop boundary.
+
+## 2026-08-26 WP8 Gate 6.3 identity-access readiness remediation
+
+- Coordinator Codex Security diff scan on prior exact head `50b68701da8a650917a0a0d218f50632820950fc` reported one medium/high-confidence finding, not zero: `csf_80d41b36a850713c6bbc2a4c`, occurrence `occ_52dec5bce30b309ab47d3757`, rule `ui-readiness.misrepresentation`. The report path, affected lines and TAC-unavailable limitation are recorded in the Gate 6.3 evidence and DonHV status.
+- Root cause: browser `Main.controller.js` inferred readiness from active profile plus `developerUserID`. Remediation adds read-only `DeveloperWorkloads.identityAccessReady`, computed server-side through one bounded `readActiveIdentityAccessByUser` call plus `hasActiveIdentityAccess`; exact linked is true, while unlinked, inactive/suspended, missing/mismatched hash, duplicate matching ACTIVE request and unknown legacy rows are false. This remains separate from assignment/workload readiness.
+- TDD RED was `56 PASS / 5 FAIL / 61 checks`; focused GREEN is `61 PASS / 0 FAIL / 61 checks`; the UI workload contract, Node syntax and CAP EDMX compile pass. Coordinator’s earlier `49/49` workload-auth, `13/13` XSUAA and UI workload PASS were preserved but did not cover this identity-access invariant.
+- The first exact-head review also caught an Important UI contract omission: `WORKLOAD_SELECT` did not request `identityAccessReady`. RED failed, the smallest select-list fix was committed, and the full matrix was rerun green. Fresh review of `44f3a34902f1f3e1b521f7a6f2c0c280b60f0d6d` returned `GO — 0 Critical / 0 Major / 0 Important / 0 Minor`.
+- Ordinary `BugService.Bugs` reads are not newly attributed to Gate 6.3 and were not changed. The branch remains source-only; authorized push/PR readback and stop-at-Draft are the remaining boundary. No Ready, merge, deploy, data/provider/user/role/email/Jira/Drive mutation, Gate 6.4 or cleanup.
