@@ -5,6 +5,14 @@ process.env.CDS_ENV = 'test'
 
 const assert = require('node:assert/strict')
 const cds = require('@sap/cds')
+const { INSERT, SELECT, UPDATE } = cds.ql
+
+const {
+  ACCESS_EVENT_BY_ACTION,
+  buildAccessDeliveryMessage,
+  processUserAccessDeliveries,
+  writeUserAccessDelivery
+} = require('../../srv/user-admin/access-delivery')
 
 const ENTITY = 'idts.cap.UserAccessNotificationDeliveries'
 
@@ -124,7 +132,268 @@ async function main () {
     'controlled subject-length mutation is detected by the normalized shape contract'
   )
 
+  await verifyAccessDeliveryBehavior()
+
   console.log('IDTS user access notification contract: PASS')
+}
+
+async function verifyAccessDeliveryBehavior () {
+  const csn = await cds.load('db/schema.cds')
+  const db = await cds.connect.to('db', { kind: 'sqlite', credentials: { url: ':memory:' } })
+  await cds.deploy(csn).to(db)
+
+  const userID = '61000000-0000-4000-8000-000000000001'
+  await db.run(INSERT.into('idts.cap.Users').entries({
+    ID: userID,
+    displayName: 'Suspended Access User',
+    email: 'access.user@example.test',
+    role_code: 'TESTER',
+    active: false
+  }))
+
+  assert.deepEqual(ACCESS_EVENT_BY_ACTION, {
+    CHANGE_ROLE: 'ACCESS_ROLE_CHANGED',
+    SUSPEND: 'ACCESS_SUSPENDED',
+    REACTIVATE: 'ACCESS_REACTIVATED',
+    REVOKE: 'ACCESS_REVOKED'
+  })
+
+  const safeConfig = {
+    enabled: true,
+    ready: true,
+    baseUrl: 'https://idts.example.test/',
+    fromAddress: 'no-reply@example.test',
+    fromName: 'IDTS Test',
+    batchSize: 10,
+    maxRetryCount: 1,
+    pollIntervalMs: 15000
+  }
+  const message = buildAccessDeliveryMessage({
+    eventType: 'ACCESS_ROLE_CHANGED',
+    effectiveRole: '<DEVELOPER>',
+    effectiveAccessState: 'ACTIVE',
+    completedAt: '2026-08-26T10:00:00.000Z'
+  }, safeConfig)
+  assert.match(message.subject, /access changed/i)
+  assert.match(message.text, /DEVELOPER/)
+  assert.match(message.text, /https:\/\/idts\.example\.test\/idtsbugmanagementui\/index\.html/)
+  assert.match(message.html, /&lt;DEVELOPER&gt;/)
+  assert.doesNotMatch(message.html, /Role Collection|provider|identity|reason/i)
+  for (const [eventType, label] of Object.entries({
+    ACCESS_ROLE_CHANGED: 'access changed',
+    ACCESS_SUSPENDED: 'access suspended',
+    ACCESS_REACTIVATED: 'access reactivated',
+    ACCESS_REVOKED: 'access revoked'
+  })) {
+    assert.match(buildAccessDeliveryMessage({ eventType }, safeConfig).subject, new RegExp(label, 'i'))
+  }
+
+  const audit = {
+    ID: '62000000-0000-4000-8000-000000000001',
+    action: 'SUSPEND',
+    result: 'APPLIED'
+  }
+  await db.run(INSERT.into('idts.cap.UserIdentityAuditEvents').entries({
+    ...audit,
+    targetUser_ID: userID,
+    correlationId: '63000000-0000-4000-8000-000000000001'
+  }))
+  const written = await writeUserAccessDelivery({
+    tx: db,
+    auditEvent: audit,
+    targetUserID: userID,
+    eventType: 'ACCESS_SUSPENDED',
+    effectiveRole: 'TESTER',
+    effectiveAccessState: 'SUSPENDED',
+    completedAt: '2026-08-26T10:00:00.000Z',
+    emailConfig: safeConfig
+  })
+  assert.equal(written.created, true, 'an applied allowlisted audit creates one delivery')
+  assert.equal(written.deliveryStatus, 'PENDING', 'an inactive suspend target is still eligible')
+  const stored = await db.run(SELECT.one.from(ENTITY).where({ ID: written.deliveryID }))
+  assert.equal(stored.sourceAuditEvent_ID, audit.ID)
+  assert.equal(stored.targetUser_ID, userID)
+  assert.equal(stored.recipientEmail, 'access.user@example.test')
+
+  const duplicate = await writeUserAccessDelivery({
+    tx: db,
+    auditEvent: audit,
+    targetUserID: userID,
+    eventType: 'ACCESS_SUSPENDED',
+    effectiveRole: 'TESTER',
+    effectiveAccessState: 'SUSPENDED',
+    completedAt: '2026-08-26T10:00:00.000Z',
+    emailConfig: safeConfig
+  })
+  assert.deepEqual(duplicate, { deliveryID: written.deliveryID, deliveryStatus: 'PENDING', created: false })
+
+  const excluded = await writeUserAccessDelivery({
+    tx: db,
+    auditEvent: { ID: '62000000-0000-4000-8000-000000000002', action: 'UPDATE_DEVELOPER_PROFILE', result: 'APPLIED' },
+    targetUserID: userID,
+    eventType: 'ACCESS_ROLE_CHANGED',
+    effectiveRole: 'DEVELOPER',
+    effectiveAccessState: 'ACTIVE',
+    completedAt: '2026-08-26T10:00:00.000Z',
+    emailConfig: safeConfig
+  })
+  assert.deepEqual(excluded, { created: false })
+  const noop = await writeUserAccessDelivery({
+    tx: db,
+    auditEvent: { ID: '62000000-0000-4000-8000-000000000003', action: 'REACTIVATE', result: 'NOOP_ALREADY_DESIRED' },
+    targetUserID: userID,
+    eventType: 'ACCESS_REACTIVATED',
+    effectiveRole: 'TESTER',
+    effectiveAccessState: 'ACTIVE',
+    completedAt: '2026-08-26T10:00:00.000Z',
+    emailConfig: safeConfig
+  })
+  assert.deepEqual(noop, { created: false })
+
+  const blankEmailUserID = '61000000-0000-4000-8000-000000000002'
+  await db.run(INSERT.into('idts.cap.Users').entries({
+    ID: blankEmailUserID,
+    displayName: 'Blank Email User',
+    email: '',
+    role_code: 'TESTER',
+    active: true
+  }))
+  const disabledAudit = await insertAppliedAudit(db, '62000000-0000-4000-8000-000000000004', userID, 'REACTIVATE')
+  const disabledDelivery = await writeUserAccessDelivery({
+    tx: db,
+    auditEvent: disabledAudit,
+    targetUserID: userID,
+    eventType: 'ACCESS_REACTIVATED',
+    effectiveRole: 'TESTER',
+    effectiveAccessState: 'ACTIVE',
+    completedAt: '2026-08-26T10:00:00.000Z',
+    emailConfig: { ...safeConfig, enabled: false, ready: false }
+  })
+  assert.equal(disabledDelivery.deliveryStatus, 'SKIPPED')
+  const blankAudit = await insertAppliedAudit(db, '62000000-0000-4000-8000-000000000005', blankEmailUserID, 'REVOKE')
+  const blankDelivery = await writeUserAccessDelivery({
+    tx: db,
+    auditEvent: blankAudit,
+    targetUserID: blankEmailUserID,
+    eventType: 'ACCESS_REVOKED',
+    effectiveRole: 'TESTER',
+    effectiveAccessState: 'REVOKED',
+    completedAt: '2026-08-26T10:00:00.000Z',
+    emailConfig: safeConfig
+  })
+  assert.equal(blankDelivery.deliveryStatus, 'SKIPPED')
+  const blankStored = await db.run(SELECT.one.from(ENTITY).where({ ID: blankDelivery.deliveryID }))
+  assert.equal(blankStored.lastErrorCode, 'RECIPIENT_EMAIL_MISSING')
+  const invalidEmailUserID = '61000000-0000-4000-8000-000000000003'
+  await db.run(INSERT.into('idts.cap.Users').entries({
+    ID: invalidEmailUserID,
+    displayName: 'Invalid Email User',
+    email: 'invalid-email',
+    role_code: 'TESTER',
+    active: true
+  }))
+  const invalidAudit = await insertAppliedAudit(db, '62000000-0000-4000-8000-000000000007', invalidEmailUserID, 'REVOKE')
+  const invalidDelivery = await writeUserAccessDelivery({
+    tx: db,
+    auditEvent: invalidAudit,
+    targetUserID: invalidEmailUserID,
+    eventType: 'ACCESS_REVOKED',
+    effectiveRole: 'TESTER',
+    effectiveAccessState: 'REVOKED',
+    completedAt: '2026-08-26T10:00:00.000Z',
+    emailConfig: safeConfig
+  })
+  const invalidStored = await db.run(SELECT.one.from(ENTITY).where({ ID: invalidDelivery.deliveryID }))
+  assert.equal(invalidStored.lastErrorCode, 'RECIPIENT_EMAIL_INVALID')
+  const unreadyAudit = await insertAppliedAudit(db, '62000000-0000-4000-8000-000000000008', userID, 'CHANGE_ROLE')
+  const unreadyDelivery = await writeUserAccessDelivery({
+    tx: db,
+    auditEvent: unreadyAudit,
+    targetUserID: userID,
+    eventType: 'ACCESS_ROLE_CHANGED',
+    effectiveRole: 'DEVELOPER',
+    effectiveAccessState: 'ACTIVE',
+    completedAt: '2026-08-26T10:00:00.000Z',
+    emailConfig: { ...safeConfig, ready: false }
+  })
+  const unreadyStored = await db.run(SELECT.one.from(ENTITY).where({ ID: unreadyDelivery.deliveryID }))
+  assert.equal(unreadyStored.lastErrorCode, 'EMAIL_CONFIG_INCOMPLETE')
+
+  const sent = []
+  const sentResult = await processUserAccessDeliveries({
+    tx: db,
+    config: safeConfig,
+    sendMail: async entry => {
+      sent.push(entry)
+      return { messageId: 'access-provider-message-id' }
+    },
+    now: new Date('2026-08-26T10:01:00.000Z'),
+    workerID: 'access-test-worker'
+  })
+  assert.deepEqual(sentResult, { sent: 1, failed: 0, skipped: 0 })
+  assert.equal(sent.length, 1)
+  assert.equal(sent[0].headers['X-IDTS-Access-Delivery-ID'], written.deliveryID)
+  const delivered = await db.run(SELECT.one.from(ENTITY).where({ ID: written.deliveryID }))
+  assert.equal(delivered.status_code, 'SENT')
+  assert.equal(delivered.providerMessageId, 'access-provider-message-id')
+
+  const retryAudit = await insertAppliedAudit(db, '62000000-0000-4000-8000-000000000006', userID, 'REACTIVATE')
+  const retryDelivery = await writeUserAccessDelivery({
+    tx: db,
+    auditEvent: retryAudit,
+    targetUserID: userID,
+    eventType: 'ACCESS_REACTIVATED',
+    effectiveRole: 'TESTER',
+    effectiveAccessState: 'ACTIVE',
+    completedAt: '2026-08-26T10:02:00.000Z',
+    emailConfig: safeConfig
+  })
+  const providerError = Object.assign(new Error('private-provider.example secret'), { code: 'ESOCKET' })
+  const failedResult = await processUserAccessDeliveries({
+    tx: db,
+    config: safeConfig,
+    sendMail: async () => { throw providerError },
+    now: new Date('2026-08-26T10:02:00.000Z'),
+    workerID: 'access-failure-worker'
+  })
+  assert.deepEqual(failedResult, { sent: 0, failed: 1, skipped: 0 })
+  const failed = await db.run(SELECT.one.from(ENTITY).where({ ID: retryDelivery.deliveryID }))
+  assert.equal(failed.status_code, 'FAILED')
+  assert.equal(failed.lastErrorCode, 'ESOCKET')
+  assert.doesNotMatch(failed.lastErrorSummary, /private-provider|secret/)
+  await db.run(UPDATE(ENTITY).set({ lockedUntil: '2026-08-26T11:00:00.000Z' }).where({ ID: retryDelivery.deliveryID }))
+  const lockedResult = await processUserAccessDeliveries({
+    tx: db,
+    config: safeConfig,
+    sendMail: async () => { throw new Error('must not send locked delivery') },
+    now: new Date('2026-08-26T10:03:00.000Z'),
+    workerID: 'access-lock-worker'
+  })
+  assert.deepEqual(lockedResult, { sent: 0, failed: 0, skipped: 0 })
+  await db.run(UPDATE(ENTITY).set({ lockedUntil: null, nextAttemptAt: '2026-08-26T10:02:00.000Z' }).where({ ID: retryDelivery.deliveryID }))
+  const retriedResult = await processUserAccessDeliveries({
+    tx: db,
+    config: safeConfig,
+    sendMail: async () => ({ messageId: 'access-retry-message-id' }),
+    now: new Date('2026-08-26T10:03:00.000Z'),
+    workerID: 'access-retry-worker'
+  })
+  assert.deepEqual(retriedResult, { sent: 1, failed: 0, skipped: 0 })
+  const retried = await db.run(SELECT.one.from(ENTITY).where({ ID: retryDelivery.deliveryID }))
+  assert.equal(retried.status_code, 'SENT')
+  assert.equal(retried.attemptCount, 2)
+
+  await db.disconnect()
+}
+
+async function insertAppliedAudit (db, ID, targetUserID, action) {
+  const audit = { ID, action, result: 'APPLIED' }
+  await db.run(INSERT.into('idts.cap.UserIdentityAuditEvents').entries({
+    ...audit,
+    targetUser_ID: targetUserID,
+    correlationId: ID.replace(/^62/, '63')
+  }))
+  return audit
 }
 
 function entityShape (definition) {
