@@ -10,6 +10,7 @@ service AuthService {
     email       : String(255);
     role_code   : String(40);
     roleName    : String(120);
+    canAdministerUsers : Boolean;
   }
 
   type LoginResult {

@@ -33,6 +33,7 @@ const {
   hashPassword,
   hashToken
 } = require('../../srv/auth/passwords')
+const { identityKeyHash } = require('../../srv/auth/identity-map')
 
 const RESULTS = []
 let PASS = 0
@@ -43,6 +44,10 @@ const ACTIVE_PASSWORD = 'idts-34-active-user-password'
 const INACTIVE_EMAIL = 'inactive-auth@example.local'
 const INACTIVE_PASSWORD = 'idts-34-inactive-user-password'
 const INACTIVE_USER_ID = '99000000-0000-0000-0000-000000000034'
+const TESTER_USER_ID = '10000000-0000-0000-0000-000000000004'
+const DEVELOPER_USER_ID = '10000000-0000-0000-0000-000000000002'
+const XSUAA_ORIGIN = 'sap.default'
+const XSUAA_ISSUER = 'https://issuer.example.invalid'
 
 function rec (label, pass, detail = '') {
   const icon = pass ? 'PASS' : 'FAIL'
@@ -224,6 +229,63 @@ async function main () {
   expectEqual('me returns current user ID', meResult.ID, loginResult.user.ID)
   expectEqual('me returns current user email', meResult.email, ACTIVE_EMAIL)
   expectEqual('me returns current user role', meResult.role_code, 'PM')
+  expectEqual('custom-auth me hides UserAdmin capability', meResult.canAdministerUsers, false)
+  expectEqual('custom-auth login hides UserAdmin capability', loginResult.user.canAdministerUsers, false)
+
+  const originalAuth = cds.env.requires.auth
+  try {
+    cds.env.requires.auth = { kind: 'xsuaa' }
+    await db.run(
+      UPDATE('idts.cap.Users')
+        .set({ externalIdentityKeyHash: xsuaaIdentityHash('pm-user-uuid') })
+        .where({ ID: loginResult.user.ID })
+    )
+    await db.run(
+      UPDATE('idts.cap.Users')
+        .set({ externalIdentityKeyHash: xsuaaIdentityHash('tester-user-uuid') })
+        .where({ ID: TESTER_USER_ID })
+    )
+    await db.run(
+      UPDATE('idts.cap.Users')
+        .set({ externalIdentityKeyHash: xsuaaIdentityHash('developer-user-uuid') })
+        .where({ ID: DEVELOPER_USER_ID })
+    )
+
+    const btpAdminProfile = await auth.send({
+      event: 'me',
+      user: xsuaaUser('pm-user-uuid', ['PM', 'UserAdmin'])
+    })
+    expectEqual('XSUAA active PM with UserAdmin exposes capability', btpAdminProfile.canAdministerUsers, true)
+    expectEqual('XSUAA capability keeps business role', btpAdminProfile.role_code, 'PM')
+
+    const btpPmProfile = await auth.send({
+      event: 'me',
+      user: xsuaaUser('pm-user-uuid', ['PM'])
+    })
+    expectEqual('XSUAA PM without UserAdmin hides capability', btpPmProfile.canAdministerUsers, false)
+
+    const btpTesterProfile = await auth.send({
+      event: 'me',
+      user: xsuaaUser('tester-user-uuid', ['TESTER', 'UserAdmin'])
+    })
+    expectEqual('XSUAA Tester with accidental UserAdmin hides capability', btpTesterProfile.canAdministerUsers, false)
+
+    const btpDeveloperProfile = await auth.send({
+      event: 'me',
+      user: xsuaaUser('developer-user-uuid', ['DEVELOPER', 'UserAdmin'])
+    })
+    expectEqual('XSUAA Developer with accidental UserAdmin hides capability', btpDeveloperProfile.canAdministerUsers, false)
+
+    await expectRejectsStatus('XSUAA missing identity fails closed', 403, () => auth.send({
+      event: 'me',
+      user: new cds.User({ id: 'missing-identity', roles: ['authenticated-user', 'PM', 'UserAdmin'] })
+    }))
+
+    const safeKeys = Object.keys(btpAdminProfile).sort()
+    expectEqual('safe XSUAA profile has no provider or identity fields', safeKeys.some(key => /scope|rolecollection|identity|token|issuer|origin|subject|provider/i.test(key)), false)
+  } finally {
+    cds.env.requires.auth = originalAuth
+  }
 
   const logoutResult = await auth.send({
     event: 'logout',
@@ -269,6 +331,37 @@ async function main () {
       if (result.detail) console.log(`        ${result.detail}`)
     }
     process.exit(1)
+  }
+}
+
+function xsuaaIdentityHash (subject) {
+  return identityKeyHash({ origin: XSUAA_ORIGIN, issuer: XSUAA_ISSUER, subject })
+}
+
+function xsuaaUser (subject, roles) {
+  return new cds.User({
+    id: `xsuaa-${subject}`,
+    roles: ['authenticated-user', ...roles],
+    authInfo: {
+      token: {
+        origin: XSUAA_ORIGIN,
+        issuer: XSUAA_ISSUER,
+        payload: {
+          user_uuid: subject,
+          user_id: `platform-${subject}`
+        }
+      }
+    }
+  })
+}
+
+async function expectRejectsStatus (label, expectedStatus, action) {
+  try {
+    await action()
+    rec(label, false, 'action unexpectedly succeeded')
+  } catch (error) {
+    const status = Number(error.status || error.statusCode || error.code)
+    rec(label, status === expectedStatus, `status=${status}`)
   }
 }
 
