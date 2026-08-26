@@ -8,7 +8,7 @@
 		"title": "{{appTitle}}",
 		"description": "{{appDescription}}",
 		"applicationVersion": {
-			"version": "1.0.16"
+			"version": "1.0.17"
 		},
 		"dataSources": {
 			"mainService": {
