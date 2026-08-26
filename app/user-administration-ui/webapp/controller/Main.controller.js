@@ -14,7 +14,7 @@ sap.ui.define([
 		COMPONENT_CATEGORY: { entity: "CatalogComponentCategories", fields: ["component_ID", "defectCategory_ID"] }
 	});
 	const WORKLOAD_ORDER = "isOverloaded desc,overdueOwnedBugCount desc,developerName asc,developerProfileID asc";
-	const WORKLOAD_SELECT = "developerProfileID,developerUserID,developerName,developerEmail,availabilityStatusCode,availabilityStatusName,availabilityCriticality,workloadLimit,openOwnedBugCount,overdueOwnedBugCount,currentActionItemCount,estimatedEffortHoursTotal,isOverloaded,active";
+	const WORKLOAD_SELECT = "developerProfileID,developerUserID,identityAccessReady,developerName,developerEmail,availabilityStatusCode,availabilityStatusName,availabilityCriticality,workloadLimit,openOwnedBugCount,overdueOwnedBugCount,currentActionItemCount,estimatedEffortHoursTotal,isOverloaded,active";
 	const WORKLOAD_BUG_SELECT = "ID,bugNumber,title,status_code,priority_code,severity_code,dueDate,estimatedEffortHours,assigneeDisplayName,currentActionOwnerDisplayName";
 	const UUID_PATTERN = /^[0-9a-f-]{36}$/i;
 

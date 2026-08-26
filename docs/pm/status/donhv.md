@@ -9000,6 +9000,18 @@ Vietnamese:
 - Fix/status: no repository, database, product or external-state mutation occurred; the probe was rerun with the repository’s complete `bugEntry` shape and the unknown-row regression was retained in the workload suite.
 - Verification/owner: the complete probe preserved the dangling Bug after profile deletion; focused backend GREEN asserts `Unknown Developer.identityAccessReady === false` and its open Bug remains visible.
 
+### 2026-08-26 Gate 6.3 independent exact-head review — Important blocker
+
+- Review head: `7c50476f2fbed15de722de55fddca6d73789b53a`; base: `d53f402ab92215e44d29da2e1d3da73a576fffd3`.
+- Result: `0 Critical / 0 Major / 1 Important / 0 Minor`; valid finding in `app/user-administration-ui/webapp/controller/Main.controller.js:17`: `WORKLOAD_SELECT` omitted `identityAccessReady`. Because the OData `$select` did not request the field, the server Boolean reached neither normalization nor the Workload UI, so exact-ready rows would display as not ready.
+- Review also confirmed the prior browser inference is removed; server authorization ordering, bounded bulk helper usage/no N+1, exact fail-closed invariant, unknown-row handling, Access readiness label, ordinary Bugs policy boundary and authorized diff scope passed.
+- Fix/status: open; add a RED assertion that `WORKLOAD_SELECT` includes `identityAccessReady`, then make the smallest select-list fix. Do not push, update PR #349, or advance until a fresh exact-head re-review returns zero Critical/Major/Important.
+
+### 2026-08-26 Gate 6.3 review-finding RED
+
+- Classification: intentional TDD RED for the Important review finding; `node scripts/qa/test-user-admin-workload.js` failed at the new `WORKLOAD_SELECT` assertion because the committed select string omitted `identityAccessReady`.
+- Fix/status: expected and isolated to the UI read contract; the server field, normalization, authorization, helper invariant, and all prior focused backend checks remain unchanged. No push/PR/Ready mutation occurred.
+
 ### 2026-08-26 Gate 6.3 readiness RED evidence
 
 - Classification: intentional TDD RED; the expanded in-memory workload suite reached `56 PASS / 5 FAIL / 61 checks`.
@@ -9029,3 +9041,9 @@ Vietnamese:
 - Classification: tooling issue; the first PowerShell allowlist wrapper nested two `git diff --name-only` arrays and compared a `System.Object[]` value, falsely reporting an unexpected `srv` path.
 - Fix/status: no source or external state changed. The wrapper was rerun with flattened scalar path collection; the intended allowlist remained exactly `srv/bug-service/monitoring.js` and `srv/service.cds`.
 - Verification: flattened wrapper passed with exactly `srv/bug-service/monitoring.js, srv/service.cds`; `db/`, dependency/lockfile and deployment-path guards also passed.
+
+### 2026-08-26 Gate 6.3 independent reviewer identity-gate interruption
+
+- Classification: delegation/tooling issue; the single bounded reviewer returned the repository member-identity question instead of reviewing exact head `7c50476f`, despite the parent task already being authorized as `donhv`.
+- Fix/status: no source, dependency, runtime or external-state mutation occurred. The same reviewer was resumed once with explicit `donhv` context; no parallel second review was spawned while it was active.
+- Follow-up: the resumed reviewer remained running without producing a source verdict after two bounded waits and an explicit finish interrupt, so it was closed before any finding could be issued. This non-started attempt does not count as the required review; one replacement will be run with inherited context and explicit `donhv` identity.
