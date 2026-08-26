@@ -179,3 +179,33 @@ Table Workload khai báo cột i18n `Trạng thái workload` riêng giữa Effor
 **English.** `DynamicPageTitle.actions` places one transparent, localized `nav-back` button before the existing emphasized Invite User button. It calls `.onOpenBugManagement`; no custom CSS or second navigation shell is introduced. If the order or handler breaks, PMs lose the clear return path while Invite remains the page's primary action. Check `Main.controller.js`, all three i18n bundles, and `scripts/qa/test-user-admin-ui.js` together.
 
 **Tiếng Việt.** `DynamicPageTitle.actions` đặt một nút transparent `nav-back` đã localize trước nút Invite User emphasized hiện có. Nút gọi `.onOpenBugManagement`; không thêm custom CSS hoặc navigation shell thứ hai. Nếu thứ tự hoặc handler sai, PM mất đường quay lại rõ ràng trong khi Invite vẫn phải là primary action của trang. Kiểm tra cùng `Main.controller.js`, cả ba bundle i18n và `scripts/qa/test-user-admin-ui.js`.
+
+## Gate 6.5 one Delivery table and type filter / Một bảng Delivery và filter type Gate 6.5
+
+### English
+
+Operations → Delivery keeps the existing table and adds one native `Select` for All types, Invitation, and Access change plus two localized columns for Type and Event. Existing recipient/status/attempt/time/details/retry cells remain in the same row. Retry calls `.onRetryDelivery`; no new tab, dialog, page, or custom CSS is introduced.
+
+- **Location**: `Main.view.xml:386-393` — delivery type `Select`.
+  **IDTS concept**: PM filters two delivery domains without splitting operational diagnosis.
+  **Impact if broken**: access rows can be hidden, mislabeled, or loaded through an invalid type.
+  **Must check together**: controller filter/session state, all i18n bundles, and server type allowlist.
+- **Location**: `Main.view.xml:397-414` — Type/Event columns and normalized row labels.
+  **IDTS concept**: users can distinguish invitation from the four material access events while recipient remains masked.
+  **Impact if broken**: row/column parity can hide the retry/details action or expose technical codes.
+  **Must check together**: `_normalizeDeliveryRow`, exact column/cell contract, and responsive build.
+
+### Tiếng Việt
+
+Operations → Delivery giữ bảng hiện có và thêm một `Select` native cho Tất cả loại, Thư mời và Thay đổi quyền truy cập, cùng hai cột localized Loại và Sự kiện. Các cell recipient/status/attempt/time/details/retry hiện có vẫn trong cùng row. Retry gọi `.onRetryDelivery`; không thêm tab, dialog, page hoặc custom CSS.
+
+- **Vị trí**: `Main.view.xml:386-393` — `Select` delivery type.
+  **Khái niệm IDTS**: PM filter hai domain delivery mà không tách chẩn đoán vận hành.
+  **Ảnh hưởng nếu sai**: row access có thể bị ẩn, gắn nhãn sai hoặc load qua type không hợp lệ.
+  **Phải kiểm tra cùng**: filter/session state controller, toàn bộ i18n bundle và allowlist type server.
+- **Vị trí**: `Main.view.xml:397-414` — cột Type/Event và label row đã normalize.
+  **Khái niệm IDTS**: user phân biệt invitation với bốn event access có ý nghĩa trong khi recipient vẫn được che.
+  **Ảnh hưởng nếu sai**: parity row/column có thể làm mất action retry/details hoặc lộ technical code.
+  **Phải kiểm tra cùng**: `_normalizeDeliveryRow`, contract exact column/cell và responsive build.
+
+**Safe editing / Sửa an toàn:** Keep native responsive controls and one table/dialog; preserve existing handlers and visibility expressions. / Giữ control responsive native và một table/dialog; giữ handler cùng visibility expression hiện có.

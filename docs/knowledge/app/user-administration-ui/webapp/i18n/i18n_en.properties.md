@@ -106,3 +106,25 @@ Label tiếng Anh giữ rõ năm khu vực cấp cao và validation khi role kh�
 **English.** `bugManagementOpenAction` and its tooltip mirror the default bundle with the concise label `Back to Bug Management`. Keep this wording aligned with the header button and free of implementation details.
 
 **Tiếng Việt.** `bugManagementOpenAction` và tooltip mirror bundle mặc định bằng label ngắn `Back to Bug Management`. Giữ wording đồng bộ với nút header và không đưa chi tiết triển khai vào copy.
+
+## Gate 6.5 English delivery copy / Copy delivery tiếng Anh Gate 6.5
+
+### English
+
+The explicit English bundle mirrors every new default key exactly: Delivery type filter, All types, Invitation, Access change, Type, Event, Role changed, Suspended, Reactivated, Revoked, and the em dash fallback. Search and empty text now describe all deliveries, not onboarding requests only.
+
+- **Location**: `i18n_en.properties:212-224,239` — Gate 6.5 Operations copy.
+  **IDTS concept**: stable English labels for safe normalized DTO codes.
+  **Impact if broken**: locale switching can lose keys, show raw codes, or give onboarding-only guidance for access rows.
+  **Must check together**: default/Vietnamese bundles, controller allowlists, and i18n parity tests.
+
+### Tiếng Việt
+
+Bundle English explicit mirror chính xác mọi key mặc định mới: filter Delivery type, All types, Invitation, Access change, Type, Event, Role changed, Suspended, Reactivated, Revoked và fallback em dash. Text search/empty giờ mô tả mọi delivery, không chỉ onboarding request.
+
+- **Vị trí**: `i18n_en.properties:212-224,239` — copy Operations Gate 6.5.
+  **Khái niệm IDTS**: label tiếng Anh ổn định cho code DTO an toàn đã normalize.
+  **Ảnh hưởng nếu sai**: đổi locale có thể mất key, hiện raw code hoặc hướng dẫn chỉ onboarding cho row access.
+  **Phải kiểm tra cùng**: bundle mặc định/Vietnamese, allowlist controller và test parity i18n.
+
+**Safe editing / Sửa an toàn:** Keep semantic equality with the default bundle and never include private environment details. / Giữ semantics bằng bundle mặc định và không đưa chi tiết môi trường private.

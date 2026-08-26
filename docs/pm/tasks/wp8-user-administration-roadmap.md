@@ -12,7 +12,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 ## Current status
 
-`GATE 6.4 COMPLETE — GATE 6.5 PLAN REFRESHED AT 5A12A7D3; IMPLEMENTATION NOT STARTED`
+`GATE 6.4 COMPLETE — GATE 6.5 SOURCE/EVIDENCE COMPLETE AT 128F5BA0; INDEPENDENT FINAL REVIEW AND LATER ROLLOUT REMAIN SEPARATE`
 
 - Gates 1–3B are merged, deployed and accepted. Gate 3 browser closure is recorded by PR #325 at `04643e12727290f2f35fd56e9c3d2a8df4cbcdbc`.
 - Gate 4 branch `feature/wp8-admin-developer-pilot-donhv` is frozen from that exact base.
@@ -50,14 +50,16 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 9. Gate 6.4 — Safe cross-app navigation — COMPLETE. Source PR #353 and cache-identity PR #354 are merged; selective CAP/content rollout and PM + UserAdmin same-tab round-trip acceptance passed at final merge `2993c707f7369e46c45ec2b105c30f9786f0d859`.
 10. Gate 6.5 — Post-completion access-change email notifications.
 
-### Gate 6.5 refreshed planning boundary — 2026-08-26
+### Gate 6.5 source-evidence boundary — 2026-08-26
 
-- Exact clean planning base: `5a12a7d3b1b32a4def1514daa809352bd22c1013`.
+- Exact clean planning base: `5a12a7d3b1b32a4def1514daa809352bd22c1013`; documented implementation head: `128f5ba0cbf9edfec6c7c1368d04316cf72f6efe`.
 - Authoritative implementation plan: `docs/superpowers/plans/2026-08-25-gate-6-5-access-change-notifications.md`.
 - The plan keeps Bug, invitation and access delivery storage domain-specific; adds exactly one access-delivery table; reuses one sender/worker/provider/scheduler/retry path; and keeps one normalized User Administration Delivery table.
 - Only final allowlisted `APPLIED` role-change/suspend/reactivate/revoke audits create deliveries. `NOOP_ALREADY_DESIRED`, failure/ambiguous/queued events and responsibility-only changes create none.
-- User Administration cache identity will advance from `1.0.16` to `1.0.17`; Bug Management remains `0.0.6`.
-- Planning is ready for DonHV review. No implementation branch, product source/schema mutation, HANA/HDI action, provider/email send, user/role/data mutation, deployment, Ready or merge has started.
+- User Administration cache identity is `1.0.17`; Bug Management remains `0.0.6`.
+- Source, focused task evidence, exact bilingual mirrors, and a compile-only additive HANA comparison are recorded in `docs/pm/evidence/user-administration/gate-6-5-access-change-notifications-source.md`. The comparison has exactly two new compiler artifacts, with zero removed/changed existing artifacts, table data, CSV, procedures, or unrelated tables/views.
+- A separate later plan is `docs/pm/evidence/user-administration/gate-6-5-access-change-notifications-rollout.md`: source review/merge, encrypted backup plus simulation/restore proof, one additive migration, selective CAP/UI deployment, controlled `APPLIED` acceptance, unified Operations acceptance, then readiness/rollback.
+- No HDI action, provider/email send, user/role/data mutation, deployment, Ready, merge, push, or PR has occurred. One bounded independent complete-head review remains the next source boundary; rollout remains separately unapproved.
 
 ## Delivery rules
 

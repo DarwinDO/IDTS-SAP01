@@ -183,3 +183,25 @@ Can kiem tra chung khi sua:
 - Source: `srv/email/outbox.js`
 - Related task: IDTS-36, IDTS-48
 - Last reviewed: 2026-08-12
+
+## Gate 6.5 shared sender formatting / Dùng chung định dạng sender Gate 6.5
+
+### English
+
+Gate 6.5 exports the existing `formatFrom(config)` helper rather than duplicating sender-name sanitization in the invitation and access outboxes. The helper strips quote/newline characters from the display name and returns no `From` value when the configured address is absent; provider selection and delivery policy remain elsewhere.
+
+- **Location**: `srv/email/outbox.js:228-234` — `module.exports.formatFrom`.
+  **IDTS concept**: Bug, invitation, and access deliveries use one provider-neutral sender representation.
+  **Impact if broken**: domain outboxes can format different senders or reintroduce header-injection risk.
+  **Must check together**: `srv/user-admin/delivery.js:6,150`, `srv/user-admin/access-delivery.js:6,145`, and sender regression tests.
+
+### Tiếng Việt
+
+Gate 6.5 export helper `formatFrom(config)` hiện có thay vì nhân đôi logic sanitize tên sender trong outbox invitation và access. Helper loại quote/newline khỏi display name và không trả `From` khi thiếu địa chỉ cấu hình; việc chọn provider và policy delivery vẫn ở module khác.
+
+- **Vị trí**: `srv/email/outbox.js:228-234` — `module.exports.formatFrom`.
+  **Khái niệm IDTS**: delivery Bug, invitation và access dùng chung biểu diễn sender không phụ thuộc provider.
+  **Ảnh hưởng nếu sai**: các outbox domain có thể format sender khác nhau hoặc đưa lại rủi ro header injection.
+  **Phải kiểm tra cùng**: `srv/user-admin/delivery.js:6,150`, `srv/user-admin/access-delivery.js:6,145` và regression sender.
+
+**Safe editing / Sửa an toàn:** Keep this a small pure formatter export; do not move sending, retry, or provider configuration into this module. / Giữ đây là export formatter thuần nhỏ; không đưa việc gửi, retry hoặc cấu hình provider vào module này.

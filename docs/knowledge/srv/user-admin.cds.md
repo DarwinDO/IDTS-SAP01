@@ -144,3 +144,33 @@ The UI may use the token as `expectedVersion` for `requestRoleChange`, `requestS
 UI có thể dùng token làm `expectedVersion` cho `requestRoleChange`, `requestSuspend`, `requestReactivate` hoặc `requestRevoke`, nhưng CAP vẫn là authority cho user ownership, state, authorization và conflict check. Nếu không có request được chọn với version integer an toàn, field details là null và UI không được tự tạo request token. Contract này là additive, không tạo public request entity hay schema column.
 
 **Anchor nguồn**: `srv/user-admin.cds:53-72` (`ActiveUserDetails`), `srv/user-admin.cds:223-257` (action read/details và lifecycle) và `srv/user-admin/active-users.js:104-126,191-243,313-325` (selection allow-list và mapping details).
+
+## Gate 6.5 unified delivery contract / Contract delivery hợp nhất Gate 6.5
+
+### English
+
+`AdministrationDeliverySummary` is the only public DTO used to combine invitation and access-change deliveries in Operations. Its thirteen fields are allowlisted: type/event, masked recipient, safe outcome/retry timestamps, sanitized error summary, retry capability, and optimistic `modifiedAt`. `searchAdministrationDeliveries` accepts only `ALL`, `INVITATION`, or `ACCESS_CHANGE`; `retryUserAccessDelivery` retains the existing UUID plus expected-timestamp optimistic contract.
+
+- **Location**: `srv/user-admin.cds:125-140` — `AdministrationDeliverySummary`.
+  **IDTS concept**: one privacy-safe operational shape over two domain-owned delivery stores.
+  **Impact if broken**: UI can expose recipient/body/provider/lock/audit internals or lose the type needed for fail-closed retry dispatch.
+  **Must check together**: `srv/user-admin/operations-audit.js:107-202,590-613` and `Main.controller.js:_normalizeDeliveryRow`.
+- **Location**: `srv/user-admin.cds:216-223,245-248` — unified search and access retry actions.
+  **IDTS concept**: bounded PM + UserAdmin diagnosis and state-valid retry.
+  **Impact if broken**: unauthorized or stale retries can bypass CAP, or the UI may invoke the invitation action for an access row.
+  **Must check together**: `srv/user-admin.js`, `operations-audit.js:417-504`, and authorization tests.
+
+### Tiếng Việt
+
+`AdministrationDeliverySummary` là DTO public duy nhất để hợp nhất delivery invitation và access-change trong Operations. Mười ba field được allowlist: type/event, recipient đã che, outcome/timestamp retry an toàn, error summary đã sanitize, khả năng retry và `modifiedAt` optimistic. `searchAdministrationDeliveries` chỉ nhận `ALL`, `INVITATION`, `ACCESS_CHANGE`; `retryUserAccessDelivery` giữ contract UUID cùng expected timestamp hiện có.
+
+- **Vị trí**: `srv/user-admin.cds:125-140` — `AdministrationDeliverySummary`.
+  **Khái niệm IDTS**: một shape vận hành bảo vệ privacy trên hai delivery store theo domain.
+  **Ảnh hưởng nếu sai**: UI có thể lộ recipient/body/provider/lock/audit nội bộ hoặc mất type cần cho retry fail-closed.
+  **Phải kiểm tra cùng**: `srv/user-admin/operations-audit.js:107-202,590-613` và `Main.controller.js:_normalizeDeliveryRow`.
+- **Vị trí**: `srv/user-admin.cds:216-223,245-248` — action search hợp nhất và retry access.
+  **Khái niệm IDTS**: chẩn đoán có giới hạn cho PM + UserAdmin và retry đúng state.
+  **Ảnh hưởng nếu sai**: retry unauthorized hoặc stale có thể bypass CAP, hoặc UI gọi nhầm action invitation cho row access.
+  **Phải kiểm tra cùng**: `srv/user-admin.js`, `operations-audit.js:417-504` và test authorization.
+
+**Safe editing / Sửa an toàn:** Keep the DTO narrower than persistence and update CDS, mapper, forbidden-field tests, UI normalization, and mirrors together. / Giữ DTO hẹp hơn persistence và cập nhật đồng thời CDS, mapper, forbidden-field test, normalize UI và mirror.
