@@ -9,6 +9,7 @@ const { INSERT, SELECT, UPDATE } = cds.ql
 
 const {
   ACCESS_EVENT_BY_ACTION,
+  buildAccessApplicationLink,
   buildAccessDeliveryMessage,
   processUserAccessDeliveries,
   writeUserAccessDelivery
@@ -133,6 +134,7 @@ async function main () {
   )
 
   await verifyAccessDeliveryBehavior()
+  await verifyAtomicDuplicateRace()
 
   console.log('IDTS user access notification contract: PASS')
 }
@@ -170,15 +172,31 @@ async function verifyAccessDeliveryBehavior () {
   }
   const message = buildAccessDeliveryMessage({
     eventType: 'ACCESS_ROLE_CHANGED',
-    effectiveRole: '<DEVELOPER>',
+    effectiveRole: 'DEVELOPER',
     effectiveAccessState: 'ACTIVE',
     completedAt: '2026-08-26T10:00:00.000Z'
   }, safeConfig)
   assert.match(message.subject, /access changed/i)
-  assert.match(message.text, /DEVELOPER/)
+  assert.match(message.text, /Developer/)
   assert.match(message.text, /https:\/\/idts\.example\.test\/idtsbugmanagementui\/index\.html/)
-  assert.match(message.html, /&lt;DEVELOPER&gt;/)
+  assert.match(message.html, /Developer/)
   assert.doesNotMatch(message.html, /Role Collection|provider|identity|reason/i)
+  assert.equal(
+    buildAccessApplicationLink(safeConfig.baseUrl),
+    'https://idts.example.test/idtsbugmanagementui/index.html',
+    'the application link is validated directly rather than inferred from rendered text'
+  )
+  for (const unsafeBaseUrl of [null, 'http://idts.example.test', 'https://user:password@idts.example.test', 'https://idts.example.test/?token=private', 'https://idts.example.test/#private', 'https://idts.example.test\r\nBcc: attacker@example.test']) {
+    assert.equal(buildAccessApplicationLink(unsafeBaseUrl), null, `unsafe base URL is rejected: ${String(unsafeBaseUrl)}`)
+  }
+  const injectedSnapshot = buildAccessDeliveryMessage({
+    eventType: 'ACCESS_ROLE_CHANGED',
+    effectiveRole: 'DEVELOPER\r\nBcc: attacker@example.test',
+    effectiveAccessState: 'ACTIVE\nForged state',
+    completedAt: '2026-08-26T10:00:00.000Z\r\nForged time'
+  }, safeConfig)
+  assert.doesNotMatch(injectedSnapshot.text, /Bcc:|Forged state|Forged time/)
+  assert.match(injectedSnapshot.text, /Effective role: Unknown/)
   for (const [eventType, label] of Object.entries({
     ACCESS_ROLE_CHANGED: 'access changed',
     ACCESS_SUSPENDED: 'access suspended',
@@ -249,6 +267,28 @@ async function verifyAccessDeliveryBehavior () {
     emailConfig: safeConfig
   })
   assert.deepEqual(noop, { created: false })
+  const excludedWriterCases = [
+    ['CHANGE_ROLE', 'QUEUED', 'ACCESS_ROLE_CHANGED'],
+    ['SUSPEND', 'FAILED', 'ACCESS_SUSPENDED'],
+    ['PROVISION', 'APPLIED', 'ACCESS_ROLE_CHANGED'],
+    ['LINK_EXISTING', 'APPLIED', 'ACCESS_ROLE_CHANGED'],
+    ['UPDATE_DEVELOPER_PROFILE', 'APPLIED', 'ACCESS_ROLE_CHANGED'],
+    ['UPDATE_DEVELOPER_RESPONSIBILITIES', 'APPLIED', 'ACCESS_ROLE_CHANGED'],
+    ['CHANGE_ROLE', 'APPLIED', 'ACCESS_REACTIVATED']
+  ]
+  for (const [action, result, eventType] of excludedWriterCases) {
+    const excludedResult = await writeUserAccessDelivery({
+      tx: db,
+      auditEvent: { ID: cds.utils.uuid(), action, result },
+      targetUserID: userID,
+      eventType,
+      effectiveRole: 'TESTER',
+      effectiveAccessState: 'ACTIVE',
+      completedAt: '2026-08-26T10:00:00.000Z',
+      emailConfig: safeConfig
+    })
+    assert.deepEqual(excludedResult, { created: false }, `${action}/${result}/${eventType} is excluded`)
+  }
 
   const blankEmailUserID = '61000000-0000-4000-8000-000000000002'
   await db.run(INSERT.into('idts.cap.Users').entries({
@@ -383,6 +423,35 @@ async function verifyAccessDeliveryBehavior () {
   assert.equal(retried.status_code, 'SENT')
   assert.equal(retried.attemptCount, 2)
 
+  const futureAudit = await insertAppliedAudit(db, '62000000-0000-4000-8000-000000000009', userID, 'SUSPEND')
+  const futureDelivery = await writeUserAccessDelivery({ tx: db, auditEvent: futureAudit, targetUserID: userID, eventType: 'ACCESS_SUSPENDED', effectiveRole: 'TESTER', effectiveAccessState: 'SUSPENDED', completedAt: '2026-08-26T10:04:00.000Z', emailConfig: safeConfig })
+  const exhaustedAudit = await insertAppliedAudit(db, '62000000-0000-4000-8000-000000000010', userID, 'REACTIVATE')
+  const exhaustedDelivery = await writeUserAccessDelivery({ tx: db, auditEvent: exhaustedAudit, targetUserID: userID, eventType: 'ACCESS_REACTIVATED', effectiveRole: 'TESTER', effectiveAccessState: 'ACTIVE', completedAt: '2026-08-26T10:04:00.000Z', emailConfig: safeConfig })
+  const expiredLockAudit = await insertAppliedAudit(db, '62000000-0000-4000-8000-000000000011', userID, 'REVOKE')
+  const expiredLockDelivery = await writeUserAccessDelivery({ tx: db, auditEvent: expiredLockAudit, targetUserID: userID, eventType: 'ACCESS_REVOKED', effectiveRole: 'TESTER', effectiveAccessState: 'REVOKED', completedAt: '2026-08-26T10:04:00.000Z', emailConfig: safeConfig })
+  const competingAudit = await insertAppliedAudit(db, '62000000-0000-4000-8000-000000000012', userID, 'CHANGE_ROLE')
+  const competingDelivery = await writeUserAccessDelivery({ tx: db, auditEvent: competingAudit, targetUserID: userID, eventType: 'ACCESS_ROLE_CHANGED', effectiveRole: 'DEVELOPER', effectiveAccessState: 'ACTIVE', completedAt: '2026-08-26T10:04:00.000Z', emailConfig: safeConfig })
+  await db.run(UPDATE(ENTITY).set({ nextAttemptAt: '2026-08-26T11:00:00.000Z' }).where({ ID: futureDelivery.deliveryID }))
+  await db.run(UPDATE(ENTITY).set({ status_code: 'FAILED', attemptCount: 2, nextAttemptAt: '2026-08-26T10:00:00.000Z' }).where({ ID: exhaustedDelivery.deliveryID }))
+  await db.run(UPDATE(ENTITY).set({ lockedUntil: '2026-08-26T10:03:00.000Z' }).where({ ID: expiredLockDelivery.deliveryID }))
+  const claimMessages = []
+  const claimResults = await Promise.all([
+    processUserAccessDeliveries({ tx: db, config: safeConfig, sendMail: async entry => { claimMessages.push(entry); return { messageId: `claim-${entry.headers['X-IDTS-Access-Delivery-ID']}` } }, now: new Date('2026-08-26T10:04:00.000Z'), workerID: 'competing-worker-a' }),
+    processUserAccessDeliveries({ tx: db, config: safeConfig, sendMail: async entry => { claimMessages.push(entry); return { messageId: `claim-${entry.headers['X-IDTS-Access-Delivery-ID']}` } }, now: new Date('2026-08-26T10:04:00.000Z'), workerID: 'competing-worker-b' })
+  ])
+  assert.equal(claimResults.reduce((total, result) => total + result.sent, 0), 2, 'competing workers claim each eligible delivery once')
+  assert.equal(claimMessages.length, 2)
+  const [futureStored, exhaustedStored, expiredLockStored, competingStored] = await Promise.all([
+    db.run(SELECT.one.from(ENTITY).where({ ID: futureDelivery.deliveryID })),
+    db.run(SELECT.one.from(ENTITY).where({ ID: exhaustedDelivery.deliveryID })),
+    db.run(SELECT.one.from(ENTITY).where({ ID: expiredLockDelivery.deliveryID })),
+    db.run(SELECT.one.from(ENTITY).where({ ID: competingDelivery.deliveryID }))
+  ])
+  assert.equal(futureStored.status_code, 'PENDING', 'future retry is excluded')
+  assert.equal(exhaustedStored.status_code, 'FAILED', 'max-attempt delivery is excluded')
+  assert.equal(expiredLockStored.status_code, 'SENT', 'expired lock is recovered')
+  assert.equal(competingStored.status_code, 'SENT', 'competing claim is delivered once')
+
   await db.disconnect()
 }
 
@@ -394,6 +463,58 @@ async function insertAppliedAudit (db, ID, targetUserID, action) {
     correlationId: ID.replace(/^62/, '63')
   }))
   return audit
+}
+
+async function verifyAtomicDuplicateRace () {
+  const state = { deliveryReads: 0, inserts: 0, delivery: null }
+  const tx = {
+    run: async query => {
+      if (query.SELECT) {
+        const source = String(query.SELECT.from?.ref?.[0] || '')
+        if (source === ENTITY) {
+          state.deliveryReads += 1
+          return state.deliveryReads <= 2 ? undefined : state.delivery
+        }
+        if (source === 'idts.cap.Users') return { ID: '65000000-0000-4000-8000-000000000001', email: 'race.user@example.test' }
+      }
+      if (query.INSERT) {
+        state.inserts += 1
+        if (state.inserts === 1) {
+          const entry = Array.isArray(query.INSERT.entries) ? query.INSERT.entries[0] : query.INSERT.entries
+          state.delivery = { ID: entry.ID, status_code: 'PENDING' }
+          return 1
+        }
+        throw Object.assign(new Error('unique constraint failed: UserAccessNotificationDeliveries.sourceAuditEvent_ID'), { code: 'SQLITE_CONSTRAINT' })
+      }
+      throw new Error('Unexpected CQN in duplicate-race test.')
+    }
+  }
+  const input = {
+    tx,
+    auditEvent: { ID: '66000000-0000-4000-8000-000000000001', action: 'SUSPEND', result: 'APPLIED' },
+    targetUserID: '65000000-0000-4000-8000-000000000001',
+    eventType: 'ACCESS_SUSPENDED',
+    effectiveRole: 'TESTER',
+    effectiveAccessState: 'SUSPENDED',
+    completedAt: '2026-08-26T10:00:00.000Z',
+    emailConfig: { enabled: true, ready: true, baseUrl: 'https://idts.example.test', fromAddress: 'no-reply@example.test' }
+  }
+  const results = await Promise.all([writeUserAccessDelivery(input), writeUserAccessDelivery(input)])
+  assert.equal(state.inserts, 2, 'both racing writers reached the atomic insert')
+  assert.deepEqual(results.map(result => result.created).sort(), [false, true])
+  assert.equal(results[0].deliveryID, results[1].deliveryID, 'the collision returns the inserted delivery')
+
+  const nonUniqueTx = {
+    run: async query => {
+      if (query.SELECT) {
+        const source = String(query.SELECT.from?.ref?.[0] || '')
+        return source === ENTITY ? undefined : { ID: input.targetUserID, email: 'race.user@example.test' }
+      }
+      if (query.INSERT) throw Object.assign(new Error('database connection failed'), { code: 'ECONNREFUSED' })
+      throw new Error('Unexpected CQN in non-unique test.')
+    }
+  }
+  await assert.rejects(writeUserAccessDelivery({ ...input, tx: nonUniqueTx }), error => error?.code === 'ECONNREFUSED')
 }
 
 function entityShape (definition) {

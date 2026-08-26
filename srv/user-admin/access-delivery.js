@@ -23,17 +23,33 @@ const EVENT_LABELS = Object.freeze({
   ACCESS_REVOKED: 'access revoked'
 })
 
+const ROLE_LABELS = Object.freeze({
+  TESTER: 'Tester',
+  DEVELOPER: 'Developer',
+  PM: 'Project Manager'
+})
+
+const ACCESS_STATE_LABELS = Object.freeze({
+  ACTIVE: 'Active',
+  SUSPENDED: 'Suspended',
+  REVOKED: 'Revoked',
+  INACTIVE: 'Inactive'
+})
+
 function buildAccessDeliveryMessage ({ eventType, effectiveRole, effectiveAccessState, completedAt }, emailConfig) {
   const label = EVENT_LABELS[eventType] || 'access updated'
   const link = buildAccessApplicationLink(emailConfig?.baseUrl)
+  const role = ROLE_LABELS[effectiveRole] || 'Unknown'
+  const accessState = ACCESS_STATE_LABELS[effectiveAccessState] || 'Unknown'
+  const completed = normalizeCompletedAt(completedAt)
   const text = [
     `Your IDTS ${label}.`,
-    `Effective role: ${effectiveRole || 'Unknown'}`,
-    `Access state: ${effectiveAccessState || 'Unknown'}`,
-    `Completed at: ${completedAt || 'Unknown'}`,
+    `Effective role: ${role}`,
+    `Access state: ${accessState}`,
+    `Completed at: ${completed}`,
     `Open IDTS: ${link || 'Unavailable'}`
   ].join('\n')
-  const html = `<!doctype html><html><body><p>Your IDTS ${escapeHtml(label)}.</p><p><strong>Effective role:</strong> ${escapeHtml(effectiveRole || 'Unknown')}</p><p><strong>Access state:</strong> ${escapeHtml(effectiveAccessState || 'Unknown')}</p><p><strong>Completed at:</strong> ${escapeHtml(completedAt || 'Unknown')}</p>${link ? `<p><a href="${escapeHtml(link)}">Open IDTS</a></p>` : ''}</body></html>`
+  const html = `<!doctype html><html><body><p>Your IDTS ${escapeHtml(label)}.</p><p><strong>Effective role:</strong> ${escapeHtml(role)}</p><p><strong>Access state:</strong> ${escapeHtml(accessState)}</p><p><strong>Completed at:</strong> ${escapeHtml(completed)}</p>${link ? `<p><a href="${escapeHtml(link)}">Open IDTS</a></p>` : ''}</body></html>`
 
   return {
     subject: `[IDTS] Your ${label}`,
@@ -63,23 +79,30 @@ async function writeUserAccessDelivery ({
   if (!recipient) return { created: false }
 
   const message = buildAccessDeliveryMessage({ eventType, effectiveRole, effectiveAccessState, completedAt }, emailConfig)
-  const skipped = skippedAccessDeliveryReason(emailConfig, recipient.email, message)
+  const skipped = skippedAccessDeliveryReason(emailConfig, recipient.email, buildAccessApplicationLink(emailConfig?.baseUrl))
   const deliveryID = cds.utils.uuid()
-  await tx.run(INSERT.into(DELIVERIES).entries({
-    ID: deliveryID,
-    sourceAuditEvent_ID: auditEvent.ID,
-    targetUser_ID: recipient.ID,
-    recipientEmail: recipient.email || '',
-    eventType,
-    templateKey: message.templateKey,
-    subject: message.subject,
-    textBody: message.text,
-    htmlBody: message.html,
-    status_code: skipped ? 'SKIPPED' : 'PENDING',
-    attemptCount: 0,
-    lastErrorCode: skipped?.code || null,
-    lastErrorSummary: skipped?.summary || null
-  }))
+  try {
+    await tx.run(INSERT.into(DELIVERIES).entries({
+      ID: deliveryID,
+      sourceAuditEvent_ID: auditEvent.ID,
+      targetUser_ID: recipient.ID,
+      recipientEmail: recipient.email || '',
+      eventType,
+      templateKey: message.templateKey,
+      subject: message.subject,
+      textBody: message.text,
+      htmlBody: message.html,
+      status_code: skipped ? 'SKIPPED' : 'PENDING',
+      attemptCount: 0,
+      lastErrorCode: skipped?.code || null,
+      lastErrorSummary: skipped?.summary || null
+    }))
+  } catch (error) {
+    if (!isUniqueConstraintError(error)) throw error
+    const concurrent = await tx.run(SELECT.one.from(DELIVERIES).where({ sourceAuditEvent_ID: auditEvent.ID }))
+    if (!concurrent) throw error
+    return { deliveryID: concurrent.ID, deliveryStatus: concurrent.status_code, created: false }
+  }
 
   return { deliveryID, deliveryStatus: skipped ? 'SKIPPED' : 'PENDING', created: true }
 }
@@ -153,24 +176,37 @@ async function processUserAccessDeliveries ({ tx, config, sendMail, now = new Da
   return result
 }
 
-function skippedAccessDeliveryReason (config, recipientEmail, message) {
+function skippedAccessDeliveryReason (config, recipientEmail, applicationLink) {
   if (!config?.enabled) return { code: 'EMAIL_DISABLED', summary: 'Email delivery is disabled.' }
   if (!config?.ready) return { code: 'EMAIL_CONFIG_INCOMPLETE', summary: 'Email delivery configuration is incomplete.' }
   if (!recipientEmail) return { code: 'RECIPIENT_EMAIL_MISSING', summary: 'Notification recipient has no email address.' }
   if (!isSafeEmailAddress(recipientEmail)) return { code: 'RECIPIENT_EMAIL_INVALID', summary: 'Notification recipient email is invalid.' }
-  if (!message.text.includes('Open IDTS: https://')) return { code: 'EMAIL_BASE_URL_INVALID', summary: 'Email delivery application URL is invalid.' }
+  if (!applicationLink) return { code: 'EMAIL_BASE_URL_INVALID', summary: 'Email delivery application URL is invalid.' }
   return null
 }
 
 function buildAccessApplicationLink (baseUrl) {
   try {
-    const url = new URL(String(baseUrl || ''))
-    return url.protocol === 'https:' && !url.username && !url.password
+    if (typeof baseUrl !== 'string' || /[\r\n]/.test(baseUrl)) return null
+    const url = new URL(baseUrl)
+    return url.protocol === 'https:' && url.hostname && !url.username && !url.password && !url.search && !url.hash
       ? `${url.origin}/idtsbugmanagementui/index.html`
       : null
   } catch {
     return null
   }
+}
+
+function normalizeCompletedAt (value) {
+  if (typeof value !== 'string' || /[\r\n]/.test(value) || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value)) return 'Unknown'
+  const date = new Date(value)
+  return Number.isFinite(date.getTime()) ? date.toISOString() : 'Unknown'
+}
+
+function isUniqueConstraintError (error) {
+  const code = String(error?.code || '').toUpperCase()
+  return code === '23505' || code === 'ER_DUP_ENTRY' || code.includes('SQLITE_CONSTRAINT') ||
+    /unique constraint|duplicate key/i.test(String(error?.message || ''))
 }
 
 function escapeHtml (value) {
@@ -184,6 +220,7 @@ function escapeHtml (value) {
 
 module.exports = {
   ACCESS_EVENT_BY_ACTION,
+  buildAccessApplicationLink,
   buildAccessDeliveryMessage,
   processUserAccessDeliveries,
   writeUserAccessDelivery
