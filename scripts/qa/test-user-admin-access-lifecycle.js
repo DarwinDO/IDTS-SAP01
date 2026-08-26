@@ -235,6 +235,11 @@ async function runProgrammaticLifecycleChecks () {
   assert.equal(suspendedSessions.find(session => session.ID === TARGET_SESSION_REVOKED_ID).revokedAt, '2026-08-20T12:01:00.000Z')
   assert.equal(suspensionAudit.result, 'QUEUED')
   assert.ok(appliedSuspensionAudit, 'local suspend appends a separate final APPLIED audit')
+  assert.equal(
+    Date.parse(suspensionAudit.createdAt) <= Date.parse(appliedSuspensionAudit.createdAt),
+    true,
+    'queued suspend audit is not later than its final APPLIED audit'
+  )
   assert.deepEqual({
     operationID: appliedSuspensionAudit.operation_ID,
     requestID: appliedSuspensionAudit.onboardingRequest_ID,
@@ -263,6 +268,10 @@ async function runProgrammaticLifecycleChecks () {
   assert.equal(suspensionDelivery.status_code, 'PENDING')
   assert.match(suspensionDelivery.textBody, /Effective role: Tester/)
   assert.match(suspensionDelivery.textBody, /Access state: Suspended/)
+  assert.equal(
+    suspensionDelivery.textBody.split('\n').find(line => line.startsWith('Completed at: ')),
+    `Completed at: ${appliedSuspensionAudit.createdAt}`
+  )
   assert.equal(await db.run(SELECT.one.from('idts.cap.UserAccessNotificationDeliveries').where({ sourceAuditEvent_ID: suspensionAudit.ID })), undefined)
   assert.equal(suspendedRequest.latestOperation_ID, null)
   assert.equal((await db.run(SELECT.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: TARGET_REQUEST_ID }))).length, beforeOperations.length)
