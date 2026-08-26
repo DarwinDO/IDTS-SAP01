@@ -50,7 +50,7 @@
 
 ### Final independent review
 
-- One bounded Terra high review covered all 30 changed files at exact range `99b100bdb07d599df17dbb2295c70384d04d1883..3a2edd85729d70fd75b32c70b057e3c4a400009f` and returned GO with `0 Critical / 0 Major / 0 Important / 3 Minor`.
+- One bounded independent review covered all 30 changed files at exact range `99b100bdb07d599df17dbb2295c70384d04d1883..3a2edd85729d70fd75b32c70b057e3c4a400009f` and returned GO with `0 Critical / 0 Major / 0 Important / 3 Minor`.
 - The three retained Minors are test-hardening only: instantiate the Bug Component session model instead of source-text assertion, read both Bug i18n bundles directly, and bind the User Administration Invite handler assertion to the second header button. Current source and localized bundles are correct; no known product/security defect remains.
 - Ponytail verdict: `Lean already. Ship.` The GO permits push and exactly one Draft PR only; it is not rollout, Ready, merge, deployment, or Gate 6.5 approval.
 
@@ -86,5 +86,5 @@ After separate rollout approval: verify PM + UserAdmin sees the Bug Management a
 - Task 1 có RED `31/6`, GREEN `37/0`; review tìm một Important về coverage alignment. Controlled bypass tạo RED `37/2`, restore tạo GREEN `39/0`, re-review xác nhận đã xử lý. Task 2 GREEN `16/0`; Task 3 UI contract PASS; cả hai review đều zero Critical/Major/Important.
 - Full matrix mới PASS: Auth `39/0`, Bug UI `16/0`, User Admin UI, secret scan, agent rules 8, QA-depth `15/0`, EDMX/HANA compile, User Admin lint và hai production build. Warning attachment cũ vẫn được ghi rõ.
 - MCP CAP/Fiori/UI5 không callable. Codex Security diff launcher thất bại hai lần trước khi tạo scan ID, nên không tuyên bố Security PASS. Coverage thay thế gồm secret scan, auth matrix deterministic, review từng task và final independent exact-diff review.
-- Final review độc lập Terra high trên exact range `99b100b...3a2edd85` trả GO với `0 Critical / 0 Major / 0 Important / 3 Minor`. Ba Minor chỉ là hardening test tĩnh, source/bundle hiện tại đúng; không còn product/security defect đã biết. Ponytail kết luận `Lean already. Ship.`
+- Final review độc lập có giới hạn trên exact range `99b100bdb07d599df17dbb2295c70384d04d1883..3a2edd85729d70fd75b32c70b057e3c4a400009f` trả GO với `0 Critical / 0 Major / 0 Important / 3 Minor`. Ba Minor chỉ là hardening test tĩnh, source/bundle hiện tại đúng; không còn product/security defect đã biết. Ponytail kết luận `Lean already. Ship.`
 - Manual browser/role/session acceptance chưa chạy và cần approval rollout riêng. Không có deploy hoặc mutation dữ liệu thật trong source gate này.
