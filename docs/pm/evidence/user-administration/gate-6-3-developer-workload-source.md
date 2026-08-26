@@ -120,3 +120,23 @@ Các contract TDD, suite User Administration/Active Users/User Access, workload 
 ## Approval boundary
 
 This evidence supports the one Draft PR handoff only. It does not claim runtime/manual acceptance, deployment, merge, Ready, release, or Gate 6.4. The exact-head source review returned zero Critical/Major/Important/Minor; live XSUAA/browser acceptance and all later release decisions remain separate.
+
+## 2026-08-26 live Actions-column remediation / Remediation cột Actions trên live
+
+### English
+
+- Live acceptance after the Gate 6.3 rollout showed correct workload data and server-derived Access readiness, but zero `View workload` buttons. The XML declared eight columns and nine row cells; the workload-state `ObjectStatus` occupied `Actions`, and UI5 did not render the extra button cell.
+- Approved TDD baseline passed. RED failed exactly at `8 !== 9` for column/cell alignment and `1.0.14 !== 1.0.15` for the required cache identity. The minimal fix adds one i18n `Workload status` column before `Actions`, keeps the existing transparent button and handler, and aligns package/lock/manifest at `1.0.15`; focused GREEN passed.
+- Fresh matrix: workload/UI/Active Users/User Access/Operations-Audit contracts PASS; secret scan PASS; agent rules `8/8`; QA-depth `15/15`; UI ESLint/build PASS; EDMX and HANA compile exit 0; diff check PASS. The existing attachment vocabulary warning remains outside the diff.
+- Ponytail review: `Lean already. Ship.` The change reuses the native responsive table, existing status formatter, button, dialog and handler; no CSS, controller branch, dependency or abstraction was added.
+- Codex Security diff scan `22c3ccf5-c51a-417c-9030-11109465c7b9` completed with zero findings across the five executable/source inventory items plus parent review of changed i18n/docs. Preflight was ready with parent fallback because delegation was not authorized; TAC advisory was unavailable because the connector was not logged in. One draft-schema write was rejected before persistence and then corrected on the same scan ID.
+- Remaining release evidence: exact branch/PR/CI/merge readback, content-only `1.0.15` rollout, and browser reacceptance of View workload, details, ownership fields and the same-origin Bug Management deep-link.
+
+### Vietnamese
+
+- Acceptance live sau rollout Gate 6.3 cho thấy dữ liệu workload và Access readiness do server tính đúng, nhưng không có nút `View workload`. XML khai báo tám cột và chín cell của row; `ObjectStatus` trạng thái workload chiếm `Actions`, còn UI5 không render cell nút bị dư.
+- Baseline TDD đã PASS. RED fail đúng `8 !== 9` cho alignment cột/cell và `1.0.14 !== 1.0.15` cho cache identity bắt buộc. Fix tối thiểu thêm một cột i18n `Trạng thái workload` trước `Actions`, giữ nút transparent cùng handler hiện có và đồng bộ package/lock/manifest tại `1.0.15`; focused GREEN đã PASS.
+- Matrix mới: contract workload/UI/Active Users/User Access/Operations-Audit PASS; secret scan PASS; agent rules `8/8`; QA-depth `15/15`; UI ESLint/build PASS; compile EDMX và HANA exit 0; diff check PASS. Warning vocabulary attachment có sẵn vẫn nằm ngoài diff.
+- Ponytail review: `Lean already. Ship.` Thay đổi tái sử dụng responsive table native, formatter trạng thái, button, dialog và handler hiện có; không thêm CSS, nhánh controller, dependency hoặc abstraction.
+- Codex Security diff scan `22c3ccf5-c51a-417c-9030-11109465c7b9` hoàn tất với zero finding cho năm item source/executable trong inventory, cộng review parent cho i18n/docs đã đổi. Preflight ready với parent fallback vì task không cho phép delegation; TAC advisory không dùng được vì connector chưa đăng nhập. Một lần ghi draft sai schema bị từ chối trước persistence và đã sửa trên cùng scan ID.
+- Evidence release còn lại: readback exact branch/PR/CI/merge, rollout content-only `1.0.15`, và browser reacceptance cho View workload, details, ownership field cùng deep-link Bug Management cùng origin.

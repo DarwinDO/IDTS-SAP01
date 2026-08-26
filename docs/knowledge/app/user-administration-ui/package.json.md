@@ -8,7 +8,7 @@ Version `1.0.9` marks the first live content containing generic Cancel copy for 
 
 Version `1.0.10` adds the Gate 4 responsibility confirmation, no-auto-reassignment notice and double-submit guard without changing dependencies or build commands.
 
-Version `1.0.14` publishes the Gate 6.3 Developer Workload and Bug drill-down content under a fresh HTML5 cache identity. It changes release metadata only; dependencies and build commands remain unchanged.
+Version `1.0.15` publishes the Gate 6.3 Workload Actions-column remediation under a fresh HTML5 cache identity. It changes release metadata only; dependencies and build commands remain unchanged.
 
 ## Tiếng Việt
 
@@ -18,7 +18,7 @@ Version `1.0.9` đánh dấu content live đầu tiên có copy Cancel tổng qu
 
 Version `1.0.10` thêm confirmation responsibility, notice không tự reassign và double-submit guard của Gate 4 mà không đổi dependency hoặc build command.
 
-Version `1.0.14` phát hành nội dung Developer Workload và Bug drill-down Gate 6.3 với cache identity HTML5 mới. Chỉ metadata release thay đổi; dependency và build command giữ nguyên.
+Version `1.0.15` phát hành remediation cột Actions của Workload Gate 6.3 với cache identity HTML5 mới. Chỉ metadata release thay đổi; dependency và build command giữ nguyên.
 
 Version `1.0.11` adds the Gate 5 Business Catalogs tab and dialogs. Dependencies and build commands remain unchanged.
 

@@ -91,6 +91,8 @@ Bundle này mirror các key workload mới từ `i18n.properties`: navigation De
 - **Ảnh hưởng nếu sai**: Đổi locale có thể làm mất explanation duy nhất về boundary workload hoặc làm action read-only nghe như mutation assignment/status.
 - **Phải kiểm tra cùng**: `i18n.properties`, `i18n_vi.properties`, XML Workload, formatter và workload contract tập trung.
 
+The `workloadStatus=Workload status` key keeps the status header distinct from the final Actions header. Vietnamese: key `workloadStatus=Workload status` giữ header trạng thái tách biệt với header Actions cuối.
+
 ### Safe editing / Sửa an toàn
 
 Keep default/English/Vietnamese key parity. Do not add raw server failures, internal identifiers, endpoints, provider terms, or credentials to this bundle.

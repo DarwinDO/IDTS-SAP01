@@ -263,6 +263,7 @@
 															<Column width="9rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>needsDeveloperAction}"/></Column>
 															<Column width="7rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>overdue}"/></Column>
 															<Column width="10rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>estimatedEffort}"/></Column>
+															<Column width="9rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>workloadStatus}"/></Column>
 															<Column width="11rem" hAlign="End"><Text text="{i18n>actions}"/></Column>
 														</columns>
 														<items>
