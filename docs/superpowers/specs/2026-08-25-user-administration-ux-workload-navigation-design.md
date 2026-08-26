@@ -4,9 +4,9 @@
 
 - Design owner: DonHV.
 - Approved in chat: 2026-08-25; Gate 6.5 outbox amendment approved later the same day.
-- Refreshed planning baseline: `origin/dev` at `170f0646e73db82451126891b4665e69a90b0aa0`.
+- Gate 6.5 refreshed planning baseline: clean `origin/dev` at `5a12a7d3b1b32a4def1514daa809352bd22c1013`.
 - Planning branch: `docs/wp8-user-admin-ux-architecture-donhv`.
-- Gate 6.2 is complete. This document now governs source planning for Gates 6.3–6.5 only; each gate still requires its own branch, Draft PR, review, rollout approval, and release boundary.
+- Gates 6.2–6.4 are complete. This document now governs source planning for Gate 6.5 only; Gate 6.5 still requires its own branch, Draft PR, review, additive migration approval, rollout approval, and release boundary.
 
 ## Purpose
 
@@ -249,6 +249,8 @@ Send a safe notification for:
 
 Do not send success mail when an operation is only queued, when provider readback is pending, or when completion fails. The email contains the action, effective IDTS role/access state, safe timestamp, and relative application link. It contains no Role Collection inventory, identity tuple, provider response, token, endpoint, or credential.
 
+For provider-backed operations, only the final audit result `APPLIED` creates a delivery. `NOOP_ALREADY_DESIRED` remains a successful reconciliation result but does not create a new material-change email. The access writer must also require the allowlisted final action, because Developer profile/responsibility audit rows may independently have `APPLIED` results.
+
 Responsibility-only availability/workload/scope edits write Audit and update UI but do not send email in this increment. This avoids notification spam. A later user-notification preference feature may revisit that decision.
 
 ### Unified Operations presentation
@@ -355,4 +357,4 @@ Each remaining gate requires a fresh `origin/dev` baseline after the previous ga
 
 ## Success criteria
 
-The design is complete when an authorized PM can reliably find a user, distinguish access/request/Developer concepts, see accurate current workload and assigned Bugs, navigate between administration and Bug Management, and receive safe post-completion access notifications without introducing duplicated workload logic, new schema, or weaker authorization.
+The design is complete when an authorized PM can reliably find a user, distinguish access/request/Developer concepts, see accurate current workload and assigned Bugs, navigate between administration and Bug Management, and receive safe post-completion access notifications without introducing duplicated workload logic, more than the one approved additive access-delivery table, or weaker authorization.

@@ -1,273 +1,398 @@
 # Gate 6.5 Access Change Notification Delivery Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (- [ ]) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Send safe, idempotent email after role change, suspend, reactivate or revoke completes, while keeping one email worker/provider/retry pipeline and one User Administration Delivery screen.
+**Goal:** Send safe, idempotent email after an actual role change, suspension, reactivation, or revocation completes, while retaining one email worker/provider/retry pipeline and one User Administration Delivery screen.
 
-**Architecture:** Add UserAccessNotificationDeliveries keyed uniquely by the source UserIdentityAuditEvent. Bug, invitation and access-change delivery storage remain domain-specific, but the existing worker entrypoint, sender/provider configuration, retry/error policy and readiness are shared. Operations normalizes Invitation and Access Change rows into one safe table.
+**Architecture:** Add one domain-owned `UserAccessNotificationDeliveries` outbox keyed uniquely by its final `UserIdentityAuditEvents` row. Bug, invitation, and access delivery storage remain separate, while the existing sender, provider configuration, scheduler action, post-commit kick, retry/backoff, sanitizer, and readiness surface are reused. Operations normalizes invitation and access-change rows into one allowlisted DTO without exposing raw recipient/body/provider/lock/audit identifiers.
 
 **Tech Stack:** SAP CAP Node.js, CDS/HANA additive schema, transactional outbox, Brevo/SMTP sender abstraction, SAP Job Scheduling/immediate kick, SAPUI5 Operations UI.
 
-**Spec:** docs/superpowers/specs/2026-08-25-user-administration-ux-workload-navigation-design.md
+**Spec:** `docs/superpowers/specs/2026-08-25-user-administration-ux-workload-navigation-design.md`
 
 ## Global Constraints
 
-- Start from merged Gate 6.4 origin/dev on branch feature/wp8-user-access-notification-delivery-donhv.
-- Schema change is additive only: one table and its unique/index artifacts; no existing table/column/constraint removal, no hdbtabledata and no seed.
-- One scheduler, sender, provider config, credential, worker entrypoint and readiness surface. No Redis, Kafka, RabbitMQ, BullMQ or new provider binding.
-- Success email is created only with APPLIED final audit state; queued/pending/failure does not create success delivery.
-- Responsibility-only updates never create access email.
-- No raw provider/identity/token/endpoint/Role Collection data in table, email, UI, logs or evidence.
-- Source gate stops at one Draft PR. HDI simulation, HANA migration, deployment and real email acceptance each require separate approval.
+- Frozen planning base: clean `origin/dev` `5a12a7d3b1b32a4def1514daa809352bd22c1013`.
+- Implementation branch: `feature/wp8-user-access-notification-delivery-donhv`, created from a fresh `origin/dev` readback after this planning package merges.
+- Add exactly one persistence entity and compiler-required additive HANA artifacts. Do not remove/change existing generated artifacts; add no `.hdbtabledata`, seed row, dependency, provider binding, scheduler, queue, credential, or endpoint.
+- Create a delivery only from a final allowlisted access audit with `result === 'APPLIED'`. `NOOP_ALREADY_DESIRED`, queued, pending, failure, conflict, ambiguous, PROVISION, LINK_EXISTING, and Developer profile/responsibility audit rows create zero access deliveries.
+- Store only delivery snapshots required to send and retry. Never expose or log raw recipient email, bodies, provider message ID, source audit ID, lock/lease value, identity tuple/hash, Role Collection inventory, token, credential, endpoint, or provider response.
+- UI changes advance only User Administration cache identity `1.0.16 -> 1.0.17` across package, lockfile root/top, and manifest. Bug Management remains unchanged.
+- Source gate stops at one Draft PR after one bounded independent exact-head review reports zero Critical/Major/Important findings. HDI simulation, HANA migration, deployment, real email send, provider/user/role/data mutation, Ready, merge, and cleanup require later explicit boundaries.
+- Ponytail: reuse the current `retryDelayMs`, `sanitizeTransportError`, sender, worker, scheduler, Operations table, and DTO patterns. Do not add `delivery-policy.js`, a second worker, a new intent entity, a generic outbox framework, or a system-wide Bug/User Administration delivery console.
+
+## File and Ownership Map
+
+| Unit | Files | Owner |
+| --- | --- | --- |
+| Persistence contract | `db/schema.cds`, focused QA, `package.json` | Coordinator |
+| Access writer/template/processor | new `srv/user-admin/access-delivery.js`, `srv/email/outbox.js`, focused tests | Luna implementation; coordinator exact-diff review |
+| Completion boundary | `srv/user-admin.js`, `srv/user-admin/access-lifecycle.js`, `srv/provisioning-broker.js` | Coordinator |
+| Shared worker | `srv/email/worker.js`, immediate/outbox tests | Coordinator |
+| Operations backend | `srv/user-admin.cds`, `srv/user-admin/operations-audit.js`, operations tests | Coordinator |
+| Operations UI/cache identity | User Administration controller/view/i18n/package/lock/manifest and UI tests | Luna after DTO freeze; coordinator exact-diff review |
+| Mirrors/evidence/release gates | matching `docs/knowledge/**`, PM evidence/status/roadmap, rollout plan | Coordinator |
+
+Luna never changes schema authorization/completion semantics, never deploys or sends email, and never pushes/merges without coordinator review. The coordinator owns task boundaries, final audit-to-delivery mapping, security/privacy review, HANA artifact comparison, exact-head review, PR, and every later mutation decision.
 
 ---
 
-### Task 1: Define schema and idempotency RED contract
+### Task 1: Add the additive outbox contract with RED-first model coverage
 
 **Files:**
-- Modify: db/schema.cds
-- Create: scripts/qa/test-user-access-notifications.js
-- Modify: package.json
+- Modify: `db/schema.cds`
+- Create: `scripts/qa/test-user-access-notifications.js`
+- Modify: `package.json`
 
 **Interfaces:**
-- Produces entity idts.cap.UserAccessNotificationDeliveries.
-- Unique source: sourceAuditEvent.
+- Produces persistence entity `idts.cap.UserAccessNotificationDeliveries`.
+- Produces unique business key `sourceAuditEvent`.
+- Reuses existing `NotificationDeliveryStatuses`; no new seed values.
 
-- [ ] Add a RED source/model test requiring:
+- [ ] **Step 1: Write RED model assertions**
 
-~~~cds
+Require this exact entity shape and prove the two existing delivery entities remain unchanged:
+
+```cds
 entity UserAccessNotificationDeliveries : cuid, managed {
-  sourceAuditEvent : Association to UserIdentityAuditEvents not null;
-  targetUser       : Association to Users not null;
-  recipientEmail  : String(255) not null;
-  eventType       : String(40) not null;
-  templateKey     : String(80) not null;
-  subject         : String(255) not null;
-  textBody        : LargeString not null;
-  htmlBody        : LargeString not null;
-  status          : Association to NotificationDeliveryStatuses not null;
-  attemptCount    : Integer default 0 not null;
-  nextAttemptAt   : Timestamp;
-  lastAttemptAt   : Timestamp;
-  sentAt          : Timestamp;
-  lastErrorCode   : String(80);
-  lastErrorSummary: String(500);
-  providerMessageId : String(255);
-  lockedUntil     : Timestamp;
-  lockToken       : String(64);
+  sourceAuditEvent    : Association to UserIdentityAuditEvents not null;
+  targetUser          : Association to Users not null;
+  recipientEmail      : String(255) not null;
+  eventType           : String(40) not null;
+  templateKey         : String(80) not null;
+  subject             : String(255) not null;
+  textBody            : LargeString not null;
+  htmlBody            : LargeString not null;
+  status              : Association to NotificationDeliveryStatuses not null;
+  attemptCount        : Integer default 0 not null;
+  nextAttemptAt       : Timestamp;
+  lastAttemptAt       : Timestamp;
+  sentAt              : Timestamp;
+  lastErrorCode       : String(80);
+  lastErrorSummary    : String(500);
+  providerMessageId   : String(255);
+  lockedUntil         : Timestamp;
+  lockToken           : String(64);
 }
-~~~
 
-- [ ] Require @assert.unique.accessAuditDelivery: [ sourceAuditEvent ].
-- [ ] Require eventType allowlist ACCESS_ROLE_CHANGED, ACCESS_SUSPENDED, ACCESS_REACTIVATED and ACCESS_REVOKED in the writer, not a client field.
-- [ ] Add package script:
+annotate UserAccessNotificationDeliveries
+  with @assert.unique.accessAuditDelivery: [ sourceAuditEvent ];
+```
 
-~~~json
+- [ ] **Step 2: Add and run the focused script**
+
+```json
 "qa:user-access-notifications:programmatic": "node scripts/qa/test-user-access-notifications.js"
-~~~
-- [ ] Run it. Expected: FAIL because the entity/writer does not exist.
-- [ ] Add the entity/unique annotation exactly as above; do not change Notifications, NotificationDeliveries or UserOnboardingDeliveries.
-- [ ] Compile:
+```
 
-~~~powershell
+```powershell
+npm run qa:user-access-notifications:programmatic
+```
+
+Expected RED: entity/unique contract missing; pre-existing model assertions remain green.
+
+- [ ] **Step 3: Add only the entity and unique annotation**
+
+Do not add a public projection, CSV, value list, hand-written HANA index, or modification to either existing delivery table.
+
+- [ ] **Step 4: Verify GREEN and CAP compilation**
+
+```powershell
+npm run qa:user-access-notifications:programmatic
 npx cds compile db/schema.cds --to hana
-~~~
+npx cds compile srv -s all --to edmx
+```
 
-Expected: exit 0 with only pre-existing warnings.
+Expected: focused PASS; compiles exit 0 with only the known attachment vocabulary warning.
 
-- [ ] Commit:
+- [ ] **Step 5: Commit**
 
-~~~powershell
+```powershell
 git add db/schema.cds scripts/qa/test-user-access-notifications.js package.json
 git commit -m "feat: add access notification delivery outbox"
-~~~
+```
 
-### Task 2: Build the safe access email writer and template
+### Task 2: Implement one access writer/template/processor using existing email policy
 
 **Files:**
-- Create: srv/email/access-template.js
-- Create: srv/user-admin/access-delivery.js
-- Create: srv/email/delivery-policy.js
-- Modify: srv/email/outbox.js
-- Modify: srv/user-admin/delivery.js
-- Modify: scripts/qa/test-user-access-notifications.js
-- Modify: scripts/qa/test-email-outbox-programmatic.js
-- Modify: scripts/qa/test-user-onboarding-programmatic.js
+- Create: `srv/user-admin/access-delivery.js`
+- Modify: `srv/email/outbox.js`
+- Modify: `srv/user-admin/delivery.js`
+- Modify: `scripts/qa/test-user-access-notifications.js`
+- Modify: `scripts/qa/test-email-outbox-programmatic.js`
+- Modify: `scripts/qa/test-user-onboarding-programmatic.js`
 
 **Interfaces:**
-- Produces buildAccessEmailMessage(input, config).
-- Produces writeUserAccessDelivery(tx, event, config).
-- Produces shared retryDelayMs, sanitizeTransportError and formatFrom without changing outputs.
+- Produces:
 
-- [ ] Move only retryDelayMs, sanitizeTransportError and safe formatFrom to delivery-policy.js; import them from Bug, invitation and access processors. Preserve current error codes/backoff exactly.
-- [ ] Implement buildAccessEmailMessage from allowlisted values: recipientEmail, eventType, effectiveRole, effectiveAccessState, completedAt and normalized Bug Management root link. Escape all dynamic HTML.
-- [ ] Implement writeUserAccessDelivery:
-  - reject missing/non-APPLIED audit event or eventType outside the four-value allowlist;
-  - read target Users.ID/email but do not require active=true so revoke/suspend mail can be sent;
-  - create subject/text/html snapshot;
-  - insert PENDING or SKIPPED using existing email config readiness;
-  - return existing row as NOOP if the source audit unique row already exists;
-  - never call provider.
-- [ ] Test HTML escaping, safe link, disabled/config-missing/invalid-email SKIPPED, duplicate audit idempotency, inactive target, and no raw reason/provider fields.
-- [ ] Run:
+```js
+buildAccessDeliveryMessage({
+  eventType,
+  effectiveRole,
+  effectiveAccessState,
+  completedAt
+}, emailConfig) // => { subject, text, html }
 
-~~~powershell
+writeUserAccessDelivery({
+  tx,
+  auditEvent,
+  targetUserID,
+  eventType,
+  effectiveRole,
+  effectiveAccessState,
+  completedAt,
+  emailConfig
+}) // => { deliveryID, deliveryStatus, created }
+
+processUserAccessDeliveries({
+  tx,
+  config,
+  sendMail,
+  now,
+  workerID
+}) // => { sent, failed, skipped }
+```
+
+- Consumes only:
+
+```js
+const ACCESS_EVENT_BY_ACTION = Object.freeze({
+  CHANGE_ROLE: 'ACCESS_ROLE_CHANGED',
+  SUSPEND: 'ACCESS_SUSPENDED',
+  REACTIVATE: 'ACCESS_REACTIVATED',
+  REVOKE: 'ACCESS_REVOKED'
+})
+```
+
+- [ ] **Step 1: Write RED writer/template tests**
+
+Cover four event mappings, APPLIED plus exact-action requirement, `NOOP_ALREADY_DESIRED` no-row, Developer administration no-row, duplicate audit NOOP, inactive suspend/revoke target, invalid/missing email/config `SKIPPED`, HTML escaping, and absence of raw reason/provider/identity/Role Collection fields.
+
+- [ ] **Step 2: Reuse existing policy without a new module**
+
+Export existing private `formatFrom` from `srv/email/outbox.js`. Import it with `retryDelayMs` and `sanitizeTransportError` in invitation/access processors; delete only the duplicated invitation `formatFrom`. Preserve current outputs/backoff/error summaries.
+
+- [ ] **Step 3: Implement the allowlisted snapshot**
+
+Read `Users.ID,email` without requiring `active=true`. Build the absolute safe application link only from validated private `emailConfig.baseUrl` plus `/idtsbugmanagementui/index.html`. Escape every dynamic HTML value. Insert `PENDING` only when config and recipient are ready; otherwise `SKIPPED`. Never call the provider from the writer.
+
+- [ ] **Step 4: Implement claim/send/update**
+
+Reuse batch size, max attempts, due predicate, conditional lock, lock expiry, retry delay, sanitizer, and `SENT/FAILED` updates. Use `X-IDTS-Access-Delivery-ID`; never log recipient, body, provider response, or source audit ID.
+
+- [ ] **Step 5: Run regression**
+
+```powershell
 npm run qa:user-access-notifications:programmatic
 npm run qa:email-outbox:programmatic
 npm run qa:user-onboarding:programmatic
-~~~
+```
 
-Expected: all exit 0 with unchanged Bug/invitation behavior.
+- [ ] **Step 6: Commit**
 
-- [ ] Commit:
+```powershell
+git add srv/user-admin/access-delivery.js srv/email/outbox.js srv/user-admin/delivery.js scripts/qa
+git commit -m "feat: write and process safe access deliveries"
+```
 
-~~~powershell
-git add srv/email srv/user-admin/access-delivery.js scripts/qa package.json
-git commit -m "feat: write safe access notification deliveries"
-~~~
-
-### Task 3: Attach delivery creation to final access audit events
+### Task 3: Create delivery only at the final access-completion boundary
 
 **Files:**
-- Modify: srv/user-admin.js
-- Modify: srv/user-admin/access-lifecycle.js
-- Modify: srv/provisioning-broker.js
-- Modify: srv/user-admin/access-delivery.js
-- Modify: scripts/qa/test-user-access-notifications.js
-- Modify: scripts/qa/test-user-access-provisioning-contract.js
-- Modify: scripts/qa/test-user-admin-access-lifecycle.js
+- Modify: `srv/user-admin.js`
+- Modify: `srv/user-admin/access-lifecycle.js`
+- Modify: `srv/provisioning-broker.js`
+- Modify: relevant access notification/provisioning/broker/lifecycle tests
 
 **Interfaces:**
-- Consumes final APPLIED UserIdentityAuditEvents.
-- Produces at most one access delivery and one post-commit worker kick per request.
+- Consumes Task 2 writer.
+- Final audit helper returns:
 
-- [ ] Make the audit insert helpers return the inserted audit event ID without changing existing audit fields.
-- [ ] For local suspend, append a final action SUSPEND/result APPLIED after Users.active=false, session revocation and SUSPENDED request update; write ACCESS_SUSPENDED delivery in the same transaction.
-- [ ] For broker final APPLIED completion:
-  - CHANGE_ROLE => ACCESS_ROLE_CHANGED;
-  - REACTIVATE => ACCESS_REACTIVATED;
-  - REVOKE => ACCESS_REVOKED;
-  - PROVISION and LINK_EXISTING => no access-change delivery.
-- [ ] Call writeUserAccessDelivery in the same transaction as final audit. Register scheduleImmediateEmailOutbox only when delivery status is PENDING; scheduling remains post-commit.
-- [ ] Prove retry/reconcile/expired lease and duplicate broker callback reuse the same final audit or hit the unique constraint and do not create a second delivery.
-- [ ] Prove queued, retryable failure, permanent failure, ambiguous result and responsibility-only update create zero rows.
-- [ ] Run:
+```js
+{ ID, operationID, requestID, actorID, targetUserID, action, result,
+  fromState, toState, correlationId, completedAt }
+```
 
-~~~powershell
+- [ ] **Step 1: Write RED completion tests**
+
+Require one row for local `SUSPEND/APPLIED` and provider `CHANGE_ROLE/APPLIED`, `REACTIVATE/APPLIED`, `REVOKE/APPLIED`. Require zero for queue audits, PROVISION, LINK_EXISTING, NOOP, failure/conflict/ambiguous/expired lease/duplicate callback and profile/responsibility audit actions.
+
+- [ ] **Step 2: Return IDs from final audit helpers**
+
+Allocate UUID before insert and return the exact inserted allowlisted audit object. Queue helper `insertIdentityAudit` keeps its `QUEUED` default.
+
+- [ ] **Step 3: Add a separate final suspend audit**
+
+After deactivation, session revocation, and optimistic request update succeed, append `SUSPEND/APPLIED` in the same transaction. Retain `REQUEST_SUSPEND/QUEUED` history. Write against only the final audit ID.
+
+- [ ] **Step 4: Attach provider-backed delivery**
+
+`appendAudit` returns its event. `completeSuccess` writes only for CHANGE_ROLE/REACTIVATE/REVOKE when `resultCode === 'APPLIED'`; NOOP creates none. Derive effective role/state from final persisted values.
+
+- [ ] **Step 5: Register post-commit kick once**
+
+If status is PENDING, use existing `scheduleImmediateEmailOutbox(req)`. Provider never runs in the business transaction; unique source audit remains duplicate defense.
+
+- [ ] **Step 6: Run regressions**
+
+```powershell
 npm run qa:user-access-notifications:programmatic
 npm run qa:user-access:programmatic
 npm run qa:user-access-broker:programmatic
 npm run qa:user-admin-access-lifecycle:programmatic
-~~~
+```
 
-Expected: all exit 0.
+- [ ] **Step 7: Commit**
 
-- [ ] Commit:
+```powershell
+git add srv/user-admin.js srv/user-admin/access-lifecycle.js srv/provisioning-broker.js scripts/qa
+git commit -m "feat: queue email after applied access change"
+```
 
-~~~powershell
-git add srv/user-admin.js srv/user-admin/access-lifecycle.js srv/provisioning-broker.js srv/user-admin/access-delivery.js scripts/qa
-git commit -m "feat: queue email after verified access completion"
-~~~
-
-### Task 4: Process access deliveries through the existing worker
+### Task 4: Add access processing to the existing worker only
 
 **Files:**
-- Modify: srv/user-admin/access-delivery.js
-- Modify: srv/email/worker.js
-- Modify: scripts/qa/test-user-access-notifications.js
-- Modify: scripts/qa/test-email-immediate-kick.js
+- Modify: `srv/email/worker.js`
+- Modify: `scripts/qa/test-email-immediate-kick.js`
+- Modify: `scripts/qa/test-user-access-notifications.js`
 
-**Interfaces:**
-- Produces processUserAccessDeliveries({ tx, config, sendMail, now, workerID }).
-- Extends processEmailOutboxBatch aggregate result without new worker/scheduler.
+**Interfaces:** Preserves `processEmailOutboxBatch({ tx, dependencies }) => { sent, failed, skipped }`.
 
-- [ ] Implement claim/send/update using the same batch size, attempt budget, due time, lock expiry, retry policy and sanitized errors as existing deliveries.
-- [ ] Add processAccess dependency to processEmailOutboxBatch and call it with the same sendMail function before sender.close().
-- [ ] Aggregate sent/failed/skipped across notification, invitation and access results.
-- [ ] Do not instantiate another sender, timer, scheduler action or credential reader.
-- [ ] Test one worker call invokes all three processors once, closes sender once, handles access success/failure/retry, and never logs recipient/body/provider response.
-- [ ] Run:
+- [ ] **Step 1: Write RED orchestration tests**
 
-~~~powershell
+One batch creates one sender, calls Bug/invitation/access once, aggregates all results, and closes once on success/failure. Missing invitation config skips invitations but not Bug/access.
+
+- [ ] **Step 2: Add one injected processor**
+
+```js
+const processAccess = dependencies.processAccess || processUserAccessDeliveries
+```
+
+Call with the same `tx`, `config`, and `sendMail` before one close. Add no timer, scheduler action, sender, provider reader, or credential path.
+
+- [ ] **Step 3: Run regression**
+
+```powershell
 npm run qa:user-access-notifications:programmatic
 npm run qa:email-immediate:programmatic
 npm run qa:email-outbox:programmatic
 npm run qa:user-onboarding:programmatic
-~~~
+```
 
-Expected: all exit 0.
+- [ ] **Step 4: Commit**
 
-- [ ] Commit:
+```powershell
+git add srv/email/worker.js scripts/qa/test-email-immediate-kick.js scripts/qa/test-user-access-notifications.js
+git commit -m "feat: process access delivery in shared worker"
+```
 
-~~~powershell
-git add srv/email/worker.js srv/user-admin/access-delivery.js scripts/qa
-git commit -m "feat: process access email in shared worker"
-~~~
-
-### Task 5: Unify Invitation and Access delivery in Operations
+### Task 5: Normalize invitation and access deliveries in Operations
 
 **Files:**
-- Modify: srv/user-admin.cds
-- Modify: srv/user-admin/operations-audit.js
-- Modify: srv/user-admin.js
-- Modify: app/user-administration-ui/webapp/controller/Main.controller.js
-- Modify: app/user-administration-ui/webapp/view/Main.view.xml
-- Modify: app/user-administration-ui/webapp/i18n/i18n.properties
-- Modify: app/user-administration-ui/webapp/i18n/i18n_en.properties
-- Modify: app/user-administration-ui/webapp/i18n/i18n_vi.properties
-- Modify: scripts/qa/test-user-admin-operations-audit.js
-- Modify: scripts/qa/test-user-admin-ui.js
+- Modify: `srv/user-admin.cds`
+- Modify: `srv/user-admin/operations-audit.js`
+- Modify: `srv/user-admin.js`
+- Modify: operations/access-notification tests
 
 **Interfaces:**
-- Produces AdministrationDeliverySummary with deliveryType and eventType.
-- Produces searchAdministrationDeliveries(deliveryType, status, query, skip, top).
-- Retains searchOnboardingDeliveries for compatibility until no consumer remains.
 
-- [ ] Extend the safe DTO with deliveryType INVITATION/ACCESS_CHANGE and nullable eventType.
-- [ ] Implement the combined search:
-  - authorize PM + UserAdmin;
-  - clamp top to 100 and skip to the documented bound;
-  - for a specified type query only that table;
-  - for All read at most skip+top newest rows from each table, normalize/mask, merge by createdAt desc then ID desc, then slice skip/top;
-  - never return raw recipient, body, provider ID, lock or audit ID.
-- [ ] Add retryUserAccessDelivery with FAILED, allowlisted transient code, attempt budget, no active lock and expected modifiedAt guards. Keep invitation expiry/status guard unchanged.
-- [ ] Make readiness consider recent SENT/FAILED from both User Administration delivery tables with SENT precedence.
-- [ ] Update Operations Delivery UI to one table with Type filter All/Invitation/Access change and one safe details dialog. Dispatch Retry by deliveryType to the correct action.
-- [ ] Test mixed ordering across both tables, 100/100/5 paging, stable no-duplicate boundaries, masking, search, type filters, readiness precedence and wrong-type retry rejection.
-- [ ] Run:
+```cds
+type AdministrationDeliverySummary {
+  deliveryID       : UUID;
+  deliveryType     : String(30);
+  eventType        : String(40);
+  recipientDisplay : String(255);
+  status           : String(40);
+  attemptCount     : Integer;
+  nextAttemptAt    : Timestamp;
+  lastAttemptAt    : Timestamp;
+  sentAt           : Timestamp;
+  errorCode        : String(80);
+  errorSummary     : String(500);
+  canRetry         : Boolean;
+  modifiedAt       : Timestamp;
+}
+```
 
-~~~powershell
+Produces `searchAdministrationDeliveries(deliveryType,status,query,skip,top)` and `retryUserAccessDelivery(deliveryID,expectedModifiedAt)`; retains legacy invitation actions.
+
+- [ ] **Step 1: Write RED backend tests**
+
+Cover authorization-before-read, filters, masking, forbidden fields, stable mixed ordering, paging boundaries, retry guards/audit, wrong-type rejection, and SENT precedence across both tables.
+
+- [ ] **Step 2: Implement bounded combined search**
+
+Concrete type queries only its table. ALL clamps top to 100 and skip to 10,000, reads at most `skip + top` newest rows from each table, normalizes, merge-sorts by `createdAt desc, ID desc`, then slices. Never use unbounded reads or client predicates directly.
+
+- [ ] **Step 3: Implement access retry**
+
+Require FAILED, transient allowlist, attempt budget, no active lock and exact modifiedAt. Reset safe retry fields, append `RETRY_ACCESS_DELIVERY/QUEUED`, and use the existing post-commit kick. Completion audit/message snapshot stay immutable.
+
+- [ ] **Step 4: Extend readiness**
+
+Read 25 newest rows from each User Administration delivery table and preserve seven-day semantics: SENT => AVAILABLE; otherwise FAILED => UNAVAILABLE; other/no conclusive => UNKNOWN.
+
+- [ ] **Step 5: Run tests and commit**
+
+```powershell
 npm run qa:user-admin-operations:programmatic
-npm run qa:user-admin-ui:programmatic
 npm run qa:user-access-notifications:programmatic
-~~~
+git add srv/user-admin.cds srv/user-admin/operations-audit.js srv/user-admin.js scripts/qa
+git commit -m "feat: unify administration delivery operations"
+```
 
-Expected: all exit 0.
-
-- [ ] Commit:
-
-~~~powershell
-git add srv/user-admin.cds srv/user-admin.js srv/user-admin/operations-audit.js app/user-administration-ui/webapp scripts/qa
-git commit -m "feat: unify user administration delivery operations"
-~~~
-
-### Task 6: Mirrors, additive HANA evidence and Draft PR
+### Task 6: Add one UI filter/details flow and advance cache identity
 
 **Files:**
-- Create/Modify: matching docs/knowledge/db, docs/knowledge/srv and docs/knowledge/app mirrors.
-- Create: docs/pm/evidence/user-administration/gate-6-5-access-notification-source.md
-- Create: docs/deployment/user-administration-gate-6-5-access-delivery-rollout.md
-- Modify: docs/pm/tasks/wp8-user-administration-roadmap.md
-- Modify: docs/pm/status/donhv.md
+- Modify: User Administration controller, main view, base/en/vi i18n, package, lockfile, manifest
+- Modify: UI and Operations QA contracts
 
-**Interfaces:** Produces source evidence and a later mutation plan; no live mutation.
+**Interfaces:** Consumes Task 5 DTO/actions; UI types are ALL, INVITATION, ACCESS_CHANGE; preserves one table/dialog.
 
-- [ ] Run officecli --version and update bilingual mirrors for schema, writer/template, shared worker, final-audit hook and Operations DTO/UI.
-- [ ] Generate baseline and candidate HANA outputs in task-temp outside the repo. Compare normalized relative paths and SHA-256.
-- [ ] Require exactly the new access-delivery table and unique/index artifacts plus any compiler-required association artifacts; zero removal/change of existing generated artifacts and zero hdbtabledata.
-- [ ] Run:
+- [ ] **Step 1: Write RED UI contract**
 
-~~~powershell
+Require one Type filter, normalized rows, friendly type/event labels, masked recipient, one details action, retry dispatch by type, no new Delivery tab, and no raw provider/audit/body/lock field.
+
+- [ ] **Step 2: Switch only the Delivery loader**
+
+Call `searchAdministrationDeliveries`; preserve busy/error/refresh/load-more/list state. Dispatch access retry separately while retaining invitation retry.
+
+- [ ] **Step 3: Add equal localized keys**
+
+Add All types, Invitation, Access change, Role changed, Suspended, Reactivated, Revoked, and safe empty-detail copy to base/en/vi. Use native UI5; no CSS/new dialog.
+
+- [ ] **Step 4: Advance version only**
+
+Set package, lockfile top/root, and manifest `1.0.17`. Assert semantic JSON parity for dependency/non-version fields. Bug UI remains `0.0.6`.
+
+- [ ] **Step 5: Run tests/build and commit**
+
+```powershell
+npm run qa:user-admin-ui:programmatic
+npm run qa:user-admin-operations:programmatic
+npm run lint --prefix app/user-administration-ui
+npm run build --prefix app/user-administration-ui
+git add app/user-administration-ui scripts/qa
+git commit -m "feat: show access changes in delivery operations"
+```
+
+### Task 7: Complete mirrors, additive proof, review, and one Draft PR
+
+**Files:**
+- Create/modify exact bilingual `docs/knowledge/**` mirrors for every changed source
+- Create Gate 6.5 source evidence and later rollout plan
+- Modify roadmap and DonHV status
+
+- [ ] **Step 1: Run `officecli --version` and mirror every changed source**
+
+Record the Markdown limitation; mirror schema, access delivery, outbox export, completion hooks, worker, Operations DTO/UI/i18n/version metadata.
+
+- [ ] **Step 2: Prove additive HANA output**
+
+Compile baseline/candidate into unique temp directories outside repo; compare normalized paths and SHA-256. Require zero removed/changed existing artifacts and zero hdbtabledata/CSV/seed/procedure/unrelated table/view. Record compiler-produced new artifacts; do not execute HDI.
+
+- [ ] **Step 3: Run final matrix**
+
+```powershell
 npm run qa:user-access-notifications:programmatic
 npm run qa:user-admin-operations:programmatic
 npm run qa:user-admin-ui:programmatic
@@ -285,16 +410,26 @@ npx cds compile db/schema.cds --to hana
 npm run lint --prefix app/user-administration-ui
 npm run build --prefix app/user-administration-ui
 git diff --check origin/dev...HEAD
-~~~
+```
 
-Expected: all exit 0; record exact additive artifact manifest.
+- [ ] **Step 4: Run one bounded independent exact-head review**
 
-- [ ] Write later rollout gates:
-  1. exact source/PR review;
-  2. HANA simulation and backup/restore proof;
-  3. additive schema migration only;
-  4. selective CAP/UI deployment;
-  5. controlled suspend/reactivate/role-change/revoke email acceptance;
-  6. Operations unified list/readiness/retry proof;
-  7. rollback/readiness verification.
-- [ ] Commit docs/evidence, push exact branch, create one Draft PR and stop. Do not run HDI, deploy, send email or mutate a real user under the source gate.
+Review schema additivity, completion timing, APPLIED/action allowlist, idempotency, retry/lock, masking, authorization, worker reuse, version parity and prohibited scope. Any Critical/Major/Important blocks push/PR until TDD remediation and fresh exact-head re-review.
+
+- [ ] **Step 5: Write later rollout gates**
+
+Separate: source review/merge; encrypted backup plus HANA simulation/restore proof; one additive migration; selective CAP/UI deploy; controlled APPLIED acceptance for eligible types; combined Operations acceptance; final readiness/rollback. Never backfill/email historical audit events.
+
+- [ ] **Step 6: Commit, push, create one Draft PR, stop**
+
+```powershell
+git add docs
+git commit -m "docs: record Gate 6.5 source evidence"
+git push -u origin feature/wp8-user-access-notification-delivery-donhv
+```
+
+Create exactly one Draft PR with QA-depth and exact CI readback. Do not Ready/merge/simulate/migrate/deploy/send/mutate real user/role/data/provider or clean the implementation worktree.
+
+## Baseline Evidence Before Implementation
+
+At `5a12a7d3b1b32a4def1514daa809352bd22c1013`, Operations, access provisioning, broker, lifecycle, immediate email kick, Bug outbox, onboarding, secret scan, agent rules 8/8 and QA-depth 15/15 all pass. This is regression evidence, not a claim that Gate 6.5 exists.
