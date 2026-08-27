@@ -13,6 +13,7 @@ const { writeNotificationRecord } = require('../../srv/email/outbox')
 const { buildLifecycleNotification } = require('../../srv/bug-service/history')
 const { hydrateNotificationPage } = require('../../srv/notification/inbox')
 const { recordBugChangeSideEffects } = require('../../srv/bug-service/history')
+const { resubmitToDeveloper, reassignRetestOwner } = require('../../srv/bug-service/actions')
 
 function emailConfig () {
   return normalizeEmailConfig({
@@ -74,6 +75,54 @@ async function main () {
   const removalRouteNotification = await db.run(SELECT.one.from('idts.cap.Notifications').where({ eventType_code: 'ASSIGNMENT_REMOVED' }))
   assert.ok(removalRouteNotification, 'assignee removal route persisted an inbox-only notification')
   assert.equal(await count(db, 'idts.cap.NotificationDeliveries', { notification_ID: removalRouteNotification.ID }), 0)
+
+  const developerProfile = await db.run(SELECT.one.from(entities.DeveloperProfiles).columns('ID', 'user_ID'))
+  const coordinator = await db.run(SELECT.one.from(entities.Users).where({ active: true, role_code: { in: ['TESTER', 'PM'] } }))
+  await db.run(cds.ql.UPDATE(entities.Bugs).set({
+    status_code: 'NEED_MORE_INFORMATION', assignee_ID: developerProfile.ID,
+    nextProcessorUser_ID: coordinator.ID, nextProcessorRole_code: 'TESTER'
+  }).where({ ID: bug.ID }))
+  const resubmitReq = new cds.Request({
+    user: new cds.User({ id: coordinator.email, roles: [coordinator.role_code, 'authenticated-user'] }),
+    params: [{ ID: bug.ID }], data: { note: 'Route coverage note.' }
+  })
+  const resubmittedBug = await db.tx(resubmitReq, () => resubmitToDeveloper(resubmitReq, entities))
+  const resubmitNotification = await db.run(SELECT.one.from('idts.cap.Notifications').where({
+    recipient_ID: resubmittedBug.nextProcessorUser_ID, eventType_code: 'RESUBMITTED'
+  }))
+  assert.ok(resubmitNotification?.sourceKey?.startsWith('STATUS:'))
+  assert.ok(resubmitNotification.sourceKey.endsWith(`:${resubmittedBug.nextProcessorUser_ID}`))
+  assert.equal(await count(db, 'idts.cap.UserNotificationInboxEntries', { bugNotification_ID: resubmitNotification.ID }), 1)
+  assert.equal(await count(db, 'idts.cap.NotificationDeliveries', { notification_ID: resubmitNotification.ID }), 1)
+
+  const pm = await db.run(SELECT.one.from(entities.Users).where({ active: true, role_code: 'PM' }))
+  let testers = await db.run(SELECT.from(entities.Users).where({ active: true, role_code: 'TESTER' }))
+  if (testers.length < 2) {
+    await db.run(cds.ql.INSERT.into(entities.Users).entries({
+      ID: 'de000000-0000-4000-8000-000000000007', displayName: 'Route Tester',
+      email: 'route-tester@example.test', role_code: 'TESTER', active: true
+    }))
+    testers = await db.run(SELECT.from(entities.Users).where({ active: true, role_code: 'TESTER' }))
+  }
+  const oldRetestOwner = testers[0]
+  const newRetestOwner = testers[1]
+  assert.ok(oldRetestOwner?.ID && newRetestOwner?.ID, 'fixture has two active testers')
+  await db.run(cds.ql.UPDATE(entities.Bugs).set({
+    status_code: 'RESOLVED', retestOwner_ID: oldRetestOwner.ID,
+    nextProcessorUser_ID: oldRetestOwner.ID, nextProcessorRole_code: 'TESTER'
+  }).where({ ID: bug.ID }))
+  const retestReq = new cds.Request({
+    user: new cds.User({ id: pm.email, roles: ['PM', 'authenticated-user'] }), params: [{ ID: bug.ID }],
+    data: { retestOwnerID: newRetestOwner.ID, reason: 'Route coverage reassignment.' }
+  })
+  await db.tx(retestReq, () => reassignRetestOwner(retestReq, entities))
+  const retestNotification = await db.run(SELECT.one.from('idts.cap.Notifications').where({
+    recipient_ID: newRetestOwner.ID, eventType_code: 'RETEST_OWNER_CHANGED'
+  }))
+  assert.ok(retestNotification?.sourceKey?.startsWith('STATUS:'))
+  assert.ok(retestNotification.sourceKey.endsWith(`:${newRetestOwner.ID}`))
+  assert.equal(await count(db, 'idts.cap.UserNotificationInboxEntries', { bugNotification_ID: retestNotification.ID }), 1)
+  assert.equal(await count(db, 'idts.cap.NotificationDeliveries', { notification_ID: retestNotification.ID }), 1)
 
   const historyID = cds.utils.uuid()
   const sourceKey = `STATUS:${historyID}:${recipient.ID}`
@@ -140,14 +189,21 @@ async function main () {
     sourceKey: concurrentSourceKey,
     emailRequired: true
   }
-  const concurrent = await Promise.all([
-    db.tx(tx => writeNotificationRecord(tx, concurrentEntry, emailConfig())),
-    db.tx(tx => writeNotificationRecord(tx, concurrentEntry, emailConfig()))
-  ])
-  assert.equal(concurrent[0].notificationID, concurrent[1].notificationID, 'concurrent source producers reuse one notification')
+  const independentProducer = () => db.tx(async tx => {
+    const calls = []
+    const instrumentedTx = { run: query => { calls.push(query); return tx.run(query) } }
+    return { result: await writeNotificationRecord(instrumentedTx, concurrentEntry, emailConfig()), calls }
+  })
+  const concurrent = await Promise.all([independentProducer(), independentProducer()])
+  assert.equal(concurrent[0].result.notificationID, concurrent[1].result.notificationID, 'independently started producers converge')
+  for (const producer of concurrent) {
+    const lockIndex = producer.calls.findIndex(query => query?.SELECT?.from?.ref?.[0] === 'idts.cap.Bugs' && query.SELECT.forUpdate)
+    const sourceLookupIndex = producer.calls.findIndex(query => JSON.stringify(query).includes('sourceKey'))
+    assert.ok(lockIndex >= 0 && sourceLookupIndex > lockIndex, 'real delegated transaction executes Bug lock before source-key lookup')
+  }
   assert.equal(await count(db, 'idts.cap.Notifications', { sourceKey: concurrentSourceKey }), 1)
-  assert.equal(await count(db, 'idts.cap.UserNotificationInboxEntries', { bugNotification_ID: concurrent[0].notificationID }), 1)
-  assert.equal(await count(db, 'idts.cap.NotificationDeliveries', { notification_ID: concurrent[0].notificationID }), 1)
+  assert.equal(await count(db, 'idts.cap.UserNotificationInboxEntries', { bugNotification_ID: concurrent[0].result.notificationID }), 1)
+  assert.equal(await count(db, 'idts.cap.NotificationDeliveries', { notification_ID: concurrent[0].result.notificationID }), 1)
 
   const rollbackSourceKey = `STATUS:${cds.utils.uuid()}:${recipient.ID}`
   await assert.rejects(db.tx(async tx => {
