@@ -5,8 +5,8 @@ Last updated: 2026-08-27
 ## 2026-08-27 My Notifications N3 source execution
 
 - N2 #362 is merged at `c722c355df5ff786d372002e20ab10864b4780ab`; that exact commit is the isolated N3 base. DonHV authorized continuing through N3 source completion. Tasks 7–9 cover lifecycle channels, selected mentions, escalation and final access indexing.
-- Tasks 7 and 8 are clean for Critical/Major/Important findings at `d6f5f14c618db86cbf975746d29885f222ced946`; one Task 8 Minor about UUID case normalization is deferred to final review. Task 9 escalation/access indexing is in progress. No N3 Draft PR, deployment or release PASS yet. The live UI rollback remains separate; N3 does not redeploy the bell or change live email/data. Details: `docs/pm/evidence/my-notifications/n3-source-evidence.md`.
-- Tiếng Việt: N2 #362 đã merge tại SHA trên, là base N3 riêng. Tasks 7–8 sạch Critical/Major/Important tại SHA trên; một Minor Task 8 về normalize UUID hoa/thường chờ final review. Task 9 escalation/access index đang làm. Chưa Draft PR/deploy/release PASS cho N3. Giữ nguyên rollback UI live, không tự bật chuông hoặc đổi email/dữ liệu thật.
+- Tasks 7–9 are implemented and task-reviewed at `459782b660df938e99da5f3c3913d573166d03e8`. The fresh integrated source matrix, CAP/HANA compile, UI lint/build and protected-path guards pass; one Task 8 Minor about UUID case normalization is explicitly handed to final review. The next boundary is one bounded whole-branch source/security review, remediation if needed, and one Draft PR. No N3 deployment or release PASS; live UI rollback remains unchanged.
+- Tiếng Việt: Tasks 7–9 đã implement và task-review tại SHA trên. Full matrix source mới, compile CAP/HANA, UI lint/build và guard path đều PASS; một Minor Task 8 về normalize UUID hoa/thường được chuyển rõ sang final review. Boundary tiếp theo là một review source/security toàn branch, sửa nếu cần, rồi đúng một Draft PR. Chưa deploy/release PASS N3; live UI rollback giữ nguyên.
 
 ## 2026-08-27 My Notifications N2 source candidate
 
