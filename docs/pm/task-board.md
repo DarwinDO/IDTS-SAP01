@@ -134,9 +134,9 @@ Vietnamese:
 
 ## In Progress
 
-My Notifications: WP7-NOTIFY is in progress. N1 #361 merged; N2 source review is GO with zero Critical/Major/Important and exactly one OPEN/Draft PR #362 targets `dev`. No deploy/migration/real backfill/Ready/merge/N3. Details: `docs/pm/tasks/wp7-my-notifications-roadmap.md`.
+My Notifications: WP7-NOTIFY is in progress. N1 #361 and N2 #362 are merged. The content-only N2 live rollout was rolled back after CAP metadata 404 confirmed the N6 backend/migration dependency; Bug UI `0.0.6` is restored and BTP is `DEMO READY`. Next is N3 source; N6 remains separately approved after N3–N5. Details: `docs/pm/tasks/wp7-my-notifications-roadmap.md`.
 
-Tiếng Việt: WP7-NOTIFY đang thực hiện; N1 #361 đã merge, review source N2 GO không còn Critical/Major/Important và đúng một Draft #362 đang mở vào `dev`. Chưa deploy/migration/backfill thật/Ready/merge/N3.
+Tiếng Việt: WP7-NOTIFY đang thực hiện; N1 #361 và N2 #362 đã merge. Rollout UI N2 đã rollback sau khi metadata CAP 404 xác nhận dependency N6; Bug UI `0.0.6` đã khôi phục và BTP `DEMO READY`. Tiếp theo là source N3; N6 vẫn duyệt riêng sau N3–N5.
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |

@@ -4,7 +4,7 @@
 
 ### Status
 
-`N1 MERGED — N2 DRAFT PR #362 OPEN; STOP BEFORE MERGE/DEPLOY/N3`
+`N1 + N2 MERGED — N2 LIVE UI ROLLED BACK; NEXT N3 SOURCE GATE`
 
 ### Authority
 
@@ -27,13 +27,13 @@ Each gate freezes a fresh base, uses a dedicated worktree/branch, TDD, exact sco
 
 ### Next boundary
 
-N1 PR #361 merged at `e35d09c0deef129f0d986457c847fe7fc28b90d4`; this is the exact N2 base. N2 Tasks 5–6 are locally verified: OData client, native bell/badge/popover, filters, paging, read actions, safe deep link, i18n, lifecycle cleanup, responsive browser and focused lint/build. Existing PASS remains reused by DonHV confirmation. One bounded exact-head review and one Draft N2 PR remain. Migration, backfill execution, deployment, Ready/merge and N3 are unapproved.
+N1 PR #361 merged at `e35d09c0deef129f0d986457c847fe7fc28b90d4`. N2 PR #362 merged at `c722c355df5ff786d372002e20ab10864b4780ab` after exact-head review and fresh verification. A content-only N2 rollout exposed the expected sequencing dependency: the live CAP app does not yet expose merged N1 `NotificationService`, so the bell entered its safe unavailable state. DonHV approved an exact content rollback; operation `a4a2b351-a1fd-11f1-b41e-eeee0a9795f8` restored Bug UI `0.0.6` while preserving User Administration `1.0.17`. Live acceptance proves no bell, no notification metadata errors, Bug grid present and final `DEMO READY`. Next boundary is N3 source work; N6 migration/backfill/CAP/UI rollout remains separately approved after N3–N5.
 
 ## Tiếng Việt
 
 ### Trạng thái
 
-`N1 ĐÃ MERGE — DRAFT PR N2 #362 ĐÃ MỞ; DỪNG TRƯỚC MERGE/DEPLOY/N3`
+`N1 + N2 ĐÃ MERGE — LIVE UI N2 ĐÃ ROLLBACK; TIẾP THEO LÀ SOURCE GATE N3`
 
 ### Thẩm quyền
 
@@ -56,4 +56,4 @@ Mỗi gate freeze base mới, dùng worktree/branch riêng, TDD, exact scope gua
 
 ### Boundary tiếp theo
 
-N1 PR #361 đã merge tại `e35d09c0deef129f0d986457c847fe7fc28b90d4`, là base N2 chính xác. N2 Tasks 5–6 đã verify local: client OData, chuông/badge/popover native, filter, paging, read action, deep link an toàn, i18n, cleanup lifecycle, browser responsive và lint/build tập trung. Tiếp tục dùng PASS cũ theo xác nhận DonHV. Còn một review exact-head có giới hạn và một Draft N2 PR. Chưa duyệt migration, chạy backfill, deploy, Ready/merge hoặc N3.
+N1 PR #361 merge tại `e35d09c0deef129f0d986457c847fe7fc28b90d4`. N2 PR #362 merge tại `c722c355df5ff786d372002e20ab10864b4780ab` sau review exact-head và verification mới. Rollout content-only N2 đã lộ dependency thứ tự dự kiến: CAP live chưa expose `NotificationService` đã merge trong N1 nên chuông vào safe unavailable state. DonHV duyệt rollback content exact; operation `a4a2b351-a1fd-11f1-b41e-eeee0a9795f8` khôi phục Bug UI `0.0.6` và giữ User Administration `1.0.17`. Acceptance live chứng minh không còn chuông, không lỗi metadata notification, Bug grid vẫn có và final `DEMO READY`. Boundary tiếp theo là source N3; migration/backfill/CAP/UI rollout N6 vẫn cần duyệt riêng sau N3–N5.
