@@ -232,15 +232,14 @@ async function readLatestDueDateEvents (tx, bugs, dueRows) {
 }
 
 async function readOverdueRecipients (tx, candidates) {
-  // Candidate IDs are already bounded to one page; lock the bulk reads so preloaded eligibility cannot drift in this tx.
+  // Candidate IDs are bounded to one page; keep bulk reads lock-free to preserve the assignment path's Profile -> Bug order.
   const profileIDs = [...new Set(candidates.map(row => row.assignee_ID).filter(Boolean))]
   const profiles = profileIDs.length
     ? await tx.run(SELECT.from(DEVELOPER_PROFILES)
       .columns('ID', 'user_ID', 'active')
       .where({ ID: { in: profileIDs }, active: true })
       .orderBy('ID asc')
-      .limit(CANDIDATE_PAGE_SIZE)
-      .forUpdate())
+      .limit(CANDIDATE_PAGE_SIZE))
     : []
   const userIDs = [...new Set([
     ...candidates.map(row => row.nextProcessorUser_ID).filter(Boolean),
@@ -251,8 +250,7 @@ async function readOverdueRecipients (tx, candidates) {
       .columns('ID', 'active')
       .where({ ID: { in: userIDs }, active: true })
       .orderBy('ID asc')
-      .limit(RECIPIENT_USER_PAGE_SIZE)
-      .forUpdate())
+      .limit(RECIPIENT_USER_PAGE_SIZE))
     : []
   const activeUsers = new Set(users.map(row => row.ID))
   const userByProfile = new Map(profiles.filter(row => activeUsers.has(row.user_ID)).map(row => [row.ID, row.user_ID]))

@@ -227,6 +227,7 @@ async function main () {
   const bulkHistoryQueries = []
   const bulkProfileQueries = []
   const bulkUserQueries = []
+  const bulkFinalUserLocks = []
   const bulkTx = {
     run: async query => {
       const from = query.SELECT?.from?.ref?.[0]
@@ -260,6 +261,7 @@ async function main () {
         ]
       }
       if (from === 'idts.cap.Users' && query.SELECT.one) {
+        if (Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate')) bulkFinalUserLocks.push(query)
         const where = JSON.stringify(query.SELECT.where)
         const ID = where.includes(IDS.assigneeUser) ? IDS.assigneeUser : IDS.owner
         return { ID, active: true, role_code: ID === IDS.owner ? 'TESTER' : 'DEVELOPER', email: `${ID}@example.test`, displayName: ID }
@@ -282,6 +284,12 @@ async function main () {
     'overdue profile bulk queries are individually bounded')
   assert.ok(bulkUserQueries.every(query => query.SELECT.limit?.rows?.val <= 1000),
     'overdue user bulk queries are individually bounded')
+  assert.ok(bulkProfileQueries.every(query => !Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate')),
+    'bulk profile eligibility reads do not acquire a Bug-to-Profile lock')
+  assert.ok(bulkUserQueries.every(query => !Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate')),
+    'bulk user eligibility reads do not acquire a Bug-to-User lock')
+  assert.ok(bulkFinalUserLocks.length > 0,
+    'each written recipient keeps a final locked User revalidation')
 
   // Re-read and lock the Bug immediately before writing; stale close/assignment/due-date changes must not emit.
   await assertStaleCandidateSkipped(db, IDS.staleClosed,
