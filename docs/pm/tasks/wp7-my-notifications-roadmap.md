@@ -4,7 +4,7 @@
 
 ### Status
 
-`DESIGN AND IMPLEMENTATION PLAN APPROVED — N1 PRECONDITION SATISFIED; SOURCE NOT STARTED`
+`N1 SOURCE IMPLEMENTED — FINAL MATRIX AND EXACT-HEAD REVIEW PENDING`
 
 ### Authority
 
@@ -27,13 +27,13 @@ Each gate freezes a fresh base, uses a dedicated worktree/branch, TDD, exact sco
 
 ### Next boundary
 
-Gate 6.5 is merged and the required access-delivery contract is present at refreshed `origin/dev` `308aa847711e969cc770453f375bb5dbcf25a612`. The next boundary is planning-package review/PR closure, then a fresh N1 worktree from the latest merged `origin/dev`; N1 source remains separately gated and must stop at one Draft PR.
+Planning PR #360 and Gate 6.5 are merged. N1 uses exact base `8ac9327b93b70633e96d2b6f09bb379a5afb681f` and implements Tasks 1–4 with RED/GREEN evidence. The next boundary is the fresh full source matrix and one bounded exact-head review; only zero unresolved Critical/Major/Important permits one Draft N1 PR. Migration, backfill execution, deployment and N2 remain unapproved.
 
 ## Tiếng Việt
 
 ### Trạng thái
 
-`ĐÃ DUYỆT THIẾT KẾ VÀ IMPLEMENTATION PLAN — ĐÃ ĐẠT PRECONDITION N1; CHƯA LÀM SOURCE`
+`ĐÃ IMPLEMENT SOURCE N1 — ĐANG CHỜ FULL MATRIX VÀ REVIEW EXACT-HEAD`
 
 ### Thẩm quyền
 
@@ -56,4 +56,4 @@ Mỗi gate freeze base mới, dùng worktree/branch riêng, TDD, exact scope gua
 
 ### Boundary tiếp theo
 
-Gate 6.5 đã merge và access-delivery contract bắt buộc có trong `origin/dev` refresh `308aa847711e969cc770453f375bb5dbcf25a612`. Boundary tiếp theo là review/PR closure planning package, sau đó tạo worktree N1 mới từ `origin/dev` merged mới nhất; source N1 vẫn là gate riêng và phải dừng tại một Draft PR.
+Planning PR #360 và Gate 6.5 đã merge. N1 dùng base chính xác `8ac9327b93b70633e96d2b6f09bb379a5afb681f` và đã implement Tasks 1–4 với bằng chứng RED/GREEN. Boundary tiếp theo là full source matrix mới và một review exact-head có giới hạn; chỉ khi không còn Critical/Major/Important mới được tạo một Draft PR N1. Migration, chạy backfill, deploy và N2 vẫn chưa được duyệt.
