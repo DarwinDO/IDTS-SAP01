@@ -1,7 +1,7 @@
 'use strict'
 
 const cds = require('@sap/cds')
-const { SELECT } = cds.ql
+const { SELECT, UPDATE } = cds.ql
 const { resolveRequestUser } = require('../bug-service/helpers')
 
 const INBOX = 'idts.cap.UserNotificationInboxEntries'
@@ -44,6 +44,50 @@ async function getMyUnreadNotificationCount (req) {
       .where({ recipient_ID: actor.ID, readAt: null })
   )
   return { count: Number(row?.count || 0) }
+}
+
+async function markMyNotificationRead (req) {
+  const actor = await resolveNotificationActor(req)
+  const notificationID = requiredUuid(req.data?.notificationID)
+  const expectedModifiedAt = requiredTimestamp(req.data?.expectedModifiedAt)
+  const now = new Date(req.timestamp || Date.now()).toISOString()
+  const tx = cds.tx(req)
+  const changed = await tx.run(
+    UPDATE(INBOX).set({ readAt: now }).where({
+      ID: notificationID,
+      recipient_ID: actor.ID,
+      modifiedAt: expectedModifiedAt,
+      readAt: null
+    })
+  )
+  const row = await readCallerInboxRow(tx, actor.ID, notificationID)
+  if (!row) throw serviceError(404, 'NOTIFICATION_NOT_FOUND', 'Notification was not found.')
+  if (changed !== 1 && !row.readAt) {
+    throw serviceError(409, 'NOTIFICATION_VERSION_CONFLICT', 'Notification changed. Reload and try again.')
+  }
+  return (await hydrateNotificationPage(tx, [row]))[0]
+}
+
+async function markAllMyNotificationsRead (req) {
+  const actor = await resolveNotificationActor(req)
+  const throughOccurredAt = requiredTimestamp(req.data?.throughOccurredAt)
+  const now = new Date(req.timestamp || Date.now()).toISOString()
+  const changed = await cds.tx(req).run(
+    UPDATE(INBOX).set({ readAt: now }).where({
+      recipient_ID: actor.ID,
+      readAt: null,
+      occurredAt: { '<=': throughOccurredAt }
+    })
+  )
+  return { count: Number(changed || 0) }
+}
+
+function readCallerInboxRow (tx, recipientID, notificationID) {
+  return tx.run(
+    SELECT.one.from(INBOX)
+      .columns('ID', 'bugNotification_ID', 'accessAuditEvent_ID', 'occurredAt', 'readAt', 'modifiedAt')
+      .where({ ID: notificationID, recipient_ID: recipientID })
+  )
 }
 
 function normalizeSearch (data = {}) {
@@ -177,6 +221,21 @@ function safeText (value, limit) {
   return normalized ? normalized.slice(0, limit) : null
 }
 
+function requiredTimestamp (value) {
+  if (typeof value !== 'string' || !value.trim() || Number.isNaN(Date.parse(value))) {
+    throw serviceError(400, 'INVALID_NOTIFICATION_TIMESTAMP', 'Notification timestamp is invalid.')
+  }
+  return new Date(value).toISOString()
+}
+
+function requiredUuid (value) {
+  const normalized = typeof value === 'string' ? value.trim().toLowerCase() : ''
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(normalized)) {
+    throw serviceError(400, 'INVALID_NOTIFICATION_ID', 'Notification ID is invalid.')
+  }
+  return normalized
+}
+
 function serviceError (status, code, message) {
   return Object.assign(new Error(message), { status, statusCode: status, code })
 }
@@ -184,6 +243,8 @@ function serviceError (status, code, message) {
 module.exports = {
   getMyUnreadNotificationCount,
   hydrateNotificationPage,
+  markAllMyNotificationsRead,
+  markMyNotificationRead,
   normalizeSearch,
   readInboxPage,
   resolveNotificationActor,

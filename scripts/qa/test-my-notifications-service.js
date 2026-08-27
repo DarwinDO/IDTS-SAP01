@@ -7,7 +7,7 @@ const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const path = require('node:path')
 const cds = require('@sap/cds')
-const { INSERT, UPDATE } = cds.ql
+const { INSERT, SELECT, UPDATE } = cds.ql
 const { enforcePlatformRoleAlignment } = require('../../srv/auth/platform-role')
 
 const root = path.resolve(__dirname, '../..')
@@ -40,6 +40,8 @@ async function main () {
     ['category', 'readState', 'skip', 'top'],
     'search has no cross-source free-text input'
   )
+  assert.ok(model.definitions['NotificationService.markMyNotificationRead'], 'single-read action exists')
+  assert.ok(model.definitions['NotificationService.markAllMyNotificationsRead'], 'snapshot mark-all action exists')
   for (const forbidden of ['recipientEmail', 'sourceAuditEvent', 'providerMessageId', 'lockToken', 'detailsSummary']) {
     assert.equal(summary.elements[forbidden], undefined, `summary omits ${forbidden}`)
   }
@@ -132,6 +134,59 @@ async function main () {
 
   const unread = await service.send({ event: 'getMyUnreadNotificationCount', user: actorA })
   assert.deepEqual(unread, { count: 104 })
+
+  const rowToRead = defaultPage.find(row => row.readAt === null)
+  const firstRead = await service.send({
+    event: 'markMyNotificationRead',
+    data: { notificationID: rowToRead.notificationID, expectedModifiedAt: rowToRead.modifiedAt },
+    user: actorA
+  })
+  assert.ok(firstRead.readAt, 'first tab persists readAt')
+  const repeatedRead = await service.send({
+    event: 'markMyNotificationRead',
+    data: { notificationID: rowToRead.notificationID, expectedModifiedAt: rowToRead.modifiedAt },
+    user: actorA
+  })
+  assert.equal(repeatedRead.readAt, firstRead.readAt, 'second tab with the same version is idempotent')
+
+  const staleRow = defaultPage.find(row => row.readAt === null && row.notificationID !== rowToRead.notificationID)
+  await expectRejected(service.send({
+    event: 'markMyNotificationRead',
+    data: { notificationID: staleRow.notificationID, expectedModifiedAt: '2026-01-01T00:00:00.000Z' },
+    user: actorA
+  }), 409, 'NOTIFICATION_VERSION_CONFLICT')
+  await expectRejected(service.send({
+    event: 'markMyNotificationRead',
+    data: { notificationID: staleRow.notificationID, expectedModifiedAt: staleRow.modifiedAt },
+    user: actorB
+  }), 404, 'NOTIFICATION_NOT_FOUND')
+
+  const snapshot = '2026-08-27T01:30:00.000Z'
+  const lateNotification = 'd3999999-0000-4000-8000-000000000001'
+  const lateInbox = 'd4999999-0000-4000-8000-000000000001'
+  await db.run(INSERT.into('idts.cap.Notifications').entries({
+    ID: lateNotification,
+    bug_ID: BUG_ID,
+    recipient_ID: USER_A,
+    eventType_code: 'UPDATED',
+    channel_code: 'IN_APP',
+    deliveryStatus_code: 'SENT',
+    message: 'Arrived after mark-all snapshot',
+    sourceKey: 'TEST:LATE'
+  }))
+  await db.run(INSERT.into('idts.cap.UserNotificationInboxEntries').entries({
+    ID: lateInbox,
+    recipient_ID: USER_A,
+    bugNotification_ID: lateNotification,
+    occurredAt: '2026-08-27T02:30:00.000Z'
+  }))
+  const marked = await service.send({
+    event: 'markAllMyNotificationsRead', data: { throughOccurredAt: snapshot }, user: actorA
+  })
+  assert.ok(marked.count > 0)
+  const lateStored = await db.run(SELECT.one.from('idts.cap.UserNotificationInboxEntries').where({ ID: lateInbox }))
+  assert.equal(lateStored.readAt, null, 'notification after snapshot remains unread')
+
   await db.run(UPDATE('idts.cap.Users').set({ active: false }).where({ ID: USER_A }))
   await expectRejected(service.send({ event: 'getMyUnreadNotificationCount', user: actorA }), 403, 'NOTIFICATION_ACTOR_REQUIRED')
   await expectRejected(service.send({

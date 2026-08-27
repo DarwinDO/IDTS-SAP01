@@ -9,6 +9,7 @@ This CDS file is the public OData contract for a signed-in user's own inbox. `No
 - **Location**: `@path: 'notification'` and service-level `authenticated-user`. **Concept**: dedicated authenticated endpoint. **Impact if broken**: anonymous or incorrectly routed requests can reach the inbox contract. **Check together**: `srv/notification.js`, AppRouter routing, CAP EDMX.
 - **Location**: `NotificationSummary`. **Concept**: privacy-safe federated DTO. **Impact if broken**: source/provider/internal fields may leak. **Check together**: hydration allowlist in `srv/notification/inbox.js` and service QA.
 - **Location**: the two functions. **Concept**: caller-only bounded read API. **Impact if broken**: clients may widen scope or request unbounded data. **Check together**: input normalization and authorization order in `inbox.js`.
+- **Location**: `markMyNotificationRead` and `markAllMyNotificationsRead`. **Concept**: optimistic single-row read state and snapshot-bounded bulk read state. **Impact if broken**: two tabs can overwrite newer state or mark notifications that arrived after the user's action. **Check together**: conditional updates in `inbox.js` and race QA.
 
 ## Tiếng Việt
 
@@ -19,6 +20,7 @@ File CDS này là hợp đồng OData công khai cho inbox của chính user đ�
 - **Vị trí**: `@path: 'notification'` và `authenticated-user` ở service. **Khái niệm**: endpoint xác thực riêng. **Ảnh hưởng nếu sai**: request anonymous hoặc route sai có thể chạm contract inbox. **Kiểm tra cùng**: `srv/notification.js`, route AppRouter và EDMX CAP.
 - **Vị trí**: `NotificationSummary`. **Khái niệm**: DTO liên nguồn bảo vệ privacy. **Ảnh hưởng nếu sai**: field source/provider/internal có thể bị lộ. **Kiểm tra cùng**: allowlist hydration trong `srv/notification/inbox.js` và QA service.
 - **Vị trí**: hai function. **Khái niệm**: API đọc bounded chỉ cho caller. **Ảnh hưởng nếu sai**: client có thể mở rộng scope hoặc yêu cầu dữ liệu không giới hạn. **Kiểm tra cùng**: normalize input và thứ tự authorization trong `inbox.js`.
+- **Vị trí**: `markMyNotificationRead` và `markAllMyNotificationsRead`. **Khái niệm**: read state optimistic cho một row và read state hàng loạt theo snapshot. **Ảnh hưởng nếu sai**: hai tab có thể ghi đè state mới hoặc đánh dấu notification đến sau thao tác của user. **Kiểm tra cùng**: conditional update trong `inbox.js` và QA race.
 
 ## Safe editing / Sửa an toàn
 

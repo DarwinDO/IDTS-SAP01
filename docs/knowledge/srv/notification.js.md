@@ -2,7 +2,7 @@
 
 ## English
 
-This is the thin CAP service adapter. It registers the two N1 function handlers and delegates all authorization, validation, querying and mapping to `srv/notification/inbox.js`. Keeping the adapter thin avoids a second policy implementation.
+This is the thin CAP service adapter. It registers the two N1 read functions and two read-state actions, then delegates authorization, validation, querying and mapping to `srv/notification/inbox.js`. Keeping the adapter thin avoids a second policy implementation.
 
 ### Important source anchors
 
@@ -10,7 +10,7 @@ This is the thin CAP service adapter. It registers the two N1 function handlers 
 
 ## Tiếng Việt
 
-Đây là adapter CAP mỏng. File đăng ký hai function handler N1 rồi giao toàn bộ authorization, validation, query và mapping cho `srv/notification/inbox.js`. Adapter mỏng giúp không tạo policy implementation thứ hai.
+Đây là adapter CAP mỏng. File đăng ký hai read function và hai read-state action N1 rồi giao authorization, validation, query và mapping cho `srv/notification/inbox.js`. Adapter mỏng giúp không tạo policy implementation thứ hai.
 
 ### Các điểm neo quan trọng
 

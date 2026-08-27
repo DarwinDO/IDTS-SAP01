@@ -28,4 +28,13 @@ service NotificationService @(requires: 'authenticated-user') {
   ) returns many NotificationSummary;
 
   function getMyUnreadNotificationCount() returns UnreadNotificationCount;
+
+  action markMyNotificationRead(
+    notificationID    : UUID,
+    expectedModifiedAt: Timestamp
+  ) returns NotificationSummary;
+
+  action markAllMyNotificationsRead(
+    throughOccurredAt : Timestamp
+  ) returns UnreadNotificationCount;
 }
