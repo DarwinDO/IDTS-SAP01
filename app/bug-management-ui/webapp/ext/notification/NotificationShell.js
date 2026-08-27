@@ -17,9 +17,10 @@ sap.ui.define([
     "sap/m/Label",
     "sap/m/BadgeCustomData",
     "sap/ui/core/Item",
+    "sap/ui/core/Icon",
     "sap/ui/core/InvisibleMessage",
+    "sap/ui/core/InvisibleMessageMode",
     "sap/ui/core/format/DateFormat",
-    "sap/ui/Device",
     "idts/bugmanagementui/ext/notification/NotificationClient"
 ], function (
     Toolbar,
@@ -39,9 +40,10 @@ sap.ui.define([
     Label,
     BadgeCustomData,
     Item,
+    Icon,
     InvisibleMessage,
+    InvisibleMessageMode,
     DateFormat,
-    Device,
     NotificationClient
 ) {
     "use strict";
@@ -78,6 +80,7 @@ sap.ui.define([
     function visibleCount(count) {
         var numeric = Number(count);
         if (!Number.isFinite(numeric) || numeric < 0) return "";
+        if (numeric < 1) return "";
         return numeric > 99 ? "99+" : String(Math.floor(numeric));
     }
 
@@ -93,6 +96,12 @@ sap.ui.define([
         } catch {
             return text(bundle, "notificationUnknownTime");
         }
+    }
+
+    function eventLabel(bundle, eventType) {
+        var code = String(eventType || "").toUpperCase();
+        var known = ["ASSIGNED", "NEED_MORE_INFORMATION", "REJECTED", "UPDATED", "OVERDUE", "CLOSED", "CHANGE_ROLE", "REACTIVATE"];
+        return known.indexOf(code) >= 0 ? text(bundle, "notificationEvent" + code) : text(bundle, "notificationEventOther");
     }
 
     function init(component) {
@@ -243,7 +252,6 @@ sap.ui.define([
             title: text(bundle, "notificationPopoverTitle"),
             placement: PlacementType.Bottom,
             showHeader: true,
-            stretch: Boolean(Device && Device.system && Device.system.phone),
             contentWidth: "30rem",
             content: [content],
             afterClose: function () {
@@ -291,8 +299,14 @@ sap.ui.define([
         state.onWindowFocus = function () {
             if (currentVisibility()) refreshUnread(state);
         };
+        state.onNotificationChange = function () {
+            if (currentVisibility()) refreshUnread(state);
+        };
         if (typeof document !== "undefined" && document.addEventListener) document.addEventListener("visibilitychange", state.onVisibilityChange);
-        if (typeof window !== "undefined" && window.addEventListener) window.addEventListener("focus", state.onWindowFocus);
+        if (typeof window !== "undefined" && window.addEventListener) {
+            window.addEventListener("focus", state.onWindowFocus);
+            window.addEventListener("idts:notification-change", state.onNotificationChange);
+        }
     }
 
     function startPolling(state) {
@@ -333,7 +347,7 @@ sap.ui.define([
             var invisibleMessage = InvisibleMessage && typeof InvisibleMessage.getInstance === "function"
                 ? InvisibleMessage.getInstance()
                 : null;
-            if (invisibleMessage && typeof invisibleMessage.announce === "function") invisibleMessage.announce(message, "polite");
+            if (invisibleMessage && typeof invisibleMessage.announce === "function") invisibleMessage.announce(message, InvisibleMessageMode.Polite);
         } catch {
             // Announcement là hỗ trợ accessibility; badge nhìn thấy vẫn giữ trạng thái chính.
         }
@@ -351,6 +365,7 @@ sap.ui.define([
             state.controls.list.removeAllItems();
         }
         state.loading = true;
+        state.controls.errorMessage.setText(text(state.bundle, "notificationLoadFailed"));
         setStateVisibility(state, { loading: true, error: false, empty: false, retry: false });
         return Promise.resolve()
             .then(function () {
@@ -401,6 +416,11 @@ sap.ui.define([
         var bundle = state.bundle;
         var unread = !row.readAt;
         var statusItems = [
+            new Icon({
+                src: row.category === "BUG" ? "sap-icon://bug" : "sap-icon://locked",
+                decorative: false,
+                tooltip: row.category === "BUG" ? text(bundle, "notificationCategoryBug") : text(bundle, "notificationCategoryAccess")
+            }),
             new ObjectStatus({
                 text: unread ? text(bundle, "notificationUnread") : text(bundle, "notificationRead"),
                 state: unread ? ValueState.Information : "None"
@@ -416,7 +436,7 @@ sap.ui.define([
             type: "Active",
             content: [new VBox({
                 items: [
-                    new HBox({ wrap: "Wrap", items: [new Text({ text: String(row.title || ""), wrapping: true }), statusItems[0], statusItems[1], statusItems[2]] }),
+                    new HBox({ wrap: "Wrap", items: [statusItems[0], new Text({ text: String(row.title || ""), wrapping: true }), statusItems[1], statusItems[2], statusItems[3], new Text({ text: eventLabel(bundle, row.eventType), wrapping: true })] }),
                     new Text({ text: String(row.summary || ""), wrapping: true }),
                     new Text({ text: text(bundle, "notificationOccurredAt", [safeDate(bundle, row.occurredAt)]), wrapping: true })
                 ]
@@ -434,7 +454,9 @@ sap.ui.define([
             .then(function () {
                 if (state.destroyed) return;
                 var now = new Date().toISOString();
-                state.rows.forEach(function (row) { if (!row.readAt) row.readAt = now; });
+                state.rows.forEach(function (row) {
+                    if (!row.readAt && typeof row.occurredAt === "string" && row.occurredAt <= snapshot) row.readAt = now;
+                });
                 renderRows(state);
                 setStateVisibility(state, { loading: false, error: false, empty: state.rows.length === 0, retry: false });
                 return refreshUnread(state);
@@ -484,7 +506,10 @@ sap.ui.define([
         state.requestVersion += 1;
         stopPolling(state);
         if (typeof document !== "undefined" && document.removeEventListener) document.removeEventListener("visibilitychange", state.onVisibilityChange);
-        if (typeof window !== "undefined" && window.removeEventListener) window.removeEventListener("focus", state.onWindowFocus);
+        if (typeof window !== "undefined" && window.removeEventListener) {
+            window.removeEventListener("focus", state.onWindowFocus);
+            window.removeEventListener("idts:notification-change", state.onNotificationChange);
+        }
         if (state.popover && typeof state.popover.destroy === "function") state.popover.destroy();
         if (state.controls && state.controls.toolbar && typeof state.controls.toolbar.destroy === "function") state.controls.toolbar.destroy();
         instances.delete(state.component);

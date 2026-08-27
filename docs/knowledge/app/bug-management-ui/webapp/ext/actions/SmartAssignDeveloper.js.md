@@ -157,4 +157,10 @@ Nếu đồng bộ thất bại, cả hai entry point của Smart Assign đều 
 
 Dialog Smart Assign xem một request explanation là một review unit. `applyAssignmentExplanations()` lấy `suggestionID` dùng chung, enable các nút Accept/Reject/Ignore theo ngữ cảnh, và hiện state đã persist kèm reviewer/time qua `AiSuggestionReview.submit`. Các nút này nằm cạnh notice AI, tách khỏi nút Assign ở footer.
 
+## N2 unread refresh signal / Tín hiệu refresh unread N2
+
+**English.** After the active `assignToDeveloper` operation succeeds, Smart Assign dispatches the payload-free browser event `idts:notification-change`. `NotificationShell` listens only to refresh the caller's server-authoritative unread count immediately instead of waiting up to 30 seconds. It sends no recipient, notification content or authorization state. Draft property changes do not signal because no final assignment notification exists yet. Check the shell listener/cleanup and UI QA together.
+
+**Tiếng Việt.** Sau khi operation active `assignToDeveloper` thành công, Smart Assign phát browser event không payload `idts:notification-change`. `NotificationShell` chỉ nghe để đọc lại unread count caller từ server ngay, không chờ tối đa 30 giây. Event không gửi recipient, nội dung notification hay state authorization. Thay đổi property draft chưa phát event vì chưa có notification assignment cuối. Kiểm cùng listener/cleanup shell và QA UI.
+
 Accept explanation chỉ ghi quyết định audit. Nó không chọn candidate, không set `selectedCandidate`, không enable assignment, không ghi `assignee_ID`, và không gọi `assignToDeveloper`. Kết quả rỗng/lỗi provider giữ review bị disable và hiện state unavailable an toàn. Lỗi load/assign dùng thông báo i18n chung thay vì chi tiết backend bị catch.

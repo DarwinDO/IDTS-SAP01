@@ -79,7 +79,9 @@ function loadShell (client, globals) {
     'sap/m/Label': control('Label', globals),
     'sap/m/BadgeCustomData': control('BadgeCustomData', globals),
     'sap/ui/core/Item': control('Item', globals),
+    'sap/ui/core/Icon': control('Icon', globals),
     'sap/ui/core/InvisibleMessage': { getInstance: () => ({ announce: message => { globals.announcements.push(message) } }) },
+    'sap/ui/core/InvisibleMessageMode': { Polite: 'Polite' },
     'sap/ui/core/format/DateFormat': { getDateTimeInstance: () => ({ format: value => `formatted:${value}` }) },
     'sap/ui/Device': { system: { phone: false } },
     'idts/bugmanagementui/ext/notification/NotificationClient': client
@@ -120,6 +122,8 @@ async function main () {
   assert.ok(fs.existsSync(moduleFile), 'NotificationShell must exist')
   const calls = { search: [], unread: 0, markRead: [], markAll: [] }
   let resolveSearch
+  let holdMarkAll = false
+  let releaseMarkAll
   const client = {
     search: async (model, options) => {
       calls.search.push(options)
@@ -128,7 +132,11 @@ async function main () {
     },
     unreadCount: async () => { calls.unread += 1; return 120 },
     markRead: async (model, notification) => { calls.markRead.push(notification); throw new Error('private backend detail') },
-    markAllRead: async (model, throughOccurredAt) => { calls.markAll.push(throughOccurredAt); return 25 },
+    markAllRead: async (model, throughOccurredAt) => {
+      calls.markAll.push(throughOccurredAt)
+      if (holdMarkAll) return new Promise(resolve => { releaseMarkAll = resolve })
+      return 25
+    },
     safeTargetPath: pathValue => pathValue === row(1).targetPath ? pathValue : null
   }
   const globals = {
@@ -140,7 +148,11 @@ async function main () {
       removeEventListener: (name, handler) => { assert.equal(globals.document[name], handler); delete globals.document[name] },
       getElementById: id => id === 'idtsNotificationShellHost' ? host : null
     },
-    window: { location: { hash: '' } },
+    window: {
+      location: { hash: '' },
+      addEventListener: (name, handler) => { globals.window[name] = handler },
+      removeEventListener: (name, handler) => { assert.equal(globals.window[name], handler); delete globals.window[name] }
+    },
     timers: [],
     setInterval: (handler, delay) => { globals.timers.push({ handler, delay }); return globals.timers.length },
     clearInterval: id => { globals.timers[id - 1].cleared = true }
@@ -180,6 +192,13 @@ async function main () {
   const list = popover.content[0].items.find(item => item.settings && item.settings.mode === 'None')
   assert.equal(list.items.length, 25, 'first page is 25 rows')
   assert.ok(list.items[0].content[0].items[0].items.some(item => item.text === 'notificationUnread'), 'unread state has a literal marker')
+  assert.ok(globals.created.Icon.some(icon => icon.src === 'sap-icon://bug'), 'Bug rows render a category icon')
+  assert.ok(list.items[0].content[0].items[0].items.some(item => item.text === 'notificationEventASSIGNED'), 'rows render the localized event type')
+
+  const countBeforeSignal = calls.unread
+  globals.window['idts:notification-change']()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(calls.unread, countBeforeSignal + 1, 'relevant Bug action signal refreshes unread count immediately')
 
   const markAll = popover.content[0].items[0].content.find(item => item.text === 'notificationMarkAllRead')
   assert.ok(markAll, 'mark all control is present')
@@ -190,13 +209,26 @@ async function main () {
   assert.equal(calls.markAll.length, 2)
   assert.equal(calls.markAll[0], calls.markAll[1], 'mark-all uses frozen first-page snapshot')
 
+  holdMarkAll = true
+  markAll.firePress()
+  resolveSearch = () => [{ ...row(99), occurredAt: '2099-01-01T00:00:00.000Z' }]
+  const loadMore = popover.content[0].items.find(item => item.text === 'notificationLoadMore')
+  loadMore.firePress()
+  await new Promise(resolve => setImmediate(resolve))
+  releaseMarkAll(25)
+  await new Promise(resolve => setImmediate(resolve))
+  const futureStatuses = list.items.at(-1).content[0].items[0].items
+  assert.ok(futureStatuses.some(item => item.text === 'notificationUnread'), 'mark-all response does not mark a post-snapshot arrival read locally')
+
   globals.document.visibilityState = 'hidden'
+  const countBeforeHiddenPoll = calls.unread
   globals.timers[0].handler()
-  assert.equal(calls.unread, 4, 'hidden polling does not request a count')
+  assert.equal(calls.unread, countBeforeHiddenPoll, 'hidden polling does not request a count')
   first.destroy()
   assert.equal(globals.timers[0].cleared, true)
   assert.equal(host.controls[0].destroyed, true)
   assert.equal(globals.document.visibilitychange, undefined)
+  assert.equal(globals.window['idts:notification-change'], undefined)
   console.log('IDTS My Notifications shell contract: PASS')
 }
 

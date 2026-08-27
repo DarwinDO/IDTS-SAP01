@@ -49,9 +49,10 @@ sap.ui.define([], function () {
                 throw new Error("INVALID_NOTIFICATION_PAGE");
             }
             var result = await call(model, "searchMyNotifications", query);
-            if (!result || !Array.isArray(result.value)) { throw new Error("INVALID_NOTIFICATION_RESPONSE"); }
+            var rows = Array.isArray(result) ? result : result && result.value;
+            if (!Array.isArray(rows)) { throw new Error("INVALID_NOTIFICATION_RESPONSE"); }
             // Giữ nguyên thứ tự server, không sort hoặc aggregate lại trên browser.
-            return result.value;
+            return rows;
         },
         unreadCount: async function (model) { return count(await call(model, "getMyUnreadNotificationCount")); },
         markRead: async function (model, row) {

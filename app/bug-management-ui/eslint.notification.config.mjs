@@ -4,7 +4,8 @@ import js from '@eslint/js';
 export default [
     js.configs.recommended,
     {
-        files: ['webapp/ext/notification/**/*.js', 'webapp/Component.js'],
+        files: ['webapp/ext/notification/**/*.js', 'webapp/ext/actions/SmartAssignDeveloper.js', 'webapp/Component.js'],
+        linterOptions: { reportUnusedDisableDirectives: false },
         languageOptions: {
             ecmaVersion: 2022,
             sourceType: 'script',
@@ -14,7 +15,9 @@ export default [
                 window: 'readonly',
                 setInterval: 'readonly',
                 clearInterval: 'readonly'
+                ,Event: 'readonly'
             }
-        }
+        },
+        rules: { 'no-redeclare': ['error', { builtinGlobals: false }] }
     }
 ];

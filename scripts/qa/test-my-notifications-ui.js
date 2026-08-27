@@ -59,6 +59,10 @@ async function main () {
   resolveInvoke()
   assert.equal((await pending)[1].notificationID, 'second', 'preserve server order')
   assert.equal(destroyed, 1)
+  payload = [{ notificationID: 'direct-first' }, { notificationID: 'direct-second' }]
+  const direct = client.search(model, {})
+  resolveInvoke()
+  assert.equal((await direct)[1].notificationID, 'direct-second', 'accept a collection returned directly by requestObject')
   for (const options of [{ top: 101 }, { top: 0 }, { skip: 10001 }, { skip: -1 }, { skip: 1.5 }, { category: 'OTHER' }, { readState: 'OTHER' }]) {
     await assert.rejects(() => client.search(model, options))
   }
@@ -109,6 +113,8 @@ async function main () {
   assert.deepEqual(order, ['base', 'profile', 'notification'], 'shell starts only after base model initialization')
   componentDefinition.exit.call(instance)
   assert.deepEqual(order.slice(-2), ['destroy', 'base-exit'], 'component teardown releases notification timers and listeners')
+  const smartAssignSource = fs.readFileSync(path.join(app, 'ext/actions/SmartAssignDeveloper.js'), 'utf8')
+  assert.match(smartAssignSource, /idts:notification-change/, 'successful assignment signals an immediate unread refresh')
   console.log('IDTS My Notifications UI client contract: PASS')
 }
 main().catch(error => { console.error(error); process.exitCode = 1 })

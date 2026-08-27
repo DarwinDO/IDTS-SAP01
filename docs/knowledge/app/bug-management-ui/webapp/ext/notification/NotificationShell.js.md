@@ -16,11 +16,11 @@ Rows use literal **Unread/Read** text in addition to semantic state, wrap safe t
 | --- | --- | --- |
 | `init` / `destroy` | Duplicate shells or leaked polling after logout/component reload | `Component.js`, index host |
 | async `bundleFor` initialization | Raw i18n keys appear during startup | three i18n bundles, browser fixture |
-| `loadPage` request version and frozen snapshot | Mixed filters, duplicate pages or marking unseen arrivals | client paging, CAP mark-all predicate |
+| `loadPage` request version and frozen snapshot | Mixed filters, duplicate pages or marking unseen arrivals; success updates only local rows at/before snapshot | client paging, CAP mark-all predicate |
 | `refreshUnread` visibility/timer | Background traffic or stale/false badge | count endpoint and visibility QA |
 | `openNotification` | Navigation blocked by transient read error or unsafe route | client target allowlist, target CAP auth |
 
-Owner: DonHV. Break first at `init`, then `loadPage`, `refreshUnread`, `markAll`, or `openNotification`. Run shell/client QA, UI build, responsive browser checks (375/768/1366/1920), 200% zoom and keyboard focus checks. This UI does not authorize deployment, backfill or notification producer changes.
+Owner: DonHV. Break first at `init`, then `loadPage`, `refreshUnread`, `markAll`, or `openNotification`. The shell also listens for the payload-free `idts:notification-change` signal after a relevant successful Bug action and removes it on destroy. Category icons and localized event labels accompany safe row text. Run shell/client QA, UI build, responsive browser checks (375/768/1366/1920), 200% zoom and keyboard focus checks. This UI does not authorize deployment, backfill or notification producer changes.
 
 ## Tiếng Việt
 
@@ -38,8 +38,8 @@ Row có chữ **Chưa đọc/Đã đọc** ngoài semantic state, wrap title/sum
 | --- | --- | --- |
 | `init` / `destroy` | Shell trùng hoặc poll rò sau logout/reload component | `Component.js`, host index |
 | khởi tạo async `bundleFor` | Hiện key i18n thô lúc startup | ba bundle i18n, fixture browser |
-| request version và snapshot trong `loadPage` | Trộn filter, trùng trang hoặc đánh dấu notification chưa xem | paging client, predicate mark-all CAP |
+| request version và snapshot trong `loadPage` | Trộn filter, trùng trang hoặc đánh dấu notification chưa xem; success chỉ cập nhật local row tại/trước snapshot | paging client, predicate mark-all CAP |
 | `refreshUnread` visibility/timer | Request nền hoặc badge cũ/sai | endpoint count và QA visibility |
 | `openNotification` | Lỗi read tạm thời chặn điều hướng hoặc đi route không an toàn | allowlist client, quyền CAP đích |
 
-Owner: DonHV. Đặt breakpoint lần lượt tại `init`, `loadPage`, `refreshUnread`, `markAll`, `openNotification`. Chạy QA shell/client, build UI, browser responsive 375/768/1366/1920, zoom 200% và keyboard focus. UI này không cho phép deploy, backfill hoặc đổi notification producer.
+Owner: DonHV. Đặt breakpoint lần lượt tại `init`, `loadPage`, `refreshUnread`, `markAll`, `openNotification`. Shell còn nghe event không payload `idts:notification-change` sau Bug action thành công và gỡ listener khi destroy. Icon category cùng label event đã localize đi với row text an toàn. Chạy QA shell/client, build UI, browser responsive 375/768/1366/1920, zoom 200% và keyboard focus. UI này không cho phép deploy, backfill hoặc đổi notification producer.

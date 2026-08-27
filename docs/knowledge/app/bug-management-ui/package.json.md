@@ -94,9 +94,9 @@ Phần này nói rõ file này liên kết với file nào, liên kết nằm �
 
 ### N2
 
-English: N2 advances the app identity to `0.0.7`, aligned with manifest and lock root metadata. The new `lint` script checks changed notification modules and Component with the existing Fiori ESLint config; no dependency is added. At baseline that config fails to load missing `@babel/eslint-parser`, which must be reported, not hidden as a green lint.
+English: N2 advances the app identity to `0.0.7`, aligned with manifest and lock root metadata. The new `lint` script checks changed notification modules and Component with the focused `eslint.notification.config.mjs`; no dependency is added. The app-wide Fiori config still fails to load missing dev-only `@babel/eslint-parser`, which is reported separately rather than hidden as green.
 
-Tiếng Việt: N2 tăng identity app lên `0.0.7`, đồng bộ manifest và metadata gốc lockfile. Script `lint` mới kiểm module notification và Component đã đổi bằng config Fiori ESLint có sẵn; không thêm dependency. Baseline config thiếu `@babel/eslint-parser`, phải báo rõ chứ không gọi lint PASS.
+Tiếng Việt: N2 tăng identity app lên `0.0.7`, đồng bộ manifest và metadata gốc lockfile. Script `lint` mới kiểm module notification và Component bằng `eslint.notification.config.mjs` tập trung; không thêm dependency. Config Fiori toàn app vẫn thiếu `@babel/eslint-parser` dev-only và được báo riêng, không bị gọi sai là GREEN.
 
 **English.** Version `0.0.6` publishes the Gate 6.4 User Administration header action under a fresh HTML5 cache identity. It changes release metadata only; dependencies and build commands are unchanged. Keep it equal to `webapp/manifest.json`, the top/root versions in `package-lock.json`, the built ZIP, and live HTML5 Repository readback.
 

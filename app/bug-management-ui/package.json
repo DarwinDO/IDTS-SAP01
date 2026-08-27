@@ -17,7 +17,7 @@
     "ui5-task-zipper": "^3"
   },
   "scripts": {
-    "lint": "eslint --config eslint.notification.config.mjs webapp/ext/notification webapp/Component.js",
+    "lint": "eslint --config eslint.notification.config.mjs webapp/ext/notification webapp/ext/actions/SmartAssignDeveloper.js webapp/Component.js",
     "deploy-config": "npx -p @sap/ux-ui5-tooling fiori add deploy-config cf",
     "build": "ui5 build preload --clean-dest",
     "start": "ui5 serve"
