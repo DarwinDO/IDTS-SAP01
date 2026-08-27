@@ -318,7 +318,7 @@ service BugService @(requires: 'authenticated-user') {
     channel.name as channelName,
     deliveryStatus.name as deliveryStatusName,
     deliveryStatus.criticality as deliveryStatusCriticality
-  };
+  } excluding { sourceKey };
   // Delivery read-only chỉ expose trạng thái an toàn cho UI; body HTML/config/credential không được công khai.
   @readonly
   entity NotificationDeliveries as projection on db.NotificationDeliveries {

@@ -3,6 +3,7 @@
 const cds = require('@sap/cds')
 const { SELECT, UPDATE } = cds.ql
 const { resolveRequestUser } = require('../bug-service/helpers')
+const { buildBugLink } = require('../email/template')
 
 const INBOX = 'idts.cap.UserNotificationInboxEntries'
 const BUG_NOTIFICATIONS = 'idts.cap.Notifications'
@@ -12,19 +13,13 @@ const MAX_PAGE_SIZE = 100
 const MAX_PAGE_SKIP = 10000
 const CATEGORIES = new Set(['ALL', 'BUG', 'ACCESS'])
 const READ_STATES = new Set(['ALL', 'UNREAD', 'READ'])
-const ACTION_REQUIRED_EVENTS = new Set([
-  'ASSIGNED',
-  'NEED_MORE_INFORMATION',
-  'REJECTED',
-  'REACTIVATE',
-  'CHANGE_ROLE'
-])
-const ACCESS_SUMMARY_BY_EVENT = Object.freeze({
-  CHANGE_ROLE: 'Your access role changed.',
-  REACTIVATE: 'Your access was reactivated.'
-})
+const BUG_EVENTS = new Set(['ASSIGNED', 'NEED_MORE_INFORMATION', 'REJECTED', 'UPDATED', 'OVERDUE', 'CLOSED'])
+const ACTION_REQUIRED_EVENTS = new Set(['ASSIGNED', 'NEED_MORE_INFORMATION', 'REJECTED'])
+// Bundle riêng dùng fallback native CAP; không dịch raw audit/message có thể chứa dữ liệu riêng.
+const texts = cds.i18n.bundle4({ basename: 'notifications', roots: [__dirname], model: undefined })
 
 async function resolveNotificationActor (req) {
+  // Luôn resolve identity active từ request trước input, query và mutation; không nhận recipient từ client.
   const actor = await resolveRequestUser(req, {})
   if (!actor?.ID || actor.active !== true) {
     throw serviceError(403, 'NOTIFICATION_ACTOR_REQUIRED', 'An active IDTS user is required.')
@@ -37,7 +32,7 @@ async function searchMyNotifications (req) {
   const input = normalizeSearch(req.data)
   const tx = cds.tx(req)
   const rows = await readInboxPage(tx, actor.ID, input)
-  return hydrateNotificationPage(tx, rows)
+  return hydrateNotificationPage(tx, rows, req.locale)
 }
 
 async function getMyUnreadNotificationCount (req) {
@@ -51,6 +46,7 @@ async function getMyUnreadNotificationCount (req) {
 }
 
 async function markMyNotificationRead (req) {
+  // Update có điều kiện; tab cũ được trả row đã đọc hoặc conflict, không overwrite phiên mới.
   const actor = await resolveNotificationActor(req)
   const notificationID = requiredUuid(req.data?.notificationID)
   const expectedModifiedAt = requiredTimestamp(req.data?.expectedModifiedAt)
@@ -69,7 +65,7 @@ async function markMyNotificationRead (req) {
   if (changed !== 1 && !row.readAt) {
     throw serviceError(409, 'NOTIFICATION_VERSION_CONFLICT', 'Notification changed. Reload and try again.')
   }
-  return (await hydrateNotificationPage(tx, [row]))[0]
+  return (await hydrateNotificationPage(tx, [row], req.locale))[0]
 }
 
 async function markAllMyNotificationsRead (req) {
@@ -89,7 +85,7 @@ async function markAllMyNotificationsRead (req) {
 function readCallerInboxRow (tx, recipientID, notificationID) {
   return tx.run(
     SELECT.one.from(INBOX)
-      .columns('ID', 'bugNotification_ID', 'accessAuditEvent_ID', 'occurredAt', 'readAt', 'modifiedAt')
+      .columns('ID', 'recipient_ID', 'bugNotification_ID', 'accessAuditEvent_ID', 'occurredAt', 'readAt', 'modifiedAt')
       .where({ ID: notificationID, recipient_ID: recipientID })
   )
 }
@@ -119,7 +115,7 @@ function normalizeEnum (value, fallback, allowed) {
 
 async function readInboxPage (tx, recipientID, input) {
   const query = SELECT.from(INBOX)
-    .columns('ID', 'bugNotification_ID', 'accessAuditEvent_ID', 'occurredAt', 'readAt', 'modifiedAt')
+    .columns('ID', 'recipient_ID', 'bugNotification_ID', 'accessAuditEvent_ID', 'occurredAt', 'readAt', 'modifiedAt')
     .where({ recipient_ID: recipientID })
 
   if (input.category === 'BUG') query.and({ bugNotification_ID: { '!=': null } })
@@ -132,61 +128,67 @@ async function readInboxPage (tx, recipientID, input) {
   )
 }
 
-async function hydrateNotificationPage (tx, rows) {
-  const bugIDs = [...new Set(rows.map(row => row.bugNotification_ID).filter(Boolean))]
-  const accessIDs = [...new Set(rows.map(row => row.accessAuditEvent_ID).filter(Boolean))]
+async function hydrateNotificationPage (tx, rows, locale = 'en') {
+  const validRows = rows.filter(row => Boolean(row.bugNotification_ID) !== Boolean(row.accessAuditEvent_ID))
+  const bugIDs = [...new Set(validRows.map(row => row.bugNotification_ID).filter(Boolean))]
+  const accessIDs = [...new Set(validRows.map(row => row.accessAuditEvent_ID).filter(Boolean))]
   const bugSources = bugIDs.length
     ? await tx.run(SELECT.from(BUG_NOTIFICATIONS)
-        .columns('ID', 'bug_ID', 'eventType_code', 'message')
+        .columns('ID', 'recipient_ID', 'bug_ID', 'eventType_code', { ref: ['bug', 'priority_code'], as: 'priority' })
         .where({ ID: { in: bugIDs } }))
     : []
   const accessSources = accessIDs.length
     ? await tx.run(SELECT.from(ACCESS_AUDITS)
-        .columns('ID', 'action', 'result')
+        .columns('ID', 'targetUser_ID', 'action', 'result')
         .where({ ID: { in: accessIDs } }))
     : []
   const bugsByID = new Map(bugSources.map(source => [source.ID, source]))
   const accessByID = new Map(accessSources.map(source => [source.ID, source]))
 
-  return rows.map(row => row.bugNotification_ID
-    ? bugSummary(row, bugsByID.get(row.bugNotification_ID))
-    : accessSummary(row, accessByID.get(row.accessAuditEvent_ID)))
+  return rows.map(row => Boolean(row.bugNotification_ID) === Boolean(row.accessAuditEvent_ID)
+    ? unavailableSummary(row, row.bugNotification_ID ? 'BUG' : 'ACCESS', locale)
+    : row.bugNotification_ID
+    ? bugSummary(row, bugsByID.get(row.bugNotification_ID), locale)
+    : accessSummary(row, accessByID.get(row.accessAuditEvent_ID), locale))
 }
 
-function bugSummary (row, source) {
-  if (!source) return unavailableSummary(row, 'BUG')
-  const eventType = safeText(source.eventType_code, 40) || 'UPDATED'
+function bugSummary (row, source, locale) {
+  if (!source || source.recipient_ID !== row.recipient_ID || !BUG_EVENTS.has(source.eventType_code)) return unavailableSummary(row, 'BUG', locale)
+  const eventType = source.eventType_code
   return baseSummary(row, {
     category: 'BUG',
     eventType,
-    title: titleFor(eventType),
-    summary: safeText(source.message, 500),
-    priority: null,
+    title: texts.at(`BUG_${eventType}_TITLE`, locale),
+    summary: texts.at(`BUG_${eventType}_SUMMARY`, locale),
+    priority: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'].includes(source.priority) ? source.priority : null,
     actionRequired: ACTION_REQUIRED_EVENTS.has(eventType),
-    targetPath: source.bug_ID ? `/idtsbugmanagementui/index.html#/Bugs(${source.bug_ID})` : null
+    targetPath: typeof source.bug_ID === 'string' && /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(source.bug_ID)
+      ? buildBugLink('/idtsbugmanagementui/index.html', source.bug_ID)
+      : null
   })
 }
 
-function accessSummary (row, source) {
-  if (!source) return unavailableSummary(row, 'ACCESS')
-  const eventType = safeText(source.action, 40) || 'ACCESS_CHANGED'
+function accessSummary (row, source, locale) {
+  if (!source || source.targetUser_ID !== row.recipient_ID) return unavailableSummary(row, 'ACCESS', locale)
+  const eventType = source.action
   const supported = source.result === 'APPLIED' && ['CHANGE_ROLE', 'REACTIVATE'].includes(eventType)
+  if (!supported) return unavailableSummary(row, 'ACCESS', locale)
   return baseSummary(row, {
     category: 'ACCESS',
     eventType,
-    title: titleFor(eventType),
-    summary: ACCESS_SUMMARY_BY_EVENT[eventType] || null,
+    title: texts.at(`ACCESS_${eventType}_TITLE`, locale),
+    summary: texts.at(`ACCESS_${eventType}_SUMMARY`, locale),
     priority: null,
-    actionRequired: supported,
-    targetPath: supported ? '/idtsbugmanagementui/index.html' : null
+    actionRequired: false,
+    targetPath: '/idtsbugmanagementui/index.html'
   })
 }
 
-function unavailableSummary (row, category) {
+function unavailableSummary (row, category, locale) {
   return baseSummary(row, {
     category,
     eventType: 'UNAVAILABLE',
-    title: 'Notification unavailable',
+    title: texts.at('UNAVAILABLE_TITLE', locale),
     summary: null,
     priority: null,
     actionRequired: false,
@@ -208,21 +210,6 @@ function baseSummary (row, source) {
     targetPath: source.targetPath,
     modifiedAt: row.modifiedAt
   }
-}
-
-function titleFor (eventType) {
-  return String(eventType || 'Notification')
-    .toLowerCase()
-    .split('_')
-    .map(word => word ? word[0].toUpperCase() + word.slice(1) : '')
-    .join(' ')
-    .slice(0, 160)
-}
-
-function safeText (value, limit) {
-  if (typeof value !== 'string') return null
-  const normalized = value.replace(/[\r\n\t]+/g, ' ').trim()
-  return normalized ? normalized.slice(0, limit) : null
 }
 
 function requiredTimestamp (value) {

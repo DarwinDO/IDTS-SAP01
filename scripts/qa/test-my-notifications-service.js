@@ -8,7 +8,7 @@ const fs = require('node:fs')
 const path = require('node:path')
 const cds = require('@sap/cds')
 const { INSERT, SELECT, UPDATE } = cds.ql
-const { enforcePlatformRoleAlignment } = require('../../srv/auth/platform-role')
+const { identityKeyHash } = require('../../srv/auth/identity-map')
 
 const root = path.resolve(__dirname, '../..')
 const servicePath = path.join(root, 'srv/notification.cds')
@@ -26,7 +26,7 @@ function user (email, role = 'TESTER') {
 
 async function expectRejected (promise, status, code) {
   await assert.rejects(promise, error =>
-    Number(error?.status || error?.statusCode) === status && (!code || error?.code === code))
+    Number(error?.status || error?.statusCode || error?.code) === status && (!code || error?.code === code))
 }
 
 async function main () {
@@ -90,7 +90,14 @@ async function main () {
     occurredAt: '2026-08-27T02:00:00.000Z'
   }))
 
-  const service = await cds.serve('NotificationService').from('srv/notification.cds')
+  const app = require('express')()
+  app.use((req, res, next) => {
+    req.user = req.headers['x-test-persona'] === 'b'
+      ? user('notification.b@example.invalid', 'DEVELOPER')
+      : new cds.User.Anonymous()
+    next()
+  })
+  const service = await cds.serve('NotificationService').from('srv/notification.cds').in(app)
   const actorA = user('notification.a@example.invalid')
   const actorB = user('notification.b@example.invalid', 'DEVELOPER')
   const defaultPage = await service.send({
@@ -105,6 +112,8 @@ async function main () {
     'equal timestamps use notification ID descending as a stable tie-breaker'
   )
   assert.ok(defaultPage.every(row => row.category === 'BUG'))
+  assert.ok(defaultPage.every(row => row.targetPath === `/idtsbugmanagementui/index.html#/Bugs(ID=${BUG_ID},IsActiveEntity=true)`),
+    'Bug deep links include the active-entity key used by the real Fiori route')
   assert.ok(defaultPage.every(row => !('recipientEmail' in row) && !('detailsSummary' in row)))
 
   const maximumPage = await service.send({
@@ -133,6 +142,23 @@ async function main () {
   assert.equal(userBRows[0].summary, 'Your access role changed.')
   assert.doesNotMatch(userBRows[0].summary, /safely/i, 'raw audit details do not enter the public DTO')
   assert.equal(userBRows[0].targetPath, '/idtsbugmanagementui/index.html')
+  for (const result of ['FAILED', 'QUEUED', 'NOOP_ALREADY_DESIRED']) {
+    await db.run(UPDATE('idts.cap.UserIdentityAuditEvents').set({ result }).where({ ID: ACCESS_AUDIT }))
+    const rows = await service.send({ event: 'searchMyNotifications', user: actorB })
+    assert.equal(rows[0].eventType, 'UNAVAILABLE', 'unapplied access cannot claim a completed change')
+    assert.equal(rows[0].summary, null)
+    assert.equal(rows[0].targetPath, null)
+  }
+  await db.run(UPDATE('idts.cap.UserIdentityAuditEvents').set({ result: 'APPLIED' }).where({ ID: ACCESS_AUDIT }))
+  const vietnamese = await service.send({ event: 'searchMyNotifications', user: actorB, locale: 'vi' })
+  assert.equal(vietnamese[0].summary, 'Vai trò truy cập của bạn đã thay đổi.')
+  const localizedBug = await service.send({ event: 'searchMyNotifications', user: actorA, locale: 'vi' })
+  assert.equal(localizedBug[0].title, 'Được giao Bug')
+  assert.equal(localizedBug[0].priority, 'HIGH')
+  await verifyODataWire(app)
+  await db.run(UPDATE('idts.cap.UserNotificationInboxEntries').set({ readAt: null })
+    .where({ ID: 'd5000000-0000-4000-8000-000000000001' }))
+  await verifyHydrationSafety(db, notifications[0].ID)
 
   const unread = await service.send({ event: 'getMyUnreadNotificationCount', user: actorA })
   assert.deepEqual(unread, { count: 104 })
@@ -194,7 +220,7 @@ async function main () {
   await expectRejected(service.send({
     event: 'getMyUnreadNotificationCount', user: user('unmapped@example.invalid')
   }), 403, 'NOTIFICATION_ACTOR_REQUIRED')
-  verifyXsuaaRoleMismatch()
+  await verifyXsuaaAuthorization(service, db)
 
   const { hydrateNotificationPage } = require('../../srv/notification/inbox')
   let sourceReads = 0
@@ -213,24 +239,101 @@ async function main () {
   console.log('IDTS My Notifications caller-only service contract: PASS')
 }
 
-function verifyXsuaaRoleMismatch () {
+async function verifyXsuaaAuthorization (service, db) {
   const originalKind = cds.env.requires.auth.kind
   const originalImpl = cds.env.requires.auth.impl
+  const origin = 'notification-test'
+  const issuer = 'https://issuer.example.invalid'
+  const subject = 'notification-user-b'
+  await db.run(UPDATE('idts.cap.Users').set({ externalIdentityKeyHash: identityKeyHash({ origin, issuer, subject }) }).where({ ID: USER_B }))
   cds.env.requires.auth.kind = 'xsuaa'
   delete cds.env.requires.auth.impl
-  const req = {
-    user: { is: role => role === 'TESTER' },
-    reject (status, message) {
-      throw Object.assign(new Error(message), { status, statusCode: status })
-    }
+  function linkedUser (roles, uuid = subject) {
+    const caller = new cds.User({ id: 'mutable-login', roles: ['authenticated-user', ...roles] })
+    caller.authInfo = { token: { origin, issuer, payload: { user_uuid: uuid } } }
+    return caller
   }
-  assert.throws(
-    () => enforcePlatformRoleAlignment(req, { ID: USER_B, role_code: 'DEVELOPER', active: true }),
-    error => Number(error?.status || error?.statusCode) === 403
-  )
-  cds.env.requires.auth.kind = originalKind
-  if (originalImpl === undefined) delete cds.env.requires.auth.impl
-  else cds.env.requires.auth.impl = originalImpl
+  try {
+    assert.deepEqual(await service.send({ event: 'getMyUnreadNotificationCount', user: linkedUser(['DEVELOPER']) }), { count: 1 })
+    for (const caller of [linkedUser(['TESTER']), linkedUser(['PM', 'UserAdmin']), linkedUser([]), linkedUser(['DEVELOPER', 'TESTER']), linkedUser(['DEVELOPER'], 'unmapped')]) {
+      for (const [event, data] of [
+        ['searchMyNotifications', { category: 'ALL' }],
+        ['getMyUnreadNotificationCount', {}],
+        ['markMyNotificationRead', { notificationID: 'd5000000-0000-4000-8000-000000000001', expectedModifiedAt: '2026-01-01T00:00:00.000Z' }],
+        ['markAllMyNotificationsRead', { throughOccurredAt: '2026-08-27T23:00:00.000Z' }]
+      ]) await expectRejected(service.send({ event, data, user: caller }), 403)
+    }
+    await db.run(UPDATE('idts.cap.Users').set({ role_code: 'PM' }).where({ ID: USER_B }))
+    const pm = linkedUser(['PM', 'UserAdmin'])
+    assert.deepEqual(await service.send({ event: 'getMyUnreadNotificationCount', user: pm }), { count: 1 }, 'PM cannot count another inbox')
+    await service.send({ event: 'markAllMyNotificationsRead', data: { throughOccurredAt: '2026-08-27T23:00:00.000Z' }, user: pm })
+    const other = await db.run(SELECT.one.from('idts.cap.UserNotificationInboxEntries').where({ ID: 'd4999999-0000-4000-8000-000000000001' }))
+    assert.equal(other.readAt, null, 'PM mark-all never updates another inbox')
+  } finally {
+    cds.env.requires.auth.kind = originalKind
+    if (originalImpl === undefined) delete cds.env.requires.auth.impl
+    else cds.env.requires.auth.impl = originalImpl
+  }
+}
+
+async function verifyODataWire (app) {
+  const server = await new Promise(resolve => {
+    const listener = app.listen(0, '127.0.0.1', () => resolve(listener))
+  })
+  const base = `http://127.0.0.1:${server.address().port}/odata/v4/notification`
+  try {
+    const denied = await fetch(`${base}/getMyUnreadNotificationCount()`)
+    assert.equal(denied.status, 401, 'wire endpoint denies anonymous sessions')
+    const headers = { 'x-test-persona': 'b', 'Accept-Language': 'vi' }
+    const response = await fetch(`${base}/searchMyNotifications(category='ALL',readState='ALL',skip=0,top=25)`, { headers })
+    assert.equal(response.status, 200)
+    const { value } = await response.json()
+    assert.equal(value.length, 1)
+    assert.equal(value[0].summary, 'Vai trò truy cập của bạn đã thay đổi.')
+    assert.equal(value[0].category, 'ACCESS')
+    const tooMany = await fetch(`${base}/searchMyNotifications(top=101)`, { headers })
+    assert.equal(tooMany.status, 400)
+    const count = await fetch(`${base}/getMyUnreadNotificationCount()`, { headers })
+    assert.equal((await count.json()).count, 1)
+    const cross = await fetch(`${base}/markMyNotificationRead`, {
+      method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ notificationID: 'd4000104-0000-4000-8000-000000000001', expectedModifiedAt: '2026-08-27T00:00:00.000Z' })
+    })
+    assert.equal(cross.status, 404)
+    const read = await fetch(`${base}/markMyNotificationRead`, {
+      method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ notificationID: value[0].notificationID, expectedModifiedAt: value[0].modifiedAt })
+    })
+    assert.equal(read.status, 200)
+    assert.ok((await read.json()).readAt)
+    const reload = await fetch(`${base}/getMyUnreadNotificationCount()`, { headers })
+    assert.equal((await reload.json()).count, 0, 'wire reload observes persisted read state')
+  } finally {
+    server.closeAllConnections()
+    await new Promise(resolve => server.close(resolve))
+  }
+}
+
+async function verifyHydrationSafety (db, bugNotificationID) {
+  const { hydrateNotificationPage } = require('../../srv/notification/inbox')
+  const row = {
+    ID: 'd6000000-0000-4000-8000-000000000001', recipient_ID: USER_A,
+    bugNotification_ID: bugNotificationID, accessAuditEvent_ID: null,
+    occurredAt: '2026-08-27T01:00:00.000Z'
+  }
+  for (const entry of [
+    { ...row, recipient_ID: USER_B },
+    { ...row, accessAuditEvent_ID: ACCESS_AUDIT },
+    { ...row, bugNotification_ID: null }
+  ]) {
+    const [result] = await hydrateNotificationPage(db, [entry], 'vi')
+    assert.equal(result.eventType, 'UNAVAILABLE', 'invalid source/recipient invariant fails closed')
+    assert.equal(result.title, 'Thông báo không khả dụng')
+    assert.equal(result.targetPath, null)
+    assert.equal(result.summary, null)
+  }
+  const [fallback] = await hydrateNotificationPage(db, [row], 'zz')
+  assert.equal(fallback.title, 'Assigned', 'unsupported locale falls back to English')
 }
 
 main().catch(error => {

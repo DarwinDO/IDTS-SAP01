@@ -1,5 +1,7 @@
 'use strict'
 
+// Gắn contract OData với handler inbox; policy caller và read-state nằm trong module inbox.
+
 const cds = require('@sap/cds')
 const {
   getMyUnreadNotificationCount,

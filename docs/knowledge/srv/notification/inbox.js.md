@@ -32,4 +32,10 @@ Module này là boundary inbox cá nhân có server làm authority. Nó resolve 
 
 ## Safe editing / Sửa an toàn
 
+### N1 review corrections / Sửa sau review N1
+
+English: `hydrateNotificationPage` now validates XOR and source-recipient agreement before revealing a row's content. Unknown/missing sources and non-APPLIED access use a localized unavailable DTO, never a success claim. Text comes from CAP's `notifications` bundle (English fallback plus Vietnamese) selected with `req.locale`; raw source messages/audit reasons are not selected. Current Bug priority is read via the same bulk source query, not an extra per-row query. Bug navigation reuses `buildBugLink` with UUID validation and the active entity key. Primary owner DonHV, backup NhanT; debug at source-to-DTO mapping and check `srv/email/template.js`, the two properties files and service/wire QA together.
+
+Tiếng Việt: `hydrateNotificationPage` kiểm tra XOR và recipient nguồn khớp recipient index trước khi trả nội dung. Source thiếu/không biết và access chưa APPLIED dùng DTO không khả dụng đã localize, không báo thành công. Text lấy từ bundle CAP `notifications` (fallback Anh và bản Việt) theo `req.locale`; không select message/audit reason thô. Priority Bug đọc trong cùng bulk query, không thêm query mỗi row. Navigation dùng lại `buildBugLink`, kiểm UUID và active key. Owner DonHV, backup NhanT; debug tại bước map source sang DTO, kiểm cùng `srv/email/template.js`, hai properties file và QA service/wire.
+
 Never accept a recipient ID from the client, never hydrate before caller scope, and never add external URLs. New sources require one bounded bulk read and an allowlisted mapper. / Không nhận recipient ID từ client, không hydrate trước khi scope caller và không thêm URL ngoài. Source mới cần một bulk read bounded và mapper theo allowlist.

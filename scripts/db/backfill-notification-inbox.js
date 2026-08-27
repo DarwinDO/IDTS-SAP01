@@ -4,44 +4,38 @@ const cds = require('@sap/cds')
 const { INSERT, SELECT } = cds.ql
 
 const NOTIFICATIONS = 'idts.cap.Notifications'
-const DELIVERIES = 'idts.cap.NotificationDeliveries'
 const INBOX = 'idts.cap.UserNotificationInboxEntries'
 
 async function buildBugInboxBackfillPlan ({ tx, now = new Date(), days = 30 }) {
   const cutoff = cutoffTimestamp(now, days)
-  const candidates = await tx.run(
-    SELECT.from(NOTIFICATIONS)
-      .columns('ID', 'recipient_ID', 'createdAt')
-      .where({ createdAt: { '>=': cutoff } })
-      .orderBy('createdAt asc', 'ID asc')
-  )
-  if (!candidates.length) return emptyPlan(cutoff)
-
-  const notificationIDs = candidates.map(row => row.ID)
-  const [deliveries, indexed] = await Promise.all([
-    tx.run(SELECT.from(DELIVERIES).columns('notification_ID').where({ notification_ID: { in: notificationIDs } })),
-    tx.run(SELECT.from(INBOX).columns('bugNotification_ID').where({ bugNotification_ID: { in: notificationIDs } }))
-  ])
-  const deliveredIDs = new Set(deliveries.map(row => row.notification_ID))
-  const indexedIDs = new Set(indexed.map(row => row.bugNotification_ID))
-  const entries = candidates
-    .filter(row => row.recipient_ID && !deliveredIDs.has(row.ID) && !indexedIDs.has(row.ID))
-    .map(row => ({
-      ID: cds.utils.uuid(),
-      recipient_ID: row.recipient_ID,
-      bugNotification_ID: row.ID,
-      accessAuditEvent_ID: null,
-      occurredAt: row.createdAt
-    }))
-  entries.forEach(assertExactlyOneSource)
-  return {
-    cutoff,
-    candidateCount: candidates.length,
-    missingCount: entries.length,
-    entries,
-    accessEntryCount: 0,
-    deliveryInsertCount: 0
+  const plan = emptyPlan(cutoff)
+  let lastID
+  while (true) {
+    const query = SELECT.from(NOTIFICATIONS).columns('ID', 'recipient_ID', 'createdAt')
+      .where({ createdAt: { '>=': cutoff } }).and({ createdAt: { '<=': new Date(now).toISOString() } })
+      .orderBy('ID asc').limit(500)
+    if (lastID) query.and({ ID: { '>': lastID } })
+    const candidates = await tx.run(query)
+    if (!candidates.length) break
+    plan.candidateCount += candidates.length
+    const indexed = await tx.run(SELECT.from(INBOX).columns('bugNotification_ID')
+      .where({ bugNotification_ID: { in: candidates.map(row => row.ID) } }))
+    const indexedIDs = new Set(indexed.map(row => row.bugNotification_ID))
+    plan.duplicateSkippedCount += indexedIDs.size
+    for (const row of candidates) {
+      if (!row.recipient_ID || indexedIDs.has(row.ID)) continue
+      const entry = {
+        ID: cds.utils.uuid(), recipient_ID: row.recipient_ID,
+        bugNotification_ID: row.ID, accessAuditEvent_ID: null, occurredAt: row.createdAt
+      }
+      assertExactlyOneSource(entry)
+      plan.entries.push(entry)
+    }
+    lastID = candidates.at(-1).ID
+    if (candidates.length < 500) break
   }
+  plan.missingCount = plan.entries.length
+  return plan
 }
 
 async function executeBugInboxBackfill ({ tx, now = new Date(), days = 30 }) {
@@ -51,17 +45,19 @@ async function executeBugInboxBackfill ({ tx, now = new Date(), days = 30 }) {
 }
 
 async function runBackfill ({ tx, now = new Date(), days = 30, execute = false, log = defaultLog }) {
-  const plan = await buildBugInboxBackfillPlan({ tx, now, days })
+  const plan = execute
+    ? await executeBugInboxBackfill({ tx, now, days })
+    : await buildBugInboxBackfillPlan({ tx, now, days })
   log(`Cutoff: ${plan.cutoff}`)
   log(`Bug candidates: ${plan.candidateCount}`)
   log(`Missing inbox entries: ${plan.missingCount}`)
+  log(`Already indexed: ${plan.duplicateSkippedCount}`)
   if (!execute) {
     log('No database was changed')
     return { ...plan, insertedCount: 0 }
   }
-  const result = await executeBugInboxBackfill({ tx, now, days })
-  log(`Inserted inbox entries: ${result.insertedCount}`)
-  return result
+  log(`Inserted inbox entries: ${plan.insertedCount}`)
+  return plan
 }
 
 function assertExactlyOneSource (entry) {
@@ -79,7 +75,7 @@ function cutoffTimestamp (now, days) {
 }
 
 function emptyPlan (cutoff) {
-  return { cutoff, candidateCount: 0, missingCount: 0, entries: [], accessEntryCount: 0, deliveryInsertCount: 0 }
+  return { cutoff, candidateCount: 0, missingCount: 0, duplicateSkippedCount: 0, entries: [], accessEntryCount: 0, deliveryInsertCount: 0 }
 }
 
 function defaultLog (line) {
@@ -90,6 +86,7 @@ async function main () {
   const execute = process.argv.slice(2).includes('--execute')
   const unknown = process.argv.slice(2).filter(argument => argument !== '--execute')
   if (unknown.length) throw new TypeError('Only --execute is supported.')
+  cds.model = cds.model || await cds.load('db')
   const db = await cds.connect.to('db')
   if (execute) {
     await db.tx(tx => runBackfill({ tx, execute: true }))
@@ -100,7 +97,7 @@ async function main () {
 
 if (require.main === module) {
   main().catch(error => {
-    process.stderr.write(`Notification inbox backfill failed: ${error.message}\n`)
+    process.stderr.write('Notification inbox backfill failed. No result is claimed; inspect the controlled database/configuration locally.\n')
     process.exitCode = 1
   }).finally(() => cds.shutdown())
 }

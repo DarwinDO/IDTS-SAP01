@@ -1,5 +1,7 @@
 using idts.cap as db from '../db/schema';
 
+// Chỉ công khai DTO và operation cho caller; không expose entity index/audit/delivery.
+
 @path: 'notification'
 service NotificationService @(requires: 'authenticated-user') {
   type NotificationSummary {

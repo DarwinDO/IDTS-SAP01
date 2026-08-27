@@ -40,7 +40,8 @@ async function main () {
     notification(recentMissing, '2026-08-20T00:00:00.000Z'),
     notification(recentWithEmail, '2026-08-21T00:00:00.000Z'),
     notification(stale, '2026-07-01T00:00:00.000Z'),
-    notification(alreadyIndexed, '2026-08-22T00:00:00.000Z')
+    notification(alreadyIndexed, '2026-08-22T00:00:00.000Z'),
+    notification('e2000000-0000-4000-8000-000000000005', '2026-08-28T00:00:00.000Z')
   ]))
   await db.run(INSERT.into('idts.cap.NotificationDeliveries').entries({
     ID: 'e3000000-0000-4000-8000-000000000001',
@@ -64,7 +65,8 @@ async function main () {
   const now = new Date('2026-08-27T00:00:00.000Z')
   const plan = await buildBugInboxBackfillPlan({ tx: db, now, days: 30 })
   assert.equal(plan.cutoff, '2026-07-28T00:00:00.000Z')
-  assert.deepEqual(plan.entries.map(entry => entry.bugNotification_ID), [recentMissing])
+  assert.deepEqual(plan.entries.map(entry => entry.bugNotification_ID), [recentMissing, recentWithEmail],
+    'backfill includes existing notifications even if email was already delivered; it never creates new email')
   assert.equal(plan.accessEntryCount, 0)
   assert.equal(plan.deliveryInsertCount, 0)
 
@@ -74,13 +76,28 @@ async function main () {
   const dryRun = await runBackfill({ tx: db, now, execute: false, log: line => logs.push(line) })
   assert.equal(dryRun.insertedCount, 0)
   assert.match(logs.join('\n'), /No database was changed/)
-  assert.equal((await buildBugInboxBackfillPlan({ tx: db, now, days: 30 })).entries.length, 1)
+  assert.equal((await buildBugInboxBackfillPlan({ tx: db, now, days: 30 })).entries.length, 2)
 
   const executed = await executeBugInboxBackfill({ tx: db, now, days: 30 })
-  assert.equal(executed.insertedCount, 1)
+  assert.equal(executed.insertedCount, 2)
   assert.equal((await buildBugInboxBackfillPlan({ tx: db, now, days: 30 })).entries.length, 0, 'rerun is a no-op')
   assert.equal(await count(db, 'idts.cap.NotificationDeliveries'), beforeDeliveryCount)
   assert.equal(await count(db, 'idts.cap.UserIdentityAuditEvents'), beforeAuditCount)
+
+  const bulk = Array.from({ length: 501 }, (_, i) => notification(`e2100000-0000-4000-8000-${String(i).padStart(12, '0')}`, '2026-08-26T00:00:00.000Z'))
+  await db.run(INSERT.into('idts.cap.Notifications').entries(bulk))
+  let pages = 0
+  const boundedTx = { run: query => {
+    if (query.SELECT?.from?.ref?.[0] === 'idts.cap.Notifications') {
+      assert.ok(query.SELECT.limit?.rows?.val <= 500, 'backfill source read has a bounded batch')
+      pages++
+    }
+    return db.run(query)
+  } }
+  const boundedPlan = await buildBugInboxBackfillPlan({ tx: boundedTx, now, days: 30 })
+  assert.equal(boundedPlan.entries.length, 501)
+  assert.ok(pages >= 2)
+  await assert.rejects(() => buildBugInboxBackfillPlan({ tx: db, now, days: 31 }), /between 1 and 30/)
 
   console.log('IDTS My Notifications dry-run backfill contract: PASS')
 }
