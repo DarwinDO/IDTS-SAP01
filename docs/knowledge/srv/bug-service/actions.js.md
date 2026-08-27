@@ -8,6 +8,8 @@
 
 **Candidate cardinality / Số lượng candidate:** The picker deliberately returns the complete eligible team-visible set in one bounded response, rather than paging and silently dropping later eligible selections. The separate write limit remains 20 selected UUIDs. / Picker chủ ý trả toàn bộ tập team-visible đủ điều kiện trong một response để không phân trang rồi làm mất selection đủ điều kiện ở page sau. Write limit riêng vẫn là 20 UUID đã chọn.
 
+**Rollback test seam / Điểm kiểm thử rollback:** `addComment` accepts an optional test dependency invoked only after the comment, history, selected-recipient notification, inbox entry, and email outbox entry have been written in the request transaction. Production passes no dependency. A throwing test hook is intentionally not swallowed, so real SQLite verification proves all five writes roll back together.
+
 ## 2026-08-08 capacity guard
 
 English: assignment actions request capacity validation only when the Developer owner changes, before assignment side effects are written. Vietnamese: action assignment chỉ yêu cầu capacity validation khi đổi Developer owner và chạy trước khi ghi side effect assignment.

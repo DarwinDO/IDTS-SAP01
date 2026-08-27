@@ -137,7 +137,7 @@ async function resubmitToDeveloper (req, entities) {
   return updatedBug
 }
 
-async function addComment (req, entities) {
+async function addComment (req, entities, dependencies = {}) {
   // Bound action này tạo comment cho Bug đã active. Nội dung và actor được chuẩn hóa ở backend;
   // side effect history/notification chạy sau khi INSERT comment thành công.
   const bugID = bugIDFrom(req)
@@ -168,7 +168,7 @@ async function addComment (req, entities) {
     })
   )
 
-  await writeHistoryEvent(req, entities, {
+  const historyID = await writeHistoryEvent(req, entities, {
     bugID: bug.ID,
     actorID: actor.ID,
     actionType: ACTION.EDIT,
@@ -193,6 +193,8 @@ async function addComment (req, entities) {
       emailRequired: true
     })
   }
+
+  await dependencies.afterMentionWrites?.({ tx, commentID, historyID, recipients })
 
   return tx.run(SELECT.one.from(entities.Bugs).where({ ID: bug.ID }))
 }

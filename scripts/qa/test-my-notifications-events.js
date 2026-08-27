@@ -123,6 +123,32 @@ async function main () {
   })
   assert.match(linkedMentionEmail.html, /href="https:\/\/idts\.example\.test\/idtsbugmanagementui\/index\.html#\/Bugs\(ID=/, 'email uses the existing allowlisted Bug link when configured')
 
+  const rollbackContent = 'Injected failure after complete mention persistence.'
+  const rollbackReq = commentRequest(routeActor, bug.ID, rollbackContent, [mentionRecipient.ID])
+  let mentionRollbackSourceKey
+  let rollbackHistoryID
+  let rollbackNotificationID
+  await assert.rejects(db.tx(rollbackReq, () => addComment(rollbackReq, mentionEntities, {
+    afterMentionWrites: async ({ tx, commentID, historyID, recipients }) => {
+      mentionRollbackSourceKey = `MENTION:${commentID}:${recipients[0].ID}`
+      rollbackHistoryID = historyID
+      assert.equal(await count(tx, 'idts.cap.Comments', { ID: commentID }), 1, 'fault hook runs after comment write')
+      assert.equal(await count(tx, 'idts.cap.HistoryEvents', { ID: historyID }), 1, 'fault hook runs after history write')
+      assert.equal(await count(tx, 'idts.cap.Notifications', { sourceKey: mentionRollbackSourceKey }), 1, 'fault hook runs after mention notification write')
+      const notification = await tx.run(SELECT.one.from('idts.cap.Notifications').columns('ID').where({ sourceKey: mentionRollbackSourceKey }))
+      rollbackNotificationID = notification.ID
+      assert.equal(await count(tx, 'idts.cap.UserNotificationInboxEntries', { bugNotification_ID: notification.ID }), 1, 'fault hook runs after inbox write')
+      assert.equal(await count(tx, 'idts.cap.NotificationDeliveries', { notification_ID: notification.ID }), 1, 'fault hook runs after outbox write')
+      throw new Error('INJECTED_MENTION_ROLLBACK')
+    }
+  })), /INJECTED_MENTION_ROLLBACK/)
+  assert.equal(await count(db, 'idts.cap.Comments', { bug_ID: bug.ID, content: rollbackContent }), 0, 'injected failure rolls back comment')
+  assert.equal(await count(db, 'idts.cap.HistoryEvents', { ID: rollbackHistoryID }), 0, 'injected failure rolls back history event')
+  assert.equal(await count(db, 'idts.cap.HistoryLogs', { event_ID: rollbackHistoryID }), 0, 'injected failure rolls back history logs')
+  assert.equal(await count(db, 'idts.cap.Notifications', { sourceKey: mentionRollbackSourceKey }), 0, 'injected failure rolls back source notification')
+  assert.equal(await count(db, 'idts.cap.UserNotificationInboxEntries', { bugNotification_ID: rollbackNotificationID }), 0, 'injected failure rolls back inbox row')
+  assert.equal(await count(db, 'idts.cap.NotificationDeliveries', { notification_ID: rollbackNotificationID }), 0, 'injected failure rolls back delivery row')
+
   const authorOnlyReq = commentRequest(routeActor, bug.ID, 'Author-only selected mention.', [routeActor.ID])
   await db.tx(authorOnlyReq, () => addComment(authorOnlyReq, mentionEntities))
   assert.equal(await count(db, 'idts.cap.Notifications', { eventType_code: 'COMMENT_MENTIONED' }), 1, 'author is excluded from mention recipients')

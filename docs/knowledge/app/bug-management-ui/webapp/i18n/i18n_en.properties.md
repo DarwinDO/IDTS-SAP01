@@ -1,5 +1,11 @@
 # Knowledge: `app/bug-management-ui/webapp/i18n/i18n_en.properties`
 
+## N3 selected comment mention copy
+
+**English:** This English bundle mirrors `commentsMentionRecipientsLabel`, `commentsMentionRecipientsPlaceholder`, `commentsMentionRecipientsHelp`, and `notificationEventCOMMENT_MENTIONED`. The copy makes selection explicit and does not imply parsing an `@name` or reveal delivery internals.
+
+**Tiếng Việt:** Bundle English này mirror `commentsMentionRecipientsLabel`, `commentsMentionRecipientsPlaceholder`, `commentsMentionRecipientsHelp` và `notificationEventCOMMENT_MENTIONED`. Copy nêu rõ phải chọn recipient, không ngụ ý parse `@name` và không lộ delivery internals.
+
 ## Smart Assign Note cleanup (2026-08-06)
 
 The English bundle also removes `smartAssignActionNote`, preserving exact key parity with the default bundle after the synthetic assignment note was retired.

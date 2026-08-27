@@ -190,11 +190,92 @@ async function verifyCommentOperation (options = {}) {
   )
 }
 
+async function verifyMentionContextRace () {
+  let module
+  const operations = []
+  const modelStore = {}
+  const selectedKeyCalls = []
+  const busyCalls = []
+  let currentContext
+  let resolveA
+  let resolveB
+  const candidateA = new Promise(resolve => { resolveA = resolve })
+  const candidateB = new Promise(resolve => { resolveB = resolve })
+  const model = {
+    bindContext: path => {
+      const deferred = path.includes('00000000-0000-0000-0000-000000000001') ? candidateA : candidateB
+      const operation = {
+        invoke: groupId => {
+          assert.strictEqual(groupId, '$direct', 'mention candidate function uses its own read group')
+          return Promise.resolve()
+        },
+        getBoundContext: () => ({ requestObject: () => deferred })
+      }
+      operations.push({ path, operation })
+      return operation
+    }
+  }
+  function JSONModel (initial) {
+    this.values = initial
+  }
+  JSONModel.prototype.setProperty = function (path, value) {
+    this.values[path.slice(1)] = value
+  }
+  JSONModel.prototype.getProperty = function (path) {
+    return this.values[path.slice(1)]
+  }
+  const picker = {
+    getModel: name => name ? modelStore[name] : model,
+    setModel: (value, name) => { modelStore[name] = value },
+    getBindingContext: () => currentContext,
+    data: (key, value) => value === undefined ? picker.dataValues[key] : (picker.dataValues[key] = value),
+    dataValues: {},
+    setSelectedKeys: value => { selectedKeyCalls.push(Array.from(value)) },
+    setBusy: value => { busyCalls.push(value) }
+  }
+  const contextA = { getPath: () => '/Bugs(ID=00000000-0000-0000-0000-000000000001,IsActiveEntity=true)' }
+  const contextB = { getPath: () => '/Bugs(ID=00000000-0000-0000-0000-000000000002,IsActiveEntity=true)' }
+  const sandbox = {
+    window: { Promise },
+    Intl,
+    Date,
+    sap: {
+      ui: {
+        define: (dependencies, factory) => {
+          module = factory({ error: () => {} }, { show: () => {} }, JSONModel)
+        }
+      }
+    }
+  }
+
+  vm.runInNewContext(controller, sandbox)
+  currentContext = contextA
+  module.onMentionContextChanged({ getSource: () => picker })
+  assert.deepStrictEqual(selectedKeyCalls, [[]], 'context A immediately clears stale recipient selections')
+  assert.strictEqual(busyCalls.at(-1), true, 'context A starts its own busy state')
+
+  currentContext = contextB
+  module.onMentionContextChanged({ getSource: () => picker })
+  assert.deepStrictEqual(selectedKeyCalls, [[], []], 'context B immediately clears A selections')
+  assert.strictEqual(operations.length, 2, 'each Bug context creates one bound candidate operation')
+
+  resolveA([{ ID: '00000000-0000-0000-0000-000000000010', displayName: 'Old A', roleCode: 'TESTER' }])
+  await new Promise(resolve => setImmediate(resolve))
+  assert.deepStrictEqual(Array.from(modelStore.mentionRecipients.getProperty('/items')), [], 'stale Bug A response cannot populate Bug B')
+  assert.strictEqual(busyCalls.at(-1), true, 'stale Bug A completion cannot clear Bug B busy state')
+
+  resolveB([{ ID: '00000000-0000-0000-0000-000000000020', displayName: 'Current B', roleCode: 'DEVELOPER' }])
+  await new Promise(resolve => setImmediate(resolve))
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(modelStore.mentionRecipients.getProperty('/items'))), [{ ID: '00000000-0000-0000-0000-000000000020', displayName: 'Current B', roleCode: 'DEVELOPER' }], 'current Bug B response populates its picker')
+  assert.strictEqual(busyCalls.at(-1), false, 'current Bug B completion clears only its busy state')
+}
+
 verifyCompiledAttachmentFacet()
   .then(() => verifyCommentOperation())
   .then(() => verifyCommentOperation({ refreshReject: true }))
   .then(() => verifyCommentOperation({ refreshThrow: true }))
   .then(() => verifyCommentOperation({ actionReject: true }))
+  .then(() => verifyMentionContextRace())
   .then(() => console.log('IDTS-116 SAP-standard collaboration UI checks passed.'))
   .catch(error => {
     console.error(error)
