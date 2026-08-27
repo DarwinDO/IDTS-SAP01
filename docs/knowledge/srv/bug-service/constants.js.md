@@ -238,3 +238,9 @@ Các label history cho nhóm field người/vai trò đang xử lý hiện dùng
 **English.** `EVENT` now holds additive stable lifecycle codes. It is the shared producer vocabulary; its CSV catalog and inbox/UI consumers must be updated together.
 
 **Tiếng Việt.** `EVENT` nay chứa stable code lifecycle theo kiểu additive. Đây là vocabulary chung của producer; phải cập nhật cùng CSV catalog và consumer inbox/UI.
+
+## Task 9 escalation ranks
+
+**English.** `PRIORITY_RANK` and `SEVERITY_RANK` are stable-code comparison maps for upward escalation. Labels are never used for a business decision.
+
+**Tiếng Việt.** `PRIORITY_RANK` và `SEVERITY_RANK` là map so sánh stable code cho escalation tăng mức. Không dùng label để quyết định nghiệp vụ.

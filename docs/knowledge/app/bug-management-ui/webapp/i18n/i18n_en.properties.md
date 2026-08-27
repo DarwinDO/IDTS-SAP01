@@ -324,3 +324,5 @@ The new Classification Apply, Duplicate Confirmation, and PM AI Activity labels 
 English: this bundle mirrors every `notification*` key from the default bundle for bell/count, filters, status, paging and safe failure states. Vietnamese: bundle này mirror đầy đủ key `notification*` của default; mọi text hiển thị không lộ chi tiết server/provider và phải đổi cùng shell, default/VI bundles và UI QA.
 
 N3 adds the same lifecycle labels as the default bundle, keeping `ASSIGNMENT_REMOVED` separate from `PENDING_ASSIGNMENT`.
+
+Task 9 mirrors default priority/severity escalation labels without exposing Bug field values or delivery internals.

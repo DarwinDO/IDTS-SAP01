@@ -19,3 +19,9 @@ Important anchor: the `BUG_*`, `ACCESS_*` and `UNAVAILABLE_TITLE` keys are a con
 Bundle fallback tiếng Anh cung cấp cặp title/summary an toàn, có giới hạn cho vocabulary Bug additive: giao/giao lại/bỏ giao, đổi owner, tiến trình và hoàn tất lifecycle, pending assignment, overdue, và code mention/escalation sau này, cùng access role-change/reactivation. Không chứa recipient, audit reason, provider data hoặc URL ngoài. `srv/notification/inbox.js` chỉ chọn key sau khi validate source và truyền locale caller cho CAP fallback; key unavailable không biến record không hỗ trợ thành success claim. `ASSIGNMENT_REMOVED` mô tả previous Developer, còn `PENDING_ASSIGNMENT` mô tả PM queue.
 
 Điểm neo: các key `BUG_*`, `ACCESS_*` và `UNAVAILABLE_TITLE` là contract với mapper. Thiếu key làm DTO trống; dịch không tương đương làm sai ý nghĩa event. Kiểm hai bundle, mapper và test HTTP Anh/Việt cùng nhau. Owner DonHV; backup NhanT. Giữ title <=160 và summary <=500 ký tự.
+
+## Task 9 escalation copy
+
+**English.** `BUG_PRIORITY_ESCALATED_*` and `BUG_SEVERITY_ESCALATED_*` describe only safe action semantics. They do not contain old/new values, recipient data, audit details, or mail status.
+
+**Tiếng Việt.** `BUG_PRIORITY_ESCALATED_*` và `BUG_SEVERITY_ESCALATED_*` chỉ mô tả action semantics an toàn; không chứa giá trị cũ/mới, recipient, audit detail hoặc mail status.

@@ -45,3 +45,5 @@ Row có chữ **Chưa đọc/Đã đọc** ngoài semantic state, wrap title/sum
 Owner: DonHV. Đặt breakpoint lần lượt tại `init`, `loadPage`, `refreshUnread`, `markAll`, `openNotification`. Shell còn nghe event không payload `idts:notification-change` sau Bug action thành công và gỡ listener khi destroy. Icon category cùng label event đã localize đi với row text an toàn. Chạy QA shell/client, build UI, browser responsive 375/768/1366/1920, zoom 200% và keyboard focus. UI này không cho phép deploy, backfill hoặc đổi notification producer.
 
 N3 adds lifecycle label recognition only. `ASSIGNMENT_REMOVED` remains distinct from `PENDING_ASSIGNMENT`, so the UI never reuses a previous-developer explanation for a later PM queue event. / N3 chỉ thêm nhận diện label lifecycle. `ASSIGNMENT_REMOVED` tách biệt `PENDING_ASSIGNMENT`, vì vậy UI không dùng lại giải thích previous developer cho event PM queue sau này.
+
+Task 9 recognizes `PRIORITY_ESCALATED` and `SEVERITY_ESCALATED` as localized Bug inbox labels. / Task 9 nhận diện `PRIORITY_ESCALATED` và `SEVERITY_ESCALATED` là label inbox Bug đã localize.

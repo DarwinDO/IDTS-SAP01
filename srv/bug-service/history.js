@@ -7,8 +7,11 @@ const {
   ACTION,
   EVENT,
   HISTORY_FIELD_LABELS,
+  PRIORITY_RANK,
+  SEVERITY_RANK,
   STATUS
 } = require('./constants')
+const { readActiveIdentityAccessByUser } = require('../access/identity-readiness')
 
 const {
   bugIDFrom,
@@ -93,6 +96,48 @@ async function recordBugChangeSideEffects (req, entities, changes, finalBug) {
       previousAssigneeUserID
     })
   }
+  await writeEscalationNotifications(req, entities, finalBug, changes, historyID)
+}
+
+async function writeEscalationNotifications (req, entities, bug, changes, historyID) {
+  const escalations = [
+    escalationForChange(changes, 'priority', PRIORITY_RANK, EVENT.PRIORITY_ESCALATED),
+    escalationForChange(changes, 'severity', SEVERITY_RANK, EVENT.SEVERITY_ESCALATED)
+  ].filter(Boolean)
+  if (!escalations.length) return
+
+  const assigneeUserID = await userIDForDeveloper(req, entities, bug.assignee_ID)
+  const directRecipientIDs = [...new Set([assigneeUserID, bug.nextProcessorUser_ID].filter(Boolean))]
+  const material = bug.priority_code === 'CRITICAL' || ['CRITICAL', 'BLOCKER'].includes(bug.severity_code)
+  const pmRecipientIDs = material ? await activeAlignedPmIDs(req, entities) : []
+  const recipientIDs = [...new Set([...directRecipientIDs, ...pmRecipientIDs])]
+  const readiness = await readActiveIdentityAccessByUser(cds.tx(req), recipientIDs)
+
+  for (const escalation of escalations) {
+    for (const recipientID of recipientIDs) {
+      if (!readiness.get(recipientID)?.ready) continue
+      await writeNotificationAndSchedule(req, {
+        bugID: bug.ID,
+        recipientID,
+        eventType: escalation.eventType,
+        message: `${bug.bugNumber || 'Bug'} ${escalation.fieldName} increased.`,
+        sourceKey: `STATUS:${historyID}:${recipientID}:${escalation.eventType}`,
+        emailRequired: material
+      })
+    }
+  }
+}
+
+function escalationForChange (changes, fieldName, ranks, eventType) {
+  const change = changes.find(item => item.fieldName === fieldName)
+  return change && ranks[change.newValue] > ranks[change.oldValue] ? { eventType, fieldName } : null
+}
+
+async function activeAlignedPmIDs (req, entities) {
+  const tx = cds.tx(req)
+  const pms = await tx.run(SELECT.from(entities.Users).columns('ID').where({ active: true, role_code: 'PM' }))
+  const readiness = await readActiveIdentityAccessByUser(tx, pms.map(pm => pm.ID))
+  return pms.map(pm => pm.ID).filter(id => readiness.get(id)?.ready)
 }
 
 async function recordCommentCreateSideEffects (req, data, entities) {
@@ -584,6 +629,7 @@ module.exports = {
   recordCreateSideEffects,
   recordUpdateSideEffects,
   recordBugChangeSideEffects,
+  writeEscalationNotifications,
   recordCommentCreateSideEffects,
   recordDraftAttachmentSaveSideEffects,
   buildAttachmentDeleteAuditEntry,

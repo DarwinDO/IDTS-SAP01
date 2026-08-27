@@ -8,7 +8,7 @@ const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const path = require('node:path')
 const cds = require('@sap/cds')
-const { SELECT } = cds.ql
+const { INSERT, SELECT } = cds.ql
 
 const { normalizeEmailConfig } = require('../../srv/email/config')
 const { writeNotificationRecord } = require('../../srv/email/outbox')
@@ -207,6 +207,72 @@ async function main () {
   assert.ok(ownerRouteNotification?.sourceKey?.startsWith(routeSourceBefore), 'owner route persisted a history-derived source key')
   assert.equal(await count(db, 'idts.cap.UserNotificationInboxEntries', { bugNotification_ID: ownerRouteNotification.ID }), 1)
   assert.equal(await count(db, 'idts.cap.NotificationDeliveries', { notification_ID: ownerRouteNotification.ID }), 1)
+
+  // RED contract: escalation uses stable codes, keeps priority/severity events distinct, and only reaches aligned recipients.
+  const escalationAssigneeUser = {
+    ID: 'de000000-0000-4000-8000-000000000008', displayName: 'Escalation Developer',
+    email: 'escalation-developer@example.test', role_code: 'DEVELOPER', active: true
+  }
+  const escalationPm = {
+    ID: 'de000000-0000-4000-8000-000000000009', displayName: 'Escalation PM',
+    email: 'escalation-pm@example.test', role_code: 'PM', active: true
+  }
+  const escalationAssignee = { ID: 'de000000-0000-4000-8000-000000000010', user_ID: escalationAssigneeUser.ID }
+  await db.run(INSERT.into(entities.Users).entries([escalationAssigneeUser, escalationPm]))
+  await db.run(INSERT.into(entities.DeveloperProfiles).entries({
+    ...escalationAssignee, availabilityStatus_code: 'AVAILABLE', workloadLimit: 5, active: true
+  }))
+  await makeIdentityReady(db, escalationAssigneeUser, routeActor.ID)
+  await makeIdentityReady(db, escalationPm, routeActor.ID)
+  const escalationBug = {
+    ...routeBug,
+    assignee_ID: escalationAssignee.ID,
+    nextProcessorUser_ID: escalationAssigneeUser.ID,
+    priority_code: 'HIGH',
+    severity_code: 'MAJOR'
+  }
+  const escalationReq = new cds.Request({ user: new cds.User({ id: routeActor.email, roles: [routeActor.role_code, 'authenticated-user'] }) })
+  await db.tx(escalationReq, () => recordBugChangeSideEffects(escalationReq, entities, [
+    { fieldName: 'priority', oldValue: 'HIGH', newValue: 'CRITICAL' },
+    { fieldName: 'severity', oldValue: 'MAJOR', newValue: 'BLOCKER' }
+  ], { ...escalationBug, priority_code: 'CRITICAL', severity_code: 'BLOCKER' }))
+  const escalationEvents = await db.run(SELECT.from('idts.cap.Notifications').where({
+    eventType_code: { in: ['PRIORITY_ESCALATED', 'SEVERITY_ESCALATED'] }
+  }))
+  assert.equal(escalationEvents.length, 4, 'both raised fields retain their own event for assignee/current owner and PM')
+  for (const notification of escalationEvents) {
+    assert.match(notification.sourceKey, new RegExp(`^STATUS:[0-9a-f-]{36}:${notification.recipient_ID}:(PRIORITY_ESCALATED|SEVERITY_ESCALATED)$`), 'event discriminator prevents same-history source-key collision')
+    assert.equal(await count(db, 'idts.cap.UserNotificationInboxEntries', { bugNotification_ID: notification.ID }), 1, 'material escalation is indexed once')
+    assert.equal(await count(db, 'idts.cap.NotificationDeliveries', { notification_ID: notification.ID }), 1, 'Critical/Blocker escalation schedules prompt email')
+  }
+  const escalationInbox = await db.run(SELECT.one.from('idts.cap.UserNotificationInboxEntries').where({ bugNotification_ID: escalationEvents[0].ID }))
+  const [escalationSummary] = await hydrateNotificationPage(db, [escalationInbox], 'en')
+  assert.equal(escalationSummary.actionRequired, true, 'escalation consumer marks the material event as requiring action')
+  assert.deepEqual([...new Set(escalationEvents.map(row => row.recipient_ID))].sort(), [escalationAssigneeUser.ID, escalationPm.ID].sort(), 'assignee and current owner dedupe while aligned PM is added')
+
+  const escalationCount = escalationEvents.length
+  const sameRankReq = new cds.Request({ user: new cds.User({ id: routeActor.email, roles: [routeActor.role_code, 'authenticated-user'] }) })
+  await db.tx(sameRankReq, () => recordBugChangeSideEffects(sameRankReq, entities, [
+    { fieldName: 'priority', oldValue: 'HIGH', newValue: 'HIGH' },
+    { fieldName: 'severity', oldValue: 'BLOCKER', newValue: 'MAJOR' }
+  ], escalationBug))
+  assert.equal(await count(db, 'idts.cap.Notifications', { eventType_code: { in: ['PRIORITY_ESCALATED', 'SEVERITY_ESCALATED'] } }), escalationCount, 'same or downward rank creates no escalation')
+
+  const lowerEscalationReq = new cds.Request({ user: new cds.User({ id: routeActor.email, roles: [routeActor.role_code, 'authenticated-user'] }) })
+  await db.tx(lowerEscalationReq, () => recordBugChangeSideEffects(lowerEscalationReq, entities, [
+    { fieldName: 'priority', oldValue: 'LOW', newValue: 'MEDIUM' }
+  ], { ...escalationBug, priority_code: 'MEDIUM', severity_code: 'MAJOR' }))
+  const lowerEscalation = await db.run(SELECT.one.from('idts.cap.Notifications').where({
+    eventType_code: 'PRIORITY_ESCALATED', recipient_ID: escalationAssigneeUser.ID
+  }).orderBy('createdAt desc'))
+  assert.equal(await count(db, 'idts.cap.NotificationDeliveries', { notification_ID: lowerEscalation.ID }), 0, 'lower upward escalation is inbox-only')
+  assert.equal(await count(db, 'idts.cap.Notifications', { eventType_code: 'PRIORITY_ESCALATED', recipient_ID: escalationPm.ID }), 1, 'PM is not added unless the resulting escalation is material')
+
+  const unreadyEscalationReq = new cds.Request({ user: new cds.User({ id: routeActor.email, roles: [routeActor.role_code, 'authenticated-user'] }) })
+  await db.tx(unreadyEscalationReq, () => recordBugChangeSideEffects(unreadyEscalationReq, entities, [
+    { fieldName: 'priority', oldValue: 'HIGH', newValue: 'CRITICAL' }
+  ], { ...escalationBug, assignee_ID: null, nextProcessorUser_ID: unreadyID, priority_code: 'CRITICAL', severity_code: 'MAJOR' }))
+  assert.equal(await count(db, 'idts.cap.Notifications', { eventType_code: 'PRIORITY_ESCALATED', recipient_ID: unreadyID }), 0, 'unmapped direct owner fails closed')
 
   const removalReq = new cds.Request({ user: new cds.User({ id: routeActor.email, roles: [routeActor.role_code, 'authenticated-user'] }) })
   await db.tx(removalReq, async () => {

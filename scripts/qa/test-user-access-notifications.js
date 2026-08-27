@@ -17,6 +17,16 @@ const {
 
 const ENTITY = 'idts.cap.UserAccessNotificationDeliveries'
 
+async function countInbox (db, auditID) {
+  const row = await db.run(SELECT.one.from('idts.cap.UserNotificationInboxEntries').columns('count(*) as count').where({ accessAuditEvent_ID: auditID }))
+  return Number(row?.count || 0)
+}
+
+async function count (db, entity, where) {
+  const row = await db.run(SELECT.one.from(entity).columns('count(*) as count').where(where))
+  return Number(row?.count || 0)
+}
+
 const BUG_DELIVERY_SHAPE = [
   ['ID', 'cds.UUID', null, false, null, null, true],
   ['createdAt', 'cds.Timestamp', null, false, null, null, false],
@@ -243,6 +253,7 @@ async function verifyAccessDeliveryBehavior () {
   assert.equal(stored.sourceAuditEvent_ID, audit.ID)
   assert.equal(stored.targetUser_ID, userID)
   assert.equal(stored.recipientEmail, 'access.user@example.test')
+  assert.equal(await countInbox(db, audit.ID), 0, 'suspend remains email-only')
 
   const duplicate = await writeUserAccessDelivery({
     tx: db,
@@ -321,6 +332,7 @@ async function verifyAccessDeliveryBehavior () {
     emailConfig: { ...safeConfig, enabled: false, ready: false }
   })
   assert.equal(disabledDelivery.deliveryStatus, 'SKIPPED')
+  assert.equal(await countInbox(db, disabledAudit.ID), 1, 'final applied reactivation is indexed even when its email is skipped')
   const blankAudit = await insertAppliedAudit(db, '62000000-0000-4000-8000-000000000005', blankEmailUserID, 'REVOKE')
   const blankDelivery = await writeUserAccessDelivery({
     tx: db,
@@ -387,6 +399,55 @@ async function verifyAccessDeliveryBehavior () {
   const delivered = await db.run(SELECT.one.from(ENTITY).where({ ID: written.deliveryID }))
   assert.equal(delivered.status_code, 'SENT')
   assert.equal(delivered.providerMessageId, 'access-provider-message-id')
+
+  const roleAudit = await insertAppliedAudit(db, '62000000-0000-4000-8000-000000000014', userID, 'CHANGE_ROLE')
+  const roleDelivery = await writeUserAccessDelivery({
+    tx: db,
+    auditEvent: roleAudit,
+    targetUserID: userID,
+    eventType: 'ACCESS_ROLE_CHANGED',
+    effectiveRole: 'DEVELOPER',
+    effectiveAccessState: 'ACTIVE',
+    completedAt: '2026-08-26T10:01:00.000Z',
+    emailConfig: safeConfig
+  })
+  assert.equal(roleDelivery.deliveryStatus, 'PENDING', 'final applied role change keeps its existing email delivery')
+  assert.equal(await countInbox(db, roleAudit.ID), 1, 'final applied role change creates one inbox index beside delivery')
+  assert.equal((await writeUserAccessDelivery({
+    tx: db,
+    auditEvent: roleAudit,
+    targetUserID: userID,
+    eventType: 'ACCESS_ROLE_CHANGED',
+    effectiveRole: 'DEVELOPER',
+    effectiveAccessState: 'ACTIVE',
+    completedAt: '2026-08-26T10:01:00.000Z',
+    emailConfig: safeConfig
+  })).deliveryID, roleDelivery.deliveryID, 'repeated final audit reuses its delivery')
+  assert.equal(await countInbox(db, roleAudit.ID), 1, 'repeated final audit cannot duplicate inbox index')
+  await processUserAccessDeliveries({
+    tx: db,
+    config: safeConfig,
+    sendMail: async () => ({ messageId: 'role-change-message-id' }),
+    now: new Date('2026-08-26T10:01:00.000Z'),
+    workerID: 'role-change-worker'
+  })
+
+  const rollbackAuditID = '62000000-0000-4000-8000-000000000015'
+  await assert.rejects(db.tx(async tx => {
+    await tx.run(INSERT.into('idts.cap.UserIdentityAuditEvents').entries({
+      ID: rollbackAuditID, action: 'CHANGE_ROLE', result: 'APPLIED', targetUser_ID: userID,
+      correlationId: '63000000-0000-4000-8000-000000000015'
+    }))
+    await writeUserAccessDelivery({
+      tx, auditEvent: { ID: rollbackAuditID, action: 'CHANGE_ROLE', result: 'APPLIED' }, targetUserID: userID,
+      eventType: 'ACCESS_ROLE_CHANGED', effectiveRole: 'DEVELOPER', effectiveAccessState: 'ACTIVE',
+      completedAt: '2026-08-26T10:01:00.000Z', emailConfig: safeConfig
+    })
+    throw new Error('ROLLBACK_ACCESS_AUDIT_DELIVERY_INDEX')
+  }), /ROLLBACK_ACCESS_AUDIT_DELIVERY_INDEX/)
+  assert.equal(await db.run(SELECT.one.from('idts.cap.UserIdentityAuditEvents').where({ ID: rollbackAuditID })), undefined, 'rollback removes final audit')
+  assert.equal(await count(db, ENTITY, { sourceAuditEvent_ID: rollbackAuditID }), 0, 'rollback removes access delivery')
+  assert.equal(await countInbox(db, rollbackAuditID), 0, 'rollback removes access inbox index')
 
   const retryAudit = await insertAppliedAudit(db, '62000000-0000-4000-8000-000000000006', userID, 'REACTIVATE')
   const retryDelivery = await writeUserAccessDelivery({
@@ -488,7 +549,7 @@ async function verifyConstraintFailuresPropagate () {
         if (source === 'idts.cap.UserIdentityAuditEvents') {
           assert.ok(query.SELECT.forUpdate, 'the persisted audit source is locked before delivery lookup')
           state.auditLocks += 1
-          return { ID: '66000000-0000-4000-8000-000000000001' }
+          return { ID: '66000000-0000-4000-8000-000000000001', action: 'SUSPEND', result: 'APPLIED', targetUser_ID: '65000000-0000-4000-8000-000000000001' }
         }
         if (source === ENTITY) {
           assert.equal(state.auditLocks, 1, 'the audit lock precedes the delivery lookup')
@@ -530,7 +591,7 @@ async function verifyConstraintFailuresPropagate () {
           if (source === 'idts.cap.UserIdentityAuditEvents') {
             assert.ok(query.SELECT.forUpdate)
             auditLocks += 1
-            return { ID: input.auditEvent.ID }
+            return { ID: input.auditEvent.ID, action: input.auditEvent.action, result: input.auditEvent.result, targetUser_ID: input.targetUserID }
           }
           if (source === ENTITY) {
             assert.equal(auditLocks, 1, `${code} mock honors the audit lock before delivery lookup`)
@@ -556,7 +617,7 @@ async function verifyConstraintFailuresPropagate () {
         if (source === 'idts.cap.UserIdentityAuditEvents') {
           assert.ok(query.SELECT.forUpdate)
           nonUniqueAuditLocks += 1
-          return { ID: input.auditEvent.ID }
+          return { ID: input.auditEvent.ID, action: input.auditEvent.action, result: input.auditEvent.result, targetUser_ID: input.targetUserID }
         }
         if (source === ENTITY) assert.equal(nonUniqueAuditLocks, 1, 'non-unique mock honors the audit lock before delivery lookup')
         return source === ENTITY ? undefined : { ID: input.targetUserID, email: 'race.user@example.test' }

@@ -51,3 +51,9 @@ Never accept a recipient ID from the client, never hydrate before caller scope, 
 **English.** The bounded Bug-event allowlist now recognizes lifecycle-specific codes including resolved, retest, reopened, resubmitted, reassigned, retest-owner changed, and assignment removed. Action-required remains true only for events that need a user response.
 
 **Tiếng Việt.** Allowlist Bug event có giới hạn nay nhận các code lifecycle riêng gồm resolved, retest, reopened, resubmitted, reassigned, đổi retest owner và bỏ assignment. `actionRequired` chỉ true cho event cần người dùng phản hồi.
+
+## Task 9 escalation hydration
+
+**English.** `PRIORITY_ESCALATED` and `SEVERITY_ESCALATED` are allowlisted Bug sources with localized safe summaries and `actionRequired=true`. The mapper still exposes no raw source message, recipient identity, or delivery/provider state.
+
+**Tiếng Việt.** `PRIORITY_ESCALATED` và `SEVERITY_ESCALATED` là Bug source được allowlist, có summary an toàn đã localize và `actionRequired=true`. Mapper vẫn không lộ raw source message, identity người nhận hoặc delivery/provider state.

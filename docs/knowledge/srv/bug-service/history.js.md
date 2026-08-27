@@ -135,3 +135,9 @@ SAP attachment plugin dùng transactional outbox cho external object store. Vì 
 **English.** `writeHistoryEvent` returns the persisted history ID. Lifecycle planning derives `STATUS:<historyID>:<recipientID>` only after that audit source exists, then writes an idempotent notification. Owner-stable In Review/In Progress returns no plan; an owner change uses the existing `UPDATED` event. Check `actions.js`, `outbox.js`, the event catalog, and inbox mapper together.
 
 **Tiếng Việt.** `writeHistoryEvent` trả về ID history đã persist. Lifecycle tạo `STATUS:<historyID>:<recipientID>` chỉ sau khi audit source tồn tại, rồi ghi notification idempotent. In Review/In Progress không đổi owner không tạo plan; đổi owner dùng event `UPDATED` hiện có. Kiểm cùng `actions.js`, `outbox.js`, event catalog và inbox mapper.
+
+## Task 9 escalation
+
+**English.** Priority and severity escalation compares stable codes only. Each upward field produces its own event and uses `STATUS:<historyID>:<recipientID>:<eventCode>` so one history row cannot suppress the other event. Only active identity-ready assignee/current-owner recipients receive it; active aligned PM recipients are added for resulting Critical/Blocker. Lower escalation is inbox-only; material escalation also uses the existing prompt outbox path.
+
+**Tiếng Việt.** Escalation priority/severity chỉ so sánh stable code. Mỗi field tăng tạo event riêng và dùng `STATUS:<historyID>:<recipientID>:<eventCode>` để một history row không chặn event còn lại. Chỉ assignee/current owner active đã identity-ready nhận event; PM active aligned chỉ được thêm khi kết quả là Critical/Blocker. Escalation thấp chỉ vào inbox; escalation material dùng lại outbox prompt hiện có.

@@ -127,6 +127,9 @@ const EVENT = {
   OWNER_CHANGED: 'OWNER_CHANGED'
 }
 
+const PRIORITY_RANK = Object.freeze({ LOW: 1, MEDIUM: 2, HIGH: 3, CRITICAL: 4 })
+const SEVERITY_RANK = Object.freeze({ MINOR: 1, MAJOR: 2, CRITICAL: 3, BLOCKER: 4 })
+
 const ALLOWED_TRANSITIONS = {
   // State machine chính: key là status hiện tại, array là status được phép đi tới.
   [STATUS.NEW]: [STATUS.PENDING_ASSIGNMENT, STATUS.ASSIGNED, STATUS.REJECTED],
@@ -249,6 +252,8 @@ module.exports = {
   DEVELOPER_ACTIONS,
   DEVELOPER_DIRECT_STATUSES,
   EVENT,
+  PRIORITY_RANK,
+  SEVERITY_RANK,
   ALLOWED_TRANSITIONS,
   DEVELOPER_STATUSES,
   TESTER_STATUSES,

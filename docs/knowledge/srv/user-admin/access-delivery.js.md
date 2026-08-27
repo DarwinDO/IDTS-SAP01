@@ -73,3 +73,9 @@ Module này sở hữu policy outbox email cho thay đổi access. Audit access 
 ### Sửa an toàn
 
 Giữ module theo domain nhưng không phụ thuộc provider. Không thêm scheduler mới, sender SDK, provider call live trong business transaction, raw audit/provider snapshot, historical backfill hoặc URL do user chọn. Khi đổi idempotency phải giữ audit lock cùng unique constraint.
+
+## Task 9 final access inbox index
+
+**English.** The locked persisted audit, not an operation snapshot, is the authority. `CHANGE_ROLE/APPLIED` and `REACTIVATE/APPLIED` insert exactly one same-transaction inbox index for the audit target while preserving their existing email delivery. Suspend and revoke deliberately remain email-only. Repeated calls reuse the delivery and do not duplicate the index.
+
+**Tiếng Việt.** Audit đã persist và lock, không phải operation snapshot, là authority. `CHANGE_ROLE/APPLIED` và `REACTIVATE/APPLIED` insert đúng một inbox index trong cùng transaction cho audit target và vẫn giữ email delivery hiện có. Suspend/revoke chủ ý chỉ gửi email. Call lặp dùng lại delivery và không tạo index trùng.

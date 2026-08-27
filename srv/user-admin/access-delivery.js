@@ -9,6 +9,7 @@ const { isSafeEmailAddress } = require('../email/config')
 const DELIVERIES = 'idts.cap.UserAccessNotificationDeliveries'
 const AUDITS = 'idts.cap.UserIdentityAuditEvents'
 const USERS = 'idts.cap.Users'
+const INBOX = 'idts.cap.UserNotificationInboxEntries'
 
 const ACCESS_EVENT_BY_ACTION = Object.freeze({
   CHANGE_ROLE: 'ACCESS_ROLE_CHANGED',
@@ -74,12 +75,15 @@ async function writeUserAccessDelivery ({
   if (!tx || !auditEvent?.ID || auditEvent.result !== 'APPLIED' || expectedEventType !== eventType) return { created: false }
 
   const sourceAudit = await tx.run(
-    SELECT.one.from(AUDITS).columns('ID').where({ ID: auditEvent.ID }).forUpdate()
+    SELECT.one.from(AUDITS).columns('ID', 'targetUser_ID', 'action', 'result', 'createdAt').where({ ID: auditEvent.ID }).forUpdate()
   )
-  if (!sourceAudit) return { created: false }
+  if (!sourceAudit || sourceAudit.action !== auditEvent.action || sourceAudit.result !== 'APPLIED' || sourceAudit.targetUser_ID !== targetUserID) return { created: false }
 
   const existing = await tx.run(SELECT.one.from(DELIVERIES).where({ sourceAuditEvent_ID: auditEvent.ID }))
-  if (existing) return { deliveryID: existing.ID, deliveryStatus: existing.status_code, created: false }
+  if (existing) {
+    await writeUserAccessInboxIndex(tx, sourceAudit, targetUserID, completedAt)
+    return { deliveryID: existing.ID, deliveryStatus: existing.status_code, created: false }
+  }
 
   const recipient = await tx.run(SELECT.one.from(USERS).columns('ID', 'email').where({ ID: targetUserID }))
   if (!recipient) return { created: false }
@@ -103,8 +107,21 @@ async function writeUserAccessDelivery ({
     lastErrorCode: skipped?.code || null,
     lastErrorSummary: skipped?.summary || null
   }))
+  await writeUserAccessInboxIndex(tx, sourceAudit, recipient.ID, completedAt)
 
   return { deliveryID, deliveryStatus, created: true }
+}
+
+async function writeUserAccessInboxIndex (tx, auditEvent, targetUserID, completedAt) {
+  if (!['CHANGE_ROLE', 'REACTIVATE'].includes(auditEvent.action) || auditEvent.result !== 'APPLIED' || auditEvent.targetUser_ID !== targetUserID) return
+  const existing = await tx.run(SELECT.one.from(INBOX).columns('ID').where({ accessAuditEvent_ID: auditEvent.ID }))
+  if (existing) return
+  await tx.run(INSERT.into(INBOX).entries({
+    ID: cds.utils.uuid(),
+    recipient_ID: targetUserID,
+    accessAuditEvent_ID: auditEvent.ID,
+    occurredAt: auditEvent.createdAt || completedAt
+  }))
 }
 
 async function processUserAccessDeliveries ({ tx, config, sendMail, now = new Date(), workerID = cds.utils.uuid() }) {
@@ -217,5 +234,6 @@ module.exports = {
   buildAccessApplicationLink,
   buildAccessDeliveryMessage,
   processUserAccessDeliveries,
-  writeUserAccessDelivery
+  writeUserAccessDelivery,
+  writeUserAccessInboxIndex
 }

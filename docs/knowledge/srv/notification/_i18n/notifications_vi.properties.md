@@ -19,3 +19,9 @@ Bundle CAP tiếng Việt cung cấp title/summary an toàn, có giới hạn ch
 Điểm neo: các key `BUG_*`, `ACCESS_*` và `UNAVAILABLE_TITLE` là contract với mapper. Thiếu key làm DTO trống; dịch không tương đương làm sai ý nghĩa event. Kiểm hai bundle, mapper và test HTTP Anh/Việt cùng nhau. Owner DonHV; backup NhanT. Giữ title <=160 và summary <=500 ký tự.
 
 `ASSIGNMENT_REMOVED` vẫn là wording Developer trước đó; `PENDING_ASSIGNMENT` vẫn là wording hàng đợi PM. Các code này không thay thế legacy `UPDATED` vì ý nghĩa và action-required khác nhau.
+
+## Task 9 escalation copy
+
+**English.** The Vietnamese priority/severity escalation keys remain equivalent to the default bundle and contain no raw Bug, identity, audit, or delivery data.
+
+**Tiếng Việt.** Key escalation priority/severity tiếng Việt tương đương bundle mặc định và không chứa raw Bug, identity, audit hoặc delivery data.

@@ -19,3 +19,5 @@ N2 tạo bundle tiếng Việt này cho shell thông báo của Bug Management. 
 N3 thêm đúng các lifecycle label giống bundle fallback/English, giữ `ASSIGNMENT_REMOVED` tách khỏi `PENDING_ASSIGNMENT`.
 
 Owner: DonHV. `NotificationShell.js` chờ ResourceBundle trước khi tạo control. Thiếu/lệch key sẽ làm lộ key kỹ thuật hoặc fallback không nhất quán. Kiểm cùng ba property bundle, QA UI và fixture browser local `?lang=vi`. Giữ UTF-8 tiếng Việt, không có ký tự replacement/mojibake.
+
+Task 9 mirror label escalation priority/severity an toàn với default/English, không lộ giá trị Bug hay delivery internals. / Task 9 mirrors safe priority/severity escalation labels with default/English and exposes no Bug values or delivery internals.
