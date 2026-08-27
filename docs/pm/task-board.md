@@ -123,7 +123,6 @@ Vietnamese:
 | IDTS-37 | Notification UI and email delivery status readability | SangVN | FE/QA review of notification section after SMTP/outbox changes, focusing on readable event/channel/status/recipient/message output. Unblocked by merged IDTS-36. |
 | IDTS-60 | Browser and manual UAT for completed Sprint 4 UI baseline | NhanT | Due 2026-07-12. Earlier QA checkpoint for merged Sprint 4 UI baseline before final `IDTS-57` regression. |
 | IDTS-40 | AWS ECS/ECR shared QA deployment direction | DonHV | Due 2026-07-18 if kept active. Treat as AWS-native follow-up/alternative, not a blocker for accepted Render QA. |
-| WP7-NOTIFY | Design personal My Notifications and prompt email delivery | DonHV | Design and implementation plan approved; refreshed against merged Gate 6.5 at `origin/dev` `308aa847`. N1 precondition is satisfied, but source remains unstarted until planning PR closure and a fresh N1 gate. |
 
 Vietnamese:
 
@@ -132,9 +131,12 @@ Vietnamese:
 | IDTS-37 | Notification UI va kha nang doc email delivery status | SangVN | FE/QA review notification section sau khi co SMTP/outbox, tap trung event/channel/status/recipient/message. Da duoc unblock boi IDTS-36 da merge. |
 | IDTS-60 | Browser/manual UAT cho baseline UI Sprint 4 da merge | NhanT | Han 2026-07-12. Checkpoint QA som cho baseline UI da merge truoc khi regression tong cuoi `IDTS-57`. |
 | IDTS-40 | Huong deploy shared QA bang AWS ECS/ECR | DonHV | Due 2026-07-18 neu giu active. Xem la AWS-native follow-up/alternative, khong block Render QA da accepted. |
-| WP7-NOTIFY | Thiet ke My Notifications ca nhan va email nhanh | DonHV | Da duyet design va implementation plan; da refresh voi Gate 6.5 merged tai `origin/dev` `308aa847`. Precondition N1 da dat, nhung source chua bat dau cho toi khi dong PR planning va mo gate N1 moi. |
 
 ## In Progress
+
+My Notifications: WP7-NOTIFY is in progress; planning #360 merged and N1 Tasks 1–4 are source-verified in OPEN/Draft PR #361. Fresh matrix passes and source review has zero findings; existing human PASS is reused with DonHV's explicit confirmation. No merge/deploy/migration/real backfill/N2. Details: `docs/pm/tasks/wp7-my-notifications-roadmap.md`.
+
+Tiếng Việt: WP7-NOTIFY đang thực hiện; planning #360 đã merge, source N1 Tasks 1–4 đã kiểm định trong Draft #361. Matrix mới PASS, review không còn finding; dùng PASS cũ theo xác nhận của DonHV. Chưa merge/deploy/migration/backfill thật/N2.
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |

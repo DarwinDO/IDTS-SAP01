@@ -4,7 +4,7 @@
 
 ### Status
 
-`N1 SOURCE VERIFIED — DRAFT PR AUTHORIZED USING EXISTING PASS EVIDENCE`
+`N1 SOURCE VERIFIED — DRAFT PR #361 OPEN; STOP BEFORE MERGE/DEPLOY/N2`
 
 ### Authority
 
@@ -33,7 +33,7 @@ Planning PR #360 and Gate 6.5 are merged. N1 uses exact base `8ac9327b93b70633e9
 
 ### Trạng thái
 
-`SOURCE N1 ĐÃ KIỂM ĐỊNH — ĐƯỢC MỞ DRAFT PR VỚI EVIDENCE PASS ĐÃ CÓ`
+`SOURCE N1 ĐÃ KIỂM ĐỊNH — DRAFT PR #361 ĐÃ MỞ; DỪNG TRƯỚC MERGE/DEPLOY/N2`
 
 ### Thẩm quyền
 
