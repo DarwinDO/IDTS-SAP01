@@ -15,6 +15,7 @@ const USERS = 'idts.cap.Users'
 const DEVELOPER_PROFILES = 'idts.cap.DeveloperProfiles'
 const HISTORY_LOGS = 'idts.cap.HistoryLogs'
 const CANDIDATE_PAGE_SIZE = 500
+const RECIPIENT_USER_PAGE_SIZE = CANDIDATE_PAGE_SIZE * 2
 const URGENT_SLA_HOURS = 4
 const STANDARD_SLA_HOURS = 24
 const URGENT_SEVERITIES = new Set(['CRITICAL', 'BLOCKER'])
@@ -50,6 +51,7 @@ async function discoverScheduledNotifications ({ tx, now, emailConfig = getEmail
     if (!candidates.length) break
     result.candidates += candidates.length
 
+    const currentBugs = []
     for (const candidate of candidates) {
       // Candidate rows are only a bounded snapshot. Lock and re-read the Bug before deriving any entry.
       const bug = await readCurrentBug(tx, candidate.ID)
@@ -57,7 +59,17 @@ async function discoverScheduledNotifications ({ tx, now, emailConfig = getEmail
         result.skipped += 1
         continue
       }
-      const anchors = await readScheduleAnchors(tx, bug)
+      if (!isScheduledCandidate(bug, businessDate)) {
+        result.skipped += 1
+        continue
+      }
+      currentBugs.push(bug)
+    }
+
+    const anchors = await readScheduleAnchors(tx, currentBugs, businessDate)
+    const overdueRecipients = await readOverdueRecipients(tx, currentBugs)
+    for (const bug of currentBugs) {
+      const anchor = anchors.get(bug.ID) || {}
       const urgent = isUrgent(bug)
       if (bug.status_code === STATUS.PENDING_ASSIGNMENT) {
         for (const recipientID of pmIDs) {
@@ -72,7 +84,7 @@ async function discoverScheduledNotifications ({ tx, now, emailConfig = getEmail
         }
 
         const thresholdHours = urgent ? URGENT_SLA_HOURS : STANDARD_SLA_HOURS
-        if (isSlaDue({ ...bug, pendingAssignmentAt: anchors.pendingAssignmentAt }, instant, thresholdHours)) {
+        if (isSlaDue({ ...bug, pendingAssignmentAt: anchor.pendingAssignmentAt }, instant, thresholdHours)) {
           for (const recipientID of pmIDs) {
             await writeScheduledEvent(tx, bug, {
               eventType: 'PENDING_ASSIGNMENT',
@@ -88,12 +100,11 @@ async function discoverScheduledNotifications ({ tx, now, emailConfig = getEmail
 
       if (isOverdue(bug, businessDate)) {
         const dueDate = String(bug.dueDate).slice(0, 10)
-        const recipients = await readOverdueRecipients(tx, [bug])
-        for (const recipientID of recipients.get(bug.ID) || []) {
+        for (const recipientID of overdueRecipients.get(bug.ID) || []) {
           await writeScheduledEvent(tx, bug, {
             eventType: 'OVERDUE',
             message: `${bug.bugNumber || 'Bug'} is overdue.`,
-            sourceKey: boundedSourceKey(`OVERDUE:${bug.ID}:${dueDate}:${anchors.overdueCycleID}:${recipientID}`),
+            sourceKey: boundedSourceKey(`OVERDUE:${bug.ID}:${dueDate}:${anchor.overdueCycleID}:${recipientID}`),
             recipientID,
             emailRequired: false,
             requirePM: false
@@ -109,6 +120,10 @@ async function discoverScheduledNotifications ({ tx, now, emailConfig = getEmail
   }
 
   return result
+}
+
+function isScheduledCandidate (bug, businessDate) {
+  return bug.status_code === STATUS.PENDING_ASSIGNMENT || isOverdue(bug, businessDate)
 }
 
 async function readCandidatePage (tx, businessDate, lastID) {
@@ -137,34 +152,107 @@ function readCurrentBug (tx, bugID) {
   )
 }
 
-async function readScheduleAnchors (tx, bug) {
-  const logs = await tx.run(
-    SELECT.from(HISTORY_LOGS)
-      .columns('event_ID', 'fieldName', 'newValue', 'createdAt')
-      .where({ bug_ID: bug.ID, fieldName: { in: ['status', 'dueDate'] } })
-      .orderBy('createdAt desc', 'event_ID desc')
-  )
-  const pendingLog = logs.find(log => log.fieldName === 'status' && log.newValue === STATUS.PENDING_ASSIGNMENT)
-  const dueDate = bug.dueDate ? String(bug.dueDate).slice(0, 10) : null
-  const dueDateLog = dueDate && logs.find(log => log.fieldName === 'dueDate' && String(log.newValue).slice(0, 10) === dueDate)
-  return {
-    pendingAssignmentAt: pendingLog?.createdAt || bug.createdAt,
+async function readScheduleAnchors (tx, bugs, businessDate) {
+  // Lock-time eligibility is established before these page-bounded aggregate reads; history is never materialized per Bug.
+  const anchors = new Map(bugs.map(bug => [bug.ID, {
+    pendingAssignmentAt: bug.createdAt,
     // History event IDs are immutable cycle identities; the created-at fallback covers legacy Bugs without due-date audit.
-    overdueCycleID: dueDateLog?.event_ID || `CREATED:${bug.ID}:${bug.createdAt || ''}`
+    overdueCycleID: `CREATED:${bug.ID}:${bug.createdAt || ''}`
+  }]))
+  if (!bugs.length) return anchors
+
+  const pendingBugs = bugs.filter(bug => bug.status_code === STATUS.PENDING_ASSIGNMENT)
+  const pendingRows = await readLatestHistoryTimes(tx, pendingBugs.map(bug => bug.ID), {
+    fieldName: 'status',
+    newValue: STATUS.PENDING_ASSIGNMENT
+  })
+  for (const row of pendingRows) {
+    const anchor = anchors.get(row.bug_ID)
+    if (anchor && row.latestAt) anchor.pendingAssignmentAt = row.latestAt
   }
+
+  const overdueBugs = bugs.filter(bug => isOverdue(bug, businessDate) && bug.dueDate)
+  const dueRows = await readLatestHistoryTimes(tx, overdueBugs.map(bug => bug.ID), { fieldName: 'dueDate' })
+  const dueEvents = await readLatestDueDateEvents(tx, overdueBugs, dueRows)
+  const bugsByID = new Map(overdueBugs.map(bug => [bug.ID, bug]))
+  const latestDueAtByBug = new Map(dueRows.map(row => [row.bug_ID, historyTimestampKey(row.latestAt)]))
+  for (const row of dueEvents) {
+    const bug = bugsByID.get(row.bug_ID)
+    const anchor = anchors.get(row.bug_ID)
+    const dueDate = bug?.dueDate && String(bug.dueDate).slice(0, 10)
+    if (anchor && dueDate && String(row.newValue).slice(0, 10) === dueDate && historyTimestampKey(row.createdAt) === latestDueAtByBug.get(row.bug_ID) && row.cycleID) {
+      anchor.overdueCycleID = row.cycleID
+    }
+  }
+  return anchors
+}
+
+function historyTimestampKey (value) {
+  const timestamp = new Date(value)
+  return Number.isNaN(timestamp.getTime()) ? String(value || '') : timestamp.toISOString()
+}
+
+async function readLatestHistoryTimes (tx, bugIDs, { fieldName, newValue } = {}) {
+  const uniqueBugIDs = [...new Set(bugIDs.filter(Boolean))]
+  if (!uniqueBugIDs.length) return []
+  const where = { bug_ID: { in: uniqueBugIDs }, fieldName }
+  if (newValue !== undefined) where.newValue = newValue
+  return tx.run(
+    SELECT.from(HISTORY_LOGS)
+      .columns('bug_ID', { func: 'max', args: [{ ref: ['createdAt'] }], as: 'latestAt' })
+      .where(where)
+      .groupBy('bug_ID')
+      .orderBy('bug_ID asc')
+      .limit(CANDIDATE_PAGE_SIZE)
+  )
+}
+
+async function readLatestDueDateEvents (tx, bugs, dueRows) {
+  if (!dueRows.length) return []
+  const bugIDs = [...new Set(bugs.map(bug => bug.ID).filter(Boolean))]
+  const dueDates = [...new Set(bugs.map(bug => bug.dueDate && String(bug.dueDate).slice(0, 10)).filter(Boolean))]
+  const latestAt = [...new Set(dueRows.map(row => row.latestAt).filter(Boolean))]
+  if (!bugIDs.length || !dueDates.length || !latestAt.length) return []
+  return tx.run(
+    SELECT.from(HISTORY_LOGS)
+      .columns(
+        'bug_ID', 'createdAt', 'newValue',
+        { func: 'max', args: [{ ref: ['event_ID'] }], as: 'cycleID' }
+      )
+      .where({
+        bug_ID: { in: bugIDs },
+        fieldName: 'dueDate',
+        newValue: { in: dueDates },
+        createdAt: { in: latestAt }
+      })
+      .groupBy('bug_ID', 'createdAt', 'newValue')
+      .orderBy('bug_ID asc')
+      .limit(CANDIDATE_PAGE_SIZE)
+  )
 }
 
 async function readOverdueRecipients (tx, candidates) {
+  // Candidate IDs are already bounded to one page; lock the bulk reads so preloaded eligibility cannot drift in this tx.
   const profileIDs = [...new Set(candidates.map(row => row.assignee_ID).filter(Boolean))]
   const profiles = profileIDs.length
-    ? await tx.run(SELECT.from(DEVELOPER_PROFILES).columns('ID', 'user_ID', 'active').where({ ID: { in: profileIDs }, active: true }))
+    ? await tx.run(SELECT.from(DEVELOPER_PROFILES)
+      .columns('ID', 'user_ID', 'active')
+      .where({ ID: { in: profileIDs }, active: true })
+      .orderBy('ID asc')
+      .limit(CANDIDATE_PAGE_SIZE)
+      .forUpdate())
     : []
   const userIDs = [...new Set([
     ...candidates.map(row => row.nextProcessorUser_ID).filter(Boolean),
     ...profiles.map(row => row.user_ID).filter(Boolean)
   ])]
   const users = userIDs.length
-    ? await tx.run(SELECT.from(USERS).columns('ID', 'active').where({ ID: { in: userIDs }, active: true }))
+    ? await tx.run(SELECT.from(USERS)
+      .columns('ID', 'active')
+      .where({ ID: { in: userIDs }, active: true })
+      .orderBy('ID asc')
+      .limit(RECIPIENT_USER_PAGE_SIZE)
+      .forUpdate())
     : []
   const activeUsers = new Set(users.map(row => row.ID))
   const userByProfile = new Map(profiles.filter(row => activeUsers.has(row.user_ID)).map(row => [row.ID, row.user_ID]))

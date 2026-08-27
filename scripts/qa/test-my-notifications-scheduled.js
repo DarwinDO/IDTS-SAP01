@@ -36,7 +36,8 @@ const IDS = Object.freeze({
   staleClosed: 'a3000000-0000-4000-8000-000000000005',
   edited: 'a3000000-0000-4000-8000-000000000006',
   staleAssigned: 'a3000000-0000-4000-8000-000000000007',
-  staleDueDate: 'a3000000-0000-4000-8000-000000000008'
+  staleDueDate: 'a3000000-0000-4000-8000-000000000008',
+  staleRecipient: 'a3000000-0000-4000-8000-000000000009'
 })
 
 const BASE_NOW = new Date('2026-08-27T04:00:00.000Z')
@@ -175,7 +176,8 @@ async function main () {
   await db.run(INSERT.into('idts.cap.Bugs').entries([
     bug(IDS.staleClosed, 'BUG-SCHEDULED-STALE-CLOSED', 'CRITICAL', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-26', IDS.owner, IDS.assigneeProfile),
     bug(IDS.staleAssigned, 'BUG-SCHEDULED-STALE-ASSIGNED', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', null, null),
-    bug(IDS.staleDueDate, 'BUG-SCHEDULED-STALE-DUE-DATE', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-26', IDS.owner, IDS.assigneeProfile, 'ASSIGNED')
+    bug(IDS.staleDueDate, 'BUG-SCHEDULED-STALE-DUE-DATE', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-26', IDS.owner, IDS.assigneeProfile, 'ASSIGNED'),
+    bug(IDS.staleRecipient, 'BUG-SCHEDULED-STALE-RECIPIENT', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-26', IDS.owner, IDS.assigneeProfile, 'ASSIGNED')
   ]))
 
   // A mutable candidate set must use keyset pagination, not OFFSET.
@@ -207,6 +209,80 @@ async function main () {
   assert.match(JSON.stringify(keysetQueries[1].SELECT.where), /ID.*>.*keyset-0500/,
     'second candidate page starts strictly after the last ID')
 
+  // A full page must bulk-read bounded history and recipient state; lock-time Bug re-reads remain per candidate.
+  const bulkCandidates = Array.from({ length: 500 }, (_, index) => ({
+    ID: `bulk-${String(index + 1).padStart(4, '0')}`,
+    bugNumber: `BULK-${index + 1}`,
+    title: 'Bulk scheduled QA fixture',
+    status_code: 'ASSIGNED',
+    priority_code: 'HIGH',
+    severity_code: 'MAJOR',
+    createdAt: '2026-08-26T00:00:00.000Z',
+    dueDate: '2026-08-26',
+    nextProcessorUser_ID: IDS.owner,
+    assignee_ID: IDS.assigneeProfile
+  }))
+  const bulkCandidateQueries = []
+  const bulkCurrentQueries = []
+  const bulkHistoryQueries = []
+  const bulkProfileQueries = []
+  const bulkUserQueries = []
+  const bulkTx = {
+    run: async query => {
+      const from = query.SELECT?.from?.ref?.[0]
+      if (from === 'idts.cap.Bugs' && query.SELECT.limit?.rows?.val === 500) {
+        bulkCandidateQueries.push(query)
+        return bulkCandidateQueries.length === 1 ? bulkCandidates : []
+      }
+      if (from === 'idts.cap.Bugs' && query.SELECT.one && Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate') && query.SELECT.columns?.length > 1) {
+        bulkCurrentQueries.push(query)
+        const where = JSON.stringify(query.SELECT.where)
+        return bulkCandidates.find(row => where.includes(row.ID)) || null
+      }
+      if (from === 'idts.cap.Bugs' && query.SELECT.one) {
+        const where = JSON.stringify(query.SELECT.where)
+        return bulkCandidates.find(row => where.includes(row.ID)) || null
+      }
+      if (from === 'idts.cap.HistoryLogs') {
+        bulkHistoryQueries.push(query)
+        return []
+      }
+      if (from === 'idts.cap.DeveloperProfiles') {
+        bulkProfileQueries.push(query)
+        return [{ ID: IDS.assigneeProfile, user_ID: IDS.assigneeUser, active: true }]
+      }
+      if (from === 'idts.cap.Users' && !query.SELECT.one) {
+        if (JSON.stringify(query.SELECT.where).includes('role_code')) return [{ ID: 'bulk-pm', active: true, role_code: 'PM' }]
+        bulkUserQueries.push(query)
+        return [
+          { ID: IDS.owner, active: true },
+          { ID: IDS.assigneeUser, active: true }
+        ]
+      }
+      if (from === 'idts.cap.Users' && query.SELECT.one) {
+        const where = JSON.stringify(query.SELECT.where)
+        const ID = where.includes(IDS.assigneeUser) ? IDS.assigneeUser : IDS.owner
+        return { ID, active: true, role_code: ID === IDS.owner ? 'TESTER' : 'DEVELOPER', email: `${ID}@example.test`, displayName: ID }
+      }
+      if (from === 'idts.cap.EventTypes') return { code: 'OVERDUE', name: 'Overdue' }
+      if (from === 'idts.cap.StatusValues') return { name: 'Assigned' }
+      return undefined
+    }
+  }
+  await discoverScheduledNotifications({ tx: bulkTx, now: BASE_NOW, emailConfig: emailConfig() })
+  assert.equal(bulkCandidateQueries.length, 2, 'full-page discovery reads the bounded second page')
+  assert.equal(bulkCurrentQueries.length, bulkCandidates.length, 'full-page discovery keeps lock-time Bug revalidation')
+  assert.ok(bulkHistoryQueries.length >= 1 && bulkHistoryQueries.length <= 3,
+    'history anchors are resolved in a bounded number of page bulk queries')
+  assert.ok(bulkHistoryQueries.every(query => query.SELECT.limit?.rows?.val <= 500),
+    'history anchor bulk queries are individually bounded')
+  assert.equal(bulkProfileQueries.length, 1, 'overdue profiles are resolved in one page-bounded bulk query')
+  assert.equal(bulkUserQueries.length, 1, 'overdue recipient users are resolved in one page-bounded bulk query')
+  assert.ok(bulkProfileQueries.every(query => query.SELECT.limit?.rows?.val <= 500),
+    'overdue profile bulk queries are individually bounded')
+  assert.ok(bulkUserQueries.every(query => query.SELECT.limit?.rows?.val <= 1000),
+    'overdue user bulk queries are individually bounded')
+
   // Re-read and lock the Bug immediately before writing; stale close/assignment/due-date changes must not emit.
   await assertStaleCandidateSkipped(db, IDS.staleClosed,
     { status_code: 'CLOSED', dueDate: '2026-08-20' },
@@ -217,6 +293,10 @@ async function main () {
   await assertStaleCandidateSkipped(db, IDS.staleDueDate,
     { dueDate: '2026-08-30' },
     'a Bug rescheduled after candidate selection is revalidated before notification insert')
+
+  // A recipient returned by the bulk read can change before its writer call; the final lock must reject it.
+  await assertStaleRecipientSkipped(db, IDS.staleRecipient, IDS.owner,
+    'a recipient deactivated after bulk resolution is revalidated before notification insert')
 
   const nonSchedulerRequest = new cds.Request({
     user: new cds.User({ id: 'ordinary-user', roles: ['authenticated-user'] }),
@@ -279,6 +359,30 @@ async function assertStaleCandidateSkipped (db, bugID, update, message) {
   }
   await discoverScheduledNotifications({ tx, now: BASE_NOW, emailConfig: emailConfig() })
   assert.equal(await count(db, 'idts.cap.Notifications', { bug_ID: bugID }), 0, message)
+}
+
+async function assertStaleRecipientSkipped (db, bugID, recipientID, message) {
+  let candidateRead = false
+  let recipientBulkRead = false
+  const tx = {
+    run: async query => {
+      const from = query.SELECT?.from?.ref?.[0]
+      if (from === 'idts.cap.Bugs' && query.SELECT.limit?.rows?.val === 500 && !candidateRead) {
+        candidateRead = true
+        const rows = await db.run(query)
+        return rows.filter(row => row.ID === bugID)
+      }
+      if (from === 'idts.cap.Users' && !query.SELECT.one && !recipientBulkRead && JSON.stringify(query.SELECT.where).includes(recipientID)) {
+        recipientBulkRead = true
+        const rows = await db.run(query)
+        await db.run(UPDATE('idts.cap.Users').set({ active: false }).where({ ID: recipientID }))
+        return rows
+      }
+      return db.run(query)
+    }
+  }
+  await discoverScheduledNotifications({ tx, now: BASE_NOW, emailConfig: emailConfig() })
+  assert.equal(await count(db, 'idts.cap.Notifications', { bug_ID: bugID, recipient_ID: recipientID }), 0, message)
 }
 
 async function addDueDateHistory (db, bugID, oldValue, newValue, eventID) {

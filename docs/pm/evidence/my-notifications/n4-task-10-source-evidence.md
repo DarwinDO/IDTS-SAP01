@@ -27,6 +27,12 @@ The exact-head review found four Important correctness gaps. Fix-round RED was w
 
 GREEN now derives Pending Assignment age from the latest immutable status `HistoryLogs.createdAt` (legacy fallback to Bug `createdAt`), locks/re-reads each candidate before deriving events, re-checks active recipients in the same transaction, uses `ID > lastID` keyset pages of 500, and adds the immutable due-date HistoryEvent identity to the Overdue source key. The existing transactional writer and email/outbox separation remain unchanged.
 
+### Fix round 2
+
+Scoped re-review of fix head `bfd8bf1773278edd25201e4b2c0b069f0cd7b958` found one new Important query-amplification gap: HistoryLogs and Overdue recipient reads had become per-candidate. RED was witnessed with a full 500-candidate page and two recipients per candidate; `npm run qa:my-notifications:scheduled` failed at `history anchors are resolved in a bounded number of page bulk queries`.
+
+GREEN now retains one lock-time Bug re-read per candidate, then resolves latest status/due-date anchors with bounded aggregate HistoryLogs reads and overdue profiles/users with one bounded bulk query per page. The existing per-recipient lock/revalidation remains immediately before the writer, so a preloaded active recipient that becomes inactive cannot pass. The focused query-count assertions prove 500 candidate re-reads, at most three bounded history queries, one profile query and one recipient-user query for the full page; immutable anchors, keyset paging, source keys and prompt/digest separation remain unchanged.
+
 ## Tiếng Việt
 
 - Owner/member: DonHV.
@@ -53,3 +59,9 @@ GREEN now derives Pending Assignment age from the latest immutable status `Histo
 Review exact-head tìm thấy bốn Important gap về correctness. RED fix round được witness bằng cách mở rộng focused suite cho Bug Pending Assignment bị edit, revalidate close/assignment/due-date ngay lúc lock, tiếp nối keyset 501 row và due-date revert. Lần chạy đầu fail ở assertion Bug bị edit vì `modifiedAt` mutable đã suppress SLA event bắt buộc; một lỗi portability CQN group gặp trong lúc fix cũng đã được log và sửa trước GREEN.
 
 GREEN nay derive tuổi Pending Assignment từ `HistoryLogs.createdAt` bất biến của status (fallback `Bug.createdAt` cho legacy), lock/đọc lại từng candidate trước khi derive event, kiểm tra lại recipient active trong cùng transaction, dùng page keyset `ID > lastID` tối đa 500, và thêm identity `HistoryEvent` bất biến của due-date vào source key Overdue. Writer transactional hiện có và tách email/outbox vẫn giữ nguyên.
+
+### Fix round 2
+
+Scoped re-review của fix head `bfd8bf1773278edd25201e4b2c0b069f0cd7b958` tìm thấy một Important mới về query amplification: HistoryLogs và recipient Overdue bị đọc từng candidate. RED được witness bằng page đủ 500 candidate và hai recipient mỗi candidate; `npm run qa:my-notifications:scheduled` fail tại `history anchors are resolved in a bounded number of page bulk queries`.
+
+GREEN nay vẫn giữ một lock-time Bug re-read cho từng candidate, sau đó resolve anchor status/due-date mới nhất bằng aggregate HistoryLogs bounded và profile/user Overdue bằng một bulk query bounded mỗi page. Lock/revalidate từng recipient ngay trước writer vẫn giữ nguyên, nên recipient đã preload active nhưng chuyển inactive không thể pass. Assertion query-count focused chứng minh 500 candidate re-read, tối đa ba history query bounded, một profile query và một recipient-user query cho page đủ; anchor bất biến, keyset paging, source key và tách prompt/digest vẫn giữ nguyên.
